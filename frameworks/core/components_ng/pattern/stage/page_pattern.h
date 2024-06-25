@@ -34,7 +34,7 @@ namespace OHOS::Ace::NG {
 using SharedTransitionMap = std::unordered_map<ShareId, WeakPtr<FrameNode>>;
 using JSAnimatorMap = std::unordered_map<std::string, RefPtr<Framework::AnimatorInfo>>;
 
-using DynamicPageSizeCallback = std::function<void(SizeF size)>;
+using DynamicPageSizeCallback = std::function<void(const SizeF& size)>;
 /**
  * When the page triggers 'onHide' or 'onShow', the callback is called,
  * and the input parameter is 'true' for onHide and false for onShow.

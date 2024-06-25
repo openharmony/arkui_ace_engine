@@ -81,6 +81,12 @@ RefPtr<DynamicComponentRenderer> DynamicComponentRenderer::Create(const RefPtr<F
     return AceType::MakeRefPtr<DynamicComponentRendererImpl>(host, hapPath, abcPath, entryPoint, runtime);
 }
 
+void DynamicComponentRendererImpl::SetAdaptiveSize(bool adaptiveWidth, bool adaptiveHeight)
+{
+    adaptiveWidth_ = adaptiveWidth;
+    adaptiveHeight_ = adaptiveHeight;
+}
+
 void DynamicComponentRendererImpl::CreateContent()
 {
     hostInstanceId_ = Container::CurrentId();
@@ -173,30 +179,53 @@ void DynamicComponentRendererImpl::RegisterSizeChangedCallback()
     auto pagePattern = AceType::DynamicCast<PagePattern>(pageNode->GetPattern());
     CHECK_NULL_VOID(pagePattern);
 
-    auto dynamicPageSizeCallback = [weak = WeakClaim(this)](SizeF size) {
+    auto dynamicPageSizeCallback = [weak = WeakClaim(this)](const SizeF& size) {
+        TAG_LOGI(AceLogTag::ACE_ISOLATED_COMPONENT, "card size callback: %{public}s", size.ToString().c_str());
         auto renderer = weak.Upgrade();
         CHECK_NULL_VOID(renderer);
-        auto width = size.Width();
-        auto height = size.Height();
-        TAG_LOGD(AceLogTag::ACE_ISOLATED_COMPONENT, "page size callback: wh(%{public}f,%{public}f)", width, height);
-        if (!NearEqual(renderer->contentSize_.Width(), width) || !NearEqual(renderer->contentSize_.Height(), height)) {
-            renderer->contentSize_.SetSizeT(size);
-            TAG_LOGI(AceLogTag::ACE_ISOLATED_COMPONENT, "dynamic card size: wh(%{public}f,%{public}f)", width, height);
-            auto hostTaskExecutor = renderer->GetHostTaskExecutor();
-            CHECK_NULL_VOID(hostTaskExecutor);
-            hostTaskExecutor->PostTask(
-                [hostWeak = renderer->host_, hostInstanceId = renderer->hostInstanceId_, width, height]() {
-                    ContainerScope scope(hostInstanceId);
-                    auto host = hostWeak.Upgrade();
-                    CHECK_NULL_VOID(host);
-                    auto pattern = AceType::DynamicCast<IsolatedPattern>(host->GetPattern());
-                    CHECK_NULL_VOID(pattern);
-                    pattern->OnSizeChanged(width, height);
-                },
-                TaskExecutor::TaskType::UI, "ArkUIDynamicComponentSizeChanged");
-        }
+        CHECK_NULL_VOID(renderer->uiContent_);
+        auto hostTaskExecutor = renderer->GetHostTaskExecutor();
+        CHECK_NULL_VOID(hostTaskExecutor);
+        hostTaskExecutor->PostTask(
+            [weak, size]() {
+                auto renderer = weak.Upgrade();
+                CHECK_NULL_VOID(renderer);
+                renderer->HandleCardSizeChangeEvent(size);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIDynamicComponentSizeChanged");
     };
     pagePattern->SetDynamicPageSizeCallback(std::move(dynamicPageSizeCallback));
+}
+
+void DynamicComponentRendererImpl::HandleCardSizeChangeEvent(const SizeF& size)
+{
+    if (!adaptiveWidth_ && !adaptiveHeight_) {
+        return;
+    }
+    CHECK_NULL_VOID(uiContent_);
+    auto instanceId = uiContent_->GetInstanceId();
+    ContainerScope scope(hostInstanceId_);
+    auto host = host_.Upgrade();
+    CHECK_NULL_VOID(host);
+    auto& layout = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layout);
+    auto padding = layout->CreatePaddingAndBorder();
+    auto rect = host->GetTransformRectRelativeToWindow();
+    auto width = adaptiveWidth_ ? int32_t(size.Width() + padding.Width()) : rect.Width();
+    auto height = adaptiveHeight_ ? int32_t(size.Height() + padding.Height()) : rect.Height();
+    if (NearEqual(width, rect.Width()) && NearEqual(height, rect.Height())) {
+        TAG_LOGI(AceLogTag::ACE_ISOLATED_COMPONENT,
+            "[%{public}d] component size not changed: [%{public}f x %{public}f]", instanceId, width, height);
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_ISOLATED_COMPONENT,
+        "[%{public}d] update component size: [%{public}f x %{public}f] -> [%{public}f x %{public}f]",
+        instanceId, rect.Width(), rect.Height(), width, height);
+    std::optional<CalcLength> calcWidth = adaptiveWidth_ ? std::optional<CalcLength>(CalcLength(width)) : std::nullopt;
+    std::optional<CalcLength> calcHeight =
+        adaptiveHeight_ ? std::optional<CalcLength>(CalcLength(height)) : std::nullopt;
+    layout->UpdateUserDefinedIdealSize(CalcSize(calcWidth, calcHeight));
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
 void DynamicComponentRendererImpl::RegisterConfigChangedCallback()
@@ -345,38 +374,57 @@ void DynamicComponentRendererImpl::TransferFocusActiveEvent(bool isFocus)
         TaskExecutor::TaskType::UI, "ArkUIDynamicComponentFocusActiveEvent");
 }
 
-void DynamicComponentRendererImpl::UpdateViewportConfig(const ViewportConfig& config,
-    Rosen::WindowSizeChangeReason reason, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+SizeF DynamicComponentRendererImpl::ComputeAdaptiveSize(const SizeF& size) const
 {
-    CHECK_NULL_VOID(uiContent_);
-    int32_t width = config.Width();
-    int32_t height = config.Height();
-    contentSize_.SetWidth(width);
-    contentSize_.SetHeight(height);
-    if (width == 0 || height == 0) {
-        auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-        if (defaultDisplay) {
-            if (width == 0) {
-                width = defaultDisplay->GetWidth();
-            }
-            if (height == 0) {
-                height = defaultDisplay->GetHeight();
-            }
-            TAG_LOGI(AceLogTag::ACE_ISOLATED_COMPONENT, "set adaptive size (%{public}d, %{public}d) for DC(%{public}d)",
-                width, height, uiContent_->GetInstanceId());
+    auto width = size.Width();
+    auto height = size.Height();
+    if (adaptiveWidth_ || adaptiveHeight_) {
+        auto host = host_.Upgrade();
+        CHECK_NULL_RETURN(host, size);
+        auto& layout = host->GetLayoutProperty();
+        CHECK_NULL_RETURN(layout, size);
+        auto& constraint = layout->GetLayoutConstraint();
+        CHECK_NULL_RETURN(constraint, size);
+        auto padding = layout->CreatePaddingAndBorder();
+        auto maxSize = constraint->maxSize;
+        if (adaptiveWidth_) {
+            width = maxSize.Width() - padding.Width();
+        }
+        if (adaptiveHeight_) {
+            height = maxSize.Height() - padding.Height();
         }
     }
-    ViewportConfig vpConfig(width, height, config.Density());
-    vpConfig.SetPosition(config.Left(), config.Top());
-    vpConfig.SetOrientation(config.Orientation());
+    return SizeF(width, height);
+}
 
-    auto task = [weak = WeakClaim(this), vpConfig, reason, rsTransaction]() {
+void DynamicComponentRendererImpl::UpdateViewportConfig(const SizeF& size, float density, int32_t orientation)
+{
+    CHECK_NULL_VOID(uiContent_);
+    auto adaptiveSize = ComputeAdaptiveSize(size);
+    ViewportConfig vpConfig(adaptiveSize.Width(), adaptiveSize.Height(), density);
+    vpConfig.SetPosition(0, 0);
+    vpConfig.SetOrientation(orientation);
+    TAG_LOGI(AceLogTag::ACE_ISOLATED_COMPONENT, "[%{public}d] adaptive size: %{public}s -> [%{public}d x %{public}d]",
+        uiContent_->GetInstanceId(), size.ToString().c_str(), vpConfig.Width(), vpConfig.Height());
+
+    auto task = [weak = WeakClaim(this), vpConfig]() {
         auto renderer = weak.Upgrade();
         CHECK_NULL_VOID(renderer);
         auto uiContent = renderer->uiContent_;
         CHECK_NULL_VOID(uiContent);
         ContainerScope scope(uiContent->GetInstanceId());
-        uiContent->UpdateViewportConfig(vpConfig, reason, rsTransaction);
+        ViewportConfig config(vpConfig.Width(), vpConfig.Height(), vpConfig.Density());
+        config.SetPosition(vpConfig.Left(), vpConfig.Top());
+        config.SetOrientation(vpConfig.Orientation());
+        if (renderer->viewport_.Width() == config.Width() && renderer->viewport_.Height() == config.Height()) {
+            TAG_LOGW(AceLogTag::ACE_ISOLATED_COMPONENT, "card viewport not changed");
+            return;
+        }
+        renderer->viewport_.SetWidth(config.Width());
+        renderer->viewport_.SetHeight(config.Height());
+        TAG_LOGI(AceLogTag::ACE_ISOLATED_COMPONENT, "update card viewport: [%{public}d x %{public}d]",
+            config.Width(), config.Height());
+        uiContent->UpdateViewportConfig(config, Rosen::WindowSizeChangeReason::UNDEFINED, nullptr);
     };
     bool contentReady = false;
     {
@@ -389,8 +437,7 @@ void DynamicComponentRendererImpl::UpdateViewportConfig(const ViewportConfig& co
     if (contentReady) {
         auto taskExecutor = GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
-            std::move(task), TaskExecutor::TaskType::UI, "ArkUIDynamicComponentUpdateViewportConfig");
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIDynamicComponentUpdateViewport");
     }
 }
 

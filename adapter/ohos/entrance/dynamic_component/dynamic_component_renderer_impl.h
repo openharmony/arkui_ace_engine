@@ -36,11 +36,11 @@ public:
         const std::string& entryPoint, void* runtime);
     ~DynamicComponentRendererImpl() override = default;
 
+    void SetAdaptiveSize(bool adaptiveWidth, bool adaptiveHeight) override;
     void CreateContent() override;
     void DestroyContent() override;
 
-    void UpdateViewportConfig(const ViewportConfig& config, Rosen::WindowSizeChangeReason reason,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) override;
+    void UpdateViewportConfig(const SizeF& size, float density, int32_t orientation) override;
 
     void TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     bool TransferKeyEvent(const KeyEvent& event) override;
@@ -73,6 +73,9 @@ private:
     void RegisterConfigChangedCallback();
     void UnRegisterConfigChangedCallback();
 
+    SizeF ComputeAdaptiveSize(const SizeF& size) const;
+    void HandleCardSizeChangeEvent(const SizeF& size);
+
     bool contentReady_ = false;
     std::function<void()> contentReadyCallback_;
     mutable std::mutex contentReadyMutex_;
@@ -86,7 +89,9 @@ private:
     int32_t hostInstanceId_ = -1;
     RendererDumpInfo rendererDumpInfo_;
 
-    SizeF contentSize_;
+    SizeT<int32_t> viewport_;
+    bool adaptiveWidth_ = true;
+    bool adaptiveHeight_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(DynamicComponentRendererImpl);
 };
