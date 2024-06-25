@@ -88,24 +88,29 @@ bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
     // apply keyboard avoidance on Page or Overlay
     if ((GetHostTag() == V2::PAGE_ETS_TAG && isNeedAvoidKeyboard && !isFocusOnOverlay) ||
         GetHostTag() == V2::OVERLAY_ETS_TAG) {
-        if (!(isFocusOnPage || isFocusOnOverlay) && LessNotEqual(manager->GetKeyboardOffset(), 0.0)) {
-            return false;
-        }
         auto renderContext = GetHostNode()->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         auto safeArea = manager->GetSafeArea();
+        auto pageCurrentOffset = GetPageCurrentOffset();
+        auto pageHasOffset = LessNotEqual(pageCurrentOffset, 0.0f);
+        if (!(isFocusOnPage || isFocusOnOverlay || pageHasOffset) && LessNotEqual(manager->GetKeyboardOffset(), 0.0)) {
+            renderContext->SavePaintRect(true, GetLayoutProperty()->GetPixelRound());
+            return false;
+        }
         auto geometryNode = GetGeometryNode();
         auto x = geometryNode->GetFrameOffset().GetX();
         if (manager->IsAtomicService()) {
             auto usingRect = RectF(OffsetF(x, manager->GetKeyboardOffset()), geometryNode->GetFrameSize());
             renderContext->UpdatePaintRect(usingRect);
             geometryNode->SetSelfAdjust(usingRect - geometryNode->GetFrameRect());
+            renderContext->SyncPartialRsProperties();
             return true;
         }
         auto usingRect =
             RectF(OffsetF(x, safeArea.top_.Length() + manager->GetKeyboardOffset()), geometryNode->GetFrameSize());
         renderContext->UpdatePaintRect(usingRect);
         geometryNode->SetSelfAdjust(usingRect - geometryNode->GetFrameRect());
+        renderContext->SyncPartialRsProperties();
         return true;
     }
     return false;
@@ -191,7 +196,7 @@ RectF LayoutWrapper::GetFrameRectWithSafeArea(bool checkPosition) const
     return geometryNode->GetSelfAdjust() + geometryNode->GetFrameRect();
 }
 
-void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
+void LayoutWrapper::ExpandSafeArea()
 {
     auto host = GetHostNode();
     CHECK_NULL_VOID(host);
@@ -219,7 +224,7 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
     CHECK_NULL_VOID(selfExpansive);
     auto geometryNode = GetGeometryNode();
     OffsetF keyboardAdjust;
-    if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && (opts->type & SAFE_AREA_TYPE_KEYBOARD) && isFocusOnPage) {
+    if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && (opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
         keyboardAdjust = ExpandIntoKeyboard();
     }
 
@@ -323,6 +328,10 @@ void LayoutWrapper::AddChildToExpandListIfNeeded(const WeakPtr<FrameNode>& node)
 
 OffsetF LayoutWrapper::ExpandIntoKeyboard()
 {
+    auto pageOffset = GetPageCurrentOffset();
+    if (GreatOrEqual(pageOffset, 0.0f)) {
+        return OffsetF();
+    }
     // if parent already expanded into keyboard, offset shouldn't be applied again
     auto parent = GetHostNode()->GetAncestorNodeOfFrame();
     while (parent) {
@@ -338,10 +347,26 @@ OffsetF LayoutWrapper::ExpandIntoKeyboard()
         }
         parent = parent->GetAncestorNodeOfFrame();
     }
-
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, OffsetF());
     return OffsetF(0.0f, -pipeline->GetSafeAreaManager()->GetKeyboardOffset());
+}
+
+float LayoutWrapper::GetPageCurrentOffset()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, 0.0f);
+    auto stageManager = pipeline->GetStageManager();
+    CHECK_NULL_RETURN(stageManager, 0.0f);
+    auto pageNode = stageManager->GetLastPageWithTransition();
+    CHECK_NULL_RETURN(pageNode, 0.0f);
+    auto pageRenderContext = pageNode->GetRenderContext();
+    CHECK_NULL_RETURN(pageRenderContext, 0.0f);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaManager, 0.0f);
+    auto safeArea = safeAreaManager->GetSafeArea();
+    auto safeAreaTop = safeAreaManager->IsAtomicService() ? 0 : safeArea.top_.Length();
+    return pageRenderContext->GetPaintRectWithoutTransform().GetY() - safeAreaTop;
 }
 
 void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint)

@@ -3594,8 +3594,12 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
         }
         needSyncRsNode = false;
     }
-    renderContext_->SavePaintRect(true, layoutProperty_->GetPixelRound());
-    renderContext_->SyncPartialRsProperties();
+    if (GetTag() != V2::PAGE_ETS_TAG) {
+        renderContext_->SavePaintRect(true, layoutProperty_->GetPixelRound());
+        if (needSyncRsNode) {
+            renderContext_->SyncPartialRsProperties();
+        }
+    }
     config = { .frameSizeChange = frameSizeChange,
         .frameOffsetChange = frameOffsetChange,
         .contentSizeChange = contentSizeChange,
