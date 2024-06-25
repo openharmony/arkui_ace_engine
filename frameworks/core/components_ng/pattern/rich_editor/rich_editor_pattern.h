@@ -64,6 +64,14 @@ struct TextConfig;
 #endif
 #endif
 
+#define COPY_SPAN_STYLE_IF_PRESENT(sourceNode, targetNode, styleType, propertyInfo) \
+    do {                                                                            \
+        if ((sourceNode)->Has##styleType()) {                                       \
+            (targetNode)->Update##styleType(*((sourceNode)->Get##styleType()));     \
+            (targetNode)->AddPropertyInfo(propertyInfo);                            \
+        }                                                                           \
+    } while (false)
+
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
