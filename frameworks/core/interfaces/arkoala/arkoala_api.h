@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 111
+#define ARKUI_FULL_API_VERSION 112
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 111
+#define ARKUI_NODE_API_VERSION 112
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -3974,6 +3974,8 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorCaretColor)(ArkUINodeHandle node);
     void (*setRichEditorSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetRichEditorSelectedBackgroundColor)(ArkUINodeHandle node);
+    void (*setRichEditorEnterKeyType)(ArkUINodeHandle node, ArkUI_Uint32 enterKeyType);
+    void (*resetRichEditorEnterKeyType)(ArkUINodeHandle node);
 };
 
 struct ArkUIRichEditorControllerModifier {

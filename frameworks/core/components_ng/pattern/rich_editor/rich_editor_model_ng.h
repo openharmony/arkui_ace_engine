@@ -54,6 +54,7 @@ public:
     static void SetCaretColor(FrameNode* frameNode, const Color& color);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& selectedColor);
     void SetEnterKeyType(TextInputAction value) override;
+    static void SetEnterKeyType(FrameNode* frameNode, const TextInputAction& action);
     void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override;
 
 private:

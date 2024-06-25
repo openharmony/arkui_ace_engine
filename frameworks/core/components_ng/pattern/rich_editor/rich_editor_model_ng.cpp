@@ -266,7 +266,7 @@ void RichEditorModelNG::SetOnEditingChange(std::function<void(const bool&)>&& fu
     eventHub->SetOnEditingChange(std::move(func));
 }
 
-void RichEditorModelNG ::SetEnterKeyType(TextInputAction action)
+void RichEditorModelNG::SetEnterKeyType(TextInputAction action)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetEnterKeyType=%{public}d", action);
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
@@ -274,6 +274,15 @@ void RichEditorModelNG ::SetEnterKeyType(TextInputAction action)
     if (action == TextInputAction::UNSPECIFIED) {
         action = TextInputAction::NEW_LINE;
     }
+    pattern->UpdateTextInputAction(action);
+}
+
+void RichEditorModelNG::SetEnterKeyType(FrameNode* frameNode, const TextInputAction& action)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetEnterKeyType=%{public}d", action);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
     pattern->UpdateTextInputAction(action);
 }
 

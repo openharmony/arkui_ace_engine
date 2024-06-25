@@ -92,12 +92,28 @@ void ResetRichEditorSelectedBackgroundColor(ArkUINodeHandle node)
     RichEditorModelNG::SetSelectedBackgroundColor(frameNode, selectedBackgroundColor);
 }
 
+void SetRichEditorEnterKeyType(ArkUINodeHandle node, ArkUI_Uint32 enterKeyType)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetEnterKeyType(frameNode, TextInputAction(enterKeyType));
+}
+
+void ResetRichEditorEnterKeyType(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto defaultEnterKeyType = TextInputAction::NEW_LINE;
+    RichEditorModelNG::SetEnterKeyType(frameNode, defaultEnterKeyType);
+}
+
 namespace NodeModifier {
 const ArkUIRichEditorModifier* GetRichEditorModifier()
 {
     static const ArkUIRichEditorModifier modifier = { SetRichEditorDetectEnable, ResetRichEditorDetectEnable,
         SetRichEditorCopyOptions, ResetRichEditorCopyOptions, SetRichEditorCaretColor, ResetRichEditorCaretColor,
-        SetRichEditorSelectedBackgroundColor, ResetRichEditorSelectedBackgroundColor };
+        SetRichEditorSelectedBackgroundColor, ResetRichEditorSelectedBackgroundColor, SetRichEditorEnterKeyType,
+        ResetRichEditorEnterKeyType };
     return &modifier;
 }
 }

@@ -7394,6 +7394,24 @@ class RichEditorSelectedBackgroundColorModifier extends ModifierWithKey {
 }
 RichEditorSelectedBackgroundColorModifier.identity = Symbol('richEditorSelectedBackgroundColor');
 
+class RichEditorEnterKeyTypeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetEnterKeyType(node);
+    }
+    else {
+      getUINativeModule().richEditor.setEnterKeyType(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+RichEditorEnterKeyTypeModifier.identity = Symbol('richEditorEnterKeyType');
+
 class ArkRichEditorComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -7417,6 +7435,11 @@ class ArkRichEditorComponent extends ArkComponent {
 
   selectedBackgroundColor(value) {
     modifierWithKey(this._modifiersWithKeys, RichEditorSelectedBackgroundColorModifier.identity, RichEditorSelectedBackgroundColorModifier, value);
+    return this;
+  }
+
+  enterKeyType(value) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorEnterKeyTypeModifier.identity, RichEditorEnterKeyTypeModifier, value);
     return this;
   }
 
