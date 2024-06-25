@@ -477,39 +477,10 @@ RefPtr<AceContainer> AceContainer::GetContainer(int32_t instanceId)
     return aceContainer;
 }
 
-bool AceContainer::OnBackPressed(int32_t instanceId)
+bool AceContainer::RemoveOverlayBySubwindowManager(int32_t instanceId)
 {
-    auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN(container, false);
-    // When the container is for overlay, it need close the overlay first.
-    if (container->IsSubContainer()) {
-#ifdef NG_BUILD
-        LOGI("back press for remove overlay node");
-        ContainerScope scope(instanceId);
-        auto subPipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-        CHECK_NULL_RETURN(subPipelineContext, false);
-        auto overlayManager = subPipelineContext->GetOverlayManager();
-        CHECK_NULL_RETURN(overlayManager, false);
-        return overlayManager->RemoveOverlayInSubwindow();
-#else
-        if (container->IsUseNewPipeline()) {
-            LOGI("back press for remove overlay node");
-            ContainerScope scope(instanceId);
-            auto subPipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-            CHECK_NULL_RETURN(subPipelineContext, false);
-            auto overlayManager = subPipelineContext->GetOverlayManager();
-            CHECK_NULL_RETURN(overlayManager, false);
-            return overlayManager->RemoveOverlayInSubwindow();
-        }
-        SubwindowManager::GetInstance()->CloseMenu();
-        LOGI("Menu consumed backpressed event");
-        return true;
-#endif
-    }
-    // remove overlay through SubwindowManager if subwindow unfocused.
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
     if (subwindow) {
-        LOGI("subwindow consumed backpressed event");
         if (subwindow->GetShown()) {
             auto subContainerId = SubwindowManager::GetInstance()->GetSubContainerId(instanceId);
             if (subContainerId < 0) {
@@ -520,6 +491,48 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
             CHECK_NULL_RETURN(overlayManager, false);
             return overlayManager->RemoveOverlayInSubwindow();
         }
+    }
+    return false;
+}
+
+bool AceContainer::OnBackPressed(int32_t instanceId)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, false);
+    // When the container is for overlay, it need close the overlay first.
+    if (container->IsSubContainer()) {
+#ifdef NG_BUILD
+        TAG_LOGI(AceLogTag::ACE_UIEVENT, "back press for remove overlay node");
+        ContainerScope scope(instanceId);
+        auto subPipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+        CHECK_NULL_RETURN(subPipelineContext, false);
+        auto overlayManager = subPipelineContext->GetOverlayManager();
+        CHECK_NULL_RETURN(overlayManager, false);
+        return overlayManager->RemoveOverlayInSubwindow();
+#else
+        if (container->IsUseNewPipeline()) {
+            TAG_LOGI(AceLogTag::ACE_UIEVENT, "back press for remove overlay node");
+            ContainerScope scope(instanceId);
+            auto subPipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_RETURN(subPipelineContext, false);
+            auto overlayManager = subPipelineContext->GetOverlayManager();
+            CHECK_NULL_RETURN(overlayManager, false);
+            if (overlayManager->RemoveOverlayInSubwindow()) {
+                TAG_LOGI(AceLogTag::ACE_UIEVENT, "subwindow consumed backpressed event");
+                return true;
+            }
+            instanceId = SubwindowManager::GetInstance()->GetParentContainerId(instanceId);
+        } else {
+            SubwindowManager::GetInstance()->CloseMenu();
+            TAG_LOGI(AceLogTag::ACE_UIEVENT, "Menu consumed backpressed event");
+            return true;
+        }
+#endif
+    }
+    // remove overlay through SubwindowManager if subwindow unfocused.
+    if (RemoveOverlayBySubwindowManager(instanceId)) {
+        TAG_LOGI(AceLogTag::ACE_UIEVENT, "subwindow consumed backpressed event");
+        return true;
     }
     ContainerScope scope(instanceId);
     auto context = container->GetPipelineContext();

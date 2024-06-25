@@ -1749,7 +1749,7 @@ bool PipelineContext::OnBackPressed()
     }
 
     // if has sharedTransition, back press will stop the sharedTransition
-    if (sharedTransitionManager_->OnBackPressed()) {
+    if (sharedTransitionManager_ && sharedTransitionManager_->OnBackPressed()) {
         LOGI("sharedTransition consumed backpressed event");
         return true;
     }
