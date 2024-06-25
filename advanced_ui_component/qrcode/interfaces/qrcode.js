@@ -33,12 +33,13 @@ export var QrcodeState;
 })(QrcodeState || (QrcodeState = {}));
 class ConfigDataConstants {
 }
-ConfigDataConstants.TIPS = '二维码已失效，请刷新';
+ConfigDataConstants.TIPS = $r('sys.string.ohos_qrcode_expiration_prompt');
 ConfigDataConstants.ANIMATION_CURVE = '0.33,0,0.67,1';
 ConfigDataConstants.ONE_HUNDRED_TWENTY_FIVE_VP = 125;
 ConfigDataConstants.ONE_HUNDRED_ONE_VP = 101;
 ConfigDataConstants.TWENTY_EIGHT_VP = 28;
 ConfigDataConstants.THIRTY_FOUR_VP = 34;
+ConfigDataConstants.TWELVE = 12;
 ConfigDataConstants.ELEVEN_FP = '11fp';
 ConfigDataConstants.SIX_VP = '6vp';
 ConfigDataConstants.FIVE_HUNDRED = 500;
@@ -46,21 +47,25 @@ ConfigDataConstants.DEFAULT_OPACITY = 0.4;
 ConfigDataConstants.DEFAULT_TIMES = 200;
 let QrcodeOptions = class QrcodeOptions {
     constructor(options) {
-        this.edgeLength = options.edgeLength ?? new LengthMetrics(ConfigDataConstants.ONE_HUNDRED_TWENTY_FIVE_VP, LengthUnit.VP);
+        this.edgeLength = options.edgeLength ??
+            new LengthMetrics(ConfigDataConstants.ONE_HUNDRED_TWENTY_FIVE_VP, LengthUnit.VP);
         this.color = options.color ?? ColorMetrics.resourceColor(Color.Black);
         this.backgroundColor = options.backgroundColor ?? ColorMetrics.resourceColor(Color.White);
         this.textColor = options.textColor ?? ColorMetrics.resourceColor(Color.White);
         this.textContent = options.textContent ?? ConfigDataConstants.TIPS;
-        this.borderRadius = options.borderRadius ?? $r('sys.float.ohos_id_corner_radius_default_s');
+        this.borderRadius = options.borderRadius ?? new LengthMetrics(ConfigDataConstants.TWELVE, LengthUnit.VP);
         this.opacity = options.opacity ?? ConfigDataConstants.DEFAULT_OPACITY;
         this.animationCurve = options.animationCurve ?? ConfigDataConstants.ANIMATION_CURVE;
         this.animationDuration = options.animationDuration ?? ConfigDataConstants.DEFAULT_TIMES;
-        this.qrcodeSideLength = options.qrcodeSideLength ?? new LengthMetrics(ConfigDataConstants.ONE_HUNDRED_ONE_VP, LengthUnit.VP);
-        this.expiredImageLength = options.expiredImageLength ?? new LengthMetrics(ConfigDataConstants.TWENTY_EIGHT_VP, LengthUnit.VP);
+        this.qrcodeSideLength = options.qrcodeSideLength ??
+            new LengthMetrics(ConfigDataConstants.ONE_HUNDRED_ONE_VP, LengthUnit.VP);
+        this.expiredImageLength = options.expiredImageLength ??
+            new LengthMetrics(ConfigDataConstants.TWENTY_EIGHT_VP, LengthUnit.VP);
         this.textSize = options.textSize ?? ConfigDataConstants.ELEVEN_FP;
         this.textWeight = options.textWeight ?? FontWeight.Medium;
         this.space = options.space ?? ConfigDataConstants.SIX_VP;
-        this.loadingImageLength = options.loadingImageLength ?? new LengthMetrics(ConfigDataConstants.THIRTY_FOUR_VP, LengthUnit.VP);
+        this.loadingImageLength = options.loadingImageLength ??
+            new LengthMetrics(ConfigDataConstants.THIRTY_FOUR_VP, LengthUnit.VP);
     }
 };
 __decorate([
@@ -118,22 +123,15 @@ export class Qrcode extends ViewV2 {
         this.initParam("options", (params && "options" in params) ? params.options : undefined);
         this.value = '';
         this.state = QrcodeState.NORMAL;
-        this.clickCallback = "clickCallback" in params ? params.clickCallback : () => { };
+        this.onAction = "onAction" in params ? params.onAction : () => {
+        };
         this.finalizeConstruction();
-    }
-    aboutToAppear() {
-        if (this.options === undefined) {
-            return;
-        }
-        else {
-            console.info('aboutToAppear:' + JSON.stringify(this.options));
-        }
     }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
             Stack.onClick(() => {
-                this.clickCallback && this.clickCallback();
+                this.onAction && this.onAction();
             });
         }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -150,7 +148,7 @@ export class Qrcode extends ViewV2 {
                         Column.height(this.options.edgeLength?.value);
                         Column.width(this.options.edgeLength?.value);
                         Column.backgroundColor(this.options.backgroundColor?.color);
-                        Column.borderRadius(this.options.borderRadius);
+                        Column.borderRadius(this.options.borderRadius?.value);
                         Column.opacity(this.state != QrcodeState.NORMAL ? this.options.opacity : 1);
                         Context.animation(null);
                         Column.justifyContent(FlexAlign.Center);
