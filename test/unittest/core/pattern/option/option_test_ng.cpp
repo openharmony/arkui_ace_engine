@@ -249,7 +249,7 @@ HWTEST_F(OptionTestNg, PerformActionTest002, TestSize.Level1)
     TouchEventInfo touchInfo2("touchDown");
     TouchLocationInfo touchLocationInfo2(1);
     touchLocationInfo2.SetTouchType(TouchType::DOWN);
-    touchInfo.AddTouchLocationInfo(std::move(touchLocationInfo2));
+    touchInfo2.AddTouchLocationInfo(std::move(touchLocationInfo2));
     optionPattern_->OnPress(touchInfo2);
     EXPECT_EQ(optionPattern_->GetBgBlendColor(), optionPattern_->selectTheme_->GetClickedColor());
 }
@@ -272,6 +272,8 @@ HWTEST_F(OptionTestNg, OptionLayoutTest002, TestSize.Level1)
     LayoutWrapperNode* rosenLayoutWrapper = new LayoutWrapperNode(nullptr, rosenRefPtr, rosenMakeRefPtr);
     auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, rosenRefPtr, rosenMakeRefPtr);
     rosenLayoutWrapper->AppendChild(childWrapper);
+    rosenLayoutWrapper->hostNode_ = frameNode_;
+    optionPattern_->selectTheme_ = AceType::MakeRefPtr<SelectTheme>();
     /**
      * @tc.steps: step2. construct layoutConstraint and call Measure.
      * @tc.expected: the value of horInterval_ is updated
@@ -541,6 +543,8 @@ HWTEST_F(OptionTestNg, OptionLayoutTest003, TestSize.Level1)
     LayoutWrapperNode* rosenLayoutWrapper = new LayoutWrapperNode(nullptr, rosenRefPtr, rosenMakeRefPtr);
     auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(nullptr, rosenRefPtr, rosenMakeRefPtr);
     rosenLayoutWrapper->AppendChild(childWrapper);
+    rosenLayoutWrapper->hostNode_ = frameNode_;
+    optionPattern_->selectTheme_ = AceType::MakeRefPtr<SelectTheme>();
     /**
      * @tc.steps: step4. Construct and update layout and content constraint,set the flag to claim that this is
      * a select option and call Measure.
@@ -635,6 +639,8 @@ HWTEST_F(OptionTestNg, OptionLayoutTest005, TestSize.Level1)
     LayoutWrapperNode* rosenLayoutWrapper = new LayoutWrapperNode(optionNode, rosenRefPtr, rosenMakeRefPtr);
     auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(optionNode, rosenRefPtr, rosenMakeRefPtr);
     rosenLayoutWrapper->AppendChild(childWrapper);
+    rosenLayoutWrapper->hostNode_ = frameNode_;
+    optionPattern_->selectTheme_ = AceType::MakeRefPtr<SelectTheme>();
     /**
      * @tc.steps: step2. construct layoutConstraint and call Measure.
      * @tc.expected: the value of horInterval_ is updated
