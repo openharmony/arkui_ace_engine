@@ -2096,6 +2096,10 @@ struct ArkUIListItemGroupModifier {
     void (*setListItemGroupChildrenMainSize)(ArkUINodeHandle node, ArkUIListChildrenMainSize option, ArkUI_Int32 unit);
     void (*resetListItemGroupChildrenMainSize)(ArkUINodeHandle node);
     void (*getlistItemGroupDivider)(ArkUINodeHandle node, ArkUIdividerOptions* option, ArkUI_Int32 unit);
+    void (*setListItemGroupSpace)(ArkUINodeHandle node, ArkUI_Float64 space);
+    void (*resetListItemGroupSpace)(ArkUINodeHandle node);
+    void (*setListItemGroupStyle)(ArkUINodeHandle node, ArkUI_Uint32 style);
+    void (*resetListItemGroupStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUIParticleModifier {

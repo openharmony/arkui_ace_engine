@@ -24649,6 +24649,19 @@ if (globalThis.ListItem !== undefined) {
 }
 
 /// <reference path='./import.ts' />
+class ListItemGroupInitializeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().listItemGroup.resetListItemGroupInitialize(node);
+    } else {
+      getUINativeModule().listItemGroup.setListItemGroupInitialize(node, this.value?.space, this.value?.style);
+    }
+  }
+}
+ListItemGroupInitializeModifier.identity = Symbol('listItemGroupinitialize');
 class ListItemGroupDividerModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -24703,6 +24716,19 @@ class ArkListItemGroupComponent extends ArkComponent {
   childrenMainSize(value) {
     modifierWithKey(this._modifiersWithKeys, ListItemGroupChildrenMainSizeModifier.identity, ListItemGroupChildrenMainSizeModifier, value);
     return this;
+  }
+  initialize(value) {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, ListItemGroupInitializeModifier.identity,
+        ListItemGroupInitializeModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, ListItemGroupInitializeModifier.identity,
+        ListItemGroupInitializeModifier, undefined);
+    }
+    return this;
+  }
+  allowChildTypes() {
+    return ["ListItem"];
   }
 }
 // @ts-ignore
