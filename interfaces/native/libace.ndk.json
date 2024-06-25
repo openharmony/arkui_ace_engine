@@ -1630,5 +1630,17 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_Curve_disposeCurve"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArKUI_NodeEvent_GetNumberValue"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArKUI_NodeEvent_GetStringValue"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArKUI_NodeEvent_SetReturnNumberValue"
     }
 ]

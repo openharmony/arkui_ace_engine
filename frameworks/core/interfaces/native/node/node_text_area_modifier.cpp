@@ -1781,5 +1781,81 @@ void SetTextAreaOnSubmit(ArkUINodeHandle node, void* extraParam)
     };
     TextFieldModelNG::SetOnSubmit(frameNode, std::move(onEvent));
 }
+
+void SetTextAreaOnWillInsertValue(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::function<bool(const InsertValueInfo&)> onWillInsert = [node, extraParam](const InsertValueInfo& Info) -> bool {
+        ArkUINodeEvent event;
+        event.kind = MIXED_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.mixedEvent.subKind = ON_TEXT_AREA_WILL_INSERT;
+        event.mixedEvent.numberData[0].f32 = Info.insertOffset;
+        event.mixedEvent.numberDataLength = 1;
+        event.mixedEvent.stringPtrData[0] = reinterpret_cast<intptr_t>(Info.insertValue.c_str());
+        event.mixedEvent.stringPtrDataLength = 1;
+        SendArkUIAsyncEvent(&event);
+        return event.mixedEvent.numberReturnData[0].i32;
+    };
+    TextFieldModelNG::SetOnWillInsertValueEvent(frameNode, std::move(onWillInsert));
+}
+
+void SetTextAreaOnDidInsertValue(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onDidInsert = [node, extraParam](const InsertValueInfo& Info) {
+        ArkUINodeEvent event;
+        event.kind = MIXED_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.mixedEvent.subKind = ON_TEXT_AREA_DID_INSERT;
+        event.mixedEvent.numberData[0].f32 = Info.insertOffset;
+        event.mixedEvent.numberDataLength = 1;
+        event.mixedEvent.stringPtrData[0] = reinterpret_cast<intptr_t>(Info.insertValue.c_str());
+        event.mixedEvent.stringPtrDataLength = 1;
+        SendArkUIAsyncEvent(&event);
+    };
+    TextFieldModelNG::SetOnDidInsertValueEvent(frameNode, std::move(onDidInsert));
+}
+
+void SetTextAreaOnWillDeleteValue(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onWillDelete = [node, extraParam](const DeleteValueInfo& Info) -> bool {
+        ArkUINodeEvent event;
+        event.kind = MIXED_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.mixedEvent.subKind = ON_TEXT_AREA_WILL_DELETE;
+        event.mixedEvent.numberData[0].f32 = Info.deleteOffset;
+        event.mixedEvent.numberData[1].i32 = static_cast<int32_t>(Info.direction);
+        event.mixedEvent.numberDataLength = 2;
+        event.mixedEvent.stringPtrData[0] = reinterpret_cast<intptr_t>(Info.deleteValue.c_str());
+        event.mixedEvent.stringPtrDataLength = 1;
+        SendArkUIAsyncEvent(&event);
+        return event.mixedEvent.numberReturnData[0].i32;
+    };
+    TextFieldModelNG::SetOnWillDeleteEvent(frameNode, std::move(onWillDelete));
+}
+
+void SetTextAreaOnDidDeleteValue(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onDidDelete = [node, extraParam](const DeleteValueInfo& Info) {
+        ArkUINodeEvent event;
+        event.kind = MIXED_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.mixedEvent.subKind = ON_TEXT_AREA_DID_DELETE;
+        event.mixedEvent.numberData[0].f32 = Info.deleteOffset;
+        event.mixedEvent.numberData[1].i32 = static_cast<int32_t>(Info.direction);
+        event.mixedEvent.numberDataLength = 2;
+        event.mixedEvent.stringPtrData[0] = reinterpret_cast<intptr_t>(Info.deleteValue.c_str());
+        event.mixedEvent.stringPtrDataLength = 1;
+        SendArkUIAsyncEvent(&event);
+    };
+    TextFieldModelNG::SetOnDidDeleteEvent(frameNode, std::move(onDidDelete));
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

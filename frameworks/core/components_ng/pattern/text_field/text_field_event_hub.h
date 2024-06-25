@@ -320,7 +320,8 @@ public:
     bool FireOnWillInsertValueEvent(const InsertValueInfo& info)
     {
         if (onWillInsertValueEvent_) {
-            return onWillInsertValueEvent_(info);
+            bool result = onWillInsertValueEvent_(info);
+            return result;
         }
         return true;
     }
