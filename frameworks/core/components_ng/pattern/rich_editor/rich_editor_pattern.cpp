@@ -1198,6 +1198,7 @@ SpanPositionInfo RichEditorPattern::GetSpanPositionInfo(int32_t position)
 void RichEditorPattern::CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target, bool needLeadingMargin)
 {
     CHECK_NULL_VOID(source);
+    CHECK_NULL_VOID(source->GetTag() == V2::SPAN_ETS_TAG);
     CHECK_NULL_VOID(target);
 
     CopyTextSpanFontStyle(source, target);
@@ -4318,8 +4319,6 @@ void RichEditorPattern::InsertValueOperation(const std::string& insertValue, Ope
     if (isSelector) {
         SetCaretPosition(textSelector_.GetTextStart());
     }
-    std::string insertValueTemp = insertValue;
-    bool isLineSeparator = insertValueTemp == std::string("\n");
 
     TextInsertValueInfo info;
     CalcInsertValueObj(info);
@@ -4332,29 +4331,30 @@ void RichEditorPattern::InsertValueOperation(const std::string& insertValue, Ope
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     RefPtr<SpanNode> spanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(info.GetSpanIndex()));
-    if (spanNode == nullptr || spanNode->GetSpanItem()->unicode != 0) {
-        InsertValueWithoutSpan(spanNode, info, insertValueTemp);
+    bool targetSpanCanInsert = spanNode && spanNode->GetTag() == V2::SPAN_ETS_TAG;
+    if (!targetSpanCanInsert) {
+        InsertValueWithoutSpan(spanNode, info, insertValue);
         return;
     }
     if (info.GetOffsetInSpan() == 0) {
         auto spanNodeBefore = DynamicCast<SpanNode>(host->GetChildAtIndex(info.GetSpanIndex() - 1));
-        if (spanNodeBefore != nullptr && !IsLineSeparatorInLast(spanNodeBefore) &&
-            spanNodeBefore->GetTag() == V2::SPAN_ETS_TAG) {
-            InsertValueAfterBeforeSpan(spanNodeBefore, spanNode, info, insertValueTemp, isIME);
+        bool beforeSpanCanInsert = spanNodeBefore && spanNodeBefore->GetTag() == V2::SPAN_ETS_TAG
+            && !IsLineSeparatorInLast(spanNodeBefore);
+        if (beforeSpanCanInsert) {
+            InsertValueAfterBeforeSpan(spanNodeBefore, spanNode, info, insertValue, isIME);
             return;
         }
     }
     if (typingStyle_.has_value() && !HasSameTypingStyle(spanNode)) {
-        InsertDiffStyleValueInSpan(spanNode, info, insertValueTemp, isIME);
+        InsertDiffStyleValueInSpan(spanNode, info, insertValue, isIME);
         return;
     }
-    if (!isLineSeparator) {
-        InsertValueToSpanNode(spanNode, insertValueTemp, info);
+    if (insertValue == std::string("\n")) {
+        SpanNodeFission(spanNode, insertValue, info);
     } else {
-        SpanNodeFission(spanNode, insertValueTemp, info);
+        InsertValueToSpanNode(spanNode, insertValue, info);
     }
-    magnifierController_->UpdateShowMagnifier();
-    AfterInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValueTemp).length()), false, isIME);
+    AfterInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()), false, isIME);
 }
 
 void RichEditorPattern::DeleteSelectOperation(OperationRecord* const record)
@@ -4372,12 +4372,12 @@ void RichEditorPattern::InsertValueWithoutSpan(
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (info.GetSpanIndex() == 0) {
+    if (info.GetSpanIndex() == 0 || (spanNode && spanNode->GetTag() != V2::SPAN_ETS_TAG)) {
         CreateTextSpanNode(spanNode, info, insertValue, isIME);
         return;
     }
     auto spanNodeBefore = DynamicCast<SpanNode>(host->GetChildAtIndex(info.GetSpanIndex() - 1));
-    if (spanNodeBefore == nullptr || spanNodeBefore->GetSpanItem()->unicode != 0) {
+    if (!spanNodeBefore || spanNodeBefore->GetTag() != V2::SPAN_ETS_TAG) {
         CreateTextSpanNode(spanNode, info, insertValue, isIME);
         return;
     }
@@ -4416,18 +4416,9 @@ void RichEditorPattern::InsertDiffStyleValueInSpan(
 
 bool RichEditorPattern::IsLineSeparatorInLast(RefPtr<SpanNode>& spanNode)
 {
-    auto spanItem = spanNode->GetSpanItem();
-    auto text = spanItem->content;
-    std::wstring textTemp = StringUtils::ToWstring(text);
-    auto index = textTemp.find(lineSeparator);
-    if (index != std::wstring::npos) {
-        auto textBefore = textTemp.substr(0, index + 1);
-        auto textAfter = textTemp.substr(index + 1);
-        if (textAfter.empty()) {
-            return true;
-        }
-    }
-    return false;
+    std::string content = spanNode->GetSpanItem()->content;
+    std::wstring wContent = StringUtils::ToWstring(content);
+    return !wContent.empty() && wContent.back() == L'\n';
 }
 
 void RichEditorPattern::InsertValueToSpanNode(
