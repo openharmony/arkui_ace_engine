@@ -300,6 +300,7 @@ void SvgDom::DrawImage(
     FitImage(canvas, imageFit, layout);
     FitViewPort(layout);
     // draw svg tree
+    root_->SetIsRootNode(true);
     if (GreatNotEqual(smoothEdge_, 0.0f)) {
         root_->SetSmoothEdge(smoothEdge_);
     }
