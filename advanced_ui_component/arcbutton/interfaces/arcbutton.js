@@ -13,431 +13,318 @@
  * limitations under the License.
  */
 
-var __decorate = this && this.__decorate || function (t, e, s, i) {
-    var o, n = arguments.length, r = n < 3 ? e : null === i ? i = Object.getOwnPropertyDescriptor(e, s) : i;
-    if ("object" == typeof Reflect && "function" == typeof Reflect.decorate) r = Reflect.decorate(t, e, s, i); else for (var a = t.length - 1; a >= 0; a--) (o = t[a]) && (r = (n < 3 ? o(r) : n > 3 ? o(e, s, r) : o(e, s)) || r);
-    return n > 3 && r && Object.defineProperty(e, s, r), r
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-const measure = globalThis.requireNapi("measure");
-const Curves = globalThis.requireNativeModule("ohos.curves");
-
-export var TYPE_MODE;
-!function(t){
-    t[t.UP_ARC=0] = "UP_ARC";
-    t[t.DOWN_ARC=1] = "DOWN_ARC"
-}(TYPE_MODE || (TYPE_MODE = {}));
-
-export var ARC_BUTTON_STYLE_MODE;
-!function(t){
-    t[t.EMPHASIZED=0] = "EMPHASIZED";
-    t[t.NORMAL01=1] = "NORMAL01";
-    t[t.NORMAL02=2] = "NORMAL02";
-    t[t.EMPHASIZEWARN=3] = "EMPHASIZEWARN"
-}(ARC_BUTTON_STYLE_MODE || (ARC_BUTTON_STYLE_MODE = {}));
-
-export var ARC_BUTTON_STATUS;
-!function(t){
-    t[t.NORMAL=0] = "NORMAL";
-    t[t.PRESSED=1] = "PRESSED";
-    t[t.UNAVAILABLE=2] = "UNAVAILABLE"
-}(ARC_BUTTON_STATUS || (ARC_BUTTON_STATUS = {}));
-
-export var CLICK_EFFECT_STATUS;
-!function(t){
-    t[t.NONE=0] = "NONE";
-    t[t.LIGHT=1] = "LIGHT";
-    t[t.MIDDLE=2] = "MIDDLE";
-    t[t.HEAVY=3] = "HEAVY"
-}(CLICK_EFFECT_STATUS || (CLICK_EFFECT_STATUS = {}));
-
-export class Margin {
+if (!("finalizeConstruction" in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
-let ArcButtonOptions = class {
-    constructor(t) {
-        var e, s, i, o, n, r, a, l, h, C, _, c, p, E, R;
-        this.type = null !== (e = t.type) && void 0 !== e ? e : TYPE_MODE.DOWN_ARC;
-        this.width = null !== (s = t.width) && void 0 !== s ? s : Constants.UPPER_ARC_CIRCLE_R;
-        this.height = null !== (i = t.height) && void 0 !== i ? i : Constants.LOWER_ARC_CIRCLE_CENTER_Y + Constants.LOWER_ARC_CIRCLE_R + Constants.UPPER_ARC_CIRCLE_R - Constants.UPPER_ARC_CIRCLE_CENTER_Y;
-        this.styleMode = null !== (o = t.styleMode) && void 0 !== o ? o : ARC_BUTTON_STYLE_MODE.EMPHASIZED;
-        this.status = null !== (n = t.status) && void 0 !== n ? n : ARC_BUTTON_STATUS.NORMAL;
-        this.resourceText = null !== (r = t.resourceText) && void 0 !== r ? r : "";
-        this.touchEffect = null !== (a = t.touchEffect) && void 0 !== a ? a : CLICK_EFFECT_STATUS.NONE;
-        this.backgroundColor = null !== (l = t.backgroundColor) && void 0 !== l ? l : Color.Black;
-        this.shadowColor = null !== (h = t.shadowColor) && void 0 !== h ? h : "#000000";
-        this.shadowEnabled = null !== (C = t.shadowEnabled) && void 0 !== C && C;
-        this.textSize = null !== (_ = t.textSize) && void 0 !== _ ? _ : Constants.MAX_FONT_SIZE;
-        this.textColor = null !== (c = t.textColor) && void 0 !== c ? c : Color.White;
-        this.pressedTextColor = null !== (p = t.pressedTextColor) && void 0 !== p ? p : Color.White;
-        this.textStyle = null !== (E = t.textStyle) && void 0 !== E ? E : FontStyle.Normal;
-        this.textFamily = t.textFamily;
-        this.textMargin = null !== (R = t.textMargin) && void 0 !== R ? R : {
+const measure = requireNapi('measure');
+const Curves = globalThis.requireNativeModule("ohos.curves");
+const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
+const LengthUnit = requireNapi('arkui.node').LengthUnit;
+export var ArcButtonTypeMode;
+(function (ArcButtonTypeMode) {
+    ArcButtonTypeMode[ArcButtonTypeMode["TOP_EDGE"] = 0] = "TOP_EDGE";
+    ArcButtonTypeMode[ArcButtonTypeMode["BOTTOM_EDGE"] = 1] = "BOTTOM_EDGE";
+})(ArcButtonTypeMode || (ArcButtonTypeMode = {}));
+export var ArcButtonStyleMode;
+(function (ArcButtonStyleMode) {
+    ArcButtonStyleMode[ArcButtonStyleMode["EMPHASIZED"] = 0] = "EMPHASIZED";
+    ArcButtonStyleMode[ArcButtonStyleMode["NORMAL_LIGHT"] = 1] = "NORMAL_LIGHT";
+    ArcButtonStyleMode[ArcButtonStyleMode["NORMAL_DEEP"] = 2] = "NORMAL_DEEP";
+    ArcButtonStyleMode[ArcButtonStyleMode["EMPHASIZED_WARNING"] = 3] = "EMPHASIZED_WARNING";
+})(ArcButtonStyleMode || (ArcButtonStyleMode = {}));
+export var ArcButtonStatus;
+(function (ArcButtonStatus) {
+    ArcButtonStatus[ArcButtonStatus["NORMAL"] = 0] = "NORMAL";
+    ArcButtonStatus[ArcButtonStatus["PRESSED"] = 1] = "PRESSED";
+    ArcButtonStatus[ArcButtonStatus["UNAVAILABLE"] = 2] = "UNAVAILABLE";
+})(ArcButtonStatus || (ArcButtonStatus = {}));
+export var ArkButtonClickEffectStyle;
+(function (ArkButtonClickEffectStyle) {
+    ArkButtonClickEffectStyle[ArkButtonClickEffectStyle["NONE"] = 0] = "NONE";
+    ArkButtonClickEffectStyle[ArkButtonClickEffectStyle["LIGHT"] = 1] = "LIGHT";
+    ArkButtonClickEffectStyle[ArkButtonClickEffectStyle["MIDDLE"] = 2] = "MIDDLE";
+    ArkButtonClickEffectStyle[ArkButtonClickEffectStyle["HEAVY"] = 3] = "HEAVY";
+})(ArkButtonClickEffectStyle || (ArkButtonClickEffectStyle = {}));
+let ArcButtonOptions = class ArcButtonOptions {
+    constructor(options) {
+        this.type = options.type ?? ArcButtonTypeMode.BOTTOM_EDGE;
+        this.width = options.width ?? Constants.UPPER_ARC_CIRCLE_R;
+        this.height = options.height ?? (Constants.LOWER_ARC_CIRCLE_CENTER_Y + Constants.LOWER_ARC_CIRCLE_R + Constants.UPPER_ARC_CIRCLE_R - Constants.UPPER_ARC_CIRCLE_CENTER_Y);
+        this.styleMode = options.styleMode ?? ArcButtonStyleMode.EMPHASIZED;
+        this.status = options.status ?? ArcButtonStatus.NORMAL;
+        this.resourceText = options.resourceText ?? '';
+        this.touchEffect = options.touchEffect ?? ArkButtonClickEffectStyle.NONE;
+        this.backgroundColor = options.backgroundColor ?? Color.Black;
+        this.shadowColor = options.shadowColor ?? '#000000';
+        this.shadowEnabled = options.shadowEnabled ?? false;
+        this.textSize = options.textSize ?? new LengthMetrics(Constants.MAX_FONT_SIZE, LengthUnit.FP);
+        this.textColor = options.textColor ?? Color.White;
+        this.pressedTextColor = options.pressedTextColor ?? Color.White;
+        this.textStyle = options.textStyle ?? FontStyle.Normal;
+        this.textFamily = options.textFamily ?? 'HarmonyOS Sans';
+        this.textMargin = options.textMargin ?? {
             left: Constants.TEXT_HORIZONTAL_MARGIN,
             top: Constants.TEXT_MARGIN_TOP,
             right: Constants.TEXT_HORIZONTAL_MARGIN,
             bottom: Constants.TEXT_MARGIN_BOTTOM
-        }
+        };
     }
 };
-ArcButtonOptions = __decorate([Observed], ArcButtonOptions);
-
+__decorate([
+    Trace
+], ArcButtonOptions.prototype, "type", void 0);
+__decorate([
+    Trace
+], ArcButtonOptions.prototype, "width", void 0);
+__decorate([
+    Trace
+], ArcButtonOptions.prototype, "height", void 0);
+__decorate([
+    Trace
+], ArcButtonOptions.prototype, "styleMode", void 0);
+__decorate([
+    Trace
+], ArcButtonOptions.prototype, "status", void 0);
+__decorate([
+    Trace
+], ArcButtonOptions.prototype, "resourceText", void 0);
+__decorate([
+    Trace
+], ArcButtonOptions.prototype, "touchEffect", void 0);
+__decorate([
+    Trace
+], ArcButtonOptions.prototype, "backgroundColor", void 0);
+__decorate([
+    Trace
+], ArcButtonOptions.prototype, "shadowColor", void 0);
+__decorate([
+    Trace
+], ArcButtonOptions.prototype, "shadowEnabled", void 0);
+__decorate([
+    Trace
+], ArcButtonOptions.prototype, "textSize", void 0);
+__decorate([
+    Trace
+], ArcButtonOptions.prototype, "textColor", void 0);
+__decorate([
+    Trace
+], ArcButtonOptions.prototype, "pressedTextColor", void 0);
+__decorate([
+    Trace
+], ArcButtonOptions.prototype, "textStyle", void 0);
+__decorate([
+    Trace
+], ArcButtonOptions.prototype, "textFamily", void 0);
+__decorate([
+    Trace
+], ArcButtonOptions.prototype, "textMargin", void 0);
+ArcButtonOptions = __decorate([
+    ObservedV2
+], ArcButtonOptions);
 export { ArcButtonOptions };
-
-export class ArcButton extends ViewPU {
-    constructor(t, e, s, i = -1, o = void 0) {
-        super(t, s, i);
-        "function" == typeof o && (this.paramsGenerator_ = o);
-        this.__options = new SynchedPropertyNesedObjectPU(e.options, this, "options");
-        this.__btnColor = new ObservedPropertySimplePU(Color.Black, this, "btnColor");
+export class ArcButton extends ViewV2 {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
+        super(parent, elmtId, extraInfo);
+        this.initParam("options", (params && "options" in params) ? params.options : undefined);
+        this.btnColor = Color.Black;
         this.btnNormalColor = Color.Black;
         this.btnPressColor = Color.Black;
         this.btnDisableColor = Color.Black;
         this.textNormalColor = Color.White;
         this.textDisableColor = Color.White;
-        this.__pathStr = new ObservedPropertySimplePU("", this, "pathStr");
-        this.__btnWidth = new ObservedPropertySimplePU(0, this, "btnWidth");
-        this.__btnHeight = new ObservedPropertySimplePU(0, this, "btnHeight");
-        this.__scaleX = new ObservedPropertySimplePU(1, this, "scaleX");
-        this.__scaleY = new ObservedPropertySimplePU(1, this, "scaleY");
-        this.__translateY = new ObservedPropertySimplePU(0, this, "translateY");
-        this.isUp = !1;
-        this.__textWidth = new ObservedPropertySimplePU(0, this, "textWidth");
-        this.__textHeight = new ObservedPropertySimplePU(0, this, "textHeight");
-        this.__textColor = new ObservedPropertySimplePU(Color.White, this, "textColor");
-        this.__isExceed = new ObservedPropertySimplePU(!1, this, "isExceed");
-        this.settings = new RenderingContextSettings(!0);
+        this.btnWidth = 0;
+        this.btnHeight = 0;
+        this.scaleX = 1;
+        this.scaleY = 1;
+        this.translateY = 0;
+        this.isUp = false;
+        this.textWidth = 0;
+        this.textHeight = 0;
+        this.textColor = Color.White;
+        this.isExceed = false;
+        this.settings = new RenderingContextSettings(true);
         this.context = new CanvasRenderingContext2D(this.settings);
-        this.__isReady = new ObservedPropertySimplePU(!1, this, "isReady");
+        this.isReady = false;
         this.curves = {};
         this.scaleValue = 1;
-        this.startTime = 0;
-        this.calStartTime = 0;
-        this.path2D = void 0;
-        this.circularCrossPointUtil = void 0;
+        this.path2D = new Path2D();
+        this.circularCrossPointUtil = new CircularCrossPointUtil();
         this.upperArcCircleR = 0;
         this.upperArcCircleY = 0;
-        this.setInitiallyProvidedValue(e);
-        this.declareWatch("options", this.optionsChange);
-        this.declareWatch("btnColor", this.doDraw);
-        this.declareWatch("pathStr", this.doDraw);
-        this.declareWatch("isReady", this.doDraw)
+        this.finalizeConstruction();
     }
-
-    setInitiallyProvidedValue(t) {
-        this.__options.set(t.options);
-        void 0 !== t.btnColor && (this.btnColor = t.btnColor);
-        void 0 !== t.btnNormalColor && (this.btnNormalColor = t.btnNormalColor);
-        void 0 !== t.btnPressColor && (this.btnPressColor = t.btnPressColor);
-        void 0 !== t.btnDisableColor && (this.btnDisableColor = t.btnDisableColor);
-        void 0 !== t.textNormalColor && (this.textNormalColor = t.textNormalColor);
-        void 0 !== t.textDisableColor && (this.textDisableColor = t.textDisableColor);
-        void 0 !== t.pathStr && (this.pathStr = t.pathStr);
-        void 0 !== t.btnWidth && (this.btnWidth = t.btnWidth);
-        void 0 !== t.btnHeight && (this.btnHeight = t.btnHeight);
-        void 0 !== t.scaleX && (this.scaleX = t.scaleX);
-        void 0 !== t.scaleY && (this.scaleY = t.scaleY);
-        void 0 !== t.translateY && (this.translateY = t.translateY);
-        void 0 !== t.isUp && (this.isUp = t.isUp);
-        void 0 !== t.textWidth && (this.textWidth = t.textWidth);
-        void 0 !== t.textHeight && (this.textHeight = t.textHeight);
-        void 0 !== t.textColor && (this.textColor = t.textColor);
-        void 0 !== t.isExceed && (this.isExceed = t.isExceed);
-        void 0 !== t.settings && (this.settings = t.settings);
-        void 0 !== t.context && (this.context = t.context);
-        void 0 !== t.isReady && (this.isReady = t.isReady);
-        void 0 !== t.curves && (this.curves = t.curves);
-        void 0 !== t.scaleValue && (this.scaleValue = t.scaleValue);
-        void 0 !== t.startTime && (this.startTime = t.startTime);
-        void 0 !== t.calStartTime && (this.calStartTime = t.calStartTime);
-        void 0 !== t.path2D && (this.path2D = t.path2D);
-        void 0 !== t.circularCrossPointUtil && (this.circularCrossPointUtil = t.circularCrossPointUtil);
-        void 0 !== t.upperArcCircleR && (this.upperArcCircleR = t.upperArcCircleR);
-        void 0 !== t.upperArcCircleY && (this.upperArcCircleY = t.upperArcCircleY)
-    }
-
-    updateStateVars(t) {
-        this.__options.set(t.options)
-    }
-
-    purgeVariableDependenciesOnElmtId(t) {
-        this.__options.purgeDependencyOnElmtId(t);
-        this.__btnColor.purgeDependencyOnElmtId(t);
-        this.__pathStr.purgeDependencyOnElmtId(t);
-        this.__btnWidth.purgeDependencyOnElmtId(t);
-        this.__btnHeight.purgeDependencyOnElmtId(t);
-        this.__scaleX.purgeDependencyOnElmtId(t);
-        this.__scaleY.purgeDependencyOnElmtId(t);
-        this.__translateY.purgeDependencyOnElmtId(t);
-        this.__textWidth.purgeDependencyOnElmtId(t);
-        this.__textHeight.purgeDependencyOnElmtId(t);
-        this.__textColor.purgeDependencyOnElmtId(t);
-        this.__isExceed.purgeDependencyOnElmtId(t);
-        this.__isReady.purgeDependencyOnElmtId(t)
-    }
-
-    aboutToBeDeleted() {
-        this.__options.aboutToBeDeleted();
-        this.__btnColor.aboutToBeDeleted();
-        this.__pathStr.aboutToBeDeleted();
-        this.__btnWidth.aboutToBeDeleted();
-        this.__btnHeight.aboutToBeDeleted();
-        this.__scaleX.aboutToBeDeleted();
-        this.__scaleY.aboutToBeDeleted();
-        this.__translateY.aboutToBeDeleted();
-        this.__textWidth.aboutToBeDeleted();
-        this.__textHeight.aboutToBeDeleted();
-        this.__textColor.aboutToBeDeleted();
-        this.__isExceed.aboutToBeDeleted();
-        this.__isReady.aboutToBeDeleted();
-        SubscriberManager.Get().delete(this.id__());
-        this.aboutToBeDeletedInternal()
-    }
-
-    get options() {
-        return this.__options.get()
-    }
-
-    get btnColor() {
-        return this.__btnColor.get()
-    }
-
-    set btnColor(t) {
-        this.__btnColor.set(t)
-    }
-
-    get pathStr() {
-        return this.__pathStr.get()
-    }
-
-    set pathStr(t) {
-        this.__pathStr.set(t)
-    }
-
-    get btnWidth() {
-        return this.__btnWidth.get()
-    }
-
-    set btnWidth(t) {
-        this.__btnWidth.set(t)
-    }
-
-    get btnHeight() {
-        return this.__btnHeight.get()
-    }
-
-    set btnHeight(t) {
-        this.__btnHeight.set(t)
-    }
-
-    get scaleX() {
-        return this.__scaleX.get()
-    }
-
-    set scaleX(t) {
-        this.__scaleX.set(t)
-    }
-
-    get scaleY() {
-        return this.__scaleY.get()
-    }
-
-    set scaleY(t) {
-        this.__scaleY.set(t)
-    }
-
-    get translateY() {
-        return this.__translateY.get()
-    }
-
-    set translateY(t) {
-        this.__translateY.set(t)
-    }
-
-    get textWidth() {
-        return this.__textWidth.get()
-    }
-
-    set textWidth(t) {
-        this.__textWidth.set(t)
-    }
-
-    get textHeight() {
-        return this.__textHeight.get()
-    }
-
-    set textHeight(t) {
-        this.__textHeight.set(t)
-    }
-
-    get textColor() {
-        return this.__textColor.get()
-    }
-
-    set textColor(t) {
-        this.__textColor.set(t)
-    }
-
-    get isExceed() {
-        return this.__isExceed.get()
-    }
-
-    set isExceed(t) {
-        this.__isExceed.set(t)
-    }
-
-    get isReady() {
-        return this.__isReady.get()
-    }
-
-    set isReady(t) {
-        this.__isReady.set(t)
-    }
-
     optionsChange() {
         this.judgeTextWidth();
         this.btnColor = this.options.backgroundColor;
         this.textColor = this.options.textColor;
-        this.changeStatus()
+        this.changeStatus();
     }
-
     changeStatus() {
         switch (this.options.styleMode) {
-            case ARC_BUTTON_STYLE_MODE.EMPHASIZED:
+            case ArcButtonStyleMode.EMPHASIZED:
                 this.btnNormalColor = Constants.EMPHASIZED_NORMAL_BTN_COLOR;
                 this.textNormalColor = Constants.EMPHASIZED_TEXT_COLOR;
                 this.btnPressColor = Constants.EMPHASIZED_PRESSED_BTN_COLOR;
                 this.btnDisableColor = Constants.EMPHASIZED_DISABLE_BTN_COLOR;
                 this.textDisableColor = Constants.EMPHASIZED_DISABLE_TEXT_COLOR;
                 break;
-            case ARC_BUTTON_STYLE_MODE.NORMAL01:
+            case ArcButtonStyleMode.NORMAL_LIGHT:
                 this.btnNormalColor = Constants.NORMAL01_NORMAL_BTN_COLOR;
                 this.textNormalColor = Constants.NORMAL01_TEXT_COLOR;
                 this.btnPressColor = Constants.NORMAL01_PRESSED_BTN_COLOR;
                 this.btnDisableColor = Constants.NORMAL01_DISABLE_BTN_COLOR;
                 this.textDisableColor = Constants.NORMAL01_DISABLE_TEXT_COLOR;
                 break;
-            case ARC_BUTTON_STYLE_MODE.NORMAL02:
+            case ArcButtonStyleMode.NORMAL_DEEP:
                 this.btnNormalColor = Constants.NORMAL02_NORMAL_BTN_COLOR;
                 this.textNormalColor = Constants.NORMAL02_TEXT_COLOR;
                 this.btnPressColor = Constants.NORMAL02_PRESSED_BTN_COLOR;
                 this.btnDisableColor = Constants.NORMAL02_DISABLE_BTN_COLOR;
                 this.textDisableColor = Constants.NORMAL02_DISABLE_TEXT_COLOR;
                 break;
-            case ARC_BUTTON_STYLE_MODE.EMPHASIZEWARN:
+            case ArcButtonStyleMode.EMPHASIZED_WARNING:
                 this.btnNormalColor = Constants.EMPHASIZEWARN_NORMAL_BTN_COLOR;
                 this.textNormalColor = Constants.EMPHASIZEWARN_TEXT_COLOR;
                 this.btnPressColor = Constants.EMPHASIZEWARN_PRESSED_BTN_COLOR;
                 this.btnDisableColor = Constants.EMPHASIZEWARN_DISABLE_BTN_COLOR;
-                this.textDisableColor = Constants.EMPHASIZEWARN_DISABLE_TEXT_COLOR
+                this.textDisableColor = Constants.EMPHASIZEWARN_DISABLE_TEXT_COLOR;
+                break;
+            default:
+                break;
         }
-        if (this.options.status === ARC_BUTTON_STATUS.UNAVAILABLE) {
+        if (this.options.status === ArcButtonStatus.UNAVAILABLE) {
             this.btnColor = this.btnDisableColor;
-            this.textColor = this.textDisableColor
-        } else {
+            this.textColor = this.textDisableColor;
+        }
+        else {
             this.btnColor = this.btnNormalColor;
-            this.textColor = this.textNormalColor
+            this.textColor = this.textNormalColor;
         }
     }
-
+    /**
+     * 初始化数据
+     */
     initValues() {
-        this.isUp = this.options.type == TYPE_MODE.UP_ARC;
+        this.isUp = this.options.type == ArcButtonTypeMode.TOP_EDGE;
         this.btnColor = this.options.backgroundColor;
         this.textColor = this.options.textColor;
         switch (this.options.touchEffect) {
-            case CLICK_EFFECT_STATUS.LIGHT:
+            case ArkButtonClickEffectStyle.LIGHT:
                 this.curves = Curves.interpolatingSpring(10, 1, 410, 38);
-                this.scaleValue = .9;
+                this.scaleValue = 0.9;
                 break;
-            case CLICK_EFFECT_STATUS.MIDDLE:
+            case ArkButtonClickEffectStyle.MIDDLE:
                 this.curves = Curves.interpolatingSpring(10, 1, 350, 35);
-                this.scaleValue = .95;
+                this.scaleValue = 0.95;
                 break;
-            case CLICK_EFFECT_STATUS.HEAVY:
+            case ArkButtonClickEffectStyle.HEAVY:
                 this.curves = Curves.interpolatingSpring(0, 1, 240, 28);
-                this.scaleValue = .95
+                this.scaleValue = 0.95;
+                break;
+            default:
+                break;
         }
-        this.changeStatus()
+        this.changeStatus();
     }
-
+    /**
+     * 判断是否超出文本框宽度
+     */
     judgeTextWidth() {
-        let t = measure.measureText({ textContent: this.options.resourceText, fontSize: this.options.textSize });
-        console.info("mitang measureTextWidth = " + JSON.stringify(t));
-        this.isExceed = t > vp2px(this.textWidth)
+        let measureTextWidth = measure.measureText({
+            textContent: this.options.resourceText,
+            fontSize: this.options.textSize.value
+        });
+        this.isExceed = measureTextWidth > vp2px(this.textWidth);
     }
-
     aboutToAppear() {
-        this.startTime = (new Date).getTime();
-        console.info("mitang aboutToAppear start time = " + this.startTime);
         this.initValues();
-        this.calStartTime = (new Date).getTime();
-        console.info("mitang calculate start time = " + this.calStartTime);
         this.upperArcCircleR = this.options.width;
         this.upperArcCircleY = Constants.LOWER_ARC_CIRCLE_CENTER_Y + Constants.LOWER_ARC_CIRCLE_R + this.upperArcCircleR - this.options.height;
-        this.circularCrossPointUtil = new CircularCrossPointUtil(this.upperArcCircleR, this.upperArcCircleY);
-        this.circularCrossPointUtil.calculate().then((t => {
-            console.info("mitang calculate end time = " + ((new Date).getTime() - this.calStartTime));
-            console.info("mitang data = " + JSON.stringify(t));
-            this.btnWidth = t.width + 2 * Constants.SHADOW_BLUR;
-            this.isUp ? this.btnHeight = t.height + Constants.SHADOW_BLUR + Constants.SHADOW_OFFSET_Y : this.btnHeight = t.height + 2 * Constants.DISTANCE_FROM_BORDER;
-            this.textWidth = t.width - this.options.textMargin.left - this.options.textMargin.right;
-            console.info("mitang judgeTextWidth start time = " + (new Date).getTime());
+        this.circularCrossPointUtil.initData(this.upperArcCircleR, this.upperArcCircleY);
+        this.circularCrossPointUtil.calculate().then((data) => {
+            if (data == null) {
+                return;
+            }
+            this.btnWidth = data.width + Constants.SHADOW_BLUR * 2;
+            if (this.isUp) {
+                this.btnHeight = data.height + Constants.SHADOW_BLUR + Constants.SHADOW_OFFSET_Y;
+            }
+            else {
+                this.btnHeight = data.height + Constants.DISTANCE_FROM_BORDER * 2;
+            }
+            this.textWidth = data.width - this.options.textMargin.left - this.options.textMargin.right;
             this.judgeTextWidth();
-            console.info("mitang judgeTextWidth end time = " + (new Date).getTime());
-            this.textHeight = t.height - this.options.textMargin.top - this.options.textMargin.bottom;
-            let e = t.leftTopPoint;
-            let s = t.rightTopPoint;
-            let i = t.leftBottomPoint;
-            let o = t.rightBottomPoint;
-            let n = t.canvasLeftTop;
-            n.x -= Constants.SHADOW_BLUR;
-            n.y -= Constants.DISTANCE_FROM_BORDER;
-            let r = `M ${vp2px(e.x - n.x)} ${vp2px(e.y - n.y)}\n        A ${vp2px(Constants.UPPER_ARC_CIRCLE_R)} ${vp2px(Constants.UPPER_ARC_CIRCLE_R)},\n        0, 0, 0, ${vp2px(s.x - n.x)} ${vp2px(s.y - n.y)} M ${vp2px(s.x - n.x)} ${vp2px(s.y - n.y)}\n          A ${vp2px(Constants.CHAMFER_CIRCLE_R)} ${vp2px(Constants.CHAMFER_CIRCLE_R)}, 0, 0, 0,\n          ${vp2px(o.x - n.x)} ${vp2px(o.y - n.y)} M ${vp2px(o.x - n.x)} ${vp2px(o.y - n.y)}\n          A ${vp2px(Constants.LOWER_ARC_CIRCLE_R)} ${vp2px(Constants.LOWER_ARC_CIRCLE_R)},\n          0, 0, 0, ${vp2px(i.x - n.x)} ${vp2px(i.y - n.y)} M ${vp2px(i.x - n.x)} ${vp2px(i.y - n.y)}\n          A ${vp2px(Constants.CHAMFER_CIRCLE_R)} ${vp2px(Constants.CHAMFER_CIRCLE_R)}, 0, 0, 0,\n          ${vp2px(e.x - n.x)} ${vp2px(e.y - n.y)} M ${vp2px(e.x - n.x)} ${vp2px(e.y - n.y)}\n          L ${vp2px(s.x - n.x)} ${vp2px(s.y - n.y)}\n          L ${vp2px(o.x - n.x)} ${vp2px(o.y - n.y)}\n          L ${vp2px(i.x - n.x)} ${vp2px(i.y - n.y)}\n          L ${vp2px(e.x - n.x)} ${vp2px(e.y - n.y)}`;
-            this.path2D = new Path2D(r);
-            console.info("mitang calculate pathStr end time = " + ((new Date).getTime() - this.calStartTime))
-        }));
-        console.info("mitang aboutToAppear end time = " + (new Date).getTime())
+            this.textHeight = data.height - this.options.textMargin.top - this.options.textMargin.bottom;
+            let leftTopPoint = data.leftTopPoint;
+            let rightTopPoint = data.rightTopPoint;
+            let leftBottomPoint = data.leftBottomPoint;
+            let rightBottomPoint = data.rightBottomPoint;
+            let canvasLeftTopPoint = data.canvasLeftTop;
+            canvasLeftTopPoint.x -= Constants.SHADOW_BLUR;
+            canvasLeftTopPoint.y -= Constants.DISTANCE_FROM_BORDER;
+            let pathStr = `M ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)}
+        A ${vp2px(Constants.UPPER_ARC_CIRCLE_R)} ${vp2px(Constants.UPPER_ARC_CIRCLE_R)},
+        0, 0, 0, ${vp2px(rightTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightTopPoint.y - canvasLeftTopPoint.y)} `
+                + `M ${vp2px(rightTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightTopPoint.y - canvasLeftTopPoint.y)}
+          A ${vp2px(Constants.CHAMFER_CIRCLE_R)} ${vp2px(Constants.CHAMFER_CIRCLE_R)}, 0, 0, 0,
+          ${vp2px(rightBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightBottomPoint.y - canvasLeftTopPoint.y)} `
+                + `M ${vp2px(rightBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightBottomPoint.y - canvasLeftTopPoint.y)}
+          A ${vp2px(Constants.LOWER_ARC_CIRCLE_R)} ${vp2px(Constants.LOWER_ARC_CIRCLE_R)},
+          0, 0, 0, ${vp2px(leftBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftBottomPoint.y - canvasLeftTopPoint.y)} `
+                + `M ${vp2px(leftBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftBottomPoint.y - canvasLeftTopPoint.y)}
+          A ${vp2px(Constants.CHAMFER_CIRCLE_R)} ${vp2px(Constants.CHAMFER_CIRCLE_R)}, 0, 0, 0,
+          ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)} `
+                + `M ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)}
+          L ${vp2px(rightTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightTopPoint.y - canvasLeftTopPoint.y)}
+          L ${vp2px(rightBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(rightBottomPoint.y - canvasLeftTopPoint.y)}
+          L ${vp2px(leftBottomPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftBottomPoint.y - canvasLeftTopPoint.y)}
+          L ${vp2px(leftTopPoint.x - canvasLeftTopPoint.x)} ${vp2px(leftTopPoint.y - canvasLeftTopPoint.y)}`;
+            this.path2D = new Path2D(pathStr);
+            this.doDraw();
+        });
     }
-
     doDraw() {
-        if (!this.isReady || void 0 === this.path2D) return;
-        let t = (new Date).getTime();
-        console.info("mitang doDraw start time = " + t);
+        if (!this.isReady || this.path2D === undefined) {
+            return;
+        }
+        let start = new Date().getTime();
         if (this.options.shadowEnabled) {
             this.context.shadowBlur = Constants.SHADOW_BLUR;
             this.context.shadowOffsetY = -Constants.SHADOW_OFFSET_Y;
-            this.context.shadowColor = this.options.shadowColor
+            this.context.shadowColor = this.options.shadowColor;
         }
         this.context.beginPath();
         this.context.fillStyle = this.btnColor;
         this.context.fill(this.path2D);
-        console.info("mitang doDraw end time = " + (new Date).getTime())
     }
-
     buildLog() {
-        console.info("mitang buildLog time = " + (new Date).getTime());
-        return !0
+        return true;
     }
-
     initialRender() {
-        this.observeComponentCreation(((t, e) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(t);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create({ alignContent: Alignment.Top });
             Context.animation(null);
             Stack.width(this.btnWidth);
             Stack.height(this.btnHeight);
-            Stack.enabled(this.options.status !== ARC_BUTTON_STATUS.UNAVAILABLE);
-            Stack.opacity(this.options.status === ARC_BUTTON_STATUS.UNAVAILABLE ? .4 : 1);
+            Stack.enabled(this.options.status !== ArcButtonStatus.UNAVAILABLE);
+            Stack.opacity(this.options.status === ArcButtonStatus.UNAVAILABLE ? 0.4 : 1);
             Stack.scale({ x: this.scaleX, y: this.scaleY, centerY: this.isUp ? 0 : this.btnHeight });
             Stack.translate({ y: this.translateY });
-            Stack.onTouch((t => {
-                console.info(`mitang onTouch event = ${JSON.stringify(t)}`);
-                let e = t.touches[0].windowX;
-                let s = t.touches[0].windowY;
-                console.info(`mitang onTouch x = ${e}, y = ${s}`);
-                switch (t.type) {
+            Stack.onTouch((event) => {
+                let x = event.touches[0].windowX;
+                let y = event.touches[0].windowY;
+                switch (event.type) {
                     case TouchType.Down:
-                        let t = this.circularCrossPointUtil.isPointInPath(e, s, this.isUp);
-                        console.info(`mitang onTouch isInPath = ${t}`);
-                        if (!t) return;
+                        let isInPath = this.circularCrossPointUtil.isPointInPath(x, y, this.isUp);
+                        if (!isInPath) {
+                            return;
+                        }
                         this.scaleX = this.scaleValue;
                         this.scaleY = this.scaleValue;
                         this.btnColor = this.btnPressColor;
@@ -445,264 +332,379 @@ export class ArcButton extends ViewPU {
                     case TouchType.Up:
                         this.scaleX = 1;
                         this.scaleY = 1;
-                        this.btnColor = this.btnNormalColor
+                        this.btnColor = this.btnNormalColor;
+                        break;
+                    default:
+                        break;
                 }
-            }));
-            Stack.onClick((t => {
-                console.info(`mitang onClick x = ${t.x}, y = ${t.y}`)
-            }));
-            e || Stack.pop();
-            ViewStackProcessor.StopGetAccessRecording()
-        }));
-        this.observeComponentCreation(((t, e) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(t);
+            });
+            Stack.onClick((event) => {
+            });
+        }, Stack);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            this.buildLog() ? this.ifElseBranchUpdateFunction(0, (() => {
-            })) : this.ifElseBranchUpdateFunction(1, (() => {
-            }));
-            e || If.pop();
-            ViewStackProcessor.StopGetAccessRecording()
-        }));
+            if (this.buildLog()) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                });
+            }
+        }, If);
         If.pop();
-        this.observeComponentCreation(((t, e) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(t);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             Canvas.create(this.context);
-            Canvas.onReady((() => {
-                console.info("mitang isReady time = " + (new Date).getTime());
-                this.isReady = !0
-            }));
+            Canvas.onReady(() => {
+                this.isReady = true;
+                this.doDraw();
+            });
             Canvas.width(this.btnWidth);
             Canvas.height(this.btnHeight);
-            Canvas.rotate({ angle: this.isUp ? 0 : 180 });
-            e || Canvas.pop();
-            ViewStackProcessor.StopGetAccessRecording()
-        }));
+            Canvas.rotate({
+                angle: this.isUp ? 0 : 180
+            });
+        }, Canvas);
         Canvas.pop();
-        this.observeComponentCreation(((t, e) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(t);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            this.isExceed ? this.ifElseBranchUpdateFunction(0, (() => {
-                this.observeComponentCreation(((t, e) => {
-                    ViewStackProcessor.StartGetAccessRecordingFor(t);
-                    Text.create(this.options.resourceText);
-                    Text.width(this.textWidth);
-                    Text.height(this.textHeight);
-                    Text.fontColor(this.textColor);
-                    Text.fontSize(this.options.textSize);
-                    Text.fontWeight(FontWeight.Medium);
-                    Text.fontStyle(this.options.textStyle);
-                    Text.fontFamily(this.options.textFamily);
-                    Text.maxLines(1);
-                    Text.textOverflow({ overflow: TextOverflow.MARQUEE });
-                    Text.margin({ top: this.isUp ? this.options.textMargin.bottom : this.options.textMargin.top });
-                    e || Text.pop();
-                    ViewStackProcessor.StopGetAccessRecording()
-                }));
-                Text.pop()
-            })) : this.ifElseBranchUpdateFunction(1, (() => {
-                this.observeComponentCreation(((t, e) => {
-                    ViewStackProcessor.StartGetAccessRecordingFor(t);
-                    Text.create(this.options.resourceText);
-                    Text.width(this.textWidth);
-                    Text.height(this.textHeight);
-                    Text.textAlign(TextAlign.Center);
-                    Text.fontColor(this.textColor);
-                    Text.maxFontSize(this.options.textSize);
-                    Text.minFontSize(Constants.MIN_FONT_SIZE);
-                    Text.fontWeight(FontWeight.Medium);
-                    Text.fontStyle(this.options.textStyle);
-                    Text.fontFamily(this.options.textFamily);
-                    Text.maxLines(1);
-                    Text.margin({ top: this.isUp ? this.options.textMargin.bottom : this.options.textMargin.top });
-                    e || Text.pop();
-                    ViewStackProcessor.StopGetAccessRecording()
-                }));
-                Text.pop()
-            }));
-            e || If.pop();
-            ViewStackProcessor.StopGetAccessRecording()
-        }));
+            if (this.isExceed) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Text.create(this.options.resourceText);
+                        Text.width(this.textWidth);
+                        Text.height(this.textHeight);
+                        Text.fontColor(this.textColor);
+                        Text.fontSize(this.options.textSize.value);
+                        Text.fontWeight(FontWeight.Medium);
+                        Text.fontStyle(this.options.textStyle);
+                        Text.fontFamily(this.options.textFamily);
+                        Text.maxLines(1);
+                        Text.textOverflow({ overflow: TextOverflow.MARQUEE });
+                        Text.margin({ top: this.isUp ? this.options.textMargin.bottom : this.options.textMargin.top });
+                    }, Text);
+                    Text.pop();
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Text.create(this.options.resourceText);
+                        Text.width(this.textWidth);
+                        Text.height(this.textHeight);
+                        Text.textAlign(TextAlign.Center);
+                        Text.fontColor(this.textColor);
+                        Text.maxFontSize(this.options.textSize.value);
+                        Text.minFontSize(new LengthMetrics(Constants.MIN_FONT_SIZE, LengthUnit.FP).value);
+                        Text.fontWeight(FontWeight.Medium);
+                        Text.fontStyle(this.options.textStyle);
+                        Text.fontFamily(this.options.textFamily);
+                        Text.maxLines(1);
+                        Text.margin({ top: this.isUp ? this.options.textMargin.bottom : this.options.textMargin.top });
+                    }, Text);
+                    Text.pop();
+                });
+            }
+        }, If);
         If.pop();
-        Stack.pop()
+        Stack.pop();
     }
-
+    updateStateVars(params) {
+        if (params === undefined) {
+            return;
+        }
+        if ("options" in params) {
+            this.updateParam("options", params.options);
+        }
+    }
     rerender() {
-        this.updateDirtyElements()
+        this.updateDirtyElements();
     }
 }
-
+__decorate([
+    Param
+], ArcButton.prototype, "options", void 0);
+__decorate([
+    Local
+], ArcButton.prototype, "btnColor", void 0);
+__decorate([
+    Local
+], ArcButton.prototype, "btnWidth", void 0);
+__decorate([
+    Local
+], ArcButton.prototype, "btnHeight", void 0);
+__decorate([
+    Local
+], ArcButton.prototype, "scaleX", void 0);
+__decorate([
+    Local
+], ArcButton.prototype, "scaleY", void 0);
+__decorate([
+    Local
+], ArcButton.prototype, "translateY", void 0);
+__decorate([
+    Local
+], ArcButton.prototype, "textWidth", void 0);
+__decorate([
+    Local
+], ArcButton.prototype, "textHeight", void 0);
+__decorate([
+    Local
+], ArcButton.prototype, "textColor", void 0);
+__decorate([
+    Local
+], ArcButton.prototype, "isExceed", void 0);
+__decorate([
+    Monitor('options')
+], ArcButton.prototype, "optionsChange", null);
+__decorate([
+    Monitor('btnColor')
+], ArcButton.prototype, "doDraw", null);
 class CircularCrossPointUtil {
-    constructor(t, e) {
+    constructor() {
         this.mirrorUpperArcCircleY = 0;
         this.upperArcCircleY = 0;
         this.upperArcCircleR = 0;
-        this.upperArcCircleR = t;
-        this.upperArcCircleY = e;
-        this.mirrorUpperArcCircleY = Constants.LOWER_ARC_CIRCLE_CENTER_Y - this.calculateDistance(Constants.LOWER_ARC_CIRCLE_CENTER_X, Constants.LOWER_ARC_CIRCLE_CENTER_Y, Constants.UPPER_ARC_CIRCLE_CENTER_X, this.upperArcCircleY);
-        console.info(`mitang mirrorUpperArcCircleY : ${JSON.stringify(this.mirrorUpperArcCircleY)}`)
     }
-
+    initData(upperArcCircleR, upperArcCircleY) {
+        this.upperArcCircleR = upperArcCircleR;
+        this.upperArcCircleY = upperArcCircleY;
+        let distance = this.calculateDistance(Constants.LOWER_ARC_CIRCLE_CENTER_X, Constants.LOWER_ARC_CIRCLE_CENTER_Y, Constants.UPPER_ARC_CIRCLE_CENTER_X, this.upperArcCircleY);
+        this.mirrorUpperArcCircleY = distance - Constants.LOWER_ARC_CIRCLE_CENTER_Y;
+    }
     async calculate() {
-        let t = new AllPoints;
-        let e = Constants.LOWER_ARC_CIRCLE_R;
-        let s = Constants.LOWER_ARC_CIRCLE_CENTER_X;
-        let i = Constants.LOWER_ARC_CIRCLE_CENTER_Y;
-        let o = Constants.UPPER_ARC_CIRCLE_CENTER_X;
-        let n = Constants.CHAMFER_CIRCLE_R;
-        let r = new Circle(this.upperArcCircleR, s, i);
-        let a = new Circle(e, o, this.upperArcCircleY);
-        let l = this.findCircleIntersections(r, a);
-        if (l.length > 1) {
-            let r = l[0];
-            let a = l[1];
-            console.info("mitang 外圆交点");
-            console.info(`mitang 交点1:${JSON.stringify(r)}`);
-            console.info(`mitang 交点2:${JSON.stringify(a)}`);
-            let h = this.findCircleIntersections(new Circle(this.upperArcCircleR - n, s, i), new Circle(e - n, o, this.upperArcCircleY));
-            if (h.length > 1) {
-                r = h[0];
-                a = h[1];
-                console.info("mitang 内圆交点-倒角圆圆心");
-                if (r.x > a.x) {
-                    let t = r;
-                    r = a;
-                    a = t
+        let lowerArcCircleR = Constants.LOWER_ARC_CIRCLE_R;
+        let lowerArcCircleCenterX = Constants.LOWER_ARC_CIRCLE_CENTER_X;
+        let lowerArcCircleCenterY = Constants.LOWER_ARC_CIRCLE_CENTER_Y;
+        let upperArcCircleCenterX = Constants.UPPER_ARC_CIRCLE_CENTER_X;
+        let chamferCircleR = Constants.CHAMFER_CIRCLE_R;
+        let upperArcCircle = new Circle(this.upperArcCircleR, lowerArcCircleCenterX, lowerArcCircleCenterY); //大圆
+        let lowerArcCircle = new Circle(lowerArcCircleR, upperArcCircleCenterX, this.upperArcCircleY); //小圆
+        let external_intersections = this.findCircleIntersections(upperArcCircle, lowerArcCircle);
+        if (external_intersections.length > 1) {
+            let intersection1 = external_intersections[0];
+            let intersection2 = external_intersections[1];
+            let inside_intersections = this.findCircleIntersections(new Circle(this.upperArcCircleR - chamferCircleR, lowerArcCircleCenterX, lowerArcCircleCenterY), new Circle(lowerArcCircleR - chamferCircleR, upperArcCircleCenterX, this.upperArcCircleY));
+            if (inside_intersections.length > 1) {
+                intersection1 = inside_intersections[0];
+                intersection2 = inside_intersections[1];
+                if (intersection1.x > intersection2.x) {
+                    let mid = intersection1;
+                    intersection1 = intersection2;
+                    intersection2 = mid;
                 }
-                console.info(`mitang 交点1:${JSON.stringify(r)}`);
-                console.info(`mitang 交点2:${JSON.stringify(a)}`);
-                let l = this.calculateIntersection(new Point(s, i), this.upperArcCircleR, new Point(r.x, r.y));
-                let C = this.calculateIntersection(new Point(s, i), this.upperArcCircleR, new Point(a.x, a.y));
-                let _ = this.calculateIntersection(new Point(o, this.upperArcCircleY), e, new Point(a.x, a.y));
-                let c = this.calculateIntersection(new Point(o, this.upperArcCircleY), e, new Point(r.x, r.y));
-                console.info(`mitang tp1 = ${JSON.stringify(l)}`);
-                console.info(`mitang tp2 = ${JSON.stringify(C)}`);
-                console.info(`mitang tp3 = ${JSON.stringify(_)}`);
-                console.info(`mitang tp4 = ${JSON.stringify(c)}`);
-                t.leftTopPoint = l;
-                t.rightTopPoint = C;
-                t.rightBottomPoint = _;
-                t.leftBottomPoint = c;
-                let p = this.calculateDistance(r.x, r.y, a.x, a.y) + 2 * n;
-                t.width = p;
-                console.info(`mitang width = ${p}`);
-                let E = this.upperArcCircleR + e - this.calculateDistance(s, i, o, this.upperArcCircleY);
-                t.height = E;
-                console.info(`mitang height = ${E}`);
-                let R = new Point(r.x - n, this.upperArcCircleY - e);
-                t.canvasLeftTop = R
+                let tp1 = this.calculateIntersection(new Point(lowerArcCircleCenterX, lowerArcCircleCenterY), this.upperArcCircleR, new Point(intersection1.x, intersection1.y));
+                let tp2 = this.calculateIntersection(new Point(lowerArcCircleCenterX, lowerArcCircleCenterY), this.upperArcCircleR, new Point(intersection2.x, intersection2.y));
+                let tp3 = this.calculateIntersection(new Point(upperArcCircleCenterX, this.upperArcCircleY), lowerArcCircleR, new Point(intersection2.x, intersection2.y));
+                let tp4 = this.calculateIntersection(new Point(upperArcCircleCenterX, this.upperArcCircleY), lowerArcCircleR, new Point(intersection1.x, intersection1.y));
+                let width = this.calculateDistance(intersection1.x, intersection1.y, intersection2.x, intersection2.y) + chamferCircleR * 2;
+                let height = (this.upperArcCircleR + lowerArcCircleR) - this.calculateDistance(lowerArcCircleCenterX, lowerArcCircleCenterY, upperArcCircleCenterX, this.upperArcCircleY);
+                let canvasLeftTop = new Point(intersection1.x - chamferCircleR, this.upperArcCircleY - lowerArcCircleR);
+                return new AllPoints(width, height, tp1, tp2, tp4, tp3, canvasLeftTop);
             }
         }
-        return t
+        return null;
     }
-
-    isPointInPath(t, e, s) {
-        return this.calculateDistance(t, e, Constants.UPPER_ARC_CIRCLE_CENTER_X, s ? this.mirrorUpperArcCircleY : this.upperArcCircleY) <= Constants.UPPER_ARC_CIRCLE_R
+    /**
+     * 判断点是否在上弧圆内
+     * @param x 触摸点X
+     * @param y 触摸点Y
+     * @returns 是否在上弧圆内
+     */
+    isPointInPath(x, y, isUp) {
+        let distance = this.calculateDistance(x, y, Constants.UPPER_ARC_CIRCLE_CENTER_X, isUp ? this.mirrorUpperArcCircleY : this.upperArcCircleY);
+        return distance <= this.upperArcCircleR;
     }
-
-    calculateDistance(t, e, s, i) {
-        return Math.sqrt((s - t)**2 + (i - e)**2)
+    /**
+     * 计算两点间距离
+     * @param point1 点1
+     * @param point2 点2
+     * @returns 距离
+     */
+    calculateDistance(x1, y1, x2, y2) {
+        return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
     }
-
-    calculateIntersection(t, e, s) {
-        let i = t.x;
-        let o = t.y;
-        let n = s.x;
-        let r = s.y;
-        let a;
-        a = n != i ? (r - o) / (n - i) : void 0;
-        let l;
-        l = isNaN(a) ? void 0 : r - a * n;
-        let h = [];
-        if (isNaN(a)) {
-            let t = i;
-            let s = o - (e**2 - (t - i)**2)**.5;
-            h = [new Point(t, o + (e**2 - (t - i)**2)**.5), new Point(t, s)]
-        } else {
-            let t = Math.pow(a, 2) + 1;
-            let s = 2 * (a * l - a * o - i);
-            let n = o**2 - e**2 + i**2 - 2 * l * o + l**2;
-            let r = (-s + (s**2 - 4 * t * n)**.5) / (2 * t);
-            let C = (-s - (s**2 - 4 * t * n)**.5) / (2 * t);
-            let _ = a * C + l;
-            h = [new Point(r, a * r + l), new Point(C, _)]
+    calculateIntersection(circleCenter, circleRadius, point) {
+        let h = circleCenter.x;
+        let k = circleCenter.y;
+        let x = point.x;
+        let y = point.y;
+        let m = 0;
+        if (x != h) {
+            m = (y - k) / (x - h);
         }
-        return this.calculateDistance(h[0].x, h[0].y, s.x, s.y) < this.calculateDistance(h[1].x, h[1].y, s.x, s.y) ? h[0] : h[1]
+        else {
+            m = -1;
+        }
+        let b = 0;
+        if (m != -1) {
+            b = y - m * x;
+        }
+        let resultPoint = [];
+        if (m != -1) {
+            let A = Math.pow(m, 2) + 1;
+            let B = 2 * (m * b - m * k - h);
+            let C = k ** 2 - circleRadius ** 2 + h ** 2 - 2 * b * k + b ** 2;
+            let x1 = (-B + (B ** 2 - 4 * A * C) ** 0.5) / (2 * A);
+            let x2 = (-B - (B ** 2 - 4 * A * C) ** 0.5) / (2 * A);
+            let y1 = m * x1 + b;
+            let y2 = m * x2 + b;
+            resultPoint = [new Point(x1, y1), new Point(x2, y2)];
+        }
+        else {
+            let x1 = h;
+            let y1 = k + (circleRadius ** 2 - (x1 - h) ** 2) ** 0.5;
+            let y2 = k - (circleRadius ** 2 - (x1 - h) ** 2) ** 0.5;
+            resultPoint = [new Point(x1, y1), new Point(x1, y2)];
+        }
+        let d1 = this.calculateDistance(resultPoint[0].x, resultPoint[0].y, point.x, point.y);
+        let d2 = this.calculateDistance(resultPoint[1].x, resultPoint[1].y, point.x, point.y);
+        if (d1 < d2) {
+            return resultPoint[0];
+        }
+        else {
+            return resultPoint[1];
+        }
     }
-
-    findCircleIntersections(t, e) {
-        let s = t.radius;
-        let i = t.x;
-        let o = t.y;
-        let n = e.radius;
-        let r = e.x;
-        let a = e.y;
-        let l = Math.sqrt((i - r)**2 + (o - a)**2);
-        if (l > s + n) return [];
-        if (l < Math.abs(s - n)) return [];
-        if (0 === l && s === n) return [];
-        let h = (s**2 - n**2 + l**2) / (2 * l);
-        let C = Math.sqrt(s**2 - h**2);
-        let _ = i + h * (r - i) / l;
-        let c = o + h * (a - o) / l;
-        return [new Point(_ + C * (a - o) / l, c - C * (r - i) / l), new Point(_ - C * (a - o) / l, c + C * (r - i) / l)]
+    /**
+     * 查找两圆的交点
+     * @param C1 第一个圆
+     * @param c2 第二个圆
+     * @returns 两圆相交的点的数组
+     */
+    findCircleIntersections(firstCircus, secondCircus) {
+        let firstCircusR = firstCircus.radius;
+        let firstCircusCenterX = firstCircus.x;
+        let firstCircusCenterY = firstCircus.y;
+        let secondCircusR = secondCircus.radius;
+        let secondCircusCenterX = secondCircus.x;
+        let secondCircusCenterY = secondCircus.y;
+        // 计算两个圆心之间的距离
+        let distance = Math.sqrt((firstCircusCenterX - secondCircusCenterX) ** 2 + (firstCircusCenterY - secondCircusCenterY) ** 2);
+        // 检查异常情况
+        if (distance > firstCircusR + secondCircusR) {
+            //两个圆分离，不相交
+            return [];
+        }
+        else if (distance < Math.abs(firstCircusR - secondCircusR)) {
+            //一个圆包含在另一个圆内，不相交
+            return [];
+        }
+        else if (distance === 0 && firstCircusR === secondCircusR) {
+            //两个圆完全重合，具有无穷多交点
+            return [];
+        }
+        // 计算交点
+        let a = (firstCircusR ** 2 - secondCircusR ** 2 + distance ** 2) / (2 * distance);
+        let h = Math.sqrt(firstCircusR ** 2 - a ** 2);
+        // 中间变量
+        let x2 = firstCircusCenterX + a * (secondCircusCenterX - firstCircusCenterX) / distance;
+        let y2 = firstCircusCenterY + a * (secondCircusCenterY - firstCircusCenterY) / distance;
+        // 交点
+        let intersection1 = new Point(x2 + h * (secondCircusCenterY - firstCircusCenterY) / distance, y2 - h * (secondCircusCenterX - firstCircusCenterX) / distance);
+        let intersection2 = new Point(x2 - h * (secondCircusCenterY - firstCircusCenterY) / distance, y2 + h * (secondCircusCenterX - firstCircusCenterX) / distance);
+        return [intersection1, intersection2];
     }
 }
-
 class Circle {
-    constructor(t, e, s) {
-        this.radius = t;
-        this.x = e;
-        this.y = s
+    constructor(radius, x, y) {
+        this.radius = radius;
+        this.x = x;
+        this.y = y;
     }
 }
-
 class Point {
-    constructor(t, e) {
-        this.x = t;
-        this.y = e
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
     }
 }
-
 class AllPoints {
+    constructor(width, height, leftTopPoint, rightTopPoint, leftBottomPoint, rightBottomPoint, canvasLeftTop) {
+        this.width = width;
+        this.height = height;
+        this.leftTopPoint = leftTopPoint;
+        this.rightTopPoint = rightTopPoint;
+        this.leftBottomPoint = leftBottomPoint;
+        this.rightBottomPoint = rightBottomPoint;
+        this.canvasLeftTop = canvasLeftTop;
+    }
 }
-
 class Constants {
 }
-
+/**
+ * 上弧圆圆心X坐标
+ */
 Constants.UPPER_ARC_CIRCLE_CENTER_X = 116.5;
+/**
+ * 上弧圆圆心Y坐标
+ */
 Constants.UPPER_ARC_CIRCLE_CENTER_Y = 514;
+/**
+ * 上弧圆半径
+ */
 Constants.UPPER_ARC_CIRCLE_R = 330;
+/**
+ * 下弧圆圆心X坐标
+ */
 Constants.LOWER_ARC_CIRCLE_CENTER_X = 116.5;
+/**
+ * 下弧圆圆心Y坐标
+ */
 Constants.LOWER_ARC_CIRCLE_CENTER_Y = 116.5;
+/**
+ * 下弧圆半径
+ */
 Constants.LOWER_ARC_CIRCLE_R = 115.5;
+/**
+ * 倒角圆半径
+ */
 Constants.CHAMFER_CIRCLE_R = 8;
-Constants.MAX_FONT_SIZE = "19fp";
-Constants.MIN_FONT_SIZE = "13fp";
+/**
+ * 最大文字大小
+ */
+Constants.MAX_FONT_SIZE = 19;
+/**
+ * 最小文字大小
+ */
+Constants.MIN_FONT_SIZE = 13;
+/**
+ * 阴影半径
+ */
 Constants.SHADOW_BLUR = 4;
+/**
+ * Y偏移
+ */
 Constants.SHADOW_OFFSET_Y = 3;
+/**
+ * 按钮与边框距离
+ */
 Constants.DISTANCE_FROM_BORDER = 1;
+/**
+ * 文本间距
+ */
 Constants.TEXT_HORIZONTAL_MARGIN = 24;
 Constants.TEXT_MARGIN_TOP = 10;
 Constants.TEXT_MARGIN_BOTTOM = 16;
-Constants.EMPHASIZED_NORMAL_BTN_COLOR = "#1F71FF";
-Constants.EMPHASIZED_TEXT_COLOR = "#FFFFFF";
-Constants.EMPHASIZED_PRESSED_BTN_COLOR = "#2B6EC2";
-Constants.EMPHASIZED_DISABLE_BTN_COLOR = "#991F71FF";
-Constants.EMPHASIZED_DISABLE_TEXT_COLOR = "#99FFFFFF";
-Constants.NORMAL01_NORMAL_BTN_COLOR = "#132230";
-Constants.NORMAL01_TEXT_COLOR = "#5EA1FF";
-Constants.NORMAL01_PRESSED_BTN_COLOR = "#25353E";
-Constants.NORMAL01_DISABLE_BTN_COLOR = "#132230";
-Constants.NORMAL01_DISABLE_TEXT_COLOR = "#995ea1ff";
-Constants.NORMAL02_NORMAL_BTN_COLOR = "#1D201C";
-Constants.NORMAL02_TEXT_COLOR = "#5EA1FF";
-Constants.NORMAL02_PRESSED_BTN_COLOR = "#30342D";
-Constants.NORMAL02_DISABLE_BTN_COLOR = "#1E211D";
-Constants.NORMAL02_DISABLE_TEXT_COLOR = "#995ea1ff";
-Constants.EMPHASIZEWARN_NORMAL_BTN_COLOR = "#BF2629";
-Constants.EMPHASIZEWARN_TEXT_COLOR = "#FFFFFF";
-Constants.EMPHASIZEWARN_PRESSED_BTN_COLOR = "#9E342F";
-Constants.EMPHASIZEWARN_DISABLE_BTN_COLOR = "#3E0d0c";
-Constants.EMPHASIZEWARN_DISABLE_TEXT_COLOR = "#99FFFFFF";
-
-export default { ArcButton, ArcButtonOptions, TYPE_MODE, ARC_BUTTON_STYLE_MODE, ARC_BUTTON_STATUS, CLICK_EFFECT_STATUS }
+Constants.EMPHASIZED_NORMAL_BTN_COLOR = '#1F71FF';
+Constants.EMPHASIZED_TEXT_COLOR = '#FFFFFF';
+Constants.EMPHASIZED_PRESSED_BTN_COLOR = '#2B6EC2';
+Constants.EMPHASIZED_DISABLE_BTN_COLOR = '#991F71FF';
+Constants.EMPHASIZED_DISABLE_TEXT_COLOR = '#99FFFFFF';
+Constants.NORMAL01_NORMAL_BTN_COLOR = '#132230';
+Constants.NORMAL01_TEXT_COLOR = '#5EA1FF';
+Constants.NORMAL01_PRESSED_BTN_COLOR = '#25353E';
+Constants.NORMAL01_DISABLE_BTN_COLOR = '#132230';
+Constants.NORMAL01_DISABLE_TEXT_COLOR = '#995ea1ff';
+Constants.NORMAL02_NORMAL_BTN_COLOR = '#1D201C';
+Constants.NORMAL02_TEXT_COLOR = '#5EA1FF';
+Constants.NORMAL02_PRESSED_BTN_COLOR = '#30342D';
+Constants.NORMAL02_DISABLE_BTN_COLOR = '#1E211D';
+Constants.NORMAL02_DISABLE_TEXT_COLOR = '#995ea1ff';
+Constants.EMPHASIZEWARN_NORMAL_BTN_COLOR = '#BF2629';
+Constants.EMPHASIZEWARN_TEXT_COLOR = '#FFFFFF';
+Constants.EMPHASIZEWARN_PRESSED_BTN_COLOR = '#9E342F';
+Constants.EMPHASIZEWARN_DISABLE_BTN_COLOR = '#3E0d0c';
+Constants.EMPHASIZEWARN_DISABLE_TEXT_COLOR = '#99FFFFFF';
+//# sourceMappingURL=ArcButton.js.map
+export default { ArcButton, ArcButtonOptions, TypeMode, ArcButtonStyleMode, ArcButtonStatus, ClickEffectStatus }
