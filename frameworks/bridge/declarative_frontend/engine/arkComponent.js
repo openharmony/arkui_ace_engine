@@ -23765,6 +23765,12 @@ class ArkFlowItemComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  initialize(value) {
+    return this;
+  }
+  allowChildCount() {
+    return 1;
+  }
 }
 // @ts-ignore
 if (globalThis.FlowItem !== undefined) {
@@ -26335,6 +26341,22 @@ class WaterFlowFlingSpeedLimitModifier extends ModifierWithKey {
   }
 }
 WaterFlowFlingSpeedLimitModifier.identity = Symbol('waterFlowFlingSpeedLimit');
+
+class WaterFlowInitializeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().waterFlow.resetWaterFlowInitialize(node);
+    } else {
+      getUINativeModule().waterFlow.setWaterFlowInitialize(node,
+        this.value?.scroller, this.value?.sections, this.value?.layoutMode);
+    }
+  }
+}
+WaterFlowInitializeModifier.identity = Symbol('waterFlowInitialize');
+
 class ArkWaterFlowComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -26432,6 +26454,19 @@ class ArkWaterFlowComponent extends ArkComponent {
   flingSpeedLimit(value) {
     modifierWithKey(this._modifiersWithKeys, WaterFlowFlingSpeedLimitModifier.identity, WaterFlowFlingSpeedLimitModifier, value);
     return this;
+  }
+  initialize(value) {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, WaterFlowInitializeModifier.identity,
+        WaterFlowInitializeModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, WaterFlowInitializeModifier.identity,
+        WaterFlowInitializeModifier, undefined);
+    }
+    return this;
+  }
+  allowChildTypes() {
+    return ["FlowItem"];
   }
 }
 

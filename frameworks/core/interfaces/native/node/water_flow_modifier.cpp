@@ -569,6 +569,52 @@ void ResetWaterFlowFlingSpeedLimit(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetFlingSpeedLimit(frameNode, -1.0);
 }
+
+ArkUINodeHandle GetScrollController(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto controller = WaterFlowModelNG::GetOrCreateController(frameNode);
+    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(controller));
+}
+
+void SetWaterFlowScroller(ArkUINodeHandle node, ArkUINodeHandle controller, ArkUINodeHandle proxy)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto scrollController = AceType::Claim(reinterpret_cast<ScrollControllerBase*>(controller));
+    CHECK_NULL_VOID(scrollController);
+    auto scrollProxy = AceType::Claim(reinterpret_cast<ScrollProxy*>(proxy));
+    CHECK_NULL_VOID(scrollProxy);
+    WaterFlowModelNG::SetScroller(frameNode, scrollController, scrollProxy);
+}
+
+void SetWaterFlowLayoutMode(ArkUINodeHandle node, ArkUI_Uint32 layoutMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowLayoutMode mode = WaterFlowLayoutMode::TOP_DOWN;
+    if (layoutMode >= static_cast<uint32_t>(WaterFlowLayoutMode::TOP_DOWN) &&
+        layoutMode <= static_cast<uint32_t>(WaterFlowLayoutMode::SLIDING_WINDOW)) {
+        mode = static_cast<WaterFlowLayoutMode>(layoutMode);
+    }
+    WaterFlowModelNG::SetLayoutMode(frameNode, mode);
+}
+
+void ResetWaterFlowLayoutMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowLayoutMode mode = WaterFlowLayoutMode::TOP_DOWN;
+    WaterFlowModelNG::SetLayoutMode(frameNode, mode);
+}
+
+void ResetWaterFlowSections(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::ResetSections(frameNode);
+}
 } // namespace
 namespace NodeModifier {
 const ArkUIWaterFlowModifier* GetWaterFlowModifier()
@@ -586,7 +632,8 @@ const ArkUIWaterFlowModifier* GetWaterFlowModifier()
         GetEdgeEffect, SetWaterFlowSectionOptions, ResetWaterFlowSectionOptions, GetWaterFlowSectionOptions,
         GetItemMinWidth, GetItemMaxWidth, GetItemMinHeight, GetItemMaxHeight, GetWaterFlowEnableScrollInteraction,
         GetWaterFlowFriction, SetScrollToIndex, SetWaterflowFooter, ResetWaterflowFooter, SetWaterFlowFlingSpeedLimit,
-        ResetWaterFlowFlingSpeedLimit, };
+        ResetWaterFlowFlingSpeedLimit, GetScrollController, SetWaterFlowScroller, SetWaterFlowLayoutMode,
+        ResetWaterFlowLayoutMode, ResetWaterFlowSections };
     return &modifier;
 }
 

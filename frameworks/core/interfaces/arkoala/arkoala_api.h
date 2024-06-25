@@ -3161,6 +3161,11 @@ struct ArkUIWaterFlowModifier {
     void (*resetWaterflowFooter)(ArkUINodeHandle node);
     void (*setWaterFlowFlingSpeedLimit)(ArkUINodeHandle node, ArkUI_Float32 maxSpeed);
     void (*resetWaterFlowFlingSpeedLimit)(ArkUINodeHandle node);
+    ArkUINodeHandle (*getScrollController)(ArkUINodeHandle node);
+    void (*setWaterFlowScroller)(ArkUINodeHandle node, ArkUINodeHandle controller, ArkUINodeHandle proxy);
+    void (*setWaterFlowLayoutMode)(ArkUINodeHandle node, ArkUI_Uint32 layoutMode);
+    void (*resetWaterFlowLayoutMode)(ArkUINodeHandle node);
+    void (*resetWaterFlowSections)(ArkUINodeHandle node);
 };
 
 struct ArkUIMenuItemModifier {
