@@ -680,7 +680,7 @@ void TabBarPattern::FocusIndexChange(int32_t index)
     CHECK_NULL_VOID(tabsPattern);
     auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(tabBarLayoutProperty);
-    if (!ContentWillChange(indicator_, index)) {
+    if (!ContentWillChange(tabBarLayoutProperty->GetIndicatorValue(0), index)) {
         return;
     }
     if (tabsPattern->GetIsCustomAnimation()) {
@@ -1117,7 +1117,7 @@ void TabBarPattern::HandleClick(const GestureEvent& info, int32_t index)
         return;
     }
 
-    if (!ContentWillChange(index)) {
+    if (!ContentWillChange(layoutProperty->GetIndicatorValue(0), index)) {
         return;
     }
     ClickTo(host, index);
