@@ -44,6 +44,9 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
     CHECK_NULL_VOID(context);
     auto pathInfo = pattern->GetNavPathInfo();
     CHECK_NULL_VOID(pathInfo);
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        state = pattern->GetIsOnShow() ? NavDestinationState::ON_SHOWN : NavDestinationState::ON_HIDDEN;
+    }
     NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
         pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()));
     CHECK_NULL_VOID(navigationHandleFunc_);
@@ -139,9 +142,14 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const 
     CHECK_NULL_RETURN(host, nullptr);
     auto pathInfo = pattern->GetNavPathInfo();
     CHECK_NULL_RETURN(pathInfo, nullptr);
-    NavDestinationState state = pattern->GetNavDestinationState();
-    if (state == NavDestinationState::NONE) {
-        return nullptr;
+    NavDestinationState state = NavDestinationState::NONE;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        state = pattern->GetNavDestinationState();
+        if (state == NavDestinationState::NONE) {
+            return nullptr;
+        }
+    } else {
+        state = pattern->GetIsOnShow() ? NavDestinationState::ON_SHOWN : NavDestinationState::ON_HIDDEN;
     }
     return std::make_shared<NavDestinationInfo>(
         GetNavigationId(pattern), pattern->GetName(),
