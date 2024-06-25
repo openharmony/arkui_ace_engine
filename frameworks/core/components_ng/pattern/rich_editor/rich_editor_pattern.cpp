@@ -3227,68 +3227,6 @@ void RichEditorPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-
-void RichEditorPattern::AddUdmfData(const RefPtr<Ace::DragEvent>& event)
-{
-    RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
-    AddSpanStringUdmfRecord(unifiedData);
-    std::list<ResultObject> finalResult;
-    auto type = SelectSpanType::TYPESPAN;
-    for (const auto& resultObj : dragResultObjects_) {
-        if (finalResult.empty() || resultObj.type != SelectSpanType::TYPESPAN || type != SelectSpanType::TYPESPAN) {
-            type = resultObj.type;
-            finalResult.emplace_back(resultObj);
-            if (resultObj.type == SelectSpanType::TYPESPAN) {
-                AddUdmfTxtPreProcessor(resultObj, finalResult.back(), false);
-            }
-        } else {
-            AddUdmfTxtPreProcessor(resultObj, finalResult.back(), true);
-        }
-    }
-    auto resultProcessor = [unifiedData, weak = WeakClaim(this)](const ResultObject& result) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (result.type == SelectSpanType::TYPESPAN) {
-            UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, result.valueString);
-            return;
-        }
-        if (result.type == SelectSpanType::TYPEIMAGE) {
-            if (result.valuePixelMap) {
-                const uint8_t* pixels = result.valuePixelMap->GetPixels();
-                CHECK_NULL_VOID(pixels);
-                int32_t length = result.valuePixelMap->GetByteCount();
-                std::vector<uint8_t> data(pixels, pixels + length);
-                PixelMapRecordDetails details = { result.valuePixelMap->GetWidth(), result.valuePixelMap->GetHeight(),
-                    result.valuePixelMap->GetPixelFormat(), result.valuePixelMap->GetAlphaType() };
-                UdmfClient::GetInstance()->AddPixelMapRecord(unifiedData, data, details);
-            } else if (result.valueString.size() > 1) {
-                UdmfClient::GetInstance()->AddImageRecord(unifiedData, result.valueString);
-            }
-        }
-    };
-    for (const auto& resultObj : finalResult) {
-        resultProcessor(resultObj);
-    }
-    event->SetData(unifiedData);
-}
-
-void RichEditorPattern::AddSpanStringUdmfRecord(RefPtr<UnifiedData>& unifiedData)
-{
-    auto selectStart = textSelector_.GetTextStart();
-    auto selectEnd = textSelector_.GetTextEnd();
-
-    RefPtr<SpanString> selectInfo;
-    if (isSpanStringMode_) {
-        selectInfo = styledString_->GetSubSpanString(selectStart, selectEnd - selectStart);
-    } else {
-        selectInfo = ToStyledString(selectStart, selectEnd - selectStart);
-    }
-    CHECK_NULL_VOID(selectInfo);
-    std::vector<uint8_t> arr;
-    selectInfo->EncodeTlv(arr);
-    UdmfClient::GetInstance()->AddSpanStringRecord(unifiedData, arr);
-}
-
 RefPtr<SpanString> RichEditorPattern::ToStyledString(int32_t start, int32_t length)
 {
     RefPtr<SpanString> spanString = MakeRefPtr<SpanString>("");
@@ -3304,14 +3242,12 @@ SelectionInfo RichEditorPattern::FromStyledString(const RefPtr<SpanString>& span
     int32_t end = 0;
     if (spanString && !spanString->GetSpanItems().empty()) {
         auto spans = spanString->GetSpanItems();
-        int32_t imageIndex = 0;
-        std::for_each(spans.begin(), spans.end(), [&imageIndex, &resultObjects](RefPtr<SpanItem>& item) {
+        int32_t index = 0;
+        std::for_each(spans.begin(), spans.end(), [&index, &resultObjects](RefPtr<SpanItem>& item) {
             CHECK_NULL_VOID(item);
             auto obj = item->GetSpanResultObject(item->interval.first, item->interval.second);
-            if (obj.type == SelectSpanType::TYPEIMAGE) {
-                obj.spanPosition.spanIndex = imageIndex;
-                ++imageIndex;
-            }
+            obj.spanPosition.spanIndex = index;
+            ++index;
             if (obj.isInit) {
                 resultObjects.emplace_back(obj);
             }
@@ -6228,7 +6164,6 @@ void RichEditorPattern::OnCopyOperation(bool isUsingExternalKeyboard)
         return;
     }
     RefPtr<PasteDataMix> pasteData = clipboard_->CreatePasteDataMix();
-    OnCopyOperationExt(pasteData);
     auto selectStart = textSelector_.GetTextStart();
     auto selectEnd = textSelector_.GetTextEnd();
     auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
