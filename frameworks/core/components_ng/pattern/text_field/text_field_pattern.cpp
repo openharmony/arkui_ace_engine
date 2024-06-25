@@ -5979,6 +5979,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
         Infinity<uint32_t>()) ? "INF" : std::to_string(GetMaxLines()).c_str(), filter);
     json->PutExtAttr("barState", GetBarStateString().c_str(), filter);
     json->PutExtAttr("caretPosition", std::to_string(GetCaretIndex()).c_str(), filter);
+    json->PutExtAttr("enablePreviewText", GetSupportPreviewText(), filter);
 
     ToJsonValueForOption(json, filter);
 }
