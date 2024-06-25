@@ -338,7 +338,7 @@ void WindowScene::BufferAvailableCallbackForSnapshot()
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
 
-        self->RemoveChild(host, self->snapshotNode_, self->snapshotNode_);
+        self->RemoveChild(host, self->snapshotNode_, self->snapshotNodeName_);
         self->snapshotNode_.Reset();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         
