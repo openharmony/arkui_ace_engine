@@ -433,6 +433,16 @@ public:
 
     bool IsFold();
 
+    void SetSheetKey(const SheetKey& sheetKey)
+    {
+        sheetKey_ = sheetKey;
+    }
+
+    SheetKey GetSheetKey() const
+    {
+        return sheetKey_;
+    }
+    
     bool GetAnimationBreak() const
     {
         return isAnimationBreak_;
@@ -602,6 +612,7 @@ private:
     void DismissTransition(bool isTransitionIn, float dragVelocity = 0.0f);
     uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;
+    SheetKey sheetKey_;
     std::optional<int32_t> titleId_;
     std::optional<int32_t> subtitleId_;
     std::string targetTag_;

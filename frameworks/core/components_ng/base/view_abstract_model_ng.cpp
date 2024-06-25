@@ -59,38 +59,6 @@ std::string GetTagFromRootNodeType(RootNodeType rootNodeType)
             return V2::PAGE_ETS_TAG;
     }
 }
-RefPtr<OverlayManager> GetOverlayFromPage(int32_t rootNodeId, RootNodeType rootNodeType)
-{
-    if (rootNodeId <= 0) {
-        return nullptr;
-    }
-    std::string tag  = GetTagFromRootNodeType(rootNodeType);
-    auto frameNode = FrameNode::GetFrameNode(tag, rootNodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    if (tag == V2::PAGE_ETS_TAG) {
-        auto node = AceType::DynamicCast<FrameNode>(frameNode);
-        CHECK_NULL_RETURN(node, nullptr);
-        auto pattern = node->GetPattern<PagePattern>();
-        return pattern->GetOverlayManager();
-    }
-    if (tag == V2::NAVDESTINATION_VIEW_ETS_TAG) {
-        auto node = AceType::DynamicCast<FrameNode>(frameNode);
-        CHECK_NULL_RETURN(node, nullptr);
-        auto pattern = node->GetPattern<NavDestinationPattern>();
-        CHECK_NULL_RETURN(pattern, nullptr);
-        return pattern->GetOverlayManager();
-    }
-#ifdef WINDOW_SCENE_SUPPORTED
-    if (tag == V2::WINDOW_SCENE_ETS_TAG) {
-        auto node = AceType::DynamicCast<FrameNode>(frameNode);
-        CHECK_NULL_RETURN(node, nullptr);
-        auto pattern = node->GetPattern<SystemWindowScene>();
-        CHECK_NULL_RETURN(pattern, nullptr);
-        return pattern->GetOverlayManager();
-    }
-#endif
-    return nullptr;
-}
 
 #ifdef WINDOW_SCENE_SUPPORTED
 RefPtr<OverlayManager> FindTargetNodeOverlay(RefPtr<UINode>& parent,
@@ -108,56 +76,6 @@ RefPtr<OverlayManager> FindTargetNodeOverlay(RefPtr<UINode>& parent,
     return overlay;
 }
 #endif
-
-RefPtr<OverlayManager> FindPageNodeOverlay(const RefPtr<FrameNode>& targetNode, bool isShow)
-{
-    CHECK_NULL_RETURN(targetNode, nullptr);
-    if (targetNode->GetRootNodeId() > 0) {
-        return GetOverlayFromPage(targetNode->GetRootNodeId(), targetNode->GetRootNodeType());
-    }
-    auto isNav = false;
-    RefPtr<OverlayManager> overlay;
-    RefPtr<UINode> parent = targetNode;
-    while (parent) {
-        if (parent->GetTag() == V2::PAGE_ETS_TAG) {
-            auto node = AceType::DynamicCast<FrameNode>(parent);
-            CHECK_NULL_RETURN(node, nullptr);
-            auto pattern = node->GetPattern<PagePattern>();
-            CHECK_NULL_RETURN(pattern, nullptr);
-            if (!isNav) {
-                pattern->CreateOverlayManager(isShow);
-                overlay = pattern->GetOverlayManager();
-                CHECK_NULL_RETURN(overlay, nullptr);
-                targetNode->SetRootNodeId(node->GetId());
-                targetNode->SetRootNodeType(RootNodeType::PAGE_ETS_TAG);
-            } else {
-                node->SetRootNodeType(RootNodeType::NAVDESTINATION_VIEW_ETS_TAG);
-                node->SetRootNodeId(targetNode->GetRootNodeId());
-            }
-            break;
-        }
-        if (parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
-            auto node = AceType::DynamicCast<FrameNode>(parent);
-            CHECK_NULL_RETURN(node, nullptr);
-            auto pattern = node->GetPattern<NavDestinationPattern>();
-            CHECK_NULL_RETURN(pattern, nullptr);
-            pattern->CreateOverlayManager(isShow);
-            overlay = pattern->GetOverlayManager();
-            CHECK_NULL_RETURN(overlay, nullptr);
-            targetNode->SetRootNodeId(node->GetId());
-            targetNode->SetRootNodeType(RootNodeType::NAVDESTINATION_VIEW_ETS_TAG);
-            isNav = true;
-        }
-#ifdef WINDOW_SCENE_SUPPORTED
-        if (parent->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
-            overlay = FindTargetNodeOverlay(parent, targetNode, isShow);
-            break;
-        }
-#endif
-        parent = parent->GetParent();
-    }
-    return overlay;
-}
 } // namespace
 
 void ViewAbstractModelNG::BindMenuGesture(
@@ -542,6 +460,90 @@ RefPtr<PipelineContext> ViewAbstractModelNG::GetSheetContext(NG::SheetStyle& she
         context = PipelineContext::GetCurrentContext();
     }
     return context;
+}
+
+RefPtr<OverlayManager> ViewAbstractModelNG::GetOverlayFromPage(int32_t rootNodeId, RootNodeType rootNodeType)
+{
+    if (rootNodeId <= 0) {
+        return nullptr;
+    }
+    std::string tag  = GetTagFromRootNodeType(rootNodeType);
+    auto frameNode = FrameNode::GetFrameNode(tag, rootNodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    if (tag == V2::PAGE_ETS_TAG) {
+        auto node = AceType::DynamicCast<FrameNode>(frameNode);
+        CHECK_NULL_RETURN(node, nullptr);
+        auto pattern = node->GetPattern<PagePattern>();
+        return pattern->GetOverlayManager();
+    }
+    if (tag == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+        auto node = AceType::DynamicCast<FrameNode>(frameNode);
+        CHECK_NULL_RETURN(node, nullptr);
+        auto pattern = node->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_RETURN(pattern, nullptr);
+        return pattern->GetOverlayManager();
+    }
+#ifdef WINDOW_SCENE_SUPPORTED
+    if (tag == V2::WINDOW_SCENE_ETS_TAG) {
+        auto node = AceType::DynamicCast<FrameNode>(frameNode);
+        CHECK_NULL_RETURN(node, nullptr);
+        auto pattern = node->GetPattern<SystemWindowScene>();
+        CHECK_NULL_RETURN(pattern, nullptr);
+        return pattern->GetOverlayManager();
+    }
+#endif
+    return nullptr;
+}
+
+RefPtr<OverlayManager> ViewAbstractModelNG::FindPageNodeOverlay(
+    const RefPtr<FrameNode>& targetNode, bool isShow, bool isStartByUIContext)
+{
+    CHECK_NULL_RETURN(targetNode, nullptr);
+    if (targetNode->GetRootNodeId() > 0 && !isStartByUIContext) {
+        return GetOverlayFromPage(targetNode->GetRootNodeId(), targetNode->GetRootNodeType());
+    }
+    auto isNav = false;
+    RefPtr<OverlayManager> overlay;
+    RefPtr<UINode> parent = targetNode;
+    while (parent) {
+        if (parent->GetTag() == V2::PAGE_ETS_TAG) {
+            auto node = AceType::DynamicCast<FrameNode>(parent);
+            CHECK_NULL_RETURN(node, nullptr);
+            auto pattern = node->GetPattern<PagePattern>();
+            CHECK_NULL_RETURN(pattern, nullptr);
+            if (!isNav) {
+                pattern->CreateOverlayManager(isShow);
+                overlay = pattern->GetOverlayManager();
+                CHECK_NULL_RETURN(overlay, nullptr);
+                targetNode->SetRootNodeId(node->GetId());
+                targetNode->SetRootNodeType(RootNodeType::PAGE_ETS_TAG);
+            } else {
+                node->SetRootNodeType(RootNodeType::NAVDESTINATION_VIEW_ETS_TAG);
+                node->SetRootNodeId(targetNode->GetRootNodeId());
+            }
+            break;
+        }
+        if (parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG && !isNav) {
+            auto node = AceType::DynamicCast<FrameNode>(parent);
+            CHECK_NULL_RETURN(node, nullptr);
+            auto pattern = node->GetPattern<NavDestinationPattern>();
+            CHECK_NULL_RETURN(pattern, nullptr);
+            pattern->CreateOverlayManager(isShow);
+            overlay = pattern->GetOverlayManager();
+            CHECK_NULL_RETURN(overlay, nullptr);
+            targetNode->SetRootNodeId(node->GetId());
+            targetNode->SetRootNodeType(RootNodeType::NAVDESTINATION_VIEW_ETS_TAG);
+            isNav = true;
+        }
+#ifdef WINDOW_SCENE_SUPPORTED
+        if (parent->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
+            overlay = FindTargetNodeOverlay(parent, targetNode, isShow);
+            break;
+        }
+#endif
+        parent = parent->GetParent();
+    }
+    return overlay;
 }
 
 void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::string&)>&& callback,

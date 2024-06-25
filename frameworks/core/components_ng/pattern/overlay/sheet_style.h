@@ -44,6 +44,35 @@ enum SheetType {
     SHEET_BOTTOM_FREE_WINDOW,
 };
 
+struct SheetKey {
+    SheetKey() {}
+    explicit SheetKey(int32_t inputTargetId) : targetId(inputTargetId) {}
+    SheetKey(bool hasValidTarget, int32_t inputContentId, int32_t inputTargetId)
+        : hasValidTargetNode(hasValidTarget), contentId(inputContentId), targetId(inputTargetId)
+    {
+        isStartUpByUIContext = true;
+    }
+
+    bool operator==(const SheetKey& other) const
+    {
+        return isStartUpByUIContext == other.isStartUpByUIContext &&
+            hasValidTargetNode == other.hasValidTargetNode &&
+            contentId == other.contentId && targetId == other.targetId;
+    }
+
+    bool isStartUpByUIContext = false;  // Indicates whether the sheet is started by UIContext
+    bool hasValidTargetNode = true;     // If sheet was start-up by UIContext and without targetId, this flag is FALSE
+    int32_t contentId = -1;             // Indicates the uniqueID of componentContent when isStartUpByUIContext is TRUE
+    int32_t targetId = -1;
+};
+
+struct SheetKeyHash {
+    size_t operator()(const SheetKey& sheetKey) const
+    {
+        return sheetKey.isStartUpByUIContext ? sheetKey.contentId : sheetKey.targetId;
+    }
+};
+
 enum SheetLevel {
     OVERLAY,
     EMBEDDED,
