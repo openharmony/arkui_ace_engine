@@ -690,55 +690,30 @@ void TextFieldModelNG::SetMargin()
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, MarginByUser, userMargin);
 }
 
-void TextFieldModelNG::SetPadding(NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp)
+void TextFieldModelNG::SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp)
 {
     if (tmp) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID(theme);
-        auto textFieldPadding = theme->GetPadding();
-        auto top = textFieldPadding.Top();
-        auto bottom = textFieldPadding.Bottom();
-        auto left = textFieldPadding.Left();
-        auto right = textFieldPadding.Right();
-
-        NG::PaddingProperty paddings;
-        if (top.Value()) {
-            if (top.Unit() == DimensionUnit::CALC) {
-                paddings.top = NG::CalcLength(top.IsNonNegative() ? top.CalcValue() : CalcDimension().CalcValue());
-            } else {
-                paddings.top = NG::CalcLength(top.IsNonNegative() ? top : CalcDimension());
-            }
-        }
-        if (bottom.Value()) {
-            if (bottom.Unit() == DimensionUnit::CALC) {
-                paddings.bottom =
-                    NG::CalcLength(bottom.IsNonNegative() ? bottom.CalcValue() : CalcDimension().CalcValue());
-            } else {
-                paddings.bottom = NG::CalcLength(bottom.IsNonNegative() ? bottom : CalcDimension());
-            }
-        }
-        if (left.Value()) {
-            if (left.Unit() == DimensionUnit::CALC) {
-                paddings.left = NG::CalcLength(left.IsNonNegative() ? left.CalcValue() : CalcDimension().CalcValue());
-            } else {
-                paddings.left = NG::CalcLength(left.IsNonNegative() ? left : CalcDimension());
-            }
-        }
-        if (right.Value()) {
-            if (right.Unit() == DimensionUnit::CALC) {
-                paddings.right =
-                    NG::CalcLength(right.IsNonNegative() ? right.CalcValue() : CalcDimension().CalcValue());
-            } else {
-                paddings.right = NG::CalcLength(right.IsNonNegative() ? right : CalcDimension());
-            }
-        }
-        ViewAbstract::SetPadding(paddings);
+        SetDefaultPadding();
         return;
     }
     NG::ViewAbstract::SetPadding(newPadding);
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, newPadding);
+}
+
+void TextFieldModelNG::SetDefaultPadding()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    auto themePadding = theme->GetPadding();
+    PaddingProperty paddings;
+    paddings.top = NG::CalcLength(themePadding.Top().ConvertToPx());
+    paddings.bottom = NG::CalcLength(themePadding.Bottom().ConvertToPx());
+    paddings.left = NG::CalcLength(themePadding.Left().ConvertToPx());
+    paddings.right = NG::CalcLength(themePadding.Right().ConvertToPx());
+    ViewAbstract::SetPadding(paddings);
+    ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, paddings);
 }
 
 void TextFieldModelNG::SetHoverEffect(HoverEffectType hoverEffect)
