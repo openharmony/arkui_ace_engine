@@ -383,6 +383,11 @@ public:
     bool IsTopNavDestination(const RefPtr<UINode>& node) const;
     void TryRestoreSystemBarStyle(const RefPtr<WindowManager>& windowManager);
 
+    bool IsNewInstanceCreated() const
+    {
+        return newInstanceCreated_;
+    }
+
 private:
     void UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host);
     void UpdateSystemBarStyleOnFullPageStateChange(const RefPtr<WindowManager>& windowManager);
@@ -505,6 +510,7 @@ private:
     WeakPtr<UINode> parentNode_;
     int32_t preStackSize_ = 0;
     bool isRightToLeft_ = false;
+    bool newInstanceCreated_ = false;
 };
 
 } // namespace OHOS::Ace::NG

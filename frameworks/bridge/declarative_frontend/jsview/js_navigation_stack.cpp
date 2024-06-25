@@ -929,26 +929,7 @@ void JSNavigationStack::UpdatePathInfoIfNeeded(RefPtr<NG::UINode>& uiNode, int32
 
 bool JSNavigationStack::GetNeedUpdatePathInfo(int32_t index)
 {
-    if (dataSourceObj_->IsEmpty()) {
-        return false;
-    }
-    auto objArray = dataSourceObj_->GetProperty("pathArray");
-    if (!objArray->IsArray()) {
-        return false;
-    }
-    auto pathArray = JSRef<JSArray>::Cast(objArray);
-    if (pathArray->IsEmpty()) {
-        return false;
-    }
-    int32_t len = static_cast<int32_t>(pathArray->Length());
-    if (index < 0 || index >= len) {
-        return false;
-    }
-    auto objVal = pathArray->GetValueAt(index);
-    if (!objVal->IsObject()) {
-        return false;
-    }
-    auto path = JSRef<JSObject>::Cast(objVal);
+    auto path = GetJsPathInfo(index);
     if (path->IsEmpty()) {
         return false;
     }
@@ -961,26 +942,7 @@ bool JSNavigationStack::GetNeedUpdatePathInfo(int32_t index)
 
 void JSNavigationStack::SetNeedUpdatePathInfo(int32_t index, bool need)
 {
-    if (dataSourceObj_->IsEmpty()) {
-        return;
-    }
-    auto objArray = dataSourceObj_->GetProperty("pathArray");
-    if (!objArray->IsArray()) {
-        return;
-    }
-    auto pathArray = JSRef<JSArray>::Cast(objArray);
-    if (pathArray->IsEmpty()) {
-        return;
-    }
-    int32_t len = static_cast<int32_t>(pathArray->Length());
-    if (index < 0 || index >= len) {
-        return;
-    }
-    auto objPath = pathArray->GetValueAt(index);
-    if (!objPath->IsObject()) {
-        return;
-    }
-    auto path = JSRef<JSObject>::Cast(objPath);
+    auto path = GetJsPathInfo(index);
     if (path->IsEmpty()) {
         return;
     }
@@ -1020,5 +982,54 @@ void JSNavigationStack::RecoveryNavigationStack()
         pathArray->SetValueAt(index, item);
     }
     dataSourceObj_->SetPropertyObject("pathArray", pathArray);
+}
+
+bool JSNavigationStack::NeedBuildNewInstance(int32_t index)
+{
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return false;
+    }
+    auto needBuildNewInstance = pathInfo->GetProperty("needBuildNewInstance");
+    if (!needBuildNewInstance->IsBoolean()) {
+        return false;
+    }
+    return needBuildNewInstance->ToBoolean();
+}
+
+void JSNavigationStack::SetNeedBuildNewInstance(int32_t index, bool need)
+{
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return;
+    }
+    pathInfo->SetProperty<bool>("needBuildNewInstance", need);
+}
+
+JSRef<JSArray> JSNavigationStack::GetJsPathArray()
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return JSRef<JSArray>();
+    }
+    auto objArray = dataSourceObj_->GetProperty("pathArray");
+    if (!objArray->IsArray()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "navPathArray invalid!");
+        return JSRef<JSArray>();
+    }
+    return JSRef<JSArray>::Cast(objArray);
+}
+
+JSRef<JSObject> JSNavigationStack::GetJsPathInfo(int32_t index)
+{
+    auto navPathArray = GetJsPathArray();
+    int32_t len = static_cast<int32_t>(navPathArray->Length());
+    if (index < 0 || index >= len) {
+        return JSRef<JSObject>();
+    }
+    auto pathInfo = navPathArray->GetValueAt(index);
+    if (!pathInfo->IsObject()) {
+        return JSRef<JSObject>();
+    }
+    return JSRef<JSObject>::Cast(pathInfo);
 }
 } // namespace OHOS::Ace::Framework

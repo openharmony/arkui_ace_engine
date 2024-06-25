@@ -163,6 +163,16 @@ public:
         return navDestinationPathInfo_;
     }
 
+    void SetNeedRemoveInNewInstance(bool need)
+    {
+        needRemoveInNewInstance_ = need;
+    }
+
+    bool NeedRemoveInNewInstance() const
+    {
+        return needRemoveInNewInstance_;
+    }
+
 private:
     RefPtr<UINode> titleBarNode_;
     RefPtr<UINode> contentNode_;
@@ -176,6 +186,7 @@ private:
     bool canReused_ = true;
     std::string navDestinationPathInfo_;
     std::string navDestinationModuleName_;
+    bool needRemoveInNewInstance_ = false;
 };
 
 } // namespace OHOS::Ace::NG

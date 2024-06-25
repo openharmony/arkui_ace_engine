@@ -208,10 +208,58 @@ bool NavigationGroupNode::ReorderNavDestination(
     return true;
 }
 
+void NavigationGroupNode::RemoveRedundantNavDestinationInNewInstance(RefPtr<FrameNode>& navigationContentNode,
+    const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged)
+{
+    RefPtr<NavDestinationGroupNode> remainDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        GetNavDestinationNode(remainChild));
+    RefPtr<NavDestinationGroupNode> currentTopDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        navigationContentNode->GetChildAtIndex(static_cast<int32_t>(slot - 1)));
+    RefPtr<NavDestinationGroupNode> maxAnimatingDestination = nullptr;
+    auto index = navigationContentNode->GetChildren().size() - 1;
+    while (index >= slot) {
+        auto navDestination =
+            AceType::DynamicCast<NavDestinationGroupNode>(navigationContentNode->GetChildAtIndex(index));
+        if (!navDestination) {
+            navigationContentNode->RemoveChildAtIndex(index);
+            hasChanged = true;
+            --index;
+            continue;
+        }
+        auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
+        if (eventHub) {
+            eventHub->FireChangeEvent(false);
+        }
+        if (navDestination == remainDestination) {
+            navDestination->SetNeedRemoveInNewInstance(true);
+        } else if (navDestination->NeedRemoveInNewInstance() || navDestination->IsOnAnimation()) {
+            if (maxAnimatingDestination == nullptr) {
+                maxAnimatingDestination = navDestination;
+            }
+        } else {
+            DealRemoveDestination(navDestination);
+            hasChanged = true;
+        }
+        --index;
+    }
+    auto maxAnimatingIndex = navigationContentNode->GetChildIndex(maxAnimatingDestination);
+    if (maxAnimatingIndex != -1 && remainDestination) {
+        remainDestination->MovePosition(maxAnimatingIndex + 1);
+    }
+    auto remainChildIndex = navigationContentNode->GetChildIndex(remainDestination);
+    if (remainChildIndex != -1) {
+        currentTopDestination->MovePosition(remainChildIndex + 1);
+    }
+}
+
 void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navigationContentNode,
     const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged, int32_t beforeLastStandardIndex)
 {
     auto pattern = GetPattern<NavigationPattern>();
+    if (pattern->IsNewInstanceCreated()) {
+        RemoveRedundantNavDestinationInNewInstance(navigationContentNode, remainChild, slot, hasChanged);
+        return;
+    }
     // record remove destination size
     int32_t removeSize = 0;
     while (
@@ -595,7 +643,12 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             auto navigation = weakNavigation.Upgrade();
             CHECK_NULL_VOID(navigation);
             auto preNode = weakPreNode.Upgrade();
-            if (preNode) {
+            while (preNode) {
+                auto preDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
+                if (preDestination && preDestination->NeedRemoveInNewInstance()) {
+                    navigation->hideNodes_.emplace_back(std::make_pair(preDestination, true));
+                    break;
+                }
                 auto preTitle = weakPreTitle.Upgrade();
                 if (preTitle) {
                     preTitle->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
@@ -609,8 +662,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                     // store this flag for navBar layout only
                     navigation->SetNeedSetInvisible(needSetInvisible);
                 } else {
-                    needSetInvisible = AceType::DynamicCast<NavDestinationGroupNode>(preNode)->GetTransitionType() ==
-                                        PageTransitionType::EXIT_PUSH;
+                    needSetInvisible = preDestination->GetTransitionType() == PageTransitionType::EXIT_PUSH;
                 }
                 // for the case, the navBar form EXIT_PUSH to push during animation
                 if (needSetInvisible) {
@@ -627,6 +679,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                         }
                     }
                 }
+                break;
             }
             navigation->RemoveDialogDestination();
             navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);

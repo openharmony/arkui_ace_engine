@@ -1982,6 +1982,7 @@ var LaunchMode;
   LaunchMode[LaunchMode.STANDARD = 0] = "STANDARD";
   LaunchMode[LaunchMode.MOVE_TO_TOP_SINGLETON = 1] = "MOVE_TO_TOP_SINGLETON";
   LaunchMode[LaunchMode.POP_TO_SINGLETON = 2] = "POP_TO_SINGLETON";
+  LaunchMode[LaunchMode.NEW_INSTANCE = 3] = "NEW_INSTANCE";
 })(LaunchMode || (LaunchMode = {}));
 
 class NavPathInfo {
@@ -1991,6 +1992,7 @@ class NavPathInfo {
     this.onPop = onPop;
     this.index = -1;
     this.needUpdate = false;
+    this.needBuildNewInstance = false;
   }
 }
 
@@ -2145,6 +2147,9 @@ class NavPathStack {
         return [true, promise];
       }
     }
+    if (launchMode === LaunchMode.NEW_INSTANCE) {
+      info.needBuildNewInstance = true;
+    }
     return [false, null];
   }
   pushPath(info, optionParam) {
@@ -2200,6 +2205,9 @@ class NavPathStack {
           this.pathArray.push(targetInfo[0]);
         }
       }
+    }
+    if (launchMode === LaunchMode.NEW_INSTANCE) {
+      info.needBuildNewInstance = true;
     }
     if (index === -1) {
       if (this.pathArray.length !== 0) {
