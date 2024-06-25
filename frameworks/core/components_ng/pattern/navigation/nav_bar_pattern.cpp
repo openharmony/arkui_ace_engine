@@ -147,11 +147,14 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
 
     uint32_t count = 0;
     std::vector<OptionParam> params;
+    OptionParam param;
     for (const auto& menuItem : menuItems) {
         ++count;
         if (needMoreButton && (count > mostMenuItemCount - 1)) {
-            params.push_back({ menuItem.text.value_or(""), menuItem.icon.value_or(""),
-                menuItem.isEnabled.value_or(true), menuItem.action, menuItem.iconSymbol.value_or(nullptr) });
+            param = { menuItem.text.value_or(""), menuItem.icon.value_or(""), menuItem.isEnabled.value_or(true),
+                menuItem.action, menuItem.iconSymbol.value_or(nullptr) };
+            param.SetSymbolUserDefinedIdealFontSize(theme->GetMenuIconSize());
+            params.push_back(param);
         } else {
             auto menuItemNode = NavigationTitleUtil::CreateMenuItemButton(theme);
             int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();

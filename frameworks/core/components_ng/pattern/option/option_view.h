@@ -21,6 +21,7 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/select/select_model.h"
+#include "core/components_ng/base/view_abstract.h"
 
 namespace OHOS::Ace::NG {
 
@@ -28,9 +29,7 @@ class ACE_EXPORT OptionView {
 public:
     static RefPtr<FrameNode> CreateMenuOption(bool optionsHasIcon, const std::string& value,
         const std::function<void()>& onClickFunc, int32_t index, const std::string& icon = "");
-    static RefPtr<FrameNode> CreateMenuOption(bool optionsHasIcon, const std::string& value,
-        const std::function<void()>& onClickFunc, int32_t index,
-        const std::function<void(WeakPtr<NG::FrameNode>)>& symbol);
+    static RefPtr<FrameNode> CreateMenuOption(bool optionsHasIcon, std::vector<OptionParam>& params, int32_t index);
 
     static RefPtr<FrameNode> CreateSelectOption(const SelectParam& param, int32_t index);
 
@@ -40,12 +39,12 @@ public:
     static void CreatePasteButton(
         const RefPtr<FrameNode>& option, const RefPtr<FrameNode>& row, const std::function<void()>& onClickFunc);
     static RefPtr<FrameNode> CreateSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& symbol,
-        const RefPtr<FrameNode>& parent, const RefPtr<FrameNode>& child = nullptr);
+        const RefPtr<FrameNode>& parent, const RefPtr<FrameNode>& child = nullptr,
+        const std::optional<Dimension>& symbolUserDefinedIdealFontSize = std::nullopt);
     static void CreateOption(bool optionsHasIcon, const std::string& value, const std::string& icon,
         const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option, const std::function<void()>& onClickFunc);
-    static void CreateOption(bool optionsHasIcon, const std::string& value,
-        const std::function<void(WeakPtr<NG::FrameNode>)>& symbol, const RefPtr<FrameNode>& row,
-        const RefPtr<FrameNode>& option, const std::function<void()>& onClickFunc);
+    static void CreateOption(bool optionsHasIcon, std::vector<OptionParam>& params, int32_t index,
+        const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option);
 };
 
 } // namespace OHOS::Ace::NG
