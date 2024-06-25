@@ -40,6 +40,14 @@ RefPtr<AppTheme> AppTheme::Builder::Build(const RefPtr<ThemeConstants>& themeCon
     if (hoverColor != Color(0xff000000)) {
         theme->hoverHighlightEnd_ = hoverColor;
     }
+    RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_APP);
+    if (!pattern) {
+        LOGW("find pattern of app_theme fail");
+        return theme;
+    }
+    theme->focusBorderColor_ = pattern->GetAttr<Color>("app_theme_focus_color", Color(0xFF007DFF));
+    theme->focusBorderWidth_ = pattern->GetAttr<Dimension>("app_theme_focus_width", 2.0_vp);
+    theme->focusBoxGlow_ = static_cast<bool>(pattern->GetAttr<double>("app_theme_focus_box_glow", 0.0));
     return theme;
 }
 } // namespace OHOS::Ace
