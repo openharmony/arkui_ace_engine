@@ -409,7 +409,8 @@ bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, c
 
 OffsetF TextLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper)
 {
-    return SetContentOffset(layoutWrapper);
+    SetContentOffset(layoutWrapper);
+    return OffsetF(0.0f, 0.0f);
 }
 
 bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::string& content,

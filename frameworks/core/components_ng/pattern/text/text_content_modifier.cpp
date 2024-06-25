@@ -444,16 +444,6 @@ void TextContentModifier::DrawNormal(DrawingContext& drawingContext)
     CHECK_NULL_VOID(!pManager->GetParagraphs().empty());
 
     auto& canvas = drawingContext.canvas;
-    auto contentSize = contentSize_->Get();
-    auto contentOffset = contentOffset_->Get();
-    canvas.Save();
-    if (clip_ && clip_->Get() &&
-        (!fontSize_.has_value() || !fontSizeFloat_ ||
-            NearEqual(fontSize_.value().Value(), fontSizeFloat_->Get()))) {
-        RSRect clipInnerRect = RSRect(contentOffset.GetX(), contentOffset.GetY(),
-            contentSize.Width() + contentOffset.GetX(), contentSize.Height() + contentOffset.GetY());
-        canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
-    }
     if (!textRacing_) {
         auto paintOffsetY = paintOffset_.GetY();
         auto paragraphs = pManager->GetParagraphs();
@@ -484,7 +474,6 @@ void TextContentModifier::DrawNormal(DrawingContext& drawingContext)
             PaintImage(drawingContext.canvas, paintOffset_.GetX() + paragraph2Offset, paintOffset_.GetY());
         }
     }
-    canvas.Restore();
 }
 
 void TextContentModifier::DrawFadeout(DrawingContext& drawingContext, const FadeoutInfo& info, const bool& isDrawNormal)
