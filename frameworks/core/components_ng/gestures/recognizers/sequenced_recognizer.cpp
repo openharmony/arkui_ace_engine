@@ -281,7 +281,7 @@ void SequencedRecognizer::SendTouchEventToNextRecognizer(
         item.second.type = TouchType::DOWN;
         if (beforeDuration > 0) {
             std::chrono::microseconds microseconds(
-                static_cast<uint64_t>(item.second.time.time_since_epoch().count()) + beforeDuration);
+                static_cast<int64_t>(item.second.time.time_since_epoch().count()) + beforeDuration);
             TimeStamp time(microseconds);
             item.second.time = time;
         }
