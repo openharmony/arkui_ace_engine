@@ -1190,18 +1190,24 @@ export class ChipComponent extends ViewPU {
             return;
         }
         if (this.isHover) {
-            if (i3.type === TouchType.Down) {
+            if (i3.type === TouchType.Down || i3.type == TouchType.Move) {
                 this.isShowPressedBackGroundColor = true;
             }
             else if (i3.type === TouchType.Up) {
                 this.isShowPressedBackGroundColor = false;
             }
+            else {
+                this.isShowPressedBackGroundColor = false;
+            }
         }
         else {
-            if (i3.type === TouchType.Down) {
+            if (i3.type === TouchType.Down || i3.type == TouchType.Move) {
                 this.isShowPressedBackGroundColor = true;
             }
             else if (i3.type === TouchType.Up) {
+                this.isShowPressedBackGroundColor = false;
+            }
+            else {
                 this.isShowPressedBackGroundColor = false;
             }
         }
@@ -1399,11 +1405,16 @@ export class ChipComponent extends ViewPU {
                 this.handleTouch(i2);
             });
             Button.onHover((h2) => {
-                if (this.isShowPressedBackGroundColor == false) {
+                if (h2) {
                     this.isShowPressedBackGroundColor = true;
                 }
                 else {
-                    this.isShowPressedBackGroundColor = false;
+                    if (!this.isShowPressedBackGroundColor && h2) {
+                        this.isShowPressedBackGroundColor = true;
+                    }
+                    else {
+                        this.isShowPressedBackGroundColor = false;
+                    }
                 }
             });
             Button.onKeyEvent((g2) => {

@@ -716,20 +716,20 @@ export struct ChipComponent {
       return
     }
     if (this.isHover) {
-      if (event.type === TouchType.Down) {
+      if (event.type === TouchType.Down || event.type == TouchEvent.Move) {
         this.isShowPressedBackGroundColor = true
-
       } else if (event.type === TouchType.Up) {
         this.isShowPressedBackGroundColor = false
-
+      } else {
+        this.isShowPressedBackGroundColor = false
       }
     } else {
-      if (event.type === TouchType.Down) {
+      if (event.type === TouchType.Down || event.type == TouchType.Move) {
         this.isShowPressedBackGroundColor = true
-
       } else if (event.type === TouchType.Up) {
         this.isShowPressedBackGroundColor = false
-
+      } else {
+        this.isShowPressedBackGroundColor = false
       }
     }
   }
@@ -1036,12 +1036,15 @@ export struct ChipComponent {
       this.handleTouch(event)
     })
     .onHover((isHover: boolean) => {
-      if (this.isShowPressedBackGroundColor == false) {
+      if (isHover) {
         this.isShowPressedBackGroundColor = true
       } else {
-        this.isShowPressedBackGroundColor = false
+        if (!this.isShowPressedBackGroundColor && isHover) {
+          this.isShowPressedBackGroundColor = true
+        } else {
+          this.isShowPressedBackGroundColor = false
+        }
       }
-
     })
     .onKeyEvent((event) => {
       if (event.type === KeyType.Down && event.keyCode === KeyCode.KEYCODE_FORWARD_DEL && !this.suffixIconOnFocus) {
