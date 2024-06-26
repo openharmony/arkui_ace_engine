@@ -1817,11 +1817,21 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
     }
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    auto subwindowMgr = SubwindowManager::GetInstance();
+
+    std::vector<int32_t> idsNeedClean;
     for (auto child: rootNode->GetChildren()) {
-        subwindowMgr->DeleteHotAreas(Container::CurrentId(), child->GetId());
+        idsNeedClean.push_back(child->GetId());
     }
+    auto pipeline = rootNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAfterLayoutTask([idsNeedClean, containerId = Container::CurrentId()] {
+        auto subwindowMgr = SubwindowManager::GetInstance();
+        for (auto child : idsNeedClean) {
+            subwindowMgr->DeleteHotAreas(containerId, child);
+        }
+    });
     rootNode->Clean();
+
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     if (menuWrapperPattern->IsContextMenu() && menuWrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
@@ -1950,11 +1960,11 @@ void OverlayManager::DeleteMenu(int32_t targetId)
     EraseMenuInfo(targetId);
 }
 
-int32_t OverlayManager::CleanMenuInSubWindowWithAnimation()
+void OverlayManager::CleanMenuInSubWindowWithAnimation()
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "clean menu insubwindow with animation enter");
     auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_RETURN(rootNode, -1);
+    CHECK_NULL_VOID(rootNode);
     RefPtr<FrameNode> menu;
     for (const auto& child : rootNode->GetChildren()) {
         auto node = DynamicCast<FrameNode>(child);
@@ -1963,11 +1973,8 @@ int32_t OverlayManager::CleanMenuInSubWindowWithAnimation()
             break;
         }
     }
-    CHECK_NULL_RETURN(menu, -1);
+    CHECK_NULL_VOID(menu);
     PopMenuAnimation(menu);
-
-    auto menuWrapper = AceType::DynamicCast<MenuWrapperPattern>(menu->GetPattern());
-    return menuWrapper->GetTargetId();
 }
 
 void OverlayManager::CleanPreviewInSubWindow()
