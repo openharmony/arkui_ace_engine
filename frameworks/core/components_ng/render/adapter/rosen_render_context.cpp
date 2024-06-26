@@ -6138,7 +6138,7 @@ void RosenRenderContext::SavePaintRect(bool isRound, uint8_t flag)
     const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     AdjustPaintRect();
-    if (!SystemProperties::GetPixelRoundEnable()) {
+    if (!SystemProperties::GetPixelRoundEnabled()) {
         isRound = false;
     }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
