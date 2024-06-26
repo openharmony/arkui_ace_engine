@@ -792,10 +792,11 @@ void TextPickerModelNG::SetDefaultPickerItemHeight(FrameNode* frameNode, const D
 
 Dimension TextPickerModelNG::GetDefaultPickerItemHeight(FrameNode* frameNode)
 {
-    Dimension value = Dimension(-1.0f);
+    Dimension value = Dimension(0.0f);
     CHECK_NULL_RETURN(frameNode, value);
     auto layoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
-    return layoutProperty->GetDefaultPickerItemHeightValue();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    return layoutProperty->HasDefaultPickerItemHeight() ? layoutProperty->GetDefaultPickerItemHeightValue() : value;
 }
 
 void TextPickerModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
