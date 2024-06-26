@@ -85,7 +85,7 @@ class VariableUtilV3 {
      *  prefix_@Provider_aliasName: {'varName': ..., 'aliasName': ...., 'deco': '@Provider' | '@Consumer'
      */
     private static metaAliasKey(aliasName: string, deco: '@Provider' | '@Consumer') : string {
-      return `${ProviderConsumerUtilV2.ALIAS_PREFIX}_${deco}_${aliasName}`;;
+      return `${ProviderConsumerUtilV2.ALIAS_PREFIX}_${deco}_${aliasName}`;
     }
 
     /**
