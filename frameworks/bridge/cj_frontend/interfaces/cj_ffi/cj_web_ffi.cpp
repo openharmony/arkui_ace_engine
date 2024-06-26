@@ -456,10 +456,6 @@ bool WebRequestHeadersToMapToCFFIArray(const RefPtr<WebRequest>& webRequest, Map
 
 void MapToCFFIArrayToFreeMemory(MapToCFFIArray& mapToCFFIArray)
 {
-    for (size_t i = 0; i < mapToCFFIArray.size; ++i) {
-        free(&mapToCFFIArray.key[i]);
-        free(&mapToCFFIArray.value[i]);
-    }
     free(mapToCFFIArray.key);
     free(mapToCFFIArray.value);
 }
