@@ -55,8 +55,8 @@ constexpr uint32_t SAFE_AREA_EDGE_LIMIT = 4;
 constexpr uint32_t SAFE_AREA_EDGE_SYSTEM = 0;
 constexpr uint32_t SAFE_AREA_EDGE_TOP = 0;
 constexpr uint32_t SAFE_AREA_EDGE_BOTTOM = 1;
-constexpr uint32_t PARAMATER_LENGTH_ONE = 1;
-constexpr uint32_t PARAMATER_LENGTH_TWO = 2;
+constexpr int32_t PARAMATER_LENGTH_ONE = 1;
+constexpr int32_t PARAMATER_LENGTH_TWO = 2;
 constexpr uint32_t FIRST_INDEX = 0;
 constexpr uint32_t SECOND_INDEX = 1;
 

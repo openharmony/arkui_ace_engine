@@ -577,7 +577,7 @@ RefPtr<FrameNode> NavigationTitleUtil::CreatePopupDialogNode(
         dialogNode = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo);
         return dialogNode;
     }
-    if (index < 0 || index >= menuItems.size()) {
+    if (index < 0 || index >= static_cast<int32_t>(menuItems.size())) {
         return nullptr;
     }
     auto menuItem = menuItems.at(index);

@@ -2805,7 +2805,7 @@ bool JsiDeclarativeEngineInstance::RegisterStringCacheTable(const EcmaVM* vm, in
     if (vm == nullptr) {
         return false;
     }
-    if (size > MAX_STRING_CACHE_SIZE) {
+    if (static_cast<uint32_t>(size) > MAX_STRING_CACHE_SIZE) {
         TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "string cache table is oversize");
         return false;
     }
