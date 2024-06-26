@@ -4991,19 +4991,19 @@ bool OverlayManager::AddCurSessionId(int32_t sessionId)
 }
 
 int32_t OverlayManager::CreateModalUIExtension(const RefPtr<WantWrap>& wantWrap,
-    const ModalUIExtensionCallbacks& callbacks, bool isProhibitBack, bool isAsyncModalBinding)
+    const ModalUIExtensionCallbacks& callbacks, const ModalUIExtensionConfig& config)
 {
     auto& want = wantWrap->GetWant();
-    return CreateModalUIExtension(want, callbacks, isProhibitBack, isAsyncModalBinding);
+    return CreateModalUIExtension(want, callbacks, config);
 }
 
 int32_t OverlayManager::CreateModalUIExtension(
     const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
-    bool isProhibitBack, bool isAsyncModalBinding, bool isAllowedBeCovered)
+    const ModalUIExtensionConfig& config)
 {
-    isProhibitBack_ = isProhibitBack;
-    SetIsAllowedBeCovered(isAllowedBeCovered);
-    auto uiExtNode = ModalUIExtension::Create(want, callbacks, isAsyncModalBinding);
+    isProhibitBack_ = config.isProhibitBack;
+    SetIsAllowedBeCovered(config.isAllowedBeCovered);
+    auto uiExtNode = ModalUIExtension::Create(want, callbacks, config.isAsyncModalBinding);
     auto layoutProperty = uiExtNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, 0);
     auto full = CalcLength(Dimension(1.0, DimensionUnit::PERCENT));
@@ -5013,7 +5013,7 @@ int32_t OverlayManager::CreateModalUIExtension(
         return uiExtNode;
     };
     auto sessionId = ModalUIExtension::GetSessionId(uiExtNode);
-    if (!isAsyncModalBinding) {
+    if (!config.isAsyncModalBinding) {
         ModalStyle modalStyle;
         modalStyle.modalTransition = NG::ModalTransition::NONE;
         modalStyle.isUIExtension = true;
@@ -5022,8 +5022,9 @@ int32_t OverlayManager::CreateModalUIExtension(
             ContentCoverParam(), nullptr, -(sessionId));
         SetIsAllowedBeCovered(true); // Reset isAllowedBeCovered
     } else {
-        auto bindModalCallback = [weak = WeakClaim(this),
-            buildNodeFunc, sessionId, id = Container::CurrentId(), isAllowedBeCovered]() {
+        auto bindModalCallback = [weak = WeakClaim(this), buildNodeFunc, sessionId, id = Container::CurrentId(),
+            isAllowedBeCovered = config.isAllowedBeCovered,
+            doAfterAsyncModalBinding = std::move(config.doAfterAsyncModalBinding)]() {
             ContainerScope scope(id);
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
@@ -5034,6 +5035,9 @@ int32_t OverlayManager::CreateModalUIExtension(
             overlayManager->BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr,
                 nullptr, nullptr, ContentCoverParam(), nullptr, -(sessionId));
             overlayManager->SetIsAllowedBeCovered(true);
+            if (doAfterAsyncModalBinding) {
+                doAfterAsyncModalBinding();
+            }
         };
         ModalUIExtension::SetBindModalCallback(uiExtNode, std::move(bindModalCallback));
         uiExtNodes_[sessionId] = WeakClaim(RawPtr(uiExtNode));
