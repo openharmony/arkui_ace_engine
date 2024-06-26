@@ -87,14 +87,13 @@ void SheetPresentationPattern::OnModifyDone()
     InitPageHeight();
 }
 
-// check device is phone, fold status, screen's height less than width
-bool SheetPresentationPattern::IsPhoneOrFold()
+// check device is phone, fold status, and device in landscape
+bool SheetPresentationPattern::IsPhoneInLandScape()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, false);
-    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     auto containerId = Container::CurrentId();
     auto foldWindow = FoldableWindow::CreateFoldableWindow(containerId);
     CHECK_NULL_RETURN(foldWindow, false);
@@ -102,7 +101,7 @@ bool SheetPresentationPattern::IsPhoneOrFold()
     CHECK_NULL_RETURN(sheetTheme, false);
     auto sheetThemeType = sheetTheme->GetSheetType();
     if (sheetThemeType == "auto" && !foldWindow->IsFoldExpand() &&
-        LessNotEqual(windowGlobalRect.Height(), windowGlobalRect.Width())) {
+        SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
         return true;
     }
     return false;
@@ -126,7 +125,7 @@ void SheetPresentationPattern::InitPageHeight()
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM &&
-        IsPhoneOrFold()) {
+        IsPhoneInLandScape()) {
         statusBarHeight_ = 0.0f;
     }
     auto windowManager = pipelineContext->GetWindowManager();
