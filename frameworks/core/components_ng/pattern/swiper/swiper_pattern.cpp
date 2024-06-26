@@ -2661,7 +2661,9 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     if (!CheckSwiperPanEvent(dragVelocity)) {
         dragVelocity = 0.0;
     }
-    UpdateDragFRCSceneInfo(dragVelocity, SceneStatus::END);
+    if (!childScrolling_) {
+        UpdateDragFRCSceneInfo(dragVelocity, SceneStatus::END);
+    }
     const auto& addEventCallback = swiperController_->GetAddTabBarEventCallback();
     if (addEventCallback) {
         addEventCallback();
