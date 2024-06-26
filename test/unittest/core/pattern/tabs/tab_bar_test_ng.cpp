@@ -33,19 +33,23 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateSubTabBoard001, TestSize.Level1)
     TabsModelNG model = CreateTabs();
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
+    auto pipeline = PipelineContext::GetCurrentContext();
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
     tabBarPattern_->UpdateSubTabBoard();
     EXPECT_EQ(swiperNode_->GetTag(), V2::SWIPER_ETS_TAG);
+    pipeline->fontScale_ = BIG_FONT_SIZE_SCALE;
     tabBarPattern_->UpdateSubTabBoard();
 
     EXPECT_EQ(tabBarPattern_->selectedModes_[0], SelectedMode::INDICATOR);
     tabBarPattern_->SetSelectedMode(SelectedMode::BOARD, 0);
     EXPECT_EQ(tabBarPattern_->selectedModes_[0], SelectedMode::BOARD);
+    pipeline->fontScale_ = LARGE_FONT_SIZE_SCALE;
     tabBarPattern_->UpdateSubTabBoard();
     EXPECT_EQ(tabBarPattern_->indicator_, 0);
 
     tabBarPattern_->indicator_ = 1;
+    pipeline->fontScale_ = MAX_FONT_SIZE_SCALE;
     tabBarPattern_->UpdateSubTabBoard();
     EXPECT_EQ(tabBarPattern_->indicator_, 1);
 
@@ -68,6 +72,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateSubTabBoard001, TestSize.Level1)
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
     tabBarPattern_->UpdateSubTabBoard();
     EXPECT_EQ(tabBarPattern_->indicator_, 0);
+    pipeline->fontScale_ = 1.f;
 }
 
 /**
