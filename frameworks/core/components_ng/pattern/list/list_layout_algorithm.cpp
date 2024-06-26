@@ -257,8 +257,7 @@ void ListLayoutAlgorithm::ClearAllItemPosition(LayoutWrapper* layoutWrapper)
         if (!groupAlgorithm) {
             continue;
         }
-        CHECK_NULL_VOID(groupAlgorithm);
-        groupAlgorithm->ClearItemPosition(&(*wrapper));
+        groupAlgorithm->ClearItemPosition();
     }
     itemPosition_.clear();
 }
@@ -949,6 +948,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
     float currentStartPos = 0.0f;
     float endMainPos = overScrollFeature_ ?
         std::max(startPos + contentMainSize_ - contentStartOffset_, endMainPos_) : endMainPos_;
+    layoutEndMainPos_ = endMainPos;
     if (forwardFeature_ && targetIndex_ && NonNegative(targetIndex_.value())) {
         endMainPos = Infinity<float>();
     }
@@ -1024,6 +1024,7 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
     float currentEndPos = 0.0f;
     float startMainPos = overScrollFeature_ ?
         std::min(endPos - contentMainSize_ + contentEndOffset_, startMainPos_) : startMainPos_;
+    layoutStartMainPos_ = startMainPos;
     if (backwardFeature_ && targetIndex_ && NonNegative(targetIndex_.value())) {
         startMainPos = -Infinity<float>();
     }
@@ -1436,10 +1437,15 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
         referencePos = (startMainPos_ + endMainPos_) / 2; // 2:average
     }
     if (jumpIndex_) {
-        auto wrapper = layoutWrapper;
-        itemGroup->ClearItemPosition(&(*wrapper));
+        itemGroup->ClearItemPosition();
     }
-    itemGroup->SetListMainSize(startMainPos_, endMainPos_, referencePos, prevContentMainSize_, forwardLayout);
+    if (forwardLayout) {
+        float endPos = layoutEndMainPos_.value_or(endMainPos_);
+        itemGroup->SetListMainSize(startMainPos_, endPos, referencePos, prevContentMainSize_, forwardLayout);
+    } else {
+        float startPos = layoutStartMainPos_.value_or(startMainPos_);
+        itemGroup->SetListMainSize(startPos, endMainPos_, referencePos, prevContentMainSize_, forwardLayout);
+    }
     itemGroup->SetNeedAdjustRefPos(needAdjustRefPos);
     itemGroup->SetListLayoutProperty(layoutProperty);
     if (!isSnapCenter_) {
@@ -1463,17 +1469,10 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
         }
     }
 
-    if (groupNeedAllLayout || targetIndex_ || (isSnapCenter_ && !childrenSize_)) {
-        auto groupItemPosition = itemGroup->GetItemPosition();
-        int32_t groupTotalItemCount = layoutWrapper->GetTotalChildCount() - itemGroup->GetItemStartIndex();
-        if (groupNeedAllLayout || (isSnapCenter_ && !childrenSize_) ||
-            (targetIndex_ && targetIndex_.value() == index) ||
-            (!(forwardLayout && !groupItemPosition.empty() &&
-            groupItemPosition.rbegin()->first == groupTotalItemCount - 1) &&
-            !(!forwardLayout && !groupItemPosition.empty() &&
-            groupItemPosition.begin()->first == 0))) {
-            itemGroup->SetNeedAllLayout();
-        }
+    if (groupNeedAllLayout || (targetIndex_ && targetIndex_.value() == index) || (isSnapCenter_ && !childrenSize_)) {
+        itemGroup->SetNeedAllLayout();
+    } else if (targetIndex_) {
+        itemGroup->CheckNeedAllLayout(layoutWrapper, forwardLayout);
     }
     layoutWrapper->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
 }

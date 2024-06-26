@@ -480,6 +480,8 @@ private:
     float currentDelta_ = 0.0f;
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
+    std::optional<float> layoutEndMainPos_;
+    std::optional<float> layoutStartMainPos_;
     float contentStartOffset_ = 0.0f;
     float contentEndOffset_ = 0.0f;
     float prevContentStartOffset_ = 0.0f;
