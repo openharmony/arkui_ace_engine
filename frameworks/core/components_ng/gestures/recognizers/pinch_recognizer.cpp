@@ -366,7 +366,7 @@ Offset PinchRecognizer::ComputePinchCenter()
 
     PointF localPoint(focalX, focalY);
     NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
-        isPostEventResult_, touchPoints_[touchPoints_.begin()->first].postEventNodeId);
+        isPostEventResult_, touchPoints_.begin()->second.postEventNodeId);
     Offset pinchCenter = Offset(localPoint.GetX(), localPoint.GetY());
 
     return pinchCenter;
