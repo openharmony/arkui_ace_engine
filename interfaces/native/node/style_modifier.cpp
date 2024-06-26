@@ -8710,6 +8710,42 @@ void ResetAccessibilityValue(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getCommonModifier()->resetAccessibilityValue(node->uiNodeHandle);
 }
 
+void ResetAreaChangeRatio(ArkUI_NodeHandle node)
+{
+    if (node->areaChangeRadio) {
+        delete[] node->areaChangeRadio->value;
+        delete node->areaChangeRadio;
+    }
+    node->areaChangeRadio = nullptr;
+}
+
+int32_t SetAreaChangeRatio(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_Int32 radioLength = item->size;
+    ArkUI_NumberValue* radioList = new ArkUI_NumberValue[radioLength];
+    for (int i = 0; i < radioLength; ++i) {
+        if (LessNotEqual(item->value[i].f32, 0.0f) || GreatNotEqual(item->value[i].f32, 1.0f)) {
+            delete[] radioList;
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        radioList[i].f32 = item->value[i].f32;
+    }
+    if (node->areaChangeRadio) {
+        ResetAreaChangeRatio(node);
+    }
+    node->areaChangeRadio = new ArkUI_AttributeItem { .value = radioList, .size = radioLength};
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetAreaChangeRatio(ArkUI_NodeHandle node)
+{
+    return node->areaChangeRadio;
+}
+
 bool CheckTransformCenter(const ArkUI_AttributeItem* item, int32_t size)
 {
     CHECK_NULL_RETURN(item, false);
@@ -12476,6 +12512,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetAccessibilityState,
         SetAccessibilityValue,
         SetExpandSafeArea,
+        SetAreaChangeRatio,
     };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -12580,6 +12617,7 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetAccessibilityState,
         GetAccessibilityValue,
         GetExpandSafeArea,
+        GetAreaChangeRatio,
     };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -12688,6 +12726,7 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetAccessibilityState,
         ResetAccessibilityValue,
         ResetExpandSafeArea,
+        ResetAreaChangeRatio,
     };
     if (subTypeId >= sizeof(resetters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);

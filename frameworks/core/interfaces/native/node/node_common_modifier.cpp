@@ -5559,20 +5559,6 @@ void SetOnVisibleAreaChange(ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_
     ViewAbstract::SetOnVisibleChange(frameNode, onEvent, ratioList);
 }
 
-void ResetVisibleAreaChange(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::ResetVisibleChange(frameNode);
-}
-
-void ResetAreaChange(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::ResetAreaChanged(frameNode);
-}
-
 void SetLayoutRect(ArkUINodeHandle node, ArkUI_Int32 (*values)[4])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -5981,7 +5967,7 @@ const ArkUICommonModifier* GetCommonModifier()
         SetMoveTransition, GetMoveTransition, ResetMask, GetAspectRatio, SetBackgroundImageResizable,
         ResetBackgroundImageResizable, SetBackgroundImageSizeWithUnit, GetRenderFit, GetOutlineColor, GetSize,
         GetRenderGroup, SetOnVisibleAreaChange, GetGeometryTransition, SetChainStyle, GetChainStyle, ResetChainStyle,
-        SetBias, GetBias, ResetBias, GetColorBlend, GetForegroundBlurStyle, ResetVisibleAreaChange, ResetAreaChange,
+        SetBias, GetBias, ResetBias, GetColorBlend, GetForegroundBlurStyle,
         SetBackgroundImagePixelMap, SetBackgroundImagePixelMapByPixelMapPtr,
         SetLayoutRect, GetLayoutRect, ResetLayoutRect, GetFocusOnTouch, SetSystemBarEffect,
         GetAccessibilityID, SetAccessibilityState, GetAccessibilityState, ResetAccessibilityState,
@@ -6188,7 +6174,6 @@ void SetOnClick(ArkUINodeHandle node, void* extraParam)
         //displayY
         event.componentAsyncEvent.data[7].f32 =
             usePx ? PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()) : screenOffset.GetY();
-
         SendArkUIAsyncEvent(&event);
     };
     if (uiNode->GetTag() == "Span") {
@@ -6468,5 +6453,95 @@ void SetOnAccessibilityActions(ArkUINodeHandle node, void* extraParam)
     accessibilityProperty->SetActions(onEvent);
 }
 
+void ResetOnAppear(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnAppear(frameNode);
+}
+
+void ResetOnDisappear(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnDisappear(frameNode);
+}
+
+void ResetOnAttach(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnAttach(frameNode);
+}
+
+void ResetOnDetach(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnDetach(frameNode);
+}
+
+void ResetOnFocus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnFocus(frameNode);
+}
+
+void ResetOnBlur(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnBlur(frameNode);
+}
+
+void ResetOnAreaChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetAreaChanged(frameNode);
+}
+
+void ResetOnVisibleAreaChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetVisibleChange(frameNode);
+}
+
+void ResetOnClick(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnClick(frameNode);
+}
+
+void ResetOnTouch(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnTouch(frameNode);
+}
+
+void ResetOnTouchIntercept(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetOnTouchIntercept(frameNode, nullptr);
+}
+
+void ResetOnHover(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnHover(frameNode);
+}
+
+void ResetOnMouse(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnMouse(frameNode);
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

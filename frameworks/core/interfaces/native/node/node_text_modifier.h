@@ -23,6 +23,8 @@
 namespace OHOS::Ace::NG::NodeModifier {
     const ArkUITextModifier* GetTextModifier();
     void SetOnDetectResultUpdate(ArkUINodeHandle node, void* extraParam);
+
+    void ResetOnDetectResultUpdate(ArkUINodeHandle node);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_TEXT_MODIFIER_H
