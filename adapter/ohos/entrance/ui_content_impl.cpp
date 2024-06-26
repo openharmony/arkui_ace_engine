@@ -1663,14 +1663,17 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     bool halfLeading = std::any_of(metaData.begin(), metaData.end(),
         [](const auto& metaDataItem) { return metaDataItem.name == "half_leading" && metaDataItem.value == "true"; });
     pipeline->SetHalfLeading(halfLeading);
-    bool hasPreviewTextOption = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
-            return metaDataItem.name == "can_preview_text";
-        });
+    bool hasPreviewTextOption = std::any_of(metaData.begin(), metaData.end(),
+        [pipelineWeak = AceType::WeakClaim(AceType::RawPtr(pipeline))](const auto& metaDataItem) {
+                if (metaDataItem.name == "can_preview_text") {
+                    auto pipeline = pipelineWeak.Upgrade();
+                    CHECK_NULL_RETURN(pipeline, false);
+                    pipeline->SetSupportPreviewText(metaDataItem.value == "false");
+                    return true;
+                }
+                return false;
+            });
     pipeline->SetHasPreviewTextOption(hasPreviewTextOption);
-    bool changePreviewTextSupported = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
-            return metaDataItem.name == "can_preview_text" && metaDataItem.value == "false";
-        });
-    pipeline->SetSupportPreviewText(changePreviewTextSupported);
     // Use metadata to control whether the cutout safeArea takes effect.
     bool useCutout = std::any_of(metaData.begin(), metaData.end(),
         [](const auto& metaDataItem) { return metaDataItem.name == "avoid_cutout" && metaDataItem.value == "true"; });
