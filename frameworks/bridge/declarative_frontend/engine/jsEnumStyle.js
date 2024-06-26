@@ -97,6 +97,12 @@ var DpiFollowStrategy;
   DpiFollowStrategy[DpiFollowStrategy["FOLLOW_UI_EXTENSION_ABILITY_DPI"] = 1] = "follow-ui-extension-ability-dpi";
 })(DpiFollowStrategy || (DpiFollowStrategy = {}));
 
+var SecurityDpiFollowStrategy;
+(function (SecurityDpiFollowStrategy) {
+  SecurityDpiFollowStrategy[SecurityDpiFollowStrategy["FOLLOW_HOST_DPI"] = 0] = "follow-host-dpi";
+  SecurityDpiFollowStrategy[SecurityDpiFollowStrategy["FOLLOW_UI_EXTENSION_ABILITY_DPI"] = 1] = "follow-ui-extension-ability-dpi";
+})(SecurityDpiFollowStrategy || (SecurityDpiFollowStrategy = {}));
+
 var EllipsisMode;
 (function (EllipsisMode) {
   EllipsisMode[EllipsisMode["START"] = 0] = "start";

@@ -119,6 +119,13 @@ void UIExtensionManager::TransferOriginAvoidArea(const Rosen::AvoidArea& avoidAr
             uiExtension->DispatchOriginAvoidArea(avoidArea, type);
         }
     }
+
+    for (const auto& it : aliveSecurityUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        if (uiExtension) {
+            uiExtension->DispatchOriginAvoidArea(avoidArea, type);
+        }
+    }
 }
 
 void UIExtensionManager::RemoveDestroyedUIExtension(int32_t nodeId)
@@ -144,6 +151,13 @@ void UIExtensionManager::NotifySizeChangeReason(WindowSizeChangeReason type,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     for (const auto& it : aliveUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        if (uiExtension) {
+            uiExtension->NotifySizeChangeReason(type, rsTransaction);
+        }
+    }
+
+    for (const auto& it : aliveSecurityUIExtensions_) {
         auto uiExtension = it.second.Upgrade();
         if (uiExtension) {
             uiExtension->NotifySizeChangeReason(type, rsTransaction);

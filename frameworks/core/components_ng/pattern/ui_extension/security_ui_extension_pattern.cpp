@@ -27,6 +27,7 @@
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
+#include "base/error/error_code.h"
 #include "base/geometry/offset.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
@@ -51,6 +52,9 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr char ABILITY_KEY_ASYNC[] = "ability.want.params.KeyAsync";
+constexpr char PROHIBIT_NESTING_FAIL_NAME[] = "Prohibit_Nesting_SecurityUIExtensionComponent";
+constexpr char PROHIBIT_NESTING_FAIL_MESSAGE[] =
+    "Prohibit nesting securityUIExtensionComponent in securityUIExtensionAbility";
 }
 
 SecurityUIExtensionPattern::SecurityUIExtensionPattern()
@@ -85,6 +89,10 @@ void SecurityUIExtensionPattern::UnregisterResources()
 
 void SecurityUIExtensionPattern::Initialize(const NG::UIExtensionConfig& config)
 {
+    if (sessionWrapper_ != nullptr) {
+        return;
+    }
+
     sessionType_ = config.sessionType;
     SessionCreateParam sessionCreateParam;
     sessionCreateParam.hostPattern = WeakClaim(this);
@@ -131,7 +139,9 @@ void SecurityUIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     if (container->GetUIContentType() == UIContentType::SECURITY_UI_EXTENSION) {
-        PLATFORM_LOGE("Not allowed nesting.");
+        PLATFORM_LOGE("Not allowed nesting in SECURITY_UI_EXTENSION.");
+        FireOnErrorCallback(ERROR_CODE_UIEXTENSION_FORBID_CASCADE,
+            PROHIBIT_NESTING_FAIL_NAME, PROHIBIT_NESTING_FAIL_MESSAGE);
         return;
     }
 
@@ -462,7 +472,7 @@ void SecurityUIExtensionPattern::SetSyncCallbacks(
 
 void SecurityUIExtensionPattern::FireSyncCallbacks()
 {
-    UIEXT_LOGD("The size of sync callbacks = %{public}zu.", onSyncOnCallbackList_.size());
+    PLATFORM_LOGD("The size of sync callbacks = %{public}zu.", onSyncOnCallbackList_.size());
     ContainerScope scope(instanceId_);
     for (const auto& callback : onSyncOnCallbackList_) {
         if (callback) {
@@ -479,7 +489,7 @@ void SecurityUIExtensionPattern::SetAsyncCallbacks(
 
 void SecurityUIExtensionPattern::FireAsyncCallbacks()
 {
-    UIEXT_LOGD("The size of async callbacks = %{public}zu.", onSyncOnCallbackList_.size());
+    PLATFORM_LOGD("The size of async callbacks = %{public}zu.", onSyncOnCallbackList_.size());
     ContainerScope scope(instanceId_);
     for (const auto& callback : onAsyncOnCallbackList_) {
         if (callback) {
