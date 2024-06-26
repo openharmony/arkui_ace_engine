@@ -98,6 +98,44 @@ void PrintInfiniteAnimation(const AnimationOption& option, AnimationInterface in
     }
 }
 
+// check whether this container needs to perform animateTo
+bool CheckContainer(const RefPtr<Container>& container)
+{
+    auto context = container->GetPipelineContext();
+    if (!context) {
+        return false;
+    }
+    if (!container->GetSettings().usingSharedRuntime) {
+        return false;
+    }
+    if (!container->IsFRSCardContainer() && !container->WindowIsShow()) {
+        return false;
+    }
+    auto executor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(executor, false);
+    return executor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI);
+}
+
+bool GetAnyContextIsLayouting(const RefPtr<PipelineBase>& currentPipeline)
+{
+    if (currentPipeline->IsLayouting()) {
+        return true;
+    }
+    bool isLayouting = false;
+    AceEngine::Get().NotifyContainers([&isLayouting](const RefPtr<Container>& container) {
+        if (isLayouting) {
+            // One container is already in layouting
+            return;
+        }
+        if (!CheckContainer(container)) {
+            return;
+        }
+        auto context = container->GetPipelineContext();
+        isLayouting |= context->IsLayouting();
+    });
+    return isLayouting;
+}
+
 void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOption& option,
     JSRef<JSFunc> jsAnimateToFunc, std::function<void()>& onFinishEvent, bool immediately)
 {
@@ -112,23 +150,11 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
     }
     NG::ScopedViewStackProcessor scopedProcessor;
     AceEngine::Get().NotifyContainers([triggerId, option](const RefPtr<Container>& container) {
+        if (!CheckContainer(container)) {
+            return;
+        }
         auto context = container->GetPipelineContext();
-        if (!context) {
-            // pa container do not have pipeline context.
-            return;
-        }
-        if (!container->GetSettings().usingSharedRuntime) {
-            return;
-        }
-        if (!container->IsFRSCardContainer() && !container->WindowIsShow()) {
-            return;
-        }
         if (context->GetInstanceId() == triggerId) {
-            return;
-        }
-        auto executor = container->GetTaskExecutor();
-        CHECK_NULL_VOID(executor);
-        if (!executor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
             return;
         }
         ContainerScope scope(container->GetInstanceId());
@@ -142,23 +168,11 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
     jsAnimateToFunc->Call(jsAnimateToFunc);
     pipelineContext->FlushOnceVsyncTask();
     AceEngine::Get().NotifyContainers([triggerId](const RefPtr<Container>& container) {
+        if (!CheckContainer(container)) {
+            return;
+        }
         auto context = container->GetPipelineContext();
-        if (!context) {
-            // pa container do not have pipeline context.
-            return;
-        }
-        if (!container->GetSettings().usingSharedRuntime) {
-            return;
-        }
-        if (!container->IsFRSCardContainer() && !container->WindowIsShow()) {
-            return;
-        }
         if (context->GetInstanceId() == triggerId) {
-            return;
-        }
-        auto executor = container->GetTaskExecutor();
-        CHECK_NULL_VOID(executor);
-        if (!executor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
             return;
         }
         ContainerScope scope(container->GetInstanceId());
@@ -548,7 +562,7 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
     if (SystemProperties::GetRosenBackendEnabled()) {
         bool usingSharedRuntime = container->GetSettings().usingSharedRuntime;
         if (usingSharedRuntime) {
-            if (pipelineContext->IsLayouting()) {
+            if (GetAnyContextIsLayouting(pipelineContext)) {
                 TAG_LOGW(AceLogTag::ACE_ANIMATION,
                     "pipeline is layouting, post animateTo, duration:%{public}d, curve:%{public}s",
                     option.GetDuration(), option.GetCurve() ? option.GetCurve()->ToString().c_str() : "");
@@ -562,7 +576,7 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
                         CHECK_NULL_VOID(pipelineContext);
                         AnimateToForStageMode(pipelineContext, option, func, onFinishEvent, immediately);
                     },
-                    TaskExecutor::TaskType::UI, "ArkUIAnimateToForStageMode");
+                    TaskExecutor::TaskType::UI, "ArkUIAnimateToForStageMode", PriorityType::IMMEDIATE);
                 return;
             }
             AnimateToForStageMode(pipelineContext, option, JSRef<JSFunc>::Cast(info[1]), onFinishEvent, immediately);
