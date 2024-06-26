@@ -143,7 +143,6 @@ public:
         layoutAlgorithm->SetChildrenMainSize(childrenMainSize_);
         layoutAlgorithm->SetCurrentOffset(currentOffset_);
         layoutAlgorithm->SetIndicator(indicator_);
-        layoutAlgorithm->SetIsBuilder(IsContainsBuilder());
         layoutAlgorithm->SetTabBarStyle(tabBarStyle_);
         layoutAlgorithm->SetNeedSetCentered(needSetCentered_);
         layoutAlgorithm->SetScrollMargin(scrollMargin_);
@@ -415,6 +414,16 @@ public:
         return animationDuration_;
     }
 
+    bool GetTabContentWillChangeFlag()
+    {
+        return tabContentWillChangeFlag_;
+    }
+
+    void ResetTabContentWillChangeFlag()
+    {
+        tabContentWillChangeFlag_ = false;
+    }
+
     void UpdateAnimationDuration();
 
     bool HasSurfaceChangedCallback()
@@ -561,6 +570,7 @@ private:
     bool isHover_ = false;
     bool isMaskAnimationByCreate_ = false;
     bool isMaskAnimationExecuted_ = false;
+    bool tabContentWillChangeFlag_ = false;
     std::optional<int32_t> imageColorOnIndex_;
     std::optional<int32_t> touchingIndex_;
     std::optional<int32_t> hoverIndex_;
