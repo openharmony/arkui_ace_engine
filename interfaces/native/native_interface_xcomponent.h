@@ -425,7 +425,7 @@ int32_t OH_NativeXComponent_GetTouchPointToolType(
 int32_t OH_NativeXComponent_GetTouchPointTiltX(OH_NativeXComponent* component, uint32_t pointIndex, float* tiltX);
 
 /**
- * @brief Obtains the touch pointer tiltX by the ArkUI XComponent.
+ * @brief Obtains the touch pointer tiltY by the ArkUI XComponent.
  *
  * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
  * @param pointIndex Indicates the pointer index in the touchPoints.
@@ -435,6 +435,62 @@ int32_t OH_NativeXComponent_GetTouchPointTiltX(OH_NativeXComponent* component, u
  * @version 1.0
  */
 int32_t OH_NativeXComponent_GetTouchPointTiltY(OH_NativeXComponent* component, uint32_t pointIndex, float* tiltY);
+
+/**
+ * @brief Obtains the x coordinate of a specific touch point relative to the upper left corner of\n
+ *        the current application window from the ArkUI XComponent.
+ *
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param pointIndex Indicates the pointer index in the touchPoints.
+ * @param windowX Indicates the x coordinate relative to the upper left corner of the current\n
+          application window.
+ * @return Returns the status code of the execution.
+ * @since 12
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_GetTouchPointWindowX(OH_NativeXComponent* component, uint32_t pointIndex, float* windowX);
+
+/**
+ * @brief Obtains the y coordinate of a specific touch point relative to the upper left corner of\n
+ *        the current application window from the ArkUI XComponent.
+ *
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param pointIndex Indicates the pointer index in the touchPoints.
+ * @param windowY Indicates the y coordinate relative to the upper left corner of the current\n
+          application window.
+ * @return Returns the status code of the execution.
+ * @since 12
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_GetTouchPointWindowY(OH_NativeXComponent* component, uint32_t pointIndex, float* windowY);
+
+/**
+ * @brief Obtains the x coordinate of a specific touch point relative to the upper left corner of\n
+ *        the current screen from the ArkUI XComponent.
+ *
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param pointIndex Indicates the pointer index in the touchPoints.
+ * @param displayX Indicates the x coordinate relative to the upper left corner of the current\n
+          screen.
+ * @return Returns the status code of the execution.
+ * @since 12
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_GetTouchPointDisplayX(OH_NativeXComponent* component, uint32_t pointIndex, float* displayX);
+
+/**
+ * @brief Obtains the y coordinate of a specific touch point relative to the upper left corner of\n
+ *        the current screen from the ArkUI XComponent.
+ *
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param pointIndex Indicates the pointer index in the touchPoints.
+ * @param displayY Indicates the y coordinate relative to the upper left corner of the current\n
+          screen.
+ * @return Returns the status code of the execution.
+ * @since 12
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_GetTouchPointDisplayY(OH_NativeXComponent* component, uint32_t pointIndex, float* displayY);
 
 /**
  * @brief Obtains the touch event dispatched by the ArkUI XComponent.

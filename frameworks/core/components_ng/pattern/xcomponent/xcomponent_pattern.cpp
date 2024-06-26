@@ -1254,6 +1254,7 @@ void XComponentPattern::SetTouchPoint(
         const auto& pointTouchInfo = *iterator;
         const auto& pointScreenOffset = pointTouchInfo.GetGlobalLocation();
         const auto& pointLocalOffset = pointTouchInfo.GetLocalLocation();
+        const auto& pointDisplayOffset = pointTouchInfo.GetScreenLocation();
         ohTouchPoint.id = pointTouchInfo.GetFingerId();
         ohTouchPoint.screenX = static_cast<float>(pointScreenOffset.GetX());
         ohTouchPoint.screenY = static_cast<float>(pointScreenOffset.GetY());
@@ -1265,10 +1266,14 @@ void XComponentPattern::SetTouchPoint(
         ohTouchPoint.timeStamp = timeStamp;
         ohTouchPoint.isPressed = (touchType == TouchType::DOWN);
         touchEventPoint_.touchPoints[index++] = ohTouchPoint;
-        // set tiltX, tiltY and sourceToolType
+        // set tiltX, tiltY, windowX, windowY, displayX, displayY and sourceToolType
         XComponentTouchPoint xcomponentTouchPoint;
         xcomponentTouchPoint.tiltX = pointTouchInfo.GetTiltX().value_or(0.0f);
         xcomponentTouchPoint.tiltY = pointTouchInfo.GetTiltY().value_or(0.0f);
+        xcomponentTouchPoint.windowX = static_cast<float>(pointScreenOffset.GetX());
+        xcomponentTouchPoint.windowY = static_cast<float>(pointScreenOffset.GetY());
+        xcomponentTouchPoint.displayX = static_cast<float>(pointDisplayOffset.GetX());
+        xcomponentTouchPoint.displayY = static_cast<float>(pointDisplayOffset.GetY());
         xcomponentTouchPoint.sourceToolType = ConvertNativeXComponentTouchToolType(pointTouchInfo.GetSourceTool());
         nativeXComponentTouchPoints_.emplace_back(xcomponentTouchPoint);
     }
