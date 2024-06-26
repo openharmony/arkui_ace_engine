@@ -1079,7 +1079,13 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
     AddMccAndMncToResConfig(context, aceResCfg);
     AddSetAppColorModeToResConfig(context, aceResCfg);
-    if (isFormRender_) {
+    if (isDynamicRender_) {
+        if (std::regex_match(hapPath_, std::regex(".*\\.hap"))) {
+            hapPath = hapPath_;
+        } else {
+            resPath = hapPath_;
+        }
+    } else if (isFormRender_) {
         resPath = "/data/bundles/" + bundleName_ + "/" + moduleName_ + "/";
         hapPath = hapPath_;
     }
