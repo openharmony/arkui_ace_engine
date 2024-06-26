@@ -73,6 +73,7 @@ bool NavDestinationModelNG::ParseCommonTitle(
                     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
             }
             textLayoutProperty->UpdateContent(title);
+            textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
         } else {
             // create and init main title
             mainTitle = FrameNode::CreateFrameNode(
@@ -87,6 +88,7 @@ bool NavDestinationModelNG::ParseCommonTitle(
             textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
             textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
             textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+            textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
                 textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetMainTitleFontSizeS());
                 textLayoutProperty->UpdateTextColor(theme->GetMainTitleFontColor());
@@ -115,6 +117,7 @@ bool NavDestinationModelNG::ParseCommonTitle(
         // update subtitle
         auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
         textLayoutProperty->UpdateContent(subtitle);
+        textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
     } else {
         // create and init subtitle
         subTitle = FrameNode::CreateFrameNode(
@@ -129,6 +132,7 @@ bool NavDestinationModelNG::ParseCommonTitle(
         textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
         textLayoutProperty->UpdateMaxLines(1);
         textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+        textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetSubTitleFontSizeS());
             textLayoutProperty->UpdateTextColor(theme->GetSubTitleFontColor());

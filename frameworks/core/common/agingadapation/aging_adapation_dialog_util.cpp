@@ -133,8 +133,7 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::CreateCustomDialog(const RefPtr<Fram
     dialogProperties.shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultLG);
     dialogProperties.borderRadius = BorderRadiusProperty(dialogTheme->GetDialogCornerRadius());
     BlurStyleOption styleOption;
-    styleOption.blurStyle = static_cast<BlurStyle>(
-        dialogProperties.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
+    styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
     auto renderContext = columnNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackBlurStyle(styleOption);
