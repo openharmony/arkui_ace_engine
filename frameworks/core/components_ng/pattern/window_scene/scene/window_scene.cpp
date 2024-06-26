@@ -34,7 +34,7 @@ const std::map<std::string, Rosen::RSAnimationTimingCurve> curveMap {
     { "spring",             Rosen::RSAnimationTimingCurve::SPRING             },
     { "interactiveSpring",  Rosen::RSAnimationTimingCurve::INTERACTIVE_SPRING },
 };
-const uint32_t CLEAN_NODE_DELAY_TIME = 400;
+const uint32_t CLEAN_NODE_DELAY_TIME = 500;
 const int32_t ANIMATION_CONFIG_CURVE = 200;
 } // namespace
 
@@ -54,12 +54,10 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
     callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
-        if (self->blankNode_) {
-            self->BufferAvailableCallbackForBlank();
-            self->deleteNodeTask_.Cancel();
-        } else if (self->snapshotNode_) {
+        if (self->snapshotNode_) {
             self->BufferAvailableCallbackForSnapshot();
-            self->deleteNodeTask_.Cancel();
+        } else if (self->blankNode_) {
+            self->BufferAvailableCallbackForBlank();
         } else {
             auto session = weakSession.promote();
             CHECK_NULL_VOID(session);
@@ -416,8 +414,6 @@ void WindowScene::DisposeSnapShotAndBlankNode()
         NearEqual(frameSize.Height(), session_->GetSessionLastRect().height_, 1.0f)) {
         return;
     }
-    RemoveChild(host, snapshotNode_, snapshotNodeName_);
-    snapshotNode_.Reset();
     if (!blankNode_) {
         CreateBlankNode();
         AddChild(host, blankNode_, blankNodeName_);
@@ -567,8 +563,6 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             CreateBlankNode();
             AddChild(host, blankNode_, blankNodeName_);
             CleanBlankNodeOrSnapshotNode();
-            RemoveChild(host, snapshotNode_, snapshotNodeName_);
-            snapshotNode_.Reset();
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
         auto surfaceNode = session_->GetSurfaceNode();
