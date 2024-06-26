@@ -271,6 +271,27 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
         BorderRadiusProperty radius;
         radius.SetRadius(dialogTheme_->GetRadius().GetX());
         contentRenderContext->UpdateBorderRadius(radius);
+        if (dialogTheme_->GetDialogDoubleBorderEnable()) {
+            contentRenderContext->UpdateOuterBorderRadius(radius);
+        }
+    }
+    if (dialogTheme_->GetDialogDoubleBorderEnable()) {
+        BorderWidthProperty innerWidthProp;
+        innerWidthProp.SetBorderWidth(Dimension(dialogTheme_->GetDialogInnerBorderWidth()));
+        auto layoutProps = contentNode->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_VOID(layoutProps);
+        layoutProps->UpdateBorderWidth(innerWidthProp);
+        contentRenderContext->UpdateBorderWidth(innerWidthProp);
+        BorderColorProperty innerColorProp;
+        innerColorProp.SetColor(dialogTheme_->GetDialogInnerBorderColor());
+        contentRenderContext->UpdateBorderColor(innerColorProp);
+
+        BorderWidthProperty outerWidthProp;
+        outerWidthProp.SetBorderWidth(Dimension(dialogTheme_->GetDialogOuterBorderWidth()));
+        contentRenderContext->UpdateOuterBorderWidth(outerWidthProp);
+        BorderColorProperty outerColorProp;
+        outerColorProp.SetColor(dialogTheme_->GetDialogOuterBorderColor());
+        contentRenderContext->UpdateBorderColor(outerColorProp);
     }
     if (props.borderWidth.has_value()) {
         auto layoutProps = contentNode->GetLayoutProperty<LinearLayoutProperty>();
