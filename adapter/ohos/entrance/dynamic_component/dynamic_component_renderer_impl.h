@@ -32,8 +32,7 @@ class DynamicComponentRendererImpl : public DynamicComponentRenderer {
     DECLARE_ACE_TYPE(DynamicComponentRendererImpl, DynamicComponentRenderer);
 
 public:
-    DynamicComponentRendererImpl(const RefPtr<FrameNode>& host, const std::string& hapPath, const std::string& abcPath,
-        const std::string& entryPoint, void* runtime);
+    DynamicComponentRendererImpl(const RefPtr<FrameNode>& host, void* runtime, const IsolatedInfo& isolatedInfo);
     ~DynamicComponentRendererImpl() override = default;
 
     void SetAdaptiveSize(bool adaptiveWidth, bool adaptiveHeight) override;
@@ -80,9 +79,7 @@ private:
     std::function<void()> contentReadyCallback_;
     mutable std::mutex contentReadyMutex_;
 
-    std::string hapPath_;
-    std::string abcPath_;
-    std::string entryPoint_;
+    IsolatedInfo isolatedInfo_;
     std::shared_ptr<UIContent> uiContent_;
     NativeEngine* runtime_ = nullptr;
     WeakPtr<FrameNode> host_;

@@ -397,6 +397,8 @@ public:
         isDynamicRender_ = isDynamicRender;
     }
 
+    virtual std::vector<std::string> GetRegisterComponents() { return {}; };
+
     void SetPageUrlChecker(const RefPtr<PageUrlChecker>& pageUrlChecker)
     {
         pageUrlChecker_ = pageUrlChecker;

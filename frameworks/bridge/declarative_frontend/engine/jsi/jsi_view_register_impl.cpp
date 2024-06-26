@@ -846,6 +846,28 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "PanRecognizer", JSPanRecognizer::JSBind }
 };
 
+void RegisterBindFuncs(BindingTarget globalObj)
+{
+    auto container = Container::Current();
+    if (container && container->IsDynamicRender() && !container->GetRegisterComponents().empty()) {
+        for (auto& moudle : container->GetRegisterComponents()) {
+            auto bindFunc = bindFuncs.find(moudle);
+            if (bindFunc != bindFuncs.end()) {
+                bindFunc->second(globalObj);
+                continue;
+            }
+            if (!RegisterExtraViewByName(globalObj, moudle)) {
+                LOGW("module not exist, name: %{public}s", moudle.c_str());
+            }
+        }
+        return;
+    }
+
+    for (auto& iter : bindFuncs) {
+        iter.second(globalObj);
+    }
+}
+
 void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)
 {
     JSColumn::JSBind(globalObj);
@@ -892,9 +914,8 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)
     JSCircleShape::JSBind(globalObj);
     JSEllipseShape::JSBind(globalObj);
     JSPathShape::JSBind(globalObj);
-    for (auto& iter : bindFuncs) {
-        iter.second(globalObj);
-    }
+
+    RegisterBindFuncs(globalObj);
     RegisterExtraViews(globalObj);
 }
 

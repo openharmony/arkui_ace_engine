@@ -704,11 +704,12 @@ UIContentErrorCode UIContentImpl::InitializeByName(
     return InitializeInner(window, name, storage, true);
 }
 
-void UIContentImpl::InitializeDynamic(
-    const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint)
+void UIContentImpl::InitializeDynamic(const std::string& hapPath, const std::string& abcPath,
+    const std::string& entryPoint, const std::vector<std::string>& registerComponents)
 {
     isDynamicRender_ = true;
     hapPath_ = hapPath;
+    registerComponents_ = registerComponents;
     auto env = reinterpret_cast<napi_env>(runtime_);
     CHECK_NULL_VOID(env);
     taskWrapper_ = std::make_shared<NG::UVTaskWrapperImpl>(env);
@@ -1037,6 +1038,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
     container->SetIsFormRender(isFormRender_);
     container->SetIsDynamicRender(isDynamicRender_);
+    container->SetRegisterComponents(registerComponents_);
     container->SetIsFRSCardContainer(isFormRender_);
     if (window_) {
         container->SetWindowName(window_->GetWindowName());
