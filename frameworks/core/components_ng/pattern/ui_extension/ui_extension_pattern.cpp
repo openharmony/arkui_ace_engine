@@ -163,32 +163,34 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     }
 
     isKeyAsync_ = want.GetBoolParam(ABILITY_KEY_ASYNC, false);
-    bool shouldCallSystem = ShouldCallSystem(want);
-    UIEXT_LOGI("The ability KeyAsync %{public}d, shouldCallSystem: %{public}d.",
-        isKeyAsync_, shouldCallSystem);
+    UIExtensionUsage uIExtensionUsage = GetUIExtensionUsage(want);
+    UIEXT_LOGI("The ability KeyAsync %{public}d, uIExtensionUsage: %{public}zu.",
+        isKeyAsync_, uIExtensionUsage);
     MountPlaceholderNode();
-    sessionWrapper_->CreateSession(want, isAsyncModalBinding_);
+    SessionConfig config;
+    config.isAsyncModalBinding = isAsyncModalBinding_;
+    sessionWrapper_->CreateSession(want, config);
     NotifyForeground();
 }
 
-bool UIExtensionPattern::ShouldCallSystem(const AAFwk::Want& want)
+UIExtensionUsage UIExtensionPattern::GetUIExtensionUsage(const AAFwk::Want& want)
 {
-    if (sessionType_ != SessionType::UI_EXTENSION_ABILITY) {
-        return false;
+    if (sessionType_ == SessionType::EMBEDDED_UI_EXTENSION) {
+        return UIExtensionUsage::EMBEDDED;
     }
 
     if (isModal_) {
-        return false;
+        return UIExtensionUsage::MODAL;
     }
 
     bool wantParamModal = want.GetBoolParam(ABILITY_KEY_IS_MODAL, false);
     auto bundleName = want.GetElement().GetBundleName();
     bool startWithAtomicService = StartWith(bundleName, ATOMIC_SERVICE_PREFIX);
     if (wantParamModal && startWithAtomicService) {
-        return false;
+        return UIExtensionUsage::MODAL;
     }
 
-    return true;
+    return UIExtensionUsage::EMBEDDED;
 }
 
 void UIExtensionPattern::OnConnect()
