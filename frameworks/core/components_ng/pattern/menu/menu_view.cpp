@@ -832,6 +832,12 @@ void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<Fram
     auto gestureEventHub = eventHub->GetGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
     auto isAllowedDrag = gestureEventHub->IsAllowedDrag(eventHub) && !gestureEventHub->GetTextDraggable();
+    if (targetNode->GetTag() == V2::TEXT_ETS_TAG && targetNode->IsDraggable() && !targetNode->IsCustomerSet()) {
+        auto textPattern = targetNode->GetPattern<TextPattern>();
+        if (textPattern && textPattern->GetCopyOptions() == CopyOptions::None) {
+            isAllowedDrag = false;
+        }
+    }
     if (menuParam.previewMode != MenuPreviewMode::NONE || isAllowedDrag) {
         SetFilter(targetNode, wrapperNode);
     }
