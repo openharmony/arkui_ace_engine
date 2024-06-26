@@ -45,7 +45,17 @@ void UIExtensionManager::UIExtensionIdUtility::RecycleExtensionId(int32_t id)
 void UIExtensionManager::RegisterUIExtensionInFocus(
     const WeakPtr<UIExtensionPattern>& uiExtensionFocused, const WeakPtr<SessionWrapper>& sessionWrapper)
 {
+    securityUiExtensionFocused_ = nullptr;
     uiExtensionFocused_ = uiExtensionFocused;
+    sessionWrapper_ = sessionWrapper;
+}
+
+void UIExtensionManager::RegisterUIExtensionInFocus(
+    const WeakPtr<SecurityUIExtensionPattern>& uiExtensionFocused,
+    const WeakPtr<SessionWrapper>& sessionWrapper)
+{
+    uiExtensionFocused_ = nullptr;
+    securityUiExtensionFocused_ = uiExtensionFocused;
     sessionWrapper_ = sessionWrapper;
 }
 

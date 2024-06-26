@@ -227,6 +227,9 @@ void SecurityUIExtensionPattern::OnConnect()
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     uiExtensionManager->AddAliveUIExtension(host->GetId(), WeakClaim(this));
+    if (isFocused) {
+        uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this), sessionWrapper_);
+    }
 }
 
 void SecurityUIExtensionPattern::OnDisconnect(bool isAbnormal)

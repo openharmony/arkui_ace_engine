@@ -67,6 +67,9 @@ public:
     std::pair<int64_t, int64_t> UnWrapExtensionAbilityId(int64_t extensionOffset, int64_t elementId);
     int32_t ApplyExtensionId();
     void RecycleExtensionId(int32_t id);
+    void RegisterUIExtensionInFocus(
+        const WeakPtr<SecurityUIExtensionPattern>& uiExtensionFocused,
+        const WeakPtr<SessionWrapper>& sessionWrapper);
 
     /**
      * @brief Create a UIExtensionComponent object on the page and save it in the UIExtension management object
@@ -121,6 +124,7 @@ private:
     };
 
     WeakPtr<UIExtensionPattern> uiExtensionFocused_;
+    WeakPtr<SecurityUIExtensionPattern> securityUiExtensionFocused_;
     WeakPtr<SessionWrapper> sessionWrapper_;
     std::map<int32_t, OHOS::Ace::WeakPtr<UIExtensionPattern>> aliveUIExtensions_;
     std::map<int32_t, OHOS::Ace::WeakPtr<SecurityUIExtensionPattern>> aliveSecurityUIExtensions_;
