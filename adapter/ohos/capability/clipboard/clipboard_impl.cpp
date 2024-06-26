@@ -63,6 +63,20 @@ void ClipboardImpl::HasData(const std::function<void(bool hasData)>& callback)
 #endif
 }
 
+void ClipboardImpl::HasDataType(const std::function<void(bool hasData)>& callback, const std::string& mimeType)
+{
+#ifdef SYSTEM_CLIPBOARD_SUPPORTED
+    bool hasData = false;
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostSyncTask(
+        [&hasData, mimeType]() {
+            hasData = OHOS::MiscServices::PasteboardClient::GetInstance()->HasDataType(mimeType);
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardHasDataType");
+    callback(hasData);
+#endif
+}
+
 void ClipboardImpl::SetData(const std::string& data, CopyOptions copyOption, bool isDragData)
 {
     CHECK_NULL_VOID(taskExecutor_);
