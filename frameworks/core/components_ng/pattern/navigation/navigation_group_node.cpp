@@ -156,7 +156,8 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
             navDestinationNodes.size(), preLastStandardNode) || hasChanged);
     }
 
-    RemoveRedundantNavDestination(navigationContentNode, remainChild, slot, hasChanged, beforeLastStandardIndex);
+    RemoveRedundantNavDestination(
+        navigationContentNode, remainChild, static_cast<int32_t>(slot), hasChanged, beforeLastStandardIndex);
     if (modeChange) {
         navigationContentNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     } else if (hasChanged) {
@@ -208,22 +209,25 @@ bool NavigationGroupNode::ReorderNavDestination(
     return true;
 }
 
-void NavigationGroupNode::RemoveRedundantNavDestinationInNewInstance(RefPtr<FrameNode>& navigationContentNode,
-    const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged)
+void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navigationContentNode,
+    const RefPtr<UINode>& remainChild, int32_t slot, bool& hasChanged, int32_t beforeLastStandardIndex)
 {
-    RefPtr<NavDestinationGroupNode> remainDestination = AceType::DynamicCast<NavDestinationGroupNode>(
-        GetNavDestinationNode(remainChild));
-    RefPtr<NavDestinationGroupNode> currentTopDestination = AceType::DynamicCast<NavDestinationGroupNode>(
-        navigationContentNode->GetChildAtIndex(static_cast<int32_t>(slot - 1)));
-    RefPtr<NavDestinationGroupNode> maxAnimatingDestination = nullptr;
-    auto index = navigationContentNode->GetChildren().size() - 1;
-    while (index >= slot) {
-        auto navDestination =
-            AceType::DynamicCast<NavDestinationGroupNode>(navigationContentNode->GetChildAtIndex(index));
+    auto pattern = GetPattern<NavigationPattern>();
+    RefPtr<UINode> maxAnimatingDestination = nullptr;
+    RefPtr<UINode> remainDestination = GetNavDestinationNode(remainChild);
+    RefPtr<UINode> curTopDestination = navigationContentNode->GetChildAtIndex(slot - 1);
+    // record remove destination size
+    int32_t removeSize = 0;
+    // record animating destination size
+    int32_t animatingSize = 0;
+    while (slot + removeSize + animatingSize < static_cast<int32_t>(navigationContentNode->GetChildren().size())) {
+        // delete useless nodes that are not at the top
+        int32_t candidateIndex = static_cast<int32_t>(navigationContentNode->GetChildren().size()) - 1 - animatingSize;
+        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+            navigationContentNode->GetChildAtIndex(candidateIndex));
         if (!navDestination) {
-            navigationContentNode->RemoveChildAtIndex(index);
+            navigationContentNode->RemoveChildAtIndex(candidateIndex);
             hasChanged = true;
-            --index;
             continue;
         }
         auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
@@ -231,60 +235,24 @@ void NavigationGroupNode::RemoveRedundantNavDestinationInNewInstance(RefPtr<Fram
             eventHub->FireChangeEvent(false);
         }
         if (navDestination == remainDestination) {
-            navDestination->SetNeedRemoveInNewInstance(true);
-        } else if (navDestination->NeedRemoveInNewInstance() || navDestination->IsOnAnimation()) {
-            if (maxAnimatingDestination == nullptr) {
-                maxAnimatingDestination = navDestination;
+            if (pattern->IsNewInstanceCreated()) {
+                // remain the last child for push animation, and this child
+                // will be remove in push's animation finish callback
+                navDestination->SetNeedRemoveInNewInstance(true);
+                navDestination->MovePosition(slot - 1);
+            } else {    
+                // remain the last child for pop animation
+                navDestination->MovePosition(slot);
             }
-        } else {
-            DealRemoveDestination(navDestination);
-            hasChanged = true;
-        }
-        --index;
-    }
-    auto maxAnimatingIndex = navigationContentNode->GetChildIndex(maxAnimatingDestination);
-    if (maxAnimatingIndex != -1 && remainDestination) {
-        remainDestination->MovePosition(maxAnimatingIndex + 1);
-    }
-    auto remainChildIndex = navigationContentNode->GetChildIndex(remainDestination);
-    if (remainChildIndex != -1) {
-        currentTopDestination->MovePosition(remainChildIndex + 1);
-    }
-}
-
-void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navigationContentNode,
-    const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged, int32_t beforeLastStandardIndex)
-{
-    auto pattern = GetPattern<NavigationPattern>();
-    if (pattern->IsNewInstanceCreated()) {
-        RemoveRedundantNavDestinationInNewInstance(navigationContentNode, remainChild, slot, hasChanged);
-        return;
-    }
-    // record remove destination size
-    int32_t removeSize = 0;
-    while (
-        static_cast<int32_t>(slot) + removeSize < static_cast<int32_t>(navigationContentNode->GetChildren().size())) {
-        // delete useless nodes that are not at the top
-        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(navigationContentNode->GetLastChild());
-        if (!navDestination) {
-            navigationContentNode->RemoveChild(navigationContentNode->GetLastChild());
-            hasChanged = true;
-            continue;
-        }
-        auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
-        if (eventHub) {
-            eventHub->FireChangeEvent(false);
-        }
-        auto uiNode = navDestination->GetPattern<NavDestinationPattern>()->GetCustomNode();
-        if (uiNode == remainChild) {
-            // remain the last child for pop animation
-            navDestination->MovePosition(slot);
             ++slot;
             continue;
         }
         if (navDestination->IsOnAnimation()) {
+            if (maxAnimatingDestination == nullptr) {
+                maxAnimatingDestination = navDestination;
+            }
             // The NavDestination in the animation needs to be cleaned in the animation onfinish callback.
-            ++slot;
+            ++animatingSize;
             continue;
         }
         // remove content child
@@ -294,7 +262,7 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
             hideNodes_.emplace_back(std::make_pair(navDestination, true));
             navDestination->SetCanReused(false);
             removeSize++;
-            auto index = static_cast<int32_t>(slot) + removeSize - 1;
+            auto index = slot + removeSize - 1;
             // move current destination position to navigation stack size + remove navDestination nodes
             if (index > 0) {
                 navDestination->MovePosition(index);
@@ -303,6 +271,23 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
         }
         DealRemoveDestination(navDestination);
         hasChanged = true;
+    }
+    if (pattern->IsNewInstanceCreated()) {
+        ReorderAnimatingDestination(
+            navigationContentNode, maxAnimatingDestination, remainDestination, curTopDestination);
+    }
+}
+
+void NavigationGroupNode::ReorderAnimatingDestination(RefPtr<FrameNode>& navigationContentNode,
+    RefPtr<UINode>& maxAnimatingDestination, RefPtr<UINode>& remainDestination, RefPtr<UINode>& curTopDestination)
+{
+    auto maxAnimatingIndex = navigationContentNode->GetChildIndex(maxAnimatingDestination);
+    if (maxAnimatingIndex != -1 && remainDestination) {
+        remainDestination->MovePosition(maxAnimatingIndex + 1);
+    }
+    auto remainIndex = navigationContentNode->GetChildIndex(remainDestination);
+    if (remainIndex != -1) {
+        curTopDestination->MovePosition(remainIndex + 1);
     }
 }
 
