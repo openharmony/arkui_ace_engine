@@ -164,7 +164,8 @@ public:
         return false;
     }
 
-    void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action) override;
+    void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,
+        const RefPtr<NG::FrameNode>& node = nullptr) override;
 
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
@@ -866,7 +867,7 @@ private:
 
     void RegisterRootEvent();
 
-    void ResetDraggingStatus(const TouchEvent& touchPoint);
+    void ResetDraggingStatus(const TouchEvent& touchPoint, const RefPtr<FrameNode>& node = nullptr);
 
     void CompensateTouchMoveEvent(const TouchEvent& event);
 
