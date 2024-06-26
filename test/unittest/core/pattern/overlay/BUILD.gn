@@ -24,5 +24,6 @@ ace_unittest("overlay_manager_test_ng") {
     "overlay_new_test_ng.cpp",
     "overlay_test_ng.cpp",
     "overlay_test_update.cpp",
+    "sheet_coverage_test_ng.cpp",
   ]
 }
