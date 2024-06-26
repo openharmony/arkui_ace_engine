@@ -28,7 +28,7 @@ export enum ArcButtonStyleMode {
   EMPHASIZED_WARNING
 }
 
-export enum ArcButtonStatus {
+enum ArcButtonStatus {
   NORMAL,
   PRESSED,
   UNAVAILABLE
@@ -41,7 +41,7 @@ export enum ArkButtonClickEffectStyle {
   HEAVY
 }
 
-export interface Margin {
+export interface ArcButtonMargin {
   left: number
   top: number
   right: number
@@ -127,7 +127,7 @@ interface CommonArcButtonOptions {
   /**
    *文字到边框的距离
    */
-  textMargin?: Margin;
+  textMargin?: ArcButtonMargin;
 }
 
 @ObservedV2
@@ -147,7 +147,7 @@ export class ArcButtonOptions {
   @Trace pressedTextColor: Color | string;
   @Trace textStyle: FontStyle;
   @Trace textFamily: string | Resource;
-  @Trace textMargin: Margin;
+  @Trace textMargin: ArcButtonMargin;
   touchCallback?: (event: TouchEvent) => VoidCallback
   onClickEvent?: (event: ClickEvent) => VoidCallback
 
@@ -599,7 +599,8 @@ class CircularCrossPointUtil {
     let secondCircusCenterY = secondCircus.y
 
     // 计算两个圆心之间的距离
-    let distance = Math.sqrt((firstCircusCenterX - secondCircusCenterX)**2 + (firstCircusCenterY - secondCircusCenterY)**2)
+    let distance = Math.sqrt((firstCircusCenterX - secondCircusCenterX)**2 + (firstCircusCenterY -
+      secondCircusCenterY)**2)
 
     // 检查异常情况
     if (distance > firstCircusR + secondCircusR) {

@@ -38,7 +38,7 @@ export var ArcButtonStyleMode;
     ArcButtonStyleMode[ArcButtonStyleMode["NORMAL_DEEP"] = 2] = "NORMAL_DEEP";
     ArcButtonStyleMode[ArcButtonStyleMode["EMPHASIZED_WARNING"] = 3] = "EMPHASIZED_WARNING";
 })(ArcButtonStyleMode || (ArcButtonStyleMode = {}));
-export var ArcButtonStatus;
+var ArcButtonStatus;
 (function (ArcButtonStatus) {
     ArcButtonStatus[ArcButtonStatus["NORMAL"] = 0] = "NORMAL";
     ArcButtonStatus[ArcButtonStatus["PRESSED"] = 1] = "PRESSED";
@@ -584,7 +584,8 @@ class CircularCrossPointUtil {
         let secondCircusCenterX = secondCircus.x;
         let secondCircusCenterY = secondCircus.y;
         // 计算两个圆心之间的距离
-        let distance = Math.sqrt((firstCircusCenterX - secondCircusCenterX) ** 2 + (firstCircusCenterY - secondCircusCenterY) ** 2);
+        let distance = Math.sqrt((firstCircusCenterX - secondCircusCenterX) ** 2 + (firstCircusCenterY -
+            secondCircusCenterY) ** 2);
         // 检查异常情况
         if (distance > firstCircusR + secondCircusR) {
             //两个圆分离，不相交
