@@ -1612,9 +1612,11 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread)
         Layout();
     } else {
         {
-            ACE_SCOPED_TRACE("CreateTaskMeasure[%s][self:%d][parent:%d]", GetTag().c_str(), GetId(),
-                GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0);
-            Measure(GetLayoutConstraint());
+            auto layoutConstraint = GetLayoutConstraint();
+            ACE_SCOPED_TRACE("CreateTaskMeasure[%s][self:%d][parent:%d][layoutConstraint:%s]", GetTag().c_str(),
+                GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0,
+                layoutConstraint.ToString().c_str());
+            Measure(layoutConstraint);
         }
         {
             ACE_SCOPED_TRACE("CreateTaskLayout[%s][self:%d][parent:%d]", GetTag().c_str(), GetId(),
@@ -3347,7 +3349,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 
     if (isConstraintNotChanged_) {
         if (!CheckNeedForceMeasureAndLayout()) {
-            ACE_SCOPED_TRACE("SkipMeasure");
+            ACE_SCOPED_TRACE("SkipMeasure [%s][self:%d]", GetTag().c_str(), GetId());
             layoutAlgorithm_->SetSkipMeasure();
             ACE_LAYOUT_TRACE_END()
             return;

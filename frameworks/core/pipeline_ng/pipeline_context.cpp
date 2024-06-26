@@ -1709,9 +1709,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
             context->safeAreaManager_->UpdateKeyboardOffset(0.0f);
         }
         TAG_LOGI(AceLogTag::ACE_KEYBOARD,
-            "keyboardHeight: %{public}f, positionY: %{public}f, textHeight: %{public}f, final calculate keyboard"
-            "offset is %{public}f",
-            keyboardHeight, positionY, height, context->safeAreaManager_->GetKeyboardOffset());
+            "keyboardHeight: %{public}f, positionY: %{public}f, textHeight: %{public}f, "
+            "rootSize.Height() %{public}f final calculate keyboard offset is %{public}f",
+            keyboardHeight, positionY, height, rootSize.Height(), context->safeAreaManager_->GetKeyboardOffset());
         context->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
         manager->AvoidKeyBoardInNavigation();
         // layout before scrolling textfield to safeArea, because of getting correct position
