@@ -123,8 +123,7 @@ export class Qrcode extends ViewV2 {
         this.initParam("options", (params && "options" in params) ? params.options : undefined);
         this.value = '';
         this.state = QrcodeState.NORMAL;
-        this.initParam("onAction", (params && "onAction" in params) ? params.onAction : () => {
-        });
+        this.initParam("onAction", (params && "onAction" in params) ? params.onAction : undefined);
         this.finalizeConstruction();
     }
     initialRender() {

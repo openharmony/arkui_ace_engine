@@ -160,8 +160,7 @@ export struct Qrcode {
   @Require @Param options: QrcodeOptions;
   @Consumer() value: string = '';
   @Consumer() state: QrcodeState = QrcodeState.NORMAL;
-  @Param onAction?: () => void = () => {
-  };
+  @Require @Param onAction?:VoidCallback;
 
   build() {
     Stack() {
