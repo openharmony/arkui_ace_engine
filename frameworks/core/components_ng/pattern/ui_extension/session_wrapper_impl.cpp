@@ -589,8 +589,13 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
             transaction = transactionController->GetRSTransaction();
         }
         if (transaction) {
-            transaction->SetParentPid(transaction->GetChildPid());
-            transaction->SetChildPid(AceApplicationInfo::GetInstance().GetPid());
+            auto extensionCount = transaction->GetExtensionCount();
+            if (extensionCount == 0) {
+                // Update the pid when encounter the first UIextension.
+                transaction->SetParentPid(transaction->GetChildPid());
+                transaction->SetChildPid(AceApplicationInfo::GetInstance().GetPid());
+            }
+            transaction->SetExtensionCount(++extensionCount);
             if (parentSession) {
                 transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
             }
