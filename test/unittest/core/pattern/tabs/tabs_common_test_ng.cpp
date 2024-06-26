@@ -30,7 +30,11 @@ AssertionResult TabsCommonTestNg::IsEqualNextFocusNode(FocusStep step,
 {
     RefPtr<FocusHub> currentFocusNode = currentNode->GetOrCreateFocusHub();
     currentFocusNode->RequestFocusImmediately();
-    RefPtr<FocusHub> nextFocusNode = pattern_->GetNextFocusNode(step, currentFocusNode).Upgrade();
+    ScopeFocusAlgorithm scopeFocusAlgorithm = pattern_->GetScopeFocusAlgorithm();
+    GetNextFocusNodeFunc getNextFocusNode = scopeFocusAlgorithm.getNextFocusNode;
+    WeakPtr<FocusHub> weakNextFocusNode;
+    getNextFocusNode(step, currentFocusNode, weakNextFocusNode);
+    RefPtr<FocusHub> nextFocusNode = weakNextFocusNode.Upgrade();
     if (expectNextNode == nullptr && nextFocusNode != nullptr) {
         return AssertionFailure() << "Next focusNode is not null";
     }

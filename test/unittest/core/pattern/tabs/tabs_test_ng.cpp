@@ -126,6 +126,7 @@ TabContentModelNG TabsTestNg::CreateTabContent()
 RefPtr<PaintWrapper> TabsTestNg::CreateTabsDone(TabsModelNG model)
 {
     model.Pop();
+    frameNode_->ProcessOffscreenTask();
     return CreateDone();
 }
 
@@ -133,7 +134,7 @@ void TabsTestNg::CreateTabContents(int32_t itemNumber)
 {
     for (int32_t index = 0; index < itemNumber; index++) {
         TabContentModelNG tabContentModel = CreateTabContent();
-        tabContentModel.Pop();
+        ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
 }
@@ -144,7 +145,7 @@ void TabsTestNg::CreateTabContentsWithBuilder(int32_t itemNumber)
         TabContentModelNG tabContentModel = CreateTabContent();
         auto tabBarItemFunc = TabBarItemBuilder();
         tabContentModel.SetTabBar("", "", std::nullopt, std::move(tabBarItemFunc), true);
-        tabContentModel.Pop();
+        ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
 }
@@ -154,8 +155,8 @@ TabBarBuilderFunc TabsTestNg::TabBarItemBuilder()
     return []() {
         ColumnModelNG colModel;
         colModel.Create(Dimension(0), nullptr, "");
-        ViewAbstract::SetWidth(CalcLength(10.f));
-        ViewAbstract::SetHeight(CalcLength(10.f));
+        ViewAbstract::SetWidth(CalcLength(BARITEM_SIZE));
+        ViewAbstract::SetHeight(CalcLength(BARITEM_SIZE));
     };
 }
 
@@ -163,7 +164,8 @@ void TabsTestNg::CreateTabContentTabBarStyle(TabBarStyle tabBarStyle)
 {
     TabContentModelNG tabContentModel = CreateTabContent();
     tabContentModel.SetTabBarStyle(tabBarStyle);
-    tabContentModel.Pop();
+    tabContentModel.SetTabBar("text", "icon", std::nullopt, nullptr, true);
+    ViewStackProcessor::GetInstance()->Pop();
     ViewStackProcessor::GetInstance()->StopGetAccessRecording();
 }
 
@@ -173,7 +175,7 @@ void TabsTestNg::CreateTabContentTabBarStyleWithBuilder(TabBarStyle tabBarStyle)
     tabContentModel.SetTabBarStyle(tabBarStyle);
     auto tabBarItemFunc = TabBarItemBuilder();
     tabContentModel.SetTabBar("", "", std::nullopt, std::move(tabBarItemFunc), true);
-    tabContentModel.Pop();
+    ViewStackProcessor::GetInstance()->Pop();
     ViewStackProcessor::GetInstance()->StopGetAccessRecording();
 }
 
@@ -274,57 +276,21 @@ HWTEST_F(TabsTestNg, TabsPatternGetScopeFocusAlgorithm001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TabContentNodelConvertFlexAlignToString001
- * @tc.desc: Test the ConvertFlexAlignToString function in the TabContentNodel class.
- * @tc.type: FUNC
- */
-HWTEST_F(TabsTestNg, TabContentNodelConvertFlexAlignToString001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(1);
-    CreateTabsDone(model);
-    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
-    auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
-    FlexAlign verticalAlign = FlexAlign::FLEX_START;
-    tabContentFrameNode->ConvertFlexAlignToString(verticalAlign);
-    verticalAlign = FlexAlign::FLEX_END;
-    tabContentFrameNode->ConvertFlexAlignToString(verticalAlign);
-
-    /**
-     * @tc.steps: steps2. ConvertFlexAlignToString.
-     * @tc.expected: steps2. Check the result of ConvertFlexAlignToString.
-     */
-    EXPECT_EQ(tabContentFrameNode->ConvertFlexAlignToString(verticalAlign), "VerticalAlign.Bottom");
-}
-
-/**
- * @tc.name: TabContentNodelConvertLayoutModeToString001
+ * @tc.name: ConvertToString001
  * @tc.desc: Test the ConvertLayoutModeToString function in the TabContentNodel class.
  * @tc.type: FUNC
  */
-HWTEST_F(TabsTestNg, TabContentNodelConvertLayoutModeToString001, TestSize.Level1)
+HWTEST_F(TabsTestNg, ConvertToString001, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
     CreateTabContents(1);
     CreateTabsDone(model);
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
-    auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
-
-    /**
-     * @tc.steps: steps2. Set different values for layoutMode to enter different branches.
-     */
-    LayoutMode layoutMode = LayoutMode::VERTICAL;
-    tabContentFrameNode->ConvertLayoutModeToString(layoutMode);
-    layoutMode = LayoutMode::HORIZONTAL;
-    tabContentFrameNode->ConvertLayoutModeToString(layoutMode);
-    layoutMode = LayoutMode::AUTO;
-    tabContentFrameNode->ConvertLayoutModeToString(layoutMode);
-
-    /**
-     * @tc.steps: steps3. ConvertLayoutModeToString.
-     * @tc.expected: steps3. Check the result of ConvertLayoutModeToString.
-     */
-    EXPECT_EQ(tabContentFrameNode->ConvertLayoutModeToString(layoutMode), "LayoutMode.AUTO");
+    EXPECT_EQ(tabContentFrameNode->ConvertFlexAlignToString(FlexAlign::FLEX_START), "VerticalAlign.Top");
+    EXPECT_EQ(tabContentFrameNode->ConvertFlexAlignToString(FlexAlign::FLEX_END), "VerticalAlign.Bottom");
+    EXPECT_EQ(tabContentFrameNode->ConvertLayoutModeToString(LayoutMode::VERTICAL), "LayoutMode.VERTICAL");
+    EXPECT_EQ(tabContentFrameNode->ConvertLayoutModeToString(LayoutMode::HORIZONTAL), "LayoutMode.HORIZONTAL");
+    EXPECT_EQ(tabContentFrameNode->ConvertLayoutModeToString(LayoutMode::AUTO), "LayoutMode.AUTO");
 }
 
 /**
@@ -335,16 +301,14 @@ HWTEST_F(TabsTestNg, TabContentNodelConvertLayoutModeToString001, TestSize.Level
 HWTEST_F(TabsTestNg, TabsNodeToJsonValue001, TestSize.Level2)
 {
     TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    CreateTabContents(1);
     CreateTabsDone(model);
-    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
-    tabBarPattern_->tabBarStyle_ = TabBarStyle::BOTTOMTABBATSTYLE;
-    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    frameNode_->tabBarId_ = frameNode_->GetTabBarId();
 
     /**
      * @tc.steps: steps2. Create ScrollableBarModeOptions and assign them different values to enter different branches.
      */
+    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
     ScrollableBarModeOptions options;
     options.margin = 0.0_vp;
     options.nonScrollableLayoutStyle = LayoutStyle::ALWAYS_AVERAGE_SPLIT;
@@ -461,7 +425,7 @@ HWTEST_F(TabsTestNg, AddChildToGroup001, TestSize.Level1)
     TabContentModelNG tabContentModel = CreateTabContent();
     LabelStyle labelStyle;
     tabContentModel.SetLabelStyle(labelStyle);
-    tabContentModel.Pop();
+    ViewStackProcessor::GetInstance()->Pop();
     CreateTabsDone(model);
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     frameNode_->AddChildToGroup(tabContentFrameNode, 1);
@@ -488,7 +452,7 @@ HWTEST_F(TabsTestNg, OnDetachFromMainTree001, TestSize.Level1)
     TabContentModelNG tabContentModel = CreateTabContent();
     LabelStyle labelStyle;
     tabContentModel.SetLabelStyle(labelStyle);
-    tabContentModel.Pop();
+    ViewStackProcessor::GetInstance()->Pop();
     CreateTabsDone(model);
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabBarNodeswiper =
@@ -624,34 +588,20 @@ HWTEST_F(TabsTestNg, DumpAdvanceInfo005, TestSize.Level1)
     TabsModelNG model = CreateTabs();
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-
-    /**
-    * @tc.steps: steps1. Set axis_ Axis: HORIZONTAL
-    * @tc.expected: Calling DumpAdvanceInfo() expects HORIZONTAL
-    */
     tabBarPattern_->DumpAdvanceInfo();
-    ASSERT_EQ(tabBarPattern_->axis_, Axis::HORIZONTAL);
-    /**
-    * @tc.steps: steps1. Set axis_ Axis: VERTICAL
-    * @tc.expected: Calling DumpAdvanceInfo() expects VERTICAL
-        */
+    EXPECT_EQ(DumpLog::GetInstance().description_[14], "Axis:HORIZONTAL\n");
+    DumpLog::GetInstance().description_.clear();
     tabBarPattern_->axis_ = Axis::VERTICAL;
     tabBarPattern_->DumpAdvanceInfo();
-    ASSERT_EQ(tabBarPattern_->axis_, Axis::VERTICAL);
-    /**
-    * @tc.steps: steps1. Set axis_ Axis: FREE
-    * @tc.expected: Calling DumpAdvanceInfo() expects FREE
-    */
+    EXPECT_EQ(DumpLog::GetInstance().description_[14], "Axis:VERTICAL\n");
+    DumpLog::GetInstance().description_.clear();
     tabBarPattern_->axis_ = Axis::FREE;
     tabBarPattern_->DumpAdvanceInfo();
-    ASSERT_EQ(tabBarPattern_->axis_, Axis::FREE);
-    /**
-    * @tc.steps: steps1. Set axis_ Axis: NONE
-    * @tc.expected: Calling DumpAdvanceInfo() expects NONE
-    */
+    EXPECT_EQ(DumpLog::GetInstance().description_[14], "Axis:FREE\n");
+    DumpLog::GetInstance().description_.clear();
     tabBarPattern_->axis_ = Axis::NONE;
     tabBarPattern_->DumpAdvanceInfo();
-    ASSERT_EQ(tabBarPattern_->axis_, Axis::NONE);
+    EXPECT_EQ(DumpLog::GetInstance().description_[14], "Axis:NONE\n");
 }
 
 /**
@@ -663,15 +613,10 @@ HWTEST_F(TabsTestNg, ProvideRestoreInfo001, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
     CreateTabContents(TABCONTENT_NUMBER);
-    TabsItemDivider divider;
-    model.SetDivider(divider);
     CreateTabsDone(model);
-    /**
-    * @tc.steps: step1. Calling the ProvideRestoreInfo interface.
-    * @tc.expected: TestTrovoid is not equal to nullpyt.
-    */
-    string testTrovid = tabBarPattern_->ProvideRestoreInfo();
-    ASSERT_TRUE(!testTrovid.empty());
+    EXPECT_EQ(tabBarPattern_->ProvideRestoreInfo(), "{\"Index\":0}");
+    SwipeToWithoutAnimation(1);
+    EXPECT_EQ(tabBarPattern_->ProvideRestoreInfo(), "{\"Index\":1}");
 }
 
 /**
@@ -844,7 +789,6 @@ HWTEST_F(TabsTestNg, CustomAnimationTest001, TestSize.Level1)
     });
     CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    const std::string text_test = "text_test";
 
     tabBarLayoutProperty_->UpdateAxis(Axis::VERTICAL);
     EXPECT_EQ(tabBarLayoutProperty_->GetAxisValue(), Axis::VERTICAL);
@@ -875,11 +819,7 @@ HWTEST_F(TabsTestNg, CustomAnimationTest002, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
     model.SetIsCustomAnimation(false);
-    for (int32_t index = 0; index < 3; index++) {
-        TabContentModelNG tabContentModel;
-        tabContentModel.Create();
-        ViewStackProcessor::GetInstance()->Pop();
-    }
+    CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
     EXPECT_FALSE(swiperPattern_->IsDisableSwipe());
 }
