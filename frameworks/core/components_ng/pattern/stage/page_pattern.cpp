@@ -296,6 +296,7 @@ bool PagePattern::OnBackPressed()
         return true;
     }
     if (isPageInTransition_) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "page is in transition");
         return true;
     }
     // if in page transition, do not set to ON_BACK_PRESS

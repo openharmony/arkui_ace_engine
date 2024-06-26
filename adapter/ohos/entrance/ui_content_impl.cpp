@@ -1504,6 +1504,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             std::make_unique<ContentEventCallback>(
                 [window = window_] {
                     CHECK_NULL_VOID(window);
+                    TAG_LOGI(AceLogTag::ACE_ROUTER, "router back to window");
                     window->PerformBack();
                 },
                 [context = context_](const std::string& address) {

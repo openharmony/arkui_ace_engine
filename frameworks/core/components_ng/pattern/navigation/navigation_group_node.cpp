@@ -310,6 +310,7 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
             result = eventHub->FireOnBackPressedEvent();
         }
         if (result) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation user onBackPress return true");
             return true;
         }
         auto navigation = navigationWeak.Upgrade();
@@ -442,6 +443,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             CHECK_NULL_VOID(preNavDesNode);
             if (preNavDesNode->GetTransitionType() != PageTransitionType::EXIT_POP) {
                 // has another transition, just return
+                TAG_LOGW(AceLogTag::ACE_NAVIGATION, "preNavDesNode has another transition");
                 return;
             }
             auto preNavDesPattern = preNavDesNode->GetPattern<NavDestinationPattern>();
@@ -635,6 +637,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                 CHECK_NULL_VOID(curNavDestination);
                 if (AceType::DynamicCast<NavDestinationGroupNode>(curNode)->GetTransitionType() !=
                     PageTransitionType::ENTER_PUSH) {
+                    TAG_LOGW(AceLogTag::ACE_NAVIGATION, "curNode has another transition");
                     return;
                 }
                 curNode->GetRenderContext()->ClipWithRRect(
@@ -795,6 +798,7 @@ void NavigationGroupNode::TransitionWithReplace(
     option.SetDuration(DEFAULT_REPLACE_DURATION);
     option.SetOnFinishEvent([weakPreNode = WeakPtr<FrameNode>(preNode), weakNavigation = WeakClaim(this),
                                 isNavBar]() {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation replace animation end");
         PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
         auto preNode = weakPreNode.Upgrade();
         CHECK_NULL_VOID(preNode);

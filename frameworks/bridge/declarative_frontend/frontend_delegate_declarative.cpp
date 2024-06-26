@@ -474,6 +474,7 @@ bool FrontendDelegateDeclarative::OnPageBackPress()
         auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
         CHECK_NULL_RETURN(pagePattern, false);
         if (pagePattern->OnBackPressed()) {
+            TAG_LOGI(AceLogTag::ACE_ROUTER, "router user onBackPress return true");
             return true;
         }
         return pageRouterManager_->Pop();
