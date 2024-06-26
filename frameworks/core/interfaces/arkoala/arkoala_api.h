@@ -2186,6 +2186,8 @@ struct ArkUISwiperModifier {
     void (*resetSwiperOnAnimationEnd)(ArkUINodeHandle node);
     void (*setSwiperOnGestureSwipe)(ArkUINodeHandle node, void* callback);
     void (*resetSwiperOnGestureSwipe)(ArkUINodeHandle node);
+    void (*setSwiperOnContentDidScroll)(ArkUINodeHandle node, void* callback);
+    void (*resetSwiperOnContentDidScroll)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperControllerModifier {

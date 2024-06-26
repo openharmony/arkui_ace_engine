@@ -4459,6 +4459,14 @@ void ArkUINativeModule::RegisterSwiperAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetIndicatorInteractive));
     swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIndicatorInteractive"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::ResetIndicatorInteractive));
+    swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSwiperCustomContentTransition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetSwiperCustomContentTransition));
+    swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSwiperCustomContentTransition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::ResetSwiperCustomContentTransition));
+    swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSwiperOnContentDidScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetOnContentDidScroll));
+    swiper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSwiperOnContentDidScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::ResetOnContentDidScroll));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "swiper"), swiper);
 }
 

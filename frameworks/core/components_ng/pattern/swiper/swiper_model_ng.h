@@ -138,6 +138,7 @@ public:
     static int32_t GetIndicatorType(FrameNode* frameNode);
     static RefPtr<SwiperController> GetSwiperController(FrameNode* frameNode);
     static void SetOnContentDidScroll(FrameNode* frameNode, ContentDidScrollEvent&& onContentDidScroll);
+    static void SetCustomContentTransition(FrameNode* frameNode, SwiperContentAnimatedTransition& transition);
     static RefPtr<SwiperController> GetOrCreateSwiperController(FrameNode* frameNode);
 };
 
