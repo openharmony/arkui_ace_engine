@@ -6012,6 +6012,12 @@ void RosenRenderContext::SetOpacity(float opacity)
     rsNode_->SetAlpha(opacity);
 }
 
+void RosenRenderContext::SetOpacityMultiplier(float opacity)
+{
+    CHECK_NULL_VOID(rsNode_);
+    SetAnimatableProperty<Rosen::RSAlphaModifier, float>(alphaModifier_, opacity);
+}
+
 void RosenRenderContext::SetTranslate(float translateX, float translateY, float translateZ)
 {
     CHECK_NULL_VOID(rsNode_);

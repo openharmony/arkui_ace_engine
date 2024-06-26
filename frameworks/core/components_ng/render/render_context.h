@@ -699,6 +699,9 @@ public:
 
     virtual void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) {}
 
+    // The additional opacity will be multiplied with the base opacity.
+    virtual void SetOpacityMultiplier(float opacity) {}
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
