@@ -4400,6 +4400,10 @@ void SwiperPattern::PostIdleTask(const RefPtr<FrameNode>& frameNode)
                 }
                 ACE_SCOPED_TRACE("Swiper cached self index: %d", *it);
                 auto wrapper = frameNode->GetOrCreateChildByIndex(*it, false, true);
+                if (!wrapper) {
+                    cachedItems.erase(it++);
+                    continue;
+                }
                 auto childNode = wrapper->GetHostNode();
                 if (childNode) {
                     childNode->GetGeometryNode()->SetParentLayoutConstraint(pattern->GetLayoutConstraint());
