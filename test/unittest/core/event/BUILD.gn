@@ -37,7 +37,10 @@ ace_unittest("click_event_test_ng") {
 ace_unittest("drag_event_test_ng") {
   type = "new"
   module_output = "events"
-  sources = [ "drag_event_test_ng.cpp" ]
+  sources = [
+    "drag_event_test_ng.cpp",
+    "drag_event_test_ng_property_config.cpp",
+  ]
 }
 
 ace_unittest("event_hub_test_ng") {
@@ -61,7 +64,7 @@ ace_unittest("gesture_event_hub_test_ng") {
   module_output = "events"
   sources = [
     "gesture_event_hub_test_ng.cpp",
-    "gesture_event_hub_test_ng_new.cpp",
+    "gesture_event_hub_test_ng_property_config.cpp",
   ]
 }
 
