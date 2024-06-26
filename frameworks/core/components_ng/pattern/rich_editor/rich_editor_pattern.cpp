@@ -4614,7 +4614,7 @@ void RichEditorPattern::DeleteBackward(int32_t length)
 {
     CHECK_NULL_VOID(length > 0);
     CHECK_NULL_VOID(GetTextContentLength() > 0);
-    CHECK_NULL_VOID(!textSelector.SelectNothing() || caretPosition_ != 0);
+    CHECK_NULL_VOID(!textSelector_.SelectNothing() || caretPosition_ != 0);
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "length=%{public}d", length);
     if (isSpanStringMode_) {
         DeleteBackwardInStyledString(length);
@@ -4689,7 +4689,7 @@ void RichEditorPattern::DeleteForward(int32_t length)
     CHECK_NULL_VOID(length > 0);
     auto contentLength = GetTextContentLength();
     CHECK_NULL_VOID(contentLength > 0);
-    CHECK_NULL_VOID(!textSelector.SelectNothing() || caretPosition_ != contentLength);
+    CHECK_NULL_VOID(!textSelector_.SelectNothing() || caretPosition_ != contentLength);
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "length=%{public}d", length);
     if (isSpanStringMode_) {
         DeleteForwardInStyledString(length);
