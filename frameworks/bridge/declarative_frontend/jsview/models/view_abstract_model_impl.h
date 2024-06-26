@@ -301,6 +301,9 @@ public:
     void SetLightIlluminated(const uint32_t value) override {};
     void SetIlluminatedBorderWidth(const Dimension& value) override {};
     void SetBloom(const float value) override {};
+    void SetPositionLocalizedEdges(bool needLocalized) override {};
+    void SetLocalizedMarkAnchor(bool needLocalized) override {};
+    void SetOffsetLocalizedEdges(bool needLocalized) override {};
 };
 
 } // namespace OHOS::Ace::Framework

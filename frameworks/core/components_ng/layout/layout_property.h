@@ -332,6 +332,40 @@ public:
     bool ConstraintEqual(const std::optional<LayoutConstraintF>& preLayoutConstraint,
         const std::optional<LayoutConstraintF>& preContentConstraint);
 
+    void UpdateNeedPositionLocalizedEdges(bool needPositionLocalizedEdges)
+    {
+        needPositionLocalizedEdges_ = needPositionLocalizedEdges;
+    }
+
+    bool IsPositionLocalizedEdges() const
+    {
+        return needPositionLocalizedEdges_;
+    }
+
+    void UpdatNeedMarkAnchorPosition(bool needMarkAnchorPosition)
+    {
+        needMarkAnchorPosition_ = needMarkAnchorPosition;
+    }
+
+    bool IsMarkAnchorPosition() const
+    {
+        return needMarkAnchorPosition_;
+    }
+
+    void UpdateNeedOffsetLocalizedEdges(bool needOffsetLocalizedEdges)
+    {
+        needOffsetLocalizedEdges_ = needOffsetLocalizedEdges;
+    }
+
+    bool IsOffsetLocalizedEdges() const
+    {
+        return needOffsetLocalizedEdges_;
+    }
+
+    void CheckPositionLocalizedEdges(TextDirection layoutDirection);
+    void CheckMarkAnchorPosition(TextDirection layoutDirection);
+    void CheckOffsetLocalizedEdges(TextDirection layoutDirection);
+
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);
 
@@ -388,6 +422,10 @@ private:
 
     bool heightPercentSensitive_ = false;
     bool widthPercentSensitive_ = false;
+
+    bool needPositionLocalizedEdges_ = false;
+    bool needMarkAnchorPosition_ = false;
+    bool needOffsetLocalizedEdges_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);
 };

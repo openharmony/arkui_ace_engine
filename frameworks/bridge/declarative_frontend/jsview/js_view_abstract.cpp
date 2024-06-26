@@ -549,22 +549,14 @@ bool ParseLocalizedEdges(const JSRef<JSObject>& LocalizeEdgesObj, EdgesParam& ed
     if (startVal->IsObject()) {
         JSRef<JSObject> startObj = JSRef<JSObject>::Cast(startVal);
         ParseJsLengthMetrics(startObj, start);
-        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-            edges.SetRight(start);
-        } else {
-            edges.SetLeft(start);
-        }
+        edges.SetLeft(start);
         useLocalizedEdges = true;
     }
     JSRef<JSVal> endVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::END));
     if (endVal->IsObject()) {
         JSRef<JSObject> endObj = JSRef<JSObject>::Cast(endVal);
         ParseJsLengthMetrics(endObj, end);
-        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-            edges.SetLeft(end);
-        } else {
-            edges.SetRight(end);
-        }
+        edges.SetRight(end);
         useLocalizedEdges = true;
     }
     JSRef<JSVal> topVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP));
@@ -594,11 +586,7 @@ bool ParseMarkAnchorPosition(const JSRef<JSObject>& LocalizeEdgesObj, CalcDimens
     if (startVal->IsObject()) {
         JSRef<JSObject> startObj = JSRef<JSObject>::Cast(startVal);
         ParseJsLengthMetrics(startObj, start);
-        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-            x = -start;
-        } else {
-            x = start;
-        }
+        x = start;
         useMarkAnchorPosition = true;
     }
     JSRef<JSVal> topVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP));
@@ -2341,6 +2329,7 @@ void JSViewAbstract::JsPosition(const JSCallbackInfo& info)
         if (ParseLocationProps(jsObj, x, y)) {
             return ViewAbstractModel::GetInstance()->SetPosition(x, y);
         } else if (ParseLocalizedEdges(jsObj, edges)) {
+            ViewAbstractModel::GetInstance()->SetPositionLocalizedEdges(true);
             return ViewAbstractModel::GetInstance()->SetPositionEdges(edges);
         } else if (ParseLocationPropsEdges(jsObj, edges)) {
             return ViewAbstractModel::GetInstance()->SetPositionEdges(edges);
@@ -2362,6 +2351,7 @@ void JSViewAbstract::JsMarkAnchor(const JSCallbackInfo& info)
     if (jsArg->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsArg);
         if (ParseMarkAnchorPosition(jsObj, x, y)) {
+            ViewAbstractModel::GetInstance()->SetLocalizedMarkAnchor(true);
             return ViewAbstractModel::GetInstance()->MarkAnchor(x, y);
         } else if (ParseLocationProps(jsObj, x, y)) {
             return ViewAbstractModel::GetInstance()->MarkAnchor(x, y);
@@ -2379,6 +2369,7 @@ void JSViewAbstract::JsOffset(const JSCallbackInfo& info)
     if (jsArg->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsArg);
         if (ParseLocalizedEdges(jsObj, edges)) {
+            ViewAbstractModel::GetInstance()->SetOffsetLocalizedEdges(true);
             return ViewAbstractModel::GetInstance()->SetOffsetEdges(edges);
         } else if (ParseLocationProps(jsObj, x, y)) {
             return ViewAbstractModel::GetInstance()->SetOffset(x, y);
