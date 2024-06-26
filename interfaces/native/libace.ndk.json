@@ -1630,5 +1630,9 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_Curve_disposeCurve"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PointerEvent_SetStopPropagation"
     }
 ]

@@ -6353,7 +6353,9 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
             event.touchEvent.historyEvents = nullptr;
             event.touchEvent.historySize = 0;
         }
+        event.touchEvent.stopPropagation = false;
         SendArkUIAsyncEvent(&event);
+        eventInfo.SetStopPropagation(event.touchEvent.stopPropagation);
     };
     ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));
 }
