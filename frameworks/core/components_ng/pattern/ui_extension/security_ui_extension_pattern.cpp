@@ -152,7 +152,8 @@ void SecurityUIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     isKeyAsync_ = want.GetBoolParam(ABILITY_KEY_ASYNC, false);
     PLATFORM_LOGI("The ability KeyAsync %{public}d.", isKeyAsync_);
     MountPlaceholderNode();
-    sessionWrapper_->CreateSession(want, false);
+    SessionConfig config;
+    sessionWrapper_->CreateSession(want, config);
     NotifyForeground();
 }
 
