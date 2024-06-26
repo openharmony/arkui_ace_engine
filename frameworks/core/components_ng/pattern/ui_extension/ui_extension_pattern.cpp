@@ -732,6 +732,10 @@ void UIExtensionPattern::FireOnErrorCallback(int32_t code, const std::string& na
     // 1. As long as the error occurs, the host believes that UIExtensionAbility has been killed.
     UIEXT_LOGD("The state is changing from '%{public}s' to 'NONE'.", ToString(state_));
     state_ = AbilityState::NONE;
+    // Release the session.
+    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
+        sessionWrapper_->DestroySession();
+    }
     if (onErrorCallback_) {
         ContainerScope scope(instanceId_);
         onErrorCallback_(code, name, message);
