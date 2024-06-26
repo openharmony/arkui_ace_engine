@@ -984,28 +984,6 @@ void JSNavigationStack::RecoveryNavigationStack()
     dataSourceObj_->SetPropertyObject("pathArray", pathArray);
 }
 
-bool JSNavigationStack::NeedBuildNewInstance(int32_t index)
-{
-    auto pathInfo = GetJsPathInfo(index);
-    if (pathInfo->IsEmpty()) {
-        return false;
-    }
-    auto needBuildNewInstance = pathInfo->GetProperty("needBuildNewInstance");
-    if (!needBuildNewInstance->IsBoolean()) {
-        return false;
-    }
-    return needBuildNewInstance->ToBoolean();
-}
-
-void JSNavigationStack::SetNeedBuildNewInstance(int32_t index, bool need)
-{
-    auto pathInfo = GetJsPathInfo(index);
-    if (pathInfo->IsEmpty()) {
-        return;
-    }
-    pathInfo->SetProperty<bool>("needBuildNewInstance", need);
-}
-
 JSRef<JSArray> JSNavigationStack::GetJsPathArray()
 {
     if (dataSourceObj_->IsEmpty()) {

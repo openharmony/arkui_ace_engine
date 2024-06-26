@@ -1992,7 +1992,6 @@ class NavPathInfo {
     this.onPop = onPop;
     this.index = -1;
     this.needUpdate = false;
-    this.needBuildNewInstance = false;
   }
 }
 
@@ -2039,11 +2038,10 @@ class NavPathStack {
     for (let i = this.popArray.length - 1; i >= 0; i--) {
       if (name === this.popArray[i].name) {
         let info = this.popArray.splice(i, 1);
-        this.pathArray[this.pathArray.length - 1].index = info[0].index;
-        return;
+        return info[0].index;
       }
     }
-    this.pathArray[this.pathArray.length - 1].index = -1; // add new navdestination
+    return -1; // add new navdestination
   }
   setNativeStack(stack) {
     this.nativeStack = stack;
@@ -2058,8 +2056,9 @@ class NavPathStack {
     return this.parentStack;
   }
   pushName(name, param) {
-    this.pathArray.push(new NavPathInfo(name, param));
-    this.findInPopArray(name);
+    let info = new NavPathInfo(name, param);
+    info.index = this.findInPopArray(name);
+    this.pathArray.push(info);
     this.isReplace = 0;
     this.nativeStack?.onStateChanged();
   }
@@ -2067,12 +2066,14 @@ class NavPathStack {
     this.pushPath(info, animated);
   }
   pushPathByName(name, param, onPop, animated) {
+    let info = undefined;
     if (onPop === undefined || typeof onPop === 'boolean') {
-      this.pathArray.push(new NavPathInfo(name, param));
+      info = new NavPathInfo(name, param);
     } else {
-      this.pathArray.push(new NavPathInfo(name, param, onPop));
+      info = new NavPathInfo(name, param, onPop);
     }
-    this.findInPopArray(name);
+    info.index = this.findInPopArray(name);
+    this.pathArray.push(info);
     this.isReplace = 0;
     if (typeof onPop === 'boolean') {
       this.animated = onPop;
@@ -2090,7 +2091,6 @@ class NavPathStack {
     } else {
       info = new NavPathInfo(name, param, onPop);
     }
-    this.pathArray.push(info);
     this.isReplace = 0;
     if (typeof onPop === 'boolean') {
       this.animated = onPop;
@@ -2102,12 +2102,12 @@ class NavPathStack {
 
     let promise = this.nativeStack?.onPushDestination(info);
     if (!promise) {
-      this.pathArray.pop();
       return new Promise((resolve, reject) => {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
-    this.findInPopArray(name);
+    info.index = this.findInPopArray(name);
+    this.pathArray.push(info);
     this.nativeStack?.onStateChanged();
     return promise;
   }
@@ -2147,9 +2147,6 @@ class NavPathStack {
         return [true, promise];
       }
     }
-    if (launchMode === LaunchMode.NEW_INSTANCE) {
-      info.needBuildNewInstance = true;
-    }
     return [false, null];
   }
   pushPath(info, optionParam) {
@@ -2158,9 +2155,8 @@ class NavPathStack {
     if (ret) {
       return;
     }
+    info.index = launchMode === LaunchMode.NEW_INSTANCE ? -1 : this.findInPopArray(info.name);
     this.pathArray.push(info);
-    let name = this.pathArray[this.pathArray.length - 1].name;
-    this.findInPopArray(name);
     this.isReplace = 0;
     this.animated = animated;
     this.nativeStack?.onStateChanged();
@@ -2171,18 +2167,16 @@ class NavPathStack {
     if (ret) {
       return promiseRet;
     }
-    this.pathArray.push(info);
     this.isReplace = 0;
     this.animated = animated;
     let promise = this.nativeStack?.onPushDestination(info);
     if (!promise) {
-      this.pathArray.pop();
       return new Promise((resolve, reject) => {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
-    let name = this.pathArray[this.pathArray.length - 1].name;
-    this.findInPopArray(name);
+    info.index = launchMode === LaunchMode.NEW_INSTANCE ? -1 : this.findInPopArray(info.name);
+    this.pathArray.push(info);
     this.nativeStack?.onStateChanged();
     return promise;
   }
@@ -2205,9 +2199,6 @@ class NavPathStack {
           this.pathArray.push(targetInfo[0]);
         }
       }
-    }
-    if (launchMode === LaunchMode.NEW_INSTANCE) {
-      info.needBuildNewInstance = true;
     }
     if (index === -1) {
       if (this.pathArray.length !== 0) {

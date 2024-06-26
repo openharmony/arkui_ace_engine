@@ -163,14 +163,14 @@ public:
         return navDestinationPathInfo_;
     }
 
-    void SetNeedRemoveInNewInstance(bool need)
+    void SetNeedRemoveInPush(bool need)
     {
-        needRemoveInNewInstance_ = need;
+        needRemoveInPush_ = need;
     }
 
-    bool NeedRemoveInNewInstance() const
+    bool NeedRemoveInPush() const
     {
-        return needRemoveInNewInstance_;
+        return needRemoveInPush_;
     }
 
 private:
@@ -186,7 +186,7 @@ private:
     bool canReused_ = true;
     std::string navDestinationPathInfo_;
     std::string navDestinationModuleName_;
-    bool needRemoveInNewInstance_ = false;
+    bool needRemoveInPush_ = false;
 };
 
 } // namespace OHOS::Ace::NG
