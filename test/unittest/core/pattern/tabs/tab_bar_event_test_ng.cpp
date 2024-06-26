@@ -374,7 +374,6 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleSubTabBarClick002, TestSize.Level
     int32_t index = 1;
     SizeF size(0.1f, 0.2f);
     tabBarNode_->GetGeometryNode()->SetFrameSize(size);
-    tabBarPattern_->SetChildrenMainSize(0.3f);
     auto swiperFrameNode = AceType::DynamicCast<FrameNode>(frameNode_->GetTabs());
     auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
     swiperPattern->currentIndex_ = 0;
@@ -395,8 +394,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleSubTabBarClick002, TestSize.Level
     auto childGeometryNode1 = childFrameNode1->GetGeometryNode();
     auto childFrameSize1 = childGeometryNode1->GetMarginFrameSize();
     childFrameSize1.SetMainSize(0.1f, Axis::HORIZONTAL);
-    OffsetF c1(0.1f, 0.2f);
-    tabBarPattern_->tabItemOffsets_.emplace_back(c1);
+    tabBarPattern_->visibleItemPosition_[0] = { 0.1f, 0.2f };
 
     /**
      * @tc.steps: step2. Test function HandleSubTabBarClick.
@@ -536,7 +534,8 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchEvent003, TestSize.Level1)
     TouchLocationInfo touchLocationInfo(1);
     touchLocationInfo.SetTouchType(TouchType::DOWN);
     touchLocationInfo.SetLocalLocation(Offset(0.f, 0.f));
-    tabBarPattern_->tabItemOffsets_ = { { -1.0f, -1.0f }, { 1.0f, 1.0f }, { 2.0f, 2.0f } };
+    tabBarPattern_->visibleItemPosition_[0] = { -1.0f, 1.0f };
+    tabBarPattern_->visibleItemPosition_[1] = { 1.0f, 2.0f };
     for (int i = 0; i <= 1; i++) {
         tabBarPattern_->HandleTouchEvent(touchLocationInfo);
         tabBarPattern_->tabBarType_.clear();
@@ -560,46 +559,33 @@ HWTEST_F(TabBarEventTestNg, TabBarLayoutAlgorithmHandleAlwaysAverageSplitLayoutS
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty());
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabbarLayoutAlgorithm));
-    auto frameSize = SizeF(20.0f, 20.0f);
-    int32_t childCount = 2;
-    tabbarLayoutAlgorithm->childrenMainSize_ = 10000.0f;
-    tabbarLayoutAlgorithm->scrollMargin_ = 10000.0f;
-    tabbarLayoutAlgorithm->itemWidths_.clear();
-    tabbarLayoutAlgorithm->itemWidths_.emplace_back(0.0f);
-    tabbarLayoutAlgorithm->itemWidths_.emplace_back(0.0f);
-    tabbarLayoutAlgorithm->itemWidths_.emplace_back(0.0f);
-    tabbarLayoutAlgorithm->HandleAlwaysAverageSplitLayoutStyle(&layoutWrapper, frameSize, childCount);
+    tabbarLayoutAlgorithm->childCount_ = 2;
+    tabbarLayoutAlgorithm->contentMainSize_ = TABS_WIDTH;
 
     /**
      * @tc.steps: steps2. HandleAlwaysAverageSplitLayoutStyle.
      * @tc.expected: steps2. Check itemWidths after HandleAlwaysAverageSplitLayoutStyle by using different itemWidths.
      */
-    frameSize = SizeF(0.0f, 0.0f);
-    tabbarLayoutAlgorithm->childrenMainSize_ = 0.0f;
-    tabbarLayoutAlgorithm->itemWidths_.clear();
+    float itemWidth1 = 400.0f;
+    tabbarLayoutAlgorithm->visibleItemLength_.clear();
+    tabbarLayoutAlgorithm->visibleItemLength_[0] = itemWidth1;
+    tabbarLayoutAlgorithm->visibleItemLength_[1] = itemWidth1;
+    tabbarLayoutAlgorithm->HandleAlwaysAverageSplitLayoutStyle(&layoutWrapper);
+    EXPECT_EQ(tabbarLayoutAlgorithm->visibleItemLength_[0], itemWidth1);
+    EXPECT_EQ(tabbarLayoutAlgorithm->visibleItemLength_[1], itemWidth1);
 
-    float itemWidth = 1000.0f;
-    tabbarLayoutAlgorithm->itemWidths_.emplace_back(itemWidth);
-    tabbarLayoutAlgorithm->itemWidths_.emplace_back(itemWidth);
-    tabbarLayoutAlgorithm->HandleAlwaysAverageSplitLayoutStyle(&layoutWrapper, frameSize, childCount);
-    EXPECT_EQ(tabbarLayoutAlgorithm->itemWidths_[0], itemWidth);
-    EXPECT_EQ(tabbarLayoutAlgorithm->itemWidths_[1], itemWidth);
+    float itemWidth2 = 300.0f;
+    tabbarLayoutAlgorithm->visibleItemLength_[0] = itemWidth2;
+    tabbarLayoutAlgorithm->visibleItemLength_[1] = itemWidth2;
+    tabbarLayoutAlgorithm->HandleAlwaysAverageSplitLayoutStyle(&layoutWrapper);
+    EXPECT_EQ(tabbarLayoutAlgorithm->visibleItemLength_[0], TABS_WIDTH / tabbarLayoutAlgorithm->childCount_);
+    EXPECT_EQ(tabbarLayoutAlgorithm->visibleItemLength_[1], TABS_WIDTH / tabbarLayoutAlgorithm->childCount_);
 
-    itemWidth = 10.0f;
-    tabbarLayoutAlgorithm->itemWidths_.clear();
-    tabbarLayoutAlgorithm->itemWidths_.emplace_back(itemWidth);
-    tabbarLayoutAlgorithm->itemWidths_.emplace_back(itemWidth);
-    tabbarLayoutAlgorithm->HandleAlwaysAverageSplitLayoutStyle(&layoutWrapper, frameSize, childCount);
-    EXPECT_EQ(tabbarLayoutAlgorithm->itemWidths_[0], itemWidth);
-    EXPECT_EQ(tabbarLayoutAlgorithm->itemWidths_[1], itemWidth);
-
-    itemWidth = 0.0f;
-    tabbarLayoutAlgorithm->itemWidths_.clear();
-    tabbarLayoutAlgorithm->itemWidths_.emplace_back(itemWidth);
-    tabbarLayoutAlgorithm->itemWidths_.emplace_back(itemWidth);
-    tabbarLayoutAlgorithm->HandleAlwaysAverageSplitLayoutStyle(&layoutWrapper, frameSize, childCount);
-    EXPECT_EQ(tabbarLayoutAlgorithm->itemWidths_[0], itemWidth);
-    EXPECT_EQ(tabbarLayoutAlgorithm->itemWidths_[1], itemWidth);
+    tabbarLayoutAlgorithm->visibleItemLength_[0] = itemWidth1;
+    tabbarLayoutAlgorithm->visibleItemLength_[1] = itemWidth2;
+    tabbarLayoutAlgorithm->HandleAlwaysAverageSplitLayoutStyle(&layoutWrapper);
+    EXPECT_EQ(tabbarLayoutAlgorithm->visibleItemLength_[0], itemWidth1);
+    EXPECT_EQ(tabbarLayoutAlgorithm->visibleItemLength_[1], TABS_WIDTH - itemWidth1);
 }
 
 /**
@@ -620,7 +606,7 @@ HWTEST_F(TabBarEventTestNg, TabBarLayoutAlgorithmHandleSpaceBetweenOrCenterLayou
     auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
     childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
     auto layoutProperty = tabBarLayoutProperty_;
-    int32_t childCount = 2;
+    tabbarLayoutAlgorithm->childCount_ = 2;
 
     /**
      * @tc.steps: steps2. Create two children for layoutWrapper.
@@ -657,53 +643,17 @@ HWTEST_F(TabBarEventTestNg, TabBarLayoutAlgorithmHandleSpaceBetweenOrCenterLayou
     /**
      * @tc.steps: steps4.  Create different conditions for entering a branch for HandleSpaceBetweenOrCenterLayoutStyle.
      */
-    tabbarLayoutAlgorithm->childrenMainSize_ = 100000.0f;
-    auto frameSize = SizeF(150.0f, 150.0f);
-    tabbarLayoutAlgorithm->HandleSpaceBetweenOrCenterLayoutStyle(&layoutWrapper, frameSize, childCount);
-    tabbarLayoutAlgorithm->itemWidths_.clear();
-    tabbarLayoutAlgorithm->itemWidths_.emplace_back(0.0f);
-    tabbarLayoutAlgorithm->itemWidths_.emplace_back(2.0f);
-    tabbarLayoutAlgorithm->childrenMainSize_ = 149.5f;
-    tabbarLayoutAlgorithm->scrollMargin_ = 1.0f;
-    tabbarLayoutAlgorithm->HandleSpaceBetweenOrCenterLayoutStyle(&layoutWrapper, frameSize, childCount);
-    tabbarLayoutAlgorithm->childrenMainSize_ = 10.0f;
-    tabbarLayoutAlgorithm->scrollMargin_ = 2.0f;
-    tabbarLayoutAlgorithm->HandleSpaceBetweenOrCenterLayoutStyle(&layoutWrapper, frameSize, childCount);
+    tabbarLayoutAlgorithm->visibleChildrenMainSize_ = 100000.0f;
+    tabbarLayoutAlgorithm->contentMainSize_ = TABS_WIDTH;
+    tabbarLayoutAlgorithm->HandleSpaceBetweenOrCenterLayoutStyle(&layoutWrapper);
+    EXPECT_FALSE(tabbarLayoutAlgorithm->useItemWidth_);
 
-    /**
-     * @tc.steps: steps5. HandleSpaceBetweenOrCenterLayoutStyle.
-     * @tc.expected: steps5. Check the result of childrenMainSize.
-     */
-    EXPECT_EQ(tabbarLayoutAlgorithm->childrenMainSize_, 6.0f);
-}
-
-/**
- * @tc.name: TabBarLayoutAlgorithmHandleAlwaysAverageSplitLayoutStyle002
- * @tc.desc: Test the HandleAlwaysAverageSplitLayoutStyle function in the TabBarLayoutAlgorithm class.
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarEventTestNg, TabBarLayoutAlgorithmHandleAlwaysAverageSplitLayoutStyle002, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    auto tabbarLayoutAlgorithm =
-        AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty());
-    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabbarLayoutAlgorithm));
-    auto frameSize = SizeF(3000.0f, 3000.0f);
-    tabbarLayoutAlgorithm->scrollMargin_ = 0.0f;
-    int32_t childCount = 1;
-
-    /**
-     * @tc.steps: steps2. HandleAlwaysAverageSplitLayoutStyle.
-     * @tc.expected: steps2. Check itemWidths in CalculateItemWidthsForSymmetricExtensible Value of.
-     */
-    tabbarLayoutAlgorithm->childrenMainSize_ = 0.0f;
-    tabbarLayoutAlgorithm->itemWidths_.clear();
-    tabbarLayoutAlgorithm->itemWidths_.emplace_back(0.0f);
-    tabbarLayoutAlgorithm->HandleAlwaysAverageSplitLayoutStyle(&layoutWrapper, frameSize, childCount);
-    EXPECT_EQ(tabbarLayoutAlgorithm->itemWidths_[0], 3000.0f);
+    tabbarLayoutAlgorithm->visibleItemLength_.clear();
+    tabbarLayoutAlgorithm->visibleItemLength_[0] = 0.0f;
+    tabbarLayoutAlgorithm->visibleItemLength_[1] = 2.0f;
+    tabbarLayoutAlgorithm->visibleChildrenMainSize_ = 2.0f;
+    tabbarLayoutAlgorithm->HandleSpaceBetweenOrCenterLayoutStyle(&layoutWrapper);
+    EXPECT_EQ(tabbarLayoutAlgorithm->visibleItemLength_[0], 179.0f);
+    EXPECT_EQ(tabbarLayoutAlgorithm->visibleItemLength_[1], 181.0f);
 }
 } // namespace OHOS::Ace::NG

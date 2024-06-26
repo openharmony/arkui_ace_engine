@@ -76,7 +76,9 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmLayoutMask001, TestSize.Level1
     auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
     tabBarLayoutProperty_->UpdateSelectedMask(0);
     tabBarLayoutProperty_->UpdateUnselectedMask(1);
-    std::vector<OffsetF> childOffsetDelta = { OffsetF(), OffsetF() };
+    std::map<int32_t, OffsetF> childOffsetDelta;
+    childOffsetDelta[0] = OffsetF();
+    childOffsetDelta[1] = OffsetF();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarLayoutProperty_);
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabBarLayoutAlgorithm));
@@ -165,7 +167,9 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmLayoutMask004, TestSize.Level1
     auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
     tabBarLayoutProperty_->UpdateSelectedMask(0);
     tabBarLayoutProperty_->UpdateUnselectedMask(1);
-    std::vector<OffsetF> childOffsetDelta = { OffsetF(), OffsetF() };
+    std::map<int32_t, OffsetF> childOffsetDelta;
+    childOffsetDelta[0] = OffsetF();
+    childOffsetDelta[1] = OffsetF();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarLayoutProperty_);
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabBarLayoutAlgorithm));
@@ -294,124 +298,6 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmApplyBarGridAlign001, TestSize
 }
 
 /**
- * @tc.name: TabBarLayoutAlgorithmConfigHorizontal001
- * @tc.desc: Test the ConfigHorizontal function in the TabBarLayoutAlgorithm class.
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmConfigHorizontal001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    auto tabbarLayoutAlgorithm =
-        AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarNode_->GetPattern<TabBarPattern>()->CreateLayoutAlgorithm());
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty());
-    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabbarLayoutAlgorithm));
-    auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper.GetLayoutProperty());
-
-    /**
-     * @tc.steps: steps2. Create different input parameters.
-     */
-    layoutProperty->UpdateTabBarMode(TabBarMode::FIXED);
-    int32_t childCount = 0;
-    BarGridColumnOptions option;
-    option.lg = 2;
-    tabBarLayoutProperty_->UpdateBarGridAlign(option);
-    auto frameSize = SizeF(1000.0f, 1000.0f);
-
-    /**
-     * @tc.steps: steps3. ConfigHorizontal.
-     * @tc.expected: steps3. Check the results of ConfigHorizontal under different conditions.
-     */
-    tabbarLayoutAlgorithm->ConfigHorizontal(&layoutWrapper, frameSize, childCount);
-    childCount = 1;
-    layoutProperty->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    ScrollableBarModeOptions options;
-    options.margin = 0.0_vp;
-    options.nonScrollableLayoutStyle = LayoutStyle::ALWAYS_AVERAGE_SPLIT;
-    tabBarLayoutProperty_->UpdateScrollableBarModeOptions(options);
-    tabbarLayoutAlgorithm->ConfigHorizontal(&layoutWrapper, frameSize, childCount);
-    options.nonScrollableLayoutStyle = LayoutStyle::SPACE_BETWEEN_OR_CENTER;
-    tabBarLayoutProperty_->UpdateScrollableBarModeOptions(options);
-    tabbarLayoutAlgorithm->ConfigHorizontal(&layoutWrapper, frameSize, childCount);
-    options.nonScrollableLayoutStyle = LayoutStyle::ALWAYS_CENTER;
-    tabBarLayoutProperty_->UpdateScrollableBarModeOptions(options);
-    tabbarLayoutAlgorithm->childrenMainSize_ = 0.0f;
-    tabbarLayoutAlgorithm->ConfigHorizontal(&layoutWrapper, frameSize, childCount);
-    layoutProperty->UpdateBarAdaptiveHeight(true);
-    tabbarLayoutAlgorithm->ConfigHorizontal(&layoutWrapper, frameSize, childCount);
-    EXPECT_EQ(tabbarLayoutAlgorithm->scrollMargin_, 0.0f);
-}
-
-/**
- * @tc.name: TabBarLayoutAlgorithmMeasureItemWidths001
- * @tc.desc: Test the MeasureItemWidths function in the TabBarLayoutAlgorithm class.
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureItemWidths001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    auto tabbarLayoutAlgorithm =
-        AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarNode_->GetPattern<TabBarPattern>()->CreateLayoutAlgorithm());
-
-    /**
-     * @tc.steps: steps2. Create a child for layoutWrapper.
-     */
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty());
-    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabbarLayoutAlgorithm));
-    auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper.GetLayoutProperty());
-    auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
-    childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
-    auto columnNode =
-        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> columnLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(columnNode, geometryNode2, columnNode->GetLayoutProperty());
-    columnLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
-    columnLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
-    layoutWrapper.AppendChild(columnLayoutWrapper);
-
-    /**
-     * @tc.steps: steps3. Create a first child named imageLayoutWrapper for columnLayoutWrapper.
-     */
-    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    RefPtr<GeometryNode> geometryNode5 = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> imageLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(imageNode, geometryNode5, imageNode->GetLayoutProperty());
-    auto imageLayoutProperty = AceType::DynamicCast<ImageLayoutProperty>(imageLayoutWrapper->GetLayoutProperty());
-    columnLayoutWrapper->AppendChild(imageLayoutWrapper);
-
-    /**
-     * @tc.steps: steps4. Create a second child named textLayoutWrapper for columnLayoutWrapper.
-     */
-    auto linearLayoutProperty = AceType::DynamicCast<LinearLayoutProperty>(columnLayoutWrapper->GetLayoutProperty());
-    auto textId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, textId, AceType::MakeRefPtr<TextPattern>());
-    RefPtr<GeometryNode> geometryNode4 = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> textLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(textNode, geometryNode4, textNode->GetLayoutProperty());
-    columnLayoutWrapper->AppendChild(textLayoutWrapper);
-    int32_t childCount = 3;
-    tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 0);
-    tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 1);
-    tabbarLayoutAlgorithm->scrollMargin_ = 0.0f;
-
-    /**
-     * @tc.steps: steps5.MeasureItemWidths.
-     * @tc.expected: steps5. Testing childrenMainSize under MeasureItemWidths Value of.
-     */
-    tabbarLayoutAlgorithm->MeasureItemWidths(&layoutWrapper, childCount);
-    EXPECT_EQ(tabbarLayoutAlgorithm->childrenMainSize_, 0.0f);
-}
-
-/**
  * @tc.name: TabBarLayoutAlgorithmMeasureMaxHeight001
  * @tc.desc: Test the MeasureMaxHeight function in the TabBarLayoutAlgorithm class.
  * @tc.type: FUNC
@@ -432,11 +318,11 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureMaxHeight001, TestSize.
     tabbarLayoutAlgorithm->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
 
     /**
-     * @tc.steps: steps2. Set itemWidths_ Clear and reassign and
+     * @tc.steps: steps2. Set visibleItemLength_ Clear and reassign and
      *                    Create two children named columnLayoutWrapper using a loop for layoutWrapper.
      */
-    tabbarLayoutAlgorithm->itemWidths_.clear();
-    tabbarLayoutAlgorithm->itemWidths_.emplace_back(10.0f);
+    tabbarLayoutAlgorithm->visibleItemLength_.clear();
+    tabbarLayoutAlgorithm->visibleItemLength_[0] = 10.0f;
     for (int32_t i = 0; i < 2; i++) {
         auto columnNode =
             FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -454,10 +340,9 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureMaxHeight001, TestSize.
      * @tc.steps: steps3.MeasureMaxHeight.
      * @tc.expected: steps3. Test itemWidths under MeasureMaxHeight Value of.
      */
-    int32_t childCount = 2;
-    tabbarLayoutAlgorithm->itemWidths_.emplace_back(2.0f);
-    tabbarLayoutAlgorithm->MeasureMaxHeight(&layoutWrapper, childCount);
-    EXPECT_EQ(tabbarLayoutAlgorithm->itemWidths_[0], 10.0f);
+    tabbarLayoutAlgorithm->visibleItemLength_[1] = 2.0f;
+    tabbarLayoutAlgorithm->MeasureMaxHeight(&layoutWrapper, childLayoutConstraint);
+    EXPECT_EQ(tabbarLayoutAlgorithm->visibleItemLength_[0], 10.0f);
 }
 
 /**
@@ -516,7 +401,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmApplyLayoutMode001, TestSize.L
         columnLayoutWrapper->AppendChild(textLayoutWrapper);
     }
     float allocatedWidth = 0.0f;
-    int32_t childCount = 2;
+    tabbarLayoutAlgorithm->childCount_ = 2;
 
     /**
      * @tc.steps: steps4. ApplyLayoutMode.
@@ -525,14 +410,14 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmApplyLayoutMode001, TestSize.L
     bottomTabBarStyle.layoutMode = LayoutMode::VERTICAL;
     tabBarPattern_->SetBottomTabBarStyle(bottomTabBarStyle, 0);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 0);
-    tabbarLayoutAlgorithm->ApplyLayoutMode(&layoutWrapper, allocatedWidth, childCount);
+    tabbarLayoutAlgorithm->ApplyLayoutMode(&layoutWrapper, allocatedWidth);
     bottomTabBarStyle.layoutMode = LayoutMode::AUTO;
     tabBarPattern_->SetBottomTabBarStyle(bottomTabBarStyle, 0);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 0);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 1);
-    tabbarLayoutAlgorithm->ApplyLayoutMode(&layoutWrapper, allocatedWidth, childCount);
+    tabbarLayoutAlgorithm->ApplyLayoutMode(&layoutWrapper, allocatedWidth);
     allocatedWidth = 200000.0f;
-    tabbarLayoutAlgorithm->ApplyLayoutMode(&layoutWrapper, allocatedWidth, childCount);
+    tabbarLayoutAlgorithm->ApplyLayoutMode(&layoutWrapper, allocatedWidth);
     EXPECT_FALSE(linearLayoutProperty->IsVertical());
 }
 
@@ -549,66 +434,113 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmLayoutChildren001, TestSize.Le
     auto tabbarLayoutAlgorithm =
         AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-
-    /**
-     * @tc.steps: steps2. Create padding and assign initial values to it.
-     */
-    PaddingProperty padding;
-    padding.left = CalcLength(200.0_vp);
-    padding.right = CalcLength(200.0_vp);
-    padding.top = CalcLength(200.0_vp);
-    padding.bottom = CalcLength(200.0_vp);
-    tabBarLayoutProperty_->UpdatePadding(padding);
-    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty());
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabbarLayoutAlgorithm));
-    layoutWrapper.currentChildCount_ = 5;
-    auto frameSize = SizeF(0.0f, 0.0f);
-    auto axis = Axis::HORIZONTAL;
-    tabbarLayoutAlgorithm->childrenMainSize_ = 10000.0f;
-    OffsetF childOffset(0.0f, 0.0f);
-    tabbarLayoutAlgorithm->LayoutChildren(&layoutWrapper, frameSize, axis, childOffset);
+
+    for (int32_t i = 0; i < 2; i++) {
+        auto columnNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+            RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
+        RefPtr<LayoutWrapperNode> columnLayoutWrapper =
+            AceType::MakeRefPtr<LayoutWrapperNode>(columnNode, geometryNode2, columnNode->GetLayoutProperty());
+        columnLayoutWrapper->GetGeometryNode()->SetFrameSize(FIRST_ITEM_SIZE);
+        layoutWrapper.AppendChild(columnLayoutWrapper);
+    }
 
     /**
-     * @tc.steps: steps3. LayoutChildren.
-     * @tc.expected: steps3. Verify childrenMainSize under LayoutChildren Value of.
+     * @tc.steps: steps2. LayoutChildren.
+     * @tc.expected: steps2. Verify childOffset under LayoutChildren Value of.
      */
-    EXPECT_EQ(tabbarLayoutAlgorithm->tabItemOffset_[0].GetX(), childOffset.GetX());
-    EXPECT_EQ(tabbarLayoutAlgorithm->tabItemOffset_[0].GetY(), childOffset.GetY());
+    tabbarLayoutAlgorithm->axis_ = Axis::HORIZONTAL;
+    tabbarLayoutAlgorithm->visibleItemPosition_[0] = { 0.0f, FIRST_ITEM_WIDTH };
+    tabbarLayoutAlgorithm->visibleItemPosition_[1] = { FIRST_ITEM_WIDTH, FIRST_ITEM_WIDTH * 2 };
+    auto frameSize = SizeF(0.0f, 0.0f);
+
+    OffsetF childOffset(0.0f, 0.0f);
+    tabbarLayoutAlgorithm->LayoutChildren(&layoutWrapper, frameSize, childOffset);
+    EXPECT_EQ(childOffset.GetX(), FIRST_ITEM_WIDTH * 2);
 }
 
 /**
- * @tc.name: TabBarLayoutAlgorithmGetContentWidth001
- * @tc.desc: Test the GetContentWidth function in the TabBarLayoutAlgorithm class.
+ * @tc.name: TabBarLayoutAlgorithmLayoutChildren002
+ * @tc.desc: Test the LayoutChildren function in the TabBarLayoutAlgorithm class.
  * @tc.type: FUNC
  */
-HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmGetContentWidth001, TestSize.Level1)
+HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmLayoutChildren002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    auto tabbarLayoutAlgorithm =
+        AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty());
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabbarLayoutAlgorithm));
+
+    for (int32_t i = 0; i < 2; i++) {
+        auto columnNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+            RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
+        RefPtr<LayoutWrapperNode> columnLayoutWrapper =
+            AceType::MakeRefPtr<LayoutWrapperNode>(columnNode, geometryNode2, columnNode->GetLayoutProperty());
+        columnLayoutWrapper->GetGeometryNode()->SetFrameSize(FIRST_ITEM_SIZE);
+        layoutWrapper.AppendChild(columnLayoutWrapper);
+    }
+
+    /**
+     * @tc.steps: steps2. LayoutChildren.
+     * @tc.expected: steps2. Verify childOffset under LayoutChildren Value of.
+     */
+    tabbarLayoutAlgorithm->axis_ = Axis::HORIZONTAL;
+    tabbarLayoutAlgorithm->isRTL_ = true;
+    tabbarLayoutAlgorithm->visibleItemPosition_[0] = { 0.0f, FIRST_ITEM_WIDTH };
+    tabbarLayoutAlgorithm->visibleItemPosition_[1] = { FIRST_ITEM_WIDTH, FIRST_ITEM_WIDTH * 2 };
+    auto frameSize = SizeF(0.0f, 0.0f);
+    OffsetF childOffset(FIRST_ITEM_WIDTH * 2, 0.0f);
+    tabbarLayoutAlgorithm->LayoutChildren(&layoutWrapper, frameSize, childOffset);
+    EXPECT_EQ(childOffset.GetX(), 0.0f);
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmGetContentMainSize001
+ * @tc.desc: Test the GetContentMainSize function in the TabBarLayoutAlgorithm class.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmGetContentMainSize001, TestSize.Level1)
 {
     TabsModelNG model = CreateTabs();
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
     tabBarPattern_->tabBarStyle_ = TabBarStyle::BOTTOMTABBATSTYLE;
-    auto tabbarLayoutAlgorithm =
+    auto tabBarLayoutAlgorithm =
         AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
-    auto layoutProperty = tabBarLayoutProperty_;
-    auto frameSize = SizeF(0.0f, 0.0f);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty());
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabBarLayoutAlgorithm));
+    auto frameSize = SizeF(1200.0f, 1200.0f);
 
     /**
-     * @tc.steps: steps2. Create padding and assign initial values to it.
+     * @tc.steps: steps2. Create padding by UpdateBarGridAlign.
      */
-    PaddingProperty padding;
-    padding.left = CalcLength(200.0_vp);
-    padding.right = CalcLength(200.0_vp);
-    padding.top = CalcLength(200.0_vp);
-    padding.bottom = CalcLength(200.0_vp);
+    BarGridColumnOptions option;
+    option.lg = 2;
+    tabBarLayoutProperty_->UpdateBarGridAlign(option);
 
     /**
-     * @tc.steps: steps3. GetContentWidth.
-     * @tc.expected: steps3. Check the result of GetContentWidth.
+     * @tc.steps: steps3. GetContentMainSize.
+     * @tc.expected: steps3. Check the result of GetContentMainSize.
      */
-    layoutProperty->UpdatePadding(padding);
-    float resultWidth = tabbarLayoutAlgorithm->GetContentWidth(layoutProperty, frameSize);
-    EXPECT_EQ(resultWidth, 0.0f);
+    tabBarLayoutAlgorithm->axis_ = Axis::HORIZONTAL;
+    float resultWidth = tabBarLayoutAlgorithm->GetContentMainSize(&layoutWrapper, frameSize);
+    float columnWidth = frameSize.Width() / LG_COLUMN_NUM;
+    float padding = (LG_COLUMN_NUM - option.lg) * columnWidth / 2;
+    EXPECT_EQ(resultWidth, frameSize.Width() - padding * 2);
+
+    tabBarLayoutAlgorithm->axis_ = Axis::VERTICAL;
+    resultWidth = tabBarLayoutAlgorithm->GetContentMainSize(&layoutWrapper, frameSize);
+    EXPECT_EQ(resultWidth, frameSize.Height());
 }
 
 /**
@@ -670,52 +602,52 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmApplySymmetricExtensible001, T
      * @tc.steps: steps3. Test ApplySymmetricExtensible by using different conditions.
      */
     float allocatedWidth = 0.0f;
-    int32_t childCount = 1;
-    tabBarLayoutAlgorithm->itemWidths_.clear();
-    tabBarLayoutAlgorithm->itemWidths_.emplace_back(1000.0f);
-    tabBarLayoutAlgorithm->itemWidths_.emplace_back(2000.0f);
-    tabBarLayoutAlgorithm->itemWidths_.emplace_back(3000.0f);
-    tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth, childCount);
-    EXPECT_NE(tabBarLayoutAlgorithm->itemWidths_.size(), 1);
-    tabBarLayoutAlgorithm->itemWidths_.clear();
-    tabBarLayoutAlgorithm->itemWidths_.emplace_back(1000.0f);
-    tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth, childCount);
-    EXPECT_EQ(tabBarLayoutAlgorithm->itemWidths_.size(), 1);
-    childCount = 3;
-    tabBarLayoutAlgorithm->itemWidths_.clear();
-    tabBarLayoutAlgorithm->itemWidths_.emplace_back(1000.0f);
-    tabBarLayoutAlgorithm->itemWidths_.emplace_back(2000.0f);
-    tabBarLayoutAlgorithm->itemWidths_.emplace_back(3000.0f);
-    tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth, childCount);
-    EXPECT_EQ(tabBarLayoutAlgorithm->itemWidths_.size(), 3);
-    tabBarLayoutAlgorithm->itemWidths_.clear();
-    tabBarLayoutAlgorithm->itemWidths_.emplace_back(1000.0f);
-    tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth, childCount);
-    EXPECT_EQ(tabBarLayoutAlgorithm->itemWidths_.size(), 1);
-    tabBarLayoutAlgorithm->itemWidths_.clear();
-    tabBarLayoutAlgorithm->itemWidths_.emplace_back(1000.0f);
-    tabBarLayoutAlgorithm->itemWidths_.emplace_back(2000.0f);
-    tabBarLayoutAlgorithm->itemWidths_.emplace_back(3000.0f);
+    tabBarLayoutAlgorithm->childCount_ = 1;
+    tabBarLayoutAlgorithm->visibleItemLength_.clear();
+    tabBarLayoutAlgorithm->visibleItemLength_[0] = 1000.0f;
+    tabBarLayoutAlgorithm->visibleItemLength_[1] = 2000.0f;
+    tabBarLayoutAlgorithm->visibleItemLength_[2] = 3000.0f;
+    tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth);
+    EXPECT_NE(tabBarLayoutAlgorithm->visibleItemLength_.size(), 1);
+    tabBarLayoutAlgorithm->visibleItemLength_.clear();
+    tabBarLayoutAlgorithm->visibleItemLength_[0] = 1000.0f;
+    tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth);
+    EXPECT_EQ(tabBarLayoutAlgorithm->visibleItemLength_.size(), 1);
+    tabBarLayoutAlgorithm->childCount_ = 3;
+    tabBarLayoutAlgorithm->visibleItemLength_.clear();
+    tabBarLayoutAlgorithm->visibleItemLength_[0] = 1000.0f;
+    tabBarLayoutAlgorithm->visibleItemLength_[1] = 2000.0f;
+    tabBarLayoutAlgorithm->visibleItemLength_[2] = 3000.0f;
+    tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth);
+    EXPECT_EQ(tabBarLayoutAlgorithm->visibleItemLength_.size(), 3);
+    tabBarLayoutAlgorithm->visibleItemLength_.clear();
+    tabBarLayoutAlgorithm->visibleItemLength_[0] = 1000.0f;
+    tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth);
+    EXPECT_EQ(tabBarLayoutAlgorithm->visibleItemLength_.size(), 1);
+    tabBarLayoutAlgorithm->visibleItemLength_.clear();
+    tabBarLayoutAlgorithm->visibleItemLength_[0] = 1000.0f;
+    tabBarLayoutAlgorithm->visibleItemLength_[1] = 2000.0f;
+    tabBarLayoutAlgorithm->visibleItemLength_[2] = 3000.0f;
 
     /**
      * @tc.steps: steps4. ApplySymmetricExtensible.
      * @tc.expected: steps4. Check the result of ApplySymmetricExtensible.
      */
     tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 0);
-    tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth, childCount);
+    tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 0);
     linearLayoutProperty->UpdateFlexDirection(FlexDirection::ROW_REVERSE);
-    tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth, childCount);
+    tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 0);
     linearLayoutProperty->UpdateFlexDirection(FlexDirection::COLUMN);
-    tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth, childCount);
+    tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth);
     allocatedWidth = 100000.0f;
     tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 0);
-    tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth, childCount);
+    tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 0);
     linearLayoutProperty->UpdateFlexDirection(FlexDirection::COLUMN);
-    tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth, childCount);
-    EXPECT_EQ(tabBarLayoutAlgorithm->itemWidths_[0], allocatedWidth);
+    tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth);
+    EXPECT_EQ(tabBarLayoutAlgorithm->visibleItemLength_[0], allocatedWidth);
 }
 
 /**
@@ -774,13 +706,13 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmCalculateItemWidthsForSymmetri
     columnLayoutWrapper->AppendChild(textLayoutWrapper);
 
     float allocatedWidth = 0.0f;
-    int32_t childCount = 2;
+    tabBarLayoutAlgorithm->childCount_ = 2;
 
     /**
      * @tc.steps: steps5. Test CalculateItemWidthsForSymmetricExtensible by using different conditions.
      */
-    tabBarLayoutAlgorithm->itemWidths_.clear();
-    tabBarLayoutAlgorithm->itemWidths_.emplace_back(10.0f);
+    tabBarLayoutAlgorithm->visibleItemLength_.clear();
+    tabBarLayoutAlgorithm->visibleItemLength_[0] = 10.0f;
     std::vector<float> spaceRequests;
     spaceRequests.clear();
     spaceRequests.emplace_back(10.0f);
@@ -791,10 +723,10 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmCalculateItemWidthsForSymmetri
     rightBuffers.clear();
     rightBuffers.emplace_back(10.0f);
     tabBarLayoutAlgorithm->CalculateItemWidthsForSymmetricExtensible(
-        &layoutWrapper, childCount, spaceRequests, leftBuffers, rightBuffers, allocatedWidth);
-    tabBarLayoutAlgorithm->itemWidths_.clear();
-    tabBarLayoutAlgorithm->itemWidths_.emplace_back(100.0f);
-    tabBarLayoutAlgorithm->itemWidths_.emplace_back(100.0f);
+        &layoutWrapper, spaceRequests, leftBuffers, rightBuffers, allocatedWidth);
+    tabBarLayoutAlgorithm->visibleItemLength_.clear();
+    tabBarLayoutAlgorithm->visibleItemLength_[0] = 100.0f;
+    tabBarLayoutAlgorithm->visibleItemLength_[1] = 100.0f;
     spaceRequests.clear();
     spaceRequests.emplace_back(100.0f);
     spaceRequests.emplace_back(100.0f);
@@ -806,11 +738,11 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmCalculateItemWidthsForSymmetri
     rightBuffers.emplace_back(100.0f);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 0);
     tabBarLayoutAlgorithm->CalculateItemWidthsForSymmetricExtensible(
-        &layoutWrapper, childCount, spaceRequests, leftBuffers, rightBuffers, allocatedWidth);
+        &layoutWrapper, spaceRequests, leftBuffers, rightBuffers, allocatedWidth);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 0);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 1);
     tabBarLayoutAlgorithm->CalculateItemWidthsForSymmetricExtensible(
-        &layoutWrapper, childCount, spaceRequests, leftBuffers, rightBuffers, allocatedWidth);
+        &layoutWrapper, spaceRequests, leftBuffers, rightBuffers, allocatedWidth);
     spaceRequests.clear();
     spaceRequests.emplace_back(0.0f);
     spaceRequests.emplace_back(0.0f);
@@ -821,7 +753,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmCalculateItemWidthsForSymmetri
     rightBuffers.emplace_back(100.0f);
     rightBuffers.emplace_back(100.0f);
     tabBarLayoutAlgorithm->CalculateItemWidthsForSymmetricExtensible(
-        &layoutWrapper, childCount, spaceRequests, leftBuffers, rightBuffers, allocatedWidth);
+        &layoutWrapper, spaceRequests, leftBuffers, rightBuffers, allocatedWidth);
     leftBuffers.clear();
     leftBuffers.emplace_back(0.0f);
     leftBuffers.emplace_back(0.0f);
@@ -834,8 +766,8 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmCalculateItemWidthsForSymmetri
      * @tc.expected: steps6. erify itemWidths in CalculateItemWidthsForSymmetricExtensible Value of.
      */
     tabBarLayoutAlgorithm->CalculateItemWidthsForSymmetricExtensible(
-        &layoutWrapper, childCount, spaceRequests, leftBuffers, rightBuffers, allocatedWidth);
-    EXPECT_EQ(tabBarLayoutAlgorithm->itemWidths_[0], 0.0f);
+        &layoutWrapper, spaceRequests, leftBuffers, rightBuffers, allocatedWidth);
+    EXPECT_EQ(tabBarLayoutAlgorithm->visibleItemLength_[0], 0.0f);
 }
 
 /**
@@ -852,10 +784,10 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmApplySymmetricExtensible002, T
     auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty());
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabBarLayoutAlgorithm));
-    tabBarLayoutAlgorithm->itemWidths_.clear();
-    tabBarLayoutAlgorithm->itemWidths_.emplace_back(1000.0f);
-    tabBarLayoutAlgorithm->itemWidths_.emplace_back(2000.0f);
-    tabBarLayoutAlgorithm->itemWidths_.emplace_back(3000.0f);
+    tabBarLayoutAlgorithm->visibleItemLength_.clear();
+    tabBarLayoutAlgorithm->visibleItemLength_[0] = 1000.0f;
+    tabBarLayoutAlgorithm->visibleItemLength_[1] = 12000.0f;
+    tabBarLayoutAlgorithm->visibleItemLength_[2] = 13000.0f;
     auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
     childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
 
@@ -899,53 +831,9 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmApplySymmetricExtensible002, T
      * @tc.expected: steps3. Check the value of itemWidths under the ApplySymmetricExtensible function.
      */
     float allocatedWidth = 0.0f;
-    int32_t childCount = 3;
-    tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth, childCount);
-    EXPECT_EQ(tabBarLayoutAlgorithm->itemWidths_[0], 0.0f);
-}
-
-/**
- * @tc.name: TabBarLayoutAlgorithmAdjustFixedItem001
- * @tc.desc: Test the AdjustFixedItem function in the TabBarLayoutAlgorithm class.
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmAdjustFixedItem001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty());
-    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabBarLayoutAlgorithm));
-    auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
-    childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
-    auto axis = Axis::HORIZONTAL;
-    auto frameSize = OptionalSizeF(0.0f, 0.0f);
-
-    /**
-     * @tc.steps: step2. Create a child named childwrapper for layoutWrapper.
-     */
-    auto columnNode1 =
-        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> childWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(columnNode1, geometryNode2, columnNode1->GetLayoutProperty());
-    childWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
-    childWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
-    layoutWrapper.AppendChild(childWrapper);
-
-    /**
-     * @tc.steps: steps3. AdjustFixedItem.
-     * @tc.expected: steps3. Check the result of AdjustFixedItem.
-     */
-    childWrapper->GetGeometryNode()->SetFrameSize(SizeF(10000.0f, 10000.0f));
-    tabBarLayoutAlgorithm->AdjustFixedItem(childWrapper, frameSize, axis);
-    axis = Axis::VERTICAL;
-    tabBarLayoutAlgorithm->AdjustFixedItem(childWrapper, frameSize, axis);
-    EXPECT_EQ(childWrapper->GetGeometryNode()->GetFrameSize(), SizeF(0.0f, 0.0f));
+    tabBarLayoutAlgorithm->childCount_ = 3;
+    tabBarLayoutAlgorithm->ApplySymmetricExtensible(&layoutWrapper, allocatedWidth);
+    EXPECT_EQ(tabBarLayoutAlgorithm->visibleItemLength_[0], 0.0f);
 }
 
 /**
@@ -1007,13 +895,13 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmCalculateItemWidthsForSymmetri
      * @tc.steps: steps5. Test CalculateItemWidthsForSymmetricExtensible by using different conditions.
      */
     float allocatedWidth = 100.0f;
-    int32_t childCount = 2;
+    tabBarLayoutAlgorithm->childCount_ = 2;
     std::vector<float> spaceRequests;
     std::vector<float> leftBuffers;
     std::vector<float> rightBuffers;
-    tabBarLayoutAlgorithm->itemWidths_.clear();
-    tabBarLayoutAlgorithm->itemWidths_.emplace_back(100.0f);
-    tabBarLayoutAlgorithm->itemWidths_.emplace_back(100.0f);
+    tabBarLayoutAlgorithm->visibleItemLength_.clear();
+    tabBarLayoutAlgorithm->visibleItemLength_[0] = 100.0f;
+    tabBarLayoutAlgorithm->visibleItemLength_[1] = 100.0f;
     spaceRequests.clear();
     spaceRequests.emplace_back(100.0f);
     spaceRequests.emplace_back(100.0f);
@@ -1026,7 +914,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmCalculateItemWidthsForSymmetri
     tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 0);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 1);
     tabBarLayoutAlgorithm->CalculateItemWidthsForSymmetricExtensible(
-        &layoutWrapper, childCount, spaceRequests, leftBuffers, rightBuffers, allocatedWidth);
+        &layoutWrapper, spaceRequests, leftBuffers, rightBuffers, allocatedWidth);
     spaceRequests.clear();
     spaceRequests.emplace_back(0.0f);
     spaceRequests.emplace_back(0.0f);
@@ -1043,8 +931,8 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmCalculateItemWidthsForSymmetri
      * @tc.expected: steps6. Check the value of itemWidths in the CalculateItemWidthsForSymmetricExtensible function.
      */
     tabBarLayoutAlgorithm->CalculateItemWidthsForSymmetricExtensible(
-        &layoutWrapper, childCount, spaceRequests, leftBuffers, rightBuffers, allocatedWidth);
-    EXPECT_EQ(tabBarLayoutAlgorithm->itemWidths_[0], 60.0f);
+        &layoutWrapper, spaceRequests, leftBuffers, rightBuffers, allocatedWidth);
+    EXPECT_EQ(tabBarLayoutAlgorithm->visibleItemLength_[0], 60.0f);
 }
 
 /**
@@ -1084,40 +972,6 @@ HWTEST_F(TabBarLayoutTestNg, TabBarPatternOnDirtyLayoutWrapperSwap002, TestSize.
 }
 
 /**
- * @tc.name: TabBarLayoutAlgorithmUpdateChildConstraint002
- * @tc.desc: test UpdateChildConstraint
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmUpdateChildConstraint002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. build tabBarNode_ and ideaSize.
-     */
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    LayoutConstraintF childConstraint = LayoutConstraintF();
-    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
-    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
-    float width = 1.0;
-    float height = 2.0;
-    auto ideaSize = SizeF(width, height);
-    int32_t childCount = 1;
-    auto axis = Axis::FREE;
-    tabBarLayoutAlgorithm->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
-
-    /**
-     * @tc.steps: step2. call UpdateChildConstraint function.
-     * @tc.expected: The function is run ok.
-     */
-    tabBarLayoutAlgorithm->UpdateChildConstraint(childConstraint, tabBarLayoutProperty_, ideaSize, childCount, axis);
-    EXPECT_EQ(tabBarLayoutProperty_->GetTabBarMode().value(), TabBarMode::FIXED);
-    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    tabBarLayoutAlgorithm->UpdateChildConstraint(childConstraint, tabBarLayoutProperty_, ideaSize, childCount, axis);
-    EXPECT_EQ(tabBarLayoutProperty_->GetTabBarMode().value(), TabBarMode::SCROLLABLE);
-}
-
-/**
  * @tc.name: TabBarLayoutAlgorithmCheckMarqueeForScrollable001
  * @tc.desc: Test the CheckMarqueeForScrollable function in the TabBarLayoutAlgorithm class.
  * @tc.type: FUNC
@@ -1138,7 +992,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmCheckMarqueeForScrollable001, 
      * @tc.steps: steps2. Create different input parameters.
      */
     layoutProperty->UpdateTabBarMode(TabBarMode::FIXED);
-    int32_t childCount = 0;
+    tabbarLayoutAlgorithm->childCount_ = 0;
     BarGridColumnOptions option;
     option.lg = 2;
     tabBarLayoutProperty_->UpdateBarGridAlign(option);
@@ -1147,10 +1001,10 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmCheckMarqueeForScrollable001, 
      * @tc.steps: steps3. CheckMarqueeForScrollable.
      * @tc.expected: steps3. Check the results of CheckMarqueeForScrollable under different conditions.
      */
-    tabbarLayoutAlgorithm->CheckMarqueeForScrollable(&layoutWrapper, childCount);
+    tabbarLayoutAlgorithm->CheckMarqueeForScrollable(&layoutWrapper);
     EXPECT_NE(tabbarLayoutAlgorithm, nullptr);
-    childCount = 1;
-    tabbarLayoutAlgorithm->CheckMarqueeForScrollable(&layoutWrapper, childCount);
+    tabbarLayoutAlgorithm->childCount_ = 1;
+    tabbarLayoutAlgorithm->CheckMarqueeForScrollable(&layoutWrapper);
     EXPECT_NE(tabbarLayoutAlgorithm, nullptr);
 }
 
@@ -1170,85 +1024,5 @@ HWTEST_F(TabBarLayoutTestNg, TabBarPatternBeforeCreateLayoutWrapper003, TestSize
     model.SetDivider(divider);
     CreateTabsDone(model);
     tabBarPattern_->BeforeCreateLayoutWrapper();
-}
-
-/**
- * @tc.name: TabBarLayoutAlgorithmUpdateChildConstraint002
- * @tc.desc: test UpdateChildConstraint
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmUpdateChildConstraint003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. build tabBarNode_ and ideaSize.
-     */
-    LayoutConstraintF childConstraint = LayoutConstraintF();
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-
-    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
-    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
-
-    /**
-     * @tc.steps: step2. Set width and height
-     */
-    float width = 1.0;
-    float height = 2.0;
-    auto ideaSize = SizeF(width, height);
-    int32_t childCount = 1;
-    auto axis = Axis::FREE;
-    tabBarLayoutAlgorithm->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
-
-    /**
-     * @tc.steps: step2. call UpdateChildConstraint function.
-     * @tc.expected: The function is run ok.
-     */
-    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED_START);
-    tabBarLayoutAlgorithm->UpdateChildConstraint(childConstraint, tabBarLayoutProperty_, ideaSize, childCount, axis);
-    EXPECT_EQ(tabBarLayoutProperty_->GetTabBarMode().value(), TabBarMode::FIXED_START);
-}
-
-/**
- * @tc.name: TabBarLayoutAlgorithmLayoutChildren002
- * @tc.desc: Test the LayoutChildren function in the TabBarLayoutAlgorithm class.
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmLayoutChildren002, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    auto tabbarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-
-    /**
-     * @tc.steps: steps2. Create padding and assign initial values to it.
-     */
-    PaddingProperty padding;
-    padding.left = CalcLength(200.0_vp);
-    padding.right = CalcLength(200.0_vp);
-    padding.top = CalcLength(200.0_vp);
-    padding.bottom = CalcLength(200.0_vp);
-    tabBarLayoutProperty_->UpdatePadding(padding);
-    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty());
-    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabbarLayoutAlgorithm));
-    layoutWrapper.currentChildCount_ = 5;
-    auto frameSize = SizeF(0.0f, 0.0f);
-    auto axis = Axis::HORIZONTAL;
-    tabbarLayoutAlgorithm->childrenMainSize_ = 10000.0f;
-    OffsetF childOffset(0.0f, 0.0f);
-
-    /**
-     * @tc.steps: steps3. LayoutChildren.
-     * @tc.expected: steps3. Verify childrenMainSize under LayoutChildren in RTL and LTR.
-     */
-    tabbarLayoutAlgorithm->LayoutChildren(&layoutWrapper, frameSize, axis, childOffset);
-    EXPECT_EQ(tabbarLayoutAlgorithm->tabItemOffset_[0].GetX(), childOffset.GetX());
-    tabbarLayoutAlgorithm->isRTL_ = true;
-    tabbarLayoutAlgorithm->axis_ = Axis::HORIZONTAL;
-    tabbarLayoutAlgorithm->LayoutChildren(&layoutWrapper, frameSize, axis, childOffset);
-    EXPECT_NE(tabbarLayoutAlgorithm->tabItemOffset_[0].GetX(), childOffset.GetX());
 }
 } // namespace OHOS::Ace::NG

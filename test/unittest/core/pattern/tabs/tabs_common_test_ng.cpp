@@ -266,8 +266,7 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty006, TestSize.Level1)
     model.SetTabBarMode(TabBarMode::SCROLLABLE);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    tabBarPattern_->currentOffset_ = -1.f;
-    tabBarPattern_->tabItemOffsets_.emplace_back(OffsetF(TABS_WIDTH + 1.f, 0.f));
+    tabBarPattern_->visibleItemPosition_.clear();
     EXPECT_FALSE(tabBarPattern_->IsAtTop());
     EXPECT_FALSE(tabBarPattern_->IsAtBottom());
 
@@ -297,7 +296,7 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty007, TestSize.Level1)
     model.SetTabBarMode(TabBarMode::SCROLLABLE);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    tabBarPattern_->tabItemOffsets_.emplace_back(OffsetF(TABS_WIDTH + 1.f, 0.f));
+    tabBarPattern_->visibleItemPosition_[3] = { 1.f, TABS_WIDTH + 1.f };
     EXPECT_TRUE(tabBarPattern_->IsAtTop());
     EXPECT_FALSE(tabBarPattern_->IsAtBottom());
 
@@ -326,7 +325,7 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty008, TestSize.Level1)
     model.SetTabBarMode(TabBarMode::SCROLLABLE);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    tabBarPattern_->currentOffset_ = -1.f;
+    tabBarPattern_->visibleItemPosition_[0] = { -1.f, TABS_WIDTH - 1.f };
     EXPECT_FALSE(tabBarPattern_->IsAtTop());
     EXPECT_TRUE(tabBarPattern_->IsAtBottom());
 
