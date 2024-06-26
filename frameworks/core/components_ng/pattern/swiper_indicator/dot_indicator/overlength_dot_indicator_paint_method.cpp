@@ -29,10 +29,10 @@ constexpr uint32_t ITEM_HALF_WIDTH = 0;
 constexpr uint32_t SELECTED_ITEM_HALF_WIDTH = 2;
 constexpr int TWOFOLD = 2;
 constexpr Dimension INDICATOR_OFFSET_UNIT = 18.0_vp;
-constexpr uint32_t NUM_0 = 0;
-constexpr uint32_t NUM_1 = 1;
-constexpr uint32_t NUM_2 = 2;
-constexpr uint32_t NUM_3 = 3;
+constexpr int32_t NUM_0 = 0;
+constexpr int32_t NUM_1 = 1;
+constexpr int32_t NUM_2 = 2;
+constexpr int32_t NUM_3 = 3;
 constexpr float HALF_FLOAT = 0.5f;
 } // namespace
 

@@ -1251,7 +1251,7 @@ void TextPickerDialogView::SetDialogNodePageActive(RefPtr<FrameNode>& contentCol
     const uint32_t& dialogNodePage, const uint32_t& columnCount)
 {
     CHECK_NULL_VOID(textPickerNode);
-    for (int i = 0; i < columnCount; i++) {
+    for (uint32_t i = 0; i < columnCount; i++) {
         auto selectedStackNode = AceType::DynamicCast<FrameNode>(textPickerNode->GetChildAtIndex(i));
         CHECK_NULL_VOID(selectedStackNode);
         if (i != dialogNodePage) {
