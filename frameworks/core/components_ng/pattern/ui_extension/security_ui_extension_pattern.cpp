@@ -234,9 +234,6 @@ void SecurityUIExtensionPattern::OnAreaChangedInner()
     DispatchDisplayArea();
 }
 
-void SecurityUIExtensionPattern::DispatchFocusState(bool focusState)
-{}
-
 void SecurityUIExtensionPattern::FireBindModalCallback()
 {}
 
@@ -355,6 +352,47 @@ void SecurityUIExtensionPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitKeyEvent(focusHub);
+}
+
+bool SecurityUIExtensionPattern::HandleKeyEvent(const KeyEvent& event)
+{
+    CHECK_NULL_RETURN(sessionWrapper_, false);
+    if (!(event.IsDirectionalKey() || event.IsKey({ KeyCode::KEY_TAB }) || event.IsShiftWith(KeyCode::KEY_TAB) ||
+        event.IsKey({ KeyCode::KEY_MOVE_HOME }) || event.IsKey({ KeyCode::KEY_MOVE_END }) || event.IsEscapeKey())) {
+        return false;
+    }
+    if (isKeyAsync_) {
+        sessionWrapper_->NotifyKeyEventAsync(event.rawKeyEvent, false);
+        return true;
+    }
+    return sessionWrapper_->NotifyKeyEventSync(event.rawKeyEvent, event.isPreIme);
+}
+
+void SecurityUIExtensionPattern::HandleFocusEvent()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline->GetIsFocusActive()) {
+        DispatchFocusActiveEvent(true);
+    }
+    DispatchFocusState(true);
+}
+
+void SecurityUIExtensionPattern::HandleBlurEvent()
+{
+    DispatchFocusActiveEvent(false);
+    DispatchFocusState(false);
+}
+
+void SecurityUIExtensionPattern::DispatchFocusActiveEvent(bool isFocusActive)
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    sessionWrapper_->NotifyFocusEventAsync(isFocusActive);
+}
+
+void SecurityUIExtensionPattern::DispatchFocusState(bool focusState)
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    sessionWrapper_->NotifyFocusStateAsync(focusState);
 }
 
 void SecurityUIExtensionPattern::DispatchDisplayArea(bool isForce)
