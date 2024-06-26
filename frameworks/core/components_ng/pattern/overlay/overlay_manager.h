@@ -433,6 +433,10 @@ public:
     RefPtr<UINode> FindWindowScene(RefPtr<FrameNode> targetNode);
 
     // ui extension
+    bool HandleUIExtNodeSize(const AAFwk::Want& want, RefPtr<FrameNode> uiExtNode);
+    bool HandleUIExtNodeAngle(int32_t uiExtNodeAngle, RefPtr<FrameNode> uiExtNode);
+    bool HandleUIExtNodeTransform(const AAFwk::Want& want, RefPtr<FrameNode> uiExtNode);
+    bool UIExtNodeAngleValid(int32_t uiExtNodeAngle);
     int32_t CreateModalUIExtension(const RefPtr<WantWrap>& want, const ModalUIExtensionCallbacks& callbacks,
         const ModalUIExtensionConfig& config);
     int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
@@ -449,6 +453,7 @@ public:
     void MarkDirty(PropertyChangeFlag flag);
     void MarkDirtyOverlay();
     float GetRootHeight() const;
+    float GetRootWidth() const;
 
     void PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool isTransitionIn, bool needTransparent = false);
 
