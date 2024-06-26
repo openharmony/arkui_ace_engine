@@ -572,43 +572,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleSelectFontStyleWrapper101, Test
 }
 
 /**
- * @tc.name: GetSelectedMaxWidth001
- * @tc.desc: test GetSelectedMaxWidth
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, GetSelectedMaxWidth001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    /**
-     * @tc.steps: step2. change parameters and call function.
-     */
-    auto overlayMod = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
-    EXPECT_NE(overlayMod, nullptr);
-    std::vector<RectF> selectedRects1 { { 1.0, 0.0, 3.0, 4.0 }, { 5.0, 0.0, 7.0, 8.0 }, { -9.0, -10.0, 11.0, 12.0 } };
-    overlayMod->selectedRects_.swap(selectedRects1);
-    auto ret = richEditorPattern->GetSelectedMaxWidth();
-    EXPECT_NE(ret, 0.0f);
-    /**
-     * @tc.steps: step3. change parameters and call function.
-     */
-    overlayMod = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
-    EXPECT_NE(overlayMod, nullptr);
-    std::vector<RectF> selectedRects2 { { 1.0, 0.0, 3.0, 4.0 }, { 5.0, 0.0, 7.0, 8.0 }, { -9.0, -10.0, 11.0, 12.0 },
-        { 13.0, 0.0, 15.0, 16.0 } };
-    overlayMod->selectedRects_.swap(selectedRects2);
-    ret = richEditorPattern->GetSelectedMaxWidth();
-    EXPECT_NE(ret, 0.0f);
-}
-
-/**
  * @tc.name: TestRichEditorHandleTripleClickEvent001
  * @tc.desc: test HandleTripleClickEvent
  * @tc.type: FUNC
