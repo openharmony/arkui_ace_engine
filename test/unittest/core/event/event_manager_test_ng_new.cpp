@@ -807,4 +807,185 @@ HWTEST_F(EventManagerTestNg, EventManagerTest056, TestSize.Level1)
     eventManager->DelKeyboardShortcutNode(2);
     ASSERT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
 }
+
+/**
+ * @tc.name: EventManagerTest057
+ * @tc.desc: Test AddGestureSnapshot function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest057, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    auto panHorizontal1 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    eventManager->AddGestureSnapshot(1, 1, panHorizontal1);
+
+    auto mouseEventTarget = AceType::MakeRefPtr<MouseEventTarget>(MOUSE, NODEID);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    mouseEventTarget->node_ = frameNode;
+    eventManager->AddGestureSnapshot(1, 1, mouseEventTarget);
+    
+    eventManager->AddGestureSnapshot(1, 1, nullptr);
+    ASSERT_TRUE(eventManager->eventTree_.eventTreeList.empty());
+}
+
+/**
+ * @tc.name: EventManagerTest058
+ * @tc.desc: Test SetHittedFrameNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest058, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    auto panHorizontal1 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    auto panHorizontal2 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    std::list<RefPtr<NG::NGGestureRecognizer>> touchTestResults;
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    panHorizontal1->node_ = frameNode;
+    touchTestResults.emplace_back(panHorizontal1);
+    touchTestResults.emplace_back(panHorizontal2);
+    eventManager->SetHittedFrameNode(touchTestResults);
+    ASSERT_TRUE(eventManager->eventTree_.eventTreeList.empty());
+}
+
+/**
+ * @tc.name: EventManagerTest059
+ * @tc.desc: Test CleanGestureEventHub function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest059, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    std::set<WeakPtr<FrameNode>> hittedFrameNode;
+    eventManager->hittedFrameNode_ = hittedFrameNode;
+    eventManager->CleanGestureEventHub();
+    ASSERT_TRUE(eventManager->hittedFrameNode_.empty());
+
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto frameNode2 = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    frameNode2->eventHub_ = eventHub;
+    hittedFrameNode.insert(frameNode);
+    hittedFrameNode.insert(frameNode2);
+    hittedFrameNode.insert(nullptr);
+    eventManager->hittedFrameNode_ = hittedFrameNode;
+    eventManager->CleanGestureEventHub();
+    ASSERT_TRUE(eventManager->hittedFrameNode_.empty());
+}
+
+/**
+ * @tc.name: EventManagerTest060
+ * @tc.desc: Test CheckAndLogLastReceivedEventInfo function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest060, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    int eventId = 1;
+    bool logImmediately = true;
+
+    eventManager->CheckAndLogLastReceivedEventInfo(eventId, logImmediately);
+    ASSERT_TRUE(eventManager->lastReceivedEvent_.eventId == -1);
+
+    logImmediately = false;
+    eventManager->lastReceivedEvent_.lastLogTimeStamp = 0;
+    eventManager->CheckAndLogLastReceivedEventInfo(eventId, logImmediately);
+    ASSERT_TRUE(eventManager->lastReceivedEvent_.eventId == 1);
+
+    auto currentTime = GetSysTimestamp();
+    auto lastLogTimeStamp = currentTime - 1000 * 1000000 - 1000;
+    eventManager->lastReceivedEvent_.lastLogTimeStamp = lastLogTimeStamp;
+    eventManager->CheckAndLogLastReceivedEventInfo(eventId, logImmediately);
+    ASSERT_TRUE(eventManager->lastReceivedEvent_.lastLogTimeStamp > currentTime);
+    
+    eventManager->lastReceivedEvent_.lastLogTimeStamp = lastLogTimeStamp + 20000;
+    eventManager->CheckAndLogLastReceivedEventInfo(eventId, logImmediately);
+    ASSERT_TRUE(eventManager->lastReceivedEvent_.lastLogTimeStamp == lastLogTimeStamp + 20000);
+}
+
+/**
+ * @tc.name: EventManagerTest061
+ * @tc.desc: Test CheckAndLogLastConsumedEventInfo function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest061, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    int eventId = 1;
+    bool logImmediately = true;
+
+    eventManager->CheckAndLogLastConsumedEventInfo(eventId, logImmediately);
+
+    logImmediately = false;
+    eventManager->lastConsumedEvent_.lastLogTimeStamp = 0;
+    eventManager->CheckAndLogLastConsumedEventInfo(eventId, logImmediately);
+    ASSERT_TRUE(eventManager->lastConsumedEvent_.eventId == 1);
+
+    auto currentTime = GetSysTimestamp();
+    auto lastLogTimeStamp = currentTime - 1000 * 1000000 - 1000;
+    eventManager->lastConsumedEvent_.lastLogTimeStamp = lastLogTimeStamp;
+    eventManager->CheckAndLogLastConsumedEventInfo(eventId, logImmediately);
+    ASSERT_TRUE(eventManager->lastConsumedEvent_.lastLogTimeStamp > currentTime);
+    
+    eventManager->lastReceivedEvent_.lastLogTimeStamp = lastLogTimeStamp + 20000;
+    eventManager->lastConsumedEvent_.lastLogTimeStamp = lastLogTimeStamp + 20000;
+    eventManager->CheckAndLogLastConsumedEventInfo(eventId, logImmediately);
+    ASSERT_TRUE(eventManager->lastConsumedEvent_.lastLogTimeStamp == lastLogTimeStamp + 20000);
+}
+
+/**
+ * @tc.name: EventManagerTest062
+ * @tc.desc: Test SetResponseLinkRecognizers function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest062, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    auto panHorizontal1 = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    std::list<RefPtr<TouchEventTarget>> result;
+    std::list<RefPtr<TouchEventTarget>> responseLinkRecognizers;
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    panHorizontal1->node_ = frameNode;
+    result.emplace_back(panHorizontal1);
+    result.emplace_back(nullptr);
+    responseLinkRecognizers.emplace_back(panHorizontal1);
+
+    eventManager->SetResponseLinkRecognizers(result, responseLinkRecognizers);
+    ASSERT_TRUE(responseLinkRecognizers.size() == 1);
+}
 } // namespace OHOS::Ace::NG
