@@ -4012,7 +4012,7 @@ void OverlayManager::OpenBindSheetByUIContext(
 }
 
 void OverlayManager::UpdateBindSheetByUIContext(
-    const RefPtr<NG::FrameNode>& sheetContentNode, NG::SheetStyle& sheetStyle,int32_t targetId, bool isPartialUpdate)
+    const RefPtr<NG::FrameNode>& sheetContentNode, NG::SheetStyle& sheetStyle, int32_t targetId, bool isPartialUpdate)
 {
     SheetKey sheetKey;
     if (!CreateSheetKey(sheetContentNode, targetId, sheetKey)) {
@@ -4048,13 +4048,13 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::She
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
-    SetSheetBackgroundColor(sheetNode, sheetTheme, sheetStyle);
+    SetSheetBackgroundColor(sheetNode, sheetTheme, sheetStyle, isPartialUpdate);
     auto topModalRenderContext = sheetNode->GetRenderContext();
     CHECK_NULL_VOID(topModalRenderContext);
     if (sheetStyle.backgroundBlurStyle.has_value()) {
         SetSheetBackgroundBlurStyle(sheetNode, sheetStyle.backgroundBlurStyle.value());
     }
-    SetSheetBorderWidth(sheetNode, sheetTheme, sheetStyle);
+    SetSheetBorderWidth(sheetNode, sheetTheme, sheetStyle, isPartialUpdate);
     if (sheetStyle.borderStyle.has_value()) {
         topModalRenderContext->UpdateBorderStyle(sheetStyle.borderStyle.value());
     }
@@ -4063,12 +4063,12 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::She
     }
     if (sheetStyle.shadow.has_value()) {
         topModalRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
-    } else {
+    } else if (!isPartialUpdate) {
         topModalRenderContext->UpdateBackShadow(ShadowConfig::NoneShadow);
     }
     auto maskNode = GetSheetMask(sheetNode);
     if (maskNode) {
-        UpdateSheetMask(maskNode, sheetNode, sheetStyle);
+        UpdateSheetMask(maskNode, sheetNode, sheetStyle, isPartialUpdate);
     }
     auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
 
@@ -4107,64 +4107,13 @@ SheetStyle OverlayManager::UpdateSheetStyle(
     CHECK_NULL_RETURN(layoutProperty, sheetStyle);
     auto currentStyle = layoutProperty->GetSheetStyleValue();
     if (isPartialUpdate) {
-        if (sheetStyle.height.has_value() && !sheetStyle.sheetMode.has_value()) {
-            currentStyle.height = sheetStyle.height;
-            currentStyle.sheetMode.reset();
-        } else if (!sheetStyle.height.has_value() && sheetStyle.sheetMode.has_value()) {
-            currentStyle.sheetMode = sheetStyle.sheetMode;
-            currentStyle.height.reset();
-        } else {
-            currentStyle.sheetMode = sheetStyle.sheetMode.has_value() ? sheetStyle.sheetMode : currentStyle.sheetMode;
-        }
-        currentStyle.showDragBar =
-            sheetStyle.showDragBar.has_value() ? sheetStyle.showDragBar : currentStyle.showDragBar;
-        currentStyle.showCloseIcon =
-            sheetStyle.showCloseIcon.has_value() ? sheetStyle.showCloseIcon : currentStyle.showCloseIcon;
-        currentStyle.isTitleBuilder =
-            sheetStyle.isTitleBuilder.has_value() ? sheetStyle.isTitleBuilder : currentStyle.isTitleBuilder;
-        currentStyle.sheetType = sheetStyle.sheetType.has_value() ? sheetStyle.sheetType : currentStyle.sheetType;
-        currentStyle.backgroundColor =
-            sheetStyle.backgroundColor.has_value() ? sheetStyle.backgroundColor : currentStyle.backgroundColor;
-        currentStyle.maskColor = sheetStyle.maskColor.has_value() ? sheetStyle.maskColor : currentStyle.maskColor;
-        currentStyle.backgroundBlurStyle =
-            sheetStyle.backgroundBlurStyle.has_value() ?
-            sheetStyle.backgroundBlurStyle : currentStyle.backgroundBlurStyle;
-        currentStyle.sheetTitle = sheetStyle.sheetTitle.has_value() ? sheetStyle.sheetTitle : currentStyle.sheetTitle;
-        currentStyle.sheetSubtitle =
-            sheetStyle.sheetSubtitle.has_value() ? sheetStyle.sheetSubtitle : currentStyle.sheetSubtitle;
-        currentStyle.detents = !sheetStyle.detents.empty() ? sheetStyle.detents : currentStyle.detents;
-        currentStyle.interactive =
-            sheetStyle.interactive.has_value() ? sheetStyle.interactive : currentStyle.interactive;
-        currentStyle.scrollSizeMode =
-            sheetStyle.scrollSizeMode.has_value() ? sheetStyle.scrollSizeMode : currentStyle.scrollSizeMode;
-        currentStyle.borderWidth =
-            sheetStyle.borderWidth.has_value() ? sheetStyle.borderWidth : currentStyle.borderWidth;
-        currentStyle.borderColor =
-            sheetStyle.borderColor.has_value() ? sheetStyle.borderColor : currentStyle.borderColor;
-        currentStyle.borderStyle =
-            sheetStyle.borderStyle.has_value() ? sheetStyle.borderStyle : currentStyle.borderStyle;
-        currentStyle.shadow = sheetStyle.shadow.has_value() ? sheetStyle.shadow : currentStyle.shadow;
-        currentStyle.width = sheetStyle.width.has_value() ? sheetStyle.width : currentStyle.width;
+        currentStyle.PartialUpdate(sheetStyle);
     } else {
-        currentStyle.height = sheetStyle.height;
-        currentStyle.sheetMode = sheetStyle.sheetMode;
-        currentStyle.showDragBar = sheetStyle.showDragBar;
-        currentStyle.showCloseIcon = sheetStyle.showCloseIcon;
-        currentStyle.isTitleBuilder = sheetStyle.isTitleBuilder;
-        currentStyle.sheetType = sheetStyle.sheetType;
-        currentStyle.backgroundColor = sheetStyle.backgroundColor;
-        currentStyle.maskColor = sheetStyle.maskColor;
-        currentStyle.backgroundBlurStyle = sheetStyle.backgroundBlurStyle;
-        currentStyle.sheetTitle = sheetStyle.sheetTitle;
-        currentStyle.sheetSubtitle = sheetStyle.sheetSubtitle;
-        currentStyle.detents = sheetStyle.detents;
-        currentStyle.interactive = sheetStyle.interactive;
-        currentStyle.scrollSizeMode = sheetStyle.scrollSizeMode;
-        currentStyle.borderWidth = sheetStyle.borderWidth;
-        currentStyle.borderColor = sheetStyle.borderColor;
-        currentStyle.borderStyle = sheetStyle.borderStyle;
-        currentStyle.shadow = sheetStyle.shadow;
-        currentStyle.width = sheetStyle.width;
+        auto currentShowInPage = currentStyle.showInPage;
+        auto currentInstanceId = currentStyle.instanceId;
+        currentStyle = sheetStyle;
+        currentStyle.showInPage = currentShowInPage;
+        currentStyle.instanceId = currentInstanceId;
     }
     layoutProperty->UpdateSheetStyle(currentStyle);
     return currentStyle;
@@ -4332,7 +4281,9 @@ RefPtr<FrameNode> OverlayManager::CreateSheetMask(const RefPtr<FrameNode>& sheet
     maskNode->MountToParent(rootNode);
     FireModalPageShow();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    sheetPageNode->GetContext()->FlushUITasks();
+    auto pipeline = sheetPageNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    pipeline->FlushUITasks();
     PlaySheetMaskTransition(maskNode, true, sheetPageNode->GetPattern<SheetPresentationPattern>()->HasCallback());
     ComputeSheetOffset(sheetStyle, sheetPageNode);
     return maskNode;

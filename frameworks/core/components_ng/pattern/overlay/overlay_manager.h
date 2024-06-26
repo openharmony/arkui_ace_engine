@@ -763,7 +763,7 @@ private:
     std::list<WeakPtr<FrameNode>> modalList_;
     std::unordered_map<SheetKey, WeakPtr<FrameNode>, SheetKeyHash> sheetMap_;
     std::function<void(const int32_t, const int32_t)> cleanViewContextMapCallback_ = nullptr;
-    std::unordered_map<int32_t, RefPtr<NG::ClickEvent>> sheetMaskClickEventMap_; // K: maskNodeId
+    std::unordered_map<int32_t, RefPtr<NG::ClickEvent>> sheetMaskClickEventMap_; // Key: maskNodeId
     WeakPtr<FrameNode> lastModalNode_; // Previous Modal Node
     float sheetHeight_ { 0.0 };
     WeakPtr<UINode> rootNodeWeak_;

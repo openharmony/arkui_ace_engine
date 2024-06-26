@@ -94,7 +94,10 @@ std::unordered_map<int32_t, std::string> BIND_SHEET_ERROR_MAP = {
     { ERROR_CODE_BIND_SHEET_CONTENT_ERROR, "The bindSheetContent is incorrect." },
     { ERROR_CODE_BIND_SHEET_CONTENT_ALREADY_EXIST, "The bindSheetContent already exists." },
     { ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND, "The bindSheetContent cannot be found." },
-    { ERROR_CODE_TARGET_ID_INVALID, "The targetId is invalid." },
+    { ERROR_CODE_TARGET_ID_NOT_EXIST, "The targetId does not exist." },
+    { ERROR_CODE_TARGET_NOT_ON_MAIN_TREE, "The node of targetId is not in the main tree." },
+    { ERROR_CODE_TARGET_NOT_PAGE_CHILD,
+        "The node of targetId is not a child of the page node or NavDestination node." },
     { ERROR_CODE_INTERNAL_ERROR, "Internal error." },
     { ERROR_CODE_PARAM_INVALID, "Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;"
         "2. Incorrect parameter types; 3. Parameter verification failed." }
@@ -787,7 +790,7 @@ void JSViewContext::JSOpenBindSheet(const JSCallbackInfo& info)
         }
         targetId = info[INDEX_TWO]->ToNumber<int32_t>();
         if (targetId < 0) {
-            ReturnPromise(info, ERROR_CODE_TARGET_ID_INVALID);
+            ReturnPromise(info, ERROR_CODE_TARGET_ID_NOT_EXIST);
             return;
         }
     }
@@ -832,10 +835,11 @@ void JSViewContext::JSUpdateBindSheet(const JSCallbackInfo& info)
     if (paramCnt >= LENGTH_TWO && info[INDEX_ONE]->IsObject()) {
         JSViewAbstract::ParseSheetStyle(info[INDEX_ONE], sheetStyle, isPartialUpdate);
         JSViewAbstract::ParseSheetTitle(info[INDEX_ONE], sheetStyle, titleBuilderFunction);
-    } else if (!isPartialUpdate) {
+    } else {
         sheetStyle.sheetMode = NG::SheetMode::LARGE;
         sheetStyle.showDragBar = true;
         sheetStyle.showInPage = false;
+        isPartialUpdate = false;
     }
     TAG_LOGI(AceLogTag::ACE_SHEET, "paramCnt: %{public}d, contentId: %{public}d, isPartialUpdate: %{public}d",
         paramCnt, sheetContentNode->GetId(), isPartialUpdate);

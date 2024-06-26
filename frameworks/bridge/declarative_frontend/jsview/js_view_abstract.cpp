@@ -7669,13 +7669,12 @@ void JSViewAbstract::ParseSheetStyle(
         sheetStyle.backgroundBlurStyle = styleOption;
     }
     bool showClose = true;
-    if (showCloseIcon->IsNull() || showCloseIcon->IsUndefined()) {
+    if (ParseJsBool(showCloseIcon, showClose)) {
         sheetStyle.showCloseIcon = showClose;
-    } else {
-        if (ParseJsBool(showCloseIcon, showClose)) {
-            sheetStyle.showCloseIcon = showClose;
-        }
+    } else if (!isPartialUpdate) {
+        sheetStyle.showCloseIcon = true;
     }
+
     bool isInteractive = false;
     if (ParseJsBool(interactive, isInteractive)) {
         sheetStyle.interactive = isInteractive;

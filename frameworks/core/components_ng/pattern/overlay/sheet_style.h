@@ -129,6 +129,37 @@ struct SheetStyle {
                 borderStyle == sheetStyle.borderStyle && shadow == sheetStyle.shadow && width == sheetStyle.width &&
                 instanceId == sheetStyle.instanceId && scrollSizeMode == sheetStyle.scrollSizeMode);
     }
+
+    void PartialUpdate(const SheetStyle& sheetStyle)
+    {
+        if (sheetStyle.height.has_value() && !sheetStyle.sheetMode.has_value()) {
+            height = sheetStyle.height;
+            sheetMode.reset();
+        } else if (!sheetStyle.height.has_value() && sheetStyle.sheetMode.has_value()) {
+            sheetMode = sheetStyle.sheetMode;
+            height.reset();
+        } else {
+            sheetMode = sheetStyle.sheetMode.has_value() ? sheetStyle.sheetMode : sheetMode;
+        }
+        showDragBar = sheetStyle.showDragBar.has_value() ? sheetStyle.showDragBar : showDragBar;
+        showCloseIcon = sheetStyle.showCloseIcon.has_value() ? sheetStyle.showCloseIcon : showCloseIcon;
+        isTitleBuilder = sheetStyle.isTitleBuilder.has_value() ? sheetStyle.isTitleBuilder : isTitleBuilder;
+        sheetType = sheetStyle.sheetType.has_value() ? sheetStyle.sheetType : sheetType;
+        backgroundColor = sheetStyle.backgroundColor.has_value() ? sheetStyle.backgroundColor : backgroundColor;
+        maskColor = sheetStyle.maskColor.has_value() ? sheetStyle.maskColor : maskColor;
+        backgroundBlurStyle = sheetStyle.backgroundBlurStyle.has_value() ?
+            sheetStyle.backgroundBlurStyle : backgroundBlurStyle;
+        sheetTitle = sheetStyle.sheetTitle.has_value() ? sheetStyle.sheetTitle : sheetTitle;
+        sheetSubtitle = sheetStyle.sheetSubtitle.has_value() ? sheetStyle.sheetSubtitle : sheetSubtitle;
+        detents = !sheetStyle.detents.empty() ? sheetStyle.detents : detents;
+        interactive = sheetStyle.interactive.has_value() ? sheetStyle.interactive : interactive;
+        scrollSizeMode = sheetStyle.scrollSizeMode.has_value() ? sheetStyle.scrollSizeMode : scrollSizeMode;
+        borderWidth = sheetStyle.borderWidth.has_value() ? sheetStyle.borderWidth : borderWidth;
+        borderColor = sheetStyle.borderColor.has_value() ? sheetStyle.borderColor : borderColor;
+        borderStyle = sheetStyle.borderStyle.has_value() ? sheetStyle.borderStyle : borderStyle;
+        shadow = sheetStyle.shadow.has_value() ? sheetStyle.shadow : shadow;
+        width = sheetStyle.width.has_value() ? sheetStyle.width : width;
+    }
 };
 } // namespace OHOS::Ace::NG
 

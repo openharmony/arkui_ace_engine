@@ -1362,9 +1362,6 @@ public:
     static std::string GetAccessibilityText(FrameNode* frameNode);
     static std::string GetAccessibilityDescription(FrameNode* frameNode);
     static std::string GetAccessibilityImportance(FrameNode* frameNode);
-    static RefPtr<OverlayManager> GetOverlayFromPage(int32_t rootNodeId, RootNodeType rootNodeType);
-    static RefPtr<OverlayManager> FindPageNodeOverlay(
-        const RefPtr<FrameNode>& targetNode, bool isShow, bool isStartByUIContext = false);
 
 private:
     void RegisterContextMenuKeyEvent(

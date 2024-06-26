@@ -35,7 +35,6 @@ public:
         NG::SheetStyle& sheetStyle, bool isPartialUpdate, int32_t currentInstanceId) override { return 0; }
     int32_t CloseBindSheet(const RefPtr<NG::FrameNode>& sheetContentNode,
         int32_t currentInstanceId) override { return 0; }
-    void CleanBindSheetMap(int32_t instanceId, int32_t sheetContentNodeId) override { }
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_VIEW_CONTEXT_MODEL_IMPL_H

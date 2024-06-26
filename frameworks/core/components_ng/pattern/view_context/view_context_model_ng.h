@@ -36,30 +36,6 @@ public:
         const RefPtr<NG::FrameNode>& sheetContentNode, NG::SheetStyle& sheetStyle, bool isPartialUpdate,
         int32_t currentInstanceId) override;
     int32_t CloseBindSheet(const RefPtr<NG::FrameNode>& sheetContentNode, int32_t currentInstanceId) override;
-    void CleanBindSheetMap(int32_t instanceId, int32_t sheetContentNodeId) override
-    {
-        overlayManagerMap_.erase(SheetContentKey(instanceId, sheetContentNodeId));
-        targetIdMap_.erase(SheetContentKey(instanceId, sheetContentNodeId));
-    }
-
-private:
-    struct SheetContentKey {
-        SheetContentKey() {}
-        SheetContentKey(int32_t inputInstanceId, int32_t inputContentNodeId)
-            : instanceId(inputInstanceId), contentNodeId(inputContentNodeId) {}
-        int32_t instanceId;
-        int32_t contentNodeId;
-        bool operator<(const SheetContentKey& other) const {
-            if (instanceId == other.instanceId) {
-                return contentNodeId < other.contentNodeId;
-            }
-            return instanceId < other.instanceId;
-        }
-    };
-
-    std::map<SheetContentKey, RefPtr<OverlayManager>> overlayManagerMap_;
-    // VAL:  The uniqueId of the FrameNode to which BindSheet is attached
-    std::map<SheetContentKey, int32_t> targetIdMap_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_MODEL_NG_H

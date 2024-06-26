@@ -41,7 +41,6 @@ public:
         const RefPtr<NG::FrameNode>& bindContentNode, NG::SheetStyle& sheetStyle, bool isPartialUpdate,
         int32_t currentInstanceId) = 0;
     virtual int32_t CloseBindSheet(const RefPtr<NG::FrameNode>& bindContentNode, int32_t currentInstanceId) = 0;
-    virtual void CleanBindSheetMap(int32_t instanceId, int32_t sheetContentNodeId) = 0;
 
 private:
     static std::unique_ptr<ViewContextModel> instance_;
