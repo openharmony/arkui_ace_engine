@@ -1006,7 +1006,7 @@ float TitleBarPattern::OnCoordScrollUpdate(float offset)
     }
     UpdateTitleBarByCoordScroll(titleBarOffset);
     coordScrollFinalOffset_ = titleBarOffset;
-    auto barStyle = options_.bgOptions.barStyle.value_or(BarStyle::STANDARD);
+    auto barStyle = options_.brOptions.barStyle.value_or(BarStyle::STANDARD);
     if (barStyle == BarStyle::STACK) {
         offsetHandled = 0.0f;
     }

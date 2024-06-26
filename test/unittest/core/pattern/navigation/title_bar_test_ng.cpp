@@ -57,7 +57,7 @@ const std::string TITLE_BAR_NODE_MENU = "menu";
 const std::string FRAME_ITEM_ETS_TAG = "FrameItem";
 const std::string NAVDES_GROUP_NODE =  "navdestination_group_node";
 const std::string NAVIGATION_MENU_ETS_TAG = "NavigationMenu";
-
+const CalcDimension DEFAULT_PADDING = 24.0_vp;
 } // namespace
 
 class TitleBarTestNg : public testing::Test {
@@ -979,8 +979,10 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternTest039, TestSize.Level1)
     auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
     EXPECT_NE(titleBarPattern, nullptr);
     NavigationTitlebarOptions opt;
-    opt.bgOptions.barStyle = std::make_optional(BarStyle::STACK);
+    opt.brOptions.barStyle = std::make_optional(BarStyle::STACK);
     titleBarPattern->SetTitlebarOptions(std::move(opt));
+    auto options = titleBarPattern->GetTitleBarOptions();
+    EXPECT_TRUE(options.brOptions.barStyle.has_value());
 }
 
 /**
@@ -996,8 +998,56 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternTest040, TestSize.Level1)
     auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
     EXPECT_NE(titleBarPattern, nullptr);
     NavigationTitlebarOptions opt;
-    opt.bgOptions.barStyle = std::make_optional(BarStyle::STANDARD);
+    opt.brOptions.barStyle = std::make_optional(BarStyle::STANDARD);
     titleBarPattern->SetTitlebarOptions(std::move(opt));
+    auto options = titleBarPattern->GetTitleBarOptions();
+    EXPECT_TRUE(options.brOptions.barStyle.has_value());
+}
+
+/**
+ * @tc.name: TitleBarPatternTest041
+ * @tc.desc: Test SetTitlebarOptions function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternTest041, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+    NavigationTitlebarOptions opt;
+    opt.brOptions.paddingStart = std::make_optional(DEFAULT_PADDING);
+    opt.brOptions.paddingEnd = std::make_optional(DEFAULT_PADDING);
+    titleBarPattern->SetTitlebarOptions(std::move(opt));
+    auto options = titleBarPattern->GetTitleBarOptions();
+    EXPECT_TRUE(options.brOptions.paddingStart.has_value());
+    EXPECT_TRUE(options.brOptions.paddingEnd.has_value());
+}
+
+/**
+ * @tc.name: TitleBarPatternTest042
+ * @tc.desc: Test SetTitlebarOptions function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternTest042, TestSize.Level1)
+{
+     /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    InitTitleBarTestNg();
+
+    /**
+     * @tc.steps: step2. Get options default values.
+     */
+    auto frameNode =
+        FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto titleBarPattern = frameNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+    auto options = titleBarPattern->GetTitleBarOptions();
+    EXPECT_FALSE(options.brOptions.paddingStart.has_value());
+    EXPECT_FALSE(options.brOptions.paddingEnd.has_value());
 }
 
 /**

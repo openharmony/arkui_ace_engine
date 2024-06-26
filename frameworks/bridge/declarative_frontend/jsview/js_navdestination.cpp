@@ -208,6 +208,7 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
     NG::NavigationTitlebarOptions options;
     if (info.Length() > 1) {
         ParseBackgroundOptions(info[1], options.bgOptions);
+        ParseBarOptions(info[1], options.brOptions);
     }
     NavDestinationModel::GetInstance()->SetTitlebarOptions(std::move(options));
 }
