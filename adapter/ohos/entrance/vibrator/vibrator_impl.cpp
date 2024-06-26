@@ -12,20 +12,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
+
+#include <vector>
 
 #include "vibrator_agent.h"
-#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
 
 using namespace OHOS::Sensors;
 
 namespace OHOS::Ace::NG {
+namespace {
+    static std::vector<const char*> effectIdNames = {
+        VIBRATOR_TYPE_SLIDE,
+        VIBRATOR_TYPE_SLIDE_LIGHT,
+        VIBRATOR_TYPE_CHARGING,
+        VIBRATOR_TYPE_CLOCK_TIMER
+    };
+};
+
+const char* VibratorImpl::supportedEffectId = nullptr;
+
+const char* VibratorImpl::GetFirstSupportedId()
+{
+    bool state = false;
+    for (auto item : effectIdNames) {
+        Sensors::IsSupportEffect(item, &state);
+        if (state) {
+            return item;
+        }
+    }
+    return nullptr;
+}
+
 void VibratorImpl::StartVibraFeedback()
 {
 #ifdef INDEXER_SUPPORT_VIBRATOR
-    bool state { false };
-    Sensors::IsSupportEffect(VIBRATOR_TYPE_SLIDE, &state);
-    if (state) {
-        Sensors::StartVibrator(VIBRATOR_TYPE_SLIDE);
+    if (supportedEffectId == nullptr) {
+        supportedEffectId = VibratorImpl::GetFirstSupportedId();
+    }
+    if (supportedEffectId != nullptr) {
+        Sensors::StartVibrator(supportedEffectId);
     }
 #endif
 }

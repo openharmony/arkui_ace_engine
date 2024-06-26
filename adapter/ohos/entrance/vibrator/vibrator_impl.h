@@ -22,6 +22,9 @@ public:
     ~VibratorImpl() = delete;
 
     static void StartVibraFeedback();
+private:
+    static const char* GetFirstSupportedId();
+    static const char* supportedEffectId;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_VIBRATOR_VIBRATOR_IMPL_H
