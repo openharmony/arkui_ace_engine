@@ -234,6 +234,7 @@ public:
 
     virtual void OnSurfaceDensityChanged(double density)
     {
+        std::lock_guard lock(densityChangeMutex_);
         for (auto&& [id, callback] : densityChangedCallbacks_) {
             if (callback) {
                 callback(density);
@@ -244,6 +245,7 @@ public:
     int32_t RegisterDensityChangedCallback(std::function<void(double)>&& callback)
     {
         if (callback) {
+            std::lock_guard lock(densityChangeMutex_);
             densityChangedCallbacks_.emplace(++densityChangeCallbackId_, std::move(callback));
             return densityChangeCallbackId_;
         }
@@ -252,6 +254,7 @@ public:
 
     void UnregisterDensityChangedCallback(int32_t callbackId)
     {
+        std::lock_guard lock(densityChangeMutex_);
         densityChangedCallbacks_.erase(callbackId);
     }
 
@@ -1431,6 +1434,7 @@ private:
     std::shared_ptr<Rosen::RSTransaction> rsTransaction_;
     uint32_t frameCount_ = 0;
 
+    std::mutex densityChangeMutex_;
     int32_t densityChangeCallbackId_ = 0;
     std::unordered_map<int32_t, std::function<void(double)>> densityChangedCallbacks_;
 
