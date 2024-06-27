@@ -55,12 +55,6 @@ void WebModelNG::Create(const std::string& src, const RefPtr<WebController>& web
     webPattern->SetWebController(webController);
     webPattern->SetRenderMode(renderMode);
     webPattern->SetIncognitoMode(incognitoMode);
-
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddWindowStateChangedCallback(nodeId);
-    pipeline->AddWindowSizeChangeCallback(nodeId);
-    AddDragFrameNodeToManager();
 }
 
 void WebModelNG::Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
@@ -88,11 +82,6 @@ void WebModelNG::Create(const std::string& src, std::function<void(int32_t)>&& s
     webPattern->SetParentNWebId(parentWebId);
     webPattern->SetRenderMode(renderMode);
     webPattern->SetIncognitoMode(incognitoMode);
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddWindowStateChangedCallback(nodeId);
-    pipeline->AddWindowSizeChangeCallback(nodeId);
-    AddDragFrameNodeToManager();
 }
 
 void WebModelNG::SetCustomScheme(const std::string& cmdLine)
@@ -207,7 +196,13 @@ void WebModelNG::SetOnRequestFocus(std::function<void(const BaseEventInfo* info)
 
     auto uiCallback = [func, weak](const std::shared_ptr<BaseEventInfo>& info) {
         auto frameNode = weak.Upgrade();
-        ContainerScope scope(frameNode->GetInstanceId());
+        int32_t instanceId = INSTANCE_ID_UNDEFINED;
+        if (frameNode) {
+            instanceId = frameNode->GetInstanceId();
+        } else {
+            instanceId = Container::CurrentIdSafely();
+        }
+        ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->PostAsyncEvent([info, func]() { func(info.get()); }, "ArkUIWebRequestFocusCallback");
@@ -275,7 +270,13 @@ void WebModelNG::SetOnKeyEvent(std::function<void(KeyEventInfo& keyEventInfo)>&&
     WeakPtr<NG::FrameNode> weak = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto uiCallback = [func, weak](KeyEventInfo& keyEventInfo) {
         auto frameNode = weak.Upgrade();
-        ContainerScope scope(frameNode->GetInstanceId());
+        int32_t instanceId = INSTANCE_ID_UNDEFINED;
+        if (frameNode) {
+            instanceId = frameNode->GetInstanceId();
+        } else {
+            instanceId = Container::CurrentIdSafely();
+        }
+        ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->PostSyncEvent([&keyEventInfo, func]() { func(keyEventInfo); }, "ArkUIWebKeyEventCallback");
@@ -518,7 +519,13 @@ void WebModelNG::SetOnMouseEvent(std::function<void(MouseInfo& info)>&& jsCallba
     WeakPtr<NG::FrameNode> weak = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto uiCallback = [func, weak](MouseInfo& info) {
         auto frameNode = weak.Upgrade();
-        ContainerScope scope(frameNode->GetInstanceId());
+        int32_t instanceId = INSTANCE_ID_UNDEFINED;
+        if (frameNode) {
+            instanceId = frameNode->GetInstanceId();
+        } else {
+            instanceId = Container::CurrentIdSafely();
+        }
+        ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->PostSyncEvent([&info, func]() { func(info); }, "ArkUIWebMouseEventCallback");
@@ -769,7 +776,13 @@ void WebModelNG::SetOnInterceptKeyEventCallback(std::function<bool(KeyEventInfo&
     WeakPtr<NG::FrameNode> weak = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onConsole = [func, weak](KeyEventInfo& keyEventInfo) -> bool {
         auto frameNode = weak.Upgrade();
-        ContainerScope scope(frameNode->GetInstanceId());
+        int32_t instanceId = INSTANCE_ID_UNDEFINED;
+        if (frameNode) {
+            instanceId = frameNode->GetInstanceId();
+        } else {
+            instanceId = Container::CurrentIdSafely();
+        }
+        ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         bool result = false;
         CHECK_NULL_RETURN(context, result);
