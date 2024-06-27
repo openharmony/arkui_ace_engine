@@ -296,8 +296,8 @@ void ImageAnalyzerManager::UpdatePressOverlay(const RefPtr<OHOS::Ace::PixelMap>&
 {
     analyzerUIConfig_.overlayOffset.SetX(offsetX);
     analyzerUIConfig_.overlayOffset.SetY(offsetY);
-    analyzerUIConfig_.touchInfo.touchPoint.x = pointX;
-    analyzerUIConfig_.touchInfo.touchPoint.y = pointY;
+    analyzerUIConfig_.touchInfo.touchPoint.x = 1.0 * pointX / rectWidth * pixelMap->GetWidth();
+    analyzerUIConfig_.touchInfo.touchPoint.y = 1.0 * pointY / rectHeight * pixelMap->GetHeight();
     analyzerUIConfig_.touchInfo.touchType = TouchType::DOWN;
     analyzerUIConfig_.selectedStatus = Status::SELECTED;
     analyzerUIConfig_.menuStatus = Status::MENU_SHOW;
