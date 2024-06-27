@@ -27,6 +27,7 @@
 #include "native_type.h"
 #include "node_extened.h"
 #include "node_model.h"
+#include "node_transition.h"
 #include "styled_string.h"
 #include "waterflow_section_option.h"
 #include "list_option.h"
@@ -3683,6 +3684,23 @@ const ArkUI_AttributeItem* GetExpandSafeArea(ArkUI_NodeHandle node)
     GetFullImpl()->getNodeModifiers()->getCommonModifier()->getExpandSafeArea(node->uiNodeHandle, &values);
     g_numberValues[NUM_0].u32 = values[NUM_0];
     g_numberValues[NUM_1].u32 = values[NUM_1];
+    return &g_attributeItem;
+}
+
+int32_t SetTransition(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
+    auto fullImpl = GetFullImpl();
+    node->transitionOption = item->object;
+    auto effectOption = reinterpret_cast<ArkUI_TransitionEffect*>(item->object);
+    auto toEffectOption = OHOS::Ace::TransitionModel::ConvertToEffectOption(effectOption);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setTransition(node->uiNodeHandle, toEffectOption);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetTransition(ArkUI_NodeHandle node)
+{
+    g_attributeItem.object = node->transitionOption;
     return &g_attributeItem;
 }
 // Text
@@ -12513,6 +12531,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetAccessibilityValue,
         SetExpandSafeArea,
         SetAreaChangeRatio,
+        SetTransition,
     };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -12618,6 +12637,7 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetAccessibilityValue,
         GetExpandSafeArea,
         GetAreaChangeRatio,
+        GetTransition,
     };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -12727,6 +12747,7 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetAccessibilityValue,
         ResetExpandSafeArea,
         ResetAreaChangeRatio,
+        nullptr,
     };
     if (subTypeId >= sizeof(resetters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);

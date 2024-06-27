@@ -1597,6 +1597,8 @@ typedef enum {
      *
      */
     NODE_ACCESSIBILITY_VALUE = 91,
+    
+    
     /**
      * @brief 定义控制组件扩展其安全区域，支持属性设置，属性重置和属性获取。
      *
@@ -1623,6 +1625,18 @@ typedef enum {
      *
      */
     NODE_VISIBLE_AREA_CHANGE_RADIO = 93,
+
+    /**
+     * @brief 定义组件插入和删除时显示过渡动效，支持属性设置，属性获取。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .object：参数类型为{@link ArkUI_TransitionEffect}。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .object：参数类型为{@link ArkUI_TransitionEffect}。 \n
+     *
+     */
+    NODE_TRANSITION = 94,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
@@ -7093,6 +7107,7 @@ int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen(ArkUI_NodeHandle nod
 * @since 12
 */
 int32_t OH_ArkUI_List_CloseAllSwipeActions(ArkUI_NodeHandle node, void* userData, void (*onFinish)(void* userData));
+
 #ifdef __cplusplus
 };
 #endif

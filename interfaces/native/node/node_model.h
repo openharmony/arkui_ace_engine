@@ -47,6 +47,7 @@ struct ArkUI_Node {
     void* customEventListeners = nullptr;
     void* altDrawableDescriptor = nullptr;
     ArkUI_AttributeItem* areaChangeRadio = nullptr;
+    void* transitionOption = nullptr;
 };
 
 struct ArkUI_Context {
