@@ -361,7 +361,11 @@ if (globalThis.WithTheme !== undefined) {
         if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
             ArkThemeScopeManager.getInstance().onExitLocalColorMode();
         }
-        ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, themeOptions, theme);
+        if (themeOptions) {
+            ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, themeOptions, theme);
+        } else {
+            ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, {}, theme);
+        }
     };
     globalThis.WithTheme.pop = function () {
         ArkThemeScopeManager.getInstance().onScopeExit();
@@ -887,7 +891,7 @@ class ArkThemeScopeManager {
     }
     makeTheme(customTheme) {
         var _a, _b;
-        if (customTheme === undefined) {
+        if (!customTheme) {
             return (_a = this.defaultTheme) !== null && _a !== void 0 ? _a : ArkThemeScopeManager.SystemTheme;
         }
         return new ArkThemeImpl((_b = this.defaultTheme) !== null && _b !== void 0 ? _b : ArkThemeScopeManager.SystemTheme, customTheme.colors, customTheme.shapes, customTheme.typography);
