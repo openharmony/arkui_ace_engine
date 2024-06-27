@@ -4973,6 +4973,7 @@ void WebPattern::GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId)
         que.push(id);
     }
 
+    int nodeCount = 0;
     while (!que.empty()) {
         uint64_t tmp = que.front();
         que.pop();
@@ -4987,7 +4988,9 @@ void WebPattern::GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId)
         for (auto id: webNodeInfo->GetChildIds()) {
             que.push(id);
         }
+        nodeCount++;
     }
+    TAG_LOGD(AceLogTag::ACE_WEB, "Current web info node count: %{public}d", nodeCount);
     cb(jsonNodeArray, webId);
     inspectorAccessibilityEnable_ = false;
     SetAccessibilityState(false);
@@ -4995,10 +4998,9 @@ void WebPattern::GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId)
 
 void WebPattern::GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId)
 {
+    CHECK_NULL_VOID(cb);
     inspectorAccessibilityEnable_ = true;
     SetAccessibilityState(true);
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
@@ -5006,7 +5008,12 @@ void WebPattern::GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t
     auto taskExecutor = pipelineContext->GetTaskExecutor();
     taskExecutor->PostDelayedTask([weak = WeakClaim(this), cb, webId] () {
         auto pattern = weak.Upgrade();
+        auto startTime = std::chrono::high_resolution_clock::now();
         pattern->GetWebAllInfosImpl(cb, webId);
+        auto nowTime = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> diff =
+            std::chrono::duration_cast<std::chrono::milliseconds>(nowTime - startTime);
+        TAG_LOGD(AceLogTag::ACE_WEB, "GetAllAccessibilityInfo time cost: %{public}f", diff.count());
         },
         TaskExecutor::TaskType::UI, WEB_ACCESSIBILITY_DELAY_TIME, "GetAllWebAccessibilityNodeInfos");
 }
