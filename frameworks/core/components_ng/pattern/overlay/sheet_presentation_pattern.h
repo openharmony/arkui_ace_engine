@@ -304,6 +304,12 @@ public:
 
     void HandleDragEnd(float dragVelocity);
 
+    void OnCoordScrollStart();
+
+    bool OnCoordScrollUpdate(float scrollOffset);
+
+    void OnCoordScrollEnd(float dragVelocity);
+
     void SheetTransition(bool isTransitionIn, float dragVelocity = 0.0f);
 
     void ModifyFireSheetTransition(float dragVelocity = 0.0f);
