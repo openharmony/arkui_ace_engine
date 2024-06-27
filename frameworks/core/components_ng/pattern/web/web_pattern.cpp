@@ -1731,7 +1731,7 @@ void WebPattern::OnAreaChangedInner()
         drawSizeCache_ = drawSize_;
         delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
     }
-    if (layoutMode_ != WebLayoutMode::FIT_CONTENT) {
+    if (renderMode_ != RenderMode::SYNC_RENDER) {
         if (webOffset_ == offset) {
             return;
         }
@@ -1741,7 +1741,7 @@ void WebPattern::OnAreaChangedInner()
     if (isInWindowDrag_)
         return;
     delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
-    if (layoutMode_ == WebLayoutMode::FIT_CONTENT) {
+    if (renderMode_ == RenderMode::SYNC_RENDER) {
         UpdateSlideOffset(true);
     }
 }
