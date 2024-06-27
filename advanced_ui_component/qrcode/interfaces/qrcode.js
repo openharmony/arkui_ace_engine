@@ -121,17 +121,13 @@ export class Qrcode extends ViewV2 {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
         super(parent, elmtId, extraInfo);
         this.initParam("options", (params && "options" in params) ? params.options : undefined);
-        this.value = '';
-        this.state = QrcodeState.NORMAL;
-        this.initParam("onAction", (params && "onAction" in params) ? params.onAction : undefined);
+        this.initParam("value", (params && "value" in params) ? params.value : undefined);
+        this.initParam("state", (params && "state" in params) ? params.state : undefined);
         this.finalizeConstruction();
     }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
-            Stack.onClick(() => {
-                this.onAction && this.onAction();
-            });
         }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
@@ -231,8 +227,11 @@ export class Qrcode extends ViewV2 {
         if ("options" in params) {
             this.updateParam("options", params.options);
         }
-        if ("onAction" in params) {
-            this.updateParam("onAction", params.onAction);
+        if ("value" in params) {
+            this.updateParam("value", params.value);
+        }
+        if ("state" in params) {
+            this.updateParam("state", params.state);
         }
     }
     rerender() {
@@ -243,13 +242,10 @@ __decorate([
     Param
 ], Qrcode.prototype, "options", void 0);
 __decorate([
-    Consumer()
+    Param
 ], Qrcode.prototype, "value", void 0);
 __decorate([
-    Consumer()
-], Qrcode.prototype, "state", void 0);
-__decorate([
     Param
-], Qrcode.prototype, "onAction", void 0);
+], Qrcode.prototype, "state", void 0);
 //# sourceMappingURL=Qrcode.js.map
-export default {Qrcode,QrcodeOptions,QrcodeState}
+export default {Qrcode, QrcodeOptions, QrcodeState}

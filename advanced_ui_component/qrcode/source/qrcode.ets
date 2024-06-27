@@ -22,18 +22,18 @@ export enum QrcodeState {
 }
 
 class ConfigDataConstants {
-  static readonly TIPS = $r('sys.string.qrcode_expiration_prompt');
-  static readonly ANIMATION_CURVE = '0.33,0,0.67,1';
-  static readonly ONE_HUNDRED_TWENTY_FIVE_VP = 125;
-  static readonly ONE_HUNDRED_ONE_VP = 101;
-  static readonly TWENTY_EIGHT_VP = 28;
-  static readonly THIRTY_FOUR_VP = 34;
-  static readonly TWELVE = 12;
-  static readonly ELEVEN_FP = '11fp';
-  static readonly SIX_VP = '6vp';
-  static readonly FIVE_HUNDRED = 500;
-  static readonly DEFAULT_OPACITY = 0.4;
-  static readonly DEFAULT_TIMES = 200;
+  public static readonly TIPS = $r('sys.string.qrcode_expiration_prompt');
+  public static readonly ANIMATION_CURVE = '0.33,0,0.67,1';
+  public static readonly ONE_HUNDRED_TWENTY_FIVE_VP = 125;
+  public static readonly ONE_HUNDRED_ONE_VP = 101;
+  public static readonly TWENTY_EIGHT_VP = 28;
+  public static readonly THIRTY_FOUR_VP = 34;
+  public static readonly TWELVE = 12;
+  public static readonly ELEVEN_FP = '11fp';
+  public static readonly SIX_VP = '6vp';
+  public static readonly FIVE_HUNDRED = 500;
+  public static readonly DEFAULT_OPACITY = 0.4;
+  public static readonly DEFAULT_TIMES = 200;
 }
 
 interface CommonQrcodeOptions {
@@ -115,21 +115,21 @@ interface CommonQrcodeOptions {
 
 @ObservedV2
 export class QrcodeOptions {
-  @Trace edgeLength?: LengthMetrics;
-  @Trace color?: ColorMetrics;
-  @Trace backgroundColor?: ColorMetrics;
-  @Trace textColor?: ColorMetrics;
-  @Trace textContent?: ResourceStr;
-  @Trace borderRadius?: LengthMetrics;
-  @Trace opacity?: number | Resource;
-  @Trace animationCurve?: Curve | string | ICurve;
-  @Trace animationDuration?: number;
-  @Trace qrcodeSideLength?: LengthMetrics;
-  @Trace expiredImageLength?: LengthMetrics;
-  @Trace textSize?: ResourceStr;
-  @Trace textWeight?: number | FontWeight | string;
-  @Trace space?: ResourceStr;
-  @Trace loadingImageLength?: LengthMetrics;
+  @Trace  edgeLength?: LengthMetrics;
+  @Trace  color?: ColorMetrics;
+  @Trace  backgroundColor?: ColorMetrics;
+  @Trace  textColor?: ColorMetrics;
+  @Trace  textContent?: ResourceStr;
+  @Trace  borderRadius?: LengthMetrics;
+  @Trace  opacity?: number | Resource;
+  @Trace  animationCurve?: Curve | string | ICurve;
+  @Trace  animationDuration?: number;
+  @Trace  qrcodeSideLength?: LengthMetrics;
+  @Trace  expiredImageLength?: LengthMetrics;
+  @Trace  textSize?: ResourceStr;
+  @Trace  textWeight?: number | FontWeight | string;
+  @Trace  space?: ResourceStr;
+  @Trace  loadingImageLength?: LengthMetrics;
 
   constructor(options: CommonQrcodeOptions) {
     this.edgeLength = options.edgeLength ??
@@ -158,9 +158,8 @@ export class QrcodeOptions {
 @ComponentV2
 export struct Qrcode {
   @Require @Param options: QrcodeOptions;
-  @Consumer() value: string = '';
-  @Consumer() state: QrcodeState = QrcodeState.NORMAL;
-  @Require @Param onAction: VoidCallback;
+  @Require @Param value: string;
+  @Require @Param state: QrcodeState;
 
   build() {
     Stack() {
@@ -222,8 +221,5 @@ export struct Qrcode {
         })
       }
     }
-    .onClick(() => {
-      this.onAction && this.onAction()
-    })
   }
 }
