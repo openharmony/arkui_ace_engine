@@ -2943,6 +2943,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
 
 void TextFieldPattern::UpdateParam(GestureEvent& info, bool shouldProcessOverlayAfterLayout)
 {
+    parentGlobalOffset_ = GetPaintRectGlobalOffset();
     auto localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
     if (selectController_->IsTouchAtLineEnd(localOffset)) {
         selectController_->UpdateCaretInfoByOffset(localOffset);
