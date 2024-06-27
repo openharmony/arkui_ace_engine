@@ -3478,8 +3478,9 @@ void ParseContentPreviewAnimationOptionsParam(const JSCallbackInfo& info, const 
             menuParam.hasPreviewTransitionEffect = true;
             menuParam.previewTransition = ParseChainedTransition(obj, info.GetExecutionContext());
         }
-        if (menuParam.previewMode != MenuPreviewMode::CUSTOM || menuParam.hasPreviewTransitionEffect ||
-            menuParam.hasTransitionEffect) {
+        if (menuParam.previewMode != MenuPreviewMode::CUSTOM ||
+            menuParam.hasPreviewTransitionEffect || menuParam.hasTransitionEffect ||
+            menuParam.contextMenuRegisterType == NG::ContextMenuRegisterType::CUSTOM_TYPE) {
             return;
         }
         auto hoverScaleProperty = animationOptionsObj->GetProperty("hoverScale");
@@ -7476,6 +7477,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
 
     if (responseType != ResponseType::LONG_PRESS) {
         menuParam.previewMode = MenuPreviewMode::NONE;
+        menuParam.isShowHoverImage = false;
     }
     menuParam.type = NG::MenuType::CONTEXT_MENU;
     ViewAbstractModel::GetInstance()->BindContextMenu(responseType, buildFunc, menuParam, previewBuildFunc);
