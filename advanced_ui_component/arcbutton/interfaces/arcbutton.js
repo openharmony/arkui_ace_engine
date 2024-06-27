@@ -38,7 +38,7 @@ export var ArcButtonStyleMode;
     ArcButtonStyleMode[ArcButtonStyleMode["NORMAL_DEEP"] = 2] = "NORMAL_DEEP";
     ArcButtonStyleMode[ArcButtonStyleMode["EMPHASIZED_WARNING"] = 3] = "EMPHASIZED_WARNING";
 })(ArcButtonStyleMode || (ArcButtonStyleMode = {}));
-var ArcButtonStatus;
+export var ArcButtonStatus;
 (function (ArcButtonStatus) {
     ArcButtonStatus[ArcButtonStatus["NORMAL"] = 0] = "NORMAL";
     ArcButtonStatus[ArcButtonStatus["PRESSED"] = 1] = "PRESSED";

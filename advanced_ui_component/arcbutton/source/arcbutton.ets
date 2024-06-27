@@ -28,7 +28,7 @@ export enum ArcButtonStyleMode {
   EMPHASIZED_WARNING
 }
 
-enum ArcButtonStatus {
+export enum ArcButtonStatus {
   NORMAL,
   PRESSED,
   UNAVAILABLE
@@ -148,8 +148,8 @@ export class ArcButtonOptions {
   @Trace textStyle: FontStyle;
   @Trace textFamily: string | Resource;
   @Trace textMargin: ArcButtonMargin;
-  touchCallback?: (event: TouchEvent) => VoidCallback
-  onClickEvent?: (event: ClickEvent) => VoidCallback
+  touchCallback?: Callback<TouchEvent>
+  onClickEvent?: Callback<ClickEvent>
 
   constructor(options: CommonArcButtonOptions) {
     this.type = options.type ?? ArcButtonTypeMode.BOTTOM_EDGE
