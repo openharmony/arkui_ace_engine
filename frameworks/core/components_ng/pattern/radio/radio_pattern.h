@@ -204,6 +204,7 @@ private:
     void SetAccessibilityAction();
     void UpdateSelectStatus(bool isSelected);
     void FireBuilder();
+    bool OnKeyEvent(const KeyEvent& event);
 
     void ImageNodeCreate();
     void startEnterAnimation();
