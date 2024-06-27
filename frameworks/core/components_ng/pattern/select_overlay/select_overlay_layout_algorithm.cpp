@@ -24,6 +24,8 @@
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -32,6 +34,31 @@ constexpr Dimension MORE_MENU_INTERVAL = 8.0_vp;
 }
 
 void SelectOverlayLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<SelectOverlayPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->GetMode() != SelectOverlayMode::HANDLE_ONLY) {
+        MeasureChild(layoutWrapper);
+    }
+    PerformMeasureSelf(layoutWrapper);
+    // match parent.
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
+    if (LessOrEqual(frameSize.Width(), 0.0f) || LessOrEqual(frameSize.Height(), 0.0f)) {
+        auto host = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(host);
+        auto parentNode = host->GetAncestorNodeOfFrame();
+        CHECK_NULL_VOID(parentNode);
+        auto parentGeo = parentNode->GetGeometryNode();
+        CHECK_NULL_VOID(parentGeo);
+        geometryNode->SetFrameSize(parentGeo->GetFrameSize());
+    }
+}
+
+void SelectOverlayLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper)
 {
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -55,14 +82,13 @@ void SelectOverlayLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         isMouseCustomMenu = true;
     }
     auto childIndex = -1;
-    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         childIndex++;
         if (childIndex == 0 && isMouseCustomMenu) {
             continue;
         }
         child->Measure(layoutConstraint);
     }
-    PerformMeasureSelf(layoutWrapper);
 }
 
 void SelectOverlayLayoutAlgorithm::CalculateCustomMenuLayoutConstraint(
@@ -117,6 +143,17 @@ OffsetF SelectOverlayLayoutAlgorithm::CalculateCustomMenuByMouseOffset(LayoutWra
 }
 
 void SelectOverlayLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<SelectOverlayPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->GetMode() != SelectOverlayMode::HANDLE_ONLY) {
+        LayoutChild(layoutWrapper);
+    }
+}
+
+void SelectOverlayLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper)
 {
     auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(menu);

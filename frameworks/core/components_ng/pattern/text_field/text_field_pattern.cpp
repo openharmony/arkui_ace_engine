@@ -1634,6 +1634,9 @@ void TextFieldPattern::FireEventHubOnChange(const std::string& text)
 void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     CHECK_NULL_VOID(!IsDragging());
+    if (selectOverlay_->IsTouchAtHandle(info)) {
+        return;
+    }
     auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
@@ -2062,6 +2065,9 @@ void TextFieldPattern::InitClickEvent()
 void TextFieldPattern::HandleClickEvent(GestureEvent& info)
 {
     CHECK_NULL_VOID(!IsDragging());
+    if (selectOverlay_->IsClickAtHandle(info)) {
+        return;
+    }
     auto focusHub = GetFocusHub();
     if (!focusHub->IsFocusable()) {
         return;
@@ -7274,6 +7280,7 @@ const Dimension& TextFieldPattern::GetAvoidSoftKeyboardOffset() const
 
 Offset TextFieldPattern::ConvertGlobalToLocalOffset(const Offset& globalOffset)
 {
+    parentGlobalOffset_ = GetPaintRectGlobalOffset();
     auto localOffset = globalOffset - Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY());
     if (selectOverlay_->HasRenderTransform()) {
         auto localOffsetF = OffsetF(globalOffset.GetX(), globalOffset.GetY());

@@ -627,6 +627,16 @@ void PipelineContext::CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, Axis
 
 void PipelineContext::PreLayout(uint64_t nanoTimestamp, uint32_t frameCount) {}
 
+void PipelineContext::AddFrameNodeChangeListener(const RefPtr<FrameNode>& node) {}
+
+void PipelineContext::RemoveFrameNodeChangeListener(const RefPtr<FrameNode>& node) {}
+
+void PipelineContext::AddChangedFrameNode(const RefPtr<FrameNode>& node) {}
+
+void PipelineContext::FlushNodeChangeFlag() {}
+
+void PipelineContext::CleanNodeChangeFlag() {}
+
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 

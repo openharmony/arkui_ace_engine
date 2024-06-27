@@ -585,6 +585,8 @@ public:
         }
     }
 
+    virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

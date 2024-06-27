@@ -3089,6 +3089,9 @@ void FrameNode::UpdateAnimatablePropertyFloat(const std::string& propertyName, f
     auto property = AceType::DynamicCast<NodeAnimatablePropertyFloat>(iter->second);
     CHECK_NULL_VOID(property);
     property->Set(value);
+    if (AnimationUtils::IsImplicitAnimationOpen()) {
+        AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_START_ANIMATION);
+    }
 }
 
 void FrameNode::CreateAnimatableArithmeticProperty(const std::string& propertyName,
@@ -4690,6 +4693,57 @@ void FrameNode::TriggerShouldParallelInnerWith(
             currentRecognizer->SetBridgeMode(true);
             result->AddBridgeObj(currentRecognizer);
         }
+    }
+}
+
+void FrameNode::OnSyncGeometryFrameFinish(const RectF& paintRect)
+{
+    if (syncedFramePaintRect_.has_value() && syncedFramePaintRect_.value() != paintRect) {
+        AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_GEOMETRY_CHANGE);
+    }
+    syncedFramePaintRect_ = paintRect;
+}
+
+void FrameNode::AddFrameNodeChangeInfoFlag(FrameNodeChangeInfoFlag changeFlag)
+{
+    if (changeInfoFlag_ == FRAME_NODE_CHANGE_INFO_NONE) {
+        auto context = GetContext();
+        CHECK_NULL_VOID(context);
+        context->AddChangedFrameNode(Claim(this));
+    }
+    changeInfoFlag_ = changeInfoFlag_ | changeFlag;
+}
+
+void FrameNode::RegisterNodeChangeListener()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddFrameNodeChangeListener(Claim(this));
+}
+
+void FrameNode::UnregisterNodeChangeListener()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->RemoveFrameNodeChangeListener(Claim(this));
+}
+
+void FrameNode::ProcessFrameNodeChangeFlag()
+{
+    auto changeFlag = FRAME_NODE_CHANGE_INFO_NONE;
+    auto parent = Claim(this);
+    while (parent) {
+        if (parent->GetChangeInfoFlag() != FRAME_NODE_CHANGE_INFO_NONE) {
+            changeFlag = changeFlag | parent->GetChangeInfoFlag();
+        }
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    if (changeFlag == FRAME_NODE_CHANGE_INFO_NONE) {
+        return;
+    }
+    auto pattern = GetPattern();
+    if (pattern) {
+        pattern->OnFrameNodeChanged(changeFlag);
     }
 }
 } // namespace OHOS::Ace::NG

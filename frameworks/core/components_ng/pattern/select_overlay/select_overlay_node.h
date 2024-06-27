@@ -54,7 +54,8 @@ public:
     explicit SelectOverlayNode(const RefPtr<Pattern>& pattern);
     ~SelectOverlayNode() override = default;
 
-    static RefPtr<FrameNode> CreateSelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& info);
+    static RefPtr<FrameNode> CreateSelectOverlayNode(
+        const std::shared_ptr<SelectOverlayInfo>& info, SelectOverlayMode mode = SelectOverlayMode::ALL);
     RefPtr<FrameNode> CreateMoreSelectOverlayNode(const std::vector<MenuOptionsParam>& menuOptionItems, int32_t index);
 
     void UpdateToolBar(bool menuItemChanged, bool noAnimation = false);
@@ -93,6 +94,8 @@ public:
 
     void HideSelectOverlay(const std::function<void()>& callback);
 
+    void SwitchToOverlayMode();
+
 private:
     void CreateToolBar();
     bool AddSystemDefaultOptions(float maxWidth, float& allocatedSize);
@@ -130,6 +133,8 @@ private:
     }
 
     static RefPtr<FrameNode> CreateMenuNode(const std::shared_ptr<SelectOverlayInfo>& info);
+
+    void NotifyUpdateToolBar(bool itemChanged);
 
     using ExecuteStateFunc = void (SelectOverlayNode::*)(FrameNodeType type, FrameNodeTrigger trigger);
 
