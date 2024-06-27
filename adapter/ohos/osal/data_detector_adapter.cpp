@@ -245,25 +245,29 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([result, weak, instanceID, startPos, info] {
-            ContainerScope scope(instanceID);
-            auto dataDetectorAdapter = weak.Upgrade();
-            CHECK_NULL_VOID(dataDetectorAdapter);
-            if (info.module != dataDetectorAdapter->textDetectTypes_) {
-                return;
-            }
-            dataDetectorAdapter->ParseAIResult(result, startPos);
-            auto host = dataDetectorAdapter->GetHost();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
-        }, "ArkUITextParseAIResult");
+        uiTaskExecutor.PostTask(
+            [result, weak, instanceID, startPos, info] {
+                ContainerScope scope(instanceID);
+                auto dataDetectorAdapter = weak.Upgrade();
+                CHECK_NULL_VOID(dataDetectorAdapter);
+                if (info.module != dataDetectorAdapter->textDetectTypes_) {
+                    return;
+                }
+                dataDetectorAdapter->ParseAIResult(result, startPos);
+                auto host = dataDetectorAdapter->GetHost();
+                CHECK_NULL_VOID(host);
+                host->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+            },
+            "ArkUITextParseAIResult");
     };
 
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-    uiTaskExecutor.PostTask([info, textFunc] {
-        TAG_LOGI(AceLogTag::ACE_TEXT, "Start entity detect using AI");
-        DataDetectorMgr::GetInstance().DataDetect(info, textFunc);
-    }, "ArkUITextInitDataDetect");
+    uiTaskExecutor.PostTask(
+        [info, textFunc] {
+            TAG_LOGI(AceLogTag::ACE_TEXT, "Start entity detect using AI");
+            DataDetectorMgr::GetInstance().DataDetect(info, textFunc);
+        },
+        "ArkUITextInitDataDetect");
 }
 
 void DataDetectorAdapter::ParseAIResult(const TextDataDetectResult& result, int32_t startPos)

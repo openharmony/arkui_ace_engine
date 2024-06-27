@@ -628,11 +628,13 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                         auto customPixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
                         auto taskScheduler = pipeline->GetTaskExecutor();
                         CHECK_NULL_VOID(taskScheduler);
-                        taskScheduler->PostTask([gestureHub, customPixelMap]() {
-                            CHECK_NULL_VOID(gestureHub);
-                            gestureHub->SetPixelMap(customPixelMap);
-                            gestureHub->SetDragPreviewPixelMap(customPixelMap);
-                        }, TaskExecutor::TaskType::UI, "ArkUIDragSetCustomPixelMap");
+                        taskScheduler->PostTask(
+                            [gestureHub, customPixelMap]() {
+                                CHECK_NULL_VOID(gestureHub);
+                                gestureHub->SetPixelMap(customPixelMap);
+                                gestureHub->SetDragPreviewPixelMap(customPixelMap);
+                            },
+                            TaskExecutor::TaskType::UI, "ArkUIDragSetCustomPixelMap");
                     }
                 };
 
