@@ -584,7 +584,8 @@ void ImagePattern::CreateObscuredImage()
     }
 }
 
-void ImagePattern::LoadImage(const ImageSourceInfo& src, const PropertyChangeFlag& propertyChangeFlag)
+void ImagePattern::LoadImage(
+    const ImageSourceInfo& src, const PropertyChangeFlag& propertyChangeFlag, VisibleType visibleType)
 {
     if (loadingCtx_) {
         auto srcPixelMap = src.GetPixmap();
@@ -603,7 +604,8 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src, const PropertyChangeFla
     if (onProgressCallback_) {
         loadingCtx_->SetOnProgressCallback(std::move(onProgressCallback_));
     }
-    if (!((propertyChangeFlag & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE)) {
+    if (!((propertyChangeFlag & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) ||
+        visibleType == VisibleType::GONE) {
         loadingCtx_->FinishMearuse();
     }
     loadingCtx_->LoadImageData();
@@ -627,7 +629,8 @@ void ImagePattern::LoadImageDataIfNeed()
     UpdateInternalResource(src);
 
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src || isImageQualityChange_) {
-        LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag());
+        LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag(),
+            imageLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE));
     } else if (IsSupportImageAnalyzerFeature()) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -1421,7 +1424,8 @@ void ImagePattern::OnConfigurationUpdate()
     UpdateInternalResource(src);
     src.SetIsConfigurationChange(true);
 
-    LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag());
+    LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag(),
+        imageLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE));
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
         auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
         if (altLoadingCtx_ && altLoadingCtx_->GetSourceInfo() == altImageSourceInfo) {
