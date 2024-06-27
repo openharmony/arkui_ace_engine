@@ -115,21 +115,21 @@ interface CommonQrcodeOptions {
 
 @ObservedV2
 export class QrcodeOptions {
-  @Trace  edgeLength?: LengthMetrics;
-  @Trace  color?: ColorMetrics;
-  @Trace  backgroundColor?: ColorMetrics;
-  @Trace  textColor?: ColorMetrics;
-  @Trace  textContent?: ResourceStr;
-  @Trace  borderRadius?: LengthMetrics;
-  @Trace  opacity?: number | Resource;
-  @Trace  animationCurve?: Curve | string | ICurve;
-  @Trace  animationDuration?: number;
-  @Trace  qrcodeSideLength?: LengthMetrics;
-  @Trace  expiredImageLength?: LengthMetrics;
-  @Trace  textSize?: ResourceStr;
-  @Trace  textWeight?: number | FontWeight | string;
-  @Trace  space?: ResourceStr;
-  @Trace  loadingImageLength?: LengthMetrics;
+  @Trace  public edgeLength?: LengthMetrics;
+  @Trace  public color?: ColorMetrics;
+  @Trace  public backgroundColor?: ColorMetrics;
+  @Trace  public textColor?: ColorMetrics;
+  @Trace  public textContent?: ResourceStr;
+  @Trace  public borderRadius?: LengthMetrics;
+  @Trace  public opacity?: number | Resource;
+  @Trace  public animationCurve?: Curve | string | ICurve;
+  @Trace  public animationDuration?: number;
+  @Trace  public qrcodeSideLength?: LengthMetrics;
+  @Trace  public expiredImageLength?: LengthMetrics;
+  @Trace  public textSize?: ResourceStr;
+  @Trace  public textWeight?: number | FontWeight | string;
+  @Trace  public space?: ResourceStr;
+  @Trace  public loadingImageLength?: LengthMetrics;
 
   constructor(options: CommonQrcodeOptions) {
     this.edgeLength = options.edgeLength ??
