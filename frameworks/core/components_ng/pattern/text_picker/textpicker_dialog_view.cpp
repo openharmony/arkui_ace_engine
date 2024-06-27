@@ -1205,7 +1205,7 @@ void TextPickerDialogView::SetDialogButtonActive(RefPtr<FrameNode>& contentColum
     if (dialogNodePage == 0) {
         SetFirstDialogButtonActive(contentRow);
         SetDividerNodeActive(contentRow, true, false, false);
-    } else if (dialogNodePage == 1 && dialogNodePage != (columnCount - 1)) {
+    } else if (dialogNodePage != (columnCount - 1)) {
         SetSecondDialogButtonActive(contentRow);
         SetDividerNodeActive(contentRow, false, true, false);
     } else {
@@ -1354,7 +1354,7 @@ RefPtr<FrameNode> TextPickerDialogView::SeparatedOptionsShow(
     auto textPickerNode = weakText.Upgrade();
     auto contentColumn = weakColumn.Upgrade();
     CHECK_NULL_VOID(dialogNode);
-    if (dialogNodePage < columnCount) {
+    if (dialogNodePage < (columnCount - 1)) {
         dialogNodePage++;
     }
     SetDialogNodePageActive(contentColumn, textPickerNode, dialogNodePage, columnCount);
