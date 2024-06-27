@@ -568,6 +568,16 @@ void NavigationPattern::UpdateNavPathList()
         auto pathName = pathNames[index];
         auto pathIndex = indexes[index];
         RefPtr<UINode> uiNode = nullptr;
+        if (navigationStack_->NeedBuildNewInstance(index)) {
+            // if marked NEW_INSTANCE when push/replace in frontend, build a new instance anyway
+            uiNode = GenerateUINodeByIndex(index);
+            navPathList.emplace_back(std::make_pair(pathName, uiNode));
+            navigationStack_->SetNeedBuildNewInstance(index, false);
+            if (index == pathListSize - 1) {
+                isCurTopNewInstance_ = true;
+            }
+            continue;
+        }
         if (index == pathListSize - 1 && addByNavRouter_) {
             addByNavRouter_ = false;
             uiNode = navigationStack_->Get();
@@ -604,9 +614,6 @@ void NavigationPattern::UpdateNavPathList()
             "index: %{public}d, name: %{public}s.", index, pathName.c_str());
         uiNode = GenerateUINodeByIndex(index);
         navPathList.emplace_back(std::make_pair(pathName, uiNode));
-        if (index == pathListSize - 1) {
-            isCurTopNewInstance_ = true;
-        }
     }
     navigationStack_->ClearPreBuildNodeList();
     navigationStack_->SetNavPathList(navPathList);
@@ -715,6 +722,11 @@ void NavigationPattern::CheckTopNavPathChange(
         isPopPage |= lastPreIndex == -1;
         preTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
             NavigationGroupNode::GetNavDestinationNode(preTopNavPath->second));
+    }
+    if (isCurTopNewInstance_) {
+        isPopPage = false;
+        // flag isCurTopNewInstance_is useless in the subsequent process of current js-stack sync, so reset it
+        isCurTopNewInstance_ = false;
     }
     RefPtr<NavDestinationGroupNode> newTopNavDestination;
     if (newTopNavPath.has_value()) {
@@ -1074,10 +1086,6 @@ void NavigationPattern::StartDefaultAnimation(const RefPtr<NavDestinationGroupNo
     if (isDialog) {
         TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage, isNeedVisible);
         return;
-    }
-    if (isCurTopNewInstance_) {
-        isPopPage = false;
-        isCurTopNewInstance_ = false;
     }
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(navigationNode);
@@ -1643,10 +1651,6 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
     if ((!preTopNavDestination && !newTopNavDestination) || !onTransition_) {
         return false;
     }
-    if (isCurTopNewInstance_) {
-        isPopPage = false;
-        isCurTopNewInstance_ = false;
-    }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     hostNode->SetIsOnAnimation(true);
     if (!newTopNavDestination) {
@@ -2155,7 +2159,6 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         NotifyDialogChange(NavDestinationLifecycle::ON_WILL_SHOW, false, true);
     }
     if (!isAnimated) {
-        isCurTopNewInstance_ = false;
         FireShowAndHideLifecycle(preDestination, topDestination, isPopPage, false);
         TransitionWithOutAnimation(preDestination, topDestination, isPopPage, isNeedVisible);
         return;

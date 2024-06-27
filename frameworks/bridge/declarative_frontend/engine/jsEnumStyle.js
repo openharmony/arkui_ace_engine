@@ -1992,6 +1992,7 @@ class NavPathInfo {
     this.onPop = onPop;
     this.index = -1;
     this.needUpdate = false;
+    this.needBuildNewInstance = false;
   }
 }
 
@@ -2155,7 +2156,10 @@ class NavPathStack {
     if (ret) {
       return;
     }
-    info.index = launchMode === LaunchMode.NEW_INSTANCE ? -1 : this.findInPopArray(info.name);
+    info.index = this.findInPopArray(info.name);
+    if (launchMode === LaunchMode.NEW_INSTANCE) {
+      info.needBuildNewInstance = true;
+    }
     this.pathArray.push(info);
     this.isReplace = 0;
     this.animated = animated;
@@ -2175,7 +2179,10 @@ class NavPathStack {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
-    info.index = launchMode === LaunchMode.NEW_INSTANCE ? -1 : this.findInPopArray(info.name);
+    info.index = this.findInPopArray(info.name);
+    if (launchMode === LaunchMode.NEW_INSTANCE) {
+      info.needBuildNewInstance = true;
+    }
     this.pathArray.push(info);
     this.nativeStack?.onStateChanged();
     return promise;

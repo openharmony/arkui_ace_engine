@@ -111,6 +111,8 @@ public:
     void MoveIndexToTop(int32_t index) override;
     void UpdatePathInfoIfNeeded(RefPtr<NG::UINode>& uiNode, int32_t index) override;
     void RecoveryNavigationStack() override;
+    bool NeedBuildNewInstance(int32_t index) override;
+    void SetNeedBuildNewInstance(int32_t index, bool need) override;
 
 protected:
     JSRef<JSObject> dataSourceObj_;
