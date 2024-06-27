@@ -38,6 +38,7 @@ build_component_ng("security_component_pattern_ng") {
         "input:libmmi-client",
         "napi:ace_napi",
         "security_component_manager:libsecurity_component_sdk",
+        "window_manager:scene_session",
       ]
     }
   }

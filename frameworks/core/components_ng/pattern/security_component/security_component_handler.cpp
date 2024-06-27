@@ -20,9 +20,11 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -321,6 +323,25 @@ double SecurityComponentHandler::CalculateCurrentVisibleRatio(const RectF& visib
     return visibleRect.Width() * visibleRect.Height() / (renderRect.Width() * renderRect.Height());
 }
 
+bool SecurityComponentHandler::GetWindowSceneWindowId(RefPtr<FrameNode>& node, uint32_t& windId)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto parent = node->GetParent();
+    while (parent != nullptr && parent->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
+        parent = parent->GetParent();
+    }
+    CHECK_NULL_RETURN(parent, false);
+    auto windowSceneFrameNode = AceType::DynamicCast<FrameNode>(parent);
+    CHECK_NULL_RETURN(windowSceneFrameNode, false);
+    auto windowScene = windowSceneFrameNode->GetPattern<SystemWindowScene>();
+    CHECK_NULL_RETURN(windowScene, false);
+    auto session = windowScene->GetSession();
+    CHECK_NULL_RETURN(session, false);
+
+    windId = static_cast<uint32_t>(session->GetPersistentId());
+    return true;
+}
+
 bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
     RefPtr<FrameNode>& node)
 {
@@ -363,6 +384,9 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
     uint32_t windId = container->GetWindowId();
     if (pipeline->IsFocusWindowIdSetted()) {
         windId = pipeline->GetFocusWindowId();
+    }
+    if (container->IsScenceBoardWindow()) {
+        GetWindowSceneWindowId(node, windId);
     }
     buttonInfo.windowId_ = static_cast<int32_t>(windId);
     return true;
