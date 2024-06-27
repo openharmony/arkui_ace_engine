@@ -564,6 +564,7 @@ void NavigationPattern::UpdateNavPathList()
     auto cacheNodes = navigationStack_->GetAllCacheNodes();
     NavPathList navPathList;
     int32_t pathListSize = static_cast<int32_t>(pathNames.size());
+    isCurTopNewInstance_ = false;
     for (int32_t index = 0; index < pathListSize; ++index) {
         auto pathName = pathNames[index];
         auto pathIndex = indexes[index];
@@ -725,8 +726,6 @@ void NavigationPattern::CheckTopNavPathChange(
     }
     if (isCurTopNewInstance_) {
         isPopPage = false;
-        // flag isCurTopNewInstance_is useless in the subsequent process of current js-stack sync, so reset it
-        isCurTopNewInstance_ = false;
     }
     RefPtr<NavDestinationGroupNode> newTopNavDestination;
     if (newTopNavPath.has_value()) {
@@ -2147,7 +2146,8 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         auto navBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarNode());
         ProcessAutoSave(navBarNode);
     }
-    if (isPopPage || (preDestination && hostNode->GetLastStandardIndex() > preDestination->GetIndex())) {
+    if (isPopPage || (preDestination &&
+        (hostNode->GetLastStandardIndex() > preDestination->GetIndex() || preDestination->NeedRemoveInPush()))) {
         NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_WILL_HIDE, true);
     }
     hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_WILL_HIDE);
@@ -2252,14 +2252,14 @@ void NavigationPattern::FireShowAndHideLifecycle(const RefPtr<NavDestinationGrou
     // don't move position hide lifecycle is from top to end
     if (preDestination) {
         auto lastStandardIndex = hostNode->GetLastStandardIndex();
-        if (isPopPage || lastStandardIndex > preDestination->GetIndex()) {
+        if (isPopPage || lastStandardIndex > preDestination->GetIndex() || preDestination->NeedRemoveInPush()) {
             // fire preTop Destination lifecycle
             NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_HIDE, true);
         }
     }
     // fire remove navDestination and invisible navDestination lifecycle for pop or clear
     hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_HIDE);
-    if (isPopPage) {
+    if (isPopPage || (preDestination && preDestination->NeedRemoveInPush())) {
         // fire removed preDestination lifecycle for pop many times or clear
         NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_WILL_DISAPPEAR, true);
     }

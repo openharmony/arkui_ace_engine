@@ -240,7 +240,7 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
                 // will be remove in push's animation finish callback
                 navDestination->SetNeedRemoveInPush(true);
                 navDestination->MovePosition(slot - 1);
-            } else {    
+            } else {
                 // remain the last child for pop animation
                 navDestination->MovePosition(slot);
             }
@@ -286,7 +286,7 @@ void NavigationGroupNode::ReorderAnimatingDestination(RefPtr<FrameNode>& navigat
         remainDestination->MovePosition(maxAnimatingIndex + 1);
     }
     auto remainIndex = navigationContentNode->GetChildIndex(remainDestination);
-    if (remainIndex != -1) {
+    if (remainIndex != -1 && curTopDestination) {
         curTopDestination->MovePosition(remainIndex + 1);
     }
 }
