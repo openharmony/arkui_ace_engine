@@ -923,11 +923,11 @@ void MenuItemPattern::OnHover(bool isHover)
         SetBgBlendColor(theme->GetHoverColor());
         ShowSubMenu();
         props->UpdateHover(true);
-        menuPattern->OnItemPressed(parent, index_, true);
+        menuPattern->OnItemPressed(parent, index_, true, true);
     } else {
         SetBgBlendColor(Color::TRANSPARENT);
         props->UpdateHover(false);
-        menuPattern->OnItemPressed(parent, index_, false);
+        menuPattern->OnItemPressed(parent, index_, false, true);
     }
     PlayBgColorAnimation();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
