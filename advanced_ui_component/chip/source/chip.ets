@@ -141,8 +141,8 @@ interface ChipNodeTheme {
   normalBorderRadius: Dimension;
   smallBorderRadius: Dimension;
   borderWidth: number;
-  focusBtnScaleX: number,
-  focusBtnScaleY: number,
+  focusBtnScaleX: Resource,
+  focusBtnScaleY: Resource,
   localizedNormalPadding: LocalizedPadding;
   localizedSmallPadding: LocalizedPadding;
   hoverBlendColor: ResourceColor;
@@ -178,13 +178,13 @@ export const defaultTheme: ChipTheme = {
     activatedFontColor: $r('sys.color.ohos_id_color_text_primary_contrary'),
     fontFamily: "HarmonyOS Sans",
     normalMargin: {
-      left: resourceFn.getNumberByName('chip_normal_text_margin_left'),
-      right: resourceFn.getNumberByName('chip_normal_text_margin_right'),
+      left: $r('sys.float.chip_normal_text_margin_left'),
+      right: $r('sys.float.chip_normal_text_margin_right'),
       top: 0,
       bottom: 0 },
     smallMargin: {
-      left: resourceFn.getNumberByName('chip_small_text_margin_left'),
-      right: resourceFn.getNumberByName('chip_small_text_margin_right'),
+      left: $r('sys.float.chip_small_text_margin_left'),
+      right: $r('sys.float.chip_small_text_margin_right'),
       top: 0,
       bottom: 0
     },
@@ -198,14 +198,14 @@ export const defaultTheme: ChipTheme = {
     localizedSmallMargin: {
       start: LengthMetrics.vp(4),
       end: LengthMetrics.vp(4),
-      top: LengthMetrics.vp(0),
-      bottom: LengthMetrics.vp(0),
+      top: LengthMetrics.vp(4),
+      bottom: LengthMetrics.vp(4),
     }
   },
   suffixIcon: {
     size: {
-      width: resourceFn.getNumberByName('chip_suffixIcon_size_width'),
-      height: resourceFn.getNumberByName('chip_suffixIcon_size_height')
+      width: $r('sys.float.chip_suffix_icon_size_width'),
+      height: $r('sys.float.chip_suffix_icon_size_height')
     },
     fillColor: $r('sys.color.chip_usually_icon_color'),
     activatedFillColor: $r('sys.color.chip_active_icon_color'),
@@ -216,7 +216,7 @@ export const defaultTheme: ChipTheme = {
   defaultSymbol: {
     normalFontColor: [$r('sys.color.ohos_id_color_secondary')],
     activatedFontColor: [$r('sys.color.ohos_id_color_text_primary_contrary')],
-    fontSize: $r('sys.float.chip_suffixIcon_size_default'),
+    fontSize: $r('sys.float.chip_suffix_icon_size_default'),
   },
   chipNode: {
     suitAgeScale: 1.75,
@@ -235,29 +235,17 @@ export const defaultTheme: ChipTheme = {
     normalBorderRadius: $r('sys.float.chip_normal_radius'),
     smallBorderRadius: $r('sys.float.chip_small_radius'),
     borderWidth: 2,
-    focusBtnScaleX: resourceFn.getNumberByName('chip_focused_btn_scale_x'),
-    focusBtnScaleY: resourceFn.getNumberByName('chip_focused_btn_scale_y'),
+    focusBtnScaleX:$r('sys.float.chip_focused_btn_scale_x'),
+    focusBtnScaleY: $r('sys.float.chip_focused_btn_scale_y'),
     localizedNormalPadding: {
-      start: {
-        value: resourceFn.getNumberByName('chip_normal_text_padding_left'),
-        unit: LengthUnit.VP
-      },
-      end: {
-        value: resourceFn.getNumberByName('chip_normal_text_padding_right'),
-        unit: LengthUnit.VP
-      },
+      start: LengthMetrics.resource($r('sys.float.chip_normal_text_padding_left')),
+      end: LengthMetrics.resource($r('sys.float.chip_normal_text_padding_right')),
       top: LengthMetrics.vp(4),
       bottom: LengthMetrics.vp(4)
     },
     localizedSmallPadding: {
-      start: {
-        value: resourceFn.getNumberByName('chip_small_text_padding_left'),
-        unit: LengthUnit.VP
-      },
-      end: {
-        value: resourceFn.getNumberByName('chip_small_text_padding_right'),
-        unit: LengthUnit.VP
-      },
+      start: LengthMetrics.resource($r('sys.float.chip_small_text_padding_left')),
+      end: LengthMetrics.resource($r('sys.float.chip_small_text_padding_right')),
       top: LengthMetrics.vp(4),
       bottom: LengthMetrics.vp(4)
     },
@@ -265,7 +253,7 @@ export const defaultTheme: ChipTheme = {
     pressedBlendColor: $r('sys.color.chip_press_color'),
     focusBlendColor: $r('sys.color.chip_focus_bg'),
     opacity: { normal: 1, hover: 0.95, pressed: 0.9, disabled: 0.4 },
-    shadowStyle: { radius: $r('sys.float.chip_shadowStyle_radius') },
+    shadowStyle: { radius: $r('sys.float.chip_shadow_style_radius') },
     breakPointConstraintWidth: {
       breakPointMinWidth: 128,
       breakPointSmMaxWidth: 156,
@@ -372,16 +360,42 @@ export struct ChipComponent {
   private getFocusFontSize(): Dimension {
     if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
       try {
+        resourceFn.getNumberByName((((this.theme.label.smallFocusFontSize as Resource)
+          .params as string[])[0]).split('.')[2]);
         return this.theme.label.smallFocusFontSize;
       } catch (error) {
         return this.theme.label.defaultFontSize;
       }
     } else {
       try {
+        resourceFn.getNumberByName((((this.theme.label.normalFocusFontSize as Resource)
+          .params as string[])[0]).split('.')[2]);
         return this.theme.label.normalFocusFontSize;
       } catch (error) {
         return this.theme.label.defaultFontSize;
       }
+    }
+  }
+
+  private getFocusBtnScaleX(): number {
+    try {
+      resourceFn.getNumberByName((((this.theme.chipNode.focusBtnScaleX as Resource)
+        .params as string[])[0]).split('.')[2]);
+      return resourceFn.getNumberByName((((this.theme.chipNode.focusBtnScaleX as Resource)
+        .params as string[])[0]).split('.')[2]);
+    } catch (error) {
+      return 1;
+    }
+  }
+
+  private getFocusBtnScaleY(): number {
+    try {
+      resourceFn.getNumberByName((((this.theme.chipNode.focusBtnScaleY as Resource)
+        .params as string[])[0]).split('.')[2]);
+      return resourceFn.getNumberByName((((this.theme.chipNode.focusBtnScaleY as Resource)
+        .params as string[])[0]).split('.')[2]);
+    } catch (error) {
+      return 1;
     }
   }
 
@@ -391,18 +405,16 @@ export struct ChipComponent {
     } else {
       if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
         try {
-          resourceManager.getSystemResourceManager()
-            .getNumberByName((((this.theme.label.smallFontSize as Resource)
-              .params as string[])[0]).split('.')[2]);
+          resourceFn.getNumberByName((((this.theme.label.smallFontSize as Resource)
+            .params as string[])[0]).split('.')[2]);
           return this.theme.label.smallFontSize;
         } catch (error) {
           return this.theme.label.defaultFontSize;
         }
       } else {
         try {
-          resourceManager.getSystemResourceManager()
-            .getNumberByName((((this.theme.label.normalFontSize as Resource)
-              .params as string[])[0]).split('.')[2]);
+          resourceFn.getNumberByName((((this.theme.label.normalFontSize as Resource)
+            .params as string[])[0]).split('.')[2]);
           return this.theme.label.normalFontSize;
         } catch (error) {
           return this.theme.label.defaultFontSize;
@@ -876,10 +888,18 @@ export struct ChipComponent {
     animateTo({ duration: 150, curve: Curve.FastOutLinearIn },
       () => {
         this.chipScale = {
-          x: this.theme.chipNode.focusBtnScaleX,
-          y: this.theme.chipNode.focusBtnScaleY,
-          centerX: '50%',
-          centerY: '50%'
+          x: this.getFocusBtnScaleX(),
+          y: this.getFocusBtnScaleY(),
+        };
+      })
+  }
+
+  private blurBtnChipNodeAnimate() {
+    animateTo({ duration: 150, curve: Curve.FastOutLinearIn },
+      () => {
+        this.chipScale = {
+          x: 1,
+          y: 1,
         };
       })
   }
@@ -1161,7 +1181,7 @@ export struct ChipComponent {
       },
       pressed: {
         .colorBlend(this.theme.chipNode.pressedBlendColor)
-      },
+      }
     })
     .onFocus(() => {
       this.chipNodeOnFocus = true;
@@ -1169,6 +1189,7 @@ export struct ChipComponent {
     })
     .onBlur(() => {
       this.chipNodeOnFocus = false;
+      this.blurBtnChipNodeAnimate()
     })
     .onTouch((event) => {
       this.handleTouch(event);

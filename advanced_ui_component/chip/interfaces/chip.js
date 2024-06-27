@@ -12,17 +12,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
+const measure = requireNapi('measure');
+const mediaquery = requireNapi('mediaquery');
+const resourceManager = requireNapi('resourceManager');
+const componentUtils = requireNapi('arkui.componentUtils');
+const hilog = requireNapi('hilog');
+const ColorMetrics = requireNapi('arkui.node').ColorMetrics;
+const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
+const LengthUnit = requireNapi('arkui.node').LengthUnit;
+const EnvironmentCallback = requireNapi('EnvironmentCallback');
+
 if (!("finalizeConstruction" in ViewPU.prototype)) {
-    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => {
+    });
 }
 
-import { KeyCode } from '@ohos.multimodalInput.keyCode';
-import measure from '@ohos.measure';
-import mediaquery from '@ohos.mediaquery';
-import resourceManager from '@ohos.resourceManager';
-import { ColorMetrics, LengthMetrics, LengthUnit } from '@ohos.arkui.node';
-import componentUtils from '@ohos.arkui.componentUtils';
-import hilog from '@ohos.hilog';
 const resourceFn = resourceManager.getSystemResourceManager();
 export var ChipSize;
 (function (ChipSize) {
@@ -52,14 +58,14 @@ export const defaultTheme = {
         activatedFontColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         fontFamily: "HarmonyOS Sans",
         normalMargin: {
-            left: resourceFn.getNumberByName('chip_normal_text_margin_left'),
-            right: resourceFn.getNumberByName('chip_normal_text_margin_right'),
+            left: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_text_margin_left'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+            right: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_text_margin_right'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
             top: 0,
             bottom: 0
         },
         smallMargin: {
-            left: resourceFn.getNumberByName('chip_small_text_margin_left'),
-            right: resourceFn.getNumberByName('chip_small_text_margin_right'),
+            left: { "id": -1, "type": 10002, params: ['sys.float.chip_small_text_margin_left'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+            right: { "id": -1, "type": 10002, params: ['sys.float.chip_small_text_margin_right'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
             top: 0,
             bottom: 0
         },
@@ -73,14 +79,14 @@ export const defaultTheme = {
         localizedSmallMargin: {
             start: LengthMetrics.vp(4),
             end: LengthMetrics.vp(4),
-            top: LengthMetrics.vp(0),
-            bottom: LengthMetrics.vp(0),
+            top: LengthMetrics.vp(4),
+            bottom: LengthMetrics.vp(4),
         }
     },
     suffixIcon: {
         size: {
-            width: resourceFn.getNumberByName('chip_suffixIcon_size_width'),
-            height: resourceFn.getNumberByName('chip_suffixIcon_size_height')
+            width: { "id": -1, "type": 10002, params: ['sys.float.chip_suffix_icon_size_width'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+            height: { "id": -1, "type": 10002, params: ['sys.float.chip_suffix_icon_size_height'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
         },
         fillColor: { "id": -1, "type": 10001, params: ['sys.color.chip_usually_icon_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         activatedFillColor: { "id": -1, "type": 10001, params: ['sys.color.chip_active_icon_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
@@ -91,7 +97,7 @@ export const defaultTheme = {
     defaultSymbol: {
         normalFontColor: [{ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }],
         activatedFontColor: [{ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }],
-        fontSize: { "id": -1, "type": 10002, params: ['sys.float.chip_suffixIcon_size_default'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        fontSize: { "id": -1, "type": 10002, params: ['sys.float.chip_suffix_icon_size_default'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
     },
     chipNode: {
         suitAgeScale: 1.75,
@@ -110,29 +116,17 @@ export const defaultTheme = {
         normalBorderRadius: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         smallBorderRadius: { "id": -1, "type": 10002, params: ['sys.float.chip_small_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         borderWidth: 2,
-        focusBtnScaleX: resourceFn.getNumberByName('chip_focused_btn_scale_x'),
-        focusBtnScaleY: resourceFn.getNumberByName('chip_focused_btn_scale_y'),
+        focusBtnScaleX: { "id": -1, "type": 10002, params: ['sys.float.chip_focused_btn_scale_x'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        focusBtnScaleY: { "id": -1, "type": 10002, params: ['sys.float.chip_focused_btn_scale_y'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         localizedNormalPadding: {
-            start: {
-                value: resourceFn.getNumberByName('chip_normal_text_padding_left'),
-                unit: LengthUnit.VP
-            },
-            end: {
-                value: resourceFn.getNumberByName('chip_normal_text_padding_right'),
-                unit: LengthUnit.VP
-            },
+            start: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.chip_normal_text_padding_left'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+            end: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.chip_normal_text_padding_right'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
             top: LengthMetrics.vp(4),
             bottom: LengthMetrics.vp(4)
         },
         localizedSmallPadding: {
-            start: {
-                value: resourceFn.getNumberByName('chip_small_text_padding_left'),
-                unit: LengthUnit.VP
-            },
-            end: {
-                value: resourceFn.getNumberByName('chip_small_text_padding_right'),
-                unit: LengthUnit.VP
-            },
+            start: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.chip_small_text_padding_left'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
+            end: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.chip_small_text_padding_right'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
             top: LengthMetrics.vp(4),
             bottom: LengthMetrics.vp(4)
         },
@@ -140,7 +134,7 @@ export const defaultTheme = {
         pressedBlendColor: { "id": -1, "type": 10001, params: ['sys.color.chip_press_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         focusBlendColor: { "id": -1, "type": 10001, params: ['sys.color.chip_focus_bg'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         opacity: { normal: 1, hover: 0.95, pressed: 0.9, disabled: 0.4 },
-        shadowStyle: { radius: { "id": -1, "type": 10002, params: ['sys.float.chip_shadowStyle_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } },
+        shadowStyle: { radius: { "id": -1, "type": 10002, params: ['sys.float.chip_shadow_style_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } },
         breakPointConstraintWidth: {
             breakPointMinWidth: 128,
             breakPointSmMaxWidth: 156,
@@ -172,7 +166,7 @@ export function Chip(options, parent = null) {
                     chipDirection: options.direction,
                     onClose: options.onClose,
                     onClicked: options.onClicked,
-                }, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/chip.ets", line: 300, col: 3 });
+                }, undefined, elmtId, () => { }, { page: "passwordLibrary/src/main/ets/components/mainpage/chip.ets", line: 289, col: 3 });
                 ViewPU.create(componentCall);
                 let paramsLambda = () => {
                     return {
@@ -627,6 +621,8 @@ export class ChipComponent extends ViewPU {
     getFocusFontSize() {
         if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
             try {
+                resourceFn.getNumberByName((this.theme.label.smallFocusFontSize
+                    .params[0]).split('.')[2]);
                 return this.theme.label.smallFocusFontSize;
             }
             catch (error) {
@@ -635,11 +631,35 @@ export class ChipComponent extends ViewPU {
         }
         else {
             try {
+                resourceFn.getNumberByName((this.theme.label.normalFocusFontSize
+                    .params[0]).split('.')[2]);
                 return this.theme.label.normalFocusFontSize;
             }
             catch (error) {
                 return this.theme.label.defaultFontSize;
             }
+        }
+    }
+    getFocusBtnScaleX() {
+        try {
+            resourceFn.getNumberByName((this.theme.chipNode.focusBtnScaleX
+                .params[0]).split('.')[2]);
+            return resourceFn.getNumberByName((this.theme.chipNode.focusBtnScaleX
+                .params[0]).split('.')[2]);
+        }
+        catch (error) {
+            return 1;
+        }
+    }
+    getFocusBtnScaleY() {
+        try {
+            resourceFn.getNumberByName((this.theme.chipNode.focusBtnScaleY
+                .params[0]).split('.')[2]);
+            return resourceFn.getNumberByName((this.theme.chipNode.focusBtnScaleY
+                .params[0]).split('.')[2]);
+        }
+        catch (error) {
+            return 1;
         }
     }
     getLabelFontSize() {
@@ -649,9 +669,8 @@ export class ChipComponent extends ViewPU {
         else {
             if (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) {
                 try {
-                    resourceManager.getSystemResourceManager()
-                        .getNumberByName((this.theme.label.smallFontSize
-                            .params[0]).split('.')[2]);
+                    resourceFn.getNumberByName((this.theme.label.smallFontSize
+                        .params[0]).split('.')[2]);
                     return this.theme.label.smallFontSize;
                 }
                 catch (error) {
@@ -660,9 +679,8 @@ export class ChipComponent extends ViewPU {
             }
             else {
                 try {
-                    resourceManager.getSystemResourceManager()
-                        .getNumberByName((this.theme.label.normalFontSize
-                            .params[0]).split('.')[2]);
+                    resourceFn.getNumberByName((this.theme.label.normalFontSize
+                        .params[0]).split('.')[2]);
                     return this.theme.label.normalFontSize;
                 }
                 catch (error) {
@@ -1135,10 +1153,16 @@ export class ChipComponent extends ViewPU {
     focusBtnChipNodeAnimate() {
         Context.animateTo({ duration: 150, curve: Curve.FastOutLinearIn }, () => {
             this.chipScale = {
-                x: this.theme.chipNode.focusBtnScaleX,
-                y: this.theme.chipNode.focusBtnScaleY,
-                centerX: '50%',
-                centerY: '50%'
+                x: this.getFocusBtnScaleX(),
+                y: this.getFocusBtnScaleY(),
+            };
+        });
+    }
+    blurBtnChipNodeAnimate() {
+        Context.animateTo({ duration: 150, curve: Curve.FastOutLinearIn }, () => {
+            this.chipScale = {
+                x: 1,
+                y: 1,
             };
         });
     }
@@ -1310,6 +1334,7 @@ export class ChipComponent extends ViewPU {
             });
             Button.onBlur(() => {
                 this.chipNodeOnFocus = false;
+                this.blurBtnChipNodeAnimate();
             });
             Button.onTouch((event) => {
                 this.handleTouch(event);
@@ -1497,4 +1522,7 @@ export class ChipComponent extends ViewPU {
         this.updateDirtyElements();
     }
 }
-//# sourceMappingURL=chip.js.map
+
+export default {
+    Chip, ChipSize
+}
