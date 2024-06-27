@@ -1699,9 +1699,6 @@ void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, do
     }
     if (GreatOrEqual(height, keyboard + GetCoordinatePoint()->GetY())) {
         double newHeight = height - keyboard - GetCoordinatePoint()->GetY();
-        if (GreatOrEqual(newHeight, oldWebHeight)) {
-            newHeight = oldWebHeight;
-        }
         if (NearEqual(newHeight, oldWebHeight)) {
             return;
         }
@@ -2468,8 +2465,10 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
         UpdateOnFocusTextField(false);
         isVirtualKeyBoardShow_ = VkState::VK_HIDE;
     } else if (isVirtualKeyBoardShow_ != VkState::VK_SHOW || lastKeyboardHeight_ != keyboard) {
-        drawSizeCache_.SetSize(drawSize_);
-        if (drawSize_.Height() <= (height - keyboard - GetCoordinatePoint()->GetY())) {
+        if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
+            drawSizeCache_.SetSize(drawSize_);
+        }
+        if (drawSizeCache_.Height() <= (height - keyboard - GetCoordinatePoint()->GetY())) {
             isVirtualKeyBoardShow_ = VkState::VK_SHOW;
             return true;
         }
@@ -2517,11 +2516,7 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeybo
 
     rect.SetSize(SizeF(drawSize_.Width(), drawSize_.Height()));
     frameNode->GetRenderContext()->SyncGeometryProperties(rect);
-    if (SearchParent(Axis::VERTICAL)) {
-        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
-    } else {
-        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    }
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     context->SetRootRect(width, height, 0);
