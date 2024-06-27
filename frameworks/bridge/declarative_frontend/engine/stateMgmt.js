@@ -10059,11 +10059,14 @@ class __RepeatVirtualScrollImpl {
  * limitations under the License.
  */
 ;
-class StorageHepler {
+class StorageHelper {
     constructor() {
         this.oldTypeValues_ = new Map();
     }
     getConnectedKey(type, keyOrDefaultCreator) {
+        if (keyOrDefaultCreator === null || keyOrDefaultCreator === undefined) {
+            stateMgmtConsole.applicationWarn(StorageHelper.NULL_OR_UNDEFINED_KEY + ', try to use the type name as key');
+        }
         if (typeof keyOrDefaultCreator === 'string') {
             return keyOrDefaultCreator;
         }
@@ -10098,16 +10101,43 @@ class StorageHepler {
         }
         return name;
     }
+    isKeyValid(key) {
+        if (typeof key !== 'string') {
+            throw new Error(StorageHelper.INVALID_TYPE);
+        }
+        // The key string is empty
+        if (key === '') {
+            stateMgmtConsole.applicationError(StorageHelper.EMPTY_STRING_KEY);
+            return false;
+        }
+        const len = key.length;
+        // The key string length should shorter than 1024
+        if (len >= 1024) {
+            stateMgmtConsole.applicationError(StorageHelper.INVALID_LENGTH_KEY);
+            return false;
+        }
+        if (len < 2 || len > 255) {
+            stateMgmtConsole.applicationWarn(StorageHelper.INVALID_LENGTH_KEY);
+        }
+        if (!/^[0-9a-zA-Z_]+$/.test(key)) {
+            stateMgmtConsole.applicationWarn(StorageHelper.INVALID_CHARACTER_KEY);
+        }
+        return true;
+    }
     checkTypeIsFunc(type) {
         if (typeof type !== 'function') {
-            throw new Error(StorageHepler.TYPE_INVALID);
+            throw new Error(StorageHelper.INVALID_TYPE);
         }
     }
 }
-StorageHepler.DEFAULT_VALUE_ERROR_MESSAGE = 'The default creator should be function when first connect';
-StorageHepler.DELETE_NOT_EXIST_KET_WARN_MESSAGE = 'The key to be deleted does not exist';
-StorageHepler.TYPE_INVALID = 'The type should be function when use storage';
-class AppStorageV2Impl extends StorageHepler {
+StorageHelper.INVALID_DEFAULT_VALUE = 'The default creator should be function when first connect';
+StorageHelper.DELETE_NOT_EXIST_KEY = 'The key to be deleted does not exist';
+StorageHelper.INVALID_TYPE = 'The type should have function constructor signature when use storage';
+StorageHelper.EMPTY_STRING_KEY = 'Cannot use empty string as the key';
+StorageHelper.INVALID_LENGTH_KEY = 'Cannot use the key! The length of key should be 2 to 255';
+StorageHelper.INVALID_CHARACTER_KEY = 'Cannot use the key! The value of key can only consist of letters, digits and underscores';
+StorageHelper.NULL_OR_UNDEFINED_KEY = `The parameter cannot be null or undefined`;
+class AppStorageV2Impl extends StorageHelper {
     constructor() {
         super();
         this.memorizedValues_ = new Map();
@@ -10121,15 +10151,15 @@ class AppStorageV2Impl extends StorageHepler {
     }
     connect(type, keyOrDefaultCreator, defaultCreator) {
         const key = this.getConnectedKey(type, keyOrDefaultCreator);
-        if (key === undefined) {
-            throw new Error(AppStorageV2Impl.TYPE_INVALID);
+        if (!this.isKeyValid(key)) {
+            return undefined;
         }
         if (typeof keyOrDefaultCreator === 'function') {
             defaultCreator = keyOrDefaultCreator;
         }
         if (!this.memorizedValues_.has(key)) {
             if (typeof defaultCreator !== 'function') {
-                throw new Error(AppStorageV2Impl.DEFAULT_VALUE_ERROR_MESSAGE);
+                throw new Error(AppStorageV2Impl.INVALID_DEFAULT_VALUE);
             }
             const defaultValue = defaultCreator();
             this.checkTypeByInstanceOf(key, type, defaultValue);
@@ -10142,9 +10172,12 @@ class AppStorageV2Impl extends StorageHepler {
         return existedValue;
     }
     remove(keyOrType) {
+        if (keyOrType === null || keyOrType === undefined) {
+            stateMgmtConsole.applicationWarn(AppStorageV2Impl.NULL_OR_UNDEFINED_KEY);
+            return;
+        }
         const key = this.getKeyOrTypeName(keyOrType);
-        if (typeof key !== 'string') {
-            stateMgmtConsole.error(AppStorageV2Impl.TYPE_INVALID);
+        if (!this.isKeyValid(key)) {
             return;
         }
         this.removeFromMemory(key);
@@ -10155,7 +10188,7 @@ class AppStorageV2Impl extends StorageHepler {
     removeFromMemory(key) {
         const isDeleted = this.memorizedValues_.delete(key);
         if (!isDeleted) {
-            stateMgmtConsole.warn(AppStorageV2Impl.DELETE_NOT_EXIST_KET_WARN_MESSAGE);
+            stateMgmtConsole.applicationWarn(AppStorageV2Impl.DELETE_NOT_EXIST_KEY);
         }
         else {
             this.oldTypeValues_.delete(key);
@@ -10163,7 +10196,7 @@ class AppStorageV2Impl extends StorageHepler {
     }
 }
 AppStorageV2Impl.instance_ = undefined;
-class PersistenceV2Impl extends StorageHepler {
+class PersistenceV2Impl extends StorageHelper {
     constructor() {
         super();
         this.cb_ = undefined;
@@ -10182,11 +10215,9 @@ class PersistenceV2Impl extends StorageHepler {
         PersistenceV2Impl.storage_ = storage;
     }
     connect(type, keyOrDefaultCreator, defaultCreator) {
-        if (typeof type !== 'function') {
-            throw new Error(PersistenceV2Impl.NOT_SUPPROT_TYPE);
-        }
+        this.checkTypeIsClassObject(type);
         const key = this.getRightKey(type, keyOrDefaultCreator);
-        if (key === undefined) {
+        if (!this.isKeyValid(key)) {
             return undefined;
         }
         if (typeof keyOrDefaultCreator === 'function') {
@@ -10227,27 +10258,36 @@ class PersistenceV2Impl extends StorageHepler {
         return Array.from(this.keysArr_);
     }
     remove(keyOrType) {
+        if (keyOrType === null || keyOrType === undefined) {
+            stateMgmtConsole.applicationWarn(PersistenceV2Impl.NULL_OR_UNDEFINED_KEY);
+            return;
+        }
         this.checkTypeIsClassObject(keyOrType);
         const key = this.getKeyOrTypeName(keyOrType);
-        if (typeof key !== 'string') {
-            throw new Error(PersistenceV2Impl.NOT_SUPPROT_TYPE);
+        if (!this.isKeyValid(key)) {
+            return;
         }
         this.disconnectValue(key);
     }
     save(keyOrType) {
+        if (keyOrType === null || keyOrType === undefined) {
+            stateMgmtConsole.applicationWarn(PersistenceV2Impl.NULL_OR_UNDEFINED_KEY);
+            return;
+        }
         this.checkTypeIsClassObject(keyOrType);
         const key = this.getKeyOrTypeName(keyOrType);
-        if (typeof key !== 'string') {
-            throw new Error(PersistenceV2Impl.NOT_SUPPROT_TYPE);
+        if (!this.isKeyValid(key)) {
+            return;
         }
-        const value = this.map_.get(key);
-        if (value) {
-            try {
-                PersistenceV2Impl.storage_.set(key, JSONCoder.stringify(value));
-            }
-            catch (err) {
-                this.errorHelper(key, "serialization" /* Serialization */, err);
-            }
+        if (!this.map_.has(key)) {
+            stateMgmtConsole.applicationWarn(`Cannot save the key '${key}'! The key is disconnected`);
+            return;
+        }
+        try {
+            PersistenceV2Impl.storage_.set(key, JSONCoder.stringify(this.map_.get(key)));
+        }
+        catch (err) {
+            this.errorHelper(key, "serialization" /* Serialization */, err);
         }
     }
     notifyOnError(cb) {
@@ -10268,14 +10308,14 @@ class PersistenceV2Impl extends StorageHepler {
     }
     checkTypeIsClassObject(keyOrType) {
         if ((typeof keyOrType !== 'string' && typeof keyOrType !== 'function') ||
-            [Array, Set, Map, Date, Boolean, Number, BigInt, String, Symbol].includes(keyOrType)) {
-            throw new Error(PersistenceV2Impl.NOT_SUPPROT_TYPE);
+            PersistenceV2Impl.NOT_SUPPORT_TYPES_.includes(keyOrType)) {
+            throw new Error(PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
         }
     }
     getRightKey(type, keyOrDefaultCreator) {
         const key = this.getConnectedKey(type, keyOrDefaultCreator);
         if (key === undefined) {
-            throw new Error(PersistenceV2Impl.NOT_SUPPROT_TYPE);
+            throw new Error(PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
         }
         if (key === PersistenceV2Impl.KEYS_ARR_) {
             this.errorHelper(key, "quota" /* Quota */, `The key '${key}' cannot be used`);
@@ -10289,12 +10329,12 @@ class PersistenceV2Impl extends StorageHepler {
             return undefined;
         }
         if (typeof defaultCreator !== 'function') {
-            throw new Error(PersistenceV2Impl.DEFAULT_VALUE_ERROR_MESSAGE);
+            throw new Error(PersistenceV2Impl.INVALID_DEFAULT_VALUE);
         }
         const observedValue = defaultCreator();
         this.checkTypeByInstanceOf(key, type, observedValue);
         if (this.isNotClassObject(observedValue)) {
-            throw new Error(PersistenceV2Impl.NOT_SUPPROT_TYPE);
+            throw new Error(PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
         }
         return observedValue;
     }
@@ -10338,9 +10378,11 @@ class PersistenceV2Impl extends StorageHepler {
                     const json = JSONCoder.stringify(value);
                     ObserveV2.getObserve().stopRecordDependencies();
                     if (this.isOverSizeLimit(json)) {
-                        throw new Error(`Cannot store the value of key '${key}'! The data size must be less than 8 KB`);
+                        stateMgmtConsole.applicationError(`Cannot store the key '${key}'! The length of data must be less than ${PersistenceV2Impl.MAX_DATA_LENGTH_}`);
                     }
-                    PersistenceV2Impl.storage_.set(key, json);
+                    else {
+                        PersistenceV2Impl.storage_.set(key, json);
+                    }
                 }
             }
             catch (err) {
@@ -10348,28 +10390,26 @@ class PersistenceV2Impl extends StorageHepler {
                     this.cb_(key, "serialization" /* Serialization */, err);
                     continue;
                 }
-                throw new Error(err);
+                stateMgmtConsole.applicationError(`For '${key}' key: ` + err);
             }
         }
     }
     isOverSizeLimit(json) {
-        let len = 0;
-        for (let i = 0; i < json.length; ++i) {
-            const c = json.charCodeAt(i);
-            // one-byte character
-            if ((c >= 0x0001 && c <= 0x007e) || (c >= 0xff60 && c <= 0xff9f)) {
-                ++len;
-            }
-            else {
-                len += 2;
-            }
+        if (typeof json !== 'string') {
+            return false;
         }
-        return len / 1024 > 8;
+        return json.length >= PersistenceV2Impl.MAX_DATA_LENGTH_;
     }
     isNotClassObject(value) {
-        return Array.isArray(value) || value instanceof Set || value instanceof Map || value instanceof Date ||
-            value instanceof Boolean || value instanceof Number || value instanceof BigInt || value instanceof String ||
-            value instanceof Symbol;
+        return Array.isArray(value) || this.isNotSupportType(value);
+    }
+    isNotSupportType(value) {
+        for (let i = 0; i < PersistenceV2Impl.NOT_SUPPORT_TYPES_.length; ++i) {
+            if (value instanceof PersistenceV2Impl.NOT_SUPPORT_TYPES_[i]) {
+                return true;
+            }
+        }
+        return false;
     }
     storeKeyToPersistenceV2(key) {
         try {
@@ -10391,7 +10431,7 @@ class PersistenceV2Impl extends StorageHepler {
     removeFromPersistenceV2(key) {
         try {
             if (!PersistenceV2Impl.storage_.has(key)) {
-                stateMgmtConsole.warn(PersistenceV2Impl.DELETE_NOT_EXIST_KET_WARN_MESSAGE);
+                stateMgmtConsole.applicationWarn(PersistenceV2Impl.DELETE_NOT_EXIST_KEY);
                 return;
             }
             PersistenceV2Impl.storage_.delete(key);
@@ -10429,8 +10469,10 @@ class PersistenceV2Impl extends StorageHepler {
 }
 PersistenceV2Impl.MIN_PERSISTENCE_ID = 0x1010000000000;
 PersistenceV2Impl.nextPersistId_ = PersistenceV2Impl.MIN_PERSISTENCE_ID;
-PersistenceV2Impl.NOT_SUPPROT_TYPE = 'Not support! Can only use the class object in Persistence';
+PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_ = 'Not support! Can only use the class object in Persistence';
 PersistenceV2Impl.KEYS_ARR_ = '___keys_arr';
+PersistenceV2Impl.MAX_DATA_LENGTH_ = 8000;
+PersistenceV2Impl.NOT_SUPPORT_TYPES_ = [Array, Set, Map, WeakSet, WeakMap, Date, Boolean, Number, String, Symbol, BigInt, RegExp, Function, Promise, ArrayBuffer];
 PersistenceV2Impl.instance_ = undefined;
 /*
  * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
