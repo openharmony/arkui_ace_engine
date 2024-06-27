@@ -328,7 +328,10 @@ void JSSecurityUIExtension::JSBind(BindingTarget globalObj)
     JSClass<JSSecurityUIExtension>::StaticMethod("onReceive", &JSSecurityUIExtension::OnReceive);
     JSClass<JSSecurityUIExtension>::StaticMethod("onError", &JSSecurityUIExtension::OnError);
     JSClass<JSSecurityUIExtension>::StaticMethod("onTerminated", &JSSecurityUIExtension::OnTerminated);
-    JSClass<JSSecurityUIExtension>::InheritAndBind<JSViewAbstract>(globalObj);
+    JSClass<JSSecurityUIExtension>::StaticMethod("width", &JSViewAbstract::JsWidth);
+    JSClass<JSSecurityUIExtension>::StaticMethod("height", &JSViewAbstract::JsHeight);
+    JSClass<JSSecurityUIExtension>::StaticMethod("backgroundColor", &JSViewAbstract::JsBackgroundColor);
+    JSClass<JSSecurityUIExtension>::Bind(globalObj);
 }
 
 void JSSecurityUIExtension::Create(const JSCallbackInfo& info)

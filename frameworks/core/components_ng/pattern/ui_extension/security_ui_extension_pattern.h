@@ -113,6 +113,7 @@ private:
     };
 
     const char* ToString(AbilityState state);
+    bool CheckConstraint();
 
     RefPtr<FrameNode> placeholderNode_ = nullptr;
     RefPtr<OHOS::Ace::WantWrap> curWant_;
