@@ -475,7 +475,8 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_
         auto actionId = pointerEvent->GetPointerId();
         MMI::PointerEvent::PointerItem item;
         if (pointerEvent->GetPointerItem(actionId, item)) {
-            LOGI("action point info: id: %{public}d, pointerId: %{public}d, x: %{public}d, y: %{public}d, action: "
+            TAG_LOGD(AceLogTag::ACE_DRAG,
+                "action point info: id: %{public}d, pointerId: %{public}d, x: %{public}d, y: %{public}d, action: "
                 "%{public}d, pressure: %{public}f, tiltX: %{public}f, tiltY: %{public}f",
                 pointerEvent->GetId(), actionId, item.GetWindowX(), item.GetWindowY(), pointerEvent->GetPointerAction(),
                 item.GetPressure(), item.GetTiltX(), item.GetTiltY());
@@ -484,8 +485,9 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_
         for (auto&& id : ids) {
             MMI::PointerEvent::PointerItem item;
             if (pointerEvent->GetPointerItem(id, item)) {
-                LOGI("all point info: id: %{public}d, x: %{public}d, y: %{public}d, isPressed: %{public}d, pressure: "
-                     "%{public}f, tiltX: %{public}f, tiltY: %{public}f",
+                TAG_LOGD(AceLogTag::ACE_UIEVENT,
+                    "all point info: id: %{public}d, x: %{public}d, y: %{public}d, isPressed: %{public}d, pressure: "
+                    "%{public}f, tiltX: %{public}f, tiltY: %{public}f",
                     actionId, item.GetWindowX(), item.GetWindowY(), item.IsPressed(), item.GetPressure(),
                     item.GetTiltX(), item.GetTiltY());
             }

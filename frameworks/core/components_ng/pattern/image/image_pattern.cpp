@@ -381,7 +381,7 @@ void ImagePattern::OnImageLoadSuccess()
     ACE_LAYOUT_SCOPED_TRACE(
         "OnImageLoadSuccess[self:%d][src:%s]", host->GetId(), loadingCtx_->GetSourceInfo().ToString().c_str());
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(
+        TAG_LOGD(
             AceLogTag::ACE_IMAGE, "OnImageLoadSuccess src=%{public}s", loadingCtx_->GetSourceInfo().ToString().c_str());
     }
     host->MarkNeedRenderOnly();
@@ -598,7 +598,7 @@ void ImagePattern::LoadImage(
 
     loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad_);
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "start loading image %{public}s", src.ToString().c_str());
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "start loading image %{public}s", src.ToString().c_str());
     }
     loadingCtx_->SetLoadInVipChannel(GetLoadInVipChannel());
     if (onProgressCallback_) {
@@ -986,7 +986,7 @@ void ImagePattern::OnVisibleChange(bool visible)
 void ImagePattern::OnVisibleAreaChange(bool visible)
 {
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "OnVisibleAreaChange visible:%{public}d", (int)visible);
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "OnVisibleAreaChange visible:%{public}d", (int)visible);
     }
     if (!visible) {
         CloseSelectOverlay();

@@ -495,7 +495,7 @@ std::shared_ptr<RSData> NetworkImageLoader::LoadImageData(
 
     // 2. if not found. download it.
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "Download network image, uri=%{public}s", uri.c_str());
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "Download network image, uri=%{public}s", uri.c_str());
     }
     std::string result;
     DownloadCallback downloadCallback;
@@ -580,7 +580,7 @@ std::shared_ptr<RSData> Base64ImageLoader::LoadImageData(
         return nullptr;
     }
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "base64 size=%{public}d, src=%{public}s", (int)base64Code.size(),
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "base64 size=%{public}d, src=%{public}s", (int)base64Code.size(),
             imageSourceInfo.ToString().c_str());
     }
     return resData;
@@ -774,7 +774,7 @@ RefPtr<NG::ImageData> DecodedDataProviderImageLoader::LoadDecodedImageData(
 
     auto cache = pipeline->GetImageCache();
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "DecodedDataProvider src=%{public}s,Key=%{public}s", src.ToString().c_str(),
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "DecodedDataProvider src=%{public}s,Key=%{public}s", src.ToString().c_str(),
             src.GetKey().c_str());
     }
     if (cache) {
@@ -807,7 +807,7 @@ RefPtr<NG::ImageData> PixelMapImageLoader::LoadDecodedImageData(
         return nullptr;
     }
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "src is pixmap %{public}s", imageSourceInfo.ToString().c_str());
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "src is pixmap %{public}s", imageSourceInfo.ToString().c_str());
     }
     return MakeRefPtr<NG::PixmapData>(imageSourceInfo.GetPixmap());
 #endif
@@ -888,14 +888,14 @@ RefPtr<NG::ImageData> AstcImageLoader::LoadDecodedImageData(
     auto pixmap = PixelMap::CreatePixelMapFromDataAbility(pixmapMediaUniquePtr);
     CHECK_NULL_RETURN(pixmap, nullptr);
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE,
+        TAG_LOGD(AceLogTag::ACE_IMAGE,
             "src=%{public}s,astc pixmap from Media width*height=%{public}d*%{public}d, ByteCount=%{public}d",
             src.ToString().c_str(), pixmap->GetWidth(), pixmap->GetHeight(), pixmap->GetByteCount());
     }
 
     auto cache = pipeline->GetImageCache();
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "AstcImageLoader src=%{public}s,Key=%{public}s", src.ToString().c_str(),
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "AstcImageLoader src=%{public}s,Key=%{public}s", src.ToString().c_str(),
             src.GetKey().c_str());
     }
     if (cache) {

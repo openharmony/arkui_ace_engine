@@ -756,7 +756,7 @@ void DragDropManager::RequestDragSummaryInfoAndPrivilege()
     RequireSummary();
     int ret = InteractionInterface::GetInstance()->AddPrivilege();
     if (ret != 0 && SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Interaction AddPrivilege in DragEnd with code:%{public}d", ret);
+        TAG_LOGD(AceLogTag::ACE_DRAG, "Interaction AddPrivilege in DragEnd with code:%{public}d", ret);
     }
     ShadowOffsetData shadowOffsetData { -1, -1, -1, -1 };
     ret = InteractionInterface::GetInstance()->GetShadowOffset(shadowOffsetData);
@@ -764,7 +764,7 @@ void DragDropManager::RequestDragSummaryInfoAndPrivilege()
         previewRect_ =
             Rect(shadowOffsetData.offsetX, shadowOffsetData.offsetY, shadowOffsetData.width, shadowOffsetData.height);
     } else {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Interaction GetShadowOffset in DragEnd with code:%{public}d", ret);
+        TAG_LOGD(AceLogTag::ACE_DRAG, "Interaction GetShadowOffset in DragEnd with code:%{public}d", ret);
     }
 }
 

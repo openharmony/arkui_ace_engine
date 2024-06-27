@@ -996,32 +996,32 @@ void EventManager::LogPrintMouseTest()
         return;
     }
     if (currMouseTestResults_.empty()) {
-        TAG_LOGI(AceLogTag::ACE_MOUSE, "Mouse test onMouse result is empty.");
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onMouse result is empty.");
     } else {
         for (const auto& result : currMouseTestResults_) {
-            TAG_LOGI(AceLogTag::ACE_MOUSE, "Mouse test onMouse result: %{public}s/%{public}d.",
+            TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onMouse result: %{public}s/%{public}d.",
                 result->GetNodeName().c_str(), result->GetNodeId());
         }
     }
     if (lastHoverTestResults_.empty()) {
-        TAG_LOGI(AceLogTag::ACE_MOUSE, "Mouse test onHover last result is empty.");
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover last result is empty.");
     } else {
         for (const auto& result : lastHoverTestResults_) {
-            TAG_LOGI(AceLogTag::ACE_MOUSE, "Mouse test onHover last result: %{public}s/%{public}d.",
+            TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover last result: %{public}s/%{public}d.",
                 result->GetNodeName().c_str(), result->GetNodeId());
         }
     }
     if (currHoverTestResults_.empty()) {
-        TAG_LOGI(AceLogTag::ACE_MOUSE, "Mouse test onHover current result is empty.");
+        TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover current result is empty.");
     } else {
         for (const auto& result : currHoverTestResults_) {
-            TAG_LOGI(AceLogTag::ACE_MOUSE, "Mouse test onHover current result: %{public}s/%{public}d.",
+            TAG_LOGD(AceLogTag::ACE_MOUSE, "Mouse test onHover current result: %{public}s/%{public}d.",
                 result->GetNodeName().c_str(), result->GetNodeId());
         }
     }
     auto lastNode = lastHoverNode_.Upgrade();
     auto currNode = currHoverNode_.Upgrade();
-    TAG_LOGI(AceLogTag::ACE_MOUSE,
+    TAG_LOGD(AceLogTag::ACE_MOUSE,
         "Mouse test last/current hoverEffect node: %{public}s/%{public}d / %{public}s/%{public}d",
         lastNode ? lastNode->GetTag().c_str() : "NULL", lastNode ? lastNode->GetId() : -1,
         currNode ? currNode->GetTag().c_str() : "NULL", currNode ? currNode->GetId() : -1);
@@ -1863,7 +1863,7 @@ void EventManager::CheckAndLogLastReceivedEventInfo(int32_t eventId, bool logImm
 {
     if (logImmediately) {
         if (SystemProperties::GetDebugEnabled()) {
-            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
                 "Received new event id=%{public}d in ace_container, lastEventInfo: id:%{public}d", eventId,
                 lastReceivedEvent_.eventId);
         }
@@ -1874,7 +1874,7 @@ void EventManager::CheckAndLogLastReceivedEventInfo(int32_t eventId, bool logImm
     if (lastReceivedEvent_.lastLogTimeStamp != 0 &&
         (currentTime - lastReceivedEvent_.lastLogTimeStamp) > EVENT_CLEAR_DURATION * TRANSLATE_NS_TO_MS) {
         if (SystemProperties::GetDebugEnabled()) {
-            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
                 "Received new event id=%{public}d has been more than a second since the last one event "
                 "received "
                 "in ace_container, lastEventInfo: id:%{public}d",
