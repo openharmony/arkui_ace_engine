@@ -89,7 +89,7 @@ frameworks/core/components_ng/pattern/effect_component/  @liuchao92
 frameworks/core/components_ng/pattern/flex/  @xiexiyun
 frameworks/core/components_ng/pattern/form/  @arondave @arcticsun
 frameworks/core/components_ng/pattern/gauge/  @zhoulianhai5
-frameworks/core/components_ng/pattern/gesture/  @zheng-qiyi
+frameworks/core/components_ng/pattern/gesture/  @zheng-qiyi @zhaojian2021
 frameworks/core/components_ng/pattern/grid/  @zcdqs
 frameworks/core/components_ng/pattern/grid/irregular/  @zhoutianer
 frameworks/core/components_ng/pattern/grid_col/  @xiexiyun
@@ -215,7 +215,7 @@ frameworks/core/components/focusable/  @catpoison
 frameworks/core/components/font/  @jyj_0306
 frameworks/core/components/foreach/  @yan-shuifeng
 frameworks/core/components/form/  @arondave @arcticsun
-frameworks/core/components/gesture_listener/  @zheng-qiyi
+frameworks/core/components/gesture_listener/  @zheng-qiyi @zhaojian202
 frameworks/core/components/grid/  @zcdqs
 frameworks/core/components/grid_layout/  @zcdqs
 frameworks/core/components/hyperlink/  @techbuilding
@@ -281,7 +281,7 @@ frameworks/core/components/tip/  @
 frameworks/core/components/toast/  @
 frameworks/core/components/toggle/  @fredtt
 frameworks/core/components/tool_bar/  @
-frameworks/core/components/touch_listener/  @zheng-qiyi
+frameworks/core/components/touch_listener/  @zheng-qiyi @zhaojian2021
 frameworks/core/components/track/  @luoying_ace_admin
 frameworks/core/components/transform/  @
 frameworks/core/components/transition/  @
@@ -301,19 +301,19 @@ frameworks/core/animation/  @hehongyang9
 frameworks/core/components_ng/animation/  @hehongyang9
 
 [Event source]
-frameworks/core/event/  @zhaojian2021 @catpoison
+frameworks/core/event/  @zhaojian2021 @piggyguy
 frameworks/core/event/time/  @zhoutianer
-frameworks/core/focus/  @catpoison
-frameworks/core/components_ng/event/  @zhaojian2021 @catpoison
-frameworks/core/components_ng/event/focus_hub.cpp  @catpoison @benb365 @piggyguy
-frameworks/core/components_ng/event/focus_hub.h  @catpoison @benb365 @piggyguy
-frameworks/core/components_ng/event/drag_event.cpp  @zhaojian2021
-frameworks/core/components_ng/event/gesture_event_hub.cpp  @zhaojian2021
-frameworks/core/components_ng/manager/drag_drop/drag_drop_manager.cpp  @zhaojian2021
+frameworks/core/focus/ @yihao-lin @benb365
+frameworks/core/components_ng/event/  @zhaojian2021 @piggyguy
+frameworks/core/components_ng/event/focus_hub.cpp  @yihao-lin
+frameworks/core/components_ng/event/focus_hub.h  @yihao-lin
+frameworks/core/components_ng/event/drag_event.cpp  @zhaojian2021 @piggyguy
+frameworks/core/components_ng/event/gesture_event_hub.cpp  @zhaojian2021 @piggyguy
+frameworks/core/components_ng/manager/drag_drop/drag_drop_manager.cpp  @zhaojian2021 @piggyguy
 
 [Gestures source]
-frameworks/core/gestures/  @zheng-qiyi
-frameworks/core/components_ng/gestures/  @zheng-qiyi
+frameworks/core/gestures/  @zhaojian2021 @piggyguy
+frameworks/core/components_ng/gestures/  @zhaojian2021 @piggyguy
 
 [Image source]
 frameworks/core/image/  @wu-yinxiao
