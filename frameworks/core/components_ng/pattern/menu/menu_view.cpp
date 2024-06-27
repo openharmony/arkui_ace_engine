@@ -356,7 +356,7 @@ void UpdateOpacityInFinishEvent(const RefPtr<FrameNode>& previewNode, const RefP
 }
 
 void SetHoverImageStackBorderRadius(const RefPtr<FrameNode>& hoverImageStackNode, const RefPtr<MenuTheme>& menuTheme,
-    bool isScaleNearEqual)
+    const RefPtr<RenderContext>& imageContext, bool isScaleNearEqual)
 {
     CHECK_NULL_VOID(hoverImageStackNode);
     auto stackContext = hoverImageStackNode->GetRenderContext();
@@ -376,11 +376,14 @@ void SetHoverImageStackBorderRadius(const RefPtr<FrameNode>& hoverImageStackNode
     }
     auto previewBorderRadius = menuTheme->GetPreviewBorderRadius();
     AnimationUtils::Animate(
-        option, [stackContext, previewBorderRadius]() {
+        option, [stackContext, imageContext, previewBorderRadius]() {
             CHECK_NULL_VOID(stackContext);
             BorderRadiusProperty borderRadius;
             borderRadius.SetRadius(previewBorderRadius);
             stackContext->UpdateBorderRadius(borderRadius);
+
+            CHECK_NULL_VOID(imageContext);
+            imageContext->UpdateBorderRadius(borderRadius);
         });
 }
 
@@ -442,6 +445,8 @@ void UpdatePreivewVisibleArea(const RefPtr<FrameNode>& hoverImageStackNode, cons
 void SetHoverImageFinishEvent(const RefPtr<FrameNode>& hoverImageStackNode, const RefPtr<FrameNode>& previewNode,
     const RefPtr<RenderContext>& imageContext, const RefPtr<MenuTheme>& menuTheme, bool isScaleNearEqual = true)
 {
+    SetHoverImageStackBorderRadius(hoverImageStackNode, menuTheme, imageContext, isScaleNearEqual);
+
     UpdateOpacityInFinishEvent(previewNode, imageContext, menuTheme, isScaleNearEqual);
 
     UpdatePreivewVisibleArea(hoverImageStackNode, previewNode, menuTheme, isScaleNearEqual);
@@ -472,8 +477,6 @@ void SetHoverImageFinishEvent(const RefPtr<FrameNode>& hoverImageStackNode, cons
             stackContext->UpdateTransformScale(VectorF(scaleTo, scaleTo));
         },
         scaleOption.GetOnFinishEvent());
-
-    SetHoverImageStackBorderRadius(hoverImageStackNode, menuTheme, isScaleNearEqual);
 }
 
 void ShowHoverImageAnimationProc(const RefPtr<FrameNode>& hoverImageStackNode, const RefPtr<FrameNode>& previewNode,
