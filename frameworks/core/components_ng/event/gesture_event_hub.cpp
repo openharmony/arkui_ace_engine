@@ -530,6 +530,14 @@ void GestureEventHub::ResetDragActionForWeb()
     isReceivedDragGestureInfo_ = false;
     CHECK_NULL_VOID(dragEventActuator_);
     dragEventActuator_->ResetDragActionForWeb();
+
+    // fix drag failed when long press drag after 500ms and before 800ms
+    // need to reset the state of the drag manager
+    auto pipeLine = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeLine);
+    auto dragDropManager = pipeLine->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->ResetDragging();
 }
 
 void GestureEventHub::StartDragTaskForWeb()
