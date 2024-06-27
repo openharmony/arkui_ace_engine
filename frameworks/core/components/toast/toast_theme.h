@@ -99,7 +99,7 @@ public:
                     toastPattern->GetAttr<Dimension>("toast_border_radius", 24.0_vp));
             }
             theme->toastDoubleBorderEnable_ = toastPattern->GetAttr<int>("toast_double_border_enable", 0);
-            theme->toastOuterBorderColor_ = 
+            theme->toastOuterBorderColor_ =
                 toastPattern->GetAttr<Color>("toast_outer_border_color", Color::TRANSPARENT);
             theme->toastOuterBorderWidth_ = toastPattern->GetAttr<double>("toast_outer_border_width", 0.0f);
             theme->toastInnerBorderColor_ =
