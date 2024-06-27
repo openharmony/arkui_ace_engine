@@ -445,6 +445,9 @@ int32_t OH_NativeXComponent_GetTouchPointTiltY(OH_NativeXComponent* component, u
  * @param windowX Indicates the x coordinate relative to the upper left corner of the current\n
           application window.
  * @return Returns the status code of the execution.
+ *         {@link OH_NATIVEXCOMPONENT_RESULT_SUCCESS} get windowX success.
+ *         {@link OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER} component is NULL, windowX is NULL\n
+ *         or native XComponent is NULL.
  * @since 12
  * @version 1.0
  */
@@ -459,6 +462,9 @@ int32_t OH_NativeXComponent_GetTouchPointWindowX(OH_NativeXComponent* component,
  * @param windowY Indicates the y coordinate relative to the upper left corner of the current\n
           application window.
  * @return Returns the status code of the execution.
+ *         {@link OH_NATIVEXCOMPONENT_RESULT_SUCCESS} get windowY success.
+ *         {@link OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER} component is NULL, windowY is NULL\n
+ *         or native XComponent is NULL.
  * @since 12
  * @version 1.0
  */
@@ -473,6 +479,9 @@ int32_t OH_NativeXComponent_GetTouchPointWindowY(OH_NativeXComponent* component,
  * @param displayX Indicates the x coordinate relative to the upper left corner of the current\n
           screen.
  * @return Returns the status code of the execution.
+ *         {@link OH_NATIVEXCOMPONENT_RESULT_SUCCESS} get displayX success.
+ *         {@link OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER} component is NULL, displayX is NULL\n
+ *         or native XComponent is NULL.
  * @since 12
  * @version 1.0
  */
@@ -487,6 +496,9 @@ int32_t OH_NativeXComponent_GetTouchPointDisplayX(OH_NativeXComponent* component
  * @param displayY Indicates the y coordinate relative to the upper left corner of the current\n
           screen.
  * @return Returns the status code of the execution.
+ *         {@link OH_NATIVEXCOMPONENT_RESULT_SUCCESS} get displayY success.
+ *         {@link OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER} component is NULL, displayY is NULL\n
+ *         or native XComponent is NULL.
  * @since 12
  * @version 1.0
  */
