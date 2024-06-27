@@ -620,6 +620,7 @@ void TabBarPattern::FocusIndexChange(int32_t index)
     CHECK_NULL_VOID(tabsPattern);
     auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(tabBarLayoutProperty);
+    
     if (!ContentWillChange(tabBarLayoutProperty->GetIndicatorValue(0), index)) {
         return;
     }
@@ -631,6 +632,7 @@ void TabBarPattern::FocusIndexChange(int32_t index)
         UpdateAnimationDuration();
         if (GetAnimationDuration().has_value()
             && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
+            tabContentWillChangeFlag_ = true;
             swiperController_->SwipeTo(index);
         } else {
             swiperController_->SwipeToWithoutAnimation(index);
@@ -639,7 +641,6 @@ void TabBarPattern::FocusIndexChange(int32_t index)
         tabBarLayoutProperty->UpdateIndicator(index);
         PaintFocusState();
     }
-
     UpdateTextColorAndFontWeight(index);
 }
 
@@ -1038,14 +1039,13 @@ void TabBarPattern::HandleClick(const GestureEvent& info, int32_t index)
     SetSwiperCurve(DurationCubicCurve);
 
     TabBarClickEvent(index);
+    if (!ContentWillChange(layoutProperty->GetIndicatorValue(0), index)) {
+        return;
+    }
     if (tabBarStyles_[indicator_] == TabBarStyle::SUBTABBATSTYLE &&
         tabBarStyles_[index] == TabBarStyle::SUBTABBATSTYLE &&
         layoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
         HandleSubTabBarClick(layoutProperty, index);
-        return;
-    }
-
-    if (!ContentWillChange(layoutProperty->GetIndicatorValue(0), index)) {
         return;
     }
     ClickTo(host, index);
@@ -1065,6 +1065,7 @@ void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
         if (GetAnimationDuration().has_value() && Positive(GetAnimationDuration().value())
             && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
+            tabContentWillChangeFlag_ = true;
             swiperController_->SwipeTo(index);
             animationTargetIndex_ = index;
         } else {
@@ -1427,12 +1428,12 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
         if (GetAnimationDuration().has_value() && Positive(GetAnimationDuration().value())
             && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
+            tabContentWillChangeFlag_ = true;
             swiperController_->SwipeTo(index);
         } else {
             swiperController_->SwipeToWithoutAnimation(index);
         }
     }
-
     layoutProperty->UpdateIndicator(index);
 }
 
@@ -2925,7 +2926,7 @@ bool TabBarPattern::ContentWillChange(int32_t currentIndex, int32_t comingIndex)
     CHECK_NULL_RETURN(tabsNode, true);
     auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
     CHECK_NULL_RETURN(tabsPattern, true);
-    if (tabsPattern->GetInterceptStatus()) {
+    if (tabsPattern->GetInterceptStatus() && currentIndex != comingIndex) {
         auto ret = tabsPattern->OnContentWillChange(currentIndex, comingIndex);
         return ret.has_value() ? ret.value() : true;
     }

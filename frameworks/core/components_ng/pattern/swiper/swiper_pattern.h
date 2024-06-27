@@ -785,7 +785,7 @@ private:
     void HandleSwiperCustomAnimation(float offset);
     void CalculateAndUpdateItemInfo(float offset);
     void UpdateItemInfoInCustomAnimation(int32_t index, float startPos, float endPos);
-    void UpdateTabBarAnimationDuration();
+    void UpdateTabIndexAndTabBarAnimationDuration(int32_t index);
 
     float GetItemSpace() const;
     float GetPrevMargin() const;
