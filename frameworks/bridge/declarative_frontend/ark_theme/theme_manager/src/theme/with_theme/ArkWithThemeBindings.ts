@@ -33,9 +33,9 @@ if (globalThis.WithTheme !== undefined) {
             ArkThemeScopeManager.getInstance().onExitLocalColorMode();
         }
 
-        if(themeOptions){
+        if (themeOptions) {
             ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, themeOptions, theme);
-        }else{
+        } else {
             ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, {}, theme);
         }
     }
