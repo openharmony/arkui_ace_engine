@@ -2747,7 +2747,9 @@ bool TextFieldPattern::FireOnTextChangeEvent()
         }
     }
     auto textCache = layoutProperty->GetValueValue("");
-    if (textCache == contentController_->GetTextValue()) {
+    auto rangeCache = layoutProperty->GetPreviewRangeValue({-1, -1});
+    TextRange curPreviewRange = {GetPreviewTextStart(), GetPreviewTextEnd()};
+    if (textCache == contentController_->GetTextValue() && rangeCache == curPreviewRange) {
         return false;
     }
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
@@ -2797,6 +2799,7 @@ void TextFieldPattern::AddTextFireOnChange()
         TextRange range;
         range.start = pattern->GetPreviewTextStart();
         range.end = pattern->GetPreviewTextEnd();
+        layoutProperty->UpdatePreviewRange(range);
         eventHub->FireOnChange(pattern->GetTextContentController()->GetTextValue(), range);
     });
 }
