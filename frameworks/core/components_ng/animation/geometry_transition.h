@@ -30,7 +30,8 @@ class GeometryTransition : public AceType {
     DECLARE_ACE_TYPE(GeometryTransition, AceType);
 
 public:
-    explicit GeometryTransition(const std::string& id, bool followWithoutTransition = false);
+    explicit GeometryTransition(const std::string& id,
+        bool followWithoutTransition = false, bool doRegisterSharedTransition = true);
     ~GeometryTransition() override = default;
 
     bool IsNodeInAndActive(const WeakPtr<FrameNode>& frameNode) const;
@@ -47,6 +48,11 @@ public:
     bool GetFollowWithoutTransition() const
     {
         return followWithoutTransition_;
+    }
+
+    bool GetDoRegisterSharedTransition() const
+    {
+        return doRegisterSharedTransition_;
     }
 
     void Build(const WeakPtr<FrameNode>& frameNode, bool isNodeIn);
@@ -94,6 +100,7 @@ private:
     bool outNodeParentHasScales_ = false;
     RefPtr<FrameNode> holder_;
     bool followWithoutTransition_ = false;
+    bool doRegisterSharedTransition_ = true;
     // static node means the node on the tree without transition
     std::optional<RectF> staticNodeAbsRect_;
     RefPtr<LayoutProperty> layoutPropertyIn_;

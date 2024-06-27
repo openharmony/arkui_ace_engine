@@ -3085,19 +3085,26 @@ ArkUINativeModuleValue CommonBridge::SetGeometryTransition(ArkUIRuntimeCallInfo 
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> idArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> optionsArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> followArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> hierarchyStrategyArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (idArg->IsUndefined() || idArg->IsNull() || !idArg->IsString(vm)) {
         GetArkUINodeModifiers()->getCommonModifier()->resetGeometryTransition(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     std::string id = idArg->ToString(vm)->ToString();
-    bool options = false;
-    if (optionsArg->IsBoolean()) {
-        options = optionsArg->ToBoolean(vm)->Value();
+    ArkUIGeometryTransitionOptions options = {false, static_cast<int32_t>(TransitionHierarchyStrategy::ADAPTIVE)};
+    if (followArg->IsBoolean()) {
+        options.follow = followArg->ToBoolean(vm)->Value();
     }
-    GetArkUINodeModifiers()->getCommonModifier()->setGeometryTransition(
-        nativeNode, id.c_str(), static_cast<int32_t>(options));
+    if (hierarchyStrategyArg->IsInt()) {
+        options.hierarchyStrategy = hierarchyStrategyArg->Int32Value(vm);
+        if (options.hierarchyStrategy < static_cast<int32_t>(TransitionHierarchyStrategy::NONE) ||
+            options.hierarchyStrategy > static_cast<int32_t>(TransitionHierarchyStrategy::ADAPTIVE)) {
+            options.hierarchyStrategy = static_cast<int32_t>(TransitionHierarchyStrategy::ADAPTIVE);
+        }
+    }
+    GetArkUINodeModifiers()->getCommonModifier()->setGeometryTransition(nativeNode, id.c_str(), &options);
     return panda::JSValueRef::Undefined(vm);
 }
 

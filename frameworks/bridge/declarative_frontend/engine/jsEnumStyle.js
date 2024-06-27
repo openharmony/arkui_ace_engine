@@ -1653,6 +1653,12 @@ var GestureControl;
   })(GestureType = GestureControl.GestureType || (GestureControl.GestureType = {}));
 })(GestureControl || (GestureControl = {}));
 
+var TransitionHierarchyStrategy;
+(function (TransitionHierarchyStrategy) {
+  TransitionHierarchyStrategy[TransitionHierarchyStrategy["NONE"] = 0] = "NONE";
+  TransitionHierarchyStrategy[TransitionHierarchyStrategy["ADAPTIVE"] = 1] = "ADAPTIVE";
+})(TransitionHierarchyStrategy || (TransitionHierarchyStrategy = {}));
+
 class SubTabBarStyle {
   constructor(content) {
     this.type = 'SubTabBarStyle';

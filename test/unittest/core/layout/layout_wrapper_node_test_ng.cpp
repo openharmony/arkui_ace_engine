@@ -302,7 +302,7 @@ HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg010, TestSize.Level1)
     /**
      * @tc.steps: step3. Create GeometryTransition.
      */
-    RefPtr<GeometryTransition> geometryTransition = AceType::MakeRefPtr<GeometryTransition>("test", true);
+    RefPtr<GeometryTransition> geometryTransition = AceType::MakeRefPtr<GeometryTransition>("test", true, true);
     geometryTransition->state_ = GeometryTransition::State::ACTIVE;
     geometryTransition->inNode_ = frameNode;
     geometryTransition->outNode_ = frameNode;
@@ -418,7 +418,7 @@ HWTEST_F(LayoutWrapperNodeTestNg, LayoutWrapperNodeTestNg012, TestSize.Level1)
      */
     RefPtr<FrameNode> frameNode1 =
         FrameNode::CreateFrameNode(ROW_FRAME_NODE, NODE_ID_1, AceType::MakeRefPtr<Pattern>());
-    RefPtr<GeometryTransition> geometryTransition = AceType::MakeRefPtr<GeometryTransition>("test", true);
+    RefPtr<GeometryTransition> geometryTransition = AceType::MakeRefPtr<GeometryTransition>("test", true, true);
     geometryTransition->state_ = GeometryTransition::State::ACTIVE;
     geometryTransition->inNode_ = frameNode;
     geometryTransition->outNode_ = frameNode1;
