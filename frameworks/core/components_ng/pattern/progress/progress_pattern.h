@@ -22,6 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -87,7 +88,19 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
+        FocusPattern focusPattern(FocusType::NODE, true, FocusStyleType::CUSTOM_REGION);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, focusPattern);
+        auto appTheme = pipeline->GetTheme<AppTheme>();
+        CHECK_NULL_RETURN(appTheme, focusPattern);
+        if (appTheme->IsFocusBoxGlow()) {
+            FocusPaintParam focusPaintParam;
+            focusPaintParam.SetPaintColor(appTheme->GetFocusBorderColor());
+            focusPaintParam.SetPaintWidth(appTheme->GetFocusBorderWidth());
+            focusPaintParam.SetFocusBoxGlow(appTheme->IsFocusBoxGlow());
+            focusPattern.SetFocusPaintParams(focusPaintParam);
+        }
+        return focusPattern;
     }
 
     void SetTextFromUser(bool value)
