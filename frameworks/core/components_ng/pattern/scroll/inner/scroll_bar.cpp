@@ -407,8 +407,7 @@ void ScrollBar::SetMouseEvent()
             } else {
                 scrollBar->isMousePressed_ = false;
             }
-        } else if (!scrollBar->IsPressed()) {
-            scrollBar->ScheduleDisappearDelayTask();
+            scrollBar->isShowScrollBar_ = true;
         }
         if (inHoverRegion && !scrollBar->IsHover()) {
             if (!scrollBar->IsPressed()) {
@@ -421,6 +420,10 @@ void ScrollBar::SetMouseEvent()
             if (!scrollBar->IsPressed()) {
                 scrollBar->PlayScrollBarShrinkAnimation();
             }
+        }
+        if (!inBarRegion && !inHoverRegion && !scrollBar->IsPressed() && scrollBar->isShowScrollBar_) {
+            scrollBar->ScheduleDisappearDelayTask();
+            scrollBar->isShowScrollBar_ = false;
         }
         scrollBar->locationInfo_ = info.GetLocalLocation();
     });

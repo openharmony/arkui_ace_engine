@@ -77,6 +77,7 @@ void ScrollBarPattern::OnModifyDone()
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
         if (source == SCROLL_FROM_START) {
+            pattern->isScrolling_ = true;
             pattern->StopDisappearAnimator();
             // AccessibilityEventType::SCROLL_START
             return true;
@@ -86,6 +87,7 @@ void ScrollBarPattern::OnModifyDone()
     scrollEndCallback_ = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->isScrolling_ = false;
         if (pattern->GetDisplayMode() == DisplayMode::AUTO) {
             pattern->StartDisappearAnimator();
         }
@@ -285,6 +287,19 @@ void ScrollBarPattern::RegisterScrollBarEventTask()
 
     gestureHub->AddTouchEvent(scrollBar_->GetTouchEvent());
     inputHub->AddOnMouseEvent(scrollBar_->GetMouseEvent());
+    auto onHover = [weak = WeakClaim(this)](bool isHover, HoverInfo&) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->isMousePressed_ || isHover) {
+            pattern->StopDisappearAnimator();
+        } else {
+            if ((pattern->displayMode_) == DisplayMode::AUTO && !(pattern->isScrolling_)) {
+                pattern->StartDisappearAnimator();
+            }
+        }
+    };
+    auto onHoverFunc = MakeRefPtr<InputEvent>(std::move(onHover));
+    inputHub->AddOnHoverEvent(onHoverFunc);
     inputHub->AddOnHoverEvent(scrollBar_->GetHoverEvent());
 }
 

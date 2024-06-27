@@ -624,6 +624,7 @@ private:
     bool needAdaptAnimation_ = false;
     bool isReverse_ = false;
     bool isReverseUpdate_ = false;
+    bool isShowScrollBar_ = false;
 
     Offset paintOffset_;
     Size viewPortSize_;
