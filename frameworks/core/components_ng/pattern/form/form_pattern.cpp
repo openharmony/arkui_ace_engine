@@ -70,11 +70,13 @@ constexpr int32_t DOUBLE = 2;
 constexpr char FORM_DIMENSION_SPLITTER = '*';
 constexpr int32_t FORM_SHAPE_CIRCLE = 2;
 constexpr double TIME_LIMIT_FONT_SIZE_BASE = 18.0;
+constexpr double TIBETAN_TIME_LIMIT_FONT_SIZE_BASE = 9.0;
 constexpr char TIME_LIMIT_RESOURCE_NAME[] = "form_disable_time_limit";
 constexpr float MAX_FONT_SCALE = 1.3f;
 constexpr uint32_t FORBIDDEN_BG_COLOR_DARK = 0xFF2E3033;
 constexpr uint32_t FORBIDDEN_BG_COLOR_LIGHT = 0xFFD1D1D6;
 constexpr double TEXT_TRANSPARENT_VAL = 0.9;
+constexpr int32_t FORM_DIMENSION_MIN_HEIGHT = 1;
 
 class FormSnapshotCallback : public Rosen::SurfaceCaptureCallback {
 public:
@@ -1688,13 +1690,16 @@ void FormPattern::OnLanguageConfigurationUpdate()
     CHECK_NULL_VOID(textNode);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
-    std::string content;
-    GetTimeLimitResource(content);
-    TAG_LOGI(AceLogTag::ACE_FORM, "FormPattern::OnLanguageConfigurationUpdate, %{public}s", content.c_str());
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
+    std::string content;
+    GetTimeLimitResource(content);
     textLayoutProperty->UpdateContent(content);
+
+    Dimension fontSize(GetTimeLimitFontSize());
+    if (!NearEqual(textLayoutProperty->GetFontSize().value(), fontSize)) {
+        textLayoutProperty->UpdateFontSize(fontSize);
+    }
 }
 
 void FormPattern::GetTimeLimitResource(std::string &content)
@@ -1726,6 +1731,7 @@ void FormPattern::GetTimeLimitResource(std::string &content)
         return;
     }
     sysResMgr->GetStringByName(TIME_LIMIT_RESOURCE_NAME, content);
+    isTibetanLanguage_ = language == "bo"? true : false;
 }
 
 void FormPattern::AddFormChildNode(FormChildNodeType formChildNodeType, const RefPtr<FrameNode> child)
@@ -1777,11 +1783,16 @@ double FormPattern::GetTimeLimitFontSize()
     if (fontScale > MAX_FONT_SCALE) {
         fontScale = MAX_FONT_SCALE;
     }
-
     double density = PipelineBase::GetCurrentDensity();
     TAG_LOGD(AceLogTag::ACE_FORM, "Density is %{public}f, font scale is %{public}f.",
         density, fontScale);
-    return TIME_LIMIT_FONT_SIZE_BASE * density * fontScale;
+   
+    int32_t dimensionHeight = GetFormDimensionHeight(cardInfo_.dimension);
+    if (dimensionHeight == FORM_DIMENSION_MIN_HEIGHT && isTibetanLanguage_) {
+        return TIBETAN_TIME_LIMIT_FONT_SIZE_BASE * density * fontScale;
+    } else {
+        return TIME_LIMIT_FONT_SIZE_BASE * density * fontScale;
+    }
 }
 
 bool FormPattern::IsMaskEnableForm(const RequestFormInfo& info)
