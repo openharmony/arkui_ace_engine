@@ -3292,12 +3292,17 @@ int32_t SetGeometryTransition(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
     if (item->string == nullptr) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    ArkUI_Bool options = false;
+    ArkUIGeometryTransitionOptions options;
+    ArkUI_Bool follow = false;
     if (item->size == 1) {
-        options = item->value[0].i32;
+        follow = item->value[0].i32;
     }
+    options.follow = follow;
+    options.hierarchyStrategy = static_cast<int32_t>(TransitionHierarchyStrategy::ADAPTIVE);
+
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getCommonModifier()->setGeometryTransition(node->uiNodeHandle, item->string, options);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setGeometryTransition(node->uiNodeHandle, item->string,
+        &options);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -3313,9 +3318,10 @@ const ArkUI_AttributeItem* GetGeometryTransition(ArkUI_NodeHandle node)
     if (!modifier) {
         return nullptr;
     }
-    ArkUI_Bool options = false;
+    ArkUIGeometryTransitionOptions options;
     g_attributeItem.string = modifier->getGeometryTransition(node->uiNodeHandle, &options);
-    g_numberValues[0].i32 = options;
+    g_numberValues[NUM_0].i32 = options.follow;
+    g_numberValues[NUM_1].i32 = options.hierarchyStrategy;
     return &g_attributeItem;
 }
 

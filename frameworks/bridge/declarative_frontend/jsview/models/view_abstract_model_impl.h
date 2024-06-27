@@ -120,7 +120,8 @@ public:
     void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) override;
     void SetSharedTransition(
         const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) override;
-    void SetGeometryTransition(const std::string& id, bool followWithoutTransition = false) override;
+    void SetGeometryTransition(
+        const std::string& id, bool followWithoutTransition = false, bool doRegisterSharedTransition = true) override;
     void SetMotionPath(const MotionPathOption& option) override;
     void SetRenderGroup(bool isRenderGroup) override {}
     void SetRenderFit(RenderFit renderFit) override {}

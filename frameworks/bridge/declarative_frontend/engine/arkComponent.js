@@ -1322,13 +1322,14 @@ class GeometryTransitionModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    let _a;
+    let _a, _b;
     if (reset) {
       getUINativeModule().common.resetGeometryTransition(node);
     }
     else {
-      getUINativeModule().common.setGeometryTransition(node, this.value.id, (_a = this.value.options) === null ||
-       _a === void 0 ? void 0 : _a.follow);
+      getUINativeModule().common.setGeometryTransition(node, this.value.id, 
+        (_a = this.value.options) === null || _a === void 0 ? void 0 : _a.follow,
+        (_b = this.value.options) === null || _b === void 0 ? void 0 : _b.hierarchyStrategy);
     }
   }
 }

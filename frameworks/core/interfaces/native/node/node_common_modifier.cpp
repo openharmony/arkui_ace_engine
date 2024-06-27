@@ -2213,21 +2213,24 @@ void ResetRotate(ArkUINodeHandle node)
     ViewAbstract::SetPivot(frameNode, center);
 }
 
-void SetGeometryTransition(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool options)
+void SetGeometryTransition(ArkUINodeHandle node, ArkUI_CharPtr id, const ArkUIGeometryTransitionOptions* options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::string idStr(id);
-    ViewAbstract::SetGeometryTransition(frameNode, idStr, static_cast<bool>(options));
+    ViewAbstract::SetGeometryTransition(frameNode, idStr,
+        static_cast<bool>(options->follow), static_cast<bool>(options->hierarchyStrategy));
 }
 
-ArkUI_CharPtr GetGeometryTransition(ArkUINodeHandle node, ArkUI_Bool* options)
+ArkUI_CharPtr GetGeometryTransition(ArkUINodeHandle node, ArkUIGeometryTransitionOptions* options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
     bool followWithoutTransition = false;
-    g_strValue = ViewAbstract::GetGeometryTransition(frameNode, &followWithoutTransition);
-    *options = followWithoutTransition;
+    bool doRegisterSharedTransition = true;
+    g_strValue = ViewAbstract::GetGeometryTransition(frameNode, &followWithoutTransition, &doRegisterSharedTransition);
+    options->follow = followWithoutTransition;
+    options->hierarchyStrategy = static_cast<int32_t>(doRegisterSharedTransition);
     return g_strValue.c_str();
 }
 
@@ -2235,7 +2238,7 @@ void ResetGeometryTransition(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetGeometryTransition(frameNode, "", false);
+    ViewAbstract::SetGeometryTransition(frameNode, "", false, true);
 }
 
 void SetOffset(ArkUINodeHandle node, const ArkUI_Float32* number, const ArkUI_Int32* unit)
