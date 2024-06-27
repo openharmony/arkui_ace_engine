@@ -24,6 +24,7 @@
 #include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components/tab_bar/tab_theme.h"
@@ -73,13 +74,6 @@ constexpr float NO_OPACITY = 0.0f;
 constexpr float TEXT_COLOR_THREDHOLD = 0.673f;
 constexpr int8_t HALF_OF_WIDTH = 2;
 
-constexpr float BIG_FONT_SIZE_SCALE = 1.75f;
-constexpr float LARGE_FONT_SIZE_SCALE = 2.0f;
-constexpr float MAX_FONT_SIZE_SCALE = 3.2f;
-constexpr double BIG_DIALOG_WIDTH = 216.0;
-constexpr double MAX_DIALOG_WIDTH = 256.0;
-constexpr int8_t GRIDCOUNT = 2;
-constexpr int8_t MAXLINES = 6;
 constexpr float MAX_FLING_VELOCITY = 4200.0f;
 const auto DurationCubicCurve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
 constexpr double TAB_BAR_MARGIN_LEFTANDRIGHT = 12.0;
@@ -94,7 +88,7 @@ void FindTextAndImageNode(
 {
     if (columnNode->GetTag() == V2::TEXT_ETS_TAG) {
         textNode = columnNode;
-    } else if (columnNode->GetTag() == V2::IMAGE_ETS_TAG) {
+    } else if (columnNode->GetTag() == V2::IMAGE_ETS_TAG || columnNode->GetTag() == V2::SYMBOL_ETS_TAG) {
         imageNode = columnNode;
     } else {
         std::list<RefPtr<UINode>> children = columnNode->GetChildren();
@@ -102,60 +96,6 @@ void FindTextAndImageNode(
             FindTextAndImageNode(AceType::DynamicCast<FrameNode>(child), textNode, imageNode);
         }
     }
-}
-
-void CreateDialogIconNode(const RefPtr<FrameNode> &columnNode, const RefPtr<PipelineBase> &pipelineContext,
-    const RefPtr<FrameNode>& imageNode)
-{
-    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo());
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
-    CHECK_NULL_VOID(tabTheme);
-    auto color = tabTheme->GetDialogIconColor();
-    imageSourceInfo.SetFillColor(Color(color.GetValue()));
-    auto iconNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    auto iconProps = iconNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(iconProps);
-    iconProps->UpdateUserDefinedIdealSize(CalcSize(CalcLength(64.0_vp), CalcLength(64.0_vp)));
-    iconProps->UpdateImageFit(ImageFit::FILL);
-    iconProps->UpdateImageSourceInfo(imageSourceInfo);
-    // add image margin
-    MarginProperty margin = {
-        .top = CalcLength(48.0_vp),
-        .bottom = CalcLength(16.0_vp),
-    };
-    iconProps->UpdateMargin(margin);
-    iconNode->MountToParent(columnNode);
-    iconNode->MarkModifyDone();
-}
-
-void CreateDialogTextNode(const RefPtr<FrameNode>& columnNode, const RefPtr<PipelineBase> &pipelineContext,
-    const RefPtr<FrameNode>& textNode)
-{
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    auto textValue = textLayoutProperty->GetContent();
-    
-    auto dialogTextNode = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    CHECK_NULL_VOID(dialogTextNode);
-    auto titleProp = AceType::DynamicCast<TextLayoutProperty>(dialogTextNode->GetLayoutProperty());
-    CHECK_NULL_VOID(titleProp);
-    titleProp->UpdateContent(textValue.value_or(""));
-    titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    titleProp->UpdateMaxLines(MAXLINES);
-    MarginProperty margin = {
-        .left = CalcLength(8.0_vp),
-        .right = CalcLength(8.0_vp),
-        .bottom = CalcLength(24.0_vp),
-    };
-    titleProp->UpdateMargin(margin);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
-    auto color = tabTheme->GetDialogFontColor();
-    titleProp->UpdateTextColor(Color(color.GetValue()));
-    columnNode->AddChild(dialogTextNode);
 }
 
 void TabBarPattern::OnAttachToFrameNode()
@@ -998,7 +938,12 @@ void TabBarPattern::InitLongPressAndDragEvent()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     float scale = pipelineContext->GetFontScale();
-    if (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE && scale >= BIG_FONT_SIZE_SCALE) {
+
+    bigScale_ = AgingAdapationDialogUtil::GetDialogBigFontSizeScale();
+    largeScale_ = AgingAdapationDialogUtil::GetDialogLargeFontSizeScale();
+    maxScale_ = AgingAdapationDialogUtil::GetDialogMaxFontSizeScale();
+
+    if (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE && scale >= bigScale_) {
         InitLongPressEvent(gestureHub);
         InitDragEvent(gestureHub);
     } else {
@@ -1028,38 +973,21 @@ void TabBarPattern::ShowDialogWithNode(int32_t index)
     CHECK_NULL_VOID(imageNode);
     CHECK_NULL_VOID(textNode);
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    CHECK_NULL_VOID(context);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    RefPtr<FrameNode> dialogColumnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    CHECK_NULL_VOID(dialogColumnNode);
-    CreateDialogIconNode(dialogColumnNode, pipelineContext, imageNode);
-    CreateDialogTextNode(dialogColumnNode, pipelineContext, textNode);
-
-    DialogProperties dialogProperties;
-    dialogProperties.alignment = DialogAlignment::CENTER;
-    dialogProperties.gridCount = GRIDCOUNT;
-    dialogProperties.isModal = false;
-    dialogProperties.backgroundColor = Color::TRANSPARENT;
-    dialogProperties.shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultLG);
-    BlurStyleOption styleOption;
-    styleOption.blurStyle = static_cast<BlurStyle>(
-        dialogProperties.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
-    auto renderContext = dialogColumnNode->GetRenderContext();
-    renderContext->UpdateBackBlurStyle(styleOption);
-    float scale = pipelineContext->GetFontScale();
-    if (scale == BIG_FONT_SIZE_SCALE || scale == LARGE_FONT_SIZE_SCALE) {
-        dialogProperties.width = CalcDimension(BIG_DIALOG_WIDTH, DimensionUnit::VP);
-    } else if (scale >= MAX_FONT_SIZE_SCALE) {
-        dialogProperties.width = CalcDimension(MAX_DIALOG_WIDTH, DimensionUnit::VP);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto textValue = textLayoutProperty->GetContent();
+    if (imageNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        auto symbolProperty = imageNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolProperty);
+        dialogNode_ =
+            AgingAdapationDialogUtil::ShowLongPressDialog(textValue.value_or(""),
+                symbolProperty->GetSymbolSourceInfoValue());
+    } else {
+        auto imageProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageProperty);
+        ImageSourceInfo imageSourceInfo = imageProperty->GetImageSourceInfoValue();
+        dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(textValue.value_or(""), imageSourceInfo);
     }
-    auto layoutProperty = dialogColumnNode->GetLayoutProperty();
-    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
-    dialogNode_ = overlayManager->ShowDialogWithNode(dialogProperties, dialogColumnNode, false);
 }
 
 void TabBarPattern::CloseDialog()
@@ -1995,9 +1923,9 @@ void TabBarPattern::UpdateSubTabBoard()
             CHECK_NULL_VOID(textNode);
             auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
-            if (GreatOrEqual(fontscale, BIG_FONT_SIZE_SCALE) && LessOrEqual(fontscale, LARGE_FONT_SIZE_SCALE)) {
+            if (GreatOrEqual(fontscale, bigScale_) && LessOrEqual(fontscale, largeScale_)) {
                 textLayoutProperty->UpdateMargin(marginLeftOrRight_);
-            } else if (GreatOrEqual(fontscale, LARGE_FONT_SIZE_SCALE) && LessOrEqual(fontscale, MAX_FONT_SIZE_SCALE)) {
+            } else if (GreatOrEqual(fontscale, largeScale_) && LessOrEqual(fontscale, maxScale_)) {
                 textLayoutProperty->UpdateMargin(marginLeftOrRight_);
             } else {
                 textLayoutProperty->UpdateMargin(marginTopOrBottom_);
@@ -3019,7 +2947,7 @@ void TabBarPattern::TabBarSuitAging()
     if (tabBarStyles_[indicator_] != TabBarStyle::SUBTABBATSTYLE) {
         return;
     }
-    if (GreatOrEqual(fontscale, BIG_FONT_SIZE_SCALE) && LessOrEqual(fontscale, LARGE_FONT_SIZE_SCALE)) {
+    if (GreatOrEqual(fontscale, bigScale_) && LessOrEqual(fontscale, largeScale_)) {
         if (tabbarproperty->GetAxis() == Axis::VERTICAL) {
             tabbarproperty->UpdateUserDefinedIdealSize(CalcSize(calcMiddleFont, std::nullopt));
             tabbarproperty->UpdateTabBarWidth(MiddleFontWidthAndHeight);
@@ -3028,7 +2956,7 @@ void TabBarPattern::TabBarSuitAging()
             tabbarproperty->UpdateTabBarHeight(MiddleFontWidthAndHeight);
         }
     }
-    if (GreatNotEqual(fontscale, LARGE_FONT_SIZE_SCALE) && LessOrEqual(fontscale, MAX_FONT_SIZE_SCALE)) {
+    if (GreatNotEqual(fontscale, largeScale_) && LessOrEqual(fontscale, maxScale_)) {
         if (tabbarproperty->GetAxis() == Axis::VERTICAL) {
             tabbarproperty->UpdateUserDefinedIdealSize(CalcSize(calcBigFont, std::nullopt));
             tabbarproperty->UpdateTabBarWidth(BigFontWidthAndHeight);
