@@ -1696,18 +1696,13 @@ void RichEditorPattern::UpdateSpanStyle(
             if (spanEnd == end) {
                 break;
             }
-        } else if (spanStart < start && start < spanEnd) {
+        } else if ((spanStart < start && start < spanEnd) || (spanStart < end && end < spanEnd)) {
             if (SymbolSpanUpdateStyle(spanNode, updateSpanStyle_, textStyle)) {
                 continue;
             }
-            TextSpanSplit(start, true);
+            auto index = spanStart < start && start < spanEnd ? start : end;
+            TextSpanSplit(index, true);
             --it;
-        } else if (spanStart < end && end < spanEnd) {
-            if (SymbolSpanUpdateStyle(spanNode, updateSpanStyle_, textStyle)) {
-                continue;
-            }
-            TextSpanSplit(end, true);
-            --(--it);
         } else if (spanStart >= end) {
             break;
         }
@@ -3748,6 +3743,12 @@ void RichEditorPattern::OnColorConfigurationUpdate()
             spanNode->UpdateTextDecorationColor(theme->GetTextStyle().GetTextColor());
         }
     }
+    auto scrollbarTheme = context->GetTheme<ScrollBarTheme>();
+    CHECK_NULL_VOID(scrollbarTheme);
+    auto scrollBar = GetScrollBar();
+    CHECK_NULL_VOID(scrollBar);
+    scrollBar->SetForegroundColor(scrollbarTheme->GetForegroundColor());
+    scrollBar->SetBackgroundColor(scrollbarTheme->GetBackgroundColor());
 }
 
 void RichEditorPattern::UpdateCaretInfoToController()
