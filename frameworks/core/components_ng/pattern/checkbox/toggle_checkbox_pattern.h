@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_TOGGLE_CHECKBOX_PATTERN_H
 
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
+#include "core/components_ng/pattern/checkbox/toggle_checkbox_accessibility_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -30,6 +31,11 @@ public:
     bool IsAtomicNode() const override
     {
         return false;
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<ToggleCheckBoxAccessibilityProperty>();
     }
 
 private:
