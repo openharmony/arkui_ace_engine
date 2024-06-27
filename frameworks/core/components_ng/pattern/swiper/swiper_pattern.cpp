@@ -4414,32 +4414,28 @@ void SwiperPattern::PostIdleTask(const RefPtr<FrameNode>& frameNode)
         });
 }
 
-bool SwiperPattern::IsVisibleChildrenSizeLessThanSwiper()
+bool SwiperPattern::IsVisibleChildrenSizeLessThanSwiper() const
 {
-    if (itemPosition_.empty()) {
+    if (itemPosition_.empty() || GetDisplayCount() > TotalCount()) {
         return true;
     }
-    auto firstItemInfoInVisibleArea = GetFirstItemInfoInVisibleArea();
-    auto lastItemInfoInVisibleArea = GetLastItemInfoInVisibleArea();
-    auto calcDisPlayCount = lastItemInfoInVisibleArea.first - firstItemInfoInVisibleArea.first + 1;
-    if (Positive(TotalCount() - calcDisPlayCount)) {
+    const auto firstItem = GetFirstItemInfoInVisibleArea();
+    const auto lastItem = GetLastItemInfoInVisibleArea();
+    const int32_t visibleItemCnt = lastItem.first - firstItem.first + 1;
+    if (TotalCount() != visibleItemCnt) {
         return false;
     }
-    if (static_cast<int32_t>(itemPosition_.size()) == TotalCount()) {
-        auto totalChildrenSize = lastItemInfoInVisibleArea.second.endPos - firstItemInfoInVisibleArea.second.startPos;
-        if (NonPositive(totalChildrenSize)) {
-            return true;
-        }
-        auto prevMargin = GetPrevMargin();
-        auto nextMargin = GetNextMargin();
-        auto itemSpace = GetItemSpace();
-        auto prevMarginMontage = Positive(prevMargin) ? prevMargin + itemSpace : 0.0f;
-        auto nextMarginMontage = Positive(nextMargin) ? nextMargin + itemSpace : 0.0f;
-        if (totalChildrenSize <= (contentMainSize_ - prevMarginMontage - nextMarginMontage)) {
-            return true;
-        }
+    const float childrenLength = lastItem.second.endPos - firstItem.second.startPos;
+    if (NonPositive(childrenLength)) {
+        return true;
     }
-    return false;
+
+    float prevMargin = GetPrevMargin();
+    float nextMargin = GetNextMargin();
+    const float itemSpace = GetItemSpace();
+    prevMargin = Positive(prevMargin) ? prevMargin + itemSpace : 0.0f;
+    nextMargin = Positive(nextMargin) ? nextMargin + itemSpace : 0.0f;
+    return LessOrEqual(childrenLength, (contentMainSize_ - prevMargin - nextMargin));
 }
 
 void SwiperPattern::UpdateItemRenderGroup(bool itemRenderGroup)
