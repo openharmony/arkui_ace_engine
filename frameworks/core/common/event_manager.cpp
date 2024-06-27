@@ -1044,7 +1044,8 @@ void EventManager::MouseTest(
     }
 
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        if (event.action == MouseAction::MOVE && event.button != MouseButton::NONE_BUTTON) {
+        if ((event.action == MouseAction::MOVE && event.button != MouseButton::NONE_BUTTON) ||
+            event.pullAction == MouseAction::PULL_MOVE) {
             testResult = mouseTestResults_[event.GetPointerId(event.id)];
         } else {
             TouchTestResult responseLinkResult;
