@@ -45,7 +45,12 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
     auto pathInfo = pattern->GetNavPathInfo();
     CHECK_NULL_VOID(pathInfo);
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        state = pattern->GetIsOnShow() ? NavDestinationState::ON_SHOWN : NavDestinationState::ON_HIDDEN;
+        if (state == NavDestinationState::ON_SHOWN || state == NavDestinationState::ON_HIDDEN) {
+            NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state);
+            CHECK_NULL_VOID(navigationHandleFunc_);
+            navigationHandleFunc_(info);
+        }
+        return;
     }
     NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
         pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()));
