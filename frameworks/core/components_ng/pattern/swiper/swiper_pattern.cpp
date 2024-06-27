@@ -1510,7 +1510,7 @@ void SwiperPattern::ShowNext()
     moveDirection_ = true;
 
     auto stepItems = IsSwipeByGroup() ? GetDisplayCount() : 1;
-    if (isVisible_) {
+    if (isVisibleArea_) {
         targetIndex_ = CheckTargetIndex(currentIndex_ + stepItems);
         preTargetIndex_ = targetIndex_;
         MarkDirtyNodeSelf();
@@ -1565,7 +1565,7 @@ void SwiperPattern::ShowPrevious()
     moveDirection_ = false;
 
     auto stepItems = IsSwipeByGroup() ? GetDisplayCount() : 1;
-    if (isVisible_) {
+    if (isVisibleArea_) {
         targetIndex_ = CheckTargetIndex(currentIndex_ - stepItems);
         preTargetIndex_ = targetIndex_;
         MarkDirtyNodeSelf();
@@ -4175,7 +4175,7 @@ void SwiperPattern::RegisterVisibleAreaChange()
 bool SwiperPattern::NeedAutoPlay() const
 {
     bool reachEnd = GetLoopIndex(CurrentIndex()) >= TotalCount() - 1 && !IsLoop();
-    return IsAutoPlay() && !reachEnd && isVisible_ && !isIndicatorLongPress_;
+    return IsAutoPlay() && !reachEnd && isVisibleArea_ && !isIndicatorLongPress_;
 }
 
 void SwiperPattern::TriggerAnimationEndOnSwipeToLeft()
@@ -4601,7 +4601,7 @@ void SwiperPattern::SetAccessibilityAction()
 
 bool SwiperPattern::NeedStartAutoPlay() const
 {
-    return isWindowShow_ && isVisibleArea_ && isVisible_;
+    return isWindowShow_ && isVisibleArea_;
 }
 
 std::string SwiperPattern::ProvideRestoreInfo()
