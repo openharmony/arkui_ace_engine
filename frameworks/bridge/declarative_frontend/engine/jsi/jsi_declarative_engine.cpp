@@ -2125,6 +2125,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         }
         auto xcPattern = DynamicCast<NG::XComponentPattern>(xcFrameNode->GetPattern());
         CHECK_NULL_VOID(xcPattern);
+        CHECK_EQUAL_VOID(xcPattern->GetLibraryName().has_value(), false);
         std::weak_ptr<OH_NativeXComponent> weakNativeXComponent;
         RefPtr<OHOS::Ace::NativeXComponentImpl> nativeXComponentImpl = nullptr;
 
@@ -2164,7 +2165,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         auto runtime = engineInstance_->GetJsRuntime();
         shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
         LocalScope scope(pandaRuntime->GetEcmaVm());
-        auto objXComp = arkNativeEngine->LoadModuleByName(xcPattern->GetLibraryName(), true, arguments,
+        auto objXComp = arkNativeEngine->LoadModuleByName(xcPattern->GetLibraryName().value(), true, arguments,
             OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent.get()), soPath);
         if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
             return;
