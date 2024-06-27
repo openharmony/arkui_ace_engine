@@ -364,6 +364,7 @@
       vtable?for?OHOS::Ace::NG::MovingPhotoNode;
       vtable?for?OHOS::Ace::NG::TouchEventActuator;
       vtable?for?OHOS::Ace::NG::SwiperModelNG;
+      vtable?for?OHOS::Ace::NG::IndexerModelNG;
 
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;

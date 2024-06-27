@@ -13,6 +13,7 @@
 
 group("component_ext") {
   deps = [
+    "arc_alphabet_indexer:arcalphabetindexer",
     "arc_swiper:arcswiper",
     "movingphoto:movingphotoview",
   ]

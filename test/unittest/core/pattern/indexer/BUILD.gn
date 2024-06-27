@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("indexer_test_ng") {
   type = "new"
   sources = [
+    "arcindexer_pattern_test_ng.cpp",
     "indexer_model_test_ng.cpp",
     "indexer_pattern_test_ng.cpp",
     "indexer_test_ng.cpp",
