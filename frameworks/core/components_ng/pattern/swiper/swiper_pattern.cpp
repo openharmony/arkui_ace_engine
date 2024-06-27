@@ -2871,8 +2871,9 @@ bool SwiperPattern::CheckDragOutOfBoundary(double dragVelocity)
 
     auto edgeEffect = GetEdgeEffect();
     // edge effect is NONE and reached boundary
-    const bool noneOutOfBoundary = (itemPosition_.begin()->first == 0 || itemPosition_.rbegin()->first == TotalCount() - 1) &&
-                             NearZero(GetDistanceToEdge()) && edgeEffect == EdgeEffect::NONE;
+    const bool noneOutOfBoundary =
+        (itemPosition_.begin()->first == 0 || itemPosition_.rbegin()->first == TotalCount() - 1) &&
+        NearZero(GetDistanceToEdge()) && edgeEffect == EdgeEffect::NONE;
     if (IsOutOfBoundary() || !NearZero(fadeOffset_) || noneOutOfBoundary) {
         isDragging_ = false;
 
