@@ -110,6 +110,47 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation004, TestSize.Level1
 }
 
 /**
+ * @tc.name: SwiperPatternSpringAnimation005
+ * @tc.desc: Test overScroll with displayCount > itemCnt
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation005, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) { model.SetDisplayCount(12); }, 10);
+    EXPECT_EQ(GetChildWidth(frameNode_, 0), 40.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 9), 40.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 9), 360.0f);
+    pattern_->UpdateCurrentOffset(-200.0f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 9), 160.0f);
+    pattern_->PlaySpringAnimation(200.0f);
+    // left align because children total size < swiper
+    EXPECT_EQ(
+        AceType::DynamicCast<NodeAnimatablePropertyFloat>(frameNode_->GetAnimatablePropertyFloat("spring"))->Get(),
+        0.0f);
+}
+
+/**
+ * @tc.name: SwiperPatternSpringAnimation006
+ * @tc.desc: Test overScroll with displayCount > itemCnt
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation006, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) { model.SetDisplayCount(12); }, 10);
+    EXPECT_EQ(GetChildWidth(frameNode_, 0), 40.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 9), 40.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 9), 360.0f);
+    pattern_->UpdateCurrentOffset(200.0f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 200.0f);
+    pattern_->PlaySpringAnimation(200.0f);
+    EXPECT_EQ(
+        AceType::DynamicCast<NodeAnimatablePropertyFloat>(frameNode_->GetAnimatablePropertyFloat("spring"))->Get(),
+        0.0f);
+}
+
+/**
  * @tc.name: SwiperPatternFinishAnimation001
  * @tc.desc: FinishAnimation
  * @tc.type: FUNC
@@ -555,7 +596,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternTriggerAnimationEndOnForceStop001, 
             pattern_->TriggerAnimationEndOnForceStop();
             pattern_->currentIndex_ = 1;
         }
-            frameNode_->AddChild(rightArrowNode_);
+        frameNode_->AddChild(rightArrowNode_);
         pattern_->currentIndex_ = 0;
     }
 }
@@ -616,8 +657,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperAutoLinearAnimationNeedReset001, TestSize.
      * @tc.steps: step1. Empty items
      * @tc.expected: AutoLinearAnimationNeedReset return false
      */
-    Create([](SwiperModelNG model) {
-    });
+    Create([](SwiperModelNG model) {});
     EXPECT_TRUE(pattern_->itemPosition_.empty());
     EXPECT_FALSE(pattern_->AutoLinearAnimationNeedReset(1.f));
 }
@@ -647,9 +687,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperAutoLinearAnimationNeedReset003, TestSize.
     /**
      * @tc.steps: step1. Has items and IsAutoLinear
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
-    });
+    CreateWithItem([](SwiperModelNG model) { model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR); });
 
     /**
      * @tc.steps: step2. translate <= 0
@@ -755,8 +793,8 @@ HWTEST_F(SwiperAnimationTestNg, SwipeCustomAnimationTest002, TestSize.Level1)
     struct SwiperItemInfo swiperItemInfo1;
     struct SwiperItemInfo swiperItemInfo2;
     struct SwiperItemInfo swiperItemInfo3;
-    swiperItemInfo1.startPos = - mainAxisLength - itemSpace;
-    swiperItemInfo1.endPos = - itemSpace;
+    swiperItemInfo1.startPos = -mainAxisLength - itemSpace;
+    swiperItemInfo1.endPos = -itemSpace;
     swiperItemInfo2.startPos = 0.0f;
     swiperItemInfo2.endPos = mainAxisLength;
     swiperItemInfo3.startPos = mainAxisLength + itemSpace;
@@ -782,9 +820,9 @@ HWTEST_F(SwiperAnimationTestNg, SwipeCustomAnimationTest002, TestSize.Level1)
     EXPECT_TRUE(pattern_->itemPositionInAnimation_.find(1) == pattern_->itemPositionInAnimation_.end());
     EXPECT_TRUE(pattern_->itemPositionInAnimation_.find(2) == pattern_->itemPositionInAnimation_.end());
     EXPECT_FALSE(pattern_->itemPositionInAnimation_.find(3) == pattern_->itemPositionInAnimation_.end());
-    EXPECT_EQ(pattern_->itemPositionInAnimation_.find(3)->second.startPos,
-        - itemSpace - mainAxisLength + offset1 + offset2);
-    EXPECT_EQ(pattern_->itemPositionInAnimation_.find(3)->second.endPos, - itemSpace + offset1 + offset2);
+    EXPECT_EQ(
+        pattern_->itemPositionInAnimation_.find(3)->second.startPos, -itemSpace - mainAxisLength + offset1 + offset2);
+    EXPECT_EQ(pattern_->itemPositionInAnimation_.find(3)->second.endPos, -itemSpace + offset1 + offset2);
 }
 
 /**
@@ -933,7 +971,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSwipeTo001, TestSize.Level1)
         for (int j = 0; j <= 1; j++) {
             pattern_->SwipeTo(index);
             if (i == 1) {
-                            pattern_->rightButtonId_ = 1;
+                pattern_->rightButtonId_ = 1;
                 continue;
             }
             pattern_->SwipeTo(index);
