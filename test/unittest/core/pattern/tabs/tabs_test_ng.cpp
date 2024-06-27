@@ -14,6 +14,7 @@
  */
 
 #include "tabs_test_ng.h"
+#include "core/components/dialog/dialog_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {}
@@ -23,9 +24,11 @@ void TabsTestNg::SetUpTestSuite()
     TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dialogTheme));
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_TAB);
     auto tabTheme = TabTheme::Builder().Build(themeConstants);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(tabTheme));
+    EXPECT_CALL(*themeManager, GetTheme(TabTheme::TypeId())).WillRepeatedly(Return(tabTheme));
     tabTheme->defaultTabBarName_ = "tabBarItemName";
     tabTheme->tabBarDefaultWidth_ = Dimension(TABBAR_DEFAULT_WIDTH);
     tabTheme->tabBarDefaultHeight_ = Dimension(TABBAR_DEFAULT_HEIGHT);
