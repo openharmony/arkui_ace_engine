@@ -41,6 +41,7 @@
 #include "core/components_ng/base/view_partial_update_model.h"
 #include "core/components_ng/base/view_partial_update_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
@@ -910,7 +911,8 @@ void JSViewPartialUpdate::CreateRecycle(const JSCallbackInfo& info)
     } else {
         node = view->CreateViewNode();
     }
-    auto dummyNode = NG::RecycleDummyNode::WrapRecycleDummyNode(node);
+    auto* stack = NG::ViewStackProcessor::GetInstance();
+    auto dummyNode = NG::RecycleDummyNode::WrapRecycleDummyNode(node, stack->GetRecycleNodeId());
     ViewStackModel::GetInstance()->Push(dummyNode, true);
 }
 
