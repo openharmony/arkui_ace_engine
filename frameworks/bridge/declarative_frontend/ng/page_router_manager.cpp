@@ -486,6 +486,8 @@ void PageRouterManager::StartClean()
         pageRouterStack_.emplace_back(temp.back());
         if (!OnCleanPageStack()) {
             std::swap(temp, pageRouterStack_);
+        } else {
+            RefreshPageIndex(pageRouterStack_.begin(), 0);
         }
         return;
     }
