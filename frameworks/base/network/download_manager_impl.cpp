@@ -211,21 +211,7 @@ public:
         });
         task->OnFail([downloadCondition](
                          const NetStackRequest& request, const NetStackResponse& response, const NetStackError& error) {
-            LOGI(
-                "Sync Http task of url [%{private}s] failed, response code %{public}d, msg from netStack: [%{public}s]",
-                request.GetURL().c_str(), response.GetResponseCode(), error.GetErrorMessage().c_str());
-            {
-                std::unique_lock<std::mutex> taskLock(downloadCondition->downloadMutex);
-                downloadCondition->errorMsg.append("Http task of url ");
-                downloadCondition->errorMsg.append(request.GetURL());
-                downloadCondition->errorMsg.append(" failed, response code ");
-                auto responseCode = response.GetResponseCode();
-                downloadCondition->errorMsg.append(std::to_string(responseCode));
-                downloadCondition->errorMsg.append(", msg from netStack: ");
-                downloadCondition->errorMsg.append(error.GetErrorMessage());
-                downloadCondition->downloadSuccess = false;
-            }
-            downloadCondition->cv.notify_all();
+            OnFail(downloadCondition, request, response, error);
         });
         if (downloadCallback.onProgressCallback) {
             task->OnProgress([onProgressCallback = downloadCallback.onProgressCallback, instanceId](
@@ -236,6 +222,26 @@ public:
         httpTaskMap_.emplace(url, task);
         auto result = task->Start();
         return HandleDownloadResult(result, std::move(downloadCallback), downloadCondition, instanceId, url);
+    }
+
+    static void OnFail(std::shared_ptr<DownloadCondition> downloadCondition, const NetStackRequest& request,
+        const NetStackResponse& response, const NetStackError& error)
+    {
+        LOGI(
+            "Sync Http task of url [%{private}s] failed, response code %{public}d, msg from netStack: [%{public}s]",
+            request.GetURL().c_str(), response.GetResponseCode(), error.GetErrorMessage().c_str());
+        {
+            std::unique_lock<std::mutex> taskLock(downloadCondition->downloadMutex);
+            downloadCondition->errorMsg.append("Http task of url ");
+            downloadCondition->errorMsg.append(request.GetURL());
+            downloadCondition->errorMsg.append(" failed, response code ");
+            auto responseCode = response.GetResponseCode();
+            downloadCondition->errorMsg.append(std::to_string(responseCode));
+            downloadCondition->errorMsg.append(", msg from netStack: ");
+            downloadCondition->errorMsg.append(error.GetErrorMessage());
+            downloadCondition->downloadSuccess = false;
+        }
+        downloadCondition->cv.notify_all();
     }
 
     bool RemoveDownloadTask(const std::string& url) override
