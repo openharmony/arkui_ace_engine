@@ -68,10 +68,16 @@ constexpr int32_t CARD_ROOT_NODE_ID_RATION = 1000;
 constexpr int32_t CARD_BASE = 100000;
 
 const std::string ACTION_ARGU_SCROLL_STUB = "scrolltype"; // wait for change
+const std::string ACTION_DEFAULT_PARAM = "ACCESSIBILITY_ACTION_INVALID";
 
 struct ActionTable {
     AceAction aceAction;
     ActionType action;
+};
+
+struct ActionStrTable {
+    ActionType action;
+    std::string actionStr;
 };
 
 struct FillEventInfoParam {
@@ -89,6 +95,7 @@ struct AccessibilityActionParam {
     int32_t setCursorIndex = -1;
     TextMoveUnit moveUnit = TextMoveUnit::STEP_CHARACTER;
     AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_DEFAULT;
+    int32_t spanId = -1;
 };
 
 const std::map<Accessibility::ActionType, std::function<bool(const AccessibilityActionParam& param)>> ACTIONS = {
@@ -134,6 +141,10 @@ const std::map<Accessibility::ActionType, std::function<bool(const Accessibility
     { ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_POSITION,
         [](const AccessibilityActionParam& param) {
             return param.accessibilityProperty->ActActionSetIndex(static_cast<int32_t>(param.setCursorIndex));
+        } },
+    { ActionType::ACCESSIBILITY_ACTION_SPAN_CLICK,
+        [](const AccessibilityActionParam& param) {
+            return param.accessibilityProperty->ActActionExecSubComponent(static_cast<int32_t>(param.spanId));
         } },
 };
 
@@ -246,6 +257,7 @@ ActionType ConvertAceAction(AceAction aceAction)
         { AceAction::ACTION_CLEAR_SELECTION, ActionType::ACCESSIBILITY_ACTION_CLEAR_SELECTION },
         { AceAction::ACTION_SET_SELECTION, ActionType::ACCESSIBILITY_ACTION_SET_SELECTION },
         { AceAction::ACTION_SET_CURSOR_POSITION, ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_POSITION },
+        { AceAction::ACTION_EXEC_SUB_COMPONENT, ActionType::ACCESSIBILITY_ACTION_SPAN_CLICK },
     };
     for (const auto& item : actionTable) {
         if (aceAction == item.aceAction) {
@@ -1185,6 +1197,15 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
         RangeInfo rangeInfo = ConvertAccessibilityValue(accessibilityProperty->GetAccessibilityValue());
         nodeInfo.SetRange(rangeInfo);
     }
+    if (accessibilityProperty->HasSubComponent()) {
+        std::vector<SubComponentInfo> subComponentInfos;
+        accessibilityProperty->GetSubComponentInfo(subComponentInfos);
+        for (const auto& subComponent : subComponentInfos) {
+            nodeInfo.AddSpan(SpanInfo(subComponent.spanId, subComponent.spanText,
+                subComponent.accessibilityText, subComponent.accessibilityDescription,
+                subComponent.accessibilityLevel));
+        }
+    }
     nodeInfo.SetHint(accessibilityProperty->GetHintText());
     nodeInfo.SetAccessibilityGroup(accessibilityProperty->IsAccessibilityGroup());
     nodeInfo.SetAccessibilityLevel(accessibilityProperty->GetAccessibilityLevel());
@@ -1920,46 +1941,34 @@ inline string GetSupportAction(const std::unordered_set<AceAction>& supportAceAc
 
 static std::string ConvertActionTypeToString(ActionType action)
 {
-    switch (action) {
-        case ActionType::ACCESSIBILITY_ACTION_FOCUS:
-            return "ACCESSIBILITY_ACTION_FOCUS";
-        case ActionType::ACCESSIBILITY_ACTION_CLEAR_FOCUS:
-            return "ACCESSIBILITY_ACTION_CLEAR_FOCUS";
-        case ActionType::ACCESSIBILITY_ACTION_SELECT:
-            return "ACCESSIBILITY_ACTION_SELECT";
-        case ActionType::ACCESSIBILITY_ACTION_CLEAR_SELECTION:
-            return "ACCESSIBILITY_ACTION_CLEAR_SELECTION";
-        case ActionType::ACCESSIBILITY_ACTION_CLICK:
-            return "ACCESSIBILITY_ACTION_CLICK";
-        case ActionType::ACCESSIBILITY_ACTION_LONG_CLICK:
-            return "ACCESSIBILITY_ACTION_LONG_CLICK";
-        case ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS:
-            return "ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS";
-        case ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS:
-            return "ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS";
-        case ActionType::ACCESSIBILITY_ACTION_SCROLL_FORWARD:
-            return "ACCESSIBILITY_ACTION_SCROLL_FORWARD";
-        case ActionType::ACCESSIBILITY_ACTION_SCROLL_BACKWARD:
-            return "ACCESSIBILITY_ACTION_SCROLL_BACKWARD";
-        case ActionType::ACCESSIBILITY_ACTION_COPY:
-            return "ACCESSIBILITY_ACTION_COPY";
-        case ActionType::ACCESSIBILITY_ACTION_PASTE:
-            return "ACCESSIBILITY_ACTION_PASTE";
-        case ActionType::ACCESSIBILITY_ACTION_CUT:
-            return "ACCESSIBILITY_ACTION_CUT";
-        case ActionType::ACCESSIBILITY_ACTION_SET_SELECTION:
-            return "ACCESSIBILITY_ACTION_SET_SELECTION";
-        case ActionType::ACCESSIBILITY_ACTION_SET_TEXT:
-            return "ACCESSIBILITY_ACTION_SET_TEXT";
-        case ActionType::ACCESSIBILITY_ACTION_NEXT_TEXT:
-            return "ACCESSIBILITY_ACTION_NEXT_TEXT";
-        case ActionType::ACCESSIBILITY_ACTION_PREVIOUS_TEXT:
-            return "ACCESSIBILITY_ACTION_PREVIOUS_TEXT";
-        case ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_POSITION:
-            return "ACCESSIBILITY_ACTION_SET_CURSOR_POSITION";
-        default:
-            return "ACCESSIBILITY_ACTION_INVALID";
+    static const ActionStrTable actionStrTable[] = {
+        { ActionType::ACCESSIBILITY_ACTION_FOCUS, "ACCESSIBILITY_ACTION_FOCUS" },
+        { ActionType::ACCESSIBILITY_ACTION_CLEAR_FOCUS, "ACCESSIBILITY_ACTION_CLEAR_FOCUS" },
+        { ActionType::ACCESSIBILITY_ACTION_SELECT, "ACCESSIBILITY_ACTION_SELECT" },
+        { ActionType::ACCESSIBILITY_ACTION_CLEAR_SELECTION, "ACCESSIBILITY_ACTION_CLEAR_SELECTION" },
+        { ActionType::ACCESSIBILITY_ACTION_CLICK, "ACCESSIBILITY_ACTION_CLICK" },
+        { ActionType::ACCESSIBILITY_ACTION_LONG_CLICK, "ACCESSIBILITY_ACTION_LONG_CLICK" },
+        { ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS, "ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS" },
+        { ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS,
+            "ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS" },
+        { ActionType::ACCESSIBILITY_ACTION_SCROLL_FORWARD, "ACCESSIBILITY_ACTION_SCROLL_FORWARD" },
+        { ActionType::ACCESSIBILITY_ACTION_SCROLL_BACKWARD, "ACCESSIBILITY_ACTION_SCROLL_BACKWARD" },
+        { ActionType::ACCESSIBILITY_ACTION_COPY, "ACCESSIBILITY_ACTION_COPY" },
+        { ActionType::ACCESSIBILITY_ACTION_PASTE, "ACCESSIBILITY_ACTION_PASTE" },
+        { ActionType::ACCESSIBILITY_ACTION_CUT, "ACCESSIBILITY_ACTION_CUT" },
+        { ActionType::ACCESSIBILITY_ACTION_SET_SELECTION, "ACCESSIBILITY_ACTION_SET_SELECTION" },
+        { ActionType::ACCESSIBILITY_ACTION_SET_TEXT, "ACCESSIBILITY_ACTION_SET_TEXT" },
+        { ActionType::ACCESSIBILITY_ACTION_NEXT_TEXT, "ACCESSIBILITY_ACTION_NEXT_TEXT" },
+        { ActionType::ACCESSIBILITY_ACTION_PREVIOUS_TEXT, "ACCESSIBILITY_ACTION_PREVIOUS_TEXT" },
+        { ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_POSITION, "ACCESSIBILITY_ACTION_SET_CURSOR_POSITION" },
+        { ActionType::ACCESSIBILITY_ACTION_SPAN_CLICK, "ACCESSIBILITY_ACTION_SPAN_CLICK" },
+    };
+    for (const auto& item : actionStrTable) {
+        if (action == item.action) {
+            return item.actionStr;
+        }
     }
+    return ACTION_DEFAULT_PARAM;
 }
 
 static AceAction ConvertAccessibilityAction(ActionType accessibilityAction)
@@ -1983,6 +1992,7 @@ static AceAction ConvertAccessibilityAction(ActionType accessibilityAction)
         { AceAction::ACTION_CLEAR_SELECTION, ActionType::ACCESSIBILITY_ACTION_CLEAR_SELECTION },
         { AceAction::ACTION_SET_SELECTION, ActionType::ACCESSIBILITY_ACTION_SET_SELECTION },
         { AceAction::ACTION_SET_CURSOR_POSITION, ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_POSITION },
+        { AceAction::ACTION_EXEC_SUB_COMPONENT, ActionType::ACCESSIBILITY_ACTION_SPAN_CLICK },
     };
     for (const auto& item : actionTable) {
         if (accessibilityAction == item.action) {
@@ -2041,6 +2051,35 @@ static void DumpExtraElementInfoNG(const AccessibilityElementInfo& nodeInfo)
     }
 }
 
+static void UpdateSpanList(std::vector<SpanInfo>& spansInfosList, std::string& spans)
+{
+    for (const auto& span : spansInfosList) {
+        if (!spans.empty()) {
+            spans.append(",");
+        }
+        spans.append("span info, span id: ");
+        spans.append(std::to_string(span.GetSpanId()));
+        spans.append("span info, span text: ");
+        spans.append(span.GetSpanText());
+        spans.append("span info, accessibility text: ");
+        spans.append(span.GetAccessibilityText());
+        spans.append("span info, accessibility description: ");
+        spans.append(span.GetAccessibilityDescription());
+        spans.append("span info, accessibility level: ");
+        spans.append(span.GetAccessibilityLevel());
+    }
+}
+
+inline void DumpSpanListNG(const AccessibilityElementInfo& nodeInfo)
+{
+    std::string spans;
+    std::vector<SpanInfo> spansInfosList = nodeInfo.GetSpanList();
+    std::size_t spanCount = spansInfosList.size();
+    UpdateSpanList(spansInfosList, spans);
+    DumpLog::GetInstance().AddDesc("span list count: ", static_cast<int32_t>(spanCount));
+    DumpLog::GetInstance().AddDesc("span list: ", spans);
+}
+
 static void DumpAccessibilityPropertyNG(const AccessibilityElementInfo& nodeInfo)
 {
     DumpLog::GetInstance().AddDesc("checked: ", BoolToString(nodeInfo.IsChecked()));
@@ -2086,6 +2125,7 @@ static void DumpAccessibilityPropertyNG(const AccessibilityElementInfo& nodeInfo
     DumpLog::GetInstance().AddDesc(
         "trigger action: ", static_cast<int32_t>(ConvertAccessibilityAction(nodeInfo.GetTriggerAction())));
     DumpLog::GetInstance().AddDesc("text move step: " + std::to_string(nodeInfo.GetTextMovementStep()));
+    DumpSpanListNG(nodeInfo);
     DumpSupportActionNG(nodeInfo);
     DumpContentListNG(nodeInfo);
     DumpLog::GetInstance().AddDesc("latest content: ", nodeInfo.GetLatestContent());
@@ -2590,6 +2630,12 @@ void JsAccessibilityManager::ProcessParameters(
         (op == ActionType::ACCESSIBILITY_ACTION_SCROLL_BACKWARD)) {
         if (params.size() > EVENT_DUMP_PARAM_LENGTH_LOWER) {
             paramsMap = { { ACTION_ARGU_SCROLL_STUB, params[EVENT_DUMP_ACTION_PARAM_INDEX] } };
+        }
+    }
+
+    if (op == ActionType::ACCESSIBILITY_ACTION_SPAN_CLICK) {
+        if (params.size() > EVENT_DUMP_PARAM_LENGTH_LOWER) {
+            paramsMap = { { ACTION_ARGU_SPAN_ID, params[EVENT_DUMP_ACTION_PARAM_INDEX] } };
         }
     }
 }
@@ -4052,7 +4098,6 @@ bool ActAccessibilityAction(Accessibility::ActionType action, const std::map<std
         }
         param.setCursorIndex = position;
     }
-
     if ((action == ActionType::ACCESSIBILITY_ACTION_SCROLL_FORWARD) ||
         (action == ActionType::ACCESSIBILITY_ACTION_SCROLL_BACKWARD)) {
         int32_t scrollType = static_cast<int32_t>(AccessibilityScrollType::SCROLL_DEFAULT);
@@ -4063,7 +4108,16 @@ bool ActAccessibilityAction(Accessibility::ActionType action, const std::map<std
         }
         param.scrollType = static_cast<AccessibilityScrollType>(scrollType);
     }
-
+    if (action == ActionType::ACCESSIBILITY_ACTION_SPAN_CLICK) {
+        auto iter = actionArguments.find(ACTION_ARGU_SPAN_ID);
+        int32_t spanId = -1;
+        if (iter != actionArguments.end()) {
+            std::stringstream strSpanId;
+            strSpanId << iter->second;
+            strSpanId >> spanId;
+        }
+        param.spanId = spanId;
+    }
     auto accessibiltyAction = ACTIONS.find(action);
     if (accessibiltyAction != ACTIONS.end()) {
         param.accessibilityProperty = accessibilityProperty;
