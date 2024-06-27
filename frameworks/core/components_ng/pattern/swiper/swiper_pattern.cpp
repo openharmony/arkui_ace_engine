@@ -2687,7 +2687,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     }
 
     UpdateAnimationProperty(static_cast<float>(dragVelocity));
-    // nested and reached end, need to pass velocity to parent scrollable
+    // nested and reached end (but not out of bounds), need to pass velocity to parent scrollable
     auto parent = GetNestedScrollParent();
     if (!IsLoop() && parent && NearZero(GetDistanceToEdge())) {
         parent->HandleScrollVelocity(dragVelocity);
@@ -2871,7 +2871,7 @@ bool SwiperPattern::CheckDragOutOfBoundary(double dragVelocity)
 
     auto edgeEffect = GetEdgeEffect();
     // edge effect is NONE and reached boundary
-    bool noneOutOfBoundary = (itemPosition_.begin()->first == 0 || itemPosition_.rbegin()->first == TotalCount() - 1) &&
+    const bool noneOutOfBoundary = (itemPosition_.begin()->first == 0 || itemPosition_.rbegin()->first == TotalCount() - 1) &&
                              NearZero(GetDistanceToEdge()) && edgeEffect == EdgeEffect::NONE;
     if (IsOutOfBoundary() || !NearZero(fadeOffset_) || noneOutOfBoundary) {
         isDragging_ = false;
@@ -2896,7 +2896,8 @@ bool SwiperPattern::CheckDragOutOfBoundary(double dragVelocity)
 
         if (edgeEffect == EdgeEffect::NONE) {
             auto parent = GetNestedScrollParent();
-            if (parent) {
+            const bool isForward = NonPositive(dragVelocity);
+            if (parent && GetNestedScroll().NeedParent(isForward)) {
                 parent->HandleScrollVelocity(dragVelocity);
             }
             StartAutoPlay();
@@ -4904,8 +4905,8 @@ bool SwiperPattern::HandleScrollVelocity(float velocity)
     }
 
     auto parent = GetNestedScrollParent();
-    auto nestedScroll = GetNestedScroll();
-    if (parent && nestedScroll.NeedParent()) {
+    const auto nestedScroll = GetNestedScroll();
+    if (parent && nestedScroll.NeedParent(NonPositive(velocity))) {
         // after reach end, parent handle velocity first
         if (parent->HandleScrollVelocity(velocity)) {
             return true;
