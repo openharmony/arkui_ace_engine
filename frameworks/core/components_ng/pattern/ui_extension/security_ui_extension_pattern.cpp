@@ -55,6 +55,9 @@ constexpr char ABILITY_KEY_ASYNC[] = "ability.want.params.KeyAsync";
 constexpr char PROHIBIT_NESTING_FAIL_NAME[] = "Prohibit_Nesting_SecurityUIExtensionComponent";
 constexpr char PROHIBIT_NESTING_FAIL_MESSAGE[] =
     "Prohibit nesting securityUIExtensionComponent in securityUIExtensionAbility";
+constexpr char PROHIBIT_NESTING_FAIL_IN_UEC_NAME[] = "Prohibit_Nesting_UIExtensionComponent";
+constexpr char PROHIBIT_NESTING_FAIL_IN_UEC_MESSAGE[] =
+    "Prohibit nesting securityUIExtensionComponent in uIExtensionAbility";
 }
 
 SecurityUIExtensionPattern::SecurityUIExtensionPattern()
@@ -134,14 +137,36 @@ void SecurityUIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& w
     UpdateWant(want);
 }
 
-void SecurityUIExtensionPattern::UpdateWant(const AAFwk::Want& want)
+bool SecurityUIExtensionPattern::CheckConstraint()
 {
+#if defined(PREVIEW)
+    PLATFORM_LOGE("No support preview.");
+    return false;
+#else
     auto container = Platform::AceContainer::GetContainer(instanceId_);
-    CHECK_NULL_VOID(container);
+    CHECK_NULL_RETURN(container, false);
     if (container->GetUIContentType() == UIContentType::SECURITY_UI_EXTENSION) {
         PLATFORM_LOGE("Not allowed nesting in SECURITY_UI_EXTENSION.");
         FireOnErrorCallback(ERROR_CODE_UIEXTENSION_FORBID_CASCADE,
             PROHIBIT_NESTING_FAIL_NAME, PROHIBIT_NESTING_FAIL_MESSAGE);
+        return false;
+    }
+
+    if (container->IsUIExtensionWindow()) {
+        PLATFORM_LOGE("Not allowed nesting in UI_EXTENSION.");
+        FireOnErrorCallback(ERROR_CODE_UIEXTENSION_FORBID_CASCADE,
+            PROHIBIT_NESTING_FAIL_IN_UEC_NAME, PROHIBIT_NESTING_FAIL_IN_UEC_MESSAGE);
+        return false;
+    }
+
+    return true;
+#endif
+}
+
+void SecurityUIExtensionPattern::UpdateWant(const AAFwk::Want& want)
+{
+    if (!CheckConstraint()) {
+        PLATFORM_LOGE("Check constraint failed.");
         return;
     }
 
@@ -228,7 +253,8 @@ void SecurityUIExtensionPattern::OnConnect()
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     uiExtensionManager->AddAliveUIExtension(host->GetId(), WeakClaim(this));
     if (isFocused) {
-        uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this), sessionWrapper_);
+        uiExtensionManager->RegisterSecurityUIExtensionInFocus(
+            WeakClaim(this), sessionWrapper_);
     }
 }
 

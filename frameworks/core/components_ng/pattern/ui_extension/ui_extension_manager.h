@@ -67,7 +67,7 @@ public:
     std::pair<int64_t, int64_t> UnWrapExtensionAbilityId(int64_t extensionOffset, int64_t elementId);
     int32_t ApplyExtensionId();
     void RecycleExtensionId(int32_t id);
-    void RegisterUIExtensionInFocus(
+    void RegisterSecurityUIExtensionInFocus(
         const WeakPtr<SecurityUIExtensionPattern>& uiExtensionFocused,
         const WeakPtr<SessionWrapper>& sessionWrapper);
 

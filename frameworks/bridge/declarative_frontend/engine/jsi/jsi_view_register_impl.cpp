@@ -805,7 +805,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "VideoController", JSVideoController::JSBind },
 #endif
     { "PluginComponent", JSPlugin::JSBind },
-    { "SecurityUIExtensionComponent", JSUIExtension::JSBind },
+    { "SecurityUIExtensionComponent", JSSecurityUIExtension::JSBind },
     { "UIExtensionComponent", JSUIExtension::JSBind },
 #endif
 #if defined(MODEL_COMPONENT_SUPPORTED)

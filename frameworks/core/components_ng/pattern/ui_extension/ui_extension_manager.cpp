@@ -50,7 +50,7 @@ void UIExtensionManager::RegisterUIExtensionInFocus(
     sessionWrapper_ = sessionWrapper;
 }
 
-void UIExtensionManager::RegisterUIExtensionInFocus(
+void UIExtensionManager::RegisterSecurityUIExtensionInFocus(
     const WeakPtr<SecurityUIExtensionPattern>& uiExtensionFocused,
     const WeakPtr<SessionWrapper>& sessionWrapper)
 {
