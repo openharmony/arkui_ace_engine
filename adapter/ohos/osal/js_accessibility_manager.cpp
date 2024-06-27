@@ -884,15 +884,7 @@ RefPtr<NG::FrameNode> GetFramenodeByAccessibilityId(const RefPtr<NG::FrameNode>&
 #endif
             }
 
-            if (frameNode != nullptr && frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>() != nullptr) {
-                auto property = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-                if (property->GetAccessibilityLevel() != NG::AccessibilityProperty::Level::NO_HIDE_DESCENDANTS &&
-                !property->IsAccessibilityGroup()) {
-                    nodes.push(Referenced::RawPtr(child));
-                }
-            } else {
-                nodes.push(Referenced::RawPtr(child));
-            }
+            nodes.push(Referenced::RawPtr(child));
         }
     }
     return nullptr;
@@ -914,53 +906,7 @@ void GetFrameNodeParent(const RefPtr<NG::UINode>& uiNode, RefPtr<NG::FrameNode>&
 
 bool CheckFrameNodeByAccessibilityLevel(const RefPtr<NG::FrameNode>& frameNode, bool isParent)
 {
-    bool ret = false;
-    CHECK_NULL_RETURN(frameNode, false);
-    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-    CHECK_NULL_RETURN(accessibilityProperty, false);
-    auto uiNode = frameNode->GetParent();
-    RefPtr<NG::FrameNode> parentNode;
-    if (uiNode != nullptr) {
-        GetFrameNodeParent(uiNode, parentNode);
-    }
-
-    auto accessibilityLevel = accessibilityProperty->GetAccessibilityLevel();
-    if (isParent) {
-        if (accessibilityLevel == NG::AccessibilityProperty::Level::NO_HIDE_DESCENDANTS) {
-            ret = false;
-            return ret;
-        }
-        if (!parentNode) {
-            if (accessibilityProperty->IsAccessibilityGroup()) {
-                ret = false;
-            } else {
-                ret = true;
-            }
-        } else {
-            if (accessibilityProperty->IsAccessibilityGroup()) {
-                ret = false;
-            } else {
-                ret = CheckFrameNodeByAccessibilityLevel(parentNode, true);
-            }
-        }
-    } else {
-        if (accessibilityLevel == NG::AccessibilityProperty::Level::AUTO ||
-            accessibilityLevel == NG::AccessibilityProperty::Level::YES) {
-            ret = true;
-            if (!parentNode) {
-                return ret;
-            }
-            auto parentAccessibilityProperty = parentNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-            if (parentAccessibilityProperty->IsAccessibilityGroup()) {
-                ret = false;
-            } else {
-                ret = CheckFrameNodeByAccessibilityLevel(parentNode, true);
-            }
-        } else {
-            ret = false;
-        }
-    }
-    return ret;
+    return true;
 }
 
 void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<int64_t>& children, int32_t pageId)
@@ -1156,6 +1102,8 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
         nodeInfo.SetRange(rangeInfo);
     }
     nodeInfo.SetHint(accessibilityProperty->GetHintText());
+    nodeInfo.SetAccessibilityGroup(accessibilityProperty->IsAccessibilityGroup());
+    nodeInfo.SetAccessibilityLevel(accessibilityProperty->GetAccessibilityLevel());
     nodeInfo.SetTextType(accessibilityProperty->GetTextType());
     nodeInfo.SetTextLengthLimit(accessibilityProperty->GetTextLengthLimit());
     nodeInfo.SetOffset(accessibilityProperty->GetScrollOffSet());
