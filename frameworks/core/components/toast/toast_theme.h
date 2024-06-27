@@ -216,7 +216,6 @@ private:
     Color toastOuterBorderColor_ = Color::TRANSPARENT;
     double toastInnerBorderWidth_ = 0.0f;
     Color toastInnerBorderColor_ = Color::TRANSPARENT;
-
 };
 
 } // namespace OHOS::Ace
