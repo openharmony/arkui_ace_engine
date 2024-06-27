@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 const measure = requireNapi('measure');
 const mediaquery = requireNapi('mediaquery');
@@ -25,8 +24,7 @@ const LengthUnit = requireNapi('arkui.node').LengthUnit;
 const EnvironmentCallback = requireNapi('EnvironmentCallback');
 
 if (!("finalizeConstruction" in ViewPU.prototype)) {
-    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => {
-    });
+    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
 
 const resourceFn = resourceManager.getSystemResourceManager();
@@ -1348,8 +1346,7 @@ export class ChipComponent extends ViewPU {
                 }
             });
             Button.onKeyEvent((event) => {
-                if (event.type === KeyType.Down &&
-                    event.keyCode === KeyCode.KEYCODE_FORWARD_DEL &&
+                if (event && event.type === KeyType.Down && event.keyCode === KeyCode.KEYCODE_FORWARD_DEL &&
                     !this.suffixIconOnFocus) {
                     this.deleteChipNodeAnimate();
                 }
@@ -1523,6 +1520,4 @@ export class ChipComponent extends ViewPU {
     }
 }
 
-export default {
-    Chip, ChipSize
-}
+export default { Chip, ChipSize }

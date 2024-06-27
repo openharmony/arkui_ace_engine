@@ -23,7 +23,7 @@ import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import componentUtils from '@ohos.arkui.componentUtils';
 import hilog from '@ohos.hilog';
 
-const resourceFn = resourceManager.getSystemResourceManager()
+const resourceFn = resourceManager.getSystemResourceManager();
 
 export enum ChipSize {
   NORMAL = "NORMAL",
@@ -118,10 +118,10 @@ interface ChipNodeOpacity {
 }
 
 interface ChipNodeConstraintWidth {
-  breakPointMinWidth: number,
-  breakPointSmMaxWidth: number,
-  breakPointMdMaxWidth: number,
-  breakPointLgMaxWidth: number,
+  breakPointMinWidth: number;
+  breakPointSmMaxWidth: number;
+  breakPointMdMaxWidth: number;
+  breakPointLgMaxWidth: number;
 }
 
 interface ChipNodeTheme {
@@ -141,8 +141,8 @@ interface ChipNodeTheme {
   normalBorderRadius: Dimension;
   smallBorderRadius: Dimension;
   borderWidth: number;
-  focusBtnScaleX: Resource,
-  focusBtnScaleY: Resource,
+  focusBtnScaleX: Resource;
+  focusBtnScaleY: Resource;
   localizedNormalPadding: LocalizedPadding;
   localizedSmallPadding: LocalizedPadding;
   hoverBlendColor: ResourceColor;
@@ -1203,8 +1203,7 @@ export struct ChipComponent {
 
     })
     .onKeyEvent((event) => {
-      if (event.type === KeyType.Down &&
-        event.keyCode === KeyCode.KEYCODE_FORWARD_DEL &&
+      if (event && event.type === KeyType.Down && event.keyCode === KeyCode.KEYCODE_FORWARD_DEL &&
         !this.suffixIconOnFocus) {
         this.deleteChipNodeAnimate();
       }
