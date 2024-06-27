@@ -1025,10 +1025,3 @@ function __checkRegexValid__(pattern) {
         return result;
     }
 }
-
-export default { Font, MediaQuery, UIInspector, DragController, UIObserver, MeasureUtils, UIContext,
-    FocusController, ComponentUtils, Router, PromptAction, AtomicServiceBar, OverlayManager, FrameCallback };
-
-globalThis.__getUIContext__ = __getUIContext__;
-globalThis.__getFrameNodeByNodeId__ = __getFrameNodeByNodeId__;
-globalThis.__checkRegexValid__ = __checkRegexValid__;
