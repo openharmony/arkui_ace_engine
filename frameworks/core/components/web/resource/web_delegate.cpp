@@ -1748,6 +1748,9 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
     }
     incognitoMode_ =
         useNewPipe ? webPattern->GetIncognitoMode() : webCom->GetIncognitoMode();
+    auto sharedRenderProcessToken =
+        useNewPipe ? webPattern->GetSharedRenderProcessToken() : webCom->GetSharedRenderProcessToken();
+    sharedRenderProcessToken_ = sharedRenderProcessToken ? sharedRenderProcessToken.value() : "";
     context_ = context;
     RegisterSurfacePositionChangedCallback();
     auto pipelineContext = context.Upgrade();
@@ -2487,6 +2490,7 @@ void WebDelegate::InitWebViewWithWindow()
                 return;
             }
 
+            initArgs->SetSharedRenderProcessToken(delegate->sharedRenderProcessToken_);
             delegate->nweb_ =
                 OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
                     delegate->window_.GetRefPtr(), initArgs,
@@ -2814,6 +2818,8 @@ void WebDelegate::InitWebViewWithSurface()
             bool isEnhanceSurface = delegate->isEnhanceSurface_;
             initArgs->SetIsEnhanceSurface(isEnhanceSurface);
             initArgs->SetIsPopup(delegate->isPopup_);
+            initArgs->SetSharedRenderProcessToken(delegate->sharedRenderProcessToken_);
+
             if (!delegate->hapPath_.empty()) {
                 initArgs->AddArg(std::string("--user-hap-path=").append(delegate->hapPath_));
             }

@@ -211,20 +211,17 @@ constexpr char ACCESSIBILITY_PARAGRAPH[] = "paragraph";
 
 WebPattern::WebPattern() = default;
 
-WebPattern::WebPattern(const std::string& webSrc,
-                       const RefPtr<WebController>& webController,
-                       RenderMode renderMode,
-                       bool incognitoMode)
-    : webSrc_(std::move(webSrc)), webController_(webController), renderMode_(renderMode),
-      incognitoMode_(incognitoMode)
+WebPattern::WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController, RenderMode renderMode,
+    bool incognitoMode, const std::string& sharedRenderProcessToken)
+    : webSrc_(std::move(webSrc)), webController_(webController), renderMode_(renderMode), incognitoMode_(incognitoMode),
+      sharedRenderProcessToken_(sharedRenderProcessToken)
 {}
 
-WebPattern::WebPattern(const std::string& webSrc,
-                       const SetWebIdCallback& setWebIdCallback,
-                       RenderMode renderMode,
-                       bool incognitoMode)
+WebPattern::WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback, RenderMode renderMode,
+    bool incognitoMode, const std::string& sharedRenderProcessToken)
     : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback), renderMode_(renderMode),
-      incognitoMode_(incognitoMode) {}
+      incognitoMode_(incognitoMode), sharedRenderProcessToken_(sharedRenderProcessToken)
+{}
 
 WebPattern::~WebPattern()
 {
