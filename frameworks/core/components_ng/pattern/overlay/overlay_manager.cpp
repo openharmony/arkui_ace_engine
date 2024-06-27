@@ -19,6 +19,9 @@
 #include <string>
 #include <utility>
 #include <vector>
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+#include "want.h"
+#endif
 
 #include "base/error/error_code.h"
 #include "base/geometry/ng/offset_t.h"
@@ -31,6 +34,7 @@
 #include "base/utils/measure_util.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "base/window/foldable_window.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/ace_application_info.h"
@@ -137,6 +141,16 @@ constexpr int32_t DUMP_LOG_DEPTH_1 = 1;
 constexpr int32_t DUMP_LOG_DEPTH_2 = 2;
 
 constexpr int32_t EVENT_COLUMN_SLOT = -2;
+
+// UIExtensionComponent Transform param key
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+constexpr char WANT_PARAM_UIEXTNODE_ANGLE_KEY[] = "modalUIExtNodeAngle";
+constexpr char WANT_PARAM_UIEXTNODE_WIDTH_KEY[] = "modalUIExtNodeWidth";
+constexpr char WANT_PARAM_UIEXTNODE_HEIGHT_KEY[] = "modalUIExtNodeHeight";
+#endif
+constexpr int32_t UIEXTNODE_ANGLE_90 = 90;
+constexpr int32_t UIEXTNODE_ANGLE_180 = 180;
+constexpr int32_t UIEXTNODE_ANGLE_270 = 270;
 
 RefPtr<FrameNode> GetLastPage()
 {
@@ -5000,6 +5014,95 @@ int32_t OverlayManager::CreateModalUIExtension(const RefPtr<WantWrap>& wantWrap,
     return CreateModalUIExtension(want, callbacks, config);
 }
 
+bool OverlayManager::HandleUIExtNodeSize(const AAFwk::Want& want, RefPtr<FrameNode> uiExtNode)
+{
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+    auto uiExtNodeWidth = want.GetIntParam(WANT_PARAM_UIEXTNODE_WIDTH_KEY, 0);
+    auto uiExtNodeHeight = want.GetIntParam(WANT_PARAM_UIEXTNODE_HEIGHT_KEY, 0);
+#else
+    auto uiExtNodeWidth = 0;
+    auto uiExtNodeHeight = 0;
+#endif
+    auto layoutProperty = uiExtNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto calcWidth =
+        CalcLength((uiExtNodeWidth > 0) ? Dimension(uiExtNodeWidth) : Dimension(1.0, DimensionUnit::PERCENT));
+    auto calcHeight =
+        CalcLength((uiExtNodeHeight > 0) ? Dimension(uiExtNodeHeight) : Dimension(1.0, DimensionUnit::PERCENT));
+    TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "UIExtensionNode Size[%{public}d, [%{public}d].", uiExtNodeWidth, uiExtNodeHeight);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(calcWidth, calcHeight));
+    return true;
+}
+
+bool OverlayManager::HandleUIExtNodeAngle(int32_t uiExtNodeAngle, RefPtr<FrameNode> uiExtNode)
+{
+    auto layoutProperty = uiExtNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    const auto& renderContext = uiExtNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "RootSize[%{public}f, %{public}f], Angle[%{public}d].",
+        GetRootWidth(), GetRootHeight(), uiExtNodeAngle);
+    switch (uiExtNodeAngle) {
+        case UIEXTNODE_ANGLE_90: {
+            layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(Dimension(GetRootHeight())),
+                CalcLength(Dimension(GetRootWidth()))));
+            TranslateOptions translate(GetRootWidth(), 0, 0);
+            renderContext->UpdateTransformTranslate(translate);
+            NG::Vector5F rotate(0.0f, 0.0f, 1.0f, 90.0f, 0.0f);
+            DimensionOffset offset(Dimension(0), Dimension(0));
+            renderContext->UpdateTransformRotate(rotate);
+            renderContext->UpdateTransformCenter(offset);
+            break;
+        }
+        case UIEXTNODE_ANGLE_180: {
+            auto full = CalcLength(Dimension(1.0, DimensionUnit::PERCENT));
+            layoutProperty->UpdateUserDefinedIdealSize(CalcSize(full, full));
+            NG::Vector5F rotate(0.0f, 0.0f, 1.0f, 180.0f, 0.0f);
+            DimensionOffset offset(0.5_pct, 0.5_pct);
+            renderContext->UpdateTransformRotate(rotate);
+            renderContext->UpdateTransformCenter(offset);
+            break;
+        }
+        case UIEXTNODE_ANGLE_270: {
+            layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(Dimension(GetRootHeight())),
+                CalcLength(Dimension(GetRootWidth()))));
+            TranslateOptions translate(0, GetRootHeight(), 0);
+            renderContext->UpdateTransformTranslate(translate);
+            NG::Vector5F rotate(0.0f, 0.0f, 1.0f, 270.0f, 0.0f);
+            DimensionOffset offset(Dimension(0), Dimension(0));
+            renderContext->UpdateTransformRotate(rotate);
+            renderContext->UpdateTransformCenter(offset);
+            break;
+        }
+    }
+    return true;
+}
+
+bool OverlayManager::HandleUIExtNodeTransform(const AAFwk::Want& want, RefPtr<FrameNode> uiExtNode)
+{
+    auto containerId = Container::CurrentId();
+    auto foldWindow = FoldableWindow::CreateFoldableWindow(containerId);
+    bool isFoldExpand = foldWindow && (foldWindow->IsFoldExpand());
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+    auto uiExtNodeAngle = want.GetIntParam(WANT_PARAM_UIEXTNODE_ANGLE_KEY, 0);
+#else
+    auto uiExtNodeAngle = 0;
+#endif
+    if (!(isFoldExpand) && UIExtNodeAngleValid(uiExtNodeAngle)) {
+        return HandleUIExtNodeAngle(uiExtNodeAngle, uiExtNode);
+    } else if (!UIExtNodeAngleValid(uiExtNodeAngle)) {
+        return HandleUIExtNodeSize(want, uiExtNode);
+    }
+    return true;
+}
+
+bool OverlayManager::UIExtNodeAngleValid(int32_t uiExtNodeAngle)
+{
+    return (uiExtNodeAngle == UIEXTNODE_ANGLE_90) ||
+        (uiExtNodeAngle == UIEXTNODE_ANGLE_180) || (uiExtNodeAngle == UIEXTNODE_ANGLE_270);
+}
+
 int32_t OverlayManager::CreateModalUIExtension(
     const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
     const ModalUIExtensionConfig& config)
@@ -5007,10 +5110,9 @@ int32_t OverlayManager::CreateModalUIExtension(
     isProhibitBack_ = config.isProhibitBack;
     SetIsAllowedBeCovered(config.isAllowedBeCovered);
     auto uiExtNode = ModalUIExtension::Create(want, callbacks, config.isAsyncModalBinding);
-    auto layoutProperty = uiExtNode->GetLayoutProperty();
-    CHECK_NULL_RETURN(layoutProperty, 0);
-    auto full = CalcLength(Dimension(1.0, DimensionUnit::PERCENT));
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(full, full));
+    if (!HandleUIExtNodeTransform(want, uiExtNode)) {
+        return 0;
+    }
     auto buildNodeFunc = [uiExtNode]() -> RefPtr<UINode> {
         uiExtNode->MarkModifyDone();
         return uiExtNode;
@@ -5430,6 +5532,16 @@ bool OverlayManager::CheckPageNeedAvoidKeyboard() const
     }
     auto frameNode = DynamicCast<FrameNode>(child);
     return !(frameNode && frameNode->GetFocusHub() && frameNode->GetFocusHub()->IsCurrentFocus());
+}
+
+float OverlayManager::GetRootWidth() const
+{
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(rootNode, 0.0);
+    auto rootGeometryNode = AceType::DynamicCast<FrameNode>(rootNode)->GetGeometryNode();
+    CHECK_NULL_RETURN(rootGeometryNode, 0.0);
+    auto rootWidth = rootGeometryNode->GetFrameSize().Width();
+    return rootWidth;
 }
 
 float OverlayManager::GetRootHeight() const
