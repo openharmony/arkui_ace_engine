@@ -26,7 +26,7 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace {
 namespace {
-
+constexpr char FORM_RENDER_STATE[] = "ohos.extra.param.key.form_render_state";
 } // namespace
 class FormRenderGroupTest : public testing::Test {
 public:
@@ -52,6 +52,8 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_001, TestSize.Level1)
     formJsInfo.moduleName = "moduleName";
     formJsInfo.formId = 1;
     EXPECT_EQ(formJsInfo.formId, 1);
+    group->AddForm(want, formJsInfo);
+    want.SetParam(FORM_RENDER_STATE, true);
     group->AddForm(want, formJsInfo);
     GTEST_LOG_(INFO) << "FormRenderGroupTest_001 end";
 }
@@ -87,6 +89,8 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_003, TestSize.Level1)
     OHOS::AppExecFwk::FormJsInfo formJsInfo;
     formJsInfo.bundleName = "bundleName";
     formJsInfo.moduleName = "moduleName";
+    group->UpdateForm(formJsInfo);
+    group->formRenderer_ = std::make_shared<FormRenderer>(nullptr, nullptr, eventHandler);
     group->UpdateForm(formJsInfo);
     GTEST_LOG_(INFO) << "FormRenderGroupTest_003 end";
 }
