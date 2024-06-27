@@ -446,6 +446,21 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
         copy = Array.isArray(obj) ? [] : {};
         Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
         copiedObjects.set(obj, copy);
+      } else {
+        /**
+         * As we define a variable called 'copy' with no initial value before this if/else branch,
+         * so it will crash at Reflect.set when obj is not instance of Set/Map/Date/Object/Array.
+         * This branch is for those known special cases:
+         * 1、obj is a NativePointer
+         * 2、obj is a @Sendable decorated class
+         * In case the application crash directly, use shallow copy instead.
+         * Will use new API when ark engine team is ready which will be a more elegant way.
+         * If we difine the copy like 'let copy = {};',
+         * it will not crash but copy will be a normal JSObject, not a @Sendable object.
+         * To keep the functionality of @Sendable, still not define copy with initial value.
+         */
+        stateMgmtConsole.warn('DeepCopy target obj is not instance of Set/Date/Map/Object/Array, will use shallow copy instead.');
+        return obj;
       }
       Object.keys(obj).forEach((objKey: any) => {
         stack.push({ name: objKey });
