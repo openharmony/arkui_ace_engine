@@ -955,6 +955,7 @@ void JSViewPartialUpdate::JSGetRouterPageInfo(const JSCallbackInfo& info)
 
 void JSViewPartialUpdate::JSGetNavigationInfo(const JSCallbackInfo& info)
 {
+    ContainerScope scope(GetInstanceId());
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto navigationMgr = pipeline->GetNavigationManager();
