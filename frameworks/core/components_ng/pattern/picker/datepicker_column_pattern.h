@@ -272,6 +272,11 @@ public:
         clickBreak_ = value;
     }
 
+    void SetButtonBgColor(const Color& color)
+    {
+        buttonBgColor_ = color;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -351,6 +356,7 @@ private:
     double distancePercent_ = 0.0;
     Color pressColor_;
     Color hoverColor_;
+    Color buttonBgColor_ = Color::TRANSPARENT;
     bool isTossStatus_ = false;
     bool clickBreak_ = false;
     bool touchBreak_ = false;

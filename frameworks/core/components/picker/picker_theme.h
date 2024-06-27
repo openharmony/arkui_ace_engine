@@ -32,6 +32,7 @@
 namespace OHOS::Ace {
 namespace {
 constexpr Dimension DIVIDER_THICKNESS = 1.0_px;
+constexpr uint32_t FOCUS_AREA_TYPE_IMPL = 1;
 } // namespace
 
 class PickerTheme final : public virtual Theme {
@@ -56,6 +57,7 @@ public:
             }
 
             InitializeTextStyles(theme, themeStyle);
+            InitializeSelectorItemStyles(theme, themeStyle);
             theme->optionSizeUnit_ = DimensionUnit::VP;
             theme->lunarWidth_ =
                 Dimension(36.0, DimensionUnit::VP); // 36.0: lunarWidth, this width do not need setting by outer.
@@ -140,6 +142,28 @@ public:
             }
         }
 
+        void InitializeSelectorItemStyles(const RefPtr<PickerTheme>& theme, const RefPtr<ThemeStyle>& themeStyle) const
+        {
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("picker_pattern", nullptr);
+            if (pattern) {
+                theme->focusImplType_ = static_cast<uint32_t>(pattern->GetAttr<int>("picker_focus_area_type", 0));
+                theme->selectorItemRadius_ = pattern->GetAttr<Dimension>("picker_selector_item_radius", 8.0_vp);
+                theme->selectorItemSpace_ = pattern->GetAttr<Dimension>("picker_selector_item_space", 4.0_vp);
+                theme->selectorItemBorderWidth_ =
+                    pattern->GetAttr<Dimension>("picker_selector_item_border_width", 0.0_vp);
+                theme->selectorItemFocusBorderWidth_ =
+                    pattern->GetAttr<Dimension>("picker_selector_item_focus_border_width", 0.0_vp);
+                theme->selectorItemBorderColor_ =
+                    pattern->GetAttr<Color>("picker_selector_item_border_color", Color::TRANSPARENT);
+                theme->selectorItemFocusBorderColor_ =
+                    pattern->GetAttr<Color>("picker_selector_item_focus_border_color", Color::TRANSPARENT);
+                theme->selectorItemFocusBgColor_ =
+                    pattern->GetAttr<Color>("picker_selector_item_focus_bg_color", Color::TRANSPARENT);
+                theme->selectorItemNormalBgColor_ =
+                    pattern->GetAttr<Color>("picker_selector_item_normal_bg_color", Color::TRANSPARENT);
+            }
+        }
+
         void InitializeTextStyles(const RefPtr<PickerTheme>& theme, const RefPtr<ThemeStyle>& themeStyle) const
         {
             InitializeItemTextStyles(theme, themeStyle);
@@ -194,7 +218,21 @@ public:
         theme->lunarswitchTextSize_ = lunarswitchTextSize_;
         theme->defaultStartDate_ = defaultStartDate_;
         theme->defaultEndDate_ = defaultEndDate_;
+        cloneSelectorProps(theme);
         return theme;
+    }
+
+    void cloneSelectorProps(RefPtr<PickerTheme> theme) const
+    {
+        theme->focusImplType_ = focusImplType_;
+        theme->selectorItemRadius_ = selectorItemRadius_;
+        theme->selectorItemSpace_ = selectorItemSpace_;
+        theme->selectorItemBorderWidth_ = selectorItemBorderWidth_;
+        theme->selectorItemFocusBorderWidth_ = selectorItemFocusBorderWidth_;
+        theme->selectorItemBorderColor_ = selectorItemBorderColor_;
+        theme->selectorItemFocusBorderColor_ = selectorItemFocusBorderColor_;
+        theme->selectorItemFocusBgColor_ = selectorItemFocusBgColor_;
+        theme->selectorItemNormalBgColor_ = selectorItemNormalBgColor_;
     }
 
     const TextStyle& GetOptionStyle(bool selected, bool focus) const
@@ -451,6 +489,51 @@ public:
         return paddingVertical_;
     }
 
+    bool NeedButtonFocusAreaType() const
+    {
+        return focusImplType_ == FOCUS_AREA_TYPE_IMPL;
+    }
+
+    const Dimension& GetSelectorItemRadius() const
+    {
+        return selectorItemRadius_;
+    }
+
+    const Dimension& GetSelectorItemSpace() const
+    {
+        return selectorItemSpace_;
+    }
+
+    const Dimension& GetSelectorItemBorderWidth() const
+    {
+        return selectorItemBorderWidth_;
+    }
+
+    const Dimension& GetSelectorItemFocusBorderWidth() const
+    {
+        return selectorItemFocusBorderWidth_;
+    }
+
+    const Color& GetSelectorItemBorderColor() const
+    {
+        return selectorItemBorderColor_;
+    }
+
+    const Color& GetSelectorItemFocusBorderColor() const
+    {
+        return selectorItemFocusBorderColor_;
+    }
+
+    const Color& GetSelectorItemFocusBgColor() const
+    {
+        return selectorItemFocusBgColor_;
+    }
+
+    const Color& GetSelectorItemNormalBgColor() const
+    {
+        return selectorItemNormalBgColor_;
+    }
+
 private:
     PickerTheme() = default;
 
@@ -519,6 +602,17 @@ private:
 
     uint32_t showCountLandscape_ = 3;
     uint32_t showCountPortrait_ = 5;
+
+    uint32_t focusImplType_ = 0;
+
+    Dimension selectorItemRadius_;
+    Dimension selectorItemSpace_;
+    Dimension selectorItemBorderWidth_;
+    Dimension selectorItemFocusBorderWidth_;
+    Color selectorItemBorderColor_;
+    Color selectorItemFocusBorderColor_;
+    Color selectorItemFocusBgColor_;
+    Color selectorItemNormalBgColor_;
 };
 
 } // namespace OHOS::Ace
