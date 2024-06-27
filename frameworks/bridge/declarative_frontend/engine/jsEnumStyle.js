@@ -3158,10 +3158,15 @@ var StyledStringKey;
   StyledStringKey[StyledStringKey["GESTURE"] = 100] = "GESTURE";
   StyledStringKey[StyledStringKey["IMAGE"] = 300] = "IMAGE";
   StyledStringKey[StyledStringKey["CUSTOM_SPAN"] = 400] = "CUSTOM_SPAN";
+  StyledStringKey[StyledStringKey["USER_DATA"] = 500] = "USER_DATA";
 })(StyledStringKey || (StyledStringKey = {}));
 
 class CustomSpan {
   type_ = "CustomSpan"
+}
+
+class UserDataSpan {
+  type_ = "ExtSpan"
 }
 
 let FocusPriority;
