@@ -838,6 +838,11 @@ protected:
     void DoKeyboardAvoidAnimate(const KeyboardAnimationConfig& keyboardAnimationConfig, float keyboardHeight,
         const std::function<void()>& func);
 
+    bool GetForceSplitEnable() const
+    {
+        return isForceSplit_;
+    }
+
 private:
     void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type);
 
@@ -1042,6 +1047,7 @@ private:
     bool isShowTitle_ = false;
     bool lastAnimationStatus_ = true;
     bool isDoKeyboardAvoidAnimate_ = true;
+    bool isForceSplit_ = false;
 
     std::list<FrameCallbackFunc> frameCallbackFuncs_;
     uint32_t transform_ = 0;

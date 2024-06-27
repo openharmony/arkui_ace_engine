@@ -57,6 +57,7 @@
 #include "core/components/common/layout/screen_system_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
@@ -919,9 +920,12 @@ void PipelineContext::SetupRootElement()
     rootFocusHub->SetFocusable(true);
     window_->SetRootFrameNode(rootNode_);
     rootNode_->AttachToMainTree(false, this);
-
+    auto stagePattern = ViewAdvancedRegister::GetInstance()->GeneratePattern(V2::STAGE_ETS_TAG);
+    if (!stagePattern) {
+        stagePattern = MakeRefPtr<StagePattern>();
+    }
     auto stageNode = FrameNode::CreateFrameNode(
-        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), stagePattern);
     RefPtr<AppBarView> appBar = AceType::MakeRefPtr<AppBarView>();
     auto atomicService = installationFree_ ? appBar->Create(stageNode) : nullptr;
     auto container = Container::Current();
@@ -950,7 +954,10 @@ void PipelineContext::SetupRootElement()
     uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
 #endif
     accessibilityManagerNG_ = MakeRefPtr<AccessibilityManagerNG>();
-    stageManager_ = MakeRefPtr<StageManager>(stageNode);
+    stageManager_ = ViewAdvancedRegister::GetInstance()->GenerateStageManager(stageNode);
+    if (!stageManager_) {
+        stageManager_ = MakeRefPtr<StageManager>(stageNode);
+    }
     overlayManager_ = MakeRefPtr<OverlayManager>(
         DynamicCast<FrameNode>(installationFree_ ? stageNode->GetParent()->GetParent() : stageNode->GetParent()));
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
@@ -1016,7 +1023,10 @@ void PipelineContext::SetupSubRootElement()
 #endif
     accessibilityManagerNG_ = MakeRefPtr<AccessibilityManagerNG>();
     // the subwindow for overlay not need stage
-    stageManager_ = MakeRefPtr<StageManager>(nullptr);
+    stageManager_ = ViewAdvancedRegister::GetInstance()->GenerateStageManager(nullptr);
+    if (!stageManager_) {
+        stageManager_ = MakeRefPtr<StageManager>(nullptr);
+    }
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
