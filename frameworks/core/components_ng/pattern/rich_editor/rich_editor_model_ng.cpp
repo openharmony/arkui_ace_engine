@@ -85,6 +85,14 @@ void RichEditorModelNG::SetOnReady(std::function<void()>&& func)
     eventHub->SetOnReady(std::move(func));
 }
 
+void RichEditorModelNG::SetOnReady(FrameNode* frameNode, std::function<void()>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnReady(std::move(callback));
+}
+
 void RichEditorModelNG::SetOnSelect(std::function<void(const BaseEventInfo*)>&& func)
 {
     CHECK_NULL_VOID(!isStyledStringMode_);
@@ -130,6 +138,14 @@ void RichEditorModelNG::SetOnDeleteComplete(std::function<void()>&& func)
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDeleteComplete(std::move(func));
+}
+
+void RichEditorModelNG::SetOnDeleteComplete(FrameNode* frameNode, std::function<void()>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDeleteComplete(std::move(callback));
 }
 
 void RichEditorModelNG::SetCustomKeyboard(std::function<void()>&& func, bool supportAvoidance)
@@ -266,7 +282,15 @@ void RichEditorModelNG::SetOnEditingChange(std::function<void(const bool&)>&& fu
     eventHub->SetOnEditingChange(std::move(func));
 }
 
-void RichEditorModelNG::SetEnterKeyType(TextInputAction action)
+void RichEditorModelNG::SetOnEditingChange(FrameNode* frameNode, std::function<void(const bool&)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnEditingChange(std::move(callback));
+}
+
+void RichEditorModelNG ::SetEnterKeyType(TextInputAction action)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetEnterKeyType=%{public}d", action);
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
