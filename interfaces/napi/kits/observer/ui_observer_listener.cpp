@@ -266,7 +266,6 @@ void UIObserverListener::OnTabContentStateChange(const NG::TabContentInfo& tabCo
     napi_value callback = nullptr;
     napi_get_reference_value(env_, callback_, &callback);
     napi_value objValue = nullptr;
-    napi_create_object(env_, &objValue);
     napi_value param1 = nullptr;
     napi_value param2 = nullptr;
     napi_value param3 = nullptr;
@@ -279,12 +278,23 @@ void UIObserverListener::OnTabContentStateChange(const NG::TabContentInfo& tabCo
     napi_create_int32(env_, tabContentInfo.index, &param4);
     napi_create_string_utf8(env_, tabContentInfo.id.c_str(), tabContentInfo.id.length(), &param5);
     napi_create_int32(env_, tabContentInfo.uniqueId, &param6);
-    napi_set_named_property(env_, objValue, "tabContentId", param1);
-    napi_set_named_property(env_, objValue, "tabContentUniqueId", param2);
-    napi_set_named_property(env_, objValue, "state", param3);
-    napi_set_named_property(env_, objValue, "index", param4);
-    napi_set_named_property(env_, objValue, "id", param5);
-    napi_set_named_property(env_, objValue, "uniqueId", param6);
+    const char *keys[] = {
+        "tabContentId",
+        "tabContentUniqueId",
+        "state",
+        "index",
+        "id",
+        "uniqueId",
+    };
+    const napi_value values[] = {
+        param1,
+        param2,
+        param3,
+        param4,
+        param5,
+        param6,
+    };
+    napi_create_object_with_named_properties(env_, &objValue, 6, keys, values);
     napi_value argv[] = { objValue };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
 }
