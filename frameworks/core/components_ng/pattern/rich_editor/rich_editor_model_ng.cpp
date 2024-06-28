@@ -182,6 +182,14 @@ void RichEditorModelNG::SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& f
     eventHub->SetOnPaste(std::move(func));
 }
 
+void RichEditorModelNG::SetOnPaste(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnPaste(std::move(func));
+}
+
 void RichEditorModelNG::SetPlaceholder(PlaceholderOptions& options)
 {
     if (options.value.has_value()) {
@@ -340,8 +348,24 @@ void RichEditorModelNG::SetOnCut(std::function<void(NG::TextCommonEvent&)>&& fun
     eventHub->SetOnCut(std::move(func));
 }
 
+void RichEditorModelNG::SetOnCut(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCut(std::move(func));
+}
+
 void RichEditorModelNG::SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func)
 {
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCopy(std::move(func));
+}
+
+void RichEditorModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnCopy(std::move(func));

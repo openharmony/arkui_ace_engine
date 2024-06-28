@@ -7437,6 +7437,48 @@ class RichEditorOnEditingChangeModifier extends ModifierWithKey {
 }
 RichEditorOnEditingChangeModifier.identity = Symbol('richEditorOnEditingChange');
 
+class RichEditorOnPasteModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnPaste(node);
+    } else {
+      getUINativeModule().richEditor.setOnPaste(node, this.value);
+    }
+  }
+}
+RichEditorOnPasteModifier.identity = Symbol('richEditorOnPaste');
+
+class RichEditorOnCutModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnCut(node);
+    } else {
+      getUINativeModule().richEditor.setOnCut(node, this.value);
+    }
+  }
+}
+RichEditorOnCutModifier.identity = Symbol('richEditorOnCut');
+
+class RichEditorOnCopyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnCopy(node);
+    } else {
+      getUINativeModule().richEditor.setOnCopy(node, this.value);
+    }
+  }
+}
+RichEditorOnCopyModifier.identity = Symbol('richEditorOnCopy');
+
 class RichEditorEnterKeyTypeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -7487,7 +7529,8 @@ class ArkRichEditorComponent extends ArkComponent {
   }
 
   onPaste(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnPasteModifier.identity, RichEditorOnPasteModifier, callback);
+    return this;
   }
   onReady(callback) {
     modifierWithKey(this._modifiersWithKeys, RichEditorOnReadyModifier.identity, RichEditorOnReadyModifier, callback);
@@ -7517,6 +7560,14 @@ class ArkRichEditorComponent extends ArkComponent {
   }
   onEditingChange(callback) {
     modifierWithKey(this._modifiersWithKeys, RichEditorOnEditingChangeModifier.identity, RichEditorOnEditingChangeModifier, callback);
+    return this;
+  }
+  onCut(callback) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnCutModifier.identity, RichEditorOnCutModifier, callback);
+    return this;
+  }
+  onCopy(callback) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnCopyModifier.identity, RichEditorOnCopyModifier, callback);
     return this;
   }
 }
