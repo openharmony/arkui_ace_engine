@@ -4827,9 +4827,40 @@ void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEve
         CHECK_NULL_VOID(webNode);
         accessibilityId = webNode->GetAccessibilityId();
     }
+    if (eventType == AccessibilityEventType::FOCUS) {
+        TextBlurReport(accessibilityId);
+    }
     event.nodeId = accessibilityId;
     event.type = eventType;
     context->SendEventToAccessibility(event);
+}
+
+void WebDelegate::TextBlurReport(int64_t accessibilityId)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    auto textBlurCallback = webPattern->GetTextBlurCallback();
+    CHECK_NULL_VOID(textBlurCallback);
+    auto lastFocusNode = webPattern->GetAccessibilityNodeById(lastFocusInputId_);
+    if (lastFocusNode && lastFocusInputId_ != accessibilityId) {
+        if (lastFocusNode->GetIsPassword()) {
+            TAG_LOGW(AceLogTag::ACE_WEB, "the input type is password, do not report");
+        } else {
+            std::string blurText = lastFocusNode->GetContent();
+            if (!blurText.empty()) {
+                TAG_LOGD(AceLogTag::ACE_WEB, "report text blur, the content length is %{public}u",
+                    static_cast<int32_t>(blurText.length()));
+                textBlurCallback(accessibilityId, blurText);
+            }
+        }
+    }
+    if (accessibilityId != 0) {
+        auto focusNode = webPattern->GetAccessibilityNodeById(accessibilityId);
+        if (focusNode && focusNode->GetIsEditable()) {
+            // record last editable focus id
+            lastFocusInputId_ = accessibilityId;
+        }
+    }
 }
 
 void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
