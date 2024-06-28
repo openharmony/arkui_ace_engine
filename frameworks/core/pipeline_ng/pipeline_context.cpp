@@ -3909,6 +3909,11 @@ void PipelineContext::RegisterFocusCallback()
     });
 }
 
+void PipelineContext::GetInspectorTree()
+{
+    rootNode_->GetInspectorValue();
+}
+
 void PipelineContext::AddFrameNodeChangeListener(const RefPtr<FrameNode>& node)
 {
     if (std::find(changeInfoListeners_.begin(), changeInfoListeners_.end(), node) == changeInfoListeners_.end()) {

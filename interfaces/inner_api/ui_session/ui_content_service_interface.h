@@ -44,7 +44,7 @@ public:
      * @description: define get the current page inspector tree info interface
      * @return: result number
      */
-    virtual int32_t GetInspectorTree() = 0;
+    virtual int32_t GetInspectorTree(const EventCallback& eventCallback) = 0;
 
     /**
      * @description: define SA process and current process connect interface
@@ -56,25 +56,25 @@ public:
      * @description: define register a callback on click event occur to execute interface
      * @return: result number
      */
-    virtual int32_t RegisterClickEventCallback(EventCallback eventCallback) = 0;
+    virtual int32_t RegisterClickEventCallback(const EventCallback& eventCallback) = 0;
 
     /**
      * @description: define register a callback on switch event occur to execute interface
      * @return: result number
      */
-    virtual int32_t RegisterRouterChangeEventCallback(EventCallback eventCallback) = 0;
+    virtual int32_t RegisterRouterChangeEventCallback(const EventCallback& eventCallback) = 0;
 
     /**
      * @description: define register a callback on search event occur to execute interface
      * @return: result number
      */
-    virtual int32_t RegisterSearchEventCallback(EventCallback eventCallback) = 0;
+    virtual int32_t RegisterSearchEventCallback(const EventCallback& eventCallback) = 0;
 
     /**
      * @description: define register a callback on component event occur to execute interface
      * @return: result number
      */
-    virtual int32_t RegisterComponentChangeEventCallback(EventCallback eventCallback) = 0;
+    virtual int32_t RegisterComponentChangeEventCallback(const EventCallback& eventCallback) = 0;
 
     /**
      * @description: define unregister the click event occur callback last register interface
@@ -106,27 +106,38 @@ public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.ace.ReportService");
     ReportService() = default;
     ~ReportService() override = default;
-    enum { REPORT_CLICK_EVENT, REPORT_SWITCH_EVENT, REPORT_COMPONENT_EVENT, REPORT_SEARCH_EVENT };
+    enum {
+        REPORT_CLICK_EVENT,
+        REPORT_SWITCH_EVENT,
+        REPORT_COMPONENT_EVENT,
+        REPORT_SEARCH_EVENT,
+        REPORT_INSPECTOR_VALUE
+    };
 
     /**
      * @description: define reports the click event to the proxy interface
      */
-    virtual void ReportClickEvent(std::string data) = 0;
+    virtual void ReportClickEvent(const std::string& data) = 0;
 
     /**
      * @description: define reports the switch event to the proxy interface
      */
-    virtual void ReportRouterChangeEvent(std::string data) = 0;
+    virtual void ReportRouterChangeEvent(const std::string& data) = 0;
 
     /**
      * @description: define reports the component change event to the proxy interface
      */
-    virtual void ReportComponentChangeEvent(std::string data) = 0;
+    virtual void ReportComponentChangeEvent(const std::string& data) = 0;
 
     /**
      * @description: define reports the search event to the proxy interface
      */
-    virtual void ReportSearchEvent(std::string data) = 0;
+    virtual void ReportSearchEvent(const std::string& data) = 0;
+
+    /**
+     * @description: define reports inspector value to the proxy interface
+     */
+    virtual void ReportInspectorTreeValue(const std::string& data) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H

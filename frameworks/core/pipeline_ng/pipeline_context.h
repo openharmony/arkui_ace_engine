@@ -802,6 +802,7 @@ public:
     {
         lastVsyncEndTimestamp_ = lastVsyncEndTimestamp;
     }
+    void GetInspectorTree();
 
     void AddFrameNodeChangeListener(const RefPtr<FrameNode>& node);
     void RemoveFrameNodeChangeListener(const RefPtr<FrameNode>& node);

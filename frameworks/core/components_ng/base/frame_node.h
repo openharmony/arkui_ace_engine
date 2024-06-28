@@ -954,6 +954,7 @@ public:
     void MarkAndCheckNewOpIncNode();
     ChildrenListWithGuard GetAllChildren();
     OPINC_TYPE_E FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth);
+    void GetInspectorValue() override;
 
     FrameNodeChangeInfoFlag GetChangeInfoFlag()
     {
