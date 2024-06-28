@@ -545,6 +545,13 @@ void SwiperPattern::CreateCaptureCallback(int32_t targetIndex, int32_t captureId
 void SwiperPattern::UpdateCaptureSource(
     std::shared_ptr<Media::PixelMap> pixelMap, int32_t captureId, int32_t targetIndex)
 {
+    // Async tasks require verifying if the pixel map is the correct target
+    if (!(captureId == GetLeftCaptureId() && leftCaptureIndex_.has_value() &&
+            targetIndex == leftCaptureIndex_.value()) &&
+        !(captureId == GetRightCaptureId() && rightCaptureIndex_.has_value() &&
+            targetIndex == rightCaptureIndex_.value())) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto targetNode = AceType::DynamicCast<FrameNode>(host->GetOrCreateChildByIndex(targetIndex));
@@ -2991,7 +2998,6 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
             "Swiper finish property translate animation with offsetX: %{public}f, offsetY: %{public}f",
             finalOffset.GetX(), finalOffset.GetY());
         ACE_SCOPED_TRACE("Swiper finish property animation X: %f, Y: %f", finalOffset.GetX(), finalOffset.GetY());
-        swiper->targetIndex_.reset();
         swiper->OnPropertyTranslateAnimationFinish(offset);
     };
     // initial translate info.
@@ -3083,6 +3089,7 @@ void SwiperPattern::OnPropertyTranslateAnimationFinish(const OffsetF& offset)
     }
 
     usePropertyAnimation_ = false;
+    targetIndex_.reset();
     // reset translate.
     for (auto& item : itemPositionInAnimation_) {
         auto frameNode = item.second.node;
