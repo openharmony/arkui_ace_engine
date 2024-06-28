@@ -40,6 +40,22 @@
         "name": "OH_NativeXComponent_GetTouchPointTiltY"
     },
     {
+        "first_introduced": "12",
+        "name": "OH_NativeXComponent_GetTouchPointWindowX"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_NativeXComponent_GetTouchPointWindowY"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_NativeXComponent_GetTouchPointDisplayX"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_NativeXComponent_GetTouchPointDisplayY"
+    },
+    {
         "first_introduced": "10",
         "name": "OH_NativeXComponent_RegisterFocusEventCallback"
     },

@@ -1010,20 +1010,24 @@ HWTEST_F(GridAttrTestNg, GridItemHoverEventTest001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     CreateFixedItems(10, GridItemStyle::PLAIN);
     CreateDone(frameNode_);
+    auto gridItemNode = GetChildFrameNode(frameNode_, 0);
     auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
+    auto gridItemeventHub = gridItemNode->GetEventHub<GridItemEventHub>();
+    auto gridItemInputHub = gridItemeventHub->GetOrCreateInputEventHub();
+    auto HandleHoverEvent = gridItemInputHub->hoverEventActuator_->inputEvents_.back()->GetOnHoverEventFunc();
 
     /**
      * @tc.steps: step1. Hover gridItem
      * @tc.expected: isHover_ is true
      */
-    gridItemPattern->HandleHoverEvent(true);
+    HandleHoverEvent(true);
     EXPECT_TRUE(gridItemPattern->isHover_);
 
     /**
      * @tc.steps: step2. Leave gridItem
      * @tc.expected: isHover_ is false
      */
-    gridItemPattern->HandleHoverEvent(false);
+    HandleHoverEvent(false);
     EXPECT_FALSE(gridItemPattern->isHover_);
 }
 
@@ -1038,20 +1042,34 @@ HWTEST_F(GridAttrTestNg, GridItemPressEventTest001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     CreateFixedItems(10, GridItemStyle::PLAIN);
     CreateDone(frameNode_);
+    auto gridItemNode = GetChildFrameNode(frameNode_, 0);
     auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
+    auto gridItemeventHub = gridItemNode->GetEventHub<GridItemEventHub>();
+    auto gridItemGesture = gridItemeventHub->GetOrCreateGestureEventHub();
+    auto HandlePressEvent = gridItemGesture->touchEventActuator_->touchEvents_.back()->GetTouchEventCallback();
 
     /**
      * @tc.steps: step1. Press gridItem
      * @tc.expected: isPressed_ is true
      */
-    gridItemPattern->HandlePressEvent(true);
+    auto info = CreateTouchEventInfo(TouchType::DOWN, Offset::Zero());
+    HandlePressEvent(info);
     EXPECT_TRUE(gridItemPattern->isPressed_);
 
     /**
-     * @tc.steps: step2. Release gridItem
+     * @tc.steps: step2. Move on gridItem
+     * @tc.expected: isPressed_ not change
+     */
+    info = CreateTouchEventInfo(TouchType::MOVE, Offset(10.f, 10.f));
+    HandlePressEvent(info);
+    EXPECT_TRUE(gridItemPattern->isPressed_);
+
+    /**
+     * @tc.steps: step3. Release gridItem
      * @tc.expected: isPressed_ is false
      */
-    gridItemPattern->HandlePressEvent(false);
+    info = CreateTouchEventInfo(TouchType::UP, Offset(10.f, 10.f));
+    HandlePressEvent(info);
     EXPECT_FALSE(gridItemPattern->isPressed_);
 }
 

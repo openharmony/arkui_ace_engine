@@ -52,6 +52,9 @@ public:
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions& copyOptions);
     static void SetCaretColor(FrameNode* frameNode, const Color& color);
+    static void SetOnReady(FrameNode* frameNode, std::function<void()>&& callback);
+    static void SetOnDeleteComplete(FrameNode* frameNode, std::function<void()>&& callback);
+    static void SetOnEditingChange(FrameNode* frameNode, std::function<void(const bool&)>&& callback);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& selectedColor);
     void SetEnterKeyType(TextInputAction value) override;
     static void SetEnterKeyType(FrameNode* frameNode, const TextInputAction& action);

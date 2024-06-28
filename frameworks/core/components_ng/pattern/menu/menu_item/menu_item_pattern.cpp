@@ -563,11 +563,11 @@ void MenuItemPattern::HideSubMenu()
         auto showedMenuItem = showedSubMenuPattern->GetParentMenuItem();
         CHECK_NULL_VOID(showedMenuItem);
         if (showedMenuItem->GetId() != host->GetId()) {
-            auto parentMenu = GetMenu();
-            CHECK_NULL_VOID(parentMenu);
-            auto parentMenuPattern = parentMenu->GetPattern<MenuPattern>();
-            CHECK_NULL_VOID(parentMenuPattern);
-            parentMenuPattern->HideSubMenu();
+            auto outterMenu = GetMenu(true);
+            CHECK_NULL_VOID(outterMenu);
+            auto outterMenuPattern = outterMenu->GetPattern<MenuPattern>();
+            CHECK_NULL_VOID(outterMenuPattern);
+            outterMenuPattern->HideSubMenu();
         }
     }
 }
@@ -786,6 +786,16 @@ void MenuItemPattern::OnClick()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto menuWrapper = GetMenuWrapper();
+    auto menuWrapperPattern = menuWrapper ? menuWrapper->GetPattern<MenuWrapperPattern>() : nullptr;
+    auto hasSubMenu = menuWrapperPattern ? menuWrapperPattern->HasStackSubMenu() : false;
+    if (expandingMode_ == SubMenuExpandingMode::STACK && !IsSubMenu() && hasSubMenu) {
+        return;
+    }
+    if (expandingMode_ == SubMenuExpandingMode::STACK && IsStackSubmenuHeader()) {
+        menuWrapperPattern->HideSubMenu();
+        return;
+    }
     auto hub = host->GetEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(hub);
     auto onChange = hub->GetOnChange();
@@ -805,16 +815,6 @@ void MenuItemPattern::OnClick()
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    auto menuWrapper = GetMenuWrapper();
-    auto menuWrapperPattern = menuWrapper ? menuWrapper->GetPattern<MenuWrapperPattern>() : nullptr;
-    auto hasSubMenu = menuWrapperPattern ? menuWrapperPattern->HasStackSubMenu() : false;
-    if (expandingMode_ == SubMenuExpandingMode::STACK && !IsSubMenu() && hasSubMenu) {
-        return;
-    }
-    if (expandingMode_ == SubMenuExpandingMode::STACK && IsStackSubmenuHeader()) {
-        menuWrapperPattern->HideSubMenu();
-        return;
-    }
     auto lastSelectedItem = menuPattern->GetLastSelectedItem();
     if (lastSelectedItem && lastSelectedItem != host) {
         auto pattern = lastSelectedItem->GetPattern<MenuItemPattern>();
@@ -1060,7 +1060,7 @@ void MenuItemPattern::AddHoverRegions(const OffsetF& topLeftPoint, const OffsetF
 bool MenuItemPattern::IsInHoverRegions(double x, double y)
 {
     for (auto hoverRegion : hoverRegions_) {
-        if (hoverRegion.ContainsInRegionNoBoundary(x, y)) {
+        if (hoverRegion.ContainsInRegion(x, y)) {
             return true;
         }
     }

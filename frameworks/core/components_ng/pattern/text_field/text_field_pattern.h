@@ -1291,11 +1291,6 @@ public:
         return hasSupportedPreviewText_;
     }
 
-    void OnTouchTestHit(SourceType hitTestType) override
-    {
-        selectOverlay_->OnTouchTestHit(hitTestType);
-    }
-
     int32_t GetPreviewTextStart() const
     {
         return hasPreviewText_ ? previewTextStart_ : selectController_->GetCaretIndex();
@@ -1314,6 +1309,10 @@ public:
     int32_t CheckPreviewTextValidate(const std::string& previewValue, const PreviewRange range) override;
     void HiddenMenu();
 
+    void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override
+    {
+        selectOverlay_->OnAncestorNodeChanged(flag);
+    }
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override

@@ -19,6 +19,7 @@
 #include "base/utils/utils.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -90,12 +91,15 @@ void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     selectOverlayContentModifier_->SetIsHiddenHandle(isHiddenHandle_);
 
     selectOverlayContentModifier_->SetViewPort(viewPort);
+    auto isOverlayMode = (info_.handleLevelMode == HandleLevelMode::OVERLAY);
     selectOverlayContentModifier_->SetPaintHandleUsePoints(
-        info_.firstHandle.isPaintHandleWithPoints || info_.secondHandle.isPaintHandleWithPoints);
-    selectOverlayContentModifier_->SetFirstHandle(info_.firstHandle.paintRect - offset);
+        isOverlayMode && (info_.firstHandle.isPaintHandleWithPoints || info_.secondHandle.isPaintHandleWithPoints));
+    selectOverlayContentModifier_->SetFirstHandle(info_.GetFirstHandlePaintRect() - offset);
     selectOverlayContentModifier_->SetFirstHandlePaintInfo(info_.firstHandle.paintInfo - offset);
-    selectOverlayContentModifier_->SetSecondHandle(info_.secondHandle.paintRect - offset);
+    selectOverlayContentModifier_->SetSecondHandle(info_.GetSecondHandlePaintRect() - offset);
     selectOverlayContentModifier_->SetSecondHandlePaintInfo(info_.secondHandle.paintInfo - offset);
+    selectOverlayContentModifier_->SetIsOverlayMode(isOverlayMode);
+    selectOverlayContentModifier_->SetScale(info_.scale);
 }
 
 void SelectOverlayPaintMethod::CheckCirclesAndBackArrowIsShown()

@@ -439,19 +439,19 @@ std::pair<float, float> PipelineContext::GetResampleCoord(const std::vector<Touc
     auto currentPoint = GetAvgPoint(current, isScreen);
 
     if (SystemProperties::GetDebugEnabled()) {
-        LOGI("input time is %{public}" PRIu64 "", nanoTimeStamp);
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "input time is %{public}" PRIu64 "", nanoTimeStamp);
         for (auto iter : history) {
-            LOGI("history point x %{public}f, y %{public}f, time %{public}" PRIu64 "", iter.x, iter.y,
-                static_cast<uint64_t>(iter.time.time_since_epoch().count()));
+            TAG_LOGD(AceLogTag::ACE_UIEVENT, "history point x %{public}f, y %{public}f, time %{public}" PRIu64 "",
+                iter.x, iter.y, static_cast<uint64_t>(iter.time.time_since_epoch().count()));
         }
-        LOGI("historyAvgPoint is x %{public}f, y %{public}f, time %{public}" PRIu64 "", std::get<INDEX_X>(historyPoint),
-            std::get<INDEX_Y>(historyPoint), std::get<INDEX_TIME>(historyPoint));
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "historyAvgPoint is x %{public}f, y %{public}f, time %{public}" PRIu64 "",
+            std::get<INDEX_X>(historyPoint), std::get<INDEX_Y>(historyPoint), std::get<INDEX_TIME>(historyPoint));
         for (auto iter : current) {
-            LOGI("current point x %{public}f, y %{public}f, time %{public}" PRIu64 "", iter.x, iter.y,
-                static_cast<uint64_t>(iter.time.time_since_epoch().count()));
+            TAG_LOGD(AceLogTag::ACE_UIEVENT, "current point x %{public}f, y %{public}f, time %{public}" PRIu64 "",
+                iter.x, iter.y, static_cast<uint64_t>(iter.time.time_since_epoch().count()));
         }
-        LOGI("currentAvgPoint is x %{public}f, y %{public}f, time %{public}" PRIu64 "", std::get<INDEX_X>(currentPoint),
-            std::get<INDEX_Y>(currentPoint), std::get<INDEX_TIME>(currentPoint));
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "currentAvgPoint is x %{public}f, y %{public}f, time %{public}" PRIu64 "",
+            std::get<INDEX_X>(currentPoint), std::get<INDEX_Y>(currentPoint), std::get<INDEX_TIME>(currentPoint));
     }
     return LinearInterpolation(historyPoint, currentPoint, nanoTimeStamp);
 }
@@ -473,7 +473,8 @@ TouchEvent PipelineContext::GetResampleTouchEvent(
         newTouchEvent.isInterpolated = true;
     }
     if (SystemProperties::GetDebugEnabled()) {
-        LOGI("Interpolate point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f, %{public}" PRIu64 "",
+        TAG_LOGD(AceLogTag::ACE_UIEVENT,
+            "Interpolate point is %{public}d, %{public}f, %{public}f, %{public}f, %{public}f, %{public}" PRIu64 "",
             newTouchEvent.id, newTouchEvent.x, newTouchEvent.y, newTouchEvent.screenX, newTouchEvent.screenY,
             static_cast<uint64_t>(newTouchEvent.time.time_since_epoch().count()));
     }
@@ -580,6 +581,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     }
     FlushMessages();
     InspectDrew();
+    FlushNodeChangeFlag();
     UIObserverHandler::GetInstance().HandleDrawCommandSendCallBack();
     if (onShow_ && onFocus_ && isWindowHasFocused_) {
         auto isDynamicRender = Container::Current() == nullptr ? false : Container::Current()->IsDynamicRender();
@@ -1709,9 +1711,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
             context->safeAreaManager_->UpdateKeyboardOffset(0.0f);
         }
         TAG_LOGI(AceLogTag::ACE_KEYBOARD,
-            "keyboardHeight: %{public}f, positionY: %{public}f, textHeight: %{public}f, final calculate keyboard"
-            "offset is %{public}f",
-            keyboardHeight, positionY, height, context->safeAreaManager_->GetKeyboardOffset());
+            "keyboardHeight: %{public}f, positionY: %{public}f, textHeight: %{public}f, "
+            "rootSize.Height() %{public}f final calculate keyboard offset is %{public}f",
+            keyboardHeight, positionY, height, rootSize.Height(), context->safeAreaManager_->GetKeyboardOffset());
         context->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
         manager->AvoidKeyBoardInNavigation();
         // layout before scrolling textfield to safeArea, because of getting correct position
@@ -2734,6 +2736,7 @@ MouseEvent ConvertAxisToMouse(const AxisEvent& event)
     result.deviceId = event.deviceId;
     result.sourceType = event.sourceType;
     result.sourceTool = event.sourceTool;
+    result.touchEventId = event.touchEventId;
     result.pointerEvent = event.pointerEvent;
     result.screenX = event.screenX;
     result.screenY = event.screenY;
@@ -3894,5 +3897,49 @@ void PipelineContext::RegisterFocusCallback()
         CHECK_NULL_VOID(node);
         InputMethodManager::GetInstance()->OnFocusNodeChange(node);
     });
+}
+
+void PipelineContext::AddFrameNodeChangeListener(const RefPtr<FrameNode>& node)
+{
+    if (std::find(changeInfoListeners_.begin(), changeInfoListeners_.end(), node) == changeInfoListeners_.end()) {
+        changeInfoListeners_.push_back(node);
+    }
+}
+
+void PipelineContext::RemoveFrameNodeChangeListener(const RefPtr<FrameNode>& node)
+{
+    changeInfoListeners_.remove(node);
+}
+
+void PipelineContext::AddChangedFrameNode(const RefPtr<FrameNode>& node)
+{
+    if (std::find(changedNodes_.begin(), changedNodes_.end(), node) == changedNodes_.end()) {
+        changedNodes_.push_back(node);
+    }
+}
+
+void PipelineContext::FlushNodeChangeFlag()
+{
+    ACE_FUNCTION_TRACE();
+    if (!changeInfoListeners_.empty()) {
+        for (const auto& it : changeInfoListeners_) {
+            if (it) {
+                it->ProcessFrameNodeChangeFlag();
+            }
+        }
+    }
+    CleanNodeChangeFlag();
+}
+
+void PipelineContext::CleanNodeChangeFlag()
+{
+    auto cleanNodes = std::move(changedNodes_);
+    changedNodes_.clear();
+    for (const auto& it : cleanNodes) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(it);
+        if (frameNode) {
+            frameNode->ClearChangeInfoFlag();
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

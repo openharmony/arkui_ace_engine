@@ -33,6 +33,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+const int32_t DEFAULT_SAVE_COUNT = 1;
+
 enum class FilterType {
     NONE,
     GRAYSCALE,

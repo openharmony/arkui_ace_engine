@@ -187,6 +187,7 @@ private:
     void OnLanguageConfigurationUpdate() override;
     void OnColorConfigurationUpdate() override;
     void OnModifyDone() override;
+    bool CheckConstraint();
 
     void InitKeyEvent(const RefPtr<FocusHub>& focusHub);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);

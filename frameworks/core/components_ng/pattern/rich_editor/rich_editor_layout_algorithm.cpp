@@ -67,7 +67,7 @@ void RichEditorLayoutAlgorithm::AppendNewLineSpan()
     if (StringUtils::ToWstring(lastSpan->content).back() == L'\n') {
         std::list<RefPtr<SpanItem>> newGroup;
         auto tailNewLineSpan = AceType::MakeRefPtr<SpanItem>();
-        tailNewLineSpan->content = "\n";
+        tailNewLineSpan->content = " \n";
         tailNewLineSpan->SetNeedRemoveNewLine(true);
         CopySpanStyle(lastSpan, tailNewLineSpan);
         newGroup.push_back(tailNewLineSpan);

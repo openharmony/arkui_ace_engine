@@ -714,7 +714,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest013, TestSize.Level1)
     ViewAbstract::SetVisibility(std::move(visible));
     ViewAbstract::SetVisibility(AceType::RawPtr(FRAME_NODE_REGISTER), std::move(visible));
     ViewAbstract::SetGeometryTransition(srcimages);
-    ViewAbstract::SetGeometryTransition(AceType::RawPtr(FRAME_NODE_REGISTER), srcimages, false);
+    ViewAbstract::SetGeometryTransition(AceType::RawPtr(FRAME_NODE_REGISTER), srcimages, false, true);
     ViewAbstract::SetOpacity(OPACITYS);
     ViewAbstract::SetOpacity(AceType::RawPtr(FRAME_NODE_REGISTER), OPACITYS);
     ViewAbstract::SetZIndex(FOUF);

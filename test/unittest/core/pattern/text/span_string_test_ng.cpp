@@ -1284,6 +1284,33 @@ HWTEST_F(SpanStringTestNg, MutableSpanString018, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MutableSpanString019
+ * @tc.desc: Test InsertSpanString of ExtSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, MutableSpanString019, TestSize.Level1)
+{
+    auto extSpan = AceType::MakeRefPtr<ExtSpan>(1, 2);
+    auto imageOption = SpanStringTestNg::GetImageOption("src/icon.png");
+    auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
+    auto spanStr = AceType::MakeRefPtr<SpanString>("12345");
+    spanStr->AddSpan(extSpan);
+    mutableStr->InsertSpanString(0, spanStr);
+    auto text = mutableStr->GetString();
+    EXPECT_EQ(text, "12345 ");
+    auto length = mutableStr->GetLength();
+    EXPECT_EQ(length, 6);
+    auto spans = mutableStr->GetSpans(0, 6);
+    EXPECT_EQ(spans.size(), 2);
+    spans = mutableStr->GetSpans(1, 3);
+    EXPECT_EQ(spans.size(), 1);
+    for (auto span : spans) {
+        EXPECT_EQ(span->GetStartIndex(), 1);
+        EXPECT_EQ(span->GetEndIndex(), 2);
+    }
+}
+
+/**
  * @tc.name: SpanStringTest009
  * @tc.desc: Test basic function of span object
  * @tc.type: FUNC

@@ -101,6 +101,113 @@ ArkUINativeModuleValue RichEditorBridge::ResetCaretColor(ArkUIRuntimeCallInfo* r
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue RichEditorBridge::SetOnReady(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getRichEditorModifier()->resetOnReady(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(void)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        func->Call(vm, func.ToLocal(), nullptr, NUM_0);
+    };
+    GetArkUINodeModifiers()->getRichEditorModifier()->setOnReady(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::ResetOnReady(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRichEditorModifier()->resetOnReady(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::SetOnDeleteComplete(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getRichEditorModifier()->resetOnDeleteComplete(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(void)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        func->Call(vm, func.ToLocal(), nullptr, NUM_0);
+    };
+    GetArkUINodeModifiers()->getRichEditorModifier()->setOnDeleteComplete(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::ResetOnDeleteComplete(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRichEditorModifier()->resetOnDeleteComplete(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::SetOnEditingChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getRichEditorModifier()->resetOnEditingChange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(bool)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](bool isInEditStatus) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        panda::Local<panda::JSValueRef> params[NUM_1] = {
+            panda::BooleanRef::New(vm, isInEditStatus) };
+        func->Call(vm, func.ToLocal(), params, NUM_1);
+    };
+    GetArkUINodeModifiers()->getRichEditorModifier()->setOnEditingChange(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::ResetOnEditingChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRichEditorModifier()->resetOnEditingChange(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue RichEditorBridge::SetSelectedBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

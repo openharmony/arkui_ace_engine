@@ -1634,6 +1634,9 @@ void TextFieldPattern::FireEventHubOnChange(const std::string& text)
 void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     CHECK_NULL_VOID(!IsDragging());
+    if (selectOverlay_->IsTouchAtHandle(info)) {
+        return;
+    }
     auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
@@ -2062,6 +2065,9 @@ void TextFieldPattern::InitClickEvent()
 void TextFieldPattern::HandleClickEvent(GestureEvent& info)
 {
     CHECK_NULL_VOID(!IsDragging());
+    if (selectOverlay_->IsClickAtHandle(info)) {
+        return;
+    }
     auto focusHub = GetFocusHub();
     if (!focusHub->IsFocusable()) {
         return;
@@ -2943,6 +2949,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
 
 void TextFieldPattern::UpdateParam(GestureEvent& info, bool shouldProcessOverlayAfterLayout)
 {
+    parentGlobalOffset_ = GetPaintRectGlobalOffset();
     auto localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
     if (selectController_->IsTouchAtLineEnd(localOffset)) {
         selectController_->UpdateCaretInfoByOffset(localOffset);
@@ -7016,7 +7023,7 @@ void TextFieldPattern::HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& no
     CHECK_NULL_VOID(host);
     if (HasFocus()) {
         if (SystemProperties::GetDebugEnabled()) {
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+            TAG_LOGD(AceLogTag::ACE_TEXT_FIELD,
                 "In OnDragMoved, the cursor has always Displayed in the textField, id:%{public}d", host->GetId());
         }
         return;
@@ -7273,6 +7280,7 @@ const Dimension& TextFieldPattern::GetAvoidSoftKeyboardOffset() const
 
 Offset TextFieldPattern::ConvertGlobalToLocalOffset(const Offset& globalOffset)
 {
+    parentGlobalOffset_ = GetPaintRectGlobalOffset();
     auto localOffset = globalOffset - Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY());
     if (selectOverlay_->HasRenderTransform()) {
         auto localOffsetF = OffsetF(globalOffset.GetX(), globalOffset.GetY());

@@ -493,9 +493,9 @@ void DragDropManager::TransDragWindowToDragFwk(int32_t windowContainerId)
     if (isDragFwkShow_) {
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_DRAG, "TransDragWindowToDragFwk is %{public}d", isDragFwkShow_);
     InteractionInterface::GetInstance()->SetDragWindowVisible(true);
     isDragFwkShow_ = true;
-    TAG_LOGI(AceLogTag::ACE_DRAG, "Transform to MSDP DragWindow.");
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(windowContainerId);
     CHECK_NULL_VOID(subwindow);
     auto overlayManager = subwindow->GetOverlayManager();
@@ -756,7 +756,7 @@ void DragDropManager::RequestDragSummaryInfoAndPrivilege()
     RequireSummary();
     int ret = InteractionInterface::GetInstance()->AddPrivilege();
     if (ret != 0 && SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Interaction AddPrivilege in DragEnd with code:%{public}d", ret);
+        TAG_LOGD(AceLogTag::ACE_DRAG, "Interaction AddPrivilege in DragEnd with code:%{public}d", ret);
     }
     ShadowOffsetData shadowOffsetData { -1, -1, -1, -1 };
     ret = InteractionInterface::GetInstance()->GetShadowOffset(shadowOffsetData);
@@ -764,7 +764,7 @@ void DragDropManager::RequestDragSummaryInfoAndPrivilege()
         previewRect_ =
             Rect(shadowOffsetData.offsetX, shadowOffsetData.offsetY, shadowOffsetData.width, shadowOffsetData.height);
     } else {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Interaction GetShadowOffset in DragEnd with code:%{public}d", ret);
+        TAG_LOGD(AceLogTag::ACE_DRAG, "Interaction GetShadowOffset in DragEnd with code:%{public}d", ret);
     }
 }
 

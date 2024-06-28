@@ -2714,15 +2714,26 @@ void JSViewAbstract::JsGeometryTransition(const JSCallbackInfo& info)
     auto id = jsVal->ToString();
     // follow flag
     bool followWithOutTransition = false;
-    if (info.Length() >= PARAMETER_LENGTH_SECOND) {
-        if (info[1]->IsBoolean()) {
-            followWithOutTransition = info[1]->ToBoolean();
-        } else if (info[1]->IsObject()) {
-            JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
-            ParseJsBool(jsOption->GetProperty("follow"), followWithOutTransition);
+    // hierarchy flag
+    bool doRegisterSharedTransition = true;
+    if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsObject()) {
+        JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
+        ParseJsBool(jsOption->GetProperty("follow"), followWithOutTransition);
+        
+        auto transitionHierarchyStrategy = static_cast<int32_t>(TransitionHierarchyStrategy::ADAPTIVE);
+        ParseJsInt32(jsOption->GetProperty("hierarchyStrategy"), transitionHierarchyStrategy);
+        switch (transitionHierarchyStrategy) {
+            case static_cast<int32_t>(TransitionHierarchyStrategy::NONE):
+                doRegisterSharedTransition = false;
+                break;
+            case static_cast<int32_t>(TransitionHierarchyStrategy::ADAPTIVE):
+                doRegisterSharedTransition = true;
+                break;
+            default:
+                break;
         }
     }
-    ViewAbstractModel::GetInstance()->SetGeometryTransition(id, followWithOutTransition);
+    ViewAbstractModel::GetInstance()->SetGeometryTransition(id, followWithOutTransition, doRegisterSharedTransition);
 }
 
 void JSViewAbstract::JsAlignSelf(const JSCallbackInfo& info)

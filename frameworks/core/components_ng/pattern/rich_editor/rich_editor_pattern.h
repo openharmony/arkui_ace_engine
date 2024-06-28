@@ -794,11 +794,6 @@ public:
         return isMoveCaretAnywhere_;
     }
 
-    void OnTouchTestHit(SourceType hitTestType) override
-    {
-        selectOverlay_->OnTouchTestHit(hitTestType);
-    }
-
     void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionItems)
     {
         menuOptionItems_ = std::move(menuOptionItems);

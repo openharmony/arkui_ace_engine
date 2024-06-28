@@ -22,7 +22,7 @@
 #include "core/components_ng/pattern/ui_extension/security_ui_extension_proxy.h"
 
 namespace OHOS::Ace::Framework {
-class JSSecurityUIExtension : public JSViewAbstract, public JSInteractableView {
+class JSSecurityUIExtension {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);

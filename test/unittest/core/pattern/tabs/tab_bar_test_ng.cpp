@@ -1865,54 +1865,6 @@ HWTEST_F(TabBarTestNg, TabBarPatternInitDragEvent001, TestSize.Level1)
     }
 }
 
-/**
- * @tc.name: TabBarPatternShowDialogWithNode001
- * @tc.desc: test ShowDialogWithNode
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarTestNg, TabBarPatternShowDialogWithNode001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    tabBarPattern_->dialogNode_ = nullptr;
-
-    /**
-     * @tc.steps: step2. Test function ShowDialogWithNode.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 3; i++) {
-        tabBarPattern_->ShowDialogWithNode(i);
-        tabBarPattern_->dialogNode_ =
-            FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<TabsPattern>());
-    }
-}
-
-/**
- * @tc.name: TabBarPatternCloseDialog001
- * @tc.desc: test CloseDialog
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarTestNg, TabBarPatternCloseDialog001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    tabBarPattern_->dialogNode_ = nullptr;
-
-    /**
-     * @tc.steps: step2. Test function CloseDialog.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        tabBarPattern_->ShowDialogWithNode(i);
-        tabBarPattern_->dialogNode_ =
-            FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<TabsPattern>());
-        tabBarPattern_->CloseDialog();
-        EXPECT_EQ(tabBarPattern_->dialogNode_, nullptr);
-    }
-}
-
 /*
  * @tc.name: TabBarPatternCalculateSelectedIndex002
  * @tc.desc: test HandleMouseEvent

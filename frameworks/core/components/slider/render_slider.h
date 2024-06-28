@@ -72,12 +72,6 @@ public:
                GreatOrEqual(bottomRightPoint_.GetX(), x) && GreatOrEqual(bottomRightPoint_.GetY(), y);
     }
 
-    bool ContainsInRegionNoBoundary(double x, double y)
-    {
-        return LessNotEqual(topLeftPoint_.GetX(), x) && LessNotEqual(topLeftPoint_.GetY(), y) &&
-               GreatNotEqual(bottomRightPoint_.GetX(), x) && GreatNotEqual(bottomRightPoint_.GetY(), y);
-    }
-
 private:
     TouchRegionPoint bottomRightPoint_;
     TouchRegionPoint topLeftPoint_;

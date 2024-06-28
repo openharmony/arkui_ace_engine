@@ -211,20 +211,17 @@ constexpr char ACCESSIBILITY_PARAGRAPH[] = "paragraph";
 
 WebPattern::WebPattern() = default;
 
-WebPattern::WebPattern(const std::string& webSrc,
-                       const RefPtr<WebController>& webController,
-                       RenderMode renderMode,
-                       bool incognitoMode)
-    : webSrc_(std::move(webSrc)), webController_(webController), renderMode_(renderMode),
-      incognitoMode_(incognitoMode)
+WebPattern::WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController, RenderMode renderMode,
+    bool incognitoMode, const std::string& sharedRenderProcessToken)
+    : webSrc_(std::move(webSrc)), webController_(webController), renderMode_(renderMode), incognitoMode_(incognitoMode),
+      sharedRenderProcessToken_(sharedRenderProcessToken)
 {}
 
-WebPattern::WebPattern(const std::string& webSrc,
-                       const SetWebIdCallback& setWebIdCallback,
-                       RenderMode renderMode,
-                       bool incognitoMode)
+WebPattern::WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback, RenderMode renderMode,
+    bool incognitoMode, const std::string& sharedRenderProcessToken)
     : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback), renderMode_(renderMode),
-      incognitoMode_(incognitoMode) {}
+      incognitoMode_(incognitoMode), sharedRenderProcessToken_(sharedRenderProcessToken)
+{}
 
 WebPattern::~WebPattern()
 {
@@ -1699,9 +1696,6 @@ void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, do
     }
     if (GreatOrEqual(height, keyboard + GetCoordinatePoint()->GetY())) {
         double newHeight = height - keyboard - GetCoordinatePoint()->GetY();
-        if (GreatOrEqual(newHeight, oldWebHeight)) {
-            newHeight = oldWebHeight;
-        }
         if (NearEqual(newHeight, oldWebHeight)) {
             return;
         }
@@ -2132,6 +2126,8 @@ void WebPattern::OnAttachContext(PipelineContext *context)
         dragDropManager->AddDragFrameNode(host->GetId(), AceType::WeakClaim(AceType::RawPtr(host)));
     }
 
+    pipelineContext->AddWindowStateChangedCallback(nodeId);
+    pipelineContext->AddWindowSizeChangeCallback(nodeId);
     pipelineContext->AddOnAreaChangeNode(nodeId);
     RegisterVisibleAreaChangeCallback(pipelineContext);
     needUpdateWeb_= true;
@@ -2147,6 +2143,8 @@ void WebPattern::OnDetachContext(PipelineContext *contextPtr)
     auto host = GetHost();
     int32_t nodeId = host->GetId();
 
+    context->RemoveWindowStateChangedCallback(nodeId);
+    context->RemoveWindowSizeChangeCallback(nodeId);
     context->RemoveOnAreaChangeNode(nodeId);
     context->RemoveVisibleAreaChangeNode(nodeId);
     context->RemoveVirtualKeyBoardCallback(nodeId);
@@ -2468,8 +2466,10 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
         UpdateOnFocusTextField(false);
         isVirtualKeyBoardShow_ = VkState::VK_HIDE;
     } else if (isVirtualKeyBoardShow_ != VkState::VK_SHOW || lastKeyboardHeight_ != keyboard) {
-        drawSizeCache_.SetSize(drawSize_);
-        if (drawSize_.Height() <= (height - keyboard - GetCoordinatePoint()->GetY())) {
+        if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
+            drawSizeCache_.SetSize(drawSize_);
+        }
+        if (drawSizeCache_.Height() <= (height - keyboard - GetCoordinatePoint()->GetY())) {
             isVirtualKeyBoardShow_ = VkState::VK_SHOW;
             return true;
         }
@@ -2517,11 +2517,7 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeybo
 
     rect.SetSize(SizeF(drawSize_.Width(), drawSize_.Height()));
     frameNode->GetRenderContext()->SyncGeometryProperties(rect);
-    if (SearchParent(Axis::VERTICAL)) {
-        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
-    } else {
-        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    }
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     context->SetRootRect(width, height, 0);
@@ -4974,6 +4970,7 @@ void WebPattern::GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId)
         que.push(id);
     }
 
+    int nodeCount = 0;
     while (!que.empty()) {
         uint64_t tmp = que.front();
         que.pop();
@@ -4988,7 +4985,9 @@ void WebPattern::GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId)
         for (auto id: webNodeInfo->GetChildIds()) {
             que.push(id);
         }
+        nodeCount++;
     }
+    TAG_LOGD(AceLogTag::ACE_WEB, "Current web info node count: %{public}d", nodeCount);
     cb(jsonNodeArray, webId);
     inspectorAccessibilityEnable_ = false;
     SetAccessibilityState(false);
@@ -4996,10 +4995,9 @@ void WebPattern::GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId)
 
 void WebPattern::GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId)
 {
+    CHECK_NULL_VOID(cb);
     inspectorAccessibilityEnable_ = true;
     SetAccessibilityState(true);
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
@@ -5007,7 +5005,12 @@ void WebPattern::GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t
     auto taskExecutor = pipelineContext->GetTaskExecutor();
     taskExecutor->PostDelayedTask([weak = WeakClaim(this), cb, webId] () {
         auto pattern = weak.Upgrade();
+        auto startTime = std::chrono::high_resolution_clock::now();
         pattern->GetWebAllInfosImpl(cb, webId);
+        auto nowTime = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> diff =
+            std::chrono::duration_cast<std::chrono::milliseconds>(nowTime - startTime);
+        TAG_LOGD(AceLogTag::ACE_WEB, "GetAllAccessibilityInfo time cost: %{public}f", diff.count());
         },
         TaskExecutor::TaskType::UI, WEB_ACCESSIBILITY_DELAY_TIME, "GetAllWebAccessibilityNodeInfos");
 }

@@ -396,6 +396,8 @@ RefPtr<SpanBase> SpanString::GetDefaultSpan(SpanType type)
             return MakeRefPtr<ParagraphStyleSpan>();
         case SpanType::LineHeight:
             return MakeRefPtr<LineHeightSpan>();
+        case SpanType::ExtSpan:
+            return MakeRefPtr<ExtSpan>();
         default:
             return nullptr;
     }

@@ -1415,6 +1415,19 @@ var BlurStyle;
   BlurStyle[BlurStyle["NONE"] = 0] = "NONE";
 })(BlurStyle || (BlurStyle = {}));
 
+var BlurStyleActivePolicy;
+(function (BlurStyleActivePolicy) {
+  BlurStyleActivePolicy[BlurStyleActivePolicy["FOLLOWS_WINDOW_ACTIVE_STATE"] = 0] = "FOLLOWS_WINDOW_ACTIVE_STATE";
+  BlurStyleActivePolicy[BlurStyleActivePolicy["ALAWYS_ACTIVE"] = 1] = "ALAWYS_ACTIVE";
+  BlurStyleActivePolicy[BlurStyleActivePolicy["ALAWYS_INACTIVE"] = 2] = "ALAWYS_INACTIVE";
+})(BlurStyleActivePolicy || (BlurStyleActivePolicy = {}));
+
+var BlurType;
+(function (BlurType) {
+  BlurType[BlurType["WITHIN_WINDOW"] = 0] = "WITHIN_WINDOW";
+  BlurType[BlurType["BEHIND_WINDOW"] = 1] = "BEHIND_WINDOW";
+})(BlurType || (BlurType = {}));
+
 var ThemeColorMode;
 (function (ThemeColorMode) {
   ThemeColorMode[ThemeColorMode["System"] = 0] = "System";
@@ -1652,6 +1665,12 @@ var GestureControl;
     GestureType[GestureType["CLICK"] = 7] = "CLICK";
   })(GestureType = GestureControl.GestureType || (GestureControl.GestureType = {}));
 })(GestureControl || (GestureControl = {}));
+
+var TransitionHierarchyStrategy;
+(function (TransitionHierarchyStrategy) {
+  TransitionHierarchyStrategy[TransitionHierarchyStrategy["NONE"] = 0] = "NONE";
+  TransitionHierarchyStrategy[TransitionHierarchyStrategy["ADAPTIVE"] = 1] = "ADAPTIVE";
+})(TransitionHierarchyStrategy || (TransitionHierarchyStrategy = {}));
 
 class SubTabBarStyle {
   constructor(content) {
@@ -3158,10 +3177,15 @@ var StyledStringKey;
   StyledStringKey[StyledStringKey["GESTURE"] = 100] = "GESTURE";
   StyledStringKey[StyledStringKey["IMAGE"] = 300] = "IMAGE";
   StyledStringKey[StyledStringKey["CUSTOM_SPAN"] = 400] = "CUSTOM_SPAN";
+  StyledStringKey[StyledStringKey["USER_DATA"] = 500] = "USER_DATA";
 })(StyledStringKey || (StyledStringKey = {}));
 
 class CustomSpan {
   type_ = "CustomSpan"
+}
+
+class UserDataSpan {
+  type_ = "ExtSpan"
 }
 
 let FocusPriority;

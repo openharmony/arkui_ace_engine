@@ -146,12 +146,13 @@ RichEditorPattern::~RichEditorPattern()
 
 void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
 {
-    CHECK_NULL_VOID(value);
-    CHECK_NULL_VOID(styledString_);
+    CHECK_NULL_VOID(value && styledString_);
     CloseSelectOverlay();
     ResetSelection();
     auto length = styledString_->GetLength();
     styledString_->ReplaceSpanString(0, length, value);
+    SetCaretPosition(styledString_->GetLength());
+    MoveCaretToContentRect(false);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -173,6 +174,9 @@ void RichEditorPattern::ProcessStyledString()
     host->Clean();
     RemoveEmptySpanItems();
     for (const auto& span : spans_) {
+        if (!span) {
+            continue;
+        }
         auto imageSpan = DynamicCast<ImageSpanItem>(span);
         if (imageSpan) {
             MountImageNode(imageSpan);
@@ -181,6 +185,9 @@ void RichEditorPattern::ProcessStyledString()
             dataDetectorAdapter_->textForAI_ += span->content;
         }
         textForDisplay_ += span->content;
+        auto [spanStart, spanEnd] = span->interval;
+        span->rangeStart = spanStart;
+        span->position = spanEnd;
     }
     if (textForDisplay_ != textCache) {
         dataDetectorAdapter_->aiDetectInitialized_ = false;
@@ -342,13 +349,11 @@ RefPtr<DecorationSpan> RichEditorPattern::CreateDecorationSpanByTextStyle(
 
 void RichEditorPattern::DeleteBackwardInStyledString(int32_t length)
 {
-    CHECK_NULL_VOID(caretPosition_ != 0);
     DeleteValueInStyledString(caretPosition_ - length, length);
 }
 
 void RichEditorPattern::DeleteForwardInStyledString(int32_t length, bool isIME)
 {
-    CHECK_NULL_VOID(GetTextContentLength() != 0);
     DeleteValueInStyledString(caretPosition_, length, isIME);
 }
 
@@ -359,6 +364,9 @@ void RichEditorPattern::DeleteValueInStyledString(int32_t start, int32_t length,
         start = textSelector_.GetTextStart();
         length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
     }
+    auto range = TextEmojiProcessor::CalSubWstringRange(start, length, styledString_->GetWideString(), true);
+    start = range.startIndex;
+    length = range.endIndex - range.startIndex;
     bool isPreventChange = isIME && !BeforeStyledStringChange(start, length, "");
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "start=%{public}d, length=%{public}d, isPreventChange=%{public}d",
         start, length, isPreventChange);
@@ -1688,18 +1696,13 @@ void RichEditorPattern::UpdateSpanStyle(
             if (spanEnd == end) {
                 break;
             }
-        } else if (spanStart < start && start < spanEnd) {
+        } else if ((spanStart < start && start < spanEnd) || (spanStart < end && end < spanEnd)) {
             if (SymbolSpanUpdateStyle(spanNode, updateSpanStyle_, textStyle)) {
                 continue;
             }
-            TextSpanSplit(start, true);
+            auto index = spanStart < start && start < spanEnd ? start : end;
+            TextSpanSplit(index, true);
             --it;
-        } else if (spanStart < end && end < spanEnd) {
-            if (SymbolSpanUpdateStyle(spanNode, updateSpanStyle_, textStyle)) {
-                continue;
-            }
-            TextSpanSplit(end, true);
-            --(--it);
         } else if (spanStart >= end) {
             break;
         }
@@ -3740,6 +3743,12 @@ void RichEditorPattern::OnColorConfigurationUpdate()
             spanNode->UpdateTextDecorationColor(theme->GetTextStyle().GetTextColor());
         }
     }
+    auto scrollbarTheme = context->GetTheme<ScrollBarTheme>();
+    CHECK_NULL_VOID(scrollbarTheme);
+    auto scrollBar = GetScrollBar();
+    CHECK_NULL_VOID(scrollBar);
+    scrollBar->SetForegroundColor(scrollbarTheme->GetForegroundColor());
+    scrollBar->SetBackgroundColor(scrollbarTheme->GetBackgroundColor());
 }
 
 void RichEditorPattern::UpdateCaretInfoToController()
@@ -4612,6 +4621,9 @@ int32_t RichEditorPattern::CalculateDeleteLength(int32_t length, bool isBackward
 
 void RichEditorPattern::DeleteBackward(int32_t length)
 {
+    CHECK_NULL_VOID(length > 0);
+    CHECK_NULL_VOID(GetTextContentLength() > 0);
+    CHECK_NULL_VOID(!textSelector_.SelectNothing() || caretPosition_ != 0);
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "length=%{public}d", length);
     if (isSpanStringMode_) {
         DeleteBackwardInStyledString(length);
@@ -4683,6 +4695,10 @@ std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
 
 void RichEditorPattern::DeleteForward(int32_t length)
 {
+    CHECK_NULL_VOID(length > 0);
+    auto contentLength = GetTextContentLength();
+    CHECK_NULL_VOID(contentLength > 0);
+    CHECK_NULL_VOID(!textSelector_.SelectNothing() || caretPosition_ != contentLength);
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "length=%{public}d", length);
     if (isSpanStringMode_) {
         DeleteForwardInStyledString(length);
@@ -5887,6 +5903,9 @@ void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
     UseHostToUpdateTextFieldManager();
     MoveCaretAndStartFocus(textOffset);
     CalcCaretInfoByClick(info.GetLocalLocation());
+    if (IsShowHandle()) {
+        CloseSelectOverlay();
+    }
 }
 
 void RichEditorPattern::HandleMouseLeftButtonRelease(const MouseInfo& info)
@@ -7546,7 +7565,7 @@ void RichEditorPattern::HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& n
     CHECK_NULL_VOID(host);
     if (isCursorAlwaysDisplayed_) {
         if (SystemProperties::GetDebugEnabled()) {
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+            TAG_LOGD(AceLogTag::ACE_TEXT_FIELD,
                 "In OnDragMoved, the cursor has always Displayed in the textField, id:%{public}d", host->GetId());
         }
         return;

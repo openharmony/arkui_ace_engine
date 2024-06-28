@@ -27,8 +27,19 @@
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_object.h"
 namespace OHOS::Ace::Framework {
 const std::unordered_set<SpanType> types = { SpanType::Font, SpanType::Gesture, SpanType::BaselineOffset,
-    SpanType::Decoration, SpanType::LetterSpacing, SpanType::TextShadow, SpanType::LineHeight,
-    SpanType::Image, SpanType::CustomSpan, SpanType::ParagraphStyle };
+    SpanType::Decoration, SpanType::LetterSpacing, SpanType::TextShadow, SpanType::LineHeight, SpanType::Image,
+    SpanType::CustomSpan, SpanType::ParagraphStyle, SpanType::ExtSpan };
+
+const std::unordered_map<SpanType, std::function<JSRef<JSObject>(const RefPtr<SpanBase>&)>> spanCreators = {
+    { SpanType::Font, JSSpanString::CreateJsFontSpan }, { SpanType::Decoration, JSSpanString::CreateJsDecorationSpan },
+    { SpanType::BaselineOffset, JSSpanString::CreateJsBaselineOffsetSpan },
+    { SpanType::LetterSpacing, JSSpanString::CreateJsLetterSpacingSpan },
+    { SpanType::Gesture, JSSpanString::CreateJsGestureSpan },
+    { SpanType::TextShadow, JSSpanString::CreateJsTextShadowSpan },
+    { SpanType::LineHeight, JSSpanString::CreateJsLineHeightSpan },
+    { SpanType::Image, JSSpanString::CreateJsImageSpan },
+    { SpanType::ParagraphStyle, JSSpanString::CreateJsParagraphStyleSpan },
+};
 
 void JSSpanString::Constructor(const JSCallbackInfo& args)
 {
@@ -178,49 +189,14 @@ JSRef<JSObject> JSSpanString::CreateJsSpanBaseObject(const RefPtr<SpanBase>& spa
 JSRef<JSObject> JSSpanString::CreateJsSpanObject(const RefPtr<SpanBase>& spanObject)
 {
     JSRef<JSObject> obj;
-    switch (spanObject->GetSpanType()) {
-        case SpanType::Font: {
-            obj = CreateJsFontSpan(spanObject);
-            break;
-        }
-        case SpanType::Decoration: {
-            obj = CreateJsDecorationSpan(spanObject);
-            break;
-        }
-        case SpanType::BaselineOffset: {
-            obj = CreateJsBaselineOffsetSpan(spanObject);
-            break;
-        }
-        case SpanType::LetterSpacing: {
-            obj = CreateJsLetterSpacingSpan(spanObject);
-            break;
-        }
-        case SpanType::Gesture: {
-            obj = CreateJsGestureSpan(spanObject);
-            break;
-        }
-        case SpanType::TextShadow: {
-            obj = CreateJsTextShadowSpan(spanObject);
-            break;
-        }
-        case SpanType::LineHeight: {
-            obj = CreateJsLineHeightSpan(spanObject);
-            break;
-        }
-        case SpanType::Image: {
-            obj = CreateJsImageSpan(spanObject);
-            break;
-        }
-        case SpanType::CustomSpan: {
-            obj = AceType::DynamicCast<JSCustomSpan>(spanObject)->GetJsCustomSpanObject();
-            break;
-        }
-        case SpanType::ParagraphStyle: {
-            obj = CreateJsParagraphStyleSpan(spanObject);
-            break;
-        }
-        default:
-            break;
+    auto type = spanObject->GetSpanType();
+    auto it = spanCreators.find(type);
+    if (it != spanCreators.end()) {
+        obj = it->second(spanObject);
+    } else if (type == SpanType::CustomSpan) {
+        obj = AceType::DynamicCast<JSCustomSpan>(spanObject)->GetJsCustomSpanObject();
+    } else if (type == SpanType::ExtSpan) {
+        obj = AceType::DynamicCast<JSExtSpan>(spanObject)->GetJsExtSpanObject();
     }
     return obj;
 }
@@ -345,6 +321,8 @@ RefPtr<SpanBase> JSSpanString::ParseJsSpanBase(int32_t start, int32_t length, Sp
             return GetImageAttachment(start, length, obj);
         case SpanType::ParagraphStyle:
             return ParseJsParagraphStyleSpan(start, length, obj);
+        case SpanType::ExtSpan:
+            return ParseJsExtSpan(start, length, obj);
         default:
             break;
     }
@@ -479,6 +457,16 @@ RefPtr<SpanBase> JSSpanString::ParseJsCustomSpan(int32_t start, int32_t length, 
     auto spanBase = AceType::MakeRefPtr<JSCustomSpan>(JSRef<JSObject>(styleStringValue), args);
     spanBase->UpdateStartIndex(start);
     spanBase->UpdateEndIndex(start + length);
+    return spanBase;
+}
+
+RefPtr<SpanBase> JSSpanString::ParseJsExtSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj)
+{
+    auto typeObj = obj->GetProperty("type_");
+    if (!typeObj->IsString() || typeObj->ToString() != "ExtSpan") {
+        return nullptr;
+    }
+    auto spanBase = AceType::MakeRefPtr<JSExtSpan>(obj, start, start + length);
     return spanBase;
 }
 

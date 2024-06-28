@@ -261,12 +261,21 @@ void TextContentModifier::PaintImage(RSCanvas& canvas, float x, float y)
     size_t index = 0;
     auto rectsForPlaceholders = pattern->GetRectsForPlaceholders();
     auto placeHolderIndexVector = pattern->GetPlaceHolderIndex();
+    auto placeholdersSize = rectsForPlaceholders.size();
+    auto placeHolderIndexSize = placeHolderIndexVector.size();
     for (const auto& imageWeak : imageNodeList_) {
         auto imageChild = imageWeak.Upgrade();
         if (!imageChild) {
             continue;
         }
-        auto rect = rectsForPlaceholders.at(placeHolderIndexVector.at(index));
+        if (index >= placeholdersSize) {
+            return;
+        }
+        auto tmp = placeHolderIndexVector.at(index);
+        if (tmp >= placeHolderIndexSize) {
+            return;
+        }
+        auto rect = rectsForPlaceholders.at(tmp);
         if (!DrawImage(imageChild, canvas, x, y, rect)) {
             continue;
         }

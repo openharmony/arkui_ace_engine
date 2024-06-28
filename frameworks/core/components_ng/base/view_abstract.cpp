@@ -1374,26 +1374,29 @@ void ViewAbstract::SetVisibility(VisibleType visible)
     }
 }
 
-void ViewAbstract::SetGeometryTransition(const std::string& id, bool followWithoutTransition)
+void ViewAbstract::SetGeometryTransition(const std::string& id,
+    bool followWithoutTransition, bool doRegisterSharedTransition)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     if (layoutProperty) {
-        layoutProperty->UpdateGeometryTransition(id, followWithoutTransition);
+        layoutProperty->UpdateGeometryTransition(id, followWithoutTransition, doRegisterSharedTransition);
     }
 }
 
-void ViewAbstract::SetGeometryTransition(FrameNode *frameNode, const std::string& id, bool followWithoutTransition)
+void ViewAbstract::SetGeometryTransition(FrameNode *frameNode, const std::string& id,
+    bool followWithoutTransition, bool doRegisterSharedTransition)
 {
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     if (layoutProperty) {
-        layoutProperty->UpdateGeometryTransition(id, followWithoutTransition);
+        layoutProperty->UpdateGeometryTransition(id, followWithoutTransition, doRegisterSharedTransition);
     }
 }
 
-const std::string ViewAbstract::GetGeometryTransition(FrameNode* frameNode, bool* followWithoutTransition)
+const std::string ViewAbstract::GetGeometryTransition(FrameNode* frameNode,
+    bool* followWithoutTransition, bool* doRegisterSharedTransition)
 {
     CHECK_NULL_RETURN(frameNode, "");
     auto layoutProperty = frameNode->GetLayoutProperty();
@@ -1401,6 +1404,7 @@ const std::string ViewAbstract::GetGeometryTransition(FrameNode* frameNode, bool
         auto geometryTransition = layoutProperty->GetGeometryTransition();
         if (geometryTransition) {
             *followWithoutTransition = geometryTransition->GetFollowWithoutTransition();
+            *doRegisterSharedTransition = geometryTransition->GetDoRegisterSharedTransition();
             return geometryTransition->GetId();
         }
     }

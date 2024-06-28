@@ -1748,6 +1748,9 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
     }
     incognitoMode_ =
         useNewPipe ? webPattern->GetIncognitoMode() : webCom->GetIncognitoMode();
+    auto sharedRenderProcessToken =
+        useNewPipe ? webPattern->GetSharedRenderProcessToken() : webCom->GetSharedRenderProcessToken();
+    sharedRenderProcessToken_ = sharedRenderProcessToken ? sharedRenderProcessToken.value() : "";
     context_ = context;
     RegisterSurfacePositionChangedCallback();
     auto pipelineContext = context.Upgrade();
@@ -2487,6 +2490,7 @@ void WebDelegate::InitWebViewWithWindow()
                 return;
             }
 
+            initArgs->SetSharedRenderProcessToken(delegate->sharedRenderProcessToken_);
             delegate->nweb_ =
                 OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
                     delegate->window_.GetRefPtr(), initArgs,
@@ -2753,7 +2757,7 @@ void WebDelegate::RegisterSurfaceOcclusionChangeFun()
 void WebDelegate::RegisterAvoidAreaChangeListener()
 {
     constexpr static int32_t PLATFORM_VERSION_TEN = 10;
-    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::GetContainer(instanceId_));
     CHECK_NULL_VOID(container);
     auto pipeline = container->GetPipelineContext();
     if (pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN &&
@@ -2777,13 +2781,14 @@ void WebDelegate::RegisterAvoidAreaChangeListener()
 void WebDelegate::UnregisterAvoidAreaChangeListener()
 {
     constexpr static int32_t PLATFORM_VERSION_TEN = 10;
-    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::GetContainer(instanceId_));
     CHECK_NULL_VOID(container);
     auto pipeline = container->GetPipelineContext();
     if (pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN &&
         (pipeline->GetIsAppWindow() || container->IsUIExtensionWindow())) {
         if (!avoidAreaChangedListener_) return;
         OHOS::Rosen::WMError regCode = container->UnregisterAvoidAreaChangeListener(avoidAreaChangedListener_);
+        avoidAreaChangedListener_ = nullptr;
         TAG_LOGI(AceLogTag::ACE_WEB, "UnregisterAvoidAreaChangeListener result:%{public}d", (int) regCode);
     } else {
         TAG_LOGI(AceLogTag::ACE_WEB, "CANNOT UnregisterAvoidAreaChangeListener %{public}d %{public}d %{public}d",
@@ -2813,6 +2818,8 @@ void WebDelegate::InitWebViewWithSurface()
             bool isEnhanceSurface = delegate->isEnhanceSurface_;
             initArgs->SetIsEnhanceSurface(isEnhanceSurface);
             initArgs->SetIsPopup(delegate->isPopup_);
+            initArgs->SetSharedRenderProcessToken(delegate->sharedRenderProcessToken_);
+
             if (!delegate->hapPath_.empty()) {
                 initArgs->AddArg(std::string("--user-hap-path=").append(delegate->hapPath_));
             }
@@ -6547,16 +6554,20 @@ bool WebDelegate::OnHandleOverrideLoading(std::shared_ptr<OHOS::NWeb::NWebUrlRes
 void WebDelegate::OnDetachContext()
 {
     UnRegisterScreenLockFunction();
+    UnregisterSurfacePositionChangedCallback();
+    UnregisterAvoidAreaChangeListener();
 }
 
 void WebDelegate::OnAttachContext(const RefPtr<NG::PipelineContext> &context)
 {
     instanceId_ = context->GetInstanceId();
     context_ = context;
+    RegisterSurfacePositionChangedCallback();
+    RegisterAvoidAreaChangeListener();
     if (nweb_) {
         auto screenLockCallback = std::make_shared<NWebScreenLockCallbackImpl>(context);
         nweb_->RegisterScreenLockFunction(instanceId_, screenLockCallback);
-        auto windowId = context->GetWindowId();
+        auto windowId = context->GetFocusWindowId();
         nweb_->SetWindowId(windowId);
     }
 }

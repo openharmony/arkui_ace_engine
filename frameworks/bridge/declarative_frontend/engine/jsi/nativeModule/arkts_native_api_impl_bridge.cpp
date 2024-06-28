@@ -1582,6 +1582,18 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetCopyOptions));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCopyOptions"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetCopyOptions));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnReady"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnReady));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnReady"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnReady));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnDeleteComplete"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnDeleteComplete));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDeleteComplete"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnDeleteComplete));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnEditingChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnEditingChange));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnEditingChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnEditingChange));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "richEditor"), richEditor);
 
     auto textArea = panda::ObjectRef::New(vm);

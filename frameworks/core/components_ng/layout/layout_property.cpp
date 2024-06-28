@@ -776,14 +776,16 @@ void LayoutProperty::ResetAspectRatio()
     }
 }
 
-void LayoutProperty::UpdateGeometryTransition(const std::string& id, bool followWithoutTransition)
+void LayoutProperty::UpdateGeometryTransition(const std::string& id,
+    bool followWithoutTransition, bool doRegisterSharedTransition)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
     auto geometryTransitionOld = GetGeometryTransition();
     auto geometryTransitionNew =
-        ElementRegister::GetInstance()->GetOrCreateGeometryTransition(id, followWithoutTransition);
+        ElementRegister::GetInstance()->GetOrCreateGeometryTransition(id,
+            followWithoutTransition, doRegisterSharedTransition);
     CHECK_NULL_VOID(geometryTransitionOld != geometryTransitionNew);
     if (geometryTransitionOld) {
         if (geometryTransitionOld->Update(host_, host_)) {

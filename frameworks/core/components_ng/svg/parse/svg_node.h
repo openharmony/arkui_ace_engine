@@ -165,11 +165,6 @@ public:
     {
         return imagePath_;
     }
-
-    void SetIsRootNode(bool isRoot)
-    {
-        isRootNode_ = isRoot;
-    }
 protected:
     // override as need by derived class
     // called by function AppendChild
@@ -240,7 +235,7 @@ protected:
     bool passStyle_ = true; // pass style attributes to child node, TAGS circle/path/line/... = false
     bool inheritStyle_ = true;  // inherit style attributes from parent node, TAGS mask/defs/pattern/filter = false
     bool drawTraversed_ = true; // enable OnDraw, TAGS mask/defs/pattern/filter = false
-    bool isRootNode_ = false;
+
 #ifndef USE_ROSEN_DRAWING
     SkCanvas* skCanvas_ = nullptr;
 #else

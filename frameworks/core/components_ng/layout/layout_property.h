@@ -159,7 +159,8 @@ public:
 
     void UpdateLayoutDirection(TextDirection value);
 
-    void UpdateGeometryTransition(const std::string& id, bool followWithoutTransition = false);
+    void UpdateGeometryTransition(const std::string& id,
+        bool followWithoutTransition = false, bool doRegisterSharedTransition = true);
 
     void ResetGeometryTransition();
 
