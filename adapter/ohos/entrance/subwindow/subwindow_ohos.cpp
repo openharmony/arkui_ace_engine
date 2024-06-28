@@ -561,11 +561,6 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> customNode, const NG:
         menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);
         menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
     }
-
-    std::set<int32_t> menuTargetId = std::move(menuTargetId_);
-    for (auto& child : menuTargetId) {
-        ClearMenuNG(child, true);
-    }
     ShowWindow();
     ResizeWindow();
     CHECK_NULL_VOID(window_);
@@ -584,11 +579,6 @@ void SubwindowOhos::ShowMenuNG(std::function<void()>&& buildFunc, std::function<
     CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
-
-    std::set<int32_t> menuTargetId = std::move(menuTargetId_);
-    for (auto& child : menuTargetId) {
-        ClearMenuNG(child, true);
-    }
     ShowWindow();
     ResizeWindow();
     CHECK_NULL_VOID(window_);
@@ -699,14 +689,10 @@ void SubwindowOhos::ClearMenuNG(int32_t targetId, bool inWindow, bool showAnimat
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     if (showAnimation) {
-        int32_t id = overlay->CleanMenuInSubWindowWithAnimation();
-        if (id >= 0) {
-            menuTargetId_.insert(id);
-        }
+        overlay->CleanMenuInSubWindowWithAnimation();
         HideFilter(true);
     } else {
         overlay->CleanMenuInSubWindow(targetId);
-        menuTargetId_.erase(targetId);
         overlay->RemoveFilter();
     }
     overlay->EraseMenuInfo(targetId);
