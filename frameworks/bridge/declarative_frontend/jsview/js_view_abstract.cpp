@@ -7644,7 +7644,8 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
         std::move(onWidthDidChangeCallback), std::move(onTypeDidChangeCallback), std::move(sheetSpringBackFunc));
 }
 
-void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle)
+void JSViewAbstract::ParseSheetStyle(
+    const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle, bool isPartialUpdate)
 {
     auto height = paramObj->GetProperty("height");
     auto showDragBar = paramObj->GetProperty("dragBar");
@@ -7666,8 +7667,9 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
         }
     }
     NG::SheetLevel sheetLevel = NG::SheetLevel::OVERLAY;
-    ParseSheetLevel(showMode, sheetLevel);
-    sheetStyle.showInPage = (sheetLevel == NG::SheetLevel::EMBEDDED);
+    if (ParseSheetLevel(showMode, sheetLevel) || !isPartialUpdate) {
+        sheetStyle.showInPage = (sheetLevel == NG::SheetLevel::EMBEDDED);
+    }
 
     std::vector<NG::SheetHeight> detents;
     if (ParseSheetDetents(sheetDetents, detents)) {
@@ -7678,24 +7680,25 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
         sheetStyle.backgroundBlurStyle = styleOption;
     }
     bool showClose = true;
-    if (showCloseIcon->IsNull() || showCloseIcon->IsUndefined()) {
+    if (ParseJsBool(showCloseIcon, showClose)) {
         sheetStyle.showCloseIcon = showClose;
-    } else {
-        if (ParseJsBool(showCloseIcon, showClose)) {
-            sheetStyle.showCloseIcon = showClose;
-        }
+    } else if (!isPartialUpdate) {
+        sheetStyle.showCloseIcon = true;
     }
+
     bool isInteractive = false;
     if (ParseJsBool(interactive, isInteractive)) {
         sheetStyle.interactive = isInteractive;
     }
-    if (showDragBar->IsNull() || showDragBar->IsUndefined()) {
-        sheetStyle.showDragBar = true;
+
+    if (showDragBar->IsBoolean()) {
+        sheetStyle.showDragBar = showDragBar->ToBoolean();
+    } else if (isPartialUpdate) {
+        sheetStyle.showDragBar.reset();
     } else {
-        if (showDragBar->IsBoolean()) {
-            sheetStyle.showDragBar = showDragBar->ToBoolean();
-        }
+        sheetStyle.showDragBar = true;
     }
+
     if (type->IsNull() || type->IsUndefined()) {
         sheetStyle.sheetType.reset();
     } else {
@@ -7750,6 +7753,23 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
                 { BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID });
         }
     }
+    if (isPartialUpdate) {
+        auto colorValue = paramObj->GetProperty("borderColor");
+        NG::BorderColorProperty borderColor;
+        if (ParseBorderColorProps(colorValue, borderColor)) {
+            sheetStyle.borderColor = borderColor;
+        } else {
+            sheetStyle.borderColor.reset();
+        }
+        auto styleValue = paramObj->GetProperty("borderStyle");
+        NG::BorderStyleProperty borderStyle;
+        if (ParseBorderStyleProps(styleValue, borderStyle)) {
+            sheetStyle.borderStyle = borderStyle;
+        } else {
+            sheetStyle.borderStyle.reset();
+        }
+    }
+
     // Parse shadow
     Shadow shadow;
     auto shadowValue = paramObj->GetProperty("shadow");
@@ -7796,7 +7816,11 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
         }
     }
     if (!ParseJsDimensionVpNG(height, sheetHeight)) {
-        sheetStyle.sheetMode = NG::SheetMode::LARGE;
+        if (isPartialUpdate) {
+            sheetStyle.sheetMode.reset();
+        } else {
+            sheetStyle.sheetMode = NG::SheetMode::LARGE;
+        }
         sheetStyle.height.reset();
     } else {
         sheetStyle.height = sheetHeight;
@@ -7882,16 +7906,18 @@ bool JSViewAbstract::ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, Blu
     return true;
 }
 
-void JSViewAbstract::ParseSheetLevel(const JSRef<JSVal>& args, NG::SheetLevel& sheetLevel)
+bool JSViewAbstract::ParseSheetLevel(const JSRef<JSVal>& args, NG::SheetLevel& sheetLevel)
 {
     if (!args->IsNumber()) {
-        return;
+        return false;
     }
     auto sheetMode = args->ToNumber<int32_t>();
     if (sheetMode >= static_cast<int>(NG::SheetLevel::OVERLAY) &&
         sheetMode <= static_cast<int>(NG::SheetLevel::EMBEDDED)) {
         sheetLevel = static_cast<NG::SheetLevel>(sheetMode);
+        return true;
     }
+    return false;
 }
 
 void JSViewAbstract::ParseCallback(const JSRef<JSObject>& paramObj,

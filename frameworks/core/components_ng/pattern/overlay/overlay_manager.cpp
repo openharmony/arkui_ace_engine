@@ -2941,7 +2941,7 @@ bool OverlayManager::RemoveModalInOverlay()
     PopTopModalNode();
     auto sheetPattern = topModalNode->GetPattern<SheetPresentationPattern>();
     if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG && sheetPattern) {
-        sheetMap_.erase(sheetPattern->GetTargetId());
+        sheetMap_.erase(sheetPattern->GetSheetKey());
     }
     if (topModalNode->GetTag() == V2::MODAL_PAGE_TAG) {
         auto modalPattern = AceType::DynamicCast<ModalPresentationPattern>(pattern);
@@ -2991,7 +2991,7 @@ bool OverlayManager::RemoveAllModalInOverlay()
         }
         auto sheetPattern = topModalNode->GetPattern<SheetPresentationPattern>();
         if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG && sheetPattern) {
-            sheetMap_.erase(sheetPattern->GetTargetId());
+            sheetMap_.erase(sheetPattern->GetSheetKey());
         }
         FireModalPageHide();
         SaveLastModalNode();
@@ -3646,174 +3646,6 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
     pipeline->AddAnimationClosure(bindSheetTask);
 }
 
-void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
-    std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
-    NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
-    std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
-    std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
-    std::function<void(const float)>&& onHeightDidChange, std::function<void(const float)>&& onDetentsDidChange,
-    std::function<void(const float)>&& onWidthDidChange, std::function<void(const float)>&& onTypeDidChange,
-    std::function<void()>&& sheetSpringBack, const RefPtr<FrameNode>& targetNode)
-{
-    int32_t targetId = targetNode->GetId();
-    auto rootNode = FindWindowScene(targetNode);
-    CHECK_NULL_VOID(rootNode);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
-    CHECK_NULL_VOID(sheetTheme);
-    if (!isShow) {
-        CloseSheet(targetId);
-        return;
-    }
-    auto iter = sheetMap_.find(targetId);
-    if (iter != sheetMap_.end()) {
-        auto topModalNode = iter->second.Upgrade();
-        CHECK_NULL_VOID(topModalNode);
-        if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG &&
-            topModalNode->GetPattern<SheetPresentationPattern>()->GetTargetId() == targetId) {
-            SetSheetBackgroundColor(topModalNode, sheetTheme, sheetStyle);
-            auto topModalRenderContext = topModalNode->GetRenderContext();
-            CHECK_NULL_VOID(topModalRenderContext);
-            if (sheetStyle.backgroundBlurStyle.has_value()) {
-                SetSheetBackgroundBlurStyle(topModalNode, sheetStyle.backgroundBlurStyle.value());
-            }
-            SetSheetBorderWidth(topModalNode, sheetTheme, sheetStyle);
-            if (sheetStyle.borderStyle.has_value()) {
-                topModalRenderContext->UpdateBorderStyle(sheetStyle.borderStyle.value());
-            }
-            if (sheetStyle.borderColor.has_value()) {
-                topModalRenderContext->UpdateBorderColor(sheetStyle.borderColor.value());
-            }
-            if (sheetStyle.shadow.has_value()) {
-                topModalRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
-            } else {
-                topModalRenderContext->UpdateBackShadow(ShadowConfig::NoneShadow);
-            }
-            auto maskNode = GetSheetMask(topModalNode);
-            if (maskNode) {
-                InitSheetMask(maskNode, topModalNode, sheetStyle);
-            }
-            auto topModalNodePattern = topModalNode->GetPattern<SheetPresentationPattern>();
-            topModalNodePattern->UpdateOnAppear(std::move(onAppear));
-            topModalNodePattern->UpdateOnDisappear(std::move(onDisappear));
-            topModalNodePattern->UpdateShouldDismiss(std::move(shouldDismiss));
-            topModalNodePattern->UpdateOnWillDismiss(std::move(onWillDismiss));
-            topModalNodePattern->UpdateOnWillDisappear(std::move(onWillDisappear));
-            topModalNodePattern->UpdateOnHeightDidChange(std::move(onHeightDidChange));
-            topModalNodePattern->UpdateOnDetentsDidChange(std::move(onDetentsDidChange));
-            topModalNodePattern->UpdateOnWidthDidChange(std::move(onWidthDidChange));
-            topModalNodePattern->UpdateOnTypeDidChange(std::move(onTypeDidChange));
-            topModalNodePattern->UpdateSheetSpringBack(std::move(sheetSpringBack));
-            auto layoutProperty = topModalNode->GetLayoutProperty<SheetPresentationProperty>();
-            layoutProperty->UpdateSheetStyle(sheetStyle);
-            topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            pipeline->FlushUITasks();
-            ComputeSheetOffset(sheetStyle, topModalNode);
-            auto sheetType = topModalNodePattern->GetSheetType();
-            if (sheetType != SheetType::SHEET_POPUP && !topModalNodePattern->GetDismissProcess()) {
-                PlaySheetTransition(topModalNode, true, false);
-            }
-            return;
-        }
-    }
-    // builder content
-    auto builder = AceType::DynamicCast<FrameNode>(buildNodeFunc());
-    CHECK_NULL_VOID(builder);
-    builder->GetRenderContext()->SetIsModalRootNode(true);
-
-    auto titlebuilder = AceType::DynamicCast<FrameNode>(buildtitleNodeFunc());
-    if (titlebuilder) {
-        titlebuilder->GetRenderContext()->SetIsModalRootNode(true);
-    }
-    // create modal page
-    auto sheetNode = SheetView::CreateSheetPage(
-        targetId, targetNode->GetTag(), builder, titlebuilder, std::move(callback), sheetStyle);
-    CHECK_NULL_VOID(sheetNode);
-    auto sheetRenderContext = sheetNode->GetRenderContext();
-    CHECK_NULL_VOID(sheetRenderContext);
-    if (sheetStyle.backgroundColor.has_value()) {
-        sheetNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundColor.value());
-    }
-    if (sheetStyle.backgroundBlurStyle.has_value()) {
-        SetSheetBackgroundBlurStyle(sheetNode, sheetStyle.backgroundBlurStyle.value());
-    }
-    SetSheetBorderWidth(sheetNode, sheetTheme, sheetStyle);
-    if (sheetStyle.borderStyle.has_value()) {
-        sheetRenderContext->UpdateBorderStyle(sheetStyle.borderStyle.value());
-    }
-    if (sheetStyle.borderColor.has_value()) {
-        sheetRenderContext->UpdateBorderColor(sheetStyle.borderColor.value());
-    }
-    if (sheetStyle.shadow.has_value()) {
-        sheetRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
-    }
-    auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    sheetNodePattern->UpdateOnAppear(std::move(onAppear));
-    sheetNodePattern->UpdateOnDisappear(std::move(onDisappear));
-    sheetNodePattern->UpdateShouldDismiss(std::move(shouldDismiss));
-    sheetNodePattern->UpdateOnWillDismiss(std::move(onWillDismiss));
-    sheetNodePattern->UpdateOnWillDisappear(std::move(onWillDisappear));
-    sheetNodePattern->UpdateOnHeightDidChange(std::move(onHeightDidChange));
-    sheetNodePattern->UpdateOnDetentsDidChange(std::move(onDetentsDidChange));
-    sheetNodePattern->UpdateOnWidthDidChange(std::move(onWidthDidChange));
-    sheetNodePattern->UpdateOnTypeDidChange(std::move(onTypeDidChange));
-    sheetNodePattern->UpdateSheetSpringBack(std::move(sheetSpringBack));
-    sheetMap_[targetId] = WeakClaim(RawPtr(sheetNode));
-    modalStack_.push(WeakClaim(RawPtr(sheetNode)));
-    SaveLastModalNode();
-    sheetNodePattern->SetOverlay(AceType::WeakClaim(this));
-    // create maskColor node(sheetWrapper)
-    auto sheetType = sheetNodePattern->GetSheetType();
-    auto maskNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<SheetWrapperPattern>());
-    CHECK_NULL_VOID(maskNode);
-    auto maskLayoutProps = maskNode->GetLayoutProperty();
-    CHECK_NULL_VOID(maskLayoutProps);
-    maskLayoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    maskLayoutProps->UpdateAlignment(Alignment::TOP_LEFT);
-    auto maskRenderContext = maskNode->GetRenderContext();
-    CHECK_NULL_VOID(maskRenderContext);
-    maskRenderContext->UpdateClipEdge(true);
-    sheetNode->MountToParent(maskNode);
-    InitSheetMask(maskNode, sheetNode, sheetStyle);
-    maskNode->MountToParent(rootNode);
-    modalList_.emplace_back(WeakClaim(RawPtr(sheetNode)));
-    FireModalPageShow();
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    pipeline->FlushUITasks();
-    PlaySheetMaskTransition(maskNode, true, static_cast<bool>(callback));
-    ComputeSheetOffset(sheetStyle, sheetNode);
-    if (onWillAppear) {
-        TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onWillAppear state.");
-        onWillAppear();
-    }
-    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-        CHECK_NULL_VOID(sheetPattern);
-        sheetPattern->OnAppear();
-    }
-
-    // start transition animation
-    if (sheetType == SheetType::SHEET_POPUP) {
-        PlayBubbleStyleSheetTransition(sheetNode, true);
-    } else {
-        PlaySheetTransition(sheetNode, true);
-    }
-
-    auto pageNode = AceType::DynamicCast<FrameNode>(maskNode->GetParent());
-    CHECK_NULL_VOID(pageNode);
-    //when sheet shows in page
-    if (pageNode->GetTag() == V2::PAGE_ETS_TAG) {
-        //set focus on sheet when page has more than one child
-        auto focusView = pageNode->GetPattern<FocusView>();
-        CHECK_NULL_VOID(focusView);
-        auto focusHub = sheetNode->GetFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusView->SetViewRootScope(focusHub);
-    }
-}
-
 void OverlayManager::InitSheetMask(
     const RefPtr<FrameNode>& maskNode, const RefPtr<FrameNode>& sheetNode, const SheetStyle& sheetStyle)
 {
@@ -3838,7 +3670,7 @@ void OverlayManager::InitSheetMask(
         maskRenderContext->UpdateBackgroundColor(sheetStyle.maskColor.value_or(sheetTheme->GetMaskColor()));
         auto eventConfirmHub = maskNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(eventConfirmHub);
-        sheetMaskClickEvent_ = AceType::MakeRefPtr<NG::ClickEvent>(
+        auto sheetMaskClickEvent = AceType::MakeRefPtr<NG::ClickEvent>(
             [weak = AceType::WeakClaim(AceType::RawPtr(sheetNode))](const GestureEvent& /* info */) {
                 auto sheet = weak.Upgrade();
                 CHECK_NULL_VOID(sheet);
@@ -3850,31 +3682,35 @@ void OverlayManager::InitSheetMask(
                 sheetPattern->SetIsDirectionUp(false);
                 sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::TOUCH_OUTSIDE);
             });
-        eventConfirmHub->AddClickEvent(sheetMaskClickEvent_);
+        auto maskNodeId = maskNode->GetId();
+        sheetMaskClickEventMap_.emplace(maskNodeId, sheetMaskClickEvent);
+        eventConfirmHub->AddClickEvent(sheetMaskClickEvent);
         if (!sheetStyle.interactive.has_value()) {
             if (sheetNode->GetPattern<SheetPresentationPattern>()->GetSheetType() == SheetType::SHEET_POPUP) {
                 maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
                     HitTestMode::HTMTRANSPARENT);
                 maskRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-                eventConfirmHub->RemoveClickEvent(sheetMaskClickEvent_);
+                eventConfirmHub->RemoveClickEvent(sheetMaskClickEvent);
+                sheetMaskClickEventMap_.erase(maskNodeId);
             }
         } else if (sheetStyle.interactive == true) {
             maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
                 HitTestMode::HTMTRANSPARENT);
             maskRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-            eventConfirmHub->RemoveClickEvent(sheetMaskClickEvent_);
+            eventConfirmHub->RemoveClickEvent(sheetMaskClickEvent);
+            sheetMaskClickEventMap_.erase(maskNodeId);
         }
     }
 }
 
-void OverlayManager::CloseSheet(int32_t targetId)
+void OverlayManager::CloseSheet(const SheetKey& sheetKey)
 {
     if (modalStack_.empty()) {
         return;
     }
-    auto iter = sheetMap_.find(targetId);
+    auto iter = sheetMap_.find(sheetKey);
     if (sheetMap_.empty() || iter == sheetMap_.end()) {
-        DeleteModal(targetId);
+        DeleteModal(sheetKey.targetId);
         return;
     }
     auto sheetNode = iter->second.Upgrade();
@@ -3905,7 +3741,8 @@ void OverlayManager::CloseSheet(int32_t targetId)
         PlaySheetTransition(sheetNode, false);
     }
     sheetNode->GetPattern<SheetPresentationPattern>()->SetDismissProcess(true);
-    sheetMap_.erase(targetId);
+    sheetMap_.erase(sheetKey);
+    CleanViewContextMap(Container::CurrentId(), sheetKey.contentId);
     RemoveSheetNode(sheetNode);
     FireModalPageHide();
     SaveLastModalNode();
@@ -3916,9 +3753,9 @@ void OverlayManager::DismissSheet()
     if (modalStack_.empty()) {
         return;
     }
-    auto iter = sheetMap_.find(dismissTargetId_);
+    auto iter = sheetMap_.find(dismissTarget_.sheetKey);
     if (sheetMap_.empty() || iter == sheetMap_.end()) {
-        DeleteModal(dismissTargetId_);
+        DeleteModal(dismissTarget_.GetTargetId());
         return;
     }
     auto sheetNode = iter->second.Upgrade();
@@ -3935,9 +3772,9 @@ void OverlayManager::DismissContentCover()
     if (modalStack_.empty()) {
         return;
     }
-    const auto& modalNode = GetModal(dismissTargetId_);
+    const auto& modalNode = GetModal(dismissTarget_.GetTargetId());
     if (modalNode == nullptr) {
-        DeleteModal(dismissTargetId_);
+        DeleteModal(dismissTarget_.GetTargetId());
         return;
     }
     if (modalNode->GetTag() == V2::MODAL_PAGE_TAG) {
@@ -3946,7 +3783,7 @@ void OverlayManager::DismissContentCover()
         if (!ModalPageExitProcess(modalNode)) {
             return;
         }
-        RemoveModal(dismissTargetId_);
+        RemoveModal(dismissTarget_.GetTargetId());
         auto modalPattern = modalNode->GetPattern<ModalPresentationPattern>();
         CHECK_NULL_VOID(modalPattern);
         auto modalTransition = modalPattern->GetType();
@@ -3960,7 +3797,7 @@ void OverlayManager::DismissContentCover()
 
 void OverlayManager::SheetSpringBack()
 {
-    auto sheetNode = sheetMap_[dismissTargetId_].Upgrade();
+    auto sheetNode = sheetMap_[dismissTarget_.sheetKey].Upgrade();
     CHECK_NULL_VOID(sheetNode);
     if (sheetNode->GetTag() == V2::SHEET_PAGE_TAG) {
         auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
@@ -4138,6 +3975,424 @@ void OverlayManager::PlaySheetTransition(
     }
 }
 
+void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
+    std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
+    NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+    std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
+    std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+    std::function<void(const float)>&& onHeightDidChange, std::function<void(const float)>&& onDetentsDidChange,
+    std::function<void(const float)>&& onWidthDidChange, std::function<void(const float)>&& onTypeDidChange,
+    std::function<void()>&& sheetSpringBack, const RefPtr<FrameNode>& targetNode)
+{
+    int32_t targetId = targetNode->GetId();
+    if (!isShow) {
+        CloseSheet(SheetKey(targetId));
+        return;
+    }
+    SheetKey sheetKey(targetId);
+    auto iter = sheetMap_.find(sheetKey);
+    if (iter != sheetMap_.end()) {
+        auto sheetNode = iter->second.Upgrade();
+        CHECK_NULL_VOID(sheetNode);
+        UpdateSheetPage(sheetNode, sheetStyle, targetId, false, false,
+            std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillDismiss),
+            std::move(onWillDisappear), std::move(onHeightDidChange),
+            std::move(onDetentsDidChange), std::move(onWidthDidChange),
+            std::move(onTypeDidChange), std::move(sheetSpringBack));
+        return;
+    }
+    // build content
+    auto sheetContentNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
+    OnBindSheetInner(std::move(callback), sheetContentNode, std::move(buildtitleNodeFunc),
+        sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillDismiss),
+        std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
+        std::move(onDetentsDidChange), std::move(onWidthDidChange),
+        std::move(onTypeDidChange), std::move(sheetSpringBack), targetNode);
+}
+
+void OverlayManager::OpenBindSheetByUIContext(
+    const RefPtr<FrameNode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
+    NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+    std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
+    std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+    std::function<void(const float)>&& onHeightDidChange,
+    std::function<void(const float)>&& onDetentsDidChange,
+    std::function<void(const float)>&& onWidthDidChange,
+    std::function<void(const float)>&& onTypeDidChange,
+    std::function<void()>&& sheetSpringBack,
+    std::function<void(const int32_t, const int32_t)> cleanViewContextMapCallback,
+    const RefPtr<FrameNode>& targetNode)
+{
+    if (cleanViewContextMapCallback_ == nullptr) {
+        cleanViewContextMapCallback_ = cleanViewContextMapCallback;
+    }
+    auto instanceId = sheetStyle.instanceId.has_value() ? sheetStyle.instanceId.value() : Container::CurrentId();
+    ContainerScope scope(instanceId);
+    OnBindSheetInner(nullptr, sheetContentNode, std::move(buildtitleNodeFunc),
+        sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillDismiss),
+        std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
+        std::move(onDetentsDidChange), std::move(onWidthDidChange),
+        std::move(onTypeDidChange), std::move(sheetSpringBack), targetNode, true);
+}
+
+void OverlayManager::UpdateBindSheetByUIContext(
+    const RefPtr<NG::FrameNode>& sheetContentNode, NG::SheetStyle& sheetStyle, int32_t targetId, bool isPartialUpdate)
+{
+    SheetKey sheetKey;
+    if (!CreateSheetKey(sheetContentNode, targetId, sheetKey)) {
+        TAG_LOGE(AceLogTag::ACE_SHEET, "CreateSheetKey failed");
+        return;
+    }
+    targetId = sheetKey.targetId;
+    auto iter = sheetMap_.find(sheetKey);
+    if (iter != sheetMap_.end()) {
+        auto sheetNode = iter->second.Upgrade();
+        CHECK_NULL_VOID(sheetNode);
+        UpdateSheetPage(sheetNode, sheetStyle, targetId, true, isPartialUpdate);
+    }
+    TAG_LOGE(AceLogTag::ACE_SHEET, "Can not find sheet.");
+    return;
+}
+
+void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& sheetStyle,
+    int32_t targetId, bool isStartByUIContext, bool isPartialUpdate,
+    std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+    std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
+    std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
+    std::function<void(const float)>&& onDetentsDidChange,
+    std::function<void(const float)>&& onWidthDidChange,
+    std::function<void(const float)>&& onTypeDidChange,
+    std::function<void()>&& sheetSpringBack)
+{
+    if (sheetNode->GetTag() != V2::SHEET_PAGE_TAG ||
+        sheetNode->GetPattern<SheetPresentationPattern>()->GetTargetId() != targetId) {
+        return;
+    }
+    auto pipeline = sheetNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    SetSheetBackgroundColor(sheetNode, sheetTheme, sheetStyle, isPartialUpdate);
+    auto topModalRenderContext = sheetNode->GetRenderContext();
+    CHECK_NULL_VOID(topModalRenderContext);
+    if (sheetStyle.backgroundBlurStyle.has_value()) {
+        SetSheetBackgroundBlurStyle(sheetNode, sheetStyle.backgroundBlurStyle.value());
+    }
+    SetSheetBorderWidth(sheetNode, sheetTheme, sheetStyle, isPartialUpdate);
+    if (sheetStyle.borderStyle.has_value()) {
+        topModalRenderContext->UpdateBorderStyle(sheetStyle.borderStyle.value());
+    }
+    if (sheetStyle.borderColor.has_value()) {
+        topModalRenderContext->UpdateBorderColor(sheetStyle.borderColor.value());
+    }
+    if (sheetStyle.shadow.has_value()) {
+        topModalRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
+    } else if (!isPartialUpdate) {
+        topModalRenderContext->UpdateBackShadow(ShadowConfig::NoneShadow);
+    }
+    auto maskNode = GetSheetMask(sheetNode);
+    if (maskNode) {
+        UpdateSheetMask(maskNode, sheetNode, sheetStyle, isPartialUpdate);
+    }
+    auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
+
+    if (isStartByUIContext) {
+        auto currentStyle = UpdateSheetStyle(sheetNode, sheetStyle, isPartialUpdate);
+        sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        pipeline->FlushUITasks();
+        ComputeSheetOffset(currentStyle, sheetNode);
+    } else {
+        sheetNodePattern->UpdateOnAppear(std::move(onAppear));
+        sheetNodePattern->UpdateOnDisappear(std::move(onDisappear));
+        sheetNodePattern->UpdateShouldDismiss(std::move(shouldDismiss));
+        sheetNodePattern->UpdateOnWillDismiss(std::move(onWillDismiss));
+        sheetNodePattern->UpdateOnWillDisappear(std::move(onWillDisappear));
+        sheetNodePattern->UpdateOnHeightDidChange(std::move(onHeightDidChange));
+        sheetNodePattern->UpdateOnDetentsDidChange(std::move(onDetentsDidChange));
+        sheetNodePattern->UpdateOnWidthDidChange(std::move(onWidthDidChange));
+        sheetNodePattern->UpdateOnTypeDidChange(std::move(onTypeDidChange));
+        sheetNodePattern->UpdateSheetSpringBack(std::move(sheetSpringBack));
+        auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+        layoutProperty->UpdateSheetStyle(sheetStyle);
+        sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        pipeline->FlushUITasks();
+        ComputeSheetOffset(sheetStyle, sheetNode);
+    }
+    auto sheetType = sheetNodePattern->GetSheetType();
+    if (sheetType != SheetType::SHEET_POPUP && !sheetNodePattern->GetDismissProcess()) {
+        PlaySheetTransition(sheetNode, true, false);
+    }
+}
+
+SheetStyle OverlayManager::UpdateSheetStyle(
+    const RefPtr<FrameNode>& sheetNode, const SheetStyle& sheetStyle, bool isPartialUpdate)
+{
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_RETURN(layoutProperty, sheetStyle);
+    auto currentStyle = layoutProperty->GetSheetStyleValue();
+    if (isPartialUpdate) {
+        currentStyle.PartialUpdate(sheetStyle);
+    } else {
+        auto currentShowInPage = currentStyle.showInPage;
+        auto currentInstanceId = currentStyle.instanceId;
+        currentStyle = sheetStyle;
+        currentStyle.showInPage = currentShowInPage;
+        currentStyle.instanceId = currentInstanceId;
+    }
+    layoutProperty->UpdateSheetStyle(currentStyle);
+    return currentStyle;
+}
+
+void OverlayManager::CloseBindSheetByUIContext(const RefPtr<NG::FrameNode>& sheetContentNode, int32_t targetId)
+{
+    SheetKey sheetKey;
+    if (!CreateSheetKey(sheetContentNode, targetId, sheetKey)) {
+        TAG_LOGE(AceLogTag::ACE_SHEET, "CreateSheetKey failed");
+        return;
+    }
+    CloseSheet(sheetKey);
+}
+
+void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& callback,
+    const RefPtr<FrameNode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
+    NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+    std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
+    std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+    std::function<void(const float)>&& onHeightDidChange, std::function<void(const float)>&& onDetentsDidChange,
+    std::function<void(const float)>&& onWidthDidChange,
+    std::function<void(const float)>&& onTypeDidChange,
+    std::function<void()>&& sheetSpringBack, const RefPtr<FrameNode>& targetNode, bool isStartByUIContext)
+{
+    CHECK_NULL_VOID(sheetContentNode);
+    sheetContentNode->GetRenderContext()->SetIsModalRootNode(true);
+    auto titleBuilder = AceType::DynamicCast<FrameNode>(buildtitleNodeFunc());
+    if (titleBuilder) {
+        titleBuilder->GetRenderContext()->SetIsModalRootNode(true);
+    }
+
+    CHECK_NULL_VOID(targetNode);
+    auto sheetNode = SheetView::CreateSheetPage(
+        targetNode->GetId(), targetNode->GetTag(), sheetContentNode, titleBuilder, std::move(callback), sheetStyle);
+    CHECK_NULL_VOID(sheetNode);
+    SetSheetProperty(sheetNode, sheetStyle, std::move(onAppear), std::move(onDisappear),
+        std::move(shouldDismiss), std::move(onWillDismiss),
+        std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
+        std::move(onDetentsDidChange), std::move(onWidthDidChange),
+        std::move(onTypeDidChange), std::move(sheetSpringBack));
+    SaveSheePageNode(sheetNode, sheetContentNode, targetNode, isStartByUIContext);
+    auto maskNode = CreateSheetMask(sheetNode, targetNode, sheetStyle);
+    CHECK_NULL_VOID(maskNode);
+
+    auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetNodePattern);
+    if (onWillAppear) {
+        TAG_LOGI(AceLogTag::ACE_SHEET, "bindSheet lifecycle change to onWillAppear state.");
+        onWillAppear();
+    }
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        sheetNodePattern->OnAppear();
+    }
+
+    // start transition animation
+    auto sheetType = sheetNodePattern->GetSheetType();
+    if (sheetType == SheetType::SHEET_POPUP) {
+        PlayBubbleStyleSheetTransition(sheetNode, true);
+    } else {
+        PlaySheetTransition(sheetNode, true);
+    }
+
+    auto pageNode = AceType::DynamicCast<FrameNode>(maskNode->GetParent());
+    CHECK_NULL_VOID(pageNode);
+    //when sheet shows in page
+    if (pageNode->GetTag() == V2::PAGE_ETS_TAG) {
+        //set focus on sheet when page has more than one child
+        auto focusView = pageNode->GetPattern<FocusView>();
+        CHECK_NULL_VOID(focusView);
+        auto focusHub = sheetNode->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusView->SetViewRootScope(focusHub);
+    }
+}
+
+void OverlayManager::SetSheetProperty(
+    const RefPtr<FrameNode>& sheetPageNode,
+    NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+    std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
+    std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+    std::function<void(const float)>&& onHeightDidChange, std::function<void(const float)>&& onDetentsDidChange,
+    std::function<void(const float)>&& onWidthDidChange,
+    std::function<void(const float)>&& onTypeDidChange,
+    std::function<void()>&& sheetSpringBack)
+{
+    auto sheetRenderContext = sheetPageNode->GetRenderContext();
+    CHECK_NULL_VOID(sheetRenderContext);
+    if (sheetStyle.backgroundColor.has_value()) {
+        sheetPageNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundColor.value());
+    }
+    if (sheetStyle.backgroundBlurStyle.has_value()) {
+        SetSheetBackgroundBlurStyle(sheetPageNode, sheetStyle.backgroundBlurStyle.value());
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    SetSheetBorderWidth(sheetPageNode, sheetTheme, sheetStyle);
+    if (sheetStyle.borderStyle.has_value()) {
+        sheetRenderContext->UpdateBorderStyle(sheetStyle.borderStyle.value());
+    }
+    if (sheetStyle.borderColor.has_value()) {
+        sheetRenderContext->UpdateBorderColor(sheetStyle.borderColor.value());
+    }
+    if (sheetStyle.shadow.has_value()) {
+        sheetRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
+    }
+    auto sheetNodePattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetNodePattern);
+    sheetNodePattern->UpdateOnAppear(std::move(onAppear));
+    sheetNodePattern->UpdateOnDisappear(std::move(onDisappear));
+    sheetNodePattern->UpdateShouldDismiss(std::move(shouldDismiss));
+    sheetNodePattern->UpdateOnWillDismiss(std::move(onWillDismiss));
+    sheetNodePattern->UpdateOnWillDisappear(std::move(onWillDisappear));
+    sheetNodePattern->UpdateOnHeightDidChange(std::move(onHeightDidChange));
+    sheetNodePattern->UpdateOnDetentsDidChange(std::move(onDetentsDidChange));
+    sheetNodePattern->UpdateOnWidthDidChange(std::move(onWidthDidChange));
+    sheetNodePattern->UpdateOnTypeDidChange(std::move(onTypeDidChange));
+    sheetNodePattern->UpdateSheetSpringBack(std::move(sheetSpringBack));
+}
+
+void OverlayManager::SaveSheePageNode(
+    const RefPtr<FrameNode>& sheetPageNode, const RefPtr<FrameNode>& sheetContentNode,
+    const RefPtr<FrameNode>& targetNode, bool isStartByUIContext)
+{
+    int32_t targetId = targetNode->GetId();
+    auto root = AceType::DynamicCast<FrameNode>(rootNodeWeak_.Upgrade());
+    CHECK_NULL_VOID(root);
+    bool isValidTarget = (root->GetId() != targetId);
+    SheetKey sheetKey;
+    if (isStartByUIContext) {
+        sheetKey = SheetKey(isValidTarget, sheetContentNode->GetId(), targetId);
+    } else {
+        sheetKey = SheetKey(targetId);
+    }
+    auto sheetNodePattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetNodePattern);
+    sheetNodePattern->SetSheetKey(sheetKey);
+    sheetMap_.emplace(sheetKey, WeakClaim(RawPtr(sheetPageNode)));
+    modalStack_.push(WeakClaim(RawPtr(sheetPageNode)));
+    modalList_.emplace_back(WeakClaim(RawPtr(sheetPageNode)));
+    SaveLastModalNode();
+    sheetNodePattern->SetOverlay(AceType::WeakClaim(this));
+}
+
+RefPtr<FrameNode> OverlayManager::CreateSheetMask(const RefPtr<FrameNode>& sheetPageNode,
+    const RefPtr<FrameNode>& targetNode, NG::SheetStyle& sheetStyle)
+{
+    // create maskColor node(sheetWrapper)
+    auto maskNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetWrapperPattern>());
+    CHECK_NULL_RETURN(maskNode, nullptr);
+    auto maskLayoutProps = maskNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(maskLayoutProps, nullptr);
+    maskLayoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    maskLayoutProps->UpdateAlignment(Alignment::TOP_LEFT);
+    auto maskRenderContext = maskNode->GetRenderContext();
+    CHECK_NULL_RETURN(maskRenderContext, nullptr);
+    maskRenderContext->UpdateClipEdge(true);
+    sheetPageNode->MountToParent(maskNode);
+    InitSheetMask(maskNode, sheetPageNode, sheetStyle);
+    auto rootNode = FindWindowScene(targetNode);
+    CHECK_NULL_RETURN(rootNode, nullptr);
+    maskNode->MountToParent(rootNode);
+    FireModalPageShow();
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto pipeline = sheetPageNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    pipeline->FlushUITasks();
+    PlaySheetMaskTransition(maskNode, true, sheetPageNode->GetPattern<SheetPresentationPattern>()->HasCallback());
+    ComputeSheetOffset(sheetStyle, sheetPageNode);
+    return maskNode;
+}
+
+bool OverlayManager::CreateSheetKey(const RefPtr<NG::FrameNode>& sheetContentNode, int32_t targetId,
+    SheetKey& sheetKey)
+{
+    CHECK_NULL_RETURN(sheetContentNode, false);
+    bool isTargetIdValid = (targetId >= 0);
+    if (!isTargetIdValid) {
+        auto rootNode = rootNodeWeak_.Upgrade();
+        CHECK_NULL_RETURN(rootNode, false);
+        targetId = rootNode->GetId();
+    }
+    sheetKey = SheetKey(isTargetIdValid, sheetContentNode->GetId(), targetId);
+    return true;
+}
+
+void OverlayManager::UpdateSheetMask(const RefPtr<FrameNode>& maskNode,
+    const RefPtr<FrameNode>& sheetNode, const SheetStyle& sheetStyle, bool isPartialUpdate)
+{
+    auto maskRenderContext = maskNode->GetRenderContext();
+    CHECK_NULL_VOID(maskRenderContext);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    auto sheetLayoutProps = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(sheetLayoutProps);
+    maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMDEFAULT);
+
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        if (sheetStyle.maskColor.has_value()) {
+            maskRenderContext->UpdateBackgroundColor(sheetStyle.maskColor.value());
+        } else {
+            maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
+                HitTestMode::HTMTRANSPARENT);
+            maskRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        }
+    } else {
+        if (sheetStyle.maskColor.has_value() || !isPartialUpdate) {
+            maskRenderContext->UpdateBackgroundColor(sheetStyle.maskColor.value_or(sheetTheme->GetMaskColor()));
+        }
+        auto eventConfirmHub = maskNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(eventConfirmHub);
+
+        auto maskNodeId = maskNode->GetId();
+        auto iter = sheetMaskClickEventMap_.find(maskNodeId);
+        if (iter == sheetMaskClickEventMap_.end() &&
+            sheetStyle.interactive.has_value() && !sheetStyle.interactive.value()) {
+            auto sheetMaskClickEvent = AceType::MakeRefPtr<NG::ClickEvent>(
+                [weak = AceType::WeakClaim(AceType::RawPtr(sheetNode))](const GestureEvent& /* info */) {
+                    auto sheet = weak.Upgrade();
+                    CHECK_NULL_VOID(sheet);
+                    auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
+                    CHECK_NULL_VOID(sheetPattern);
+                    if (sheetPattern->IsDragging()) {
+                        return;
+                    }
+                    sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::TOUCH_OUTSIDE);
+                });
+            sheetMaskClickEventMap_.emplace(maskNodeId, sheetMaskClickEvent);
+            eventConfirmHub->AddClickEvent(sheetMaskClickEvent);
+            return;
+        }
+
+        if (!sheetStyle.interactive.has_value() && !isPartialUpdate) {
+            if (sheetNode->GetPattern<SheetPresentationPattern>()->GetSheetType() == SheetType::SHEET_POPUP) {
+                maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
+                    HitTestMode::HTMTRANSPARENT);
+                maskRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+                eventConfirmHub->RemoveClickEvent(iter->second);
+                sheetMaskClickEventMap_.erase(maskNodeId);
+            }
+        } else if (sheetStyle.interactive == true) {
+            maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
+                HitTestMode::HTMTRANSPARENT);
+            maskRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+            eventConfirmHub->RemoveClickEvent(iter->second);
+            sheetMaskClickEventMap_.erase(maskNodeId);
+        }
+    }
+}
+
 void OverlayManager::PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn)
 {
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
@@ -4202,10 +4457,11 @@ void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool is
     if (isTransitionIn) {
         context->OpacityAnimation(option, 0.0, 1.0);
     } else {
-        if (sheetMaskClickEvent_) {
+        auto iter = sheetMaskClickEventMap_.find(maskNode->GetId());
+        if (iter != sheetMaskClickEventMap_.end()) {
             auto eventConfirmHub = maskNode->GetOrCreateGestureEventHub();
             CHECK_NULL_VOID(eventConfirmHub);
-            eventConfirmHub->RemoveClickEvent(sheetMaskClickEvent_);
+            eventConfirmHub->RemoveClickEvent(iter->second);
         }
         option.SetOnFinishEvent(
             [rootWeak = rootNodeWeak_, maskNodeWK = WeakClaim(RawPtr(maskNode)),
@@ -4226,7 +4482,7 @@ void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool is
 }
 
 void OverlayManager::SetSheetBorderWidth(const RefPtr<FrameNode>& sheetNode, const RefPtr<SheetTheme>& sheetTheme,
-    const NG::SheetStyle& sheetStyle)
+    const NG::SheetStyle& sheetStyle, bool isPartialUpdate)
 {
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
@@ -4248,7 +4504,7 @@ void OverlayManager::SetSheetBorderWidth(const RefPtr<FrameNode>& sheetNode, con
         renderContext->UpdateBorderRadius(borderRadius);
         layoutProperty->UpdateBorderWidth(borderWidth);
         renderContext->UpdateBorderWidth(borderWidth);
-    } else if (renderContext->GetBorderWidth().has_value()) {
+    } else if (renderContext->GetBorderWidth().has_value() && !isPartialUpdate) {
         BorderWidthProperty borderWidth;
         borderWidth.SetBorderWidth(0.0_vp);
         layoutProperty->UpdateBorderWidth(borderWidth);
@@ -4257,13 +4513,13 @@ void OverlayManager::SetSheetBorderWidth(const RefPtr<FrameNode>& sheetNode, con
 }
 
 void OverlayManager::SetSheetBackgroundColor(const RefPtr<FrameNode>& sheetNode, const RefPtr<SheetTheme>& sheetTheme,
-    const NG::SheetStyle& sheetStyle)
+    const NG::SheetStyle& sheetStyle, bool isPartialUpdate)
 {
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         if (sheetStyle.backgroundColor.has_value()) {
             sheetNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundColor.value());
         }
-    } else {
+    } else if (sheetStyle.backgroundColor.has_value() || !isPartialUpdate) {
         sheetNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundColor.value_or(
             sheetTheme->GetSheetBackgoundColor()));
     }
@@ -4315,7 +4571,7 @@ void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<Frame
             }
         case SheetType::SHEET_BOTTOM:
         case SheetType::SHEET_BOTTOM_FREE_WINDOW:
-            if (sheetStyle.detents.size() > 0) {
+            if (!sheetStyle.detents.empty()) {
                 ComputeDetentsSheetOffset(sheetStyle, sheetNode);
             } else {
                 ComputeSingleGearSheetOffset(sheetStyle, sheetNode);
@@ -4446,14 +4702,14 @@ void OverlayManager::ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPt
     }
 }
 
-void OverlayManager::DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t targetId)
+void OverlayManager::DestroySheet(const RefPtr<FrameNode>& sheetNode, const SheetKey& sheetKey)
 {
     if (modalStack_.empty()) {
         return;
     }
-    auto iter = sheetMap_.find(targetId);
+    auto iter = sheetMap_.find(sheetKey);
     if (sheetMap_.empty() || iter == sheetMap_.end()) {
-        DeleteModal(targetId, false);
+        DeleteModal(sheetKey.targetId, false);
         return;
     }
     auto mapSheetNode = iter->second.Upgrade();
@@ -4461,7 +4717,7 @@ void OverlayManager::DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t ta
     if (mapSheetNode->GetTag() != V2::SHEET_PAGE_TAG) {
         return;
     }
-    if (mapSheetNode->GetPattern<SheetPresentationPattern>()->GetTargetId() != targetId) {
+    if (mapSheetNode->GetPattern<SheetPresentationPattern>()->GetTargetId() != sheetKey.targetId) {
         return;
     }
     auto rootNode = FindWindowScene(sheetNode);
@@ -4473,7 +4729,8 @@ void OverlayManager::DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t ta
     CHECK_NULL_VOID(sheetParent);
     root->RemoveChild(sheetParent);
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    sheetMap_.erase(targetId);
+    sheetMap_.erase(sheetKey);
+    CleanViewContextMap(Container::CurrentId(), sheetKey.contentId);
     RemoveSheetNode(sheetNode);
     FireModalPageHide();
     SaveLastModalNode();
@@ -4531,12 +4788,14 @@ void OverlayManager::DeleteModalNode(
         FireNavigationStateChange(false, modalNode);
         rootNode->RemoveChild(modalNode);
     } else {
+        auto sheetPattern = modalNode->GetPattern<SheetPresentationPattern>();
+        CHECK_NULL_VOID(sheetPattern);
         if (needOnWillDisappear) {
-            modalNode->GetPattern<SheetPresentationPattern>()->OnWillDisappear();
+            sheetPattern->OnWillDisappear();
         }
-        modalNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
-        modalNode->GetPattern<SheetPresentationPattern>()->FireCallback("false");
-        sheetMap_.erase(targetId);
+        sheetPattern->OnDisappear();
+        sheetPattern->FireCallback("false");
+        sheetMap_.erase(sheetPattern->GetSheetKey());
         auto sheetParent = DynamicCast<FrameNode>(modalNode->GetParent());
         CHECK_NULL_VOID(sheetParent);
         rootNode->RemoveChild(sheetParent);
@@ -5848,7 +6107,7 @@ void OverlayManager::DumpOverlayInfo() const
     DumpMapInfo(toastMap_, "ToastMap", false);
 
     DumpLog::GetInstance().Print("----------SheetMapInfo----------");
-    DumpMapInfo(sheetMap_, "SheetMap");
+    DumpSheetMapInfo(sheetMap_, "SheetMap");
 
     DumpLog::GetInstance().Print("----------MaskNodeIdMapInfo----------");
     DumpMaskNodeIdMapInfo();
@@ -5915,6 +6174,24 @@ void OverlayManager::DumpMapInfo(
             std::string entryLog = GetMapNodeLog(node, hasTarget);
             DumpLog::GetInstance().Print(DUMP_LOG_DEPTH_2, entryLog);
         }
+    }
+
+    DumpLog::GetInstance().Print(DUMP_LOG_DEPTH_1, "]");
+}
+
+void OverlayManager::DumpSheetMapInfo(
+    const std::unordered_map<SheetKey, WeakPtr<FrameNode>, SheetKeyHash>& map,
+    const std::string mapName) const
+{
+    DumpLog::GetInstance().Print(mapName + ": ");
+    DumpLog::GetInstance().Print(DUMP_LOG_DEPTH_1, "Size: " + std::to_string(map.size()));
+    DumpLog::GetInstance().Print(DUMP_LOG_DEPTH_1, "Entries: [");
+
+    for (const auto& entry : map) {
+        auto targetId = entry.first.targetId;
+        auto targetNode = ElementRegister::GetInstance()->GetSpecificItemById<FrameNode>(targetId);
+        auto node = entry.second.Upgrade();
+        DumpEntry(targetNode, targetId, node);
     }
 
     DumpLog::GetInstance().Print(DUMP_LOG_DEPTH_1, "]");

@@ -19,6 +19,7 @@
 #include <mutex>
 
 #include "core/components/common/properties/animation_option.h"
+#include "core/components_ng/pattern/overlay/sheet_style.h"
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT ViewContextModel {
@@ -28,6 +29,18 @@ public:
 
     virtual void closeAnimation(const AnimationOption& option, bool needFlush) = 0;
     virtual void openAnimation(const AnimationOption& option) = 0;
+    virtual int32_t OpenBindSheet(const RefPtr<NG::FrameNode>& bindContentNode,
+        std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
+        std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
+        std::function<void(const int32_t info)>&& onWillDismiss, std::function<void()>&& onWillAppear,
+        std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
+        int32_t currentInstanceId, int32_t targetId) = 0;
+    virtual int32_t UpdateBindSheet(
+        const RefPtr<NG::FrameNode>& bindContentNode, NG::SheetStyle& sheetStyle, bool isPartialUpdate,
+        int32_t currentInstanceId) = 0;
+    virtual int32_t CloseBindSheet(const RefPtr<NG::FrameNode>& bindContentNode, int32_t currentInstanceId) = 0;
 
 private:
     static std::unique_ptr<ViewContextModel> instance_;

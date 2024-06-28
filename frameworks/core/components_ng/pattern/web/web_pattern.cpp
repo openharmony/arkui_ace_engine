@@ -4261,9 +4261,6 @@ void WebPattern::OnRootLayerChanged(int width, int height)
         return;
     }
     rootLayerChangeSize_ = Size(width, height);
-    if (GetPendingSizeStatus()) {
-        return;
-    }
     ReleaseResizeHold();
 }
 
@@ -4577,7 +4574,7 @@ void WebPattern::SetAccessibilityState(bool state)
     CHECK_NULL_VOID(delegate_);
     if (!state) {
         if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()
-            || inspectorAccessibilityEnable_) {
+            || inspectorAccessibilityEnable_ || textBlurAccessibilityEnable_) {
                 return;
         }
         accessibilityState_ = state;
@@ -5074,4 +5071,31 @@ void WebPattern::DestroyAnalyzerOverlay()
     }
 }
 
+void WebPattern::RegisterTextBlurCallback(TextBlurCallback&& callback)
+{
+    CHECK_NULL_VOID(callback);
+    textBlurCallback_ = std::move(callback);
+    textBlurAccessibilityEnable_ = true;
+    SetAccessibilityState(true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto setAccessibilityStateTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        // web root node id
+        pattern->GetAccessibilityNodeById(-1);
+    };
+    taskExecutor->PostDelayedTask(setAccessibilityStateTask, TaskExecutor::TaskType::UI, WEB_ACCESSIBILITY_DELAY_TIME,
+        "RegisterTextBlurCallback");
+}
+
+void WebPattern::UnRegisterTextBlurCallback()
+{
+    textBlurCallback_ = nullptr;
+    textBlurAccessibilityEnable_ = false;
+    SetAccessibilityState(false);
+}
 } // namespace OHOS::Ace::NG

@@ -789,7 +789,7 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
             CHECK_NULL_VOID(overlayManager);
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
-            overlayManager->DestroySheet(host, pattern->GetTargetId());
+            overlayManager->DestroySheet(host, pattern->GetSheetKey());
             pattern->FireCallback("false");
         }
     });
@@ -801,7 +801,7 @@ void SheetPresentationPattern::SheetInteractiveDismiss(BindSheetDismissReason di
     if (HasShouldDismiss() || HasOnWillDismiss()) {
         const auto& overlayManager = GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
-        overlayManager->SetDismissTargetId(targetId_);
+        overlayManager->SetDismissTarget(DismissTarget(sheetKey_));
         if (dismissReason == BindSheetDismissReason::SLIDE_DOWN) {
             ProcessColumnRect(height_);
             if (HasSheetSpringBack()) {
@@ -1273,6 +1273,9 @@ void SheetPresentationPattern::GetSheetTypeWithPopup(SheetType& sheetType)
     } else {
         sheetType = SheetType::SHEET_BOTTOM_FREE_WINDOW;
     }
+    if (sheetType == SheetType::SHEET_POPUP && !sheetKey_.hasValidTargetNode) {
+        sheetType = SheetType::SHEET_CENTER;
+    }
 }
 
 void SheetPresentationPattern::BubbleStyleSheetTransition(bool isTransitionIn)
@@ -1295,7 +1298,7 @@ void SheetPresentationPattern::BubbleStyleSheetTransition(bool isTransitionIn)
                 CHECK_NULL_VOID(pattern);
                 const auto& overlayManager = pattern->GetOverlayManager();
                 CHECK_NULL_VOID(overlayManager);
-                overlayManager->DestroySheet(node, pattern->GetTargetId());
+                overlayManager->DestroySheet(node, pattern->GetSheetKey());
                 pattern->FireCallback("false");
             });
     }

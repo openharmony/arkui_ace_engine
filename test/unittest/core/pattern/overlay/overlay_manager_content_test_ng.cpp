@@ -328,7 +328,7 @@ HWTEST_F(OverlayManagerContentTestNg, OnBindContentCover007, TestSize.Level1)
     auto topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
     ASSERT_NE(topModalPattern, nullptr);
     auto targetId = topModalPattern->GetTargetId();
-    overlayManager->SetDismissTargetId(targetId);
+    overlayManager->SetDismissTarget(DismissTarget(targetId));
     overlayManager->DismissContentCover();
     EXPECT_TRUE(overlayManager->modalStack_.empty());
 
@@ -458,7 +458,7 @@ HWTEST_F(OverlayManagerContentTestNg, OnBindContentCover009, TestSize.Level1)
     auto topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
     ASSERT_NE(topModalPattern, nullptr);
     auto targetId = topModalPattern->GetTargetId();
-    overlayManager->SetDismissTargetId(targetId);
+    overlayManager->SetDismissTarget(DismissTarget(targetId));
     overlayManager->DismissContentCover();
     EXPECT_TRUE(overlayManager->modalStack_.empty());
 
@@ -588,7 +588,7 @@ HWTEST_F(OverlayManagerContentTestNg, OnBindContentCover011, TestSize.Level1)
     auto topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
     ASSERT_NE(topModalPattern, nullptr);
     auto targetId = topModalPattern->GetTargetId();
-    overlayManager->SetDismissTargetId(targetId);
+    overlayManager->SetDismissTarget(DismissTarget(targetId));
     overlayManager->DismissContentCover();
     EXPECT_TRUE(overlayManager->modalStack_.empty());
 
@@ -718,7 +718,7 @@ HWTEST_F(OverlayManagerContentTestNg, OnBindContentCover013, TestSize.Level1)
     auto topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
     ASSERT_NE(topModalPattern, nullptr);
     auto targetId = topModalPattern->GetTargetId();
-    overlayManager->SetDismissTargetId(targetId);
+    overlayManager->SetDismissTarget(DismissTarget(targetId));
     overlayManager->DismissContentCover();
     EXPECT_TRUE(overlayManager->modalStack_.empty());
 
@@ -848,7 +848,7 @@ HWTEST_F(OverlayManagerContentTestNg, OnBindContentCover015, TestSize.Level1)
     auto topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
     ASSERT_NE(topModalPattern, nullptr);
     auto targetId = topModalPattern->GetTargetId();
-    overlayManager->SetDismissTargetId(targetId);
+    overlayManager->SetDismissTarget(DismissTarget(targetId));
     overlayManager->DismissContentCover();
     EXPECT_TRUE(overlayManager->modalStack_.empty());
 
@@ -978,7 +978,7 @@ HWTEST_F(OverlayManagerContentTestNg, OnBindContentCover017, TestSize.Level1)
     auto topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
     ASSERT_NE(topModalPattern, nullptr);
     auto targetId = topModalPattern->GetTargetId();
-    overlayManager->SetDismissTargetId(targetId);
+    overlayManager->SetDismissTarget(DismissTarget(targetId));
     overlayManager->DismissContentCover();
     EXPECT_TRUE(overlayManager->modalStack_.empty());
 
@@ -1108,7 +1108,7 @@ HWTEST_F(OverlayManagerContentTestNg, OnBindContentCover019, TestSize.Level1)
     auto topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
     ASSERT_NE(topModalPattern, nullptr);
     auto targetId = topModalPattern->GetTargetId();
-    overlayManager->SetDismissTargetId(targetId);
+    overlayManager->SetDismissTarget(DismissTarget(targetId));
     overlayManager->DismissContentCover();
     EXPECT_TRUE(overlayManager->modalStack_.empty());
 

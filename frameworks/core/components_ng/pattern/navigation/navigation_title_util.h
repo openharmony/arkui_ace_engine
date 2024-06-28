@@ -45,10 +45,12 @@ namespace OHOS::Ace::NG {
 class NavigationTitleUtil {
 public:
     static RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG::BarItem>& menuItems,
-        RefPtr<TitleBarNode> titleBarNode, const bool isButtonEnabled);
+        RefPtr<TitleBarNode> titleBarNode, bool isButtonEnabled);
     static void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<BarItemNode>& barItemNode,
         const RefPtr<FrameNode>& barMenuNode, const RefPtr<TitleBarNode>& titleBarNode);
 
+    static bool BuildMoreButton(bool isButtonEnabled, RefPtr<NavigationBarTheme> theme,
+        RefPtr<TitleBarNode> titleBarNode, RefPtr<FrameNode> menuNode, std::vector<OptionParam>&& params);
     static RefPtr<FrameNode> CreateMenuItemNode(
         RefPtr<NavigationBarTheme> theme, const BarItem& menuItem, bool isButtonEnabled);
     static RefPtr<FrameNode> CreateMenuItemButton(RefPtr<NavigationBarTheme> theme);
@@ -57,6 +59,7 @@ public:
     static RefPtr<FrameNode> CreateBarItemIconNode(const BarItem& barItem, bool isButtonEnabled);
     static void InitTitleBarButtonEvent(const RefPtr<FrameNode>& buttonNode, const RefPtr<FrameNode>& iconNode,
         bool isMoreButton,  BarItem menuItem = BarItem(), bool isButtonEnabled = true);
+    static void SetAccessibility(const RefPtr<FrameNode>& node, const std::string& message);
     static void UpdateBarItemNodeWithItem(
         const RefPtr<BarItemNode>& barItemNode, const BarItem& barItem, bool isButtonEnabled);
     static void BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNode, bool isButtonEnabled);

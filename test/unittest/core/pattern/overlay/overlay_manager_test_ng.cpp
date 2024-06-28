@@ -395,6 +395,378 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OpenBindSheetByUIContext001
+ * @tc.desc: Test OverlayManager::OpenBindSheetByUIContext create sheet page.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, OpenBindSheetByUIContext001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    ViewStackProcessor::GetInstance()->Push(targetNode);
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheet-content node.
+     */
+    auto sheetContentNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    sheetContentNode->AddChild(childFrameNode);
+    auto buildTitleNodeFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    /**
+     * @tc.steps: step3. create sheet node and get sheet node, get pattern.
+     * @tc.expected: related function is called.
+     */
+    SheetStyle sheetStyle;
+    CreateSheetStyle(sheetStyle);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OpenBindSheetByUIContext(sheetContentNode, std::move(buildTitleNodeFunc), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        nullptr, targetNode);
+
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
+    EXPECT_FALSE(topSheetNode == nullptr);
+    auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
+    EXPECT_FALSE(topSheetPattern == nullptr);
+    auto sheetLayoutProperty = topSheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    EXPECT_FALSE(sheetLayoutProperty == nullptr);
+    auto sheetChildren = topSheetNode->GetChildren();
+    auto oprationNode = sheetChildren.front();
+    EXPECT_FALSE(oprationNode == nullptr);
+    auto scrollNode = *(std::next(sheetChildren.begin(), 1));
+    EXPECT_FALSE(scrollNode == nullptr);
+    auto closeIconNode = topSheetNode->GetLastChild();
+    EXPECT_FALSE(closeIconNode == nullptr);
+    auto sheetDragBarNode = AceType::DynamicCast<FrameNode>(oprationNode->GetFirstChild());
+    EXPECT_FALSE(sheetDragBarNode == nullptr);
+    auto sheetDragBarPattern = sheetDragBarNode->GetPattern<SheetDragBarPattern>();
+    EXPECT_FALSE(sheetDragBarPattern == nullptr);
+    auto sheetDragBarPaintProperty = sheetDragBarNode->GetPaintProperty<SheetDragBarPaintProperty>();
+    EXPECT_FALSE(sheetDragBarPaintProperty == nullptr);
+    SheetStyle sheetStyle1;
+    topSheetPattern->pageHeight_ = 10;
+
+    // sheetStyle1.sheetMode is null.
+    sheetStyle1.sheetMode = std::nullopt;
+    overlayManager->sheetHeight_ = 0;
+    sheetStyle1.height->unit_ = DimensionUnit::PERCENT;
+    sheetStyle1.height->value_ = 2.0;
+    overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 2));
+
+    overlayManager->sheetHeight_ = 0;
+    sheetStyle1.height->unit_ = DimensionUnit::PERCENT;
+    sheetStyle1.height->value_ = -2.0;
+    overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 2));
+
+    overlayManager->sheetHeight_ = 0;
+    sheetStyle1.height->unit_ = DimensionUnit::PERCENT;
+    sheetStyle1.height->value_ = 0.1;
+    overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 1.0));
+
+    overlayManager->sheetHeight_ = 0;
+    sheetStyle1.height->unit_ = DimensionUnit::VP;
+    sheetStyle1.height->value_ = 2;
+    overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 2));
+
+    // sheetStyle1.sheetMode is not null.
+    sheetStyle1.sheetMode = SheetMode(5);
+    overlayManager->sheetHeight_ = 0;
+    sheetStyle1.height->unit_ = DimensionUnit::PERCENT;
+    sheetStyle1.height->value_ = 2.0;
+    overlayManager->ComputeSheetOffset(sheetStyle1, topSheetNode);
+    EXPECT_TRUE(NearEqual(overlayManager->sheetHeight_, 0));
+
+    std::string title = "11";
+    std::string subtitle = "22";
+    sheetStyle1.sheetTitle = title;
+    EXPECT_EQ(sheetStyle1.sheetTitle, title);
+    sheetStyle1.sheetSubtitle = subtitle;
+    EXPECT_EQ(sheetStyle1.sheetSubtitle, subtitle);
+    std::stack<WeakPtr<FrameNode>> modalStack;
+    overlayManager->modalStack_ = modalStack;
+    EXPECT_FALSE(sheetDragBarPaintProperty == nullptr);
+}
+
+/**
+ * @tc.name: UpdateBindSheetByUIContext001
+ * @tc.desc: Test OverlayManager::UpdateBindSheetByUIContext create sheet page.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, UpdateBindSheetByUIContext001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    int32_t targetId = targetNode->GetId();
+    ViewStackProcessor::GetInstance()->Push(targetNode);
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheet node.
+     */
+    auto sheetContentNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    sheetContentNode->AddChild(childFrameNode);
+    auto buildTitleNodeFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    /**
+     * @tc.steps: step3. OpenBindSheetByUIContext
+     */
+    SheetStyle sheetStyle;
+    CreateSheetStyle(sheetStyle);
+    SheetKey sheetKey = SheetKey(true, sheetContentNode->GetId(), targetId);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OpenBindSheetByUIContext(sheetContentNode, std::move(buildTitleNodeFunc), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        nullptr, targetNode);
+
+    /**
+     * @tc.steps: step4. UpdateBindSheetByUIContext
+     * @tc.expected: related property is updated.
+     */
+    sheetStyle.height = Dimension(0.0f, DimensionUnit::AUTO);
+    sheetStyle.sheetMode = SheetMode::AUTO;
+    sheetStyle.showDragBar = false;
+    sheetStyle.showCloseIcon = false;
+    sheetStyle.isTitleBuilder = false;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM_FREE_WINDOW;
+    sheetStyle.backgroundColor = Color::BLACK;
+    sheetStyle.maskColor = Color::BLACK;
+    sheetStyle.sheetTitle = "Title";
+    sheetStyle.sheetSubtitle = "SubTitle";
+    sheetStyle.interactive = true;
+    sheetStyle.scrollSizeMode = ScrollSizeMode::CONTINUOUS;
+    sheetStyle.shadow = ShadowConfig::DefaultShadowL;
+    sheetStyle.width = Dimension(0.0f, DimensionUnit::AUTO);
+    overlayManager->UpdateBindSheetByUIContext(sheetContentNode, sheetStyle, targetId, false);
+
+    auto sheetNode = overlayManager->sheetMap_[sheetKey].Upgrade();
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    auto currentStyle = layoutProperty->GetSheetStyleValue();
+
+    EXPECT_EQ(currentStyle.height, sheetStyle.height);
+    EXPECT_EQ(currentStyle.sheetMode, sheetStyle.sheetMode);
+    EXPECT_EQ(currentStyle.showDragBar, sheetStyle.showDragBar);
+    EXPECT_EQ(currentStyle.showCloseIcon, sheetStyle.showCloseIcon);
+    EXPECT_EQ(currentStyle.isTitleBuilder, sheetStyle.isTitleBuilder);
+    EXPECT_EQ(currentStyle.sheetType, sheetStyle.sheetType);
+    EXPECT_EQ(currentStyle.backgroundColor, sheetStyle.backgroundColor);
+    EXPECT_EQ(currentStyle.maskColor, sheetStyle.maskColor);
+    EXPECT_EQ(currentStyle.sheetTitle, sheetStyle.sheetTitle);
+    EXPECT_EQ(currentStyle.sheetSubtitle, sheetStyle.sheetSubtitle);
+    EXPECT_EQ(currentStyle.interactive, sheetStyle.interactive);
+    EXPECT_EQ(currentStyle.scrollSizeMode, sheetStyle.scrollSizeMode);
+    EXPECT_EQ(currentStyle.shadow, sheetStyle.shadow);
+    EXPECT_EQ(currentStyle.width, sheetStyle.width);
+}
+
+/**
+ * @tc.name: UpdateBindSheetByUIContext002
+ * @tc.desc: Test OverlayManager::UpdateBindSheetByUIContext create sheet page.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, UpdateBindSheetByUIContext002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    int32_t targetId = targetNode->GetId();
+    ViewStackProcessor::GetInstance()->Push(targetNode);
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheet node.
+     */
+    auto sheetContentNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    sheetContentNode->AddChild(childFrameNode);
+    auto buildTitleNodeFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    /**
+     * @tc.steps: step3. OpenBindSheetByUIContext
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.height = Dimension(0.0f, DimensionUnit::AUTO);
+    sheetStyle.sheetMode = SheetMode::AUTO;
+    sheetStyle.showDragBar = false;
+    sheetStyle.showCloseIcon = false;
+    sheetStyle.isTitleBuilder = false;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM_FREE_WINDOW;
+    sheetStyle.backgroundColor = Color::BLACK;
+    sheetStyle.maskColor = Color::BLACK;
+    sheetStyle.sheetTitle = "Title";
+    sheetStyle.sheetSubtitle = "SubTitle";
+    sheetStyle.interactive = true;
+    sheetStyle.scrollSizeMode = ScrollSizeMode::CONTINUOUS;
+    sheetStyle.shadow = ShadowConfig::DefaultShadowL;
+    sheetStyle.width = Dimension(0.0f, DimensionUnit::AUTO);
+    SheetKey sheetKey = SheetKey(true, sheetContentNode->GetId(), targetId);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OpenBindSheetByUIContext(sheetContentNode, std::move(buildTitleNodeFunc), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        nullptr, targetNode);
+
+    /**
+     * @tc.steps: step4. UpdateBindSheetByUIContext
+     * @tc.expected: related property is updated.
+     */
+    sheetStyle.height = Dimension(0.0f, DimensionUnit::AUTO);
+    sheetStyle.sheetMode = SheetMode::AUTO;
+    sheetStyle.showDragBar = false;
+    sheetStyle.showCloseIcon = false;
+    sheetStyle.isTitleBuilder = false;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM_FREE_WINDOW;
+    sheetStyle.backgroundColor = Color::BLACK;
+    sheetStyle.maskColor = Color::BLACK;
+    sheetStyle.sheetTitle.reset();
+    sheetStyle.sheetSubtitle.reset();
+    sheetStyle.interactive.reset();
+    sheetStyle.scrollSizeMode.reset();
+    sheetStyle.shadow.reset();
+    sheetStyle.width.reset();
+    overlayManager->UpdateBindSheetByUIContext(sheetContentNode, sheetStyle, targetId, true);
+
+    auto sheetNode = overlayManager->sheetMap_[sheetKey].Upgrade();
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    auto currentStyle = layoutProperty->GetSheetStyleValue();
+
+    EXPECT_EQ(currentStyle.height, sheetStyle.height);
+    EXPECT_EQ(currentStyle.sheetMode, sheetStyle.sheetMode);
+    EXPECT_EQ(currentStyle.showDragBar, sheetStyle.showDragBar);
+    EXPECT_EQ(currentStyle.showCloseIcon, sheetStyle.showCloseIcon);
+    EXPECT_EQ(currentStyle.isTitleBuilder, sheetStyle.isTitleBuilder);
+    EXPECT_EQ(currentStyle.sheetType, sheetStyle.sheetType);
+    EXPECT_EQ(currentStyle.backgroundColor, sheetStyle.backgroundColor);
+    EXPECT_EQ(currentStyle.maskColor, sheetStyle.maskColor);
+    EXPECT_TRUE(currentStyle.sheetTitle.has_value());
+    EXPECT_TRUE(currentStyle.sheetSubtitle.has_value());
+    EXPECT_TRUE(currentStyle.interactive.has_value());
+    EXPECT_TRUE(currentStyle.scrollSizeMode.has_value());
+    EXPECT_TRUE(currentStyle.shadow.has_value());
+    EXPECT_TRUE(currentStyle.width.has_value());
+}
+
+/**
+ * @tc.name: CloseBindSheetByUIContext001
+ * @tc.desc: Test OverlayManager::CloseBindSheetByUIContext create sheet page.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, CloseBindSheetByUIContext001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    int32_t targetId = targetNode->GetId();
+    ViewStackProcessor::GetInstance()->Push(targetNode);
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheet node.
+     */
+    auto sheetContentNode =
+        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    sheetContentNode->AddChild(childFrameNode);
+    auto buildTitleNodeFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    /**
+     * @tc.steps: step3. OpenBindSheetByUIContext
+     */
+    SheetStyle sheetStyle;
+    CreateSheetStyle(sheetStyle);
+    SheetKey sheetKey = SheetKey(true, sheetContentNode->GetId(), targetId);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OpenBindSheetByUIContext(sheetContentNode, std::move(buildTitleNodeFunc), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        nullptr, targetNode);
+
+    /**
+     * @tc.steps: step4. CloseBindSheetByUIContext
+     * @tc.expected: sheet is deleted.
+     */
+    overlayManager->CloseBindSheetByUIContext(sheetContentNode, targetId);
+
+    auto iter = overlayManager->sheetMap_.find(sheetKey);
+    EXPECT_EQ(iter, overlayManager->sheetMap_.end());
+    EXPECT_TRUE(overlayManager->IsModalEmpty());
+    EXPECT_TRUE(overlayManager->modalList_.empty());
+}
+
+/**
  * @tc.name: RemoveAllModalInOverlay001
  * @tc.desc: Test OverlayManager::RemoveAllModalInOverlay.
  * @tc.type: FUNC
@@ -626,18 +998,18 @@ HWTEST_F(OverlayManagerTestNg, DestroySheet003, TestSize.Level1)
      */
     sheetNode->tag_ = V2::SHEET_MASK_TAG;
     EXPECT_NE(sheetNode->GetTag(), V2::SHEET_PAGE_TAG);
-    overlayManager->DestroySheet(sheetNode, targetId);
+    overlayManager->DestroySheet(sheetNode, SheetKey(targetId));
     EXPECT_FALSE(overlayManager->modalStack_.empty());
 
     sheetNode->tag_ = V2::SHEET_PAGE_TAG;
     sheetNode->GetPattern<SheetPresentationPattern>()->targetId_ = targetId - 1;
     EXPECT_NE(sheetNode->GetPattern<SheetPresentationPattern>()->targetId_, targetId);
-    overlayManager->DestroySheet(sheetNode, targetId);
+    overlayManager->DestroySheet(sheetNode, SheetKey(targetId));
     EXPECT_FALSE(overlayManager->modalStack_.empty());
 
     sheetNode->tag_ = V2::SHEET_PAGE_TAG;
     sheetNode->GetPattern<SheetPresentationPattern>()->targetId_ = targetId;
-    overlayManager->DestroySheet(sheetNode, targetId);
+    overlayManager->DestroySheet(sheetNode, SheetKey(targetId));
     EXPECT_TRUE(overlayManager->modalStack_.empty());
 
     auto targetNodeSecond = CreateTargetNode();
@@ -649,7 +1021,7 @@ HWTEST_F(OverlayManagerTestNg, DestroySheet003, TestSize.Level1)
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
-    overlayManager->DestroySheet(sheetNode, targetId);
+    overlayManager->DestroySheet(sheetNode, SheetKey(targetId));
     EXPECT_FALSE(overlayManager->modalStack_.empty());
 }
 
@@ -718,7 +1090,7 @@ HWTEST_F(OverlayManagerTestNg, OnBindSheet003, TestSize.Level1)
     overlayManager->OnBindSheet(!isShow, nullptr, nullptr, nullptr, sheetStyle, nullptr, onDisappear, nullptr,
         nullptr, nullptr, onWillDisappear, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     overlayManager->modalList_.emplace_back(AceType::WeakClaim(AceType::RawPtr(stageNode)));
-    overlayManager->DestroySheet(sheetNode, targetId);
+    overlayManager->DestroySheet(sheetNode, SheetKey(targetId));
     overlayManager->FindWindowScene(targetNode);
     overlayManager->DeleteModal(targetId);
     EXPECT_TRUE(overlayManager->modalStack_.empty());
@@ -807,7 +1179,7 @@ HWTEST_F(OverlayManagerTestNg, GetSheetMask001, TestSize.Level1)
     overlayManager->OnBindSheet(!isShow, nullptr, nullptr, nullptr, sheetStyle, nullptr, onDisappear, nullptr, nullptr,
         nullptr, onWillDisappear, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     overlayManager->modalList_.emplace_back(AceType::WeakClaim(AceType::RawPtr(stageNode)));
-    overlayManager->DestroySheet(sheetNode, targetId);
+    overlayManager->DestroySheet(sheetNode, SheetKey(targetId));
     overlayManager->FindWindowScene(targetNode);
     overlayManager->DeleteModal(targetId);
     EXPECT_TRUE(overlayManager->modalStack_.empty());
@@ -2619,7 +2991,7 @@ HWTEST_F(OverlayManagerTestNg, TestSheetPage004, TestSize.Level1)
 
 /**
  * @tc.name: GetSheetType001
- * @tc.desc: Test SheetPresentationPattern::GetSheetType.
+ * @tc.desc: Test SheetPresentationPattern::GetSheetType::
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayManagerTestNg, GetSheetType001, TestSize.Level1)

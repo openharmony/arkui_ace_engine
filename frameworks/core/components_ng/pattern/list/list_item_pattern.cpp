@@ -410,7 +410,7 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
 
 void ListItemPattern::HandleDragStart(const GestureEvent& info)
 {
-    if (info.GetInputEventType() == InputEventType::AXIS) {
+    if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
         return;
     }
     if (springController_ && !springController_->IsStopped()) {
@@ -566,7 +566,7 @@ float ListItemPattern::SetReverseValue(float offset)
 
 void ListItemPattern::HandleDragUpdate(const GestureEvent& info)
 {
-    if (info.GetInputEventType() == InputEventType::AXIS) {
+    if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
         return;
     }
     auto layoutProperty = GetLayoutProperty<ListItemLayoutProperty>();
@@ -726,7 +726,7 @@ void ListItemPattern::ResetToItemChild()
 
 void ListItemPattern::HandleDragEnd(const GestureEvent& info)
 {
-    if (info.GetInputEventType() == InputEventType::AXIS) {
+    if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
         return;
     }
 
