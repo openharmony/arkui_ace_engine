@@ -27,6 +27,7 @@ namespace OHOS::Ace::Napi {
 namespace {
 constexpr char NAV_BAR[] = "navBar";
 constexpr int32_t PARAM_SIZE_TWO = 2;
+constexpr int32_t PARAM_SIZE_SIX = 6;
 }
 
 void UIObserverListener::OnNavigationStateChange(const NG::NavDestinationInfo& info)
@@ -294,7 +295,7 @@ void UIObserverListener::OnTabContentStateChange(const NG::TabContentInfo& tabCo
         param5,
         param6,
     };
-    napi_create_object_with_named_properties(env_, &objValue, 6, keys, values);
+    napi_create_object_with_named_properties(env_, &objValue, PARAM_SIZE_SIX, keys, values);
     napi_value argv[] = { objValue };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
 }
