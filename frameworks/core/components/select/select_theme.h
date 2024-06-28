@@ -35,6 +35,7 @@ constexpr double SELECT_OPTION_RIGHT_LENGTH = 16.0;
 constexpr double SELECT_OPTION_BOTTOM_LENGTH = 15.0;
 constexpr double NONE_SHADOW_VALUE = 6.0;
 constexpr double CONTENT_ALIGN_LEFT = 4.0;
+constexpr double SELECT_FOCUS_SCALE = 1.0;
 constexpr Dimension VERTICAL_INTERVAL = 14.4_vp;
 constexpr Dimension MENU_END_ICON_WIDTH = 24.0_vp;
 constexpr Dimension MENU_END_ICON_HEIGHT = 24.0_vp;
@@ -282,6 +283,39 @@ public:
                 static_cast<uint32_t>(pattern->GetAttr<double>("menu_item_focused_shadow_style", NONE_SHADOW_VALUE));
             theme->menuItemContentAlign_ =
                 static_cast<uint32_t>(pattern->GetAttr<double>("menu_item_content_align", CONTENT_ALIGN_LEFT));
+            theme->selectNormalBorderWidth_ = pattern->GetAttr<Dimension>("select_normal_border_width", 0.0_vp);
+            theme->selectNormalBorderColor_ = pattern->GetAttr<Color>("select_normal_border_color", Color::TRANSPARENT);
+            theme->selectNormalShadow_ =
+                static_cast<uint32_t>(pattern->GetAttr<double>("select_normal_shadow", NONE_SHADOW_VALUE));
+            theme->selectFocusedShadow_ =
+            static_cast<uint32_t>(pattern->GetAttr<double>("select_focused_shadow", NONE_SHADOW_VALUE));
+            theme->selectFocusedScale_ =
+            pattern->GetAttr<double>("select_focused_scale", SELECT_FOCUS_SCALE);
+            theme->selectFocusedTextColor_ = pattern->GetAttr<Color>("select_focused_text_color", Color(0xff182431));
+            theme->selectFocusedBackgroundColor_ =
+                pattern->GetAttr<Color>("select_focused_back_ground_color", Color::TRANSPARENT);
+            theme->menuNormalBorderWidth_ = pattern->GetAttr<Dimension>("menu_normal_border_width", 0.0_vp);
+            theme->menuNormalBorderColor_ = pattern->GetAttr<Color>("menu_normal_border_color", Color::TRANSPARENT);
+            theme->menuNormalBackgroundBlurStyle_ =
+                static_cast<uint32_t>(pattern->GetAttr<double>("menu_normal_back_ground_blur_type", 0));
+            theme->optionNormalTopBottomMargin_ =
+                pattern->GetAttr<Dimension>("option_normal_top_bottom_margin", 0.0_vp);
+            theme->optionContentNormalLeftRightPadding_ =
+                pattern->GetAttr<Dimension>("option_content_normal_left_right_padding", 0.0_vp);
+            theme->optionContentNormalAlign_ =
+                static_cast<uint32_t>(pattern->GetAttr<double>("option_content_normal_align", CONTENT_ALIGN_LEFT));
+            theme->optionFocusedLeftRightMargin_ =
+                pattern->GetAttr<Dimension>("option_focused_left_right_margin", 0.0_vp);
+            theme->optionFocusedBackgroundColor_ =
+                pattern->GetAttr<Color>("option_focused_back_ground_color", Color::TRANSPARENT);
+            theme->optionFocusedShadow_ =
+                static_cast<uint32_t>(pattern->GetAttr<double>("option_focus_shadow", NONE_SHADOW_VALUE));
+            theme->optionFocusedFontColor_ = pattern->GetAttr<Color>("option_focused_font_color", Color(0xff182431));
+            theme->shadowNormal_ =
+                static_cast<uint32_t>(pattern->GetAttr<double>("option_default_shadow", NONE_SHADOW_VALUE));
+            theme->optionSelectedBorderColor_ =
+                pattern->GetAttr<Color>("option_selected_border_color", Color::TRANSPARENT);
+            theme->optionSelectedBorderWidth_ = pattern->GetAttr<Dimension>("option_selected_border_width", 0.0_vp);
         }
     };
 
@@ -391,6 +425,26 @@ public:
         theme->menuItemFocusedTextColor_ = menuItemFocusedTextColor_;
         theme->menuItemFocusedShadowStyle_ = menuItemFocusedShadowStyle_;
         theme->menuItemContentAlign_ = menuItemContentAlign_;
+        theme->selectNormalBorderWidth_ = selectNormalBorderWidth_;
+        theme->selectNormalBorderColor_ = selectNormalBorderColor_;
+        theme->selectNormalShadow_ = selectNormalShadow_;
+        theme->selectFocusedShadow_ = selectFocusedShadow_;
+        theme->selectFocusedScale_ = selectFocusedScale_;
+        theme->selectFocusedTextColor_ = selectFocusedTextColor_;
+        theme->selectFocusedBackgroundColor_ = selectFocusedBackgroundColor_;
+        theme->menuNormalBorderWidth_ = menuNormalBorderWidth_;
+        theme->menuNormalBorderColor_ = menuNormalBorderColor_;
+        theme->menuNormalBackgroundBlurStyle_ = menuNormalBackgroundBlurStyle_;
+        theme->optionNormalTopBottomMargin_ = optionNormalTopBottomMargin_;
+        theme->optionContentNormalLeftRightPadding_ = optionContentNormalLeftRightPadding_;
+        theme->optionContentNormalAlign_ = optionContentNormalAlign_;
+        theme->optionFocusedLeftRightMargin_ = optionFocusedLeftRightMargin_;
+        theme->optionFocusedBackgroundColor_ = optionFocusedBackgroundColor_;
+        theme->optionFocusedShadow_ = optionFocusedShadow_;
+        theme->optionFocusedFontColor_ = optionFocusedFontColor_;
+        theme->shadowNormal_ = shadowNormal_;
+        theme->optionSelectedBorderColor_ = optionSelectedBorderColor_;
+        theme->optionSelectedBorderWidth_ = optionSelectedBorderWidth_;
         return theme;
     }
 
@@ -1081,6 +1135,105 @@ public:
         return menuItemContentAlign_;
     }
 
+    const Dimension& GetSelectNormalBorderWidth() const
+    {
+        return selectNormalBorderWidth_;
+    }
+
+    const Color& GetSelectNormalBorderColor() const
+    {
+        return selectNormalBorderColor_;
+    }
+
+    uint32_t GetSelectNormalShadow() const
+    {
+        return selectNormalShadow_;
+    }
+
+    uint32_t GetSelectFocusedShadow() const
+    {
+        return selectFocusedShadow_;
+    }
+
+    double GetSelectFocusedScale() const
+    {
+        return selectFocusedScale_;
+    }
+
+    const Color& GetSelectFocusedBackground() const
+    {
+        return selectFocusedBackgroundColor_;
+    }
+
+    const Color& GetSelectFocusTextColor() const
+    {
+        return selectFocusedTextColor_;
+    }
+
+    const Dimension& GetMenuNormalBorderWidth() const
+    {
+        return menuNormalBorderWidth_;
+    }
+
+    const int& GetMenuNormalBackgroundBlurStyle() const
+    {
+        return menuNormalBackgroundBlurStyle_;
+    }
+
+    const Color& GetMenuNormalBorderColor() const
+    {
+        return menuNormalBorderColor_;
+    }
+
+    const Dimension& GetOptionNormalTopBottomMargin() const
+    {
+        return optionNormalTopBottomMargin_;
+    }
+
+    const Dimension& GetOptionFocusedLeftRightMargin() const
+    {
+        return optionFocusedLeftRightMargin_;
+    }
+
+    const Color& GetOptionFocusedBackgroundColor() const
+    {
+        return optionFocusedBackgroundColor_;
+    }
+
+    uint32_t GetOptionFocusedShadow() const
+    {
+        return optionFocusedShadow_;
+    }
+
+    const Color& GetOptionFocusedFontColor() const
+    {
+        return optionFocusedFontColor_;
+    }
+
+    const Dimension& GetOptionContentNormalLeftRightPadding() const
+    {
+        return optionContentNormalLeftRightPadding_;
+    }
+
+    const uint32_t& GetOptionContentNormalAlign() const
+    {
+        return optionContentNormalAlign_;
+    }
+
+    uint32_t GetShadowNormal() const
+    {
+        return shadowNormal_;
+    }
+
+    const Color& GetOptionSelectedBorderColor() const
+    {
+        return optionSelectedBorderColor_;
+    }
+
+    const Dimension& GetOptionSelectedBorderWidth() const
+    {
+        return optionSelectedBorderWidth_;
+    }
 private:
     Color disabledColor_;
     Color clickedColor_;
@@ -1202,6 +1355,26 @@ private:
     Color menuItemFocusedTextColor_;
     uint32_t menuItemFocusedShadowStyle_;
     uint32_t menuItemContentAlign_;
+    Dimension selectNormalBorderWidth_;
+    Color selectNormalBorderColor_;
+    Color selectFocusedTextColor_;
+    Color selectFocusedBackgroundColor_;
+    uint32_t selectNormalShadow_;
+    uint32_t selectFocusedShadow_;
+    double selectFocusedScale_;
+    Dimension menuNormalBorderWidth_;
+    Color menuNormalBorderColor_;
+    int menuNormalBackgroundBlurStyle_;
+    Dimension optionNormalTopBottomMargin_;
+    Dimension optionContentNormalLeftRightPadding_;
+    uint32_t optionContentNormalAlign_;
+    Dimension optionFocusedLeftRightMargin_;
+    Color optionFocusedBackgroundColor_;
+    uint32_t optionFocusedShadow_;
+    Color optionFocusedFontColor_;
+    uint32_t shadowNormal_;  // no shadow
+    Color optionSelectedBorderColor_;
+    Dimension optionSelectedBorderWidth_;
 };
 
 } // namespace OHOS::Ace

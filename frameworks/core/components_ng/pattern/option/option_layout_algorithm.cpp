@@ -106,7 +106,6 @@ void OptionLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         child->Layout();
         return;
     }
-
     auto direction = layoutProps->GetNonAutoLayoutDirection();
     bool isRtl = direction == TextDirection::RTL;
     const auto& selectTheme = optionPattern->GetSelectTheme();
@@ -122,11 +121,14 @@ void OptionLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         iconProps->UpdateMargin(margin);
         iconChild->Layout();
     }
-
     float horInterval = horInterval_;
     if (isRtl) {
         SizeF childSize = child->GetGeometryNode()->GetMarginFrameSize();
         horInterval = optionSize.Width() - childSize.Width() - horInterval_;
+    }
+    auto textAlign = static_cast<TextAlign>(selectTheme->GetOptionContentNormalAlign());
+    if (textAlign == TextAlign::CENTER) {
+        extendTextAndRowNode(child, optionSize, horInterval);
     }
     child->GetGeometryNode()->SetMarginFrameOffset(
         OffsetF(horInterval, (optionHeight - child->GetGeometryNode()->GetFrameSize().Height()) / 2.0f));
@@ -172,5 +174,35 @@ void OptionLayoutAlgorithm::MeasureRow(const RefPtr<LayoutWrapper>& row, const L
         roWHeight = std::max(roWHeight, childSize.Height());
     }
     row->GetGeometryNode()->SetFrameSize(SizeF(rowWidth, roWHeight));
+}
+
+void OptionLayoutAlgorithm::extendTextAndRowNode(const RefPtr<LayoutWrapper>& row, const SizeF& optSize, float interval)
+{
+    CHECK_NULL_VOID(row);
+    auto children = row->GetAllChildrenWithBuild();
+    if (children.empty()) {
+        return;
+    }
+    SizeF frameSize;
+    for (auto textChild : children) {
+        if (!textChild) {
+            continue;
+        }
+        if (textChild->GetHostTag() != V2::TEXT_ETS_TAG) {
+            continue;
+        }
+        auto geometryNode = textChild->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        frameSize = geometryNode->GetMarginFrameSize();
+        auto startOffset = geometryNode->GetMarginFrameOffset();
+        auto width = optSize.Width() - startOffset.GetX() - interval;
+        auto height = frameSize.Height();
+        geometryNode->SetFrameSize(SizeF(width, height));
+        textChild->Layout();
+    }
+    auto geometryNode = row->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    frameSize = geometryNode->GetMarginFrameSize();
+    geometryNode->SetFrameSize(SizeF(optSize.Width() - interval, frameSize.Height()));
 }
 } // namespace OHOS::Ace::NG

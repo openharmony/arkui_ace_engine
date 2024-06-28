@@ -34,6 +34,7 @@ public:
 
 private:
     void MeasureRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint);
+    void extendTextAndRowNode(const RefPtr<LayoutWrapper>& row, const SizeF& optSize, float intervall);
     std::optional<float> GetIdealWidth(LayoutWrapper* layoutWrapper);
     float horInterval_ = 0.0f;
 
