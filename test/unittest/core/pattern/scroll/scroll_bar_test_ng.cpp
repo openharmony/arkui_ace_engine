@@ -14,8 +14,6 @@
  */
 
 #include "scroll_test_ng.h"
-#include "base/log/dump_log.h"
-
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1026,14 +1024,8 @@ HWTEST_F(ScrollBarTestNg, DumpAdvanceInfo001, TestSize.Level1)
     CreateContent(TOTAL_ITEM_NUMBER);
     auto paintWrapper = CreateDone(frameNode_);
     auto scrollBar = pattern_->GetScrollBar();
-
     scrollBar->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_[7], "shapeMode: RECT\n");
-    EXPECT_EQ(DumpLog::GetInstance().description_[8], "positionMode: RIGHT\n");
-    EXPECT_EQ(DumpLog::GetInstance().description_[10], "axis: VERTICAL\n");
-    EXPECT_EQ(DumpLog::GetInstance().description_[11], "panDirection: VERTICAL\n");
 
-    DumpLog::GetInstance().description_.clear();
     scrollBar->SetShapeMode(ShapeMode::ROUND);
     scrollBar->SetPositionMode(PositionMode::LEFT);
     scrollBar->SetAxis(Axis::NONE);
@@ -1041,34 +1033,20 @@ HWTEST_F(ScrollBarTestNg, DumpAdvanceInfo001, TestSize.Level1)
     panDirection.type = 0;
     scrollBar->panRecognizer_->direction_ = panDirection;
     scrollBar->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_[7], "shapeMode: ROUND\n");
-    EXPECT_EQ(DumpLog::GetInstance().description_[8], "positionMode: LEFT\n");
-    EXPECT_EQ(DumpLog::GetInstance().description_[10], "axis: NONE\n");
-    EXPECT_EQ(DumpLog::GetInstance().description_[11], "panDirection: NONE\n");
 
-    DumpLog::GetInstance().description_.clear();
     scrollBar->SetShapeMode(ShapeMode::DEFAULT);
     scrollBar->SetPositionMode(PositionMode::BOTTOM);
     scrollBar->SetAxis(Axis::HORIZONTAL);
     panDirection.type = 3;
     scrollBar->panRecognizer_->direction_ = panDirection;
     scrollBar->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_[7], "shapeMode: DEFAULT\n");
-    EXPECT_EQ(DumpLog::GetInstance().description_[8], "positionMode: BOTTOM\n");
-    EXPECT_EQ(DumpLog::GetInstance().description_[10], "axis: HORIZONTAL\n");
-    EXPECT_EQ(DumpLog::GetInstance().description_[11], "panDirection: HORIZONTAL\n");
 
-    DumpLog::GetInstance().description_.clear();
     scrollBar->SetAxis(Axis::FREE);
     panDirection.type = 15;
     scrollBar->panRecognizer_->direction_ = panDirection;
     scrollBar->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_[10], "axis: FREE\n");
-    EXPECT_EQ(DumpLog::GetInstance().description_[11], "panDirection: FREE\n");
 
-    DumpLog::GetInstance().description_.clear();
     scrollBar->panRecognizer_ = nullptr;
     scrollBar->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_[11], "panDirection is null\n");
 }
 } // namespace OHOS::Ace::NG

@@ -1097,6 +1097,8 @@ HWTEST_F(GridCommonTestNg, SetSpecificSupportAction001, TestSize.Level1)
      */
     ClearOldNodes();
     CreateGrid();
+    model.SetRowsTemplate("1fr");
+    model.SetColumnsTemplate("1fr");
     CreateDone(frameNode_);
     EXPECT_FALSE(accessibilityProperty_->IsScrollable());
     accessibilityProperty_->ResetSupportAction();
