@@ -4264,9 +4264,6 @@ void WebPattern::OnRootLayerChanged(int width, int height)
         return;
     }
     rootLayerChangeSize_ = Size(width, height);
-    if (GetPendingSizeStatus()) {
-        return;
-    }
     ReleaseResizeHold();
 }
 
