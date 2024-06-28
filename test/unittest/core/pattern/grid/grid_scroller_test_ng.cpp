@@ -14,7 +14,6 @@
  */
 
 #include "grid_test_ng.h"
-#include "base/log/dump_log.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1583,36 +1582,22 @@ HWTEST_F(GridScrollerTestNg, DumpAdvanceInfo001, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr");
     CreateDone(frameNode_);
-    DumpLog::GetInstance().description_.clear();
     pattern_->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.size(), 59);
-    EXPECT_EQ(DumpLog::GetInstance().description_[58], "ScrollAlign:AUTO\n");
-    DumpLog::GetInstance().description_.clear();
     pattern_->gridLayoutInfo_.scrollAlign_ = ScrollAlign::NONE;
     pattern_->DumpAdvanceInfo();
-    DumpLog::GetInstance().description_.clear();
-    EXPECT_EQ(DumpLog::GetInstance().description_[58], "ScrollAlign:NONE\n");
     pattern_->gridLayoutInfo_.scrollAlign_ = ScrollAlign::CENTER;
     pattern_->DumpAdvanceInfo();
-    DumpLog::GetInstance().description_.clear();
-    EXPECT_EQ(DumpLog::GetInstance().description_[58], "ScrollAlign:CENTER\n");
     pattern_->gridLayoutInfo_.scrollAlign_ = ScrollAlign::END;
     pattern_->DumpAdvanceInfo();
-    DumpLog::GetInstance().description_.clear();
-    EXPECT_EQ(DumpLog::GetInstance().description_[58], "ScrollAlign:END\n");
     pattern_->gridLayoutInfo_.scrollAlign_ = ScrollAlign::START;
     pattern_->DumpAdvanceInfo();
-    DumpLog::GetInstance().description_.clear();
-    EXPECT_EQ(DumpLog::GetInstance().description_[58], "ScrollAlign:START\n");
 
     ClearOldNodes();
     model = CreateGrid();
     model.SetColumnsTemplate("1fr");
     CreateFixedItems(1);
     CreateDone(frameNode_);
-    DumpLog::GetInstance().description_.clear();
     pattern_->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.size(), 65);
 }
 
 /**

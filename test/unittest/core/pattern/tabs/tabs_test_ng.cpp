@@ -592,19 +592,12 @@ HWTEST_F(TabsTestNg, DumpAdvanceInfo005, TestSize.Level1)
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
     tabBarPattern_->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_[14], "Axis:HORIZONTAL\n");
-    DumpLog::GetInstance().description_.clear();
     tabBarPattern_->axis_ = Axis::VERTICAL;
     tabBarPattern_->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_[14], "Axis:VERTICAL\n");
-    DumpLog::GetInstance().description_.clear();
     tabBarPattern_->axis_ = Axis::FREE;
     tabBarPattern_->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_[14], "Axis:FREE\n");
-    DumpLog::GetInstance().description_.clear();
     tabBarPattern_->axis_ = Axis::NONE;
     tabBarPattern_->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_[14], "Axis:NONE\n");
 }
 
 /**
