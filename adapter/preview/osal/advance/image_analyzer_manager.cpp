@@ -51,7 +51,8 @@ void ImageAnalyzerManager::UpdateAnalyzerOverlayLayout()
 {
 }
 
-void ImageAnalyzerManager::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
+void ImageAnalyzerManager::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode,
+    const PixelMapInfo& info)
 {
 }
 

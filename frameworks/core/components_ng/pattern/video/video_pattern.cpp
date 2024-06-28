@@ -1041,10 +1041,6 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
             videoFrameSize.Height());
     }
 
-    if (IsSupportImageAnalyzer()) {
-        UpdateAnalyzerUIConfig(geometryNode);
-    }
-
     auto padding  = layoutProperty->CreatePaddingAndBorder();
     auto imageFit = layoutProperty->GetObjectFitValue(ImageFit::COVER);
     if (imageFit == ImageFit::COVER) {
@@ -1055,6 +1051,10 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
             (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE + padding.top.value_or(0),
             videoFrameSize.Width(), videoFrameSize.Height());
     }
+    if (IsSupportImageAnalyzer()) {
+        UpdateAnalyzerUIConfig(geometryNode);
+    }
+
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     host->MarkNeedSyncRenderTree();
@@ -1825,8 +1825,14 @@ void VideoPattern::CreateAnalyzerOverlay()
 void VideoPattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
 {
     if (IsSupportImageAnalyzer()) {
+        auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto padding  = layoutProperty->CreatePaddingAndBorder();
+        OffsetF contentOffset = { contentRect_.Left() - padding.left.value_or(0),
+                                  contentRect_.Top() - padding.top.value_or(0) };
+        PixelMapInfo info = { contentRect_.GetSize().Width(), contentRect_.GetSize().Height(), contentOffset };
         CHECK_NULL_VOID(imageAnalyzerManager_);
-        imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
+        imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode, info);
     }
 }
 
