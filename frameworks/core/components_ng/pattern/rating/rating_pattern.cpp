@@ -150,6 +150,7 @@ void RatingPattern::UpdatePaintConfig()
     auto layoutProperty = GetLayoutProperty<RatingLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto starsNum = layoutProperty->GetStarsValue(themeStarNum_);
+    CHECK_EQUAL_VOID(starsNum, 0);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();

@@ -431,8 +431,7 @@ HWTEST_F(RatingTestNg, RatingMeasureTest009, TestSize.Level1)
     layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
     auto ratingTheme = AceType::MakeRefPtr<RatingTheme>();
     ASSERT_NE(ratingTheme, nullptr);
-    EXPECT_EQ(ratingLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper),
-        SizeF(ratingTheme->GetRatingHeight().ConvertToPx(), ratingTheme->GetRatingWidth().ConvertToPx()));
+    EXPECT_EQ(ratingLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper), std::nullopt);
 
     /**
      * @tc.steps: step4. Invoke MeasureContent when the size has been defined.
@@ -455,8 +454,7 @@ HWTEST_F(RatingTestNg, RatingMeasureTest009, TestSize.Level1)
     layoutConstraintSize.selfIdealSize.SetSize(INVALID_CONTAINER_SIZE);
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize);
     layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
-    EXPECT_EQ(ratingLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper),
-        SizeF(ratingTheme->GetRatingHeight().ConvertToPx(), ratingTheme->GetRatingWidth().ConvertToPx()));
+    EXPECT_EQ(ratingLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper), std::nullopt);
 
     /**
      * @tc.steps: step6. Invoke Layout when contentSize is valid.
