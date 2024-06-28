@@ -30,6 +30,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t COLOR_BLACK = 0xff000000;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
+constexpr uint32_t COLOR_WHITE_TRANSLUCENT = 0x66FFFFFF;
+constexpr Dimension RADIO_SNAPSHOT_IMAGE = 16.0_vp;
 } // namespace
 
 class LifecycleListener : public Rosen::ILifecycleListener {
@@ -215,6 +217,30 @@ void WindowPattern::CreateStartingWindow()
     startingWindow_->MarkModifyDone();
 }
 
+void WindowPattern::UpdateSnapshotNodeProperty()
+{
+    CHECK_NULL_VOID(snapshotNode_ && session_);
+    auto isExitSplitOnBackground = session_->IsExitSplitOnBackground();
+    if (isExitSplitOnBackground) {
+        auto imagePattern = snapshotNode_->GetPattern<ImagePattern>();
+        auto renderContext = snapshotNode_->GetRenderContext();
+        auto imageRenderProperty = snapshotNode_->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(imagePattern && renderContext && imageRenderProperty);
+
+        BorderRadiusProperty borderRadius;
+        borderRadius.SetRadius(RADIO_SNAPSHOT_IMAGE);
+        borderRadius.multiValued = false;
+        renderContext->UpdateBorderRadius(borderRadius);
+        renderContext->UpdateBackgroundColor(Color(COLOR_WHITE_TRANSLUCENT));
+        imagePattern->SetNeedBorderRadius(true);
+        imageRenderProperty->UpdateNeedBorderRadius(true);
+    }
+    auto imageLayoutProperty = snapshotNode_->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    imageLayoutProperty->UpdateImageFit(isExitSplitOnBackground ? ImageFit::CONTAIN : ImageFit::COVER_TOP_LEFT);
+    snapshotNode_->MarkModifyDone();
+}
+
 void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::PixelMap>> snapshot)
 {
     auto host = GetHost();
@@ -257,8 +283,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
             self->snapshotWindow_->MarkNeedRenderOnly();
         });
     }
-    imageLayoutProperty->UpdateImageFit(ImageFit::COVER_TOP_LEFT);
-    snapshotWindow_->MarkModifyDone();
+    UpdateSnapshotNodeProperty();
 }
 
 void WindowPattern::ClearImageCache(const ImageSourceInfo& sourceInfo)
