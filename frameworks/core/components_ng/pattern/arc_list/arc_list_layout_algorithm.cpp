@@ -45,13 +45,17 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float ARC_LIST_ITER_SCALE = 0.92f;
 constexpr float ARC_LIST_ONE_PERCENT = 0.01f;
+constexpr float ARC_LIST_MAIN_POS_OFFSET = 200.f;
+constexpr float ARC_LIST_ITEM_SNAP_SIZE = 72.5f;
+constexpr float FLOAT_TWO = 2.0f;
 } // namespace
 
+// map data from UX, mark for scale ratio according to distance between item center and list center
 ArcListLayoutAlgorithm::CenterPos2ScaleMap ArcListLayoutAlgorithm::centerPos2ScaleMap_ = { { 141, 78 }, { 118, 88 },
     { 94, 97 }, { 70.6, 103 }, { 47, 107 }, { 23.5, 107.5 }, { 0, 108 }, { -23, 107.5 }, { -45, 107 }, { -66, 103 },
     { -89, 98 }, { -112, 90 }, { -132, 82 } };
 
-float ArcListLayoutAlgorithm::GetNearScale(const float pos)
+float ArcListLayoutAlgorithm::GetNearScale(float pos)
 {
     if (centerPos2ScaleMap_.empty()) {
         return 0.0;
@@ -74,111 +78,12 @@ float ArcListLayoutAlgorithm::GetNearScale(const float pos)
     return 0.0;
 }
 
-void ArcListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
-{
-    auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(listLayoutProperty);
-
-    axis_ = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
-    // Pre-recycle
-    ScrollableUtils::RecycleItemsOutOfBoundary(axis_, -currentDelta_, GetStartIndex(), GetEndIndex(), layoutWrapper);
-
-    const auto& layoutConstraint = listLayoutProperty->GetLayoutConstraint().value();
-
-    // calculate idealSize and set FrameSize
-    contentStartOffset_ = 0.0;
-    contentEndOffset_ = 0.0;
-
-    // calculate main size.
-    auto contentConstraint = listLayoutProperty->GetContentLayoutConstraint().value();
-
-    float expandHeight = ScrollableUtils::CheckHeightExpansion(listLayoutProperty, axis_);
-    contentEndOffset_ += expandHeight;
-    // expand contentSize
-    contentConstraint.MinusPadding(std::nullopt, std::nullopt, std::nullopt, -expandHeight);
-    auto&& safeAreaOpts = listLayoutProperty->GetSafeAreaExpandOpts();
-    expandSafeArea_ = safeAreaOpts && safeAreaOpts->Expansive();
-
-    auto contentIdealSize = CreateIdealSize(
-        contentConstraint, axis_, listLayoutProperty->GetMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS));
-
-    const auto& padding = listLayoutProperty->CreatePaddingAndBorder();
-    paddingBeforeContent_ = axis_ == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
-    paddingAfterContent_ = axis_ == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
-    contentMainSize_ = 0.0f;
-    totalItemCount_ = layoutWrapper->GetTotalChildCount() - itemStartIndex_;
-    if (childrenSize_) {
-        childrenSize_->ResizeChildrenSize(totalItemCount_);
-    }
-    if (!GetMainAxisSize(contentIdealSize, axis_)) {
-        if (totalItemCount_ == 0) {
-            contentMainSize_ = 0.0f;
-        } else {
-            // use parent max size first.
-            auto parentMaxSize = contentConstraint.maxSize;
-            contentMainSize_ = GetMainAxisSize(parentMaxSize, axis_);
-            mainSizeIsDefined_ = false;
-        }
-    } else {
-        contentMainSize_ = GetMainAxisSize(contentIdealSize.ConvertToSizeT(), axis_);
-        mainSizeIsDefined_ = true;
-    }
-    contentStartOffset_ = 0;
-    contentEndOffset_ = 0;
-
-    MeasureHeader(layoutWrapper);
-
-    if (totalItemCount_ > 0) {
-        OnSurfaceChanged(layoutWrapper);
-
-        childLayoutConstraint_ = listLayoutProperty->CreateChildConstraint();
-        auto mainPercentRefer = GetMainAxisSize(childLayoutConstraint_.percentReference, axis_);
-        auto space = listLayoutProperty->GetSpace().value_or(Dimension(0));
-        spaceWidth_ = ConvertToPx(space, layoutConstraint.scaleProperty, mainPercentRefer).value_or(0);
-        ReviseSpace(listLayoutProperty);
-        CheckJumpToIndex();
-        currentOffset_ = currentDelta_;
-        startMainPos_ = currentOffset_;
-        endMainPos_ = currentOffset_ + contentMainSize_;
-        // calculate child layout constraint.
-        UpdateListItemConstraint(axis_, contentIdealSize, childLayoutConstraint_);
-        if (posMap_) {
-            posMap_->UpdatePosMap(layoutWrapper, 0, spaceWidth_, childrenSize_);
-        }
-        MeasureList(layoutWrapper);
-    } else {
-        itemPosition_.clear();
-        if (posMap_) {
-            posMap_->ClearPosMap();
-        }
-    }
-
-    SetActiveChildRange(layoutWrapper);
-
-    auto crossSize = contentIdealSize.CrossSize(axis_);
-    if (crossSize.has_value() && GreaterOrEqualToInfinity(crossSize.value())) {
-        contentIdealSize.SetCrossSize(GetChildMaxCrossSize(layoutWrapper, axis_), axis_);
-        crossMatchChild_ = true;
-    }
-    contentIdealSize.SetMainSize(contentMainSize_, axis_);
-    AddPaddingToSize(padding, contentIdealSize);
-
-    auto size = contentIdealSize.ConvertToSizeT();
-    // Cancel frame size expansion, only expand content size here.
-    // Frame expansion will be determined after Layout.
-    size.MinusHeight(expandHeight);
-    layoutWrapper->GetGeometryNode()->SetFrameSize(size);
-
-    // set list cache info.
-    SetCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountValue(1));
-}
-
 void ArcListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
 {
     int32_t startIndex = 0;
     int32_t endIndex = 0;
     int32_t midIndex = 0;
-    float midItemMidPos = contentMainSize_ / 2.0f;
+    float midItemMidPos = contentMainSize_ / FLOAT_TWO;
     float startPos = headerMainSize_;
     float endPos = 0.0f;
     float itemTotalSize = 0.0f;
@@ -211,8 +116,8 @@ void ArcListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         }
         UpdateSnapCenterContentOffset(layoutWrapper);
         midIndex = GetMidIndex(layoutWrapper, true);
-        midItemMidPos = (itemPosition_[midIndex].startPos + itemPosition_[midIndex].endPos) / 2.0f -
-                        prevContentMainSize_ / 2.0f + contentMainSize_ / 2.0f;
+        midItemMidPos = (itemPosition_[midIndex].startPos + itemPosition_[midIndex].endPos) / FLOAT_TWO -
+                        prevContentMainSize_ / FLOAT_TWO + contentMainSize_ / FLOAT_TWO;
         midIndex = std::min(midIndex, totalItemCount_ - 1);
         OffScreenLayoutDirection();
 
@@ -243,7 +148,7 @@ void ArcListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         if (NearZero(currentOffset_) || (!overScrollFeature_ && NonNegative(currentOffset_)) ||
             (overScrollFeature_ && overScrollTop) ||
             LessOrEqual(itemTotalSize, contentMainSize_ - contentStartOffset_ - contentEndOffset_)) {
-            startPos = midItemMidPos - midItemHeight / 2.0f;
+            startPos = midItemMidPos - midItemHeight / FLOAT_TWO;
             if (childrenSize_) {
                 posMap_->OptimizeBeforeMeasure(startIndex, startPos, currentOffset_, contentMainSize_);
             }
@@ -252,7 +157,7 @@ void ArcListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
                 LayoutBackward(layoutWrapper, GetStartIndex() - 1, GetStartPosition());
             }
         } else {
-            endPos = midItemMidPos + midItemHeight / 2.0f;
+            endPos = midItemMidPos + midItemHeight / FLOAT_TWO;
             if (childrenSize_) {
                 posMap_->OptimizeBeforeMeasure(endIndex, endPos, currentOffset_, contentMainSize_);
             }
@@ -324,7 +229,7 @@ float ArcListLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float ch
     if (LessOrEqual(delta, 0)) {
         return 0.0f;
     }
-    return delta / 2.0f;
+    return delta / FLOAT_TWO;
 }
 
 void ArcListLayoutAlgorithm::FixPredictSnapOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty)
@@ -360,122 +265,43 @@ void ArcListLayoutAlgorithm::FixPredictSnapOffsetAlignCenter()
     float snapSize = LessOrEqual(itemHeight, ARC_LIST_ITEM_SNAP_SIZE + spaceWidth_)
                          ? itemHeight
                          : ARC_LIST_ITEM_SNAP_SIZE + spaceWidth_;
-    if (LessNotEqual(predictEndPos, snapSize / 2.0f - contentMainSize_ / 2.0f - spaceWidth_ / 2.0f)) {
+    if (LessNotEqual(predictEndPos, snapSize / FLOAT_TWO - contentMainSize_ / FLOAT_TWO - spaceWidth_ / FLOAT_TWO)) {
         if (isSpringEffect_) {
             return;
         }
-        predictEndPos = snapSize / 2.0f - contentMainSize_ / 2.0f - spaceWidth_ / 2.0f;
+        predictEndPos = snapSize / FLOAT_TWO - contentMainSize_ / FLOAT_TWO - spaceWidth_ / FLOAT_TWO;
     } else if (GreatNotEqual(
-        predictEndPos + contentMainSize_ / 2.0f, itemHeight * totalItemCount_ - snapSize / 2.0f)) {
+        predictEndPos + contentMainSize_ / FLOAT_TWO, itemHeight * totalItemCount_ - snapSize / FLOAT_TWO)) {
         if (isSpringEffect_) {
             return;
         }
-        predictEndPos = itemHeight * totalItemCount_ - snapSize / 2.0f - contentMainSize_ / 2.0f - spaceWidth_ / 2.0f;
+        predictEndPos = itemHeight * totalItemCount_ - snapSize / FLOAT_TWO - contentMainSize_ / FLOAT_TWO -
+                        spaceWidth_ / FLOAT_TWO;
     } else {
         int32_t index;
         for (index = 0; index <= GetMaxListItemIndex(); index++) {
-            if (std::abs(predictEndPos + contentMainSize_ / 2.0f - index * itemHeight - itemHeight / 2.0f) <
-                itemHeight / 2.0f) {
+            if (std::abs(predictEndPos + contentMainSize_ / FLOAT_TWO - index * itemHeight - itemHeight / FLOAT_TWO) <
+                itemHeight / FLOAT_TWO) {
                 break;
             }
         }
-        float snapLow = index * itemHeight + snapSize / 2.0f - contentMainSize_ / 2.0f - spaceWidth_ / 2.0f;
-        float snapHigh = (index + 1) * itemHeight - snapSize / 2.0f - contentMainSize_ / 2.0f - spaceWidth_ / 2.0f;
+        float snapLow =
+            index * itemHeight + snapSize / FLOAT_TWO - contentMainSize_ / FLOAT_TWO - spaceWidth_ / FLOAT_TWO;
+        float snapHigh =
+            (index + 1) * itemHeight - snapSize / FLOAT_TWO - contentMainSize_ / FLOAT_TWO - spaceWidth_ / FLOAT_TWO;
         predictEndPos = LessNotEqual(predictEndPos, snapLow) ? snapLow : predictEndPos;
         predictEndPos = LessNotEqual(snapHigh, predictEndPos) ? snapHigh : predictEndPos;
-        if (LessNotEqual(predictEndPos, snapSize / 2.0f - contentMainSize_ / 2.0f)) {
-            predictEndPos = snapSize / 2.0f - contentMainSize_ / 2.0f - spaceWidth_ / 2.0f;
-        } else if (GreatNotEqual(
-            predictEndPos + contentMainSize_ / 2.0f, itemHeight * totalItemCount_ - snapSize / 2.0f)) {
-            predictEndPos =
-                itemHeight * totalItemCount_ - snapSize / 2.0f - contentMainSize_ / 2.0f - spaceWidth_ / 2.0f;
+        if (LessNotEqual(predictEndPos, snapSize / FLOAT_TWO - contentMainSize_ / FLOAT_TWO)) {
+            predictEndPos = snapSize / FLOAT_TWO - contentMainSize_ / FLOAT_TWO - spaceWidth_ / FLOAT_TWO;
+        } else if (GreatNotEqual(predictEndPos + contentMainSize_ / FLOAT_TWO,
+            itemHeight * totalItemCount_ - snapSize / FLOAT_TWO)) {
+            predictEndPos = itemHeight * totalItemCount_ - snapSize / FLOAT_TWO - contentMainSize_ / FLOAT_TWO -
+                            spaceWidth_ / FLOAT_TWO;
         }
     }
 
     predictSnapOffset_ = totalOffset_ - predictEndPos;
     predictSnapEndPos_ = predictEndPos;
-}
-
-void ArcListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
-{
-    auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(listLayoutProperty);
-    auto axis_ = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    MinusPaddingToSize(padding, size);
-    paddingOffset_ = padding.Offset();
-    float crossSize = GetCrossAxisSize(size, axis_);
-    totalItemCount_ = layoutWrapper->GetTotalChildCount() - itemStartIndex_;
-    int32_t startIndex = GetStartIndex();
-
-    totalOffset_ += currentOffset_;
-    FixPredictSnapOffset(listLayoutProperty);
-    // layout items.
-    for (auto& pos : itemPosition_) {
-        auto wrapper = GetListItem(layoutWrapper, pos.first);
-        if (!wrapper) {
-            continue;
-        }
-        pos.second.startPos -= currentOffset_;
-        pos.second.endPos -= currentOffset_;
-        LayoutItem(wrapper, pos.first, pos.second, startIndex, crossSize);
-        if (expandSafeArea_ || wrapper->CheckNeedForceMeasureAndLayout()) {
-            wrapper->Layout();
-        } else {
-            SyncGeometry(wrapper);
-        }
-        auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
-        if (frameNode) {
-            frameNode->MarkAndCheckNewOpIncNode();
-        }
-    }
-    for (auto& pos : recycledItemPosition_) {
-        pos.second.startPos -= currentOffset_;
-        pos.second.endPos -= currentOffset_;
-    }
-
-    GenerateItemOffset(layoutWrapper);
-
-    for (auto& pos : itemPosition_) {
-        auto wrapper = GetListItem(layoutWrapper, pos.first);
-        if (!wrapper) {
-            continue;
-        }
-
-        auto frameNode = wrapper->GetHostNode();
-        if (!frameNode) {
-            continue;
-        }
-
-        auto renderContext = frameNode->GetRenderContext();
-        if (!renderContext) {
-            continue;
-        }
-
-        // Adjust item location.
-        // This must be adjust item location first and then scale it, otherwise it will not work properly.
-        renderContext->UpdateTranslateInXY({ 0, pos.second.offsetY });
-
-        // Scale item.
-        renderContext->UpdateTransformScale({ pos.second.scale, pos.second.scale });
-    }
-
-    LayoutHeader(layoutWrapper, paddingOffset_, crossSize);
-
-    auto cacheCount = listLayoutProperty->GetCachedCountValue(1);
-    if (!itemPosition_.empty() && cacheCount > 0) {
-        auto items = LayoutCachedItem(layoutWrapper, cacheCount);
-        if (!items.empty()) {
-            PostIdleTask(layoutWrapper->GetHostNode(), { items, childLayoutConstraint_ });
-        } else {
-            auto host = layoutWrapper->GetHostNode();
-            CHECK_NULL_VOID(host);
-            auto pattern = host->GetPattern<ArcListPattern>();
-            CHECK_NULL_VOID(pattern);
-            pattern->SetPredictLayoutParam(std::nullopt);
-        }
-    }
 }
 
 void ArcListLayoutAlgorithm::GenerateItemOffset(LayoutWrapper* layoutWrapper)
@@ -493,9 +319,9 @@ void ArcListLayoutAlgorithm::GenerateItemOffset(LayoutWrapper* layoutWrapper)
         }
 
         float scale = 1.0;
-        auto contentCenterPos = contentMainSize_ / 2.0;
+        auto contentCenterPos = contentMainSize_ / FLOAT_TWO;
         if (autoScale) {
-            auto itemCenterPos = (pos.second.startPos + pos.second.endPos) / 2.0;
+            auto itemCenterPos = (pos.second.startPos + pos.second.endPos) / FLOAT_TWO;
             scale = GetNearScale(itemCenterPos - contentCenterPos);
         }
 
@@ -510,9 +336,9 @@ void ArcListLayoutAlgorithm::GenerateItemOffset(LayoutWrapper* layoutWrapper)
     if (iter == itemPosition_.end()) {
         TAG_LOGE(AceLogTag::ACE_LIST, "No mid element was found in the forward traversal");
     } else {
-        auto offset = iter->second.offsetY / 2.0;
+        auto offset = iter->second.offsetY / FLOAT_TWO;
         for (++iter; iter != itemPosition_.end(); ++iter) {
-            auto bak = offset + iter->second.offsetY / 2.0;
+            auto bak = offset + iter->second.offsetY / FLOAT_TWO;
             offset += iter->second.offsetY;
             iter->second.offsetY = bak;
         }
@@ -525,10 +351,10 @@ void ArcListLayoutAlgorithm::GenerateItemOffset(LayoutWrapper* layoutWrapper)
     if (riter == itemPosition_.rend()) {
         TAG_LOGE(AceLogTag::ACE_LIST, "No mid element was found in the backward traversal");
     } else {
-        auto offset = riter->second.offsetY / 2.0;
+        auto offset = riter->second.offsetY / FLOAT_TWO;
         riter->second.offsetY = 0.0f;
         for (++riter; riter != itemPosition_.rend(); ++riter) {
-            auto bak = offset + riter->second.offsetY / 2.0;
+            auto bak = offset + riter->second.offsetY / FLOAT_TWO;
             offset += riter->second.offsetY;
             riter->second.offsetY = -bak;
         }
@@ -538,14 +364,14 @@ void ArcListLayoutAlgorithm::GenerateItemOffset(LayoutWrapper* layoutWrapper)
 float ArcListLayoutAlgorithm::CalculatePredictSnapEndPositionByIndex(uint32_t index, float prevPredictEndPos)
 {
     float predictSnapEndPos = prevPredictEndPos;
-    float predictPos = prevPredictEndPos + contentMainSize_ / 2.0f - totalOffset_;
+    float predictPos = prevPredictEndPos + contentMainSize_ / FLOAT_TWO - totalOffset_;
     float itemHeight = itemPosition_[index].endPos - itemPosition_[index].startPos;
     float snapSize = LessOrEqual(itemHeight, ARC_LIST_ITEM_SNAP_SIZE) ? itemHeight : ARC_LIST_ITEM_SNAP_SIZE;
-    float snapLow = itemPosition_[index].startPos + snapSize / 2.0f;
-    float snapHigh = itemPosition_[index].endPos - snapSize / 2.0f;
+    float snapLow = itemPosition_[index].startPos + snapSize / FLOAT_TWO;
+    float snapHigh = itemPosition_[index].endPos - snapSize / FLOAT_TWO;
     predictPos = LessNotEqual(predictPos, snapLow) ? snapLow : predictPos;
     predictPos = LessNotEqual(snapHigh, predictPos) ? snapHigh : predictPos;
-    predictSnapEndPos = totalOffset_ + predictPos - contentMainSize_ / 2.0f;
+    predictSnapEndPos = totalOffset_ + predictPos - contentMainSize_ / FLOAT_TWO;
     return predictSnapEndPos;
 }
 
@@ -557,11 +383,11 @@ void ArcListLayoutAlgorithm::OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrap
 
     float startPos = 0.0f;
     float endPos = 0.0f;
-    startPos = totalOffset_ + itemPosition_[index].startPos - spaceWidth_ / 2.0f;
-    endPos = totalOffset_ + itemPosition_[index].endPos + spaceWidth_ / 2.0f;
+    startPos = totalOffset_ + itemPosition_[index].startPos - spaceWidth_ / FLOAT_TWO;
+    endPos = totalOffset_ + itemPosition_[index].endPos + spaceWidth_ / FLOAT_TWO;
 
     float predictSnapEndPos = predictSnapEndPos_.value();
-    float stopOnScreen = contentMainSize_ / 2.0f;
+    float stopOnScreen = contentMainSize_ / FLOAT_TWO;
     if (GreatOrEqual(predictSnapEndPos + stopOnScreen, startPos) &&
         LessNotEqual(predictSnapEndPos + stopOnScreen, endPos)) {
         predictSnapEndPos = CalculatePredictSnapEndPositionByIndex(index, predictSnapEndPos);
@@ -572,6 +398,11 @@ void ArcListLayoutAlgorithm::OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrap
     if (!NearEqual(predictSnapEndPos, predictSnapEndPos_.value())) {
         predictSnapEndPos_ = predictSnapEndPos;
     }
+}
+
+float ArcListLayoutAlgorithm::GetItemSnapSize()
+{
+    return ARC_LIST_ITEM_SNAP_SIZE;
 }
 
 void ArcListLayoutAlgorithm::MeasureHeader(LayoutWrapper* layoutWrapper)
@@ -615,7 +446,7 @@ void ArcListLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper, const Of
     if (itemPosition_.count(0) != 0) {
         auto info = itemPosition_[0];
         float itemDeltaHeight = (info.endPos - info.startPos) * (info.scale - 1);
-        float itemDispStartPos = info.startPos + info.offsetY - itemDeltaHeight / 2.0f;
+        float itemDispStartPos = info.startPos + info.offsetY - itemDeltaHeight / FLOAT_TWO;
         if (LessOrEqual(itemDispStartPos, headerMainSize_)) {
             startHeaderPos_ = itemDispStartPos - headerMainSize_;
         } else {
@@ -652,6 +483,42 @@ void ArcListLayoutAlgorithm::UpdateZIndex(const RefPtr<LayoutWrapper>& layoutWra
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateZIndex(1);
+}
+
+float ArcListLayoutAlgorithm::GetLayoutFixOffset()
+{
+    return ARC_LIST_MAIN_POS_OFFSET;
+}
+
+void ArcListLayoutAlgorithm::FixItemLayoutOffset(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+
+    GenerateItemOffset(layoutWrapper);
+
+    for (auto& pos : itemPosition_) {
+        auto wrapper = GetListItem(layoutWrapper, pos.first);
+        if (!wrapper) {
+            continue;
+        }
+
+        auto frameNode = wrapper->GetHostNode();
+        if (!frameNode) {
+            continue;
+        }
+
+        auto renderContext = frameNode->GetRenderContext();
+        if (!renderContext) {
+            continue;
+        }
+
+        // Adjust item location.
+        // This must be adjust item location first and then scale it, otherwise it will not work properly.
+        renderContext->UpdateTranslateInXY({ 0, pos.second.offsetY });
+
+        // Scale item.
+        renderContext->UpdateTransformScale({ pos.second.scale, pos.second.scale });
+    }
 }
 
 } // namespace OHOS::Ace::NG

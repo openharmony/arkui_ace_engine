@@ -22,7 +22,6 @@
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/pattern/list/list_utils.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/list/list_component.h"
 
@@ -33,10 +32,7 @@ class ACE_EXPORT ListLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(ListLayoutProperty, LayoutProperty);
 
 public:
-    ListLayoutProperty(ListType type = ListType::RECT_LIST) : listType_(type)
-    {
-        ResetArcListProperty();
-    }
+    ListLayoutProperty() = default;
 
     ~ListLayoutProperty() override = default;
 
@@ -84,8 +80,6 @@ public:
         ResetEditMode();
         ResetScrollEnabled();
         ResetFadingEdge();
-
-        ResetArcListProperty();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -114,19 +108,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FadingEdge, bool, PROPERTY_UPDATE_MEASURE);
 
 protected:
-    void ResetArcListProperty()
-    {
-        if (listType_ != ListType::ARC_LIST) {
-            return;
-        }
-        propListDirection_ = Axis::VERTICAL;
-        propListItemAlign_ = V2::ListItemAlign::CENTER;
-        propScrollSnapAlign_ = V2::ScrollSnapAlign::CENTER;
-        propEditMode_ = false;
-    }
-
-private:
-    ListType listType_ = ListType::RECT_LIST;
+    void UpdateLayoutProperty(const ListLayoutProperty* layoutProperty);
 };
 } // namespace OHOS::Ace::NG
 

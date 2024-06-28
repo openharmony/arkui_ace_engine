@@ -90,7 +90,7 @@ public:
     void Initialize(PipelineContext* context);
 
 #ifdef SUPPORT_DIGITAL_CROWN
-    void ListenDigitalCrownEvent(RefPtr<FrameNode> frameNode);
+    void ListenDigitalCrownEvent(const RefPtr<FrameNode>& frameNode);
     void SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
     {
         crownSensitivity_ = sensitivity;

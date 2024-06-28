@@ -44,9 +44,12 @@ constexpr float ARC_LIST_VELOCITY_SCALE = 0.6f;
 constexpr float ARC_LIST_FRICTION = 0.8f;
 constexpr float FRICTION_SCALE = -4.2f;
 constexpr float DRAG_FIX_OFFSET_RATIO = 0.6f;
+constexpr float ARC_LIST_DRAG_OVER_FRICTION = 0.5f;
+constexpr float ARC_LIST_ITEM_MOVE_THRESHOLD_RATIO = 0.4f;
+constexpr float FLOAT_TWO = 2.0f;
 } // namespace
 
-ArcListPattern::ArcListPattern() : ListPattern(ListType::ARC_LIST)
+ArcListPattern::ArcListPattern()
 {
     SetFriction(ARC_LIST_FRICTION);
     SetVelocityScale(ARC_LIST_VELOCITY_SCALE);
@@ -99,7 +102,7 @@ void ArcListPattern::ReadThemeToFadingEdge()
     CHECK_NULL_VOID(host);
     auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listLayoutProperty);
-    auto conlist = PipelineBase::GetCurrentContextSafely();
+    auto conlist = GetContext();
     CHECK_NULL_VOID(conlist);
     auto listTheme = conlist->GetTheme<ArcListTheme>();
     CHECK_NULL_VOID(listTheme);
@@ -211,9 +214,9 @@ void ArcListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrol
         if (!list->itemPosition_.empty()) {
             float endItemHeight =
                 list->itemPosition_.rbegin()->second.endPos - list->itemPosition_.rbegin()->second.startPos;
-            float snapSize = ARC_LIST_ITEM_SNAP_SIZE;
+            float snapSize = ArcListLayoutAlgorithm::GetItemSnapSize();
             float snapHeight = LessOrEqual(endItemHeight, snapSize) ? endItemHeight : snapSize;
-            return list->contentMainSize_ / 2.0f + snapHeight / 2.0f - (endPos - startPos);
+            return list->contentMainSize_ / FLOAT_TWO + snapHeight / FLOAT_TWO - (endPos - startPos);
         }
         float leading = list->contentMainSize_ - (endPos - startPos) - list->contentEndOffset_;
         return (list->startIndex_ == 0) ? std::min(leading, list->contentStartOffset_) : leading;
@@ -224,9 +227,9 @@ void ArcListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrol
         if (!list->itemPosition_.empty()) {
             float startItemHeight =
                 list->itemPosition_.begin()->second.endPos - list->itemPosition_.begin()->second.startPos;
-            float snapSize = ARC_LIST_ITEM_SNAP_SIZE;
+            float snapSize = ArcListLayoutAlgorithm::GetItemSnapSize();
             float snapHeight = LessOrEqual(startItemHeight, snapSize) ? startItemHeight : snapSize;
-            return list->contentMainSize_ / 2.0f - snapHeight / 2.0f;
+            return list->contentMainSize_ / FLOAT_TWO - snapHeight / FLOAT_TWO;
         }
 
         return list->contentStartOffset_;
@@ -238,9 +241,9 @@ void ArcListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrol
         if (!list->itemPosition_.empty()) {
             float endItemHeight =
                 list->itemPosition_.rbegin()->second.endPos - list->itemPosition_.rbegin()->second.startPos;
-            float snapSize = ARC_LIST_ITEM_SNAP_SIZE;
+            float snapSize = ArcListLayoutAlgorithm::GetItemSnapSize();
             float snapHeight = LessOrEqual(endItemHeight, snapSize) ? endItemHeight : snapSize;
-            return list->contentMainSize_ / 2.0f + snapHeight / 2.0f - (endPos - startPos);
+            return list->contentMainSize_ / FLOAT_TWO + snapHeight / FLOAT_TWO - (endPos - startPos);
         }
         float leading = list->contentMainSize_ - (endPos - startPos) - list->contentEndOffset_;
         return (list->startIndex_ == 0) ? std::min(leading, list->contentStartOffset_) : leading;
@@ -251,9 +254,9 @@ void ArcListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrol
         if (!list->itemPosition_.empty()) {
             float startItemHeight =
                 list->itemPosition_.begin()->second.endPos - list->itemPosition_.begin()->second.startPos;
-            float snapSize = ARC_LIST_ITEM_SNAP_SIZE;
+            float snapSize = ArcListLayoutAlgorithm::GetItemSnapSize();
             float snapHeight = LessOrEqual(startItemHeight, snapSize) ? startItemHeight : snapSize;
-            return list->contentMainSize_ / 2.0f - snapHeight / 2.0f;
+            return list->contentMainSize_ / FLOAT_TWO - snapHeight / FLOAT_TWO;
         }
 
         return list->contentStartOffset_;
@@ -278,7 +281,7 @@ std::function<bool(int32_t)> ArcListPattern::GetScrollIndexAbility()
 
 bool ArcListPattern::ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_t nextIndexInGroup)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     ScrollToIndex(nextIndex, smooth_, ScrollAlign::CENTER);
     pipeline->FlushUITasks();
@@ -353,7 +356,7 @@ bool ArcListPattern::GetOneItemSnapPosByFinalPos(float mainPos, float finalPos, 
     auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(host->GetLayoutProperty());
     CHECK_NULL_RETURN(listLayoutProperty, false);
     auto contentConstraint = listLayoutProperty->GetContentLayoutConstraint().value();
-    float stopOnScreen = GetMainAxisSize(contentConstraint.maxSize, Axis::VERTICAL) / 2.0f;
+    float stopOnScreen = GetMainAxisSize(contentConstraint.maxSize, Axis::VERTICAL) / FLOAT_TWO;
     float predictStop = stopOnScreen + deltaPos;
 
     int32_t deltaIdx = LessOrEqual(mainPos, finalPos) ? -1 : 1;
@@ -366,8 +369,8 @@ bool ArcListPattern::GetOneItemSnapPosByFinalPos(float mainPos, float finalPos, 
             break;
         }
         itemInfo = GetItemDisplayInfo(index);
-        if (GreatOrEqual(predictStop, itemInfo.startPos - space / 2) && /* 2:half */
-            LessNotEqual(predictStop, itemInfo.endPos + space / 2)) { /* 2:half */
+        if (GreatOrEqual(predictStop, itemInfo.startPos - space / FLOAT_TWO) &&
+            LessNotEqual(predictStop, itemInfo.endPos + space / FLOAT_TWO)) {
             break;
         }
     }
@@ -400,9 +403,9 @@ bool ArcListPattern::GetOneItemSnapPosByFinalPos(float mainPos, float finalPos, 
 
 int32_t ArcListPattern::GetMidIndex()
 {
-    float midPos = contentMainSize_ / 2.0f;
+    float midPos = contentMainSize_ / FLOAT_TWO;
     for (auto& pos : itemPosition_) {
-        if (midPos <= pos.second.endPos + spaceWidth_ / 2) { /* 2:half */
+        if (midPos <= pos.second.endPos + spaceWidth_ / FLOAT_TWO) {
             return pos.first;
         }
     }
@@ -459,13 +462,13 @@ bool ArcListPattern::GetItemSnapPosition(int32_t nIndex, ItemSnapInfo& snapInfo)
     float mainSize = geometryNode->GetMarginFrameSize().MainSize(axis);
     float itemStart = itemPosition_[nIndex].startPos;
     float itemEnd = itemPosition_[nIndex].endPos;
-    if (LessOrEqual(mainSize, ARC_LIST_ITEM_SNAP_SIZE)) {
-        snapInfo.snapLow = snapInfo.snapHigh = (itemStart + itemEnd) / 2.0f;
+    if (LessOrEqual(mainSize, ArcListLayoutAlgorithm::GetItemSnapSize())) {
+        snapInfo.snapLow = snapInfo.snapHigh = (itemStart + itemEnd) / FLOAT_TWO;
         snapInfo.moveThreshold = mainSize * ARC_LIST_ITEM_MOVE_THRESHOLD_RATIO;
     } else {
-        snapInfo.snapLow = itemStart + ARC_LIST_ITEM_SNAP_SIZE / 2.0f;
-        snapInfo.snapHigh = itemEnd - ARC_LIST_ITEM_SNAP_SIZE / 2.0f;
-        snapInfo.moveThreshold = ARC_LIST_ITEM_SNAP_SIZE * ARC_LIST_ITEM_MOVE_THRESHOLD_RATIO;
+        snapInfo.snapLow = itemStart + ArcListLayoutAlgorithm::GetItemSnapSize() / FLOAT_TWO;
+        snapInfo.snapHigh = itemEnd - ArcListLayoutAlgorithm::GetItemSnapSize() / FLOAT_TWO;
+        snapInfo.moveThreshold = ArcListLayoutAlgorithm::GetItemSnapSize() * ARC_LIST_ITEM_MOVE_THRESHOLD_RATIO;
     }
 
     return true;
@@ -492,6 +495,11 @@ float ArcListPattern::FixScrollOffset(float offset, int32_t source)
     fixOffset = offset * scale;
 
     return fixOffset;
+}
+
+float ArcListPattern::GetScrollUpdateFriction(float overScroll)
+{
+    return ARC_LIST_DRAG_OVER_FRICTION;
 }
 
 } // namespace OHOS::Ace::NG

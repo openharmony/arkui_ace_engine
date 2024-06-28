@@ -87,10 +87,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     const auto& layoutConstraint = listLayoutProperty->GetLayoutConstraint().value();
 
     // calculate idealSize and set FrameSize
-    auto startOffset = listLayoutProperty->GetContentStartOffset().value_or(0.0f);
-    contentStartOffset_ = std::max(PipelineBase::Vp2PxWithCurrentDensity(startOffset), 0.0);
-    auto endOffset = listLayoutProperty->GetContentEndOffset().value_or(0.0f);
-    contentEndOffset_ = std::max(PipelineBase::Vp2PxWithCurrentDensity(endOffset), 0.0);
+    CalcContentOffset(listLayoutProperty);
 
     // calculate main size.
     auto contentConstraint = listLayoutProperty->GetContentLayoutConstraint().value();
@@ -109,7 +106,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     paddingBeforeContent_ = axis_ == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
     paddingAfterContent_ = axis_ == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
     contentMainSize_ = 0.0f;
-    totalItemCount_ = layoutWrapper->GetTotalChildCount();
+    totalItemCount_ = layoutWrapper->GetTotalChildCount() - itemStartIndex_;
     isSnapCenter_ = IsScrollSnapAlignCenter(layoutWrapper);
     if (childrenSize_) {
         childrenSize_->ResizeChildrenSize(totalItemCount_);
@@ -133,6 +130,8 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         contentEndOffset_ = 0;
     }
     UpdateSnapAlignContentOffset(listLayoutProperty);
+
+    MeasureHeader(layoutWrapper);
 
     if (totalItemCount_ > 0) {
         OnSurfaceChanged(layoutWrapper);
@@ -162,11 +161,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     }
 
-    if (itemPosition_.empty()) {
-        layoutWrapper->SetActiveChildRange(-1, -1);
-    } else {
-        layoutWrapper->SetActiveChildRange(itemPosition_.begin()->first, itemPosition_.rbegin()->first);
-    }
+    SetActiveChildRange(layoutWrapper);
 
     auto crossSize = contentIdealSize.CrossSize(axis_);
     if (crossSize.has_value() && GreaterOrEqualToInfinity(crossSize.value())) {
@@ -184,6 +179,25 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // set list cache info.
     SetCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountValue(1));
+}
+
+void ListLayoutAlgorithm::SetActiveChildRange(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    if (itemPosition_.empty()) {
+        layoutWrapper->SetActiveChildRange(-1, -1);
+    } else {
+        layoutWrapper->SetActiveChildRange(itemPosition_.begin()->first, itemPosition_.rbegin()->first);
+    }
+}
+
+void ListLayoutAlgorithm::CalcContentOffset(const RefPtr<ListLayoutProperty>& property)
+{
+    CHECK_NULL_VOID(property);
+    auto startOffset = property->GetContentStartOffset().value_or(0.0f);
+    contentStartOffset_ = std::max(PipelineBase::Vp2PxWithCurrentDensity(startOffset), 0.0);
+    auto endOffset = property->GetContentEndOffset().value_or(0.0f);
+    contentEndOffset_ = std::max(PipelineBase::Vp2PxWithCurrentDensity(endOffset), 0.0);
 }
 
 void ListLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount)
@@ -1334,7 +1348,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, size);
     paddingOffset_ = padding.Offset();
     float crossSize = GetCrossAxisSize(size, axis_);
-    totalItemCount_ = layoutWrapper->GetTotalChildCount();
+    totalItemCount_ = layoutWrapper->GetTotalChildCount() - itemStartIndex_;
     listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
     int32_t startIndex = GetStartIndex();
 
@@ -1363,6 +1377,9 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         pos.second.startPos -= currentOffset_;
         pos.second.endPos -= currentOffset_;
     }
+    FixItemLayoutOffset(layoutWrapper);
+    LayoutHeader(layoutWrapper, paddingOffset_, crossSize);
+
     DelAnimate(listLayoutProperty, layoutWrapper);
     UpdateOverlay(layoutWrapper);
 }
@@ -1641,7 +1658,7 @@ std::list<int32_t> ListLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* layoutWr
     auto currPos = itemPosition_.rbegin()->second.endPos + spaceWidth_;
     for (int32_t i = 0; i < cacheCount && currIndex + i < totalItemCount_; i++) {
         int32_t index = currIndex + i;
-        auto wrapper = layoutWrapper->GetChildByIndex(index, true);
+        auto wrapper = layoutWrapper->GetChildByIndex(index + itemStartIndex_, true);
         if (!wrapper || CheckNeedMeasure(wrapper)) {
             predictBuildList.emplace_back(index);
             continue;
@@ -1662,7 +1679,7 @@ std::list<int32_t> ListLayoutAlgorithm::LayoutCachedItem(LayoutWrapper* layoutWr
     currPos = itemPosition_.begin()->second.startPos - spaceWidth_;
     for (int32_t i = 0; i < cacheCount && currIndex - i >= 0; i++) {
         int32_t index = currIndex - i;
-        auto wrapper = layoutWrapper->GetChildByIndex(index, true);
+        auto wrapper = layoutWrapper->GetChildByIndex(index + itemStartIndex_, true);
         if (!wrapper || CheckNeedMeasure(wrapper)) {
             predictBuildList.emplace_back(index);
             continue;

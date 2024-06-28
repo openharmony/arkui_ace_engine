@@ -38,7 +38,7 @@ constexpr int32_t ARC_LISTITEM_HOVER_TO_PRESS_DURATION = 100;
  * using ArcListItemTheme::Builder.
  */
 class ArcListItemTheme : public virtual Theme {
-DECLARE_ACE_TYPE(ArcListItemTheme, Theme);
+    DECLARE_ACE_TYPE(ArcListItemTheme, Theme);
 
 public:
     class Builder {

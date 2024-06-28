@@ -21,18 +21,12 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {
-constexpr float ARC_LIST_ITEM_SNAP_SIZE = 72.5f;
-constexpr float ARC_LIST_ITEM_MOVE_THRESHOLD_RATIO = 0.4f;
-constexpr float ARC_LIST_MAIN_POS_OFFSET = 200.f;
-} // namespace
-
 class ACE_EXPORT ArcListLayoutAlgorithm : public ListLayoutAlgorithm {
     DECLARE_ACE_TYPE(ArcListLayoutAlgorithm, ListLayoutAlgorithm);
 
 public:
     ArcListLayoutAlgorithm(int32_t headerIndex, int32_t itemStartIndex)
-        : ListLayoutAlgorithm(itemStartIndex, ListType::ARC_LIST), headerIndex_(headerIndex)
+        : ListLayoutAlgorithm(itemStartIndex), headerIndex_(headerIndex)
     {}
 
     ~ArcListLayoutAlgorithm() override = default;
@@ -46,10 +40,6 @@ public:
 
     using CenterPos2ScaleMap = std::map<float, float, AscendingOrder>;
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
-
-    void Layout(LayoutWrapper* layoutWrapper) override;
-
     void OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrapper, uint32_t index);
 
     float GetStartHeaderPos() const
@@ -62,30 +52,29 @@ public:
         startHeaderPos_ = position;
     }
 
+    static float GetItemSnapSize();
+
 protected:
-    virtual int32_t LayoutALineForward(
+    int32_t LayoutALineForward(
         LayoutWrapper* layoutWrapper, int32_t& currentIndex, float startPos, float& endPos) override;
-    virtual int32_t LayoutALineBackward(
+    int32_t LayoutALineBackward(
         LayoutWrapper* layoutWrapper, int32_t& currentIndex, float endPos, float& startPos) override;
-    virtual float CalculateLaneCrossOffset(float crossSize, float childCrossSize) override;
-    virtual float GetLayoutFixOffset() override
-    {
-        return ARC_LIST_MAIN_POS_OFFSET;
-    }
+    float CalculateLaneCrossOffset(float crossSize, float childCrossSize) override;
+    float GetLayoutFixOffset() override;
 
 private:
-    void MeasureList(LayoutWrapper* layoutWrapper);
+    void MeasureList(LayoutWrapper* layoutWrapper) override;
 
-    void FixPredictSnapOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty);
+    void FixPredictSnapOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty) override;
     void FixPredictSnapOffsetAlignCenter();
 
     float CalculatePredictSnapEndPositionByIndex(uint32_t index, float prevPredictEndPos);
 
-    static float GetLerpValue(const float a, const float b, const float t)
+    static float GetLerpValue(float a, float b, float t)
     {
         return a + t * (b - a);
     }
-    static float GetNearScale(const float pos);
+    static float GetNearScale(float pos);
     void GenerateItemOffset(LayoutWrapper* layoutWrapper);
 
     static void LayoutConstraintApplyScale(LayoutConstraintF& layoutConstraint, float scale)
@@ -97,10 +86,21 @@ private:
         layoutConstraint.selfIdealSize.ApplyScale(scale);
     }
 
-    void MeasureHeader(LayoutWrapper* layoutWrapper);
-    void SetActiveChildRange(LayoutWrapper* layoutWrapper);
-    void LayoutHeader(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
+    void MeasureHeader(LayoutWrapper* layoutWrapper) override;
+    void SetActiveChildRange(LayoutWrapper* layoutWrapper) override;
+    void LayoutHeader(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize) override;
     void UpdateZIndex(const RefPtr<LayoutWrapper>& layoutWrapper);
+    void CalcContentOffset(const RefPtr<ListLayoutProperty>& property) override
+    {
+        contentStartOffset_ = 0.0;
+        contentEndOffset_ = 0.0;
+    }
+    bool IsScrollSnapAlignCenter(LayoutWrapper* layoutWrapper) override
+    {
+        return true;
+    }
+    void UpdateSnapAlignContentOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty) override {}
+    void FixItemLayoutOffset(LayoutWrapper* layoutWrapper) override;
 
     static CenterPos2ScaleMap centerPos2ScaleMap_;
     int32_t headerIndex_ = -1;

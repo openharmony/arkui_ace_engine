@@ -18,6 +18,7 @@
 
 #include "core/components_ng/pattern/arc_list/arc_list_item_pattern.h"
 #include "core/components_ng/pattern/arc_list/arc_list_layout_algorithm.h"
+#include "core/components_ng/pattern/arc_list/arc_list_layout_property.h"
 #include "core/components_ng/pattern/arc_list/arc_list_position_map.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 
@@ -33,10 +34,6 @@ struct ItemSnapInfo {
     float moveThreshold;
 };
 
-namespace {
-constexpr float ARC_LIST_DRAG_OVER_FRICTION = 0.5f;
-};
-
 class ArcListPattern : public ListPattern {
     DECLARE_ACE_TYPE(ArcListPattern, ListPattern);
 
@@ -46,7 +43,7 @@ public:
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
-        return MakeRefPtr<ListLayoutProperty>(ListType::ARC_LIST);
+        return MakeRefPtr<ArcListLayoutProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
@@ -55,7 +52,7 @@ public:
 
     std::function<bool(int32_t)> GetScrollIndexAbility() override;
 
-    virtual void OnChildrenSizeChanged(std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag) override;
+    void OnChildrenSizeChanged(std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag) override;
 
     void AddHeader(const RefPtr<NG::FrameNode>& header)
     {
@@ -87,7 +84,7 @@ public:
 #endif
 
 protected:
-    virtual void SetFriction(double friction) override;
+    void SetFriction(double friction) override;
 
 private:
     void OnModifyDone() override;
@@ -104,13 +101,10 @@ private:
     ListItemInfo GetItemDisplayInfo(int32_t index);
     bool GetItemSnapPosition(int32_t nIndex, ItemSnapInfo& snapInfo);
 
-    virtual float FixScrollOffset(float offset, int32_t source) override;
-    virtual void OnScrollVisibleContentChange(RefPtr<ListEventHub> listEventHub, bool indexChanged) override {}
-    virtual float GetScrollUpdateFriction(float overScroll) override
-    {
-        return ARC_LIST_DRAG_OVER_FRICTION;
-    }
-    virtual ScrollAlign GetScrollToNodeAlign() override
+    float FixScrollOffset(float offset, int32_t source) override;
+    void OnScrollVisibleContentChange(const RefPtr<ListEventHub>& listEventHub, bool indexChanged) override {}
+    float GetScrollUpdateFriction(float overScroll) override;
+    ScrollAlign GetScrollToNodeAlign() override
     {
         return ScrollAlign::CENTER;
     }

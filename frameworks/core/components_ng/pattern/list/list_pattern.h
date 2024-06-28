@@ -27,7 +27,6 @@
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_paint_method.h"
 #include "core/components_ng/pattern/list/list_position_map.h"
-#include "core/components_ng/pattern/list/list_utils.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
@@ -48,7 +47,7 @@ class ListPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(ListPattern, ScrollablePattern);
 
 public:
-    ListPattern(ListType type = ListType::RECT_LIST) : ScrollablePattern(EdgeEffect::SPRING, false), listType_(type) {}
+    ListPattern() : ScrollablePattern(EdgeEffect::SPRING, false) {}
     ~ListPattern() override = default;
 
     void CreateAnalyzerOverlay(const RefPtr<FrameNode> listNode);
@@ -307,7 +306,7 @@ protected:
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void SetChainAnimationToPosMap();
     void SetChainAnimationLayoutAlgorithm(
-        RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, RefPtr<ListLayoutProperty> listLayoutProperty);
+        RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, const RefPtr<ListLayoutProperty>& listLayoutProperty);
 
     void SetAccessibilityAction();
 
@@ -316,7 +315,7 @@ protected:
     {
         return offset;
     }
-    virtual void OnScrollVisibleContentChange(RefPtr<ListEventHub> listEventHub, bool indexChanged);
+    virtual void OnScrollVisibleContentChange(const RefPtr<ListEventHub>& listEventHub, bool indexChanged);
     virtual float GetScrollUpdateFriction(float overScroll);
     virtual ScrollAlign GetScrollToNodeAlign()
     {
@@ -459,8 +458,6 @@ private:
 
     ListItemIndex startInfo_ = {-1, -1, -1};
     ListItemIndex endInfo_ = {-1, -1, -1};
-
-    ListType listType_ = ListType::RECT_LIST;
 };
 } // namespace OHOS::Ace::NG
 

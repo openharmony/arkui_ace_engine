@@ -25,8 +25,8 @@ class ACE_EXPORT ArcListItemPattern : public ListItemPattern {
     DECLARE_ACE_TYPE(ArcListItemPattern, ListItemPattern);
 
 public:
-    explicit ArcListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : ListItemPattern(shallowBuilder) {}
-    explicit ArcListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder, V2::ListItemStyle listItemStyle)
+    ArcListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : ListItemPattern(shallowBuilder) {}
+    ArcListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder, V2::ListItemStyle listItemStyle)
         : ListItemPattern(shallowBuilder, listItemStyle)
     {}
     ~ArcListItemPattern() override = default;
@@ -36,17 +36,17 @@ public:
         return MakeRefPtr<ArcListItemLayoutProperty>();
     }
 
-    virtual FocusPattern GetFocusPattern() const override;
+    FocusPattern GetFocusPattern() const override;
 
-    virtual void SetListItemDefaultAttributes(const RefPtr<FrameNode>& listItemNode) override;
+    void SetListItemDefaultAttributes(const RefPtr<FrameNode>& listItemNode) override;
 
     void HandleHoverEvent(bool isHover, const RefPtr<NG::FrameNode>& itemNode) override;
     void HandlePressEvent(bool isPressed, const RefPtr<NG::FrameNode>& itemNode) override;
 
 private:
-    virtual Color GetBlendGgColor() override;
-    virtual void InitDisableEvent() override;
-    virtual void SetAccessibilityAction() override {}
+    Color GetBlendGgColor() override;
+    void InitDisableEvent() override;
+    void SetAccessibilityAction() override {}
 
     ACE_DISALLOW_COPY_AND_MOVE(ArcListItemPattern);
 };

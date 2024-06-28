@@ -200,7 +200,7 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
 }
 
 #ifdef SUPPORT_DIGITAL_CROWN
-void Scrollable::ListenDigitalCrownEvent(RefPtr<FrameNode> frameNode)
+void Scrollable::ListenDigitalCrownEvent(const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetFocusHub();
@@ -324,18 +324,20 @@ void Scrollable::HandleCrownActionEnd(const TimeStamp& timeStamp, double mainDel
 
 void Scrollable::HandleCrownActionCancel(GestureEvent& info)
 {
-    if (isDragging_) {
-        if (dragCancelCallback_) {
-            dragCancelCallback_();
-        }
-        info.SetMainDelta(0);
-        info.SetMainVelocity(0);
-        HandleDragEnd(info);
-        if (actionEnd_) {
-            actionEnd_(info);
-        }
-        isDragging_ = false;
+    if (!isDragging_) {
+        return;
     }
+
+    if (dragCancelCallback_) {
+        dragCancelCallback_();
+    }
+    info.SetMainDelta(0);
+    info.SetMainVelocity(0);
+    HandleDragEnd(info);
+    if (actionEnd_) {
+        actionEnd_(info);
+    }
+    isDragging_ = false;
 }
 #endif
 

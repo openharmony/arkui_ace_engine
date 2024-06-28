@@ -24,7 +24,6 @@
 #include "core/components_ng/pattern/list/list_item_layout_property.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
-#include "core/components_ng/pattern/list/list_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item_pool.h"
 #include "core/components_v2/inspector/inspector_constants.h"

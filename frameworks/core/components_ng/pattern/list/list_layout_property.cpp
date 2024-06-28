@@ -41,49 +41,47 @@ void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         return;
     }
     json->PutExtAttr("space", propSpace_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+    json->PutExtAttr("contentStartOffset", std::to_string(propContentStartOffset_.value_or(0)).c_str(), filter);
+    json->PutExtAttr("contentEndOffset", std::to_string(propContentEndOffset_.value_or(0)).c_str(), filter);
     json->PutExtAttr("initialIndex", std::to_string(propInitialIndex_.value_or(0)).c_str(), filter);
-    json->PutExtAttr("cachedCount", std::to_string(propCachedCount_.value_or(0)).c_str(), filter);
-    json->PutExtAttr("chainAnimation", propChainAnimation_.value_or(false), filter);
-    json->PutExtAttr("fadingEdge", propFadingEdge_.value_or(false), filter);
-    if (listType_ != ListType::ARC_LIST) {
-        json->PutExtAttr("contentStartOffset", std::to_string(propContentStartOffset_.value_or(0)).c_str(), filter);
-        json->PutExtAttr("contentEndOffset", std::to_string(propContentEndOffset_.value_or(0)).c_str(), filter);
-        json->PutExtAttr("listDirection", propListDirection_.value_or(Axis::VERTICAL) == Axis::VERTICAL
+    json->PutExtAttr("listDirection", propListDirection_.value_or(Axis::VERTICAL) == Axis::VERTICAL
                                    ? "Axis.Vertical" : "Axis.Horizontal", filter);
-        json->PutExtAttr("editMode", propEditMode_.value_or(false), filter);
-        auto divider = JsonUtil::Create(true);
-        if (propDivider_.has_value()) {
-            divider->Put("strokeWidth", propDivider_.value().strokeWidth.ToString().c_str());
-            divider->Put("startMargin", propDivider_.value().startMargin.ToString().c_str());
-            divider->Put("endMargin", propDivider_.value().endMargin.ToString().c_str());
-            divider->Put("color", propDivider_.value().color.ColorToString().c_str());
-        }
-        json->PutExtAttr("divider", divider, filter);
-        json->PutExtAttr("lanes", std::to_string(propLanes_.value_or(0)).c_str(), filter);
-        json->PutExtAttr("laneMinLength",
-            propLaneMinLength_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
-        json->PutExtAttr("laneMaxLength",
-            propLaneMaxLength_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
-        json->PutExtAttr("laneGutter",
-            propLaneGutter_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
-        if (propListItemAlign_.value_or(V2::ListItemAlign::START) == V2::ListItemAlign::START) {
-            json->PutExtAttr("alignListItem", "ListItemAlign.Start", filter);
-        } else if (propListItemAlign_.value_or(V2::ListItemAlign::START) == V2::ListItemAlign::CENTER) {
-            json->PutExtAttr("alignListItem", "ListItemAlign.Center", filter);
-        } else {
-            json->PutExtAttr("alignListItem", "ListItemAlign.End", filter);
-        }
-        auto sticky = propStickyStyle_.value_or(V2::StickyStyle::NONE);
-        if (sticky == V2::StickyStyle::HEADER) {
-            json->PutExtAttr("sticky", "StickyStyle.Header", filter);
-        } else if (sticky == V2::StickyStyle::FOOTER) {
-            json->PutExtAttr("sticky", "StickyStyle.Footer", filter);
-        } else if (sticky == V2::StickyStyle::BOTH) {
-            json->PutExtAttr("sticky", "StickyStyle.Header | StickyStyle.Footer", filter);
-        } else {
-            json->PutExtAttr("sticky", "StickyStyle.None", filter);
-        }
+    json->PutExtAttr("editMode", propEditMode_.value_or(false), filter);
+    json->PutExtAttr("chainAnimation", propChainAnimation_.value_or(false), filter);
+    auto divider = JsonUtil::Create(true);
+    if (propDivider_.has_value()) {
+        divider->Put("strokeWidth", propDivider_.value().strokeWidth.ToString().c_str());
+        divider->Put("startMargin", propDivider_.value().startMargin.ToString().c_str());
+        divider->Put("endMargin", propDivider_.value().endMargin.ToString().c_str());
+        divider->Put("color", propDivider_.value().color.ColorToString().c_str());
     }
+    json->PutExtAttr("divider", divider, filter);
+    json->PutExtAttr("lanes", std::to_string(propLanes_.value_or(0)).c_str(), filter);
+    json->PutExtAttr("laneMinLength",
+        propLaneMinLength_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+    json->PutExtAttr("laneMaxLength",
+        propLaneMaxLength_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+    json->PutExtAttr("laneGutter",
+        propLaneGutter_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+    if (propListItemAlign_.value_or(V2::ListItemAlign::START) == V2::ListItemAlign::START) {
+        json->PutExtAttr("alignListItem", "ListItemAlign.Start", filter);
+    } else if (propListItemAlign_.value_or(V2::ListItemAlign::START) == V2::ListItemAlign::CENTER) {
+        json->PutExtAttr("alignListItem", "ListItemAlign.Center", filter);
+    } else {
+        json->PutExtAttr("alignListItem", "ListItemAlign.End", filter);
+    }
+    json->PutExtAttr("cachedCount", std::to_string(propCachedCount_.value_or(0)).c_str(), filter);
+    auto sticky = propStickyStyle_.value_or(V2::StickyStyle::NONE);
+    if (sticky == V2::StickyStyle::HEADER) {
+        json->PutExtAttr("sticky", "StickyStyle.Header", filter);
+    } else if (sticky == V2::StickyStyle::FOOTER) {
+        json->PutExtAttr("sticky", "StickyStyle.Footer", filter);
+    } else if (sticky == V2::StickyStyle::BOTH) {
+        json->PutExtAttr("sticky", "StickyStyle.Header | StickyStyle.Footer", filter);
+    } else {
+        json->PutExtAttr("sticky", "StickyStyle.None", filter);
+    }
+    json->PutExtAttr("fadingEdge", propFadingEdge_.value_or(false), filter);
     ScrollSnapPropToJsonValue(json, filter);
 }
 
@@ -94,17 +92,15 @@ void ListLayoutProperty::ScrollSnapPropToJsonValue(
     if (filter.IsFastFilter()) {
         return;
     }
-    if (listType_ != ListType::ARC_LIST) {
-        auto scrollSnapAlign = propScrollSnapAlign_.value_or(V2::ScrollSnapAlign::NONE);
-        if (scrollSnapAlign == V2::ScrollSnapAlign::START) {
-            json->PutExtAttr("scrollSnapAlign", "ScrollSnapAlign.START", filter);
-        } else if (scrollSnapAlign == V2::ScrollSnapAlign::CENTER) {
-            json->PutExtAttr("scrollSnapAlign", "ScrollSnapAlign.CENTER", filter);
-        } else if (scrollSnapAlign == V2::ScrollSnapAlign::END) {
-            json->PutExtAttr("scrollSnapAlign", "ScrollSnapAlign.END", filter);
-        } else {
-            json->PutExtAttr("scrollSnapAlign", "ScrollSnapAlign.NONE", filter);
-        }
+    auto scrollSnapAlign = propScrollSnapAlign_.value_or(V2::ScrollSnapAlign::NONE);
+    if (scrollSnapAlign == V2::ScrollSnapAlign::START) {
+        json->PutExtAttr("scrollSnapAlign", "ScrollSnapAlign.START", filter);
+    } else if (scrollSnapAlign == V2::ScrollSnapAlign::CENTER) {
+        json->PutExtAttr("scrollSnapAlign", "ScrollSnapAlign.CENTER", filter);
+    } else if (scrollSnapAlign == V2::ScrollSnapAlign::END) {
+        json->PutExtAttr("scrollSnapAlign", "ScrollSnapAlign.END", filter);
+    } else {
+        json->PutExtAttr("scrollSnapAlign", "ScrollSnapAlign.NONE", filter);
     }
     json->PutExtAttr("enableScrollInteraction", propScrollEnabled_.value_or(true), filter);
 }
@@ -113,12 +109,32 @@ void ListLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
 {
     UpdateSpace(Dimension::FromString(json->GetString("space")));
     UpdateInitialIndex(StringUtils::StringToInt(json->GetString("initialIndex")));
-    if (listType_ != ListType::ARC_LIST) {
-        auto dividerJson = json->GetObject("divider");
-        if (dividerJson->Contains("strokeWidth")) {
-            UpdateDivider(ItemDividerFromJson(dividerJson));
-        }
+    auto dividerJson = json->GetObject("divider");
+    if (dividerJson->Contains("strokeWidth")) {
+        UpdateDivider(ItemDividerFromJson(dividerJson));
     }
     LayoutProperty::FromJson(json);
 }
+
+void ListLayoutProperty::UpdateLayoutProperty(const ListLayoutProperty* layoutProperty)
+{
+    propSpace_ = layoutProperty->CloneSpace();
+    propInitialIndex_ = layoutProperty->CloneInitialIndex();
+    propListDirection_ = layoutProperty->CloneListDirection();
+    propDivider_ = layoutProperty->CloneDivider();
+    propLanes_ = layoutProperty->CloneLanes();
+    propLaneMinLength_ = layoutProperty->CloneLaneMinLength();
+    propLaneMaxLength_ = layoutProperty->CloneLaneMaxLength();
+    propLaneGutter_ = layoutProperty->CloneLaneGutter();
+    propListItemAlign_ = layoutProperty->CloneListItemAlign();
+    propCachedCount_ = layoutProperty->CloneCachedCount();
+    propStickyStyle_ = layoutProperty->CloneStickyStyle();
+    propContentStartOffset_ = layoutProperty->CloneContentStartOffset();
+    propContentEndOffset_ = layoutProperty->CloneContentEndOffset();
+    propScrollSnapAlign_ = layoutProperty->CloneScrollSnapAlign();
+    propEditMode_ = layoutProperty->CloneEditMode();
+    propScrollEnabled_ = layoutProperty->CloneScrollEnabled();
+    propFadingEdge_ = layoutProperty->CloneFadingEdge();
+}
+
 }

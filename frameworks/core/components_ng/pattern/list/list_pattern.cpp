@@ -745,7 +745,7 @@ void ListPattern::SetChainAnimationToPosMap()
 }
 
 void ListPattern::SetChainAnimationLayoutAlgorithm(
-    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, RefPtr<ListLayoutProperty> listLayoutProperty)
+    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, const RefPtr<ListLayoutProperty>& listLayoutProperty)
 {
     CHECK_NULL_VOID(listLayoutAlgorithm);
     CHECK_NULL_VOID(listLayoutProperty);
@@ -2367,12 +2367,10 @@ void ListPattern::DumpAdvanceInfo()
     } else {
         DumpLog::GetInstance().AddDesc("jumpIndex:null");
     }
-    if (listType_ != ListType::ARC_LIST) {
-        if (jumpIndexInGroup_.has_value()) {
-            DumpLog::GetInstance().AddDesc("jumpIndexInGroup:" + std::to_string(jumpIndexInGroup_.value()));
-        } else {
-            DumpLog::GetInstance().AddDesc("jumpIndexInGroup:null");
-        }
+    if (jumpIndexInGroup_.has_value()) {
+        DumpLog::GetInstance().AddDesc("jumpIndexInGroup:" + std::to_string(jumpIndexInGroup_.value()));
+    } else {
+        DumpLog::GetInstance().AddDesc("jumpIndexInGroup:null");
     }
     if (targetIndex_.has_value()) {
         DumpLog::GetInstance().AddDesc("targetIndex:" + std::to_string(targetIndex_.value()));
@@ -2399,25 +2397,19 @@ void ListPattern::DumpAdvanceInfo()
         DumpLog::GetInstance().AddDesc("itemPosition.first:" + std::to_string(item.first));
         DumpLog::GetInstance().AddDesc("startPos:" + std::to_string(item.second.startPos));
         DumpLog::GetInstance().AddDesc("endPos:" + std::to_string(item.second.endPos));
-        if (listType_ != ListType::ARC_LIST) {
-            DumpLog::GetInstance().AddDesc("isGroup:" + std::to_string(item.second.isGroup));
-        }
+        DumpLog::GetInstance().AddDesc("isGroup:" + std::to_string(item.second.isGroup));
     }
     DumpLog::GetInstance().AddDesc("------------------------------------------");
     scrollStop_ ? DumpLog::GetInstance().AddDesc("scrollStop:true")
                 : DumpLog::GetInstance().AddDesc("scrollStop:false");
-    if (listType_ != ListType::ARC_LIST) {
-        for (auto item : lanesItemRange_) {
-            DumpLog::GetInstance().AddDesc("------------------------------------------");
-            DumpLog::GetInstance().AddDesc("lanesItemRange.first:" + std::to_string(item.first));
-            DumpLog::GetInstance().AddDesc("lanesItemRange.second:" + std::to_string(item.second));
-        }
+    for (auto item : lanesItemRange_) {
+        DumpLog::GetInstance().AddDesc("------------------------------------------");
+        DumpLog::GetInstance().AddDesc("lanesItemRange.first:" + std::to_string(item.first));
+        DumpLog::GetInstance().AddDesc("lanesItemRange.second:" + std::to_string(item.second));
     }
     DumpLog::GetInstance().AddDesc("------------------------------------------");
-    if (listType_ != ListType::ARC_LIST) {
-        DumpLog::GetInstance().AddDesc("lanes:" + std::to_string(lanes_));
-        DumpLog::GetInstance().AddDesc("laneGutter:" + std::to_string(laneGutter_));
-    }
+    DumpLog::GetInstance().AddDesc("lanes:" + std::to_string(lanes_));
+    DumpLog::GetInstance().AddDesc("laneGutter:" + std::to_string(laneGutter_));
     dragFromSpring_ ? DumpLog::GetInstance().AddDesc("dragFromSpring:true")
                     : DumpLog::GetInstance().AddDesc("dragFromSpring:false");
     isScrollEnd_ ? DumpLog::GetInstance().AddDesc("isScrollEnd:true")
@@ -2505,7 +2497,7 @@ void ListPattern::ResetChildrenSize()
     }
 }
 
-void ListPattern::OnScrollVisibleContentChange(RefPtr<ListEventHub> listEventHub, bool indexChanged)
+void ListPattern::OnScrollVisibleContentChange(const RefPtr<ListEventHub>& listEventHub, bool indexChanged)
 {
     CHECK_NULL_VOID(listEventHub);
     auto onScrollVisibleContentChange = listEventHub->GetOnScrollVisibleContentChange();

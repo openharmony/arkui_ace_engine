@@ -25,7 +25,6 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_position_map.h"
-#include "core/components_ng/pattern/list/list_utils.h"
 #include "core/components_v2/list/list_component.h"
 #include "core/components_v2/list/list_properties.h"
 
@@ -62,8 +61,8 @@ public:
     using PositionMap = std::map<int32_t, ListItemInfo>;
     static constexpr int32_t LAST_ITEM = -1;
 
-    ListLayoutAlgorithm(int32_t itemStartIndex = 0, ListType type = ListType::RECT_LIST)
-        : itemStartIndex_(itemStartIndex), listType_(type)
+    ListLayoutAlgorithm(int32_t itemStartIndex = 0)
+        : itemStartIndex_(itemStartIndex)
     {}
 
     ~ListLayoutAlgorithm() override = default;
@@ -410,12 +409,12 @@ protected:
     bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const;
     void ReviseSpace(const RefPtr<ListLayoutProperty>& listLayoutProperty);
 
-    void MeasureList(LayoutWrapper* layoutWrapper);
+    virtual void MeasureList(LayoutWrapper* layoutWrapper);
     void CheckJumpToIndex();
 
     void OnSurfaceChanged(LayoutWrapper* layoutWrapper);
 
-    void FixPredictSnapOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty);
+    virtual void FixPredictSnapOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty);
     void FixPredictSnapOffsetAlignCenter();
     virtual std::list<int32_t> LayoutCachedItem(LayoutWrapper* layoutWrapper, int32_t cacheCount);
     static void PostIdleTask(RefPtr<FrameNode> frameNode, const ListPredictLayoutParam& param);
@@ -433,6 +432,14 @@ protected:
     {
         return 0.0f;
     }
+
+    virtual void MeasureHeader(LayoutWrapper* layoutWrapper) {}
+    virtual void SetActiveChildRange(LayoutWrapper* layoutWrapper);
+    virtual void LayoutHeader(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize) {}
+    virtual void CalcContentOffset(const RefPtr<ListLayoutProperty>& property);
+    virtual bool IsScrollSnapAlignCenter(LayoutWrapper* layoutWrapper);
+    virtual void UpdateSnapAlignContentOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty);
+    virtual void FixItemLayoutOffset(LayoutWrapper* layoutWrapper) {}
 
     Axis axis_ = Axis::VERTICAL;
     LayoutConstraintF childLayoutConstraint_;
@@ -489,11 +496,11 @@ private:
 
     void FixPredictSnapOffsetAlignStart();
     void FixPredictSnapOffsetAlignEnd();
-    bool IsScrollSnapAlignCenter(LayoutWrapper* layoutWrapper);
+    // virtual bool IsScrollSnapAlignCenter(LayoutWrapper* layoutWrapper);
     static bool PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint);
 
     float GetStopOnScreenOffset(V2::ScrollSnapAlign scrollSnapAlign);
-    void UpdateSnapAlignContentOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty);
+    // virtual void UpdateSnapAlignContentOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty);
 
     std::optional<int32_t> jumpIndexInGroup_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;
@@ -514,8 +521,6 @@ private:
     V2::StickyStyle stickyStyle_ = V2::StickyStyle::NONE;
 
     float chainInterval_ = 0.0f;
-
-    ListType listType_ = ListType::RECT_LIST;
 };
 } // namespace OHOS::Ace::NG
 

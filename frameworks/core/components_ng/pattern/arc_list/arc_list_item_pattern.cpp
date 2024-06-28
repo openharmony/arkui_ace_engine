@@ -52,7 +52,7 @@ void ArcListItemPattern::SetListItemDefaultAttributes(const RefPtr<FrameNode>& l
     CHECK_NULL_VOID(renderContext);
     auto layoutProperty = listItemNode->GetLayoutProperty<ArcListItemLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto listItemTheme = pipeline->GetTheme<ArcListItemTheme>();
     CHECK_NULL_VOID(listItemTheme);
@@ -72,7 +72,7 @@ void ArcListItemPattern::SetListItemDefaultAttributes(const RefPtr<FrameNode>& l
 Color ArcListItemPattern::GetBlendGgColor()
 {
     Color color = Color::TRANSPARENT;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, color);
     auto theme = pipeline->GetTheme<ArcListItemTheme>();
     CHECK_NULL_RETURN(theme, color);
@@ -121,7 +121,7 @@ void ArcListItemPattern::InitDisableEvent()
     CHECK_NULL_VOID(eventHub);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ArcListItemTheme>();
     CHECK_NULL_VOID(theme);

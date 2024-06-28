@@ -24,11 +24,11 @@ namespace OHOS::Ace::NG {
 class ArcListPositionMap : public ListPositionMap {
     DECLARE_ACE_TYPE(ArcListPositionMap, ListPositionMap)
 public:
-    ArcListPositionMap(int32_t itemStartIndex) : itemStartIndex_(itemStartIndex) {}
+    explicit ArcListPositionMap(int32_t itemStartIndex) : itemStartIndex_(itemStartIndex) {}
     ~ArcListPositionMap() override = default;
 
-    virtual void UpdatePosMap(LayoutWrapper* layoutWrapper, int32_t lanes, float space,
-        RefPtr<ListChildrenMainSize>& childrenSize) override
+    void UpdatePosMap(
+        LayoutWrapper* layoutWrapper, int32_t lanes, float space, RefPtr<ListChildrenMainSize>& childrenSize) override
     {
         childrenSize_ = childrenSize;
         if (totalItemCount_ != layoutWrapper->GetTotalChildCount() - itemStartIndex_) {

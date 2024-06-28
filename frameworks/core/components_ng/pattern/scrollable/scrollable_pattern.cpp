@@ -60,7 +60,7 @@ ScrollablePattern::ScrollablePattern()
 {
     friction_ = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_FRICTION : FRICTION;
     velocityScale_ =
-        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_VELOCITY_SCALE : VELOCITY_SCALE;
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_VELOCITY_SCALE : VELOCITY_SCALE;
 }
 
 ScrollablePattern::ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled)
@@ -68,7 +68,7 @@ ScrollablePattern::ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled)
 {
     friction_ = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_FRICTION : FRICTION;
     velocityScale_ =
-        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_VELOCITY_SCALE : VELOCITY_SCALE;
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_VELOCITY_SCALE : VELOCITY_SCALE;
 }
 
 RefPtr<PaintProperty> ScrollablePattern::CreatePaintProperty()
@@ -900,7 +900,7 @@ void ScrollablePattern::SetFriction(double friction)
 void ScrollablePattern::SetVelocityScale(double scale)
 {
     if (LessOrEqual(scale, 0.0)) {
-        scale = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_FRICTION : FRICTION;
+        scale = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_FRICTION : FRICTION;
     }
     velocityScale_ = scale;
     CHECK_NULL_VOID(scrollableEvent_);
