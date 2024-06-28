@@ -256,6 +256,39 @@ void UIObserverListener::OnDidClick(
     napi_close_handle_scope(env_, scope);
 }
 
+void UIObserverListener::OnTabContentStateChange(const NG::TabContentInfo& tabContentInfo)
+{
+    if (!env_ || !callback_) {
+        TAG_LOGW(AceLogTag::ACE_OBSERVER,
+            "Handle tabContent state change failed, runtime or callback function invalid!");
+        return;
+    }
+    napi_value callback = nullptr;
+    napi_get_reference_value(env_, callback_, &callback);
+    napi_value objValue = nullptr;
+    napi_create_object(env_, &objValue);
+    napi_value param1 = nullptr;
+    napi_value param2 = nullptr;
+    napi_value param3 = nullptr;
+    napi_value param4 = nullptr;
+    napi_value param5 = nullptr;
+    napi_value param6 = nullptr;
+    napi_create_string_utf8(env_, tabContentInfo.tabContentId.c_str(), tabContentInfo.tabContentId.length(), &param1);
+    napi_create_int32(env_, tabContentInfo.tabContentUniqueId, &param2);
+    napi_create_int32(env_, static_cast<int32_t>(tabContentInfo.state), &param3);
+    napi_create_int32(env_, tabContentInfo.index, &param4);
+    napi_create_string_utf8(env_, tabContentInfo.id.c_str(), tabContentInfo.id.length(), &param5);
+    napi_create_int32(env_, tabContentInfo.uniqueId, &param6);
+    napi_set_named_property(env_, objValue, "tabContentId", param1);
+    napi_set_named_property(env_, objValue, "tabContentUniqueId", param2);
+    napi_set_named_property(env_, objValue, "state", param3);
+    napi_set_named_property(env_, objValue, "index", param4);
+    napi_set_named_property(env_, objValue, "id", param5);
+    napi_set_named_property(env_, objValue, "uniqueId", param6);
+    napi_value argv[] = { objValue };
+    napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+}
+
 napi_valuetype UIObserverListener::GetValueType(napi_env env, napi_value value)
 {
     if (value == nullptr) {

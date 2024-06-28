@@ -963,6 +963,8 @@ private:
     std::optional<RefPtr<UINode>> FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode = true) const;
     bool NeedForceMeasure() const;
 
+    void TabContentStateCallBack(int32_t oldIndex, int32_t nextIndex) const;
+
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> hoverEvent_;

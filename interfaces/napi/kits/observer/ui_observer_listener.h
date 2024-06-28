@@ -44,6 +44,7 @@ public:
         const RefPtr<NG::FrameNode> frameNode);
     void OnDidClick(const GestureEvent& gestureEventInfo, const ClickInfo& clickInfo,
         const RefPtr<NG::FrameNode> frameNode);
+    void OnTabContentStateChange(const NG::TabContentInfo& tabContentInfo);
     void OnNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo);
     bool NapiEqual(napi_value cb);
     void OnDrawOrLayout();
