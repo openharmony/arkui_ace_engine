@@ -5499,7 +5499,8 @@ bool SwiperPattern::ContentWillChange(int32_t currentIndex, int32_t comingIndex)
     CHECK_NULL_RETURN(tabBarNode, true);
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_RETURN(tabBarPattern, true);
-    if (!tabBarPattern->GetTabContentWillChangeFlag() && tabsPattern->GetInterceptStatus()) {
+    if (!tabBarPattern->GetTabContentWillChangeFlag() &&
+        tabsPattern->GetInterceptStatus() && currentIndex != comingIndex) {
         tabBarPattern->ResetTabContentWillChangeFlag();
         auto ret = tabsPattern->OnContentWillChange(currentIndex, comingIndex);
         return ret.has_value() ? ret.value() : true;
