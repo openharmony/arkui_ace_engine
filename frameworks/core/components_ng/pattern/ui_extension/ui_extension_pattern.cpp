@@ -164,7 +164,7 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
 
     isKeyAsync_ = want.GetBoolParam(ABILITY_KEY_ASYNC, false);
     UIExtensionUsage uIExtensionUsage = GetUIExtensionUsage(want);
-    UIEXT_LOGI("The ability KeyAsync %{public}d, uIExtensionUsage: %{public}zu.",
+    UIEXT_LOGI("The ability KeyAsync %{public}d, uIExtensionUsage: %{public}u.",
         isKeyAsync_, uIExtensionUsage);
     MountPlaceholderNode();
     SessionConfig config;
