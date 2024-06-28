@@ -7783,7 +7783,6 @@ void RichEditorPattern::OnVirtualKeyboardAreaChanged()
     textSelector_.selectionDestinationOffset.SetX(
         CalcCursorOffsetByPosition(textSelector_.GetEnd(), selectLineHeight).GetX());
     CreateHandles();
-    selectOverlay_->HideMenu(true);
 }
 
 void RichEditorPattern::ResetDragOption()
