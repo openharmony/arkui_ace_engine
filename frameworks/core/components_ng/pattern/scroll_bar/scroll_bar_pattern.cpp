@@ -901,7 +901,7 @@ void ScrollBarPattern::Updatebackgroundcolor(RefPtr<RenderContext>& renderContex
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(theme);
     if (!renderContext->HasBackgroundColor()) {
-        renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
+        renderContext->UpdateBackgroundColor(theme->GetScrollBarBackColor());
     }
 }
 } // namespace OHOS::Ace::NG
