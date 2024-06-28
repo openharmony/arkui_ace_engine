@@ -1041,6 +1041,14 @@
     },
     {
         "first_introduced": "12",
+        "name": "OH_ArkUI_SwiperIndicator_SetMaxDisplayCount"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_SwiperIndicator_GetMaxDisplayCount"
+    },
+    {
+        "first_introduced": "12",
         "name": "OH_ArkUI_DrawableDescriptor_CreateFromPixelMap"
     },
     {

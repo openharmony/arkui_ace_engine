@@ -7180,6 +7180,8 @@ int32_t SetSwiperIndicator(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
         indicatorProp.colorValue = ArkUIOptionalUint { indicator->colorValue.isSet, indicator->colorValue.value };
         indicatorProp.selectedColorValue =
             ArkUIOptionalUint { indicator->selectedColorValue.isSet, indicator->selectedColorValue.value };
+        indicatorProp.maxDisplayCount =
+        ArkUIOptionalInt { indicator->maxDisplayCount.isSet, indicator->maxDisplayCount.value };
     } else {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -7217,6 +7219,7 @@ const ArkUI_AttributeItem* GetSwiperIndicator(ArkUI_NodeHandle node)
         indicator->maskValue.value = props.maskValue.value;
         indicator->colorValue.value = props.colorValue.value;
         indicator->selectedColorValue.value = props.selectedColorValue.value;
+        indicator->maxDisplayCount.value = props.maxDisplayCount.value;
     } else {
         indicator = nullptr;
     }

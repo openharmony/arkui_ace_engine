@@ -317,6 +317,8 @@ SwiperParameters GetDotIndicatorProps(FrameNode* frameNode, ArkUISwiperIndicator
         indicator->colorValue.isSet == 1 ? Color(indicator->colorValue.value) : swiperIndicatorTheme->GetColor();
     swiperParameters.selectedColorVal = indicator->selectedColorValue.isSet == 1 ?
         Color(indicator->selectedColorValue.value) : swiperIndicatorTheme->GetSelectedColor();
+    swiperParameters.maxDisplayCountVal = indicator->maxDisplayCount.isSet == 1 ?
+        indicator->maxDisplayCount.value : NUM_0;
     return swiperParameters;
 }
 
@@ -1010,6 +1012,7 @@ void GetSwiperIndicator(ArkUINodeHandle node, ArkUISwiperIndicator* props)
         props->maskValue = ArkUIOptionalInt { 1, params->maskValue.value_or(0) };
         props->colorValue = ArkUIOptionalUint { 1, params->colorVal.value().GetValue() };
         props->selectedColorValue = ArkUIOptionalUint { 1, params->selectedColorVal.value().GetValue() };
+        props->maxDisplayCount = ArkUIOptionalInt { 1, params->maxDisplayCountVal.value() };
     }
 }
 
