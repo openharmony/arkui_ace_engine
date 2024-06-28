@@ -483,14 +483,14 @@ class CircularCrossPointUtil {
         let chamferCircleR = Constants.CHAMFER_CIRCLE_R;
         let upperArcCircle = new Circle(this.upperArcCircleR, lowerArcCircleCenterX, lowerArcCircleCenterY); //大圆
         let lowerArcCircle = new Circle(lowerArcCircleR, upperArcCircleCenterX, this.upperArcCircleY); //小圆
-        let external_intersections = this.findCircleIntersections(upperArcCircle, lowerArcCircle);
-        if (external_intersections.length > 1) {
-            let intersection1 = external_intersections[0];
-            let intersection2 = external_intersections[1];
-            let inside_intersections = this.findCircleIntersections(new Circle(this.upperArcCircleR - chamferCircleR, lowerArcCircleCenterX, lowerArcCircleCenterY), new Circle(lowerArcCircleR - chamferCircleR, upperArcCircleCenterX, this.upperArcCircleY));
-            if (inside_intersections.length > 1) {
-                intersection1 = inside_intersections[0];
-                intersection2 = inside_intersections[1];
+        let externalIntersections = this.findCircleIntersections(upperArcCircle, lowerArcCircle);
+        if (externalIntersections.length > 1) {
+            let intersection1 = externalIntersections[0];
+            let intersection2 = externalIntersections[1];
+            let insideIntersections = this.findCircleIntersections(new Circle(this.upperArcCircleR - chamferCircleR, lowerArcCircleCenterX, lowerArcCircleCenterY), new Circle(lowerArcCircleR - chamferCircleR, upperArcCircleCenterX, this.upperArcCircleY));
+            if (insideIntersections.length > 1) {
+                intersection1 = insideIntersections[0];
+                intersection2 = insideIntersections[1];
                 if (intersection1.x > intersection2.x) {
                     let mid = intersection1;
                     intersection1 = intersection2;

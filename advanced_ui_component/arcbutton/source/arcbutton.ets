@@ -489,17 +489,17 @@ class CircularCrossPointUtil {
     let upperArcCircle = new Circle(this.upperArcCircleR, lowerArcCircleCenterX, lowerArcCircleCenterY) //大圆
     let lowerArcCircle = new Circle(lowerArcCircleR, upperArcCircleCenterX, this.upperArcCircleY) //小圆
 
-    let external_intersections = this.findCircleIntersections(upperArcCircle, lowerArcCircle)
-    if (external_intersections.length > 1) {
-      let intersection1: Point = external_intersections[0]
-      let intersection2: Point = external_intersections[1]
+    let externalIntersections = this.findCircleIntersections(upperArcCircle, lowerArcCircle)
+    if (externalIntersections.length > 1) {
+      let intersection1: Point = externalIntersections[0]
+      let intersection2: Point = externalIntersections[1]
 
-      let inside_intersections = this.findCircleIntersections(new Circle(this.upperArcCircleR - chamferCircleR,
+      let insideIntersections = this.findCircleIntersections(new Circle(this.upperArcCircleR - chamferCircleR,
         lowerArcCircleCenterX, lowerArcCircleCenterY), new Circle(lowerArcCircleR - chamferCircleR,
         upperArcCircleCenterX, this.upperArcCircleY))
-      if (inside_intersections.length > 1) {
-        intersection1 = inside_intersections[0]
-        intersection2 = inside_intersections[1]
+      if (insideIntersections.length > 1) {
+        intersection1 = insideIntersections[0]
+        intersection2 = insideIntersections[1]
 
         if (intersection1.x > intersection2.x) {
           let mid = intersection1
@@ -646,9 +646,9 @@ class CircularCrossPointUtil {
 }
 
 class Circle {
-  radius: number
-  x: number
-  y: number
+  public radius: number
+  public x: number
+  public y: number
 
   constructor(radius: number, x: number, y: number) {
     this.radius = radius
@@ -658,8 +658,8 @@ class Circle {
 }
 
 class Point {
-  x: number
-  y: number
+  public x: number
+  public y: number
 
   constructor(x: number, y: number) {
     this.x = x
@@ -668,13 +668,13 @@ class Point {
 }
 
 class AllPoints {
-  width: number
-  height: number
-  leftTopPoint: Point
-  rightTopPoint: Point
-  leftBottomPoint: Point
-  rightBottomPoint: Point
-  canvasLeftTop: Point
+  public width: number
+  public height: number
+  public leftTopPoint: Point
+  public rightTopPoint: Point
+  public leftBottomPoint: Point
+  public rightBottomPoint: Point
+  public canvasLeftTop: Point
 
   constructor(width: number,
               height: number,
