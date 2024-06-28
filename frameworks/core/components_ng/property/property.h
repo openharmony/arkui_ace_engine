@@ -311,6 +311,20 @@ public:                                                             \
         On##name##Update(value);                                    \
     }
 
+#define ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP_FOR_VIRTUAL_NODE(name, type)                 \
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(name, type)                                       \
+public:                                                                                          \
+    void Update##name(const type& value, const int64_t accessibilityIdForVirtualNode = -2100000) \
+    {                                                                                            \
+        if (prop##name##_.has_value()) {                                                         \
+            if (NearEqual(prop##name##_.value(), value)) {                                       \
+                return;                                                                          \
+            }                                                                                    \
+        }                                                                                        \
+        prop##name##_ = value;                                                                   \
+        On##name##Update(value, accessibilityIdForVirtualNode);                                  \
+    }
+
 // For Property Group Struct
 #define ACE_DEFINE_PROPERTY_GROUP_ITEM(name, type)      \
     std::optional<type> prop##name;                     \
