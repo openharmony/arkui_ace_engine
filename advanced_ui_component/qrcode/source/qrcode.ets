@@ -155,11 +155,35 @@ export class QrcodeOptions {
   }
 }
 
+
+
 @ComponentV2
 export struct Qrcode {
   @Require @Param options: QrcodeOptions;
   @Require @Param value: string;
   @Require @Param state: QrcodeState;
+
+  @Builder symbolGlyphBuilder() {
+    SymbolGlyph($r('sys.symbol.arrow_clockwise')).fontSize(this.options.expiredImageLength?.value)
+      .fontColor([this.options.textColor?.color])
+      .visibility(this.state == QrcodeState.EXPIRED ? Visibility.Visible : Visibility.None)
+  }
+
+  @Builder textBuilder() {
+    Text(this.options.textContent).margin({ top: this.options.space }).fontColor(this.options.textColor?.color)
+      .fontSize(this.options.textSize).fontWeight(this.options.textWeight).textAlign(TextAlign.Center)
+      .width(this.options.qrcodeSideLength?.value)
+      .visibility(this.state == QrcodeState.EXPIRED ? Visibility.Visible : Visibility.None)
+  }
+
+  @Builder loadinProgressBuilder() {
+    LoadingProgress().color(Color.White).height(this.options.loadingImageLength?.value)
+      .width(this.options.loadingImageLength?.value)
+      .visibility(this.state == QrcodeState.LOADING ? Visibility.Visible : Visibility.None)
+      .animation({ duration: this.options.animationDuration, curve: this.options.animationCurve,
+        playMode: PlayMode.Normal
+      })
+  }
 
   build() {
     Stack() {
@@ -177,22 +201,11 @@ export struct Qrcode {
         .justifyContent(FlexAlign.Center)
 
         Column() {
-          SymbolGlyph($r('sys.symbol.arrow_clockwise')).fontSize(this.options.expiredImageLength?.value)
-            .fontColor([this.options.textColor?.color])
-            .visibility(this.state == QrcodeState.EXPIRED ? Visibility.Visible : Visibility.None)
-
+          this.symbolGlyphBuilder()
           if (this.state == QrcodeState.LOADING) {
-            LoadingProgress().color(Color.White).height(this.options.loadingImageLength?.value)
-              .width(this.options.loadingImageLength?.value)
-              .visibility(this.state == QrcodeState.LOADING ? Visibility.Visible : Visibility.None)
-              .animation({ duration: this.options.animationDuration, curve: this.options.animationCurve,
-                playMode: PlayMode.Normal
-              })
+            this.loadinProgressBuilder()
           }
-          Text(this.options.textContent).margin({ top: this.options.space }).fontColor(this.options.textColor?.color)
-            .fontSize(this.options.textSize).fontWeight(this.options.textWeight).textAlign(TextAlign.Center)
-            .width(this.options.qrcodeSideLength?.value)
-            .visibility(this.state == QrcodeState.EXPIRED ? Visibility.Visible : Visibility.None)
+          this.textBuilder()
         }
         .visibility(this.state == QrcodeState.NORMAL ? Visibility.None : Visibility.Visible)
         .animation({ duration: this.options.animationDuration, curve: this.options.animationCurve,
