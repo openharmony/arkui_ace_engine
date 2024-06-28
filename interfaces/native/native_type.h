@@ -1947,6 +1947,31 @@ typedef enum {
     ARKUI_SAFE_AREA_EDGE_END = 1 << 3,
 } ArkUI_SafeAreaEdge;
 
+typedef struct {
+    float x;
+    float y;
+    float z;
+} ArkUI_TranslationOptions;
+
+typedef struct {
+    float x;
+    float y;
+    float z;
+    float centerX;
+    float centerY;
+} ArkUI_ScaleOptions;
+
+typedef struct {
+    float x;
+    float y;
+    float z;
+    float angle;
+    float centerX;
+    float centerY;
+    float centerZ;
+    float perspective;
+} ArkUI_RotationOptions;
+
 /**
 * @brief Creates a size constraint.
 *

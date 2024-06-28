@@ -1650,5 +1650,41 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_PointerEvent_SetStopPropagation"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CreateOpacityTransitionEffect"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CreateTranslationTransitionEffect"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CreateScaleTransitionEffect"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CreateRotationTransitionEffect"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CreateMovementTransitionEffect"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CreateAsymmetricTransitionEffect"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_TransitionEffect_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_TransitionEffect_Combine"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_TransitionEffect_SetAnimation"
     }
 ]

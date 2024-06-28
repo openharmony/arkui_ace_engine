@@ -1204,6 +1204,45 @@ struct ArkUIAccessibilityValue {
     ArkUIOptionalCharPtr text;
 };
 
+struct ArkUITranslateOption {
+    ArkUI_Float32 x;
+    ArkUI_Float32 y;
+    ArkUI_Float32 z;
+};
+
+struct ArkUIScaleOption {
+    ArkUI_Float32 x;
+    ArkUI_Float32 y;
+    ArkUI_Float32 z;
+    ArkUI_Float32 centerX;
+    ArkUI_Float32 centerY;
+};
+
+struct ArkUIRotateOption {
+    ArkUI_Float32 x;
+    ArkUI_Float32 y;
+    ArkUI_Float32 z;
+    ArkUI_Float32 angle;
+    ArkUI_Float32 centerX;
+    ArkUI_Float32 centerY;
+    ArkUI_Float32 centerZ;
+    ArkUI_Float32 perspective;
+};
+
+struct ArkUITransitionEffectOption {
+    ArkUI_Int32 type;
+    ArkUI_Float32 opacity;
+    ArkUITranslateOption translate;
+    ArkUIScaleOption scale;
+    ArkUIRotateOption rotate;
+    ArkUI_Int32 move;
+    ArkUITransitionEffectOption* appear;
+    ArkUITransitionEffectOption* disappear;
+    ArkUITransitionEffectOption* combine;
+    ArkUI_Bool hasAnimation;
+    ArkUIAnimateOption animation;
+};
+
 struct ArkUIDragPreViewOptions {
     ArkUI_Int32 mode;
     ArkUI_Int32 modeArrayLength;
@@ -1651,6 +1690,7 @@ struct ArkUICommonModifier {
     void (*resetPixelRound)(ArkUINodeHandle node);
     void (*setBorderDashParams)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize);
     void (*getExpandSafeArea)(ArkUINodeHandle node, ArkUI_Uint32 (*values)[2]);
+    void (*setTransition)(ArkUINodeHandle node, ArkUITransitionEffectOption* option);
 };
 
 struct ArkUICommonShapeModifier {

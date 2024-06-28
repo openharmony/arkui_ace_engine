@@ -486,6 +486,7 @@ ohos_unittest("native_node_napi_test") {
     "$ace_root/interfaces/native/node/native_node_napi.cpp",
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
+    "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
     "$ace_root/test/mock/adapter/mock_log_wrapper.cpp",
     "native_node_napi_test.cpp",
