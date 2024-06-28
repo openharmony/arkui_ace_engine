@@ -168,6 +168,10 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
             auto iconNode = AceType::DynamicCast<FrameNode>(barItemNode->GetChildren().front());
             NavigationTitleUtil::InitTitleBarButtonEvent(
                 menuItemNode, iconNode, false, menuItem, menuItem.isEnabled.value_or(true));
+
+            // read navigation menu button
+            NavigationTitleUtil::SetAccessibility(menuItemNode, menuItem.text.value_or(""));
+
             barItemNode->MountToParent(menuItemNode);
             barItemNode->MarkModifyDone();
             menuItemNode->MarkModifyDone();
@@ -199,6 +203,10 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
         BuildMoreItemNodeAction(menuItemNode, barItemNode, barMenuNode, navBarNode);
         auto iconNode = AceType::DynamicCast<FrameNode>(barItemNode->GetChildren().front());
         NavigationTitleUtil::InitTitleBarButtonEvent(menuItemNode, iconNode, true);
+
+        // read navigation "more" button
+        std::string message  = Localization::GetInstance()->GetEntryLetters("navigation.more");
+        NavigationTitleUtil::SetAccessibility(menuItemNode, message);
 
         barItemNode->MountToParent(menuItemNode);
         barItemNode->MarkModifyDone();
