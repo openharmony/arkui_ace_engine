@@ -884,7 +884,7 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
 }
 
 void SearchPattern::GetSearchFocusPaintRadius(float& radiusTopLeft, float& radiusTopRight,
-        float& radiusBottomLeft, float& radiusBottomRight)
+    float& radiusBottomLeft, float& radiusBottomRight)
 {
     auto host = GetHost();
     auto renderContext = host->GetRenderContext();
