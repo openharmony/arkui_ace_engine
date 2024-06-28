@@ -109,7 +109,6 @@ void JSNavDestinationContext::GetRouteInfo(const JSCallbackInfo& info)
         data->SetProperty<std::string>(iter->first.c_str(), iter->second.c_str());
     }
     routeData->SetPropertyObject("data", data);
-    routeData->SetPropertyJsonObject("customData", routeInfo.customData.c_str());
     info.SetReturnValue(routeData);
 }
 
