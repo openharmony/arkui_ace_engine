@@ -1715,6 +1715,12 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     hostNode->SetIsOnAnimation(false);
+    if (preTopNavDestination) {
+        preTopNavDestination->SetIsOnAnimation(false);
+    }
+    if (newTopNavDestination) {
+        newTopNavDestination->SetIsOnAnimation(false);
+    }
     hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
     do {
         if (replaceValue != 0) {
@@ -2349,6 +2355,12 @@ bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode
         proxy->SetIsSuccess(false);
         proxy->SetIsFinished(true);
         return false;
+    }
+    if (preTopNavDestination) {
+        preTopNavDestination->SetIsOnAnimation(true);
+    }
+    if (newTopNavDestination) {
+        newTopNavDestination->SetIsOnAnimation(true);
     }
     proxy->SetInteractive(navigationTransition.interactive);
     // set on transition end callback
