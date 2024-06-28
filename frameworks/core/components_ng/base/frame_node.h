@@ -918,7 +918,7 @@ public:
         auto property = GetAccessibilityProperty<NG::AccessibilityProperty>();
         if (property) {
             auto level = property->GetAccessibilityLevel();
-            if (level == NG::AccessibilityProperty::Level::NO ||
+            if (level == NG::AccessibilityProperty::Level::NO_STR ||
                 level == NG::AccessibilityProperty::Level::NO_HIDE_DESCENDANTS) {
                 return true;
             }

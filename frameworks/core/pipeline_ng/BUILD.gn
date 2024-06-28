@@ -63,6 +63,7 @@ template("ace_core_pipeline_ng_source_set") {
         include_dirs = [
           "//foundation/graphic/graphic_2d/utils/color_manager/export",
           "//foundation/multimedia/image_framework/interfaces/innerkits/include",
+          "//foundation/graphic/graphic_surface/interfaces/inner_api/surface",
         ]
       }
     }
