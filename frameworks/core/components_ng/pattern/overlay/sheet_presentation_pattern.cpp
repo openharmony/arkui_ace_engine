@@ -1058,8 +1058,35 @@ void SheetPresentationPattern::CheckSheetHeightChange()
     }
 }
 
+void SheetPresentationPattern::IsCustomDetentsChanged(SheetStyle sheetStyle)
+{
+    unsigned int preDetentsSize = preDetents_.size();
+    unsigned int userSetDetentsSize = sheetStyle.detents.size();
+    // if preview detents size is not equal to the new one, set detents index to zero
+    if (preDetentsSize != userSetDetentsSize) {
+        detentsFinalIndex_ = 0;
+        return;
+    }
+
+    // check whether the new coming one's content is equal to the last time input
+    unsigned int length = std::min(preDetentsSize, userSetDetentsSize);
+    for (unsigned int index = 0; index < length; index++) {
+        if (sheetStyle.detents[index] != preDetents_[index]) {
+            // if detents has been changed, set detents index to zero
+            detentsFinalIndex_ = 0;
+            break;
+        }
+    }
+}
+
 void SheetPresentationPattern::InitSheetDetents()
 {
+    // record input detents
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    IsCustomDetentsChanged(sheetStyle);
+    preDetents_.clear();
     sheetDetentHeight_.clear();
     unSortedSheetDentents_.clear();
     float height = 0.0f;
@@ -1068,9 +1095,6 @@ void SheetPresentationPattern::InitSheetDetents()
     auto geometryNode = sheetNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto largeHeight = sheetMaxHeight_ - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
-    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
     auto sheetType = GetSheetType();
     auto sheetFrameHeight = geometryNode->GetFrameSize().Height();
     auto mediumSize = MEDIUM_SIZE;
@@ -1092,6 +1116,7 @@ void SheetPresentationPattern::InitSheetDetents()
                 break;
             }
             for (auto iter : sheetStyle.detents) {
+                preDetents_.emplace_back(iter);
                 if (iter.sheetMode.has_value()) {
                     if (iter.sheetMode == SheetMode::MEDIUM) {
                         height = pageHeight_ * mediumSize;
