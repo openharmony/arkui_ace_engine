@@ -25,6 +25,7 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
 const measure = requireNapi('measure');
 const Curves = globalThis.requireNativeModule("ohos.curves");
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
+const ColorMetrics = requireNapi('arkui.node').ColorMetrics;
 const LengthUnit = requireNapi('arkui.node').LengthUnit;
 export var ArcButtonTypeMode;
 (function (ArcButtonTypeMode) {
@@ -54,19 +55,19 @@ export var ArkButtonClickEffectStyle;
 let ArcButtonOptions = class ArcButtonOptions {
     constructor(options) {
         this.type = options.type ?? ArcButtonTypeMode.BOTTOM_EDGE;
-        this.width = options.width ?? Constants.UPPER_ARC_CIRCLE_R;
-        this.height = options.height ?? (Constants.LOWER_ARC_CIRCLE_CENTER_Y + Constants.LOWER_ARC_CIRCLE_R +
-            Constants.UPPER_ARC_CIRCLE_R - Constants.UPPER_ARC_CIRCLE_CENTER_Y);
+        this.width = options.width ?? new LengthMetrics(Constants.UPPER_ARC_CIRCLE_R, LengthUnit.VP);
+        this.height = options.height ?? new LengthMetrics((Constants.LOWER_ARC_CIRCLE_CENTER_Y +
+            Constants.LOWER_ARC_CIRCLE_R + Constants.UPPER_ARC_CIRCLE_R - Constants.UPPER_ARC_CIRCLE_CENTER_Y), LengthUnit.VP);
         this.styleMode = options.styleMode ?? ArcButtonStyleMode.EMPHASIZED;
         this.status = options.status ?? ArcButtonStatus.NORMAL;
         this.resourceText = options.resourceText ?? '';
         this.touchEffect = options.touchEffect ?? ArkButtonClickEffectStyle.NONE;
-        this.backgroundColor = options.backgroundColor ?? Color.Black;
-        this.shadowColor = options.shadowColor ?? '#000000';
+        this.backgroundColor = options.backgroundColor ?? ColorMetrics.resourceColor(Color.Black);
+        this.shadowColor = options.shadowColor ?? ColorMetrics.resourceColor('#000000');
         this.shadowEnabled = options.shadowEnabled ?? false;
         this.textSize = options.textSize ?? new LengthMetrics(Constants.MAX_FONT_SIZE, LengthUnit.FP);
-        this.textColor = options.textColor ?? Color.White;
-        this.pressedTextColor = options.pressedTextColor ?? Color.White;
+        this.textColor = options.textColor ?? ColorMetrics.resourceColor(Color.White);
+        this.pressedTextColor = options.pressedTextColor ?? ColorMetrics.resourceColor(Color.White);
         this.textStyle = options.textStyle ?? FontStyle.Normal;
         this.textFamily = options.textFamily ?? '';
         this.textMargin = options.textMargin ?? {
@@ -133,12 +134,12 @@ export class ArcButton extends ViewV2 {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
         super(parent, elmtId, extraInfo);
         this.initParam("options", (params && "options" in params) ? params.options : undefined);
-        this.btnColor = Color.Black;
-        this.btnNormalColor = Color.Black;
-        this.btnPressColor = Color.Black;
-        this.btnDisableColor = Color.Black;
-        this.textNormalColor = Color.White;
-        this.textDisableColor = Color.White;
+        this.btnColor = ColorMetrics.resourceColor(Color.Black);
+        this.btnNormalColor = ColorMetrics.resourceColor(Color.Black);
+        this.btnPressColor = ColorMetrics.resourceColor(Color.Black);
+        this.btnDisableColor = ColorMetrics.resourceColor(Color.Black);
+        this.textNormalColor = ColorMetrics.resourceColor(Color.White);
+        this.textDisableColor = ColorMetrics.resourceColor(Color.White);
         this.btnWidth = 0;
         this.btnHeight = 0;
         this.scaleX = 1;
@@ -147,7 +148,7 @@ export class ArcButton extends ViewV2 {
         this.isUp = false;
         this.textWidth = 0;
         this.textHeight = 0;
-        this.textColor = Color.White;
+        this.textColor = ColorMetrics.resourceColor(Color.White);
         this.isExceed = false;
         this.settings = new RenderingContextSettings(true);
         this.context = new CanvasRenderingContext2D(this.settings);
@@ -169,32 +170,32 @@ export class ArcButton extends ViewV2 {
     changeStatus() {
         switch (this.options.styleMode) {
             case ArcButtonStyleMode.EMPHASIZED:
-                this.btnNormalColor = Constants.EMPHASIZED_NORMAL_BTN_COLOR;
-                this.textNormalColor = Constants.EMPHASIZED_TEXT_COLOR;
-                this.btnPressColor = Constants.EMPHASIZED_PRESSED_BTN_COLOR;
-                this.btnDisableColor = Constants.EMPHASIZED_DISABLE_BTN_COLOR;
-                this.textDisableColor = Constants.EMPHASIZED_DISABLE_TEXT_COLOR;
+                this.btnNormalColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_NORMAL_BTN_COLOR);
+                this.textNormalColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_TEXT_COLOR);
+                this.btnPressColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_PRESSED_BTN_COLOR);
+                this.btnDisableColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_DISABLE_BTN_COLOR);
+                this.textDisableColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_DISABLE_TEXT_COLOR);
                 break;
             case ArcButtonStyleMode.NORMAL_LIGHT:
-                this.btnNormalColor = Constants.NORMAL01_NORMAL_BTN_COLOR;
-                this.textNormalColor = Constants.NORMAL01_TEXT_COLOR;
-                this.btnPressColor = Constants.NORMAL01_PRESSED_BTN_COLOR;
-                this.btnDisableColor = Constants.NORMAL01_DISABLE_BTN_COLOR;
-                this.textDisableColor = Constants.NORMAL01_DISABLE_TEXT_COLOR;
+                this.btnNormalColor = ColorMetrics.resourceColor(Constants.NORMAL01_NORMAL_BTN_COLOR);
+                this.textNormalColor = ColorMetrics.resourceColor(Constants.NORMAL01_TEXT_COLOR);
+                this.btnPressColor = ColorMetrics.resourceColor(Constants.NORMAL01_PRESSED_BTN_COLOR);
+                this.btnDisableColor = ColorMetrics.resourceColor(Constants.NORMAL01_DISABLE_BTN_COLOR);
+                this.textDisableColor = ColorMetrics.resourceColor(Constants.NORMAL01_DISABLE_TEXT_COLOR);
                 break;
             case ArcButtonStyleMode.NORMAL_DEEP:
-                this.btnNormalColor = Constants.NORMAL02_NORMAL_BTN_COLOR;
-                this.textNormalColor = Constants.NORMAL02_TEXT_COLOR;
-                this.btnPressColor = Constants.NORMAL02_PRESSED_BTN_COLOR;
-                this.btnDisableColor = Constants.NORMAL02_DISABLE_BTN_COLOR;
-                this.textDisableColor = Constants.NORMAL02_DISABLE_TEXT_COLOR;
+                this.btnNormalColor = ColorMetrics.resourceColor(Constants.NORMAL02_NORMAL_BTN_COLOR);
+                this.textNormalColor = ColorMetrics.resourceColor(Constants.NORMAL02_TEXT_COLOR);
+                this.btnPressColor = ColorMetrics.resourceColor(Constants.NORMAL02_PRESSED_BTN_COLOR);
+                this.btnDisableColor = ColorMetrics.resourceColor(Constants.NORMAL02_DISABLE_BTN_COLOR);
+                this.textDisableColor = ColorMetrics.resourceColor(Constants.NORMAL02_DISABLE_TEXT_COLOR);
                 break;
             case ArcButtonStyleMode.EMPHASIZED_WARNING:
-                this.btnNormalColor = Constants.EMPHASIZEWARN_NORMAL_BTN_COLOR;
-                this.textNormalColor = Constants.EMPHASIZEWARN_TEXT_COLOR;
-                this.btnPressColor = Constants.EMPHASIZEWARN_PRESSED_BTN_COLOR;
-                this.btnDisableColor = Constants.EMPHASIZEWARN_DISABLE_BTN_COLOR;
-                this.textDisableColor = Constants.EMPHASIZEWARN_DISABLE_TEXT_COLOR;
+                this.btnNormalColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_NORMAL_BTN_COLOR);
+                this.textNormalColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_TEXT_COLOR);
+                this.btnPressColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_PRESSED_BTN_COLOR);
+                this.btnDisableColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_DISABLE_BTN_COLOR);
+                this.textDisableColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_DISABLE_TEXT_COLOR);
                 break;
             default:
                 break;
@@ -245,9 +246,9 @@ export class ArcButton extends ViewV2 {
     }
     aboutToAppear() {
         this.initValues();
-        this.upperArcCircleR = this.options.width;
+        this.upperArcCircleR = this.options.width.value;
         this.upperArcCircleY = Constants.LOWER_ARC_CIRCLE_CENTER_Y + Constants.LOWER_ARC_CIRCLE_R + this.upperArcCircleR -
-            this.options.height;
+            this.options.height.value;
         this.circularCrossPointUtil.initData(this.upperArcCircleR, this.upperArcCircleY);
         this.circularCrossPointUtil.calculate().then((data) => {
             if (data == null) {
@@ -299,10 +300,10 @@ export class ArcButton extends ViewV2 {
         if (this.options.shadowEnabled) {
             this.context.shadowBlur = Constants.SHADOW_BLUR;
             this.context.shadowOffsetY = -Constants.SHADOW_OFFSET_Y;
-            this.context.shadowColor = this.options.shadowColor;
+            this.context.shadowColor = this.options.shadowColor.color;
         }
         this.context.beginPath();
-        this.context.fillStyle = this.btnColor;
+        this.context.fillStyle = this.btnColor.color;
         this.context.fill(this.path2D);
     }
     buildLog() {
@@ -376,7 +377,7 @@ export class ArcButton extends ViewV2 {
                         Text.create(this.options.resourceText);
                         Text.width(this.textWidth);
                         Text.height(this.textHeight);
-                        Text.fontColor(this.textColor);
+                        Text.fontColor(this.textColor.color);
                         Text.fontSize(this.options.textSize.value);
                         Text.fontWeight(FontWeight.Medium);
                         Text.fontStyle(this.options.textStyle);
@@ -395,7 +396,7 @@ export class ArcButton extends ViewV2 {
                         Text.width(this.textWidth);
                         Text.height(this.textHeight);
                         Text.textAlign(TextAlign.Center);
-                        Text.fontColor(this.textColor);
+                        Text.fontColor(this.textColor.color);
                         Text.maxFontSize(this.options.textSize.value);
                         Text.minFontSize(new LengthMetrics(Constants.MIN_FONT_SIZE, LengthUnit.FP).value);
                         Text.fontWeight(FontWeight.Medium);
@@ -499,8 +500,8 @@ class CircularCrossPointUtil {
                 let tp2 = this.calculateIntersection(new Point(lowerArcCircleCenterX, lowerArcCircleCenterY), this.upperArcCircleR, new Point(intersection2.x, intersection2.y));
                 let tp3 = this.calculateIntersection(new Point(upperArcCircleCenterX, this.upperArcCircleY), lowerArcCircleR, new Point(intersection2.x, intersection2.y));
                 let tp4 = this.calculateIntersection(new Point(upperArcCircleCenterX, this.upperArcCircleY), lowerArcCircleR, new Point(intersection1.x, intersection1.y));
-                let width = this.calculateDistance(intersection1.x, intersection1.y, intersection2.x, intersection2.y)
-                    + chamferCircleR * 2;
+                let width = this.calculateDistance(intersection1.x, intersection1.y, intersection2.x, intersection2.y) +
+                    chamferCircleR * 2;
                 let height = (this.upperArcCircleR + lowerArcCircleR) - this.calculateDistance(lowerArcCircleCenterX, lowerArcCircleCenterY, upperArcCircleCenterX, this.upperArcCircleY);
                 let canvasLeftTop = new Point(intersection1.x - chamferCircleR, this.upperArcCircleY - lowerArcCircleR);
                 return new AllPoints(width, height, tp1, tp2, tp4, tp3, canvasLeftTop);
@@ -515,8 +516,8 @@ class CircularCrossPointUtil {
      * @returns 是否在上弧圆内
      */
     isPointInPath(x, y, isUp) {
-        let distance = this.calculateDistance(x, y, Constants.UPPER_ARC_CIRCLE_CENTER_X, isUp ? this.mirrorUpperArcCircleY
-            : this.upperArcCircleY);
+        let distance = this.calculateDistance(x, y, Constants.UPPER_ARC_CIRCLE_CENTER_X, isUp ?
+            this.mirrorUpperArcCircleY : this.upperArcCircleY);
         return distance <= this.upperArcCircleR;
     }
     /**
