@@ -179,8 +179,8 @@ private:
     void CalcTargetStatusOnAllPointMoveBackward(const LinearVector<float>& itemHalfSizes);
     std::pair<LinearVector<float>, std::pair<float, float>> CalcIndicatorCenterX(
         const LinearVector<float>& itemHalfSizes, int32_t selectedIndex, OverlongType overlongType, int32_t pageIndex);
-    LinearVector<float> CalcIndicatorSize(const LinearVector<float>& itemHalfSizes, int32_t selectedIndex,
-        OverlongType overlongType, int32_t pageIndex, bool isWidth);
+    LinearVector<float> CalcIndicatorSize(
+        const LinearVector<float>& itemHalfSizes, OverlongType overlongType, int32_t pageIndex, bool isWidth);
     void UpdateSelectedCenterXOnDrag(const LinearVector<float>& itemHalfSizes);
     void UpdateUnselectedCenterXOnDrag();
     int32_t CalcTargetIndexOnDrag() const;

@@ -390,6 +390,8 @@ void SwiperPattern::OnModifyDone()
     if (IsSwipeByGroup()) {
         needAdjustIndex_ = true;
     }
+
+    SetIndicatorJumpIndex(currentIndex_);
 }
 
 void SwiperPattern::OnAfterModifyDone()
@@ -609,6 +611,7 @@ void SwiperPattern::InitSurfaceChangedCallback()
                 swiper->itemPosition_.clear();
                 swiper->isVoluntarilyClear_ = true;
                 swiper->jumpIndex_ = currentIndex;
+                swiper->SetIndicatorJumpIndex(currentIndex);
                 swiper->MarkDirtyNodeSelf();
                 auto swiperNode = swiper->GetHost();
                 CHECK_NULL_VOID(swiperNode);
