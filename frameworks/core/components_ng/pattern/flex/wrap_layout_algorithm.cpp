@@ -415,7 +415,7 @@ void WrapLayoutAlgorithm::LayoutWholeWrap(
             break;
         }
         case WrapAlignment::SPACE_EVENLY: {
-            float crossSpace = crossAxisRemainSpace / static_cast<float>(contentNum + 1);
+            float crossSpace = contentNum != -1 ? crossAxisRemainSpace / static_cast<float>(contentNum + 1) : 0.0f;
             AddExtraSpaceToStartPosition(startPosition, crossSpace, false);
             spaceBetweenContentsOnCrossAxis =
                 isHorizontal_ ? OffsetF(0.0f, std::abs(crossSpace)) : OffsetF(std::abs(crossSpace), 0.0f);
@@ -559,13 +559,13 @@ void WrapLayoutAlgorithm::CalcItemMainAxisStartAndSpaceBetween(
             break;
         }
         case WrapAlignment::SPACE_EVENLY: {
-            float mainSpace = spaceLeftOnMainAxis / static_cast<float>(content.count + 1);
+            float mainSpace = content.count != -1 ? spaceLeftOnMainAxis / static_cast<float>(content.count + 1) : 0.0f;
             AddExtraSpaceToStartPosition(startPosition, mainSpace, true);
             spaceBetweenItemsOnMainAxis = isHorizontal_ ? OffsetF(mainSpace, 0.0f) : OffsetF(0.0f, mainSpace);
             break;
         }
         case WrapAlignment::SPACE_AROUND: {
-            float mainSpace = spaceLeftOnMainAxis / static_cast<float>(content.count);
+            float mainSpace = content.count != 0 ? spaceLeftOnMainAxis / static_cast<float>(content.count) : 0.0f;
             AddExtraSpaceToStartPosition(startPosition, mainSpace / 2.0f, true);
             spaceBetweenItemsOnMainAxis = isHorizontal_ ? OffsetF(mainSpace, 0.0f) : OffsetF(0.0f, mainSpace);
             break;
@@ -721,14 +721,14 @@ void WrapLayoutAlgorithm::UpdateStartPositionByAlign(
             break;
         }
         case WrapAlignment::SPACE_EVENLY: {
-            float crossSpace = crossAxisRemainSpace / static_cast<float>(contentNum + 1);
+            float crossSpace = contentNum != -1 ? crossAxisRemainSpace / static_cast<float>(contentNum + 1) : 0.0f;
             startPosition.AddX(crossSpace);
             spaceBetweenContentsOnCrossAxis =
                 isHorizontal_ ? OffsetF(0.0f, std::abs(crossSpace)) : OffsetF(std::abs(crossSpace), 0.0f);
             break;
         }
         case WrapAlignment::SPACE_AROUND: {
-            float crossSpace = crossAxisRemainSpace / static_cast<float>(contentNum);
+            float crossSpace = contentNum != 0 ? crossAxisRemainSpace / static_cast<float>(contentNum) : 0.0f;
             startPosition.AddX(crossSpace / 2.0f);
             spaceBetweenContentsOnCrossAxis = OffsetF(std::abs(crossSpace), 0.0);
             break;
