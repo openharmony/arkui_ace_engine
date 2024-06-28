@@ -853,4 +853,12 @@ RefPtr<SwiperController> SwiperModelNG::GetSwiperController(FrameNode* frameNode
     CHECK_NULL_RETURN(pattern, nullptr);
     return pattern->GetSwiperController();
 }
+
+bool SwiperModelNG::GetIndicatorInteractive(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->IsIndicatorInteractive();
+}
 } // namespace OHOS::Ace::NG
