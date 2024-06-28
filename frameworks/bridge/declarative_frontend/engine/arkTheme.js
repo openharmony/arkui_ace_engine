@@ -103,14 +103,11 @@ if (globalThis.LazyForEach !== undefined) {
             }
             return;
         }
-        const itemGeneratorWrapper = _item => {
-            const item = _item;
-            {
-                const result = ArkThemeScopeManager.getInstance().onDeepRenderScopeEnter(themeScope);
-                paramItemGenerator(item);
-                if (result === true) {
-                    ArkThemeScopeManager.getInstance().onDeepRenderScopeExit();
-                }
+        const itemGeneratorWrapper = (...params) => {
+            const result = ArkThemeScopeManager.getInstance().onDeepRenderScopeEnter(themeScope);
+            paramItemGenerator(...params);
+            if (result === true) {
+                ArkThemeScopeManager.getInstance().onDeepRenderScopeExit();
             }
         };
         if (paramUpdateChangedNode) {
