@@ -4409,9 +4409,6 @@ void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args)
 {
     CalcDimension borderRadius;
     if (ParseJsDimensionVp(args, borderRadius)) {
-        if (borderRadius.Unit() == DimensionUnit::PERCENT) {
-            borderRadius.Reset();
-        }
         ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
@@ -4448,11 +4445,7 @@ void JSViewAbstract::ParseOuterBorderRadius(const JSRef<JSVal>& args)
 
 void JSViewAbstract::GetBorderRadius(const char* key, JSRef<JSObject>& object, CalcDimension& radius)
 {
-    if (ParseJsDimensionVp(object->GetProperty(key), radius)) {
-        if ((radius.Unit() == DimensionUnit::PERCENT)) {
-            radius.Reset();
-        }
-    }
+    ParseJsDimensionVp(object->GetProperty(key), radius);
 }
 
 void JSViewAbstract::GetBorderRadiusByLengthMetrics(const char* key, JSRef<JSObject>& object, CalcDimension& radius)
@@ -4460,9 +4453,6 @@ void JSViewAbstract::GetBorderRadiusByLengthMetrics(const char* key, JSRef<JSObj
     if (object->HasProperty(key) && object->GetProperty(key)->IsObject()) {
         JSRef<JSObject> startObj = JSRef<JSObject>::Cast(object->GetProperty(key));
         ParseJsLengthMetrics(startObj, radius);
-        if ((radius.Unit() == DimensionUnit::PERCENT)) {
-            radius.Reset();
-        }
     }
 }
 
