@@ -4832,6 +4832,7 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
             }
             FlushFocus(curChildFrame);
         } while (0);
+        auto tempOldIndex = oldIndex_;
         oldIndex_ = nextIndex;
         currentFirstIndex_ = GetLoopIndex(nextIndex);
         turnPageRate_ = 0.0f;
@@ -4842,9 +4843,36 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
             pipeline->FlushMessages();
         }
         FireChangeEvent();
+        TabContentStateCallBack(tempOldIndex, nextIndex);
         // lazyBuild feature.
         SetLazyLoadFeature(true);
     }
+}
+
+void SwiperPattern::TabContentStateCallBack(int32_t oldIndex, int32_t nextIndex) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_VOID(tabsNode);
+    std::string id = tabsNode->GetInspectorId().value_or("");
+    int32_t uniqueId = tabsNode->GetId();
+
+    auto tabContents = tabsNode->GetTabs();
+    CHECK_NULL_VOID(tabContents);
+    auto oldTabContent = tabContents->GetChildAtIndex(oldIndex);
+    auto nextTabContent = tabContents->GetChildAtIndex(nextIndex);
+    std::string oldTabContentId = oldTabContent->GetInspectorId().value_or("");
+    int32_t oldTabContentUniqueId = oldTabContent->GetId();
+    std::string nextTabContentId = nextTabContent->GetInspectorId().value_or("");
+    int32_t nextTabContentUniqueId = nextTabContent->GetId();
+
+    TabContentInfo oldTabContentInfo(oldTabContentId, oldTabContentUniqueId, TabContentState::ON_HIDE, oldIndex,
+        id, uniqueId);
+    TabContentInfo nextTabContentInfo(nextTabContentId, nextTabContentUniqueId, TabContentState::ON_SHOW, nextIndex,
+        id, uniqueId);
+    UIObserverHandler::GetInstance().NotifyTabContentStateUpdate(oldTabContentInfo);
+    UIObserverHandler::GetInstance().NotifyTabContentStateUpdate(nextTabContentInfo);
 }
 
 void SwiperPattern::UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus)

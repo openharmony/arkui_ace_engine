@@ -1008,6 +1008,8 @@ private:
 
     void PostIdleTask(const RefPtr<FrameNode>& frameNode);
 
+    void TabContentStateCallBack(int32_t oldIndex, int32_t nextIndex) const;
+
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> hoverEvent_;
