@@ -714,4 +714,4 @@ Constants.EMPHASIZEWARN_PRESSED_BTN_COLOR = '#9E342F';
 Constants.EMPHASIZEWARN_DISABLE_BTN_COLOR = '#3E0d0c';
 Constants.EMPHASIZEWARN_DISABLE_TEXT_COLOR = '#99FFFFFF';
 //# sourceMappingURL=ArcButton.js.map
-export default { ArcButton, ArcButtonOptions, TypeMode, ArcButtonStyleMode, ArcButtonStatus, ClickEffectStatus }
+export default { ArcButton, ArcButtonOptions, TypeMode, ArcButtonStyleMode, ArcButtonStatus, ArkButtonClickEffectStyle }

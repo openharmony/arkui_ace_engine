@@ -132,24 +132,24 @@ interface CommonArcButtonOptions {
 
 @ObservedV2
 export class ArcButtonOptions {
-  @Trace type: ArcButtonTypeMode;
-  @Trace width: number;
-  @Trace height: number;
-  @Trace styleMode: ArcButtonStyleMode;
-  @Trace status: ArcButtonStatus;
-  @Trace resourceText: ResourceStr;
-  @Trace touchEffect: ArkButtonClickEffectStyle;
-  @Trace backgroundColor: string | Color;
-  @Trace shadowColor: string;
-  @Trace shadowEnabled: boolean;
-  @Trace textSize: LengthMetrics;
-  @Trace textColor: Color | string;
-  @Trace pressedTextColor: Color | string;
-  @Trace textStyle: FontStyle;
-  @Trace textFamily: string | Resource;
-  @Trace textMargin: ArcButtonMargin;
-  touchCallback?: Callback<TouchEvent>
-  onClickEvent?: Callback<ClickEvent>
+  @Trace public  type: ArcButtonTypeMode;
+  @Trace public  width: number;
+  @Trace public height: number;
+  @Trace public styleMode: ArcButtonStyleMode;
+  @Trace public status: ArcButtonStatus;
+  @Trace public resourceText: ResourceStr;
+  @Trace public touchEffect: ArkButtonClickEffectStyle;
+  @Trace public backgroundColor: string | Color;
+  @Trace public shadowColor: string;
+  @Trace public shadowEnabled: boolean;
+  @Trace public textSize: LengthMetrics;
+  @Trace public textColor: Color | string;
+  @Trace public pressedTextColor: Color | string;
+  @Trace public textStyle: FontStyle;
+  @Trace public textFamily: string | Resource;
+  @Trace public textMargin: ArcButtonMargin;
+  public touchCallback?: Callback<TouchEvent>
+  public onClickEvent?: Callback<ClickEvent>
 
   constructor(options: CommonArcButtonOptions) {
     this.type = options.type ?? ArcButtonTypeMode.BOTTOM_EDGE
@@ -683,75 +683,75 @@ class Constants {
   /**
    * 上弧圆圆心X坐标
    */
-  static readonly UPPER_ARC_CIRCLE_CENTER_X = 116.5;
+  public static readonly UPPER_ARC_CIRCLE_CENTER_X = 116.5;
   /**
    * 上弧圆圆心Y坐标
    */
-  static readonly UPPER_ARC_CIRCLE_CENTER_Y = 514;
+  public static readonly UPPER_ARC_CIRCLE_CENTER_Y = 514;
   /**
    * 上弧圆半径
    */
-  static readonly UPPER_ARC_CIRCLE_R = 330;
+  public static readonly UPPER_ARC_CIRCLE_R = 330;
   /**
    * 下弧圆圆心X坐标
    */
-  static readonly LOWER_ARC_CIRCLE_CENTER_X = 116.5;
+  public static readonly LOWER_ARC_CIRCLE_CENTER_X = 116.5;
   /**
    * 下弧圆圆心Y坐标
    */
-  static readonly LOWER_ARC_CIRCLE_CENTER_Y = 116.5;
+  public static readonly LOWER_ARC_CIRCLE_CENTER_Y = 116.5;
   /**
    * 下弧圆半径
    */
-  static readonly LOWER_ARC_CIRCLE_R = 115.5;
+  public static readonly LOWER_ARC_CIRCLE_R = 115.5;
   /**
    * 倒角圆半径
    */
-  static readonly CHAMFER_CIRCLE_R = 8;
+  public static readonly CHAMFER_CIRCLE_R = 8;
   /**
    * 最大文字大小
    */
-  static readonly MAX_FONT_SIZE = 19
+  public static readonly MAX_FONT_SIZE = 19
   /**
    * 最小文字大小
    */
-  static readonly MIN_FONT_SIZE = 13
+  public static readonly MIN_FONT_SIZE = 13
   /**
    * 阴影半径
    */
-  static readonly SHADOW_BLUR = 4
+  public static readonly SHADOW_BLUR = 4
   /**
    * Y偏移
    */
-  static readonly SHADOW_OFFSET_Y = 3
+  public static readonly SHADOW_OFFSET_Y = 3
   /**
    * 按钮与边框距离
    */
-  static readonly DISTANCE_FROM_BORDER = 1
+  public static readonly DISTANCE_FROM_BORDER = 1
   /**
    * 文本间距
    */
-  static readonly TEXT_HORIZONTAL_MARGIN = 24
-  static readonly TEXT_MARGIN_TOP = 10
-  static readonly TEXT_MARGIN_BOTTOM = 16
-  static readonly EMPHASIZED_NORMAL_BTN_COLOR = '#1F71FF'
-  static readonly EMPHASIZED_TEXT_COLOR = '#FFFFFF'
-  static readonly EMPHASIZED_PRESSED_BTN_COLOR = '#2B6EC2'
-  static readonly EMPHASIZED_DISABLE_BTN_COLOR = '#991F71FF'
-  static readonly EMPHASIZED_DISABLE_TEXT_COLOR = '#99FFFFFF'
-  static readonly NORMAL01_NORMAL_BTN_COLOR = '#132230'
-  static readonly NORMAL01_TEXT_COLOR = '#5EA1FF'
-  static readonly NORMAL01_PRESSED_BTN_COLOR = '#25353E'
-  static readonly NORMAL01_DISABLE_BTN_COLOR = '#132230'
-  static readonly NORMAL01_DISABLE_TEXT_COLOR = '#995ea1ff'
-  static readonly NORMAL02_NORMAL_BTN_COLOR = '#1D201C'
-  static readonly NORMAL02_TEXT_COLOR = '#5EA1FF'
-  static readonly NORMAL02_PRESSED_BTN_COLOR = '#30342D'
-  static readonly NORMAL02_DISABLE_BTN_COLOR = '#1E211D'
-  static readonly NORMAL02_DISABLE_TEXT_COLOR = '#995ea1ff'
-  static readonly EMPHASIZEWARN_NORMAL_BTN_COLOR = '#BF2629'
-  static readonly EMPHASIZEWARN_TEXT_COLOR = '#FFFFFF'
-  static readonly EMPHASIZEWARN_PRESSED_BTN_COLOR = '#9E342F'
-  static readonly EMPHASIZEWARN_DISABLE_BTN_COLOR = '#3E0d0c'
-  static readonly EMPHASIZEWARN_DISABLE_TEXT_COLOR = '#99FFFFFF'
+  public static readonly TEXT_HORIZONTAL_MARGIN = 24
+  public static readonly TEXT_MARGIN_TOP = 10
+  public static readonly TEXT_MARGIN_BOTTOM = 16
+  public static readonly EMPHASIZED_NORMAL_BTN_COLOR = '#1F71FF'
+  public static readonly EMPHASIZED_TEXT_COLOR = '#FFFFFF'
+  public static readonly EMPHASIZED_PRESSED_BTN_COLOR = '#2B6EC2'
+  public static readonly EMPHASIZED_DISABLE_BTN_COLOR = '#991F71FF'
+  public static readonly EMPHASIZED_DISABLE_TEXT_COLOR = '#99FFFFFF'
+  public static readonly NORMAL01_NORMAL_BTN_COLOR = '#132230'
+  public static readonly NORMAL01_TEXT_COLOR = '#5EA1FF'
+  public static readonly NORMAL01_PRESSED_BTN_COLOR = '#25353E'
+  public static readonly NORMAL01_DISABLE_BTN_COLOR = '#132230'
+  public static readonly NORMAL01_DISABLE_TEXT_COLOR = '#995ea1ff'
+  public static readonly NORMAL02_NORMAL_BTN_COLOR = '#1D201C'
+  public static readonly NORMAL02_TEXT_COLOR = '#5EA1FF'
+  public static readonly NORMAL02_PRESSED_BTN_COLOR = '#30342D'
+  public static readonly NORMAL02_DISABLE_BTN_COLOR = '#1E211D'
+  public static readonly NORMAL02_DISABLE_TEXT_COLOR = '#995ea1ff'
+  public static readonly EMPHASIZEWARN_NORMAL_BTN_COLOR = '#BF2629'
+  public static readonly EMPHASIZEWARN_TEXT_COLOR = '#FFFFFF'
+  public static readonly EMPHASIZEWARN_PRESSED_BTN_COLOR = '#9E342F'
+  public static readonly EMPHASIZEWARN_DISABLE_BTN_COLOR = '#3E0d0c'
+  public static readonly EMPHASIZEWARN_DISABLE_TEXT_COLOR = '#99FFFFFF'
 }
