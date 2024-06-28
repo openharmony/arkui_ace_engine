@@ -618,6 +618,7 @@ public:
     std::shared_ptr<Rosen::RSNode> GetSurfaceRSNode() const;
 
     void GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId);
+    void OnAccessibilityHoverEvent(const PointF& point) override;
 
 private:
     friend class WebContextSelectOverlay;
