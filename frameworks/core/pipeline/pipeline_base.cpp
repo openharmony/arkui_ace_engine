@@ -533,6 +533,16 @@ bool PipelineBase::Dump(const std::vector<std::string>& params) const
     return OnDumpInfo(params);
 }
 
+bool PipelineBase::IsDestroyed()
+{
+    return destroyed_;
+}
+
+void PipelineBase::SetDestroyed()
+{
+    destroyed_ = true;
+}
+
 void PipelineBase::ForceLayoutForImplicitAnimation()
 {
     if (!pendingImplicitLayout_.empty()) {
@@ -895,6 +905,7 @@ bool PipelineBase::MaybeRelease()
 void PipelineBase::Destroy()
 {
     CHECK_RUN_ON(UI);
+    destroyed_ = true;
     ClearImageCache();
     platformResRegister_.Reset();
     drawDelegate_.reset();
@@ -914,7 +925,10 @@ void PipelineBase::Destroy()
     etsCardTouchEventCallback_.clear();
     formLinkInfoMap_.clear();
     finishFunctions_.clear();
-    densityChangedCallbacks_.clear();
+    {
+        std::lock_guard lock(densityChangeMutex_);
+        densityChangedCallbacks_.clear();
+    }
 }
 
 std::string PipelineBase::OnFormRecycle()

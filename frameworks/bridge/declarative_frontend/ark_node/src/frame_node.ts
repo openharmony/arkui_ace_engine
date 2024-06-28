@@ -774,6 +774,26 @@ const __creatorMap__ = new Map<string, (context: UIContext) => FrameNode>(
         return new ArkButtonComponent(node, type);
       })
     }],
+    ["XComponent", (context: UIContext) => {
+      return new TypedFrameNode(context, "XComponent", (node: NodePtr, type: ModifierType) => {
+        return new ArkXComponentComponent(node, type);
+      })
+    }],
+    ["ListItemGroup", (context: UIContext) => {
+      return new TypedFrameNode(context, "ListItemGroup", (node: NodePtr, type: ModifierType) => {
+        return new ArkListItemGroupComponent(node, type);
+      })
+    }],
+    ["WaterFlow", (context: UIContext) => {
+      return new TypedFrameNode(context, "WaterFlow", (node: NodePtr, type: ModifierType) => {
+        return new ArkWaterFlowComponent(node, type);
+      })
+    }],
+    ["FlowItem", (context: UIContext) => {
+      return new TypedFrameNode(context, "FlowItem", (node: NodePtr, type: ModifierType) => {
+        return new ArkFlowItemComponent(node, type);
+      })
+    }],
   ]
 )
 

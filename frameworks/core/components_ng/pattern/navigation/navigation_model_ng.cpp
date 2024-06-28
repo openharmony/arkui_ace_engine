@@ -1302,11 +1302,16 @@ void NavigationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolB
     bool needMoreButton = toolBarItems.size() > MAXIMUM_TOOLBAR_ITEMS_IN_BAR ? true : false;
     uint32_t count = 0;
     std::vector<OptionParam> params;
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    OptionParam param;
     for (const auto& toolBarItem : toolBarItems) {
         ++count;
         if (needMoreButton && (count > MAXIMUM_TOOLBAR_ITEMS_IN_BAR - 1)) {
-            params.push_back({ toolBarItem.text.value_or(""), toolBarItem.icon.value_or(""), toolBarItem.action,
-                toolBarItem.iconSymbol.value_or(nullptr) });
+            param = { toolBarItem.text.value_or(""), toolBarItem.icon.value_or(""), toolBarItem.action,
+                toolBarItem.iconSymbol.value_or(nullptr) };
+            param.SetSymbolUserDefinedIdealFontSize(theme->GetToolbarIconSize());
+            params.push_back(param);
         } else {
             auto toolBarItemNode =
                 CreateToolbarItemInContainer(toolBarItem, toolBarItems.size(), count, needMoreButton);

@@ -86,8 +86,12 @@ class ParticleEmitterModifier extends ModifierWithKey<Array<EmitterProperty>> {
   }
 
   static identity: Symbol = Symbol('emitter');
-  applyPeer(node, reset) {
-    let emitRatePlaceHolder, positionXPlaceHolder, positionYPlaceHolder, sizeXPlaceHolder, sizeYPlaceHolder;
+  applyPeer(node, reset): void {
+    let emitRatePlaceHolder;
+    let positionXPlaceHolder;
+    let positionYPlaceHolder;
+    let sizeXPlaceHolder;
+    let sizeYPlaceHolder;
     if (reset) {
       getUINativeModule().particle.resetEmitter(node);
     }

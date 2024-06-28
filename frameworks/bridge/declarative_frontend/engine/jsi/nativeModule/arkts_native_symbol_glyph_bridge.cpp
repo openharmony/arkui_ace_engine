@@ -127,6 +127,8 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetFontWeight(ArkUIRuntimeCallInfo* ru
     if (secondArg->IsString(vm)) {
         std::string weight = secondArg->ToString(vm)->ToString();
         GetArkUINodeModifiers()->getSymbolGlyphModifier()->setFontWeightStr(nativeNode, weight.c_str());
+    } else if (secondArg->IsNumber()) {
+        GetArkUINodeModifiers()->getSymbolGlyphModifier()->setFontWeight(nativeNode, secondArg->Int32Value(vm));
     } else {
         GetArkUINodeModifiers()->getSymbolGlyphModifier()->resetFontWeight(nativeNode);
     }

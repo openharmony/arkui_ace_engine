@@ -200,7 +200,7 @@ void XComponentPattern::Initialize()
             if (!SystemProperties::GetExtSurfaceEnabled()) {
                 renderSurface_->SetRenderContext(renderContextForSurface_);
             } else {
-                auto pipelineContext = PipelineContext::GetCurrentContext();
+                auto pipelineContext = host->GetContextRefPtr();
                 CHECK_NULL_VOID(pipelineContext);
                 pipelineContext->AddOnAreaChangeNode(host->GetId());
                 extSurfaceClient_ = MakeRefPtr<XComponentExtSurfaceCallbackClient>(WeakClaim(this));
@@ -224,7 +224,7 @@ void XComponentPattern::Initialize()
         InitEvent();
         SetMethodCall();
     } else if (type_ == XComponentType::NODE) {
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = host->GetContextRefPtr();
         if (context) {
             FireExternalEvent(context, id_, host->GetId(), false);
             InitNativeNodeCallbacks();
@@ -374,7 +374,7 @@ void XComponentPattern::OnAttachToFrameNode()
 #endif
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(host->GetId());
     SetRotation(pipeline->GetTransformHint());
@@ -565,7 +565,7 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     }
 
     auto id = frameNode->GetId();
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
     if (HasTransformHintChangedCallbackId()) {
@@ -579,7 +579,9 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 void XComponentPattern::SetMethodCall()
 {
     CHECK_NULL_VOID(xcomponentController_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto uiTaskExecutor = SingleTaskExecutor::Make(pipelineContext->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     xcomponentController_->SetConfigSurfaceImpl(
@@ -755,7 +757,9 @@ void XComponentPattern::NativeXComponentOffset(double x, double y)
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(nativeXComponent_);
     CHECK_NULL_VOID(nativeXComponentImpl_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     float scale = pipelineContext->GetViewScale();
     nativeXComponentImpl_->SetXComponentOffsetX(x * scale);
@@ -779,7 +783,9 @@ void XComponentPattern::NativeXComponentDispatchTouchEvent(
 
 void XComponentPattern::InitNativeWindow(float textureWidth, float textureHeight)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     if (renderSurface_->IsSurfaceValid() && (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE)) {
         float viewScale = context->GetViewScale();
@@ -792,8 +798,9 @@ void XComponentPattern::InitNativeWindow(float textureWidth, float textureHeight
 void XComponentPattern::XComponentSizeInit()
 {
     CHECK_RUN_ON(UI);
-    ContainerScope scope(GetHostInstanceId());
-    auto context = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     InitNativeWindow(initSize_.Width(), initSize_.Height());
 #ifdef RENDER_EXTRACT_SUPPORTED
@@ -801,8 +808,6 @@ void XComponentPattern::XComponentSizeInit()
         xcomponentController_->SetSurfaceId(renderSurface_->GetUniqueId());
     }
 #endif
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     TAG_LOGI(
@@ -820,10 +825,11 @@ void XComponentPattern::XComponentSizeInit()
 
 void XComponentPattern::XComponentSizeChange(const RectF& surfaceRect, bool needFireNativeEvent)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     // do not trigger when the size is first initialized
     if (needFireNativeEvent) {
-        ContainerScope scope(GetHostInstanceId());
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = host->GetContextRefPtr();
         CHECK_NULL_VOID(context);
         auto viewScale = context->GetViewScale();
         renderSurface_->AdjustNativeWindowSize(static_cast<uint32_t>(surfaceRect.Width() * viewScale),
@@ -832,8 +838,6 @@ void XComponentPattern::XComponentSizeChange(const RectF& surfaceRect, bool need
     }
     renderSurface_->UpdateSurfaceSizeInUserData(
         static_cast<uint32_t>(surfaceRect.Width()), static_cast<uint32_t>(surfaceRect.Height()));
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireControllerChangedEvent(surfaceId_, surfaceRect);
@@ -1253,11 +1257,13 @@ void XComponentPattern::SetTouchPoint(
          iterator++) {
         OH_NativeXComponent_TouchPoint ohTouchPoint;
         const auto& pointTouchInfo = *iterator;
-        const auto& pointScreenOffset = pointTouchInfo.GetGlobalLocation();
+        const auto& pointWindowOffset = pointTouchInfo.GetGlobalLocation();
         const auto& pointLocalOffset = pointTouchInfo.GetLocalLocation();
+        const auto& pointDisplayOffset = pointTouchInfo.GetScreenLocation();
         ohTouchPoint.id = pointTouchInfo.GetFingerId();
-        ohTouchPoint.screenX = static_cast<float>(pointScreenOffset.GetX());
-        ohTouchPoint.screenY = static_cast<float>(pointScreenOffset.GetY());
+        // screenX and screenY implementation wrong but should not modify for maintaining compatibility
+        ohTouchPoint.screenX = static_cast<float>(pointWindowOffset.GetX());
+        ohTouchPoint.screenY = static_cast<float>(pointWindowOffset.GetY());
         ohTouchPoint.x = static_cast<float>(pointLocalOffset.GetX());
         ohTouchPoint.y = static_cast<float>(pointLocalOffset.GetY());
         ohTouchPoint.type = ConvertNativeXComponentTouchEvent(touchType);
@@ -1266,10 +1272,14 @@ void XComponentPattern::SetTouchPoint(
         ohTouchPoint.timeStamp = timeStamp;
         ohTouchPoint.isPressed = (touchType == TouchType::DOWN);
         touchEventPoint_.touchPoints[index++] = ohTouchPoint;
-        // set tiltX, tiltY and sourceToolType
+        // set tiltX, tiltY, windowX, windowY, displayX, displayY and sourceToolType
         XComponentTouchPoint xcomponentTouchPoint;
         xcomponentTouchPoint.tiltX = pointTouchInfo.GetTiltX().value_or(0.0f);
         xcomponentTouchPoint.tiltY = pointTouchInfo.GetTiltY().value_or(0.0f);
+        xcomponentTouchPoint.windowX = static_cast<float>(pointWindowOffset.GetX());
+        xcomponentTouchPoint.windowY = static_cast<float>(pointWindowOffset.GetY());
+        xcomponentTouchPoint.displayX = static_cast<float>(pointDisplayOffset.GetX());
+        xcomponentTouchPoint.displayY = static_cast<float>(pointDisplayOffset.GetY());
         xcomponentTouchPoint.sourceToolType = ConvertNativeXComponentTouchToolType(pointTouchInfo.GetSourceTool());
         nativeXComponentTouchPoints_.emplace_back(xcomponentTouchPoint);
     }
@@ -1329,15 +1339,16 @@ void XComponentPattern::FireExternalEvent(RefPtr<NG::PipelineContext> context,
 
 ExternalEvent XComponentPattern::CreateExternalEvent()
 {
-    return [weak = AceType::WeakClaim(this)](
-               const std::string& componentId, const uint32_t nodeId, const bool isDestroy) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        ContainerScope scope(pattern->GetHostInstanceId());
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        pattern->FireExternalEvent(context, componentId, nodeId, isDestroy);
-    };
+    return
+        [weak = AceType::WeakClaim(this)](const std::string& componentId, const uint32_t nodeId, const bool isDestroy) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto context = host->GetContextRefPtr();
+            CHECK_NULL_VOID(context);
+            pattern->FireExternalEvent(context, componentId, nodeId, isDestroy);
+        };
 }
 
 void XComponentPattern::SetHandlingRenderContextForSurface(const RefPtr<RenderContext>& otherRenderContext)
@@ -1474,7 +1485,9 @@ bool XComponentPattern::StopTextureExport()
 
 void XComponentPattern::AddAfterLayoutTaskForExportTexture()
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();

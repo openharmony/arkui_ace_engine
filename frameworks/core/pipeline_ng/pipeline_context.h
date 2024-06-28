@@ -164,7 +164,8 @@ public:
         return false;
     }
 
-    void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action) override;
+    void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,
+        const RefPtr<NG::FrameNode>& node = nullptr) override;
 
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
@@ -278,8 +279,6 @@ public:
     void SetWindowSceneConsumed(bool isConsumed);
 
     bool IsWindowSceneConsumed();
-
-    bool IsDestroyed();
 
     void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) override;
     void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) override;
@@ -804,6 +803,10 @@ public:
         lastVsyncEndTimestamp_ = lastVsyncEndTimestamp;
     }
     void GetInspectorTree();
+
+    void AddFrameNodeChangeListener(const RefPtr<FrameNode>& node);
+    void RemoveFrameNodeChangeListener(const RefPtr<FrameNode>& node);
+    void AddChangedFrameNode(const RefPtr<FrameNode>& node);
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -869,7 +872,7 @@ private:
 
     void RegisterRootEvent();
 
-    void ResetDraggingStatus(const TouchEvent& touchPoint);
+    void ResetDraggingStatus(const TouchEvent& touchPoint, const RefPtr<FrameNode>& node = nullptr);
 
     void CompensateTouchMoveEvent(const TouchEvent& event);
 
@@ -916,6 +919,9 @@ private:
         const std::vector<TouchEvent>& history, const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp);
 
     TouchEvent GetLatestPoint(const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp);
+
+    void FlushNodeChangeFlag();
+    void CleanNodeChangeFlag();
 
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 
@@ -997,7 +1003,6 @@ private:
     bool isWindowAnimation_ = false;
     bool prevKeyboardAvoidMode_ = false;
     bool isFreezeFlushMessage_ = false;
-    bool destroyed_ = false;
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
@@ -1046,6 +1051,8 @@ private:
 
     std::list<FrameCallbackFunc> frameCallbackFuncs_;
     uint32_t transform_ = 0;
+    std::list<RefPtr<FrameNode>> changeInfoListeners_;
+    std::list<RefPtr<FrameNode>> changedNodes_;
 };
 } // namespace OHOS::Ace::NG
 

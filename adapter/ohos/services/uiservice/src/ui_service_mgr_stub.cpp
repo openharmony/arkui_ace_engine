@@ -22,8 +22,12 @@
 #include "ui_service_mgr_errors.h"
 #include "ui_service_proxy.h"
 #include "ui_service_stub.h"
+#include "xcollie/xcollie.h"
+#include "xcollie/xcollie_define.h"
 
 namespace OHOS::Ace {
+constexpr uint32_t UI_MGR_SERVICE_TIMEOUT = 5;
+
 UIServiceMgrStub::UIServiceMgrStub()
 {
     requestFuncMap_[REGISTER_CALLBACK] = &UIServiceMgrStub::RegisterCallBackInner;
@@ -64,6 +68,8 @@ bool UIServiceMgrStub::IsSystemApp()
 
 int32_t UIServiceMgrStub::RegisterCallBackInner(MessageParcel& data, MessageParcel& reply)
 {
+    int32_t id = OHOS::HiviewDFX::XCollie::GetInstance().SetTimer("UISERVICE_REGISTER_CALLBACK", UI_MGR_SERVICE_TIMEOUT,
+        nullptr, nullptr, OHOS::HiviewDFX::XCOLLIE_FLAG_LOG | OHOS::HiviewDFX::XCOLLIE_FLAG_RECOVERY);
     if (!IsSystemApp()) {
         return ERR_PERMISSION_DENIED;
     }
@@ -80,11 +86,15 @@ int32_t UIServiceMgrStub::RegisterCallBackInner(MessageParcel& data, MessageParc
     auto uiService = iface_cast<IUIService>(object);
     int32_t result = RegisterCallBack(*want, uiService);
     reply.WriteInt32(result);
+    OHOS::HiviewDFX::XCollie::GetInstance().CancelTimer(id);
     return NO_ERROR;
 }
 
 int32_t UIServiceMgrStub::UnregisterCallBackInner(MessageParcel& data, MessageParcel& reply)
 {
+    int32_t id =
+        OHOS::HiviewDFX::XCollie::GetInstance().SetTimer("UISERVICE_UNREGISTER_CALLBACK", UI_MGR_SERVICE_TIMEOUT,
+            nullptr, nullptr, OHOS::HiviewDFX::XCOLLIE_FLAG_LOG | OHOS::HiviewDFX::XCOLLIE_FLAG_RECOVERY);
     if (!IsSystemApp()) {
         return ERR_PERMISSION_DENIED;
     }
@@ -94,11 +104,14 @@ int32_t UIServiceMgrStub::UnregisterCallBackInner(MessageParcel& data, MessagePa
     }
     int32_t result = UnregisterCallBack(*want);
     reply.WriteInt32(result);
+    OHOS::HiviewDFX::XCollie::GetInstance().CancelTimer(id);
     return NO_ERROR;
 }
 
 int32_t UIServiceMgrStub::PushInner(MessageParcel& data, MessageParcel& reply)
 {
+    int32_t id = OHOS::HiviewDFX::XCollie::GetInstance().SetTimer("UISERVICE_PUSH", UI_MGR_SERVICE_TIMEOUT, nullptr,
+        nullptr, OHOS::HiviewDFX::XCOLLIE_FLAG_LOG | OHOS::HiviewDFX::XCOLLIE_FLAG_RECOVERY);
     if (!IsSystemApp()) {
         return ERR_PERMISSION_DENIED;
     }
@@ -113,11 +126,14 @@ int32_t UIServiceMgrStub::PushInner(MessageParcel& data, MessageParcel& reply)
 
     int32_t result = Push(*want, name, jsonPath, dataStr, extraData);
     reply.WriteInt32(result);
+    OHOS::HiviewDFX::XCollie::GetInstance().CancelTimer(id);
     return NO_ERROR;
 }
 
 int32_t UIServiceMgrStub::RequestInner(MessageParcel& data, MessageParcel& reply)
 {
+    int32_t id = OHOS::HiviewDFX::XCollie::GetInstance().SetTimer("UISERVICE_REQUEST", UI_MGR_SERVICE_TIMEOUT, nullptr,
+        nullptr, OHOS::HiviewDFX::XCOLLIE_FLAG_LOG | OHOS::HiviewDFX::XCOLLIE_FLAG_RECOVERY);
     if (!IsSystemApp()) {
         return ERR_PERMISSION_DENIED;
     }
@@ -129,11 +145,14 @@ int32_t UIServiceMgrStub::RequestInner(MessageParcel& data, MessageParcel& reply
     const std::string& dataStr = data.ReadString();
     int32_t result = Request(*want, name, dataStr);
     reply.WriteInt32(result);
+    OHOS::HiviewDFX::XCollie::GetInstance().CancelTimer(id);
     return NO_ERROR;
 }
 
 int32_t UIServiceMgrStub::ReturnRequestInner(MessageParcel& data, MessageParcel& reply)
 {
+    int32_t id = OHOS::HiviewDFX::XCollie::GetInstance().SetTimer("UISERVICE_RETURN_REQUEST", UI_MGR_SERVICE_TIMEOUT,
+        nullptr, nullptr, OHOS::HiviewDFX::XCOLLIE_FLAG_LOG | OHOS::HiviewDFX::XCOLLIE_FLAG_RECOVERY);
     if (!IsSystemApp()) {
         return ERR_PERMISSION_DENIED;
     }
@@ -146,6 +165,7 @@ int32_t UIServiceMgrStub::ReturnRequestInner(MessageParcel& data, MessageParcel&
     const std::string& extraData = data.ReadString();
     int32_t result = ReturnRequest(*want, source, dataStr, extraData);
     reply.WriteInt32(result);
+    OHOS::HiviewDFX::XCollie::GetInstance().CancelTimer(id);
     return NO_ERROR;
 }
 }

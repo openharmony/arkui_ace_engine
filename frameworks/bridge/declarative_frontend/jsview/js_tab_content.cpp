@@ -386,24 +386,11 @@ bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
     return true;
 }
 
-bool ParseTabsIsRtl()
-{
-    auto tabContentNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_RETURN(tabContentNode, false);
-    auto swiperNode = tabContentNode->GetParent();
-    CHECK_NULL_RETURN(swiperNode, false);
-    auto tabsNode = AceType::DynamicCast<NG::TabsNode>(swiperNode->GetParent());
-    CHECK_NULL_RETURN(tabsNode, false);
-    auto layoutProperty = tabsNode->GetLayoutProperty<NG::TabsLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, false);
-    bool isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    return isRTL;
-}
-
 void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
 {
     CalcDimension length;
     NG::PaddingProperty padding;
+    bool useLocalizedPadding = false;
     if (ParseJsDimensionVp(info, length) && NonNegative(length.Value()) && length.Unit() != DimensionUnit::PERCENT) {
         padding.left = NG::CalcLength(length);
         padding.right = NG::CalcLength(length);
@@ -452,45 +439,41 @@ void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
     }
     if (info->IsObject()) {
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info);
-        bool isRTL = ParseTabsIsRtl();
         CalcDimension start;
         CalcDimension end;
         CalcDimension top;
         CalcDimension bottom;
         if (paddingObj->GetProperty("start")->IsObject()) {
             JSRef<JSObject> startObj = JSRef<JSObject>::Cast(paddingObj->GetProperty("start"));
-            if (isRTL) {
-                ParseJsLengthMetrics(startObj, start);
-                padding.right = NG::CalcLength(start);
-            } else {
-                ParseJsLengthMetrics(startObj, start);
+            if (ParseJsLengthMetrics(startObj, start)) {
                 padding.left = NG::CalcLength(start);
+                useLocalizedPadding = true;
             }
         }
         if (paddingObj->GetProperty("end")->IsObject()) {
             JSRef<JSObject> endObj = JSRef<JSObject>::Cast(paddingObj->GetProperty("end"));
-            if (isRTL) {
-                ParseJsLengthMetrics(endObj, end);
-                padding.left = NG::CalcLength(end);
-            } else {
-                ParseJsLengthMetrics(endObj, end);
+            if (ParseJsLengthMetrics(endObj, end)) {
                 padding.right = NG::CalcLength(end);
+                useLocalizedPadding = true;
             }
         }
         if (paddingObj->GetProperty("top")->IsObject()) {
             JSRef<JSObject> topObj = JSRef<JSObject>::Cast(paddingObj->GetProperty("top"));
             if (ParseJsLengthMetrics(topObj, top)) {
                 padding.top = NG::CalcLength(top);
+                useLocalizedPadding = true;
             }
         }
         if (paddingObj->GetProperty("bottom")->IsObject()) {
             JSRef<JSObject> bottomObj = JSRef<JSObject>::Cast(paddingObj->GetProperty("bottom"));
             if (ParseJsLengthMetrics(bottomObj, bottom)) {
                 padding.bottom = NG::CalcLength(bottom);
+                useLocalizedPadding = true;
             }
         }
     }
     TabContentModel::GetInstance()->SetPadding(padding);
+    TabContentModel::GetInstance()->SetUseLocalizedPadding(useLocalizedPadding);
 }
 
 void JSTabContent::SetId(const JSRef<JSVal>& info)

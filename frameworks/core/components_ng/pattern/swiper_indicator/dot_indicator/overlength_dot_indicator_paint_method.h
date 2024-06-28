@@ -20,8 +20,8 @@
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.h"
 namespace OHOS::Ace::NG {
-constexpr uint32_t DISPLAY_COUNT_MIN = 6;
-constexpr uint32_t DISPLAY_COUNT_MAX = 9;
+constexpr int32_t DISPLAY_COUNT_MIN = 6;
+constexpr int32_t DISPLAY_COUNT_MAX = 9;
 constexpr int32_t NUMBER_ONE = 1;
 class ACE_EXPORT OverlengthDotIndicatorPaintMethod : public DotIndicatorPaintMethod {
     DECLARE_ACE_TYPE(OverlengthDotIndicatorPaintMethod, DotIndicatorPaintMethod)

@@ -24,12 +24,11 @@
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
 
-
 extern "C" {
 struct NativeFontInfo {
     const char* path = "";
     const char* postScriptName = "";
-    const char* fullName = "" ;
+    const char* fullName = "";
     const char* family = "";
     const char* subfamily = "";
     uint32_t weight = 0;
@@ -86,7 +85,7 @@ struct NativeOptionFloat64 {
 
 struct NativeOptionCallBack {
     bool hasValue;
-    void(*value)();
+    void (*value)();
 };
 
 struct NativeOptionBool {
@@ -180,23 +179,15 @@ struct CJMouseEvent {
 };
 
 struct CJClickInfo {
-    double globalX;
-    double globalY;
-    double localX;
-    double localY;
+    double x;
+    double y;
     int64_t timestamp;
-    int32_t sourceType;
+    int32_t source;
     CJEventTarget* target;
-    std::string ToString() const;
-};
-
-struct ClickInfoForSpan {
-    double globalX;
-    double globalY;
-    double localX;
-    double localY;
-    int64_t timestamp;
-    int32_t sourceType;
+    double windowX;
+    double windowY;
+    double displayX;
+    double displayY;
     std::string ToString() const;
 };
 
@@ -244,7 +235,6 @@ struct CJDragItemInfo {
     void (*builder)();
     const char* extraInfo;
 };
-
 
 struct AtCPackage;
 
@@ -301,7 +291,12 @@ namespace OHOS::Ace {
 void TransformNativeTouchLocationInfo(
     CJTouchInfo* sources, const std::list<OHOS::Ace::TouchLocationInfo>& touchLocationInfoList);
 
-void TransformNativeCJFingerInfo(
-    CJFingerInfo* sources, const std::list<OHOS::Ace::FingerInfo>& fingerInfoList);
-}
+void TransformNativeCJFingerInfo(CJFingerInfo* sources, const std::list<OHOS::Ace::FingerInfo>& fingerInfoList);
+
+void AssambleCJEventTarget(
+    const OHOS::Ace::EventTarget& eventTarget, CJArea& area, CJPosition& position, CJPosition& globalPosition);
+
+void AssambleCJClickInfo(const OHOS::Ace::GestureEvent& event, CJClickInfo& clickInfo, CJEventTarget& eventTarget,
+    CJArea& area, CJPosition& position, CJPosition& globalPosition);
+} // namespace OHOS::Ace
 #endif // OHOS_ACE_FRAMEWORK_CJ_COMMON_FFI_H

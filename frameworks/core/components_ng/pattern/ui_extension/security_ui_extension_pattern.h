@@ -62,7 +62,6 @@ public:
     int32_t GetSessionId();
     int32_t GetNodeId();
     int32_t GetInstanceId();
-    void DispatchFocusState(bool focusState);
 
     void OnAreaChangedInner() override;
     bool OnDirtyLayoutWrapperSwap(
@@ -100,6 +99,12 @@ public:
     void OnDpiConfigurationUpdate() override;
 
 private:
+    bool HandleKeyEvent(const KeyEvent& event) override;
+    void HandleFocusEvent() override;
+    void HandleBlurEvent() override;
+    void DispatchFocusActiveEvent(bool isFocusActive) override;
+    void DispatchFocusState(bool focusState);
+
     enum class AbilityState {
         NONE = 0,
         FOREGROUND,
@@ -108,6 +113,7 @@ private:
     };
 
     const char* ToString(AbilityState state);
+    bool CheckConstraint();
 
     RefPtr<FrameNode> placeholderNode_ = nullptr;
     RefPtr<OHOS::Ace::WantWrap> curWant_;

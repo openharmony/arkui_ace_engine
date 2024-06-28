@@ -24,7 +24,6 @@
 #include "core/components/common/properties/animation_option.h"
 
 namespace OHOS::Ace {
-
 class Offset {
 public:
     Offset() = default;

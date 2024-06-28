@@ -29,10 +29,10 @@ constexpr uint32_t ITEM_HALF_WIDTH = 0;
 constexpr uint32_t SELECTED_ITEM_HALF_WIDTH = 2;
 constexpr int TWOFOLD = 2;
 constexpr Dimension INDICATOR_OFFSET_UNIT = 18.0_vp;
-constexpr uint32_t NUM_0 = 0;
-constexpr uint32_t NUM_1 = 1;
-constexpr uint32_t NUM_2 = 2;
-constexpr uint32_t NUM_3 = 3;
+constexpr int32_t NUM_0 = 0;
+constexpr int32_t NUM_1 = 1;
+constexpr int32_t NUM_2 = 2;
+constexpr int32_t NUM_3 = 3;
 constexpr float HALF_FLOAT = 0.5f;
 } // namespace
 
@@ -71,19 +71,7 @@ void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* pain
         dotIndicatorModifier_->InitOverlongStatus(currentIndex_);
     }
 
-    if (touchBottomType_ != TouchBottomType::NONE) {
-        if (!dotIndicatorModifier_->GetIsPressed()) {
-            PaintPressIndicator(paintWrapper);
-            dotIndicatorModifier_->SetIsPressed(true);
-        }
-        UpdateBackground(paintWrapper);
-    } else if (isPressed_) {
-        PaintPressIndicator(paintWrapper);
-        dotIndicatorModifier_->SetIsPressed(true);
-    } else if (isHover_) {
-        PaintHoverIndicator(paintWrapper);
-        dotIndicatorModifier_->SetIsHover(true);
-    } else {
+    if (touchBottomType_ == TouchBottomType::NONE && !isPressed_ && !isHover_) {
         PaintNormalIndicator(paintWrapper);
         dotIndicatorModifier_->SetIsHover(false);
         dotIndicatorModifier_->SetIsPressed(false);

@@ -107,11 +107,14 @@ public:
     using PermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using OnOpenAppLinkCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using DefaultFileSelectorShowCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
+    using WebNodeInfoCallback = const std::function<void(std::shared_ptr<JsonValue>& jsonNodeArray, int32_t webId)>;
     WebPattern();
     WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController,
-               RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
+               RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
+			   const std::string& sharedRenderProcessToken = "");
     WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback,
-               RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
+               RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
+			   const std::string& sharedRenderProcessToken = "");
 
     ~WebPattern() override;
 
@@ -119,6 +122,46 @@ public:
         VK_NONE,
         VK_SHOW,
         VK_HIDE
+    };
+
+    enum class WebAccessibilityType : int32_t {
+        ID = 0,
+        SEL_START,
+        SEL_END,
+        INPUT_TYPE,
+        LIVE_REGION,
+        HINT,
+        CONTENT,
+        ERROR,
+        PARENT_ID,
+        GRID_ROWS,
+        GRID_COLS,
+        GRID_SEL_MODE,
+        GRID_ITEM_ROW,
+        GRID_ITEM_ROW_SPAN,
+        GRID_ITEM_COL,
+        GRID_ITEM_COL_SPAN,
+        PAGE_ID,
+        RECTX,
+        RECTY,
+        RECT_WIDTH,
+        RECT_HEIGHT,
+        HEADING,
+        CHECKED,
+        EDITABLE,
+        ENABLED,
+        FOCUSED,
+        SELECTED,
+        CHECKABLE,
+        CLICKABLE,
+        FOCUSABLE,
+        SCROLLABLE,
+        PASSWORD,
+        VISIBLE,
+        PLURAL_LINE,
+        POPUP,
+        DELETABLE,
+        FOCUS,
     };
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
@@ -263,6 +306,16 @@ public:
     bool GetIncognitoMode() const
     {
         return incognitoMode_;
+    }
+
+    void SetSharedRenderProcessToken(const std::string& sharedRenderProcessToken)
+    {
+        sharedRenderProcessToken_ = sharedRenderProcessToken;
+    }
+
+    const std::optional<std::string>& GetSharedRenderProcessToken() const
+    {
+        return sharedRenderProcessToken_;
     }
 
     void SetOnControllerAttachedCallback(OnControllerAttachedCallback&& callback)
@@ -562,6 +615,9 @@ public:
         TAG_LOGD(AceLogTag::ACE_WEB, "Web surfaceNodeId is %{public}" PRIu64 "", surfaceNodeId);
         return surfaceNodeId;
     }
+    std::shared_ptr<Rosen::RSNode> GetSurfaceRSNode() const;
+
+    void GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId);
 
 private:
     friend class WebContextSelectOverlay;
@@ -757,7 +813,6 @@ private:
     static bool ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos);
     void InitEnhanceSurfaceFlag();
     void UpdateBackgroundColorRightNow(int32_t color);
-    void UpdateBackgroundColorRightNow();
     void UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty);
     DialogProperties GetDialogProperties(const RefPtr<DialogTheme>& theme);
     bool ShowDateTimeDialog(std::shared_ptr<OHOS::NWeb::NWebDateTimeChooser> chooser,
@@ -792,6 +847,7 @@ private:
     void UpdateSlideOffset(bool isNeedReset = false);
     void ClearKeyEventByKeyCode(int32_t keyCode);
     void SetRotation(uint32_t rotation);
+    Color GetSystemColor() const;
     void UpdateTransformHintChangedCallbackId(std::optional<int32_t> id)
     {
         transformHintChangedCallbackId_ = id;
@@ -801,6 +857,18 @@ private:
     {
         return transformHintChangedCallbackId_.has_value();
     }
+
+    void JsonNodePutDefaultValue(std::unique_ptr<OHOS::Ace::JsonValue>& jsonNode,
+        WebAccessibilityType key, int32_t value, int32_t defaultValue);
+    void JsonNodePutDefaultValue(std::unique_ptr<OHOS::Ace::JsonValue>& jsonNode,
+        WebAccessibilityType key, bool value);
+    void JsonNodePutDefaultValue(std::unique_ptr<OHOS::Ace::JsonValue>& jsonNode,
+        WebAccessibilityType key, std::string value);
+    void WebNodeInfoToJsonValue(std::shared_ptr<OHOS::Ace::JsonValue>& jsonNodeArray,
+                                std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> webNodeInfo,
+                                std::string& nodeTag);
+    void GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId);
+    std::string EnumTypeToString(WebAccessibilityType type);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -923,6 +991,8 @@ private:
     std::function<void(int32_t)> updateInstanceIdCallback_;
     std::shared_ptr<TouchEventListener> touchEventListener_ = nullptr;
     double lastKeyboardHeight_ = 0.0;
+    bool inspectorAccessibilityEnable_ = false;
+    std::optional<std::string> sharedRenderProcessToken_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -322,6 +322,7 @@ void MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
         titleLayoutProperty->UpdateAdaptMaxFontSize(subTitleSize);
         titleLayoutProperty->UpdateHeightAdaptivePolicy(textHeightAdaptivePolicy);
     }
+    titleLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
 
     subtitleNode->MarkModifyDone();
 }
@@ -422,6 +423,7 @@ void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
 
     titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
     titleLayoutProperty->UpdateHeightAdaptivePolicy(textHeightAdaptivePolicy);
+    titleLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
     auto maxLines = hostNode->GetSubtitle() ? 1 : TITLEBAR_MAX_LINES;
     titleLayoutProperty->UpdateMaxLines(maxLines);
     if (currentFontSize != titleLayoutProperty->GetFontSizeValue(Dimension(0)) ||

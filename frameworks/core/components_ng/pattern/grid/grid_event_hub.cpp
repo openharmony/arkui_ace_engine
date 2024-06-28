@@ -255,10 +255,6 @@ void GridEventHub::HandleOnItemDragEnd(const GestureEvent& info)
 
 void GridEventHub::HandleOnItemDragCancel()
 {
-    if (!GetEditable()) {
-        return;
-    }
-
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->onItemDragCancel();
     dragDropProxy_->DestroyDragWindow();

@@ -219,6 +219,11 @@ public:
         return defaultOnDragStartExecuted_;
     }
 
+    const OptionsAfterApplied& GetOptionsAfterApplied()
+    {
+        return optionsAfterApplied_;
+    }
+
     void CopyDragEvent(const RefPtr<DragEventActuator>& dragEventActuator);
 
     void SetGatherNodeAboveFilter(const RefPtr<DragEventActuator>& actuator);
@@ -307,6 +312,7 @@ private:
     bool isDragUserReject_ = false;
     bool defaultOnDragStartExecuted_ = false;
     bool isResponseRegionFull = false;
+    OptionsAfterApplied optionsAfterApplied_;
 
     PanDirection direction_;
     int32_t fingers_ = 1;

@@ -190,6 +190,7 @@ public:
             InitClickEventRecorder();
         }
 #endif
+        CheckLocalizedPosition();
         auto* frameNode = GetUnsafeHostPtr();
         const auto& children = frameNode->GetChildren();
         if (children.empty()) {
@@ -285,7 +286,6 @@ public:
 
     virtual void NotifyForNextTouchEvent() {}
 
-    // TODO: for temp use, need to delete this.
     virtual bool OnDirtyLayoutWrapperSwap(
         const RefPtr<LayoutWrapper>& /*dirty*/, bool /*skipMeasure*/, bool /*skipLayout*/)
     {
@@ -566,6 +566,26 @@ public:
     virtual void OnAttachContext(PipelineContext *context) {}
     virtual void OnDetachContext(PipelineContext *context) {}
     virtual void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) {}
+
+    void CheckLocalizedPosition()
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto layoutProperty = host->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+        if (layoutProperty->IsPositionLocalizedEdges()) {
+            layoutProperty->CheckPositionLocalizedEdges(layoutDirection);
+        }
+        if (layoutProperty->IsMarkAnchorPosition()) {
+            layoutProperty->CheckMarkAnchorPosition(layoutDirection);
+        }
+        if (layoutProperty->IsOffsetLocalizedEdges()) {
+            layoutProperty->CheckOffsetLocalizedEdges(layoutDirection);
+        }
+    }
+
+    virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

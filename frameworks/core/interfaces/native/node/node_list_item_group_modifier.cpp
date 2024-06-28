@@ -108,12 +108,41 @@ void GetlistDivider(ArkUINodeHandle node, ArkUIdividerOptions* option, ArkUI_Int
     option->endMargin = divider.endMargin.GetNativeValue(static_cast<DimensionUnit>(unit));
 }
 
+void SetListItemGroupSpace(ArkUINodeHandle node, ArkUI_Float64 space)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemGroupModelNG::SetSpace(frameNode, Dimension(space, DimensionUnit::VP));
+}
+
+void ResetListItemGroupSpace(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemGroupModelNG::SetSpace(frameNode, Dimension(0.0, DimensionUnit::VP));
+}
+
+void SetListItemGroupStyle(ArkUINodeHandle node, ArkUI_Uint32 style)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemGroupModelNG::SetStyle(frameNode, static_cast<V2::ListItemGroupStyle>(style));
+}
+
+void ResetListItemGroupStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemGroupModelNG::SetStyle(frameNode, V2::ListItemGroupStyle::NONE);
+}
+
 namespace NodeModifier {
 const ArkUIListItemGroupModifier* GetListItemGroupModifier()
 {
     static const ArkUIListItemGroupModifier modifier = { ListItemGroupSetDivider, ListItemGroupResetDivider,
         ListItemGroupSetHeader, ListItemGroupSetFooter, SetListItemGroupChildrenMainSize,
-        ResetListItemGroupChildrenMainSize };
+        ResetListItemGroupChildrenMainSize, GetlistDivider, SetListItemGroupSpace, ResetListItemGroupSpace,
+        SetListItemGroupStyle, ResetListItemGroupStyle };
     return &modifier;
 }
 } // namespace NodeModifier

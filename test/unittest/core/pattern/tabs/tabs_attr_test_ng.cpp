@@ -34,7 +34,9 @@ HWTEST_F(TabsAttrTestNg, Interface001, TestSize.Level1)
      * @tc.cases: BarPosition is default, index is default, vertical is default
      * @tc.expected: TabBar is at top, show first tabContent(size > 0), swiper is HORIZONTAL
      */
-    CreateWithItem([](TabsModelNG model) {}, BarPosition::START, 0);
+    TabsModelNG model = CreateTabs(BarPosition::START, 0);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_EQ(tabBarNode_->GetGeometryNode()->GetFrameRect().GetY(), 0);
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
     EXPECT_GT(GetChildWidth(swiperNode_, 0), 0);
@@ -52,7 +54,9 @@ HWTEST_F(TabsAttrTestNg, Interface002, TestSize.Level1)
      * @tc.cases: BarPosition is END, index is 1, vertical is default
      * @tc.expected: TabBar is at bottom, show second tabContent(size > 0)
      */
-    CreateWithItem([](TabsModelNG model) {}, BarPosition::END, 1);
+    TabsModelNG model = CreateTabs(BarPosition::END, 1);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_EQ(tabBarNode_->GetGeometryNode()->GetFrameRect().GetY(), TABS_HEIGHT - TABBAR_DEFAULT_HEIGHT);
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
     EXPECT_GT(GetChildWidth(swiperNode_, 1), 0);
@@ -69,7 +73,10 @@ HWTEST_F(TabsAttrTestNg, Interface003, TestSize.Level1)
      * @tc.cases: BarPosition is default, index is -1, vertical is true
      * @tc.expected: TabBar is at left, show third tabContent(size > 0), swiper is VERTICAL
      */
-    CreateWithItem([](TabsModelNG model) { model.SetIsVertical(true); }, BarPosition::START, 2);
+    TabsModelNG model = CreateTabs(BarPosition::START, 2);
+    model.SetIsVertical(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_EQ(tabBarNode_->GetGeometryNode()->GetFrameRect().GetX(), 0);
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 2);
     EXPECT_GT(GetChildWidth(swiperNode_, 2), 0);
@@ -87,7 +94,10 @@ HWTEST_F(TabsAttrTestNg, Interface004, TestSize.Level1)
      * @tc.cases: BarPosition is END, index is TABCONTENT_NUMBER, vertical is true
      * @tc.expected: TabBar is at right, show fourth tabContent(size > 0)
      */
-    CreateWithItem([](TabsModelNG model) { model.SetIsVertical(true); }, BarPosition::END, 3);
+    TabsModelNG model = CreateTabs(BarPosition::END, 3);
+    model.SetIsVertical(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_EQ(tabBarNode_->GetGeometryNode()->GetFrameRect().GetX(), TABS_WIDTH - TABBAR_DEFAULT_WIDTH);
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 3);
     EXPECT_GT(GetChildWidth(swiperNode_, 3), 0);
@@ -103,17 +113,9 @@ HWTEST_F(TabsAttrTestNg, Interface005, TestSize.Level1)
     /**
      * @tc.cases: create tabs
      */
-    TabsModelNG model;
-    model.Create(BarPosition::START, 0, nullptr, nullptr);
-    ViewAbstract::SetWidth(CalcLength(TABS_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(TABS_HEIGHT));
-    CreateItem(TABCONTENT_NUMBER);
-    auto tabNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    auto tabBarNode_ = AceType::DynamicCast<FrameNode>(tabNode->GetTabBar());
-    tabBarNode_->GetOrCreateFocusHub();
-    model.Pop();
-    GetInstance();
-    FlushLayoutTask(frameNode_);
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.cases: set invalid properties
@@ -176,7 +178,9 @@ HWTEST_F(TabsAttrTestNg, Bar001, TestSize.Level1)
      * @tc.cases: BarMode is default
      * @tc.expected: TabBarItem width is average of TABS_WIDTH, barWidth is TABS_WIDTH
      */
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_EQ(GetChildWidth(tabBarNode_, 0), TABS_WIDTH / TABCONTENT_NUMBER);
     EXPECT_TRUE(IsEqual(tabBarNode_->GetGeometryNode()->GetFrameSize(), SizeF(TABS_WIDTH, TABBAR_DEFAULT_HEIGHT)));
 }
@@ -192,7 +196,10 @@ HWTEST_F(TabsAttrTestNg, Bar002, TestSize.Level1)
      * @tc.cases: BarMode is SCROLLABLE
      * @tc.expected: TabBarItem width is its actual width
      */
-    CreateWithItem([](TabsModelNG model) { model.SetTabBarMode(TabBarMode::SCROLLABLE); });
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_EQ(GetChildWidth(tabBarNode_, 0), 10.f);
     EXPECT_TRUE(IsEqual(tabBarNode_->GetGeometryNode()->GetFrameSize(), SizeF(TABS_WIDTH, TABBAR_DEFAULT_HEIGHT)));
 }
@@ -208,10 +215,11 @@ HWTEST_F(TabsAttrTestNg, Bar003, TestSize.Level1)
      * @tc.cases: Set BarWidth 10, set barHeight 10
      * @tc.expected: TabBarItem width is average of 10, barWidth is 10, barHeight is 10
      */
-    CreateWithItem([](TabsModelNG model) {
-        model.SetTabBarWidth(Dimension(10.f));
-        model.SetTabBarHeight(Dimension(10.f));
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarWidth(Dimension(10.f));
+    model.SetTabBarHeight(Dimension(10.f));
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_EQ(GetChildWidth(tabBarNode_, 0), 10.f / TABCONTENT_NUMBER);
     EXPECT_TRUE(IsEqual(tabBarNode_->GetGeometryNode()->GetFrameSize(), SizeF(10.f, 10.f)));
 }
@@ -227,7 +235,9 @@ HWTEST_F(TabsAttrTestNg, Divider001, TestSize.Level1)
      * @tc.cases: No set divider
      * @tc.expected: No show divider
      */
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_TRUE(IsEqual(dividerNode_->GetGeometryNode()->GetFrameSize(), SizeF(TABS_WIDTH, 0.f))); // (720.f, 0.f)
 }
 
@@ -248,7 +258,10 @@ HWTEST_F(TabsAttrTestNg, Divider002, TestSize.Level1)
     divider.endMargin = Dimension(5);
     divider.color = Color::BLUE;
     divider.isNull = false;
-    CreateWithItem([divider](TabsModelNG model) { model.SetDivider(divider); });
+    TabsModelNG model = CreateTabs();
+    model.SetDivider(divider);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_TRUE(IsEqual(dividerNode_->GetGeometryNode()->GetFrameSize(), SizeF(710.f, 4.f)));
 }
 
@@ -269,7 +282,10 @@ HWTEST_F(TabsAttrTestNg, Divider003, TestSize.Level1)
     divider.endMargin = Dimension(5);
     divider.color = Color::BLUE;
     divider.isNull = true;
-    CreateWithItem([divider](TabsModelNG model) { model.SetDivider(divider); });
+    TabsModelNG model = CreateTabs();
+    model.SetDivider(divider);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_TRUE(IsEqual(dividerNode_->GetGeometryNode()->GetFrameSize(), SizeF(720.f, 1.f)));
 }
 
@@ -284,7 +300,9 @@ HWTEST_F(TabsAttrTestNg, BarGridAlign001, TestSize.Level1)
      * @tc.cases: Default
      * @tc.expected: TabBarItem position is default
      */
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_EQ(GetChildX(tabBarNode_, 0), TABS_WIDTH / TABCONTENT_NUMBER * 0);
     EXPECT_EQ(GetChildX(tabBarNode_, 1), TABS_WIDTH / TABCONTENT_NUMBER * 1);
     EXPECT_EQ(GetChildX(tabBarNode_, 2), TABS_WIDTH / TABCONTENT_NUMBER * 2);
@@ -306,7 +324,10 @@ HWTEST_F(TabsAttrTestNg, BarGridAlign002, TestSize.Level1)
     options.md = 4;
     options.gutter = Dimension(5);
     options.margin = Dimension(10);
-    CreateWithItem([options](TabsModelNG model) { model.SetBarGridAlign(options); });
+    TabsModelNG model = CreateTabs();
+    model.SetBarGridAlign(options);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_EQ(GetChildX(tabBarNode_, 0), 186.25);
     EXPECT_EQ(GetChildX(tabBarNode_, 1), 273.125);
     EXPECT_EQ(GetChildX(tabBarNode_, 2), 360);
@@ -320,9 +341,10 @@ HWTEST_F(TabsAttrTestNg, BarGridAlign002, TestSize.Level1)
  */
 HWTEST_F(TabsAttrTestNg, TabsModelSetFadingEdge001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {
-        model.SetFadingEdge(true);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetFadingEdge(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_EQ(frameNode_->GetTag(), V2::TABS_ETS_TAG);
     EXPECT_EQ(tabBarNode_->GetTag(), V2::TAB_BAR_ETS_TAG);
     EXPECT_TRUE(tabBarPaintProperty_->GetFadingEdgeValue());
@@ -342,7 +364,10 @@ HWTEST_F(TabsAttrTestNg, TabsModelOnUpdateShowDivider001, TestSize.Level1)
     Color color = Color::RED;
     TabsItemDivider divider;
     divider.color = color;
-    CreateWithItem([divider](TabsModelNG model) { model.SetDivider(divider); });
+    TabsModelNG model = CreateTabs();
+    model.SetDivider(divider);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     pattern_->OnUpdateShowDivider();
     auto dividerColor = dividerRenderProperty_->GetDividerColor();
@@ -368,7 +393,9 @@ HWTEST_F(TabsAttrTestNg, TabsModelOnUpdateShowDivider002, TestSize.Level2)
  */
 HWTEST_F(TabsAttrTestNg, TabsModelOnUpdateShowDivider003, TestSize.Level2)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     pattern_->OnUpdateShowDivider();
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 3);
 }
@@ -380,7 +407,9 @@ HWTEST_F(TabsAttrTestNg, TabsModelOnUpdateShowDivider003, TestSize.Level2)
  */
 HWTEST_F(TabsAttrTestNg, TabsModelOnUpdateShowDivider004, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     pattern_->OnUpdateShowDivider();
     auto childNode = frameNode_->GetChildAtIndex(1);
     EXPECT_EQ(childNode->GetTag(), V2::DIVIDER_ETS_TAG);
@@ -393,7 +422,9 @@ HWTEST_F(TabsAttrTestNg, TabsModelOnUpdateShowDivider004, TestSize.Level1)
  */
 HWTEST_F(TabsAttrTestNg, TabsModelToJsonValue001, TestSize.Level2)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
     frameNode_->ToJsonValue(json, filter);
     auto dividerJson = json->GetValue("divider");
@@ -407,7 +438,9 @@ HWTEST_F(TabsAttrTestNg, TabsModelToJsonValue001, TestSize.Level2)
  */
 HWTEST_F(TabsAttrTestNg, TabContentModelSetIndicator001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
     IndicatorStyle indicator;
     indicator.color = Color::BLACK;
@@ -431,7 +464,9 @@ HWTEST_F(TabsAttrTestNg, TabContentModelSetIndicator001, TestSize.Level1)
  */
 HWTEST_F(TabsAttrTestNg, TabContentModelSetIndicator002, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
     tabContentPattern->SetIndicatorStyle(IndicatorStyle());
     EXPECT_EQ(tabContentPattern->GetIndicatorStyle().width, 0.0_vp);
@@ -458,7 +493,9 @@ HWTEST_F(TabsAttrTestNg, TabContentModelCreate001, TestSize.Level1)
  */
 HWTEST_F(TabsAttrTestNg, TabContentModelSetSubTabBorderRadius001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
     BoardStyle boardStyle;
     boardStyle.borderRadius = 10.0_vp;
@@ -474,7 +511,9 @@ HWTEST_F(TabsAttrTestNg, TabContentModelSetSubTabBorderRadius001, TestSize.Level
  */
 HWTEST_F(TabsAttrTestNg, TabContentModelSetSubTabBorderRadius002, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
     BoardStyle boardStyle;
     boardStyle.borderRadius = 10.0_vp;
@@ -490,7 +529,9 @@ HWTEST_F(TabsAttrTestNg, TabContentModelSetSubTabBorderRadius002, TestSize.Level
  */
 HWTEST_F(TabsAttrTestNg, TabContentModelSetSelectedMode001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
     EXPECT_EQ(tabContentPattern->GetSelectedMode(), SelectedMode::INDICATOR);
 }
@@ -502,7 +543,9 @@ HWTEST_F(TabsAttrTestNg, TabContentModelSetSelectedMode001, TestSize.Level1)
  */
 HWTEST_F(TabsAttrTestNg, TabContentModelSetLabelStyle001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
     LabelStyle labelStyle;
     tabContentPattern->SetLabelStyle(labelStyle);
@@ -526,7 +569,9 @@ HWTEST_F(TabsAttrTestNg, TabContentModelSetLabelStyle001, TestSize.Level1)
  */
 HWTEST_F(TabsAttrTestNg, TabContentModelSetLabelStyle002, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
     LabelStyle labelStyle;
     labelStyle.textOverflow = TextOverflow::CLIP;
@@ -562,7 +607,9 @@ HWTEST_F(TabsAttrTestNg, TabContentModelSetLabelStyle002, TestSize.Level1)
  */
 HWTEST_F(TabsAttrTestNg, TabContentModelSetIconStyle001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
     IconStyle iconStyle;
     tabContentPattern->SetIconStyle(iconStyle);
@@ -577,7 +624,9 @@ HWTEST_F(TabsAttrTestNg, TabContentModelSetIconStyle001, TestSize.Level1)
  */
 HWTEST_F(TabsAttrTestNg, TabContentModelSetIconStyle002, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
     IconStyle iconStyle;
     iconStyle.unselectedColor = Color::WHITE;
@@ -606,11 +655,11 @@ HWTEST_F(TabsAttrTestNg, TabContentModelUpdateLabelStyle001, TestSize.Level1)
     labelStyle.fontFamily = { "unknown" };
     std::vector<std::string> fontVect = { "" };
     labelStyle.fontStyle = Ace::FontStyle::NORMAL;
-    Create([=](TabsModelNG model) {
-        CreateSingleItem([=](TabContentModelNG tabContentModel) {
-            tabContentModel.UpdateLabelStyle(labelStyle, layoutProperty);
-        }, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.UpdateLabelStyle(labelStyle, layoutProperty);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
     EXPECT_EQ(layoutProperty->GetTextOverflow(), labelStyle.textOverflow);
     EXPECT_EQ(layoutProperty->GetMaxLines(), labelStyle.maxLines);
     EXPECT_EQ(layoutProperty->GetAdaptMinFontSize(), labelStyle.minFontSize);
@@ -631,11 +680,10 @@ HWTEST_F(TabsAttrTestNg, TabContentModelUpdateLabelStyle002, TestSize.Level1)
 {
     auto layoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
     LabelStyle labelStyle;
-    Create([=](TabsModelNG model) {
-        CreateSingleItem([=](TabContentModelNG tabContentModel) {
-            tabContentModel.UpdateLabelStyle(labelStyle, layoutProperty);
-        }, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.UpdateLabelStyle(labelStyle, layoutProperty);
+    CreateTabsDone(model);
     EXPECT_FALSE(layoutProperty->GetTextOverflow().has_value());
     EXPECT_FALSE(layoutProperty->GetMaxLines().has_value());
     EXPECT_FALSE(layoutProperty->GetAdaptMinFontSize().has_value());
@@ -654,7 +702,9 @@ HWTEST_F(TabsAttrTestNg, TabContentModelUpdateLabelStyle002, TestSize.Level1)
  */
 HWTEST_F(TabsAttrTestNg, TabContentModelToJsonValue001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
     LabelStyle labelStyle;
@@ -683,21 +733,21 @@ HWTEST_F(TabsAttrTestNg, TabContentModel001, TestSize.Level1)
      * @tc.steps: step1. SetTabBar without builder
      * @tc.expected: tabbarnode has default textNode and imageNode
      */
-    Create([](TabsModelNG model) {
-        auto tabFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-        auto weakTab = AceType::WeakClaim(AceType::RawPtr(tabFrameNode));
-        TabContentModelNG tabContentModel;
-        tabContentModel.Create();
-        tabContentModel.SetTabBar("", "", std::nullopt, nullptr, true); // SetTabBar without builder
-        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
-        ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
-        auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-        auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
-        tabContentNode->UpdateRecycleElmtId(0); // for AddChildToGroup
-        tabContentNode->GetTabBarItemId();           // for AddTabBarItem
-        tabContentNode->SetParent(weakTab);          // for AddTabBarItem
-        tabContentModel.Pop();
-    });
+    TabsModelNG model = CreateTabs();
+    auto tabFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto weakTab = AceType::WeakClaim(AceType::RawPtr(tabFrameNode));
+    TabContentModelNG tabContentModel;
+    tabContentModel.Create();
+    tabContentModel.SetTabBar("", "", std::nullopt, nullptr, true); // SetTabBar without builder
+    ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+    ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
+    auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
+    tabContentNode->UpdateRecycleElmtId(0); // for AddChildToGroup
+    tabContentNode->GetTabBarItemId();           // for AddTabBarItem
+    tabContentNode->SetParent(weakTab);          // for AddTabBarItem
+    tabContentModel.Pop();
+    CreateTabsDone(model);
     auto colNode = GetChildFrameNode(tabBarNode_, 0);
     EXPECT_EQ(colNode->GetTag(), V2::COLUMN_ETS_TAG);
     EXPECT_EQ(colNode->GetTotalChildCount(), 1);
@@ -713,24 +763,24 @@ HWTEST_F(TabsAttrTestNg, TabContentModel001, TestSize.Level1)
  */
 HWTEST_F(TabsAttrTestNg, TabContentModel002, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        auto tabFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-        auto weakTab = AceType::WeakClaim(AceType::RawPtr(tabFrameNode));
-        TabContentModelNG tabContentModel;
-        tabContentModel.Create();
-        TabBarSymbol tabBarSymbol;
-        tabContentModel.SetTabBar("", "", tabBarSymbol, nullptr, true);
-        tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
-        ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
-        auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-        auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
-        tabContentNode->UpdateRecycleElmtId(0); // for AddChildToGroup
-        tabContentNode->GetTabBarItemId();           // for AddTabBarItem
-        tabContentNode->SetParent(weakTab);          // for AddTabBarItem
-        tabContentModel.AddTabBarItem(tabContentFrameNode, 0, true);
-        ViewStackProcessor::GetInstance()->PopContainer();
-    });
+    TabsModelNG model = CreateTabs();
+    auto tabFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto weakTab = AceType::WeakClaim(AceType::RawPtr(tabFrameNode));
+    TabContentModelNG tabContentModel;
+    tabContentModel.Create();
+    TabBarSymbol tabBarSymbol;
+    tabContentModel.SetTabBar("", "", tabBarSymbol, nullptr, true);
+    tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+    ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
+    auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
+    tabContentNode->UpdateRecycleElmtId(0); // for AddChildToGroup
+    tabContentNode->GetTabBarItemId();           // for AddTabBarItem
+    tabContentNode->SetParent(weakTab);          // for AddTabBarItem
+    tabContentModel.AddTabBarItem(tabContentFrameNode, 0, true);
+    ViewStackProcessor::GetInstance()->PopContainer();
+    CreateTabsDone(model);
     auto colNode = GetChildFrameNode(tabBarNode_, 0);
     EXPECT_EQ(colNode->GetTag(), V2::COLUMN_ETS_TAG);
     EXPECT_EQ(colNode->GetTotalChildCount(), 2);
@@ -755,25 +805,29 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetBarOverlap001, TestSize.Level1)
      * @tc.steps: steps2. SetBarOverlap true
      * @tc.expected: steps2. Check the BarOverlap property value
      */
-    CreateWithItem([](TabsModelNG model) {
-        model.SetBarOverlap(true);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetBarOverlap(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_TRUE(layoutProperty_->GetBarOverlap().value());
 
-    CreateWithItem([](TabsModelNG model) {
-        model.SetBarOverlap(false);
-    });
+    model = CreateTabs();
+    model.SetBarOverlap(false);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_FALSE(layoutProperty_->GetBarOverlap().value());
 
-    CreateWithItem([](TabsModelNG model) {
-        model.SetBarOverlap(true);
-    });
+    model = CreateTabs();
+    model.SetBarOverlap(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     tabBarPaintProperty_->UpdateBarBackgroundColor(Color::RED);
     EXPECT_TRUE(layoutProperty_->GetBarOverlap().value());
 
-    CreateWithItem([](TabsModelNG model) {
-        model.SetBarOverlap(false);
-    });
+    model = CreateTabs();
+    model.SetBarOverlap(false);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     tabBarPaintProperty_->UpdateBarBackgroundColor(Color::RED);
     EXPECT_FALSE(layoutProperty_->GetBarOverlap().value());
 }
@@ -789,9 +843,10 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetBarBackgroundColor001, TestSize.Level1)
      * @tc.steps: steps2. SetBarBackgroundColor true
      * @tc.expected: steps2. Check the BarBarBackgroundColor property value
      */
-    CreateWithItem([](TabsModelNG model) {
-        model.SetBarBackgroundColor(Color::RED);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetBarBackgroundColor(Color::RED);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_EQ(tabBarPaintProperty_->GetBarBackgroundColor().value_or(Color::BLACK), Color::RED);
 }
 
@@ -806,13 +861,13 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetWidthAuto001, TestSize.Level1)
   * @tc.steps: step1. Test function SetWidthAuto and SetHeightAuto When isAuto is true.
   * @tc.expected: Related functions run ok.
   */
-    CreateWithItem([](TabsModelNG model) {
-        model.SetWidthAuto(true);
-        model.SetHeightAuto(true);
-    });
-    auto tabsLayoutProperty = layoutProperty_;
-    EXPECT_TRUE(tabsLayoutProperty->GetWidthAutoValue(false));
-    EXPECT_TRUE(tabsLayoutProperty->GetHeightAutoValue(false));
+    TabsModelNG model = CreateTabs();
+    model.SetWidthAuto(true);
+    model.SetHeightAuto(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    EXPECT_TRUE(layoutProperty_->GetWidthAutoValue(false));
+    EXPECT_TRUE(layoutProperty_->GetHeightAutoValue(false));
 }
 
 /**
@@ -826,13 +881,14 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetAnimationDuration001, TestSize.Level1)
      * @tc.steps: step2. Test function SetAnimationDuration.
      * @tc.expected: Related function runs ok.
      */
-    CreateWithItem([](TabsModelNG model) {
-        bool duration = true;
-        for (int i = 0; i <= 1; i++) {
-            model.SetAnimationDuration(duration);
-            duration = false;
-        }
-    });
+    TabsModelNG model = CreateTabs();
+    bool duration = true;
+    for (int i = 0; i <= 1; i++) {
+        model.SetAnimationDuration(duration);
+        duration = false;
+    }
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 }
 
 /**
@@ -846,7 +902,9 @@ HWTEST_F(TabsAttrTestNg, TabsModelGetOrCreateTabsNode001, TestSize.Level1)
      * @tc.steps: step2. Test function TabsModelGetOrCreateTabsNode.
      * @tc.expected: Related function runs ok.
      */
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     const std::string tag = "TabsID";
     int32_t nodeId = 1;
     auto frameNode = TabsModelNG::GetOrCreateTabsNode(tag, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
@@ -860,9 +918,10 @@ HWTEST_F(TabsAttrTestNg, TabsModelGetOrCreateTabsNode001, TestSize.Level1)
  */
 HWTEST_F(TabsAttrTestNg, TabsModelSetOnChange001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {
-        model.SetOnChange(nullptr);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetOnChange(nullptr);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Test function SetOnChange.
@@ -879,9 +938,10 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetOnChange001, TestSize.Level1)
 HWTEST_F(TabsAttrTestNg, TabsModelNg001, TestSize.Level1)
 {
     auto onGestureSwipe = [](int32_t index, const AnimationCallbackInfo& info) {};
-    CreateWithItem([=](TabsModelNG model) {
-        model.SetOnGestureSwipe(std::move(onGestureSwipe));
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetOnGestureSwipe(std::move(onGestureSwipe));
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     auto eventHub = swiperNode_->GetEventHub<SwiperEventHub>();
     EXPECT_NE(eventHub->gestureSwipeEvent_, nullptr);
 }
@@ -893,10 +953,11 @@ HWTEST_F(TabsAttrTestNg, TabsModelNg001, TestSize.Level1)
  */
 HWTEST_F(TabsAttrTestNg, TabsModelSetScrollable001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {
-        model.SetScrollable(true);
-        model.SetScrollable(false);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetScrollable(true);
+    model.SetScrollable(false);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 }
 
 /**
@@ -906,10 +967,11 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetScrollable001, TestSize.Level1)
  */
 HWTEST_F(TabsAttrTestNg, TabsModelSetClipEdge001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {
-        model.SetClipEdge(true);
-        model.SetClipEdge(false);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetClipEdge(true);
+    model.SetClipEdge(false);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 }
 
 /**
@@ -927,11 +989,11 @@ HWTEST_F(TabsAttrTestNg, TabContentModelSetPadding001, TestSize.Level1)
     padding.right = CalcLength(20.0_vp);
     padding.top = CalcLength(20.0_vp);
     padding.bottom = CalcLength(20.0_vp);
-    Create([=](TabsModelNG model) {
-        CreateSingleItem([=](TabContentModelNG tabContentModel) {
-            tabContentModel.SetPadding(padding);
-        }, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.SetPadding(padding);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
 
@@ -953,11 +1015,11 @@ HWTEST_F(TabsAttrTestNg, TabContentModelSetPadding001, TestSize.Level1)
 HWTEST_F(TabsAttrTestNg, TabContentModelSetLayoutMode001, TestSize.Level1)
 {
     LayoutMode layoutMode = LayoutMode::AUTO;
-    Create([=](TabsModelNG model) {
-        CreateSingleItem([=](TabContentModelNG tabContentModel) {
-            tabContentModel.SetLayoutMode(layoutMode);
-        }, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.SetLayoutMode(layoutMode);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
 
@@ -976,11 +1038,11 @@ HWTEST_F(TabsAttrTestNg, TabContentModelSetLayoutMode001, TestSize.Level1)
 HWTEST_F(TabsAttrTestNg, TabContentModelSetVerticalAlign001, TestSize.Level1)
 {
     FlexAlign verticalAlign = FlexAlign::CENTER;
-    Create([=](TabsModelNG model) {
-        CreateSingleItem([=](TabContentModelNG tabContentModel) {
-            tabContentModel.SetVerticalAlign(verticalAlign);
-        }, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.SetVerticalAlign(verticalAlign);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
 
@@ -999,11 +1061,11 @@ HWTEST_F(TabsAttrTestNg, TabContentModelSetVerticalAlign001, TestSize.Level1)
 HWTEST_F(TabsAttrTestNg, TabContentModelSetSymmetricExtensible001, TestSize.Level1)
 {
     bool isExtensible = true;
-    Create([=](TabsModelNG model) {
-        CreateSingleItem([=](TabContentModelNG tabContentModel) {
-            tabContentModel.SetSymmetricExtensible(isExtensible);
-        }, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.SetSymmetricExtensible(isExtensible);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
 
@@ -1025,9 +1087,10 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetBarAdaptiveHeight001, TestSize.Level1)
      * @tc.steps: steps2. SetBarAdaptiveHeight.
      * @tc.expected: steps2. Check the result of SetBarAdaptiveHeight.
      */
-    CreateWithItem([](TabsModelNG model) {
-        model.SetBarAdaptiveHeight(false);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetBarAdaptiveHeight(false);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_TRUE(tabBarLayoutProperty_->GetBarAdaptiveHeight());
 }
 
@@ -1039,17 +1102,68 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetBarAdaptiveHeight001, TestSize.Level1)
 HWTEST_F(TabsAttrTestNg, TabsModelSetScrollableBarModeOptions001, TestSize.Level1)
 {
     /**
-     * @tc.steps: steps2. SetScrollableBarModeOptions.
-     * @tc.expected: steps2. Check if the SetScrollableBarModeOptions function successfully sets
-     *                       ScrollableBarModeOptions.
+     * @tc.steps: steps1. Default ScrollableBarModeOptions
+     * @tc.expected: The items are compact and centered
      */
     ScrollableBarModeOptions option;
-    option.margin = 0.0_vp;
-    option.nonScrollableLayoutStyle = LayoutStyle::ALWAYS_CENTER;
-    CreateWithItem([option](TabsModelNG model) {
-        model.SetScrollableBarModeOptions(option);
-    });
-    EXPECT_EQ(tabBarLayoutProperty_->GetScrollableBarModeOptions(), option);
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    model.SetScrollableBarModeOptions(option);
+    CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    float halfTabsWidth = TABS_WIDTH / 2;
+    EXPECT_EQ(GetChildX(tabBarNode_, 0), halfTabsWidth - BARITEM_SIZE * 2);
+    EXPECT_EQ(GetChildX(tabBarNode_, 1), halfTabsWidth - BARITEM_SIZE);
+    EXPECT_EQ(GetChildX(tabBarNode_, 2), halfTabsWidth);
+    EXPECT_EQ(GetChildX(tabBarNode_, 3), halfTabsWidth + BARITEM_SIZE);
+
+    /**
+     * @tc.steps: steps2. Set margin and ALWAYS_AVERAGE_SPLIT
+     * @tc.expected: The items are evenly distributed
+     */
+    float margin = 10.f;
+    option.margin = Dimension(margin);
+    option.nonScrollableLayoutStyle = LayoutStyle::ALWAYS_AVERAGE_SPLIT;
+    tabBarLayoutProperty_->UpdateScrollableBarModeOptions(option);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    float interval = (halfTabsWidth - margin) / 2;
+    EXPECT_EQ(GetChildX(tabBarNode_, 0), margin);
+    EXPECT_EQ(GetChildX(tabBarNode_, 1), halfTabsWidth - interval);
+    EXPECT_EQ(GetChildX(tabBarNode_, 2), halfTabsWidth);
+    EXPECT_EQ(GetChildX(tabBarNode_, 3), halfTabsWidth + interval);
+
+    /**
+     * @tc.steps: steps3. Set SPACE_BETWEEN_OR_CENTER, and total items width not exceed halfTabsWidth
+     * @tc.expected: The items are compact and centered in halfTabsWidth
+     */
+    option.margin = Dimension(0.f);
+    option.nonScrollableLayoutStyle = LayoutStyle::SPACE_BETWEEN_OR_CENTER;
+    tabBarLayoutProperty_->UpdateScrollableBarModeOptions(option);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    interval = halfTabsWidth / TABCONTENT_NUMBER;
+    EXPECT_EQ(GetChildX(tabBarNode_, 0), halfTabsWidth - interval * 2);
+    EXPECT_EQ(GetChildX(tabBarNode_, 1), halfTabsWidth - interval);
+    EXPECT_EQ(GetChildX(tabBarNode_, 2), halfTabsWidth);
+    EXPECT_EQ(GetChildX(tabBarNode_, 3), halfTabsWidth + interval);
+
+    /**
+     * @tc.steps: steps4. Set SPACE_BETWEEN_OR_CENTER, and total items width exceed halfTabsWidth
+     * @tc.expected: The items are evenly distributed
+     */
+    option.margin = Dimension(0.f);
+    option.nonScrollableLayoutStyle = LayoutStyle::SPACE_BETWEEN_OR_CENTER;
+    const float tabsWidth  = BARITEM_SIZE * (TABCONTENT_NUMBER + 1);
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(tabsWidth));
+    tabBarLayoutProperty_->UpdateScrollableBarModeOptions(option);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    halfTabsWidth = tabsWidth / 2;
+    EXPECT_EQ(GetChildX(tabBarNode_, 0), halfTabsWidth - BARITEM_SIZE * 2);
+    EXPECT_EQ(GetChildX(tabBarNode_, 1), halfTabsWidth - BARITEM_SIZE);
+    EXPECT_EQ(GetChildX(tabBarNode_, 2), halfTabsWidth);
+    EXPECT_EQ(GetChildX(tabBarNode_, 3), halfTabsWidth + BARITEM_SIZE);
 }
 
 /**
@@ -1068,9 +1182,10 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetBarGridAlign001, TestSize.Level1)
     BarGridColumnOptions.lg = -1;
     BarGridColumnOptions.gutter = 0.0_vp;
     BarGridColumnOptions.margin = 0.0_vp;
-    CreateWithItem([BarGridColumnOptions](TabsModelNG model) {
-        model.SetBarGridAlign(BarGridColumnOptions);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetBarGridAlign(BarGridColumnOptions);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: steps3. SetBarGridAlign.
@@ -1087,9 +1202,10 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetBarGridAlign001, TestSize.Level1)
 HWTEST_F(TabsAttrTestNg, TabsModelSetAnimationDuration002, TestSize.Level1)
 {
     float duration = 1;
-    CreateWithItem([duration](TabsModelNG model) {
-        model.SetAnimationDuration(duration);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetAnimationDuration(duration);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_FLOAT_EQ(duration, 1);
 
     /**
@@ -1097,9 +1213,10 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetAnimationDuration002, TestSize.Level1)
      * @tc.expected: Related function runs ok.
      */
     duration = -1;
-    CreateWithItem([duration](TabsModelNG model) {
-        model.SetAnimationDuration(duration);
-    });
+    model = CreateTabs();
+    model.SetAnimationDuration(duration);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_FLOAT_EQ(duration, -1);
 }
 
@@ -1110,7 +1227,9 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetAnimationDuration002, TestSize.Level1)
  */
 HWTEST_F(TabsAttrTestNg, TabsModelSetAnimationDuration003, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     auto pipeline = PipelineContext::GetCurrentContext();
     auto tabTheme = pipeline->GetTheme<TabTheme>();
     auto defaultDuration = tabTheme->GetTabContentAnimationDuration();
@@ -1175,10 +1294,14 @@ HWTEST_F(TabsAttrTestNg, TabsModelNGSetIndex001, TestSize.Level2)
      * @tc.steps: steps2. GetScrollableBarModeOptions.
      * @tc.expected: steps2. Check the result of GetScrollableBarModeOptions.
      */
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     swiperLayoutProperty_->UpdateIndex(1);
     EXPECT_EQ(swiperNode_->TotalChildCount(), 4);
-    CreateWithItem([](TabsModelNG model) {}, BarPosition::START, 1);
+    CreateTabs(BarPosition::START, 1);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_EQ(swiperNode_->TotalChildCount(), 4);
 }
 
@@ -1189,14 +1312,10 @@ HWTEST_F(TabsAttrTestNg, TabsModelNGSetIndex001, TestSize.Level2)
  */
 HWTEST_F(TabsAttrTestNg, TabsModelPop001, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-        }, 1);
-    }, BarPosition::END);
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
     tabBarNode_->eventHub_ = AceType::MakeRefPtr<EventHub>();
     tabBarNode_->eventHub_->focusHub_ = AceType::MakeRefPtr<FocusHub>(tabBarNode_->eventHub_);
     ASSERT_NE(tabBarNode_->eventHub_->focusHub_, nullptr);
@@ -1260,10 +1379,11 @@ HWTEST_F(TabsAttrTestNg, TabsModelMeasure007, TestSize.Level1)
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
      */
-    CreateWithItem([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step1. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
@@ -1337,25 +1457,23 @@ HWTEST_F(TabsAttrTestNg, BarGridAlign003, TestSize.Level1)
      * @tc.cases: Set BarGridColumnOptions
      * @tc.expected: TabBarItem position changed
      */
-    TabsModelNG model;
-    model.Create(BarPosition::START, 1, nullptr, nullptr);
-    ViewAbstract::SetWidth(CalcLength(TABS_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(TABS_HEIGHT));
-    CreateItem(TABCONTENT_NUMBER);
-    auto tabNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    auto tabBarNode_ = AceType::DynamicCast<FrameNode>(tabNode->GetTabBar());
-    tabBarNode_->GetOrCreateFocusHub();
-
-    frameNode_ = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    swiperNode_ = AceType::DynamicCast<FrameNode>(frameNode_->GetTabs());
-    FlushLayoutTask(frameNode_);
+    TabsModelNG model = CreateTabs(BarPosition::START, 1);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_EQ(swiperNode_->TotalChildCount(), TABCONTENT_NUMBER);
+    EXPECT_EQ(frameNode_->GetIndex(), 1);
 
-    model.SetIndex(2);
+    ClearOldNodes();
+    model = CreateTabs(BarPosition::START, 2);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(frameNode_->GetIndex(), 2);
 
-    model.SetIndex(-1);
+    ClearOldNodes();
+    model = CreateTabs(BarPosition::START, -1);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(frameNode_->GetIndex(), 0);
 }

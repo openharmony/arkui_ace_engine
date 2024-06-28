@@ -37,6 +37,7 @@ constexpr int CALL_ARG_4 = 4;
 constexpr int PARAM_ARR_LENGTH_1 = 1;
 constexpr int PARAM_ARR_LENGTH_2 = 2;
 constexpr int32_t ARG_GROUP_LENGTH = 4;
+constexpr int32_t DEFAULT_MODE = -1;
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 constexpr uint32_t ILLEGAL_VALUE = 0;
 const int32_t MINI_VALID_VALUE = 1;
@@ -933,13 +934,18 @@ ArkUINativeModuleValue TextInputBridge::SetUnderlineColor(ArkUIRuntimeCallInfo* 
         if (ArkTSUtils::ParseJsColorAlpha(vm, disableArg, disableColor)) {
             userColor.disable = disableColor;
         }
-        uint32_t size = ARG_GROUP_LENGTH;
-        ArkUI_Uint32 values[size];
+        ArkUI_Uint32 values[ARG_GROUP_LENGTH];
         values[CALL_ARG_0] = userColor.typing->GetValue();
         values[CALL_ARG_1] = userColor.normal->GetValue();
         values[CALL_ARG_2] = userColor.error->GetValue();
         values[CALL_ARG_3] = userColor.disable->GetValue();
-        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputUserUnderlineColor(nativeNode, values, size);
+        ArkUI_Bool hasValues[ARG_GROUP_LENGTH];
+        hasValues[CALL_ARG_0] = userColor.typing.has_value();
+        hasValues[CALL_ARG_1] = userColor.normal.has_value();
+        hasValues[CALL_ARG_2] = userColor.error.has_value();
+        hasValues[CALL_ARG_3] = userColor.disable.has_value();
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputUserUnderlineColor(
+            nativeNode, values, hasValues, ARG_GROUP_LENGTH);
     } else {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputUserUnderlineColor(nativeNode);
     }
@@ -1407,16 +1413,13 @@ ArkUINativeModuleValue TextInputBridge::SetShowCounter(ArkUIRuntimeCallInfo* run
     if (highlightBorderArg->IsBoolean()) {
         highlightBorder = highlightBorderArg->BooleaValue();
     }
-    int32_t thresholdValue = -1;
+    int32_t thresholdValue = DEFAULT_MODE;
     if (thresholdArg->IsNumber()) {
         thresholdValue = thresholdArg->Int32Value(vm);
         if (thresholdValue < MINI_VALID_VALUE || thresholdValue > MAX_VALID_VALUE) {
             thresholdValue = ILLEGAL_VALUE;
             showCounter = false;
         }
-    }
-    if (thresholdValue == -1) {
-        return panda::JSValueRef::Undefined(vm);
     }
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputShowCounter(
         nativeNode, static_cast<uint32_t>(showCounter), thresholdValue, static_cast<uint32_t>(highlightBorder));

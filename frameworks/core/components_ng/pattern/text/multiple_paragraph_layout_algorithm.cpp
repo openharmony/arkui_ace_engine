@@ -127,8 +127,9 @@ void MultipleParagraphLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             ++index;
             continue;
         }
-        if (index >= placeholderIndex.size() || (placeholderIndex.at(index) >= rectsForPlaceholders.size() &&
-                                                    child->GetHostTag() != V2::PLACEHOLDER_SPAN_ETS_TAG)) {
+        if (index >= placeholderIndex.size() ||
+            (placeholderIndex.at(index) >= static_cast<int32_t>(rectsForPlaceholders.size()) &&
+                child->GetHostTag() != V2::PLACEHOLDER_SPAN_ETS_TAG)) {
             child->SetActive(false);
             continue;
         }

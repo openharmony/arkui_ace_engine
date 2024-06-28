@@ -1794,4 +1794,78 @@ HWTEST_F(NavBarTestNg, NavigationStack020, TestSize.Level1)
     int32_t handle = 44;
     EXPECT_NE(navigationStack->GetFromCacheNode(handle), std::nullopt);
 }
+
+/**
+ * @tc.name: NavigationStack021
+ * @tc.desc: Test RemoveInPreNavPathList function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavigationStack021, TestSize.Level1)
+{
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    std::string name = "pageOne";
+    int32_t index = -1;
+    EXPECT_EQ(navigationStack->RemoveInPreNavPathList(name, nullptr), index);
+}
+
+/**
+ * @tc.name: NavigationStack022
+ * @tc.desc: Test RemoveInPreNavPathList function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavigationStack022, TestSize.Level1)
+{
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(tempNode, nullptr);
+
+    NavPathList cacheNodes;
+    cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
+    navigationStack->preNavPathList_ = cacheNodes;
+    std::string name = "pageOne";
+    int32_t index = 0;
+    EXPECT_EQ(navigationStack->RemoveInPreNavPathList(name, tempNode), index);
+    navigationStack->navPathList_ = cacheNodes;
+    int32_t index_ = -1;
+    EXPECT_EQ(navigationStack->Get(index_), nullptr);
+    int32_t indexs = 3;
+    EXPECT_EQ(navigationStack->Get(indexs), nullptr);
+}
+
+/**
+ * @tc.name: NavigationStack023
+ * @tc.desc: Test GetFromPreBackup function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavigationStack023, TestSize.Level1)
+{
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    EXPECT_NE(tempNode, nullptr);
+
+    NavPathList cacheNodes;
+    cacheNodes.emplace_back(std::make_pair("pageOne", tempNode));
+    navigationStack->preNavPathList_ = cacheNodes;
+    int32_t index = 44;
+    RefPtr<UINode> navDestinationNode = nullptr;
+    EXPECT_EQ(navigationStack->GetFromPreBackup("pageOne", navDestinationNode, index), true);
+}
+
+/**
+ * @tc.name: NavigationStack024
+ * @tc.desc: Test GetAllPathIndex function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavigationStack024, TestSize.Level1)
+{
+    auto navigationStack = std::make_shared<NavigationStack>();
+    EXPECT_NE(navigationStack, nullptr);
+    auto siz = navigationStack->GetAllPathIndex().size();
+    EXPECT_EQ(siz, 0);
+}
 } // namespace OHOS::Ace::NG

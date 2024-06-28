@@ -265,6 +265,27 @@ class WaterFlowFlingSpeedLimitModifier extends ModifierWithKey<number> {
   }
 }
 
+class WaterFlowInitializeModifier extends ModifierWithKey<WaterFlowParam> {
+  constructor(value: WaterFlowParam) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('waterFlowInitialize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().waterFlow.resetWaterFlowInitialize(node);
+    } else {
+      getUINativeModule().waterFlow.setWaterFlowInitialize(node,
+        this.value?.scroller, this.value?.sections, this.value?.layoutMode);
+    }
+  }
+}
+
+interface WaterFlowParam {
+  scroller?: Scroller;
+  sections?: WaterFlowSections;
+  layoutMode?: WaterFlowLayoutMode;
+}
+
 class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -364,6 +385,19 @@ class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAttribute {
   flingSpeedLimit(value: number): this {
     modifierWithKey(this._modifiersWithKeys, WaterFlowFlingSpeedLimitModifier.identity, WaterFlowFlingSpeedLimitModifier, value);
     return this;
+  }
+  initialize(value: Object[]): this {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, WaterFlowInitializeModifier.identity,
+        WaterFlowInitializeModifier, (value[0] as WaterFlowParam));
+    } else {
+      modifierWithKey(this._modifiersWithKeys, WaterFlowInitializeModifier.identity,
+        WaterFlowInitializeModifier, undefined);
+    }
+    return this;
+  }
+  allowChildTypes(): string[] {
+    return ["FlowItem"];
   }
 }
 

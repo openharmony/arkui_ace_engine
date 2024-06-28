@@ -625,9 +625,10 @@ public:
         ViewAbstract::SetSharedTransition(shareId, option);
     }
 
-    void SetGeometryTransition(const std::string& id, bool followWithoutTransition = false) override
+    void SetGeometryTransition(const std::string& id,
+        bool followWithoutTransition = false, bool doRegisterSharedTransition = true) override
     {
-        ViewAbstract::SetGeometryTransition(id, followWithoutTransition);
+        ViewAbstract::SetGeometryTransition(id, followWithoutTransition, doRegisterSharedTransition);
     }
 
     void SetMotionPath(const MotionPathOption& option) override
@@ -1393,6 +1394,21 @@ private:
     void UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts) override
     {
         ViewAbstract::UpdateSafeAreaExpandOpts(opts);
+    }
+
+    void SetPositionLocalizedEdges(bool needLocalized) override
+    {
+        ViewAbstract::SetPositionLocalizedEdges(needLocalized);
+    }
+
+    void SetLocalizedMarkAnchor(bool needLocalized) override
+    {
+        ViewAbstract::SetLocalizedMarkAnchor(needLocalized);
+    }
+
+    void SetOffsetLocalizedEdges(bool needLocalized) override
+    {
+        ViewAbstract::SetOffsetLocalizedEdges(needLocalized);
     }
 };
 } // namespace OHOS::Ace::NG

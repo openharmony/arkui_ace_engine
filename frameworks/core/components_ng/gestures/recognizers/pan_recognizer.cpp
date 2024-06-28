@@ -385,7 +385,8 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         (Offset(windowPoint.GetX(), windowPoint.GetY()) - Offset(windowTouchPoint.GetX(), windowTouchPoint.GetY()));
 
     if (SystemProperties::GetDebugEnabled()) {
-        LOGI("Delta is x %{public}f, y %{public}f ", touchInfoForPan.delta_.GetX(), touchInfoForPan.delta_.GetY());
+        TAG_LOGD(AceLogTag::ACE_GESTURE, "Delta is x %{public}f, y %{public}f ", touchInfoForPan.delta_.GetX(),
+            touchInfoForPan.delta_.GetY());
     }
     touchInfoForPan.mainDelta_ = GetMainAxisDelta();
     UpdateTouchPointInVelocityTracker(event.history.empty() ? event : event.history.back());

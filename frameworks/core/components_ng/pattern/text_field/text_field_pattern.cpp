@@ -115,7 +115,6 @@ constexpr Dimension AVOID_OFFSET = 24.0_vp;
 constexpr Dimension DEFAULT_FONT = Dimension(16, DimensionUnit::FP);
 constexpr Dimension COUNTER_BOTTOM = 22.0_vp;
 constexpr double BOTTOM_MARGIN = 22.0;
-constexpr float MARGIN_ZERO = 0.0f;
 constexpr int32_t ILLEGAL_VALUE = 0;
 constexpr float DOUBLECLICK_INTERVAL_MS = 300.0f;
 constexpr float DOUBLECLICK_MIN_INTERVAL_MS = 0.0f;
@@ -1635,6 +1634,9 @@ void TextFieldPattern::FireEventHubOnChange(const std::string& text)
 void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     CHECK_NULL_VOID(!IsDragging());
+    if (selectOverlay_->IsTouchAtHandle(info)) {
+        return;
+    }
     auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
@@ -2063,6 +2065,9 @@ void TextFieldPattern::InitClickEvent()
 void TextFieldPattern::HandleClickEvent(GestureEvent& info)
 {
     CHECK_NULL_VOID(!IsDragging());
+    if (selectOverlay_->IsClickAtHandle(info)) {
+        return;
+    }
     auto focusHub = GetFocusHub();
     if (!focusHub->IsFocusable()) {
         return;
@@ -2301,7 +2306,7 @@ bool TextFieldPattern::ProcessAutoFill(bool& isPopup, bool isFromKeyBoard, bool 
     CHECK_NULL_RETURN(container, false);
     SetAutoFillTriggeredStateByType(autoFillType);
     SetFillRequestFinish(false);
-    return (container->RequestAutoFill(host, autoFillType, isPopup, isNewPassWord));
+    return (container->RequestAutoFill(host, autoFillType, isNewPassWord, isPopup, autoFillSessionId_));
 }
 
 void TextFieldPattern::HandleDoubleClickEvent(GestureEvent& info)
@@ -2728,7 +2733,7 @@ void TextFieldPattern::AutoFillValueChanged()
     CHECK_NULL_VOID(container);
     if (autoContentType >= TextContentType::FULL_STREET_ADDRESS && autoContentType <= TextContentType::END
         && CheckAutoFill()) {
-        container->UpdatePopupUIExtension(host);
+        container->UpdatePopupUIExtension(host, autoFillSessionId_);
     }
 }
 
@@ -2944,6 +2949,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
 
 void TextFieldPattern::UpdateParam(GestureEvent& info, bool shouldProcessOverlayAfterLayout)
 {
+    parentGlobalOffset_ = GetPaintRectGlobalOffset();
     auto localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
     if (selectController_->IsTouchAtLineEnd(localOffset)) {
         selectController_->UpdateCaretInfoByOffset(localOffset);
@@ -3773,7 +3779,6 @@ void TextFieldPattern::InsertValueOperation(const SourceAndValueInfo& info)
         auto isInsert = BeforeIMEInsertValue(insertValue, caretStart);
         CHECK_NULL_VOID(isInsert);
     }
-    UpdateEditingValueToRecord();
     int32_t caretMoveLength = 0;
     bool hasInsertValue = false;
     int32_t originLength = 0;
@@ -3803,6 +3808,7 @@ void TextFieldPattern::InsertValueOperation(const SourceAndValueInfo& info)
     }
     selectController_->UpdateCaretIndex(caretStart + caretMoveLength);
     UpdateObscure(insertValue, hasInsertValue);
+    UpdateEditingValueToRecord();
     if (isIME) {
         AfterIMEInsertValue(contentController_->GetInsertValue());
     }
@@ -3918,7 +3924,7 @@ void TextFieldPattern::UpdateCounterMargin()
         !IsInPasswordMode()) {
         MarginProperty margin;
         const auto& getMargin = layoutProperty->GetMarginProperty();
-        if (!getMargin || GetMarginBottom() == MARGIN_ZERO) {
+        if (!getMargin) {
             margin.bottom = CalcLength(COUNTER_BOTTOM);
             layoutProperty->UpdateMargin(margin);
             return;
@@ -4716,11 +4722,11 @@ void TextFieldPattern::DeleteBackward(int32_t length)
         auto value = contentController_->GetSelectedValue(start, end);
         auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::BACKWARD, end);
         CHECK_NULL_VOID(isDelete);
-        UpdateEditingValueToRecord();
         Delete(start, end);
         AfterIMEDeleteValue(value, TextDeleteDirection::BACKWARD);
         showCountBorderStyle_ = false;
         HandleCountStyle();
+        UpdateEditingValueToRecord();
         return;
     }
     if (selectController_->GetCaretIndex() <= 0) {
@@ -4742,7 +4748,6 @@ void TextFieldPattern::DeleteBackwardOperation(int32_t length)
     auto value = contentController_->GetSelectedValue(idx - willDeleteLength, idx);
     auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::BACKWARD, idx);
     CHECK_NULL_VOID(isDelete);
-    UpdateEditingValueToRecord();
     int32_t count = contentController_->Delete(selectController_->GetCaretIndex(), length, true);
     selectController_->UpdateCaretIndex(std::max(idx - count, 0));
     if (GetIsPreviewText()) {
@@ -4750,6 +4755,7 @@ void TextFieldPattern::DeleteBackwardOperation(int32_t length)
     }
     AfterIMEDeleteValue(value, TextDeleteDirection::BACKWARD);
     StartTwinkling();
+    UpdateEditingValueToRecord();
 }
 
 void TextFieldPattern::DeleteForwardOperation(int32_t length)
@@ -4760,13 +4766,13 @@ void TextFieldPattern::DeleteForwardOperation(int32_t length)
     auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::FORWARD, caretIndex);
     CHECK_NULL_VOID(isDelete);
     ResetObscureTickCountDown();
-    UpdateEditingValueToRecord();
     contentController_->Delete(caretIndex, length, false);
     if (GetIsPreviewText()) {
         UpdatePreviewIndex(GetPreviewTextStart(), GetPreviewTextEnd() - length);
     }
     AfterIMEDeleteValue(value, TextDeleteDirection::FORWARD);
     StartTwinkling();
+    UpdateEditingValueToRecord();
 }
 
 void TextFieldPattern::DeleteForward(int32_t length)
@@ -4778,11 +4784,11 @@ void TextFieldPattern::DeleteForward(int32_t length)
         auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::FORWARD, start);
         CHECK_NULL_VOID(isDelete);
         ResetObscureTickCountDown();
-        UpdateEditingValueToRecord();
         Delete(start, end);
         AfterIMEDeleteValue(value, TextDeleteDirection::FORWARD);
         showCountBorderStyle_ = false;
         HandleCountStyle();
+        UpdateEditingValueToRecord();
         return;
     }
     if (selectController_->GetCaretIndex() >= static_cast<int32_t>(contentController_->GetWideText().length())) {
@@ -5166,6 +5172,8 @@ std::string TextFieldPattern::TextInputTypeToString() const
             return IsTextArea() ? "TextAreaType.EMAIL" : "InputType.Email";
         case TextInputType::PHONE:
             return IsTextArea() ? "TextAreaType.PHONE_NUMBER" : "InputType.PhoneNumber";
+        case TextInputType::URL:
+            return IsTextArea() ? "TextAreaType.URL" : "InputType.URL";
         case TextInputType::VISIBLE_PASSWORD:
             return "InputType.Password";
         case TextInputType::USER_NAME:
@@ -5980,6 +5988,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
         Infinity<uint32_t>()) ? "INF" : std::to_string(GetMaxLines()).c_str(), filter);
     json->PutExtAttr("barState", GetBarStateString().c_str(), filter);
     json->PutExtAttr("caretPosition", std::to_string(GetCaretIndex()).c_str(), filter);
+    json->PutExtAttr("enablePreviewText", GetSupportPreviewText(), filter);
 
     ToJsonValueForOption(json, filter);
 }
@@ -7014,7 +7023,7 @@ void TextFieldPattern::HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& no
     CHECK_NULL_VOID(host);
     if (HasFocus()) {
         if (SystemProperties::GetDebugEnabled()) {
-            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+            TAG_LOGD(AceLogTag::ACE_TEXT_FIELD,
                 "In OnDragMoved, the cursor has always Displayed in the textField, id:%{public}d", host->GetId());
         }
         return;
@@ -7271,6 +7280,7 @@ const Dimension& TextFieldPattern::GetAvoidSoftKeyboardOffset() const
 
 Offset TextFieldPattern::ConvertGlobalToLocalOffset(const Offset& globalOffset)
 {
+    parentGlobalOffset_ = GetPaintRectGlobalOffset();
     auto localOffset = globalOffset - Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY());
     if (selectOverlay_->HasRenderTransform()) {
         auto localOffsetF = OffsetF(globalOffset.GetX(), globalOffset.GetY());

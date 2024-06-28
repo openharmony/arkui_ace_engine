@@ -340,7 +340,8 @@ void AppBarView::CreateServicePanel(bool firstTry)
          "UIExtension bundle: %{public}s, ability: %{public}s, module: %{public}s",
         appGalleryBundleName.c_str(), abilityName.c_str(), params["bundleName"].c_str(), params["abilityName"].c_str(),
         params["module"].c_str());
-    sessionId_ = overlayManager->CreateModalUIExtension(wantWrap, callbacks, false);
+    ModalUIExtensionConfig config;
+    sessionId_ = overlayManager->CreateModalUIExtension(wantWrap, callbacks, config);
 #endif
 }
 

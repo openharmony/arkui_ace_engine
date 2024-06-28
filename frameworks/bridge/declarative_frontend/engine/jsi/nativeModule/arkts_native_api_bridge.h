@@ -87,7 +87,7 @@ private:
     static void RegisterShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSwiperAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterListAttributes(Local<panda::ObjectRef> object, EcmaVM* vm); 
+    static void RegisterListAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterGridAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListItemGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterQRCodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

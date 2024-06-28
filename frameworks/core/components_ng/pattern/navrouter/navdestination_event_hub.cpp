@@ -112,22 +112,29 @@ void NavDestinationEventHub::FireOnAppear()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto navigationManager = pipeline->GetNavigationManager();
-    navigationManager->AddNavigationUpdateCallback([weakEventHub = WeakClaim(this)]() {
-        auto eventHub = weakEventHub.Upgrade();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->state_ = NavDestinationState::ON_APPEAR;
-        UIObserverHandler::GetInstance().NotifyNavigationStateChange(eventHub->GetNavDestinationPattern(),
-            NavDestinationState::ON_APPEAR);
-        if (eventHub->onAppear_) {
-            auto onAppear = eventHub->onAppear_;
-            onAppear();
-        }
-
-        if (eventHub->onJSFrameNodeAppear_) {
-            auto onJSFrameNodeAppear = eventHub->onJSFrameNodeAppear_;
-            onJSFrameNodeAppear();
-        }
-    });
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
+    CHECK_NULL_VOID(navDestination);
+    auto pattern = navDestination->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->GetNavigationNode()) {
+        navigationManager->AddNavigationUpdateCallback([weakEventHub = WeakClaim(this)]() {
+            auto eventHub = weakEventHub.Upgrade();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->state_ = NavDestinationState::ON_APPEAR;
+            UIObserverHandler::GetInstance().NotifyNavigationStateChange(eventHub->GetNavDestinationPattern(),
+                NavDestinationState::ON_APPEAR);
+            if (eventHub->onAppear_) {
+                auto onAppear = eventHub->onAppear_;
+                onAppear();
+            }
+            if (eventHub->onJSFrameNodeAppear_) {
+                auto onJSFrameNodeAppear = eventHub->onJSFrameNodeAppear_;
+                onJSFrameNodeAppear();
+            }
+        });
+    } else {
+        EventHub::FireOnAppear();
+    }
 }
 
 void NavDestinationEventHub::FireOnWillAppear()

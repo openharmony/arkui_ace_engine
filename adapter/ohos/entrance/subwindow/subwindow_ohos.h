@@ -147,6 +147,8 @@ public:
     void ResizeWindowForFoldStatus(int32_t parentContainerId) override;
     void MarkDirtyDialogSafeArea() override;
 
+    bool Close() override;
+
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);
@@ -207,7 +209,6 @@ private:
     bool haveDialog_ = false;
     bool isShowed_ = false;
     sptr<OHOS::Rosen::Window> parentWindow_ = nullptr;
-    std::set<int32_t> menuTargetId_;
 };
 
 } // namespace OHOS::Ace

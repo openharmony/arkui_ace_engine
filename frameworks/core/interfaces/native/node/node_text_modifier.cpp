@@ -1138,5 +1138,12 @@ void SetOnDetectResultUpdate(ArkUINodeHandle node, void* extraParam)
     };
     TextModelNG::SetOnDetectResultUpdate(frameNode, std::move(onDetectResultUpdate));
 }
+
+void ResetOnDetectResultUpdate(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetOnDetectResultUpdate(frameNode, nullptr);
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

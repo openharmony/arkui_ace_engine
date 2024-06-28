@@ -1229,4 +1229,38 @@ HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerHandleOverdueDeadlineTest
     longPressRecognizerPtr->HandleOverdueDeadline(true);
     EXPECT_TRUE(guestureEventHub->dragEventActuator_->isDragUserReject_);
 }
+
+/**
+ * @tc.name: LongPressRecognizerLongPressRecognizerTest
+ * @tc.desc: Test LongPressRecognizer function: LongPressRecognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerLongPressRecognizerTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Recognizer、TargetComponent.
+     */
+    LongPressRecognizer longPressRecognizer1 = LongPressRecognizer(100, 9, false, false, false);
+    LongPressRecognizer longPressRecognizer2 = LongPressRecognizer(100, 11, false, false, false);
+    LongPressRecognizer longPressRecognizer3 = LongPressRecognizer(0, 10, false, false, false);
+    EXPECT_EQ(longPressRecognizer1.fingers_, 9);
+    EXPECT_EQ(longPressRecognizer2.fingers_, 1);
+    EXPECT_EQ(longPressRecognizer3.duration_, 500);
+}
+
+/**
+ * @tc.name: DeadlineTimerTest
+ * @tc.desc: Test LongPressRecognizer function: DeadlineTimer
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, DeadlineTimerTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Recognizer、TargetComponent.
+     */
+    RefPtr<LongPressRecognizer> longPressRecognizerPtr = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION,
+        FINGER_NUMBER, false);
+    longPressRecognizerPtr->DeadlineTimer(1, true);
+    ASSERT_NE(longPressRecognizerPtr, nullptr);
+}
 } // namespace OHOS::Ace::NG

@@ -1143,10 +1143,10 @@ HWTEST_F(LayoutPropertyTestNg, UpdateAllGeometryTransition001, TestSize.Level1)
      * @tc.steps1 Create a layoutProperty.
      */
     auto parent = FrameNode::CreateFrameNode("parentNode", 0, AceType::MakeRefPtr<Pattern>());
-    parent->GetLayoutProperty()->UpdateGeometryTransition("parent", true);
+    parent->GetLayoutProperty()->UpdateGeometryTransition("parent", true, true);
 
     auto child = FrameNode::CreateFrameNode("childNode", 1, AceType::MakeRefPtr<Pattern>());
-    child->GetLayoutProperty()->UpdateGeometryTransition("child", false);
+    child->GetLayoutProperty()->UpdateGeometryTransition("child", false, true);
     child->MountToParent(parent);
 
     LayoutProperty::UpdateAllGeometryTransition(parent);
@@ -1322,7 +1322,7 @@ HWTEST_F(LayoutPropertyTestNg, UpdateAllGeometryTransition002, TestSize.Level1)
      * @tc.steps3 Create a weakGeo.
      * @tc.expected: GetGeometryTransition is not null
      */
-    RefPtr<GeometryTransition> geo = AceType::MakeRefPtr<GeometryTransition>("test", true);
+    RefPtr<GeometryTransition> geo = AceType::MakeRefPtr<GeometryTransition>("test", true, true);
     WeakPtr<GeometryTransition> weakGeo = AceType::WeakClaim(AceType::RawPtr(geo));
     layoutProperty->geometryTransition_ = weakGeo;
     EXPECT_NE(layoutProperty->GetGeometryTransition(), nullptr);
@@ -1332,7 +1332,7 @@ HWTEST_F(LayoutPropertyTestNg, UpdateAllGeometryTransition002, TestSize.Level1)
      * @tc.expected: geometryTransition_ is Changed to new
      */
     SystemProperties::debugEnabled_ = true;
-    layoutProperty->UpdateGeometryTransition("test1", true);
+    layoutProperty->UpdateGeometryTransition("test1", true, true);
     EXPECT_EQ(layoutProperty->geometryTransition_.Upgrade()->id_, "test1");
 }
 

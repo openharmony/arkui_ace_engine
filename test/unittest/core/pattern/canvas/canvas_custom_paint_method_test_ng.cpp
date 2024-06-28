@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "gtest/gtest.h"
+#include "mock_canvas_paint.h"
 
 #define protected public
 #define private public
@@ -34,6 +35,8 @@
 #include "core/components_ng/pattern/custom_paint/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/rosen/mock_canvas.h"
 #undef private
 #undef protected
 
@@ -46,6 +49,10 @@ namespace {
 const double MAX_WIDTH = 2.0;
 const double MAX_INTRINSIC_WIDTH = 4.0;
 const double SCALE = 0.5;
+const double END_ANGLE = 8.0;
+const double MAX_END_ANGLE = 1160.0;
+const double HALF = 0.5;
+const double HANGING_PERCENT = 0.8;
 }
 
 class CanvasCustomPaintMethodTestNg : public testing::Test {
@@ -54,9 +61,15 @@ public:
     static void TearDownTestCase();
 };
 
-void CanvasCustomPaintMethodTestNg::SetUpTestCase() {}
+void CanvasCustomPaintMethodTestNg::SetUpTestCase()
+{
+    MockContainer::SetUp();
+}
 
-void CanvasCustomPaintMethodTestNg::TearDownTestCase() {}
+void CanvasCustomPaintMethodTestNg::TearDownTestCase()
+{
+    MockContainer::TearDown();
+}
 
 /**
  * @tc.name: CanvasCustomPaintMethodTest001
@@ -478,5 +491,745 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest012, TestSize
 
     result = paintMethod->CalcTextScale(MAX_INTRINSIC_WIDTH, MAX_WIDTH);
     EXPECT_EQ(result.value(), SCALE);
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest013
+ * @tc.desc: Test the function 'GetStrokePaint' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    Testing::MockPen mockPen;
+    RSSamplingOptions options;
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    /**
+     * @tc.steps2: Call the function GetStrokePaint.
+     * @tc.expected: return value are as expected.
+     */
+    paintMethod->state_.strokeState.paintStyle_ = PaintStyle::Color;
+    EXPECT_CALL(mockPen, SetColor(_)).Times(AtLeast(1));
+    EXPECT_CALL(mockPen, SetJoinStyle(_)).Times(AtLeast(1));
+    EXPECT_CALL(mockPen, SetCapStyle(_)).Times(AtLeast(1));
+    EXPECT_CALL(mockPen, SetWidth(_)).Times(AtLeast(1));
+    EXPECT_CALL(mockPen, SetMiterLimit(_)).Times(AtLeast(1));
+    paintMethod->GetStrokePaint(mockPen, options);
+    EXPECT_EQ(paintMethod->state_.strokeState.GetPaintStyle(), PaintStyle::Color);
+    paintMethod->state_.globalState.SetAlpha(1.0);
+    EXPECT_CALL(mockPen, SetAlphaF(_)).Times(AtLeast(1));
+    paintMethod->GetStrokePaint(mockPen, options);
+    EXPECT_TRUE(paintMethod->state_.globalState.HasGlobalAlpha());
+    paintMethod->state_.strokeState.paintStyle_ = PaintStyle::Gradient;
+    ASSERT_NE(paintMethod->state_.strokeState.GetPaintStyle(), PaintStyle::Color);
+    EXPECT_CALL(mockPen, SetAlphaF(_)).Times(AtLeast(1));
+    paintMethod->GetStrokePaint(mockPen, options);
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest014
+ * @tc.desc: Test the function 'DrawImageInternal' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    Testing::MockCanvas canvas;
+    Ace::CanvasImage canvasImage;
+    std::shared_ptr<RSImage> image;
+    Testing::MockBrush brush;
+    /**
+     * @tc.steps2: Call the function DrawImageInternal.
+     * @tc.expected: return value are as expected.
+     */
+    paintMethod->rsCanvas_ = std::make_shared<RSCanvas>();
+    paintMethod->state_.globalState.SetType(CompositeOperation::SOURCE_ATOP);
+    paintMethod->state_.globalState.SetAlpha(1.0);
+    EXPECT_TRUE(paintMethod->state_.globalState.HasGlobalAlpha());
+    EXPECT_CALL(canvas, SaveLayer(_)).WillRepeatedly(Return());
+    EXPECT_CALL(brush, SetAlphaF(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    canvasImage.flag = CustomPaintPaintMethod::DrawImageType::THREE_PARAMS;
+    EXPECT_CALL(canvas, DrawImage(_, _, _, _)).WillRepeatedly(Return());
+    paintMethod->DrawImageInternal(canvasImage, image);
+    canvasImage.flag = CustomPaintPaintMethod::DrawImageType::FIVE_PARAMS;
+    EXPECT_CALL(canvas, DrawImageRect(_, _, _)).WillRepeatedly(Return());
+    paintMethod->DrawImageInternal(canvasImage, image);
+    canvasImage.flag = CustomPaintPaintMethod::DrawImageType::NINE_PARAMS;
+    EXPECT_CALL(canvas, DrawImageRect(_, _, _)).WillRepeatedly(Return());
+    paintMethod->DrawImageInternal(canvasImage, image);
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest015
+ * @tc.desc: Test the function 'FillRect' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    Testing::MockCanvas canvas;
+    Testing::MockBrush brush;
+    Testing::MockPath path;
+    Rect rect;
+    Offset offset(1.0, 1.0);
+    /**
+     * @tc.steps2: Call the function FillRect.
+     * @tc.expected: return value are as expected.
+     */
+    paintMethod->rsCanvas_ = std::make_shared<RSCanvas>();
+    paintMethod->state_.globalState.SetAlpha(1.0);
+    EXPECT_TRUE(paintMethod->state_.globalState.HasGlobalAlpha());
+    paintMethod->state_.globalState.SetType(CompositeOperation::SOURCE_OVER);
+    paintMethod->state_.shadow.SetOffset(offset);
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRect(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(brush, SetColor(_)).WillRepeatedly(Return());
+    EXPECT_CALL(brush, SetAlphaF(_)).WillRepeatedly(Return());
+    EXPECT_CALL(path, AddRect(_, _)).WillRepeatedly(Return());
+    paintMethod->FillRect(rect);
+
+    paintMethod->state_.globalState.SetType(CompositeOperation::SOURCE_ATOP);
+    EXPECT_CALL(path, AddRect(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, SaveLayer(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRect(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
+    paintMethod->FillRect(rect);
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest016
+ * @tc.desc: Test the function 'StrokeRect' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    Testing::MockCanvas canvas;
+    Testing::MockPath path;
+    Rect rect;
+    Offset offset(1.0, 1.0);
+    /**
+     * @tc.steps2: Call the function StrokeRect.
+     * @tc.expected: return value are as expected.
+     */
+    paintMethod->rsCanvas_ = std::make_shared<RSCanvas>();
+    paintMethod->state_.globalState.SetType(CompositeOperation::SOURCE_OVER);
+    paintMethod->state_.shadow.SetOffset(offset);
+    EXPECT_CALL(path, AddRect(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRect(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    paintMethod->StrokeRect(rect);
+
+    paintMethod->state_.globalState.SetType(CompositeOperation::SOURCE_ATOP);
+    EXPECT_CALL(path, AddRect(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, SaveLayer(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRect(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
+    paintMethod->StrokeRect(rect);
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest017
+ * @tc.desc: Test the function 'SetFillRuleForPath' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    CanvasFillRule rule = CanvasFillRule::NONZERO;
+    Testing::MockPath path;
+    /**
+     * @tc.steps2: Call the function SetFillRuleForPath.
+     * @tc.expected: return value are as expected.
+     */
+    EXPECT_CALL(path, SetFillStyle(_)).WillRepeatedly(Return());
+    paintMethod->SetFillRuleForPath(rule);
+
+    rule = CanvasFillRule::EVENODD;
+    EXPECT_CALL(path, SetFillStyle(_)).WillRepeatedly(Return());
+    paintMethod->SetFillRuleForPath(rule);
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest018
+ * @tc.desc: Test the function 'SetFillRuleForPath2D' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    CanvasFillRule rule = CanvasFillRule::NONZERO;
+    Testing::MockPath path;
+    paintMethod->rsCanvas_ = std::make_shared<RSCanvas>();
+    /**
+     * @tc.steps2: Call the function SetFillRuleForPath2D.
+     * @tc.expected: return value are as expected.
+     */
+    EXPECT_CALL(path, SetFillStyle(_)).WillRepeatedly(Return());
+    paintMethod->SetFillRuleForPath2D(rule);
+
+    rule = CanvasFillRule::EVENODD;
+    EXPECT_CALL(path, SetFillStyle(_)).WillRepeatedly(Return());
+    paintMethod->SetFillRuleForPath2D(rule);
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest019
+ * @tc.desc: Test the function 'Fill' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    Testing::MockBrush brush;
+    Testing::MockCanvas canvas;
+    Offset offset(1.0, 1.0);
+    /**
+     * @tc.steps2: Call the function Fill.
+     * @tc.expected: return value are as expected.
+     */
+    paintMethod->rsCanvas_ = std::make_shared<RSCanvas>();
+    paintMethod->state_.fillState.paintStyle_ = OHOS::Ace::PaintStyle::Color;
+    paintMethod->state_.globalState.SetType(CompositeOperation::SOURCE_OVER);
+    paintMethod->state_.shadow.SetOffset(offset);
+    EXPECT_CALL(brush, SetColor(_)).WillRepeatedly(Return());
+    paintMethod->state_.globalState.SetAlpha(1.0);
+    EXPECT_TRUE(paintMethod->state_.globalState.HasGlobalAlpha());
+    EXPECT_CALL(brush, SetAlphaF(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    paintMethod->Fill();
+
+    paintMethod->state_.fillState.paintStyle_ = OHOS::Ace::PaintStyle::Gradient;
+    paintMethod->state_.globalState.SetType(CompositeOperation::SOURCE_ATOP);
+    EXPECT_CALL(brush, SetAlphaF(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, SaveLayer(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
+    paintMethod->Fill();
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest020
+ * @tc.desc: Test the function 'Path2DFill' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    Testing::MockCanvas canvas;
+    Testing::MockBrush brush;
+    Offset offset(1.0, 1.0);
+    /**
+     * @tc.steps2: Call the function Path2DFill.
+     * @tc.expected: return value are as expected.
+     */
+    paintMethod->rsCanvas_ = std::make_shared<RSCanvas>();
+    paintMethod->state_.fillState.paintStyle_ = OHOS::Ace::PaintStyle::Color;
+    paintMethod->state_.globalState.SetAlpha(1.0);
+    EXPECT_TRUE(paintMethod->state_.globalState.HasGlobalAlpha());
+    paintMethod->state_.globalState.SetType(CompositeOperation::SOURCE_OVER);
+    paintMethod->state_.shadow.SetOffset(offset);
+    EXPECT_CALL(brush, SetColor(_)).WillRepeatedly(Return());
+    EXPECT_CALL(brush, SetAlphaF(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    paintMethod->Path2DFill();
+
+    paintMethod->state_.fillState.paintStyle_ = OHOS::Ace::PaintStyle::Gradient;
+    paintMethod->state_.globalState.SetType(CompositeOperation::SOURCE_ATOP);
+    EXPECT_CALL(brush, SetAlphaF(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, SaveLayer(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRect(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
+    paintMethod->Path2DFill();
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest021
+ * @tc.desc: Test the function 'Stroke' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    Testing::MockCanvas canvas;
+    Testing::MockBrush brush;
+    Offset offset(1.0, 1.0);
+    /**
+     * @tc.steps2: Call the function Stroke.
+     * @tc.expected: return value are as expected.
+     */
+    paintMethod->rsCanvas_ = std::make_shared<RSCanvas>();
+    paintMethod->state_.fillState.paintStyle_ = OHOS::Ace::PaintStyle::Color;
+    paintMethod->state_.globalState.SetType(CompositeOperation::SOURCE_OVER);
+    paintMethod->state_.shadow.SetOffset(offset);
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    paintMethod->Stroke();
+
+    paintMethod->state_.globalState.SetType(CompositeOperation::SOURCE_ATOP);
+    EXPECT_CALL(canvas, SaveLayer(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
+    paintMethod->Stroke();
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest022
+ * @tc.desc: Test the function 'Path2DStroke' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest022, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    Testing::MockCanvas canvas;
+    Testing::MockBrush brush;
+    Offset offset(1.0, 1.0);
+    /**
+     * @tc.steps2: Call the function Path2DStroke.
+     * @tc.expected: return value are as expected.
+     */
+    paintMethod->rsCanvas_ = std::make_shared<RSCanvas>();
+    paintMethod->state_.globalState.SetType(CompositeOperation::SOURCE_OVER);
+    paintMethod->state_.shadow.SetOffset(offset);
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    paintMethod->Path2DStroke();
+
+    paintMethod->state_.globalState.SetType(CompositeOperation::SOURCE_ATOP);
+    EXPECT_CALL(canvas, SaveLayer(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
+    paintMethod->Path2DStroke();
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest023
+ * @tc.desc: Test the function 'Arc' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest023, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    ArcParam arcParam;
+    Testing::MockPath path;
+    /**
+     * @tc.steps2: Call the function Arc.
+     * @tc.expected: return value are as expected.
+     */
+    arcParam.x = 1.0;
+    arcParam.y = 1.0;
+    arcParam.radius = 1.0;
+    arcParam.startAngle = 0.0;
+    arcParam.endAngle = 1.0;
+    EXPECT_CALL(path, ArcTo(_, _, _, _)).WillRepeatedly(Return());
+    paintMethod->Arc(arcParam);
+    arcParam.endAngle = M_PI * MAX_WIDTH;
+    EXPECT_CALL(path, ArcTo(_, _, _, _)).WillRepeatedly(Return());
+    paintMethod->Arc(arcParam);
+    arcParam.endAngle = END_ANGLE;
+    EXPECT_CALL(path, ArcTo(_, _, _, _)).WillRepeatedly(Return());
+    paintMethod->Arc(arcParam);
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest024
+ * @tc.desc: Test the function 'Ellipse' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    EllipseParam param;
+    Testing::MockPath path;
+    Testing::MockMatrix matrix;
+    /**
+     * @tc.steps2: Call the function Ellipse.
+     * @tc.expected: return value are as expected.
+     */
+    param.x = 1.0;
+    param.y = 1.0;
+    param.startAngle = 0.0;
+    param.endAngle = 1.0;
+    param.rotation = 1.0;
+    
+    EXPECT_CALL(matrix, Rotate(_, _, _)).WillRepeatedly(Return());
+    EXPECT_CALL(path, Transform(_)).WillRepeatedly(Return());
+    paintMethod->Ellipse(param);
+    param.endAngle = M_PI * MAX_WIDTH;
+    EXPECT_CALL(path, ArcTo(_, _, _, _)).WillRepeatedly(Return());
+    paintMethod->Ellipse(param);
+    param.endAngle = END_ANGLE;
+    EXPECT_CALL(path, ArcTo(_, _, _, _)).WillRepeatedly(Return());
+    paintMethod->Ellipse(param);
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest025
+ * @tc.desc: Test the function 'ParsePath2D' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest025, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    PathArgs args;
+    Testing::MockPath path;
+    RefPtr<CanvasPath2D> path2D = AceType::MakeRefPtr<CanvasPath2D>();
+    /**
+     * @tc.steps2: Call the function ParsePath2D.
+     * @tc.expected: return value are as expected.
+     */
+    path2D->caches_.emplace_back(PathCmd::CMDS, args);
+    EXPECT_CALL(path, AddPath(_)).WillRepeatedly(Return());
+    paintMethod->ParsePath2D(path2D);
+    path2D->caches_.emplace_back(PathCmd::TRANSFORM, args);
+    EXPECT_CALL(path, AddPath(_)).WillRepeatedly(Return());
+    paintMethod->ParsePath2D(path2D);
+    path2D->caches_.emplace_back(PathCmd::MOVE_TO, args);
+    EXPECT_CALL(path, AddPath(_)).WillRepeatedly(Return());
+    paintMethod->ParsePath2D(path2D);
+    path2D->caches_.emplace_back(PathCmd::LINE_TO, args);
+    EXPECT_CALL(path, AddPath(_)).WillRepeatedly(Return());
+    paintMethod->ParsePath2D(path2D);
+    path2D->caches_.emplace_back(PathCmd::ARC, args);
+    EXPECT_CALL(path, AddPath(_)).WillRepeatedly(Return());
+    paintMethod->ParsePath2D(path2D);
+    path2D->caches_.emplace_back(PathCmd::ARC_TO, args);
+    EXPECT_CALL(path, AddPath(_)).WillRepeatedly(Return());
+    paintMethod->ParsePath2D(path2D);
+    path2D->caches_.emplace_back(PathCmd::QUADRATIC_CURVE_TO, args);
+    EXPECT_CALL(path, AddPath(_)).WillRepeatedly(Return());
+    paintMethod->ParsePath2D(path2D);
+    path2D->caches_.emplace_back(PathCmd::BEZIER_CURVE_TO, args);
+    EXPECT_CALL(path, AddPath(_)).WillRepeatedly(Return());
+    paintMethod->ParsePath2D(path2D);
+    path2D->caches_.emplace_back(PathCmd::ELLIPSE, args);
+    EXPECT_CALL(path, AddPath(_)).WillRepeatedly(Return());
+    paintMethod->ParsePath2D(path2D);
+    path2D->caches_.emplace_back(PathCmd::RECT, args);
+    EXPECT_CALL(path, AddPath(_)).WillRepeatedly(Return());
+    paintMethod->ParsePath2D(path2D);
+    path2D->caches_.emplace_back(PathCmd::CLOSE_PATH, args);
+    EXPECT_CALL(path, AddPath(_)).WillRepeatedly(Return());
+    paintMethod->ParsePath2D(path2D);
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest026
+ * @tc.desc: Test the function 'Path2DArc' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest026, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    PathArgs args;
+    Testing::MockPath path;
+    /**
+     * @tc.steps2: Call the function Path2DArc.
+     * @tc.expected: return value are as expected.
+     */
+    args.para4 = 0.0;
+    args.para5 = 1.0;
+    EXPECT_CALL(path, ArcTo(_, _, _, _)).WillRepeatedly(Return());
+    paintMethod->Path2DArc(args);
+    args.para5 = M_PI * MAX_WIDTH;
+    EXPECT_CALL(path, ArcTo(_, _, _, _)).WillRepeatedly(Return());
+    paintMethod->Path2DArc(args);
+    args.para5 = END_ANGLE;
+    EXPECT_CALL(path, ArcTo(_, _, _, _)).WillRepeatedly(Return());
+    paintMethod->Path2DArc(args);
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest027
+ * @tc.desc: Test the function 'Path2DEllipse' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest027, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    PathArgs args;
+    Testing::MockPath path;
+    Testing::MockMatrix matrix;
+    /**
+     * @tc.steps2: Call the function Path2DEllipse.
+     * @tc.expected: return value are as expected.
+     */
+    args.para5 = 1.0;
+    args.para6 = 0.0;
+    args.para7 = 1.0;
+    EXPECT_CALL(matrix, Rotate(_, _, _)).WillRepeatedly(Return());
+    EXPECT_CALL(path, Transform(_)).WillRepeatedly(Return());
+    EXPECT_CALL(path, ArcTo(_, _, _, _)).WillRepeatedly(Return());
+    paintMethod->Path2DEllipse(args);
+    args.para8 = 1.0;
+    args.para7 = M_PI * MAX_WIDTH;
+    EXPECT_CALL(path, ArcTo(_, _, _, _)).WillRepeatedly(Return());
+    paintMethod->Path2DEllipse(args);
+    args.para8 = 0.0;
+    args.para7 = MAX_END_ANGLE;
+    EXPECT_CALL(path, ArcTo(_, _, _, _)).WillRepeatedly(Return());
+    paintMethod->Path2DEllipse(args);
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest028
+ * @tc.desc: Test the function 'PaintText' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest028, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    paintMethod->paragraph_ = std::make_unique<RSParagraph>();
+    paintMethod->rsCanvas_ = std::make_shared<RSCanvas>();
+    Testing::MockTypography typography;
+    Testing::MockCanvas canvas;
+    /**
+     * @tc.steps2: Call the function PaintText.
+     * @tc.expected: return value are as expected.
+     */
+    float width = 2.f;
+    std::optional<double> maxWidth = 0.5;
+    int32_t settingApiVersion = 10;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    EXPECT_CALL(typography, Layout(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, Save()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, Scale(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(typography, Paint(_, _, _)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
+    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true, true);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+
+    EXPECT_CALL(typography, Layout(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, Save()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, Scale(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(typography, Paint(_, _, _)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
+    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true, false);
+
+    maxWidth = 10.0;
+    EXPECT_CALL(typography, Layout(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, Save()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, Scale(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(typography, Paint(_, _, _)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
+    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true, true);
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest029
+ * @tc.desc: Test the function 'PaintText' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest029, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    /**
+     * @tc.steps2: Call the function PaintText.
+     * @tc.expected: return value are as expected.
+     */
+    TextAlign align = TextAlign::LEFT;
+    auto result = paintMethod->GetAlignOffset(align, MAX_WIDTH);
+    EXPECT_EQ(result, 0.0);
+    align = TextAlign::START;
+    paintMethod->state_.fillState.SetOffTextDirection(TextDirection::RTL);
+    result = paintMethod->GetAlignOffset(align, MAX_WIDTH);
+    EXPECT_EQ(result, -MAX_WIDTH);
+    align = TextAlign::RIGHT;
+    result = paintMethod->GetAlignOffset(align, MAX_WIDTH);
+    EXPECT_EQ(result, -MAX_WIDTH);
+    align = TextAlign::END;
+    paintMethod->state_.fillState.SetOffTextDirection(TextDirection::LTR);
+    result = paintMethod->GetAlignOffset(align, MAX_WIDTH);
+    EXPECT_EQ(result, -MAX_WIDTH);
+    align = TextAlign::CENTER;
+    result = paintMethod->GetAlignOffset(align, MAX_WIDTH);
+    EXPECT_EQ(result, -1.0);
+    align = TextAlign::JUSTIFY;
+    result = paintMethod->GetAlignOffset(align, MAX_WIDTH);
+    EXPECT_EQ(result, 0.0);
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest030
+ * @tc.desc: Test the function 'GetBaselineOffset' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest030, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    /**
+     * @tc.steps2: Call the function GetBaselineOffset.
+     * @tc.expected: return value are as expected.
+     */
+    auto paragraph = std::make_unique<RSParagraph>();
+    TextBaseline baseLine = TextBaseline::ALPHABETIC;
+    auto result = paintMethod->GetBaselineOffset(baseLine, paragraph);
+    EXPECT_EQ(result, 0.0);
+
+    baseLine = TextBaseline::IDEOGRAPHIC;
+    paintMethod->state_.fillState.SetOffTextDirection(TextDirection::RTL);
+    result = paintMethod->GetBaselineOffset(baseLine, paragraph);
+    EXPECT_EQ(result, 0.0);
+
+    baseLine = TextBaseline::BOTTOM;
+    result = paintMethod->GetBaselineOffset(baseLine, paragraph);
+    EXPECT_EQ(result, -1.0);
+
+    baseLine = TextBaseline::TOP;
+    paintMethod->state_.fillState.SetOffTextDirection(TextDirection::LTR);
+    result = paintMethod->GetBaselineOffset(baseLine, paragraph);
+    EXPECT_EQ(result, 0.0);
+
+    baseLine = TextBaseline::MIDDLE;
+    result = paintMethod->GetBaselineOffset(baseLine, paragraph);
+    EXPECT_EQ(result, -HALF);
+
+    baseLine = TextBaseline::HANGING;
+    result = paintMethod->GetBaselineOffset(baseLine, paragraph);
+    EXPECT_EQ(result, -HANGING_PERCENT);
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTest031
+ * @tc.desc: Test the function 'GetEffectiveAlign' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest031, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_NE(paintMethod, nullptr);
+    /**
+     * @tc.steps2: Call the function GetEffectiveAlign.
+     * @tc.expected: return value are as expected.
+     */
+    RSTextAlign align = RSTextAlign::START;
+    RSTextDirection direction = RSTextDirection::LTR;
+    auto result = paintMethod->GetEffectiveAlign(align, direction);
+    EXPECT_EQ(result, RSTextAlign::LEFT);
+
+    align = RSTextAlign::END;
+    direction = RSTextDirection::LTR;
+    result = paintMethod->GetEffectiveAlign(align, direction);
+    EXPECT_EQ(result, RSTextAlign::RIGHT);
+
+    align = RSTextAlign::JUSTIFY;
+    result = paintMethod->GetEffectiveAlign(align, direction);
+    EXPECT_EQ(result, RSTextAlign::JUSTIFY);
 }
 } // namespace OHOS::Ace::NG

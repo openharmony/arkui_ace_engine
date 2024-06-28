@@ -52,6 +52,10 @@ struct NavDestinationInfo {
 
     NavDestinationInfo() = default;
 
+    NavDestinationInfo(std::string id, std::string name, NavDestinationState state)
+        : navigationId(std::move(id)), name(std::move(name)), state(state)
+    {}
+
     NavDestinationInfo(std::string id, std::string name, NavDestinationState state,
         int32_t index, napi_value param, std::string navDesId)
         : navigationId(std::move(id)), name(std::move(name)), state(state),

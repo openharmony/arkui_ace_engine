@@ -14,8 +14,8 @@
  */
 #include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
 
-#include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 
 namespace OHOS::Ace::NG {
 /**
@@ -458,7 +458,7 @@ HWTEST_F(WaterFlowTestNg, PositionController100, TestSize.Level1)
     pattern_->AnimateTo(1.5, 1.f, Curves::LINEAR, false, false);
     EXPECT_FALSE(pattern_->isAnimationStop_);
 
-	/**
+    /**
      * @tc.steps: step8. test event
      * @tc.expected: return the scroll event is ture.
      */
@@ -474,7 +474,7 @@ HWTEST_F(WaterFlowTestNg, PositionController100, TestSize.Level1)
         result.offset = offset;
         return result;
     };
-	
+
     eventHub_->SetOnWillScroll(std::move(onWillScroll));
     pattern_->ScrollTo(ITEM_HEIGHT * 5);
     EXPECT_TRUE(isOnWillScrollCallBack);

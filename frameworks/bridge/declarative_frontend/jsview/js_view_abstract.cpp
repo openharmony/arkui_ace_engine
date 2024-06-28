@@ -549,22 +549,14 @@ bool ParseLocalizedEdges(const JSRef<JSObject>& LocalizeEdgesObj, EdgesParam& ed
     if (startVal->IsObject()) {
         JSRef<JSObject> startObj = JSRef<JSObject>::Cast(startVal);
         ParseJsLengthMetrics(startObj, start);
-        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-            edges.SetRight(start);
-        } else {
-            edges.SetLeft(start);
-        }
+        edges.SetLeft(start);
         useLocalizedEdges = true;
     }
     JSRef<JSVal> endVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::END));
     if (endVal->IsObject()) {
         JSRef<JSObject> endObj = JSRef<JSObject>::Cast(endVal);
         ParseJsLengthMetrics(endObj, end);
-        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-            edges.SetLeft(end);
-        } else {
-            edges.SetRight(end);
-        }
+        edges.SetRight(end);
         useLocalizedEdges = true;
     }
     JSRef<JSVal> topVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP));
@@ -594,11 +586,7 @@ bool ParseMarkAnchorPosition(const JSRef<JSObject>& LocalizeEdgesObj, CalcDimens
     if (startVal->IsObject()) {
         JSRef<JSObject> startObj = JSRef<JSObject>::Cast(startVal);
         ParseJsLengthMetrics(startObj, start);
-        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-            x = -start;
-        } else {
-            x = start;
-        }
+        x = start;
         useMarkAnchorPosition = true;
     }
     JSRef<JSVal> topVal = LocalizeEdgesObj->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP));
@@ -2341,6 +2329,7 @@ void JSViewAbstract::JsPosition(const JSCallbackInfo& info)
         if (ParseLocationProps(jsObj, x, y)) {
             return ViewAbstractModel::GetInstance()->SetPosition(x, y);
         } else if (ParseLocalizedEdges(jsObj, edges)) {
+            ViewAbstractModel::GetInstance()->SetPositionLocalizedEdges(true);
             return ViewAbstractModel::GetInstance()->SetPositionEdges(edges);
         } else if (ParseLocationPropsEdges(jsObj, edges)) {
             return ViewAbstractModel::GetInstance()->SetPositionEdges(edges);
@@ -2362,6 +2351,7 @@ void JSViewAbstract::JsMarkAnchor(const JSCallbackInfo& info)
     if (jsArg->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsArg);
         if (ParseMarkAnchorPosition(jsObj, x, y)) {
+            ViewAbstractModel::GetInstance()->SetLocalizedMarkAnchor(true);
             return ViewAbstractModel::GetInstance()->MarkAnchor(x, y);
         } else if (ParseLocationProps(jsObj, x, y)) {
             return ViewAbstractModel::GetInstance()->MarkAnchor(x, y);
@@ -2379,6 +2369,7 @@ void JSViewAbstract::JsOffset(const JSCallbackInfo& info)
     if (jsArg->IsObject()) {
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsArg);
         if (ParseLocalizedEdges(jsObj, edges)) {
+            ViewAbstractModel::GetInstance()->SetOffsetLocalizedEdges(true);
             return ViewAbstractModel::GetInstance()->SetOffsetEdges(edges);
         } else if (ParseLocationProps(jsObj, x, y)) {
             return ViewAbstractModel::GetInstance()->SetOffset(x, y);
@@ -2723,15 +2714,26 @@ void JSViewAbstract::JsGeometryTransition(const JSCallbackInfo& info)
     auto id = jsVal->ToString();
     // follow flag
     bool followWithOutTransition = false;
-    if (info.Length() >= PARAMETER_LENGTH_SECOND) {
-        if (info[1]->IsBoolean()) {
-            followWithOutTransition = info[1]->ToBoolean();
-        } else if (info[1]->IsObject()) {
-            JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
-            ParseJsBool(jsOption->GetProperty("follow"), followWithOutTransition);
+    // hierarchy flag
+    bool doRegisterSharedTransition = true;
+    if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsObject()) {
+        JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
+        ParseJsBool(jsOption->GetProperty("follow"), followWithOutTransition);
+        
+        auto transitionHierarchyStrategy = static_cast<int32_t>(TransitionHierarchyStrategy::ADAPTIVE);
+        ParseJsInt32(jsOption->GetProperty("hierarchyStrategy"), transitionHierarchyStrategy);
+        switch (transitionHierarchyStrategy) {
+            case static_cast<int32_t>(TransitionHierarchyStrategy::NONE):
+                doRegisterSharedTransition = false;
+                break;
+            case static_cast<int32_t>(TransitionHierarchyStrategy::ADAPTIVE):
+                doRegisterSharedTransition = true;
+                break;
+            default:
+                break;
         }
     }
-    ViewAbstractModel::GetInstance()->SetGeometryTransition(id, followWithOutTransition);
+    ViewAbstractModel::GetInstance()->SetGeometryTransition(id, followWithOutTransition, doRegisterSharedTransition);
 }
 
 void JSViewAbstract::JsAlignSelf(const JSCallbackInfo& info)
@@ -6133,6 +6135,9 @@ void JSViewAbstract::JsSetDraggable(bool draggable)
 NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackInfo& info)
 {
     NG::DragPreviewOption previewOption;
+    if (!info[0]->IsObject()) {
+        return previewOption;
+    }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     auto mode = obj->GetProperty("mode");
     bool isAuto = true;
@@ -7241,7 +7246,7 @@ void JSViewAbstract::JsRestoreId(int32_t restoreId)
 void JSViewAbstract::JsDebugLine(const JSCallbackInfo& info)
 {
     std::string debugLine;
-    uint32_t length = info.Length();
+    auto length = info.Length();
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING };
 
     if (length == 1) { // deprecated version of debug line

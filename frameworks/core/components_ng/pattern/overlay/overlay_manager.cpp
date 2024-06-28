@@ -19,6 +19,9 @@
 #include <string>
 #include <utility>
 #include <vector>
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+#include "want.h"
+#endif
 
 #include "base/error/error_code.h"
 #include "base/geometry/ng/offset_t.h"
@@ -31,6 +34,7 @@
 #include "base/utils/measure_util.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "base/window/foldable_window.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/ace_application_info.h"
@@ -131,11 +135,22 @@ const RefPtr<InterpolatingSpring> MENU_ANIMATION_CURVE =
 
 const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 280.0f, 30.0f);
+const std::string HOVER_IMAGE_CLIP_DISAPPEAR_PROPERTY_NAME = "hoverImageClipDisAppear";
 constexpr double MENU_ORIGINAL_SCALE = 0.6f;
 constexpr int32_t DUMP_LOG_DEPTH_1 = 1;
 constexpr int32_t DUMP_LOG_DEPTH_2 = 2;
 
 constexpr int32_t EVENT_COLUMN_SLOT = -2;
+
+// UIExtensionComponent Transform param key
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+constexpr char WANT_PARAM_UIEXTNODE_ANGLE_KEY[] = "modalUIExtNodeAngle";
+constexpr char WANT_PARAM_UIEXTNODE_WIDTH_KEY[] = "modalUIExtNodeWidth";
+constexpr char WANT_PARAM_UIEXTNODE_HEIGHT_KEY[] = "modalUIExtNodeHeight";
+#endif
+constexpr int32_t UIEXTNODE_ANGLE_90 = 90;
+constexpr int32_t UIEXTNODE_ANGLE_180 = 180;
+constexpr int32_t UIEXTNODE_ANGLE_270 = 270;
 
 RefPtr<FrameNode> GetLastPage()
 {
@@ -250,6 +265,62 @@ void ShowPreviewDisappearAnimationProc(const RefPtr<MenuWrapperPattern>& menuWra
     });
 }
 
+void UpdatePreivewVisibleAreaWhenDisappear(const RefPtr<FrameNode>& hoverImageStackNode,
+    const RefPtr<FrameNode>& previewNode)
+{
+    auto previewPattern = previewNode->GetPattern<MenuPreviewPattern>();
+    CHECK_NULL_VOID(previewPattern);
+
+    // reverse
+    auto clipStartValue = previewPattern->GetIsWidthDistLarger() ?
+        previewPattern->GetCustomPreviewAfterScaleWidth() : previewPattern->GetCustomPreviewAfterScaleHeight();
+    auto clipEndValue = previewPattern->GetIsWidthDistLarger() ? previewPattern->GetHoverImageAfterScaleWidth() :
+        previewPattern->GetHoverImageAfterScaleHeight();
+
+    hoverImageStackNode->CreateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_DISAPPEAR_PROPERTY_NAME, 0,
+        [weak = AceType::WeakClaim(AceType::RawPtr(hoverImageStackNode)),
+            previewWeak = AceType::WeakClaim(AceType::RawPtr(previewNode))](float value) {
+            auto clipNode = weak.Upgrade();
+            CHECK_NULL_VOID(clipNode);
+            auto clipContext = clipNode->GetRenderContext();
+            CHECK_NULL_VOID(clipContext);
+
+            auto preview = previewWeak.Upgrade();
+            CHECK_NULL_VOID(preview);
+            auto previewPattern = preview->GetPattern<MenuPreviewPattern>();
+            CHECK_NULL_VOID(previewPattern);
+            auto clipStartWidth = previewPattern->GetCustomPreviewAfterScaleWidth();
+            auto clipEndWidth = previewPattern->GetHoverImageAfterScaleWidth();
+            
+            auto clipStartHeight = previewPattern->GetCustomPreviewAfterScaleHeight();
+            auto clipEndHeight = previewPattern->GetHoverImageAfterScaleHeight();
+            auto dist = 1.0f;
+            auto rate = 1.0f;
+            auto currentWidth = 0.0f;
+            auto currentHeight = 0.0f;
+            if (previewPattern->GetIsWidthDistLarger()) {
+                dist = NearEqual(clipStartWidth, clipEndWidth) ? 1.0f : clipEndWidth - clipStartWidth;
+                rate = (value - clipStartWidth) / dist;
+                currentWidth = value;
+                currentHeight = rate * (clipEndHeight - clipStartHeight) + clipStartHeight;
+            } else {
+                dist = NearEqual(clipStartHeight, clipEndHeight) ? 1.0f : clipEndHeight - clipStartHeight;
+                rate = (value - clipStartHeight) / dist;
+                currentWidth = rate * (clipEndWidth - clipStartWidth) + clipStartWidth;
+                currentHeight = value;
+            }
+            auto imageOffset = previewPattern->GetHoverImageAfterScaleOffset();
+            clipContext->ClipWithRect(RectF(OffsetF(rate * imageOffset.GetX(), rate * imageOffset.GetY()),
+                SizeF(currentWidth, currentHeight)));
+        });
+    AnimationOption option;
+    option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
+    hoverImageStackNode->UpdateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_DISAPPEAR_PROPERTY_NAME, clipStartValue);
+    auto clipAnimation_ = AnimationUtils::StartAnimation(option, [hoverImageStackNode, clipEndValue]() {
+        hoverImageStackNode->UpdateAnimatablePropertyFloat(HOVER_IMAGE_CLIP_DISAPPEAR_PROPERTY_NAME, clipEndValue);
+    });
+}
+
 void UpdateHoverImageDisappearScaleAndPosition(const RefPtr<MenuWrapperPattern>& menuWrapperPattern,
     const RefPtr<MenuPreviewPattern>& previewPattern)
 {
@@ -313,6 +384,7 @@ void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapper
 
     auto previewPattern = previewChild->GetPattern<MenuPreviewPattern>();
     CHECK_NULL_VOID(previewPattern);
+    UpdatePreivewVisibleAreaWhenDisappear(menuWrapperPattern->GetHoverImageStackNode(), previewChild);
     UpdateHoverImageDisappearScaleAndPosition(menuWrapperPattern, previewPattern);
 }
 
@@ -1759,11 +1831,21 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
     }
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    auto subwindowMgr = SubwindowManager::GetInstance();
+
+    std::vector<int32_t> idsNeedClean;
     for (auto child: rootNode->GetChildren()) {
-        subwindowMgr->DeleteHotAreas(Container::CurrentId(), child->GetId());
+        idsNeedClean.push_back(child->GetId());
     }
+    auto pipeline = rootNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAfterLayoutTask([idsNeedClean, containerId = Container::CurrentId()] {
+        auto subwindowMgr = SubwindowManager::GetInstance();
+        for (auto child : idsNeedClean) {
+            subwindowMgr->DeleteHotAreas(containerId, child);
+        }
+    });
     rootNode->Clean();
+
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     if (menuWrapperPattern->IsContextMenu() && menuWrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
@@ -1892,11 +1974,11 @@ void OverlayManager::DeleteMenu(int32_t targetId)
     EraseMenuInfo(targetId);
 }
 
-int32_t OverlayManager::CleanMenuInSubWindowWithAnimation()
+void OverlayManager::CleanMenuInSubWindowWithAnimation()
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "clean menu insubwindow with animation enter");
     auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_RETURN(rootNode, -1);
+    CHECK_NULL_VOID(rootNode);
     RefPtr<FrameNode> menu;
     for (const auto& child : rootNode->GetChildren()) {
         auto node = DynamicCast<FrameNode>(child);
@@ -1905,11 +1987,8 @@ int32_t OverlayManager::CleanMenuInSubWindowWithAnimation()
             break;
         }
     }
-    CHECK_NULL_RETURN(menu, -1);
+    CHECK_NULL_VOID(menu);
     PopMenuAnimation(menu);
-
-    auto menuWrapper = AceType::DynamicCast<MenuWrapperPattern>(menu->GetPattern());
-    return menuWrapper->GetTargetId();
 }
 
 void OverlayManager::CleanPreviewInSubWindow()
@@ -3967,6 +4046,9 @@ void OverlayManager::RemoveSheetNode(const RefPtr<FrameNode>& sheetNode)
 void OverlayManager::PlaySheetTransition(
     RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition)
 {
+    CHECK_NULL_VOID(sheetNode);
+    sheetNode->OnAccessibilityEvent(
+        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     // current sheet animation
     AnimationOption option;
     const RefPtr<InterpolatingSpring> curve =
@@ -4933,29 +5015,117 @@ bool OverlayManager::AddCurSessionId(int32_t sessionId)
 }
 
 int32_t OverlayManager::CreateModalUIExtension(const RefPtr<WantWrap>& wantWrap,
-    const ModalUIExtensionCallbacks& callbacks, bool isProhibitBack, bool isAsyncModalBinding)
+    const ModalUIExtensionCallbacks& callbacks, const ModalUIExtensionConfig& config)
 {
     auto& want = wantWrap->GetWant();
-    return CreateModalUIExtension(want, callbacks, isProhibitBack, isAsyncModalBinding);
+    return CreateModalUIExtension(want, callbacks, config);
+}
+
+bool OverlayManager::HandleUIExtNodeSize(const AAFwk::Want& want, RefPtr<FrameNode> uiExtNode)
+{
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+    auto uiExtNodeWidth = want.GetIntParam(WANT_PARAM_UIEXTNODE_WIDTH_KEY, 0);
+    auto uiExtNodeHeight = want.GetIntParam(WANT_PARAM_UIEXTNODE_HEIGHT_KEY, 0);
+#else
+    auto uiExtNodeWidth = 0;
+    auto uiExtNodeHeight = 0;
+#endif
+    auto layoutProperty = uiExtNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto calcWidth =
+        CalcLength((uiExtNodeWidth > 0) ? Dimension(uiExtNodeWidth) : Dimension(1.0, DimensionUnit::PERCENT));
+    auto calcHeight =
+        CalcLength((uiExtNodeHeight > 0) ? Dimension(uiExtNodeHeight) : Dimension(1.0, DimensionUnit::PERCENT));
+    TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "UIExtensionNode Size[%{public}d, [%{public}d].", uiExtNodeWidth, uiExtNodeHeight);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(calcWidth, calcHeight));
+    return true;
+}
+
+bool OverlayManager::HandleUIExtNodeAngle(int32_t uiExtNodeAngle, RefPtr<FrameNode> uiExtNode)
+{
+    auto layoutProperty = uiExtNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    const auto& renderContext = uiExtNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "RootSize[%{public}f, %{public}f], Angle[%{public}d].",
+        GetRootWidth(), GetRootHeight(), uiExtNodeAngle);
+    switch (uiExtNodeAngle) {
+        case UIEXTNODE_ANGLE_90: {
+            layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(Dimension(GetRootHeight())),
+                CalcLength(Dimension(GetRootWidth()))));
+            TranslateOptions translate(GetRootWidth(), 0, 0);
+            renderContext->UpdateTransformTranslate(translate);
+            NG::Vector5F rotate(0.0f, 0.0f, 1.0f, 90.0f, 0.0f);
+            DimensionOffset offset(Dimension(0), Dimension(0));
+            renderContext->UpdateTransformRotate(rotate);
+            renderContext->UpdateTransformCenter(offset);
+            break;
+        }
+        case UIEXTNODE_ANGLE_180: {
+            auto full = CalcLength(Dimension(1.0, DimensionUnit::PERCENT));
+            layoutProperty->UpdateUserDefinedIdealSize(CalcSize(full, full));
+            NG::Vector5F rotate(0.0f, 0.0f, 1.0f, 180.0f, 0.0f);
+            DimensionOffset offset(0.5_pct, 0.5_pct);
+            renderContext->UpdateTransformRotate(rotate);
+            renderContext->UpdateTransformCenter(offset);
+            break;
+        }
+        case UIEXTNODE_ANGLE_270: {
+            layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(Dimension(GetRootHeight())),
+                CalcLength(Dimension(GetRootWidth()))));
+            TranslateOptions translate(0, GetRootHeight(), 0);
+            renderContext->UpdateTransformTranslate(translate);
+            NG::Vector5F rotate(0.0f, 0.0f, 1.0f, 270.0f, 0.0f);
+            DimensionOffset offset(Dimension(0), Dimension(0));
+            renderContext->UpdateTransformRotate(rotate);
+            renderContext->UpdateTransformCenter(offset);
+            break;
+        }
+    }
+    return true;
+}
+
+bool OverlayManager::HandleUIExtNodeTransform(const AAFwk::Want& want, RefPtr<FrameNode> uiExtNode)
+{
+    auto containerId = Container::CurrentId();
+    auto foldWindow = FoldableWindow::CreateFoldableWindow(containerId);
+    bool isFoldExpand = foldWindow && (foldWindow->IsFoldExpand());
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+    auto uiExtNodeAngle = want.GetIntParam(WANT_PARAM_UIEXTNODE_ANGLE_KEY, 0);
+#else
+    auto uiExtNodeAngle = 0;
+#endif
+    if (!(isFoldExpand) && UIExtNodeAngleValid(uiExtNodeAngle)) {
+        return HandleUIExtNodeAngle(uiExtNodeAngle, uiExtNode);
+    } else if (!UIExtNodeAngleValid(uiExtNodeAngle)) {
+        return HandleUIExtNodeSize(want, uiExtNode);
+    }
+    return true;
+}
+
+bool OverlayManager::UIExtNodeAngleValid(int32_t uiExtNodeAngle)
+{
+    return (uiExtNodeAngle == UIEXTNODE_ANGLE_90) ||
+        (uiExtNodeAngle == UIEXTNODE_ANGLE_180) || (uiExtNodeAngle == UIEXTNODE_ANGLE_270);
 }
 
 int32_t OverlayManager::CreateModalUIExtension(
     const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
-    bool isProhibitBack, bool isAsyncModalBinding, bool isAllowedBeCovered)
+    const ModalUIExtensionConfig& config)
 {
-    isProhibitBack_ = isProhibitBack;
-    SetIsAllowedBeCovered(isAllowedBeCovered);
-    auto uiExtNode = ModalUIExtension::Create(want, callbacks, isAsyncModalBinding);
-    auto layoutProperty = uiExtNode->GetLayoutProperty();
-    CHECK_NULL_RETURN(layoutProperty, 0);
-    auto full = CalcLength(Dimension(1.0, DimensionUnit::PERCENT));
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(full, full));
+    isProhibitBack_ = config.isProhibitBack;
+    SetIsAllowedBeCovered(config.isAllowedBeCovered);
+    auto uiExtNode = ModalUIExtension::Create(want, callbacks, config.isAsyncModalBinding);
+    if (!HandleUIExtNodeTransform(want, uiExtNode)) {
+        return 0;
+    }
     auto buildNodeFunc = [uiExtNode]() -> RefPtr<UINode> {
         uiExtNode->MarkModifyDone();
         return uiExtNode;
     };
     auto sessionId = ModalUIExtension::GetSessionId(uiExtNode);
-    if (!isAsyncModalBinding) {
+    if (!config.isAsyncModalBinding) {
         ModalStyle modalStyle;
         modalStyle.modalTransition = NG::ModalTransition::NONE;
         modalStyle.isUIExtension = true;
@@ -4964,8 +5134,9 @@ int32_t OverlayManager::CreateModalUIExtension(
             ContentCoverParam(), nullptr, -(sessionId));
         SetIsAllowedBeCovered(true); // Reset isAllowedBeCovered
     } else {
-        auto bindModalCallback = [weak = WeakClaim(this),
-            buildNodeFunc, sessionId, id = Container::CurrentId(), isAllowedBeCovered]() {
+        auto bindModalCallback = [weak = WeakClaim(this), buildNodeFunc, sessionId, id = Container::CurrentId(),
+            isAllowedBeCovered = config.isAllowedBeCovered,
+            doAfterAsyncModalBinding = std::move(config.doAfterAsyncModalBinding)]() {
             ContainerScope scope(id);
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
@@ -4976,6 +5147,9 @@ int32_t OverlayManager::CreateModalUIExtension(
             overlayManager->BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr,
                 nullptr, nullptr, ContentCoverParam(), nullptr, -(sessionId));
             overlayManager->SetIsAllowedBeCovered(true);
+            if (doAfterAsyncModalBinding) {
+                doAfterAsyncModalBinding();
+            }
         };
         ModalUIExtension::SetBindModalCallback(uiExtNode, std::move(bindModalCallback));
         uiExtNodes_[sessionId] = WeakClaim(RawPtr(uiExtNode));
@@ -5365,6 +5539,16 @@ bool OverlayManager::CheckPageNeedAvoidKeyboard() const
     }
     auto frameNode = DynamicCast<FrameNode>(child);
     return !(frameNode && frameNode->GetFocusHub() && frameNode->GetFocusHub()->IsCurrentFocus());
+}
+
+float OverlayManager::GetRootWidth() const
+{
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(rootNode, 0.0);
+    auto rootGeometryNode = AceType::DynamicCast<FrameNode>(rootNode)->GetGeometryNode();
+    CHECK_NULL_RETURN(rootGeometryNode, 0.0);
+    auto rootWidth = rootGeometryNode->GetFrameSize().Width();
+    return rootWidth;
 }
 
 float OverlayManager::GetRootHeight() const

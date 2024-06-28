@@ -142,6 +142,7 @@ public:
     }
     void ClearToastInSystemSubwindow();
     void OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
+    bool IsSubwindowExist(RefPtr<Subwindow> subwindow);
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);

@@ -381,7 +381,7 @@ class LocalStorage extends NativeLocalStorage {
             newProp = new ObservedPropertyPU(value, undefined, propName);
         }
         else {
-            newProp = (typeof value === "object") ?
+            newProp = (typeof value === 'object') ?
                 new ObservedPropertyObject(value, undefined, propName)
                 : new ObservedPropertySimple(value, undefined, propName);
         }
@@ -2007,22 +2007,22 @@ class Environment {
         }
         let tmp;
         switch (key) {
-            case "accessibilityEnabled":
+            case 'accessibilityEnabled':
                 tmp = Environment.envBackend_.getAccessibilityEnabled();
                 break;
-            case "colorMode":
+            case 'colorMode':
                 tmp = Environment.envBackend_.getColorMode();
                 break;
             case 'fontScale':
                 tmp = Environment.envBackend_.getFontScale();
                 break;
-            case "fontWeightScale":
+            case 'fontWeightScale':
                 tmp = Environment.envBackend_.getFontWeightScale().toFixed(2);
                 break;
-            case "layoutDirection":
+            case 'layoutDirection':
                 tmp = Environment.envBackend_.getLayoutDirection();
                 break;
-            case "languageCode":
+            case 'languageCode':
                 tmp = Environment.envBackend_.getLanguageCode();
                 break;
             default:
@@ -3382,7 +3382,7 @@ class SynchedPropertySimpleOneWay extends ObservedPropertySimpleAbstract {
         throw new Error("Can not create a 'Link' from a 'Prop' property. ");
     }
     createProp(subscribeOwner, linkPropName) {
-        throw new Error("Method not supported, create a SynchedPropertySimpleOneWaySubscribing from, where to create a Prop.");
+        throw new Error('Method not supported, create a SynchedPropertySimpleOneWaySubscribing from, where to create a Prop.');
     }
 }
 /*
@@ -5290,7 +5290,7 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
                 // code path for 
                 // 1- source is of same type C in parent, source is its value, not the backing store ObservedPropertyObject
                 // 2- nested Object/Array inside observed another object/array in parent, source is its value
-                if (typeof sourceValue == "object" && !((sourceValue instanceof SubscribableAbstract) || ObservedObject.IsObservedObject(sourceValue))) {
+                if (typeof sourceValue == 'object' && !((sourceValue instanceof SubscribableAbstract) || ObservedObject.IsObservedObject(sourceValue))) {
                     stateMgmtConsole.applicationWarn(`${this.debugInfo()}: Provided source object's class lacks @Observed class decorator.
             Object property changes will not be observed.`);
                 }
@@ -5509,8 +5509,8 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
         // therefore shallowCopyObject will always be used in API version 9 and before
         // but the code in this file is the same regardless of API version
         
-        return ((typeof ViewStackProcessor["getApiVersion"] == "function") &&
-            (ViewStackProcessor["getApiVersion"]() >= 10))
+        return ((typeof ViewStackProcessor['getApiVersion'] == 'function') &&
+            (ViewStackProcessor['getApiVersion']() >= 10))
             ? this.deepCopyObject(value, propName)
             : this.shallowCopyObject(value, propName);
     }
@@ -5521,7 +5521,7 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
         if (!rawValue || typeof rawValue !== 'object') {
             copy = rawValue;
         }
-        else if (typeof rawValue != "object") {
+        else if (typeof rawValue != 'object') {
             // FIXME would it be better to throw Exception here?
             stateMgmtConsole.error(`${this.debugInfo()}: shallowCopyObject: request to copy non-object value, actual type is '${typeof rawValue}'. Internal error! Setting copy:=original value.`);
             copy = rawValue;
@@ -6753,7 +6753,7 @@ class ViewPU extends PUV2ViewBase {
                 this.updateStateVars(params);
                 this.aboutToReuse(params);
             }
-        }, "aboutToReuse", this.constructor.name);
+        }, 'aboutToReuse', this.constructor.name);
         for (const stateLinkPropVar of this.ownObservedPropertiesStore_) {
             const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate(true);
             if (changedElmtIds) {
@@ -7194,20 +7194,20 @@ function makeBuilderParameterProxy(builderName, source) {
             throw Error(`@Builder '${builderName}': Invalid attempt to set(write to) parameter '${prop.toString()}' error!`);
         },
         get(target, prop) {
-            const prop1 = prop.toString().trim().startsWith("__")
+            const prop1 = prop.toString().trim().startsWith('__')
                 ? prop.toString().trim().substring(2)
                 : prop.toString().trim();
             
-            if (!(typeof target === "object") && (prop1 in target)) {
+            if (!(typeof target === 'object') && (prop1 in target)) {
                 throw Error(`@Builder '${builderName}': '${prop1}' used but not a function parameter error!`);
             }
             const value = target[prop1];
-            if (typeof value !== "function") {
+            if (typeof value !== 'function') {
                 
                 return value;
             }
             const funcRet = value();
-            if ((typeof funcRet === "object") && ('get' in funcRet)) {
+            if ((typeof funcRet === 'object') && ('get' in funcRet)) {
                 if (prop1 !== prop) {
                     
                     return funcRet;
@@ -8303,13 +8303,15 @@ function observedV2Internal(BaseClass) {
         
         BaseClass.prototype[ObserveV2.ID_REFS] = {};
     }
-    return class extends BaseClass {
+    const observedClass = class extends BaseClass {
         constructor(...args) {
             super(...args);
             AsyncAddComputedV2.addComputed(this, BaseClass.name);
             AsyncAddMonitorV2.addMonitor(this, BaseClass.name);
         }
     };
+    Object.defineProperty(observedClass, 'name', { value: BaseClass.name });
+    return observedClass;
 }
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
@@ -8743,6 +8745,7 @@ class ViewV2 extends PUV2ViewBase {
    * @param newValue
    */
     initParam(paramVariableName, newValue) {
+        this.checkIsV1Proxy(paramVariableName, newValue);
         VariableUtilV3.initParam(this, paramVariableName, newValue);
     }
     /**
@@ -8755,7 +8758,13 @@ class ViewV2 extends PUV2ViewBase {
     * @param newValue
    */
     updateParam(paramVariableName, newValue) {
+        this.checkIsV1Proxy(paramVariableName, newValue);
         VariableUtilV3.updateParam(this, paramVariableName, newValue);
+    }
+    checkIsV1Proxy(paramVariableName, value) {
+        if (ObservedObject.IsObservedObject(value)) {
+            throw new Error(`Cannot assign the ComponentV1 value to the ComponentV2 for the property '${paramVariableName}'`);
+        }
     }
     /**
    *  inform that UINode with given elmtId needs rerender
@@ -9365,7 +9374,7 @@ class JSONCoder {
             JSONCoder.parseInto(target, json);
         }
         else {
-            throw `The type of target '${t2}' mismatches the type of source '${t1}'`;
+            throw new Error(`The type of target '${t2}' mismatches the type of source '${t1}'`);
         }
         return target;
     }
@@ -9400,7 +9409,7 @@ class JSONCoder {
     }
     static parseInto(target, source) {
         if (typeof source !== 'object') {
-            throw `The type of target '${typeof target}' mismatches the type of source '${typeof source}' in parseInto`;
+            throw new Error(`The type of target '${typeof target}' mismatches the type of source '${typeof source}'`);
         }
         const meta = Meta.gets(target);
         const alias2prop = JSONCoder.getAlias2Prop(meta, target);
@@ -9463,13 +9472,13 @@ class JSONCoder {
                 target[targetKey] = value;
             }
             else if (target[targetKey] !== undefined) {
-                throw `The type of target '${tarType}' mismatches the type of source '${typeof value}' in parseItemInto`;
+                throw new Error(`The type of target '${tarType}' mismatches the type of source '${typeof value}'`);
             }
             return;
         }
         // value is object, target[targetKey] is undefined or null
         if (target[targetKey] === null) {
-            throw `Miss @Type in object defined, the property name is ${targetKey}`;
+            throw new Error(`Miss @Type in object defined, the property name is ${targetKey}`);
         }
         else if (target[targetKey] === undefined) {
             // ignore target[targetKey] undefined
@@ -9487,7 +9496,7 @@ class JSONCoder {
     }
     static parseIntoArray(target, source, options) {
         if (typeof target !== 'object') {
-            throw `The type of target '${typeof target}' mismatches the type of source '${typeof source}'`;
+            throw new Error(`The type of target '${typeof target}' mismatches the type of source '${typeof source}'`);
         }
         // here, source maybe a array or map or set
         if (target instanceof Map) {
@@ -9520,7 +9529,7 @@ class JSONCoder {
             if (i === 0) {
                 if (!(options === null || options === void 0 ? void 0 : options.factory)) {
                     target.length = 0;
-                    throw `Miss @Type in array defined`;
+                    throw new Error(`Miss @Type in array defined`);
                 }
             }
             target[i] = Array.isArray(item) ?
@@ -10032,8 +10041,57 @@ class __RepeatVirtualScrollImpl {
  * limitations under the License.
  */
 ;
-class AppStorageV2Impl {
+class StorageHepler {
     constructor() {
+        this.oldTypeValues_ = new Map();
+    }
+    getConnectedKey(type, keyOrDefaultCreator) {
+        if (typeof keyOrDefaultCreator === 'string') {
+            return keyOrDefaultCreator;
+        }
+        return this.getTypeName(type);
+    }
+    getKeyOrTypeName(keyOrType) {
+        if (typeof keyOrType === 'function') {
+            keyOrType = this.getTypeName(keyOrType);
+        }
+        return keyOrType;
+    }
+    checkTypeByName(key, type, oldType) {
+        if (this.getTypeName(type) !== oldType) {
+            throw new Error(`The type mismatches when use the key '${key}' in storage`);
+        }
+    }
+    checkTypeByInstanceOf(key, type, ins) {
+        this.checkTypeIsFunc(type);
+        if (!(ins instanceof type)) {
+            throw new Error(`The type mismatches when use the key '${key}' in storage`);
+        }
+    }
+    getTypeName(type) {
+        this.checkTypeIsFunc(type);
+        let name = type.name;
+        while (name === undefined) {
+            type = Object.getPrototypeOf(type);
+            if (!type) {
+                break;
+            }
+            name = type.name;
+        }
+        return name;
+    }
+    checkTypeIsFunc(type) {
+        if (typeof type !== 'function') {
+            throw new Error(StorageHepler.TYPE_INVALID);
+        }
+    }
+}
+StorageHepler.DEFAULT_VALUE_ERROR_MESSAGE = 'The default creator should be function when first connect';
+StorageHepler.DELETE_NOT_EXIST_KET_WARN_MESSAGE = 'The key to be deleted does not exist';
+StorageHepler.TYPE_INVALID = 'The type should be function when use storage';
+class AppStorageV2Impl extends StorageHepler {
+    constructor() {
+        super();
         this.memorizedValues_ = new Map();
     }
     static instance() {
@@ -10043,32 +10101,53 @@ class AppStorageV2Impl {
         AppStorageV2Impl.instance_ = new AppStorageV2Impl();
         return AppStorageV2Impl.instance_;
     }
-    connect(key, defaultCreator) {
+    connect(type, keyOrDefaultCreator, defaultCreator) {
+        const key = this.getConnectedKey(type, keyOrDefaultCreator);
+        if (key === undefined) {
+            throw new Error(AppStorageV2Impl.TYPE_INVALID);
+        }
+        if (typeof keyOrDefaultCreator === 'function') {
+            defaultCreator = keyOrDefaultCreator;
+        }
         if (!this.memorizedValues_.has(key)) {
             if (typeof defaultCreator !== 'function') {
-                stateMgmtConsole.error(AppStorageV2Impl.defaultValueErrorMessage);
-                return undefined;
+                throw new Error(AppStorageV2Impl.DEFAULT_VALUE_ERROR_MESSAGE);
             }
             const defaultValue = defaultCreator();
+            this.checkTypeByInstanceOf(key, type, defaultValue);
             this.memorizedValues_.set(key, defaultValue);
+            this.oldTypeValues_.set(key, this.getTypeName(type));
             return defaultValue;
         }
-        return this.memorizedValues_.get(key);
+        this.checkTypeByName(key, type, this.oldTypeValues_.get(key));
+        const existedValue = this.memorizedValues_.get(key);
+        return existedValue;
     }
-    remove(key) {
-        return this.removeFromMemory(key);
+    remove(keyOrType) {
+        const key = this.getKeyOrTypeName(keyOrType);
+        if (typeof key !== 'string') {
+            stateMgmtConsole.error(AppStorageV2Impl.TYPE_INVALID);
+            return;
+        }
+        this.removeFromMemory(key);
     }
     getMemoryKeys() {
         return Array.from(this.memorizedValues_.keys());
     }
     removeFromMemory(key) {
-        return this.memorizedValues_.delete(key);
+        const isDeleted = this.memorizedValues_.delete(key);
+        if (!isDeleted) {
+            stateMgmtConsole.warn(AppStorageV2Impl.DELETE_NOT_EXIST_KET_WARN_MESSAGE);
+        }
+        else {
+            this.oldTypeValues_.delete(key);
+        }
     }
 }
-AppStorageV2Impl.defaultValueErrorMessage = 'The default creator should be function when first connect';
 AppStorageV2Impl.instance_ = undefined;
-class PersistenceV2Impl {
+class PersistenceV2Impl extends StorageHepler {
     constructor() {
+        super();
         this.cb_ = undefined;
         this.map_ = new Proxy(new Map(), ObserveV2.arraySetMapProxy);
         this.keysArr_ = new Set();
@@ -10084,63 +10163,35 @@ class PersistenceV2Impl {
     static configureBackend(storage) {
         PersistenceV2Impl.storage_ = storage;
     }
-    connect(key, defaultCreator) {
-        if (key === PersistenceV2Impl.KEYS_ARR_) {
-            this.errorHelper(key, "quota" /* Quota */, `The key '${key}' cannot be used`);
+    connect(type, keyOrDefaultCreator, defaultCreator) {
+        if (typeof type !== 'function') {
+            throw new Error(PersistenceV2Impl.NOT_SUPPROT_TYPE);
+        }
+        const key = this.getRightKey(type, keyOrDefaultCreator);
+        if (key === undefined) {
             return undefined;
+        }
+        if (typeof keyOrDefaultCreator === 'function') {
+            defaultCreator = keyOrDefaultCreator;
         }
         // In memory
         if (this.map_.has(key)) {
-            return this.map_.get(key);
+            const existedValue = this.map_.get(key);
+            this.checkTypeByName(key, type, this.oldTypeValues_.get(key));
+            return existedValue;
         }
-        if (!PersistenceV2Impl.storage_) {
-            this.errorHelper(key, "unknown" /* Unknown */, `The storage is null`);
-            return undefined;
-        }
-        if (typeof defaultCreator !== 'function') {
-            this.errorHelper(key, "quota" /* Quota */, AppStorageV2Impl.defaultValueErrorMessage);
-            return undefined;
-        }
-        const observedValue = defaultCreator();
-        if (this.isNotClassObject(observedValue)) {
-            this.errorHelper(key, "quota" /* Quota */, `Not support! only the class object can be serialized`);
+        const observedValue = this.getConnectDefaultValue(key, type, defaultCreator);
+        if (!observedValue) {
             return undefined;
         }
         const id = ++PersistenceV2Impl.nextPersistId_;
         this.idToKey_.set(id, key);
         // Not in memory, but in disk
         if (PersistenceV2Impl.storage_.has(key)) {
-            let newObservedValue;
-            try {
-                const json = PersistenceV2Impl.storage_.get(key);
-                // Adding ref for persistence
-                ObserveV2.getObserve().startRecordDependencies(this, id);
-                newObservedValue = JSONCoder.parseTo(observedValue, json);
-                ObserveV2.getObserve().stopRecordDependencies();
-            }
-            catch (err) {
-                if (this.cb_ && typeof this.cb_ === 'function') {
-                    this.cb_(key, 'serialization' /* Serialization */, err);
-                    return undefined;
-                }
-                throw err;
-            }
-            this.map_.set(key, newObservedValue);
-            this.storeKeyToPersistenceV2(key);
-            return newObservedValue;
+            return this.getValueFromDisk(key, id, observedValue, type);
         }
         // Neither in memory or in disk
-        ObserveV2.getObserve().startRecordDependencies(this, id);
-        // Map is a proxy object. When it is connected for the first time, map.has is used to add dependencies,
-        // and map.set is used to trigger writing to disk.
-        const hasKey = this.map_.has(key);
-        ObserveV2.getObserve().stopRecordDependencies();
-        // Writing to persistence by ref
-        if (!hasKey) {
-            this.map_.set(key, observedValue);
-            this.storeKeyToPersistenceV2(key);
-        }
-        return observedValue;
+        return this.setValueToDisk(key, id, observedValue, type);
     }
     keys() {
         try {
@@ -10153,26 +10204,31 @@ class PersistenceV2Impl {
                 this.cb_('', "unknown" /* Unknown */, `fail to get all persisted keys`);
                 return;
             }
-            throw err;
+            throw new Error(err);
         }
         return Array.from(this.keysArr_);
     }
-    remove(key) {
-        this.map_.delete(key);
-        return this.removeFromPersistenceV2(key);
+    remove(keyOrType) {
+        this.checkTypeIsClassObject(keyOrType);
+        const key = this.getKeyOrTypeName(keyOrType);
+        if (typeof key !== 'string') {
+            throw new Error(PersistenceV2Impl.NOT_SUPPROT_TYPE);
+        }
+        this.disconnectValue(key);
     }
-    save(key) {
+    save(keyOrType) {
+        this.checkTypeIsClassObject(keyOrType);
+        const key = this.getKeyOrTypeName(keyOrType);
+        if (typeof key !== 'string') {
+            throw new Error(PersistenceV2Impl.NOT_SUPPROT_TYPE);
+        }
         const value = this.map_.get(key);
         if (value) {
             try {
                 PersistenceV2Impl.storage_.set(key, JSONCoder.stringify(value));
             }
             catch (err) {
-                if (this.cb_ && typeof this.cb_ === 'function') {
-                    this.cb_(key, 'serialization' /* Serialization */, err);
-                    return;
-                }
-                throw err;
+                this.errorHelper(key, "serialization" /* Serialization */, err);
             }
         }
     }
@@ -10181,6 +10237,76 @@ class PersistenceV2Impl {
     }
     onChangeObserved(persistKeys) {
         this.writeAllChangedToFile(persistKeys);
+    }
+    connectNewValue(key, newValue, typeName) {
+        this.map_.set(key, newValue);
+        this.oldTypeValues_.set(key, typeName);
+        this.storeKeyToPersistenceV2(key);
+    }
+    disconnectValue(key) {
+        this.map_.delete(key);
+        this.oldTypeValues_.delete(key);
+        this.removeFromPersistenceV2(key);
+    }
+    checkTypeIsClassObject(keyOrType) {
+        if ((typeof keyOrType !== 'string' && typeof keyOrType !== 'function') ||
+            [Array, Set, Map, Date, Boolean, Number, BigInt, String, Symbol].includes(keyOrType)) {
+            throw new Error(PersistenceV2Impl.NOT_SUPPROT_TYPE);
+        }
+    }
+    getRightKey(type, keyOrDefaultCreator) {
+        const key = this.getConnectedKey(type, keyOrDefaultCreator);
+        if (key === undefined) {
+            throw new Error(PersistenceV2Impl.NOT_SUPPROT_TYPE);
+        }
+        if (key === PersistenceV2Impl.KEYS_ARR_) {
+            this.errorHelper(key, "quota" /* Quota */, `The key '${key}' cannot be used`);
+            return undefined;
+        }
+        return key;
+    }
+    getConnectDefaultValue(key, type, defaultCreator) {
+        if (!PersistenceV2Impl.storage_) {
+            this.errorHelper(key, "unknown" /* Unknown */, `The storage is null`);
+            return undefined;
+        }
+        if (typeof defaultCreator !== 'function') {
+            throw new Error(PersistenceV2Impl.DEFAULT_VALUE_ERROR_MESSAGE);
+        }
+        const observedValue = defaultCreator();
+        this.checkTypeByInstanceOf(key, type, observedValue);
+        if (this.isNotClassObject(observedValue)) {
+            throw new Error(PersistenceV2Impl.NOT_SUPPROT_TYPE);
+        }
+        return observedValue;
+    }
+    getValueFromDisk(key, id, observedValue, type) {
+        let newObservedValue;
+        try {
+            const json = PersistenceV2Impl.storage_.get(key);
+            // Adding ref for persistence
+            ObserveV2.getObserve().startRecordDependencies(this, id);
+            newObservedValue = JSONCoder.parseTo(observedValue, json);
+            ObserveV2.getObserve().stopRecordDependencies();
+        }
+        catch (err) {
+            this.errorHelper(key, "serialization" /* Serialization */, err);
+        }
+        this.checkTypeByInstanceOf(key, type, newObservedValue);
+        this.connectNewValue(key, newObservedValue, this.getTypeName(type));
+        return newObservedValue;
+    }
+    setValueToDisk(key, id, observedValue, type) {
+        ObserveV2.getObserve().startRecordDependencies(this, id);
+        // Map is a proxy object. When it is connected for the first time, map.has is used to add dependencies,
+        // and map.set is used to trigger writing to disk.
+        const hasKey = this.map_.has(key);
+        ObserveV2.getObserve().stopRecordDependencies();
+        // Writing to persistence by ref
+        if (!hasKey) {
+            this.connectNewValue(key, observedValue, this.getTypeName(type));
+        }
+        return observedValue;
     }
     writeAllChangedToFile(persistKeys) {
         for (let i = 0; i < persistKeys.length; ++i) {
@@ -10193,22 +10319,39 @@ class PersistenceV2Impl {
                     ObserveV2.getObserve().startRecordDependencies(this, id);
                     const json = JSONCoder.stringify(value);
                     ObserveV2.getObserve().stopRecordDependencies();
+                    if (this.isOverSizeLimit(json)) {
+                        throw new Error(`Cannot store the value of key '${key}'! The data size must be less than 8 KB`);
+                    }
                     PersistenceV2Impl.storage_.set(key, json);
                 }
             }
             catch (err) {
                 if (this.cb_ && typeof this.cb_ === 'function') {
-                    this.cb_(key, 'serialization' /* Serialization */, err);
+                    this.cb_(key, "serialization" /* Serialization */, err);
                     continue;
                 }
-                throw err;
+                throw new Error(err);
             }
         }
+    }
+    isOverSizeLimit(json) {
+        let len = 0;
+        for (let i = 0; i < json.length; ++i) {
+            const c = json.charCodeAt(i);
+            // one-byte character
+            if ((c >= 0x0001 && c <= 0x007e) || (c >= 0xff60 && c <= 0xff9f)) {
+                ++len;
+            }
+            else {
+                len += 2;
+            }
+        }
+        return len / 1024 > 8;
     }
     isNotClassObject(value) {
         return Array.isArray(value) || value instanceof Set || value instanceof Map || value instanceof Date ||
             value instanceof Boolean || value instanceof Number || value instanceof BigInt || value instanceof String ||
-            value instanceof Symbol || value === undefined || value === null;
+            value instanceof Symbol;
     }
     storeKeyToPersistenceV2(key) {
         try {
@@ -10224,33 +10367,25 @@ class PersistenceV2Impl {
             this.storeKeysArrToStorage(this.keysArr_);
         }
         catch (err) {
-            if (this.cb_ && typeof this.cb_ === 'function') {
-                this.cb_(key, "unknown" /* Unknown */, `fail to store the key '${key}'`);
-                return;
-            }
-            throw err;
+            this.errorHelper(key, "unknown" /* Unknown */, `fail to store the key '${key}'`);
         }
     }
     removeFromPersistenceV2(key) {
         try {
-            if (PersistenceV2Impl.storage_.has(key)) {
-                PersistenceV2Impl.storage_.delete(key);
-                // The first call to remove
-                if (!this.keysArr_.has(key)) {
-                    this.keysArr_ = this.getKeysArrFromStorage();
-                }
-                this.keysArr_.delete(key);
-                this.storeKeysArrToStorage(this.keysArr_);
-                return true;
-            }
-            return false;
-        }
-        catch (err) {
-            if (this.cb_ && typeof this.cb_ === 'function') {
-                this.cb_(key, "unknown" /* Unknown */, `fail to remove the key '${key}'`);
+            if (!PersistenceV2Impl.storage_.has(key)) {
+                stateMgmtConsole.warn(PersistenceV2Impl.DELETE_NOT_EXIST_KET_WARN_MESSAGE);
                 return;
             }
-            throw err;
+            PersistenceV2Impl.storage_.delete(key);
+            // The first call to remove
+            if (!this.keysArr_.has(key)) {
+                this.keysArr_ = this.getKeysArrFromStorage();
+            }
+            this.keysArr_.delete(key);
+            this.storeKeysArrToStorage(this.keysArr_);
+        }
+        catch (err) {
+            this.errorHelper(key, "unknown" /* Unknown */, `fail to remove the key '${key}'`);
         }
     }
     getKeysArrFromStorage() {
@@ -10266,14 +10401,17 @@ class PersistenceV2Impl {
     errorHelper(key, reason, message) {
         if (this.cb_ && typeof this.cb_ === 'function') {
             this.cb_(key, reason, message);
+            return;
         }
-        else {
-            stateMgmtConsole.error(message);
+        if (!key) {
+            key = 'unknown';
         }
+        throw new Error(`For '${key}' key: ` + message);
     }
 }
 PersistenceV2Impl.MIN_PERSISTENCE_ID = 0x1010000000000;
 PersistenceV2Impl.nextPersistId_ = PersistenceV2Impl.MIN_PERSISTENCE_ID;
+PersistenceV2Impl.NOT_SUPPROT_TYPE = 'Not support! Can only use the class object in Persistence';
 PersistenceV2Impl.KEYS_ARR_ = '___keys_arr';
 PersistenceV2Impl.instance_ = undefined;
 /*

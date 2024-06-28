@@ -106,15 +106,16 @@ bool OnJsCommonDialog(
     if (task == nullptr) {
         return false;
     }
-    task->PostSyncTask([&webClientImpl, dialogEventType, &param, &jsResult] {
-        if (webClientImpl == nullptr) {
-            return;
-        }
-        auto delegate = webClientImpl->GetWebDelegate();
-        if (delegate) {
-            jsResult = delegate->OnCommonDialog(param, dialogEventType);
-        }
-    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientCommonDialogEvent");
+    task->PostSyncTask(
+        [&webClientImpl, dialogEventType, &param, &jsResult] {
+            if (webClientImpl == nullptr) {
+                return;
+            }
+            auto delegate = webClientImpl->GetWebDelegate();
+            if (delegate) {
+                jsResult = delegate->OnCommonDialog(param, dialogEventType);
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientCommonDialogEvent");
     return jsResult;
 }
 
@@ -202,15 +203,16 @@ bool WebClientImpl::OnConsoleLog(const std::shared_ptr<OHOS::NWeb::NWebConsoleLo
     if (!task) {
         return false;
     }
-    task->PostSyncTask([webClient = this, message, &jsMessage] {
-        if (!webClient) {
-            return;
-        }
-        auto delegate = webClient->webDelegate_.Upgrade();
-        if (delegate) {
-            jsMessage = delegate->OnConsoleLog(message);
-        }
-    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientConsoleLog");
+    task->PostSyncTask(
+        [webClient = this, message, &jsMessage] {
+            if (!webClient) {
+                return;
+            }
+            auto delegate = webClient->webDelegate_.Upgrade();
+            if (delegate) {
+                jsMessage = delegate->OnConsoleLog(message);
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientConsoleLog");
 
     return jsMessage;
 }
@@ -328,16 +330,17 @@ void WebClientImpl::OnHttpError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceReque
         return;
     }
     std::weak_ptr<WebClientImpl> webClientWeak = shared_from_this();
-    task->PostTask([webClient = webClientWeak, request, response] {
-        auto webClientUpgrade = webClient.lock();
-        if (webClientUpgrade == nullptr) {
-            return;
-        }
-        auto delegate = webClientUpgrade->GetWebDelegate();
-        if (delegate) {
-            delegate->OnHttpErrorReceive(request, response);
-        }
-    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientHttpError");
+    task->PostTask(
+        [webClient = webClientWeak, request, response] {
+            auto webClientUpgrade = webClient.lock();
+            if (webClientUpgrade == nullptr) {
+                return;
+            }
+            auto delegate = webClientUpgrade->GetWebDelegate();
+            if (delegate) {
+                delegate->OnHttpErrorReceive(request, response);
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientHttpError");
 }
 
 void WebClientImpl::OnMessage(const std::string& param)
@@ -497,15 +500,16 @@ bool WebClientImpl::OnFileSelectorShow(
     if (task == nullptr) {
         return false;
     }
-    task->PostSyncTask([webClient = this, &param, &jsResult] {
-        if (webClient == nullptr) {
-            return;
-        }
-        auto delegate = webClient->GetWebDelegate();
-        if (delegate) {
-            jsResult = delegate->OnFileSelectorShow(param);
-        }
-    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientFileSelectorShow");
+    task->PostSyncTask(
+        [webClient = this, &param, &jsResult] {
+            if (webClient == nullptr) {
+                return;
+            }
+            auto delegate = webClient->GetWebDelegate();
+            if (delegate) {
+                jsResult = delegate->OnFileSelectorShow(param);
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientFileSelectorShow");
     return jsResult;
 }
 
@@ -519,16 +523,17 @@ void WebClientImpl::OnResource(const std::string& url)
         return;
     }
     std::weak_ptr<WebClientImpl> webClientWeak = shared_from_this();
-    task->PostTask([webClient = webClientWeak, url] {
-        auto webClientUpgrade = webClient.lock();
-        if (webClientUpgrade == nullptr) {
-            return;
-        }
-        auto delegate = webClientUpgrade->GetWebDelegate();
-        if (delegate) {
-            delegate->OnResourceLoad(url);
-        }
-    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientResourceLoad");
+    task->PostTask(
+        [webClient = webClientWeak, url] {
+            auto webClientUpgrade = webClient.lock();
+            if (webClientUpgrade == nullptr) {
+                return;
+            }
+            auto delegate = webClientUpgrade->GetWebDelegate();
+            if (delegate) {
+                delegate->OnResourceLoad(url);
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientResourceLoad");
 }
 
 void WebClientImpl::OnScaleChanged(float oldScaleFactor, float newScaleFactor)
@@ -585,7 +590,8 @@ bool WebClientImpl::OnSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSSslErrorRe
     ContainerScope scope(delegate->GetInstanceId());
 
     bool jsResult = false;
-    auto param = std::make_shared<WebSslErrorEvent>(AceType::MakeRefPtr<SslErrorResultOhos>(result), static_cast<int32_t>(error));
+    auto param = std::make_shared<WebSslErrorEvent>(AceType::MakeRefPtr<SslErrorResultOhos>(result),
+        static_cast<int32_t>(error));
     auto task = Container::CurrentTaskExecutor();
     if (task == nullptr) {
         return false;
@@ -698,15 +704,16 @@ bool WebClientImpl::RunContextMenu(
     if (task == nullptr) {
         return false;
     }
-    task->PostSyncTask([webClient = this, &param, &jsResult] {
-        if (webClient == nullptr) {
-            return;
-        }
-        auto delegate = webClient->GetWebDelegate();
-        if (delegate) {
-            jsResult = delegate->OnContextMenuShow(param);
-        }
-    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebRunContextMenu");
+    task->PostSyncTask(
+        [webClient = this, &param, &jsResult] {
+            if (webClient == nullptr) {
+                return;
+            }
+            auto delegate = webClient->GetWebDelegate();
+            if (delegate) {
+                jsResult = delegate->OnContextMenuShow(param);
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebRunContextMenu");
     return jsResult;
 }
 

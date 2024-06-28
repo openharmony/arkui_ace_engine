@@ -231,7 +231,7 @@ public:
 
     static bool GetDebugPixelMapSaveEnabled();
 
-    static bool GetPixelRoundEnable();
+    static bool IsPixelRoundEnabled();
 
     static bool GetRosenBackendEnabled()
     {
@@ -281,6 +281,11 @@ public:
     static bool GetSyncDebugTraceEnabled()
     {
         return syncDebugTraceEnable_;
+    }
+
+    static bool GetPixelRoundEnabled()
+    {
+        return pixelRoundEnable_;
     }
 
     static bool GetTextTraceEnabled()
@@ -541,6 +546,7 @@ private:
     static bool traceInputEventEnable_;
     static bool buildTraceEnable_;
     static bool syncDebugTraceEnable_;
+    static bool pixelRoundEnable_;
     static bool textTraceEnable_;
     static bool accessTraceEnable_;
     static bool accessibilityEnabled_;

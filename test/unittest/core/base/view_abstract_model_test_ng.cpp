@@ -158,4 +158,125 @@ HWTEST_F(ViewAbstractModelTestNg, BindSheetShowInPageTest2, TestSize.Level1)
     EXPECT_TRUE(!pageNode->RootNodeIsPage());
     EXPECT_EQ(pageNode->GetRootNodeId(), targetNode->GetRootNodeId());
 }
+
+/**
+ * @tc.name: GetOverlayFromPageTest
+ * @tc.desc: set sheetStyle.showInPage.value_or(false) to endter FindPageNodeOverlay
+ *           and targetNode->GetRootNodeId() > 0 to enter GetOverlayFromPage
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, GetOverlayFromPageTest, TestSize.Level1)
+{
+    // pagelevel Node is navDestination Node
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    auto column = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto navDestinaion = FrameNode::CreateFrameNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<NavDestinationPattern>());
+    auto targetNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    targetNode->MountToParent(navDestinaion);
+    targetNode->SetRootNodeId(1);
+    navDestinaion->MountToParent(column);
+    column->MountToParent(pageNode);
+    ViewStackProcessor::GetInstance()->Push(targetNode);
+    NG::SheetStyle sheetStyle;
+    sheetStyle.showInPage = true;
+    viewAbstractModelNG.BindSheet(true, nullptr, nullptr, nullptr, sheetStyle, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+
+    sheetStyle.showInPage = false;
+    viewAbstractModelNG.BindSheet(true, nullptr, nullptr, nullptr, sheetStyle, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+
+    sheetStyle.showInPage = false;
+    viewAbstractModelNG.BindSheet(false, nullptr, nullptr, nullptr, sheetStyle, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+
+    auto navPatern = navDestinaion->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navPatern, nullptr);
+    auto overlay = navPatern->GetOverlayManager();
+    EXPECT_NE(overlay, nullptr);
+    EXPECT_TRUE(!targetNode->RootNodeIsPage());
+    EXPECT_EQ(targetNode->GetRootNodeId(), 1);
+    EXPECT_TRUE(!pageNode->RootNodeIsPage());
+    EXPECT_EQ(pageNode->GetRootNodeId(), targetNode->GetRootNodeId());
+}
+
+/**
+ * @tc.name: BindContextMenuTest
+ * @tc.desc: Test the BindContextMenu method with various parameters and conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestNg, BindContextMenuTest, TestSize.Level1)
+{
+    std::function<void()> buildFunc = nullptr;
+    std::function<void()> previewBuildFunc = nullptr;
+    MenuParam menuParam;
+
+    /**
+     * @tc.steps: subwindow is null and does not enter BindContextMenuSingle.
+     */
+    SubwindowManager::GetInstance()->RemoveSubwindow(Container::CurrentId());
+    viewAbstractModelNG.BindContextMenu(ResponseType::RIGHT_CLICK, buildFunc, menuParam, previewBuildFunc);
+    ASSERT_EQ(SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId()), nullptr);
+
+    /**
+     * @tc.steps: entering BindContextMenuSingle with subwindow null, menuParam.isShow true, and buildFunc not null.
+     */
+    menuParam.contextMenuRegisterType = ContextMenuRegisterType::CUSTOM_TYPE;
+    menuParam.isShow = true;
+    buildFunc = []() {};
+    viewAbstractModelNG.BindContextMenu(ResponseType::RIGHT_CLICK, buildFunc, menuParam, previewBuildFunc);
+    ASSERT_EQ(SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId()), nullptr);
+
+    /**
+     * @tc.steps: entering BindContextMenuSingle with subwindow null, menuParam.isShow true, and buildFunc null.
+     */
+    menuParam.contextMenuRegisterType = ContextMenuRegisterType::CUSTOM_TYPE;
+    menuParam.isShow = true;
+    buildFunc = nullptr;
+    viewAbstractModelNG.BindContextMenu(ResponseType::RIGHT_CLICK, buildFunc, menuParam, previewBuildFunc);
+    ASSERT_EQ(SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId()), nullptr);
+
+    /**
+     * @tc.steps: BindContextMenuSingle with subwindow null, menuParam.isShow false, and buildFunc not null.
+     */
+    menuParam.contextMenuRegisterType = ContextMenuRegisterType::CUSTOM_TYPE;
+    menuParam.isShow = false;
+    buildFunc = []() {};
+    viewAbstractModelNG.BindContextMenu(ResponseType::RIGHT_CLICK, buildFunc, menuParam, previewBuildFunc);
+    ASSERT_EQ(SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId()), nullptr);
+
+    /**
+     * @tc.steps: entering BindContextMenuSingle with subwindow null, menuParam.isShow false, and buildFunc null.
+     */
+    menuParam.contextMenuRegisterType = ContextMenuRegisterType::CUSTOM_TYPE;
+    menuParam.isShow = false;
+    buildFunc = nullptr;
+    viewAbstractModelNG.BindContextMenu(ResponseType::RIGHT_CLICK, buildFunc, menuParam, previewBuildFunc);
+    ASSERT_EQ(SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId()), nullptr);
+
+    /**
+     * @tc.steps: subwindow is null and does not enter BindContextMenuSingle, with type == ResponseType::RIGHT_CLICK.
+     */
+    menuParam.contextMenuRegisterType = ContextMenuRegisterType::NORMAL_TYPE;
+    viewAbstractModelNG.BindContextMenu(ResponseType::RIGHT_CLICK, buildFunc, menuParam, previewBuildFunc);
+    ASSERT_EQ(SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId()), nullptr);
+
+    /**
+     * @tc.steps: subwindow is null and does not enter BindContextMenuSingle, with type == ResponseType::LONG_PRESS.
+     */
+    viewAbstractModelNG.BindContextMenu(ResponseType::LONG_PRESS, buildFunc, menuParam, previewBuildFunc);
+    ASSERT_EQ(SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId()), nullptr);
+
+    /**
+     * @tc.steps: subwindow is not null.
+     */
+    auto subwindow = Subwindow::CreateSubwindow(Container::CurrentId());
+    SubwindowManager::GetInstance()->AddSubwindow(Container::CurrentId(), subwindow);
+    viewAbstractModelNG.BindContextMenu(ResponseType::LONG_PRESS, buildFunc, menuParam, previewBuildFunc);
+    ASSERT_NE(SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId()), nullptr);
+}
 } // namespace OHOS::Ace::NG

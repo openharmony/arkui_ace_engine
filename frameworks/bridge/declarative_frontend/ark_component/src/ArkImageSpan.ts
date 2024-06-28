@@ -61,7 +61,9 @@ class ImageSpanTextBackgroundStyleModifier extends ModifierWithKey<TextBackgroun
         getUINativeModule().imageSpan.resetTextBackgroundStyle(node);
       }
       else {
-        getUINativeModule().imageSpan.setTextBackgroundStyle(node, textBackgroundStyle.color, textBackgroundStyle.radius.topLeft, textBackgroundStyle.radius.topRight, textBackgroundStyle.radius.bottomLeft, textBackgroundStyle.radius.bottomRight);
+        getUINativeModule().imageSpan.setTextBackgroundStyle(
+          node, textBackgroundStyle.color, textBackgroundStyle.radius.topLeft,
+          textBackgroundStyle.radius.topRight, textBackgroundStyle.radius.bottomLeft, textBackgroundStyle.radius.bottomRight);
       }
     }
   }

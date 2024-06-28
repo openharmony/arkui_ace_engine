@@ -32,8 +32,12 @@ if (globalThis.WithTheme !== undefined) {
         if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
             ArkThemeScopeManager.getInstance().onExitLocalColorMode();
         }
-    
-        ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, themeOptions, theme);
+
+        if (themeOptions) {
+            ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, themeOptions, theme);
+        } else {
+            ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, {}, theme);
+        }
     }
     // @ts-ignore
     globalThis.WithTheme.pop = function () {

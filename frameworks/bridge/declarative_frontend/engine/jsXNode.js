@@ -1302,6 +1302,26 @@ const __creatorMap__ = new Map([
                 return new ArkButtonComponent(node, type);
             });
         }],
+    ["XComponent", (context) => {
+            return new TypedFrameNode(context, "XComponent", (node, type) => {
+                return new ArkXComponentComponent(node, type);
+            });
+        }],
+    ["ListItemGroup", (context) => {
+            return new TypedFrameNode(context, "ListItemGroup", (node, type) => {
+                return new ArkListItemGroupComponent(node, type);
+            });
+        }],
+    ["WaterFlow", (context) => {
+            return new TypedFrameNode(context, "WaterFlow", (node, type) => {
+                return new ArkWaterFlowComponent(node, type);
+            });
+        }],
+    ["FlowItem", (context) => {
+            return new TypedFrameNode(context, "FlowItem", (node, type) => {
+                return new ArkFlowItemComponent(node, type);
+            });
+        }],
 ]);
 class typeNode {
     static createNode(context, type) {

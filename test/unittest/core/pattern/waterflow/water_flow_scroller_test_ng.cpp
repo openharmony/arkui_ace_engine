@@ -431,7 +431,8 @@ HWTEST_F(WaterFlowScrollerTestNg, ScrollToIndex001, TestSize.Level1)
      */
     CreateWithItem([](WaterFlowModelNG model) {});
     pattern_->ScrollToIndex(20, true);
-    EXPECT_EQ(pattern_->targetIndex_, 20);
+    // Item 20 doesn't exist
+    EXPECT_EQ(pattern_->targetIndex_, std::nullopt);
 }
 
 /**

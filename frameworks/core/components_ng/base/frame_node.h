@@ -543,6 +543,11 @@ public:
         previewOption_.onApply = std::move(previewOption.onApply);
     }
 
+    void SetOptionsAfterApplied(const OptionsAfterApplied& optionsAfterApplied)
+    {
+        previewOption_.options = optionsAfterApplied;
+    }
+
     DragPreviewOption GetDragPreviewOption() const
     {
         return previewOption_;
@@ -907,6 +912,7 @@ public:
     void NotifyTransformInfoChanged()
     {
         isLocalRevertMatrixAvailable_ = false;
+        AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_TRANSFORM_CHANGE);
     }
 
     void AddPredictLayoutNode(const RefPtr<FrameNode>& node)
@@ -949,6 +955,22 @@ public:
     ChildrenListWithGuard GetAllChildren();
     OPINC_TYPE_E FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth);
     void GetInspectorValue() override;
+
+    FrameNodeChangeInfoFlag GetChangeInfoFlag()
+    {
+        return changeInfoFlag_;
+    }
+
+    void ClearChangeInfoFlag()
+    {
+        changeInfoFlag_ = FRAME_NODE_CHANGE_INFO_NONE;
+    }
+
+    void OnSyncGeometryFrameFinish(const RectF& paintRect);
+    void AddFrameNodeChangeInfoFlag(FrameNodeChangeInfoFlag changeFlag = FRAME_NODE_CHANGE_INFO_NONE);
+    void RegisterNodeChangeListener();
+    void UnregisterNodeChangeListener();
+    void ProcessFrameNodeChangeFlag();
 
 protected:
     void DumpInfo() override;
@@ -1153,6 +1175,8 @@ private:
     };
     std::vector<onSizeChangeDumpInfo> onSizeChangeDumpInfos;
     std::list<WeakPtr<FrameNode>> predictLayoutNode_;
+    FrameNodeChangeInfoFlag changeInfoFlag_ = FRAME_NODE_CHANGE_INFO_NONE;
+    std::optional<RectF> syncedFramePaintRect_;
 
     friend class RosenRenderContext;
     friend class RenderContext;

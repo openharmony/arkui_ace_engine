@@ -177,12 +177,17 @@ bool ScrollablePattern::OnScrollPosition(double& offset, int32_t source)
     if (needLinked_) {
         auto isAtTop = (IsAtTop() && Positive(offset));
         auto refreshCoordinateMode = RefreshCoordinationMode::UNKNOWN;
+        auto modalSheetCoordinationMode = ModalSheetCoordinationMode::UNKNOWN;
+        if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            modalSheetCoordinationMode = CoordinateWithSheet(offset, source, isAtTop);
+        }
         if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) ||
             !isSearchRefresh) {
             refreshCoordinateMode = CoordinateWithRefresh(offset, source, isAtTop);
         }
         auto navigationInCoordination = CoordinateWithNavigation(offset, source, isAtTop);
-        if ((refreshCoordinateMode == RefreshCoordinationMode::REFRESH_SCROLL) || navigationInCoordination) {
+        if ((refreshCoordinateMode == RefreshCoordinationMode::REFRESH_SCROLL) || navigationInCoordination ||
+            (modalSheetCoordinationMode == ModalSheetCoordinationMode::SHEET_SCROLL)) {
             return false;
         }
     }
@@ -262,6 +267,34 @@ RefreshCoordinationMode ScrollablePattern::CoordinateWithRefresh(double& offset,
     return mode;
 }
 
+ModalSheetCoordinationMode ScrollablePattern::CoordinateWithSheet(double& offset, int32_t source, bool isAtTop)
+{
+    auto coordinationMode = ModalSheetCoordinationMode::UNKNOWN;
+    if (source == SCROLL_FROM_START) {
+        isSheetInReactive_ = false;
+
+        if (!sheetPattern_) {
+            GetParentModalSheet();
+        }
+    }
+    auto overOffsets = GetOverScrollOffset(offset);
+    if (IsAtTop() && (source == SCROLL_FROM_UPDATE) && !isSheetInReactive_ && (axis_ == Axis::VERTICAL)) {
+        isSheetInReactive_ = true;
+        if (sheetPattern_) {
+            sheetPattern_->OnCoordScrollStart();
+        }
+    }
+    if (sheetPattern_ && isSheetInReactive_) {
+        if (!sheetPattern_->OnCoordScrollUpdate(GreatNotEqual(overOffsets.start, 0.0) ? overOffsets.start : offset)) {
+            isSheetInReactive_ = false;
+            coordinationMode = ModalSheetCoordinationMode::SCROLLABLE_SCROLL;
+        } else {
+            coordinationMode = ModalSheetCoordinationMode::SHEET_SCROLL;
+        }
+    }
+    return coordinationMode;
+}
+
 bool ScrollablePattern::CoordinateWithNavigation(double& offset, int32_t source, bool isAtTop)
 {
     if (source == SCROLL_FROM_START) {
@@ -339,6 +372,12 @@ void ScrollablePattern::OnScrollEnd()
         isRefreshInReactive_ = false;
         refreshCoordination_->OnScrollEnd(GetVelocity());
     }
+    if (isSheetInReactive_) {
+        isSheetInReactive_ = false;
+        if (sheetPattern_) {
+            sheetPattern_->OnCoordScrollEnd(GetVelocity());
+        }
+    }
     if (isReactInParentMovement_) {
         isReactInParentMovement_ = false;
         ProcessNavBarReactOnEnd();
@@ -413,14 +452,14 @@ void ScrollablePattern::AddScrollEvent()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->FireAndCleanScrollingListener();
-        pattern->OnScrollStartRecursive(position, pattern->GetVelocity());
+        pattern->OnScrollStartRecursiveInner(position, pattern->GetVelocity());
     };
     scrollable->SetOnScrollStartRec(std::move(scrollStart));
 
     auto scrollEndRec = [weak = WeakClaim(this)](const std::optional<float>& velocity) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->OnScrollEndRecursive(velocity);
+        pattern->OnScrollEndRecursiveInner(velocity);
     };
     scrollable->SetOnScrollEndRec(std::move(scrollEndRec));
 
@@ -968,6 +1007,32 @@ void ScrollablePattern::GetParentNavigation()
     return;
 }
 
+void ScrollablePattern::GetParentModalSheet()
+{
+    if (sheetPattern_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    if (host->GetTag() != V2::SCROLL_ETS_TAG) {
+        return;
+    }
+
+    for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
+        RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+        if (!frameNode) {
+            continue;
+        }
+        sheetPattern_ = frameNode->GetPattern<SheetPresentationPattern>();
+        if (!sheetPattern_) {
+            continue;
+        }
+        return;
+    }
+    return;
+}
+
 void ScrollablePattern::StopAnimate()
 {
     if (!IsScrollableStopped()) {
@@ -1026,7 +1091,9 @@ void ScrollablePattern::AnimateTo(
     } else {
         PlayCurveAnimation(position, duration, curve, canOverScroll);
     }
-    FireOnScrollStart();
+    if (!GetIsDragging()) {
+        FireOnScrollStart();
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
@@ -1758,6 +1825,20 @@ ScrollResult ScrollablePattern::HandleScrollParentFirst(float& offset, int32_t s
     return { 0, GetCanOverScroll() };
 }
 
+ScrollResult ScrollablePattern::HandleOutBoundary(float& offset, int32_t source, NestedState state)
+{
+    ScrollResult result = {offset, false};
+    auto overOffsets = GetOverScrollOffset(offset);
+    auto overOffset = Negative(offset) ? overOffsets.start : overOffsets.end;
+    if (NearZero(overOffset)) {
+        return result;
+    }
+    result.remain = offset - overOffset;
+    bool moved = HandleScrollImpl(overOffset, source);
+    NotifyMoved(moved);
+    return result;
+}
+
 ScrollResult ScrollablePattern::HandleScrollSelfFirst(float& offset, int32_t source, NestedState state)
 {
     auto parent = GetNestedScrollParent();
@@ -1774,13 +1855,19 @@ ScrollResult ScrollablePattern::HandleScrollSelfFirst(float& offset, int32_t sou
         }
         return { 0, true };
     }
+    auto handleParentOutBoundary = false;
+    if (InstanceOf<ScrollablePattern>(parent)) {
+        auto result = parent->HandleOutBoundary(offset, source, state);
+        offset = result.remain;
+        handleParentOutBoundary = NearZero(offset);
+    }
     float allOffset = offset;
     ExecuteScrollFrameBegin(offset, scrollState);
     auto remainOffset = std::abs(offset) < std::abs(allOffset) ? allOffset - offset : 0;
     auto overOffsets = GetOverScrollOffset(offset);
     auto overOffset = offset > 0 ? overOffsets.start : overOffsets.end;
     if (NearZero(overOffset) && NearZero(remainOffset)) {
-        SetCanOverScroll(false);
+        SetCanOverScroll(handleParentOutBoundary);
         return { 0, false };
     }
     offset -= overOffset;
@@ -1986,6 +2073,12 @@ void ScrollablePattern::ExecuteScrollFrameBegin(float& mainDelta, ScrollState st
 
 void ScrollablePattern::OnScrollStartRecursive(float position, float velocity)
 {
+    OnScrollStartRecursiveInner(position, velocity);
+    nestedScrolling_ = true;
+}
+
+void ScrollablePattern::OnScrollStartRecursiveInner(float position, float velocity)
+{
     SetIsNestedInterrupt(false);
     HandleScrollImpl(position, SCROLL_FROM_START);
     auto parent = GetNestedScrollParent();
@@ -1996,6 +2089,13 @@ void ScrollablePattern::OnScrollStartRecursive(float position, float velocity)
 }
 
 void ScrollablePattern::OnScrollEndRecursive(const std::optional<float>& velocity)
+{
+    OnScrollEndRecursiveInner(velocity);
+    CheckRestartSpring(false);
+    nestedScrolling_ = false;
+}
+
+void ScrollablePattern::OnScrollEndRecursiveInner(const std::optional<float>& velocity)
 {
     OnScrollEnd();
     auto parent = GetNestedScrollParent();

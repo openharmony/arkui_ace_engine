@@ -290,5 +290,24 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(JSCustomSpan);
     JSRef<JSObject> customSpanObj_;
 };
+
+class JSExtSpan : public ExtSpan {
+    DECLARE_ACE_TYPE(JSExtSpan, ExtSpan)
+
+public:
+    JSExtSpan() = default;
+    JSExtSpan(JSRef<JSObject> customSpanObj);
+    JSExtSpan(JSRef<JSObject> customSpanObj, int32_t start, int32_t end);
+    ~JSExtSpan() override = default;
+
+    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    void SetJsExtSpanObject(const JSRef<JSObject>& extSpanObj);
+    JSRef<JSObject>& GetJsExtSpanObject();
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(JSExtSpan);
+    JSRef<JSObject> extSpanObj_;
+};
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_STYLE_STRING_JS_SPAN_OBJECT_H

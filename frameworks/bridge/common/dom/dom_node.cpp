@@ -188,7 +188,6 @@ void DOMNode::AddEvent(int32_t pageId, const std::vector<std::string>& events)
             };
             boxComponent_->SetOnDragStartId(onDragStartId);
         }
-
     }
     if (declaration_) {
         declaration_->AddEvent(pageId, GetNodeIdForEvent(), tempEvents);
@@ -701,9 +700,7 @@ void DOMNode::CachePseudoClassStyle(const std::pair<std::string, std::string>& p
     auto pseudoSymbolLocation = styleKey.find(DOM_PSEUDO_CLASS_SYMBOL);
     auto dealedStyleKey =
         ((pseudoSymbolLocation != std::string::npos) ? styleKey.substr(0, pseudoSymbolLocation) : styleKey);
-
     auto styleMapIter = pseudoClassStyleMap_.find(pseudoClassType);
-
     if (styleMapIter != pseudoClassStyleMap_.end()) {
         auto result = styleMapIter->second.try_emplace(dealedStyleKey, pseudoClassStyle.second);
         if (!result.second) {
@@ -1978,7 +1975,6 @@ void DOMNode::UpdateFocusableEventComponents()
     bool supportFocus = focusEvent.IsValid() && !focusEvent.focus.eventMarker.IsEmpty();
     bool supportBlur = focusEvent.IsValid() && !focusEvent.blur.eventMarker.IsEmpty();
     bool supportKey = keyEvent.IsValid() && !keyEvent.key.eventMarker.IsEmpty();
-
     if (!focusable && GetClickId().IsEmpty() && !supportFocus && !supportBlur && !supportKey && !HasFocusPseudo()) {
         return;
     }
@@ -1991,11 +1987,8 @@ void DOMNode::UpdateFocusableEventComponents()
     } else {
         focusableEventComponent_->SetFocusable(true);
     }
-
     focusableEventComponent_->SetOnClickId(GetClickId());
-
     PrepareFocusableEventId();
-
     if (focusEvent.IsValid()) {
         focusableEventComponent_->SetOnBlurId(focusEvent.blur.eventMarker);
         focusableEventComponent_->SetOnFocusId(focusEvent.focus.eventMarker);

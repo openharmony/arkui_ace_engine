@@ -203,22 +203,25 @@ constexpr int32_t STATUS_ZOOMOUT = 2;
 constexpr int32_t ZOOM_ERROR_COUNT_MAX = 5;
 constexpr double ZOOMIN_SMOOTH_SCALE = 0.99;
 
+constexpr char ACCESSIBILITY_GENERIC_CONTAINER[] = "genericContainer";
+constexpr char ACCESSIBILITY_IMAGE[] = "image";
+constexpr char ACCESSIBILITY_PARAGRAPH[] = "paragraph";
+
+#define WEB_ACCESSIBILITY_DELAY_TIME 100
+
 WebPattern::WebPattern() = default;
 
-WebPattern::WebPattern(const std::string& webSrc,
-                       const RefPtr<WebController>& webController,
-                       RenderMode renderMode,
-                       bool incognitoMode)
-    : webSrc_(std::move(webSrc)), webController_(webController), renderMode_(renderMode),
-      incognitoMode_(incognitoMode)
+WebPattern::WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController, RenderMode renderMode,
+    bool incognitoMode, const std::string& sharedRenderProcessToken)
+    : webSrc_(std::move(webSrc)), webController_(webController), renderMode_(renderMode), incognitoMode_(incognitoMode),
+      sharedRenderProcessToken_(sharedRenderProcessToken)
 {}
 
-WebPattern::WebPattern(const std::string& webSrc,
-                       const SetWebIdCallback& setWebIdCallback,
-                       RenderMode renderMode,
-                       bool incognitoMode)
+WebPattern::WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback, RenderMode renderMode,
+    bool incognitoMode, const std::string& sharedRenderProcessToken)
     : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback), renderMode_(renderMode),
-      incognitoMode_(incognitoMode) {}
+      incognitoMode_(incognitoMode), sharedRenderProcessToken_(sharedRenderProcessToken)
+{}
 
 WebPattern::~WebPattern()
 {
@@ -295,6 +298,17 @@ void WebPattern::OnAttachToFrameNode()
     SetRotation(pipeline->GetTransformHint());
 
     host->GetRenderContext()->SetClipToFrame(true);
+    auto color = GetSystemColor();
+    host->GetRenderContext()->UpdateBackgroundColor(color);
+    if (!renderContextForSurface_) {
+        renderContextForSurface_ = RenderContext::Create();
+        static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
+            "RosenWeb" };
+        CHECK_NULL_VOID(renderContextForSurface_);
+        renderContextForSurface_->InitContext(false, param);
+    }
+    CHECK_NULL_VOID(renderContextForSurface_);
+    renderContextForSurface_->UpdateBackgroundColor(color);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
 
@@ -1682,9 +1696,6 @@ void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, do
     }
     if (GreatOrEqual(height, keyboard + GetCoordinatePoint()->GetY())) {
         double newHeight = height - keyboard - GetCoordinatePoint()->GetY();
-        if (GreatOrEqual(newHeight, oldWebHeight)) {
-            newHeight = oldWebHeight;
-        }
         if (NearEqual(newHeight, oldWebHeight)) {
             return;
         }
@@ -2115,6 +2126,8 @@ void WebPattern::OnAttachContext(PipelineContext *context)
         dragDropManager->AddDragFrameNode(host->GetId(), AceType::WeakClaim(AceType::RawPtr(host)));
     }
 
+    pipelineContext->AddWindowStateChangedCallback(nodeId);
+    pipelineContext->AddWindowSizeChangeCallback(nodeId);
     pipelineContext->AddOnAreaChangeNode(nodeId);
     RegisterVisibleAreaChangeCallback(pipelineContext);
     needUpdateWeb_= true;
@@ -2130,6 +2143,8 @@ void WebPattern::OnDetachContext(PipelineContext *contextPtr)
     auto host = GetHost();
     int32_t nodeId = host->GetId();
 
+    context->RemoveWindowStateChangedCallback(nodeId);
+    context->RemoveWindowSizeChangeCallback(nodeId);
     context->RemoveOnAreaChangeNode(nodeId);
     context->RemoveVisibleAreaChangeNode(nodeId);
     context->RemoveVirtualKeyBoardCallback(nodeId);
@@ -2241,7 +2256,6 @@ void WebPattern::OnModifyDone()
         delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
         delegate_->SetPopup(isPopup_);
         delegate_->SetParentNWebId(parentNWebId_);
-        UpdateBackgroundColorRightNow();
         delegate_->SetBackgroundColor(GetBackgroundColorValue(
             static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue())));
         if (isEnhanceSurface_) {
@@ -2253,11 +2267,7 @@ void WebPattern::OnModifyDone()
             delegate_->SetDrawSize(drawSize);
             int32_t instanceId = Container::CurrentId();
             CHECK_NULL_VOID(renderSurface_);
-            renderContextForSurface_ = RenderContext::Create();
             CHECK_NULL_VOID(renderContextForSurface_);
-            static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
-                "RosenWeb" };
-            renderContextForSurface_->InitContext(false, param);
             renderSurface_->SetInstanceId(instanceId);
             renderSurface_->SetRenderContext(host->GetRenderContext());
             if (renderMode_ == RenderMode::SYNC_RENDER) {
@@ -2283,7 +2293,6 @@ void WebPattern::OnModifyDone()
         }
         UpdateJavaScriptOnDocumentStart();
         UpdateJavaScriptOnDocumentEnd();
-        UpdateBackgroundColorRightNow();
         bool isApiGteTwelve =
             AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE);
         delegate_->UpdateBackgroundColor(GetBackgroundColorValue(
@@ -2457,8 +2466,10 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
         UpdateOnFocusTextField(false);
         isVirtualKeyBoardShow_ = VkState::VK_HIDE;
     } else if (isVirtualKeyBoardShow_ != VkState::VK_SHOW || lastKeyboardHeight_ != keyboard) {
-        drawSizeCache_.SetSize(drawSize_);
-        if (drawSize_.Height() <= (height - keyboard - GetCoordinatePoint()->GetY())) {
+        if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
+            drawSizeCache_.SetSize(drawSize_);
+        }
+        if (drawSizeCache_.Height() <= (height - keyboard - GetCoordinatePoint()->GetY())) {
             isVirtualKeyBoardShow_ = VkState::VK_SHOW;
             return true;
         }
@@ -2506,11 +2517,7 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeybo
 
     rect.SetSize(SizeF(drawSize_.Width(), drawSize_.Height()));
     frameNode->GetRenderContext()->SyncGeometryProperties(rect);
-    if (SearchParent(Axis::VERTICAL)) {
-        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
-    } else {
-        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    }
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     context->SetRootRect(width, height, 0);
@@ -4014,23 +4021,25 @@ void WebPattern::UpdateBackgroundColorRightNow(int32_t color)
     renderContextForSurface_->UpdateBackgroundColor(Color(static_cast<uint32_t>(color)));
 }
 
-void WebPattern::UpdateBackgroundColorRightNow()
+Color WebPattern::GetSystemColor() const
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto color = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
-    if (color == Color::TRANSPARENT && delegate_) {
-        auto colorMode = delegate_->GetSystemColorMode();
-        color = Color::WHITE;
-        if (colorMode == "dark") {
-            color = Color::BLACK;
-        }
+    Color color = Color::WHITE;
+    auto appMgrClient = std::make_shared<AppExecFwk::AppMgrClient>();
+    CHECK_NULL_RETURN(appMgrClient, color);
+    if (appMgrClient->ConnectAppMgrService()) {
+        return color;
     }
-    renderContext->UpdateBackgroundColor(color);
-    CHECK_NULL_VOID(renderContextForSurface_);
-    renderContextForSurface_->UpdateBackgroundColor(color);
+    auto systemConfig = OHOS::AppExecFwk::Configuration();
+    appMgrClient->GetConfiguration(systemConfig);
+    auto colorMode = systemConfig.GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    if (colorMode == OHOS::AppExecFwk::ConfigurationInner::COLOR_MODE_DARK) {
+        return Color::BLACK;
+    }
+    if (colorMode == OHOS::AppExecFwk::ConfigurationInner::COLOR_MODE_LIGHT) {
+        return Color::WHITE;
+    }
+    TAG_LOGW(AceLogTag::ACE_WEB, "no system color mode is found.");
+    return color;
 }
 
 void WebPattern::OnNotifyMemoryLevel(int32_t level)
@@ -4566,6 +4575,16 @@ void WebPattern::ExecuteAction(int64_t accessibilityId, AceAction action,
 void WebPattern::SetAccessibilityState(bool state)
 {
     CHECK_NULL_VOID(delegate_);
+    if (!state) {
+        if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()
+            || inspectorAccessibilityEnable_) {
+                return;
+        }
+        accessibilityState_ = state;
+        delegate_->SetAccessibilityState(state);
+        return;
+    }
+
     if (accessibilityState_ != state) {
         accessibilityState_ = state;
         delegate_->SetAccessibilityState(state);
@@ -4600,6 +4619,14 @@ void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
 
     renderContext->UpdateAccessibilityFocusRect(rect);
     renderContext->UpdateAccessibilityFocus(true);
+}
+
+std::shared_ptr<Rosen::RSNode> WebPattern::GetSurfaceRSNode() const
+{
+    CHECK_NULL_RETURN(renderContextForSurface_, nullptr);
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContextForSurface_);
+    CHECK_NULL_RETURN(rosenRenderContext, nullptr);
+    return rosenRenderContext->GetRSNode();
 }
 
 bool WebPattern::GetAccessibilityFocusRect(RectT<int32_t>& paintRect, int64_t accessibilityId) const
@@ -4845,6 +4872,149 @@ WebInfoType WebPattern::GetWebInfoType()
     }
     return WebInfoType::TYPE_UNKNOWN;
 }
+
+void WebPattern::JsonNodePutDefaultValue(std::unique_ptr<OHOS::Ace::JsonValue>& jsonNode,
+    WebAccessibilityType key, bool value)
+{
+    if (!value) {
+        return;
+    }
+    jsonNode->Put(EnumTypeToString(key).c_str(), 1);
+}
+
+void WebPattern::JsonNodePutDefaultValue(std::unique_ptr<OHOS::Ace::JsonValue>& jsonNode,
+    WebAccessibilityType key, std::string value)
+{
+    if (value.empty()) {
+        return;
+    }
+    jsonNode->Put(EnumTypeToString(key).c_str(), value.c_str());
+}
+
+void WebPattern::JsonNodePutDefaultValue(std::unique_ptr<OHOS::Ace::JsonValue>& jsonNode,
+    WebAccessibilityType key, int32_t value, int32_t defaultValue)
+{
+    if (value == defaultValue) {
+        return;
+    }
+    jsonNode->Put(EnumTypeToString(key).c_str(), value);
+}
+
+std::string WebPattern::EnumTypeToString(WebAccessibilityType type)
+{
+    return std::to_string(static_cast<int>(type));
+}
+
+void WebPattern::WebNodeInfoToJsonValue(std::shared_ptr<OHOS::Ace::JsonValue>& jsonNodeArray,
+    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> webNodeInfo, std::string& nodeTag)
+{
+    auto jsonNode = JsonUtil::Create(true);
+    jsonNode->Put(EnumTypeToString(WebAccessibilityType::ID).c_str(), webNodeInfo->GetAccessibilityId());
+    if (webNodeInfo->GetSelectionEnd() != 0) {
+        jsonNode->Put(EnumTypeToString(WebAccessibilityType::SEL_START).c_str(), webNodeInfo->GetSelectionStart());
+        jsonNode->Put(EnumTypeToString(WebAccessibilityType::SEL_END).c_str(), webNodeInfo->GetSelectionEnd());
+    }
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::INPUT_TYPE, webNodeInfo->GetInputType(), -1);
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::LIVE_REGION, webNodeInfo->GetLiveRegion(), -1);
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::HINT, webNodeInfo->GetHint());
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::CONTENT, webNodeInfo->GetContent());
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::ERROR, webNodeInfo->GetError());
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::PARENT_ID, webNodeInfo->GetParentId(), -1);
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::GRID_ROWS, webNodeInfo->GetGridRows(), -1);
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::GRID_COLS, webNodeInfo->GetGridColumns(), -1);
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::GRID_SEL_MODE, webNodeInfo->GetGridSelectedMode(), -1);
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::GRID_ITEM_ROW, webNodeInfo->GetGridItemRow(), -1);
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::GRID_ITEM_ROW_SPAN, webNodeInfo->GetGridItemRowSpan(), -1);
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::GRID_ITEM_COL, webNodeInfo->GetGridItemColumn(), -1);
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::GRID_ITEM_COL_SPAN,
+        webNodeInfo->GetGridItemColumnSpan(), -1);
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::PAGE_ID, webNodeInfo->GetPageId(), -1);
+
+    if (webNodeInfo->GetRectWidth() != 0 || webNodeInfo->GetRectHeight() != 0) {
+        jsonNode->Put(EnumTypeToString(WebAccessibilityType::RECTX).c_str(), webNodeInfo->GetRectX());
+        jsonNode->Put(EnumTypeToString(WebAccessibilityType::RECTY).c_str(), webNodeInfo->GetRectY());
+        jsonNode->Put(EnumTypeToString(WebAccessibilityType::RECT_WIDTH).c_str(), webNodeInfo->GetRectWidth());
+        jsonNode->Put(EnumTypeToString(WebAccessibilityType::RECT_HEIGHT).c_str(), webNodeInfo->GetRectHeight());
+    }
+
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::HEADING, webNodeInfo->GetIsHeading());
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::CHECKED, webNodeInfo->GetIsChecked());
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::EDITABLE, webNodeInfo->GetIsEditable());
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::ENABLED, webNodeInfo->GetIsEnabled());
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::FOCUSED, webNodeInfo->GetIsFocused());
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::SELECTED, webNodeInfo->GetIsSelected());
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::CHECKABLE, webNodeInfo->GetIsCheckable());
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::CLICKABLE, webNodeInfo->GetIsClickable());
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::FOCUSABLE, webNodeInfo->GetIsFocusable());
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::SCROLLABLE, webNodeInfo->GetIsScrollable());
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::PASSWORD, webNodeInfo->GetIsPassword());
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::VISIBLE, webNodeInfo->GetIsVisible());
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::PLURAL_LINE, webNodeInfo->GetIsPluralLineSupported());
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::POPUP, webNodeInfo->GetIsPopupSupported());
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::DELETABLE, webNodeInfo->GetIsDeletable());
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::FOCUS, webNodeInfo->GetIsAccessibilityFocus());
+    jsonNodeArray->PutRef(nodeTag.c_str(), std::move(jsonNode));
+}
+
+void WebPattern::GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId)
+{
+    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> rootWebNode;
+    if (delegate_) {
+        rootWebNode = delegate_->GetAccessibilityNodeInfoById(-1);
+    }
+    CHECK_NULL_VOID(rootWebNode);
+
+    auto jsonNodeArray = static_cast<std::shared_ptr<JsonValue> >(JsonUtil::Create(true));
+    std::queue<uint64_t> que;
+    for (auto id: rootWebNode->GetChildIds()) {
+        que.push(id);
+    }
+
+    int nodeCount = 0;
+    while (!que.empty()) {
+        uint64_t tmp = que.front();
+        que.pop();
+        auto webNodeInfo = delegate_->GetAccessibilityNodeInfoById(tmp);
+        CHECK_NULL_VOID(webNodeInfo);
+        auto componentType = webNodeInfo->GetComponentType();
+        if (componentType.compare(ACCESSIBILITY_GENERIC_CONTAINER) != 0
+            && componentType.compare(ACCESSIBILITY_PARAGRAPH) != 0
+            && componentType.compare(ACCESSIBILITY_IMAGE) != 0) {
+            WebNodeInfoToJsonValue(jsonNodeArray, webNodeInfo, componentType);
+        }
+        for (auto id: webNodeInfo->GetChildIds()) {
+            que.push(id);
+        }
+        nodeCount++;
+    }
+    TAG_LOGD(AceLogTag::ACE_WEB, "Current web info node count: %{public}d", nodeCount);
+    cb(jsonNodeArray, webId);
+    inspectorAccessibilityEnable_ = false;
+    SetAccessibilityState(false);
+}
+
+void WebPattern::GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId)
+{
+    CHECK_NULL_VOID(cb);
+    inspectorAccessibilityEnable_ = true;
+    SetAccessibilityState(true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    taskExecutor->PostDelayedTask([weak = WeakClaim(this), cb, webId] () {
+        auto pattern = weak.Upgrade();
+        auto startTime = std::chrono::high_resolution_clock::now();
+        pattern->GetWebAllInfosImpl(cb, webId);
+        auto nowTime = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> diff =
+            std::chrono::duration_cast<std::chrono::milliseconds>(nowTime - startTime);
+        TAG_LOGD(AceLogTag::ACE_WEB, "GetAllAccessibilityInfo time cost: %{public}f", diff.count());
+        },
+        TaskExecutor::TaskType::UI, WEB_ACCESSIBILITY_DELAY_TIME, "GetAllWebAccessibilityNodeInfos");
+}
+
 void WebPattern::RequestFocus()
 {
     WebRequestFocus();

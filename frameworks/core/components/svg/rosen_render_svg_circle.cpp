@@ -36,7 +36,6 @@ void RosenRenderSvgCircle::Paint(RenderContext& context, const Offset& offset)
     const auto renderContext = static_cast<RosenRenderContext*>(&context);
     auto rsNode = renderContext->GetRSNode();
     auto canvas = renderContext->GetCanvas();
-
     if (!canvas) {
         LOGE("Paint canvas is null");
         return;

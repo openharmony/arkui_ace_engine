@@ -61,6 +61,7 @@ public:
         DrawImageRect, void(const TestingImage& image, const TestingRect& dst, const TestingSamplingOptions& sampling));
     MOCK_METHOD5(DrawImageRect, void(const TestingImage& image, const TestingRect& src, const TestingRect& dst,
                                     const TestingSamplingOptions& sampling, SrcRectConstraint constraint));
+    MOCK_METHOD1(SaveLayer, void(const TestingSaveLayerOps& saveLayerOps));
     MOCK_METHOD1(DrawOval, void(const TestingRect& oval));
 };
 } // namespace OHOS::Ace::Testing

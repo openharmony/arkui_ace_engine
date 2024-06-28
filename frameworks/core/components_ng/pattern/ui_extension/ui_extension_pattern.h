@@ -93,7 +93,6 @@ public:
     void OnWindowShow() override;
     void OnWindowHide() override;
     void OnVisibleChange(bool visible) override;
-    void OnAreaChangedInner() override;
     void OnMountToParentDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -188,6 +187,7 @@ private:
     void OnLanguageConfigurationUpdate() override;
     void OnColorConfigurationUpdate() override;
     void OnModifyDone() override;
+    bool CheckConstraint();
 
     void InitKeyEvent(const RefPtr<FocusHub>& focusHub);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -207,7 +207,7 @@ private:
     void RegisterVisibleAreaChange();
     void MountPlaceholderNode();
     void RemovePlaceholderNode();
-    bool ShouldCallSystem(const AAFwk::Want& want);
+    UIExtensionUsage GetUIExtensionUsage(const AAFwk::Want& want);
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;

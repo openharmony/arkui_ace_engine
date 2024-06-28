@@ -142,5 +142,12 @@ void SetListItemOnSelect(ArkUINodeHandle node, void* extraParam)
     };
     ListItemModelNG::SetSelectCallback(frameNode, std::move(onEvent));
 }
+
+void ResetListItemOnSelect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemModelNG::SetSelectCallback(frameNode, nullptr);
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

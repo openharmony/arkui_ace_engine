@@ -50,6 +50,14 @@ inline constexpr PropertyChangeFlag PROPERTY_UPDATE_EVENT = 1 << 8;
 
 inline constexpr PropertyChangeFlag PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD = 1 << 9;
 
+using FrameNodeChangeInfoFlag = uint32_t;
+inline constexpr FrameNodeChangeInfoFlag FRAME_NODE_CHANGE_INFO_NONE = 0;
+inline constexpr FrameNodeChangeInfoFlag FRAME_NODE_CHANGE_START_SCROLL = 1 << 1;
+inline constexpr FrameNodeChangeInfoFlag FRAME_NODE_CHANGE_END_SCROLL = 1 << 2;
+inline constexpr FrameNodeChangeInfoFlag FRAME_NODE_CHANGE_START_ANIMATION = 1 << 3;
+inline constexpr FrameNodeChangeInfoFlag FRAME_NODE_CHANGE_GEOMETRY_CHANGE = 1 << 4;
+inline constexpr FrameNodeChangeInfoFlag FRAME_NODE_CHANGE_TRANSFORM_CHANGE = 1 << 5;
+
 inline bool CheckNeedMakePropertyDiff(PropertyChangeFlag flag)
 {
     return (flag & PROPERTY_UPDATE_DIFF) == PROPERTY_UPDATE_DIFF;

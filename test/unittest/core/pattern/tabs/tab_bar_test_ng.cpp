@@ -30,20 +30,26 @@ public:
  */
 HWTEST_F(TabBarTestNg, TabBarPatternUpdateSubTabBoard001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    auto pipeline = PipelineContext::GetCurrentContext();
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
     tabBarPattern_->UpdateSubTabBoard();
     EXPECT_EQ(swiperNode_->GetTag(), V2::SWIPER_ETS_TAG);
+    pipeline->fontScale_ = BIG_FONT_SIZE_SCALE;
     tabBarPattern_->UpdateSubTabBoard();
 
     EXPECT_EQ(tabBarPattern_->selectedModes_[0], SelectedMode::INDICATOR);
     tabBarPattern_->SetSelectedMode(SelectedMode::BOARD, 0);
     EXPECT_EQ(tabBarPattern_->selectedModes_[0], SelectedMode::BOARD);
+    pipeline->fontScale_ = LARGE_FONT_SIZE_SCALE;
     tabBarPattern_->UpdateSubTabBoard();
     EXPECT_EQ(tabBarPattern_->indicator_, 0);
 
     tabBarPattern_->indicator_ = 1;
+    pipeline->fontScale_ = MAX_FONT_SIZE_SCALE;
     tabBarPattern_->UpdateSubTabBoard();
     EXPECT_EQ(tabBarPattern_->indicator_, 1);
 
@@ -66,6 +72,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateSubTabBoard001, TestSize.Level1)
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
     tabBarPattern_->UpdateSubTabBoard();
     EXPECT_EQ(tabBarPattern_->indicator_, 0);
+    pipeline->fontScale_ = 1.f;
 }
 
 /**
@@ -75,9 +82,10 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateSubTabBoard001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternUpdateGradientRegions001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {
-        model.SetTabBarMode(TabBarMode::SCROLLABLE);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
     tabBarLayoutProperty_->UpdateAxis(Axis::VERTICAL);
@@ -134,9 +142,10 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateGradientRegions001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternSetSelectedMode001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {
-        model.SetFadingEdge(true);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetFadingEdge(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_EQ(tabBarPattern_->GetSelectedMode(), SelectedMode::INDICATOR);
 
     tabBarPattern_->SetSelectedMode(SelectedMode::INDICATOR, 0);
@@ -169,9 +178,10 @@ HWTEST_F(TabBarTestNg, TabBarPatternSetSelectedMode001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternUpdateIndicator001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {
-        model.SetFadingEdge(true);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetFadingEdge(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 0);
     EXPECT_EQ(tabBarPattern_->tabBarStyles_[0], TabBarStyle::BOTTOMTABBATSTYLE);
@@ -212,9 +222,10 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateIndicator001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternPlayPressAnimation001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {
-        model.SetFadingEdge(true);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetFadingEdge(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE, 0);
     IndicatorStyle indicatorStyle;
@@ -261,7 +272,9 @@ HWTEST_F(TabBarTestNg, TabBarPatternPlayPressAnimation001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternGetIndicatorRect001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     auto rect = tabBarLayoutProperty_->GetIndicatorRect(0);
     EXPECT_EQ(rect.GetX(), 85.f);
 }
@@ -273,7 +286,9 @@ HWTEST_F(TabBarTestNg, TabBarPatternGetIndicatorRect001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternGetSelectedMode001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     tabBarPattern_->indicator_ = 1;
     auto mode = tabBarPattern_->GetSelectedMode();
     EXPECT_EQ(mode, SelectedMode::INDICATOR);
@@ -289,14 +304,10 @@ HWTEST_F(TabBarTestNg, TabBarPatternMaskAnimationFinish001, TestSize.Level1)
     /**
      * @tc.steps: step1. build two bottom style tabbar.
      */
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 1);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. call MaskAnimationFinish function.
@@ -319,14 +330,10 @@ HWTEST_F(TabBarTestNg, TabBarPatternMaskAnimationFinish002, TestSize.Level1)
     /**
      * @tc.steps: step1. build two bottom style tabbar.
      */
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 1);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. call MaskAnimationFinish function.
@@ -353,14 +360,10 @@ HWTEST_F(TabBarTestNg, TabBarPatternChangeMask001, TestSize.Level1)
     /**
      * @tc.steps: step1. build two bottom style tabbar.
      */
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 1);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. call ChangeMask function.
@@ -403,14 +406,10 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateImageColor001, TestSize.Level1)
     /**
      * @tc.steps: step1. build two bottom style tabbar.
      */
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 1);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. call UpdateImageColor function.
@@ -436,16 +435,17 @@ HWTEST_F(TabBarTestNg, TabsModelSetTabBarWidth001, TestSize.Level1)
      * @tc.steps: step2. Test function SetTabBarWidth and SetTabBarHeight When tabBarWidth and tabBarHeight change.
      * @tc.expected: Related functions run ok.
      */
-    CreateWithItem([](TabsModelNG model) {
-        Dimension tabBarWidth = 10.0_vp;
-        Dimension tabBarHeight = 3.0_vp;
-        for (int i = 0; i <= 1; i++) {
-            model.SetTabBarWidth(tabBarWidth);
-            model.SetTabBarHeight(tabBarHeight);
-            tabBarWidth = -1.0_vp;
-            tabBarHeight = -1.0_vp;
-        }
-    });
+    TabsModelNG model = CreateTabs();
+    Dimension tabBarWidth = 10.0_vp;
+    Dimension tabBarHeight = 3.0_vp;
+    for (int i = 0; i <= 1; i++) {
+        model.SetTabBarWidth(tabBarWidth);
+        model.SetTabBarHeight(tabBarHeight);
+        tabBarWidth = -1.0_vp;
+        tabBarHeight = -1.0_vp;
+    }
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 }
 
 /**
@@ -455,7 +455,9 @@ HWTEST_F(TabBarTestNg, TabsModelSetTabBarWidth001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternInitClick001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Test function InitClick.
@@ -478,7 +480,9 @@ HWTEST_F(TabBarTestNg, TabBarPatternInitClick001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternInitScrollable001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     tabBarPattern_->axis_ = Axis::HORIZONTAL;
     tabBarPattern_->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::HORIZONTAL);
     auto eventHub = AceType::MakeRefPtr<EventHub>();
@@ -504,7 +508,9 @@ HWTEST_F(TabBarTestNg, TabBarPatternInitScrollable001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternInitTouche001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     tabBarPattern_->touchEvent_ = AceType::MakeRefPtr<TouchEventImpl>([](TouchEventInfo&) {});
@@ -527,9 +533,9 @@ HWTEST_F(TabBarTestNg, TabBarPatternInitTouche001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternGetBottomTabBarImageSizeAndOffset001, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
     std::vector<int32_t> selectedIndexes(1, 1);
     float selectedImageSize = 1.0f;
     float unselectedImageSize = 1.1f;
@@ -582,7 +588,9 @@ HWTEST_F(TabBarTestNg, TabBarPatternGetBottomTabBarImageSizeAndOffset001, TestSi
  */
 HWTEST_F(TabBarTestNg, TabBarPatternFocusIndexChange001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     int32_t index = 1;
     std::optional<int32_t> animation_test = 1;
 
@@ -607,7 +615,9 @@ HWTEST_F(TabBarTestNg, TabBarPatternMaskAnimationFinish003, TestSize.Level1)
      * @tc.steps: step2. Test function MaskAnimationFinish.
      * @tc.expected: Related functions run ok.
      */
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     int32_t selectedIndex = -1;
     bool isSelected = true;
@@ -622,9 +632,10 @@ HWTEST_F(TabBarTestNg, TabBarPatternMaskAnimationFinish003, TestSize.Level1)
 HWTEST_F(TabBarTestNg, TabBarDistributedTest001, TestSize.Level1)
 {
     TabsItemDivider divider;
-    CreateWithItem([divider](TabsModelNG model) {
-        model.SetDivider(divider);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetDivider(divider);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Set Indicator.
@@ -656,10 +667,11 @@ HWTEST_F(TabBarTestNg, TabBarDistributedTest001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternPlayPressAnimation002, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     int32_t index = 1;
     auto pressColor = Color();
@@ -690,10 +702,11 @@ HWTEST_F(TabBarTestNg, TabBarPatternPlayPressAnimation002, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternStopTabBarTranslateAnimation001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
 
     /**
@@ -713,10 +726,11 @@ HWTEST_F(TabBarTestNg, TabBarPatternStopTabBarTranslateAnimation001, TestSize.Le
  */
 HWTEST_F(TabBarTestNg, TabBarPatternSetEdgeEffect001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
 
     /**
@@ -735,11 +749,11 @@ HWTEST_F(TabBarTestNg, TabBarPatternSetEdgeEffect001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternUpdateTextColorAndFontWeight001, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabContents(1);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
     ASSERT_TRUE(pr.second);
@@ -767,11 +781,11 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateTextColorAndFontWeight001, TestSize.Le
  */
 HWTEST_F(TabBarTestNg, TabBarPatternUpdateTextColorAndFontWeight002, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabContents(1);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     for (int i = 0; i <= 1; i++) {
         AceType::DynamicCast<FrameNode>(
@@ -798,7 +812,9 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateTextColorAndFontWeight002, TestSize.Le
  */
 HWTEST_F(TabBarTestNg, TabBarPatternInitScrollable002, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     tabBarPattern_->axis_ = Axis::HORIZONTAL;
     tabBarLayoutProperty_->UpdateAxis(Axis::VERTICAL);
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
@@ -829,7 +845,9 @@ HWTEST_F(TabBarTestNg, TabBarPatternInitScrollable002, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternInitScrollable003, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     tabBarPattern_->axis_ = Axis::HORIZONTAL;
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
@@ -879,7 +897,9 @@ HWTEST_F(TabBarTestNg, TabBarPatternInitScrollable003, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternPlayMaskAnimation001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Test function PlayMaskAnimation.
@@ -915,7 +935,9 @@ HWTEST_F(TabBarTestNg, TabBarPatternPlayTranslateAnimation001, TestSize.Level1)
      * @tc.steps: step2. Test function PlayTranslateAnimation.
      * @tc.expected: Related function runs ok.
      */
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     float startPos = 0.1f;
     float endPos = 0.2f;
     float targetCurrentOffset = 0.3f;
@@ -933,10 +955,11 @@ HWTEST_F(TabBarTestNg, TabBarPatternPlayTranslateAnimation001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternSetEdgeEffect002, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     tabBarPattern_->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>();
 
@@ -956,10 +979,11 @@ HWTEST_F(TabBarTestNg, TabBarPatternSetEdgeEffect002, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternPlayTabBarTranslateAnimation001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabsDone(model);
     int32_t targetIndex = 1;
     tabBarPattern_->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>();
     tabBarNode_->GetGeometryNode()->SetFrameSize(SizeF(1.0f, 1.0f));
@@ -996,14 +1020,10 @@ HWTEST_F(TabBarTestNg, TabBarPatternPlayTabBarTranslateAnimation001, TestSize.Le
  */
 HWTEST_F(TabBarTestNg, TabBarPatternAdjustFocusPosition001, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-        }, 1);
-    }, BarPosition::END);
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: steps2. GetScopeFocusAlgorithm
@@ -1032,14 +1052,10 @@ HWTEST_F(TabBarTestNg, TabBarPatternAdjustFocusPosition001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternAdjustFocusPosition002, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-        }, 1);
-    }, BarPosition::END);
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: steps2. GetScopeFocusAlgorithm
@@ -1073,10 +1089,11 @@ HWTEST_F(TabBarTestNg, TabsModelSetOnTabBarClick001, TestSize.Level1)
      * @tc.steps: steps2. SetOnTabBarClick
      * @tc.expected: steps2. Check the result of SetOnTabBarClick
      */
-    CreateWithItem([](TabsModelNG model) {
-        model.SetOnTabBarClick([](const BaseEventInfo* info) {});
-        model.SetOnTabBarClick([](const BaseEventInfo* info) {});
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetOnTabBarClick([](const BaseEventInfo* info) {});
+    model.SetOnTabBarClick([](const BaseEventInfo* info) {});
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_NE(pattern_->onTabBarClickEvent_, nullptr);
     EXPECT_NE(pattern_->onTabBarClickEvent_, nullptr);
 }
@@ -1088,14 +1105,10 @@ HWTEST_F(TabBarTestNg, TabsModelSetOnTabBarClick001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternInitScrollable004, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 1);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
     tabBarPattern_->axis_ = Axis::HORIZONTAL;
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
@@ -1137,14 +1150,10 @@ HWTEST_F(TabBarTestNg, TabBarPatternInitScrollable004, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternGetIndicatorStyle001, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-        }, 1);
-    }, BarPosition::END);
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    CreateTabContentTabBarStyleWithBuilder(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyleWithBuilder(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: steps2. GetIndicatorStyle
@@ -1195,14 +1204,10 @@ HWTEST_F(TabBarTestNg, TabBarPatternGetIndicatorStyle001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternCheckSwiperDisable001, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-        }, 1);
-    }, BarPosition::END);
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: steps2. CheckSwiperDisable
@@ -1218,14 +1223,10 @@ HWTEST_F(TabBarTestNg, TabBarPatternCheckSwiperDisable001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternApplyTurnPageRateToIndicator001, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-        }, 1);
-    }, BarPosition::END);
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: steps2. ApplyTurnPageRateToIndicator
@@ -1259,14 +1260,10 @@ HWTEST_F(TabBarTestNg, TabBarPatternApplyTurnPageRateToIndicator001, TestSize.Le
  */
 HWTEST_F(TabBarTestNg, TabBarPatternAdjustFocusPosition003, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-        }, 1);
-    }, BarPosition::END);
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     tabBarPattern_->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
     tabBarPattern_->tabItemOffsets_.clear();
@@ -1303,12 +1300,12 @@ HWTEST_F(TabBarTestNg, TabBarPatternAdjustFocusPosition003, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarOnAttachToMainTree001, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            LabelStyle labelStyle;
-            tabContentModel.SetLabelStyle(labelStyle);
-        }, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    LabelStyle labelStyle;
+    tabContentModel.SetLabelStyle(labelStyle);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
 
@@ -1326,7 +1323,9 @@ HWTEST_F(TabBarTestNg, TabBarOnAttachToMainTree001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternInitScrollable005, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     tabBarPattern_->axis_ = Axis::HORIZONTAL;
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
@@ -1357,9 +1356,9 @@ HWTEST_F(TabBarTestNg, TabBarPatternInitScrollable005, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternCalculateSelectedIndex001, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
     auto info = MouseInfo();
     Offset s1(0.1, 0.1);
     Offset s2(0.4, 0.4);
@@ -1392,14 +1391,10 @@ HWTEST_F(TabBarTestNg, TabBarPatternCalculateSelectedIndex001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternGetIndicatorStyle002, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-        }, 1);
-    }, BarPosition::END);
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    CreateTabContentTabBarStyleWithBuilder(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyleWithBuilder(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: steps2. GetIndicatorStyle
@@ -1447,7 +1442,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternGetIndicatorStyle002, TestSize.Level1)
     tabBarPattern_->swiperStartIndex_ = -1;
     tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
     EXPECT_EQ(tabBarPattern_->swiperStartIndex_, -1);
-    EXPECT_EQ(indicatorOffset.GetY(), 0.f);
+    EXPECT_EQ(indicatorOffset.GetY(), 33.f);
 }
 
 /**
@@ -1457,7 +1452,9 @@ HWTEST_F(TabBarTestNg, TabBarPatternGetIndicatorStyle002, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternIsAtBottom001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
 
     /**
@@ -1476,14 +1473,10 @@ HWTEST_F(TabBarTestNg, TabBarPatternIsAtBottom001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternApplyTurnPageRateToIndicator002, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-        }, 1);
-    }, BarPosition::END);
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: steps2. ApplyTurnPageRateToIndicator
@@ -1521,14 +1514,10 @@ HWTEST_F(TabBarTestNg, TabBarPatternApplyTurnPageRateToIndicator002, TestSize.Le
  */
 HWTEST_F(TabBarTestNg, TabBarPatternApplyTurnPageRateToIndicator003, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-        }, 1);
-    }, BarPosition::END);
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: steps2. ApplyTurnPageRateToIndicator
@@ -1588,9 +1577,10 @@ HWTEST_F(TabBarTestNg, TabBarPatternApplyTurnPageRateToIndicator003, TestSize.Le
  */
 HWTEST_F(TabBarTestNg, TabBarPatternUpdateIndicator002, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {
-        model.SetFadingEdge(true);
-    });
+    TabsModelNG model = CreateTabs();
+    model.SetFadingEdge(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_TRUE(tabBarPaintProperty_->GetFadingEdgeValue());
 
     /**
@@ -1617,7 +1607,9 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateIndicator002, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternOnRestoreInfo001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Set Indicator.
@@ -1662,10 +1654,11 @@ HWTEST_F(TabBarTestNg, TabBarPatternOnRestoreInfo001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternSetEdgeEffect003, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
 
     /**
@@ -1684,7 +1677,9 @@ HWTEST_F(TabBarTestNg, TabBarPatternSetEdgeEffect003, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarBlurStyle001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     auto pipeline = PipelineContext::GetCurrentContext();
     pipeline->SetMinPlatformVersion(PLATFORM_VERSION_11);
 
@@ -1708,7 +1703,9 @@ HWTEST_F(TabBarTestNg, TabBarBlurStyle001, TestSize.Level1)
 */
 HWTEST_F(TabBarTestNg, SetTabBarStyle001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
 
@@ -1737,10 +1734,11 @@ HWTEST_F(TabBarTestNg, SetTabBarStyle001, TestSize.Level1)
 */
 HWTEST_F(TabBarTestNg, TabBarPatternProvideRestoreInfo003, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step1.1. Constructing TabBarPattern class pointers
@@ -1756,7 +1754,9 @@ HWTEST_F(TabBarTestNg, TabBarPatternProvideRestoreInfo003, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternAdjustFocusPosition004, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: steps2. GetScopeFocusAlgorithm
@@ -1824,7 +1824,9 @@ HWTEST_F(TabBarTestNg, TabContentModelAddTabBarItem001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternInitLongPressEvent001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     tabBarPattern_->longPressEvent_ = nullptr;
@@ -1846,7 +1848,9 @@ HWTEST_F(TabBarTestNg, TabBarPatternInitLongPressEvent001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternInitDragEvent001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     tabBarPattern_->dragEvent_ = nullptr;
@@ -1861,50 +1865,6 @@ HWTEST_F(TabBarTestNg, TabBarPatternInitDragEvent001, TestSize.Level1)
     }
 }
 
-/**
- * @tc.name: TabBarPatternShowDialogWithNode001
- * @tc.desc: test ShowDialogWithNode
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarTestNg, TabBarPatternShowDialogWithNode001, TestSize.Level1)
-{
-    CreateWithItem([](TabsModelNG model) {});
-    tabBarPattern_->dialogNode_ = nullptr;
-
-    /**
-     * @tc.steps: step2. Test function ShowDialogWithNode.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 3; i++) {
-        tabBarPattern_->ShowDialogWithNode(i);
-        tabBarPattern_->dialogNode_ =
-            FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<TabsPattern>());
-    }
-}
-
-/**
- * @tc.name: TabBarPatternCloseDialog001
- * @tc.desc: test CloseDialog
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarTestNg, TabBarPatternCloseDialog001, TestSize.Level1)
-{
-    CreateWithItem([](TabsModelNG model) {});
-    tabBarPattern_->dialogNode_ = nullptr;
-
-    /**
-     * @tc.steps: step2. Test function CloseDialog.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        tabBarPattern_->ShowDialogWithNode(i);
-        tabBarPattern_->dialogNode_ =
-            FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<TabsPattern>());
-        tabBarPattern_->CloseDialog();
-        EXPECT_EQ(tabBarPattern_->dialogNode_, nullptr);
-    }
-}
-
 /*
  * @tc.name: TabBarPatternCalculateSelectedIndex002
  * @tc.desc: test HandleMouseEvent
@@ -1912,7 +1872,9 @@ HWTEST_F(TabBarTestNg, TabBarPatternCloseDialog001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarPatternCalculateSelectedIndex002, TestSize.Level1)
 {
-    Create([](TabsModelNG model) { CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0); });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
     auto info = MouseInfo();
     Offset s1(0.1, 0.1);
     Offset s2(0.4, 0.4);

@@ -403,6 +403,13 @@ void SwiperModelNG::SetCustomContentTransition(SwiperContentAnimatedTransition& 
     pattern->SetSwiperCustomContentTransition(transition);
 }
 
+void SwiperModelNG::SetCustomContentTransition(FrameNode* frameNode, SwiperContentAnimatedTransition& transition)
+{
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSwiperCustomContentTransition(transition);
+}
+
 void SwiperModelNG::SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

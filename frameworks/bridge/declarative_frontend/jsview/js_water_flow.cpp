@@ -121,15 +121,16 @@ void ParseScroller(const JSRef<JSObject>& obj)
     }
 }
 } // namespace
+} // namespace
 
-void UpdateWaterFlowSections(const JSCallbackInfo& args, const JSRef<JSVal>& sections)
+void UpdateSections(
+    const JSCallbackInfo& args, const JSRef<JSVal>& sections, RefPtr<NG::WaterFlowSections>& waterFlowSections)
 {
+    CHECK_NULL_VOID(waterFlowSections);
     auto sectionsObject = JSRef<JSObject>::Cast(sections);
     auto changes = sectionsObject->GetProperty("changeArray");
     CHECK_NULL_VOID(changes->IsArray());
     auto changeArray = JSRef<JSArray>::Cast(changes);
-    auto waterFlowSections = WaterFlowModel::GetInstance()->GetOrCreateWaterFlowSections();
-    CHECK_NULL_VOID(waterFlowSections);
     ParseChanges(args, changeArray, waterFlowSections);
 
     auto lengthFunc = sectionsObject->GetProperty("length");
@@ -146,7 +147,21 @@ void UpdateWaterFlowSections(const JSCallbackInfo& args, const JSRef<JSVal>& sec
     auto func = JSRef<JSFunc>::Cast(clearFunc);
     func->Call(sectionsObject);
 }
-} // namespace
+
+void UpdateWaterFlowSections(const JSCallbackInfo& args, const JSRef<JSVal>& sections)
+{
+    auto waterFlowSections = WaterFlowModel::GetInstance()->GetOrCreateWaterFlowSections();
+    CHECK_NULL_VOID(waterFlowSections);
+    UpdateSections(args, sections, waterFlowSections);
+}
+
+void JSWaterFlow::UpdateWaterFlowSectionsByFrameNode(
+    NG::FrameNode* frameNode, const JSCallbackInfo& args, const JSRef<JSVal>& sections)
+{
+    auto waterFlowSections = NG::WaterFlowModelNG::GetOrCreateWaterFlowSections(frameNode);
+    CHECK_NULL_VOID(waterFlowSections);
+    UpdateSections(args, sections, waterFlowSections);
+}
 
 void JSWaterFlow::Create(const JSCallbackInfo& args)
 {

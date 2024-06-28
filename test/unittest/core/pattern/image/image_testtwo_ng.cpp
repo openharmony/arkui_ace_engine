@@ -609,7 +609,7 @@ HWTEST_F(ImageTestTwoNg, ImageSensitiveTest0002, TestSize.Level1)
 
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, true, nullptr, true);
     EXPECT_TRUE(imagePaintMethod.sensitive_);
 }
 
