@@ -883,6 +883,29 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
     host->MarkModifyDone();
 }
 
+void SearchPattern::GetSearchFocusPaintRadius(float& radiusTopLeft, float& radiusTopRight,
+        float& radiusBottomLeft, float& radiusBottomRight)
+{
+    auto host = GetHost();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto radius = renderContext->GetBorderRadius();
+    if (radius.has_value()) {
+        if (radius->radiusTopLeft.has_value()) {
+            radiusTopLeft = static_cast<float>(radius->radiusTopLeft->ConvertToPx());
+        }
+        if (radius->radiusTopRight.has_value()) {
+            radiusTopRight = static_cast<float>(radius->radiusTopRight->ConvertToPx());
+        }
+        if (radius->radiusBottomLeft.has_value()) {
+            radiusBottomLeft = static_cast<float>(radius->radiusBottomLeft->ConvertToPx());
+        }
+        if (radius->radiusBottomRight.has_value()) {
+            radiusBottomRight = static_cast<float>(radius->radiusBottomRight->ConvertToPx());
+        }
+    }
+}
+
 void SearchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
     float originX = 0.0f;
@@ -902,24 +925,7 @@ void SearchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
         originY = searchOffset_.GetY() - DOUBLE * focusOffset;
         endX = searchSize_.Width() + searchOffset_.GetX() + DOUBLE * focusOffset;
         endY = searchSize_.Height() + searchOffset_.GetY() + DOUBLE * focusOffset;
-        auto host = GetHost();
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        auto radius = renderContext->GetBorderRadius();
-        if (radius.has_value()) {
-            if (radius->radiusTopLeft.has_value()) {
-                radiusTopLeft = static_cast<float>(radius->radiusTopLeft->ConvertToPx());
-            }
-            if (radius->radiusTopRight.has_value()) {
-                radiusTopRight = static_cast<float>(radius->radiusTopRight->ConvertToPx());
-            }
-            if (radius->radiusBottomLeft.has_value()) {
-                radiusBottomLeft = static_cast<float>(radius->radiusBottomLeft->ConvertToPx());
-            }
-            if (radius->radiusBottomRight.has_value()) {
-                radiusBottomRight = static_cast<float>(radius->radiusBottomRight->ConvertToPx());
-            }
-        }
+        GetSearchFocusPaintRadius(radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
     }
     if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
         originX = cancelButtonOffset_.GetX() + focusOffset;
@@ -1300,8 +1306,7 @@ void SearchPattern::HandleBlurEvent()
     auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdateTextColor(normalTextColor_);
-    if (isFocusPlaceholderColorSet_)
-    {
+    if (isFocusPlaceholderColorSet_) {
         textFieldLayoutProperty->UpdatePlaceholderTextColor(normalPlaceholderColor_);
         isFocusPlaceholderColorSet_ = false;
     }

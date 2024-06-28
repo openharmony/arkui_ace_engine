@@ -211,6 +211,8 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState(bool recoverFlag = false);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
+    void GetSearchFocusPaintRadius(float& radiusTopLeft, float& radiusTopRight,
+        float& radiusBottomLeft, float& radiusBottomRight);
     void RequestKeyboard();
     // Init touch and hover event
     void InitTextFieldValueChangeEvent();
