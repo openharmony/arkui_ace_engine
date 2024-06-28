@@ -496,11 +496,9 @@ private:
 
     void FixPredictSnapOffsetAlignStart();
     void FixPredictSnapOffsetAlignEnd();
-    // virtual bool IsScrollSnapAlignCenter(LayoutWrapper* layoutWrapper);
     static bool PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint);
 
     float GetStopOnScreenOffset(V2::ScrollSnapAlign scrollSnapAlign);
-    // virtual void UpdateSnapAlignContentOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty);
 
     std::optional<int32_t> jumpIndexInGroup_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;
