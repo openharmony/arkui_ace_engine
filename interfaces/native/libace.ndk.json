@@ -1613,39 +1613,39 @@
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_Curve_InitCurve"
+        "name": "OH_ArkUI_Curve_CreateCurveByType"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_Curve_StepsCurve"
+        "name": "OH_ArkUI_Curve_CreateStepsCurve"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_Curve_CubicBezierCurve"
+        "name": "OH_ArkUI_Curve_CreateCubicBezierCurve"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_Curve_SpringCurve"
+        "name": "OH_ArkUI_Curve_CreateSpringCurve"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_Curve_SpringMotion"
+        "name": "OH_ArkUI_Curve_CreateSpringMotion"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_Curve_ResponsiveSpringMotion"
+        "name": "OH_ArkUI_Curve_CreateResponsiveSpringMotion"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_Curve_InterpolatingSpring"
+        "name": "OH_ArkUI_Curve_CreateInterpolatingSpring"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_Curve_CustomCurve"
+        "name": "OH_ArkUI_Curve_CreateCustomCurve"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_Curve_disposeCurve"
+        "name": "OH_ArkUI_Curve_DisposeCurve"
     },
     {
         "first_introduced": "12",
