@@ -285,7 +285,19 @@ SizeF TextFieldLayoutAlgorithm::PlaceHolderMeasureContent(const LayoutConstraint
     }
 
     auto contentWidth = ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph_, imageWidth);
-    CounterNodeMeasure(contentWidth, layoutWrapper);
+
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, SizeF());
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, SizeF());
+    if (pattern->GetTextInputFlag()) {
+        // TextInput's counter is outside the input area
+        auto reviseContentWidth = contentWidth + imageWidth;
+        CounterNodeMeasure(reviseContentWidth, layoutWrapper);
+    } else {
+        // TextArea's counter is inside the input area
+        CounterNodeMeasure(contentWidth, layoutWrapper);
+    }
 
     UpdateParagraphTextFadeoutWidth(contentConstraint, layoutWrapper->GetHostNode());
 

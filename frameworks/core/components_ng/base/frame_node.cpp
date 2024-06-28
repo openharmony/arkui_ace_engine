@@ -1160,9 +1160,8 @@ void FrameNode::OnDetachFromMainTree(bool recursive)
         auto focusView = focusHub->GetFirstChildFocusView();
         if (focusView) {
             focusView->FocusViewClose();
-        } else {
-            focusHub->RemoveSelf();
         }
+        focusHub->RemoveSelf();
     }
     eventHub_->FireOnDetach();
     pattern_->OnDetachFromMainTree();
@@ -1639,9 +1638,11 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread)
         Layout();
     } else {
         {
-            ACE_SCOPED_TRACE("CreateTaskMeasure[%s][self:%d][parent:%d]", GetTag().c_str(), GetId(),
-                GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0);
-            Measure(GetLayoutConstraint());
+            auto layoutConstraint = GetLayoutConstraint();
+            ACE_SCOPED_TRACE("CreateTaskMeasure[%s][self:%d][parent:%d][layoutConstraint:%s]", GetTag().c_str(),
+                GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0,
+                layoutConstraint.ToString().c_str());
+            Measure(layoutConstraint);
         }
         {
             ACE_SCOPED_TRACE("CreateTaskLayout[%s][self:%d][parent:%d]", GetTag().c_str(), GetId(),
@@ -2251,7 +2252,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
 {
     if (!isActive_ || !eventHub_->IsEnabled() || bypass_) {
         if (SystemProperties::GetDebugEnabled()) {
-            LOGI("%{public}s is inActive, need't do touch test", GetTag().c_str());
+            TAG_LOGD(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test", GetTag().c_str());
         }
         return HitTestResult::OUT_OF_REGION;
     }
@@ -2286,11 +2287,11 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
 
     auto responseRegionList = GetResponseRegionList(origRect, static_cast<int32_t>(touchRestrict.sourceType));
     if (SystemProperties::GetDebugEnabled()) {
-        LOGI("TouchTest: point is %{public}s in %{public}s, depth: %{public}d", parentRevertPoint.ToString().c_str(),
-            GetTag().c_str(), GetDepth());
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "TouchTest: point is %{public}s in %{public}s, depth: %{public}d",
+            parentRevertPoint.ToString().c_str(), GetTag().c_str(), GetDepth());
         for (const auto& rect : responseRegionList) {
-            LOGI("TouchTest: responseRegionList is %{public}s, point is %{public}s", rect.ToString().c_str(),
-                parentRevertPoint.ToString().c_str());
+            TAG_LOGD(AceLogTag::ACE_UIEVENT, "TouchTest: responseRegionList is %{public}s, point is %{public}s",
+                rect.ToString().c_str(), parentRevertPoint.ToString().c_str());
         }
     }
     {
@@ -2330,7 +2331,10 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     auto subRevertPoint = revertPoint - origRect.GetOffset();
     bool consumed = false;
 
-    auto onTouchInterceptresult = TriggerOnTouchIntercept(touchRestrict.touchEvent);
+    HitTestMode onTouchInterceptresult = HitTestMode::HTMDEFAULT;
+    if (touchRestrict.inputEventType != InputEventType::MOUSE_BUTTON) {
+        onTouchInterceptresult = TriggerOnTouchIntercept(touchRestrict.touchEvent);
+    }
     TouchResult touchRes;
     if (onTouchInterceptresult != HitTestMode::HTMBLOCK) {
         std::vector<TouchTestInfo> touchInfos;
@@ -3085,6 +3089,9 @@ void FrameNode::UpdateAnimatablePropertyFloat(const std::string& propertyName, f
     auto property = AceType::DynamicCast<NodeAnimatablePropertyFloat>(iter->second);
     CHECK_NULL_VOID(property);
     property->Set(value);
+    if (AnimationUtils::IsImplicitAnimationOpen()) {
+        AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_START_ANIMATION);
+    }
 }
 
 void FrameNode::CreateAnimatableArithmeticProperty(const std::string& propertyName,
@@ -3188,7 +3195,7 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
 {
     if (SystemProperties::GetDebugEnabled()) {
         const std::string sceneStatusStrs[] = { "START", "RUNNING", "END" };
-        LOGI("%{public}s  AddFRCSceneInfo scene:%{public}s   speed:%{public}f  status:%{public}s", GetTag().c_str(),
+        LOGD("%{public}s  AddFRCSceneInfo scene:%{public}s   speed:%{public}f  status:%{public}s", GetTag().c_str(),
             scene.c_str(), std::abs(speed), sceneStatusStrs[static_cast<int32_t>(status)].c_str());
     }
 
@@ -3374,7 +3381,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 
     if (isConstraintNotChanged_) {
         if (!CheckNeedForceMeasureAndLayout()) {
-            ACE_SCOPED_TRACE("SkipMeasure");
+            ACE_SCOPED_TRACE("SkipMeasure [%s][self:%d]", GetTag().c_str(), GetId());
             layoutAlgorithm_->SetSkipMeasure();
             ACE_LAYOUT_TRACE_END()
             return;
@@ -3595,8 +3602,12 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
         }
         needSyncRsNode = false;
     }
-    renderContext_->SavePaintRect(true, layoutProperty_->GetPixelRound());
-    renderContext_->SyncPartialRsProperties();
+    if (GetTag() != V2::PAGE_ETS_TAG) {
+        renderContext_->SavePaintRect(true, layoutProperty_->GetPixelRound());
+        if (needSyncRsNode) {
+            renderContext_->SyncPartialRsProperties();
+        }
+    }
     config = { .frameSizeChange = frameSizeChange,
         .frameOffsetChange = frameOffsetChange,
         .contentSizeChange = contentSizeChange,
@@ -4574,7 +4585,7 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
     if (SystemProperties::GetDebugEnabled()) {
         const auto& hostTag = GetHostTag();
         path = path + " --> " + hostTag;
-        LOGI("FindSuggestOpIncNode : %{public}s, with depth %{public}d, boundary: %{public}f, self: %{public}f, "
+        LOGD("FindSuggestOpIncNode : %{public}s, with depth %{public}d, boundary: %{public}f, self: %{public}f, "
              "status: %{public}d",
             path.c_str(), depth, boundary.Height(), GetGeometryNode()->GetFrameSize().Height(), status);
     }
@@ -4682,6 +4693,57 @@ void FrameNode::TriggerShouldParallelInnerWith(
             currentRecognizer->SetBridgeMode(true);
             result->AddBridgeObj(currentRecognizer);
         }
+    }
+}
+
+void FrameNode::OnSyncGeometryFrameFinish(const RectF& paintRect)
+{
+    if (syncedFramePaintRect_.has_value() && syncedFramePaintRect_.value() != paintRect) {
+        AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_GEOMETRY_CHANGE);
+    }
+    syncedFramePaintRect_ = paintRect;
+}
+
+void FrameNode::AddFrameNodeChangeInfoFlag(FrameNodeChangeInfoFlag changeFlag)
+{
+    if (changeInfoFlag_ == FRAME_NODE_CHANGE_INFO_NONE) {
+        auto context = GetContext();
+        CHECK_NULL_VOID(context);
+        context->AddChangedFrameNode(Claim(this));
+    }
+    changeInfoFlag_ = changeInfoFlag_ | changeFlag;
+}
+
+void FrameNode::RegisterNodeChangeListener()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddFrameNodeChangeListener(Claim(this));
+}
+
+void FrameNode::UnregisterNodeChangeListener()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->RemoveFrameNodeChangeListener(Claim(this));
+}
+
+void FrameNode::ProcessFrameNodeChangeFlag()
+{
+    auto changeFlag = FRAME_NODE_CHANGE_INFO_NONE;
+    auto parent = Claim(this);
+    while (parent) {
+        if (parent->GetChangeInfoFlag() != FRAME_NODE_CHANGE_INFO_NONE) {
+            changeFlag = changeFlag | parent->GetChangeInfoFlag();
+        }
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    if (changeFlag == FRAME_NODE_CHANGE_INFO_NONE) {
+        return;
+    }
+    auto pattern = GetPattern();
+    if (pattern) {
+        pattern->OnFrameNodeChanged(changeFlag);
     }
 }
 } // namespace OHOS::Ace::NG

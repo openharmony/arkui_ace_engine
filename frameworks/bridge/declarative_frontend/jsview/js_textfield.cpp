@@ -216,7 +216,7 @@ void JSTextField::SetType(const JSCallbackInfo& info)
     if (!jsValue->IsNumber()) {
         return;
     }
-    TextInputType textInputType = static_cast<TextInputType>(jsValue->ToNumber<int32_t>());
+    TextInputType textInputType = CastToTextInputType(jsValue->ToNumber<int32_t>());
     TextFieldModel::GetInstance()->SetType(textInputType);
 }
 
@@ -708,6 +708,7 @@ void JSTextField::JsPadding(const JSCallbackInfo& info)
     CalcDimension length;
     ParseJsDimensionVp(jsValue, length);
     if (length.IsNegative()) {
+        TextFieldModel::GetInstance()->SetPadding(NG::PaddingProperty(), Edge(), true);
         return;
     }
     bool tmp = !jsValue->IsString() && !jsValue->IsNumber() && !jsValue->IsObject();

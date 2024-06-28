@@ -254,6 +254,7 @@ private:
     bool focusEventInitialized_ = false;
     std::function<void(bool)> isFocusActiveUpdateEvent_;
     RefPtr<RadioModifier> radioModifier_;
+    bool isTouchPreventDefault_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
 };
 } // namespace OHOS::Ace::NG

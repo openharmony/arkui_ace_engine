@@ -114,6 +114,19 @@ class SetGutterModifier extends ModifierWithKey<number | GutterOption> {
     }
   }
 }
+class GridRowOnBreakpointChangeModifier extends ModifierWithKey<(breakpoints: string) => void> {
+  constructor(value: (breakpoints: string) => void) {
+    super(value);
+  }
+  static identity = Symbol('gridRowOnBreakpointChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().gridRow.resetOnBreakpointChange(node);
+    } else {
+      getUINativeModule().gridRow.setOnBreakpointChange(node, this.value);
+    }
+  }
+}
 interface GridRowParam {
   gutter?: number | GutterOption;
   columns?: number | GridRowColumnOption;
@@ -128,7 +141,8 @@ class ArkGridRowComponent extends ArkComponent implements CommonMethod<GridRowAt
     return ["GridCol"];
   }
   onBreakpointChange(callback: (breakpoints: string) => void): GridRowAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, GridRowOnBreakpointChangeModifier.identity, GridRowOnBreakpointChangeModifier, callback);
+    return this;
   }
   alignItems(value: ItemAlign): GridRowAttribute {
     modifierWithKey(this._modifiersWithKeys, GridRowAlignItemsModifier.identity, GridRowAlignItemsModifier, value);

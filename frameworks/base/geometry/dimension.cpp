@@ -178,6 +178,9 @@ std::string Dimension::ToString() const
     if (unit_ == DimensionUnit::NONE) {
         return StringUtils::DoubleToString(value_).append("none");
     }
+    if (unit_ == DimensionUnit::INVALID) {
+        return StringUtils::DoubleToString(value_).append("invalid");
+    }
     if (units[static_cast<int>(unit_)] == units[percentIndex]) {
         return StringUtils::DoubleToString(value_ * percentUnit).append(units[static_cast<int>(unit_)]);
     }

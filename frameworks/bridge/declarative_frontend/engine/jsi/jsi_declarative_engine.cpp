@@ -80,16 +80,19 @@ extern const char _binary_jsMockSystemPlugin_abc_end[];
 #endif
 extern const char _binary_stateMgmt_abc_start[];
 extern const char _binary_jsEnumStyle_abc_start[];
+extern const char _binary_jsUIContext_abc_start[];
 extern const char _binary_arkComponent_abc_start[];
 extern const char _binary_arkTheme_abc_start[];
 #if !defined(IOS_PLATFORM)
 extern const char _binary_stateMgmt_abc_end[];
 extern const char _binary_jsEnumStyle_abc_end[];
+extern const char _binary_jsUIContext_abc_end[];
 extern const char _binary_arkComponent_abc_end[];
 extern const char _binary_arkTheme_abc_end[];
 #else
 extern const char* _binary_stateMgmt_abc_end;
 extern const char* _binary_jsEnumStyle_abc_end;
+extern const char* _binary_jsUIContext_abc_end;
 extern const char* _binary_arkComponent_abc_end;
 extern const char* _binary_arkTheme_abc_end;
 #endif
@@ -189,6 +192,13 @@ inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
     return runtime->EvaluateJsCode(
         (uint8_t*)_binary_stateMgmt_abc_start, _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start, str);
 #endif
+}
+
+inline bool PreloadUIContent(const shared_ptr<JsRuntime>& runtime)
+{
+    uint8_t* codeStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(_binary_jsUIContext_abc_start));
+    int32_t codeLength = _binary_jsUIContext_abc_end - _binary_jsUIContext_abc_start;
+    return runtime->EvaluateJsCode(codeStart, codeLength);
 }
 
 inline bool PreloadArkComponent(const shared_ptr<JsRuntime>& runtime)
@@ -498,6 +508,7 @@ void JsiDeclarativeEngineInstance::InitJsObject()
             PreloadExports(runtime_, global);
             PreloadRequireNative(runtime_, global);
             PreloadStateManagement(runtime_);
+            PreloadUIContent(runtime_);
             PreloadArkComponent(runtime_);
             PreloadArkTheme(runtime_);
         }
@@ -526,6 +537,7 @@ void JsiDeclarativeEngineInstance::InitAceModule()
         PreloadJsEnums(runtime_);
         PreloadArkComponent(runtime_);
         PreloadArkTheme(runtime_);
+        PreloadUIContent(runtime_);
     }
 #if defined(PREVIEW)
     std::string jsMockSystemPluginString(_binary_jsMockSystemPlugin_abc_start,
@@ -642,6 +654,8 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     }
 
     bool evalResult = PreloadStateManagement(arkRuntime);
+
+    PreloadUIContent(arkRuntime);
 
     // preload ark component
     bool arkComponentResult = PreloadArkComponent(arkRuntime);
@@ -1724,6 +1738,7 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
     CHECK_NULL_RETURN(!namedRouterRegisterMap_.empty(), false);
     auto iter = namedRouterRegisterMap_.find(namedRoute);
     if (isTriggeredByJs && iter == namedRouterRegisterMap_.end()) {
+        LOGW("named route %{public}s not found!", namedRoute.c_str());
         return false;
     }
     // if this triggering is not from js named router api,
@@ -1750,15 +1765,22 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
         bundleName = bundleName_;
         moduleName = moduleName_;
 #endif
+        // when need to locate page in main_pages.json, url shouldn't be empty
+        if (url == "") {
+            LOGW("page not found! bundleName: %{public}s, moduleName: %{public}s, url: %{public}s",
+                bundleName.c_str(), moduleName.c_str(), url.c_str());
+            return false;
+        }
         iter = std::find_if(namedRouterRegisterMap_.begin(), namedRouterRegisterMap_.end(),
             [&bundleName, &moduleName, &url](const auto& item) {
                 return item.second.bundleName == bundleName && item.second.moduleName == moduleName &&
                        item.second.pagePath == url;
             });
-    }
-    if (iter == namedRouterRegisterMap_.end()) {
-        LOGE("page is not in namedRouterRegisterMap_, please check bundleName、moduleName and url");
-        return false;
+        if (iter == namedRouterRegisterMap_.end()) {
+            LOGW("page not found! bundleName: %{public}s, moduleName: %{public}s, url: %{public}s",
+                bundleName.c_str(), moduleName.c_str(), url.c_str());
+            return false;
+        }
     }
 
     /**
@@ -2783,7 +2805,7 @@ bool JsiDeclarativeEngineInstance::RegisterStringCacheTable(const EcmaVM* vm, in
     if (vm == nullptr) {
         return false;
     }
-    if (size > MAX_STRING_CACHE_SIZE) {
+    if (static_cast<uint32_t>(size) > MAX_STRING_CACHE_SIZE) {
         TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "string cache table is oversize");
         return false;
     }

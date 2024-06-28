@@ -59,15 +59,15 @@ typedef struct {
 */
 typedef struct ArkUI_AnimateOption ArkUI_AnimateOption;
 
-struct ArkUI_Curve;
+typedef struct ArkUI_Curve ArkUI_Curve;
 typedef struct ArkUI_Curve* ArkUI_CurveHandle;
 
 typedef struct ArkUI_KeyframeAnimateOption ArkUI_KeyframeAnimateOption;
 typedef struct ArkUI_AnimatorOption ArkUI_AnimatorOption;
 typedef struct ArkUI_Animator* ArkUI_AnimatorHandle;
 
-struct ArkUI_AnimatorEvent;
-struct ArkUI_AnimatorOnFrameEvent;
+typedef struct ArkUI_AnimatorEvent ArkUI_AnimatorEvent;
+typedef struct ArkUI_AnimatorOnFrameEvent ArkUI_AnimatorOnFrameEvent;
 
 /**
  * @brief Implements the native animation APIs provided by ArkUI.
@@ -102,7 +102,7 @@ typedef struct {
 * @return Returns the pointer to the created animation configuration.
 * @since 12
 */
-ArkUI_AnimateOption* OH_ArkUI_AnimateOption_Create();
+ArkUI_AnimateOption* OH_ArkUI_AnimateOption_Create(void);
 
 /**
 * @brief Destroys an animation configuration.

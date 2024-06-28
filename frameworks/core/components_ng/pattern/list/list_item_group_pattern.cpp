@@ -413,4 +413,14 @@ void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint,
         backwardCachedIndex_ = std::max(currentIndex + 1, limit);
     }
 }
+
+void ListItemGroupPattern::SetListItemGroupStyle(V2::ListItemGroupStyle style)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (listItemGroupStyle_ == V2::ListItemGroupStyle::NONE && style == V2::ListItemGroupStyle::CARD) {
+        listItemGroupStyle_ = style;
+        SetListItemGroupDefaultAttributes(host);
+    }
+}
 } // namespace OHOS::Ace::NG

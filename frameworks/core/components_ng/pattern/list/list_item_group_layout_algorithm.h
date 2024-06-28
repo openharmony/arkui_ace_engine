@@ -65,7 +65,7 @@ public:
         itemPosition_ = itemPosition;
     }
 
-    void ClearItemPosition(LayoutWrapper* layoutWrapper);
+    void ClearItemPosition();
 
     float GetSpaceWidth() const
     {
@@ -201,6 +201,8 @@ public:
     {
         needAllLayout_ = true;
     }
+
+    void CheckNeedAllLayout(const RefPtr<LayoutWrapper>& layoutWrapper, bool forwardLayout);
 
     void SetScrollAlign(ScrollAlign align)
     {

@@ -23,6 +23,10 @@ void StagePattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto container = Container::Current();
+    if (container && container->IsDynamicRender()) {
+        host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     host->GetRenderContext()->UpdateBackgroundColor(pipeline->GetAppBgColor());

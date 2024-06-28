@@ -23,60 +23,16 @@
 
 namespace OHOS {
 namespace AppExecFwk {
-class MockFormIRemoteObject : public IRemoteObject {
+class MockFormIRemoteObject : public IPCObjectStub {
 public:
-    MockFormIRemoteObject() : IRemoteObject(u"mock_i_remote_object") {}
+    MockFormIRemoteObject() : IPCObjectStub(u"mock_i_remote_object") {}
 
     ~MockFormIRemoteObject() {}
 
-    int32_t GetObjectRefCount() override
-    {
-        return 0;
-    }
-
     MOCK_METHOD(int, SendRequest, (uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option));
-
-    bool IsProxyObject() const override
-    {
-        return true;
-    }
-
-    bool CheckObjectLegality() const override
-    {
-        return true;
-    }
-
-    bool AddDeathRecipient(const sptr<DeathRecipient> &recipient) override
-    {
-        return true;
-    }
-
-    bool RemoveDeathRecipient(const sptr<DeathRecipient> &recipient) override
-    {
-        return true;
-    }
-
-    bool Marshalling(Parcel &parcel) const override
-    {
-        return true;
-    }
-
-    sptr<IRemoteBroker> AsInterface() override
-    {
-        return nullptr;
-    }
-
-    int Dump(int fd, const std::vector<std::u16string> &args) override
-    {
-        return 0;
-    }
-
-    std::u16string GetObjectDescriptor() const
-    {
-        std::u16string descriptor = std::u16string();
-        return descriptor;
-    }
+    MOCK_METHOD(int, OnRemoteRequest, (uint32_t code, MessageParcel &data, MessageParcel &reply,
+        MessageOption &option));
 };
-} // namespace Notification
+} // namespace AppExecFwk
 } // namespace OHOS
 #endif

@@ -14,14 +14,36 @@
  */
 
 #include "tabs_test_ng.h"
+#include "core/components_ng/pattern/dialog/dialog_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+constexpr double BIG_DIALOG_WIDTH = 216.0;
+constexpr double MAX_DIALOG_WIDTH = 256.0;
+} // namespace
 
 class TabBarEventTestNg : public TabsTestNg {
 public:
+    void LongPress(Offset location);
+    void DragTo(Offset location);
 };
+
+void TabBarEventTestNg::LongPress(Offset location)
+{
+    auto handleLongPressEvent = tabBarPattern_->longPressEvent_->GetGestureEventFunc();
+    GestureEvent info;
+    info.SetLocalLocation(location);
+    handleLongPressEvent(info);
+}
+
+void TabBarEventTestNg::DragTo(Offset location)
+{
+    auto dragUpdate = tabBarPattern_->dragEvent_->GetActionUpdateEventFunc();
+    GestureEvent info;
+    info.SetLocalLocation(location);
+    dragUpdate(info);
+}
 
 /**
  * @tc.name: TabBarPatternHandleBottomTabBarChange001
@@ -34,14 +56,10 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarChange001, TestSize.L
      * @tc.steps: step2. call HandleBottomTabBarChange function.
      * @tc.expected: step2. expect The function is run ok.
      */
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 1);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 0);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 1);
     tabBarPattern_->indicator_ = 0;
@@ -59,14 +77,10 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarChange002, TestSize.L
     /**
      * @tc.steps: step1. build a bottom style tabbar and a sub style tabbar.
      */
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-        }, 1);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. call HandleBottomTabBarChange function.
@@ -89,14 +103,10 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarChange003, TestSize.L
     /**
      * @tc.steps: step1. build a bottom style tabbar and a sub style tabbar.
      */
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-        }, 1);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. call HandleBottomTabBarChange function.
@@ -119,14 +129,10 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarChange004, TestSize.L
     /**
      * @tc.steps: step1. build a sub style tabbar and a bottom style tabbar.
      */
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 1);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. call HandleBottomTabBarChange function.
@@ -149,14 +155,10 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarChange005, TestSize.L
     /**
      * @tc.steps: step1. build two sub style tabbar.
      */
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-        }, 1);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. call HandleBottomTabBarChange function.
@@ -180,14 +182,10 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarChange006, TestSize.L
      * @tc.steps: step2. call HandleBottomTabBarChange function.
      * @tc.expected: step2. expect The function is run ok.
      */
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 1);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 0);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 1);
     tabBarPattern_->indicator_ = 0;
@@ -210,14 +208,10 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarChange007, TestSize.L
      * @tc.steps: step2. call HandleBottomTabBarChange function.
      * @tc.expected: step2. expect The function is run ok.
      */
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 1);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 0);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 1);
     tabBarPattern_->indicator_ = 0;
@@ -239,14 +233,10 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarChange008, TestSize.L
      * @tc.steps: step2. call HandleBottomTabBarChange function.
      * @tc.expected: step2. expect The function is run ok.
      */
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 1);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 0);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 1);
     tabBarPattern_->indicator_ = 0;
@@ -268,14 +258,10 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarChange009, TestSize.L
      * @tc.steps: step2. call HandleBottomTabBarChange function.
      * @tc.expected: step2. expect The function is run ok.
      */
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 1);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 0);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE, 1);
     tabBarPattern_->indicator_ = 0;
@@ -286,78 +272,15 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarChange009, TestSize.L
 }
 
 /**
- * @tc.name: TabBarLayoutAlgorithmHandleAlwaysAverageSplitLayoutStyle003
- * @tc.desc: test HandleAlwaysAverageSplitLayoutStyle
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarEventTestNg, TabBarLayoutAlgorithmHandleAlwaysAverageSplitLayoutStyle003, TestSize.Level1)
-{
-    CreateWithItem([](TabsModelNG model) {});
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty<TabBarLayoutProperty>());
-    LayoutWrapperNode layoutWrapper_test =
-        LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty<TabBarLayoutProperty>());
-    auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
-    childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
-
-    RefPtr<GeometryNode> geometryNode1 = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> swiperLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(swiperNode_, geometryNode1, swiperLayoutProperty_);
-    swiperLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
-    swiperLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
-    layoutWrapper.AppendChild(swiperLayoutWrapper);
-
-    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
-    tabBarLayoutAlgorithm->HandleAlwaysAverageSplitLayoutStyle(&layoutWrapper, FIRST_ITEM_SIZE, 5);
-    tabBarLayoutAlgorithm->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
-    tabBarLayoutAlgorithm->HandleAlwaysAverageSplitLayoutStyle(&layoutWrapper, FIRST_ITEM_SIZE, 5);
-}
-
-/**
- * @tc.name: TabBarLayoutAlgorithmHandleSpaceBetweenOrCenterLayoutStyle002
- * @tc.desc: test HandleSpaceBetweenOrCenterLayoutStyle
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarEventTestNg, TabBarLayoutAlgorithmHandleSpaceBetweenOrCenterLayoutStyle002, TestSize.Level1)
-{
-    CreateWithItem([](TabsModelNG model) {});
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(tabBarNode_, geometryNode, tabBarLayoutProperty_);
-    LayoutWrapperNode layoutWrapper_test =
-        LayoutWrapperNode(tabBarNode_, geometryNode, tabBarLayoutProperty_);
-    auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
-    childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
-
-    RefPtr<GeometryNode> geometryNode1 = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> swiperLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(swiperNode_, geometryNode1, swiperNode_->GetLayoutProperty());
-    swiperLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
-    swiperLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
-    layoutWrapper.AppendChild(swiperLayoutWrapper);
-
-    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
-    SizeF frameSize(SizeF(0.0f, 0.0f));
-    /**
-     * @tc.steps: step2. call HandleSpaceBetweenOrCenterLayoutStyle function.
-     * @tc.expected: The function is run ok.
-     */
-    tabBarLayoutAlgorithm->HandleSpaceBetweenOrCenterLayoutStyle(&layoutWrapper, FIRST_ITEM_SIZE, 5);
-    tabBarLayoutAlgorithm->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
-    tabBarLayoutAlgorithm->HandleSpaceBetweenOrCenterLayoutStyle(&layoutWrapper, FIRST_ITEM_SIZE, 5);
-}
-
-/**
  * @tc.name: TabBarPatternHandleBottomTabBarClick001
  * @tc.desc: test HandleBottomTabBarClick
  * @tc.type: FUNC
  */
 HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarClick001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     int32_t selectedIndex = 1;
     int32_t unselectedIndex = 1;
 
@@ -375,7 +298,9 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarClick001, TestSize.Le
  */
 HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarClick002, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     int32_t selectedIndex = 1;
     int32_t unselectedIndex = 1;
     IconStyle iconStyle;
@@ -397,7 +322,9 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarClick002, TestSize.Le
  */
 HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarClick003, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     int32_t selectedIndex = 1;
     int32_t unselectedIndex = 1;
     IconStyle iconStyle;
@@ -418,7 +345,9 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarClick003, TestSize.Le
  */
 HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarClick004, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     int32_t selectedIndex = 1;
     int32_t unselectedIndex = 1;
     IconStyle iconStyle;
@@ -439,7 +368,9 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarClick004, TestSize.Le
  */
 HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarClick005, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     int32_t selectedIndex = 1;
     int32_t unselectedIndex = 1;
     IconStyle iconStyle;
@@ -459,7 +390,9 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarClick005, TestSize.Le
  */
 HWTEST_F(TabBarEventTestNg, TabBarPatternHandleSubTabBarClick002, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     int32_t index = 1;
     SizeF size(0.1f, 0.2f);
     tabBarNode_->GetGeometryNode()->SetFrameSize(size);
@@ -504,7 +437,9 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleSubTabBarClick002, TestSize.Level
  */
 HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchDown001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     tabBarPattern_->swiperController_->SetRemoveSwiperEventCallback(nullptr);
     tabBarPattern_->tabBarStyles_ = { TabBarStyle::SUBTABBATSTYLE, TabBarStyle::BOTTOMTABBATSTYLE };
@@ -527,7 +462,9 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchDown001, TestSize.Level1)
  */
 HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchUp001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     tabBarPattern_->swiperController_->SetAddSwiperEventCallback(nullptr);
     tabBarPattern_->SetTouching(false);
@@ -551,10 +488,11 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchUp001, TestSize.Level1)
  */
 HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchUp002, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabsDone(model);
 
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     int32_t index = 1;
@@ -605,11 +543,11 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchUp002, TestSize.Level1)
  */
 HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchEvent003, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabContents(1);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
     tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
 
@@ -636,7 +574,9 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchEvent003, TestSize.Level1)
  */
 HWTEST_F(TabBarEventTestNg, TabBarLayoutAlgorithmHandleAlwaysAverageSplitLayoutStyle001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     auto tabbarLayoutAlgorithm =
         AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarNode_->GetPattern<TabBarPattern>()->CreateLayoutAlgorithm());
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -691,7 +631,9 @@ HWTEST_F(TabBarEventTestNg, TabBarLayoutAlgorithmHandleAlwaysAverageSplitLayoutS
  */
 HWTEST_F(TabBarEventTestNg, TabBarLayoutAlgorithmHandleSpaceBetweenOrCenterLayoutStyle001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     auto tabbarLayoutAlgorithm =
         AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarNode_->GetPattern<TabBarPattern>()->CreateLayoutAlgorithm());
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -764,7 +706,9 @@ HWTEST_F(TabBarEventTestNg, TabBarLayoutAlgorithmHandleSpaceBetweenOrCenterLayou
  */
 HWTEST_F(TabBarEventTestNg, TabBarLayoutAlgorithmHandleAlwaysAverageSplitLayoutStyle002, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     auto tabbarLayoutAlgorithm =
         AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -783,5 +727,201 @@ HWTEST_F(TabBarEventTestNg, TabBarLayoutAlgorithmHandleAlwaysAverageSplitLayoutS
     tabbarLayoutAlgorithm->itemWidths_.emplace_back(0.0f);
     tabbarLayoutAlgorithm->HandleAlwaysAverageSplitLayoutStyle(&layoutWrapper, frameSize, childCount);
     EXPECT_EQ(tabbarLayoutAlgorithm->itemWidths_[0], 3000.0f);
+}
+
+/**
+ * @tc.name: Drag001
+ * @tc.desc: test Press to drag barItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, Drag001, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->fontScale_ = BIG_FONT_SIZE_SCALE; // for InitLongPressEvent
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
+    const Offset firstItemPoint = Offset(180.f, 30.f);
+    const Offset secondItemPoint = Offset(540.f, 30.f);
+    const Offset outOfTabBarPoint = Offset(540.f, 200.f);
+
+    /**
+     * @tc.steps: step1. Long press on barItem(index:0)
+     * @tc.expected: Show dialog
+     */
+    MouseTo(MouseAction::MOVE, firstItemPoint, true);
+    TouchTo(TouchType::DOWN, firstItemPoint);
+    LongPress(firstItemPoint);
+    EXPECT_NE(tabBarPattern_->dialogNode_, nullptr);
+
+    /**
+     * @tc.steps: step2. Drag to itSelf
+     * @tc.expected: moveIndex_ be set
+     */
+    DragTo(firstItemPoint);
+    EXPECT_EQ(tabBarPattern_->moveIndex_, 0);
+    EXPECT_NE(tabBarPattern_->dialogNode_, nullptr);
+
+    /**
+     * @tc.steps: step3. Drag to barItem(index:1)
+     * @tc.expected: moveIndex_ changed
+     */
+    DragTo(secondItemPoint);
+    EXPECT_EQ(tabBarPattern_->moveIndex_, 1);
+    EXPECT_NE(tabBarPattern_->dialogNode_, nullptr);
+
+    /**
+     * @tc.steps: step4. Drag to outSide
+     * @tc.expected: Nothing changed
+     */
+    DragTo(outOfTabBarPoint);
+    EXPECT_EQ(tabBarPattern_->moveIndex_, 1);
+    EXPECT_NE(tabBarPattern_->dialogNode_, nullptr);
+
+    /**
+     * @tc.steps: step5. Release press
+     * @tc.expected: Hide dialog
+     */
+    TouchTo(TouchType::UP, outOfTabBarPoint);
+    EXPECT_EQ(tabBarPattern_->dialogNode_, nullptr);
+    pipeline->fontScale_ = 1.f;
+}
+
+/**
+ * @tc.name: DialogStyle001
+ * @tc.desc: test Dailog style
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, DialogStyle001, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->fontScale_ = BIG_FONT_SIZE_SCALE; // for InitLongPressEvent
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
+    const Offset firstItemPoint = Offset(180.f, 30.f);
+
+    /**
+     * @tc.steps: step1. Press/TouchUp to show/hide dialog, Set BIG_FONT_SIZE_SCALE
+     * @tc.expected: Dialog width changed
+     */
+    LongPress(firstItemPoint);
+    auto dialog = tabBarPattern_->dialogNode_;
+    auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialog->GetLayoutProperty());
+    EXPECT_EQ(dialogLayoutProp->GetWidthValue().ConvertToPx(), BIG_DIALOG_WIDTH);
+
+    /**
+     * @tc.steps: step2. Set MAX_FONT_SIZE_SCALE
+     * @tc.expected: Dialog width changed
+     */
+    pipeline->fontScale_ = MAX_FONT_SIZE_SCALE;
+    LongPress(firstItemPoint);
+    dialog = tabBarPattern_->dialogNode_;
+    dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialog->GetLayoutProperty());
+    EXPECT_EQ(dialogLayoutProp->GetWidthValue().ConvertToPx(), MAX_DIALOG_WIDTH);
+
+    /**
+     * @tc.steps: step3. Set LARGE_FONT_SIZE_SCALE
+     * @tc.expected: Dialog width changed
+     */
+    pipeline->fontScale_ = LARGE_FONT_SIZE_SCALE;
+    LongPress(firstItemPoint);
+    dialog = tabBarPattern_->dialogNode_;
+    dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialog->GetLayoutProperty());
+    EXPECT_EQ(dialogLayoutProp->GetWidthValue().ConvertToPx(), BIG_DIALOG_WIDTH);
+    pipeline->fontScale_ = 1.f;
+}
+
+/**
+ * @tc.name: ScrollableEvent001
+ * @tc.desc: test position when out of Boundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, ScrollableEvent001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    // Set tabs width less than total barItems width, make tabBar scrollable
+    const float tabsWidth  = BARITEM_SIZE * (TABCONTENT_NUMBER - 1);
+    const float scrollableDistance = BARITEM_SIZE;
+    ViewAbstract::SetWidth(CalcLength(tabsWidth));
+    CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step1. Make itemBar out of left Boundary
+     */
+    float outLeftOffset = 1.f;
+    tabBarPattern_->UpdateCurrentOffset(outLeftOffset);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: step2. Drag out of left Boundary
+     * @tc.expected: The friction take effect
+     */
+    auto scrollable = tabBarPattern_->scrollableEvent_->GetScrollable();
+    float dragOffset = 100.f;
+    scrollable->UpdateScrollPosition(dragOffset, SCROLL_FROM_UPDATE);
+    EXPECT_GT(tabBarPattern_->currentOffset_, outLeftOffset);
+    EXPECT_LT(tabBarPattern_->currentOffset_, dragOffset - outLeftOffset);
+
+    /**
+     * @tc.steps: step3. Make itemBar out of right Boundary
+     */
+    float outRightOffset = -(scrollableDistance + 1.f);
+    tabBarPattern_->currentOffset_ = outRightOffset;
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: step4. Drag out of right Boundary
+     * @tc.expected: The friction take effect
+     */
+    dragOffset = -100.f;
+    scrollable->UpdateScrollPosition(dragOffset, SCROLL_FROM_UPDATE);
+    EXPECT_LT(tabBarPattern_->currentOffset_, outRightOffset);
+    EXPECT_GT(tabBarPattern_->currentOffset_, dragOffset - outRightOffset);
+}
+
+/**
+ * @tc.name: ScrollableEvent002
+ * @tc.desc: Scroll tabBar by SCROLL_FROM_AXIS
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, ScrollableEvent002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    // Set tabs width less than total barItems width, make scrollable
+    const float tabsWidth  = BARITEM_SIZE * (TABCONTENT_NUMBER - 1);
+    const float scrollableDistance = BARITEM_SIZE;
+    ViewAbstract::SetWidth(CalcLength(tabsWidth));
+    CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step1. Scroll to right, not out of Boundary
+     * @tc.expected: The scrollOffset not changed by AdjustOffset
+     */
+    auto scrollable = tabBarPattern_->scrollableEvent_->GetScrollable();
+    scrollable->UpdateScrollPosition(-scrollableDistance / 2, SCROLL_FROM_AXIS);
+    EXPECT_EQ(tabBarPattern_->currentOffset_, -scrollableDistance / 2);
+
+    /**
+     * @tc.steps: step2. Scroll to right out of Boundary
+     * @tc.expected: Can not out of Boundary by AdjustOffset
+     */
+    scrollable->UpdateScrollPosition(-scrollableDistance * 2, SCROLL_FROM_AXIS);
+    EXPECT_EQ(tabBarPattern_->currentOffset_, -scrollableDistance);
+
+    /**
+     * @tc.steps: step3. Scroll to left out of Boundary
+     * @tc.expected: Can not out of Boundary by AdjustOffset
+     */
+    scrollable->UpdateScrollPosition(scrollableDistance * 2, SCROLL_FROM_AXIS);
+    EXPECT_EQ(tabBarPattern_->currentOffset_, 0.f);
 }
 } // namespace OHOS::Ace::NG

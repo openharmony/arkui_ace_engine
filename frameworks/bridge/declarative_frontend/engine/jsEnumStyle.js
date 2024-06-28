@@ -12,13 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* Load the UIContext module. */
-
-if (globalThis.requireNapi === undefined) {
-    const UIContext = globalThis.requireNapiPreview('arkui.uicontext');
-} else {
-    const UIContext = globalThis.requireNapi('arkui.uicontext');
-}
 
 /* If a new value is added, add it from the end. */
 var Color;
@@ -103,6 +96,12 @@ var DpiFollowStrategy;
   DpiFollowStrategy[DpiFollowStrategy["FOLLOW_HOST_DPI"] = 0] = "follow-host-dpi";
   DpiFollowStrategy[DpiFollowStrategy["FOLLOW_UI_EXTENSION_ABILITY_DPI"] = 1] = "follow-ui-extension-ability-dpi";
 })(DpiFollowStrategy || (DpiFollowStrategy = {}));
+
+var SecurityDpiFollowStrategy;
+(function (SecurityDpiFollowStrategy) {
+  SecurityDpiFollowStrategy[SecurityDpiFollowStrategy["FOLLOW_HOST_DPI"] = 0] = "follow-host-dpi";
+  SecurityDpiFollowStrategy[SecurityDpiFollowStrategy["FOLLOW_UI_EXTENSION_ABILITY_DPI"] = 1] = "follow-ui-extension-ability-dpi";
+})(SecurityDpiFollowStrategy || (SecurityDpiFollowStrategy = {}));
 
 var EllipsisMode;
 (function (EllipsisMode) {
@@ -938,6 +937,7 @@ var InputType;
   InputType[InputType["USER_NAME"] = 10] = "USER_NAME";
   InputType[InputType["NEW_PASSWORD"] = 11] = "NEW_PASSWORD";
   InputType[InputType["NUMBER_DECIMAL"] = 12] = "NUMBER_DECIMAL";
+  InputType[InputType["URL"] = 13] = "URL";
 })(InputType || (InputType = {}));
 
 var SearchType;
@@ -947,6 +947,7 @@ var SearchType;
   SearchType[SearchType["PHONE_NUMBER"] = 3] = "PHONE_NUMBER";
   SearchType[SearchType["EMAIL"] = 5] = "EMAIL";
   SearchType[SearchType["NUMBER_DECIMAL"] = 12] = "NUMBER_DECIMAL";
+  SearchType[SearchType["URL"] = 13] = "URL";
 })(SearchType || (SearchType = {}));
 
 var TextAreaType;
@@ -956,6 +957,7 @@ var TextAreaType;
   TextAreaType[TextAreaType["PHONE_NUMBER"] = 3] = "PHONE_NUMBER";
   TextAreaType[TextAreaType["EMAIL"] = 5] = "EMAIL";
   TextAreaType[TextAreaType["NUMBER_DECIMAL"] = 12] = "NUMBER_DECIMAL";
+  TextAreaType[TextAreaType["URL"] = 13] = "URL";
 })(TextAreaType || (TextAreaType = {}));
 
 var EnterKeyType;
@@ -1413,6 +1415,19 @@ var BlurStyle;
   BlurStyle[BlurStyle["NONE"] = 0] = "NONE";
 })(BlurStyle || (BlurStyle = {}));
 
+var BlurStyleActivePolicy;
+(function (BlurStyleActivePolicy) {
+  BlurStyleActivePolicy[BlurStyleActivePolicy["FOLLOWS_WINDOW_ACTIVE_STATE"] = 0] = "FOLLOWS_WINDOW_ACTIVE_STATE";
+  BlurStyleActivePolicy[BlurStyleActivePolicy["ALAWYS_ACTIVE"] = 1] = "ALAWYS_ACTIVE";
+  BlurStyleActivePolicy[BlurStyleActivePolicy["ALAWYS_INACTIVE"] = 2] = "ALAWYS_INACTIVE";
+})(BlurStyleActivePolicy || (BlurStyleActivePolicy = {}));
+
+var BlurType;
+(function (BlurType) {
+  BlurType[BlurType["WITHIN_WINDOW"] = 0] = "WITHIN_WINDOW";
+  BlurType[BlurType["BEHIND_WINDOW"] = 1] = "BEHIND_WINDOW";
+})(BlurType || (BlurType = {}));
+
 var ThemeColorMode;
 (function (ThemeColorMode) {
   ThemeColorMode[ThemeColorMode["System"] = 0] = "System";
@@ -1650,6 +1665,12 @@ var GestureControl;
     GestureType[GestureType["CLICK"] = 7] = "CLICK";
   })(GestureType = GestureControl.GestureType || (GestureControl.GestureType = {}));
 })(GestureControl || (GestureControl = {}));
+
+var TransitionHierarchyStrategy;
+(function (TransitionHierarchyStrategy) {
+  TransitionHierarchyStrategy[TransitionHierarchyStrategy["NONE"] = 0] = "NONE";
+  TransitionHierarchyStrategy[TransitionHierarchyStrategy["ADAPTIVE"] = 1] = "ADAPTIVE";
+})(TransitionHierarchyStrategy || (TransitionHierarchyStrategy = {}));
 
 class SubTabBarStyle {
   constructor(content) {
@@ -3156,10 +3177,15 @@ var StyledStringKey;
   StyledStringKey[StyledStringKey["GESTURE"] = 100] = "GESTURE";
   StyledStringKey[StyledStringKey["IMAGE"] = 300] = "IMAGE";
   StyledStringKey[StyledStringKey["CUSTOM_SPAN"] = 400] = "CUSTOM_SPAN";
+  StyledStringKey[StyledStringKey["USER_DATA"] = 500] = "USER_DATA";
 })(StyledStringKey || (StyledStringKey = {}));
 
 class CustomSpan {
   type_ = "CustomSpan"
+}
+
+class UserDataSpan {
+  type_ = "ExtSpan"
 }
 
 let FocusPriority;

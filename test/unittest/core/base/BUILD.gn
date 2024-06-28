@@ -63,6 +63,7 @@ ace_unittest("view_abstract_test_ng") {
   module_output = "basic"
   sources = [
     "view_abstract_test_ng.cpp",
+    "view_abstract_test_ng_for_property_config.cpp",
     "view_abstract_test_ng_new.cpp",
   ]
 }

@@ -230,7 +230,8 @@ bool SceneRecord::IsDisplayAnimator(const std::string& sceneId)
     if (sceneId == PerfConstants::APP_LIST_FLING || sceneId == PerfConstants::APP_SWIPER_SCROLL
         || sceneId == PerfConstants::SNAP_RECENT_ANI
         || sceneId == PerfConstants::WINDOW_RECT_RESIZE
-        || sceneId == PerfConstants::WINDOW_RECT_MOVE) {
+        || sceneId == PerfConstants::WINDOW_RECT_MOVE
+        || sceneId == PerfConstants::LAUNCHER_SPRINGBACK_SCROLL) {
         return true;
     }
     return false;

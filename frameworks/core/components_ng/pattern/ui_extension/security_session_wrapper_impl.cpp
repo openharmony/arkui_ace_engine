@@ -53,6 +53,8 @@ constexpr char EXIT_ABNORMALLY_NAME[] = "extension_exit_abnormally";
 constexpr char EXIT_ABNORMALLY_MESSAGE[] = "the extension ability exited abnormally, please check AMS log.";
 constexpr char LIFECYCLE_TIMEOUT_NAME[] = "extension_lifecycle_timeout";
 constexpr char LIFECYCLE_TIMEOUT_MESSAGE[] = "the lifecycle of extension ability is timeout, please check AMS log.";
+constexpr char EVENT_TIMEOUT_NAME[] = "handle_event_timeout";
+constexpr char EVENT_TIMEOUT_MESSAGE[] = "the extension ability has timed out processing the key event.";
 // Defines the want parameter to control the soft-keyboard area change of the provider.
 constexpr char OCCUPIED_AREA_CHANGE_KEY[] = "ability.want.params.IsNotifyOccupiedAreaChange";
 } // namespace
@@ -291,8 +293,7 @@ void SecuritySessionWrapperImpl::InitAllCallback()
 /*********************** End: Initialization *************************************/
 
 /*********************** Begin: About session ************************************/
-void SecuritySessionWrapperImpl::CreateSession(
-    const AAFwk::Want& want, bool isAsyncModalBinding, bool isCallerSystem)
+void SecuritySessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionConfig& config)
 {
     PLATFORM_LOGI("The session is created with want = %{private}s", want.ToString().c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -316,8 +317,8 @@ void SecuritySessionWrapperImpl::CreateSession(
         .callerToken_ = callerToken,
         .rootToken_ = (isTransferringCaller_ && parentToken) ? parentToken : callerToken,
         .want = wantPtr,
-        .isAsyncModalBinding_ = isAsyncModalBinding,
-        .isModal_ = !isCallerSystem,
+        .isAsyncModalBinding_ = config.isAsyncModalBinding,
+        .uiExtensionUsage_ = static_cast<uint32_t>(config.uiExtensionUsage),
     };
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
@@ -374,13 +375,24 @@ bool SecuritySessionWrapperImpl::NotifyPointerEventSync(
 bool SecuritySessionWrapperImpl::NotifyKeyEventSync(
     const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme)
 {
-    return false;
+    CHECK_NULL_RETURN(session_, false);
+    bool isConsumed = false;
+    bool isTimeout = false;
+    session_->TransferKeyEventForConsumed(keyEvent, isConsumed, isTimeout, isPreIme);
+    auto pattern = hostPattern_.Upgrade();
+    if (isTimeout && pattern) {
+        pattern->FireOnErrorCallback(ERROR_CODE_UIEXTENSION_EVENT_TIMEOUT, EVENT_TIMEOUT_NAME, EVENT_TIMEOUT_MESSAGE);
+        return false;
+    }
+    return isConsumed;
 }
 
 bool SecuritySessionWrapperImpl::NotifyKeyEventAsync(
     const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme)
 {
-    return false;
+    CHECK_NULL_RETURN(session_, false);
+    session_->TransferKeyEventAsync(keyEvent, isPreIme);
+    return true;
 }
 
 bool SecuritySessionWrapperImpl::NotifyAxisEventSync(
@@ -393,12 +405,16 @@ bool SecuritySessionWrapperImpl::NotifyAxisEventSync(
 /*************************** Begin: Asynchronous interface for event notify **********************/
 bool SecuritySessionWrapperImpl::NotifyFocusEventAsync(bool isFocus)
 {
-    return false;
+    CHECK_NULL_RETURN(session_, false);
+    session_->TransferFocusActiveEvent(isFocus);
+    return true;
 }
 
 bool SecuritySessionWrapperImpl::NotifyFocusStateAsync(bool focusState)
 {
-    return false;
+    CHECK_NULL_RETURN(session_, false);
+    session_->TransferFocusStateEvent(focusState);
+    return true;
 }
 
 bool SecuritySessionWrapperImpl::NotifyBackPressedAsync()

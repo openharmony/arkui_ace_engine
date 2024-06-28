@@ -932,7 +932,7 @@ void JSSearch::SetType(const JSCallbackInfo& info)
     if (!info[0]->IsNumber()) {
         return;
     }
-    TextInputType textInputType = static_cast<TextInputType>(info[0]->ToNumber<int32_t>());
+    TextInputType textInputType = CastToTextInputType(info[0]->ToNumber<int32_t>());
     SearchModel::GetInstance()->SetType(textInputType);
 }
 

@@ -142,6 +142,14 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     modifierWithKey(this._modifiersWithKeys, SwiperIndicatorInteractiveModifier.identity, SwiperIndicatorInteractiveModifier, value);
     return this;
   }
+  customContentTransition(transition: SwiperContentAnimatedTransition): this {
+    modifierWithKey(this._modifiersWithKeys, SwiperCustomContentTransitionModifier.identity, SwiperCustomContentTransitionModifier, transition);
+    return this;
+  }
+  onContentDidScroll(handler: ContentDidScrollCallback): this {
+    modifierWithKey(this._modifiersWithKeys, SwiperOnContentDidScrollModifier.identity, SwiperOnContentDidScrollModifier, handler);
+    return this;
+  }
 }
 class SwiperInitializeModifier extends ModifierWithKey<SwiperController> {
   static identity: Symbol = Symbol('swiperInitialize');
@@ -764,7 +772,39 @@ class SwiperIndicatorInteractiveModifier extends ModifierWithKey<boolean> {
     }
   }
 }
-
+class SwiperCustomContentTransitionModifier extends ModifierWithKey<SwiperContentAnimatedTransition> {
+  constructor(value: SwiperContentAnimatedTransition) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperCustomContentTransition');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperCustomContentTransition(node);
+    } else {
+      getUINativeModule().swiper.setSwiperCustomContentTransition(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class SwiperOnContentDidScrollModifier extends ModifierWithKey<(selectedIndex: number, index: number,
+  position: number, mainAxisLength: number) => void> {
+  constructor(value: (selectedIndex: number, index: number, position: number, mainAxisLength: number) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperOnContentDidScroll');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnContentDidScroll(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnContentDidScroll(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
 // @ts-ignore
 globalThis.Swiper.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {

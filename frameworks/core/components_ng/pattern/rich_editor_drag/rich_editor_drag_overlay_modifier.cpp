@@ -62,7 +62,7 @@ void RichEditorDragOverlayModifier::onDraw(DrawingContext& context)
     canvas.Save();
     canvas.ClipPath(*pattern->GetClipPath(), RSClipOp::INTERSECT, true);
     OffsetF offset = { pattern->GetTextRect().GetX(), pattern->GetTextRect().GetY() };
-    for (auto && info : hostPattern->GetParagraphs()) {
+    for (auto &&info : hostPattern->GetParagraphs()) {
         info.paragraph->Paint(canvas, offset.GetX(), offset.GetY());
         offset.AddY(info.paragraph->GetHeight());
     }
@@ -98,17 +98,7 @@ void RichEditorDragOverlayModifier::PaintImage(DrawingContext& context)
         auto rect = rectsForPlaceholders.at(index);
         auto offset = OffsetF(rect.Left(), rect.Top()) + pattern->GetTextRect().GetOffset();
         auto pattern = child->GetPattern();
-        auto imagePattern = DynamicCast<ImagePattern>(pattern);
-        if (imagePattern) {
-            auto canvasImage = imagePattern->GetCanvasImage();
-            if (canvasImage && !canvasImage->GetPaintConfig().isSvg_) {
-                PaintImageNode(context, child, imagePattern, offset);
-            } else {
-                PaintFrameNode(context, child, pattern, offset);
-            }
-        } else {
-            PaintFrameNode(context, child, pattern, offset);
-        }
+        PaintFrameNode(context, child, pattern, offset);
         ++index;
     }
 }

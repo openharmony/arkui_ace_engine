@@ -143,6 +143,12 @@ public:
     // common virtual methods.
     virtual RectF GetVisibleContentRect();
     virtual bool CheckHandleVisible(const RectF& paintRect) = 0;
+
+    virtual bool OnlyAllowedPasteNonEmptyString()
+    {
+        return false;
+    }
+
     virtual void OnResetTextSelection() {}
 
     virtual bool IsAcceptResetSelectionEvent(SourceType sourceType, TouchType touchType);
@@ -172,17 +178,37 @@ public:
     bool CheckHandleIsVisibleWithTransform(const OffsetF& startPoint, const OffsetF& endPoint, float epsilon);
     bool IsPointInRect(const OffsetF& point, const OffsetF& leftBottom, const OffsetF& rightBottom,
         const OffsetF& rightTop, const OffsetF& leftTop);
-    void OnTouchTestHit(SourceType hitTestType);
 
     void SetScrollableParentCallback();
     void ResetScrollableParentCallback();
     virtual void OnParentScrollStart();
-    virtual void OnParentScrollEnd() {}
+    virtual void OnParentScrollEnd() {};
     virtual void OnParentScrolling();
 
     void SetkeyBoardChangeCallback();
     void RemoveKeyboardChangeCallback();
     virtual void OnKeyboardChanged(bool isKeyboardShow);
+
+    float GetHandleDiameter();
+    VectorF GetHostScale();
+    void SwitchToOverlayMode();
+    void SwitchToEmbedMode();
+    void SetHandleLevelMode(HandleLevelMode mode);
+    bool IsOverlayMode()
+    {
+        return handleLevelMode_ == HandleLevelMode::OVERLAY;
+    }
+
+    void OnHandleLevelModeChanged(HandleLevelMode mode) override
+    {
+        SetHandleLevelMode(mode);
+    }
+    virtual void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag);
+    void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info) override;
+    bool IsTouchAtHandle(const TouchEventInfo& info);
+    bool IsClickAtHandle(const GestureEvent& info);
+    bool HasThreeDimensionTransform();
+    bool CheckSwitchToMode(HandleLevelMode mode) override;
 
 protected:
     RectF MergeSelectedBoxes(
@@ -200,13 +226,30 @@ protected:
     RectF ConvertPaintInfoToRect(const SelectHandlePaintInfo& paintInfo);
     void SetTransformPaintInfo(SelectHandleInfo& handleInfo, const RectF& localHandleRect);
     std::optional<RectF> GetAncestorNodeViewPort();
+    bool CheckHandleCanPaintInHost(const RectF& firstRect, const RectF& secondRect);
+    virtual RectF GetFirstHandleLocalPaintRect();
+    virtual RectF GetSecondHandleLocalPaintRect();
+    virtual void CalcHandleLevelMode(const RectF& firstLocalPaintRect, const RectF& secondLocalPaintRect);
+    bool IsAncestorNodeStartAnimation(FrameNodeChangeInfoFlag flag);
+    bool IsAncestorNodeGeometryChange(FrameNodeChangeInfoFlag flag);
+    bool IsAncestorNodeStartScroll(FrameNodeChangeInfoFlag flag);
+    bool IsAncestorNodeEndScroll(FrameNodeChangeInfoFlag flag);
+    bool IsAncestorNodeTransformChange(FrameNodeChangeInfoFlag flag);
+    void SetEnableHandleLevel(bool enableHandleLevel)
+    {
+        enableHandleLevel_ = enableHandleLevel;
+    }
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
+    HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;
 
 private:
     void UpdateTransformFlag();
     void FindScrollableParentAndSetCallback(const RefPtr<FrameNode>& host);
     void RegisterParentScrollCallback(const RefPtr<FrameNode>& host, int32_t parentId);
+    void ShowSelectOverlay(const OverlayRequest& request, bool hasClipboardData);
+    void GetHandlePoints(const RectF& handleRect, std::vector<PointF>& points, bool handleOnTop);
+    bool IsPointsInRegion(const std::vector<PointF>& points, const RectF& regionRect);
     bool isSingleHandle_ = false;
     bool isShowPaste_ = false;
     bool isShowMenu_ = true;
@@ -216,9 +259,9 @@ private:
     WeakPtr<TextBase> hostTextBase_;
     bool hasScrollableParent_ = true;
     std::vector<int32_t> scrollableParentIds_;
-    bool hasTouchTestHit_ = false;
-    bool resetSelectionHitTest_ = false;
-    bool accepResetSelectionHitTest_ = false;
+    bool enableHandleLevel_ = false;
+    bool touchAtHandle_ = false;
+    bool isChangeToOverlayModeAtEdge_ = true;
 };
 
 } // namespace OHOS::Ace::NG

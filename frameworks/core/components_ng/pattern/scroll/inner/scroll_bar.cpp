@@ -181,7 +181,7 @@ void ScrollBar::SetBarRegion(const Offset& offset, const Size& size)
         double height =
             std::max(size.Height() - NormalizeToPx(startReservedHeight_) - NormalizeToPx(endReservedHeight_), 0.0);
         if (positionMode_ == PositionMode::LEFT) {
-            barRect_ = Rect(0.0, 0.0, normalWidth, height) + offset;
+            barRect_ = Rect(NormalizeToPx(padding_.Left()), 0.0, normalWidth, height) + offset;
         } else if (positionMode_ == PositionMode::RIGHT) {
             barRect_ =
                 Rect(size.Width() - normalWidth - NormalizeToPx(padding_.Right()), 0.0, normalWidth, height) + offset;
@@ -237,7 +237,8 @@ void ScrollBar::SetRectTrickRegion(
     if (positionMode_ == PositionMode::LEFT) {
         inactiveSize = activeRect_.Height();
         inactiveMainOffset = activeRect_.Top();
-        activeRect_ = Rect(-NormalizeToPx(position_), activeMainOffset, normalWidth, activeSize) + offset;
+        activeRect_ = Rect(-NormalizeToPx(position_) + NormalizeToPx(padding_.Left()),
+            activeMainOffset, normalWidth, activeSize) + offset;
         if (isUserNormalWidth_) {
             touchRegion_ = activeRect_;
             hoverRegion_ = activeRect_;

@@ -104,8 +104,8 @@ void TransitionElement::ReplaceAnimation(TweenOption& transitionOption)
             renderBox->UpdateStyleFromRenderNode(propertyAnimatableType);
             float width = renderBox->GetWidth();
             auto keyframeWidthBegin = AceType::MakeRefPtr<Keyframe<float>>(0.0f, width);
-            AceType::DynamicCast<KeyframeAnimation<float>>
-                (propertyAnimationMap[PropertyAnimatableType::PROPERTY_WIDTH])->ReplaceKeyframe(keyframeWidthBegin);
+            AceType::DynamicCast<KeyframeAnimation<float>>(
+                propertyAnimationMap[PropertyAnimatableType::PROPERTY_WIDTH])->ReplaceKeyframe(keyframeWidthBegin);
         }
         if (propertyAnimatableType == PropertyAnimatableType::PROPERTY_HEIGHT) {
             renderBox->UpdateStyleFromRenderNode(propertyAnimatableType);

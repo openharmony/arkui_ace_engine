@@ -1253,6 +1253,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     json->PutExtAttr("inputFilter", textFieldLayoutProperty->GetInputFilterValue("").c_str(), filter);
     json->PutExtAttr(
         "textIndent", textFieldLayoutProperty->GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
+    json->PutExtAttr("enablePreviewText", textFieldPattern->GetSupportPreviewText(), filter);
 }
 
 std::string SearchPattern::SearchTypeToString() const
@@ -1270,6 +1271,8 @@ std::string SearchPattern::SearchTypeToString() const
             return "SearchType.EMAIL";
         case TextInputType::PHONE:
             return "SearchType.PHONE_NUMBER";
+        case TextInputType::URL:
+            return "SearchType.URL";
         default:
             return "SearchType.NORMAL";
     }

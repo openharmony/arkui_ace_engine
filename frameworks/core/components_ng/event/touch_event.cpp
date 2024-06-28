@@ -66,7 +66,8 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
         firstInputTimeWithId_.erase(point.id);
     }
 
-    if (touchEvents_.empty() && !userCallback_ && !onTouchEventCallback_ && !commonTouchEventCallback_) {
+    if (touchEvents_.empty() && !touchAfterEvents_ && !userCallback_ && !onTouchEventCallback_ &&
+        !commonTouchEventCallback_) {
         return true;
     }
     TouchEvent lastPoint;

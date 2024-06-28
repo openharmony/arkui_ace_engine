@@ -1612,6 +1612,17 @@ typedef enum {
      *
      */
     NODE_EXPAND_SAFE_AREA = 92,
+    /**
+     * @brief 定义控制组件触发可视区域面积变更事件的可视区域面积占组件本身面积的比例。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .value[...].f32：占比数值，输入范围0-1
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[...].f32：占比数值；\n。 \n
+     *
+     */
+    NODE_VISIBLE_AREA_CHANGE_RADIO = 93,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
@@ -5435,8 +5446,8 @@ typedef enum {
      * @brief 定义在将要输入时，触发回调的枚举值。
      *
      * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
-     * 通过OH_ArKUI_NodeEvent_GetNumberValue获取到index为0的value.f32：插入的值的位置信息。\n
-     * 通过OH_ArKUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：插入的值。
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：插入的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：插入的值。
      * @return 在返回true时，表示正常插入，返回false时，表示不插入。
      * 可通过OH_ArKUI_NodeEvent_SetReturnValue设置返回值。\n
      */
@@ -5445,17 +5456,17 @@ typedef enum {
      * @brief 定义在输入完成时，触发回调的枚举值。
      *
      * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
-     * 通过OH_ArKUI_NodeEvent_GetNumberValue获取到index为0的value.f32：插入的值的位置信息。\n
-     * 通过OH_ArKUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：插入的值。
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：插入的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：插入的值。
      */
     NODE_TEXT_INPUT_ON_DID_INSERT = 7010,
     /**
      * @brief 定义在将要删除时，触发回调的枚举值。
      *
      * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
-     * 通过OH_ArKUI_NodeEvent_GetNumberValue获取到index为0的value.f32：删除的值的位置信息。\n
-     * 通过OH_ArKUI_NodeEvent_GetNumberValue获取到index为1的value.i32：删除值的方向。\n
-     * 通过OH_ArKUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：删除的值。
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：删除的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为1的value.i32：删除值的方向。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：删除的值。
      * @return 在返回true时，表示正常插入，返回false时，表示不插入。\n
      * 可通过OH_ArKUI_NodeEvent_SetReturnValue设置返回值。\n
      */
@@ -5464,9 +5475,9 @@ typedef enum {
      * @brief 定义在删除完成时，触发回调的枚举值。
      *
      * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
-     * 通过OH_ArKUI_NodeEvent_GetNumberValue获取到index为0的value.f32：删除的值的位置信息。\n
-     * 通过OH_ArKUI_NodeEvent_GetNumberValue获取到index为1的value.i32：删除值的方向。\n
-     * 通过OH_ArKUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：删除的值。
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：删除的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为1的value.i32：删除值的方向。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：删除的值。
      */
     NODE_TEXT_INPUT_ON_DID_DELETE = 7012,
     /**
@@ -5563,8 +5574,8 @@ typedef enum {
      * @brief 定义在将要输入时，触发回调的枚举值。
      *
      * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
-     * 通过OH_ArKUI_NodeEvent_GetNumberValue获取到index为0的value.f32：插入的值的位置信息。\n
-     * 通过OH_ArKUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：插入的值。
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：插入的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：插入的值。
      * @return 在返回true时，表示正常插入，返回false时，表示不插入。
      * 可通过OH_ArKUI_NodeEvent_SetReturnValue设置返回值。\n
      */
@@ -5573,17 +5584,17 @@ typedef enum {
      * @brief 定义在输入完成时，触发回调的枚举值。
      *
      * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
-     * 通过OH_ArKUI_NodeEvent_GetNumberValue获取到index为0的value.f32：插入的值的位置信息。\n
-     * 通过OH_ArKUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：插入的值。
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：插入的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：插入的值。
      */
     NODE_TEXT_AREA_ON_DID_INSERT = 8009,
     /**
      * @brief 定义在将要删除时，触发回调的枚举值。
      *
      * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
-     * 通过OH_ArKUI_NodeEvent_GetNumberValue获取到index为0的value.f32：删除的值的位置信息。\n
-     * 通过OH_ArKUI_NodeEvent_GetNumberValue获取到index为1的value.i32：删除值的方向。\n
-     * 通过OH_ArKUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：删除的值。
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：删除的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为1的value.i32：删除值的方向。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：删除的值。
      * @return 在返回true时，表示正常插入，返回false时，表示不插入。\n
      * 可通过OH_ArKUI_NodeEvent_SetReturnValue设置返回值。\n
      */
@@ -5592,9 +5603,9 @@ typedef enum {
      * @brief 定义在删除完成时，触发回调的枚举值。
      *
      * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
-     * 通过OH_ArKUI_NodeEvent_GetNumberValue获取到index为0的value.f32：删除的值的位置信息。\n
-     * 通过OH_ArKUI_NodeEvent_GetNumberValue获取到index为1的value.i32：删除值的方向。\n
-     * 通过OH_ArKUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：删除的值。
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：删除的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为1的value.i32：删除值的方向。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：删除的值。
      */
     NODE_TEXT_AREA_ON_DID_DELETE = 8011,
     /**
@@ -6141,7 +6152,7 @@ void* OH_ArkUI_NodeEvent_GetUserData(ArkUI_NodeEvent* event);
  *         {@link ARKUI_ERROR_CODE_NODE_EVENT_NO_RETURN} 组件事件不支持返回值。
  * @since 12
  */
-int32_t OH_ArKUI_NodeEvent_GetNumberValue(ArkUI_NodeEvent* event, int32_t index, ArkUI_NumberValue* value);
+int32_t OH_ArkUI_NodeEvent_GetNumberValue(ArkUI_NodeEvent* event, int32_t index, ArkUI_NumberValue* value);
 
     /**
  * @brief 获取组件回调事件的字符串类型参数，字符串数据仅在事件回调过程中有效，需要在事件回调外使用建议进行额外拷贝处理。
@@ -6156,7 +6167,7 @@ int32_t OH_ArKUI_NodeEvent_GetNumberValue(ArkUI_NodeEvent* event, int32_t index,
  *         {@link ARKUI_ERROR_CODE_NODE_EVENT_PARAM_INVALID} 组件事件中不存在该数据。
  * @since 12
  */
-int32_t OH_ArKUI_NodeEvent_GetStringValue(ArkUI_NodeEvent* event, int32_t index, char** string, int32_t* stringSize);
+int32_t OH_ArkUI_NodeEvent_GetStringValue(ArkUI_NodeEvent* event, int32_t index, char** string, int32_t* stringSize);
 
 /**
     * @brief 设置组件回调事件的返回值。
@@ -6169,7 +6180,7 @@ int32_t OH_ArKUI_NodeEvent_GetStringValue(ArkUI_NodeEvent* event, int32_t index,
     *         {@link ARKUI_ERROR_CODE_NODE_EVENT_NO_RETURN} 组件事件不支持返回值。
     * @since 12
     */
-int32_t OH_ArKUI_NodeEvent_SetReturnNumberValue(ArkUI_NodeEvent* event, ArkUI_NumberValue* value, int32_t size);
+int32_t OH_ArkUI_NodeEvent_SetReturnNumberValue(ArkUI_NodeEvent* event, ArkUI_NumberValue* value, int32_t size);
 
 /**
     * @brief Defines the dirty area flag passed in the <b>::markDirty</b> API.
@@ -6178,10 +6189,10 @@ int32_t OH_ArKUI_NodeEvent_SetReturnNumberValue(ArkUI_NodeEvent* event, ArkUI_Nu
     */
 typedef enum {
     /**
-        * @brief Remeasure.
-        *
-        * When this type of flag is specified, re-layout is triggered by default.
-        */
+     * @brief Remeasure.
+     *
+     * When this type of flag is specified, re-layout is triggered by default.
+     */
     NODE_NEED_MEASURE = 1,
 
     /** Re-layout. */

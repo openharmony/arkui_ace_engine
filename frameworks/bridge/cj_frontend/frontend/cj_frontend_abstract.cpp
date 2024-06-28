@@ -332,12 +332,12 @@ void CJFrontendAbstract::OpenCustomDialog(const PromptDialogAttr &dialogAttr,
     std::function<void(int32_t)> &&callback)
 {
     DialogProperties dialogProperties = {
+        .onWillDismiss = dialogAttr.customOnWillDismiss,
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
         .isSysBlurStyle = false,
         .customBuilder = dialogAttr.customBuilder,
-        .maskRect = dialogAttr.maskRect,
-        .onWillDismiss = dialogAttr.customOnWillDismiss
+        .maskRect = dialogAttr.maskRect
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {

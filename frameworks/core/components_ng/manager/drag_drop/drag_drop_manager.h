@@ -89,8 +89,14 @@ public:
     void UpdateDragWindowPosition(int32_t globalX, int32_t globalY);
     void OnDragStart(const Point& point);
     void OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode);
-    void OnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo);
-    void OnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo);
+    void OnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo,
+        const RefPtr<FrameNode>& node = nullptr);
+    void OnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo,
+        const RefPtr<FrameNode>& node = nullptr);
+    void HandleOnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo,
+        const RefPtr<FrameNode>& dragFrameNode);
+    void HandleOnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo,
+        const RefPtr<FrameNode>& dragFrameNode);
     void DoDropAction(const RefPtr<FrameNode>& dragFrameNode, const PointerEvent& pointerEvent,
         const RefPtr<UnifiedData>& unifiedData, const std::string& udKey);
     void RequestDragSummaryInfoAndPrivilege();
@@ -425,7 +431,8 @@ private:
     bool GetDragPreviewInfo(const OHOS::Ace::RefPtr<OHOS::Ace::NG::OverlayManager>& overlayManager,
         DragPreviewInfo& dragPreviewInfo);
     bool IsNeedDoDragMoveAnimate(const PointerEvent& pointerEvent);
-    RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY);
+    RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY,
+        const RefPtr<FrameNode>& node = nullptr);
     void FireOnDragEvent(
         const RefPtr<FrameNode>& frameNode, const PointerEvent& pointerEvent,
         DragEventType type, const std::string& extraInfo);

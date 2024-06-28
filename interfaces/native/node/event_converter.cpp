@@ -669,7 +669,7 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_CompatibleNodeEvent* event)
             ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->componentAsyncEvent.subKind);
             event->kind = ConvertToNodeEventType(subKind);
             if (memcpy_sp(event->componentEvent.data, MAX_COMPONENT_EVENT_ARG_NUM * sizeof(ArkUI_NumberValue),
-                    origin->componentAsyncEvent.data, MAX_COMPONENT_EVENT_ARG_NUM * sizeof(ArkUI_NumberValue)) != 0) {
+                origin->componentAsyncEvent.data, MAX_COMPONENT_EVENT_ARG_NUM * sizeof(ArkUI_NumberValue)) != 0) {
                 TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert origin event data");
                 return false;
             }
@@ -702,7 +702,7 @@ bool ConvertEventResult(ArkUI_CompatibleNodeEvent* event, ArkUINodeEvent* origin
     }
     if (!IsStringEvent(event->kind)) {
         if (memcpy_sp(origin->componentAsyncEvent.data, MAX_COMPONENT_EVENT_ARG_NUM * sizeof(ArkUI_NumberValue),
-                event->componentEvent.data, MAX_COMPONENT_EVENT_ARG_NUM * sizeof(ArkUI_NumberValue)) != 0) {
+            event->componentEvent.data, MAX_COMPONENT_EVENT_ARG_NUM * sizeof(ArkUI_NumberValue)) != 0) {
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert event result data");
             return false;
         }
@@ -782,7 +782,7 @@ void* OH_ArkUI_NodeEvent_GetUserData(ArkUI_NodeEvent* event)
     return event->userData;
 }
 
-int32_t OH_ArKUI_NodeEvent_GetNumberValue(ArkUI_NodeEvent* event, int32_t index, ArkUI_NumberValue* value)
+int32_t OH_ArkUI_NodeEvent_GetNumberValue(ArkUI_NodeEvent* event, int32_t index, ArkUI_NumberValue* value)
 {
     if (!event || event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_MIXED_EVENT)) {
         return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
@@ -803,7 +803,7 @@ int32_t OH_ArKUI_NodeEvent_GetNumberValue(ArkUI_NodeEvent* event, int32_t index,
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 
-int32_t OH_ArKUI_NodeEvent_GetStringValue(
+int32_t OH_ArkUI_NodeEvent_GetStringValue(
     ArkUI_NodeEvent* event, int32_t index, char** string, int32_t* stringSize)
 {
     if (!event || event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_MIXED_EVENT)) {
@@ -822,17 +822,24 @@ int32_t OH_ArKUI_NodeEvent_GetStringValue(
         return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
     }
     size_t strLen = strlen(str);
-    if (strLen >= stringSize[index]) {
-        int32_t size = stringSize[index];
-        strncpy(string[index], str, size - 1);
+    int32_t size = stringSize[index];
+    if (size <= 0) {
+        return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
+    }
+    bool copyResult = false;
+    if (strLen >= size) {
+        copyResult = strncpy_s(string[index], size, str, size - 1);
         string[index][size - 1] = '\0';
     } else {
-        strcpy(string[index], str);
+        copyResult = strcpy_s(string[index], size, str);
+    }
+    if (!copyResult) {
+        return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
     }
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 
-int32_t OH_ArKUI_NodeEvent_SetReturnNumberValue(ArkUI_NodeEvent* event, ArkUI_NumberValue* value, int32_t size)
+int32_t OH_ArkUI_NodeEvent_SetReturnNumberValue(ArkUI_NodeEvent* event, ArkUI_NumberValue* value, int32_t size)
 {
     if (!event || event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_MIXED_EVENT)) {
         return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;

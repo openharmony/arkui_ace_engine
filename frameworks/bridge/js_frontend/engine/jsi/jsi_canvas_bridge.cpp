@@ -1843,7 +1843,6 @@ shared_ptr<JsValue>  JsiCanvasBridge::JsGetPixelMap(const shared_ptr<JsRuntime>&
         LOGE("jsValue is null");
         return runtime->NewUndefined();
     }
-
     return jsValue;
 #else
     LOGW("[Engine Log] The function 'getPixelMap' is not supported on the current platform.");

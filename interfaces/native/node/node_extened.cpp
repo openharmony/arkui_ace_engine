@@ -347,7 +347,7 @@ int32_t LayoutNode(ArkUI_NodeHandle node, int32_t positionX, int32_t positionY)
     data[0] = positionX;
     //positionY
     data[1] = positionY;
-    impl->getExtendedAPI()->layoutNode(nullptr, node->uiNodeHandle, data);
+    impl->getExtendedAPI()->layoutNode(nullptr, node->uiNodeHandle, &data);
     return ERROR_CODE_NO_ERROR;
 }
 

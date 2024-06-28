@@ -388,5 +388,12 @@ void SetOnToggleChange(ArkUINodeHandle node, void* extraParam)
     };
     ToggleModelNG::OnChange(frameNode, std::move(onChange));
 }
+
+void ResetOnToggleChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ToggleModelNG::OnChange(frameNode, nullptr);
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

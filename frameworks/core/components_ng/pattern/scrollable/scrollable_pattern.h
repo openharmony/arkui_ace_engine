@@ -255,6 +255,7 @@ public:
     }
 
     void GetParentNavigation();
+    void GetParentModalSheet();
 
     /**
      * @brief Return the portion of delta that's in overScroll range.
@@ -353,7 +354,7 @@ public:
     bool CanOverScroll(int32_t source)
     {
         auto canOverScroll = (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR &&
-                              IsScrollable() && (!ScrollableIdle() || animateOverScroll_ || animateCanOverScroll_));
+            IsScrollable() && (!ScrollableIdle() || animateOverScroll_ || animateCanOverScroll_ || nestedScrolling_));
         if (canOverScroll != lastCanOverScroll_) {
             lastCanOverScroll_ = canOverScroll;
             AddScrollableFrameInfo(source);
@@ -746,12 +747,15 @@ private:
     bool HandleScrollVelocity(float velocity) override;
 
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
+    void OnScrollEndRecursiveInner(const std::optional<float>& velocity);
     void OnScrollStartRecursive(float position, float velocity = 0.f) override;
+    void OnScrollStartRecursiveInner(float position, float velocity = 0.f);
 
     ScrollResult HandleScrollParentFirst(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollSelfFirst(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollSelfOnly(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollParallel(float& offset, int32_t source, NestedState state);
+    ScrollResult HandleOutBoundary(float& offset, int32_t source, NestedState state) override;
 
     void ExecuteScrollFrameBegin(float& mainDelta, ScrollState state);
 
@@ -785,6 +789,7 @@ private:
     RefreshCoordinationMode CoordinateWithRefresh(double& offset, int32_t source, bool isAtTop);
     bool CoordinateWithNavigation(double& offset, int32_t source, bool isAtTop);
     void NotifyFRCSceneInfo(const std::string& scene, double velocity, SceneStatus sceneStatus);
+    ModalSheetCoordinationMode CoordinateWithSheet(double& offset, int32_t source, bool isAtTop);
     bool NeedCoordinateScrollWithNavigation(double offset, int32_t source, const OverScrollOffset& overOffsets);
     void SetUiDvsyncSwitch(bool on);
 
@@ -803,6 +808,7 @@ private:
     float estimatedHeight_ = 0.0f;
     bool isReactInParentMovement_ = false;
     bool isRefreshInReactive_ = false; // true if Refresh component is ready to receive scroll offset.
+    bool isSheetInReactive_ = false;
     bool isCoordEventNeedSpring_ = true;
     double scrollBarOutBoundaryExtent_ = 0.0;
     double friction_ = 0.0;
@@ -830,6 +836,7 @@ private:
     RefPtr<PanEvent> boxSelectPanEvent_;
 
     RefPtr<NavBarPattern> navBarPattern_;
+    RefPtr<SheetPresentationPattern> sheetPattern_;
     std::vector<RefPtr<ScrollingListener>> scrollingListener_;
 
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;
@@ -862,6 +869,7 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     bool isMousePressed_ = false;
     bool lastCanOverScroll_ = false;
+    bool nestedScrolling_ = false;
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;

@@ -261,12 +261,21 @@ void TextContentModifier::PaintImage(RSCanvas& canvas, float x, float y)
     size_t index = 0;
     auto rectsForPlaceholders = pattern->GetRectsForPlaceholders();
     auto placeHolderIndexVector = pattern->GetPlaceHolderIndex();
+    auto placeholdersSize = rectsForPlaceholders.size();
+    auto placeHolderIndexSize = placeHolderIndexVector.size();
     for (const auto& imageWeak : imageNodeList_) {
         auto imageChild = imageWeak.Upgrade();
         if (!imageChild) {
             continue;
         }
-        auto rect = rectsForPlaceholders.at(placeHolderIndexVector.at(index));
+        if (index >= placeholdersSize) {
+            return;
+        }
+        auto tmp = placeHolderIndexVector.at(index);
+        if (tmp >= placeHolderIndexSize) {
+            return;
+        }
+        auto rect = rectsForPlaceholders.at(tmp);
         if (!DrawImage(imageChild, canvas, x, y, rect)) {
             continue;
         }
@@ -335,18 +344,18 @@ void TextContentModifier::PaintCustomSpan(DrawingContext& drawingContext)
     auto x = paintOffset_.GetX();
     auto y = paintOffset_.GetY();
     auto rectsForPlaceholderSize = rectsForPlaceholders.size();
-    for (auto customSpanPlaceholder : customSpanPlaceholderInfo) {
+    for (const auto& customSpanPlaceholder : customSpanPlaceholderInfo) {
         if (!customSpanPlaceholder.onDraw) {
             continue;
         }
         auto index = customSpanPlaceholder.customSpanIndex;
-        if (index >= rectsForPlaceholderSize) {
+        if (index >= static_cast<int32_t>(rectsForPlaceholderSize)) {
             return;
         }
         auto rect = rectsForPlaceholders.at(index);
         auto lineMetrics = pManager->GetLineMetricsByRectF(rect, customSpanPlaceholder.paragraphIndex);
         CustomSpanOptions customSpanOptions;
-        customSpanOptions.x = static_cast<double>(rect.Left()) + x;
+        customSpanOptions.x = static_cast<float>(rect.Left()) + x;
         customSpanOptions.lineTop = lineMetrics.y + y;
         customSpanOptions.lineBottom = lineMetrics.y + lineMetrics.height + y;
         customSpanOptions.baseline = lineMetrics.y + lineMetrics.ascender + y;

@@ -48,6 +48,17 @@ public:
      * @return main length of the footer node.
      */
     static float MeasureFooter(LayoutWrapper* layoutWrapper, Axis axis);
+
+    /**
+     * @brief Get user defined height of an item from Sections.
+     *
+     * @param sections WaterFlowSections
+     * @param seg section index
+     * @param idx item index
+     * @return user defined item height, -1 if not defined.
+     */
+    static float GetUserDefHeight(const RefPtr<WaterFlowSections>& sections, int32_t seg, int32_t idx);
+    static void UpdateItemIdealSize(const RefPtr<LayoutWrapper>& item, Axis axis, float userHeight);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_LAYOUT_UTILS_H

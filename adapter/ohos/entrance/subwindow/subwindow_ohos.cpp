@@ -118,6 +118,7 @@ void SubwindowOhos::InitContainer()
         window_ = OHOS::Rosen::Window::Create("ARK_APP_SUBWINDOW_" + parentWindowName + std::to_string(windowId_),
             windowOption, parentWindow->GetContext());
         if (!window_) {
+            SetIsRosenWindowCreate(false);
             TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Window create failed");
         }
         CHECK_NULL_VOID(window_);
@@ -150,6 +151,7 @@ void SubwindowOhos::InitContainer()
     container->SetHapPath(parentContainer->GetHapPath());
     container->SetIsSubContainer(true);
     container->InitializeSubContainer(parentContainerId_);
+    SetIsRosenWindowCreate(true);
     ViewportConfig config;
     // create ace_view
     auto aceView =
@@ -559,11 +561,6 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> customNode, const NG:
         menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);
         menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
     }
-
-    std::set<int32_t> menuTargetId = std::move(menuTargetId_);
-    for (auto& child : menuTargetId) {
-        ClearMenuNG(child, true);
-    }
     ShowWindow();
     ResizeWindow();
     CHECK_NULL_VOID(window_);
@@ -582,11 +579,6 @@ void SubwindowOhos::ShowMenuNG(std::function<void()>&& buildFunc, std::function<
     CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
-
-    std::set<int32_t> menuTargetId = std::move(menuTargetId_);
-    for (auto& child : menuTargetId) {
-        ClearMenuNG(child, true);
-    }
     ShowWindow();
     ResizeWindow();
     CHECK_NULL_VOID(window_);
@@ -697,14 +689,10 @@ void SubwindowOhos::ClearMenuNG(int32_t targetId, bool inWindow, bool showAnimat
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     if (showAnimation) {
-        int32_t id = overlay->CleanMenuInSubWindowWithAnimation();
-        if (id >= 0) {
-            menuTargetId_.insert(id);
-        }
+        overlay->CleanMenuInSubWindowWithAnimation();
         HideFilter(true);
     } else {
         overlay->CleanMenuInSubWindow(targetId);
-        menuTargetId_.erase(targetId);
         overlay->RemoveFilter();
     }
     overlay->EraseMenuInfo(targetId);
@@ -1685,6 +1673,19 @@ bool SubwindowOhos::CheckHostWindowStatus() const
             return false;
         }
     }
+    return true;
+}
+
+bool SubwindowOhos::Close()
+{
+    CHECK_NULL_RETURN(window_, false);
+    OHOS::Rosen::WMError ret = window_->Close();
+    if (ret != OHOS::Rosen::WMError::WM_OK) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "SubwindowOhos fail to close the dialog subwindow.");
+        return false;
+    }
+    sptr<OHOS::Rosen::Window> uiWindow = nullptr;
+    Ace::Platform::DialogContainer::SetUIWindow(childContainerId_, uiWindow);
     return true;
 }
 } // namespace OHOS::Ace

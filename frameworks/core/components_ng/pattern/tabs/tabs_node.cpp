@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -93,6 +94,7 @@ void TabsNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
     json->PutExtAttr("barBackgroundColor", GetBarBackgroundColor().ColorToString().c_str(), filter);
     json->PutExtAttr("barBackgroundBlurStyle",
         BAR_BLURSTYLE[static_cast<int32_t>(GetBarBackgroundBlurStyle())].c_str(), filter);
+    json->PutExtAttr("animationMode", GetAnimationMode().c_str(), filter);
 
     auto barGridAlignJson = JsonUtil::Create(true);
     auto barGridAlign = GetBarGridAlign();
@@ -253,5 +255,28 @@ ScrollableBarModeOptions TabsNode::GetScrollableBarModeOptions() const
     auto tabBarProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_RETURN(tabBarProperty, option);
     return tabBarProperty->GetScrollableBarModeOptions().value_or(option);
+}
+
+std::string TabsNode::GetAnimationMode() const
+{
+    std::string ret = "AnimationMode.CONTENT_FIRST";
+    auto tabsPattern = GetPattern<TabsPattern>();
+    CHECK_NULL_RETURN(tabsPattern, ret);
+    TabAnimateMode mode = tabsPattern->GetAnimateMode();
+    switch (mode) {
+        case TabAnimateMode::CONTENT_FIRST:
+            ret = "AnimationMode.CONTENT_FIRST";
+            break;
+        case TabAnimateMode::ACTION_FIRST:
+            ret = "AnimationMode.ACTION_FIRST";
+            break;
+        case TabAnimateMode::NO_ANIMATION:
+            ret = "AnimationMode.NO_ANIMATION";
+            break;
+        default:
+            ret = "AnimationMode.CONTENT_FIRST";
+            break;
+    }
+    return ret;
 }
 } // namespace OHOS::Ace::NG

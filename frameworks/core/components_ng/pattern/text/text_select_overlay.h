@@ -36,6 +36,9 @@ public:
     bool CheckHandleVisible(const RectF& paintRect) override;
     bool CheckAndAdjustHandle(RectF& paintRect);
     void OnResetTextSelection() override;
+    RectF GetFirstHandleLocalPaintRect() override;
+    RectF GetSecondHandleLocalPaintRect() override;
+    void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag) override;
 
     // override SelectOverlayHolder
     std::optional<SelectHandleInfo> GetFirstHandleInfo() override;
@@ -52,6 +55,7 @@ public:
     void OnHandleMoveDone(const RectF& rect, bool isFirst) override;
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info = nullptr) override;
     void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) override;
+    void OnHandleLevelModeChanged(HandleLevelMode mode) override;
 
 protected:
     virtual void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle);

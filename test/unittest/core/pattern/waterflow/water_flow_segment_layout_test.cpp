@@ -15,8 +15,8 @@
 #include "test/unittest/core/pattern/waterflow/water_flow_item_maps.h"
 #include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
 
-#include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 
@@ -24,8 +24,8 @@
 #define private public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
-#include "core/components_ng/pattern/waterflow/water_flow_item_node.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_segmented_layout.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_node.h"
 
 namespace OHOS::Ace::NG {
 class WaterFlowSegmentTest : public WaterFlowTestNg {
@@ -1310,7 +1310,6 @@ HWTEST_F(WaterFlowSegmentTest, ChildrenCount002, TestSize.Level1)
     algo->Layout(AceType::RawPtr(frameNode_));
 }
 
-
 /**
  * @tc.name: Illegal001
  * @tc.desc: Layout WaterFlow with empty sections.
@@ -1362,44 +1361,6 @@ HWTEST_F(WaterFlowSegmentTest, Illegal002, TestSize.Level1)
     EXPECT_EQ(info->itemInfos_[0].mainSize, 0.0f);
     EXPECT_EQ(info->startIndex_, 0);
     EXPECT_EQ(info->endIndex_, 9);
-}
-
-/**
- * @tc.name: Illegal003
- * @tc.desc: Layout WaterFlow without items.
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowSegmentTest, Illegal003, TestSize.Level1)
-{
-    Create(
-        [](WaterFlowModelNG model) {
-            ViewAbstract::SetWidth(CalcLength(400.0f));
-            ViewAbstract::SetHeight(CalcLength(600.f));
-            CreateItem(6);
-        },
-        false);
-    auto secObj = pattern_->GetOrCreateWaterFlowSections();
-    secObj->ChangeData(0, 0, SECTION_9);
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
-    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
-    EXPECT_EQ(info->endIndex_, 5);
-
-    auto newSection = SECTION_8;
-    newSection[0].itemsCount = 0;
-    secObj->ChangeData(0, 1, newSection);
-    for (int i = 0; i < 10; ++i) {
-        frameNode_->RemoveChildAtIndex(0);
-    }
-    frameNode_->ChildrenUpdatedFrom(0);
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    FlushLayoutTask(frameNode_);
-
-    pattern_->ScrollToIndex(LAST_ITEM);
-    EXPECT_EQ(info->jumpIndex_, LAST_ITEM);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info->endIndex_, -1);
-    EXPECT_EQ(info->childrenCount_, 0);
 }
 
 /**
@@ -1470,6 +1431,7 @@ HWTEST_F(WaterFlowSegmentTest, ResetSections001, TestSize.Level1)
 
     UpdateCurrentOffset(-205.0f);
     EXPECT_EQ(info->currentOffset_, -205.0f);
+    EXPECT_EQ(info->storedOffset_, -100.0f);
     EXPECT_EQ(info->startIndex_, 3);
     EXPECT_EQ(info->endIndex_, 11);
 
@@ -1480,13 +1442,8 @@ HWTEST_F(WaterFlowSegmentTest, ResetSections001, TestSize.Level1)
     EXPECT_EQ(info->startIndex_, 1);
     EXPECT_EQ(info->endIndex_, 5);
     EXPECT_EQ(info->GetCrossCount(), 1);
-    if (SystemProperties::WaterFlowUseSegmentedLayout()) {
-        EXPECT_EQ(info->segmentTails_.size(), 1);
-        EXPECT_EQ(info->margins_.size(), 1);
-    } else {
-        EXPECT_TRUE(info->segmentTails_.empty());
-        EXPECT_TRUE(info->margins_.empty());
-    }
+    EXPECT_EQ(info->segmentTails_.size(), 1);
+    EXPECT_EQ(info->margins_.size(), 1);
 
     UpdateCurrentOffset(250.0f);
     EXPECT_EQ(info->currentOffset_, 0.0f);

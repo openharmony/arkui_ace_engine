@@ -176,6 +176,17 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     auto boardStyle = tabContentPattern->GetBoardStyle();
     auto bottomTabBarStyle = tabContentPattern->GetBottomTabBarStyle();
     auto padding = tabContentPattern->GetPadding();
+    auto tabLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
+    CHECK_NULL_VOID(tabLayoutProperty);
+    auto isRTL = tabLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    if (isRTL && tabContentPattern->GetUseLocalizedPadding()) {
+        PaddingProperty paddingRtl;
+        paddingRtl.left = padding.right;
+        paddingRtl.right = padding.left;
+        paddingRtl.top = padding.top;
+        paddingRtl.bottom = padding.bottom;
+        padding = paddingRtl;
+    }
 
     if (tabBarParam.GetTabBarStyle() == TabBarStyle::BOTTOMTABBATSTYLE) {
         if (bottomTabBarStyle.layoutMode == LayoutMode::HORIZONTAL) {
@@ -515,6 +526,13 @@ void TabContentModelNG::SetPadding(const PaddingProperty& padding)
     auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
     CHECK_NULL_VOID(frameNodePattern);
     frameNodePattern->SetPadding(padding);
+}
+
+void TabContentModelNG::SetUseLocalizedPadding(bool useLocalizedPadding)
+{
+    auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetUseLocalizedPadding(useLocalizedPadding);
 }
 
 void TabContentModelNG::SetLayoutMode(LayoutMode layoutMode)

@@ -873,4 +873,540 @@ HWTEST_F(GestureEventHubTestNg, UpdateExtraInfoTest001, TestSize.Level1)
     radiusJs = jsInfos->GetDouble("blur_radius", -1);
     EXPECT_EQ(radiusJs, -1);
 }
+
+/**
+ * @tc.name: GestureEventHubAddGestureToGestureHierarchyTest001
+ * @tc.desc: Test AddGestureToGestureHierarchy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubAddGestureToGestureHierarchyTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke AddGestureToGestureHierarchy.
+     * @tc.expected: gesture is null.
+     */
+    guestureEventHub->AddGestureToGestureHierarchy(nullptr);
+}
+
+/**
+ * @tc.name: GestureEventHubGetPixelMapScaleTest001
+ * @tc.desc: Test GetPixelMapScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapScaleTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke GetPixelMapScale.
+     * @tc.expected: height is 1 and width is 0.
+     */
+    auto scale = guestureEventHub->GetPixelMapScale(1, 0);
+    EXPECT_EQ(scale, 1.0f);
+
+    /**
+     * @tc.steps: step2. Invoke GetPixelMapScale.
+     * @tc.expected: height is 1 and width is 0.
+     */
+    scale = guestureEventHub->GetPixelMapScale(0, 1);
+    EXPECT_EQ(scale, 1.0f);
+}
+
+/**
+ * @tc.name: GestureEventHubGenerateMousePixelMapTest001
+ * @tc.desc: Test GenerateMousePixelMap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubGenerateMousePixelMapTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke GenerateMousePixelMap.
+     * @tc.expected: TextDraggable is true.
+     */
+    GestureEvent info = GestureEvent();
+    auto frameNode2 = guestureEventHub->GetFrameNode();
+    ASSERT_NE(frameNode2, nullptr);
+    EXPECT_EQ(guestureEventHub->pixelMap_, nullptr);
+    guestureEventHub->SetTextDraggable(true);
+    guestureEventHub->GenerateMousePixelMap(info);
+    EXPECT_EQ(guestureEventHub->pixelMap_, 0);
+    
+    /**
+     * @tc.steps: step3. Invoke GenerateMousePixelMap.
+     * @tc.expected: TextDraggable is false.
+     */
+    guestureEventHub->pixelMap_ = nullptr;
+    guestureEventHub->SetTextDraggable(false);
+    guestureEventHub->GenerateMousePixelMap(info);
+    EXPECT_EQ(guestureEventHub->pixelMap_, 0);
+}
+
+/**
+ * @tc.name: GestureEventHubCopyEventTest001
+ * @tc.desc: Test CopyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubCopyEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto eventHub1 = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub1, nullptr);
+    auto framenode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(framenode, nullptr);
+    eventHub1->host_ = AceType::WeakClaim(AceType::RawPtr(framenode));
+    auto gestureEventHub1 = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub1)));
+    ASSERT_NE(gestureEventHub1, nullptr);
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub1)), DRAG_DIRECTION, FINGERS_NUMBER, DRAG_DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+
+    auto eventHub2 = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub2, nullptr);
+    auto gestureEventHub2 = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub2)));
+    ASSERT_NE(gestureEventHub2, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke CopyEvent.
+     */
+    gestureEventHub2->CopyEvent(gestureEventHub1);
+    EXPECT_FALSE(gestureEventHub1->touchEventActuator_);
+    EXPECT_FALSE(gestureEventHub1->clickEventActuator_);
+    EXPECT_FALSE(gestureEventHub1->longPressEventActuator_);
+    EXPECT_FALSE(gestureEventHub1->dragEventActuator_);
+    EXPECT_FALSE(gestureEventHub1->showMenu_);
+
+    /**
+     * @tc.steps: step3. Invoke CopyEvent.
+     */
+    gestureEventHub1->touchEventActuator_ = AceType::MakeRefPtr<TouchEventActuator>();
+    EXPECT_NE(gestureEventHub1->touchEventActuator_, nullptr);
+    gestureEventHub1->clickEventActuator_ = AceType::MakeRefPtr<ClickEventActuator>(gestureEventHub1);
+    EXPECT_NE(gestureEventHub1->clickEventActuator_, nullptr);
+    gestureEventHub1->longPressEventActuator_ = AceType::MakeRefPtr<LongPressEventActuator>(gestureEventHub1);
+    EXPECT_NE(gestureEventHub1->longPressEventActuator_, nullptr);
+    gestureEventHub1->dragEventActuator_ = dragEventActuator;
+    EXPECT_NE(gestureEventHub1->dragEventActuator_, nullptr);
+    GestureEventFunc callback = [](GestureEvent& info) {};
+    gestureEventHub1->showMenu_ = AceType::MakeRefPtr<ClickEvent>(std::move(callback));
+    EXPECT_NE(gestureEventHub1->showMenu_, nullptr);
+    EXPECT_FALSE(gestureEventHub2->showMenu_);
+    gestureEventHub2->CopyEvent(gestureEventHub1);
+    EXPECT_TRUE(gestureEventHub2->showMenu_);
+
+    /**
+     * @tc.steps: step4. Invoke CopyEvent.
+     */
+    gestureEventHub2->showMenu_ = AceType::MakeRefPtr<ClickEvent>(std::move(callback));
+    gestureEventHub2->CopyEvent(gestureEventHub1);
+    EXPECT_TRUE(gestureEventHub2->showMenu_);
+}
+
+/**
+ * @tc.name: GestureEventHubIsNeedSwitchToSubWindowTest001
+ * @tc.desc: Test IsNeedSwitchToSubWindow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubIsNeedSwitchToSubWindowTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode1 = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode1->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke IsNeedSwitchToSubWindow.
+     * @tc.expected: gestureEventHub->IsPixelMapNeedScale() is false.
+     */
+    auto frameNode2 = gestureEventHub->GetFrameNode();
+    EXPECT_NE(frameNode2, nullptr);
+    frameNode2->GetOrCreateFocusHub();
+    auto focusHub = frameNode2->GetFocusHub();
+    EXPECT_NE(focusHub, nullptr);
+    gestureEventHub->IsNeedSwitchToSubWindow();
+    EXPECT_FALSE(gestureEventHub->IsPixelMapNeedScale());
+}
+
+/**
+ * @tc.name: GestureEventHubSetDragGatherPixelMapsTest001
+ * @tc.desc: Test SetDragGatherPixelMaps.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubSetDragGatherPixelMapsTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub and DragEventActuator.
+     * @tc.expected: dragEventActuator and gestureEventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto framenode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(framenode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(framenode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DRAG_DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke SetDragGatherPixelMaps.
+     */
+    GestureEvent info = GestureEvent();
+    gestureEventHub->dragEventActuator_ = dragEventActuator;
+    gestureEventHub->SetDragGatherPixelMaps(info);
+    EXPECT_TRUE(!dragEventActuator->IsNeedGather());
+}
+
+/**
+ * @tc.name: GestureEventHubGetSelectItemSizeTest001
+ * @tc.desc: Test GetSelectItemSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubGetSelectItemSizeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub and DragEventActuator.
+     * @tc.expected: dragEventActuator and gestureEventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto framenode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(framenode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(framenode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DRAG_DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke GetSelectItemSize.
+     */
+    gestureEventHub->dragEventActuator_ = dragEventActuator;
+    gestureEventHub->GetSelectItemSize();
+    EXPECT_TRUE(!gestureEventHub->dragEventActuator_->IsNeedGather());
+}
+
+/**
+ * @tc.name: GestureEventHubNodeTest003
+ * @tc.desc: Test SetOnTouchEvent, SetJSFrameNodeOnTouchEvent and ClearJSFrameNodeOnTouch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubNodeTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+
+    /**
+     * @tc.steps: step2. Create touchEventFunc and call SetOnTouchEvent.
+     * @tc.expected: TouchEventActuator_ is nullptr.
+     */
+    gestureEventHub->touchEventActuator_ = nullptr;
+    TouchEventFunc touchEventFunc = [](TouchEventInfo& info) {};
+    gestureEventHub->SetOnTouchEvent(std::move(touchEventFunc));
+    gestureEventHub->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
+    gestureEventHub->ClearJSFrameNodeOnTouch();
+    EXPECT_NE(gestureEventHub->touchEventActuator_, nullptr);
+}
+
+/**
+ * @tc.name: GestureEventHubNodeTest004
+ * @tc.desc: ClearJSFrameNodeOnClick.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubNodeTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+
+    /**
+     * @tc.steps: step2. Call ClearJSFrameNodeOnClick.
+     * @tc.expected: clickEventActuator_ is nullptr.
+     */
+    gestureEventHub->ClearJSFrameNodeOnClick();
+    EXPECT_FALSE(gestureEventHub->clickEventActuator_);
+}
+
+/**
+ * @tc.name: HandleOnDragUpdate004
+ * @tc.desc: Test Functions related with drag
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, HandleOnDragUpdate004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create gestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("MyButton", 102, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto eventHub = gestureEventHub->eventHub_.Upgrade();
+    eventHub->AttachHost(frameNode);
+    ASSERT_NE(eventHub, nullptr);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    /**
+     * @tc.steps: step2. call HandleOnDragUpdate
+     * @tc.expected: dragDropProxy_ is not null.
+     */
+    constexpr int64_t PROXY_ID_NOT_FIT = 101;
+    auto dragDropProxy = AceType::MakeRefPtr<DragDropProxy>(PROXY_ID_NOT_FIT);
+    gestureEventHub->dragDropProxy_ = dragDropProxy;
+    GestureEvent info;
+    auto dragDropManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    dragDropManager->isDragged_ = true;
+    gestureEventHub->HandleOnDragUpdate(info);
+    EXPECT_TRUE(dragDropManager->IsDragged());
+}
+
+/**
+ * @tc.name: GestureEventHubGetPixelMapOffset001
+ * @tc.desc: Test GetPixelMapOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create gestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode1 = FrameNode::CreateFrameNode("MyButton", 102, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode1->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto eventHub = gestureEventHub->eventHub_.Upgrade();
+    eventHub->AttachHost(frameNode1);
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps2: Invoke GetPixelMapOffset
+     * @tc.expected: NearZero(gestureEventHub->frameNodeSize_.Width()) is true,
+     * NearZero(size.Width()) is false.
+     */
+    constexpr float PIXELMAP_WIDTH_RATE = -0.5f;
+    constexpr float PIXELMAP_HEIGHT_RATE = -0.2f;
+    GestureEvent info = GestureEvent();
+    auto size = SizeF(1, 1);
+    gestureEventHub->GetPixelMapOffset(info, size, 1.0f, true);
+    auto frameNode2 = gestureEventHub->GetFrameNode();
+    EXPECT_NE(frameNode2, nullptr);
+    OffsetF result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
+    EXPECT_TRUE(NearZero(gestureEventHub->frameNodeSize_.Width()));
+    EXPECT_FALSE(NearZero(size.Width()));
+    EXPECT_FALSE(result.GetX() >= 0.0f);
+    EXPECT_FALSE(result.GetX() + size.Width() <= 0.0f);
+    EXPECT_FALSE(result.GetY() >= 0.0f);
+    EXPECT_FALSE(result.GetY() + size.Height() <= 0.0f);
+
+    /**
+     * @tc.steps3: Invoke GetPixelMapOffset
+     * @tc.expected: NearZero(gestureEventHub->frameNodeSize_.Width()) is true,
+     * NearZero(size.Width()) is true.
+     */
+    size = SizeF(0, 0);
+    gestureEventHub->GetPixelMapOffset(info, size, 1.0f, true);
+    result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
+    EXPECT_TRUE(NearZero(gestureEventHub->frameNodeSize_.Width()));
+    EXPECT_TRUE(NearZero(size.Width()));
+    EXPECT_TRUE(result.GetX() >= 0.0f);
+    EXPECT_TRUE(result.GetX() + size.Width() <= 0.0f);
+    EXPECT_TRUE(result.GetY() >= 0.0f);
+    EXPECT_TRUE(result.GetY() + size.Height() <= 0.0f);
+
+    /**
+     * @tc.steps4: Invoke GetPixelMapOffset
+     * @tc.expected: NearZero(gestureEventHub->frameNodeSize_.Width()) is false,
+     * NearZero(size.Width()) is false.
+     */
+    size = SizeF(500, 600);
+    gestureEventHub->frameNodeSize_ = SizeF(1, 1);
+    gestureEventHub->GetPixelMapOffset(info, size, 1.0f, true);
+    result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
+    EXPECT_FALSE(NearZero(gestureEventHub->frameNodeSize_.Width()));
+    EXPECT_FALSE(NearZero(size.Width()));
+
+    /**
+     * @tc.steps5: Invoke GetPixelMapOffset
+     * @tc.expected: NearZero(gestureEventHub->frameNodeSize_.Width()) is false,
+     * NearZero(size.Width()) is true.
+     */
+    size = SizeF(0, 0);
+    gestureEventHub->frameNodeSize_ = SizeF(1, 1);
+    gestureEventHub->GetPixelMapOffset(info, size, 1.0f, true);
+    result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
+    EXPECT_FALSE(NearZero(gestureEventHub->frameNodeSize_.Width()));
+    EXPECT_TRUE(NearZero(size.Width()));
+}
+
+/**
+ * @tc.name: GestureEventHubGetPixelMapScaleTest002
+ * @tc.desc: Test GetPixelMapScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapScaleTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create gestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode1 = FrameNode::CreateFrameNode(V2::WEB_ETS_TAG, 102, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode1->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto eventHub = gestureEventHub->eventHub_.Upgrade();
+    eventHub->AttachHost(frameNode1);
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps2: Invoke GetPixelMapScale
+     */
+    int32_t height = 500;
+    int32_t width = 600;
+    GestureEvent info = GestureEvent();
+    auto size = SizeF(1, 1);
+    gestureEventHub->GetPixelMapOffset(info, size, 1.0f, true);
+    auto frameNode2 = gestureEventHub->GetFrameNode();
+    EXPECT_NE(frameNode2, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    EXPECT_NE(dragDropManager, nullptr);
+    auto dragPreviewOption = frameNode2->GetDragPreviewOption();
+    dragPreviewOption.isScaleEnabled = true;
+    gestureEventHub->GetPixelMapScale(height, width);
+    EXPECT_FALSE(!frameNode2->GetDragPreviewOption().isScaleEnabled);
+    EXPECT_FALSE(!(frameNode2->GetTag() == V2::WEB_ETS_TAG));
+
+    /**
+     * @tc.steps3: Invoke GetPixelMapScale
+     */
+    constexpr float PIXELMAP_DEFALUT_LIMIT_SCALE = 0.5f;
+    SystemProperties::SetDevicePhysicalHeight(600);
+    SystemProperties::SetDevicePhysicalWidth(200);
+    int32_t deviceHeight = SystemProperties::GetDevicePhysicalHeight();
+    int32_t deviceWidth = SystemProperties::GetDevicePhysicalWidth();
+    int32_t maxDeviceLength = std::max(deviceHeight, deviceWidth);
+    int32_t minDeviceLength = std::min(deviceHeight, deviceWidth);
+    gestureEventHub->GetPixelMapScale(height, width);
+    EXPECT_TRUE(maxDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE > minDeviceLength);
+    EXPECT_TRUE(height > minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE);
+
+    /**
+     * @tc.steps4: Invoke GetPixelMapScale
+     */
+    height = 50;
+    SystemProperties::SetDevicePhysicalHeight(600);
+    SystemProperties::SetDevicePhysicalWidth(200);
+    deviceHeight = SystemProperties::GetDevicePhysicalHeight();
+    deviceWidth = SystemProperties::GetDevicePhysicalWidth();
+    maxDeviceLength = std::max(deviceHeight, deviceWidth);
+    minDeviceLength = std::min(deviceHeight, deviceWidth);
+    gestureEventHub->GetPixelMapScale(height, width);
+    EXPECT_TRUE(maxDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE > minDeviceLength);
+    EXPECT_FALSE(height > minDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE);
+}
+
+/**
+ * @tc.name: GestureEventHubGetPixelMapScaleTest003
+ * @tc.desc: Test GetPixelMapScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapScaleTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create gestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode1 = FrameNode::CreateFrameNode(V2::WEB_ETS_TAG, 102, AceType::MakeRefPtr<Pattern>());
+    auto gestureEventHub = frameNode1->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto eventHub = gestureEventHub->eventHub_.Upgrade();
+    eventHub->AttachHost(frameNode1);
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps2: Invoke GetPixelMapScale
+     */
+    int32_t height = 500;
+    int32_t width = 600;
+    constexpr float PIXELMAP_DEFALUT_LIMIT_SCALE = 0.5f;
+    constexpr float PIXELMAP_DRAG_WGR_SCALE = 3.0f;
+    SystemProperties::SetDevicePhysicalHeight(600);
+    SystemProperties::SetDevicePhysicalWidth(600);
+    int32_t deviceHeight = SystemProperties::GetDevicePhysicalHeight();
+    int32_t deviceWidth = SystemProperties::GetDevicePhysicalWidth();
+    int32_t maxDeviceLength = std::max(deviceHeight, deviceWidth);
+    int32_t minDeviceLength = std::min(deviceHeight, deviceWidth);
+    gestureEventHub->GetPixelMapScale(height, width);
+    EXPECT_FALSE(maxDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE > minDeviceLength);
+    EXPECT_FALSE(gestureEventHub->GetTextDraggable());
+    EXPECT_TRUE(height > minDeviceLength / PIXELMAP_DRAG_WGR_SCALE);
+    EXPECT_TRUE(width > minDeviceLength * PIXELMAP_DRAG_WGR_TEXT_SCALE / PIXELMAP_DRAG_WGR_SCALE);
+    EXPECT_TRUE(height > minDeviceLength / PIXELMAP_DRAG_WGR_SCALE);
+    EXPECT_TRUE(width > minDeviceLength / PIXELMAP_DRAG_WGR_SCALE);
+
+    /**
+     * @tc.steps3: Invoke GetPixelMapScale
+     */
+    gestureEventHub->SetTextDraggable(true);
+    gestureEventHub->GetPixelMapScale(height, width);
+    EXPECT_FALSE(maxDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE > minDeviceLength);
+    EXPECT_TRUE(gestureEventHub->GetTextDraggable());
+    EXPECT_TRUE(height > minDeviceLength / PIXELMAP_DRAG_WGR_SCALE);
+    EXPECT_TRUE(width > minDeviceLength * PIXELMAP_DRAG_WGR_TEXT_SCALE / PIXELMAP_DRAG_WGR_SCALE);
+
+    /**
+     * @tc.steps4: Invoke GetPixelMapScale
+     */
+    height = 100;
+    width = 100;
+    gestureEventHub->SetTextDraggable(false);
+    gestureEventHub->GetPixelMapScale(height, width);
+    EXPECT_FALSE(maxDeviceLength * PIXELMAP_DEFALUT_LIMIT_SCALE > minDeviceLength);
+    EXPECT_FALSE(gestureEventHub->GetTextDraggable());
+    EXPECT_FALSE(height > minDeviceLength / PIXELMAP_DRAG_WGR_SCALE);
+    EXPECT_FALSE(width > minDeviceLength / PIXELMAP_DRAG_WGR_SCALE);
+}
 } // namespace OHOS::Ace::NG

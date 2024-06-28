@@ -86,7 +86,6 @@ std::string StepperItemComposedElement::GetStatus() const
     } else {
         return "ItemState.Normal";
     }
-    
 }
 
 RefPtr<Element> StepperItemComposedElement::GetElementChildBySlot(const RefPtr<Element>& element, int32_t& slot) const

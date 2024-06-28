@@ -92,11 +92,11 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (sheetStyle_.width.has_value()) {
             float width = 0.0f;
             if (sheetStyle_.width->Unit() == DimensionUnit::PERCENT) {
-                width = sheetStyle_.width->ConvertToPxWithSize(sheetWidth_);
+                width = sheetStyle_.width->ConvertToPxWithSize(maxSize.Width());
             } else {
                 width = sheetStyle_.width->ConvertToPx();
             }
-            if (width > sheetWidth_ || width < 0.0f) {
+            if (width > maxSize.Width() || width < 0.0f) {
                 width = sheetWidth_;
             }
             sheetWidth_ = width;

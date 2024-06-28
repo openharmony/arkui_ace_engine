@@ -122,6 +122,11 @@ public:
         return isNestedInterrupt_;
     }
 
+    virtual ScrollResult HandleOutBoundary(float& offset, int32_t source, NestedState state)
+    {
+        return {offset, false};
+    }
+
 protected:
     /**
      * @brief Helper function. Searches for the parent NestableScrollContainer of the current instance.

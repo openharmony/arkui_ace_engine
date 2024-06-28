@@ -349,10 +349,10 @@ public:
     {
         LOGD("Avoid area changed, type:%{public}d, topRect: avoidArea:x:%{public}d, y:%{public}d, "
              "width:%{public}d, height%{public}d; bottomRect: avoidArea:x:%{public}d, y:%{public}d, "
-             "width:%{public}d, height%{public}d",
+             "width:%{public}d, height%{public}d, instanceId %{public}d",
             type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
             (int32_t)avoidArea.topRect_.height_, avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_,
-            (int32_t)avoidArea.bottomRect_.width_, (int32_t)avoidArea.bottomRect_.height_);
+            (int32_t)avoidArea.bottomRect_.width_, (int32_t)avoidArea.bottomRect_.height_, instanceId_);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
         auto pipeline = container->GetPipelineContext();
@@ -704,11 +704,12 @@ UIContentErrorCode UIContentImpl::InitializeByName(
     return InitializeInner(window, name, storage, true);
 }
 
-void UIContentImpl::InitializeDynamic(
-    const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint)
+void UIContentImpl::InitializeDynamic(const std::string& hapPath, const std::string& abcPath,
+    const std::string& entryPoint, const std::vector<std::string>& registerComponents)
 {
     isDynamicRender_ = true;
     hapPath_ = hapPath;
+    registerComponents_ = registerComponents;
     auto env = reinterpret_cast<napi_env>(runtime_);
     CHECK_NULL_VOID(env);
     taskWrapper_ = std::make_shared<NG::UVTaskWrapperImpl>(env);
@@ -1037,6 +1038,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
     container->SetIsFormRender(isFormRender_);
     container->SetIsDynamicRender(isDynamicRender_);
+    container->SetRegisterComponents(registerComponents_);
     container->SetIsFRSCardContainer(isFormRender_);
     if (window_) {
         container->SetWindowName(window_->GetWindowName());
@@ -1079,7 +1081,13 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
     AddMccAndMncToResConfig(context, aceResCfg);
     AddSetAppColorModeToResConfig(context, aceResCfg);
-    if (isFormRender_) {
+    if (isDynamicRender_) {
+        if (std::regex_match(hapPath_, std::regex(".*\\.hap"))) {
+            hapPath = hapPath_;
+        } else {
+            resPath = hapPath_;
+        }
+    } else if (isFormRender_) {
         resPath = "/data/bundles/" + bundleName_ + "/" + moduleName_ + "/";
         hapPath = hapPath_;
     }
@@ -1657,14 +1665,17 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     bool halfLeading = std::any_of(metaData.begin(), metaData.end(),
         [](const auto& metaDataItem) { return metaDataItem.name == "half_leading" && metaDataItem.value == "true"; });
     pipeline->SetHalfLeading(halfLeading);
-    bool hasPreviewTextOption = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
-            return metaDataItem.name == "can_preview_text";
-        });
+    bool hasPreviewTextOption = std::any_of(metaData.begin(), metaData.end(),
+        [pipelineWeak = AceType::WeakClaim(AceType::RawPtr(pipeline))](const auto& metaDataItem) {
+                if (metaDataItem.name == "can_preview_text") {
+                    auto pipeline = pipelineWeak.Upgrade();
+                    CHECK_NULL_RETURN(pipeline, false);
+                    pipeline->SetSupportPreviewText(metaDataItem.value == "false");
+                    return true;
+                }
+                return false;
+            });
     pipeline->SetHasPreviewTextOption(hasPreviewTextOption);
-    bool changePreviewTextSupported = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
-            return metaDataItem.name == "can_preview_text" && metaDataItem.value == "false";
-        });
-    pipeline->SetSupportPreviewText(changePreviewTextSupported);
     // Use metadata to control whether the cutout safeArea takes effect.
     bool useCutout = std::any_of(metaData.begin(), metaData.end(),
         [](const auto& metaDataItem) { return metaDataItem.name == "avoid_cutout" && metaDataItem.value == "true"; });
@@ -2124,6 +2135,9 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     if (container->IsUseStageModel() && (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
         reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC)) {
         viewportConfigMgr_->UpdateConfigSync(aceViewportConfig, std::move(task));
+    } else if (rsTransaction != nullptr) {
+        // When rsTransaction is not nullptr, the task contains animation. It shouldn't be cancled.
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::PLATFORM, "ArkUIUpdateViewportConfig");
     } else {
         viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig");
     }
@@ -2679,8 +2693,7 @@ int32_t UIContentImpl::CreateModalUIExtension(
             CHECK_NULL_VOID(pipeline);
             auto overlay = pipeline->GetOverlayManager();
             CHECK_NULL_VOID(overlay);
-            sessionId = overlay->CreateModalUIExtension(want, callbacks,
-                config.isProhibitBack, config.isAsyncModalBinding, config.isAllowedBeCovered);
+            sessionId = overlay->CreateModalUIExtension(want, callbacks, config);
         },
         TaskExecutor::TaskType::UI, "ArkUICreateModalUIExtension");
     LOGI("[%{public}s][%{public}s][%{public}d]: UIExtension create modal page end, sessionId=%{public}d, "

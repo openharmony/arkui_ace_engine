@@ -22,6 +22,9 @@ TextInputType CastToTextInputType(int32_t value)
     if (value < static_cast<int32_t>(TextInputType::BEGIN) || value > static_cast<int32_t>(TextInputType::END)) {
         return TextInputType::TEXT;
     }
+    if (value == static_cast<int32_t>(TextInputType::JS_ENUM_URL)) {
+        return TextInputType::URL;
+    }
     return static_cast<TextInputType>(value);
 }
 

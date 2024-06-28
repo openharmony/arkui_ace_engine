@@ -638,6 +638,11 @@ public:
         isIndicatorInteractive_ = isInteractive;
     }
 
+    bool IsIndicatorInteractive() const
+    {
+        return isIndicatorInteractive_;
+    }
+
     void SetNextMarginIgnoreBlank(bool nextMarginIgnoreBlank)
     {
         nextMarginIgnoreBlank_ = nextMarginIgnoreBlank;
@@ -693,6 +698,11 @@ public:
     bool GetRequestLongPredict() const
     {
         return requestLongPredict_;
+    }
+
+    bool IsTouchDown() const
+    {
+        return isTouchDown_;
     }
 
 protected:
@@ -775,7 +785,7 @@ private:
     void HandleSwiperCustomAnimation(float offset);
     void CalculateAndUpdateItemInfo(float offset);
     void UpdateItemInfoInCustomAnimation(int32_t index, float startPos, float endPos);
-    void UpdateTabBarAnimationDuration();
+    void UpdateTabIndexAndTabBarAnimationDuration(int32_t index);
 
     float GetItemSpace() const;
     float GetPrevMargin() const;
@@ -821,7 +831,7 @@ private:
     void TriggerAnimationEndOnSwipeToLeft();
     void TriggerAnimationEndOnSwipeToRight();
     void TriggerEventOnFinish(int32_t nextIndex);
-    bool IsVisibleChildrenSizeLessThanSwiper();
+    bool IsVisibleChildrenSizeLessThanSwiper() const;
     void BeforeCreateLayoutWrapper() override;
 
     void SetLazyLoadFeature(bool useLazyLoad);
@@ -993,7 +1003,7 @@ private:
     std::optional<RefPtr<UINode>> FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode = true) const;
     bool NeedForceMeasure() const;
     void SetIndicatorChangeIndexStatus(bool withAnimation);
-    void SetIndicatorJumpIndex(const RefPtr<FrameNode> indicatorNode, std::optional<int32_t> jumpIndex);
+    void SetIndicatorJumpIndex(std::optional<int32_t> jumpIndex);
     bool ParseTabsIsRtl();
 
     void PostIdleTask(const RefPtr<FrameNode>& frameNode);

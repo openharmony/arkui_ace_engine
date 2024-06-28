@@ -89,7 +89,7 @@ public:
     void SetOnChangeEvent(std::function<void(const std::string&)>&& func) override;
     void SetBackgroundColor(const Color& color, bool tmp) override;
     void SetHeight(const Dimension& value) override;
-    void SetPadding(NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) override;
+    void SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) override;
     void SetMargin() override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
     void SetSelectionMenuHidden(bool contextMenuHidden) override;
@@ -275,6 +275,7 @@ private:
     void AddDragFrameNodeToManager() const;
     void SetDraggable(bool draggable);
     void SetTextRectWillChange();
+    void SetDefaultPadding();
 };
 
 } // namespace OHOS::Ace::NG

@@ -432,8 +432,8 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
         detentsLowerPos = sheetDetentsSize - 1;
         detentsUpperPos = sheetDetentsSize - 1;
     } else {
-        uint32_t lowerPosition = std::distance(sheetDetentHeight_.begin(), lowerIter);
-        uint32_t upperPosition = std::distance(sheetDetentHeight_.begin(), upperIter);
+        auto lowerPosition = static_cast<uint32_t>(std::distance(sheetDetentHeight_.begin(), lowerIter));
+        auto upperPosition = static_cast<uint32_t>(std::distance(sheetDetentHeight_.begin(), upperIter));
         if (lowerPosition == 0) {
             upHeight = sheetDetentHeight_[lowerPosition];
             downHeight = 0;
@@ -492,7 +492,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
     auto detentHeight = sheetDetentHeight_[detentsIndex_];
     auto pos = std::find(unSortedSheetDentents_.begin(), unSortedSheetDentents_.end(), detentHeight);
     if (pos != std::end(unSortedSheetDentents_)) {
-        auto idx = std::distance(unSortedSheetDentents_.begin(), pos);
+        auto idx = static_cast<uint32_t>(std::distance(unSortedSheetDentents_.begin(), pos));
         detentsFinalIndex_ = idx;
     }
 }
@@ -504,6 +504,51 @@ void SheetPresentationPattern::ChangeSheetPage(float height)
     }
     ChangeScrollHeight(height);
     ProcessColumnRect(height);
+}
+
+void SheetPresentationPattern::OnCoordScrollStart()
+{
+    if (animation_ && isAnimationProcess_) {
+        AnimationUtils::StopAnimation(animation_);
+        isAnimationBreak_ = true;
+    }
+    currentOffset_ = 0.0f;
+}
+
+bool SheetPresentationPattern::OnCoordScrollUpdate(float scrollOffset)
+{
+    if (!GetShowState() || !IsScrollable()) {
+        return false;
+    }
+
+    auto sheetType = GetSheetType();
+    auto sheetDetentsSize = sheetDetentHeight_.size();
+    if ((sheetType == SheetType::SHEET_POPUP) || (sheetDetentsSize == 0)) {
+        return false;
+    }
+    auto height = height_ + sheetHeightUp_;
+    if ((NearZero(currentOffset_)) && (LessNotEqual(scrollOffset, 0.0f)) &&
+        (GreatOrEqual(height, sheetDetentHeight_[sheetDetentsSize - 1]))) {
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    currentOffset_ = currentOffset_ + scrollOffset;
+    auto pageHeight = GetPageHeightWithoutOffset();
+    auto offset = pageHeight - height + currentOffset_;
+    if (LessOrEqual(offset, pageHeight - sheetMaxHeight_)) {
+        offset = pageHeight - sheetMaxHeight_;
+        currentOffset_ = height - sheetMaxHeight_;
+    }
+    ProcessColumnRect(height - currentOffset_);
+    auto renderContext = host->GetRenderContext();
+    renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
+    return true;
+}
+
+void SheetPresentationPattern::OnCoordScrollEnd(float dragVelocity)
+{
+    HandleDragEnd(dragVelocity);
 }
 
 void SheetPresentationPattern::InitialLayoutProps()
@@ -1392,6 +1437,8 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
             },
             option.GetOnFinishEvent());
     } else {
+        host->OnAccessibilityEvent(
+            AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
         if (sheetPattern->HasCallback()) {
             sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
                 HitTestMode::HTMTRANSPARENT);

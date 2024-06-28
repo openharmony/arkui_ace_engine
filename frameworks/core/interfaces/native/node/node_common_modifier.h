@@ -33,4 +33,18 @@ void SetOnTouchIntercept(ArkUINodeHandle node, void* extraParam);
 void SetOnHover(ArkUINodeHandle node, void* extraParam);
 void SetOnMouse(ArkUINodeHandle node, void* extraParam);
 void SetOnAccessibilityActions(ArkUINodeHandle node, void* extraParam);
+
+void ResetOnAppear(ArkUINodeHandle node);
+void ResetOnDisappear(ArkUINodeHandle node);
+void ResetOnAttach(ArkUINodeHandle node);
+void ResetOnDetach(ArkUINodeHandle node);
+void ResetOnFocus(ArkUINodeHandle node);
+void ResetOnBlur(ArkUINodeHandle node);
+void ResetOnAreaChange(ArkUINodeHandle node);
+void ResetOnVisibleAreaChange(ArkUINodeHandle node);
+void ResetOnClick(ArkUINodeHandle node);
+void ResetOnTouch(ArkUINodeHandle node);
+void ResetOnTouchIntercept(ArkUINodeHandle node);
+void ResetOnHover(ArkUINodeHandle node);
+void ResetOnMouse(ArkUINodeHandle node);
 } // namespace OHOS::Ace::NG::NodeModifier

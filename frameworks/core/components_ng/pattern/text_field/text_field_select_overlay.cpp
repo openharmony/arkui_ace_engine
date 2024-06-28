@@ -58,8 +58,7 @@ bool TextFieldSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     UpdatePattern(request);
     CHECK_NULL_RETURN(!pattern->IsTransparent(), false);
     pattern->ShowSelect();
-    SetScrollableParentCallback();
-    SetkeyBoardChangeCallback();
+    SetEnableHandleLevel(true);
     return true;
 }
 
@@ -102,6 +101,7 @@ void TextFieldSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
 
 void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
+    BaseTextSelectOverlay::OnCloseOverlay(menuType, reason, info);
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     CloseMagnifier();
@@ -111,8 +111,6 @@ void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason
             pattern->OnBackPressed();
         }
     }
-    ResetScrollableParentCallback();
-    RemoveKeyboardChangeCallback();
 }
 
 void TextFieldSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
@@ -148,38 +146,54 @@ void TextFieldSelectOverlay::HandleOnShowMenu()
 
 std::optional<SelectHandleInfo> TextFieldSelectOverlay::GetFirstHandleInfo()
 {
-    return IsSingleHandle() ? std::nullopt : GetHandleInfo(HandleIndex::FIRST);
+    if (IsSingleHandle()) {
+        return std::nullopt;
+    }
+    auto handleRect = GetFirstHandleLocalPaintRect();
+    return GetHandleInfo(handleRect);
 }
 
 std::optional<SelectHandleInfo> TextFieldSelectOverlay::GetSecondHandleInfo()
 {
-    return IsSingleHandle() ? GetHandleInfo(HandleIndex::CARET) : GetHandleInfo(HandleIndex::SECOND);
+    auto handleRect = GetSecondHandleLocalPaintRect();
+    return GetHandleInfo(handleRect);
 }
 
-std::optional<SelectHandleInfo> TextFieldSelectOverlay::GetHandleInfo(HandleIndex handlIndex)
+RectF TextFieldSelectOverlay::GetFirstHandleLocalPaintRect()
 {
     auto pattern = GetPattern<TextFieldPattern>();
-    CHECK_NULL_RETURN(pattern, std::nullopt);
+    CHECK_NULL_RETURN(pattern, RectF());
     auto controller = pattern->GetTextSelectController();
-    CHECK_NULL_RETURN(controller, std::nullopt);
-    RectF handleRect;
-    if (handlIndex == HandleIndex::FIRST) {
-        handleRect = controller->GetFirstHandleRect();
-    } else if (handlIndex == HandleIndex::SECOND) {
-        handleRect = controller->GetSecondHandleRect();
-        auto contentHeight = pattern->GetTextContentRect().Height();
-        auto handleHeight = std::min(handleRect.Height(), contentHeight);
-        handleRect.SetHeight(handleHeight);
-    } else {
-        handleRect = controller->GetCaretRect();
+    CHECK_NULL_RETURN(controller, RectF());
+    return controller->GetFirstHandleRect();
+}
+
+RectF TextFieldSelectOverlay::GetSecondHandleLocalPaintRect()
+{
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, RectF());
+    auto controller = pattern->GetTextSelectController();
+    CHECK_NULL_RETURN(controller, RectF());
+    if (IsSingleHandle()) {
+        return controller->GetCaretRect();
     }
-    auto localHandleRect = handleRect;
+    auto handleRect = controller->GetSecondHandleRect();
+    auto contentHeight = pattern->GetTextContentRect().Height();
+    auto handleHeight = std::min(handleRect.Height(), contentHeight);
+    handleRect.SetHeight(handleHeight);
+    return handleRect;
+}
+
+std::optional<SelectHandleInfo> TextFieldSelectOverlay::GetHandleInfo(const RectF& handlePaintRect)
+{
+    auto handleRect = handlePaintRect;
     SelectHandleInfo handleInfo;
+    handleInfo.localPaintRect = handlePaintRect;
     handleRect.SetOffset(handleRect.GetOffset() + GetPaintOffsetWithoutTransform());
     handleInfo.paintRect = handleRect;
     handleInfo.isShow = CheckHandleVisible(handleRect);
 
-    SetTransformPaintInfo(handleInfo, localHandleRect);
+    SetTransformPaintInfo(handleInfo, handlePaintRect);
     return handleInfo;
 }
 
@@ -406,19 +420,26 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     CHECK_NULL_VOID(pattern->IsOperation());
-    auto localOffset = handleRect.GetOffset() - GetPaintOffsetWithoutTransform();
+    auto localOffset = handleRect.GetOffset();
+    if (IsOverlayMode()) {
+        localOffset = localOffset - GetPaintOffsetWithoutTransform();
+    }
     auto selectController = pattern->GetTextSelectController();
     if (pattern->GetMagnifierController() && SelectOverlayIsOn()) {
         auto movingCaretOffset =
             selectController->CalcCaretOffsetByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
-        GetLocalPointWithTransform(movingCaretOffset);
+        if (IsOverlayMode()) {
+            GetLocalPointWithTransform(movingCaretOffset);
+        }
         pattern->SetMovingCaretOffset(movingCaretOffset);
         auto contentRect = pattern->GetContentRect();
         auto caretRect = pattern->GetCaretRect();
         float x = std::clamp(localOffset.GetX(), contentRect.Left(), contentRect.Right() - caretRect.Width());
         float y = std::clamp(localOffset.GetY(), contentRect.Top(), contentRect.Bottom() - caretRect.Height());
         auto magnifierLocalOffset = OffsetF(x, y);
-        GetLocalPointWithTransform(magnifierLocalOffset);
+        if (IsOverlayMode()) {
+            GetLocalPointWithTransform(magnifierLocalOffset);
+        }
         pattern->GetMagnifierController()->SetLocalOffset(magnifierLocalOffset);
     }
     if (IsSingleHandle()) {
@@ -480,5 +501,13 @@ void TextFieldSelectOverlay::ProcessSelectAllOverlay(const OverlayRequest& reque
     OverlayRequest newRequest = request;
     newRequest.requestCode = static_cast<uint32_t>(newRequest.requestCode) | REQUEST_SELECT_ALL;
     ProcessOverlay(newRequest);
+}
+
+void TextFieldSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
+{
+    if (IsAncestorNodeGeometryChange(flag)) {
+        UpdateAllHandlesOffset();
+    }
+    BaseTextSelectOverlay::OnAncestorNodeChanged(flag);
 }
 } // namespace OHOS::Ace::NG

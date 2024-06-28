@@ -27,7 +27,7 @@ class RecycleDummyNode : public UINode {
 
 public:
     static RefPtr<RecycleDummyNode> CreateRecycleDummyNode(int32_t nodeId = -1);
-    static RefPtr<AceType> WrapRecycleDummyNode(const RefPtr<AceType>& customNode);
+    static RefPtr<AceType> WrapRecycleDummyNode(const RefPtr<AceType>& customNode, int32_t nodeId = -1);
     explicit RecycleDummyNode(int32_t nodeId);
     ~RecycleDummyNode() override;
     bool IsAtomicNode() const override

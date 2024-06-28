@@ -1126,6 +1126,7 @@ RefPtr<OverlengthDotIndicatorPaintMethod> SwiperIndicatorPattern::CreateOverlong
 
     if (changeIndexWithAnimation_ && !changeIndexWithAnimation_.value()) {
         animationStartIndex = overlongDotIndicatorModifier_->GetAnimationEndIndex();
+        paintMethodTemp->SetGestureState(GestureState::GESTURE_STATE_NONE);
     }
 
     if (jumpIndex_) {
@@ -1138,6 +1139,7 @@ RefPtr<OverlengthDotIndicatorPaintMethod> SwiperIndicatorPattern::CreateOverlong
 
     overlongPaintMethod->SetAnimationStartIndex(animationStartIndex);
     overlongPaintMethod->SetAnimationEndIndex(animationEndIndex);
+    overlongDotIndicatorModifier_->SetIsSwiperTouchDown(swiperPattern->IsTouchDown());
     overlongDotIndicatorModifier_->SetBoundsRect(CalcBoundsRect());
     changeIndexWithAnimation_.reset();
     jumpIndex_.reset();

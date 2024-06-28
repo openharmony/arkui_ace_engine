@@ -1566,11 +1566,11 @@ void VideoPattern::OnFullScreenChange(bool isFullScreen)
             break;
         }
     }
-    if (isFullScreen && isEnableAnalyzer_ && isAnalyzerCreated_) {
+    if (isEnableAnalyzer_) {
         if (!imageAnalyzerManager_) {
             EnableAnalyzer(isEnableAnalyzer_);
         }
-        if (imageAnalyzerManager_) {
+        if (imageAnalyzerManager_ && isAnalyzerCreated_) {
             StartImageAnalyzer();
         }
     }

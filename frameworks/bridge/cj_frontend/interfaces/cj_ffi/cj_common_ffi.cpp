@@ -15,9 +15,9 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 
-#include "core/common/container.h"
-#include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
+#include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
+#include "core/common/container.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
@@ -67,5 +67,40 @@ void TransformNativeCJFingerInfo(CJFingerInfo* sources, const std::list<OHOS::Ac
         ffiFingers.localY = PipelineBase::Px2VpWithCurrentDensity(localLoc.GetY());
         id++;
     }
+}
+
+void AssambleCJEventTarget(
+    const OHOS::Ace::EventTarget& eventTarget, CJArea& area, CJPosition& position, CJPosition& globalPosition)
+{
+    area.width = eventTarget.area.GetWidth().ConvertToVp();
+    area.height = eventTarget.area.GetHeight().ConvertToVp();
+    const auto& localOffset = eventTarget.area.GetOffset();
+    const auto& origin = eventTarget.origin;
+    position.x = localOffset.GetX().ConvertToVp();
+    position.y = localOffset.GetY().ConvertToVp();
+    globalPosition.x = origin.GetX().ConvertToVp() + localOffset.GetX().ConvertToVp();
+    globalPosition.y = origin.GetX().ConvertToVp() + localOffset.GetY().ConvertToVp();
+}
+
+void AssambleCJClickInfo(const OHOS::Ace::GestureEvent& event, CJClickInfo& clickInfo, CJEventTarget& eventTarget,
+    CJArea& area, CJPosition& position, CJPosition& globalPosition)
+{
+    AssambleCJEventTarget(event.GetTarget(), area, position, globalPosition);
+    area.position = &position;
+    area.globalPosition = &globalPosition;
+    eventTarget.area = &area;
+    clickInfo.target = &eventTarget;
+    clickInfo.timestamp = event.GetTimeStamp().time_since_epoch().count();
+    Offset globalOffset = event.GetGlobalLocation();
+    Offset localOffset = event.GetLocalLocation();
+    Offset screenOffset = event.GetScreenLocation();
+    double currtDensity = PipelineBase::GetCurrentDensity();
+    clickInfo.x = localOffset.GetX() / currtDensity;
+    clickInfo.y = localOffset.GetY() / currtDensity;
+    clickInfo.windowX = globalOffset.GetX() / currtDensity;
+    clickInfo.windowY = globalOffset.GetY() / currtDensity;
+    clickInfo.displayX = screenOffset.GetX() / currtDensity;
+    clickInfo.displayY = screenOffset.GetY() / currtDensity;
+    clickInfo.source = static_cast<int32_t>(event.GetSourceDevice());
 }
 } // namespace OHOS::Ace

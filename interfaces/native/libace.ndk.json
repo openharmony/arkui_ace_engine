@@ -40,6 +40,22 @@
         "name": "OH_NativeXComponent_GetTouchPointTiltY"
     },
     {
+        "first_introduced": "12",
+        "name": "OH_NativeXComponent_GetTouchPointWindowX"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_NativeXComponent_GetTouchPointWindowY"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_NativeXComponent_GetTouchPointDisplayX"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_NativeXComponent_GetTouchPointDisplayY"
+    },
+    {
         "first_introduced": "10",
         "name": "OH_NativeXComponent_RegisterFocusEventCallback"
     },
@@ -1633,14 +1649,18 @@
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArKUI_NodeEvent_GetNumberValue"
+        "name": "OH_ArkUI_NodeEvent_GetNumberValue"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArKUI_NodeEvent_GetStringValue"
+        "name": "OH_ArkUI_NodeEvent_GetStringValue"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArKUI_NodeEvent_SetReturnNumberValue"
+        "name": "OH_ArkUI_NodeEvent_SetReturnNumberValue"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PointerEvent_SetStopPropagation"
     }
 ]

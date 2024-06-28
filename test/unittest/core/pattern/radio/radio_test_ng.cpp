@@ -1373,6 +1373,9 @@ HWTEST_F(RadioTestNg, RadioPatternTest025, TestSize.Level1)
     /**
      * fire touch event
      */
+    auto touchCallback = [](TouchEventInfo& info) {};
+    auto touchEvent = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    gesture->AddTouchEvent(touchEvent);
     auto touchEventActuator = gesture->touchEventActuator_;
     ASSERT_NE(touchEventActuator, nullptr);
     auto events = touchEventActuator->touchEvents_;

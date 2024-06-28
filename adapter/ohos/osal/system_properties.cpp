@@ -363,6 +363,7 @@ bool SystemProperties::traceInputEventEnable_ = IsTraceInputEventEnabled() && de
 bool SystemProperties::stateManagerEnable_ = IsStateManagerEnable();
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
 bool SystemProperties::syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
+bool SystemProperties::pixelRoundEnable_ = IsPixelRoundEnabled();
 bool SystemProperties::textTraceEnable_ = IsTextTraceEnabled();
 bool SystemProperties::accessTraceEnable_ = IsAccessTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
@@ -548,6 +549,7 @@ void SystemProperties::InitDeviceInfo(
     stateManagerEnable_ = IsStateManagerEnable();
     buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
     syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
+    pixelRoundEnable_ = IsPixelRoundEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     canvasDebugMode_ = ReadCanvasDebugMode();
     isHookModeEnabled_ = IsHookModeEnabled();
@@ -664,7 +666,7 @@ bool SystemProperties::GetDebugPixelMapSaveEnabled()
     return system::GetBoolParameter("persist.ace.save.pixelmap.enabled", false);
 }
 
-bool SystemProperties::GetPixelRoundEnable()
+bool SystemProperties::IsPixelRoundEnabled()
 {
     return system::GetBoolParameter("ace.debug.pixelround.enabled", true);
 }

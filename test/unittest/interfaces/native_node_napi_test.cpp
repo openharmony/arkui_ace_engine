@@ -78,3 +78,59 @@ HWTEST_F(NativeNodeNapiTest, NativeNodeNapiTest004, TestSize.Level1)
     void* object = OH_ArkUI_QueryModuleInterfaceByName(static_cast<ArkUI_NativeAPIVariantKind>(-1), "");
     EXPECT_EQ(object, nullptr);
 }
+
+/**
+ * @tc.name: NativeNodeNapiTest005
+ * @tc.desc: Test OH_ArkUI_QueryModuleInterfaceByName function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NativeNodeNapiTest005, TestSize.Level1)
+{
+    void* object = OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "");
+    EXPECT_EQ(object, nullptr);
+}
+
+/**
+ * @tc.name: NativeNodeNapiTest006
+ * @tc.desc: Test OH_ArkUI_QueryModuleInterfaceByName function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NativeNodeNapiTest006, TestSize.Level1)
+{
+    void* object = OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_DIALOG, "");
+    EXPECT_EQ(object, nullptr);
+}
+
+/**
+ * @tc.name: NativeNodeNapiTest007
+ * @tc.desc: Test OH_ArkUI_QueryModuleInterfaceByName function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NativeNodeNapiTest007, TestSize.Level1)
+{
+    void* object = OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_GESTURE, "");
+    EXPECT_EQ(object, nullptr);
+}
+
+/**
+ * @tc.name: NativeNodeNapiTest008
+ * @tc.desc: Test OH_ArkUI_QueryModuleInterfaceByName function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NativeNodeNapiTest008, TestSize.Level1)
+{
+    void* object = OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_ANIMATE, "");
+    EXPECT_EQ(object, nullptr);
+}
+
+/**
+ * @tc.name: NativeNodeNapiTest009
+ * @tc.desc: Test OH_ArkUI_QueryModuleInterfaceByName function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NativeNodeNapiTest009, TestSize.Level1)
+{
+    void* object = OH_ArkUI_QueryModuleInterfaceByName(
+        static_cast<ArkUI_NativeAPIVariantKind>(ARKUI_NATIVE_GESTURE + 1), "");
+    EXPECT_EQ(object, nullptr);
+}

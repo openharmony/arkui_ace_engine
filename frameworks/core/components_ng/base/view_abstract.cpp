@@ -1374,26 +1374,29 @@ void ViewAbstract::SetVisibility(VisibleType visible)
     }
 }
 
-void ViewAbstract::SetGeometryTransition(const std::string& id, bool followWithoutTransition)
+void ViewAbstract::SetGeometryTransition(const std::string& id,
+    bool followWithoutTransition, bool doRegisterSharedTransition)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     if (layoutProperty) {
-        layoutProperty->UpdateGeometryTransition(id, followWithoutTransition);
+        layoutProperty->UpdateGeometryTransition(id, followWithoutTransition, doRegisterSharedTransition);
     }
 }
 
-void ViewAbstract::SetGeometryTransition(FrameNode *frameNode, const std::string& id, bool followWithoutTransition)
+void ViewAbstract::SetGeometryTransition(FrameNode *frameNode, const std::string& id,
+    bool followWithoutTransition, bool doRegisterSharedTransition)
 {
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     if (layoutProperty) {
-        layoutProperty->UpdateGeometryTransition(id, followWithoutTransition);
+        layoutProperty->UpdateGeometryTransition(id, followWithoutTransition, doRegisterSharedTransition);
     }
 }
 
-const std::string ViewAbstract::GetGeometryTransition(FrameNode* frameNode, bool* followWithoutTransition)
+const std::string ViewAbstract::GetGeometryTransition(FrameNode* frameNode,
+    bool* followWithoutTransition, bool* doRegisterSharedTransition)
 {
     CHECK_NULL_RETURN(frameNode, "");
     auto layoutProperty = frameNode->GetLayoutProperty();
@@ -1401,6 +1404,7 @@ const std::string ViewAbstract::GetGeometryTransition(FrameNode* frameNode, bool
         auto geometryTransition = layoutProperty->GetGeometryTransition();
         if (geometryTransition) {
             *followWithoutTransition = geometryTransition->GetFollowWithoutTransition();
+            *doRegisterSharedTransition = geometryTransition->GetDoRegisterSharedTransition();
             return geometryTransition->GetId();
         }
     }
@@ -4684,5 +4688,32 @@ uint32_t ViewAbstract::GetSafeAreaExpandEdges(FrameNode* frameNode)
         value = SafeAreaExpandOpts->edges;
     }
     return value;
+}
+
+void ViewAbstract::SetPositionLocalizedEdges(bool needLocalized)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedPositionLocalizedEdges(needLocalized);
+}
+
+void ViewAbstract::SetLocalizedMarkAnchor(bool needLocalized)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdatNeedMarkAnchorPosition(needLocalized);
+}
+
+void ViewAbstract::SetOffsetLocalizedEdges(bool needLocalized)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedOffsetLocalizedEdges(needLocalized);
 }
 } // namespace OHOS::Ace::NG

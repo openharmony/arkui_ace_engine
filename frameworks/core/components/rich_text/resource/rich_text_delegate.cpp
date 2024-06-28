@@ -87,12 +87,13 @@ void RichTextDelegate::Stop()
     if (platformTaskExecutor.IsRunOnCurrentThread()) {
         UnregisterEvent();
     } else {
-        platformTaskExecutor.PostTask([weak = WeakClaim(this)] {
-            auto delegate = weak.Upgrade();
-            if (delegate) {
-                delegate->UnregisterEvent();
-            }
-        }, "ArkUIRichTextUnregisterEvent");
+        platformTaskExecutor.PostTask(
+            [weak = WeakClaim(this)] {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->UnregisterEvent();
+                }
+            }, "ArkUIRichTextUnregisterEvent");
     }
 }
 
@@ -141,56 +142,57 @@ void RichTextDelegate::CreatePluginResource(
                                                          TaskExecutor::TaskType::PLATFORM);
     auto resRegister = pipelineContext->GetPlatformResRegister();
     auto weakRes = AceType::WeakClaim(AceType::RawPtr(resRegister));
-    platformTaskExecutor.PostTask([weak = WeakClaim(this), weakRes, top, left, visible] {
-        auto delegate = weak.Upgrade();
-        if (!delegate) {
-            return;
-        }
-        auto webCom = delegate->webComponent_.Upgrade();
-        if (!webCom) {
-            delegate->OnError(NTC_ERROR, "fail to call WebDelegate::SetSrc PostTask");
-        }
-        auto resRegister = weakRes.Upgrade();
-        if (!resRegister) {
-            delegate->OnError(RICH_TEXT_ERROR_CODE_CREATEFAIL, RICH_TEXT_ERROR_MSG_CREATEFAIL);
-            return;
-        }
+    platformTaskExecutor.PostTask(
+        [weak = WeakClaim(this), weakRes, top, left, visible] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            auto webCom = delegate->webComponent_.Upgrade();
+            if (!webCom) {
+                delegate->OnError(NTC_ERROR, "fail to call WebDelegate::SetSrc PostTask");
+            }
+            auto resRegister = weakRes.Upgrade();
+            if (!resRegister) {
+                delegate->OnError(RICH_TEXT_ERROR_CODE_CREATEFAIL, RICH_TEXT_ERROR_MSG_CREATEFAIL);
+                return;
+            }
 
-        auto context = delegate->context_.Upgrade();
-        if (!context) {
-            LOGE("context is null");
-            return;
-        }
+            auto context = delegate->context_.Upgrade();
+            if (!context) {
+                LOGE("context is null");
+                return;
+            }
 
-        delegate->id_ = CREATING_ID;
+            delegate->id_ = CREATING_ID;
 
-        std::string pageUrl;
-        int32_t pageId;
-        OHOS::Ace::Framework::DelegateClient::GetInstance().GetWebPageUrl(pageUrl, pageId);
-        std::string richTextVisible = visible ? "true" : "false";
-        delegate->pageUrl_ = pageUrl;
-        delegate->pageId_ = pageId;
+            std::string pageUrl;
+            int32_t pageId;
+            OHOS::Ace::Framework::DelegateClient::GetInstance().GetWebPageUrl(pageUrl, pageId);
+            std::string richTextVisible = visible ? "true" : "false";
+            delegate->pageUrl_ = pageUrl;
+            delegate->pageId_ = pageId;
 
-        std::stringstream paramStream;
-        paramStream << NTC_PARAM_RICH_TEXT << RICHTEXT_PARAM_EQUALS << delegate->id_ << RICHTEXT_PARAM_AND
-                    << NTC_PARAM_CONTENT_DATA << RICHTEXT_PARAM_EQUALS << webCom->GetData() << RICHTEXT_PARAM_AND
-                    << NTC_PARAM_LEFT << RICHTEXT_PARAM_EQUALS << left << RICHTEXT_PARAM_AND
-                    << NTC_PARAM_TOP << RICHTEXT_PARAM_EQUALS << top << RICHTEXT_PARAM_AND
-                    << NTC_PARAM_RICHTEXT_VISIBILITY << RICHTEXT_PARAM_EQUALS << richTextVisible << RICHTEXT_PARAM_AND
-                    << NTC_PARAM_PAGE_PATH << RICHTEXT_PARAM_EQUALS << pageUrl;
+            std::stringstream paramStream;
+            paramStream << NTC_PARAM_RICH_TEXT << RICHTEXT_PARAM_EQUALS << delegate->id_ << RICHTEXT_PARAM_AND
+                        << NTC_PARAM_CONTENT_DATA << RICHTEXT_PARAM_EQUALS << webCom->GetData() << RICHTEXT_PARAM_AND
+                        << NTC_PARAM_LEFT << RICHTEXT_PARAM_EQUALS << left << RICHTEXT_PARAM_AND
+                        << NTC_PARAM_TOP << RICHTEXT_PARAM_EQUALS << top << RICHTEXT_PARAM_AND
+                        << NTC_PARAM_RICHTEXT_VISIBILITY << RICHTEXT_PARAM_EQUALS << richTextVisible
+                        << RICHTEXT_PARAM_AND << NTC_PARAM_PAGE_PATH << RICHTEXT_PARAM_EQUALS << pageUrl;
 
-        std::string param = paramStream.str();
-        delegate->id_ = resRegister->CreateResource(RICH_TEXT_RESOURCE_NAME, param);
-        if (delegate->id_ == INVALID_ID) {
-            delegate->OnError(RICH_TEXT_ERROR_CODE_CREATEFAIL, RICH_TEXT_ERROR_MSG_CREATEFAIL);
-            return;
-        }
-        delegate->state_ = State::CREATED;
-        delegate->hash_ = delegate->MakeResourceHash();
-        delegate->RegisterWebEvent();
-        delegate->BindPopPageSuccessMethod();
-        delegate->BindIsPagePathInvalidMethod();
-    }, "ArkUIRichTextCreatePluginResource");
+            std::string param = paramStream.str();
+            delegate->id_ = resRegister->CreateResource(RICH_TEXT_RESOURCE_NAME, param);
+            if (delegate->id_ == INVALID_ID) {
+                delegate->OnError(RICH_TEXT_ERROR_CODE_CREATEFAIL, RICH_TEXT_ERROR_MSG_CREATEFAIL);
+                return;
+            }
+            delegate->state_ = State::CREATED;
+            delegate->hash_ = delegate->MakeResourceHash();
+            delegate->RegisterWebEvent();
+            delegate->BindPopPageSuccessMethod();
+            delegate->BindIsPagePathInvalidMethod();
+        }, "ArkUIRichTextCreatePluginResource");
 }
 
 void RichTextDelegate::InitWebEvent()

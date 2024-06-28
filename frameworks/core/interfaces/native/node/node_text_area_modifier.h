@@ -33,5 +33,14 @@ namespace OHOS::Ace::NG::NodeModifier {
     void SetTextAreaOnDidInsertValue(ArkUINodeHandle node, void* extraParam);
     void SetTextAreaOnWillDeleteValue(ArkUINodeHandle node, void* extraParam);
     void SetTextAreaOnDidDeleteValue(ArkUINodeHandle node, void* extraParam);
+
+    void ResetOnTextAreaChange(ArkUINodeHandle node);
+    void ResetOnTextAreaPaste(ArkUINodeHandle node);
+    void ResetOnTextAreaSelectionChange(ArkUINodeHandle node);
+    void ResetOnTextAreaEditChange(ArkUINodeHandle node);
+    void ResetOnTextAreaContentSizeChange(ArkUINodeHandle node);
+    void ResetOnTextAreaInputFilterError(ArkUINodeHandle node);
+    void ResetTextAreaOnTextContentScroll(ArkUINodeHandle node);
+    void ResetTextAreaOnSubmit(ArkUINodeHandle node);
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif

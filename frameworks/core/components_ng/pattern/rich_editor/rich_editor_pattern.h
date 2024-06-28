@@ -64,6 +64,14 @@ struct TextConfig;
 #endif
 #endif
 
+#define COPY_SPAN_STYLE_IF_PRESENT(sourceNode, targetNode, styleType, propertyInfo) \
+    do {                                                                            \
+        if ((sourceNode)->Has##styleType()) {                                       \
+            (targetNode)->Update##styleType(*((sourceNode)->Get##styleType()));     \
+            (targetNode)->AddPropertyInfo(propertyInfo);                            \
+        }                                                                           \
+    } while (false)
+
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
@@ -375,7 +383,6 @@ public:
     int32_t CalcLineBeginPosition();
     float GetTextThemeFontSize();
     int32_t CalcLineEndPosition();
-    bool CursorMoveLineEndPos(OffsetF& caretOffsetUp, OffsetF& caretOffsetDown, OffsetF& nextCaretOffset);
     bool CursorMoveLineBegin();
     bool CursorMoveLineEnd();
     void HandleSelectFontStyle(KeyCode code) override;
@@ -545,7 +552,6 @@ public:
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) override;
-    void AddUdmfData(const RefPtr<Ace::DragEvent>& event) override;
     bool RequestCustomKeyboard();
     bool CloseCustomKeyboard();
     const std::string& GetPasteStr() const
@@ -786,11 +792,6 @@ public:
     bool IsMoveCaretAnywhere() const
     {
         return isMoveCaretAnywhere_;
-    }
-
-    void OnTouchTestHit(SourceType hitTestType) override
-    {
-        selectOverlay_->OnTouchTestHit(hitTestType);
     }
 
     void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionItems)
@@ -1054,7 +1055,6 @@ private:
     TextSpanOptions GetTextSpanOptions(const RefPtr<SpanItem>& spanItem);
     void HandleOnCopyStyledString();
     void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event);
-    void AddSpanStringUdmfRecord(RefPtr<UnifiedData>& unifiedData);
     void NotifyExitTextPreview();
     void TripleClickSection(GestureEvent& info, int32_t start, int32_t end, int32_t pos);
 
@@ -1106,7 +1106,6 @@ private:
     CancelableCallback<void()> caretTwinklingTask_;
     RefPtr<RichEditorController> richEditorController_;
     RefPtr<RichEditorStyledStringController> richEditorStyledStringController_;
-    RefPtr<MutableSpanString> styledString_;
     MoveDirection moveDirection_ = MoveDirection::FORWARD;
     RectF frameRect_;
     std::optional<struct UpdateSpanStyle> typingStyle_;

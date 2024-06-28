@@ -2683,7 +2683,7 @@ const ArkUI_AttributeItem* GetRadialGradient(ArkUI_NodeHandle node)
 
 int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item->size < NUM_3) {
+    if (item->size < NUM_4) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
@@ -2696,12 +2696,8 @@ int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         auto stroke = item->size > NUM_1 ? item->value[NUM_1].u32 : DEFAULT_FIll_COLOR;
         float strokeWidth = item->size > NUM_2 ? item->value[NUM_2].f32 : NUM_0;
         ArkUI_Float32 pathAttributes[NUM_2];
-        if (LessNotEqual(item->value[NUM_4].f32, 0.0f) || LessNotEqual(item->value[NUM_5].f32, 0.0f)) {
-            return ERROR_CODE_PARAM_INVALID;
-        } else {
-            pathAttributes[NUM_0] = item->value[NUM_4].f32;
-            pathAttributes[NUM_1] = item->value[NUM_5].f32;
-        }
+        pathAttributes[NUM_0] = item->size > NUM_4 ? item->value[NUM_4].f32 : NUM_0; // path width
+        pathAttributes[NUM_1] = item->size > NUM_5 ? item->value[NUM_5].f32 : NUM_0; // path height
         fullImpl->getNodeModifiers()->getCommonModifier()->setMaskPath(
             node->uiNodeHandle, "path", fill, stroke, strokeWidth, &pathAttributes, item->string, unit);
     } else if (item->value[0].i32 == ArkUI_MaskType::ARKUI_MASK_TYPE_PROGRESS) {
@@ -2709,12 +2705,15 @@ int32_t SetMask(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         if (LessNotEqual(item->value[NUM_1].f32, 0.0f) || LessNotEqual(item->value[NUM_2].f32, 0.0f)) {
             return ERROR_CODE_PARAM_INVALID;
         }
-        progressAttributes[NUM_0] = item->value[NUM_1].f32; //value
-        progressAttributes[NUM_1] = item->value[NUM_2].f32; //total
+        progressAttributes[NUM_0] = item->value[NUM_1].f32; // value
+        progressAttributes[NUM_1] = item->value[NUM_2].f32; // total
         uint32_t color = item->value[NUM_3].u32;
         fullImpl->getNodeModifiers()->getCommonModifier()->setProgressMask(
             node->uiNodeHandle, progressAttributes, color);
     } else {
+        if (item->size < NUM_6) {
+            return ERROR_CODE_PARAM_INVALID;
+        }
         auto fill = item->size > NUM_0 ? item->value[0].u32 : DEFAULT_FIll_COLOR;
         auto stroke = item->size > NUM_1 ? item->value[NUM_1].u32 : DEFAULT_FIll_COLOR;
         float strokeWidth = item->size > NUM_2 ? item->value[NUM_2].f32 : NUM_0;
@@ -3293,12 +3292,17 @@ int32_t SetGeometryTransition(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
     if (item->string == nullptr) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    ArkUI_Bool options = false;
+    ArkUIGeometryTransitionOptions options;
+    ArkUI_Bool follow = false;
     if (item->size == 1) {
-        options = item->value[0].i32;
+        follow = item->value[0].i32;
     }
+    options.follow = follow;
+    options.hierarchyStrategy = static_cast<int32_t>(TransitionHierarchyStrategy::ADAPTIVE);
+
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getCommonModifier()->setGeometryTransition(node->uiNodeHandle, item->string, options);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setGeometryTransition(node->uiNodeHandle, item->string,
+        &options);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -3314,9 +3318,10 @@ const ArkUI_AttributeItem* GetGeometryTransition(ArkUI_NodeHandle node)
     if (!modifier) {
         return nullptr;
     }
-    ArkUI_Bool options = false;
+    ArkUIGeometryTransitionOptions options;
     g_attributeItem.string = modifier->getGeometryTransition(node->uiNodeHandle, &options);
-    g_numberValues[0].i32 = options;
+    g_numberValues[NUM_0].i32 = options.follow;
+    g_numberValues[NUM_1].i32 = options.hierarchyStrategy;
     return &g_attributeItem;
 }
 
@@ -4446,9 +4451,10 @@ int32_t SetTextInputUnderlineColor(ArkUI_NodeHandle node, const ArkUI_AttributeI
     values[NUM_1] = item->value[NUM_1].u32;
     values[NUM_2] = item->value[NUM_2].u32;
     values[NUM_3] = item->value[NUM_3].u32;
+    ArkUI_Bool hasValues[NUM_4] = { 1, 1, 1, 1 };
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputUserUnderlineColor(
-        node->uiNodeHandle, values, NUM_4);
+        node->uiNodeHandle, values, hasValues, NUM_4);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -4961,7 +4967,7 @@ int32_t SetScrollScrollSnap(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
     paginationParams[item->size - NUM_3 + NUM_0] = snapAlign;
     paginationParams[item->size - NUM_3 + NUM_1] = enableSnapToStart;
     paginationParams[item->size - NUM_3 + NUM_2] = enableSnapToEnd;
-    paginationParams[item->size] = (item->size - NUM_3 >= 1) ? true : false;
+    paginationParams[item->size] = (item->size - NUM_3 > 1) ? true : false;
 
     fullImpl->getNodeModifiers()->getScrollModifier()->setScrollScrollSnap(
         node->uiNodeHandle, paginations, item->size - NUM_3, paginationParams, item->size + NUM_1);
@@ -8049,7 +8055,7 @@ int32_t SetTextPickerRange(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
     if (actualSize < 0 || !InRegion(static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_SINGLE),
-        static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_CASCADE_RANGE_CONTENT), item->value[NUM_0].i32)) {
+        static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_MULTI), item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     bool isSingleRange = false;
@@ -8708,6 +8714,42 @@ void ResetAccessibilityValue(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->resetAccessibilityValue(node->uiNodeHandle);
+}
+
+void ResetAreaChangeRatio(ArkUI_NodeHandle node)
+{
+    if (node->areaChangeRadio) {
+        delete[] node->areaChangeRadio->value;
+        delete node->areaChangeRadio;
+    }
+    node->areaChangeRadio = nullptr;
+}
+
+int32_t SetAreaChangeRatio(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_Int32 radioLength = item->size;
+    ArkUI_NumberValue* radioList = new ArkUI_NumberValue[radioLength];
+    for (int i = 0; i < radioLength; ++i) {
+        if (LessNotEqual(item->value[i].f32, 0.0f) || GreatNotEqual(item->value[i].f32, 1.0f)) {
+            delete[] radioList;
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        radioList[i].f32 = item->value[i].f32;
+    }
+    if (node->areaChangeRadio) {
+        ResetAreaChangeRatio(node);
+    }
+    node->areaChangeRadio = new ArkUI_AttributeItem { .value = radioList, .size = radioLength};
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetAreaChangeRatio(ArkUI_NodeHandle node)
+{
+    return node->areaChangeRadio;
 }
 
 bool CheckTransformCenter(const ArkUI_AttributeItem* item, int32_t size)
@@ -12476,6 +12518,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetAccessibilityState,
         SetAccessibilityValue,
         SetExpandSafeArea,
+        SetAreaChangeRatio,
     };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -12580,6 +12623,7 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetAccessibilityState,
         GetAccessibilityValue,
         GetExpandSafeArea,
+        GetAreaChangeRatio,
     };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -12688,6 +12732,7 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetAccessibilityState,
         ResetAccessibilityValue,
         ResetExpandSafeArea,
+        ResetAreaChangeRatio,
     };
     if (subTypeId >= sizeof(resetters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);

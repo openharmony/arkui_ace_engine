@@ -137,7 +137,6 @@ void JSInteractableView::JsOnHover(const JSCallbackInfo& info)
 void JSInteractableView::JsOnPan(const JSCallbackInfo& args)
 {
     if (args[0]->IsObject()) {
-        // TODO: JSPanHandler should support ng build
 #ifndef NG_BUILD
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
         JSPanHandler* handler = obj->Unwrap<JSPanHandler>();

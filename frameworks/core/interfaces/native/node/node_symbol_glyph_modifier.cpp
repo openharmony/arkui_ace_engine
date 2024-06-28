@@ -33,6 +33,26 @@ FontWeight ConvertStrToFontWeight(ArkUI_CharPtr weight, FontWeight defaultFontWe
     return StringUtils::StringToFontWeight(weightStr, defaultFontWeight);
 }
 
+FontWeight ConvertIntToFontWeight(ArkUI_Int32 weight)
+{
+    static const std::unordered_map<ArkUI_Int32, FontWeight> fontWeightMap = {
+        {100, FontWeight::W100},
+        {200, FontWeight::W200},
+        {300, FontWeight::W300},
+        {400, FontWeight::W400},
+        {500, FontWeight::W500},
+        {600, FontWeight::W600},
+        {700, FontWeight::W700},
+        {800, FontWeight::W800},
+        {900, FontWeight::W900},
+    };
+    auto weightFindIter = fontWeightMap.find(weight);
+    if (weightFindIter != fontWeightMap.end()) {
+        return weightFindIter->second;
+    }
+    return FontWeight::NORMAL;
+}
+
 void SetFontColor(ArkUINodeHandle node, ArkUI_Uint32* color, int32_t size)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -93,7 +113,7 @@ void SetFontWeight(ArkUINodeHandle node, ArkUI_Int32 weight)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SymbolModelNG::SetFontWeight(frameNode, static_cast<FontWeight>(weight));
+    SymbolModelNG::SetFontWeight(frameNode, ConvertIntToFontWeight(weight));
 }
 
 void ResetFontWeight(ArkUINodeHandle node)
