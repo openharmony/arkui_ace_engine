@@ -135,9 +135,7 @@ export class Qrcode extends ViewV2 {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Column.create();
-                        Context.animation({
-                            duration: this.options.animationDuration,
-                            curve: this.options.animationCurve,
+                        Context.animation({ duration: this.options.animationDuration, curve: this.options.animationCurve,
                             playMode: PlayMode.Normal
                         });
                         Column.height(this.options.edgeLength?.value);
@@ -159,9 +157,7 @@ export class Qrcode extends ViewV2 {
                     Column.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Column.create();
-                        Context.animation({
-                            duration: this.options.animationDuration,
-                            curve: this.options.animationCurve,
+                        Context.animation({ duration: this.options.animationDuration, curve: this.options.animationCurve,
                             playMode: PlayMode.Normal
                         });
                         Column.visibility(this.state == QrcodeState.NORMAL ? Visibility.None : Visibility.Visible);
@@ -179,9 +175,7 @@ export class Qrcode extends ViewV2 {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     LoadingProgress.create();
-                                    Context.animation({
-                                        duration: this.options.animationDuration,
-                                        curve: this.options.animationCurve,
+                                    Context.animation({ duration: this.options.animationDuration, curve: this.options.animationCurve,
                                         playMode: PlayMode.Normal
                                     });
                                     LoadingProgress.color(Color.White);

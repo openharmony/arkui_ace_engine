@@ -115,21 +115,21 @@ interface CommonQrcodeOptions {
 
 @ObservedV2
 export class QrcodeOptions {
-  @Trace  public edgeLength?: LengthMetrics;
-  @Trace  public color?: ColorMetrics;
-  @Trace  public backgroundColor?: ColorMetrics;
-  @Trace  public textColor?: ColorMetrics;
-  @Trace  public textContent?: ResourceStr;
-  @Trace  public borderRadius?: LengthMetrics;
-  @Trace  public opacity?: number | Resource;
-  @Trace  public animationCurve?: Curve | string | ICurve;
-  @Trace  public animationDuration?: number;
-  @Trace  public qrcodeSideLength?: LengthMetrics;
-  @Trace  public expiredImageLength?: LengthMetrics;
-  @Trace  public textSize?: ResourceStr;
-  @Trace  public textWeight?: number | FontWeight | string;
-  @Trace  public space?: ResourceStr;
-  @Trace  public loadingImageLength?: LengthMetrics;
+  @Trace public edgeLength?: LengthMetrics;
+  @Trace public color?: ColorMetrics;
+  @Trace public backgroundColor?: ColorMetrics;
+  @Trace public textColor?: ColorMetrics;
+  @Trace public textContent?: ResourceStr;
+  @Trace public borderRadius?: LengthMetrics;
+  @Trace public opacity?: number | Resource;
+  @Trace public animationCurve?: Curve | string | ICurve;
+  @Trace public animationDuration?: number;
+  @Trace public qrcodeSideLength?: LengthMetrics;
+  @Trace public expiredImageLength?: LengthMetrics;
+  @Trace public textSize?: ResourceStr;
+  @Trace public textWeight?: number | FontWeight | string;
+  @Trace public space?: ResourceStr;
+  @Trace public loadingImageLength?: LengthMetrics;
 
   constructor(options: CommonQrcodeOptions) {
     this.edgeLength = options.edgeLength ??
@@ -165,58 +165,37 @@ export struct Qrcode {
     Stack() {
       if (this.options !== void 0) {
         Column() {
-          QRCode(this.value)
-            .color(this.options.color?.color)
-            .backgroundColor(Color.Transparent)
-            .width(this.options.qrcodeSideLength?.value)
-            .height(this.options.qrcodeSideLength?.value)
+          QRCode(this.value).color(this.options.color?.color).backgroundColor(Color.Transparent)
+            .width(this.options.qrcodeSideLength?.value).height(this.options.qrcodeSideLength?.value)
         }
-        .height(this.options.edgeLength?.value)
-        .width(this.options.edgeLength?.value)
-        .backgroundColor(this.options.backgroundColor?.color)
-        .borderRadius(this.options.borderRadius?.value)
+        .height(this.options.edgeLength?.value).width(this.options.edgeLength?.value)
+        .backgroundColor(this.options.backgroundColor?.color).borderRadius(this.options.borderRadius?.value)
         .opacity(this.state != QrcodeState.NORMAL ? this.options.opacity : 1)
-        .animation({
-          duration: this.options.animationDuration,
-          curve: this.options.animationCurve,
+        .animation({ duration: this.options.animationDuration, curve: this.options.animationCurve,
           playMode: PlayMode.Normal
         })
         .justifyContent(FlexAlign.Center)
 
-
         Column() {
-          SymbolGlyph($r('sys.symbol.arrow_clockwise'))
-            .fontSize(this.options.expiredImageLength?.value)
+          SymbolGlyph($r('sys.symbol.arrow_clockwise')).fontSize(this.options.expiredImageLength?.value)
             .fontColor([this.options.textColor?.color])
             .visibility(this.state == QrcodeState.EXPIRED ? Visibility.Visible : Visibility.None)
 
           if (this.state == QrcodeState.LOADING) {
-            LoadingProgress()
-              .color(Color.White)
-              .height(this.options.loadingImageLength?.value)
+            LoadingProgress().color(Color.White).height(this.options.loadingImageLength?.value)
               .width(this.options.loadingImageLength?.value)
               .visibility(this.state == QrcodeState.LOADING ? Visibility.Visible : Visibility.None)
-              .animation({
-                duration: this.options.animationDuration,
-                curve: this.options.animationCurve,
+              .animation({ duration: this.options.animationDuration, curve: this.options.animationCurve,
                 playMode: PlayMode.Normal
               })
           }
-
-          Text(this.options.textContent)
-            .margin({ top: this.options.space })
-            .fontColor(this.options.textColor?.color)
-            .fontSize(this.options.textSize)
-            .fontWeight(this.options.textWeight)
-            .textAlign(TextAlign.Center)
+          Text(this.options.textContent).margin({ top: this.options.space }).fontColor(this.options.textColor?.color)
+            .fontSize(this.options.textSize).fontWeight(this.options.textWeight).textAlign(TextAlign.Center)
             .width(this.options.qrcodeSideLength?.value)
             .visibility(this.state == QrcodeState.EXPIRED ? Visibility.Visible : Visibility.None)
-
         }
         .visibility(this.state == QrcodeState.NORMAL ? Visibility.None : Visibility.Visible)
-        .animation({
-          duration: this.options.animationDuration,
-          curve: this.options.animationCurve,
+        .animation({ duration: this.options.animationDuration, curve: this.options.animationCurve,
           playMode: PlayMode.Normal
         })
       }
