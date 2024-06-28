@@ -54,9 +54,9 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
     callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
-        if (self->snapshotNode_) {
+        if (self->snapshotWindow_) {
             self->BufferAvailableCallbackForSnapshot();
-        } else if (self->blankNode_) {
+        } else if (self->blankWindow_) {
             self->BufferAvailableCallbackForBlank();
         } else {
             auto session = weakSession.promote();
@@ -161,8 +161,8 @@ void WindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
 
 void WindowScene::OnMountToParentDone()
 {
-    if (snapshotNode_) {
-        snapshotNode_->MovePosition(-1);
+    if (snapshotWindow_) {
+        snapshotWindow_->MovePosition(-1);
     }
 }
 
@@ -237,15 +237,14 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
 void WindowScene::BufferAvailableCallback()
 {
     auto uiTask = [weakThis = WeakClaim(this)]() {
-        ACE_SCOPED_TRACE("WindowScene::BufferAvailableCallback");
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self && self->session_);
 
+        CHECK_NULL_VOID(self->startingWindow_);
         const auto& config =
             Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
         if (config.enabled_) {
-            CHECK_NULL_VOID(self->startingNode_);
-            auto context = AceType::DynamicCast<RosenRenderContext>(self->startingNode_->GetRenderContext());
+            auto context = AceType::DynamicCast<RosenRenderContext>(self->startingWindow_->GetRenderContext());
             CHECK_NULL_VOID(context);
             auto rsNode = context->GetRSNode();
             CHECK_NULL_VOID(rsNode);
@@ -269,8 +268,8 @@ void WindowScene::BufferAvailableCallback()
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        self->RemoveChild(host, self->startingNode_, self->startingNodeName_);
-        self->startingNode_.Reset();
+        self->RemoveChild(host, self->startingWindow_, self->startingWindowName_);
+        self->startingWindow_.Reset();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
             "[WMSMain] Remove starting window finished, id: %{public}d, node id: %{public}d, name: %{public}s",
@@ -290,13 +289,13 @@ void WindowScene::BufferAvailableCallbackForBlank()
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self && self->session_);
 
-        auto contentContext = AceType::DynamicCast<RosenRenderContext>(self->contentNode_->GetRenderContext());
+        auto contentContext = AceType::DynamicCast<RosenRenderContext>(self->appWindow_->GetRenderContext());
         CHECK_NULL_VOID(contentContext && contentContext->GetRSNode());
         auto rsNode = contentContext->GetRSNode();
         rsNode->SetAlpha(1);
 
-        CHECK_NULL_VOID(self->blankNode_);
-        auto context = AceType::DynamicCast<RosenRenderContext>(self->blankNode_->GetRenderContext());
+        CHECK_NULL_VOID(self->blankWindow_);
+        auto context = AceType::DynamicCast<RosenRenderContext>(self->blankWindow_->GetRenderContext());
         CHECK_NULL_VOID(context);
         auto blankRsNode = context->GetRSNode();
         CHECK_NULL_VOID(blankRsNode);
@@ -306,19 +305,19 @@ void WindowScene::BufferAvailableCallbackForBlank()
         protocol.SetDuration(ANIMATION_CONFIG_CURVE);
         auto curve = Rosen::RSAnimationTimingCurve::LINEAR;
         Rosen::RSNode::Animate(protocol, curve, [blankRsNode, effect] {
-            AceAsyncTraceBegin(0, "BlankNodeExitAnimation");
+            AceAsyncTraceBegin(0, "BlankWindowExitAnimation");
             blankRsNode->NotifyTransition(effect, false);
         }, []() {
-            AceAsyncTraceEnd(0, "BlankNodeExitAnimation");
+            AceAsyncTraceEnd(0, "BlankWindowExitAnimation");
         });
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        self->RemoveChild(host, self->blankNode_, self->blankNodeName_);
-        self->blankNode_.Reset();
+        self->RemoveChild(host, self->blankWindow_, self->blankWindowName_);
+        self->blankWindow_.Reset();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-            "[WMSMain] Remove Blank Node finished, id: %{public}d, node id: %{public}d, name: %{public}s",
+            "[WMSMain] Remove blank window finished, id: %{public}d, node id: %{public}d, name: %{public}s",
             self->session_->GetPersistentId(), host->GetId(), self->session_->GetSessionInfo().bundleName_.c_str());
     };
     ContainerScope scope(instanceId_);
@@ -336,8 +335,8 @@ void WindowScene::BufferAvailableCallbackForSnapshot()
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
 
-        self->RemoveChild(host, self->snapshotNode_, self->snapshotNodeName_);
-        self->snapshotNode_.Reset();
+        self->RemoveChild(host, self->snapshotWindow_, self->snapshotWindowName_);
+        self->snapshotWindow_.Reset();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
@@ -364,32 +363,33 @@ void WindowScene::OnActivation()
         self->session_->SetShowRecent(false);
         if (self->destroyed_) {
             self->destroyed_ = false;
-            self->RemoveChild(host, self->startingNode_, self->startingNodeName_);
-            self->RemoveChild(host, self->contentNode_, self->contentNodeName_);
-            self->RemoveChild(host, self->snapshotNode_, self->snapshotNodeName_);
-            self->startingNode_.Reset();
-            self->contentNode_.Reset();
-            self->snapshotNode_.Reset();
+            self->RemoveChild(host, self->startingWindow_, self->startingWindowName_);
+            self->RemoveChild(host, self->appWindow_, self->appWindowName_);
+            self->RemoveChild(host, self->snapshotWindow_, self->snapshotWindowName_);
+            self->startingWindow_.Reset();
+            self->appWindow_.Reset();
+            self->snapshotWindow_.Reset();
             self->session_->SetNeedSnapshot(true);
             self->OnAttachToFrameNode();
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         } else if (showingInRecents &&
-            self->session_->GetSessionState() == Rosen::SessionState::STATE_DISCONNECT && self->snapshotNode_) {
-            self->RemoveChild(host, self->snapshotNode_, self->snapshotNodeName_);
-            self->snapshotNode_.Reset();
+            self->session_->GetSessionState() == Rosen::SessionState::STATE_DISCONNECT && self->snapshotWindow_) {
+            self->RemoveChild(host, self->snapshotWindow_, self->snapshotWindowName_);
+            self->snapshotWindow_.Reset();
             self->session_->SetNeedSnapshot(true);
-            self->CreateStartingNode();
-            self->AddChild(host, self->startingNode_, self->startingNodeName_);
+            self->CreateStartingWindow();
+            self->AddChild(host, self->startingWindow_, self->startingWindowName_);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        } else if (self->session_->GetSessionState() != Rosen::SessionState::STATE_DISCONNECT && self->startingNode_) {
+        } else if (self->startingWindow_ &&
+            self->session_->GetSessionState() != Rosen::SessionState::STATE_DISCONNECT) {
             auto surfaceNode = self->session_->GetSurfaceNode();
             CHECK_NULL_VOID(surfaceNode);
-            self->AddChild(host, self->contentNode_, self->contentNodeName_, 0);
+            self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             surfaceNode->SetBufferAvailableCallback(self->callback_);
         } else {
-            self->DisposeSnapShotAndBlankNode();
-        };
+            self->DisposeSnapShotAndBlankWindow();
+        }
     };
 
     ContainerScope scope(instanceId_);
@@ -398,7 +398,7 @@ void WindowScene::OnActivation()
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneActivation", TaskExecutor::TaskType::UI);
 }
 
-void WindowScene::DisposeSnapShotAndBlankNode()
+void WindowScene::DisposeSnapShotAndBlankWindow()
 {
     CHECK_NULL_VOID(session_);
     auto surfaceNode = session_->GetSurfaceNode();
@@ -408,16 +408,16 @@ void WindowScene::DisposeSnapShotAndBlankNode()
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
-    AddChild(host, contentNode_, contentNodeName_, 0);
+    AddChild(host, appWindow_, appWindowName_, 0);
     surfaceNode->SetBufferAvailableCallback(callback_);
     if (NearEqual(frameSize.Width(), session_->GetSessionLastRect().width_, 1.0f) &&
         NearEqual(frameSize.Height(), session_->GetSessionLastRect().height_, 1.0f)) {
         return;
     }
-    if (!blankNode_) {
-        CreateBlankNode();
-        AddChild(host, blankNode_, blankNodeName_);
-        CleanBlankNodeOrSnapshotNode();
+    if (!blankWindow_) {
+        CreateBlankWindow();
+        AddChild(host, blankWindow_, blankWindowName_);
+        CleanBlankOrSnapshotWindow();
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     surfaceNode->SetIsNotifyUIBufferAvailable(true);
@@ -436,15 +436,15 @@ void WindowScene::OnConnect()
         auto surfaceNode = self->session_->GetSurfaceNode();
         CHECK_NULL_VOID(surfaceNode);
 
-        CHECK_NULL_VOID(self->contentNode_);
-        auto context = AceType::DynamicCast<NG::RosenRenderContext>(self->contentNode_->GetRenderContext());
+        CHECK_NULL_VOID(self->appWindow_);
+        auto context = AceType::DynamicCast<NG::RosenRenderContext>(self->appWindow_->GetRenderContext());
         CHECK_NULL_VOID(context);
         context->SetRSNode(surfaceNode);
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        self->AddChild(host, self->contentNode_, self->contentNodeName_, 0);
-        self->contentNode_->ForceSyncGeometryNode();
+        self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
+        self->appWindow_->ForceSyncGeometryNode();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
             "[WMSMain] Add app window finished, id: %{public}d, node id: %{public}d, name: %{public}s",
@@ -469,9 +469,10 @@ void WindowScene::OnForeground()
         if (self->session_->IsAnco()) {
             return;
         }
+        CHECK_NULL_VOID(self->snapshotWindow_);
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        self->AddChild(host, self->contentNode_, self->contentNodeName_, 0);
+        self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
 
@@ -501,13 +502,13 @@ void WindowScene::OnDisconnect()
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        if (!self->snapshotNode_ && !self->startingNode_) {
+        if (!self->snapshotWindow_ && !self->startingWindow_) {
             if (snapshot) {
-                self->CreateSnapshotNode(snapshot);
-                self->AddChild(host, self->snapshotNode_, self->snapshotNodeName_);
+                self->CreateSnapshotWindow(snapshot);
+                self->AddChild(host, self->snapshotWindow_, self->snapshotWindowName_);
             } else {
-                self->CreateStartingNode();
-                self->AddChild(host, self->startingNode_, self->startingNodeName_);
+                self->CreateStartingWindow();
+                self->AddChild(host, self->startingWindow_, self->startingWindowName_);
             }
         }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -526,13 +527,13 @@ void WindowScene::OnDrawingCompleted()
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
 
-        CHECK_NULL_VOID(self->snapshotNode_);
+        CHECK_NULL_VOID(self->snapshotWindow_);
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        self->RemoveChild(host, self->snapshotNode_, self->snapshotNodeName_);
-        self->snapshotNode_.Reset();
+        self->RemoveChild(host, self->snapshotWindow_, self->snapshotWindowName_);
+        self->snapshotWindow_.Reset();
         self->session_->SetNeedSnapshot(true);
-        self->AddChild(host, self->contentNode_, self->contentNodeName_, 0);
+        self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
 
@@ -553,16 +554,16 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         CHECK_NULL_RETURN(dirty, false);
         auto size = dirty->GetGeometryNode()->GetFrameSize();
         if (!(NearEqual(size.Width(), session_->GetSessionLastRect().width_, 1.0f) &&
-            NearEqual(size.Height(), session_->GetSessionLastRect().height_, 1.0f)) && snapshotNode_) {
-            auto context = AceType::DynamicCast<RosenRenderContext>(contentNode_->GetRenderContext());
+            NearEqual(size.Height(), session_->GetSessionLastRect().height_, 1.0f)) && snapshotWindow_) {
+            auto context = AceType::DynamicCast<RosenRenderContext>(appWindow_->GetRenderContext());
             CHECK_NULL_RETURN(context, false);
             auto rsNode = context->GetRSNode();
             CHECK_NULL_RETURN(rsNode, false);
             rsNode->SetAlpha(0);
-            AddChild(host, contentNode_, contentNodeName_, 0);
-            CreateBlankNode();
-            AddChild(host, blankNode_, blankNodeName_);
-            CleanBlankNodeOrSnapshotNode();
+            AddChild(host, appWindow_, appWindowName_, 0);
+            CreateBlankWindow();
+            AddChild(host, blankWindow_, blankWindowName_);
+            CleanBlankOrSnapshotWindow();
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
         auto surfaceNode = session_->GetSurfaceNode();
@@ -573,36 +574,36 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     return false;
 }
 
-void WindowScene::CleanBlankNodeOrSnapshotNode()
+void WindowScene::CleanBlankOrSnapshotWindow()
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    deleteNodeTask_.Cancel();
-    deleteNodeTask_.Reset([weakThis = WeakClaim(this)]() {
-        ACE_SCOPED_TRACE("WindowScene::CleanBlankNodeOrSnapshotNode");
+    deleteWindowTask_.Cancel();
+    deleteWindowTask_.Reset([weakThis = WeakClaim(this)]() {
+        ACE_SCOPED_TRACE("WindowScene::CleanBlankOrSnapshotWindow");
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        if (self->snapshotNode_) {
-            self->RemoveChild(host, self->snapshotNode_, self->snapshotNodeName_);
-            self->snapshotNode_.Reset();
+        if (self->snapshotWindow_) {
+            self->RemoveChild(host, self->snapshotWindow_, self->snapshotWindowName_);
+            self->snapshotWindow_.Reset();
         }
-        if (self->blankNode_) {
-            self->RemoveChild(host, self->blankNode_, self->blankNodeName_);
-            self->blankNode_.Reset();
-            self->AddChild(host, self->contentNode_, self->contentNodeName_, 0);
-            auto contentNodeContext = AceType::DynamicCast<RosenRenderContext>(self->contentNode_->GetRenderContext());
-            CHECK_NULL_VOID(contentNodeContext);
-            auto rsNode = contentNodeContext->GetRSNode();
+        if (self->blankWindow_) {
+            self->RemoveChild(host, self->blankWindow_, self->blankWindowName_);
+            self->blankWindow_.Reset();
+            self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
+            auto appWindowContext = AceType::DynamicCast<RosenRenderContext>(self->appWindow_->GetRenderContext());
+            CHECK_NULL_VOID(appWindowContext);
+            auto rsNode = appWindowContext->GetRSNode();
             CHECK_NULL_VOID(rsNode);
             rsNode->SetAlpha(1);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     });
     taskExecutor->PostDelayedTask(
-        deleteNodeTask_, TaskExecutor::TaskType::UI, CLEAN_NODE_DELAY_TIME, "ArkUICleanBlankNodeOrSnapshotNode");
+        deleteWindowTask_, TaskExecutor::TaskType::UI, CLEAN_NODE_DELAY_TIME, "ArkUICleanBlankOrSnapshotWindow");
 }
 } // namespace OHOS::Ace::NG
