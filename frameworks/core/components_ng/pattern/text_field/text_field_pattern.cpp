@@ -4730,6 +4730,9 @@ void TextFieldPattern::DeleteBackward(int32_t length)
         return;
     }
     if (selectController_->GetCaretIndex() <= 0) {
+        auto isDelete = BeforeIMEDeleteValue("", TextDeleteDirection::BACKWARD, 0);
+        CHECK_NULL_VOID(isDelete);
+        AfterIMEDeleteValue("", TextDeleteDirection::BACKWARD);
         return;
     }
     inputOperations_.emplace(InputOperation::DELETE_BACKWARD);
@@ -4791,7 +4794,11 @@ void TextFieldPattern::DeleteForward(int32_t length)
         UpdateEditingValueToRecord();
         return;
     }
-    if (selectController_->GetCaretIndex() >= static_cast<int32_t>(contentController_->GetWideText().length())) {
+    auto contentLength = static_cast<int32_t>(contentController_->GetWideText().length());
+    if (selectController_->GetCaretIndex() >= contentLength) {
+        auto isDelete = BeforeIMEDeleteValue("", TextDeleteDirection::FORWARD, contentLength);
+        CHECK_NULL_VOID(isDelete);
+        AfterIMEDeleteValue("", TextDeleteDirection::FORWARD);
         return;
     }
     inputOperations_.emplace(InputOperation::DELETE_FORWARD);
