@@ -110,9 +110,11 @@ public:
     using WebNodeInfoCallback = const std::function<void(std::shared_ptr<JsonValue>& jsonNodeArray, int32_t webId)>;
     WebPattern();
     WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController,
-               RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
+               RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
+			   const std::string& sharedRenderProcessToken = "");
     WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback,
-               RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
+               RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
+			   const std::string& sharedRenderProcessToken = "");
 
     ~WebPattern() override;
 
@@ -304,6 +306,16 @@ public:
     bool GetIncognitoMode() const
     {
         return incognitoMode_;
+    }
+
+    void SetSharedRenderProcessToken(const std::string& sharedRenderProcessToken)
+    {
+        sharedRenderProcessToken_ = sharedRenderProcessToken;
+    }
+
+    const std::optional<std::string>& GetSharedRenderProcessToken() const
+    {
+        return sharedRenderProcessToken_;
     }
 
     void SetOnControllerAttachedCallback(OnControllerAttachedCallback&& callback)
@@ -980,6 +992,7 @@ private:
     std::shared_ptr<TouchEventListener> touchEventListener_ = nullptr;
     double lastKeyboardHeight_ = 0.0;
     bool inspectorAccessibilityEnable_ = false;
+    std::optional<std::string> sharedRenderProcessToken_;
 };
 } // namespace OHOS::Ace::NG
 

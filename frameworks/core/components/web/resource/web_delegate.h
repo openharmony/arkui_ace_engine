@@ -1199,6 +1199,7 @@ private:
     sptr<Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
     int32_t instanceId_;
     std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler_ = nullptr;
+    std::string sharedRenderProcessToken_;
 #endif
 };
 
