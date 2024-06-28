@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
+#include <optional>
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
@@ -23,7 +24,8 @@
 
 namespace OHOS::Ace::NG {
 const uint32_t DEFAULT_SURFACE_SIZE = 0;
-void XComponentModelNG::Create(const std::string& id, XComponentType type, const std::string& libraryname,
+void XComponentModelNG::Create(const std::optional<std::string>& id, XComponentType type,
+    const std::optional<std::string>& libraryname,
     const std::shared_ptr<InnerXComponentController>& xcomponentController)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -59,16 +61,16 @@ RefPtr<AceType> XComponentModelNG::Create(int32_t nodeId, float width, float hei
     return frameNode;
 }
 
-std::string XComponentModelNG::GetLibraryName()
+std::optional<std::string> XComponentModelNG::GetLibraryName()
 {
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    CHECK_NULL_RETURN(frameNode, "");
+    CHECK_NULL_RETURN(frameNode, std::nullopt);
     auto type = GetTypeImpl(frameNode);
     if (type == XComponentType::COMPONENT) {
-        return "";
+        return std::nullopt;
     }
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
-    CHECK_NULL_RETURN(xcPattern, "");
+    CHECK_NULL_RETURN(xcPattern, std::nullopt);
     return xcPattern->GetLibraryName();
 }
 

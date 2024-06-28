@@ -55,6 +55,9 @@ declare_args() {
 
   # Don't use currentIdSafely in some function
   use_origin_scope = false
+
+  # Enable split_mode support
+  enable_split_mode = false
 }
 
 enable_dump_drawcmd = false

@@ -34,7 +34,7 @@ void ModalPresentationPattern::ModalInteractiveDismiss()
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    overlayManager->SetDismissTargetId(targetId_);
+    overlayManager->SetDismissTarget(DismissTarget(targetId_));
     CallOnWillDismiss(static_cast<int32_t>(ContentCoverDismissReason::BACK_PRESSED));
 }
 } // namespace OHOS::Ace::NG

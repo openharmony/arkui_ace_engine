@@ -54,6 +54,8 @@ public:
         onRebuildFrameCallback_ = std::move(callback);
     }
 
+    virtual void SetPrimaryPage(const RefPtr<FrameNode>& primaryPage) {}
+
 private:
     std::function<void()> onRebuildFrameCallback_;
     int32_t currentPageIndex_ = 0;

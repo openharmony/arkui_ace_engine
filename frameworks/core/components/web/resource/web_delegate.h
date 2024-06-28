@@ -1014,6 +1014,7 @@ private:
     void BindRouterBackMethod();
     void BindPopPageSuccessMethod();
     void BindIsPagePathInvalidMethod();
+    void TextBlurReport(int64_t accessibilityId);
 
 #ifdef OHOS_STANDARD_SYSTEM
     sptr<OHOS::Rosen::Window> CreateWindow();
@@ -1201,6 +1202,7 @@ private:
     int32_t instanceId_;
     std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler_ = nullptr;
     std::string sharedRenderProcessToken_;
+    int64_t lastFocusInputId_ = 0;
 #endif
 };
 

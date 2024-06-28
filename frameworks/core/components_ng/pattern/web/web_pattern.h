@@ -108,6 +108,7 @@ public:
     using OnOpenAppLinkCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using DefaultFileSelectorShowCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using WebNodeInfoCallback = const std::function<void(std::shared_ptr<JsonValue>& jsonNodeArray, int32_t webId)>;
+    using TextBlurCallback = std::function<void(int64_t, const std::string)>;
     WebPattern();
     WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController,
                RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
@@ -619,6 +620,12 @@ public:
 
     void GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId);
     void OnAccessibilityHoverEvent(const PointF& point) override;
+    void RegisterTextBlurCallback(TextBlurCallback&& callback);
+    void UnRegisterTextBlurCallback();
+    TextBlurCallback GetTextBlurCallback() const
+    {
+        return textBlurCallback_;
+    }
 
 private:
     friend class WebContextSelectOverlay;
@@ -994,6 +1001,8 @@ private:
     double lastKeyboardHeight_ = 0.0;
     bool inspectorAccessibilityEnable_ = false;
     std::optional<std::string> sharedRenderProcessToken_;
+    bool textBlurAccessibilityEnable_ = false;
+    TextBlurCallback textBlurCallback_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

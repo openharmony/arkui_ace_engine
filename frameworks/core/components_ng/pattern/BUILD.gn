@@ -283,6 +283,7 @@ build_component_ng("pattern_ng") {
     "overlay/popup_base_pattern.cpp",
     "overlay/sheet_drag_bar_paint_method.cpp",
     "overlay/sheet_drag_bar_pattern.cpp",
+    "overlay/sheet_manager.cpp",
     "overlay/sheet_presentation_layout_algorithm.cpp",
     "overlay/sheet_presentation_pattern.cpp",
     "overlay/sheet_view.cpp",
@@ -564,6 +565,10 @@ build_component_ng("pattern_ng") {
   if (defined(vendor_configs.ace_engine_advanced)) {
     sources += vendor_configs.ace_engine_advanced_pattern
     external_deps += vendor_configs.ace_engine_ext_extra_deps
+  }
+
+  if (enable_split_mode && defined(vendor_configs.ace_advanced_split_mode)) {
+    sources += vendor_configs.ace_advanced_split_mode
   }
 
   if (is_ohos_standard_system) {

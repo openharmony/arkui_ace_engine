@@ -656,47 +656,48 @@ int32_t OH_ArkUI_Animator_Reverse(ArkUI_AnimatorHandle animator)
     return OHOS::Ace::AnimateModel::AnimatorReverse(animator);
 }
 
-ArkUI_CurveHandle OH_ArkUI_Curve_InitCurve(ArkUI_AnimationCurve curve)
+ArkUI_CurveHandle OH_ArkUI_Curve_CreateCurveByType(ArkUI_AnimationCurve curve)
 {
     return OHOS::Ace::AnimateModel::InitCurve(curve);
 }
 
-ArkUI_CurveHandle OH_ArkUI_Curve_StepsCurve(int32_t count, bool end)
+ArkUI_CurveHandle OH_ArkUI_Curve_CreateStepsCurve(int32_t count, bool end)
 {
     return OHOS::Ace::AnimateModel::StepsCurve(count, end);
 }
 
-ArkUI_CurveHandle OH_ArkUI_Curve_CubicBezierCurve(float x1, float y1, float x2, float y2)
+ArkUI_CurveHandle OH_ArkUI_Curve_CreateCubicBezierCurve(float x1, float y1, float x2, float y2)
 {
     return OHOS::Ace::AnimateModel::CubicBezierCurve(x1, y1, x2, y2);
 }
 
-ArkUI_CurveHandle OH_ArkUI_Curve_SpringCurve(float velocity, float mass, float stiffness, float damping)
+ArkUI_CurveHandle OH_ArkUI_Curve_CreateSpringCurve(float velocity, float mass, float stiffness, float damping)
 {
     return OHOS::Ace::AnimateModel::SpringCurve(velocity, mass, stiffness, damping);
 }
 
-ArkUI_CurveHandle OH_ArkUI_Curve_SpringMotion(float response, float dampingFraction, float overlapDuration)
+ArkUI_CurveHandle OH_ArkUI_Curve_CreateSpringMotion(float response, float dampingFraction, float overlapDuration)
 {
     return OHOS::Ace::AnimateModel::SpringMotion(response, dampingFraction, overlapDuration);
 }
 
-ArkUI_CurveHandle OH_ArkUI_Curve_ResponsiveSpringMotion(float response, float dampingFraction, float overlapDuration)
+ArkUI_CurveHandle OH_ArkUI_Curve_CreateResponsiveSpringMotion(
+    float response, float dampingFraction, float overlapDuration)
 {
     return OHOS::Ace::AnimateModel::ResponsiveSpringMotion(response, dampingFraction, overlapDuration);
 }
 
-ArkUI_CurveHandle OH_ArkUI_Curve_InterpolatingSpring(float velocity, float mass, float stiffness, float damping)
+ArkUI_CurveHandle OH_ArkUI_Curve_CreateInterpolatingSpring(float velocity, float mass, float stiffness, float damping)
 {
     return OHOS::Ace::AnimateModel::InterpolatingSpring(velocity, mass, stiffness, damping);
 }
 
-ArkUI_CurveHandle OH_ArkUI_Curve_CustomCurve(void* userData, float (*interpolate)(float fraction, void* userdata))
+ArkUI_CurveHandle OH_ArkUI_Curve_CreateCustomCurve(void* userData, float (*interpolate)(float fraction, void* userdata))
 {
     return OHOS::Ace::AnimateModel::CustomCurve(userData, interpolate);
 }
 
-void OH_ArkUI_Curve_disposeCurve(ArkUI_CurveHandle curveHandle)
+void OH_ArkUI_Curve_DisposeCurve(ArkUI_CurveHandle curveHandle)
 {
     return OHOS::Ace::AnimateModel::DisposeCurve(curveHandle);
 }

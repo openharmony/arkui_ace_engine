@@ -88,6 +88,8 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     TouchTestResult hitTestResult;
     const NG::PointF point { touchPoint.x, touchPoint.y };
     if (refereeNG_->CheckEventTypeChange(touchPoint.sourceType)) {
+        AxisEvent axisEvent;
+        MockCancelEventAndDispatch(axisEvent);
         refereeNG_->CleanAll(true);
         touchTestResults_.clear();
         axisTouchTestResults_.clear();
@@ -352,6 +354,8 @@ void EventManager::TouchTest(
     ContainerScope scope(instanceId_);
 
     if (refereeNG_->CheckSourceTypeChange(event.sourceType, true)) {
+        TouchEvent touchEvent;
+        MockCancelEventAndDispatch(touchEvent);
         refereeNG_->CleanAll(true);
         touchTestResults_.clear();
         axisTouchTestResults_.clear();
@@ -1932,5 +1936,16 @@ void EventManager::MockCancelEventAndDispatch(const TouchEvent& touchPoint)
         mockedEvent.id = iter;
         DispatchTouchEvent(mockedEvent);
     }
+}
+
+void EventManager::MockCancelEventAndDispatch(const AxisEvent& axisEvent)
+{
+    if (axisTouchTestResults_.empty()) {
+        return;
+    }
+    AxisEvent mockedEvent = axisEvent;
+    mockedEvent.action = AxisAction::CANCEL;
+    mockedEvent.id = static_cast<int32_t>(axisTouchTestResults_.begin()->first);
+    DispatchTouchEvent(mockedEvent);
 }
 } // namespace OHOS::Ace

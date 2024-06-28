@@ -549,7 +549,7 @@ HWTEST_F(OverlayTestNg, OnBindContentCover005, TestSize.Level1)
     auto topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
     ASSERT_NE(topModalPattern, nullptr);
     auto targetId = topModalPattern->GetTargetId();
-    overlayManager->SetDismissTargetId(targetId);
+    overlayManager->SetDismissTarget(DismissTarget(targetId));
     overlayManager->DismissContentCover();
     EXPECT_TRUE(overlayManager->modalStack_.empty());
 

@@ -160,11 +160,12 @@ public:
     static void JsBindSheet(const JSCallbackInfo& info);
     static void ParseSheetIsShow(
         const JSCallbackInfo& info, bool& isShow, std::function<void(const std::string&)>& callback);
-    static void ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
+    static void ParseSheetStyle(
+        const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle, bool isPartialUpdate = false);
     static bool ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG::SheetHeight>& sheetDetents);
     static void ParseSheetDetentHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent);
     static bool ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, BlurStyleOption& blurStyleOptions);
-    static void ParseSheetLevel(const JSRef<JSVal>& args, NG::SheetLevel& sheetLevel);
+    static bool ParseSheetLevel(const JSRef<JSVal>& args, NG::SheetLevel& sheetLevel);
     static void ParseCallback(const JSRef<JSObject>& paramObj,
         std::function<void(const float)>& callbackDidChange, const char* prop);
     static void ParseLifeCycleCallback(const JSRef<JSObject>& paramObj, std::function<void()>& lifeCycleCallBack,

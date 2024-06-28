@@ -140,6 +140,7 @@ bool ExclusiveRecognizer::HandleEvent(const AxisEvent& event)
         case AxisAction::BEGIN:
         case AxisAction::UPDATE:
         case AxisAction::END:
+        case AxisAction::CANCEL:
         case AxisAction::NONE: {
             if (activeRecognizer_) {
                 activeRecognizer_->HandleEvent(event);
