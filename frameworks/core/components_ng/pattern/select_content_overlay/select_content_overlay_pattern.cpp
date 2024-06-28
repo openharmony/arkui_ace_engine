@@ -129,7 +129,8 @@ void SelectContentOverlayPattern::UpdateHandleHotZone()
     if (!CheckIfNeedHandle()) {
         return;
     }
-    if (info_->firstHandle.isPaintHandleWithPoints || info_->secondHandle.isPaintHandleWithPoints) {
+    if (info_->handleLevelMode == HandleLevelMode::OVERLAY &&
+        (info_->firstHandle.isPaintHandleWithPoints || info_->secondHandle.isPaintHandleWithPoints)) {
         UpdateHandleHotZoneWithPoint();
     } else {
         SelectOverlayPattern::UpdateHandleHotZone();

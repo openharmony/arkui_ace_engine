@@ -252,6 +252,7 @@ private:
     bool closedByGlobalTouchEvent_ = false;
     SelectOverlayMode overlayMode_ = SelectOverlayMode::ALL;
     bool isSimulateOnClick_ = false;
+    bool clickConsumeBySimulate_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayPattern);
 };
