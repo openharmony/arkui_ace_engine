@@ -72,4 +72,5 @@ void ListItemLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const
     json->PutExtAttr("endDeleteAreaDistance",
         propEndDeleteAreaDistance_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
 }
+
 }

@@ -46,9 +46,12 @@ class InspectorFilter;
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
 constexpr double NEW_FRICTION = 0.7;
+constexpr double VELOCITY_SCALE = 1.0;
+constexpr double NEW_VELOCITY_SCALE = 1.5;
 constexpr double MAX_VELOCITY = 4200.0;
 #else
 constexpr double FRICTION = 0.9;
+constexpr double VELOCITY_SCALE = 0.8;
 constexpr double MAX_VELOCITY = 5000.0;
 #endif
 enum class ModalSheetCoordinationMode : char {
@@ -283,12 +286,14 @@ public:
         }
     }
 
-    void SetFriction(double friction);
+    virtual void SetFriction(double friction);
 
     double GetFriction() const
     {
         return friction_;
     }
+
+    void SetVelocityScale(double scale);
 
     void SetMaxFlingVelocity(double max);
 
@@ -800,6 +805,7 @@ private:
     bool isCoordEventNeedSpring_ = true;
     double scrollBarOutBoundaryExtent_ = 0.0;
     double friction_ = 0.0;
+    double velocityScale_ = 0.0;
     double maxFlingVelocity_ = MAX_VELOCITY;
     // scroller
     RefPtr<Animator> animator_;

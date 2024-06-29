@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,8 +25,9 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ListItemModelNG : public ListItemModel {
 public:
-    void Create(std::function<void(int32_t)>&& deepRenderFunc, V2::ListItemStyle listItemStyle) override;
-    void Create() override;
+    void Create(std::function<void(int32_t)>&& deepRenderFunc, V2::ListItemStyle listItemStyle,
+        bool isCreateArc = false) override;
+    void Create(bool isCreateArc = false) override;
     void SetBorderRadius(const Dimension& borderRadius) override {}
     void SetType(const std::string& type) override {}
     void SetIsLazyCreating(bool isLazy) override {}
@@ -42,7 +43,8 @@ public:
     void SetDeleteArea(std::function<void()>&& builderAction, OnDeleteEvent&& onDelete,
         OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
         OnStateChangedEvent&& onStateChangeEvent, const Dimension& length, bool isStartArea) override;
-        
+    void SetAutoScale(bool autoScale) override;
+
     static void SetDeleteArea(FrameNode* frameNode, FrameNode* footerNode, OnDeleteEvent&& onDelete,
         OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
         OnStateChangedEvent&& onStateChangeEvent, const Dimension& length, bool isStartArea);
@@ -51,7 +53,9 @@ public:
         V2::SwipeEdgeEffect edgeEffect);
     static void SetSelected(FrameNode* frameNode, bool selected);
     static void SetSelectable(FrameNode* frameNode, bool selectable);
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetAutoScale(FrameNode* frameNode, bool autoScale);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, bool isCreateArc = false);
+
 private:
     void InstallSwiperCallBack(RefPtr<ListItemEventHub> eventHub,
                                OnDeleteEvent&& onDelete,

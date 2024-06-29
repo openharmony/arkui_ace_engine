@@ -575,14 +575,7 @@ void ListPattern::ProcessEvent(
         }
     }
 
-    auto onScrollVisibleContentChange = listEventHub->GetOnScrollVisibleContentChange();
-    if (onScrollVisibleContentChange) {
-        bool startChanged = UpdateStartListItemIndex();
-        bool endChanged = UpdateEndListItemIndex();
-        if (indexChanged || startChanged || endChanged) {
-            onScrollVisibleContentChange(startInfo_, endInfo_);
-        }
-    }
+    OnScrollVisibleContentChange(listEventHub, indexChanged);
 
     auto onReachStart = listEventHub->GetOnReachStart();
     if (onReachStart && (startIndex_ == 0)) {
@@ -752,7 +745,7 @@ void ListPattern::SetChainAnimationToPosMap()
 }
 
 void ListPattern::SetChainAnimationLayoutAlgorithm(
-    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, RefPtr<ListLayoutProperty> listLayoutProperty)
+    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, const RefPtr<ListLayoutProperty>& listLayoutProperty)
 {
     CHECK_NULL_VOID(listLayoutAlgorithm);
     CHECK_NULL_VOID(listLayoutProperty);
@@ -950,6 +943,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         }
         return false;
     }
+    offset = FixScrollOffset(offset, source);
     SetScrollSource(source);
     FireAndCleanScrollingListener();
     auto lastDelta = currentDelta_;
@@ -988,7 +982,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 
     if (GetScrollSource() == SCROLL_FROM_UPDATE) {
         // adjust offset.
-        auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / contentMainSize_);
+        auto friction = GetScrollUpdateFriction(overScroll);
         currentDelta_ = currentDelta_ * friction;
     }
 
@@ -1349,7 +1343,7 @@ bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     auto focusPattern = focusFrameNode->GetPattern<ListItemPattern>();
     CHECK_NULL_RETURN(focusPattern, false);
     auto curIndex = focusPattern->GetIndexInList();
-    ScrollToIndex(curIndex, smooth_, ScrollAlign::AUTO);
+    ScrollToIndex(curIndex, smooth_, GetScrollToNodeAlign());
     auto pipeline = GetContext();
     if (pipeline) {
         pipeline->FlushUITasks();
@@ -2502,4 +2496,23 @@ void ListPattern::ResetChildrenSize()
         OnChildrenSizeChanged({ -1, -1, -1 }, LIST_UPDATE_CHILD_SIZE);
     }
 }
+
+void ListPattern::OnScrollVisibleContentChange(const RefPtr<ListEventHub>& listEventHub, bool indexChanged)
+{
+    CHECK_NULL_VOID(listEventHub);
+    auto onScrollVisibleContentChange = listEventHub->GetOnScrollVisibleContentChange();
+    if (onScrollVisibleContentChange) {
+        bool startChanged = UpdateStartListItemIndex();
+        bool endChanged = UpdateEndListItemIndex();
+        if (indexChanged || startChanged || endChanged) {
+            onScrollVisibleContentChange(startInfo_, endInfo_);
+        }
+    }
+}
+
+float ListPattern::GetScrollUpdateFriction(float overScroll)
+{
+    return ScrollablePattern::CalculateFriction(std::abs(overScroll) / contentMainSize_);
+}
+
 } // namespace OHOS::Ace::NG
