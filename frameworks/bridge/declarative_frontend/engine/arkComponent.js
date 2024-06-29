@@ -273,7 +273,14 @@ class BorderRadiusModifier extends ModifierWithKey {
         getUINativeModule().common.setBorderRadius(node, this.value, this.value, this.value, this.value);
       }
       else {
-        getUINativeModule().common.setBorderRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
+        if ((Object.keys(this.value).indexOf('topStart') >= 0) ||
+            (Object.keys(this.value).indexOf('topEnd') >= 0) ||
+            (Object.keys(this.value).indexOf('bottomStart') >= 0) ||
+            (Object.keys(this.value).indexOf('bottomEnd') >= 0)) {
+          getUINativeModule().common.setBorderRadius(node, this.value.topStart, this.value.topEnd, this.value.bottomStart, this.value.bottomEnd);
+        } else {
+          getUINativeModule().common.setBorderRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
+        }
       }
     }
   }
@@ -282,6 +289,15 @@ class BorderRadiusModifier extends ModifierWithKey {
       return !isResourceEqual(this.stageValue, this.value);
     }
     else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      if ((Object.keys(this.value).indexOf('topStart') >= 0) ||
+          (Object.keys(this.value).indexOf('topEnd') >= 0) ||
+          (Object.keys(this.value).indexOf('bottomStart') >= 0) ||
+          (Object.keys(this.value).indexOf('bottomEnd') >= 0)) {
+        return !(this.stageValue.topStart === this.value.topStart &&
+          this.stageValue.topEnd === this.value.topEnd &&
+          this.stageValue.bottomStart === this.value.bottomStart &&
+          this.stageValue.bottomEnd === this.value.bottomEnd);
+      }
       return !(this.stageValue.topLeft === this.value.topLeft &&
         this.stageValue.topRight === this.value.topRight &&
         this.stageValue.bottomLeft === this.value.bottomLeft &&
@@ -3116,9 +3132,19 @@ class ArkComponent {
       }
       else {
         arkValue.top = value.top;
-        arkValue.right = value.right;
         arkValue.bottom = value.bottom;
-        arkValue.left = value.left;
+        if (Object.keys(value).indexOf('right') >= 0) {
+          arkValue.right = value.right;
+        }
+        if (Object.keys(value).indexOf('end') >= 0) {
+          arkValue.right = value.end;
+        }
+        if (Object.keys(value).indexOf('left') >= 0) {
+          arkValue.left = value.left;
+        }
+        if (Object.keys(value).indexOf('start') >= 0) {
+          arkValue.left = value.start;
+        }
       }
       modifierWithKey(this._modifiersWithKeys, PaddingModifier.identity, PaddingModifier, arkValue);
     }
@@ -3138,9 +3164,19 @@ class ArkComponent {
       }
       else {
         arkValue.top = value.top;
-        arkValue.right = value.right;
         arkValue.bottom = value.bottom;
-        arkValue.left = value.left;
+        if (Object.keys(value).indexOf('right') >= 0) {
+          arkValue.right = value.right;
+        }
+        if (Object.keys(value).indexOf('end') >= 0) {
+          arkValue.right = value.end;
+        }
+        if (Object.keys(value).indexOf('left') >= 0) {
+          arkValue.left = value.left;
+        }
+        if (Object.keys(value).indexOf('start') >= 0) {
+          arkValue.left = value.start;
+        }
       }
       modifierWithKey(this._modifiersWithKeys, MarginModifier.identity, MarginModifier, arkValue);
     }
