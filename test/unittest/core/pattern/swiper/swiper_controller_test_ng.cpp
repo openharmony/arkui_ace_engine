@@ -14,6 +14,14 @@
  */
 
 #include "swiper_test_ng.h"
+#include "core/components_ng/syntax/for_each_model_ng.h"
+#include "core/components_ng/syntax/for_each_node.h"
+#include "core/components_ng/syntax/lazy_for_each_model_ng.h"
+#include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
+#include "core/components_ng/syntax/syntax_item.h"
+#include "test/unittest/core/syntax/mock_lazy_for_each_actuator.h"
+#include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 
 namespace OHOS::Ace::NG {
 
@@ -23,6 +31,8 @@ class SwiperControllerTestNg : public SwiperTestNg {
 public:
     AssertionResult VerifyShowNext(int32_t expectIndex);
     AssertionResult VerifyShowPrevious(int32_t expectIndex);
+    void CreateForEachSwiper(int32_t itemNumber = ITEM_NUMBER);
+    void CreateLazyForEachSwiper(int32_t itemNumber = ITEM_NUMBER);
 };
 
 AssertionResult SwiperControllerTestNg::VerifyShowNext(int32_t expectIndex)
@@ -37,6 +47,64 @@ AssertionResult SwiperControllerTestNg::VerifyShowPrevious(int32_t expectIndex)
     controller_->ShowPrevious();
     FlushLayoutTask(frameNode_);
     return IsEqual(pattern_->GetCurrentIndex(), expectIndex);
+}
+
+void SwiperControllerTestNg::CreateForEachSwiper(int32_t itemNumber)
+{
+    SwiperModelNG model;
+    model.Create();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto weakSwiper = AceType::WeakClaim(AceType::RawPtr(swiperNode));
+    ForEachModelNG forEachModelNG;
+    forEachModelNG.Create();
+    auto forEachNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    forEachNode->SetParent(weakSwiper); // for InitAllChildrenDragManager
+    std::list<std::string> newIds;
+    for (int32_t index = 0; index < itemNumber; index++) {
+        newIds.emplace_back(std::to_string(index));
+    }
+    forEachModelNG.SetNewIds(std::move(newIds));
+    for (int32_t index = 0; index < itemNumber; index++) {
+        // key is 0,1,2,3...
+        forEachModelNG.CreateNewChildStart(std::to_string(index));
+        CreateItem(1);
+        forEachModelNG.CreateNewChildFinish(std::to_string(index));
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+    GetInstance();
+    FlushLayoutTask(frameNode_);
+}
+
+void SwiperControllerTestNg::CreateLazyForEachSwiper(int32_t itemNumber)
+{
+    SwiperModelNG model;
+    model.Create();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto weakSwiper = AceType::WeakClaim(AceType::RawPtr(swiperNode));
+    const RefPtr<LazyForEachActuator> lazyForEachActuator =
+        AceType::MakeRefPtr<Framework::MockLazyForEachBuilder>();
+    LazyForEachModelNG lazyForEachModelNG;
+    lazyForEachModelNG.Create(lazyForEachActuator);
+    auto node = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    node->SetParent(weakSwiper); // for InitAllChildrenDragManager
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(node);
+    for (int32_t index = 0; index < itemNumber; index++) {
+        ButtonModelNG buttonModelNG;
+        buttonModelNG.CreateWithLabel("label");
+        auto swiperItemNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        lazyForEachNode->builder_->cachedItems_.try_emplace(
+            index, LazyForEachChild(std::to_string(index), swiperItemNode));
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    ViewStackProcessor::GetInstance()->Pop();
+    GetInstance();
+    FlushLayoutTask(frameNode_);
 }
 
 /**
@@ -603,5 +671,36 @@ HWTEST_F(SwiperControllerTestNg, ChangeIndex003, TestSize.Level1)
     pattern_->ChangeIndex(3, false);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
+}
+
+/**
+ * @tc.name: PreloadItems001
+ * @tc.desc: Test SwiperPattern ChangeIndex On SwipeByGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerTestNg, PreloadItems001, TestSize.Level1)
+{
+    CreateForEachSwiper();
+    const std::set<int32_t>& indexSet = {1, 2};
+    controller_->PreloadItems(indexSet);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_EQ(forEachNode->TotalChildCount(), 4);
+}
+
+/**
+ * @tc.name: PreloadItems002
+ * @tc.desc: Test SwiperPattern ChangeIndex On SwipeByGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerTestNg, PreloadItems002, TestSize.Level1)
+{
+    CreateLazyForEachSwiper();
+    const std::set<int32_t>& indexSet = {1, 2};
+    controller_->PreloadItems(indexSet);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(frameNode_->TotalChildCount(), 5);
 }
 } // namespace OHOS::Ace::NG
