@@ -331,7 +331,7 @@ private:
     float GetChildMainAxisSize(
         const RefPtr<LayoutWrapper>& childWrapper, const RefPtr<SwiperLayoutProperty>& swiperProperty, Axis axis);
 
-    void CheckCachedItem();
+    void CheckCachedItem(int32_t startIndex, int32_t endIndex);
 
     bool isLoop_ = true;
     float prevMargin_ = 0.0f;

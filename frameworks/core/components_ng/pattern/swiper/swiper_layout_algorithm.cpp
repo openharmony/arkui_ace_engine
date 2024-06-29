@@ -221,9 +221,9 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (itemPosition_.empty()) {
         layoutWrapper->SetActiveChildRange(-1, -1);
     } else if (itemPositionInAnimation_.empty()) {
-        CheckCachedItem();
         int32_t startIndex = GetLoopIndex(GetStartIndex());
         int32_t endIndex = GetLoopIndex(GetEndIndex());
+        CheckCachedItem(startIndex, endIndex);
         if (isLoop_) {
             layoutWrapper->SetActiveChildRange(ActiveChildSets({ activeItems_, cachedItems_ }),
                 ActiveChildRange({ startIndex, endIndex, cachedCount_, cachedCount_ }));
@@ -243,7 +243,13 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         while (endIndex - 1 >= 0 && itemPositionInAnimation_.find(endIndex - 1) != itemPositionInAnimation_.end()) {
             endIndex--;
         }
-        layoutWrapper->SetActiveChildRange(endIndex, startIndex);
+        CheckCachedItem(endIndex, startIndex);
+        if (isLoop_) {
+            layoutWrapper->SetActiveChildRange(ActiveChildSets({ activeItems_, cachedItems_ }),
+                ActiveChildRange({ endIndex, startIndex, cachedCount_, cachedCount_ }));
+        } else {
+            layoutWrapper->SetActiveChildRange(endIndex, startIndex, cachedCount_, cachedCount_);
+        }
     }
 
     contentIdealSize.SetMainSize(contentMainSize_, axis);
@@ -255,7 +261,9 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // set swiper cache info.
     auto measuredItemCount = static_cast<int32_t>(measuredItems_.size());
-    auto maxCachedCount = static_cast<int32_t>(std::ceil(static_cast<float>(realTotalCount_ - measuredItemCount) / 2));
+    auto maxCachedCount =
+        isLoop_ ? static_cast<int32_t>(std::ceil(static_cast<float>(realTotalCount_ - measuredItemCount) / 2))
+                : realTotalCount_;
     layoutWrapper->SetCacheCount(std::min(swiperPattern->GetCachedCount(), maxCachedCount), childLayoutConstraint);
     layoutWrapper->SetLongPredictTask();
 
@@ -1396,10 +1404,8 @@ bool SwiperLayoutAlgorithm::IsNormalItem(const RefPtr<LayoutWrapper>& wrapper) c
     return true;
 }
 
-void SwiperLayoutAlgorithm::CheckCachedItem()
+void SwiperLayoutAlgorithm::CheckCachedItem(int32_t startIndex, int32_t endIndex)
 {
-    auto startIndex = GetLoopIndex(GetStartIndex());
-    auto endIndex = GetLoopIndex(GetEndIndex());
     if (startIndex <= endIndex) {
         for (auto i = startIndex; i <= endIndex; ++i) {
             activeItems_.insert(i);
