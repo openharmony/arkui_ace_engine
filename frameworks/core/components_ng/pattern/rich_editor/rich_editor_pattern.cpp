@@ -1797,18 +1797,21 @@ void RichEditorPattern::MixTextEmojiUpdateStyle(
     }
 }
 
-void RichEditorPattern::SetSelectSpanStyle(
-    int32_t start, int32_t end, RefPtr<SpanNode>& target, KeyCode code, bool isStart)
+void RichEditorPattern::SetSelectSpanStyle(int32_t start, int32_t end, KeyCode code, bool isStart)
 {
     TextStyle spanStyle;
     struct UpdateSpanStyle updateSpanStyle;
     ImageSpanAttribute imageStyle;
-
-    std::optional<TextStyle> spanStyle_t = (target->GetSpanItem())->GetTextStyle();
-    if (!spanStyle_t.has_value()) {
-        spanStyle_t = spanStyle;
+    auto it = std::find_if(spans_.begin(), spans_.end(), [start](const RefPtr<SpanItem>& spanItem) {
+        return (spanItem->rangeStart <= start) && (start < spanItem->position);
+    });
+    if (it == spans_.end()) {
+        return;
     }
-    spanStyle = spanStyle_t.value();
+    std::optional<TextStyle> spanTextStyle = (*it)->GetTextStyle();
+    if (spanTextStyle.has_value()) {
+        spanStyle = spanTextStyle.value();
+    }
     HandleSelectFontStyleWrapper(code, spanStyle);
     updateSpanStyle.updateTextColor = spanStyle.GetTextColor();
     updateSpanStyle.updateFontSize = spanStyle.GetFontSize();
@@ -1884,55 +1887,98 @@ void RichEditorPattern::GetSelectSpansPositionInfo(
     }
 }
 
-void RichEditorPattern::UpdateSelectSpanStyle(int32_t start, int32_t end, KeyCode code)
+std::list<RefPtr<UINode>>::const_iterator RichEditorPattern::GetSpanNodeIter(int32_t index)
 {
-    SpanPositionInfo startPositionSpanInfo(-1, -1, -1, -1);
-    SpanPositionInfo endPositionSpanInfo(-1, -1, -1, -1);
     auto host = GetHost();
-    GetSelectSpansPositionInfo(start, end, startPositionSpanInfo, endPositionSpanInfo);
-    auto itStart = host->GetChildren().begin();
-    auto itEnd = host->GetChildren().begin();
-    auto itEndNext = host->GetChildren().begin();
-    std::advance(itStart, startPositionSpanInfo.spanIndex_);
-    std::advance(itEnd, endPositionSpanInfo.spanIndex_);
-    std::advance(itEndNext, endPositionSpanInfo.spanIndex_ + 1);
+    CHECK_NULL_RETURN(host, {});
+    auto spanNodeIter = host->GetChildren().begin();
+    std::advance(spanNodeIter, index);
+    return spanNodeIter;
+}
+
+std::list<SpanPosition> RichEditorPattern::GetSelectSpanSplit(
+    SpanPositionInfo& startPositionSpanInfo, SpanPositionInfo& endPositionSpanInfo)
+{
+    std::list<SpanPosition> resultObjects;
+    int32_t spanIndex = 0;
+    auto itStart = GetSpanNodeIter(startPositionSpanInfo.spanIndex_);
+    auto itEnd = GetSpanNodeIter(endPositionSpanInfo.spanIndex_);
+    auto itEndNext = GetSpanNodeIter(endPositionSpanInfo.spanIndex_ + 1);
     for (auto itSelect = itStart; itSelect != itEndNext; itSelect++) {
-        int32_t startPosition = 0;
-        int32_t endPosition = 0;
+        SpanPosition resultObject;
         auto spanNode = DynamicCast<SpanNode>(*itSelect);
-        if (!spanNode) {
+        if (!spanNode || spanNode->GetTag() != V2::SPAN_ETS_TAG) {
             continue;
         }
         auto spanItem = spanNode->GetSpanItem();
-        if (startPositionSpanInfo.spanIndex_ == endPositionSpanInfo.spanIndex_) {
-            startPosition = start;
-            endPosition = end;
-            SetSelectSpanStyle(startPosition, endPosition, spanNode, code, true);
-            continue;
-        }
         if (itSelect == itStart) {
             if (startPositionSpanInfo.spanOffset_ == 0) {
-                startPosition = startPositionSpanInfo.spanStart_;
+                resultObject.spanRange[RichEditorSpanRange::RANGESTART] = startPositionSpanInfo.spanStart_;
             } else {
-                startPosition = startPositionSpanInfo.spanStart_ + startPositionSpanInfo.spanOffset_;
+                resultObject.spanRange[RichEditorSpanRange::RANGESTART] =
+                    startPositionSpanInfo.spanStart_ + startPositionSpanInfo.spanOffset_;
             }
-            endPosition = startPositionSpanInfo.spanEnd_;
-            SetSelectSpanStyle(startPosition, endPosition, spanNode, code, true);
+            resultObject.spanRange[RichEditorSpanRange::RANGEEND] = startPositionSpanInfo.spanEnd_;
+            resultObject.spanIndex = spanIndex;
+            spanIndex++;
+            resultObjects.emplace_back(resultObject);
             continue;
         }
         if (itSelect == itEnd) {
-            startPosition = endPositionSpanInfo.spanStart_;
+            resultObject.spanRange[RichEditorSpanRange::RANGESTART] = endPositionSpanInfo.spanStart_;
             if (endPositionSpanInfo.spanOffset_ == spanItem->content.size()) {
-                endPosition = endPositionSpanInfo.spanEnd_;
+                resultObject.spanRange[RichEditorSpanRange::RANGEEND] = endPositionSpanInfo.spanEnd_;
             } else {
-                endPosition = endPositionSpanInfo.spanStart_ + endPositionSpanInfo.spanOffset_;
+                resultObject.spanRange[RichEditorSpanRange::RANGEEND] =
+                    endPositionSpanInfo.spanStart_ + endPositionSpanInfo.spanOffset_;
             }
-            SetSelectSpanStyle(startPosition, endPosition, spanNode, code, false);
+            resultObject.spanIndex = spanIndex;
+            spanIndex++;
+            resultObjects.emplace_back(resultObject);
             continue;
         }
-        startPosition = spanItem->position - StringUtils::ToWstring(spanItem->content).length();
-        endPosition = spanItem->position;
-        SetSelectSpanStyle(startPosition, endPosition, spanNode, code, false);
+        resultObject.spanRange[RichEditorSpanRange::RANGESTART] =
+            spanItem->position - StringUtils::ToWstring(spanItem->content).length();
+        resultObject.spanRange[RichEditorSpanRange::RANGEEND] = spanItem->position;
+        resultObject.spanIndex = spanIndex;
+        spanIndex++;
+        resultObjects.emplace_back(resultObject);
+    }
+    return resultObjects;
+}
+
+std::list<SpanPosition> RichEditorPattern::GetSelectSpanInfo(int32_t start, int32_t end)
+{
+    SpanPositionInfo startPositionSpanInfo(-1, -1, -1, -1);
+    SpanPositionInfo endPositionSpanInfo(-1, -1, -1, -1);
+    std::list<SpanPosition> resultObjects;
+    int32_t spanIndex = 0;
+    GetSelectSpansPositionInfo(start, end, startPositionSpanInfo, endPositionSpanInfo);
+    if (startPositionSpanInfo.spanIndex_ == endPositionSpanInfo.spanIndex_) {
+        SpanPosition resultObject;
+        resultObject.spanRange[RichEditorSpanRange::RANGESTART] = start;
+        resultObject.spanRange[RichEditorSpanRange::RANGEEND] = end;
+        resultObject.spanIndex = spanIndex;
+        spanIndex++;
+        resultObjects.emplace_back(resultObject);
+    } else {
+        resultObjects = GetSelectSpanSplit(startPositionSpanInfo, endPositionSpanInfo);
+    }
+    return resultObjects;
+}
+
+void RichEditorPattern::UpdateSelectSpanStyle(int32_t start, int32_t end, KeyCode code)
+{
+    std::list<SpanPosition> resultObjects;
+    resultObjects = GetSelectSpanInfo(start, end);
+    for (const auto& spanStyleIter : resultObjects) {
+        if (spanStyleIter.spanIndex == 0) {
+            SetSelectSpanStyle(spanStyleIter.spanRange[RichEditorSpanRange::RANGESTART],
+                spanStyleIter.spanRange[RichEditorSpanRange::RANGEEND], code, true);
+            continue;
+        }
+        SetSelectSpanStyle(spanStyleIter.spanRange[RichEditorSpanRange::RANGESTART],
+            spanStyleIter.spanRange[RichEditorSpanRange::RANGEEND], code, false);
     }
 }
 
