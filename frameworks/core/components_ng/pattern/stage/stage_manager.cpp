@@ -305,6 +305,7 @@ bool StageManager::PopPage(bool needShowNext, bool needTransition)
     StopPageTransition();
     const auto& children = stageNode_->GetChildren();
     if (children.empty()) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "router pop page start, children is empty");
         return false;
     }
     auto pageNode = children.back();

@@ -318,13 +318,14 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index, const Wea
     auto param = GetParamByIndex(index);
     RefPtr<NG::UINode> node;
     if (GetNodeFromPreBuildList(index, name, param, node)) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "get node from prebuild list");
         return node;
     }
     RefPtr<NG::NavDestinationGroupNode> desNode;
     NG::ScopedViewStackProcessor scopedViewStackProcessor;
     int32_t errorCode = LoadDestination(name, param, customNode, node, desNode);
     if (errorCode != ERROR_CODE_NO_ERROR) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't find target destination by index, create empty node");
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't find target destination by index, create empty node");
         return AceType::DynamicCast<NG::UINode>(NavDestinationModel::GetInstance()->CreateEmpty());
     }
     auto pattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
@@ -801,6 +802,7 @@ bool JSNavigationStack::LoadDestinationByBuilder(const std::string& name, const 
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
     if (navDestBuilderFunc_->IsEmpty()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Builder function is empty");
         return false;
     }
     auto builderObj = JSRef<JSObject>::Cast(navDestBuilderFunc_);
@@ -824,6 +826,7 @@ int32_t JSNavigationStack::LoadDestination(const std::string& name, const JSRef<
     NG::ScopedViewStackProcessor scopedViewStackProcessor;
     // execute navdestination attribute builder
     if (LoadDestinationByBuilder(name, param, node, desNode)) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "load destination by buildermap");
         return ERROR_CODE_NO_ERROR;
     }
     // deal route config and execute route config builder
