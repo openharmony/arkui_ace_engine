@@ -410,7 +410,7 @@ void WaterFlowLayoutInfoSW::ClearDataFrom(int32_t idx, const std::vector<float>&
             ++it;
         }
     }
-    for (int32_t i = GetSegment(idx); i < lanes_.size(); ++i) {
+    for (int32_t i = GetSegment(idx); i < static_cast<int32_t>(lanes_.size()); ++i) {
         for (auto& lane : lanes_[i]) {
             while (!lane.items_.empty() && lane.items_.back().idx >= idx) {
                 lane.endPos -= lane.items_.back().mainSize + mainGap[i];
@@ -473,7 +473,7 @@ void WaterFlowLayoutInfoSW::InitSegments(const std::vector<WaterFlowSections::Se
     }
 
     lanes_.resize(n);
-    for (size_t i = start; i < n; ++i) {
+    for (size_t i = static_cast<size_t>(start); i < n; ++i) {
         lanes_[i] = std::vector<Lane>(sections[i].crossCount.value_or(1));
     }
 
