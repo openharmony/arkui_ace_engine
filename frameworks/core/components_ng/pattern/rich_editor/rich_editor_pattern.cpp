@@ -3276,6 +3276,8 @@ void RichEditorPattern::SetSubSpans(RefPtr<SpanString>& spanString, int32_t star
             auto spanEnd = oldEnd < end ? oldEnd - start : end - start;
             auto newSpanItem = spanItem->GetSameStyleSpanItem();
             newSpanItem->interval = {spanStart, spanEnd};
+            newSpanItem->position = spanStart;
+            newSpanItem->rangeStart = spanEnd;
             newSpanItem->content = StringUtils::ToString(
                 StringUtils::ToWstring(spanItem->content)
                     .substr(std::max(start - oldStart, 0), std::min(end, oldEnd) - std::max(start, oldStart)));
@@ -3296,25 +3298,18 @@ void RichEditorPattern::SetSubMap(RefPtr<SpanString>& spanString)
         if (!spanItem) {
             continue;
         }
-        std::list<RefPtr<SpanBase>> spanBases;
-        spanBases.emplace_back(ToFontSpan(spanItem));
-        spanBases.emplace_back(ToDecorationSpan(spanItem));
-        spanBases.emplace_back(ToBaselineOffsetSpan(spanItem));
-        spanBases.emplace_back(ToLetterSpacingSpan(spanItem));
-        spanBases.emplace_back(ToGestureSpan(spanItem));
-        spanBases.emplace_back(ToImageSpan(spanItem));
-        spanBases.emplace_back(ToParagraphStyleSpan(spanItem));
-        spanBases.emplace_back(ToLineHeightSpan(spanItem));
+        std::list<RefPtr<SpanBase>> spanBases = { ToFontSpan(spanItem), ToDecorationSpan(spanItem),
+            ToBaselineOffsetSpan(spanItem), ToLetterSpacingSpan(spanItem), ToGestureSpan(spanItem),
+            ToImageSpan(spanItem), ToParagraphStyleSpan(spanItem), ToLineHeightSpan(spanItem) };
         for (auto& spanBase : spanBases) {
             if (!spanBase) {
                 continue;
             }
-            if (subMap.find(spanBase->GetSpanType()) == subMap.end()) {
-                subMap[spanBase->GetSpanType()].emplace_back(spanBase);
+            auto it = subMap.find(spanBase->GetSpanType());
+            if (it == subMap.end()) {
+                subMap.insert({ spanBase->GetSpanType(), { spanBase } });
             } else {
-                auto spans = subMap[spanBase->GetSpanType()];
-                spans.emplace_back(spanBase);
-                subMap[spanBase->GetSpanType()] = spans;
+                it->second.emplace_back(std::move(spanBase));
             }
         }
     }
@@ -3429,6 +3424,9 @@ RefPtr<LineHeightSpan> RichEditorPattern::ToLineHeightSpan(const RefPtr<SpanItem
 void RichEditorPattern::AddSpanByPasteData(const RefPtr<SpanString>& spanString)
 {
     CHECK_NULL_VOID(spanString);
+    if (spanString->GetSpansMap().empty()) {
+        CompleteStyledString(const_cast<RefPtr<SpanString>&>(spanString));
+    }
     if (isSpanStringMode_) {
         InsertStyledStringByPaste(spanString);
     } else {
@@ -3439,6 +3437,21 @@ void RichEditorPattern::AddSpanByPasteData(const RefPtr<SpanString>& spanString)
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
+}
+
+void RichEditorPattern::CompleteStyledString(RefPtr<SpanString>& spanString)
+{
+    CHECK_NULL_VOID(spanString);
+    std::string text;
+    auto spans = spanString->GetSpanItems();
+    std::for_each(spans.begin(), spans.end(), [&text](RefPtr<SpanItem>& item) {
+        CHECK_NULL_VOID(item);
+        text.append(item->content);
+        item->position = item->interval.second;
+        item->rangeStart = item->interval.first;
+    });
+    spanString->SetString(std::move(text));
+    SetSubMap(spanString);
 }
 
 void RichEditorPattern::InsertStyledStringByPaste(const RefPtr<SpanString>& spanString)

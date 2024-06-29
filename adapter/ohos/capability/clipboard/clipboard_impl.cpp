@@ -476,11 +476,11 @@ void ClipboardImpl::GetSpanStringDataHelper(
         auto getDataRes = OHOS::MiscServices::PasteboardClient::GetInstance()->GetPasteData(pasteData);
         CHECK_NULL_VOID(getDataRes);
         std::vector<uint8_t> arr;
-        clip->ProcessSpanStringData(arr, pasteData);
         std::string text;
+        clip->ProcessSpanStringData(arr, pasteData, text);
         auto textData = pasteData.GetPrimaryText();
-        if (textData) {
-            text = *textData;
+        if (textData && text.empty()) {
+            text.append(*textData);
         }
         callback(arr, text);
     };
@@ -491,7 +491,8 @@ void ClipboardImpl::GetSpanStringDataHelper(
     }
 }
 
-void ClipboardImpl::ProcessSpanStringData(std::vector<uint8_t>& arr, const OHOS::MiscServices::PasteData& pasteData)
+void ClipboardImpl::ProcessSpanStringData(
+    std::vector<uint8_t>& arr, const OHOS::MiscServices::PasteData& pasteData, std::string& text)
 {
     for (const auto& pasteDataRecord : pasteData.AllRecords()) {
         if (pasteDataRecord == nullptr) {
@@ -512,6 +513,10 @@ void ClipboardImpl::ProcessSpanStringData(std::vector<uint8_t>& arr, const OHOS:
                 spanStr->EncodeTlv(arr);
                 return;
             }
+        }
+        if (pasteDataRecord->GetPlainText() != nullptr) {
+            auto textData = pasteDataRecord->GetPlainText();
+            text.append(*textData);
         }
     }
 }

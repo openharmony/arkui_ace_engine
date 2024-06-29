@@ -66,7 +66,8 @@ private:
     void GetPixelMapDataAsync(const std::function<void(const RefPtr<PixelMap>&)>& callback);
     void GetSpanStringDataHelper(
         const std::function<void(std::vector<uint8_t>&, const std::string&)>& callback, bool syncMode = false);
-    void ProcessSpanStringData(std::vector<uint8_t>& arr, const OHOS::MiscServices::PasteData& pasteData);
+    void ProcessSpanStringData(
+        std::vector<uint8_t>& arr, const OHOS::MiscServices::PasteData& pasteData, std::string& resText);
 #endif
 };
 
