@@ -17,9 +17,6 @@ import { KeyCode } from '@ohos.multimodalInput.keyCode'
 import util from '@ohos.util';
 import { LengthMetrics } from '@ohos.arkui.node'
 import resourceManager from '@ohos.resourceManager';
-import { BusinessError } from '@ohos.base';
-import hilog from '@ohos.hilog';
-import json from '@ohos.util.json';
 
 const MIN_ITEM_COUNT = 2
 const MAX_ITEM_COUNT = 5
@@ -476,8 +473,12 @@ struct MultiSelectItemArray {
  * @param resourceName resource name
  * @returns resource size
  */
-function getNumberByResource(resourceName: Resource): number {
-  return resourceManager.getSystemResourceManager().getNumber(resourceName);
+function getNumberByResource(resourceName: Resource): number | null {
+  try {
+    return resourceManager.getSystemResourceManager().getNumber(resourceName);
+  } catch (error) {
+    return null;
+  }
 }
 
 @Component

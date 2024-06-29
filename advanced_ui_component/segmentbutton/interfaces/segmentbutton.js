@@ -28,7 +28,6 @@ const KeyCode = globalThis.requireNapi("multimodalInput.keyCode").KeyCode;
 const util = globalThis.requireNapi("util");
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const resourceManager = requireNapi("resourceManager");
-
 const MIN_ITEM_COUNT = 2;
 const MAX_ITEM_COUNT = 5;
 const segmentButtonTheme = {
@@ -601,7 +600,12 @@ class MultiSelectItemArray extends ViewPU {
  * @returns resource size
  */
 function getNumberByResource(resourceName) {
-    return resourceManager.getSystemResourceManager().getNumber(resourceName);
+    try {
+        return resourceManager.getSystemResourceManager().getNumber(resourceName);
+    }
+    catch (error) {
+        return null;
+    }
 }
 class SegmentButtonItem extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
@@ -1374,7 +1378,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                                         colorProperty: this.hoverColorArray[index],
                                                         press: this.pressArray[index],
                                                         options: this.options,
-                                                    }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton.ets", line: 801, col: 15 });
+                                                    }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton.ets", line: 802, col: 15 });
                                                     ViewPU.create(componentCall);
                                                     let paramsLambda = () => {
                                                         return {
@@ -1420,7 +1424,7 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                                         property: this.buttonItemProperty[index],
                                                         groupId: this.groupId,
                                                         marquee: this.marquee
-                                                    }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton.ets", line: 807, col: 15 });
+                                                    }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton.ets", line: 808, col: 15 });
                                                     ViewPU.create(componentCall);
                                                     let paramsLambda = () => {
                                                         return {
@@ -1977,7 +1981,7 @@ export class SegmentButton extends ViewPU {
                                             let componentCall = new MultiSelectBackground(this, {
                                                 optionsArray: this.options.buttons,
                                                 options: this.options,
-                                            }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton.ets", line: 1073, col: 11 });
+                                            }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton.ets", line: 1074, col: 11 });
                                             ViewPU.create(componentCall);
                                             let paramsLambda = () => {
                                                 return {
@@ -2032,7 +2036,7 @@ export class SegmentButton extends ViewPU {
                                                 optionsArray: this.options.buttons,
                                                 options: this.options,
                                                 selectedIndexes: this.__selectedIndexes
-                                            }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton.ets", line: 1087, col: 13 });
+                                            }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton.ets", line: 1088, col: 13 });
                                             ViewPU.create(componentCall);
                                             let paramsLambda = () => {
                                                 return {
@@ -2062,7 +2066,7 @@ export class SegmentButton extends ViewPU {
                                                 optionsArray: this.options.buttons,
                                                 options: this.options,
                                                 selectedIndexes: this.__selectedIndexes
-                                            }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton.ets", line: 1093, col: 13 });
+                                            }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton.ets", line: 1094, col: 13 });
                                             ViewPU.create(componentCall);
                                             let paramsLambda = () => {
                                                 return {
@@ -2093,7 +2097,7 @@ export class SegmentButton extends ViewPU {
                                     optionsArray: this.options.buttons,
                                     options: this.options,
                                     selectedIndexes: this.__selectedIndexes,
-                                }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton.ets", line: 1107, col: 9 });
+                                }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/mainpage/segmentbutton.ets", line: 1108, col: 9 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {
