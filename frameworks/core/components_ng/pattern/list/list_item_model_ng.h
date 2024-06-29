@@ -23,7 +23,7 @@
 #include "core/components_ng/pattern/list/list_item_model.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT ListItemModelNG : public ListItemModel {
+class ACE_FORCE_EXPORT ListItemModelNG : public ListItemModel {
 public:
     void Create(std::function<void(int32_t)>&& deepRenderFunc, V2::ListItemStyle listItemStyle,
         bool isCreateArc = false) override;

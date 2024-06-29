@@ -62,7 +62,7 @@ public:
     static void SetEdgeEffect(const JSCallbackInfo& info);
     static void SetEditMode(bool editMode);
     static void SetCachedCount(const JSCallbackInfo& info);
-    static void SetChainAnimation(bool enableChainAnimation);
+    static void SetChainAnimation(const JSCallbackInfo& args);
     static void SetChainAnimationOptions(const JSCallbackInfo& info);
     static void SetChildrenMainSize(const JSCallbackInfo& args);
     static void SetMultiSelectable(bool multiSelectable);
@@ -81,7 +81,7 @@ public:
     static void ItemDragMoveCallback(const JSCallbackInfo& info);
     static void ItemDragLeaveCallback(const JSCallbackInfo& info);
     static void ItemDropCallback(const JSCallbackInfo& info);
-    static void SetFadingEdge(bool fadingEdge);
+    static void SetFadingEdge(const JSCallbackInfo& args);
     static void SetListItemIndex(JSRef<JSObject> listItemInfo, ListItemIndex indexInfo);
 };
 

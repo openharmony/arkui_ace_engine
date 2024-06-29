@@ -59,6 +59,10 @@ public:
     private:
         void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<ArcListItemTheme>& theme) const
         {
+            static const Dimension ARC_LISTITEM_LISTITEMGROUP_INTERVAL = 4.0_vp;
+            static const Dimension ARC_LISTITEM_PADDING = 8.0_vp;
+            static const int32_t ARC_LISTITEM_HOVER_DURATION = 250;
+            static const int32_t ARC_LISTITEM_HOVER_TO_PRESS_DURATION = 100;
             if (!themeStyle) {
                 return;
             }

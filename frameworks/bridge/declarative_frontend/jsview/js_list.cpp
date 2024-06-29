@@ -276,9 +276,9 @@ void JSList::SetChildrenMainSize(const JSCallbackInfo& args)
     JSRef<JSVal>::Cast(func->Call(childrenSizeObj));
 }
 
-void JSList::SetChainAnimation(bool enableChainAnimation)
+void JSList::SetChainAnimation(const JSCallbackInfo& args)
 {
-    ListModel::GetInstance()->SetChainAnimation(enableChainAnimation);
+    ListModel::GetInstance()->SetChainAnimation(args[0]->IsBoolean() ? args[0]->ToBoolean() : false);
 }
 
 void JSList::SetChainAnimationOptions(const JSCallbackInfo& info)
@@ -495,48 +495,68 @@ void JSList::SetFriction(const JSCallbackInfo& info)
 
 void JSList::ReachStartCallback(const JSCallbackInfo& args)
 {
+    if (args.Length() <= 0) {
+        return;
+    }
     if (args[0]->IsFunction()) {
         auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
             return;
         };
         ListModel::GetInstance()->SetOnReachStart(std::move(onReachStart));
+    } else {
+        ListModel::GetInstance()->SetOnReachStart(nullptr);
     }
     args.ReturnSelf();
 }
 
 void JSList::ReachEndCallback(const JSCallbackInfo& args)
 {
+    if (args.Length() <= 0) {
+        return;
+    }
     if (args[0]->IsFunction()) {
         auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
             return;
         };
         ListModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));
+    } else {
+        ListModel::GetInstance()->SetOnReachEnd(nullptr);
     }
     args.ReturnSelf();
 }
 
 void JSList::ScrollStartCallback(const JSCallbackInfo& args)
 {
+    if (args.Length() <= 0) {
+        return;
+    }
     if (args[0]->IsFunction()) {
         auto onScrollStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
             return;
         };
         ListModel::GetInstance()->SetOnScrollStart(std::move(onScrollStart));
+    } else {
+        ListModel::GetInstance()->SetOnScrollStart(nullptr);
     }
     args.ReturnSelf();
 }
 
 void JSList::ScrollStopCallback(const JSCallbackInfo& args)
 {
+    if (args.Length() <= 0) {
+        return;
+    }
     if (args[0]->IsFunction()) {
         auto onScrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
             return;
         };
         ListModel::GetInstance()->SetOnScrollStop(std::move(onScrollStop));
+    } else {
+        ListModel::GetInstance()->SetOnScrollStop(nullptr);
     }
     args.ReturnSelf();
 }
@@ -575,6 +595,9 @@ void JSList::ItemMoveCallback(const JSCallbackInfo& args)
 
 void JSList::ScrollIndexCallback(const JSCallbackInfo& args)
 {
+    if (args.Length() <= 0) {
+        return;
+    }
     if (args[0]->IsFunction()) {
         auto onScrollIndex = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
                                  const int32_t start, const int32_t end, const int32_t center) {
@@ -584,6 +607,8 @@ void JSList::ScrollIndexCallback(const JSCallbackInfo& args)
             return;
         };
         ListModel::GetInstance()->SetOnScrollIndex(std::move(onScrollIndex));
+    } else {
+        ListModel::GetInstance()->SetOnScrollIndex(nullptr);
     }
     args.ReturnSelf();
 }
@@ -790,9 +815,9 @@ void JSList::ScrollFrameBeginCallback(const JSCallbackInfo& args)
     }
 }
 
-void JSList::SetFadingEdge(bool fadingEdge)
+void JSList::SetFadingEdge(const JSCallbackInfo& args)
 {
-    ListModel::GetInstance()->SetFadingEdge(fadingEdge);
+    ListModel::GetInstance()->SetFadingEdge(args[0]->IsBoolean() ? args[0]->ToBoolean() : false);
 }
 
 void JSList::JSBind(BindingTarget globalObj)
