@@ -127,14 +127,16 @@ void MultipleParagraphLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             ++index;
             continue;
         }
-        if (index >= placeholderIndex.size() ||
-            (placeholderIndex.at(index) >= static_cast<int32_t>(rectsForPlaceholders.size()) &&
-                child->GetHostTag() != V2::PLACEHOLDER_SPAN_ETS_TAG)) {
+        if (index >= placeholderIndex.size() || index < 0) {
+            child->SetActive(false);
+            continue;
+        }
+        auto indexTemp = placeholderIndex.at(index);
+        if (indexTemp >= static_cast<int32_t>(rectsForPlaceholders.size()) || indexTemp < 0) {
             child->SetActive(false);
             continue;
         }
         child->SetActive(true);
-        auto indexTemp = placeholderIndex.at(index);
         auto rect = rectsForPlaceholders.at(indexTemp) - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
         auto geometryNode = child->GetGeometryNode();
         if (!geometryNode) {
