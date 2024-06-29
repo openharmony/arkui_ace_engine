@@ -189,4 +189,18 @@ bool TextAdaptFontSizer::IsNeedAdaptFontSize(const TextStyle& textStyle, const L
     }
     return IsNeedAdaptFontSize(maxFontSize, minFontSize);
 }
+
+void TextAdaptFontSizer::SetAdaptFontSizeLineHeight(const Dimension& lineHeight)
+{
+    lineHeight_ = lineHeight.ConvertToPx();
+}
+
+bool TextAdaptFontSizer::IsAdaptFontSizeExceedLineHeight(const RefPtr<Paragraph>& paragraph)
+{
+    if (LessOrEqual(lineHeight_, 0.0)) {
+        return false;
+    }
+    auto lineMetrics = paragraph->GetLineMetrics(0);
+    return GreatNotEqual(lineMetrics.height, lineHeight_);
+}
 } // namespace OHOS::Ace::NG
