@@ -874,10 +874,11 @@ void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc
             pattern->HandleSelectionChange(aiSpan.start, aiSpan.end);
             pattern->HandleOnCopy();
         } else if (action == std::string(SELECT_ACTION)) {
-            pattern->HandleSelectionChange(aiSpan.start, aiSpan.end);
             if (calculateHandleFunc == nullptr) {
+                pattern->SetTextSelection(aiSpan.start, aiSpan.end);
                 pattern->CalculateHandleOffsetAndShowOverlay();
             } else {
+                pattern->HandleSelectionChange(aiSpan.start, aiSpan.end);
                 calculateHandleFunc();
             }
             if (showSelectOverlayFunc == nullptr) {
