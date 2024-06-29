@@ -199,8 +199,9 @@ void OverlengthDotIndicatorModifier::PlayBlackPointsAnimation(const LinearVector
     auto pointMoveCurve = AceType::MakeRefPtr<CubicCurve>(BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY,
         CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING);
     blackPointOption.SetCurve(pointMoveCurve);
-    blackPointOption.SetDuration(BLACK_POINT_DURATION);
-    
+    auto duration = std::min(animationDuration_, BLACK_POINT_DURATION);
+    blackPointOption.SetDuration(duration);
+
     vectorBlackPointCenterX_->Set(animationStartCenterX_);
     unselectedIndicatorWidth_->Set(animationStartIndicatorWidth_);
     unselectedIndicatorHeight_->Set(animationStartIndicatorHeight_);
@@ -228,8 +229,8 @@ void OverlengthDotIndicatorModifier::PlayBlackPointsAnimation(const LinearVector
     });
 }
 
-LinearVector<float> OverlengthDotIndicatorModifier::CalcIndicatorSize(const LinearVector<float>& itemHalfSizes,
-    int32_t selectedIndex, OverlongType overlongType, int32_t pageIndex, bool isWidth)
+LinearVector<float> OverlengthDotIndicatorModifier::CalcIndicatorSize(
+    const LinearVector<float>& itemHalfSizes, OverlongType overlongType, int32_t pageIndex, bool isWidth)
 {
     auto unselectedIndicatorRadius = isWidth ? itemHalfSizes[0] : itemHalfSizes[1];
     LinearVector<float> indicatorSize(maxDisplayCount_ + 1);
@@ -398,22 +399,21 @@ void OverlengthDotIndicatorModifier::CalcTargetStatusOnLongPointMove(const Linea
         CalcIndicatorCenterX(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_);
     animationEndCenterX_ = endCenterX.first;
     overlongSelectedEndCenterX_ = endCenterX.second;
-    animationStartIndicatorWidth_ =
-        CalcIndicatorSize(itemHalfSizes, currentSelectedIndex_, currentOverlongType_, animationStartIndex_, true);
+    animationStartIndicatorWidth_ = CalcIndicatorSize(itemHalfSizes, currentOverlongType_, animationStartIndex_, true);
     animationStartIndicatorHeight_ =
-        CalcIndicatorSize(itemHalfSizes, currentSelectedIndex_, currentOverlongType_, animationStartIndex_, false);
+        CalcIndicatorSize(itemHalfSizes, currentOverlongType_, animationStartIndex_, false);
 
-    animationEndIndicatorWidth_ =
-        CalcIndicatorSize(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_, true);
-    animationEndIndicatorHeight_ =
-        CalcIndicatorSize(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_, false);
+    animationEndIndicatorWidth_ = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, animationEndIndex_, true);
+    animationEndIndicatorHeight_ = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, animationEndIndex_, false);
 
-    animationStartCenterX_.resize(maxDisplayCount_);
-    animationEndCenterX_.resize(maxDisplayCount_);
-    animationStartIndicatorWidth_.resize(maxDisplayCount_);
-    animationStartIndicatorHeight_.resize(maxDisplayCount_);
-    animationEndIndicatorWidth_.resize(maxDisplayCount_);
-    animationEndIndicatorHeight_.resize(maxDisplayCount_);
+    if (touchBottomTypeLoop_ != TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
+        animationStartCenterX_.resize(maxDisplayCount_);
+        animationEndCenterX_.resize(maxDisplayCount_);
+        animationStartIndicatorWidth_.resize(maxDisplayCount_);
+        animationStartIndicatorHeight_.resize(maxDisplayCount_);
+        animationEndIndicatorWidth_.resize(maxDisplayCount_);
+        animationEndIndicatorHeight_.resize(maxDisplayCount_);
+    }
 
     UpdateUnselectedCenterXOnDrag();
     UpdateSelectedCenterXOnDrag(itemHalfSizes);
@@ -430,10 +430,8 @@ void OverlengthDotIndicatorModifier::CalcTargetStatusOnAllPointMoveForward(const
     auto targetCenterX =
         CalcIndicatorCenterX(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_);
     overlongSelectedEndCenterX_ = targetCenterX.second;
-    auto targetIndicatorWidth =
-        CalcIndicatorSize(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_, true);
-    auto targetIndicatorHeight =
-        CalcIndicatorSize(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_, false);
+    auto targetIndicatorWidth = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, animationEndIndex_, true);
+    auto targetIndicatorHeight = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, animationEndIndex_, false);
 
     float itemSpacePx = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
     // calc new point current position
@@ -479,10 +477,8 @@ void OverlengthDotIndicatorModifier::CalcTargetStatusOnAllPointMoveBackward(cons
     auto targetCenterX =
         CalcIndicatorCenterX(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_);
     overlongSelectedEndCenterX_ = targetCenterX.second;
-    auto targetIndicatorWidth =
-        CalcIndicatorSize(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_, true);
-    auto targetIndicatorHeight =
-        CalcIndicatorSize(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_, false);
+    auto targetIndicatorWidth = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, animationEndIndex_, true);
+    auto targetIndicatorHeight = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, animationEndIndex_, false);
 
     float itemSpacePx = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
     // calc new point current position
@@ -540,10 +536,9 @@ void OverlengthDotIndicatorModifier::CalcAnimationEndCenterX(const LinearVector<
         return;
     }
 
-    animationStartIndicatorWidth_ =
-        CalcIndicatorSize(itemHalfSizes, currentSelectedIndex_, currentOverlongType_, animationStartIndex_, true);
+    animationStartIndicatorWidth_ = CalcIndicatorSize(itemHalfSizes, currentOverlongType_, animationStartIndex_, true);
     animationStartIndicatorHeight_ =
-        CalcIndicatorSize(itemHalfSizes, currentSelectedIndex_, currentOverlongType_, animationStartIndex_, false);
+        CalcIndicatorSize(itemHalfSizes, currentOverlongType_, animationStartIndex_, false);
     animationEndCenterX_.resize(maxDisplayCount_ + 1);
     animationEndIndicatorWidth_.resize(maxDisplayCount_ + 1);
     animationEndIndicatorHeight_.resize(maxDisplayCount_ + 1);
