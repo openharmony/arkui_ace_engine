@@ -8632,7 +8632,7 @@ class ViewV2 extends PUV2ViewBase {
        */
         this.__mkRepeatAPI = (arr) => {
             // factory is for future extensions, currently always return the same
-            const elmtId = this.getCurrentlyRenderedElmtId();
+            const elmtId = ObserveV2.getCurrentRecordedId();
             let repeat = this.elmtId2Repeat_.get(elmtId);
             if (!repeat) {
                 repeat = new __RepeatV2(arr);
