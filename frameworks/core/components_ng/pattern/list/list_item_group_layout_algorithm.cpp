@@ -104,7 +104,11 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             headerMainSize_, footerMainSize_);
         totalMainSize_ = posMap_->GetTotalHeight();
     }
-    MeasureListItem(layoutWrapper, childLayoutConstraint_);
+    if (cacheParam_) {
+        MeasureCacheItem(layoutWrapper);
+    } else {
+        MeasureListItem(layoutWrapper, childLayoutConstraint_);
+    }
     childrenSize_ ? AdjustByPosMap() : AdjustItemPosition();
 
     auto crossSize = contentIdealSize.CrossSize(axis_);
@@ -150,6 +154,10 @@ void ListItemGroupLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         } else {
             LayoutHeaderFooterLTR(layoutWrapper, paddingOffset, crossSize);
         }
+    }
+    if (cacheParam_) {
+        LayoutCacheItem(layoutWrapper);
+        return;
     }
     // layout items.
     LayoutListItem(layoutWrapper, paddingOffset, crossSize);
@@ -1124,5 +1132,69 @@ bool ListItemGroupLayoutAlgorithm::IsCardStyleForListItemGroup(const LayoutWrapp
     auto listItemGroup = host->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_RETURN(listItemGroup, false);
     return listItemGroup->GetListItemGroupStyle() == V2::ListItemGroupStyle::CARD;
+}
+
+void ListItemGroupLayoutAlgorithm::MeasureCacheItem(LayoutWrapper* layoutWrapper)
+{
+    ListItemGroupCacheParam& cacheParam = cacheParam_.value();
+    if (cacheParam.forward) {
+        int32_t endIndex = itemPosition_.empty() ? -1 : itemPosition_.rbegin()->first;
+        int32_t limit = std::min(endIndex + cacheParam.cacheCount, totalItemCount_ - 1);
+        int32_t currentIndex = cacheParam.currCachedIndex + 1;
+        for (; currentIndex <= limit; currentIndex++) {
+            auto item = layoutWrapper->GetOrCreateChildByIndex(currentIndex + itemStartIndex_, false, true);
+            auto frameNode = AceType::DynamicCast<FrameNode>(item);
+            if (!frameNode) {
+                break;
+            }
+            if (!frameNode->CheckNeedForceMeasureAndLayout()) {
+                continue;
+            }
+            if (frameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
+                frameNode->GetPattern<ListItemPattern>()->BeforeCreateLayoutWrapper();
+            }
+            if (!frameNode->GetHostNode()->RenderCustomChild(cacheParam.deadline)) {
+                break;
+            }
+            item->Measure(childLayoutConstraint_);
+            cachedItem_.push_back(currentIndex);
+        }
+        cacheParam.currCachedIndex = std::min(currentIndex - 1, limit);
+    } else {
+        int32_t startIndex = itemPosition_.empty() ? totalItemCount_ : itemPosition_.begin()->first;
+        int32_t limit = std::max(startIndex - cacheParam.cacheCount, 0);
+        int32_t currentIndex = cacheParam.currCachedIndex - 1;
+        for (; currentIndex >= limit; currentIndex--) {
+            auto item = layoutWrapper->GetOrCreateChildByIndex(currentIndex + itemStartIndex_, false, true);
+            auto frameNode = AceType::DynamicCast<FrameNode>(item);
+            if (!frameNode) {
+                break;
+            }
+            if (!frameNode->CheckNeedForceMeasureAndLayout()) {
+                continue;
+            }
+            if (frameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
+                frameNode->GetPattern<ListItemPattern>()->BeforeCreateLayoutWrapper();
+            }
+            if (!frameNode->GetHostNode()->RenderCustomChild(cacheParam.deadline)) {
+                break;
+            }
+            item->Measure(childLayoutConstraint_);
+            cachedItem_.push_back(currentIndex);
+        }
+        cacheParam.currCachedIndex = std::max(currentIndex + 1, limit);
+    }
+}
+
+void ListItemGroupLayoutAlgorithm::LayoutCacheItem(LayoutWrapper* layoutWrapper)
+{
+    for (auto index : cachedItem_) {
+        auto item = layoutWrapper->GetOrCreateChildByIndex(index + itemStartIndex_, false, true);
+        if (item) {
+            item->SetActive(true);
+            item->Layout();
+            item->SetActive(false);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG
