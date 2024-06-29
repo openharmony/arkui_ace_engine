@@ -76,6 +76,7 @@ public:
                 theme->pressAnimationDuration_ = pattern->GetAttr<double>("press_animation_duration", 0.0);
                 theme->iconSubSize_ = pattern->GetAttr<double>("rating_icon_sub_size", 0.0);
                 theme->iconBoardDistance_ = pattern->GetAttr<double>("rating_icon_board_distance", 0.0);
+                theme->focusColor_ = pattern->GetAttr<Color>("rating_focus_bgcolor", Color());
             } else {
                 LOGW("find pattern of rating fail");
             }
@@ -195,6 +196,11 @@ public:
         return pressColor_;
     }
 
+    const Color& GetFocusColor() const
+    {
+        return focusColor_;
+    }
+
     const Color& GetStarColorActive() const
     {
         return starColorActive_;
@@ -245,6 +251,7 @@ private:
     Color pressColor_;
     Color starColorActive_;
     Color starColorInactive_;
+    Color focusColor_;
     Dimension focusBorderWidth_;
     Dimension borderRadius_;
 };
