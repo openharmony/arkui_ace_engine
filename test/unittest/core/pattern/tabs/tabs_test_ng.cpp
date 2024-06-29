@@ -15,6 +15,7 @@
 
 #include "tabs_test_ng.h"
 #include "core/components/dialog/dialog_theme.h"
+#include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {}
@@ -26,6 +27,14 @@ void TabsTestNg::SetUpTestSuite()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dialogTheme));
+    auto agingAdapationDialogTheme = AceType::MakeRefPtr<AgingAdapationDialogTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(AgingAdapationDialogTheme::TypeId()))
+        .WillRepeatedly(Return(agingAdapationDialogTheme));
+    agingAdapationDialogTheme->bigFontSizeScale_ = BIG_FONT_SIZE_SCALE;
+    agingAdapationDialogTheme->largeFontSizeScale_ = LARGE_FONT_SIZE_SCALE;
+    agingAdapationDialogTheme->maxFontSizeScale_ = MAX_FONT_SIZE_SCALE;
+    agingAdapationDialogTheme->bigDialogWidth_ = BIG_DIALOG_WIDTH;
+    agingAdapationDialogTheme->maxDialogWidth_ = MAX_DIALOG_WIDTH;
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_TAB);
     auto tabTheme = TabTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(TabTheme::TypeId())).WillRepeatedly(Return(tabTheme));

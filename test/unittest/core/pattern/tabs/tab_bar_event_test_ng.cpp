@@ -18,10 +18,7 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {
-constexpr double BIG_DIALOG_WIDTH = 216.0;
-constexpr double MAX_DIALOG_WIDTH = 256.0;
-} // namespace
+namespace {} // namespace
 
 class TabBarEventTestNg : public TabsTestNg {
 public:
