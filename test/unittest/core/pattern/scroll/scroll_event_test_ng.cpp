@@ -211,6 +211,7 @@ HWTEST_F(ScrolleEventTestNg, Event004, TestSize.Level1)
     isTrigger = false;
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
     EXPECT_TRUE(isTrigger);
+    pattern_->isAnimationStop_ = true; // Stop ScrollToEdge animation
 
     /**
      * @tc.steps: step4. Trigger onScrollStop / onScrollEnd event

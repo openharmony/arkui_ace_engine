@@ -785,7 +785,7 @@ private:
     void HandleSwiperCustomAnimation(float offset);
     void CalculateAndUpdateItemInfo(float offset);
     void UpdateItemInfoInCustomAnimation(int32_t index, float startPos, float endPos);
-    void UpdateTabBarAnimationDuration();
+    void UpdateTabIndexAndTabBarAnimationDuration(int32_t index);
 
     float GetItemSpace() const;
     float GetPrevMargin() const;
@@ -831,7 +831,7 @@ private:
     void TriggerAnimationEndOnSwipeToLeft();
     void TriggerAnimationEndOnSwipeToRight();
     void TriggerEventOnFinish(int32_t nextIndex);
-    bool IsVisibleChildrenSizeLessThanSwiper();
+    bool IsVisibleChildrenSizeLessThanSwiper() const;
     void BeforeCreateLayoutWrapper() override;
 
     void SetLazyLoadFeature(bool useLazyLoad);
@@ -1007,6 +1007,8 @@ private:
     bool ParseTabsIsRtl();
 
     void PostIdleTask(const RefPtr<FrameNode>& frameNode);
+
+    void TabContentStateCallBack(int32_t oldIndex, int32_t nextIndex) const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;

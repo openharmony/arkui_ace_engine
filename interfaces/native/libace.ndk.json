@@ -40,6 +40,22 @@
         "name": "OH_NativeXComponent_GetTouchPointTiltY"
     },
     {
+        "first_introduced": "12",
+        "name": "OH_NativeXComponent_GetTouchPointWindowX"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_NativeXComponent_GetTouchPointWindowY"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_NativeXComponent_GetTouchPointDisplayX"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_NativeXComponent_GetTouchPointDisplayY"
+    },
+    {
         "first_introduced": "10",
         "name": "OH_NativeXComponent_RegisterFocusEventCallback"
     },
@@ -1597,38 +1613,78 @@
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_Curve_InitCurve"
+        "name": "OH_ArkUI_Curve_CreateCurveByType"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_Curve_StepsCurve"
+        "name": "OH_ArkUI_Curve_CreateStepsCurve"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_Curve_CubicBezierCurve"
+        "name": "OH_ArkUI_Curve_CreateCubicBezierCurve"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_Curve_SpringCurve"
+        "name": "OH_ArkUI_Curve_CreateSpringCurve"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_Curve_SpringMotion"
+        "name": "OH_ArkUI_Curve_CreateSpringMotion"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_Curve_ResponsiveSpringMotion"
+        "name": "OH_ArkUI_Curve_CreateResponsiveSpringMotion"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_Curve_InterpolatingSpring"
+        "name": "OH_ArkUI_Curve_CreateInterpolatingSpring"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_Curve_CustomCurve"
+        "name": "OH_ArkUI_Curve_CreateCustomCurve"
     },
     {
         "first_introduced": "12",
-        "name": "OH_ArkUI_Curve_disposeCurve"
+        "name": "OH_ArkUI_Curve_DisposeCurve"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_PointerEvent_SetStopPropagation"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CreateOpacityTransitionEffect"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CreateTranslationTransitionEffect"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CreateScaleTransitionEffect"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CreateRotationTransitionEffect"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CreateMovementTransitionEffect"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CreateAsymmetricTransitionEffect"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_TransitionEffect_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_TransitionEffect_Combine"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_TransitionEffect_SetAnimation"
     }
 ]

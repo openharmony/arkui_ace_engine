@@ -92,10 +92,10 @@ public:
     virtual void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info = nullptr) {}
     virtual bool CheckTouchInHostNode(const PointF& touchPoint) = 0;
     virtual void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) {};
-    virtual void OnHandleGlobalEvent(const PointF& touchPoint, const TouchEvent& event)
+    virtual void OnHandleGlobalEvent(const PointF& touchPoint, const PointF& localPoint, const TouchEvent& event)
     {
         if (event.type == TouchType::DOWN) {
-            isIntercept_ = event.sourceType != SourceType::MOUSE && CheckTouchInHostNode(touchPoint);
+            isIntercept_ = event.sourceType != SourceType::MOUSE && CheckTouchInHostNode(localPoint);
         }
         CHECK_NULL_VOID(!isIntercept_);
         if (event.type == TouchType::UP) {
@@ -126,6 +126,11 @@ public:
     {
         downPointInfo_.Reset();
         isIntercept_ = false;
+    }
+
+    virtual void OnHandleLevelModeChanged(HandleLevelMode mode) {}
+    virtual bool CheckSwitchToMode(HandleLevelMode mode) {
+        return true;
     }
 
 private:

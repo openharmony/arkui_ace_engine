@@ -641,7 +641,7 @@ void JSCanvasRenderer::JsPutImageData(const JSCallbackInfo& info)
     for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
         for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
             uint32_t idx = 4 * (j + imgWidth * i);
-            if (bufferLength > idx + 3) {
+            if (bufferLength > static_cast<int32_t>(idx + 3)) {
                 imageData.data.emplace_back(
                     Color::FromARGB(buffer[idx + 3], buffer[idx], buffer[idx + 1], buffer[idx + 2]));
             }

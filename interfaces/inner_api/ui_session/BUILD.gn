@@ -41,6 +41,7 @@ ohos_shared_library("ui_session") {
     "$ace_root/adapter/ohos/entrance/ui_session/ui_content_stub_impl.cpp",
     "$ace_root/adapter/ohos/entrance/ui_session/ui_report_proxy.cpp",
     "$ace_root/adapter/ohos/entrance/ui_session/ui_report_stub.cpp",
+    "$ace_root/adapter/ohos/entrance/ui_session/ui_session_json_util.cpp",
     "$ace_root/adapter/ohos/entrance/ui_session/ui_session_manager.cpp",
   ]
 
@@ -50,6 +51,7 @@ ohos_shared_library("ui_session") {
 
   external_deps = [
     "ability_base:want",
+    "cJSON:cjson",
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",

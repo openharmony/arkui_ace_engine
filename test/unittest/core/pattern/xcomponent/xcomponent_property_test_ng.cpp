@@ -106,9 +106,9 @@ void XComponentPropertyTestNg::TearDownTestSuite()
 
 RefPtr<FrameNode> XComponentPropertyTestNg::CreateXComponentNode(TestProperty& testProperty)
 {
-    auto xcId = testProperty.xcId.value();
+    auto xcId = testProperty.xcId;
     auto xcType = testProperty.xcType.value();
-    auto libraryName = testProperty.libraryName.value();
+    auto libraryName = testProperty.libraryName;
     auto xcomponentController = std::make_shared<XComponentControllerNG>();
     XComponentModelNG().Create(xcId, xcType, libraryName, xcomponentController);
 

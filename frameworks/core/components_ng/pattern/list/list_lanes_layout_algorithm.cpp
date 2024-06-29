@@ -647,7 +647,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrap
         float mainLen = 0.0f;
         bool isGroup = false;
         int32_t cnt = 0;
-        for (int32_t i = 0; i < lanes_ && currIndex >= 0; i++) {
+        for (int32_t i = 0; i < lanes_ && currIndex - i >= 0; i++) {
             auto idx = currIndex - i;
             wrapper = layoutWrapper->GetChildByIndex(idx, true);
             if (!wrapper) {

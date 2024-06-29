@@ -217,11 +217,13 @@ RefPtr<FrameNode> SheetView::CreateScrollNode()
     pattern->SetEdgeEffect(EdgeEffect::SPRING, false);
     pattern->SetScrollToSafeAreaHelper(false);
     props->UpdateAlignment(Alignment::TOP_CENTER);
-    NestedScrollOptions nestedOpt = {
-        .forward = NestedScrollMode::PARENT_FIRST,
-        .backward = NestedScrollMode::SELF_FIRST,
-    };
-    pattern->SetNestedScroll(nestedOpt);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        NestedScrollOptions nestedOpt = {
+            .forward = NestedScrollMode::PARENT_FIRST,
+            .backward = NestedScrollMode::SELF_FIRST,
+        };
+        pattern->SetNestedScroll(nestedOpt);
+    }
     scroll->MarkModifyDone();
     return scroll;
 }

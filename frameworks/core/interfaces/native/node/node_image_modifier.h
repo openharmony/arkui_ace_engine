@@ -24,5 +24,10 @@ void SetImageOnComplete(ArkUINodeHandle node, void* extraParam);
 void SetImageOnError(ArkUINodeHandle node, void* extraParam);
 void SetImageOnSvgPlayFinish(ArkUINodeHandle node, void* extraParam);
 void SetImageOnDownloadProgress(ArkUINodeHandle node, void* extraParam);
+
+void ResetImageOnComplete(ArkUINodeHandle node);
+void ResetImageOnError(ArkUINodeHandle node);
+void ResetImageOnSvgPlayFinish(ArkUINodeHandle node);
+void ResetImageOnDownloadProgress(ArkUINodeHandle node);
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif

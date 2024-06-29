@@ -852,9 +852,22 @@ void FfiOHOSAceFrameworkViewAbstractSetSharedTransition(char* shareId, CJSharedT
     ViewAbstractModel::GetInstance()->SetSharedTransition(std::string(shareId), sharedOption);
 }
 
-void FfiOHOSAceFrameworkViewAbstractSetGeometryTransition(char* id, bool followWithoutTransition)
+void FfiOHOSAceFrameworkViewAbstractSetGeometryTransition(char* id, CJGeometryTransitionOptions option)
 {
-    ViewAbstractModel::GetInstance()->SetGeometryTransition(std::string(id), followWithoutTransition);
+    bool followWithoutTransition = option.follow;
+    bool doRegisterSharedTransition = true;
+    switch (option.hierarchyStrategy) {
+        case 0:
+            doRegisterSharedTransition = false;
+            break;
+        case 1:
+            doRegisterSharedTransition = true;
+            break;
+        default:
+            break;
+    }
+    ViewAbstractModel::GetInstance()->SetGeometryTransition(
+        std::string(id), followWithoutTransition, doRegisterSharedTransition);
 }
 
 void FfiOHOSAceFrameworkViewAbstractSetBlur(double value)

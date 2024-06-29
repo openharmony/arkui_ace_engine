@@ -572,11 +572,11 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleSelectFontStyleWrapper101, Test
 }
 
 /**
- * @tc.name: GetSelectedMaxWidth001
- * @tc.desc: test GetSelectedMaxWidth
+ * @tc.name: HandleTripleClickEvent
+ * @tc.desc: test HandleTripleClickEvent001
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, GetSelectedMaxWidth001, TestSize.Level1)
+HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTripleClickEvent001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. declare and init variables and call function.
@@ -584,72 +584,22 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetSelectedMaxWidth001, TestSize.Leve
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    /**
-     * @tc.steps: step2. change parameters and call function.
-     */
-    auto overlayMod = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
-    EXPECT_NE(overlayMod, nullptr);
-    std::vector<RectF> selectedRects1 { { 1.0, 0.0, 3.0, 4.0 }, { 5.0, 0.0, 7.0, 8.0 }, { -9.0, -10.0, 11.0, 12.0 } };
-    overlayMod->selectedRects_.swap(selectedRects1);
-    auto ret = richEditorPattern->GetSelectedMaxWidth();
-    EXPECT_NE(ret, 0.0f);
-    /**
-     * @tc.steps: step3. change parameters and call function.
-     */
-    overlayMod = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
-    EXPECT_NE(overlayMod, nullptr);
-    std::vector<RectF> selectedRects2 { { 1.0, 0.0, 3.0, 4.0 }, { 5.0, 0.0, 7.0, 8.0 }, { -9.0, -10.0, 11.0, 12.0 },
-        { 13.0, 0.0, 15.0, 16.0 } };
-    overlayMod->selectedRects_.swap(selectedRects2);
-    ret = richEditorPattern->GetSelectedMaxWidth();
-    EXPECT_NE(ret, 0.0f);
-}
-
-/**
- * @tc.name: TestRichEditorHandleTripleClickEvent001
- * @tc.desc: test HandleTripleClickEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, TestRichEditorHandleTripleClickEvent001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
-    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    TestParagraphRect paragraphRect = { .start = 0, .end = 2, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 2,
+        .indexOffsetMap = { { 0, Offset(0, 0) }, { 6, Offset(50, 0) } },
+        .testParagraphRects = { paragraphRect } };
     AddParagraph(paragraphItem);
-    TestParagraphRect paragraphRect1 = { .start = 0, .end = 6, .rects = { { -300.0, -300.0, 100.0, 100.0 } } };
-    TestParagraphItem paragraphItem1 = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect1 } };
-    AddParagraph(paragraphItem1);
-
     GestureEvent info;
-    richEditorPattern->HandleTripleClickEvent(info);
-    EXPECT_NE(richEditorPattern->GetFocusHub(), nullptr);
-    EXPECT_EQ(richEditorPattern->GetFocusHub()->IsFocusable(), true);
-    /**
-     * @tc.steps: step2. change parameters and call function.
-     */
-    richEditorPattern->textSelector_.baseOffset = -1;
-    richEditorPattern->textSelector_.destinationOffset = -2;
-    richEditorPattern->caretTwinkling_ = false;
-    richEditorPattern->HandleTripleClickEvent(info);
-    EXPECT_NE(richEditorPattern->GetFocusHub(), nullptr);
-    EXPECT_EQ(richEditorPattern->GetFocusHub()->IsFocusable(), true);
-    /**
-     * @tc.steps: step2. change parameters and call function.
-     */
-    richEditorPattern->textSelector_.baseOffset = 1;
-    richEditorPattern->textSelector_.destinationOffset = 2;
-    info.sourceTool_ = SourceTool::FINGER;
-    richEditorPattern->HandleTripleClickEvent(info);
-    EXPECT_NE(richEditorPattern->GetFocusHub(), nullptr);
-    EXPECT_EQ(richEditorPattern->GetFocusHub()->IsFocusable(), true);
+    int32_t start = 0;
+    int32_t end = 0;
+    for (auto item : paragraphItem.indexOffsetMap) {
+        info.localLocation_ = item.second;
+        richEditorPattern->HandleTripleClickEvent(info);
+        start = std::min(richEditorPattern->GetTextContentLength(), paragraphItem.start);
+        end = std::min(richEditorPattern->GetTextContentLength(), paragraphItem.start);
+        EXPECT_TRUE(start == richEditorPattern->textSelector_.baseOffset);
+        EXPECT_TRUE(end == richEditorPattern->textSelector_.destinationOffset);
+    }
 }
 
 /**

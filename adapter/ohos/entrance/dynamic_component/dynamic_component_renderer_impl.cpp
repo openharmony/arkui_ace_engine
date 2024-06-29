@@ -67,18 +67,17 @@ void ApplyAccessibilityElementInfoOffset(std::list<Accessibility::AccessibilityE
 }
 
 DynamicComponentRendererImpl::DynamicComponentRendererImpl(
-    const RefPtr<FrameNode>& host, const std::string& hapPath,
-    const std::string& abcPath, const std::string& entryPoint, void* runtime)
-    : hapPath_(hapPath), abcPath_(abcPath), entryPoint_(entryPoint)
+    const RefPtr<FrameNode>& host, void* runtime, const IsolatedInfo& isolatedInfo)
+    : isolatedInfo_(isolatedInfo)
 {
     host_ = WeakPtr(host);
     runtime_ = reinterpret_cast<NativeEngine*>(runtime);
 }
 
-RefPtr<DynamicComponentRenderer> DynamicComponentRenderer::Create(const RefPtr<FrameNode>& host,
-    const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint, void* runtime)
+RefPtr<DynamicComponentRenderer> DynamicComponentRenderer::Create(
+    const RefPtr<FrameNode>& host, void* runtime, const IsolatedInfo& isolatedInfo)
 {
-    return AceType::MakeRefPtr<DynamicComponentRendererImpl>(host, hapPath, abcPath, entryPoint, runtime);
+    return AceType::MakeRefPtr<DynamicComponentRendererImpl>(host, runtime, isolatedInfo);
 }
 
 void DynamicComponentRendererImpl::SetAdaptiveSize(bool adaptiveWidth, bool adaptiveHeight)
@@ -118,7 +117,8 @@ void DynamicComponentRendererImpl::InitUiContent()
     CHECK_NULL_VOID(uiContent_);
     rendererDumpInfo_.createUiContenTime = GetCurrentTimestamp();
 
-    uiContent_->InitializeDynamic(hapPath_, abcPath_, entryPoint_);
+    uiContent_->InitializeDynamic(
+        isolatedInfo_.reourcePath, isolatedInfo_.abcPath, isolatedInfo_.entryPoint, isolatedInfo_.registerComponents);
     ContainerScope scope(uiContent_->GetInstanceId());
     RegisterErrorEventHandler();
     RegisterSizeChangedCallback();

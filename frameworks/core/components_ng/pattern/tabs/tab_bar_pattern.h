@@ -412,6 +412,16 @@ public:
         return animationDuration_;
     }
 
+    bool GetTabContentWillChangeFlag()
+    {
+        return tabContentWillChangeFlag_;
+    }
+
+    void ResetTabContentWillChangeFlag()
+    {
+        tabContentWillChangeFlag_ = false;
+    }
+
     void UpdateAnimationDuration();
 
     bool HasSurfaceChangedCallback()
@@ -536,6 +546,10 @@ private:
     AnimationStartEventPtr animationStartEvent_;
     AnimationEndEventPtr animationEndEvent_;
 
+
+    float bigScale_ = 0.0f;
+    float largeScale_ = 0.0f;
+    float maxScale_ = 0.0f;
     int32_t indicator_ = 0;
     int32_t focusIndicator_ = 0;
     Axis axis_ = Axis::HORIZONTAL;
@@ -554,6 +568,7 @@ private:
     bool isHover_ = false;
     bool isMaskAnimationByCreate_ = false;
     bool isMaskAnimationExecuted_ = false;
+    bool tabContentWillChangeFlag_ = false;
     std::optional<int32_t> imageColorOnIndex_;
     std::optional<int32_t> touchingIndex_;
     std::optional<int32_t> hoverIndex_;

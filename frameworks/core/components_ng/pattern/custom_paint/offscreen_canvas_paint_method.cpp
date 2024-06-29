@@ -32,47 +32,9 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/paint_state.h"
+#include "core/components_ng/pattern/custom_paint/custom_paint_util.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-#ifndef ACE_UNITTEST
-constexpr double DEFAULT_QUALITY = 0.92;
-constexpr int32_t MAX_LENGTH = 2048 * 2048;
-constexpr double HANGING_PERCENT = 0.8;
-#endif
-const std::string UNSUPPORTED = "data:image/png";
-const std::string URL_PREFIX = "data:";
-const std::string URL_SYMBOL = ";base64,";
-const std::string IMAGE_PNG = "image/png";
-const std::string IMAGE_JPEG = "image/jpeg";
-const std::string IMAGE_WEBP = "image/webp";
-
-#ifndef ACE_UNITTEST
-// If args is empty or invalid format, use default: image/png
-std::string GetMimeType(const std::string& args)
-{
-    std::string type = args;
-    for (size_t i = 0; i < type.size(); ++i) {
-        type[i] = static_cast<uint8_t>(tolower(type[i]));
-    }
-    return type;
-}
-
-// Quality need between 0.0 and 1.0 for MimeType jpeg and webp
-double GetQuality(const std::string& args, const double quality)
-{
-    std::string type = args;
-    auto mimeType = GetMimeType(type);
-    if (mimeType != IMAGE_JPEG && mimeType != IMAGE_WEBP) {
-        return DEFAULT_QUALITY;
-    }
-    if (quality < 0.0 || quality > 1.0) {
-        return DEFAULT_QUALITY;
-    }
-    return quality;
-}
-#endif
-} // namespace
 
 OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(int32_t width, int32_t height)
 {
@@ -421,7 +383,13 @@ std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const
 {
 #ifndef ACE_UNITTEST
     std::string mimeType = GetMimeType(type);
-    double qua = GetQuality(type, quality);
+    double qua = quality;
+    if (mimeType != IMAGE_JPEG && mimeType != IMAGE_WEBP) {
+        qua = DEFAULT_QUALITY;
+    }
+    if (quality < 0.0 || quality > 1.0) {
+        qua = DEFAULT_QUALITY;
+    }
     auto imageInfo = SkImageInfo::Make(width_, height_, SkColorType::kBGRA_8888_SkColorType,
         (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType);
     RSBitmap tempCache;

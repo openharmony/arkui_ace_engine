@@ -27,6 +27,7 @@
 #include "native_type.h"
 #include "node_extened.h"
 #include "node_model.h"
+#include "node_transition.h"
 #include "styled_string.h"
 #include "waterflow_section_option.h"
 #include "list_option.h"
@@ -3292,12 +3293,17 @@ int32_t SetGeometryTransition(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
     if (item->string == nullptr) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    ArkUI_Bool options = false;
+    ArkUIGeometryTransitionOptions options;
+    ArkUI_Bool follow = false;
     if (item->size == 1) {
-        options = item->value[0].i32;
+        follow = item->value[0].i32;
     }
+    options.follow = follow;
+    options.hierarchyStrategy = static_cast<int32_t>(TransitionHierarchyStrategy::ADAPTIVE);
+
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getCommonModifier()->setGeometryTransition(node->uiNodeHandle, item->string, options);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setGeometryTransition(node->uiNodeHandle, item->string,
+        &options);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -3313,9 +3319,10 @@ const ArkUI_AttributeItem* GetGeometryTransition(ArkUI_NodeHandle node)
     if (!modifier) {
         return nullptr;
     }
-    ArkUI_Bool options = false;
+    ArkUIGeometryTransitionOptions options;
     g_attributeItem.string = modifier->getGeometryTransition(node->uiNodeHandle, &options);
-    g_numberValues[0].i32 = options;
+    g_numberValues[NUM_0].i32 = options.follow;
+    g_numberValues[NUM_1].i32 = options.hierarchyStrategy;
     return &g_attributeItem;
 }
 
@@ -3683,6 +3690,23 @@ const ArkUI_AttributeItem* GetExpandSafeArea(ArkUI_NodeHandle node)
     GetFullImpl()->getNodeModifiers()->getCommonModifier()->getExpandSafeArea(node->uiNodeHandle, &values);
     g_numberValues[NUM_0].u32 = values[NUM_0];
     g_numberValues[NUM_1].u32 = values[NUM_1];
+    return &g_attributeItem;
+}
+
+int32_t SetTransition(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
+    auto fullImpl = GetFullImpl();
+    node->transitionOption = item->object;
+    auto effectOption = reinterpret_cast<ArkUI_TransitionEffect*>(item->object);
+    auto toEffectOption = OHOS::Ace::TransitionModel::ConvertToEffectOption(effectOption);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setTransition(node->uiNodeHandle, toEffectOption);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetTransition(ArkUI_NodeHandle node)
+{
+    g_attributeItem.object = node->transitionOption;
     return &g_attributeItem;
 }
 // Text
@@ -4961,7 +4985,7 @@ int32_t SetScrollScrollSnap(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
     paginationParams[item->size - NUM_3 + NUM_0] = snapAlign;
     paginationParams[item->size - NUM_3 + NUM_1] = enableSnapToStart;
     paginationParams[item->size - NUM_3 + NUM_2] = enableSnapToEnd;
-    paginationParams[item->size] = (item->size - NUM_3 >= 1) ? true : false;
+    paginationParams[item->size] = (item->size - NUM_3 > 1) ? true : false;
 
     fullImpl->getNodeModifiers()->getScrollModifier()->setScrollScrollSnap(
         node->uiNodeHandle, paginations, item->size - NUM_3, paginationParams, item->size + NUM_1);
@@ -8049,7 +8073,7 @@ int32_t SetTextPickerRange(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
     if (actualSize < 0 || !InRegion(static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_SINGLE),
-        static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_CASCADE_RANGE_CONTENT), item->value[NUM_0].i32)) {
+        static_cast<int32_t>(ARKUI_TEXTPICKER_RANGETYPE_MULTI), item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     bool isSingleRange = false;
@@ -8708,6 +8732,42 @@ void ResetAccessibilityValue(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->resetAccessibilityValue(node->uiNodeHandle);
+}
+
+void ResetAreaChangeRatio(ArkUI_NodeHandle node)
+{
+    if (node->areaChangeRadio) {
+        delete[] node->areaChangeRadio->value;
+        delete node->areaChangeRadio;
+    }
+    node->areaChangeRadio = nullptr;
+}
+
+int32_t SetAreaChangeRatio(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_Int32 radioLength = item->size;
+    ArkUI_NumberValue* radioList = new ArkUI_NumberValue[radioLength];
+    for (int i = 0; i < radioLength; ++i) {
+        if (LessNotEqual(item->value[i].f32, 0.0f) || GreatNotEqual(item->value[i].f32, 1.0f)) {
+            delete[] radioList;
+            return ERROR_CODE_PARAM_INVALID;
+        }
+        radioList[i].f32 = item->value[i].f32;
+    }
+    if (node->areaChangeRadio) {
+        ResetAreaChangeRatio(node);
+    }
+    node->areaChangeRadio = new ArkUI_AttributeItem { .value = radioList, .size = radioLength};
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetAreaChangeRatio(ArkUI_NodeHandle node)
+{
+    return node->areaChangeRadio;
 }
 
 bool CheckTransformCenter(const ArkUI_AttributeItem* item, int32_t size)
@@ -12476,6 +12536,8 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetAccessibilityState,
         SetAccessibilityValue,
         SetExpandSafeArea,
+        SetAreaChangeRatio,
+        SetTransition,
     };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -12580,6 +12642,8 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetAccessibilityState,
         GetAccessibilityValue,
         GetExpandSafeArea,
+        GetAreaChangeRatio,
+        GetTransition,
     };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -12688,6 +12752,8 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetAccessibilityState,
         ResetAccessibilityValue,
         ResetExpandSafeArea,
+        ResetAreaChangeRatio,
+        nullptr,
     };
     if (subTypeId >= sizeof(resetters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);

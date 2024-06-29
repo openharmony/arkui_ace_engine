@@ -20,10 +20,15 @@
 #include "base/geometry/dimension.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
+#include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
+#include "bridge/declarative_frontend/engine/functions/js_swiper_function.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
+#include "bridge/declarative_frontend/jsview/js_swiper.h"
 #include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_swiper.h"
+#include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -937,6 +942,102 @@ ArkUINativeModuleValue SwiperBridge::ResetSwiperOnGestureSwipe(ArkUIRuntimeCallI
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperOnGestureSwipe(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SwiperBridge::SetSwiperCustomContentTransition(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    using namespace OHOS::Ace::Framework;
+    JsiCallbackInfo info = JsiCallbackInfo(runtimeCallInfo);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    if (info.Length() < 2 || !info[1]->IsObject()) { // 2: Array length
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    SwiperContentAnimatedTransition transitionInfo;
+    auto transitionObj = JSRef<JSObject>::Cast(info[1]);
+    JSRef<JSVal> timeoutProperty = transitionObj->GetProperty("timeout");
+    if (timeoutProperty->IsNumber()) {
+        auto timeout = timeoutProperty->ToNumber<int32_t>();
+        transitionInfo.timeout = timeout < 0 ? 0 : timeout;
+    } else {
+        transitionInfo.timeout = 0;
+    }
+
+    JSRef<JSVal> transition = transitionObj->GetProperty("transition");
+    if (transition->IsFunction()) {
+        auto jsOnTransition =
+            AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(transition));
+        auto onTransition = [execCtx = info.GetExecutionContext(), func = std::move(jsOnTransition)](
+                                const RefPtr<SwiperContentTransitionProxy>& proxy) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Swiper.customContentTransition");
+            func->Execute(proxy);
+        };
+        transitionInfo.transition = std::move(onTransition);
+    }
+    SwiperModelNG::SetCustomContentTransition(frameNode, transitionInfo);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SwiperBridge::ResetSwiperCustomContentTransition(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    SwiperContentAnimatedTransition transitionInfo;
+    SwiperModelNG::SetCustomContentTransition(frameNode, transitionInfo);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SwiperBridge::SetOnContentDidScroll(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperOnContentDidScroll(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(int32_t, int32_t, float_t, float_t)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](int32_t selectedIndex, int32_t index,
+        float position, float mainAxisLength) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        panda::Local<panda::NumberRef> selectedIndexParam = panda::NumberRef::New(vm, selectedIndex);
+        panda::Local<panda::NumberRef> indexParam = panda::NumberRef::New(vm, index);
+        panda::Local<panda::NumberRef> positionParam = panda::NumberRef::New(vm, position);
+        panda::Local<panda::NumberRef> mainAxisLengthParam = panda::NumberRef::New(vm, mainAxisLength);
+        panda::Local<panda::JSValueRef> params[4] = { selectedIndexParam, indexParam, // 4: Array length
+            positionParam, mainAxisLengthParam };
+        func->Call(vm, func.ToLocal(), params, 4); // 4: Array length
+    };
+    GetArkUINodeModifiers()->getSwiperModifier()->setSwiperOnContentDidScroll(nativeNode,
+        reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SwiperBridge::ResetOnContentDidScroll(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperOnContentDidScroll(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

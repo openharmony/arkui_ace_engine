@@ -105,7 +105,7 @@ public:
     }
 
     RefPtr<NG::GeometryTransition> GetOrCreateGeometryTransition(
-        const std::string& id, bool followWithoutTransition = false);
+        const std::string& id, bool followWithoutTransition = false, bool doRegisterSharedTransition = true);
     void DumpGeometryTransition();
 
     void ReSyncGeometryTransition(const WeakPtr<NG::FrameNode>& trigger = nullptr,

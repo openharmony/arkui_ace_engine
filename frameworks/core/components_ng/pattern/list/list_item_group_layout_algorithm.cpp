@@ -322,9 +322,22 @@ void ListItemGroupLayoutAlgorithm::LayoutListItemAll(LayoutWrapper* layoutWrappe
     }
 }
 
-void ListItemGroupLayoutAlgorithm::ClearItemPosition(LayoutWrapper* layoutWrapper)
+void ListItemGroupLayoutAlgorithm::ClearItemPosition()
 {
     itemPosition_.clear();
+}
+
+void ListItemGroupLayoutAlgorithm::CheckNeedAllLayout(const RefPtr<LayoutWrapper>& layoutWrapper, bool forwardLayout)
+{
+    if (itemPosition_.empty()) {
+        needAllLayout_ = true;
+        return;
+    }
+    int32_t totalItemCount = layoutWrapper->GetTotalChildCount() - itemStartIndex_;
+    if (!(forwardLayout && itemPosition_.rbegin()->first == totalItemCount - 1) &&
+        !(!forwardLayout && itemPosition_.begin()->first == 0)) {
+        needAllLayout_ = true;
+    }
 }
 
 void ListItemGroupLayoutAlgorithm::MeasureListItem(

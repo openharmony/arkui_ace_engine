@@ -2333,16 +2333,17 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
     if (windowId == 0) {
         return;
     }
-
+    RefPtr<NG::PipelineContext> ngPipeline;
     AccessibilityEventInfo eventInfo;
     if (AceType::InstanceOf<NG::PipelineContext>(context)) {
         RefPtr<NG::FrameNode> node;
-        auto ngPipeline = FindPipelineByElementId(accessibilityEvent.nodeId, node);
+        ngPipeline = FindPipelineByElementId(accessibilityEvent.nodeId, node);
         CHECK_NULL_VOID(ngPipeline);
         CHECK_NULL_VOID(node);
         FillEventInfo(node, eventInfo, ngPipeline, accessibilityEvent.nodeId, Claim(this));
         eventInfo.SetWindowId(ngPipeline->GetFocusWindowId());
     } else {
+        ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
         auto node = GetAccessibilityNodeFromPage(accessibilityEvent.nodeId);
         CHECK_NULL_VOID(node);
         FillEventInfo(node, eventInfo);
@@ -2354,7 +2355,6 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
 
     GenerateAccessibilityEventInfo(accessibilityEvent, eventInfo);
 
-    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
     auto container = Container::GetContainer(context->GetInstanceId());
     if (IsExtensionSendAccessibilitySyncEvent(ngPipeline)) {
         SendExtensionAccessibilitySyncEvent(accessibilityEvent, eventInfo);

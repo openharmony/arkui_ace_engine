@@ -1142,6 +1142,23 @@ int32_t OH_ArkUI_PointerEvent_SetInterceptHitTestMode(const ArkUI_UIInputEvent* 
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 
+int32_t OH_ArkUI_PointerEvent_SetStopPropagation(const ArkUI_UIInputEvent* event, bool stopPropagation)
+{
+    if (!event) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    switch (event->eventTypeId) {
+        case C_TOUCH_EVENT_ID: {
+            auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+            touchEvent->stopPropagation = stopPropagation;
+            break;
+        }
+        default:
+            return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
 int32_t OH_ArkUI_MouseEvent_GetMouseButton(const ArkUI_UIInputEvent* event)
 {
     if (!event) {

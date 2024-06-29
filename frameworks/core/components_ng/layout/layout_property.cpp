@@ -776,14 +776,16 @@ void LayoutProperty::ResetAspectRatio()
     }
 }
 
-void LayoutProperty::UpdateGeometryTransition(const std::string& id, bool followWithoutTransition)
+void LayoutProperty::UpdateGeometryTransition(const std::string& id,
+    bool followWithoutTransition, bool doRegisterSharedTransition)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
     auto geometryTransitionOld = GetGeometryTransition();
     auto geometryTransitionNew =
-        ElementRegister::GetInstance()->GetOrCreateGeometryTransition(id, followWithoutTransition);
+        ElementRegister::GetInstance()->GetOrCreateGeometryTransition(id,
+            followWithoutTransition, doRegisterSharedTransition);
     CHECK_NULL_VOID(geometryTransitionOld != geometryTransitionNew);
     if (geometryTransitionOld) {
         if (geometryTransitionOld->Update(host_, host_)) {
@@ -1271,5 +1273,73 @@ bool LayoutProperty::ConstraintEqual(const std::optional<LayoutConstraintF>& pre
                 content.EqualWithoutPercentHeight(preContentConstraint.value()));
     }
     return (preLayoutConstraint == layoutConstraint_ && preContentConstraint == contentConstraint_);
+}
+
+void LayoutProperty::CheckPositionLocalizedEdges(TextDirection layoutDirection)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& target = host->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    EdgesParam edges;
+    auto positionEdges = target->GetPositionEdgesValue(EdgesParam {});
+    edges.SetTop(positionEdges.top.value_or(Dimension(0.0)));
+    edges.SetBottom(positionEdges.bottom.value_or(Dimension(0.0)));
+    if (positionEdges.left.has_value()) {
+        if (layoutDirection == TextDirection::RTL) {
+            edges.SetRight(positionEdges.left.value_or(Dimension(0.0)));
+        } else {
+            edges.SetLeft(positionEdges.left.value_or(Dimension(0.0)));
+        }
+    }
+    if (positionEdges.right.has_value()) {
+        if (layoutDirection == TextDirection::RTL) {
+            edges.SetLeft(positionEdges.right.value_or(Dimension(0.0)));
+        } else {
+            edges.SetRight(positionEdges.right.value_or(Dimension(0.0)));
+        }
+    }
+    target->UpdatePositionEdges(edges);
+}
+
+void LayoutProperty::CheckMarkAnchorPosition(TextDirection layoutDirection)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& target = host->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    CalcDimension x;
+    CalcDimension y;
+    auto anchor = target->GetAnchorValue({});
+    x = layoutDirection == TextDirection::RTL ? -anchor.GetX() : anchor.GetX();
+    y = anchor.GetY();
+    target->UpdateAnchor({ x, y });
+}
+
+void LayoutProperty::CheckOffsetLocalizedEdges(TextDirection layoutDirection)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& target = host->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    EdgesParam edges;
+    auto offsetEdges = target->GetOffsetEdgesValue(EdgesParam {});
+    edges.SetTop(offsetEdges.top.value_or(Dimension(0.0)));
+    edges.SetBottom(offsetEdges.bottom.value_or(Dimension(0.0)));
+    if (offsetEdges.left.has_value()) {
+        if (layoutDirection == TextDirection::RTL) {
+            edges.SetRight(offsetEdges.left.value_or(Dimension(0.0)));
+        } else {
+            edges.SetLeft(offsetEdges.left.value_or(Dimension(0.0)));
+        }
+    }
+    if (offsetEdges.right.has_value()) {
+        if (layoutDirection == TextDirection::RTL) {
+            edges.SetLeft(offsetEdges.right.value_or(Dimension(0.0)));
+        } else {
+            edges.SetRight(offsetEdges.right.value_or(Dimension(0.0)));
+        }
+    }
+    target->UpdateOffsetEdges(edges);
 }
 } // namespace OHOS::Ace::NG

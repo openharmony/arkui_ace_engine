@@ -34,7 +34,6 @@ class CustomThemeImpl implements CustomTheme {
 const TITLE_MAX_LINES: number = 2;
 const HORIZON_BUTTON_MAX_COUNT: number = 2;
 const VERTICAL_BUTTON_MAX_COUNT: number = 4;
-const BUTTON_DEFAULT_HEIGHT: number = 40;
 const BUTTON_LAYOUT_WEIGHT: number = 1;
 const CHECKBOX_CONTAINER_HEIGHT: number = 48;
 const CONTENT_MAX_LINES: number = 2;
@@ -97,22 +96,23 @@ export struct TipsDialog {
   primaryButton?: ButtonOptions | null = null;
   secondaryButton?: ButtonOptions | null = null;
   buttons?: ButtonOptions[] | undefined = undefined;
-  @State imageSizeHeight: number = 0;
   @State textAlignment: TextAlign = TextAlign.Start;
   marginOffset: number = 0;
-  @State checkBoxHeight: number = 0;
-  @State buttonHeight: number = 0;
   // the controller of content area scroll
   contentScroller: Scroller = new Scroller();
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
   themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
   @State fontSizeScale: number = 1;
-  @State windowSize: Size = { width: 0, height: 0 };
   @State minContentHeight: number = 160;
-  updateButtonHeight: (height: number) => void = (height: number) => {
-    this.buttonHeight = height;
+  updateTextAlign: (maxWidth: number) => void = (maxWidth: number) => {
+    if (this.content) {
+      this.textAlignment = getTextAlign(maxWidth, this.content, `${BODY_L}fp`);
+    }
   }
+  imageIndex: number = 0;
+  textIndex: number = 1;
+  checkBoxIndex: number = 2;
 
   build() {
     CustomDialogContentComponent({
@@ -124,91 +124,82 @@ export struct TipsDialog {
       theme: this.theme,
       themeColorMode: this.themeColorMode,
       fontSizeScale: this.fontSizeScale,
-      windowSize: this.windowSize,
-      updateButtonHeight: this.updateButtonHeight,
-      minContentHeight: this.minContentHeight
+      minContentHeight: this.minContentHeight,
     }).constraintSize({ maxHeight: '100%' });
   }
 
   @Builder
   contentBuilder(): void {
-    Column() {
-      this.imagePart();
-
-      if (this.title != null || this.content != null) {
-        Column() {
-          this.textPart();
+    TipsDialogContentLayout({
+      title: this.title,
+      content: this.content,
+      checkTips: this.checkTips,
+      minContentHeight: this.minContentHeight,
+      updateTextAlign: this.updateTextAlign
+    }) {
+      ForEach([this.imageIndex, this.textIndex, this.checkBoxIndex], (index: number) => {
+        if (index === this.imageIndex) {
+          this.imagePart();
+        } else if (index === this.textIndex) {
+          Column() {
+            this.textPart();
+          }
+          .padding({ top: $r('sys.float.padding_level8') })
+        } else {
+          this.checkBoxPart();
         }
-        .padding({ top: $r('sys.float.padding_level8') })
-        .constraintSize({
-          maxHeight: `calc(100% - ${this.checkBoxHeight}vp - ${this.imageSizeHeight}vp - ${this.buttonHeight}vp)`
-        })
-      }
-
-      if (this.checkTips != null) {
-        this.checkBoxPart(this.checkTips);
-      }
+      });
     }
   }
 
   @Builder
-  checkBoxPart(content: ResourceStr): void {
+  checkBoxPart(): void {
     Row() {
-      Checkbox({ name: 'checkbox', group: 'checkboxGroup' }).select(this.isChecked)
-        .onChange((checked: boolean) => {
-          this.isChecked = checked;
-          if (this.checkAction) {
-            this.checkAction(checked);
-          }
-          if (this.onCheckedChange) {
-            this.onCheckedChange(checked);
-          }
-        })
-        .margin({ right: $r('sys.float.padding_level4') })
-      Text(content)
-        .fontSize($r('sys.float.Body_L'))
-        .fontWeight(FontWeight.Regular)
-        .fontColor(this.fontColorWithTheme)
-        .maxLines(CONTENT_MAX_LINES)
-        .layoutWeight(1)
-        .focusable(false)
-        .textOverflow({ overflow: TextOverflow.Ellipsis })
-        .onClick(() => {
-          this.isChecked = !this.isChecked;
-          if (this.checkAction) {
-            this.checkAction(this.isChecked);
-          }
-        })
+      if (this.checkTips !== null) {
+        Checkbox({ name: 'checkbox', group: 'checkboxGroup' }).select(this.isChecked)
+          .onChange((checked: boolean) => {
+            this.isChecked = checked;
+            if (this.checkAction) {
+              this.checkAction(checked);
+            }
+            if (this.onCheckedChange) {
+              this.onCheckedChange(checked);
+            }
+          })
+          .margin({ right: $r('sys.float.padding_level4') })
+        Text(this.checkTips)
+          .fontSize($r('sys.float.Body_L'))
+          .fontWeight(FontWeight.Regular)
+          .fontColor(this.fontColorWithTheme)
+          .maxLines(CONTENT_MAX_LINES)
+          .layoutWeight(1)
+          .focusable(false)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .onClick(() => {
+            this.isChecked = !this.isChecked;
+            if (this.checkAction) {
+              this.checkAction(this.isChecked);
+            }
+          })
+      }
     }
-    .padding({ top: $r('sys.float.padding_level8') })
+    .padding({ top: 8, bottom: 8 })
     .constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT })
     .width('100%')
-    .onAreaChange((oldValue: Area, newValue: Area) => {
-      this.checkBoxHeight = Number(newValue.height);
-    })
   }
 
   @Builder
   imagePart(): void {
     Column() {
       Image(this.imageRes)
-        .size(this.imageSize)
         .objectFit(ImageFit.Contain)
         .borderRadius($r('sys.float.corner_radius_level6'))
         .constraintSize({
-          maxWidth: '100%',
-          maxHeight:
-          `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
+          maxWidth: this.imageSize?.width ?? DEFAULT_IMAGE_SIZE,
+          maxHeight: this.imageSize?.height ?? DEFAULT_IMAGE_SIZE
         })
     }
     .width('100%')
-    .constraintSize({
-      maxHeight:
-      `calc(100% - ${this.checkBoxHeight}vp - ${this.buttonHeight}vp - ${TEXT_MIN_HEIGHT}vp + ${this.marginOffset}vp)`
-    })
-    .onAreaChange((oldValue: Area, newValue: Area) => {
-      this.imageSizeHeight = Number(newValue.height);
-    })
   }
 
   @Builder
@@ -243,9 +234,6 @@ export struct TipsDialog {
                   resolveKeyEvent(event, this.contentScroller);
                 }
               })
-              .onAreaChange((oldValue: Area, newValue: Area) => {
-                this.getTextAlign(Number(newValue.width));
-              })
           }
         }
       }
@@ -262,31 +250,8 @@ export struct TipsDialog {
     this.initMargin();
   }
 
-  private getTextAlign(maxWidth: number): void {
-    let contentFontSize: Length = this.getContentFontSize()
-    let contentSize: SizeOptions = measure.measureTextSize({
-      textContent: this.content,
-      fontSize: contentFontSize,
-      constraintWidth: maxWidth,
-    });
-    let oneLineSize: SizeOptions = measure.measureTextSize({
-      textContent: this.content,
-      fontSize: contentFontSize,
-    });
-    if (this.getTextHeight(contentSize) <= this.getTextHeight(oneLineSize)) {
-      this.textAlignment = TextAlign.Center;
-    }
-  }
-
   getContentFontSize(): Length {
     return BODY_L + 'fp';
-  }
-
-  private getTextHeight(textSize: SizeOptions): number {
-    if (textSize && textSize.height !== null && textSize.height !== undefined) {
-      return Number(textSize.height);
-    }
-    return 0;
   }
 
   private initButtons(): void {
@@ -304,6 +269,90 @@ export struct TipsDialog {
 
   private initMargin(): void {
     this.marginOffset = 0 - PADDING_LEVEL_8;
+  }
+}
+
+@Component
+struct TipsDialogContentLayout {
+  @Builder
+  doNothingBuilder() {
+  };
+
+  title?: ResourceStr | null = null;
+  content?: ResourceStr | null = null;
+  checkTips?: ResourceStr | null = null;
+  updateTextAlign: (maxWidth: number) => void = (maxWidth: number) => {
+  };
+  @Link minContentHeight: number;
+  @BuilderParam dialogBuilder: () => void = this.doNothingBuilder;
+  imageIndex: number = 0;
+  textIndex: number = 1;
+  checkBoxIndex: number = 2;
+  childrenSize: number = 3;
+
+  onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>,
+    constraint: ConstraintSizeOptions) {
+    let currentX: number = 0;
+    let currentY: number = 0;
+    for (let index = 0; index < children.length; index++) {
+      let child = children[index];
+      child.layout({ x: currentX, y: currentY });
+      currentY += child.measureResult.height;
+    }
+  }
+
+  onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>,
+    constraint: ConstraintSizeOptions): SizeResult {
+    let sizeResult: SizeResult = { width: Number(constraint.maxWidth), height: 0 };
+    if (children.length < this.childrenSize) {
+      return sizeResult;
+    }
+    let height: number = 0;
+    let checkBoxHeight: number = 0;
+    if (this.checkTips !== null) {
+      let checkboxChild: Measurable = children[this.checkBoxIndex];
+      let checkboxConstraint: ConstraintSizeOptions = {
+        maxWidth: constraint.maxWidth,
+        minHeight: CHECKBOX_CONTAINER_HEIGHT,
+        maxHeight: constraint.maxHeight
+      }
+      let checkBoxMeasureResult: MeasureResult = checkboxChild.measure(checkboxConstraint);
+      checkBoxHeight = checkBoxMeasureResult.height;
+      height += checkBoxHeight;
+    }
+
+    let imageChild: Measurable = children[this.imageIndex];
+    let textMinHeight: number = 0;
+    if (this.title !== null || this.content !== null) {
+      textMinHeight = TEXT_MIN_HEIGHT + PADDING_LEVEL_8;
+    }
+    let imageMaxHeight = Number(constraint.maxHeight) - checkBoxHeight - textMinHeight;
+    let imageConstraint: ConstraintSizeOptions = {
+      maxWidth: constraint.maxWidth,
+      maxHeight: imageMaxHeight
+    }
+    let imageMeasureResult: MeasureResult = imageChild.measure(imageConstraint);
+    height += imageMeasureResult.height;
+
+    if (this.title !== null || this.content !== null) {
+      let textChild: Measurable = children[this.textIndex];
+      this.updateTextAlign(sizeResult.width);
+      let contentMaxHeight: number = Number(constraint.maxHeight) - imageMeasureResult.height - checkBoxHeight;
+      let contentConstraint: ConstraintSizeOptions =
+        {
+          maxWidth: constraint.maxWidth,
+          maxHeight: Math.max(contentMaxHeight, TEXT_MIN_HEIGHT)
+        };
+      let contentMeasureResult: MeasureResult = textChild.measure(contentConstraint);
+      height += contentMeasureResult.height;
+    }
+    sizeResult.height = height;
+    this.minContentHeight = Math.max(checkBoxHeight + imageMeasureResult.height + textMinHeight, MIN_CONTENT_HEIGHT);
+    return sizeResult;
+  }
+
+  build() {
+    this.dialogBuilder();
   }
 }
 
@@ -329,7 +378,7 @@ export struct SelectDialog {
   // the controller of content list
   contentScroller: Scroller = new Scroller();
   @State fontSizeScale: number = 1;
-  @State windowSize: Size = { width: 0, height: 0 };
+  @State minContentHeight: number = MIN_CONTENT_HEIGHT;
 
   @Styles
   paddingContentStyle() {
@@ -454,7 +503,7 @@ export struct SelectDialog {
       theme: this.theme,
       themeColorMode: this.themeColorMode,
       fontSizeScale: this.fontSizeScale,
-      windowSize: this.windowSize
+      minContentHeight: this.minContentHeight,
     }).constraintSize({ maxHeight: '100%' });
   }
 
@@ -500,6 +549,66 @@ export struct SelectDialog {
   }
 }
 
+@Component
+struct ConfirmDialogContentLayout {
+  textIndex: number = 0;
+  checkboxIndex: number = 1;
+  @Link minContentHeight: number;
+  updateTextAlign: (maxWidth: number) => void = (maxWidth: number) => {
+  };
+
+  @Builder
+  doNothingBuilder() {
+  };
+
+  @BuilderParam dialogBuilder: () => void = this.doNothingBuilder;
+
+  onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>,
+    constraint: ConstraintSizeOptions) {
+    let currentX: number = 0;
+    let currentY: number = 0;
+    for (let index = 0; index < children.length; index++) {
+      let child = children[index];
+      child.layout({ x: currentX, y: currentY });
+      currentY += child.measureResult.height;
+    }
+  }
+
+  onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>,
+    constraint: ConstraintSizeOptions): SizeResult {
+    let sizeResult: SizeResult = { width: Number(constraint.maxWidth), height: 0 };
+    let childrenSize: number = 2;
+    if (children.length < childrenSize) {
+      return sizeResult;
+    }
+    this.updateTextAlign(sizeResult.width);
+    let height: number = 0;
+    let checkboxChild: Measurable = children[this.checkboxIndex];
+    let checkboxConstraint: ConstraintSizeOptions = {
+      maxWidth: constraint.maxWidth,
+      minHeight: CHECKBOX_CONTAINER_HEIGHT,
+      maxHeight: constraint.maxHeight
+    }
+    let checkBoxMeasureResult: MeasureResult = checkboxChild.measure(checkboxConstraint);
+    height += checkBoxMeasureResult.height;
+
+    let textChild: Measurable = children[this.textIndex];
+    let textConstraint: ConstraintSizeOptions = {
+      maxWidth: constraint.maxWidth,
+      maxHeight: Number(constraint.maxHeight) - height
+    }
+    let textMeasureResult: MeasureResult = textChild.measure(textConstraint);
+    height += textMeasureResult.height;
+    sizeResult.height = height;
+    this.minContentHeight = Math.max(checkBoxMeasureResult.height + TEXT_MIN_HEIGHT, MIN_CONTENT_HEIGHT);
+    return sizeResult;
+  }
+
+  build() {
+    this.dialogBuilder();
+  }
+}
+
 @CustomDialog
 export struct ConfirmDialog {
   controller: CustomDialogController
@@ -517,116 +626,82 @@ export struct ConfirmDialog {
   buttons?: ButtonOptions[] | undefined = undefined;
   @State textAlign: TextAlign = TextAlign.Start;
   marginOffset: number = 0;
-  @State titleHeight: number = 0;
-  @State buttonHeight: number = 0;
-  @State checkBoxHeight: number = CHECKBOX_CONTAINER_HEIGHT;
   @State fontSizeScale: number = 1;
-  @State windowSize: Size = { width: 0, height: 0 };
-  @State maxContentHeight: string =
-    `calc(100% - ${this.checkBoxHeight}vp - ${this.titleHeight}vp - ${this.buttonHeight}vp)`;
-  updateTitleHeight: (height: number) => void = (height: number) => {
-    this.titleHeight = height;
-    this.maxContentHeight = `calc(100% - ${this.checkBoxHeight}vp - ${this.titleHeight}vp - ${this.buttonHeight}vp)`;
+  @State minContentHeight: number = MIN_CONTENT_HEIGHT;
+  textIndex: number = 0;
+  checkboxIndex: number = 1;
+  updateTextAlign: (maxWidth: number) => void = (maxWidth: number) => {
+    if (this.content) {
+      this.textAlign = getTextAlign(maxWidth, this.content, `${BODY_L}fp`);
+    }
   }
-  updateButtonHeight: (height: number) => void = (height: number) => {
-    this.buttonHeight = height;
-    this.maxContentHeight = `calc(100% - ${this.checkBoxHeight}vp - ${this.titleHeight}vp - ${this.buttonHeight}vp)`;
+
+  @Builder
+  textBuilder(): void {
+    Column() {
+      Scroll(this.contentScroller) {
+        Column() {
+          Text(this.content)
+            .focusable(true)
+            .defaultFocus(!(this.primaryButton?.value || this.secondaryButton?.value))
+            .fontSize($r('sys.float.Body_L'))
+            .fontWeight(FontWeight.Medium)
+            .fontColor(this.fontColorWithTheme)
+            .textAlign(this.textAlign)
+            .onKeyEvent((event: KeyEvent) => {
+              if (event) {
+                resolveKeyEvent(event, this.contentScroller);
+              }
+            })
+            .width('100%')
+        }
+        .margin({ right: $r('sys.float.padding_level8') })
+      }
+      .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
+      .margin({ right: `${this.marginOffset}vp` })
+    }
+  }
+
+  @Builder
+  checkBoxBuilder(): void {
+    Row() {
+      Checkbox({ name: 'checkbox', group: 'checkboxGroup' }).select(this.isChecked)
+        .onChange((checked: boolean) => {
+          this.isChecked = checked;
+          if (this.onCheckedChange) {
+            this.onCheckedChange(this.isChecked);
+          }
+        })
+        .hitTestBehavior(HitTestMode.Block)
+        .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(8) })
+
+      Text(this.checkTips)
+        .fontSize($r('sys.float.Body_M'))
+        .fontWeight(FontWeight.Medium)
+        .fontColor(this.fontColorWithTheme)
+        .maxLines(CONTENT_MAX_LINES)
+        .focusable(false)
+        .layoutWeight(1)
+        .textOverflow({ overflow: TextOverflow.Ellipsis })
+        .onClick(() => {
+          this.isChecked = !this.isChecked;
+        })
+    }
+    .width('100%')
+    .padding({ top: 8, bottom: 8 })
   }
 
   @Builder
   buildContent(): void {
-    Column() {
-      if (this.content) {
-        Row() {
-          Scroll(this.contentScroller) {
-            Text(this.content)
-              .focusable(true)
-              .defaultFocus(!(this.primaryButton?.value || this.secondaryButton?.value))
-              .fontSize(this.getContentFontSize())
-              .fontWeight(FontWeight.Medium)
-              .fontColor(this.fontColorWithTheme)
-              .textAlign(this.textAlign)
-              .onAreaChange((oldValue: Area, newValue: Area) =>
-              this.getTextAlign(Number(newValue.width))
-              )
-              .margin({ right: $r('sys.float.padding_level8') })
-              .onKeyEvent((event: KeyEvent) => {
-                if (event) {
-                  resolveKeyEvent(event, this.contentScroller);
-                }
-              })
-              .width(`calc(100% - ${PADDING_LEVEL_8}vp)`)
-          }
-          .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
-          .width('100%')
+    ConfirmDialogContentLayout({ minContentHeight: this.minContentHeight, updateTextAlign: this.updateTextAlign }) {
+      ForEach([this.textIndex, this.checkboxIndex], (index: number) => {
+        if (index === this.textIndex) {
+          this.textBuilder();
+        } else if (index === this.checkboxIndex) {
+          this.checkBoxBuilder();
         }
-        .padding({ bottom: 8 })
-        .margin({ right: `${this.marginOffset}vp` })
-        .constraintSize({
-          minHeight: 36,
-          maxHeight: this.maxContentHeight
-        })
-      }
-
-      Row() {
-        Checkbox({ name: 'checkbox', group: 'checkboxGroup' }).select(this.isChecked)
-          .onChange((checked: boolean) => {
-            this.isChecked = checked;
-            if (this.onCheckedChange) {
-              this.onCheckedChange(this.isChecked);
-            }
-          })
-          .hitTestBehavior(HitTestMode.Block)
-          .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(8) })
-
-        Text(this.checkTips)
-          .fontSize($r('sys.float.Body_M'))
-          .fontWeight(FontWeight.Medium)
-          .fontColor(this.fontColorWithTheme)
-          .maxLines(CONTENT_MAX_LINES)
-          .focusable(false)
-          .layoutWeight(1)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .onClick(() => {
-            this.isChecked = !this.isChecked;
-          })
-      }
-      .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
-        this.checkBoxHeight = Number(newValue.height);
-        this.maxContentHeight =
-          `calc(100% - ${this.checkBoxHeight}vp - ${this.titleHeight}vp - ${this.buttonHeight}vp)`;
-      })
-      .constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT })
-      .width('100%')
-      .padding({ top: 8, bottom: 8 })
+      });
     }
-  }
-
-  getContentFontSize(): Length {
-    return BODY_L + 'fp';
-  }
-
-  getTextAlign(maxWidth: number): void {
-    let fontSize: Length = this.getContentFontSize();
-    let contentSize: SizeOptions = measure.measureTextSize({
-      textContent: this.content,
-      fontSize: fontSize,
-      constraintWidth: maxWidth,
-    });
-    let oneLineSize: SizeOptions = measure.measureTextSize({
-      textContent: this.content,
-      fontSize: fontSize,
-    });
-    if (this.getTextHeight(contentSize) <= this.getTextHeight(oneLineSize)) {
-      this.textAlign = TextAlign.Center;
-    }
-  }
-
-  getTextHeight(textSize: SizeOptions): number {
-    if (textSize && textSize.height !== null && textSize.height !== undefined) {
-      return Number(textSize.height);
-    }
-    return 0;
   }
 
   build() {
@@ -636,13 +711,11 @@ export struct ConfirmDialog {
       contentBuilder: () => {
         this.buildContent();
       },
-      updateTitleHeight: this.updateTitleHeight,
-      updateButtonHeight: this.updateButtonHeight,
+      minContentHeight: this.minContentHeight,
       buttons: this.buttons,
       theme: this.theme,
       themeColorMode: this.themeColorMode,
       fontSizeScale: this.fontSizeScale,
-      windowSize: this.windowSize
     }).constraintSize({ maxHeight: '100%' });
   }
 
@@ -686,8 +759,8 @@ export struct AlertDialog {
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
   themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
-  @State windowSize: Size = { width: MAX_DIALOG_WIDTH, height: 0 };
   @State fontSizeScale: number = 1;
+  @State minContentHeight: number = MIN_CONTENT_HEIGHT;
 
   build() {
     CustomDialogContentComponent({
@@ -701,7 +774,7 @@ export struct AlertDialog {
       theme: this.theme,
       themeColorMode: this.themeColorMode,
       fontSizeScale: this.fontSizeScale,
-      windowSize: this.windowSize,
+      minContentHeight: this.minContentHeight,
     }).constraintSize({ maxHeight: '100%' });
   }
 
@@ -712,14 +785,14 @@ export struct AlertDialog {
         Text(this.content)
           .focusable(true)
           .defaultFocus(!(this.primaryButton || this.secondaryButton))
-          .fontSize(this.getContentFontSize())
+          .fontSize($r('sys.float.Body_L'))
           .fontWeight(this.getFontWeight())
           .fontColor(this.fontColorWithTheme)
           .margin({ right: $r('sys.float.padding_level8'), })
           .width(`calc(100% - ${PADDING_LEVEL_8}vp)`)
           .textAlign(this.textAlign)
           .onAreaChange((oldValue: Area, newValue: Area) => {
-            this.getTextAlign(Number(newValue.width));
+            this.updateTextAlign(Number(newValue.width));
           })
           .onKeyEvent((event: KeyEvent) => {
             if (event) {
@@ -739,31 +812,8 @@ export struct AlertDialog {
     this.initButtons();
   }
 
-  private getContentFontSize(): Length {
-    return BODY_L + 'fp';
-  }
-
-  private getTextAlign(maxWidth: number): void {
-    let fontSize: Length = this.getContentFontSize();
-    let contentSize: SizeOptions = measure.measureTextSize({
-      textContent: this.content,
-      fontSize: fontSize,
-      constraintWidth: maxWidth,
-    });
-    let oneLineSize: SizeOptions = measure.measureTextSize({
-      textContent: this.content,
-      fontSize: fontSize,
-    });
-    if (this.getTextHeight(contentSize) <= this.getTextHeight(oneLineSize)) {
-      this.textAlign = TextAlign.Center;
-    }
-  }
-
-  private getTextHeight(textSize: SizeOptions): number {
-    if (textSize && textSize.height !== null && textSize.height !== undefined) {
-      return Number(textSize.height);
-    }
-    return 0;
+  private updateTextAlign(maxWidth: number): void {
+    this.textAlign = getTextAlign(maxWidth, this.content, $r('sys.float.Body_L'));
   }
 
   private initButtons(): void {
@@ -802,7 +852,7 @@ export struct CustomContentDialog {
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
   themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
   @State fontSizeScale: number = 1;
-  @State windowSize: Size = { width: 0, height: 0 };
+  @State minContentHeight: number = MIN_CONTENT_HEIGHT;
 
   build() {
     CustomDialogContentComponent({
@@ -817,7 +867,7 @@ export struct CustomContentDialog {
       theme: this.theme,
       themeColorMode: this.themeColorMode,
       fontSizeScale: this.fontSizeScale,
-      windowSize: this.windowSize
+      minContentHeight: this.minContentHeight,
     }).constraintSize({ maxHeight: '100%' });
   }
 }
@@ -832,6 +882,72 @@ class CustomDialogControllerExtend extends CustomDialogController {
 }
 
 @Component
+struct CustomDialogLayout {
+  @Builder
+  doNothingBuilder(): void {
+  };
+
+  @Link titleHeight: number;
+  @Link buttonHeight: number;
+  @Link titleMinHeight: Length;
+  @BuilderParam dialogBuilder: () => void = this.doNothingBuilder;
+  titleIndex: number = 0;
+  contentIndex: number = 1;
+  buttonIndex: number = 2;
+
+  onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>,
+    constraint: ConstraintSizeOptions) {
+    let currentX: number = 0;
+    let currentY: number = 0;
+    for (let index = 0; index < children.length; index++) {
+      let child = children[index];
+      child.layout({ x: currentX, y: currentY });
+      currentY += child.measureResult.height;
+    }
+  }
+
+  onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>,
+    constraint: ConstraintSizeOptions): SizeResult {
+    let sizeResult: SizeResult = { width: Number(constraint.maxWidth), height: 0 };
+    let childrenSize: number = 3;
+    if (children.length < childrenSize) {
+      return sizeResult;
+    }
+    let height: number = 0;
+    let titleChild: Measurable = children[this.titleIndex];
+    let titleConstraint: ConstraintSizeOptions = {
+      maxWidth: constraint.maxWidth,
+      minHeight: this.titleMinHeight,
+      maxHeight: constraint.maxHeight
+    };
+    let titleMeasureResult: MeasureResult = titleChild.measure(titleConstraint);
+    this.titleHeight = titleMeasureResult.height;
+    height += this.titleHeight;
+
+    let buttonChild: Measurable = children[this.buttonIndex];
+    let buttonMeasureResult: MeasureResult = buttonChild.measure(constraint);
+    this.buttonHeight = buttonMeasureResult.height;
+    height += this.buttonHeight;
+
+    let contentChild: Measurable = children[this.contentIndex];
+    let contentConstraint: ConstraintSizeOptions = {
+      maxWidth: constraint.maxWidth,
+      maxHeight: Number(constraint.maxHeight) - height
+    };
+
+    let contentMeasureResult: MeasureResult = contentChild.measure(contentConstraint);
+    height += contentMeasureResult.height;
+    sizeResult.height = height;
+    return sizeResult;
+  }
+
+  build() {
+    this.dialogBuilder();
+  }
+}
+
+
+@Component
 struct CustomDialogContentComponent {
   controller?: CustomDialogController;
   primaryTitle?: ResourceStr;
@@ -842,7 +958,7 @@ struct CustomDialogContentComponent {
   keyIndex: number = 0;
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
   themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
-  minContentHeight?: number | undefined;
+  @Link minContentHeight: number;
 
   @Builder
   defaultContentBuilder(): void {
@@ -850,56 +966,47 @@ struct CustomDialogContentComponent {
 
   @State titleHeight: number = 0;
   @State buttonHeight: number = 0;
-  @State contentMaxHeight: string = `calc(100% - ${this.titleHeight}vp - ${this.buttonHeight}vp)`;
-  updateTitleHeight?: (height: number) => void;
-  updateButtonHeight?: (height: number) => void;
-  targetSdk: number = VERSION_TWELVE;
+  @State contentMaxHeight: Length = '100%';
   @Link fontSizeScale: number;
-  @Link windowSize: Size;
   @State customStyle: boolean = false;
-  screenSize: Size = { width: 0, height: 0 };
-  initCustomStyle: boolean = false;
   @State buttonMaxFontSize: Length = $r('sys.float.Body_L');
   @State buttonMinFontSize: Length = 9;
   @State primaryTitleMaxFontSize: Length = $r('sys.float.Title_S');
   @State primaryTitleMinFontSize: Length = $r('sys.float.Body_L');
   @State secondaryTitleMaxFontSize: Length = $r('sys.float.Subtitle_S');
   @State secondaryTitleMinFontSize: Length = $r('sys.float.Body_S');
+  @State primaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
+  @State secondaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_secondary');
+  @State titleTextAlign: TextAlign = TextAlign.Center;
+  @State isButtonVertical: boolean = false;
+  @State titleMinHeight: Length = 0;
+  titleIndex: number = 0;
+  contentIndex: number = 1;
+  buttonIndex: number = 2;
 
   build() {
     WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
       Scroll() {
         Column() {
-          // title area
-          TitleComponent({
-            primaryTitle: this.primaryTitle,
-            secondaryTitle: this.secondaryTitle,
-            windowSize: this.windowSize,
-            fontSizeScale: this.fontSizeScale,
-            titleHeight: this.titleHeight,
-            theme: this.theme,
-            primaryTitleMaxFontSize: this.primaryTitleMaxFontSize,
-            primaryTitleMinFontSize: this.primaryTitleMinFontSize,
-            secondaryTitleMaxFontSize: this.secondaryTitleMaxFontSize,
-            secondaryTitleMinFontSize: this.secondaryTitleMinFontSize
-          })
-          // content area
-          Column() {
-            this.contentBuilder();
-          }
-          .padding(this.getContentPadding())
-          .constraintSize({ maxHeight: this.contentMaxHeight })
-
-          ButtonComponent({
-            buttons: this.buttons,
-            windowSize: this.windowSize,
+          CustomDialogLayout({
             buttonHeight: this.buttonHeight,
-            controller: this.controller,
-            theme: this.theme,
-            buttonMaxFontSize: this.buttonMaxFontSize,
-            buttonMinFontSize: this.buttonMinFontSize
-          })
+            titleHeight: this.titleHeight,
+            titleMinHeight: this.titleMinHeight
+          }) {
+            ForEach([this.titleIndex, this.contentIndex, this.buttonIndex], (index: number) => {
+              if (index === this.titleIndex) {
+                this.titleBuilder();
+              } else if (index === this.contentIndex) {
+                Column() {
+                  this.contentBuilder();
+                }.padding(this.getContentPadding())
+              } else {
+                this.ButtonBuilder();
+              }
+            });
+          }
         }
+        .constraintSize({ maxHeight: this.contentMaxHeight })
         .backgroundBlurStyle(this.customStyle ? BlurStyle.Thick : BlurStyle.NONE)
         .borderRadius(this.customStyle ? $r('sys.float.ohos_id_corner_radius_dialog') : 0)
         .margin(this.customStyle ? {
@@ -919,38 +1026,39 @@ struct CustomDialogContentComponent {
     let sizeResult: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
     let maxWidth: number = Number(constraint.maxWidth);
     let maxHeight: number = Number(constraint.maxHeight);
-    this.windowSize = { width: maxWidth, height: maxHeight };
     this.updateFontScale();
     this.updateFontSize();
+    this.isButtonVertical = this.isVerticalAlignButton(Math.min(maxWidth - BUTTON_HORIZONTAL_MARGIN * 2,
+      MAX_DIALOG_WIDTH));
+    this.titleMinHeight = this.getTitleAreaMinHeight();
+    let height: number = 0;
     children.forEach((child) => {
+      this.contentMaxHeight = '100%';
       let measureResult: MeasureResult = child.measure(constraint);
-      if (this.updateButtonHeight) {
-        this.updateButtonHeight(this.buttonHeight);
+      if (maxHeight - this.buttonHeight - this.titleHeight < this.minContentHeight) {
+        this.contentMaxHeight = MAX_CONTENT_HEIGHT;
+        measureResult = child.measure(constraint);
       }
-      if (this.updateTitleHeight) {
-        this.updateTitleHeight(this.titleHeight);
-      }
-      if (maxHeight - this.buttonHeight - this.titleHeight <
-        (this.minContentHeight ? this.minContentHeight : MIN_CONTENT_HEIGHT)) {
-        this.contentMaxHeight = `${MAX_CONTENT_HEIGHT}vp`;
-      } else {
-        this.contentMaxHeight = `calc(100% - ${this.titleHeight}vp - ${this.buttonHeight}vp)`;
-      }
-      measureResult = child.measure(constraint);
-      sizeResult.height = measureResult.height;
-      sizeResult.width = measureResult.width;
+      height += measureResult.height;
     });
+    sizeResult.height = height;
+    sizeResult.width = maxWidth;
     return sizeResult;
   }
 
   aboutToAppear(): void {
     this.updateFontScale();
-    if(this.controller) {
+    if (this.controller) {
       let customController: CustomDialogControllerExtend = this.controller as CustomDialogControllerExtend;
-      if(customController.arg_ && customController.arg_.customStyle && customController.arg_.customStyle === true) {
+      if (customController.arg_ && customController.arg_.customStyle && customController.arg_.customStyle === true) {
         this.customStyle = true;
       }
     }
+    this.primaryTitleFontColorWithTheme = this.theme?.colors?.fontPrimary ?
+    this.theme.colors.fontPrimary : $r('sys.color.font_primary');
+    this.secondaryTitleFontColorWithTheme = this.theme?.colors?.fontSecondary ?
+    this.theme.colors.fontSecondary : $r('sys.color.font_secondary');
+    this.initTitleTextAlign();
   }
 
   private updateFontSize(): void {
@@ -1022,25 +1130,9 @@ struct CustomDialogContentComponent {
       };
     }
   }
-}
 
-@Component
-struct TitleComponent {
-  primaryTitle?: ResourceStr;
-  secondaryTitle?: ResourceStr;
-  theme?: Theme | CustomTheme = new CustomThemeImpl({});
-  @State primaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
-  @State secondaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_secondary');
-  @State titleTextAlign: TextAlign = TextAlign.Center;
-  @Link primaryTitleMaxFontSize: Length;
-  @Link primaryTitleMinFontSize: Length;
-  @Link secondaryTitleMaxFontSize: Length;
-  @Link secondaryTitleMinFontSize: Length;
-  @Link fontSizeScale: number;
-  @Link windowSize: Size;
-  @Link titleHeight: Length;
-
-  build() {
+  @Builder
+  titleBuilder() {
     Column() {
       Row() {
         Text(this.primaryTitle)
@@ -1076,38 +1168,9 @@ struct TitleComponent {
       }
       .width('100%')
     }
-    .constraintSize({
-      minHeight: this.getTitleAreaMinHeight(),
-    })
     .justifyContent(FlexAlign.Center)
     .width('100%')
     .padding(this.getTitleAreaPadding())
-  }
-
-  aboutToAppear(): void {
-    this.primaryTitleFontColorWithTheme = this.theme?.colors?.fontPrimary ?
-    this.theme.colors.fontPrimary : $r('sys.color.font_primary');
-    this.secondaryTitleFontColorWithTheme = this.theme?.colors?.fontSecondary ?
-    this.theme.colors.fontSecondary : $r('sys.color.font_secondary');
-    this.initTitleTextAlign();
-  }
-
-  onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>,
-                constraint: ConstraintSizeOptions): SizeResult {
-    let sizeResult: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
-    let titleConstraint: ConstraintSizeOptions = {
-      minWidth: constraint.minWidth,
-      minHeight: this.getTitleAreaMinHeight(),
-      maxWidth: constraint.maxWidth,
-      maxHeight: constraint.maxHeight
-    }
-    children.forEach((child) => {
-      let measureResult: MeasureResult = child.measure(titleConstraint);
-      sizeResult.height = measureResult.height;
-      sizeResult.width = measureResult.width;
-    });
-    this.titleHeight = sizeResult.height;
-    return sizeResult;
   }
 
   /**
@@ -1166,22 +1229,9 @@ struct TitleComponent {
       return 0;
     }
   }
-}
 
-@Component
-struct ButtonComponent {
-  controller?: CustomDialogController;
-  buttons?: ButtonOptions[];
-  @Link buttonMaxFontSize: Length;
-  @Link buttonMinFontSize: Length;
-  keyIndex: number = 0;
-  theme?: Theme | CustomTheme = new CustomThemeImpl({});
-  @State singleButtonHeight: number = BUTTON_DEFAULT_HEIGHT;
-  @State isButtonVertical: boolean = false;
-  @Link windowSize: Size;
-  @Link buttonHeight: Length;
-
-  build() {
+  @Builder
+  ButtonBuilder(): void {
     Column() {
       if (this.buttons && this.buttons.length > 0) {
         if (this.isButtonVertical) {
@@ -1193,24 +1243,6 @@ struct ButtonComponent {
     }
     .width('100%')
     .padding(this.getOperationAreaPadding());
-  }
-
-  aboutToAppear(): void {
-    this.isButtonVertical = this.isVerticalAlignButton(Math.min(this.windowSize.width - BUTTON_HORIZONTAL_MARGIN * 2,
-      MAX_DIALOG_WIDTH));
-  }
-
-  onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>,
-    constraint: ConstraintSizeOptions): SizeResult {
-    let sizeResult: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
-    this.isButtonVertical = this.isVerticalAlignButton(Number(constraint.maxWidth));
-    children.forEach((child) => {
-      let measureResult: MeasureResult = child.measure(constraint);
-      sizeResult.height = measureResult.height;
-      sizeResult.width = measureResult.width;
-    });
-    this.buttonHeight = Number(sizeResult.height);
-    return sizeResult;
   }
 
   /**
@@ -1426,6 +1458,43 @@ function getEnumNumberByResourceId(resourceId: number): number {
 }
 
 /**
+ * get Text Align
+ *
+ * @param maxWidth maxWidth
+ * @param content textContent
+ * @param fontSize fontSize
+ * @returns textAlign
+ */
+function getTextAlign(maxWidth: number, content: ResourceStr, fontSize: number | string | Resource): TextAlign {
+  let contentSize: SizeOptions = measure.measureTextSize({
+    textContent: content,
+    fontSize: fontSize,
+    constraintWidth: maxWidth,
+  });
+  let oneLineSize: SizeOptions = measure.measureTextSize({
+    textContent: content,
+    fontSize: fontSize,
+  });
+  if (getTextHeight(contentSize) <= getTextHeight(oneLineSize)) {
+    return TextAlign.Center;
+  }
+  return TextAlign.Start;
+}
+
+/**
+ * get text height
+ *
+ * @param textSize textSize
+ * @returns text height
+ */
+function getTextHeight(textSize: SizeOptions): number {
+  if (textSize && textSize.height !== null && textSize.height !== undefined) {
+    return Number(textSize.height);
+  }
+  return 0;
+}
+
+/**
  * resolve content area keyEvent
  *
  * @param event keyEvent
@@ -1459,7 +1528,7 @@ export struct LoadingDialog {
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
   themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
   @State fontSizeScale: number = 1;
-  @State windowSize: Size = { width: 0, height: 0 };
+  @State minContentHeight: number = MIN_CONTENT_HEIGHT;
 
   build() {
     Column() {
@@ -1471,13 +1540,13 @@ export struct LoadingDialog {
         theme: this.theme,
         themeColorMode: this.themeColorMode,
         fontSizeScale: this.fontSizeScale,
-        windowSize: this.windowSize
+        minContentHeight: this.minContentHeight,
       }).constraintSize({ maxHeight: '100%' });
     }
   }
 
   @Builder
-  contentBuilder() {
+  contentBuilder(): void {
     Column() {
       Row() {
         Text(this.content)

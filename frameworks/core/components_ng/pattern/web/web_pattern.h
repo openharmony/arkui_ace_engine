@@ -108,11 +108,14 @@ public:
     using OnOpenAppLinkCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using DefaultFileSelectorShowCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using WebNodeInfoCallback = const std::function<void(std::shared_ptr<JsonValue>& jsonNodeArray, int32_t webId)>;
+    using TextBlurCallback = std::function<void(int64_t, const std::string)>;
     WebPattern();
     WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController,
-               RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
+               RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
+			   const std::string& sharedRenderProcessToken = "");
     WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback,
-               RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
+               RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
+			   const std::string& sharedRenderProcessToken = "");
 
     ~WebPattern() override;
 
@@ -304,6 +307,16 @@ public:
     bool GetIncognitoMode() const
     {
         return incognitoMode_;
+    }
+
+    void SetSharedRenderProcessToken(const std::string& sharedRenderProcessToken)
+    {
+        sharedRenderProcessToken_ = sharedRenderProcessToken;
+    }
+
+    const std::optional<std::string>& GetSharedRenderProcessToken() const
+    {
+        return sharedRenderProcessToken_;
     }
 
     void SetOnControllerAttachedCallback(OnControllerAttachedCallback&& callback)
@@ -603,8 +616,15 @@ public:
         TAG_LOGD(AceLogTag::ACE_WEB, "Web surfaceNodeId is %{public}" PRIu64 "", surfaceNodeId);
         return surfaceNodeId;
     }
+    std::shared_ptr<Rosen::RSNode> GetSurfaceRSNode() const;
 
     void GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId);
+    void RegisterTextBlurCallback(TextBlurCallback&& callback);
+    void UnRegisterTextBlurCallback();
+    TextBlurCallback GetTextBlurCallback() const
+    {
+        return textBlurCallback_;
+    }
 
 private:
     friend class WebContextSelectOverlay;
@@ -979,6 +999,9 @@ private:
     std::shared_ptr<TouchEventListener> touchEventListener_ = nullptr;
     double lastKeyboardHeight_ = 0.0;
     bool inspectorAccessibilityEnable_ = false;
+    std::optional<std::string> sharedRenderProcessToken_;
+    bool textBlurAccessibilityEnable_ = false;
+    TextBlurCallback textBlurCallback_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

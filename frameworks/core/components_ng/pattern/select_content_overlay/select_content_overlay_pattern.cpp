@@ -126,6 +126,9 @@ bool SelectContentOverlayPattern::IsHandleInSameLine(const RectF& first, const R
 
 void SelectContentOverlayPattern::UpdateHandleHotZone()
 {
+    if (!CheckIfNeedHandle()) {
+        return;
+    }
     if (info_->firstHandle.isPaintHandleWithPoints || info_->secondHandle.isPaintHandleWithPoints) {
         UpdateHandleHotZoneWithPoint();
     } else {
@@ -152,12 +155,14 @@ bool SelectContentOverlayPattern::UpdateHandleHotZoneWithPoint()
             auto offsetX = centerOffset.GetX() - hotZone;
             auto offsetY = centerOffset.GetY() - hotZone;
             UpdateHandleHotRegion(secondHandleRegion_, { offsetX, offsetY });
+            firstHandleRegion_.Reset();
         } else {
             // Use the first handle to make a single handle.
             auto centerOffset = GetHandleHotZoneOffset(true, radius, false);
             auto offsetX = centerOffset.GetX() - hotZone;
             auto offsetY = centerOffset.GetY() - hotZone;
             UpdateHandleHotRegion(firstHandleRegion_, { offsetX, offsetY });
+            secondHandleRegion_.Reset();
         }
         return true;
     }

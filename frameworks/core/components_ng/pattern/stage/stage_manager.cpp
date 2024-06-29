@@ -510,17 +510,22 @@ void StageManager::FireAutoSave(const RefPtr<FrameNode>& outPageNode, const RefP
     auto outPagePattern = outPageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(outPagePattern);
     auto onUIExtNodeDestroy = [weak = WeakPtr<FrameNode>(inPageNode)]() {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called.");
         auto page = weak.Upgrade();
         CHECK_NULL_VOID(page);
         auto pattern = page->GetPattern<PagePattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetIsModalCovered(false);
     };
-    if (outPagePattern->ProcessAutoSave(onUIExtNodeDestroy)) {
-        auto inPagePattern = inPageNode->GetPattern<PagePattern>();
-        CHECK_NULL_VOID(inPagePattern);
-        inPagePattern->SetIsModalCovered(true);
-    }
+    auto onUIExtNodeBindingCompleted = [weak = WeakPtr<FrameNode>(inPageNode)]() {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called.");
+        auto page = weak.Upgrade();
+        CHECK_NULL_VOID(page);
+        auto pattern = page->GetPattern<PagePattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetIsModalCovered(true);
+    };
+    outPagePattern->ProcessAutoSave(onUIExtNodeDestroy, onUIExtNodeBindingCompleted);
 }
 
 RefPtr<FrameNode> StageManager::GetLastPage()

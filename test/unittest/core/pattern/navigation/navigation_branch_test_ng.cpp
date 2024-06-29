@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "test/mock/base/mock_system_bar_style.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_container.h"
@@ -1190,5 +1191,315 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest032, TestSize.Level1)
     ASSERT_NE(pattern->navigationStack_, nullptr);
     pattern->isFullPageNavigation_ = true;
     pattern->UpdateSystemBarStyleOnPageVisibilityChange(false);
+}
+
+/**
+ * @tc.name: NavigationPatternTest033
+ * @tc.desc: Test SetSystemBarStyle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationPatternTest033, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
+    // set backupStyle_ is has value
+    auto backupStyle = AceType::MakeRefPtr<MockSystemBarStyle>();
+    pattern->backupStyle_ = backupStyle;
+    // set isFullPageNavigation_ is false
+    pattern->isFullPageNavigation_ = false;
+    pattern->SetSystemBarStyle(nullptr);
+}
+
+/**
+ * @tc.name: NavigationPatternTest034
+ * @tc.desc: Test SetSystemBarStyle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationPatternTest034, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    // set navigationStack_ is not nullptr
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
+    // set isFullPageNavigation_ is true
+    pattern->isFullPageNavigation_ = true;
+    pattern->SetSystemBarStyle(nullptr);
+}
+
+/**
+ * @tc.name: NavigationPatternTest035
+ * @tc.desc: Test SetSystemBarStyle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationPatternTest035, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    // set navigationStack_ is not nullptr
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
+    // set navPathList_
+    NavPathList navPathList;
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navPathList.emplace_back(std::make_pair("pageOne", tempNode));
+    pattern->navigationStack_->SetNavPathList(navPathList);
+    // set isFullPageNavigation_ is true
+    pattern->isFullPageNavigation_ = true;
+    pattern->SetSystemBarStyle(nullptr);
+}
+
+/**
+ * @tc.name: NavigationPatternTest036
+ * @tc.desc: Test SetSystemBarStyle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationPatternTest036, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    // set navigationStack_ is not nullptr
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
+    // set navPathList_
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageOne", nullptr));
+    pattern->navigationStack_->SetNavPathList(navPathList);
+    // set isFullPageNavigation_ is true
+    pattern->isFullPageNavigation_ = true;
+    auto newStyle = AceType::MakeRefPtr<MockSystemBarStyle>();
+    pattern->SetSystemBarStyle(newStyle);
+}
+
+/**
+ * @tc.name: NavigationPatternTest037
+ * @tc.desc: Test IsTopNavDestination function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationPatternTest037, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    // set navigationStack_ is not nullptr
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
+    EXPECT_EQ(pattern->IsTopNavDestination(nullptr), false);
+}
+
+/**
+ * @tc.name: NavigationPatternTest038
+ * @tc.desc: Test IsTopNavDestination function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationPatternTest038, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    // set navigationStack_ is not nullptr
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
+    // set navPathList_
+    NavPathList navPathList;
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navPathList.emplace_back(std::make_pair("pageOne", tempNode));
+    pattern->navigationStack_->SetNavPathList(navPathList);
+    EXPECT_EQ(pattern->IsTopNavDestination(nullptr), false);
+}
+
+/**
+ * @tc.name: NavigationPatternTest039
+ * @tc.desc: Test UpdateIsFullPageNavigation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationPatternTest039, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    // set navigationStack_ is not nullptr
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
+    pattern->pageNode_ = WeakPtr<FrameNode>(frameNode);
+    pattern->isFullPageNavigation_ = false;
+    pattern->UpdateIsFullPageNavigation(frameNode);
+}
+
+/**
+ * @tc.name: NavigationPatternTest040
+ * @tc.desc: Test UpdateIsFullPageNavigation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationPatternTest040, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<FrameNode> frameNode_ = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode_, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    // set navigationStack_ is not nullptr
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
+    pattern->pageNode_ = WeakPtr<FrameNode>(frameNode_);
+    frameNode_->geometryNode_ = nullptr;
+    pattern->isFullPageNavigation_ = true;
+    pattern->UpdateIsFullPageNavigation(frameNode);
+}
+
+/**
+ * @tc.name: NavigationPatternTest041
+ * @tc.desc: Test UpdateSystemBarStyleOnTopNavPathChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationPatternTest041, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    // set navigationStack_ is not nullptr
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
+    pattern->isFullPageNavigation_ = true;
+    auto newTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto newTopNavPath = std::pair<std::string, RefPtr<UINode>>("newTopNavDestination", newTopNavDestination);
+    pattern->UpdateSystemBarStyleOnTopNavPathChange(newTopNavPath);
+}
+
+/**
+ * @tc.name: NavigationPatternTest042
+ * @tc.desc: Test UpdateSystemBarStyleWithTopNavPath function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationPatternTest042, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    // set navigationStack_ is not nullptr
+    pattern->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(pattern->navigationStack_, nullptr);
+    pattern->currStyle_ = AceType::MakeRefPtr<MockSystemBarStyle>();
+    auto windowManager = AceType::MakeRefPtr<WindowManager>();
+    auto newTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto topNavPath = std::pair<std::string, RefPtr<UINode>>("newTopNavDestination", newTopNavDestination);
+    pattern->UpdateSystemBarStyleWithTopNavPath(windowManager, topNavPath);
+
+    auto topNavPath_ = std::nullopt;
+    pattern->UpdateSystemBarStyleWithTopNavPath(windowManager, topNavPath_);
+
+    pattern->currStyle_ = nullptr;
+    pattern->backupStyle_ = AceType::MakeRefPtr<MockSystemBarStyle>();
+    pattern->UpdateSystemBarStyleWithTopNavPath(windowManager, topNavPath_);
 }
 } // namespace OHOS::Ace::NG

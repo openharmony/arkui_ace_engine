@@ -192,7 +192,8 @@ public:
     virtual void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount);
 
     // Called by viewr
-    virtual void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action) = 0;
+    virtual void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,
+        const RefPtr<NG::FrameNode>& node = nullptr) = 0;
 
     // Called by view when idle event.
     virtual void OnIdle(int64_t deadline) = 0;
@@ -233,6 +234,7 @@ public:
 
     virtual void OnSurfaceDensityChanged(double density)
     {
+        std::lock_guard lock(densityChangeMutex_);
         for (auto&& [id, callback] : densityChangedCallbacks_) {
             if (callback) {
                 callback(density);
@@ -243,6 +245,7 @@ public:
     int32_t RegisterDensityChangedCallback(std::function<void(double)>&& callback)
     {
         if (callback) {
+            std::lock_guard lock(densityChangeMutex_);
             densityChangedCallbacks_.emplace(++densityChangeCallbackId_, std::move(callback));
             return densityChangeCallbackId_;
         }
@@ -251,6 +254,7 @@ public:
 
     void UnregisterDensityChangedCallback(int32_t callbackId)
     {
+        std::lock_guard lock(densityChangeMutex_);
         densityChangedCallbacks_.erase(callbackId);
     }
 
@@ -1430,6 +1434,7 @@ private:
     std::shared_ptr<Rosen::RSTransaction> rsTransaction_;
     uint32_t frameCount_ = 0;
 
+    std::mutex densityChangeMutex_;
     int32_t densityChangeCallbackId_ = 0;
     std::unordered_map<int32_t, std::function<void(double)>> densityChangedCallbacks_;
 

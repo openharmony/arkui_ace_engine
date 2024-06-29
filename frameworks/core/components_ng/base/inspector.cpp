@@ -613,10 +613,9 @@ std::string Inspector::GetInspectorOfNode(RefPtr<NG::UINode> node)
     CHECK_NULL_RETURN(node, jsonRoot->ToString());
     auto pageId = context->GetStageManager()->GetLastPage()->GetPageId();
     auto jsonNodeArray = JsonUtil::CreateArray(true);
-    GetInspectorChildren(node, jsonNodeArray, pageId, true);
+    GetInspectorChildren(node, jsonNodeArray, pageId, true, InspectorFilter(), 0);
     if (jsonNodeArray->GetArraySize()) {
         jsonRoot = jsonNodeArray->GetArrayItem(0);
-        jsonRoot->Delete(INSPECTOR_CHILDREN);
         GetContextInfo(context, jsonRoot);
     }
 

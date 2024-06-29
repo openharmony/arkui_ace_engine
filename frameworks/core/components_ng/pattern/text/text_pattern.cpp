@@ -520,18 +520,15 @@ void TextPattern::HandleOnCopy()
         return;
     }
     auto value = GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
-    if (value.empty()) {
-        HiddenMenu();
-        return;
-    }
     if (IsSelectableAndCopy()) {
         if (isSpanStringMode_ && !externalParagraph_) {
             HandleOnCopySpanString();
-        } else {
+        } else if (!value.empty()) {
             clipboard_->SetData(value, copyOption_);
         }
     }
     HiddenMenu();
+    CHECK_NULL_VOID(!value.empty());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextEventHub>();
@@ -681,6 +678,9 @@ void TextPattern::OnHandleTouchUp()
 
 void TextPattern::HandleClickEvent(GestureEvent& info)
 {
+    if (selectOverlay_->IsClickAtHandle(info)) {
+        return;
+    }
     if (dataDetectorAdapter_->hasClickedAISpan_) {
         dataDetectorAdapter_->hasClickedAISpan_ = false;
     } else if (hasClicked_) {

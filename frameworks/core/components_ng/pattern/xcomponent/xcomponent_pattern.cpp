@@ -174,7 +174,8 @@ OH_NativeXComponent_KeyEvent ConvertNativeXComponentKeyEvent(const KeyEvent& eve
 }
 } // namespace
 
-XComponentPattern::XComponentPattern(const std::string& id, XComponentType type, const std::string& libraryname,
+XComponentPattern::XComponentPattern(const std::optional<std::string>& id, XComponentType type,
+    const std::optional<std::string>& libraryname,
     const std::shared_ptr<InnerXComponentController>& xcomponentController, float initWidth, float initHeight)
     : id_(id), type_(type), xcomponentController_(xcomponentController), initSize_(initWidth, initHeight)
 {
@@ -223,10 +224,10 @@ void XComponentPattern::Initialize()
         surfaceId_ = renderSurface_->GetUniqueId();
         InitEvent();
         SetMethodCall();
-    } else if (type_ == XComponentType::NODE) {
+    } else if (type_ == XComponentType::NODE && id_.has_value()) {
         auto context = host->GetContextRefPtr();
         if (context) {
-            FireExternalEvent(context, id_, host->GetId(), false);
+            FireExternalEvent(context, id_.value(), host->GetId(), false);
             InitNativeNodeCallbacks();
         }
     }
@@ -236,11 +237,11 @@ void XComponentPattern::InitializeRenderContext()
 {
     renderContextForSurface_ = RenderContext::Create();
 #ifdef RENDER_EXTRACT_SUPPORTED
-    auto contextType = type_ == XComponentType::TEXTURE ?
-        RenderContext::ContextType::HARDWARE_TEXTURE : RenderContext::ContextType::HARDWARE_SURFACE;
-    RenderContext::ContextParam param = { contextType, id_ + "Surface" };
+    auto contextType = type_ == XComponentType::TEXTURE ? RenderContext::ContextType::HARDWARE_TEXTURE
+                                                        : RenderContext::ContextType::HARDWARE_SURFACE;
+    RenderContext::ContextParam param = { contextType, GetId() + "Surface" };
 #else
-    RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, id_ + "Surface" };
+    RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, GetId() + "Surface" };
 #endif
 
     renderContextForSurface_->InitContext(false, param);
@@ -402,7 +403,7 @@ void XComponentPattern::PlatformViewInitialize()
     CHECK_NULL_VOID(host);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    platformView_ = PlatformViewProxy::GetInstance().Attach(id_);
+    platformView_ = PlatformViewProxy::GetInstance().Attach(GetId());
     platformView_->InitPlatformView();
     renderSurface_ = RenderSurface::Create();
     renderSurface_->SetInstanceId(GetHostInstanceId());
@@ -484,7 +485,8 @@ void XComponentPattern::OnAreaChangedInner()
 void XComponentPattern::SetSurfaceNodeToGraphic()
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    if (type_ != XComponentType::SURFACE || !Rosen::RSExtNodeOperation::GetInstance().CheckNeedToProcess(GetId())) {
+    if (type_ != XComponentType::SURFACE || !id_.has_value() ||
+        !Rosen::RSExtNodeOperation::GetInstance().CheckNeedToProcess(id_.value())) {
         return;
     }
     auto host = GetHost();
@@ -549,12 +551,14 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
         {
-            ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireDestroyEvent", id_.c_str());
+            ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireDestroyEvent", GetId().c_str());
             eventHub->FireDestroyEvent();
         }
-        eventHub->FireDetachEvent(id_);
+        if (id_.has_value()) {
+            eventHub->FireDetachEvent(id_.value());
+        }
         {
-            ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireControllerDestroyedEvent", id_.c_str());
+            ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireControllerDestroyedEvent", GetId().c_str());
             eventHub->FireControllerDestroyedEvent(surfaceId_);
         }
 #ifdef RENDER_EXTRACT_SUPPORTED
@@ -640,7 +644,8 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
     CHECK_NULL_VOID(geometryNode);
     drawSize_ = geometryNode->GetContentSize();
     if (!drawSize_.IsPositive()) {
-        TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s]'s size is not positive", id_.c_str());
+        TAG_LOGW(
+            AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s]'s size is not positive", GetId().c_str());
         return;
     }
     globalPosition_ = geometryNode->GetFrameOffset();
@@ -706,9 +711,9 @@ void XComponentPattern::UpdatePlatformViewLayoutIfNeeded()
 
 void XComponentPattern::DumpInfo()
 {
-    DumpLog::GetInstance().AddDesc(std::string("xcomponentId: ").append(id_));
+    DumpLog::GetInstance().AddDesc(std::string("xcomponentId: ").append(id_.value_or("no id")));
     DumpLog::GetInstance().AddDesc(std::string("xcomponentType: ").append(XComponentTypeToString(type_)));
-    DumpLog::GetInstance().AddDesc(std::string("libraryName: ").append(libraryname_));
+    DumpLog::GetInstance().AddDesc(std::string("libraryName: ").append(libraryname_.value_or("no library name")));
 }
 
 void XComponentPattern::DumpAdvanceInfo()
@@ -741,7 +746,7 @@ void XComponentPattern::NativeXComponentChange(float width, float height)
 
 void XComponentPattern::NativeXComponentDestroy()
 {
-    ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] NativeXComponentDestroy", id_.c_str());
+    ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] NativeXComponentDestroy", GetId().c_str());
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(nativeXComponent_);
     CHECK_NULL_VOID(nativeXComponentImpl_);
@@ -810,15 +815,17 @@ void XComponentPattern::XComponentSizeInit()
 #endif
     auto eventHub = host->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
-    TAG_LOGI(
-        AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] triggers onLoad and OnSurfaceCreated callback", id_.c_str());
-    eventHub->FireSurfaceInitEvent(id_, host->GetId());
-    {
-        ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireLoadEvent", id_.c_str());
-        eventHub->FireLoadEvent(id_);
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] triggers onLoad and OnSurfaceCreated callback",
+        GetId().c_str());
+    if (id_.has_value()) {
+        eventHub->FireSurfaceInitEvent(id_.value(), host->GetId());
     }
     {
-        ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireControllerCreatedEvent", id_.c_str());
+        ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireLoadEvent", GetId().c_str());
+        eventHub->FireLoadEvent(GetId());
+    }
+    {
+        ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireControllerCreatedEvent", GetId().c_str());
         eventHub->FireControllerCreatedEvent(surfaceId_);
     }
 }
@@ -881,7 +888,9 @@ void XComponentPattern::InitEvent()
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnSurfaceInitEvent(CreateExternalEvent());
+    if (id_.has_value()) {
+        eventHub->SetOnSurfaceInitEvent(CreateExternalEvent());
+    }
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     InitTouchEvent(gestureHub);
@@ -1257,11 +1266,13 @@ void XComponentPattern::SetTouchPoint(
          iterator++) {
         OH_NativeXComponent_TouchPoint ohTouchPoint;
         const auto& pointTouchInfo = *iterator;
-        const auto& pointScreenOffset = pointTouchInfo.GetGlobalLocation();
+        const auto& pointWindowOffset = pointTouchInfo.GetGlobalLocation();
         const auto& pointLocalOffset = pointTouchInfo.GetLocalLocation();
+        const auto& pointDisplayOffset = pointTouchInfo.GetScreenLocation();
         ohTouchPoint.id = pointTouchInfo.GetFingerId();
-        ohTouchPoint.screenX = static_cast<float>(pointScreenOffset.GetX());
-        ohTouchPoint.screenY = static_cast<float>(pointScreenOffset.GetY());
+        // screenX and screenY implementation wrong but should not modify for maintaining compatibility
+        ohTouchPoint.screenX = static_cast<float>(pointWindowOffset.GetX());
+        ohTouchPoint.screenY = static_cast<float>(pointWindowOffset.GetY());
         ohTouchPoint.x = static_cast<float>(pointLocalOffset.GetX());
         ohTouchPoint.y = static_cast<float>(pointLocalOffset.GetY());
         ohTouchPoint.type = ConvertNativeXComponentTouchEvent(touchType);
@@ -1270,10 +1281,14 @@ void XComponentPattern::SetTouchPoint(
         ohTouchPoint.timeStamp = timeStamp;
         ohTouchPoint.isPressed = (touchType == TouchType::DOWN);
         touchEventPoint_.touchPoints[index++] = ohTouchPoint;
-        // set tiltX, tiltY and sourceToolType
+        // set tiltX, tiltY, windowX, windowY, displayX, displayY and sourceToolType
         XComponentTouchPoint xcomponentTouchPoint;
         xcomponentTouchPoint.tiltX = pointTouchInfo.GetTiltX().value_or(0.0f);
         xcomponentTouchPoint.tiltY = pointTouchInfo.GetTiltY().value_or(0.0f);
+        xcomponentTouchPoint.windowX = static_cast<float>(pointWindowOffset.GetX());
+        xcomponentTouchPoint.windowY = static_cast<float>(pointWindowOffset.GetY());
+        xcomponentTouchPoint.displayX = static_cast<float>(pointDisplayOffset.GetX());
+        xcomponentTouchPoint.displayY = static_cast<float>(pointDisplayOffset.GetY());
         xcomponentTouchPoint.sourceToolType = ConvertNativeXComponentTouchToolType(pointTouchInfo.GetSourceTool());
         nativeXComponentTouchPoints_.emplace_back(xcomponentTouchPoint);
     }

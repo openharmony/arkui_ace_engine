@@ -57,12 +57,6 @@ RefPtr<AceType> NativeView::CreateUI()
 {
     wptr<NativeView> weakThis = this;
     NodeInfoPU partialUpdateCallbacks {
-        .completeReloadFunc = [weakThis]()-> RefPtr<AceType> {
-            auto view = weakThis.promote();
-            CHECK_NULL_RETURN(view, nullptr);
-            ContainerScope scope(view->instanceId_);
-            return view->InitialUIRender();
-        },
         .appearFunc = [weakThis]() -> void {
             auto self = weakThis.promote();
             CHECK_NULL_VOID(self);
@@ -95,6 +89,12 @@ RefPtr<AceType> NativeView::CreateUI()
             auto self = weakThis.promote();
             CHECK_NULL_VOID(self);
             self->Destroy();
+        },
+        .completeReloadFunc = [weakThis]() -> RefPtr<AceType> {
+            auto view = weakThis.promote();
+            CHECK_NULL_RETURN(view, nullptr);
+            ContainerScope scope(view->instanceId_);
+            return view->InitialUIRender();
         },
     };
     auto node = ViewPartialUpdateModel::GetInstance()->CreateNode(std::move(partialUpdateCallbacks));

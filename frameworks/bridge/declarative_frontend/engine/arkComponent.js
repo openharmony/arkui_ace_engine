@@ -1322,13 +1322,14 @@ class GeometryTransitionModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    let _a;
+    let _a, _b;
     if (reset) {
       getUINativeModule().common.resetGeometryTransition(node);
     }
     else {
-      getUINativeModule().common.setGeometryTransition(node, this.value.id, (_a = this.value.options) === null ||
-       _a === void 0 ? void 0 : _a.follow);
+      getUINativeModule().common.setGeometryTransition(node, this.value.id, 
+        (_a = this.value.options) === null || _a === void 0 ? void 0 : _a.follow,
+        (_b = this.value.options) === null || _b === void 0 ? void 0 : _b.hierarchyStrategy);
     }
   }
 }
@@ -7394,6 +7395,90 @@ class RichEditorSelectedBackgroundColorModifier extends ModifierWithKey {
 }
 RichEditorSelectedBackgroundColorModifier.identity = Symbol('richEditorSelectedBackgroundColor');
 
+class RichEditorOnReadyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnReady(node);
+    } else {
+      getUINativeModule().richEditor.setOnReady(node, this.value);
+    }
+  }
+}
+RichEditorOnReadyModifier.identity = Symbol('richEditorOnReady');
+
+class RichEditorOnDeleteCompleteModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnDeleteComplete(node);
+    } else {
+      getUINativeModule().richEditor.setOnDeleteComplete(node, this.value);
+    }
+  }
+}
+RichEditorOnDeleteCompleteModifier.identity = Symbol('richEditorOnDeleteComplete');
+
+class RichEditorOnEditingChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnEditingChange(node);
+    } else {
+      getUINativeModule().richEditor.setOnEditingChange(node, this.value);
+    }
+  }
+}
+RichEditorOnEditingChangeModifier.identity = Symbol('richEditorOnEditingChange');
+
+class RichEditorOnPasteModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnPaste(node);
+    } else {
+      getUINativeModule().richEditor.setOnPaste(node, this.value);
+    }
+  }
+}
+RichEditorOnPasteModifier.identity = Symbol('richEditorOnPaste');
+
+class RichEditorOnCutModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnCut(node);
+    } else {
+      getUINativeModule().richEditor.setOnCut(node, this.value);
+    }
+  }
+}
+RichEditorOnCutModifier.identity = Symbol('richEditorOnCut');
+
+class RichEditorOnCopyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnCopy(node);
+    } else {
+      getUINativeModule().richEditor.setOnCopy(node, this.value);
+    }
+  }
+}
+RichEditorOnCopyModifier.identity = Symbol('richEditorOnCopy');
+
 class RichEditorEnterKeyTypeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -7444,10 +7529,12 @@ class ArkRichEditorComponent extends ArkComponent {
   }
 
   onPaste(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnPasteModifier.identity, RichEditorOnPasteModifier, callback);
+    return this;
   }
   onReady(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnReadyModifier.identity, RichEditorOnReadyModifier, callback);
+    return this;
   }
   onSelect(callback) {
     throw new Error('Method not implemented.');
@@ -7462,13 +7549,26 @@ class ArkRichEditorComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   onDeleteComplete(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnDeleteCompleteModifier.identity, RichEditorOnDeleteCompleteModifier, callback);
+    return this;
   }
   bindSelectionMenu(spanType, content, responseType, options) {
     throw new Error('Method not implemented.');
   }
   customKeyboard(value) {
     throw new Error('Method not implemented.');
+  }
+  onEditingChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnEditingChangeModifier.identity, RichEditorOnEditingChangeModifier, callback);
+    return this;
+  }
+  onCut(callback) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnCutModifier.identity, RichEditorOnCutModifier, callback);
+    return this;
+  }
+  onCopy(callback) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnCopyModifier.identity, RichEditorOnCopyModifier, callback);
+    return this;
   }
 }
 // @ts-ignore
@@ -24997,6 +25097,14 @@ class ArkSwiperComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SwiperIndicatorInteractiveModifier.identity, SwiperIndicatorInteractiveModifier, value);
     return this;
   }
+  customContentTransition(value) {
+    modifierWithKey(this._modifiersWithKeys, SwiperCustomContentTransitionModifier.identity, SwiperCustomContentTransitionModifier, value);
+    return this;
+  }
+  onContentDidScroll(value) {
+    modifierWithKey(this._modifiersWithKeys, SwiperOnContentDidScrollModifier.identity, SwiperOnContentDidScrollModifier, value);
+    return this;
+  }
 }
 class SwiperInitializeModifier extends ModifierWithKey {
   applyPeer(node, reset) {
@@ -25542,6 +25650,38 @@ class SwiperIndicatorInteractiveModifier extends ModifierWithKey {
   }
 }
 SwiperIndicatorInteractiveModifier.identity = Symbol('indicatorInteractive');
+class SwiperCustomContentTransitionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperCustomContentTransition(node);
+    } else {
+      getUINativeModule().swiper.setSwiperCustomContentTransition(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SwiperCustomContentTransitionModifier.identity = Symbol('swiperCustomContentTransition');
+class SwiperOnContentDidScrollModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnContentDidScroll(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnContentDidScroll(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SwiperOnContentDidScrollModifier.identity = Symbol('swiperOnContentDidScroll');
 // @ts-ignore
 if (globalThis.Swiper !== undefined) {
   globalThis.Swiper.attributeModifier = function (modifier) {

@@ -232,6 +232,7 @@ private:
     bool isFormObscured_ = false;
     bool isJsCard_ = true;
     std::unordered_map<FormChildNodeType, RefPtr<FrameNode>> formChildrenNodeMap_;
+    bool isTibetanLanguage_ = false;
 };
 } // namespace NG
 } // namespace Ace

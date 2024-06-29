@@ -186,7 +186,8 @@ public:
     virtual void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) = 0;
     virtual void SetSharedTransition(
         const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) = 0;
-    virtual void SetGeometryTransition(const std::string& id, bool followWithoutTransition = false) = 0;
+    virtual void SetGeometryTransition(const std::string& id,
+        bool followWithoutTransition = false, bool doRegisterSharedTransition = true) = 0;
     virtual void SetMotionPath(const MotionPathOption& option) = 0;
     virtual void SetRenderGroup(bool isRenderGroup) = 0;
     virtual void SetRenderFit(RenderFit renderFit) = 0;
@@ -387,6 +388,9 @@ public:
     virtual void SetLightIlluminated(const uint32_t value) = 0;
     virtual void SetIlluminatedBorderWidth(const Dimension& value) = 0;
     virtual void SetBloom(const float value) = 0;
+    virtual void SetPositionLocalizedEdges(bool needLocalized) = 0;
+    virtual void SetLocalizedMarkAnchor(bool needLocalized) = 0;
+    virtual void SetOffsetLocalizedEdges(bool needLocalized) = 0;
 
 private:
     static std::unique_ptr<ViewAbstractModel> instance_;

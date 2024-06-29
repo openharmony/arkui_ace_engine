@@ -117,6 +117,9 @@ constexpr char NAVIGATION_MODULE_NAME[] = "moduleName";
 constexpr char NAVIGATION_PAGE_PATH[] = "pagePath";
 constexpr char IS_USER_CREATE_STACK[] = "isUserCreateStack";
 
+// font scale
+constexpr float STANDARD_FONT_SCALE = 1.0f;
+
 enum class NavToolbarItemStatus {
     NORMAL = 0,
     DISABLED,

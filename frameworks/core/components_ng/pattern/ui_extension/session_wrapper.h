@@ -61,6 +61,18 @@ enum class SessionType : int32_t {
     CLOUD_CARD = 2,
     SECURITY_UI_EXTENSION_ABILITY = 3,
 };
+
+enum class UIExtensionUsage : uint32_t {
+    MODAL = 0,
+    EMBEDDED = 1,
+    CONSTRAINED_EMBEDDED = 2,
+};
+
+struct SessionConfig {
+    bool isAsyncModalBinding = false;
+    UIExtensionUsage uiExtensionUsage = UIExtensionUsage::MODAL;
+};
+
 class SessionWrapper : public AceType {
     DECLARE_ACE_TYPE(SessionWrapper, AceType);
 
@@ -69,7 +81,7 @@ public:
 
     // About session
     virtual void CreateSession(
-        const AAFwk::Want& want, bool isAsyncModalBinding = false, uint32_t uiExtensionUsage = 0) = 0;
+        const AAFwk::Want& want, const SessionConfig& config) = 0;
     virtual void DestroySession() = 0;
     virtual bool IsSessionValid() = 0;
     virtual int32_t GetSessionId() = 0;

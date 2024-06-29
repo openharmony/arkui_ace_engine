@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 112
+#define ARKUI_FULL_API_VERSION 113
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 112
+#define ARKUI_NODE_API_VERSION 113
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -402,6 +402,11 @@ struct ArkUIConstraintSizeOptions {
     ArkUI_Float32 maxWidth;
     ArkUI_Float32 minHeight;
     ArkUI_Float32 maxHeight;
+};
+
+struct ArkUIGeometryTransitionOptions {
+    ArkUI_Bool follow;
+    ArkUI_Int32 hierarchyStrategy;
 };
 
 struct ArkUIFlexOptions {
@@ -1199,6 +1204,45 @@ struct ArkUIAccessibilityValue {
     ArkUIOptionalCharPtr text;
 };
 
+struct ArkUITranslateOption {
+    ArkUI_Float32 x;
+    ArkUI_Float32 y;
+    ArkUI_Float32 z;
+};
+
+struct ArkUIScaleOption {
+    ArkUI_Float32 x;
+    ArkUI_Float32 y;
+    ArkUI_Float32 z;
+    ArkUI_Float32 centerX;
+    ArkUI_Float32 centerY;
+};
+
+struct ArkUIRotateOption {
+    ArkUI_Float32 x;
+    ArkUI_Float32 y;
+    ArkUI_Float32 z;
+    ArkUI_Float32 angle;
+    ArkUI_Float32 centerX;
+    ArkUI_Float32 centerY;
+    ArkUI_Float32 centerZ;
+    ArkUI_Float32 perspective;
+};
+
+struct ArkUITransitionEffectOption {
+    ArkUI_Int32 type;
+    ArkUI_Float32 opacity;
+    ArkUITranslateOption translate;
+    ArkUIScaleOption scale;
+    ArkUIRotateOption rotate;
+    ArkUI_Int32 move;
+    ArkUITransitionEffectOption* appear;
+    ArkUITransitionEffectOption* disappear;
+    ArkUITransitionEffectOption* combine;
+    ArkUI_Bool hasAnimation;
+    ArkUIAnimateOption animation;
+};
+
 struct ArkUIDragPreViewOptions {
     ArkUI_Int32 mode;
     ArkUI_Int32 modeArrayLength;
@@ -1320,7 +1364,8 @@ struct ArkUICommonModifier {
         const ArkUI_Int32* units, ArkUI_Int32 unitLength);
     void (*setRotateWithoutTransformCenter)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength);
     void (*resetRotate)(ArkUINodeHandle node);
-    void (*setGeometryTransition)(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool options);
+    void (*setGeometryTransition)(
+        ArkUINodeHandle node, ArkUI_CharPtr id, const ArkUIGeometryTransitionOptions* options);
     void (*resetGeometryTransition)(ArkUINodeHandle node);
     void (*setPixelStretchEffect)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
@@ -1608,7 +1653,7 @@ struct ArkUICommonModifier {
     ArkUI_Bool (*getRenderGroup)(ArkUINodeHandle node);
     void (*setOnVisibleAreaChange)(
         ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_Float32* values, ArkUI_Int32 size);
-    ArkUI_CharPtr (*getGeometryTransition)(ArkUINodeHandle node, ArkUI_Bool* options);
+    ArkUI_CharPtr (*getGeometryTransition)(ArkUINodeHandle node, ArkUIGeometryTransitionOptions* options);
     void (*setChainStyle)(ArkUINodeHandle node, ArkUI_Int32 direction, ArkUI_Int32 style);
     void (*getChainStyle)(ArkUINodeHandle node, ArkUI_Int32 (*values)[2]);
     void (*resetChainStyle)(ArkUINodeHandle node);
@@ -1617,8 +1662,6 @@ struct ArkUICommonModifier {
     void (*resetBias)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getColorBlend)(ArkUINodeHandle node);
     ArkUIBlurStyleOptionType (*getForegroundBlurStyle)(ArkUINodeHandle node);
-    void (*resetVisibleAreaChange)(ArkUINodeHandle node);
-    void (*resetAreaChange)(ArkUINodeHandle node);
     void (*setBackgroundImagePixelMap)(ArkUINodeHandle node, void* drawableDescriptor, ArkUI_Int32 repeatIndex);
     void (*setBackgroundImagePixelMapByPixelMapPtr)(ArkUINodeHandle node, void* pixelMapPtr, ArkUI_Int32 repeatIndex);
     void (*setLayoutRect)(ArkUINodeHandle node, ArkUI_Int32 (*values)[4]);
@@ -1647,6 +1690,7 @@ struct ArkUICommonModifier {
     void (*resetPixelRound)(ArkUINodeHandle node);
     void (*setBorderDashParams)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize);
     void (*getExpandSafeArea)(ArkUINodeHandle node, ArkUI_Uint32 (*values)[2]);
+    void (*setTransition)(ArkUINodeHandle node, ArkUITransitionEffectOption* option);
 };
 
 struct ArkUICommonShapeModifier {
@@ -2186,6 +2230,8 @@ struct ArkUISwiperModifier {
     void (*resetSwiperOnAnimationEnd)(ArkUINodeHandle node);
     void (*setSwiperOnGestureSwipe)(ArkUINodeHandle node, void* callback);
     void (*resetSwiperOnGestureSwipe)(ArkUINodeHandle node);
+    void (*setSwiperOnContentDidScroll)(ArkUINodeHandle node, void* callback);
+    void (*resetSwiperOnContentDidScroll)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperControllerModifier {
@@ -3972,8 +4018,20 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorCopyOptions)(ArkUINodeHandle node);
     void (*setRichEditorCaretColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetRichEditorCaretColor)(ArkUINodeHandle node);
+    void (*setOnReady)(ArkUINodeHandle node, void* callback);
+    void (*resetOnReady)(ArkUINodeHandle node);
+    void (*setOnDeleteComplete)(ArkUINodeHandle node, void* callback);
+    void (*resetOnDeleteComplete)(ArkUINodeHandle node);
+    void (*setOnEditingChange)(ArkUINodeHandle node, void* callback);
+    void (*resetOnEditingChange)(ArkUINodeHandle node);
     void (*setRichEditorSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetRichEditorSelectedBackgroundColor)(ArkUINodeHandle node);
+    void (*setRichEditorOnPaste)(ArkUINodeHandle node, void* callback);
+    void (*resetRichEditorOnPaste)(ArkUINodeHandle node);
+    void (*setRichEditorOnCut)(ArkUINodeHandle node, void* callback);
+    void (*resetRichEditorOnCut)(ArkUINodeHandle node);
+    void (*setRichEditorOnCopy)(ArkUINodeHandle node, void* callback);
+    void (*resetRichEditorOnCopy)(ArkUINodeHandle node);
     void (*setRichEditorEnterKeyType)(ArkUINodeHandle node, ArkUI_Uint32 enterKeyType);
     void (*resetRichEditorEnterKeyType)(ArkUINodeHandle node);
 };

@@ -1694,18 +1694,18 @@ HWTEST_F(SelectOverlayManagerTestNg, CreateSelectOverlay, TestSize.Level1)
 }
 
 /**
- * @tc.name: CreateAndMountNode
- * @tc.desc: test CreateAndMountNode
+ * @tc.name: MountNodeToRoot
+ * @tc.desc: test MountNodeToRoot
  * @tc.type: FUNC
  */
-HWTEST_F(SelectOverlayManagerTestNg, CreateAndMountNode, TestSize.Level1)
+HWTEST_F(SelectOverlayManagerTestNg, MountNodeToRoot, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. CreateAndMountNode
+     * @tc.steps: step1. MountNodeToRoot
      */
     auto content = SelectContentOverlayManager(root_);
     bool animation = true;
-    content.CreateAndMountNode(root_, animation);
+    content.MountNodeToRoot(root_, animation);
     EXPECT_EQ(content.selectionHoldId_, -1);
 }
 

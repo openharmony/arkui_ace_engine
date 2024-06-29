@@ -1174,6 +1174,10 @@ void TextFieldModelNG::SetEnableAutoFill(FrameNode* frameNode, bool enableAutoFi
 
 void TextFieldModelNG::SetShowCounter(FrameNode* frameNode, bool value)
 {
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCounterState(false);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value, frameNode);
 }
 

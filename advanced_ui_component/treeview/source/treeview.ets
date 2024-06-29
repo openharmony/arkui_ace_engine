@@ -2296,6 +2296,9 @@ class ListNodeDataSource extends BasicDataSource {
       this.appEventBus.emit(TreeListenType.NODE_MODIFY, backParamModify);
     } else if (operation === MenuOperation.ADD_NODE) {
       let addNodeInfo: NodeInfo = this.listNode[addNodeId];
+      if (addNodeInfo === undefined) {
+        return;
+      }
       let icon: Resource | string | undefined = (addNodeInfo.getNodeItem().imageNode !== undefined) ?
         addNodeInfo.getNodeItem().imageNode?.source : undefined;
       let selectedIcon: Resource | string | undefined = (addNodeInfo.getNodeItem().imageNode !== undefined) ?
@@ -2334,6 +2337,9 @@ class ListNodeDataSource extends BasicDataSource {
         }
       }
       let nodeInfo: NodeInfo = this.listNode[index];
+      if (nodeInfo === undefined) {
+        return;
+      }
       nodeInfo.setIsModify(true);
       if (nodeInfo.getNodeItem().mainTitleNode === null) {
         return; // no title
@@ -2358,6 +2364,9 @@ class ListNodeDataSource extends BasicDataSource {
     index = nodeId;
     if (operation === MenuOperation.COMMIT_NODE) {
       let nodeInfo: NodeInfo = this.listNode[index];
+      if (nodeInfo === undefined) {
+        return;
+      }
       nodeInfo.setTitleAndInputTextStatus(false);
       nodeInfo.setIsModify(false);
       this.setImageSource(index, InteractionStatus.FinishEdit);
@@ -2369,6 +2378,9 @@ class ListNodeDataSource extends BasicDataSource {
 
   public setPopUpInfo(popUpType: PopUpType, inputError: InputError, isShow: boolean, index: number) {
     let nodeInfo: NodeInfo = this.listNode[index];
+    if (nodeInfo === undefined) {
+      return;
+    }
     nodeInfo.setPopUpIsShow(isShow);
     // this.listNode index to lazyForEach index.
     let lazyForEachIndex: number = this.loadedNodeIdAndIndexMap.get(nodeInfo.getCurrentNodeId()) as number;
@@ -3355,7 +3367,11 @@ export struct TreeViewInner {
           }
 
           else if (event.type === TouchType.Up) {
-            this.item.setNodeColor(this.treeViewTheme.itemSelectedBgColor);
+            if (!(typeof this.treeViewTheme.itemSelectedBgColor === 'string')) {
+              this.item.setNodeColor(COLOR_SELECT)
+            } else {
+              this.item.setNodeColor(this.treeViewTheme.itemSelectedBgColor)
+            }
             if (this.item.getNodeItem().imageNode !== null) {
               this.item.getNodeItem().imageNode?.setImageSource(InteractionStatus.Selected);
               this.item.imageSource = this.item.getNodeItem().imageNode?.source;

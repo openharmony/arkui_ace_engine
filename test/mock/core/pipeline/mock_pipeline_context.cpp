@@ -169,7 +169,8 @@ void PipelineContext::FlushTouchEvents() {}
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event) {}
 
-void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action) {}
+void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,
+    const RefPtr<NG::FrameNode>& node) {}
 
 void PipelineContext::OnIdle(int64_t deadline) {}
 
@@ -625,6 +626,16 @@ void PipelineContext::CheckAndLogLastReceivedAxisEventInfo(int32_t eventId, Axis
 void PipelineContext::CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, AxisAction action) {}
 
 void PipelineContext::PreLayout(uint64_t nanoTimestamp, uint32_t frameCount) {}
+
+void PipelineContext::AddFrameNodeChangeListener(const RefPtr<FrameNode>& node) {}
+
+void PipelineContext::RemoveFrameNodeChangeListener(const RefPtr<FrameNode>& node) {}
+
+void PipelineContext::AddChangedFrameNode(const RefPtr<FrameNode>& node) {}
+
+void PipelineContext::FlushNodeChangeFlag() {}
+
+void PipelineContext::CleanNodeChangeFlag() {}
 
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================

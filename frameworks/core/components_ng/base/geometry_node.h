@@ -57,7 +57,6 @@ public:
 
     SizeF GetMarginFrameSize(bool withSafeArea = false) const
     {
-        // TODO: add margin in negative.
         auto size = frame_.rect_.GetSize();
         if (withSafeArea) {
             size += selfAdjust_.GetSize();
@@ -70,7 +69,6 @@ public:
 
     OffsetF GetMarginFrameOffset(bool withSafeArea = false) const
     {
-        // TODO: add margin in negative.
         auto offset = frame_.rect_.GetOffset();
         if (withSafeArea) {
             offset += selfAdjust_.GetOffset();

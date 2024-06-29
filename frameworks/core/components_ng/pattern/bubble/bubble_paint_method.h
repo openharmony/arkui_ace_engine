@@ -54,10 +54,6 @@ public:
         return [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
             auto bubble = weak.Upgrade();
             if (bubble) {
-                auto context = paintWrapper->GetRenderContext();
-                if (context) {
-                    context->ClearDrawCommands();
-                }
                 bubble->PaintInnerBorder(canvas, paintWrapper);
                 bubble->PaintOuterBorder(canvas, paintWrapper);
             }

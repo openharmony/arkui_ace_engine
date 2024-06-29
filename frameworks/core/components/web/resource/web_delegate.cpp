@@ -1748,6 +1748,9 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
     }
     incognitoMode_ =
         useNewPipe ? webPattern->GetIncognitoMode() : webCom->GetIncognitoMode();
+    auto sharedRenderProcessToken =
+        useNewPipe ? webPattern->GetSharedRenderProcessToken() : webCom->GetSharedRenderProcessToken();
+    sharedRenderProcessToken_ = sharedRenderProcessToken ? sharedRenderProcessToken.value() : "";
     context_ = context;
     RegisterSurfacePositionChangedCallback();
     auto pipelineContext = context.Upgrade();
@@ -2487,6 +2490,7 @@ void WebDelegate::InitWebViewWithWindow()
                 return;
             }
 
+            initArgs->SetSharedRenderProcessToken(delegate->sharedRenderProcessToken_);
             delegate->nweb_ =
                 OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
                     delegate->window_.GetRefPtr(), initArgs,
@@ -2753,7 +2757,7 @@ void WebDelegate::RegisterSurfaceOcclusionChangeFun()
 void WebDelegate::RegisterAvoidAreaChangeListener()
 {
     constexpr static int32_t PLATFORM_VERSION_TEN = 10;
-    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::GetContainer(instanceId_));
     CHECK_NULL_VOID(container);
     auto pipeline = container->GetPipelineContext();
     if (pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN &&
@@ -2777,13 +2781,14 @@ void WebDelegate::RegisterAvoidAreaChangeListener()
 void WebDelegate::UnregisterAvoidAreaChangeListener()
 {
     constexpr static int32_t PLATFORM_VERSION_TEN = 10;
-    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::GetContainer(instanceId_));
     CHECK_NULL_VOID(container);
     auto pipeline = container->GetPipelineContext();
     if (pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN &&
         (pipeline->GetIsAppWindow() || container->IsUIExtensionWindow())) {
         if (!avoidAreaChangedListener_) return;
         OHOS::Rosen::WMError regCode = container->UnregisterAvoidAreaChangeListener(avoidAreaChangedListener_);
+        avoidAreaChangedListener_ = nullptr;
         TAG_LOGI(AceLogTag::ACE_WEB, "UnregisterAvoidAreaChangeListener result:%{public}d", (int) regCode);
     } else {
         TAG_LOGI(AceLogTag::ACE_WEB, "CANNOT UnregisterAvoidAreaChangeListener %{public}d %{public}d %{public}d",
@@ -2813,6 +2818,8 @@ void WebDelegate::InitWebViewWithSurface()
             bool isEnhanceSurface = delegate->isEnhanceSurface_;
             initArgs->SetIsEnhanceSurface(isEnhanceSurface);
             initArgs->SetIsPopup(delegate->isPopup_);
+            initArgs->SetSharedRenderProcessToken(delegate->sharedRenderProcessToken_);
+
             if (!delegate->hapPath_.empty()) {
                 initArgs->AddArg(std::string("--user-hap-path=").append(delegate->hapPath_));
             }
@@ -4820,9 +4827,40 @@ void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEve
         CHECK_NULL_VOID(webNode);
         accessibilityId = webNode->GetAccessibilityId();
     }
+    if (eventType == AccessibilityEventType::FOCUS) {
+        TextBlurReport(accessibilityId);
+    }
     event.nodeId = accessibilityId;
     event.type = eventType;
     context->SendEventToAccessibility(event);
+}
+
+void WebDelegate::TextBlurReport(int64_t accessibilityId)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    auto textBlurCallback = webPattern->GetTextBlurCallback();
+    CHECK_NULL_VOID(textBlurCallback);
+    auto lastFocusNode = webPattern->GetAccessibilityNodeById(lastFocusInputId_);
+    if (lastFocusNode && lastFocusInputId_ != accessibilityId) {
+        if (lastFocusNode->GetIsPassword()) {
+            TAG_LOGW(AceLogTag::ACE_WEB, "the input type is password, do not report");
+        } else {
+            std::string blurText = lastFocusNode->GetContent();
+            if (!blurText.empty()) {
+                TAG_LOGD(AceLogTag::ACE_WEB, "report text blur, the content length is %{public}u",
+                    static_cast<int32_t>(blurText.length()));
+                textBlurCallback(accessibilityId, blurText);
+            }
+        }
+    }
+    if (accessibilityId != 0) {
+        auto focusNode = webPattern->GetAccessibilityNodeById(accessibilityId);
+        if (focusNode && focusNode->GetIsEditable()) {
+            // record last editable focus id
+            lastFocusInputId_ = accessibilityId;
+        }
+    }
 }
 
 void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
@@ -5878,6 +5916,8 @@ void WebDelegate::SetSurface(const sptr<Surface>& surface)
     CHECK_NULL_VOID(rosenRenderContext);
     rsNode_ = rosenRenderContext->GetRSNode();
     CHECK_NULL_VOID(rsNode_);
+    surfaceRsNode_ = webPattern->GetSurfaceRSNode();
+    CHECK_NULL_VOID(surfaceRsNode_);
     surfaceNodeId_ = webPattern->GetWebSurfaceNodeId();
 }
 #endif
@@ -6545,16 +6585,20 @@ bool WebDelegate::OnHandleOverrideLoading(std::shared_ptr<OHOS::NWeb::NWebUrlRes
 void WebDelegate::OnDetachContext()
 {
     UnRegisterScreenLockFunction();
+    UnregisterSurfacePositionChangedCallback();
+    UnregisterAvoidAreaChangeListener();
 }
 
 void WebDelegate::OnAttachContext(const RefPtr<NG::PipelineContext> &context)
 {
     instanceId_ = context->GetInstanceId();
     context_ = context;
+    RegisterSurfacePositionChangedCallback();
+    RegisterAvoidAreaChangeListener();
     if (nweb_) {
         auto screenLockCallback = std::make_shared<NWebScreenLockCallbackImpl>(context);
         nweb_->RegisterScreenLockFunction(instanceId_, screenLockCallback);
-        auto windowId = context->GetWindowId();
+        auto windowId = context->GetFocusWindowId();
         nweb_->SetWindowId(windowId);
     }
 }

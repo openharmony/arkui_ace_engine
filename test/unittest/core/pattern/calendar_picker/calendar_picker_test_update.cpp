@@ -1241,4 +1241,360 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles023, TestSize
     auto testval3 = buttonLayoutProperty->GetFontSizeValue();
     EXPECT_EQ(testval3, Dimension(1));
 }
+
+/**
+ * @tc.name: CalendarPickerPatternTest050
+ * @tc.desc: InitDateIndex Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerPatternTest050, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+
+    pickerPattern->SetCalendarEdgeAlign(CalendarEdgeAlign::EDGE_ALIGN_START);
+    pickerPattern->UpdateEdgeAlign();
+    EXPECT_EQ(layoutProperty->GetDialogAlignType(), CalendarEdgeAlign::EDGE_ALIGN_END);
+
+    pickerPattern->SetCalendarEdgeAlign(CalendarEdgeAlign::EDGE_ALIGN_END);
+    pickerPattern->UpdateEdgeAlign();
+    EXPECT_EQ(layoutProperty->GetDialogAlignType(), CalendarEdgeAlign::EDGE_ALIGN_START);
+
+    pickerPattern->SetCalendarEdgeAlign(CalendarEdgeAlign::EDGE_ALIGN_CENTER);
+    pickerPattern->UpdateEdgeAlign();
+    EXPECT_EQ(layoutProperty->GetDialogAlignType(), CalendarEdgeAlign::EDGE_ALIGN_CENTER);
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest051
+ * @tc.desc: HandleYearKeyEvent Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerPatternTest051, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    auto json = JsonUtil::Create(true);
+    pickerPattern->isKeyWaiting_ = true;
+    json->Put("year", 999);
+    json->Put("month", 1);
+    json->Put("day", 1);
+    pickerPattern->SetDate(json->ToString());
+    pickerPattern->yearPrefixZeroCount_ = 1;
+    pickerPattern->yearEnterCount_ = 2;
+    EXPECT_TRUE(pickerPattern->HandleYearKeyEvent(0));
+
+    pickerPattern->isKeyWaiting_ = true;
+    json->Put("year", 999);
+    json->Put("month", 1);
+    json->Put("day", 1);
+    pickerPattern->SetDate(json->ToString());
+    pickerPattern->yearPrefixZeroCount_ = 0;
+    pickerPattern->yearEnterCount_ = 2;
+    EXPECT_TRUE(pickerPattern->HandleYearKeyEvent(1));
+
+    pickerPattern->isKeyWaiting_ = true;
+    json->Put("year", 999);
+    json->Put("month", 1);
+    json->Put("day", 1);
+    pickerPattern->SetDate(json->ToString());
+    pickerPattern->yearPrefixZeroCount_ = 3;
+    pickerPattern->yearEnterCount_ = 2;
+    EXPECT_FALSE(pickerPattern->HandleYearKeyEvent(0));
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest052
+ * @tc.desc: HandleYearKeyEvent Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerPatternTest052, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    auto json = JsonUtil::Create(true);
+    pickerPattern->isKeyWaiting_ = true;
+    json->Put("year", 0);
+    json->Put("month", 1);
+    json->Put("day", 1);
+    pickerPattern->SetDate(json->ToString());
+    pickerPattern->yearPrefixZeroCount_ = 1;
+    pickerPattern->yearEnterCount_ = 2;
+    EXPECT_TRUE(pickerPattern->HandleYearKeyEvent(1));
+
+    pickerPattern->isKeyWaiting_ = true;
+    json->Put("year", 0);
+    json->Put("month", 1);
+    json->Put("day", 1);
+    pickerPattern->SetDate(json->ToString());
+    pickerPattern->yearPrefixZeroCount_ = 0;
+    pickerPattern->yearEnterCount_ = 2;
+    EXPECT_TRUE(pickerPattern->HandleYearKeyEvent(1));
+
+    pickerPattern->isKeyWaiting_ = true;
+    json->Put("year", 0);
+    json->Put("month", 1);
+    json->Put("day", 1);
+    pickerPattern->SetDate(json->ToString());
+    pickerPattern->yearPrefixZeroCount_ = 1;
+    pickerPattern->yearEnterCount_ = 3;
+    EXPECT_TRUE(pickerPattern->HandleYearKeyEvent(1));
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest053
+ * @tc.desc: HandleYearKeyEvent Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerPatternTest053, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    auto json = JsonUtil::Create(true);
+    pickerPattern->isKeyWaiting_ = true;
+    json->Put("year", 0);
+    json->Put("month", 1);
+    json->Put("day", 1);
+    pickerPattern->SetDate(json->ToString());
+    pickerPattern->yearPrefixZeroCount_ = 1;
+    pickerPattern->yearEnterCount_ = 3;
+    EXPECT_TRUE(pickerPattern->HandleYearKeyEvent(0));
+
+    pickerPattern->isKeyWaiting_ = true;
+    json->Put("year", 0);
+    json->Put("month", 1);
+    json->Put("day", 1);
+    pickerPattern->SetDate(json->ToString());
+    pickerPattern->yearPrefixZeroCount_ = 0;
+    pickerPattern->yearEnterCount_ = 1;
+    EXPECT_TRUE(pickerPattern->HandleYearKeyEvent(0));
+
+    pickerPattern->isKeyWaiting_ = true;
+    json->Put("year", 0);
+    json->Put("month", 1);
+    json->Put("day", 1);
+    pickerPattern->SetDate(json->ToString());
+    pickerPattern->yearPrefixZeroCount_ = 0;
+    pickerPattern->yearEnterCount_ = 2;
+    EXPECT_TRUE(pickerPattern->HandleYearKeyEvent(0));
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest054
+ * @tc.desc: HandleZeroStartTaskCallback Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerPatternTest054, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    pickerPattern->taskCount_ = 2;
+    pickerPattern->HandleZeroStartTaskCallback();
+    EXPECT_EQ(pickerPattern->taskCount_, 1);
+
+    pickerPattern->taskCount_ = 0;
+    pickerPattern->isKeyWaiting_ = true;
+    pickerPattern->HandleZeroStartTaskCallback();
+    EXPECT_EQ(pickerPattern->taskCount_, 0);
+    EXPECT_FALSE(pickerPattern->isKeyWaiting_);
+
+    pickerPattern->taskCount_ = 0;
+    pickerPattern->isKeyWaiting_ = false;
+    pickerPattern->HandleZeroStartTaskCallback();
+    EXPECT_EQ(pickerPattern->taskCount_, 0);
+    EXPECT_FALSE(pickerPattern->isKeyWaiting_);
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest055
+ * @tc.desc: SetSelectDateWithNode Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerPatternTest055, TestSize.Level1)
+{
+    CalendarSettingData settingData;
+    CalendarPickerModelNG calendarPickerModel;
+    calendarPickerModel.Create(settingData);
+    DimensionOffset offset;
+    calendarPickerModel.SetEdgeAlign(CalendarEdgeAlign::EDGE_ALIGN_START, offset);
+    PickerTextStyle textStyle;
+    calendarPickerModel.SetTextStyle(textStyle);
+    auto onChange = [](const std::string& /* info */) {};
+    calendarPickerModel.SetOnChange(onChange);
+    calendarPickerModel.SetChangeEvent(onChange);
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto contentFrameNode = FrameNode::GetOrCreateFrameNode(
+        V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<StackPattern>(); });
+    ASSERT_NE(contentFrameNode, nullptr);
+
+    auto yearNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(yearNode, nullptr);
+    yearNode->MountToParent(contentFrameNode);
+
+    auto textNode1 = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode1, nullptr);
+    textNode1->MountToParent(contentFrameNode);
+
+    auto monthNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(monthNode, nullptr);
+    monthNode->MountToParent(contentFrameNode);
+
+    auto textNode2 = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode2, nullptr);
+    textNode2->MountToParent(contentFrameNode);
+
+    auto dayNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(dayNode, nullptr);
+    dayNode->MountToParent(contentFrameNode);
+
+    contentFrameNode->MountToParent(frameNode);
+    calendarPickerModel.SetSelectDateWithNode(frameNode.GetRawPtr(), 2000, 1, 1);
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest056
+ * @tc.desc: SetSelectDateWithNode Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerPatternTest056, TestSize.Level1)
+{
+    CalendarSettingData settingData;
+    CalendarPickerModelNG calendarPickerModel;
+    calendarPickerModel.Create(settingData);
+    DimensionOffset offset;
+    calendarPickerModel.SetEdgeAlign(CalendarEdgeAlign::EDGE_ALIGN_START, offset);
+    PickerTextStyle textStyle;
+    calendarPickerModel.SetTextStyle(textStyle);
+    auto onChange = [](const std::string& /* info */) {};
+    calendarPickerModel.SetOnChange(onChange);
+    calendarPickerModel.SetChangeEvent(onChange);
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto contentFrameNode = FrameNode::GetOrCreateFrameNode(
+        V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<StackPattern>(); });
+    ASSERT_NE(contentFrameNode, nullptr);
+
+    auto yearNode = FrameNode::GetOrCreateFrameNode(
+        V2::BLANK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<StackPattern>(); });
+    ASSERT_NE(yearNode, nullptr);
+    yearNode->MountToParent(contentFrameNode);
+
+    auto textNode1 = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode1, nullptr);
+    textNode1->MountToParent(contentFrameNode);
+
+    auto monthNode = FrameNode::GetOrCreateFrameNode(
+        V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<StackPattern>(); });
+    ASSERT_NE(monthNode, nullptr);
+    monthNode->MountToParent(contentFrameNode);
+
+    auto textNode2 = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode2, nullptr);
+    textNode2->MountToParent(contentFrameNode);
+
+    auto dayNode = FrameNode::GetOrCreateFrameNode(
+        V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<StackPattern>(); });
+    ASSERT_NE(dayNode, nullptr);
+    dayNode->MountToParent(contentFrameNode);
+
+    contentFrameNode->MountToParent(frameNode);
+    calendarPickerModel.SetSelectDateWithNode(frameNode.GetRawPtr(), 2000, 1, 1);
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest057
+ * @tc.desc: SetSelectDateWithNode Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerPatternTest057, TestSize.Level1)
+{
+    CalendarSettingData settingData;
+    CalendarPickerModelNG calendarPickerModel;
+    calendarPickerModel.Create(settingData);
+    DimensionOffset offset;
+    calendarPickerModel.SetEdgeAlign(CalendarEdgeAlign::EDGE_ALIGN_START, offset);
+    PickerTextStyle textStyle;
+    calendarPickerModel.SetTextStyle(textStyle);
+    auto onChange = [](const std::string& /* info */) {};
+    calendarPickerModel.SetOnChange(onChange);
+    calendarPickerModel.SetChangeEvent(onChange);
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+
+    calendarPickerModel.SetSelectDateWithNode(frameNode.GetRawPtr(), 2000, 1, 1);
+    calendarPickerModel.SetSelectDateWithNode(frameNode.GetRawPtr(), 0, 0, 0);
+}
 } // namespace OHOS::Ace::NG

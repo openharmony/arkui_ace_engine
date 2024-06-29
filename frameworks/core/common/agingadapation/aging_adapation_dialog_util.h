@@ -31,6 +31,8 @@ public:
     static RefPtr<FrameNode> ShowLongPressDialog(const std::string& message, const SymbolSourceInfo& symbolSourceInfo,
         const std::vector<Color>& symbolColorList = {});
     static float GetDialogBigFontSizeScale();
+    static float GetDialogLargeFontSizeScale();
+    static float GetDialogMaxFontSizeScale();
 
 private:
     static void CreateDialogTextNode(const RefPtr<FrameNode>& columnNode, const std::string& message);

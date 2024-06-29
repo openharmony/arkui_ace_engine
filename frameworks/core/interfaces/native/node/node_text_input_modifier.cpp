@@ -1941,5 +1941,46 @@ void SetTextInputOnTextContentScroll(ArkUINodeHandle node, void* extraParam)
     };
     TextFieldModelNG::SetOnContentScroll(frameNode, std::move(onScroll));
 }
+
+void ResetOnTextInputChange(ArkUINodeHandle node)
+{
+    GetTextInputModifier()->resetTextInputOnChange(node);
+}
+void ResetTextInputOnSubmit(ArkUINodeHandle node)
+{
+    GetTextInputModifier()->resetTextInputOnSubmitWithEvent(node);
+}
+void ResetOnTextInputCut(ArkUINodeHandle node)
+{
+    GetTextInputModifier()->resetTextInputOnCut(node);
+}
+void ResetOnTextInputPaste(ArkUINodeHandle node)
+{
+    GetTextInputModifier()->resetTextInputOnPaste(node);
+}
+void ResetOnTextInputSelectionChange(ArkUINodeHandle node)
+{
+    GetTextInputModifier()->resetTextInputOnTextSelectionChange(node);
+}
+void ResetOnTextInputEditChange(ArkUINodeHandle node)
+{
+    GetTextInputModifier()->resetTextInputOnEditChange(node);
+}
+void ResetOnTextInputContentSizeChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnContentSizeChange(frameNode, nullptr);
+}
+void ResetOnTextInputInputFilterError(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetInputFilterError(frameNode, nullptr);
+}
+void ResetTextInputOnTextContentScroll(ArkUINodeHandle node)
+{
+    GetTextInputModifier()->resetTextInputOnContentScroll(node);
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

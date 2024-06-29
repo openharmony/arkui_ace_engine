@@ -44,6 +44,7 @@ private:
         float startX, float startY, float endX, float endY, bool haveOffset);
     std::shared_ptr<RSPath> GetPathByPoints(const std::vector<TextPoint>& points);
     void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas);
+    void PaintMagnifierToPixelMap(RSCanvas& canvas, RefPtr<PixelMap> pixelMap);
 
     WeakPtr<Pattern> pattern_;
     MagnifierRect magnifierRect_;

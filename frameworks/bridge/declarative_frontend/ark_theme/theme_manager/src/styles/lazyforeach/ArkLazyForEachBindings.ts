@@ -19,7 +19,7 @@ if (globalThis.LazyForEach !== undefined) {
         paramViewId: any,
         paramParentView: any,
         paramDataSource: any,
-        paramItemGenerator: (item: any) => void,
+        paramItemGenerator: (...params: any[]) => void,
         paramKeyGenerator: any,
         paramUpdateChangedNode: any
     ) {
@@ -45,15 +45,13 @@ if (globalThis.LazyForEach !== undefined) {
         }
     
         // create wrapper under original itemGenerator to add enter/exit callbacks for ThemeScopeManager
-        const itemGeneratorWrapper = _item => {
-            const item = _item
-            {
-                const result = ArkThemeScopeManager.getInstance().onDeepRenderScopeEnter(themeScope);
-                paramItemGenerator(item);
-                if (result === true) {
-                    ArkThemeScopeManager.getInstance().onDeepRenderScopeExit();
-                }
+        const itemGeneratorWrapper = (...params: any[]) => {
+            const result = ArkThemeScopeManager.getInstance().onDeepRenderScopeEnter(themeScope);
+            paramItemGenerator(...params);
+            if (result === true) {
+                ArkThemeScopeManager.getInstance().onDeepRenderScopeExit();
             }
+        
         }
     
         // pass itemGeneratorWrapper instead of original paramItemGenerator to LazyForEach

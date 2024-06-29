@@ -139,7 +139,7 @@ public:
 
     void FireOnChange(const std::string& value, TextRange& range)
     {
-        if (lastValue_.has_value() && lastValue_.value() == value) {
+        if (lastValue_.has_value() && lastValue_.value() == value && lastPreviewRange_ == range) {
             return;
         }
         if (onValueChangeEvent_) {
@@ -152,6 +152,7 @@ public:
             onChange_(value, range);
         }
         lastValue_ = value;
+        lastPreviewRange_ = range;
     }
 
     void SetOnContentSizeChange(std::function<void(float, float)>&& func)
@@ -364,6 +365,7 @@ public:
 
 private:
     std::optional<std::string> lastValue_;
+    TextRange lastPreviewRange_ {};
 
     OnScrollEvent onScrollEvent_;
     OnScrollBeginEvent onScrollBeginEvent_;
