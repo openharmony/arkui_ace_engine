@@ -76,7 +76,7 @@ void ListCommonTestNg::MouseSelect(Offset start, Offset end)
         info.SetRawGlobalLocation(end);
         pattern_->HandleDragUpdate(info);
     }
-    pattern_->HandleDragEnd(info);
+    pattern_->HandleDragEnd();
 }
 
 AssertionResult ListCommonTestNg::IsEqualNextFocusNode(FocusStep step, int32_t currentIndex, int32_t expectNextIndex)

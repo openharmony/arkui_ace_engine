@@ -54,7 +54,7 @@ void GridCommonTestNg::MouseSelect(Offset start, Offset end)
         info.SetRawGlobalLocation(end);
         pattern_->HandleDragUpdate(info);
     }
-    pattern_->HandleDragEnd(info);
+    pattern_->HandleDragEnd();
 }
 
 int32_t GridCommonTestNg::FindFocusNodeIndex(RefPtr<FocusHub>& focusNode)

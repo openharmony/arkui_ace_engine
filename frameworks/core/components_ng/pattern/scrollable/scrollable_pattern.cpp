@@ -1349,9 +1349,13 @@ void ScrollablePattern::InitMouseEvent()
         auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->HandleDragEnd(info);
+            pattern->HandleDragEnd();
         };
-        GestureEventNoParameter actionCancelTask;
+        GestureEventNoParameter actionCancelTask = [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleDragEnd();
+        };
         boxSelectPanEvent_ = MakeRefPtr<PanEvent>(std::move(actionStartTask), std::move(actionUpdateTask),
             std::move(actionEndTask), std::move(actionCancelTask));
     }
@@ -1396,7 +1400,7 @@ void ScrollablePattern::HandleDragUpdate(const GestureEvent& info)
         return;
     }
     if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON) {
-        HandleDragEnd(info);
+        HandleDragEnd();
         return;
     }
     lastMouseMove_ = info;
@@ -1412,7 +1416,7 @@ void ScrollablePattern::HandleDragUpdate(const GestureEvent& info)
     SelectWithScroll();
 }
 
-void ScrollablePattern::HandleDragEnd(const GestureEvent& info)
+void ScrollablePattern::HandleDragEnd()
 {
     TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Box select end");
     mouseStartOffset_.Reset();
