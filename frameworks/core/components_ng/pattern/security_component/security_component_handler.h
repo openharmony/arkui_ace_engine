@@ -69,6 +69,7 @@ private:
     static bool CheckParentNodesEffect(RefPtr<FrameNode>& node);
     static void GetVisibleRect(RefPtr<FrameNode>& node, RectF& visibleRect);
     static double CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect);
+    static bool GetWindowSceneWindowId(RefPtr<FrameNode>& node, uint32_t& windId);
     static bool InitBaseInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
     static bool InitChildInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
     static bool CheckSecurityComponentStatus(const RefPtr<UINode>& root, std::vector<RectF>& rect, int32_t secNodeId);

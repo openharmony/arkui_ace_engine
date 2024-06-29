@@ -45,13 +45,16 @@ ohos_unittest("security_component_test_ng") {
     sources += [
       "$ace_root/frameworks/core/components_ng/pattern/security_component/security_component_handler.cpp",
       "$ace_root/frameworks/core/components_ng/pattern/security_component/security_component_probe.cpp",
+      "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/system_window_scene.cpp",
       "$ace_root/test/mock/adapter/mock_ace_container.cpp",
     ]
     external_deps = [
       "ability_runtime:abilitykit_native",
       "c_utils:utils",
+      "graphic_2d:librender_service_client",
       "input:libmmi-client",
       "napi:ace_napi",
+      "window_manager:scene_session",
     ]
   }
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
