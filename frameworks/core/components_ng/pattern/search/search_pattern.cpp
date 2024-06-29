@@ -959,7 +959,9 @@ FocusPattern SearchPattern::GetFocusPattern() const
 {
     FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
     focusPattern.SetIsFocusActiveWhenFocused(true);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, FocusPattern());
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, FocusPattern());
     auto appTheme = pipeline->GetTheme<AppTheme>();
     CHECK_NULL_RETURN(appTheme, FocusPattern());
