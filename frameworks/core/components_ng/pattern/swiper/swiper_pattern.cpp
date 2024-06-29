@@ -613,6 +613,7 @@ void SwiperPattern::InitSurfaceChangedCallback()
                 }
                 swiper->currentOffset_ = 0.0f;
                 swiper->itemPosition_.clear();
+                swiper->placeItemWidth_.reset();
                 swiper->isVoluntarilyClear_ = true;
                 swiper->jumpIndex_ = currentIndex;
                 swiper->MarkDirtyNodeSelf();
