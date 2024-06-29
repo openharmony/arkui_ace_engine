@@ -265,6 +265,15 @@ void SearchPattern::SetSearchFieldAccessibilityAction()
         GestureEvent gestureEvent;
         callBack(gestureEvent);
     });
+
+    auto textAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    textAccessibilityProperty->SetActionSetText([host](const std::string& value) {
+        auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+        CHECK_NULL_VOID(textFieldFrameNode);
+        auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(textFieldPattern);
+        textFieldPattern->InsertValue(value);
+    });
 }
 
 void SearchPattern::HandleBackgroundColor()
