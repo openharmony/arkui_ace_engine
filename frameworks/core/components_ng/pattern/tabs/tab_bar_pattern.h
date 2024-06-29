@@ -546,7 +546,6 @@ private:
     AnimationStartEventPtr animationStartEvent_;
     AnimationEndEventPtr animationEndEvent_;
 
-
     float bigScale_ = 0.0f;
     float largeScale_ = 0.0f;
     float maxScale_ = 0.0f;
