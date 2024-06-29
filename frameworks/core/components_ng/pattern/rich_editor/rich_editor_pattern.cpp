@@ -1710,6 +1710,16 @@ void RichEditorPattern::UpdateSpanStyle(
     CloseSystemMenu();
 }
 
+void RichEditorPattern::SetResultObjectText(ResultObject& resultObject, const RefPtr<SpanItem>& spanItem)
+{
+    CHECK_NULL_VOID(spanItem);
+    if (spanItem == previewTextRecord_.previewTextSpan) {
+        resultObject.previewText = spanItem->content;
+    } else {
+        resultObject.valueString = spanItem->content;
+    }
+}
+
 std::string RichEditorPattern::GetContentBySpans()
 {
     std::stringstream ss;
@@ -6732,6 +6742,10 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
     bool hasFocus = HasFocus();
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "range=[%{public}d,%{public}d], hasFocus=%{public}d", start, end, hasFocus);
     CHECK_NULL_VOID(hasFocus);
+    if (IsPreviewTextInputting()) {
+        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "SetSelection failed for previewText inputting");
+        return;
+    }
     if (start == -1 && end == -1) {
         start = 0;
         end = GetTextContentLength();

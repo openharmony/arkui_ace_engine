@@ -1859,11 +1859,17 @@ ResultObject TextPattern::GetTextResultObject(RefPtr<UINode> uinode, int32_t ind
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
         resultObject.type = SelectSpanType::TYPESPAN;
-        resultObject.valueString = spanItem->content;
+        SetResultObjectText(resultObject, spanItem);
         auto spanNode = DynamicCast<SpanNode>(uinode);
         resultObject.textStyle = GetTextStyleObject(spanNode);
     }
     return resultObject;
+}
+
+void TextPattern::SetResultObjectText(ResultObject& resultObject, const RefPtr<SpanItem>& spanItem)
+{
+    CHECK_NULL_VOID(spanItem);
+    resultObject.valueString = spanItem->content;
 }
 
 ResultObject TextPattern::GetSymbolSpanResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end)
