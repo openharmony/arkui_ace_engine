@@ -490,6 +490,8 @@ public:
     bool BeforeAddImage(RichEditorChangeValue& changeValue, const ImageSpanOptions& options, int32_t insertIndex);
     RefPtr<SpanString> ToStyledString(int32_t start, int32_t length);
     SelectionInfo FromStyledString(const RefPtr<SpanString>& spanString);
+    bool BeforeAddSymbol(RichEditorChangeValue& changeValue, const SymbolSpanOptions& options);
+    void AfterAddSymbol(RichEditorChangeValue& changeValue);
 
     bool IsUsingMouse() const
     {

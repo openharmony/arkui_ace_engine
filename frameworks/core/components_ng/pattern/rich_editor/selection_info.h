@@ -23,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/resource/resource_object.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/event/ace_events.h"
 #include "core/event/axis_event.h"
@@ -31,6 +32,9 @@ namespace OHOS::Ace::NG {
 struct SpanItem;
 }
 namespace OHOS::Ace {
+namespace {
+Color DEFAULT_SYMBOL_COLOR = Color::BLACK;
+}
 using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 enum GetSpansMethod : int32_t {
     GETSPANS,
@@ -73,6 +77,26 @@ struct SymbolSpanStyle {
     int32_t fontWeight = 0;
     uint32_t renderingStrategy;
     uint32_t effectStrategy;
+
+    SymbolSpanStyle() {}
+    SymbolSpanStyle(const TextStyle& style)
+    {
+        fontSize = style.GetFontSize().ConvertToVp();
+        lineHeight = style.GetLineHeight().ConvertToPx();
+        letterSpacing = style.GetLetterSpacing().ConvertToPx();
+        lineSpacing = style.GetLineSpacing().ConvertToPx();
+
+        for (const auto& color : style.GetSymbolColorList()) {
+            symbolColor += color.ColorToString() + ",";
+        }
+        symbolColor = symbolColor.substr(0, symbolColor.size() - 1);
+        symbolColor = symbolColor.empty() ? DEFAULT_SYMBOL_COLOR.ColorToString() : symbolColor;
+
+        fontFeature = style.GetFontFeatures();
+        fontWeight = static_cast<int32_t>(style.GetFontWeight());
+        renderingStrategy = style.GetRenderStrategy();
+        effectStrategy = style.GetEffectStrategy();
+    }
 };
 
 struct TextStyleResult {
