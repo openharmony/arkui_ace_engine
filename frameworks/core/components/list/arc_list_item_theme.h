@@ -23,15 +23,15 @@
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace {
-namespace {
-constexpr Dimension ARC_LISTITEM_MARGIN_PADDING = 12.0_vp;
-constexpr Dimension ARC_LISTITEM_LISTITEMGROUP_INTERVAL = 4.0_vp;
-constexpr Dimension ARC_LISTITEMGROUP_PADDING = 4.0_vp;
-constexpr Dimension ARC_LISTITEM_PADDING = 8.0_vp;
-constexpr double ARC_SELECTED_ALPHA = 0.1;
-constexpr int32_t ARC_LISTITEM_HOVER_DURATION = 250;
-constexpr int32_t ARC_LISTITEM_HOVER_TO_PRESS_DURATION = 100;
-} // namespace
+// namespace {
+// constexpr Dimension ARC_LISTITEM_MARGIN_PADDING = 12.0_vp;
+// constexpr Dimension ARC_LISTITEM_LISTITEMGROUP_INTERVAL = 4.0_vp;
+// constexpr Dimension ARC_LISTITEMGROUP_PADDING = 4.0_vp;
+// constexpr Dimension ARC_LISTITEM_PADDING = 8.0_vp;
+// constexpr double ARC_SELECTED_ALPHA = 0.1;
+// constexpr int32_t ARC_LISTITEM_HOVER_DURATION = 250;
+// constexpr int32_t ARC_LISTITEM_HOVER_TO_PRESS_DURATION = 100;
+// } // namespace
 
 /**
  * ArcListItemTheme defines styles of arc list or grid item. ArcListItemTheme should be built
