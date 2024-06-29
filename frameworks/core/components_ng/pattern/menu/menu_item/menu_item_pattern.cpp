@@ -861,8 +861,9 @@ void MenuItemPattern::OnTouch(const TouchEventInfo& info)
     if (touchType == TouchType::DOWN) {
         // change background color, update press status
         SetBgBlendColor(GetSubBuilder() ? theme->GetHoverColor() : theme->GetClickedColor());
-        CHECK_NULL_VOID(menuWrapperPattern);
-        menuWrapperPattern->SetLastTouchItem(host);
+        if (menuWrapperPattern) {
+            menuWrapperPattern->SetLastTouchItem(host);
+        }
         props->UpdatePress(true);
         menuPattern->OnItemPressed(parent, index_, true);
     } else if (touchType == TouchType::UP) {

@@ -5509,9 +5509,6 @@ SizeF OverlayManager::CaculateMenuSize(
     CHECK_NULL_RETURN(selectTheme, SizeF());
     auto minItemHeight = static_cast<float>(selectTheme->GetOptionMinHeight().ConvertToPx());
     auto menuItemHeight = std::max(minItemHeight, static_cast<float>(measureSize.Height()));
-    auto groupDividerPadding = static_cast<float>(selectTheme->GetDividerPaddingVertical().ConvertToPx()) * 2 +
-                           static_cast<float>(selectTheme->GetDefaultDividerWidth().ConvertToPx());
-    auto groupHeight = menuItemHeight + groupDividerPadding;
 
     auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(menuLayoutProperty, SizeF());
@@ -5533,7 +5530,7 @@ SizeF OverlayManager::CaculateMenuSize(
     auto minWidth = static_cast<float>(columnInfo->GetWidth()) - padding.Width();
     childConstraint.minSize.SetWidth(minWidth);
     auto idealWidth = std::max(contentWidth, childConstraint.minSize.Width());
-    auto idealHeight = groupHeight * (menuSize - 1) + menuItemHeight;
+    auto idealHeight = menuItemHeight * menuSize;
     auto contentSize = SizeF(idealWidth, idealHeight);
     AddPaddingToSize(padding, contentSize);
     return contentSize;
