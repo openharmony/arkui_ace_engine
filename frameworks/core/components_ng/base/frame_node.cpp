@@ -2255,7 +2255,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
     TouchTestResult& responseLinkResult, bool isDispatch)
 {
-    if (!isActive_ || !eventHub_->IsEnabled() || bypass_) {
+    if (!isActive_ || !eventHub_->IsEnabled()) {
         if (SystemProperties::GetDebugEnabled()) {
             TAG_LOGD(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test", GetTag().c_str());
         }
@@ -3248,51 +3248,6 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
         default:
             return;
     }
-}
-
-void FrameNode::CheckSecurityComponentStatus(std::vector<RectF>& rect)
-{
-    auto paintRect = GetTransformRectRelativeToWindow();
-    if (IsSecurityComponent()) {
-        bypass_ = CheckRectIntersect(paintRect, rect);
-    }
-    for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
-        const auto& child = iter->Upgrade();
-        if (child) {
-            child->CheckSecurityComponentStatus(rect);
-        }
-    }
-    rect.push_back(paintRect);
-}
-
-bool FrameNode::CheckRectIntersect(const RectF& dest, std::vector<RectF>& origin)
-{
-    for (auto originRect : origin) {
-        if (originRect.IsInnerIntersectWithRound(dest)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool FrameNode::HaveSecurityComponent()
-{
-    if (IsSecurityComponent()) {
-        return true;
-    }
-    for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
-        const auto& child = iter->Upgrade();
-        if (child && child->HaveSecurityComponent()) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool FrameNode::IsSecurityComponent()
-{
-    return GetTag() == V2::LOCATION_BUTTON_ETS_TAG || GetTag() == V2::PASTE_BUTTON_ETS_TAG ||
-           GetTag() == V2::SAVE_BUTTON_ETS_TAG;
 }
 
 void FrameNode::GetPercentSensitive()

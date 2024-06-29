@@ -108,10 +108,6 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         refereeNG_->ForceCleanGestureReferee();
         CleanGestureEventHub();
     }
-    if (frameNode->HaveSecurityComponent()) {
-        std::vector<NG::RectF> rect;
-        frameNode->CheckSecurityComponentStatus(rect);
-    }
     if (!needAppend && touchTestResults_.empty()) {
         NG::NGGestureRecognizer::ResetGlobalTransCfg();
     }
@@ -367,10 +363,6 @@ void EventManager::TouchTest(
     }
     // collect
     const NG::PointF point { event.x, event.y };
-    if (frameNode->HaveSecurityComponent()) {
-        std::vector<NG::RectF> rect;
-        frameNode->CheckSecurityComponentStatus(rect);
-    }
     // For root node, the parent local point is the same as global point.
     TouchTestResult hitTestResult;
     TouchTestResult responseLinkResult;
@@ -1040,10 +1032,6 @@ void EventManager::MouseTest(
     CHECK_NULL_VOID(frameNode);
     const NG::PointF point { event.x, event.y };
     TouchTestResult testResult;
-    if (frameNode->HaveSecurityComponent()) {
-        std::vector<NG::RectF> rect;
-        frameNode->CheckSecurityComponentStatus(rect);
-    }
 
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         if ((event.action == MouseAction::MOVE && event.button != MouseButton::NONE_BUTTON) ||

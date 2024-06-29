@@ -185,51 +185,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg008, TestSize.Level1)
     /**
      * @tc.steps: step 1. create framenode and initialize the params used in Test.
      */
-    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto node = FrameNode::CreateFrameNode("node", nodeId, AceType::MakeRefPtr<Pattern>(), true);
-
-    auto parentNode = FrameNode::CreateFrameNode("LocationButton", nodeId + 1, AceType::MakeRefPtr<Pattern>(), true);
-    /**
-     * @tc.steps: step 2. call AddFRCSceneInfo .
-     * @tc.expect: rosenContext set scene and speed, no expect
-     */
-    node->AddFRCSceneInfo("test", 0, SceneStatus::START);
-    node->AddFRCSceneInfo("test", 0, SceneStatus::RUNNING);
-
-    /**
-     * @tc.steps: step 3. call CheckSecurityComponentStatus .
-     * @tc.expect: rect.size ++
-     */
-    EXPECT_FALSE(node->HaveSecurityComponent());
-    std::list<RefPtr<FrameNode>> nodeList;
-    nodeList.push_back(parentNode);
-    node->frameChildren_ = { nodeList.begin(), nodeList.end() };
-    std::vector<RectF> rect;
-    node->CheckSecurityComponentStatus(rect);
-    EXPECT_EQ(rect.size(), 2);
-    rect.clear();
-    rect.emplace_back(RectF(0, 0, 0, 0));
-    parentNode->CheckSecurityComponentStatus(rect);
-    EXPECT_EQ(rect.size(), 2);
-
-    /**
-     * @tc.steps: step 3. call HaveSecurityComponent.
-     * @tc.expect: Different GetTag() return false or true.
-     */
-    EXPECT_TRUE(parentNode->HaveSecurityComponent());
-    EXPECT_TRUE(node->HaveSecurityComponent());
-}
-
-/**
- * @tc.name: FrameNodeTestNg009
- * @tc.desc: Test frame node method
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeTestNg009, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step 1. create framenode and initialize the params used in Test.
-     */
     RefPtr<NG::DrawModifier> drawModifier = AceType::MakeRefPtr<NG::DrawModifier>();
     ASSERT_NE(drawModifier, nullptr);
 
