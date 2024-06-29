@@ -665,6 +665,10 @@ bool UINode::IsAutoFillContainerNode()
 
 void UINode::DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer)
 {
+    auto frameNode = AceType::DynamicCast<FrameNode>(this);
+    if (frameNode && !frameNode->IsVisible()) {
+        return;
+    }
     DumpViewDataPageNode(viewDataWrap);
     for (const auto& item : GetChildren()) {
         if (!item) {
@@ -679,6 +683,10 @@ void UINode::DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap, bool skipS
 
 bool UINode::NeedRequestAutoSave()
 {
+    auto frameNode = AceType::DynamicCast<FrameNode>(this);
+    if (frameNode && !frameNode->IsVisible()) {
+        return false;
+    }
     if (CheckAutoSave()) {
         return true;
     }
