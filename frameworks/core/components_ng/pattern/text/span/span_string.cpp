@@ -23,6 +23,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace {
 
@@ -348,6 +349,13 @@ void SpanString::RemoveSpan(int32_t start, int32_t length, SpanType key)
     if (!CheckRange(start, length)) {
         return;
     }
+    auto text = GetWideString();
+    TextEmojiSubStringRange range = TextEmojiProcessor::CalSubWstringRange(
+        start, length, text, true);
+    int startIndex = range.startIndex;
+    int endIndex = range.endIndex;
+    start = startIndex;
+    length = endIndex - startIndex;
     auto it = spansMap_.find(key);
     if (it == spansMap_.end()) {
         return;
