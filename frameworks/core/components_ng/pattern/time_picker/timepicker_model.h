@@ -41,6 +41,7 @@ public:
     virtual void SetSelectedTime(const PickerTime& value) = 0;
     virtual void SetOnChange(ChangeEvent&& onChange) = 0;
     virtual void SetHour24(bool isUseMilitaryTime) = 0;
+    virtual void SetIsEnableHapticFeedback(bool isEnableHapticFeedback) {};
     virtual void SetDateTimeOptions(ZeroPrefixType& hourType,
         ZeroPrefixType& minuteType, ZeroPrefixType& secondType) {};
     virtual void SetWheelModeEnabled(bool wheelModeEnabled) = 0;

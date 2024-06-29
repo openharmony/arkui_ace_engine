@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_accessibility_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_layout_algorithm.h"
+#include "core/components_ng/pattern/time_picker/timepicker_haptic_interface.h"
 #include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/pattern/time_picker/toss_animation_controller.h"
 
@@ -364,7 +365,7 @@ private:
     DimensionRect CalculateHotZone(int32_t index, int32_t midSize, float middleChildHeight, float otherChildHeight);
     void AddHotZoneRectToText();
     void InitTextFontFamily();
-
+    void InitHapticController(const RefPtr<FrameNode>& host);
     double mainVelocity_ = 0.0;
     float localDownDistance_ = 0.0f;
     Color pressColor_;
@@ -414,7 +415,7 @@ private:
     bool hasUserDefinedDisappearFontFamily_ = false;
     bool hasUserDefinedNormalFontFamily_ = false;
     bool hasUserDefinedSelectedFontFamily_ = false;
-
+    std::shared_ptr<ITimepickerAudioHaptic> hapticController_ = nullptr;
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnPattern);
 };
 } // namespace OHOS::Ace::NG

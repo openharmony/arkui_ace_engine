@@ -65,6 +65,7 @@
                 "init",
                 "image_framework",
                 "player_framework",
+                "audio_framework",
                 "access_token",
                 "input",
                 "webview",

@@ -1289,6 +1289,7 @@ void JSTimePicker::JSBind(BindingTarget globalObj)
     JSClass<JSTimePicker>::StaticMethod("backgroundColor", &JSTimePicker::PickerBackgroundColor);
     JSClass<JSTimePicker>::StaticMethod("loop", &JSTimePicker::Loop);
     JSClass<JSTimePicker>::StaticMethod("useMilitaryTime", &JSTimePicker::UseMilitaryTime);
+    JSClass<JSTimePicker>::StaticMethod("enableHapticFeedback", &JSTimePicker::EnableHapticFeedback);
     JSClass<JSTimePicker>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSTimePicker>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTimePicker>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -1320,6 +1321,11 @@ void JSTimePicker::Loop(const JSCallbackInfo& info)
         isLoop = info[0]->ToBoolean();
     }
     TimePickerModel::GetInstance()->SetWheelModeEnabled(isLoop);
+}
+
+void JSTimePicker::EnableHapticFeedback(bool isEnableHapticFeedback)
+{
+    TimePickerModel::GetInstance()->SetIsEnableHapticFeedback(isEnableHapticFeedback);
 }
 
 void JSTimePicker::UseMilitaryTime(bool isUseMilitaryTime)
