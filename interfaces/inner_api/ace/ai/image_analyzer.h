@@ -72,6 +72,12 @@ struct TouchInfo {
     TouchType touchType = TouchType::CANCEL;
 };
 
+struct PixelMapInfo {
+    float width = 0.0f;
+    float height = 0.0f;
+    NG::OffsetF overlayOffset = { 0.0f, 0.0f };
+};
+
 struct ImageAnalyzerConfig {
     NG::MarginProperty aiButtonMargin;
     std::set<ImageAnalyzerType> types;
@@ -94,6 +100,15 @@ struct ImageAnalyzerInnerConfig {
     OnTextSelectedCallback onTextSelected;
     void* pixelmapNapiVal = nullptr;
     OHOS::Ace::TouchInfo touchInfo;
+
+    void UpdateFromInfo(const PixelMapInfo& info)
+    {
+        contentWidth = info.width;
+        contentHeight = info.height;
+        pixelMapWidth = info.width;
+        pixelMapHeight = info.height;
+        overlayOffset = info.overlayOffset;
+    }
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_INNERKITS_PROPERTIES_IMAGE_ANALYZER_H

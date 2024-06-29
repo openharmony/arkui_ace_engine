@@ -36,7 +36,7 @@ public:
     void CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, const NG::OffsetF& offset = { 0.0f, 0.0f });
     void UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap);
     void UpdateAnalyzerOverlayLayout();
-    void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
+    void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode, const PixelMapInfo& info = {});
     void DestroyAnalyzerOverlay();
     void ReleaseImageAnalyzer();
     void SetImageAnalyzerConfig(void* config);
@@ -47,6 +47,7 @@ public:
         int rectHeight, int pointX, int pointY, OnTextSelectedCallback callback);
     void UpdateOverlayTouchInfo(int touchPointX, int touchPointY, TouchType touchType);
     void UpdateOverlayStatus(bool status, int offsetX, int offsetY, int rectWidth, int rectHeight);
+    bool UpdateVideoConfig(const PixelMapInfo& info);
 
 private:
     WeakPtr<NG::FrameNode> frameNode_;
