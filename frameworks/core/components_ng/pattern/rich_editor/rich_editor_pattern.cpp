@@ -7503,7 +7503,7 @@ std::string RichEditorPattern::GetPositionSpansText(int32_t position, int32_t& s
 
     start = std::clamp(start, 0, GetTextContentLength());
     end = std::clamp(end, 0, GetTextContentLength());
-
+    AdjustSelector(start, end);
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "caret=%{public}d, range=[%{public}d,%{public}d]", position, start, end);
 
     // get all the spans between start and end, then filter the valid text
