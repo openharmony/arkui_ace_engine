@@ -25,6 +25,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/common/router_recover_record.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/render/snapshot_param.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/common/media_query/media_query_info.h"
@@ -228,11 +229,12 @@ public:
     virtual void CancelAnimationFrame(const std::string& callbackId) = 0;
 
     virtual void GetSnapshot(const std::string& componentId,
-        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback)
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+        const NG::SnapshotOptions& options)
     {}
     virtual void CreateSnapshot(std::function<void()>&& customBuilder,
         std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
-        bool enableInspector)
+        bool enableInspector, const NG::SnapshotParam& param)
     {}
 
     virtual bool GetAssetContent(const std::string& url, std::string& content) = 0;

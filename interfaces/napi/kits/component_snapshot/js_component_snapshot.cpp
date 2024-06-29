@@ -20,6 +20,7 @@
 #include "js_native_api_types.h"
 #include "napi/native_common.h"
 #include "node_api_types.h"
+#include "base/utils/utils.h"
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
@@ -29,10 +30,12 @@
 
 #include "bridge/common/utils/utils.h"
 #include "core/common/ace_engine.h"
+
 #include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::Napi {
 namespace {
+
 struct SnapshotAsyncCtx {
     napi_env env = nullptr;
     napi_deferred deferred = nullptr;
@@ -68,7 +71,7 @@ void OnComplete(SnapshotAsyncCtx* asyncCtx, std::function<void()> finishCallback
             napi_open_handle_scope(ctx->env, &scope);
 
             // callback result format: [Error, PixelMap]
-            napi_value result[JsComponentSnapshot::ARGC_MAX] = { nullptr };
+            napi_value result[2] = { nullptr };
             napi_get_undefined(ctx->env, &result[0]);
             napi_get_undefined(ctx->env, &result[1]);
 
@@ -92,7 +95,7 @@ void OnComplete(SnapshotAsyncCtx* asyncCtx, std::function<void()> finishCallback
                 napi_value ret = nullptr;
                 napi_value napiCallback = nullptr;
                 napi_get_reference_value(ctx->env, ctx->callbackRef, &napiCallback);
-                napi_call_function(ctx->env, nullptr, napiCallback, JsComponentSnapshot::ARGC_MAX, result, &ret);
+                napi_call_function(ctx->env, nullptr, napiCallback, 2, result, &ret);
                 napi_delete_reference(ctx->env, ctx->callbackRef);
             }
 
@@ -130,6 +133,7 @@ bool JsComponentSnapshot::CheckArgs(napi_valuetype firstArgType)
         errorMsg = "The largest number of parameters is 2.";
         LOGE("%{public}s", errorMsg.c_str());
         NapiThrow(env_, errorMsg, ERROR_CODE_PARAM_INVALID);
+        return false;
     }
     napi_valuetype type = napi_undefined;
     napi_typeof(env_, argv_[0], &type);
@@ -139,24 +143,19 @@ bool JsComponentSnapshot::CheckArgs(napi_valuetype firstArgType)
         NapiThrow(env_, errorMsg, ERROR_CODE_PARAM_INVALID);
         return false;
     }
-    if (argc_ == ARGC_MAX) {
-        napi_typeof(env_, argv_[1], &type);
-        if (type != napi_function) {
-            errorMsg = "parameter callback is not of type function";
-            LOGE("%{public}s", errorMsg.c_str());
-            NapiThrow(env_, errorMsg, ERROR_CODE_PARAM_INVALID);
-            return false;
-        }
-    }
     return true;
 }
 
 auto JsComponentSnapshot::CreateCallback(napi_value* result)
 {
     auto* asyncCtx = new SnapshotAsyncCtx;
+    napi_valuetype type = napi_undefined;
     // parse JsCallback
-    if (argc_ == ARGC_MAX) {
-        napi_create_reference(env_, argv_[1], 1, &asyncCtx->callbackRef);
+    if (argc_ >= 2) {
+        napi_typeof(env_, argv_[1], &type);
+        if (type == napi_function) {
+            napi_create_reference(env_, argv_[1], 1, &asyncCtx->callbackRef);
+        }
     }
     // init promise
     if (!asyncCtx->callbackRef) {
@@ -181,6 +180,109 @@ napi_value JsComponentSnapshot::GetArgv(int32_t idx)
         return nullptr;
     }
     return argv_[idx];
+}
+
+void JsComponentSnapshot::ParseParamForBuilder(NG::SnapshotParam& param)
+{
+    // parse second param for builder interface
+    if (argc_ >= 2) {
+        napi_valuetype type = napi_undefined;
+        napi_typeof(env_, argv_[1], &type);
+        if (type != napi_function) {
+            ParseParam(1, param);
+        }
+    }
+    // parse third param for builder interface
+    if (argc_ >= 3) {
+        ParseParam(2, param);
+    }
+    // parse fourth param for builder interface
+    if (argc_ >= 4) {
+        ParseParam(3, param);
+    }
+    // parse fifth param for builder interface
+    if (argc_ == 5) {
+        ParseParam(4, param);
+    }
+}
+
+void JsComponentSnapshot::ParseParamForGet(NG::SnapshotOptions& options)
+{
+    // parse options param for Promise
+    if (argc_ >= 2) {
+        napi_valuetype type = napi_undefined;
+        napi_typeof(env_, argv_[1], &type);
+        if (type != napi_function) {
+            ParseOptions(1, options);
+        }
+    }
+    // parse options param for Callback
+    if (argc_ == 3) {
+        ParseOptions(2, options);
+    }
+}
+
+void JsComponentSnapshot::ParseParam(int32_t idx, NG::SnapshotParam& param)
+{
+    if (static_cast<int32_t>(argc_) <= idx) {
+        return;
+    }
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env_, argv_[idx], &type);
+    // parse delay param
+    if (type == napi_number) {
+        int32_t delayTime = 0;
+        napi_get_value_int32(env_, argv_[idx], &delayTime);
+        if (delayTime >= 0) {
+            param.delay = delayTime;
+        }
+    }
+    // parse checkImageStatus param
+    if (type == napi_boolean) {
+        bool checkImageStatus = 0;
+        napi_get_value_bool(env_, argv_[idx], &checkImageStatus);
+        param.checkImageStatus = checkImageStatus;
+    }
+    // parse SnapshotOptions param
+    if (type == napi_object) {
+        NG::SnapshotOptions options;
+        ParseOptions(idx, options);
+        param.options = options;
+    }
+}
+
+void JsComponentSnapshot::ParseOptions(int32_t idx, NG::SnapshotOptions& options)
+{
+    if (static_cast<int32_t>(argc_) <= idx) {
+        return;
+    }
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env_, argv_[idx], &type);
+    if (type != napi_object) {
+        return;
+    }
+
+    bool result = false;
+    napi_has_named_property(env_, argv_[idx], "scale", &result);
+    if (result) {
+        napi_value scaleNapi = nullptr;
+        napi_get_named_property(env_, argv_[idx], "scale", &scaleNapi);
+        double scale = 0.0;
+        napi_get_value_double(env_, scaleNapi, &scale);
+        if (GreatNotEqual(scale, 0.0)) {
+            options.scale = static_cast<float>(scale);
+        }
+    }
+
+    result = false;
+    napi_has_named_property(env_, argv_[idx], "waitUntilRenderFinished", &result);
+    if (result) {
+        napi_value waitUntilRenderFinishedNapi = nullptr;
+        napi_get_named_property(env_, argv_[idx], "waitUntilRenderFinished", &waitUntilRenderFinishedNapi);
+        bool waitUntilRenderFinished = false;
+        napi_get_value_bool(env_, waitUntilRenderFinishedNapi, &waitUntilRenderFinished);
+        options.waitUntilRenderFinished = waitUntilRenderFinished;
+    }
 }
 
 static napi_value JSSnapshotGet(napi_env env, napi_callback_info info)
@@ -212,7 +314,10 @@ static napi_value JSSnapshotGet(napi_env env, napi_callback_info info)
         return result;
     }
 
-    delegate->GetSnapshot(componentId, helper.CreateCallback(&result));
+    NG::SnapshotOptions options;
+    helper.ParseParamForGet(options);
+
+    delegate->GetSnapshot(componentId, helper.CreateCallback(&result), options);
 
     napi_escape_handle(env, scope, result, &result);
     napi_close_escapable_handle_scope(env, scope);
@@ -240,7 +345,11 @@ static napi_value JSSnapshotFromBuilder(napi_env env, napi_callback_info info)
     // create builder closure
     auto builder = [build = helper.GetArgv(0), env] { napi_call_function(env, nullptr, build, 0, nullptr, nullptr); };
     napi_value result = nullptr;
-    delegate->CreateSnapshot(builder, helper.CreateCallback(&result), true);
+
+    NG::SnapshotParam param;
+    helper.ParseParamForBuilder(param);
+
+    delegate->CreateSnapshot(builder, helper.CreateCallback(&result), true, param);
 
     napi_escape_handle(env, scope, result, &result);
     napi_close_escapable_handle_scope(env, scope);
