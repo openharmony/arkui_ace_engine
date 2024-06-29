@@ -1806,7 +1806,7 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
     auto iter = std::find(rootChildren.begin(), rootChildren.end(), menu);
     // menuNode already showing
     if (iter == rootChildren.end()) {
-        menu->MountToParent(rootNode);
+        MountToParentWithService(rootNode, menu);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         ShowMenuAnimation(menu);
@@ -3026,7 +3026,7 @@ void OverlayManager::PlayTransitionEffectOut(const RefPtr<FrameNode>& topModalNo
             FireNavigationStateChange(false, topModalNode);
         }
         auto rootNode = FindWindowScene(topModalNode);
-        rootNode->RemoveChild(topModalNode);
+        RemoveChildWithService(rootNode, topModalNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         // Fire shown event of navdestination under the disappeared modal
         FireNavigationStateChange(true);
@@ -3044,7 +3044,7 @@ void OverlayManager::PlayTransitionEffectOut(const RefPtr<FrameNode>& topModalNo
                     // Fire hidden event of navdestination on the disappeared modal
                     overlayManager->FireNavigationStateChange(false, modal);
                 }
-                root->RemoveChild(modal);
+                overlayManager->RemoveChildWithService(root, modal);
                 root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                 // Fire shown event of navdestination under the disappeared modal
                 overlayManager->FireNavigationStateChange(true);
@@ -3079,7 +3079,7 @@ bool OverlayManager::ModalPageExitProcess(const RefPtr<FrameNode>& topModalNode)
         topModalNode->GetPattern<ModalPresentationPattern>()->OnDisappear();
         // Fire hidden event of navdestination on the disappeared modal
         FireNavigationStateChange(false, topModalNode);
-        rootNode->RemoveChild(topModalNode);
+        RemoveChildWithService(rootNode, topModalNode);;
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     topModalNode->GetPattern<ModalPresentationPattern>()->FireCallback("false");
@@ -3371,7 +3371,7 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     modalStack_.push(WeakClaim(RawPtr(modalNode)));
     modalList_.emplace_back(WeakClaim(RawPtr(modalNode)));
     SaveLastModalNode();
-    modalNode->MountToParent(rootNode, DEFAULT_NODE_SLOT, false, false, true);
+    MountToParentWithService(rootNode, modalNode);
     modalNode->AddChild(builder);
     if (!isAllowedBeCovered_ && rootNode) {
         TAG_LOGI(AceLogTag::ACE_OVERLAY,
@@ -3383,7 +3383,7 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     }
 
     FireModalPageShow();
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    modalNode->GetParent()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     if (contentCoverParam.transitionEffect != nullptr) {
         PlayTransitionEffectIn(modalNode);
         return;
@@ -3440,7 +3440,7 @@ void OverlayManager::HandleModalPop(
             // Fire hidden event of navdestination on the disappeared modal
             FireNavigationStateChange(false, topModalNode);
         }
-        rootNode->RemoveChild(topModalNode);
+        RemoveChildWithService(rootNode, topModalNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     modalStack_.pop();
@@ -3536,7 +3536,7 @@ void OverlayManager::PlayDefaultModalOut(
                 // Fire hidden event of navdestination on the disappeared modal
                 overlayManager->FireNavigationStateChange(false, modal);
             }
-            root->RemoveChild(modal);
+            overlayManager->RemoveChildWithService(root, modal);
             root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             // Fire shown event of navdestination under the disappeared modal
             overlayManager->FireNavigationStateChange(true);
@@ -3597,7 +3597,7 @@ void OverlayManager::PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode
                     // Fire hidden event of navdestination on the disappeared modal
                     overlayManager->FireNavigationStateChange(false, modal);
                 }
-                root->RemoveChild(modal);
+                overlayManager->RemoveChildWithService(root, modal);
                 root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                 // Fire shown event of navdestination under the disappeared modal
                 overlayManager->FireNavigationStateChange(true);
@@ -3957,7 +3957,7 @@ void OverlayManager::PlaySheetTransition(
                 CHECK_NULL_VOID(root);
                 auto sheetParent = DynamicCast<FrameNode>(sheet->GetParent());
                 CHECK_NULL_VOID(sheetParent);
-                root->RemoveChild(sheetParent);
+                overlayManager->RemoveChildWithService(root, sheetParent);
                 root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             });
         if (sheetPattern->HasCallback()) {
@@ -4302,7 +4302,7 @@ RefPtr<FrameNode> OverlayManager::CreateSheetMask(const RefPtr<FrameNode>& sheet
     InitSheetMask(maskNode, sheetPageNode, sheetStyle);
     auto rootNode = FindWindowScene(targetNode);
     CHECK_NULL_RETURN(rootNode, nullptr);
-    maskNode->MountToParent(rootNode);
+    MountToParentWithService(rootNode, maskNode);
     FireModalPageShow();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     auto pipeline = sheetPageNode->GetContext();
@@ -4437,7 +4437,7 @@ void OverlayManager::PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode,
                         CHECK_NULL_VOID(root);
                         auto sheetParent = DynamicCast<FrameNode>(sheet->GetParent());
                         CHECK_NULL_VOID(sheetParent);
-                        root->RemoveChild(sheetParent);
+                         overlayManager->RemoveChildWithService(root, sheetParent);
                         root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                     },
                     TaskExecutor::TaskType::UI, "ArkUIOverlaySheetExitingAnimation");
@@ -4727,7 +4727,7 @@ void OverlayManager::DestroySheet(const RefPtr<FrameNode>& sheetNode, const Shee
     sheetNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
     auto sheetParent = DynamicCast<FrameNode>(sheetNode->GetParent());
     CHECK_NULL_VOID(sheetParent);
-    root->RemoveChild(sheetParent);
+    RemoveChildWithService(root, sheetParent);
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     sheetMap_.erase(sheetKey);
     CleanViewContextMap(Container::CurrentId(), sheetKey.contentId);
@@ -4786,7 +4786,7 @@ void OverlayManager::DeleteModalNode(
         modalNode->GetPattern<ModalPresentationPattern>()->FireCallback("false");
         // Fire hidden event of navdestination on the disappeared modal
         FireNavigationStateChange(false, modalNode);
-        rootNode->RemoveChild(modalNode);
+        RemoveChildWithService(rootNode, modalNode);
     } else {
         auto sheetPattern = modalNode->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_VOID(sheetPattern);
@@ -4798,7 +4798,7 @@ void OverlayManager::DeleteModalNode(
         sheetMap_.erase(sheetPattern->GetSheetKey());
         auto sheetParent = DynamicCast<FrameNode>(modalNode->GetParent());
         CHECK_NULL_VOID(sheetParent);
-        rootNode->RemoveChild(sheetParent);
+        RemoveChildWithService(rootNode, sheetParent);
     }
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
@@ -6074,7 +6074,7 @@ void OverlayManager::RemoveMenuNotInSubWindow(
         rootNode = overlayManager->FindWindowScene(menu);
     }
     CHECK_NULL_VOID(rootNode);
-    rootNode->RemoveChild(menu);
+    RemoveChildWithService(rootNode, menu);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -6273,7 +6273,11 @@ void OverlayManager::MountToParentWithService(const RefPtr<UINode>& rootNode, co
         // it is in atomicservice
         SetNodeBeforeAppbar(rootNode, node);
     } else {
-        node->MountToParent(rootNode);
+        if (node->GetTag() == V2::MODAL_PAGE_TAG) {
+            node->MountToParent(rootNode, DEFAULT_NODE_SLOT, false, false, true);
+        } else {
+            node->MountToParent(rootNode);
+        }
     }
 }
  
