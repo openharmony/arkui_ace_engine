@@ -117,7 +117,6 @@ private:
         const std::vector<float>& rightBuffer, float allocatedWidth);
     void UpdateHorizontalPadding(LayoutWrapper* layoutWrapper, float horizontalPadding) const;
     void MeasureMask(LayoutWrapper* layoutWrapper) const;
-    void CheckMarqueeForScrollable(LayoutWrapper* layoutWrapper) const;
     void UpdateChildMarginProperty(float rightMargin, float leftMargin, const RefPtr<LayoutWrapper>& childWrapper);
 
     bool isRTL_ = false;

@@ -224,7 +224,6 @@ void TabBarLayoutAlgorithm::MeasureScrollableMode(LayoutWrapper* layoutWrapper, 
         CHECK_NULL_VOID(layoutProperty);
         auto layoutStyle = layoutProperty->GetScrollableBarModeOptions().value_or(ScrollableBarModeOptions());
         scrollMargin_ = layoutStyle.margin.ConvertToPx();
-        CheckMarqueeForScrollable(layoutWrapper);
         MeasureVisibleItems(layoutWrapper, childLayoutConstraint);
 
         useItemWidth_ = true;
@@ -295,21 +294,6 @@ LayoutConstraintF TabBarLayoutAlgorithm::GetChildConstraint(LayoutWrapper* layou
         }
     }
     return childLayoutConstraint;
-}
-
-void TabBarLayoutAlgorithm::CheckMarqueeForScrollable(LayoutWrapper* layoutWrapper) const
-{
-    for (int32_t index = 0; index < childCount_; ++index) {
-        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        CHECK_NULL_VOID(childWrapper);
-        auto textWrapper = childWrapper->GetOrCreateChildByIndex(1);
-        CHECK_NULL_VOID(textWrapper);
-        auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
-        CHECK_NULL_VOID(textLayoutProperty);
-        if (textLayoutProperty->GetTextOverflow().value_or(TextOverflow::NONE) == TextOverflow::MARQUEE) {
-            textLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
-        }
-    }
 }
 
 void TabBarLayoutAlgorithm::MeasureVisibleItems(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint)
@@ -387,6 +371,9 @@ void TabBarLayoutAlgorithm::MeasureWithOffset(LayoutWrapper* layoutWrapper, Layo
     auto startPos = scrollMargin_;
     auto endIndex = 0;
     auto endPos = scrollMargin_;
+    if (isRTL_ && axis_ == Axis::HORIZONTAL) {
+        currentDelta_ = -currentDelta_;
+    }
     if (NonNegative(currentDelta_)) {
         if (!visibleItemPosition_.empty()) {
             endIndex = visibleItemPosition_.begin()->first;
@@ -403,13 +390,8 @@ void TabBarLayoutAlgorithm::MeasureWithOffset(LayoutWrapper* layoutWrapper, Layo
         endPos = startPos;
     }
 
-    if (isRTL_ && axis_ == Axis::HORIZONTAL) {
-        startPos -= currentDelta_;
-        endPos -= currentDelta_;
-    } else {
-        startPos += currentDelta_;
-        endPos += currentDelta_;
-    }
+    startPos += currentDelta_;
+    endPos += currentDelta_;
     visibleItemPosition_.clear();
     LayoutForward(layoutWrapper, childLayoutConstraint, endIndex, endPos);
     LayoutBackward(layoutWrapper, childLayoutConstraint, startIndex, startPos);
@@ -484,6 +466,8 @@ void TabBarLayoutAlgorithm::MeasureItem(LayoutWrapper* layoutWrapper, LayoutCons
     CHECK_NULL_VOID(tabBarPattern);
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID (childWrapper);
+    auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
     if (tabBarPattern->GetTabBarStyle(index) == TabBarStyle::BOTTOMTABBATSTYLE) {
         auto iconWrapper = childWrapper->GetOrCreateChildByIndex(0);
         CHECK_NULL_VOID(iconWrapper);
@@ -501,6 +485,17 @@ void TabBarLayoutAlgorithm::MeasureItem(LayoutWrapper* layoutWrapper, LayoutCons
         auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
         CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateMargin({ CalcLength(0.0_vp), CalcLength(0.0_vp), {}, {} });
+    }
+    if (layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
+        axis_ == Axis::HORIZONTAL) {
+        auto textWrapper = childWrapper->GetOrCreateChildByIndex(1);
+        if (textWrapper) {
+            auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
+            if (textLayoutProperty &&
+                textLayoutProperty->GetTextOverflow().value_or(TextOverflow::NONE) == TextOverflow::MARQUEE) {
+                textLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
+            }
+        }
     }
 
     childWrapper->Measure(childLayoutConstraint);
