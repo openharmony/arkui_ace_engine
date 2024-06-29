@@ -1343,6 +1343,7 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
     StopTranslateAnimation();
     StopFadeAnimation();
     StopSpringAnimation();
+    StopIndicatorAnimation(true);
     jumpIndex_ = index;
     uiCastJumpIndex_ = index;
     MarkDirtyNodeSelf();
@@ -1620,7 +1621,7 @@ void SwiperPattern::FinishAnimation()
     }
     StopSpringAnimation();
     StopFadeAnimation();
-    StopIndicatorAnimation();
+    StopIndicatorAnimation(true);
 
     if (usePropertyAnimation_) {
         isFinishAnimation_ = true;
