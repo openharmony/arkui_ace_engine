@@ -20,6 +20,8 @@
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/pattern/toast/toast_view.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_algorithm.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 void UpdateToastAlign(int32_t& alignment)
@@ -83,10 +85,29 @@ void ToastLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     text->Layout();
 }
 
+size_t GetLineCount(const RefPtr<LayoutWrapper>& textWrapper, LayoutConstraintF& layoutConstraint)
+{
+    textWrapper->Measure(layoutConstraint);
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(textWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, 0);
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(textLayoutAlgorithm, 0);
+    auto paragraph = textLayoutAlgorithm->GetSingleParagraph();
+    CHECK_NULL_RETURN(paragraph, 0);
+    auto paragLineCount = paragraph->GetLineCount();
+    return paragLineCount;
+}
+
 void ToastLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     auto text = layoutWrapper->GetOrCreateChildByIndex(0);
+    // TextAlign should be START when lines of text are greater than 1
+    if (GetLineCount(text, layoutConstraint) > 1) {
+        auto textLayoutProp = DynamicCast<TextLayoutProperty>(text->GetLayoutProperty());
+        CHECK_NULL_VOID(textLayoutProp);
+        textLayoutProp->UpdateTextAlign(TextAlign::START);
+    }
     text->Measure(layoutConstraint);
     PerformMeasureSelf(layoutWrapper);
 }
