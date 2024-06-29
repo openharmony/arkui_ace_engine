@@ -238,7 +238,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         if (lanesLayoutAlgorithm->GetLanes() != lanes_) {
             auto item = swiperItem_.Upgrade();
             if (item) {
-                item->SwiperReset();
+                item->ResetSwipeStatus();
             }
         }
         lanes_ = lanesLayoutAlgorithm->GetLanes();
@@ -1032,7 +1032,7 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
         ProcessDragStart(offset);
         auto item = swiperItem_.Upgrade();
         if (item) {
-            item->SwiperReset();
+            item->ResetSwipeStatus();
         }
         FireOnScrollStart();
         return true;
@@ -2155,7 +2155,7 @@ void ListPattern::SetSwiperItem(WeakPtr<ListItemPattern> swiperItem)
         if (swiperItem != swiperItem_) {
             auto item = swiperItem_.Upgrade();
             if (item) {
-                item->SwiperReset();
+                item->ResetSwipeStatus();
             }
             swiperItem_ = std::move(swiperItem);
         }
