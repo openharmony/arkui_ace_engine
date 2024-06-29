@@ -721,6 +721,7 @@ void LayoutProperty::UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts)
     if (*safeAreaExpandOpts_ != opts) {
         *safeAreaExpandOpts_ = opts;
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+        safeAreaExpandOpts_->switchToNone = !opts.Expansive();
     }
 }
 
