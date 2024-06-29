@@ -580,8 +580,10 @@ build_component_ng("pattern_ng") {
       external_deps += [ "window_manager:scene_session" ]
     }
     if (product_name == "ohos-sdk") {
-      sources +=
-          [ "$ace_root/test/mock/core/pattern/mock_indexer_vibrator.cpp" ]
+      sources += [
+        "$ace_root/test/mock/core/pattern/mock_indexer_vibrator.cpp",
+        "$ace_root/test/mock/core/pattern/mock_time_picker_haptic_controller.cpp",
+      ]
     }
   } else if (is_arkui_x) {
     deps += [

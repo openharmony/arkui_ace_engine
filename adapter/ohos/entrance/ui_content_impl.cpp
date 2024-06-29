@@ -449,6 +449,7 @@ public:
                 action = DragEventAction::DRAG_EVENT_START;
                 break;
         }
+        CHECK_NULL_VOID(static_cast<int>(action));
     }
 
 private:
@@ -1623,7 +1624,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     if (!useNewPipe) {
         Ace::Platform::UIEnvCallback callback = nullptr;
 #ifdef ENABLE_ROSEN_BACKEND
-        callback = [window, id = instanceId_, container, aceView, rsUiDirector](
+        callback = [id = instanceId_, container, rsUiDirector](
                        const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) {
             if (rsUiDirector) {
                 ACE_SCOPED_TRACE("OHOS::Rosen::RSUIDirector::Create()");
