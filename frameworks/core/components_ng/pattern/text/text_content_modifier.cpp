@@ -349,7 +349,7 @@ void TextContentModifier::PaintCustomSpan(DrawingContext& drawingContext)
             continue;
         }
         auto index = customSpanPlaceholder.customSpanIndex;
-        if (index >= static_cast<int32_t>(rectsForPlaceholderSize)) {
+        if (index >= static_cast<int32_t>(rectsForPlaceholderSize) || index < 0) {
             return;
         }
         auto rect = rectsForPlaceholders.at(index);

@@ -554,7 +554,7 @@ void SetTextAreaType(ArkUINodeHandle node, ArkUI_Int32 type)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetType(frameNode, static_cast<Ace::TextInputType>(type));
+    TextFieldModelNG::SetType(frameNode, CastToTextInputType(type));
 }
 
 void ResetTextAreaType(ArkUINodeHandle node)
