@@ -166,6 +166,11 @@ public:
         isSwiperTouchDown_ = isSwiperTouchDown;
     }
 
+    void SetKeepStatus(bool keepStatus)
+    {
+        keepStatus_ = keepStatus;
+    }
+
     void InitOverlongStatus(int32_t pageIndex);
     void CalcTargetSelectedIndex(int32_t currentPageIndex, int32_t targetPageIndex);
     void CalcTargetOverlongStatus(int32_t currentPageIndex, int32_t targetPageIndex);
@@ -218,6 +223,7 @@ private:
     TouchBottomTypeLoop touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     bool isCustomSizeValue_ = false;
     bool isSwiperTouchDown_ = false;
+    bool keepStatus_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(OverlengthDotIndicatorModifier);
 };
 } // namespace OHOS::Ace::NG
