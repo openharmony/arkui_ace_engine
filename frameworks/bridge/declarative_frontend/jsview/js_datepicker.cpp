@@ -1323,8 +1323,12 @@ void JSTimePicker::Loop(const JSCallbackInfo& info)
     TimePickerModel::GetInstance()->SetWheelModeEnabled(isLoop);
 }
 
-void JSTimePicker::EnableHapticFeedback(bool isEnableHapticFeedback)
+void JSTimePicker::EnableHapticFeedback(const JSCallbackInfo& info)
 {
+    bool isEnableHapticFeedback = true;
+    if (info[0]->IsBoolean()) {
+        isEnableHapticFeedback = info[0]->ToBoolean();
+    }
     TimePickerModel::GetInstance()->SetIsEnableHapticFeedback(isEnableHapticFeedback);
 }
 
