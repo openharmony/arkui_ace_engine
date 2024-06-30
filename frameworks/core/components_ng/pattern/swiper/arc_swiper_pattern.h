@@ -55,6 +55,7 @@ private:
         Color backColor;
         OffsetF offset;
     };
+
     enum AnimationFinishType {
         EXIT_SCALE,
         EXIT_OFFSET,
@@ -69,38 +70,67 @@ private:
         ENTRY_BACKGROUND
     };
 
+    void ResetAnimationParam() override;
     void ClearAnimationFinishList() override;
-    void InitialFrameNodePropertyAnimation(const RefPtr<FrameNode>& frameNode, const OffsetF& offset) override;
-    void CancelFrameNodePropertyAnimation(const RefPtr<FrameNode>& frameNode) override;
+    void InitialFrameNodePropertyAnimation(const OffsetF& offset, RefPtr<FrameNode>& frameNode) override;
+    void CancelFrameNodePropertyAnimation(RefPtr<FrameNode>& frameNode) override;
     void PlayPropertyTranslateAnimation(
         float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false) override;
+    void PlayScrollAnimation() override;
+    void HorizontalScrollAnimation();
+    void PlayHorizontalScrollExitAnimation(float swiperWidth, float startPos, RefPtr<FrameNode>& frameNode);
+    void PlayHorizontalScrollEntryAnimation(float swiperWidth, float startPos, RefPtr<FrameNode>& frameNode);
+    
+    void VerticalScrollAnimation();
+    void PlayVerticalScrollExitAnimation(float swiperWidth, float startPos, RefPtr<FrameNode>& frameNode);
+    void PlayVerticalScrollEntryAnimation(float swiperWidth, float startPosj, RefPtr<FrameNode>& frameNode);
+
+    void PlayScrollScaleAnimation(float scale, RefPtr<RenderContext>& renderContext);
+    void PlayScrollOffsetAnimation(float translate, bool horizontal, RefPtr<RenderContext>& renderContext);
+    void PlayScrollBlurAnimation(float blur, RefPtr<RenderContext>& renderContext);
+    void PlayScrollAlpahAnimation(float alpha, RefPtr<RenderContext>& renderContext);
+    void PlayScrollBackgroundAnimation(const Color& color, RefPtr<RenderContext>& renderContext);
+
     void PlayPropertyTranslateFlipAnimation(const OffsetF& offset);
 
-    void PlayHorizontalEntryAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode);
-    void PlayHorizontalExitAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode);
+    void PlayHorizontalEntryAnimation(const OffsetF& offset, RefPtr<FrameNode>& frameNode);
+    void PlayHorizontalExitAnimation(const OffsetF& offset, RefPtr<FrameNode>& frameNode);
     
-    void PlayVerticalExitAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode);
-    void PlayVerticalEntryAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode);
+    void PlayVerticalExitAnimation(const OffsetF& offset, RefPtr<FrameNode>& frameNode);
+    void PlayVerticalEntryAnimation(const OffsetF& offset, RefPtr<FrameNode>& frameNode);
    
-    void PlayAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode, int32_t index);
-    void PlayHorizontalAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode, int32_t index);
-    void PlayVerticalAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode, int32_t index);
+    void PlayAnimation(const OffsetF& offset, int32_t index, RefPtr<FrameNode>& frameNode);
+    void PlayHorizontalAnimation(const OffsetF& offset, int32_t index, RefPtr<FrameNode>& frameNode);
+    void PlayVerticalAnimation(const OffsetF& offset, int32_t index, RefPtr<FrameNode>& frameNode);
    
     void AnimationFinish();
-    void BuildAnimationFinishCallback(const AnimationParam& param, const RefPtr<RenderContext>& renderContext,
-        bool exit, FinishCallback& finishCallback);
+    void BuildAnimationFinishCallback(bool exit, AnimationParam& param, RefPtr<RenderContext>& renderContext,
+        FinishCallback& finishCallback);
     void HandlePropertyTranslateCallback(float translate, int32_t nextIndex, float velocity);
     void AddFinishAnimation(const AnimationFinishType& animationFinishType);
 
-    bool IsPreItem(int32_t index);
+    bool IsPreItem(int32_t index, float translate);
     bool IsScrollOverCritical();
     Color GetBackgroundColorValue(const RefPtr<FrameNode>& frameNode);
-    std::shared_ptr<AnimationUtils::Animation> Animation(const AnimationParam& param, bool exit);
-
+    std::shared_ptr<AnimationUtils::Animation> Animation(bool exit, AnimationParam& param);
+   
     Color preNodeBackgroundColor_;
     OffsetF offset_;
     std::vector<std::shared_ptr<AnimationUtils::Animation>> animationVector_;
     std::vector<AnimationFinishType> animationFinishList_;
+    std::vector<std::shared_ptr<AnimationUtils::Animation>> scrollAnimationVector_;
+    float horizontalExitNodeScale_ = 0;
+    float horizontalExitNodeBlur_ = 0;
+    float horizontalExitNodeOpacity_ = 0;
+    float horizontalEntryNodeScale_ = 0;
+    float horizontalEntryNodeBlur_ = 0;
+    float horizontalEntryNodeOpacity_ = 0;
+
+    float verticalExitNodeScale_ = 0;
+    float verticalExitNodeBlur_ = 0;
+    float verticalExitNodeOpacity_ = 0;
+    float verticalEntryNodeScale_ = 0;
+    float verticalEntryNodeOpacity_ = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_ARC_SWIPER_PATTERN_H

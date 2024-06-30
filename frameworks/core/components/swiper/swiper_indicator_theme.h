@@ -54,6 +54,13 @@ enum class TouchBottomTypeLoop {
     TOUCH_BOTTOM_TYPE_LOOP_LEFT,
     TOUCH_BOTTOM_TYPE_LOOP_RIGHT,
 };
+
+enum class FadeOutState {
+    FADE_OUT_NONE,
+    FADE_OUT_LEFT,
+    FADE_OUT_RIGHT,
+    FADE_OUT_BILATERAL
+};
 class SwiperIndicatorTheme : public virtual Theme {
     DECLARE_ACE_TYPE(SwiperIndicatorTheme, Theme);
 

@@ -115,6 +115,11 @@ public:
         touchBottomType_ = touchBottomType;
     }
 
+    void SetTouchBottomRate(float touchBottomRate)
+    {
+        touchBottomRate_ = touchBottomRate;
+    }
+
     void UpdateBackground(const PaintWrapper* paintWrapper);
 
 private:
@@ -125,7 +130,7 @@ private:
     std::pair<int32_t, int32_t> GetIndex(int32_t index);
     int32_t GetHalfIndex();
     float GetBlackPointAngle(const LinearVector<float>& itemSizes, int32_t index, int32_t currentIndex, float offset);
-    std::pair<int32_t, int32_t>
+    std::pair<float, float>
         GetLongPointAngle(const LinearVector<float>& itemSizes, int32_t currentIndex, int32_t indicatorStartIndex);
     float GetAllPointArcAngle(const LinearVector<float>& itemSizes, int32_t currentIndex);
     void CalculatePointRadius(int32_t index, int32_t indicatorStartIndex);
@@ -140,8 +145,14 @@ private:
                                    float itemMiniRadius,
                                    int32_t indicatorStartIndex);
     float CalculateBlackPointRotateAngle(int32_t indicatorStartIndex);
-    int32_t CalculateIndicatorStartIndex();
+    int32_t CalculateIndicatorStartIndex(int32_t priorIndicatorIndex);
     int32_t CalculateInitIndicatorPosition();
+    void SetFadeOutState(int32_t indicatorStartIndex);
+    float GetFadeOutPadding(float dotPaddingAngle,
+                            int32_t itemIndex,
+                            int32_t currentIndex,
+                            const LinearVector<float>& itemSizes,
+                            int32_t symbol);
 
     RefPtr<CircleDotIndicatorModifier> circleDotIndicatorModifier_;
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;
@@ -150,7 +161,9 @@ private:
     int32_t currentIndexActual_ = 0;
     int32_t nextValidIndex_ = 0;
     int32_t itemCount_ = 0;
+    int32_t indicatorStartIndex_ = 0;
     float turnPageRate_ = 0.0f;
+    float touchBottomRate_ = 0.0f;
     SwiperArcDirection arcDirection_ = SwiperArcDirection::SIX_CLOCK_DIRECTION;
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     TouchBottomTypeLoop touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
@@ -163,6 +176,7 @@ private:
     LinearVector<float> longPointCenter_ = {};
     ACE_DISALLOW_COPY_AND_MOVE(CircleDotIndicatorPaintMethod);
     TouchBottomType touchBottomType_ = TouchBottomType::NONE;
+    FadeOutState fadeOutState_ = FadeOutState::FADE_OUT_NONE;
 };
 } // namespace OHOS::Ace::NG
 
