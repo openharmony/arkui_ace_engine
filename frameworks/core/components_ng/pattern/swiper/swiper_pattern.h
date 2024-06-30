@@ -700,6 +700,11 @@ public:
         return requestLongPredict_;
     }
 
+    bool IsPropertyAnimationRunning() const
+    {
+        return usePropertyAnimation_;
+    }
+
     bool IsTouchDown() const
     {
         return isTouchDown_;

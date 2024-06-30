@@ -61,6 +61,11 @@ public:
         animationEndIndex_ = animationEndIndex;
     }
 
+    void SetKeepStatus(bool keepStatus)
+    {
+        keepStatus_ = keepStatus;
+    }
+
 private:
     std::pair<float, float> CalculatePointCenterX(const StarAndEndPointCenter& starAndEndPointCenter,
         const LinearVector<float>& startVectorBlackPointCenterX,
@@ -85,6 +90,7 @@ private:
     int32_t realItemCount_ = 0;
     int32_t animationStartIndex_ = 0;
     int32_t animationEndIndex_ = 0;
+    bool keepStatus_ = false;
     std::pair<float, float> overlongSelectedCenterX_ = { 0.0f, 0.0f};
     ACE_DISALLOW_COPY_AND_MOVE(OverlengthDotIndicatorPaintMethod);
 };

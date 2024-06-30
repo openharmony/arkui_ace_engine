@@ -415,11 +415,10 @@ void OverlengthDotIndicatorModifier::CalcTargetStatusOnLongPointMove(const Linea
         animationEndIndicatorHeight_.resize(maxDisplayCount_);
     }
 
-    UpdateUnselectedCenterXOnDrag();
-    UpdateSelectedCenterXOnDrag(itemHalfSizes);
-
-    if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT ||
-        gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
+    if (isSwiperTouchDown_ && (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT ||
+                                  gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT)) {
+        UpdateUnselectedCenterXOnDrag();
+        UpdateSelectedCenterXOnDrag(itemHalfSizes);
         targetSelectedIndex_ = currentSelectedIndex_;
         targetOverlongType_ = currentOverlongType_;
     }
@@ -517,8 +516,8 @@ void OverlengthDotIndicatorModifier::CalcTargetStatusOnAllPointMoveBackward(cons
 
 void OverlengthDotIndicatorModifier::CalcAnimationEndCenterX(const LinearVector<float>& itemHalfSizes)
 {
-    if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT ||
-        gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
+    if (isSwiperTouchDown_ && (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT ||
+                                  gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT)) {
         animationEndIndex_ = CalcTargetIndexOnDrag();
     }
 
@@ -661,7 +660,7 @@ void OverlengthDotIndicatorModifier::InitOverlongStatus(int32_t pageIndex)
 
 void OverlengthDotIndicatorModifier::CalcTargetSelectedIndex(int32_t currentPageIndex, int32_t targetPageIndex)
 {
-    if (currentPageIndex == targetPageIndex) {
+    if (currentPageIndex == targetPageIndex || keepStatus_) {
         return;
     }
 
