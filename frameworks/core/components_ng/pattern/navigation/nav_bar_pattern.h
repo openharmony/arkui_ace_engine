@@ -176,7 +176,6 @@ private:
     void WindowFocus(bool isFocus);
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnModifyDone() override;
-    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleOnDragStart(float offset);
     void HandleOnDragUpdate(float offset);
     void HandleOnDragEnd();
