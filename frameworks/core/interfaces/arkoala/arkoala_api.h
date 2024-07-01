@@ -2494,11 +2494,18 @@ struct ArkUITabsControllerModifier {
 
 struct ArkUIGesture;
 
+struct ArkUIGestureEvent {
+    ArkUIAPIEventGestureAsyncEvent eventData;
+    void* attachNode;
+};
+
 struct ArkUIGestureInterruptInfo {
     bool isSystemGesture;
     ArkUI_Int32 systemRecognizerType;
     ArkUIAPIEventGestureAsyncEvent* event = nullptr;
     void* userData = nullptr;
+    void* inputEvent = nullptr;
+    void* gestureEvent = nullptr;
 };
 
 struct ArkUIGestureModifier {
