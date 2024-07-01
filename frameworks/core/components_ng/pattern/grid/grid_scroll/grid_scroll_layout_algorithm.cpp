@@ -545,6 +545,12 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
         }
     }
     layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
+    if (gridLayoutInfo_.extraOffset_.has_value()) {
+        gridLayoutInfo_.UpdateStartIndexForExtralOffset(mainGap_, mainSize);
+        ACE_SCOPED_TRACE(
+            "UpdateStartIndexForExtralOffset startIndex:%d, endIndex:%d, currentOffset:%f, mainSize:%f, mainGap:%f",
+            gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_, gridLayoutInfo_.currentOffset_, mainSize, mainGap_);
+    }
 }
 
 void GridScrollLayoutAlgorithm::ReloadToStartIndex(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
@@ -1075,7 +1081,6 @@ void GridScrollLayoutAlgorithm::UpdateCurrentOffsetForJumpTo(float mainSize)
     }
     if (gridLayoutInfo_.extraOffset_.has_value()) {
         gridLayoutInfo_.currentOffset_ += gridLayoutInfo_.extraOffset_.value();
-        gridLayoutInfo_.extraOffset_.reset();
     }
 }
 

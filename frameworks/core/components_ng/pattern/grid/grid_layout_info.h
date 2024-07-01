@@ -68,6 +68,8 @@ struct GridLayoutInfo {
         startIndex_ = startLine->second.begin()->second;
     }
 
+    void UpdateStartIndexForExtralOffset(float mainGap, float mainSize);
+
     void UpdateEndLine(float mainSize, float mainGap);
     // for overScroll at top
     void UpdateEndIndex(float overScrollOffset, float mainSize, float mainGap);
