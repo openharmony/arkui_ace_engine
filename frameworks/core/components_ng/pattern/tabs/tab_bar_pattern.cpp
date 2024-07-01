@@ -212,6 +212,16 @@ void TabBarPattern::InitSurfaceChangedCallback()
     }
 }
 
+void TabBarPattern::OnDetachFromFrameNode(FrameNode* node)
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (HasSurfaceChangedCallback()) {
+        pipeline->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
+    }
+    pipeline->RemoveWindowStateChangedCallback(node->GetId());
+}
+
 void TabBarPattern::AddTabBarItemClickEvent(const RefPtr<FrameNode>& tabBarItem)
 {
     CHECK_NULL_VOID(tabBarItem);

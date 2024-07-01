@@ -437,6 +437,7 @@ public:
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* node) override;
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
