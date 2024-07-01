@@ -1528,8 +1528,8 @@ bool DragDropManager::UpdateDragMovePositionFinished(
 }
 void DragDropManager::DoDragMoveAnimate(const PointerEvent& pointerEvent)
 {
-    bool needDoDragMoveAnimate = IsNeedDoDragMoveAnimate(pointerEvent);
-    if (!needDoDragMoveAnimate && !isDragWithContextMenu_) {
+    bool needDoDragMoveAnimate = IsNeedDoDragMoveAnimate(pointerEvent) || isDragWithContextMenu_;
+    if (!needDoDragMoveAnimate) {
         return;
     }
     isPullMoveReceivedForCurrentDrag_ = true;
@@ -1595,7 +1595,7 @@ void DragDropManager::DoDragStartAnimation(
 {
     CHECK_NULL_VOID(overlayManager);
     if (!(GetDragPreviewInfo(overlayManager, info_))
-        || (!IsNeedDisplayInSubwindow() && !isSubwindowOverlay)) {
+        || (!IsNeedDisplayInSubwindow() && !isSubwindowOverlay && !isDragWithContextMenu_)) {
         if (isDragWithContextMenu_) {
             UpdateDragPreviewScale();
             isDragFwkShow_ = false;
@@ -1889,5 +1889,18 @@ bool DragDropManager::IsUIExtensionShowPlaceholder(const RefPtr<NG::UINode>& nod
     return manager->IsShowPlaceholder(node->GetId());
 #endif
     return true;
+}
+
+void DragDropManager::UpdateDragMovePosition(const NG::OffsetF& offset, bool isRedragStart)
+{
+    if (isRedragStart) {
+        ResetContextMenuRedragPosition();
+    }
+    lastDragMovePosition_ = dragMovePosition_;
+    dragMovePosition_ = offset;
+    if (lastDragMovePosition_.NonOffset()) {
+        return;
+    }
+    dragTotalMovePosition_ += (dragMovePosition_ - lastDragMovePosition_);
 }
 } // namespace OHOS::Ace::NG
