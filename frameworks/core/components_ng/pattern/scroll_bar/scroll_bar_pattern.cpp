@@ -318,7 +318,7 @@ bool ScrollBarPattern::UpdateScrollBarDisplay()
     CHECK_NULL_RETURN(host, false);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
-    Updatebackgroundcolor(renderContext);
+    UpdateBackgroundColor(renderContext);
     if (controlDistanceChanged_) {
         controlDistanceChanged_ = false;
         if (!Positive(controlDistance_)) {
@@ -894,7 +894,7 @@ void ScrollBarPattern::SetReverse(bool reverse)
 {
     isReverse_ = reverse;
 }
-void ScrollBarPattern::Updatebackgroundcolor(RefPtr<RenderContext>& renderContext)
+void ScrollBarPattern::UpdateBackgroundColor(RefPtr<RenderContext>& renderContext)
 {
     auto pipelineContext = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipelineContext);
