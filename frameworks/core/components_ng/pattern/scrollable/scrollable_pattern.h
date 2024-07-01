@@ -744,7 +744,13 @@ private:
      */
     ScrollResult HandleScroll(
         float offset, int32_t source, NestedState state = NestedState::GESTURE, float velocity = 0.f) override;
-    bool HandleScrollVelocity(float velocity) override;
+    bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
+
+    void RemainVelocityToChild(float remainVelocity) override;
+    bool NestedScrollOutOfBoundary() override
+    {
+        return OutBoundaryCallback();
+    }
 
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
     void OnScrollEndRecursiveInner(const std::optional<float>& velocity);
@@ -755,7 +761,8 @@ private:
     ScrollResult HandleScrollSelfFirst(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollSelfOnly(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollParallel(float& offset, int32_t source, NestedState state);
-    ScrollResult HandleOutBoundary(float& offset, int32_t source, NestedState state) override;
+    bool HandleOutBoundary(float& offset, int32_t source, NestedState state, ScrollResult& result);
+    void HandleSelfOutBoundary(float& offset, int32_t source);
 
     void ExecuteScrollFrameBegin(float& mainDelta, ScrollState state);
 
@@ -763,7 +770,7 @@ private:
     bool GetCanOverScroll() const;
 
     void OnScrollEnd();
-    void ProcessSpringEffect(float velocity);
+    void ProcessSpringEffect(float velocity, bool needRestart = false);
     void SetEdgeEffect(EdgeEffect edgeEffect);
 
     // Scrollable::UpdateScrollPosition
@@ -775,6 +782,7 @@ private:
      *******************************************************************************/
 
     bool HandleOverScroll(float velocity);
+    bool HandleScrollableOverScroll(float velocity);
 
     void CreateRefreshCoordination()
     {

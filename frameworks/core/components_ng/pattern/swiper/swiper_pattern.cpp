@@ -4939,7 +4939,7 @@ inline bool SwiperPattern::AnimationRunning() const
            (fadeAnimation_ && fadeAnimationIsRunning_) || targetIndex_ || usePropertyAnimation_;
 }
 
-bool SwiperPattern::HandleScrollVelocity(float velocity)
+bool SwiperPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child)
 {
     if (IsDisableSwipe()) {
         return false;

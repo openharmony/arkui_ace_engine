@@ -397,7 +397,7 @@ public:
     }
     ScrollResult HandleScroll(float offset, int32_t source, NestedState state, float velocity = 0.f) override;
     ScrollResult HandleScroll(RefPtr<NestableScrollContainer> parent, float offset, int32_t source, NestedState state);
-    bool HandleScrollVelocity(float velocity) override;
+    bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
     bool HandleScrollVelocity(RefPtr<NestableScrollContainer> parent, float velocity);
     void OnScrollStartRecursive(float position, float velocity = 0.f) override;
     void OnScrollStartRecursive(std::vector<float> positions);

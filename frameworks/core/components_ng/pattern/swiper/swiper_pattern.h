@@ -909,7 +909,12 @@ private:
 
     ScrollResult HandleScrollParentFirst(float offset, int32_t source, NestedState state, float velocity = 0.f);
 
-    bool HandleScrollVelocity(float velocity) override;
+    bool NestedScrollOutOfBoundary() override
+    {
+        return IsOutOfBoundary();
+    }
+
+    bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
 
     void OnScrollStartRecursive(float position, float velocity = 0.f) override;
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;

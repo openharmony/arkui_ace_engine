@@ -4075,7 +4075,7 @@ ScrollResult WebPattern::HandleScroll(RefPtr<NestableScrollContainer> parent, fl
     return { 0.0f, false };
 }
 
-bool WebPattern::HandleScrollVelocity(float velocity)
+bool WebPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child)
 {
     // If no parent object is specified, the nearest nested scrollable parent is used by default.
     return HandleScrollVelocity(GetNestedScrollParent(), velocity);
