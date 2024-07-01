@@ -34,6 +34,7 @@
 #include "core/common/recorder/node_data_cache.h"
 #include "core/common/thread_checker.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -1415,7 +1416,7 @@ RefPtr<FrameNode> PageRouterManager::CreatePage(int32_t pageId, const RouterPage
         target.path.c_str(), (target.recoverable ? "yes" : "no"), (target.isNamedRouterMode ? "yes" : "no"));
     auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(
         pageId, target.url, target.path, target.params, target.recoverable, target.isNamedRouterMode);
-    auto pagePattern = AceType::MakeRefPtr<PagePattern>(entryPageInfo);
+    auto pagePattern = ViewAdvancedRegister::GetInstance()->CreatePagePattern(entryPageInfo);
     std::unordered_map<std::string, std::string> reportData { { "pageUrl", target.url } };
     ResSchedReportScope reportScope("push_page", reportData);
     auto pageNode =
@@ -1509,7 +1510,7 @@ UIContentErrorCode PageRouterManager::LoadCard(int32_t pageId, const RouterPageI
 {
     CHECK_RUN_ON(JS);
     auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(pageId, target.url, target.path, params);
-    auto pagePattern = AceType::MakeRefPtr<PagePattern>(entryPageInfo);
+    auto pagePattern = ViewAdvancedRegister::GetInstance()->CreatePagePattern(entryPageInfo);
     auto pageNode =
         FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
     pageNode->SetHostPageId(pageId);
