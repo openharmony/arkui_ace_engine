@@ -4865,7 +4865,9 @@ void SwiperPattern::TabContentStateCallBack(int32_t oldIndex, int32_t nextIndex)
     auto tabContents = tabsNode->GetTabs();
     CHECK_NULL_VOID(tabContents);
     auto oldTabContent = tabContents->GetChildAtIndex(oldIndex);
+    CHECK_NULL_VOID(oldTabContent);
     auto nextTabContent = tabContents->GetChildAtIndex(nextIndex);
+    CHECK_NULL_VOID(nextTabContent);
     std::string oldTabContentId = oldTabContent->GetInspectorId().value_or("");
     int32_t oldTabContentUniqueId = oldTabContent->GetId();
     std::string nextTabContentId = nextTabContent->GetInspectorId().value_or("");
