@@ -3920,6 +3920,7 @@ void WebDelegate::LoadUrl()
 
 void WebDelegate::OnInactive()
 {
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnInactive, webId:%{public}d", GetWebId());
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -3939,6 +3940,7 @@ void WebDelegate::OnInactive()
 
 void WebDelegate::OnActive()
 {
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnActive, webId:%{public}d", GetWebId());
     auto context = context_.Upgrade();
     if (!context) {
         return;
