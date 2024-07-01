@@ -219,9 +219,7 @@ void TimePickerModelNG::SetSelectedTime(const PickerTime& value)
 void TimePickerModelNG::SetIsEnableHapticFeedback(bool isEnableHapticFeedback)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
-    timePickerRowPattern->SetIsEnableHaptic(isEnableHapticFeedback);
+    SetIsEnableHapticFeedback(frameNode, isEnableHapticFeedback);
 }
 
 void TimePickerModelNG::SetHour24(bool isUseMilitaryTime)
@@ -596,8 +594,10 @@ void TimePickerModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& co
 
 void TimePickerModelNG::SetIsEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-        TimePickerLayoutProperty, IsEnableHapticFeedback, isEnableHapticFeedback, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    timePickerRowPattern->SetIsEnableHaptic(isEnableHapticFeedback);
 }
 
 void TimePickerModelNG::SetHour24(FrameNode* frameNode, bool isUseMilitaryTime)
@@ -714,8 +714,10 @@ uint32_t TimePickerModelNG::getTimepickerBackgroundColor(FrameNode* frameNode)
 
 int32_t TimePickerModelNG::getEnableHapticFeedback(FrameNode* frameNode)
 {
-    CHECK_NULL_RETURN(frameNode, 0);
-    return frameNode->GetLayoutProperty<TimePickerLayoutProperty>()->GetIsEnableHapticFeedbackValue(false);
+    CHECK_NULL_RETURN(frameNode, static_cast<uint32_t>(true));
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_RETURN(timePickerRowPattern, static_cast<uint32_t>(true));
+    return static_cast<uint32_t>(timePickerRowPattern->GetIsEnableHaptic());
 }
 
 int32_t TimePickerModelNG::getTimepickerUseMilitaryTime(FrameNode* frameNode)
