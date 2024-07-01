@@ -126,6 +126,22 @@ void SetControllerCallback(const JSRef<JSObject>& object, const JsiExecutionCont
     }
 }
 
+std::shared_ptr<InnerXComponentController> GetXComponentController(
+    const JSRef<JSObject>& controller, std::optional<std::string>& id, const JsiExecutionContext& execCtx)
+{
+    std::shared_ptr<InnerXComponentController> xcomponentController = nullptr;
+    auto* jsXComponentController = controller->Unwrap<JSXComponentController>();
+    if (jsXComponentController) {
+        jsXComponentController->SetInstanceId(Container::CurrentId());
+        if (id.has_value()) {
+            XComponentClient::GetInstance().AddControllerToJSXComponentControllersMap(
+                id.value(), jsXComponentController);
+        }
+        xcomponentController = jsXComponentController->GetController();
+    }
+    return xcomponentController;
+}
+
 void JSXComponent::JSBind(BindingTarget globalObj)
 {
     JSClass<JSXComponent>::Declare("XComponent");
@@ -193,15 +209,7 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     JSRef<JSObject> controllerObj;
     if (controller->IsObject()) {
         controllerObj = JSRef<JSObject>::Cast(controller);
-        auto* jsXComponentController = controllerObj->Unwrap<JSXComponentController>();
-        if (jsXComponentController) {
-            jsXComponentController->SetInstanceId(Container::CurrentId());
-            if (idOpt.has_value()) {
-                XComponentClient::GetInstance().AddControllerToJSXComponentControllersMap(
-                    idOpt.value(), jsXComponentController);
-            }
-            xcomponentController = jsXComponentController->GetController();
-        }
+        xcomponentController = GetXComponentController(controllerObj, idOpt, info.GetExecutionContext());
     }
     XComponentType xcomponentType = XComponentType::SURFACE;
     if (type->IsString()) {
@@ -210,7 +218,7 @@ void JSXComponent::Create(const JSCallbackInfo& info)
         xcomponentType = static_cast<XComponentType>(type->ToNumber<int32_t>());
     }
     XComponentModel::GetInstance()->Create(idOpt, xcomponentType, libraryNameOpt, xcomponentController);
-    if (libraryNameValue->IsEmpty() && xcomponentController && !controllerObj->IsUndefined()) {
+    if (!libraryNameOpt.has_value() && xcomponentController && !controllerObj->IsUndefined()) {
         SetControllerCallback(controllerObj, info.GetExecutionContext());
     }
 
