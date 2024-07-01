@@ -258,7 +258,6 @@ void RatingPattern::ConstrainsRatingScore(const RefPtr<RatingLayoutProperty>& la
     const double ratingScore = ratingRenderProperty->GetRatingScore().value_or(themeRatingScore_);
     const double stepSize = ratingRenderProperty->GetStepSize().value_or(themeStepSize_);
     const double drawScore = fmin(Round(ratingScore / stepSize) * stepSize, static_cast<double>(starNum));
-
     // do not fire onChange callback when rating is initialized for the first time.
     if (hasInit_ && lastRatingScore_ != drawScore) {
         FireChangeEvent();

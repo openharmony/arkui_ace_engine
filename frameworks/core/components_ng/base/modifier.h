@@ -181,7 +181,7 @@ private:
         explicit classname(const type& value) : template_class(value) {} \
         ~classname() override = default;                                 \
         ACE_DISALLOW_COPY_AND_MOVE(classname);                           \
-    };
+    }
 
 DECLARE_PROP_TYPED_CLASS(PropertyBool, NormalProperty, bool);
 DECLARE_PROP_TYPED_CLASS(PropertySizeF, NormalProperty, SizeF);
