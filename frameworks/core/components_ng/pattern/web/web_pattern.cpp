@@ -466,10 +466,16 @@ void WebPattern::HandleFlingMove(const GestureEvent& event)
     if ((event.GetInputEventType() == InputEventType::AXIS) &&
         (event.GetSourceTool() == SourceTool::TOUCHPAD)) {
         CHECK_NULL_VOID(delegate_);
+        std::vector<int32_t> pressedCodes;
+        auto gesturePressedCodes = event.GetPressedKeyCodes();
+        for (auto pCode : gesturePressedCodes) {
+            pressedCodes.push_back(static_cast<int32_t>(pCode));
+        }
         auto localLocation = event.GetLocalLocation();
-        delegate_->HandleTouchpadFlingEvent(localLocation.GetX(), localLocation.GetY(),
-                                            event.GetVelocity().GetVelocityX(),
-                                            event.GetVelocity().GetVelocityY());
+        delegate_->WebHandleTouchpadFlingEvent(localLocation.GetX(), localLocation.GetY(),
+                                               event.GetVelocity().GetVelocityX(),
+                                               event.GetVelocity().GetVelocityY(),
+                                               pressedCodes);
     }
 }
 
@@ -478,8 +484,14 @@ void WebPattern::HandleDragMove(const GestureEvent& event)
     if (event.GetInputEventType() == InputEventType::AXIS) {
         CHECK_NULL_VOID(delegate_);
         auto localLocation = event.GetLocalLocation();
-        delegate_->HandleAxisEvent(localLocation.GetX(), localLocation.GetY(),
-            event.GetDelta().GetX() * DEFAULT_AXIS_RATIO, event.GetDelta().GetY() * DEFAULT_AXIS_RATIO);
+        std::vector<int32_t> pressedCodes;
+        auto gesturePressedCodes = event.GetPressedKeyCodes();
+        for (auto pCode : gesturePressedCodes) {
+            pressedCodes.push_back(static_cast<int32_t>(pCode));
+        }
+        delegate_->WebHandleAxisEvent(localLocation.GetX(), localLocation.GetY(),
+            event.GetDelta().GetX() * DEFAULT_AXIS_RATIO, event.GetDelta().GetY() * DEFAULT_AXIS_RATIO,
+            pressedCodes);
     }
 }
 
