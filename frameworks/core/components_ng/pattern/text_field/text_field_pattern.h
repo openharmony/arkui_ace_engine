@@ -863,6 +863,7 @@ public:
     void StripNextLine(std::wstring& data);
     bool IsShowHandle();
     std::string GetCancelButton();
+    std::string GetPasswordIconPromptInformation(bool show);
     bool OnKeyEvent(const KeyEvent& event);
     int32_t GetLineCount() const;
     TextInputType GetKeyboard()
@@ -1435,7 +1436,8 @@ private:
     void SetAccessibilityActionGetAndSetCaretPosition();
     void SetAccessibilityMoveTextAction();
     void SetAccessibilityScrollAction();
-    void SetAccessibilityDeleteAction();
+    void SetAccessibilityClearAction();
+    void SetAccessibilityPasswordIconAction();
 
     void UpdateCopyAllStatus();
     void RestorePreInlineStates();
