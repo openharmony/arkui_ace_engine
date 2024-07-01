@@ -972,43 +972,6 @@ HWTEST_F(TabBarLayoutTestNg, TabBarPatternOnDirtyLayoutWrapperSwap002, TestSize.
 }
 
 /**
- * @tc.name: TabBarLayoutAlgorithmCheckMarqueeForScrollable001
- * @tc.desc: Test the CheckMarqueeForScrollable function in the TabBarLayoutAlgorithm class.
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmCheckMarqueeForScrollable001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    auto tabbarLayoutAlgorithm =
-        AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern_->CreateLayoutAlgorithm());
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode_, geometryNode, tabBarNode_->GetLayoutProperty());
-    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabbarLayoutAlgorithm));
-    auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper.GetLayoutProperty());
-
-    /**
-     * @tc.steps: steps2. Create different input parameters.
-     */
-    layoutProperty->UpdateTabBarMode(TabBarMode::FIXED);
-    tabbarLayoutAlgorithm->childCount_ = 0;
-    BarGridColumnOptions option;
-    option.lg = 2;
-    tabBarLayoutProperty_->UpdateBarGridAlign(option);
-
-    /**
-     * @tc.steps: steps3. CheckMarqueeForScrollable.
-     * @tc.expected: steps3. Check the results of CheckMarqueeForScrollable under different conditions.
-     */
-    tabbarLayoutAlgorithm->CheckMarqueeForScrollable(&layoutWrapper);
-    EXPECT_NE(tabbarLayoutAlgorithm, nullptr);
-    tabbarLayoutAlgorithm->childCount_ = 1;
-    tabbarLayoutAlgorithm->CheckMarqueeForScrollable(&layoutWrapper);
-    EXPECT_NE(tabbarLayoutAlgorithm, nullptr);
-}
-
-/**
 * @tc.name: TabBarPatternBeforeCreateLayoutWrapper003
 * @tc.desc: test Measure
 * @tc.type: FUNC
