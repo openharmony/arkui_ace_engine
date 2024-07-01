@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t COLOR_BLACK = 0xff000000;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
-constexpr uint32_t COLOR_WHITE_TRANSLUCENT = 0x66FFFFFF;
+constexpr uint32_t COLOR_WHITE_TRANSLUCENT = 0x66ffffff;
 constexpr Dimension RADIO_SNAPSHOT_IMAGE = 16.0_vp;
 } // namespace
 
