@@ -344,9 +344,9 @@ public:
     void HandleOnDelete(bool backward) override;
     std::pair<bool, bool> IsEmojiOnCaretPosition(int32_t& emojiLength, bool isBackward, int32_t length);
     int32_t CalculateDeleteLength(int32_t length, bool isBackward);
-    void DeleteBackward(int32_t length = 0) override;
-    std::wstring DeleteBackwardOperation(int32_t length = 0);
-    void DeleteForward(int32_t length) override;
+    void DeleteBackward(int32_t length = 1) override;
+    std::wstring DeleteBackwardOperation(int32_t length);
+    void DeleteForward(int32_t length = 1) override;
     std::wstring DeleteForwardOperation(int32_t length);
     void SetInputMethodStatus(bool keyboardShown) override;
     bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan) override;
