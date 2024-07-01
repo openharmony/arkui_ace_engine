@@ -83,7 +83,7 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
         if (currentSourceInfo != sourceInfo) {
             TAG_LOGW(AceLogTag::ACE_IMAGE,
                 "sourceInfo does not match, ignore current callback. "
-                "current: %{public}s vs callback's: %{public}s",
+                "current: %{private}s vs callback's: %{private}s",
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
@@ -102,7 +102,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
         if (currentSourceInfo != sourceInfo) {
             TAG_LOGW(AceLogTag::ACE_IMAGE,
                 "sourceInfo does not match, ignore current callback. "
-                "current: %{public}s vs callback's: %{public}s",
+                "current: %{private}s vs callback's: %{private}s",
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
@@ -121,7 +121,7 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
         if (currentSourceInfo != sourceInfo) {
             TAG_LOGW(AceLogTag::ACE_IMAGE,
                 "sourceInfo does not match, ignore current callback. "
-                "current: %{public}s vs callback's: %{public}s",
+                "current: %{private}s vs callback's: %{private}s",
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
@@ -142,7 +142,7 @@ OnCompleteInDataReadyNotifyTask ImagePattern::CreateCompleteCallBackInDataReady(
         if (currentSourceInfo != sourceInfo) {
             TAG_LOGW(AceLogTag::ACE_IMAGE,
                 "sourceInfo does not match, ignore current callback. "
-                "current: %{public}s vs callback's: %{public}s",
+                "current: %{private}s vs callback's: %{private}s",
                 currentSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
@@ -827,7 +827,7 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallbackForAlt()
         if (currentAltSourceInfo != sourceInfo) {
             TAG_LOGW(AceLogTag::ACE_IMAGE,
                 "alt image sourceInfo does not match, ignore current callback. "
-                "current: %{public}s vs callback's: %{public}s",
+                "current: %{private}s vs callback's: %{private}s",
                 currentAltSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
@@ -860,7 +860,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         if (currentAltSrc != sourceInfo) {
             TAG_LOGW(AceLogTag::ACE_IMAGE,
                 "alt image sourceInfo does not match, ignore current callback. "
-                "current: %{public}s vs callback's: %{public}s",
+                "current: %{private}s vs callback's: %{private}s",
                 currentAltSrc.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
