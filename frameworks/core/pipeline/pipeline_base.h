@@ -234,6 +234,8 @@ public:
 
     virtual void OnSurfaceDensityChanged(double density)
     {
+        // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker
+        // thread.
         std::lock_guard lock(densityChangeMutex_);
         for (auto&& [id, callback] : densityChangedCallbacks_) {
             if (callback) {
@@ -245,6 +247,8 @@ public:
     int32_t RegisterDensityChangedCallback(std::function<void(double)>&& callback)
     {
         if (callback) {
+            // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker
+            // thread.
             std::lock_guard lock(densityChangeMutex_);
             densityChangedCallbacks_.emplace(++densityChangeCallbackId_, std::move(callback));
             return densityChangeCallbackId_;
@@ -254,6 +258,8 @@ public:
 
     void UnregisterDensityChangedCallback(int32_t callbackId)
     {
+        // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker
+        // thread.
         std::lock_guard lock(densityChangeMutex_);
         densityChangedCallbacks_.erase(callbackId);
     }
@@ -1434,6 +1440,7 @@ private:
     std::shared_ptr<Rosen::RSTransaction> rsTransaction_;
     uint32_t frameCount_ = 0;
 
+    // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker thread.
     std::mutex densityChangeMutex_;
     int32_t densityChangeCallbackId_ = 0;
     std::unordered_map<int32_t, std::function<void(double)>> densityChangedCallbacks_;
