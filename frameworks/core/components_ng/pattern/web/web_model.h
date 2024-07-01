@@ -187,6 +187,7 @@ public:
 
     virtual void SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
     virtual void SetOverlayScrollbarEnabled(bool isEnabled) {};
+    virtual void SetKeyboardAvoidMode(const WebKeyboardAvoidMode& mode) {}
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

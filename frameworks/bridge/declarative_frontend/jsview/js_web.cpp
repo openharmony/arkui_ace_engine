@@ -1936,6 +1936,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onInterceptKeyboardAttach", &JSWeb::OnInterceptKeyboardAttach);
     JSClass<JSWeb>::StaticMethod("onAdsBlocked", &JSWeb::OnAdsBlocked);
     JSClass<JSWeb>::StaticMethod("forceDisplayScrollBar", &JSWeb::ForceDisplayScrollBar);
+    JSClass<JSWeb>::StaticMethod("keyboardAvoidMode", &JSWeb::KeyboardAvoidMode);
 
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -5050,5 +5051,16 @@ void JSWeb::ForceDisplayScrollBar(const JSCallbackInfo& args)
     }
     bool isEnabled = args[0]->ToBoolean();
     WebModel::GetInstance()->SetOverlayScrollbarEnabled(isEnabled);
+}
+
+void JSWeb::KeyboardAvoidMode(int32_t mode)
+{
+    if (mode < static_cast<int32_t>(WebKeyboardAvoidMode::RESIZE_VISUAL) ||
+        mode > static_cast<int32_t>(WebKeyboardAvoidMode::DEFAULT)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "KeyboardAvoidMode param err");
+        return;
+    }
+    WebKeyboardAvoidMode avoidMode = static_cast<WebKeyboardAvoidMode>(mode);
+    WebModel::GetInstance()->SetKeyboardAvoidMode(avoidMode);
 }
 } // namespace OHOS::Ace::Framework

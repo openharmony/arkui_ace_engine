@@ -463,6 +463,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SmoothDragResizeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverlayScrollbarEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAvoidMode, WebKeyboardAvoidMode);
 
     bool IsFocus() const
     {
@@ -633,8 +634,10 @@ private:
     void CloseContextSelectionMenu();
     RectF ComputeMouseClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
     void RegistVirtualKeyBoardListener(const RefPtr<PipelineContext> &context);
+    bool ProcessVirtualKeyBoardHide(int32_t width, int32_t height, bool safeAreaEnabled);
+    bool ProcessVirtualKeyBoardShow(int32_t width, int32_t height, double keyboard, bool safeAreaEnabled);
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
-    void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard);
+    void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard, bool isUpdate = true);
     void UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
@@ -706,6 +709,7 @@ private:
     void WindowDrag(int32_t width, int32_t height);
     void OnSmoothDragResizeEnabledUpdate(bool value);
     void OnOverlayScrollbarEnabledUpdate(bool enable);
+    void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
     int GetWebId();
 
     void InitEvent();
@@ -912,6 +916,9 @@ private:
     std::shared_ptr<FullScreenEnterEvent> fullScreenExitHandler_ = nullptr;
     bool needOnFocus_ = false;
     Size drawSize_;
+    Size visibleViewportSize_{-1.0, -1.0};
+    bool isKeyboardInSafeArea_ = false;
+    WebKeyboardAvoidMode keyBoardAvoidMode_ = WebKeyboardAvoidMode::DEFAULT;
     Size rootLayerChangeSize_;
     Size drawSizeCache_;
     Size areaChangeSize_;

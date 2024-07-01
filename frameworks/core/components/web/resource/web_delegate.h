@@ -890,6 +890,7 @@ public:
     void GLContextInit(void* window);
     sptr<OHOS::SurfaceDelegate> GetSurfaceDelegateClient();
     void SetBoundsOrResize(const Size& drawSize, const Offset& offset, bool isKeyboard = false);
+    void ResizeVisibleViewport(const Size& visibleSize, bool isKeyboard = false);
     Offset GetWebRenderGlobalPos();
     bool InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context);
     int GetWebId();
@@ -1193,6 +1194,8 @@ private:
     bool isSmoothDragResizeEnabled_ = false;
     double resizeWidth_ = 0.0;
     double resizeHeight_ = 0.0;
+    double resizeVisibleWidth_ = -1.0;
+    double resizeVisibleHeight_ = -1.0;
     OHOS::Ace::Rect currentArea_;
     NG::SafeAreaInsets systemSafeArea_;
     NG::SafeAreaInsets cutoutSafeArea_;
