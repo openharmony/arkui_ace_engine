@@ -6208,13 +6208,7 @@ void TextFieldPattern::StopEditing()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d Stop Editing", host->GetId());
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    if (HasConnection() || isCustomKeyboardAttached_) {
-#else
-    if (isCustomKeyboardAttached_) {
-#endif
-        FocusHub::LostFocusToViewRoot();
-    }
+    FocusHub::LostFocusToViewRoot();
     UpdateSelection(selectController_->GetCaretIndex());
     StopTwinkling();
     CloseKeyboard(true);
