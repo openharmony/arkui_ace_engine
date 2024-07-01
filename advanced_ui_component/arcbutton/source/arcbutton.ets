@@ -56,10 +56,10 @@ export enum ArkButtonClickEffectStyle {
 }
 
 export interface ArcButtonMargin {
-  left: number;
-  top: number;
-  right: number;
-  bottom: number;
+  left: LengthMetrics;
+  top: LengthMetrics;
+  right: LengthMetrics;
+  bottom: LengthMetrics;
 }
 
 interface CommonArcButtonOptions {
@@ -183,10 +183,10 @@ export class ArcButtonOptions {
     this.textStyle = options.textStyle ?? FontStyle.Normal
     this.textFamily = options.textFamily ?? ''
     this.textMargin = options.textMargin ?? {
-      left: Constants.TEXT_HORIZONTAL_MARGIN,
-      top: Constants.TEXT_MARGIN_TOP,
-      right: Constants.TEXT_HORIZONTAL_MARGIN,
-      bottom: Constants.TEXT_MARGIN_BOTTOM
+      left: new LengthMetrics(Constants.TEXT_HORIZONTAL_MARGIN, LengthUnit.VP),
+      top:  new LengthMetrics(Constants.TEXT_MARGIN_TOP, LengthUnit.VP),
+      right:  new LengthMetrics(Constants.TEXT_HORIZONTAL_MARGIN, LengthUnit.VP),
+      bottom:  new LengthMetrics(Constants.TEXT_MARGIN_BOTTOM, LengthUnit.VP)
     }
   }
 }
@@ -330,9 +330,9 @@ export struct ArcButton {
       } else {
         this.btnHeight = data.height + Constants.DISTANCE_FROM_BORDER * 2
       }
-      this.textWidth = data.width - this.options.textMargin.left - this.options.textMargin.right
+      this.textWidth = data.width - this.options.textMargin.left.value - this.options.textMargin.right.value
       this.judgeTextWidth()
-      this.textHeight = data.height - this.options.textMargin.top - this.options.textMargin.bottom
+      this.textHeight = data.height - this.options.textMargin.top.value - this.options.textMargin.bottom.value
       let leftTopPoint = data.leftTopPoint
       let rightTopPoint = data.rightTopPoint
       let leftBottomPoint = data.leftBottomPoint
