@@ -396,15 +396,27 @@ std::string GetReplaceContentStr(int pos, const std::string& type, JSRef<JSArray
     JSRef<JSVal> item = params->GetValueAt(pos + containCount);
     if (type == "d") {
         if (item->IsNumber()) {
-            return std::to_string(item->ToNumber<uint32_t>());
+            return std::to_string(item->ToNumber<int32_t>());
+        } else if (item->IsObject()) {
+            int32_t result = 0;
+            JSViewAbstract::ParseJsInteger(item, result);
+            return std::to_string(result);
         }
     } else if (type == "s") {
         if (item->IsString()) {
             return item->ToString();
+        } else if (item->IsObject()) {
+            std::string result;
+            JSViewAbstract::ParseJsString(item, result);
+            return result;
         }
     } else if (type == "f") {
         if (item->IsNumber()) {
             return std::to_string(item->ToNumber<float>());
+        } else if (item->IsObject()) {
+            double result = 0.0;
+            JSViewAbstract::ParseJsDouble(item, result);
+            return std::to_string(result);
         }
     }
     return std::string();
