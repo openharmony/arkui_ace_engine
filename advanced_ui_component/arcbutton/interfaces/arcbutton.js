@@ -309,6 +309,39 @@ export class ArcButton extends ViewV2 {
     buildLog() {
         return true;
     }
+    textBuilderIsExceed(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create(this.options.resourceText);
+            Text.width(this.textWidth);
+            Text.height(this.textHeight);
+            Text.fontColor(this.textColor.color);
+            Text.fontSize(this.options.textSize.value);
+            Text.fontWeight(FontWeight.Medium);
+            Text.fontStyle(this.options.textStyle);
+            Text.fontFamily(this.options.textFamily);
+            Text.maxLines(1);
+            Text.textOverflow({ overflow: TextOverflow.MARQUEE });
+            Text.margin({ top: this.isUp ? this.options.textMargin.bottom : this.options.textMargin.top });
+        }, Text);
+        Text.pop();
+    }
+    textBuilderNormal(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create(this.options.resourceText);
+            Text.width(this.textWidth);
+            Text.height(this.textHeight);
+            Text.textAlign(TextAlign.Center);
+            Text.fontColor(this.textColor.color);
+            Text.maxFontSize(this.options.textSize.value);
+            Text.minFontSize(new LengthMetrics(Constants.MIN_FONT_SIZE, LengthUnit.FP).value);
+            Text.fontWeight(FontWeight.Medium);
+            Text.fontStyle(this.options.textStyle);
+            Text.fontFamily(this.options.textFamily);
+            Text.maxLines(1);
+            Text.margin({ top: this.isUp ? this.options.textMargin.bottom : this.options.textMargin.top });
+        }, Text);
+        Text.pop();
+    }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create({ alignContent: Alignment.Top });
@@ -364,48 +397,19 @@ export class ArcButton extends ViewV2 {
             });
             Canvas.width(this.btnWidth);
             Canvas.height(this.btnHeight);
-            Canvas.rotate({
-                angle: this.isUp ? 0 : 180
-            });
+            Canvas.rotate({ angle: this.isUp ? 0 : 180 });
         }, Canvas);
         Canvas.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
             if (this.isExceed) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Text.create(this.options.resourceText);
-                        Text.width(this.textWidth);
-                        Text.height(this.textHeight);
-                        Text.fontColor(this.textColor.color);
-                        Text.fontSize(this.options.textSize.value);
-                        Text.fontWeight(FontWeight.Medium);
-                        Text.fontStyle(this.options.textStyle);
-                        Text.fontFamily(this.options.textFamily);
-                        Text.maxLines(1);
-                        Text.textOverflow({ overflow: TextOverflow.MARQUEE });
-                        Text.margin({ top: this.isUp ? this.options.textMargin.bottom : this.options.textMargin.top });
-                    }, Text);
-                    Text.pop();
+                    this.textBuilderIsExceed.bind(this)(this);
                 });
             }
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Text.create(this.options.resourceText);
-                        Text.width(this.textWidth);
-                        Text.height(this.textHeight);
-                        Text.textAlign(TextAlign.Center);
-                        Text.fontColor(this.textColor.color);
-                        Text.maxFontSize(this.options.textSize.value);
-                        Text.minFontSize(new LengthMetrics(Constants.MIN_FONT_SIZE, LengthUnit.FP).value);
-                        Text.fontWeight(FontWeight.Medium);
-                        Text.fontStyle(this.options.textStyle);
-                        Text.fontFamily(this.options.textFamily);
-                        Text.maxLines(1);
-                        Text.margin({ top: this.isUp ? this.options.textMargin.bottom : this.options.textMargin.top });
-                    }, Text);
-                    Text.pop();
+                    this.textBuilderNormal.bind(this)(this);
                 });
             }
         }, If);

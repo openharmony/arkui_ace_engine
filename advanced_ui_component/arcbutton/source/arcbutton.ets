@@ -12,20 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 import measure from '@ohos.measure'
 import Curves from '@ohos.curves'
 import { ColorMetrics, LengthMetrics, LengthUnit } from '@ohos.arkui.node';
@@ -146,8 +132,8 @@ interface CommonArcButtonOptions {
 
 @ObservedV2
 export class ArcButtonOptions {
-  @Trace public  type: ArcButtonTypeMode;
-  @Trace public  width: LengthMetrics;
+  @Trace public type: ArcButtonTypeMode;
+  @Trace public width: LengthMetrics;
   @Trace public height: LengthMetrics;
   @Trace public styleMode: ArcButtonStyleMode;
   @Trace public status: ArcButtonStatus;
@@ -175,7 +161,7 @@ export class ArcButtonOptions {
     this.resourceText = options.resourceText ?? ''
     this.touchEffect = options.touchEffect ?? ArkButtonClickEffectStyle.NONE
     this.backgroundColor = options.backgroundColor ?? ColorMetrics.resourceColor(Color.Black)
-    this.shadowColor = options.shadowColor ??  ColorMetrics.resourceColor('#000000')
+    this.shadowColor = options.shadowColor ?? ColorMetrics.resourceColor('#000000')
     this.shadowEnabled = options.shadowEnabled ?? false
     this.textSize = options.textSize ?? new LengthMetrics(Constants.MAX_FONT_SIZE, LengthUnit.FP)
     this.textColor = options.textColor ?? ColorMetrics.resourceColor(Color.White)
@@ -184,9 +170,9 @@ export class ArcButtonOptions {
     this.textFamily = options.textFamily ?? ''
     this.textMargin = options.textMargin ?? {
       left: new LengthMetrics(Constants.TEXT_HORIZONTAL_MARGIN, LengthUnit.VP),
-      top:  new LengthMetrics(Constants.TEXT_MARGIN_TOP, LengthUnit.VP),
-      right:  new LengthMetrics(Constants.TEXT_HORIZONTAL_MARGIN, LengthUnit.VP),
-      bottom:  new LengthMetrics(Constants.TEXT_MARGIN_BOTTOM, LengthUnit.VP)
+      top: new LengthMetrics(Constants.TEXT_MARGIN_TOP, LengthUnit.VP),
+      right: new LengthMetrics(Constants.TEXT_HORIZONTAL_MARGIN, LengthUnit.VP),
+      bottom: new LengthMetrics(Constants.TEXT_MARGIN_BOTTOM, LengthUnit.VP)
     }
   }
 }
@@ -386,6 +372,37 @@ export struct ArcButton {
     return true;
   }
 
+  @Builder
+  textBuilderIsExceed() {
+    Text(this.options.resourceText)
+      .width(this.textWidth)
+      .height(this.textHeight)
+      .fontColor(this.textColor.color)
+      .fontSize(this.options.textSize.value)
+      .fontWeight(FontWeight.Medium)
+      .fontStyle(this.options.textStyle)
+      .fontFamily(this.options.textFamily)
+      .maxLines(1)
+      .textOverflow({ overflow: TextOverflow.MARQUEE })
+      .margin({ top: this.isUp ? this.options.textMargin.bottom : this.options.textMargin.top })
+  }
+
+  @Builder
+  textBuilderNormal() {
+    Text(this.options.resourceText)
+      .width(this.textWidth)
+      .height(this.textHeight)
+      .textAlign(TextAlign.Center)
+      .fontColor(this.textColor.color)
+      .maxFontSize(this.options.textSize.value)
+      .minFontSize(new LengthMetrics(Constants.MIN_FONT_SIZE, LengthUnit.FP).value)
+      .fontWeight(FontWeight.Medium)
+      .fontStyle(this.options.textStyle)
+      .fontFamily(this.options.textFamily)
+      .maxLines(1)
+      .margin({ top: this.isUp ? this.options.textMargin.bottom : this.options.textMargin.top })
+  }
+
   build() {
     Stack({ alignContent: Alignment.Top }) {
       if (this.buildLog()) {
@@ -397,35 +414,11 @@ export struct ArcButton {
         })
         .width(this.btnWidth)
         .height(this.btnHeight)
-        .rotate({
-          angle: this.isUp ? 0 : 180
-        })
-
+        .rotate({ angle: this.isUp ? 0 : 180 })
       if (this.isExceed) {
-        Text(this.options.resourceText)
-          .width(this.textWidth)
-          .height(this.textHeight)
-          .fontColor(this.textColor.color)
-          .fontSize(this.options.textSize.value)
-          .fontWeight(FontWeight.Medium)
-          .fontStyle(this.options.textStyle)
-          .fontFamily(this.options.textFamily)
-          .maxLines(1)
-          .textOverflow({ overflow: TextOverflow.MARQUEE })
-          .margin({ top: this.isUp ? this.options.textMargin.bottom : this.options.textMargin.top })
+        this.textBuilderIsExceed()
       } else {
-        Text(this.options.resourceText)
-          .width(this.textWidth)
-          .height(this.textHeight)
-          .textAlign(TextAlign.Center)
-          .fontColor(this.textColor.color)
-          .maxFontSize(this.options.textSize.value)
-          .minFontSize(new LengthMetrics(Constants.MIN_FONT_SIZE, LengthUnit.FP).value)
-          .fontWeight(FontWeight.Medium)
-          .fontStyle(this.options.textStyle)
-          .fontFamily(this.options.textFamily)
-          .maxLines(1)
-          .margin({ top: this.isUp ? this.options.textMargin.bottom : this.options.textMargin.top })
+        this.textBuilderNormal()
       }
     }
     .animation({ curve: this.curves })
@@ -448,13 +441,11 @@ export struct ArcButton {
           this.scaleY = this.scaleValue
           this.btnColor = this.btnPressColor
           break
-
         case TouchType.Up:
           this.scaleX = 1
           this.scaleY = 1
           this.btnColor = this.btnNormalColor
           break
-
         default:
           break
       }
