@@ -432,7 +432,7 @@ void PageRouterManager::Clear()
 
 void PageRouterManager::EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)>&& callback)
 {
-    auto currentPage = pageRouterStack_.back().Upgrade();
+    auto currentPage = GetCurrentPageNode();
     CHECK_NULL_VOID(currentPage);
     auto pagePattern = currentPage->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
@@ -468,7 +468,7 @@ void PageRouterManager::DisableAlertBeforeBackPage()
     if (pageRouterStack_.empty()) {
         return;
     }
-    auto currentPage = pageRouterStack_.back().Upgrade();
+    auto currentPage = GetCurrentPageNode();
     CHECK_NULL_VOID(currentPage);
     auto pagePattern = currentPage->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
@@ -511,7 +511,7 @@ bool PageRouterManager::Pop()
 bool PageRouterManager::StartPop()
 {
     CHECK_RUN_ON(JS);
-    auto currentPage = pageRouterStack_.empty() ? nullptr : pageRouterStack_.back().Upgrade();
+    auto currentPage = GetCurrentPageNode();
     CHECK_NULL_RETURN(currentPage, false);
     auto pagePattern = currentPage->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
@@ -536,7 +536,7 @@ bool PageRouterManager::StartPop()
     pageRouterStack_.pop_back();
 
     // clean prev top page params
-    currentPage = pageRouterStack_.back().Upgrade();
+    currentPage = GetCurrentPageNode();
     CHECK_NULL_RETURN(currentPage, false);
     pagePattern = currentPage->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
@@ -699,7 +699,7 @@ void PageRouterManager::GetState(int32_t& index, std::string& name, std::string&
             index = index - 1;
         }
     }
-    auto pageNode = pageRouterStack_.back().Upgrade();
+    auto pageNode = GetCurrentPageNode();
     CHECK_NULL_VOID(pageNode);
     auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
     CHECK_NULL_VOID(pagePattern);
@@ -836,7 +836,7 @@ std::string PageRouterManager::GetParams() const
         if (pageRouterStack_.empty()) {
             return "";
         }
-        pageNode = pageRouterStack_.back().Upgrade();
+        pageNode = GetCurrentPageNode();
     }
 
     CHECK_NULL_RETURN(pageNode, "");
@@ -871,7 +871,7 @@ std::string PageRouterManager::GetCurrentPageUrl()
     if (pageRouterStack_.empty()) {
         return "";
     }
-    auto pageNode = pageRouterStack_.back().Upgrade();
+    auto pageNode = GetCurrentPageNode();
     CHECK_NULL_RETURN(pageNode, "");
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, "");
@@ -887,7 +887,7 @@ RefPtr<Framework::RevSourceMap> PageRouterManager::GetCurrentPageSourceMap(const
     if (pageRouterStack_.empty()) {
         return nullptr;
     }
-    auto pageNode = pageRouterStack_.back().Upgrade();
+    auto pageNode = GetCurrentPageNode();
     CHECK_NULL_RETURN(pageNode, nullptr);
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, nullptr);
@@ -1339,7 +1339,7 @@ void PageRouterManager::BackCheckAlert(const RouterPageInfo& target)
     if (pageRouterStack_.empty()) {
         return;
     }
-    auto currentPage = pageRouterStack_.back().Upgrade();
+    auto currentPage = GetCurrentPageNode();
     CHECK_NULL_VOID(currentPage);
     auto pagePattern = currentPage->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
@@ -1364,7 +1364,7 @@ void PageRouterManager::BackToIndexCheckAlert(int32_t index, const std::string& 
         return;
     }
     RouterPageInfo target = GetPageInfoByIndex(index, params);
-    auto currentPage = pageRouterStack_.back().Upgrade();
+    auto currentPage = GetCurrentPageNode();
     CHECK_NULL_VOID(currentPage);
     auto pagePattern = currentPage->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
@@ -1794,7 +1794,7 @@ void PageRouterManager::StartRestorePageWithTarget(const RouterPageInfo& target,
 
 void PageRouterManager::FlushFrontend()
 {
-    auto currentPage = pageRouterStack_.back().Upgrade();
+    auto currentPage = GetCurrentPageNode();
     CHECK_NULL_VOID(currentPage);
     auto customNode = DynamicCast<CustomNode>(currentPage->GetFirstChild());
     CHECK_NULL_VOID(customNode);
@@ -1823,7 +1823,7 @@ void PageRouterManager::PopPage(
     }
 
     // update param first.
-    auto nextNode = pageRouterStack_.back().Upgrade();
+    auto nextNode = GetCurrentPageNode();
     CHECK_NULL_VOID(nextNode);
     auto pagePattern = nextNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
@@ -1855,7 +1855,7 @@ void PageRouterManager::PopPageToIndex(int32_t index, const std::string& params,
     }
 
     // update param first.
-    auto nextNode = pageRouterStack_.back().Upgrade();
+    auto nextNode = GetCurrentPageNode();
     CHECK_NULL_VOID(nextNode);
     auto pagePattern = nextNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
@@ -2032,7 +2032,7 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
     TAG_LOGI(AceLogTag::ACE_ROUTER,
         "router replace in new lifecycle(API version > 11), replace mode: %{public}d, url: %{public}s",
         static_cast<int32_t>(info.routerMode), info.url.c_str());
-    auto popNode = pageRouterStack_.back().Upgrade();
+    auto popNode = GetCurrentPageNode();
     int32_t popIndex = static_cast<int32_t>(pageRouterStack_.size() - 1);
     bool findPage = false;
     if (info.routerMode == RouterMode::SINGLE) {
@@ -2065,7 +2065,7 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
         LoadPage(GenerateNextPageId(), info, true, false);
         isNewPageReplacing_ = false;
     }
-    if (popIndex < 0 || popNode == pageRouterStack_.back().Upgrade() || GetPageIndex(popNode) != popIndex) {
+    if (popIndex < 0 || popNode == GetCurrentPageNode() || GetPageIndex(popNode) != popIndex) {
         return;
     }
     auto iter = pageRouterStack_.begin();
