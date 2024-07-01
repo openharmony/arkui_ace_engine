@@ -1615,16 +1615,17 @@ typedef enum {
      */
     NODE_EXPAND_SAFE_AREA = 92,
     /**
-     * @brief 定义控制组件触发可视区域面积变更事件的可视区域面积占组件本身面积的比例。
+     * @brief Defines the visible area ratio (visible area/total area of the component) threshold for invoking the
+     * visible area change event of the component.
      *
-     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
-     * .value[...].f32：占比数值，输入范围0-1
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[...].f32: threshold array. The value range is 0 to 1.
      * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[...].f32：占比数值；\n。 \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[...].f32: threshold array. \n
      *
      */
-    NODE_VISIBLE_AREA_CHANGE_RADIO = 93,
+    NODE_VISIBLE_AREA_CHANGE_RATIO = 93,
 
     /**
      * @brief 定义组件插入和删除时显示过渡动效，支持属性设置，属性获取。
@@ -5222,31 +5223,40 @@ typedef enum {
      */
     NODE_ON_TOUCH_INTERCEPT,
     /**
-     * @brief 组件可见区域变化事件。
+     * @brief Defines the visible area change event.
      *
-     * 触发该事件的条件：组件可见面积与自身面积的比值接近设置的阈值时触发回调。\n
-     * 传入参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0...].f32: 阈值数组，阈值表示组件可见面积与组件自身面积的比值。每个阈值的取值范围均为[0.0, 1.0]\n
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
-     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：组件可见面积与自身面积的比值与上次变化相比的情况，变大为1，变小为0。\n
-     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>：触发回调时组件可见面积与自身面积的比值。\n
+     * This event is triggered when the ratio of the component's visible area to its total area is greater than or less
+     * than the threshold.
+     * Before registering this event, you must set <b>NODE_VISIBLE_AREA_CHANGE_RATIO</b>. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains two parameters:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: how the ratio of the component's visible area to its total area
+     * changes compared to the previous one. The value <b>1</b> indicates an increase, and <b>0</b> indicates a
+     * decrease. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: ratio of the component's visible area to its total area when this
+     * callback is invoked. \n
      */
     NODE_EVENT_ON_VISIBLE_AREA_CHANGE,
     /**
-     * @brief 鼠标进入或退出组件事件。
+     * @brief Defines the event triggered when the mouse pointer is moved over or away from the component.
      *
-     * 触发该事件的条件：鼠标进入或退出组件时触发回调。\n
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * {@link ArkUI_NodeComponentEvent}中包含1个参数：\n
-     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：鼠标是否悬浮在组件上，鼠标进入时为1，退出时为0。\n
+      \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: whether the mouse pointer is hovered over the component.
+     * The value <b>1</b> indicates that the mouse pointer is hovered over the component, and <b>0</b> indicates that
+     * the mouse pointer is moved away from the component. \n
      */
     NODE_ON_HOVER,
     /**
-     * @brief 组件点击事件。
+     * @brief Defines the click event.
      *
-     * 触发该事件的条件：组件被鼠标按键点击或者鼠标在组件上悬浮移动时触发该回调。\n
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_UIInputEvent}。\n
+     * This event is triggered when the component is clicked by a mouse device button or when the mouse pointer moves
+     * within the component. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_UIInputEvent}. \n
      */
     NODE_ON_MOUSE,
     /**
