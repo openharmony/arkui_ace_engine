@@ -71,6 +71,26 @@ enum class RequestFocusResult : int32_t {
     NON_EXIST = 3,
     NON_FOCUSABLE_BY_TAB = 4,
 };
+enum class SwitchingStartReason : int32_t {
+    DEFAULT = 0,
+    WINDOW_FOCUS = 1,
+    REQUEST_FOCUS = 2,
+    LOST_FOCUS_TO_VIEW_ROOT = 3,
+    REMOVE_SELF = 4,
+    REMOVE_CHILD = 5,
+};
+enum class SwitchingEndReason : int32_t {
+    DEFAULT = 0,
+    FOCUS_GUARD_DESTROY = 1,
+    DEPENDENCE_SELF = 2,
+    NO_FOCUSABLE_CHILD = 3,
+    NODE_FOCUS = 4,
+};
+enum class SwitchingUpdateReason : int32_t {
+    DEFAULT = 0,
+    SWITCH_FOCUS = 1,
+    ON_FOCUS_NODE = 2,
+};
 
 using GetNextFocusNodeFunc = std::function<void(FocusStep, const WeakPtr<FocusHub>&, WeakPtr<FocusHub>&)>;
 

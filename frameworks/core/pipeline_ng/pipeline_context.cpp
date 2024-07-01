@@ -2909,7 +2909,8 @@ void PipelineContext::WindowFocus(bool isFocus)
     } else {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d get focus.", windowId_);
         GetOrCreateFocusManager()->WindowFocusMoveStart();
-        GetOrCreateFocusManager()->FocusSwitchingStart(focusManager_->GetCurrentFocus());
+        GetOrCreateFocusManager()->FocusSwitchingStart(focusManager_->GetCurrentFocus(),
+            SwitchingStartReason::WINDOW_FOCUS);
         isWindowHasFocused_ = true;
         InputMethodManager::GetInstance()->SetWindowFocus(true);
         auto curFocusView = focusManager_ ? focusManager_->GetLastFocusView().Upgrade() : nullptr;
