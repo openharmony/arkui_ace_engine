@@ -499,8 +499,8 @@ class ObserveV2 {
       if (weakComp && 'deref' in weakComp && (comp = weakComp.deref()) && comp instanceof ComputedV2) {
         const target = comp.getTarget();
         if (target instanceof ViewV2 && !target.isViewActive()) {
-          // FIXME @Component freeze enable
-          // addDelayedComputedIds id
+          // add delayed ComputedIds id
+          target.addDelayedComputedIds(id);
         } else {
           comp.fireChange();
         }
