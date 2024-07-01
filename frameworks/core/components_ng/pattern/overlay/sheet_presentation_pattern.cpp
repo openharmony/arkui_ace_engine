@@ -901,6 +901,12 @@ SheetType SheetPresentationPattern::GetSheetType()
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, sheetType);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
+
+    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+    if (windowGlobalRect.Width() < SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) {
+        return SheetType::SHEET_BOTTOM;
+    }
+    
     if (sheetThemeType_ == "auto") {
         if (IsFold()) {
             sheetType = SheetType::SHEET_CENTER;
