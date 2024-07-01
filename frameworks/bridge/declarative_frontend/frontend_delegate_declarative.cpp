@@ -1088,6 +1088,7 @@ void FrontendDelegateDeclarative::GetRouterStateByIndex(int32_t& index, std::str
         }
     }
     auto pos = url.rfind(".js");
+    // url length - (.js) length
     if (pos == url.length() - 3) {
         url = url.substr(0, pos);
     }
@@ -1135,6 +1136,7 @@ void FrontendDelegateDeclarative::GetRouterStateByUrl(std::string& url, std::vec
             if (iter.url == url) {
                 stateInfo.index = counter;
                 auto pos = url.rfind(".js");
+                // url length - (.js) length
                 if (pos == url.length() - 3) {
                     tempUrl = url.substr(0, pos);
                 }

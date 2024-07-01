@@ -784,6 +784,7 @@ void FrontendDelegateImpl::GetState(int32_t& index, std::string& name, std::stri
         url = pageRouteStack_.back().url;
     }
     auto pos = url.rfind(".js");
+    // url length - (.js) length
     if (pos == url.length() - 3) {
         url = url.substr(0, pos);
     }
@@ -1833,6 +1834,7 @@ std::string FrontendDelegateImpl::GetRunningPageUrl() const
     }
     const auto& pageUrl = pageRouteStack_.back().url;
     auto pos = pageUrl.rfind(".js");
+    // url length - (.js) length
     if (pos == pageUrl.length() - 3) {
         return pageUrl.substr(0, pos);
     }
