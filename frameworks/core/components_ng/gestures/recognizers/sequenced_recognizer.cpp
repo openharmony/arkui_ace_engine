@@ -118,8 +118,8 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
         } else {
             inputEventType_ = InputEventType::MOUSE_BUTTON;
         }
-        TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, sequenced %{public}d type: %{public}d", point.touchEventId,
-            point.id, static_cast<int32_t>(point.type));
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, sequenced %{public}d type: %{public}d",
+            point.touchEventId, point.id, static_cast<int32_t>(point.type));
     }
     auto iter = recognizers_.begin();
     std::advance(iter, currentIndex_);

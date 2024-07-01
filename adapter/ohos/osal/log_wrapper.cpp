@@ -124,6 +124,7 @@ const std::unordered_map<AceLogTag, const char*> g_DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_MOVING_PHOTO, "AceMovingPhoto" },
     { AceLogTag::ACE_ARK_COMPONENT, "AceArkComponent" },
     { AceLogTag::ACE_WINDOW, "AceWindow" },
+    { AceLogTag::ACE_INPUTKEYFLOW, "InputKeyFlow"},
 };
 // initial static member object
 LogLevel LogWrapper::level_ = LogLevel::DEBUG;
