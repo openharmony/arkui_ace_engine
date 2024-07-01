@@ -1111,9 +1111,8 @@ int32_t GestureEventHub::RegisterCoordinationListener(const RefPtr<PipelineBase>
         CHECK_NULL_VOID(dragDropManager);
         auto taskScheduler = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
-        taskScheduler->PostTask([dragDropManager]() {
-            dragDropManager->HideDragPreviewOverlay();
-        }, TaskExecutor::TaskType::UI, "ArkUIGestureHideDragPreviewOverlay");
+        taskScheduler->PostTask([dragDropManager]() { dragDropManager->HideDragPreviewOverlay(); },
+            TaskExecutor::TaskType::UI, "ArkUIGestureHideDragPreviewOverlay");
     };
     return InteractionInterface::GetInstance()->RegisterCoordinationListener(callback);
 }
