@@ -33,6 +33,8 @@ namespace {
 constexpr int32_t TOTAL_MINUTE_OF_HOUR = 60;
 constexpr int32_t TOTAL_SECONDS_OF_HOUR = 60 * 60;
 constexpr int32_t SECONDS_OF_MILLISECOND = 1000;
+constexpr int32_t SECONDS_OF_HUNDRED = 100;
+constexpr int32_t SECONDS_OF_TEN = 10;
 constexpr double DEFAULT_COUNT = 60000.0;
 const std::string DEFAULT_FORMAT = "HH:mm:ss.SS";
 } // namespace
@@ -322,8 +324,12 @@ uint64_t TextTimerPattern::GetFormatDuration(uint64_t duration) const
     auto layoutProperty = host->GetLayoutProperty<TextTimerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, duration);
     auto format = layoutProperty->GetFormat().value_or(DEFAULT_FORMAT);
-    if (format.find('S') != std::string::npos) {
+    if (format.find("SSS") != std::string::npos) {
         return duration;
+    } else if (format.find("SS") != std::string::npos) {
+        return duration / SECONDS_OF_TEN;
+    } else if (format.find('S') != std::string::npos) {
+        return duration / SECONDS_OF_HUNDRED;
     } else if (format.find('s') != std::string::npos) {
         duration = duration / SECONDS_OF_MILLISECOND;
     } else if (format.find('m') != std::string::npos) {
@@ -341,8 +347,12 @@ uint64_t TextTimerPattern::GetMillisecondsDuration(uint64_t duration) const
     auto layoutProperty = host->GetLayoutProperty<TextTimerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, duration);
     auto format = layoutProperty->GetFormat().value_or(DEFAULT_FORMAT);
-    if (format.find('S') != std::string::npos) {
+    if (format.find("SSS") != std::string::npos) {
         return duration;
+    } else if (format.find("SS") != std::string::npos) {
+        return duration * SECONDS_OF_TEN;
+    } else if (format.find('S') != std::string::npos) {
+        return duration * SECONDS_OF_HUNDRED;
     } else if (format.find('s') != std::string::npos) {
         duration = duration * SECONDS_OF_MILLISECOND;
     } else if (format.find('m') != std::string::npos) {
