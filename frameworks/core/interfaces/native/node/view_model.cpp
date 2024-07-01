@@ -259,6 +259,7 @@ void* createComponentRootNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = CommonViewModelNG::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
     frameNode->IncRefCount();
     TAG_LOGD(AceLogTag::ACE_NATIVE_NODE, "createComponentRootNode: frameNode %{public}p", AceType::RawPtr(frameNode));
     return AceType::RawPtr(frameNode);

@@ -1171,23 +1171,29 @@ ArkUIAPICallbackMethod* GetArkUIAPICallbackMethod()
     return ViewModel::GetCallbackMethod();
 }
 
-int SetVsyncCallback(ArkUIVMContext vmContext, ArkUI_Int32 device, ArkUI_Int32 callbackId)
+ArkUIPipelineContext GetPipelineContext(ArkUINodeHandle node)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    return reinterpret_cast<ArkUIPipelineContext>(frameNode->GetContext());
+}
+
+void SetVsyncCallback(ArkUIVMContext vmContext, ArkUIPipelineContext pipelineContext, ArkUI_Int32 callbackId)
 {
     static int vsyncCount = 1;
     auto vsync = [vmContext, callbackId]() {
-        ArkUIEventCallbackArg args[] = { { vsyncCount++ } };
+        ArkUIEventCallbackArg args[] = { {.i32 =vsyncCount++ } };
         ArkUIAPICallbackMethod* cbs = GetArkUIAPICallbackMethod();
         CHECK_NULL_VOID(vmContext);
         CHECK_NULL_VOID(cbs);
         cbs->CallInt(vmContext, callbackId, 1, &args[0]);
     };
-    PipelineContext::GetCurrentContext()->SetVsyncListener(vsync);
-    return 0;
+
+    reinterpret_cast<PipelineContext*>(pipelineContext)->SetVsyncListener(vsync);
 }
 
-void UnblockVsyncWait(ArkUIVMContext vmContext, ArkUI_Int32 device)
+void UnblockVsyncWait(ArkUIVMContext vmContext, ArkUIPipelineContext pipelineContext)
 {
-    PipelineContext::GetCurrentContext()->RequestFrame();
+    reinterpret_cast<PipelineContext*>(pipelineContext)->RequestFrame();
 }
 
 ArkUI_Int32 MeasureNode(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Float32* data)
@@ -1580,6 +1586,7 @@ ArkUIExtendedNodeAPI impl_extended = {
     nullptr, // indexerChecker
     nullptr, // setRangeUpdater
     nullptr, // setLazyItemIndexer
+    GetPipelineContext,
     SetVsyncCallback,
     UnblockVsyncWait,
     NodeEvent::CheckEvent,

@@ -32,7 +32,7 @@ extern "C" {
 #define ARKUI_NODE_API_VERSION 113
 
 #define ARKUI_BASIC_API_VERSION 8
-#define ARKUI_EXTENDED_API_VERSION 7
+#define ARKUI_EXTENDED_API_VERSION 8
 #define ARKUI_NODE_GRAPHICS_API_VERSION 5
 #define ARKUI_NODE_MODIFIERS_API_VERSION 7
 #define ARKUI_AUTO_GENERATE_NODE_ID (-2)
@@ -55,6 +55,7 @@ typedef const char* ArkUI_CharPtr;
 
 // Several opaque struct declarations.
 struct _ArkUIVMContext;
+struct _ArkUIPipelineContext;
 struct _ArkUIVMObject;
 struct _ArkUINode;
 struct _ArkUICanvas;
@@ -70,6 +71,7 @@ struct ArkUI_ListChildrenMainSize;
 
 typedef _ArkUINode* ArkUINodeHandle;
 typedef _ArkUIVMContext* ArkUIVMContext;
+typedef _ArkUIPipelineContext* ArkUIPipelineContext;
 typedef _ArkUIVMObject* ArkUIVMObject;
 typedef _ArkUICanvas* ArkUICanvasHandle;
 typedef _ArkUIPaint* ArkUIPaintHandle;
@@ -4601,8 +4603,9 @@ struct ArkUIExtendedNodeAPI {
     void (*setRangeUpdater)(ArkUINodeHandle node, ArkUI_Int32 updaterId);
     void (*setLazyItemIndexer)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Int32 indexerId);
     /// Vsync support.
-    ArkUI_Int32 (*setVsyncCallback)(ArkUIVMContext vmContext, ArkUI_Int32 device, ArkUI_Int32 callbackId);
-    void (*unblockVsyncWait)(ArkUIVMContext vmContext, ArkUI_Int32 device);
+    ArkUIPipelineContext (*getPipelineContext)(ArkUINodeHandle node);
+    void (*setVsyncCallback)(ArkUIVMContext vmContext, ArkUIPipelineContext pipelineContext, ArkUI_Int32 callbackId);
+    void (*unblockVsyncWait)(ArkUIVMContext vmContext, ArkUIPipelineContext pipelineContext);
     /// Events.
     /**
      * Returns != 0 if an event was received,
