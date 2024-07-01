@@ -18,6 +18,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_swiper_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_tabs_function.h"
+#include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/tabs_model_impl.h"
@@ -650,6 +651,15 @@ void JSTabs::SetAnimateMode(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetAnimateMode(static_cast<TabAnimateMode>(value));
 }
 
+void JSTabs::SetEdgeEffect(const JSCallbackInfo& info)
+{
+    auto edgeEffect = EdgeEffect::SPRING;
+    if (info.Length() > 0) {
+        edgeEffect = JSScrollable::ParseEdgeEffect(info[0], EdgeEffect::SPRING);
+    }
+    TabsModel::GetInstance()->SetEdgeEffect(edgeEffect);
+}
+
 void JSTabs::JSBind(BindingTarget globalObj)
 {
     JsTabContentTransitionProxy::JSBind(globalObj);
@@ -691,6 +701,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("customContentTransition", &JSTabs::SetCustomContentTransition);
     JSClass<JSTabs>::StaticMethod("onContentWillChange", &JSTabs::SetOnContentWillChange);
     JSClass<JSTabs>::StaticMethod("animationMode", &JSTabs::SetAnimateMode);
+    JSClass<JSTabs>::StaticMethod("edgeEffect", &JSTabs::SetEdgeEffect);
 
     JSClass<JSTabs>::InheritAndBind<JSContainerBase>(globalObj);
 }

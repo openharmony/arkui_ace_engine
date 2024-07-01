@@ -1001,4 +1001,18 @@ void TabsModelNG::SetAnimateMode(FrameNode* frameNode, TabAnimateMode mode)
     CHECK_NULL_VOID(tabPattern);
     tabPattern->SetAnimateMode(mode);
 }
+
+void TabsModelNG::SetEdgeEffect(EdgeEffect edgeEffect)
+{
+    auto swiperPaintProperty = GetSwiperPaintProperty();
+    CHECK_NULL_VOID(swiperPaintProperty);
+    swiperPaintProperty->UpdateEdgeEffect(edgeEffect);
+}
+
+void TabsModelNG::SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect)
+{
+    auto swiperPaintProperty = GetSwiperPaintProperty(frameNode);
+    CHECK_NULL_VOID(swiperPaintProperty);
+    swiperPaintProperty->UpdateEdgeEffect(static_cast<EdgeEffect>(edgeEffect));
+}
 } // namespace OHOS::Ace::NG

@@ -65,6 +65,7 @@ public:
     void SetOnCustomAnimation(TabsCustomAnimationEvent&& onCustomAnimation) override;
     void SetOnContentWillChange(std::function<bool(int32_t, int32_t)>&& callback) override;
     void SetAnimateMode(TabAnimateMode mode) override;
+    void SetEdgeEffect(EdgeEffect edgeEffect) override;
     static RefPtr<TabsNode> GetOrCreateTabsNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
@@ -87,6 +88,7 @@ public:
     static void SetScrollableBarModeOptions(FrameNode* frameNode, const ScrollableBarModeOptions& option);
     static void SetClipEdge(FrameNode* frameNode, bool clipEdge);
     static void SetAnimateMode(FrameNode* frameNode, TabAnimateMode mode);
+    static void SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect);
 
 private:
     static void InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController);
