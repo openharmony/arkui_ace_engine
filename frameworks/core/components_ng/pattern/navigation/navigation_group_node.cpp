@@ -674,6 +674,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                 auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
                 CHECK_NULL_VOID(curNavDestination);
                 if (curNavDestination->GetTransitionType() != PageTransitionType::ENTER_PUSH) {
+                    TAG_LOGW(AceLogTag::ACE_NAVIGATION, "curNode has another transition");
                     return;
                 }
                 curNavDestination->SetIsOnAnimation(false);

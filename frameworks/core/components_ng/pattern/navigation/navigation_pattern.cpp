@@ -611,7 +611,7 @@ void NavigationPattern::UpdateNavPathList()
             navigationStack_->RemoveCacheNode(cacheNodes, pathName, uiNode);
             continue;
         }
-        TAG_LOGD(AceLogTag::ACE_NAVIGATION, "find in nowhere, navigation stack create new node, "
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "find in nowhere, navigation stack create new node, "
             "index: %{public}d, name: %{public}s.", index, pathName.c_str());
         uiNode = GenerateUINodeByIndex(index);
         navPathList.emplace_back(std::make_pair(pathName, uiNode));
