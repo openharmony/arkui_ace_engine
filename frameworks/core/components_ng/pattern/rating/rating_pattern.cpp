@@ -31,10 +31,25 @@
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/image/image_source_info.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t RATING_IMAGE_SUCCESS_CODE = 0b111;
 constexpr int32_t DEFAULT_RATING_TOUCH_STAR_NUMBER = 0;
+
+void RatingPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto ratingTheme = pipeline->GetTheme<RatingTheme>();
+    CHECK_NULL_VOID(ratingTheme);
+    themeStarNum_ = ratingTheme->GetStarNum();
+    themeStepSize_ = ratingTheme->GetStepSize();
+    themeRatingScore_ = ratingTheme->GetRatingScore();
+    themeBorderWidth_ = ratingTheme->GetFocusBorderWidth();
+}
 
 void RatingPattern::CheckImageInfoHasChangedOrNot(
     int32_t imageFlag, const ImageSourceInfo& sourceInfo, const std::string& lifeCycleTag)
@@ -908,19 +923,5 @@ RefPtr<FrameNode> RatingPattern::BuildContentModifierNode()
     auto enabled = eventHub->IsEnabled();
     RatingConfiguration ratingConfiguration(starNum, isIndicator, ratingScore, stepSize, enabled);
     return (makeFunc_.value())(ratingConfiguration);
-}
-
-void RatingPattern::InitDefaultParams()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto ratingTheme = pipeline->GetTheme<RatingTheme>();
-    CHECK_NULL_VOID(ratingTheme);
-    themeStarNum_ = ratingTheme->GetStarNum();
-    themeStepSize_ = ratingTheme->GetStepSize();
-    themeRatingScore_ = ratingTheme->GetRatingScore();
-    themeBorderWidth_ = ratingTheme->GetFocusBorderWidth();
 }
 } // namespace OHOS::Ace::NG
