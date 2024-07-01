@@ -2262,6 +2262,7 @@ void RichEditorPattern::HandleClickEvent(GestureEvent& info)
     if (!focusHub->IsFocusable()) {
         return;
     }
+    CHECK_NULL_VOID(!selectOverlay_->IsClickAtHandle(info));
 
     if (CheckTripClickEvent(info)) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "HandleTripleClickEvent");
@@ -2881,6 +2882,7 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
 
 Offset RichEditorPattern::ConvertGlobalToLocalOffset(const Offset& globalOffset)
 {
+    parentGlobalOffset_ = GetPaintRectGlobalOffset();
     auto localPoint = OffsetF(globalOffset.GetX(), globalOffset.GetY());
     selectOverlay_->RevertLocalPointWithTransform(localPoint);
     return Offset(localPoint.GetX(), localPoint.GetY());
@@ -5820,6 +5822,7 @@ void RichEditorPattern::InitTouchEvent()
 
 void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
+    CHECK_NULL_VOID(!selectOverlay_->IsTouchAtHandle(info));
     auto touchInfo = info.GetTouches().front();
     auto touchType = touchInfo.GetTouchType();
     if (touchType == TouchType::DOWN) {
