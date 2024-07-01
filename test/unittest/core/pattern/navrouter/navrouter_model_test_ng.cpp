@@ -1715,4 +1715,39 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0046, TestSize.Level1)
     algorithm->MeasureBackButton(AceType::RawPtr(layoutWrapper), titleBarNode, titleBarLayoutProperty);
     ASSERT_EQ(pipeline->minPlatformVersion_, 10);
 }
+
+/**
+ * @tc.name: AccessibilityTest001
+ * @tc.desc: Test navdestination "backbutton" and "more" button.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterModelTestNg, AccessibilityTest001, TestSize.Level1)
+{
+    auto navdestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 3, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto titleBarNode = AceType::MakeRefPtr<TitleBarNode>("TitleBarNode", 66, AceType::MakeRefPtr<TitleBarPattern>());
+    auto backButtonNode = FrameNode::CreateFrameNode(
+        V2::BACK_BUTTON_ETS_TAG, 7, AceType::MakeRefPtr<ButtonPattern>());
+    titleBarNode->backButton_ = backButtonNode;
+    navdestinationNode->titleBarNode_ = titleBarNode;
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(navdestinationNode->GetTitleBarNode());
+    ASSERT_NE(titleNode, nullptr);
+    EXPECT_NE(titleNode->GetBackButton(), nullptr);
+
+    auto AccessibilityProperty1 = backButtonNode->GetAccessibilityProperty<AccessibilityProperty>();
+    AccessibilityProperty1->SetAccessibilityGroup(true);
+    AccessibilityProperty1->SetAccessibilityText("NavdestinationBackbutton");
+    auto text1 = AccessibilityProperty1->GetAccessibilityText();
+    EXPECT_EQ(text1, "NavdestinationBackbutton");
+
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto menuNode = AceType::MakeRefPtr<FrameNode>(V2::BAR_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(menuNode, nullptr);
+    titleBarNode->SetMenu(menuNode);
+    auto AccessibilityProperty2 = menuNode->GetAccessibilityProperty<AccessibilityProperty>();
+    AccessibilityProperty2->SetAccessibilityGroup(true);
+    AccessibilityProperty2->SetAccessibilityText("NavdestinationMenu");
+    auto text2 = AccessibilityProperty2->GetAccessibilityText();
+    EXPECT_EQ(text2, "NavdestinationMenu");
+}
 } // namespace OHOS::Ace::NG

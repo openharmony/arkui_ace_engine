@@ -35,6 +35,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
     constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
         super(parent, elmtId, extraInfo);
+        this.setIsV2(true);
         stateMgmtConsole.debug(`ViewV2 constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
     }
 
@@ -178,6 +179,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
    * @param newValue
    */
     protected initParam<Z>(paramVariableName: string, newValue: Z): void {
+        this.checkIsV1Proxy(paramVariableName, newValue);
         VariableUtilV3.initParam<Z>(this, paramVariableName, newValue);
     }
     /**
@@ -190,7 +192,14 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     * @param newValue
    */
     protected updateParam<Z>(paramVariableName: string, newValue: Z): void {
+        this.checkIsV1Proxy(paramVariableName, newValue);
         VariableUtilV3.updateParam<Z>(this, paramVariableName, newValue);
+      }
+
+    private checkIsV1Proxy<Z>(paramVariableName: string, value: Z): void {
+        if (ObservedObject.IsObservedObject(value)) {
+            throw new Error(`Cannot assign the ComponentV1 value to the ComponentV2 for the property '${paramVariableName}'`);
+        }
     }
 
     /**
@@ -455,7 +464,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
    */
     public __mkRepeatAPI: <I>(arr: Array<I>) => RepeatAPI<I> = <I>(arr: Array<I>): RepeatAPI<I> => {
         // factory is for future extensions, currently always return the same
-        const elmtId = this.getCurrentlyRenderedElmtId();
+        const elmtId = ObserveV2.getCurrentRecordedId();
         let repeat = this.elmtId2Repeat_.get(elmtId) as __RepeatV2<I>;
         if (!repeat) {
             repeat = new __RepeatV2<I>(arr);

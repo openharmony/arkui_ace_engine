@@ -1126,4 +1126,181 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg011, TestSize.Level1)
     EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 0);
     EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetY(), 0);
 }
+/**
+ * @tc.name: MenuItemPatternTestNg012
+ * @tc.desc: Verify HandleFocusEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg012, TestSize.Level1)
+{
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    mainMenu->GetGeometryNode()->SetFrameSize(SizeF(100, 100));
+    menuItemPattern->HandleFocusEvent();
+
+    menuItemPattern->HandleFocusEvent();
+}
+/**
+ * @tc.name: MenuItemPatternTestNg013
+ * @tc.desc: Verify HandleBlurEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg013, TestSize.Level1)
+{
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    mainMenu->GetGeometryNode()->SetFrameSize(SizeF(100, 100));
+    menuItemPattern->HandleBlurEvent();
+    auto RenderContext = menuItemNode->GetRenderContext();
+    menuItemPattern->isFocusBGColorSet_ = true;
+    menuItemPattern->isFocusShadowSet_ = true;
+    menuItemPattern->HandleBlurEvent();
+}
+/**
+ * @tc.name: MenuItemPatternTestNg014
+ * @tc.desc: Verify InitFocusEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg014, TestSize.Level1)
+{
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    mainMenu->GetGeometryNode()->SetFrameSize(SizeF(100, 100));
+    menuItemPattern->InitFocusEvent();
+}
+/**
+ * @tc.name: MenuItemPatternTestNg015
+ * @tc.desc: Verify GetShadowFromTheme.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg015, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(wrapperNode);
+    wrapperNode->RemoveChildAtIndex(0);
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    mainMenu->GetGeometryNode()->SetFrameSize(SizeF(100, 100));
+    menuItemPattern->OnClick();
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::STACK;
+    menuItemPattern->OnClick();
+}
+/**
+ * @tc.name: MenuItemPatternTestNg016
+ * @tc.desc: Verify ShowSubMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg016, TestSize.Level1)
+{
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    mainMenu->GetGeometryNode()->SetFrameSize(SizeF(100, 100));
+    menuItemPattern->ShowSubMenu();
+    menuItemPattern->isSubMenuShowed_ = false;
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::EMBEDDED;
+    menuItemPattern->ShowSubMenu();
+}
+/**
+ * @tc.name: MenuItemPatternTestNg017
+ * @tc.desc: Verify AddClickableArea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create cascade menu condition
+     * @tc.expected: wrapper and child pattern is not null
+     */
+    std::function<void()> buildFun = []() {
+        MenuModelNG MenuModelInstance;
+        MenuModelInstance.Create();
+    };
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto subMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    auto subMenuParent = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 5, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    subMenu->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->ShowSubMenu();
+    menuItemPattern->SetSubBuilder(buildFun);
+    menuItemPattern->SetIsSubMenuShowed(false);
+    auto mainMenuPattern = mainMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(mainMenuPattern, nullptr);
+    mainMenuPattern->SetShowedSubMenu(subMenu);
+    auto subMenuPattern = subMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(subMenuPattern, nullptr);
+    subMenuPattern->SetParentMenuItem(subMenuParent);
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::EMBEDDED;
+    menuItemPattern->AddClickableArea();
+}
+/**
+ * @tc.name: MenuItemPatternTestNg018
+ * @tc.desc: Verify FindTouchedEmbeddedMenuItem.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create cascade menu condition
+     * @tc.expected: wrapper and child pattern is not null
+     */
+    std::function<void()> buildFun = []() {
+        MenuModelNG MenuModelInstance;
+        MenuModelInstance.Create();
+    };
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto subMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    auto subMenuParent = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 5, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    subMenu->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->ShowSubMenu();
+    menuItemPattern->SetSubBuilder(buildFun);
+    menuItemPattern->SetIsSubMenuShowed(false);
+    auto mainMenuPattern = mainMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(mainMenuPattern, nullptr);
+    mainMenuPattern->SetShowedSubMenu(subMenu);
+    auto subMenuPattern = subMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(subMenuPattern, nullptr);
+    subMenuPattern->SetParentMenuItem(subMenuParent);
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::EMBEDDED;
+    menuItemPattern->FindTouchedEmbeddedMenuItem(OffsetF(MENU_OFFSET_X, MENU_OFFSET_Y));
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::STACK;
+    menuItemPattern->isExpanded_ = true;
+    menuItemPattern->embeddedMenu_ = mainMenu;
+    menuItemPattern->FindTouchedEmbeddedMenuItem(OffsetF(MENU_OFFSET_X, MENU_OFFSET_Y));
+}
+
 } // namespace OHOS::Ace::NG

@@ -611,7 +611,7 @@ HWTEST_F(ImageTestNg, ImagePaintMethod001, TestSize.Level1)
     ASSERT_NE(imagePattern, nullptr);
     imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(imagePattern->image_, true, true);
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, true, nullptr, true);
     /**
      * @tc.steps: step3. ImagePaintMethod GetContentDrawFunction.
      */

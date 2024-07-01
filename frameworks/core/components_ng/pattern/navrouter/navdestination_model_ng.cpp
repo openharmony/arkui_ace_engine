@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 
+#include "base/i18n/localization.h"
 #include "base/log/ace_scoring_log.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -22,7 +23,9 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
@@ -72,6 +75,7 @@ bool NavDestinationModelNG::ParseCommonTitle(
                     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
             }
             textLayoutProperty->UpdateContent(title);
+            textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
         } else {
             // create and init main title
             mainTitle = FrameNode::CreateFrameNode(
@@ -86,6 +90,7 @@ bool NavDestinationModelNG::ParseCommonTitle(
             textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
             textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
             textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+            textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
                 textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetMainTitleFontSizeS());
                 textLayoutProperty->UpdateTextColor(theme->GetMainTitleFontColor());
@@ -114,6 +119,7 @@ bool NavDestinationModelNG::ParseCommonTitle(
         // update subtitle
         auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
         textLayoutProperty->UpdateContent(subtitle);
+        textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
     } else {
         // create and init subtitle
         subTitle = FrameNode::CreateFrameNode(
@@ -128,6 +134,7 @@ bool NavDestinationModelNG::ParseCommonTitle(
         textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
         textLayoutProperty->UpdateMaxLines(1);
         textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+        textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetSubTitleFontSizeS());
             textLayoutProperty->UpdateTextColor(theme->GetSubTitleFontColor());
@@ -198,6 +205,9 @@ void NavDestinationModelNG::CreateImageButton(const RefPtr<NavDestinationGroupNo
     auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(backButtonLayoutProperty);
     backButtonLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    auto imageRenderProperty = backButtonNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imageRenderProperty);
+    imageRenderProperty->UpdateMatchTextDirection(true);
     backButtonNode->MarkModifyDone();
 }
 
@@ -215,6 +225,9 @@ void CreateImageBackButton(RefPtr<FrameNode>& backButtonNode, RefPtr<TitleBarNod
     CHECK_NULL_VOID(backButtonImageLayoutProperty);
     backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     backButtonImageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto imageRenderProperty = backButtonImageNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imageRenderProperty);
+    imageRenderProperty->UpdateMatchTextDirection(true);
     backButtonNode->AddChild(backButtonImageNode);
     backButtonImageNode->MarkModifyDone();
     backButtonNode->MarkModifyDone();
@@ -263,6 +276,11 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
         buttonPattern->SetFocusBorderColor(theme->GetBackgroundFocusOutlineColor());
         buttonPattern->SetFocusBorderWidth(theme->GetBackgroundFocusOutlineWeight());
     }
+
+    // read navdestination back button
+    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+    NavigationTitleUtil::SetAccessibility(backButtonNode, message);
+    
     titleBarNode->AddChild(backButtonNode);
     titleBarNode->SetBackButton(backButtonNode);
     auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();

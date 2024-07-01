@@ -189,7 +189,7 @@ T JsiObject::GetPropertyValue(const char* prop, T defaultValue) const
     } else if constexpr (std::is_arithmetic<T>::value) {
         return valueRef->IsNumber() ? JsiValueConvertor::fromJsiValue<T>(vm, valueRef) : defaultValue;
     } else if constexpr (std::is_same_v<T, std::string>) {
-        return valueRef->IsString() ? valueRef->ToString(vm)->ToString() : defaultValue;
+        return valueRef->IsString(vm) ? valueRef->ToString(vm)->ToString() : defaultValue;
     } else {
         LOGW("Get property value failed.");
     }
@@ -210,7 +210,7 @@ T JsiObject::GetPropertyValue(int32_t propertyIndex, T defaultValue) const
     } else if constexpr (std::is_arithmetic<T>::value) {
         return valueRef->IsNumber() ? JsiValueConvertor::fromJsiValue<T>(vm, valueRef) : defaultValue;
     } else if constexpr (std::is_same_v<T, std::string>) {
-        return valueRef->IsString() ? valueRef->ToString(vm)->ToString() : defaultValue;
+        return valueRef->IsString(vm) ? valueRef->ToString(vm)->ToString() : defaultValue;
     } else {
         LOGW("Get property value failed.");
     }
@@ -233,7 +233,7 @@ template<typename T>
 T* JsiCallbackInfo::UnwrapArg(size_t index) const
 {
     auto arg = info_->GetCallArgRef(index);
-    if (arg.IsEmpty() || !arg->IsObject()) {
+    if (arg.IsEmpty() || !arg->IsObject(info_->GetVM())) {
         return nullptr;
     }
     return static_cast<T*>(arg->ToEcmaObject(info_->GetVM())->GetNativePointerField(0));

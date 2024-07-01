@@ -321,11 +321,11 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
     }
     if (isCache) {
         child.second->SetParent(WeakClaim(this));
-        child.second->SetJSViewActive(false);
+        child.second->SetJSViewActive(false, true);
         return child.second->GetFrameChildByIndex(0, needBuild);
     }
     if (isActive_) {
-        child.second->SetJSViewActive(true);
+        child.second->SetJSViewActive(true, true);
     }
     if (addToRenderTree) {
         child.second->SetActive(true);
@@ -388,7 +388,7 @@ void LazyForEachNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
     }
 }
 
-void LazyForEachNode::DoSetActiveChildRange(int32_t start, int32_t end)
+void LazyForEachNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
 {
     if (!builder_) {
         return;
@@ -473,7 +473,7 @@ RefPtr<FrameNode> LazyForEachNode::GetFrameNode(int32_t index)
     return AceType::DynamicCast<FrameNode>(child.second->GetFrameChildByIndex(0, true));
 }
 
-int32_t LazyForEachNode::GetFrameNodeIndex(RefPtr<FrameNode> node, bool isExpanded)
+int32_t LazyForEachNode::GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded)
 {
     if (!isExpanded) {
         return UINode::GetFrameNodeIndex(node, false);

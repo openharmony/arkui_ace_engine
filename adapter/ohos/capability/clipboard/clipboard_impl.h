@@ -47,7 +47,8 @@ public:
     RefPtr<PasteDataMix> CreatePasteDataMix() override;
     void HasData(const std::function<void(bool hasData)>& callback) override;
     void Clear() override;
-    void GetSpanStringData(const std::function<void(std::vector<uint8_t>&)>& callback, bool syncMode = false) override;
+    void GetSpanStringData(
+        const std::function<void(std::vector<uint8_t>&, const std::string&)>& callback, bool syncMode = false) override;
 
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
 private:
@@ -63,7 +64,9 @@ private:
         std::string& resText);
     void GetPixelMapDataSync(const std::function<void(const RefPtr<PixelMap>&)>& callback);
     void GetPixelMapDataAsync(const std::function<void(const RefPtr<PixelMap>&)>& callback);
-    void GetSpanStringDataHelper(const std::function<void(std::vector<uint8_t>&)>& callback, bool syncMode);
+    void GetSpanStringDataHelper(
+        const std::function<void(std::vector<uint8_t>&, const std::string&)>& callback, bool syncMode = false);
+    void ProcessSpanStringData(std::vector<uint8_t>& arr, const OHOS::MiscServices::PasteData& pasteData);
 #endif
 };
 

@@ -69,6 +69,8 @@ private:
         PriorityType priorityType = PriorityType::LOW) const final;
     Task WrapTaskWithTraceId(Task&& task, int32_t id) const final;
     void RemoveTaskFromTaskRunner(const RefPtr<TaskRunnerAdapter>& taskRunner, const std::string& name);
+    bool OnPostTaskWithoutTraceId(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
+        PriorityType priorityType = PriorityType::LOW) const final;
 
 #ifdef ACE_DEBUG
     bool OnPreSyncTask(TaskType type) const final;

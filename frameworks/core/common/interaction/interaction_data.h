@@ -57,7 +57,6 @@ struct DragDataCore {
     bool hasCanceledAnimation = false;
     bool hasCoordinateCorrected = false;
     std::map<std::string, int64_t> summarys;
-    float dragNodeGrayscale = 0;
 };
 
 struct DragNotifyMsg {

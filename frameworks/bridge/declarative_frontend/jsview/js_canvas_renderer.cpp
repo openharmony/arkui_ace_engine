@@ -395,14 +395,10 @@ RefPtr<CanvasPath2D> JSCanvasRenderer::JsMakePath2D(const JSCallbackInfo& info)
     return AceType::MakeRefPtr<CanvasPath2D>();
 }
 
-JSRenderImage* JSCanvasRenderer::UnwrapNapiImage(const JSRef<JSObject> jsObject)
+JSRenderImage* JSCanvasRenderer::UnwrapNapiImage(const EcmaVM* vm, const JSRef<JSObject> jsObject)
 {
     ContainerScope scope(instanceId_);
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    if (runtime == nullptr) {
-        return nullptr;
-    }
-    auto vm = runtime->GetEcmaVm();
+    CHECK_NULL_RETURN(vm, nullptr);
     panda::Local<JsiValue> value = jsObject.Get().GetLocalHandle();
     JSValueWrapper valueWrapper = value;
     Global<JSValueRef> arkValue = valueWrapper;
@@ -427,7 +423,7 @@ JSRenderImage* JSCanvasRenderer::UnwrapNapiImage(const JSRef<JSObject> jsObject)
     JSRenderImage* jsImage = nullptr;
     Local<panda::StringRef> keyObj = panda::StringRef::GetNapiWrapperString(vm);
     Local<panda::JSValueRef> valObj = nativeObject->Get(vm, keyObj);
-    if (valObj->IsObject()) {
+    if (valObj->IsObject(vm)) {
         Local<panda::ObjectRef> ext(valObj);
         auto ref = reinterpret_cast<NativeReference*>(ext->GetNativePointerField(0));
         jsImage = ref != nullptr ? reinterpret_cast<JSRenderImage*>(ref->GetData()) : nullptr;
@@ -448,7 +444,7 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return;
     }
-    JSRenderImage* jsImage = UnwrapNapiImage(info[0]);
+    JSRenderImage* jsImage = UnwrapNapiImage(info.GetVm(), info[0]);
 #if !defined(PREVIEW)
     RefPtr<PixelMap> pixelMap = nullptr;
     RefPtr<NG::SvgDomBase> svgDom = nullptr;
@@ -465,7 +461,9 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
             isImage = true;
             pixelMap = jsImage->GetPixelMap();
         } else {
-            pixelMap = CreatePixelMapFromNapiValue(info[0]);
+            auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+            CHECK_NULL_VOID(runtime);
+            pixelMap = CreatePixelMapFromNapiValue(info[0], runtime->GetNativeEngine());
         }
         CHECK_NULL_VOID(pixelMap);
     }
@@ -542,7 +540,7 @@ void JSCanvasRenderer::JsCreatePattern(const JSCallbackInfo& info)
 {
     auto arg0 = info[0];
     if (arg0->IsObject()) {
-        JSRenderImage* jsImage = UnwrapNapiImage(info[0]);
+        JSRenderImage* jsImage = UnwrapNapiImage(info.GetVm(), info[0]);
         CHECK_NULL_VOID(jsImage);
         std::string repeat;
         info.GetStringArg(1, repeat);
@@ -643,7 +641,7 @@ void JSCanvasRenderer::JsPutImageData(const JSCallbackInfo& info)
     for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
         for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
             uint32_t idx = 4 * (j + imgWidth * i);
-            if (bufferLength > idx + 3) {
+            if (bufferLength > static_cast<int32_t>(idx + 3)) {
                 imageData.data.emplace_back(
                     Color::FromARGB(buffer[idx + 3], buffer[idx], buffer[idx + 1], buffer[idx + 2]));
             }
@@ -768,10 +766,13 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
 // setPixelMap(value?: PixelMap): void
 void JSCanvasRenderer::JsSetPixelMap(const JSCallbackInfo& info)
 {
+    ContainerScope scope(instanceId_);
 #if !defined(PREVIEW)
     if (info[0]->IsObject()) {
         ImageInfo imageInfo;
-        imageInfo.pixelMap = CreatePixelMapFromNapiValue(info[0]);
+        auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+        CHECK_NULL_VOID(runtime);
+        imageInfo.pixelMap = CreatePixelMapFromNapiValue(info[0], runtime->GetNativeEngine());
         CHECK_NULL_VOID(imageInfo.pixelMap);
         renderingContext2DModel_->DrawPixelMap(imageInfo);
     }
@@ -1395,24 +1396,29 @@ void JSCanvasRenderer::JsMeasureText(const JSCallbackInfo& info)
     paintState_.SetTextStyle(style_);
     double density = GetDensity();
     if (Positive(density) && info.GetStringArg(0, text)) {
-        double width = renderingContext2DModel_->GetMeasureTextWidth(paintState_, text);
-        double height = renderingContext2DModel_->GetMeasureTextHeight(paintState_, text);
         TextMetrics textMetrics = renderingContext2DModel_->GetMeasureTextMetrics(paintState_, text);
-        auto retObj = JSRef<JSObject>::New();
-        retObj->SetProperty("width", width / density);
-        retObj->SetProperty("height", height / density);
-        retObj->SetProperty("actualBoundingBoxLeft", textMetrics.actualBoundingBoxLeft / density);
-        retObj->SetProperty("actualBoundingBoxRight", textMetrics.actualBoundingBoxRight / density);
-        retObj->SetProperty("actualBoundingBoxAscent", textMetrics.actualBoundingBoxAscent / density);
-        retObj->SetProperty("actualBoundingBoxDescent", textMetrics.actualBoundingBoxDescent / density);
-        retObj->SetProperty("hangingBaseline", textMetrics.hangingBaseline / density);
-        retObj->SetProperty("alphabeticBaseline", textMetrics.alphabeticBaseline / density);
-        retObj->SetProperty("ideographicBaseline", textMetrics.ideographicBaseline / density);
-        retObj->SetProperty("emHeightAscent", textMetrics.emHeightAscent / density);
-        retObj->SetProperty("emHeightDescent", textMetrics.emHeightDescent / density);
-        retObj->SetProperty("fontBoundingBoxAscent", textMetrics.fontBoundingBoxAscent / density);
-        retObj->SetProperty("fontBoundingBoxDescent", textMetrics.fontBoundingBoxDescent / density);
-        info.SetReturnValue(retObj);
+        auto vm = info.GetVm();
+        CHECK_NULL_VOID(vm);
+        static const char* keysOfMeasureText[] = { "width", "height", "actualBoundingBoxLeft", "actualBoundingBoxRight",
+            "actualBoundingBoxAscent", "actualBoundingBoxDescent", "hangingBaseline", "alphabeticBaseline",
+            "ideographicBaseline", "emHeightAscent", "emHeightDescent", "fontBoundingBoxAscent",
+            "fontBoundingBoxDescent" };
+        Local<JSValueRef> valuesOfMeasureText[] = { panda::NumberRef::New(vm, (textMetrics.width / density)),
+            panda::NumberRef::New(vm, (textMetrics.height / density)),
+            panda::NumberRef::New(vm, (textMetrics.actualBoundingBoxLeft / density)),
+            panda::NumberRef::New(vm, (textMetrics.actualBoundingBoxRight / density)),
+            panda::NumberRef::New(vm, (textMetrics.actualBoundingBoxAscent / density)),
+            panda::NumberRef::New(vm, (textMetrics.actualBoundingBoxDescent / density)),
+            panda::NumberRef::New(vm, (textMetrics.hangingBaseline / density)),
+            panda::NumberRef::New(vm, (textMetrics.alphabeticBaseline / density)),
+            panda::NumberRef::New(vm, (textMetrics.ideographicBaseline / density)),
+            panda::NumberRef::New(vm, (textMetrics.emHeightAscent / density)),
+            panda::NumberRef::New(vm, (textMetrics.emHeightDescent / density)),
+            panda::NumberRef::New(vm, (textMetrics.fontBoundingBoxAscent / density)),
+            panda::NumberRef::New(vm, (textMetrics.fontBoundingBoxDescent / density)) };
+        auto obj = panda::ObjectRef::NewWithNamedProperties(
+            vm, ArraySize(keysOfMeasureText), keysOfMeasureText, valuesOfMeasureText);
+        info.SetReturnValue(JsiRef<JsiObject>(JsiObject(obj)));
     }
 }
 

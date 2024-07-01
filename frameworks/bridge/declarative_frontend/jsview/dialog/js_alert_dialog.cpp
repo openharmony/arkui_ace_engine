@@ -343,7 +343,7 @@ void ParseTextStyle(DialogProperties& properties, JSRef<JSObject> obj)
     if (args->IsNumber()) {
         index = args->ToNumber<int32_t>();
     }
-    if (index < 0 || index >= WORD_BREAK_TYPES.size()) {
+    if (index < 0 || index >= static_cast<int32_t>(WORD_BREAK_TYPES.size())) {
         index = 1;
     }
     properties.wordBreak = WORD_BREAK_TYPES[index];

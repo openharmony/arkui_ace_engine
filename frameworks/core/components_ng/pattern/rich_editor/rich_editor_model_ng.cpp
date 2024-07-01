@@ -85,6 +85,14 @@ void RichEditorModelNG::SetOnReady(std::function<void()>&& func)
     eventHub->SetOnReady(std::move(func));
 }
 
+void RichEditorModelNG::SetOnReady(FrameNode* frameNode, std::function<void()>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnReady(std::move(callback));
+}
+
 void RichEditorModelNG::SetOnSelect(std::function<void(const BaseEventInfo*)>&& func)
 {
     CHECK_NULL_VOID(!isStyledStringMode_);
@@ -132,6 +140,14 @@ void RichEditorModelNG::SetOnDeleteComplete(std::function<void()>&& func)
     eventHub->SetOnDeleteComplete(std::move(func));
 }
 
+void RichEditorModelNG::SetOnDeleteComplete(FrameNode* frameNode, std::function<void()>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDeleteComplete(std::move(callback));
+}
+
 void RichEditorModelNG::SetCustomKeyboard(std::function<void()>&& func, bool supportAvoidance)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -161,6 +177,14 @@ void RichEditorModelNG::BindSelectionMenu(TextSpanType& editorType, TextResponse
 
 void RichEditorModelNG::SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func)
 {
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnPaste(std::move(func));
+}
+
+void RichEditorModelNG::SetOnPaste(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnPaste(std::move(func));
@@ -266,6 +290,14 @@ void RichEditorModelNG::SetOnEditingChange(std::function<void(const bool&)>&& fu
     eventHub->SetOnEditingChange(std::move(func));
 }
 
+void RichEditorModelNG::SetOnEditingChange(FrameNode* frameNode, std::function<void(const bool&)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnEditingChange(std::move(callback));
+}
+
 void RichEditorModelNG ::SetEnterKeyType(TextInputAction action)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetEnterKeyType=%{public}d", action);
@@ -274,6 +306,15 @@ void RichEditorModelNG ::SetEnterKeyType(TextInputAction action)
     if (action == TextInputAction::UNSPECIFIED) {
         action = TextInputAction::NEW_LINE;
     }
+    pattern->UpdateTextInputAction(action);
+}
+
+void RichEditorModelNG::SetEnterKeyType(FrameNode* frameNode, const TextInputAction& action)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetEnterKeyType=%{public}d", action);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
     pattern->UpdateTextInputAction(action);
 }
 
@@ -307,8 +348,24 @@ void RichEditorModelNG::SetOnCut(std::function<void(NG::TextCommonEvent&)>&& fun
     eventHub->SetOnCut(std::move(func));
 }
 
+void RichEditorModelNG::SetOnCut(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCut(std::move(func));
+}
+
 void RichEditorModelNG::SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func)
 {
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnCopy(std::move(func));
+}
+
+void RichEditorModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnCopy(std::move(func));

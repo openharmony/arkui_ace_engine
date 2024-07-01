@@ -383,7 +383,7 @@ HWTEST_F(FrameNodeTestNg, DumpAdvanceInfo001, TestSize.Level1)
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     FRAME_NODE2->layoutProperty_ = layoutProperty;
     FRAME_NODE3->layoutProperty_->geometryTransition_ =
-        ElementRegister::GetInstance()->GetOrCreateGeometryTransition("test", false);
+        ElementRegister::GetInstance()->GetOrCreateGeometryTransition("test", false, true);
     FRAME_NODE3->DumpAdvanceInfo();
     EXPECT_NE(FRAME_NODE3->renderContext_, nullptr);
 }

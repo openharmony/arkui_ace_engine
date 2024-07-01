@@ -163,6 +163,9 @@ void JSSearch::SetFontFeature(const JSCallbackInfo& info)
         return;
     }
 
+    if (!info[0]->IsString() && !info[0]->IsObject()) {
+        return;
+    }
     std::string fontFeatureSettings = info[0]->ToString();
     SearchModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
 }
@@ -929,7 +932,7 @@ void JSSearch::SetType(const JSCallbackInfo& info)
     if (!info[0]->IsNumber()) {
         return;
     }
-    TextInputType textInputType = static_cast<TextInputType>(info[0]->ToNumber<int32_t>());
+    TextInputType textInputType = CastToTextInputType(info[0]->ToNumber<int32_t>());
     SearchModel::GetInstance()->SetType(textInputType);
 }
 

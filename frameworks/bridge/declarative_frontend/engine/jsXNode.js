@@ -101,6 +101,7 @@ class JSBuilderNode extends BaseNode {
         this.updateFuncByElmtId = new Map();
     }
     reuse(param) {
+        this.updateStart();
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild.deref();
             if (child) {
@@ -113,6 +114,7 @@ class JSBuilderNode extends BaseNode {
                 }
             } // if child
         });
+        this.updateEnd();
     }
     recycle() {
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
@@ -1049,6 +1051,7 @@ class FrameNode {
             this._commonAttribute = new ArkComponent(this.nodePtr_, ModifierType.FRAME_NODE);
         }
         this._commonAttribute.setNodePtr(this.nodePtr_);
+        this._commonAttribute.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
         return this._commonAttribute;
     }
     get commonEvent() {
@@ -1167,6 +1170,7 @@ class TypedFrameNode extends FrameNode {
             this.attribute_ = this.attrCreator_(this.nodePtr_, ModifierType.FRAME_NODE);
         }
         this.attribute_.setNodePtr(this.nodePtr_);
+        this.attribute_.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
         return this.attribute_;
     }
     checkValid(node) {
@@ -1296,6 +1300,26 @@ const __creatorMap__ = new Map([
     ["Button", (context) => {
             return new TypedFrameNode(context, "Button", (node, type) => {
                 return new ArkButtonComponent(node, type);
+            });
+        }],
+    ["XComponent", (context) => {
+            return new TypedFrameNode(context, "XComponent", (node, type) => {
+                return new ArkXComponentComponent(node, type);
+            });
+        }],
+    ["ListItemGroup", (context) => {
+            return new TypedFrameNode(context, "ListItemGroup", (node, type) => {
+                return new ArkListItemGroupComponent(node, type);
+            });
+        }],
+    ["WaterFlow", (context) => {
+            return new TypedFrameNode(context, "WaterFlow", (node, type) => {
+                return new ArkWaterFlowComponent(node, type);
+            });
+        }],
+    ["FlowItem", (context) => {
+            return new TypedFrameNode(context, "FlowItem", (node, type) => {
+                return new ArkFlowItemComponent(node, type);
             });
         }],
 ]);

@@ -32,9 +32,13 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
+#endif
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/mouse_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -42,72 +46,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t LONG_PRESS_DURATION = 800;
-
-RefPtr<OverlayManager> GetOverlayFromPage(int32_t pageLevelId, bool isNav)
-{
-    if (pageLevelId <= 0) {
-        return nullptr;
-    }
-    std::string tag = isNav ? V2::NAVDESTINATION_VIEW_ETS_TAG : V2::PAGE_ETS_TAG;
-    auto frameNode = FrameNode::GetFrameNode(tag, pageLevelId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    if (tag == V2::PAGE_ETS_TAG) {
-        auto node = AceType::DynamicCast<FrameNode>(frameNode);
-        CHECK_NULL_RETURN(node, nullptr);
-        auto pattern = node->GetPattern<PagePattern>();
-        return pattern->GetOverlayManager();
-    }
-    if (tag == V2::NAVDESTINATION_VIEW_ETS_TAG) {
-        auto node = AceType::DynamicCast<FrameNode>(frameNode);
-        CHECK_NULL_RETURN(node, nullptr);
-        auto pattern = node->GetPattern<NavDestinationPattern>();
-        CHECK_NULL_RETURN(pattern, nullptr);
-        return pattern->GetOverlayManager();
-    }
-    return nullptr;
-}
-
-RefPtr<OverlayManager> FindPageNodeOverlay(const RefPtr<FrameNode>& targetNode, bool isShow)
-{
-    if (targetNode->GetPageLevelNodeId() > 0) {
-        return GetOverlayFromPage(targetNode->GetPageLevelNodeId(), targetNode->PageLevelIsNavDestination());
-    }
-    auto isNav = false;
-    RefPtr<OverlayManager> overlay;
-    RefPtr<UINode> parent = targetNode;
-    while (parent) {
-        if (parent->GetTag() == V2::PAGE_ETS_TAG) {
-            auto node = AceType::DynamicCast<FrameNode>(parent);
-            CHECK_NULL_RETURN(node, nullptr);
-            auto pattern = node->GetPattern<PagePattern>();
-            CHECK_NULL_RETURN(pattern, nullptr);
-            if (!isNav) {
-                pattern->CreateOverlayManager(isShow);
-                overlay = pattern->GetOverlayManager();
-                CHECK_NULL_RETURN(overlay, nullptr);
-                targetNode->SetPageLevelNodeId(node->GetId());
-            } else {
-                node->SetPageLevelToNav(true);
-                node->SetPageLevelNodeId(targetNode->GetPageLevelNodeId());
-            }
-            break;
-        }
-        if (parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
-            auto node = AceType::DynamicCast<FrameNode>(parent);
-            CHECK_NULL_RETURN(node, nullptr);
-            auto pattern = node->GetPattern<NavDestinationPattern>();
-            CHECK_NULL_RETURN(pattern, nullptr);
-            pattern->CreateOverlayManager(isShow);
-            overlay = pattern->GetOverlayManager();
-            CHECK_NULL_RETURN(overlay, nullptr);
-            targetNode->SetPageLevelToNav(true);
-            targetNode->SetPageLevelNodeId(node->GetId());
-            isNav = true;
-        }
-        parent = parent->GetParent();
-    }
-    return overlay;
-}
 } // namespace
 
 void ViewAbstractModelNG::BindMenuGesture(
@@ -521,14 +459,14 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     if (sheetStyle.showInPage.value_or(false)) {
-        overlayManager = FindPageNodeOverlay(targetNode, isShow);
+        overlayManager = SheetManager::FindPageNodeOverlay(targetNode, isShow);
     }
     CHECK_NULL_VOID(overlayManager);
 
     // delete Sheet when target node destroy
     auto destructor =
-        [id = targetNode->GetId(), pageLevelId = targetNode->GetPageLevelNodeId(),
-            isNav = targetNode->PageLevelIsNavDestination(), showInPage = sheetStyle.showInPage.value_or(false),
+        [id = targetNode->GetId(), rootNodeId = targetNode->GetRootNodeId(),
+            rootNodeType = targetNode->GetRootNodeType(), showInPage = sheetStyle.showInPage.value_or(false),
             instanceId = sheetStyle.instanceId.has_value() ? sheetStyle.instanceId.value() : Container::CurrentId()]() {
             ContainerScope scope(instanceId);
             auto pipeline = NG::PipelineContext::GetCurrentContext();
@@ -536,7 +474,7 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
             auto overlayManager = pipeline->GetOverlayManager();
             if (showInPage) {
                 TAG_LOGD(AceLogTag::ACE_SHEET, "To showInPage, get overlayManager from GetOverlayFromPage");
-                overlayManager = GetOverlayFromPage(pageLevelId, isNav);
+                overlayManager = SheetManager::GetOverlayFromPage(rootNodeId, rootNodeType);
             }
             CHECK_NULL_VOID(overlayManager);
             overlayManager->DeleteModal(id);

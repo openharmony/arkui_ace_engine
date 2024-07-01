@@ -202,6 +202,9 @@ void RequestPermissionsFromUserWeb(CJWebPermissionRequest& request)
     std::string permission = "ohos.permission.READ_PASTEBOARD";
     char* cPermission = MallocCString(permission);
 
+    if (cPermission == nullptr) {
+        return;
+    }
     auto callBack = [&request](RetDataCPermissionRequestResult infoRef) -> void {
         if (infoRef.code == 0) {
             request.GetAccessibleResources();
@@ -227,14 +230,6 @@ void FfiOHOSAceFrameworkWebSetCallback(RequestResultCallback cb)
 
 void FfiOHOSAceFrameworkWebCreate(const char* src, int64_t controllerId, int32_t type, bool mode)
 {
-    std::string webSrc = src;
-    std::optional<std::string> dstSrc;
-    int np = static_cast<int>(webSrc.find_first_of("/"));
-    dstSrc = np < 0 ? webSrc : webSrc.erase(np, 1);
-    if (!dstSrc) {
-        return;
-    }
-
     RenderMode renderMode = RenderMode::ASYNC_RENDER;
     renderMode = static_cast<RenderMode>(type);
 
@@ -254,7 +249,7 @@ void FfiOHOSAceFrameworkWebCreate(const char* src, int64_t controllerId, int32_t
 
         int32_t parentNWebId = -1;
         bool isPopup = CJWebWindowNewHandler::ExistController(controller, parentNWebId);
-        WebModel::GetInstance()->Create(dstSrc.value(), std::move(setIdCallback), std::move(setHapPathCallback),
+        WebModel::GetInstance()->Create(src, std::move(setIdCallback), std::move(setHapPathCallback),
             parentNWebId, isPopup, renderMode, mode);
         WebModel::GetInstance()->SetPermissionClipboard(std::move(requestPermissionsFromUserCallback));
         if (!controller->customeSchemeCmdLine_.empty()) {
@@ -453,10 +448,6 @@ bool WebRequestHeadersToMapToCFFIArray(const RefPtr<WebRequest>& webRequest, Map
 
 void MapToCFFIArrayToFreeMemory(MapToCFFIArray& mapToCFFIArray)
 {
-    for (size_t i = 0; i < mapToCFFIArray.size; ++i) {
-        free(&mapToCFFIArray.key[i]);
-        free(&mapToCFFIArray.value[i]);
-    }
     free(mapToCFFIArray.key);
     free(mapToCFFIArray.value);
 }

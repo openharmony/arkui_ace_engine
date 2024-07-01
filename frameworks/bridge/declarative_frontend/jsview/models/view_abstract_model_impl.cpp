@@ -749,10 +749,10 @@ void ViewAbstractModelImpl::SetTransition(const NG::TransitionOptions& transitio
 }
 
 void ViewAbstractModelImpl::SetOverlay(const std::string& text, std::function<void()>&& buildFunc,
-    const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
-    const std::optional<Dimension>& offsetY, NG::OverlayType type)
+    const RefPtr<NG::FrameNode>& contentNode, const std::optional<Alignment>& align,
+    const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY, NG::OverlayType type)
 {
-    if (buildFunc) {
+    if (buildFunc || contentNode) {
         return;
     }
     auto coverageComponent = ViewStackProcessor::GetInstance()->GetCoverageComponent();
@@ -802,7 +802,8 @@ void ViewAbstractModelImpl::SetSharedTransition(
     }
 }
 
-void ViewAbstractModelImpl::SetGeometryTransition(const std::string& id, bool followWithoutTransition)
+void ViewAbstractModelImpl::SetGeometryTransition(const std::string& id,
+    bool followWithoutTransition, bool doRegisterSharedTransition)
 {
     auto boxComponent = ViewStackProcessor::GetInstance()->GetBoxComponent();
     boxComponent->SetGeometryTransitionId(id);

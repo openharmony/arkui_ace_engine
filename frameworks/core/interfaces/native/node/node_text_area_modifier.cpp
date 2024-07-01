@@ -507,7 +507,7 @@ void GetTextAreaPlaceholderFont(ArkUINodeHandle node, ArkUITextFont* font)
     }
     if (!value.fontFamilies.empty()) {
         std::string families;
-        int index = 0;
+        uint32_t index = 0;
         for (auto& family : value.fontFamilies) {
             families += family;
             if (index != value.fontFamilies.size() - 1) {
@@ -554,7 +554,7 @@ void SetTextAreaType(ArkUINodeHandle node, ArkUI_Int32 type)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetType(frameNode, static_cast<Ace::TextInputType>(type));
+    TextFieldModelNG::SetType(frameNode, CastToTextInputType(type));
 }
 
 void ResetTextAreaType(ArkUINodeHandle node)
@@ -1491,15 +1491,15 @@ void ResetTextAreaMargin(ArkUINodeHandle node)
     TextFieldModelNG::SetMargin(frameNode, paddings);
 }
 
-void GetTextAreaMargin(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 length, ArkUI_Int32 unit)
+void GetTextAreaMargin(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 length, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto margin = TextFieldModelNG::GetMargin(frameNode);
-    values[NUM_0] = margin.top->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
-    values[NUM_1] = margin.right->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
-    values[NUM_2] = margin.bottom->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
-    values[NUM_3] = margin.left->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_0] = margin.top->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_1] = margin.right->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_2] = margin.bottom->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_3] = margin.left->GetDimension().GetNativeValue(static_cast<DimensionUnit>(unit));
     length = NUM_4;
 }
 
@@ -1592,6 +1592,18 @@ void ResetTextAreaEnablePreviewText(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetEnablePreviewText(frameNode, DEFAULT_ENABLE_PREVIEW_TEXT_VALUE);
 }
+
+void GetTextAreaPadding(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_Int32 length, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto padding = TextFieldModelNG::GetPadding(frameNode);
+    (*values)[NUM_0] = padding.top->GetDimensionContainsNegative().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_1] = padding.right->GetDimensionContainsNegative().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_2] = padding.bottom->GetDimensionContainsNegative().GetNativeValue(static_cast<DimensionUnit>(unit));
+    (*values)[NUM_3] = padding.left->GetDimensionContainsNegative().GetNativeValue(static_cast<DimensionUnit>(unit));
+    length = NUM_4;
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1639,7 +1651,7 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         SetTextAreaOnDidInsert, ResetTextAreaOnDidInsert,
         SetTextAreaOnWillDelete, ResetTextAreaOnWillDelete,
         SetTextAreaOnDidDelete, ResetTextAreaOnDidDelete,
-        SetTextAreaEnablePreviewText, ResetTextAreaEnablePreviewText };
+        SetTextAreaEnablePreviewText, ResetTextAreaEnablePreviewText, GetTextAreaPadding };
     return &modifier;
 }
 
@@ -1768,6 +1780,43 @@ void SetTextAreaOnSubmit(ArkUINodeHandle node, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnSubmit(frameNode, std::move(onEvent));
+}
+
+void ResetOnTextAreaChange(ArkUINodeHandle node)
+{
+    GetTextAreaModifier()->resetTextAreaOnChange(node);
+}
+void ResetOnTextAreaPaste(ArkUINodeHandle node)
+{
+    GetTextAreaModifier()->resetTextAreaOnPaste(node);
+}
+void ResetOnTextAreaSelectionChange(ArkUINodeHandle node)
+{
+    GetTextAreaModifier()->resetTextAreaOnTextSelectionChange(node);
+}
+void ResetOnTextAreaEditChange(ArkUINodeHandle node)
+{
+    GetTextAreaModifier()->resetTextAreaOnEditChange(node);
+}
+void ResetOnTextAreaContentSizeChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnContentSizeChange(frameNode, nullptr);
+}
+void ResetOnTextAreaInputFilterError(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetInputFilterError(frameNode, nullptr);
+}
+void ResetTextAreaOnTextContentScroll(ArkUINodeHandle node)
+{
+    GetTextAreaModifier()->resetTextAreaOnContentScroll(node);
+}
+void ResetTextAreaOnSubmit(ArkUINodeHandle node)
+{
+    GetTextAreaModifier()->resetTextAreaOnSubmitWithEvent(node);
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

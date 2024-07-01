@@ -92,7 +92,8 @@ void TextLayoutAlgorithm::ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>
                 break;
             }
             if (pStyle != nextSpanParagraphStyle ||
-                (pStyle.leadingMargin.has_value() && pStyle.leadingMargin->pixmap)) {
+                (pStyle.leadingMargin.has_value() && pStyle.leadingMargin->pixmap) || Positive(pStyle.indent.Value()) ||
+                pStyle.maxLines != UINT32_MAX) {
                 std::list<RefPtr<SpanItem>> newGroup;
                 spanItem->SetNeedRemoveNewLine(true);
                 newGroup.splice(newGroup.begin(), spans, spans.begin(), std::next(it));
@@ -335,7 +336,7 @@ bool TextLayoutAlgorithm::CreateParagraph(
 bool TextLayoutAlgorithm::UpdateSymbolTextStyle(const TextStyle& textStyle, const ParagraphStyle& paraStyle,
     LayoutWrapper* layoutWrapper, RefPtr<FrameNode>& frameNode)
 {
-    auto && paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
+    auto &&paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
     CHECK_NULL_RETURN(paragraph, false);
     auto layoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, false);

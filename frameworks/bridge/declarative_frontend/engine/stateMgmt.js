@@ -381,7 +381,7 @@ class LocalStorage extends NativeLocalStorage {
             newProp = new ObservedPropertyPU(value, undefined, propName);
         }
         else {
-            newProp = (typeof value === "object") ?
+            newProp = (typeof value === 'object') ?
                 new ObservedPropertyObject(value, undefined, propName)
                 : new ObservedPropertySimple(value, undefined, propName);
         }
@@ -2007,22 +2007,22 @@ class Environment {
         }
         let tmp;
         switch (key) {
-            case "accessibilityEnabled":
+            case 'accessibilityEnabled':
                 tmp = Environment.envBackend_.getAccessibilityEnabled();
                 break;
-            case "colorMode":
+            case 'colorMode':
                 tmp = Environment.envBackend_.getColorMode();
                 break;
             case 'fontScale':
                 tmp = Environment.envBackend_.getFontScale();
                 break;
-            case "fontWeightScale":
+            case 'fontWeightScale':
                 tmp = Environment.envBackend_.getFontWeightScale().toFixed(2);
                 break;
-            case "layoutDirection":
+            case 'layoutDirection':
                 tmp = Environment.envBackend_.getLayoutDirection();
                 break;
-            case "languageCode":
+            case 'languageCode':
                 tmp = Environment.envBackend_.getLanguageCode();
                 break;
             default:
@@ -3382,7 +3382,7 @@ class SynchedPropertySimpleOneWay extends ObservedPropertySimpleAbstract {
         throw new Error("Can not create a 'Link' from a 'Prop' property. ");
     }
     createProp(subscribeOwner, linkPropName) {
-        throw new Error("Method not supported, create a SynchedPropertySimpleOneWaySubscribing from, where to create a Prop.");
+        throw new Error('Method not supported, create a SynchedPropertySimpleOneWaySubscribing from, where to create a Prop.');
     }
 }
 /*
@@ -4113,21 +4113,15 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         this.purgeDeletedElmtIds();
         Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
         if (deep) {
-            this.childrenWeakrefMap_.forEach((weakRefChild) => {
-                const child = weakRefChild.deref();
-                if (child) {
-                    if (child instanceof ViewPU) {
-                        if (!child.hasBeenRecycled_) {
-                            child.forceCompleteRerender(true);
-                        } else {
-                            child.delayCompleteRerender(deep);
-                        }
-                    }
-                } else {
-                    throw new Error('forceCompleteRender not implemented for ViewV2, yet');
+            for (const child of this.childrenWeakrefMap_.values()) {
+                const childView = child.deref();
+                if (childView) {
+                    childView.forceCompleteRerender(true);
                 }
-            });
+            }
         }
+        
+        
     }
     /**
     * force a complete rerender / update on specific node by executing update function.
@@ -4618,20 +4612,11 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
             var _a, _b;
             if ('debugInfo' in subscriber) {
                 const observedProp = subscriber;
-                let isCircleReference = false;
-                let errorMsg = '';
-                try {
-                    JSON.stringify(observedProp.getRawObjectValue());
-                }
-                catch (error) {
-                    stateMgmtConsole.applicationError(`${observedProp.debugInfo()} has error in JSON.stringify value, error: ${error.message}`);
-                    errorMsg = error.message;
-                    isCircleReference = true;
-                }
+                let rawValue = observedProp.getRawObjectValue();
                 let syncPeer = {
                     decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
                     changedTrackPropertyName: changedTrackPropertyName,
-                    value: isCircleReference ? `Profiler Notification: cannot show the value because of ${errorMsg}` : observedProp.getRawObjectValue(),
+                    value: typeof rawValue === 'object' ? 'Only support to dump simple type: string, number, boolean, enum type' : rawValue,
                     inRenderingElementId: stateMgmtDFX.inRenderingElementId_.length === 0 ? -1 : stateMgmtDFX.inRenderingElementId_[stateMgmtDFX.inRenderingElementId_.length - 1],
                     dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, isProfiler),
                     owningView: { componentName: (_a = observedProp.owningView_) === null || _a === void 0 ? void 0 : _a.constructor.name, id: (_b = observedProp.owningView_) === null || _b === void 0 ? void 0 : _b.id__() }
@@ -4644,19 +4629,10 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
     onDumpProfiler(changedTrackPropertyName) {
         var _a, _b, _c, _d;
         let res = new DumpInfo();
-        let isCircleReference = false;
-        let errorMsg = '';
-        try {
-            JSON.stringify(this.getRawObjectValue());
-        }
-        catch (error) {
-            stateMgmtConsole.applicationError(`${this.debugInfo()} has error in JSON.stringify value, error: ${error.message}`);
-            errorMsg = error.message;
-            isCircleReference = true;
-        }
+        let rawValue = this.getRawObjectValue();
         let observedPropertyInfo = {
             decorator: this.debugInfoDecorator(), propertyName: this.info(), id: this.id__(), changedTrackPropertyName: changedTrackPropertyName,
-            value: isCircleReference ? `Profiler Notification: cannot show the value because of ${errorMsg}` : this.getRawObjectValue(),
+            value: typeof rawValue === 'object' ? 'Only support to dump simple type: string, number, boolean, enum type' : rawValue,
             inRenderingElementId: stateMgmtDFX.inRenderingElementId_.length === 0 ? -1 : stateMgmtDFX.inRenderingElementId_[stateMgmtDFX.inRenderingElementId_.length - 1],
             dependentElementIds: this.dumpDependentElmtIdsObj(typeof this.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(this.getUnmonitored()) : false, true),
             owningView: { componentName: (_a = this.owningView_) === null || _a === void 0 ? void 0 : _a.constructor.name, id: (_b = this.owningView_) === null || _b === void 0 ? void 0 : _b.id__() },
@@ -5314,7 +5290,7 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
                 // code path for 
                 // 1- source is of same type C in parent, source is its value, not the backing store ObservedPropertyObject
                 // 2- nested Object/Array inside observed another object/array in parent, source is its value
-                if (typeof sourceValue == "object" && !((sourceValue instanceof SubscribableAbstract) || ObservedObject.IsObservedObject(sourceValue))) {
+                if (typeof sourceValue == 'object' && !((sourceValue instanceof SubscribableAbstract) || ObservedObject.IsObservedObject(sourceValue))) {
                     stateMgmtConsole.applicationWarn(`${this.debugInfo()}: Provided source object's class lacks @Observed class decorator.
             Object property changes will not be observed.`);
                 }
@@ -5533,8 +5509,8 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
         // therefore shallowCopyObject will always be used in API version 9 and before
         // but the code in this file is the same regardless of API version
         
-        return ((typeof ViewStackProcessor["getApiVersion"] == "function") &&
-            (ViewStackProcessor["getApiVersion"]() >= 10))
+        return ((typeof ViewStackProcessor['getApiVersion'] == 'function') &&
+            (ViewStackProcessor['getApiVersion']() >= 10))
             ? this.deepCopyObject(value, propName)
             : this.shallowCopyObject(value, propName);
     }
@@ -5545,7 +5521,7 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
         if (!rawValue || typeof rawValue !== 'object') {
             copy = rawValue;
         }
-        else if (typeof rawValue != "object") {
+        else if (typeof rawValue != 'object') {
             // FIXME would it be better to throw Exception here?
             stateMgmtConsole.error(`${this.debugInfo()}: shallowCopyObject: request to copy non-object value, actual type is '${typeof rawValue}'. Internal error! Setting copy:=original value.`);
             copy = rawValue;
@@ -5613,7 +5589,6 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
             const alreadyCopiedObject = copiedObjects.get(obj);
             if (alreadyCopiedObject) {
                 let msg = `@Prop deepCopyObject: Found reference to already copied object: Path ${variable ? variable : 'unknown variable'}`;
-                stack.forEach(stackItem => msg += ` - ${stackItem.name}`);
                 
                 return alreadyCopiedObject;
             }
@@ -5649,9 +5624,31 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
                 Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
                 copiedObjects.set(obj, copy);
             }
+            else {
+                /**
+                 * As we define a variable called 'copy' with no initial value before this if/else branch,
+                 * so it will crash at Reflect.set when obj is not instance of Set/Map/Date/Object/Array.
+                 * This branch is for those known special cases:
+                 * 1、obj is a NativePointer
+                 * 2、obj is a @Sendable decorated class
+                 * In case the application crash directly, use shallow copy instead.
+                 * Will use new API when ark engine team is ready which will be a more elegant way.
+                 * If we difine the copy like 'let copy = {};',
+                 * it will not crash but copy will be a normal JSObject, not a @Sendable object.
+                 * To keep the functionality of @Sendable, still not define copy with initial value.
+                 */
+                stateMgmtConsole.warn('DeepCopy target obj is not instance of Set/Date/Map/Object/Array, will use shallow copy instead.');
+                return obj;
+            }
             Object.keys(obj).forEach((objKey) => {
                 stack.push({ name: objKey });
-                Reflect.set(copy, objKey, getDeepCopyOfObjectRecursive(obj[objKey]));
+                try {
+                    Reflect.set(copy, objKey, getDeepCopyOfObjectRecursive(obj[objKey]));
+                }
+                catch (error) {
+                    stateMgmtConsole.error('DeepCopy failed, will use shallow copy instead. Error message is:', error);
+                    copy[objKey] = obj[objKey];
+                }
                 stack.pop();
             });
             return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
@@ -6306,22 +6303,27 @@ class ViewPU extends PUV2ViewBase {
     }
     /**
    * ArkUI engine will call this function when the corresponding CustomNode's active status change.
+   * ArkUI engine will not recurse children nodes to inform the stateMgmt for the performance reason.
+   * So the stateMgmt needs to recurse the children although the isCompFreezeAllowed is false because the children nodes
+   * may enable the freezeWhenInActive.
    * @param active true for active, false for inactive
    */
     setActiveInternal(active) {
         
-        if (!this.isCompFreezeAllowed()) {
-            
-            
-            return;
+        if (this.isCompFreezeAllowed()) {
+            this.isActive_ = active;
+            if (this.isActive_) {
+                this.onActiveInternal();
+            }
+            else {
+                this.onInactiveInternal();
+            }
         }
-        
-        this.isActive_ = active;
-        if (this.isActive_) {
-            this.onActiveInternal();
-        }
-        else {
-            this.onInactiveInternal();
+        for (const child of this.childrenWeakrefMap_.values()) {
+            const childView = child.deref();
+            if (childView) {
+                childView.setActiveInternal(active);
+            }
         }
         
     }
@@ -6333,12 +6335,6 @@ class ViewPU extends PUV2ViewBase {
         this.performDelayedUpdate();
         // Remove the active component from the Map for Dfx
         ViewPU.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
-        for (const child of this.childrenWeakrefMap_.values()) {
-            const childView = child.deref();
-            if (childView) {
-                childView.setActiveInternal(this.isActive_);
-            }
-        }
     }
     onInactiveInternal() {
         if (this.isActive_) {
@@ -6350,12 +6346,6 @@ class ViewPU extends PUV2ViewBase {
         }
         // Add the inactive Components to Map for Dfx listing
         ViewPU.inactiveComponents_.add(`${this.constructor.name}[${this.id__()}]`);
-        for (const child of this.childrenWeakrefMap_.values()) {
-            const childView = child.deref();
-            if (childView) {
-                childView.setActiveInternal(this.isActive_);
-            }
-        }
     }
     initialRenderView() {
         
@@ -6779,7 +6769,7 @@ class ViewPU extends PUV2ViewBase {
                 this.updateStateVars(params);
                 this.aboutToReuse(params);
             }
-        }, "aboutToReuse", this.constructor.name);
+        }, 'aboutToReuse', this.constructor.name);
         for (const stateLinkPropVar of this.ownObservedPropertiesStore_) {
             const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate(true);
             if (changedElmtIds) {
@@ -7060,19 +7050,10 @@ class ViewPU extends PUV2ViewBase {
             const prop = Reflect.get(this, varName);
             if ('debugInfoDecorator' in prop) {
                 const observedProp = prop;
-                let isCircleReference = false;
-                let errorMsg = '';
-                try {
-                    JSON.stringify(observedProp.getRawObjectValue());
-                }
-                catch (error) {
-                    stateMgmtConsole.applicationError(`${observedProp.debugInfo()} has error in JSON.stringify value, error: ${error.message}`);
-                    errorMsg = error.message;
-                    isCircleReference = true;
-                }
+                let rawValue = observedProp.getRawObjectValue();
                 let observedPropertyInfo = {
                     decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
-                    value: isCircleReference ? `Inspector Notification: cannot show the value because of ${errorMsg}` : observedProp.getRawObjectValue(),
+                    value: typeof rawValue === 'object' ? 'Only support to dump simple type: string, number, boolean, enum type' : rawValue,
                     dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, false),
                     owningView: { componentName: this.constructor.name, id: this.id__() }, syncPeers: observedProp.dumpSyncPeers(false)
                 };
@@ -7229,20 +7210,20 @@ function makeBuilderParameterProxy(builderName, source) {
             throw Error(`@Builder '${builderName}': Invalid attempt to set(write to) parameter '${prop.toString()}' error!`);
         },
         get(target, prop) {
-            const prop1 = prop.toString().trim().startsWith("__")
+            const prop1 = prop.toString().trim().startsWith('__')
                 ? prop.toString().trim().substring(2)
                 : prop.toString().trim();
             
-            if (!(typeof target === "object") && (prop1 in target)) {
+            if (!(typeof target === 'object') && (prop1 in target)) {
                 throw Error(`@Builder '${builderName}': '${prop1}' used but not a function parameter error!`);
             }
             const value = target[prop1];
-            if (typeof value !== "function") {
+            if (typeof value !== 'function') {
                 
                 return value;
             }
             const funcRet = value();
-            if ((typeof funcRet === "object") && ('get' in funcRet)) {
+            if ((typeof funcRet === 'object') && ('get' in funcRet)) {
                 if (prop1 !== prop) {
                     
                     return funcRet;
@@ -7330,6 +7311,7 @@ class ObserveV2 {
         this.elmtIdsChanged_ = new Set();
         this.computedPropIdsChanged_ = new Set();
         this.monitorIdsChanged_ = new Set();
+        this.persistenceChanged_ = new Set();
         // avoid recursive execution of updateDirty
         // by state changes => fireChange while
         // UINode rerender or @monitor function execution
@@ -7348,6 +7330,10 @@ class ObserveV2 {
     // return true given value is @observed object
     static IsObservedObjectV2(value) {
         return (value && typeof (value) === 'object' && value[ObserveV2.V2_DECO_META]);
+    }
+    static getCurrentRecordedId() {
+        const bound = ObserveV2.getObserve().stackOfRenderedComponents_.top();
+        return bound ? bound[0] : -1;
     }
     // At the start of observeComponentCreation or
     // MonitorV2 observeObjectAccess
@@ -7498,8 +7484,6 @@ class ObserveV2 {
     // add dependency view model object 'target' property 'attrName'
     // to current this.bindId
     addRef(target, attrName) {
-        var _a, _b, _c, _d;
-        var _e, _f;
         const bound = this.stackOfRenderedComponents_.top();
         if (!bound) {
             return;
@@ -7510,7 +7494,15 @@ class ObserveV2 {
             throw new TypeError(error);
         }
         
-        const id = bound[0];
+        this.addRef4IdInternal(bound[0], target, attrName);
+    }
+    addRef4Id(id, target, attrName) {
+        
+        this.addRef4IdInternal(id, target, attrName);
+    }
+    addRef4IdInternal(id, target, attrName) {
+        var _a, _b, _c, _d;
+        var _e, _f;
         // Map: attribute/symbol -> dependent id
         const symRefs = (_a = target[_e = ObserveV2.SYMBOL_REFS]) !== null && _a !== void 0 ? _a : (target[_e] = {});
         (_b = symRefs[attrName]) !== null && _b !== void 0 ? _b : (symRefs[attrName] = new Set());
@@ -7612,17 +7604,33 @@ class ObserveV2 {
             else if (id < MonitorV2.MIN_WATCH_ID) {
                 this.computedPropIdsChanged_.add(id);
             }
-            else {
+            else if (id < PersistenceV2Impl.MIN_PERSISTENCE_ID) {
                 this.monitorIdsChanged_.add(id);
+            }
+            else {
+                this.persistenceChanged_.add(id);
             }
         } // for
     }
     updateDirty() {
         this.startDirty_ = true;
-        this.updateDirty2();
+        this.updateDirty2(false);
         this.startDirty_ = false;
     }
-    updateDirty2() {
+    /**
+     * execute /update in this order
+     * - @Computed variables
+     * - @Monitor functions
+     * - UINode re-render
+     * three nested loops, means:
+     * process @Computed until no more @Computed need update
+     * process @Monitor until no more @Computed and @Monitor
+     * process UINode update until no more @Computed and @Monitor and UINode rerender
+     *
+     * @param updateUISynchronously should be set to true if called during VSYNC only
+     *
+     */
+    updateDirty2(updateUISynchronously = false) {
         aceTrace.begin('updateDirty2');
         
         // obtain and unregister the removed elmtIds
@@ -7643,18 +7651,24 @@ class ObserveV2 {
                     this.computedPropIdsChanged_ = new Set();
                     this.updateDirtyComputedProps(computedProps);
                 }
+                if (this.persistenceChanged_.size) {
+                    const persistKeys = Array.from(this.persistenceChanged_);
+                    this.persistenceChanged_ = new Set();
+                    PersistenceV2Impl.instance().onChangeObserved(persistKeys);
+                }
                 if (this.monitorIdsChanged_.size) {
                     const monitors = this.monitorIdsChanged_;
                     this.monitorIdsChanged_ = new Set();
                     this.updateDirtyMonitors(monitors);
                 }
-            } while (this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size > 0);
+            } while (this.monitorIdsChanged_.size + this.persistenceChanged_.size + this.computedPropIdsChanged_.size > 0);
             if (this.elmtIdsChanged_.size) {
                 const elmtIds = Array.from(this.elmtIdsChanged_).sort((elmtId1, elmtId2) => elmtId1 - elmtId2);
                 this.elmtIdsChanged_ = new Set();
-                this.updateUINodes(elmtIds);
+                updateUISynchronously ? this.updateUINodesSynchronously(elmtIds) : this.updateUINodes(elmtIds);
             }
         } while (this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size > 0);
+        
         aceTrace.end();
     }
     updateDirtyComputedProps(computed) {
@@ -7702,10 +7716,11 @@ class ObserveV2 {
      * FlushDirtyNodesUpdate to CustomNode to ViewV2.updateDirtyElements to UpdateElement
      * Code left here to reproduce benchmark measurements, compare with future optimisation
      * @param elmtIds
+     *
      */
-    updateUINodesWithoutVSync(elmtIds) {
+    updateUINodesSynchronously(elmtIds) {
         
-        aceTrace.begin(`ObserveV2.updateUINodes: ${elmtIds.length} elmtId`);
+        aceTrace.begin(`ObserveV2.updateUINodesSynchronously: ${elmtIds.length} elmtId`);
         let view;
         let weak;
         elmtIds.forEach((elmtId) => {
@@ -7729,7 +7744,7 @@ class ObserveV2 {
     // much slower
     updateUINodes(elmtIds) {
         
-        aceTrace.begin(`ObserveV2.updateUINodesSlow: ${elmtIds.length} elmtId`);
+        aceTrace.begin(`ObserveV2.updateUINodes: ${elmtIds.length} elmtId`);
         let viewWeak;
         let view;
         elmtIds.forEach((elmtId) => {
@@ -8304,13 +8319,15 @@ function observedV2Internal(BaseClass) {
         
         BaseClass.prototype[ObserveV2.ID_REFS] = {};
     }
-    return class extends BaseClass {
+    const observedClass = class extends BaseClass {
         constructor(...args) {
             super(...args);
             AsyncAddComputedV2.addComputed(this, BaseClass.name);
             AsyncAddMonitorV2.addMonitor(this, BaseClass.name);
         }
     };
+    Object.defineProperty(observedClass, 'name', { value: BaseClass.name });
+    return observedClass;
 }
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
@@ -8615,7 +8632,7 @@ class ViewV2 extends PUV2ViewBase {
        */
         this.__mkRepeatAPI = (arr) => {
             // factory is for future extensions, currently always return the same
-            const elmtId = this.getCurrentlyRenderedElmtId();
+            const elmtId = ObserveV2.getCurrentRecordedId();
             let repeat = this.elmtId2Repeat_.get(elmtId);
             if (!repeat) {
                 repeat = new __RepeatV2(arr);
@@ -8626,6 +8643,7 @@ class ViewV2 extends PUV2ViewBase {
             }
             return repeat;
         };
+        this.setIsV2(true);
         
     }
     /**
@@ -8743,6 +8761,7 @@ class ViewV2 extends PUV2ViewBase {
    * @param newValue
    */
     initParam(paramVariableName, newValue) {
+        this.checkIsV1Proxy(paramVariableName, newValue);
         VariableUtilV3.initParam(this, paramVariableName, newValue);
     }
     /**
@@ -8755,7 +8774,13 @@ class ViewV2 extends PUV2ViewBase {
     * @param newValue
    */
     updateParam(paramVariableName, newValue) {
+        this.checkIsV1Proxy(paramVariableName, newValue);
         VariableUtilV3.updateParam(this, paramVariableName, newValue);
+    }
+    checkIsV1Proxy(paramVariableName, value) {
+        if (ObservedObject.IsObservedObject(value)) {
+            throw new Error(`Cannot assign the ComponentV1 value to the ComponentV2 for the property '${paramVariableName}'`);
+        }
     }
     /**
    *  inform that UINode with given elmtId needs rerender
@@ -9198,6 +9223,339 @@ const Computed = (target, propertyKey, descriptor) => {
         : target[watchProp] = { [propertyKey]: computeFunction };
 };
 /*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+const V2_STATE_PREFIX = '__ob_';
+const V2_PREFIX_LENGTH = V2_STATE_PREFIX.length;
+;
+class Meta {
+    static define(proto, prop, value) {
+        const meta = Meta.proto2props.get(proto);
+        if (!meta) {
+            Meta.proto2props.set(proto, { [prop]: value });
+        }
+        else {
+            meta[prop] = value;
+        }
+    }
+    static get(obj, prop) {
+        let proto = obj.__proto__;
+        while (proto) {
+            let meta = Meta.proto2props.get(proto);
+            if (meta && meta[prop]) {
+                return meta[prop];
+            }
+            proto = proto.__proto__;
+        }
+        return undefined;
+    }
+    static gets(obj) {
+        const ret = {};
+        let proto = obj.__proto__;
+        while (proto) {
+            let meta = Meta.proto2props.get(proto);
+            Object.assign(ret, meta);
+            proto = proto.__proto__;
+        }
+        return ret;
+    }
+    static getOwn(obj, prop) {
+        const meta = Meta.proto2props.get(obj.__proto__);
+        return meta && meta[prop];
+    }
+}
+Meta.proto2props = new WeakMap();
+function __Type__(type, alias) {
+    const options = JSONCoder.getOptions(type);
+    if (alias) {
+        options.alias = alias;
+    }
+    return (target, prop) => {
+        const tar = typeof target === 'function' ? target.prototype : target;
+        Meta.define(tar, prop, options);
+    };
+}
+function ObservedReplacer(replacer) {
+    const defaultReplacer = function (key, value) {
+        return value;
+    };
+    const realReplacer = replacer || defaultReplacer;
+    return function (key, value) {
+        if (typeof value !== 'object' || Array.isArray(value)) {
+            return realReplacer.call(this, key, value);
+        }
+        if (value instanceof Set) {
+            return realReplacer.call(this, key, Array.from(value));
+        }
+        if (value instanceof Map) {
+            return realReplacer.call(this, key, Array.from(value.entries()));
+        }
+        const ret = {};
+        const meta = Meta.gets(value);
+        Object.keys(value).forEach(key => {
+            let saveKey = key.startsWith(V2_STATE_PREFIX) ? key.substring(V2_PREFIX_LENGTH) : key;
+            let options = meta && meta[saveKey];
+            if (options && options.disabled) {
+                return;
+            }
+            ret[(options && options.alias) || saveKey] = value[saveKey];
+        });
+        return realReplacer.call(this, key, ret);
+    };
+}
+/**
+ * JSONCoder
+ *
+ * The JSONCoder utility enhances the serialization and deserialization capabilities beyond
+ * the standard JSON.stringify and JSON.parse methods. While JSON.stringify serializes
+ * object properties and their values, it drops functions, class, property, and function decorators,
+ * and does not support Map, Set, or Date serialization. JSONCoder addresses these limitations,
+ * providing robust support for a wider range of JavaScript features.
+ *
+ * Main Features:
+ * - Adds support for serializing and deserializing class instances, including methods and decorators.
+ * - Supports serialization of complex data structures like Map, Set, and Date.
+ * - Provides full reconstruction of class instances through the JSONCoder.parseTo method.
+ *
+ * Usage Scenarios:
+ * - Serializing class instances to JSON for network transmission or storage.
+ * - Deserializing JSON data back into fully functional class instances, preserving methods and decorators.
+ * - Converting JSON data received from network or database into state management observable view models (e.g., @ObservedV2 class objects).
+ *
+ * The name 'JSONCoder' is derived from the 'JSON stringify/parse', reflecting its purpose to enhance JSON serialization and deserialization for classes.
+ *
+ */
+class JSONCoder {
+    /**
+     * Serializes the given object into a string. This string includes additional meta info
+     * allowing `stringify` to fully reconstruct the original object, including its class
+     * type and properties.
+     *
+     * @template T - The type of the object being serialized.
+     * @param { T } value - The object to serialize.
+     * @param { (this: JSONAny, key: string, value: JSONAny) => JSONAny } [replacer] - A function that alters the behavior when stringify
+     * @param { string | number } [space] - For format
+     * @returns { string } The serialized string representation of the object.
+     */
+    static stringify(value, replacer, space) {
+        return JSON.stringify(value, ObservedReplacer(replacer), space);
+    }
+    /**
+     * Parses a JSON string or object and applies the nested key-values to a class object.
+     * The main usage scenario is to convert JSON data received from a network or database
+     * to a state management observable view model.
+     *
+     * @template T - The type of the object being parsed.
+     * @param { TypeConstructor<T> | TransformOptions<T> } type - The class prototype or constructor function that has no parameters.
+     * @param { object | string } source - The JSON string or JSON object.
+     * @returns { T | T[] } The parsed object of type T or T[].
+     */
+    static parse(type, source) {
+        const json = typeof source === 'string' ? JSON.parse(source) : source;
+        const options = JSONCoder.getOptions(type);
+        return Array.isArray(json) ?
+            JSONCoder.parseIntoArray([], json, options) :
+            JSONCoder.parseInto(JSONCoder.newItem(json, options), json);
+    }
+    /**
+     * Deserializes a string produced by `parseTo` back into the original object,
+     * fully reconstructing its class type and properties.
+     *
+     * @template T - The original object being parsed.
+     * @param { T | T[] } type - The original object.
+     * @param { object | string } source - The JSON string or JSON object.
+     * @param { TypeConstructor<T> | TransformOptions<T> } [type] - The class prototype or constructor function that has no parameters.
+     * @returns { T | T[] } The parsed object of type T or T[].
+     */
+    static parseTo(target, source, type) {
+        const json = typeof source === 'string' ? JSON.parse(source) : source;
+        const t1 = Array.isArray(json);
+        const t2 = Array.isArray(target);
+        const options = JSONCoder.getOptions(type);
+        if (t1 && t2) {
+            JSONCoder.parseIntoArray(target, json, options);
+        }
+        else if (!t1 && !t2) {
+            JSONCoder.parseInto(target, json);
+        }
+        else {
+            throw new Error(`The type of target '${t2}' mismatches the type of source '${t1}'`);
+        }
+        return target;
+    }
+    /**
+     * Get the type options from the object creator.
+     *
+     * @template T - The object being parsed.
+     * @param { TypeConstructor<T> | TransformOptions<T> | string } [type] - The type info of the object creator.
+     * @returns { TransformOptions<T> } The options of the type info.
+     */
+    static getOptions(type) {
+        const paramType = typeof type;
+        const options = {};
+        if (paramType === 'object') {
+            Object.assign(options, type);
+        }
+        else if (paramType === 'function') {
+            options.factory = (_) => type;
+        }
+        else if (paramType === 'string') {
+            options.alias = type;
+        }
+        return options;
+    }
+    static getAlias2Prop(meta, target) {
+        const ret = new Map();
+        Object.keys(meta).forEach(prop => {
+            const options = meta[prop];
+            ret.set(options.alias || prop, prop);
+        });
+        return ret;
+    }
+    static parseInto(target, source) {
+        if (typeof source !== 'object') {
+            throw new Error(`The type of target '${typeof target}' mismatches the type of source '${typeof source}'`);
+        }
+        const meta = Meta.gets(target);
+        const alias2prop = JSONCoder.getAlias2Prop(meta, target);
+        Object.keys(source).forEach((key) => {
+            const prop = alias2prop.get(key) || key;
+            const options = meta && meta[prop];
+            if (options && options.disabled) {
+                return;
+            }
+            JSONCoder.parseItemInto(target, prop, source, options);
+        });
+        return target;
+    }
+    static parseItemInto(target, targetKey, source, options) {
+        if (source === null || source === undefined) {
+            return;
+        }
+        let tarType = typeof target[targetKey];
+        if (tarType === 'function') {
+            return;
+        }
+        const sourceKey = (options === null || options === void 0 ? void 0 : options.alias) || targetKey;
+        // Handling invalid values
+        const value = JSONCoder.getTargetValue(source[sourceKey], options);
+        if (value === undefined || value === null) {
+            if (tarType === 'object') {
+                if (target[targetKey] instanceof Map || target[targetKey] instanceof Set) {
+                    target[targetKey].clear();
+                }
+                else if (Array.isArray(target[targetKey])) {
+                    target[targetKey].splice(0, target[targetKey].length);
+                }
+                else if (options && options.factory) {
+                    // if options.factory exists, can be assigned to undefined or null
+                    target[targetKey] = value;
+                }
+            }
+            // other scene ignore all
+            return;
+        }
+        // value is array, it maybe array or map or set
+        if (Array.isArray(value)) {
+            target[targetKey] = JSONCoder.parseIntoArray(target[targetKey], value, options);
+            return;
+        }
+        // if target[targetKey] invalid, then attempt create
+        if (target[targetKey] === null || target[targetKey] === undefined) {
+            target[targetKey] = JSONCoder.newItem(value, options);
+            tarType = typeof target[targetKey];
+        }
+        if (typeof value !== 'object') {
+            // value is Primitive Type
+            if (target[targetKey] instanceof Date) {
+                target[targetKey] = new Date(value);
+            }
+            else if (tarType === 'string') {
+                target[targetKey] = value.toString();
+            }
+            else if (tarType === typeof value) {
+                target[targetKey] = value;
+            }
+            else if (target[targetKey] !== undefined) {
+                throw new Error(`The type of target '${tarType}' mismatches the type of source '${typeof value}'`);
+            }
+            return;
+        }
+        // value is object, target[targetKey] is undefined or null
+        if (target[targetKey] === null) {
+            throw new Error(`Miss @Type in object defined, the property name is ${targetKey}`);
+        }
+        else if (target[targetKey] === undefined) {
+            // ignore target[targetKey] undefined
+            return;
+        }
+        this.parseInto(target[targetKey], value);
+    }
+    static newItem(json, options) {
+        const type = options === null || options === void 0 ? void 0 : options.factory(json);
+        return type && new type();
+    }
+    static getTargetValue(value, options) {
+        // future can convert the value to different type or value
+        return value;
+    }
+    static parseIntoArray(target, source, options) {
+        if (typeof target !== 'object') {
+            throw new Error(`The type of target '${typeof target}' mismatches the type of source '${typeof source}'`);
+        }
+        // here, source maybe a array or map or set
+        if (target instanceof Map) {
+            target.clear();
+            for (let i = 0; i < source.length; ++i) {
+                // If target is a map, item must be an array. Otherwise, ignore it
+                const item = source[i];
+                if (!Array.isArray(item) || item.length < 2 || typeof item[0] !== 'string') {
+                    continue;
+                }
+                target.set(item[0], typeof item[1] !== 'object' ? item[1] : JSONCoder.parse(options, item[1]));
+            }
+            return target;
+        }
+        if (target instanceof Set) {
+            target.clear();
+            for (let i = 0; i < source.length; ++i) {
+                const item = source[i];
+                target.add(typeof item !== 'object' ? item : JSONCoder.parse(options, item));
+            }
+            return target;
+        }
+        target.length = source.length;
+        for (let i = 0; i < source.length; ++i) {
+            const item = source[i];
+            if (typeof item !== 'object') {
+                target[i] = item;
+                continue;
+            }
+            if (i === 0) {
+                if (!(options === null || options === void 0 ? void 0 : options.factory)) {
+                    target.length = 0;
+                    throw new Error(`Miss @Type in array defined`);
+                }
+            }
+            target[i] = Array.isArray(item) ?
+                JSONCoder.parseIntoArray(target[i] || [], item, options) :
+                JSONCoder.parseInto(target[i] || JSONCoder.newItem(item, options), item);
+        }
+        return target;
+    }
+}
+/*
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -9222,9 +9580,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 // implementation for existing state observation system
 class __RepeatItemPU {
     constructor(owningView, initialItem, initialIndex) {
-        this._observedItem = new ObservedPropertyPU(initialItem, owningView, "Repeat item");
+        this._observedItem = new ObservedPropertyPU(initialItem, owningView, 'Repeat item');
         if (initialIndex !== undefined) {
-            this._observedIndex = new ObservedPropertyPU(initialIndex, owningView, "Repeat index");
+            this._observedIndex = new ObservedPropertyPU(initialIndex, owningView, 'Repeat index');
         }
     }
     get item() {
@@ -9289,7 +9647,7 @@ class __RepeatDefaultKeyGen {
     }
     static funcImpl(item) {
         // fast keygen logic can be used with objects/symbols only
-        if (typeof item !== 'object' && typeof item !== 'symbol') {
+        if (typeof item != 'object' && typeof item !== 'symbol') {
             return JSON.stringify(item);
         }
         // generate a numeric key, store mappings in WeakMap
@@ -9302,34 +9660,129 @@ class __RepeatDefaultKeyGen {
 }
 __RepeatDefaultKeyGen.weakMap_ = new WeakMap();
 __RepeatDefaultKeyGen.lastKey_ = 0;
+;
+;
 // __Repeat implements ForEach with child re-use for both existing state observation
 // and deep observation , for non-virtual and virtual code paths (TODO)
 class __RepeatV2 {
     constructor(arr) {
+        this.config = {};
         this.isVirtualScroll = false;
-        this.key2Item_ = new Map();
-        this.arr_ = arr !== null && arr !== void 0 ? arr : [];
-        this.keyGenFunction_ = __RepeatDefaultKeyGen.func;
-    }
-    updateArr(arr) {
-        this.arr_ = arr !== null && arr !== void 0 ? arr : [];
-        return this;
+        //console.log('__RepeatV2 ctor')
+        this.config.arr = arr !== null && arr !== void 0 ? arr : [];
+        this.config.itemGenFuncs = {};
+        this.config.keyGenFunc = __RepeatDefaultKeyGen.func;
+        this.config.typeGenFunc = (() => '');
+        this.config.totalCount = this.config.arr.length;
+        this.config.templateOptions = {};
+        this.config.mkRepeatItem = this.mkRepeatItem;
     }
     each(itemGenFunc) {
-        this.itemGenFunc_ = itemGenFunc;
+        //console.log('__RepeatV2.each()')
+        this.config.itemGenFuncs[''] = itemGenFunc;
+        this.config.templateOptions[''] = Object.assign({}, this.defaultTemplateOptions());
         return this;
     }
-    key(idGenFunc) {
-        this.keyGenFunction_ = idGenFunc !== null && idGenFunc !== void 0 ? idGenFunc : __RepeatDefaultKeyGen.func;
+    key(keyGenFunc) {
+        //console.log('__RepeatV2.key()')
+        this.config.keyGenFunc = keyGenFunc !== null && keyGenFunc !== void 0 ? keyGenFunc : __RepeatDefaultKeyGen.func;
         return this;
     }
-    virtualScroll() {
+    virtualScroll(options) {
+        var _a;
+        //console.log('__RepeatV2.virtualScroll()')
+        this.config.totalCount = (_a = options === null || options === void 0 ? void 0 : options.totalCount) !== null && _a !== void 0 ? _a : this.config.arr.length;
         this.isVirtualScroll = true;
         return this;
     }
-    onMove(handler) {
-        this.onMoveHandler_ = handler;
+    // function to decide which template to use, each template has an id
+    templateId(typeFunc) {
+        //console.log('__RepeatV2.templateId()')
+        this.config.typeGenFunc = typeFunc;
         return this;
+    }
+    // template: id + builder function to render specific type of data item 
+    template(type, itemGenFunc, options) {
+        //console.log('__RepeatV2.template()')
+        this.config.itemGenFuncs[type] = itemGenFunc;
+        this.config.templateOptions[type] = Object.assign(Object.assign({}, this.defaultTemplateOptions()), options);
+        return this;
+    }
+    updateArr(arr) {
+        //console.log('__RepeatV2.updateArr()')
+        this.config.arr = arr !== null && arr !== void 0 ? arr : [];
+        return this;
+    }
+    render(isInitialRender) {
+        var _a, _b, _c;
+        //console.log('__RepeatV2.render()')
+        if (!((_a = this.config.itemGenFuncs) === null || _a === void 0 ? void 0 : _a[''])) {
+            throw new Error(`__RepeatV2 item builder function unspecified. Usage error`);
+        }
+        if (!this.isVirtualScroll) {
+            // Repeat
+            (_b = this.impl) !== null && _b !== void 0 ? _b : (this.impl = new __RepeatImpl());
+            this.impl.render(this.config, isInitialRender);
+        }
+        else {
+            // RepeatVirtualScroll
+            (_c = this.impl) !== null && _c !== void 0 ? _c : (this.impl = new __RepeatVirtualScrollImpl());
+            this.impl.render(this.config, isInitialRender);
+        }
+    }
+    onMove(handler) {
+        this.config.onMoveHandler = handler;
+        return this;
+    }
+    defaultTemplateOptions() {
+        return { cachedCount: 1 };
+    }
+    mkRepeatItem(item, index) {
+        return new __RepeatItemV2(item, index);
+    }
+}
+; // __RepeatV2<T>
+// __Repeat implements ForEach with child re-use for both existing state observation
+// and deep observation , for non-virtual and virtual code paths (TODO)
+class __RepeatPU extends __RepeatV2 {
+    constructor(owningView, arr) {
+        super(arr);
+        this.owningView_ = owningView;
+    }
+    mkRepeatItem(item, index) {
+        return new __RepeatItemPU(this.owningView_, item, index);
+    }
+}
+/*
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * all definitions in this file are framework internal
+*/
+class __RepeatImpl {
+    /**/
+    constructor() {
+        this.key2Item_ = new Map();
+    }
+    /**/
+    render(config, isInitialRender) {
+        this.arr_ = config.arr;
+        this.itemGenFuncs_ = config.itemGenFuncs;
+        this.typeGenFunc_ = config.typeGenFunc;
+        this.keyGenFunction_ = config.keyGenFunc;
+        this.mkRepeatItem_ = config.mkRepeatItem;
+        this.onMoveHandler_ = config.onMoveHandler;
+        isInitialRender ? this.initialRender() : this.reRender();
     }
     genKeys() {
         const key2Item = new Map();
@@ -9338,34 +9791,20 @@ class __RepeatV2 {
             key2Item.set(key, { key, index });
         });
         if (key2Item.size < this.arr_.length) {
-            stateMgmtConsole.warn("Duplicates detected, fallback to index-based keyGen.");
+            stateMgmtConsole.warn("__RepeatImpl: Duplicates detected, fallback to index-based keyGen.");
             // Causes all items to be re-rendered
             this.keyGenFunction_ = __RepeatDefaultKeyGen.funcWithIndex;
             return this.genKeys();
         }
         return key2Item;
     }
-    mkRepeatItem(item, index) {
-        return new __RepeatItemV2(item, index);
-    }
-    render(isInitialRender) {
-        if (!this.itemGenFunc_) {
-            throw new Error(`itemGen function undefined. Usage error`);
-        }
-        if (this.isVirtualScroll) {
-            // TODO: Add render for LazyforEach with child update.
-            throw new Error("TODO virtual code path");
-        }
-        else {
-            isInitialRender ? this.initialRenderNoneVirtual() : this.rerenderNoneVirtual();
-        }
-    }
-    initialRenderNoneVirtual() {
+    initialRender() {
+        //console.log('__RepeatImpl initialRender() 0')
         this.key2Item_ = this.genKeys();
         RepeatNative.startRender();
         let index = 0;
         this.key2Item_.forEach((itemInfo, key) => {
-            itemInfo.repeatItem = this.mkRepeatItem(this.arr_[index], index);
+            itemInfo.repeatItem = this.mkRepeatItem_(this.arr_[index], index);
             this.initialRenderItem(key, itemInfo.repeatItem);
             index++;
         });
@@ -9376,7 +9815,7 @@ class __RepeatV2 {
         UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs(removedChildElmtIds);
         
     }
-    rerenderNoneVirtual() {
+    reRender() {
         const oldKey2Item = this.key2Item_;
         this.key2Item_ = this.genKeys();
         // identify array items that have been deleted
@@ -9402,6 +9841,15 @@ class __RepeatV2 {
                 itemInfo.repeatItem.updateIndex(index);
                 // C++ mv from tempChildren[oldIndex] to end of children_
                 RepeatNative.moveChild(oldIndex);
+                // TBD moveChild() only when item types are same
+                //const type0 = this.typeGenFunc_(oldItemInfo.repeatItem.item, oldIndex);
+                //const type1 = this.typeGenFunc_(itemInfo.repeatItem.item, index);
+                //if (type0 == type1) {
+                //    // C++ mv from tempChildren[oldIndex] to end of children_
+                //    RepeatNative.moveChild(oldIndex);
+                //} else {
+                //    this.initialRenderItem(key, itemInfo.repeatItem);
+                //}
             }
             else if (deletedKeysAndIndex.length) {
                 // case #2:
@@ -9417,6 +9865,7 @@ class __RepeatV2 {
                 itemInfo.repeatItem.updateIndex(index);
                 // update key2item_ Map
                 this.key2Item_.set(key, itemInfo);
+                // TBD moveChild() only when item types are same
                 // C++ mv from tempChildren[oldIndex] to end of children_
                 RepeatNative.moveChild(oldKeyIndex);
             }
@@ -9424,7 +9873,7 @@ class __RepeatV2 {
                 // case #3:
                 // new array item, there are no deleted array items
                 // render new UINode children
-                itemInfo.repeatItem = this.mkRepeatItem(item, index);
+                itemInfo.repeatItem = this.mkRepeatItem_(item, index);
                 this.initialRenderItem(key, itemInfo.repeatItem);
             }
             index++;
@@ -9444,26 +9893,543 @@ class __RepeatV2 {
         
     }
     initialRenderItem(key, repeatItem) {
+        var _a, _b;
+        //console.log('__RepeatImpl initialRenderItem()')
         // render new UINode children
         
         // C++: initial render will render to the end of children_
         RepeatNative.createNewChildStart(key);
-        // execute the ItemGen function
-        this.itemGenFunc_(repeatItem);
+        // execute the itemGen function
+        const itemType = (_a = this.typeGenFunc_(repeatItem.item, repeatItem.index)) !== null && _a !== void 0 ? _a : '';
+        const itemFunc = (_b = this.itemGenFuncs_[itemType]) !== null && _b !== void 0 ? _b : this.itemGenFuncs_[''];
+        itemFunc(repeatItem);
         RepeatNative.createNewChildFinish(key);
     }
 }
-// __Repeat implements ForEach with child re-use for both existing state observation
-// and deep observation , for non-virtual and virtual code paths (TODO)
-class __RepeatPU extends __RepeatV2 {
-    constructor(owningView, arr) {
-        super(arr);
-        this.owningView_ = owningView;
+;
+/*
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * all definitions in this file are framework internal
+*/
+// Implements ForEach with child re-use for both existing state observation and
+// deep observation. For virtual-scroll code paths
+class __RepeatVirtualScrollImpl {
+    /**/
+    constructor() {
     }
-    mkRepeatItem(item, index) {
-        return new __RepeatItemPU(this.owningView_, item, index);
+    render(config, isInitialRender) {
+        this.arr_ = config.arr;
+        this.itemGenFuncs_ = config.itemGenFuncs;
+        this.keyGenFunc_ = config.keyGenFunc;
+        this.typeGenFunc_ = config.typeGenFunc;
+        this.totalCount_ = config.totalCount;
+        this.templateOptions_ = config.templateOptions;
+        this.mkRepeatItem_ = config.mkRepeatItem;
+        this.onMoveHandler_ = config.onMoveHandler;
+        if (isInitialRender) {
+            this.initialRender(ObserveV2.getCurrentRecordedId());
+        }
+        else {
+            this.reRender();
+        }
+    }
+    /**/
+    initialRender(repeatElmtId) {
+        // Map key -> RepeatItem
+        // added to closure of following lambdas
+        const _repeatItem4Key = new Map();
+        const repeatElmtId1 = repeatElmtId;
+        const onCreateNode = (forIndex) => {
+            
+            if (forIndex < 0) {
+                // FIXME check also index < totalCount
+                throw new Error(`__RepeatVirtualScrollImpl onCreateNode: for index=${forIndex} out of range error.`);
+            }
+            // create dependency array item [forIndex] -> Repeat
+            // so Repeat updates when the array item changes
+            // FIXME observe dependencies, adding the array is insurgent for Array of objects
+            ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, forIndex.toString());
+            const repeatItem = this.mkRepeatItem_(this.arr_[forIndex], forIndex);
+            const forKey = this.keyGenFunc_(this.arr_[forIndex], forIndex);
+            _repeatItem4Key.set(forKey, repeatItem);
+            // execute the itemGen function
+            this.initialRenderItem(repeatItem);
+            
+        };
+        const onUpdateNode = (fromKey, forIndex) => {
+            if (!fromKey || fromKey == "" || forIndex < 0) {
+                // FIXME check also index < totalCount
+                throw new Error(`__RepeatVirtualScrollImpl onUpdateNode: fromKey "${fromKey}", forIndex=${forIndex} invalid function input error.`);
+            }
+            // create dependency array item [forIndex] -> Repeat
+            // so Repeat updates when the array item changes
+            // FIXME observe dependencies, adding the array is insurgent for Array of objects
+            ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, forIndex.toString());
+            const repeatItem = _repeatItem4Key.get(fromKey);
+            if (!repeatItem) {
+                stateMgmtConsole.error(`__RepeatVirtualScrollImpl onUpdateNode: fromKey "${fromKey}", forIndex=${forIndex}, can not find RepeatItem for key. Unrecoverable error`);
+                return;
+            }
+            const forKey = this.keyGenFunc_(this.arr_[forIndex], forIndex);
+            
+            repeatItem.updateItem(this.arr_[forIndex]);
+            repeatItem.updateIndex(forIndex);
+            // update Map according to made update:
+            // del fromKey entry and add forKey
+            _repeatItem4Key.delete(fromKey);
+            _repeatItem4Key.set(forKey, repeatItem);
+            
+            // FIXME request re-render right away!
+            ObserveV2.getObserve().updateDirty2(true);
+        };
+        const onGetKeys4Range = (from, to) => {
+            
+            const result = new Array();
+            for (let i = from; i <= to && i < this.arr_.length; i++) {
+                // create dependency array item [i] -> Repeat
+                // so Repeat updates when the array item changes
+                // FIXME observe dependencies, adding the array is insurgent for Array of objects
+                ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, i.toString());
+                result.push(this.keyGenFunc_(this.arr_[i], i));
+            }
+            
+            return result;
+        };
+        const onGetTypes4Range = (from, to) => {
+            var _a;
+            
+            const result = new Array();
+            // FIXME observe dependencies, adding the array is insurgent for Array of objects
+            for (let i = from; i <= to && i < this.arr_.length; i++) {
+                // ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, i.toString());
+                result.push((_a = this.typeGenFunc_(this.arr_[i], i)) !== null && _a !== void 0 ? _a : '');
+            }
+            
+            return result;
+        };
+        
+        RepeatVirtualScrollNative.create(this.totalCount_, Object.entries(this.templateOptions_), {
+            onCreateNode,
+            onUpdateNode,
+            onGetKeys4Range,
+            onGetTypes4Range
+        });
+        
+    }
+    reRender() {
+        
+        RepeatVirtualScrollNative.invalidateKeyCache(this.totalCount_);
+        
+    }
+    initialRenderItem(repeatItem) {
+        var _a, _b;
+        // execute the itemGen function
+        const itemType = (_a = this.typeGenFunc_(repeatItem.item, repeatItem.index)) !== null && _a !== void 0 ? _a : '';
+        const itemFunc = (_b = this.itemGenFuncs_[itemType]) !== null && _b !== void 0 ? _b : this.itemGenFuncs_[''];
+        itemFunc(repeatItem);
     }
 }
+;
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+;
+class StorageHepler {
+    constructor() {
+        this.oldTypeValues_ = new Map();
+    }
+    getConnectedKey(type, keyOrDefaultCreator) {
+        if (typeof keyOrDefaultCreator === 'string') {
+            return keyOrDefaultCreator;
+        }
+        return this.getTypeName(type);
+    }
+    getKeyOrTypeName(keyOrType) {
+        if (typeof keyOrType === 'function') {
+            keyOrType = this.getTypeName(keyOrType);
+        }
+        return keyOrType;
+    }
+    checkTypeByName(key, type, oldType) {
+        if (this.getTypeName(type) !== oldType) {
+            throw new Error(`The type mismatches when use the key '${key}' in storage`);
+        }
+    }
+    checkTypeByInstanceOf(key, type, ins) {
+        this.checkTypeIsFunc(type);
+        if (!(ins instanceof type)) {
+            throw new Error(`The type mismatches when use the key '${key}' in storage`);
+        }
+    }
+    getTypeName(type) {
+        this.checkTypeIsFunc(type);
+        let name = type.name;
+        while (name === undefined) {
+            type = Object.getPrototypeOf(type);
+            if (!type) {
+                break;
+            }
+            name = type.name;
+        }
+        return name;
+    }
+    checkTypeIsFunc(type) {
+        if (typeof type !== 'function') {
+            throw new Error(StorageHepler.TYPE_INVALID);
+        }
+    }
+}
+StorageHepler.DEFAULT_VALUE_ERROR_MESSAGE = 'The default creator should be function when first connect';
+StorageHepler.DELETE_NOT_EXIST_KET_WARN_MESSAGE = 'The key to be deleted does not exist';
+StorageHepler.TYPE_INVALID = 'The type should be function when use storage';
+class AppStorageV2Impl extends StorageHepler {
+    constructor() {
+        super();
+        this.memorizedValues_ = new Map();
+    }
+    static instance() {
+        if (AppStorageV2Impl.instance_) {
+            return AppStorageV2Impl.instance_;
+        }
+        AppStorageV2Impl.instance_ = new AppStorageV2Impl();
+        return AppStorageV2Impl.instance_;
+    }
+    connect(type, keyOrDefaultCreator, defaultCreator) {
+        const key = this.getConnectedKey(type, keyOrDefaultCreator);
+        if (key === undefined) {
+            throw new Error(AppStorageV2Impl.TYPE_INVALID);
+        }
+        if (typeof keyOrDefaultCreator === 'function') {
+            defaultCreator = keyOrDefaultCreator;
+        }
+        if (!this.memorizedValues_.has(key)) {
+            if (typeof defaultCreator !== 'function') {
+                throw new Error(AppStorageV2Impl.DEFAULT_VALUE_ERROR_MESSAGE);
+            }
+            const defaultValue = defaultCreator();
+            this.checkTypeByInstanceOf(key, type, defaultValue);
+            this.memorizedValues_.set(key, defaultValue);
+            this.oldTypeValues_.set(key, this.getTypeName(type));
+            return defaultValue;
+        }
+        this.checkTypeByName(key, type, this.oldTypeValues_.get(key));
+        const existedValue = this.memorizedValues_.get(key);
+        return existedValue;
+    }
+    remove(keyOrType) {
+        const key = this.getKeyOrTypeName(keyOrType);
+        if (typeof key !== 'string') {
+            stateMgmtConsole.error(AppStorageV2Impl.TYPE_INVALID);
+            return;
+        }
+        this.removeFromMemory(key);
+    }
+    getMemoryKeys() {
+        return Array.from(this.memorizedValues_.keys());
+    }
+    removeFromMemory(key) {
+        const isDeleted = this.memorizedValues_.delete(key);
+        if (!isDeleted) {
+            stateMgmtConsole.warn(AppStorageV2Impl.DELETE_NOT_EXIST_KET_WARN_MESSAGE);
+        }
+        else {
+            this.oldTypeValues_.delete(key);
+        }
+    }
+}
+AppStorageV2Impl.instance_ = undefined;
+class PersistenceV2Impl extends StorageHepler {
+    constructor() {
+        super();
+        this.cb_ = undefined;
+        this.map_ = new Proxy(new Map(), ObserveV2.arraySetMapProxy);
+        this.keysArr_ = new Set();
+        this.idToKey_ = new Map();
+    }
+    static instance() {
+        if (PersistenceV2Impl.instance_) {
+            return PersistenceV2Impl.instance_;
+        }
+        PersistenceV2Impl.instance_ = new PersistenceV2Impl();
+        return PersistenceV2Impl.instance_;
+    }
+    static configureBackend(storage) {
+        PersistenceV2Impl.storage_ = storage;
+    }
+    connect(type, keyOrDefaultCreator, defaultCreator) {
+        if (typeof type !== 'function') {
+            throw new Error(PersistenceV2Impl.NOT_SUPPROT_TYPE);
+        }
+        const key = this.getRightKey(type, keyOrDefaultCreator);
+        if (key === undefined) {
+            return undefined;
+        }
+        if (typeof keyOrDefaultCreator === 'function') {
+            defaultCreator = keyOrDefaultCreator;
+        }
+        // In memory
+        if (this.map_.has(key)) {
+            const existedValue = this.map_.get(key);
+            this.checkTypeByName(key, type, this.oldTypeValues_.get(key));
+            return existedValue;
+        }
+        const observedValue = this.getConnectDefaultValue(key, type, defaultCreator);
+        if (!observedValue) {
+            return undefined;
+        }
+        const id = ++PersistenceV2Impl.nextPersistId_;
+        this.idToKey_.set(id, key);
+        // Not in memory, but in disk
+        if (PersistenceV2Impl.storage_.has(key)) {
+            return this.getValueFromDisk(key, id, observedValue, type);
+        }
+        // Neither in memory or in disk
+        return this.setValueToDisk(key, id, observedValue, type);
+    }
+    keys() {
+        try {
+            if (!this.keysArr_.size) {
+                this.keysArr_ = this.getKeysArrFromStorage();
+            }
+        }
+        catch (err) {
+            if (this.cb_ && typeof this.cb_ === 'function') {
+                this.cb_('', "unknown" /* Unknown */, `fail to get all persisted keys`);
+                return;
+            }
+            throw new Error(err);
+        }
+        return Array.from(this.keysArr_);
+    }
+    remove(keyOrType) {
+        this.checkTypeIsClassObject(keyOrType);
+        const key = this.getKeyOrTypeName(keyOrType);
+        if (typeof key !== 'string') {
+            throw new Error(PersistenceV2Impl.NOT_SUPPROT_TYPE);
+        }
+        this.disconnectValue(key);
+    }
+    save(keyOrType) {
+        this.checkTypeIsClassObject(keyOrType);
+        const key = this.getKeyOrTypeName(keyOrType);
+        if (typeof key !== 'string') {
+            throw new Error(PersistenceV2Impl.NOT_SUPPROT_TYPE);
+        }
+        const value = this.map_.get(key);
+        if (value) {
+            try {
+                PersistenceV2Impl.storage_.set(key, JSONCoder.stringify(value));
+            }
+            catch (err) {
+                this.errorHelper(key, "serialization" /* Serialization */, err);
+            }
+        }
+    }
+    notifyOnError(cb) {
+        this.cb_ = cb;
+    }
+    onChangeObserved(persistKeys) {
+        this.writeAllChangedToFile(persistKeys);
+    }
+    connectNewValue(key, newValue, typeName) {
+        this.map_.set(key, newValue);
+        this.oldTypeValues_.set(key, typeName);
+        this.storeKeyToPersistenceV2(key);
+    }
+    disconnectValue(key) {
+        this.map_.delete(key);
+        this.oldTypeValues_.delete(key);
+        this.removeFromPersistenceV2(key);
+    }
+    checkTypeIsClassObject(keyOrType) {
+        if ((typeof keyOrType !== 'string' && typeof keyOrType !== 'function') ||
+            [Array, Set, Map, Date, Boolean, Number, BigInt, String, Symbol].includes(keyOrType)) {
+            throw new Error(PersistenceV2Impl.NOT_SUPPROT_TYPE);
+        }
+    }
+    getRightKey(type, keyOrDefaultCreator) {
+        const key = this.getConnectedKey(type, keyOrDefaultCreator);
+        if (key === undefined) {
+            throw new Error(PersistenceV2Impl.NOT_SUPPROT_TYPE);
+        }
+        if (key === PersistenceV2Impl.KEYS_ARR_) {
+            this.errorHelper(key, "quota" /* Quota */, `The key '${key}' cannot be used`);
+            return undefined;
+        }
+        return key;
+    }
+    getConnectDefaultValue(key, type, defaultCreator) {
+        if (!PersistenceV2Impl.storage_) {
+            this.errorHelper(key, "unknown" /* Unknown */, `The storage is null`);
+            return undefined;
+        }
+        if (typeof defaultCreator !== 'function') {
+            throw new Error(PersistenceV2Impl.DEFAULT_VALUE_ERROR_MESSAGE);
+        }
+        const observedValue = defaultCreator();
+        this.checkTypeByInstanceOf(key, type, observedValue);
+        if (this.isNotClassObject(observedValue)) {
+            throw new Error(PersistenceV2Impl.NOT_SUPPROT_TYPE);
+        }
+        return observedValue;
+    }
+    getValueFromDisk(key, id, observedValue, type) {
+        let newObservedValue;
+        try {
+            const json = PersistenceV2Impl.storage_.get(key);
+            // Adding ref for persistence
+            ObserveV2.getObserve().startRecordDependencies(this, id);
+            newObservedValue = JSONCoder.parseTo(observedValue, json);
+            ObserveV2.getObserve().stopRecordDependencies();
+        }
+        catch (err) {
+            this.errorHelper(key, "serialization" /* Serialization */, err);
+        }
+        this.checkTypeByInstanceOf(key, type, newObservedValue);
+        this.connectNewValue(key, newObservedValue, this.getTypeName(type));
+        return newObservedValue;
+    }
+    setValueToDisk(key, id, observedValue, type) {
+        ObserveV2.getObserve().startRecordDependencies(this, id);
+        // Map is a proxy object. When it is connected for the first time, map.has is used to add dependencies,
+        // and map.set is used to trigger writing to disk.
+        const hasKey = this.map_.has(key);
+        ObserveV2.getObserve().stopRecordDependencies();
+        // Writing to persistence by ref
+        if (!hasKey) {
+            this.connectNewValue(key, observedValue, this.getTypeName(type));
+        }
+        return observedValue;
+    }
+    writeAllChangedToFile(persistKeys) {
+        for (let i = 0; i < persistKeys.length; ++i) {
+            const id = persistKeys[i];
+            const key = this.idToKey_.get(id);
+            try {
+                const hasKey = this.map_.has(key);
+                if (hasKey) {
+                    const value = this.map_.get(key);
+                    ObserveV2.getObserve().startRecordDependencies(this, id);
+                    const json = JSONCoder.stringify(value);
+                    ObserveV2.getObserve().stopRecordDependencies();
+                    if (this.isOverSizeLimit(json)) {
+                        throw new Error(`Cannot store the value of key '${key}'! The data size must be less than 8 KB`);
+                    }
+                    PersistenceV2Impl.storage_.set(key, json);
+                }
+            }
+            catch (err) {
+                if (this.cb_ && typeof this.cb_ === 'function') {
+                    this.cb_(key, "serialization" /* Serialization */, err);
+                    continue;
+                }
+                throw new Error(err);
+            }
+        }
+    }
+    isOverSizeLimit(json) {
+        let len = 0;
+        for (let i = 0; i < json.length; ++i) {
+            const c = json.charCodeAt(i);
+            // one-byte character
+            if ((c >= 0x0001 && c <= 0x007e) || (c >= 0xff60 && c <= 0xff9f)) {
+                ++len;
+            }
+            else {
+                len += 2;
+            }
+        }
+        return len / 1024 > 8;
+    }
+    isNotClassObject(value) {
+        return Array.isArray(value) || value instanceof Set || value instanceof Map || value instanceof Date ||
+            value instanceof Boolean || value instanceof Number || value instanceof BigInt || value instanceof String ||
+            value instanceof Symbol;
+    }
+    storeKeyToPersistenceV2(key) {
+        try {
+            if (this.keysArr_.has(key)) {
+                return;
+            }
+            // Initializing the keys arr in memory
+            if (!this.keysArr_.size) {
+                this.keysArr_ = this.getKeysArrFromStorage();
+            }
+            this.keysArr_.add(key);
+            // Updating the keys arr in disk
+            this.storeKeysArrToStorage(this.keysArr_);
+        }
+        catch (err) {
+            this.errorHelper(key, "unknown" /* Unknown */, `fail to store the key '${key}'`);
+        }
+    }
+    removeFromPersistenceV2(key) {
+        try {
+            if (!PersistenceV2Impl.storage_.has(key)) {
+                stateMgmtConsole.warn(PersistenceV2Impl.DELETE_NOT_EXIST_KET_WARN_MESSAGE);
+                return;
+            }
+            PersistenceV2Impl.storage_.delete(key);
+            // The first call to remove
+            if (!this.keysArr_.has(key)) {
+                this.keysArr_ = this.getKeysArrFromStorage();
+            }
+            this.keysArr_.delete(key);
+            this.storeKeysArrToStorage(this.keysArr_);
+        }
+        catch (err) {
+            this.errorHelper(key, "unknown" /* Unknown */, `fail to remove the key '${key}'`);
+        }
+    }
+    getKeysArrFromStorage() {
+        if (!PersistenceV2Impl.storage_.has(PersistenceV2Impl.KEYS_ARR_)) {
+            return this.keysArr_;
+        }
+        const jsonKeysArr = PersistenceV2Impl.storage_.get(PersistenceV2Impl.KEYS_ARR_);
+        return new Set(JSON.parse(jsonKeysArr));
+    }
+    storeKeysArrToStorage(keysArr) {
+        PersistenceV2Impl.storage_.set(PersistenceV2Impl.KEYS_ARR_, JSON.stringify(Array.from(keysArr)));
+    }
+    errorHelper(key, reason, message) {
+        if (this.cb_ && typeof this.cb_ === 'function') {
+            this.cb_(key, reason, message);
+            return;
+        }
+        if (!key) {
+            key = 'unknown';
+        }
+        throw new Error(`For '${key}' key: ` + message);
+    }
+}
+PersistenceV2Impl.MIN_PERSISTENCE_ID = 0x1010000000000;
+PersistenceV2Impl.nextPersistId_ = PersistenceV2Impl.MIN_PERSISTENCE_ID;
+PersistenceV2Impl.NOT_SUPPROT_TYPE = 'Not support! Can only use the class object in Persistence';
+PersistenceV2Impl.KEYS_ARR_ = '___keys_arr';
+PersistenceV2Impl.instance_ = undefined;
 /*
  * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -9479,6 +10445,7 @@ class __RepeatPU extends __RepeatV2 {
  * limitations under the License.
  */
 
+PersistenceV2Impl.configureBackend(new Storage());
 PersistentStorage.configureBackend(new Storage());
 Environment.configureBackend(new EnvironmentSetting());
 

@@ -106,6 +106,12 @@ PipelineContext* PipelineContext::GetCurrentContextPtrSafely()
     return AceType::RawPtr(context);
 }
 
+PipelineContext* PipelineContext::GetCurrentContextPtrSafelyWithCheck()
+{
+    auto context = MockPipelineContext::GetCurrent();
+    return AceType::RawPtr(context);
+}
+
 RefPtr<PipelineContext> PipelineContext::GetMainPipelineContext()
 {
     return MockPipelineContext::GetCurrent();
@@ -163,7 +169,8 @@ void PipelineContext::FlushTouchEvents() {}
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event) {}
 
-void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action) {}
+void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,
+    const RefPtr<NG::FrameNode>& node) {}
 
 void PipelineContext::OnIdle(int64_t deadline) {}
 
@@ -620,6 +627,16 @@ void PipelineContext::CheckAndLogLastConsumedAxisEventInfo(int32_t eventId, Axis
 
 void PipelineContext::PreLayout(uint64_t nanoTimestamp, uint32_t frameCount) {}
 
+void PipelineContext::AddFrameNodeChangeListener(const RefPtr<FrameNode>& node) {}
+
+void PipelineContext::RemoveFrameNodeChangeListener(const RefPtr<FrameNode>& node) {}
+
+void PipelineContext::AddChangedFrameNode(const RefPtr<FrameNode>& node) {}
+
+void PipelineContext::FlushNodeChangeFlag() {}
+
+void PipelineContext::CleanNodeChangeFlag() {}
+
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
@@ -640,6 +657,13 @@ bool PipelineBase::CloseImplicitAnimation()
 {
     return true;
 }
+
+bool PipelineBase::IsDestroyed()
+{
+    return false;
+}
+
+void PipelineBase::SetDestroyed() {}
 
 RefPtr<Frontend> PipelineBase::GetFrontend() const
 {
@@ -783,6 +807,10 @@ Dimension NG::PipelineContext::GetCustomTitleHeight()
 void PipelineBase::SetFontScale(float fontScale)
 {
     fontScale_ = fontScale;
+}
+
+void PipelineBase::SetUiDvsyncSwitch(bool on)
+{
 }
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

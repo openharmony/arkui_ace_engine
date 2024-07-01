@@ -90,54 +90,58 @@ class ArkThemeNativeHelper {
         WithTheme.sendThemeToNative(colorsArray, elmtId);
     }
 }
-globalThis.LazyForEach.create = function (paramViewId, paramParentView, paramDataSource, paramItemGenerator, paramKeyGenerator, paramUpdateChangedNode) {
-    const themeScope = ArkThemeScopeManager.getInstance().lastLocalThemeScope();
-    if (themeScope === undefined) {
-        if (paramUpdateChangedNode) {
-            LazyForEach.createInternal(paramViewId, paramParentView, paramDataSource, paramItemGenerator, paramKeyGenerator, paramUpdateChangedNode);
+
+if (globalThis.LazyForEach !== undefined) {
+    globalThis.LazyForEach.create = function (paramViewId, paramParentView, paramDataSource, paramItemGenerator, paramKeyGenerator, paramUpdateChangedNode) {
+        const themeScope = ArkThemeScopeManager.getInstance().lastLocalThemeScope();
+        if (themeScope === undefined) {
+            if (paramUpdateChangedNode) {
+                LazyForEach.createInternal(paramViewId, paramParentView, paramDataSource, paramItemGenerator, paramKeyGenerator, paramUpdateChangedNode);
+            }
+            else {
+                LazyForEach.createInternal(paramViewId, paramParentView, paramDataSource, paramItemGenerator, paramKeyGenerator);
+            }
+            return;
         }
-        else {
-            LazyForEach.createInternal(paramViewId, paramParentView, paramDataSource, paramItemGenerator, paramKeyGenerator);
-        }
-        return;
-    }
-    const itemGeneratorWrapper = _item => {
-        const item = _item;
-        {
+        const itemGeneratorWrapper = (...params) => {
             const result = ArkThemeScopeManager.getInstance().onDeepRenderScopeEnter(themeScope);
-            paramItemGenerator(item);
+            paramItemGenerator(...params);
             if (result === true) {
                 ArkThemeScopeManager.getInstance().onDeepRenderScopeExit();
             }
+        };
+        if (paramUpdateChangedNode) {
+            LazyForEach.createInternal(paramViewId, paramParentView, paramDataSource, itemGeneratorWrapper, paramKeyGenerator, paramUpdateChangedNode);
+        }
+        else {
+            LazyForEach.createInternal(paramViewId, paramParentView, paramDataSource, itemGeneratorWrapper, paramKeyGenerator);
         }
     };
-    if (paramUpdateChangedNode) {
-        LazyForEach.createInternal(paramViewId, paramParentView, paramDataSource, itemGeneratorWrapper, paramKeyGenerator, paramUpdateChangedNode);
-    }
-    else {
-        LazyForEach.createInternal(paramViewId, paramParentView, paramDataSource, itemGeneratorWrapper, paramKeyGenerator);
-    }
-};
-globalThis.ListItem.create = function (deepRenderFunction, isLazy, options) {
-    if (isLazy === false) {
-        ListItem.createInternal(deepRenderFunction, isLazy, options);
-        return;
-    }
-    const listItemElmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    const themeScope = ArkThemeScopeManager.getInstance().scopeForElmtId(listItemElmtId);
-    if (themeScope === undefined) {
-        ListItem.createInternal(deepRenderFunction, isLazy, options);
-        return;
-    }
-    const deepRenderFunctionWrapper = (elmtId, isInitialRender) => {
-        const result = ArkThemeScopeManager.getInstance().onDeepRenderScopeEnter(themeScope);
-        deepRenderFunction(elmtId, isInitialRender);
-        if (result === true) {
-            ArkThemeScopeManager.getInstance().onDeepRenderScopeExit();
+}
+
+if (globalThis.ListItem !== undefined) {
+    globalThis.ListItem.create = function (deepRenderFunction, isLazy, options) {
+        if (isLazy === false) {
+            ListItem.createInternal(deepRenderFunction, isLazy, options);
+            return;
         }
+        const listItemElmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+        const themeScope = ArkThemeScopeManager.getInstance().scopeForElmtId(listItemElmtId);
+        if (themeScope === undefined) {
+            ListItem.createInternal(deepRenderFunction, isLazy, options);
+            return;
+        }
+        const deepRenderFunctionWrapper = (elmtId, isInitialRender) => {
+            const result = ArkThemeScopeManager.getInstance().onDeepRenderScopeEnter(themeScope);
+            deepRenderFunction(elmtId, isInitialRender);
+            if (result === true) {
+                ArkThemeScopeManager.getInstance().onDeepRenderScopeExit();
+            }
+        };
+        ListItem.createInternal(deepRenderFunctionWrapper, isLazy, options);
     };
-    ListItem.createInternal(deepRenderFunctionWrapper, isLazy, options);
-};
+}
+
 class ArkSystemColors {
     constructor() {
         this.brand = ArkResourcesHelper.$r('sys.color.brand', 125830976);
@@ -342,22 +346,29 @@ class ArkSystemTheme {
         this.typography = new ArkSystemTypography();
     }
 }
-globalThis.WithTheme.create = function (themeOptions) {
-    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    const theme = ArkThemeScopeManager.getInstance().makeTheme(themeOptions === null || themeOptions === void 0 ? void 0 : themeOptions.theme);
-    const colorMode = themeOptions === null || themeOptions === void 0 ? void 0 : themeOptions.colorMode;
-    if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
-        ArkThemeScopeManager.getInstance().onEnterLocalColorMode(colorMode);
-    }
-    ArkThemeNativeHelper.sendThemeToNative(theme, elmtId);
-    if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
-        ArkThemeScopeManager.getInstance().onExitLocalColorMode();
-    }
-    ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, themeOptions, theme);
-};
-globalThis.WithTheme.pop = function () {
-    ArkThemeScopeManager.getInstance().onScopeExit();
-};
+if (globalThis.WithTheme !== undefined) {
+    globalThis.WithTheme.create = function (themeOptions) {
+        const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+        const theme = ArkThemeScopeManager.getInstance().makeTheme(themeOptions === null || themeOptions === void 0 ? void 0 : themeOptions.theme);
+        const colorMode = themeOptions === null || themeOptions === void 0 ? void 0 : themeOptions.colorMode;
+        if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
+            ArkThemeScopeManager.getInstance().onEnterLocalColorMode(colorMode);
+        }
+        ArkThemeNativeHelper.sendThemeToNative(theme, elmtId);
+        if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
+            ArkThemeScopeManager.getInstance().onExitLocalColorMode();
+        }
+        if (themeOptions) {
+            ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, themeOptions, theme);
+        } else {
+            ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, {}, theme);
+        }
+    };
+    globalThis.WithTheme.pop = function () {
+        ArkThemeScopeManager.getInstance().onScopeExit();
+    };
+}
+
 class ArkColorsImpl {
     constructor(colors = {}, baselineColors) {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35;
@@ -877,7 +888,7 @@ class ArkThemeScopeManager {
     }
     makeTheme(customTheme) {
         var _a, _b;
-        if (customTheme === undefined) {
+        if (!customTheme) {
             return (_a = this.defaultTheme) !== null && _a !== void 0 ? _a : ArkThemeScopeManager.SystemTheme;
         }
         return new ArkThemeImpl((_b = this.defaultTheme) !== null && _b !== void 0 ? _b : ArkThemeScopeManager.SystemTheme, customTheme.colors, customTheme.shapes, customTheme.typography);

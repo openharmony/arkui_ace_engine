@@ -355,6 +355,18 @@ public:
         return result;
     }
 
+    void SetRecycleNodeId(int32_t recycleNodeId)
+    {
+        recycleNodeId_ = recycleNodeId;
+    }
+
+    int32_t GetRecycleNodeId()
+    {
+        const auto result = recycleNodeId_;
+        recycleNodeId_ = ElementRegister::UndefinedElementId;
+        return result;
+    }
+
     /**
      * get the elmtId to which all get access should be accounted
      * ElementRegister::UndefinedElementId; means no get access recording enabled
@@ -452,6 +464,11 @@ public:
     {
         containerId_ = containerId;
     }
+
+    bool IsEmpty() const
+    {
+        return elementsStack_.empty();
+    }
 private:
     ViewStackProcessor();
 
@@ -480,6 +497,7 @@ private:
     int32_t containerId_ = OHOS::Ace::INSTANCE_ID_UNDEFINED;
     int32_t restoreInstanceId_ = OHOS::Ace::INSTANCE_ID_UNDEFINED;
 
+    ElementIdType recycleNodeId_ = ElementRegister::UndefinedElementId;
     // elmtId reserved for next component creation
     ElementIdType reservedNodeId_ = ElementRegister::UndefinedElementId;
 

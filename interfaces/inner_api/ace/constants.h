@@ -40,6 +40,14 @@ enum class ContentInfoType : int32_t {
     APP_RECOVERY = 2,                // app recovery
     RESOURCESCHEDULE_RECOVERY = 3,   // app is killed due to resource schedule
 };
+
+enum class UIContentType {
+    UNDEFINED,
+    NORMA,                     // app
+    FORM,                      // form
+    UI_EXTENSION,              // ui extension
+    SECURITY_UI_EXTENSION,     // security ui extension
+};
 } // namespace OHOS::Ace
 
 #endif // INTERFACES_INNER_API_ACE_CONSTANTS_H

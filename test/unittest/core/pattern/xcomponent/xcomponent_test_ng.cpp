@@ -165,7 +165,7 @@ RefPtr<FrameNode> XComponentTestNg::CreateXComponentNode(TestProperty& testPrope
     auto xcType = testProperty.xcType.value();
     auto libraryName = testProperty.libraryName.value();
     auto xcomponentController = std::make_shared<XComponentControllerNG>();
-    XComponentModelNG().Create(xcId, xcType, libraryName, xcomponentController);
+    XComponentModelNG().Create(testProperty.xcId, xcType, libraryName, xcomponentController);
 
     if (testProperty.soPath.has_value()) {
         XComponentModelNG().SetSoPath(testProperty.soPath.value());

@@ -549,18 +549,18 @@ std::map<std::size_t, std::string> CalendarPickerModelNG::GetDateNodeOrder(const
         order[num++] = (date.GetMonth() < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(date.GetMonth());
         order[num] = (date.GetDay() < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(date.GetDay());
     } else {
-        int32_t index = 0;
+        size_t index = 0;
         for (size_t i = 0; i < outOrder.size(); ++i) {
             if (outOrder[i] == "year") {
-                yearNodeIndex_ = i + index;
+                yearNodeIndex_ = static_cast<int32_t>(i + index);
                 order[i] = std::to_string(date.GetYear());
             }
             if (outOrder[i] == "month") {
-                monthNodeIndex_ = i + index;
+                monthNodeIndex_ = static_cast<int32_t>(i + index);
                 order[i] = (date.GetMonth() < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(date.GetMonth());
             }
             if (outOrder[i] == "day") {
-                dayNodeIndex_ = i + index;
+                dayNodeIndex_ = static_cast<int32_t>(i + index);
                 order[i] = (date.GetDay() < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(date.GetDay());
             }
             index++;

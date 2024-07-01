@@ -153,8 +153,11 @@ void TextPickerPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
-    SetLayoutDirection(layoutDirection);
+
+    auto layoutDirection = layoutProperty->GetLayoutDirection();
+    if (layoutDirection != TextDirection::AUTO) {
+        SetLayoutDirection(layoutDirection);
+    }
     OnColumnsBuilding();
     FlushOptions();
     CalculateHeight();
@@ -411,6 +414,7 @@ double TextPickerPattern::CalculateHeight()
         auto textPickerColumnPattern = it.second->GetPattern<TextPickerColumnPattern>();
         CHECK_NULL_RETURN(textPickerColumnPattern, height);
         textPickerColumnPattern->SetDefaultPickerItemHeight(height);
+        textPickerColumnPattern->ResetOptionPropertyHeight();
         textPickerColumnPattern->NeedResetOptionPropertyHeight(true);
     }
     return height;

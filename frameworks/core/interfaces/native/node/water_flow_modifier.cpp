@@ -457,7 +457,7 @@ void SetWaterFlowSectionOptions(ArkUINodeHandle node, ArkUI_Int32 start, ArkUIWa
         }
     }
 
-    waterFlowSections->ChangeDataNow(start, newSections.size(), newSections);
+    waterFlowSections->ReplaceFrom(start, newSections);
 }
 
 void ResetWaterFlowSectionOptions(ArkUINodeHandle node)
@@ -569,6 +569,52 @@ void ResetWaterFlowFlingSpeedLimit(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetFlingSpeedLimit(frameNode, -1.0);
 }
+
+ArkUINodeHandle GetScrollController(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto controller = WaterFlowModelNG::GetOrCreateController(frameNode);
+    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(controller));
+}
+
+void SetWaterFlowScroller(ArkUINodeHandle node, ArkUINodeHandle controller, ArkUINodeHandle proxy)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto scrollController = AceType::Claim(reinterpret_cast<ScrollControllerBase*>(controller));
+    CHECK_NULL_VOID(scrollController);
+    auto scrollProxy = AceType::Claim(reinterpret_cast<ScrollProxy*>(proxy));
+    CHECK_NULL_VOID(scrollProxy);
+    WaterFlowModelNG::SetScroller(frameNode, scrollController, scrollProxy);
+}
+
+void SetWaterFlowLayoutMode(ArkUINodeHandle node, ArkUI_Uint32 layoutMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowLayoutMode mode = WaterFlowLayoutMode::TOP_DOWN;
+    if (layoutMode >= static_cast<uint32_t>(WaterFlowLayoutMode::TOP_DOWN) &&
+        layoutMode <= static_cast<uint32_t>(WaterFlowLayoutMode::SLIDING_WINDOW)) {
+        mode = static_cast<WaterFlowLayoutMode>(layoutMode);
+    }
+    WaterFlowModelNG::SetLayoutMode(frameNode, mode);
+}
+
+void ResetWaterFlowLayoutMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowLayoutMode mode = WaterFlowLayoutMode::TOP_DOWN;
+    WaterFlowModelNG::SetLayoutMode(frameNode, mode);
+}
+
+void ResetWaterFlowSections(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::ResetSections(frameNode);
+}
 } // namespace
 namespace NodeModifier {
 const ArkUIWaterFlowModifier* GetWaterFlowModifier()
@@ -586,7 +632,8 @@ const ArkUIWaterFlowModifier* GetWaterFlowModifier()
         GetEdgeEffect, SetWaterFlowSectionOptions, ResetWaterFlowSectionOptions, GetWaterFlowSectionOptions,
         GetItemMinWidth, GetItemMaxWidth, GetItemMinHeight, GetItemMaxHeight, GetWaterFlowEnableScrollInteraction,
         GetWaterFlowFriction, SetScrollToIndex, SetWaterflowFooter, ResetWaterflowFooter, SetWaterFlowFlingSpeedLimit,
-        ResetWaterFlowFlingSpeedLimit, };
+        ResetWaterFlowFlingSpeedLimit, GetScrollController, SetWaterFlowScroller, SetWaterFlowLayoutMode,
+        ResetWaterFlowLayoutMode, ResetWaterFlowSections };
     return &modifier;
 }
 
@@ -730,6 +777,55 @@ void SetOnWaterFlowReachStart(ArkUINodeHandle node, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     WaterFlowModelNG::SetOnReachStart(frameNode, std::move(onReachStart));
+}
+
+void ResetOnWillScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetOnWillScroll(frameNode, nullptr);
+}
+void ResetOnWaterFlowReachEnd(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetOnReachEnd(frameNode, nullptr);
+}
+void ResetOnDidScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetOnDidScroll(frameNode, nullptr);
+}
+void ResetOnWaterFlowScrollStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetOnScrollStart(frameNode, nullptr);
+}
+void ResetOnWaterFlowScrollStop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetOnScrollStop(frameNode, nullptr);
+}
+void ResetOnWaterFlowScrollFrameBegin(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetOnScrollFrameBegin(frameNode, nullptr);
+}
+void ResetOnWaterFlowScrollIndex(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetOnScrollIndex(frameNode, nullptr);
+}
+void ResetOnWaterFlowReachStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetOnReachStart(frameNode, nullptr);
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

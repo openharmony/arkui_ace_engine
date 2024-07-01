@@ -47,7 +47,7 @@ void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     BorderRadiusProperty border;
-    border.SetRadius(theme->GetInnerBorderRadius());
+    border.SetRadius(theme->GetMenuBorderRadius());
     renderContext->UpdateBorderRadius(border);
 
     CHECK_NULL_VOID(customNode);
@@ -81,7 +81,7 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     BorderRadiusProperty border;
-    border.SetRadius(theme->GetInnerBorderRadius());
+    border.SetRadius(theme->GetMenuBorderRadius());
     renderContext->UpdateBorderRadius(border);
 
     auto leftRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),

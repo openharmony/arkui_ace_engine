@@ -68,8 +68,6 @@ public:
         return false;
     }
 
-    void OnPixelRoundFinish(const SizeF& pixelGridRoundSize) override;
-
     void SetAntiAlias(bool isEnabled);
 
     void FillRect(const Rect& rect);
@@ -94,8 +92,6 @@ public:
 
     void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth);
     void StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth);
-    double MeasureText(const std::string& text, const PaintState& state);
-    double MeasureTextHeight(const std::string& text, const PaintState& state);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
 
     void DrawImage(const Ace::CanvasImage& image, double width, double height);
@@ -165,7 +161,7 @@ public:
     void RestoreLayer();
     void EnableAnalyzer(bool enable);
     void SetImageAIOptions(void* options);
-    void StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed);
+    void StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed);
     void StopImageAnalyzer();
     void Reset();
 

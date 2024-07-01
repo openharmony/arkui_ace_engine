@@ -60,6 +60,46 @@ public:
         return isShowHoverImage_;
     }
 
+    void SetHoverImageAfterScaleWidth(float width)
+    {
+        hoverImageAfterScaleWidth_ = width;
+    }
+
+    float GetHoverImageAfterScaleWidth() const
+    {
+        return hoverImageAfterScaleWidth_;
+    }
+
+    void SetHoverImageAfterScaleHeight(float height)
+    {
+        hoverImageAfterScaleHeight_ = height;
+    }
+
+    float GetHoverImageAfterScaleHeight() const
+    {
+        return hoverImageAfterScaleHeight_;
+    }
+
+    void SetStackCenterOffset(const OffsetF& offset)
+    {
+        stackCenterOffset_ = offset;
+    }
+
+    OffsetF GetStackCenterOffset() const
+    {
+        return stackCenterOffset_;
+    }
+
+    void SetHoverImageAfterScaleOffset(const OffsetF& offset)
+    {
+        hoverImageAfterScaleOffset_ = offset;
+    }
+
+    OffsetF GetHoverImageAfterScaleOffset() const
+    {
+        return hoverImageAfterScaleOffset_;
+    }
+
     void SetCustomPreviewWidth(float width)
     {
         customPreviewWidth_ = width;
@@ -78,6 +118,56 @@ public:
     float GetCustomPreviewHeight() const
     {
         return customPreviewHeight_;
+    }
+
+    void SetCustomPreviewAfterScaleWidth(float width)
+    {
+        customPreviewAfterScaleWidth_ = width;
+    }
+
+    float GetCustomPreviewAfterScaleWidth() const
+    {
+        return customPreviewAfterScaleWidth_;
+    }
+
+    void SetCustomPreviewAfterScaleHeight(float height)
+    {
+        customPreviewAfterScaleHeight_ = height;
+    }
+
+    float GetCustomPreviewAfterScaleHeight() const
+    {
+        return customPreviewAfterScaleHeight_;
+    }
+
+    void SetIsWidthDistLarger(bool widthDistLarger)
+    {
+        isWidthDistLarge_ = widthDistLarger;
+    }
+
+    bool GetIsWidthDistLarger() const
+    {
+        return isWidthDistLarge_;
+    }
+
+    void SetHoverImageScaleFrom(float scaleFrom)
+    {
+        hoverImageScaleFrom_ = scaleFrom;
+    }
+
+    float GetHoverImageScaleFrom() const
+    {
+        return hoverImageScaleFrom_;
+    }
+
+    void SetHoverImageScaleTo(float scaleTo)
+    {
+        hoverImageScaleTo_ = scaleTo;
+    }
+
+    float GetHoverImageScaleTo() const
+    {
+        return hoverImageScaleTo_;
     }
 
     void SetCustomPreviewScaleFrom(float scaleFrom)
@@ -144,8 +234,17 @@ private:
     bool hasPreviewTransitionEffect_ = false;
 
     bool isShowHoverImage_ = false;
+    bool isWidthDistLarge_ = false;
+    OffsetF stackCenterOffset_;
+    OffsetF hoverImageAfterScaleOffset_;
+    float hoverImageAfterScaleWidth_ = 0.0f;
+    float hoverImageAfterScaleHeight_ = 0.0f;
     float customPreviewWidth_ = 0.0f;
     float customPreviewHeight_ = 0.0f;
+    float customPreviewAfterScaleWidth_ = 0.0f;
+    float customPreviewAfterScaleHeight_ = 0.0f;
+    float hoverImageScaleFrom_ = 1.0f;
+    float hoverImageScaleTo_ = 1.0f;
     float customPreviewScaleFrom_ = 1.0f;
     float customPreviewScaleTo_ = 1.0f;
     float hoverImageDisAppearScale_ = 1.0f;

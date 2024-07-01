@@ -28,6 +28,9 @@ const char TEXT[] = "text";
 const char HINT[] = "hint";
 const char SELECTION_START[] = "selectionStart";
 const char SELECTION_END[] = "selectionEnd";
+const char IS_DELETE[] = "isDelete";
+const char APPEND_TEXT[] = "appendText";
+
 
 } // namespace
 
@@ -35,6 +38,8 @@ void TextEditingValue::ParseFromJson(const JsonValue& json)
 {
     text = json.GetString(TEXT);
     hint = json.GetString(HINT);
+    isDelete = json.GetBool(IS_DELETE);
+    appendText = json.GetString(APPEND_TEXT);
     selection.baseOffset = json.GetInt(SELECTION_START, -1);
     selection.extentOffset = json.GetInt(SELECTION_END, -1);
 }

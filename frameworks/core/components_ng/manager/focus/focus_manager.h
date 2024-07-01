@@ -38,9 +38,11 @@ class FocusManager : public virtual AceType {
 public:
     class FocusGuard {
     public:
-        explicit FocusGuard(const RefPtr<FocusHub>& focushub);
+        explicit FocusGuard(const RefPtr<FocusHub>& focushub, SwitchingStartReason reason);
         FocusGuard() = delete;
         ~FocusGuard();
+        void CreateFocusGuard(const RefPtr<FocusHub>& focushub, const RefPtr<FocusManager>& focusManager,
+            SwitchingStartReason reason);
     private:
         RefPtr<FocusManager> focusMng_;
     };
@@ -112,12 +114,12 @@ public:
     void RemoveScopePriorityNode(const std::string& focusScopeId, const RefPtr<FocusHub>& priorFocusHub);
     std::optional<std::list<WeakPtr<FocusHub>>*> GetFocusScopePriorityList(const std::string& focusScopeId);
 
-    void UpdateCurrentFocus(const RefPtr<FocusHub>& current);
+    void UpdateCurrentFocus(const RefPtr<FocusHub>& current, SwitchingUpdateReason reason);
     RefPtr<FocusHub> GetCurrentFocus();
     int32_t AddFocusListener(FocusChangeCallback&& callback);
     void RemoveFocusListener(int32_t id);
-    void FocusSwitchingStart(const RefPtr<FocusHub>& focusHub);
-    void FocusSwitchingEnd();
+    void FocusSwitchingStart(const RefPtr<FocusHub>& focusHub, SwitchingStartReason reason);
+    void FocusSwitchingEnd(SwitchingEndReason reason = SwitchingEndReason::FOCUS_GUARD_DESTROY);
     void WindowFocusMoveStart();
     void WindowFocusMoveEnd();
 
@@ -142,6 +144,10 @@ private:
     std::optional<bool> isSwitchingFocus_;
     bool isSwitchingWindow_ = false;
     RefPtr<FocusHub> switchingFocus_;
+
+    std::optional<SwitchingStartReason> startReason;
+    std::optional<SwitchingEndReason> endReason;
+    std::optional<SwitchingUpdateReason> updateReason;
 
     ACE_DISALLOW_COPY_AND_MOVE(FocusManager);
 };

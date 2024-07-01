@@ -41,21 +41,31 @@ public:
     void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, SessionType sessionType) override;
     // for dynamic component
     void Create() override;
+    void Create(const UIExtensionConfig& config) override;
     void InitializeDynamicComponent(const RefPtr<FrameNode>& frameNode, const std::string& hapPath,
         const std::string& abcPath, const std::string& entryPoint, void* runtime) override;
     void InitializeIsolatedComponent(const RefPtr<NG::FrameNode>& frameNode,
         const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime) override;
-    void SetOnSizeChanged(std::function<void(int32_t, int32_t)>&& onSizeChanged) override;
+    void SetAdaptiveWidth(bool state) override;
+    void SetAdaptiveHeight(bool state) override;
 
     void SetOnRemoteReady(std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady) override;
     void SetOnRelease(std::function<void(int32_t)>&& onRelease) override;
     void SetOnResult(std::function<void(int32_t, const AAFwk::Want&)>&& onResult) override;
-    void SetOnTerminated(std::function<void(int32_t, const RefPtr<WantWrap>&)>&& onTerminated) override;
-    void SetOnReceive(std::function<void(const AAFwk::WantParams&)>&& onReceive) override;
+    void SetOnTerminated(std::function<void(int32_t, const RefPtr<WantWrap>&)>&& onTerminated,
+        NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY) override;
+    void SetOnReceive(std::function<void(const AAFwk::WantParams&)>&& onReceive,
+        NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY) override;
+    void SetSecurityOnRemoteReady(
+        std::function<void(const RefPtr<NG::SecurityUIExtensionProxy>&)>&& onRemoteReady) override;
     void SetOnError(
-        std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError) override;
+        std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError,
+        NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY) override;
     void SetPlatformOnError(std::function<void(
         int32_t code, const std::string& name, const std::string& message)>&& onError) override;
+
+private:
+    void CreateSecurityUIExtension(const UIExtensionConfig& config);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_MODEL_NG_H

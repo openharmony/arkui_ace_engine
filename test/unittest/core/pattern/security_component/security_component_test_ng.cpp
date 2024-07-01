@@ -1706,6 +1706,20 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest004, TestSize
 }
 
 /**
+ * @tc.name: SecurityComponentHandlerTest005
+ * @tc.desc: Test security component handler
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest005, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+
+    ASSERT_EQ(SecurityComponentHandler::CheckComponentCoveredStatus(frameNode->GetId()), false);
+}
+
+/**
  * @tc.name: SecurityComponentCheckParentNodesEffectTest001
  * @tc.desc: Test security component CheckParentNodesEffect
  * @tc.type: FUNC

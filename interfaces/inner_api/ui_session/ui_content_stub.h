@@ -28,9 +28,17 @@ public:
         uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 
 private:
-    virtual int32_t OnGetInspectorTreeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option) = 0;
-    virtual int32_t OnReportUnfocusEventInner(MessageParcel& data, MessageParcel& reply, MessageOption& option) = 0;
-    virtual int32_t RegisterRemoteObjectInner(MessageParcel& data, MessageParcel& reply, MessageOption& option) = 0;
+    int32_t GetInspectorTreeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t ConnectInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t RegisterClickEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t RegisterRouterChangeEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t RegisterSearchEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t RegisterComponentChangeEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t UnregisterClickEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t UnregisterSearchEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t UnregisterRouterChangeEventCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t UnregisterComponentChangeEventCallbackInner(
+        MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_STUB_H

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/inspector.h"
 
+#include <unistd.h>
 #include <unordered_set>
 
 #include "base/memory/ace_type.h"
@@ -343,6 +344,9 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
     auto jsonObject = JsonUtil::Create(true);
     parent->ToJsonValue(jsonObject, filter);
     jsonNode->PutRef(INSPECTOR_ATTRS, std::move(jsonObject));
+    std::string jsonNodeStr = jsonNode->ToString();
+    ConvertIllegalStr(jsonNodeStr);
+    auto jsonNodeNew = JsonUtil::ParseJsonString(jsonNodeStr);
     std::vector<RefPtr<NG::UINode>> children;
     for (const auto& item : parent->GetChildren()) {
         GetFrameNodeChildren(item, children, pageId, isLayoutInspector);
@@ -359,13 +363,10 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
             GetInspectorChildren(uiNode, jsonChildrenArray, pageId, isActive, filter, depth - 1, isLayoutInspector);
         }
         if (jsonChildrenArray->GetArraySize()) {
-            jsonNode->PutRef(INSPECTOR_CHILDREN, std::move(jsonChildrenArray));
+            jsonNodeNew->PutRef(INSPECTOR_CHILDREN, std::move(jsonChildrenArray));
         }
     }
-    std::string jsonChildStr = jsonNode->ToString();
-    ConvertIllegalStr(jsonChildStr);
-    auto jsonChild = JsonUtil::ParseJsonString(jsonChildStr);
-    jsonNodeArray->PutRef(std::move(jsonChild));
+    jsonNodeArray->PutRef(std::move(jsonNodeNew));
 }
 #endif
 
@@ -410,6 +411,12 @@ std::string GetInspectorInfo(std::vector<RefPtr<NG::UINode>> children, int32_t p
         auto jsonTree = JsonUtil::Create(true);
         jsonTree->Put("type", "root");
         jsonTree->PutRef("content", std::move(jsonRoot));
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        if (pipeline) {
+            jsonTree->Put("VsyncID", (int32_t)pipeline->GetFrameCount());
+            jsonTree->Put("ProcessID", getpid());
+            jsonTree->Put("WindowID", (int32_t)pipeline->GetWindowId());
+        }
         return jsonTree->ToString();
     }
 
@@ -606,10 +613,9 @@ std::string Inspector::GetInspectorOfNode(RefPtr<NG::UINode> node)
     CHECK_NULL_RETURN(node, jsonRoot->ToString());
     auto pageId = context->GetStageManager()->GetLastPage()->GetPageId();
     auto jsonNodeArray = JsonUtil::CreateArray(true);
-    GetInspectorChildren(node, jsonNodeArray, pageId, true);
+    GetInspectorChildren(node, jsonNodeArray, pageId, true, InspectorFilter(), 0);
     if (jsonNodeArray->GetArraySize()) {
         jsonRoot = jsonNodeArray->GetArrayItem(0);
-        jsonRoot->Delete(INSPECTOR_CHILDREN);
         GetContextInfo(context, jsonRoot);
     }
 

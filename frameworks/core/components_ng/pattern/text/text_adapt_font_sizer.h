@@ -54,10 +54,13 @@ public:
     static SizeF GetMaxMeasureSize(const LayoutConstraintF& contentConstraint);
 
 protected:
-    bool DidExceedMaxLines(const SizeF& maxSize);
+    virtual bool DidExceedMaxLines(const SizeF& maxSize);
+    void SetAdaptFontSizeLineHeight(const Dimension& lineHeight);
+    bool IsAdaptFontSizeExceedLineHeight(const RefPtr<Paragraph>& paragraph);
 
 private:
     virtual bool IsAdaptExceedLimit(const SizeF& maxSize);
+    double lineHeight_ = 0.0;
 };
 } // namespace OHOS::Ace::NG
 

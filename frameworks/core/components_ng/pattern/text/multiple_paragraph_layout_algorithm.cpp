@@ -35,7 +35,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
-constexpr double IMAGE_SPAN_BASELINE_OFFSET = 1.25;
 float GetContentOffsetY(LayoutWrapper* layoutWrapper)
 {
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
@@ -128,13 +127,16 @@ void MultipleParagraphLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             ++index;
             continue;
         }
-        if (index >= placeholderIndex.size() ||
-            (index >= rectsForPlaceholders.size() && child->GetHostTag() != V2::PLACEHOLDER_SPAN_ETS_TAG)) {
+        if (index >= placeholderIndex.size() || index < 0) {
+            child->SetActive(false);
+            continue;
+        }
+        auto indexTemp = placeholderIndex.at(index);
+        if (indexTemp >= static_cast<int32_t>(rectsForPlaceholders.size()) || indexTemp < 0) {
             child->SetActive(false);
             continue;
         }
         child->SetActive(true);
-        auto indexTemp = placeholderIndex.at(index);
         auto rect = rectsForPlaceholders.at(indexTemp) - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
         auto geometryNode = child->GetGeometryNode();
         if (!geometryNode) {
@@ -513,7 +515,7 @@ void MultipleParagraphLayoutAlgorithm::AddSymbolSpanToParagraph(const RefPtr<Spa
 void MultipleParagraphLayoutAlgorithm::AddTextSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
     const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph)
 {
-    spanTextLength += StringUtils::ToWstring(child->content).length();
+    spanTextLength += static_cast<int32_t>(StringUtils::ToWstring(child->content).length());
     child->position = spanTextLength;
     child->UpdateParagraph(frameNode, paragraph, isSpanStringMode_);
 }
@@ -545,7 +547,7 @@ void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>
         imageSpanItem->placeholderIndex =
             imageSpanItem->UpdateParagraph(parentNode, paragraph, isSpanStringMode_, placeholderStyle);
     } else {
-        placeholderStyle.baselineOffset = (baselineOffset - Dimension(IMAGE_SPAN_BASELINE_OFFSET)).ConvertToPx();
+        placeholderStyle.baselineOffset = baselineOffset.ConvertToPx();
         imageSpanItem->placeholderIndex =
             imageSpanItem->UpdateParagraph(parentNode, paragraph, isSpanStringMode_, placeholderStyle);
     }

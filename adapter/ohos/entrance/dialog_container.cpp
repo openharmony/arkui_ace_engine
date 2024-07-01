@@ -56,7 +56,7 @@ void DialogContainer::InitializeTouchEventCallback()
                                     const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
-            [context, event, markProcess, id]() {
+            [context, event, markProcess]() {
                 context->OnTouchEvent(event);
                 context->NotifyDispatchTouchEventDismiss(event);
                 CHECK_NULL_VOID(markProcess);
@@ -75,7 +75,7 @@ void DialogContainer::InitializeMouseEventCallback()
                                     const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
-            [context, event, markProcess, id]() {
+            [context, event, markProcess]() {
                 context->OnMouseEvent(event);
                 CHECK_NULL_VOID(markProcess);
                 markProcess();
@@ -93,7 +93,7 @@ void DialogContainer::InitializeAxisEventCallback()
                                    const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
-            [context, event, markProcess, id]() {
+            [context, event, markProcess]() {
                 context->OnAxisEvent(event);
                 CHECK_NULL_VOID(markProcess);
                 markProcess();
@@ -191,10 +191,11 @@ void DialogContainer::InitializeDragEventCallback()
 {
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
     auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](
-                                    const PointerEvent& pointerEvent, const DragEventAction& action) {
+                                    const PointerEvent& pointerEvent, const DragEventAction& action,
+                                    const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
-            [context, pointerEvent, action]() { context->OnDragEvent(pointerEvent, action); },
+            [context, pointerEvent, action, node]() { context->OnDragEvent(pointerEvent, action, node); },
             TaskExecutor::TaskType::UI, "ArkUIDialogDragEvent");
     };
     aceView_->RegisterDragEventCallback(dragEventCallback);

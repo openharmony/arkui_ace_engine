@@ -192,7 +192,8 @@ public:
     virtual void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount);
 
     // Called by viewr
-    virtual void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action) = 0;
+    virtual void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,
+        const RefPtr<NG::FrameNode>& node = nullptr) = 0;
 
     // Called by view when idle event.
     virtual void OnIdle(int64_t deadline) = 0;
@@ -233,6 +234,7 @@ public:
 
     virtual void OnSurfaceDensityChanged(double density)
     {
+        std::lock_guard lock(densityChangeMutex_);
         for (auto&& [id, callback] : densityChangedCallbacks_) {
             if (callback) {
                 callback(density);
@@ -243,6 +245,7 @@ public:
     int32_t RegisterDensityChangedCallback(std::function<void(double)>&& callback)
     {
         if (callback) {
+            std::lock_guard lock(densityChangeMutex_);
             densityChangedCallbacks_.emplace(++densityChangeCallbackId_, std::move(callback));
             return densityChangeCallbackId_;
         }
@@ -251,6 +254,7 @@ public:
 
     void UnregisterDensityChangedCallback(int32_t callbackId)
     {
+        std::lock_guard lock(densityChangeMutex_);
         densityChangedCallbacks_.erase(callbackId);
     }
 
@@ -1107,6 +1111,16 @@ public:
         return halfLeading_;
     }
 
+    void SetHasPreviewTextOption(bool hasOption)
+    {
+        hasPreviewTextOption_ = hasOption;
+    }
+
+    bool GetHasPreviewTextOption() const
+    {
+        return hasPreviewTextOption_;
+    }
+
     void SetSupportPreviewText(bool changeSupported)
     {
         hasSupportedPreviewText_ = !changeSupported;
@@ -1241,7 +1255,11 @@ public:
 
     virtual bool IsDensityChanged() const = 0;
 
+    void SetUiDvsyncSwitch(bool on);
     virtual bool GetOnShow() const = 0;
+    bool IsDestroyed();
+
+    void SetDestroyed();
 
     virtual void UpdateLastVsyncEndTimestamp(uint64_t lastVsyncEndTimestamp) {}
 
@@ -1403,17 +1421,20 @@ private:
     int64_t formAnimationStartTime_ = 0;
     bool isFormAnimation_ = false;
     bool halfLeading_ = false;
-    bool hasSupportedPreviewText_ = true;
+    bool hasSupportedPreviewText_ = false;
+    bool hasPreviewTextOption_ = false;
     bool useCutout_ = false;
     uint64_t vsyncTime_ = 0;
 
     bool delaySurfaceChange_ = false;
+    bool destroyed_ = false;
     int32_t width_ = -1;
     int32_t height_ = -1;
     WindowSizeChangeReason type_ = WindowSizeChangeReason::UNDEFINED;
     std::shared_ptr<Rosen::RSTransaction> rsTransaction_;
     uint32_t frameCount_ = 0;
 
+    std::mutex densityChangeMutex_;
     int32_t densityChangeCallbackId_ = 0;
     std::unordered_map<int32_t, std::function<void(double)>> densityChangedCallbacks_;
 

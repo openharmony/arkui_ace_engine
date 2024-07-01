@@ -1374,26 +1374,29 @@ void ViewAbstract::SetVisibility(VisibleType visible)
     }
 }
 
-void ViewAbstract::SetGeometryTransition(const std::string& id, bool followWithoutTransition)
+void ViewAbstract::SetGeometryTransition(const std::string& id,
+    bool followWithoutTransition, bool doRegisterSharedTransition)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     if (layoutProperty) {
-        layoutProperty->UpdateGeometryTransition(id, followWithoutTransition);
+        layoutProperty->UpdateGeometryTransition(id, followWithoutTransition, doRegisterSharedTransition);
     }
 }
 
-void ViewAbstract::SetGeometryTransition(FrameNode *frameNode, const std::string& id, bool followWithoutTransition)
+void ViewAbstract::SetGeometryTransition(FrameNode *frameNode, const std::string& id,
+    bool followWithoutTransition, bool doRegisterSharedTransition)
 {
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     if (layoutProperty) {
-        layoutProperty->UpdateGeometryTransition(id, followWithoutTransition);
+        layoutProperty->UpdateGeometryTransition(id, followWithoutTransition, doRegisterSharedTransition);
     }
 }
 
-const std::string ViewAbstract::GetGeometryTransition(FrameNode* frameNode, bool* followWithoutTransition)
+const std::string ViewAbstract::GetGeometryTransition(FrameNode* frameNode,
+    bool* followWithoutTransition, bool* doRegisterSharedTransition)
 {
     CHECK_NULL_RETURN(frameNode, "");
     auto layoutProperty = frameNode->GetLayoutProperty();
@@ -1401,6 +1404,7 @@ const std::string ViewAbstract::GetGeometryTransition(FrameNode* frameNode, bool
         auto geometryTransition = layoutProperty->GetGeometryTransition();
         if (geometryTransition) {
             *followWithoutTransition = geometryTransition->GetFollowWithoutTransition();
+            *doRegisterSharedTransition = geometryTransition->GetDoRegisterSharedTransition();
             return geometryTransition->GetId();
         }
     }
@@ -2045,12 +2049,19 @@ void ViewAbstract::CleanTransition()
     }
 }
 
-void ViewAbstract::SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect)
+void ViewAbstract::SetChainedTransition(
+    const RefPtr<NG::ChainedTransitionEffect>& effect, NG::TransitionFinishCallback&& finishCallback)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(ChainedTransition, effect);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    const auto& target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateChainedTransition(effect);
+        target->SetTransitionUserCallback(std::move(finishCallback));
+    }
 }
 
 void ViewAbstract::SetClipShape(const RefPtr<BasicShape>& basicShape)
@@ -2366,8 +2377,6 @@ void ViewAbstract::SetOverlayBuilder(std::function<void()>&& buildFunc,
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     if (buildFunc) {
         auto buildNodeFunc = [func = std::move(buildFunc)]() -> RefPtr<UINode> {
             ScopedViewStackProcessor builderViewStackProcessor;
@@ -2377,25 +2386,48 @@ void ViewAbstract::SetOverlayBuilder(std::function<void()>&& buildFunc,
         };
         auto overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
         CHECK_NULL_VOID(overlayNode);
-        frameNode->SetOverlayNode(overlayNode);
-        overlayNode->SetParent(AceType::WeakClaim(frameNode));
-        overlayNode->SetActive(true);
-        overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
-        CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->SetIsOverlayNode(true);
-        layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        layoutProperty->UpdateAlignment(align.value_or(Alignment::TOP_LEFT));
-        layoutProperty->SetOverlayOffset(offsetX, offsetY);
-        auto renderContext = overlayNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->UpdateZIndex(INT32_MAX);
-        auto focusHub = overlayNode->GetOrCreateFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->SetFocusable(false);
+        AddOverlayToFrameNode(overlayNode, align, offsetX, offsetY);
     } else {
-        frameNode->SetOverlayNode(nullptr);
+        AddOverlayToFrameNode(nullptr, align, offsetX, offsetY);
     }
+}
+
+void ViewAbstract::SetOverlayComponentContent(const RefPtr<NG::FrameNode>& contentNode,
+    const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+    const std::optional<Dimension>& offsetY)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    AddOverlayToFrameNode(contentNode, align, offsetX, offsetY);
+}
+
+void ViewAbstract::AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,
+    const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+    const std::optional<Dimension>& offsetY)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (overlayNode == nullptr) {
+        frameNode->SetOverlayNode(nullptr);
+        return;
+    }
+    frameNode->SetOverlayNode(overlayNode);
+    overlayNode->SetParent(AceType::WeakClaim(frameNode));
+    overlayNode->SetActive(true);
+    overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->SetIsOverlayNode(true);
+    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    layoutProperty->UpdateAlignment(align.value_or(Alignment::TOP_LEFT));
+    layoutProperty->SetOverlayOffset(offsetX, offsetY);
+    auto renderContext = overlayNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateZIndex(INT32_MAX);
+    auto focusHub = overlayNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(false);
 }
 
 void ViewAbstract::SetMotionPath(const MotionPathOption& motionPath)
@@ -2599,6 +2631,14 @@ void ViewAbstract::SetRenderFit(RenderFit renderFit)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(RenderFit, renderFit);
+}
+
+void ViewAbstract::SetAttractionEffect(const AttractionEffect& effect)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(AttractionEffect, effect);
 }
 
 void ViewAbstract::SetBorderRadius(FrameNode *frameNode, const BorderRadiusProperty& value)
@@ -3369,9 +3409,15 @@ void ViewAbstract::CleanTransition(FrameNode* frameNode)
     }
 }
 
-void ViewAbstract::SetChainedTransition(FrameNode* frameNode, const RefPtr<NG::ChainedTransitionEffect>& effect)
+void ViewAbstract::SetChainedTransition(FrameNode* frameNode, const RefPtr<NG::ChainedTransitionEffect>& effect,
+    NG::TransitionFinishCallback&& finishCallback)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ChainedTransition, effect, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    const auto& target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateChainedTransition(effect);
+        target->SetTransitionUserCallback(std::move(finishCallback));
+    }
 }
 
 void ViewAbstract::SetEnabled(FrameNode* frameNode, bool enabled)
@@ -4614,5 +4660,60 @@ void ViewAbstract::SetFocusScopePriority(FrameNode* frameNode, const std::string
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusScopePriority(focusScopeId, focusPriority);
+}
+
+uint32_t ViewAbstract::GetSafeAreaExpandType(FrameNode* frameNode)
+{
+    uint32_t value = SAFE_AREA_TYPE_ALL;
+    CHECK_NULL_RETURN(frameNode, value);
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& SafeAreaExpandOpts = layoutProperty->GetSafeAreaExpandOpts();
+    CHECK_NULL_RETURN(SafeAreaExpandOpts, value);
+    if (SafeAreaExpandOpts->type > 0) {
+        value = SafeAreaExpandOpts->type;
+    }
+    return value;
+}
+
+uint32_t ViewAbstract::GetSafeAreaExpandEdges(FrameNode* frameNode)
+{
+    uint32_t value = SAFE_AREA_EDGE_ALL;
+    CHECK_NULL_RETURN(frameNode, value);
+    const auto& layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    const auto& SafeAreaExpandOpts = layoutProperty->GetSafeAreaExpandOpts();
+    CHECK_NULL_RETURN(SafeAreaExpandOpts, value);
+    if (SafeAreaExpandOpts->edges > 0) {
+        value = SafeAreaExpandOpts->edges;
+    }
+    return value;
+}
+
+void ViewAbstract::SetPositionLocalizedEdges(bool needLocalized)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedPositionLocalizedEdges(needLocalized);
+}
+
+void ViewAbstract::SetLocalizedMarkAnchor(bool needLocalized)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdatNeedMarkAnchorPosition(needLocalized);
+}
+
+void ViewAbstract::SetOffsetLocalizedEdges(bool needLocalized)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedOffsetLocalizedEdges(needLocalized);
 }
 } // namespace OHOS::Ace::NG

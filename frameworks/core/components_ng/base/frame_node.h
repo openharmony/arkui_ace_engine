@@ -347,12 +347,6 @@ public:
     HitTestResult AxisTest(
         const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult) override;
 
-    void CheckSecurityComponentStatus(std::vector<RectF>& rect);
-
-    bool HaveSecurityComponent();
-
-    bool IsSecurityComponent();
-
     void AnimateHoverEffect(bool isHovered) const;
 
     bool IsAtomicNode() const override;
@@ -488,7 +482,6 @@ public:
     void RemoveLastHotZoneRect() const;
 
     virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t sourceType);
-    bool CheckRectIntersect(const RectF& dest, std::vector<RectF>& origin);
 
     bool IsLayoutDirtyMarked() const
     {
@@ -541,6 +534,11 @@ public:
     {
         previewOption_ = previewOption;
         previewOption_.onApply = std::move(previewOption.onApply);
+    }
+
+    void SetOptionsAfterApplied(const OptionsAfterApplied& optionsAfterApplied)
+    {
+        previewOption_.options = optionsAfterApplied;
     }
 
     DragPreviewOption GetDragPreviewOption() const
@@ -716,8 +714,10 @@ public:
     void RemoveChildInRenderTree(uint32_t index) override;
     void RemoveAllChildInRenderTree() override;
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
-    void SetActiveChildRange(int32_t start, int32_t end) override;
-    void DoSetActiveChildRange(int32_t start, int32_t end) override;
+    void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0) override;
+    void SetActiveChildRange(const std::optional<ActiveChildSets>& activeChildSets,
+        const std::optional<ActiveChildRange>& activeChildRange = std::nullopt) override;
+    void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
     void RecycleItemsByIndex(int32_t start, int32_t end) override;
     const std::string& GetHostTag() const override
     {
@@ -727,6 +727,7 @@ public:
     void UpdateFocusState();
     bool SelfOrParentExpansive();
     bool SelfExpansive();
+    bool SelfExpansiveToKeyboard();
     bool ParentExpansive();
 
     bool IsActive() const override
@@ -735,11 +736,6 @@ public:
     }
 
     void SetActive(bool active = true) override;
-
-    bool GetBypass() const
-    {
-        return bypass_;
-    }
 
     bool IsOutOfLayout() const override
     {
@@ -825,7 +821,7 @@ public:
 
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
-    void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "");
+    void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false);
 
     int32_t GetUiExtensionId();
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId);
@@ -904,6 +900,7 @@ public:
     void NotifyTransformInfoChanged()
     {
         isLocalRevertMatrixAvailable_ = false;
+        AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_TRANSFORM_CHANGE);
     }
 
     void AddPredictLayoutNode(const RefPtr<FrameNode>& node)
@@ -945,6 +942,23 @@ public:
     void MarkAndCheckNewOpIncNode();
     ChildrenListWithGuard GetAllChildren();
     OPINC_TYPE_E FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth);
+    void GetInspectorValue() override;
+
+    FrameNodeChangeInfoFlag GetChangeInfoFlag()
+    {
+        return changeInfoFlag_;
+    }
+
+    void ClearChangeInfoFlag()
+    {
+        changeInfoFlag_ = FRAME_NODE_CHANGE_INFO_NONE;
+    }
+
+    void OnSyncGeometryFrameFinish(const RectF& paintRect);
+    void AddFrameNodeChangeInfoFlag(FrameNodeChangeInfoFlag changeFlag = FRAME_NODE_CHANGE_INFO_NONE);
+    void RegisterNodeChangeListener();
+    void UnregisterNodeChangeListener();
+    void ProcessFrameNodeChangeFlag();
 
 protected:
     void DumpInfo() override;
@@ -1092,7 +1106,6 @@ private:
     bool exclusiveEventForChild_ = false;
     bool isActive_ = false;
     bool isResponseRegion_ = false;
-    bool bypass_ = false;
     bool isLayoutComplete_ = false;
     bool isFirstBuilding_ = true;
 
@@ -1149,6 +1162,8 @@ private:
     };
     std::vector<onSizeChangeDumpInfo> onSizeChangeDumpInfos;
     std::list<WeakPtr<FrameNode>> predictLayoutNode_;
+    FrameNodeChangeInfoFlag changeInfoFlag_ = FRAME_NODE_CHANGE_INFO_NONE;
+    std::optional<RectF> syncedFramePaintRect_;
 
     friend class RosenRenderContext;
     friend class RenderContext;

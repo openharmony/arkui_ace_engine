@@ -93,8 +93,6 @@ public:
     void SetLineDash(const std::vector<double>& lineDash) override;
     void SetTextAlign(const TextAlign& align) override;
     void SetTextBaseline(const TextBaseline& baseline) override;
-    double GetMeasureTextWidth(const PaintState& state, const std::string& text) override;
-    double GetMeasureTextHeight(const PaintState& state, const std::string& text) override;
     void FillRect(const Rect& rect) override;
     void StrokeRect(const Rect& rect) override;
     void ClearRect(const Rect& rect) override;
@@ -109,7 +107,7 @@ public:
     // All interfaces that only the 'CanvasRenderingContext2D' has.
     void GetWidth(RefPtr<AceType>& canvasPattern, double& width) override;
     void GetHeight(RefPtr<AceType>& canvasPattern, double& height) override;
-    void StartImageAnalyzer(RefPtr<AceType>& canvasPattern, void* config, onAnalyzedCallback& onAnalyzed) override;
+    void StartImageAnalyzer(RefPtr<AceType>& canvasPattern, void* config, OnAnalyzedCallback& onAnalyzed) override;
     void StopImageAnalyzer(RefPtr<AceType>& canvasPattern) override;
 #ifdef PIXEL_MAP_SUPPORTED
     void TransferFromImageBitmap(RefPtr<AceType>& canvasPattern, const RefPtr<AceType>& pixelMap) override;

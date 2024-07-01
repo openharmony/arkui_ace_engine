@@ -196,6 +196,7 @@ public:
         }
     }
 
+    void SetListItemGroupStyle(V2::ListItemGroupStyle style);
     RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize();
     void SetListChildrenMainSize(float defaultSize, const std::vector<float>& mainSize);
     void OnChildrenSizeChanged(std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag);
@@ -205,6 +206,10 @@ public:
     VisibleContentInfo GetEndListItemIndex();
     void ResetChildrenSize();
 
+    void CalculateItemStartIndex();
+    int32_t GetForwardCachedIndex(int32_t cacheCount);
+    int32_t GetBackwardCachedIndex(int32_t cacheCount);
+    void LayoutCache(const LayoutConstraintF& constraint, bool forward, int64_t deadline, int32_t cached);
 private:
     bool IsNeedInitClickEventRecorder() const override
     {
@@ -226,6 +231,8 @@ private:
     WeakPtr<UINode> header_;
     WeakPtr<UINode> footer_;
     int32_t itemStartIndex_ = 0;
+    int32_t headerIndex_ = -1;
+    int32_t footerIndex_ = -1;
     int32_t itemTotalCount_ = -1;
     int32_t itemDisplayEndIndex_ = -1;
     int32_t itemDisplayStartIndex_ = -1;
@@ -235,6 +242,9 @@ private:
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
     std::set<int32_t> pressedItem_;
     bool layouted_ = false;
+
+    int32_t backwardCachedIndex_ = -1;
+    int32_t forwardCachedIndex_ = -1;
 
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
     float spaceWidth_ = 0.0f;

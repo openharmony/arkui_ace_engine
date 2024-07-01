@@ -75,7 +75,7 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
 }
 
 RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
-    const std::string& message, const SymbolSourceInfo& symbolSourceInfo)
+    const std::string& message, const SymbolSourceInfo& symbolSourceInfo, const std::vector<Color>& symbolColorList)
 {
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(context, nullptr);
@@ -89,7 +89,8 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
     CHECK_NULL_RETURN(symbolProperty, nullptr);
     symbolProperty->UpdateFontSize(dialogTheme->GetIdealSize());
     symbolProperty->UpdateSymbolSourceInfo(symbolSourceInfo);
-    symbolProperty->UpdateSymbolColorList({dialogTheme->GetDialogIconColor()});
+    symbolColorList.empty() ? symbolProperty->UpdateSymbolColorList({ dialogTheme->GetDialogIconColor() })
+                            : symbolProperty->UpdateSymbolColorList(symbolColorList);
     MarginProperty symbolMargin;
     Dimension dialogHeight;
     if (message.empty()) {
@@ -132,8 +133,7 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::CreateCustomDialog(const RefPtr<Fram
     dialogProperties.shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultLG);
     dialogProperties.borderRadius = BorderRadiusProperty(dialogTheme->GetDialogCornerRadius());
     BlurStyleOption styleOption;
-    styleOption.blurStyle = static_cast<BlurStyle>(
-        dialogProperties.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
+    styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
     auto renderContext = columnNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackBlurStyle(styleOption);
@@ -209,4 +209,21 @@ float AgingAdapationDialogUtil::GetDialogBigFontSizeScale()
     return dialogTheme->GetBigFontSizeScale();
 }
 
+float AgingAdapationDialogUtil::GetDialogLargeFontSizeScale()
+{
+    auto context = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(context, 0.0);
+    auto dialogTheme = context->GetTheme<AgingAdapationDialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, 0.0);
+    return dialogTheme->GetLargeFontSizeScale();
+}
+
+float AgingAdapationDialogUtil::GetDialogMaxFontSizeScale()
+{
+    auto context = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(context, 0.0);
+    auto dialogTheme = context->GetTheme<AgingAdapationDialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, 0.0);
+    return dialogTheme->GetMaxFontSizeScale();
+}
 } // namespace OHOS::Ace::NG

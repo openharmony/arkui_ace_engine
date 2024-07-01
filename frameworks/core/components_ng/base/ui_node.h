@@ -51,6 +51,12 @@ enum class NodeStatus : char {
     BUILDER_NODE_ON_MAINTREE = 2   // Indicates it is a BuilderNode and is attach to the mainTree;
 };
 
+enum class RootNodeType : int32_t {
+    PAGE_ETS_TAG = 0,
+    NAVDESTINATION_VIEW_ETS_TAG = 1,
+    WINDOW_SCENE_ETS_TAG = 2
+};
+
 class InspectorFilter;
 class PipelineContext;
 constexpr int32_t DEFAULT_NODE_SLOT = -1;
@@ -76,7 +82,7 @@ public:
 
     // Tree operation start.
     void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
-        bool addDefaultTransition = false);
+        bool addDefaultTransition = false, bool addModalUiextension = false);
     void AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
     void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
 
@@ -85,7 +91,7 @@ public:
     void ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode);
     void MovePosition(int32_t slot);
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
-        bool addDefaultTransition = false);
+        bool addDefaultTransition = false, bool addModalUiextension = false);
     RefPtr<FrameNode> GetParentFrameNode() const;
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
@@ -108,14 +114,13 @@ public:
     // process offscreen process.
     void ProcessOffscreenTask(bool recursive = false);
 
-    bool IsProhibitedAddChildNode()
+    void UpdateModalUiextensionCount(bool addNode)
     {
-        return isProhibitedAddChildNode_;
-    }
-
-    void SetIsProhibitedAddChildNode(bool isProhibitedAddChildNode)
-    {
-        isProhibitedAddChildNode_ = isProhibitedAddChildNode;
+        if (addNode) {
+            modalUiextensionCount_++;
+        } else {
+            modalUiextensionCount_--;
+        }
     }
 
     int32_t TotalChildCount() const;
@@ -175,6 +180,7 @@ public:
 
     // performance.
     PipelineContext* GetContext();
+    PipelineContext* GetContextWithCheck();
 
     RefPtr<PipelineContext> GetContextRefPtr();
 
@@ -340,7 +346,7 @@ public:
 
     virtual void SetActive(bool active);
 
-    virtual void SetJSViewActive(bool active);
+    virtual void SetJSViewActive(bool active, bool isLazyForEachNode = false);
 
     virtual void TryVisibleChangeOnDescendant(bool isVisible);
 
@@ -420,7 +426,7 @@ public:
         bool addToRenderTree = false);
     virtual RefPtr<UINode> GetFrameChildByIndexWithoutExpanded(uint32_t index);
     // Get current frameNode index with or without expanded all LazyForEachNode;
-    virtual int32_t GetFrameNodeIndex(RefPtr<FrameNode> node, bool isExpanded = true);
+    virtual int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded = true);
     void SetDebugLine(const std::string& line)
     {
         debugLine_ = line;
@@ -538,7 +544,10 @@ public:
     // --------------------------------------------------------------------------------
 
     virtual void DoRemoveChildInRenderTree(uint32_t index, bool isAll = false);
-    virtual void DoSetActiveChildRange(int32_t start, int32_t end);
+    virtual void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd);
+    virtual void DoSetActiveChildRange(
+        const std::set<int32_t>& activeItems, const std::set<int32_t>& cachedItems, int32_t baseIndex)
+    {}
     virtual void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint);
 
     // return value: true if the node can be removed immediately.
@@ -603,24 +612,29 @@ public:
         return (flag & nodeFlag_) == flag;
     }
 
-    void SetPageLevelNodeId(int32_t pageLevelId)
+    void SetRootNodeId(int32_t rootNodeId)
     {
-        pageLevelId_ = pageLevelId;
+        rootNodeId_ = rootNodeId;
     }
 
-    int32_t GetPageLevelNodeId() const
+    int32_t GetRootNodeId() const
     {
-        return pageLevelId_;
+        return rootNodeId_;
     }
 
-    void SetPageLevelToNav(bool isLevelNavDest)
+    bool RootNodeIsPage() const
     {
-        isLevelNavDest_ = isLevelNavDest;
+        return rootNodeType_ == RootNodeType::PAGE_ETS_TAG;
     }
 
-    bool PageLevelIsNavDestination() const
+    void SetRootNodeType(RootNodeType rootNodeType)
     {
-        return isLevelNavDest_;
+        rootNodeType_ = rootNodeType;
+    }
+
+    RootNodeType GetRootNodeType() const
+    {
+        return rootNodeType_;
     }
 
     void GetPageNodeCountAndDepth(int32_t* count, int32_t* depth);
@@ -687,6 +701,9 @@ public:
     {
         return updateNodeConfig_;
     }
+
+    virtual void GetInspectorValue();
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -764,8 +781,7 @@ private:
     int32_t nodeId_ = 0;
     int64_t accessibilityId_ = -1;
     int32_t layoutPriority_ = 0;
-    int32_t pageLevelId_ = 0; // host is Page or NavDestination
-    bool isLevelNavDest_ = false;
+    int32_t rootNodeId_ = 0; // host is Page or NavDestination
     bool isRoot_ = false;
     bool onMainTree_ = false;
     bool removeSilently_ = true;
@@ -775,6 +791,7 @@ private:
     bool isRootBuilderNode_ = false;
     bool isArkTsFrameNode_ = false;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
+    RootNodeType rootNodeType_ = RootNodeType::PAGE_ETS_TAG;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
     int32_t instanceId_ = -1;
     uint32_t nodeFlag_ { 0 };
@@ -793,7 +810,10 @@ private:
     std::string viewId_;
     void* externalData_ = nullptr;
     std::function<void(int32_t)> destroyCallback_;
-    bool isProhibitedAddChildNode_ = false;
+    // Other components cannot be masked above the modal uiextension,
+    // except for the modal uiextension
+    // Used to mark modal uiextension count below the root node
+    int32_t modalUiextensionCount_ = 0;
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };

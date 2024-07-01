@@ -261,7 +261,7 @@ std::pair<int32_t, int32_t> TextSelectController::GetSelectRangeByOffset(const O
             pos + GetGraphemeClusterLength(contentController_->GetWideText(), pos, true));
     }
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_TEXT,
+        TAG_LOGD(AceLogTag::ACE_TEXT,
             "current word position = %{public}d, select position {start:%{public}d, end:%{public}d}", pos, start, end);
     }
     return { start, end };
@@ -292,7 +292,7 @@ std::pair<int32_t, int32_t> TextSelectController::GetSelectParagraphByOffset(con
     GetSubParagraphByOffset(pos, start, end);
 
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_TEXT,
+        TAG_LOGD(AceLogTag::ACE_TEXT,
             "current word position = %{public}d, select position {start:%{public}d, end:%{public}d}", pos, start, end);
     }
     return { start, end };
@@ -462,6 +462,15 @@ void TextSelectController::AdjustHandleAtEdge(RectF& handleRect) const
 void TextSelectController::AdjustHandleOffset(RectF& handleRect) const
 {
     handleRect.SetOffset(OffsetF(handleRect.GetX() - handleRect.Width() / 2.0f, handleRect.GetY()));
+    // The handle position does not extend beyond the left edge of the text.
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textFiled = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textFiled);
+    auto textRect = textFiled->GetTextRect();
+    if (LessNotEqual(handleRect.GetX(), textRect.GetX())) {
+        handleRect.SetOffset(OffsetF(textRect.GetX(), handleRect.GetY()));
+    }
 }
 
 void TextSelectController::MoveFirstHandleToContentRect(int32_t index, bool moveHandle)
@@ -531,7 +540,7 @@ void TextSelectController::MoveCaretToContentRect(int32_t index, TextAffinity te
             caretInfo_.index < static_cast<int32_t>(contentController_->GetWideText().length())) {
             boundaryAdjustment = paragraph_->GetCharacterWidth(caretInfo_.index);
             if (SystemProperties::GetDebugEnabled()) {
-                TAG_LOGI(AceLogTag::ACE_TEXT, "caretInfo_.index = %{public}d, boundaryAdjustment =%{public}f",
+                TAG_LOGD(AceLogTag::ACE_TEXT, "caretInfo_.index = %{public}d, boundaryAdjustment =%{public}f",
                     caretInfo_.index, boundaryAdjustment);
             }
         }

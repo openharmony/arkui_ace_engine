@@ -54,6 +54,11 @@ constexpr int32_t BLACK_POINT_DURATION = 400;
 
 void DotIndicatorModifier::onDraw(DrawingContext& context)
 {
+    if (isOverlong_) {
+        isOverlong_ = false;
+        return;
+    }
+
     ContentProperty contentProperty;
     contentProperty.backgroundColor = backgroundColor_->Get().ToColor();
     contentProperty.vectorBlackPointCenterX = vectorBlackPointCenterX_->Get();

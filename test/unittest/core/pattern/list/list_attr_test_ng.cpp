@@ -164,11 +164,11 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty002, TestSize.Level1)
      * @tc.step2: set valid values for LaneMinLength and LaneMaxLength
      * @tc.expected: the set value
      */
-    model.SetListFriction(AceType::RawPtr(frameNode_), NEW_FRICTION);
+    model.SetListFriction(AceType::RawPtr(frameNode_), API12_FRICTION);
     model.SetLaneConstrain(AceType::RawPtr(frameNode_), Dimension(40), Dimension(60));
     model.SetListScrollBar(AceType::RawPtr(frameNode_), 2);
     EXPECT_EQ(paintProperty_->GetScrollBarModeValue(DisplayMode::OFF), DisplayMode::ON);
-    EXPECT_EQ(pattern_->friction_, NEW_FRICTION);
+    EXPECT_EQ(pattern_->friction_, API12_FRICTION);
     EXPECT_EQ(layoutProperty_->GetLaneMinLengthValue(), Dimension(40));
     EXPECT_EQ(layoutProperty_->GetLaneMaxLengthValue(), Dimension(60));
     model.SetListScrollBar(AceType::RawPtr(frameNode_), -1);

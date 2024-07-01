@@ -426,16 +426,6 @@ void CanvasRenderingContext2DModelNG::SetTextBaseline(const TextBaseline& baseli
     pattern_->UpdateTextBaseline(baseline);
 }
 
-double CanvasRenderingContext2DModelNG::GetMeasureTextWidth(const PaintState& state, const std::string& text)
-{
-    return pattern_ ? pattern_->MeasureText(text, state) : 0.0;
-}
-
-double CanvasRenderingContext2DModelNG::GetMeasureTextHeight(const PaintState& state, const std::string& text)
-{
-    return pattern_ ? pattern_->MeasureTextHeight(text, state) : 0.0;
-}
-
 void CanvasRenderingContext2DModelNG::FillRect(const Rect& rect)
 {
     CHECK_NULL_VOID(pattern_);
@@ -600,7 +590,7 @@ void CanvasRenderingContext2DModelNG::TransferFromImageBitmap(
 #endif
 
 void CanvasRenderingContext2DModelNG::StartImageAnalyzer(
-    RefPtr<AceType>& canvasPattern, void* config, onAnalyzedCallback& onAnalyzed)
+    RefPtr<AceType>& canvasPattern, void* config, OnAnalyzedCallback& onAnalyzed)
 {
     auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern);
     CHECK_NULL_VOID(customPaintPattern);

@@ -173,7 +173,7 @@ public:
     // TextField needs softkeyboard, override function.
     bool NeedSoftKeyboard() const override
     {
-        return true;
+        return needToRequestKeyboardOnFocus_;
     }
     void SetBlurOnSubmit(bool blurOnSubmit)
     {
@@ -222,6 +222,7 @@ public:
     }
 
     void OnModifyDone() override;
+    void ProcessUnderlineColorOnModifierDone();
     void UpdateSelectionOffset();
     void CalcCaretMetricsByPosition(
         int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity = TextAffinity::DOWNSTREAM);
@@ -858,6 +859,7 @@ public:
     void HandleOnPaste() override;
     void HandleOnCut() override;
     void HandleOnCameraInput();
+    void UpdateShowCountBorderStyle();
     void StripNextLine(std::wstring& data);
     bool IsShowHandle();
     std::string GetCancelButton();
@@ -1060,7 +1062,7 @@ public:
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
-    void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "") override;
+    void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) override;
     bool CheckAutoSave() override;
     void OnColorConfigurationUpdate() override;
     bool NeedPaintSelect();
@@ -1207,7 +1209,7 @@ public:
     {
         autoFillUserName_ = userName;
     }
-    
+
     std::string GetAutoFillUserName()
     {
         return autoFillUserName_;
@@ -1284,11 +1286,11 @@ public:
         hasSupportedPreviewText_ = isSupported;
     }
 
-    void OnTouchTestHit(SourceType hitTestType) override
+    bool GetSupportPreviewText() const
     {
-        selectOverlay_->OnTouchTestHit(hitTestType);
+        return hasSupportedPreviewText_;
     }
-    
+
     int32_t GetPreviewTextStart() const
     {
         return hasPreviewText_ ? previewTextStart_ : selectController_->GetCaretIndex();
@@ -1299,9 +1301,18 @@ public:
         return hasPreviewText_ ? previewTextEnd_ : selectController_->GetCaretIndex();
     }
 
+    bool IsPressSelectedBox()
+    {
+        return isPressSelectedBox_;
+    }
+
     int32_t CheckPreviewTextValidate(const std::string& previewValue, const PreviewRange range) override;
     void HiddenMenu();
 
+    void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override
+    {
+        selectOverlay_->OnAncestorNodeChanged(flag);
+    }
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override
@@ -1520,6 +1531,8 @@ private:
 
     bool FinishTextPreviewByPreview(const std::string& insertValue);
 
+    bool GetTouchInnerPreviewText(const Offset& offset) const;
+
     RectF frameRect_;
     RectF textRect_;
     RefPtr<Paragraph> paragraph_;
@@ -1574,6 +1587,7 @@ private:
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
     bool scrollable_ = true;
     bool blockPress_ = false;
+    bool isPressSelectedBox_ = false;
     float previewWidth_ = 0.0f;
     float lastTextRectY_ = 0.0f;
     std::optional<DisplayMode> barState_;
@@ -1685,6 +1699,7 @@ private:
     std::string autoFillUserName_;
     std::string autoFillNewPassword_;
     bool autoFillOtherAccount_ = false;
+    uint32_t autoFillSessionId_ = 0;
     std::unordered_map<std::string, std::variant<std::string, bool, int32_t>> fillContentMap_;
 
     bool textInputBlurOnSubmit_ = true;
@@ -1697,16 +1712,16 @@ private:
     bool isFocusTextColorSet_ = false;
     bool isFocusPlaceholderColorSet_ = false;
     Dimension previewUnderlineWidth_ = 2.0_vp;
-    bool hasSupportedPreviewText_ = true;
+    bool hasSupportedPreviewText_ = false;
     bool hasPreviewText_ = false;
     std::queue<PreviewTextInfo> previewTextOperation_;
     int32_t previewTextStart_ = -1;
     int32_t previewTextEnd_ = -1;
     PreviewRange lastCursorRange_ = {};
     bool showKeyBoardOnFocus_ = true;
-    bool isTouchDownRequestFocus_ = false;
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;
+    bool isTouchPreviewText_ = false;
 };
 } // namespace OHOS::Ace::NG
 

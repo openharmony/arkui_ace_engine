@@ -52,17 +52,19 @@ RefPtr<PaintWrapper> TestNG::FlushLayoutTask(const RefPtr<FrameNode>& frameNode)
     return wrapper;
 }
 
-void TestNG::CreateDone(const RefPtr<FrameNode>& frameNode)
+RefPtr<PaintWrapper> TestNG::CreateDone(const RefPtr<FrameNode>& frameNode)
 {
     auto& elementsStack = ViewStackProcessor::GetInstance()->elementsStack_;
     while (elementsStack.size() > 1) {
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
-    ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto rootNode = AceType::DynamicCast<FrameNode>(element);
     ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    frameNode->MarkModifyDone();
-    FlushLayoutTask(frameNode);
+    auto layoutNode = frameNode ? frameNode : rootNode;
+    layoutNode->MarkModifyDone();
+    return FlushLayoutTask(layoutNode);
 }
 
 uint64_t TestNG::GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty)

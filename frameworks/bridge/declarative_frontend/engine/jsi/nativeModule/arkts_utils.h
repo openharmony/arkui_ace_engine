@@ -35,6 +35,7 @@ public:
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
     static bool ParseJsColorAlpha(
         const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, const Color& defaultColor);
+    static bool ParseJsSymbolColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
     static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result);
     static bool ParseJsDimensionFromResource(
         const EcmaVM* vm, const Local<JSValueRef>& jsObj, DimensionUnit dimensionUnit, CalcDimension& result);
@@ -81,6 +82,8 @@ public:
     static double parseShadowOffset(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static bool ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::uint32_t& symbolId);
     static void ParseOuterBorder(EcmaVM* vm, const Local<JSValueRef>& args,
+        std::optional<CalcDimension>& optionalDimension);
+    static void ParseOuterBorderForDashParams(EcmaVM* vm, const Local<JSValueRef>& args,
         std::optional<CalcDimension>& optionalDimension);
     static void PushOuterBorderDimensionVector(const std::optional<CalcDimension>& valueDim,
         std::vector<ArkUI_Float32>& values, std::vector<ArkUI_Int32>& units);
@@ -161,6 +164,12 @@ public:
     static Local<JSValueRef> GetModifierKeyState(
         ArkUIRuntimeCallInfo* info, const std::vector<KeyCode>& pressedKeyCodes);
     static Local<JSValueRef> JsGetModifierKeyState(ArkUIRuntimeCallInfo* info);
+    static bool IsDrawable(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
+    static RefPtr<PixelMap> GetDrawablePixmap(const EcmaVM* vm, Local<JSValueRef> obj);
+    static void* UnwrapNapiValue(const EcmaVM* vm, const Local<JSValueRef>& obj);
+#if !defined(PREVIEW)
+    static RefPtr<PixelMap> CreatePixelMapFromNapiValue(const EcmaVM* vm, Local<JSValueRef> obj);
+#endif
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H

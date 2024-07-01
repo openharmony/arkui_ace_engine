@@ -139,7 +139,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg038, TestSize.Level1)
     ASSERT_NE(frameNode_, nullptr);
     context_->onWindowSizeChangeCallbacks_.emplace_back(frameNode_->GetId());
     context_->FlushWindowSizeChangeCallback(0, 0, WindowSizeChangeReason::UNDEFINED);
-    EXPECT_EQ(context_->onWindowSizeChangeCallbacks_.size(), 1);
+    EXPECT_EQ(context_->onWindowSizeChangeCallbacks_.size(), 2);
 }
 
 /**
@@ -702,7 +702,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg052, TestSize.Level1)
     auto frameNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId, nullptr);
     context_->safeAreaManager_->AddGeoRestoreNode(frameNode);
-    context_->SyncSafeArea(false);
+    context_->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_NONE);
     EXPECT_TRUE(frameNode->isLayoutDirtyMarked_);
 }
 

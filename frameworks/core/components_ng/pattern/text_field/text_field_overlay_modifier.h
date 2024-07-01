@@ -90,7 +90,7 @@ private:
 
     bool needPaintSelect_ = false;
     bool needPaintPreviewText = false;
-    PreviewTextStyle previewTextStyle_;
+    PreviewTextStyle previewTextStyle_ = PreviewTextStyle::NORMAL;
     WeakPtr<Pattern> pattern_;
     WeakPtr<ScrollBar> scrollBar_;
     WeakPtr<ScrollEdgeEffect> edgeEffect_;

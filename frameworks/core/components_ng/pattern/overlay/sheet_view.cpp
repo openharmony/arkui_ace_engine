@@ -93,7 +93,7 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
     layoutProps->UpdateMargin(margin);
 
     layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
-    if (sheetStyle.isTitleBuilder.has_value() && pipeline->GetFontScale() == SHEET_NORMAL_SCALE) {
+    if (sheetStyle.isTitleBuilder.has_value() && pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale()) {
         layoutProps->UpdateUserDefinedIdealSize(
             CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT - SHEET_TITLE_AERA_MARGIN)));
         if (sheetStyle.sheetTitle.has_value() && sheetStyle.sheetSubtitle.has_value()) {
@@ -217,11 +217,13 @@ RefPtr<FrameNode> SheetView::CreateScrollNode()
     pattern->SetEdgeEffect(EdgeEffect::SPRING, false);
     pattern->SetScrollToSafeAreaHelper(false);
     props->UpdateAlignment(Alignment::TOP_CENTER);
-    NestedScrollOptions nestedOpt = {
-        .forward = NestedScrollMode::PARENT_FIRST,
-        .backward = NestedScrollMode::SELF_FIRST,
-    };
-    pattern->SetNestedScroll(nestedOpt);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        NestedScrollOptions nestedOpt = {
+            .forward = NestedScrollMode::PARENT_FIRST,
+            .backward = NestedScrollMode::SELF_FIRST,
+        };
+        pattern->SetNestedScroll(nestedOpt);
+    }
     scroll->MarkModifyDone();
     return scroll;
 }
@@ -249,6 +251,7 @@ RefPtr<FrameNode> SheetView::BuildMainTitle(RefPtr<FrameNode> sheetNode, NG::She
     if (sheetStyle.sheetTitle.has_value()) {
         titleProp->UpdateContent(sheetStyle.sheetTitle.value());
     }
+    titleProp->UpdateMaxFontScale(sheetTheme->GetSheetMaxAgingScale());
     titleProp->UpdateFontSize(titleTextFontSize);
     titleProp->UpdateFontWeight(FontWeight::BOLD);
     titleProp->UpdateTextColor(sheetTheme->GetTitleTextFontColor());
@@ -329,8 +332,10 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_RETURN(sheetTheme, nullptr);
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
-    if (pipeline->GetFontScale() == SHEET_NORMAL_SCALE) {
+    if (pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale()) {
         layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT)));
     }
     MarginProperty margin;
@@ -356,10 +361,17 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
             auto subtitleRow = BuildSubTitle(sheetNode, sheetStyle);
             CHECK_NULL_RETURN(subtitleRow, nullptr);
             subtitleRow->MountToParent(titleColumn);
-            if (pipeline->GetFontScale() == SHEET_NORMAL_SCALE) {
+            if (pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale()) {
                 layoutProperty->UpdateUserDefinedIdealSize(
                     CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_DRAG_BAR_HEIGHT)));
             }
+        }
+    } else if (sheetStyle.isTitleBuilder.has_value()) {
+        auto isCustomBuilder = sheetStyle.isTitleBuilder.value();
+		
+        // When title is custombuilder, set FlexAlign to CENTER.
+        if (isCustomBuilder) {
+            columnProps->UpdateMainAxisAlign(FlexAlign::CENTER);
         }
     }
     return titleColumn;

@@ -23,6 +23,8 @@ class JSWaterFlow : public JSScrollableBase {
 public:
     static void Create(const JSCallbackInfo& args);
     static void JSBind(BindingTarget globalObj);
+    static void UpdateWaterFlowSectionsByFrameNode(
+        NG::FrameNode* frameNode, const JSCallbackInfo& args, const JSRef<JSVal>& sections);
 
 protected:
     static void SetColumnsGap(const JSCallbackInfo& info);

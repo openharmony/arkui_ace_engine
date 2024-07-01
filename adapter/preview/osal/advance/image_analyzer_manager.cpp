@@ -51,7 +51,8 @@ void ImageAnalyzerManager::UpdateAnalyzerOverlayLayout()
 {
 }
 
-void ImageAnalyzerManager::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
+void ImageAnalyzerManager::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode,
+    const PixelMapInfo& info)
 {
 }
 
@@ -63,7 +64,7 @@ void ImageAnalyzerManager::SetImageAIOptions(void* options)
 {
 }
 
-void ImageAnalyzerManager::SetImageAnalyzerCallback(onAnalyzedCallback& callback)
+void ImageAnalyzerManager::SetImageAnalyzerCallback(OnAnalyzedCallback& callback)
 {
 }
 

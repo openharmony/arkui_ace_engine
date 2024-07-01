@@ -301,7 +301,7 @@ void ImageFileCache::ConvertToAstcAndWriteToFile(const std::string& fileCacheKey
         removeVector.push_back(filePath);
 
         auto infoIter = fileNameToFileInfoPos_[fileCacheKey];
-        cacheFileSize_ = cacheFileSize_ + packedSize - infoIter->fileSize;
+        cacheFileSize_ = cacheFileSize_ + static_cast<size_t>(packedSize) - infoIter->fileSize;
         infoIter->fileName = astcFileName;
         infoIter->fileSize = static_cast<uint64_t>(packedSize);
     }

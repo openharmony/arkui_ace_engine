@@ -120,6 +120,23 @@ const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
     OHOS::Ace::Curves::SMOOTH,
     OHOS::Ace::Curves::FRICTION,
 };
+
+enum TransitionEffectType {
+    TRANSITION_EFFECT_OPACITY = 0,
+    TRANSITION_EFFECT_TRANSLATE,
+    TRANSITION_EFFECT_SCALE,
+    TRANSITION_EFFECT_ROTATE,
+    TRANSITION_EFFECT_MOVE,
+    TRANSITION_EFFECT_ASYMMETRIC,
+};
+
+const std::vector<AnimationDirection> DIRECTION_LIST = {
+    AnimationDirection::NORMAL,
+    AnimationDirection::REVERSE,
+    AnimationDirection::ALTERNATE,
+    AnimationDirection::ALTERNATE_REVERSE,
+};
+
 constexpr int32_t DEFAULT_DURATION = 1000;
 std::string g_strValue;
 
@@ -1825,6 +1842,8 @@ void ResetBorder(ArkUINodeHandle node)
     ViewAbstract::SetBorderColor(frameNode, Color::BLACK);
     ViewAbstract::SetBorderRadius(frameNode, borderWidth);
     ViewAbstract::SetBorderStyle(frameNode, BorderStyle::SOLID);
+    ViewAbstract::SetDashGap(frameNode, Dimension(-1));
+    ViewAbstract::SetDashWidth(frameNode, Dimension(-1));
 }
 
 void SetBackgroundImagePosition(
@@ -1969,6 +1988,20 @@ void SetBackgroundImagePixelMap(ArkUINodeHandle node, void* drawableDescriptor, 
         ViewAbstract::SetBackgroundImageRepeat(frameNode, OHOS::Ace::ImageRepeat::NO_REPEAT);
     }
 #endif
+}
+
+void SetBackgroundImagePixelMapByPixelMapPtr(ArkUINodeHandle node, void* pixelMapPtr, ArkUI_Int32 repeatIndex)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<PixelMap> pixelmap = PixelMap::CreatePixelMap(pixelMapPtr);
+    ViewAbstract::SetBackgroundImage(frameNode, OHOS::Ace::ImageSourceInfo { pixelmap });
+    auto repeat = static_cast<ImageRepeat>(repeatIndex);
+    if (repeat >= OHOS::Ace::ImageRepeat::NO_REPEAT && repeat <= OHOS::Ace::ImageRepeat::REPEAT) {
+        ViewAbstract::SetBackgroundImageRepeat(frameNode, repeat);
+    } else {
+        ViewAbstract::SetBackgroundImageRepeat(frameNode, OHOS::Ace::ImageRepeat::NO_REPEAT);
+    }
 }
 
 void ResetBackgroundImage(ArkUINodeHandle node)
@@ -2197,21 +2230,24 @@ void ResetRotate(ArkUINodeHandle node)
     ViewAbstract::SetPivot(frameNode, center);
 }
 
-void SetGeometryTransition(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool options)
+void SetGeometryTransition(ArkUINodeHandle node, ArkUI_CharPtr id, const ArkUIGeometryTransitionOptions* options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::string idStr(id);
-    ViewAbstract::SetGeometryTransition(frameNode, idStr, static_cast<bool>(options));
+    ViewAbstract::SetGeometryTransition(frameNode, idStr,
+        static_cast<bool>(options->follow), static_cast<bool>(options->hierarchyStrategy));
 }
 
-ArkUI_CharPtr GetGeometryTransition(ArkUINodeHandle node, ArkUI_Bool* options)
+ArkUI_CharPtr GetGeometryTransition(ArkUINodeHandle node, ArkUIGeometryTransitionOptions* options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
     bool followWithoutTransition = false;
-    g_strValue = ViewAbstract::GetGeometryTransition(frameNode, &followWithoutTransition);
-    *options = followWithoutTransition;
+    bool doRegisterSharedTransition = true;
+    g_strValue = ViewAbstract::GetGeometryTransition(frameNode, &followWithoutTransition, &doRegisterSharedTransition);
+    options->follow = followWithoutTransition;
+    options->hierarchyStrategy = static_cast<int32_t>(doRegisterSharedTransition);
     return g_strValue.c_str();
 }
 
@@ -2219,7 +2255,7 @@ void ResetGeometryTransition(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetGeometryTransition(frameNode, "", false);
+    ViewAbstract::SetGeometryTransition(frameNode, "", false, true);
 }
 
 void SetOffset(ArkUINodeHandle node, const ArkUI_Float32* number, const ArkUI_Int32* unit)
@@ -3068,32 +3104,11 @@ void ResetGridSpan(ArkUINodeHandle node)
     ViewAbstract::SetGrid(frameNode, DEFAULT_GRIDSPAN, std::nullopt);
 }
 
-void SetExpandSafeArea(ArkUINodeHandle node, ArkUI_CharPtr typeStr, ArkUI_CharPtr edgesStr)
+void SetExpandSafeArea(ArkUINodeHandle node, ArkUI_Uint32 safeAreaType, ArkUI_Uint32 safeAreaEdge)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_ALL, .edges = NG::SAFE_AREA_EDGE_ALL };
-    uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
-    uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
-    std::string safeAreaTypeStr = std::string(typeStr);
-    std::string safeAreaEdgeStr = std::string(edgesStr);
-    std::string delimiter = "|";
-    size_t pos = 0;
-    std::string type;
-    std::string edges;
-    while ((pos = safeAreaTypeStr.find(delimiter)) != std::string::npos) {
-        type = safeAreaTypeStr.substr(0, pos);
-        safeAreaType |= (1 << StringUtils::StringToUint(type));
-        safeAreaTypeStr.erase(0, pos + delimiter.length());
-    }
-    safeAreaType |= (1 << StringUtils::StringToUint(safeAreaTypeStr));
-    pos = 0;
-    while ((pos = safeAreaEdgeStr.find(delimiter)) != std::string::npos) {
-        edges = safeAreaEdgeStr.substr(0, pos);
-        safeAreaEdge |= (1 << StringUtils::StringToUint(edges));
-        safeAreaEdgeStr.erase(0, pos + delimiter.length());
-    }
-    safeAreaEdge |= (1 << StringUtils::StringToUint(safeAreaEdgeStr));
     opts.type = safeAreaType;
     opts.edges = safeAreaEdge;
     ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
@@ -3519,7 +3534,7 @@ void SetDragPreviewOptions(ArkUINodeHandle node, ArkUIDragPreViewOptions dragPre
     if (!dragPreviewOptions.isModeArray) {
         ParseDragPreviewMode(option, dragPreviewOptions.mode, isAuto);
     } else {
-        for (size_t i = 0; i < dragPreviewOptions.modeArrayLength; i++) {
+        for (int32_t i = 0; i < dragPreviewOptions.modeArrayLength; i++) {
             ParseDragPreviewMode(option, dragPreviewOptions.modeArray[i], isAuto);
             if (isAuto) {
                 break;
@@ -4447,14 +4462,14 @@ void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, A
 }
 
 void SetMaskPath(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, ArkUI_Uint32 stroke,
-    ArkUI_Float32 strokeWidth, const ArkUI_Float32* attribute, ArkUI_CharPtr commands, ArkUI_Int32 unit)
+    ArkUI_Float32 strokeWidth, const ArkUI_Float32 (*attribute)[2], ArkUI_CharPtr commands, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     auto strokeWidth_ = Dimension(strokeWidth, static_cast<OHOS::Ace::DimensionUnit>(unit));
     CHECK_NULL_VOID(frameNode);
     auto path = AceType::MakeRefPtr<Path>();
-    auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(unit));
-    auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(unit));
+    auto width = Dimension((*attribute)[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(unit));
+    auto height = Dimension((*attribute)[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(unit));
     std::string pathCommands(commands);
     path->SetWidth(width);
     path->SetHeight(height);
@@ -5564,35 +5579,22 @@ void SetOnVisibleAreaChange(ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_
     ViewAbstract::SetOnVisibleChange(frameNode, onEvent, ratioList);
 }
 
-void ResetVisibleAreaChange(ArkUINodeHandle node)
+void SetLayoutRect(ArkUINodeHandle node, ArkUI_Int32 (*values)[4])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::ResetVisibleChange(frameNode);
-}
-
-void ResetAreaChange(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::ResetAreaChanged(frameNode);
-}
-
-void SetLayoutRect(ArkUINodeHandle node, ArkUI_Int32* values)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    auto rect = NG::RectF(values[0], values[1], values[2], values[3]); // 2:index of width, 3:index of height
+    auto rect =
+        NG::RectF((*values)[0], (*values)[1], (*values)[2], (*values)[3]); // 2:index of width, 3:index of height
     ViewAbstract::SetLayoutRect(frameNode, rect);
 }
 
-void GetLayoutRect(ArkUINodeHandle node, ArkUI_Int32* values)
+void GetLayoutRect(ArkUINodeHandle node, ArkUI_Int32 (*values)[4])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     auto rect = ViewAbstract::GetLayoutRect(frameNode);
-    values[0] = rect.GetX();
-    values[1] = rect.GetY();
-    values[2] = rect.Width(); // 2:index of width
-    values[3] = rect.Height(); // 3:index of height
+    (*values)[0] = rect.GetX();
+    (*values)[1] = rect.GetY();
+    (*values)[2] = rect.Width(); // 2:index of width
+    (*values)[3] = rect.Height(); // 3:index of height
 }
 
 void ResetLayoutRect(ArkUINodeHandle node)
@@ -5878,6 +5880,155 @@ void ResetPixelRound(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetPixelRound(frameNode, static_cast<uint8_t>(PixelRoundCalcPolicy::NO_FORCE_ROUND));
 }
+
+RefPtr<NG::ChainedTransitionEffect> ParseTransition(ArkUITransitionEffectOption* option)
+{
+    CHECK_NULL_RETURN(option, nullptr);
+    auto type = static_cast<TransitionEffectType>(option->type);
+    RefPtr<NG::ChainedTransitionEffect> transitionEffect;
+    switch (type) {
+        case TransitionEffectType::TRANSITION_EFFECT_OPACITY: {
+            transitionEffect = AceType::MakeRefPtr<NG::ChainedOpacityEffect>(option->opacity);
+            break;
+        }
+
+        case TransitionEffectType::TRANSITION_EFFECT_TRANSLATE: {
+            CalcDimension x(option->translate.x, DimensionUnit::VP);
+            CalcDimension y(option->translate.y, DimensionUnit::VP);
+            CalcDimension z(option->translate.z, DimensionUnit::VP);
+            NG::TranslateOptions translate(x, y, z);
+            transitionEffect = AceType::MakeRefPtr<NG::ChainedTranslateEffect>(translate);
+            break;
+        }
+
+        case TransitionEffectType::TRANSITION_EFFECT_SCALE: {
+            CalcDimension centerX(option->scale.centerX, DimensionUnit::PERCENT);
+            CalcDimension centerY(option->scale.centerY, DimensionUnit::PERCENT);
+            NG::ScaleOptions scale(option->scale.x, option->scale.y, option->scale.z, centerX, centerY);
+            transitionEffect = AceType::MakeRefPtr<NG::ChainedScaleEffect>(scale);
+            break;
+        }
+
+        case TransitionEffectType::TRANSITION_EFFECT_ROTATE: {
+            CalcDimension centerX(option->rotate.centerX, DimensionUnit::PERCENT);
+            CalcDimension centerY(option->rotate.centerY, DimensionUnit::PERCENT);
+            CalcDimension centerZ(option->rotate.centerZ, DimensionUnit::PERCENT);
+            NG::RotateOptions rotate(option->rotate.x, option->rotate.y, option->rotate.z, option->rotate.angle,
+                centerX, centerY, centerZ, option->rotate.perspective);
+            transitionEffect = AceType::MakeRefPtr<NG::ChainedRotateEffect>(rotate);
+            break;
+        }
+
+        case TransitionEffectType::TRANSITION_EFFECT_MOVE: {
+            transitionEffect =
+                AceType::MakeRefPtr<NG::ChainedMoveEffect>(static_cast<NG::TransitionEdge>(option->move));
+            break;
+        }
+
+        case TransitionEffectType::TRANSITION_EFFECT_ASYMMETRIC: {
+            RefPtr<NG::ChainedTransitionEffect> appearEffect;
+            RefPtr<NG::ChainedTransitionEffect> disappearEffect;
+            if (option->appear) {
+                appearEffect = ParseTransition(option->appear);
+            }
+            if (option->disappear) {
+                disappearEffect = ParseTransition(option->disappear);
+            }
+            transitionEffect = AceType::MakeRefPtr<NG::ChainedAsymmetricEffect>(appearEffect, disappearEffect);
+            break;
+        }
+    }
+
+    CHECK_NULL_RETURN(transitionEffect, nullptr);
+
+    if (option->hasAnimation) {
+        auto animation = option->animation;
+        AnimationOption animationOption;
+        animationOption.SetDuration(animation.duration);
+        animationOption.SetDelay(animation.delay);
+        animationOption.SetIteration(animation.iterations);
+        animationOption.SetTempo(animation.tempo);
+        animationOption.SetAnimationDirection(
+            DIRECTION_LIST[animation.playMode > DIRECTION_LIST.size() ? 0 : animation.playMode]);
+
+        // curve
+        if (animation.iCurve) {
+            auto curve = reinterpret_cast<Curve*>(animation.iCurve);
+            animationOption.SetCurve(AceType::Claim(curve));
+        } else {
+            if (animation.curve < 0 || animation.curve >= CURVES.size()) {
+                animationOption.SetCurve(OHOS::Ace::Curves::EASE_IN_OUT);
+            } else {
+                animationOption.SetCurve(CURVES[animation.curve]);
+            }
+        }
+
+        if (animation.expectedFrameRateRange) {
+            RefPtr<FrameRateRange> frameRateRange =
+                AceType::MakeRefPtr<FrameRateRange>(animation.expectedFrameRateRange->min,
+                    animation.expectedFrameRateRange->max, animation.expectedFrameRateRange->expected);
+            animationOption.SetFrameRateRange(frameRateRange);
+        }
+        auto animationOptionResult = std::make_shared<AnimationOption>(animationOption);
+        transitionEffect->SetAnimationOption(animationOptionResult);
+    }
+
+    if (option->combine) {
+        transitionEffect->SetNext(ParseTransition(option->combine));
+    }
+    return transitionEffect;
+}
+
+void SetTransition(ArkUINodeHandle node, ArkUITransitionEffectOption* option)
+{
+    CHECK_NULL_VOID(option);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    auto transitionEffectOption = ParseTransition(option);
+    CHECK_NULL_VOID(transitionEffectOption);
+    ViewAbstract::SetChainedTransition(frameNode, transitionEffectOption);
+}
+
+void GetExpandSafeArea(ArkUINodeHandle node, ArkUI_Uint32 (*values)[2])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    (*values)[NUM_0] = ViewAbstract::GetSafeAreaExpandType(frameNode);
+    (*values)[NUM_1] = ViewAbstract::GetSafeAreaExpandEdges(frameNode);
+}
+
+void SetBorderDashParams(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if ((values == nullptr) || (valuesSize != NUM_24)) {
+        return;
+    }
+
+    int32_t offset = NUM_0;
+    NG::BorderWidthProperty borderDashGap;
+    SetOptionalBorder(borderDashGap.leftDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderDashGap.rightDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderDashGap.topDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderDashGap.bottomDimen, values, valuesSize, offset);
+    borderDashGap.multiValued = true;
+    if (borderDashGap.leftDimen.has_value() || borderDashGap.rightDimen.has_value() ||
+        borderDashGap.topDimen.has_value() || borderDashGap.bottomDimen.has_value()) {
+        ViewAbstract::SetDashGap(frameNode, borderDashGap);
+    }
+
+    NG::BorderWidthProperty borderDashWidth;
+    SetOptionalBorder(borderDashWidth.leftDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderDashWidth.rightDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderDashWidth.topDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderDashWidth.bottomDimen, values, valuesSize, offset);
+    borderDashWidth.multiValued = true;
+    if (borderDashWidth.leftDimen.has_value() || borderDashWidth.rightDimen.has_value() ||
+        borderDashWidth.topDimen.has_value() || borderDashWidth.bottomDimen.has_value()) {
+        ViewAbstract::SetDashWidth(frameNode, borderDashWidth);
+    }
+}
 } // namespace
 
 namespace NodeModifier {
@@ -5890,22 +6041,21 @@ const ArkUICommonModifier* GetCommonModifier()
     static const ArkUICommonModifier modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
         SetHeight, ResetHeight, SetBorderRadius, ResetBorderRadius, SetBorderWidth, ResetBorderWidth, SetTransform,
         ResetTransform, SetBorderColor, ResetBorderColor, SetPosition, ResetPosition, SetPositionEdges,
-        ResetPositionEdges, SetBorderStyle, ResetBorderStyle, SetBackShadow, ResetBackShadow,
-        SetHitTestBehavior, ResetHitTestBehavior, SetZIndex, ResetZIndex, SetOpacity,
-        ResetOpacity, SetAlign, ResetAlign, SetBackdropBlur, ResetBackdropBlur, SetHueRotate, ResetHueRotate, SetInvert,
-        ResetInvert, SetSepia, ResetSepia, SetSaturate, ResetSaturate, SetColorBlend, ResetColorBlend, SetGrayscale,
-        ResetGrayscale, SetContrast, ResetContrast, SetBrightness, ResetBrightness, SetBlur, ResetBlur,
-        SetLinearGradient, ResetLinearGradient, SetSweepGradient, ResetSweepGradient, SetRadialGradient,
-        ResetRadialGradient, SetOverlay, ResetOverlay, SetBorderImage, ResetBorderImage, SetBorderImageGradient,
-        SetForegroundBlurStyle, ResetForegroundBlurStyle, SetLinearGradientBlur, ResetLinearGradientBlur,
-        SetBackgroundBlurStyle, ResetBackgroundBlurStyle, SetBorder, ResetBorder, SetBackgroundImagePosition,
-        ResetBackgroundImagePosition, SetBackgroundImageSize, ResetBackgroundImageSize, SetBackgroundImage,
-        ResetBackgroundImage, SetTranslate, ResetTranslate, SetScale, SetScaleWithoutTransformCenter, ResetScale,
-        SetRotate, SetRotateWithoutTransformCenter, ResetRotate, SetGeometryTransition, ResetGeometryTransition,
-        SetPixelStretchEffect, ResetPixelStretchEffect, SetLightUpEffect, ResetLightUpEffect, SetSphericalEffect,
-        ResetSphericalEffect, SetRenderGroup, ResetRenderGroup, SetRenderFit, ResetRenderFit, SetUseEffect,
-        ResetUseEffect, SetForegroundColor, ResetForegroundColor, SetMotionPath, ResetMotionPath,
-        SetMotionBlur, ResetMotionBlur, SetGroupDefaultFocus,
+        ResetPositionEdges, SetBorderStyle, ResetBorderStyle, SetBackShadow, ResetBackShadow, SetHitTestBehavior,
+        ResetHitTestBehavior, SetZIndex, ResetZIndex, SetOpacity, ResetOpacity, SetAlign, ResetAlign, SetBackdropBlur,
+        ResetBackdropBlur, SetHueRotate, ResetHueRotate, SetInvert, ResetInvert, SetSepia, ResetSepia, SetSaturate,
+        ResetSaturate, SetColorBlend, ResetColorBlend, SetGrayscale, ResetGrayscale, SetContrast, ResetContrast,
+        SetBrightness, ResetBrightness, SetBlur, ResetBlur, SetLinearGradient, ResetLinearGradient, SetSweepGradient,
+        ResetSweepGradient, SetRadialGradient, ResetRadialGradient, SetOverlay, ResetOverlay, SetBorderImage,
+        ResetBorderImage, SetBorderImageGradient, SetForegroundBlurStyle, ResetForegroundBlurStyle,
+        SetLinearGradientBlur, ResetLinearGradientBlur, SetBackgroundBlurStyle, ResetBackgroundBlurStyle, SetBorder,
+        ResetBorder, SetBackgroundImagePosition, ResetBackgroundImagePosition, SetBackgroundImageSize,
+        ResetBackgroundImageSize, SetBackgroundImage, ResetBackgroundImage, SetTranslate, ResetTranslate, SetScale,
+        SetScaleWithoutTransformCenter, ResetScale, SetRotate, SetRotateWithoutTransformCenter, ResetRotate,
+        SetGeometryTransition, ResetGeometryTransition, SetPixelStretchEffect, ResetPixelStretchEffect,
+        SetLightUpEffect, ResetLightUpEffect, SetSphericalEffect, ResetSphericalEffect, SetRenderGroup,
+        ResetRenderGroup, SetRenderFit, ResetRenderFit, SetUseEffect, ResetUseEffect, SetForegroundColor,
+        ResetForegroundColor, SetMotionPath, ResetMotionPath, SetMotionBlur, ResetMotionBlur, SetGroupDefaultFocus,
         ResetGroupDefaultFocus, SetFocusOnTouch, ResetFocusOnTouch, SetFocusable, ResetFocusable, SetTouchable,
         ResetTouchable, SetDefaultFocus, ResetDefaultFocus, SetDisplayPriority, ResetDisplayPriority, SetOffset,
         SetOffsetEdges, ResetOffset, SetPadding, ResetPadding, SetMargin, ResetMargin, SetMarkAnchor, ResetMarkAnchor,
@@ -5917,46 +6067,43 @@ const ArkUICommonModifier* GetCommonModifier()
         ResetGridOffset, SetGridSpan, ResetGridSpan, SetExpandSafeArea, ResetExpandSafeArea, SetFlexBasis,
         ResetFlexBasis, SetAlignRules, ResetAlignRules, SetAccessibilityDescription, ResetAccessibilityDescription,
         SetId, ResetId, SetKey, ResetKey, SetRestoreId, ResetRestoreId, SetTabIndex, ResetTabIndex, SetObscured,
-        ResetObscured, SetResponseRegion, ResetResponseRegion,
-        SetForegroundEffect, ResetForegroundEffect, SetBackgroundEffect, ResetBackgroundEffect,
-        SetBackgroundBrightness, ResetBackgroundBrightness, SetBackgroundBrightnessInternal, ResetBackgroundBrightnessInternal, 
-        SetForegroundBrightness, ResetForegroundBrightness, SetDragPreviewOptions, ResetDragPreviewOptions,
-        SetMouseResponseRegion, ResetMouseResponseRegion, SetEnabled, ResetEnabled, SetUseShadowBatching,
-        ResetUseShadowBatching, SetDraggable, ResetDraggable, SetAccessibilityGroup, ResetAccessibilityGroup,
-        SetHoverEffect, ResetHoverEffect, SetClickEffect, ResetClickEffect, SetKeyBoardShortCut, ResetKeyBoardShortCut,
-        SetPointLightPosition, ResetPointLightPosition, SetPointLightIntensity, ResetPointLightIntensity,
-        SetPointLightColor, ResetPointLightColor, SetPointLightIlluminated, ResetPointLightIlluminated,
-        SetPointLightBloom, ResetPointLightBloom,
-        SetClip, SetClipShape, SetClipPath, ResetClip, SetTransitionCenter, SetOpacityTransition, SetRotateTransition,
-        SetScaleTransition, SetTranslateTransition, SetMaskShape, SetMaskPath, SetProgressMask, SetBlendMode,
-        ResetBlendMode, SetMonopolizeEvents, ResetMonopolizeEvents, SetConstraintSize, ResetConstraintSize,
-        SetOutlineColor, ResetOutlineColor, SetOutlineRadius, ResetOutlineRadius, SetOutlineWidth, ResetOutlineWidth,
-        SetOutlineStyle, ResetOutlineStyle, SetOutline, ResetOutline, SetBindPopup, ResetBindPopup, GetFocusable,
-        GetDefaultFocus, GetResponseRegion,
-        GetOverlay, GetAccessibilityGroup, GetAccessibilityText, GetAccessibilityDescription, GetAccessibilityLevel,
-        SetNeedFocus, GetNeedFocus, GetOpacity, GetBorderWidth, GetBorderWidthDimension,
-        GetBorderRadius, GetBorderColor, GetBorderStyle, GetZIndex, GetVisibility, GetClip, GetClipShape, GetTransform,
-        GetHitTestBehavior, GetPosition, GetShadow, GetCustomShadow, GetSweepGradient, GetRadialGradient, GetMask,
-        GetBlendMode, GetDirection, GetAlignSelf, GetTransformCenter, GetOpacityTransition, GetRotateTransition,
-        GetScaleTransition, GetTranslateTransition, GetOffset, GetMarkAnchor, GetAlignRules, GetBackgroundBlurStyle,
-        GetBackgroundImageSize, GetBackgroundImageSizeWidthStyle, SetOutlineWidthFloat, GetOutlineWidthFloat,
-        GetDisplayPriority, SetAlignRulesWidthType, GetLayoutWeight, GetScale, GetRotate, GetBrightness, GetSaturate,
-        GetBackgroundImagePosition, GetFlexGrow, GetFlexShrink, GetFlexBasis, GetConstraintSize, GetGrayScale,
-        GetInvert, GetSepia, GetContrast, GetForegroundColor, GetBlur, GetLinearGradient, GetAlign, GetWidth,
-        GetHeight, GetBackgroundColor, GetBackgroundImage, GetPadding, GetPaddingDimension, GetConfigSize, GetKey,
-        GetEnabled, GetMargin, GetMarginDimension, GetTranslate, SetMoveTransition, GetMoveTransition, ResetMask,
-        GetAspectRatio, SetBackgroundImageResizable, ResetBackgroundImageResizable,
-        SetBackgroundImageSizeWithUnit, GetRenderFit, GetOutlineColor, GetSize, GetRenderGroup,
-        SetOnVisibleAreaChange, GetGeometryTransition, SetChainStyle, GetChainStyle, ResetChainStyle,
+        ResetObscured, SetResponseRegion, ResetResponseRegion, SetForegroundEffect, ResetForegroundEffect,
+        SetBackgroundEffect, ResetBackgroundEffect, SetBackgroundBrightness, ResetBackgroundBrightness,
+        SetBackgroundBrightnessInternal, ResetBackgroundBrightnessInternal, SetForegroundBrightness,
+        ResetForegroundBrightness, SetDragPreviewOptions, ResetDragPreviewOptions, SetMouseResponseRegion,
+        ResetMouseResponseRegion, SetEnabled, ResetEnabled, SetUseShadowBatching, ResetUseShadowBatching, SetDraggable,
+        ResetDraggable, SetAccessibilityGroup, ResetAccessibilityGroup, SetHoverEffect, ResetHoverEffect,
+        SetClickEffect, ResetClickEffect, SetKeyBoardShortCut, ResetKeyBoardShortCut, SetPointLightPosition,
+        ResetPointLightPosition, SetPointLightIntensity, ResetPointLightIntensity, SetPointLightColor,
+        ResetPointLightColor, SetPointLightIlluminated, ResetPointLightIlluminated, SetPointLightBloom,
+        ResetPointLightBloom, SetClip, SetClipShape, SetClipPath, ResetClip, SetTransitionCenter, SetOpacityTransition,
+        SetRotateTransition, SetScaleTransition, SetTranslateTransition, SetMaskShape, SetMaskPath, SetProgressMask,
+        SetBlendMode, ResetBlendMode, SetMonopolizeEvents, ResetMonopolizeEvents, SetConstraintSize,
+        ResetConstraintSize, SetOutlineColor, ResetOutlineColor, SetOutlineRadius, ResetOutlineRadius, SetOutlineWidth,
+        ResetOutlineWidth, SetOutlineStyle, ResetOutlineStyle, SetOutline, ResetOutline, SetBindPopup, ResetBindPopup,
+        GetFocusable, GetDefaultFocus, GetResponseRegion, GetOverlay, GetAccessibilityGroup, GetAccessibilityText,
+        GetAccessibilityDescription, GetAccessibilityLevel, SetNeedFocus, GetNeedFocus, GetOpacity, GetBorderWidth,
+        GetBorderWidthDimension, GetBorderRadius, GetBorderColor, GetBorderStyle, GetZIndex, GetVisibility, GetClip,
+        GetClipShape, GetTransform, GetHitTestBehavior, GetPosition, GetShadow, GetCustomShadow, GetSweepGradient,
+        GetRadialGradient, GetMask, GetBlendMode, GetDirection, GetAlignSelf, GetTransformCenter, GetOpacityTransition,
+        GetRotateTransition, GetScaleTransition, GetTranslateTransition, GetOffset, GetMarkAnchor, GetAlignRules,
+        GetBackgroundBlurStyle, GetBackgroundImageSize, GetBackgroundImageSizeWidthStyle, SetOutlineWidthFloat,
+        GetOutlineWidthFloat, GetDisplayPriority, SetAlignRulesWidthType, GetLayoutWeight, GetScale, GetRotate,
+        GetBrightness, GetSaturate, GetBackgroundImagePosition, GetFlexGrow, GetFlexShrink, GetFlexBasis,
+        GetConstraintSize, GetGrayScale, GetInvert, GetSepia, GetContrast, GetForegroundColor, GetBlur,
+        GetLinearGradient, GetAlign, GetWidth, GetHeight, GetBackgroundColor, GetBackgroundImage, GetPadding,
+        GetPaddingDimension, GetConfigSize, GetKey, GetEnabled, GetMargin, GetMarginDimension, GetTranslate,
+        SetMoveTransition, GetMoveTransition, ResetMask, GetAspectRatio, SetBackgroundImageResizable,
+        ResetBackgroundImageResizable, SetBackgroundImageSizeWithUnit, GetRenderFit, GetOutlineColor, GetSize,
+        GetRenderGroup, SetOnVisibleAreaChange, GetGeometryTransition, SetChainStyle, GetChainStyle, ResetChainStyle,
         SetBias, GetBias, ResetBias, GetColorBlend, GetForegroundBlurStyle,
-        ResetVisibleAreaChange, ResetAreaChange, SetBackgroundImagePixelMap, SetLayoutRect, GetLayoutRect,
-        ResetLayoutRect, GetFocusOnTouch, SetSystemBarEffect, GetAccessibilityID,
-        SetAccessibilityState, GetAccessibilityState, ResetAccessibilityState,
-        SetAccessibilityValue, GetAccessibilityValue, ResetAccessibilityValue,
-        SetAccessibilityActions, ResetAccessibilityActions, GetAccessibilityActions,
-        SetAccessibilityRole, ResetAccessibilityRole, GetAccessibilityRole,
-        SetFocusScopeId, ResetFocusScopeId,
-        SetFocusScopePriority, ResetFocusScopePriority, SetPixelRound, ResetPixelRound };
+        SetBackgroundImagePixelMap, SetBackgroundImagePixelMapByPixelMapPtr,
+        SetLayoutRect, GetLayoutRect, ResetLayoutRect, GetFocusOnTouch, SetSystemBarEffect,
+        GetAccessibilityID, SetAccessibilityState, GetAccessibilityState, ResetAccessibilityState,
+        SetAccessibilityValue, GetAccessibilityValue, ResetAccessibilityValue, SetAccessibilityActions,
+        ResetAccessibilityActions, GetAccessibilityActions, SetAccessibilityRole, ResetAccessibilityRole,
+        GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
+        SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition };
 
     return &modifier;
 }
@@ -6156,7 +6303,6 @@ void SetOnClick(ArkUINodeHandle node, void* extraParam)
         //displayY
         event.componentAsyncEvent.data[7].f32 =
             usePx ? PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()) : screenOffset.GetY();
-
         SendArkUIAsyncEvent(&event);
     };
     if (uiNode->GetTag() == "Span") {
@@ -6321,7 +6467,9 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
             event.touchEvent.historyEvents = nullptr;
             event.touchEvent.historySize = 0;
         }
+        event.touchEvent.stopPropagation = false;
         SendArkUIAsyncEvent(&event);
+        eventInfo.SetStopPropagation(event.touchEvent.stopPropagation);
     };
     ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));
 }
@@ -6434,5 +6582,95 @@ void SetOnAccessibilityActions(ArkUINodeHandle node, void* extraParam)
     accessibilityProperty->SetActions(onEvent);
 }
 
+void ResetOnAppear(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnAppear(frameNode);
+}
+
+void ResetOnDisappear(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnDisappear(frameNode);
+}
+
+void ResetOnAttach(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnAttach(frameNode);
+}
+
+void ResetOnDetach(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnDetach(frameNode);
+}
+
+void ResetOnFocus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnFocus(frameNode);
+}
+
+void ResetOnBlur(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnBlur(frameNode);
+}
+
+void ResetOnAreaChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetAreaChanged(frameNode);
+}
+
+void ResetOnVisibleAreaChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetVisibleChange(frameNode);
+}
+
+void ResetOnClick(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnClick(frameNode);
+}
+
+void ResetOnTouch(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnTouch(frameNode);
+}
+
+void ResetOnTouchIntercept(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetOnTouchIntercept(frameNode, nullptr);
+}
+
+void ResetOnHover(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnHover(frameNode);
+}
+
+void ResetOnMouse(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnMouse(frameNode);
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

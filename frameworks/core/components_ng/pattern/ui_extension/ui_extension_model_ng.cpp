@@ -22,6 +22,8 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/ui_extension/isolated_pattern.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
+#include "core/components_ng/pattern/ui_extension/security_ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_hub.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -127,6 +129,38 @@ void UIExtensionModelNG::Create()
     pipeline->AddWindowStateChangedCallback(nodeId);
 }
 
+void UIExtensionModelNG::Create(const UIExtensionConfig& config)
+{
+    switch (config.sessionType) {
+        case SessionType::SECURITY_UI_EXTENSION_ABILITY:
+            CreateSecurityUIExtension(config);
+            break;
+        default:
+            LOGW("The type uiextension is not supported");
+    }
+}
+
+void UIExtensionModelNG::CreateSecurityUIExtension(const UIExtensionConfig& config)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<SecurityUIExtensionPattern>(); });
+    auto pattern = frameNode->GetPattern<SecurityUIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->Initialize(config);
+    pattern->SetPlaceholderNode(config.placeholderNode);
+    pattern->UpdateWant(config.wantWrap);
+    pattern->SetDensityDpi(config.densityDpi);
+    stack->Push(frameNode);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowStateChangedCallback(nodeId);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->AddDragFrameNode(nodeId, AceType::WeakClaim(AceType::RawPtr(frameNode)));
+}
+
 void UIExtensionModelNG::InitializeDynamicComponent(const RefPtr<FrameNode>& frameNode, const std::string& hapPath,
     const std::string& abcPath, const std::string& entryPoint, void* runtime)
 {
@@ -143,12 +177,22 @@ void UIExtensionModelNG::InitializeIsolatedComponent(
     pattern->InitializeIsolatedComponent(wantWrap, runtime);
 }
 
-void UIExtensionModelNG::SetOnSizeChanged(std::function<void(int32_t, int32_t)>&& onSizeChanged)
+void UIExtensionModelNG::SetAdaptiveWidth(bool state)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<IsolatedPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetOnSizeChangedCallback(std::move(onSizeChanged));
+    pattern->SetAdaptiveWidth(state);
+}
+
+void UIExtensionModelNG::SetAdaptiveHeight(bool state)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<IsolatedPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetAdaptiveHeight(state);
 }
 
 void UIExtensionModelNG::SetOnRemoteReady(std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady)
@@ -158,6 +202,17 @@ void UIExtensionModelNG::SetOnRemoteReady(std::function<void(const RefPtr<UIExte
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOnRemoteReadyCallback(std::move(onRemoteReady));
+}
+
+void UIExtensionModelNG::SetSecurityOnRemoteReady(
+    std::function<void(const RefPtr<NG::SecurityUIExtensionProxy>&)>&& onRemoteReady)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<UIExtensionHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnRemoteReadyCallback(std::move(onRemoteReady));
+    return;
 }
 
 void UIExtensionModelNG::SetOnRelease(std::function<void(int32_t)>&& onRelease)
@@ -177,27 +232,51 @@ void UIExtensionModelNG::SetOnResult(std::function<void(int32_t, const AAFwk::Wa
     pattern->SetOnResultCallback(std::move(onResult));
 }
 
-void UIExtensionModelNG::SetOnTerminated(std::function<void(int32_t, const RefPtr<WantWrap>&)>&& onTerminated)
+void UIExtensionModelNG::SetOnTerminated(
+    std::function<void(int32_t, const RefPtr<WantWrap>&)>&& onTerminated, NG::SessionType sessionType)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    if (sessionType == SessionType::SECURITY_UI_EXTENSION_ABILITY) {
+        auto eventHub = frameNode->GetEventHub<UIExtensionHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetOnTerminatedCallback(std::move(onTerminated));
+        return;
+    }
+
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     pattern->SetOnTerminatedCallback(std::move(onTerminated));
 }
 
-void UIExtensionModelNG::SetOnReceive(std::function<void(const AAFwk::WantParams&)>&& onReceive)
+void UIExtensionModelNG::SetOnReceive(
+    std::function<void(const AAFwk::WantParams&)>&& onReceive, NG::SessionType sessionType)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    if (sessionType == SessionType::SECURITY_UI_EXTENSION_ABILITY) {
+        auto eventHub = frameNode->GetEventHub<UIExtensionHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetOnReceiveCallback(std::move(onReceive));
+        return;
+    }
+
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     pattern->SetOnReceiveCallback(std::move(onReceive));
 }
 
 void UIExtensionModelNG::SetOnError(
-    std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError)
+    std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError,
+    NG::SessionType sessionType)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    if (sessionType == SessionType::SECURITY_UI_EXTENSION_ABILITY) {
+        auto pattern = frameNode->GetPattern<SecurityUIExtensionPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetOnErrorCallback(std::move(onError));
+        return;
+    }
+
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOnErrorCallback(std::move(onError));

@@ -136,6 +136,7 @@
 #include "bridge/declarative_frontend/jsview/js_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
 #include "bridge/declarative_frontend/jsview/js_repeat.h"
+#include "bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.h"
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
 #include "bridge/declarative_frontend/jsview/js_row.h"
 #include "bridge/declarative_frontend/jsview/js_row_split.h"
@@ -252,6 +253,7 @@
 
 #if defined(WINDOW_SCENE_SUPPORTED)
 #include "bridge/declarative_frontend/jsview/js_embedded_component.h"
+#include "bridge/declarative_frontend/jsview/js_security_ui_extension.h"
 #include "bridge/declarative_frontend/jsview/js_ui_extension.h"
 #include "bridge/declarative_frontend/jsview/window_scene/js_root_scene.h"
 #include "bridge/declarative_frontend/jsview/window_scene/js_screen.h"
@@ -634,6 +636,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Swiper", JSSwiper::JSBind },
     { "Panel", JSSlidingPanel::JSBind },
     { "RepeatNative", JSRepeat::JSBind },
+    { "RepeatVirtualScrollNative", JSRepeatVirtualScroll::JSBind },
     { "NavDestination", JSNavDestination::JSBind },
     { "Navigation", JSNavigation::JSBind },
     { "NativeNavPathStack", JSNavPathStack::JSBind },
@@ -802,6 +805,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "VideoController", JSVideoController::JSBind },
 #endif
     { "PluginComponent", JSPlugin::JSBind },
+    { "SecurityUIExtensionComponent", JSSecurityUIExtension::JSBind },
     { "UIExtensionComponent", JSUIExtension::JSBind },
 #endif
 #if defined(MODEL_COMPONENT_SUPPORTED)
@@ -811,6 +815,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "EmbeddedComponent", JSEmbeddedComponent::JSBind },
     { "RootScene", JSRootScene::JSBind },
     { "Screen", JSScreen::JSBind },
+    { "SecurityUIExtensionComponent", JSSecurityUIExtension::JSBind },
+    { "SecurityUIExtensionProxy", JSSecurityUIExtensionProxy::JSBind },
     { "UIExtensionComponent", JSUIExtension::JSBind },
     { "UIExtensionProxy", JSUIExtensionProxy::JSBind },
     { "WindowScene", JSWindowScene::JSBind },
@@ -839,6 +845,28 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ScrollableTargetInfo", JSScrollableTargetInfo::JSBind },
     { "PanRecognizer", JSPanRecognizer::JSBind }
 };
+
+void RegisterBindFuncs(BindingTarget globalObj)
+{
+    auto container = Container::Current();
+    if (container && container->IsDynamicRender() && !container->GetRegisterComponents().empty()) {
+        for (auto& moudle : container->GetRegisterComponents()) {
+            auto bindFunc = bindFuncs.find(moudle);
+            if (bindFunc != bindFuncs.end()) {
+                bindFunc->second(globalObj);
+                continue;
+            }
+            if (!RegisterExtraViewByName(globalObj, moudle)) {
+                LOGW("module not exist, name: %{public}s", moudle.c_str());
+            }
+        }
+        return;
+    }
+
+    for (auto& iter : bindFuncs) {
+        iter.second(globalObj);
+    }
+}
 
 void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)
 {
@@ -886,9 +914,8 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)
     JSCircleShape::JSBind(globalObj);
     JSEllipseShape::JSBind(globalObj);
     JSPathShape::JSBind(globalObj);
-    for (auto& iter : bindFuncs) {
-        iter.second(globalObj);
-    }
+
+    RegisterBindFuncs(globalObj);
     RegisterExtraViews(globalObj);
 }
 
@@ -1070,6 +1097,7 @@ void JsBindFormViews(
             RegisterFormModuleByName(globalObj, module, nativeEngine);
         }
     } else {
+        TAG_LOGI(AceLogTag::ACE_FORM, "register all form components, isReload:%{public}d", isReload);
         RegisterAllFormModule(globalObj, nativeEngine);
     }
 }

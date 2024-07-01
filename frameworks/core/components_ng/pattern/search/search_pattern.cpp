@@ -223,6 +223,7 @@ void SearchPattern::OnModifyDone()
 void SearchPattern::SetAccessibilityAction()
 {
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto textAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(textAccessibilityProperty);
     textAccessibilityProperty->SetActionSetSelection([host](int32_t start, int32_t end, bool isForward) {
@@ -244,6 +245,34 @@ void SearchPattern::SetAccessibilityAction()
         CHECK_NULL_RETURN(pattern, -1);
         auto index = pattern->HandleGetCaretIndex();
         return index;
+    });
+    SetSearchFieldAccessibilityAction();
+}
+
+void SearchPattern::SetSearchFieldAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldAccessibilityProperty = textFieldFrameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    textFieldAccessibilityProperty->SetActionClick([host]() {
+        auto gesture = host->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gesture);
+        auto actuator = gesture->GetUserClickEventActuator();
+        CHECK_NULL_VOID(actuator);
+        auto callBack = actuator->GetClickEvent();
+        CHECK_NULL_VOID(callBack);
+        GestureEvent gestureEvent;
+        callBack(gestureEvent);
+    });
+
+    auto textAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    textAccessibilityProperty->SetActionSetText([host](const std::string& value) {
+        auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+        CHECK_NULL_VOID(textFieldFrameNode);
+        auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(textFieldPattern);
+        textFieldPattern->InsertValue(value);
     });
 }
 
@@ -1233,6 +1262,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     json->PutExtAttr("inputFilter", textFieldLayoutProperty->GetInputFilterValue("").c_str(), filter);
     json->PutExtAttr(
         "textIndent", textFieldLayoutProperty->GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
+    json->PutExtAttr("enablePreviewText", textFieldPattern->GetSupportPreviewText(), filter);
 }
 
 std::string SearchPattern::SearchTypeToString() const
@@ -1250,6 +1280,8 @@ std::string SearchPattern::SearchTypeToString() const
             return "SearchType.EMAIL";
         case TextInputType::PHONE:
             return "SearchType.PHONE_NUMBER";
+        case TextInputType::URL:
+            return "SearchType.URL";
         default:
             return "SearchType.NORMAL";
     }

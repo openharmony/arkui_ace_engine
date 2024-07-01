@@ -58,7 +58,8 @@ class XComponentPattern : public Pattern {
 
 public:
     XComponentPattern() = default;
-    XComponentPattern(const std::string& id, XComponentType type, const std::string& libraryname,
+    XComponentPattern(const std::optional<std::string>& id, XComponentType type,
+        const std::optional<std::string>& libraryname,
         const std::shared_ptr<InnerXComponentController>& xcomponentController, float initWidth = 0.0f,
         float initHeight = 0.0f);
     ~XComponentPattern() override = default;
@@ -121,6 +122,7 @@ public:
 
     void NativeXComponentInit()
     {
+        ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] NativeXComponentInit", GetId().c_str());
         CHECK_RUN_ON(UI);
         CHECK_NULL_VOID(nativeXComponentImpl_);
         CHECK_NULL_VOID(nativeXComponent_);
@@ -154,9 +156,13 @@ public:
         return renderSurface_->GetNativeWindow();
     }
 
-    const std::string& GetId() const
+    std::string GetId() const
     {
-        return id_;
+        if (id_.has_value()) {
+            return id_.value();
+        }
+        auto host = GetHost();
+        return "nodeId:" + (host ? std::to_string(host->GetId()) : "-1");
     }
 
     void SetId(const std::string& id)
@@ -164,12 +170,12 @@ public:
         id_ = id;
     }
 
-    const std::string& GetLibraryName() const
+    const std::optional<std::string>& GetLibraryName() const
     {
         return libraryname_;
     }
 
-    void SetLibraryName(const std::string& libraryname)
+    void SetLibraryName(const std::optional<std::string>& libraryname)
     {
         libraryname_ = libraryname;
     }
@@ -297,7 +303,7 @@ public:
     void UpdateSurfaceBounds(bool needForceRender, bool frameOffsetChange = false);
     void EnableAnalyzer(bool enable);
     void SetImageAIOptions(void* options);
-    void StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed);
+    void StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed);
     void StopImageAnalyzer();
     RectF AdjustPaintRect(float positionX, float positionY, float width, float height, bool isRound);
     float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
@@ -376,9 +382,9 @@ private:
 #endif
 
     std::vector<OH_NativeXComponent_HistoricalPoint> SetHistoryPoint(const std::list<TouchLocationInfo>& touchInfoList);
-    std::string id_;
+    std::optional<std::string> id_;
     XComponentType type_;
-    std::string libraryname_;
+    std::optional<std::string> libraryname_;
     std::shared_ptr<InnerXComponentController> xcomponentController_;
     std::optional<std::string> soPath_;
 

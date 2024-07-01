@@ -579,9 +579,10 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollVelocity001, TestSize.Level
  */
 HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollVelocity002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
-    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
-    pattern_->itemPosition_.insert({ 0, SwiperItemInfo { .startPos = 0.0f } });
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetEdgeEffect(EdgeEffect::NONE);
+        model.SetLoop(false);
+    });
     auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
     EXPECT_CALL(*mockScroll, HandleScrollVelocity).Times(1).WillOnce(Return(true));
     pattern_->parent_ = mockScroll;
@@ -593,6 +594,28 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollVelocity002, TestSize.Level
 
     auto res = pattern_->HandleScrollVelocity(5.0f);
     EXPECT_TRUE(res);
+    // shouldn't be passed parent
+    pattern_->nestedScroll_ = {
+        .forward = NestedScrollMode::SELF_ONLY,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    pattern_->HandleDragEnd(5.0f);
+
+    pattern_->nestedScroll_ = {
+        .forward = NestedScrollMode::SELF_FIRST,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
+    EXPECT_TRUE(pattern_->nestedScroll_.NeedParent(true));
+    EXPECT_FALSE(pattern_->nestedScroll_.NeedParent(false));
+    mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
+    EXPECT_CALL(*mockScroll, HandleScrollVelocity).Times(0);
+    pattern_->parent_ = mockScroll;
+    pattern_->HandleDragEnd(5.0f);
+
+    pattern_->UpdateCurrentOffset(-5.0f);
+    pattern_->MarkDirtyNodeSelf();
+    FlushLayoutTask(frameNode_);
+    pattern_->HandleDragEnd(-5.0f);
 }
 
 /**

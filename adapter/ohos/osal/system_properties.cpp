@@ -15,6 +15,7 @@
 
 #include "base/utils/system_properties.h"
 
+#include <cstdint>
 #include <memory>
 #include <mutex>
 #include <shared_mutex>
@@ -335,6 +336,11 @@ float ReadDragStartPanDistanceThreshold()
         DEFAULT_DRAG_START_PAN_DISTANCE_THRESHOLD_IN_VP) * 1.0f;
 }
 
+uint32_t ReadCanvasDebugMode()
+{
+    return system::GetUintParameter("persist.ace.canvas.debug.mode", 0u);
+}
+
 bool IsFaultInjectEnabled()
 {
     return (system::GetParameter("persist.ace.fault.inject.enabled", "false") == "true");
@@ -357,6 +363,7 @@ bool SystemProperties::traceInputEventEnable_ = IsTraceInputEventEnabled() && de
 bool SystemProperties::stateManagerEnable_ = IsStateManagerEnable();
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
 bool SystemProperties::syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
+bool SystemProperties::pixelRoundEnable_ = IsPixelRoundEnabled();
 bool SystemProperties::textTraceEnable_ = IsTextTraceEnabled();
 bool SystemProperties::accessTraceEnable_ = IsAccessTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
@@ -411,6 +418,7 @@ bool SystemProperties::faultInjectEnabled_  = IsFaultInjectEnabled();
 bool SystemProperties::opincEnabled_ = IsOpIncEnabled();
 float SystemProperties::dragStartDampingRatio_ = ReadDragStartDampingRatio();
 float SystemProperties::dragStartPanDisThreshold_ = ReadDragStartPanDistanceThreshold();
+uint32_t SystemProperties::canvasDebugMode_ = ReadCanvasDebugMode();
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -541,7 +549,9 @@ void SystemProperties::InitDeviceInfo(
     stateManagerEnable_ = IsStateManagerEnable();
     buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
     syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
+    pixelRoundEnable_ = IsPixelRoundEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
+    canvasDebugMode_ = ReadCanvasDebugMode();
     isHookModeEnabled_ = IsHookModeEnabled();
     debugAutoUIEnabled_ = system::GetParameter(ENABLE_DEBUG_AUTOUI_KEY, "false") == "true";
     debugOffsetLogEnabled_ = system::GetParameter(ENABLE_DEBUG_OFFSET_LOG_KEY, "false") == "true";
@@ -656,7 +666,7 @@ bool SystemProperties::GetDebugPixelMapSaveEnabled()
     return system::GetBoolParameter("persist.ace.save.pixelmap.enabled", false);
 }
 
-bool SystemProperties::GetPixelRoundEnable()
+bool SystemProperties::IsPixelRoundEnabled()
 {
     return system::GetBoolParameter("ace.debug.pixelround.enabled", true);
 }

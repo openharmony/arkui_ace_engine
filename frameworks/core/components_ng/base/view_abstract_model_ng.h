@@ -584,17 +584,20 @@ public:
         ViewAbstract::CleanTransition();
     }
 
-    void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect, bool passThrough = false) override
+    void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect,
+        NG::TransitionFinishCallback&& finishCallback = nullptr) override
     {
-        ViewAbstract::SetChainedTransition(effect);
+        ViewAbstract::SetChainedTransition(effect, std::move(finishCallback));
     }
 
     void SetOverlay(const std::string& text, std::function<void()>&& buildFunc,
-        const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
-        const std::optional<Dimension>& offsetY, NG::OverlayType type) override
+        const RefPtr<NG::FrameNode>& contentNode, const std::optional<Alignment>& align,
+        const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY, NG::OverlayType type) override
     {
         if (type == NG::OverlayType::BUILDER) {
             ViewAbstract::SetOverlayBuilder(std::move(buildFunc), align, offsetX, offsetY);
+        } else if (type == NG::OverlayType::COMPONENT_CONTENT) {
+            ViewAbstract::SetOverlayComponentContent(contentNode, align, offsetX, offsetY);
         } else {
             NG::OverlayOptions overlay;
             overlay.content = text;
@@ -622,9 +625,10 @@ public:
         ViewAbstract::SetSharedTransition(shareId, option);
     }
 
-    void SetGeometryTransition(const std::string& id, bool followWithoutTransition = false) override
+    void SetGeometryTransition(const std::string& id,
+        bool followWithoutTransition = false, bool doRegisterSharedTransition = true) override
     {
-        ViewAbstract::SetGeometryTransition(id, followWithoutTransition);
+        ViewAbstract::SetGeometryTransition(id, followWithoutTransition, doRegisterSharedTransition);
     }
 
     void SetMotionPath(const MotionPathOption& option) override
@@ -869,6 +873,13 @@ public:
     void SetOnKeyPreIme(OnKeyPreImeFunc&& onKeyCallback) override
     {
         auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
+    }
+
+    static void SetOnKeyPreIme(FrameNode* frameNode, OnKeyPreImeFunc&& onKeyCallback)
+    {
+        auto focusHub = frameNode->GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
     }
@@ -1217,6 +1228,13 @@ public:
         focusHub->ClearOnKeyPreIme();
     }
 
+    static void DisableOnKeyPreIme(FrameNode* frameNode)
+    {
+        auto focusHub = frameNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->ClearOnKeyPreIme();
+    }
+
     void DisableOnHover() override
     {
         ViewAbstract::DisableOnHover();
@@ -1376,6 +1394,21 @@ private:
     void UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts) override
     {
         ViewAbstract::UpdateSafeAreaExpandOpts(opts);
+    }
+
+    void SetPositionLocalizedEdges(bool needLocalized) override
+    {
+        ViewAbstract::SetPositionLocalizedEdges(needLocalized);
+    }
+
+    void SetLocalizedMarkAnchor(bool needLocalized) override
+    {
+        ViewAbstract::SetLocalizedMarkAnchor(needLocalized);
+    }
+
+    void SetOffsetLocalizedEdges(bool needLocalized) override
+    {
+        ViewAbstract::SetOffsetLocalizedEdges(needLocalized);
     }
 };
 } // namespace OHOS::Ace::NG

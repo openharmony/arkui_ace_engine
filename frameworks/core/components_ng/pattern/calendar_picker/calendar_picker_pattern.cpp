@@ -71,18 +71,18 @@ void CalendarPickerPattern::InitDateIndex()
         monthIndex_ = MONTH_INDEX;
         dayIndex_ = DAY_INDEX;
     } else {
-        int32_t index = 0;
+        size_t index = 0;
         for (size_t i = 0; i < outOrder.size(); ++i) {
             if (outOrder[i] == "year") {
-                yearIndex_ = i + index;
+                yearIndex_ = static_cast<int32_t>(i + index);
             }
 
             if (outOrder[i] == "month") {
-                monthIndex_ = i + index;
+                monthIndex_ = static_cast<int32_t>(i + index);
             }
 
             if (outOrder[i] == "day") {
-                dayIndex_ = i + index;
+                dayIndex_ = static_cast<int32_t>(i + index);
             }
 
             index++;

@@ -806,4 +806,12 @@ int32_t ListModelNG::GetInitialIndex(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, InitialIndex, value, frameNode, value);
     return value;
 }
+
+V2::ItemDivider ListModelNG::GetDivider(FrameNode* frameNode)
+{
+    V2::ItemDivider value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, Divider, value, frameNode, value);
+    return value;
+}
+
 } // namespace OHOS::Ace::NG

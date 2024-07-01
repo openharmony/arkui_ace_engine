@@ -35,9 +35,6 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    static void PrintGridMatrix(
-        const std::map<int32_t, std::map<int32_t, int32_t>>& gridMatrix, const std::map<int32_t, float>& positions);
-    static void PrintLineHeightMap(const std::map<int32_t, float>& lineHeightMap);
     void SetCanOverScroll(bool canOverScroll)
     {
         canOverScroll_ = canOverScroll;

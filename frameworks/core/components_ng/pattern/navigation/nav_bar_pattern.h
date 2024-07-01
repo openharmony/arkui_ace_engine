@@ -49,6 +49,11 @@ public:
     {
         return MakeRefPtr<NavBarLayoutAlgorithm>();
     }
+    
+    bool CheckCustomAvoidKeyboard() const override
+    {
+        return !NearZero(avoidKeyboardOffset_);
+    }
 
     void SetTitleBarMenuItems(const std::vector<NG::BarItem>& menuItems)
     {
@@ -155,13 +160,13 @@ public:
     }
     OffsetF GetShowMenuOffset(const RefPtr<BarItemNode> barItemNode, RefPtr<FrameNode> menuNode);
 
-    void SetKeyboardOffset(float keyboardOffset)
+    void SetAvoidKeyboardOffset(float avoidKeyboardOffset)
     {
-        keyboardOffset_ = keyboardOffset;
+        avoidKeyboardOffset_ = avoidKeyboardOffset;
     }
-    float GetKeyboardOffset()
+    float GetAvoidKeyboardOffset()
     {
-        return keyboardOffset_;
+        return avoidKeyboardOffset_;
     }
 
 protected:
@@ -191,7 +196,7 @@ private:
     bool isTitleMenuNodeShowing_ = false;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
     int32_t maxMenuNums_ = -1;
-    float keyboardOffset_ = 0.0f;
+    float avoidKeyboardOffset_ = 0.0f;
     bool isWindowFocus_ = true;
 };
 

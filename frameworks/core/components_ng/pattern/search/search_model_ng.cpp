@@ -39,9 +39,11 @@ constexpr int32_t IMAGE_INDEX = 1;
 constexpr int32_t CANCEL_IMAGE_INDEX = 2;
 constexpr int32_t CANCEL_BUTTON_INDEX = 3;
 constexpr int32_t BUTTON_INDEX = 4;
+constexpr float MAX_FONT_SCALE = 2.0f;
 const std::string INSPECTOR_PREFIX = "__SearchField__";
 const std::vector<std::string> SPECICALIZED_INSPECTOR_INDEXS = { "", "Image__", "CancelImage__", "CancelButton__",
     "Button__" };
+const std::string DROP_TYPE_STYLED_STRING = "ApplicationDefinedType";
 
 void UpdateInnerInspector(FrameNode* frameNode, const std::string& key)
 {
@@ -668,7 +670,7 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
         V2::SEARCH_Field_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SearchTextFieldPattern>(); });
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
-    std::set<std::string> allowDropSet({ DROP_TYPE_PLAIN_TEXT });
+    std::set<std::string> allowDropSet({ DROP_TYPE_PLAIN_TEXT, DROP_TYPE_HYPERLINK, DROP_TYPE_STYLED_STRING });
     frameNode->SetAllowDrop(allowDropSet);
     
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
@@ -690,6 +692,7 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
     pattern->InitSurfaceChangedCallback();
     pattern->InitSurfacePositionChangedCallback();
     pattern->SetTextFadeoutCapacity(true);
+    pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
     auto renderContext = frameNode->GetRenderContext();
@@ -745,6 +748,7 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
     textLayoutProperty->UpdateContent(defaultText);
     textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
     textLayoutProperty->UpdateFontSize(searchTheme->GetFontSize());
+    textLayoutProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
     textLayoutProperty->UpdateMaxLines(1);
 
     PaddingProperty padding;

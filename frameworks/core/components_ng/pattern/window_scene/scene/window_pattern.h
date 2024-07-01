@@ -53,11 +53,12 @@ protected:
     void RegisterLifecycleListener();
     void UnregisterLifecycleListener();
 
-    void CreateStartingNode();
-    void CreateContentNode();
-    void CreateSnapshotNode(std::optional<std::shared_ptr<Media::PixelMap>> snapshot = std::nullopt);
+    void CreateAppWindow();
+    void CreateBlankWindow();
+    void CreateStartingWindow();
+    void CreateSnapshotWindow(std::optional<std::shared_ptr<Media::PixelMap>> snapshot = std::nullopt);
     void ClearImageCache(const ImageSourceInfo& sourceInfo);
-    void CreateBlankNode();
+
     void AddChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
         const std::string& nodeType, int32_t index = DEFAULT_NODE_SLOT);
     void RemoveChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
@@ -68,15 +69,16 @@ protected:
     virtual void OnForeground() {}
     virtual void OnBackground() {}
     virtual void OnDisconnect() {}
+    virtual void OnDrawingCompleted() {}
 
-    RefPtr<FrameNode> startingNode_;
-    RefPtr<FrameNode> contentNode_;
-    RefPtr<FrameNode> snapshotNode_;
-    RefPtr<FrameNode> blankNode_;
-    std::string startingNodeName_ = "startingNode";
-    std::string contentNodeName_ = "contentNode";
-    std::string snapshotNodeName_ = "snapshotNode";
-    std::string blankNodeName_ = "blankNode";
+    RefPtr<FrameNode> startingWindow_;
+    RefPtr<FrameNode> appWindow_;
+    RefPtr<FrameNode> snapshotWindow_;
+    RefPtr<FrameNode> blankWindow_;
+    std::string startingWindowName_ = "StartingWindow";
+    std::string appWindowName_ = "AppWindow";
+    std::string snapshotWindowName_ = "SnapshotWindow";
+    std::string blankWindowName_ = "BlankWindow";
     bool attachToFrameNodeFlag_ = false;
 
     sptr<Rosen::Session> session_;

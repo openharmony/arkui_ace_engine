@@ -69,4 +69,29 @@ ArkUINativeModuleValue RefreshBridege::ResetPullToRefresh(ArkUIRuntimeCallInfo* 
     GetArkUINodeModifiers()->getRefreshModifier()->resetPullToRefresh(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+ArkUINativeModuleValue RefreshBridege::SetPullDownRatio(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    if (valueArg->IsNumber()) {
+        float value = std::clamp(static_cast<float>(valueArg->ToNumber(vm)->Value()), 0.f, 1.f);
+        GetArkUINodeModifiers()->getRefreshModifier()->setPullDownRatio(nativeNode, value);
+    } else {
+        GetArkUINodeModifiers()->getRefreshModifier()->resetPullDownRatio(nativeNode);
+    }
+
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue RefreshBridege::ResetPullDownRatio(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRefreshModifier()->resetPullDownRatio(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

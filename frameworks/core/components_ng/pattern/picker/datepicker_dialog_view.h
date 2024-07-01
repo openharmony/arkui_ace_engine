@@ -96,6 +96,7 @@ private:
     static void SwitchPickerPage(const RefPtr<FrameNode>& pickerStack, const RefPtr<FrameNode>& contentColumn,
         const RefPtr<DateTimeAnimationController>& animationController, bool useMilitary = false);
     static void SwitchDatePickerPage(const RefPtr<FrameNode>& dateNode, bool IsSwitchByTitle = false);
+    static void HideContentChildrenButton(const RefPtr<FrameNode>& contentRow);
     static void SwitchContentRowButton(const RefPtr<FrameNode>& contentRow, bool useMilitary = false);
     static void ShowContentRowButton(const RefPtr<FrameNode>& contentRow, bool isFirstPage = true);
     static void CreateAndAddTitleClickEvent(
@@ -113,6 +114,7 @@ private:
         const RefPtr<ButtonLayoutProperty>& buttonConfirmLayoutProperty, const RefPtr<DialogTheme>& dialogTheme);
     static void UpdateCancelButtonMargin(
         const RefPtr<ButtonLayoutProperty>& buttonCancelLayoutProperty, const RefPtr<DialogTheme>& dialogTheme);
+    static void UpdateNextButtonMargin(const RefPtr<ButtonLayoutProperty>& buttonNextLayoutProperty);
     static void UpdateButtonStyles(const std::vector<ButtonInfo>& buttonInfos, size_t index,
         const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext);
     static void UpdateButtonStyleAndRole(const std::vector<ButtonInfo>& buttonInfos, size_t index,
@@ -139,17 +141,19 @@ private:
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static std::function<void()> CreateAndSetTimePickerSwitchEvent(
         const RefPtr<FrameNode>& monthAndDayPickerNode, const RefPtr<FrameNode>& timePickerNode,
-        const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<FrameNode>& buttonConfirmNode,
-        const RefPtr<FrameNode>& cancelNextDividerNode, const RefPtr<FrameNode>& nextConfirmDividerNode);
+        const RefPtr<FrameNode>& contentRow);
+    static std::function<void(const GestureEvent&)> CreateNextPrevClickEvent(
+        const RefPtr<FrameNode>& textNextPrevNode, const RefPtr<FrameNode>& nextPrevButtonNode,
+        const RefPtr<DialogTheme>& dialogTheme, const RefPtr<FrameNode>& dateNode,
+        std::function<void()>& switchEvent, const RefPtr<FrameNode>& contentRow);
     static void SwitchTimePickerPage(
         const RefPtr<FrameNode> &monthAndDayPickerNode, const RefPtr<FrameNode> &timePickerNode,
-        const RefPtr<FrameNode> &buttonCancelNode, const RefPtr<FrameNode> &buttonConfirmNode,
-        const RefPtr<FrameNode>& datePickerNode, const RefPtr<FrameNode>& contentRow);
+        const RefPtr<FrameNode> &contentRow);
     static bool GetIsUserSetTextProperties(const PickerTextProperties& properties);
-
+    static void SetAnimationProperty(const RefPtr<FrameNode>& pickerStack,
+        const RefPtr<FrameNode>& contentColumn, const RefPtr<DateTimeAnimationController>& animationController);
     static bool switchTimePickerFlag_;
     static bool switchDatePickerFlag_;
-    static bool hasSwitchContentRow_;
     static bool isShowTime_;
     static bool isUserSetFont_;
 };

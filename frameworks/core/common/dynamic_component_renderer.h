@@ -23,9 +23,9 @@
 
 namespace OHOS::Ace::NG {
 struct RendererDumpInfo {
-    int64_t createUiContenTime;
-    int64_t limitedWorkerInitTime;
-    int64_t loadAbcTime;
+    int64_t createUiContenTime = 0;
+    int64_t limitedWorkerInitTime = 0;
+    int64_t loadAbcTime = 0;
 
     void ReSet()
     {
@@ -35,6 +35,13 @@ struct RendererDumpInfo {
     }
 };
 
+struct IsolatedInfo {
+    std::string abcPath;
+    std::string reourcePath;
+    std::string entryPoint;
+    std::vector<std::string> registerComponents;
+};
+
 class DynamicComponentRenderer : public virtual AceType {
     DECLARE_ACE_TYPE(DynamicComponentRenderer, AceType);
 
@@ -42,14 +49,14 @@ public:
     DynamicComponentRenderer() = default;
     virtual ~DynamicComponentRenderer() = default;
 
-    static RefPtr<DynamicComponentRenderer> Create(const RefPtr<FrameNode>& host, const std::string& hapPath,
-        const std::string& abcPath, const std::string& entryPoint, void* runtime);
+    static RefPtr<DynamicComponentRenderer> Create(
+        const RefPtr<FrameNode>& host, void* runtime, const IsolatedInfo& isolatedInfo);
 
+    virtual void SetAdaptiveSize(bool adaptiveWidth, bool adaptiveHeight) = 0;
     virtual void CreateContent() = 0;
     virtual void DestroyContent() = 0;
 
-    virtual void UpdateViewportConfig(const ViewportConfig& config, Rosen::WindowSizeChangeReason reason,
-        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) = 0;
+    virtual void UpdateViewportConfig(const SizeF& size, float density, int32_t orientation) = 0;
 
     virtual void TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
     virtual bool TransferKeyEvent(const KeyEvent& event) = 0;

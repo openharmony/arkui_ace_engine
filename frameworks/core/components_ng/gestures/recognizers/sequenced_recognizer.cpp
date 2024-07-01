@@ -112,6 +112,15 @@ void SequencedRecognizer::OnBlocked()
 
 bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
 {
+    if (point.type == TouchType::DOWN || point.type == TouchType::UP) {
+        if (point.sourceType == SourceType::TOUCH) {
+            inputEventType_ = InputEventType::TOUCH_SCREEN;
+        } else {
+            inputEventType_ = InputEventType::MOUSE_BUTTON;
+        }
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, sequenced %{public}d type: %{public}d", point.touchEventId,
+            point.id, static_cast<int32_t>(point.type));
+    }
     auto iter = recognizers_.begin();
     std::advance(iter, currentIndex_);
     RefPtr<NGGestureRecognizer> curRecognizer = *iter;
@@ -126,15 +135,10 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
         childTouchTestList_ = point.childTouchTestList;
     }
     touchPoints_[point.id] = point;
-    if (currentIndex_ > 0 && curRecognizer->GetRefereeState() == RefereeState::READY) {
-        // the prevState is ready, need to pase down event to the new coming recognizer.
-        for (auto& item : touchPoints_) {
-            item.second.type = TouchType::DOWN;
-            if (!childTouchTestList_.empty()) {
-                item.second.childTouchTestList = childTouchTestList_;
-            }
-            curRecognizer->HandleEvent(item.second);
-            AddGestureProcedure(item.second, curRecognizer);
+    // the prevState is ready, need to pase down event to the new coming recognizer.
+    if (curRecognizer && curRecognizer->GetRefereeState() == RefereeState::READY) {
+        if (inputEventType_ != InputEventType::MOUSE_BUTTON || !CheckBetweenTwoLongPressRecognizer(currentIndex_)) {
+            SendTouchEventToNextRecognizer(curRecognizer);
         }
     }
     switch (point.type) {
@@ -161,6 +165,9 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
 
 bool SequencedRecognizer::HandleEvent(const AxisEvent& point)
 {
+    if (point.action == AxisAction::BEGIN) {
+        inputEventType_ = InputEventType::AXIS;
+    }
     auto iter = recognizers_.begin();
     std::advance(iter, currentIndex_);
     RefPtr<NGGestureRecognizer> curRecognizer = *iter;
@@ -168,13 +175,12 @@ bool SequencedRecognizer::HandleEvent(const AxisEvent& point)
         GroupAdjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return true;
     }
+    lastAxisEvent_ = point;
     if (currentIndex_ > 0) {
         auto prevState = curRecognizer->GetRefereeState();
         if (prevState == RefereeState::READY) {
             // the prevState is ready, need to pass axis-begin event to the new coming recognizer.
-            auto event = point;
-            event.action = AxisAction::BEGIN;
-            curRecognizer->HandleEvent(event);
+            SendTouchEventToNextRecognizer(curRecognizer);
         }
     }
     if (point.action != AxisAction::NONE) {
@@ -235,6 +241,56 @@ void SequencedRecognizer::UpdateCurrentIndex()
         return;
     }
     currentIndex_++;
+    // if the sequence recognizer between long press recognizer, auto send to next event.
+    if (inputEventType_ == InputEventType::MOUSE_BUTTON && CheckBetweenTwoLongPressRecognizer(currentIndex_)) {
+        auto duration = 0;
+        auto iter = recognizers_.begin();
+        std::advance(iter, currentIndex_ - 1);
+        RefPtr<NGGestureRecognizer> curRecognizer = *iter;
+        RefPtr<LongPressRecognizer> recognizer = AceType::DynamicCast<LongPressRecognizer>(curRecognizer);
+        if (recognizer) {
+            duration = recognizer->GetDuration();
+        }
+        SendTouchEventToNextRecognizer(curRecognizer, duration);
+    }
+}
+
+bool SequencedRecognizer::CheckBetweenTwoLongPressRecognizer(int32_t currentIndex)
+{
+    if (currentIndex <= 0 || currentIndex_ == static_cast<int32_t>((recognizers_.size() - 1))) {
+        return false;
+    }
+    auto iterBefore = recognizers_.begin();
+    std::advance(iterBefore, currentIndex - 1);
+    auto iterAfter = recognizers_.begin();
+    std::advance(iterAfter, currentIndex);
+    return AceType::InstanceOf<LongPressRecognizer>(*iterBefore) &&
+           AceType::InstanceOf<LongPressRecognizer>(*iterAfter);
+}
+
+void SequencedRecognizer::SendTouchEventToNextRecognizer(
+    const RefPtr<NGGestureRecognizer> curRecognizer, int64_t beforeDuration)
+{
+    if (inputEventType_ == InputEventType::AXIS) {
+        auto event = lastAxisEvent_;
+        event.action = AxisAction::BEGIN;
+        curRecognizer->HandleEvent(event);
+        return;
+    }
+    for (auto& item : touchPoints_) {
+        item.second.type = TouchType::DOWN;
+        if (beforeDuration > 0) {
+            std::chrono::microseconds microseconds(
+                static_cast<int64_t>(item.second.time.time_since_epoch().count()) + beforeDuration);
+            TimeStamp time(microseconds);
+            item.second.time = time;
+        }
+        if (!childTouchTestList_.empty()) {
+            item.second.childTouchTestList = childTouchTestList_;
+        }
+        curRecognizer->HandleEvent(item.second);
+        AddGestureProcedure(item.second, curRecognizer);
+    }
 }
 
 void SequencedRecognizer::OnResetStatus()
@@ -242,6 +298,7 @@ void SequencedRecognizer::OnResetStatus()
     RecognizerGroup::OnResetStatus();
     currentIndex_ = 0;
     deadlineTimer_.Cancel();
+    childTouchTestList_.clear();
 }
 
 void SequencedRecognizer::DeadlineTimer()
@@ -314,6 +371,7 @@ void SequencedRecognizer::CleanRecognizerState()
         disposal_ = GestureDisposal::NONE;
     }
     currentIndex_ = 0;
+    childTouchTestList_.clear();
 }
 
 void SequencedRecognizer::ForceCleanRecognizer()
@@ -325,5 +383,6 @@ void SequencedRecognizer::ForceCleanRecognizer()
     }
     MultiFingersRecognizer::ForceCleanRecognizer();
     currentIndex_ = 0;
+    childTouchTestList_.clear();
 }
 } // namespace OHOS::Ace::NG

@@ -19,6 +19,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/common/font_manager.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components_ng/image_provider/svg_dom_base.h"
 #include "core/components_ng/pattern/custom_paint/canvas_modifier.h"
@@ -32,6 +33,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+const int32_t DEFAULT_SAVE_COUNT = 1;
+
 enum class FilterType {
     NONE,
     GRAYSCALE,
@@ -304,6 +308,7 @@ public:
 protected:
     std::optional<double> CalcTextScale(double maxIntrinsicWidth, std::optional<double> maxWidth);
     bool HasShadow() const;
+    void UpdateFontFamilies();
     void UpdateLineDash(RSPen& pen);
     void UpdatePaintShader(RSPen* pen, RSBrush* brush, const Ace::Gradient& gradient);
     void UpdatePaintShader(const Ace::Pattern& pattern, RSPen* pen, RSBrush* brush);

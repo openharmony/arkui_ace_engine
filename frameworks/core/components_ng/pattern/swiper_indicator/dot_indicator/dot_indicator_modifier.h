@@ -83,6 +83,8 @@ public:
     struct ContentProperty {
         Color backgroundColor = Color::TRANSPARENT;
         LinearVector<float> vectorBlackPointCenterX;
+        LinearVector<float> unselectedIndicatorWidth;
+        LinearVector<float> unselectedIndicatorHeight;
         LinearVector<float> itemHalfSizes = {};
         float longPointLeftCenterX = 0;
         float longPointRightCenterX = 0;
@@ -105,14 +107,14 @@ public:
         float leftThirdPointSizeRate = INIT_SIZE_RATE;
         float rightSecondPointSizeRate = INIT_SIZE_RATE;
         float rightFirstPointSizeRate = INIT_SIZE_RATE;
-        Color firstPointColor = Color::TRANSPARENT;
-        Color newPointColor = Color::TRANSPARENT;
+        uint8_t firstPointOpacity = 0;
+        uint8_t newPointOpacity = 0;
     };
 
     void onDraw(DrawingContext& context) override;
     // paint
     virtual void PaintContent(DrawingContext& context, ContentProperty& contentProperty);
-    virtual void PaintUnselectedIndicator(RSCanvas& canvas, const OffsetF& center,
+    void PaintUnselectedIndicator(RSCanvas& canvas, const OffsetF& center,
         const LinearVector<float>& itemHalfSizes,
         bool currentIndexFlag, const LinearColor& indicatorColor);
     void PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& leftCenter,
@@ -122,13 +124,13 @@ public:
     virtual LinearVector<float> GetItemHalfSizes(size_t index, ContentProperty& contentProperty);
     void SetFocusedAndSelectedColor(ContentProperty& contentProperty);
     // Update property
-    virtual void UpdateShrinkPaintProperty(const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
+    void UpdateShrinkPaintProperty(const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
         const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
     void UpdateDilatePaintProperty(const LinearVector<float>& hoverItemHalfSizes,
         const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
     void UpdateBackgroundColor(const Color& backgroundColor);
 
-    virtual void UpdateNormalPaintProperty(const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
+    void UpdateNormalPaintProperty(const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
         const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
     void UpdateHoverPaintProperty(const LinearVector<float>& hoverItemHalfSizes,
         const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
@@ -285,7 +287,7 @@ public:
     {
         animationDuration_ = duration;
     }
-    virtual void PlayIndicatorAnimation(const LinearVector<float>& vectorBlackPointCenterX,
+    void PlayIndicatorAnimation(const LinearVector<float>& vectorBlackPointCenterX,
         const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState,
         TouchBottomTypeLoop touchBottomTypeLoop);
     virtual void StopAnimation(bool ifImmediately = false);
@@ -305,6 +307,11 @@ public:
         return { longPointLeftCenterX_->Get(), longPointRightCenterX_->Get() };
     }
 
+    void SetIsOverlong(bool isOverlong)
+    {
+        isOverlong_ = isOverlong;
+    }
+
 protected:
     static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
     {
@@ -315,7 +322,7 @@ protected:
         return swiperTheme;
     }
 
-    virtual void PlayBlackPointsAnimation(const LinearVector<float>& vectorBlackPointCenterX);
+    void PlayBlackPointsAnimation(const LinearVector<float>& vectorBlackPointCenterX);
     void PlayLongPointAnimation(const std::vector<std::pair<float, float>>& longPointCenterX,
         GestureState gestureState, TouchBottomTypeLoop touchBottomTypeLoop,
         const LinearVector<float>& vectorBlackPointCenterX);
@@ -372,6 +379,7 @@ protected:
     Color originalUnselectColor_;
     Color originalSelectColor_;
     TouchBottomType touchBottomType_ = TouchBottomType::NONE;
+    bool isOverlong_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(DotIndicatorModifier);
 };
 } // namespace OHOS::Ace::NG

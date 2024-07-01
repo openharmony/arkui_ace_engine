@@ -25,7 +25,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float DEFAULT_SIZE = 12.0f;
-const std::string DEFAULT_FAMILY = "HarmonyOS Sans";
 }
 void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
@@ -59,10 +58,9 @@ void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
     defaultFont.SetFontSize(Dimension(DEFAULT_SIZE, DimensionUnit::FP));
     defaultFont.SetFontWeight(FontWeight::REGULAR);
     auto fontFamily = std::vector<std::string>();
-    fontFamily.emplace_back(DEFAULT_FAMILY);
     defaultFont.SetFontFamilies(fontFamily);
     json->PutExtAttr("font", ToJsonObjectValue(propFont_.value_or(defaultFont)), filter);
-    json->PutExtAttr("selectFont", ToJsonObjectValue(propSelectedFont_.value_or(defaultFont)), filter);
+    json->PutExtAttr("selectedFont", ToJsonObjectValue(propSelectedFont_.value_or(defaultFont)), filter);
     json->PutExtAttr("popupFont", ToJsonObjectValue(propPopupFont_.value_or(defaultFont)), filter);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

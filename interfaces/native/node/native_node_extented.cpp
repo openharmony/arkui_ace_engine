@@ -368,7 +368,8 @@ ArkUI_StyledString* OH_ArkUI_StyledString_Create(
 {
     ArkUI_StyledString* storage = new ArkUI_StyledString;
     storage->builder = OH_Drawing_CreateTypographyHandler(typoStyle, collection);
-    storage->paragraphStyle = typoStyle;
+    OH_Drawing_TypographyStyle* typographyStyle = OH_Drawing_CreateTypographyStyle();
+    storage->paragraphStyle = typographyStyle;
     return storage;
 }
 
@@ -378,15 +379,24 @@ void OH_ArkUI_StyledString_Destroy(ArkUI_StyledString* storage)
     for (auto item : storage->items) {
         delete item;
     }
+    while (!storage->styles.empty()) {
+        auto style = reinterpret_cast<OH_Drawing_TextStyle*>(storage->styles.top());
+        OH_Drawing_DestroyTextStyle(style);
+        storage->styles.pop();
+    }
     storage->styles = std::stack<void*>();
     storage->items.clear();
+    OH_Drawing_TypographyStyle* paragraphStyle =
+        reinterpret_cast<OH_Drawing_TypographyStyle*>(storage->paragraphStyle);
+    OH_Drawing_DestroyTypographyStyle(paragraphStyle);
     delete storage;
 }
 
 void OH_ArkUI_StyledString_PushTextStyle(ArkUI_StyledString* storage, OH_Drawing_TextStyle* style)
 {
     OH_Drawing_TypographyHandlerPushTextStyle(reinterpret_cast<OH_Drawing_TypographyCreate*>(storage->builder), style);
-    storage->styles.push(style);
+    OH_Drawing_TextStyle* textStyle = OH_Drawing_CreateTextStyle();
+    storage->styles.push(textStyle);
 }
 
 void OH_ArkUI_StyledString_AddText(ArkUI_StyledString* storage, const char* content)

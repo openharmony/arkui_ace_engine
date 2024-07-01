@@ -617,7 +617,7 @@ class InvertModifier extends ModifierWithKey<number | InvertOptions> {
     if (reset) {
       getUINativeModule().common.resetInvert(node);
     } else {
-      if(isNumber(this.value)) {
+      if (isNumber(this.value)) {
         getUINativeModule().common.setInvert(node, this.value, undefined, undefined, undefined, undefined);
       } else {
         getUINativeModule().common.setInvert(node, undefined,
@@ -629,10 +629,10 @@ class InvertModifier extends ModifierWithKey<number | InvertOptions> {
     }
   }
   checkObjectDiff(): boolean {
-    return !((this.stageValue as InvertOptions).high == (this.value as InvertOptions).high &&
-      (this.stageValue as InvertOptions).low == (this.value as InvertOptions).low &&
-      (this.stageValue as InvertOptions).threshold == (this.value as InvertOptions).threshold &&
-      (this.stageValue as InvertOptions).thresholdRange == (this.value as InvertOptions).thresholdRange);
+    return !((this.stageValue as InvertOptions).high === (this.value as InvertOptions).high &&
+      (this.stageValue as InvertOptions).low === (this.value as InvertOptions).low &&
+      (this.stageValue as InvertOptions).threshold === (this.value as InvertOptions).threshold &&
+      (this.stageValue as InvertOptions).thresholdRange === (this.value as InvertOptions).thresholdRange);
   }
 }
 
@@ -954,11 +954,13 @@ class BorderModifier extends ModifierWithKey<ArkBorder> {
     if (reset) {
       getUINativeModule().common.resetBorder(node);
     } else {
-      getUINativeModule().common.setBorder(node,
+      getUINativeModule().common.setBorderWithDashParams(node,
         this.value.arkWidth.left, this.value.arkWidth.right, this.value.arkWidth.top, this.value.arkWidth.bottom,
         this.value.arkColor.leftColor, this.value.arkColor.rightColor, this.value.arkColor.topColor, this.value.arkColor.bottomColor,
         this.value.arkRadius.topLeft, this.value.arkRadius.topRight, this.value.arkRadius.bottomLeft, this.value.arkRadius.bottomRight,
-        this.value.arkStyle.top, this.value.arkStyle.right, this.value.arkStyle.bottom, this.value.arkStyle.left);
+        this.value.arkStyle.top, this.value.arkStyle.right, this.value.arkStyle.bottom, this.value.arkStyle.left,
+        this.value.arkDashGap.left, this.value.arkDashGap.right, this.value.arkDashGap.top, this.value.arkDashGap.bottom,
+        this.value.arkDashWidth.left, this.value.arkDashWidth.right, this.value.arkDashWidth.top, this.value.arkDashWidth.bottom);
     }
   }
 
@@ -1415,8 +1417,9 @@ class GeometryTransitionModifier extends ModifierWithKey<ArkGeometryTransition> 
     if (reset) {
       getUINativeModule().common.resetGeometryTransition(node);
     } else {
-      getUINativeModule().common.setGeometryTransition(node, this.value.id, 
-        (this.value.options as GeometryTransitionOptions)?.follow);
+      getUINativeModule().common.setGeometryTransition(node, this.value.id,
+        (this.value.options as GeometryTransitionOptions)?.follow,
+        (this.value.options as GeometryTransitionOptions)?.hierarchyStrategy);
     }
   }
 }
@@ -1719,6 +1722,20 @@ class OnKeyEventModifier extends ModifierWithKey<KeyEventCallback> {
   }
 }
 
+class OnKeyPreImeModifier extends ModifierWithKey<Callback<KeyEvent, boolean>> {
+  constructor(value: Callback<KeyEvent, boolean>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onKeyPreIme');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnKeyPreIme(node);
+    } else {
+      getUINativeModule().common.setOnKeyPreIme(node, this.value);
+    }
+  }
+}
+
 class OnFocusModifier extends ModifierWithKey<VoidCallback> {
   constructor(value: VoidCallback) {
     super(value);
@@ -1747,7 +1764,7 @@ class OnBlurModifier extends ModifierWithKey<VoidCallback> {
   }
 }
 
-declare type HoverEventCallback = (isHover: boolean, event: HoverEvent) => void
+declare type HoverEventCallback = (isHover: boolean, event: HoverEvent) => void;
 class OnHoverModifier extends ModifierWithKey<HoverEventCallback> {
   constructor(value: HoverEventCallback) {
     super(value);
@@ -1762,7 +1779,7 @@ class OnHoverModifier extends ModifierWithKey<HoverEventCallback> {
   }
 }
 
-declare type MouseEventCallback = (event: MouseEvent) => void
+declare type MouseEventCallback = (event: MouseEvent) => void;
 class OnMouseModifier extends ModifierWithKey<MouseEventCallback> {
   constructor(value: MouseEventCallback) {
     super(value);
@@ -1777,7 +1794,7 @@ class OnMouseModifier extends ModifierWithKey<MouseEventCallback> {
   }
 }
 
-declare type SizeChangeEventCallback = (oldValue: SizeOptions, newValue: SizeOptions) => void
+declare type SizeChangeEventCallback = (oldValue: SizeOptions, newValue: SizeOptions) => void;
 class OnSizeChangeModifier extends ModifierWithKey<SizeChangeEventCallback> {
   constructor(value: SizeChangeEventCallback) {
     super(value);
@@ -1792,7 +1809,7 @@ class OnSizeChangeModifier extends ModifierWithKey<SizeChangeEventCallback> {
   }
 }
 
-declare type AreaChangeEventCallback = (oldValue: Area, newValue: Area) => void
+declare type AreaChangeEventCallback = (oldValue: Area, newValue: Area) => void;
 class OnAreaChangeModifier extends ModifierWithKey<AreaChangeEventCallback> {
   constructor(value: AreaChangeEventCallback) {
     super(value);
@@ -1807,7 +1824,7 @@ class OnAreaChangeModifier extends ModifierWithKey<AreaChangeEventCallback> {
   }
 }
 
-declare type GestureJudgeBeginCallback = (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult
+declare type GestureJudgeBeginCallback = (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult;
 class OnGestureJudgeBeginModifier extends ModifierWithKey<GestureJudgeBeginCallback> {
   constructor(value: GestureJudgeBeginCallback) {
     super(value);
@@ -2922,6 +2939,11 @@ function modifierWithKey<T extends number | string | boolean | object, M extends
   }
 }
 
+declare class __JSScopeUtil__ {
+  static syncInstanceId(instanceId: number): void;
+  static restoreInstanceId(): void;
+}
+
 class ArkComponent implements CommonMethod<CommonAttribute> {
   _modifiersWithKeys: Map<Symbol, AttributeModifierWithKey>;
   _changed: boolean;
@@ -2930,19 +2952,27 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   _classType: ModifierType | undefined;
   _nativePtrChanged: boolean;
   _gestureEvent: UIGestureEvent;
+  _instanceId: number;
 
   constructor(nativePtr: KNode, classType?: ModifierType) {
     this.nativePtr = nativePtr;
     this._changed = false;
     this._classType = classType;
+    this._instanceId = -1;
     if (classType === ModifierType.FRAME_NODE) {
       this._modifiersWithKeys = new ObservedMap();
       (this._modifiersWithKeys as ObservedMap).setOnChange((key, value) => {
         if (this.nativePtr === undefined) {
           return;
         }
+        if (this._instanceId !== -1) {
+          __JSScopeUtil__.syncInstanceId(this._instanceId);
+        }
         value.applyStage(this.nativePtr, this);
         getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
+        if (this._instanceId !== -1) {
+          __JSScopeUtil__.restoreInstanceId();
+        }
       })
     } else if (classType === ModifierType.EXPOSE_MODIFIER || classType === ModifierType.STATE) {
       this._modifiersWithKeys = new ObservedMap();
@@ -2959,6 +2989,10 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     this.nativePtr = nodePtr;
   }
 
+  setInstanceId(instanceId: number): void {
+    this._instanceId = instanceId;
+  }
+
   getOrCreateGestureEvent() {
     if (this._gestureEvent !== null) {
       this._gestureEvent = new UIGestureEvent();
@@ -2968,7 +3002,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   cleanStageValue(): void {
-    if (!this._modifiersWithKeys){
+    if (!this._modifiersWithKeys) {
       return;
     }
     this._modifiersWithKeys.forEach((value, key) => {
@@ -3223,7 +3257,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  backgroundImage(src: ResourceStr, repeat?: ImageRepeat): this {
+  backgroundImage(src: ResourceStr | PixelMap, repeat?: ImageRepeat): this {
     let arkBackgroundImage = new ArkBackgroundImage();
     arkBackgroundImage.src = src;
     arkBackgroundImage.repeat = repeat;
@@ -3350,6 +3384,32 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         }
       }
     }
+    if (!isUndefined(value?.dashGap) && value?.dashGap !== null) {
+      if (isNumber(value.dashGap) || isString(value.dashGap) || isResource(value.dashGap) || isObject(value.dashGap) && isNumber(value.dashGap.value)) {
+        arkBorder.arkDashGap.left = value.dashGap;
+        arkBorder.arkDashGap.right = value.dashGap;
+        arkBorder.arkDashGap.top = value.dashGap;
+        arkBorder.arkDashGap.bottom = value.dashGap;
+      } else {
+        arkBorder.arkDashGap.left = (value.dashGap as EdgeWidths).left;
+        arkBorder.arkDashGap.right = (value.dashGap as EdgeWidths).right;
+        arkBorder.arkDashGap.top = (value.dashGap as EdgeWidths).top;
+        arkBorder.arkDashGap.bottom = (value.dashGap as EdgeWidths).bottom;
+      }
+    }
+    if (!isUndefined(value?.dashWidth) && value?.dashWidth !== null) {
+      if (isNumber(value.dashWidth) || isString(value.dashWidth) || isResource(value.dashWidth) || isObject(value.dashWidth) && isNumber(value.dashWidth.value)) {
+        arkBorder.arkDashWidth.left = value.dashWidth;
+        arkBorder.arkDashWidth.right = value.dashWidth;
+        arkBorder.arkDashWidth.top = value.dashWidth;
+        arkBorder.arkDashWidth.bottom = value.dashWidth;
+      } else {
+        arkBorder.arkDashWidth.left = (value.dashWidth as EdgeWidths).left;
+        arkBorder.arkDashWidth.right = (value.dashWidth as EdgeWidths).right;
+        arkBorder.arkDashWidth.top = (value.dashWidth as EdgeWidths).top;
+        arkBorder.arkDashWidth.bottom = (value.dashWidth as EdgeWidths).bottom;
+      }
+    }
     modifierWithKey(this._modifiersWithKeys, BorderModifier.identity, BorderModifier, arkBorder);
     return this;
   }
@@ -3412,6 +3472,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   onKeyEvent(event: (event?: KeyEvent) => void): this {
     modifierWithKey(this._modifiersWithKeys, OnKeyEventModifier.identity, OnKeyEventModifier, event);
+    return this;
+  }
+
+  onKeyPreIme(event: Callback<KeyEvent, boolean>): this {
+    modifierWithKey(this._modifiersWithKeys, OnKeyPreImeModifier.identity, OnKeyPreImeModifier, event);
     return this;
   }
 

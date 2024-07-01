@@ -65,6 +65,7 @@ struct SelectHandleInfo {
     bool isPaintHandleWithPoints = false;
     // in Global coordinates.
     RectF paintRect;
+    RectF localPaintRect;
     SelectHandlePaintInfo paintInfo;
     std::function<RectF(const SelectHandlePaintInfo&)> paintInfoConverter;
 
@@ -216,6 +217,14 @@ struct CallerFrameNodeInfo {
     OffsetF paintOffset;
 };
 
+enum class SelectOverlayMode {
+    ALL, MENU_ONLY, HANDLE_ONLY
+};
+
+enum class HandleLevelMode {
+    OVERLAY, EMBED
+};
+
 struct SelectOverlayInfo {
     WeakPtr<Pattern> pattern;
     bool isUsingMouse = false;
@@ -271,6 +280,10 @@ struct SelectOverlayInfo {
     std::string selectText;
     bool isSingleLine = false;
 
+    HandleLevelMode handleLevelMode = HandleLevelMode::OVERLAY;
+    bool enableHandleLevel = false;
+    VectorF scale = VectorF(1.0f, 1.0f);
+
     std::string ToString() const
     {
         auto jsonValue = JsonUtil::Create(true);
@@ -291,6 +304,8 @@ struct SelectOverlayInfo {
     }
 
     void GetCallerNodeAncestorViewPort(RectF& viewPort);
+    const RectF& GetFirstHandlePaintRect();
+    const RectF& GetSecondHandlePaintRect();
 };
 
 } // namespace OHOS::Ace::NG

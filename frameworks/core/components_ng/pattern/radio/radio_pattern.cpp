@@ -338,10 +338,16 @@ void RadioPattern::InitClickEvent()
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto radioPattern = weak.Upgrade();
         CHECK_NULL_VOID(radioPattern);
+        if (info.GetSourceDevice() == SourceType::TOUCH &&
+            (info.IsPreventDefault() || radioPattern->isTouchPreventDefault_)) {
+            TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "radio preventDefault successfully");
+            radioPattern->isTouchPreventDefault_ = false;
+            return;
+        }
         radioPattern->OnClick();
     };
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    gesture->AddClickEvent(clickListener_);
+    gesture->AddClickAfterEvent(clickListener_);
 }
 
 void RadioPattern::InitTouchEvent()
@@ -359,6 +365,9 @@ void RadioPattern::InitTouchEvent()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto radioPattern = weak.Upgrade();
         CHECK_NULL_VOID(radioPattern);
+        if (info.GetSourceDevice() == SourceType::TOUCH && info.IsPreventDefault()) {
+            radioPattern->isTouchPreventDefault_ = info.IsPreventDefault();
+        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             radioPattern->OnTouchDown();
         }
@@ -368,7 +377,7 @@ void RadioPattern::InitTouchEvent()
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    gesture->AddTouchEvent(touchListener_);
+    gesture->AddTouchAfterEvent(touchListener_);
 }
 
 void RadioPattern::InitMouseEvent()

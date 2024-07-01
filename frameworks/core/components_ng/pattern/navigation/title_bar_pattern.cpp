@@ -322,6 +322,7 @@ void MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
         titleLayoutProperty->UpdateAdaptMaxFontSize(subTitleSize);
         titleLayoutProperty->UpdateHeightAdaptivePolicy(textHeightAdaptivePolicy);
     }
+    titleLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
 
     subtitleNode->MarkModifyDone();
 }
@@ -422,6 +423,7 @@ void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
 
     titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
     titleLayoutProperty->UpdateHeightAdaptivePolicy(textHeightAdaptivePolicy);
+    titleLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
     auto maxLines = hostNode->GetSubtitle() ? 1 : TITLEBAR_MAX_LINES;
     titleLayoutProperty->UpdateMaxLines(maxLines);
     if (currentFontSize != titleLayoutProperty->GetFontSizeValue(Dimension(0)) ||
@@ -1006,7 +1008,7 @@ float TitleBarPattern::OnCoordScrollUpdate(float offset)
     }
     UpdateTitleBarByCoordScroll(titleBarOffset);
     coordScrollFinalOffset_ = titleBarOffset;
-    auto barStyle = options_.bgOptions.barStyle.value_or(BarStyle::STANDARD);
+    auto barStyle = options_.brOptions.barStyle.value_or(BarStyle::STANDARD);
     if (barStyle == BarStyle::STACK) {
         offsetHandled = 0.0f;
     }
@@ -1094,10 +1096,6 @@ void TitleBarPattern::OnColorConfigurationUpdate()
         backButton = AceType::DynamicCast<FrameNode>(backButton->GetChildren().front());
         CHECK_NULL_VOID(backButton);
     }
-    auto backButtonImgNode = AceType::DynamicCast<FrameNode>(backButton->GetChildren().front());
-    CHECK_NULL_VOID(backButtonImgNode);
-    auto backButtonImgRender = backButtonImgNode->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(backButtonImgRender);
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     auto iconColor = theme->GetBackButtonIconColor();
@@ -1113,7 +1111,13 @@ void TitleBarPattern::OnColorConfigurationUpdate()
         renderContext->UpdateBackgroundColor(backButtonColor);
         backButton->MarkModifyDone();
     }
-    backButtonImgRender->UpdateSvgFillColor(iconColor);
+    auto backButtonImgNode = AceType::DynamicCast<FrameNode>(backButton->GetChildren().front());
+    CHECK_NULL_VOID(backButtonImgNode);
+    if (backButtonImgNode->GetTag() == V2::IMAGE_ETS_TAG) {
+        auto backButtonImgRender = backButtonImgNode->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(backButtonImgRender);
+        backButtonImgRender->UpdateSvgFillColor(iconColor);
+    }
     backButtonImgNode->MarkModifyDone();
 }
 

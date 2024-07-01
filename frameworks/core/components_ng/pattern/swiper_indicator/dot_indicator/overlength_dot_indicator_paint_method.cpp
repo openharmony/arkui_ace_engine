@@ -17,11 +17,6 @@
 
 #include <valarray>
 
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/swiper/render_swiper.h"
-#include "core/components_ng/pattern/swiper/swiper_layout_property.h"
-#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -34,13 +29,11 @@ constexpr uint32_t ITEM_HALF_WIDTH = 0;
 constexpr uint32_t SELECTED_ITEM_HALF_WIDTH = 2;
 constexpr int TWOFOLD = 2;
 constexpr Dimension INDICATOR_OFFSET_UNIT = 18.0_vp;
-constexpr Dimension INDICATOR_ITEM_SPECIFIC_SPACE = 10.0_vp;
-constexpr float FIRST_FADING_RATIO = 0.5f;
-constexpr float SECOND_FADING_RATIO = 0.75f;
-constexpr uint32_t NUM_0 = 0;
-constexpr uint32_t NUM_1 = 1;
-constexpr uint32_t NUM_2 = 2;
-constexpr uint32_t NUM_3 = 3;
+constexpr int32_t NUM_0 = 0;
+constexpr int32_t NUM_1 = 1;
+constexpr int32_t NUM_2 = 2;
+constexpr int32_t NUM_3 = 3;
+constexpr float HALF_FLOAT = 0.5f;
 } // namespace
 
 void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
@@ -67,22 +60,19 @@ void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* pain
     dotIndicatorModifier_->SetIndicatorMask(paintProperty->GetIndicatorMaskValue(false));
     dotIndicatorModifier_->SetIsIndicatorCustomSize(IsCustomSizeValue_);
     dotIndicatorModifier_->SetOffset(geometryNode->GetContentOffset());
+    dotIndicatorModifier_->SetAnimationStartIndex(animationStartIndex_);
+    dotIndicatorModifier_->SetAnimationEndIndex(animationEndIndex_);
+    dotIndicatorModifier_->SetKeepStatus(keepStatus_);
+
     SizeF contentSize = geometryNode->GetFrameSize();
-    centerY_ = (axis_ == Axis::HORIZONTAL ? contentSize.Height() : contentSize.Width()) * FIRST_FADING_RATIO;
+    centerY_ = (axis_ == Axis::HORIZONTAL ? contentSize.Height() : contentSize.Width()) * HALF_FLOAT;
     dotIndicatorModifier_->SetCenterY(centerY_);
-    if (touchBottomType_ != TouchBottomType::NONE) {
-        if (!dotIndicatorModifier_->GetIsPressed()) {
-            PaintPressIndicator(paintWrapper);
-            dotIndicatorModifier_->SetIsPressed(true);
-        }
-        UpdateBackground(paintWrapper);
-    } else if (isPressed_) {
-        PaintPressIndicator(paintWrapper);
-        dotIndicatorModifier_->SetIsPressed(true);
-    } else if (isHover_) {
-        PaintHoverIndicator(paintWrapper);
-        dotIndicatorModifier_->SetIsHover(true);
-    } else {
+
+    if (dotIndicatorModifier_->GetCurrentOverlongType() == OverlongType::NONE) {
+        dotIndicatorModifier_->InitOverlongStatus(currentIndex_);
+    }
+
+    if (touchBottomType_ == TouchBottomType::NONE && !isPressed_ && !isHover_) {
         PaintNormalIndicator(paintWrapper);
         dotIndicatorModifier_->SetIsHover(false);
         dotIndicatorModifier_->SetIsPressed(false);
@@ -92,15 +82,21 @@ void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* pain
 void OverlengthDotIndicatorPaintMethod::UpdateNormalIndicator(
     LinearVector<float>& itemHalfSizes, const PaintWrapper* paintWrapper)
 {
+    dotIndicatorModifier_->SetTurnPageRate(turnPageRate_);
+    dotIndicatorModifier_->SetGestureState(gestureState_);
+    dotIndicatorModifier_->SetIsCustomSizeValue(IsCustomSizeValue_);
+    dotIndicatorModifier_->SetTouchBottomTypeLoop(touchBottomTypeLoop_);
     if (gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT ||
         gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
-        std::vector<std::pair<float, float>> pointCenterX({ longPointCenterX_ });
-        GetLongPointAnimationStateSecondCenter(paintWrapper, pointCenterX);
         dotIndicatorModifier_->PlayIndicatorAnimation(
-            vectorBlackPointBegCenterX_, pointCenterX, gestureState_, touchBottomTypeLoop_);
+            normalMargin_, itemHalfSizes, gestureState_, touchBottomTypeLoop_);
     } else {
-        dotIndicatorModifier_->UpdateNormalPaintProperty(
-            normalMargin_, itemHalfSizes, vectorBlackPointCenterX_, longPointCenterX_);
+        const auto [blackPointCenterMoveRate, longPointLeftCenterMoveRate, longPointRightCenterMoveRate] =
+            GetMoveRate();
+        dotIndicatorModifier_->SetBlackPointCenterMoveRate(blackPointCenterMoveRate);
+        dotIndicatorModifier_->SetLongPointLeftCenterMoveRate(longPointLeftCenterMoveRate);
+        dotIndicatorModifier_->SetLongPointRightCenterMoveRate(longPointRightCenterMoveRate);
+        dotIndicatorModifier_->UpdateNormalPaintProperty(normalMargin_, itemHalfSizes, overlongSelectedCenterX_);
     }
 }
 
@@ -163,32 +159,20 @@ std::tuple<std::pair<float, float>, LinearVector<float>> OverlengthDotIndicatorP
         static_cast<float>(paintProperty->GetSelectedItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
 
     int32_t displayCount = itemCount_;
-    int32_t currentIndex = currentIndex_;
     // use radius calculation
     auto itemSpace = INDICATOR_ITEM_SPACE.ConvertToPx();
     if (maxDisplayCount_ > 0) {
         displayCount = maxDisplayCount_;
-        // Within this interval the capsule is removed from the third point on the right
-        if (currentIndex_ >= maxDisplayCount_ - NUM_3 && currentIndex_ < realItemCount_ - NUM_2) {
-            currentIndex = maxDisplayCount_ - NUM_3;
-        }
-        if (currentIndex_ == realItemCount_ - NUM_2) {
-            currentIndex = maxDisplayCount_ - NUM_2;
-        }
-        if (currentIndex_ == realItemCount_ - NUM_1) {
-            currentIndex = maxDisplayCount_ - NUM_1;
-        }
-        itemSpace = INDICATOR_ITEM_SPECIFIC_SPACE.ConvertToPx();
     }
     LinearVector<float> itemHalfSizes;
-    itemHalfSizes.emplace_back(itemWidth * FIRST_FADING_RATIO);
-    itemHalfSizes.emplace_back(itemHeight * FIRST_FADING_RATIO);
-    itemHalfSizes.emplace_back(selectedItemWidth * FIRST_FADING_RATIO);
-    itemHalfSizes.emplace_back(selectedItemHeight * FIRST_FADING_RATIO);
+    itemHalfSizes.emplace_back(itemWidth * HALF_FLOAT);
+    itemHalfSizes.emplace_back(itemHeight * HALF_FLOAT);
+    itemHalfSizes.emplace_back(selectedItemWidth * HALF_FLOAT);
+    itemHalfSizes.emplace_back(selectedItemHeight * HALF_FLOAT);
     CalculateNormalMargin(itemHalfSizes, frameSize, displayCount);
 
     auto longPointCenterX = CalculatePointCenterX(itemHalfSizes, normalMargin_.GetX(),
-        static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx()), static_cast<float>(itemSpace), currentIndex);
+        static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx()), static_cast<float>(itemSpace), currentIndex_);
     return { longPointCenterX, itemHalfSizes };
 }
 
@@ -247,7 +231,6 @@ std::pair<float, float> OverlengthDotIndicatorPaintMethod::ForwardCalculation(
     auto [startCurrentIndex, endCurrentIndex] = GetStartAndEndIndex(index);
     for (int32_t i = 0; i < itemCount_; ++i) {
         float item_width = itemHalfSizes[ITEM_HALF_WIDTH];
-        ConvertItemWidth(i, itemHalfSizes, nposStation, item_width);
         if (i != startCurrentIndex) {
             startVectorBlackPointCenterX[i] = startCenterX + item_width;
             startCenterX += item_width * TWOFOLD;
@@ -296,34 +279,6 @@ void OverlengthDotIndicatorPaintMethod::AnalysisIndexRange(int32_t& nposStation)
         nposStation = NUM_2;
     } else if (currentIndex_ >= realItemCount_ - NUM_2) {
         nposStation = NUM_3;
-    }
-}
-void OverlengthDotIndicatorPaintMethod::ConvertItemWidth(const int32_t i, const LinearVector<float>& itemHalfSizes,
-    const int32_t nposStation, float& item_width)
-{
-    if (nposStation == NUM_1) {
-        if (i == itemCount_ - NUM_2) {
-            item_width = itemHalfSizes[ITEM_HALF_WIDTH] * SECOND_FADING_RATIO;
-        }
-        if (i == itemCount_ - NUM_1) {
-            item_width = itemHalfSizes[ITEM_HALF_WIDTH] * FIRST_FADING_RATIO;
-        }
-    }
-    if (nposStation == NUM_2) {
-        if (i == NUM_0 || i == itemCount_ - NUM_1) {
-            item_width = itemHalfSizes[ITEM_HALF_WIDTH] * FIRST_FADING_RATIO;
-        }
-        if (i == NUM_1 || i == itemCount_ - NUM_2) {
-            item_width = itemHalfSizes[ITEM_HALF_WIDTH] * SECOND_FADING_RATIO;
-        }
-    }
-    if (nposStation == NUM_3) {
-        if (i == NUM_0) {
-            item_width = itemHalfSizes[ITEM_HALF_WIDTH] * FIRST_FADING_RATIO;
-        }
-        if (i == NUM_1) {
-            item_width = itemHalfSizes[ITEM_HALF_WIDTH] * SECOND_FADING_RATIO;
-        }
     }
 }
 } // namespace OHOS::Ace::NG

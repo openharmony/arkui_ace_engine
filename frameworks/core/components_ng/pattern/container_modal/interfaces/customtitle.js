@@ -23,11 +23,11 @@ const TITLE_ROW_HEIGHT = '37vp'
 export class Index extends ViewPU {
   constructor(parent, params, __localStorage, elmtId = -1) {
     super(parent, __localStorage, elmtId);
-    this.__appLabel = new ObservedPropertySimplePU('', this, "appLabel");
-    this.__appTitle = new ObservedPropertySimplePU('', this, "appTitle");
-    this.__textColor = new ObservedPropertySimplePU(0x66000000, this, "textColor");
-    this.__pixelMap = new ObservedPropertyObjectPU(undefined, this, "pixelMap");
-    this.__iconOpacity = new ObservedPropertySimplePU(0.4, this, "iconOpacity");
+    this.__appLabel = new ObservedPropertySimplePU('', this, 'appLabel');
+    this.__appTitle = new ObservedPropertySimplePU('', this, 'appTitle');
+    this.__textColor = new ObservedPropertySimplePU(0x66000000, this, 'textColor');
+    this.__pixelMap = new ObservedPropertyObjectPU(undefined, this, 'pixelMap');
+    this.__iconOpacity = new ObservedPropertySimplePU(0.4, this, 'iconOpacity');
     this.setInitiallyProvidedValue(params);
   }
   setInitiallyProvidedValue(params) {
@@ -127,7 +127,7 @@ export class Index extends ViewPU {
     this.observeComponentCreation((elmtId, isInitialRender) => {
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
       Image.create(this.pixelMap);
-      Image.id("enhanceAppIcon");
+      Image.id('enhanceAppIcon');
       Image.height(TITLE_ICON_SIZE);
       Image.width(TITLE_ICON_SIZE);
       Image.interpolation(ImageInterpolation.Medium);
@@ -143,7 +143,7 @@ export class Index extends ViewPU {
     this.observeComponentCreation((elmtId, isInitialRender) => {
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
       Text.create(this.appTitle ? this.appTitle : this.appLabel);
-      Image.id("enhanceAppLabel");
+      Image.id('enhanceAppLabel');
       Text.maxLines(1);
       Text.fontSize(TITLE_TEXT_FONT_SIZE);
       Text.fontColor(this.textColor);

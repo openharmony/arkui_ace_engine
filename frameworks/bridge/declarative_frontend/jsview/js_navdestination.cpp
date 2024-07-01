@@ -55,8 +55,8 @@ constexpr uint32_t SAFE_AREA_EDGE_LIMIT = 4;
 constexpr uint32_t SAFE_AREA_EDGE_SYSTEM = 0;
 constexpr uint32_t SAFE_AREA_EDGE_TOP = 0;
 constexpr uint32_t SAFE_AREA_EDGE_BOTTOM = 1;
-constexpr uint32_t PARAMATER_LENGTH_ONE = 1;
-constexpr uint32_t PARAMATER_LENGTH_TWO = 2;
+constexpr int32_t PARAMATER_LENGTH_ONE = 1;
+constexpr int32_t PARAMATER_LENGTH_TWO = 2;
 constexpr uint32_t FIRST_INDEX = 0;
 constexpr uint32_t SECOND_INDEX = 1;
 
@@ -90,7 +90,9 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
     std::string moduleName;
     std::string pagePath;
     if (info.Length() == 1) {
+        // input format: builder/pathInfo
         if (info[0]->IsFunction()) {
+            // first parameter = builder
             auto builderFunctionJS = info[0];
             auto builderFunc = [context = info.GetExecutionContext(), builder = std::move(builderFunctionJS)]() {
                 JAVASCRIPT_EXECUTION_SCOPE(context)
@@ -102,6 +104,7 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
             NavDestinationModel::GetInstance()->Create(std::move(builderFunc), std::move(ctx));
             return;
         } else if (info[0]->IsObject()) {
+            // first parameter = pathInfo{'moduleName': stringA, 'pagePath': stringB}
             auto infoObj = JSRef<JSObject>::Cast(info[0]);
             if (!infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->IsString() ||
                 !infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->IsString()) {
@@ -118,6 +121,7 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
             "current input info is neither buildFunction or navDestination usefulInfo");
         return;
     } else if (info.Length() == 2) {
+        // parameter = builder(maybe empty) + pathInfo
         if (!info[0]->IsFunction() || !info[1]->IsObject()) {
             TAG_LOGE(AceLogTag::ACE_NAVIGATION, "buider or pageInfo is invalid");
             return;
@@ -142,7 +146,6 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
         NavDestinationModel::GetInstance()->Create(std::move(builderFunc), std::move(ctx));
         NavDestinationModel::GetInstance()->SetNavDestinationPathInfo(moduleName, pagePath);
     }
-    return;
 }
 
 void JSNavDestination::SetHideTitleBar(bool hide)
@@ -192,7 +195,7 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
         JSRef<JSVal> builderObject = jsObj->GetProperty("builder");
         if (builderObject->IsFunction()) {
             ViewStackModel::GetInstance()->NewScope();
-            JsFunction jsBuilderFunc(info.This(), JSRef<JSObject>::Cast(builderObject));
+            JsFunction jsBuilderFunc(info.This(), JSRef<JSFunc>::Cast(builderObject));
             ACE_SCORING_EVENT("Navdestination.title.builder");
             jsBuilderFunc.Execute();
             auto customNode = ViewStackModel::GetInstance()->Finish();
@@ -205,6 +208,7 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
     NG::NavigationTitlebarOptions options;
     if (info.Length() > 1) {
         ParseBackgroundOptions(info[1], options.bgOptions);
+        ParseBarOptions(info[1], options.brOptions);
     }
     NavDestinationModel::GetInstance()->SetTitlebarOptions(std::move(options));
 }

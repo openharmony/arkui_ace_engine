@@ -1019,7 +1019,7 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternFlushCurrentOptions015, 
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    ASSERT_FALSE(textLayoutProperty->HasFontWeight());
+    ASSERT_TRUE(textLayoutProperty->HasFontWeight());
 }
 
 void InnerHandleScrollUp003Init()
@@ -1135,7 +1135,7 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternInnerHandleScrollUp004, 
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    ASSERT_FALSE(textLayoutProperty->HasFontSize());
+    ASSERT_TRUE(textLayoutProperty->HasFontSize());
 }
 
 /**
@@ -1195,7 +1195,7 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternInnerHandleScrollDown003
     ASSERT_NE(textLayoutProperty, nullptr);
     std::string content = textLayoutProperty->GetContent().value_or("");
     EXPECT_EQ("test1", content);
-    ASSERT_FALSE(textLayoutProperty->HasFontSize());
+    ASSERT_TRUE(textLayoutProperty->HasFontSize());
 }
 
 /**
@@ -1811,6 +1811,9 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest010, TestSize.Level1
     prop.fontheight = 1.0f;
     prop.prevDistance = 4.0f;
     prop.nextDistance = 5.0f;
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);

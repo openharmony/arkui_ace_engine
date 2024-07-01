@@ -87,6 +87,7 @@ ohos_source_set("preview_osal_source") {
       "time_event_proxy_preview.cpp",
       "trace_id_impl.cpp",
       "view_data_wrap_impl.cpp",
+      "want_wrap_preview.cpp",
     ]
 
     if (defined(resourceschedule_ffrt_support) &&

@@ -245,6 +245,16 @@ public:
         return predictLayoutParam_;
     }
 
+    void SetPredictLayoutParamV2(std::optional<ListPredictLayoutParamV2> param)
+    {
+        predictLayoutParamV2_ = param;
+    }
+
+    std::optional<ListPredictLayoutParamV2> GetPredictLayoutParamV2() const
+    {
+        return predictLayoutParamV2_;
+    }
+
     void CloseAllSwipeActions(OnFinishFunc&&);
 
     std::string ProvideRestoreInfo() override;
@@ -413,6 +423,7 @@ private:
     bool isScrollEnd_ = false;
     bool needReEstimateOffset_ = false;
     std::optional<ListPredictLayoutParam> predictLayoutParam_;
+    std::optional<ListPredictLayoutParamV2> predictLayoutParamV2_;
 
     bool isNeedToUpdateListDirection_ = false;
 

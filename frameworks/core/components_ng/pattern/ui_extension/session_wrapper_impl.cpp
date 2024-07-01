@@ -244,8 +244,7 @@ void SessionWrapperImpl::InitAllCallback()
 /************************************************ End: Initialization *************************************************/
 
 /************************************************ Begin: About session ************************************************/
-void SessionWrapperImpl::CreateSession(
-    const AAFwk::Want& want, bool isAsyncModalBinding, bool isCallerSystem)
+void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionConfig& config)
 {
     UIEXT_LOGI("The session is created with want = %{private}s", want.ToString().c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -285,8 +284,8 @@ void SessionWrapperImpl::CreateSession(
         .callerToken_ = callerToken,
         .rootToken_ = (isTransferringCaller_ && parentToken) ? parentToken : callerToken,
         .want = wantPtr,
-        .isAsyncModalBinding_ = isAsyncModalBinding,
-        .isModal_ = !isCallerSystem,
+        .isAsyncModalBinding_ = config.isAsyncModalBinding,
+        .uiExtensionUsage_ = static_cast<uint32_t>(config.uiExtensionUsage),
     };
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
@@ -466,10 +465,17 @@ void SessionWrapperImpl::OnConnect()
 
 void SessionWrapperImpl::OnDisconnect(bool isAbnormal)
 {
+    int32_t callSessionId = GetSessionId();
     taskExecutor_->PostTask(
-        [weak = hostPattern_, sessionType = sessionType_, isAbnormal]() {
+        [weak = hostPattern_, sessionType = sessionType_, isAbnormal, callSessionId]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            if (callSessionId != pattern->GetSessionId()) {
+                LOGW("[AceUiExtensionComponent]OnDisconnect: The callSessionId(%{public}d)"
+                        " is inconsistent with the curSession(%{public}d)",
+                    callSessionId, pattern->GetSessionId());
+                return;
+            }
             pattern->OnDisconnect(isAbnormal);
             if (sessionType == SessionType::UI_EXTENSION_ABILITY && pattern->IsCompatibleOldVersion()) {
                 pattern->FireOnReleaseCallback(static_cast<int32_t>(isAbnormal));
@@ -582,7 +588,13 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
             transaction = transactionController->GetRSTransaction();
         }
         if (transaction) {
-            transaction->SetHostPid(AceApplicationInfo::GetInstance().GetPid());
+            auto extensionCount = transaction->GetExtensionCount();
+            if (extensionCount == 0) {
+                // Update the pid when encounter the first UIextension.
+                transaction->SetParentPid(transaction->GetChildPid());
+                transaction->SetChildPid(AceApplicationInfo::GetInstance().GetPid());
+            }
+            transaction->SetExtensionCount(++extensionCount);
             if (parentSession) {
                 transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
             }

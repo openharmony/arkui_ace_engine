@@ -59,37 +59,28 @@ void NavToolbarPattern::OnModifyDone()
 {
     auto hostNode = AceType::DynamicCast<NavToolbarNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
-    auto containerNode = hostNode->GetToolbarContainerNode();
+    auto containerNode = AceType::DynamicCast<FrameNode>(hostNode->GetToolbarContainerNode());
     CHECK_NULL_VOID(containerNode);
+    auto gestureHub = containerNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     float scale = context->GetFontScale();
     if (LessNotEqual(scale, AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
+        gestureHub->RemoveDragEvent();
+        gestureHub->SetLongPressEvent(nullptr);
         return;
     }
-    for (auto toolBarItemNode : containerNode->GetChildren()) {
-        auto toolBarItem = AceType::DynamicCast<FrameNode>(toolBarItemNode);
-        CHECK_NULL_VOID(toolBarItem);
-        auto gestureHub = toolBarItem->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(gestureHub);
-        RefPtr<BarItemNode> barItemNode = AceType::DynamicCast<BarItemNode>(toolBarItem->GetChildren().front());
-        if (!barItemNode) {
-            TAG_LOGD(AceLogTag::ACE_NAVIGATION, "current bar item node is empty, continue");
-            continue;
-        }
-        InitLongPressEvent(gestureHub, barItemNode);
-    }
+    InitLongPressEvent(gestureHub);
+    InitDragEvent(gestureHub);
 }
 
-void NavToolbarPattern::InitLongPressEvent(
-    const RefPtr<GestureEventHub>& gestureHub, const RefPtr<BarItemNode>& barItemNode)
+void NavToolbarPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    auto longPressTask = [weak = WeakClaim(this), weakBarItemNode = WeakPtr<BarItemNode>(barItemNode)](
-                             GestureEvent& info) {
-        auto toolBar = weak.Upgrade();
-        CHECK_NULL_VOID(toolBar);
-        auto barItemNode = weakBarItemNode.Upgrade();
-        toolBar->HandleLongPressEvent(barItemNode);
+    auto longPressTask = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto toolBarPattern = weak.Upgrade();
+        CHECK_NULL_VOID(toolBarPattern);
+        toolBarPattern->HandleLongPressEvent(info);
     };
     auto longPressEvent = AceType::MakeRefPtr<LongPressEvent>(std::move(longPressTask));
     gestureHub->SetLongPressEvent(longPressEvent);
@@ -97,14 +88,75 @@ void NavToolbarPattern::InitLongPressEvent(
     auto longPressRecognizer = gestureHub->GetLongPressRecognizer();
     CHECK_NULL_VOID(longPressRecognizer);
     auto longPressActionEnd = [weak = WeakClaim(this)](GestureEvent& info) {
-        auto toolBar = weak.Upgrade();
-        CHECK_NULL_VOID(toolBar);
-        toolBar->HandleLongPressActionEnd();
+        auto toolBarPattern = weak.Upgrade();
+        CHECK_NULL_VOID(toolBarPattern);
+        toolBarPattern->HandleLongPressActionEnd();
     };
     longPressRecognizer->SetOnActionEnd(longPressActionEnd);
 }
 
-void NavToolbarPattern::HandleLongPressEvent(const RefPtr<BarItemNode>& barItemNode)
+void NavToolbarPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto toolBarPattern = weak.Upgrade();
+        CHECK_NULL_VOID(toolBarPattern);
+        auto hostNode = AceType::DynamicCast<NavToolbarNode>(toolBarPattern->GetHost());
+        CHECK_NULL_VOID(hostNode);
+        auto containerNode = AceType::DynamicCast<FrameNode>(hostNode->GetToolbarContainerNode());
+        CHECK_NULL_VOID(containerNode);
+        auto toolBarItemNode =
+            containerNode->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+        CHECK_NULL_VOID(toolBarItemNode);
+        auto index = containerNode->GetChildIndex(toolBarItemNode);
+        auto totalCount = containerNode->TotalChildCount();
+        if (toolBarPattern->dialogNode_ && index >= 0 && index < totalCount) {
+            if (!toolBarPattern->moveIndex_.has_value()) {
+                toolBarPattern->moveIndex_ = index;
+            }
+
+            if (toolBarPattern->moveIndex_ != index) {
+                toolBarPattern->HandleLongPressActionEnd();
+                toolBarPattern->moveIndex_ = index;
+                auto barItemNode = AceType::DynamicCast<BarItemNode>(toolBarItemNode->GetFirstChild());
+                CHECK_NULL_VOID(barItemNode);
+                toolBarPattern->ShowDialogWithNode(barItemNode);
+            }
+        }
+    };
+
+    auto dragEvent = MakeRefPtr<DragEvent>(nullptr, std::move(actionUpdateTask), nullptr, nullptr);
+    PanDirection panDirection = { .type = PanDirection::ALL };
+    gestureHub->SetDragEvent(dragEvent, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+}
+
+void NavToolbarPattern::HandleLongPressEvent(const GestureEvent& info)
+{
+    auto hostNode = AceType::DynamicCast<NavToolbarNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto containerNode = AceType::DynamicCast<FrameNode>(hostNode->GetToolbarContainerNode());
+    CHECK_NULL_VOID(containerNode);
+    auto toolBarItem =
+        containerNode->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+    CHECK_NULL_VOID(toolBarItem);
+    RefPtr<BarItemNode> barItemNode = AceType::DynamicCast<BarItemNode>(toolBarItem->GetFirstChild());
+    CHECK_NULL_VOID(barItemNode);
+    ShowDialogWithNode(barItemNode);
+}
+
+void NavToolbarPattern::HandleLongPressActionEnd()
+{
+    CHECK_NULL_VOID(dialogNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->CloseDialog(dialogNode_);
+    dialogNode_ = nullptr;
+}
+
+void NavToolbarPattern::ShowDialogWithNode(const RefPtr<BarItemNode>& barItemNode)
 {
     HandleLongPressActionEnd();
     CHECK_NULL_VOID(barItemNode);
@@ -117,8 +169,8 @@ void NavToolbarPattern::HandleLongPressEvent(const RefPtr<BarItemNode>& barItemN
         CHECK_NULL_VOID(theme);
         message = Localization::GetInstance()->GetEntryLetters("common.more");
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            dialogNode_ =
-                AgingAdapationDialogUtil::ShowLongPressDialog(message, SymbolSourceInfo(theme->GetMoreSymbolId()));
+            dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(
+                message, SymbolSourceInfo(theme->GetMoreSymbolId()));
             return;
         }
         auto info = ImageSourceInfo("");
@@ -140,8 +192,8 @@ void NavToolbarPattern::HandleLongPressEvent(const RefPtr<BarItemNode>& barItemN
         if (imageNode->GetTag() == V2::SYMBOL_ETS_TAG) {
             auto symbolProperty = imageNode->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(symbolProperty);
-            dialogNode_ =
-                AgingAdapationDialogUtil::ShowLongPressDialog(message, symbolProperty->GetSymbolSourceInfoValue());
+            dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(
+                message, symbolProperty->GetSymbolSourceInfoValue(), symbolProperty->GetSymbolColorListValue({}));
             return;
         }
         auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -152,17 +204,6 @@ void NavToolbarPattern::HandleLongPressEvent(const RefPtr<BarItemNode>& barItemN
     }
     auto imageSourceInfo = ImageSourceInfo("");
     dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo);
-}
-
-void NavToolbarPattern::HandleLongPressActionEnd()
-{
-    CHECK_NULL_VOID(dialogNode_);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto overlayManager = pipeline->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    overlayManager->CloseDialog(dialogNode_);
-    dialogNode_ = nullptr;
 }
 
 void NavToolbarPattern::SetDefaultBackgroundColorIfNeeded(RefPtr<FrameNode>& host)

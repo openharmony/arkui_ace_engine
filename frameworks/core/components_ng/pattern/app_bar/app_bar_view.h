@@ -54,9 +54,10 @@ private:
     RefPtr<FrameNode> BuildDivider();
     void BindMenuCallback(const RefPtr<FrameNode>& menuButton);
     void BindCloseCallback(const RefPtr<FrameNode>& closeButton);
-    static void BindContentCover(const RefPtr<FrameNode>& targetNode, bool firstBind = true);
+    void CreateServicePanel(bool firstTry);
+    void DestroyServicePanel();
     static void InitUIExtensionNode(const RefPtr<FrameNode>& uiExtNode);
-    static std::map<std::string, std::string> CreateUIExtensionParams();
+    int32_t sessionId_ = 0;
 
     WeakPtr<FrameNode> atomicService_;
 };

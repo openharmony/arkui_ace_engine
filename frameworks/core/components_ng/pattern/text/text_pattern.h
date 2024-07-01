@@ -612,12 +612,16 @@ public:
     TextLineMetrics GetLineMetrics(int32_t lineNumber) override;
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
 
-    void OnTouchTestHit(SourceType hitTestType) override
+    void OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsParam> && menuOptionsItems);
+    void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override
     {
-        selectOverlay_->OnTouchTestHit(hitTestType);
+        selectOverlay_->OnAncestorNodeChanged(flag);
     }
 
-    void OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsParam> && menuOptionsItems);
+    void UpdateParentGlobalOffset()
+    {
+        parentGlobalOffset_ = GetParentGlobalOffset();
+    }
 
 protected:
     void OnAttachToFrameNode() override;
@@ -660,9 +664,9 @@ protected:
     void InitKeyEvent();
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     void HandleOnSelect(KeyCode code);
-    void HandleSelectionUp(int32_t start, int32_t end);
-    void HandleSelectionDown(int32_t start, int32_t end);
-    void HandleSelection(int32_t start, int32_t end);
+    void HandleSelectionUp();
+    void HandleSelectionDown();
+    void HandleSelection(bool isEmojiStart, int32_t end);
     double GetTextHeight(int32_t index, bool isNextLine);
     int32_t GetTextLength();
     bool IsSelectableAndCopy();
@@ -695,7 +699,7 @@ protected:
     bool focusInitialized_ = false;
     bool hoverInitialized_ = false;
     bool isSpanStringMode_ = false;
-    RefPtr<MutableSpanString> spanString = MakeRefPtr<MutableSpanString>("");
+    RefPtr<MutableSpanString> styledString_ = MakeRefPtr<MutableSpanString>("");
     bool keyEventInitialized_ = false;
 
     RefPtr<FrameNode> dragNode_;
@@ -811,7 +815,7 @@ private:
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;
     std::optional<int32_t> surfaceChangedCallbackId_;
-    SourceTool lastDragTool_;
+    SourceTool lastDragTool_ = SourceTool::UNKNOWN;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
     int32_t dragRecordSize_ = -1;
     RefPtr<TextController> textController_;

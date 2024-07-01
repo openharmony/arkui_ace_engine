@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
+#include "core/components_ng/pattern/custom_paint/custom_paint_util.h"
 
 #ifndef ACE_UNITTEST
 #include "include/encode/SkJpegEncoder.h"
@@ -32,63 +33,21 @@
 #include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
-#include "core/common/font_manager.h"
 #include "core/components_ng/image_provider/image_object.h"
 #include "core/components_ng/pattern/custom_paint/canvas_paint_op.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-#ifndef ACE_UNITTEST
-constexpr double DEFAULT_QUALITY = 0.92;
-constexpr int32_t MAX_LENGTH = 2048 * 2048;
-constexpr double HANGING_PERCENT = 0.8;
-#endif
-constexpr int32_t DEFAULT_SAVE_COUNT = 1;
-const std::string UNSUPPORTED = "data:image/png";
-const std::string URL_PREFIX = "data:";
-const std::string URL_SYMBOL = ";base64,";
-const std::string IMAGE_PNG = "image/png";
-const std::string IMAGE_JPEG = "image/jpeg";
-const std::string IMAGE_WEBP = "image/webp";
 
-#ifndef ACE_UNITTEST
-std::string GetMimeType(const std::string& args)
+CanvasPaintMethod::CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, const RefPtr<FrameNode>& frameNode)
+    : frameNode_(frameNode)
 {
-    // Args example: ["image/png"]
-    std::vector<std::string> values;
-    StringUtils::StringSplitter(args, ',', values);
-    if (values.size() > 2) {
-        return IMAGE_PNG;
-    }
-    // Convert to lowercase string.
-    for (size_t i = 0; i < values[0].size(); ++i) {
-        values[0][i] = static_cast<uint8_t>(tolower(values[0][i]));
-    }
-    return values[0];
+    matrix_.Reset();
+    context_ = frameNode ? frameNode->GetContextRefPtr() : nullptr;
+    imageShadow_ = std::make_unique<Shadow>();
+    contentModifier_ = contentModifier;
+    InitImageCallbacks();
 }
-
-// Quality need between 0.0 and 1.0 for MimeType jpeg and webp
-double GetQuality(const std::string& args)
-{
-    // Args example: ["image/jpeg", 0.8]
-    std::vector<std::string> values;
-    StringUtils::StringSplitter(args, ',', values);
-    if (values.size() < 2) {
-        return DEFAULT_QUALITY;
-    }
-    auto mimeType = GetMimeType(args);
-    if (mimeType != IMAGE_JPEG && mimeType != IMAGE_WEBP) {
-        return DEFAULT_QUALITY;
-    }
-    double quality = StringUtils::StringToDouble(values[1]);
-    if (quality < 0.0 || quality > 1.0) {
-        return DEFAULT_QUALITY;
-    }
-    return quality;
-}
-#endif
-} // namespace
 
 #ifndef USE_FAST_TASKPOOL
 void CanvasPaintMethod::PushTask(const TaskFunc& task)
@@ -131,10 +90,17 @@ void CanvasPaintMethod::FlushTask()
 void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
     ACE_SCOPED_TRACE("CanvasPaintMethod::UpdateContentModifier");
-    CHECK_NULL_VOID(paintWrapper);
+    auto host = frameNode_.Upgrade();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto pixelGridRoundSize = geometryNode->GetPixelGridRoundSize();
+    if (lastLayoutSize_ != pixelGridRoundSize) {
+        UpdateRecordingCanvas(pixelGridRoundSize.Width(), pixelGridRoundSize.Height());
+        lastLayoutSize_.SetSizeT(pixelGridRoundSize);
+    }
     auto recordingCanvas = std::static_pointer_cast<RSRecordingCanvas>(rsCanvas_);
     CHECK_NULL_VOID(recordingCanvas);
-    lastLayoutSize_ = paintWrapper->GetGeometryNode()->GetFrameSize();
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     auto fontManager = context->GetFontManager();
@@ -428,52 +394,10 @@ void CanvasPaintMethod::StrokeText(const std::string& text, double x, double y, 
         CHECK_NULL_VOID(success);
         PaintText(lastLayoutSize_.Width(), x, y, maxWidth, true, true);
     }
-
+    // need to process again for non-shadow case
     auto success = UpdateParagraph(text, true);
     CHECK_NULL_VOID(success);
     PaintText(lastLayoutSize_.Width(), x, y, maxWidth, true);
-}
-
-double CanvasPaintMethod::MeasureText(const std::string& text, const PaintState& state)
-{
-#ifndef ACE_UNITTEST
-    RSParagraphStyle style;
-    style.textAlign = Constants::ConvertTxtTextAlign(state.GetTextAlign());
-    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
-    CHECK_NULL_RETURN(fontCollection, 0.0);
-    std::unique_ptr<RSParagraphBuilder> builder = RSParagraphBuilder::Create(style, fontCollection);
-    RSTextStyle txtStyle;
-    Constants::ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
-    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
-    builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    auto paragraph = builder->CreateTypography();
-    paragraph->Layout(Size::INFINITE_SIZE);
-    return paragraph->GetMaxIntrinsicWidth();
-#else
-    return 0.0;
-#endif
-}
-
-double CanvasPaintMethod::MeasureTextHeight(const std::string& text, const PaintState& state)
-{
-#ifndef ACE_UNITTEST
-    RSParagraphStyle style;
-    style.textAlign = Constants::ConvertTxtTextAlign(state.GetTextAlign());
-    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
-    CHECK_NULL_RETURN(fontCollection, 0.0);
-    std::unique_ptr<RSParagraphBuilder> builder = RSParagraphBuilder::Create(style, fontCollection);
-    RSTextStyle txtStyle;
-    Constants::ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
-    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
-    builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    auto paragraph = builder->CreateTypography();
-    paragraph->Layout(Size::INFINITE_SIZE);
-    return paragraph->GetHeight();
-#else
-    return 0.0;
-#endif
 }
 
 TextMetrics CanvasPaintMethod::MeasureTextMetrics(const std::string& text, const PaintState& state)
@@ -551,6 +475,7 @@ bool CanvasPaintMethod::UpdateParagraph(const std::string& text, bool isStroke, 
         txtStyle.shadows.emplace_back(txtShadow);
     }
     txtStyle.locale = Localization::GetInstance()->GetFontLocale();
+    UpdateFontFamilies();
     UpdateTextStyleForeground(isStroke, txtStyle, hasShadow);
     builder->PushStyle(txtStyle);
     builder->AppendText(StringUtils::Str8ToStr16(text));

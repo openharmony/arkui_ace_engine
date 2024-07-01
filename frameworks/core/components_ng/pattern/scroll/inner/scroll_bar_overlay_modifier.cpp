@@ -34,6 +34,7 @@ constexpr int32_t BAR_SHRINK_DURATION = 250;     // 250ms, scroll bar width shri
 constexpr int32_t BAR_DISAPPEAR_FRAME_RATE = 15; // 15fps, the expected frame rate of opacity animation
 constexpr int32_t BAR_DISAPPEAR_MIN_FRAME_RATE = 0;
 constexpr int32_t BAR_DISAPPEAR_MAX_FRAME_RATE = 90;
+constexpr float ADAPT_ACCURACY = 0.5f;
 } // namespace
 
 ScrollBarOverlayModifier::ScrollBarOverlayModifier(const OffsetF& barOffset, const SizeF& barSize)
@@ -60,6 +61,7 @@ void ScrollBarOverlayModifier::onDraw(DrawingContext& drawingContext)
     CHECK_NULL_VOID(barHeight_);
     CHECK_NULL_VOID(barX_);
     CHECK_NULL_VOID(barY_);
+    CheckMainModeNearEqual();
     auto barWidth = barWidth_->Get();
     auto barHeight = barHeight_->Get();
     auto barX = barX_->Get();
@@ -169,6 +171,7 @@ void ScrollBarOverlayModifier::StartAdaptAnimation(const Rect& fgRect, bool need
     AnimationOption option;
     auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
     option.SetCurve(motion);
+    isAdaptAnimationStop_ = false;
     adaptAnimation_ = AnimationUtils::StartAnimation(option, [&]() {
         SetMainModeSize(fgRect.GetSize());
         SetMainModeOffset(fgRect.GetOffset());
@@ -178,13 +181,8 @@ void ScrollBarOverlayModifier::StartAdaptAnimation(const Rect& fgRect, bool need
 void ScrollBarOverlayModifier::StopAdaptAnimation()
 {
     if (adaptAnimation_) {
-        AnimationOption option;
-        option.SetCurve(Curves::FRICTION);
-        option.SetDuration(0);
-        adaptAnimation_ = AnimationUtils::StartAnimation(option, [&]() {
-            SetMainModeSize(Size(barWidth_->Get(), barHeight_->Get()));
-            SetMainModeOffset(Offset(barX_->Get(), barY_->Get()));
-        });
+        isAdaptAnimationStop_ = true;
+        AnimationUtils::StopAnimation(adaptAnimation_);
     }
 }
 
@@ -284,5 +282,27 @@ Offset ScrollBarOverlayModifier::GetHoverOffset(const Size& size) const
         return Offset(0.f, size.Height() - barHeight_->Get());
     }
     return Offset::Zero();
+}
+
+void ScrollBarOverlayModifier::CheckMainModeNearEqual()
+{
+    if (isAdaptAnimationStop_) {
+        return;
+    }
+    float MainModeHeight = 0.f;
+    float MainModeOffset = 0.f;
+    if (positionMode_ == PositionMode::BOTTOM) {
+        MainModeHeight = barWidth_->Get();
+        MainModeOffset = barX_->Get();
+    } else {
+        MainModeHeight = barHeight_->Get();
+        MainModeOffset = barY_->Get();
+    }
+    if (NearEqual(lastMainModeHeight_, MainModeHeight, ADAPT_ACCURACY) &&
+        NearEqual(lastMainModeOffset_, MainModeOffset, ADAPT_ACCURACY)) {
+        StopAdaptAnimation();
+    }
+    lastMainModeHeight_ = MainModeHeight;
+    lastMainModeOffset_ = MainModeOffset;
 }
 } // namespace OHOS::Ace::NG

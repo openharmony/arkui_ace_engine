@@ -285,9 +285,13 @@ struct CJSharedTransitionOptions {
     CJMotionPathOptions motionPathOption;
     int32_t type;
 };
+struct CJGeometryTransitionOptions {
+    bool follow = false;
+    int32_t hierarchyStrategy;
+};
 
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetSharedTransition(char* shareId, CJSharedTransitionOptions option);
-CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetGeometryTransition(char* id, bool followWithoutTransition);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetGeometryTransition(char* id, CJGeometryTransitionOptions option);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBlur(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetColorBlend(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBackdropBlur(double value);

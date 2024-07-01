@@ -46,4 +46,10 @@ void ImageAnalyzerMgr::UpdateInnerConfig(void** overlayData, ImageAnalyzerInnerC
 void ImageAnalyzerMgr::Release(void** overlayData)
 {
 }
+void ImageAnalyzerMgr::UpdatePressOverlay(void** overlayData, ImageAnalyzerInnerConfig* config)
+{
+}
+void ImageAnalyzerMgr::UpdateOverlayStatus(void** overlayData, ImageAnalyzerInnerConfig* config)
+{
+}
 }

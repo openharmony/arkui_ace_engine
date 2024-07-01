@@ -210,6 +210,9 @@ void SelectOverlayContentModifier::PaintDoubleHandleWithRect(RSCanvas& canvas)
 
 void SelectOverlayContentModifier::ClipViewPort(RSCanvas& canvas)
 {
+    if (!isOverlayMode_) {
+        return;
+    }
     auto left = viewPort_->Get().Left();
     auto top = viewPort_->Get().Top();
     auto right = viewPort_->Get().Right();
@@ -285,14 +288,17 @@ void SelectOverlayContentModifier::PaintHandle(
     auto centerOffset = OffsetF(rectTopX, 0.0f);
     OffsetF startPoint(0.0, 0.0);
     OffsetF endPoint(0.0, 0.0);
+    auto scaleY = isOverlayMode_ ? 1.0f : scale_.y;
+    auto handleRadius = handleRadius_->Get() * scaleY;
+    auto gap = NearEqual(scaleY, 1.0f) ? 0.0f : handleStrokeWidth_->Get() * scaleY;
     if (handleOnTop) {
-        centerOffset.SetY(handleRect.Top() - handleRadius_->Get());
-        startPoint.SetY(handleRadius_->Get());
-        endPoint.SetY(handleRadius_->Get() + handleRect.Height());
+        centerOffset.SetY(handleRect.Top() - handleRadius);
+        startPoint.SetY(handleRadius + gap);
+        endPoint.SetY(handleRadius + handleRect.Height() + gap);
     } else {
-        centerOffset.SetY(handleRect.Bottom() + handleRadius_->Get());
-        startPoint.SetY(-handleRadius_->Get());
-        endPoint.SetY(-handleRadius_->Get() - handleRect.Height());
+        centerOffset.SetY(handleRect.Bottom() + handleRadius);
+        startPoint.SetY(-handleRadius - gap);
+        endPoint.SetY(-handleRadius - handleRect.Height() - gap);
     }
     HandleDrawInfo drawInfo = { .startPoint = startPoint,
         .endPoint = endPoint,
@@ -304,10 +310,14 @@ void SelectOverlayContentModifier::PaintHandle(
 
 void SelectOverlayContentModifier::PaintHandle(RSCanvas& canvas, const HandleDrawInfo& handleInfo)
 {
+    auto scaleX = isOverlayMode_ ? 1.0f : scale_.x;
+    auto scaleY = isOverlayMode_ ? 1.0f : scale_.y;
     canvas.Save();
     RSBrush brush;
     brush.SetAntiAlias(true);
     canvas.Translate(handleInfo.centerOffset.GetX(), handleInfo.centerOffset.GetY());
+    canvas.Save();
+    canvas.Scale(scaleX, scaleY);
     // Paint inner circle.
     Color innerHandleColor = innerHandleColor_->Get();
     innerHandleColor = innerHandleColor.BlendOpacity(handleOpacity_->Get());
@@ -326,8 +336,11 @@ void SelectOverlayContentModifier::PaintHandle(RSCanvas& canvas, const HandleDra
     canvas.AttachPen(strokePen);
     canvas.DrawCircle(RSPoint(0.0, 0.0), handleRadius_->Get());
     canvas.DetachPen();
+    canvas.Restore();
 
     if (handleInfo.isHandleLineShow) {
+        canvas.Save();
+        canvas.Scale(scaleX, 1.0f);
         RSPen pen;
         pen.SetAntiAlias(true);
         // Paint line of handle.
@@ -338,6 +351,7 @@ void SelectOverlayContentModifier::PaintHandle(RSCanvas& canvas, const HandleDra
         canvas.DrawLine(RSPoint(handleInfo.startPoint.GetX(), handleInfo.startPoint.GetY()),
             RSPoint(handleInfo.endPoint.GetX(), handleInfo.endPoint.GetY()));
         canvas.DetachPen();
+        canvas.Restore();
     }
     canvas.Restore();
 }

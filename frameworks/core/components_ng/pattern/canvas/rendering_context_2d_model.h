@@ -96,8 +96,8 @@ public:
     virtual void SetLineDash(const std::vector<double>& lineDash) = 0;
     virtual void SetTextAlign(const TextAlign& align) = 0;
     virtual void SetTextBaseline(const TextBaseline& baseline) = 0;
-    virtual double GetMeasureTextWidth(const PaintState& state, const std::string& text) = 0;
-    virtual double GetMeasureTextHeight(const PaintState& state, const std::string& text) = 0;
+    virtual double GetMeasureTextWidth(const PaintState& state, const std::string& text) { return 0.0; };
+    virtual double GetMeasureTextHeight(const PaintState& state, const std::string& text) { return 0.0; };
     virtual void FillRect(const Rect& rect) = 0;
     virtual void StrokeRect(const Rect& rect) = 0;
     virtual void ClearRect(const Rect& rect) = 0;
@@ -136,7 +136,7 @@ public:
     virtual void TransferFromImageBitmap(
         RefPtr<AceType>& canvasPattern, const std::shared_ptr<Ace::ImageData>& imageData) {};
 #endif
-    virtual void StartImageAnalyzer(RefPtr<AceType>& canvasPattern, void* config, onAnalyzedCallback& onAnalyzed) {};
+    virtual void StartImageAnalyzer(RefPtr<AceType>& canvasPattern, void* config, OnAnalyzedCallback& onAnalyzed) {};
     virtual void StopImageAnalyzer(RefPtr<AceType>& canvasPattern) {};
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasRenderingContext2DModel);

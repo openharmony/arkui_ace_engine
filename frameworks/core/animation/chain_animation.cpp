@@ -51,6 +51,14 @@ void ChainAnimationNode::SetDelta(float delta, float duration)
     spring_->Reset(curPosition_, space_, curVelocity_, springProperty_);
 }
 
+float ChainAnimationNode::GetDeltaPredict(float delta, float duration)
+{
+    spring_->OnTimestampChanged(duration, 0.0f, false);
+    float curPosition = spring_->GetCurrentPosition();
+    curPosition = std::clamp(curPosition + delta, minSpace_, maxSpace_);
+    return curPosition - space_;
+}
+
 float ChainAnimationNode::GetDelta() const
 {
     return curPosition_ - space_;
@@ -136,6 +144,28 @@ float ChainAnimation::GetValue(int32_t index)
     } else if (index < controlIndex_) {
         for (int32_t i = 1; i <= controlIndex_ - index && i < CHAIN_NODE_NUMBER; i++) {
             value -= nodes_[-i]->GetDelta();
+        }
+    }
+    return value;
+}
+
+float ChainAnimation::GetValuePredict(int32_t index, float delta)
+{
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, 0);
+    auto timestamp = context->GetTimeFromExternalTimer();
+    double duration = static_cast<double>(timestamp - timestamp_) / static_cast<double>(NANOS_TO_MILLS);
+    float value = 0.0f;
+    float factor = (1 - conductivity_) * intensity_;
+    if (index > controlIndex_) {
+        for (int32_t i = 1; i <= index - controlIndex_ && i < CHAIN_NODE_NUMBER; i++) {
+            value += nodes_[i]->GetDeltaPredict(delta * factor, duration);
+            factor *= conductivity_;
+        }
+    } else if (index < controlIndex_) {
+        for (int32_t i = 1; i <= controlIndex_ - index && i < CHAIN_NODE_NUMBER; i++) {
+            value -= nodes_[-i]->GetDeltaPredict(-delta * factor, duration);
+            factor *= conductivity_;
         }
     }
     return value;

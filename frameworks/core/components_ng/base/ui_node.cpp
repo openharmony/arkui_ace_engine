@@ -114,12 +114,14 @@ void UINode::DetachContext(bool recursive)
     }
 }
 
-void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently, bool addDefaultTransition)
+void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot,
+    bool silently, bool addDefaultTransition, bool addModalUiextension)
 {
     CHECK_NULL_VOID(child);
-    if (isProhibitedAddChildNode_) {
-        LOGW("Current Node(id: %{public}d) is prohibited add child(tag %{public}s, id: %{public}d)",
-            GetId(), child->GetTag().c_str(), child->GetId());
+    if (!addModalUiextension && modalUiextensionCount_ > 0) {
+        LOGW("Current Node(id: %{public}d) is prohibited add child(tag %{public}s, id: %{public}d), "
+            "Current modalUiextension count is : %{public}d",
+            GetId(), child->GetTag().c_str(), child->GetId(), modalUiextensionCount_);
         return;
     }
 
@@ -290,10 +292,11 @@ void UINode::Clean(bool cleanDirectly, bool allowTransition)
     MarkNeedSyncRenderTree(true);
 }
 
-void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool silently, bool addDefaultTransition)
+void UINode::MountToParent(const RefPtr<UINode>& parent,
+    int32_t slot, bool silently, bool addDefaultTransition, bool addModalUiextension)
 {
     CHECK_NULL_VOID(parent);
-    parent->AddChild(AceType::Claim(this), slot, silently, addDefaultTransition);
+    parent->AddChild(AceType::Claim(this), slot, silently, addDefaultTransition, addModalUiextension);
     if (parent->IsInDestroying()) {
         parent->SetChildrenInDestroying();
     }
@@ -814,10 +817,27 @@ void UINode::GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& visibleList)
 
 PipelineContext* UINode::GetContext()
 {
+    PipelineContext* context = nullptr;
+    if (context_) {
+        context = context_;
+    } else {
+        context = PipelineContext::GetCurrentContextPtrSafely();
+    }
+    
+    if (context && context->IsDestroyed()) {
+        LOGW("Get context from node when the context is destroyed. The context_ of node is%{public}s nullptr",
+            context_? " not" : "");
+    }
+
+    return context;
+}
+
+PipelineContext* UINode::GetContextWithCheck()
+{
     if (context_) {
         return context_;
     }
-    return PipelineContext::GetCurrentContextPtrSafely();
+    return PipelineContext::GetCurrentContextPtrSafelyWithCheck();
 }
 
 RefPtr<PipelineContext> UINode::GetContextRefPtr()
@@ -992,14 +1012,17 @@ void UINode::SetActive(bool active)
     }
 }
 
-void UINode::SetJSViewActive(bool active)
+void UINode::SetJSViewActive(bool active, bool isLazyForEachNode)
 {
     for (const auto& child : GetChildren()) {
         auto customNode = AceType::DynamicCast<CustomNode>(child);
         // do not need to recursive here, stateMgmt will recursive all children when set active
+        if (customNode && customNode->GetIsV2() && isLazyForEachNode) {
+            return;
+        }
         if (customNode) {
             customNode->SetJSViewActive(active);
-            return;
+            continue;
         }
         child->SetJSViewActive(active);
     }
@@ -1219,7 +1242,7 @@ RefPtr<UINode> UINode::GetFrameChildByIndexWithoutExpanded(uint32_t index)
     return nullptr;
 }
 
-int32_t UINode::GetFrameNodeIndex(RefPtr<FrameNode> node, bool isExpanded)
+int32_t UINode::GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded)
 {
     int32_t index = 0;
     for (const auto& child : GetChildren()) {
@@ -1257,11 +1280,11 @@ void UINode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
     }
 }
 
-void UINode::DoSetActiveChildRange(int32_t start, int32_t end)
+void UINode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
 {
     for (const auto& child : children_) {
         uint32_t count = static_cast<uint32_t>(child->FrameCount());
-        child->DoSetActiveChildRange(start, end);
+        child->DoSetActiveChildRange(start, end, cacheStart, cacheEnd);
         start -= static_cast<int32_t>(count);
         end -= static_cast<int32_t>(count);
     }
@@ -1411,4 +1434,10 @@ bool UINode::IsContextTransparent()
     return true;
 }
 
+void UINode::GetInspectorValue()
+{
+    for (const auto& item : GetChildren()) {
+        item->GetInspectorValue();
+    }
+}
 } // namespace OHOS::Ace::NG

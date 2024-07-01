@@ -178,14 +178,16 @@ public:
     virtual void SetOpacity(double opacity, bool passThrough = false) = 0;
     virtual void SetTransition(const NG::TransitionOptions& transitionOptions, bool passThrough = false) = 0;
     virtual void CleanTransition() {};
-    virtual void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect, bool passThrough = false) = 0;
+    virtual void SetChainedTransition(
+        const RefPtr<NG::ChainedTransitionEffect>& effect, NG::TransitionFinishCallback&& finishCallback = nullptr) = 0;
     virtual void SetOverlay(const std::string& text, std::function<void()>&& buildFunc,
-        const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
-        const std::optional<Dimension>& offsetY, NG::OverlayType type) = 0;
+        const RefPtr<NG::FrameNode>& contentNode, const std::optional<Alignment>& align,
+        const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY, NG::OverlayType type) = 0;
     virtual void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) = 0;
     virtual void SetSharedTransition(
         const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) = 0;
-    virtual void SetGeometryTransition(const std::string& id, bool followWithoutTransition = false) = 0;
+    virtual void SetGeometryTransition(const std::string& id,
+        bool followWithoutTransition = false, bool doRegisterSharedTransition = true) = 0;
     virtual void SetMotionPath(const MotionPathOption& option) = 0;
     virtual void SetRenderGroup(bool isRenderGroup) = 0;
     virtual void SetRenderFit(RenderFit renderFit) = 0;
@@ -386,6 +388,9 @@ public:
     virtual void SetLightIlluminated(const uint32_t value) = 0;
     virtual void SetIlluminatedBorderWidth(const Dimension& value) = 0;
     virtual void SetBloom(const float value) = 0;
+    virtual void SetPositionLocalizedEdges(bool needLocalized) = 0;
+    virtual void SetLocalizedMarkAnchor(bool needLocalized) = 0;
+    virtual void SetOffsetLocalizedEdges(bool needLocalized) = 0;
 
 private:
     static std::unique_ptr<ViewAbstractModel> instance_;

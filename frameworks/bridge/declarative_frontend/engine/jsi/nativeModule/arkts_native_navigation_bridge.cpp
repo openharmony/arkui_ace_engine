@@ -109,7 +109,7 @@ ArkUINativeModuleValue NavigationBridge::SetSubtitle(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> subtitleArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    if (subtitleArg->IsString()) {
+    if (subtitleArg->IsString(vm)) {
         std::string subtitle = subtitleArg->ToString(vm)->ToString();
         GetArkUINodeModifiers()->getNavigationModifier()->setSubtitle(nativeNode, subtitle.c_str());
     } else {
@@ -398,14 +398,14 @@ ArkUINativeModuleValue NavigationBridge::SetIgnoreLayoutSafeArea(ArkUIRuntimeCal
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::string typeCppStr;
     std::string edgesCppStr;
-    if (secondArg->IsString()) {
+    if (secondArg->IsString(vm)) {
         typeCppStr = secondArg->ToString(vm)->ToString();
     } else {
         //type system
         typeCppStr = "0";
     }
 
-    if (thirdArg->IsString()) {
+    if (thirdArg->IsString(vm)) {
         edgesCppStr = thirdArg->ToString(vm)->ToString();
     } else {
         //edge top and bottom

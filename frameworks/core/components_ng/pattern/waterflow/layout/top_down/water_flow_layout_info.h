@@ -24,7 +24,6 @@
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
-#include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
 struct FlowItemIndex {
@@ -62,6 +61,7 @@ public:
     int32_t GetEndIndexByOffset(float offset) const;
     float GetMaxMainHeight() const;
     float GetContentHeight() const override;
+    float EstimateContentHeight() const;
     bool IsAllCrossReachEnd(float mainSize) const;
 
     /**
@@ -126,15 +126,8 @@ public:
      */
     void InitSegments(const std::vector<WaterFlowSections::Section>& sections, int32_t start) override;
 
-    /**
-     * @brief Initialize margin of each section, along with segmentStartPos_, which depends on margin_.
-     *
-     * @param sections vector of Sections info.
-     * @param scale for calculating margins in PX.
-     * @param percentWidth for calculating margins in PX.
-     */
-    void InitMargins(
-        const std::vector<WaterFlowSections::Section>& sections, const ScaleProperty& scale, float percentWidth);
+    // set up startPos of next segment after initializing margins_
+    void PrepareSegmentStartPos();
 
     void ResetSegmentStartPos();
 
@@ -202,9 +195,6 @@ public:
      * Only add to this map when a new endPos is greater than the last one in array.
      */
     std::vector<std::pair<float, int32_t>> endPosArray_;
-
-    // margin of each segment
-    std::vector<PaddingPropertyF> margins_;
 
     // Stores the start position of each segment.
     std::vector<float> segmentStartPos_ = { 0.0f };

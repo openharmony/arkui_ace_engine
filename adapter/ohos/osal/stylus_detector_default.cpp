@@ -35,13 +35,14 @@ bool StylusDetectorDefault::IsEnable()
     return isEnable_;
 }
 
-bool StylusDetectorDefault::RegisterStylusInteractionListener(const std::shared_ptr<IStylusDetectorCallback>& callback)
+bool StylusDetectorDefault::RegisterStylusInteractionListener(
+    const std::string& bundleName, const std::shared_ptr<IStylusDetectorCallback>& callback)
 {
     defaultCallback_ = std::move(callback);
     return true;
 }
 
-void StylusDetectorDefault::UnRegisterStylusInteractionListener()
+void StylusDetectorDefault::UnRegisterStylusInteractionListener(const std::string& bundleName)
 {
     defaultCallback_ = nullptr;
 }

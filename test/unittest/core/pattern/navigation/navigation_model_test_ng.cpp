@@ -1664,5 +1664,40 @@ HWTEST_F(NavigationModelTestNg, OnAttachToMainTree001, TestSize.Level1)
     navigationNode->pattern_ = prePattern;
     ASSERT_EQ(AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern()), prePattern);
 }
+
+/**
+ * @tc.name: AccessibilityTest001
+ * @tc.desc: Test navigation "backbutton" and "more" button.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, AccessibilityTest001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+
+    titleBarNode->backButton_ = FrameNode::CreateFrameNode("button", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    ASSERT_NE(backButtonNode, nullptr);
+    navBarNode->menu_ = FrameNode::CreateFrameNode("menu", 102, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto menuNode = AceType::DynamicCast<FrameNode>(navBarNode->GetMenu());
+    ASSERT_NE(menuNode, nullptr);
+
+    auto AccessibilityProperty1 = backButtonNode->GetAccessibilityProperty<AccessibilityProperty>();
+    AccessibilityProperty1->SetAccessibilityGroup(true);
+    AccessibilityProperty1->SetAccessibilityText("NavigationBackButton");
+    auto text1 = AccessibilityProperty1->GetAccessibilityText();
+    EXPECT_EQ(text1, "NavigationBackButton");
+
+    auto AccessibilityProperty2 = menuNode->GetAccessibilityProperty<AccessibilityProperty>();
+    AccessibilityProperty2->SetAccessibilityGroup(true);
+    AccessibilityProperty2->SetAccessibilityText("NavigationMenu");
+    auto text2 = AccessibilityProperty2->GetAccessibilityText();
+    EXPECT_EQ(text2, "NavigationMenu");
+}
 } // namespace OHOS::Ace::NG
 

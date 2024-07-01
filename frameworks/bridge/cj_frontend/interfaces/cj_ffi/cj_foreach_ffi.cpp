@@ -20,6 +20,7 @@
 #include <unordered_set>
 
 #include "cj_lambda.h"
+
 #include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
 #include "core/components_ng/syntax/for_each_model.h"
 
@@ -62,7 +63,7 @@ void FfiOHOSAceFrameworkForEachPop()
 
 static void FfiOHOSAceFrameworkDeleteIdArray(VectorToCFFIArrayString* src)
 {
-    for (size_t i = 0;i < src->size; ++i) {
+    for (size_t i = 0; i < src->size; ++i) {
         free(src->buffer[i]);
     }
     free(src->buffer);
@@ -74,25 +75,24 @@ VectorToCFFIArrayString FfiOHOSAceFrameworkViewGetIdArray(int64_t elmtId)
 
     auto buffer = (char**)malloc(sizeof(const char*) * result.size());
     if (!buffer) {
-        return {
-            .size = 0,
-            .buffer = nullptr,
-            .free = FfiOHOSAceFrameworkDeleteIdArray
-        };
+        return { .size = 0, .buffer = nullptr, .free = FfiOHOSAceFrameworkDeleteIdArray };
     }
 
     size_t i = 0;
     for (const auto& element : result) {
         auto data = (char*)malloc(element.size() * sizeof(char));
+        if (data == nullptr) {
+            for (size_t j = 0; j < result.size(); j++) {
+                free(buffer[j]);
+            }
+            free(buffer);
+            return { .size = 0, .buffer = nullptr, .free = FfiOHOSAceFrameworkDeleteIdArray };
+        }
         std::char_traits<char>::copy(data, element.c_str(), element.size());
         buffer[i++] = data;
     }
 
-    return {
-        .size = result.size(),
-        .buffer = buffer,
-        .free = FfiOHOSAceFrameworkDeleteIdArray
-    };
+    return { .size = result.size(), .buffer = buffer, .free = FfiOHOSAceFrameworkDeleteIdArray };
 }
 
 VectorToCFFIArray FfiOHOSAceFrameworkViewSetIdArray(int64_t elmtId, VectorCJStringHandle vecHandle)
@@ -123,21 +123,17 @@ VectorToCFFIArray FfiOHOSAceFrameworkViewSetIdArray(int64_t elmtId, VectorCJStri
     temp = (int64_t*)malloc(sizeof(int64_t) * diffIndexArray.size());
     if (!temp) {
         VectorToCFFIArray faultData {
-            .size = 0,
-            .buffer = nullptr,
-            .free = reinterpret_cast<void (*)(int64_t*)>(free)
+            .size = 0, .buffer = nullptr, .free = reinterpret_cast<void (*)(int64_t*)>(free)
         };
         return faultData;
     }
 
     VectorToCFFIArray res {
-        .size = diffIndexArray.size(),
-        .buffer = temp,
-        .free = reinterpret_cast<void (*)(int64_t*)>(free)
+        .size = diffIndexArray.size(), .buffer = temp, .free = reinterpret_cast<void (*)(int64_t*)>(free)
     };
 
     for (size_t i = 0; i < diffIndexArray.size(); i++) {
-        res.buffer[i] =  static_cast<int64_t>(diffIndexArray[i]);
+        res.buffer[i] = static_cast<int64_t>(diffIndexArray[i]);
     }
 
     return res;

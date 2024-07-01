@@ -109,6 +109,7 @@ void ToggleButtonPattern::OnModifyDone()
     InitButtonAndText();
     HandleEnabled();
     HandleBorderColorAndWidth();
+    InitClickEvent();
     InitTouchEvent();
     InitHoverEvent();
     InitOnKeyEvent();
@@ -366,6 +367,9 @@ void ToggleButtonPattern::InitTouchEvent()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto buttonPattern = weak.Upgrade();
         CHECK_NULL_VOID(buttonPattern);
+        if (info.GetSourceDevice() == SourceType::TOUCH && info.IsPreventDefault()) {
+            buttonPattern->isTouchPreventDefault_ = info.IsPreventDefault();
+        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "button touch down");
             buttonPattern->OnTouchDown();
@@ -377,7 +381,7 @@ void ToggleButtonPattern::InitTouchEvent()
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    gesture->AddTouchEvent(touchListener_);
+    gesture->AddTouchAfterEvent(touchListener_);
 }
 
 void ToggleButtonPattern::OnTouchDown()
@@ -418,10 +422,6 @@ void ToggleButtonPattern::OnTouchUp()
     CHECK_NULL_VOID(host);
     auto buttonEventHub = GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
-    auto toggleButtonPattern = host->GetPattern<ToggleButtonPattern>();
-    if (toggleButtonPattern) {
-        toggleButtonPattern->OnClick();
-    }
     if (buttonEventHub->GetStateEffect()) {
         auto renderContext = host->GetRenderContext();
         if (isSetClickedColor_) {
@@ -449,10 +449,17 @@ void ToggleButtonPattern::InitClickEvent()
     CHECK_NULL_VOID(gesture);
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto buttonPattern = weak.Upgrade();
+        CHECK_NULL_VOID(buttonPattern);
+        if (info.GetSourceDevice() == SourceType::TOUCH &&
+            (info.IsPreventDefault() || buttonPattern->isTouchPreventDefault_)) {
+            TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "toggle button preventDefault successfully");
+            buttonPattern->isTouchPreventDefault_ = false;
+            return;
+        }
         buttonPattern->OnClick();
     };
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    gesture->AddClickEvent(clickListener_);
+    gesture->AddClickAfterEvent(clickListener_);
 }
 
 void ToggleButtonPattern::OnClick()
@@ -572,9 +579,7 @@ void ToggleButtonPattern::InitButtonAndText()
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    if (!textLayoutProperty->HasFontSize()) {
-        textLayoutProperty->UpdateFontSize(textFontSize_);
-    } else {
+    if (textLayoutProperty->HasFontSize()) {
         layoutProperty->UpdateFontSize(textLayoutProperty->GetFontSizeValue(textFontSize_));
     }
     layoutProperty->UpdateLabel(textLayoutProperty->GetContentValue(""));

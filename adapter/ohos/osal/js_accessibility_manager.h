@@ -136,7 +136,7 @@ public:
         int32_t action, const RefPtr<PipelineBase>& context, int64_t uiExtensionOffset) override;
 #ifdef WEB_SUPPORTED
     bool ExecuteWebActionNG(int64_t elementId, Accessibility::ActionType action, const RefPtr<NG::FrameNode>& frameNode,
-        const RefPtr<NG::PipelineContext>& ngPipeline);
+        const RefPtr<NG::PipelineContext>& ngPipeline, const std::map<std::string, std::string>& actionArguments);
     void SetWebAccessibilityState(bool state);
     void UpdateAccessibilityFocusId(const RefPtr<PipelineBase>& context, int64_t accessibilityId,
         bool isFocus) override;
@@ -371,7 +371,7 @@ private:
     std::unordered_map<int64_t, std::shared_ptr<AccessibilityChildTreeCallback>> childTreeCallbackMap_;
     int32_t treeId_ = 0;
     int64_t parentElementId_ = INVALID_PARENT_ID;
-    int32_t parentWindowId_ = -1;
+    uint32_t parentWindowId_ = 0;
     std::function<void(int32_t&, int32_t&)> getParentRectHandler_;
 };
 

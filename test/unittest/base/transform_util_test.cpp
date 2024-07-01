@@ -248,4 +248,19 @@ HWTEST_F(TransformUtilTest, TransformUtilTest008, TestSize.Level1)
     EXPECT_EQ(result.GetOperations()[3].rotateOperation_, RotateOperation());
     EXPECT_EQ(result.GetOperations()[4].perspectiveOperation_, PerspectiveOperation());
 }
+
+/**
+ * @tc.name: TransformUtilTest009
+ * @tc.desc: Test the functions of the class ComposeTransform.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TransformUtilTest, TransformUtilTest009, TestSize.Level1)
+{
+    DecomposedTransform decomposedTransform;
+    decomposedTransform.skew[0] = 1.0f;
+    decomposedTransform.skew[1] = 1.0f;
+    decomposedTransform.skew[2] = 1.0f;
+    EXPECT_EQ(TransformUtil::ComposeTransform(decomposedTransform).GetScaleX(), 1.0);
+    EXPECT_EQ(TransformUtil::ComposeTransform(decomposedTransform).GetScaleY(), 1.0);
+}
 } // namespace OHOS::Ace

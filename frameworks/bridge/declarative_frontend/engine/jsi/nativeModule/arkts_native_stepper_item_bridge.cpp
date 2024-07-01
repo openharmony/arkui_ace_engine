@@ -83,7 +83,7 @@ ArkUINativeModuleValue StepperItemBridge::SetStatus(ArkUIRuntimeCallInfo* runtim
     const std::array<std::string, 4> statusArray = { "normal", "disabled", "waiting", "skip" };
     std::string status = statusArray[0];
     int32_t index = valueArg->Int32Value(vm);
-    if (index > 0 && index < statusArray.size()) {
+    if (index > 0 && static_cast<size_t>(index) < statusArray.size()) {
         status = statusArray.at(index);
     }
     GetArkUINodeModifiers()->getStepperItemModifier()->setStatus(nativeNode, status.c_str());

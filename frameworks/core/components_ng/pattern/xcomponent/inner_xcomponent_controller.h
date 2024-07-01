@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 enum class ImageAnalyzerState;
-using onAnalyzedCallback = std::optional<std::function<void(ImageAnalyzerState)>>;
+using OnAnalyzedCallback = std::optional<std::function<void(ImageAnalyzerState)>>;
 class InnerXComponentController : public OHOS::Ace::XComponentController {
 public:
     InnerXComponentController() = default;
@@ -62,7 +62,7 @@ public:
     virtual void SetIdealSurfaceOffsetY(float offsetY) {}
     virtual void ClearIdealSurfaceOffset(bool isXAxis) {}
     virtual void UpdateSurfaceBounds() {}
-    virtual void StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed) {}
+    virtual void StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed) {}
     virtual void StopImageAnalyzer() {}
     virtual void SetSurfaceRotation(bool isLock) {}
     virtual bool GetSurfaceRotation()

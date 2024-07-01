@@ -473,7 +473,7 @@ int32_t ArkJSRuntime::LoadDestinationFile(const std::string& bundleName, const s
     int ret = JSNApi::ExecuteWithSingletonPatternFlag(vm_, bundleName, module, pageSourceFile, isSingleton);
     HandleUncaughtException(trycatch);
     if (ret != 0) {
-        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "load pageSourceFile failed: %{public}d", ret);
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "load pageSourceFile failed code is: %{public}d", ret);
     }
     return ret;
 }

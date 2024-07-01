@@ -121,9 +121,10 @@ private:
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, float subtitleHeight);
     float ChangeOffsetByDirection(LayoutWrapper* layoutWrapper,
         const RefPtr<NG::GeometryNode>& childGeometryNode, float offsetX) const;
+    float ParseCalcDimensionToPx(const std::optional<CalcDimension>& value, const SizeF& titleBarSize);
 
     // set variables from theme
-    void InitializeTheme(const SizeF& titleBarSize);
+    void InitializeTheme(const RefPtr<TitleBarNode>& titleBarNode, const SizeF& titleBarSize);
 
     Dimension maxPaddingStart_;
     Dimension maxPaddingEnd_;
@@ -152,8 +153,8 @@ private:
     float singleLineTitleHeight_ = 0.0f;
     float doubleLineTitleBarHeight_ = 0.0f;
     float navTitleSpaceVertical_ = 0.0f;
-    float navLeftMargin_ = 0.0f;
-    float navRightMargin_ = 0.0f;
+    float paddingLeft_ = 0.0f;
+    float paddingRight_ = 0.0f;
     float navBackIconWidth_ = 0.0f;
     float navButtonPadding_ = 0.0f;
     float navHorizontalMargin_ = 0.0f;

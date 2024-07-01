@@ -489,24 +489,76 @@ class ArkBackgroundBlurStyle {
   }
 }
 
+class ArkBorderDashGap {
+  left: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
+  right: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
+  top: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
+  bottom: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
+
+  constructor() {
+    this.left = undefined;
+    this.right = undefined;
+    this.top = undefined;
+    this.bottom = undefined;
+  }
+
+  isEqual(another: ArkBorderDashGap): boolean {
+    return (
+      this.left === another.left &&
+      this.right === another.right &&
+      this.top === another.top &&
+      this.bottom === another.bottom
+    );
+  }
+}
+
+class ArkBorderDashWidth {
+  left: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
+  right: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
+  top: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
+  bottom: EdgeWidths | LengthMetrics | LocalizedEdgeWidths;
+
+  constructor() {
+    this.left = undefined;
+    this.right = undefined;
+    this.top = undefined;
+    this.bottom = undefined;
+  }
+
+  isEqual(another: ArkBorderDashWidth): boolean {
+    return (
+      this.left === another.left &&
+      this.right === another.right &&
+      this.top === another.top &&
+      this.bottom === another.bottom
+    );
+  }
+}
+
 class ArkBorder {
   arkWidth: ArkBorderWidth;
   arkColor: ArkBorderColor;
   arkRadius: ArkBorderRadius;
   arkStyle: ArkBorderStyle;
+  arkDashGap: ArkBorderDashGap;
+  arkDashWidth: ArkBorderDashWidth;
 
   constructor() {
     this.arkWidth = new ArkBorderWidth();
     this.arkColor = new ArkBorderColor();
     this.arkRadius = new ArkBorderRadius();
     this.arkStyle = new ArkBorderStyle();
+    this.arkDashGap = new ArkBorderDashGap();
+    this.arkDashWidth = new ArkBorderDashWidth();
   }
   isEqual(another: ArkBorder): boolean {
     return (
       this.arkWidth.isEqual(another.arkWidth) &&
       this.arkColor.isEqual(another.arkColor) &&
       this.arkRadius.isEqual(another.arkRadius) &&
-      this.arkStyle.isEqual(another.arkStyle)
+      this.arkStyle.isEqual(another.arkStyle) &&
+      this.arkDashGap.isEqual(another.arkDashGap) &&
+      this.arkDashWidth.isEqual(another.arkDashWidth)
     );
   }
 
@@ -530,7 +582,7 @@ class ArkBackgroundImageSize {
 }
 
 class ArkBackgroundImage {
-  src: string | undefined | Resource;
+  src: string | undefined | Resource | PixelMap;
   repeat: number | undefined;
   constructor() {
     this.src = undefined;

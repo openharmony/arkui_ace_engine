@@ -214,7 +214,8 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
     auto pattern = GetPattern<NavigationPattern>();
     // record remove destination size
     int32_t removeSize = 0;
-    while (slot + removeSize < navigationContentNode->GetChildren().size()) {
+    while (
+        static_cast<int32_t>(slot) + removeSize < static_cast<int32_t>(navigationContentNode->GetChildren().size())) {
         // delete useless nodes that are not at the top
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(navigationContentNode->GetLastChild());
         if (!navDestination) {
@@ -310,6 +311,7 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
             result = eventHub->FireOnBackPressedEvent();
         }
         if (result) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation user onBackPress return true");
             return true;
         }
         auto navigation = navigationWeak.Upgrade();
@@ -342,6 +344,16 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
 
     navDestination->SetNavDestinationBackButtonEvent(onBackButtonEvent);
     backButtonEventHub->GetOrCreateGestureEventHub()->SetUserOnClick(onBackButtonEvent);
+}
+
+RefPtr<FrameNode> NavigationGroupNode::GetTopDestination()
+{
+    auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto navigationStack = pattern->GetNavigationStack();
+    CHECK_NULL_RETURN(navigationStack, nullptr);
+    auto topNavdestination = AceType::DynamicCast<FrameNode>(GetNavDestinationNode(navigationStack->Get()));
+    return topNavdestination;
 }
 
 bool NavigationGroupNode::CheckCanHandleBack()
@@ -420,7 +432,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
         weakPreBackIcon = WeakPtr<FrameNode>(preBackIcon),
         weakNavigation = WeakClaim(this)] {
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation pop animation end");
-            ACE_SCOPED_TRACE("Navigation page pop transition end");
+            ACE_SCOPED_TRACE_COMMERCIAL("Navigation page pop transition end");
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
             auto navigation = weakNavigation.Upgrade();
             auto backIcon = weakPreBackIcon.Upgrade();
@@ -433,6 +445,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             CHECK_NULL_VOID(preNavDesNode);
             if (preNavDesNode->GetTransitionType() != PageTransitionType::EXIT_POP) {
                 // has another transition, just return
+                TAG_LOGW(AceLogTag::ACE_NAVIGATION, "preNavDesNode has another transition");
                 return;
             }
             auto preNavDesPattern = preNavDesNode->GetPattern<NavDestinationPattern>();
@@ -490,7 +503,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
         callback);
     auto newPopAnimation = AnimationUtils::StartAnimation(option, [
         this, preNode, preTitleNode, preFrameSize, curNode, curTitleBarNode]() {
-            ACE_SCOPED_TRACE("Navigation page pop transition start");
+            ACE_SCOPED_TRACE_COMMERCIAL("Navigation page pop transition start");
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation pop animation start");
             /* preNode */
@@ -581,7 +594,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
         weakNavigation = WeakClaim(this),
         weakCurNode = WeakPtr<FrameNode>(curNode),
         isNavBar] {
-            ACE_SCOPED_TRACE("Navigation page push transition end");
+            ACE_SCOPED_TRACE_COMMERCIAL("Navigation page push transition end");
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation push animation end");
             auto navigation = weakNavigation.Upgrade();
@@ -628,6 +641,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                 CHECK_NULL_VOID(curNavDestination);
                 if (AceType::DynamicCast<NavDestinationGroupNode>(curNode)->GetTransitionType() !=
                     PageTransitionType::ENTER_PUSH) {
+                    TAG_LOGW(AceLogTag::ACE_NAVIGATION, "curNode has another transition");
                     return;
                 }
                 curNode->GetRenderContext()->ClipWithRRect(
@@ -659,7 +673,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
         callback);
     auto newPushAnimation = AnimationUtils::StartAnimation(option, [
         this, preNode, preTitleNode, curNode, curTitleNode, preFrameSize, curFrameSize, mode]() {
-            ACE_SCOPED_TRACE("Navigation page push transition start");
+            ACE_SCOPED_TRACE_COMMERCIAL("Navigation page push transition start");
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation push animation start");
             float flag = CheckLanguageDirection();
@@ -789,7 +803,8 @@ void NavigationGroupNode::TransitionWithReplace(
     option.SetDuration(DEFAULT_REPLACE_DURATION);
     option.SetOnFinishEvent([weakPreNode = WeakPtr<FrameNode>(preNode), weakNavigation = WeakClaim(this),
                                 isNavBar]() {
-        ACE_SCOPED_TRACE("Navigation page replace transition end");
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation replace animation end");
+        ACE_SCOPED_TRACE_COMMERCIAL("Navigation page replace transition end");
         PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
         auto preNode = weakPreNode.Upgrade();
         CHECK_NULL_VOID(preNode);
@@ -813,7 +828,7 @@ void NavigationGroupNode::TransitionWithReplace(
     AnimationUtils::Animate(
         option,
         [curNode]() {
-            ACE_SCOPED_TRACE("Navigation page replace transition start");
+            ACE_SCOPED_TRACE_COMMERCIAL("Navigation page replace transition start");
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
             curNode->GetRenderContext()->UpdateOpacity(1.0f);
         },

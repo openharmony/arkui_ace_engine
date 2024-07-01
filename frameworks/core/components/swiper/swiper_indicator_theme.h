@@ -40,6 +40,19 @@ constexpr Dimension SWIPER_INDICATOR_DOT_ITEM_SPACE = 8.0_vp;
 constexpr double INDICATOR_ZOOM_IN_SCALE = 1.33;
 } // namespace
 
+enum class OverlongType {
+    NONE = 0,
+    LEFT_NORMAL_RIGHT_FADEOUT,
+    LEFT_FADEOUT_RIGHT_NORMAL,
+    LEFT_FADEOUT_RIGHT_FADEOUT
+};
+
+enum class OverlongIndicatorMove {
+    NONE = 0,
+    MOVE_FORWARD,
+    MOVE_BACKWARD
+};
+
 enum class GestureState {
     GESTURE_STATE_INIT,
     GESTURE_STATE_NONE,

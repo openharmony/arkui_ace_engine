@@ -3091,7 +3091,8 @@ void PipelineContext::ProcessDragEventEnd(
     SetInitRenderNode(nullptr);
 }
 
-void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action)
+void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,
+    const RefPtr<NG::FrameNode>& node)
 {
     if (!clipboard_) {
         clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(GetTaskExecutor());

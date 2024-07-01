@@ -22,11 +22,6 @@
 #include "test/mock/base/mock_system_properties.h"
 #endif
 #include "test/mock/core/rosen/mock_canvas.h"
-
-#include "core/components/scroll/scroll_controller_base.h"
-#include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
-#include "core/components_ng/property/property.h"
-
 #define protected public
 #define private public
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -35,10 +30,12 @@
 
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
+#include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/water_flow_accessibility_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
@@ -48,6 +45,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #undef private
 #undef protected
@@ -1758,5 +1756,34 @@ HWTEST_F(WaterFlowTestNg, Reverse001, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 3), 200.0f);
     EXPECT_EQ(GetChildY(frameNode_, 4), 100.0f);
     EXPECT_EQ(GetChildY(frameNode_, 5), -100.0f);
+}
+
+/**
+ * @tc.name: EstimateContentHeight001
+ * @tc.desc: Test EstimateContentHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, EstimateContentHeight001, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateItem(TOTAL_LINE_NUMBER * 4);
+    });
+    FlushLayoutTask(frameNode_);
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 10);
+
+    int32_t childCount = 0;
+    for (const auto& item : info->items_[0]) {
+        childCount += item.second.size();
+    }
+    EXPECT_EQ(info->EstimateContentHeight(), info->GetMaxMainHeight() / childCount * info->childrenCount_);
+
+    pattern_->UpdateCurrentOffset(-5000.f, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info->startIndex_, 31);
+    EXPECT_EQ(info->endIndex_, TOTAL_LINE_NUMBER * 4 - 1);
+    EXPECT_EQ(info->EstimateContentHeight(), info->maxHeight_);
 }
 } // namespace OHOS::Ace::NG

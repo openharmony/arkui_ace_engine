@@ -23,6 +23,7 @@
 #include <utility>
 
 #include "base/log/log.h"
+#include "securec.h"
 
 namespace OHOS::Ace::NG {
 
@@ -32,19 +33,35 @@ template <typename T,
 class AutoTMalloc {
 public:
     explicit AutoTMalloc(T* ptr = nullptr) : fPtr_(ptr) {}
-    explicit AutoTMalloc(size_t count)
-        : fPtr_(count ? (T*)MallocThrow(count, sizeof(T)) : nullptr) {}
+    explicit AutoTMalloc(size_t count) : fPtr_(count ? (T*)MallocThrow(count, sizeof(T)) : nullptr)
+    {
+        if (fPtr_) {
+            allocatedSize_ = count * sizeof(T);
+        } else {
+            allocatedSize_ = 0;
+        }
+    }
 
     AutoTMalloc(AutoTMalloc&&) = default;
     AutoTMalloc& operator=(AutoTMalloc&&) = default;
     void realloc(size_t count)
     {
-        fPtr_.reset(count ? (T*)ReallocThrow(fPtr_.release(), count * sizeof(T)) : nullptr);
+        fPtr_.reset(count ? (T*)ReallocThrow(fPtr_.release(), count * sizeof(T), allocatedSize_) : nullptr);
+        if (fPtr_) {
+            allocatedSize_ = count * sizeof(T);
+        } else {
+            allocatedSize_ = 0;
+        }
     }
 
     T* Reset(size_t count = 0)
     {
         fPtr_.reset(count ? (T*)MallocThrow(count, sizeof(T)) : nullptr);
+        if (fPtr_) {
+            allocatedSize_ = count * sizeof(T);
+        } else {
+            allocatedSize_ = 0;
+        }
         return this->get();
     }
     T* get() const { return fPtr_.get(); }
@@ -121,9 +138,17 @@ private:
         return MallocFlags(size, MALLOC_THROW);
     }
 
-    static inline void* ReallocThrow(void*addr, size_t size)
+    static inline void* ReallocThrow(void* addr, size_t size, size_t oldSize)
     {
-        return ThrowOnFailure(size, std::realloc(addr, size));
+        void* newAddr = std::malloc(size);
+        CHECK_NULL_RETURN(newAddr, nullptr);
+        if (addr != nullptr) {
+            if (memcpy_s(newAddr, size, addr, oldSize) != 0) {
+                TAG_LOGE(AceLogTag::ACE_CANVAS_COMPONENT, "memcpy overflow.");
+                return newAddr;
+            }
+        }
+        return newAddr;
     }
 
     template <typename V, V* P>
@@ -138,6 +163,7 @@ private:
     std::unique_ptr<T, FunctionWrapper<void(void*),  free>> fPtr_;
     static constexpr uint32_t INT32SIZE = 32;
     static constexpr uint32_t INT32VALUE = 0xFFFFFFFF;
+    size_t allocatedSize_ = 0;
 };
 
 } // namespce OHOS::Ace

@@ -834,7 +834,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged002, TestSize.Level1
 
 /**
  * @tc.name: HandleOnEditChanged003
- * @tc.desc: test Long press edit status is true
+ * @tc.desc: test Long press edit status is keep false
  * @tc.type: FUNC
  */
 HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged003, TestSize.Level1)
@@ -855,18 +855,18 @@ HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged003, TestSize.Level1
 
     GestureEvent info;
     richEditorPattern->HandleDoubleClickOrLongPress(info);
-    EXPECT_TRUE(richEditorController->IsEditing());
+    EXPECT_FALSE(richEditorController->IsEditing());
 
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
     richEditorModel.SetOnEditingChange([](bool value) {});
 
     /* *
-     * @tc.steps: step3. Long press to trigger the callback function and modify the editing status
+     * @tc.steps: step3. Long press to trigger the callback function and keep preview state
      */
 
     richEditorPattern->HandleDoubleClickOrLongPress(info);
-    EXPECT_TRUE(richEditorController->IsEditing());
+    EXPECT_FALSE(richEditorController->IsEditing());
 }
 
 /**

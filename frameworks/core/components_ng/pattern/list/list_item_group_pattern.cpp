@@ -96,27 +96,8 @@ void ListItemGroupPattern::DumpAdvanceInfo()
 
 RefPtr<LayoutAlgorithm> ListItemGroupPattern::CreateLayoutAlgorithm()
 {
-    int32_t headerIndex = -1;
-    int32_t footerIndex = -1;
-    int32_t itemStartIndex = 0;
-    auto header = header_.Upgrade();
-    if (header) {
-        auto count = header->FrameCount();
-        if (count > 0) {
-            headerIndex = itemStartIndex;
-            itemStartIndex += count;
-        }
-    }
-    auto footer = footer_.Upgrade();
-    if (footer) {
-        int32_t count = footer->FrameCount();
-        if (count > 0) {
-            footerIndex = itemStartIndex;
-            itemStartIndex += count;
-        }
-    }
-    itemStartIndex_ = itemStartIndex;
-    auto layoutAlgorithm = MakeRefPtr<ListItemGroupLayoutAlgorithm>(headerIndex, footerIndex, itemStartIndex_);
+    CalculateItemStartIndex();
+    auto layoutAlgorithm = MakeRefPtr<ListItemGroupLayoutAlgorithm>(headerIndex_, footerIndex_, itemStartIndex_);
     layoutAlgorithm->SetItemsPosition(itemPosition_);
     layoutAlgorithm->SetLayoutedItemInfo(layoutedItemInfo_);
     if (childrenSize_ && ListChildrenSizeExist()) {
@@ -171,6 +152,15 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     auto accessibilityProperty = host->GetAccessibilityProperty<ListItemGroupAccessibilityProperty>();
     if (accessibilityProperty != nullptr) {
         accessibilityProperty->SetCollectionItemCounts(layoutAlgorithm->GetTotalItemCount());
+    }
+    auto cacheParam = layoutAlgorithm->GetCacheParam();
+    if (cacheParam) {
+        if (cacheParam.value().forward) {
+            forwardCachedIndex_ = cacheParam.value().currCachedIndex;
+        } else {
+            backwardCachedIndex_ = cacheParam.value().currCachedIndex;
+        }
+        layoutAlgorithm->SetCacheParam(std::nullopt);
     }
     auto listLayoutProperty = host->GetLayoutProperty<ListItemGroupLayoutProperty>();
     return listLayoutProperty && listLayoutProperty->GetDivider().has_value() && !itemPosition_.empty();
@@ -344,6 +334,90 @@ void ListItemGroupPattern::ResetChildrenSize()
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         OnChildrenSizeChanged({ -1, -1, -1 }, LIST_UPDATE_CHILD_SIZE);
+    }
+}
+
+void ListItemGroupPattern::CalculateItemStartIndex()
+{
+    int32_t headerIndex = -1;
+    int32_t footerIndex = -1;
+    int32_t itemStartIndex = 0;
+    auto header = header_.Upgrade();
+    if (header) {
+        auto count = header->FrameCount();
+        if (count > 0) {
+            headerIndex = itemStartIndex;
+            itemStartIndex += count;
+        }
+    }
+    auto footer = footer_.Upgrade();
+    if (footer) {
+        int32_t count = footer->FrameCount();
+        if (count > 0) {
+            footerIndex = itemStartIndex;
+            itemStartIndex += count;
+        }
+    }
+    headerIndex_ = headerIndex;
+    footerIndex_ = footerIndex;
+    itemStartIndex_ = itemStartIndex;
+}
+
+int32_t ListItemGroupPattern::GetForwardCachedIndex(int32_t cacheCount)
+{
+    int32_t endIndex = itemPosition_.empty() ? -1 : itemPosition_.rbegin()->first;
+    int32_t limit = std::min(endIndex + cacheCount, itemTotalCount_ - 1);
+    forwardCachedIndex_ = std::clamp(forwardCachedIndex_, endIndex, limit);
+    return forwardCachedIndex_;
+}
+
+int32_t ListItemGroupPattern::GetBackwardCachedIndex(int32_t cacheCount)
+{
+    int32_t startIndex = itemPosition_.empty() ? itemTotalCount_ : itemPosition_.begin()->first;
+    int32_t limit = std::max(startIndex - cacheCount, 0);
+    backwardCachedIndex_ = std::clamp(backwardCachedIndex_, limit, startIndex);
+    return backwardCachedIndex_;
+}
+
+void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint,
+    bool forward, int64_t deadline, int32_t cached)
+{
+    ACE_SCOPED_TRACE("Group LayoutCache:%d,%d", forward, cached);
+    auto listNode = GetListFrameNode();
+    CHECK_NULL_VOID(listNode);
+    auto listLayoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_VOID(listLayoutProperty);
+    auto cacheCount = listLayoutProperty->GetCachedCountValue(1) - cached;
+    if (cacheCount < 1) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutAlgorithmWrapper = host->GetLayoutAlgorithm(true);
+    CHECK_NULL_VOID(layoutAlgorithmWrapper);
+    auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(itemGroup);
+    int32_t currentIndex = forward ? GetForwardCachedIndex(cached) : GetBackwardCachedIndex(cacheCount);
+    ListItemGroupCacheParam param = {
+        .forward = forward,
+        .cacheCount = cacheCount,
+        .currCachedIndex = currentIndex,
+        .deadline = deadline,
+    };
+    itemGroup->SetCacheParam(param);
+    itemGroup->SetListLayoutProperty(listLayoutProperty);
+    host->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    host->GetGeometryNode()->SetParentLayoutConstraint(constraint);
+    FrameNode::ProcessOffscreenNode(host);
+}
+
+void ListItemGroupPattern::SetListItemGroupStyle(V2::ListItemGroupStyle style)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (listItemGroupStyle_ == V2::ListItemGroupStyle::NONE && style == V2::ListItemGroupStyle::CARD) {
+        listItemGroupStyle_ = style;
+        SetListItemGroupDefaultAttributes(host);
     }
 }
 } // namespace OHOS::Ace::NG

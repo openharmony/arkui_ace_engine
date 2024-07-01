@@ -520,8 +520,10 @@ void GridPattern::MarkDirtyNodeSelf()
 void GridPattern::OnScrollEndCallback()
 {
     isSmoothScrolling_ = false;
-    scrollStop_ = true;
-    MarkDirtyNodeSelf();
+    if (AnimateStoped()) {
+        scrollStop_ = true;
+        MarkDirtyNodeSelf();
+    }
 }
 
 std::pair<bool, bool> GridPattern::IsFirstOrLastFocusableChild(int32_t curMainIndex, int32_t curCrossIndex)
@@ -1260,7 +1262,7 @@ void GridPattern::ScrollPage(bool reverse, bool smooth)
     float distance = reverse ? GetMainContentSize() : -GetMainContentSize();
     if (smooth) {
         float position = -gridLayoutInfo_.currentHeight_ + distance;
-        ScrollablePattern::AnimateTo(-position, -1, nullptr, true);
+        ScrollablePattern::AnimateTo(-position, -1, nullptr, true, false, false);
         return;
     } else {
         if (!isConfigScrollable_) {
@@ -1294,12 +1296,14 @@ bool GridPattern::UpdateStartIndex(int32_t index, ScrollAlign align)
 
 void GridPattern::OnAnimateStop()
 {
-    scrollStop_ = true;
-    MarkDirtyNodeSelf();
-    // AccessibilityEventType::SCROLL_END
+    if (!GetIsDragging() || GetScrollAbort()) {
+        scrollStop_ = true;
+        MarkDirtyNodeSelf();
+    }
 }
 
-void GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll)
+void GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve> &curve, bool smooth,
+                            bool canOverScroll, bool useTotalOffset)
 {
     if (!isConfigScrollable_) {
         return;

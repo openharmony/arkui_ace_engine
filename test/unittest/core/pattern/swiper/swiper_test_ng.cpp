@@ -2067,17 +2067,17 @@ HWTEST_F(SwiperTestNg, WearableSwiperOnModifyDone001, TestSize.Level1)
  */
 HWTEST_F(SwiperTestNg, SwiperSetFrameRateTest001, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. create swiper and frameRateRange
-     */
     CreateWithItem([](SwiperModelNG model) {});
-    auto type = SwiperDynamicSyncSceneType::GESTURE;
-    auto frameRateRange = AceType::MakeRefPtr<FrameRateRange>(0, 120, 60);
-
-    /**
-     * @tc.steps: step2. call SetFrameRateRange.
-     */
-    pattern_->SetFrameRateRange(frameRateRange, type);
-    EXPECT_TRUE(pattern_->frameRateRange_[type] == frameRateRange);
+    int32_t expectedRate = 60;
+    auto frameRateRange = AceType::MakeRefPtr<FrameRateRange>(0, 120, expectedRate);
+    pattern_->SetFrameRateRange(frameRateRange, SwiperDynamicSyncSceneType::GESTURE);
+    auto frameRateManager = MockPipelineContext::GetCurrentContext()->GetFrameRateManager();
+    int32_t nodeId = frameNode_->GetId();
+    frameRateManager->AddNodeRate(nodeId, 1);
+    frameRateManager->isRateChanged_ = false;
+    pattern_->UpdateNodeRate();
+    auto iter = frameRateManager->nodeRateMap_.find(nodeId);
+    EXPECT_EQ(iter->second, expectedRate);
+    EXPECT_TRUE(frameRateManager->isRateChanged_);
 }
 } // namespace OHOS::Ace::NG

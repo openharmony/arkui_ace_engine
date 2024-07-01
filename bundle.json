@@ -65,6 +65,7 @@
                 "init",
                 "image_framework",
                 "player_framework",
+                "audio_framework",
                 "access_token",
                 "input",
                 "webview",
@@ -77,7 +78,7 @@
                 "app_file_service",
                 "ets_utils",
                 "bounds_checking_function",
-		        "libxml2",
+                "libxml2",
                 "ffrt",
                 "icu",
                 "miscdevice",
@@ -89,7 +90,8 @@
                 "opengles",
                 "zlib",
                 "skia",
-                "libuv"
+                "libuv",
+                "background_task_mgr"
             ],
             "third_party": []
         },
@@ -196,12 +198,22 @@
                 },
                 {
                     "header": {
-                      "header_base": "//foundation/arkui/ace_engine/frameworks/core/common/",
-                      "header_files": [
-                          "container_scope.h"
-                      ]
+                        "header_base": "//foundation/arkui/ace_engine/frameworks/core/common/",
+                        "header_files": [
+                            "container_scope.h"
+                        ]
                     },
                     "name": "//foundation/arkui/ace_engine/frameworks/core:ace_container_scope"
+                },
+                {
+                    "header": {
+                        "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/ui_session/",
+                        "header_files": [
+                            "ui_content_service_interface.h",
+                            "ui_content_proxy.h"
+                        ]
+                    },
+                    "name": "//foundation/arkui/ace_engine/interfaces/inner_api/ui_session:ui_session"
                 }
             ],
             "test": [

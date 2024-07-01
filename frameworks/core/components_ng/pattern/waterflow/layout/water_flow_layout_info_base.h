@@ -21,6 +21,7 @@
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
+#include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t EMPTY_JUMP_INDEX = -2;
@@ -39,7 +40,7 @@ public:
 
     /* PURE GETTERs */
     virtual WaterFlowLayoutMode Mode() const = 0;
-    virtual float Offset() const = 0; // total offset of content
+    virtual float Offset() const = 0;     // total offset of content
     virtual int32_t FirstIdx() const = 0; // for compatibility
 
     virtual void UpdateOffset(float delta) = 0;
@@ -132,7 +133,14 @@ public:
      */
     virtual bool IsMisaligned() const = 0;
 
-    virtual void InitSegments(const std::vector<WaterFlowSections::Section>& sections, int32_t start) {}
+    /**
+     * @brief Initialize variables based on incoming section data.
+     *
+     * @param sections section data.
+     * @param start first updated section.
+     */
+    virtual void InitSegments(const std::vector<WaterFlowSections::Section>& sections, int32_t start) = 0;
+
     /**
      * @brief Get the Segment index of a FlowItem
      *
@@ -141,8 +149,23 @@ public:
      */
     int32_t GetSegment(int32_t itemIdx) const;
 
-    bool itemStart_ = false;
+    // convert FlowItem's index to children node index.
+    inline int32_t NodeIdx(int32_t idx) const
+    {
+        return idx + footerIndex_ + 1;
+    }
 
+    /**
+     * @brief Initialize margin of each section, along with segmentStartPos_, which depends on margin_.
+     *
+     * @param sections vector of Sections info.
+     * @param scale for calculating margins in PX.
+     * @param percentWidth for calculating margins in PX.
+     */
+    void InitMargins(
+        const std::vector<WaterFlowSections::Section>& sections, const ScaleProperty& scale, float percentWidth);
+
+    bool itemStart_ = false;
     /**
      * @brief last item is partially in viewport.
      * With footer, footer should be considered the last item.
@@ -171,6 +194,8 @@ public:
     std::vector<int32_t> segmentTails_;
     // K: item index; V: corresponding segment index
     mutable std::unordered_map<int32_t, int32_t> segmentCache_;
+    // margin of each segment
+    std::vector<PaddingPropertyF> margins_;
 
     ACE_DISALLOW_COPY_AND_MOVE(WaterFlowLayoutInfoBase);
 };

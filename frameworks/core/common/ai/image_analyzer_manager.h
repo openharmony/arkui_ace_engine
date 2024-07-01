@@ -36,16 +36,21 @@ public:
     void CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, const NG::OffsetF& offset = { 0.0f, 0.0f });
     void UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap);
     void UpdateAnalyzerOverlayLayout();
-    void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
+    void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode, const PixelMapInfo& info = {});
     void DestroyAnalyzerOverlay();
     void ReleaseImageAnalyzer();
     void SetImageAnalyzerConfig(void* config);
-    void SetImageAnalyzerCallback(onAnalyzedCallback& callback);
+    void SetImageAnalyzerCallback(OnAnalyzedCallback& callback);
     void SetImageAIOptions(void* options);
     bool IsOverlayCreated();
+    void UpdatePressOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int offsetX, int offsetY, int rectWidth,
+        int rectHeight, int pointX, int pointY, OnTextSelectedCallback callback);
+    void UpdateOverlayTouchInfo(int touchPointX, int touchPointY, TouchType touchType);
+    void UpdateOverlayStatus(bool status, int offsetX, int offsetY, int rectWidth, int rectHeight);
+    bool UpdateVideoConfig(const PixelMapInfo& info);
 
 private:
-    RefPtr<NG::FrameNode> frameNode_;
+    WeakPtr<NG::FrameNode> frameNode_;
     ImageAnalyzerHolder holder_;
     ImageAnalyzerInnerConfig analyzerUIConfig_;
     std::shared_ptr<ImageAnalyzerAdapter> imageAnalyzerAdapter_;

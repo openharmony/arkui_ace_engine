@@ -34,7 +34,6 @@ const int32_t DIVIDER_ROWS_THREE = 3;
 const int32_t MARGIN_HALF = 2;
 const int32_t BUFFER_NODE_NUMBER = 2;
 constexpr Dimension PICKER_DIALOG_MARGIN_FORM_EDGE = 24.0_vp;
-constexpr Dimension BUTTON_BOTTOM_LEFTRIGHT_MARGIN = 0.0_vp;
 constexpr uint8_t PIXEL_ROUND = 18;
 constexpr size_t ACCEPT_BUTTON_INDEX = 0;
 constexpr size_t CANCEL_BUTTON_INDEX = 1;
@@ -340,17 +339,17 @@ RefPtr<FrameNode> TimePickerDialogView::ShowForAging(const DialogProperties& dia
     buttonTitlePattern->SetSkipColorConfigurationUpdate();
     auto hourNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(1));
     CHECK_NULL_RETURN(hourNode, nullptr);
-    hourNode->SetActive(false);
     auto hourLayoutProperty = hourNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_RETURN(hourLayoutProperty, nullptr);
     hourLayoutProperty->UpdateVisibility(VisibleType::GONE);
+    hourNode->MarkModifyDone();
 
     auto minuteNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(2));
     CHECK_NULL_RETURN(minuteNode, nullptr);
-    minuteNode->SetActive(false);
     auto minuteLayoutProperty = minuteNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_RETURN(minuteLayoutProperty, nullptr);
     minuteLayoutProperty->UpdateVisibility(VisibleType::GONE);
+    minuteNode->MarkModifyDone();
 
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
@@ -382,56 +381,58 @@ RefPtr<FrameNode> TimePickerDialogView::CreateNextPrevButtonNode(std::function<v
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-
     auto nextPrevButtonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_RETURN(nextPrevButtonNode, nullptr);
     auto textNextPrevNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textNextPrevNode, nullptr);
-    auto textLayoutProperty = textNextPrevNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("stepper.next"));
-    textLayoutProperty->UpdateAlignment(Alignment::CENTER);
-    textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
-    textLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
-    textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
-    auto nextPrevButtonPattern = nextPrevButtonNode->GetPattern<ButtonPattern>();
-
-    MarginProperty margin;
-    margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
-    margin.top = CalcLength(dialogTheme->GetDividerHeight());
-    margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-
+    auto textNextPrevLayoutProperty = textNextPrevNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textNextPrevLayoutProperty, nullptr);
+    textNextPrevLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.next"));
+    textNextPrevLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+    textNextPrevLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
+    textNextPrevLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
+    textNextPrevNode->MountToParent(nextPrevButtonNode);
+    auto eventNextPrevHub = nextPrevButtonNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(eventNextPrevHub, nullptr);
+    auto event = UpdateTimePickerSwitchEvent(timeNode, textNextPrevNode, dialogTheme, nextPrevButtonNode,
+        timePickerSwitchEvent);
+    eventNextPrevHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(std::move(event)));
+    auto buttonNextPrevEventHub = nextPrevButtonNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_RETURN(buttonNextPrevEventHub, nullptr);
+    buttonNextPrevEventHub->SetStateEffect(true);
     auto buttonNextPrevLayoutProperty = nextPrevButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    buttonNextPrevLayoutProperty->UpdateMargin(margin);
-    buttonNextPrevLayoutProperty->UpdateFontSize(pickerTheme->GetOptionStyle(false, false).GetFontSize());
-    buttonNextPrevLayoutProperty->UpdateFlexShrink(1.0);
-    buttonNextPrevLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    buttonNextPrevLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.next"));
     buttonNextPrevLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    auto buttonNextPrevRenderContext = nextPrevButtonNode->GetRenderContext();
-    buttonNextPrevRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonNextPrevLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    buttonNextPrevLayoutProperty->UpdateFlexShrink(1.0);
     UpdateConfirmButtonMargin(buttonNextPrevLayoutProperty, dialogTheme);
-    UpdateButtonDefaultFocus(buttonInfos, nextPrevButtonNode, true);
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        buttonNextPrevLayoutProperty->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
+            buttonNextPrevLayoutProperty->UpdateUserDefinedIdealSize(
+                CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
     } else {
-        auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
-        CHECK_NULL_RETURN(buttonTheme, nullptr);
         buttonNextPrevLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(buttonTheme->GetHeight())));
     }
+    auto buttonNextPrevRenderContext = nextPrevButtonNode->GetRenderContext();
+    buttonNextPrevRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    UpdateButtonStyles(buttonInfos, CANCEL_BUTTON_INDEX, buttonNextPrevLayoutProperty, buttonNextPrevRenderContext);
+    UpdateButtonDefaultFocus(buttonInfos, nextPrevButtonNode, false);
+    nextPrevButtonNode->MarkModifyDone();
+    return nextPrevButtonNode;
+}
 
-    textNextPrevNode->MountToParent(nextPrevButtonNode);
-    auto eventNextPrevmHub = nextPrevButtonNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_RETURN(eventNextPrevmHub, nullptr);
-    CHECK_NULL_RETURN(timeNode, nullptr);
-    auto onClickCallback = [weak = WeakPtr<FrameNode>(timeNode), textWeak = WeakPtr<FrameNode>(textNextPrevNode),
-                            nextPrevButtonNodeWeak = WeakPtr<FrameNode>(nextPrevButtonNode),
-                            dialogThemeWeak = WeakPtr<DialogTheme>(dialogTheme),
-                            func = std::move(timePickerSwitchEvent)](const GestureEvent& /* info */) {
+std::function<void(const GestureEvent&)> TimePickerDialogView::UpdateTimePickerSwitchEvent(
+    const RefPtr<FrameNode>& timeNode, const RefPtr<FrameNode>& textNode, const RefPtr<DialogTheme>& dialogTheme,
+    const RefPtr<FrameNode>& buttonNode, const std::function<void()>& timePickerSwitchEvent)
+{
+    auto nextPrevEvent = [weak = WeakPtr<FrameNode>(timeNode), textWeak = WeakPtr<FrameNode>(textNode),
+                        nextPrevButtonNodeWeak = WeakPtr<FrameNode>(buttonNode),
+                        dialogThemeWeak = WeakPtr<DialogTheme>(dialogTheme),
+                        func = std::move(timePickerSwitchEvent)](const GestureEvent&) {
         auto timeNode = weak.Upgrade();
         CHECK_NULL_VOID(timeNode);
         auto textNode = textWeak.Upgrade();
@@ -451,19 +452,17 @@ RefPtr<FrameNode> TimePickerDialogView::CreateNextPrevButtonNode(std::function<v
         CHECK_NULL_VOID(buttonNextPrevLayoutProperty);
         timePickerEventHub->FireDialogAcceptEvent(pickerPattern->GetSelectedObject(true));
         func();
-        if (textLayoutProperty->GetContent() == Localization::GetInstance()->GetEntryLetters("stepper.next")) {
+        if (textLayoutProperty->GetContent() == Localization::GetInstance()->GetEntryLetters("common.next")) {
             UpdateCancelButtonMargin(buttonNextPrevLayoutProperty, dialogTheme);
-            textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("datepicker.prev"));
+            textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.prev"));
         } else {
             UpdateConfirmButtonMargin(buttonNextPrevLayoutProperty, dialogTheme);
-            textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("stepper.next"));
+            textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.next"));
         }
         timeNode->MarkModifyDone();
         textNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     };
-    eventNextPrevmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(onClickCallback));
-    nextPrevButtonNode->MarkModifyDone();
-    return nextPrevButtonNode;
+    return nextPrevEvent;
 }
 
 RefPtr<FrameNode> TimePickerDialogView::CreateStackNode()
@@ -512,10 +511,6 @@ RefPtr<FrameNode> TimePickerDialogView::CreateDividerNode(const RefPtr<FrameNode
     CHECK_NULL_RETURN(dividerLayoutProps, nullptr);
     dividerLayoutProps->UpdateVertical(true);
 
-    MarginProperty margin;
-    margin.top = CalcLength(dialogTheme->GetDividerHeight());
-    margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-    dividerLayoutProps->UpdateMargin(margin);
     dividerLayoutProps->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(dialogTheme->GetDividerWidth()), CalcLength(dialogTheme->GetDividerHeight())));
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -645,15 +640,11 @@ RefPtr<FrameNode> TimePickerDialogView::CreateButtonNodeForAging(const RefPtr<Fr
     switchFlag_ = false;
     for (const auto& child : contentRow->GetChildren()) {
         auto firstChild = AceType::DynamicCast<FrameNode>(child);
-        firstChild->SetActive(true);
         auto layoutProperty = firstChild->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     }
-
-    buttonConfirmNode->SetActive(false);
     auto layoutProperty = buttonConfirmNode->GetLayoutProperty<LayoutProperty>();
     layoutProperty->UpdateVisibility(VisibleType::GONE);
-    nextConfirmDividerNode->SetActive(false);
     auto nextConfirmDividerProperty = nextConfirmDividerNode->GetLayoutProperty<LayoutProperty>();
     nextConfirmDividerProperty->UpdateVisibility(VisibleType::GONE);
     return contentRow;
@@ -694,7 +685,6 @@ void TimePickerDialogView::SwitchTimePickerPage(const RefPtr<FrameNode> &timePic
 {
     auto ampmNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(0));
     CHECK_NULL_VOID(ampmNode);
-    ampmNode->SetActive(switchFlag_ ? true : false);
     auto ampmLayoutProperty = ampmNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(ampmLayoutProperty);
     ampmLayoutProperty->UpdateVisibility(switchFlag_ ? VisibleType::VISIBLE : VisibleType::GONE);
@@ -702,40 +692,37 @@ void TimePickerDialogView::SwitchTimePickerPage(const RefPtr<FrameNode> &timePic
 
     auto hourNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(1));
     CHECK_NULL_VOID(hourNode);
-    hourNode->SetActive(switchFlag_ ? false : true);
     auto hourLayoutProperty = hourNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(hourLayoutProperty);
     hourLayoutProperty->UpdateVisibility(switchFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
 
     auto minuteNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(2));
     CHECK_NULL_VOID(minuteNode);
-    minuteNode->SetActive(switchFlag_ ? false : true);
     auto minuteLayoutProperty = minuteNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(minuteLayoutProperty);
     minuteLayoutProperty->UpdateVisibility(switchFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
     hourNode->MarkDirtyNode();
     minuteNode->MarkDirtyNode();
 
-    buttonCancelNode->SetActive(switchFlag_ ? true : false);
     auto cancelButtonLayoutProperty = buttonCancelNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(cancelButtonLayoutProperty);
     cancelButtonLayoutProperty->UpdateVisibility(switchFlag_ ? VisibleType::VISIBLE : VisibleType::GONE);
     buttonCancelNode->MarkDirtyNode();
 
-    cancelNextDividerNode->SetActive(switchFlag_ ? true : false);
     auto cancelNextLayoutProperty = cancelNextDividerNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(cancelNextLayoutProperty);
     cancelNextLayoutProperty->UpdateVisibility(switchFlag_ ? VisibleType::VISIBLE : VisibleType::GONE);
+    cancelNextDividerNode->MarkDirtyNode();
 
-    buttonConfirmNode->SetActive(switchFlag_ ? false : true);
     auto confirmButtonLayoutProperty = buttonConfirmNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(confirmButtonLayoutProperty);
     confirmButtonLayoutProperty->UpdateVisibility(switchFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
+    buttonConfirmNode->MarkDirtyNode();
 
-    nextConfirmDividerNode->SetActive(switchFlag_ ? false : true);
     auto nextConfirmLayoutProperty = nextConfirmDividerNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(nextConfirmLayoutProperty);
     nextConfirmLayoutProperty->UpdateVisibility(switchFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
+    nextConfirmDividerNode->MarkDirtyNode();
 
     switchFlag_ = !switchFlag_;
 }
@@ -824,12 +811,12 @@ void TimePickerDialogView::UpdateConfirmButtonMargin(
         margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
         margin.top = CalcLength(dialogTheme->GetDividerHeight());
         margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-        margin.left = CalcLength(BUTTON_BOTTOM_LEFTRIGHT_MARGIN);
+        margin.left = CalcLength(0.0_vp);
     } else {
         margin.right = CalcLength(dialogTheme->GetActionsPadding().Right());
         margin.top = CalcLength(dialogTheme->GetActionsPadding().Bottom());
         margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
-        margin.left = CalcLength(BUTTON_BOTTOM_LEFTRIGHT_MARGIN);
+        margin.left = CalcLength(0.0_vp);
     }
     buttonConfirmLayoutProperty->UpdateMargin(margin);
 }
@@ -842,12 +829,12 @@ void TimePickerDialogView::UpdateCancelButtonMargin(
         margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
         margin.top = CalcLength(dialogTheme->GetDividerHeight());
         margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-        margin.right = CalcLength(BUTTON_BOTTOM_LEFTRIGHT_MARGIN);
+        margin.right = CalcLength(0.0_vp);
     } else {
         margin.left = CalcLength(dialogTheme->GetActionsPadding().Left());
         margin.top = CalcLength(dialogTheme->GetActionsPadding().Bottom());
         margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
-        margin.right = CalcLength(BUTTON_BOTTOM_LEFTRIGHT_MARGIN);
+        margin.right = CalcLength(0.0_vp);
     }
     buttonCancelLayoutProperty->UpdateMargin(margin);
 }

@@ -17,26 +17,27 @@
 #include <optional>
 
 #include "gtest/gtest.h"
+#define protected public
+#define private public
+
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "core/components_ng/event/focus_hub.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
-
-#define protected public
-#define private public
 #include "core/components/button/button_theme.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/button/toggle_button_paint_property.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/event/touch_event.h"
+#include "core/pipeline/base/element_register.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -313,8 +314,6 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest006, TestSize.Level1)
      * @tc.steps: step3. pattern InitClickEvent.
      * @tc.expected: step3. check whether clickListener_ is initialized.
      */
-    EXPECT_FALSE(togglePattern->clickListener_);
-    togglePattern->InitClickEvent();
     EXPECT_TRUE(togglePattern->clickListener_);
 }
 
@@ -355,7 +354,7 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest007, TestSize.Level1)
     ASSERT_NE(textNode, nullptr);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(childFontSize).Value(), dimensionValue);
+    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(childFontSize).Value(), childDimensionValue);
 
     /**
      * @tc.steps: step4. Creat child node and set font size.
@@ -470,5 +469,99 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest011, TestSize.Level1)
     pattern->isOn_ = false;
     pattern->UpdateSelectStatus(isSelected);
     EXPECT_TRUE(accessibilityProperty->ActActionClearSelection());
+}
+
+/**
+ * @tc.name: PreventDefault001
+ * @tc.desc: test InitTouchEvent and InitClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, PreventDefault001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toggleButtonModelNG.
+     */
+    ToggleButtonModelNG toggleButtonModelNG;
+    toggleButtonModelNG.Create(TOGGLE_ETS_TAG);
+    toggleButtonModelNG.SetIsOn(true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Mock TouchEventInfo info and set preventDefault to true
+     * @tc.expected: Check the param value
+     */
+    pattern->InitTouchEvent();
+    TouchEventInfo touchInfo("onTouch");
+    TouchLocationInfo touchDownInfo(1);
+    touchDownInfo.SetTouchType(TouchType::DOWN);
+    touchInfo.SetPreventDefault(true);
+    touchInfo.SetSourceDevice(SourceType::TOUCH);
+    touchInfo.AddTouchLocationInfo(std::move(touchDownInfo));
+    pattern->touchListener_->callback_(touchInfo);
+    EXPECT_TRUE(pattern->isTouchPreventDefault_);
+    EXPECT_TRUE(pattern->isPress_);
+    /**
+     * @tc.steps: step3.Mock GestureEvent info and set preventDefault to true
+     * @tc.expected: Check the param value
+     */
+    pattern->InitClickEvent();
+    GestureEvent clickInfo;
+    clickInfo.SetPreventDefault(true);
+    clickInfo.SetSourceDevice(SourceType::TOUCH);
+    pattern->clickListener_->operator()(clickInfo);
+    EXPECT_FALSE(pattern->isTouchPreventDefault_);
+    EXPECT_FALSE(pattern->isOn_);
+    EXPECT_FALSE(pattern->isFocus_);
+}
+
+/**
+ * @tc.name: PreventDefault002
+ * @tc.desc: test InitTouchEvent and InitClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, PreventDefault002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create toggleButtonModelNG.
+     */
+    ToggleButtonModelNG toggleButtonModelNG;
+    toggleButtonModelNG.Create(TOGGLE_ETS_TAG);
+    toggleButtonModelNG.SetIsOn(true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Mock TouchEvent info and set preventDefault to false
+     * @tc.expected: Check the param value
+     */
+    pattern->InitTouchEvent();
+    TouchEventInfo touchInfo("onTouch");
+    TouchLocationInfo touchDownInfo(1);
+    touchDownInfo.SetTouchType(TouchType::DOWN);
+    touchInfo.SetPreventDefault(false);
+    touchInfo.SetSourceDevice(SourceType::TOUCH);
+    touchInfo.AddTouchLocationInfo(std::move(touchDownInfo));
+    pattern->touchListener_->callback_(touchInfo);
+    EXPECT_EQ(touchInfo.IsPreventDefault(), pattern->isTouchPreventDefault_);
+    /**
+     * @tc.steps: step3. Mock GestureEvent info and set preventDefault to false
+     * @tc.expected: Check the param value
+     */
+    pattern->InitClickEvent();
+    GestureEvent clickInfo;
+    clickInfo.SetPreventDefault(false);
+    clickInfo.SetSourceDevice(SourceType::TOUCH);
+    pattern->clickListener_->operator()(clickInfo);
+    EXPECT_FALSE(pattern->isTouchPreventDefault_);
+    EXPECT_TRUE(pattern->isOn_);
 }
 } // namespace OHOS::Ace::NG

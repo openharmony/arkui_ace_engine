@@ -57,6 +57,9 @@ void FormRendererDispatcherProxy::DispatchPointerEvent(
         HILOG_ERROR("Serialized gesture size is not valid!");
     } else {
         auto buffer = static_cast<const char*>(reply.ReadRawData(size));
+        if (buffer == nullptr) {
+            return;
+        }
         serializedGesture.data = std::vector<char>(buffer, buffer + size);
     }
 

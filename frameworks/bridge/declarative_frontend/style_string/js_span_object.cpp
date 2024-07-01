@@ -733,24 +733,7 @@ ImageSpanOptions JSImageAttachment::CreateImageOptions(const JSRef<JSObject>& ob
 ImageSpanAttribute JSImageAttachment::ParseJsImageSpanAttribute(const JSRef<JSObject>& obj)
 {
     ImageSpanAttribute imageStyle;
-    auto sizeObj = obj->GetProperty("size");
-    if (sizeObj->IsObject()) {
-        ImageSpanSize imageSize;
-        auto size = JSRef<JSObject>::Cast(sizeObj);
-        JSRef<JSVal> width = size->GetProperty("width");
-        CalcDimension imageSpanWidth;
-        if (!width->IsNull() && JSContainerBase::ParseJsDimensionVpNG(width, imageSpanWidth, false) &&
-            GreatNotEqual(imageSpanWidth.Value(), 0.0)) {
-            imageSize.width = imageSpanWidth;
-        }
-        JSRef<JSVal> height = size->GetProperty("height");
-        CalcDimension imageSpanHeight;
-        if (!height->IsNull() && JSContainerBase::ParseJsDimensionVpNG(height, imageSpanHeight, false) &&
-            GreatNotEqual(imageSpanHeight.Value(), 0.0)) {
-            imageSize.height = imageSpanHeight;
-        }
-        imageStyle.size = imageSize;
-    }
+    ParseJsImageSpanSizeAttribute(obj, imageStyle);
     JSRef<JSVal> verticalAlign = obj->GetProperty("verticalAlign");
     if (!verticalAlign->IsNull()) {
         auto align = static_cast<VerticalAlign>(verticalAlign->ToNumber<int32_t>());
@@ -770,16 +753,40 @@ ImageSpanAttribute JSImageAttachment::ParseJsImageSpanAttribute(const JSRef<JSOb
         imageStyle.objectFit = ImageFit::COVER;
     }
     auto layoutStyleObj = obj->GetProperty("layoutStyle");
-    auto layoutStyleObject = JSRef<JSObject>::Cast(layoutStyleObj);
-    if (!layoutStyleObject->IsUndefined()) {
-        auto marginAttr = layoutStyleObject->GetProperty("margin");
-        imageStyle.marginProp = JSRichEditor::ParseMarginAttr(marginAttr);
-        auto paddingAttr = layoutStyleObject->GetProperty("padding");
-        imageStyle.paddingProp = JSRichEditor::ParseMarginAttr(paddingAttr);
-        auto borderRadiusAttr = layoutStyleObject->GetProperty("borderRadius");
-        imageStyle.borderRadius = JSRichEditor::ParseBorderRadiusAttr(borderRadiusAttr);
+    if (layoutStyleObj->IsObject()) {
+        auto layoutStyleObject = JSRef<JSObject>::Cast(layoutStyleObj);
+        if (!layoutStyleObject->IsUndefined()) {
+            auto marginAttr = layoutStyleObject->GetProperty("margin");
+            imageStyle.marginProp = JSRichEditor::ParseMarginAttr(marginAttr);
+            auto paddingAttr = layoutStyleObject->GetProperty("padding");
+            imageStyle.paddingProp = JSRichEditor::ParseMarginAttr(paddingAttr);
+            auto borderRadiusAttr = layoutStyleObject->GetProperty("borderRadius");
+            imageStyle.borderRadius = JSRichEditor::ParseBorderRadiusAttr(borderRadiusAttr);
+        }
     }
     return imageStyle;
+}
+
+void JSImageAttachment::ParseJsImageSpanSizeAttribute(const JSRef<JSObject>& obj, ImageSpanAttribute& imageStyle)
+{
+    auto sizeObj = obj->GetProperty("size");
+    if (sizeObj->IsObject()) {
+        ImageSpanSize imageSize;
+        auto size = JSRef<JSObject>::Cast(sizeObj);
+        JSRef<JSVal> width = size->GetProperty("width");
+        CalcDimension imageSpanWidth;
+        if (!width->IsNull() && JSContainerBase::ParseJsDimensionVpNG(width, imageSpanWidth, false) &&
+            GreatNotEqual(imageSpanWidth.Value(), 0.0)) {
+            imageSize.width = imageSpanWidth;
+        }
+        JSRef<JSVal> height = size->GetProperty("height");
+        CalcDimension imageSpanHeight;
+        if (!height->IsNull() && JSContainerBase::ParseJsDimensionVpNG(height, imageSpanHeight, false) &&
+            GreatNotEqual(imageSpanHeight.Value(), 0.0)) {
+            imageSize.height = imageSpanHeight;
+        }
+        imageStyle.size = imageSize;
+    }
 }
 
 void JSImageAttachment::GetImageSrc(const JSCallbackInfo& info)
@@ -1241,11 +1248,11 @@ void JSParagraphStyleSpan::ParseJsWordBreak(const JSRef<JSObject>& obj, SpanPara
         return;
     }
     JSRef<JSVal> args = obj->GetProperty("wordBreak");
-    uint32_t index = WORD_BREAK_TYPES_DEFAULT;
+    int32_t index = WORD_BREAK_TYPES_DEFAULT;
     if (args->IsNumber()) {
         index = args->ToNumber<int32_t>();
     }
-    if (index < 0 || index >= WORD_BREAK_TYPES.size()) {
+    if (index < 0 || index >= static_cast<int32_t>(WORD_BREAK_TYPES.size())) {
         index = 0;
     }
     paragraphStyle.wordBreak = WORD_BREAK_TYPES[index];
@@ -1431,5 +1438,36 @@ RefPtr<ParagraphStyleSpan>& JSParagraphStyleSpan::GetParagraphStyleSpan()
 void JSParagraphStyleSpan::SetParagraphStyleSpan(const RefPtr<ParagraphStyleSpan>& paragraphStyleSpan)
 {
     paragraphStyleSpan_ = paragraphStyleSpan;
+}
+
+// JSExtSpan
+JSExtSpan::JSExtSpan(JSRef<JSObject> extSpanObj) : extSpanObj_(extSpanObj) {}
+
+JSExtSpan::JSExtSpan(JSRef<JSObject> extSpanObj, int32_t start, int32_t end)
+    : ExtSpan(start, end), extSpanObj_(extSpanObj)
+{}
+
+RefPtr<SpanBase> JSExtSpan::GetSubSpan(int32_t start, int32_t end)
+{
+    RefPtr<SpanBase> spanBase = MakeRefPtr<JSExtSpan>(extSpanObj_, start, end);
+    return spanBase;
+}
+
+bool JSExtSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
+{
+    auto extSpan = DynamicCast<JSExtSpan>(other);
+    if (!extSpan) {
+        return false;
+    }
+    return &(extSpan->extSpanObj_) == &extSpanObj_;
+}
+void JSExtSpan::SetJsExtSpanObject(const JSRef<JSObject>& extSpanObj)
+{
+    extSpanObj_ = extSpanObj;
+}
+
+JSRef<JSObject>& JSExtSpan::GetJsExtSpanObject()
+{
+    return extSpanObj_;
 }
 } // namespace OHOS::Ace::Framework

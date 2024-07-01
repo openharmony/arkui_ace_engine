@@ -44,13 +44,10 @@ void CanvasPattern::OnAttachToFrameNode()
     renderCtx->SetClipToBounds(false);
     renderCtx->SetUsingContentRectForRenderFrame(true);
     renderCtx->SetFrameGravity(Rosen::Gravity::RESIZE_ASPECT_FILL);
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-
     if (!contentModifier_) {
         contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
     }
-    paintMethod_ = MakeRefPtr<CanvasPaintMethod>(context, contentModifier_, host);
+    paintMethod_ = MakeRefPtr<CanvasPaintMethod>(contentModifier_, host);
 #endif
 }
 
@@ -376,16 +373,6 @@ void CanvasPattern::StrokeText(const std::string& text, double x, double y, std:
 #else
     paintMethod_->PushTask<StrokeTextOp>(text, x, y, maxWidth);
 #endif
-}
-
-double CanvasPattern::MeasureText(const std::string& text, const PaintState& state)
-{
-    return paintMethod_->MeasureText(text, state);
-}
-
-double CanvasPattern::MeasureTextHeight(const std::string& text, const PaintState& state)
-{
-    return paintMethod_->MeasureTextHeight(text, state);
 }
 
 TextMetrics CanvasPattern::MeasureTextMetrics(const std::string& text, const PaintState& state)
@@ -1062,12 +1049,6 @@ void CanvasPattern::RestoreLayer()
 #endif
 }
 
-void CanvasPattern::OnPixelRoundFinish(const SizeF& pixelGridRoundSize)
-{
-    CHECK_NULL_VOID(paintMethod_);
-    paintMethod_->UpdateRecordingCanvas(pixelGridRoundSize.Width(), pixelGridRoundSize.Height());
-}
-
 void CanvasPattern::EnableAnalyzer(bool enable)
 {
     isEnableAnalyzer_ = enable;
@@ -1099,7 +1080,7 @@ void CanvasPattern::SetImageAIOptions(void* options)
     imageAnalyzerManager_->SetImageAIOptions(options);
 }
 
-void CanvasPattern::StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed)
+void CanvasPattern::StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed)
 {
     if (!IsSupportImageAnalyzerFeature()) {
         CHECK_NULL_VOID(onAnalyzed);

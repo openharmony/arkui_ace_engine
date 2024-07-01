@@ -27,11 +27,11 @@ public:
     void CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, const NG::OffsetF& offset = { 0.0f, 0.0f });
     void UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap);
     void UpdateAnalyzerOverlayLayout();
-    void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
+    void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode, const PixelMapInfo& info = {});
     void DestroyAnalyzerOverlay();
     void ReleaseImageAnalyzer();
     void SetImageAnalyzerConfig(void* config);
-    void SetImageAnalyzerCallback(onAnalyzedCallback& callback);
+    void SetImageAnalyzerCallback(OnAnalyzedCallback& callback);
     void SetImageAIOptions(void* options);
     bool IsOverlayCreated();
 };

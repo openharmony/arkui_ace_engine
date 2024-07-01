@@ -54,10 +54,6 @@ public:
         return [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
             auto bubble = weak.Upgrade();
             if (bubble) {
-                auto context = paintWrapper->GetRenderContext();
-                if (context) {
-                    context->ClearDrawCommands();
-                }
                 bubble->PaintInnerBorder(canvas, paintWrapper);
                 bubble->PaintOuterBorder(canvas, paintWrapper);
             }
@@ -112,6 +108,16 @@ public:
     void SetArrowHeight(const float arrowHeight)
     {
         arrowHeight_ = arrowHeight;
+    }
+
+    void SetOuterBorderWidth(const Dimension outerBorderWidth)
+    {
+        outerBorderWidth_ = outerBorderWidth.ConvertToPx();
+    }
+
+    void SetInnerBorderWidth(const Dimension innerBorderWidth)
+    {
+        innerBorderWidth_ = innerBorderWidth.ConvertToPx();
     }
 
     void PaintBubble(RSCanvas& canvas, PaintWrapper* paintWrapper);

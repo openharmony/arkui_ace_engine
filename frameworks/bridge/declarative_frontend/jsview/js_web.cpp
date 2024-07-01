@@ -2268,6 +2268,9 @@ void JSWeb::Create(const JSCallbackInfo& info)
     bool incognitoMode = false;
     ParseJsBool(paramObject->GetProperty("incognitoMode"), incognitoMode);
 
+    std::string sharedRenderProcessToken = "";
+    ParseJsString(paramObject->GetProperty("sharedRenderProcessToken"), sharedRenderProcessToken);
+
     auto controller = JSRef<JSObject>::Cast(controllerObj);
     auto setWebIdFunction = controller->GetProperty("setWebId");
     if (setWebIdFunction->IsFunction()) {
@@ -2348,10 +2351,8 @@ void JSWeb::Create(const JSCallbackInfo& info)
 
         int32_t parentNWebId = -1;
         bool isPopup = JSWebWindowNewHandler::ExistController(controller, parentNWebId);
-        WebModel::GetInstance()->Create(
-            isPopup ? "" : dstSrc.value(), std::move(setIdCallback),
-            std::move(setHapPathCallback), parentNWebId, isPopup, renderMode,
-            incognitoMode);
+        WebModel::GetInstance()->Create(isPopup ? "" : dstSrc.value(), std::move(setIdCallback),
+            std::move(setHapPathCallback), parentNWebId, isPopup, renderMode, incognitoMode, sharedRenderProcessToken);
 
         WebModel::GetInstance()->SetPermissionClipboard(std::move(requestPermissionsFromUserCallback));
         WebModel::GetInstance()->SetOpenAppLinkFunction(std::move(openAppLinkCallback));
@@ -2390,8 +2391,8 @@ void JSWeb::Create(const JSCallbackInfo& info)
     } else {
         auto* jsWebController = controller->Unwrap<JSWebController>();
         CHECK_NULL_VOID(jsWebController);
-        WebModel::GetInstance()->Create(dstSrc.value(),
-            jsWebController->GetController(), renderMode, incognitoMode);
+        WebModel::GetInstance()->Create(
+            dstSrc.value(), jsWebController->GetController(), renderMode, incognitoMode, sharedRenderProcessToken);
     }
 
     WebModel::GetInstance()->SetFocusable(true);

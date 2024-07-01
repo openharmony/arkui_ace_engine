@@ -273,10 +273,11 @@ std::optional<std::list<WeakPtr<FocusHub>>*> FocusManager::GetFocusScopePriority
     return std::nullopt;
 }
 
-void FocusManager::UpdateCurrentFocus(const RefPtr<FocusHub>& current)
+void FocusManager::UpdateCurrentFocus(const RefPtr<FocusHub>& current, SwitchingUpdateReason reason)
 {
     if (isSwitchingFocus_.value_or(false)) {
         switchingFocus_ = current;
+        updateReason = reason;
     }
 }
 
@@ -288,7 +289,7 @@ RefPtr<FocusHub> FocusManager::GetCurrentFocus()
 int32_t FocusManager::AddFocusListener(FocusChangeCallback&& callback)
 {
     // max callbacks count: INT32_MAX - 1
-    if (listeners_.size() == std::numeric_limits<int32_t>::max() - 1) {
+    if (listeners_.size() == static_cast<size_t>(std::numeric_limits<int32_t>::max() - 1)) {
         return -1;
     }
     int32_t handler = nextListenerHdl_;
@@ -313,13 +314,15 @@ RefPtr<FocusManager> FocusManager::GetFocusManager(RefPtr<FrameNode>& node)
     return focusManager;
 }
 
-void FocusManager::FocusSwitchingStart(const RefPtr<FocusHub>& focusHub)
+void FocusManager::FocusSwitchingStart(const RefPtr<FocusHub>& focusHub,
+    SwitchingStartReason reason)
 {
     isSwitchingFocus_ = true;
     switchingFocus_ = focusHub;
+    startReason = reason;
 }
 
-void FocusManager::FocusSwitchingEnd()
+void FocusManager::FocusSwitchingEnd(SwitchingEndReason reason)
 {
     // While switching window, focus may move by steps.(WindowFocus/FlushFocus)
     // Merge all steps together as a single movement.
@@ -327,13 +330,20 @@ void FocusManager::FocusSwitchingEnd()
         return;
     }
     if (!isSwitchingWindow_) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "FocusSwitching end, startReason: %{public}d, endReason: %{public}d, "
+            "updateReason: %{public}d",
+            startReason.value_or(SwitchingStartReason::DEFAULT),
+            reason, updateReason.value_or(SwitchingUpdateReason::DEFAULT));
         for (auto& [_, cb] : listeners_) {
             cb(currentFocus_, switchingFocus_);
         }
         currentFocus_ = switchingFocus_;
         isSwitchingFocus_.reset();
+        startReason.reset();
+        updateReason.reset();
     } else {
         isSwitchingFocus_ = false;
+        endReason = reason;
     }
 }
 
@@ -346,24 +356,47 @@ void FocusManager::WindowFocusMoveEnd()
 {
     isSwitchingWindow_ = false;
     if (!isSwitchingFocus_.value_or(true)) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "WindowFocusMove end, startReason: %{public}d, endReason: %{public}d, "
+            "updateReason: %{public}d",
+            startReason.value_or(SwitchingStartReason::DEFAULT),
+            endReason.value_or(SwitchingEndReason::DEFAULT),
+            updateReason.value_or(SwitchingUpdateReason::DEFAULT));
         for (auto& [_, cb] : listeners_) {
             cb(currentFocus_, switchingFocus_);
         }
         currentFocus_ = switchingFocus_;
         isSwitchingFocus_.reset();
+        startReason.reset();
+        updateReason.reset();
+        endReason.reset();
     }
 }
 
-FocusManager::FocusGuard::FocusGuard(const RefPtr<FocusHub>& focusHub)
+void FocusManager::FocusGuard::CreateFocusGuard(const RefPtr<FocusHub>& focusHub,
+    const RefPtr<FocusManager>& focusManager, SwitchingStartReason reason)
 {
     CHECK_NULL_VOID(focusHub);
-    auto mng = focusHub->GetFocusManager();
-    CHECK_NULL_VOID(mng);
-    if (mng->isSwitchingFocus_.value_or(false)) {
+    CHECK_NULL_VOID(focusManager);
+    if (focusManager->isSwitchingFocus_.value_or(false)) {
         return;
     }
-    mng->FocusSwitchingStart(focusHub);
-    focusMng_ = mng;
+    focusManager->FocusSwitchingStart(focusHub, reason);
+    focusMng_ = focusManager;
+}
+
+FocusManager::FocusGuard::FocusGuard(const RefPtr<FocusHub>& focusHub,
+    SwitchingStartReason reason)
+{
+    RefPtr<FocusHub> hub = focusHub;
+    if (!focusHub ||!focusHub->GetFocusManager()) {
+        auto curFocusView = FocusView::GetCurrentFocusView();
+        CHECK_NULL_VOID(curFocusView);
+        auto curFocusViewHub = curFocusView->GetFocusHub();
+        CHECK_NULL_VOID(curFocusViewHub);
+        hub = curFocusViewHub;
+    }
+    auto mng = hub->GetFocusManager();
+    CreateFocusGuard(hub, mng, reason);
 }
 
 FocusManager::FocusGuard::~FocusGuard()

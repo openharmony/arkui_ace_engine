@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -176,12 +176,17 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto id = paramObject->GetProperty("id");
-    if (!id->IsString()) {
-        return;
-    }
 
     auto type = paramObject->GetProperty("type");
     auto libraryNameValue = paramObject->GetProperty("libraryname");
+    std::optional<std::string> idOpt = std::nullopt;
+    std::optional<std::string> libraryNameOpt = std::nullopt;
+    if (id->IsString()) {
+        idOpt = id->ToString();
+    }
+    if (libraryNameValue->IsString()) {
+        libraryNameOpt = libraryNameValue->ToString();
+    }
     auto controller = paramObject->GetProperty("controller");
     auto aiOptions = paramObject->GetProperty("imageAIOptions");
     std::shared_ptr<InnerXComponentController> xcomponentController = nullptr;
@@ -191,8 +196,10 @@ void JSXComponent::Create(const JSCallbackInfo& info)
         auto* jsXComponentController = controllerObj->Unwrap<JSXComponentController>();
         if (jsXComponentController) {
             jsXComponentController->SetInstanceId(Container::CurrentId());
-            XComponentClient::GetInstance().AddControllerToJSXComponentControllersMap(
-                id->ToString(), jsXComponentController);
+            if (idOpt.has_value()) {
+                XComponentClient::GetInstance().AddControllerToJSXComponentControllersMap(
+                    idOpt.value(), jsXComponentController);
+            }
             xcomponentController = jsXComponentController->GetController();
         }
     }
@@ -202,10 +209,7 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     } else if (type->IsNumber()) {
         xcomponentType = static_cast<XComponentType>(type->ToNumber<int32_t>());
     }
-
-    std::string libraryName = libraryNameValue->IsString() ? libraryNameValue->ToString() : "";
-    XComponentModel::GetInstance()->Create(
-        id->ToString(), xcomponentType, libraryName, xcomponentController);
+    XComponentModel::GetInstance()->Create(idOpt, xcomponentType, libraryNameOpt, xcomponentController);
     if (libraryNameValue->IsEmpty() && xcomponentController && !controllerObj->IsUndefined()) {
         SetControllerCallback(controllerObj, info.GetExecutionContext());
     }
@@ -303,7 +307,7 @@ void JSXComponent::RegisterOnCreate(const JsiExecutionContext& execCtx, const Lo
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(frameNode_);
     CHECK_NULL_VOID(frameNode);
 
-    if (!func->IsFunction()) {
+    if (!func->IsFunction(execCtx.vm_)) {
         return;
     }
 
@@ -328,7 +332,7 @@ void JSXComponent::RegisterOnDestroy(const JsiExecutionContext& execCtx, const L
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(frameNode_);
     CHECK_NULL_VOID(frameNode);
 
-    if (!func->IsFunction()) {
+    if (!func->IsFunction(execCtx.vm_)) {
         return;
     }
 

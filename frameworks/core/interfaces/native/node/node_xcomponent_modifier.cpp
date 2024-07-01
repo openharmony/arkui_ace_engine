@@ -131,6 +131,20 @@ void* GetNativeXComponent(ArkUINodeHandle node)
     auto pair = xcPattern->GetNativeXComponent();
     return reinterpret_cast<void*>(pair.second.lock().get());
 }
+
+void SetXComponentLibraryname(ArkUINodeHandle node, const char* libraryname)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::SetXComponentLibraryname(frameNode, libraryname);
+}
+
+void SetImageAIOptions(ArkUINodeHandle node, void* options)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::SetImageAIOptions(frameNode, options);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -153,6 +167,8 @@ const ArkUIXComponentModifier* GetXComponentModifier()
         GetXComponentSurfaceWidth,
         GetXComponentSurfaceHeight,
         GetNativeXComponent,
+        SetXComponentLibraryname,
+        SetImageAIOptions,
     };
 
     return &modifier;

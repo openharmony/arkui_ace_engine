@@ -556,7 +556,7 @@ void RenderGridLayout::UpdateAccessibilityAttr()
     refPtr->AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
 }
 
-// Support five ways below:
+// This function support five ways as below:
 // (1) 50px 100px 60px
 // (2) 1fr 1fr 2fr
 // (3) 30% 20% 50%
@@ -1160,11 +1160,9 @@ void RenderGridLayout::PanOnActionUpdate(const GestureEvent& info)
     auto targetRenderGrid = FindTargetRenderNode<RenderGridLayout>(GetContext().Upgrade(), info);
     auto preTargetRenderGrid = GetPreTargetRenderGrid();
     auto mainTargetRenderGrid = GetMainTargetRenderGrid();
-
     if (!mainTargetRenderGrid) {
         return;
     }
-
     if (targetRenderGrid) {
         if (preTargetRenderGrid == targetRenderGrid) {
             mainTargetRenderGrid->OnDragMove(event);

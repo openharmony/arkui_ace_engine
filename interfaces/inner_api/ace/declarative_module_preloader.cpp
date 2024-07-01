@@ -45,11 +45,11 @@ void DeclarativeModulePreloader::Preload(NativeEngine& runtime)
 }
 
 // ArkTsCard start
-using CreateFuncCard = void (*)(void*, const char*);
+using CreateFuncCard = void (*)(void*, const char*, const void*);
 constexpr char PRE_INIT_ACE_MODULE_FUNC_CARD[] = "OHOS_ACE_PreloadAceModuleCard";
 constexpr char RELOAD_ACE_MODULE_FUNC_CARD[] = "OHOS_ACE_ReloadAceModuleCard";
 
-void InitAceModuleCard(void* runtime, const char* bundleName)
+void InitAceModuleCard(void* runtime, const char* bundleName, const void* hapPathMap)
 {
     LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
     if (handle == nullptr) {
@@ -62,15 +62,17 @@ void InitAceModuleCard(void* runtime, const char* bundleName)
         return;
     }
 
-    entry(runtime, bundleName);
+    entry(runtime, bundleName, hapPathMap);
 }
 
-void DeclarativeModulePreloader::PreloadCard(NativeEngine& runtime, const std::string &bundleName)
+void DeclarativeModulePreloader::PreloadCard(NativeEngine& runtime, const std::string& bundleName,
+    const std::map<std::string, std::string>& hapPathMap)
 {
-    InitAceModuleCard(reinterpret_cast<void*>(&runtime), bundleName.c_str());
+    InitAceModuleCard(reinterpret_cast<void*>(&runtime), bundleName.c_str(),
+        reinterpret_cast<const void*>(&hapPathMap));
 }
 
-void ReloadAceModuleCard(void* runtime, const char* bundleName)
+void ReloadAceModuleCard(void* runtime, const char* bundleName, const void* hapPathMap)
 {
     LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
     if (handle == nullptr) {
@@ -83,12 +85,14 @@ void ReloadAceModuleCard(void* runtime, const char* bundleName)
         return;
     }
 
-    entry(runtime, bundleName);
+    entry(runtime, bundleName, hapPathMap);
 }
 
-void DeclarativeModulePreloader::ReloadCard(NativeEngine& runtime, const std::string &bundleName)
+void DeclarativeModulePreloader::ReloadCard(NativeEngine& runtime, const std::string &bundleName,
+    const std::map<std::string, std::string>& hapPathMap)
 {
-    ReloadAceModuleCard(reinterpret_cast<void*>(&runtime), bundleName.c_str());
+    ReloadAceModuleCard(reinterpret_cast<void*>(&runtime), bundleName.c_str(),
+        reinterpret_cast<const void*>(&hapPathMap));
 }
 // ArkTsCard end
 

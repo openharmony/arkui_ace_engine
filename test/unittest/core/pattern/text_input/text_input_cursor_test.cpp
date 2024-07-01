@@ -15,12 +15,16 @@
 
 #include "text_input_base.h"
 
+#include "core/components_ng/pattern/indexer/indexer_layout_property.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
 
 class TextInputCursorTest : public TextInputBases {
 public:
+    RefPtr<TextFieldLayoutProperty> layoutProperty_;
+    RefPtr<TextFieldPattern> pattern_;
 };
 
 /**
@@ -1544,5 +1548,4 @@ HWTEST_F(TextInputCursorTest, OnFocusNodeChange_001, TestSize.Level0)
     EXPECT_FALSE(pattern_1->needToRequestKeyboardInner_);
     EXPECT_TRUE(pattern_2->needToRequestKeyboardInner_);
 }
-
 } // namespace OHOS::Ace::NG

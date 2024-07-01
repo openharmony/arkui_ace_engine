@@ -98,6 +98,13 @@ public:
     static void HandleDidClick(NG::AbilityContextInfo& info, const GestureEvent& gestureEventInfo,
         const ClickInfo& clickInfo, const RefPtr<NG::FrameNode>& frameNode);
 
+    static void RegisterTabContentStateCallback(const std::shared_ptr<UIObserverListener>& listener);
+    static void RegisterTabContentStateCallback(
+        const std::string& id, const std::shared_ptr<UIObserverListener>& listener);
+    static void UnRegisterTabContentStateCallback(napi_value cb);
+    static void UnRegisterTabContentStateCallback(const std::string& id, napi_value cb);
+    static void HandleTabContentStateChange(const NG::TabContentInfo& tabContentInfo);
+
     static bool ParseStringFromNapi(napi_env env, napi_value val, std::string& str);
     static bool MatchValueType(napi_env env, napi_value value, napi_valuetype targetType);
 private:
@@ -136,6 +143,9 @@ private:
         abilityContextDidClickListeners_;
     static std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
         specifiedDidClickListeners_;
+    static std::list<std::shared_ptr<UIObserverListener>> tabContentStateListeners_;
+    static std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
+        specifiedTabContentStateListeners_;
 
     static std::unordered_map<napi_ref, NavIdAndListenersMap> abilityUIContextNavDesSwitchListeners_;
     static std::unordered_map<int32_t, NavIdAndListenersMap> uiContextNavDesSwitchListeners_;

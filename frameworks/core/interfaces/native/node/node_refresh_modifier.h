@@ -24,6 +24,11 @@ void SetRefreshOnStateChange(ArkUINodeHandle node, void* extraParam);
 void SetOnRefreshing(ArkUINodeHandle node, void* extraParam);
 void SetRefreshOnOffsetChange(ArkUINodeHandle node, void* extraParam);
 void SetRefreshChangeEvent(ArkUINodeHandle node, void* extraParam);
+
+void ResetRefreshOnStateChange(ArkUINodeHandle node);
+void ResetOnRefreshing(ArkUINodeHandle node);
+void ResetRefreshOnOffsetChange(ArkUINodeHandle node);
+void ResetRefreshChangeEvent(ArkUINodeHandle node);
 } // namespace OHOS::Ace::NG::NodeModifier
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_REFRESH_MODIFIER_H

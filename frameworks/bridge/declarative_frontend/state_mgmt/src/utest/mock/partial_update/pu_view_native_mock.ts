@@ -75,6 +75,10 @@ abstract class NativeViewPartialUpdate {
     return -1;
   }
 
+  setIsV2(test: boolean): void {
+    console.warn("NativeViewPU(Mock).setIsV2() -  unimplemented!");
+  }
+
   resetRecycleCustomNode(): void {
     console.warn("NativeViewPU(Mock).resetRecycleCustomNode() -  unimplemented!");
   }

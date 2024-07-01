@@ -216,18 +216,20 @@ void NavigationPattern::OnModifyDone()
     auto&& opts = layoutProperty->GetSafeAreaExpandOpts();
     if (opts) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Navigation SafArea expand as %{public}s", opts->ToString().c_str());
-
-        navBarNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+        uint8_t ignoreExpandKeyboard = 0x11;
+        SafeAreaExpandOpts optsExceptKeyboard = { .type = opts->type & ignoreExpandKeyboard,
+            .edges = opts->edges };
+        navBarNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(optsExceptKeyboard);
         navBarNode->MarkModifyDone();
 
         auto navigationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
         CHECK_NULL_VOID(navigationContentNode);
-        navigationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+        navigationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(optsExceptKeyboard);
         navigationContentNode->MarkModifyDone();
 
         auto dividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetDividerNode());
         CHECK_NULL_VOID(dividerNode);
-        dividerNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+        dividerNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(optsExceptKeyboard);
         dividerNode->MarkModifyDone();
     }
 
@@ -597,7 +599,7 @@ void NavigationPattern::UpdateNavPathList()
             navigationStack_->RemoveCacheNode(cacheNodes, pathName, uiNode);
             continue;
         }
-        TAG_LOGD(AceLogTag::ACE_NAVIGATION, "find in nowhere, navigation stack create new node, "
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "find in nowhere, navigation stack create new node, "
             "index: %{public}d, name: %{public}s.", static_cast<int32_t>(i), pathName.c_str());
         uiNode = GenerateUINodeByIndex(static_cast<int32_t>(i));
         navPathList.emplace_back(std::make_pair(pathName, uiNode));
@@ -1639,8 +1641,6 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
         // pop animation with top navDestination, recover navBar visible tag
         hostNode->SetNeedSetInvisible(false);
     }
-    ACE_SCOPED_TRACE("Navigation page custom transition start");
-    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
     auto proxy = AceType::MakeRefPtr<NavigationTransitionProxy>();
     proxy->SetPreDestination(preTopNavDestination);
     proxy->SetTopDestination(newTopNavDestination);
@@ -1651,6 +1651,8 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
         return false;
     }
     ExecuteAddAnimation(preTopNavDestination, newTopNavDestination, isPopPage, proxy, navigationTransition);
+    ACE_SCOPED_TRACE_COMMERCIAL("Navigation page custom transition start");
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
     if (navigationTransition.interactive) {
         auto finishCallback = [weakNavigation = WeakClaim(this),
                                         weakPreNavDestination = WeakPtr<NavDestinationGroupNode>(preTopNavDestination),
@@ -1709,12 +1711,18 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "preDestination and topDestination is invalid");
         return;
     }
-    ACE_SCOPED_TRACE("Navigation page custom transition end");
+    ACE_SCOPED_TRACE_COMMERCIAL("Navigation page custom transition end");
     PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
     auto replaceValue = navigationStack_->GetReplaceValue();
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     hostNode->SetIsOnAnimation(false);
+    if (preTopNavDestination) {
+        preTopNavDestination->SetIsOnAnimation(false);
+    }
+    if (newTopNavDestination) {
+        newTopNavDestination->SetIsOnAnimation(false);
+    }
     hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
     do {
         if (replaceValue != 0) {
@@ -2308,7 +2316,7 @@ void NavigationPattern::RecoveryToLastStack()
 
     // update cached node
     auto destinationNodes = navigationStack_->GetAllNavDestinationNodes();
-    for (auto index = 0; index < destinationNodes.size(); index++) {
+    for (uint32_t index = 0; index < destinationNodes.size(); index++) {
         auto childNode = destinationNodes[index];
         if (!childNode.second) {
             continue;
@@ -2334,7 +2342,7 @@ void NavigationPattern::RecoveryToLastStack()
 
     // update name index
     navigationStack_->RecoveryNavigationStack();
-    ACE_SCOPED_TRACE("Navigation page transition end");
+    ACE_SCOPED_TRACE_COMMERCIAL("Navigation page transition end");
     PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
     hostNode->SetIsOnAnimation(false);
     hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
@@ -2351,6 +2359,12 @@ bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode
         proxy->SetIsFinished(true);
         return false;
     }
+    if (preTopNavDestination) {
+        preTopNavDestination->SetIsOnAnimation(true);
+    }
+    if (newTopNavDestination) {
+        newTopNavDestination->SetIsOnAnimation(true);
+    }
     proxy->SetInteractive(navigationTransition.interactive);
     // set on transition end callback
     proxy->SetEndCallback(std::move(navigationTransition.endCallback));
@@ -2360,12 +2374,14 @@ bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode
                                         isPopPage, proxy]() {
         // to avoid call finishTransition many times
         if (proxy == nullptr || proxy->GetIsFinished()) {
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "custom animation proxy is empty or is finished");
             return;
         }
         auto pattern = weakNavigation.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto preDestination = weakPreNavDestination.Upgrade();
         auto topDestination = weakNewNavDestination.Upgrade();
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "custom animation finish end");
         proxy->SetIsFinished(true);
         // update pre navigation stack
         pattern->GetNavigationStack()->ClearRecoveryList();

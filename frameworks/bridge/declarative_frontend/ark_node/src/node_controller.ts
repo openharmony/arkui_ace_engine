@@ -35,7 +35,7 @@ abstract class NodeController {
 
   }
   rebuild() {
-    if (this._nodeContainerId != undefined && this._nodeContainerId !== null && this._nodeContainerId._value >= 0) {
+    if (this._nodeContainerId !== undefined && this._nodeContainerId !== null && this._nodeContainerId._value >= 0) {
       getUINativeModule().nodeContainer.rebuild(this._nodeContainerId._value);
     }
   }

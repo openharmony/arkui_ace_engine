@@ -30,9 +30,9 @@ public:
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateBottomTabBarImageColor001, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
     std::vector<int32_t> selectedIndexes(1, 1);
 
     IconStyle iconStyle;
@@ -52,9 +52,9 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateBottomTabBarImageColor001, Test
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateBottomTabBarImageColor002, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
     std::vector<int32_t> selectedIndexes(1, 1);
 
     IconStyle iconStyle;
@@ -73,9 +73,9 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateBottomTabBarImageColor002, Test
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateBottomTabBarImageColor003, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
     std::vector<int32_t> selectedIndexes(1, 1);
 
     IconStyle iconStyle;
@@ -95,9 +95,9 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateBottomTabBarImageColor003, Test
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateBottomTabBarImageColor004, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
     std::vector<int32_t> selectedIndexes(1, 1);
 
     IconStyle iconStyle;
@@ -116,9 +116,9 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateBottomTabBarImageColor004, Test
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternGetBottomTabBarImageSizeAndOffset002, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
     std::vector<int32_t> selectedIndexes(1, 1);
     float selectedImageSize = 1.0f;
     float unselectedImageSize = 1.1f;
@@ -170,9 +170,9 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternGetBottomTabBarImageSizeAndOffset002,
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternGetBottomTabBarImageSizeAndOffset003, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
     std::vector<int32_t> selectedIndexes(1, 1);
     float selectedImageSize = 1.0f;
     float unselectedImageSize = 1.1f;
@@ -224,9 +224,9 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternGetBottomTabBarImageSizeAndOffset003,
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternGetBottomTabBarImageSizeAndOffset004, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
     std::vector<int32_t> selectedIndexes(1, 1);
     float selectedImageSize = 1.0f;
     float unselectedImageSize = 1.1f;
@@ -280,14 +280,10 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternMaskAnimationFinish004, TestSize.Leve
     /**
      * @tc.steps: step1. build two bottom style tabbar.
      */
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 1);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. call MaskAnimationFinish function.
@@ -313,14 +309,10 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternMaskAnimationFinish005, TestSize.Leve
     /**
      * @tc.steps: step1. build two bottom style tabbar.
      */
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 1);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. call MaskAnimationFinish function.
@@ -346,14 +338,10 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternMaskAnimationFinish006, TestSize.Leve
     /**
      * @tc.steps: step1. build two bottom style tabbar.
      */
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 1);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. call MaskAnimationFinish function.
@@ -375,11 +363,11 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternMaskAnimationFinish006, TestSize.Leve
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight003, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabContents(1);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
     ASSERT_TRUE(pr.second);
@@ -411,11 +399,11 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight003, Test
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight004, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabContents(1);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     for (int i = 0; i <= 1; i++) {
         AceType::DynamicCast<FrameNode>(
@@ -446,11 +434,11 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight004, Test
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight005, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabContents(1);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
     ASSERT_TRUE(pr.second);
@@ -481,11 +469,11 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight005, Test
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight006, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabContents(1);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     for (int i = 0; i <= 1; i++) {
         AceType::DynamicCast<FrameNode>(
@@ -515,11 +503,11 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight006, Test
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight007, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabContents(1);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
     ASSERT_TRUE(pr.second);
@@ -550,11 +538,11 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight007, Test
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight008, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabContents(1);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     for (int i = 0; i <= 1; i++) {
         AceType::DynamicCast<FrameNode>(
@@ -584,11 +572,11 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight008, Test
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight009, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabContents(1);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
     ASSERT_TRUE(pr.second);
@@ -618,11 +606,11 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight009, Test
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight010, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabContents(1);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     for (int i = 0; i <= 1; i++) {
         AceType::DynamicCast<FrameNode>(
@@ -651,11 +639,11 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight010, Test
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight011, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabContents(1);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
     ASSERT_TRUE(pr.second);
@@ -686,11 +674,11 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight011, Test
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight012, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabContents(1);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
     ASSERT_TRUE(pr.second);
@@ -720,11 +708,11 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight012, Test
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight013, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabContents(1);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
     ASSERT_TRUE(pr.second);
@@ -754,11 +742,11 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight013, Test
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight014, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabContents(1);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
     ASSERT_TRUE(pr.second);
@@ -790,14 +778,10 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateImageColor002, TestSize.Level1)
     /**
      * @tc.steps: step1. build two bottom style tabbar.
      */
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 1);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. call UpdateImageColor function.
@@ -826,14 +810,10 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateImageColor003, TestSize.Level1)
     /**
      * @tc.steps: step1. build two bottom style tabbar.
      */
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 1);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. call UpdateImageColor function.
@@ -861,14 +841,10 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateImageColor004, TestSize.Level1)
     /**
      * @tc.steps: step1. build two bottom style tabbar.
      */
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 1);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. call UpdateImageColor function.
@@ -896,14 +872,10 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateImageColor005, TestSize.Level1)
     /**
      * @tc.steps: step1. build two bottom style tabbar.
      */
-    Create([](TabsModelNG model) {
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 0);
-        CreateSingleItem([](TabContentModelNG tabContentModel) {
-            tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        }, 1);
-    });
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. call UpdateImageColor function.
@@ -927,11 +899,11 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateImageColor005, TestSize.Level1)
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight015, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabContents(1);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
     ASSERT_TRUE(pr.second);
@@ -962,11 +934,11 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight015, Test
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight016, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabContents(1);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
     ASSERT_TRUE(pr.second);
@@ -996,11 +968,11 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight016, Test
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight017, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabContents(1);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
     ASSERT_TRUE(pr.second);
@@ -1030,11 +1002,11 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight017, Test
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight018, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabContents(1);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
     ASSERT_TRUE(pr.second);
@@ -1063,11 +1035,11 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight018, Test
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight019, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabContents(1);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
     ASSERT_TRUE(pr.second);
@@ -1097,11 +1069,11 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight019, Test
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight020, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabContents(1);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
     ASSERT_TRUE(pr.second);
@@ -1130,11 +1102,11 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight020, Test
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight021, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabContents(1);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
     ASSERT_TRUE(pr.second);
@@ -1163,11 +1135,11 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight021, Test
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight022, TestSize.Level1)
 {
-    Create([](TabsModelNG model) {
-        TabsItemDivider divider;
-        model.SetDivider(divider);
-        CreateSingleItemWithoutBuilder([](TabContentModelNG tabContentModel) {}, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabContents(1);
+    CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
     auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
     ASSERT_TRUE(pr.second);
@@ -1195,7 +1167,9 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight022, Test
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternPlayMaskAnimation002, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Test function PlayMaskAnimation.
@@ -1231,7 +1205,9 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternPlayMaskAnimation002, TestSize.Level1
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternPlayMaskAnimation003, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Test function PlayMaskAnimation.
@@ -1266,7 +1242,9 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternPlayMaskAnimation003, TestSize.Level1
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternPlayMaskAnimation004, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Test function PlayMaskAnimation.
@@ -1301,7 +1279,9 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternPlayMaskAnimation004, TestSize.Level1
  */
 HWTEST_F(TabBarPatternTestNg, TabBarPatternPlayMaskAnimation005, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. Test function PlayMaskAnimation.

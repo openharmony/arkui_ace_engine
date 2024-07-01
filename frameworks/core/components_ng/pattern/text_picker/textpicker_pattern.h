@@ -369,6 +369,46 @@ public:
         return canloop_;
     }
 
+    void HasUserDefinedDisappearFontFamily(bool isUserDefined)
+    {
+        hasUserDefinedDisappearFontFamily_ = isUserDefined;
+    }
+
+    bool GetHasUserDefinedDisappearFontFamily()
+    {
+        return hasUserDefinedDisappearFontFamily_;
+    }
+
+    void HasUserDefinedNormalFontFamily(bool isUserDefined)
+    {
+        hasUserDefinedNormalFontFamily_ = isUserDefined;
+    }
+
+    bool GetHasUserDefinedNormalFontFamily()
+    {
+        return hasUserDefinedNormalFontFamily_;
+    }
+
+    void HasUserDefinedSelectedFontFamily(bool isUserDefined)
+    {
+        hasUserDefinedSelectedFontFamily_ = isUserDefined;
+    }
+
+    bool GetHasUserDefinedSelectedFontFamily()
+    {
+        return hasUserDefinedSelectedFontFamily_;
+    }
+
+    void SetRangeType(int32_t rangeType)
+    {
+        rangeType_ = rangeType;
+    }
+
+    int32_t GetRangeType()
+    {
+        return rangeType_;
+    }
+
 private:
     void OnModifyDone() override;
     void SetLayoutDirection(TextDirection textDirection);
@@ -427,6 +467,10 @@ private:
     // inner focus switch
     bool operationOn_ = false;
 
+    bool hasUserDefinedDisappearFontFamily_ = false;
+    bool hasUserDefinedNormalFontFamily_ = false;
+    bool hasUserDefinedSelectedFontFamily_ = false;
+
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerPattern);
 
     WeakPtr<NG::FrameNode> contentRowNode_;
@@ -436,6 +480,7 @@ private:
     ItemDivider divider_;
     bool customDividerFlag_ = false;
     Dimension value_;
+    int32_t rangeType_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

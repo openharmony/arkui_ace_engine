@@ -220,7 +220,8 @@ bool ConvertResourceType(const std::string& typeName, ResourceType& resType)
     return true;
 }
 
-bool ParseDollarResource(napi_env env, napi_value value, ResourceType& resType, std::string& resName)
+bool ParseDollarResource(
+    napi_env env, napi_value value, ResourceType& resType, std::string& resName, std::string& moduleName)
 {
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, value, &valueType);
@@ -233,10 +234,24 @@ bool ParseDollarResource(napi_env env, napi_value value, ResourceType& resType, 
     }
     std::vector<std::string> tokens;
     StringUtils::StringSplitter(resPath, '.', tokens);
-    if (static_cast<int32_t>(tokens.size()) != 3) { // $r format like app.xxx.xxx, has 3 paragraph
+    // $r format like app.xxx.xxx, has 3 paragraph
+    if (static_cast<int32_t>(tokens.size()) != 3) {
         return false;
     }
-    if (std::find(RESOURCE_HEADS.begin(), RESOURCE_HEADS.end(), tokens[0]) == RESOURCE_HEADS.end()) {
+    std::string maybeModuleName = tokens[0];
+    // [*] or app/hsp at least has 3 chars
+    if (maybeModuleName.size() < 3) {
+        return false;
+    }
+    char begin = *maybeModuleName.begin();
+    char end = maybeModuleName.at(maybeModuleName.size() - 1);
+    bool headCheckPass = false;
+    if (begin == '[' && end == ']') {
+        // moduleName not include 2 brackets
+        moduleName = maybeModuleName.substr(1, maybeModuleName.size() - 2);
+        headCheckPass = true;
+    }
+    if (std::find(RESOURCE_HEADS.begin(), RESOURCE_HEADS.end(), tokens[0]) == RESOURCE_HEADS.end() && !headCheckPass) {
         return false;
     }
     if (!ConvertResourceType(tokens[1], resType)) {
@@ -246,7 +261,49 @@ bool ParseDollarResource(napi_env env, napi_value value, ResourceType& resType, 
     return true;
 }
 
+ResourceStruct CheckResourceStruct(napi_env env, napi_value value)
+{
+    napi_value idNApi = nullptr;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+    if (valueType != napi_object) {
+        return ResourceStruct::CONSTANT;
+    }
+    if (napi_get_named_property(env, value, "id", &idNApi) != napi_ok) {
+        return ResourceStruct::CONSTANT;
+    }
+    napi_typeof(env, idNApi, &valueType);
+    if (valueType == napi_string) {
+        return ResourceStruct::DYNAMIC_V1;
+    }
+    if (valueType == napi_number) {
+        int32_t id = 0;
+        napi_get_value_int32(env, idNApi, &id);
+        if (id == UNKNOWN_RESOURCE_ID) {
+            return ResourceStruct::DYNAMIC_V2;
+        }
+    }
+    return ResourceStruct::CONSTANT;
+}
+
 void CompleteResourceParam(napi_env env, napi_value value)
+{
+    ResourceStruct resourceStruct = CheckResourceStruct(env, value);
+    switch (resourceStruct) {
+        case ResourceStruct::CONSTANT:
+            return;
+        case ResourceStruct::DYNAMIC_V1:
+            CompleteResourceParamV1(env, value);
+            return;
+        case ResourceStruct::DYNAMIC_V2:
+            CompleteResourceParamV2(env, value);
+            return;
+        default:
+            return;
+    }
+}
+
+void CompleteResourceParamV1(napi_env env, napi_value value)
 {
     napi_value idNApi = nullptr;
     napi_valuetype valueType = napi_undefined;
@@ -258,8 +315,9 @@ void CompleteResourceParam(napi_env env, napi_value value)
         return;
     }
     std::string resName;
+    std::string moduleName;
     ResourceType resType;
-    if (!ParseDollarResource(env, idNApi, resType, resName)) {
+    if (!ParseDollarResource(env, idNApi, resType, resName, moduleName)) {
         return;
     }
     bool hasProperty = false;
@@ -281,6 +339,41 @@ void CompleteResourceParam(napi_env env, napi_value value)
     napi_has_property(env, value, moduleNameKeyNApi, &hasProperty);
     if (!hasProperty) {
         napi_set_property(env, value, moduleNameKeyNApi, defaultNameNApi);
+    }
+}
+
+void CompleteResourceParamV2(napi_env env, napi_value value)
+{
+    napi_value paramsNApi = nullptr;
+    if (napi_get_named_property(env, value, "params", &paramsNApi) != napi_ok) {
+        return;
+    }
+    bool isArray = false;
+    napi_is_array(env, paramsNApi, &isArray);
+    if (!isArray) {
+        return;
+    }
+    uint32_t paramCount = 0;
+    napi_get_array_length(env, paramsNApi, &paramCount);
+    if (paramCount <= 0) {
+        return;
+    }
+    napi_value resNameNApi = nullptr;
+    napi_get_element(env, paramsNApi, 0, &resNameNApi);
+    std::string resName;
+    std::string moduleName;
+    ResourceType resType;
+    if (!ParseDollarResource(env, resNameNApi, resType, resName, moduleName)) {
+        return;
+    }
+    napi_value typeIdNApi = nullptr;
+    napi_value typeKeyNApi = CreateNapiString(env, "type");
+    napi_create_int32(env, static_cast<uint32_t>(resType), &typeIdNApi);
+    napi_set_property(env, value, typeKeyNApi, typeIdNApi);
+    if (!moduleName.empty()) {
+        napi_value moduleNameNApi = CreateNapiString(env, moduleName);
+        napi_value moduleNameKeyNApi = CreateNapiString(env, "moduleName");
+        napi_set_property(env, value, moduleNameKeyNApi, moduleNameNApi);
     }
 }
 

@@ -21,6 +21,7 @@ template("cj_frontend") {
   ohos_shared_library(target_name) {
     subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
+    innerapi_tags = [ "platformsdk" ]
     defines += invoker.defines
     defines += platform_config.common_defines
     configs = [ "$ace_root:ace_config" ]

@@ -852,9 +852,22 @@ void FfiOHOSAceFrameworkViewAbstractSetSharedTransition(char* shareId, CJSharedT
     ViewAbstractModel::GetInstance()->SetSharedTransition(std::string(shareId), sharedOption);
 }
 
-void FfiOHOSAceFrameworkViewAbstractSetGeometryTransition(char* id, bool followWithoutTransition)
+void FfiOHOSAceFrameworkViewAbstractSetGeometryTransition(char* id, CJGeometryTransitionOptions option)
 {
-    ViewAbstractModel::GetInstance()->SetGeometryTransition(std::string(id), followWithoutTransition);
+    bool followWithoutTransition = option.follow;
+    bool doRegisterSharedTransition = true;
+    switch (option.hierarchyStrategy) {
+        case 0:
+            doRegisterSharedTransition = false;
+            break;
+        case 1:
+            doRegisterSharedTransition = true;
+            break;
+        default:
+            break;
+    }
+    ViewAbstractModel::GetInstance()->SetGeometryTransition(
+        std::string(id), followWithoutTransition, doRegisterSharedTransition);
 }
 
 void FfiOHOSAceFrameworkViewAbstractSetBlur(double value)
@@ -1042,7 +1055,7 @@ void FfiOHOSAceFrameworkViewAbstractSetOverlay(const char* title, int32_t align,
     Dimension offsetX(x, DimensionUnit::VP);
     Dimension offsetY(y, DimensionUnit::VP);
     ViewAbstractModel::GetInstance()->SetOverlay(
-        title, nullptr, ALIGNMENT_LIST[align], offsetX, offsetY, NG::OverlayType::TEXT);
+        title, nullptr, nullptr, ALIGNMENT_LIST[align], offsetX, offsetY, NG::OverlayType::TEXT);
 }
 
 void FfiOHOSAceFrameworkViewAbstractBindPopup(bool isShow, CJBindPopupParams bindPopupParams)

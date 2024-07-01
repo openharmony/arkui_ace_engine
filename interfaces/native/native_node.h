@@ -1597,6 +1597,46 @@ typedef enum {
      *
      */
     NODE_ACCESSIBILITY_VALUE = 91,
+    
+    
+    /**
+     * @brief 定义控制组件扩展其安全区域，支持属性设置，属性重置和属性获取。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .value[0]?.u32：扩展安全区域的枚举值集合{@link ArkUI_SafeAreaType}，
+     * 例如：ARKUI_SAFE_AREA_TYPE_SYSTEM | ARKUI_SAFE_AREA_TYPE_CUTOUT；\n
+     * .value[1]?.u32：扩展安全区域的方向枚举值集合{@link ArkUI_SafeAreaEdge}；\n
+     * 例如：ARKUI_SAFE_AREA_EDGE_TOP | ARKUI_SAFE_AREA_EDGE_BOTTOM；\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[0].u32：扩展安全区域；\n。 \n
+     * .value[1].u32：扩展安全区域的方向；\n。 \n
+     *
+     */
+    NODE_EXPAND_SAFE_AREA = 92,
+    /**
+     * @brief 定义控制组件触发可视区域面积变更事件的可视区域面积占组件本身面积的比例。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .value[...].f32：占比数值，输入范围0-1
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .value[...].f32：占比数值；\n。 \n
+     *
+     */
+    NODE_VISIBLE_AREA_CHANGE_RADIO = 93,
+
+    /**
+     * @brief 定义组件插入和删除时显示过渡动效，支持属性设置，属性获取。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .object：参数类型为{@link ArkUI_TransitionEffect}。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .object：参数类型为{@link ArkUI_TransitionEffect}。 \n
+     *
+     */
+    NODE_TRANSITION = 94,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
@@ -2647,7 +2687,7 @@ typedef enum {
     *
     */
     NODE_TEXT_INPUT_SHOW_KEYBOARD_ON_FOCUS,
-    
+
     /**
      * @brief 设置该属性后，通过该属性计算textInput组件的高度。
      *
@@ -4198,6 +4238,24 @@ typedef enum {
      * .value[0].i32: 当前List初次加载时视口起始位置显示的item的索引值，默认值：0。 \n
      */
     NODE_LIST_INITIAL_INDEX = 1003008,
+    /**
+     * @brief sets the ListItem splitter style. By default, there is no splitter.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Attribute setting method parameter {@link ArkUI_AttributeItem} Format: \n
+     *.value[0].u32: divider color, type 0xargb; \n
+     *.value[1].f32: dividing line width; \n
+     *.value[2].f32: the distance between the divider and the beginning of the side of the list, unit vp; \n
+     *.value[3].f32: the distance between the divider and the end of the side of the list (unit: vp). \n
+     * \n
+     * Attribute fetch method return value {@link ArkUI_AttributeItem} format: \n
+     *.value[0].u32: divider color, type 0xargb; \n
+     *.value[1].f32: dividing line width; \n
+     *.value[2].f32: the distance between the divider and the beginning of the side of the list, unit vp; \n
+     *.value[3].f32: the distance between the divider and the end of the side of the list (unit: vp). \n
+     *
+     */
+    NODE_LIST_DIVIDER = 1003009,
 
     /**
      * @brief Defines whether to enable loop playback for the swiper. This attribute can be set, reset, and obtained
@@ -6774,6 +6832,15 @@ typedef struct {
      * @return Returns the pointer to the subnode if the subnode exists; returns <b>NULL</b> otherwise.
      */
     ArkUI_NodeHandle (*getParent)(ArkUI_NodeHandle node);
+
+    /**
+     * @brief 从父组件上卸载所有子节点。
+     *
+     * @param parent 目标节点对象。
+     * @return 0 - 成功。
+     *         401 - 函数参数异常。
+     */
+    int32_t (*removeAllChildren)(ArkUI_NodeHandle parent);
 } ArkUI_NativeNodeAPI_1;
 
 /**
@@ -7040,6 +7107,7 @@ int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen(ArkUI_NodeHandle nod
 * @since 12
 */
 int32_t OH_ArkUI_List_CloseAllSwipeActions(ArkUI_NodeHandle node, void* userData, void (*onFinish)(void* userData));
+
 #ifdef __cplusplus
 };
 #endif

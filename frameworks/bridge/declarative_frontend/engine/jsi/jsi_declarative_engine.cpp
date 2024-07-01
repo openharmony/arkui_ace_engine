@@ -80,16 +80,19 @@ extern const char _binary_jsMockSystemPlugin_abc_end[];
 #endif
 extern const char _binary_stateMgmt_abc_start[];
 extern const char _binary_jsEnumStyle_abc_start[];
+extern const char _binary_jsUIContext_abc_start[];
 extern const char _binary_arkComponent_abc_start[];
 extern const char _binary_arkTheme_abc_start[];
 #if !defined(IOS_PLATFORM)
 extern const char _binary_stateMgmt_abc_end[];
 extern const char _binary_jsEnumStyle_abc_end[];
+extern const char _binary_jsUIContext_abc_end[];
 extern const char _binary_arkComponent_abc_end[];
 extern const char _binary_arkTheme_abc_end[];
 #else
 extern const char* _binary_stateMgmt_abc_end;
 extern const char* _binary_jsEnumStyle_abc_end;
+extern const char* _binary_jsUIContext_abc_end;
 extern const char* _binary_arkComponent_abc_end;
 extern const char* _binary_arkTheme_abc_end;
 #endif
@@ -191,6 +194,13 @@ inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
 #endif
 }
 
+inline bool PreloadUIContent(const shared_ptr<JsRuntime>& runtime)
+{
+    uint8_t* codeStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(_binary_jsUIContext_abc_start));
+    int32_t codeLength = _binary_jsUIContext_abc_end - _binary_jsUIContext_abc_start;
+    return runtime->EvaluateJsCode(codeStart, codeLength);
+}
+
 inline bool PreloadArkComponent(const shared_ptr<JsRuntime>& runtime)
 {
     std::string str("arkui_binary_arkComponent_abc_loadFile");
@@ -256,27 +266,49 @@ inline bool PreloadRequireNative(const shared_ptr<JsRuntime>& runtime, const sha
     return global->SetProperty(runtime, "requireNativeModule", runtime->NewFunction(RequireNativeModule));
 }
 
-std::string buildOhmUrl(const std::string& bundleName, const std::string& moduleName, const std::string& pagePath)
+/**
+ * The old version of the SDK will not generate the ohmUrl field, so we need to build it ourselves
+ * for forward compatibility. The basic ohmUrl formats are as follows:
+ *
+ * 1. @bundle:{bundleName}/{moduleName}/ets/{pagePath}
+ * examples as follow:
+ *   @bundle:com.example.app/entry/ets/pages/Index
+ *   @bundle:com.example.app/hsp/ets/pages/Second
+ *
+ * 2. @bundle:{bundleName}/{moduleName}@{harModuleName}/ets/{pagePath}
+ * examples as follow:
+ *   @bundle:com.example.app/entry@har/ets/pages/Index
+ *   @bundle:com.example.app/hsp@har/ets/pages/Second
+ * In this case, since the compiler did not generate the harModuleName field and pagePath is a relative path during
+ * compilation, wee need to split the harModuleName and normal pathPath fields from the original pagePath.
+ * for example:
+ *    original pagePath: "../../../../har/src/main/ets/pages/harPageTwo"
+ *     -> harModuleName: "har"
+ *     -> result pagePath: "pages/harPageTwo"
+ *
+ * For any other situation, currently only format 1 ohmUrl can be returned.
+ */
+std::string BuildOhmUrl(const std::string& bundleName, const std::string& moduleName, const std::string& pagePath)
 {
     LOGE("It is necessary to build ohmUrl for forward compatibility");
     std::string tempUrl = OHMURL_START_TAG + bundleName + "/" + moduleName;
+    std::string ohmUrl = tempUrl + "/ets/" + pagePath;
     auto pos = pagePath.rfind("../");
     if (pos == std::string::npos) {
-        tempUrl = tempUrl + "/ets/" + pagePath;
-    } else {
-        /**
-         * In the scenario where HAP references HAR, pagePath starts with the relative path at compile time,
-         * so we need to remove "../", and moduleName of ohmUrl consists of hap's module + @ + har's modsule.
-         */
-        std::string newPagePath = pagePath.substr(pos + 3);
-        pos = newPagePath.find("/");
-        std::string harModuleName = newPagePath.substr(0, pos);
-        pos = newPagePath.find("ets");
-        newPagePath = newPagePath.substr(pos);
-        tempUrl = tempUrl + "@" + harModuleName + "/" + newPagePath;
+        return ohmUrl;
     }
-
-    return tempUrl;
+    std::string newPagePath = pagePath.substr(pos + 3);
+    pos = newPagePath.find("/");
+    if (pos == std::string::npos) {
+        return ohmUrl;
+    }
+    std::string harModuleName = newPagePath.substr(0, pos);
+    pos = newPagePath.find("ets");
+    if (pos == std::string::npos) {
+        return ohmUrl;
+    }
+    newPagePath = newPagePath.substr(pos);
+    return tempUrl + "@" + harModuleName + "/" + newPagePath;
 }
 
 bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRef>& params, std::string& bundleName,
@@ -285,7 +317,7 @@ bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRe
     auto jsBundleName = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"));
     auto jsModuleName = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
     auto jsPagePath = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "pagePath"));
-    if (!jsBundleName->IsString() || !jsModuleName->IsString() || !jsPagePath->IsString()) {
+    if (!jsBundleName->IsString(vm) || !jsModuleName->IsString(vm) || !jsPagePath->IsString(vm)) {
         return false;
     }
     bundleName = jsBundleName->ToString(vm)->ToString();
@@ -294,7 +326,7 @@ bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRe
     bool ohmUrlValid = false;
     if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "ohmUrl"))) {
         auto jsOhmUrl = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "ohmUrl"));
-        if (jsOhmUrl->IsString()) {
+        if (jsOhmUrl->IsString(vm)) {
             ohmUrl = jsOhmUrl->ToString(vm)->ToString();
             if (ohmUrl.find(OHMURL_START_TAG) == std::string::npos) {
                 ohmUrl = OHMURL_START_TAG + ohmUrl;
@@ -305,14 +337,14 @@ bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRe
         }
     }
     if (!ohmUrlValid) {
-        ohmUrl = buildOhmUrl(bundleName, moduleName, pagePath);
+        ohmUrl = BuildOhmUrl(bundleName, moduleName, pagePath);
     }
 
     std::string integratedHspName = "false";
     // Integrated hsp adaptation
     if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"))) {
         auto integratedHsp = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"));
-        if (integratedHsp->IsString()) {
+        if (integratedHsp->IsString(vm)) {
             integratedHspName = integratedHsp->ToString(vm)->ToString();
         }
     }
@@ -323,7 +355,7 @@ bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRe
 
     if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"))) {
         auto pageFullPathInfo = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"));
-        if (pageFullPathInfo->IsString()) {
+        if (pageFullPathInfo->IsString(vm)) {
             pageFullPath = pageFullPathInfo->ToString(vm)->ToString();
         }
     }
@@ -476,6 +508,7 @@ void JsiDeclarativeEngineInstance::InitJsObject()
             PreloadExports(runtime_, global);
             PreloadRequireNative(runtime_, global);
             PreloadStateManagement(runtime_);
+            PreloadUIContent(runtime_);
             PreloadArkComponent(runtime_);
             PreloadArkTheme(runtime_);
         }
@@ -504,6 +537,7 @@ void JsiDeclarativeEngineInstance::InitAceModule()
         PreloadJsEnums(runtime_);
         PreloadArkComponent(runtime_);
         PreloadArkTheme(runtime_);
+        PreloadUIContent(runtime_);
     }
 #if defined(PREVIEW)
     std::string jsMockSystemPluginString(_binary_jsMockSystemPlugin_abc_start,
@@ -620,6 +654,8 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     }
 
     bool evalResult = PreloadStateManagement(arkRuntime);
+
+    PreloadUIContent(arkRuntime);
 
     // preload ark component
     bool arkComponentResult = PreloadArkComponent(arkRuntime);
@@ -1702,6 +1738,7 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
     CHECK_NULL_RETURN(!namedRouterRegisterMap_.empty(), false);
     auto iter = namedRouterRegisterMap_.find(namedRoute);
     if (isTriggeredByJs && iter == namedRouterRegisterMap_.end()) {
+        LOGW("named route %{public}s not found!", namedRoute.c_str());
         return false;
     }
     // if this triggering is not from js named router api,
@@ -1728,15 +1765,22 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
         bundleName = bundleName_;
         moduleName = moduleName_;
 #endif
+        // when need to locate page in main_pages.json, url shouldn't be empty
+        if (url == "") {
+            LOGW("page not found! bundleName: %{public}s, moduleName: %{public}s, url: %{public}s",
+                bundleName.c_str(), moduleName.c_str(), url.c_str());
+            return false;
+        }
         iter = std::find_if(namedRouterRegisterMap_.begin(), namedRouterRegisterMap_.end(),
             [&bundleName, &moduleName, &url](const auto& item) {
                 return item.second.bundleName == bundleName && item.second.moduleName == moduleName &&
                        item.second.pagePath == url;
             });
-    }
-    if (iter == namedRouterRegisterMap_.end()) {
-        LOGE("page is not in namedRouterRegisterMap_, please check bundleName、moduleName and url");
-        return false;
+        if (iter == namedRouterRegisterMap_.end()) {
+            LOGW("page not found! bundleName: %{public}s, moduleName: %{public}s, url: %{public}s",
+                bundleName.c_str(), moduleName.c_str(), url.c_str());
+            return false;
+        }
     }
 
     /**
@@ -1756,7 +1800,7 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
     LocalScope scope(vm);
     JSViewStackProcessor::JsStartGetAccessRecordingFor(JSViewStackProcessor::JsAllocateNewElmetIdForNextComponent());
     auto ret = iter->second.pageGenerator->Call(vm, JSNApi::GetGlobalObject(vm), argv.data(), 0);
-    if (!ret->IsObject()) {
+    if (!ret->IsObject(vm)) {
         return false;
     }
 #if defined(PREVIEW)
@@ -2081,6 +2125,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         }
         auto xcPattern = DynamicCast<NG::XComponentPattern>(xcFrameNode->GetPattern());
         CHECK_NULL_VOID(xcPattern);
+        CHECK_EQUAL_VOID(xcPattern->GetLibraryName().has_value(), false);
         std::weak_ptr<OH_NativeXComponent> weakNativeXComponent;
         RefPtr<OHOS::Ace::NativeXComponentImpl> nativeXComponentImpl = nullptr;
 
@@ -2120,7 +2165,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         auto runtime = engineInstance_->GetJsRuntime();
         shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
         LocalScope scope(pandaRuntime->GetEcmaVm());
-        auto objXComp = arkNativeEngine->LoadModuleByName(xcPattern->GetLibraryName(), true, arguments,
+        auto objXComp = arkNativeEngine->LoadModuleByName(xcPattern->GetLibraryName().value(), true, arguments,
             OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent.get()), soPath);
         if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
             return;
@@ -2702,6 +2747,9 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
         return;
     }
 
+    // preload state management
+    isModulePreloaded_ = PreloadStateManagement(arkRuntime);
+
     // preload ark styles
     bool arkThemeResult = PreloadArkTheme(arkRuntime);
     if (!arkThemeResult) {
@@ -2709,9 +2757,6 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
         globalRuntime_ = nullptr;
         return;
     }
-
-    // preload state management
-    isModulePreloaded_ = PreloadStateManagement(arkRuntime);
 
     {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
@@ -2761,7 +2806,7 @@ bool JsiDeclarativeEngineInstance::RegisterStringCacheTable(const EcmaVM* vm, in
     if (vm == nullptr) {
         return false;
     }
-    if (size > MAX_STRING_CACHE_SIZE) {
+    if (static_cast<uint32_t>(size) > MAX_STRING_CACHE_SIZE) {
         TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "string cache table is oversize");
         return false;
     }

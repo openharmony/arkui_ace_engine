@@ -22,20 +22,21 @@
 
 namespace OHOS::Ace::Framework {
 
-void XComponentModelImpl::Create(const std::string& id, XComponentType /* type */, const std::string& libraryname,
+void XComponentModelImpl::Create(const std::optional<std::string>& id, XComponentType /* type */,
+    const std::optional<std::string>& libraryname,
     const std::shared_ptr<InnerXComponentController>& xcomponentController)
 {
     auto xcomponentComponent = AceType::MakeRefPtr<OHOS::Ace::XComponentComponent>("xcomponent");
-    xcomponentComponent->SetId(id);
+    xcomponentComponent->SetId(id.value_or(""));
     xcomponentComponent->SetXComponentType("surface");
-    xcomponentComponent->SetLibraryName(libraryname);
+    xcomponentComponent->SetLibraryName(libraryname.value_or(""));
     if (xcomponentController) {
         xcomponentComponent->SetXComponentController(xcomponentController);
     }
 
     XComponentComponentClient::GetInstance().AddXComponentToXcomponentsMap(
         xcomponentComponent->GetId(), xcomponentComponent);
-    auto deleteCallback = [xcId = id]() {
+    auto deleteCallback = [xcId = id.value_or("")]() {
         XComponentComponentClient::GetInstance().DeleteFromXcomponentsMapById(xcId);
         XComponentClient::GetInstance().DeleteControllerFromJSXComponentControllersMap(xcId);
     };

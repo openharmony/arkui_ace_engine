@@ -931,7 +931,8 @@ public:
     bool ShouldVirtualKeyboardOverlay();
     void ScrollBy(float deltaX, float deltaY);
     void ScrollByRefScreen(float deltaX, float deltaY, float vx = 0, float vy = 0);
-    void ExecuteAction(int64_t accessibilityId, AceAction action);
+    void ExecuteAction(int64_t accessibilityId, AceAction action,
+        const std::map<std::string, std::string>& actionArguments);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetFocusedAccessibilityNodeInfo(
         int64_t accessibilityId, bool isAccessibilityFocus);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeInfoById(int64_t accessibilityId);
@@ -971,6 +972,13 @@ public:
 
     void OnCustomKeyboardClose();
 
+    void CreateOverlay(void* data, size_t len, int width, int height, int offsetX, int offsetY, int rectWidth,
+        int rectHeight, int pointX, int pointY);
+
+    void OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, int rectHeight);
+
+    void OnTextSelected();
+
     void OnAttachContext(const RefPtr<NG::PipelineContext> &context);
     void OnDetachContext();
 
@@ -990,6 +998,7 @@ public:
             keyboardHandler_->Close();
         }
     }
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1004,6 +1013,7 @@ private:
     void BindRouterBackMethod();
     void BindPopPageSuccessMethod();
     void BindIsPagePathInvalidMethod();
+    void TextBlurReport(int64_t accessibilityId);
 
 #ifdef OHOS_STANDARD_SYSTEM
     sptr<OHOS::Rosen::Window> CreateWindow();
@@ -1136,8 +1146,8 @@ private:
     std::function<WebKeyboardOption(const std::shared_ptr<BaseEventInfo>&)> onInterceptKeyboardAttachV2_;
     EventCallbackV2 onAdsBlockedV2_;
 
-    int32_t renderMode_;
-    int32_t layoutMode_;
+    int32_t renderMode_ = -1;
+    int32_t layoutMode_ = -1;
     std::string bundlePath_;
     std::string bundleDataPath_;
     std::string hapPath_;
@@ -1148,13 +1158,13 @@ private:
     bool isEnhanceSurface_ = false;
     sptr<WebSurfaceCallback> surfaceCallback_;
     sptr<OHOS::SurfaceDelegate> surfaceDelegate_;
-    EGLNativeWindowType mEglWindow;
+    EGLNativeWindowType mEglWindow = nullptr;
     EGLDisplay mEGLDisplay = EGL_NO_DISPLAY;
     EGLConfig mEGLConfig = nullptr;
     EGLContext mEGLContext = EGL_NO_CONTEXT;
     EGLContext mSharedEGLContext = EGL_NO_CONTEXT;
     EGLSurface mEGLSurface = nullptr;
-    WindowsSurfaceInfo surfaceInfo_;
+    WindowsSurfaceInfo surfaceInfo_ = { nullptr, EGL_NO_DISPLAY, nullptr, EGL_NO_CONTEXT };
     bool forceDarkMode_ = false;
     WebDarkMode current_dark_mode_ = WebDarkMode::Auto;
     sptr<AppExecFwk::IConfigurationObserver> configChangeObserver_ = nullptr;
@@ -1166,6 +1176,7 @@ private:
     uint32_t rosenWindowId_ = 0;
     RefPtr<WebDelegateObserver> observer_;
     std::shared_ptr<Rosen::RSNode> rsNode_;
+    std::shared_ptr<Rosen::RSNode> surfaceRsNode_;
     Rosen::NodeId surfaceNodeId_ = 0;
     float visibleRatio_ = 1.0;
     uint32_t delayTime_ = 500;
@@ -1189,6 +1200,8 @@ private:
     sptr<Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
     int32_t instanceId_;
     std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler_ = nullptr;
+    std::string sharedRenderProcessToken_;
+    int64_t lastFocusInputId_ = 0;
 #endif
 };
 

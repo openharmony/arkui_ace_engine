@@ -474,30 +474,60 @@ bool CalendarDialogPattern::HandleKeyEvent(const KeyEvent& event)
         return false;
     }
 
+    auto calendarNode = GetCalendarFrameNode();
+    CHECK_NULL_RETURN(calendarNode, false);
+    auto textDirection = calendarNode->GetLayoutProperty()->GetNonAutoLayoutDirection();
     switch (event.code) {
         case KeyCode::KEY_DPAD_LEFT: {
-            if ((focusAreaID_ == TITLE_NODE_INDEX && focusAreaChildID_ == TITLE_TEXT_NODE_INDEX + 1) ||
-                (focusAreaID_ == OPTIONS_NODE_INDEX && focusAreaChildID_ == OPTIONS_DIVIDER_NODE_INDEX + 1)) {
+            if (textDirection == TextDirection::RTL) {
+                if ((focusAreaID_ == TITLE_NODE_INDEX && focusAreaChildID_ == TITLE_TEXT_NODE_INDEX - 1) ||
+                    (focusAreaID_ == OPTIONS_NODE_INDEX && focusAreaChildID_ == OPTIONS_DIVIDER_NODE_INDEX - 1)) {
+                    focusAreaChildID_++;
+                }
+                focusAreaChildID_++;
+                auto childSize = static_cast<int32_t>(host->GetChildAtIndex(focusAreaID_)->GetChildren().size());
+                if (focusAreaChildID_ > childSize - 1) {
+                    focusAreaChildID_ = childSize - 1;
+                }
+            } else {
+                if ((focusAreaID_ == TITLE_NODE_INDEX && focusAreaChildID_ == TITLE_TEXT_NODE_INDEX + 1) ||
+                    (focusAreaID_ == OPTIONS_NODE_INDEX && focusAreaChildID_ == OPTIONS_DIVIDER_NODE_INDEX + 1)) {
+                    focusAreaChildID_--;
+                }
                 focusAreaChildID_--;
+                if (focusAreaChildID_ < 0) {
+                    focusAreaChildID_ = 0;
+                }
             }
-            focusAreaChildID_--;
-            if (focusAreaChildID_ < 0) {
-                focusAreaChildID_ = 0;
-            }
+
             PaintFocusState();
             ChangeEntryState();
             return true;
         }
         case KeyCode::KEY_DPAD_RIGHT: {
-            if ((focusAreaID_ == TITLE_NODE_INDEX && focusAreaChildID_ == TITLE_TEXT_NODE_INDEX - 1) ||
-                (focusAreaID_ == OPTIONS_NODE_INDEX && focusAreaChildID_ == OPTIONS_DIVIDER_NODE_INDEX - 1)) {
+            if (textDirection == TextDirection::RTL) {
+                if ((focusAreaID_ == TITLE_NODE_INDEX && focusAreaChildID_ == TITLE_TEXT_NODE_INDEX + 1) ||
+                    (focusAreaID_ == OPTIONS_NODE_INDEX && focusAreaChildID_ == OPTIONS_DIVIDER_NODE_INDEX + 1)) {
+                    focusAreaChildID_--;
+                }
+
+                focusAreaChildID_--;
+                if (focusAreaChildID_ < 0) {
+                    focusAreaChildID_ = 0;
+                }
+            } else {
+                if ((focusAreaID_ == TITLE_NODE_INDEX && focusAreaChildID_ == TITLE_TEXT_NODE_INDEX - 1) ||
+                    (focusAreaID_ == OPTIONS_NODE_INDEX && focusAreaChildID_ == OPTIONS_DIVIDER_NODE_INDEX - 1)) {
+                    focusAreaChildID_++;
+                }
+
                 focusAreaChildID_++;
+                auto childSize = static_cast<int32_t>(host->GetChildAtIndex(focusAreaID_)->GetChildren().size());
+                if (focusAreaChildID_ > childSize - 1) {
+                    focusAreaChildID_ = childSize - 1;
+                }
             }
-            focusAreaChildID_++;
-            auto childSize = static_cast<int32_t>(host->GetChildAtIndex(focusAreaID_)->GetChildren().size());
-            if (focusAreaChildID_ > childSize - 1) {
-                focusAreaChildID_ = childSize - 1;
-            }
+
             PaintFocusState();
             ChangeEntryState();
             return true;
@@ -535,27 +565,30 @@ bool CalendarDialogPattern::HandleCalendarNodeKeyEvent(const KeyEvent& event)
     auto calendarPattern = GetCalendarPattern();
     CHECK_NULL_RETURN(calendarPattern, false);
     ObtainedMonth currentMonthData = calendarPattern->GetCurrentMonthData();
-
+    auto calendarNode = GetCalendarFrameNode();
+    CHECK_NULL_RETURN(calendarNode, false);
+    auto textDirection = calendarNode->GetLayoutProperty()->GetNonAutoLayoutDirection();
     int32_t focusedDayIndex = GetIndexByFocusedDay();
+
     switch (event.code) {
         case KeyCode::KEY_DPAD_LEFT: {
-            focusedDayIndex--;
-            if (IsIndexInCurrentMonth(focusedDayIndex, currentMonthData)) {
-                focusedDay_ = currentMonthData.days[focusedDayIndex];
-                PaintCurrentMonthFocusState();
+            if (textDirection == TextDirection::RTL) {
+                focusedDayIndex++;
             } else {
-                PaintNonCurrentMonthFocusState(focusedDayIndex);
+                focusedDayIndex--;
             }
+
+            PaintMonthFocusState(focusedDayIndex);
             return true;
         }
         case KeyCode::KEY_DPAD_RIGHT: {
-            focusedDayIndex++;
-            if (IsIndexInCurrentMonth(focusedDayIndex, currentMonthData)) {
-                focusedDay_ = currentMonthData.days[focusedDayIndex];
-                PaintCurrentMonthFocusState();
+            if (textDirection == TextDirection::RTL) {
+                focusedDayIndex--;
             } else {
-                PaintNonCurrentMonthFocusState(focusedDayIndex);
+                focusedDayIndex++;
             }
+
+            PaintMonthFocusState(focusedDayIndex);
             return true;
         }
         case KeyCode::KEY_DPAD_UP: {
@@ -617,6 +650,19 @@ bool CalendarDialogPattern::HandleCalendarNodeKeyEvent(const KeyEvent& event)
     return false;
 }
 
+void CalendarDialogPattern::PaintMonthFocusState(int32_t focusedDayIndex)
+{
+    auto calendarPattern = GetCalendarPattern();
+    CHECK_NULL_VOID(calendarPattern);
+    ObtainedMonth currentMonthData = calendarPattern->GetCurrentMonthData();
+    if (IsIndexInCurrentMonth(focusedDayIndex, currentMonthData)) {
+        focusedDay_ = currentMonthData.days[focusedDayIndex];
+        PaintCurrentMonthFocusState();
+    } else {
+        PaintNonCurrentMonthFocusState(focusedDayIndex);
+    }
+}
+
 bool CalendarDialogPattern::IsIndexInCurrentMonth(int32_t focusedDayIndex, const ObtainedMonth& currentMonthData)
 {
     return focusedDayIndex >= 0 && focusedDayIndex < static_cast<int32_t>(currentMonthData.days.size()) &&
@@ -675,6 +721,7 @@ void CalendarDialogPattern::FocusedLastFocusedDay()
     if (it != monthData.days.end()) {
         focusedDay_ = *it;
         it->isKeyFocused = true;
+        calendarPattern->SetDialogClickEventState(true);
         UpdateSwiperNode(monthData, isPrev);
     }
 }
@@ -785,7 +832,7 @@ void CalendarDialogPattern::PaintNonCurrentMonthFocusState(int32_t focusedDayInd
         day.isKeyFocused = false;
     }
     calendarPattern->SetCurrentMonthData(currentMonthData);
-
+    calendarPattern->SetDialogClickEventState(true);
     if (focusedDayIndex == -1) {
         focusedDay_ = preMonthData.days[preMonthData.days.size() ? preMonthData.days.size() - 1 : 0];
         preMonthData.days[preMonthData.days.size() ? preMonthData.days.size() - 1 : 0].isKeyFocused = true;
@@ -799,6 +846,17 @@ void CalendarDialogPattern::PaintNonCurrentMonthFocusState(int32_t focusedDayInd
         swiperPattern->ShowNext();
         return;
     }
+    UpdateNonCurrentMonthFocusedDay(focusedDayIndex);
+}
+
+void CalendarDialogPattern::UpdateNonCurrentMonthFocusedDay(int32_t focusedDayIndex)
+{
+    auto calendarPattern = GetCalendarPattern();
+    CHECK_NULL_VOID(calendarPattern);
+
+    ObtainedMonth currentMonthData = calendarPattern->GetCurrentMonthData();
+    ObtainedMonth preMonthData = calendarPattern->GetPreMonthData();
+    ObtainedMonth nextMonthData = calendarPattern->GetNextMonthData();
 
     if (focusedDayIndex < 0 || focusedDayIndex >= static_cast<int32_t>(currentMonthData.days.size())) {
         return;

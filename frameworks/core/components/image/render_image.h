@@ -253,7 +253,8 @@ public:
         return border_;
     }
 #ifndef USE_ROSEN_DRAWING
-    virtual void* GetSkImage() {
+    virtual void* GetSkImage()
+    {
         return nullptr;
     }
 

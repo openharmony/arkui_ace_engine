@@ -45,7 +45,11 @@ RefPtr<TextClockController> TextClockModelNG::Create()
 
 void TextClockModelNG::SetFormat(const std::string& format)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, Format, format);
+    if (format.empty()) {
+        ACE_RESET_LAYOUT_PROPERTY(TextClockLayoutProperty, Format);
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, Format, format);
+    }
 }
 
 void TextClockModelNG::SetTextShadow(const std::vector<Shadow>& value)
@@ -123,9 +127,18 @@ void TextClockModelNG::InitFontDefault(const TextStyle& textStyle)
     }
 }
 
+void TextClockModelNG::SetDateTimeOptions(const ZeroPrefixType& hourType)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, PrefixHour, hourType);
+}
+
 void TextClockModelNG::SetFormat(FrameNode* frameNode, const std::string& format)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, Format, format, frameNode);
+    if (format.empty()) {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, Format, frameNode);
+    } else {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, Format, format, frameNode);
+    }
 }
 
 void TextClockModelNG::SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value)
@@ -171,5 +184,11 @@ void TextClockModelNG::SetBuilderFunc(FrameNode* frameNode, TextClockMakeCallbac
     auto pattern = frameNode->GetPattern<TextClockPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetBuilderFunc(std::move(makeFunc));
+}
+
+void TextClockModelNG::SetDateTimeOptions(FrameNode* frameNode, const ZeroPrefixType& hourType)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, PrefixHour, hourType, frameNode);
 }
 } // namespace OHOS::Ace::NG

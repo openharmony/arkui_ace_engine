@@ -92,7 +92,7 @@ public:
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false,
         bool addToRenderTree = false) override;
     bool RenderCustomChild(int64_t deadline) override;
-    void SetJSViewActive(bool active) override;
+    void SetJSViewActive(bool active, bool isLazyForEachNode = false) override;
 
     bool GetJsActive()
     {
@@ -114,7 +114,7 @@ public:
         return extraInfos_;
     }
 
-    void DoSetActiveChildRange(int32_t start, int32_t end) override;
+    void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
 
     const WeakPtr<UINode>& GetNavigationNode() const
     {

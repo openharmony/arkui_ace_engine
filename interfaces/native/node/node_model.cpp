@@ -132,6 +132,14 @@ struct ExtraData {
 
 std::set<ArkUI_NodeHandle> g_nodeSet;
 
+bool IsValidArkUINode(ArkUI_NodeHandle nodePtr)
+{
+    if (!nodePtr || g_nodeSet.count(nodePtr) == 0) {
+        return false;
+    }
+    return true;
+}
+
 ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
 {
     static const ArkUINodeType nodes[] = { ARKUI_CUSTOM, ARKUI_TEXT, ARKUI_SPAN, ARKUI_IMAGE_SPAN, ARKUI_IMAGE,
@@ -181,6 +189,11 @@ void DisposeNativeSource(ArkUI_NodeHandle nativePtr)
         }
         delete eventListenersSet;
         nativePtr->eventListeners = nullptr;
+    }
+    if (nativePtr->areaChangeRadio) {
+        delete[] nativePtr->areaChangeRadio->value;
+        delete nativePtr->areaChangeRadio;
+        nativePtr->areaChangeRadio = nullptr;
     }
 }
 
@@ -338,7 +351,10 @@ int32_t RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventTyp
         extraData->eventMap[eventType] = extraParam;
     }
     if (eventType == NODE_EVENT_ON_VISIBLE_AREA_CHANGE) {
-        auto radio = static_cast<ArkUI_AttributeItem*>(userData);
+        ArkUI_AttributeItem* radio = nodePtr->areaChangeRadio;
+        if (radio == nullptr) {
+            radio = static_cast<ArkUI_AttributeItem*>(userData);
+        }
         ArkUI_Int32 radioLength = radio->size;
         if (radioLength <= 0) {
             return ERROR_CODE_PARAM_INVALID;
@@ -382,14 +398,12 @@ void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType
         delete extraData;
         nodePtr->extraData = nullptr;
     }
-    if (eventType == NODE_EVENT_ON_VISIBLE_AREA_CHANGE) {
-        auto* impl = GetFullImpl();
-        impl->getNodeModifiers()->getCommonModifier()->resetVisibleAreaChange(nodePtr->uiNodeHandle);
+    auto originEventType = ConvertOriginEventType(eventType, nodePtr->type);
+    if (originEventType < 0) {
+        return;
     }
-    if (eventType == NODE_EVENT_ON_AREA_CHANGE) {
-        auto* impl = GetFullImpl();
-        impl->getNodeModifiers()->getCommonModifier()->resetAreaChange(nodePtr->uiNodeHandle);
-    }
+    impl->getBasicAPI()->unRegisterNodeAsyncEvent(
+        nodePtr->uiNodeHandle, static_cast<ArkUIEventSubKind>(originEventType));
 }
 
 void (*g_compatibleEventReceiver)(ArkUI_CompatibleNodeEvent* event) = nullptr;
@@ -664,6 +678,7 @@ int32_t OH_ArkUI_NodeContent_AddNode(ArkUI_NodeContentHandle content, ArkUI_Node
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
+    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     return impl->getNodeModifiers()->getNodeContentModifier()->addChild(
         reinterpret_cast<ArkUINodeContentHandle>(content), node->uiNodeHandle);
 }
@@ -672,6 +687,7 @@ int32_t OH_ArkUI_NodeContent_InsertNode(ArkUI_NodeContentHandle content, ArkUI_N
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
+    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     return impl->getNodeModifiers()->getNodeContentModifier()->insertChild(
         reinterpret_cast<ArkUINodeContentHandle>(content), node->uiNodeHandle, position);
 }
@@ -680,6 +696,7 @@ int32_t OH_ArkUI_NodeContent_RemoveNode(ArkUI_NodeContentHandle content, ArkUI_N
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND);
+    CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     return impl->getNodeModifiers()->getNodeContentModifier()->removeChild(
         reinterpret_cast<ArkUINodeContentHandle>(content), node->uiNodeHandle);
 }

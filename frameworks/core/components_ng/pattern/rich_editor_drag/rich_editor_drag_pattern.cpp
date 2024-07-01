@@ -86,13 +86,17 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
     auto boxes = hostPattern->GetTextBoxes();
     for (const auto& child : imageChildren) {
         auto imageIndex = placeholderIndex[index];
-        if (imageIndex >= rectsForPlaceholders.size()) {
+        if (imageIndex >= static_cast<int32_t>(rectsForPlaceholders.size())) {
             break;
         }
         auto rect = rectsForPlaceholders.at(imageIndex);
 
         for (const auto& box : boxes) {
             if (box.IsInRegion({rect.GetX() + rect.Width() / 2, rect.GetY() + rect.Height() / 2})) {
+                auto gestureHub = child->GetOrCreateGestureEventHub();
+                if (gestureHub) {
+                    gestureHub->SetPixelMap(nullptr);
+                }
                 realImageChildren.emplace_back(child);
                 realRectsForPlaceholders.emplace_back(rect);
             }

@@ -60,6 +60,7 @@
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/node_span_modifier.h"
 #include "core/interfaces/native/node/node_stack_modifier.h"
+#include "core/interfaces/native/node/node_folder_stack_modifier.h"
 #include "core/interfaces/native/node/node_swiper_modifier.h"
 #include "core/interfaces/native/node/node_text_area_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
@@ -143,6 +144,7 @@ const ArkUINodeModifiers impl = {
     NodeModifier::GetSliderModifier,
     NodeModifier::GetDividerModifier,
     NodeModifier::GetStackModifier,
+    NodeModifier::GetFolderStackModifier,
     NodeModifier::GetNavDestinationModifier,
     NodeModifier::GetGridModifier,
     NodeModifier::GetGridColModifier,

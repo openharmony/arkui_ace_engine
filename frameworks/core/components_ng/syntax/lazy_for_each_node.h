@@ -112,7 +112,7 @@ public:
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false,
         bool addToRenderTree = false) override;
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
-    void DoSetActiveChildRange(int32_t start, int32_t end) override;
+    void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
 
     const std::list<RefPtr<UINode>>& GetChildren() const override;
     void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override
@@ -122,7 +122,7 @@ public:
             builder_->SetCacheCount(cacheCount);
         }
     }
-    void SetJSViewActive(bool active = true) override
+    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false) override
     {
         if (builder_) {
             builder_->SetJSViewActive(active);
@@ -141,7 +141,7 @@ public:
         startIndex_ = start;
         count_ = count;
     }
-    void RecycleItems(int32_t from, int32_t to);
+    void RecycleItems(int32_t from, int32_t to) override;
 
     const RefPtr<LazyForEachBuilder>& GetBuilder() const
     {
@@ -160,7 +160,7 @@ public:
     void MoveData(int32_t from, int32_t to) override;
     void FireOnMove(int32_t from, int32_t to) override;
     RefPtr<FrameNode> GetFrameNode(int32_t index) override;
-    int32_t GetFrameNodeIndex(RefPtr<FrameNode> node, bool isExpanded = true) override;
+    int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded = true) override;
     void InitDragManager(const RefPtr<FrameNode>& childNode);
     void InitAllChilrenDragManager(bool init);
 private:
@@ -168,6 +168,18 @@ private:
     {
         UINode::OnAttachToMainTree(recursive);
         RegisterBuilderListener();
+    }
+
+    void OnDetachFromMainTree(bool recursive) override
+    {
+        UINode::OnDetachFromMainTree(recursive);
+        if (builder_) {
+            for (const auto& item : builder_->GetCachedUINodeMap()) {
+                if (item.second.second != nullptr) {
+                    item.second.second->DetachFromMainTree(recursive);
+                }
+            }
+        }
     }
 
     void OnOffscreenProcess(bool recursive) override

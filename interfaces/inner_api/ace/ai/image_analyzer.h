@@ -35,7 +35,8 @@
 
 namespace OHOS::Ace {
 enum class ImageAnalyzerState;
-using onAnalyzedCallback = std::optional<std::function<void(ImageAnalyzerState)>>;
+using OnAnalyzedCallback = std::optional<std::function<void(ImageAnalyzerState)>>;
+using OnTextSelectedCallback = std::function<void()>;
 
 enum class ImageAnalyzerType {
     SUBJECT = 0,
@@ -59,6 +60,24 @@ enum class ImageAnalyzerState {
     FINISHED
 };
 
+enum class Status {
+    SELECTED = 0,
+    UNSELECTED,
+    MENU_SHOW,
+    MENU_HIDE
+};
+
+struct TouchInfo {
+    TouchPoint touchPoint;
+    TouchType touchType = TouchType::CANCEL;
+};
+
+struct PixelMapInfo {
+    float width = 0.0f;
+    float height = 0.0f;
+    NG::OffsetF overlayOffset = { 0.0f, 0.0f };
+};
+
 struct ImageAnalyzerConfig {
     NG::MarginProperty aiButtonMargin;
     std::set<ImageAnalyzerType> types;
@@ -75,7 +94,21 @@ struct ImageAnalyzerInnerConfig {
     ImageAnalyzerHolder holder = ImageAnalyzerHolder::OTHERS;
     ImageFit imageFit = ImageFit::COVER;
     Matrix4 transformMat = Matrix4::CreateIdentity();
-    onAnalyzedCallback onAnalyzed;
+    OnAnalyzedCallback onAnalyzed;
+    Status selectedStatus = Status::SELECTED;
+    Status menuStatus = Status::MENU_SHOW;
+    OnTextSelectedCallback onTextSelected;
+    void* pixelmapNapiVal = nullptr;
+    OHOS::Ace::TouchInfo touchInfo;
+
+    void UpdateFromInfo(const PixelMapInfo& info)
+    {
+        contentWidth = info.width;
+        contentHeight = info.height;
+        pixelMapWidth = info.width;
+        pixelMapHeight = info.height;
+        overlayOffset = info.overlayOffset;
+    }
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_INNERKITS_PROPERTIES_IMAGE_ANALYZER_H

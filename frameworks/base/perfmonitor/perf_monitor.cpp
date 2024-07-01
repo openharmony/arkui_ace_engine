@@ -230,7 +230,8 @@ bool SceneRecord::IsDisplayAnimator(const std::string& sceneId)
     if (sceneId == PerfConstants::APP_LIST_FLING || sceneId == PerfConstants::APP_SWIPER_SCROLL
         || sceneId == PerfConstants::SNAP_RECENT_ANI
         || sceneId == PerfConstants::WINDOW_RECT_RESIZE
-        || sceneId == PerfConstants::WINDOW_RECT_MOVE) {
+        || sceneId == PerfConstants::WINDOW_RECT_MOVE
+        || sceneId == PerfConstants::LAUNCHER_SPRINGBACK_SCROLL) {
         return true;
     }
     return false;
@@ -511,24 +512,25 @@ void PerfMonitor::ReportPerfEvent(PerfEventType type, DataBase& data)
 
 bool PerfMonitor::IsExceptResponseTime(int64_t time, const std::string& sceneId)
 {
-    if ((sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH
-        && GetCurrentRealTimeNs() - time > RESPONSE_TIMEOUT)
-        || sceneId == PerfConstants::VOLUME_BAR_SHOW
-        || sceneId == PerfConstants::APP_TRANSITION_TO_OTHER_APP
-        || sceneId == PerfConstants::APP_TRANSITION_FROM_OTHER_APP) {
+    int64_t currentRealTimeNs = GetCurrentRealTimeNs();
+    static set<std::string> exceptSceneSet = {
+        PerfConstants::APP_LIST_FLING, PerfConstants::SCREEN_ROTATION_ANI,
+        PerfConstants::SHOW_INPUT_METHOD_ANIMATION, PerfConstants::HIDE_INPUT_METHOD_ANIMATION,
+        PerfConstants::APP_TRANSITION_FROM_OTHER_APP, PerfConstants::APP_TRANSITION_TO_OTHER_APP,
+        PerfConstants::VOLUME_BAR_SHOW, PerfConstants::PC_APP_CENTER_GESTURE_OPERATION,
+        PerfConstants::PC_GESTURE_TO_RECENT, PerfConstants::PC_SHORTCUT_SHOW_DESKTOP,
+        PerfConstants::PC_ALT_TAB_TO_RECENT, PerfConstants::PC_SHOW_DESKTOP_GESTURE_OPERATION,
+        PerfConstants::PC_SHORTCUT_RESTORE_DESKTOP, PerfConstants::PC_SHORTCUT_TO_RECENT,
+        PerfConstants::PC_EXIT_RECENT, PerfConstants::PC_SHORTCUT_TO_APP_CENTER_ON_RECENT,
+        PerfConstants::PC_SHORTCUT_TO_APP_CENTER, PerfConstants::PC_SHORTCUT_EXIT_APP_CENTER,
+        PerfConstants::WINDOW_TITLE_BAR_MINIMIZED,
+        PerfConstants::APP_EXIT_FROM_WINDOW_TITLE_BAR_CLOSED
+    };
+    if (exceptSceneSet.find(sceneId) != exceptSceneSet.end()) {
         return true;
     }
-    if (sceneId == PerfConstants::PC_APP_CENTER_GESTURE_OPERATION ||
-        sceneId == PerfConstants::PC_GESTURE_TO_RECENT ||
-        sceneId == PerfConstants::PC_SHORTCUT_SHOW_DESKTOP ||
-        sceneId == PerfConstants::PC_SHORTCUT_RESTORE_DESKTOP ||
-        sceneId == PerfConstants::PC_SHOW_DESKTOP_GESTURE_OPERATION ||
-        sceneId == PerfConstants::PC_ALT_TAB_TO_RECENT ||
-        sceneId == PerfConstants::PC_SHORTCUT_TO_RECENT ||
-        sceneId == PerfConstants::PC_EXIT_RECENT ||
-        sceneId == PerfConstants::PC_SHORTCUT_TO_APP_CENTER ||
-        sceneId == PerfConstants::PC_SHORTCUT_TO_APP_CENTER_ON_RECENT ||
-        sceneId == PerfConstants::PC_SHORTCUT_EXIT_APP_CENTER) {
+    if ((sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH && currentRealTimeNs - time > RESPONSE_TIMEOUT)
+        || (sceneId == PerfConstants::CLOSE_FOLDER_ANI && currentRealTimeNs - time > RESPONSE_TIMEOUT)) {
         return true;
     }
     return false;

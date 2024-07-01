@@ -172,8 +172,8 @@ void JSSymbol::parseSymbolEffect(const JSRef<JSObject> symbolEffectObj, NG::Symb
     auto scopeTypeProperty = symbolEffectObj->GetProperty("scope");
     if (scopeTypeProperty->IsNumber()) {
         auto scopeTypeNum = scopeTypeProperty->ToNumber<uint32_t>();
-        if (scopeTypeNum >= static_cast<int>(ScopeType::LAYER) &&
-            scopeTypeNum <= static_cast<int>(ScopeType::WHOLE)) {
+        if (scopeTypeNum >= static_cast<uint32_t>(ScopeType::LAYER) &&
+            scopeTypeNum <= static_cast<uint32_t>(ScopeType::WHOLE)) {
             symbolEffectOptions.SetScopeType(static_cast<ScopeType>(scopeTypeNum));
         }
     }
@@ -181,8 +181,8 @@ void JSSymbol::parseSymbolEffect(const JSRef<JSObject> symbolEffectObj, NG::Symb
     auto commonSubTypeProperty = symbolEffectObj->GetProperty("direction");
     if (commonSubTypeProperty->IsNumber()) {
         auto commonSubTypeNum = commonSubTypeProperty->ToNumber<uint32_t>();
-        if (commonSubTypeNum >= static_cast<int>(CommonSubType::DOWN) &&
-            commonSubTypeNum <= static_cast<int>(CommonSubType::UP)) {
+        if (commonSubTypeNum >= static_cast<uint32_t>(CommonSubType::DOWN) &&
+            commonSubTypeNum <= static_cast<uint32_t>(CommonSubType::UP)) {
             symbolEffectOptions.SetCommonSubType(static_cast<CommonSubType>(commonSubTypeNum));
         }
     }

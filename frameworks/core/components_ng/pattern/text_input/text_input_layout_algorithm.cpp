@@ -251,7 +251,15 @@ void TextInputLayoutAlgorithm::UpdateContentPosition(const UpdateContentPosition
 
 void TextInputLayoutAlgorithm::UpdateTextRect(const UpdateTextRectParams& params)
 {
-    if (LessOrEqual(textRect_.Width(), params.contentSize.Width())) {
+    auto buttonWidth = 0.0f;
+    if (params.cleanResponseArea) {
+        buttonWidth += params.cleanResponseArea->GetAreaRect().Width();
+    }
+    if (params.responseArea) {
+        buttonWidth += params.responseArea->GetAreaRect().Width();
+    }
+    if (LessOrEqual(textRect_.Width(), params.contentSize.Width()) ||
+        LessOrEqual(textRect_.Width() - buttonWidth, params.contentSize.Width())) {
         float textRectOffsetX = 0.0f;
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             textRectOffsetX = params.pattern->GetPaddingLeft();
@@ -267,13 +275,13 @@ void TextInputLayoutAlgorithm::UpdateTextRect(const UpdateTextRectParams& params
         if (params.isRTL) {
             if (params.responseArea) {
                 RectF responseAreaRect = params.responseArea->GetAreaRect();
-                textRect_.SetOffset(OffsetF(textRectOffsetX + responseAreaRect.Width(), params.offsetBase.GetY()));
-            } else if (params.cleanResponseArea) {
-                RectF cleanResponseAreaRect = params.cleanResponseArea->GetAreaRect();
-                textRect_.SetOffset(OffsetF(textRectOffsetX + cleanResponseAreaRect.Width(), params.offsetBase.GetY()));
-            } else {
-                textRect_.SetOffset(OffsetF(textRectOffsetX, params.offsetBase.GetY()));
+                textRectOffsetX += responseAreaRect.Width();
             }
+            if (params.cleanResponseArea) {
+                RectF cleanResponseAreaRect = params.cleanResponseArea->GetAreaRect();
+                textRectOffsetX += cleanResponseAreaRect.Width();
+            }
+            textRect_.SetOffset(OffsetF(textRectOffsetX, params.offsetBase.GetY()));
         } else {
             textRect_.SetOffset(OffsetF(textRectOffsetX, params.offsetBase.GetY()));
         }

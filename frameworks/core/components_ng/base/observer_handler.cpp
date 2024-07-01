@@ -44,6 +44,14 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
     CHECK_NULL_VOID(context);
     auto pathInfo = pattern->GetNavPathInfo();
     CHECK_NULL_VOID(pathInfo);
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (state == NavDestinationState::ON_SHOWN || state == NavDestinationState::ON_HIDDEN) {
+            NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state);
+            CHECK_NULL_VOID(navigationHandleFunc_);
+            navigationHandleFunc_(info);
+        }
+        return;
+    }
     NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
         pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()));
     CHECK_NULL_VOID(navigationHandleFunc_);
@@ -58,6 +66,11 @@ void UIObserverHandler::NotifyScrollEventStateChange(const WeakPtr<AceType>& wea
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
+    if (eventType == ScrollEventType::SCROLL_START) {
+        host->AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_START_SCROLL);
+    } else if (eventType == ScrollEventType::SCROLL_STOP) {
+        host->AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_END_SCROLL);
+    }
     std::string id = host->GetInspectorId().value_or("");
     int32_t uniqueId = host->GetId();
     float offset = pattern->GetTotalOffset();
@@ -120,6 +133,12 @@ void UIObserverHandler::NotifyDidClick(
     didClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
 }
 
+void UIObserverHandler::NotifyTabContentStateUpdate(const TabContentInfo& info)
+{
+    CHECK_NULL_VOID(tabContentStateHandleFunc_);
+    tabContentStateHandleFunc_(info);
+}
+
 std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const RefPtr<AceType>& node)
 {
     CHECK_NULL_RETURN(node, nullptr);
@@ -139,9 +158,14 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const 
     CHECK_NULL_RETURN(host, nullptr);
     auto pathInfo = pattern->GetNavPathInfo();
     CHECK_NULL_RETURN(pathInfo, nullptr);
-    NavDestinationState state = pattern->GetNavDestinationState();
-    if (state == NavDestinationState::NONE) {
-        return nullptr;
+    NavDestinationState state = NavDestinationState::NONE;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        state = pattern->GetNavDestinationState();
+        if (state == NavDestinationState::NONE) {
+            return nullptr;
+        }
+    } else {
+        state = pattern->GetIsOnShow() ? NavDestinationState::ON_SHOWN : NavDestinationState::ON_HIDDEN;
     }
     return std::make_shared<NavDestinationInfo>(
         GetNavigationId(pattern), pattern->GetName(),
@@ -278,6 +302,11 @@ void UIObserverHandler::SetWillClickFunc(WillClickHandleFunc func)
 void UIObserverHandler::SetDidClickFunc(DidClickHandleFunc func)
 {
     didClickHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetHandleTabContentStateUpdateFunc(TabContentStateHandleFunc func)
+{
+    tabContentStateHandleFunc_ = func;
 }
 
 napi_value UIObserverHandler::GetUIContextValue()

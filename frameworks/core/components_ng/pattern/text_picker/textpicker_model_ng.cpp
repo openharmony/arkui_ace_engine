@@ -340,6 +340,33 @@ void TextPickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTh
         TextPickerLayoutProperty, SelectedFontStyle, value.fontStyle.value_or(selectedStyle.GetFontStyle()));
 }
 
+void TextPickerModelNG::HasUserDefinedDisappearFontFamily(bool isUserDefined)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->HasUserDefinedDisappearFontFamily(isUserDefined);
+}
+
+void TextPickerModelNG::HasUserDefinedNormalFontFamily(bool isUserDefined)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->HasUserDefinedNormalFontFamily(isUserDefined);
+}
+
+void TextPickerModelNG::HasUserDefinedSelectedFontFamily(bool isUserDefined)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->HasUserDefinedSelectedFontFamily(isUserDefined);
+}
+
 void TextPickerModelNG::SetOnCascadeChange(TextCascadeChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -765,10 +792,11 @@ void TextPickerModelNG::SetDefaultPickerItemHeight(FrameNode* frameNode, const D
 
 Dimension TextPickerModelNG::GetDefaultPickerItemHeight(FrameNode* frameNode)
 {
-    Dimension value = Dimension(-1.0f);
+    Dimension value = Dimension(0.0f);
     CHECK_NULL_RETURN(frameNode, value);
     auto layoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
-    return layoutProperty->GetDefaultPickerItemHeightValue();
+    CHECK_NULL_RETURN(layoutProperty, value);
+    return layoutProperty->HasDefaultPickerItemHeight() ? layoutProperty->GetDefaultPickerItemHeightValue() : value;
 }
 
 void TextPickerModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
@@ -1138,5 +1166,21 @@ std::vector<uint32_t> TextPickerModelNG::getTextPickerSelecteds(FrameNode* frame
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_RETURN(textPickerPattern, defaultValue);
     return textPickerPattern->GetSelecteds();
+}
+
+void TextPickerModelNG::SetTextPickerRangeType(FrameNode* frameNode, int32_t rangeType)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetRangeType(rangeType);
+}
+
+int32_t TextPickerModelNG::GetTextPickerRangeType(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, 0);
+    return textPickerPattern->GetRangeType();
 }
 } // namespace OHOS::Ace::NG

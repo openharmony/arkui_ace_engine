@@ -140,7 +140,7 @@ bool CheckTopEdgeOverlap(const RefPtr<NavBarLayoutProperty>& navBarLayoutPropert
         auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
         CHECK_NULL_RETURN(titlePattern, false);
         auto options = titlePattern->GetTitleBarOptions();
-        auto barStyle = options.bgOptions.barStyle.value_or(BarStyle::STANDARD);
+        auto barStyle = options.brOptions.barStyle.value_or(BarStyle::STANDARD);
         if ((navBarLayoutProperty->GetHideTitleBar().value_or(false) || barStyle == BarStyle::STACK) &&
             safeAreaPos.top_.IsOverlapped(frame.Top())) {
             return true;
@@ -359,8 +359,8 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostN
     CHECK_NULL_VOID(contentWrapper);
     auto geometryNode = contentWrapper->GetGeometryNode();
     auto pattern = hostNode->GetPattern<NavBarPattern>();
-    float keyboardOffset = pattern ? pattern->GetKeyboardOffset() : 0.0f;
-    auto contentOffset = OffsetF(0.0f, keyboardOffset);
+    float avoidKeyboardOffset = pattern ? pattern->GetAvoidKeyboardOffset() : 0.0f;
+    auto contentOffset = OffsetF(0.0f, avoidKeyboardOffset);
     if (!navBarLayoutProperty->GetHideTitleBar().value_or(false)) {
         contentOffset += OffsetF(geometryNode->GetFrameOffset().GetX(), titlebarHeight);
     }
@@ -463,7 +463,7 @@ float TransferTitleBarHeight(const RefPtr<NavBarNode>& hostNode, float titleBarH
     CHECK_NULL_RETURN(titlePattern, 0.0f);
     auto resetTitleBarHeight = 0.0f;
     auto options = titlePattern->GetTitleBarOptions();
-    auto barStyle = options.bgOptions.barStyle.value_or(BarStyle::STANDARD);
+    auto barStyle = options.brOptions.barStyle.value_or(BarStyle::STANDARD);
     if (barStyle == BarStyle::STACK) {
         resetTitleBarHeight = 0.0f;
     } else {

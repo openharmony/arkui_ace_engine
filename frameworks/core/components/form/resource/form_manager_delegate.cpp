@@ -54,9 +54,7 @@ constexpr int32_t RENDER_DEAD_CODE = 16501006;
 constexpr int32_t FORM_NOT_TRUST_CODE = 16501007;
 constexpr char ALLOW_UPDATE[] = "allowUpdate";
 constexpr char IS_DYNAMIC[] = "isDynamic";
-constexpr int32_t READD_FORM_DELAY_TIME = 50;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_10S = 10000;
-constexpr int DELAY_TIME_OF_RECYCLE_FORM_AFTER_HANDLE_CLICK_EVENT = 10000;
 } // namespace
 
 FormManagerDelegate::~FormManagerDelegate()
@@ -244,13 +242,6 @@ void FormManagerDelegate::HandleCachedClickEvents()
         }
         pointerEventCache_.clear();
     }
-
-    // recycle form after handle click event
-    std::vector<int64_t> formIds = {runningCardId_};
-    AAFwk::Want want;
-    want.SetParam(OHOS::AppExecFwk::Constants::FORM_DELAY_TIME_OF_RECYCLE,
-        DELAY_TIME_OF_RECYCLE_FORM_AFTER_HANDLE_CLICK_EVENT);
-    OHOS::AppExecFwk::FormMgr::GetInstance().RecycleForms(formIds, want);
 }
 
 std::string FormManagerDelegate::ConvertRequestInfo(const RequestFormInfo& info) const
@@ -571,14 +562,6 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
         formManagerDelegate->OnGetRectRelativeToWindow(top, left);
     };
     renderDelegate_->SetGetRectRelativeToWindowHandler(onGetRectRelativeToWindowHandler);
-
-    auto&& enableFormEventHandler = [weak = WeakClaim(this)](const OHOS::AppExecFwk::FormJsInfo& formInfo,
-        const bool enable) {
-        auto formManagerDelegate = weak.Upgrade();
-        CHECK_NULL_VOID(formManagerDelegate);
-        formManagerDelegate->OnEnableForm(formInfo, enable);
-    };
-    renderDelegate_->SetEnableFormEventHandler(std::move(enableFormEventHandler));
 }
 
 void FormManagerDelegate::OnActionEvent(const std::string& action)
@@ -795,7 +778,6 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
         code.c_str(), msg.c_str(), externalErrorCode, errorMsg.c_str());
     switch (externalErrorCode) {
         case RENDER_DEAD_CODE:
-            std::this_thread::sleep_for(std::chrono::milliseconds(READD_FORM_DELAY_TIME));
             ReAddForm();
             break;
         case FORM_NOT_TRUST_CODE:
@@ -807,13 +789,6 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
             }
             break;
     }
-}
-
-void FormManagerDelegate::OnEnableForm(const AppExecFwk::FormJsInfo& formInfo, const bool enable)
-{
-    TAG_LOGI(AceLogTag::ACE_FORM, "FormManagerDelegate::OnEnableForm,formInfo.formId = %{public}" PRId64 "",
-        formInfo.formId);
-    HandleEnableFormCallback(enable);
 }
 
 void FormManagerDelegate::HandleUnTrustFormCallback()
@@ -836,6 +811,7 @@ void FormManagerDelegate::HandleEnableFormCallback(const bool enable)
 {
     if (!enableFormCallback_) {
         TAG_LOGE(AceLogTag::ACE_FORM, "enableFormCallback_. is null");
+        return;
     }
     enableFormCallback_(enable);
 }
@@ -1022,6 +998,13 @@ void FormManagerDelegate::ProcessRecycleForm()
         recycleStatus_ = RecycleStatus::RECYCLED;
     }
     HandleSnapshotCallback(0);
+}
+
+void FormManagerDelegate::ProcessEnableForm(bool enable)
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "ProcessEnableForm, formId is %{public}s",
+        std::to_string(runningCardId_).c_str());
+    HandleEnableFormCallback(enable);
 }
 #endif
 } // namespace OHOS::Ace

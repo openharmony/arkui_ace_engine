@@ -24,6 +24,7 @@
 #include "base/utils/linear_map.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/utils.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/image/image_cache.h"
@@ -45,8 +46,10 @@ constexpr double FULL_CIRCLE_ANGLE = 360.0;
 constexpr double CONIC_START_ANGLE = 0.0;
 constexpr double CONIC_END_ANGLE = 359.9;
 constexpr double MAX_GRAYSCALE = 255.0;
-constexpr int32_t DEFAULT_SAVE_COUNT = 1;
 constexpr double HANGING_PERCENT = 0.8;
+
+const int32_t PX2REM_NUM = 15;
+
 #ifndef ACE_UNITTEST
 constexpr int32_t IMAGE_CACHE_COUNT = 50;
 #endif
@@ -191,6 +194,27 @@ void CustomPaintPaintMethod::UpdateLineDash(RSPen& pen)
         }
         RSScalar phase = static_cast<RSScalar>(state_.strokeState.GetLineDash().dashOffset);
         pen.SetPathEffect(RSPathEffect::CreateDashPathEffect(intervals, lineDashState.size(), phase));
+    }
+}
+
+void CustomPaintPaintMethod::UpdateFontFamilies()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        context = PipelineBase::GetCurrentContextSafely();
+    }
+    CHECK_NULL_VOID(context);
+    auto fontManager = context->GetFontManager();
+    CHECK_NULL_VOID(fontManager);
+    if (!fontManager->IsUseAppCustomFont()) {
+        return;
+    }
+    auto fontFamilies = Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont());
+    if (state_.fillState.GetTextStyle().GetFontFamilies().empty()) {
+        state_.fillState.SetFontFamilies(fontFamilies);
+    }
+    if (state_.strokeState.GetTextStyle().GetFontFamilies().empty()) {
+        state_.strokeState.SetFontFamilies(fontFamilies);
     }
 }
 
@@ -610,8 +634,7 @@ void CustomPaintPaintMethod::DrawImageInternal(
 void CustomPaintPaintMethod::DrawImage(const Ace::CanvasImage& canvasImage, double width, double height)
 {
 #ifndef ACE_UNITTEST
-    std::string::size_type tmp = canvasImage.src.find(".svg");
-    if (tmp != std::string::npos) {
+    if (OHOS::Ace::StringUtils::EndWith(canvasImage.src, ".svg")) {
         DrawSvgImage(canvasImage);
         return;
     }
@@ -1623,25 +1646,18 @@ void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam, 
 {
     std::string percent = filterParam;
     float rad = 0.0f;
-    if (percent.find("deg") != std::string::npos) {
-        size_t index = percent.find("deg");
+    size_t index = percent.find("deg");
+    if (index != std::string::npos) {
         percent.resize(index);
-        std::istringstream iss(percent);
-        iss >> rad;
+        rad = StringUtils::StringToFloat(percent);
         rad = rad / HALF_CIRCLE_ANGLE * M_PI;
-    }
-    if (percent.find("turn") != std::string::npos) {
-        size_t index = percent.find("turn");
+    } else if ((index = percent.find("turn")) != std::string::npos) {
         percent.resize(index);
-        std::istringstream iss(percent);
-        iss >> rad;
+        rad = StringUtils::StringToFloat(percent);
         rad = rad * 2 * M_PI;
-    }
-    if (percent.find("rad") != std::string::npos) {
-        size_t index = percent.find("rad");
+    } else if ((index = percent.find("rad")) != std::string::npos) {
         percent.resize(index);
-        std::istringstream iss(percent);
-        iss >> rad;
+        rad = StringUtils::StringToFloat(percent);
     }
 
     float cosValue = std::cos(rad);
@@ -1815,8 +1831,8 @@ bool CustomPaintPaintMethod::GetFilterType(std::vector<FilterProperty>& filters)
 
 bool CustomPaintPaintMethod::IsPercentStr(std::string& percent)
 {
-    if (percent.find("%") != std::string::npos) {
-        size_t index = percent.find("%");
+    size_t index = percent.find("%");
+    if (index != std::string::npos) {
         percent = percent.substr(0, index);
         return true;
     }
@@ -1829,8 +1845,7 @@ double CustomPaintPaintMethod::PxStrToDouble(const std::string& str)
     size_t index = str.find("px");
     if (index != std::string::npos) {
         std::string result = str.substr(0, index);
-        std::istringstream iss(result);
-        iss >> ret;
+        ret = StringUtils::StringToDouble(result);
     }
     return ret;
 }
@@ -1838,23 +1853,24 @@ double CustomPaintPaintMethod::PxStrToDouble(const std::string& str)
 double CustomPaintPaintMethod::BlurStrToDouble(const std::string& str)
 {
     double ret = 0;
+    
+    // check px case
     size_t index = str.find("px");
-    size_t index1 = str.find("rem");
-    size_t demIndex = std::string::npos;
     if (index != std::string::npos) {
-        demIndex = index;
+        std::string result = str.substr(0, index);
+        ret = StringUtils::StringToDouble(result);
+        return ret;
     }
-    if (index1 != std::string::npos) {
-        demIndex = index1;
+    
+    // check rem case
+    index = str.find("rem");
+    if (index != std::string::npos) {
+        std::string result = str.substr(0, index);
+        ret = StringUtils::StringToDouble(result);
+        ret = ret * PX2REM_NUM;
+        return ret;
     }
-    if (demIndex != std::string::npos) {
-        std::string result = str.substr(0, demIndex);
-        std::istringstream iss(result);
-        iss >> ret;
-    }
-    if (str.find("rem") != std::string::npos) {
-        return ret * 15;
-    }
+
     return ret;
 }
 
@@ -1863,8 +1879,7 @@ float CustomPaintPaintMethod::PercentStrToFloat(const std::string& percentStr)
     std::string percentage = percentStr;
     bool hasPercent = IsPercentStr(percentage);
     float percentNum = 0.0f;
-    std::istringstream iss(percentage);
-    iss >> percentNum;
+    percentNum = StringUtils::StringToFloat(percentage);
     if (hasPercent) {
         percentNum = percentNum / 100;
     }

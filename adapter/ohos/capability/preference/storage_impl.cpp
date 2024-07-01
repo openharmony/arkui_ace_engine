@@ -19,7 +19,13 @@
 namespace OHOS::Ace {
 std::shared_ptr<NativePreferences::Preferences> StorageImpl::GetPreference(const std::string& fileName)
 {
-    return NativePreferences::PreferencesHelper::GetPreferences(fileName, errCode_);
+    auto it = preferences_.find(fileName);
+    if (it != preferences_.end()) {
+        return it->second;
+    }
+    auto pref = NativePreferences::PreferencesHelper::GetPreferences(fileName, errCode_);
+    preferences_.insert(std::make_pair(fileName, pref));
+    return pref;
 }
 
 void StorageImpl::SetString(const std::string& key, const std::string& value)
@@ -47,6 +53,7 @@ void StorageImpl::Clear()
     pref->Clear();
     LOGD("StorageImpl: Clear preferences");
     NativePreferences::PreferencesHelper::DeletePreferences(fileName_);
+    preferences_.erase(fileName_);
 }
 
 void StorageImpl::Delete(const std::string& key)

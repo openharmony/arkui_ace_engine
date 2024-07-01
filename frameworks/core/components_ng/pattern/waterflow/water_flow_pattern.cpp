@@ -120,8 +120,8 @@ void WaterFlowPattern::UpdateScrollBarOffset()
         overScroll = Positive(overScroll) ? overScroll : 0.0f;
     }
     HandleScrollBarOutBoundary(overScroll);
-    UpdateScrollBarRegion(
-        -info->currentOffset_, info->GetContentHeight(), Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
+    UpdateScrollBarRegion(-info->currentOffset_, info->EstimateContentHeight(),
+        Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
 };
 
 RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
@@ -131,9 +131,6 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
     }
     RefPtr<WaterFlowLayoutBase> algorithm;
     if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
-        if (sections_) {
-            return nullptr;
-        }
         algorithm = MakeRefPtr<WaterFlowLayoutSW>(DynamicCast<WaterFlowLayoutInfoSW>(layoutInfo_));
     } else if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
         algorithm = MakeRefPtr<WaterFlowSegmentedLayout>(DynamicCast<WaterFlowLayoutInfo>(layoutInfo_));
@@ -376,7 +373,7 @@ void WaterFlowPattern::ScrollPage(bool reverse, bool smooth)
     if (smooth) {
         float distance = reverse ? mainContentSize : -mainContentSize;
         float position = layoutInfo_->Offset() + distance;
-        ScrollablePattern::AnimateTo(-position, -1, nullptr, true);
+        ScrollablePattern::AnimateTo(-position, -1, nullptr, true, false, false);
     } else {
         UpdateCurrentOffset(reverse ? mainContentSize : -mainContentSize, SCROLL_FROM_JUMP);
     }
@@ -422,17 +419,11 @@ Rect WaterFlowPattern::GetItemRect(int32_t index) const
 
 RefPtr<WaterFlowSections> WaterFlowPattern::GetSections() const
 {
-    if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
-        return nullptr;
-    }
     return sections_;
 }
 
 RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
 {
-    if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
-        return nullptr;
-    }
     if (sections_) {
         return sections_;
     }
@@ -449,52 +440,14 @@ RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
         });
         context->RequestFrame();
     };
-    auto callbackNow = [weakPattern = WeakClaim(this)](int32_t start) {
-        auto pattern = weakPattern.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->OnSectionChangedNow(start);
-    };
     sections_->SetOnDataChange(callback);
-    sections_->SetOnDataChangeNow(callbackNow);
     return sections_;
 }
 
 void WaterFlowPattern::OnSectionChanged(int32_t start)
 {
-    // SlidingWindow mode should never reach this callback
-    if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
-        return;
-    }
-    auto info = DynamicCast<WaterFlowLayoutInfo>(layoutInfo_);
-    CHECK_NULL_VOID(info);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    int32_t childUpdateIdx = host->GetChildrenUpdated();
-    if (childUpdateIdx > -1 && info->GetSegment(childUpdateIdx - 1) == start && sections_->IsSpecialUpdate()) {
-        // optimize adding or removing children in the last section. Prevent complete reset of that section.
-        ++start;
-    }
-    info->InitSegments(sections_->GetSectionInfo(), start);
-    info->margins_.clear();
+    layoutInfo_->InitSegments(sections_->GetSectionInfo(), start);
 
-    MarkDirtyNodeSelf();
-}
-
-void WaterFlowPattern::OnSectionChangedNow(int32_t start)
-{
-    if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
-        return;
-    }
-    auto info = DynamicCast<WaterFlowLayoutInfo>(layoutInfo_);
-    CHECK_NULL_VOID(info);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    int32_t childUpdateIdx = host->GetChildrenUpdated();
-    if (sections_->IsSpecialUpdateCAPI(childUpdateIdx)) {
-        start += sections_->GetSectionInfo().size();
-    }
-    info->InitSegments(sections_->GetSectionInfo(), start);
-    info->margins_.clear();
     MarkDirtyNodeSelf();
 }
 
@@ -504,9 +457,6 @@ void WaterFlowPattern::ResetSections()
         return;
     }
     sections_.Reset();
-    if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
-        return;
-    }
     layoutInfo_->Reset();
     MarkDirtyNodeSelf();
 }
@@ -516,7 +466,7 @@ void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign ali
     SetScrollSource(SCROLL_FROM_JUMP);
     SetScrollAlign(align);
     StopAnimate();
-    if ((index >= 0) || (index == LAST_ITEM)) {
+    if (index > EMPTY_JUMP_INDEX && index < GetChildrenCount()) {
         if (smooth) {
             SetExtraOffset(extraOffset);
             if (!ScrollToTargetIndex(index)) {
@@ -578,20 +528,24 @@ void WaterFlowPattern::MarkDirtyNodeSelf()
 
 void WaterFlowPattern::OnScrollEndCallback()
 {
-    scrollStop_ = true;
+    if (AnimateStoped()) {
+        scrollStop_ = true;
+    }
     CheckMisalignment(layoutInfo_);
     MarkDirtyNodeSelf();
 }
 
 void WaterFlowPattern::OnAnimateStop()
 {
-    scrollStop_ = true;
+    if (!GetIsDragging() || GetScrollAbort()) {
+        scrollStop_ = true;
+    }
     CheckMisalignment(layoutInfo_);
     MarkDirtyNodeSelf();
 }
 
 void WaterFlowPattern::AnimateTo(
-    float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll)
+    float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll, bool useTotalOffset)
 {
     if (layoutInfo_->Mode() == WaterFlowLayoutMode::SLIDING_WINDOW) {
         return;

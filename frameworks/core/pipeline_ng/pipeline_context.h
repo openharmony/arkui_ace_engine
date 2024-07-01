@@ -88,6 +88,9 @@ public:
     static RefPtr<PipelineContext> GetCurrentContextSafelyWithCheck();
 
     static PipelineContext* GetCurrentContextPtrSafely();
+    
+    static PipelineContext* GetCurrentContextPtrSafelyWithCheck();
+
 
     static RefPtr<PipelineContext> GetMainPipelineContext();
 
@@ -161,7 +164,8 @@ public:
         return false;
     }
 
-    void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action) override;
+    void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,
+        const RefPtr<NG::FrameNode>& node = nullptr) override;
 
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
@@ -566,7 +570,8 @@ public:
     bool CheckPageFocus();
     bool CheckOverlayFocus();
     void NotifyFillRequestSuccess(AceAutoFillType autoFillType, RefPtr<ViewDataWrap> viewDataWrap);
-    void NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode, const std::string& fillContent = "");
+    void NotifyFillRequestFailed(RefPtr<FrameNode> node, int32_t errCode,
+        const std::string& fillContent = "", bool isPopup = false);
 
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& id) override;
     void AddOrReplaceNavigationNode(const std::string& id, const WeakPtr<FrameNode>& node);
@@ -709,6 +714,8 @@ public:
 
     void SetOverlayNodePositions(std::vector<Ace::RectF> rects);
 
+    static void SetCallBackNode(const WeakPtr<NG::FrameNode>& node);
+
     std::vector<Ace::RectF> GetOverlayNodePositions();
 
     void RegisterOverlayNodePositionsUpdateCallback(
@@ -795,6 +802,11 @@ public:
     {
         lastVsyncEndTimestamp_ = lastVsyncEndTimestamp;
     }
+    void GetInspectorTree();
+
+    void AddFrameNodeChangeListener(const RefPtr<FrameNode>& node);
+    void RemoveFrameNodeChangeListener(const RefPtr<FrameNode>& node);
+    void AddChangedFrameNode(const RefPtr<FrameNode>& node);
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -830,6 +842,11 @@ protected:
     void DoKeyboardAvoidAnimate(const KeyboardAnimationConfig& keyboardAnimationConfig, float keyboardHeight,
         const std::function<void()>& func);
 
+    bool GetForceSplitEnable() const
+    {
+        return isForceSplit_;
+    }
+
 private:
     void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type);
 
@@ -860,7 +877,7 @@ private:
 
     void RegisterRootEvent();
 
-    void ResetDraggingStatus(const TouchEvent& touchPoint);
+    void ResetDraggingStatus(const TouchEvent& touchPoint, const RefPtr<FrameNode>& node = nullptr);
 
     void CompensateTouchMoveEvent(const TouchEvent& event);
 
@@ -869,7 +886,7 @@ private:
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
     void AnimateOnSafeAreaUpdate();
-    void SyncSafeArea(bool onKeyboard = false);
+    void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
 
     // only used for static form.
     void UpdateFormLinkInfos();
@@ -907,6 +924,9 @@ private:
         const std::vector<TouchEvent>& history, const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp);
 
     TouchEvent GetLatestPoint(const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp);
+
+    void FlushNodeChangeFlag();
+    void CleanNodeChangeFlag();
 
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 
@@ -988,7 +1008,6 @@ private:
     bool isWindowAnimation_ = false;
     bool prevKeyboardAvoidMode_ = false;
     bool isFreezeFlushMessage_ = false;
-    bool destroyed_ = false;
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
@@ -1034,9 +1053,12 @@ private:
     bool isShowTitle_ = false;
     bool lastAnimationStatus_ = true;
     bool isDoKeyboardAvoidAnimate_ = true;
+    bool isForceSplit_ = false;
 
     std::list<FrameCallbackFunc> frameCallbackFuncs_;
     uint32_t transform_ = 0;
+    std::list<RefPtr<FrameNode>> changeInfoListeners_;
+    std::list<RefPtr<FrameNode>> changedNodes_;
 };
 } // namespace OHOS::Ace::NG
 

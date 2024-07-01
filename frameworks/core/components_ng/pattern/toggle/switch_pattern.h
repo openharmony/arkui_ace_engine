@@ -234,6 +234,7 @@ private:
     RefPtr<SwitchModifier> switchModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);
     std::function<void(bool)> isFocusActiveUpdateEvent_;
+    bool isTouchPreventDefault_ = false;
 };
 } // namespace OHOS::Ace::NG
 

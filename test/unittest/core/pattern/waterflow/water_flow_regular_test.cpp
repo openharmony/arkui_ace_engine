@@ -30,8 +30,10 @@ HWTEST_F(WaterFlowTestNg, OffsetEnd001, TestSize.Level1)
         model.SetRowsGap(Dimension(5.0f));
         CreateItem(30);
     });
-    pattern_->ScrollToIndex(29, false, ScrollAlign::END);
     auto info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 10);
+    pattern_->ScrollToIndex(29, false, ScrollAlign::END);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info->endIndex_, 29);
     EXPECT_EQ(GetChildY(frameNode_, 30), 600.0f);
@@ -110,5 +112,36 @@ HWTEST_F(WaterFlowTestNg, Constraint001, TestSize.Level1)
     EXPECT_EQ(GetChildWidth(frameNode_, 4), 300.0f);
     EXPECT_EQ(info->storedOffset_, -20.0f);
     EXPECT_EQ(info->startIndex_, 3);
+}
+
+/**
+ * @tc.name: IllegalItemCnt
+ * @tc.desc: Layout WaterFlow without items.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, IllegalItemCnt, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            model.SetColumnsTemplate("1fr 1fr");
+            CreateItem(6);
+        },
+        true);
+    const auto& info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->endIndex_, 5);
+
+    for (int i = 0; i < 6; ++i) {
+        frameNode_->RemoveChildAtIndex(0);
+    }
+    frameNode_->childrenUpdatedFrom_ = 0;
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    FlushLayoutTask(frameNode_);
+
+    pattern_->ScrollToIndex(LAST_ITEM);
+    EXPECT_EQ(info->jumpIndex_, LAST_ITEM);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(info->startIndex_ >= info->endIndex_);
 }
 } // namespace OHOS::Ace::NG

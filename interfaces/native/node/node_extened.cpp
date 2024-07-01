@@ -167,7 +167,7 @@ void HandleInnerCustomEvent(ArkUICustomNodeEvent* origin)
         return;
     }
     auto* nodePtr = reinterpret_cast<ArkUI_NodeHandle>(origin->extraParam);
-    if (!nodePtr->extraCustomData) {
+    if (!IsValidArkUINode(nodePtr) || !nodePtr->extraCustomData) {
         return;
     }
 
@@ -347,7 +347,7 @@ int32_t LayoutNode(ArkUI_NodeHandle node, int32_t positionX, int32_t positionY)
     data[0] = positionX;
     //positionY
     data[1] = positionY;
-    impl->getExtendedAPI()->layoutNode(nullptr, node->uiNodeHandle, data);
+    impl->getExtendedAPI()->layoutNode(nullptr, node->uiNodeHandle, &data);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -442,5 +442,13 @@ ArkUI_NodeHandle GetParent(ArkUI_NodeHandle node)
         return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
     }
     return nullptr;
+}
+
+int32_t RemoveAllChildren(ArkUI_NodeHandle parentNode)
+{
+    CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
+    auto* impl = GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->clearChildren(parentNode->uiNodeHandle);
+    return ERROR_CODE_NO_ERROR;
 }
 } // namespace OHOS::Ace::NodeModel

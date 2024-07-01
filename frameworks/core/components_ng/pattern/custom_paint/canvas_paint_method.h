@@ -34,17 +34,7 @@ class CanvasPaintMethod : public CustomPaintPaintMethod {
     DECLARE_ACE_TYPE(CanvasPaintMethod, CustomPaintPaintMethod)
 public:
     CanvasPaintMethod() = default;
-    CanvasPaintMethod(const WeakPtr<PipelineBase> context, RefPtr<CanvasModifier> contentModifier,
-        const WeakPtr<FrameNode>& frameNode)
-        : frameNode_(frameNode)
-    {
-        matrix_.Reset();
-        context_ = context;
-        imageShadow_ = std::make_unique<Shadow>();
-        contentModifier_ = contentModifier;
-        InitImageCallbacks();
-    }
-
+    CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, const RefPtr<FrameNode>& frameNode);
     ~CanvasPaintMethod() override = default;
 
     void GetFastTaskPool();
@@ -99,8 +89,6 @@ public:
 
     void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth);
     void StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth);
-    double MeasureText(const std::string& text, const PaintState& state);
-    double MeasureTextHeight(const std::string& text, const PaintState& state);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
     void Reset();
 

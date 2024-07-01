@@ -125,11 +125,14 @@ void StepperLayoutAlgorithm::MeasureLeftButton(LayoutWrapper* layoutWrapper, Lay
         pipeline->GetFontScale() == SUIT_AGE_LEVEL_THRER) {
         auto stepperHeight = layoutWrapper->GetGeometryNode()->GetFrameSize().Height();
         buttonLayoutConstraint.maxSize = { buttonWidth, stepperHeight };
-        MeasureText(leftButtonWrapper, buttonLayoutConstraint, true);
         auto ButtonRow = leftButtonWrapper->GetChildByIndex(0);
         CHECK_NULL_VOID(ButtonRow);
         auto ButtonText = ButtonRow->GetChildByIndex(1);
         CHECK_NULL_VOID(ButtonText);
+        auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(ButtonText->GetLayoutProperty());
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateMaxFontScale(SUIT_AGE_LEVEL_TWO);
+        MeasureText(leftButtonWrapper, buttonLayoutConstraint, true);
         float TextHeight = ButtonText->GetGeometryNode()->GetFrameSize().Height();
         buttonLayoutConstraint.selfIdealSize =
             OptionalSizeF(std::nullopt, TextHeight + PADDING.ConvertToPx() * HEIGHT_DOUBLE_RATIO);
@@ -163,17 +166,23 @@ void StepperLayoutAlgorithm::MeasureRightButton(LayoutWrapper* layoutWrapper, La
         pipeline->GetFontScale() == SUIT_AGE_LEVEL_THRER) {
         auto stepperHeight = hostNode->GetGeometryNode()->GetFrameSize().Height();
         buttonLayoutConstraint.maxSize = { buttonWidth, stepperHeight };
-        MeasureText(rightButtonWrapper, buttonLayoutConstraint, false);
         auto ButtonRow = rightButtonWrapper->GetChildByIndex(0);
         CHECK_NULL_VOID(ButtonRow);
         auto ButtonText = ButtonRow->GetChildByIndex(0);
         if (!ButtonText) {
+            auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(ButtonRow->GetLayoutProperty());
+            CHECK_NULL_VOID(textLayoutProperty);
+            textLayoutProperty->UpdateMaxFontScale(SUIT_AGE_LEVEL_TWO);
             PaddingProperty textPadding;
             textPadding.top = CalcLength(PADDING.ConvertToPx(), DimensionUnit::PX);
             textPadding.bottom = CalcLength(PADDING.ConvertToPx(), DimensionUnit::PX);
             rightButtonWrapper->GetLayoutProperty()->UpdatePadding(textPadding);
             buttonLayoutConstraint.selfIdealSize = OptionalSizeF(std::nullopt, std::nullopt);
         } else {
+            auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(ButtonText->GetLayoutProperty());
+            CHECK_NULL_VOID(textLayoutProperty);
+            textLayoutProperty->UpdateMaxFontScale(SUIT_AGE_LEVEL_TWO);
+            MeasureText(rightButtonWrapper, buttonLayoutConstraint, false);
             float TextHeight = ButtonText->GetGeometryNode()->GetFrameSize().Height();
             buttonLayoutConstraint.selfIdealSize =
                 OptionalSizeF(std::nullopt, TextHeight + PADDING.ConvertToPx() * HEIGHT_DOUBLE_RATIO);
@@ -289,7 +298,9 @@ void StepperLayoutAlgorithm::SuitAgeLayoutButton(
     } else {
         buttonOffset += OffsetF(stepperPadding.left.value_or(0.0), -stepperPadding.bottom.value_or(0.0));
     }
-    bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto stepperLayoutProperty = hostNode->GetLayoutProperty<StepperLayoutProperty>();
+    CHECK_NULL_VOID(stepperLayoutProperty);
+    auto isRightToLeft = stepperLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (isRightToLeft) {
         auto frameWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
         auto offsetX = frameWidth - ButtonWrapper->GetGeometryNode()->GetFrameSize().Width() - buttonOffset.GetX();
@@ -356,8 +367,9 @@ void StepperLayoutAlgorithm::LayoutLeftButton(LayoutWrapper* layoutWrapper)
     const auto& stepperPadding = layoutProperty->CreatePaddingAndBorder();
     buttonOffset += OffsetF(stepperPadding.left.value_or(0.0), -stepperPadding.bottom.value_or(0.0));
     auto geometryNode = leftButtonWrapper->GetGeometryNode();
-    
-    bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto stepperLayoutProperty = hostNode->GetLayoutProperty<StepperLayoutProperty>();
+    CHECK_NULL_VOID(stepperLayoutProperty);
+    auto isRightToLeft = stepperLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (isRightToLeft) {
         auto frameWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
         auto offsetX = frameWidth - geometryNode->GetFrameSize().Width() - buttonOffset.GetX();
@@ -393,7 +405,9 @@ void StepperLayoutAlgorithm::LayoutRightButton(LayoutWrapper* layoutWrapper)
     const auto& stepperPadding = layoutProperty->CreatePaddingAndBorder();
     buttonOffset -= OffsetF(stepperPadding.right.value_or(0.0), stepperPadding.bottom.value_or(0.0));
  
-    bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto stepperLayoutProperty = hostNode->GetLayoutProperty<StepperLayoutProperty>();
+    CHECK_NULL_VOID(stepperLayoutProperty);
+    auto isRightToLeft = stepperLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (isRightToLeft) {
         auto offsetX = frameSizeWidth - rightButtonWidth - buttonOffset.GetX();
         buttonOffset.SetX(offsetX);

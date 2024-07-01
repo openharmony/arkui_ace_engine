@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 
+#include "base/log/log_wrapper.h"
 #include "base/subwindow/subwindow.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -24,6 +25,7 @@ namespace OHOS::Ace::Framework {
 
 void JSContextMenu::Close(const JSCallbackInfo& args)
 {
+    TAG_LOGI(AceLogTag::ACE_MENU, "contextMenu close enter");
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.

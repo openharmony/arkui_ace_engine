@@ -35,6 +35,9 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const std::string DROP_TYPE_STYLED_STRING = "ApplicationDefinedType";
+}
 void TextFieldModelNG::CreateNode(
     const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool isTextArea)
 {
@@ -48,7 +51,7 @@ void TextFieldModelNG::CreateNode(
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textfieldPaintProperty);
-    std::set<std::string> allowDropSet({ DROP_TYPE_PLAIN_TEXT });
+    std::set<std::string> allowDropSet({ DROP_TYPE_PLAIN_TEXT, DROP_TYPE_HYPERLINK, DROP_TYPE_STYLED_STRING });
     frameNode->SetAllowDrop(allowDropSet);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->SetModifyDoneStatus(false);
@@ -121,6 +124,9 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     pattern->InitSurfaceChangedCallback();
     pattern->InitSurfacePositionChangedCallback();
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
     ProcessDefaultStyleAndBehaviors(frameNode);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "text field create node in c-api");
     return frameNode;
@@ -346,7 +352,13 @@ void TextFieldModelNG::SetLineBreakStrategy(LineBreakStrategy value)
 void TextFieldModelNG::SetMaxLength(uint32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxLength, value);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateShowCountBorderStyle();
 }
+
 void TextFieldModelNG::ResetMaxLength()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -678,55 +690,30 @@ void TextFieldModelNG::SetMargin()
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, MarginByUser, userMargin);
 }
 
-void TextFieldModelNG::SetPadding(NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp)
+void TextFieldModelNG::SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp)
 {
     if (tmp) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID(theme);
-        auto textFieldPadding = theme->GetPadding();
-        auto top = textFieldPadding.Top();
-        auto bottom = textFieldPadding.Bottom();
-        auto left = textFieldPadding.Left();
-        auto right = textFieldPadding.Right();
-
-        NG::PaddingProperty paddings;
-        if (top.Value()) {
-            if (top.Unit() == DimensionUnit::CALC) {
-                paddings.top = NG::CalcLength(top.IsNonNegative() ? top.CalcValue() : CalcDimension().CalcValue());
-            } else {
-                paddings.top = NG::CalcLength(top.IsNonNegative() ? top : CalcDimension());
-            }
-        }
-        if (bottom.Value()) {
-            if (bottom.Unit() == DimensionUnit::CALC) {
-                paddings.bottom =
-                    NG::CalcLength(bottom.IsNonNegative() ? bottom.CalcValue() : CalcDimension().CalcValue());
-            } else {
-                paddings.bottom = NG::CalcLength(bottom.IsNonNegative() ? bottom : CalcDimension());
-            }
-        }
-        if (left.Value()) {
-            if (left.Unit() == DimensionUnit::CALC) {
-                paddings.left = NG::CalcLength(left.IsNonNegative() ? left.CalcValue() : CalcDimension().CalcValue());
-            } else {
-                paddings.left = NG::CalcLength(left.IsNonNegative() ? left : CalcDimension());
-            }
-        }
-        if (right.Value()) {
-            if (right.Unit() == DimensionUnit::CALC) {
-                paddings.right =
-                    NG::CalcLength(right.IsNonNegative() ? right.CalcValue() : CalcDimension().CalcValue());
-            } else {
-                paddings.right = NG::CalcLength(right.IsNonNegative() ? right : CalcDimension());
-            }
-        }
-        ViewAbstract::SetPadding(paddings);
+        SetDefaultPadding();
         return;
     }
     NG::ViewAbstract::SetPadding(newPadding);
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, newPadding);
+}
+
+void TextFieldModelNG::SetDefaultPadding()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    auto themePadding = theme->GetPadding();
+    PaddingProperty paddings;
+    paddings.top = NG::CalcLength(themePadding.Top().ConvertToPx());
+    paddings.bottom = NG::CalcLength(themePadding.Bottom().ConvertToPx());
+    paddings.left = NG::CalcLength(themePadding.Left().ConvertToPx());
+    paddings.right = NG::CalcLength(themePadding.Right().ConvertToPx());
+    ViewAbstract::SetPadding(paddings);
+    ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, paddings);
 }
 
 void TextFieldModelNG::SetHoverEffect(HoverEffectType hoverEffect)
@@ -1057,6 +1044,10 @@ void TextFieldModelNG::SetFontStyle(FrameNode* frameNode, Ace::FontStyle value)
 void TextFieldModelNG::SetMaxLength(FrameNode* frameNode, uint32_t value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxLength, value, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateShowCountBorderStyle();
 }
 
 void TextFieldModelNG::ResetMaxLength(FrameNode* frameNode)
@@ -1183,6 +1174,10 @@ void TextFieldModelNG::SetEnableAutoFill(FrameNode* frameNode, bool enableAutoFi
 
 void TextFieldModelNG::SetShowCounter(FrameNode* frameNode, bool value)
 {
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCounterState(false);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value, frameNode);
 }
 
@@ -1854,7 +1849,7 @@ void TextFieldModelNG::SetNumberOfLines(FrameNode* frameNode, int32_t value)
 
 int32_t TextFieldModelNG::GetNumberOfLines(FrameNode* frameNode)
 {
-    uint32_t value = -1;
+    int32_t value = -1;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, NumberOfLines, value, frameNode, value);
     return value;
 }
@@ -1975,5 +1970,20 @@ void TextFieldModelNG::SetEnablePreviewText(FrameNode* frameNode, bool enablePre
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSupportPreviewText(enablePreviewText);
+}
+
+PaddingProperty TextFieldModelNG::GetPadding(FrameNode* frameNode)
+{
+    NG::PaddingProperty paddings = NG::ViewAbstract::GetPadding(frameNode);
+    auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(textfieldPaintProperty, paddings);
+    if (textfieldPaintProperty->HasPaddingByUser()) {
+        const auto& property = textfieldPaintProperty->GetPaddingByUserValue();
+        paddings.top = std::optional<CalcLength>(property.top);
+        paddings.right = std::optional<CalcLength>(property.right);
+        paddings.bottom = std::optional<CalcLength>(property.bottom);
+        paddings.left = std::optional<CalcLength>(property.left);
+    }
+    return paddings;
 }
 } // namespace OHOS::Ace::NG

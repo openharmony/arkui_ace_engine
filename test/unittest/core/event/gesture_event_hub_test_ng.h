@@ -64,6 +64,9 @@ const PointF LOCAL_POINT { 15.0f, 15.0f };
 RefPtr<DragWindow> MOCK_DRAG_WINDOW;
 constexpr int32_t GESTURES_COUNTS = 2;
 RefPtr<MockTaskExecutor> MOCK_TASK_EXECUTOR;
+constexpr float DRAG_DISTANCE = 10.5f;
+const PanDirection DRAG_DIRECTION = { PanDirection::LEFT };
+constexpr int32_t FINGERS_NUMBER = 2;
 } // namespace
 
 class GestureEventHubTestNg : public testing::Test {

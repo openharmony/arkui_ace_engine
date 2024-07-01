@@ -193,5 +193,30 @@ void SetRefreshChangeEvent(ArkUINodeHandle node, void* extraParam)
     };
     RefreshModelNG::SetChangeEvent(frameNode, std::move(onEvent));
 }
+
+void ResetRefreshOnStateChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetOnStateChange(frameNode, nullptr);
+}
+void ResetOnRefreshing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetOnRefreshing(frameNode, nullptr);
+}
+void ResetRefreshOnOffsetChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetOnOffsetChange(frameNode, nullptr);
+}
+void ResetRefreshChangeEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetChangeEvent(frameNode, nullptr);
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

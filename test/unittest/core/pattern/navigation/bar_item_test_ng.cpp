@@ -46,14 +46,12 @@ public:
 
     RefPtr<BarItemNode> frameNode_;
     RefPtr<BarItemPattern> barItemPattern_;
-    RefPtr<BarItemAccessibilityProperty> barItemAccessibilityProperty_;
 };
 
 void BarItemTestNg::DestroyBarItemObject()
 {
     frameNode_ = nullptr;
     barItemPattern_ = nullptr;
-    barItemAccessibilityProperty_ = nullptr;
 }
 
 void BarItemTestNg::InitBarItemTestNg()
@@ -66,8 +64,6 @@ void BarItemTestNg::InitBarItemTestNg()
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     frameNode_->SetTextNode(textNode);
-    barItemAccessibilityProperty_ = frameNode_->GetAccessibilityProperty<BarItemAccessibilityProperty>();
-    ASSERT_NE(barItemAccessibilityProperty_, nullptr);
 }
 
 /**
@@ -248,26 +244,6 @@ HWTEST_F(BarItemTestNg, GetIconNode001, TestSize.Level1)
     auto barItemNode = AceType::MakeRefPtr<BarItemNode>(barTag, nodeId);
     auto ret = barItemNode->GetIconNode();
     EXPECT_EQ(ret, nullptr);
-}
-
-/**
- * @tc.name: BarItemAccessibilityPropertyGetText001
- * @tc.desc: Test GetText of barItem.
- * @tc.type: FUNC
- */
-HWTEST_F(BarItemTestNg, BarItemAccessibilityPropertyGetText001, TestSize.Level1)
-{
-    InitBarItemTestNg();
-    EXPECT_EQ(barItemAccessibilityProperty_->GetText(), EMPTY_TEXT);
-    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<TextPattern>(); });
-    ASSERT_NE(textNode, nullptr);
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    ASSERT_NE(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(BAR_ITEM_TEXT);
-    frameNode_->SetTextNode(textNode);
-    EXPECT_EQ(barItemAccessibilityProperty_->GetText(), BAR_ITEM_TEXT);
-    DestroyBarItemObject();
 }
 
 /**

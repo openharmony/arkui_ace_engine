@@ -26,6 +26,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/event_hub.h"
@@ -637,6 +638,11 @@ public:
         isIndicatorInteractive_ = isInteractive;
     }
 
+    bool IsIndicatorInteractive() const
+    {
+        return isIndicatorInteractive_;
+    }
+
     void SetNextMarginIgnoreBlank(bool nextMarginIgnoreBlank)
     {
         nextMarginIgnoreBlank_ = nextMarginIgnoreBlank;
@@ -667,13 +673,43 @@ public:
         frameRateRange_[type] = rateRange;
     }
     void UpdateNodeRate();
-    int32_t GetMaxDisplayCount() const
+    int32_t GetMaxDisplayCount() const;
+
+    const std::set<int32_t>& GetCachedItems() const
     {
-        if ((swiperParameters_ != nullptr) && (swiperParameters_->maxDisplayCountVal.has_value())) {
-            return swiperParameters_->maxDisplayCountVal.value();
-        }
-        return 0;
+        return cachedItems_;
     }
+
+    void SetCachedItems(const std::set<int32_t>& cachedItems)
+    {
+        cachedItems_ = cachedItems;
+    }
+
+    LayoutConstraintF GetLayoutConstraint() const
+    {
+        return layoutConstraint_;
+    }
+
+    void SetLayoutConstraint(const LayoutConstraintF& layoutConstraint)
+    {
+        layoutConstraint_ = layoutConstraint;
+    }
+
+    bool GetRequestLongPredict() const
+    {
+        return requestLongPredict_;
+    }
+
+    bool IsPropertyAnimationRunning() const
+    {
+        return usePropertyAnimation_;
+    }
+
+    bool IsTouchDown() const
+    {
+        return isTouchDown_;
+    }
+
 protected:
     void MarkDirtyNodeSelf();
 
@@ -754,6 +790,7 @@ private:
     void HandleSwiperCustomAnimation(float offset);
     void CalculateAndUpdateItemInfo(float offset);
     void UpdateItemInfoInCustomAnimation(int32_t index, float startPos, float endPos);
+    void UpdateTabIndexAndTabBarAnimationDuration(int32_t index);
 
     float GetItemSpace() const;
     float GetPrevMargin() const;
@@ -799,10 +836,10 @@ private:
     void TriggerAnimationEndOnSwipeToLeft();
     void TriggerAnimationEndOnSwipeToRight();
     void TriggerEventOnFinish(int32_t nextIndex);
-    bool IsVisibleChildrenSizeLessThanSwiper();
+    bool IsVisibleChildrenSizeLessThanSwiper() const;
     void BeforeCreateLayoutWrapper() override;
 
-    void SetLazyLoadFeature(bool useLazyLoad) const;
+    void SetLazyLoadFeature(bool useLazyLoad);
     void SetLazyForEachLongPredict(bool useLazyLoad) const;
     void SetLazyLoadIsLoop() const;
     int32_t ComputeNextIndexByVelocity(float velocity, bool onlyDistance = false) const;
@@ -970,6 +1007,13 @@ private:
 
     std::optional<RefPtr<UINode>> FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode = true) const;
     bool NeedForceMeasure() const;
+    void SetIndicatorChangeIndexStatus(bool withAnimation);
+    void SetIndicatorJumpIndex(std::optional<int32_t> jumpIndex);
+    bool ParseTabsIsRtl();
+
+    void PostIdleTask(const RefPtr<FrameNode>& frameNode);
+
+    void TabContentStateCallBack(int32_t oldIndex, int32_t nextIndex) const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -1066,6 +1110,7 @@ private:
     float contentMainSize_ = 0.0f;
     float contentCrossSize_ = 0.0f;
     bool crossMatchChild_ = false;
+    float ignoreBlankSpringOffset_ = 0.0f;
 
     std::optional<int32_t> uiCastJumpIndex_;
     std::optional<int32_t> jumpIndex_;
@@ -1129,6 +1174,11 @@ private:
 
     bool needFireCustomAnimationEvent_ = true;
     std::optional<bool> isSwipeByGroup_;
+    std::set<WeakPtr<FrameNode>> groupedItems_;
+
+    std::set<int32_t> cachedItems_;
+    LayoutConstraintF layoutConstraint_;
+    bool requestLongPredict_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -400,4 +400,290 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest007, TestSize.Lev
     props.SetActionGetIndex([]() {return 2;});
     EXPECT_TRUE(props.ActActionGetIndex());
 }
+
+/**
+ * @tc.name: AccessibilityPropertyTest008
+ * @tc.desc: GetScrollOffSet
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest008, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    auto result = accessibilityProperty.GetScrollOffSet();
+    EXPECT_EQ(result, -1.0f);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest009
+ * @tc.desc: HoverTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest009, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    auto root = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 11, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    NG::PointF hoverPoint(0, 0);
+    auto debugInfo = std::make_unique<AccessibilityProperty::HoverTestDebugTraceInfo>();
+    auto result = accessibilityProperty.HoverTest(hoverPoint, root, debugInfo);
+    EXPECT_EQ(result.size(), 0);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest010
+ * @tc.desc: CreateNodeSearchInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest010, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    auto root = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, 12, AceType::MakeRefPtr<Pattern>(), true);
+    NG::PointF hoverPoint(0, 0);
+    auto result = accessibilityProperty.CreateNodeSearchInfo(root, hoverPoint);
+    EXPECT_NE(result, nullptr);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest011
+ * @tc.desc: HoverTestRecursive
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest011, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    AccessibilityHoverTestPath path;
+    auto root = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 13, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    NG::PointF hoverPoint(0, 0);
+    auto debugInfo = std::make_unique<AccessibilityProperty::HoverTestDebugTraceInfo>();
+    auto result = accessibilityProperty.HoverTestRecursive(hoverPoint, root, path, debugInfo);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest012
+ * @tc.desc: GetSearchStrategy
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest012, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 14, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto result = accessibilityProperty.GetSearchStrategy(frameNode);
+    EXPECT_EQ(result, std::make_pair(true, true));
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest013
+ * @tc.desc: IsAccessibilityFocusableDebug
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest013, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    auto root = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, 15, AceType::MakeRefPtr<Pattern>(), true);
+    std::unique_ptr<JsonValue> info = JsonUtil::Create();
+    auto result = accessibilityProperty.IsAccessibilityFocusableDebug(root, info);
+    EXPECT_EQ(result, false);
+}
+
+
+/**
+ * @tc.name: AccessibilityPropertyTest014
+ * @tc.desc: IsAccessibilityFocusable
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest014, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 6, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto result = accessibilityProperty.IsAccessibilityFocusable(frameNode);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest015
+ * @tc.desc: HasAccessibilityTextOrDescription
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest015, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    auto result = accessibilityProperty.HasAccessibilityTextOrDescription();
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest016
+ * @tc.desc: HasAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest016, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    auto result = accessibilityProperty.HasAction();
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest017
+ * @tc.desc: SetAccessibilityActions, ResetAccessibilityActions, HasAccessibilityActions and GetAccessibilityActions
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest017, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    uint32_t accessibilityActions = 1;
+    accessibilityProperty.SetAccessibilityActions(accessibilityActions);
+    EXPECT_TRUE(accessibilityProperty.HasAccessibilityActions());
+    EXPECT_EQ(accessibilityProperty.GetAccessibilityActions(), accessibilityActions);
+    accessibilityProperty.ResetAccessibilityActions();
+    EXPECT_FALSE(accessibilityProperty.HasAccessibilityActions());
+    EXPECT_EQ(accessibilityProperty.GetAccessibilityActions(), 0);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest018
+ * @tc.desc: SetAccessibilityRole, ResetAccessibilityRole, HasAccessibilityRole and GetAccessibilityRole
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest018, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    const std::string role = "role";
+    accessibilityProperty.SetAccessibilityRole(role);
+    EXPECT_TRUE(accessibilityProperty.HasAccessibilityRole());
+    EXPECT_EQ(accessibilityProperty.GetAccessibilityRole(), role);
+    accessibilityProperty.ResetAccessibilityRole();
+    EXPECT_FALSE(accessibilityProperty.HasAccessibilityRole());
+    EXPECT_EQ(accessibilityProperty.GetAccessibilityRole(), "");
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest019
+ * @tc.desc: SetActions
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest019, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    ActionsImpl actionsImpl = [](uint32_t type){};
+    accessibilityProperty.SetActions(actionsImpl);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest020
+ * @tc.desc: SetUserDisabled HasUserDisabled and IsUserDisabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest020, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    const bool isDisabled = true;
+    EXPECT_FALSE(accessibilityProperty.HasUserDisabled());
+    EXPECT_FALSE(accessibilityProperty.IsUserDisabled());
+    accessibilityProperty.SetUserDisabled(isDisabled);
+    EXPECT_TRUE(accessibilityProperty.HasUserDisabled());
+    EXPECT_TRUE(accessibilityProperty.IsUserDisabled());
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest021
+ * @tc.desc: HasUserSelected SetUserSelected and IsUserSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest021, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    const bool isSelected = true;
+    EXPECT_FALSE(accessibilityProperty.HasUserSelected());
+    EXPECT_FALSE(accessibilityProperty.IsUserSelected());
+    accessibilityProperty.SetUserSelected(isSelected);
+    EXPECT_TRUE(accessibilityProperty.HasUserSelected());
+    EXPECT_TRUE(accessibilityProperty.IsUserSelected());
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest022
+ * @tc.desc: HasUserCheckedType GetUserCheckedType and SetUserCheckedType
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest022, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    const int32_t checkedType = 1;
+    EXPECT_FALSE(accessibilityProperty.HasUserCheckedType());
+    EXPECT_EQ(accessibilityProperty.GetUserCheckedType(), 0);
+    accessibilityProperty.SetUserCheckedType(checkedType);
+    EXPECT_TRUE(accessibilityProperty.HasUserCheckedType());
+    EXPECT_EQ(accessibilityProperty.GetUserCheckedType(), checkedType);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest023
+ * @tc.desc: GetUserMinValue SetUserMinValue and HasUserMinValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest023, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    const int32_t minValue = -2;
+    EXPECT_EQ(accessibilityProperty.GetUserMinValue(), -1);
+    EXPECT_FALSE(accessibilityProperty.HasUserMinValue());
+    accessibilityProperty.SetUserMinValue(minValue);
+    EXPECT_TRUE(accessibilityProperty.HasUserMinValue());
+    EXPECT_EQ(accessibilityProperty.GetUserMinValue(), minValue);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest024
+ * @tc.desc: GetUserMaxValue HasUserMaxValue and SetUserMaxValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest024, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    const int32_t maxValue = 2;
+    EXPECT_EQ(accessibilityProperty.GetUserMaxValue(), -1);
+    EXPECT_FALSE(accessibilityProperty.HasUserMaxValue());
+    accessibilityProperty.SetUserMaxValue(maxValue);
+    EXPECT_TRUE(accessibilityProperty.HasUserMaxValue());
+    EXPECT_EQ(accessibilityProperty.GetUserMaxValue(), maxValue);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest025
+ * @tc.desc: GetUserCurrentValue SetUserCurrentValue and HasUserCurrentValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest025, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    const int32_t currentValue = 2;
+    EXPECT_EQ(accessibilityProperty.GetUserCurrentValue(), -1);
+    EXPECT_FALSE(accessibilityProperty.HasUserCurrentValue());
+    accessibilityProperty.SetUserCurrentValue(currentValue);
+    EXPECT_TRUE(accessibilityProperty.HasUserCurrentValue());
+    EXPECT_EQ(accessibilityProperty.GetUserCurrentValue(), currentValue);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest026
+ * @tc.desc: SetUserTextValue, SetUserTextValue and GetUserTextValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest026, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    const std::string textValue = "textValue";
+    EXPECT_EQ(accessibilityProperty.GetUserTextValue(), "");
+    EXPECT_FALSE(accessibilityProperty.HasUserTextValue());
+    accessibilityProperty.SetUserTextValue(textValue);
+    EXPECT_TRUE(accessibilityProperty.HasUserTextValue());
+    EXPECT_EQ(accessibilityProperty.GetUserTextValue(), textValue);
+}
 } // namespace OHOS::Ace::NG

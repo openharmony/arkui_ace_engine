@@ -274,7 +274,6 @@ void RosenRenderSurface::DrawBuffer(int32_t width, int32_t height)
     }
     if (!CompareBufferSize(width, height, surfaceNode)) {
         LOGE("RosenRenderSurface buffer is not matched.");
-        return;
     }
     ACE_SCOPED_TRACE("Web DrawBuffer");
     rosenRenderContext->StartRecording();

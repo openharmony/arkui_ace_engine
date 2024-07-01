@@ -237,6 +237,16 @@ public:
         return padding_;
     }
 
+    void SetUseLocalizedPadding(bool useLocalizedPadding)
+    {
+        useLocalizedPadding_ = useLocalizedPadding;
+    }
+
+    bool GetUseLocalizedPadding()
+    {
+        return useLocalizedPadding_;
+    }
+
     void SetSymmetricExtensible(bool isExtensible)
     {
         bottomTabBarStyle_.symmetricExtensible = isExtensible;
@@ -333,6 +343,7 @@ private:
     TabBarSymbol symbol_;
 
     bool firstTimeLayout_ = true;
+    bool useLocalizedPadding_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TabContentPattern);
 };

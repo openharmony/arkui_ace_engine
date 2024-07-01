@@ -351,6 +351,7 @@ public:
     {
         return isDownScroll_;
     }
+    void ResetOptionPropertyHeight();
 
 private:
     void OnModifyDone() override;
@@ -425,9 +426,10 @@ private:
     RefPtr<ClickEvent> CreateItemClickEventListener(RefPtr<EventParam> param);
     void SetAccessibilityAction();
 
-    void ResetOptionPropertyHeight();
     bool IsTextFadeOut();
     void UpdateTexOverflow(bool isSel, const RefPtr<TextLayoutProperty>& textLayoutProperty);
+
+    void InitTextFontFamily();
 
     bool isTossing_ = false;
     bool isTextFadeOut_ = false;
@@ -487,6 +489,11 @@ private:
     bool needOptionPropertyHeightReset_ = false;
     bool isLoop_ = true;
     bool isDownScroll_ = false;
+
+    bool hasAppCustomFont_ = false;
+    bool hasUserDefinedDisappearFontFamily_ = false;
+    bool hasUserDefinedNormalFontFamily_ = false;
+    bool hasUserDefinedSelectedFontFamily_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerColumnPattern);
 };

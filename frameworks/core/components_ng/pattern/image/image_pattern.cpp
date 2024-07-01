@@ -15,6 +15,7 @@
 
 #include "third_party/libphonenumber/cpp/src/phonenumbers/base/logging.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
+#include "core/components_ng/pattern/image/image_overlay_modifier.h"
 #include "core/image/image_source_info.h"
 #define NAPI_VERSION 8
 
@@ -377,7 +378,12 @@ void ImagePattern::OnImageLoadSuccess()
             pattern->CreateAnalyzerOverlay();
         }, "ArkUIImageCreateAnalyzerOverlay");
     }
-    ACE_LAYOUT_SCOPED_TRACE("OnImageLoadSuccess[self:%d]", host->GetId());
+    ACE_LAYOUT_SCOPED_TRACE(
+        "OnImageLoadSuccess[self:%d][src:%s]", host->GetId(), loadingCtx_->GetSourceInfo().ToString().c_str());
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGD(
+            AceLogTag::ACE_IMAGE, "OnImageLoadSuccess src=%{public}s", loadingCtx_->GetSourceInfo().ToString().c_str());
+    }
     host->MarkNeedRenderOnly();
 }
 
@@ -499,15 +505,19 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
         CHECK_NULL_RETURN(host, nullptr);
         sensitive = host->IsPrivacySensitive();
     }
+    if (!overlayMod_) {
+        overlayMod_ = MakeRefPtr<ImageOverlayModifier>();
+    }
     if (image_) {
-        return MakeRefPtr<ImagePaintMethod>(image_, selectOverlay_, sensitive, interpolationDefault_);
+        return MakeRefPtr<ImagePaintMethod>(image_, isSelected_, overlayMod_, sensitive, interpolationDefault_);
     }
     if (altImage_ && altDstRect_ && altSrcRect_) {
-        return MakeRefPtr<ImagePaintMethod>(altImage_, selectOverlay_, sensitive, interpolationDefault_);
+        return MakeRefPtr<ImagePaintMethod>(altImage_, isSelected_, overlayMod_, sensitive, interpolationDefault_);
     }
     CreateObscuredImage();
     if (obscuredImage_) {
-        return MakeRefPtr<ImagePaintMethod>(obscuredImage_, selectOverlay_, sensitive, interpolationDefault_);
+        return MakeRefPtr<ImagePaintMethod>(
+            obscuredImage_, isSelected_, overlayMod_, sensitive, interpolationDefault_);
     }
     return nullptr;
 }
@@ -574,20 +584,28 @@ void ImagePattern::CreateObscuredImage()
     }
 }
 
-void ImagePattern::LoadImage(const ImageSourceInfo& src, const PropertyChangeFlag& propertyChangeFlag)
+void ImagePattern::LoadImage(
+    const ImageSourceInfo& src, const PropertyChangeFlag& propertyChangeFlag, VisibleType visibleType)
 {
+    if (loadingCtx_) {
+        auto srcPixelMap = src.GetPixmap();
+        auto loadPixelMap = loadingCtx_->GetSourceInfo().GetPixmap();
+        isPixelMapChanged_ = !srcPixelMap || !loadPixelMap || srcPixelMap->GetRawPixelMapPtr() !=
+                                                              loadPixelMap->GetRawPixelMapPtr();
+    }
     LoadNotifier loadNotifier(CreateDataReadyCallback(), CreateLoadSuccessCallback(), CreateLoadFailCallback());
     loadNotifier.onDataReadyComplete_ = CreateCompleteCallBackInDataReady();
 
     loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad_);
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "start loading image %{public}s", src.ToString().c_str());
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "start loading image %{public}s", src.ToString().c_str());
     }
     loadingCtx_->SetLoadInVipChannel(GetLoadInVipChannel());
     if (onProgressCallback_) {
         loadingCtx_->SetOnProgressCallback(std::move(onProgressCallback_));
     }
-    if (!((propertyChangeFlag & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE)) {
+    if (!((propertyChangeFlag & PROPERTY_UPDATE_MEASURE) == PROPERTY_UPDATE_MEASURE) ||
+        visibleType == VisibleType::GONE) {
         loadingCtx_->FinishMearuse();
     }
     loadingCtx_->LoadImageData();
@@ -610,14 +628,9 @@ void ImagePattern::LoadImageDataIfNeed()
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
 
-    if (loadingCtx_) {
-        auto srcPixelMap = src.GetPixmap();
-        auto loadPixelMap = loadingCtx_->GetSourceInfo().GetPixmap();
-        isPixelMapChanged_ = !srcPixelMap || !loadPixelMap || srcPixelMap->GetRawPixelMapPtr() !=
-                                                              loadPixelMap->GetRawPixelMapPtr();
-    }
     if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src || isImageQualityChange_) {
-        LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag());
+        LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag(),
+            imageLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE));
     } else if (IsSupportImageAnalyzerFeature()) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -972,6 +985,9 @@ void ImagePattern::OnVisibleChange(bool visible)
 
 void ImagePattern::OnVisibleAreaChange(bool visible)
 {
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "OnVisibleAreaChange visible:%{public}d", (int)visible);
+    }
     if (!visible) {
         CloseSelectOverlay();
     }
@@ -1144,6 +1160,7 @@ void ImagePattern::OpenSelectOverlay()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     selectOverlay_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(info, WeakClaim(this));
+    isSelected_ = true;
     CHECK_NULL_VOID(selectOverlay_);
     pipeline->AddOnAreaChangeNode(host->GetId());
     // paint selected mask effect
@@ -1158,7 +1175,7 @@ void ImagePattern::CloseSelectOverlay()
     if (!selectOverlay_->IsClosed()) {
         selectOverlay_->Close();
     }
-    selectOverlay_ = nullptr;
+    isSelected_ = false;
     // remove selected mask effect
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1314,6 +1331,9 @@ void ImagePattern::DumpInfo()
         auto currentLoadImageState = loadingCtx_->GetCurrentLoadingState();
         DumpLog::GetInstance().AddDesc(std::string("currentLoadImageState : ").append(currentLoadImageState));
         DumpLog::GetInstance().AddDesc(std::string("rawImageSize: ").append(loadingCtx_->GetImageSize().ToString()));
+        DumpLog::GetInstance().AddDesc(std::string("LoadErrorMsg: ").append(loadingCtx_->GetErrorMsg()));
+    } else {
+        DumpLog::GetInstance().AddDesc(std::string("imageLoadingContext: null"));
     }
 
     auto host = GetHost();
@@ -1404,7 +1424,8 @@ void ImagePattern::OnConfigurationUpdate()
     UpdateInternalResource(src);
     src.SetIsConfigurationChange(true);
 
-    LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag());
+    LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag(),
+        imageLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE));
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
         auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
         if (altLoadingCtx_ && altLoadingCtx_->GetSourceInfo() == altImageSourceInfo) {

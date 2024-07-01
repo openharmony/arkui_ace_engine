@@ -58,17 +58,17 @@ using namespace testing;
 using namespace testing::ext;
 constexpr float SCROLL_WIDTH = 480.f;
 constexpr float SCROLL_HEIGHT = 800.f;
-constexpr int32_t TOTAL_LINE_NUMBER = 10;
-constexpr int32_t VIEW_LINE_NUMBER = 8;
+constexpr int32_t TOTAL_ITEM_NUMBER = 10;
+constexpr int32_t VIEW_ITEM_NUMBER = 8;
 constexpr int32_t SNAP_ITEM_NUMBER = 30;
 constexpr float DEFAULT_ACTIVE_WIDTH = 8.0f;
 constexpr float DEFAULT_INACTIVE_WIDTH = 4.0f;
 constexpr float DEFAULT_NORMAL_WIDTH = 4.0f;
 constexpr float DEFAULT_TOUCH_WIDTH = 32.0f;
-constexpr float ITEM_WIDTH = SCROLL_WIDTH / VIEW_LINE_NUMBER;
-constexpr float ITEM_HEIGHT = SCROLL_HEIGHT / VIEW_LINE_NUMBER;
-constexpr float VERTICAL_SCROLLABLE_DISTANCE = (TOTAL_LINE_NUMBER - VIEW_LINE_NUMBER) * ITEM_HEIGHT;
-constexpr float SNAP_SCROLLABLE_DISTANCE = (SNAP_ITEM_NUMBER - VIEW_LINE_NUMBER) * ITEM_HEIGHT;
+constexpr float ITEM_WIDTH = 60.f;
+constexpr float ITEM_HEIGHT = 100.f;
+constexpr float VERTICAL_SCROLLABLE_DISTANCE = (TOTAL_ITEM_NUMBER - VIEW_ITEM_NUMBER) * ITEM_HEIGHT;
+constexpr float SNAP_SCROLLABLE_DISTANCE = (SNAP_ITEM_NUMBER - VIEW_ITEM_NUMBER) * ITEM_HEIGHT;
 constexpr float NORMAL_WIDTH = 4.f;
 constexpr float SCROLL_PAGING_SPEED_THRESHOLD = 1200.0f;
 
@@ -78,26 +78,22 @@ public:
     static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
-    void GetInstance();
-    void UpdateCurrentOffset(float offset);
+    void GetScroll();
 
-    void Create(const std::function<void(ScrollModelNG)>& callback = nullptr);
-    void CreateWithContent(
-        const std::function<void(ScrollModelNG)>& callback = nullptr, int32_t childNumber = TOTAL_LINE_NUMBER);
+    ScrollModelNG CreateScroll();
     void CreateSnapScroll(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
         const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide);
 
-    static void CreateContent(int32_t childNumber = TOTAL_LINE_NUMBER);
+    void CreateContent(int32_t childNumber = TOTAL_ITEM_NUMBER);
     RefPtr<FrameNode> GetContentChild(int32_t index);
-    void Touch(TouchLocationInfo locationInfo, SourceType sourceType);
     void Touch(TouchType touchType, Offset offset, SourceType sourceType);
-    void Mouse(MouseInfo mouseInfo);
-    void Mouse(Offset moveOffset);
+    void Mouse(Offset location, MouseButton mouseButton = MouseButton::NONE_BUTTON,
+        MouseAction mouseAction = MouseAction::NONE);
     void Hover(bool isHover);
     bool OnScrollCallback(float offset, int32_t source);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
     void ScrollTo(float offset);
-    static Axis GetAxis();
+    Axis GetAxis();
     float GetOffset(float childNumber);
     AssertionResult UpdateAndVerifyPosition(float offset, float expectOffset, int32_t source = SCROLL_FROM_UPDATE);
     AssertionResult ScrollToNode(int32_t childIndex, float expectChildNumber);

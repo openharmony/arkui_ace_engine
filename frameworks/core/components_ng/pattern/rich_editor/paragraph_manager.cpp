@@ -131,7 +131,7 @@ PositionWithAffinity ParagraphManager::GetGlyphPositionAtCoordinate(Offset offse
         if (LessOrEqual(offset.GetY(), info.paragraph->GetHeight()) ||
             (idx == static_cast<int>(paragraphs_.size()) - 1)) {
             auto result = info.paragraph->GetGlyphPositionAtCoordinate(offset);
-            finalResult.position_ = result.position_ + info.start;
+            finalResult.position_ = result.position_ + static_cast<size_t>(info.start);
             TAG_LOGI(AceLogTag::ACE_TEXT,
                 "Current paragraph, originPos = %{public}zu, finalPos =%{public}zu and affinity = %{public}d",
                 result.position_, finalResult.position_, result.affinity_);
@@ -143,7 +143,7 @@ PositionWithAffinity ParagraphManager::GetGlyphPositionAtCoordinate(Offset offse
     }
     auto info = paragraphs_.back();
     auto result = info.paragraph->GetGlyphPositionAtCoordinate(offset);
-    finalResult.position_ = info.end;
+    finalResult.position_ = static_cast<size_t>(info.end);
     finalResult.affinity_ = static_cast<TextAffinity>(result.affinity_);
     TAG_LOGI(AceLogTag::ACE_TEXT,
         "Current paragraph, final position = %{public}zu and affinity = %{public}d", finalResult.position_,

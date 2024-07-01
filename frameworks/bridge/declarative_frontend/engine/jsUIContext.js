@@ -330,6 +330,68 @@ class UIContext {
         __JSScopeUtil__.restoreInstanceId();
     }
 
+    openBindSheet(content, options, targetId) {
+        let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.'
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let argLength = arguments.length;
+        if (argLength < 1 || content == null || content == undefined) {
+            __JSScopeUtil__.restoreInstanceId();
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            })
+        }
+        if ((argLength >= 3 && (targetId == null || targetId == undefined))) {
+            __JSScopeUtil__.restoreInstanceId();
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            })
+        }
+        let result_;
+        if (argLength === 1) {
+            result_ = Context.openBindSheet(content.getNodePtr());
+        } else if (argLength === 2) {
+            result_ = Context.openBindSheet(content.getNodePtr(), options);
+        } else {
+            result_ = Context.openBindSheet(content.getNodePtr(), options, targetId);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
+    updateBindSheet(content, options, partialUpdate) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let argLength = arguments.length;
+        if (argLength < 2 || content == null || content == undefined) {
+            __JSScopeUtil__.restoreInstanceId();
+            return new Promise((resolve, reject) => {
+                reject({ message: 'Parameter error.', code: 401 });
+            })
+        }
+        let result_;
+        if (argLength === 2) {
+            result_ = Context.updateBindSheet(content.getNodePtr(), options);
+        } else {
+            result_ = Context.updateBindSheet(content.getNodePtr(), options, partialUpdate);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
+    closeBindSheet(content) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (arguments.length < 1 || content == null || content == undefined) {
+            __JSScopeUtil__.restoreInstanceId();
+            return new Promise((resolve, reject) => {
+                reject({ message: 'Parameter error.', code: 401 });
+            })
+        }
+        let result_ = Context.closeBindSheet(content.getNodePtr());
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
     showDatePickerDialog(options) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         DatePickerDialog.show(options);
@@ -1025,10 +1087,3 @@ function __checkRegexValid__(pattern) {
         return result;
     }
 }
-
-export default { Font, MediaQuery, UIInspector, DragController, UIObserver, MeasureUtils, UIContext,
-    FocusController, ComponentUtils, Router, PromptAction, AtomicServiceBar, OverlayManager, FrameCallback };
-
-globalThis.__getUIContext__ = __getUIContext__;
-globalThis.__getFrameNodeByNodeId__ = __getFrameNodeByNodeId__;
-globalThis.__checkRegexValid__ = __checkRegexValid__;

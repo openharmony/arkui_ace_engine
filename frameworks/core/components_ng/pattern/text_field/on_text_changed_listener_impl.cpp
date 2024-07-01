@@ -320,8 +320,14 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
         keyboardInfo.keyBoardType = KeyBoardType::STATUS_BAR;
     }
     keyboardInfo.visible = info.visible;
-    auto pipeline = PipelineBase::GetCurrentContext();
-    auto task = [weak = WeakPtr(pipeline), keyboardInfo, id = Container::CurrentId()] {
+    auto textclient = pattern_.Upgrade();
+    CHECK_NULL_VOID(textclient);
+    auto pattern = AceType::DynamicCast<Pattern>(textclient);
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContextRefPtr();
+    auto task = [weak = WeakPtr(pipelineContext), keyboardInfo, id = Container::CurrentId()] {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
         ContainerScope scope(id);

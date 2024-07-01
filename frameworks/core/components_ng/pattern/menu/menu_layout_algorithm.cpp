@@ -367,7 +367,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
         InitializePadding(layoutWrapper);
     }
     InitWrapperRect(props, menuPattern);
-    InitializeParam();
+    InitializeParam(menuPattern);
     placement_ = props->GetMenuPlacement().value_or(Placement::BOTTOM_LEFT);
     if (menuPattern->IsSubMenu() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         placement_ = props->GetMenuPlacement().value_or(Placement::BOTTOM_RIGHT);
@@ -380,7 +380,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     InitSpace(props, menuPattern);
 }
 
-void MenuLayoutAlgorithm::InitializeParam()
+void MenuLayoutAlgorithm::InitializeParam(const RefPtr<MenuPattern>& menuPattern)
 {
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -388,6 +388,10 @@ void MenuLayoutAlgorithm::InitializeParam()
     CHECK_NULL_VOID(safeAreaManager);
     auto top = safeAreaManager->GetSafeAreaWithoutProcess().top_.Length();
     auto bottom = safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length();
+    auto keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
+    if (menuPattern->IsSelectOverlayExtensionMenu() && GreatNotEqual(keyboardHeight, 0)) {
+        bottom = keyboardHeight;
+    }
     auto windowGlobalRect = hierarchicalParameters_ ? pipelineContext->GetDisplayAvailableRect()
                                                     : pipelineContext->GetDisplayWindowRectInfo();
     float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());
@@ -436,6 +440,10 @@ void MenuLayoutAlgorithm::InitWrapperRect(
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
     // system safeArea(AvoidAreaType.TYPE_SYSTEM) only include status bar,now the bottom is 0
     auto bottom = safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length();
+    auto keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
+    if (menuPattern->IsSelectOverlayExtensionMenu() && GreatNotEqual(keyboardHeight, 0)) {
+        bottom = keyboardHeight;
+    }
     auto top = safeAreaManager->GetSafeAreaWithoutProcess().top_.Length();
     dumpInfo_.top = top;
     dumpInfo_.bottom = bottom;
@@ -672,6 +680,27 @@ void MenuLayoutAlgorithm::CalculateIdealSize(LayoutWrapper* layoutWrapper,
     geometryNode->SetFrameSize(idealSize);
 }
 
+void MenuLayoutAlgorithm::GetPreviewNodeTargetHoverImageChild(const RefPtr<LayoutWrapper>& child,
+    RefPtr<FrameNode>& hostNode, RefPtr<GeometryNode>& geometryNode, bool isShowHoverImage)
+{
+    CHECK_NULL_VOID(isShowHoverImage);
+    bool isColNode = hostNode->GetTag() == V2::FLEX_ETS_TAG;
+    CHECK_NULL_VOID(isColNode);
+    // flex -> stack -> image index 0 , preview index 1 when hoverScale api in use
+    auto childNode = child->GetChildByIndex(0)->GetChildByIndex(1);
+    CHECK_NULL_VOID(childNode);
+
+    auto hostChild = childNode->GetHostNode();
+    CHECK_NULL_VOID(hostChild);
+    CHECK_NULL_VOID(hostChild->GetTag() == V2::MENU_PREVIEW_ETS_TAG || hostChild->GetTag() == V2::IMAGE_ETS_TAG);
+
+    auto childGeometryNode = childNode->GetGeometryNode();
+    CHECK_NULL_VOID(childGeometryNode);
+
+    hostNode = hostChild;
+    geometryNode = childGeometryNode;
+}
+
 void MenuLayoutAlgorithm::GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& child, const Rect& windowGlobalRect,
     RefPtr<LayoutWrapper>& previewLayoutWrapper, SizeF& size, bool isShowHoverImage)
 {
@@ -680,6 +709,8 @@ void MenuLayoutAlgorithm::GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& c
     if (!hostNode || !geometryNode) {
         return;
     }
+    GetPreviewNodeTargetHoverImageChild(child, hostNode, geometryNode, isShowHoverImage);
+
     bool isImageNode = hostNode->GetTag() == V2::IMAGE_ETS_TAG;
     if (hostNode->GetTag() != V2::MENU_PREVIEW_ETS_TAG && !isImageNode) {
         return;

@@ -67,7 +67,7 @@ void RichEditorLayoutAlgorithm::AppendNewLineSpan()
     if (StringUtils::ToWstring(lastSpan->content).back() == L'\n') {
         std::list<RefPtr<SpanItem>> newGroup;
         auto tailNewLineSpan = AceType::MakeRefPtr<SpanItem>();
-        tailNewLineSpan->content = "\n";
+        tailNewLineSpan->content = " \n";
         tailNewLineSpan->SetNeedRemoveNewLine(true);
         CopySpanStyle(lastSpan, tailNewLineSpan);
         newGroup.push_back(tailNewLineSpan);
@@ -109,7 +109,20 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
         CHECK_NULL_RETURN(richEditorTheme, std::nullopt);
         auto defaultCaretHeight = richEditorTheme->GetDefaultCaretHeight().ConvertToPx();
         auto width = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
-        return SizeF(width, defaultCaretHeight);
+        auto host = layoutWrapper->GetHostNode();
+        CHECK_NULL_RETURN(host, std::nullopt);
+        auto pattern = host->GetPattern<RichEditorPattern>();
+        CHECK_NULL_RETURN(pattern, std::nullopt);
+        auto presetParagraph = pattern->GetPresetParagraph();
+        if (!presetParagraph) {
+            pattern->PreferredParagraph();
+        }
+        auto contentHeight = defaultCaretHeight;
+        presetParagraph = pattern->GetPresetParagraph();
+        if (presetParagraph) {
+            contentHeight = presetParagraph->GetHeight();
+        }
+        return SizeF(width, static_cast<float>(contentHeight));
     }
 
     auto layoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());

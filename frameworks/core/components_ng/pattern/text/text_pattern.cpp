@@ -58,6 +58,7 @@
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/event/ace_events.h"
+#include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace::NG {
 
@@ -519,18 +520,15 @@ void TextPattern::HandleOnCopy()
         return;
     }
     auto value = GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
-    if (value.empty()) {
-        HiddenMenu();
-        return;
-    }
     if (IsSelectableAndCopy()) {
         if (isSpanStringMode_ && !externalParagraph_) {
             HandleOnCopySpanString();
-        } else {
+        } else if (!value.empty()) {
             clipboard_->SetData(value, copyOption_);
         }
     }
     HiddenMenu();
+    CHECK_NULL_VOID(!value.empty());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextEventHub>();
@@ -541,7 +539,7 @@ void TextPattern::HandleOnCopy()
 void TextPattern::HandleOnCopySpanString()
 {
     RefPtr<PasteDataMix> pasteData = clipboard_->CreatePasteDataMix();
-    auto subSpanString = spanString->GetSubSpanString(textSelector_.GetTextStart(),
+    auto subSpanString = styledString_->GetSubSpanString(textSelector_.GetTextStart(),
         textSelector_.GetTextEnd() - textSelector_.GetTextStart());
     std::vector<uint8_t> tlvData;
     subSpanString->EncodeTlv(tlvData);
@@ -680,6 +678,9 @@ void TextPattern::OnHandleTouchUp()
 
 void TextPattern::HandleClickEvent(GestureEvent& info)
 {
+    if (selectOverlay_->IsClickAtHandle(info)) {
+        return;
+    }
     if (dataDetectorAdapter_->hasClickedAISpan_) {
         dataDetectorAdapter_->hasClickedAISpan_ = false;
     } else if (hasClicked_) {
@@ -873,10 +874,11 @@ void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc
             pattern->HandleSelectionChange(aiSpan.start, aiSpan.end);
             pattern->HandleOnCopy();
         } else if (action == std::string(SELECT_ACTION)) {
-            pattern->HandleSelectionChange(aiSpan.start, aiSpan.end);
             if (calculateHandleFunc == nullptr) {
+                pattern->SetTextSelection(aiSpan.start, aiSpan.end);
                 pattern->CalculateHandleOffsetAndShowOverlay();
             } else {
+                pattern->HandleSelectionChange(aiSpan.start, aiSpan.end);
                 calculateHandleFunc();
             }
             if (showSelectOverlayFunc == nullptr) {
@@ -1269,23 +1271,22 @@ bool TextPattern::HandleKeyEvent(const KeyEvent& keyEvent)
 
 void TextPattern::HandleOnSelect(KeyCode code)
 {
-    auto start = textSelector_.GetStart();
     auto end = textSelector_.GetEnd();
     switch (code) {
         case KeyCode::KEY_DPAD_LEFT: {
-            HandleSelection(start, end - 1);
+            HandleSelection(true, end - 1);
             break;
         }
         case KeyCode::KEY_DPAD_RIGHT: {
-            HandleSelection(start, end + 1);
+            HandleSelection(false, end + 1);
             break;
         }
         case KeyCode::KEY_DPAD_UP: {
-            HandleSelectionUp(start, end);
+            HandleSelectionUp();
             break;
         }
         case KeyCode::KEY_DPAD_DOWN: {
-            HandleSelectionDown(start, end);
+            HandleSelectionDown();
             break;
         }
         default:
@@ -1293,11 +1294,12 @@ void TextPattern::HandleOnSelect(KeyCode code)
     }
 }
 
-void TextPattern::HandleSelectionUp(int32_t start, int32_t end)
+void TextPattern::HandleSelectionUp()
 {
+    auto end = textSelector_.GetEnd();
     auto line = pManager_->GetLineCount();
     if (line == 1) {
-        HandleSelection(start, 0);
+        HandleSelection(true, 0);
         return;
     }
     CaretMetricsF secondHandleMetrics;
@@ -1305,40 +1307,45 @@ void TextPattern::HandleSelectionUp(int32_t start, int32_t end)
     auto secondOffsetX = secondHandleMetrics.offset.GetX();
     auto secondOffsetY = secondHandleMetrics.offset.GetY();
     double height = GetTextHeight(end, false);
-    if (NearZero(height)) {
-        end = 0;
-    } else {
-        Offset offset = { secondOffsetX, secondOffsetY - height * 0.5 };
-        end = GetHandleIndex(offset);
+    Offset offset = { secondOffsetX, secondOffsetY - height * 0.5 };
+    auto caculateIndex = GetHandleIndex(offset);
+    if (end == caculateIndex) {
+        caculateIndex = 0;
     }
-    HandleSelection(start, end);
+    HandleSelection(true, caculateIndex);
 }
 
-void TextPattern::HandleSelectionDown(int32_t start, int32_t end)
+void TextPattern::HandleSelectionDown()
 {
+    auto end = textSelector_.GetEnd();
     auto line = pManager_->GetLineCount();
     if (line == 1) {
-        HandleSelection(start, GetTextLength());
+        HandleSelection(true, GetTextLength());
         return;
     }
     CaretMetricsF secondHandleMetrics;
     CalcCaretMetricsByPosition(textSelector_.destinationOffset, secondHandleMetrics, TextAffinity::UPSTREAM);
     auto secondOffsetX = secondHandleMetrics.offset.GetX();
-    auto secondOffsetY = secondHandleMetrics.offset.GetY();
     double height = GetTextHeight(end, true);
-    if (NearZero(height)) {
-        end = GetTextLength();
-    } else {
-        Offset offset = { secondOffsetX, secondOffsetY + height + height * 0.5 };
-        end = GetHandleIndex(offset);
+    auto caculateIndex = GetHandleIndex({ secondOffsetX, height });
+    if (NearZero(height) || caculateIndex == end) {
+        caculateIndex = GetTextLength();
     }
-    HandleSelection(start, end);
+    HandleSelection(true, caculateIndex);
 }
 
-void TextPattern::HandleSelection(int32_t start, int32_t end)
+void TextPattern::HandleSelection(bool isEmojiStart, int32_t end)
 {
+    auto start = textSelector_.GetStart();
     if (start < 0 || start > GetTextLength() || end < 0 || end > GetTextLength()) {
         return;
+    }
+    int32_t emojiStartIndex;
+    int32_t emojiEndIndex;
+    bool isIndexInEmoji = TextEmojiProcessor::IsIndexInEmoji(end, GetSelectedText(0, GetTextLength()),
+        emojiStartIndex, emojiEndIndex);
+    if (isIndexInEmoji) {
+        end = isEmojiStart ? emojiStartIndex : emojiEndIndex;
     }
     HandleSelectionChange(start, end);
     CalculateHandleOffsetAndShowOverlay();
@@ -1356,17 +1363,18 @@ double TextPattern::GetTextHeight(int32_t index, bool isNextLine)
         auto lineMetrics = GetLineMetrics(lineNumber);
         auto startIndex = static_cast<int32_t>(lineMetrics.startIndex);
         auto endIndex = static_cast<int32_t>(lineMetrics.endIndex);
+        lineHeight += lineMetrics.height;
         if (isNextLine) {
-            if (index >= startIndex && index <= endIndex && endIndex != GetTextLength() - 1) {
-                lineHeight = GetLineMetrics(lineNumber + 1).height;
+            if (index <= endIndex && endIndex != GetTextLength()) {
+                return lineHeight;
             }
         } else {
-            if (index >= startIndex && index <= endIndex && startIndex != 0) {
-                lineHeight = GetLineMetrics(lineNumber - 1).height;
+            if (index <= endIndex && startIndex != 0) {
+                return GetLineMetrics(lineNumber - 1).height;
             }
         }
     }
-    return lineHeight;
+    return 0.0;
 }
 
 int32_t TextPattern::GetTextLength()
@@ -1498,7 +1506,7 @@ void TextPattern::AddUdmfData(const RefPtr<Ace::DragEvent>& event)
     };
     if (isSpanStringMode_) {
         std::vector<uint8_t> arr;
-        auto dragSpanString = spanString->GetSubSpanString(recoverStart_, recoverEnd_ - recoverStart_);
+        auto dragSpanString = styledString_->GetSubSpanString(recoverStart_, recoverEnd_ - recoverStart_);
         dragSpanString->EncodeTlv(arr);
         UdmfClient::GetInstance()->AddSpanStringRecord(unifiedData, arr);
     } else {
@@ -2064,6 +2072,14 @@ void TextPattern::OnModifyDone()
             CloseSelectOverlay();
             ResetSelection();
         }
+
+        if (textDetectEnable_) {
+            auto entityJson = JsonUtil::ParseJsonString(textForDisplay_);
+            if (!entityJson->IsNull() && !entityJson->GetValue("bundleName")->IsNull() &&
+                dataDetectorAdapter_->ParseOriText(entityJson, textForDisplay_)) {
+                textLayoutProperty->UpdateContent(textForDisplay_);
+            }
+        }
     }
 
     RecoverCopyOption();
@@ -2623,6 +2639,7 @@ void TextPattern::AddImageToSpanItem(const RefPtr<UINode>& child)
             CHECK_NULL_VOID(gesture);
             gesture->SetHitTestMode(HitTestMode::HTMNONE);
         }
+        imageSpanItem->UpdatePlaceholderBackgroundStyle(imageSpanNode);
         spans_.emplace_back(imageSpanItem);
         spans_.back()->imageNodeId = imageSpanNode->GetId();
         return;
@@ -3278,8 +3295,8 @@ void TextPattern::SetStyledString(const RefPtr<SpanString>& value)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ProcessSpanString();
-    auto length = spanString->GetLength();
-    spanString->ReplaceSpanString(0, length, value);
+    auto length = styledString_->GetLength();
+    styledString_->ReplaceSpanString(0, length, value);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -3459,7 +3476,7 @@ bool TextPattern::DidExceedMaxLines() const
 TextLineMetrics TextPattern::GetLineMetrics(int32_t lineNumber)
 {
     CHECK_NULL_RETURN(pManager_, TextLineMetrics());
-    if (lineNumber < 0 || lineNumber > GetLineCount()) {
+    if (lineNumber < 0 || static_cast<size_t>(lineNumber) > GetLineCount()) {
         TAG_LOGI(AceLogTag::ACE_TEXT, "GetLineMetrics failed, lineNumber not between 0 and max lines:%{public}d",
             lineNumber);
         return TextLineMetrics();

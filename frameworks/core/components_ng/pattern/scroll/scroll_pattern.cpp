@@ -228,8 +228,10 @@ void ScrollPattern::OnScrollEndCallback()
     if (scrollEndEvent) {
         scrollEndEvent();
     }
-    scrollStop_ = true;
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    if (AnimateStoped()) {
+        scrollStop_ = true;
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 
 void ScrollPattern::ResetPosition()
@@ -532,11 +534,12 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
 
 void ScrollPattern::OnAnimateStop()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    // AccessibilityEventType::SCROLL_END
-    scrollStop_ = true;
+    if (!GetIsDragging() || GetScrollAbort()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        scrollStop_ = true;
+    }
 }
 
 void ScrollPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
@@ -572,7 +575,7 @@ void ScrollPattern::ScrollBy(float pixelX, float pixelY, bool smooth, const std:
     }
     float position = currentOffset_ + distance;
     if (smooth) {
-        AnimateTo(-position, fabs(distance) * UNIT_CONVERT / SCROLL_BY_SPEED, Curves::EASE_OUT, true);
+        AnimateTo(-position, fabs(distance) * UNIT_CONVERT / SCROLL_BY_SPEED, Curves::EASE_OUT, true, false, false);
         return;
     }
     JumpToPosition(position);

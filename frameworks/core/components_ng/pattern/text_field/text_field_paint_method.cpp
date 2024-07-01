@@ -194,7 +194,8 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     textFieldOverlayModifier_->SetTextRect(textFieldPattern->GetTextRect());
     textFieldOverlayModifier_->SetShowPreviewTextDecoration(textFieldPattern->GetIsPreviewText());
     textFieldOverlayModifier_->SetPreviewTextRects(textFieldPattern->NeedDrawPreviewText());
-    textFieldOverlayModifier_->SetPreviewTextDecorationColor(textFieldPattern->GetPreviewDecorationColor());
+    auto previewDecorationColor = paintProperty->GetCursorColorValue(textFieldPattern->GetPreviewDecorationColor());
+    textFieldOverlayModifier_->SetPreviewTextDecorationColor(previewDecorationColor);
     textFieldOverlayModifier_->SetPreviewTextStyle(textFieldPattern->GetPreviewTextStyle());
     UpdateScrollBar();
 }

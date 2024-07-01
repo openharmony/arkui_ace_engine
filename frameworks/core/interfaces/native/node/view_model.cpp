@@ -716,14 +716,14 @@ ArkUI_Int32 MeasureNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_F
     return 0;
 }
 
-ArkUI_Int32 LayoutNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Float32* data)
+ArkUI_Int32 LayoutNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Float32  (*data)[2])
 {
     // call frameNode layout.
     auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(nodePtr));
     if (frameNode) {
         frameNode->SetActive(true);
-        frameNode->GetGeometryNode()->SetMarginFrameOffsetX(data[0]);
-        frameNode->GetGeometryNode()->SetMarginFrameOffsetY(data[1]);
+        frameNode->GetGeometryNode()->SetMarginFrameOffsetX((*data)[0]);
+        frameNode->GetGeometryNode()->SetMarginFrameOffsetY((*data)[1]);
         frameNode->Layout();
     }
     return 0;

@@ -915,6 +915,9 @@ void JSText::SetFontFeature(const JSCallbackInfo& info)
         return;
     }
 
+    if (!info[0]->IsString() && !info[0]->IsObject()) {
+        return;
+    }
     std::string fontFeatureSettings = info[0]->ToString();
     TextModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
 }

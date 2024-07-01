@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
-import { Chip, ChipSize, SymbolOptions } from '@ohos.arkui.advanced.Chip';
+import { Chip, ChipSize, ChipSymbolGlyphOptions } from '@ohos.arkui.advanced.Chip';
 
 interface ChipGroupTheme {
   itemStyle: ChipGroupStyleTheme;
@@ -23,7 +23,7 @@ interface ChipGroupTheme {
 
 const noop = (selectedIndexes: Array<number>) => {
 }
-const colorStops: ( string | number )[] = [['rgba(0, 0, 0, 1)', 0], ['rgba(0, 0, 0, 0)', 1]]
+const colorStops: ([string, number])[] = [['rgba(0, 0, 0, 1)', 0], ['rgba(0, 0, 0, 0)', 1]]
 const defaultTheme: ChipGroupTheme = {
   itemStyle: {
     size: ChipSize.NORMAL,
@@ -35,7 +35,7 @@ const defaultTheme: ChipGroupTheme = {
     selectedFillColor: $r('sys.color.ohos_id_color_text_primary_contrary'),
   },
   chipGroupSpace: { itemSpace: 8, startSpace: 16, endSpace: 16 },
-  chipGroupPadding: { top: 14, bottom: 14 }
+  chipGroupPadding: { top: 0, bottom: 0 }
 }
 
 const iconGroupSuffixTheme: IconGroupSuffixTheme = {
@@ -47,7 +47,8 @@ const iconGroupSuffixTheme: IconGroupSuffixTheme = {
   normalBackgroundSize: 36,
   marginLeft: 8,
   marginRight: 16,
-  fillColor: $r('sys.color.ohos_id_color_primary')
+  fillColor: $r('sys.color.ohos_id_color_primary'),
+  defaultEffect: -1
 }
 
 enum ChipGroupHeight {
@@ -83,10 +84,10 @@ interface LabelOptions {
 
 export interface ChipGroupItemOptions {
   prefixIcon?: IconOptions;
-  prefixSymbol?: SymbolOptions;
+  prefixSymbol?: ChipSymbolGlyphOptions;
   label: LabelOptions;
   suffixIcon?: IconOptions;
-  suffixSymbol?: SymbolOptions;
+  suffixSymbol?: ChipSymbolGlyphOptions;
   allowClose?: boolean;
 }
 
@@ -119,6 +120,7 @@ interface IconGroupSuffixTheme {
   marginLeft: number;
   marginRight: number;
   fillColor: ResourceColor;
+  defaultEffect: number;
 }
 
 function parseDimension<T>(
@@ -175,6 +177,7 @@ function isValidDimensionNoPercentageString(dimension: string): boolean {
 export struct IconGroupSuffix {
   @Consume chipSize: ChipSize | SizeOptions;
   @Prop items: Array<IconItemOptions | SymbolGlyphModifier> = [];
+  symbolEffect: SymbolEffect = new SymbolEffect();
 
   private getBackgroundSize(): number {
     if (this.chipSize === ChipSize.SMALL) {
@@ -186,7 +189,9 @@ export struct IconGroupSuffix {
 
   private getIconSize(val?: Length): Length {
     if (val === undefined) {
-      return this.chipSize === ChipSize.SMALL ? iconGroupSuffixTheme.smallIconSize : iconGroupSuffixTheme.normalIconSize;
+      return this.chipSize === ChipSize.SMALL ?
+      iconGroupSuffixTheme.smallIconSize :
+      iconGroupSuffixTheme.normalIconSize;
     }
     let value: Length;
     if (this.chipSize === ChipSize.SMALL) {
@@ -207,6 +212,9 @@ export struct IconGroupSuffix {
               .fontSize(this.getIconSize())
               .attributeModifier(suffixItem)
               .focusable(true)
+              .effectStrategy(SymbolEffectStrategy.NONE)
+              .symbolEffect(this.symbolEffect, false)
+              .symbolEffect(this.symbolEffect, iconGroupSuffixTheme.defaultEffect)
           } else {
             Image(suffixItem.icon.src)
               .fillColor(iconGroupSuffixTheme.fillColor)
@@ -280,10 +288,11 @@ export struct ChipGroup {
           return defaultTheme.itemStyle.fontColor;
         }
         if (temp.type === 10001) {
-          return this.itemStyle.fontColor
+          return this.itemStyle.fontColor;
         }
         return defaultTheme.itemStyle.fontColor;
       }
+      return this.itemStyle.fontColor;
     }
     return defaultTheme.itemStyle.fontColor;
   }
@@ -296,10 +305,11 @@ export struct ChipGroup {
           return defaultTheme.itemStyle.selectedFontColor;
         }
         if (temp.type === 10001) {
-          return this.itemStyle.selectedFontColor
+          return this.itemStyle.selectedFontColor;
         }
         return defaultTheme.itemStyle.selectedFontColor;
       }
+      return this.itemStyle.selectedFontColor;
     }
     return defaultTheme.itemStyle.selectedFontColor;
   }
@@ -326,10 +336,11 @@ export struct ChipGroup {
           return defaultTheme.itemStyle.backgroundColor;
         }
         if (temp.type === 10001) {
-          return this.itemStyle.backgroundColor
+          return this.itemStyle.backgroundColor;
         }
         return defaultTheme.itemStyle.backgroundColor;
       }
+      return this.itemStyle.backgroundColor;
     }
     return defaultTheme.itemStyle.backgroundColor;
   }
@@ -342,10 +353,11 @@ export struct ChipGroup {
           return defaultTheme.itemStyle.selectedBackgroundColor;
         }
         if (temp.type === 10001) {
-          return this.itemStyle.selectedBackgroundColor
+          return this.itemStyle.selectedBackgroundColor;
         }
         return defaultTheme.itemStyle.selectedBackgroundColor;
       }
+      return this.itemStyle.selectedBackgroundColor;
     }
     return defaultTheme.itemStyle.selectedBackgroundColor;
   }
@@ -555,7 +567,7 @@ export struct ChipGroup {
     }
     .align(Alignment.End)
     .width("100%")
-    .height(this.getChipGroupHeight())
+    .height(this.getChipGroupHeight() + (this.getPaddingTop() as number) + (this.getPaddingTop() as number))
     .padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() })
   }
 }

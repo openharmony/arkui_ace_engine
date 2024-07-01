@@ -362,10 +362,10 @@ void JSIndexer::SetSelected(const JSCallbackInfo& args)
 
 void JSIndexer::SetPopupPosition(const JSCallbackInfo& args)
 {
+    std::optional<Dimension> xOpt;
+    std::optional<Dimension> yOpt;
     if (args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-        std::optional<Dimension> xOpt;
-        std::optional<Dimension> yOpt;
         CalcDimension x;
         CalcDimension y;
         JSRef<JSVal> xVal = obj->GetProperty("x");
@@ -374,13 +374,13 @@ void JSIndexer::SetPopupPosition(const JSCallbackInfo& args)
             (!xVal->IsString() && JSViewAbstract::ParseJsDimensionVp(xVal, x))) {
             xOpt = x;
         }
-        IndexerModel::GetInstance()->SetPopupPositionX(xOpt);
         if ((yVal->IsString() && StringUtils::StringToCalcDimensionNG(yVal->ToString(), y, false)) ||
             (!yVal->IsString() && JSViewAbstract::ParseJsDimensionVp(yVal, y))) {
             yOpt = y;
         }
-        IndexerModel::GetInstance()->SetPopupPositionY(yOpt);
     }
+    IndexerModel::GetInstance()->SetPopupPositionX(xOpt);
+    IndexerModel::GetInstance()->SetPopupPositionY(yOpt);
 }
 
 void JSIndexer::SetPopupSelectedColor(const JSCallbackInfo& args)

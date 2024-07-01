@@ -17,6 +17,7 @@
 
 #include "video_node.h"
 
+#include "base/background_task_helper/background_task_helper.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/i18n/localization.h"
@@ -58,6 +59,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 namespace {
+using HiddenChangeEvent = std::function<void(bool)>;
 constexpr uint32_t SECONDS_PER_HOUR = 3600;
 constexpr uint32_t SECONDS_PER_MINUTE = 60;
 const std::string FORMAT_HH_MM_SS = "%02d:%02d:%02d";
@@ -727,6 +729,9 @@ void VideoPattern::OnAttachToFrameNode()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowStateChangedCallback(host->GetId());
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
@@ -749,6 +754,15 @@ void VideoPattern::OnAttachToFrameNode()
     renderContext->UpdateBackgroundColor(Color::BLACK);
     renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
     renderContext->SetClipToBounds(true);
+}
+
+void VideoPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto id = frameNode->GetId();
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowStateChangedCallback(id);
 }
 
 void VideoPattern::OnDetachFromMainTree()
@@ -813,19 +827,20 @@ void VideoPattern::RegisterRenderContextCallBack()
 void VideoPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+
     if (!hiddenChangeEvent_) {
-        SetHiddenChangeEvent([weak = WeakClaim(this)](bool hidden) {
-            auto videoPattern = weak.Upgrade();
-            CHECK_NULL_VOID(videoPattern);
-            auto fullScreenNode = videoPattern->GetFullScreenNode();
-            if (fullScreenNode) {
-                auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(fullScreenNode->GetPattern());
-                CHECK_NULL_VOID(fullScreenPattern);
-                fullScreenPattern->HiddenChange(hidden);
-                return;
-            }
-            videoPattern->HiddenChange(hidden);
-        });
+        SetHiddenChangeEvent(CreateHiddenChangeEvent());
+    }
+
+    // src has changed
+    auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+#ifdef RENDER_EXTRACT_SUPPORTED
+    if ((layoutProperty && layoutProperty->HasVideoSource() && layoutProperty->GetVideoSource().value() != src_)) {
+#else
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
+        (layoutProperty && layoutProperty->HasVideoSource() && layoutProperty->GetVideoSource().value() != src_)) {
+#endif
+        ResetStatus();
     }
 
     // update full screen pattern state
@@ -870,6 +885,22 @@ void VideoPattern::OnModifyDone()
     }
 }
 
+HiddenChangeEvent VideoPattern::CreateHiddenChangeEvent()
+{
+    return [weak = WeakClaim(this)](bool hidden) {
+        auto videoPattern = weak.Upgrade();
+        CHECK_NULL_VOID(videoPattern);
+        auto fullScreenNode = videoPattern->GetFullScreenNode();
+        if (fullScreenNode) {
+            auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(fullScreenNode->GetPattern());
+            CHECK_NULL_VOID(fullScreenPattern);
+            fullScreenPattern->HiddenChange(hidden);
+            return;
+        }
+        videoPattern->HiddenChange(hidden);
+    };
+}
+
 void VideoPattern::UpdatePreviewImage()
 {
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
@@ -886,7 +917,7 @@ void VideoPattern::UpdatePreviewImage()
     CHECK_NULL_VOID(video);
     auto image = AceType::DynamicCast<FrameNode>(video->GetPreviewImage());
     CHECK_NULL_VOID(image);
-    if (!isInitialState_ || !layoutProperty->HasPosterImageInfo()) {
+    if (!isInitialState_) {
         auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
         posterLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
         image->MarkModifyDone();
@@ -1010,10 +1041,6 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
             videoFrameSize.Height());
     }
 
-    if (IsSupportImageAnalyzer()) {
-        UpdateAnalyzerUIConfig(geometryNode);
-    }
-
     auto padding  = layoutProperty->CreatePaddingAndBorder();
     auto imageFit = layoutProperty->GetObjectFitValue(ImageFit::COVER);
     if (imageFit == ImageFit::COVER) {
@@ -1024,6 +1051,10 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
             (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE + padding.top.value_or(0),
             videoFrameSize.Width(), videoFrameSize.Height());
     }
+    if (IsSupportImageAnalyzer()) {
+        UpdateAnalyzerUIConfig(geometryNode);
+    }
+
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     host->MarkNeedSyncRenderTree();
@@ -1535,11 +1566,11 @@ void VideoPattern::OnFullScreenChange(bool isFullScreen)
             break;
         }
     }
-    if (isFullScreen && isEnableAnalyzer_ && isAnalyzerCreated_) {
+    if (isEnableAnalyzer_) {
         if (!imageAnalyzerManager_) {
             EnableAnalyzer(isEnableAnalyzer_);
         }
-        if (imageAnalyzerManager_) {
+        if (imageAnalyzerManager_ && isAnalyzerCreated_) {
             StartImageAnalyzer();
         }
     }
@@ -1794,8 +1825,14 @@ void VideoPattern::CreateAnalyzerOverlay()
 void VideoPattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
 {
     if (IsSupportImageAnalyzer()) {
+        auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto padding  = layoutProperty->CreatePaddingAndBorder();
+        OffsetF contentOffset = { contentRect_.Left() - padding.left.value_or(0),
+                                  contentRect_.Top() - padding.top.value_or(0) };
+        PixelMapInfo info = { contentRect_.GetSize().Width(), contentRect_.GetSize().Height(), contentOffset };
         CHECK_NULL_VOID(imageAnalyzerManager_);
-        imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
+        imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode, info);
     }
 }
 
@@ -1810,4 +1847,16 @@ bool VideoPattern::GetAnalyzerState()
     CHECK_NULL_RETURN(imageAnalyzerManager_, false);
     return imageAnalyzerManager_->IsOverlayCreated();
 }
+
+void VideoPattern::OnWindowHide()
+{
+#if defined(OHOS_PLATFORM)
+    if (!BackgroundTaskHelper::GetInstance().HasBackgroundTask()) {
+        Pause();
+    }
+#else
+    Pause();
+#endif
+}
+
 } // namespace OHOS::Ace::NG

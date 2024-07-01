@@ -135,4 +135,24 @@ void ListItemGroupModelNG::ResetListChildrenMainSize(FrameNode* frameNode)
     CHECK_NULL_VOID(pattern);
     pattern->ResetChildrenSize();
 }
+
+V2::ItemDivider ListItemGroupModelNG::GetDivider(FrameNode* frameNode)
+{
+    V2::ItemDivider value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListItemGroupLayoutProperty, Divider, value, frameNode, value);
+    return value;
+}
+
+void ListItemGroupModelNG::SetSpace(FrameNode* frameNode, const Dimension& space)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Space, space, frameNode);
+}
+
+void ListItemGroupModelNG::SetStyle(FrameNode* frameNode, V2::ListItemGroupStyle style)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetListItemGroupStyle(style);
+}
 } // namespace OHOS::Ace::NG

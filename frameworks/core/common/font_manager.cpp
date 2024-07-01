@@ -77,7 +77,7 @@ bool FontManager::IsDefaultFontChanged()
     return isDefaultFontChanged_;
 }
 
-bool FontManager::IsUseAppCustomFont()
+bool FontManager::IsUseAppCustomFont() const
 {
     return !appCustomFont_.empty();
 }

@@ -68,6 +68,11 @@ public:
         return true;
     }
 
+    void SetOverlay(const WeakPtr<OverlayManager>& overlayManager)
+    {
+        overlayManager_ = overlayManager;
+    }
+
     bool IsAtomicNode() const override
     {
         return false;
@@ -299,6 +304,12 @@ public:
 
     void HandleDragEnd(float dragVelocity);
 
+    void OnCoordScrollStart();
+
+    bool OnCoordScrollUpdate(float scrollOffset);
+
+    void OnCoordScrollEnd(float dragVelocity);
+
     void SheetTransition(bool isTransitionIn, float dragVelocity = 0.0f);
 
     void ModifyFireSheetTransition(float dragVelocity = 0.0f);
@@ -428,6 +439,16 @@ public:
 
     bool IsFold();
 
+    void SetSheetKey(const SheetKey& sheetKey)
+    {
+        sheetKey_ = sheetKey;
+    }
+
+    SheetKey GetSheetKey() const
+    {
+        return sheetKey_;
+    }
+    
     bool GetAnimationBreak() const
     {
         return isAnimationBreak_;
@@ -556,7 +577,7 @@ public:
         return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW;
     }
     
-    int32_t GetDetentsIndex() const
+    uint32_t GetDetentsIndex() const
     {
         return detentsFinalIndex_;
     }
@@ -597,6 +618,7 @@ private:
     void DismissTransition(bool isTransitionIn, float dragVelocity = 0.0f);
     uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;
+    SheetKey sheetKey_;
     std::optional<int32_t> titleId_;
     std::optional<int32_t> subtitleId_;
     std::string targetTag_;
@@ -645,11 +667,13 @@ private:
     ScrollSizeMode scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT;
 
     //record sheet sored detent index
-    int32_t detentsIndex_ = 0;
+    uint32_t detentsIndex_ = 0;
 
     //record sheet unsoreddetent index
-    int32_t detentsFinalIndex_ = 0;
+    uint32_t detentsFinalIndex_ = 0;
     std::string sheetThemeType_ = "auto";
+
+    WeakPtr<OverlayManager> overlayManager_ = nullptr;
 
     std::vector<float> sheetDetentHeight_;
     std::vector<float> unSortedSheetDentents_;

@@ -266,10 +266,12 @@ protected:
 
 private:
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnDetachFromMainTree() override;
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
+    void OnWindowHide() override;
 
     // Set properties for media player.
     void PrepareMediaPlayer();
@@ -316,6 +318,8 @@ private:
 
     // Fire error manually, eg. src is not existed. It must run on ui.
     void FireError();
+
+    HiddenChangeEvent CreateHiddenChangeEvent();
 
     void SetMediaFullScreen(bool isFullScreen)
     {

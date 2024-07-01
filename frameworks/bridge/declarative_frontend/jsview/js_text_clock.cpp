@@ -35,6 +35,9 @@ namespace OHOS::Ace {
 
 std::unique_ptr<TextClockModel> TextClockModel::instance_ = nullptr;
 std::mutex TextClockModel::mutex_;
+const char TEXTCLOCK_DATE_TIME_OPTIONS_HOUR[] = "hour";
+const std::string TEXTCLOCK_DATE_TIME_OPTIONS_TWO_DIGIT_VAL = "2-digit";
+const std::string TEXTCLOCK_DATE_TIME_OPTIONS_NUMERIC_VAL = "numeric";
 
 TextClockModel* TextClockModel::GetInstance()
 {
@@ -60,7 +63,6 @@ namespace OHOS::Ace::Framework {
 
 namespace {
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-const std::string DEFAULT_FORMAT_API_ELEVEN = "aa hh:mm:ss";
 const std::string DEFAULT_FORMAT_API_TEN = "hms";
 constexpr int32_t HOURS_WEST_LOWER_LIMIT = -14;
 constexpr int32_t HOURS_WEST_UPPER_LIMIT = 12;
@@ -73,10 +75,7 @@ bool HoursWestIsValid(int32_t hoursWest)
 
 float GetHoursWest(float hoursWest)
 {
-    RefPtr<Container> container = Container::Current();
-    CHECK_NULL_RETURN(container, int32_t(hoursWest));
-    auto apiTargetVersion = container->GetApiTargetVersion();
-    if (apiTargetVersion >= static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
         for (float i : HOURS_WEST) {
             if (NearEqual(hoursWest, i)) {
                 return hoursWest;
@@ -140,6 +139,7 @@ void JSTextClock::JSBind(BindingTarget globalObj)
     JSClass<JSTextClock>::StaticMethod("fontFamily", &JSTextClock::SetFontFamily, opt);
     JSClass<JSTextClock>::StaticMethod("textShadow", &JSTextClock::SetTextShadow, opt);
     JSClass<JSTextClock>::StaticMethod("fontFeature", &JSTextClock::SetFontFeature, opt);
+    JSClass<JSTextClock>::StaticMethod("dateTimeOptions", &JSTextClock::SetDateTimeOptions, opt);
     JSClass<JSTextClock>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -243,8 +243,8 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
         return;
     }
     if (!info[0]->IsString()) {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT_API_ELEVEN);
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
+            TextClockModel::GetInstance()->SetFormat("");
         } else {
             TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT_API_TEN);
         }
@@ -252,15 +252,10 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
     }
 
     auto format = info[0]->ToString();
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        if (format.length() == 0) {
-            TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT_API_ELEVEN);
-            return;
-        }
-    } else {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
         std::regex pattern(
             R"(^([Yy]*[_|\W\s]*[M]*[_|\W\s]*[d]*[_|\W\s]*[D]*[_|\W\s]*[Hh]*[_|\W\s]*[m]*[_|\W\s]*[s]*[_|\W\s]*[S]*)$)");
-        if (format.length() == 0 || !StringUtils::IsAscii(format) || !std::regex_match(format, pattern)) {
+        if (format.empty() || !StringUtils::IsAscii(format) || !std::regex_match(format, pattern)) {
             TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT_API_TEN);
             return;
         }
@@ -354,5 +349,24 @@ void JSTextClockController::Stop()
             i->Stop();
         }
     }
+}
+
+void JSTextClock::SetDateTimeOptions(const JSCallbackInfo& info)
+{
+    JSRef<JSObject> paramObject;
+    ZeroPrefixType hourType = ZeroPrefixType::AUTO;
+    if (info.Length() >= 1 && info[0]->IsObject()) {
+        paramObject = JSRef<JSObject>::Cast(info[0]);
+        auto hourValue = paramObject->GetProperty(TEXTCLOCK_DATE_TIME_OPTIONS_HOUR);
+        if (hourValue->IsString()) {
+            std::string hour = hourValue->ToString();
+            if (hour == TEXTCLOCK_DATE_TIME_OPTIONS_TWO_DIGIT_VAL) {
+                hourType = ZeroPrefixType::SHOW;
+            } else if (hour == TEXTCLOCK_DATE_TIME_OPTIONS_NUMERIC_VAL) {
+                hourType = ZeroPrefixType::HIDE;
+            }
+        }
+    }
+    TextClockModel::GetInstance()->SetDateTimeOptions(hourType);
 }
 } // namespace OHOS::Ace::Framework

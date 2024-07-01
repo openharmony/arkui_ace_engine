@@ -1833,6 +1833,14 @@ typedef enum {
     ARKUI_SWIPER_INDICATOR_TYPE_DIGIT,
 } ArkUI_SwiperIndicatorType;
 
+
+typedef enum {
+    ARKUI_ANIMATION_DIRECTION_NORMAL = 0,
+    ARKUI_ANIMATION_DIRECTION_REVERSE,
+    ARKUI_ANIMATION_DIRECTION_ALTERNATE,
+    ARKUI_ANIMATION_DIRECTION_ALTERNATE_REVERSE,
+} ArkUI_AnimationDirection;
+
 typedef enum {
     /** In the folded state, when the ListItem slides in the opposite direction to the main axis,
      * the operation item is hidden.*/
@@ -1908,6 +1916,61 @@ typedef enum {
     /** Failed to add the adapter because the corresponding node already has a subnode. */
     ARKUI_ERROR_CODE_NODE_ADAPTER_CHILD_NODE_EXIST = 106106,
 } ArkUI_ErrorCode;
+
+/**
+ * @brief defines the enumerated value of the extended security zone.
+ *
+ * @since 12
+*/
+typedef enum {
+    /** The default security zone includes the status bar and navigation bar. */
+    ARKUI_SAFE_AREA_TYPE_SYSTEM = 1,
+    /** Non-secure areas of the device, such as bangs or hole holes. */
+    ARKUI_SAFE_AREA_TYPE_CUTOUT = 1 << 1,
+    /** Soft keyboard area. */
+    ARKUI_SAFE_AREA_TYPE_KEYBOARD = 1 << 2,
+} ArkUI_SafeAreaType;
+
+/**
+ * @brief defines the enumerated value of the direction of the extended security zone.
+ *
+ * @since 12
+*/
+typedef enum {
+    /** Upper area. */
+    ARKUI_SAFE_AREA_EDGE_TOP = 1,
+    /** Lower area. */
+    ARKUI_SAFE_AREA_EDGE_BOTTOM = 1 << 1,
+    /** Front area. */
+    ARKUI_SAFE_AREA_EDGE_START = 1 << 2,
+    /** Tail area. */
+    ARKUI_SAFE_AREA_EDGE_END = 1 << 3,
+} ArkUI_SafeAreaEdge;
+
+typedef struct {
+    float x;
+    float y;
+    float z;
+} ArkUI_TranslationOptions;
+
+typedef struct {
+    float x;
+    float y;
+    float z;
+    float centerX;
+    float centerY;
+} ArkUI_ScaleOptions;
+
+typedef struct {
+    float x;
+    float y;
+    float z;
+    float angle;
+    float centerX;
+    float centerY;
+    float centerZ;
+    float perspective;
+} ArkUI_RotationOptions;
 
 /**
 * @brief Creates a size constraint.

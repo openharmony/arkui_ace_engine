@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const __relative_container__ = requireInternal("arkui.relativeContainer");
+const __relative_container__ = requireInternal('arkui.relativeContainer');
 
 class RelativeContainer extends JSContainerBase {
     static create(value) {

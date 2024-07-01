@@ -13,10 +13,18 @@
  * limitations under the License.
  */
 
+#include <string>
+
+#include "gtest/gtest.h"
 #include "search_base.h"
+
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+const std::string INSPECTOR_PREFIX = "__SearchField__";
+const std::vector<std::string> SPECIALIZED_INSPECTOR_INDEX = { "", "Image__", "CancelImage__", "CancelButton__",
+    "Button__" };
+} // namespace
 
 class SearchTestTwoNg : public SearchBases {
 public:
@@ -931,7 +939,7 @@ HWTEST_F(SearchTestTwoNg, SetProperty001, TestSize.Level1)
     searchModelInstance.SetHeight(Dimension(2.5, DimensionUnit::VP));
 
     //test SetOnChange
-    searchModelInstance.SetOnChange([](const std::string str) {});
+    searchModelInstance.SetOnChange([](const std::string str, TextRange range) {});
     EXPECT_NE(eventHub->GetOnChange(), nullptr);
 
     //test SetOnTextSelectionChange
@@ -1291,5 +1299,45 @@ HWTEST_F(SearchTestTwoNg, SupportAvoidanceTest, TestSize.Level1)
     supportAvoidance = false;
     textFieldPattern->SetCustomKeyboardOption(supportAvoidance);
     EXPECT_FALSE(textFieldPattern->keyboardAvoidance_);
+}
+
+/**
+ * @tc.name: UpdateInspectorId001
+ * @tc.desc: test search model UpdateInspectorId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, UpdateInspectorId001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create frameNode and ChildrenNode.
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto imageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
+    ASSERT_NE(imageFrameNode, nullptr);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    ASSERT_NE(buttonFrameNode, nullptr);
+    auto cancelButtonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_BUTTON_INDEX));
+    ASSERT_NE(cancelButtonFrameNode, nullptr);
+    auto cancelImageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
+    ASSERT_NE(cancelImageFrameNode, nullptr);
+
+    /**
+     * @tc.step: step2.  set different idName, test children inspectorId.
+     */
+    std::vector<std::string> idNames = { "", "searchTest", "searchTest_Key" };
+    for (int32_t i = 0; i < idNames.size(); i++) {
+        searchModelInstance.UpdateInspectorId(idNames[i]);
+        auto result1 = INSPECTOR_PREFIX + SPECIALIZED_INSPECTOR_INDEX[IMAGE_INDEX] + idNames[i];
+        EXPECT_TRUE(imageFrameNode->GetInspectorIdValue() == result1);
+        auto result2 = INSPECTOR_PREFIX + SPECIALIZED_INSPECTOR_INDEX[BUTTON_INDEX] + idNames[i];
+        EXPECT_TRUE(buttonFrameNode->GetInspectorIdValue() == result2);
+        auto result3 = INSPECTOR_PREFIX + SPECIALIZED_INSPECTOR_INDEX[CANCEL_BUTTON_INDEX] + idNames[i];
+        EXPECT_TRUE(cancelButtonFrameNode->GetInspectorIdValue() == result3);
+        auto result4 = INSPECTOR_PREFIX + SPECIALIZED_INSPECTOR_INDEX[CANCEL_IMAGE_INDEX] + idNames[i];
+        EXPECT_TRUE(cancelImageFrameNode->GetInspectorIdValue() == result4);
+    }
 }
 } // namespace OHOS::Ace::NG

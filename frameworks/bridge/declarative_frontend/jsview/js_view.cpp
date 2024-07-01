@@ -41,6 +41,7 @@
 #include "core/components_ng/base/view_partial_update_model.h"
 #include "core/components_ng/base/view_partial_update_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
@@ -162,6 +163,7 @@ void JSView::JsGetCardId(const JSCallbackInfo& info)
 {
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(cardId_)));
 }
+
 
 JSViewFullUpdate::JSViewFullUpdate(const std::string& viewId, JSRef<JSObject> jsObject, JSRef<JSFunc> jsRenderFunction)
 {
@@ -691,7 +693,8 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout() ||
                               jsViewFunction_->HasMeasureSize() || jsViewFunction_->HasPlaceChildren(),
         .isStatic = IsStatic(),
-        .jsViewName = GetJSViewName() };
+        .jsViewName = GetJSViewName(),
+        .isV2 = GetJSIsV2() };
 
     auto measureFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
         auto jsView = weak.Upgrade();
@@ -908,7 +911,8 @@ void JSViewPartialUpdate::CreateRecycle(const JSCallbackInfo& info)
     } else {
         node = view->CreateViewNode();
     }
-    auto dummyNode = NG::RecycleDummyNode::WrapRecycleDummyNode(node);
+    auto* stack = NG::ViewStackProcessor::GetInstance();
+    auto dummyNode = NG::RecycleDummyNode::WrapRecycleDummyNode(node, stack->GetRecycleNodeId());
     ViewStackModel::GetInstance()->Push(dummyNode, true);
 }
 
@@ -951,6 +955,7 @@ void JSViewPartialUpdate::JSGetRouterPageInfo(const JSCallbackInfo& info)
 
 void JSViewPartialUpdate::JSGetNavigationInfo(const JSCallbackInfo& info)
 {
+    ContainerScope scope(GetInstanceId());
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto navigationMgr = pipeline->GetNavigationManager();
@@ -1013,6 +1018,11 @@ void JSViewPartialUpdate::JSSendStateInfo(const std::string& stateInfo)
 #endif
 }
 
+void JSViewPartialUpdate::JSSetIsV2(const bool isV2)
+{
+    isV2_ = isV2;
+}
+
 void JSViewPartialUpdate::JSBind(BindingTarget object)
 {
     JSClass<JSViewPartialUpdate>::Declare("NativeViewPartialUpdate");
@@ -1044,6 +1054,7 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::CustomMethod("getUIContext", &JSViewPartialUpdate::JSGetUIContext);
     JSClass<JSViewPartialUpdate>::Method("sendStateInfo", &JSViewPartialUpdate::JSSendStateInfo);
     JSClass<JSViewPartialUpdate>::CustomMethod("getUniqueId", &JSViewPartialUpdate::JSGetUniqueId);
+    JSClass<JSViewPartialUpdate>::Method("setIsV2", &JSViewPartialUpdate::JSSetIsV2);
     JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
 }
 

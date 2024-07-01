@@ -994,7 +994,7 @@ HWTEST_F(RadioTestNg, RadioPaintMethodTest009, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(4);
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(5);
     radioPaintMethod.radioModifier_->enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
     radioPaintMethod.radioModifier_->uiStatus_ =
         AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(UIStatus::UNSELECTED));
@@ -1373,6 +1373,9 @@ HWTEST_F(RadioTestNg, RadioPatternTest025, TestSize.Level1)
     /**
      * fire touch event
      */
+    auto touchCallback = [](TouchEventInfo& info) {};
+    auto touchEvent = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    gesture->AddTouchEvent(touchEvent);
     auto touchEventActuator = gesture->touchEventActuator_;
     ASSERT_NE(touchEventActuator, nullptr);
     auto events = touchEventActuator->touchEvents_;

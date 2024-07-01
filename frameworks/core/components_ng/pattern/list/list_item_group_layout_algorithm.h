@@ -40,6 +40,13 @@ struct ListItemGroupInfo {
     bool isPressed = false;
 };
 
+struct ListItemGroupCacheParam {
+    bool forward = true;
+    int32_t cacheCount = 0;
+    int32_t currCachedIndex = -1;
+    int64_t deadline = 0;
+};
+
 // TextLayoutAlgorithm acts as the underlying text layout.
 class ACE_EXPORT ListItemGroupLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(ListItemGroupLayoutAlgorithm, LayoutAlgorithm);
@@ -65,7 +72,7 @@ public:
         itemPosition_ = itemPosition;
     }
 
-    void ClearItemPosition(LayoutWrapper* layoutWrapper);
+    void ClearItemPosition();
 
     float GetSpaceWidth() const
     {
@@ -202,6 +209,8 @@ public:
         needAllLayout_ = true;
     }
 
+    void CheckNeedAllLayout(const RefPtr<LayoutWrapper>& layoutWrapper, bool forwardLayout);
+
     void SetScrollAlign(ScrollAlign align)
     {
         scrollAlign_ = align;
@@ -260,6 +269,16 @@ public:
         return endFooterPos_;
     }
 
+    void SetCacheParam(std::optional<ListItemGroupCacheParam> param)
+    {
+        cacheParam_ = param;
+    }
+
+    std::optional<ListItemGroupCacheParam> GetCacheParam() const
+    {
+        return cacheParam_;
+    }
+
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -299,7 +318,7 @@ private:
     void MeasureEnd(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
     void MeasureAuto(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
     void MeasureHeaderFooter(LayoutWrapper* layoutWrapper);
-    void SetActiveChildRange(LayoutWrapper* layoutWrapper);
+    void SetActiveChildRange(LayoutWrapper* layoutWrapper, int32_t cacheCount);
     float UpdateReferencePos(RefPtr<LayoutProperty> layoutProperty, bool forwardLayout, float referencePos);
     bool NeedMeasureItem(LayoutWrapper* layoutWrapper);
     static void SetListItemIndex(const LayoutWrapper* groupLayoutWrapper,
@@ -308,6 +327,8 @@ private:
     float GetListItemGroupMaxWidth(const OptionalSizeF& parentIdealSize, RefPtr<LayoutProperty> layoutProperty);
     void AdjustItemPosition();
     bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const;
+    void MeasureCacheItem(LayoutWrapper* layoutWrapper);
+    void LayoutCacheItem(LayoutWrapper* layoutWrapper);
 
     bool isCardStyle_ = false;
     int32_t headerIndex_;
@@ -352,7 +373,10 @@ private:
 
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
     LayoutConstraintF childLayoutConstraint_;
-    TextDirection layoutDirection_;
+    TextDirection layoutDirection_ = TextDirection::LTR;
+
+    std::optional<ListItemGroupCacheParam> cacheParam_;
+    std::list<int32_t> cachedItem_;
 };
 } // namespace OHOS::Ace::NG
 

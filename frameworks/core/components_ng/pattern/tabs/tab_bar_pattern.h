@@ -140,16 +140,15 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         auto layoutAlgorithm = MakeRefPtr<TabBarLayoutAlgorithm>();
-        layoutAlgorithm->SetChildrenMainSize(childrenMainSize_);
-        layoutAlgorithm->SetCurrentOffset(currentOffset_);
-        layoutAlgorithm->SetIndicator(indicator_);
-        layoutAlgorithm->SetIsBuilder(IsContainsBuilder());
+        layoutAlgorithm->SetCurrentDelta(currentDelta_);
         layoutAlgorithm->SetTabBarStyle(tabBarStyle_);
-        if (needSetCentered_) {
-            layoutAlgorithm->SetNeedSetCentered();
-            needSetCentered_ = false;
+        if (targetIndex_) {
+            layoutAlgorithm->SetTargetIndex(targetIndex_);
+        } else if (jumpIndex_) {
+            layoutAlgorithm->SetJumpIndex(jumpIndex_);
         }
-        layoutAlgorithm->SetScrollMargin(scrollMargin_);
+        layoutAlgorithm->SetVisibleItemPosition(visibleItemPosition_);
+        layoutAlgorithm->SetCanOverScroll(canOverScroll_);
         return layoutAlgorithm;
     }
 
@@ -177,11 +176,6 @@ public:
         focusPaintParams.SetPaintWidth(tabTheme->GetActiveIndicatorWidth());
         focusPaintParams.SetPaintColor(focusTheme->GetColor());
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
-    }
-
-    void SetChildrenMainSize(float childrenMainSize)
-    {
-        childrenMainSize_ = childrenMainSize;
     }
 
     void SetIndicator(int32_t indicator)
@@ -240,8 +234,8 @@ public:
         return tabBarStyle_;
     }
 
-    void PlayTabBarTranslateAnimation(int32_t targetIndex);
-    void StopTabBarTranslateAnimation();
+    void TriggerTranslateAnimation(int32_t currentIndex, int32_t targetIndex);
+
     void HandleBottomTabBarChange(int32_t index);
 
     bool GetChangeByClick() const
@@ -255,7 +249,7 @@ public:
     }
     void SetSelectedMode(SelectedMode selectedMode, uint32_t position)
     {
-        if (selectedModes_.size() == position) {
+        if (selectedModes_.size() <= position) {
             selectedModes_.emplace_back(selectedMode);
         } else {
             selectedModes_[position] = selectedMode;
@@ -264,7 +258,7 @@ public:
 
     void SetIndicatorStyle(const IndicatorStyle& indicatorStyle, uint32_t position)
     {
-        if (indicatorStyles_.size() == position) {
+        if (indicatorStyles_.size() <= position) {
             indicatorStyles_.emplace_back(indicatorStyle);
         } else {
             indicatorStyles_[position] = indicatorStyle;
@@ -273,7 +267,7 @@ public:
 
     void SetTabBarStyle(TabBarStyle tabBarStyle, uint32_t position)
     {
-        if (tabBarStyles_.size() == position) {
+        if (tabBarStyles_.size() <= position) {
             tabBarStyles_.emplace_back(tabBarStyle);
         } else {
             tabBarStyles_[position] = tabBarStyle;
@@ -282,7 +276,7 @@ public:
 
     void SetBottomTabBarStyle(const BottomTabBarStyle& bottomTabBarStyle, uint32_t position)
     {
-        if (bottomTabBarStyles_.size() == position) {
+        if (bottomTabBarStyles_.size() <= position) {
             bottomTabBarStyles_.emplace_back(bottomTabBarStyle);
         } else {
             bottomTabBarStyles_[position] = bottomTabBarStyle;
@@ -291,7 +285,7 @@ public:
 
     void SetLabelStyle(const LabelStyle& labelStyle, uint32_t position)
     {
-        if (labelStyles_.size() == position) {
+        if (labelStyles_.size() <= position) {
             labelStyles_.emplace_back(labelStyle);
         } else {
             labelStyles_[position] = labelStyle;
@@ -300,7 +294,7 @@ public:
 
     void SetIconStyle(const IconStyle& iconStyle, uint32_t position)
     {
-        if (iconStyles_.size() == position) {
+        if (iconStyles_.size() <= position) {
             iconStyles_.emplace_back(iconStyle);
         } else {
             iconStyles_[position] = iconStyle;
@@ -314,7 +308,7 @@ public:
 
     void SetSymbol(const TabBarSymbol& symbol, uint32_t position)
     {
-        if (symbolArray_.size() == position) {
+        if (symbolArray_.size() <= position) {
             symbolArray_.emplace_back(symbol);
         } else {
             symbolArray_[position] = symbol;
@@ -413,7 +407,22 @@ public:
 
     void DumpAdvanceInfo() override;
 
-    std::optional<int32_t> GetAnimationDuration();
+    std::optional<int32_t> GetAnimationDuration()
+    {
+        return animationDuration_;
+    }
+
+    bool GetTabContentWillChangeFlag()
+    {
+        return tabContentWillChangeFlag_;
+    }
+
+    void ResetTabContentWillChangeFlag()
+    {
+        tabContentWillChangeFlag_ = false;
+    }
+
+    void UpdateAnimationDuration();
 
     bool HasSurfaceChangedCallback()
     {
@@ -483,8 +492,11 @@ private:
     int32_t CalculateSelectedIndex(const Offset& info);
 
     void PlayPressAnimation(int32_t index, const Color& pressColor, AnimationType animationType);
-    void PlayTranslateAnimation(float startPos, float endPos, float targetCurrentOffset);
+    void PlayTabBarTranslateAnimation(AnimationOption option, float targetCurrentOffset);
+    void PlayIndicatorTranslateAnimation(AnimationOption option, RectF originalPaintRect, RectF targetPaintRect,
+        float targetOffset);
     void StopTranslateAnimation();
+    float CalculateTargetOffset(int32_t targetIndex);
     void UpdateIndicatorCurrentOffset(float offset);
 
     void GetInnerFocusPaintRect(RoundRect& paintRect);
@@ -499,13 +511,11 @@ private:
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect);
     bool IsOutOfBoundary();
     void SetAccessibilityAction();
-    void AdjustFocusPosition();
     void TabBarClickEvent(int32_t index) const;
     void OnCustomContentTransition(int32_t fromIndex, int32_t toIndex);
     void ApplyTurnPageRateToIndicator(float turnPageRate);
     bool CheckSwiperDisable() const;
     void SetSwiperCurve(const RefPtr<Curve>& curve) const;
-    void AdjustOffset(double& offset) const;
     void InitTurnPageRateEvent();
     void GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset);
     void CalculateIndicatorStyle(
@@ -513,8 +523,6 @@ private:
     Color GetTabBarBackgroundColor() const;
     float GetLeftPadding() const;
     void HandleBottomTabBarAnimation(int32_t index);
-    void TriggerTranslateAnimation(
-        const RefPtr<TabBarLayoutProperty>& layoutProperty, int32_t index, int32_t indicator);
     void UpdatePaintIndicator(int32_t indicator, bool needMarkDirty);
     bool IsNeedUpdateFontWeight(int32_t index);
     std::pair<float, float> GetOverScrollInfo(const SizeF& size);
@@ -523,6 +531,8 @@ private:
     void AddMaskItemClickEvent();
     void TabBarSuitAging();
     void SetMarginVP(MarginProperty& marginLeftOrRight, MarginProperty& marginTopOrBottom);
+    bool CanScroll() const;
+
     std::map<int32_t, RefPtr<ClickEvent>> clickEvents_;
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -536,29 +546,28 @@ private:
     AnimationStartEventPtr animationStartEvent_;
     AnimationEndEventPtr animationEndEvent_;
 
-    float currentOffset_ = 0.0f;
-    float childrenMainSize_ = 0.0f;
+    float bigScale_ = 0.0f;
+    float largeScale_ = 0.0f;
+    float maxScale_ = 0.0f;
     int32_t indicator_ = 0;
     int32_t focusIndicator_ = 0;
     Axis axis_ = Axis::HORIZONTAL;
-    std::vector<OffsetF> tabItemOffsets_;
     std::unordered_map<int32_t, bool> tabBarType_;
     std::optional<int32_t> animationDuration_;
 
     std::shared_ptr<AnimationUtils::Animation> tabbarIndicatorAnimation_;
     std::shared_ptr<AnimationUtils::Animation> translateAnimation_;
-    std::shared_ptr<AnimationUtils::Animation> tabBarTranslateAnimation_;
 
     bool indicatorAnimationIsRunning_ = false;
     bool translateAnimationIsRunning_ = false;
-    bool tabBarTranslateAnimationIsRunning_ = false;
 
-    bool isRTL_ = false; // TODO Adapt RTL.
+    bool isRTL_ = false;
 
     bool touching_ = false; // whether the item is in touching
     bool isHover_ = false;
     bool isMaskAnimationByCreate_ = false;
     bool isMaskAnimationExecuted_ = false;
+    bool tabContentWillChangeFlag_ = false;
     std::optional<int32_t> imageColorOnIndex_;
     std::optional<int32_t> touchingIndex_;
     std::optional<int32_t> hoverIndex_;
@@ -584,13 +593,19 @@ private:
     std::vector<bool> gradientRegions_ = {false, false, false, false};
     bool isAnimating_ = false;
     bool changeByClick_ = false;
-    bool needSetCentered_ = false;
     float scrollMargin_ = 0.0f;
     bool isFirstLayout_ = true;
     std::optional<int32_t> animationTargetIndex_;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<WindowSizeChangeReason> windowSizeChangeReason_;
     std::pair<double, double> prevRootSize_;
+
+    std::optional<int32_t> jumpIndex_;
+    std::optional<int32_t> targetIndex_;
+    float currentDelta_ = 0.0f;
+    float currentOffset_ = 0.0f;
+    std::map<int32_t, ItemInfo> visibleItemPosition_;
+    bool canOverScroll_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
     MarginProperty marginLeftOrRight_;
     MarginProperty marginTopOrBottom_;

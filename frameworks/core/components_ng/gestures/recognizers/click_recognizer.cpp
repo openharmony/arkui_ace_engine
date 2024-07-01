@@ -62,7 +62,9 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
         auto paintRect = renderContext->GetPaintRectWithoutTransform();
         localPoint = localPoint + paintRect.GetOffset();
         if (!host->InResponseRegionList(localPoint, responseRegionBuffer_)) {
-            TAG_LOGI(AceLogTag::ACE_GESTURE, "This MOVE/UP event is out of region, try to reject click gesture");
+            TAG_LOGI(AceLogTag::ACE_GESTURE,
+                "InputTracking id:%{public}d, this MOVE/UP event is out of region, try to reject click gesture",
+                event.touchEventId);
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
             return false;
         }
@@ -142,7 +144,7 @@ void ClickRecognizer::OnAccepted()
     firstInputTime_.reset();
 
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Click gesture has been accepted, node tag = %{public}s, id = %{public}s",
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Click accepted, tag: %{public}s, id: %{public}s",
         node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
     if (onAccessibilityEventFunc_) {
         onAccessibilityEventFunc_(AccessibilityEventType::CLICK);
@@ -188,10 +190,8 @@ void ClickRecognizer::OnRejected()
 void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, click recognizer receives %{public}d touch down event, begin to detect click "
-        "event, current finger info: "
-        "%{public}d, %{public}d",
-        event.touchEventId, event.id, equalsToFingers_, currentTouchPointsNum_);
+        "Id:%{public}d, click %{public}d down, ETF: %{public}d, CTP: %{public}d, state: %{public}d",
+        event.touchEventId, event.id, equalsToFingers_, currentTouchPointsNum_, refereeState_);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -251,8 +251,8 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, click recognizer receives %{public}d touch up event",
-        event.touchEventId, event.id);
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, click %{public}d up, state: %{public}d", event.touchEventId,
+        event.id, refereeState_);
     auto pipeline = PipelineBase::GetCurrentContext();
     // In a card scenario, determine the interval between finger pressing and finger lifting. Delete this section of
     // logic when the formal scenario is complete.
@@ -287,7 +287,7 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         tappedCount_++;
 
         if (tappedCount_ == count_) {
-            TAG_LOGI(AceLogTag::ACE_GESTURE, "This gesture is click, try to accept it");
+            TAG_LOGI(AceLogTag::ACE_GESTURE, "Click try accept");
             time_ = event.time;
             if (!useCatchMode_) {
                 OnAccepted();
@@ -340,9 +340,7 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, click recognizer receives %{public}d touch cancel event", event.touchEventId,
-        event.id);
+    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, click %{public}d cancel", event.touchEventId, event.id);
     if (IsRefereeFinished()) {
         return;
     }
