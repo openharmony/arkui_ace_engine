@@ -2791,8 +2791,7 @@ void WebDelegate::UnregisterAvoidAreaChangeListener()
         avoidAreaChangedListener_ = nullptr;
         TAG_LOGI(AceLogTag::ACE_WEB, "UnregisterAvoidAreaChangeListener result:%{public}d", (int) regCode);
     } else {
-        TAG_LOGI(AceLogTag::ACE_WEB, "CANNOT UnregisterAvoidAreaChangeListener %{public}d %{public}d %{public}d",
-            pipeline->GetMinPlatformVersion(), pipeline->GetIsAppWindow(), container->IsUIExtensionWindow());
+        TAG_LOGI(AceLogTag::ACE_WEB, "CANNOT UnregisterAvoidAreaChangeListener");
     }
 }
 
