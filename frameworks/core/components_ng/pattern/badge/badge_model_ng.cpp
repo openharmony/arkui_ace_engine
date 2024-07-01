@@ -91,8 +91,12 @@ void BadgeModelNG::UpdateBadgeStyle(BadgeParameters& badgeParameters, const RefP
     }
     if (badgeParameters.badgeTextColor.has_value()) {
         layoutProperty->UpdateBadgeTextColor(badgeParameters.badgeTextColor.value());
+        ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, badgeParameters.badgeTextColor.value());
+        ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
     } else {
         layoutProperty->UpdateBadgeTextColor(badgeTheme->GetBadgeTextColor());
+        ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, badgeTheme->GetBadgeTextColor());
+        ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
     }
     if (badgeParameters.badgeFontSize.has_value()) {
         layoutProperty->UpdateBadgeFontSize(badgeParameters.badgeFontSize.value());
