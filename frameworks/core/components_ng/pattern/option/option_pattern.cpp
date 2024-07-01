@@ -135,18 +135,12 @@ void OptionPattern::HandleFocusEvent()
         renderContext->UpdateBackShadow(Shadow::CreateShadow(shadowStyle));
         isFocusShadowSet_ = true;
     }
-    if (selected_ > 0 && selected_ != index_) {
-        Color color = GetBgColor();
-        isFocusBGColorSet_ = renderContext->GetBackgroundColor() == color;
-        if (isFocusBGColorSet_) {
-            renderContext->UpdateBackgroundColor(selectTheme_->GetOptionFocusedBackgroundColor());
-        }
-    }
-    
-    CHECK_NULL_VOID(text_);
-    auto context = text_->GetRenderContext();
-    CHECK_NULL_VOID(context);
-    if (!context->HasForegroundColor()) {
+    if (selected_ != index_) {
+        isFocusBGColorSet_ = true;
+        renderContext->UpdateBackgroundColor(selectTheme_->GetOptionFocusedBackgroundColor());
+        CHECK_NULL_VOID(text_);
+        auto context = text_->GetRenderContext();
+        CHECK_NULL_VOID(context);
         context->UpdateForegroundColor(selectTheme_->GetOptionFocusedFontColor());
         context->UpdateForegroundColorFlag(false);
         context->ResetForegroundColorStrategy();
@@ -163,7 +157,7 @@ void OptionPattern::HandleBlurEvent()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (isFocusBGColorSet_) {
-        renderContext->SetBackgroundColor(Color::TRANSPARENT.GetValue());
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         isFocusBGColorSet_ = false;
     }
     if (isFocusShadowSet_) {

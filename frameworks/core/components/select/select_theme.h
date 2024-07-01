@@ -316,6 +316,10 @@ public:
             theme->optionSelectedBorderColor_ =
                 pattern->GetAttr<Color>("option_selected_border_color", Color::TRANSPARENT);
             theme->optionSelectedBorderWidth_ = pattern->GetAttr<Dimension>("option_selected_border_width", 0.0_vp);
+            theme->optionNormalWidth_ = pattern->GetAttr<Dimension>("option_normal_width", 156.0_vp);
+            theme->selectedFontSizeText = pattern->GetAttr<Dimension>("select_font_size_text", 16.0_fp);
+            theme->selectNormalLeftRightMargin_ =
+		pattern->GetAttr<Dimension>("select_normal_left_right_margin", 8.0_vp);
         }
     };
 
@@ -445,6 +449,9 @@ public:
         theme->shadowNormal_ = shadowNormal_;
         theme->optionSelectedBorderColor_ = optionSelectedBorderColor_;
         theme->optionSelectedBorderWidth_ = optionSelectedBorderWidth_;
+        theme->optionNormalWidth_ = optionNormalWidth_;
+        theme->selectedFontSizeText = selectedFontSizeText;
+        theme->selectNormalLeftRightMargin_ = selectNormalLeftRightMargin_;
         return theme;
     }
 
@@ -1234,6 +1241,21 @@ public:
     {
         return optionSelectedBorderWidth_;
     }
+
+    Dimension GetMenuNormalWidth() const
+    {
+        return optionNormalWidth_;
+    }
+
+    Dimension GetSelectFontSizeText() const
+    {
+        return selectedFontSizeText;
+    }
+
+    Dimension GetSelectNormalLeftRightMargin() const
+    {
+        return selectNormalLeftRightMargin_;
+    }
 private:
     Color disabledColor_;
     Color clickedColor_;
@@ -1375,6 +1397,9 @@ private:
     uint32_t shadowNormal_;  // no shadow
     Color optionSelectedBorderColor_;
     Dimension optionSelectedBorderWidth_;
+    Dimension optionNormalWidth_;
+    Dimension selectedFontSizeText;
+    Dimension selectNormalLeftRightMargin_;
 };
 
 } // namespace OHOS::Ace

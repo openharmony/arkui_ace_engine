@@ -195,7 +195,7 @@ void OptionLayoutAlgorithm::extendTextAndRowNode(const RefPtr<LayoutWrapper>& ro
         CHECK_NULL_VOID(geometryNode);
         frameSize = geometryNode->GetMarginFrameSize();
         auto startOffset = geometryNode->GetMarginFrameOffset();
-        auto width = optSize.Width() - startOffset.GetX() - interval;
+        auto width = optSize.Width() - startOffset.GetX() - 2.0f * interval;
         auto height = frameSize.Height();
         geometryNode->SetFrameSize(SizeF(width, height));
         textChild->Layout();
@@ -203,6 +203,6 @@ void OptionLayoutAlgorithm::extendTextAndRowNode(const RefPtr<LayoutWrapper>& ro
     auto geometryNode = row->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     frameSize = geometryNode->GetMarginFrameSize();
-    geometryNode->SetFrameSize(SizeF(optSize.Width() - interval, frameSize.Height()));
+    geometryNode->SetFrameSize(SizeF(optSize.Width() - 2.0f * interval, frameSize.Height()));
 }
 } // namespace OHOS::Ace::NG

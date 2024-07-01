@@ -968,6 +968,9 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
     }
     if (selectedFont_.FontSize.has_value()) {
         newSelected->SetFontSize(selectedFont_.FontSize.value());
+    } else {
+        auto selectedFontSizeText = theme->GetSelectFontSizeText();
+        newSelected->SetFontSize(selectedFontSizeText);
     }
     if (selectedFont_.FontStyle.has_value()) {
         newSelected->SetItalicFontStyle(selectedFont_.FontStyle.value());
@@ -1560,5 +1563,16 @@ void SelectPattern::SetLayoutDirection(TextDirection value)
 ControlSize SelectPattern::GetControlSize()
 {
     return controlSize_;
+}
+
+Dimension SelectPattern::GetSelectLeftRightMargin()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, SELECT_MARGIN_VP);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, SELECT_MARGIN_VP);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(selectTheme, SELECT_MARGIN_VP);
+    return selectTheme->GetSelectNormalLeftRightMargin();
 }
 } // namespace OHOS::Ace::NG
