@@ -163,7 +163,7 @@ RefPtr<FrameNode> GetLastPage()
 }
 
 void ShowPreviewBgDisappearAnimationProc(const RefPtr<RenderContext>& previewRenderContext,
-    const RefPtr<MenuTheme>& menuTheme)
+    const RefPtr<MenuTheme>& menuTheme, bool isShowHoverImage)
 {
     auto shadow = previewRenderContext->GetBackShadow();
     if (!shadow.has_value()) {
@@ -172,8 +172,12 @@ void ShowPreviewBgDisappearAnimationProc(const RefPtr<RenderContext>& previewRen
     previewRenderContext->UpdateBackShadow(shadow.value());
     auto disappearDuration = menuTheme->GetDisappearDuration();
     AnimationOption previewOption;
-    previewOption.SetCurve(Curves::SHARP);
-    previewOption.SetDuration(disappearDuration);
+    if (isShowHoverImage) {
+        previewOption.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
+    } else {
+        previewOption.SetCurve(Curves::SHARP);
+        previewOption.SetDuration(disappearDuration);
+    }
     AnimationUtils::Animate(previewOption, [previewRenderContext, shadow]() mutable {
         CHECK_NULL_VOID(previewRenderContext);
         auto color = shadow->GetColor();
@@ -197,20 +201,16 @@ void UpdateHoverImagePreviewOpacityAnimation(const RefPtr<MenuTheme>& menuTheme,
     CHECK_NULL_VOID(previewRenderContext);
 
     bool isCustomPreview = previewChild->GetTag() == V2::MENU_PREVIEW_ETS_TAG;
-    auto duration = isCustomPreview ? menuTheme->GetHoverImagePreviewDisAppearDuration() :
-        menuTheme->GetHoverImageDisAppearDuration();
-    auto opacityStart = isCustomPreview ? 1.0f : 0.0f;
-    auto opacityEnd = isCustomPreview ? 0.0f : 1.0f;
+    // only update custom preview opacity
+    CHECK_NULL_VOID(isCustomPreview);
 
-    // update image or custom preview opacity
-    previewRenderContext->UpdateOpacity(opacityStart);
     AnimationOption option;
-    option.SetDuration(duration);
+    option.SetDuration(menuTheme->GetHoverImagePreviewDisAppearDuration());
     option.SetCurve(Curves::FRICTION);
     AnimationUtils::Animate(
-        option, [previewRenderContext, opacityEnd]() {
+        option, [previewRenderContext]() {
             CHECK_NULL_VOID(previewRenderContext);
-            previewRenderContext->UpdateOpacity(opacityEnd);
+            previewRenderContext->UpdateOpacity(0.0);
         });
 }
 
@@ -253,7 +253,7 @@ void ShowPreviewDisappearAnimationProc(const RefPtr<MenuWrapperPattern>& menuWra
             previewScale = menuPattern->GetTargetSize().Width() / preivewSize.Width();
         }
     }
-    ShowPreviewBgDisappearAnimationProc(previewRenderContext, menuTheme);
+    ShowPreviewBgDisappearAnimationProc(previewRenderContext, menuTheme, menuWrapperPattern->GetIsShowHoverImage());
 
     CHECK_NULL_VOID(!menuPattern->GetIsShowHoverImage());
     AnimationUtils::Animate(scaleOption,
@@ -329,25 +329,22 @@ void UpdateHoverImageDisappearScaleAndPosition(const RefPtr<MenuWrapperPattern>&
 
     CHECK_NULL_VOID(previewPattern);
     // reverse scale
-    auto scaleFrom = previewPattern->GetCustomPreviewScaleTo();
     auto scaleTo = previewPattern->GetHoverImageScaleFrom();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
-    auto scaleBefore = LessNotEqual(scaleFrom, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleFrom;
     auto scaleAfter = LessNotEqual(scaleTo, 0.0) ? menuTheme->GetPreviewBeforeAnimationScale() : scaleTo;
 
     auto stackNode = menuWrapperPattern->GetHoverImageStackNode();
     CHECK_NULL_VOID(stackNode);
     auto stackContext = stackNode->GetRenderContext();
     CHECK_NULL_VOID(stackContext);
-    stackContext->UpdateTransformScale(VectorF(scaleBefore, scaleBefore));
 
-    auto colNode = menuWrapperPattern->GetHoverImageColNode();
-    CHECK_NULL_VOID(colNode);
-    auto colContext = colNode->GetRenderContext();
-    CHECK_NULL_VOID(colContext);
+    auto flexNode = menuWrapperPattern->GetHoverImageFlexNode();
+    CHECK_NULL_VOID(flexNode);
+    auto flexContext = flexNode->GetRenderContext();
+    CHECK_NULL_VOID(flexContext);
     
     auto menuChild = menuWrapperPattern->GetMenu();
     CHECK_NULL_VOID(menuChild);
@@ -358,16 +355,16 @@ void UpdateHoverImageDisappearScaleAndPosition(const RefPtr<MenuWrapperPattern>&
     AnimationOption option = AnimationOption();
     option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
     AnimationUtils::Animate(
-        option, [stackContext, scaleAfter, colContext, previewPosition]() {
+        option, [stackContext, scaleAfter, flexContext, previewPosition]() {
             CHECK_NULL_VOID(stackContext);
             stackContext->UpdateTransformScale(VectorF(scaleAfter, scaleAfter));
 
-            CHECK_NULL_VOID(colContext);
-            colContext->UpdatePosition(
+            CHECK_NULL_VOID(flexContext);
+            flexContext->UpdatePosition(
                 OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
         });
 
-    ShowPreviewBgDisappearAnimationProc(stackContext, menuTheme);
+    ShowPreviewBgDisappearAnimationProc(stackContext, menuTheme, menuWrapperPattern->GetHoverImageStackNode());
 }
 
 void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapperPattern)
@@ -376,7 +373,7 @@ void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapper
     auto previewChild = menuWrapperPattern->GetPreview();
     CHECK_NULL_VOID(previewChild);
     ShowPreviewDisappearAnimationProc(menuWrapperPattern, previewChild);
-
+    
     CHECK_NULL_VOID(menuWrapperPattern->GetIsShowHoverImage());
     auto hoverImagePreview = menuWrapperPattern->GetHoverImagePreview();
     CHECK_NULL_VOID(hoverImagePreview);
@@ -384,8 +381,9 @@ void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapper
 
     auto previewPattern = previewChild->GetPattern<MenuPreviewPattern>();
     CHECK_NULL_VOID(previewPattern);
-    UpdatePreivewVisibleAreaWhenDisappear(menuWrapperPattern->GetHoverImageStackNode(), previewChild);
     UpdateHoverImageDisappearScaleAndPosition(menuWrapperPattern, previewPattern);
+    CHECK_NULL_VOID(!previewPattern->IsHoverImageAnimationPlaying());
+    UpdatePreivewVisibleAreaWhenDisappear(menuWrapperPattern->GetHoverImageStackNode(), previewChild);
 }
 
 void UpdateContextMenuDisappearPositionAnimation(const RefPtr<FrameNode>& menu, const NG::OffsetF& offset)
@@ -465,15 +463,9 @@ void ContextMenuSwitchDragPreviewScaleAnimationProc(const RefPtr<RenderContext>&
 void ContextMenuSwitchDragPreviewAnimationProc(const RefPtr<FrameNode>& menu,
     const RefPtr<NG::FrameNode>& dragPreviewNode, const NG::OffsetF& offset)
 {
-    CHECK_NULL_VOID(dragPreviewNode);
-    CHECK_NULL_VOID(menu);
+    CHECK_NULL_VOID(dragPreviewNode && menu);
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    CHECK_NULL_VOID(menuWrapperPattern->GetIsShowHoverImage());
-    auto previewChild = menuWrapperPattern->GetPreview();
-    CHECK_NULL_VOID(previewChild);
-    auto previewRenderContext = previewChild->GetRenderContext();
-    CHECK_NULL_VOID(previewRenderContext);
+    CHECK_NULL_VOID(menuWrapperPattern && menuWrapperPattern->GetIsShowHoverImage());
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -482,6 +474,10 @@ void ContextMenuSwitchDragPreviewAnimationProc(const RefPtr<FrameNode>& menu,
     // consistent with the menu disappear duration
     auto duration = menuTheme->GetDisappearDuration();
 
+    auto previewChild = menuWrapperPattern->GetPreview();
+    CHECK_NULL_VOID(previewChild);
+    auto previewRenderContext = previewChild->GetRenderContext();
+    CHECK_NULL_VOID(previewRenderContext);
     auto dragPreviewContext = dragPreviewNode->GetRenderContext();
     CHECK_NULL_VOID(dragPreviewContext);
 
@@ -492,6 +488,12 @@ void ContextMenuSwitchDragPreviewAnimationProc(const RefPtr<FrameNode>& menu,
     // custom preview and drag preview update Opacity
     CHECK_NULL_VOID(!menuWrapperPattern->GetIsShowHoverImagePreviewStartDrag());
     menuWrapperPattern->SetIsShowHoverImagePreviewStartDrag(true);
+    auto imageNode = menuWrapperPattern->GetHoverImagePreview();
+    CHECK_NULL_VOID(imageNode);
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
+    imageContext->UpdateOpacity(0.0);
+
     previewRenderContext->UpdateOpacity(1.0);
     dragPreviewContext->UpdateOpacity(0.0);
     AnimationOption option;
@@ -1991,6 +1993,29 @@ void OverlayManager::CleanMenuInSubWindowWithAnimation()
     PopMenuAnimation(menu);
 }
 
+void OverlayManager::CleanHoverImagePreviewInSubWindow(const RefPtr<FrameNode>& flexNode)
+{
+    CHECK_NULL_VOID(flexNode && flexNode->GetTag() == V2::FLEX_ETS_TAG);
+    for (const auto& child : flexNode->GetChildren()) {
+        auto node = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(node && node->GetTag() == V2::STACK_ETS_TAG);
+
+        auto previewNode = node->GetLastChild();
+        if (previewNode && previewNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG) {
+            node->RemoveChild(previewNode);
+        }
+
+        auto imageNode = node->GetFirstChild();
+        if (imageNode && imageNode->GetTag() == V2::IMAGE_ETS_TAG) {
+            node->RemoveChild(imageNode);
+        }
+
+        flexNode->RemoveChild(node);
+        flexNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        break;
+    }
+}
+
 void OverlayManager::CleanPreviewInSubWindow()
 {
     auto rootNode = rootNodeWeak_.Upgrade();
@@ -2032,8 +2057,9 @@ void OverlayManager::CleanMenuInSubWindow(int32_t targetId)
 
         for (auto& childNode : node->GetChildren()) {
             auto frameNode = DynamicCast<FrameNode>(childNode);
-            if (frameNode &&
-                (frameNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || frameNode->GetTag() == V2::IMAGE_ETS_TAG)) {
+            if (frameNode && (frameNode->GetTag() == V2::FLEX_ETS_TAG ||
+                frameNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || frameNode->GetTag() == V2::IMAGE_ETS_TAG)) {
+                CleanHoverImagePreviewInSubWindow(frameNode);
                 node->RemoveChild(frameNode);
                 break;
             }

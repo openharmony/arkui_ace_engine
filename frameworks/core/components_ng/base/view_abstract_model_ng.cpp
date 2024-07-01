@@ -46,6 +46,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t LONG_PRESS_DURATION = 800;
+constexpr int32_t HOVER_IMAGE_LONG_PRESS_DURATION = 100;
 } // namespace
 
 void ViewAbstractModelNG::BindMenuGesture(
@@ -306,7 +307,8 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
             };
             auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
             ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
-            hub->SetLongPressEvent(longPress, false, true, LONG_PRESS_DURATION);
+            auto longPressDuration = menuParam.isShowHoverImage ? HOVER_IMAGE_LONG_PRESS_DURATION : LONG_PRESS_DURATION;
+            hub->SetLongPressEvent(longPress, false, true, longPressDuration);
         } else {
             return;
         }
