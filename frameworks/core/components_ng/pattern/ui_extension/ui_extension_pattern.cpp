@@ -192,6 +192,7 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     MountPlaceholderNode();
     SessionConfig config;
     config.isAsyncModalBinding = isAsyncModalBinding_;
+    config.uiExtensionUsage = uIExtensionUsage;
     sessionWrapper_->CreateSession(want, config);
     NotifyForeground();
 }
