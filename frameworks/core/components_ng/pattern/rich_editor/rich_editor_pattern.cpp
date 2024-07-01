@@ -3259,10 +3259,16 @@ void RichEditorPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-RefPtr<SpanString> RichEditorPattern::ToStyledString(int32_t start, int32_t length)
+RefPtr<SpanString> RichEditorPattern::ToStyledString(int32_t start, int32_t end)
 {
+    auto length = GetTextContentLength();
+    int32_t realStart = (start == -1) ? 0 : std::clamp(start, 0, length);
+    int32_t realEnd = (end == -1) ? length : std::clamp(end, 0, length);
+    if (realStart > realEnd) {
+        std::swap(realStart, realEnd);
+    }
     RefPtr<SpanString> spanString = MakeRefPtr<SpanString>("");
-    SetSubSpans(spanString, start, length);
+    SetSubSpans(spanString, realStart, realEnd);
     SetSubMap(spanString);
     return spanString;
 }
@@ -3298,18 +3304,19 @@ SelectionInfo RichEditorPattern::FromStyledString(const RefPtr<SpanString>& span
     return selection;
 }
 
-void RichEditorPattern::SetSubSpans(RefPtr<SpanString>& spanString, int32_t start, int32_t length)
+void RichEditorPattern::SetSubSpans(RefPtr<SpanString>& spanString, int32_t start, int32_t end)
 {
     CHECK_NULL_VOID(spanString);
     std::list<RefPtr<SpanItem>> subSpans;
-    auto end = start + length;
     std::string text;
     for (const auto& spanItem : spans_) {
+        if (!spanItem ||
+            (!AceType::InstanceOf<ImageSpanItem>(spanItem) && AceType::InstanceOf<PlaceholderSpanItem>(spanItem))) {
+            continue;
+        }
         auto spanEndPos = spanItem->position;
-        auto spanLength = static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length());
-        auto spanStartPos = spanEndPos - spanLength;
-
-        if (spanEndPos > start && spanStartPos < start +length) {
+        auto spanStartPos = spanItem->rangeStart;
+        if (spanEndPos > start && spanStartPos < end) {
             int32_t oldStart = spanStartPos;
             int32_t oldEnd = spanEndPos;
             auto spanStart = oldStart <= start ? 0 : oldStart - start;
@@ -6192,7 +6199,7 @@ void RichEditorPattern::CheckEditorTypeChange()
 void RichEditorPattern::OnCopyOperationExt(RefPtr<PasteDataMix>& pasteData)
 {
     auto subSpanString =
-        ToStyledString(textSelector_.GetTextStart(), textSelector_.GetTextEnd() - textSelector_.GetTextStart());
+        ToStyledString(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     std::vector<uint8_t> tlvData;
     subSpanString->EncodeTlv(tlvData);
     auto text = subSpanString->GetString();
