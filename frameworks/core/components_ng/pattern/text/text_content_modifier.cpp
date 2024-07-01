@@ -367,12 +367,13 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
 {
     auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textPattern);
-    ACE_SCOPED_TRACE("Text paint offset=[%f,%f]", paintOffset_.GetX(), paintOffset_.GetY());
     bool ifPaintObscuration = std::any_of(obscuredReasons_.begin(), obscuredReasons_.end(),
         [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
     auto pManager = textPattern->GetParagraphManager();
     CHECK_NULL_VOID(pManager);
     CHECK_NULL_VOID(!pManager->GetParagraphs().empty());
+    ACE_SCOPED_TRACE(
+        "Text[id:%d] paint[offset:%f,%f]", textPattern->GetHost()->GetId(), paintOffset_.GetX(), paintOffset_.GetY());
 
     auto info = GetFadeoutInfo(drawingContext);
     bool isDrawNormal = !ifPaintObscuration || ifHaveSpanItemChildren_;
