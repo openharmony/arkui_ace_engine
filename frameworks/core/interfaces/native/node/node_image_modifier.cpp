@@ -590,10 +590,11 @@ void SetImageOpacity(ArkUINodeHandle node, ArkUI_Float32 opacity)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
-        opacity = 0.0f;
+    auto opacityValue = static_cast<float>(opacity);
+    if ((LessNotEqual(opacityValue, 0.0)) || GreatNotEqual(opacityValue, 1.0)) {
+        opacityValue = 0.0f;
     }
-    ViewAbstract::SetOpacity(frameNode, opacity);
+    ViewAbstract::SetOpacity(frameNode, opacityValue);
 }
 
 void ResetImageOpacity(ArkUINodeHandle node)
