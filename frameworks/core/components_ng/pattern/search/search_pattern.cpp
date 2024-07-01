@@ -850,6 +850,10 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
         auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(textFieldLayoutProperty);
         textFieldLayoutProperty->UpdateTextColor(focusTextColor_);
+        if (textFieldLayoutProperty->GetPlaceholderTextColorValue(normalPlaceholderColor_) == normalPlaceholderColor_) {
+            textFieldLayoutProperty->UpdatePlaceholderTextColor(focusPlaceholderColor_);
+            isFocusPlaceholderColorSet_ = true;
+        }
         if (!recoverFlag) {
             if (!textFieldPattern->GetTextValue().empty()) {
                 textFieldPattern->NeedRequestKeyboard();
@@ -879,6 +883,29 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
     host->MarkModifyDone();
 }
 
+void SearchPattern::GetSearchFocusPaintRadius(float& radiusTopLeft, float& radiusTopRight,
+    float& radiusBottomLeft, float& radiusBottomRight)
+{
+    auto host = GetHost();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto radius = renderContext->GetBorderRadius();
+    if (radius.has_value()) {
+        if (radius->radiusTopLeft.has_value()) {
+            radiusTopLeft = static_cast<float>(radius->radiusTopLeft->ConvertToPx());
+        }
+        if (radius->radiusTopRight.has_value()) {
+            radiusTopRight = static_cast<float>(radius->radiusTopRight->ConvertToPx());
+        }
+        if (radius->radiusBottomLeft.has_value()) {
+            radiusBottomLeft = static_cast<float>(radius->radiusBottomLeft->ConvertToPx());
+        }
+        if (radius->radiusBottomRight.has_value()) {
+            radiusBottomRight = static_cast<float>(radius->radiusBottomRight->ConvertToPx());
+        }
+    }
+}
+
 void SearchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
     float originX = 0.0f;
@@ -891,7 +918,14 @@ void SearchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     float radiusBottomRight = 0.0f;
     float focusOffset = FOCUS_OFFSET.ConvertToPx();
     if (focusChoice_ == FocusChoice::SEARCH) {
-        return;
+        if (!focusBoxGlow_) {
+            return;
+        }
+        originX = searchOffset_.GetX() - DOUBLE * focusOffset;
+        originY = searchOffset_.GetY() - DOUBLE * focusOffset;
+        endX = searchSize_.Width() + searchOffset_.GetX() + DOUBLE * focusOffset;
+        endY = searchSize_.Height() + searchOffset_.GetY() + DOUBLE * focusOffset;
+        GetSearchFocusPaintRadius(radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
     }
     if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
         originX = cancelButtonOffset_.GetX() + focusOffset;
@@ -925,15 +959,17 @@ FocusPattern SearchPattern::GetFocusPattern() const
 {
     FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
     focusPattern.SetIsFocusActiveWhenFocused(true);
-    if (focusBoxGlow_) {
-        focusPattern.SetStyleType(FocusStyleType::INNER_BORDER);
-        FocusPaintParam focusPaintParam;
-        focusPaintParam.SetPaintColor(focusBorderColor_);
-        focusPaintParam.SetPaintWidth(focusBorderWidth_);
-        focusPaintParam.SetFocusPadding(focusBorderPadding_);
-        focusPaintParam.SetFocusBoxGlow(true);
-        focusPattern.SetFocusPaintParams(focusPaintParam);
-    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, FocusPattern());
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, FocusPattern());
+    auto appTheme = pipeline->GetTheme<AppTheme>();
+    CHECK_NULL_RETURN(appTheme, FocusPattern());
+    FocusPaintParam focusPaintParam;
+    focusPaintParam.SetPaintColor(appTheme->GetFocusBorderColor());
+    focusPaintParam.SetPaintWidth(appTheme->GetFocusBorderWidth());
+    focusPaintParam.SetFocusBoxGlow(appTheme->IsFocusBoxGlow());
+    focusPattern.SetFocusPaintParams(focusPaintParam);
     return focusPattern;
 }
 
@@ -1121,9 +1157,7 @@ void SearchPattern::InitSearchTheme()
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto appTheme = pipeline->GetTheme<AppTheme>();
-    focusBorderColor_ = appTheme->GetFocusColor();
-    focusBorderWidth_ = appTheme->GetFocusWidthVp();
-    focusBorderPadding_ = appTheme->GetFocusOutPaddingVp();
+    focusBoxGlow_ = appTheme->IsFocusBoxGlow();
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
     searchNormalColor_ = textFieldTheme->GetBgColor();
@@ -1131,12 +1165,13 @@ void SearchPattern::InitSearchTheme()
     CHECK_NULL_VOID(searchTheme);
     searchHoverColor_ = searchTheme->GetHoverColor();
     searchTouchColor_ = searchTheme->GetTouchColor();
-    focusBoxGlow_ = searchTheme->IsFocusBoxGlow();
     focusBgColor_ = searchTheme->GetFocusBgColor();
     normalIconColor_ = searchTheme->GetSearchIconColor();
     focusIconColor_ = searchTheme->GetFocusIconColor();
     normalTextColor_ = searchTheme->GetTextColor();
     focusTextColor_ = searchTheme->GetFocusTextColor();
+    normalPlaceholderColor_ = searchTheme->GetPlaceholderColor();
+    focusPlaceholderColor_ = searchTheme->GetFocusPlaceholderColor();
 }
 
 void SearchPattern::InitHoverEvent()
@@ -1273,6 +1308,10 @@ void SearchPattern::HandleBlurEvent()
     auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdateTextColor(normalTextColor_);
+    if (isFocusPlaceholderColorSet_) {
+        textFieldLayoutProperty->UpdatePlaceholderTextColor(normalPlaceholderColor_);
+        isFocusPlaceholderColorSet_ = false;
+    }
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->HandleBlurEvent();

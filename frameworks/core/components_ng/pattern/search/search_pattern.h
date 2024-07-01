@@ -211,6 +211,8 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState(bool recoverFlag = false);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
+    void GetSearchFocusPaintRadius(float& radiusTopLeft, float& radiusTopRight,
+        float& radiusBottomLeft, float& radiusBottomRight);
     void RequestKeyboard();
     // Init touch and hover event
     void InitTextFieldValueChangeEvent();
@@ -300,18 +302,18 @@ private:
     bool isSearchButtonHover_ = false;
     bool isSearchButtonEnabled_ = false;
     bool focusBoxGlow_ = false;
+    bool isFocusPlaceholderColorSet_ = false;
     Color searchHoverColor_;
     Color searchTouchColor_;
     Color searchNormalColor_;
-    Color focusBorderColor_;
     Color focusBgColor_;
     Color focusIconColor_;
     Color normalIconColor_;
     Color focusTextColor_;
     Color normalTextColor_;
+    Color focusPlaceholderColor_;
+    Color normalPlaceholderColor_;
     Color transparentColor_ = Color::TRANSPARENT;
-    Dimension focusBorderWidth_;
-    Dimension focusBorderPadding_;
 
     RefPtr<FrameNode> cancelButtonNode_;
     RefPtr<FrameNode> buttonNode_;
