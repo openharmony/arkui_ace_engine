@@ -1137,13 +1137,14 @@ RefPtr<OverlengthDotIndicatorPaintMethod> SwiperIndicatorPattern::CreateOverlong
         }
     }
 
+    auto isSwiperTouchDown = swiperPattern->IsTouchDown();
     auto isSwiperAnimationRunning = swiperPattern->IsPropertyAnimationRunning();
-    auto keepStatus =
-        !isSwiperAnimationRunning && animationStartIndex != animationEndIndex && !changeIndexWithAnimation_;
+    auto keepStatus = !isSwiperTouchDown && !isSwiperAnimationRunning && animationStartIndex != animationEndIndex &&
+                      !changeIndexWithAnimation_;
     overlongPaintMethod->SetKeepStatus(keepStatus);
     overlongPaintMethod->SetAnimationStartIndex(animationStartIndex);
     overlongPaintMethod->SetAnimationEndIndex(animationEndIndex);
-    overlongDotIndicatorModifier_->SetIsSwiperTouchDown(swiperPattern->IsTouchDown());
+    overlongDotIndicatorModifier_->SetIsSwiperTouchDown(isSwiperTouchDown);
     overlongDotIndicatorModifier_->SetBoundsRect(CalcBoundsRect());
     changeIndexWithAnimation_.reset();
     jumpIndex_.reset();
