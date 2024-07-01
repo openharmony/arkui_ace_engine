@@ -30,8 +30,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t COLOR_BLACK = 0xff000000;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
-constexpr uint32_t COLOR_WHITE_TRANSLUCENT = 0x66ffffff;
-constexpr Dimension RADIO_SNAPSHOT_IMAGE = 16.0_vp;
+constexpr uint32_t COLOR_TRANSLUCENT_WHITE = 0x66ffffff;
+constexpr Dimension SNAPSHOT_RADIUS = 16.0_vp;
 } // namespace
 
 class LifecycleListener : public Rosen::ILifecycleListener {
@@ -228,10 +228,10 @@ void WindowPattern::UpdateSnapshotWindowProperty()
         CHECK_NULL_VOID(imagePattern && renderContext && imageRenderProperty);
 
         BorderRadiusProperty borderRadius;
-        borderRadius.SetRadius(RADIO_SNAPSHOT_IMAGE);
+        borderRadius.SetRadius(SNAPSHOT_RADIUS);
         borderRadius.multiValued = false;
         renderContext->UpdateBorderRadius(borderRadius);
-        renderContext->UpdateBackgroundColor(Color(COLOR_WHITE_TRANSLUCENT));
+        renderContext->UpdateBackgroundColor(Color(COLOR_TRANSLUCENT_WHITE));
         imagePattern->SetNeedBorderRadius(true);
         imageRenderProperty->UpdateNeedBorderRadius(true);
     }
