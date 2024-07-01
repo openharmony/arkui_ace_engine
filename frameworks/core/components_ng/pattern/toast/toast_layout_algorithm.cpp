@@ -72,8 +72,7 @@ void ToastLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto offset = toastPattern->GetToastInfo().offset;
     if (offset.has_value()) {
         bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-        double xValue = isRtl ? offset->GetX().Value() * (-1) : offset->GetX().Value();
-        Dimension offsetX = Dimension(xValue);
+        Dimension offsetX = isRtl ? offset->GetX() * (-1) : offset->GetX();
         offset->SetX(offsetX);
         toastProperty->UpdateToastOffset(offset.value());
     } else {
