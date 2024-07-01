@@ -1112,7 +1112,9 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
     if (configurationChange.colorModeUpdate) {
         pattern_->OnColorConfigurationUpdate();
         if (colorModeUpdateCallback_) {
-            colorModeUpdateCallback_();
+            // copy it first in case of changing colorModeUpdateCallback_ in the callback
+            auto cb = colorModeUpdateCallback_;
+            cb();
         }
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
