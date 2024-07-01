@@ -28,6 +28,7 @@
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "base/geometry/offset.h"
+#include "base/error/error_code.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/event/event_hub.h"
@@ -53,6 +54,9 @@ namespace {
 constexpr char ABILITY_KEY_ASYNC[] = "ability.want.params.KeyAsync";
 constexpr char ABILITY_KEY_IS_MODAL[] = "ability.want.params.IsModal";
 constexpr char ATOMIC_SERVICE_PREFIX[] = "com.atomicservice.";
+constexpr char PROHIBIT_NESTING_FAIL_NAME[] = "Prohibit_Nesting_SecurityUIExtensionComponent";
+constexpr char PROHIBIT_NESTING_FAIL_MESSAGE[] =
+    "Prohibit nesting securityUIExtensionComponent in UIExtensionAbility";
 
 bool StartWith(const std::string &source, const std::string &prefix)
 {
@@ -146,8 +150,27 @@ void UIExtensionPattern::RemovePlaceholderNode()
     }
 }
 
+bool UIExtensionPattern::CheckConstraint()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    if (container->GetUIContentType() == UIContentType::SECURITY_UI_EXTENSION) {
+        UIEXT_LOGE("Not allowed nesting in SECURITY_UI_EXTENSION.");
+        FireOnErrorCallback(ERROR_CODE_UIEXTENSION_FORBID_CASCADE,
+            PROHIBIT_NESTING_FAIL_NAME, PROHIBIT_NESTING_FAIL_MESSAGE);
+        return false;
+    }
+
+    return true;
+}
+
 void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
 {
+    if (!CheckConstraint()) {
+        UIEXT_LOGE("Check constraint failed.");
+        return;
+    }
+
     CHECK_NULL_VOID(sessionWrapper_);
     // Prohibit rebuilding the session unless the Want is updated.
     if (sessionWrapper_->IsSessionValid()) {
@@ -163,32 +186,35 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     }
 
     isKeyAsync_ = want.GetBoolParam(ABILITY_KEY_ASYNC, false);
-    bool shouldCallSystem = ShouldCallSystem(want);
-    UIEXT_LOGI("The ability KeyAsync %{public}d, shouldCallSystem: %{public}d.",
-        isKeyAsync_, shouldCallSystem);
+    UIExtensionUsage uIExtensionUsage = GetUIExtensionUsage(want);
+    UIEXT_LOGI("The ability KeyAsync %{public}d, uIExtensionUsage: %{public}u.",
+        isKeyAsync_, uIExtensionUsage);
     MountPlaceholderNode();
-    sessionWrapper_->CreateSession(want, isAsyncModalBinding_);
+    SessionConfig config;
+    config.isAsyncModalBinding = isAsyncModalBinding_;
+    config.uiExtensionUsage = uIExtensionUsage;
+    sessionWrapper_->CreateSession(want, config);
     NotifyForeground();
 }
 
-bool UIExtensionPattern::ShouldCallSystem(const AAFwk::Want& want)
+UIExtensionUsage UIExtensionPattern::GetUIExtensionUsage(const AAFwk::Want& want)
 {
-    if (sessionType_ != SessionType::UI_EXTENSION_ABILITY) {
-        return false;
+    if (sessionType_ == SessionType::EMBEDDED_UI_EXTENSION) {
+        return UIExtensionUsage::EMBEDDED;
     }
 
     if (isModal_) {
-        return false;
+        return UIExtensionUsage::MODAL;
     }
 
     bool wantParamModal = want.GetBoolParam(ABILITY_KEY_IS_MODAL, false);
     auto bundleName = want.GetElement().GetBundleName();
     bool startWithAtomicService = StartWith(bundleName, ATOMIC_SERVICE_PREFIX);
     if (wantParamModal && startWithAtomicService) {
-        return false;
+        return UIExtensionUsage::MODAL;
     }
 
-    return true;
+    return UIExtensionUsage::EMBEDDED;
 }
 
 void UIExtensionPattern::OnConnect()
@@ -732,6 +758,10 @@ void UIExtensionPattern::FireOnErrorCallback(int32_t code, const std::string& na
     // 1. As long as the error occurs, the host believes that UIExtensionAbility has been killed.
     UIEXT_LOGD("The state is changing from '%{public}s' to 'NONE'.", ToString(state_));
     state_ = AbilityState::NONE;
+    // Release the session.
+    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
+        sessionWrapper_->DestroySession();
+    }
     if (onErrorCallback_) {
         ContainerScope scope(instanceId_);
         onErrorCallback_(code, name, message);

@@ -58,7 +58,7 @@ bool CheckTopEdgeOverlap(const RefPtr<NavDestinationLayoutProperty>& navDestinat
         auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
         CHECK_NULL_RETURN(titlePattern, false);
         auto options = titlePattern->GetTitleBarOptions();
-        auto barStyle = options.bgOptions.barStyle.value_or(BarStyle::STANDARD);
+        auto barStyle = options.brOptions.barStyle.value_or(BarStyle::STANDARD);
         if ((navDestinationLayoutProperty->GetHideTitleBar().value_or(false) || barStyle == BarStyle::STACK) &&
             safeAreaPos.top_.IsOverlapped(frame.Top())) {
             return true;
@@ -280,7 +280,7 @@ float TransferTitleBarHeight(const RefPtr<NavDestinationGroupNode>& hostNode, fl
     auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_RETURN(titlePattern, 0.0f);
     auto options = titlePattern->GetTitleBarOptions();
-    auto barStyle = options.bgOptions.barStyle.value_or(BarStyle::STANDARD);
+    auto barStyle = options.brOptions.barStyle.value_or(BarStyle::STANDARD);
     float resetTitleBarHeight = 0.0f;
     if (barStyle == BarStyle::STACK) {
         resetTitleBarHeight = 0.0f;

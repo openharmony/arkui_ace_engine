@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace {
 
-int32_t UIContentServiceProxy::GetInspectorTree()
+int32_t UIContentServiceProxy::GetInspectorTree(const EventCallback& eventCallback)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -30,6 +30,7 @@ int32_t UIContentServiceProxy::GetInspectorTree()
         LOGW("GetInspectorTree write interface token failed");
         return FAILED;
     }
+    report_->RegisterGetInspectorTreeCallback(eventCallback);
     if (Remote()->SendRequest(UI_CONTENT_SERVICE_GET_TREE, data, reply, option) != ERR_NONE) {
         LOGW("GetInspectorTree send request failed");
         return REPLY_ERROR;
@@ -67,7 +68,7 @@ int32_t UIContentServiceProxy::Connect()
     return NO_ERROR;
 }
 
-int32_t UIContentServiceProxy::RegisterClickEventCallback(EventCallback eventCallback)
+int32_t UIContentServiceProxy::RegisterClickEventCallback(const EventCallback& eventCallback)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -87,7 +88,7 @@ int32_t UIContentServiceProxy::RegisterClickEventCallback(EventCallback eventCal
     return NO_ERROR;
 }
 
-int32_t UIContentServiceProxy::RegisterSearchEventCallback(EventCallback eventCallback)
+int32_t UIContentServiceProxy::RegisterSearchEventCallback(const EventCallback& eventCallback)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -107,7 +108,7 @@ int32_t UIContentServiceProxy::RegisterSearchEventCallback(EventCallback eventCa
     return NO_ERROR;
 }
 
-int32_t UIContentServiceProxy::RegisterRouterChangeEventCallback(EventCallback eventCallback)
+int32_t UIContentServiceProxy::RegisterRouterChangeEventCallback(const EventCallback& eventCallback)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -120,14 +121,14 @@ int32_t UIContentServiceProxy::RegisterRouterChangeEventCallback(EventCallback e
         LOGW("reportStub is nullptr,connect is not execute");
     }
     report_->RegisterRouterChangeEventCallback(eventCallback);
-    if (Remote()->SendRequest(UNREGISTER_ROUTER_CHANGE_EVENT, data, reply, option) != ERR_NONE) {
+    if (Remote()->SendRequest(REGISTER_ROUTER_CHANGE_EVENT, data, reply, option) != ERR_NONE) {
         LOGW("RegisterRouterChangeEventCallback send request failed");
         return REPLY_ERROR;
     }
     return NO_ERROR;
 }
 
-int32_t UIContentServiceProxy::RegisterComponentChangeEventCallback(EventCallback eventCallback)
+int32_t UIContentServiceProxy::RegisterComponentChangeEventCallback(const EventCallback& eventCallback)
 {
     MessageParcel data;
     MessageParcel reply;

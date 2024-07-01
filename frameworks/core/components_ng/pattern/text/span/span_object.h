@@ -41,7 +41,8 @@ enum class SpanType {
     Gesture = 100,
     ParagraphStyle = 200,
     Image = 300,
-    CustomSpan = 400
+    CustomSpan = 400,
+    ExtSpan = 500
 };
 
 struct SpanParagraphStyle {
@@ -329,6 +330,19 @@ private:
     void RemoveLineHeightStyle(const RefPtr<NG::SpanItem>& spanItem) const;
 
     Dimension lineHeight_;
+};
+
+class ExtSpan : public SpanBase {
+    DECLARE_ACE_TYPE(ExtSpan, SpanBase);
+
+public:
+    ExtSpan() = default;
+    ExtSpan(int32_t start, int32_t end);
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
+    SpanType GetSpanType() const override;
+    std::string ToString() const override;
+    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override {}
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_SPAN_SPAN_OBJECT_H

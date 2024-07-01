@@ -228,12 +228,7 @@ void DialogLayoutAlgorithm::AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper
                 scrollPropery->UpdateAlignment(Alignment::CENTER);
             }
         } else {
-            bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-            if (!isRtl) {
-                scrollPropery->UpdateAlignment(Alignment::CENTER_LEFT);
-            } else {
-                scrollPropery->UpdateAlignment(Alignment::CENTER_RIGHT);
-            }
+            scrollPropery->UpdateAlignment(Alignment::CENTER_LEFT);
         }
     }
 }
@@ -486,11 +481,6 @@ void DialogLayoutAlgorithm::ProcessMaskRect(
     auto width = maskRect->GetWidth();
     auto height = maskRect->GetHeight();
     auto offset = maskRect->GetOffset();
-    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    if (isRtl) {
-        Dimension offsetX = Dimension(offset.GetX().Value() * (-1));
-        offset.SetX(offsetX);
-    }
     if (width.IsNegative()) {
         width = FULLSCREEN;
     }

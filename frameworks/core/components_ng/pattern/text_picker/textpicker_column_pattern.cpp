@@ -874,18 +874,21 @@ void TextPickerColumnPattern::UpdatePickerTextProperties(const RefPtr<TextLayout
 void TextPickerColumnPattern::TextPropertiesLinearAnimation(const RefPtr<TextLayoutProperty>& textLayoutProperty,
     uint32_t idx, uint32_t showCount, bool isDown, double scaleSize)
 {
-    auto deltaIdx = GetOverScrollDeltaIndex();
+    uint32_t deltaIdx = static_cast<uint32_t>(GetOverScrollDeltaIndex());
     auto index = idx;
     if (GreatNotEqual(scrollDelta_, 0.0f)) {
         index = index + deltaIdx;
     } else {
+        if (index < deltaIdx) {
+            return;
+        }
         index = index - deltaIdx;
     }
 
     auto percent = distancePercent_ - deltaIdx;
     auto scale = scaleSize - deltaIdx;
 
-    if (index < 0 || index >= animationProperties_.size()) {
+    if (index >= animationProperties_.size()) {
         return;
     }
     Dimension startFontSize = animationProperties_[index].fontSize;

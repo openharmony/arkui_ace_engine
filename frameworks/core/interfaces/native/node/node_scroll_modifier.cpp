@@ -753,5 +753,60 @@ void SetOnScrollReachEnd(ArkUINodeHandle node, void* extraParam)
     };
     ScrollModelNG::SetOnReachEnd(frameNode, std::move(onReachEnd));
 }
+
+void ResetOnScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetOnScroll(frameNode, nullptr);
+}
+void ResetOnScrollFrameBegin(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetOnScrollFrameBegin(frameNode, nullptr);
+}
+void ResetScrollOnWillScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetOnWillScroll(frameNode, nullptr);
+}
+void ResetScrollOnDidScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetOnDidScroll(frameNode, nullptr);
+}
+void ResetOnScrollStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetOnScrollStart(frameNode, nullptr);
+}
+void ResetOnScrollStop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetOnScrollStop(frameNode, nullptr);
+}
+void ResetOnScrollEdge(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetOnScrollEdge(frameNode, nullptr);
+}
+void ResetOnScrollReachStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetOnReachStart(frameNode, nullptr);
+}
+void ResetOnScrollReachEnd(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetOnReachEnd(frameNode, nullptr);
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

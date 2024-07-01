@@ -1048,7 +1048,7 @@ void MenuPattern::ShowPreviewMenuScaleAnimation()
 
     auto preview = isShowHoverImage_ ? menuWrapperPattern->GetHoverImageColNode() : menuWrapperPattern->GetPreview();
     CHECK_NULL_VOID(preview);
-    bool isHoverImageTarget = isShowHoverImage_ && preview->GetTag() == V2::COLUMN_ETS_TAG;
+    bool isHoverImageTarget = isShowHoverImage_ && preview->GetTag() == V2::FLEX_ETS_TAG;
     auto previewRenderContext = preview->GetRenderContext();
     CHECK_NULL_VOID(previewRenderContext);
     auto previewGeometryNode = preview->GetGeometryNode();

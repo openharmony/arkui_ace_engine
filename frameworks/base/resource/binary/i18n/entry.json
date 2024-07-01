@@ -46,6 +46,10 @@
             "year":"年",
             "month":"月",
             "day":"日"
+        },
+        "navigation":{
+            "back":"返回",
+            "more":"更多"
         }
     },
     "en-US":{
@@ -88,6 +92,10 @@
         "datepicker":{
             "lunarSwitch":"Display Lunar",
             "prev":"PREV"
+        },
+        "navigation":{
+            "back":"BACK",
+            "more":"MORE"
         }
     },
     "ml":{

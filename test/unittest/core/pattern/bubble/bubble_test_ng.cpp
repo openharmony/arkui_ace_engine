@@ -172,6 +172,7 @@ void BubbleTestNg::SetUpTestCase()
 void BubbleTestNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 PaddingProperty CreatePadding(float left, float top, float right, float bottom)

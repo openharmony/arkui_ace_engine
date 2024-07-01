@@ -19,12 +19,13 @@
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
+#include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_segmented_layout.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT WaterFlowLayoutSW : public WaterFlowLayoutBase {
-    DECLARE_ACE_TYPE(WaterFlowLayoutSW, WaterFlowLayoutBase);
+class ACE_EXPORT WaterFlowLayoutSW : public WaterFlowSegmentLayoutBase {
+    DECLARE_ACE_TYPE(WaterFlowLayoutSW, WaterFlowSegmentLayoutBase);
 
 public:
     explicit WaterFlowLayoutSW(const RefPtr<WaterFlowLayoutInfoSW>& info) : info_(info) {}
@@ -38,6 +39,8 @@ public:
 
 private:
     void Init(const SizeF& frameSize);
+    /* init WaterFlow without Sections */
+    void SingleInit(const SizeF& frameSize);
     void CheckReset();
 
     void MeasureOnOffset(float delta);
@@ -80,6 +83,12 @@ private:
      */
     void FillFront(float viewportBound, int32_t idx, int32_t minChildIdx);
     /**
+     * @brief fills backward with one section.
+     *
+     * @return true if viewportBound is reached. False implies idx > maxChildIdx.
+     */
+    bool FillFrontSection(float viewportBound, int32_t& idx, int32_t minChildIdx);
+    /**
      * @brief fills the viewport backward with cached idx -> lane mapping.
      */
     void RecoverFront(float viewportBound, int32_t& idx, int32_t minChildIdx);
@@ -102,7 +111,13 @@ private:
      */
     void FillBack(float viewportBound, int32_t idx, int32_t maxChildIdx);
     /**
-     * @brief fills the viewport backward with cached idx -> lane mapping.
+     * @brief fills forward with one section.
+     *
+     * @return true if viewportBound is reached. False implies idx > maxChildIdx.
+     */
+    bool FillBackSection(float viewportBound, int32_t& idx, int32_t maxChildIdx);
+    /**
+     * @brief fills the viewport forward with cached idx -> lane mapping.
      */
     void RecoverBack(float viewportBound, int32_t& idx, int32_t maxChildIdx);
     /**
@@ -125,20 +140,26 @@ private:
 
     float MeasureChild(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t lane);
 
+    /**
+     * @brief Layout a single section of items
+     *
+     * @param idx section index.
+     * @param paddingOffset WaterFlow padding, need to add to the child offset.
+     * @param selfCrossLen cross length of WaterFlow.
+     * @param reverse true if reverse layout
+     * @param rtl true if layout right to left
+     */
+    void LayoutSection(size_t idx, const OffsetF& paddingOffset, float selfCrossLen, bool reverse, bool rtl);
     void LayoutFooter(const OffsetF& paddingOffset, bool reverse);
 
     // convert FlowItem's index to children node index.
     inline int32_t nodeIdx(int32_t idx) const;
 
-    LayoutWrapper* wrapper_ {};
     RefPtr<WaterFlowLayoutInfoSW> info_;
+    RefPtr<WaterFlowSections> sections_;
 
     int32_t itemCnt_ = 0;
-    Axis axis_ {};
-    std::vector<float> itemCrossSize_;
     float mainLen_ = 0.0f;
-    float mainGap_ = 0.0f;
-    float crossGap_ = 0.0f;
 
     bool overScroll_ = true;
 };

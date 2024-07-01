@@ -27,7 +27,6 @@
 #include "core/components_ng/pattern/custom_paint/canvas_model.h"
 #include "core/components_ng/pattern/custom_paint/canvas_model_ng.h"
 #include "core/components_ng/pattern/custom_paint/canvas_modifier.h"
-#include "core/components_ng/pattern/custom_paint/canvas_paint_mem.h"
 #include "core/components_ng/pattern/custom_paint/canvas_paint_method.h"
 #include "core/components_ng/pattern/custom_paint/canvas_paint_op.h"
 #include "core/components_ng/pattern/custom_paint/canvas_pattern.h"

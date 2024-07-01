@@ -149,7 +149,6 @@ constexpr int32_t REFLEX_ANGLE = 270;
 constexpr int32_t FULL_ROTATION = 360;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
-constexpr int32_t DELAY_TIME = 300;
 constexpr Dimension DASH_GEP_WIDTH = -1.0_px;
 
 Rosen::Gravity GetRosenGravity(RenderFit renderFit)
@@ -576,6 +575,9 @@ void RosenRenderContext::SyncGeometryFrame(const RectF& paintRect)
         rsNode_->SetFrame(paintRect.GetX() + frameOffset_->GetX(), paintRect.GetY() + frameOffset_->GetY(),
             paintRect.Width(), paintRect.Height());
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnSyncGeometryFrameFinish(paintRect);
 }
 
 void RosenRenderContext::SetChildBounds(const RectF& paintRect) const
@@ -2307,15 +2309,12 @@ void RosenRenderContext::SetBorderRadius(const BorderRadiusProperty& value)
     if (isDisappearing_ && !paintRect.IsValid()) {
         return;
     }
-    double radiusX = paintRect.Width();
+    double width = paintRect.Width();
     Rosen::Vector4f cornerRadius;
-    // When the unit of radius is percent, the length and width of rect should be calculated at the same time,
-    // but currently SetCornerRadius only supports Vector4f parameter passing.
-    // Graphic should provide support .
-    cornerRadius.SetValues(static_cast<float>(value.radiusTopLeft.value_or(Dimension()).ConvertToPxWithSize(radiusX)),
-        static_cast<float>(value.radiusTopRight.value_or(Dimension()).ConvertToPxWithSize(radiusX)),
-        static_cast<float>(value.radiusBottomRight.value_or(Dimension()).ConvertToPxWithSize(radiusX)),
-        static_cast<float>(value.radiusBottomLeft.value_or(Dimension()).ConvertToPxWithSize(radiusX)));
+    cornerRadius.SetValues(static_cast<float>(value.radiusTopLeft.value_or(Dimension()).ConvertToPxWithSize(width)),
+        static_cast<float>(value.radiusTopRight.value_or(Dimension()).ConvertToPxWithSize(width)),
+        static_cast<float>(value.radiusBottomRight.value_or(Dimension()).ConvertToPxWithSize(width)),
+        static_cast<float>(value.radiusBottomLeft.value_or(Dimension()).ConvertToPxWithSize(width)));
     rsNode_->SetCornerRadius(cornerRadius);
     RequestNextFrame();
 }
@@ -2708,7 +2707,8 @@ void RosenRenderContext::CreateBackgroundPixelMap(const RefPtr<FrameNode>& custo
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUICreateBackgroundPixelMap");
     };
-    NG::ComponentSnapshot::Create(customNode, std::move(callback), false, DELAY_TIME, false);
+    SnapshotParam param;
+    NG::ComponentSnapshot::Create(customNode, std::move(callback), false, param, false);
 }
 
 void RosenRenderContext::OnBorderImageUpdate(const RefPtr<BorderImage>& /*borderImage*/)
@@ -6138,7 +6138,7 @@ void RosenRenderContext::SavePaintRect(bool isRound, uint8_t flag)
     const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     AdjustPaintRect();
-    if (!SystemProperties::GetPixelRoundEnable()) {
+    if (!SystemProperties::GetPixelRoundEnabled()) {
         isRound = false;
     }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {

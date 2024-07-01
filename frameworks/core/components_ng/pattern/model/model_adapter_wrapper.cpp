@@ -234,7 +234,9 @@ void ModelAdapterWrapper::DrawFrame()
     ACE_FUNCTION_TRACE();
 #if defined(KIT_3D_ENABLE)
     if (sceneAdapter_) {
-        sceneAdapter_->RenderFrame();
+        sceneAdapter_->RenderFrame(needsSyncPaint_);
+        needsRepaint_ = sceneAdapter_->NeedsRepaint();
+        needsSyncPaint_ = false;
         return;
     }
 #endif

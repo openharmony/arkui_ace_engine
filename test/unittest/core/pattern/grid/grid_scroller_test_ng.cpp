@@ -1565,16 +1565,39 @@ HWTEST_F(GridScrollerTestNg, ScrollBy001, TestSize.Level1)
     EXPECT_FALSE(pattern_->IsOutOfBoundary());
 
     /**
-     * @tc.steps: step2. DumpAdvanceInfo information function call
-     */
-    pattern_->DumpAdvanceInfo();
-
-    /**
      * @tc.steps: step3. Test AnimateTo function
      * @tc.expected: pattern_->isAnimationStop_ is false
      */
     pattern_->AnimateTo(1.5, 1.f, Curves::LINEAR, false);
     EXPECT_FALSE(pattern_->isAnimationStop_);
+}
+
+/**
+ * @tc.name: DumpAdvanceInfo001
+ * @tc.desc: Test ScrollBy
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, DumpAdvanceInfo001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    CreateDone(frameNode_);
+    pattern_->DumpAdvanceInfo();
+    pattern_->gridLayoutInfo_.scrollAlign_ = ScrollAlign::NONE;
+    pattern_->DumpAdvanceInfo();
+    pattern_->gridLayoutInfo_.scrollAlign_ = ScrollAlign::CENTER;
+    pattern_->DumpAdvanceInfo();
+    pattern_->gridLayoutInfo_.scrollAlign_ = ScrollAlign::END;
+    pattern_->DumpAdvanceInfo();
+    pattern_->gridLayoutInfo_.scrollAlign_ = ScrollAlign::START;
+    pattern_->DumpAdvanceInfo();
+
+    ClearOldNodes();
+    model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    CreateFixedItems(1);
+    CreateDone(frameNode_);
+    pattern_->DumpAdvanceInfo();
 }
 
 /**

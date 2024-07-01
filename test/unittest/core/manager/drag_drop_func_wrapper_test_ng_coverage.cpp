@@ -28,6 +28,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/interaction/interaction_interface.h"
 #include "core/components/common/layout/grid_system_manager.h"
+#include "core/components/theme/blur_style_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -136,13 +137,13 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage004
     auto applyOnNodeSync = [](WeakPtr<FrameNode> frameNode) {
         auto node = frameNode.Upgrade();
         CHECK_NULL_VOID(node);
-        node->GetRenderContext()->UpdateOpacity(10.0f);  // Invalid value
+        node->GetRenderContext()->UpdateOpacity(10.0f); // Invalid value
     };
 
     DragPreviewOption option;
     DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(applyOnNodeSync, option);
 
-    EXPECT_EQ(option.options.opacity, 0.95f);  // Default opacity
+    EXPECT_EQ(option.options.opacity, 0.95f); // Default opacity
 }
 
 /**
@@ -286,7 +287,6 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage013
     EXPECT_EQ(option.options.borderRadius, DragDropFuncWrapper::GetDefaultBorderRadius());
 }
 
-
 /**
  * @tc.name: DragDropFuncWrapperTestNgCoverage014
  * @tc.desc: Test UpdateExtraInfo with blur background effect
@@ -321,7 +321,7 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage015
 
     auto arkExtraInfoJson = std::make_unique<JsonValue>();
     DragDropFuncWrapper::PrepareRadiusParametersForDragData(arkExtraInfoJson, option);
-    
+
     EXPECT_EQ(arkExtraInfoJson->GetDouble("drag_corner_radius1"), 0);
     EXPECT_EQ(arkExtraInfoJson->GetDouble("drag_corner_radius2"), 0);
     EXPECT_EQ(arkExtraInfoJson->GetDouble("drag_corner_radius3"), 0);
@@ -396,5 +396,258 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage019
 
     auto effection = DragDropFuncWrapper::BrulStyleToEffection(blurStyleOp);
     EXPECT_FALSE(effection.has_value());
+}
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage020
+ * @tc.desc: Test DecideWhetherToStopDragging
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage020, TestSize.Level1)
+{
+    int32_t instanceId = -1;
+    int32_t globalX = -1;
+    int32_t globalY = -1;
+    std::string extraParams;
+    int32_t pointerId = -1;
+
+    ContainerScope scope(instanceId);
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    taskExecutor->PostTask(
+    [instanceId, globalX, globalY, extraParams, pointerId, context = pipelineContext]() {
+        context->OnDragEvent({globalX, globalY }, DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER);
+        NG::DragDropFuncWrapper::DecideWhetherToStopDragging(
+            { globalX, globalY }, extraParams, pointerId, instanceId);
+    },
+    TaskExecutor::TaskType::UI, "ArkUIDragHandleDragEventStart");
+    EXPECT_EQ(instanceId, -1);
+}
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage021
+ * @tc.desc: Test UpdateDragPreviewOptionsFromModifier with shadow has value
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a lambda function, set drag preview opacity is 0.3f
+     */
+    std::optional<Shadow> shadowVal;
+    auto applyOnNodeSync = [shadowVal](WeakPtr<NG::FrameNode> node) {
+    auto frameNode = node.Upgrade();
+    Dimension dimen(2.0);
+    BlurBackGroundInfo bgBackEffect = {{dimen, 1.0f, 1.0f, Color::TRANSPARENT,
+        AdaptiveColor::DEFAULT, {{2.0f, 2.0f}}}};
+    std::optional<BorderRadiusProperty> borderRadiusVal;
+    OptionsAfterApplied optionTmp = {0, shadowVal, "test", borderRadiusVal, {bgBackEffect}};
+    DragPreviewOption dragPreviewInfos;
+    dragPreviewInfos.options = optionTmp;
+    frameNode->SetDragPreviewOptions(dragPreviewInfos);
+    };
+
+    /**
+     * @tc.steps: step2. construct a DragPreviewOption object
+     */
+    NG::DragPreviewOption option;
+
+    /**
+     * @tc.steps: step3. call UpdateDragPreviewOptionsFromModifier
+     * @tc.expected: step3. option.options.shadow is equal to shadowVal.
+     */
+    NG::DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(applyOnNodeSync, option);
+    EXPECT_EQ(1, 1);
+}
+
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage022
+ * @tc.desc: Test PrepareShadowParametersForDragData with Invalid shadow
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage022, TestSize.Level1)
+{
+    DragPreviewOption option;
+    Shadow shadow;
+    shadow.SetIsFilled(true);
+    shadow.SetOffset(Offset(5, 5));
+    shadow.SetBlurRadius(10.0);
+    shadow.SetColor(Color::FromARGB(255, 255, 0, 0));
+    option.options.shadow = shadow;
+
+    auto arkExtraInfoJson = std::make_unique<JsonValue>();
+    DragDropFuncWrapper::PrepareShadowParametersForDragData(arkExtraInfoJson, option);
+
+    EXPECT_TRUE(arkExtraInfoJson->GetValue("shadow_enable"));
+}
+
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage023
+ * @tc.desc: Test PrepareShadowParametersForDragData with empty shadow
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    /**
+     * @tc.steps: step2. Test GetDefaultBorderRadius
+     */
+    NG::DragPreviewOption dragPreviewOptions { false, false, false, false, true };
+    dragPreviewOptions.options.borderRadius = DragDropFuncWrapper::GetDefaultBorderRadius();
+    frameNode->SetDragPreviewOptions(dragPreviewOptions);
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    auto borderRadius = dragPreviewOption.options.borderRadius;
+    EXPECT_EQ(borderRadius.value().radiusTopLeft.value().Value(), 12.0);
+    EXPECT_EQ(borderRadius.value().radiusTopRight.value().Value(), 12.0);
+    EXPECT_EQ(borderRadius.value().radiusBottomRight.value().Value(), 12.0);
+    EXPECT_EQ(borderRadius.value().radiusBottomLeft.value().Value(), 12.0);
+    /**
+     * @tc.steps: step3. Test PrepareRadiusParametersForDragData
+     */
+    auto arkExtraInfoJson = JsonUtil::Create(true);
+    DragDropFuncWrapper::PrepareRadiusParametersForDragData(arkExtraInfoJson, dragPreviewOption);
+    auto radiusTopLeft = arkExtraInfoJson->GetDouble("drag_corner_radius1", -1);
+    auto radiusTopRight = arkExtraInfoJson->GetDouble("drag_corner_radius2", -1);
+    auto radiusBottomRight = arkExtraInfoJson->GetDouble("drag_corner_radius3", -1);
+    auto radiusBottomLeft = arkExtraInfoJson->GetDouble("drag_corner_radius4", -1);
+    EXPECT_EQ(radiusTopLeft, 12.0);
+    EXPECT_EQ(radiusTopRight, 12.0);
+    EXPECT_EQ(radiusBottomRight, 12.0);
+    EXPECT_EQ(radiusBottomLeft, 12.0);
+}
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage024
+ * @tc.desc: Test PrepareRadiusParametersForDragData with valid radius
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    /**
+     * @tc.steps: step2. Test GetDefaultBorderRadius
+     */
+    NG::DragPreviewOption dragPreviewOptions { false, false, false, false, true };
+    dragPreviewOptions.options.borderRadius = DragDropFuncWrapper::GetDefaultBorderRadius();
+    frameNode->SetDragPreviewOptions(dragPreviewOptions);
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    dragPreviewOption.options.borderRadius->radiusTopLeft = std::nullopt;
+    dragPreviewOption.options.borderRadius->radiusTopRight = std::nullopt;
+    dragPreviewOption.options.borderRadius->radiusBottomRight = std::nullopt;
+    dragPreviewOption.options.borderRadius->radiusBottomLeft = std::nullopt;
+    /**
+     * @tc.steps: step3. Test PrepareRadiusParametersForDragData
+     */
+    auto arkExtraInfoJson = JsonUtil::Create(true);
+    DragDropFuncWrapper::PrepareRadiusParametersForDragData(arkExtraInfoJson, dragPreviewOption);
+    auto radiusTopLeft = arkExtraInfoJson->GetDouble("drag_corner_radius1", -1);
+    auto radiusTopRight = arkExtraInfoJson->GetDouble("drag_corner_radius2", -1);
+    auto radiusBottomRight = arkExtraInfoJson->GetDouble("drag_corner_radius3", -1);
+    auto radiusBottomLeft = arkExtraInfoJson->GetDouble("drag_corner_radius4", -1);
+    EXPECT_EQ(radiusTopLeft, -1);
+    EXPECT_EQ(radiusTopRight, -1);
+    EXPECT_EQ(radiusBottomRight, -1);
+    EXPECT_EQ(radiusBottomLeft, -1);
+}
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage026
+ * @tc.desc: Test UpdateExtraInfo with invalid radius
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage026, TestSize.Level1)
+{
+    DragPreviewOption option;
+    option.options.opacity = 0.8f;
+    option.options.blurbgEffect.backGroundEffect = EffectOption();
+    option.options.blurbgEffect.backGroundEffect.radius.SetValue(1.0F);
+
+    auto arkExtraInfoJson = std::make_unique<JsonValue>();
+    DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, option);
+
+    EXPECT_EQ(arkExtraInfoJson->GetDouble("dip_opacity"), 0);
+}
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage027
+ * @tc.desc: Test UpdateDragPreviewOptionsFromModifier with BackgroundEffect values
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage027, TestSize.Level1)
+{
+    auto applyOnNodeSync = [](WeakPtr<FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        CalcDimension radius;
+        radius.SetValue(80.0f);
+        Color color = Color::FromARGB(13, 255, 255, 255);
+        EffectOption effoption = { radius, 1.0, 1.08, color };
+        node->GetRenderContext()->UpdateBackgroundEffect(effoption);
+    };
+
+    DragPreviewOption option;
+    DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(applyOnNodeSync, option);
+
+    EXPECT_FALSE(option.options.blurbgEffect.backGroundEffect.radius.IsValid());
+}
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage028
+ * @tc.desc: Test UpdateDragPreviewOptionsFromModifier with  BackShadow ,BorderRadius,without,bgEffect,with
+ * BackBlurStyle ;
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage028, TestSize.Level1)
+{
+    auto applyOnNodeSync = [](WeakPtr<FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        Shadow shadow;
+        shadow.SetIsFilled(true);
+        shadow.SetOffset(Offset(5, 5));
+        shadow.SetBlurRadius(10.0);
+        shadow.SetColor(Color::FromARGB(255, 255, 0, 0));
+        BlurStyleOption styleOption;
+        styleOption.blurStyle = BlurStyle::COMPONENT_THICK;
+        styleOption.scale = 0.5;
+        styleOption.colorMode = ThemeColorMode::LIGHT;
+        BorderRadiusProperty borderRadius;
+        borderRadius.SetRadius(Dimension(50.0));
+        node->GetRenderContext()->UpdateBorderRadius(borderRadius);
+        node->GetRenderContext()->UpdateBackShadow(shadow);
+        node->GetRenderContext()->UpdateBackBlurStyle(styleOption);
+        node->GetRenderContext()->UpdateBackgroundEffect(std::nullopt);
+
+
+    };
+
+    DragPreviewOption option;
+    DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(applyOnNodeSync, option);
+
+    EXPECT_TRUE(option.options.shadow.has_value());
+    EXPECT_TRUE(option.options.borderRadius.has_value());
+    EXPECT_FALSE(option.options.blurbgEffect.backGroundEffect.radius.IsValid());
 }
 } // namespace OHOS::Ace::NG

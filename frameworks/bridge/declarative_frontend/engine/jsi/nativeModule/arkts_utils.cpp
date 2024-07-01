@@ -737,10 +737,6 @@ bool ArkTSUtils::ParseAllBorder(const EcmaVM* vm, const Local<JSValueRef>& args,
         if (result.IsNegative()) {
             result.Reset();
         }
-
-        if (result.Unit() == DimensionUnit::PERCENT) {
-            result.Reset();
-        }
         return true;
     } else {
         return false;

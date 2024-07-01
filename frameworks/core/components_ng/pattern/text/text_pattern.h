@@ -612,12 +612,16 @@ public:
     TextLineMetrics GetLineMetrics(int32_t lineNumber) override;
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
 
-    void OnTouchTestHit(SourceType hitTestType) override
+    void OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsParam> && menuOptionsItems);
+    void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override
     {
-        selectOverlay_->OnTouchTestHit(hitTestType);
+        selectOverlay_->OnAncestorNodeChanged(flag);
     }
 
-    void OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsParam> && menuOptionsItems);
+    void UpdateParentGlobalOffset()
+    {
+        parentGlobalOffset_ = GetParentGlobalOffset();
+    }
 
 protected:
     void OnAttachToFrameNode() override;

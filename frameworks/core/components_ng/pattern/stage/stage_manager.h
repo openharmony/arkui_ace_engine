@@ -37,14 +37,14 @@ public:
     explicit StageManager(const RefPtr<FrameNode>& stage);
     ~StageManager() override = default;
 
-    bool PushPage(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true);
-    bool InsertPage(const RefPtr<FrameNode>& node, bool bellowTopOrBottom);
-    bool PopPage(bool needShowNext = true, bool needTransition = true);
-    bool PopPageToIndex(int32_t index, bool needShowNext = true, bool needTransition = true);
-    bool CleanPageStack();
-    bool MovePageToFront(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true);
+    virtual bool PushPage(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true);
+    virtual bool InsertPage(const RefPtr<FrameNode>& node, bool bellowTopOrBottom);
+    virtual bool PopPage(bool needShowNext = true, bool needTransition = true);
+    virtual bool PopPageToIndex(int32_t index, bool needShowNext = true, bool needTransition = true);
+    virtual bool CleanPageStack();
+    virtual bool MovePageToFront(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true);
 
-    void StartTransition(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage, RouteType type);
+    virtual void StartTransition(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage, RouteType type);
 
     void PageChangeCloseKeyboard();
 

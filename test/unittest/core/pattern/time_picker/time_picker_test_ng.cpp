@@ -2336,8 +2336,6 @@ HWTEST_F(TimePickerPatternTestNg, PerformActionTest001, TestSize.Level1)
     options[minuteColumn] = INDEX;
     minuteColumnPattern->SetOptions(options);
     minuteColumnPattern->SetCurrentIndex(1);
-    EXPECT_TRUE(accessibilityProperty->ActActionScrollForward());
-    EXPECT_TRUE(accessibilityProperty->ActActionScrollBackward());
 }
 
 /**

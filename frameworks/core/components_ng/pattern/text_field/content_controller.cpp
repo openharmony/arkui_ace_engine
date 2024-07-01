@@ -30,7 +30,6 @@ const std::string DIGIT_WHITE_LIST = "[0-9]";
 const std::string DIGIT_DECIMAL_WHITE_LIST = "[0-9.]";
 const std::string PHONE_WHITE_LIST = R"([0-9 \+\-\*\#\(\)])";
 const std::string EMAIL_WHITE_LIST = "[\\w.\\@]";
-const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
 // when do ai analaysis, we should list the left and right of the string
 constexpr static int32_t AI_TEXT_RANGE_LEFT = 50;
 constexpr static int32_t AI_TEXT_RANGE_RIGHT = 50;
@@ -133,10 +132,6 @@ void ContentController::FilterTextInputStyle(bool& textChanged, std::string& res
         case TextInputType::EMAIL_ADDRESS: {
             textChanged |= FilterWithEvent(EMAIL_WHITE_LIST, result);
             textChanged |= FilterWithEmail(result);
-            break;
-        }
-        case TextInputType::URL: {
-            textChanged |= FilterWithEvent(URL_WHITE_LIST, result);
             break;
         }
         case TextInputType::VISIBLE_PASSWORD:

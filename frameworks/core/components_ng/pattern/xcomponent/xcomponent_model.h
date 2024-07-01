@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_XCOMPONENT_XCOMPONENT_MODEL_H
 
 #include <mutex>
+#include <optional>
 
 #include "base/memory/ace_type.h"
 #include "core/common/container.h"
@@ -42,14 +43,15 @@ public:
 #endif
                (type == XComponentType::SURFACE && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN));
     }
-    static bool IsCommonEventAvailable(const XComponentType& type, std::string& libraryName)
+    static bool IsCommonEventAvailable(const XComponentType& type, std::optional<std::string>& libraryName)
     {
         return type == XComponentType::NODE ||
-               (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) && libraryName == "");
+               (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) && !libraryName.has_value());
     }
     virtual ~XComponentModel() = default;
 
-    virtual void Create(const std::string& id, XComponentType type, const std::string& libraryname,
+    virtual void Create(const std::optional<std::string>& id, XComponentType type,
+        const std::optional<std::string>& libraryname,
         const std::shared_ptr<InnerXComponentController>& xcomponentController) = 0;
     virtual RefPtr<AceType> Create(int32_t /* nodeId */, float /* width */, float /* height */,
         const std::string& /* id */, XComponentType /* type */, const std::string& /* libraryname */,
@@ -71,9 +73,9 @@ public:
     {
         return XComponentType::UNKNOWN;
     }
-    virtual std::string GetLibraryName()
+    virtual std::optional<std::string> GetLibraryName()
     {
-        return "";
+        return std::nullopt;
     }
     virtual void EnableAnalyzer(bool enable) {}
     virtual void SetImageAIOptions(void* options) {}

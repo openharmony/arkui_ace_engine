@@ -131,7 +131,7 @@ public:
     bool DownloadAsync(DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId) override
     {
         NetStackRequest httpReq;
-        httpReq.SetHeader("Accept", "image/avif,image/webp,image/apng,*/*");
+        httpReq.SetHeader("Accept", "image/webp,image/apng,*/*");
         httpReq.SetURL(url);
         auto& session = NetStack::HttpClient::HttpSession::GetInstance();
         auto task = session.CreateTask(httpReq);
@@ -183,7 +183,7 @@ public:
     {
         LOGI("DownloadSync task of [%{private}s] start", url.c_str());
         NetStackRequest httpReq;
-        httpReq.SetHeader("Accept", "image/avif,image/webp,image/apng,*/*");
+        httpReq.SetHeader("Accept", "image/webp,image/apng,*/*");
         httpReq.SetURL(url);
         auto& session = NetStack::HttpClient::HttpSession::GetInstance();
         auto task = session.CreateTask(httpReq);

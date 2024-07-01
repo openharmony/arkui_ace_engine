@@ -120,6 +120,23 @@ const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
     OHOS::Ace::Curves::SMOOTH,
     OHOS::Ace::Curves::FRICTION,
 };
+
+enum TransitionEffectType {
+    TRANSITION_EFFECT_OPACITY = 0,
+    TRANSITION_EFFECT_TRANSLATE,
+    TRANSITION_EFFECT_SCALE,
+    TRANSITION_EFFECT_ROTATE,
+    TRANSITION_EFFECT_MOVE,
+    TRANSITION_EFFECT_ASYMMETRIC,
+};
+
+const std::vector<AnimationDirection> DIRECTION_LIST = {
+    AnimationDirection::NORMAL,
+    AnimationDirection::REVERSE,
+    AnimationDirection::ALTERNATE,
+    AnimationDirection::ALTERNATE_REVERSE,
+};
+
 constexpr int32_t DEFAULT_DURATION = 1000;
 std::string g_strValue;
 
@@ -2213,21 +2230,24 @@ void ResetRotate(ArkUINodeHandle node)
     ViewAbstract::SetPivot(frameNode, center);
 }
 
-void SetGeometryTransition(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool options)
+void SetGeometryTransition(ArkUINodeHandle node, ArkUI_CharPtr id, const ArkUIGeometryTransitionOptions* options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::string idStr(id);
-    ViewAbstract::SetGeometryTransition(frameNode, idStr, static_cast<bool>(options));
+    ViewAbstract::SetGeometryTransition(frameNode, idStr,
+        static_cast<bool>(options->follow), static_cast<bool>(options->hierarchyStrategy));
 }
 
-ArkUI_CharPtr GetGeometryTransition(ArkUINodeHandle node, ArkUI_Bool* options)
+ArkUI_CharPtr GetGeometryTransition(ArkUINodeHandle node, ArkUIGeometryTransitionOptions* options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
     bool followWithoutTransition = false;
-    g_strValue = ViewAbstract::GetGeometryTransition(frameNode, &followWithoutTransition);
-    *options = followWithoutTransition;
+    bool doRegisterSharedTransition = true;
+    g_strValue = ViewAbstract::GetGeometryTransition(frameNode, &followWithoutTransition, &doRegisterSharedTransition);
+    options->follow = followWithoutTransition;
+    options->hierarchyStrategy = static_cast<int32_t>(doRegisterSharedTransition);
     return g_strValue.c_str();
 }
 
@@ -2235,7 +2255,7 @@ void ResetGeometryTransition(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetGeometryTransition(frameNode, "", false);
+    ViewAbstract::SetGeometryTransition(frameNode, "", false, true);
 }
 
 void SetOffset(ArkUINodeHandle node, const ArkUI_Float32* number, const ArkUI_Int32* unit)
@@ -5559,20 +5579,6 @@ void SetOnVisibleAreaChange(ArkUINodeHandle node, ArkUI_Int64 extraParam, ArkUI_
     ViewAbstract::SetOnVisibleChange(frameNode, onEvent, ratioList);
 }
 
-void ResetVisibleAreaChange(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::ResetVisibleChange(frameNode);
-}
-
-void ResetAreaChange(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::ResetAreaChanged(frameNode);
-}
-
 void SetLayoutRect(ArkUINodeHandle node, ArkUI_Int32 (*values)[4])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -5875,6 +5881,115 @@ void ResetPixelRound(ArkUINodeHandle node)
     ViewAbstract::SetPixelRound(frameNode, static_cast<uint8_t>(PixelRoundCalcPolicy::NO_FORCE_ROUND));
 }
 
+RefPtr<NG::ChainedTransitionEffect> ParseTransition(ArkUITransitionEffectOption* option)
+{
+    CHECK_NULL_RETURN(option, nullptr);
+    auto type = static_cast<TransitionEffectType>(option->type);
+    RefPtr<NG::ChainedTransitionEffect> transitionEffect;
+    switch (type) {
+        case TransitionEffectType::TRANSITION_EFFECT_OPACITY: {
+            transitionEffect = AceType::MakeRefPtr<NG::ChainedOpacityEffect>(option->opacity);
+            break;
+        }
+
+        case TransitionEffectType::TRANSITION_EFFECT_TRANSLATE: {
+            CalcDimension x(option->translate.x, DimensionUnit::VP);
+            CalcDimension y(option->translate.y, DimensionUnit::VP);
+            CalcDimension z(option->translate.z, DimensionUnit::VP);
+            NG::TranslateOptions translate(x, y, z);
+            transitionEffect = AceType::MakeRefPtr<NG::ChainedTranslateEffect>(translate);
+            break;
+        }
+
+        case TransitionEffectType::TRANSITION_EFFECT_SCALE: {
+            CalcDimension centerX(option->scale.centerX, DimensionUnit::PERCENT);
+            CalcDimension centerY(option->scale.centerY, DimensionUnit::PERCENT);
+            NG::ScaleOptions scale(option->scale.x, option->scale.y, option->scale.z, centerX, centerY);
+            transitionEffect = AceType::MakeRefPtr<NG::ChainedScaleEffect>(scale);
+            break;
+        }
+
+        case TransitionEffectType::TRANSITION_EFFECT_ROTATE: {
+            CalcDimension centerX(option->rotate.centerX, DimensionUnit::PERCENT);
+            CalcDimension centerY(option->rotate.centerY, DimensionUnit::PERCENT);
+            CalcDimension centerZ(option->rotate.centerZ, DimensionUnit::PERCENT);
+            NG::RotateOptions rotate(option->rotate.x, option->rotate.y, option->rotate.z, option->rotate.angle,
+                centerX, centerY, centerZ, option->rotate.perspective);
+            transitionEffect = AceType::MakeRefPtr<NG::ChainedRotateEffect>(rotate);
+            break;
+        }
+
+        case TransitionEffectType::TRANSITION_EFFECT_MOVE: {
+            transitionEffect =
+                AceType::MakeRefPtr<NG::ChainedMoveEffect>(static_cast<NG::TransitionEdge>(option->move));
+            break;
+        }
+
+        case TransitionEffectType::TRANSITION_EFFECT_ASYMMETRIC: {
+            RefPtr<NG::ChainedTransitionEffect> appearEffect;
+            RefPtr<NG::ChainedTransitionEffect> disappearEffect;
+            if (option->appear) {
+                appearEffect = ParseTransition(option->appear);
+            }
+            if (option->disappear) {
+                disappearEffect = ParseTransition(option->disappear);
+            }
+            transitionEffect = AceType::MakeRefPtr<NG::ChainedAsymmetricEffect>(appearEffect, disappearEffect);
+            break;
+        }
+    }
+
+    CHECK_NULL_RETURN(transitionEffect, nullptr);
+
+    if (option->hasAnimation) {
+        auto animation = option->animation;
+        AnimationOption animationOption;
+        animationOption.SetDuration(animation.duration);
+        animationOption.SetDelay(animation.delay);
+        animationOption.SetIteration(animation.iterations);
+        animationOption.SetTempo(animation.tempo);
+        animationOption.SetAnimationDirection(
+            DIRECTION_LIST[animation.playMode > DIRECTION_LIST.size() ? 0 : animation.playMode]);
+
+        // curve
+        if (animation.iCurve) {
+            auto curve = reinterpret_cast<Curve*>(animation.iCurve);
+            animationOption.SetCurve(AceType::Claim(curve));
+        } else {
+            if (animation.curve < 0 || animation.curve >= CURVES.size()) {
+                animationOption.SetCurve(OHOS::Ace::Curves::EASE_IN_OUT);
+            } else {
+                animationOption.SetCurve(CURVES[animation.curve]);
+            }
+        }
+
+        if (animation.expectedFrameRateRange) {
+            RefPtr<FrameRateRange> frameRateRange =
+                AceType::MakeRefPtr<FrameRateRange>(animation.expectedFrameRateRange->min,
+                    animation.expectedFrameRateRange->max, animation.expectedFrameRateRange->expected);
+            animationOption.SetFrameRateRange(frameRateRange);
+        }
+        auto animationOptionResult = std::make_shared<AnimationOption>(animationOption);
+        transitionEffect->SetAnimationOption(animationOptionResult);
+    }
+
+    if (option->combine) {
+        transitionEffect->SetNext(ParseTransition(option->combine));
+    }
+    return transitionEffect;
+}
+
+void SetTransition(ArkUINodeHandle node, ArkUITransitionEffectOption* option)
+{
+    CHECK_NULL_VOID(option);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    auto transitionEffectOption = ParseTransition(option);
+    CHECK_NULL_VOID(transitionEffectOption);
+    ViewAbstract::SetChainedTransition(frameNode, transitionEffectOption);
+}
+
 void GetExpandSafeArea(ArkUINodeHandle node, ArkUI_Uint32 (*values)[2])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -5981,14 +6096,14 @@ const ArkUICommonModifier* GetCommonModifier()
         SetMoveTransition, GetMoveTransition, ResetMask, GetAspectRatio, SetBackgroundImageResizable,
         ResetBackgroundImageResizable, SetBackgroundImageSizeWithUnit, GetRenderFit, GetOutlineColor, GetSize,
         GetRenderGroup, SetOnVisibleAreaChange, GetGeometryTransition, SetChainStyle, GetChainStyle, ResetChainStyle,
-        SetBias, GetBias, ResetBias, GetColorBlend, GetForegroundBlurStyle, ResetVisibleAreaChange, ResetAreaChange,
+        SetBias, GetBias, ResetBias, GetColorBlend, GetForegroundBlurStyle,
         SetBackgroundImagePixelMap, SetBackgroundImagePixelMapByPixelMapPtr,
         SetLayoutRect, GetLayoutRect, ResetLayoutRect, GetFocusOnTouch, SetSystemBarEffect,
         GetAccessibilityID, SetAccessibilityState, GetAccessibilityState, ResetAccessibilityState,
         SetAccessibilityValue, GetAccessibilityValue, ResetAccessibilityValue, SetAccessibilityActions,
         ResetAccessibilityActions, GetAccessibilityActions, SetAccessibilityRole, ResetAccessibilityRole,
         GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
-        SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea };
+        SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition };
 
     return &modifier;
 }
@@ -6188,7 +6303,6 @@ void SetOnClick(ArkUINodeHandle node, void* extraParam)
         //displayY
         event.componentAsyncEvent.data[7].f32 =
             usePx ? PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()) : screenOffset.GetY();
-
         SendArkUIAsyncEvent(&event);
     };
     if (uiNode->GetTag() == "Span") {
@@ -6353,7 +6467,9 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
             event.touchEvent.historyEvents = nullptr;
             event.touchEvent.historySize = 0;
         }
+        event.touchEvent.stopPropagation = false;
         SendArkUIAsyncEvent(&event);
+        eventInfo.SetStopPropagation(event.touchEvent.stopPropagation);
     };
     ViewAbstract::SetOnTouch(frameNode, std::move(onEvent));
 }
@@ -6466,5 +6582,95 @@ void SetOnAccessibilityActions(ArkUINodeHandle node, void* extraParam)
     accessibilityProperty->SetActions(onEvent);
 }
 
+void ResetOnAppear(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnAppear(frameNode);
+}
+
+void ResetOnDisappear(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnDisappear(frameNode);
+}
+
+void ResetOnAttach(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnAttach(frameNode);
+}
+
+void ResetOnDetach(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnDetach(frameNode);
+}
+
+void ResetOnFocus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnFocus(frameNode);
+}
+
+void ResetOnBlur(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnBlur(frameNode);
+}
+
+void ResetOnAreaChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetAreaChanged(frameNode);
+}
+
+void ResetOnVisibleAreaChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetVisibleChange(frameNode);
+}
+
+void ResetOnClick(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnClick(frameNode);
+}
+
+void ResetOnTouch(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnTouch(frameNode);
+}
+
+void ResetOnTouchIntercept(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetOnTouchIntercept(frameNode, nullptr);
+}
+
+void ResetOnHover(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnHover(frameNode);
+}
+
+void ResetOnMouse(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnMouse(frameNode);
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

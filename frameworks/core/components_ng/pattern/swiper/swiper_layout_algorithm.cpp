@@ -221,13 +221,16 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (itemPosition_.empty()) {
         layoutWrapper->SetActiveChildRange(-1, -1);
     } else if (itemPositionInAnimation_.empty()) {
-        int32_t startIndex = std::min(GetLoopIndex(GetStartIndex()), realTotalCount_ - 1);
-        int32_t endIndex = std::min(GetLoopIndex(GetEndIndex()), realTotalCount_ - 1);
-        CheckCachedItem();
+        int32_t startIndex = GetLoopIndex(GetStartIndex());
+        int32_t endIndex = GetLoopIndex(GetEndIndex());
+        CheckCachedItem(startIndex, endIndex);
         if (isLoop_) {
             layoutWrapper->SetActiveChildRange(ActiveChildSets({ activeItems_, cachedItems_ }),
                 ActiveChildRange({ startIndex, endIndex, cachedCount_, cachedCount_ }));
         } else {
+            // startIndex maybe target to invalid blank items in group mode, need to be adjusted.
+            startIndex = startIndex < realTotalCount_ ? startIndex : 0;
+            endIndex = std::min(endIndex, realTotalCount_ - 1);
             layoutWrapper->SetActiveChildRange(startIndex, endIndex, cachedCount_, cachedCount_);
         }
     } else {
@@ -240,7 +243,13 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         while (endIndex - 1 >= 0 && itemPositionInAnimation_.find(endIndex - 1) != itemPositionInAnimation_.end()) {
             endIndex--;
         }
-        layoutWrapper->SetActiveChildRange(endIndex, startIndex);
+        CheckCachedItem(endIndex, startIndex);
+        if (isLoop_) {
+            layoutWrapper->SetActiveChildRange(ActiveChildSets({ activeItems_, cachedItems_ }),
+                ActiveChildRange({ endIndex, startIndex, cachedCount_, cachedCount_ }));
+        } else {
+            layoutWrapper->SetActiveChildRange(endIndex, startIndex, cachedCount_, cachedCount_);
+        }
     }
 
     contentIdealSize.SetMainSize(contentMainSize_, axis);
@@ -252,7 +261,9 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // set swiper cache info.
     auto measuredItemCount = static_cast<int32_t>(measuredItems_.size());
-    auto maxCachedCount = static_cast<int32_t>(std::ceil(static_cast<float>(realTotalCount_ - measuredItemCount) / 2));
+    auto maxCachedCount =
+        isLoop_ ? static_cast<int32_t>(std::ceil(static_cast<float>(realTotalCount_ - measuredItemCount) / 2))
+                : realTotalCount_;
     layoutWrapper->SetCacheCount(std::min(swiperPattern->GetCachedCount(), maxCachedCount), childLayoutConstraint);
     layoutWrapper->SetLongPredictTask();
 
@@ -1393,23 +1404,21 @@ bool SwiperLayoutAlgorithm::IsNormalItem(const RefPtr<LayoutWrapper>& wrapper) c
     return true;
 }
 
-void SwiperLayoutAlgorithm::CheckCachedItem()
+void SwiperLayoutAlgorithm::CheckCachedItem(int32_t startIndex, int32_t endIndex)
 {
-    int32_t startIndex = GetLoopIndex(GetStartIndex());
-    int32_t endIndex = GetLoopIndex(GetEndIndex());
     if (startIndex <= endIndex) {
-        for (uint32_t i = startIndex; i <= endIndex; ++i) {
+        for (auto i = startIndex; i <= endIndex; ++i) {
             activeItems_.insert(i);
         }
     } else {
-        for (uint32_t i = 0; i <= endIndex; ++i) {
+        for (auto i = 0; i <= endIndex; ++i) {
             activeItems_.insert(i);
         }
-        for (uint32_t i = startIndex; i < realTotalCount_; ++i) {
+        for (auto i = startIndex; i < totalItemCount_; ++i) {
             activeItems_.insert(i);
         }
     }
-    uint32_t cachedCount = cachedCount_;
+    auto cachedCount = cachedCount_;
     while (cachedCount > 0) {
         --startIndex;
         if (!isLoop_ && startIndex < 0) {
@@ -1426,16 +1435,22 @@ void SwiperLayoutAlgorithm::CheckCachedItem()
     cachedCount = cachedCount_;
     while (cachedCount > 0) {
         ++endIndex;
-        if (!isLoop_ && endIndex >= realTotalCount_) {
+        if (!isLoop_ && endIndex >= totalItemCount_) {
             break;
         }
-        if (isLoop_ && endIndex >= realTotalCount_) {
+        if (isLoop_ && endIndex >= totalItemCount_) {
             endIndex = GetLoopIndex(endIndex);
         }
         if (activeItems_.find(endIndex) == activeItems_.end()) {
             cachedItems_.insert(endIndex);
         }
         --cachedCount;
+    }
+    if (swipeByGroup_) {
+        for (auto i = realTotalCount_; i < totalItemCount_; ++i) {
+            activeItems_.erase(i);
+            cachedItems_.erase(i);
+        }
     }
 }
 } // namespace OHOS::Ace::NG

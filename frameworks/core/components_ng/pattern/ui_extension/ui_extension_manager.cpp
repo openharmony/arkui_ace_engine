@@ -45,7 +45,17 @@ void UIExtensionManager::UIExtensionIdUtility::RecycleExtensionId(int32_t id)
 void UIExtensionManager::RegisterUIExtensionInFocus(
     const WeakPtr<UIExtensionPattern>& uiExtensionFocused, const WeakPtr<SessionWrapper>& sessionWrapper)
 {
+    securityUiExtensionFocused_ = nullptr;
     uiExtensionFocused_ = uiExtensionFocused;
+    sessionWrapper_ = sessionWrapper;
+}
+
+void UIExtensionManager::RegisterSecurityUIExtensionInFocus(
+    const WeakPtr<SecurityUIExtensionPattern>& uiExtensionFocused,
+    const WeakPtr<SessionWrapper>& sessionWrapper)
+{
+    uiExtensionFocused_ = nullptr;
+    securityUiExtensionFocused_ = uiExtensionFocused;
     sessionWrapper_ = sessionWrapper;
 }
 
@@ -119,6 +129,13 @@ void UIExtensionManager::TransferOriginAvoidArea(const Rosen::AvoidArea& avoidAr
             uiExtension->DispatchOriginAvoidArea(avoidArea, type);
         }
     }
+
+    for (const auto& it : aliveSecurityUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        if (uiExtension) {
+            uiExtension->DispatchOriginAvoidArea(avoidArea, type);
+        }
+    }
 }
 
 void UIExtensionManager::RemoveDestroyedUIExtension(int32_t nodeId)
@@ -144,6 +161,13 @@ void UIExtensionManager::NotifySizeChangeReason(WindowSizeChangeReason type,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     for (const auto& it : aliveUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        if (uiExtension) {
+            uiExtension->NotifySizeChangeReason(type, rsTransaction);
+        }
+    }
+
+    for (const auto& it : aliveSecurityUIExtensions_) {
         auto uiExtension = it.second.Upgrade();
         if (uiExtension) {
             uiExtension->NotifySizeChangeReason(type, rsTransaction);

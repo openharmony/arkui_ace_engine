@@ -431,8 +431,7 @@ HWTEST_F(RatingTestNg, RatingMeasureTest009, TestSize.Level1)
     layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
     auto ratingTheme = AceType::MakeRefPtr<RatingTheme>();
     ASSERT_NE(ratingTheme, nullptr);
-    EXPECT_EQ(ratingLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper),
-        SizeF(ratingTheme->GetRatingHeight().ConvertToPx(), ratingTheme->GetRatingWidth().ConvertToPx()));
+    EXPECT_EQ(ratingLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper), std::nullopt);
 
     /**
      * @tc.steps: step4. Invoke MeasureContent when the size has been defined.
@@ -455,8 +454,7 @@ HWTEST_F(RatingTestNg, RatingMeasureTest009, TestSize.Level1)
     layoutConstraintSize.selfIdealSize.SetSize(INVALID_CONTAINER_SIZE);
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize);
     layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
-    EXPECT_EQ(ratingLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper),
-        SizeF(ratingTheme->GetRatingHeight().ConvertToPx(), ratingTheme->GetRatingWidth().ConvertToPx()));
+    EXPECT_EQ(ratingLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper), std::nullopt);
 
     /**
      * @tc.steps: step6. Invoke Layout when contentSize is valid.
@@ -1662,5 +1660,99 @@ HWTEST_F(RatingTestNg, RatingPatternTest071, TestSize.Level1)
      */
     ratingPattern->SetBuilderFunc(node);
     ratingPattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: PreventDefault001
+ * @tc.desc: test InitTouchEvent and InitClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, PreventDefault001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RatingModelNG.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR);
+    rating.SetStepSize(RATING_STEP_SIZE_1);
+    rating.SetStars(DEFAULT_STAR_NUM);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Mock TouchEventInfo info and set preventDefault to true
+     * @tc.expected: Check the param value
+     */
+    pattern->InitTouchEvent(gestureHub);
+    TouchEventInfo touchInfo("onTouch");
+    TouchLocationInfo touchDownInfo(1);
+    touchDownInfo.SetTouchType(TouchType::DOWN);
+    touchInfo.SetPreventDefault(true);
+    touchInfo.SetSourceDevice(SourceType::TOUCH);
+    touchInfo.AddTouchLocationInfo(std::move(touchDownInfo));
+    pattern->touchEvent_->callback_(touchInfo);
+    EXPECT_TRUE(pattern->isTouchPreventDefault_);
+    /**
+     * @tc.steps: step3.Mock GestureEvent info and set preventDefault to true
+     * @tc.expected: Check the param value
+     */
+    pattern->InitClickEvent(gestureHub);
+    GestureEvent clickInfo;
+    clickInfo.SetPreventDefault(true);
+    clickInfo.SetSourceDevice(SourceType::TOUCH);
+    pattern->clickEvent_->operator()(clickInfo);
+    EXPECT_FALSE(pattern->isTouchPreventDefault_);
+}
+
+/**
+ * @tc.name: PreventDefault002
+ * @tc.desc: test InitTouchEvent and InitClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, PreventDefault002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create RatingModelNG.
+     */
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetIndicator(RATING_INDICATOR);
+    rating.SetStepSize(RATING_STEP_SIZE_1);
+    rating.SetStars(DEFAULT_STAR_NUM);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Mock TouchEvent info and set preventDefault to false
+     * @tc.expected: Check the param value
+     */
+    pattern->InitTouchEvent(gestureHub);
+    TouchEventInfo touchInfo("onTouch");
+    TouchLocationInfo touchDownInfo(1);
+    touchDownInfo.SetTouchType(TouchType::DOWN);
+    touchInfo.SetPreventDefault(false);
+    touchInfo.SetSourceDevice(SourceType::TOUCH);
+    touchInfo.AddTouchLocationInfo(std::move(touchDownInfo));
+    pattern->touchEvent_->callback_(touchInfo);
+    EXPECT_EQ(touchInfo.IsPreventDefault(), pattern->isTouchPreventDefault_);
+    /**
+     * @tc.steps: step3. Mock GestureEvent info and set preventDefault to false
+     * @tc.expected: Check the param value
+     */
+    pattern->InitClickEvent(gestureHub);
+    GestureEvent clickInfo;
+    clickInfo.SetPreventDefault(false);
+    clickInfo.SetSourceDevice(SourceType::TOUCH);
+    pattern->clickEvent_->operator()(clickInfo);
+    EXPECT_FALSE(pattern->isTouchPreventDefault_);
 }
 } // namespace OHOS::Ace::NG

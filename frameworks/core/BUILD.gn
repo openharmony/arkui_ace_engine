@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 
 config("container_scope_config") {
   visibility = [ ":*" ]
@@ -56,6 +57,10 @@ template("ace_core_source_set") {
     defines += invoker.defines
     platform = invoker.platform
     include_dirs = []
+
+    if (enable_split_mode && defined(vendor_configs.ace_advanced_split_mode)) {
+      include_dirs += vendor_configs.ace_advanced_split_mode_dirs
+    }
 
     # add common source file needed by all product platform here
     sources = [

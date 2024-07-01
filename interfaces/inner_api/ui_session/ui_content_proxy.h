@@ -22,15 +22,15 @@
 #include "ui_report_stub.h"
 
 namespace OHOS::Ace {
-class UIContentServiceProxy : public IRemoteProxy<IUiContentService> {
+class ACE_FORCE_EXPORT UIContentServiceProxy : public IRemoteProxy<IUiContentService> {
 public:
     explicit UIContentServiceProxy(const sptr<IRemoteObject>& impl) : IRemoteProxy<IUiContentService>(impl) {};
-    virtual int32_t GetInspectorTree() override;
+    virtual int32_t GetInspectorTree(const EventCallback& eventCallback) override;
     virtual int32_t Connect() override;
-    virtual int32_t RegisterClickEventCallback(EventCallback eventCallback) override;
-    virtual int32_t RegisterRouterChangeEventCallback(EventCallback eventCallback) override;
-    virtual int32_t RegisterSearchEventCallback(EventCallback eventCallback) override;
-    virtual int32_t RegisterComponentChangeEventCallback(EventCallback eventCallback) override;
+    virtual int32_t RegisterClickEventCallback(const EventCallback& eventCallback) override;
+    virtual int32_t RegisterRouterChangeEventCallback(const EventCallback& eventCallback) override;
+    virtual int32_t RegisterSearchEventCallback(const EventCallback& eventCallback) override;
+    virtual int32_t RegisterComponentChangeEventCallback(const EventCallback& eventCallback) override;
     virtual int32_t UnregisterClickEventCallback() override;
     virtual int32_t UnregisterSearchEventCallback() override;
     virtual int32_t UnregisterRouterChangeEventCallback() override;

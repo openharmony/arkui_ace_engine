@@ -530,6 +530,14 @@ void GestureEventHub::ResetDragActionForWeb()
     isReceivedDragGestureInfo_ = false;
     CHECK_NULL_VOID(dragEventActuator_);
     dragEventActuator_->ResetDragActionForWeb();
+
+    // fix drag failed when long press drag after 500ms and before 800ms
+    // need to reset the state of the drag manager
+    auto pipeLine = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeLine);
+    auto dragDropManager = pipeLine->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->ResetDragging();
 }
 
 void GestureEventHub::StartDragTaskForWeb()
@@ -807,7 +815,9 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
                 },
                 TaskExecutor::TaskType::UI, "ArkUIGestureDragStart");
         };
-        NG::ComponentSnapshot::Create(dragDropInfo.customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
+        SnapshotParam param;
+        param.delay = CREATE_PIXELMAP_TIME;
+        NG::ComponentSnapshot::Create(dragDropInfo.customNode, std::move(callback), false, param);
         PrintBuilderNode(dragPreviewInfo.customNode);
         return;
     }
@@ -1079,6 +1089,9 @@ void GestureEventHub::UpdateExtraInfo(const RefPtr<FrameNode>& frameNode,
     double opacity = frameNode->GetDragPreviewOption().options.opacity;
     auto optionInfo = frameNode->GetDragPreviewOption().options;
     arkExtraInfoJson->Put("dip_opacity", opacity);
+    TAG_LOGD(AceLogTag::ACE_DRAG, "The info of opacity update to the framework is %{public}s",
+        arkExtraInfoJson->ToString().c_str());
+
     if (optionInfo.blurbgEffect.backGroundEffect.radius.IsValid()) {
         optionInfo.blurbgEffect.ToJsonValue(arkExtraInfoJson);
     }

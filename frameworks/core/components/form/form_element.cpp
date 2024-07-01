@@ -321,19 +321,21 @@ void FormElement::Prepare(const WeakPtr<Element>& parent)
                     }
                 }, "ArkUIFormRemoveCard");
             });
-        formManagerBridge_->AddFormUninstallCallback([weak = WeakClaim(this), instanceID](int64_t formId) {
-            ContainerScope scope(instanceID);
-            auto element = weak.Upgrade();
-            auto uiTaskExecutor = SingleTaskExecutor::Make(
-                element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask([formId, weak, instanceID] {
+        formManagerBridge_->AddFormUninstallCallback(
+            [weak = WeakClaim(this), instanceID](int64_t formId) {
                 ContainerScope scope(instanceID);
-                auto form = weak.Upgrade();
-                if (form) {
-                    form->HandleOnUninstallEvent(formId);
-                }
-            }, "ArkUIFormUninstall");
-        });
+                auto element = weak.Upgrade();
+                auto uiTaskExecutor = SingleTaskExecutor::Make(
+                    element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+                uiTaskExecutor.PostTask(
+                    [formId, weak, instanceID] {
+                        ContainerScope scope(instanceID);
+                        auto form = weak.Upgrade();
+                        if (form) {
+                            form->HandleOnUninstallEvent(formId);
+                        }
+                    }, "ArkUIFormUninstall");
+            });
     }
 }
 

@@ -85,7 +85,7 @@ class VariableUtilV3 {
      *  prefix_@Provider_aliasName: {'varName': ..., 'aliasName': ...., 'deco': '@Provider' | '@Consumer'
      */
     private static metaAliasKey(aliasName: string, deco: '@Provider' | '@Consumer') : string {
-      return `${ProviderConsumerUtilV2.ALIAS_PREFIX}_${deco}_${aliasName}`;;
+      return `${ProviderConsumerUtilV2.ALIAS_PREFIX}_${deco}_${aliasName}`;
     }
 
     /**
@@ -116,7 +116,7 @@ class VariableUtilV3 {
         // check all entries of this format varName: { deco: '@Provider' | '@Consumer', aliasName: ..... }
         // do not check alias entries
         // 'varName' is only in alias entries, see addProvideConsumeVariableDecoMeta
-        if (typeof value == 'object' && value['deco'] === '@Consumer' && !('varName' in value)) {
+        if (typeof value === 'object' && value['deco'] === '@Consumer' && !('varName' in value)) {
           let result = ProviderConsumerUtilV2.findProvider(view, value['aliasName']);
           if (result && result[0] && result[1]) {
             ProviderConsumerUtilV2.connectConsumer2Provider(view, key, result[0], result[1]);
@@ -136,7 +136,7 @@ class VariableUtilV3 {
     */
     private static findProvider(view: ViewV2, aliasName: string): [ViewV2, string] | undefined {
       let checkView : IView | undefined = view?.getParent();
-      const searchingPrefixedAliasName = ProviderConsumerUtilV2.metaAliasKey(aliasName, "@Provider");
+      const searchingPrefixedAliasName = ProviderConsumerUtilV2.metaAliasKey(aliasName, '@Provider');
       stateMgmtConsole.debug(`findProvider: Try to connect ${view.debugInfo__()} '@Consumer ${aliasName}' to @Provider counterpart....`);
       while (checkView) {
         const meta = checkView.constructor?.prototype[ObserveV2.V2_DECO_META];

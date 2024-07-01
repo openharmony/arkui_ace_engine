@@ -486,6 +486,8 @@ void PageRouterManager::StartClean()
         pageRouterStack_.emplace_back(temp.back());
         if (!OnCleanPageStack()) {
             std::swap(temp, pageRouterStack_);
+        } else {
+            RefreshPageIndex(pageRouterStack_.begin(), 0);
         }
         return;
     }
@@ -500,6 +502,7 @@ bool PageRouterManager::Pop()
 {
     CHECK_RUN_ON(JS);
     if (inRouterOpt_) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "router pop is in routeropt");
         return false;
     }
     RouterOptScope scope(this);
@@ -516,6 +519,7 @@ bool PageRouterManager::StartPop()
     auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
     CHECK_NULL_RETURN(pageInfo, false);
     if (pageInfo->GetAlertCallback()) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "pop alert check start");
         BackCheckAlert(RouterPageInfo());
         return true;
     }
@@ -1139,6 +1143,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
     CHECK_RUN_ON(JS);
     RouterOptScope scope(this);
     if (target.url.empty()) {
+        TAG_LOGE(AceLogTag::ACE_ROUTER, "push url is empty");
         return;
     }
 #if !defined(PREVIEW)
@@ -1335,6 +1340,7 @@ void PageRouterManager::BackCheckAlert(const RouterPageInfo& target)
 {
     RouterOptScope scope(this);
     if (pageRouterStack_.empty()) {
+        TAG_LOGW(AceLogTag::ACE_ROUTER, "Page router stack size is zero, can not back");
         return;
     }
     auto currentPage = pageRouterStack_.back().Upgrade();
@@ -1386,6 +1392,7 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     CHECK_RUN_ON(JS);
     auto pageNode = CreatePage(pageId, target);
     if (!pageNode) {
+        TAG_LOGE(AceLogTag::ACE_ROUTER, "create page failed");
         return;
     }
 
@@ -1844,6 +1851,7 @@ void PageRouterManager::PopPage(
 
 void PageRouterManager::PopPageToIndex(int32_t index, const std::string& params, bool needShowNext, bool needTransition)
 {
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "pop page to %{public}d", index);
     std::list<WeakPtr<FrameNode>> temp;
     std::swap(temp, pageRouterStack_);
     auto iter = temp.begin();

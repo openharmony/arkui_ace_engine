@@ -153,6 +153,15 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     if (accessibilityProperty != nullptr) {
         accessibilityProperty->SetCollectionItemCounts(layoutAlgorithm->GetTotalItemCount());
     }
+    auto cacheParam = layoutAlgorithm->GetCacheParam();
+    if (cacheParam) {
+        if (cacheParam.value().forward) {
+            forwardCachedIndex_ = cacheParam.value().currCachedIndex;
+        } else {
+            backwardCachedIndex_ = cacheParam.value().currCachedIndex;
+        }
+        layoutAlgorithm->SetCacheParam(std::nullopt);
+    }
     auto listLayoutProperty = host->GetLayoutProperty<ListItemGroupLayoutProperty>();
     return listLayoutProperty && listLayoutProperty->GetDivider().has_value() && !itemPosition_.empty();
 }
@@ -384,34 +393,22 @@ void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint,
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    CalculateItemStartIndex();
-    itemTotalCount_ = host->GetTotalChildCount() - itemStartIndex_;
-    if (itemTotalCount_ == 0) {
-        return;
-    }
-    if (forward) {
-        int32_t endIndex = itemPosition_.empty() ? -1 : itemPosition_.rbegin()->first;
-        int32_t limit = std::min(endIndex + cacheCount, itemTotalCount_ - 1);
-        int32_t currentIndex = GetForwardCachedIndex(cacheCount) + 1;
-        for (; currentIndex <= limit; currentIndex++) {
-            auto item = host->GetOrCreateChildByIndex(currentIndex + itemStartIndex_, false, true);
-            if (!item) {
-                break;
-            }
-        }
-        forwardCachedIndex_ = std::min(currentIndex - 1, limit);
-    } else {
-        int32_t startIndex = itemPosition_.empty() ? itemTotalCount_ : itemPosition_.begin()->first;
-        int32_t limit = std::max(startIndex - cacheCount, 0);
-        int32_t currentIndex = GetBackwardCachedIndex(cacheCount) - 1;
-        for (; currentIndex >= limit; currentIndex--) {
-            auto item = host->GetOrCreateChildByIndex(currentIndex + itemStartIndex_, false, true);
-            if (!item) {
-                break;
-            }
-        }
-        backwardCachedIndex_ = std::max(currentIndex + 1, limit);
-    }
+    auto layoutAlgorithmWrapper = host->GetLayoutAlgorithm(true);
+    CHECK_NULL_VOID(layoutAlgorithmWrapper);
+    auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(itemGroup);
+    int32_t currentIndex = forward ? GetForwardCachedIndex(cached) : GetBackwardCachedIndex(cacheCount);
+    ListItemGroupCacheParam param = {
+        .forward = forward,
+        .cacheCount = cacheCount,
+        .currCachedIndex = currentIndex,
+        .deadline = deadline,
+    };
+    itemGroup->SetCacheParam(param);
+    itemGroup->SetListLayoutProperty(listLayoutProperty);
+    host->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    host->GetGeometryNode()->SetParentLayoutConstraint(constraint);
+    FrameNode::ProcessOffscreenNode(host);
 }
 
 void ListItemGroupPattern::SetListItemGroupStyle(V2::ListItemGroupStyle style)

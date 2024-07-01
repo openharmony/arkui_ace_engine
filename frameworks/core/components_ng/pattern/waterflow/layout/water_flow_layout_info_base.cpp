@@ -18,6 +18,8 @@
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"
+#include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/measure_utils.h"
 namespace OHOS::Ace::NG {
 RefPtr<WaterFlowLayoutInfoBase> WaterFlowLayoutInfoBase::Create(WaterFlowLayoutMode mode)
 {
@@ -46,5 +48,20 @@ int32_t WaterFlowLayoutInfoBase::GetSegment(int32_t itemIdx) const
     int32_t idx = it - segmentTails_.begin();
     segmentCache_[itemIdx] = idx;
     return idx;
+}
+
+void WaterFlowLayoutInfoBase::InitMargins(
+    const std::vector<WaterFlowSections::Section>& sections, const ScaleProperty& scale, float percentWidth)
+{
+    size_t n = sections.size();
+    if (n == 0) {
+        return;
+    }
+    margins_.resize(n);
+    for (size_t i = 0; i < n; ++i) {
+        if (sections[i].margin) {
+            margins_[i] = ConvertToMarginPropertyF(*sections[i].margin, scale, percentWidth);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

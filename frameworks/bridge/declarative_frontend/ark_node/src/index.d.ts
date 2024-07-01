@@ -103,7 +103,7 @@ declare class FinalizationRegistry {
 
 declare function getUINativeModule(): any;
 
-declare function applyUIAttributes(modifier: AttributeModifier<CommonAttribute>, nativeNode: NodePtr, component: ArkComponent): void
+declare function applyUIAttributes(modifier: AttributeModifier<CommonAttribute>, nativeNode: NodePtr, component: ArkComponent): void;
 
 declare interface CommonAttribute { }
 
@@ -167,6 +167,10 @@ declare class ArkButtonComponent extends ArkComponent {}
 declare class ArkXComponentComponent extends ArkComponent {}
 
 declare class ArkListItemGroupComponent extends ArkComponent {}
+
+declare class ArkWaterFlowComponent extends ArkComponent {}
+
+declare class ArkFlowItemComponent extends ArkComponent {}
 
 declare class UICommonEvent {
   private _nodePtr: NodePtr;

@@ -99,7 +99,7 @@ public:
 
     ~AceContainer() override;
 
-    bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node) override;
+    bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node, uint32_t autoFillSessionId) override;
 
     void Initialize() override;
 
@@ -571,9 +571,10 @@ public:
     bool GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
         int32_t& sourceTool, StopDragCallback&& stopDragCallback) override;
 
-    bool RequestAutoFill(const RefPtr<NG::FrameNode>& node,
-        AceAutoFillType autoFillType, bool& isPopup, bool isNewPassWord = false) override;
-    bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish) override;
+    bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
+        bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId) override;
+    bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish,
+        const std::function<void()>& onUIExtNodeBindingCompleted) override;
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
     bool ChangeType(AbilityBase::ViewData& viewData);
     AceAutoFillType PlaceHolderToType(const std::string& onePlaceHolder) override;
@@ -650,6 +651,16 @@ public:
     void NotifyDensityUpdate();
     void NotifyDirectionUpdate();
 
+    void SetRegisterComponents(const std::vector<std::string>& registerComponents)
+    {
+        registerComponents_ = registerComponents;
+    }
+
+    std::vector<std::string> GetRegisterComponents() override
+    {
+        return registerComponents_;
+    }
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
@@ -718,6 +729,7 @@ private:
     // for other AceContainer subscribe configuration from host AceContaier
     // key is instanceId, value is callback function
     std::unordered_map<int32_t, ConfigurationChangedCallback> configurationChangedCallbacks_;
+    std::vector<std::string> registerComponents_;
 
     std::unordered_set<std::string> resAdapterRecord_;
 

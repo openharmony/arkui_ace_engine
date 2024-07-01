@@ -656,6 +656,7 @@ void SubwindowManager::ShowToast(const std::string& message, int32_t duration, c
         auto subwindow =
             showMode == NG::ToastShowMode::SYSTEM_TOP_MOST ? GetOrCreateSystemSubWindow() : GetOrCreateSubWindow();
         CHECK_NULL_VOID(subwindow);
+        subwindow->SetIsSystemTopMost(showMode == NG::ToastShowMode::SYSTEM_TOP_MOST);
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "before show toast");
         subwindow->ShowToast(message, duration, bottom, showMode, alignment, offset);
     } else {

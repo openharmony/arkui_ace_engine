@@ -132,7 +132,43 @@ int32_t OH_NativeXComponent::GetTiltY(size_t pointIndex, float* tiltY)
     if (xcomponentImpl_ == nullptr) {
         return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
     }
-    (*tiltY) = xcomponentImpl_->GetTiltX(pointIndex);
+    (*tiltY) = xcomponentImpl_->GetTiltY(pointIndex);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent::GetWindowX(size_t pointIndex, float* windowX)
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    (*windowX) = xcomponentImpl_->GetWindowX(pointIndex);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent::GetWindowY(size_t pointIndex, float* windowY)
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    (*windowY) = xcomponentImpl_->GetWindowY(pointIndex);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent::GetDisplayX(size_t pointIndex, float* displayX)
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    (*displayX) = xcomponentImpl_->GetDisplayX(pointIndex);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent::GetDisplayY(size_t pointIndex, float* displayY)
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    (*displayY) = xcomponentImpl_->GetDisplayY(pointIndex);
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }
 

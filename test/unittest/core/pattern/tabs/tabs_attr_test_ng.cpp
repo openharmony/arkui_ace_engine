@@ -866,9 +866,8 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetWidthAuto001, TestSize.Level1)
     model.SetHeightAuto(true);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    auto tabsLayoutProperty = layoutProperty_;
-    EXPECT_TRUE(tabsLayoutProperty->GetWidthAutoValue(false));
-    EXPECT_TRUE(tabsLayoutProperty->GetHeightAutoValue(false));
+    EXPECT_TRUE(layoutProperty_->GetWidthAutoValue(false));
+    EXPECT_TRUE(layoutProperty_->GetHeightAutoValue(false));
 }
 
 /**
@@ -1103,18 +1102,68 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetBarAdaptiveHeight001, TestSize.Level1)
 HWTEST_F(TabsAttrTestNg, TabsModelSetScrollableBarModeOptions001, TestSize.Level1)
 {
     /**
-     * @tc.steps: steps2. SetScrollableBarModeOptions.
-     * @tc.expected: steps2. Check if the SetScrollableBarModeOptions function successfully sets
-     *                       ScrollableBarModeOptions.
+     * @tc.steps: steps1. Default ScrollableBarModeOptions
+     * @tc.expected: The items are compact and centered
      */
     ScrollableBarModeOptions option;
-    option.margin = 0.0_vp;
-    option.nonScrollableLayoutStyle = LayoutStyle::ALWAYS_CENTER;
     TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
     model.SetScrollableBarModeOptions(option);
-    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    EXPECT_EQ(tabBarLayoutProperty_->GetScrollableBarModeOptions(), option);
+    float halfTabsWidth = TABS_WIDTH / 2;
+    EXPECT_EQ(GetChildX(tabBarNode_, 0), halfTabsWidth - BARITEM_SIZE * 2);
+    EXPECT_EQ(GetChildX(tabBarNode_, 1), halfTabsWidth - BARITEM_SIZE);
+    EXPECT_EQ(GetChildX(tabBarNode_, 2), halfTabsWidth);
+    EXPECT_EQ(GetChildX(tabBarNode_, 3), halfTabsWidth + BARITEM_SIZE);
+
+    /**
+     * @tc.steps: steps2. Set margin and ALWAYS_AVERAGE_SPLIT
+     * @tc.expected: The items are evenly distributed
+     */
+    float margin = 10.f;
+    option.margin = Dimension(margin);
+    option.nonScrollableLayoutStyle = LayoutStyle::ALWAYS_AVERAGE_SPLIT;
+    tabBarLayoutProperty_->UpdateScrollableBarModeOptions(option);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    float interval = (halfTabsWidth - margin) / 2;
+    EXPECT_EQ(GetChildX(tabBarNode_, 0), margin);
+    EXPECT_EQ(GetChildX(tabBarNode_, 1), halfTabsWidth - interval);
+    EXPECT_EQ(GetChildX(tabBarNode_, 2), halfTabsWidth);
+    EXPECT_EQ(GetChildX(tabBarNode_, 3), halfTabsWidth + interval);
+
+    /**
+     * @tc.steps: steps3. Set SPACE_BETWEEN_OR_CENTER, and total items width not exceed halfTabsWidth
+     * @tc.expected: The items are compact and centered in halfTabsWidth
+     */
+    option.margin = Dimension(0.f);
+    option.nonScrollableLayoutStyle = LayoutStyle::SPACE_BETWEEN_OR_CENTER;
+    tabBarLayoutProperty_->UpdateScrollableBarModeOptions(option);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    interval = halfTabsWidth / TABCONTENT_NUMBER;
+    EXPECT_EQ(GetChildX(tabBarNode_, 0), halfTabsWidth - interval * 2);
+    EXPECT_EQ(GetChildX(tabBarNode_, 1), halfTabsWidth - interval);
+    EXPECT_EQ(GetChildX(tabBarNode_, 2), halfTabsWidth);
+    EXPECT_EQ(GetChildX(tabBarNode_, 3), halfTabsWidth + interval);
+
+    /**
+     * @tc.steps: steps4. Set SPACE_BETWEEN_OR_CENTER, and total items width exceed halfTabsWidth
+     * @tc.expected: The items are evenly distributed
+     */
+    option.margin = Dimension(0.f);
+    option.nonScrollableLayoutStyle = LayoutStyle::SPACE_BETWEEN_OR_CENTER;
+    const float tabsWidth  = BARITEM_SIZE * (TABCONTENT_NUMBER + 1);
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(tabsWidth));
+    tabBarLayoutProperty_->UpdateScrollableBarModeOptions(option);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    halfTabsWidth = tabsWidth / 2;
+    EXPECT_EQ(GetChildX(tabBarNode_, 0), halfTabsWidth - BARITEM_SIZE * 2);
+    EXPECT_EQ(GetChildX(tabBarNode_, 1), halfTabsWidth - BARITEM_SIZE);
+    EXPECT_EQ(GetChildX(tabBarNode_, 2), halfTabsWidth);
+    EXPECT_EQ(GetChildX(tabBarNode_, 3), halfTabsWidth + BARITEM_SIZE);
 }
 
 /**

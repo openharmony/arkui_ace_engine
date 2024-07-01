@@ -71,13 +71,13 @@ void RatingModifier::PaintBoard(DrawingContext& context)
     LinearColor bgColor = boardColor_->Get();
     auto pressBorderRadius = ratingTheme->GetFocusBorderRadius();
     auto& canvas = context.canvas;
-
+    auto starNum = starNum_->Get();
+    CHECK_EQUAL_VOID(starNum, 0);
     auto singleStarImagePaintConfig = foregroundImageCanvas_->GetPaintConfig();
-    const float singleStarWidth = contentSize_->Get().Width() / static_cast<float>(starNum_->Get());
+    const float singleStarWidth = contentSize_->Get().Width() / static_cast<float>(starNum);
     const float singleStarHeight = contentSize_->Get().Height();
     auto offset = contentOffset_->Get();
     auto touchStar = touchStar_->Get();
-    auto starNum = starNum_->Get();
     if (touchStar >= 0 && touchStar < starNum) {
         RSBrush rsBrush(ToRSColor(bgColor));
         rsBrush.SetAntiAlias(true);
@@ -101,9 +101,10 @@ void RatingModifier::PaintStar(DrawingContext& context)
     auto& canvas = context.canvas;
     auto offset = contentOffset_->Get();
     auto starNum = starNum_->Get();
+    CHECK_EQUAL_VOID(starNum, 0);
     auto drawScore = drawScore_->Get();
     auto config = foregroundImageCanvas_->GetPaintConfig();
-    const float singleStarWidth = contentSize_->Get().Width() / static_cast<float>(starNum_->Get());
+    const float singleStarWidth = contentSize_->Get().Width() / static_cast<float>(starNum);
     const float singleStarHeight = contentSize_->Get().Height();
     // step2: calculate 3 images repeat times.
     const int32_t foregroundImageRepeatNum = ceil(drawScore);
@@ -155,9 +156,10 @@ void RatingModifier::PaintReverseStar(DrawingContext& context)
     auto& canvas = context.canvas;
     auto offset = contentOffset_->Get();
     auto starNum = starNum_->Get();
+    CHECK_EQUAL_VOID(starNum, 0);
     auto drawScore = drawScore_->Get();
     auto config = foregroundImageCanvas_->GetPaintConfig();
-    const float singleStarWidth = contentSize_->Get().Width() / static_cast<float>(starNum_->Get());
+    const float singleStarWidth = contentSize_->Get().Width() / static_cast<float>(starNum);
     const float singleStarHeight = contentSize_->Get().Height();
     const int32_t foregroundImageRepeatNum = ceil(drawScore);
     const float secondaryImageRepeatNum = foregroundImageRepeatNum - drawScore;

@@ -22,7 +22,7 @@ namespace OHOS::Ace::Framework {
 
 void RegisterExtraViews(BindingTarget globalObj);
 
-void RegisterExtraViewByName(BindingTarget globalObj, const std::string& moduleName);
+bool RegisterExtraViewByName(BindingTarget globalObj, const std::string& moduleName);
 
 } // namespace OHOS::Ace::Framework
 

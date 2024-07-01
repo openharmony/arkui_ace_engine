@@ -177,12 +177,17 @@ bool ScrollablePattern::OnScrollPosition(double& offset, int32_t source)
     if (needLinked_) {
         auto isAtTop = (IsAtTop() && Positive(offset));
         auto refreshCoordinateMode = RefreshCoordinationMode::UNKNOWN;
+        auto modalSheetCoordinationMode = ModalSheetCoordinationMode::UNKNOWN;
+        if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            modalSheetCoordinationMode = CoordinateWithSheet(offset, source, isAtTop);
+        }
         if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) ||
             !isSearchRefresh) {
             refreshCoordinateMode = CoordinateWithRefresh(offset, source, isAtTop);
         }
         auto navigationInCoordination = CoordinateWithNavigation(offset, source, isAtTop);
-        if ((refreshCoordinateMode == RefreshCoordinationMode::REFRESH_SCROLL) || navigationInCoordination) {
+        if ((refreshCoordinateMode == RefreshCoordinationMode::REFRESH_SCROLL) || navigationInCoordination ||
+            (modalSheetCoordinationMode == ModalSheetCoordinationMode::SHEET_SCROLL)) {
             return false;
         }
     }
@@ -262,6 +267,34 @@ RefreshCoordinationMode ScrollablePattern::CoordinateWithRefresh(double& offset,
     return mode;
 }
 
+ModalSheetCoordinationMode ScrollablePattern::CoordinateWithSheet(double& offset, int32_t source, bool isAtTop)
+{
+    auto coordinationMode = ModalSheetCoordinationMode::UNKNOWN;
+    if (source == SCROLL_FROM_START) {
+        isSheetInReactive_ = false;
+
+        if (!sheetPattern_) {
+            GetParentModalSheet();
+        }
+    }
+    auto overOffsets = GetOverScrollOffset(offset);
+    if (IsAtTop() && (source == SCROLL_FROM_UPDATE) && !isSheetInReactive_ && (axis_ == Axis::VERTICAL)) {
+        isSheetInReactive_ = true;
+        if (sheetPattern_) {
+            sheetPattern_->OnCoordScrollStart();
+        }
+    }
+    if (sheetPattern_ && isSheetInReactive_) {
+        if (!sheetPattern_->OnCoordScrollUpdate(GreatNotEqual(overOffsets.start, 0.0) ? overOffsets.start : offset)) {
+            isSheetInReactive_ = false;
+            coordinationMode = ModalSheetCoordinationMode::SCROLLABLE_SCROLL;
+        } else {
+            coordinationMode = ModalSheetCoordinationMode::SHEET_SCROLL;
+        }
+    }
+    return coordinationMode;
+}
+
 bool ScrollablePattern::CoordinateWithNavigation(double& offset, int32_t source, bool isAtTop)
 {
     if (source == SCROLL_FROM_START) {
@@ -338,6 +371,12 @@ void ScrollablePattern::OnScrollEnd()
     if (refreshCoordination_) {
         isRefreshInReactive_ = false;
         refreshCoordination_->OnScrollEnd(GetVelocity());
+    }
+    if (isSheetInReactive_) {
+        isSheetInReactive_ = false;
+        if (sheetPattern_) {
+            sheetPattern_->OnCoordScrollEnd(GetVelocity());
+        }
     }
     if (isReactInParentMovement_) {
         isReactInParentMovement_ = false;
@@ -968,6 +1007,32 @@ void ScrollablePattern::GetParentNavigation()
     return;
 }
 
+void ScrollablePattern::GetParentModalSheet()
+{
+    if (sheetPattern_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    if (host->GetTag() != V2::SCROLL_ETS_TAG) {
+        return;
+    }
+
+    for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
+        RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+        if (!frameNode) {
+            continue;
+        }
+        sheetPattern_ = frameNode->GetPattern<SheetPresentationPattern>();
+        if (!sheetPattern_) {
+            continue;
+        }
+        return;
+    }
+    return;
+}
+
 void ScrollablePattern::StopAnimate()
 {
     if (!IsScrollableStopped()) {
@@ -1284,9 +1349,13 @@ void ScrollablePattern::InitMouseEvent()
         auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->HandleDragEnd(info);
+            pattern->HandleDragEnd();
         };
-        GestureEventNoParameter actionCancelTask;
+        GestureEventNoParameter actionCancelTask = [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleDragEnd();
+        };
         boxSelectPanEvent_ = MakeRefPtr<PanEvent>(std::move(actionStartTask), std::move(actionUpdateTask),
             std::move(actionEndTask), std::move(actionCancelTask));
     }
@@ -1331,7 +1400,7 @@ void ScrollablePattern::HandleDragUpdate(const GestureEvent& info)
         return;
     }
     if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON) {
-        HandleDragEnd(info);
+        HandleDragEnd();
         return;
     }
     lastMouseMove_ = info;
@@ -1347,7 +1416,7 @@ void ScrollablePattern::HandleDragUpdate(const GestureEvent& info)
     SelectWithScroll();
 }
 
-void ScrollablePattern::HandleDragEnd(const GestureEvent& info)
+void ScrollablePattern::HandleDragEnd()
 {
     TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Box select end");
     mouseStartOffset_.Reset();

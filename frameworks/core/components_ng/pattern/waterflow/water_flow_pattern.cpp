@@ -131,9 +131,6 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
     }
     RefPtr<WaterFlowLayoutBase> algorithm;
     if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
-        if (sections_) {
-            return nullptr;
-        }
         algorithm = MakeRefPtr<WaterFlowLayoutSW>(DynamicCast<WaterFlowLayoutInfoSW>(layoutInfo_));
     } else if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
         algorithm = MakeRefPtr<WaterFlowSegmentedLayout>(DynamicCast<WaterFlowLayoutInfo>(layoutInfo_));
@@ -422,17 +419,11 @@ Rect WaterFlowPattern::GetItemRect(int32_t index) const
 
 RefPtr<WaterFlowSections> WaterFlowPattern::GetSections() const
 {
-    if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
-        return nullptr;
-    }
     return sections_;
 }
 
 RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
 {
-    if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
-        return nullptr;
-    }
     if (sections_) {
         return sections_;
     }
@@ -455,14 +446,7 @@ RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
 
 void WaterFlowPattern::OnSectionChanged(int32_t start)
 {
-    // SlidingWindow mode should never reach this callback
-    if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
-        return;
-    }
-    auto info = DynamicCast<WaterFlowLayoutInfo>(layoutInfo_);
-    CHECK_NULL_VOID(info);
-    info->InitSegments(sections_->GetSectionInfo(), start);
-    info->margins_.clear();
+    layoutInfo_->InitSegments(sections_->GetSectionInfo(), start);
 
     MarkDirtyNodeSelf();
 }
@@ -473,9 +457,6 @@ void WaterFlowPattern::ResetSections()
         return;
     }
     sections_.Reset();
-    if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
-        return;
-    }
     layoutInfo_->Reset();
     MarkDirtyNodeSelf();
 }
@@ -485,7 +466,7 @@ void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign ali
     SetScrollSource(SCROLL_FROM_JUMP);
     SetScrollAlign(align);
     StopAnimate();
-    if ((index >= 0) || (index == LAST_ITEM)) {
+    if (index > EMPTY_JUMP_INDEX && index < GetChildrenCount()) {
         if (smooth) {
             SetExtraOffset(extraOffset);
             if (!ScrollToTargetIndex(index)) {

@@ -632,7 +632,8 @@ void SetOnSelectSelect(ArkUINodeHandle node, void* extraParam)
         ArkUINodeEvent event;
         event.kind = TEXT_ARRAY;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        const char* arrayValue[] = {value.c_str(), std::to_string(index).c_str()};
+        auto indexStr = std::to_string(index);
+        const char* arrayValue[] = {value.c_str(), indexStr.c_str()};
         event.textArrayEvent.subKind = ON_SELECT_SELECT;
         event.textArrayEvent.nativeStringArrayPtr = reinterpret_cast<intptr_t>(arrayValue);
         SendArkUIAsyncEvent(&event);

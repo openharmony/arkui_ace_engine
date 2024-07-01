@@ -338,7 +338,7 @@ void AnimatedPixmap::DecodeImpl(uint32_t idx)
     }
     RefPtr<PixelMap> frame;
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE,
+        TAG_LOGD(AceLogTag::ACE_IMAGE,
             "gif decode to pixmap, src=%{public}s, idx = %{public}d, resolutionQuality = %{public}s",
             GetCacheKey().c_str(), idx, GetResolutionQuality(size_.imageQuality).c_str());
     }

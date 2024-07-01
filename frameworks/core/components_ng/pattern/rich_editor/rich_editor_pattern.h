@@ -64,6 +64,14 @@ struct TextConfig;
 #endif
 #endif
 
+#define COPY_SPAN_STYLE_IF_PRESENT(sourceNode, targetNode, styleType, propertyInfo) \
+    do {                                                                            \
+        if ((sourceNode)->Has##styleType()) {                                       \
+            (targetNode)->Update##styleType(*((sourceNode)->Get##styleType()));     \
+            (targetNode)->AddPropertyInfo(propertyInfo);                            \
+        }                                                                           \
+    } while (false)
+
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
@@ -420,9 +428,13 @@ public:
     ResultObject TextEmojiSplit(int32_t& start, int32_t end, std::string& content);
     SelectionInfo GetEmojisBySelect(int32_t start, int32_t end);
     void MixTextEmojiUpdateStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle);
-    void SetSelectSpanStyle(int32_t start, int32_t end, RefPtr<SpanNode>& target, KeyCode code, bool isStart);
+    void SetSelectSpanStyle(int32_t start, int32_t end, KeyCode code, bool isStart);
     void GetSelectSpansPositionInfo(
         int32_t start, int32_t end, SpanPositionInfo& startPositionSpanInfo, SpanPositionInfo& endPositionSpanInfo);
+    std::list<RefPtr<UINode>>::const_iterator GetSpanNodeIter(int32_t index);
+    std::list<SpanPosition> GetSelectSpanSplit(
+        SpanPositionInfo& startPositionSpanInfo, SpanPositionInfo& endPositionSpanInfo);
+    std::list<SpanPosition> GetSelectSpanInfo(int32_t start, int32_t end);
     void UpdateSelectSpanStyle(int32_t start, int32_t end, KeyCode code);
     bool SymbolSpanUpdateStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
@@ -482,6 +494,8 @@ public:
     bool BeforeAddImage(RichEditorChangeValue& changeValue, const ImageSpanOptions& options, int32_t insertIndex);
     RefPtr<SpanString> ToStyledString(int32_t start, int32_t length);
     SelectionInfo FromStyledString(const RefPtr<SpanString>& spanString);
+    bool BeforeAddSymbol(RichEditorChangeValue& changeValue, const SymbolSpanOptions& options);
+    void AfterAddSymbol(RichEditorChangeValue& changeValue);
 
     bool IsUsingMouse() const
     {
@@ -784,11 +798,6 @@ public:
     bool IsMoveCaretAnywhere() const
     {
         return isMoveCaretAnywhere_;
-    }
-
-    void OnTouchTestHit(SourceType hitTestType) override
-    {
-        selectOverlay_->OnTouchTestHit(hitTestType);
     }
 
     void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionItems)

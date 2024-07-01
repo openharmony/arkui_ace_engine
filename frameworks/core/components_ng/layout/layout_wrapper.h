@@ -225,7 +225,7 @@ public:
     // apply keyboard avoidance on content rootNodes
     bool AvoidKeyboard(bool isFocusOnPage = true);
     // expand the SafeArea of expansive nodes, which are previously recorded during Layout traversal
-    void ExpandSafeArea(bool isFocusOnPage = true);
+    void ExpandSafeArea();
 
     bool SkipSyncGeometryNode() const
     {
@@ -249,6 +249,7 @@ protected:
     // keyboard avoidance is done by offsetting, to expand into keyboard area, reverse the offset.
     OffsetF ExpandIntoKeyboard();
     bool CheckValidSafeArea();
+    float GetPageCurrentOffset();
 
     WeakPtr<FrameNode> hostNode_;
 

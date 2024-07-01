@@ -110,6 +110,12 @@ constexpr int32_t TABBAR_DEFAULT_WIDTH = 56.f;
 constexpr int32_t TABBAR_DEFAULT_HEIGHT = 56.f;
 constexpr Dimension BAR_SATURATE = 1.3_vp;
 const InspectorFilter filter;
+constexpr float BARITEM_SIZE = 10.f;
+constexpr float BIG_FONT_SIZE_SCALE = 1.75f;
+constexpr float LARGE_FONT_SIZE_SCALE = 2.0f;
+constexpr float MAX_FONT_SIZE_SCALE = 3.2f;
+constexpr double BIG_DIALOG_WIDTH = 216.0;
+constexpr double MAX_DIALOG_WIDTH = 256.0;
 
 class TabsTestNg : public TestNG {
 public:

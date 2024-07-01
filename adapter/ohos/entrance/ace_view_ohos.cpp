@@ -147,12 +147,12 @@ void AceViewOhos::DispatchTouchEvent(const RefPtr<AceViewOhos>& view,
             pointerAction <= MMI::PointerEvent::POINTER_ACTION_ROTATE_END)) {
             view->ProcessAxisEvent(pointerEvent, node, isInjected);
         } else {
-            view->ProcessDragEvent(pointerEvent);
+            view->ProcessDragEvent(pointerEvent, node);
             view->ProcessMouseEvent(pointerEvent, node, isInjected);
         }
     } else {
         // touch event
-        view->ProcessDragEvent(pointerEvent);
+        view->ProcessDragEvent(pointerEvent, node);
         view->ProcessTouchEvent(pointerEvent, node, callback, isInjected);
     }
 }
@@ -315,7 +315,8 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
     }
 }
 
-void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    const RefPtr<OHOS::Ace::NG::FrameNode>& node)
 {
     DragEventAction action;
     PointerEvent event;
@@ -325,22 +326,22 @@ void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& poi
     switch (orgAction) {
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE: {
             action = DragEventAction::DRAG_EVENT_MOVE;
-            dragEventCallback_(event, action);
+            dragEventCallback_(event, action, node);
             break;
         }
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP: {
             action = DragEventAction::DRAG_EVENT_END;
-            dragEventCallback_(event, action);
+            dragEventCallback_(event, action, node);
             break;
         }
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW: {
             action = DragEventAction::DRAG_EVENT_START;
-            dragEventCallback_(event, action);
+            dragEventCallback_(event, action, node);
             break;
         }
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW: {
             action = DragEventAction::DRAG_EVENT_OUT;
-            dragEventCallback_(event, action);
+            dragEventCallback_(event, action, node);
             break;
         }
         default:
@@ -348,10 +349,11 @@ void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& poi
     }
 }
 
-void AceViewOhos::ProcessDragEvent(int32_t x, int32_t y, const DragEventAction& action)
+void AceViewOhos::ProcessDragEvent(int32_t x, int32_t y, const DragEventAction& action,
+    const RefPtr<OHOS::Ace::NG::FrameNode>& node)
 {
     CHECK_NULL_VOID(dragEventCallback_);
-    dragEventCallback_(PointerEvent(x, y), action);
+    dragEventCallback_(PointerEvent(x, y), action, node);
 }
 
 void AceViewOhos::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,

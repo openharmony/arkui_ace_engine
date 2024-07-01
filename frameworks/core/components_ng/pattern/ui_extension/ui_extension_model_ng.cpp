@@ -177,12 +177,22 @@ void UIExtensionModelNG::InitializeIsolatedComponent(
     pattern->InitializeIsolatedComponent(wantWrap, runtime);
 }
 
-void UIExtensionModelNG::SetOnSizeChanged(std::function<void(int32_t, int32_t)>&& onSizeChanged)
+void UIExtensionModelNG::SetAdaptiveWidth(bool state)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<IsolatedPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetOnSizeChangedCallback(std::move(onSizeChanged));
+    pattern->SetAdaptiveWidth(state);
+}
+
+void UIExtensionModelNG::SetAdaptiveHeight(bool state)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<IsolatedPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetAdaptiveHeight(state);
 }
 
 void UIExtensionModelNG::SetOnRemoteReady(std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady)

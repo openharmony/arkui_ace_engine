@@ -50,6 +50,7 @@ const Y_BOTTOM_OFF_SET = '-1.25vp';
 const Y_BASE_PLATE_OFF_SET = '1.5vp';
 const COLOR_IMAGE_EDIT = '#FFFFFF';
 const COLOR_IMAGE_ROW = '#00000000';
+const COLOR_SELECT = '#1A0A59F7';
 const SHADOW_COLOR = '#00001E';
 const GRAG_POP_UP_HEIGHT = '48';
 const FLOOR_MIN_WIDTH = '128vp';
@@ -2067,6 +2068,9 @@ class ListNodeDataSource extends BasicDataSource {
         }
         else if (o15 === MenuOperation.ADD_NODE) {
             let p15 = this.listNode[n15];
+            if (p15 === undefined) {
+                return;
+            }
             let q15 = (p15.getNodeItem().imageNode !== undefined) ?
                 p15.getNodeItem().imageNode?.source : undefined;
             let r15 = (p15.getNodeItem().imageNode !== undefined) ?
@@ -2105,6 +2109,9 @@ class ListNodeDataSource extends BasicDataSource {
                 }
             }
             let l15 = this.listNode[j15];
+            if (l15 === undefined) {
+                return;
+            }
             l15.setIsModify(true);
             if (l15.getNodeItem().mainTitleNode === null) {
                 return;
@@ -2139,6 +2146,9 @@ class ListNodeDataSource extends BasicDataSource {
         j15 = h15;
         if (i15 === MenuOperation.COMMIT_NODE) {
             let k15 = this.listNode[j15];
+            if (k15 === undefined) {
+                return;
+            }
             k15.setTitleAndInputTextStatus(false);
             k15.setIsModify(false);
             this.setImageSource(j15, InteractionStatus.FinishEdit);
@@ -2150,6 +2160,9 @@ class ListNodeDataSource extends BasicDataSource {
 
     setPopUpInfo(b15, c15, d15, e15) {
         let f15 = this.listNode[e15];
+        if (f15 === undefined) {
+            return;
+        }
         f15.setPopUpIsShow(d15);
         let g15 = this.loadedNodeIdAndIndexMap.get(f15.getCurrentNodeId());
         if (!d15) {
@@ -3222,7 +3235,12 @@ export class TreeViewInner extends ViewPU {
                                 this.item.setNodeColor(this.treeViewTheme.itemPressedBgColor);
                             }
                             else if (i8.type === TouchType.Up) {
-                                this.item.setNodeColor(this.treeViewTheme.itemSelectedBgColor);
+                                if (!(typeof this.treeViewTheme.itemSelectedBgColor === 'string')) {
+                                    this.item.setNodeColor(COLOR_SELECT);
+                                }
+                                else {
+                                    this.item.setNodeColor(this.treeViewTheme.itemSelectedBgColor);
+                                }
                                 if (this.item.getNodeItem().imageNode !== null) {
                                     this.item.getNodeItem().imageNode?.setImageSource(InteractionStatus.Selected);
                                     this.item.imageSource = this.item.getNodeItem().imageNode?.source;

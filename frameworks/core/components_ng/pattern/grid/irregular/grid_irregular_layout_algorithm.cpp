@@ -163,9 +163,11 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
     int32_t updateIdx = wrapper_->GetHostNode()->GetChildrenUpdated();
     if (updateIdx != -1) {
         auto it = info.FindInMatrix(updateIdx);
-        info.ClearHeightsToEnd(it->first);
-        info.ClearMatrixToEnd(updateIdx, it->first);
-        if (updateIdx <= info.startIndex_) {
+        if (it != info.gridMatrix_.end()) {
+            info.ClearHeightsToEnd(it->first);
+            info.ClearMatrixToEnd(updateIdx, it->first);
+        }
+        if (updateIdx <= info.endIndex_) {
             postJumpOffset_ = info.currentOffset_;
             PrepareJumpOnReset(info);
             ResetLayoutRange(info);

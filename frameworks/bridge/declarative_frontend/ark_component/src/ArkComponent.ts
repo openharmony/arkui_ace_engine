@@ -1417,8 +1417,9 @@ class GeometryTransitionModifier extends ModifierWithKey<ArkGeometryTransition> 
     if (reset) {
       getUINativeModule().common.resetGeometryTransition(node);
     } else {
-      getUINativeModule().common.setGeometryTransition(node, this.value.id, 
-        (this.value.options as GeometryTransitionOptions)?.follow);
+      getUINativeModule().common.setGeometryTransition(node, this.value.id,
+        (this.value.options as GeometryTransitionOptions)?.follow,
+        (this.value.options as GeometryTransitionOptions)?.hierarchyStrategy);
     }
   }
 }

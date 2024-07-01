@@ -45,7 +45,12 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
     auto pathInfo = pattern->GetNavPathInfo();
     CHECK_NULL_VOID(pathInfo);
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        state = pattern->GetIsOnShow() ? NavDestinationState::ON_SHOWN : NavDestinationState::ON_HIDDEN;
+        if (state == NavDestinationState::ON_SHOWN || state == NavDestinationState::ON_HIDDEN) {
+            NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state);
+            CHECK_NULL_VOID(navigationHandleFunc_);
+            navigationHandleFunc_(info);
+        }
+        return;
     }
     NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
         pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()));
@@ -61,6 +66,11 @@ void UIObserverHandler::NotifyScrollEventStateChange(const WeakPtr<AceType>& wea
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
+    if (eventType == ScrollEventType::SCROLL_START) {
+        host->AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_START_SCROLL);
+    } else if (eventType == ScrollEventType::SCROLL_STOP) {
+        host->AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_END_SCROLL);
+    }
     std::string id = host->GetInspectorId().value_or("");
     int32_t uniqueId = host->GetId();
     float offset = pattern->GetTotalOffset();
@@ -121,6 +131,12 @@ void UIObserverHandler::NotifyDidClick(
         Container::Current()->GetModuleName()
     };
     didClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
+}
+
+void UIObserverHandler::NotifyTabContentStateUpdate(const TabContentInfo& info)
+{
+    CHECK_NULL_VOID(tabContentStateHandleFunc_);
+    tabContentStateHandleFunc_(info);
 }
 
 std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const RefPtr<AceType>& node)
@@ -286,6 +302,11 @@ void UIObserverHandler::SetWillClickFunc(WillClickHandleFunc func)
 void UIObserverHandler::SetDidClickFunc(DidClickHandleFunc func)
 {
     didClickHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetHandleTabContentStateUpdateFunc(TabContentStateHandleFunc func)
+{
+    tabContentStateHandleFunc_ = func;
 }
 
 napi_value UIObserverHandler::GetUIContextValue()

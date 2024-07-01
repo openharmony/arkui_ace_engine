@@ -41,11 +41,11 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             break;
         }
         case REGISTER_SEARCH_EVENT: {
-            RegisterRouterChangeEventCallbackInner(data, reply, option);
+            RegisterSearchEventCallbackInner(data, reply, option);
             break;
         }
         case REGISTER_ROUTER_CHANGE_EVENT: {
-            RegisterSearchEventCallbackInner(data, reply, option);
+            RegisterRouterChangeEventCallbackInner(data, reply, option);
             break;
         }
         case REGISTER_COMPONENT_EVENT: {
@@ -78,6 +78,7 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
 
 int32_t UiContentStub::GetInspectorTreeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
+    GetInspectorTree(nullptr);
     return NO_ERROR;
 }
 

@@ -13,8 +13,7 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-# ----------- Both _old and _ng are in Top Down LayoutMode.
-# Test original WaterFlow
+# Test original top-down WaterFlow
 ace_unittest("water_flow_test_original") {
   type = "new"
   sources = [
@@ -25,7 +24,7 @@ ace_unittest("water_flow_test_original") {
   ]
 }
 
-# Test sectioned WaterFlow
+# Test segmented top-down WaterFlow
 ace_unittest("water_flow_test_segmented") {
   type = "new"
   defines = [ "TEST_SEGMENTED_WATER_FLOW" ]
@@ -33,6 +32,7 @@ ace_unittest("water_flow_test_segmented") {
     "water_flow_layout_info_test.cpp",
     "water_flow_scroller_test_ng.cpp",
     "water_flow_section_test.cpp",
+    "water_flow_segment_common_test.cpp",
     "water_flow_segment_integrated.cpp",
     "water_flow_segment_layout_test.cpp",
     "water_flow_test_ng.cpp",
@@ -47,6 +47,7 @@ ace_unittest("water_flow_test_sw") {
   sources = [
     "water_flow_regular_test.cpp",
     "water_flow_scroller_test_ng.cpp",
+    "water_flow_segment_common_test.cpp",
     "water_flow_sw_layout_test.cpp",
     "water_flow_test_ng.cpp",
   ]

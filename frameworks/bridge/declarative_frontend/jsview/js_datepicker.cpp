@@ -53,8 +53,6 @@ const char TIMEPICKER_OPTIONS_MINUTE[] = "minute";
 const char TIMEPICKER_OPTIONS_SECOND[] = "second";
 const std::string TIMEPICKER_OPTIONS_NUMERIC_VAL = "numeric";
 const std::string TIMEPICKER_OPTIONS_TWO_DIGIT_VAL = "2-digit";
-// difference in shanghai time zone changes
-const int32_t TZDB_CHANGE_MILLISECOND = 343000;
 } // namespace
 
 std::unique_ptr<DatePickerModel> DatePickerModel::datePickerInstance_ = nullptr;
@@ -860,9 +858,6 @@ JsiRef<JsiValue> JSDatePickerDialog::GetDateObj(const std::unique_ptr<JsonValue>
     auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(&dateTime));
     auto duration = timestamp.time_since_epoch();
     auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-    if (dateTime.tm_year <= 0) {
-        milliseconds += TZDB_CHANGE_MILLISECOND;
-    }
     auto dateObj = JSDate::New(milliseconds);
     return dateObj;
 }
@@ -1294,6 +1289,7 @@ void JSTimePicker::JSBind(BindingTarget globalObj)
     JSClass<JSTimePicker>::StaticMethod("backgroundColor", &JSTimePicker::PickerBackgroundColor);
     JSClass<JSTimePicker>::StaticMethod("loop", &JSTimePicker::Loop);
     JSClass<JSTimePicker>::StaticMethod("useMilitaryTime", &JSTimePicker::UseMilitaryTime);
+    JSClass<JSTimePicker>::StaticMethod("enableHapticFeedback", &JSTimePicker::EnableHapticFeedback);
     JSClass<JSTimePicker>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSTimePicker>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTimePicker>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -1325,6 +1321,11 @@ void JSTimePicker::Loop(const JSCallbackInfo& info)
         isLoop = info[0]->ToBoolean();
     }
     TimePickerModel::GetInstance()->SetWheelModeEnabled(isLoop);
+}
+
+void JSTimePicker::EnableHapticFeedback(bool isEnableHapticFeedback)
+{
+    TimePickerModel::GetInstance()->SetIsEnableHapticFeedback(isEnableHapticFeedback);
 }
 
 void JSTimePicker::UseMilitaryTime(bool isUseMilitaryTime)

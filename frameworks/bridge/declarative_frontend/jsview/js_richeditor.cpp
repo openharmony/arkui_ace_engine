@@ -746,10 +746,8 @@ void JSRichEditor::SetTextChangeSpanResult(JSRef<JSObject>& resultObj,
 void JSRichEditor::SetSymbolChangeSpanResult(JSRef<JSObject>& resultObj,
     const NG::RichEditorAbstractSpanResult& spanResult)
 {
-    JSRef<JSObject> textStyleObj = JSRef<JSObject>::New();
-    CreateTextStyleObj(textStyleObj, spanResult);
-    resultObj->SetProperty<std::string>("value", spanResult.GetValue());
-    resultObj->SetPropertyObject("textStyle", textStyleObj);
+    resultObj->SetPropertyObject("symbolSpanStyle", CreateJSSymbolSpanStyleResult(spanResult.GetSymbolSpanStyle()));
+    resultObj->SetPropertyObject("valueResource", CreateJSValueResource(spanResult.GetValueResource()));
     resultObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(spanResult.GetTextStyle()));
 }
 

@@ -80,6 +80,7 @@ namespace {
 constexpr double ICON_SIZE = 24;
 constexpr double ICON_HOT_ZONE_SIZE = 40;
 constexpr double FONT_SIZE = 16;
+const Dimension STROKE_DASH_1 {1.0, DimensionUnit::PX};
 constexpr int32_t DEFAULT_NODE_ID = 1;
 constexpr int32_t MIN_PLATFORM_VERSION = 10;
 constexpr int32_t DEFAULT_VALUE = 0;
@@ -1804,6 +1805,137 @@ HWTEST_F(TextFieldModifyTest, GetTextSelectionIndex001, TestSize.Level1)
         auto pattern = frameNode->GetPattern<TextFieldPattern>();
         ASSERT_NE(pattern, DEFAULT_VALUE);
         model.GetTextSelectionIndex(frameNode, false);
+    });
+}
+
+/**
+ * @tc.name: SetPlaceholderFont001
+ * @tc.desc: Test the OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, SetPlaceholderFont001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        Font font;
+        model.SetPlaceholderFont(font);
+        font.fontSize = Dimension(2);
+        font.fontStyle = Ace::FontStyle::NORMAL;
+        font.fontWeight = FontWeight::W200;
+        std::vector<std::string> families = { "cursive" };
+        font.fontFamilies = families;
+        model.SetPlaceholderFont(font);
+    });
+}
+
+/**
+ * @tc.name: SetShowCounter001
+ * @tc.desc: Test the OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, SetShowCounter001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowCounter(true);
+    });
+    /**
+     * @tc.steps: step2. Set CustomerDraggable true. Call function OnModifyDone.
+     * @tc.expected: Check if the text draggable.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowCounter(false);
+    });
+}
+
+/**
+ * @tc.name: SetBackBorder001
+ * @tc.desc: Test the OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, SetBackBorder001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        ASSERT_NE(frameNode, nullptr);
+        auto renderContext = frameNode->GetRenderContext();
+        ASSERT_NE(renderContext, nullptr);
+        model.SetBackBorder();
+        EXPECT_FALSE(renderContext->HasBorderRadius());
+        EXPECT_FALSE(renderContext->HasBorderColor());
+        EXPECT_FALSE(renderContext->HasBorderWidth());
+        EXPECT_FALSE(renderContext->HasBorderStyle());
+    });
+}
+
+/**
+ * @tc.name: SetCustomKeyboard001
+ * @tc.desc: Test the OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, SetCustomKeyboard001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        std::function<void()> buildFunc;
+        model.SetCustomKeyboard(std::move(buildFunc), true);
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        EXPECT_TRUE(frameNode->GetPattern<TextFieldPattern>());
+    });
+}
+
+/**
+ * @tc.name: SetCaretStyle001
+ * @tc.desc: Test the OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, SetCaretStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CaretStyle caretStyle;
+        caretStyle.caretWidth = STROKE_DASH_1;
+        model.SetCaretStyle(frameNode, caretStyle);
+    });
+
+    /**
+     * @tc.steps: step2. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CaretStyle caretStyle;
+        model.SetCaretStyle(frameNode, caretStyle);
+    });
+}
+
+/**
+ * @tc.name: SetTextFieldText001
+ * @tc.desc: Test the OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldModifyTest, SetTextFieldText001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto pattern = frameNode->GetPattern<TextFieldPattern>();
+        auto textValue = pattern->GetTextValue();
+        model.SetTextFieldText(frameNode, HELLO_TEXT);
+        EXPECT_EQ(textValue, HELLO_TEXT);
     });
 }
 } // namespace OHOS::Ace::NG

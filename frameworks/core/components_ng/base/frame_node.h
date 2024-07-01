@@ -347,12 +347,6 @@ public:
     HitTestResult AxisTest(
         const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult) override;
 
-    void CheckSecurityComponentStatus(std::vector<RectF>& rect);
-
-    bool HaveSecurityComponent();
-
-    bool IsSecurityComponent();
-
     void AnimateHoverEffect(bool isHovered) const;
 
     bool IsAtomicNode() const override;
@@ -488,7 +482,6 @@ public:
     void RemoveLastHotZoneRect() const;
 
     virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t sourceType);
-    bool CheckRectIntersect(const RectF& dest, std::vector<RectF>& origin);
 
     bool IsLayoutDirtyMarked() const
     {
@@ -744,11 +737,6 @@ public:
 
     void SetActive(bool active = true) override;
 
-    bool GetBypass() const
-    {
-        return bypass_;
-    }
-
     bool IsOutOfLayout() const override
     {
         return renderContext_->HasPosition() || renderContext_->HasPositionEdges();
@@ -912,6 +900,7 @@ public:
     void NotifyTransformInfoChanged()
     {
         isLocalRevertMatrixAvailable_ = false;
+        AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_TRANSFORM_CHANGE);
     }
 
     void AddPredictLayoutNode(const RefPtr<FrameNode>& node)
@@ -953,6 +942,23 @@ public:
     void MarkAndCheckNewOpIncNode();
     ChildrenListWithGuard GetAllChildren();
     OPINC_TYPE_E FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth);
+    void GetInspectorValue() override;
+
+    FrameNodeChangeInfoFlag GetChangeInfoFlag()
+    {
+        return changeInfoFlag_;
+    }
+
+    void ClearChangeInfoFlag()
+    {
+        changeInfoFlag_ = FRAME_NODE_CHANGE_INFO_NONE;
+    }
+
+    void OnSyncGeometryFrameFinish(const RectF& paintRect);
+    void AddFrameNodeChangeInfoFlag(FrameNodeChangeInfoFlag changeFlag = FRAME_NODE_CHANGE_INFO_NONE);
+    void RegisterNodeChangeListener();
+    void UnregisterNodeChangeListener();
+    void ProcessFrameNodeChangeFlag();
 
 protected:
     void DumpInfo() override;
@@ -1100,7 +1106,6 @@ private:
     bool exclusiveEventForChild_ = false;
     bool isActive_ = false;
     bool isResponseRegion_ = false;
-    bool bypass_ = false;
     bool isLayoutComplete_ = false;
     bool isFirstBuilding_ = true;
 
@@ -1157,6 +1162,8 @@ private:
     };
     std::vector<onSizeChangeDumpInfo> onSizeChangeDumpInfos;
     std::list<WeakPtr<FrameNode>> predictLayoutNode_;
+    FrameNodeChangeInfoFlag changeInfoFlag_ = FRAME_NODE_CHANGE_INFO_NONE;
+    std::optional<RectF> syncedFramePaintRect_;
 
     friend class RosenRenderContext;
     friend class RenderContext;

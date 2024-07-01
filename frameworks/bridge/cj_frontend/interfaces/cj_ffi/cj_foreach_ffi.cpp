@@ -82,6 +82,10 @@ VectorToCFFIArrayString FfiOHOSAceFrameworkViewGetIdArray(int64_t elmtId)
     for (const auto& element : result) {
         auto data = (char*)malloc(element.size() * sizeof(char));
         if (data == nullptr) {
+            for (size_t j = 0; j < result.size(); j++) {
+                free(buffer[j]);
+            }
+            free(buffer);
             return { .size = 0, .buffer = nullptr, .free = FfiOHOSAceFrameworkDeleteIdArray };
         }
         std::char_traits<char>::copy(data, element.c_str(), element.size());

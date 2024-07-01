@@ -33,7 +33,8 @@ namespace OHOS::Ace {
 constexpr int32_t AI_TEXT_MAX_LENGTH = 500;
 constexpr int32_t AI_TEXT_GAP = 100;
 constexpr int32_t AI_DELAY_TIME = 100;
-const std::pair<std::string, std::string> UI_EXTENSION_TYPE = { "ability.want.params.uiExtensionType", "sys/commonUI" };
+const std::pair<std::string, std::string> UI_EXTENSION_TYPE = { "ability.want.params.uiExtensionType",
+    "sys/visualExtension" };
 constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
 const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
     { TextDataDetectType::PHONE_NUMBER, "phoneNum" }, { TextDataDetectType::URL, "url" },

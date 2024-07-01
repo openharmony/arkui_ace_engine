@@ -367,5 +367,36 @@ void SetImageAnimatorOnFinish(ArkUINodeHandle node, void* extraParam)
     };
     ImageAnimatorModelNG::SetOnFinish(frameNode, std::move(onEvent));
 }
+
+void ResetImageAnimatorOnStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageAnimatorModelNG::SetOnStart(frameNode, nullptr);
+}
+void ResetImageAnimatorOnPause(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageAnimatorModelNG::SetOnPause(frameNode, nullptr);
+}
+void ResetImageAnimatorOnRepeat(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageAnimatorModelNG::SetOnRepeat(frameNode, nullptr);
+}
+void ResetImageAnimatorOnCancel(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageAnimatorModelNG::SetOnCancel(frameNode, nullptr);
+}
+void ResetImageAnimatorOnFinish(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageAnimatorModelNG::SetOnFinish(frameNode, nullptr);
+}
 }
 } // namespace OHOS::Ace::NG

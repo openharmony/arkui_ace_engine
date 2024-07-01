@@ -76,8 +76,11 @@ bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper,
     return false;
 }
 
-void PagePattern::BeforeSyncGeometryProperties(const DirtySwapConfig& /* config */)
+void PagePattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
 {
+    if (config.skipLayout || config.skipMeasure) {
+        return;
+    }
     CHECK_NULL_VOID(dynamicPageSizeCallback_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -127,7 +130,8 @@ bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::func
     return renderContext->TriggerPageTransition(type, wrappedOnFinish);
 }
 
-bool PagePattern::ProcessAutoSave(const std::function<void()>& onFinish)
+bool PagePattern::ProcessAutoSave(const std::function<void()>& onFinish,
+    const std::function<void()>& onUIExtNodeBindingCompleted)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -136,7 +140,7 @@ bool PagePattern::ProcessAutoSave(const std::function<void()>& onFinish)
     }
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
-    return container->RequestAutoSave(host, onFinish);
+    return container->RequestAutoSave(host, onFinish, onUIExtNodeBindingCompleted);
 }
 
 void PagePattern::ProcessHideState()
@@ -296,6 +300,7 @@ bool PagePattern::OnBackPressed()
         return true;
     }
     if (isPageInTransition_) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "page is in transition");
         return true;
     }
     // if in page transition, do not set to ON_BACK_PRESS

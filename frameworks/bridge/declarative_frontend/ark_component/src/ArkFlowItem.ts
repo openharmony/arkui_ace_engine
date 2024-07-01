@@ -18,6 +18,12 @@ class ArkFlowItemComponent extends ArkComponent implements FlowItemAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  initialize(value: Object[]): this {
+    return this;
+  }
+  allowChildCount(): number {
+    return 1;
+  }
 }
 
 // @ts-ignore

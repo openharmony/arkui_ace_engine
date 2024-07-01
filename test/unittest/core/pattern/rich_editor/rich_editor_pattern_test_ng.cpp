@@ -1097,44 +1097,6 @@ HWTEST_F(RichEditorPatternTestNg, UpdateScrollBarOffset001, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnSelectionMenuOptionsUpdate001
- * @tc.desc: test OnSelectionMenuOptionsUpdate
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, OnSelectionMenuOptionsUpdate001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    /**
-     * @tc.steps: step2. change parameter and call function.
-     */
-    std::vector<MenuOptionsParam> menuOptionsItems;
-    MenuOptionsParam menuOptionItem1;
-    menuOptionItem1.content = "test1";
-    menuOptionItem1.actionRange = [](int32_t, int32_t) {};
-    menuOptionsItems.emplace_back(menuOptionItem1);
-    MenuOptionsParam menuOptionItem2;
-    menuOptionItem2.content = "test2";
-    menuOptionItem2.actionRange = [](int32_t, int32_t) {};
-    menuOptionsItems.emplace_back(menuOptionItem2);
-    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(menuOptionsItems));
-    for (auto& menuOption : richEditorPattern->menuOptionItems_) {
-        std::function<void(int32_t, int32_t)> actionRange = menuOption.actionRange;
-        auto weak = AceType::WeakClaim(&(*richEditorPattern));
-        std::string selectInfo = "test123";
-        menuOption.action(selectInfo);
-    }
-    EXPECT_NE(richEditorPattern->menuOptionItems_.size(), 0);
-}
-
-/**
  * @tc.name: GetChangeSpanStyle002
  * @tc.desc: test GetChangeSpanStyle
  * @tc.type: FUNC

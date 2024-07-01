@@ -16,7 +16,11 @@
 
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/jsview/js_scroller.h"
+#include "bridge/declarative_frontend/jsview/js_water_flow.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "core/components_ng/pattern/scrollable/scrollable_controller.h"
+#include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -507,6 +511,105 @@ ArkUINativeModuleValue WaterFlowBridge::ResetFlingSpeedLimit(ArkUIRuntimeCallInf
     Local<JSValueRef> argNode = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(argNode->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowFlingSpeedLimit(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+void SetWaterFlowScroller(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_VOID(vm);
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (!info[1]->IsNull() && info[1]->IsObject()) {
+        Framework::JSScroller* jsScroller =
+            Framework::JSRef<Framework::JSObject>::Cast(info[1])->Unwrap<Framework::JSScroller>();
+        if (jsScroller) {
+            jsScroller->SetInstanceId(Container::CurrentId());
+            auto positionController = GetArkUINodeModifiers()->getWaterFlowModifier()->getScrollController(nativeNode);
+            auto nodePositionController =
+                AceType::Claim(reinterpret_cast<OHOS::Ace::ScrollControllerBase*>(positionController));
+            jsScroller->SetController(nodePositionController);
+            // Init scroll bar proxy.
+            auto proxy = jsScroller->GetScrollBarProxy();
+            if (!proxy) {
+                proxy = WaterFlowModel::GetInstance()->CreateScrollBarProxy();
+                jsScroller->SetScrollBarProxy(proxy);
+            }
+            auto proxyPtr = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(proxy));
+            GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterFlowScroller(
+                nativeNode, positionController, proxyPtr);
+        }
+    } else {
+        auto positionController = AceType::MakeRefPtr<ScrollableController>();
+        auto controller = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(positionController));
+        auto proxy = WaterFlowModel::GetInstance()->CreateScrollBarProxy();
+        auto proxyPtr = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(proxy));
+        GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterFlowScroller(
+            nativeNode, controller, proxyPtr);
+    }
+}
+
+void SetWaterFlowSections(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_VOID(vm);
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    Framework::JSRef<Framework::JSVal> sectionsArgs = info[2]; //2 is the index of sections
+    if (!sectionsArgs->IsNull() && sectionsArgs->IsObject()) {
+        auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+        Framework::JSWaterFlow::UpdateWaterFlowSectionsByFrameNode(frameNode, info, sectionsArgs);
+    } else {
+        GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowSections(nativeNode);
+    }
+}
+
+ArkUINativeModuleValue WaterFlowBridge::SetWaterFlowInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> layoutModeArgs = runtimeCallInfo->GetCallArgRef(3); //3 is the index of layoutMode
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+
+    SetWaterFlowScroller(runtimeCallInfo);
+
+    if (layoutModeArgs->IsUndefined() || layoutModeArgs->IsNull() || !layoutModeArgs->IsNumber()) {
+        GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowLayoutMode(nativeNode);
+        SetWaterFlowSections(runtimeCallInfo);
+    } else {
+        uint32_t layoutMode = layoutModeArgs->Uint32Value(vm);
+        if (layoutMode < static_cast<uint32_t>(NG::WaterFlowLayoutMode::TOP_DOWN) ||
+            layoutMode > static_cast<uint32_t>(NG::WaterFlowLayoutMode::SLIDING_WINDOW)) {
+            layoutMode = static_cast<uint32_t>(NG::WaterFlowLayoutMode::TOP_DOWN);
+        }
+        GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterFlowLayoutMode(nativeNode, layoutMode);
+        if (layoutMode != static_cast<uint32_t>(NG::WaterFlowLayoutMode::SLIDING_WINDOW)) {
+            SetWaterFlowSections(runtimeCallInfo);
+        }
+    }
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WaterFlowBridge::ResetWaterFlowInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+
+    auto positionController = AceType::MakeRefPtr<ScrollableController>();
+    auto controller = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(positionController));
+    auto proxy = WaterFlowModel::GetInstance()->CreateScrollBarProxy();
+    auto proxyPtr = reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(proxy));
+    GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterFlowScroller(
+        nativeNode, controller, proxyPtr);
+    GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowSections(nativeNode);
+    GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowLayoutMode(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

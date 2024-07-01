@@ -61,7 +61,8 @@ using AxisEventCallback = std::function<void(const AxisEvent&, const std::functi
     const RefPtr<NG::FrameNode>&)>;
 using RotationEventCallBack = std::function<bool(const RotationEvent&)>;
 using CardViewPositionCallBack = std::function<void(int id, float offsetX, float offsetY)>;
-using DragEventCallBack = std::function<void(const PointerEvent& pointerEvent, const DragEventAction& action)>;
+using DragEventCallBack = std::function<void(const PointerEvent&, const DragEventAction&,
+    const RefPtr<NG::FrameNode>&)>;
 using StopDragCallback = std::function<void()>;
 
 class ACE_FORCE_EXPORT Container : public virtual AceType {
@@ -81,7 +82,7 @@ public:
     }
 
     virtual void DestroyView() {}
-    virtual bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node)
+    virtual bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node, uint32_t autoFillSessionId)
     {
         return false;
     }
@@ -396,6 +397,8 @@ public:
         isDynamicRender_ = isDynamicRender;
     }
 
+    virtual std::vector<std::string> GetRegisterComponents() { return {}; };
+
     void SetPageUrlChecker(const RefPtr<PageUrlChecker>& pageUrlChecker)
     {
         pageUrlChecker_ = pageUrlChecker;
@@ -478,13 +481,14 @@ public:
         return false;
     }
 
-    virtual bool RequestAutoFill(
-        const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool& isPopup, bool isNewPassWord = false)
+    virtual bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
+        bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId)
     {
         return false;
     }
 
-    virtual bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish = nullptr)
+    virtual bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish = nullptr,
+        const std::function<void()>& onUIExtNodeBindingCompleted = nullptr)
     {
         return false;
     }

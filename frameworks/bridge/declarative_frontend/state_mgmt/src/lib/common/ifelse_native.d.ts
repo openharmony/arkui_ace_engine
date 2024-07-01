@@ -21,7 +21,7 @@
  * non-public API
  */
 
-declare class If  {
+declare class If {
     static create(): void;
     static pop() : void;
     static branchId(id: number, removedChildelmtIds: Array<number>): void;

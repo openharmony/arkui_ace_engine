@@ -14,8 +14,8 @@
  */
 #include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
 
-#include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 
 namespace OHOS::Ace::NG {
 /**
@@ -458,7 +458,7 @@ HWTEST_F(WaterFlowTestNg, PositionController100, TestSize.Level1)
     pattern_->AnimateTo(1.5, 1.f, Curves::LINEAR, false, false);
     EXPECT_FALSE(pattern_->isAnimationStop_);
 
-	/**
+    /**
      * @tc.steps: step8. test event
      * @tc.expected: return the scroll event is ture.
      */
@@ -474,9 +474,38 @@ HWTEST_F(WaterFlowTestNg, PositionController100, TestSize.Level1)
         result.offset = offset;
         return result;
     };
-	
+
     eventHub_->SetOnWillScroll(std::move(onWillScroll));
     pattern_->ScrollTo(ITEM_HEIGHT * 5);
     EXPECT_TRUE(isOnWillScrollCallBack);
+}
+
+/**
+ * @tc.name: EstimateContentHeight001
+ * @tc.desc: Test EstimateContentHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, EstimateContentHeight001, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateItem(TOTAL_LINE_NUMBER * 4);
+    });
+    FlushLayoutTask(frameNode_);
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 10);
+
+    int32_t childCount = 0;
+    for (const auto& item : info->items_[0]) {
+        childCount += item.second.size();
+    }
+    EXPECT_EQ(info->EstimateContentHeight(), info->GetMaxMainHeight() / childCount * info->childrenCount_);
+
+    pattern_->UpdateCurrentOffset(-5000.f, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info->startIndex_, 31);
+    EXPECT_EQ(info->endIndex_, TOTAL_LINE_NUMBER * 4 - 1);
+    EXPECT_EQ(info->EstimateContentHeight(), info->maxHeight_);
 }
 } // namespace OHOS::Ace::NG

@@ -20,6 +20,7 @@
 #include <iterator>
 #include <list>
 
+#include "core/components_ng/pattern/time_picker/timepicker_haptic_factory.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
@@ -76,6 +77,7 @@ void TimePickerColumnPattern::OnAttachToFrameNode()
     CreateAnimation();
     InitPanEvent(gestureHub);
     host->GetRenderContext()->SetClipToFrame(true);
+    InitHapticController(host);
 }
 
 void TimePickerColumnPattern::OnModifyDone()
@@ -124,6 +126,24 @@ void TimePickerColumnPattern::OnModifyDone()
             childIndex++;
         }
         SetOptionShiftDistance();
+    }
+    InitHapticController(host);
+}
+
+void TimePickerColumnPattern::InitHapticController(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_VOID(host);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_VOID(stackNode);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    auto timePickerLayoutProperty = parentNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    CHECK_NULL_VOID(timePickerLayoutProperty);
+    hapticController_ = nullptr;
+    if (timePickerLayoutProperty->GetIsEnableHapticFeedbackValue(true)) {
+        hapticController_ = TimepickerAudioHapticFactory::GetInstance();
     }
 }
 
@@ -1124,6 +1144,9 @@ bool TimePickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropert
         currentIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount; // index reduce one
     }
     SetCurrentIndex(currentIndex);
+    if (hapticController_) {
+        hapticController_->PlayOnce();
+    }
     FlushCurrentOptions(isDown, isUpatePropertiesOnly);
     HandleChangeCallback(isDown, true);
     HandleEventCallback(true);
@@ -1135,6 +1158,9 @@ bool TimePickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropert
 void TimePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 {
     int32_t dragDelta = offsetY - yLast_;
+    if (hapticController_) {
+        hapticController_->HandleDelta(dragDelta);
+    }
     yLast_ = offsetY;
     if (!CanMove(LessNotEqual(dragDelta, 0))) {
         return;
@@ -1154,6 +1180,8 @@ void TimePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
             auto toss = GetToss();
             CHECK_NULL_VOID(toss);
             toss->StopTossAnimation();
+            CHECK_NULL_VOID(hapticController_);
+            hapticController_->Stop();
         }
         ScrollOption(dragDelta, true);
         offsetCurSet_ = dragDelta;

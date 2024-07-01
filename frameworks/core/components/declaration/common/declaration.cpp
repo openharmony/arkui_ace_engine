@@ -2283,7 +2283,6 @@ void Declaration::SetBorderImage(const std::string& value, Declaration& declarat
     }
     if (borderImageJson->Contains(DOM_VALUES) && borderImageJson->GetValue(DOM_VALUES)->IsArray() &&
         borderImageJson->GetValue(DOM_VALUES)->GetArraySize() > 0) {
-
         auto values = borderImageJson->GetValue(DOM_VALUES)->GetArrayItem(0);
 
         if (values->Contains("url")) {

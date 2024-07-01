@@ -33,6 +33,7 @@ namespace {
 constexpr char RESOURCE_PATH[] = "resourcePath";
 constexpr char ABC_PATH[] = "abcPath";
 constexpr char ENTRY_POINT[] = "entryPoint";
+constexpr char REGISTER_COMPONENTS[] = "registerComponents";
 constexpr int32_t PARAM_ERR_CODE = 10001;
 constexpr char PARAM_NAME[] = "paramError";
 constexpr char PARAM_MSG[] = "The param is empty";
@@ -43,12 +44,32 @@ int32_t IsolatedPattern::isolatedIdGenerator_ = 0;
 IsolatedPattern::IsolatedPattern()
     : PlatformPattern(AceLogTag::ACE_ISOLATED_COMPONENT, ++isolatedIdGenerator_)
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto uiExtensionManager = pipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
+    uiExtensionId_ = uiExtensionManager->ApplyExtensionId();
     PLATFORM_LOGI("The IsolatedPattern is created.");
 }
 
 IsolatedPattern::~IsolatedPattern()
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto uiExtensionManager = pipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
+    uiExtensionManager->RecycleExtensionId(uiExtensionId_);
     PLATFORM_LOGI("The IsolatedPattern is destroyed.");
+}
+
+int32_t IsolatedPattern::GetUiExtensionId()
+{
+    return uiExtensionId_;
+}
+
+int64_t IsolatedPattern::WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId)
+{
+    return uiExtensionId_ * extensionOffset + abilityId;
 }
 
 void IsolatedPattern::InitializeDynamicComponent(
@@ -71,6 +92,7 @@ void IsolatedPattern::InitializeIsolatedComponent(const RefPtr<OHOS::Ace::WantWr
     auto resourcePath = want.GetStringParam(RESOURCE_PATH);
     auto abcPath = want.GetStringParam(ABC_PATH);
     auto entryPoint = want.GetStringParam(ENTRY_POINT);
+    auto registerComponents = want.GetStringArrayParam(REGISTER_COMPONENTS);
     if (resourcePath.empty() || abcPath.empty() || entryPoint.empty() || runtime == nullptr) {
         PLATFORM_LOGE("The param empty.");
         FireOnErrorCallback(PARAM_ERR_CODE, PARAM_NAME, PARAM_MSG);
@@ -80,6 +102,7 @@ void IsolatedPattern::InitializeIsolatedComponent(const RefPtr<OHOS::Ace::WantWr
     curIsolatedInfo_.abcPath = abcPath;
     curIsolatedInfo_.reourcePath = resourcePath;
     curIsolatedInfo_.entryPoint = entryPoint;
+    curIsolatedInfo_.registerComponents = registerComponents;
     InitializeRender(runtime);
 }
 
@@ -89,9 +112,9 @@ void IsolatedPattern::InitializeRender(void* runtime)
 #if !defined(PREVIEW)
     if (!dynamicComponentRenderer_) {
         ContainerScope scope(instanceId_);
-        dynamicComponentRenderer_ = DynamicComponentRenderer::Create(GetHost(),
-            curIsolatedInfo_.reourcePath, curIsolatedInfo_.abcPath, curIsolatedInfo_.entryPoint, runtime);
+        dynamicComponentRenderer_ = DynamicComponentRenderer::Create(GetHost(), runtime, curIsolatedInfo_);
         CHECK_NULL_VOID(dynamicComponentRenderer_);
+        dynamicComponentRenderer_->SetAdaptiveSize(adaptiveWidth_, adaptiveHeight_);
         dynamicComponentRenderer_->CreateContent();
     }
 #else
@@ -160,13 +183,13 @@ void IsolatedPattern::OnAttachToFrameNode()
 
 bool IsolatedPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    if (config.skipLayout || config.skipMeasure) {
+        return false;
+    }
     CHECK_NULL_RETURN(dynamicComponentRenderer_, false);
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto rect = host->GetTransformRectRelativeToWindow();
-    Ace::ViewportConfig vpConfig;
-    vpConfig.SetSize(rect.Width(), rect.Height());
-    vpConfig.SetPosition(0, 0);
+    auto& node = dirty->GetGeometryNode();
+    CHECK_NULL_RETURN(node, false);
+    auto size = node->GetContentSize();
     float density = 1.0f;
     int32_t orientation = 0;
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
@@ -174,9 +197,7 @@ bool IsolatedPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
         density = defaultDisplay->GetVirtualPixelRatio();
         orientation = static_cast<int32_t>(defaultDisplay->GetOrientation());
     }
-    vpConfig.SetDensity(density);
-    vpConfig.SetOrientation(orientation);
-    dynamicComponentRenderer_->UpdateViewportConfig(vpConfig, Rosen::WindowSizeChangeReason::UNDEFINED, nullptr);
+    dynamicComponentRenderer_->UpdateViewportConfig(size, density, orientation);
     return false;
 }
 
@@ -185,6 +206,20 @@ void IsolatedPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(dynamicComponentRenderer_);
     dynamicComponentRenderer_->DestroyContent();
     dynamicComponentRenderer_ = nullptr;
+}
+
+void IsolatedPattern::SetAdaptiveWidth(bool state)
+{
+    adaptiveWidth_ = state;
+    CHECK_NULL_VOID(dynamicComponentRenderer_);
+    dynamicComponentRenderer_->SetAdaptiveSize(adaptiveWidth_, adaptiveHeight_);
+}
+
+void IsolatedPattern::SetAdaptiveHeight(bool state)
+{
+    adaptiveHeight_ = state;
+    CHECK_NULL_VOID(dynamicComponentRenderer_);
+    dynamicComponentRenderer_->SetAdaptiveSize(adaptiveWidth_, adaptiveHeight_);
 }
 
 void IsolatedPattern::SearchExtensionElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,

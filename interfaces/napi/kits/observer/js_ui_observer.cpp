@@ -66,6 +66,9 @@ static constexpr uint32_t ON_PAGE_SHOW = 2;
 static constexpr uint32_t ON_PAGE_HIDE = 3;
 static constexpr uint32_t ON_BACK_PRESS = 4;
 
+static constexpr uint32_t ON_SHOW = 0;
+static constexpr uint32_t ON_HIDE = 1;
+
 constexpr char NAVDESTINATION_UPDATE[] = "navDestinationUpdate";
 constexpr char ROUTERPAGE_UPDATE[] = "routerPageUpdate";
 constexpr char SCROLL_EVENT[] = "scrollEvent";
@@ -75,6 +78,7 @@ constexpr char DRAW_COMMAND_SEND[] = "willDraw";
 constexpr char NAVDESTINATION_SWITCH[] = "navDestinationSwitch";
 constexpr char WILLCLICK_UPDATE[] = "willClick";
 constexpr char DIDCLICK_UPDATE[] = "didClick";
+constexpr char TAB_CONTENT_STATE[] = "tabContentUpdate";
 
 bool IsUIAbilityContext(napi_env env, napi_value context)
 {
@@ -320,6 +324,7 @@ ObserverProcess::ObserverProcess()
         { NAVDESTINATION_SWITCH, &ObserverProcess::ProcessNavDestinationSwitchRegister },
         { WILLCLICK_UPDATE, &ObserverProcess::ProcessWillClickRegister },
         { DIDCLICK_UPDATE, &ObserverProcess::ProcessDidClickRegister },
+        { TAB_CONTENT_STATE, &ObserverProcess::ProcessTabContentStateRegister },
     };
     unregisterProcessMap_ = {
         { NAVDESTINATION_UPDATE, &ObserverProcess::ProcessNavigationUnRegister },
@@ -331,6 +336,7 @@ ObserverProcess::ObserverProcess()
         { NAVDESTINATION_SWITCH, &ObserverProcess::ProcessNavDestinationSwitchUnRegister },
         { WILLCLICK_UPDATE, &ObserverProcess::ProcessWillClickUnRegister },
         { DIDCLICK_UPDATE, &ObserverProcess::ProcessDidClickUnRegister },
+        { TAB_CONTENT_STATE, &ObserverProcess::ProcessTabContentStateUnRegister },
     };
 }
 
@@ -882,6 +888,59 @@ napi_value ObserverProcess::ProcessDidClickUnRegister(napi_env env, napi_callbac
     return nullptr;
 }
 
+napi_value ObserverProcess::ProcessTabContentStateRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+        auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ONE]);
+        UIObserver::RegisterTabContentStateCallback(listener);
+    }
+
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object)
+        && MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        std::string id;
+        if (ParseScrollId(env, argv[PARAM_INDEX_ONE], id)) {
+            auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_TWO]);
+            UIObserver::RegisterTabContentStateCallback(id, listener);
+        }
+    }
+
+    napi_value result = nullptr;
+    return result;
+}
+
+napi_value ObserverProcess::ProcessTabContentStateUnRegister(napi_env env, napi_callback_info info)
+{
+    GET_PARAMS(env, info, PARAM_SIZE_THREE);
+
+    if (argc == PARAM_SIZE_ONE) {
+        UIObserver::UnRegisterTabContentStateCallback(nullptr);
+    }
+
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
+        UIObserver::UnRegisterTabContentStateCallback(argv[PARAM_INDEX_ONE]);
+    }
+
+    if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object)) {
+        std::string id;
+        if (ParseScrollId(env, argv[PARAM_INDEX_ONE], id)) {
+            UIObserver::UnRegisterTabContentStateCallback(id, nullptr);
+        }
+    }
+
+    if (argc == PARAM_SIZE_THREE && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_object)
+        && MatchValueType(env, argv[PARAM_INDEX_TWO], napi_function)) {
+        std::string id;
+        if (ParseScrollId(env, argv[PARAM_INDEX_ONE], id)) {
+            UIObserver::UnRegisterTabContentStateCallback(id, argv[PARAM_INDEX_TWO]);
+        }
+    }
+
+    napi_value result = nullptr;
+    return result;
+}
+
 napi_value ObserverOn(napi_env env, napi_callback_info info)
 {
     return ObserverProcess::GetInstance().ProcessRegister(env, info);
@@ -948,6 +1007,18 @@ napi_value CreateNavDestinationState(napi_env env)
     return navDestinationState;
 }
 
+napi_value AddToTabContentState(napi_env env)
+{
+    napi_value tabContentState = nullptr;
+    napi_value prop = nullptr;
+    napi_create_object(env, &tabContentState);
+    napi_create_uint32(env, ON_SHOW, &prop);
+    napi_set_named_property(env, tabContentState, "ON_SHOW", prop);
+    napi_create_uint32(env, ON_HIDE, &prop);
+    napi_set_named_property(env, tabContentState, "ON_HIDE", prop);
+    return tabContentState;
+}
+
 static napi_value UIObserverExport(napi_env env, napi_value exports)
 {
     NG::UIObserverHandler::GetInstance().SetHandleNavigationChangeFunc(&UIObserver::HandleNavigationStateChange);
@@ -959,6 +1030,7 @@ static napi_value UIObserverExport(napi_env env, napi_value exports)
     NG::UIObserverHandler::GetInstance().SetHandleNavDestinationSwitchFunc(&UIObserver::HandleNavDestinationSwitch);
     NG::UIObserverHandler::GetInstance().SetWillClickFunc(&UIObserver::HandleWillClick);
     NG::UIObserverHandler::GetInstance().SetDidClickFunc(&UIObserver::HandleDidClick);
+    NG::UIObserverHandler::GetInstance().SetHandleTabContentStateUpdateFunc(&UIObserver::HandleTabContentStateChange);
     napi_value navDestinationState = CreateNavDestinationState(env);
 
     napi_value scrollEventType = nullptr;
@@ -967,12 +1039,16 @@ static napi_value UIObserverExport(napi_env env, napi_value exports)
     napi_value routerPageState = nullptr;
     routerPageState = AddToRouterPageState(env);
 
+    napi_value tabContentState = nullptr;
+    tabContentState = AddToTabContentState(env);
+
     napi_property_descriptor uiObserverDesc[] = {
         DECLARE_NAPI_FUNCTION("on", ObserverOn),
         DECLARE_NAPI_FUNCTION("off", ObserverOff),
         DECLARE_NAPI_PROPERTY("NavDestinationState", navDestinationState),
         DECLARE_NAPI_PROPERTY("ScrollEventType", scrollEventType),
         DECLARE_NAPI_PROPERTY("RouterPageState", routerPageState),
+        DECLARE_NAPI_PROPERTY("TabContentState", tabContentState),
     };
     NAPI_CALL(
         env, napi_define_properties(env, exports, sizeof(uiObserverDesc) / sizeof(uiObserverDesc[0]), uiObserverDesc));

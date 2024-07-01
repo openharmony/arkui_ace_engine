@@ -1836,8 +1836,8 @@ typedef enum {
 
 typedef enum {
     ARKUI_ANIMATION_DIRECTION_NORMAL = 0,
-    ARKUI_ANIMATION_DIRECTION_ALTERNATE,
     ARKUI_ANIMATION_DIRECTION_REVERSE,
+    ARKUI_ANIMATION_DIRECTION_ALTERNATE,
     ARKUI_ANIMATION_DIRECTION_ALTERNATE_REVERSE,
 } ArkUI_AnimationDirection;
 
@@ -1946,6 +1946,31 @@ typedef enum {
     /** Tail area. */
     ARKUI_SAFE_AREA_EDGE_END = 1 << 3,
 } ArkUI_SafeAreaEdge;
+
+typedef struct {
+    float x;
+    float y;
+    float z;
+} ArkUI_TranslationOptions;
+
+typedef struct {
+    float x;
+    float y;
+    float z;
+    float centerX;
+    float centerY;
+} ArkUI_ScaleOptions;
+
+typedef struct {
+    float x;
+    float y;
+    float z;
+    float angle;
+    float centerX;
+    float centerY;
+    float centerZ;
+    float perspective;
+} ArkUI_RotationOptions;
 
 /**
 * @brief Creates a size constraint.

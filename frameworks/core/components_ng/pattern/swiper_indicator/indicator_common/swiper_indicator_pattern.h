@@ -144,9 +144,11 @@ public:
         CHECK_NULL_RETURN(swiperPattern, nullptr);
         if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::DOT) {
             if (swiperPattern->GetMaxDisplayCount() > 0) {
+                SetIndicatorInteractive(false);
                 return CreateOverlongDotIndicatorPaintMethod(swiperPattern);
             }
 
+            SetIndicatorInteractive(swiperPattern->IsIndicatorInteractive());
             return CreateDotIndicatorPaintMethod(swiperPattern);
         } else if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::ARC_DOT) {
             if (!circleDotIndicatorModifier_) {

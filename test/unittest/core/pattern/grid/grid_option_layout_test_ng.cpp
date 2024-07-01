@@ -404,7 +404,6 @@ HWTEST_F(GridOptionLayoutTestNg, GridPattern_GetItemRect001, TestSize.Level1)
      * @tc.steps: step4. Slide Grid by Scroller.
      */
     UpdateCurrentOffset(ITEM_HEIGHT + ITEM_HEIGHT / 2);
-    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.steps: step5. Get invalid GridItem Rect.
@@ -551,10 +550,10 @@ HWTEST_F(GridOptionLayoutTestNg, GetEndOffset004, TestSize.Level1)
     model.SetLayoutOptions({ .irregularIndexes = { 1, 5 } });
     model.SetColumnsGap(Dimension { 5.0f });
     model.SetRowsGap(Dimension { 5.0f });
-        CreateFixedHeightItems(6, 100.0f);
+    CreateFixedHeightItems(6, 100.0f);
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
-        // make content smaller than viewport
-        ViewAbstract::SetHeight(CalcLength(700.0f));
+    // make content smaller than viewport
+    ViewAbstract::SetHeight(CalcLength(700.0f));
     CreateDone(frameNode_);
     auto& info = pattern_->gridLayoutInfo_;
     pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
@@ -576,7 +575,7 @@ HWTEST_F(GridOptionLayoutTestNg, TestChildrenUpdate001, TestSize.Level1)
 {
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateFixedHeightItems(2, 100.0f);
+    CreateFixedHeightItems(2, 100.0f);
     model.SetLayoutOptions({});
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateDone(frameNode_);

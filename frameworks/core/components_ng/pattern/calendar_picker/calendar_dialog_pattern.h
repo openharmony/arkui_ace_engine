@@ -134,6 +134,8 @@ private:
     void UpdateImage(const RefPtr<FrameNode>& buttonNode, const InternalResource::ResourceId& resourceId);
     void UpdateOptionsButton();
     void UpdateCalendarLayout();
+    void UpdateNonCurrentMonthFocusedDay(int32_t focusedDayIndex);
+    void PaintMonthFocusState(int32_t focusedDayIndex);
 
     RefPtr<FrameNode> GetCalendarFrameNode();
     RefPtr<CalendarPattern> GetCalendarPattern();

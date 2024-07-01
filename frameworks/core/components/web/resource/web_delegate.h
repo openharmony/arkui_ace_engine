@@ -1013,6 +1013,7 @@ private:
     void BindRouterBackMethod();
     void BindPopPageSuccessMethod();
     void BindIsPagePathInvalidMethod();
+    void TextBlurReport(int64_t accessibilityId);
 
 #ifdef OHOS_STANDARD_SYSTEM
     sptr<OHOS::Rosen::Window> CreateWindow();
@@ -1175,6 +1176,7 @@ private:
     uint32_t rosenWindowId_ = 0;
     RefPtr<WebDelegateObserver> observer_;
     std::shared_ptr<Rosen::RSNode> rsNode_;
+    std::shared_ptr<Rosen::RSNode> surfaceRsNode_;
     Rosen::NodeId surfaceNodeId_ = 0;
     float visibleRatio_ = 1.0;
     uint32_t delayTime_ = 500;
@@ -1198,6 +1200,8 @@ private:
     sptr<Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
     int32_t instanceId_;
     std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler_ = nullptr;
+    std::string sharedRenderProcessToken_;
+    int64_t lastFocusInputId_ = 0;
 #endif
 };
 
