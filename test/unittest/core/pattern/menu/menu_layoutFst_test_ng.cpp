@@ -1344,7 +1344,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg033, TestSize.Level1)
 
 /**
  * @tc.name: MenuLayoutAlgorithmTestNg034
- * @tc.desc: Test MultiMenu measure algorithm.
+ * @tc.desc: Test MultiMenuLayoutAlgorithm::Measure
  * @tc.type: FUNC
  */
 HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg034, TestSize.Level1)
@@ -1361,6 +1361,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg034, TestSize.Level1)
     LayoutConstraintF parentLayoutConstraint;
     parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
     parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.selfIdealSize = OptionalSizeF(1.0f, 1.0f);
     layoutProp->UpdateLayoutConstraint(parentLayoutConstraint);
     layoutProp->UpdateContentConstraint();
     auto* wrapper = new LayoutWrapperNode(multiMenu, geometryNode, layoutProp);
@@ -1378,6 +1379,8 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg034, TestSize.Level1)
     // @tc.expected: menu content width = item width, height = sum(item height)
     auto expectedSize = SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT * 3);
     EXPECT_EQ(wrapper->GetGeometryNode()->GetContentSize().Height(), expectedSize.Height());
+    menuPattern->isEmbedded_ = true;
+    algorithm->Measure(wrapper);
 }
 
 /**
