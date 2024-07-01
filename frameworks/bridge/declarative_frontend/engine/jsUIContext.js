@@ -333,20 +333,20 @@ class UIContext {
     openBindSheet(content, options, targetId) {
         let paramErrMsg =
             'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
-            ' 2. Incorrect parameter types; 3. Parameter verification failed.'
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let argLength = arguments.length;
-        if (argLength < 1 || content == null || content == undefined) {
+        if (argLength < 1 || content === null || content === undefined) {
             __JSScopeUtil__.restoreInstanceId();
             return new Promise((resolve, reject) => {
                 reject({ message: paramErrMsg, code: 401 });
-            })
+            });
         }
-        if ((argLength >= 3 && (targetId == null || targetId == undefined))) {
+        if ((argLength >= 3 && (targetId === null || targetId === undefined))) {
             __JSScopeUtil__.restoreInstanceId();
             return new Promise((resolve, reject) => {
                 reject({ message: paramErrMsg, code: 401 });
-            })
+            });
         }
         let result_;
         if (argLength === 1) {
@@ -361,13 +361,16 @@ class UIContext {
     }
 
     updateBindSheet(content, options, partialUpdate) {
+        let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let argLength = arguments.length;
-        if (argLength < 2 || content == null || content == undefined) {
+        if (argLength < 2 || content === null || content === undefined) {
             __JSScopeUtil__.restoreInstanceId();
             return new Promise((resolve, reject) => {
-                reject({ message: 'Parameter error.', code: 401 });
-            })
+                reject({ message: paramErrMsg, code: 401 });
+            });
         }
         let result_;
         if (argLength === 2) {
@@ -380,12 +383,15 @@ class UIContext {
     }
 
     closeBindSheet(content) {
+        let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        if (arguments.length < 1 || content == null || content == undefined) {
+        if (arguments.length < 1 || content === null || content === undefined) {
             __JSScopeUtil__.restoreInstanceId();
             return new Promise((resolve, reject) => {
-                reject({ message: 'Parameter error.', code: 401 });
-            })
+                reject({ message: paramErrMsg, code: 401 });
+            });
         }
         let result_ = Context.closeBindSheet(content.getNodePtr());
         __JSScopeUtil__.restoreInstanceId();
