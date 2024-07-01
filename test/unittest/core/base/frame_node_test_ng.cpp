@@ -68,19 +68,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg002, TestSize.Level1)
 }
 
 /**
- * @tc.name: FrameNodeTestNg003
- * @tc.desc: Test frame node method
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeTestNg003, TestSize.Level1)
-{
-    auto jsonValue = std::make_unique<JsonValue>();
-    FRAME_NODE->GetOrCreateFocusHub();
-    FRAME_NODE->FocusToJsonValue(jsonValue, filter);
-    EXPECT_FALSE(jsonValue->GetBool("enabled", false));
-}
-
-/**
  * @tc.name: FrameNodeTestNg004
  * @tc.desc: Test frame node method
  * @tc.type: FUNC

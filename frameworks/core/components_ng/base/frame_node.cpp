@@ -889,45 +889,6 @@ bool FrameNode::CheckAutoSave()
     return false;
 }
 
-void FrameNode::FocusToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
-{
-    bool enabled = true;
-    bool focusable = false;
-    bool focused = false;
-    bool defaultFocus = false;
-    bool groupDefaultFocus = false;
-    bool focusOnTouch = false;
-    int32_t tabIndex = 0;
-    auto focusHub = GetFocusHub();
-    if (filter.IsFastFilter()) {
-        if (filter.CheckFixedAttr(FIXED_ATTR_FOCUSABLE)) {
-            if (focusHub) {
-                focusable = focusHub->IsFocusable();
-                focused = focusHub->IsCurrentFocus();
-            }
-            json->Put("focusable", focusable);
-            json->Put("focused", focused);
-        }
-        return;
-    }
-    if (focusHub) {
-        enabled = focusHub->IsEnabled();
-        focusable = focusHub->IsFocusable();
-        focused = focusHub->IsCurrentFocus();
-        defaultFocus = focusHub->IsDefaultFocus();
-        groupDefaultFocus = focusHub->IsDefaultGroupFocus();
-        focusOnTouch = focusHub->IsFocusOnTouch().value_or(false);
-        tabIndex = focusHub->GetTabIndex();
-    }
-    json->PutExtAttr("enabled", enabled, filter);
-    json->PutFixedAttr("focusable", focusable, filter, FIXED_ATTR_FOCUSABLE);
-    json->PutFixedAttr("focused", focused, filter, FIXED_ATTR_FOCUSED);
-    json->PutExtAttr("defaultFocus", defaultFocus, filter);
-    json->PutExtAttr("groupDefaultFocus", groupDefaultFocus, filter);
-    json->PutExtAttr("focusOnTouch", focusOnTouch, filter);
-    json->PutExtAttr("tabIndex", tabIndex, filter);
-}
-
 void FrameNode::MouseToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     std::string hoverEffect = "HoverEffect.Auto";
@@ -1024,7 +985,7 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFil
     if (eventHub_) {
         eventHub_->ToJsonValue(json, filter);
     }
-    FocusToJsonValue(json, filter);
+    FocusHub::ToJsonValue(GetFocusHub(), json, filter);
     MouseToJsonValue(json, filter);
     TouchToJsonValue(json, filter);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {

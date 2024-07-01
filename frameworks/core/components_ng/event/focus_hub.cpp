@@ -2475,4 +2475,43 @@ bool FocusHub::IsNestingFocusGroup()
     }
     return false;
 }
+
+void FocusHub::ToJsonValue(
+    const RefPtr<FocusHub>& hub, std::unique_ptr<JsonValue>& json, const InspectorFilter& filter)
+{
+    bool focusable = false;
+    bool focused = false;
+    if (hub) {
+        focusable = hub->IsFocusable();
+        focused = hub->IsCurrentFocus();
+    }
+    if (filter.CheckFixedAttr(FIXED_ATTR_FOCUSABLE)) {
+        json->Put("focusable", focusable);
+        json->Put("focused", focused);
+    }
+    if (filter.IsFastFilter()) {
+        return;
+    }
+
+    bool enabled = true;
+    bool defaultFocus = false;
+    bool groupDefaultFocus = false;
+    bool focusOnTouch = false;
+    int32_t tabIndex = 0;
+    std::unique_ptr<JsonValue> focusBox = nullptr;
+    if (hub) {
+        enabled = hub->IsEnabled();
+        defaultFocus = hub->IsDefaultFocus();
+        groupDefaultFocus = hub->IsDefaultGroupFocus();
+        focusOnTouch = hub->IsFocusOnTouch().value_or(false);
+        tabIndex = hub->GetTabIndex();
+        focusBox = FocusBox::ToJsonValue(hub->box_);
+    }
+    json->PutExtAttr("enabled", enabled, filter);
+    json->PutExtAttr("defaultFocus", defaultFocus, filter);
+    json->PutExtAttr("groupDefaultFocus", groupDefaultFocus, filter);
+    json->PutExtAttr("focusOnTouch", focusOnTouch, filter);
+    json->PutExtAttr("tabIndex", tabIndex, filter);
+    json->PutExtAttr("focusBox", focusBox, filter);
+}
 } // namespace OHOS::Ace::NG
