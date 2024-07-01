@@ -926,6 +926,8 @@ void PipelineBase::Destroy()
     formLinkInfoMap_.clear();
     finishFunctions_.clear();
     {
+        // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker
+        // thread.
         std::lock_guard lock(densityChangeMutex_);
         densityChangedCallbacks_.clear();
     }
