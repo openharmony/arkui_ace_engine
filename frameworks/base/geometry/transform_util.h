@@ -24,7 +24,9 @@
 #include "base/geometry/quaternion.h"
 
 namespace OHOS::Ace {
-
+namespace {
+constexpr double epsilon = 0.000001;
+}
 struct ACE_EXPORT TranslateOperation {
     TranslateOperation() = default;
     TranslateOperation(Dimension dx, Dimension dy, Dimension dz = Dimension {}) : dx(dx), dy(dy), dz(dz) {}
@@ -44,7 +46,6 @@ struct ACE_EXPORT ScaleOperation {
     ScaleOperation(float x, float y, float z) : scaleX(x), scaleY(y), scaleZ(z) {}
     bool operator==(const ScaleOperation& other) const
     {
-        constexpr double epsilon = 0.0001;
         return NearEqual(scaleX, other.scaleX, epsilon) && NearEqual(scaleY, other.scaleY, epsilon) &&
                NearEqual(scaleZ, other.scaleZ, epsilon);
     }
@@ -60,7 +61,7 @@ struct ACE_EXPORT SkewOperation {
     SkewOperation(float x, float y) : skewX(x), skewY(y) {}
     bool operator==(const SkewOperation& other) const
     {
-        return NearEqual(skewX, other.skewX) && NearEqual(skewY, other.skewY);
+        return NearEqual(skewX, other.skewX, epsilon) && NearEqual(skewY, other.skewY, epsilon);
     }
     float skewX = 0.0f;
     float skewY = 0.0f;
@@ -73,8 +74,8 @@ struct ACE_EXPORT RotateOperation {
     RotateOperation(float x, float y, float z, float angle) : dx(x), dy(y), dz(z), angle(angle) {}
     bool operator==(const RotateOperation& other) const
     {
-        return NearEqual(dx, other.dx) && NearEqual(dy, other.dy) && NearEqual(dz, other.dz) &&
-               NearEqual(angle, other.angle);
+        return NearEqual(dx, other.dx, epsilon) && NearEqual(dy, other.dy, epsilon) &&
+               NearEqual(dz, other.dz, epsilon) && NearEqual(angle, other.angle, epsilon);
     }
     float dx = 0.0f;
     float dy = 0.0f;
