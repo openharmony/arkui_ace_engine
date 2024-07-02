@@ -122,6 +122,8 @@ void MarqueePattern::OnModifyDone()
     CHECK_NULL_VOID(layoutProperty);
     auto textChild = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(textChild);
+    auto childRenderContext = textChild->GetRenderContext();
+    CHECK_NULL_VOID(childRenderContext);
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     auto src = layoutProperty->GetSrc().value_or(" ");
@@ -140,7 +142,8 @@ void MarqueePattern::OnModifyDone()
     }
     textLayoutProperty->UpdateTextColor(layoutProperty->GetFontColor().value_or(theme->GetTextStyle().GetTextColor()));
     textChild->MarkModifyDone();
-    textChild->GetRenderContext()->SetClipToFrame(true);
+    childRenderContext->UpdateClipEdge(true);
+    childRenderContext->SetClipToFrame(true);
     if (CheckMeasureFlag(layoutProperty->GetPropertyChangeFlag()) ||
         CheckLayoutFlag(layoutProperty->GetPropertyChangeFlag())) {
         measureChanged_ = true;
