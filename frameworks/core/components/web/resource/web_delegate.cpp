@@ -4829,6 +4829,9 @@ void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEve
     if (eventType == AccessibilityEventType::FOCUS) {
         TextBlurReport(accessibilityId);
     }
+    if (eventType == AccessibilityEventType::CLICK) {
+        WebComponentClickReport(accessibilityId);
+    }
     event.nodeId = accessibilityId;
     event.type = eventType;
     context->SendEventToAccessibility(event);
@@ -4860,6 +4863,17 @@ void WebDelegate::TextBlurReport(int64_t accessibilityId)
             lastFocusInputId_ = accessibilityId;
         }
     }
+}
+
+void WebDelegate::WebComponentClickReport(int64_t accessibilityId)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    auto webAccessibilityNode = webPattern->GetAccessibilityNodeById(accessibilityId);
+    CHECK_NULL_VOID(webAccessibilityNode);
+    auto webComponentClickCallback = webPattern->GetWebComponentClickCallback();
+    CHECK_NULL_VOID(webComponentClickCallback);
+    webComponentClickCallback(accessibilityId, webAccessibilityNode->GetContent());
 }
 
 void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
