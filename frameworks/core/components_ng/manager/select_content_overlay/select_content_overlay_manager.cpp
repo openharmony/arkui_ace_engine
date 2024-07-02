@@ -606,8 +606,7 @@ void SelectContentOverlayManager::DestroySelectOverlayNode(const RefPtr<FrameNod
     auto parentFrameNode = DynamicCast<FrameNode>(parentNode);
     if (parentFrameNode) {
         auto pattern = overlay->GetPattern<SelectOverlayPattern>();
-        CHECK_NULL_VOID(pattern);
-        if (pattern->GetMode() == SelectOverlayMode::HANDLE_ONLY) {
+        if (pattern && pattern->GetMode() == SelectOverlayMode::HANDLE_ONLY) {
             parentFrameNode->SetOverlayNode(nullptr);
             overlay->SetParent(nullptr);
         }
