@@ -3079,7 +3079,7 @@ bool OverlayManager::ModalPageExitProcess(const RefPtr<FrameNode>& topModalNode)
         topModalNode->GetPattern<ModalPresentationPattern>()->OnDisappear();
         // Fire hidden event of navdestination on the disappeared modal
         FireNavigationStateChange(false, topModalNode);
-        RemoveChildWithService(rootNode, topModalNode);;
+        RemoveChildWithService(rootNode, topModalNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     topModalNode->GetPattern<ModalPresentationPattern>()->FireCallback("false");
