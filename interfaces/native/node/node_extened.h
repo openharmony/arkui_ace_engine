@@ -113,6 +113,7 @@ struct ArkUI_SwiperIndicator {
     ArkUI_OptionalInt maskValue;
     ArkUI_OptionalUint colorValue;
     ArkUI_OptionalUint selectedColorValue;
+    ArkUI_OptionalInt maxDisplayCount;
 };
 
 struct ArkUI_DrawableDescriptor {

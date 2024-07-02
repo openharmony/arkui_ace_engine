@@ -2920,6 +2920,27 @@ void OH_ArkUI_SwiperIndicator_SetSelectedColor(ArkUI_SwiperIndicator* indicator,
 uint32_t OH_ArkUI_SwiperIndicator_GetSelectedColor(ArkUI_SwiperIndicator* indicator);
 
 /**
+ * @brief Sets the number of maxDisplayCount for the dot navigation indicator.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @param maxDisplayCount the maxDisplayCount of the navigation dot, span is 6-9.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} Success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ * @since 12
+*/
+int32_t OH_ArkUI_SwiperIndicator_SetMaxDisplayCount(ArkUI_SwiperIndicator* indicator, int32_t maxDisplayCount);
+
+/**
+ * @brief Obtains the number of maxDisplayCount for the dot navigation indicator.
+ *
+ * @param indicator Indicates the pointer to the indicator.
+ * @return Returns the number of the maxDisplayCount, span is 6-9.
+ * @since 12
+*/
+int32_t OH_ArkUI_SwiperIndicator_GetMaxDisplayCount(ArkUI_SwiperIndicator* indicator);
+
+/**
  * @brief Create a configuration item for the ListitemSwipeActionItem interface settings.
  *
  * @return List Item SwipeActionItem configuration item instance.

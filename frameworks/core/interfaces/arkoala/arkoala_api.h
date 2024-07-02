@@ -1137,6 +1137,7 @@ struct ArkUISwiperIndicator {
     ArkUIOptionalInt maskValue;
     ArkUIOptionalUint colorValue;
     ArkUIOptionalUint selectedColorValue;
+    ArkUIOptionalInt maxDisplayCount;
 };
 
 struct ArkUI_StyledString;

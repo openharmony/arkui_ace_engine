@@ -488,10 +488,10 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
 void JSSwiper::SetDotIndicatorInfo(const JSRef<JSObject>& obj, SwiperParameters& swiperParameters,
     const RefPtr<SwiperIndicatorTheme>& swiperIndicatorTheme)
 {
-    JSRef<JSVal> maskValue = obj->GetProperty("maskValue");
-    JSRef<JSVal> colorValue = obj->GetProperty("colorValue");
-    JSRef<JSVal> selectedColorValue = obj->GetProperty("selectedColorValue");
-    JSRef<JSVal> maxDisplayCountVal = obj->GetProperty("maxDisplayCountValue");
+    JSRef<JSVal> maskValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::MASK_VALUE));
+    JSRef<JSVal> colorValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLOR_VALUE));
+    JSRef<JSVal> selectedColorValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::SELECTED_COLOR_VALUE));
+    JSRef<JSVal> maxDisplayCountVal = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::MAX_DISPLAY_COUNT_VALUE));
     if (maskValue->IsBoolean()) {
         auto mask = maskValue->ToBoolean();
         swiperParameters.maskValue = mask;
@@ -501,6 +501,9 @@ void JSSwiper::SetDotIndicatorInfo(const JSRef<JSObject>& obj, SwiperParameters&
     swiperParameters.colorVal = parseOk ? colorVal : swiperIndicatorTheme->GetColor();
     parseOk = ParseJsColor(selectedColorValue, colorVal);
     swiperParameters.selectedColorVal = parseOk ? colorVal : swiperIndicatorTheme->GetSelectedColor();
+    if (maxDisplayCountVal->IsUndefined()) {
+        return;
+    }
     uint32_t result = 0;
     auto setMaxDisplayCountVal = ParseJsInteger(maxDisplayCountVal, result);
     swiperParameters.maxDisplayCountVal = setMaxDisplayCountVal && result > 0 ? result : 0;
