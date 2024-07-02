@@ -1041,6 +1041,9 @@ public:
         return focusPriority_;
     }
 
+    static void ToJsonValue(
+        const RefPtr<FocusHub>& hub, std::unique_ptr<JsonValue>& json, const InspectorFilter& filter);
+
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     bool OnKeyEventNode(const KeyEvent& keyEvent);
