@@ -973,6 +973,7 @@ void ListItemGroupLayoutAlgorithm::LayoutHeaderFooterRTL(LayoutWrapper* layoutWr
                 stickyPos = std::min(stickyPos, GetEndPosition() - footerMainSize);
             }
             footerPos = std::max(footerPos, stickyPos);
+            footerPos = std::min(footerPos, totalMainSize_ - footerMainSize_ - headerMainSize_);
         }
         LayoutIndex(wrapper, paddingOffset, crossSize, footerPos);
         endFooterPos_ = endFooterPos_ > mainPos ? mainPos : endFooterPos_;
