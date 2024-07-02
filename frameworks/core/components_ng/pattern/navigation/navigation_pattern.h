@@ -411,7 +411,8 @@ private:
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
     RefPtr<RenderContext> GetTitleBarRenderContext();
     void DoAnimation(NavigationMode usrNavigationMode);
-    void RecoveryToLastStack();
+    void RecoveryToLastStack(const RefPtr<NavDestinationGroupNode>& preTopDestination,
+        const RefPtr<NavDestinationGroupNode>& newTopDestination);
     RefPtr<UINode> GenerateUINodeByIndex(int32_t index);
     void DoNavbarHideAnimation(const RefPtr<NavigationGroupNode>& hostNode);
     RefPtr<FrameNode> GetDividerNode() const;

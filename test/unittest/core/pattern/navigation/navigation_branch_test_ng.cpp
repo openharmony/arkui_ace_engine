@@ -755,7 +755,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest017, TestSize.Level1)
     // set recoveryList_
     pattern->navigationStack_->UpdateRecoveryList();
     pattern->OnModifyDone();
-    pattern->RecoveryToLastStack();
+    pattern->RecoveryToLastStack(nullptr, nullptr);
 }
 
 /**
@@ -789,7 +789,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest018, TestSize.Level1)
     // set recoveryList_
     pattern->navigationStack_->UpdateRecoveryList();
     pattern->OnModifyDone();
-    pattern->RecoveryToLastStack();
+    pattern->RecoveryToLastStack(nullptr, nullptr);
 }
 
 /**

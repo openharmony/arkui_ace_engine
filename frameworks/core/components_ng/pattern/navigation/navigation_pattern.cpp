@@ -1657,7 +1657,7 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
                                         weakPreNavDestination = WeakPtr<NavDestinationGroupNode>(preTopNavDestination),
                                         weakNewNavDestination = WeakPtr<NavDestinationGroupNode>(newTopNavDestination),
                                         isPopPage, proxy]() {
-            if (proxy == nullptr || proxy->GetIsFinished() || !proxy->GetInteractive()) {
+            if (proxy == nullptr || !proxy->GetInteractive()) {
                 return;
             }
             auto pattern = weakNavigation.Upgrade();
@@ -1673,7 +1673,7 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
             } else {
                 // fire page cancel transition
                 TAG_LOGI(AceLogTag::ACE_NAVIGATION, "interactive animation canceled");
-                pattern->RecoveryToLastStack();
+                pattern->RecoveryToLastStack(preDestination, topDestination);
             }
             proxy->FireEndCallback();
         };
@@ -2303,8 +2303,16 @@ void NavigationPattern::RefreshFocusToDestination()
     }
 }
 
-void NavigationPattern::RecoveryToLastStack()
+void NavigationPattern::RecoveryToLastStack(
+    const RefPtr<NavDestinationGroupNode>& preTopDestination,
+    const RefPtr<NavDestinationGroupNode>& newTopDestination)
 {
+    if (preTopDestination) {
+        preTopDestination->SetIsOnAnimation(false);
+    }
+    if (newTopDestination) {
+        newTopDestination->SetIsOnAnimation(false);
+    }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     // clear last sync stack last nodes
@@ -2370,7 +2378,7 @@ bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode
                                         weakNewNavDestination = WeakPtr<NavDestinationGroupNode>(newTopNavDestination),
                                         isPopPage, proxy]() {
         // to avoid call finishTransition many times
-        if (proxy == nullptr || proxy->GetIsFinished()) {
+        if (proxy == nullptr) {
             TAG_LOGW(AceLogTag::ACE_NAVIGATION, "custom animation proxy is empty or is finished");
             return;
         }
