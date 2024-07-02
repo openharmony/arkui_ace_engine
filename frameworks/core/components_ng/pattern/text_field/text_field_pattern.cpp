@@ -3772,9 +3772,6 @@ void TextFieldPattern::InsertValueOperation(const SourceAndValueInfo& info)
     auto isIME = info.isIME;
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (FinishTextPreviewByPreview(insertValue)) {
-        return;
-    }
     auto start = selectController_->GetStartIndex();
     auto end = selectController_->GetEndIndex();
     auto caretStart = IsSelected() ? start : selectController_->GetCaretIndex();
@@ -3832,8 +3829,7 @@ void TextFieldPattern::TwinklingByFocus()
 bool TextFieldPattern::FinishTextPreviewByPreview(const std::string& insertValue)
 {
     if (GetIsPreviewText()) {
-        PreviewTextInfo info = { .text = insertValue, .range = { -1, -1 } };
-        SetPreviewTextOperation(info);
+        SetPreviewText(insertValue, { -1, -1 });
         FinishTextPreview();
         return true;
     }
@@ -3883,6 +3879,9 @@ void TextFieldPattern::InsertValue(const std::string& insertValue, bool isIME)
         return;
     }
     focusIndex_ = FocuseIndex::TEXT;
+    if (FinishTextPreviewByPreview(insertValue)) {
+        return;
+    }
     inputOperations_.emplace(InputOperation::INSERT);
     SourceAndValueInfo info;
     info.insertValue = insertValue;
