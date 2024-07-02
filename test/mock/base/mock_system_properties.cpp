@@ -67,6 +67,7 @@ bool SystemProperties::developerModeOn_ = false;
 bool SystemProperties::faultInjectEnabled_ = false;
 bool SystemProperties::imageFileCacheConvertAstc_ = true;
 bool SystemProperties::imageFrameworkEnable_ = true;
+bool SystemProperties::debugAutoUIEnabled_ = false;
 float SystemProperties::dragStartDampingRatio_ = 0.2f;
 float SystemProperties::dragStartPanDisThreshold_ = 10.0f;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
