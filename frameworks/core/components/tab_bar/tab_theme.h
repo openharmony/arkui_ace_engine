@@ -102,6 +102,8 @@ public:
             theme->bottomTabBarDefaultHeight_ =
                 pattern->GetAttr<Dimension>("bottom_tab_bar_default_height", 0.0_vp);
             theme->tabBarDefaultWidth_ = pattern->GetAttr<Dimension>("tab_bar_default_width", 0.0_vp);
+            theme->tabBarDefaultMargin_ = pattern->GetAttr<Dimension>("tab_bar_margin_width", 0.0_vp);
+            theme->tabBarFocusedColor_ = pattern->GetAttr<Color>("tab_bar_focused_color", Color::TRANSPARENT);
             theme->subTabBarMinWidth_ = pattern->GetAttr<Dimension>("sub_tab_bar_min_width", 0.0_vp);
             theme->dividerColor_ = pattern->GetAttr<Color>("divider_color", Color::BLACK);
             theme->tabBarShadowMargin_ = pattern->GetAttr<Dimension>("tab_bar_shadow_margin", 0.0_vp);
@@ -364,6 +366,11 @@ public:
         return tabBarDefaultWidth_;
     }
 
+    const Dimension& GetTabBarDefaultMargin() const
+    {
+        return tabBarDefaultMargin_;
+    }
+
     const Dimension& GetSubTabBarMinWidth() const
     {
         return subTabBarMinWidth_;
@@ -372,6 +379,11 @@ public:
     const Color& GetDividerColor() const
     {
         return dividerColor_;
+    }
+
+    const Color& GetTabBarFocusedColor() const
+    {
+        return tabBarFocusedColor_;
     }
 
     const Dimension& GetTabBarShadowMargin() const
@@ -476,6 +488,8 @@ private:
     Dimension bottomTabBarDefaultHeight_;
     Dimension tabBarDefaultWidth_;
     Dimension subTabBarMinWidth_;
+    Dimension tabBarDefaultMargin_;
+    Color tabBarFocusedColor_;
     Color dividerColor_;
     Dimension tabBarShadowMargin_;
     Dimension tabBarGradientWidth_;

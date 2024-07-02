@@ -451,6 +451,7 @@ private:
     void HandleHoverEvent(bool isHover);
     void HandleHoverOnEvent(int32_t index);
     void HandleMoveAway(int32_t index);
+    void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool OnKeyEventWithoutClick(const KeyEvent& event);
@@ -593,6 +594,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
     MarginProperty marginLeftOrRight_;
     MarginProperty marginTopOrBottom_;
+    bool isFocusSet_ = false;
 };
 } // namespace OHOS::Ace::NG
 
