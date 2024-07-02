@@ -218,7 +218,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
 
     auto pagePattern = node->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
-    stagePattern_->currentPageIndex_ = pagePattern->GetPageInfo()->GetPageId();
+    stagePattern_->SetCurrentPageIndex(pagePattern->GetPageInfo()->GetPageId());
     if (AceChecker::IsPerformanceCheckEnabled()) {
         // After completing layout tasks at all nodes on the page, perform performance testing and management
         pipeline->AddAfterLayoutTask([weakStage = WeakClaim(this), weakNode = WeakPtr<FrameNode>(node), startTime]() {

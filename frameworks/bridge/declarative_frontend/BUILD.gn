@@ -45,6 +45,17 @@ template("declarative_frontend") {
       ]
     }
 
+    if (enable_split_mode && defined(vender_configs.ace_advanced_split_mode)) {
+      include_dirs += vender_configs.ace_advanced_split_mode_dirs
+    }
+
+    if (enable_split_mode &&
+        defined(vender_configs.ace_advanced_split_mode_bridge)) {
+      sources += vender_configs.ace_engine_advanced_split_mode_bridge
+    } else {
+      sources += [ "ng/page_router_manager_factory.cpp" ]
+    }
+
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
     external_deps = [
       "ets_runtime:libark_jsruntime",

@@ -67,7 +67,7 @@ public:
         stageInTrasition_ = stageInTrasition;
     }
 
-private:
+protected:
     // ace performance check
     void PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout);
     void StopPageTransition();
