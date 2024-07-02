@@ -22,11 +22,13 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/event/touch_event.h"
+#include "base/geometry/offset.h"
 
 namespace OHOS::Ace {
 namespace ResDefine {
 constexpr int32_t LOAD_PAGE_START_EVENT = 0;
 constexpr int32_t LOAD_PAGE_COMPLETE_EVENT = 1;
+constexpr double JUDGE_DISTANCE = 3.125;
 }
 
 using ReportDataFunc = void (*)(uint32_t resType, int64_t value,
@@ -40,14 +42,28 @@ public:
     void ResSchedDataReport(const char* name, const std::unordered_map<std::string, std::string>& param = {});
     void ResSchedDataReport(uint32_t resType, int32_t value = 0,
         const std::unordered_map<std::string, std::string>& payload = {});
-    void OnTouchEvent(const TouchType& touchType);
+    void OnTouchEvent(const TouchEvent& touchEvent);
     void LoadPageEvent(int32_t value);
 
 private:
     ResSchedReport() {}
     ~ResSchedReport() {}
+    void HandleTouchDown(const TouchEvent& touchEvent);
+    void HandleTouchUp(const TouchEvent& touchEvent);
+    void HandleTouchMove(const TouchEvent& touchEvent);
+    void HandleTouchCancel(const TouchEvent& touchEvent);
+    void HandleTouchPullDown(const TouchEvent& touchEvent);
+    void HandleTouchPullUp(const TouchEvent& touchEvent);
+    void HandleTouchPullMove(const TouchEvent& touchEvent);
+    float GetUpVelocity(const TouchEvent& lastMoveInfo,
+        const TouchEvent& upEventInfo);
+
     ReportDataFunc reportDataFunc_ = nullptr;
     bool loadPageOn_ = false;
+    std::map<int32_t, TouchEvent> touchPoints_;
+    int32_t currentFingers_ = 0;
+    Offset averageDistance_;
+    bool isInSilde = false;
 };
 
 class ACE_EXPORT ResSchedReportScope final {
