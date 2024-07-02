@@ -150,9 +150,9 @@ public:
     virtual RectF GetVisibleContentRect();
     virtual bool CheckHandleVisible(const RectF& paintRect) = 0;
 
-    virtual bool OnlyAllowedPasteNonEmptyString()
+    virtual std::string GetPasteMimeType()
     {
-        return false;
+        return "";
     }
 
     virtual void OnResetTextSelection() {}
