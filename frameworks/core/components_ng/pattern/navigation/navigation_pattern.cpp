@@ -1642,7 +1642,7 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
     auto proxy = AceType::MakeRefPtr<NavigationTransitionProxy>();
     proxy->SetPreDestination(preTopNavDestination);
     proxy->SetTopDestination(newTopNavDestination);
-    currentProxy_ = proxy;
+    currentProxy_ = proxy; 
     auto navigationTransition = ExecuteTransition(preTopNavDestination, newTopNavDestination, isPopPage);
     if (!navigationTransition.isValid) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "custom transition value is invalid, do default animation");
