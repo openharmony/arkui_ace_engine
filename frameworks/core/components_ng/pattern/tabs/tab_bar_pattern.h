@@ -204,6 +204,8 @@ public:
 
     void UpdateSubTabBoard();
 
+    void GetColumnId(int32_t& selectedColumnId, int32_t& focusedColumnId);
+
     SelectedMode GetSelectedMode() const;
 
     void AddTabBarItemType(int32_t tabBarItemId, bool isBuilder)

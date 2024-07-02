@@ -1972,6 +1972,20 @@ void TabBarPattern::UpdateSymbolEffect(int32_t index)
     }
 }
 
+void TabBarPattern::GetColumnId(int32_t& selectedColumnId, int32_t& focusedColumnId)
+{
+    auto tabBarNode = GetHost();
+    CHECK_NULL_VOID(tabBarNode);
+    auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(indicator_));
+    CHECK_NULL_VOID(columnNode);
+    selectedColumnId = columnNode->GetId();
+    auto focusedColumnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(focusIndicator_));
+    CHECK_NULL_VOID(focusedColumnNode);
+    focusedColumnId = focusedColumnNode->GetId();
+}
+
 void TabBarPattern::UpdateSubTabBoard()
 {
     auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
@@ -1984,14 +1998,9 @@ void TabBarPattern::UpdateSubTabBoard()
     }
     auto tabBarNode = GetHost();
     CHECK_NULL_VOID(tabBarNode);
-    auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(indicator_));
-    CHECK_NULL_VOID(columnNode);
-    auto selectedColumnId = columnNode->GetId();
-    auto focusedColumnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(focusIndicator_));
-    CHECK_NULL_VOID(focusedColumnNode);
-    auto focusedColumnId = focusedColumnNode->GetId();
+    int32_t selectedColumnId = 0;
+    int32_t focusedColumnId = 0;
+    GetColumnId(selectedColumnId,focusedColumnId);
     auto pipelineContext = GetHost()->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
