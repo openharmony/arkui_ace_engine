@@ -1242,6 +1242,9 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     GridInfo gridInfo(accessibilityProperty->GetCollectionInfo().rows,
         accessibilityProperty->GetCollectionInfo().columns, accessibilityProperty->GetCollectionInfo().selectMode);
     nodeInfo.SetGrid(gridInfo);
+    ExtraElementInfo extraElementInfo {};
+    accessibilityProperty->GetAllExtraElementInfo(extraElementInfo);
+    nodeInfo.SetExtraElement(extraElementInfo);
 
     int32_t row = accessibilityProperty->GetCollectionItemInfo().row;
     int32_t column = accessibilityProperty->GetCollectionItemInfo().column;
@@ -2003,6 +2006,23 @@ inline void DumpContentListNG(const AccessibilityElementInfo& nodeInfo)
     DumpLog::GetInstance().AddDesc("content list: ", contents);
 }
 
+static void DumpExtraElementInfoNG(const AccessibilityElementInfo& nodeInfo)
+{
+    ExtraElementInfo extraElementInfo = nodeInfo.GetExtraElement();
+    if (!extraElementInfo.GetExtraElementInfoValueStr().empty()) {
+        for (auto i = extraElementInfo.GetExtraElementInfoValueStr().begin();
+             i != extraElementInfo.GetExtraElementInfoValueStr().end(); ++i) {
+            DumpLog::GetInstance().AddDesc("extra element info: ", i->first, i->second);
+        }
+    }
+    if (!extraElementInfo.GetExtraElementInfoValueInt().empty()) {
+        for (auto i = extraElementInfo.GetExtraElementInfoValueInt().begin();
+             i != extraElementInfo.GetExtraElementInfoValueInt().end(); ++i) {
+            DumpLog::GetInstance().AddDesc("extra element info: ", i->first, i->second);
+        }
+    }
+}
+
 static void DumpAccessibilityPropertyNG(const AccessibilityElementInfo& nodeInfo)
 {
     DumpLog::GetInstance().AddDesc("checked: ", BoolToString(nodeInfo.IsChecked()));
@@ -2044,6 +2064,7 @@ static void DumpAccessibilityPropertyNG(const AccessibilityElementInfo& nodeInfo
     DumpLog::GetInstance().AddDesc("content description: ", nodeInfo.GetDescriptionInfo());
     DumpLog::GetInstance().AddDesc("content invalid: ", BoolToString(nodeInfo.GetContentInvalid()));
     DumpLog::GetInstance().AddDesc("accessibility label: ", nodeInfo.GetLabeledAccessibilityId());
+    DumpExtraElementInfoNG(nodeInfo);
     DumpLog::GetInstance().AddDesc(
         "trigger action: ", static_cast<int32_t>(ConvertAccessibilityAction(nodeInfo.GetTriggerAction())));
     DumpLog::GetInstance().AddDesc("text move step: " + std::to_string(nodeInfo.GetTextMovementStep()));

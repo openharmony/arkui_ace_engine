@@ -26,6 +26,10 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
 
+namespace OHOS::Accessibility {
+class ExtraElementInfo;
+}
+
 namespace OHOS::Ace::NG {
 using ActionNoParam = std::function<void()>;
 using ActionSetTextImpl = std::function<void(const std::string&)>;
@@ -45,6 +49,7 @@ using ActionGetCursorIndexImpl = std::function<int32_t(void)>;
 using ActionClickImpl = ActionNoParam;
 using ActionLongClickImpl = ActionNoParam;
 using ActionsImpl = std::function<void((uint32_t actionType))>;
+using GetRelatedElementInfoImpl = std::function<void(Accessibility::ExtraElementInfo& extraElementInfo)>;
 using OnAccessibilityFocusCallbackImpl = std::function<void((bool isFocus))>;
 
 class FrameNode;
@@ -605,6 +610,21 @@ public:
     */
     static bool IsAccessibilityFocusableDebug(const RefPtr<FrameNode>& node, std::unique_ptr<JsonValue>& info);
 
+    virtual void GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo) {}
+
+    void SetRelatedElementInfoCallback(const GetRelatedElementInfoImpl& getRelatedElementInfoImpl)
+    {
+        getRelatedElementInfoImpl_ = getRelatedElementInfoImpl;
+    }
+    
+    void GetAllExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo)
+    {
+        if (getRelatedElementInfoImpl_) {
+            getRelatedElementInfoImpl_(extraElementInfo);
+        }
+        GetExtraElementInfo(extraElementInfo);
+    }
+
     void SetAccessibilityActions(uint32_t actions);
     void ResetAccessibilityActions();
     bool HasAccessibilityActions();
@@ -696,6 +716,7 @@ protected:
     ActionClickImpl actionClickImpl_;
     ActionLongClickImpl actionLongClickImpl_;
     ActionsImpl actionsImpl_;
+    GetRelatedElementInfoImpl getRelatedElementInfoImpl_;
     OnAccessibilityFocusCallbackImpl onAccessibilityFocusCallbackImpl_;
     bool accessibilityGroup_ = false;
     int32_t childTreeId_ = -1;
