@@ -24,6 +24,9 @@
 #include "input_method_controller.h"
 #include "parameters.h"
 
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 #include "base/geometry/ng/offset_t.h"
 #include "base/image/file_uri_helper.h"
 #include "base/mousestyle/mouse_style.h"
@@ -320,6 +323,14 @@ void WebPattern::OnAttachToFrameNode()
         }
     });
     UpdateTransformHintChangedCallbackId(callbackId);
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+    if (UiSessionManager::GetInstance().GetWebFocusRegistered()) {
+        auto callback = [](int64_t accessibilityId, const std::string data) {
+            UiSessionManager::GetInstance().ReportWebUnfocusEvent(accessibilityId, data);
+        };
+        RegisterTextBlurCallback(callback);
+    }
+#endif
 }
 
 void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -339,6 +350,11 @@ void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     if (HasTransformHintChangedCallbackId()) {
         pipeline->UnregisterTransformHintChangedCallback(transformHintChangedCallbackId_.value_or(-1));
     }
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+    if (UiSessionManager::GetInstance().GetWebFocusRegistered()) {
+        UnRegisterTextBlurCallback();
+    }
+#endif
 }
 
 void WebPattern::SetRotation(uint32_t rotation)

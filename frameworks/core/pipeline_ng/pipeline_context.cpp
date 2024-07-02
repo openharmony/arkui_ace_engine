@@ -3964,4 +3964,9 @@ void PipelineContext::CleanNodeChangeFlag()
         }
     }
 }
+
+void PipelineContext::NotifyAllWebPattern(bool isRegister)
+{
+    rootNode_->NotifyWebPattern(isRegister);
+}
 } // namespace OHOS::Ace::NG

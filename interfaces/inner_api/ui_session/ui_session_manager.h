@@ -28,7 +28,7 @@ namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UiSessionManager {
 public:
     using InspectorFunction = std::function<void()>;
-
+    using NotifyAllWebFunction = std::function<void(bool isRegister)>;
     /**
      * @description: Get ui_manager instance,this object process singleton
      * @return The return value is ui_manager singleton
@@ -69,6 +69,9 @@ public:
     void WebTaskNumsChange(int32_t num);
     void ReportInspectorTreeValue(const std::string& value);
     void SaveInspectorTreeFunction(InspectorFunction&& function);
+    void SaveRegisterForWebFunction(NotifyAllWebFunction&& function);
+    void ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data);
+    void NotifyAllWebPattern(bool isRegister);
     void SetClickEventRegistered(bool status);
     void SetSearchEventRegistered(bool status);
     void SetRouterChangeEventRegistered(bool status);
@@ -77,7 +80,7 @@ public:
     bool GetSearchEventRegistered();
     bool GetRouterChangeEventRegistered();
     bool GetComponentChangeEventRegistered();
-
+    bool GetWebFocusRegistered();
 private:
     static std::mutex mutex_;
     std::map<int32_t, sptr<IRemoteObject>> reportObjectMap_;
@@ -85,7 +88,9 @@ private:
     int32_t searchEventRegisterProcesses_ = 0;
     int32_t routerChangeEventRegisterProcesses_ = 0;
     int32_t componentChangeEventRegisterProcesses_ = 0;
+    bool webFocusEventRegistered = false;
     InspectorFunction inspectorFunction_ = 0;
+    NotifyAllWebFunction notifyWebFunction_ = 0;
     std::shared_ptr<InspectorJsonValue> jsonValue_ = nullptr;
     int32_t webTaskNums = 0;
 };

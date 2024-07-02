@@ -703,6 +703,7 @@ public:
     }
 
     virtual void GetInspectorValue();
+    virtual void NotifyWebPattern(bool isRegister);
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
@@ -765,7 +766,6 @@ protected:
     virtual void PaintDebugBoundary(bool flag) {}
 
     PipelineContext* context_ = nullptr;
-
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);

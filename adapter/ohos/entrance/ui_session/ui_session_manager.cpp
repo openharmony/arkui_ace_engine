@@ -73,6 +73,18 @@ void UiSessionManager::ReportComponentChangeEvent(const std::string& data)
     }
 }
 
+void UiSessionManager::ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data)
+{
+    for (auto pair : reportObjectMap_) {
+        auto reportService = iface_cast<ReportService>(pair.second);
+        if (reportService != nullptr) {
+            reportService->ReportWebUnfocusEvent(accessibilityId, data);
+        } else {
+            LOGW("report web unfocus event failed,process id:%{public}d", pair.first);
+        }
+    }
+}
+
 void UiSessionManager::SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId)
 {
     reportObjectMap_.emplace(processId, reportStub);
@@ -148,7 +160,7 @@ void UiSessionManager::GetInspectorTree()
 
 void UiSessionManager::SaveInspectorTreeFunction(InspectorFunction&& function)
 {
-    inspectorFunction_ = function;
+    inspectorFunction_ = std::move(function);
 }
 
 void UiSessionManager::AddValueForTree(int32_t id, const std::string& value)
@@ -180,5 +192,21 @@ void UiSessionManager::ReportInspectorTreeValue(const std::string& data)
             LOGW("report component event failed,process id:%{public}d", pair.first);
         }
     }
+}
+
+void UiSessionManager::NotifyAllWebPattern(bool isRegister)
+{
+    webFocusEventRegistered = isRegister;
+    notifyWebFunction_(isRegister);
+}
+
+void UiSessionManager::SaveRegisterForWebFunction(NotifyAllWebFunction&& function)
+{
+    notifyWebFunction_ = std::move(function);
+}
+
+bool UiSessionManager::GetWebFocusRegistered()
+{
+    return webFocusEventRegistered;
 }
 } // namespace OHOS::Ace

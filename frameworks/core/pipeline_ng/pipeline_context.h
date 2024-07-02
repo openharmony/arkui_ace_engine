@@ -803,7 +803,7 @@ public:
         lastVsyncEndTimestamp_ = lastVsyncEndTimestamp;
     }
     void GetInspectorTree();
-
+    void NotifyAllWebPattern(bool isRegister);
     void AddFrameNodeChangeListener(const RefPtr<FrameNode>& node);
     void RemoveFrameNodeChangeListener(const RefPtr<FrameNode>& node);
     void AddChangedFrameNode(const RefPtr<FrameNode>& node);

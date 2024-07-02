@@ -31,10 +31,13 @@ public:
     virtual int32_t RegisterRouterChangeEventCallback(const EventCallback& eventCallback) override;
     virtual int32_t RegisterSearchEventCallback(const EventCallback& eventCallback) override;
     virtual int32_t RegisterComponentChangeEventCallback(const EventCallback& eventCallback) override;
+    virtual int32_t RegisterWebUnfocusEventCallback(
+        const std::function<void(int64_t accessibilityId, const std::string& data)>& eventCallback) override;
     virtual int32_t UnregisterClickEventCallback() override;
     virtual int32_t UnregisterSearchEventCallback() override;
     virtual int32_t UnregisterRouterChangeEventCallback() override;
     virtual int32_t UnregisterComponentChangeEventCallback() override;
+    virtual int32_t UnregisterWebUnfocusEventCallback() override;
 
 private:
     static inline BrokerDelegator<UIContentServiceProxy> delegator_;
