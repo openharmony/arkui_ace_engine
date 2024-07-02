@@ -420,6 +420,26 @@ public:
         isDragWithContextMenu_ = isDragWithContextMenu;
     }
 
+    void UpdateDragMovePosition(const NG::OffsetF& offset, bool isRedragStart = false);
+
+    void ResetContextMenuDragPosition()
+    {
+        dragMovePosition_ = OffsetF(0.0f, 0.0f);
+        lastDragMovePosition_ = OffsetF(0.0f, 0.0f);
+        dragTotalMovePosition_ = OffsetF(0.0f, 0.0f);
+    }
+
+    void ResetContextMenuRedragPosition()
+    {
+        dragMovePosition_ = OffsetF(0.0f, 0.0f);
+        lastDragMovePosition_ = OffsetF(0.0f, 0.0f);
+    }
+
+    OffsetF GetUpdateDragMovePosition() const
+    {
+        return dragTotalMovePosition_;
+    }
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
@@ -513,6 +533,9 @@ private:
     int32_t badgeNumber_ = -1;
     bool isDragWithContextMenu_ = false;
     Point dragDampStartPoint_ { 1, 1 };
+    OffsetF dragMovePosition_ = OffsetF(0.0f, 0.0f);
+    OffsetF lastDragMovePosition_ = OffsetF(0.0f, 0.0f);
+    OffsetF dragTotalMovePosition_ = OffsetF(0.0f, 0.0f);
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };

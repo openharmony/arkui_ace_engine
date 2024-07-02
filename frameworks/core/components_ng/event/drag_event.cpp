@@ -732,8 +732,10 @@ void DragEventActuator::HandleDragDampingMove(const Point& point, int32_t pointe
     if (isRedragStart && !isRedragStart_) {
         isRedragStart_ = true;
         SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, true);
+        dragDropManager->UpdateDragMovePosition(updateOffset, true);
     } else {
         SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, false);
+        dragDropManager->UpdateDragMovePosition(updateOffset, false);
     }
     SubwindowManager::GetInstance()->UpdatePreviewPosition();
 }
