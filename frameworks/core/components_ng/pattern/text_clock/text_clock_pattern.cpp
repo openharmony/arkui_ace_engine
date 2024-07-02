@@ -275,7 +275,9 @@ void TextClockPattern::RequestUpdateForNextSecond()
     int32_t delayTime =
         (INTERVAL_OF_U_SECOND - static_cast<int32_t>(currentTime.tv_usec)) / MICROSECONDS_OF_MILLISECOND +
         1; // millisecond
-    if (isForm_) {
+    auto nextMinuteFlag = isForm_ || (!makeFunc_.has_value() && GetFormat().find('S') == std::string::npos
+            && GetFormat().find('s') == std::string::npos);
+    if (nextMinuteFlag) {
         time_t current = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         auto* timeZoneTime = std::localtime(&current);
         // delay to next minute
