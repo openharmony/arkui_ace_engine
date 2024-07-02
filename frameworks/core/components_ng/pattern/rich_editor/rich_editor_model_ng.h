@@ -47,7 +47,8 @@ public:
     void SetOnDidChange(std::function<void(const RichEditorChangeValue&)>&& func) override;
     void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) override;
     void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) override;
-    void SetSelectionMenuOptions(const std::vector<MenuOptionsParam>&& menuOptionsItems) override;
+    void SetSelectionMenuOptions(const OnCreateMenuCallback&& onCreateMenuCallback,
+        const OnMenuItemClickCallback&& onMenuItemClick) override;
 
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions& copyOptions);

@@ -115,16 +115,6 @@ public:
 
     void UpdateSelectInfo(const std::string& selectInfo);
 
-    void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionItems)
-    {
-        menuOptionItems_ = std::move(menuOptionItems);
-    }
-
-    const std::vector<MenuOptionsParam>&& GetMenuOptionItems() const
-    {
-        return std::move(menuOptionItems_);
-    }
-
     virtual void OnParentScrollStartOrEnd(bool isEnd, bool noAnimation = false);
 
     virtual void OnParentScrollCallback(Axis axis, int32_t offset) {};
@@ -177,7 +167,6 @@ private:
     ScrollableParentInfo scrollableParentInfo_;
     SelectOverlayInfo selectOverlayInfo_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_;
-    std::vector<MenuOptionsParam> menuOptionItems_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_SELECT_OVERLAY_SELECT_OVERLAY_CLIENT_H

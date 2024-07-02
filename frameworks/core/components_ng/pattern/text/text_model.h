@@ -96,7 +96,6 @@ public:
     virtual void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) = 0;
     virtual void SetOnDrop(NG::OnDragDropFunc&& onDrop) = 0;
     virtual void SetDraggable(bool draggable) = 0;
-    virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;
 
     virtual void SetTextSelection(int32_t startIndex, int32_t endIndex) = 0;
     virtual void SetTextSelectableMode(TextSelectableMode textSelectable) = 0;
@@ -111,7 +110,8 @@ public:
     virtual void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) = 0;
     virtual void SetMarqueeOptions(const NG::TextMarqueeOptions& options) = 0;
     virtual void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) = 0;
-    virtual void SetSelectionMenuOptions(const std::vector<NG::MenuOptionsParam>&& menuOptionsItems) {};
+    virtual void SetSelectionMenuOptions(
+        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
 
 private:
     static std::unique_ptr<TextModel> instance_;

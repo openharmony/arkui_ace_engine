@@ -1947,6 +1947,48 @@ class TransitionEffect {
   }
 }
 
+class TextMenuItemId {
+  id_ = '';
+
+  constructor(id) {
+    this.id_ = id;
+  }
+
+  static of(id) {
+    return new TextMenuItemId(id);
+  }
+
+  equals(id) {
+    return id.id_ == this.id_;
+  }
+
+  static get CUT() {
+    return new TextMenuItemId('OH_DEFAULT_CUT');
+  }
+  
+  static get COPY() {
+    return new TextMenuItemId('OH_DEFAULT_COPY');
+  }
+
+  static get PASTE() {
+    return new TextMenuItemId('OH_DEFAULT_PASTE');
+  }
+
+  static get SELECT_ALL() {
+    return new TextMenuItemId('OH_DEFAULT_SELECT_ALL');
+  }
+
+  static get COLLABORATION_SERVICE() {
+    return new TextMenuItemId('OH_DEFAULT_COLLABORATION_SERVICE');
+  }
+
+  static get CAMERA_INPUT() {
+    return new TextMenuItemId('OH_DEFAULT_CAMERA_INPUT');
+  }
+}
+
+globalThis.TextMenuItemId = TextMenuItemId;
+
 var SliderBlockType;
 (function (SliderBlockType) {
   SliderBlockType[SliderBlockType["DEFAULT"] = 0] = "DEFAULT";

@@ -978,4 +978,11 @@ bool BaseTextSelectOverlay::CheckSwitchToMode(HandleLevelMode mode)
     }
     return true;
 }
+
+void BaseTextSelectOverlay::OnSelectionMenuOptionsUpdate(
+    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
+{
+    onCreateMenuCallback_ = onCreateMenuCallback;
+    onMenuItemClick_ = onMenuItemClick;
+}
 } // namespace OHOS::Ace::NG

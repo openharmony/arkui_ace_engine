@@ -9366,23 +9366,10 @@ void RichEditorPattern::HideMenu()
     selectOverlay_->HideMenu();
 }
 
-void RichEditorPattern::OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsParam>&& menuOptionsItems)
+void RichEditorPattern::OnSelectionMenuOptionsUpdate(
+    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
 {
-    menuOptionItems_ = std::move(menuOptionsItems);
-    for (auto& menuOption : menuOptionItems_) {
-        std::function<void(int32_t, int32_t)> actionRange = menuOption.actionRange;
-        menuOption.action = [weak = AceType::WeakClaim(this), actionRange] (
-                                const std::string& selectInfo) {
-            auto richEditorPattern = weak.Upgrade();
-            CHECK_NULL_VOID(richEditorPattern);
-            if (actionRange) {
-                auto start = richEditorPattern->textSelector_.GetTextStart();
-                auto end = richEditorPattern->textSelector_.GetTextEnd();
-                actionRange(start, end);
-            }
-            richEditorPattern->HideMenu();
-        };
-    }
+    selectOverlay_->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 
 bool RichEditorPattern::CheckTripClickEvent(GestureEvent& info)

@@ -265,7 +265,7 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
     selectInfo.pattern = AceType::WeakClaim(AceType::RawPtr(pattern));
     selectInfo.handlerColor = pattern->GetCaretColor();
     selectInfo.handleReverse = IsHandleReverse();
-    selectInfo.menuOptionItems = pattern->GetMenuOptionItems();
+    OnUpdateOnCreateMenuCallback(selectInfo);
     bool usingMouse = pattern->IsUsingMouse();
     auto responseType = pattern->textResponseType_.value_or(TextResponseType::NONE);
     auto& firstHandle = pattern->textSelector_.firstHandle;
@@ -307,7 +307,6 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
         };
     }
 }
-
 void RichEditorSelectOverlay::CheckEditorTypeChange(SelectOverlayInfo& selectInfo, TextSpanType selectType)
 {
     auto manager = SelectContentOverlayManager::GetOverlayManager();

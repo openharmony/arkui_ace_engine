@@ -291,7 +291,7 @@ void TextFieldSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overla
     auto paintProperty = textFieldPattern->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     overlayInfo.handlerColor = paintProperty->GetCursorColor();
-    overlayInfo.menuOptionItems = textFieldPattern->GetMenuOptionItems();
+    OnUpdateOnCreateMenuCallback(overlayInfo);
     auto layoutProperty =
         DynamicCast<TextFieldLayoutProperty>(textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>());
     CHECK_NULL_VOID(layoutProperty);

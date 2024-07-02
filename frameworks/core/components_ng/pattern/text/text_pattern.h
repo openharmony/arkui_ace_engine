@@ -35,9 +35,9 @@
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
+#include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
-#include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_base.h"
@@ -185,16 +185,6 @@ public:
     RefPtr<TextContentModifier> GetContentModifier()
     {
         return contentMod_;
-    }
-
-    void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionItems)
-    {
-        menuOptionItems_ = std::move(menuOptionItems);
-    }
-
-    const std::vector<MenuOptionsParam>&& GetMenuOptionItems() const
-    {
-        return std::move(menuOptionItems_);
     }
 
     void SetTextDetectEnable(bool enable)
@@ -613,7 +603,8 @@ public:
     TextLineMetrics GetLineMetrics(int32_t lineNumber) override;
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
 
-    void OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsParam> && menuOptionsItems);
+    void OnSelectionMenuOptionsUpdate(
+        const NG::OnCreateMenuCallback && onCreateMenuCallback, const NG::OnMenuItemClickCallback && onMenuItemClick);
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override
     {
         selectOverlay_->OnAncestorNodeChanged(flag);
@@ -806,7 +797,6 @@ private:
     bool isMarqueeRunning_ = false;
 
     RefPtr<ParagraphManager> pManager_;
-    std::vector<MenuOptionsParam> menuOptionItems_;
     std::vector<int32_t> placeholderIndex_;
     std::vector<RectF> rectsForPlaceholders_;
     OffsetF imageOffset_;

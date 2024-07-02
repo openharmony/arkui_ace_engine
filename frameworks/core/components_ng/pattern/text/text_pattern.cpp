@@ -571,8 +571,8 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
             CHECK_NULL_VOID(renderContext);
             auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
             bool ifHaveObscured = textPattern->GetSpanItemChildren().empty() &&
-                std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
-                [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
+                                  std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
+                                      [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
             auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
             if (textLayoutProperty->GetCalcLayoutConstraint() &&
@@ -3158,23 +3158,10 @@ void TextPattern::FireOnMarqueeStateChange(const TextMarqueeState& state)
     RecoverCopyOption();
 }
 
-void TextPattern::OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsParam>&& menuOptionsItems)
+void TextPattern::OnSelectionMenuOptionsUpdate(
+    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
 {
-    menuOptionItems_ = std::move(menuOptionsItems);
-    for (auto& menuOption : menuOptionItems_) {
-        std::function<void(int32_t, int32_t)> actionRange = menuOption.actionRange;
-        menuOption.action = [weak = AceType::WeakClaim(this), actionRange] (
-                                const std::string selectInfo) {
-            auto textPattern = weak.Upgrade();
-            CHECK_NULL_VOID(textPattern);
-            if (actionRange) {
-                auto start = textPattern->textSelector_.GetTextStart();
-                auto end = textPattern->textSelector_.GetTextEnd();
-                actionRange(start, end);
-            }
-            textPattern->HiddenMenu();
-        };
-    }
+    selectOverlay_->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 
 void TextPattern::HandleSelectionChange(int32_t start, int32_t end)

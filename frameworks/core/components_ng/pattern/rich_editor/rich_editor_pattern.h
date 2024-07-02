@@ -45,13 +45,13 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -779,7 +779,7 @@ public:
     bool AdjustSelectorForEmoji(int32_t& index, HandleType handleType, SelectorAdjustPolicy policy);
     void UpdateSelector(int32_t start, int32_t end);
     std::list<RefPtr<SpanItem>>::iterator GetSpanIter(int32_t index);
-    
+
     void DumpAdvanceInfo() override {}
 
     void SetContentChange(bool onChange)
@@ -789,7 +789,8 @@ public:
 
     void HideMenu();
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
-    void OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsParam> && menuOptionsItems);
+    void OnSelectionMenuOptionsUpdate(
+        const NG::OnCreateMenuCallback && onCreateMenuCallback, const NG::OnMenuItemClickCallback && onMenuItemClick);
     RectF GetTextContentRect(bool isActualText = false) const override
     {
         return contentRect_;
@@ -798,16 +799,6 @@ public:
     bool IsMoveCaretAnywhere() const
     {
         return isMoveCaretAnywhere_;
-    }
-
-    void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionItems)
-    {
-        menuOptionItems_ = std::move(menuOptionItems);
-    }
-
-    const std::vector<MenuOptionsParam> && GetMenuOptionItems() const
-    {
-        return std::move(menuOptionItems_);
     }
 
     void PreferredParagraph();
@@ -1105,7 +1096,6 @@ private:
     // still in progress
     ParagraphManager paragraphs_;
     RefPtr<Paragraph> presetParagraph_;
-    std::vector<MenuOptionsParam> menuOptionItems_;
     std::vector<OperationRecord> operationRecords_;
     std::vector<OperationRecord> redoOperationRecords_;
 
