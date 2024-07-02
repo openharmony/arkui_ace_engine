@@ -165,12 +165,6 @@ void OptionView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>&
     auto pattern = option->GetPattern<OptionPattern>();
     CHECK_NULL_VOID(pattern);
 
-    if (optionsHasIcon) {
-        auto iconNode = CreateIcon(icon, row);
-        pattern->SetIconNode(iconNode);
-        pattern->SetIcon(icon);
-    }
-
     auto pasteLayoutProperty = pasteNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     CHECK_NULL_VOID(pasteLayoutProperty);
     auto pastePaintProperty = pasteNode->GetPaintProperty<SecurityComponentPaintProperty>();
@@ -179,6 +173,10 @@ void OptionView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>&
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
+    if (optionsHasIcon) {
+        auto left = theme->GetIconSideLength().ConvertToPx() + theme->GetIconContentPadding().ConvertToPx();
+        pasteLayoutProperty->UpdateLeftSpace(Dimension(left));
+    }
 
     pasteLayoutProperty->UpdateFontSize(theme->GetMenuFontSize());
     pasteLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
