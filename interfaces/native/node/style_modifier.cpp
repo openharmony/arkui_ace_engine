@@ -7245,6 +7245,32 @@ const ArkUI_AttributeItem* GetSwiperIndicator(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetSwiperIndicatorInteractive(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getSwiperModifier()->setIndicatorInteractive(node->uiNodeHandle,
+        static_cast<bool>(item->value[0].i32));
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetSwiperIndicatorInteractive(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getSwiperModifier()->resetIndicatorInteractive(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetSwiperIndicatorInteractive(ArkUI_NodeHandle node)
+{
+    ArkUI_Int32 value = GetFullImpl()->getNodeModifiers()->getSwiperModifier()->
+        getIndicatorInteractive(node->uiNodeHandle);
+    g_numberValues[0].i32 = value;
+    return &g_attributeItem;
+}
+
 int32_t SetTextFontFamily(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (item->string == nullptr) {
@@ -13514,7 +13540,7 @@ int32_t SetSwiperAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetSwiperVertical, SetSwiperDuration, SetSwiperCurve, SetSwiperItemSpace, SetSwiperIndex, SetSwiperDisplayCount,
         SetSwiperDisableSwipe, SetSwiperShowDisplayArrow, SetSwiperEffectMode, SetSwiperNodeAdapter,
         SetSwiperCachedCount, SetSwiperPrevMargin, SetSwiperNextMargin, SetSwiperIndicator, SetSwiperNestedScroll,
-        SetSwiperToIndex };
+        SetSwiperToIndex, SetSwiperIndicatorInteractive };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "swiper node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -13528,7 +13554,8 @@ void ResetSwiperAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetSwiperInterval, ResetSwiperVertical, ResetSwiperDuration, ResetSwiperCurve, ResetSwiperItemSpace,
         ResetSwiperIndex, ResetSwiperDisplayCount, ResetSwiperDisableSwipe, ResetSwiperShowDisplayArrow,
         ResetSwiperEffectMode, ResetSwiperNodeAdapter, ResetSwiperCachedCount, ResetSwiperPrevMargin,
-        ResetSwiperNextMargin, ResetSwiperIndicator, ResetSwiperNestedScroll, nullptr };
+        ResetSwiperNextMargin, ResetSwiperIndicator, ResetSwiperNestedScroll, nullptr,
+        ResetSwiperIndicatorInteractive };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "swiper node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -13542,7 +13569,7 @@ const ArkUI_AttributeItem* GetSwiperAttribute(ArkUI_NodeHandle node, int32_t sub
         GetSwiperVertical, GetSwiperDuration, GetSwiperCurve, GetSwiperItemSpace, GetSwiperIndex, GetSwiperDisplayCount,
         GetSwiperDisableSwipe, GetSwiperShowDisplayArrow, GetSwiperEffectMode, GetSwiperNodeAdapter,
         GetSwiperCachedCount, GetSwiperPrevMargin, GetSwiperNextMargin, GetSwiperIndicator, GetSwiperNestedScroll,
-        nullptr };
+        nullptr, GetSwiperIndicatorInteractive };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "swiper node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;

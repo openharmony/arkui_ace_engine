@@ -4536,6 +4536,18 @@ typedef enum {
     NODE_SWIPER_SWIPE_TO_INDEX,
 
     /**
+    * @brief Set to disable component navigation point interactions.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32: Set to disable component navigation point interaction, set to true to indicate the navigation point
+    * is interactive, default value is true.\n
+    * \n
+    * The return value of the attribute acquisition method {@link ArkUI_AttributeItem} format: \n
+    * .value[0].i32: Set to disable component navigation point interactions. \n
+    */
+    NODE_SWIPER_INDICATOR_INTERACTIVE,
+
+    /**
      * @brief: Set the delineation component of the ListItem, supporting property settings, property resets, and
      * property acquisition interfaces.
      *
