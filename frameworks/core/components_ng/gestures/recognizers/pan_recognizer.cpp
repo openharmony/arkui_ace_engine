@@ -228,7 +228,6 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     lastTouchEvent_ = event;
     touchPoints_[event.id] = event;
     touchPointsDistance_[event.id] = Offset(0.0, 0.0);
-
     auto fingerNum = static_cast<int32_t>(touchPoints_.size());
 
     if (fingerNum >= fingers_) {

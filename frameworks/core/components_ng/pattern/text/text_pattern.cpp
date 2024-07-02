@@ -583,7 +583,7 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
                 auto selfIdealSizeHeight = textLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height();
                 auto constraint = textLayoutProperty->GetLayoutConstraint();
                 if ((selfIdealSizeWidth.has_value() && NearZero(selfIdealSizeWidth->GetDimension().ConvertToPxWithSize(
-                                                           constraint->percentReference.Width()))) ||
+                            constraint->percentReference.Width()))) ||
                     (selfIdealSizeHeight.has_value() &&
                         NearZero(selfIdealSizeHeight->GetDimension().ConvertToPxWithSize(
                             constraint->percentReference.Height())))) {
@@ -776,7 +776,7 @@ bool TextPattern::CheckClickedOnSpanOrText(RectF textContentRect, const Offset& 
         textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
     }
     if (textContentRect.IsInRegion(
-            PointF(static_cast<float>(localLocation.GetX()), static_cast<float>(localLocation.GetY()))) &&
+        PointF(static_cast<float>(localLocation.GetX()), static_cast<float>(localLocation.GetY()))) &&
         !spans_.empty() && pManager_) {
         if (CalculateClickedSpanPosition(textOffset)) {
             return true;
@@ -2420,7 +2420,6 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
     while (!nodes.empty()) {
         auto current = nodes.top();
         nodes.pop();
-        // TODO: Add the judgment of display.
         if (!current.node) {
             continue;
         }
@@ -2662,8 +2661,9 @@ void TextPattern::DumpAdvanceInfo()
             .append((textStyle_.has_value() ? textStyle_->GetTextColor() : Color::BLACK).ColorToString()));
     DumpLog::GetInstance().AddDesc(
         std::string("FontSize: ")
-            .append((textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(DIMENSION_VALUE, DimensionUnit::FP))
-                        .ToString()));
+            .append(
+            (textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(
+                DIMENSION_VALUE, DimensionUnit::FP)).ToString()));
     DumpLog::GetInstance().AddDesc(std::string("contentRect-->x:")
                                        .append(std::to_string(contentRect_.GetX()))
                                        .append(" y:")
