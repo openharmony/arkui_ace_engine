@@ -733,8 +733,15 @@ void ContainerModalPattern::InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRo
 CalcLength ContainerModalPattern::GetControlButtonRowWidth()
 {
     auto row = GetControlButtonRow();
-    int32_t buttonNum = row->GetChildren().size();
-
+    // default
+    int32_t buttonNum = 0;
+    const auto& children = row->GetChildren();
+    for (const auto& child : children) {
+        auto childButton = AceType::DynamicCast<FrameNode>(child);
+        if (childButton && childButton->IsVisible()) {
+            buttonNum++;
+        }
+    }
     return CalcLength(TITLE_ELEMENT_MARGIN_HORIZONTAL * (buttonNum - 1) + TITLE_BUTTON_SIZE * buttonNum +
                       TITLE_PADDING_START + TITLE_PADDING_END);
 }
