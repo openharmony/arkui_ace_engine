@@ -21,6 +21,8 @@ import { BusinessError } from '@ohos.base';
 import hilog from '@ohos.hilog';
 import common from '@ohos.app.ability.common';
 
+const INDEX_ZERO: number = 0;
+const INDEX_ONE: number = 1;
 const INDEX_TWO: number = 2;
 // 行数及整体高度
 const SINGLE_LINE_NUM: number = 1;
@@ -45,12 +47,6 @@ const LOADING_SIZE: number = 24;
 const PADDING_LEVEL_2: number = 4;
 const MAX_RIGHT_WIDTH: Length = '34%';
 const MIN_FONT_SIZE: number = 1.75;
-const MIN_HOT_AREA_LENGTH: number = 40;
-const MULTI_ICON_REGION_WIDTH: number = 36;
-const ICON_REGION_X: number = -9;
-const ICON_REGION_Y: number = -8;
-const SINGLE_ICON_REGION_X: number = -12;
-const SINGLE_ICON_NUMBER: number = 1;
 
 export enum OperationType {
   TEXT_ARROW = 0,
@@ -141,6 +137,7 @@ function disabledStyle() {
 
 class SubHeaderModifier implements AttributeModifier<RowAttribute> {
   public isAgeing: boolean = false
+
   applyNormalAttribute(instance: RowAttribute): void {
     if (this.isAgeing) {
       instance.width('100%')
@@ -179,10 +176,11 @@ export struct SubHeader {
   @Prop contentPadding: LocalizedPadding;
   @State subHeaderMargin: LocalizedMargin = {
     start: LengthMetrics.resource($r('sys.float.margin_left')),
-    end: LengthMetrics.resource($r('sys.float.margin_right'))
+    end: LengthMetrics.resource($r('sys.float.margin_right')),
   };
   @Provide subHeaderTheme: SubHeaderTheme = new SubHeaderTheme();
   constraintWidth: number = 0;
+  paddingLeft: number = 2;
 
   onWillApplyTheme(theme: Theme) {
     this.subHeaderTheme.fontPrimaryColor = theme.colors.fontPrimary;
@@ -210,34 +208,6 @@ export struct SubHeader {
       end: LengthMetrics.resource($r('sys.float.padding_level6')),
       top: LengthMetrics.resource($r('sys.float.padding_level4')),
       bottom: LengthMetrics.resource($r('sys.float.padding_level4')),
-    })
-  }
-
-  @Styles
-  private rightAreaClickEvent() {
-    .onClick(() => {
-      if ((this.operationType === OperationType.TEXT_ARROW || this.operationType === OperationType.BUTTON) &&
-      this.operationItem && this.operationItem.length > 0 && this.operationItem[0].action) {
-        this.operationItem[0].action();
-      }
-    })
-    .onTouch((event) => {
-      if (event.type === TouchType.Down) {
-        if (this.operationType === OperationType.TEXT_ARROW) {
-          this.textArrowBgColor = $r('sys.color.interactive_pressed');
-        }
-        if (this.operationType === OperationType.BUTTON) {
-          this.buttonBgColor =  $r('sys.color.interactive_pressed');
-        }
-      }
-      if (event.type === TouchType.Up) {
-        if (this.operationType === OperationType.TEXT_ARROW) {
-          this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
-        }
-        if (this.operationType === OperationType.BUTTON) {
-          this.buttonBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
-        }
-      }
     })
   }
 
@@ -270,8 +240,12 @@ export struct SubHeader {
           this.leftArea();
         }
         .margin({
-          top: $r('sys.float.padding_level8'),
-          bottom: $r('sys.float.padding_level1'),
+          top: LengthMetrics.resource($r('sys.float.padding_level8')),
+          bottom: LengthMetrics.resource($r('sys.float.padding_level1')),
+        })
+        .padding({
+          start: LengthMetrics.resource($r('sys.float.margin_left')),
+          end: LengthMetrics.resource($r('sys.float.margin_right')),
         })
         .width('100%')
 
@@ -280,13 +254,18 @@ export struct SubHeader {
         }
         .margin({
           bottom: $r('sys.float.padding_level4'),
+
+        })
+        .padding({
+          // 'sys.float.margin_left' id,value: 16vp
+          start: LengthMetrics.vp((Util.getNumberByResource(125830936) ?? 16) - this.paddingLeft),
+          // 'sys.float.margin_right' id,value: 16vp
+          end: LengthMetrics.vp(Util.getNumberByResource(125830937) ?? 16),
         })
         .justifyContent(FlexAlign.Start)
         .width('100%')
-        .rightAreaClickEvent()
       }
       .constraintSize({ minHeight: this.getMinHeight() })
-      .margin(this.contentMargin ?? this.subHeaderMargin)
       .padding(this.getAreaPadding())
     } else {
       Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.End }) {
@@ -300,14 +279,8 @@ export struct SubHeader {
           this.rightArea();
         }
         .justifyContent(FlexAlign.End)
-        .alignItems(VerticalAlign.Bottom)
-        .constraintSize({
-          maxWidth: this.getRightAreaMaxWidth(),
-          minWidth: this.getRightAreaMinWidth(),
-          minHeight: MIN_HOT_AREA_LENGTH,
-        })
+        .constraintSize({ maxWidth: this.getMaxWidth() })
         .flexShrink(0)
-        .rightAreaClickEvent()
       }
       .constraintSize({ minHeight: this.getMinHeight() })
       .margin(this.contentMargin ?? this.subHeaderMargin)
@@ -341,19 +314,12 @@ export struct SubHeader {
     })
   }
 
-  private getRightAreaMaxWidth(): Length {
+  private getMaxWidth(): Length {
     if (this.operationType === OperationType.ICON_GROUP && (this.operationItem && this.operationItem.length > 0)) {
       return '100%';
     } else {
       return MAX_RIGHT_WIDTH;
     }
-  }
-
-  private getRightAreaMinWidth(): Length {
-    if (this.operationItem && this.operationItem.length > 0) {
-      return MIN_HOT_AREA_LENGTH;
-    }
-    return 0;
   }
 
   private getMinHeight(): Length {
@@ -589,8 +555,7 @@ export struct SubHeader {
               .focusable(true)
           }
           .padding({
-            start: LengthMetrics.resource(this.ageing ? $r('sys.float.padding_level0') :
-            $r('sys.float.padding_level1')),
+            start: LengthMetrics.resource($r('sys.float.padding_level1')),
             end: LengthMetrics.resource($r('sys.float.padding_level1')),
             top: LengthMetrics.resource($r('sys.float.padding_level2')),
             bottom: LengthMetrics.resource($r('sys.float.padding_level2')),
@@ -627,6 +592,19 @@ export struct SubHeader {
               this.buttonBgColor = this.subHeaderTheme.textArrowHoverBgColor;
             } else {
               this.buttonBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+            }
+          })
+          .onTouch((event) => {
+            if (event.type === TouchType.Down) {
+              this.buttonBgColor = $r('sys.color.interactive_pressed');
+            }
+            if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+              this.buttonBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+            }
+          })
+          .onClick((event) => {
+            if (button.action) {
+              button.action();
             }
           })
         }
@@ -732,6 +710,19 @@ export struct SubHeader {
           this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
         }
       })
+      .onTouch((event) => {
+        if (event.type === TouchType.Down) {
+          this.textArrowBgColor = $r('sys.color.interactive_pressed');
+        }
+        if (event.type === TouchType.Up) {
+          this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+        }
+      })
+      .onClick((event) => {
+        if (textArrow.action) {
+          textArrow.action();
+        }
+      })
     }
     .attributeModifier(this.subHeaderModifier)
     .focusable(true)
@@ -745,9 +736,9 @@ export struct SubHeader {
   @Builder
   IconGroupStyle(operationItem: Array<OperationOption>): void {
     Row() {
-      ForEach(operationItem, (item: OperationOption, index: number) => {
+      ForEach(operationItem, (item: OperationOption, index?: number) => {
         if (Util.isResourceType(item.value)) {
-          if (index <= INDEX_TWO) {
+          if (index === INDEX_ZERO) {
             SingleIconStyle({
               item: {
                 iconOptions: {
@@ -756,8 +747,18 @@ export struct SubHeader {
                   this.operationSymbolOptions[index] : null,
                 },
                 action: item.action,
-              },
-              isSingleIcon: this.operationItem?.length === SINGLE_ICON_NUMBER,
+              }
+            })
+          } else if (index === INDEX_ONE || index === INDEX_TWO) {
+            SingleIconStyle({
+              item: {
+                action: item.action,
+                iconOptions: {
+                  icon: item.value as Resource,
+                  symbolicIconOption: this.operationSymbolOptions && this.operationSymbolOptions.length > index ?
+                  this.operationSymbolOptions[index] : null,
+                },
+              }
             })
               .margin({
                 start: LengthMetrics.resource($r('sys.float.padding_level4')),
@@ -766,10 +767,13 @@ export struct SubHeader {
             // 最大支持3个ICON,此场景不支持
           }
         }
-      })
+      });
     }
     .justifyContent(FlexAlign.End)
     .focusable(true)
+    .margin({
+      start: LengthMetrics.resource($r('sys.float.padding_level4')),
+    })
   }
 
   @Builder
@@ -812,7 +816,6 @@ struct SingleIconStyle {
   @State isFocus: boolean = false;
   item: ContentIconOption | null = null;
   @Consume subHeaderTheme: SubHeaderTheme;
-  isSingleIcon: boolean = true;
 
   build() {
     if (this.item && this.item.iconOptions) {
@@ -859,20 +862,12 @@ struct SingleIconStyle {
           this.bgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
         }
       })
-      .responseRegion(this.iconResponseRegion())
       .onClick((event) => {
         if (this.item?.action) {
           this.item?.action();
         }
       })
     }
-  }
-
-  private iconResponseRegion(): Rectangle {
-    if (this.isSingleIcon) {
-      return { x: SINGLE_ICON_REGION_X, y: ICON_REGION_Y, width: MIN_HOT_AREA_LENGTH, height: MIN_HOT_AREA_LENGTH };
-    }
-    return { x: ICON_REGION_X, y: ICON_REGION_Y, width: MULTI_ICON_REGION_WIDTH, height: MIN_HOT_AREA_LENGTH };
   }
 
   private fontSizeValue(item: ContentIconOption): Length {
@@ -907,8 +902,10 @@ class Util {
   private static readonly DEFAULT_VALUE: number = 0;
   private static readonly DEFAULT_BREAKPOINT_S: number = 600;
   private static readonly DEFAULT_BREAKPOINT_M: number = 840;
-  private static readonly CALCULATE_BREAKPOINT_S: number = this.getNumberByResource('breakpoint_horizontal_s');
-  private static readonly CALCULATE_BREAKPOINT_M: number = this.getNumberByResource('breakpoint_horizontal_m');
+  // 'sys.float.breakpoint_horizontal_s' id,value: 600vp
+  private static readonly CALCULATE_BREAKPOINT_S: number = this.getNumberByResource(125832765) ?? 600;
+  // 'sys.float.breakpoint_horizontal_m' id,value: 800vp
+  private static readonly CALCULATE_BREAKPOINT_M: number = this.getNumberByResource(125832766) ?? 840;
   public static readonly BREAKPOINT_S: number =
     this.CALCULATE_BREAKPOINT_S === this.DEFAULT_VALUE ? this.DEFAULT_BREAKPOINT_S : this.CALCULATE_BREAKPOINT_S;
   public static readonly BREAKPOINT_M: number =
@@ -948,14 +945,14 @@ class Util {
    * @param resourceName resource name
    * @returns resource size
    */
-  public static getNumberByResource(resourceName: string): number {
+  public static getNumberByResource(resourceId: number): number | null {
     try {
-      return resourceManager.getSystemResourceManager().getNumberByName(resourceName);
+      return resourceManager.getSystemResourceManager().getNumber(resourceId);
     } catch (error) {
       let code: number = (error as BusinessError).code;
       let message: string = (error as BusinessError).message;
       hilog.error(0x3900, 'Ace', `SubHeader getNumberByResource error, code: ${code}, message: ${message}`);
-      return Util.DEFAULT_VALUE;
+      return null;
     }
   }
 
