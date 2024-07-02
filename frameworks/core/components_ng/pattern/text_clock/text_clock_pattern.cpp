@@ -765,9 +765,9 @@ void TextClockPattern::FireBuilder()
         for (const auto& child : children) {
             if (child->GetId() == nodeId_) {
                 host->RemoveChildAndReturnIndex(child);
+                host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
             }
         }
-        host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
         return;
     }
     auto node = BuildContentModifierNode();
