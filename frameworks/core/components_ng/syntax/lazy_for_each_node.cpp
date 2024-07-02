@@ -112,7 +112,7 @@ void LazyForEachNode::PostIdleTask()
 
 void LazyForEachNode::OnDataReloaded()
 {
-    ACE_SCOPED_TRACE("OnDataReloaded");
+    ACE_SCOPED_TRACE("LazyForEach OnDataReloaded");
     children_.clear();
     if (builder_) {
         builder_->SetUseNewInterface(false);
@@ -128,7 +128,7 @@ void LazyForEachNode::OnDataReloaded()
 
 void LazyForEachNode::OnDataAdded(size_t index)
 {
-    ACE_SCOPED_TRACE("OnDataAdded");
+    ACE_SCOPED_TRACE("LazyForEach OnDataAdded");
     auto insertIndex = static_cast<int32_t>(index);
     if (builder_) {
         builder_->SetUseNewInterface(false);
@@ -142,7 +142,7 @@ void LazyForEachNode::OnDataAdded(size_t index)
 
 void LazyForEachNode::OnDataBulkAdded(size_t index, size_t count)
 {
-    ACE_SCOPED_TRACE("OnDataBulkAdded");
+    ACE_SCOPED_TRACE("LazyForEach OnDataBulkAdded");
     auto insertIndex = static_cast<int32_t>(index);
     if (builder_) {
         builder_->SetUseNewInterface(false);
@@ -156,7 +156,7 @@ void LazyForEachNode::OnDataBulkAdded(size_t index, size_t count)
 
 void LazyForEachNode::OnDataDeleted(size_t index)
 {
-    ACE_SCOPED_TRACE("OnDataDeleted");
+    ACE_SCOPED_TRACE("LazyForEach OnDataDeleted");
     auto deletedIndex = static_cast<int32_t>(index);
     if (builder_) {
         builder_->SetUseNewInterface(false);
@@ -179,7 +179,7 @@ void LazyForEachNode::OnDataDeleted(size_t index)
 
 void LazyForEachNode::OnDataBulkDeleted(size_t index, size_t count)
 {
-    ACE_SCOPED_TRACE("OnDataBulkDeleted");
+    ACE_SCOPED_TRACE("LazyForEach OnDataBulkDeleted");
     auto deletedIndex = static_cast<int32_t>(index);
     if (builder_) {
         builder_->SetUseNewInterface(false);
@@ -218,7 +218,7 @@ void LazyForEachNode::OnDataChanged(size_t index)
 
 void LazyForEachNode::OnDataBulkChanged(size_t index, size_t count)
 {
-    ACE_SCOPED_TRACE("OnDataBulkChanged");
+    ACE_SCOPED_TRACE("LazyForEach OnDataBulkChanged");
     auto deletedIndex = static_cast<int32_t>(index);
     if (builder_) {
         builder_->SetUseNewInterface(false);
@@ -269,7 +269,7 @@ void LazyForEachNode::OnDataMoved(size_t from, size_t to)
 
 void LazyForEachNode::OnDatasetChange(const std::list<V2::Operation>& DataOperations)
 {
-    ACE_SCOPED_TRACE("OnDatasetChange");
+    ACE_SCOPED_TRACE("LazyForEach OnDatasetChange");
     int32_t initialChangedIndex = 0;
     if (builder_) {
         builder_->SetUseNewInterface(true);
