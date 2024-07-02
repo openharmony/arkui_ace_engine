@@ -60,7 +60,7 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    auto& info = gridLayoutInfo_;
+    const auto& info = gridLayoutInfo_;
     if (info.childrenCount_ <= 0) {
         return;
     }

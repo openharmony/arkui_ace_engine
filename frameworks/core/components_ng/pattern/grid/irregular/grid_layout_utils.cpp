@@ -51,10 +51,14 @@ GridItemSize GridLayoutUtils::GetItemSize(const GridLayoutInfo* info, const Layo
 void GridLayoutUtils::PreloadGridItems(
     const RefPtr<GridPattern>& pattern, std::list<int32_t>&& items, const BuildGridItemCallback& buildCb)
 {
+    if (items.empty()) {
+        return;
+    }
     CHECK_NULL_VOID(pattern);
-    if (!pattern->GetPreloadItemList().empty()) {
-        // task already added to pipeline, only need to update item list
-        pattern->SetPreloadItemList(std::move(items));
+    const bool taskAdded = !pattern->GetPreloadItemList().empty();
+    pattern->SetPreloadItemList(std::move(items));
+    if (taskAdded) {
+        // task already in queue, only need to update item list
         return;
     }
     PreloadGridItemsHelper(pattern, buildCb);
@@ -62,7 +66,7 @@ void GridLayoutUtils::PreloadGridItems(
 
 void GridLayoutUtils::PreloadGridItemsHelper(const RefPtr<GridPattern>& pattern, const BuildGridItemCallback& buildCb)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
     context->AddPredictTask([weak = AceType::WeakClaim(AceType::RawPtr(pattern)), buildCb](int64_t deadline, bool _) {
         ACE_SCOPED_TRACE("Grid preload items");
