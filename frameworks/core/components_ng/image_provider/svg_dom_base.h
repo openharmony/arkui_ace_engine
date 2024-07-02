@@ -21,6 +21,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/size.h"
 #include "base/memory/ace_type.h"
+#include "core/common/ace_application_info.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -58,8 +59,12 @@ public:
     virtual void DrawImage(
         RSCanvas& canvas, const ImageFit& imageFit, const Size& layout) = 0;
 
-    void ApplyImageFit(ImageFit imageFit, double& scaleX, double& scaleY)
+    void ApplyImageFit(ImageFit imageFit, double& scaleX, double& scaleY, float& addTx, float& addTy)
     {
+        if (needAdjustAlignment_ && imageFit >= ImageFit::TOP_LEFT && imageFit <= ImageFit::BOTTOM_END) {
+            ApplyImageAlignmentFit(imageFit, addTx, addTy);
+            return;
+        }
         switch (imageFit) {
             case ImageFit::FILL:
                 ApplyFill(scaleX, scaleY);
@@ -122,6 +127,54 @@ public:
     Size layout_;  // layout size set by Image Component
     Size svgSize_; // self size specified in SVG file
     std::unique_ptr<BorderRadiusArray> radius_;
+
+protected:
+    void ApplyAlignment(float& addTx, float& addTy, const Alignment& alignMent)
+    {
+        if (!svgSize_.IsValid()) {
+            return;
+        }
+        constexpr float half = 0.5f;
+        addTx = alignMent.GetHorizontal() * (layout_.Width() - svgSize_.Width()) * half;
+        addTy = alignMent.GetVertical() * (layout_.Height() - svgSize_.Height()) * half;
+    }
+
+    void ApplyImageAlignmentFit(ImageFit imageFit, float& addTx, float& addTy)
+    {
+        auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+        switch (imageFit) {
+            case ImageFit::TOP_LEFT:
+                ApplyAlignment(addTx, addTy, isRightToLeft ? Alignment::TOP_RIGHT : Alignment::TOP_LEFT);
+                break;
+            case ImageFit::TOP:
+                ApplyAlignment(addTx, addTy, Alignment::TOP_CENTER);
+                break;
+            case ImageFit::TOP_END:
+                ApplyAlignment(addTx, addTy, isRightToLeft ? Alignment::TOP_LEFT : Alignment::TOP_RIGHT);
+                break;
+            case ImageFit::START:
+                ApplyAlignment(addTx, addTy, isRightToLeft ? Alignment::CENTER_RIGHT : Alignment::CENTER_LEFT);
+                break;
+            case ImageFit::CENTER:
+                ApplyAlignment(addTx, addTy, Alignment::CENTER);
+                break;
+            case ImageFit::END:
+                ApplyAlignment(addTx, addTy, isRightToLeft ? Alignment::CENTER_LEFT : Alignment::CENTER_RIGHT);
+                break;
+            case ImageFit::BOTTOM_START:
+                ApplyAlignment(addTx, addTy, isRightToLeft ? Alignment::BOTTOM_RIGHT : Alignment::BOTTOM_LEFT);
+                break;
+            case ImageFit::BOTTOM:
+                ApplyAlignment(addTx, addTy, Alignment::BOTTOM_CENTER);
+                break;
+            case ImageFit::BOTTOM_END:
+                ApplyAlignment(addTx, addTy, isRightToLeft ? Alignment::BOTTOM_LEFT : Alignment::BOTTOM_RIGHT);
+                break;
+            default:
+                break;
+        }
+    }
+    bool needAdjustAlignment_ = false;
 };
 
 } // namespace OHOS::Ace::NG
