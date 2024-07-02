@@ -1140,8 +1140,8 @@ void ListItemGroupLayoutAlgorithm::MeasureCacheItem(LayoutWrapper* layoutWrapper
     ListItemGroupCacheParam& cacheParam = cacheParam_.value();
     if (cacheParam.forward) {
         int32_t endIndex = itemPosition_.empty() ? -1 : itemPosition_.rbegin()->first;
-        int32_t limit = std::min(endIndex + cacheParam.cacheCount, totalItemCount_ - 1);
-        int32_t currentIndex = cacheParam.currCachedIndex + 1;
+        int32_t limit = std::min(endIndex + cacheParam.cacheCount * lanes_, totalItemCount_ - 1);
+        int32_t currentIndex = std::clamp(cacheParam.forwardCachedIndex, endIndex, limit) + 1;
         for (; currentIndex <= limit; currentIndex++) {
             auto item = layoutWrapper->GetOrCreateChildByIndex(currentIndex + itemStartIndex_, false, true);
             auto frameNode = AceType::DynamicCast<FrameNode>(item);
@@ -1160,11 +1160,11 @@ void ListItemGroupLayoutAlgorithm::MeasureCacheItem(LayoutWrapper* layoutWrapper
             item->Measure(childLayoutConstraint_);
             cachedItem_.push_back(currentIndex);
         }
-        cacheParam.currCachedIndex = std::min(currentIndex - 1, limit);
+        cacheParam.forwardCachedIndex = std::min(currentIndex - 1, limit);
     } else {
         int32_t startIndex = itemPosition_.empty() ? totalItemCount_ : itemPosition_.begin()->first;
-        int32_t limit = std::max(startIndex - cacheParam.cacheCount, 0);
-        int32_t currentIndex = cacheParam.currCachedIndex - 1;
+        int32_t limit = std::max(startIndex - cacheParam.cacheCount * lanes_, 0);
+        int32_t currentIndex = std::clamp(cacheParam.backwardCachedIndex, limit, startIndex) - 1;
         for (; currentIndex >= limit; currentIndex--) {
             auto item = layoutWrapper->GetOrCreateChildByIndex(currentIndex + itemStartIndex_, false, true);
             auto frameNode = AceType::DynamicCast<FrameNode>(item);
@@ -1183,7 +1183,7 @@ void ListItemGroupLayoutAlgorithm::MeasureCacheItem(LayoutWrapper* layoutWrapper
             item->Measure(childLayoutConstraint_);
             cachedItem_.push_back(currentIndex);
         }
-        cacheParam.currCachedIndex = std::max(currentIndex + 1, limit);
+        cacheParam.backwardCachedIndex = std::max(currentIndex + 1, limit);
     }
 }
 
