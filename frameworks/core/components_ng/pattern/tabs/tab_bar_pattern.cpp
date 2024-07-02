@@ -2000,7 +2000,7 @@ void TabBarPattern::UpdateSubTabBoard()
     CHECK_NULL_VOID(tabBarNode);
     int32_t selectedColumnId = 0;
     int32_t focusedColumnId = 0;
-    GetColumnId(selectedColumnId,focusedColumnId);
+    GetColumnId(selectedColumnId, focusedColumnId);
     auto pipelineContext = GetHost()->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
