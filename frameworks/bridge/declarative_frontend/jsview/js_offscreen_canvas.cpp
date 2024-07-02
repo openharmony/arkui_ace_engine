@@ -382,7 +382,10 @@ napi_value JSOffscreenCanvas::onGetContext(napi_env env, napi_callback_info info
     contextType = text.get();
     if (contextType == "2d") {
         contextType_ = ContextType::CONTEXT_2D;
-        napi_value contextObj = CreateContext2d(env, GetWidth(), GetHeight());
+        auto jsInfo = reinterpret_cast<panda::JsiRuntimeCallInfo*>(info);
+        auto* vm = jsInfo->GetVM();
+        CHECK_NULL_RETURN(vm, nullptr);
+        napi_value contextObj = CreateContext2d(env, GetWidth(), GetHeight(), vm);
         if (contextObj == nullptr) {
             return nullptr;
         }
@@ -412,7 +415,7 @@ napi_value JSOffscreenCanvas::onGetContext(napi_env env, napi_callback_info info
     return nullptr;
 }
 
-napi_value JSOffscreenCanvas::CreateContext2d(napi_env env, double width, double height)
+napi_value JSOffscreenCanvas::CreateContext2d(napi_env env, double width, double height, const EcmaVM* vm)
 {
     napi_value global = nullptr;
     napi_status status = napi_get_global(env, &global);
@@ -445,8 +448,7 @@ napi_value JSOffscreenCanvas::CreateContext2d(napi_env env, double width, double
     napi_create_int32(env, isSucceed, &value);
     napi_set_named_property(env, thisVal, "__isSucceed", value);
 
-    panda::Local<panda::ObjectRef> localValue = NapiValueToLocalValue(thisVal);
-    JSObject jsObject(localValue);
+    JSObject jsObject(vm, NapiValueToLocalValue(thisVal)->ToEcmaObject(vm));
     offscreenCanvasContext_ = Referenced::Claim(jsObject.Unwrap<JSOffscreenRenderingContext>());
     offscreenCanvasContext_->SetInstanceId(Container::CurrentId());
     offscreenCanvasContext_->SetOffscreenPattern(offscreenCanvasPattern_);
