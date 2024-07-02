@@ -220,7 +220,7 @@ float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Ax
         return 0.0f;
     }
     float maxCrossSize = 0.0f;
-    float crossSize = 0.0f;
+    float crossSize = -laneGutter_;
     float prevPos = GetItemPosition().begin()->second.startPos;
     for (const auto& pos : GetItemPosition()) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first, false);
@@ -232,7 +232,7 @@ float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Ax
             continue;
         }
         if (NearEqual(prevPos, pos.second.startPos)) {
-            crossSize += getGeometryNode->GetMarginFrameSize().CrossSize(axis);
+            crossSize = crossSize + getGeometryNode->GetMarginFrameSize().CrossSize(axis) + laneGutter_;
         } else {
             crossSize = getGeometryNode->GetMarginFrameSize().CrossSize(axis);
         }
