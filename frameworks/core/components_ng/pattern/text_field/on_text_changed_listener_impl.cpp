@@ -36,8 +36,9 @@ void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
         TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "the text is null");
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "InsertText length:%{public}d", text.length());
     auto task = [textFieldPattern = pattern_, text] {
-        ACE_SCOPED_TRACE("InsertText");
+        ACE_SCOPED_TRACE("InsertText [length:%d]", text.length());
         auto client = textFieldPattern.Upgrade();
         CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());

@@ -1310,6 +1310,7 @@ void TextFieldPattern::HandleOnUndoAction()
     if (operationRecords_.empty()) {
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnUndoAction");
     auto textEditingValue = operationRecords_.back();
     if (redoOperationRecords_.size() >= RECORD_MAX_LENGTH) {
         redoOperationRecords_.erase(redoOperationRecords_.begin());
@@ -1329,6 +1330,7 @@ void TextFieldPattern::HandleOnRedoAction()
     if (redoOperationRecords_.empty()) {
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnRedoAction");
     auto textEditingValue = redoOperationRecords_.back();
     redoOperationRecords_.pop_back();
     operationRecords_.push_back(textEditingValue);
@@ -1447,6 +1449,7 @@ void TextFieldPattern::HandleOnPaste()
 {
     auto pasteCallback = [weak = WeakClaim(this)](const std::string& data) {
         if (data.empty()) {
+            TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "HandleOnPaste fail, because data is empty");
             return;
         }
         auto textfield = weak.Upgrade();
@@ -3491,6 +3494,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     auto optionalTextConfig = GetMiscTextConfig();
     CHECK_NULL_RETURN(optionalTextConfig.has_value(), false);
     MiscServices::TextConfig textConfig = optionalTextConfig.value();
+    ACE_LAYOUT_SCOPED_TRACE("RequestKeyboard[id:%d][WId:%u]", tmpHost->GetId(), textConfig.windowId);
     TAG_LOGI(
         AceLogTag::ACE_TEXT_FIELD, "node %{public}d RequestKeyboard set calling window id:%{public}u"
         " inputType: %{public}d enterKeyType: %{public}d", tmpHost->GetId(), textConfig.windowId,
