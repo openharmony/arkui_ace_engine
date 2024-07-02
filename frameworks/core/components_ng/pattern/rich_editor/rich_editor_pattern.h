@@ -1164,9 +1164,11 @@ private:
     bool isCaretInContentArea_ = false;
     OffsetF movingHandleOffset_;
     int32_t initSelectStart_ = 0;
+    std::pair<int32_t, int32_t> initSelector_ = { 0, 0 };
     bool isMoveCaretAnywhere_ = false;
     std::vector<TimeStamp> clickInfo_;
     bool previewLongPress_ = false;
+    bool editingLongPress_ = false;
 };
 } // namespace OHOS::Ace::NG
 
