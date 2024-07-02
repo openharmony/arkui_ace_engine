@@ -4081,7 +4081,9 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
             return;
         }
         const child = iChild;
-        child.updateStateVars(params);
+        if ('updateStateVars' in child) {
+            child.updateStateVars(params);
+        }
         
         
     }
