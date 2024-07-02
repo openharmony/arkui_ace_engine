@@ -306,6 +306,10 @@ const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextInputContentSizeChange,
     NodeModifier::SetOnTextInputInputFilterError,
     NodeModifier::SetTextInputOnTextContentScroll,
+    NodeModifier::SetTextInputOnWillInsert,
+    NodeModifier::SetTextInputOnDidInsert,
+    NodeModifier::SetTextInputOnWillDelete,
+    NodeModifier::SetTextInputOnDidDelete,
 };
 
 const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
@@ -318,6 +322,10 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextAreaContentSizeChange,
     NodeModifier::SetOnTextAreaInputFilterError,
     NodeModifier::SetTextAreaOnTextContentScroll,
+    NodeModifier::SetTextAreaOnWillInsertValue,
+    NodeModifier::SetTextAreaOnDidInsertValue,
+    NodeModifier::SetTextAreaOnWillDeleteValue,
+    NodeModifier::SetTextAreaOnDidDeleteValue,
 };
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {

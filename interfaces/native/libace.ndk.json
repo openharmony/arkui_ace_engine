@@ -1649,6 +1649,18 @@
     },
     {
         "first_introduced": "12",
+        "name": "OH_ArkUI_NodeEvent_GetNumberValue"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeEvent_GetStringValue"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeEvent_SetReturnNumberValue"
+    },
+    {
+        "first_introduced": "12",
         "name": "OH_ArkUI_PointerEvent_SetStopPropagation"
     },
     {
