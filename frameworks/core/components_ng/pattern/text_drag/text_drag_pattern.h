@@ -51,18 +51,23 @@ struct SelectPositionInfo {
 
 struct TextDragData {
     TextDragData() {}
-    TextDragData(RectF textRect, float frameWidth, float frameHeight, float lineHeight, SelectPositionInfo position,
-        bool oneLineSelected)
+    TextDragData(RectF textRect, float frameWidth, float frameHeight, float lineHeight, float lastLineHeight)
         : textRect_(textRect), frameWidth_(frameWidth), frameHeight_(frameHeight), lineHeight_(lineHeight),
-          selectPosition_(position), oneLineSelected_(oneLineSelected)
+          lastLineHeight_(lastLineHeight)
     {}
 
     RectF textRect_;
     float frameWidth_ = 0;
     float frameHeight_ = 0;
     float lineHeight_ = 0;
+    float lastLineHeight_ = 0;
     SelectPositionInfo selectPosition_;
     bool oneLineSelected_ = false;
+    void initSelecitonInfo(SelectPositionInfo selectionInfo, bool oneLineSelected)
+    {
+        selectPosition_ = selectionInfo;
+        oneLineSelected_ = oneLineSelected;
+    }
 };
 
 struct TextPoint {
@@ -198,6 +203,9 @@ public:
 
 protected:
     static TextDragData CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragNode);
+    static RectF GetHandler(const bool isLeftHandler, const std::vector<RectF> boxes, const RectF contentRect,
+        const OffsetF globalOffset, const OffsetF textStartOffset);
+    static void AdjustHandlers(const RectF contentRect, RectF& leftHandler, RectF& rightHandler);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     std::shared_ptr<RSPath> GenerateClipPath();
     void GenerateBackgroundPoints(std::vector<TextPoint>& points, float offset, bool needAdjust = true);
