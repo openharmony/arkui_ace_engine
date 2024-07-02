@@ -394,46 +394,6 @@ void NavBarPattern::OnAttachToFrameNode()
     }
 }
 
-void NavBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
-{
-    if (isHideTitlebar_ || titleMode_ != NavigationTitleMode::FREE) {
-        gestureHub->RemovePanEvent(panEvent_);
-        return;
-    }
-
-    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleOnDragStart(info.GetOffsetY());
-    };
-
-    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleOnDragUpdate(info.GetOffsetY());
-    };
-
-    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleOnDragEnd();
-    };
-
-    auto actionCancelTask = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleOnDragEnd();
-    };
-
-    if (!panEvent_) {
-        panEvent_ = MakeRefPtr<PanEvent>(std::move(actionStartTask), std::move(actionUpdateTask),
-            std::move(actionEndTask), std::move(actionCancelTask));
-    }
-
-    PanDirection panDirection = { .type = PanDirection::VERTICAL };
-    gestureHub->SetPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
-}
-
 void NavBarPattern::HandleOnDragStart(float offset)
 {
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());

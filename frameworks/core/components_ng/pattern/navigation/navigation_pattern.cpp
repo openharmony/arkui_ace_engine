@@ -205,7 +205,7 @@ void NavigationPattern::OnModifyDone()
         CHECK_NULL_VOID(dividerNode);
         auto gestureHub = dividerNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
-        InitDragEvent(gestureHub);
+        InitPanEvent(gestureHub);
         auto inputHub = dividerNode->GetOrCreateInputEventHub();
         CHECK_NULL_VOID(inputHub);
         InitDividerMouseEvent(inputHub);
@@ -1471,9 +1471,9 @@ void NavigationPattern::HandleDragEnd()
     mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), MouseFormat::DEFAULT);
 }
 
-void NavigationPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
+void NavigationPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID(!dragEvent_);
+    CHECK_NULL_VOID(!panEvent_);
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -1494,10 +1494,10 @@ void NavigationPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragEnd();
     };
-    dragEvent_ = MakeRefPtr<DragEvent>(
+    panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     PanDirection panDirection = { .type = PanDirection::HORIZONTAL };
-    gestureHub->SetDragEvent(dragEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
 
 void NavigationPattern::OnHover(bool isHover)

@@ -417,7 +417,7 @@ private:
     RefPtr<FrameNode> GetDividerNode() const;
     void FireInterceptionEvent(bool isBefore,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
-    void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart();
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
@@ -466,7 +466,7 @@ private:
     std::function<void(std::string)> builder_;
     RefPtr<NavigationStack> navigationStack_;
     RefPtr<InputEvent> hoverEvent_;
-    RefPtr<DragEvent> dragEvent_;
+    RefPtr<PanEvent> panEvent_;
     RefPtr<NavigationTransitionProxy> currentProxy_;
     RectF dragRect_;
     WeakPtr<FrameNode> pageNode_;
