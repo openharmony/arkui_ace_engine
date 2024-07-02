@@ -55,9 +55,9 @@
 #include "core/components_ng/pattern/search/search_event_hub.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/pattern/text_field/text_content_type.h"
@@ -87,8 +87,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
-#include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
 #include "parameters.h"
+
+#include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
 #endif
 #endif
 #include "core/common/udmf/udmf_client.h"
@@ -1140,7 +1141,7 @@ void TextFieldPattern::InitDisableColor()
     if (IsUnderlineMode()) {
         underlineWidth_ = HasFocus() ? TYPING_UNDERLINE_WIDTH : UNDERLINE_WIDTH;
         Color underlineColor = HasFocus() ? userUnderlineColor_.typing.value_or(theme->GetUnderlineTypingColor())
-            : userUnderlineColor_.normal.value_or(theme->GetUnderlineColor());
+                                          : userUnderlineColor_.normal.value_or(theme->GetUnderlineColor());
         if (userUnderlineColor_.disable) {
             underlineColor_ = IsDisabled() ? userUnderlineColor_.disable.value() : underlineColor;
         } else {
@@ -2113,7 +2114,7 @@ int32_t TextFieldPattern::CheckClickLocation(GestureEvent& info)
     TimeStamp clickTimeStamp = info.GetTimeStamp();
     std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout = clickTimeStamp - lastClickTimeStamp_;
     std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeoutLast =
-	    lastClickTimeStamp_ - penultimateClickTimeStamp_;
+        lastClickTimeStamp_ - penultimateClickTimeStamp_;
     penultimateClickTimeStamp_ = lastClickTimeStamp_;
     lastClickTimeStamp_ = info.GetTimeStamp();
 
@@ -2198,7 +2199,7 @@ void TextFieldPattern::DoProcessAutoFill()
 bool TextFieldPattern::IsAutoFillPasswordType(const AceAutoFillType& autoFillType)
 {
     return (autoFillType == AceAutoFillType::ACE_USER_NAME || autoFillType == AceAutoFillType::ACE_PASSWORD ||
-           autoFillType == AceAutoFillType::ACE_NEW_PASSWORD);
+            autoFillType == AceAutoFillType::ACE_NEW_PASSWORD);
 }
 
 AceAutoFillType TextFieldPattern::GetHintType()
@@ -6059,10 +6060,10 @@ void TextFieldPattern::SetAccessibilityAction()
 
     accessibilityProperty->SetActionSetSelection([weakPtr = WeakClaim(this)](int32_t start,
                                                                              int32_t end, bool isForward) {
-        const auto& pattern = weakPtr.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetSelectionFlag(start, end, std::nullopt, isForward);
-    });
+            const auto& pattern = weakPtr.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetSelectionFlag(start, end, std::nullopt, isForward);
+        });
 
     accessibilityProperty->SetActionCopy([weakPtr = WeakClaim(this)]() {
         const auto& pattern = weakPtr.Upgrade();
@@ -6249,7 +6250,7 @@ void TextFieldPattern::DumpInfo()
                                            .append(std::to_string(isCustomKeyboardAttached_)));
     }
     DumpLog::GetInstance().AddDesc(std::string("wordBreak:")
-        .append(V2::ConvertWrapWordBreakToString(layoutProperty->GetWordBreak().value_or(WordBreak::BREAK_WORD))));
+            .append(V2::ConvertWrapWordBreakToString(layoutProperty->GetWordBreak().value_or(WordBreak::BREAK_WORD))));
 }
 
 void TextFieldPattern::DumpAdvanceInfo()
@@ -7550,23 +7551,10 @@ void TextFieldPattern::HiddenMenu()
     selectOverlay_->HideMenu();
 }
 
-void TextFieldPattern::OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsParam>&& menuOptionsItems)
+void TextFieldPattern::OnSelectionMenuOptionsUpdate(
+    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
 {
-    menuOptionItems_ = std::move(menuOptionsItems);
-    for (auto& menuOption : menuOptionItems_) {
-        std::function<void(int32_t, int32_t)> actionRange = menuOption.actionRange;
-        menuOption.action = [weak = AceType::WeakClaim(this), actionRange] (
-                                const std::string selectInfo) {
-            auto textFiledPattern = weak.Upgrade();
-            CHECK_NULL_VOID(textFiledPattern);
-            if (actionRange) {
-                auto start = textFiledPattern->selectController_->GetStartIndex();
-                auto end = textFiledPattern->selectController_->GetEndIndex();
-                actionRange(start, end);
-            }
-            textFiledPattern->HiddenMenu();
-        };
-    }
+    selectOverlay_->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 
 bool TextFieldPattern::GetTouchInnerPreviewText(const Offset& offset) const

@@ -23,17 +23,38 @@ namespace OHOS::Ace::NG {
 struct MenuOptionsParam {
     std::optional<std::string> content;
     std::optional<std::string> icon;
+    std::string id;
     std::function<void(const std::string&)> action;
-    std::function<void(int32_t, int32_t)> actionRange;
     std::string ToString() const
     {
         std::string result;
-        result.append("content: ");
+        result.append("id: ");
+        result.append(id);
+        result.append(", content: ");
         result.append(content.value_or("na"));
         result.append(", icon: ");
         result.append(icon.value_or("na"));
         return result;
     }
 };
+struct MenuItemParam {
+    MenuOptionsParam menuOptionsParam;
+    int32_t start = -1;
+    int32_t end = -1;
+
+    std::string ToString() const
+    {
+        std::string result;
+        result.append("[start: ");
+        result.append(std::to_string(start));
+        result.append(", end: ");
+        result.append(std::to_string(end));
+        result.append("], ");
+        result.append(menuOptionsParam.ToString());
+        return result;
+    }
+};
+using OnCreateMenuCallback = std::function<std::vector<MenuOptionsParam>(const std::vector<NG::MenuItemParam>&)>;
+using OnMenuItemClickCallback = std::function<bool(const NG::MenuItemParam&)>;
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_NAVIGATION_NAVIGATION_DECLARATION_H

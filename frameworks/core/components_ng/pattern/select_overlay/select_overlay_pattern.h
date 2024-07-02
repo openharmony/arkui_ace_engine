@@ -129,9 +129,9 @@ public:
         return defaultMenuEndOffset_;
     }
 
-    float GetMenuWidth() const
+    std::optional<float> GetMenuWidth() const
     {
-        return menuWidth_.value_or(0);
+        return menuWidth_;
     }
 
     const RectF& GetHandleRegion(bool isFirst) const

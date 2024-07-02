@@ -88,6 +88,7 @@ const std::string IMAGE_PNG = "image/png";
 const std::string IMAGE_JPEG = "image/jpeg";
 const std::string IMAGE_WEBP = "image/webp";
 const std::u16string ELLIPSIS = u"\u2026";
+const std::string FONTWEIGHT = "wght";
 
 // If args is empty or invalid format, use default: image/png
 std::string GetMimeType(const std::string& args)
@@ -778,6 +779,13 @@ Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
     txtStyle.font_weight = ConvertTxtFontWeight(fontWeightStr);
 #else
     txtStyle.fontWeight = ConvertTxtFontWeight(fontWeightStr);
+    auto fontWeightValue = (static_cast<int32_t>(
+            ConvertTxtFontWeight(fontWeightStr)) + 1) * 100;
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    if (pipelineContext) {
+        fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
+    }
+    txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
 #endif
     StringUtils::StringSplitter(context.fontFamily, ',', fontFamilies);
 #ifndef USE_GRAPHIC_TEXT_GINE

@@ -659,16 +659,6 @@ public:
         return mouseStatus_;
     }
 
-    void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionItems)
-    {
-        menuOptionItems_ = std::move(menuOptionItems);
-    }
-
-    const std::vector<MenuOptionsParam>&& GetMenuOptionItems() const
-    {
-        return std::move(menuOptionItems_);
-    }
-
     void UpdateEditingValueToRecord();
 
     void UpdateScrollBarOffset() override;
@@ -1279,7 +1269,8 @@ public:
         return showKeyBoardOnFocus_;
     }
 
-    void OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsParam> && menuOptionsItems);
+    void OnSelectionMenuOptionsUpdate(
+        const NG::OnCreateMenuCallback && onCreateMenuCallback, const NG::OnMenuItemClickCallback && onMenuItemClick);
 
     void SetSupportPreviewText(bool isSupported)
     {
@@ -1312,6 +1303,12 @@ public:
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override
     {
         selectOverlay_->OnAncestorNodeChanged(flag);
+    }
+
+    void GetSelectIndex(int32_t& start, int32_t& end) const override
+    {
+        start = selectController_->GetStartIndex();
+        end = selectController_->GetEndIndex();
     }
 protected:
     virtual void InitDragEvent();
@@ -1388,8 +1385,8 @@ private:
     // when moving one handle causes shift of textRect, update x position of the other handle
     void SetHandlerOnMoveDone();
     void OnDetachFromFrameNode(FrameNode* node) override;
-    void OnAttachContext(PipelineContext *context) override;
-    void OnDetachContext(PipelineContext *context) override;
+    void OnAttachContext(PipelineContext* context) override;
+    void OnDetachContext(PipelineContext* context) override;
     void UpdateSelectionByMouseDoubleClick();
 
     void AfterSelection();
@@ -1623,12 +1620,12 @@ private:
     int32_t dragTextEnd_ = 0;
     std::string dragValue_;
     RefPtr<FrameNode> dragNode_;
-    DragStatus dragStatus_ = DragStatus::NONE; // The status of the dragged initiator
+    DragStatus dragStatus_ = DragStatus::NONE;          // The status of the dragged initiator
     DragStatus dragRecipientStatus_ = DragStatus::NONE; // Drag the recipient's state
     RefPtr<Clipboard> clipboard_;
     std::vector<TextEditingValueNG> operationRecords_;
     std::vector<TextEditingValueNG> redoOperationRecords_;
-    std::vector<MenuOptionsParam> menuOptionItems_;
+    std::vector<NG::MenuOptionsParam> menuOptionItems_;
     BorderRadiusProperty borderRadius_;
     PasswordModeStyle passwordModeStyle_;
     SelectMenuInfo selectMenuInfo_;
