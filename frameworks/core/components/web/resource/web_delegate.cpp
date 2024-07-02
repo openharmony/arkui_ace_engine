@@ -5755,6 +5755,15 @@ bool WebDelegate::GetPendingSizeStatus()
     }
     return false;
 }
+
+void WebDelegate::HandleAccessibilityHoverEvent(int32_t x, int32_t y)
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->SendAccessibilityHoverEvent(x, y);
+    }
+}
+
 #endif
 
 std::string WebDelegate::GetUrlStringParam(const std::string& param, const std::string& name) const

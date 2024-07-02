@@ -5071,6 +5071,22 @@ void WebPattern::DestroyAnalyzerOverlay()
     }
 }
 
+void WebPattern::OnAccessibilityHoverEvent(const PointF& point)
+{
+    CHECK_NULL_VOID(delegate_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto viewScale = pipelineContext->GetViewScale();
+    int32_t globalX = static_cast<int32_t>(point.GetX()) * viewScale;
+    int32_t globalY = static_cast<int32_t>(point.GetY()) * viewScale;
+    auto offset = GetCoordinatePoint().value_or(OffsetF());
+    globalX = static_cast<int32_t>(globalX - offset.GetX());
+    globalY = static_cast<int32_t>(globalY - offset.GetY());
+    delegate_->HandleAccessibilityHoverEvent(globalX, globalY);
+}
+
 void WebPattern::RegisterTextBlurCallback(TextBlurCallback&& callback)
 {
     CHECK_NULL_VOID(callback);

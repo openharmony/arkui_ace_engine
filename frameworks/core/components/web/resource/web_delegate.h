@@ -789,6 +789,7 @@ public:
     {
         richtextData_ = richtextData;
     }
+    void HandleAccessibilityHoverEvent(int32_t x, int32_t y);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
