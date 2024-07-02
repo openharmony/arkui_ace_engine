@@ -4865,18 +4865,22 @@ void SwiperPattern::TabContentStateCallBack(int32_t oldIndex, int32_t nextIndex)
 
     auto tabContents = tabsNode->GetTabs();
     CHECK_NULL_VOID(tabContents);
+    
     auto oldTabContent = tabContents->GetChildAtIndex(oldIndex);
+    if (oldTabContent) {
+        std::string oldTabContentId = oldTabContent->GetInspectorId().value_or("");
+        int32_t oldTabContentUniqueId = oldTabContent->GetId();
+        TabContentInfo oldTabContentInfo(oldTabContentId, oldTabContentUniqueId, TabContentState::ON_HIDE, oldIndex,
+            id, uniqueId);
+        UIObserverHandler::GetInstance().NotifyTabContentStateUpdate(oldTabContentInfo);
+    }
+
     auto nextTabContent = tabContents->GetChildAtIndex(nextIndex);
-    std::string oldTabContentId = oldTabContent->GetInspectorId().value_or("");
-    int32_t oldTabContentUniqueId = oldTabContent->GetId();
+    CHECK_NULL_VOID(nextTabContent);
     std::string nextTabContentId = nextTabContent->GetInspectorId().value_or("");
     int32_t nextTabContentUniqueId = nextTabContent->GetId();
-
-    TabContentInfo oldTabContentInfo(oldTabContentId, oldTabContentUniqueId, TabContentState::ON_HIDE, oldIndex,
-        id, uniqueId);
     TabContentInfo nextTabContentInfo(nextTabContentId, nextTabContentUniqueId, TabContentState::ON_SHOW, nextIndex,
         id, uniqueId);
-    UIObserverHandler::GetInstance().NotifyTabContentStateUpdate(oldTabContentInfo);
     UIObserverHandler::GetInstance().NotifyTabContentStateUpdate(nextTabContentInfo);
 }
 
