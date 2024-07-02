@@ -7682,8 +7682,8 @@ class ObserveV2 {
             if (weakComp && 'deref' in weakComp && (comp = weakComp.deref()) && comp instanceof ComputedV2) {
                 const target = comp.getTarget();
                 if (target instanceof ViewV2 && !target.isViewActive()) {
-                    // FIXME @Component freeze enable
-                    // addDelayedComputedIds id
+                    // add delayed ComputedIds id
+                    target.addDelayedComputedIds(id);
                 }
                 else {
                     comp.fireChange();
@@ -8160,7 +8160,6 @@ class ProviderConsumerUtilV2 {
      */
     static metaAliasKey(aliasName, deco) {
         return `${ProviderConsumerUtilV2.ALIAS_PREFIX}_${deco}_${aliasName}`;
-        ;
     }
     /**
      * Helper function to add meta data about @Provider and @Consumer decorators to ViewV2
@@ -8189,7 +8188,7 @@ class ProviderConsumerUtilV2 {
             // check all entries of this format varName: { deco: '@Provider' | '@Consumer', aliasName: ..... }
             // do not check alias entries
             // 'varName' is only in alias entries, see addProvideConsumeVariableDecoMeta
-            if (typeof value == 'object' && value['deco'] === '@Consumer' && !('varName' in value)) {
+            if (typeof value === 'object' && value['deco'] === '@Consumer' && !('varName' in value)) {
                 let result = ProviderConsumerUtilV2.findProvider(view, value['aliasName']);
                 if (result && result[0] && result[1]) {
                     ProviderConsumerUtilV2.connectConsumer2Provider(view, key, result[0], result[1]);
@@ -8210,7 +8209,7 @@ class ProviderConsumerUtilV2 {
     static findProvider(view, aliasName) {
         var _a;
         let checkView = view === null || view === void 0 ? void 0 : view.getParent();
-        const searchingPrefixedAliasName = ProviderConsumerUtilV2.metaAliasKey(aliasName, "@Provider");
+        const searchingPrefixedAliasName = ProviderConsumerUtilV2.metaAliasKey(aliasName, '@Provider');
         
         while (checkView) {
             const meta = (_a = checkView.constructor) === null || _a === void 0 ? void 0 : _a.prototype[ObserveV2.V2_DECO_META];
@@ -8975,6 +8974,7 @@ class ViewV2 extends PUV2ViewBase {
         this.markNeedUpdate();
         this.elmtIdsDelayedUpdate.clear();
         this.monitorIdsDelayedUpdate.clear();
+        this.computedIdsDelayedUpdate.clear();
         
     }
     /*
