@@ -2753,7 +2753,7 @@ bool TextFieldPattern::FireOnTextChangeEvent()
         }
     }
     auto textCache = layoutProperty->GetValueValue("");
-    auto rangeCache = layoutProperty->GetPreviewRangeValue({-1, -1});
+    auto rangeCache = layoutProperty->GetPreviewRangeValue({GetPreviewTextStart(), GetPreviewTextEnd()});
     TextRange curPreviewRange = {GetPreviewTextStart(), GetPreviewTextEnd()};
     if (textCache == contentController_->GetTextValue() && rangeCache == curPreviewRange) {
         return false;
