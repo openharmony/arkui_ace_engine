@@ -34,16 +34,16 @@ export var ArcButtonTypeMode;
 })(ArcButtonTypeMode || (ArcButtonTypeMode = {}));
 export var ArcButtonStyleMode;
 (function (ArcButtonStyleMode) {
-    ArcButtonStyleMode[ArcButtonStyleMode["EMPHASIZED"] = 0] = "EMPHASIZED";
-    ArcButtonStyleMode[ArcButtonStyleMode["NORMAL_LIGHT"] = 1] = "NORMAL_LIGHT";
-    ArcButtonStyleMode[ArcButtonStyleMode["NORMAL_DEEP"] = 2] = "NORMAL_DEEP";
-    ArcButtonStyleMode[ArcButtonStyleMode["EMPHASIZED_WARNING"] = 3] = "EMPHASIZED_WARNING";
+    ArcButtonStyleMode[ArcButtonStyleMode["EMPHASIZED_LIGHT"] = 0] = "EMPHASIZED_LIGHT";
+    ArcButtonStyleMode[ArcButtonStyleMode["EMPHASIZED_DEEP"] = 1] = "EMPHASIZED_DEEP";
+    ArcButtonStyleMode[ArcButtonStyleMode["NORMAL_LIGHT"] = 2] = "NORMAL_LIGHT";
+    ArcButtonStyleMode[ArcButtonStyleMode["NORMAL_DEEP"] = 3] = "NORMAL_DEEP";
 })(ArcButtonStyleMode || (ArcButtonStyleMode = {}));
 export var ArcButtonStatus;
 (function (ArcButtonStatus) {
     ArcButtonStatus[ArcButtonStatus["NORMAL"] = 0] = "NORMAL";
     ArcButtonStatus[ArcButtonStatus["PRESSED"] = 1] = "PRESSED";
-    ArcButtonStatus[ArcButtonStatus["UNAVAILABLE"] = 2] = "UNAVAILABLE";
+    ArcButtonStatus[ArcButtonStatus["DISABLED"] = 2] = "DISABLED";
 })(ArcButtonStatus || (ArcButtonStatus = {}));
 export var ArkButtonClickEffectStyle;
 (function (ArkButtonClickEffectStyle) {
@@ -58,7 +58,7 @@ let ArcButtonOptions = class ArcButtonOptions {
         this.width = options.width ?? new LengthMetrics(Constants.UPPER_ARC_CIRCLE_R, LengthUnit.VP);
         this.height = options.height ?? new LengthMetrics((Constants.LOWER_ARC_CIRCLE_CENTER_Y +
             Constants.LOWER_ARC_CIRCLE_R + Constants.UPPER_ARC_CIRCLE_R - Constants.UPPER_ARC_CIRCLE_CENTER_Y), LengthUnit.VP);
-        this.styleMode = options.styleMode ?? ArcButtonStyleMode.EMPHASIZED;
+        this.styleMode = options.styleMode ?? ArcButtonStyleMode.EMPHASIZED_LIGHT;
         this.status = options.status ?? ArcButtonStatus.NORMAL;
         this.resourceText = options.resourceText ?? '';
         this.touchEffect = options.touchEffect ?? ArkButtonClickEffectStyle.NONE;
@@ -169,7 +169,7 @@ export class ArcButton extends ViewV2 {
     }
     changeStatus() {
         switch (this.options.styleMode) {
-            case ArcButtonStyleMode.EMPHASIZED:
+            case ArcButtonStyleMode.EMPHASIZED_LIGHT:
                 this.btnNormalColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_NORMAL_BTN_COLOR);
                 this.textNormalColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_TEXT_COLOR);
                 this.btnPressColor = ColorMetrics.resourceColor(Constants.EMPHASIZED_PRESSED_BTN_COLOR);
@@ -190,7 +190,7 @@ export class ArcButton extends ViewV2 {
                 this.btnDisableColor = ColorMetrics.resourceColor(Constants.NORMAL02_DISABLE_BTN_COLOR);
                 this.textDisableColor = ColorMetrics.resourceColor(Constants.NORMAL02_DISABLE_TEXT_COLOR);
                 break;
-            case ArcButtonStyleMode.EMPHASIZED_WARNING:
+            case ArcButtonStyleMode.EMPHASIZED_DEEP:
                 this.btnNormalColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_NORMAL_BTN_COLOR);
                 this.textNormalColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_TEXT_COLOR);
                 this.btnPressColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_PRESSED_BTN_COLOR);
@@ -200,7 +200,7 @@ export class ArcButton extends ViewV2 {
             default:
                 break;
         }
-        if (this.options.status === ArcButtonStatus.UNAVAILABLE) {
+        if (this.options.status === ArcButtonStatus.DISABLED) {
             this.btnColor = this.btnDisableColor;
             this.textColor = this.textDisableColor;
         }
@@ -296,7 +296,6 @@ export class ArcButton extends ViewV2 {
         if (!this.isReady || this.path2D === undefined) {
             return;
         }
-        let start = new Date().getTime();
         if (this.options.shadowEnabled) {
             this.context.shadowBlur = Constants.SHADOW_BLUR;
             this.context.shadowOffsetY = -Constants.SHADOW_OFFSET_Y;
@@ -348,11 +347,14 @@ export class ArcButton extends ViewV2 {
             Context.animation(null);
             Stack.width(this.btnWidth);
             Stack.height(this.btnHeight);
-            Stack.enabled(this.options.status !== ArcButtonStatus.UNAVAILABLE);
-            Stack.opacity(this.options.status === ArcButtonStatus.UNAVAILABLE ? 0.4 : 1);
+            Stack.enabled(this.options.status !== ArcButtonStatus.DISABLED);
+            Stack.opacity(this.options.status === ArcButtonStatus.DISABLED ? 0.4 : 1);
             Stack.scale({ x: this.scaleX, y: this.scaleY, centerY: this.isUp ? 0 : this.btnHeight });
             Stack.translate({ y: this.translateY });
             Stack.onTouch((event) => {
+                if (this.options.touchCallback) {
+                    this.options.touchCallback(event);
+                }
                 let x = event.touches[0].windowX;
                 let y = event.touches[0].windowY;
                 switch (event.type) {
@@ -375,6 +377,9 @@ export class ArcButton extends ViewV2 {
                 }
             });
             Stack.onClick((event) => {
+                if (this.options.onClickEvent) {
+                    this.options.onClickEvent(event);
+                }
             });
         }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
