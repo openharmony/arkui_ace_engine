@@ -159,7 +159,7 @@ void ResSchedReport::ResSchedDataReport(uint32_t resType, int32_t value,
 
 void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent)
 {
-    switch(touchEvent.type) {
+    switch (touchEvent.type) {
         case TouchType::DOWN:
             HandleTouchDown(touchEvent);
             break;
