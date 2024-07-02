@@ -21,6 +21,7 @@
 #include "node_model.h"
 #include "gesture_impl.h"
 
+#include "base/utils/utils.h"
 #include "core/gestures/gesture_event.h"
 #include "frameworks/core/interfaces/arkoala/arkoala_api.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
@@ -160,10 +161,16 @@ ArkUI_GestureRecognizer* OH_ArkUI_GestureInterruptInfo_GetRecognizer(const ArkUI
 
 ArkUI_GestureEvent* OH_ArkUI_GestureInterruptInfo_GetGestureEvent(const ArkUI_GestureInterruptInfo* event)
 {
-    ArkUI_GestureEvent* gestureEvent = reinterpret_cast<ArkUI_GestureEvent *>(event->interruptData.event);
-    ArkUI_UIInputEvent* uiEvent = new ArkUI_UIInputEvent{
-        ARKUI_UIINPUTEVENT_TYPE_TOUCH, C_TOUCH_EVENT_ID, gestureEvent->eventData.rawPointerEvent };
+    CHECK_NULL_RETURN(event, nullptr);
+    ArkUI_GestureEvent* gestureEvent = reinterpret_cast<ArkUI_GestureEvent*>(event->interruptData.gestureEvent);
+    CHECK_NULL_RETURN(gestureEvent, nullptr);
+
+    ArkUI_UIInputEvent* uiEvent = reinterpret_cast<ArkUI_UIInputEvent*>(event->interruptData.inputEvent);
     gestureEvent->eventData.rawPointerEvent = uiEvent;
+
+    auto* gestureRecognizer = reinterpret_cast<ArkUI_GestureRecognizer*>(event->interruptData.userData);
+    CHECK_NULL_RETURN(gestureRecognizer, nullptr);
+    gestureEvent->attachNode = gestureRecognizer->attachNode;
     return gestureEvent;
 }
 
