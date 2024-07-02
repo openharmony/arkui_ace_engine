@@ -139,6 +139,28 @@ OffsetF SelectOverlayLayoutAlgorithm::CalculateCustomMenuByMouseOffset(LayoutWra
             menuOffset.SetX(menuOffset.GetX() - menuSize.Width() / 2.0f);
         }
     }
+    auto maxHeight = layoutConstraint->selfIdealSize.Height().value_or(0.0f);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, menuOffset);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaManager, menuOffset);
+    auto keyboardInsert = safeAreaManager->GetKeyboardInset();
+    auto keyboardY = maxHeight - keyboardInsert.Length();
+    uint32_t top = safeAreaManager->GetSystemSafeArea().top_.Length();
+    if (GreatNotEqual(menuOffset.GetY() + menuSize.Height(), keyboardY)) {
+        auto currentY = menuOffset.GetY();
+        if (GreatOrEqual(currentY, menuSize.Height())) {
+            currentY = menuOffset.GetY() - menuSize.Height();
+        } else if (LessOrEqual(menuSize.Height(), keyboardY)) {
+            currentY = keyboardY - menuSize.Height();
+        } else if (GreatNotEqual(menuSize.Height(), keyboardY)) {
+            currentY = menuOffset.GetY() - menuSize.Height() / 2.0f;
+        }
+        if (GreatNotEqual(top, currentY)) {
+            currentY = top;
+        }
+        menuOffset.SetY(currentY);
+    }
     return menuOffset;
 }
 
