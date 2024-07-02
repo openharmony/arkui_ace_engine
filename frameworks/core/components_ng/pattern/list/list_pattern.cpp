@@ -464,12 +464,12 @@ bool ListPattern::UpdateStartListItemIndex()
     auto startWrapper = host->GetOrCreateChildByIndex(startIndex_);
     int32_t startArea = -1;
     int32_t startItemIndexInGroup = -1;
-    bool startFlagChanged = false;
+    bool startFlagChanged = (startInfo_.index != startIndex_);
     bool startIsGroup = startWrapper && startWrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     if (startIsGroup) {
         auto startPattern = startWrapper->GetHostNode()->GetPattern<ListItemGroupPattern>();
         VisibleContentInfo startGroupInfo = startPattern->GetStartListItemIndex();
-        startFlagChanged = (startInfo_.index != startIndex_) || (startInfo_.area != startGroupInfo.area) ||
+        startFlagChanged = startFlagChanged || (startInfo_.area != startGroupInfo.area) ||
                            (startInfo_.indexInGroup != startGroupInfo.indexInGroup);
         startArea = startGroupInfo.area;
         startItemIndexInGroup = startGroupInfo.indexInGroup;
@@ -485,12 +485,12 @@ bool ListPattern::UpdateEndListItemIndex()
     auto endWrapper = host->GetOrCreateChildByIndex(endIndex_);
     int32_t endArea = -1;
     int32_t endItemIndexInGroup = -1;
-    bool endFlagChanged = false;
+    bool endFlagChanged = (endInfo_.index != endIndex_);
     bool endIsGroup = endWrapper && endWrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     if (endIsGroup) {
         auto endPattern = endWrapper->GetHostNode()->GetPattern<ListItemGroupPattern>();
         VisibleContentInfo endGroupInfo = endPattern->GetEndListItemIndex();
-        endFlagChanged = (endInfo_.index != endIndex_) || (endInfo_.area != endGroupInfo.area) ||
+        endFlagChanged = endFlagChanged || (endInfo_.area != endGroupInfo.area) ||
                          (endInfo_.indexInGroup != endGroupInfo.indexInGroup);
         endArea = endGroupInfo.area;
         endItemIndexInGroup = endGroupInfo.indexInGroup;
@@ -546,7 +546,7 @@ void ListPattern::ProcessEvent(
     if (onScrollVisibleContentChange) {
         bool startChanged = UpdateStartListItemIndex();
         bool endChanged = UpdateEndListItemIndex();
-        if (indexChanged || startChanged || endChanged) {
+        if (startChanged || endChanged) {
             onScrollVisibleContentChange(startInfo_, endInfo_);
         }
     }
