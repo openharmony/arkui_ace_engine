@@ -189,6 +189,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOnDataMoveToNewPlaceTest001, TestSi
     lazyForEachNode->builder_ = nullptr;
     lazyForEachNode->OnDataAdded(INDEX_EQUAL_WITH_START_INDEX);
     lazyForEachNode->OnDataMoveToNewPlace(INDEX_EQUAL_WITH_START_INDEX, INDEX_GREATER_THAN_END_INDEX);
+    lazyForEachNode->OnDataMoveToNewPlace(INDEX_EQUAL_WITH_START_INDEX, INDEX_EQUAL_WITH_START_INDEX);
 }
 
 /**
