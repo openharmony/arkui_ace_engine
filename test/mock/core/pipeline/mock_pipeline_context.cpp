@@ -420,7 +420,6 @@ void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback)
 
 void PipelineContext::AddPredictTask(PredictTask&& task)
 {
-    std::cout << "add task\n";
     predictTasks_.emplace_back(task);
 }
 

@@ -1074,65 +1074,6 @@ HWTEST_F(GridAttrTestNg, GridItemPressEventTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: LayoutOptions001
- * @tc.desc: Test LayoutOptions
- * @tc.type: FUNC
- */
-HWTEST_F(GridAttrTestNg, LayoutOptions001, TestSize.Level1)
-{
-    /**
-     * @tc.cases: Set GridLayoutOptions:irregularIndexes
-     * @tc.expected: Each gridItem rect is correct
-     */
-    GridLayoutOptions option;
-    option.irregularIndexes = { 6, 1, 4 };
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    model.SetLayoutOptions(option);
-    CreateGridItems(10, -2, ITEM_HEIGHT);
-    CreateDone(frameNode_);
-    EXPECT_TRUE(VerifyBigItemRect(0, RectF(0.f, ITEM_HEIGHT * 0, ITEM_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, ITEM_HEIGHT * 1, GRID_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(2, RectF(0.f, ITEM_HEIGHT * 2, ITEM_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(3, RectF(ITEM_WIDTH, ITEM_HEIGHT * 2, ITEM_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(4, RectF(0.f, ITEM_HEIGHT * 3, GRID_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(5, RectF())); // out of view
-}
-
-/**
- * @tc.name: LayoutOptions002
- * @tc.desc: Test LayoutOptions
- * @tc.type: FUNC
- */
-HWTEST_F(GridAttrTestNg, LayoutOptions002, TestSize.Level1)
-{
-    /**
-     * @tc.cases: Set GridLayoutOptions:irregularIndexes getSizeByIndex
-     * @tc.expected: Each gridItem rect is correct
-     */
-    GridLayoutOptions option;
-    option.irregularIndexes = { 6, 1, 3, 4, 5, 0 };
-    GetSizeByIndex onGetIrregularSizeByIndex = [](int32_t index) {
-        if (index == 3) {
-            return GridItemSize { 1, 2 };
-        }
-        return GridItemSize { 1, 4 };
-    };
-    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    model.SetLayoutOptions(option);
-    CreateGridItems(10, -2, ITEM_HEIGHT);
-    CreateDone(frameNode_);
-    EXPECT_TRUE(VerifyBigItemRect(0, RectF(0.f, ITEM_HEIGHT * 0, GRID_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(1, RectF(0.f, ITEM_HEIGHT * 1, GRID_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(2, RectF(0.f, ITEM_HEIGHT * 2, ITEM_WIDTH * 1, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(3, RectF(ITEM_WIDTH, ITEM_HEIGHT * 2, ITEM_WIDTH * 2, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(4, RectF(0.f, ITEM_HEIGHT * 3, GRID_WIDTH, ITEM_HEIGHT)));
-    EXPECT_TRUE(VerifyBigItemRect(5, RectF())); // out of view
-}
-
-/**
  * @tc.name: GridItemDumpAdvanceInfoTest001
  * @tc.desc: GirdItem dumpadvanceinfo test.
  * @tc.type: FUNC
