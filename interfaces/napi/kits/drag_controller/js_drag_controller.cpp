@@ -768,6 +768,7 @@ void OnMultipleComplete(DragControllerAsyncCtx* asyncCtx)
     taskExecutor->PostTask(
         [asyncCtx]() {
             CHECK_NULL_VOID(asyncCtx);
+            ContainerScope scope(asyncCtx->instanceId);
             DragState dragState = DragState::PENDING;
             {
                 std::lock_guard<std::mutex> lock(asyncCtx->dragStateMutex);
@@ -802,6 +803,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
     taskExecutor->PostTask(
         [asyncCtx]() {
             CHECK_NULL_VOID(asyncCtx);
+            ContainerScope scope(asyncCtx->instanceId);
             DragState dragState = DragState::PENDING;
             {
                 std::lock_guard<std::mutex> lock(asyncCtx->dragStateMutex);
