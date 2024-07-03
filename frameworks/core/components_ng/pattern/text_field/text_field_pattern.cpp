@@ -2947,29 +2947,14 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     }
     gestureHub->SetIsTextDraggable(false);
     isLongPress_ = true;
-    UpdateParam(info, shouldProcessOverlayAfterLayout);
     if (!focusHub->IsCurrentFocus()) {
         focusHub->RequestFocusImmediately();
     }
-    UpdateCaretInfoToController();
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void TextFieldPattern::UpdateParam(GestureEvent& info, bool shouldProcessOverlayAfterLayout)
-{
-    parentGlobalOffset_ = GetPaintRectGlobalOffset();
     auto localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
     if (selectController_->IsTouchAtLineEnd(localOffset)) {
         selectController_->UpdateCaretInfoByOffset(localOffset);
-        NotifyOnEditChanged(true);
-    }
-    if (isEdit_) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleLongPress:edit+longpress, show fixed caret");
-        isMoveCaretAnywhere_ = true;
-        selectController_->MoveCaretAnywhere(localOffset);
-        CloseSelectOverlay();
-        ShowCaretAndStopTwinkling();
-        return;
+    } else {
+        selectController_->UpdateSelectByOffset(localOffset);
     }
     if (IsSelected()) {
         StopTwinkling();
@@ -2980,6 +2965,7 @@ void TextFieldPattern::UpdateParam(GestureEvent& info, bool shouldProcessOverlay
     } else {
         ProcessOverlay({ .animation = true });
     }
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 bool TextFieldPattern::IsOnUnitByPosition(const Offset& globalOffset)
