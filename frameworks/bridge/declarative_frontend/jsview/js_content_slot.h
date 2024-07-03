@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JSVIEW_JS_CONTENT_SLOT_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JSVIEW_JS_CONTENT_SLOT_H
 
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/bindings_defines.h"
@@ -42,3 +43,4 @@ public:
 };
 
 } // namespace OHOS::Ace::Framework
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JSVIEW_JS_CONTENT_SLOT_H
