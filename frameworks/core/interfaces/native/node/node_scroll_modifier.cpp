@@ -530,54 +530,39 @@ namespace NodeModifier {
 const ArkUIScrollModifier* GetScrollModifier()
 {
     /* clang-format off */
-    static const ArkUIScrollModifier modifier = {
-        SetScrollNestedScroll,
-        ResetScrollNestedScroll,
-        GetScrollEnableScroll,
-        SetScrollEnableScroll,
-        ResetScrollEnableScroll,
-        GetScrollFriction,
-        SetScrollFriction,
-        ResetScrollFriction,
-        GetScrollScrollSnap,
-        SetScrollScrollSnap,
-        ResetScrollScrollSnap,
-        GetScrollScrollBar,
-        SetScrollScrollBar,
-        ResetScrollScrollBar,
-        GetScrollScrollable,
-        SetScrollScrollable,
-        ResetScrollScrollable,
-        GetScrollScrollBarColor,
-        SetScrollScrollBarColor,
-        ResetScrollScrollBarColor,
-        GetScrollScrollBarWidth,
-        SetScrollScrollBarWidth,
-        ResetScrollScrollBarWidth,
-        GetScrollEdgeEffect,
-        SetScrollEdgeEffect,
-        ResetScrollEdgeEffect,
-        GetEnableScrollInteraction,
-        SetEnableScrollInteraction,
-        ResetEnableScrollInteraction,
-        SetScrollTo,
-        SetScrollEdge,
-        ResetScrollTo,
-        ResetScrollEdge,
-        GetScrollEnablePaging,
-        SetScrollEnablePaging,
-        ResetScrollEnablePaging,
+        static const ArkUIScrollModifier modifier = {
+        SetScrollNestedScroll, ResetScrollNestedScroll,
+        GetScrollEnableScroll, SetScrollEnableScroll,
+        ResetScrollEnableScroll, GetScrollFriction,
+        SetScrollFriction, ResetScrollFriction,
+        GetScrollScrollSnap, SetScrollScrollSnap,
+        ResetScrollScrollSnap, GetScrollScrollBar,
+        SetScrollScrollBar, ResetScrollScrollBar,
+        GetScrollScrollable, SetScrollScrollable,
+        ResetScrollScrollable, GetScrollScrollBarColor,
+        SetScrollScrollBarColor, ResetScrollScrollBarColor,
+        GetScrollScrollBarWidth, SetScrollScrollBarWidth,
+        ResetScrollScrollBarWidth, GetScrollEdgeEffect,
+        SetScrollEdgeEffect, ResetScrollEdgeEffect,
+        GetEnableScrollInteraction, SetEnableScrollInteraction, ResetEnableScrollInteraction,
+        SetScrollTo, SetScrollEdge,
+        ResetScrollTo, ResetScrollEdge,
+        GetScrollEnablePaging, SetScrollEnablePaging, ResetScrollEnablePaging,
         GetScrollNestedScroll,
         GetScrollOffset,
         GetScrollEdge,
-        SetScrollInitialOffset,
-        ResetScrollInitialOffset,
-        SetScrollFlingSpeedLimit,
-        ResetScrollFlingSpeedLimit,
+        SetScrollInitialOffset, ResetScrollInitialOffset,
+        SetScrollFlingSpeedLimit, ResetScrollFlingSpeedLimit,
         SetScrollPage,
         SetScrollBy,
         GetScroll,
         SetScrollBarProxy, SetScrollToIndex,
+        SetScrollOnScrollStart, ResetScrollOnScrollStart,
+        SetScrollOnScrollEnd, ResetScrollOnScrollEnd,
+        SetScrollOnScrollStop, ResetScrollOnScrollStop,
+        SetScrollOnScroll, ResetScrollOnScroll,
+        SetScrollOnScrollEdge, ResetScrollOnScrollEdge,
+        SetScrollOnDidScrollCallBack, ResetScrollOnDidScroll,
     };
     /* clang-format on */
     return &modifier;
@@ -808,5 +793,113 @@ void ResetOnScrollReachEnd(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ScrollModelNG::SetOnReachEnd(frameNode, nullptr);
 }
+
+void SetScrollOnScrollStart(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onStart = reinterpret_cast<std::function<void()>*>(callback);
+        ScrollModelNG::SetOnScrollStart(frameNode, std::move(*onStart));
+    } else {
+        ScrollModelNG::SetOnScrollStart(frameNode, nullptr);
+    }
+}
+
+void ResetScrollOnScrollStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetOnScrollStart(frameNode, nullptr);
+}
+
+void SetScrollOnScrollEnd(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEnd = reinterpret_cast<std::function<void()>*>(callback);
+        ScrollModelNG::SetOnScrollStop(frameNode, std::move(*onEnd));
+    } else {
+        ScrollModelNG::SetOnScrollStop(frameNode, nullptr);
+    }
+}
+
+void ResetScrollOnScrollEnd(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetOnScrollStop(frameNode, nullptr);
+}
+
+void SetScrollOnScrollStop(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEnd = reinterpret_cast<std::function<void()>*>(callback);
+        ScrollModelNG::SetOnScrollStop(frameNode, std::move(*onEnd));
+    } else {
+        ScrollModelNG::SetOnScrollStop(frameNode, nullptr);
+    }
+}
+
+void ResetScrollOnScrollStop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetOnScrollStop(frameNode, nullptr);
+}
+
+void SetScrollOnScroll(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onScroll = reinterpret_cast<std::function<void(OHOS::Ace::Dimension, OHOS::Ace::Dimension)>*>(callback);
+        ScrollModelNG::SetOnScroll(frameNode, std::move(*onScroll));
+    } else {
+        ScrollModelNG::SetOnScroll(frameNode, nullptr);
+    }
+}
+
+void ResetScrollOnScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetOnScroll(frameNode, nullptr);
+}
+
+void SetScrollOnScrollEdge(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onScrollEdge = reinterpret_cast<std::function<void(OHOS::Ace::NG::ScrollEdge)>*>(callback);
+        ScrollModelNG::SetOnScrollEdge(frameNode, std::move(*onScrollEdge));
+    } else {
+        ScrollModelNG::SetOnScrollEdge(frameNode, nullptr);
+    }
+}
+
+void ResetScrollOnScrollEdge(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetOnScrollEdge(frameNode, nullptr);
+}
+
+void SetScrollOnDidScrollCallBack(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onDidScroll = reinterpret_cast<std::function<void(Dimension, Dimension, ScrollState)>*>(callback);
+        ScrollModelNG::SetOnDidScroll(frameNode, std::move(*onDidScroll));
+    } else {
+        ScrollModelNG::SetOnDidScroll(frameNode, nullptr);
+    }
+}
+
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG
