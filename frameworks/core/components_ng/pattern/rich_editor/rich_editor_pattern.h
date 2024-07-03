@@ -886,6 +886,7 @@ private:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     std::string GetPlaceHolderInJson() const;
     std::string GetTextColorInJson(const std::optional<Color>& value) const;
+    void ResetSelectionAfterAddSpan(bool isPaste);
 
     void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
     {

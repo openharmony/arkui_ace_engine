@@ -691,13 +691,22 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     if (updateCaret) {
         SetCaretPosition(insertIndex + spanItem->content.length());
     }
-    if (!isPaste && textSelector_.IsValid()) {
-        CloseSelectOverlay();
-        ResetSelection();
-    }
+    ResetSelectionAfterAddSpan(isPaste);
     AfterAddImage(changeValue);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "end");
     return spanIndex;
+}
+
+void RichEditorPattern::ResetSelectionAfterAddSpan(bool isPaste)
+{
+    if (isPaste || !textSelector_.IsValid()) {
+        return;
+    }
+    CloseSelectOverlay();
+    ResetSelection();
+    if (isEditing_ && !caretVisible_) {
+        StartTwinkling();
+    }
 }
 
 void RichEditorPattern::AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset)
@@ -874,10 +883,7 @@ int32_t RichEditorPattern::AddTextSpanOperation(
             SetCaretPosition(GetTextContentLength());
         }
     }
-    if (!isPaste && textSelector_.IsValid()) {
-        CloseSelectOverlay();
-        ResetSelection();
-    }
+    ResetSelectionAfterAddSpan(isPaste);
     SpanNodeFission(spanNode);
     return spanIndex;
 }
@@ -930,6 +936,7 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
     spanItem->SetResourceObject(options.resourceObject);
     AddSpanItem(spanItem, spanIndex);
     SetCaretPosition(insertIndex + spanItem->content.length());
+    ResetSelectionAfterAddSpan(false);
     SpanNodeFission(spanNode);
     return spanIndex;
 }
