@@ -63,6 +63,16 @@ struct SelectHandlePaintInfo {
             .width = width
         };
     }
+
+    bool operator==(const SelectHandlePaintInfo& info) const
+    {
+        return (startPoint == info.startPoint) && (endPoint == info.endPoint) && (width == info.width);
+    }
+
+    bool operator!=(const SelectHandlePaintInfo& info) const
+    {
+        return !(*this == info);
+    }
 };
 
 struct SelectHandleInfo {
@@ -77,7 +87,7 @@ struct SelectHandleInfo {
 
     bool operator==(const SelectHandleInfo& info) const
     {
-        return (isShow == info.isShow) && (paintRect == info.paintRect);
+        return (isShow == info.isShow) && (paintRect == info.paintRect) && (paintInfo == info.paintInfo);
     }
 
     bool operator!=(const SelectHandleInfo& info) const
