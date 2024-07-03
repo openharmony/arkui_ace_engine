@@ -7298,8 +7298,13 @@ void JSViewAbstract::JsAccessibilityGroup(bool accessible)
     ViewAbstractModel::GetInstance()->SetAccessibilityGroup(accessible);
 }
 
-void JSViewAbstract::JsAccessibilityText(const std::string& text)
+void JSViewAbstract::JsAccessibilityText(const JSCallbackInfo& info)
 {
+    const JSRef<JSVal>& jsValue = info[0];
+    std::string text;
+    if (!ParseJsString(jsValue, text)) {
+        return;
+    }
     ViewAbstractModel::GetInstance()->SetAccessibilityText(text);
 }
 
@@ -7308,8 +7313,13 @@ void JSViewAbstract::JsAccessibilityTextHint(const std::string& text)
     ViewAbstractModel::GetInstance()->SetAccessibilityTextHint(text);
 }
 
-void JSViewAbstract::JsAccessibilityDescription(const std::string& description)
+void JSViewAbstract::JsAccessibilityDescription(const JSCallbackInfo& info)
 {
+    const JSRef<JSVal>& jsValue = info[0];
+    std::string description;
+    if (!ParseJsString(jsValue, description)) {
+        return;
+    }
     std::pair<bool, std::string> autoEventPair(false, "");
     std::pair<bool, std::string> descriptionPair(false, "");
     ParseAccessibilityDescriptionJson(description, autoEventPair, descriptionPair);
