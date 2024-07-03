@@ -1933,8 +1933,8 @@ HWTEST_F(TextFieldModifyTest, SetTextFieldText001, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         auto pattern = frameNode->GetPattern<TextFieldPattern>();
-        auto textValue = pattern->GetTextValue();
         model.SetTextFieldText(frameNode, HELLO_TEXT);
+        auto textValue = pattern->GetTextValue();
         EXPECT_EQ(textValue, HELLO_TEXT);
     });
 }
