@@ -53,7 +53,7 @@ public:
     /**
      * @description: execute click callback when page some component change occurs
      */
-    void ReportComponentChangeEvent(const std::string& data);
+    void ReportComponentChangeEvent(const std::string& key, const std::string& value);
 
     /**
      * @description: save report communication stub side

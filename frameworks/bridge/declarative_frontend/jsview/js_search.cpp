@@ -17,6 +17,9 @@
 
 #include <optional>
 #include <string>
+#if !defined(PREVIEW)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
@@ -776,6 +779,9 @@ void JSSearch::SetOnPaste(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onPaste");
         func->Execute(val, info);
+#if !defined(PREVIEW)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onPaste");
+#endif
     };
     SearchModel::GetInstance()->SetOnPasteWithEvent(std::move(onPaste));
 }

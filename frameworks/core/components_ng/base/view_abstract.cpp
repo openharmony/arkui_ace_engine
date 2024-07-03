@@ -19,6 +19,9 @@
 #include <optional>
 #include <string>
 #include <utility>
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
@@ -1736,6 +1739,9 @@ void ViewAbstract::DismissDialog()
         if (overlayManager->isMaskNode(dialogPattern->GetHost()->GetId())) {
             overlayManager->PopModalDialog(dialogPattern->GetHost()->GetId());
         }
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("onVisibleChange", "destroy");
+#endif
     }
 }
 
