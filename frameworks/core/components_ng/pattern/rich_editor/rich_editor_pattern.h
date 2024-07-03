@@ -808,6 +808,11 @@ public:
         return presetParagraph_;
     }
 
+    void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override
+    {
+        selectOverlay_->OnAncestorNodeChanged(flag);
+    }
+
 protected:
     bool CanStartAITask() override;
 
