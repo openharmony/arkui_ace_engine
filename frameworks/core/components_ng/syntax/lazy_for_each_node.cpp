@@ -113,7 +113,6 @@ void LazyForEachNode::PostIdleTask()
 void LazyForEachNode::OnDataReloaded()
 {
     ACE_SCOPED_TRACE("LazyForEach OnDataReloaded");
-    children_.clear();
     if (builder_) {
         builder_->SetUseNewInterface(false);
         builder_->OnDataReloaded();
@@ -134,7 +133,6 @@ void LazyForEachNode::OnDataAdded(size_t index)
         builder_->SetUseNewInterface(false);
         builder_->OnDataAdded(index);
     }
-    children_.clear();
     NotifyDataCountChanged(insertIndex);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -148,7 +146,6 @@ void LazyForEachNode::OnDataBulkAdded(size_t index, size_t count)
         builder_->SetUseNewInterface(false);
         builder_->OnDataBulkAdded(index, count);
     }
-    children_.clear();
     NotifyDataCountChanged(insertIndex);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -171,7 +168,6 @@ void LazyForEachNode::OnDataDeleted(size_t index)
             builder_->ProcessOffscreenNode(node, true);
         }
     }
-    children_.clear();
     NotifyDataCountChanged(deletedIndex);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -198,7 +194,6 @@ void LazyForEachNode::OnDataBulkDeleted(size_t index, size_t count)
         }
         builder_->clearDeletedNodes();
     }
-    children_.clear();
     NotifyDataCountChanged(deletedIndex);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -210,7 +205,6 @@ void LazyForEachNode::OnDataChanged(size_t index)
         builder_->SetUseNewInterface(false);
         builder_->OnDataChanged(index);
     }
-    children_.clear();
     NotifyDataCountChanged(static_cast<int32_t>(index));
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -237,7 +231,6 @@ void LazyForEachNode::OnDataBulkChanged(size_t index, size_t count)
         }
         builder_->clearDeletedNodes();
     }
-    children_.clear();
     NotifyDataCountChanged(deletedIndex);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -249,7 +242,6 @@ void LazyForEachNode::OnDataMoveToNewPlace(size_t from, size_t to)
         builder_->SetUseNewInterface(false);
         builder_->OnDataMoveToNewPlace(from, to);
     }
-    children_.clear();
     NotifyDataCountChanged(static_cast<int32_t>(std::min(from, to)));
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -261,7 +253,6 @@ void LazyForEachNode::OnDataMoved(size_t from, size_t to)
         builder_->SetUseNewInterface(false);
         builder_->OnDataMoved(from, to);
     }
-    children_.clear();
     NotifyDataCountChanged(static_cast<int32_t>(std::min(from, to)));
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -289,7 +280,6 @@ void LazyForEachNode::OnDatasetChange(const std::list<V2::Operation>& DataOperat
         }
         builder_->clearDeletedNodes();
     }
-    children_.clear();
     NotifyDataCountChanged(initialChangedIndex);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
@@ -312,6 +302,7 @@ void LazyForEachNode::MarkNeedSyncRenderTree(bool needRebuild)
 
 RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
 {
+    children_.clear();
     if (index >= static_cast<uint32_t>(FrameCount())) {
         return nullptr;
     }
@@ -334,7 +325,6 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
         child.second->SetDepth(GetDepth() + 1);
     }
     MarkNeedSyncRenderTree();
-    children_.clear();
     child.second->SetParent(WeakClaim(this));
     if (IsOnMainTree()) {
         child.second->AttachToMainTree(false, GetContext());
