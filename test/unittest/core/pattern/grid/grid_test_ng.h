@@ -56,6 +56,8 @@ public:
     void TearDown() override;
     void GetGrid();
     GridModelNG CreateGrid();
+    GridModelNG CreateRepeatGrid(int32_t itemNumber, float itemHeight);
+
     /**
      * @param height -2 corresponds to 100% height
      */
