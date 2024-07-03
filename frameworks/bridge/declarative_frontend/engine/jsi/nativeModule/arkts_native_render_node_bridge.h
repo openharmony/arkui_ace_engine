@@ -54,10 +54,14 @@ public:
     static ArkUINativeModuleValue SetRoundRectMask(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOvalMask(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetCommandPathMask(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetRectClip(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetCircleClip(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetRoundRectClip(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOvalClip(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetCommandPathClip(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue Invalidate(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetMarkNodeGroup(ArkUIRuntimeCallInfo* runtimeCallInfo);
-
-private:
+    
     template<typename T>
     static T GetNumber(EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, int index, T defaultValue)
     {

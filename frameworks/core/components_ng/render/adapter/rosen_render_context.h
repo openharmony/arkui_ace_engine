@@ -227,6 +227,9 @@ public:
     void SetTransitionUserCallback(TransitionFinishCallback&& callback) override;
     void ClipWithRect(const RectF& rectF) override;
     void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) override;
+    void ClipWithRoundRect(const RoundRect& roundRect) override;
+    void ClipWithOval(const RectF& rectF) override;
+    void ClipWithCircle(const Circle& circle) override;
     void RemoveClipWithRRect() override;
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
