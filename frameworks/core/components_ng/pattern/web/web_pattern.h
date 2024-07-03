@@ -109,6 +109,7 @@ public:
     using DefaultFileSelectorShowCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using WebNodeInfoCallback = const std::function<void(std::shared_ptr<JsonValue>& jsonNodeArray, int32_t webId)>;
     using TextBlurCallback = std::function<void(int64_t, const std::string)>;
+    using WebComponentClickCallback = std::function<void(int64_t, const std::string)>;
     WebPattern();
     WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController,
                RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
@@ -134,6 +135,7 @@ public:
         HINT,
         CONTENT,
         ERROR,
+        CHILD_IDS,
         PARENT_ID,
         GRID_ROWS,
         GRID_COLS,
@@ -626,6 +628,9 @@ public:
     {
         return textBlurCallback_;
     }
+    void RegisterWebComponentClickCallback(WebComponentClickCallback&& callback);
+    void UnregisterWebComponentClickCallback();
+    WebComponentClickCallback GetWebComponentClickCallback() const { return webComponentClickCallback_; }
 
 private:
     friend class WebContextSelectOverlay;
@@ -877,6 +882,7 @@ private:
                                 std::string& nodeTag);
     void GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId);
     std::string EnumTypeToString(WebAccessibilityType type);
+    std::string VectorIntToString(std::vector<int64_t>&& vec);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -1003,6 +1009,7 @@ private:
     std::optional<std::string> sharedRenderProcessToken_;
     bool textBlurAccessibilityEnable_ = false;
     TextBlurCallback textBlurCallback_ = nullptr;
+    WebComponentClickCallback webComponentClickCallback_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 
