@@ -2567,7 +2567,7 @@ void RichEditorPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub
         pattern->HandleClickEvent(info);
     };
     auto clickListener = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    gestureHub->AddClickEvent(clickListener);
+    gestureHub->AddClickAfterEvent(clickListener);
     clickEventInitialized_ = true;
 }
 
@@ -6500,7 +6500,6 @@ void RichEditorPattern::OnAreaChangedInner()
         textSelector_.selectionDestinationOffset.SetX(
             CalcCursorOffsetByPosition(textSelector_.GetEnd(), selectLineHeight).GetX());
         CreateHandles();
-        selectOverlay_->HideMenu(true);
     }
 }
 

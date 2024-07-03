@@ -707,10 +707,6 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         HandleNotallowDrag(info);
         return;
     }
-    if (GetTextDraggable() && !GetIsTextDraggable()) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Text category component does not meet the drag condition, forbidden drag.");
-        return;
-    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto eventManager = pipeline->GetEventManager();

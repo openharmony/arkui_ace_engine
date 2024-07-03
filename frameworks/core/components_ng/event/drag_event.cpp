@@ -300,7 +300,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 actuator->UpdatePreviewOptionFromModifier(frameNode);
             }
         }
-
+        if (gestureHub->GetTextDraggable() && !gestureHub->GetIsTextDraggable()) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "Text category component does not meet the drag condition, forbidden drag.");
+            return;
+        }
        // Trigger drag start event set by user.
         CHECK_NULL_VOID(actuator->userCallback_);
         auto userActionStart = actuator->userCallback_->GetActionStartEventFunc();
