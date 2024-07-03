@@ -4827,7 +4827,7 @@ void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEve
         CHECK_NULL_VOID(webNode);
         accessibilityId = webNode->GetAccessibilityId();
     }
-    if (eventType == AccessibilityEventType::FOCUS) {
+    if (eventType == AccessibilityEventType::FOCUS || eventType == AccessibilityEventType::CLICK) {
         TextBlurReport(accessibilityId);
     }
     event.nodeId = accessibilityId;
