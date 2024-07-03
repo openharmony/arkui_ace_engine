@@ -1213,11 +1213,13 @@ void WebDelegate::AddJavascriptInterface(const std::string& objectName, const st
             if (delegate->nweb_) {
                 // Async methods list is empty
                 std::vector<std::string> asyncMethodList;
-                // webcontroller not support object, so the object_id param assign
-                // error code
+                std::string permission;
+                // webcontroller not support object, so the object_id param
+                // assign error code
                 delegate->nweb_->RegisterArkJSfunction(
                     objectName, methodList, asyncMethodList,
-                    static_cast<int32_t>(JavaScriptObjIdErrorCode::WEBCONTROLLERERROR));
+                    static_cast<int32_t>(JavaScriptObjIdErrorCode::WEBCONTROLLERERROR),
+                    permission);
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebAddJsInterface");
