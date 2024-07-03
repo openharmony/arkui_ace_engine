@@ -476,8 +476,14 @@ void DatePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     const RefPtr<DataPickerRowLayoutProperty>& dataPickerRowLayoutProperty)
 {
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
-    textLayoutProperty->UpdateTextColor(dataPickerRowLayoutProperty->GetSelectedColor().value_or(
-        pickerTheme->GetOptionStyle(true, false).GetTextColor()));
+    auto selectTextThemeColor = pickerTheme->GetOptionStyle(true, false).GetTextColor();
+    auto selectTextColor = dataPickerRowLayoutProperty->GetSelectedColor().value_or(selectTextThemeColor);
+    if (isFocusColumn_) {
+        if (selectTextColor == selectTextThemeColor) {
+            selectTextColor = pickerTheme->GetOptionStyle(true, true).GetTextColor();
+        }
+    }
+    textLayoutProperty->UpdateTextColor(selectTextColor);
     if (dataPickerRowLayoutProperty->HasSelectedFontSize()) {
         textLayoutProperty->UpdateFontSize(dataPickerRowLayoutProperty->GetSelectedFontSize().value());
     } else {

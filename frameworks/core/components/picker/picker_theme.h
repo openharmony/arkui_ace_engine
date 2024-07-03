@@ -57,7 +57,6 @@ public:
             }
 
             InitializeTextStyles(theme, themeStyle);
-            InitializeSelectorItemStyles(theme, themeStyle);
             theme->optionSizeUnit_ = DimensionUnit::VP;
             theme->lunarWidth_ =
                 Dimension(36.0, DimensionUnit::VP); // 36.0: lunarWidth, this width do not need setting by outer.
@@ -66,6 +65,7 @@ public:
             theme->rotateInterval_ = 15.0; // when rotate 15.0 angle handle scroll of picker column.
             theme->dividerThickness_ = DIVIDER_THICKNESS;
             Parse(themeStyle, theme);
+            InitializeSelectorItemStyles(theme, themeStyle);
             return theme;
         }
 
@@ -161,6 +161,14 @@ public:
                     pattern->GetAttr<Color>("picker_selector_item_focus_bg_color", Color::TRANSPARENT);
                 theme->selectorItemNormalBgColor_ =
                     pattern->GetAttr<Color>("picker_selector_item_normal_bg_color", Color::TRANSPARENT);
+
+                if (FOCUS_AREA_TYPE_IMPL == theme->focusImplType_) {
+                    theme->focusOptionStyle_.SetFontSize(pattern->GetAttr<Dimension>(
+                        "picker_focus_option_font_size", theme->selectedOptionStyle_.GetFontSize()));
+                    theme->focusOptionStyle_.SetTextColor(pattern->GetAttr<Color>(
+                        "picker_focus_option_text_color", theme->selectedOptionStyle_.GetTextColor()));
+                    theme->dividerColor_ = pattern->GetAttr<Color>("picker_select_divider_color", Color::TRANSPARENT);
+                }
             }
         }
 
