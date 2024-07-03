@@ -38,12 +38,12 @@ constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
 const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
     { TextDataDetectType::PHONE_NUMBER, "phoneNum" }, { TextDataDetectType::URL, "url" },
     { TextDataDetectType::EMAIL, "email" }, { TextDataDetectType::ADDRESS, "location" },
-    { TextDataDetectType::DATETIME, "datetime" }
+    { TextDataDetectType::DATE_TIME, "datetime" }
 };
 const std::unordered_map<std::string, TextDataDetectType> TEXT_DETECT_MAP_REVERSE = {
     { "phoneNum", TextDataDetectType::PHONE_NUMBER }, { "url", TextDataDetectType::URL },
     { "email", TextDataDetectType::EMAIL }, { "location", TextDataDetectType::ADDRESS },
-    { "datetime", TextDataDetectType::DATETIME }
+    { "datetime", TextDataDetectType::DATE_TIME }
 };
 
 bool DataDetectorAdapter::ShowUIExtensionMenu(
@@ -164,7 +164,7 @@ void DataDetectorAdapter::SetWantParamaters(const AISpan& aiSpan, AAFwk::Want& w
     if (entityJson_.find(aiSpan.start) != entityJson_.end()) {
         want.SetParam("entityJson", entityJson_[aiSpan.start]);
     }
-    if (aiSpan.type == TextDataDetectType::DATETIME) {
+    if (aiSpan.type == TextDataDetectType::DATE_TIME) {
         want.SetParam("fullText", textForAI_);
         want.SetParam("offset", aiSpan.start);
     }
