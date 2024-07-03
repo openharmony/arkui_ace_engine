@@ -112,11 +112,22 @@ bool TextSelectOverlay::CheckAndAdjustHandle(RectF& paintRect)
         clip = true;
     }
     if (!renderContext->GetClipEdge().value_or(clip)) {
-        return true;
+        auto contentRect = textPattern->GetTextContentRect();
+        auto localPaintRect = paintRect;
+        localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
+        auto visibleContentRect = contentRect.CombineRectT(localPaintRect);
+        visibleContentRect.SetOffset(visibleContentRect.GetOffset() + textPattern->GetTextPaintOffset());
+        visibleContentRect = GetVisibleRect(host, visibleContentRect);
+        return CheckAndAdjustHandleWithContent(visibleContentRect, paintRect);
     }
     auto contentRect = textPattern->GetTextContentRect();
     RectF visibleContentRect(contentRect.GetOffset() + textPattern->GetTextPaintOffset(), contentRect.GetSize());
     visibleContentRect = GetVisibleRect(host, visibleContentRect);
+    return CheckAndAdjustHandleWithContent(visibleContentRect, paintRect);
+}
+
+bool TextSelectOverlay::CheckAndAdjustHandleWithContent(const RectF& visibleContentRect, RectF& paintRect)
+{
     PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
     PointF topPoint = { paintRect.Left(), paintRect.Top() + BOX_EPSILON };
     bool bottomInRegion = visibleContentRect.IsInRegion(bottomPoint);

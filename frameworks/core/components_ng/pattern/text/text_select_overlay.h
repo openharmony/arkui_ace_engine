@@ -35,6 +35,7 @@ public:
     bool PreProcessOverlay(const OverlayRequest& request) override;
     bool CheckHandleVisible(const RectF& paintRect) override;
     bool CheckAndAdjustHandle(RectF& paintRect);
+    bool CheckAndAdjustHandleWithContent(const RectF& contentRect, RectF& paintRect);
     void OnResetTextSelection() override;
     RectF GetFirstHandleLocalPaintRect() override;
     RectF GetSecondHandleLocalPaintRect() override;
