@@ -436,6 +436,17 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         return (this.getParent()) ? this.getParent().localStorage_ : new LocalStorage({ /* empty */ });
     }
 
+    /**
+     * @function observeRecycleComponentCreation
+     * @description custom node recycle creation not supported for V2. So a dummy function is implemented to report
+     * an error message
+     * @param name custom node name
+     * @param recycleUpdateFunc custom node recycle update which can be converted to a normal update function
+     * @return void
+     */
+    public observeRecycleComponentCreation(name: string, recycleUpdateFunc: RecycleUpdateFunc): void {
+        stateMgmtConsole.error(`${this.debugInfo__()}: Recycle not supported for ComponentV2 instances`);
+    }
 
     public debugInfoDirtDescendantElementIdsInternal(depth: number = 0, recursive: boolean = false, counter: ProfileRecursionCounter): string {
         let retVaL: string = `\n${'  '.repeat(depth)}|--${this.constructor.name}[${this.id__()}]: {`;
