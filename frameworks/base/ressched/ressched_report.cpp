@@ -255,7 +255,7 @@ float ResSchedReport::GetUpVelocity(const TouchEvent& lastMoveInfo,
 {
     float distance = sqrt(pow(lastMoveInfo.x - upEventInfo.x, SQUARE) + pow(lastMoveInfo.y - upEventInfo.y, SQUARE));
     int64_t time = abs(lastMoveInfo.GetTimeStamp().time_since_epoch().count() -
-        upEventInfoGet.TimeStamp().time_since_epoch().count());
+        upEventInfo.GetTimeStamp().time_since_epoch().count());
     if (time < SECOND_UNIT) {
         return 0.0f;
     }
