@@ -21,7 +21,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 
-namespace OHOS::Ace {
+namespace OHOS::Ace::ArcList {
 using HandleValue = std::function<void(napi_env, napi_value, napi_valuetype)>;
 using HandleUndefined = std::function<void()>;
 napi_value UnwrapOptionalValue(
@@ -29,5 +29,5 @@ napi_value UnwrapOptionalValue(
 
 using HandleModifier = std::function<void(napi_env, NG::FrameNode*, int32_t, napi_value*)>;
 napi_value UnwrapModifier(napi_env env, napi_callback_info info, const HandleModifier& handleModifier);
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::ArcList
 #endif // COMPONENT_EXT_ARC_LIST_ARC_LIST_NAPI_H

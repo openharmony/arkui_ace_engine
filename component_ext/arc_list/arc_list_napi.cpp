@@ -40,6 +40,8 @@ namespace {
 static constexpr size_t MAX_ARG_NUM = 10;
 } // namespace
 
+using namespace ArcList;
+
 namespace ArcList {
 void SetScroller(napi_env env, Framework::JSScroller* jsScroller)
 {
@@ -326,6 +328,7 @@ napi_value JsSetAutoScale(napi_env env, napi_callback_info info)
 }
 } // namespace ArcListItem
 
+namespace ArcList {
 napi_value UnwrapOptionalValue(
     napi_env env, napi_callback_info info, const HandleValue& handleValue, const HandleUndefined& handleUndefined)
 {
@@ -416,6 +419,7 @@ napi_value ExportArcList(napi_env env, napi_value exports)
     InitArcListItem(env, exports);
     return exports;
 }
+} // namespace ArcList
 
 } // namespace OHOS::Ace
 
@@ -445,7 +449,7 @@ static napi_module arcListModule = {
     .nm_version = 1,
     .nm_flags = 0,
     .nm_filename = nullptr,
-    .nm_register_func = OHOS::Ace::ExportArcList,
+    .nm_register_func = OHOS::Ace::ArcList::ExportArcList,
     .nm_modname = "arkui.arclist",
     .nm_priv = ((void*)0),
     .reserved = { 0 },

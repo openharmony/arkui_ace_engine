@@ -50,10 +50,10 @@ public:
     private:
         void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<ArcListItemTheme>& theme) const
         {
-            static const Dimension ARC_LISTITEM_LISTITEMGROUP_INTERVAL = 4.0_vp;
-            static const Dimension ARC_LISTITEM_PADDING = 8.0_vp;
-            static const int32_t ARC_LISTITEM_HOVER_DURATION = 250;
-            static const int32_t ARC_LISTITEM_HOVER_TO_PRESS_DURATION = 100;
+            static const Dimension arcListItemGroupInterval = 4.0_vp;
+            static const Dimension arcListItemPadding = 8.0_vp;
+            static const int32_t arcListItemHoverDuration = 250;
+            static const int32_t arcListItemHoverToPressDuration = 100;
             if (!themeStyle) {
                 return;
             }
@@ -64,15 +64,15 @@ public:
             }
             theme->itemDefaultColor_ = pattern->GetAttr<Color>("item_normal_color", Color::WHITE);
             theme->borderRadiusValue_ = pattern->GetAttr<Dimension>("item_border_radius", 0.0_vp);
-            theme->itemBorderRadius_.SetRadius(theme->borderRadiusValue_ - ARC_LISTITEM_LISTITEMGROUP_INTERVAL);
-            theme->itemLeftPadding_ = ARC_LISTITEM_PADDING;
-            theme->itemRightPadding_ = ARC_LISTITEM_PADDING;
+            theme->itemBorderRadius_.SetRadius(theme->borderRadiusValue_ - arcListItemGroupInterval);
+            theme->itemLeftPadding_ = arcListItemPadding;
+            theme->itemRightPadding_ = arcListItemPadding;
             theme->focusBorderColor_ = pattern->GetAttr<Color>("item_focus_color", Color::WHITE);
             theme->hoverColor_ = pattern->GetAttr<Color>("item_hover_color", Color::WHITE);
             theme->pressColor_ = pattern->GetAttr<Color>("item_press_color", Color::WHITE);
             theme->disabledAlpha_ = pattern->GetAttr<double>("item_disabled_alpha", 0.0);
-            theme->hoverAnimationDuration_ = ARC_LISTITEM_HOVER_DURATION;
-            theme->hoverToPressAnimationDuration_ = ARC_LISTITEM_HOVER_TO_PRESS_DURATION;
+            theme->hoverAnimationDuration_ = arcListItemHoverDuration;
+            theme->hoverToPressAnimationDuration_ = arcListItemHoverToPressDuration;
         }
     };
 
