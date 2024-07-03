@@ -17,6 +17,11 @@ import(
 if (is_ohos_standard_system) {
   config("window_scene_config") {
     visibility = [ ":*" ]
+
+    if (defined(global_parts_info) && defined(
+            global_parts_info.atomicservicedistribution_atomicservice_basic_engine)) {
+      include_dirs = [ "//vendor/huawei/atomicservicedistribution/hag_serviceability/interface/innerkits/include" ]
+    }
   }
 }
 
@@ -59,5 +64,11 @@ build_component_ng("window_scene") {
       "window_manager:screen_session",
       "window_manager:screen_session_manager_client",
     ]
+  }
+
+  if (defined(global_parts_info) && defined(
+          global_parts_info.atomicservicedistribution_atomicservice_basic_engine)) {
+    external_deps += [ "atomicservice_basic_engine:hagserviceability_client" ]
+    defines = [ "ATOMIC_SERVICE_ATTRIBUTION_ENABLE" ]
   }
 }
