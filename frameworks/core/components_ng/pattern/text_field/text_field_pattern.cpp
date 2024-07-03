@@ -7275,6 +7275,7 @@ void TextFieldPattern::SetThemeAttr()
     } else {
         layoutProperty->UpdateTextColor(paintProperty->GetTextColorFlagByUserValue());
     }
+    inlineFocusState_ = false;
 }
 
 const Dimension& TextFieldPattern::GetAvoidSoftKeyboardOffset() const
