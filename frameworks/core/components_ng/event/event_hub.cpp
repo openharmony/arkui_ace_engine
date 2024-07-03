@@ -48,7 +48,7 @@ void EventHub::OnDetachContext(PipelineContext *context)
     }
 
     if (HasVisibleAreaCallback(true) || HasVisibleAreaCallback(false)) {
-        host->TriggerVisibleAreaChangeCallback(true);
+        host->TriggerVisibleAreaChangeCallback(0, true);
         context->RemoveVisibleAreaChangeNode(host->GetId());
     }
 }

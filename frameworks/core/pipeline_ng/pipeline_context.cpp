@@ -593,7 +593,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         }
     }
     HandleOnAreaChangeEvent(nanoTimestamp);
-    HandleVisibleAreaChangeEvent();
+    HandleVisibleAreaChangeEvent(nanoTimestamp);
     if (isNeedFlushMouseEvent_) {
         FlushMouseEvent();
         isNeedFlushMouseEvent_ = false;
@@ -2824,7 +2824,7 @@ void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId)
     onVisibleAreaChangeNodeIds_.erase(nodeId);
 }
 
-void PipelineContext::HandleVisibleAreaChangeEvent()
+void PipelineContext::HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp)
 {
     ACE_FUNCTION_TRACE();
     if (onVisibleAreaChangeNodeIds_.empty()) {
@@ -2832,7 +2832,7 @@ void PipelineContext::HandleVisibleAreaChangeEvent()
     }
     auto nodes = FrameNode::GetNodesById(onVisibleAreaChangeNodeIds_);
     for (auto&& frameNode : nodes) {
-        frameNode->TriggerVisibleAreaChangeCallback();
+        frameNode->TriggerVisibleAreaChangeCallback(nanoTimestamp);
     }
 }
 
@@ -3138,7 +3138,7 @@ void PipelineContext::FlushWindowStateChangedCallback(bool isShow)
             ++iter;
         }
     }
-    HandleVisibleAreaChangeEvent();
+    HandleVisibleAreaChangeEvent(GetTimeFromExternalTimer());
     HandleSubwindow(isShow);
 }
 
