@@ -396,7 +396,7 @@ protected:
         return index;
     }
     virtual void SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount);
-    virtual void SetActiveChildRange(LayoutWrapper* layoutWrapper, int32_t cacheCount);
+    virtual void SetActiveChildRange(LayoutWrapper* layoutWrapper, int32_t cacheStart, int32_t cacheEnd);
 
     void SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index, float referencePos,
         bool forwardLayout, const RefPtr<ListLayoutProperty>& layoutProperty, bool groupNeedAllLayout,
@@ -417,7 +417,7 @@ protected:
     bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const;
     void ReviseSpace(const RefPtr<ListLayoutProperty>& listLayoutProperty);
     std::pair<int32_t, int32_t> GetLayoutGroupCachedCount(
-        const RefPtr<LayoutWrapper>& wrapper, bool forward, int32_t cacheCount);
+        const RefPtr<LayoutWrapper>& wrapper, bool forward, int32_t cacheCount, bool outOfView);
 
     Axis axis_ = Axis::VERTICAL;
     LayoutConstraintF childLayoutConstraint_;
@@ -449,8 +449,11 @@ private:
     static void PostIdleTask(RefPtr<FrameNode> frameNode, const ListPredictLayoutParam& param);
     static bool PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint);
 
-    virtual int32_t LayoutCachedForward(LayoutWrapper* layoutWrapper, int32_t cacheCount, int32_t cached);
-    virtual int32_t LayoutCachedBackward(LayoutWrapper* layoutWrapper, int32_t cacheCount, int32_t cached);
+    void ProcessCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount);
+    virtual int32_t LayoutCachedForward(LayoutWrapper* layoutWrapper,
+        int32_t cacheCount, int32_t cached, int32_t& currIndex);
+    virtual int32_t LayoutCachedBackward(LayoutWrapper* layoutWrapper,
+        int32_t cacheCount, int32_t cached, int32_t& currIndex);
     std::list<PredictLayoutItem> LayoutCachedItemV2(LayoutWrapper* layoutWrapper, int32_t cacheCount);
     static bool PredictBuildGroup(RefPtr<LayoutWrapper> wrapper,
         const LayoutConstraintF& constraint, bool forward, int64_t deadline, int32_t cached);
