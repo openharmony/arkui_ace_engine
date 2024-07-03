@@ -5504,7 +5504,7 @@ RefPtr<FrameNode> SwiperPattern::GetCurrentFrameNode(int32_t currentIndex) const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto currentLayoutWrapper = host->GetChildByIndex(GetLoopIndex(currentIndex));
+    auto currentLayoutWrapper = host->GetChildByIndex(GetLoopIndex(currentIndex), true);
     CHECK_NULL_RETURN(currentLayoutWrapper, nullptr);
     return currentLayoutWrapper->GetHostNode();
 }
