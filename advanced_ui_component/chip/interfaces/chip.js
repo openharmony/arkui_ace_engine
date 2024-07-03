@@ -1190,7 +1190,7 @@ export class ChipComponent extends ViewPU {
             return;
         }
         if (this.isHover) {
-            if (i3.type === TouchType.Down || i3.type == TouchType.Move) {
+            if (i3.type === TouchType.Down || i3.type === TouchType.Move) {
                 this.isShowPressedBackGroundColor = true;
             }
             else if (i3.type === TouchType.Up) {
@@ -1201,7 +1201,7 @@ export class ChipComponent extends ViewPU {
             }
         }
         else {
-            if (i3.type === TouchType.Down || i3.type == TouchType.Move) {
+            if (i3.type === TouchType.Down || i3.type === TouchType.Move) {
                 this.isShowPressedBackGroundColor = true;
             }
             else if (i3.type === TouchType.Up) {
