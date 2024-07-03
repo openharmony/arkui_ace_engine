@@ -28,11 +28,16 @@
 namespace OHOS::Ace::NG {
 
 struct GridPredictLayoutParam {
-    std::list<int32_t> items;
     LayoutConstraintF layoutConstraint;
     std::map<int32_t, float> itemsCrossSizes;
     float crossGap;
 };
+
+/**
+ * @brief callback to build a grid item at [itemIdx] in an IdleTask
+ * @returns true if the built item needs Grid to perform a layout.
+ */
+using BuildGridItemCallback = std::function<bool(const RefPtr<FrameNode>& host, int32_t itemIdx)>;
 
 constexpr int32_t EMPTY_JUMP_INDEX = -2;
 constexpr int32_t JUMP_TO_BOTTOM_EDGE = -3;
