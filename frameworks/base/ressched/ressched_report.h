@@ -61,7 +61,6 @@ private:
     ReportDataFunc reportDataFunc_ = nullptr;
     bool loadPageOn_ = false;
     std::map<int32_t, TouchEvent> touchPoints_;
-    int32_t currentFingers_ = 0;
     Offset averageDistance_;
     bool isInSilde = false;
 };

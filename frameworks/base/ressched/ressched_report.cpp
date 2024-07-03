@@ -191,9 +191,6 @@ void ResSchedReport::HandleTouchDown(const TouchEvent& touchEvent)
     std::unordered_map<std::string, std::string> payload;
     payload[NAME] = TOUCH;
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_DOWN_EVENT, payload);
-    if (touchEvent.GetOffset() != touchPoints_[touchEvent.id]) {
-        currentFingers_ ++;
-    }
     touchPoints_[touchEvent.id] = touchEvent;
 }
 
@@ -204,11 +201,8 @@ void ResSchedReport::HandleTouchUp(const TouchEvent& touchEvent)
     payload[UP_SPEED_KEY] = std::to_string(GetUpVelocity(touchPoints_[touchEvent.id], touchEvent));
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_UP_EVENT, payload);
     touchPoints_.erase(touchEvent.id);
-    currentFingers_ = currentFingers_ > 0 ? currentFingers_ - 1 : 0;
-    if (currentFingers_ == 0) {
-        isInSilde = false;
-        averageDistance_.Reset();
-    }
+    isInSilde = false;
+    averageDistance_.Reset();
 }
 
 void ResSchedReport::HandleTouchMove(const TouchEvent& touchEvent)
@@ -227,15 +221,13 @@ void ResSchedReport::HandleTouchMove(const TouchEvent& touchEvent)
 
 void ResSchedReport::HandleTouchCancel(const TouchEvent& touchEvent)
 {
-    currentFingers_ = currentFingers_ > 0 ? currentFingers_ - 1 : 0;
     touchPoints_.erase(touchEvent.id);
+    isInSilde = false;
+    averageDistance_.Reset();
 }
 
 void ResSchedReport::HandleTouchPullDown(const TouchEvent& touchEvent)
 {
-    if (touchEvent.GetOffset() != touchPoints_[touchEvent.id]) {
-        currentFingers_ ++;
-    }
     touchPoints_[touchEvent.id] = touchEvent;
 }
 
@@ -244,7 +236,6 @@ void ResSchedReport::HandleTouchPullUp(const TouchEvent& touchEvent)
     std::unordered_map<std::string, std::string> payload;
     payload[NAME] = TOUCH;
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_PULL_UP_EVENT, payload);
-    currentFingers_ = currentFingers_ > 0 ? currentFingers_ - 1 : 0;
     touchPoints_.erase(touchEvent.id);
     averageDistance_.Reset();
 }
