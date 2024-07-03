@@ -618,9 +618,6 @@ void TextFieldContentModifier::DoNormalDraw(DrawingContext& context)
     auto contentRect = textFieldPattern->GetContentRect();
     auto clipRectHeight = 0.0f;
     auto errorMargin = 0.0f;
-    auto errorViewHeight = 0.0f;
-    auto errorParagraph = textFieldPattern->GetErrorParagraph();
-    auto textFrameRect = textFieldPattern->GetFrameRect();
     auto frameNode = textFieldPattern->GetHost();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -633,10 +630,7 @@ void TextFieldContentModifier::DoNormalDraw(DrawingContext& context)
         errorMargin = theme->GetTextInputAndErrTipsSpacing().ConvertToPx();
     }
     ProcessErrorParagraph(context, errorMargin);
-    if (errorParagraph && showErrorState_->Get()) {
-        errorViewHeight = textFrameRect.Bottom() - textFrameRect.Top() + errorMargin;
-    }
-    clipRectHeight = contentRect.GetY() + contentRect.Height() + errorViewHeight;
+    clipRectHeight = contentRect.GetY() + contentRect.Height();
     canvas.Save();
     RSRect clipInnerRect = RSRect(contentRect.GetX(), contentRect.GetY(),
         contentRect.Width() + contentRect.GetX() + textFieldPattern->GetInlinePadding(), clipRectHeight);
