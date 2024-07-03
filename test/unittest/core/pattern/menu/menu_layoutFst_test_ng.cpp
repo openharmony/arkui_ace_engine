@@ -1379,8 +1379,10 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg034, TestSize.Level1)
     // @tc.expected: menu content width = item width, height = sum(item height)
     auto expectedSize = SizeF(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT * 3);
     EXPECT_EQ(wrapper->GetGeometryNode()->GetContentSize().Height(), expectedSize.Height());
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     menuPattern->isEmbedded_ = true;
     algorithm->Measure(wrapper);
+    EXPECT_TRUE(LessNotEqual(parentLayoutConstraint.selfIdealSize.Width().value(), MIN_MENU_WIDTH.ConvertToPx()));
 }
 
 /**

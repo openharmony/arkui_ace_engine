@@ -512,9 +512,13 @@ HWTEST_F(MenuTestNg, MenuAccessibilityPropertyGetSupportAction001, TestSize.Leve
     scrollPattern->scrollableDistance_ = -1.0;
     scrollPattern->currentOffset_ = 0.0f;
     menuAccessibilityProperty_->SetSpecificSupportAction();
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
+    EXPECT_EQ(menuAccessibilityProperty_->supportActions_, expectActions);
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
     scrollPattern->SetAxis(Axis::NONE);
     scrollPattern->scrollableDistance_ = 0.0f;
     menuAccessibilityProperty_->SetSpecificSupportAction();
+    EXPECT_EQ(menuAccessibilityProperty_->supportActions_, expectActions);
     /**
      * @tc.steps: step2. Create Menu and test firstchild not SCROLL.
      */
@@ -531,6 +535,7 @@ HWTEST_F(MenuTestNg, MenuAccessibilityPropertyGetSupportAction001, TestSize.Leve
     ASSERT_NE(textNode, nullptr);
     textNode->MountToParent(menuNode, 0);
     menuAccessibility->SetSpecificSupportAction();
+    EXPECT_EQ(menuAccessibility->supportActions_, (0));
 }
 
 /**
@@ -709,6 +714,11 @@ HWTEST_F(MenuTestNg, MenuLayoutPropertyTestNg009, TestSize.Level1)
     EXPECT_EQ(fontJsonObject->GetString("weight"), V2::ConvertWrapFontWeightToStirng(FontWeight::BOLD));
     property.UpdateExpandingMode(SubMenuExpandingMode::STACK);
     property.ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("title"), "title");
+    EXPECT_EQ(json->GetString("offset"), OffsetF(25.0f, 30.0f).ToString());
+    EXPECT_EQ(json->GetString("fontSize"), Dimension(25.0f).ToString());
+    EXPECT_EQ(json->GetString("fontColor"), Color::RED.ColorToString());
+    EXPECT_EQ(fontJsonObject->GetString("weight"), V2::ConvertWrapFontWeightToStirng(FontWeight::BOLD));
 }
 
 /**
