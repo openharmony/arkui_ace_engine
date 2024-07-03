@@ -175,9 +175,6 @@ void BindContextMenuSingle(
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(targetNode);
-    auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetPreviewMode(menuParam.previewMode);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
     auto targetId = targetNode->GetId();
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
@@ -364,6 +361,19 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
     targetNode->PushDestroyCallback(destructor);
 }
 
+void ViewAbstractModelNG::BindDragWithContextMenuParams(const NG::MenuParam& menuParam)
+{
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(targetNode);
+
+    auto gestureHub = targetNode->GetOrCreateGestureEventHub();
+    if (gestureHub) {
+        gestureHub->SetPreviewMode(menuParam.previewMode);
+        gestureHub->SetContextMenuShowStatus(menuParam.isShow);
+    } else {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Can not get gestureEventHub!");
+    }
+}
 void ViewAbstractModelNG::BindBackground(std::function<void()>&& buildFunc, const Alignment& align)
 {
     auto buildNodeFunc = [buildFunc = std::move(buildFunc)]() -> RefPtr<UINode> {

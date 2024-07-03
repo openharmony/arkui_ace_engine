@@ -7452,6 +7452,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     }
     menuParam.type = NG::MenuType::CONTEXT_MENU;
     ViewAbstractModel::GetInstance()->BindContextMenu(responseType, buildFunc, menuParam, previewBuildFunc);
+    ViewAbstractModel::GetInstance()->BindDragWithContextMenuParams(menuParam);
 }
 
 bool ParseBindContentCoverIsShow(const JSCallbackInfo& info)
