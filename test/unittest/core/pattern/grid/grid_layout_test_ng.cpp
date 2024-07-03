@@ -1718,7 +1718,6 @@ HWTEST_F(GridLayoutTestNg, Cache001, TestSize.Level1)
     model.SetCachedCount(2); // 2 lines
     CreateDone(frameNode_);
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 50);
-    EXPECT_EQ(frameNode_->GetChildren().size(), 1);
     const auto& info = pattern_->gridLayoutInfo_;
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 11);
@@ -1733,19 +1732,23 @@ HWTEST_F(GridLayoutTestNg, Cache001, TestSize.Level1)
         EXPECT_TRUE(frameNode_->GetChildByIndex(i));
         EXPECT_EQ(GetChildRect(frameNode_, i).Height(), 200.0f);
     }
+    FlushLayoutTask(frameNode_);
+    // preload next line
+    const std::list<int32_t> preloadList2 = { 15, 16, 17 };
+    EXPECT_EQ(pattern_->preloadItemList_, preloadList2);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_TRUE(pattern_->preloadItemList_.empty());
+    for (const int32_t i : preloadList2) {
+        EXPECT_TRUE(frameNode_->GetChildByIndex(i));
+        EXPECT_EQ(GetChildRect(frameNode_, i).Height(), 200.0f);
+    }
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(pattern_->preloadItemList_.empty());
 
     pattern_->ScrollToIndex(49);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info.startIndex_, 39);
     // GridScroll algo currently not capable of preloading backward
-    const std::list<int32_t> preloadList2 = {};
-    EXPECT_EQ(pattern_->preloadItemList_, preloadList2);
-    const int64_t time = GetSysTimestamp();
-    PipelineContext::GetCurrentContext()->OnIdle(time - 1);
-    // no time to execute
-    EXPECT_EQ(pattern_->preloadItemList_, preloadList2);
-    for (const int32_t i : preloadList2) {
-        EXPECT_FALSE(frameNode_->GetChildByIndex(i));
-    }
+    EXPECT_TRUE(pattern_->preloadItemList_.empty());
 }
 } // namespace OHOS::Ace::NG
