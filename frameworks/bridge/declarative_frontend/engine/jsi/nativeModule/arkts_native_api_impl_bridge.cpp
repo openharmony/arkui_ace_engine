@@ -4201,6 +4201,30 @@ void ArkUINativeModule::RegisterScrollAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ScrollBridge::SetFlingSpeedLimit));
     scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFlingSpeedLimit"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ScrollBridge::ResetFlingSpeedLimit));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollOnScrollStart"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::SetScrollOnScrollStart));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollOnScrollStart"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::ResetScrollOnScrollStart));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollOnScrollEnd"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::SetScrollOnScrollEnd));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollOnScrollEnd"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::ResetScrollOnScrollEnd));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollOnScrollStop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::SetScrollOnScrollStop));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollOnScrollStop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::ResetScrollOnScrollStop));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollOnScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::SetScrollOnScroll));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollOnScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::ResetScrollOnScroll));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollOnScrollEdge"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::SetScrollOnScrollEdge));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollOnScrollEdge"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::ResetScrollOnScrollEdge));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollOnDidScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::SetScrollOnDidScroll));
+    scroll->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollOnDidScroll"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBridge::ResetScrollOnDidScroll));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "scroll"), scroll);
 }
 
