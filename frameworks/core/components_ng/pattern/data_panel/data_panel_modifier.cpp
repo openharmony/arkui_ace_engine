@@ -346,7 +346,11 @@ void DataPanelModifier::PaintLinearProgress(DrawingContext& context, OffsetF off
             continue;
         }
         segmentWidthSum += values_[i]->Get();
-        ++segmentSize;
+        if (LessNotEqual(segmentWidthSum, max_->Get())) {
+            ++segmentSize;
+        } else {
+            break;
+        }
     }
 
     float scaleMaxValue = 0.0f;
