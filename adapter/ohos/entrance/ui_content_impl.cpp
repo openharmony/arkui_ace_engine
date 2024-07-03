@@ -1129,7 +1129,8 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     }
 
     if (isFormRender_) {
-        errorCode = Platform::AceContainer::SetViewNew(aceView, density, formWidth_, formHeight_, window_);
+        errorCode = Platform::AceContainer::SetViewNew(aceView, density, round(formWidth_),
+            round(formHeight_), window_);
         CHECK_ERROR_CODE_RETURN(errorCode);
         auto frontend = AceType::DynamicCast<FormFrontendDeclarative>(container->GetFrontend());
         CHECK_NULL_RETURN(frontend, UIContentErrorCode::NULL_POINTER);
@@ -1155,7 +1156,8 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     }
 
     if (isFormRender_) {
-        Platform::AceViewOhos::SurfaceChanged(aceView, formWidth_, formHeight_, deviceHeight >= deviceWidth ? 0 : 1);
+        Platform::AceViewOhos::SurfaceChanged(aceView, round(formWidth_), round(formHeight_),
+            deviceHeight >= deviceWidth ? 0 : 1);
         SetFontScaleAndWeightScale(container, instanceId_);
         // Set sdk version in module json mode for form
         auto pipeline = container->GetPipelineContext();
@@ -2561,14 +2563,16 @@ void UIContentImpl::OnFormSurfaceChange(float width, float height)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
+    int32_t formWidth = round(width);
+    int32_t formHeight = round(height);
     auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
-    Platform::AceViewOhos::ChangeViewSize(aceView, width, height);
+    Platform::AceViewOhos::ChangeViewSize(aceView, formWidth, formHeight);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     ContainerScope scope(instanceId_);
     auto density = pipelineContext->GetDensity();
-    pipelineContext->SetRootSize(density, width, height);
-    pipelineContext->OnSurfaceChanged(width, height);
+    pipelineContext->SetRootSize(density, formWidth, formHeight);
+    pipelineContext->OnSurfaceChanged(formWidth, formHeight);
 }
 
 void UIContentImpl::SetFormBackgroundColor(const std::string& color)
