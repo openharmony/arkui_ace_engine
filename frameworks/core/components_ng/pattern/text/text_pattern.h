@@ -660,7 +660,7 @@ protected:
     void HandleSelectionDown();
     void HandleSelection(bool isEmojiStart, int32_t end);
     double GetTextHeight(int32_t index, bool isNextLine);
-    int32_t GetTextLength();
+    int32_t GetActualTextLength();
     bool IsSelectableAndCopy();
     void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
 
