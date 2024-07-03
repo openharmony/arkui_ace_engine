@@ -19,6 +19,10 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#if !defined(PREVIEW)
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
@@ -575,6 +579,17 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
             ACE_SCORING_EVENT("Text.onClick");
             PipelineContext::SetCallBackNode(node);
             func->Execute(*clickInfo);
+#if !defined(PREVIEW)
+            std::string label = "";
+            if (!node.Invalid()) {
+                auto pattern = node.GetRawPtr()->GetPattern();
+                CHECK_NULL_VOID(pattern);
+                auto layoutProperty = pattern->GetLayoutProperty<NG::TextLayoutProperty>();
+                CHECK_NULL_VOID(layoutProperty);
+                label = layoutProperty->GetContent().value_or("");
+            }
+            JSInteractableView::ReportClickEvent(node, label);
+#endif
         };
         TextModel::GetInstance()->SetOnClick(std::move(onClick));
 
