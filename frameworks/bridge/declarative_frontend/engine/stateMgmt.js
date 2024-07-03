@@ -7767,17 +7767,17 @@ class ObserveV2 {
     constructMonitor(owningObject, owningObjectName) {
         let watchProp = Symbol.for(MonitorV2.WATCH_PREFIX + owningObjectName);
         if (owningObject && (typeof owningObject === 'object') && owningObject[watchProp]) {
-            Object.entries(owningObject[watchProp]).forEach(([monitorFuncName, monitorFunc]) => {
+            Object.entries(owningObject[watchProp]).forEach(([pathString, monitorFunc]) => {
                 var _a;
                 var _b;
-                if (monitorFunc && monitorFuncName && typeof monitorFunc === 'function') {
-                    const monitor = new MonitorV2(owningObject, monitorFuncName, monitorFunc);
+                if (monitorFunc && pathString && typeof monitorFunc === 'function') {
+                    const monitor = new MonitorV2(owningObject, pathString, monitorFunc);
                     monitor.InitRun();
                     const refs = (_a = owningObject[_b = ObserveV2.MONITOR_REFS]) !== null && _a !== void 0 ? _a : (owningObject[_b] = {});
                     // store a reference inside owningObject
                     // thereby MonitorV2 will share lifespan as owning @ComponentV2 or @ObservedV2
                     // remember: id2cmp only has a WeakRef to MonitorV2 obj
-                    refs[monitorFuncName] = monitor;
+                    refs[monitorFunc.name] = monitor;
                 }
                 // FIXME Else handle error
             });
