@@ -716,7 +716,7 @@ export struct ChipComponent {
       return
     }
     if (this.isHover) {
-      if (event.type === TouchType.Down || event.type === TouchEvent.Move) {
+      if (event.type === TouchType.Down || event.type === TouchType.Move) {
         this.isShowPressedBackGroundColor = true
       } else if (event.type === TouchType.Up) {
         this.isShowPressedBackGroundColor = false
@@ -921,7 +921,6 @@ export struct ChipComponent {
         } else if (this.prefixIcon?.src !== "") {
           Image(this.prefixIcon?.src)
             .direction(this.chipDirection)
-            .matchTextDirection(this.chipDirection == Direction.Ltr ? false : true)
             .opacity(this.getChipNodeOpacity())
             .size(this.getPrefixIconSize())
             .fillColor(this.getPrefixIconFilledColor())
@@ -965,7 +964,6 @@ export struct ChipComponent {
         } else if (this.suffixIcon?.src !== "") {
           Image(this.getSuffixIconSrc())
             .direction(this.chipDirection)
-            .matchTextDirection(this.chipDirection == Direction.Ltr ? false : true)
             .opacity(this.getChipNodeOpacity())
             .size(this.getSuffixIconSize())
             .fillColor(this.getSuffixIconFilledColor())
