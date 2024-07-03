@@ -776,4 +776,85 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder02, TestSize.Level1)
     auto step6 = lazyForEachBuilder->ConvertFormToIndex(1);
     EXPECT_EQ(step6, 0);
 }
+
+/**
+ * @tc.name: LazyForEachBuilder03
+ * @tc.desc: LazyForEachBuilder::PreBuild
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder03, TestSize.Level1)
+{
+    LazyForEachModelNG lazyForEach;
+    const RefPtr<LazyForEachActuator> mockLazyForEachActuator =
+        AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    lazyForEach.Create(mockLazyForEachActuator);
+    auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
+    LayoutConstraintF layoutConstraint;
+
+    /**
+     * @tc.steps: step1. all == false;
+     */
+    auto step1 = lazyForEachBuilder->PreBuild(10, layoutConstraint, true);
+    EXPECT_TRUE(step1);
+
+    /**
+     * @tc.steps: step2. itemConstraint, startIndex_ != -1;
+     */
+    layoutConstraint.parentIdealSize = OptionalSizeF(768, 1024);
+    layoutConstraint.selfIdealSize = OptionalSizeF(480, 960);
+    lazyForEachBuilder->startIndex_ = 3;
+    auto step2 = lazyForEachBuilder->PreBuild(10, layoutConstraint, true);
+    EXPECT_TRUE(step2);
+
+    /**
+     * @tc.steps: step3. startIndex_ != -1 && endIndex_ != -1;
+     */
+    lazyForEachBuilder->endIndex_ = 1;
+    auto step3 = lazyForEachBuilder->PreBuild(10, layoutConstraint, true);
+    EXPECT_TRUE(step3);
+
+    /**
+     * @tc.steps: step4. !canRunLongPredictTask;
+     */
+    auto step4 = lazyForEachBuilder->PreBuild(10, layoutConstraint, false);
+    EXPECT_FALSE(step4);
+}
+
+/**
+ * @tc.name: LazyForEachBuilder04
+ * @tc.desc: LazyForEachBuilder::PreBuild
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder04, TestSize.Level1)
+{
+    LazyForEachModelNG lazyForEach;
+    const RefPtr<LazyForEachActuator> mockLazyForEachActuator =
+        AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    lazyForEach.Create(mockLazyForEachActuator);
+    auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
+
+    /**
+     * @tc.steps: step1. cachedItems_.empty();
+     */
+    auto step1 = lazyForEachBuilder->OnDataBulkChanged(0, 0);
+    EXPECT_EQ(step1.size(), 0);
+
+    /**
+     * @tc.steps: step1. node.first;
+     */
+    std::string str0 = "0";
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild(str0, nullptr);
+    lazyForEachBuilder->expiringItem_[str0] = LazyForEachCacheChild(2, nullptr);
+    std::string str1 = "1";
+    lazyForEachBuilder->cachedItems_[1] = LazyForEachChild(str1, nullptr);
+    lazyForEachBuilder->expiringItem_[str1] = LazyForEachCacheChild(7, nullptr);
+    std::string str2 = "2";
+    lazyForEachBuilder->cachedItems_[2] = LazyForEachChild(str2, nullptr);
+    lazyForEachBuilder->expiringItem_[str2] = LazyForEachCacheChild(0, nullptr);
+    lazyForEachBuilder->OnDataBulkChanged(1, 5);
+    EXPECT_EQ(lazyForEachBuilder->expiringItem_[str0].first, -1);
+    EXPECT_EQ(lazyForEachBuilder->expiringItem_[str1].first, 7);
+    EXPECT_EQ(lazyForEachBuilder->expiringItem_[str2].first, 0);
+}
+
 } // namespace OHOS::Ace::NG
