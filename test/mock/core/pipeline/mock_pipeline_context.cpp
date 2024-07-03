@@ -29,6 +29,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr double DISPLAY_WIDTH = 720;
 constexpr double DISPLAY_HEIGHT = 1280;
+static std::list<PipelineContext::PredictTask> predictTasks_;
 } // namespace
 
 RefPtr<MockPipelineContext> MockPipelineContext::pipeline_;
@@ -51,6 +52,7 @@ void MockPipelineContext::TearDown()
         pipeline_->Destroy();
         pipeline_ = nullptr;
     }
+    predictTasks_.clear();
 }
 
 RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
@@ -153,7 +155,8 @@ void PipelineContext::SetupRootElement()
 }
 
 void PipelineContext::SendEventToAccessibilityWithNode(
-    const AccessibilityEvent& accessibilityEvent, const RefPtr<FrameNode>& node) {}
+    const AccessibilityEvent& accessibilityEvent, const RefPtr<FrameNode>& node)
+{}
 
 void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe) {}
 
@@ -169,10 +172,17 @@ void PipelineContext::FlushTouchEvents() {}
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event) {}
 
-void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,
-    const RefPtr<NG::FrameNode>& node) {}
+void PipelineContext::OnDragEvent(
+    const PointerEvent& pointerEvent, DragEventAction action, const RefPtr<NG::FrameNode>& node)
+{}
 
-void PipelineContext::OnIdle(int64_t deadline) {}
+void PipelineContext::OnIdle(int64_t deadline)
+{
+    const auto tasks(std::move(predictTasks_));
+    for (const auto& task : tasks) {
+        task(deadline, false);
+    }
+}
 
 void PipelineContext::Destroy()
 {
@@ -260,7 +270,10 @@ void PipelineContext::FlushRequestFocus() {}
 
 void PipelineContext::CheckNeedUpdateBackgroundColor(Color& color) {}
 
-bool PipelineContext::CheckNeedDisableUpdateBackgroundImage() { return false; }
+bool PipelineContext::CheckNeedDisableUpdateBackgroundImage()
+{
+    return false;
+}
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance)
@@ -405,7 +418,11 @@ void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback)
     buildFinishCallbacks_.emplace_back(std::move(callback));
 }
 
-void PipelineContext::AddPredictTask(PredictTask&& task) {}
+void PipelineContext::AddPredictTask(PredictTask&& task)
+{
+    std::cout << "add task\n";
+    predictTasks_.emplace_back(task);
+}
 
 void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask)
 {
@@ -601,10 +618,14 @@ void PipelineContext::FlushFocusView()
 
 void PipelineContext::SetOverlayNodePositions(std::vector<Ace::RectF> rects) {}
 
-std::vector<Ace::RectF> PipelineContext::GetOverlayNodePositions() { return {}; }
+std::vector<Ace::RectF> PipelineContext::GetOverlayNodePositions()
+{
+    return {};
+}
 
 void PipelineContext::RegisterOverlayNodePositionsUpdateCallback(
-    const std::function<void(std::vector<Ace::RectF>)>&& callback) {}
+    const std::function<void(std::vector<Ace::RectF>)>&& callback)
+{}
 
 void PipelineContext::TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects) {}
 
@@ -740,11 +761,11 @@ uint64_t PipelineBase::GetTimeFromExternalTimer()
 
 void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, const std::string& name, TaskExecutor::TaskType type) {}
 
-void PipelineBase::PostAsyncEvent(
-    const TaskExecutor::Task& task, const std::string& name, TaskExecutor::TaskType type) {}
+void PipelineBase::PostAsyncEvent(const TaskExecutor::Task& task, const std::string& name, TaskExecutor::TaskType type)
+{}
 
-void PipelineBase::PostSyncEvent(
-    const TaskExecutor::Task& task, const std::string& name, TaskExecutor::TaskType type) {}
+void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, const std::string& name, TaskExecutor::TaskType type)
+{}
 
 RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 {
@@ -752,10 +773,10 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 }
 
 #ifdef WINDOW_SCENE_SUPPORTED
-    const RefPtr<UIExtensionManager>& GetUIExtensionManager()
-    {
-        return AceType::MakeRefPtr<UIExtensionManager>();
-    }
+const RefPtr<UIExtensionManager>& GetUIExtensionManager()
+{
+    return AceType::MakeRefPtr<UIExtensionManager>();
+}
 #endif
 
 bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
@@ -809,8 +830,6 @@ void PipelineBase::SetFontScale(float fontScale)
     fontScale_ = fontScale;
 }
 
-void PipelineBase::SetUiDvsyncSwitch(bool on)
-{
-}
+void PipelineBase::SetUiDvsyncSwitch(bool on) {}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================
