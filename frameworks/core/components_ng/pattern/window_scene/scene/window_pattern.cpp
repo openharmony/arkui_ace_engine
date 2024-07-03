@@ -530,10 +530,10 @@ void WindowPattern::AddChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNo
 }
 
 void WindowPattern::RemoveChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
-    const std::string& nodeType)
+    const std::string& nodeType, bool allowTransition)
 {
     ACE_SCOPED_TRACE("WindowScene::RemoveChild[%s][self:%d]", nodeType.c_str(), host->GetId());
-    host->RemoveChild(child);
+    host->RemoveChild(child, allowTransition);
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "RemoveChild %{public}s, %{public}d", nodeType.c_str(), host->GetId());
 }
 } // namespace OHOS::Ace::NG
