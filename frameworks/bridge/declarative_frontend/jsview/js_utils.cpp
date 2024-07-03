@@ -99,7 +99,7 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(const JSRef<JSVal>& obj, NativeEngi
     if (localNativeEngine != nullptr) {
         nativeEngine = localNativeEngine;
     } else {
-        auto engine = EngineHelper::GetCurrentEngine();
+        auto engine = EngineHelper::GetCurrentEngineSafely();
         if (!engine) {
             return nullptr;
         }
