@@ -57,7 +57,7 @@ private:
     void HandleTouchPullMove(const TouchEvent& touchEvent);
     float GetUpVelocity(const TouchEvent& lastMoveInfo,
         const TouchEvent& upEventInfo);
-    void RecordTouchEvent(const TouchEvent& touchEvent);
+    void RecordTouchEvent(const TouchEvent& touchEvent, bool enforce = false);
 
     ReportDataFunc reportDataFunc_ = nullptr;
     bool loadPageOn_ = false;

@@ -182,7 +182,7 @@ void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent)
     }
 }
 
-void ResSchedReport::RecordTouchEvent(const TouchEvent& touchEvent)
+void ResSchedReport::RecordTouchEvent(const TouchEvent& touchEvent, bool enforce)
 {
     if (curTouchEvent_.GetOffset() != touchEvent.GetOffset()) {
         lastTouchEvent_ = curTouchEvent_;
@@ -195,7 +195,7 @@ void ResSchedReport::HandleTouchDown(const TouchEvent& touchEvent)
     std::unordered_map<std::string, std::string> payload;
     payload[NAME] = TOUCH;
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_DOWN_EVENT, payload);
-    RecordTouchEvent(touchEvent);
+    RecordTouchEvent(touchEvent,true);
 }
 
 void ResSchedReport::HandleTouchUp(const TouchEvent& touchEvent)
@@ -203,7 +203,7 @@ void ResSchedReport::HandleTouchUp(const TouchEvent& touchEvent)
     std::unordered_map<std::string, std::string> payload;
     RecordTouchEvent(touchEvent);
     payload[NAME] = TOUCH;
-    payload[UP_SPEED_KEY] = std::to_string(GetUpVelocity(touchPoints_[touchEvent.id], touchEvent));
+    payload[UP_SPEED_KEY] = std::to_string(GetUpVelocity(lastTouchEvent_, curTouchEvent_));
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_UP_EVENT, payload);
     isInSilde = false;
     averageDistance_.Reset();
@@ -229,7 +229,7 @@ void ResSchedReport::HandleTouchCancel(const TouchEvent& touchEvent)
 
 void ResSchedReport::HandleTouchPullDown(const TouchEvent& touchEvent)
 {
-    RecordTouchEvent(touchEvent);
+    RecordTouchEvent(touchEvent, true);
 }
 
 void ResSchedReport::HandleTouchPullUp(const TouchEvent& touchEvent)
