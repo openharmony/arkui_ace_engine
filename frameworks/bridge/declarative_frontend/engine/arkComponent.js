@@ -15001,7 +15001,7 @@ class ArkButtonComponent extends ArkComponent {
       modifierWithKey(this._modifiersWithKeys, ButtonCreateTypeModifier.identity, ButtonCreateTypeModifier, false);
     }
     if (value.length === 1) {
-      if (isObject(value[0])) {
+      if (!isNull(value[0]) && isObject(value[0])) {
         modifierWithKey(this._modifiersWithKeys, ButtonOptionsModifier.identity, ButtonOptionsModifier, value[0]);
       } else if (isResource(value[0]) || isString(value[0])) {
         modifierWithKey(this._modifiersWithKeys, ButtonLabelModifier.identity, ButtonLabelModifier, value[0]);
@@ -26243,6 +26243,19 @@ class TabClipModifier extends ModifierWithKey {
   }
 }
 TabClipModifier.identity = Symbol('tabclip');
+class TabEdgeEffectModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetTabEdgeEffect(node);
+    } else {
+      getUINativeModule().tabs.setTabEdgeEffect(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TabClipModifier.identity = Symbol('tabedgeEffect');
 class TabWidthModifier extends ModifierWithKey {
     constructor(value) {
         super(value);

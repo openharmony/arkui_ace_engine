@@ -1614,6 +1614,7 @@ class RenderNode {
         this.scaleValue = { x: 1.0, y: 1.0 };
         this.shadowColorValue = 0;
         this.shadowOffsetValue = { x: 0, y: 0 };
+        this.labelValue = '';
         this.shadowAlphaValue = 0;
         this.shadowElevationValue = 0;
         this.shadowRadiusValue = 0;
@@ -1711,6 +1712,10 @@ class RenderNode {
             this.shadowOffsetValue.y = this.checkUndefinedOrNullWithDefaultValue(offset.y, 0);
         }
         getUINativeModule().renderNode.setShadowOffset(this.nodePtr, this.shadowOffsetValue.x, this.shadowOffsetValue.y, this.lengthMetricsUnitValue);
+    }
+    set label(label) {
+        this.labelValue = this.checkUndefinedOrNullWithDefaultValue(label, '');
+        getUINativeModule().renderNode.setLabel(this.nodePtr, this.labelValue);
     }
     set shadowAlpha(alpha) {
         this.shadowAlphaValue = this.checkUndefinedOrNullWithDefaultValue(alpha, 0);
@@ -1810,6 +1815,9 @@ class RenderNode {
     }
     get shadowOffset() {
         return this.shadowOffsetValue;
+    }
+    get label() {
+        return this.labelValue;
     }
     get shadowAlpha() {
         return this.shadowAlphaValue;

@@ -44,6 +44,14 @@ void JSLayoutManager::GetLineMetrics(const JSCallbackInfo& args)
     args.SetReturnValue(JSRef<JSVal>::Cast(lineMetricsObj));
 }
 
+void JSLayoutManager::DidExceedMaxLines(const JSCallbackInfo& args)
+{
+    auto layoutInfoInterface = layoutInfoInterface_.Upgrade();
+    CHECK_NULL_VOID(layoutInfoInterface);
+    auto exceedMaxLines = layoutInfoInterface->DidExceedMaxLines();
+    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(exceedMaxLines)));
+}
+
 void JSLayoutManager::CreateJSLineMetrics(JSRef<JSObject>& lineMetricsObj, const TextLineMetrics& lineMetrics)
 {
     lineMetricsObj->SetProperty<int32_t>("startIndex", lineMetrics.startIndex);
@@ -200,6 +208,7 @@ void JSLayoutManager::JSBind(BindingTarget globalObj)
     JSClass<JSLayoutManager>::CustomMethod(
         "getGlyphPositionAtCoordinate", &JSLayoutManager::GetGlyphPositionAtCoordinate);
     JSClass<JSLayoutManager>::CustomMethod("getLineMetrics", &JSLayoutManager::GetLineMetrics);
+    JSClass<JSLayoutManager>::CustomMethod("didExceedMaxLines", &JSLayoutManager::DidExceedMaxLines);
     JSClass<JSLayoutManager>::Bind(globalObj, JSLayoutManager::Constructor, JSLayoutManager::Destructor);
 }
 } // namespace OHOS::Ace::Framework

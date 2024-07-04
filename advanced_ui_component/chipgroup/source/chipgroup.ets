@@ -14,6 +14,7 @@
  */
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import { Chip, ChipSize, ChipSymbolGlyphOptions } from '@ohos.arkui.advanced.Chip';
+import DeviceType from '@ohos.resourceManager';
 
 interface ChipGroupTheme {
   itemStyle: ChipGroupStyleTheme;
@@ -275,6 +276,11 @@ export struct ChipGroup {
 
   private getChipSize(): ChipSize | SizeOptions {
     if (this.itemStyle && this.itemStyle.size) {
+      if (typeof this.itemStyle.size == 'object') {
+        if ( !this.itemStyle.size.width || !this.itemStyle.size.height ) {
+          return defaultTheme.itemStyle.size;
+        }
+      }
       return this.itemStyle.size;
     }
     return defaultTheme.itemStyle.size;
@@ -523,6 +529,9 @@ export struct ChipGroup {
                     } else {
                       if (!this.isMultiple()) {
                         this.selectedIndexes = [];
+                      }
+                      if (!this.selectedIndexes || this.selectedIndexes.length === 0) {
+                        this.selectedIndexes = this.getSelectedIndexes();
                       }
                       this.selectedIndexes.push(index);
                     }

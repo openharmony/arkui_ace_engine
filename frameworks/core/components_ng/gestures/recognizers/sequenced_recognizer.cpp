@@ -251,13 +251,15 @@ void SequencedRecognizer::UpdateCurrentIndex()
         if (recognizer) {
             duration = recognizer->GetDuration();
         }
+        std::advance(iter, 1);
+        curRecognizer = *iter;
         SendTouchEventToNextRecognizer(curRecognizer, duration);
     }
 }
 
 bool SequencedRecognizer::CheckBetweenTwoLongPressRecognizer(int32_t currentIndex)
 {
-    if (currentIndex <= 0 || currentIndex_ == static_cast<int32_t>((recognizers_.size() - 1))) {
+    if (currentIndex <= 0 || currentIndex_ > static_cast<int32_t>((recognizers_.size() - 1))) {
         return false;
     }
     auto iterBefore = recognizers_.begin();

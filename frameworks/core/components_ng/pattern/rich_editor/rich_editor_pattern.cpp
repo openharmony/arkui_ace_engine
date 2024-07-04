@@ -4199,7 +4199,7 @@ void RichEditorPattern::FinishTextPreview()
     if (shouldInsertContent) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "insert preview text pos = %{public}d", previewStartPos);
         caretPosition_ = previewStartPos;
-        InsertValue(previewContent);
+        InsertValue(previewContent, true);
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);

@@ -1059,22 +1059,21 @@ bool ParsePixelMapAndBuilder(DragControllerAsyncCtx* asyncCtx, std::string& errM
     PixelMapNapiEntry pixelMapNapiEntry = Framework::JsEngine::GetPixelMapNapiEntry();
     if (pixelMapNapiEntry == nullptr) {
         TAG_LOGW(AceLogTag::ACE_DRAG, "failed to parse pixelMap from the first argument");
-        napi_value customBuilderValue;
-        napi_get_named_property(asyncCtx->env, element, "builder", &customBuilderValue);
-        napi_valuetype valueType = napi_undefined;
-        napi_typeof(asyncCtx->env, customBuilderValue, &valueType);
-        if (valueType != napi_function) {
-            errMsg = "The type of customBuilder of the first parameter is incorrect.";
-            return false;
-        }
-        napi_ref ref = nullptr;
-        napi_create_reference(asyncCtx->env, customBuilderValue, 1, &ref);
-        asyncCtx->customBuilderList.push_back(ref);
     } else {
         void* pixmapPtrAddr = pixelMapNapiEntry(asyncCtx->env, pixelMapValue);
         if (pixmapPtrAddr == nullptr) {
             TAG_LOGW(AceLogTag::ACE_DRAG, "the pixelMap parsed from the first argument is null");
-            return false;
+            napi_value customBuilderValue;
+            napi_get_named_property(asyncCtx->env, element, "builder", &customBuilderValue);
+            napi_valuetype valueType = napi_undefined;
+            napi_typeof(asyncCtx->env, customBuilderValue, &valueType);
+            if (valueType != napi_function) {
+                errMsg = "The type of customBuilder of the first parameter is incorrect.";
+                return false;
+            }
+            napi_ref ref = nullptr;
+            napi_create_reference(asyncCtx->env, customBuilderValue, 1, &ref);
+            asyncCtx->customBuilderList.push_back(ref);
         } else {
             asyncCtx->pixelMapList.push_back(*(reinterpret_cast<std::shared_ptr<Media::PixelMap>*>(pixmapPtrAddr)));
         }

@@ -249,6 +249,23 @@ ArkUINativeModuleValue RenderNodeBridge::SetShadowOffset(ArkUIRuntimeCallInfo* r
     GetArkUINodeModifiers()->getRenderNodeModifier()->setShadowOffset(nativeNode, offsetX, offsetY, unit);
     return panda::JSValueRef::Undefined(vm);
 }
+ArkUINativeModuleValue RenderNodeBridge::SetLabel(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> label = runtimeCallInfo->GetCallArgRef(1);
+    std::string labelValue;
+    if (label->IsString(vm)) {
+        labelValue = label->ToString(vm)->ToString();
+    } else {
+        labelValue = "";
+        LOGW("The label of the node should be a string!");
+    }
+    GetArkUINodeModifiers()->getRenderNodeModifier()->setLabel(nativeNode, labelValue.c_str());
+    return panda::JSValueRef::Undefined(vm);
+}
 ArkUINativeModuleValue RenderNodeBridge::SetShadowAlpha(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

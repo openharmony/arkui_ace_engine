@@ -201,9 +201,12 @@ public:
             theme->cancelButtonIconColor_ = pattern->GetAttr<Color>("cancel_button_icon_color", Color());
             theme->previewUnderlineColor_ = pattern->GetAttr<Color>(PREVIEW_UNDERLINE_COLOR, Color());
             theme->previewBoardColor_ = pattern->GetAttr<Color>(PREVIEW_BOARD_COLOR, Color());
-            theme->cancelButton_ = pattern->GetAttr<std::string>("textfield_accessibility_property_delete", "");
 
             theme->placeholderLineSpacing_ = pattern->GetAttr<Dimension>("text_field_placeholder_linespacing", 0.0_vp);
+
+            theme->cancelButton_ = pattern->GetAttr<std::string>("textfield_accessibility_property_clear", "");
+            theme->showPasswordPromptInformation_ = pattern->GetAttr<std::string>("textfield_accessibility_show_password", "");
+            theme->hiddenPasswordPromptInformation_ = pattern->GetAttr<std::string>("textfield_accessibility_hide_password", "");
         }
     };
 
@@ -599,6 +602,16 @@ public:
         return placeholderLineSpacing_;
     }
 
+    const std::string& GetShowPasswordPromptInformation() const
+    {
+        return showPasswordPromptInformation_;
+    }
+
+    const std::string& GetHiddenPasswordPromptInformation() const
+    {
+        return hiddenPasswordPromptInformation_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -700,6 +713,9 @@ private:
 
     Dimension inlinePaddingRight_ = 12.0_vp;
     Dimension placeholderLineSpacing_ = 0.0_vp;
+
+    std::string showPasswordPromptInformation_;
+    std::string hiddenPasswordPromptInformation_;
 };
 
 } // namespace OHOS::Ace

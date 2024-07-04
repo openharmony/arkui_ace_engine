@@ -570,6 +570,14 @@ public:
         FocusHub::LostFocusToViewRoot();
         isKeyboardClosedByUser_ = false;
     }
+
+    void NotifyKeyboardClosed() override
+    {
+        if (HasFocus()) {
+            FocusHub::LostFocusToViewRoot();
+        }
+    }
+
     std::u16string GetLeftTextOfCursor(int32_t number) override;
     std::u16string GetRightTextOfCursor(int32_t number) override;
     int32_t GetTextIndexAtCursor() override;
@@ -853,6 +861,7 @@ public:
     void StripNextLine(std::wstring& data);
     bool IsShowHandle();
     std::string GetCancelButton();
+    std::string GetPasswordIconPromptInformation(bool show);
     bool OnKeyEvent(const KeyEvent& event);
     int32_t GetLineCount() const;
     TextInputType GetKeyboard()
@@ -1432,7 +1441,8 @@ private:
     void SetAccessibilityActionGetAndSetCaretPosition();
     void SetAccessibilityMoveTextAction();
     void SetAccessibilityScrollAction();
-    void SetAccessibilityDeleteAction();
+    void SetAccessibilityClearAction();
+    void SetAccessibilityPasswordIconAction();
 
     void UpdateCopyAllStatus();
     void RestorePreInlineStates();

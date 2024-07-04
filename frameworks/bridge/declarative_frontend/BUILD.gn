@@ -512,6 +512,7 @@ template("declarative_js_engine") {
     if (defined(vendor_configs.ace_engine_advanced)) {
       include_dirs += vendor_configs.ace_advance_dirs
       sources += vendor_configs.ace_engine_advanced_jsview
+      external_deps += vendor_configs.ace_engine_ext_jsview_deps
     } else {
       sources += [ "jsview/js_cached_image.cpp" ]
     }
