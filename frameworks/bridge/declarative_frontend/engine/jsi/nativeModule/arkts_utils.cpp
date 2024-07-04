@@ -149,14 +149,14 @@ std::string ToString(const EcmaVM* vm,  Local<JSValueRef>& jsVal)
 RefPtr<ResourceObject> GetResourceObject(const EcmaVM* vm, const Local<JSValueRef>& jsObj)
 {
     auto obj = jsObj->ToObject(vm);
-    auto id = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::ID)))->Int32Value(vm);
-    auto type = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::TYPE)))->Int32Value(vm);
-    auto args = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::PARAMS)));
+    auto id = obj->Get(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::ID)))->Int32Value(vm);
+    auto type = obj->Get(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::TYPE)))->Int32Value(vm);
+    auto args = obj->Get(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::PARAMS)));
 
     std::string bundleName;
     std::string moduleName;
-    auto bundle = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::BUNDLE_NAME)));
-    auto module = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::MODULE_NAME)));
+    auto bundle = obj->Get(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::BUNDLE_NAME)));
+    auto module = obj->Get(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::MODULE_NAME)));
     if (bundle->IsString(vm) && module->IsString(vm)) {
         bundleName = bundle->ToString(vm)->ToString();
         moduleName = module->ToString(vm)->ToString();
@@ -299,17 +299,17 @@ bool ParseDollarResource(std::string& targetModule, ResourceType& resType,
 void CompleteResourceObjectFromParams(const EcmaVM* vm, Local<panda::ObjectRef>& jsObj,
     std::string& targetModule, ResourceType& resType, std::string& resName)
 {
-    auto type = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::TYPE)));
+    auto type = jsObj->Get(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::TYPE)));
     int32_t typeNum = -1;
     if (type->IsNumber()) {
         typeNum = type->Int32Value(vm);
     }
-    auto resId = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::ID)));
+    auto resId = jsObj->Get(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::ID)));
     int32_t resIdValue = resId->Int32Value(vm);
     if (resIdValue != UNKNOWN_RESOURCE_ID) {
         return;
     }
-    auto args = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::PARAMS)));
+    auto args = jsObj->Get(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::PARAMS)));
     Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
     auto identity = panda::ArrayRef::GetValueAt(vm, params, 0);
     if (!identity->IsString(vm)) {
@@ -322,20 +322,20 @@ void CompleteResourceObjectFromParams(const EcmaVM* vm, Local<panda::ObjectRef>&
         return;
     }
 
-    auto moduleName = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::MODULE_NAME)));
+    auto moduleName = jsObj->Get(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::MODULE_NAME)));
     if (moduleName->IsString(vm) && moduleName->ToString(vm)->ToString().empty()) {
         std::regex resNameRegex(RESOURCE_NAME_PATTERN);
         std::smatch resNameResults;
         if (std::regex_match(targetModule, resNameResults, resNameRegex)) {
-            jsObj->Set(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::MODULE_NAME)),
+            jsObj->Set(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::MODULE_NAME)),
                 panda::StringRef::NewFromUtf8(vm, resNameResults.str(1).c_str()));
         } else {
-            jsObj->Set(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::MODULE_NAME)),
+            jsObj->Set(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::MODULE_NAME)),
                 panda::StringRef::NewFromUtf8(vm, ""));
         }
     }
     if (typeNum == UNKNOWN_RESOURCE_TYPE) {
-        jsObj->Set(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::TYPE)),
+        jsObj->Set(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::TYPE)),
             panda::NumberRef::New(vm, static_cast<int32_t>(resType)));
     }
 }
@@ -343,7 +343,7 @@ void CompleteResourceObjectFromParams(const EcmaVM* vm, Local<panda::ObjectRef>&
 void CompleteResourceObjectFromId(const EcmaVM* vm, const Local<JSValueRef>& type, Local<panda::ObjectRef>& jsObj,
     ResourceType& resType, const std::string& resName)
 {
-    auto args = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::PARAMS)));
+    auto args = jsObj->Get(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::PARAMS)));
     if (!args->IsArray(vm)) {
         return;
     }
@@ -358,7 +358,7 @@ void CompleteResourceObjectFromId(const EcmaVM* vm, const Local<JSValueRef>& typ
         }
         panda::ArrayRef::SetValueAt(vm, params, 0, name);
         uint32_t paramIndex = 1;
-        auto firstParam = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::TYPE)));
+        auto firstParam = jsObj->Get(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::TYPE)));
         if (!firstParam->IsNull()) {
             panda::ArrayRef::SetValueAt(vm, params, paramIndex, firstParam);
             paramIndex++;
@@ -370,16 +370,16 @@ void CompleteResourceObjectFromId(const EcmaVM* vm, const Local<JSValueRef>& typ
     } else {
         panda::ArrayRef::SetValueAt(vm, params, 0, name);
     }
-    jsObj->Set(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::ID)),
+    jsObj->Set(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::ID)),
                 panda::NumberRef::New(vm, UNKNOWN_RESOURCE_ID));
-    jsObj->Set(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::TYPE)),
-            panda::NumberRef::New(vm, static_cast<int32_t>(resType)));
-    if (!jsObj->Has(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::BUNDLE_NAME)))) {
-        jsObj->Set(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::BUNDLE_NAME)),
+    jsObj->Set(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::TYPE)),
+            panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(resType)));
+    if (!jsObj->Has(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::BUNDLE_NAME)))) {
+        jsObj->Set(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::BUNDLE_NAME)),
                 panda::StringRef::NewFromUtf8(vm, ""));
     }
-    if (!jsObj->Has(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::MODULE_NAME)))) {
-        jsObj->Set(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::MODULE_NAME)),
+    if (!jsObj->Has(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::MODULE_NAME)))) {
+        jsObj->Set(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::MODULE_NAME)),
             panda::StringRef::NewFromUtf8(vm, ""));
     }
 }
@@ -388,12 +388,12 @@ void CompleteResourceObject(const EcmaVM* vm, Local<panda::ObjectRef>& jsObj)
 {
     // dynamic $r raw input format is
     // {"id":"app.xxx.xxx", "params":[], "bundleName":"xxx", "moduleName":"xxx"}
-    auto resId = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::ID)));
+    auto resId = jsObj->Get(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::ID)));
     ResourceType resType;
     std::string targetModule;
     std::string resName;
     if (resId->IsString(vm)) {
-        auto type = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::TYPE)));
+        auto type = jsObj->Get(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::TYPE)));
         int32_t typeNum = -1;
         if (type->IsNumber()) {
             typeNum = type->Int32Value(vm);
@@ -944,7 +944,7 @@ bool ArkTSUtils::ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue
     if (jsValue->IsObject(vm)) {
         auto obj = jsValue->ToObject(vm);
         CompleteResourceObject(vm, obj);
-        auto resId = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::ID)));
+        auto resId = obj->Get(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::ID)));
         if (!resId->IsNumber()) {
             return false;
         }
@@ -956,8 +956,8 @@ bool ArkTSUtils::ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue
 bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result)
 {
     auto jsObj = jsValue->ToObject(vm);
-    auto type = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::TYPE)));
-    auto resId = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::ID)));
+    auto type = jsObj->Get(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::TYPE)));
+    auto resId = jsObj->Get(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::ID)));
     if (!resId->IsNull() && !type->IsNull() && type->IsNumber() && resId->IsNumber()) {
         auto resourceObject = GetResourceObject(vm, jsValue);
         auto resourceWrapper = CreateResourceWrapper(vm, jsValue, resourceObject);
@@ -966,7 +966,7 @@ bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM *vm, const Local<JSValueR
         }
 
         if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::RAWFILE)) {
-            auto args = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::PARAMS)));
+            auto args = jsObj->Get(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::PARAMS)));
             if (!args->IsArray(vm)) {
                 return false;
             }
@@ -983,7 +983,7 @@ bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM *vm, const Local<JSValueR
             if (!IsGetResourceByName(vm, jsValue)) {
                 return false;
             }
-            auto args = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::PARAMS)));
+            auto args = jsObj->Get(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::PARAMS)));
             if (!args->IsArray(vm)) {
                 return false;
             }
@@ -1232,8 +1232,8 @@ void ArkTSUtils::GetJsMediaBundleInfo(
     }
     auto jsObj = jsValue->ToObject(vm);
     if (!jsObj->IsUndefined()) {
-        auto bundle = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::BUNDLE_NAME)));
-        auto module = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::MODULE_NAME)));
+        auto bundle = jsObj->Get(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::BUNDLE_NAME)));
+        auto module = jsObj->Get(vm, panda::ExternalStringCache::GetCacheString(vm, static_cast<int32_t>(Framework::ArkUIIndex::MODULE_NAME)));
         if (bundle->IsString(vm) && module->IsString(vm)) {
             bundleName = bundle->ToString(vm)->ToString();
             moduleName = module->ToString(vm)->ToString();
