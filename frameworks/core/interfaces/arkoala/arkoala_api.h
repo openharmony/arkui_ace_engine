@@ -4345,6 +4345,26 @@ struct ArkUIAnimation {
 struct ArkUINavigation {
     void (*popPageToIndex)(ArkUI_Int32 index);
     void (*setNavDestinationBackPressed)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Int32 indexerId);
+    ArkUI_Int32 (*getNavigationId)(
+        ArkUINodeHandle node, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* writeLen);
+    ArkUI_Int32 (*getNavDestinationName)(
+        ArkUINodeHandle node, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* writeLen);
+    ArkUI_Int32 (*getStackLength)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getNavDesNameByIndex)(
+        ArkUINodeHandle node, ArkUI_Int32 index, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* writeLen);
+    ArkUI_Int32 (*getNavDestinationId)(
+        ArkUINodeHandle node, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* writeLen);
+    ArkUI_Int32 (*getNavDestinationState)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getNavDestinationIndex)(ArkUINodeHandle node);
+    void* (*getNavDestinationParam)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getRouterPageIndex)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getRouterPageName)(
+        ArkUINodeHandle node, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* writeLen);
+    ArkUI_Int32 (*getRouterPagePath)(
+        ArkUINodeHandle node, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* writeLen);
+    ArkUI_Int32 (*getRouterPageState)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getRouterPageId)(
+        ArkUINodeHandle node, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* writeLen);
 };
 
 struct ArkUIGraphicsCanvas {
@@ -4579,6 +4599,8 @@ struct ArkUIBasicAPI {
     ArkUI_Bool (*isBuilderNode)(ArkUINodeHandle node);
 
     ArkUI_Float64 (*convertLengthMetricsUnit)(ArkUI_Float64 value, ArkUI_Int32 originUnit, ArkUI_Int32 targetUnit);
+
+    ArkUI_Int32 (*getContextByNode)(ArkUINodeHandle node);
 };
 
 struct ArkUIDialogAPI {
