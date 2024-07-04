@@ -453,7 +453,7 @@ void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, co
 
 void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
 
-void PipelineContext::HandleVisibleAreaChangeEvent() {}
+void PipelineContext::HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp) {}
 
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isBypass)
 {
