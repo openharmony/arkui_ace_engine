@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
 #include "text_base.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
+#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -2631,7 +2634,7 @@ HWTEST_F(TextTestNg, TextSelectOverlayTestPreProcessOverlay001, TestSize.Level1)
     ASSERT_EQ(textSelectOverlay->PreProcessOverlay(request), false);
     textSelectOverlay->hostTextBase_ = pattern;
 
-    ASSERT_EQ(textSelectOverlay->PreProcessOverlay(request), false);
+    ASSERT_EQ(textSelectOverlay->PreProcessOverlay(request), true);
 }
 
 /**
@@ -3776,5 +3779,32 @@ HWTEST_F(TextTestNg, TextPattern018, TestSize.Level1)
 
     auto IsShowHandle = pattern->IsShowHandle();
     EXPECT_EQ(IsShowHandle, false);
+}
+
+/**
+ * @tc.name: TextPattern019
+ * @tc.desc: Test TextPattern OnFrameNodeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPattern019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and test pattern IsShowHandle
+     */
+    auto [frameNode, pattern] = Init();
+    pattern->textSelector_.Update(0, TEXT_SIZE_INT);
+
+    /**
+     * @tc.steps: step2. show selectoverlay.
+     */
+    pattern->ShowSelectOverlay();
+    EXPECT_TRUE(pattern->selectOverlay_->SelectOverlayIsOn());
+
+    /**
+     * @tc.steps: step3. mark framnode changed.
+     */
+    frameNode->AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_START_SCROLL);
+    frameNode->ProcessFrameNodeChangeFlag();
+    EXPECT_EQ(pattern->selectOverlay_->handleLevelMode_, HandleLevelMode::EMBED);
 }
 } // namespace OHOS::Ace::NG

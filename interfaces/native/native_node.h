@@ -4536,6 +4536,18 @@ typedef enum {
     NODE_SWIPER_SWIPE_TO_INDEX,
 
     /**
+    * @brief Set to disable component navigation point interactions.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32: Set to disable component navigation point interaction, set to true to indicate the navigation point
+    * is interactive, default value is true.\n
+    * \n
+    * The return value of the attribute acquisition method {@link ArkUI_AttributeItem} format: \n
+    * .value[0].i32: Set to disable component navigation point interactions. \n
+    */
+    NODE_SWIPER_INDICATOR_INTERACTIVE,
+
+    /**
      * @brief: Set the delineation component of the ListItem, supporting property settings, property resets, and
      * property acquisition interfaces.
      *
@@ -5467,6 +5479,44 @@ typedef enum {
      */
     NODE_TEXT_INPUT_ON_CONTENT_SCROLL,
     /**
+     * @brief 定义在将要输入时，触发回调的枚举值。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：插入的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：插入的值。
+     * @return 在返回true时，表示正常插入，返回false时，表示不插入。
+     * 可通过OH_ArKUI_NodeEvent_SetReturnValue设置返回值。\n
+     */
+    NODE_TEXT_INPUT_ON_WILL_INSERT = 7009,
+    /**
+     * @brief 定义在输入完成时，触发回调的枚举值。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：插入的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：插入的值。
+     */
+    NODE_TEXT_INPUT_ON_DID_INSERT = 7010,
+    /**
+     * @brief 定义在将要删除时，触发回调的枚举值。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：删除的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为1的value.i32：删除值的方向。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：删除的值。
+     * @return 在返回true时，表示正常插入，返回false时，表示不插入。\n
+     * 可通过OH_ArKUI_NodeEvent_SetReturnValue设置返回值。\n
+     */
+    NODE_TEXT_INPUT_ON_WILL_DELETE = 7011,
+    /**
+     * @brief 定义在删除完成时，触发回调的枚举值。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：删除的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为1的value.i32：删除值的方向。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：删除的值。
+     */
+    NODE_TEXT_INPUT_ON_DID_DELETE = 7012,
+    /**
      * @brief Defines the event triggered when the input in the text box changes.
      *
       \n
@@ -5556,7 +5606,44 @@ typedef enum {
      *
      */
     NODE_TEXT_AREA_ON_CONTENT_SIZE_CHANGE,
-
+/**
+     * @brief 定义在将要输入时，触发回调的枚举值。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：插入的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：插入的值。
+     * @return 在返回true时，表示正常插入，返回false时，表示不插入。
+     * 可通过OH_ArKUI_NodeEvent_SetReturnValue设置返回值。\n
+     */
+    NODE_TEXT_AREA_ON_WILL_INSERT = 8008,
+    /**
+     * @brief 定义在输入完成时，触发回调的枚举值。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：插入的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：插入的值。
+     */
+    NODE_TEXT_AREA_ON_DID_INSERT = 8009,
+    /**
+     * @brief 定义在将要删除时，触发回调的枚举值。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：删除的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为1的value.i32：删除值的方向。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：删除的值。
+     * @return 在返回true时，表示正常插入，返回false时，表示不插入。\n
+     * 可通过OH_ArKUI_NodeEvent_SetReturnValue设置返回值。\n
+     */
+    NODE_TEXT_AREA_ON_WILL_DELETE = 8010,
+    /**
+     * @brief 定义在删除完成时，触发回调的枚举值。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：删除的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为1的value.i32：删除值的方向。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：删除的值。
+     */
+    NODE_TEXT_AREA_ON_DID_DELETE = 8011,
     /**
      * @brief Defines the event triggered when the selected status of the <b>ARKUI_NODE_CHECKBOX</b> component changes.
      *
@@ -6090,10 +6177,52 @@ ArkUI_StringAsyncEvent* OH_ArkUI_NodeEvent_GetStringAsyncEvent(ArkUI_NodeEvent* 
 void* OH_ArkUI_NodeEvent_GetUserData(ArkUI_NodeEvent* event);
 
 /**
- * @brief Defines the dirty area flag passed in the <b>::markDirty</b> API.
+ * @brief 获取组件回调事件的数字类型参数。
  *
+ * @param event 组件事件指针。
+ * @param index 返回值索引。
+ * @param value 具体返回值。
+ * @return 错误码。
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
+ *         {@link ARKUI_ERROR_CODE_NODE_EVENT_PARAM_INVALID} 组件事件中参数长度超限。
+ *         {@link ARKUI_ERROR_CODE_NODE_EVENT_NO_RETURN} 组件事件不支持返回值。
  * @since 12
  */
+int32_t OH_ArkUI_NodeEvent_GetNumberValue(ArkUI_NodeEvent* event, int32_t index, ArkUI_NumberValue* value);
+
+    /**
+ * @brief 获取组件回调事件的字符串类型参数，字符串数据仅在事件回调过程中有效，需要在事件回调外使用建议进行额外拷贝处理。
+ *
+ * @param event 组件事件指针。
+ * @param index 返回值索引。
+ * @param string 字符串数组的指针。
+ * @param stringSize 字符串数组的长度。
+ * @return 错误码。
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
+ *         {@link ARKUI_ERROR_CODE_NODE_EVENT_PARAM_INDEX_OUT_OF_RANGE} 组件事件中参数长度超限。
+ *         {@link ARKUI_ERROR_CODE_NODE_EVENT_PARAM_INVALID} 组件事件中不存在该数据。
+ * @since 12
+ */
+int32_t OH_ArkUI_NodeEvent_GetStringValue(ArkUI_NodeEvent* event, int32_t index, char** string, int32_t* stringSize);
+
+/**
+    * @brief 设置组件回调事件的返回值。
+    *
+    * @param event 组件事件指针。
+    * @param value 事件数字类型数组。
+    * @param size 数组长度。
+    * @return 错误码。
+    *         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
+    *         {@link ARKUI_ERROR_CODE_NODE_EVENT_NO_RETURN} 组件事件不支持返回值。
+    * @since 12
+    */
+int32_t OH_ArkUI_NodeEvent_SetReturnNumberValue(ArkUI_NodeEvent* event, ArkUI_NumberValue* value, int32_t size);
+
+/**
+    * @brief Defines the dirty area flag passed in the <b>::markDirty</b> API.
+    *
+    * @since 12
+    */
 typedef enum {
     /**
      * @brief Remeasure.

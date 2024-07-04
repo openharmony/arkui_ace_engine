@@ -36,8 +36,8 @@ public:
     static RefPtr<FrameNode> CreateText(const std::string& value, const RefPtr<FrameNode>& parent);
     static RefPtr<FrameNode> CreateIcon(const std::string& icon, const RefPtr<FrameNode>& parent,
         const RefPtr<FrameNode>& child = nullptr);
-    static void CreatePasteButton(
-        const RefPtr<FrameNode>& option, const RefPtr<FrameNode>& row, const std::function<void()>& onClickFunc);
+    static void CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& option, const RefPtr<FrameNode>& row,
+        const std::function<void()>& onClickFunc, const std::string& icon = "");
     static RefPtr<FrameNode> CreateSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& symbol,
         const RefPtr<FrameNode>& parent, const RefPtr<FrameNode>& child = nullptr,
         const std::optional<Dimension>& symbolUserDefinedIdealFontSize = std::nullopt);

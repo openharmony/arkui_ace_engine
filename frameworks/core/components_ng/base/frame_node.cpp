@@ -3450,7 +3450,7 @@ void FrameNode::Layout()
 bool FrameNode::SelfExpansive()
 {
     auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
-    return opts && opts->Expansive();
+    return opts && (opts->Expansive() || opts->switchToNone);
 }
 
 bool FrameNode::SelfExpansiveToKeyboard()

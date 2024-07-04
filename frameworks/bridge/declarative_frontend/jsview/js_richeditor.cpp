@@ -560,13 +560,13 @@ void JSRichEditor::SetOnCopy(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetOnCopy(std::move(onCopy));
 }
 
-void JSRichEditor::SelectionMenuOptions(const JSCallbackInfo& info)
+void JSRichEditor::EditMenuOptions(const JSCallbackInfo& info)
 {
-    std::vector<NG::MenuOptionsParam> menuOptionsItems;
-    if (!JSViewAbstract::ParseSelectionMenuOptions(info, menuOptionsItems)) {
-        return;
-    }
-    RichEditorModel::GetInstance()->SetSelectionMenuOptions(std::move(menuOptionsItems));
+    NG::OnCreateMenuCallback onCreateMenuCallback;
+    NG::OnMenuItemClickCallback onMenuItemClick;
+    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick);
+    RichEditorModel::GetInstance()->SetSelectionMenuOptions(
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 
 void JSRichEditor::SetCustomKeyboard(const JSCallbackInfo& args)
@@ -1217,7 +1217,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("onDidChange", &JSRichEditor::SetOnDidChange);
     JSClass<JSRichEditor>::StaticMethod("onCut", &JSRichEditor::SetOnCut);
     JSClass<JSRichEditor>::StaticMethod("onCopy", &JSRichEditor::SetOnCopy);
-    JSClass<JSRichEditor>::StaticMethod("selectionMenuOptions", &JSRichEditor::SelectionMenuOptions);
+    JSClass<JSRichEditor>::StaticMethod("editMenuOptions", &JSRichEditor::EditMenuOptions);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

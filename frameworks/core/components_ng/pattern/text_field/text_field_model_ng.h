@@ -69,7 +69,6 @@ public:
     void SetOnPaste(std::function<void(const std::string&)>&& func) override;
     void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func) override;
     void SetCopyOption(CopyOptions copyOption) override;
-    void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems) override;
     static void ProcessDefaultStyleAndBehaviors(const RefPtr<FrameNode>& frameNode);
     void ResetMaxLength() override;
     void SetForegroundColor(const Color& value) override;
@@ -118,7 +117,8 @@ public:
     void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func) override;
     void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) override;
     void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) override;
-    void SetSelectionMenuOptions(const std::vector<MenuOptionsParam>&& menuOptionsItems) override;
+    void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
     void SetEnablePreviewText(bool enablePreviewText) override;
 
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);

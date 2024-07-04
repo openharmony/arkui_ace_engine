@@ -340,7 +340,7 @@ bool SecuritySessionWrapperImpl::IsSessionValid()
     return session_ != nullptr;
 }
 
-int32_t SecuritySessionWrapperImpl::GetSessionId()
+int32_t SecuritySessionWrapperImpl::GetSessionId() const
 {
     return session_ ? session_->GetPersistentId() : 0;
 }

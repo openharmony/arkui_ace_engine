@@ -2551,6 +2551,9 @@ void AceContainer::UpdateResource()
     if (SystemProperties::GetResourceDecoupling()) {
         auto context = runtimeContext_.lock();
         auto abilityInfo = abilityInfo_.lock();
+        if (pipelineContext_->IsFormRender()) {
+            ReleaseResourceAdapter();
+        }
         InitResourceAndThemeManager(
             pipelineContext_, assetManager_, colorScheme_, resourceInfo_, context, abilityInfo, true);
     } else {

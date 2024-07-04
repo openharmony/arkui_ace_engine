@@ -60,7 +60,8 @@ RefPtr<ImageData> QueryDataFromCache(const ImageSourceInfo& src, bool& dataHit)
     }
     auto drawingData = ImageLoader::LoadDataFromCachedFile(src.GetSrc());
     if (drawingData) {
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "%{private}s hit the disk Cache.", src.GetSrc().c_str());
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "%{private}s hit the disk Cache, and the data size is %{public}d.",
+            src.GetSrc().c_str(), static_cast<int32_t>(drawingData->GetSize()));
         auto data = std::make_shared<RSData>();
         data->BuildWithCopy(drawingData->GetData(), drawingData->GetSize());
         return AceType::MakeRefPtr<NG::DrawingImageData>(data);
@@ -290,15 +291,15 @@ void ImageLoadingContext::DownloadImageSuccess(const std::string& imageData)
     TAG_LOGI(AceLogTag::ACE_IMAGE, "Download image successfully, srcInfo = %{private}s, ImageData length=%{public}zu",
         GetSrc().ToString().c_str(), imageData.size());
     ACE_LAYOUT_SCOPED_TRACE("DownloadImageSuccess[src:%s]", GetSrc().ToString().c_str());
-    auto data = ImageData::MakeFromDataWithCopy(imageData.data(), imageData.size());
     if (!Positive(imageData.size())) {
         FailCallback("The length of imageData from netStack is not positive");
         return;
     }
+    auto data = ImageData::MakeFromDataWithCopy(imageData.data(), imageData.size());
     // if downloading is necessary, cache object, data to file
     RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(GetSourceInfo(), data);
     if (!imageObj) {
-        FailCallback("ImageObject null");
+        FailCallback("After download successful, imageObject Create fail");
         return;
     }
     imageDataCopy_ = imageData;

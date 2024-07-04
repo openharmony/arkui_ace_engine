@@ -32,7 +32,6 @@ namespace OHOS::Ace::Framework {
 // NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto PANDA_MAIN_FUNCTION = "_GLOBAL::func_main_0";
 #if !defined(PREVIEW)
-constexpr int32_t FORMAT_JSON = 1;
 constexpr auto DEBUGGER = "@Debugger";
 #endif
 
@@ -419,8 +418,12 @@ void ArkJSRuntime::NotifyUIIdle()
 #if !defined(PREVIEW) && !defined(IOS_PLATFORM)
 void ArkJSRuntime::DumpHeapSnapshot(bool isPrivate)
 {
+    panda::ecmascript::DumpSnapShotOption dumpOption;
+    dumpOption.dumpFormat = panda::ecmascript::DumpFormat::JSON;
+    dumpOption.isVmMode = true;
+    dumpOption.isPrivate = isPrivate;
     LocalScope scope(vm_);
-    panda::DFXJSNApi::DumpHeapSnapshot(vm_, FORMAT_JSON, true, isPrivate);
+    panda::DFXJSNApi::DumpHeapSnapshot(vm_, dumpOption);
 }
 #else
 void ArkJSRuntime::DumpHeapSnapshot(bool isPrivate)

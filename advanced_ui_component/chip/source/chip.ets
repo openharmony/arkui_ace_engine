@@ -716,7 +716,7 @@ export struct ChipComponent {
       return
     }
     if (this.isHover) {
-      if (event.type === TouchType.Down || event.type == TouchEvent.Move) {
+      if (event.type === TouchType.Down || event.type === TouchEvent.Move) {
         this.isShowPressedBackGroundColor = true
       } else if (event.type === TouchType.Up) {
         this.isShowPressedBackGroundColor = false
@@ -724,7 +724,7 @@ export struct ChipComponent {
         this.isShowPressedBackGroundColor = false
       }
     } else {
-      if (event.type === TouchType.Down || event.type == TouchType.Move) {
+      if (event.type === TouchType.Down || event.type === TouchType.Move) {
         this.isShowPressedBackGroundColor = true
       } else if (event.type === TouchType.Up) {
         this.isShowPressedBackGroundColor = false

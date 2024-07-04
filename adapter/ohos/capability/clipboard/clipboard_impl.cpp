@@ -63,6 +63,20 @@ void ClipboardImpl::HasData(const std::function<void(bool hasData)>& callback)
 #endif
 }
 
+void ClipboardImpl::HasDataType(const std::function<void(bool hasData)>& callback, const std::string& mimeType)
+{
+#ifdef SYSTEM_CLIPBOARD_SUPPORTED
+    bool hasData = false;
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->PostSyncTask(
+        [&hasData, mimeType]() {
+            hasData = OHOS::MiscServices::PasteboardClient::GetInstance()->HasDataType(mimeType);
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardHasDataType");
+    callback(hasData);
+#endif
+}
+
 void ClipboardImpl::SetData(const std::string& data, CopyOptions copyOption, bool isDragData)
 {
     CHECK_NULL_VOID(taskExecutor_);
@@ -476,11 +490,11 @@ void ClipboardImpl::GetSpanStringDataHelper(
         auto getDataRes = OHOS::MiscServices::PasteboardClient::GetInstance()->GetPasteData(pasteData);
         CHECK_NULL_VOID(getDataRes);
         std::vector<uint8_t> arr;
-        clip->ProcessSpanStringData(arr, pasteData);
         std::string text;
+        clip->ProcessSpanStringData(arr, pasteData, text);
         auto textData = pasteData.GetPrimaryText();
-        if (textData) {
-            text = *textData;
+        if (textData && text.empty()) {
+            text.append(*textData);
         }
         callback(arr, text);
     };
@@ -491,7 +505,8 @@ void ClipboardImpl::GetSpanStringDataHelper(
     }
 }
 
-void ClipboardImpl::ProcessSpanStringData(std::vector<uint8_t>& arr, const OHOS::MiscServices::PasteData& pasteData)
+void ClipboardImpl::ProcessSpanStringData(
+    std::vector<uint8_t>& arr, const OHOS::MiscServices::PasteData& pasteData, std::string& text)
 {
     for (const auto& pasteDataRecord : pasteData.AllRecords()) {
         if (pasteDataRecord == nullptr) {
@@ -512,6 +527,10 @@ void ClipboardImpl::ProcessSpanStringData(std::vector<uint8_t>& arr, const OHOS:
                 spanStr->EncodeTlv(arr);
                 return;
             }
+        }
+        if (pasteDataRecord->GetPlainText() != nullptr) {
+            auto textData = pasteDataRecord->GetPlainText();
+            text.append(*textData);
         }
     }
 }

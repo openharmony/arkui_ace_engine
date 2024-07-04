@@ -698,7 +698,9 @@ export struct ConfirmDialog {
         if (index === this.textIndex) {
           this.textBuilder();
         } else if (index === this.checkboxIndex) {
-          this.checkBoxBuilder();
+          WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
+            this.checkBoxBuilder();
+          }
         }
       });
     }
@@ -995,13 +997,19 @@ struct CustomDialogContentComponent {
           }) {
             ForEach([this.titleIndex, this.contentIndex, this.buttonIndex], (index: number) => {
               if (index === this.titleIndex) {
-                this.titleBuilder();
+                WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
+                  this.titleBuilder();
+                }
               } else if (index === this.contentIndex) {
                 Column() {
-                  this.contentBuilder();
+                  WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
+                    this.contentBuilder();
+                  }
                 }.padding(this.getContentPadding())
               } else {
-                this.ButtonBuilder();
+                WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
+                  this.ButtonBuilder();
+                }
               }
             });
           }

@@ -109,14 +109,13 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("onCut", &JSSearch::SetOnCut);
     JSClass<JSSearch>::StaticMethod("onPaste", &JSSearch::SetOnPaste);
     JSClass<JSSearch>::StaticMethod("copyOption", &JSSearch::SetCopyOption);
-    JSClass<JSSearch>::StaticMethod("textMenuOptions", &JSSearch::JsMenuOptionsExtension);
     JSClass<JSSearch>::StaticMethod("selectionMenuHidden", &JSSearch::SetSelectionMenuHidden);
     JSClass<JSSearch>::StaticMethod("customKeyboard", &JSSearch::SetCustomKeyboard);
     JSClass<JSSearch>::StaticMethod("enterKeyType", &JSSearch::SetEnterKeyType);
     JSClass<JSSearch>::StaticMethod("maxLength", &JSSearch::SetMaxLength);
     JSClass<JSSearch>::StaticMethod("type", &JSSearch::SetType);
     JSClass<JSSearch>::StaticMethod("dragPreviewOptions", &JSSearch::SetDragPreviewOptions);
-    JSClass<JSSearch>::StaticMethod("selectionMenuOptions", &JSSearch::SelectionMenuOptions);
+    JSClass<JSSearch>::StaticMethod("editMenuOptions", &JSSearch::EditMenuOptions);
     JSBindMore();
     JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
 }
@@ -879,15 +878,6 @@ void JSSearch::OnDidDelete(const JSCallbackInfo& info)
     SearchModel::GetInstance()->SetOnDidDeleteEvent(std::move(callback));
 }
 
-void JSSearch::JsMenuOptionsExtension(const JSCallbackInfo& info)
-{
-    if (info[0]->IsArray()) {
-        std::vector<NG::MenuOptionsParam> menuOptionsItems;
-        JSViewAbstract::ParseMenuOptions(info, JSRef<JSArray>::Cast(info[0]), menuOptionsItems);
-        SearchModel::GetInstance()->SetMenuOptionItems(std::move(menuOptionsItems));
-    }
-}
-
 void JSSearch::SetSelectionMenuHidden(const JSCallbackInfo& info)
 {
     if (info[0]->IsUndefined() || !info[0]->IsBoolean()) {
@@ -1077,13 +1067,12 @@ void JSSearch::SetLineHeight(const JSCallbackInfo& info)
     SearchModel::GetInstance()->SetLineHeight(value);
 }
 
-void JSSearch::SelectionMenuOptions(const JSCallbackInfo& info)
+void JSSearch::EditMenuOptions(const JSCallbackInfo& info)
 {
-    std::vector<NG::MenuOptionsParam> menuOptionsItems;
-    if (!JSViewAbstract::ParseSelectionMenuOptions(info, menuOptionsItems)) {
-        return;
-    }
-    SearchModel::GetInstance()->SetSelectionMenuOptions(std::move(menuOptionsItems));
+    NG::OnCreateMenuCallback onCreateMenuCallback;
+    NG::OnMenuItemClickCallback onMenuItemClick;
+    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick);
+    SearchModel::GetInstance()->SetSelectionMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 
 void JSSearch::SetEnablePreviewText(const JSCallbackInfo& info)

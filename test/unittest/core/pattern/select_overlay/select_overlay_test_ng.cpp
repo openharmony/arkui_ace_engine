@@ -2593,23 +2593,23 @@ HWTEST_F(SelectOverlayTestNg, NewMenuAvoidStrategy001, TestSize.Level1)
 
     auto menuWidth = 200;
     auto menuHeight = 100;
-    auto ret1 = newNode->NewMenuAvoidStrategy(menuWidth, menuHeight);
+    auto ret1 = newNode->NewMenuAvoidStrategy(AccessibilityManager::RawPtr(layoutWrapper), menuWidth, menuHeight);
     std::cout << ret1.ToString();
-    OffsetF expectRet1(100, 400);
+    OffsetF expectRet1(100, 0);
     bool equal1 = (ret1 == expectRet1);
     EXPECT_TRUE(equal1);
 
     infoPtr->firstHandle.isShow = false;
     infoPtr->secondHandle.isShow = false;
-    auto ret2 = newNode->NewMenuAvoidStrategy(menuWidth, menuHeight);
+    auto ret2 = newNode->NewMenuAvoidStrategy(AccessibilityManager::RawPtr(layoutWrapper), menuWidth, menuHeight);
     OffsetF expectRet2(100, -100);
     bool equal2 = (ret2 == expectRet2);
     EXPECT_TRUE(equal2);
 
     infoPtr->firstHandle.isShow = false;
     infoPtr->secondHandle.isShow = true;
-    auto ret3 = newNode->NewMenuAvoidStrategy(menuWidth, menuHeight);
-    OffsetF expectRet3(100, -100);
+    auto ret3 = newNode->NewMenuAvoidStrategy(AccessibilityManager::RawPtr(layoutWrapper), menuWidth, menuHeight);
+    OffsetF expectRet3(100, 0);
     bool equal3 = (ret3 == expectRet3);
     EXPECT_TRUE(equal3);
 }
@@ -2677,7 +2677,7 @@ HWTEST_F(SelectOverlayTestNg, NewMenuAvoidStrategy002, TestSize.Level1)
     auto menuHeight = 100;
     infoPtr->firstHandle.isShow = false;
     infoPtr->secondHandle.isShow = false;
-    auto ret = newNode->NewMenuAvoidStrategy(menuWidth, menuHeight);
+    auto ret = newNode->NewMenuAvoidStrategy(AccessibilityManager::RawPtr(layoutWrapper), menuWidth, menuHeight);
     OffsetF expectRet(100, 200);
     bool equal = (ret == expectRet);
     EXPECT_TRUE(equal);

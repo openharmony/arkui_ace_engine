@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 113
+#define ARKUI_FULL_API_VERSION 115
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 113
+#define ARKUI_NODE_API_VERSION 115
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -652,7 +652,8 @@ enum ArkUINodeType {
     ARKUI_SELECT,
     ARKUI_IMAGE_ANIMATOR,
     ARKUI_CIRCLE,
-    ARKUI_TAB_CONTENT
+    ARKUI_TAB_CONTENT,
+    ARKUI_NAVIGATION
 };
 
 enum ArkUIEventCategory {
@@ -666,6 +667,7 @@ enum ArkUIEventCategory {
     TOUCH_EVENT = 7,
     TEXT_ARRAY = 8,
     MOUSE_INPUT_EVENT = 9,
+    MIXED_EVENT = 10,
 };
 
 #define ARKUI_MAX_EVENT_NUM 1000
@@ -719,6 +721,10 @@ enum ArkUIEventSubKind {
     ON_TEXT_INPUT_CONTENT_SIZE_CHANGE,
     ON_TEXT_INPUT_INPUT_FILTER_ERROR,
     ON_TEXT_INPUT_CONTENT_SCROLL,
+    ON_TEXT_INPUT_WILL_INSERT,
+    ON_TEXT_INPUT_DID_INSERT,
+    ON_TEXT_INPUT_WILL_DELETE,
+    ON_TEXT_INPUT_DID_DELETE,
 
     ON_TEXTAREA_EDIT_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXTAREA,
     ON_TEXTAREA_SUBMIT,
@@ -729,6 +735,10 @@ enum ArkUIEventSubKind {
     ON_TEXTAREA_CONTENT_SIZE_CHANGE,
     ON_TEXT_AREA_INPUT_FILTER_ERROR,
     ON_TEXT_AREA_CONTENT_SCROLL,
+    ON_TEXT_AREA_WILL_INSERT,
+    ON_TEXT_AREA_DID_INSERT,
+    ON_TEXT_AREA_WILL_DELETE,
+    ON_TEXT_AREA_DID_DELETE,
 
     ON_SWIPER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_SWIPER,
     ON_SWIPER_ANIMATION_START,
@@ -955,6 +965,15 @@ struct ArkUIAPIEventGestureAsyncEvent {
     void* rawPointerEvent;
 };
 
+struct ArkUIMixedEvent {
+    ArkUIEventCallbackArg numberData[ARKUI_ASYNC_EVENT_ARGS_COUNT];
+    ArkUI_Int32 numberDataLength;
+    ArkUI_Int64 stringPtrData[ARKUI_ASYNC_EVENT_ARGS_COUNT];
+    ArkUI_Int32 stringPtrDataLength;
+    ArkUIEventCallbackArg numberReturnData[ARKUI_ASYNC_EVENT_ARGS_COUNT];
+    ArkUI_Int32 subKind; // ArkUIEventSubKind actually
+};
+
 struct ArkUINodeEvent {
     ArkUI_Int32 kind; // Actually ArkUIEventCategory.
     ArkUI_Int32 nodeId;
@@ -969,6 +988,7 @@ struct ArkUINodeEvent {
         ArkUITouchEvent touchEvent;
         ArkUIAPIEventTextArray textArrayEvent;
         ArkUIMouseEvent mouseEvent;
+        ArkUIMixedEvent mixedEvent;
     };
 };
 
@@ -1118,6 +1138,7 @@ struct ArkUISwiperIndicator {
     ArkUIOptionalInt maskValue;
     ArkUIOptionalUint colorValue;
     ArkUIOptionalUint selectedColorValue;
+    ArkUIOptionalInt maxDisplayCount;
 };
 
 struct ArkUI_StyledString;
@@ -2234,6 +2255,7 @@ struct ArkUISwiperModifier {
     void (*resetSwiperOnGestureSwipe)(ArkUINodeHandle node);
     void (*setSwiperOnContentDidScroll)(ArkUINodeHandle node, void* callback);
     void (*resetSwiperOnContentDidScroll)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getIndicatorInteractive)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperControllerModifier {
@@ -2442,6 +2464,18 @@ struct ArkUIScrollModifier {
     ArkUINodeHandle (*getScroll)(ArkUINodeHandle node);
     void (*setScrollBarProxy)(ArkUINodeHandle node, ArkUINodeHandle proxy);
     void (*setScrollToIndex)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 smooth, ArkUI_Int32 align);
+    void (*setScrollOnScrollStart)(ArkUINodeHandle node, void* callback);
+    void (*resetScrollOnScrollStart)(ArkUINodeHandle node);
+    void (*setScrollOnScrollEnd)(ArkUINodeHandle node, void* callback);
+    void (*resetScrollOnScrollEnd)(ArkUINodeHandle node);
+    void (*setScrollOnScrollStop)(ArkUINodeHandle node, void* callback);
+    void (*resetScrollOnScrollStop)(ArkUINodeHandle node);
+    void (*setScrollOnScroll)(ArkUINodeHandle node, void* callback);
+    void (*resetScrollOnScroll)(ArkUINodeHandle node);
+    void (*setScrollOnScrollEdge)(ArkUINodeHandle node, void* callback);
+    void (*resetScrollOnScrollEdge)(ArkUINodeHandle node);
+    void (*setScrollOnDidScrollCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetScrollOnDidScroll)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemModifier {
@@ -2536,11 +2570,18 @@ struct ArkUITabsControllerModifier {
 
 struct ArkUIGesture;
 
+struct ArkUIGestureEvent {
+    ArkUIAPIEventGestureAsyncEvent eventData;
+    void* attachNode;
+};
+
 struct ArkUIGestureInterruptInfo {
     bool isSystemGesture;
     ArkUI_Int32 systemRecognizerType;
     ArkUIAPIEventGestureAsyncEvent* event = nullptr;
     void* userData = nullptr;
+    void* inputEvent = nullptr;
+    void* gestureEvent = nullptr;
 };
 
 struct ArkUIGestureModifier {
@@ -4020,6 +4061,10 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorCopyOptions)(ArkUINodeHandle node);
     void (*setRichEditorCaretColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetRichEditorCaretColor)(ArkUINodeHandle node);
+    void (*setRichEditorOnSubmit)(ArkUINodeHandle node, void* callback);
+    void (*resetRichEditorOnSubmit)(ArkUINodeHandle node);
+    void (*setRichEditorAboutToIMEInput)(ArkUINodeHandle node, void* callback);
+    void (*resetRichEditorAboutToIMEInput)(ArkUINodeHandle node);
     void (*setOnReady)(ArkUINodeHandle node, void* callback);
     void (*resetOnReady)(ArkUINodeHandle node);
     void (*setOnDeleteComplete)(ArkUINodeHandle node, void* callback);

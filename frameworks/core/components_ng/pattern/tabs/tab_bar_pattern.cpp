@@ -1061,7 +1061,7 @@ void TabBarPattern::HandleClick(const GestureEvent& info, int32_t index)
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
+    if (layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE && scrollableEvent_) {
         auto scrollable = scrollableEvent_->GetScrollable();
         if (scrollable && !scrollable->IsSpringStopped()) {
             if (IsOutOfBoundary()) {

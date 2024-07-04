@@ -30,6 +30,8 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 constexpr int NUM_5 = 5;
+constexpr int32_t MAX_DISPLAY_COUNT_MIN = 6;
+constexpr int32_t MAX_DISPLAY_COUNT_MAX = 9;
 
 ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Create()
 {
@@ -209,6 +211,7 @@ ArkUI_SwiperIndicator* OH_ArkUI_SwiperIndicator_Create(ArkUI_SwiperIndicatorType
         indicator->maskValue = ArkUI_OptionalInt { 0, 0 };
         indicator->colorValue = ArkUI_OptionalUint { 0, 0xFF000000 };
         indicator->selectedColorValue = ArkUI_OptionalUint { 0, 0xFF000000 };
+        indicator->maxDisplayCount = ArkUI_OptionalInt { 0, 0 };
     } else {
         return nullptr;
     }
@@ -361,6 +364,24 @@ uint32_t OH_ArkUI_SwiperIndicator_GetSelectedColor(ArkUI_SwiperIndicator* indica
 {
     CHECK_NULL_RETURN(indicator, 0);
     return indicator->selectedColorValue.value;
+}
+
+
+int32_t OH_ArkUI_SwiperIndicator_SetMaxDisplayCount(ArkUI_SwiperIndicator* indicator, int32_t maxDisplayCount)
+{
+    CHECK_NULL_RETURN(indicator, ARKUI_ERROR_CODE_PARAM_INVALID);
+    if (maxDisplayCount < MAX_DISPLAY_COUNT_MIN || maxDisplayCount > MAX_DISPLAY_COUNT_MAX) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    indicator->maxDisplayCount.isSet = 1;
+    indicator->maxDisplayCount.value = maxDisplayCount;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_SwiperIndicator_GetMaxDisplayCount(ArkUI_SwiperIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0);
+    return indicator->maxDisplayCount.value;
 }
 
 ArkUI_StyledString* OH_ArkUI_StyledString_Create(

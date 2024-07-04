@@ -35,9 +35,9 @@
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
+#include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
-#include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
 #include "core/components_ng/pattern/text/text_base.h"
@@ -187,16 +187,6 @@ public:
         return contentMod_;
     }
 
-    void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionItems)
-    {
-        menuOptionItems_ = std::move(menuOptionItems);
-    }
-
-    const std::vector<MenuOptionsParam>&& GetMenuOptionItems() const
-    {
-        return std::move(menuOptionItems_);
-    }
-
     void SetTextDetectEnable(bool enable)
     {
         auto host = GetHost();
@@ -340,6 +330,7 @@ public:
     RefPtr<UINode> GetChildByIndex(int32_t index) const;
     RefPtr<SpanItem> GetSpanItemByIndex(int32_t index) const;
     ResultObject GetTextResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
+    virtual void SetResultObjectText(ResultObject& resultObject, const RefPtr<SpanItem>& spanItem);
     ResultObject GetSymbolSpanResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     ResultObject GetImageResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     std::string GetFontInJson() const;
@@ -612,7 +603,8 @@ public:
     TextLineMetrics GetLineMetrics(int32_t lineNumber) override;
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
 
-    void OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsParam> && menuOptionsItems);
+    void OnSelectionMenuOptionsUpdate(
+        const NG::OnCreateMenuCallback && onCreateMenuCallback, const NG::OnMenuItemClickCallback && onMenuItemClick);
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override
     {
         selectOverlay_->OnAncestorNodeChanged(flag);
@@ -668,7 +660,7 @@ protected:
     void HandleSelectionDown();
     void HandleSelection(bool isEmojiStart, int32_t end);
     double GetTextHeight(int32_t index, bool isNextLine);
-    int32_t GetTextLength();
+    int32_t GetActualTextLength();
     bool IsSelectableAndCopy();
     void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
 
@@ -805,7 +797,6 @@ private:
     bool isMarqueeRunning_ = false;
 
     RefPtr<ParagraphManager> pManager_;
-    std::vector<MenuOptionsParam> menuOptionItems_;
     std::vector<int32_t> placeholderIndex_;
     std::vector<RectF> rectsForPlaceholders_;
     OffsetF imageOffset_;

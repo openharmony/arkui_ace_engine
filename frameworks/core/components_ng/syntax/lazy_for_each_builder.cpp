@@ -622,7 +622,7 @@ namespace OHOS::Ace::NG {
     bool LazyForEachBuilder::PreBuild(int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint,
         bool canRunLongPredictTask)
     {
-        ACE_SCOPED_TRACE("expiringItem_ count:[%zu]", expiringItem_.size());
+        ACE_SYNTAX_SCOPED_TRACE("expiringItem_ count:[%zu]", expiringItem_.size());
         outOfBoundaryNodes_.clear();
         if (itemConstraint && !canRunLongPredictTask) {
             return false;

@@ -25,6 +25,7 @@
 #include "core/components_ng/manager/select_content_overlay/select_overlay_holder.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_base.h"
+#include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/event/ace_events.h"
 #include "core/event/touch_event.h"
 
@@ -50,6 +51,11 @@ public:
     RefPtr<T> GetPattern()
     {
         return DynamicCast<T>(hostTextBase_.Upgrade());
+    }
+
+    WeakPtr<TextBase> GetHostTextBase()
+    {
+        return hostTextBase_;
     }
 
     void ProcessOverlay(const OverlayRequest& request = OverlayRequest());
@@ -144,9 +150,9 @@ public:
     virtual RectF GetVisibleContentRect();
     virtual bool CheckHandleVisible(const RectF& paintRect) = 0;
 
-    virtual bool OnlyAllowedPasteNonEmptyString()
+    virtual std::string GetPasteMimeType()
     {
-        return false;
+        return "";
     }
 
     virtual void OnResetTextSelection() {}
@@ -185,6 +191,9 @@ public:
     virtual void OnParentScrollEnd() {};
     virtual void OnParentScrolling();
 
+    void OnSelectionMenuOptionsUpdate(
+        const NG::OnCreateMenuCallback && onCreateMenuCallback, const NG::OnMenuItemClickCallback && onMenuItemClick);
+
     void SetkeyBoardChangeCallback();
     void RemoveKeyboardChangeCallback();
     virtual void OnKeyboardChanged(bool isKeyboardShow);
@@ -209,6 +218,18 @@ public:
     bool IsClickAtHandle(const GestureEvent& info);
     bool HasThreeDimensionTransform();
     bool CheckSwitchToMode(HandleLevelMode mode) override;
+
+    void OnUpdateOnCreateMenuCallback(SelectOverlayInfo& selectInfo)
+    {
+        selectInfo.onCreateCallback.onCreateMenuCallback = onCreateMenuCallback_;
+        selectInfo.onCreateCallback.onMenuItemClick = onMenuItemClick_;
+        auto textRange = [weak = GetHostTextBase()](int32_t& start, int32_t& end) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->GetSelectIndex(start, end);
+        };
+        selectInfo.onCreateCallback.textRangeCallback = textRange;
+    }
 
 protected:
     RectF MergeSelectedBoxes(
@@ -242,6 +263,8 @@ protected:
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;
+    OnCreateMenuCallback onCreateMenuCallback_;
+    OnMenuItemClickCallback onMenuItemClick_;
 
 private:
     void UpdateTransformFlag();

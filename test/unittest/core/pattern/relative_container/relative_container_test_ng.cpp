@@ -1668,4 +1668,209 @@ HWTEST_F(RelativeContainerTestNg, ChainTest0017, TestSize.Level1)
     EXPECT_EQ(frameNode_->GetChildByIndex(1)->GetGeometryNode()->GetFrameOffset().GetX(), 115.0f);
     EXPECT_EQ(frameNode_->GetChildByIndex(2)->GetGeometryNode()->GetFrameOffset().GetX(), 220.0f);
 }
+
+static void SetContainer(RefPtr<FrameNode> relativeContainerFrameNode, std::string id, float width, float height)
+{
+    /**
+     * add selfIdealSize for frameNode
+     */
+    std::optional<CalcLength> swidth = CalcLength(width);
+    std::optional<CalcLength> sheight = CalcLength(height);
+    MeasureProperty layoutConstraint;
+    layoutConstraint.selfIdealSize = CalcSize(swidth, sheight);
+    relativeContainerFrameNode->UpdateLayoutConstraint(layoutConstraint);
+    relativeContainerFrameNode->UpdateInspectorId(id);
+}
+
+static void RelativeContainerLayoutRtl(LayoutWrapperNode &layoutWrapper)
+{
+    auto relativeContainerLayoutProperty = layoutWrapper.GetLayoutProperty();
+    EXPECT_FALSE(relativeContainerLayoutProperty == nullptr);
+    relativeContainerLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+}
+
+static void AddAlignRule(const std::string& id, const AlignDirection& direction,
+    const HorizontalAlign& horizontalRule, std::map<AlignDirection, AlignRule>& alignRules)
+{
+    RelativeContainerTestUtilsNG::AddAlignRule(id, direction, horizontalRule, alignRules);
+}
+
+static void AddAlignRule(const std::string& id, const AlignDirection& direction,
+    const VerticalAlign& verticalRule, std::map<AlignDirection, AlignRule>& alignRules)
+{
+    RelativeContainerTestUtilsNG::AddAlignRule(id, direction, verticalRule, alignRules);
+}
+
+/**
+ * @tc.name: RelativeContainerLayoutRtlTest001
+ * @tc.desc: Set an item with align rules with RelativeContainer and check it, direction::RTL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RelativeContainerTestNg, RelativeContainerLayoutRtlTest001, TestSize.Level1)
+{
+    auto relativeContainerFrameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
+        []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
+    EXPECT_FALSE(relativeContainerFrameNode == nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+
+    SetContainer(relativeContainerFrameNode, CONTAINER_ID, CONTAINER_WIDTH, CONTAINER_HEIGHT);
+
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(relativeContainerFrameNode, geometryNode, relativeContainerFrameNode->GetLayoutProperty());
+    auto relativeContainerPattern = relativeContainerFrameNode->GetPattern<RelativeContainerPattern>();
+    EXPECT_FALSE(relativeContainerPattern == nullptr);
+
+    RelativeContainerLayoutRtl(layoutWrapper);
+    auto relativeContainerLayoutAlgorithm = relativeContainerPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(relativeContainerLayoutAlgorithm == nullptr);
+    layoutWrapper.SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(relativeContainerLayoutAlgorithm));
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.selfIdealSize.SetSize(CONTAINER_SIZE);
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+
+    auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.maxSize = CONTAINER_SIZE;
+    childLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
+    /**
+    corresponding ets code:
+        RelativeContainer() {
+            Button("Button 1")
+            .alignRules({
+                start: { anchor: "__container__", align: HorizontalAlign.Center },
+                end:{ anchor: "__container__", align: HorizontalAlign.End },
+                top: { anchor: "__container__", align: VerticalAlign.Center },
+                bottom: { anchor: "__container__", align: VerticalAlign.Bottom }
+            }).id("bt1").borderWidth(1).borderColor(Color.Black)
+        }.width(200).height(200)
+    .backgroundColor(Color.Orange)
+    */
+    auto firstFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    firstGeometryNode->Reset();
+    RefPtr<LayoutWrapperNode> firstLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(firstFrameNode, firstGeometryNode, firstFrameNode->GetLayoutProperty());
+    firstLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    auto boxLayoutAlgorithm = firstFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    EXPECT_FALSE(boxLayoutAlgorithm == nullptr);
+    firstLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
+
+    const auto& firstFlexProperty = firstLayoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
+    std::map<AlignDirection, AlignRule> firstAlignRules;
+    AddAlignRule(CONTAINER_ID, AlignDirection::START, HorizontalAlign::CENTER, firstAlignRules);
+    AddAlignRule(CONTAINER_ID, AlignDirection::END, HorizontalAlign::END, firstAlignRules);
+    AddAlignRule(CONTAINER_ID, AlignDirection::TOP, VerticalAlign::CENTER, firstAlignRules);
+    AddAlignRule(CONTAINER_ID, AlignDirection::BOTTOM, VerticalAlign::BOTTOM, firstAlignRules);
+    firstFrameNode->UpdateInspectorId(FIRST_ITEM_ID);
+    firstFrameNode->GetLayoutProperty()->UpdateAlignRules(firstAlignRules);
+    relativeContainerFrameNode->AddChild(firstFrameNode);
+    layoutWrapper.AppendChild(firstLayoutWrapper);
+
+    relativeContainerLayoutAlgorithm->Measure(&layoutWrapper);
+    relativeContainerLayoutAlgorithm->Layout(&layoutWrapper);
+
+    EXPECT_EQ(firstFlexProperty->GetAlignRulesValue(), firstAlignRules);
+    EXPECT_EQ(
+        firstLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(CONTAINER_WIDTH / 2.0f, CONTAINER_HEIGHT / 2.0f));
+    EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_CENTER_LEFT);
+}
+
+std::vector<std::pair<float, float>> biasPairs = {
+    std::make_pair(-1.0f, -1.0f),
+    std::make_pair(0.0f, 0.0f),
+    std::make_pair(0.3f, 0.3f),
+    std::make_pair(0.5f, 0.5f),
+    std::make_pair(1.0f, 1.0f),
+    std::make_pair(1.5f, 1.5f)
+};
+
+std::vector<OffsetF> offsets = {
+    OffsetF(CONTAINER_WIDTH - 150.0f - 75.0f, 75.0f),
+    OffsetF(CONTAINER_WIDTH - 150.0f - 0.0f, 0.0f),
+    OffsetF(CONTAINER_WIDTH - 150.0f - 45.0f, 45.0f),
+    OffsetF(CONTAINER_WIDTH - 150.0f - 75.0f, 75.0f),
+    OffsetF(CONTAINER_WIDTH - 150.0f - 150.0f, 150.0f),
+    OffsetF(CONTAINER_WIDTH - 150.0f - 225.0f, 225.0f)
+};
+
+static void LayoutConstraint(RefPtr<LayoutWrapperNode> layoutWrapper, SizeF containerSize)
+{
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = containerSize;
+    parentLayoutConstraint.percentReference = containerSize;
+    parentLayoutConstraint.selfIdealSize.SetSize(containerSize);
+
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+}
+
+/**
+ * @tc.name: BiasRulesTestRtl001
+ * @tc.desc: Set an item with bias with RelativeContainer and check it, direction::RTL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RelativeContainerTestNg, BiasRulesTestRtl001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
+        []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
+    EXPECT_FALSE(frameNode == nullptr);
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto relativeContainerPattern = frameNode->GetPattern<RelativeContainerPattern>();
+    auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
+    relativeContainerLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    frameNode->UpdateInspectorId(CONTAINER_ID);
+    relativeContainerLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(CONTAINER_WIDTH), CalcLength(CONTAINER_HEIGHT)));
+    auto relativeContainerLayoutAlgorithm = relativeContainerPattern->CreateLayoutAlgorithm();
+    layoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(relativeContainerLayoutAlgorithm));
+
+    LayoutConstraint(layoutWrapper, CONTAINER_SIZE);
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize.SetSize(SizeF(150.0f, 150.0f));
+    auto firstItemFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<GeometryNode> firstItemGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    firstItemGeometryNode->Reset();
+    RefPtr<LayoutWrapperNode> firstItemLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        firstItemFrameNode, firstItemGeometryNode, firstItemFrameNode->GetLayoutProperty());
+    firstItemLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    firstItemLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(150.0f), CalcLength(150.0)));
+    std::map<AlignDirection, AlignRule> firstItemAlignRules;
+    AddAlignRule(CONTAINER_ID, AlignDirection::START, HorizontalAlign::START, firstItemAlignRules);
+    AddAlignRule(CONTAINER_ID, AlignDirection::TOP, VerticalAlign::TOP, firstItemAlignRules);
+    AddAlignRule(CONTAINER_ID, AlignDirection::END, HorizontalAlign::END, firstItemAlignRules);
+    AddAlignRule(CONTAINER_ID, AlignDirection::BOTTOM, VerticalAlign::BOTTOM, firstItemAlignRules);
+    firstItemFrameNode->UpdateInspectorId(FIRST_ITEM_ID);
+    firstItemFrameNode->GetLayoutProperty()->UpdateAlignRules(firstItemAlignRules);
+
+    /**
+     * set bias for first node, then the container is in the middle of the parent container
+     * set align rules for first node
+     */
+    for (int i = 0; i < 6; i++) {
+        firstItemFrameNode->GetLayoutProperty()->UpdateBias(biasPairs[i]);
+        auto boxLayoutAlgorithm = firstItemFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+        firstItemLayoutWrapper->SetLayoutAlgorithm(
+            AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
+        frameNode->AddChild(firstItemFrameNode);
+        layoutWrapper->AppendChild(firstItemLayoutWrapper);
+
+        relativeContainerLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+        relativeContainerLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+        EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), CONTAINER_SIZE);
+
+        EXPECT_EQ(firstItemLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(150.0f, 150.0f));
+        EXPECT_EQ(firstItemLayoutWrapper->GetGeometryNode()->GetFrameOffset(), offsets[i]);
+    }
+}
+
 } // namespace OHOS::Ace::NG

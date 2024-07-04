@@ -41,6 +41,11 @@ public:
         return GetCollectionItemCounts() - 1;
     }
 
+    std::string GetAccessibilityLevel() const override
+    {
+        return Level::NO;
+    }
+
 protected:
     void SetSpecificSupportAction() override;
 

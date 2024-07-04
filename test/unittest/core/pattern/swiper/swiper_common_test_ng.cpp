@@ -1008,4 +1008,65 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest003, TestSize.Level1)
         offset += itemWidth;
     }
 }
+
+/**
+ * @tc.name: IsAtStartEnd001
+ * @tc.desc: Test IsAtStart IsAtEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, IsAtStartEnd001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Loop is true
+     * @tc.expected: There are no start or end
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetLoop(true);
+    });
+    EXPECT_FALSE(pattern_->IsAtStart());
+    EXPECT_FALSE(pattern_->IsAtEnd());
+
+    /**
+     * @tc.steps: step2. Empty items
+     * @tc.expected: There are no start or end
+     */
+    Create([](SwiperModelNG model) {
+        model.SetLoop(false);
+    });
+    EXPECT_FALSE(pattern_->IsAtStart());
+    EXPECT_FALSE(pattern_->IsAtEnd());
+}
+
+/**
+ * @tc.name: IsAtStartEnd002
+ * @tc.desc: Test IsAtStart IsAtEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, IsAtStartEnd002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. At start
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetLoop(false);
+    });
+    EXPECT_TRUE(pattern_->IsAtStart());
+    EXPECT_FALSE(pattern_->IsAtEnd());
+
+    /**
+     * @tc.steps: step2. Change currentIndex to middle item
+     * @tc.expected: Not at start or end
+     */
+    ChangeIndex(1);
+    EXPECT_FALSE(pattern_->IsAtStart());
+    EXPECT_FALSE(pattern_->IsAtEnd());
+
+    /**
+     * @tc.steps: step3. Change currentIndex to end item
+     * @tc.expected: At end
+     */
+    ChangeIndex(ITEM_NUMBER - 1);
+    EXPECT_FALSE(pattern_->IsAtStart());
+    EXPECT_TRUE(pattern_->IsAtEnd());
+}
 } // namespace OHOS::Ace::NG

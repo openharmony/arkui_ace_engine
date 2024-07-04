@@ -7413,6 +7413,34 @@ class RichEditorCaretColorModifier extends ModifierWithKey {
 }
 RichEditorCaretColorModifier.identity = Symbol('richEditorCaretColor');
 
+class RichEditorOnSubmitModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnSubmit(node);
+    } else {
+      getUINativeModule().richEditor.setOnSubmit(node, this.value);
+    }
+  }
+}
+RichEditorOnSubmitModifier.identity = Symbol('richEditorOnSubmit');
+
+class RichEditorAboutToIMEInputModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetAboutToIMEInput(node);
+    } else {
+      getUINativeModule().richEditor.setAboutToIMEInput(node, this.value);
+    }
+  }
+}
+RichEditorAboutToIMEInputModifier.identity = Symbol('richEditorAboutToIMEInput');
+
 class RichEditorSelectedBackgroundColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -7575,8 +7603,13 @@ class ArkRichEditorComponent extends ArkComponent {
   onSelect(callback) {
     throw new Error('Method not implemented.');
   }
+  onSubmit(callback) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnSubmitModifier.identity, RichEditorOnSubmitModifier, callback);
+    return this;
+  }
   aboutToIMEInput(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, RichEditorAboutToIMEInputModifier.identity, RichEditorAboutToIMEInputModifier, callback);
+    return this;
   }
   onIMEInputComplete(callback) {
     throw new Error('Method not implemented.');
@@ -15977,6 +16010,91 @@ class ScrollInitializeModifier extends ModifierWithKey {
   }
 }
 ScrollInitializeModifier.identity = Symbol('scrollInitialize');
+
+class ScrollOnScrollStartModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollOnScrollStart(node);
+    } else {
+      getUINativeModule().scroll.setScrollOnScrollStart(node, this.value);
+    }
+  }
+}
+ScrollOnScrollStartModifier.identity = Symbol('scrollOnScrollStart');
+
+class ScrollOnScrollEndModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollOnScrollEnd(node);
+    } else {
+      getUINativeModule().scroll.setScrollOnScrollEnd(node, this.value);
+    }
+  }
+}
+ScrollOnScrollEndModifier.identity = Symbol('scrollOnScrollEnd');
+
+class ScrollOnScrollStopModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollOnScrollStop(node);
+    } else {
+      getUINativeModule().scroll.setScrollOnScrollStop(node, this.value);
+    }
+  }
+}
+ScrollOnScrollStopModifier.identity = Symbol('scrollOnScrollStop');
+
+class ScrollOnScrollModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollOnScroll(node);
+    } else {
+      getUINativeModule().scroll.setScrollOnScroll(node, this.value);
+    }
+  }
+}
+ScrollOnScrollModifier.identity = Symbol('scrollOnScroll');
+
+class ScrollOnScrollEdgeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollOnScrollEdge(node);
+    } else {
+      getUINativeModule().scroll.setScrollOnScrollEdge(node, this.value);
+    }
+  }
+}
+ScrollOnScrollEdgeModifier.identity = Symbol('scrollOnScrollEdge');
+
+class ScrollOnDidScrollModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollOnDidScroll(node);
+    } else {
+      getUINativeModule().scroll.setScrollOnDidScroll(node, this.value);
+    }
+  }
+}
+ScrollOnDidScrollModifier.identity = Symbol('scrollOnDidScroll');
+
 class ArkScrollComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -15995,19 +16113,24 @@ class ArkScrollComponent extends ArkComponent {
     return this;
   }
   onScroll(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ScrollOnScrollModifier.identity, ScrollOnScrollModifier, event);
+    return this;
   }
   onScrollEdge(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ScrollOnScrollEdgeModifier.identity, ScrollOnScrollEdgeModifier, event);
+    return this;
   }
   onScrollStart(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ScrollOnScrollStartModifier.identity, ScrollOnScrollStartModifier, event);
+    return this;
   }
   onScrollEnd(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ScrollOnScrollEndModifier.identity, ScrollOnScrollEndModifier, event);
+    return this;
   }
   onScrollStop(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ScrollOnScrollStopModifier.identity, ScrollOnScrollStopModifier, event);
+    return this;
   }
   scrollBar(value) {
     if (value in BarState) {
@@ -16036,6 +16159,12 @@ class ArkScrollComponent extends ArkComponent {
   onScrollFrameBegin(event) {
     throw new Error('Method not implemented.');
   }
+
+  onDidScroll(callback) {
+    modifierWithKey(this._modifiersWithKeys, ScrollOnDidScrollModifier.identity, ScrollOnDidScrollModifier, callback);
+    return this;
+  }
+
   nestedScroll(value) {
     let options = new ArkNestedScrollOptions();
     if (value) {

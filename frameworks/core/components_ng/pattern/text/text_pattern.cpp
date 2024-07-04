@@ -571,8 +571,8 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
             CHECK_NULL_VOID(renderContext);
             auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
             bool ifHaveObscured = textPattern->GetSpanItemChildren().empty() &&
-                std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
-                [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
+                                  std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
+                                      [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
             auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
             if (textLayoutProperty->GetCalcLayoutConstraint() &&
@@ -1319,8 +1319,9 @@ void TextPattern::HandleSelectionDown()
 {
     auto end = textSelector_.GetEnd();
     auto line = pManager_->GetLineCount();
+    auto lastIndex = GetActualTextLength();
     if (line == 1) {
-        HandleSelection(true, GetTextLength());
+        HandleSelection(true, lastIndex);
         return;
     }
     CaretMetricsF secondHandleMetrics;
@@ -1328,8 +1329,8 @@ void TextPattern::HandleSelectionDown()
     auto secondOffsetX = secondHandleMetrics.offset.GetX();
     double height = GetTextHeight(end, true);
     auto caculateIndex = GetHandleIndex({ secondOffsetX, height });
-    if (NearZero(height) || caculateIndex == end) {
-        caculateIndex = GetTextLength();
+    if (NearZero(height) || caculateIndex == end || caculateIndex > lastIndex) {
+        caculateIndex = lastIndex;
     }
     HandleSelection(true, caculateIndex);
 }
@@ -1337,12 +1338,13 @@ void TextPattern::HandleSelectionDown()
 void TextPattern::HandleSelection(bool isEmojiStart, int32_t end)
 {
     auto start = textSelector_.GetStart();
-    if (start < 0 || start > GetTextLength() || end < 0 || end > GetTextLength()) {
+    auto lastIndex = GetActualTextLength();
+    if (start < 0 || start > lastIndex || end < 0 || end > lastIndex) {
         return;
     }
     int32_t emojiStartIndex;
     int32_t emojiEndIndex;
-    bool isIndexInEmoji = TextEmojiProcessor::IsIndexInEmoji(end, GetSelectedText(0, GetTextLength()),
+    bool isIndexInEmoji = TextEmojiProcessor::IsIndexInEmoji(end, GetSelectedText(0, lastIndex),
         emojiStartIndex, emojiEndIndex);
     if (isIndexInEmoji) {
         end = isEmojiStart ? emojiStartIndex : emojiEndIndex;
@@ -1365,11 +1367,15 @@ double TextPattern::GetTextHeight(int32_t index, bool isNextLine)
         auto endIndex = static_cast<int32_t>(lineMetrics.endIndex);
         lineHeight += lineMetrics.height;
         if (isNextLine) {
-            if (index <= endIndex && endIndex != GetTextLength()) {
+            if (index <= endIndex && endIndex != GetActualTextLength()) {
                 return lineHeight;
             }
         } else {
-            if (index <= endIndex && startIndex != 0) {
+            auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_RETURN(textLayoutProperty, 0);
+            auto maxLines = textLayoutProperty->GetMaxLinesValue(Infinity<float>());
+            if ((index <= endIndex && startIndex != 0) ||
+                ((lineNumber + 1) == maxLines && lineNumber != 0)) {
                 return GetLineMetrics(lineNumber - 1).height;
             }
         }
@@ -1377,12 +1383,10 @@ double TextPattern::GetTextHeight(int32_t index, bool isNextLine)
     return 0.0;
 }
 
-int32_t TextPattern::GetTextLength()
+int32_t TextPattern::GetActualTextLength()
 {
-    if (!spans_.empty()) {
-        return static_cast<int32_t>(GetWideText().length()) + placeholderCount_;
-    }
-    return static_cast<int32_t>(GetWideText().length());
+    auto lineCount = static_cast<int32_t>(pManager_->GetLineCount());
+    return GetLineMetrics(lineCount - 1).endIndex;
 }
 
 void TextPattern::SetTextSelectableMode(TextSelectableMode value)
@@ -1859,11 +1863,17 @@ ResultObject TextPattern::GetTextResultObject(RefPtr<UINode> uinode, int32_t ind
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
         resultObject.type = SelectSpanType::TYPESPAN;
-        resultObject.valueString = spanItem->content;
+        SetResultObjectText(resultObject, spanItem);
         auto spanNode = DynamicCast<SpanNode>(uinode);
         resultObject.textStyle = GetTextStyleObject(spanNode);
     }
     return resultObject;
+}
+
+void TextPattern::SetResultObjectText(ResultObject& resultObject, const RefPtr<SpanItem>& spanItem)
+{
+    CHECK_NULL_VOID(spanItem);
+    resultObject.valueString = spanItem->content;
 }
 
 ResultObject TextPattern::GetSymbolSpanResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end)
@@ -3152,23 +3162,10 @@ void TextPattern::FireOnMarqueeStateChange(const TextMarqueeState& state)
     RecoverCopyOption();
 }
 
-void TextPattern::OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsParam>&& menuOptionsItems)
+void TextPattern::OnSelectionMenuOptionsUpdate(
+    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
 {
-    menuOptionItems_ = std::move(menuOptionsItems);
-    for (auto& menuOption : menuOptionItems_) {
-        std::function<void(int32_t, int32_t)> actionRange = menuOption.actionRange;
-        menuOption.action = [weak = AceType::WeakClaim(this), actionRange] (
-                                const std::string selectInfo) {
-            auto textPattern = weak.Upgrade();
-            CHECK_NULL_VOID(textPattern);
-            if (actionRange) {
-                auto start = textPattern->textSelector_.GetTextStart();
-                auto end = textPattern->textSelector_.GetTextEnd();
-                actionRange(start, end);
-            }
-            textPattern->HiddenMenu();
-        };
-    }
+    selectOverlay_->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 
 void TextPattern::HandleSelectionChange(int32_t start, int32_t end)

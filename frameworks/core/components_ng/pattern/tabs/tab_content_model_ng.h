@@ -60,6 +60,7 @@ public:
     void SetOnWillShow(std::function<void()>&& onWillShow) override;
     void SetOnWillHide(std::function<void()>&& onWillHide) override;
     void SetCustomStyleNode(const RefPtr<NG::FrameNode>& customStyleNode) override;
+    static void SetCustomTabBar(FrameNode* node, FrameNode* tabBar);
     static void UpdateDefaultSymbol(RefPtr<TabTheme>& tabTheme, RefPtr<TextLayoutProperty> symbolProperty);
     static void UpdateSymbolEffect(RefPtr<TextLayoutProperty> symbolProperty, bool isActive);
 

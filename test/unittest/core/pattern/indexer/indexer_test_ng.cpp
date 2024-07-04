@@ -1720,14 +1720,14 @@ HWTEST_F(IndexerTestNg, IndexerPatternCoverage001, TestSize.Level1)
      * has no condition that selected_ more than itemCount_-1 when OnTouchUp.
      */
     pattern_->selected_ = CREATE_ARRAY.size();
-    pattern_->OnSelect(true);
+    pattern_->OnSelect();
 
     /**
      * @tc.steps: step5. Supplement OnSelect branch.
      * has no condition that selected_ less than 0 when OnTouchUp.
      */
     pattern_->selected_ = -1;
-    pattern_->OnSelect(true);
+    pattern_->OnSelect();
 
     /**
      * @tc.steps: step6. Supplement UpdateBubbleSize branch,

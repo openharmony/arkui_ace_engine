@@ -119,7 +119,7 @@ private:
     bool MoveIndexBySearch(const std::string& searchStr);
     void ApplyIndexChanged(
         bool isTextNodeInTree, bool refreshBubble = true, bool fromTouchUp = false, bool indexerSizeChanged = false);
-    void OnSelect(bool changed = false);
+    void OnSelect();
     int32_t GetSkipChildIndex(int32_t step);
     int32_t GetFocusChildIndex(const std::string& searchStr);
 
