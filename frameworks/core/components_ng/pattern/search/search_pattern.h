@@ -210,6 +210,7 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState(bool recoverFlag = false);
+    void PaintSearchFocusState();
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void GetSearchFocusPaintRadius(float& radiusTopLeft, float& radiusTopRight,
         float& radiusBottomLeft, float& radiusBottomRight);
@@ -268,6 +269,7 @@ private:
     void UpdateIconSrc(int32_t index, const std::string& src);
     void UpdateIconColor(int32_t index, const Color& color);
     void UpdateIconSize(int32_t index, const Dimension& value);
+    Color GetDefaultIconColor(int32_t index);
 
     uint32_t GetMaxLength() const;
     std::string SearchTypeToString() const;
@@ -303,6 +305,9 @@ private:
     bool isSearchButtonEnabled_ = false;
     bool focusBoxGlow_ = false;
     bool isFocusPlaceholderColorSet_ = false;
+    bool isFocusBgColorSet_ = false;
+    bool isFocusIconColorSet_ = false;
+    bool isFocusTextColorSet_ = false;
     Color searchHoverColor_;
     Color searchTouchColor_;
     Color searchNormalColor_;
