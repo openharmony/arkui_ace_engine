@@ -395,7 +395,7 @@ void CompleteResourceObjectFromId(const EcmaVM* vm, const Local<JSValueRef>& typ
         panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(Framework::ArkUIIndex::BUNDLE_NAME)))) {
         jsObj->Set(vm,
             panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(Framework::ArkUIIndex::BUNDLE_NAME)),
-                panda::StringRef::NewFromUtf8(vm, ""));
+            panda::StringRef::NewFromUtf8(vm, ""));
     }
     if (!jsObj->Has(vm,
         panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(Framework::ArkUIIndex::MODULE_NAME)))) {
