@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-#include "core/common/vibrator/vibrator_utils.h"
+#include "core/components_ng/pattern/time_picker/timepicker_haptic_factory.h"
+#include "core/components_ng/pattern/time_picker/timepicker_haptic_interface.h"
+
 
 namespace OHOS::Ace::NG {
-void VibratorUtils::StartVibraFeedback()
+std::shared_ptr<ITimepickerAudioHaptic> TimepickerAudioHapticFactory::GetInstance()
 {
-}
-
-void VibratorUtils::StartVibraFeedback(const std::string& vibratorType)
-{
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG

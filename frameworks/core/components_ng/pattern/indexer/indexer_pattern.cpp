@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
 
-#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/log/dump_log.h"
@@ -26,6 +25,7 @@
 #include "core/animation/animator.h"
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/popup_param.h"
@@ -846,7 +846,7 @@ void IndexerPattern::ApplyIndexChanged(
     if (selectChanged) {
         ShowBubble();
         if (enableHapticFeedback_ && selectedChangedForHaptic_ && !fromTouchUp) {
-            VibratorImpl::StartVibraFeedback();
+            VibratorUtils::StartVibraFeedback();
         }
     }
 }
