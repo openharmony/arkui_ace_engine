@@ -2180,6 +2180,7 @@ export class CustomContentDialog extends ViewPU {
         this.secondaryTitle = undefined;
         this.contentBuilder = undefined;
         this.contentAreaPadding = undefined;
+        this.localizedContentAreaPadding = undefined;
         this.buttons = undefined;
         this.theme = new CustomThemeImpl({});
         this.themeColorMode = ThemeColorMode.SYSTEM;
@@ -2204,6 +2205,9 @@ export class CustomContentDialog extends ViewPU {
         }
         if (params.contentAreaPadding !== undefined) {
             this.contentAreaPadding = params.contentAreaPadding;
+        }
+        if (params.localizedContentAreaPadding !== undefined) {
+            this.localizedContentAreaPadding = params.localizedContentAreaPadding;
         }
         if (params.buttons !== undefined) {
             this.buttons = params.buttons;
@@ -2273,6 +2277,7 @@ export class CustomContentDialog extends ViewPU {
                             this.contentBuilder();
                         },
                         contentAreaPadding: this.contentAreaPadding,
+                        localizedContentAreaPadding: this.localizedContentAreaPadding,
                         buttons: this.buttons,
                         theme: this.theme,
                         themeColorMode: this.themeColorMode,
@@ -2290,6 +2295,7 @@ export class CustomContentDialog extends ViewPU {
                                 this.contentBuilder();
                             },
                             contentAreaPadding: this.contentAreaPadding,
+                            localizedContentAreaPadding: this.localizedContentAreaPadding,
                             buttons: this.buttons,
                             theme: this.theme,
                             themeColorMode: this.themeColorMode,
@@ -2454,6 +2460,7 @@ class CustomDialogContentComponent extends ViewPU {
         this.controller = undefined;
         this.primaryTitle = undefined;
         this.secondaryTitle = undefined;
+        this.localizedContentAreaPadding = undefined;
         this.contentBuilder = this.defaultContentBuilder;
         this.buttons = undefined;
         this.contentAreaPadding = undefined;
@@ -2535,6 +2542,9 @@ class CustomDialogContentComponent extends ViewPU {
         }
         if (params.secondaryTitle !== undefined) {
             this.secondaryTitle = params.secondaryTitle;
+        }
+        if (params.localizedContentAreaPadding !== undefined) {
+            this.localizedContentAreaPadding = params.localizedContentAreaPadding;
         }
         if (params.contentBuilder !== undefined) {
             this.contentBuilder = params.contentBuilder;
@@ -3069,6 +3079,9 @@ class CustomDialogContentComponent extends ViewPU {
     }
 
     getContentPadding() {
+        if (this.localizedContentAreaPadding) {
+            return this.localizedContentAreaPadding;
+        }
         if (this.contentAreaPadding) {
             return this.contentAreaPadding;
         }

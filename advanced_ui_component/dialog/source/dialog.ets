@@ -850,6 +850,7 @@ export struct CustomContentDialog {
   secondaryTitle?: ResourceStr;
   @BuilderParam contentBuilder: () => void;
   contentAreaPadding?: Padding;
+  localizedContentAreaPadding?: LocalizedPadding;
   buttons?: ButtonOptions[];
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
   themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
@@ -865,6 +866,7 @@ export struct CustomContentDialog {
         this.contentBuilder();
       },
       contentAreaPadding: this.contentAreaPadding,
+      localizedContentAreaPadding: this.localizedContentAreaPadding,
       buttons: this.buttons,
       theme: this.theme,
       themeColorMode: this.themeColorMode,
@@ -954,6 +956,7 @@ struct CustomDialogContentComponent {
   controller?: CustomDialogController;
   primaryTitle?: ResourceStr;
   secondaryTitle?: ResourceStr;
+  localizedContentAreaPadding?: LocalizedPadding;
   @BuilderParam contentBuilder: () => void = this.defaultContentBuilder;
   buttons?: ButtonOptions[];
   contentAreaPadding?: Padding;
@@ -1103,7 +1106,10 @@ struct CustomDialogContentComponent {
    *
    * @returns content padding
    */
-  private getContentPadding(): Padding {
+  private getContentPadding(): Padding | LocalizedPadding {
+    if (this.localizedContentAreaPadding) {
+      return this.localizedContentAreaPadding;
+    }
     if (this.contentAreaPadding) {
       return this.contentAreaPadding;
     }
