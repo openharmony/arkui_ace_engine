@@ -2518,6 +2518,7 @@ void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
     ACE_SCOPED_TRACE("Swiper HandleTouchDown");
     TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper HandleTouchDown");
     isTouchDown_ = true;
+    isTouchDownOnOverlong_ = true;
     if (HasIndicatorNode()) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -2572,6 +2573,7 @@ void SwiperPattern::HandleTouchUp()
     ACE_SCOPED_TRACE("Swiper HandleTouchUp");
     TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper HandleTouchUp");
     isTouchDown_ = false;
+    isTouchDownOnOverlong_ = false;
     auto firstItemInfoInVisibleArea = GetFirstItemInfoInVisibleArea();
     if (!isDragging_ && !childScrolling_ && !NearZero(firstItemInfoInVisibleArea.second.startPos) &&
         !isTouchDownSpringAnimation_) {
@@ -2618,6 +2620,7 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
     gestureSwipeIndex_ = currentIndex_;
     isDragging_ = true;
     isTouchDown_ = true;
+    isTouchDownOnOverlong_ = true;
     mainDeltaSum_ = 0.0f;
     // in drag process, close lazy feature.
     SetLazyLoadFeature(false);
@@ -2674,6 +2677,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
         PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_SCROLL, false);
     }
     isTouchDown_ = false;
+    isTouchDownOnOverlong_ = false;
     if (!CheckSwiperPanEvent(dragVelocity)) {
         dragVelocity = 0.0;
     }

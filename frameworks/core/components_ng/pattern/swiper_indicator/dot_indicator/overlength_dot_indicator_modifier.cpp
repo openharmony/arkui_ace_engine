@@ -238,9 +238,11 @@ void OverlengthDotIndicatorModifier::PlayBlackPointsAnimation(const LinearVector
     }, [weak = WeakClaim(this)]() {
         auto modifier = weak.Upgrade();
         CHECK_NULL_VOID(modifier);
-        modifier->currentSelectedIndex_ = modifier->targetSelectedIndex_;
-        modifier->currentOverlongType_ = modifier->targetOverlongType_;
-        modifier->blackPointsAnimEnd_ = true;
+        if (!modifier->blackPointsAnimEnd_) {
+            modifier->currentSelectedIndex_ = modifier->targetSelectedIndex_;
+            modifier->currentOverlongType_ = modifier->targetOverlongType_;
+            modifier->blackPointsAnimEnd_ = true;
+        }
     });
 }
 
@@ -571,6 +573,8 @@ void OverlengthDotIndicatorModifier::PlayIndicatorAnimation(const OffsetF& margi
     const LinearVector<float>& itemHalfSizes, GestureState gestureState, TouchBottomTypeLoop touchBottomTypeLoop)
 {
     StopAnimation(false);
+    currentSelectedIndex_ = targetSelectedIndex_;
+    currentOverlongType_ = targetOverlongType_;
     isTouchBottomLoop_ = false;
     animationState_ = TouchBottomAnimationStage::STAGE_NONE;
     normalMargin_ = margin;
@@ -605,6 +609,7 @@ void OverlengthDotIndicatorModifier::StopAnimation(bool ifImmediately)
         });
     }
 
+    blackPointsAnimEnd_ = true;
     AnimationOption option;
     option.SetDuration(0);
     option.SetCurve(Curves::LINEAR);
@@ -621,8 +626,6 @@ void OverlengthDotIndicatorModifier::StopAnimation(bool ifImmediately)
     longPointLeftAnimEnd_ = true;
     longPointRightAnimEnd_ = true;
     ifNeedFinishCallback_ = false;
-    currentSelectedIndex_ = targetSelectedIndex_;
-    currentOverlongType_ = targetOverlongType_;
 }
 
 void OverlengthDotIndicatorModifier::InitOverlongStatus(int32_t pageIndex)

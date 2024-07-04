@@ -710,6 +710,11 @@ public:
         return isTouchDown_;
     }
 
+    bool IsTouchDownOnOverlong() const
+    {
+        return isTouchDownOnOverlong_;
+    }
+
 protected:
     void MarkDirtyNodeSelf();
 
@@ -1087,6 +1092,7 @@ private:
      */
     bool childScrolling_ = false;
     bool isTouchDown_ = false;
+    bool isTouchDownOnOverlong_ = false;
     std::optional<bool> preLoop_;
 
     Axis direction_ = Axis::HORIZONTAL;
