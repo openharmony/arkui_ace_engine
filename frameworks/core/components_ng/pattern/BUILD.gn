@@ -579,10 +579,6 @@ build_component_ng("pattern_ng") {
     if (!use_mingw_win && !use_mac && !use_linux) {
       external_deps += [ "window_manager:scene_session" ]
     }
-    if (product_name == "ohos-sdk") {
-      sources +=
-          [ "$ace_root/test/mock/core/pattern/mock_indexer_vibrator.cpp" ]
-    }
   } else if (is_arkui_x) {
     deps += [
       "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static",
