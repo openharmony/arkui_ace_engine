@@ -727,7 +727,7 @@ HWTEST_F(GridLayoutTestNg, GridLayout002, TestSize.Level1)
 HWTEST_F(GridLayoutTestNg, GridLayout003, TestSize.Level1)
 {
     GridModelNG model = CreateGrid();
-        std::string emptyString;
+    std::string emptyString;
     model.SetColumnsTemplate(emptyString);
     model.SetRowsTemplate(emptyString);
     CreateFixedItems(16);
@@ -977,11 +977,11 @@ HWTEST_F(GridLayoutTestNg, PaintEdgeEffect001, TestSize.Level1)
 HWTEST_F(GridLayoutTestNg, GridScrollTest006, TestSize.Level1)
 {
     GridModelNG model = CreateGrid();
-        ScrollBarUpdateFunc scrollFunc = [](int32_t index, Dimension offset) {
-            std::optional<float> horizontalOffset = offset.ConvertToPx();
-            std::optional<float> verticalOffset = offset.ConvertToPx();
-            return std::make_pair(horizontalOffset, verticalOffset);
-        };
+    ScrollBarUpdateFunc scrollFunc = [](int32_t index, Dimension offset) {
+        std::optional<float> horizontalOffset = offset.ConvertToPx();
+        std::optional<float> verticalOffset = offset.ConvertToPx();
+        return std::make_pair(horizontalOffset, verticalOffset);
+    };
     model.SetRowsTemplate("1fr 1fr");
     CreateFixedItems(2);
     model.SetGridHeight(Dimension(5));
@@ -990,9 +990,9 @@ HWTEST_F(GridLayoutTestNg, GridScrollTest006, TestSize.Level1)
     model.SetScrollBarWidth("10vp");
     model.SetIsRTL(TextDirection::LTR);
 
-        NestedScrollOptions nestedOpt;
+    NestedScrollOptions nestedOpt;
     model.SetNestedScroll(std::move(nestedOpt));
-        ScrollToIndexFunc value;
+    ScrollToIndexFunc value;
     model.SetOnScrollToIndex(std::move(value));
     CreateDone(frameNode_);
     auto paintProperty = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
@@ -1516,7 +1516,7 @@ HWTEST_F(GridLayoutTestNg, AdaptToChildMainSize003, TestSize.Level1)
 {
     GridModelNG model = CreateGrid();
     model.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        ViewAbstract::SetWidth(CalcLength(Infinity<int32_t>()));
+    ViewAbstract::SetWidth(CalcLength(Infinity<int32_t>()));
     CreateFixedItems(8);
     CreateDone(frameNode_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().lastMainSize_, ITEM_WIDTH * 2);
@@ -1702,5 +1702,53 @@ HWTEST_F(GridLayoutTestNg, GridItemDisableEventTest002, TestSize.Level1)
     EXPECT_EQ(mockRenderContext->opacityMultiplier_, 0.4f);
     gridItemPattern->InitDisableStyle();
     EXPECT_EQ(mockRenderContext->opacityMultiplier_, 0.4f);
+}
+
+/**
+ * @tc.name: Cache001
+ * @tc.desc: Test Grid preload items
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, Cache001, TestSize.Level1)
+{
+    GridModelNG model = CreateRepeatGrid(50, 200.0f);
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    model.SetCachedCount(2); // 2 lines
+    CreateDone(frameNode_);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 50);
+    const auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 11);
+    const std::list<int32_t> preloadList = { 12, 13, 14 };
+    for (const int32_t i : preloadList) {
+        EXPECT_FALSE(frameNode_->GetChildByIndex(i));
+    }
+    EXPECT_EQ(pattern_->preloadItemList_, preloadList);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_TRUE(pattern_->preloadItemList_.empty());
+    for (const int32_t i : preloadList) {
+        EXPECT_TRUE(frameNode_->GetChildByIndex(i));
+        EXPECT_EQ(GetChildRect(frameNode_, i).Height(), 200.0f);
+    }
+    FlushLayoutTask(frameNode_);
+    // preload next line
+    const std::list<int32_t> preloadList2 = { 15, 16, 17 };
+    EXPECT_EQ(pattern_->preloadItemList_, preloadList2);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_TRUE(pattern_->preloadItemList_.empty());
+    for (const int32_t i : preloadList2) {
+        EXPECT_TRUE(frameNode_->GetChildByIndex(i));
+        EXPECT_EQ(GetChildRect(frameNode_, i).Height(), 200.0f);
+    }
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(pattern_->preloadItemList_.empty());
+
+    pattern_->ScrollToIndex(49);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info.startIndex_, 39);
+    // GridScroll algo currently not capable of preloading backward
+    EXPECT_TRUE(pattern_->preloadItemList_.empty());
 }
 } // namespace OHOS::Ace::NG
