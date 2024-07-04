@@ -396,6 +396,11 @@ export class ChipGroup extends ViewPU {
     }
     getChipSize() {
         if (this.itemStyle && this.itemStyle.size) {
+            if (typeof this.itemStyle.size == 'object') {
+                if (!this.itemStyle.size.width || !this.itemStyle.size.height) {
+                    return defaultTheme.itemStyle.size;
+                }
+            }
             return this.itemStyle.size;
         }
         return defaultTheme.itemStyle.size;
@@ -626,6 +631,9 @@ export class ChipGroup extends ViewPU {
                                     else {
                                         if (!this.isMultiple()) {
                                             this.selectedIndexes = [];
+                                        }
+                                        if (!this.selectedIndexes || this.selectedIndexes.length === 0) {
+                                            this.selectedIndexes = this.getSelectedIndexes();
                                         }
                                         this.selectedIndexes.push(index);
                                     }
