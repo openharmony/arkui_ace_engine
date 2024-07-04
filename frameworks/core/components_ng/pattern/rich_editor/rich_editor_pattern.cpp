@@ -382,6 +382,7 @@ void RichEditorPattern::DeleteValueInStyledString(int32_t start, int32_t length,
         if (previewLongPress_ && isIME) {
             TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewLongPress_ is true, before RequestKeyboard");
             RequestKeyboard(false, true, true);
+            HandleOnEditChanged(true);
             previewLongPress_ = false;
         }
     }
@@ -2349,7 +2350,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
         if (focusHub->RequestFocusImmediately()) {
             StartTwinkling();
             RequestKeyboard(false, true, true);
-            TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "focusHub: set HandleOnEditChanged to 1");
+            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "focusHub: set HandleOnEditChanged to 1");
             HandleOnEditChanged(true);
         }
     }
@@ -2648,6 +2649,7 @@ void RichEditorPattern::HandleBlurEvent()
     }
     isCaretInContentArea_ = reason == BlurReason::WINDOW_BLUR && IsCaretInContentArea();
     HandleOnEditChanged(false);
+    isMoveCaretAnywhere_ = false;
     FinishTextPreview();
 }
 
@@ -2661,7 +2663,7 @@ void RichEditorPattern::HandleFocusEvent()
     dataDetectorAdapter_->CancelAITask();
     UseHostToUpdateTextFieldManager();
     if (previewLongPress_) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "if preview and longpress, lock then unlock: need keep preview state");
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "if preview and longpress: keep preview state");
         return;
     }
     if (textSelector_.SelectNothing()) {
@@ -4816,6 +4818,7 @@ std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
         if (previewLongPress_) {
             TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewLongPress_ is true, so RequestKeyboard");
             RequestKeyboard(false, true, true);
+            HandleOnEditChanged(true);
             previewLongPress_ = false;
         }
     }
@@ -6333,6 +6336,7 @@ void RichEditorPattern::ResetAfterPaste()
     if (previewLongPress_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewLongPress_ is true, before RequestKeyboard");
         RequestKeyboard(false, true, true);
+        HandleOnEditChanged(true);
         previewLongPress_ = false;
     }
     CloseSelectOverlay();
@@ -6363,11 +6367,7 @@ void RichEditorPattern::HandleOnPaste()
         CloseSelectOverlay();
         ResetSelection();
         StartTwinkling();
-        if (previewLongPress_) {
-            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewLongPress_ is true, before RequestKeyboard");
-            RequestKeyboard(false, true, true);
-            previewLongPress_ = false;
-        }
+        RequestKeyboardToEdit();
         return;
     }
     CHECK_NULL_VOID(clipboard_);
@@ -6379,17 +6379,14 @@ void RichEditorPattern::HandleOnPaste()
         auto spanItems = str->GetSpanItems();
         if (!spanItems.empty()) {
             richEditor->AddSpanByPasteData(str);
+            richEditor->RequestKeyboardToEdit();
             return;
         }
         if (text.empty()) {
             richEditor->ResetSelection();
             richEditor->StartTwinkling();
             richEditor->CloseSelectOverlay();
-            if (richEditor->previewLongPress_) {
-                TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewLongPress_ is true, before RequestKeyboard");
-                richEditor->RequestKeyboard(false, true, true);
-                richEditor->previewLongPress_ = false;
-            }
+            richEditor->RequestKeyboardToEdit();
             return;
         }
         richEditor->AddPasteStr(text);
@@ -6426,6 +6423,7 @@ void RichEditorPattern::HandleOnCut()
         if (previewLongPress_) {
             TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewLongPress_ is true, before RequestKeyboard");
             RequestKeyboard(false, true, true);
+            HandleOnEditChanged(true);
             previewLongPress_ = false;
         }
         return;
@@ -6773,10 +6771,30 @@ void RichEditorPattern::InitSelection(const Offset& pos)
 {
     int32_t currentPosition = paragraphs_.GetIndex(pos);
     currentPosition = std::min(currentPosition, GetTextContentLength());
-    bool currentPosEqualParagraphBegin = currentPosition == GetParagraphBeginPosition(currentPosition);
-    if (IsTouchBeforeCaret(currentPosition, pos) && !currentPosEqualParagraphBegin) {
-        currentPosition = std::max(0, currentPosition - 1);
+    if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
+        SelectType selectType = SelectType::NONE;
+        selectType = CheckResult(pos, currentPosition);
+        if (selectType == SelectType::NOT_SELECT) {
+            textSelector_.Update(-1, -1);
+            return;
+        }
+        if (selectType == SelectType::SELECT_ABOVE_LINE) {
+            int32_t aboveLineEnd = std::max(0, currentPosition - 1);
+            SetCaretPosition(aboveLineEnd);
+            int32_t aboveLineBegin = CalcLineBeginPosition();
+            textSelector_.Update(aboveLineBegin, aboveLineEnd);
+            return;
+        }
+        if (selectType == SelectType::SELECT_BACKWARD) {
+            currentPosition = std::max(0, currentPosition - 1);
+        }
+    } else {
+        bool currentPosEqualParagraphBegin = currentPosition == GetParagraphBeginPosition(currentPosition);
+        if (IsTouchBeforeCaret(currentPosition, pos) && !currentPosEqualParagraphBegin) {
+            currentPosition = std::max(0, currentPosition - 1);
+        }
     }
+
     int32_t nextPosition = currentPosition + GetGraphemeClusterLength(GetWideText(), currentPosition);
     nextPosition = std::min(nextPosition, GetTextContentLength());
     MouseDoubleClickParagraphEnd(currentPosition);
@@ -6784,12 +6802,41 @@ void RichEditorPattern::InitSelection(const Offset& pos)
     if (!IsCustomSpanInCaretPos(currentPosition, true)) {
         AdjustWordSelection(currentPosition, nextPosition);
     }
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "init select [%{public}d--%{public}d]", currentPosition, nextPosition);
     textSelector_.Update(currentPosition, nextPosition);
     auto selectedRects = paragraphs_.GetRects(currentPosition, nextPosition);
     bool isSelectEmpty = selectedRects.empty() || (selectedRects.size() == 1 && NearZero((selectedRects[0].Width())));
     if (isSelectEmpty) {
         textSelector_.Update(currentPosition, currentPosition);
     }
+}
+
+SelectType RichEditorPattern::CheckResult(const Offset& pos, int32_t currentPosition)
+{
+    SelectType selectType = SelectType::NONE;
+    if (GetTextContentLength() == 0) {
+        selectType = SelectType::NOT_SELECT;
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "result:empty content, not select");
+        return selectType;
+    }
+    AdjustCursorPosition(currentPosition);
+    caretPosition_ = currentPosition;
+    int32_t lineBeginPosition = CalcLineBeginPosition();
+    int32_t lineEndPosition = CalcLineEndPosition();
+    int32_t paragraphBegin = GetParagraphBeginPosition(currentPosition);
+    bool isTouchBeforeCaret = IsTouchBeforeCaret(currentPosition, pos);
+    bool currentPosEqualParagraphBegin = currentPosition == paragraphBegin;
+    bool touchAtLineEnd = currentPosition == lineEndPosition;
+    bool lineEmpty = lineBeginPosition == lineEndPosition;
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Line: begin|end=%{public}d|%{public}d, touch=%{public}d",
+                lineBeginPosition, lineEndPosition, currentPosition);
+    if ((isTouchBeforeCaret && !currentPosEqualParagraphBegin) || (touchAtLineEnd && !lineEmpty)) {
+        selectType = SelectType::SELECT_BACKWARD;
+    } else if (touchAtLineEnd && lineEmpty) {
+        selectType = SelectType::SELECT_ABOVE_LINE;
+    }
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "result:%{public}d(0:N/A,2:Select Backward,3:Select Above)", selectType);
+    return selectType;
 }
 
 void RichEditorPattern::HandleSelectOverlayWithOptions(const SelectionOptions& options)
@@ -9368,6 +9415,7 @@ void RichEditorPattern::MoveCaretAnywhere(const Offset& offset)
     // make sure the caret is display in the range of frame.
     localOffset.SetX(std::clamp(localOffset.GetX(), 0.0f, frameSize.Width()));
     DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(localOffset, caretHeight);
+    MoveCaretToContentRect(localOffset, caretHeight);
 }
 
 void RichEditorPattern::HideMenu()
@@ -9451,5 +9499,14 @@ void RichEditorPattern::TripleClickSection(GestureEvent& info, int32_t start, in
         StopTwinkling();
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void RichEditorPattern::RequestKeyboardToEdit()
+{
+    CHECK_NULL_VOID(previewLongPress_);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewLongPress_ is true, before RequestKeyboard");
+    RequestKeyboard(false, true, true);
+    HandleOnEditChanged(true);
+    previewLongPress_ = false;
 }
 } // namespace OHOS::Ace::NG
