@@ -186,7 +186,7 @@ void ButtonModelNG::SetButtonSize(FrameNode* frameNode, const std::optional<Cont
         defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
             CalcLength(padding.Top()), CalcLength(padding.Bottom()) };
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding, frameNode);
 }
 
 void ButtonModelNG::SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize)
@@ -431,6 +431,13 @@ void ButtonModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const
 void ButtonModelNG::SetFontSize(FrameNode* frameNode, const Dimension& fontSize)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, fontSize, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->ResetAdaptMinFontSize();
+    textLayoutProperty->ResetAdaptMaxFontSize();
 }
 
 void ButtonModelNG::SetFontWeight(FrameNode* frameNode, const Ace::FontWeight& fontWeight)
