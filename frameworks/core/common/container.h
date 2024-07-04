@@ -521,7 +521,10 @@ public:
     static bool GreatOrEqualAPITargetVersion(PlatformVersion version)
     {
         auto container = Current();
-        CHECK_NULL_RETURN(container, false);
+        if (!container) {
+            auto apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
+            return apiTargetVersion >= static_cast<int32_t>(version);
+        }
         auto apiTargetVersion = container->GetApiTargetVersion();
         return apiTargetVersion >= static_cast<int32_t>(version);
     }
