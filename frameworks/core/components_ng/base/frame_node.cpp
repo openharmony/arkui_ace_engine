@@ -4656,10 +4656,6 @@ void FrameNode::TriggerShouldParallelInnerWith(
 
 void FrameNode::GetInspectorValue()
 {
-    auto jsonItem = JsonUtil::Create(true);
-    auto rect = geometryNode_->GetFrameRect();
-    jsonItem->Put("x", rect.GetX());
-    jsonItem->Put("y", rect.GetY());
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST)
     if (GetTag() == V2::WEB_ETS_TAG) {
         UiSessionManager::GetInstance().WebTaskNumsChange(1);
@@ -4671,7 +4667,6 @@ void FrameNode::GetInspectorValue()
         };
         pattern->GetAllWebAccessibilityNodeInfos(cb, GetId());
     }
-    UiSessionManager::GetInstance().AddValueForTree(GetId(), jsonItem->ToString());
 #endif
     UINode::GetInspectorValue();
 }
