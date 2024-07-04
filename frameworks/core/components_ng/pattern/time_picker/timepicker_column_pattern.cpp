@@ -37,7 +37,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-// TODO timepicker style modification
+// timepicker style modification
 constexpr Dimension PADDING_WEIGHT = 10.0_vp;
 const Dimension FONT_SIZE = Dimension(2.0);
 const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
