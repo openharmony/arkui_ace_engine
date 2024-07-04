@@ -570,6 +570,14 @@ public:
         FocusHub::LostFocusToViewRoot();
         isKeyboardClosedByUser_ = false;
     }
+
+    void NotifyKeyboardClosed() override
+    {
+        if (HasFocus()) {
+            FocusHub::LostFocusToViewRoot();
+        }
+    }
+
     std::u16string GetLeftTextOfCursor(int32_t number) override;
     std::u16string GetRightTextOfCursor(int32_t number) override;
     int32_t GetTextIndexAtCursor() override;
