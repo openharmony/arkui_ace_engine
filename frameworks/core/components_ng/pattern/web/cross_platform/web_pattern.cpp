@@ -60,7 +60,8 @@ WebPattern::WebPattern() = default;
 WebPattern::WebPattern(const std::string& webSrc,
                        const RefPtr<WebController>& webController,
                        RenderMode renderMode,
-                       bool incognitoMode)
+                       bool incognitoMode,
+                       const std::string& sharedRenderProcessToken)
     : webSrc_(std::move(webSrc)), webController_(webController), renderMode_(renderMode),
       incognitoMode_(incognitoMode)
 {}
@@ -68,7 +69,8 @@ WebPattern::WebPattern(const std::string& webSrc,
 WebPattern::WebPattern(const std::string& webSrc,
                        const SetWebIdCallback& setWebIdCallback,
                        RenderMode renderMode,
-                       bool incognitoMode)
+                       bool incognitoMode,
+                       const std::string& sharedRenderProcessToken)
     : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback), renderMode_(renderMode),
       incognitoMode_(incognitoMode) {}
 
@@ -145,7 +147,7 @@ void WebPattern::InitEvent()
         CHECK_NULL_VOID(WebPattern);
         WebPattern->UpdateLocale();
     };
-    context->SetConfigChangedCallback(std::move(langTask));
+    context->SetConfigChangedCallback(GetHost()->GetId(), std::move(langTask));
 }
 
 void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -383,6 +385,11 @@ void WebPattern::WebRequestFocus()
     CHECK_NULL_VOID(focusHub);
 
     focusHub->RequestFocusImmediately();
+}
+
+WebInfoType WebPattern::GetWebInfoType()
+{
+    return WebInfoType::TYPE_MOBILE;
 }
 
 void WebPattern::UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty)
@@ -1191,9 +1198,14 @@ void WebPattern::InitSlideUpdateListener()
     // cross platform is not support now;
 }
 
-void WebPattern::UpdateSlideOffset()
+void WebPattern::UpdateSlideOffset(bool isNeedReset)
 {
    // cross platform is not support now;
+}
+
+void WebPattern::Backward()
+{
+    // cross platform is not support now;
 }
 
 void WebPattern::CalculateHorizontalDrawRect()

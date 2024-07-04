@@ -17,7 +17,7 @@
 
 #include <cstdint>
 
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(WEB_SUPPORTED)&& !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
@@ -4662,7 +4662,7 @@ void FrameNode::GetInspectorValue()
     auto rect = geometryNode_->GetFrameRect();
     jsonItem->Put("x", rect.GetX());
     jsonItem->Put("y", rect.GetY());
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(WEB_SUPPORTED)&& !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
     if (GetTag() == V2::WEB_ETS_TAG) {
         UiSessionManager::GetInstance().WebTaskNumsChange(1);
         auto pattern = GetPattern<NG::WebPattern>();

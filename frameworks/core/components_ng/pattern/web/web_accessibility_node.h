@@ -17,7 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WEB_WEB_ACCESSIBILITY_NODE_H
 
 #include "base/memory/referenced.h"
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "base/web/webview/ohos_nweb/include/nweb_accessibility_node_info.h"
+#else
+#include "base/web/webview/ohos_interface/include/ohos_nweb/nweb_accessibility_node_info.h"
+#endif
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/node_flag.h"
 #include "core/components_ng/property/property.h"
