@@ -392,6 +392,7 @@ public:
     void UpdatePaintRect(const RectF& paintRect) override;
     Matrix4 GetRevertMatrix() override;
     void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) override;
+    void SetOpacityMultiplier(float opacity) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -665,6 +666,7 @@ private:
     std::shared_ptr<Rosen::RSScaleModifier> scaleXYUserModifier_;
     std::shared_ptr<Rosen::RectF> drawRegionRects_[DRAW_REGION_RECT_COUNT] = { nullptr };
     RefPtr<FocusAnimationModifier> focusAnimationModifier_;
+    std::shared_ptr<Rosen::RSAlphaModifier> alphaModifier_;
 
     // translate modifiers for interruption
     std::shared_ptr<Rosen::RSTranslateModifier> translateXY_;
