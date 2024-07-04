@@ -71,9 +71,9 @@ let ArcButtonOptions = class ArcButtonOptions {
         this.textStyle = options.textStyle ?? FontStyle.Normal;
         this.textFamily = options.textFamily ?? '';
         this.textMargin = options.textMargin ?? {
-            left: new LengthMetrics(Constants.TEXT_HORIZONTAL_MARGIN, LengthUnit.VP),
+            start: new LengthMetrics(Constants.TEXT_HORIZONTAL_MARGIN, LengthUnit.VP),
             top: new LengthMetrics(Constants.TEXT_MARGIN_TOP, LengthUnit.VP),
-            right: new LengthMetrics(Constants.TEXT_HORIZONTAL_MARGIN, LengthUnit.VP),
+            end: new LengthMetrics(Constants.TEXT_HORIZONTAL_MARGIN, LengthUnit.VP),
             bottom: new LengthMetrics(Constants.TEXT_MARGIN_BOTTOM, LengthUnit.VP)
         };
     }
@@ -261,9 +261,14 @@ export class ArcButton extends ViewV2 {
             else {
                 this.btnHeight = data.height + Constants.DISTANCE_FROM_BORDER * 2;
             }
-            this.textWidth = data.width - this.options.textMargin.left.value - this.options.textMargin.right.value;
+            let margin = this.options.textMargin;
+            let start = margin?.start?.value ?? 0;
+            let end = margin?.end?.value ?? 0;
+            let top = margin?.top?.value ?? 0;
+            let bottom = margin?.bottom?.value ?? 0;
+            this.textWidth = data.width - start - end;
+            this.textHeight = data.height - top - bottom;
             this.judgeTextWidth();
-            this.textHeight = data.height - this.options.textMargin.top.value - this.options.textMargin.bottom.value;
             let leftTopPoint = data.leftTopPoint;
             let rightTopPoint = data.rightTopPoint;
             let leftBottomPoint = data.leftBottomPoint;
@@ -320,7 +325,12 @@ export class ArcButton extends ViewV2 {
             Text.fontFamily(this.options.textFamily);
             Text.maxLines(1);
             Text.textOverflow({ overflow: TextOverflow.MARQUEE });
-            Text.margin({ top: this.isUp ? this.options.textMargin.bottom : this.options.textMargin.top });
+            Text.margin({
+                start: this.options.textMargin.start,
+                top: this.isUp ? this.options.textMargin.bottom : this.options.textMargin.top,
+                end: this.options.textMargin.end,
+                bottom: this.options.textMargin.bottom
+            });
         }, Text);
         Text.pop();
     }
@@ -337,13 +347,18 @@ export class ArcButton extends ViewV2 {
             Text.fontStyle(this.options.textStyle);
             Text.fontFamily(this.options.textFamily);
             Text.maxLines(1);
-            Text.margin({ top: this.isUp ? this.options.textMargin.bottom : this.options.textMargin.top });
+            Text.margin({
+                start: this.options.textMargin.start,
+                top: this.isUp ? this.options.textMargin.bottom : this.options.textMargin.top,
+                end: this.options.textMargin.end,
+                bottom: this.options.textMargin.bottom
+            });
         }, Text);
         Text.pop();
     }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Stack.create({ alignContent: Alignment.Top });
+            Stack.create({ alignContent: Alignment.TopStart });
             Context.animation(null);
             Stack.width(this.btnWidth);
             Stack.height(this.btnHeight);
@@ -724,4 +739,4 @@ Constants.EMPHASIZEWARN_PRESSED_BTN_COLOR = '#9E342F';
 Constants.EMPHASIZEWARN_DISABLE_BTN_COLOR = '#3E0d0c';
 Constants.EMPHASIZEWARN_DISABLE_TEXT_COLOR = '#99FFFFFF';
 //# sourceMappingURL=ArcButton.js.map
-export default { ArcButton, ArcButtonOptions, TypeMode, ArcButtonStyleMode, ArcButtonStatus, ArkButtonClickEffectStyle }
+export default { ArcButton, ArcButtonOptions, ArcButtonTypeMode, ArcButtonStyleMode, ArcButtonStatus, ArkButtonClickEffectStyle }

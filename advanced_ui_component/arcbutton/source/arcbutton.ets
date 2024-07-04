@@ -41,13 +41,6 @@ export enum ArkButtonClickEffectStyle {
   HEAVY = 3
 }
 
-export interface ArcButtonMargin {
-  left: LengthMetrics;
-  top: LengthMetrics;
-  right: LengthMetrics;
-  bottom: LengthMetrics;
-}
-
 interface CommonArcButtonOptions {
   /**
    * 上下弧形按钮类型属性,默认为下弧形按钮
@@ -127,7 +120,7 @@ interface CommonArcButtonOptions {
   /**
    *文字到边框的距离
    */
-  textMargin?: ArcButtonMargin;
+  textMargin?: LocalizedMargin;
 }
 
 @ObservedV2
@@ -147,7 +140,7 @@ export class ArcButtonOptions {
   @Trace public pressedTextColor: ColorMetrics;
   @Trace public textStyle: FontStyle;
   @Trace public textFamily: string | Resource;
-  @Trace public textMargin: ArcButtonMargin;
+  @Trace public textMargin: LocalizedMargin;
   public touchCallback?: Callback<TouchEvent>
   public onClickEvent?: Callback<ClickEvent>
 
@@ -169,9 +162,9 @@ export class ArcButtonOptions {
     this.textStyle = options.textStyle ?? FontStyle.Normal
     this.textFamily = options.textFamily ?? ''
     this.textMargin = options.textMargin ?? {
-      left: new LengthMetrics(Constants.TEXT_HORIZONTAL_MARGIN, LengthUnit.VP),
+      start: new LengthMetrics(Constants.TEXT_HORIZONTAL_MARGIN, LengthUnit.VP),
       top: new LengthMetrics(Constants.TEXT_MARGIN_TOP, LengthUnit.VP),
-      right: new LengthMetrics(Constants.TEXT_HORIZONTAL_MARGIN, LengthUnit.VP),
+      end: new LengthMetrics(Constants.TEXT_HORIZONTAL_MARGIN, LengthUnit.VP),
       bottom: new LengthMetrics(Constants.TEXT_MARGIN_BOTTOM, LengthUnit.VP)
     }
   }
@@ -316,9 +309,14 @@ export struct ArcButton {
       } else {
         this.btnHeight = data.height + Constants.DISTANCE_FROM_BORDER * 2
       }
-      this.textWidth = data.width - this.options.textMargin.left.value - this.options.textMargin.right.value
+      let margin = this.options.textMargin
+      let start = margin?.start?.value ?? 0
+      let end = margin?.end?.value ?? 0
+      let top = margin?.top?.value ?? 0
+      let bottom = margin?.bottom?.value ?? 0
+      this.textWidth = data.width - start - end
+      this.textHeight = data.height - top - bottom
       this.judgeTextWidth()
-      this.textHeight = data.height - this.options.textMargin.top.value - this.options.textMargin.bottom.value
       let leftTopPoint = data.leftTopPoint
       let rightTopPoint = data.rightTopPoint
       let leftBottomPoint = data.leftBottomPoint
@@ -383,7 +381,12 @@ export struct ArcButton {
       .fontFamily(this.options.textFamily)
       .maxLines(1)
       .textOverflow({ overflow: TextOverflow.MARQUEE })
-      .margin({ top: this.isUp ? this.options.textMargin.bottom : this.options.textMargin.top })
+      .margin({
+        start: this.options.textMargin.start,
+        top: this.isUp ? this.options.textMargin.bottom : this.options.textMargin.top,
+        end: this.options.textMargin.end,
+        bottom: this.options.textMargin.bottom
+      })
   }
 
   @Builder
@@ -399,11 +402,16 @@ export struct ArcButton {
       .fontStyle(this.options.textStyle)
       .fontFamily(this.options.textFamily)
       .maxLines(1)
-      .margin({ top: this.isUp ? this.options.textMargin.bottom : this.options.textMargin.top })
+      .margin({
+        start: this.options.textMargin.start,
+        top: this.isUp ? this.options.textMargin.bottom : this.options.textMargin.top,
+        end: this.options.textMargin.end,
+        bottom: this.options.textMargin.bottom
+      })
   }
 
   build() {
-    Stack({ alignContent: Alignment.Top }) {
+    Stack({ alignContent: Alignment.TopStart }) {
       if (this.buildLog()) {
       }
       Canvas(this.context)
