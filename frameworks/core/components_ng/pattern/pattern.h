@@ -111,6 +111,11 @@ public:
         return false;
     }
 
+    virtual bool NeedToRequestKeyboardOnFocus() const
+    {
+        return true;
+    }
+
     virtual bool DefaultSupportDrag()
     {
         return false;

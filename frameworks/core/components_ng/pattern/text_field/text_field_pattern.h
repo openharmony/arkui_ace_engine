@@ -173,18 +173,21 @@ public:
     // TextField needs softkeyboard, override function.
     bool NeedSoftKeyboard() const override
     {
-        return needToRequestKeyboardOnFocus_;
+        return true;
     }
+
     void SetBlurOnSubmit(bool blurOnSubmit)
     {
         textInputBlurOnSubmit_ = blurOnSubmit;
         textAreaBlurOnSubmit_ = blurOnSubmit;
     }
+
     bool GetBlurOnSubmit()
     {
         return IsTextArea() ? textAreaBlurOnSubmit_ : textInputBlurOnSubmit_;
     }
-    bool GetNeedToRequestKeyboardOnFocus() const
+
+    bool NeedToRequestKeyboardOnFocus() const override
     {
         return needToRequestKeyboardOnFocus_;
     }
