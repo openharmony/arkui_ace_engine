@@ -171,6 +171,23 @@ HWTEST_F(HyperlinkTestNg, HyperlinkModelNGTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HyperlinkModelNGTest002
+ * @tc.desc: Test HyperlinkModelNG SetDraggable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HyperlinkTestNg, HyperlinkModelNGTest003, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    HyperlinkModelNG hyperlinkModelNG;
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    hyperlinkModelNG.SetDraggable(true);
+    hyperlinkModelNG.SetDraggable(false);
+    hyperlinkModelNG.SetDraggable(frameNode, false);
+    frameNode->draggable_ = false;
+    hyperlinkModelNG.SetDraggable(frameNode, true);
+}
+
+/**
  * @tc.name: HyperlinkPatternTest003
  * @tc.desc: Test HyperlinkPattern InitTouchEvent.
  * @tc.type: FUNC
