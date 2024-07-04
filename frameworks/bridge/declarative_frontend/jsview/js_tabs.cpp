@@ -302,6 +302,8 @@ void JSTabs::SetBarMode(const JSCallbackInfo& info)
     if (barMode == TabBarMode::SCROLLABLE) {
         if (info.Length() > 1 && info[1]->IsObject()) {
             SetScrollableBarModeOptions(info[1]);
+        } else {
+            TabsModel::GetInstance()->ResetScrollableBarModeOptions();
         }
     }
     TabsModel::GetInstance()->SetTabBarMode(barMode);
