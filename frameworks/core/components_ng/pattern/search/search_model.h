@@ -49,7 +49,6 @@ public:
     virtual void SetTextColor(const Color& color);
     virtual void SetTextAlign(const TextAlign& textAlign);
     virtual void SetCopyOption(const CopyOptions& copyOptions);
-    virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;
     virtual void SetFocusable(bool focusable) {};
     virtual void SetFocusNode(bool isFocusNode) {};
     virtual void SetHeight(const Dimension& height);
@@ -68,7 +67,7 @@ public:
     virtual void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func);
     virtual void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent);
     virtual void SetSelectionMenuHidden(bool selectionMenuHidden) = 0;
-    virtual void SetCustomKeyboard(const std::function<void ()> &&buildFunc, bool supportAvoidance = false);
+    virtual void SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance = false);
     virtual void SetSearchEnterKeyType(TextInputAction value);
     virtual void SetMaxLength(uint32_t value);
     virtual void ResetMaxLength();
@@ -88,8 +87,10 @@ public:
     virtual void SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError) {};
     virtual void SetOnEditChanged(std::function<void(bool)>&& func) {};
     virtual void SetTextIndent(const Dimension& value) {};
-    virtual void SetSelectionMenuOptions(const std::vector<NG::MenuOptionsParam>&& menuOptionsItems) {};
+    virtual void SetSelectionMenuOptions(
+        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
     virtual void SetEnablePreviewText(bool enablePreviewText) = 0;
+
 private:
     static std::unique_ptr<SearchModel> instance_;
     static std::mutex mutex_;

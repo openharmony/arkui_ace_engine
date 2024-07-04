@@ -1213,11 +1213,13 @@ void WebDelegate::AddJavascriptInterface(const std::string& objectName, const st
             if (delegate->nweb_) {
                 // Async methods list is empty
                 std::vector<std::string> asyncMethodList;
-                // webcontroller not support object, so the object_id param assign
-                // error code
+                std::string permission;
+                // webcontroller not support object, so the object_id param
+                // assign error code
                 delegate->nweb_->RegisterArkJSfunction(
                     objectName, methodList, asyncMethodList,
-                    static_cast<int32_t>(JavaScriptObjIdErrorCode::WEBCONTROLLERERROR));
+                    static_cast<int32_t>(JavaScriptObjIdErrorCode::WEBCONTROLLERERROR),
+                    permission);
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebAddJsInterface");
@@ -4829,6 +4831,9 @@ void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEve
     if (eventType == AccessibilityEventType::FOCUS) {
         TextBlurReport(accessibilityId);
     }
+    if (eventType == AccessibilityEventType::CLICK) {
+        WebComponentClickReport(accessibilityId);
+    }
     event.nodeId = accessibilityId;
     event.type = eventType;
     context->SendEventToAccessibility(event);
@@ -4860,6 +4865,17 @@ void WebDelegate::TextBlurReport(int64_t accessibilityId)
             lastFocusInputId_ = accessibilityId;
         }
     }
+}
+
+void WebDelegate::WebComponentClickReport(int64_t accessibilityId)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    auto webAccessibilityNode = webPattern->GetAccessibilityNodeById(accessibilityId);
+    CHECK_NULL_VOID(webAccessibilityNode);
+    auto webComponentClickCallback = webPattern->GetWebComponentClickCallback();
+    CHECK_NULL_VOID(webComponentClickCallback);
+    webComponentClickCallback(accessibilityId, webAccessibilityNode->GetContent());
 }
 
 void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
@@ -5755,6 +5771,15 @@ bool WebDelegate::GetPendingSizeStatus()
     }
     return false;
 }
+
+void WebDelegate::HandleAccessibilityHoverEvent(int32_t x, int32_t y)
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->SendAccessibilityHoverEvent(x, y);
+    }
+}
+
 #endif
 
 std::string WebDelegate::GetUrlStringParam(const std::string& param, const std::string& name) const

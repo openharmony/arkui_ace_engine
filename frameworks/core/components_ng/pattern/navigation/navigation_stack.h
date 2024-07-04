@@ -180,6 +180,8 @@ public:
 
     virtual void UpdatePathInfoIfNeeded(RefPtr<UINode>& uiNode, int32_t index) {}
     virtual void RecoveryNavigationStack() {}
+    virtual bool NeedBuildNewInstance(int32_t index) { return false; }
+    virtual void SetNeedBuildNewInstance(int32_t index, bool need) {}
 
     void UpdateRecoveryList()
     {

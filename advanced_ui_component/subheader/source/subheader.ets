@@ -21,8 +21,6 @@ import { BusinessError } from '@ohos.base';
 import hilog from '@ohos.hilog';
 import common from '@ohos.app.ability.common';
 
-const INDEX_ZERO: number = 0;
-const INDEX_ONE: number = 1;
 const INDEX_TWO: number = 2;
 // 行数及整体高度
 const SINGLE_LINE_NUM: number = 1;
@@ -47,6 +45,12 @@ const LOADING_SIZE: number = 24;
 const PADDING_LEVEL_2: number = 4;
 const MAX_RIGHT_WIDTH: Length = '34%';
 const MIN_FONT_SIZE: number = 1.75;
+const MIN_HOT_AREA_LENGTH: number = 40;
+const MULTI_ICON_REGION_WIDTH: number = 36;
+const ICON_REGION_X: number = -9;
+const ICON_REGION_Y: number = -8;
+const SINGLE_ICON_REGION_X: number = -12;
+const SINGLE_ICON_NUMBER: number = 1;
 
 export enum OperationType {
   TEXT_ARROW = 0,
@@ -209,6 +213,34 @@ export struct SubHeader {
     })
   }
 
+  @Styles
+  private rightAreaClickEvent() {
+    .onClick(() => {
+      if ((this.operationType === OperationType.TEXT_ARROW || this.operationType === OperationType.BUTTON) &&
+      this.operationItem && this.operationItem.length > 0 && this.operationItem[0].action) {
+        this.operationItem[0].action();
+      }
+    })
+    .onTouch((event) => {
+      if (event.type === TouchType.Down) {
+        if (this.operationType === OperationType.TEXT_ARROW) {
+          this.textArrowBgColor = $r('sys.color.interactive_pressed');
+        }
+        if (this.operationType === OperationType.BUTTON) {
+          this.buttonBgColor =  $r('sys.color.interactive_pressed');
+        }
+      }
+      if (event.type === TouchType.Up) {
+        if (this.operationType === OperationType.TEXT_ARROW) {
+          this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+        }
+        if (this.operationType === OperationType.BUTTON) {
+          this.buttonBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+        }
+      }
+    })
+  }
+
   async aboutToAppear(): Promise<void> {
     let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
     this.fontSize = context.config?.fontSizeScale ?? 1;
@@ -251,6 +283,7 @@ export struct SubHeader {
         })
         .justifyContent(FlexAlign.Start)
         .width('100%')
+        .rightAreaClickEvent()
       }
       .constraintSize({ minHeight: this.getMinHeight() })
       .margin(this.contentMargin ?? this.subHeaderMargin)
@@ -267,8 +300,14 @@ export struct SubHeader {
           this.rightArea();
         }
         .justifyContent(FlexAlign.End)
-        .constraintSize({ maxWidth: this.getMaxWidth() })
+        .alignItems(VerticalAlign.Bottom)
+        .constraintSize({
+          maxWidth: this.getRightAreaMaxWidth(),
+          minWidth: this.getRightAreaMinWidth(),
+          minHeight: MIN_HOT_AREA_LENGTH,
+        })
         .flexShrink(0)
+        .rightAreaClickEvent()
       }
       .constraintSize({ minHeight: this.getMinHeight() })
       .margin(this.contentMargin ?? this.subHeaderMargin)
@@ -302,12 +341,19 @@ export struct SubHeader {
     })
   }
 
-  private getMaxWidth(): Length {
+  private getRightAreaMaxWidth(): Length {
     if (this.operationType === OperationType.ICON_GROUP && (this.operationItem && this.operationItem.length > 0)) {
       return '100%';
     } else {
       return MAX_RIGHT_WIDTH;
     }
+  }
+
+  private getRightAreaMinWidth(): Length {
+    if (this.operationItem && this.operationItem.length > 0) {
+      return MIN_HOT_AREA_LENGTH;
+    }
+    return 0;
   }
 
   private getMinHeight(): Length {
@@ -583,19 +629,6 @@ export struct SubHeader {
               this.buttonBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
             }
           })
-          .onTouch((event) => {
-            if (event.type === TouchType.Down) {
-              this.buttonBgColor = $r('sys.color.interactive_pressed');
-            }
-            if (event.type === TouchType.Up) {
-              this.buttonBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
-            }
-          })
-          .onClick((event) => {
-            if (button.action) {
-              button.action();
-            }
-          })
         }
       }
       .focusable(true)
@@ -699,19 +732,6 @@ export struct SubHeader {
           this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
         }
       })
-      .onTouch((event) => {
-        if (event.type === TouchType.Down) {
-          this.textArrowBgColor = $r('sys.color.interactive_pressed');
-        }
-        if (event.type === TouchType.Up) {
-          this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
-        }
-      })
-      .onClick((event) => {
-        if (textArrow.action) {
-          textArrow.action();
-        }
-      })
     }
     .attributeModifier(this.subHeaderModifier)
     .focusable(true)
@@ -725,9 +745,9 @@ export struct SubHeader {
   @Builder
   IconGroupStyle(operationItem: Array<OperationOption>): void {
     Row() {
-      ForEach(operationItem, (item: OperationOption, index?: number) => {
+      ForEach(operationItem, (item: OperationOption, index: number) => {
         if (Util.isResourceType(item.value)) {
-          if (index === INDEX_ZERO) {
+          if (index <= INDEX_TWO) {
             SingleIconStyle({
               item: {
                 iconOptions: {
@@ -736,18 +756,8 @@ export struct SubHeader {
                   this.operationSymbolOptions[index] : null,
                 },
                 action: item.action,
-              }
-            })
-          } else if (index === INDEX_ONE || index === INDEX_TWO) {
-            SingleIconStyle({
-              item: {
-                action: item.action,
-                iconOptions: {
-                  icon: item.value as Resource,
-                  symbolicIconOption: this.operationSymbolOptions && this.operationSymbolOptions.length > index ?
-                  this.operationSymbolOptions[index] : null,
-                },
-              }
+              },
+              isSingleIcon: this.operationItem?.length === SINGLE_ICON_NUMBER,
             })
               .margin({
                 start: LengthMetrics.resource($r('sys.float.padding_level4')),
@@ -756,13 +766,10 @@ export struct SubHeader {
             // 最大支持3个ICON,此场景不支持
           }
         }
-      });
+      })
     }
     .justifyContent(FlexAlign.End)
     .focusable(true)
-    .margin({
-      start: LengthMetrics.resource($r('sys.float.padding_level4')),
-    })
   }
 
   @Builder
@@ -805,6 +812,7 @@ struct SingleIconStyle {
   @State isFocus: boolean = false;
   item: ContentIconOption | null = null;
   @Consume subHeaderTheme: SubHeaderTheme;
+  isSingleIcon: boolean = true;
 
   build() {
     if (this.item && this.item.iconOptions) {
@@ -851,12 +859,20 @@ struct SingleIconStyle {
           this.bgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
         }
       })
+      .responseRegion(this.iconResponseRegion())
       .onClick((event) => {
         if (this.item?.action) {
           this.item?.action();
         }
       })
     }
+  }
+
+  private iconResponseRegion(): Rectangle {
+    if (this.isSingleIcon) {
+      return { x: SINGLE_ICON_REGION_X, y: ICON_REGION_Y, width: MIN_HOT_AREA_LENGTH, height: MIN_HOT_AREA_LENGTH };
+    }
+    return { x: ICON_REGION_X, y: ICON_REGION_Y, width: MULTI_ICON_REGION_WIDTH, height: MIN_HOT_AREA_LENGTH };
   }
 
   private fontSizeValue(item: ContentIconOption): Length {

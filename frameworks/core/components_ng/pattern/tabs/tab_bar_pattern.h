@@ -106,12 +106,18 @@ public:
         return tabBarStyle_;
     }
 
+    void SetCustomNode(FrameNode* node)
+    {
+        node_ = node;
+    }
+
 private:
     std::string text_;
     std::string icon_;
     std::optional<TabBarSymbol> symbol_;
     TabBarBuilderFunc builder_;
     TabBarStyle tabBarStyle_;
+    FrameNode* node_ = nullptr;
 };
 
 enum class AnimationType {

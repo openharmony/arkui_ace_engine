@@ -23,7 +23,6 @@ namespace {} // namespace
 
 class TextFieldPatternTest : public TextInputBases {
 public:
-    RefPtr<TextFieldLayoutProperty> layoutProperty_;
 };
 
 /**
@@ -281,11 +280,19 @@ HWTEST_F(TextFieldPatternTest, TextPattern012, TestSize.Level1)
      */
     CreateTextField();
     GestureEvent info;
+    info.deviceType_ = SourceType::MOUSE;
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->hasPreviewText_ = true;
+    pattern->HandleDoubleClickEvent(info);
+    pattern->showSelect_ = false;
+    pattern->hasPreviewText_ = false;
+    pattern->selectController_->firstHandleInfo_.index = 1;
+    pattern->selectController_->secondHandleInfo_.index = 2;
+    pattern->HandleDoubleClickEvent(info);
+    info.deviceType_ = SourceType::NONE;
     pattern->HandleDoubleClickEvent(info);
 }
 
@@ -345,22 +352,17 @@ HWTEST_F(TextFieldPatternTest, TextPattern015, TestSize.Level1)
      * @tc.steps: step1. create frameNode and test pattern IsShowHandle
      */
     CreateTextField();
-    GestureEvent info1;
-    auto textFieldNode1 = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+    GestureEvent info;
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
-    RefPtr<TextFieldPattern> pattern1 = textFieldNode1->GetPattern<TextFieldPattern>();
-    ASSERT_NE(pattern1, nullptr);
-    pattern1->hasPreviewText_ = true;
-    pattern1->HandleTripleClickEvent(info1);
-
-    GestureEvent info2;
-    auto textFieldNode2 = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
-    RefPtr<TextFieldPattern> pattern2 = textFieldNode2->GetPattern<TextFieldPattern>();
-    ASSERT_NE(pattern2, nullptr);
-    pattern2->hasPreviewText_ = false;
-    pattern2->showSelect_ = false;
-    pattern2->HandleTripleClickEvent(info2);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->hasPreviewText_ = true;
+    pattern->HandleTripleClickEvent(info);
+    pattern->hasPreviewText_ = false;
+    pattern->showSelect_ = false;
+    info.deviceType_ = SourceType::MOUSE;
+    pattern->HandleTripleClickEvent(info);
 }
 
 /**
@@ -452,6 +454,15 @@ HWTEST_F(TextFieldPatternTest, TextPattern019, TestSize.Level1)
     ASSERT_NE(pattern2, nullptr);
     pattern2->hasPreviewText_ = false;
     pattern2->HandleRightMouseReleaseEvent(info2);
+
+    MouseInfo info3;
+    auto textFieldNode3 = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    RefPtr<TextFieldPattern> pattern3 = textFieldNode3->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern3, nullptr);
+    pattern3->hasPreviewText_ = false;
+    pattern3->GetFocusHub()->currentFocus_ = true;
+    pattern3->HandleRightMouseReleaseEvent(info3);
 }
 
 /**
@@ -482,6 +493,26 @@ HWTEST_F(TextFieldPatternTest, TextPattern020, TestSize.Level1)
     pattern2->leftMouseCanMove_ = true;
     pattern2->blockPress_ = false;
     pattern2->HandleLeftMouseMoveEvent(info2);
+
+    MouseInfo info3;
+    auto textFieldNode3 = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    RefPtr<TextFieldPattern> pattern3 = textFieldNode3->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern3, nullptr);
+    pattern3->leftMouseCanMove_ = true;
+    pattern3->blockPress_ = false;
+    pattern3->GetFocusHub()->currentFocus_ = true;
+    pattern3->HandleLeftMouseMoveEvent(info3);
+
+    MouseInfo info4;
+    auto textFieldNode4 = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    RefPtr<TextFieldPattern> pattern4 = textFieldNode4->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern4, nullptr);
+    pattern4->leftMouseCanMove_ = true;
+    pattern4->blockPress_ = false;
+    pattern4->GetFocusHub()->currentFocus_ = false;
+    pattern4->HandleLeftMouseMoveEvent(info4);
 }
 
 /**
@@ -534,7 +565,6 @@ HWTEST_F(TextFieldPatternTest, TextPattern022, TestSize.Level1)
     pattern->RequestKeyboard(false, true, true);
     pattern->showKeyBoardOnFocus_ = false;
     auto func1 = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ;
     pattern->customKeyboard_ = AceType::Claim<UINode>(func1);
     pattern->RequestKeyboard(false, true, true);
 }
@@ -603,6 +633,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern025, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    pattern->GetFocusHub()->focusType_ = FocusType::DISABLE;
+    pattern->HandleLongPress(info);
+    pattern->GetFocusHub()->focusType_ = FocusType::NODE;
     pattern->hasPreviewText_ = true;
     pattern->HandleLongPress(info);
 }
@@ -691,7 +724,11 @@ HWTEST_F(TextFieldPatternTest, TextPattern029, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    pattern->GetFocusHub()->focusType_ = FocusType::DISABLE;
     pattern->hasPreviewText_ = true;
+    pattern->HandleRightMousePressEvent(info);
+    pattern->selectController_->firstHandleInfo_.index = 1;
+    pattern->selectController_->secondHandleInfo_.index = 2;
     pattern->HandleRightMousePressEvent(info);
 }
 
@@ -1928,5 +1965,245 @@ HWTEST_F(TextFieldPatternTest, TextPattern082, TestSize.Level0)
     pattern->ProcessOverlay();
     pattern->isTouchCaret_ = false;
     pattern->HandleTouchEvent(touchEventInfo);
+}
+
+/**
+ * @tc.name: TextPattern083
+ * @tc.desc: test testInput text HandleTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextPattern083, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    Offset offset(1.0, 1.0);
+    pattern->enableTouchAndHoverEffect_ = false;
+    pattern->HandleTouchDown(offset);
+    pattern->enableTouchAndHoverEffect_ = true;
+    pattern->isMousePressed_ = true;
+    pattern->HandleTouchDown(offset);
+    pattern->isMousePressed_ = false;
+    pattern->isTouchCaret_ = false;
+    pattern->HandleTouchDown(offset);
+}
+
+/**
+ * @tc.name: TextPattern084
+ * @tc.desc: test testInput text HandleTouchUp
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextPattern084, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    Offset offset(1.0, 1.0);
+    pattern->magnifierController_->isShowMagnifier_ = true;
+    pattern->hasPreviewText_ = true;
+    pattern->HandleTouchUp();
+    pattern->hasPreviewText_ = false;
+    pattern->HandleTouchUp();
+}
+
+/**
+ * @tc.name: TextPattern085
+ * @tc.desc: test testInput text HandleTouchMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextPattern085, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    TouchEventInfo touchEventInfo("onTouch");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.touchType_ = TouchType::MOVE;
+    touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+
+    pattern->isTouchCaret_ = true;
+    pattern->hasPreviewText_ = true;
+    pattern->HandleTouchMove(touchEventInfo);
+    pattern->hasPreviewText_ = false;
+    pattern->HandleTouchMove(touchEventInfo);
+}
+
+/**
+ * @tc.name: TextPattern086
+ * @tc.desc: test testInput text UpdateCaretByTouchMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextPattern086, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    TouchEventInfo touchEventInfo("onTouch");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.touchType_ = TouchType::MOVE;
+    touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+
+    pattern->hasPreviewText_ = true;
+    pattern->UpdateCaretByTouchMove(touchEventInfo);
+}
+
+/**
+ * @tc.name: TextPattern087
+ * @tc.desc: test testInput text ShowSelectAfterDragEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextPattern087, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->selectOverlay_->isUsingMouse_ = true;
+    pattern->ShowSelectAfterDragEvent();
+}
+
+/**
+ * @tc.name: TextPattern088
+ * @tc.desc: test testInput text HandleClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextPattern088, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    GestureEvent info;
+    pattern->GetFocusHub()->focusType_ = FocusType::DISABLE;
+    pattern->HandleClickEvent(info);
+}
+
+/**
+ * @tc.name: TextPattern089
+ * @tc.desc: test testInput text ProcessAutoFill
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextPattern089, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER);
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    bool isPopup1 = true;
+    bool isPopup2 = false;
+    pattern->ProcessAutoFill(isPopup1, true, true);
+    pattern->ProcessAutoFill(isPopup2, false, false);
+}
+
+/**
+ * @tc.name: TextPattern090
+ * @tc.desc: test testInput text ScheduleCursorTwinkling
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextPattern090, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER);
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isTransparent_ = true;
+    pattern->ScheduleCursorTwinkling();
+}
+
+/**
+ * @tc.name: TextPattern092
+ * @tc.desc: test testInput text ScheduleCursorTwinkling
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextPattern092, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto tmpHost = pattern->GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    auto frameId = tmpHost->GetId();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    Offset offset1(1.0, -1.0);
+    pattern->frameRect_ = RectF(0, 0, 0, 0);
+    pattern->ChangeMouseState(offset1, pipeline, frameId, true);
+    Offset offset2(1.0, -1.0);
+    pattern->frameRect_ = RectF(0, 0, 10, 0);
+    pattern->ChangeMouseState(offset2, pipeline, frameId, true);
+    Offset offset3(1.0, 1.0);
+    pattern->frameRect_ = RectF(0, 0, 10, 0);
+    pattern->ChangeMouseState(offset3, pipeline, frameId, true);
+    Offset offset4(1.0, 1.0);
+    pattern->frameRect_ = RectF(0, 0, 10, 50);
+    pattern->ChangeMouseState(offset4, pipeline, frameId, true);
+}
+
+/**
+ * @tc.name: TextPattern093
+ * @tc.desc: test testInput text ScheduleCursorTwinkling
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextPattern093, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->GetFocusHub()->currentFocus_ = false;
+    pattern->TwinklingByFocus();
 }
 } // namespace OHOS::Ace::NG

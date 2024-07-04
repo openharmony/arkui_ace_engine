@@ -694,9 +694,9 @@ RefPtr<ImageSpan> JSImageAttachment::ParseJsImageSpan(const JSRef<JSObject>& obj
 ImageSpanOptions JSImageAttachment::CreateImageOptions(const JSRef<JSObject>& obj)
 {
     ImageSpanOptions options;
-    auto container = Container::Current();
+    auto container = Container::CurrentSafely();
     CHECK_NULL_RETURN(container, options);
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, options);
     bool isCard = context->IsFormRender() && !container->IsDynamicRender();
 

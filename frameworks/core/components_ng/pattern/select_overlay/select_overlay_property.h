@@ -35,6 +35,12 @@ constexpr int32_t MENU_SHOW_ANIMATION_DURATION = 250;
 constexpr int32_t MENU_HIDE_ANIMATION_DURATION = 200;
 constexpr int32_t HANDLE_ANIMATION_DURATION = 150;
 
+struct OnMenuItemCallback {
+    OnCreateMenuCallback onCreateMenuCallback;
+    OnMenuItemClickCallback onMenuItemClick;
+    std::function<void(int32_t&, int32_t&)> textRangeCallback;
+};
+
 struct SelectHandlePaintInfo {
     OffsetF startPoint;
     OffsetF endPoint;
@@ -266,6 +272,7 @@ struct SelectOverlayInfo {
     SelectMenuCallback menuCallback;
 
     std::vector<MenuOptionsParam> menuOptionItems;
+    OnMenuItemCallback onCreateCallback;
 
     // force hide callback, which may be called when other textOverlay shows.
     std::function<void(bool)> onClose;

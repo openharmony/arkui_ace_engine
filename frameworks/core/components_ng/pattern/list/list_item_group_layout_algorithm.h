@@ -43,7 +43,8 @@ struct ListItemGroupInfo {
 struct ListItemGroupCacheParam {
     bool forward = true;
     int32_t cacheCount = 0;
-    int32_t currCachedIndex = -1;
+    int32_t forwardCachedIndex = -1;
+    int32_t backwardCachedIndex = INT_MAX;
     int64_t deadline = 0;
 };
 

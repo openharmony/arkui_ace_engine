@@ -37,9 +37,9 @@ public:
     bool PreProcessOverlay(const OverlayRequest& request) override;
     bool CheckHandleVisible(const RectF& paintRect) override;
 
-    bool OnlyAllowedPasteNonEmptyString() override
+    std::string GetPasteMimeType() override
     {
-        return true;
+        return pasteMimeType_;
     }
 
     void OnResetTextSelection() override;
@@ -86,6 +86,7 @@ private:
     int32_t GetTextInputCaretPosition(const OffsetF& localOffset);
     void CloseMagnifier();
     SourceType lastSourceType_ = SourceType::NONE;
+    std::string pasteMimeType_ = "text/plain";
 };
 
 } // namespace OHOS::Ace::NG

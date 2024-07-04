@@ -188,7 +188,7 @@ public:
 
     ACE_DISALLOW_COPY_AND_MOVE(JSOffscreenCanvas);
 private:
-    napi_value CreateContext2d(napi_env env, double width, double height);
+    napi_value CreateContext2d(napi_env env, double width, double height, const EcmaVM* vm);
     napi_value onTransferToImageBitmap(napi_env env);
     napi_value onGetContext(napi_env env, napi_callback_info info);
     napi_value OnSetWidth(napi_env env, napi_callback_info info);

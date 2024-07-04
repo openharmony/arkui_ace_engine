@@ -116,6 +116,15 @@ void RichEditorModelNG::SetAboutToIMEInput(std::function<bool(const RichEditorIn
     eventHub->SetAboutToIMEInput(std::move(func));
 }
 
+void RichEditorModelNG::SetAboutToIMEInput(FrameNode* frameNode,
+    std::function<bool(const RichEditorInsertValue&)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetAboutToIMEInput(std::move(callback));
+}
+
 void RichEditorModelNG::SetOnIMEInputComplete(std::function<void(const RichEditorAbstractSpanResult&)>&& func)
 {
     CHECK_NULL_VOID(!isStyledStringMode_);
@@ -325,6 +334,15 @@ void RichEditorModelNG::SetOnSubmit(std::function<void(int32_t, NG::TextFieldCom
     eventHub->SetOnSubmit(std::move(func));
 }
 
+void RichEditorModelNG::SetOnSubmit(FrameNode* frameNode,
+    std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSubmit(std::move(callback));
+}
+
 void RichEditorModelNG::SetOnWillChange(std::function<bool(const RichEditorChangeValue&)>&& func)
 {
     CHECK_NULL_VOID(!isStyledStringMode_);
@@ -371,10 +389,11 @@ void RichEditorModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(NG::T
     eventHub->SetOnCopy(std::move(func));
 }
 
-void RichEditorModelNG::SetSelectionMenuOptions(const std::vector<MenuOptionsParam>&& menuOptionsItems)
+void RichEditorModelNG::SetSelectionMenuOptions(
+    const OnCreateMenuCallback&& onCreateMenuCallback, const OnMenuItemClickCallback&& onMenuItemClick)
 {
     auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
     CHECK_NULL_VOID(richEditorPattern);
-    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(menuOptionsItems));
+    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 } // namespace OHOS::Ace::NG

@@ -613,7 +613,7 @@ HWTEST_F(OptionTestNg, CreatePasteButton001, TestSize.Level1)
      * @tc.steps: step3. Create pasteButton node.
      * @tc.expected: The child node pastebutton can be obtained through the parent node option.
      */
-    OptionView::CreatePasteButton(option, row, []() {});
+    OptionView::CreatePasteButton(false, option, row, []() {});
     auto PasteButtonNode = option->GetChildAtIndex(0)->GetChildren();
     EXPECT_FALSE(PasteButtonNode.empty());
 }

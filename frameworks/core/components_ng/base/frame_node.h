@@ -909,14 +909,6 @@ public:
     }
 
     bool CheckAccessibilityLevelNo() const {
-        auto property = GetAccessibilityProperty<NG::AccessibilityProperty>();
-        if (property) {
-            auto level = property->GetAccessibilityLevel();
-            if (level == NG::AccessibilityProperty::Level::NO ||
-                level == NG::AccessibilityProperty::Level::NO_HIDE_DESCENDANTS) {
-                return true;
-            }
-        }
         return false;
     }
 

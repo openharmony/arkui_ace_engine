@@ -30,6 +30,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t COLOR_BLACK = 0xff000000;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
+constexpr uint32_t COLOR_TRANSLUCENT_WHITE = 0x66ffffff;
+constexpr Dimension SNAPSHOT_RADIUS = 16.0_vp;
 } // namespace
 
 class LifecycleListener : public Rosen::ILifecycleListener {
@@ -215,6 +217,30 @@ void WindowPattern::CreateStartingWindow()
     startingWindow_->MarkModifyDone();
 }
 
+void WindowPattern::UpdateSnapshotWindowProperty()
+{
+    CHECK_NULL_VOID(snapshotWindow_ && session_);
+    auto isExitSplitOnBackground = session_->IsExitSplitOnBackground();
+    if (isExitSplitOnBackground) {
+        auto imagePattern = snapshotWindow_->GetPattern<ImagePattern>();
+        auto renderContext = snapshotWindow_->GetRenderContext();
+        auto imageRenderProperty = snapshotWindow_->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(imagePattern && renderContext && imageRenderProperty);
+
+        BorderRadiusProperty borderRadius;
+        borderRadius.SetRadius(SNAPSHOT_RADIUS);
+        borderRadius.multiValued = false;
+        renderContext->UpdateBorderRadius(borderRadius);
+        renderContext->UpdateBackgroundColor(Color(COLOR_TRANSLUCENT_WHITE));
+        imagePattern->SetNeedBorderRadius(true);
+        imageRenderProperty->UpdateNeedBorderRadius(true);
+    }
+    auto imageLayoutProperty = snapshotWindow_->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    imageLayoutProperty->UpdateImageFit(isExitSplitOnBackground ? ImageFit::CONTAIN : ImageFit::COVER_TOP_LEFT);
+    snapshotWindow_->MarkModifyDone();
+}
+
 void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::PixelMap>> snapshot)
 {
     auto host = GetHost();
@@ -257,8 +283,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
             self->snapshotWindow_->MarkNeedRenderOnly();
         });
     }
-    imageLayoutProperty->UpdateImageFit(ImageFit::COVER_TOP_LEFT);
-    snapshotWindow_->MarkModifyDone();
+    UpdateSnapshotWindowProperty();
 }
 
 void WindowPattern::ClearImageCache(const ImageSourceInfo& sourceInfo)
@@ -505,10 +530,10 @@ void WindowPattern::AddChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNo
 }
 
 void WindowPattern::RemoveChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
-    const std::string& nodeType)
+    const std::string& nodeType, bool allowTransition)
 {
     ACE_SCOPED_TRACE("WindowScene::RemoveChild[%s][self:%d]", nodeType.c_str(), host->GetId());
-    host->RemoveChild(child);
+    host->RemoveChild(child, allowTransition);
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "RemoveChild %{public}s, %{public}d", nodeType.c_str(), host->GetId());
 }
 } // namespace OHOS::Ace::NG

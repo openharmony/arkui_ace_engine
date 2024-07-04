@@ -493,6 +493,16 @@ void TabContentModelNG::SetIndicator(const IndicatorStyle& indicator)
     frameNodePattern->SetIndicatorStyle(indicator);
 }
 
+void TabContentModelNG::SetCustomTabBar(FrameNode* node, FrameNode* tabBar)
+{
+    CHECK_NULL_VOID(node);
+    CHECK_NULL_VOID(tabBar);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetTabBarStyle(TabBarStyle::NOSTYLE);
+    frameNodePattern->SetCustomTabBar(tabBar);
+}
+
 void TabContentModelNG::SetBoard(const BoardStyle& board)
 {
     auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();

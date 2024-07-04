@@ -146,7 +146,7 @@ struct ContentItemStruct {
 
   @Builder
   createIcon() {
-    if (this.icon != null && this.iconStyle != null) {
+    if (this.icon != null && this.iconStyle != null && ICON_SIZE_MAP.has(this.iconStyle)) {
       if (this.iconStyle <= IconType.PREVIEW) {
         Image(this.icon)
           .objectFit(ImageFit.Contain)

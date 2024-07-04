@@ -201,6 +201,9 @@ int32_t OH_ArkUI_GetDrawableDescriptorFromResourceNapiValue(
         new ArkUI_DrawableDescriptor { nullptr, nullptr, 0, nullptr, nullptr, nullptr, nullptr };
     drawable->resource = std::make_shared<ArkUI_Resource>();
     parseApi(value, drawable->resource.get());
+    if (drawable->resource->src == "") {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     *drawableDescriptor = drawable;
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }

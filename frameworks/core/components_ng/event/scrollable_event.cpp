@@ -99,7 +99,7 @@ void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, con
                 CHECK_NULL_VOID(pattern);
                 auto item = pattern->GetSwiperItem().Upgrade();
                 CHECK_NULL_VOID(item);
-                item->SwiperReset(true);
+                item->ResetSwipeStatus();
             });
             result.emplace_front(clickRecognizer_);
             responseLinkResult.emplace_back(clickRecognizer_);

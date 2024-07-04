@@ -276,6 +276,7 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
         wantPtr->SetParam(UI_EXTENSION_TYPE_KEY, EMBEDDED_UI);
     }
     isNotifyOccupiedAreaChange_ = want.GetBoolParam(OCCUPIED_AREA_CHANGE_KEY, true);
+    UIEXT_LOGI("Want param isNotifyOccupiedAreaChange is %{public}d.", isNotifyOccupiedAreaChange_);
     auto callerToken = container->GetToken();
     auto parentToken = container->GetParentToken();
     Rosen::SessionInfo extensionSessionInfo = {
@@ -306,7 +307,7 @@ bool SessionWrapperImpl::IsSessionValid()
     return session_ != nullptr;
 }
 
-int32_t SessionWrapperImpl::GetSessionId()
+int32_t SessionWrapperImpl::GetSessionId() const
 {
     return session_ ? session_->GetPersistentId() : 0;
 }
@@ -332,7 +333,8 @@ bool SessionWrapperImpl::NotifyBackPressedSync()
     CHECK_NULL_RETURN(session_, false);
     bool isConsumed = false;
     session_->TransferBackPressedEventForConsumed(isConsumed);
-    UIEXT_LOGD("The back evnet is notified to the provider and %{public}s consumed.", isConsumed ? "is" : "is not");
+    UIEXT_LOGI("Back event notified to uiextension, persistentid = %{public}d and %{public}s consumed.",
+        GetSessionId(), isConsumed ? "is" : "is not");
     return isConsumed;
 }
 
@@ -352,7 +354,8 @@ bool SessionWrapperImpl::NotifyKeyEventSync(const std::shared_ptr<OHOS::MMI::Key
         pattern->FireOnErrorCallback(ERROR_CODE_UIEXTENSION_EVENT_TIMEOUT, EVENT_TIMEOUT_NAME, EVENT_TIMEOUT_MESSAGE);
         return false;
     }
-    UIEXT_LOGD("The key evnet is notified to the provider and %{public}s consumed.", isConsumed ? "is" : "is not");
+    UIEXT_LOGI("Key event notified to uiextension, persistentid = %{public}d and %{public}s consumed.",
+        GetSessionId(), isConsumed ? "is" : "is not");
     return isConsumed;
 }
 
@@ -373,7 +376,8 @@ bool SessionWrapperImpl::NotifyAxisEventSync(const std::shared_ptr<OHOS::MMI::Ax
 bool SessionWrapperImpl::NotifyFocusEventAsync(bool isFocus)
 {
     CHECK_NULL_RETURN(session_, false);
-    UIEXT_LOGD("Notify the provider to %{public}s the focus state.", isFocus ? "paint" : "clear");
+    UIEXT_LOGI("Notify uiextension, persistentid = %{public}d to %{public}s the focus state.",
+        GetSessionId(), isFocus ? "paint" : "clear");
     session_->TransferFocusActiveEvent(isFocus);
     return true;
 }
@@ -381,7 +385,8 @@ bool SessionWrapperImpl::NotifyFocusEventAsync(bool isFocus)
 bool SessionWrapperImpl::NotifyFocusStateAsync(bool focusState)
 {
     CHECK_NULL_RETURN(session_, false);
-    UIEXT_LOGD("The %{public}s state is notified to the provider.", focusState ? "focused" : "unfocused");
+    UIEXT_LOGI("%{public}s state notified to uiextension, persistentid = %{public}d.",
+        focusState ? "focused" : "unfocused", GetSessionId());
     session_->TransferFocusStateEvent(focusState);
     return true;
 }
@@ -393,7 +398,8 @@ bool SessionWrapperImpl::NotifyBackPressedAsync()
 bool SessionWrapperImpl::NotifyPointerEventAsync(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
     if (session_ && pointerEvent) {
-        UIEXT_LOGD("Transfer the pointer event with 'id = %{public}d' to the provider.", pointerEvent->GetId());
+        UIEXT_LOGD("Transfer pointer event with 'id = %{public}d' to uiextension, persistentid = %{public}d.",
+            pointerEvent->GetId(), GetSessionId());
         session_->TransferPointerEvent(pointerEvent);
     }
     return false;
@@ -401,7 +407,8 @@ bool SessionWrapperImpl::NotifyPointerEventAsync(const std::shared_ptr<OHOS::MMI
 bool SessionWrapperImpl::NotifyKeyEventAsync(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent)
 {
     if (session_ && keyEvent) {
-        UIEXT_LOGD("Transfer the key event with 'id = %{public}d' to the provider.", keyEvent->GetId());
+        UIEXT_LOGI("Transfer key event with 'id = %{public}d' to uiextension, persistentid = %{public}d.",
+            keyEvent->GetId(), GetSessionId());
         session_->TransferKeyEvent(keyEvent);
     }
     return false;
@@ -573,12 +580,14 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     CHECK_NULL_VOID(pipeline);
     auto curWindow = pipeline->GetCurrentWindowRect();
     displayArea_ = displayArea + OffsetF(curWindow.Left(), curWindow.Top());
-    UIEXT_LOGD("The display area with '%{public}s' is notified to the provider.", displayArea_.ToString().c_str());
+    UIEXT_LOGI("Display area with '%{public}s' notified to uiextension, persistentid = %{public}d.",
+        displayArea_.ToString().c_str(), GetSessionId());
     std::shared_ptr<Rosen::RSTransaction> transaction;
     auto parentSession = session_->GetParentSession();
     auto reason = parentSession ? parentSession->GetSizeChangeReason() : session_->GetSizeChangeReason();
     auto persistentId = parentSession ? parentSession->GetPersistentId() : session_->GetPersistentId();
-    ACE_SCOPED_TRACE("NotifyDisplayArea id: %d, reason [%d]", persistentId, reason);
+    ACE_SCOPED_TRACE("NotifyDisplayArea id: %d, reason [%d], displayArea [%s]",
+        persistentId, reason, displayArea_.ToString().c_str());
     UIEXT_LOGD("NotifyDisplayArea id: %{public}d, reason = %{public}d", persistentId, reason);
     if (reason == Rosen::SizeChangeReason::ROTATION) {
         if (transaction_.lock()) {
@@ -637,7 +646,8 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaCh
         keyboardHeight = static_cast<int32_t>(std::max(keyboardHeight - spaceWindow, 0));
     }
     info->rect_.height_ = static_cast<uint32_t>(keyboardHeight);
-    UIEXT_LOGD("The occcupied area with 'keyboardHeight = %{public}d' is notified to the provider.", keyboardHeight);
+    UIEXT_LOGI("Occcupied area with 'keyboardHeight = %{public}d' notified to uiextension, persistentid = %{public}d.",
+        keyboardHeight, GetSessionId());
     session_->NotifyOccupiedAreaChangeInfo(info);
     return true;
 }
