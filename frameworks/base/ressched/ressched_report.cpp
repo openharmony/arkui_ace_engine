@@ -191,7 +191,6 @@ void ResSchedReport::RecordTouchEvent(const TouchEvent& touchEvent, bool enforce
         lastTouchEvent_ = curTouchEvent_;
         curTouchEvent_ = touchEvent;
     }
-
 }
 
 void ResSchedReport::HandleTouchDown(const TouchEvent& touchEvent)
@@ -259,8 +258,8 @@ float ResSchedReport::GetUpVelocity(const TouchEvent& lastMoveInfo,
     const TouchEvent& upEventInfo)
 {
     float distance = sqrt(pow(lastMoveInfo.x - upEventInfo.x, SQUARE) + pow(lastMoveInfo.y - upEventInfo.y, SQUARE));
-    int64_t time = (int64_t)abs((int64_t)lastMoveInfo.GetTimeStamp().time_since_epoch().count() -
-        (int64_t)upEventInfo.GetTimeStamp().time_since_epoch().count());
+    int64_t time = std::abs(lastMoveInfo.GetTimeStamp().time_since_epoch().count() -
+        upEventInfo.GetTimeStamp().time_since_epoch().count());
     if (time < SECOND_UNIT) {
         return 0.0f;
     }
