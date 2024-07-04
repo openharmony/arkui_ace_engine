@@ -317,14 +317,19 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
-    auto leftIndex = 0;
-    auto rightIndex = swiperPattern->TotalCount() - swiperPattern->GetDisplayCount();
-    if (swiperPattern->IsHorizontalAndRightToLeft()) {
-        leftIndex = swiperPattern->TotalCount() - swiperPattern->GetDisplayCount();
-        rightIndex = 0;
+
+    auto displaycount = swiperPattern->GetDisplayCount();
+    bool leftArrowIsHidden = (index_ == 0);
+    bool rightArrowIsHidden = (index_ == swiperPattern->TotalCount() - displaycount);
+    if (swiperPattern->IsSwipeByGroup()) {
+        leftArrowIsHidden = (index_ < displaycount);
+        rightArrowIsHidden = (index_ == (swiperPattern->DisplayIndicatorTotalCount() - 1) * displaycount);
     }
-    if ((host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG && index_ == leftIndex) ||
-        (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG && index_ == rightIndex)) {
+    if (swiperPattern->IsHorizontalAndRightToLeft()) {
+        std::swap(leftArrowIsHidden, rightArrowIsHidden);
+    }
+    if ((host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG && leftArrowIsHidden) ||
+        (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG && rightArrowIsHidden)) {
         if (!swiperArrowLayoutProperty->GetLoopValue(true)) {
             renderContext->SetVisible(false);
             hostFocusHub->SetParentFocusable(false);
