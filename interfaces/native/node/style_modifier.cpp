@@ -2045,7 +2045,8 @@ int32_t SetShadow(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     auto* fullImpl = GetFullImpl();
     ArkUIInt32orFloat32 shadows[NUM_1] = { {.i32 = ArkUI_ShadowStyle::ARKUI_SHADOW_STYLE_OUTER_DEFAULT_XS} };
     shadows[NUM_0].i32 = item->value[0].i32;
-    fullImpl->getNodeModifiers()->getCommonModifier()->setBackShadow(node->uiNodeHandle, shadows, ALLOW_SIZE_1);
+    ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_VP);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setBackShadow(node->uiNodeHandle, shadows, ALLOW_SIZE_1, unit);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -2103,7 +2104,8 @@ int32_t SetCustomShadow(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (length > NUM_6) {
         shadows[NUM_6].i32 = item->value[NUM_6].i32;
     }
-    fullImpl->getNodeModifiers()->getCommonModifier()->setBackShadow(node->uiNodeHandle, shadows, ALLOW_SIZE_7);
+    ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_VP);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setBackShadow(node->uiNodeHandle, shadows, ALLOW_SIZE_7, unit);
     return ERROR_CODE_NO_ERROR;
 }
 
