@@ -599,7 +599,6 @@ public:
     }
 
     size_t GetLineCount() const override;
-    bool DidExceedMaxLines() const override;
     TextLineMetrics GetLineMetrics(int32_t lineNumber) override;
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
 
@@ -755,6 +754,7 @@ private:
     void CreateModifier();
 
     bool IsLineBreakOrEndOfParagraph(int32_t pos) const;
+    bool DidExceedMaxLines() const override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     // SpanString
     void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
