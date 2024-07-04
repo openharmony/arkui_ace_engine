@@ -202,6 +202,8 @@ public:
             theme->previewUnderlineColor_ = pattern->GetAttr<Color>(PREVIEW_UNDERLINE_COLOR, Color());
             theme->previewBoardColor_ = pattern->GetAttr<Color>(PREVIEW_BOARD_COLOR, Color());
             theme->cancelButton_ = pattern->GetAttr<std::string>("textfield_accessibility_property_delete", "");
+
+            theme->placeholderLineSpacing_ = pattern->GetAttr<Dimension>("text_field_placeholder_linespacing", 0.0_vp);
         }
     };
 
@@ -592,6 +594,11 @@ public:
         return inlinePaddingRight_;
     }
 
+    const Dimension& GetPlaceholderLineSpacing() const
+    {
+        return placeholderLineSpacing_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -692,6 +699,7 @@ private:
     std::string cancelButton_;
 
     Dimension inlinePaddingRight_ = 12.0_vp;
+    Dimension placeholderLineSpacing_ = 0.0_vp;
 };
 
 } // namespace OHOS::Ace

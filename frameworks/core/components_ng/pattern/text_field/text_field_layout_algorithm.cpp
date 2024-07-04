@@ -1259,9 +1259,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(const RefPtr<Frame
         placeholderTextStyle.SetLineHeight(layoutProperty->GetLineHeight().value());
         placeholderTextStyle.SetHalfLeading(pipeline->GetHalfLeading());
     }
-    if (layoutProperty->HasLineSpacing()) {
-        placeholderTextStyle.SetLineSpacing(layoutProperty->GetLineSpacing().value());
-    }
+    placeholderTextStyle.SetLineSpacing(theme->GetPlaceholderLineSpacing());
 }
 
 void TextFieldLayoutAlgorithm::UpdateTextFadeoutTextStyle(
