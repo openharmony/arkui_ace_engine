@@ -1157,6 +1157,24 @@ typedef enum {
     ARKUI_OBJECT_FIT_SCALE_DOWN,
     /** The original size is retained. */
     ARKUI_OBJECT_FIT_NONE,
+    /** Not resized, the image is aligned with the start edge of the top of the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_TOP_START,
+    /** Not resized, the image is horizontally centered at the top of the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_TOP,
+    /** Not resized, the image is aligned with the end edge at the top of the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_TOP_END,
+    /** Not resized, the image is vertically centered on the start edge of the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_START,
+    /** Not resized, the image is horizontally and vertically centered in the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_CENTER,
+    /** Not resized, the image is vertically centered on the end edge of the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_END,
+    /** Not resized, the image is aligned with the start edge at the bottom of the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_BOTTOM_START,
+    /** Not resized, the image is horizontally centered at the bottom of the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_BOTTOM,
+    /** Not resized, the image is aligned with the end edge at the bottom of the container. */
+    ARKUI_OBJECT_FIT_NONE_AND_ALIGN_BOTTOM_END,
 } ArkUI_ObjectFit;
 
 /**

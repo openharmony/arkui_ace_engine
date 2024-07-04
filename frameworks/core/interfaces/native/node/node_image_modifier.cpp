@@ -296,9 +296,6 @@ void SetObjectFit(ArkUINodeHandle node, ArkUI_Int32 objectFitNumber)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageFit objectFitValue = static_cast<ImageFit>(objectFitNumber);
-    if (objectFitValue < ImageFit::FILL || objectFitValue > ImageFit::SCALE_DOWN) {
-        objectFitValue = ImageFit::COVER;
-    }
     ImageModelNG::SetImageFit(frameNode, objectFitValue);
 }
 
