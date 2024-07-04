@@ -423,7 +423,7 @@ napi_value ExportArcList(napi_env env, napi_value exports)
 
 } // namespace OHOS::Ace
 
-extern "C" __attribute__((visibility("default"))) void NAPI_arkui_arclist_GetJSCode(const char** buf, int* bufLen)
+extern "C" __attribute__((visibility("default"))) void NAPI_arkui_ArcList_GetJSCode(const char** buf, int* bufLen)
 {
     if (buf != nullptr) {
         *buf = _binary_arkui_arclist_js_start;
@@ -435,7 +435,7 @@ extern "C" __attribute__((visibility("default"))) void NAPI_arkui_arclist_GetJSC
 }
 
 // arkui_arclist JS register
-extern "C" __attribute__((visibility("default"))) void NAPI_arkui_arclist_GetABCCode(const char** buf, int* buflen)
+extern "C" __attribute__((visibility("default"))) void NAPI_arkui_ArcList_GetABCCode(const char** buf, int* buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_arkui_arclist_abc_start;
@@ -450,7 +450,7 @@ static napi_module arcListModule = {
     .nm_flags = 0,
     .nm_filename = nullptr,
     .nm_register_func = OHOS::Ace::ArcList::ExportArcList,
-    .nm_modname = "arkui.arclist",
+    .nm_modname = "arkui.ArcList",
     .nm_priv = ((void*)0),
     .reserved = { 0 },
 };
