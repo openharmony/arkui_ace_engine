@@ -823,19 +823,22 @@ class OperateItemStruct extends ViewPU {
         this.observeComponentCreation2((x5, y5) => {
             Button.createWithChild({ type: ButtonType.Normal });
             Button.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
-            Button.hitTestBehavior(HitTestMode.Block);
+            Button.hitTestBehavior(HitTestMode.Transparent);
             Button.backgroundColor(Color.Transparent);
             Button.height(OPERATEITEM_ICONLIKE_SIZE);
             Button.width(OPERATEITEM_ARROW_WIDTH);
             Button.onFocus(() => {
                 this.parentCanFocus = false;
             });
+            Button.stateEffect(this.arrow?.action !== undefined);
             Button.onTouch((d6) => {
-                if (d6.type === TouchType.Down) {
-                    this.parentCanTouch = false;
-                }
-                if (d6.type === TouchType.Up || d6.type === TouchType.Cancel) {
-                    this.parentCanTouch = true;
+                if (this.arrow?.action !== undefined) {
+                    if (d6.type === TouchType.Down) {
+                        this.parentCanTouch = false;
+                    }
+                    if (d6.type === TouchType.Up || d6.type === TouchType.Cancel) {
+                        this.parentCanTouch = true;
+                    }
                 }
             });
             Button.onHover((c6) => {
@@ -980,7 +983,7 @@ class OperateItemStruct extends ViewPU {
     createTextArrow(v3 = null) {
         this.observeComponentCreation2((g4, h4) => {
             Button.createWithChild({ type: ButtonType.Normal });
-            Button.hitTestBehavior(HitTestMode.Block);
+            Button.hitTestBehavior(HitTestMode.Transparent);
             Button.labelStyle({
                 maxLines: TEXT_MAX_LINE
             });
@@ -990,12 +993,15 @@ class OperateItemStruct extends ViewPU {
             Button.onFocus(() => {
                 this.parentCanFocus = false;
             });
+            Button.stateEffect(this.arrow?.action !== undefined);
             Button.onTouch((m4) => {
-                if (m4.type === TouchType.Down) {
-                    this.parentCanTouch = false;
-                }
-                if (m4.type === TouchType.Up || m4.type === TouchType.Cancel) {
-                    this.parentCanTouch = true;
+                if (this.arrow?.action !== undefined) {
+                    if (m4.type === TouchType.Down) {
+                        this.parentCanTouch = false;
+                    }
+                    if (m4.type === TouchType.Up || m4.type === TouchType.Cancel) {
+                        this.parentCanTouch = true;
+                    }
                 }
             });
             Button.onHover((l4) => {
