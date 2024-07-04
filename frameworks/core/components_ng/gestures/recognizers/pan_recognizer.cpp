@@ -296,7 +296,6 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             // last one to fire end.
             isStartTriggered_ = false;
             SendCallbackMsg(onActionEnd_);
-            touchInfoForPan.averageDistance_.Reset();
             averageDistance_.Reset();
             AddOverTimeTrace();
             refereeState_ = RefereeState::READY;
