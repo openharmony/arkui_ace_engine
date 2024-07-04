@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,8 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t SHEET_DETENTS_TWO = 2;
+constexpr int32_t SHEET_DETENTS_THREE = 3;
 } // namespace
 
 class SheetCoverageTestNg : public testing::Test {
@@ -195,13 +197,11 @@ HWTEST_F(SheetCoverageTestNg, CreatePropertyCallback001, TestSize.Level1)
     property->updateCallback_(scale);
 
     dragBarPattern->isDown_ = true;
-    EXPECT_NE(dragBarPattern->GetPaintProperty<SheetDragBarPaintProperty>(), nullptr);
     EXPECT_TRUE(dragBarPattern->isDown_);
     property->updateCallback_(scale);
 
     scale = 0.0f;
     EXPECT_TRUE(NearZero(scale));
-    EXPECT_NE(dragBarPattern->GetPaintProperty<SheetDragBarPaintProperty>(), nullptr);
     property->updateCallback_(scale);
 
     EXPECT_NE(dragBarPattern->property_, nullptr);
@@ -226,18 +226,17 @@ HWTEST_F(SheetCoverageTestNg, CreateOperationColumnNode001, TestSize.Level1)
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
     EXPECT_FALSE(sheetStyle.isTitleBuilder.has_value());
     auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
     EXPECT_NE(pipeline->GetFontScale(), pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale());
     SheetView::CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
 
     pipeline->fontScale_ = pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale();
-    EXPECT_FALSE(sheetStyle.isTitleBuilder.has_value());
     EXPECT_EQ(pipeline->GetFontScale(), pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale());
     SheetView::CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
 
     sheetStyle.isTitleBuilder = true;
     pipeline->fontScale_ = pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale();
     EXPECT_TRUE(sheetStyle.isTitleBuilder.has_value());
-    EXPECT_EQ(pipeline->GetFontScale(), pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale());
     EXPECT_FALSE(sheetStyle.sheetTitle.has_value());
     EXPECT_FALSE(sheetStyle.sheetSubtitle.has_value());
     SheetView::CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
@@ -264,6 +263,7 @@ HWTEST_F(SheetCoverageTestNg, CreateOperationColumnNode002, TestSize.Level1)
     sheetStyle.isTitleBuilder = true;
     sheetStyle.sheetSubtitle = "sheetSubtitle";
     auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
     pipeline->fontScale_ = pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale();
     EXPECT_TRUE(sheetStyle.isTitleBuilder.has_value());
     EXPECT_EQ(pipeline->GetFontScale(), pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale());
@@ -274,13 +274,347 @@ HWTEST_F(SheetCoverageTestNg, CreateOperationColumnNode002, TestSize.Level1)
     sheetStyle.isTitleBuilder = true;
     sheetStyle.sheetTitle = "sheetTitle";
     sheetStyle.sheetSubtitle = "sheetSubtitle";
-    pipeline = PipelineContext::GetCurrentContext();
     pipeline->fontScale_ = pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale();
-    EXPECT_TRUE(sheetStyle.isTitleBuilder.has_value());
-    EXPECT_EQ(pipeline->GetFontScale(), pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale());
     EXPECT_TRUE(sheetStyle.sheetTitle.has_value());
-    EXPECT_TRUE(sheetStyle.sheetSubtitle.has_value());
     SheetView::CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: CreateDragBarNode001
+ * @tc.desc: Increase the coverage of CreateDragBarNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, CreateDragBarNode001, TestSize.Level1)
+{
+    auto titleBuilder = FrameNode::CreateFrameNode("Title", 101, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto operationColumn = FrameNode::CreateFrameNode("Column", 201, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
+        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(sheetLayoutProperty, nullptr);
+    NG::SheetStyle sheetStyle;
+    sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+    EXPECT_NE(sheetStyle.detents.size(), SHEET_DETENTS_TWO);
+    EXPECT_NE(sheetStyle.detents.size(), SHEET_DETENTS_THREE);
+    EXPECT_FALSE(sheetStyle.isTitleBuilder.has_value());
+    SheetView::CreateDragBarNode(titleBuilder, operationColumn, sheetStyle, sheetNode);
+
+    SheetHeight detent;
+    detent.sheetMode = SheetMode::AUTO;
+    sheetStyle.detents.emplace_back(detent);
+    detent.sheetMode = SheetMode::MEDIUM;
+    sheetStyle.detents.emplace_back(detent);
+    detent.sheetMode = SheetMode::LARGE;
+    sheetStyle.detents.emplace_back(detent);
+    sheetStyle.showDragBar = false;
+    sheetStyle.isTitleBuilder = false;
+    EXPECT_NE(sheetStyle.detents.size(), SHEET_DETENTS_TWO);
+    EXPECT_EQ(sheetStyle.detents.size(), SHEET_DETENTS_THREE);
+    EXPECT_FALSE(sheetStyle.showDragBar.value_or(true));
+    EXPECT_TRUE(sheetStyle.isTitleBuilder.has_value());
+    EXPECT_EQ(SheetView::BuildTitleColumn(sheetNode, sheetStyle), nullptr);
+    SheetView::CreateDragBarNode(titleBuilder, operationColumn, sheetStyle, sheetNode);
+
+    sheetStyle.detents.pop_back();
+    sheetStyle.showDragBar = true;
+    EXPECT_EQ(sheetStyle.detents.size(), SHEET_DETENTS_TWO);
+    EXPECT_NE(sheetStyle.detents.size(), SHEET_DETENTS_THREE);
+    EXPECT_TRUE(sheetStyle.showDragBar.value_or(true));
+    SheetView::CreateDragBarNode(nullptr, operationColumn, sheetStyle, sheetNode);
+}
+
+/**
+ * @tc.name: CreateDragBarNode002
+ * @tc.desc: Increase the coverage of CreateDragBarNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, CreateDragBarNode002, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto operationColumn = FrameNode::CreateFrameNode("Column", 201, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
+        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(sheetLayoutProperty, nullptr);
+    NG::SheetStyle sheetStyle;
+    sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+    sheetStyle.isTitleBuilder = false;
+    EXPECT_TRUE(sheetStyle.isTitleBuilder.has_value());
+    EXPECT_NE(SheetView::BuildTitleColumn(sheetNode, sheetStyle), nullptr);
+    SheetView::CreateDragBarNode(nullptr, operationColumn, sheetStyle, sheetNode);
+
+    auto titleBuilder = FrameNode::CreateFrameNode("Title", 101, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    EXPECT_FALSE(sheetStyle.isTitleBuilder.value());
+    SheetView::CreateDragBarNode(titleBuilder, operationColumn, sheetStyle, sheetNode);
+
+    sheetStyle.isTitleBuilder = true;
+    EXPECT_TRUE(sheetStyle.isTitleBuilder.value());
+    SheetView::CreateDragBarNode(titleBuilder, operationColumn, sheetStyle, sheetNode);
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: CreateCloseIconButtonNode001
+ * @tc.desc: Increase the coverage of CreateCloseIconButtonNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, CreateCloseIconButtonNode001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    NG::SheetStyle sheetStyle;
+    int32_t minPlatformVersion = PipelineBase::GetCurrentContext()->minPlatformVersion_;
+    PipelineBase::GetCurrentContext()->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+    EXPECT_TRUE(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN));
+    SheetView::CreateCloseIconButtonNode(sheetNode, sheetStyle);
+
+    PipelineBase::GetCurrentContext()->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TEN);
+    EXPECT_FALSE(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN));
+    SheetView::CreateCloseIconButtonNode(sheetNode, sheetStyle);
+    PipelineBase::GetCurrentContext()->minPlatformVersion_ = minPlatformVersion;
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: BuildMainTitle001
+ * @tc.desc: Increase the coverage of BuildMainTitle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, BuildMainTitle001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    NG::SheetStyle sheetStyle;
+    EXPECT_FALSE(sheetStyle.sheetTitle.has_value());
+    SheetView::BuildMainTitle(sheetNode, sheetStyle);
+
+    sheetStyle.sheetTitle = "sheetTitle";
+    EXPECT_TRUE(sheetStyle.sheetTitle.has_value());
+    SheetView::BuildMainTitle(sheetNode, sheetStyle);
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: BuildSubTitle001
+ * @tc.desc: Increase the coverage of BuildSubTitle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, BuildSubTitle001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    NG::SheetStyle sheetStyle;
+    EXPECT_FALSE(sheetStyle.sheetSubtitle.has_value());
+    SheetView::BuildSubTitle(sheetNode, sheetStyle);
+
+    sheetStyle.sheetSubtitle = "sheetSubtitle";
+    EXPECT_TRUE(sheetStyle.sheetSubtitle.has_value());
+    SheetView::BuildSubTitle(sheetNode, sheetStyle);
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetTitlePaddingPos001
+ * @tc.desc: Increase the coverage of GetTitlePaddingPos function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, GetTitlePaddingPos001, TestSize.Level1)
+{
+    PaddingProperty padding;
+    AceApplicationInfo& applicationInfo = AceApplicationInfo::GetInstance();
+    applicationInfo.apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TEN);
+    EXPECT_FALSE(applicationInfo.GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE));
+    SheetView::GetTitlePaddingPos(padding);
+
+    applicationInfo.apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+    applicationInfo.isRightToLeft_ = false;
+    EXPECT_TRUE(applicationInfo.GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE));
+    EXPECT_FALSE(applicationInfo.IsRightToLeft());
+    SheetView::GetTitlePaddingPos(padding);
+
+    applicationInfo.isRightToLeft_ = true;
+    EXPECT_TRUE(applicationInfo.IsRightToLeft());
+    SheetView::GetTitlePaddingPos(padding);
+}
+
+/**
+ * @tc.name: BuildTitleColumn001
+ * @tc.desc: Increase the coverage of BuildTitleColumn function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, BuildTitleColumn001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    NG::SheetStyle sheetStyle;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->fontScale_ = pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale() + 1;
+    EXPECT_NE(pipeline->GetFontScale(), pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale());
+    EXPECT_FALSE(sheetStyle.sheetTitle.has_value());
+    EXPECT_FALSE(sheetStyle.isTitleBuilder.has_value());
+    SheetView::BuildTitleColumn(sheetNode, sheetStyle);
+
+    pipeline->fontScale_ = pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale();
+    sheetStyle.isTitleBuilder = true;
+    EXPECT_EQ(pipeline->GetFontScale(), pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale());
+    EXPECT_TRUE(sheetStyle.isTitleBuilder.has_value());
+    EXPECT_TRUE(sheetStyle.isTitleBuilder.value());
+    SheetView::BuildTitleColumn(sheetNode, sheetStyle);
+
+    sheetStyle.isTitleBuilder = false;
+    EXPECT_FALSE(sheetStyle.isTitleBuilder.value());
+    SheetView::BuildTitleColumn(sheetNode, sheetStyle);
+
+    sheetStyle.sheetTitle = "sheetTitle";
+    EXPECT_TRUE(sheetStyle.sheetTitle.has_value());
+    EXPECT_FALSE(sheetStyle.sheetSubtitle.has_value());
+    SheetView::BuildTitleColumn(sheetNode, sheetStyle);
+
+    sheetStyle.sheetSubtitle = "sheetSubtitle";
+    pipeline->fontScale_ = pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale() + 1;
+    EXPECT_TRUE(sheetStyle.sheetSubtitle.has_value());
+    EXPECT_NE(pipeline->GetFontScale(), pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale());
+    SheetView::BuildTitleColumn(sheetNode, sheetStyle);
+
+    pipeline->fontScale_ = pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale();
+    EXPECT_EQ(pipeline->GetFontScale(), pipeline->GetTheme<SheetTheme>()->GetSheetNormalScale());
+    SheetView::BuildTitleColumn(sheetNode, sheetStyle);
+    SheetCoverageTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: OnScrollStartRecursive001
+ * @tc.desc: Increase the coverage of OnScrollStartRecursive function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, OnScrollStartRecursive001, TestSize.Level1)
+{
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->animation_ = nullptr;
+    EXPECT_EQ(sheetPattern->animation_, nullptr);
+    sheetPattern->OnScrollStartRecursive(0.0f, 0.0f);
+
+    AnimationOption option;
+    sheetPattern->animation_ = AnimationUtils::StartAnimation(option, []() {}, []() {});
+    sheetPattern->isAnimationProcess_ = false;
+    EXPECT_NE(sheetPattern->animation_, nullptr);
+    EXPECT_FALSE(sheetPattern->isAnimationProcess_);
+    sheetPattern->OnScrollStartRecursive(0.0f, 0.0f);
+
+    sheetPattern->isAnimationProcess_ = true;
+    EXPECT_TRUE(sheetPattern->isAnimationProcess_);
+    sheetPattern->OnScrollStartRecursive(0.0f, 0.0f);
+}
+
+/**
+ * @tc.name: HandleScroll001
+ * @tc.desc: Increase the coverage of HandleScroll function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, HandleScroll001, TestSize.Level1)
+{
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->currentOffset_ = -1.0f;
+    sheetPattern->isSheetNeedScroll_ = true;
+    int32_t source = SCROLL_FROM_ANIMATION;
+    NestedState state = NestedState::CHILD_SCROLL;
+    sheetPattern->isSheetPosChanged_ = false;
+    EXPECT_FALSE(GreatOrEqual(sheetPattern->currentOffset_, 0.0f));
+    EXPECT_TRUE(sheetPattern->isSheetNeedScroll_);
+    EXPECT_EQ(state, NestedState::CHILD_SCROLL);
+    sheetPattern->HandleScroll(0.0f, source, state, 0.0f);
+
+    sheetPattern->currentOffset_ = 1.0f;
+    sheetPattern->isSheetPosChanged_ = true;
+    EXPECT_TRUE(GreatOrEqual(sheetPattern->currentOffset_, 0.0f));
+    EXPECT_NE(source, SCROLL_FROM_UPDATE);
+    sheetPattern->HandleScroll(0.0f, source, state, 0.0f);
+
+    source = SCROLL_FROM_UPDATE;
+    sheetPattern->isSheetNeedScroll_ = true;
+    EXPECT_TRUE(sheetPattern->isSheetNeedScroll_);
+    EXPECT_EQ(source, SCROLL_FROM_UPDATE);
+    sheetPattern->HandleScroll(0.0f, source, state, 0.0f);
+
+    state = NestedState::CHILD_OVER_SCROLL;
+    sheetPattern->isSheetNeedScroll_ = false;
+    EXPECT_FALSE(sheetPattern->isSheetNeedScroll_);
+    EXPECT_EQ(state, NestedState::CHILD_OVER_SCROLL);
+    sheetPattern->HandleScroll(0.0f, source, state, 0.0f);
+
+    sheetPattern->currentOffset_ = -1.0f;
+    sheetPattern->isSheetNeedScroll_ = true;
+    state = NestedState::GESTURE;
+    EXPECT_FALSE(GreatOrEqual(sheetPattern->currentOffset_, 0.0f));
+    EXPECT_TRUE(sheetPattern->isSheetNeedScroll_);
+    EXPECT_NE(state, NestedState::CHILD_SCROLL);
+    EXPECT_NE(state, NestedState::CHILD_OVER_SCROLL);
+    sheetPattern->HandleScroll(0.0f, source, state, 0.0f);
+
+    sheetPattern->isSheetNeedScroll_ = false;
+    EXPECT_FALSE(GreatOrEqual(sheetPattern->currentOffset_, 0.0f));
+    EXPECT_FALSE(sheetPattern->isSheetNeedScroll_);
+    sheetPattern->HandleScroll(0.0f, source, state, 0.0f);
+}
+
+/**
+ * @tc.name: HandleScrollWithSheet001
+ * @tc.desc: Increase the coverage of HandleScrollWithSheet function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetCoverageTestNg, HandleScrollWithSheet001, TestSize.Level1)
+{
+    SheetCoverageTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    float scrollOffset = 0.0f;
+    PipelineBase::GetCurrentContext()->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TEN);
+    sheetPattern->sheetDetentHeight_.emplace_back(1);
+    sheetPattern->currentOffset_ = 1.0f;
+    sheetPattern->height_ = 0.0f;
+    sheetPattern->sheetHeightUp_ = 0.0f;
+    sheetPattern->sheetMaxHeight_ = 0.0f;
+    sheetPattern->scrollSizeMode_= ScrollSizeMode::FOLLOW_DETENT;
+    EXPECT_FALSE(NearZero(sheetPattern->currentOffset_));
+    sheetPattern->HandleScrollWithSheet(scrollOffset);
+
+    scrollOffset = 0.0f;
+    sheetPattern->currentOffset_ = 0.0f;
+    EXPECT_TRUE(NearZero(sheetPattern->currentOffset_));
+    EXPECT_FALSE(LessNotEqual(scrollOffset, 0.0f));
+    sheetPattern->HandleScrollWithSheet(scrollOffset);
+
+    scrollOffset = -1.0f;
+    sheetPattern->scrollSizeMode_= ScrollSizeMode::CONTINUOUS;
+    EXPECT_TRUE(LessNotEqual(scrollOffset, 0.0f));
+    sheetPattern->HandleScrollWithSheet(scrollOffset);
+
+    sheetPattern->sheetDetentHeight_.emplace_back(0);
+    sheetPattern->HandleScrollWithSheet(scrollOffset);
+
+    sheetPattern->sheetDetentHeight_.clear();
+    EXPECT_EQ(sheetPattern->sheetDetentHeight_.size(), 0);
+    sheetPattern->HandleScrollWithSheet(scrollOffset);
     SheetCoverageTestNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG

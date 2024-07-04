@@ -277,8 +277,7 @@ HWTEST_F(GridLayoutInfoTest, GetContentOffset001, TestSize.Level1)
 HWTEST_F(GridLayoutInfoTest, GetContentOffset002, TestSize.Level1)
 {
     GridLayoutInfo info;
-    info.lineHeightMap_ = { { 0, 5.0f }, { 1, 5.0f }, { 2, 5.0f }, { 3, 5.0f }, { 4, 5.0f }, { 5, 5.0f },
-        { 6, 5.0f } };
+    info.lineHeightMap_ = { { 0, 5.0f }, { 1, 5.0f }, { 2, 5.0f }, { 3, 5.0f }, { 4, 5.0f }, { 5, 5.0f }, { 6, 5.0f } };
     info.gridMatrix_ = MATRIX_DEMO_12;
 
     auto option = GetOptionDemo12();
@@ -382,7 +381,7 @@ HWTEST_F(GridLayoutInfoTest, FindItemInRange001, TestSize.Level1)
 HWTEST_F(GridLayoutInfoTest, GetTotalHeightOfItemsInView001, TestSize.Level1)
 {
     GridLayoutInfo info;
-    info.lineHeightMap_ = {{0, 100.0f}, {1, 0.0f}, {2, 100.0f}, {3, 200.0f}};
+    info.lineHeightMap_ = { { 0, 100.0f }, { 1, 0.0f }, { 2, 100.0f }, { 3, 200.0f } };
     info.startMainLineIndex_ = 0;
     info.endMainLineIndex_ = 3;
     info.currentOffset_ = -50.0f;

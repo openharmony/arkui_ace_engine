@@ -114,7 +114,7 @@ struct TextStyleResult {
     int32_t textAlign = 0;
     int32_t wordBreak = static_cast<int32_t>(WordBreak::BREAK_WORD);
     int32_t lineBreakStrategy = static_cast<int32_t>(LineBreakStrategy::GREEDY);
-    std::string leadingMarginSize[2] = { "0.0", "0.0" };
+    std::string leadingMarginSize[2] = { "0.00px", "0.00px" };
 };
 
 struct ImageStyleResult {
@@ -130,6 +130,7 @@ struct ResultObject {
     SelectSpanType type = SelectSpanType::TYPESPAN;
     int32_t offsetInSpan[2] = { 0, 0 };
     std::string valueString;
+    std::string previewText;
     RefPtr<PixelMap> valuePixelMap;
     TextStyleResult textStyle;
     ImageStyleResult imageStyle;
@@ -206,7 +207,7 @@ public:
 struct ParagraphInfo {
     // style
     RefPtr<PixelMap> leadingMarginPixmap;
-    std::string leadingMarginSize[2] = { "0.0", "0.0" };
+    std::string leadingMarginSize[2] = { "0.00px", "0.00px" };
     int32_t textAlign = 0;
     int32_t wordBreak = static_cast<int32_t>(WordBreak::BREAK_WORD);
     int32_t lineBreakStrategy = static_cast<int32_t>(LineBreakStrategy::GREEDY);

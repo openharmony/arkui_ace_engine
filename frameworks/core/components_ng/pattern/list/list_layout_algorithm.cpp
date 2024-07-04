@@ -167,8 +167,6 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     }
 
-    SetActiveChildRange(layoutWrapper, listLayoutProperty->GetCachedCountValue(1));
-
     auto crossSize = contentIdealSize.CrossSize(axis_);
     if (crossSize.has_value() && GreaterOrEqualToInfinity(crossSize.value())) {
         contentIdealSize.SetCrossSize(GetChildMaxCrossSize(layoutWrapper, axis_), axis_);
@@ -192,14 +190,14 @@ void ListLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t ca
     layoutWrapper->SetCacheCount(cacheCount);
 }
 
-void ListLayoutAlgorithm::SetActiveChildRange(LayoutWrapper* layoutWrapper, int32_t cacheCount)
+void ListLayoutAlgorithm::SetActiveChildRange(LayoutWrapper* layoutWrapper, int32_t cacheStart, int32_t cacheEnd)
 {
     if (itemPosition_.empty()) {
         layoutWrapper->SetActiveChildRange(-1, -1);
         return;
     }
     layoutWrapper->SetActiveChildRange(
-        itemPosition_.begin()->first, itemPosition_.rbegin()->first, cacheCount, cacheCount);
+        itemPosition_.begin()->first, itemPosition_.rbegin()->first, cacheStart, cacheEnd);
 }
 
 bool ListLayoutAlgorithm::CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const
@@ -220,7 +218,7 @@ float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Ax
         return 0.0f;
     }
     float maxCrossSize = 0.0f;
-    float crossSize = 0.0f;
+    float crossSize = -laneGutter_;
     float prevPos = GetItemPosition().begin()->second.startPos;
     for (const auto& pos : GetItemPosition()) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first, false);
@@ -232,7 +230,7 @@ float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Ax
             continue;
         }
         if (NearEqual(prevPos, pos.second.startPos)) {
-            crossSize += getGeometryNode->GetMarginFrameSize().CrossSize(axis);
+            crossSize = crossSize + getGeometryNode->GetMarginFrameSize().CrossSize(axis) + laneGutter_;
         } else {
             crossSize = getGeometryNode->GetMarginFrameSize().CrossSize(axis);
         }
@@ -1204,7 +1202,6 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignCenter()
     if (itemPosition_.empty()) {
         return;
     }
-
     auto predictEndPos = totalOffset_ - predictSnapOffset_.value();
     auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
     if (LessNotEqual(predictEndPos, itemHeight / 2.0f - contentMainSize_ / 2.0f - spaceWidth_ / 2.0f)) {
@@ -1320,6 +1317,24 @@ void ListLayoutAlgorithm::LayoutItem(RefPtr<LayoutWrapper>& wrapper, int32_t ind
     SetListItemIndex(wrapper, index);
 }
 
+void ListLayoutAlgorithm::ProcessCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount)
+{
+    if (!itemPosition_.empty() && cacheCount > 0) {
+        auto items = LayoutCachedItemV2(layoutWrapper, cacheCount);
+        auto host = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(host);
+        if (!items.empty()) {
+            PostIdleTaskV2(host, { items, childLayoutConstraint_, GetGroupLayoutConstraint() });
+        } else {
+            auto pattern = host->GetPattern<ListPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetPredictLayoutParamV2(std::nullopt);
+        }
+    } else {
+        SetActiveChildRange(layoutWrapper, cacheCount, cacheCount);
+    }
+}
+
 void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -1360,18 +1375,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         pos.second.endPos -= currentOffset_;
     }
     auto cacheCount = listLayoutProperty->GetCachedCountValue(1);
-    if (!itemPosition_.empty() && cacheCount > 0) {
-        auto items = LayoutCachedItemV2(layoutWrapper, cacheCount);
-        auto host = layoutWrapper->GetHostNode();
-        CHECK_NULL_VOID(host);
-        if (!items.empty()) {
-            PostIdleTaskV2(host, { items, childLayoutConstraint_, GetGroupLayoutConstraint() });
-        } else {
-            auto pattern = host->GetPattern<ListPattern>();
-            CHECK_NULL_VOID(pattern);
-            pattern->SetPredictLayoutParamV2(std::nullopt);
-        }
-    }
+    ProcessCacheCount(layoutWrapper, cacheCount);
 }
 
 float ListLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float childCrossSize)
@@ -1719,7 +1723,7 @@ void ListLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const ListPr
 
 // return current CachedCount and max CacheCount
 std::pair<int32_t, int32_t> ListLayoutAlgorithm::GetLayoutGroupCachedCount(
-    const RefPtr<LayoutWrapper>& wrapper, bool forward, int32_t cacheCount)
+    const RefPtr<LayoutWrapper>& wrapper, bool forward, int32_t cacheCount, bool outOfView)
 {
     ACE_FUNCTION_TRACE();
     std::pair<int32_t, int32_t> res = { 0, 0 };
@@ -1729,30 +1733,33 @@ std::pair<int32_t, int32_t> ListLayoutAlgorithm::GetLayoutGroupCachedCount(
     CHECK_NULL_RETURN(groupPattern, res);
     const auto& itemPos = groupPattern->GetItemPosition();
     int32_t itemCount = groupPattern->GetTotalItemCount();
+    int32_t lanes = groupPattern->GetLanesInGroup();
+    lanes = lanes > 1 ? lanes : 1;
     if (groupNode->CheckNeedForceMeasureAndLayout()) {
         groupPattern->CalculateItemStartIndex();
         itemCount = groupNode->GetTotalChildCount() - groupPattern->GetItemStartIndex();
     }
     if (forward) {
-        int32_t cachedIndex = groupPattern->GetForwardCachedIndex(cacheCount);
-        int32_t endIndex = itemPos.empty() ? -1 : itemPos.rbegin()->first;
-        res.first = cachedIndex - endIndex;
-        res.second = itemCount - 1 - endIndex;
+        int32_t cachedIndex = groupPattern->UpdateForwardCachedIndex(cacheCount, outOfView);
+        int32_t endIndex = (outOfView || itemPos.empty()) ? -1 : itemPos.rbegin()->first;
+        res.first = (cachedIndex - endIndex) / lanes;
+        res.second = (itemCount - 1 - endIndex) / lanes;
     } else {
-        int32_t cachedIndex = groupPattern->GetBackwardCachedIndex(cacheCount);
-        int32_t startIndex = itemPos.empty() ? itemCount : itemPos.begin()->first;
-        res.first = startIndex - cachedIndex;
-        res.second = startIndex;
+        int32_t cachedIndex = groupPattern->UpdateBackwardCachedIndex(cacheCount, outOfView);
+        int32_t startIndex = (outOfView || itemPos.empty()) ? itemCount : itemPos.begin()->first;
+        res.first = (startIndex - cachedIndex) / lanes;
+        res.second = startIndex / lanes;
     }
     return res;
 }
 
-int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper, int32_t cacheCount, int32_t cached)
+int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
+    int32_t cacheCount, int32_t cached, int32_t& currIndex)
 {
     ACE_SCOPED_TRACE("LayoutCachedForward:%d,%d", cacheCount, cached);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     float crossSize = GetCrossAxisSize(size, axis_);
-    int32_t currIndex = itemPosition_.rbegin()->first + 1;
+    currIndex = itemPosition_.rbegin()->first + 1;
     auto currPos = itemPosition_.rbegin()->second.endPos + spaceWidth_;
     while (cached < cacheCount && currIndex < totalItemCount_) {
         auto wrapper = layoutWrapper->GetChildByIndex(currIndex, true);
@@ -1773,7 +1780,7 @@ int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper, i
         SyncGeometry(wrapper);
         wrapper->SetActive(false);
         if (isGroup) {
-            auto res = GetLayoutGroupCachedCount(wrapper, true, cacheCount);
+            auto res = GetLayoutGroupCachedCount(wrapper, true, cacheCount - cached, true);
             if (res.first < res.second && res.first < cacheCount - cached) {
                 return currIndex;
             }
@@ -1786,12 +1793,13 @@ int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper, i
     return -1;
 }
 
-int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper, int32_t cacheCount, int32_t cached)
+int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
+    int32_t cacheCount, int32_t cached, int32_t& currIndex)
 {
     ACE_SCOPED_TRACE("LayoutCachedBackward:%d,%d", cacheCount, cached);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     float crossSize = GetCrossAxisSize(size, axis_);
-    int32_t currIndex = itemPosition_.begin()->first - 1;
+    currIndex = itemPosition_.begin()->first - 1;
     auto currPos = itemPosition_.begin()->second.startPos - spaceWidth_;
     while (cached < cacheCount && currIndex >= 0) {
         auto wrapper = layoutWrapper->GetChildByIndex(currIndex, true);
@@ -1812,7 +1820,7 @@ int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper, 
         SyncGeometry(wrapper);
         wrapper->SetActive(false);
         if (isGroup) {
-            auto res = GetLayoutGroupCachedCount(wrapper, false, cacheCount);
+            auto res = GetLayoutGroupCachedCount(wrapper, false, cacheCount - cached, true);
             if (res.first < res.second && res.first < cacheCount - cached) {
                 return currIndex;
             }
@@ -1833,34 +1841,41 @@ std::list<PredictLayoutItem> ListLayoutAlgorithm::LayoutCachedItemV2(LayoutWrapp
     int32_t endIndex = itemPosition_.rbegin()->first;
     if (itemPosition_.rbegin()->second.isGroup) {
         auto wrapper = layoutWrapper->GetChildByIndex(endIndex);
-        auto res = GetLayoutGroupCachedCount(wrapper, true, cacheCount);
+        auto res = GetLayoutGroupCachedCount(wrapper, true, cacheCount, false);
         if (res.first < res.second && res.first < cacheCount) {
             predictBuildList.emplace_back(PredictLayoutItem { endIndex, true, cachedForward });
         }
         cachedForward += res.second;
     }
     if (cachedForward < cacheCount && endIndex < totalItemCount_ - 1) {
-        int32_t index = LayoutCachedForward(layoutWrapper, cacheCount, cachedForward);
+        int32_t index = LayoutCachedForward(layoutWrapper, cacheCount, cachedForward, endIndex);
         if (index >= 0) {
             predictBuildList.emplace_back(PredictLayoutItem { index, true, cachedForward });
+        } else {
+            endIndex--;
         }
     }
     int32_t cachedBackward = 0;
     int32_t startIndex = itemPosition_.begin()->first;
     if (itemPosition_.begin()->second.isGroup) {
         auto wrapper = layoutWrapper->GetChildByIndex(startIndex);
-        auto res = GetLayoutGroupCachedCount(wrapper, false, cacheCount);
+        auto res = GetLayoutGroupCachedCount(wrapper, false, cacheCount, false);
         if (res.first < res.second && res.first < cacheCount) {
             predictBuildList.emplace_back(PredictLayoutItem { startIndex, false, cachedBackward });
         }
         cachedBackward += res.second;
     }
     if (cachedBackward < cacheCount && startIndex > 0) {
-        auto index = LayoutCachedBackward(layoutWrapper, cacheCount, cachedBackward);
+        auto index = LayoutCachedBackward(layoutWrapper, cacheCount, cachedBackward, startIndex);
         if (index >= 0) {
             predictBuildList.emplace_back(PredictLayoutItem { index, false, cachedBackward });
+        } else {
+            startIndex++;
         }
     }
+    int32_t cacheStart = itemPosition_.begin()->first - startIndex;
+    int32_t cacheEnd = endIndex - itemPosition_.rbegin()->first;
+    SetActiveChildRange(layoutWrapper, cacheStart, cacheEnd);
     return predictBuildList;
 }
 

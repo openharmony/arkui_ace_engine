@@ -62,7 +62,7 @@ protected:
     void AddChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
         const std::string& nodeType, int32_t index = DEFAULT_NODE_SLOT);
     void RemoveChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
-        const std::string& nodeType);
+        const std::string& nodeType, bool allowTransition = false);
 
     virtual void OnActivation() {}
     virtual void OnConnect() {}
@@ -95,6 +95,7 @@ private:
     bool IsFilterMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void SetWindowSceneConsumed(int32_t action);
     void FilterInvalidPointerItem(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void UpdateSnapshotWindowProperty();
 
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
     RefPtr<TouchEventImpl> touchEvent_;

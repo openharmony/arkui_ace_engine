@@ -591,12 +591,12 @@ void TextPickerDialogView::UpdateConfirmButtonMargin(
         margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
         margin.top = CalcLength(dialogTheme->GetDividerHeight());
         margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-        margin.left = CalcLength(0.0_vp);
+        margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
     } else {
         margin.right = CalcLength(dialogTheme->GetActionsPadding().Right());
         margin.top = CalcLength(dialogTheme->GetActionsPadding().Top());
         margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
-        margin.left = CalcLength(0.0_vp);
+        margin.left = CalcLength(dialogTheme->GetActionsPadding().Left());
     }
     buttonConfirmNode->GetLayoutProperty()->UpdateMargin(margin);
 }
@@ -609,12 +609,12 @@ void TextPickerDialogView::UpdateCancelButtonMargin(
         margin.left = CalcLength(dialogTheme->GetDividerPadding().Left());
         margin.top = CalcLength(dialogTheme->GetDividerHeight());
         margin.bottom = CalcLength(dialogTheme->GetDividerPadding().Bottom());
-        margin.right = CalcLength(0.0_vp);
+        margin.right = CalcLength(dialogTheme->GetDividerPadding().Right());
     } else {
         margin.left = CalcLength(dialogTheme->GetActionsPadding().Left());
         margin.top = CalcLength(dialogTheme->GetActionsPadding().Top());
         margin.bottom = CalcLength(dialogTheme->GetActionsPadding().Bottom());
-        margin.right = CalcLength(0.0_vp);
+        margin.right = CalcLength(dialogTheme->GetActionsPadding().Right());
     }
     buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);
 }
@@ -1205,7 +1205,7 @@ void TextPickerDialogView::SetDialogButtonActive(RefPtr<FrameNode>& contentColum
     if (dialogNodePage == 0) {
         SetFirstDialogButtonActive(contentRow);
         SetDividerNodeActive(contentRow, true, false, false);
-    } else if (dialogNodePage == 1 && dialogNodePage != (columnCount - 1)) {
+    } else if (dialogNodePage != (columnCount - 1)) {
         SetSecondDialogButtonActive(contentRow);
         SetDividerNodeActive(contentRow, false, true, false);
     } else {
@@ -1354,7 +1354,7 @@ RefPtr<FrameNode> TextPickerDialogView::SeparatedOptionsShow(
     auto textPickerNode = weakText.Upgrade();
     auto contentColumn = weakColumn.Upgrade();
     CHECK_NULL_VOID(dialogNode);
-    if (dialogNodePage < columnCount) {
+    if (dialogNodePage < (columnCount - 1)) {
         dialogNodePage++;
     }
     SetDialogNodePageActive(contentColumn, textPickerNode, dialogNodePage, columnCount);

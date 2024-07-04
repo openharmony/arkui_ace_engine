@@ -515,10 +515,7 @@ bool WebClientImpl::OnFileSelectorShow(
 
 void WebClientImpl::OnResource(const std::string& url)
 {
-    auto delegate = webDelegate_.Upgrade();
-    CHECK_NULL_VOID(delegate);
-    ContainerScope scope(delegate->GetInstanceId());
-    auto task = Container::CurrentTaskExecutor();
+    auto task = Container::CurrentTaskExecutorSafely();
     if (task == nullptr) {
         return;
     }

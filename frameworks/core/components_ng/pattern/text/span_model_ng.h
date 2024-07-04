@@ -41,7 +41,6 @@ public:
     void SetLetterSpacing(const Dimension& value) override;
     void SetBaselineOffset(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
-    // TODO: add extra event for span.
     void SetOnClick(std::function<void(BaseEventInfo* info)>&& click) override;
     void ClearOnClick() override;
     

@@ -1107,6 +1107,26 @@ HWTEST_F(TextFieldUXTest, TextInputTypeToString005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextInputTypeToString006
+ * @tc.desc: Test TextInputTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputTypeToString006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize show number icon text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::URL);
+    });
+
+    /**
+     * @tc.steps: step2. Call TextInputTypeToString.
+     */
+    EXPECT_EQ(pattern_->TextInputTypeToString(), "TextAreaType.URL");
+}
+
+/**
  * @tc.name: AreaSupportAvoidanceTest
  * @tc.desc: test whether the custom keyboard supports the collision avoidance function
  * @tc.type: FUNC

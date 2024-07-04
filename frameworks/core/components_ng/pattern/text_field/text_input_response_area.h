@@ -86,6 +86,11 @@ public:
         ChangeObscuredState();
     }
 
+    bool IsObscured() const
+    {
+        return isObscured_;
+    }
+
     void Refresh() override;
 
     void ClearArea() override

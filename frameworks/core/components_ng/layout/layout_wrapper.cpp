@@ -222,6 +222,7 @@ void LayoutWrapper::ExpandSafeArea()
         return;
     }
     CHECK_NULL_VOID(selfExpansive);
+    opts->switchToNone = false;
     auto geometryNode = GetGeometryNode();
     OffsetF keyboardAdjust;
     if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && (opts->type & SAFE_AREA_TYPE_KEYBOARD)) {

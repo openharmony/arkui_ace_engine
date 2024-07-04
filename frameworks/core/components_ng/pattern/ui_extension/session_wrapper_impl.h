@@ -39,7 +39,7 @@ public:
     void CreateSession(const AAFwk::Want& want, const SessionConfig& config) override;
     void DestroySession() override;
     bool IsSessionValid() override;
-    int32_t GetSessionId() override;
+    int32_t GetSessionId() const override;
     const std::shared_ptr<AAFwk::Want> GetWant() override;
 
     // Synchronous interface for event notify

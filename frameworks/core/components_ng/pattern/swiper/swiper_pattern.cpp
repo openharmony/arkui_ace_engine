@@ -1353,6 +1353,7 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
     StopTranslateAnimation();
     StopFadeAnimation();
     StopSpringAnimation();
+    StopIndicatorAnimation(true);
     jumpIndex_ = index;
     uiCastJumpIndex_ = index;
     MarkDirtyNodeSelf();
@@ -1633,7 +1634,7 @@ void SwiperPattern::FinishAnimation()
     }
     StopSpringAnimation();
     StopFadeAnimation();
-    StopIndicatorAnimation();
+    StopIndicatorAnimation(true);
 
     if (usePropertyAnimation_) {
         isFinishAnimation_ = true;
@@ -2517,6 +2518,7 @@ void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
     ACE_SCOPED_TRACE("Swiper HandleTouchDown");
     TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper HandleTouchDown");
     isTouchDown_ = true;
+    isTouchDownOnOverlong_ = true;
     if (HasIndicatorNode()) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -2571,6 +2573,7 @@ void SwiperPattern::HandleTouchUp()
     ACE_SCOPED_TRACE("Swiper HandleTouchUp");
     TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper HandleTouchUp");
     isTouchDown_ = false;
+    isTouchDownOnOverlong_ = false;
     auto firstItemInfoInVisibleArea = GetFirstItemInfoInVisibleArea();
     if (!isDragging_ && !childScrolling_ && !NearZero(firstItemInfoInVisibleArea.second.startPos) &&
         !isTouchDownSpringAnimation_) {
@@ -2617,6 +2620,7 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
     gestureSwipeIndex_ = currentIndex_;
     isDragging_ = true;
     isTouchDown_ = true;
+    isTouchDownOnOverlong_ = true;
     mainDeltaSum_ = 0.0f;
     // in drag process, close lazy feature.
     SetLazyLoadFeature(false);
@@ -2673,6 +2677,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
         PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_SCROLL, false);
     }
     isTouchDown_ = false;
+    isTouchDownOnOverlong_ = false;
     if (!CheckSwiperPanEvent(dragVelocity)) {
         dragVelocity = 0.0;
     }
@@ -3868,6 +3873,7 @@ std::shared_ptr<SwiperParameters> SwiperPattern::GetSwiperParameters() const
         swiperParameters_->maskValue = false;
         swiperParameters_->colorVal = swiperIndicatorTheme->GetColor();
         swiperParameters_->selectedColorVal = swiperIndicatorTheme->GetSelectedColor();
+        swiperParameters_->maxDisplayCountVal = 0;
     }
     return swiperParameters_;
 }
@@ -4808,10 +4814,6 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
         preTargetIndex_.reset();
     }
 
-    if (currentIndex_ == nextIndex) {
-        return;
-    }
-
     if (isFinishAnimation_) {
         currentDelta_ = 0.0f;
         itemPosition_.clear();
@@ -4823,7 +4825,7 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
             pipeline->FlushUITasks();
         }
         isFinishAnimation_ = false;
-    } else {
+    } else if (currentIndex_ != nextIndex) {
         UpdateCurrentIndex(nextIndex);
         if (currentFocusIndex_ < currentIndex_ || currentFocusIndex_ >= currentIndex_ + GetDisplayCount()) {
             currentFocusIndex_ = currentIndex_;
@@ -4864,18 +4866,22 @@ void SwiperPattern::TabContentStateCallBack(int32_t oldIndex, int32_t nextIndex)
 
     auto tabContents = tabsNode->GetTabs();
     CHECK_NULL_VOID(tabContents);
+    
     auto oldTabContent = tabContents->GetChildAtIndex(oldIndex);
+    if (oldTabContent) {
+        std::string oldTabContentId = oldTabContent->GetInspectorId().value_or("");
+        int32_t oldTabContentUniqueId = oldTabContent->GetId();
+        TabContentInfo oldTabContentInfo(oldTabContentId, oldTabContentUniqueId, TabContentState::ON_HIDE, oldIndex,
+            id, uniqueId);
+        UIObserverHandler::GetInstance().NotifyTabContentStateUpdate(oldTabContentInfo);
+    }
+
     auto nextTabContent = tabContents->GetChildAtIndex(nextIndex);
-    std::string oldTabContentId = oldTabContent->GetInspectorId().value_or("");
-    int32_t oldTabContentUniqueId = oldTabContent->GetId();
+    CHECK_NULL_VOID(nextTabContent);
     std::string nextTabContentId = nextTabContent->GetInspectorId().value_or("");
     int32_t nextTabContentUniqueId = nextTabContent->GetId();
-
-    TabContentInfo oldTabContentInfo(oldTabContentId, oldTabContentUniqueId, TabContentState::ON_HIDE, oldIndex,
-        id, uniqueId);
     TabContentInfo nextTabContentInfo(nextTabContentId, nextTabContentUniqueId, TabContentState::ON_SHOW, nextIndex,
         id, uniqueId);
-    UIObserverHandler::GetInstance().NotifyTabContentStateUpdate(oldTabContentInfo);
     UIObserverHandler::GetInstance().NotifyTabContentStateUpdate(nextTabContentInfo);
 }
 
@@ -4939,7 +4945,7 @@ inline bool SwiperPattern::AnimationRunning() const
            (fadeAnimation_ && fadeAnimationIsRunning_) || targetIndex_ || usePropertyAnimation_;
 }
 
-bool SwiperPattern::HandleScrollVelocity(float velocity)
+bool SwiperPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child)
 {
     if (IsDisableSwipe()) {
         return false;
@@ -5498,7 +5504,7 @@ RefPtr<FrameNode> SwiperPattern::GetCurrentFrameNode(int32_t currentIndex) const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto currentLayoutWrapper = host->GetChildByIndex(GetLoopIndex(currentIndex));
+    auto currentLayoutWrapper = host->GetChildByIndex(GetLoopIndex(currentIndex), true);
     CHECK_NULL_RETURN(currentLayoutWrapper, nullptr);
     return currentLayoutWrapper->GetHostNode();
 }

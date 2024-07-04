@@ -840,7 +840,7 @@ bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
             RefPtr<FocusHub> nextFocusHub = nullptr;
             if (IsFocusStepTab(moveStep)) {
                 nextFocusHub = lastFocusNode->GetNearestNodeByProjectArea(
-                    GetChildren(), moveStep == FocusStep::TAB ? FocusStep::RIGHT : FocusStep::LEFT);
+                    GetChildren(), GetRealFocusStepByTab(moveStep, AceApplicationInfo::GetInstance().IsRightToLeft()));
             }
             if (!nextFocusHub) {
                 nextFocusHub = lastFocusNode->GetNearestNodeByProjectArea(GetChildren(), moveStep);
@@ -2127,7 +2127,7 @@ RefPtr<FocusHub> FocusHub::GetNearestNodeByProjectArea(const std::list<RefPtr<Fo
     CHECK_NULL_RETURN(!allNodes.empty(), nullptr);
     auto curFrameNode = GetFrameNode();
     CHECK_NULL_RETURN(curFrameNode, nullptr);
-    auto curFrameOffset = curFrameNode->GetOffsetRelativeToWindow();
+    auto curFrameOffset = curFrameNode->GetTransformRelativeOffset();
     auto curGeometryNode = curFrameNode->GetGeometryNode();
     CHECK_NULL_RETURN(curGeometryNode, nullptr);
     RectF curFrameRect = RectF(curFrameOffset, curGeometryNode->GetFrameRect().GetSize());
@@ -2138,6 +2138,7 @@ RefPtr<FocusHub> FocusHub::GetNearestNodeByProjectArea(const std::list<RefPtr<Fo
         curFrameRect.Bottom());
     bool isTabStep = IsFocusStepTab(step);
     double resDistance = !isTabStep ? std::numeric_limits<double>::max() : 0.0f;
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     RefPtr<FocusHub> nextNode;
     for (const auto& node : allNodes) {
         if (!node || AceType::RawPtr(node) == this) {
@@ -2147,7 +2148,7 @@ RefPtr<FocusHub> FocusHub::GetNearestNodeByProjectArea(const std::list<RefPtr<Fo
         if (!frameNode) {
             continue;
         }
-        auto frameOffset = frameNode->GetOffsetRelativeToWindow();
+        auto frameOffset = frameNode->GetTransformRelativeOffset();
         auto geometryNode = frameNode->GetGeometryNode();
         if (!geometryNode) {
             continue;
@@ -2156,17 +2157,22 @@ RefPtr<FocusHub> FocusHub::GetNearestNodeByProjectArea(const std::list<RefPtr<Fo
         auto realStep = step;
         if (step == FocusStep::TAB) {
             frameRect -= OffsetF(0, curFrameRect.Height());
-            realStep = FocusStep::LEFT;
+            // If TAB step, for RTL, the direction of focus is RIGHT.
+            // If TAB step, for LTR, the direction of focus is LEFT.
+            realStep = isRtl ? FocusStep::RIGHT : FocusStep::LEFT;
         } else if (step == FocusStep::SHIFT_TAB) {
             frameRect += OffsetF(0, curFrameRect.Height());
-            realStep = FocusStep::RIGHT;
+            // If SHIFT_TAB step, for RTL, the direction of focus is LEFT.
+            // If SHIFT_TAB step, for LTR, the direction of focus is RIGHT.
+            realStep = isRtl ? FocusStep::LEFT : FocusStep::RIGHT;
         }
         auto projectArea = GetProjectAreaOnRect(frameRect, curFrameRect, realStep);
         if (Positive(projectArea)) {
             OffsetF vec = frameRect.Center() - curFrameRect.Center();
             double val = (vec.GetX() * vec.GetX()) + (vec.GetY() * vec.GetY());
-            if ((step == FocusStep::TAB && Positive(vec.GetX())) ||
-                (step == FocusStep::SHIFT_TAB && Negative(vec.GetX()))) {
+            // The operation direction is opposite for RTL languages.
+            if ((step == FocusStep::TAB && (isRtl ? Negative(vec.GetX()) : Positive(vec.GetX()))) ||
+                (step == FocusStep::SHIFT_TAB && (isRtl ? Positive(vec.GetX()) : Negative(vec.GetX())))) {
                 val *= -1.0;
             }
             if ((!isTabStep && val < resDistance) || (isTabStep && val > resDistance)) {
@@ -2474,5 +2480,44 @@ bool FocusHub::IsNestingFocusGroup()
         parent = parent->GetParentFocusHub();
     }
     return false;
+}
+
+void FocusHub::ToJsonValue(
+    const RefPtr<FocusHub>& hub, std::unique_ptr<JsonValue>& json, const InspectorFilter& filter)
+{
+    bool focusable = false;
+    bool focused = false;
+    if (hub) {
+        focusable = hub->IsFocusable();
+        focused = hub->IsCurrentFocus();
+    }
+    if (filter.CheckFixedAttr(FIXED_ATTR_FOCUSABLE)) {
+        json->Put("focusable", focusable);
+        json->Put("focused", focused);
+    }
+    if (filter.IsFastFilter()) {
+        return;
+    }
+
+    bool enabled = true;
+    bool defaultFocus = false;
+    bool groupDefaultFocus = false;
+    bool focusOnTouch = false;
+    int32_t tabIndex = 0;
+    std::unique_ptr<JsonValue> focusBox = nullptr;
+    if (hub) {
+        enabled = hub->IsEnabled();
+        defaultFocus = hub->IsDefaultFocus();
+        groupDefaultFocus = hub->IsDefaultGroupFocus();
+        focusOnTouch = hub->IsFocusOnTouch().value_or(false);
+        tabIndex = hub->GetTabIndex();
+        focusBox = FocusBox::ToJsonValue(hub->box_);
+    }
+    json->PutExtAttr("enabled", enabled, filter);
+    json->PutExtAttr("defaultFocus", defaultFocus, filter);
+    json->PutExtAttr("groupDefaultFocus", groupDefaultFocus, filter);
+    json->PutExtAttr("focusOnTouch", focusOnTouch, filter);
+    json->PutExtAttr("tabIndex", tabIndex, filter);
+    json->PutExtAttr("focusBox", focusBox, filter);
 }
 } // namespace OHOS::Ace::NG

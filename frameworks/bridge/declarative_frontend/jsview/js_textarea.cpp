@@ -81,7 +81,6 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextArea>::StaticMethod("onEditChange", &JSTextField::SetOnEditChanged);
     JSClass<JSTextArea>::StaticMethod("copyOption", &JSTextField::SetCopyOption);
-    JSClass<JSTextArea>::StaticMethod("textMenuOptions", &JSTextField::JsMenuOptionsExtension);
     JSClass<JSTextArea>::StaticMethod("foregroundColor", &JSTextField::SetForegroundColor);
     JSClass<JSTextArea>::StaticMethod("enableKeyboardOnFocus", &JSTextField::SetEnableKeyboardOnFocus);
     JSClass<JSTextArea>::StaticMethod("selectionMenuHidden", &JSTextField::SetSelectionMenuHidden);
@@ -109,7 +108,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("onDidInsert", &JSTextField::OnDidInsertValue);
     JSClass<JSTextArea>::StaticMethod("onWillDelete", &JSTextField::OnWillDelete);
     JSClass<JSTextArea>::StaticMethod("onDidDelete", &JSTextField::OnDidDelete);
-    JSClass<JSTextArea>::StaticMethod("selectionMenuOptions", &JSTextField::SelectionMenuOptions);
+    JSClass<JSTextArea>::StaticMethod("editMenuOptions", &JSTextField::EditMenuOptions);
     JSClass<JSTextArea>::StaticMethod("enablePreviewText", &JSTextField::SetEnablePreviewText);
     JSClass<JSTextArea>::InheritAndBind<JSViewAbstract>(globalObj);
 }

@@ -819,6 +819,9 @@ void Scrollable::StartSpringMotion(
     springOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
     ACE_SCOPED_TRACE("Scrollable spring animation start, start:%f, end:%f, vel:%f, id:%d, tag:%s", mainPosition,
         finalPosition_, mainVelocity, nodeId_, nodeTag_.c_str());
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    lastVsyncTime_ = context->GetVsyncTime();
     springOffsetProperty_->AnimateWithVelocity(
         option, finalPosition_, mainVelocity, [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
@@ -957,7 +960,7 @@ void Scrollable::ProcessSpringMotion(double position)
         auto distance = currentPos_ - finalPosition_;
         auto nextDistance = position - finalPosition_;
         isFadingAway_ = GreatNotEqual(std::abs(nextDistance), std::abs(distance));
-        moved_ = UpdateScrollPosition(position - currentPos_, SCROLL_FROM_ANIMATION_SPRING);
+        auto delta = position - currentPos_;
         if (distance * nextDistance < 0) {
             double currentVelocity = currentVelocity_;
             scrollPause_ = true;
@@ -966,8 +969,14 @@ void Scrollable::ProcessSpringMotion(double position)
             ACE_SCOPED_TRACE("change direction in spring animation and start fling animation, distance:%f, "
                              "nextDistance:%f, nodeId:%d, tag:%s",
                 distance, nextDistance, nodeId_, nodeTag_.c_str());
-            StartScrollAnimation(position, currentVelocity);
+            if (remainVelocityCallback_ && remainVelocityCallback_(currentVelocity)) {
+                // pass the velocity to the child component to avoid dealing with additional offsets
+                delta = finalPosition_ - currentPos_;
+            } else {
+                StartScrollAnimation(position, currentVelocity);
+            }
         }
+        moved_ = UpdateScrollPosition(delta, SCROLL_FROM_ANIMATION_SPRING);
         if (!moved_) {
             StopSpringAnimation();
         } else if (!touchUp_) {
@@ -1140,6 +1149,12 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSpringProperty()
         auto scroll = weak.Upgrade();
         CHECK_NULL_VOID(scroll);
         if (!scroll->isSpringAnimationStop_) {
+            // Avoid the situation where the scrollable has reverted to an unbounded state,
+            // but the spring animation is still running
+            if (scroll->outBoundaryCallback_ && !scroll->outBoundaryCallback_()) {
+                scroll->StopSpringAnimation();
+                return;
+            }
             if (NearEqual(scroll->finalPosition_, position, SPRING_ACCURACY)) {
                 scroll->ProcessSpringMotion(scroll->finalPosition_);
                 scroll->StopSpringAnimation();

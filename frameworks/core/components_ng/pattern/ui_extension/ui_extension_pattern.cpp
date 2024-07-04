@@ -697,7 +697,7 @@ void UIExtensionPattern::SetModalOnRemoteReadyCallback(
 
 void UIExtensionPattern::FireOnRemoteReadyCallback()
 {
-    UIEXT_LOGD("The current state is '%{public}s'.", ToString(state_));
+    UIEXT_LOGI("OnRemoteReady the current state is '%{public}s'.", ToString(state_));
     ContainerScope scope(instanceId_);
     // These two callbacks will be unified in the future.
     if (onRemoteReadyCallback_) {
@@ -715,7 +715,7 @@ void UIExtensionPattern::SetModalOnDestroy(const std::function<void()>&& callbac
 
 void UIExtensionPattern::FireModalOnDestroy()
 {
-    UIEXT_LOGD("The current state is '%{public}s'.", ToString(state_));
+    UIEXT_LOGI("ModalOnDestroy the current state is '%{public}s'.", ToString(state_));
     // Native modal page destroy callback
     if (onModalDestroy_) {
         ContainerScope scope(instanceId_);
@@ -730,7 +730,7 @@ void UIExtensionPattern::SetOnReleaseCallback(const std::function<void(int32_t)>
 
 void UIExtensionPattern::FireOnReleaseCallback(int32_t releaseCode)
 {
-    UIEXT_LOGD("The state is changing from '%{public}s' to 'DESTRUCTION' and releaseCode = %{public}d.",
+    UIEXT_LOGI("OnRelease the state is changing from '%{public}s' to 'DESTRUCTION' and releaseCode = %{public}d.",
         ToString(state_), releaseCode);
     state_ = AbilityState::DESTRUCTION;
     if (onReleaseCallback_) {
@@ -756,7 +756,7 @@ void UIExtensionPattern::SetOnErrorCallback(
 void UIExtensionPattern::FireOnErrorCallback(int32_t code, const std::string& name, const std::string& message)
 {
     // 1. As long as the error occurs, the host believes that UIExtensionAbility has been killed.
-    UIEXT_LOGD("The state is changing from '%{public}s' to 'NONE'.", ToString(state_));
+    UIEXT_LOGI("OnError the state is changing from '%{public}s' to 'NONE'.", ToString(state_));
     state_ = AbilityState::NONE;
     // Release the session.
     if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
@@ -777,7 +777,7 @@ void UIExtensionPattern::SetOnResultCallback(const std::function<void(int32_t, c
 
 void UIExtensionPattern::FireOnResultCallback(int32_t code, const AAFwk::Want& want)
 {
-    UIEXT_LOGD("The state is changing from '%{public}s' to 'DESTRUCTION'.", ToString(state_));
+    UIEXT_LOGI("OnResult tThe state is changing from '%{public}s' to 'DESTRUCTION'.", ToString(state_));
     if (onResultCallback_ && (state_ != AbilityState::DESTRUCTION)) {
         ContainerScope scope(instanceId_);
         onResultCallback_(code, want);
@@ -799,7 +799,7 @@ void UIExtensionPattern::SetOnTerminatedCallback(
 
 void UIExtensionPattern::FireOnTerminatedCallback(int32_t code, const RefPtr<WantWrap>& wantWrap)
 {
-    UIEXT_LOGD("The state is changing from '%{public}s' to 'DESTRUCTION'.", ToString(state_));
+    UIEXT_LOGI("OnTerminated the state is changing from '%{public}s' to 'DESTRUCTION'.", ToString(state_));
     if (onTerminatedCallback_ && (state_ != AbilityState::DESTRUCTION)) {
         ContainerScope scope(instanceId_);
         onTerminatedCallback_(code, wantWrap);
@@ -814,7 +814,7 @@ void UIExtensionPattern::SetOnReceiveCallback(const std::function<void(const AAF
 
 void UIExtensionPattern::FireOnReceiveCallback(const AAFwk::WantParams& params)
 {
-    UIEXT_LOGD("The current state is '%{public}s'.", ToString(state_));
+    UIEXT_LOGI("OnReceive the current state is '%{public}s'.", ToString(state_));
     if (onReceiveCallback_) {
         ContainerScope scope(instanceId_);
         onReceiveCallback_(params);

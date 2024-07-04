@@ -53,7 +53,7 @@ public:
     /**
      * @description: execute click callback when page some component change occurs
      */
-    void ReportComponentChangeEvent(const std::string& data);
+    void ReportComponentChangeEvent(const std::string& key, const std::string& value);
 
     /**
      * @description: save report communication stub side
@@ -71,6 +71,7 @@ public:
     void SaveInspectorTreeFunction(InspectorFunction&& function);
     void SetClickEventRegistered(bool status);
     void SetSearchEventRegistered(bool status);
+    void OnRouterChange(const std::string& path, const std::string& event);
     void SetRouterChangeEventRegistered(bool status);
     void SetComponentChangeEventRegistered(bool status);
     bool GetClickEventRegistered();

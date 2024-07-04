@@ -23,8 +23,6 @@ namespace {} // namespace
 
 class TextInputCursorTest : public TextInputBases {
 public:
-    RefPtr<TextFieldLayoutProperty> layoutProperty_;
-    RefPtr<TextFieldPattern> pattern_;
 };
 
 /**

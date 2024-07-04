@@ -70,8 +70,6 @@ public:
     virtual RefPtr<GestureSnapshot> Dump() const override;
     RefPtr<Gesture> CreateGestureFromRecognizer() const override;
     void ForceCleanRecognizer() override;
-    
-    void UpdateFingerListInfo() override;
 
     double GetDistance() const
     {
@@ -118,6 +116,7 @@ private:
     bool CalculateTruthFingers(bool isDirectionUp) const;
     void UpdateTouchPointInVelocityTracker(const TouchEvent& event, bool end = false);
     void UpdateAxisPointInVelocityTracker(const AxisEvent& event, bool end = false);
+    void UpdateTouchEventInfo(const TouchEvent& event);
     Offset GetRawGlobalLocation(int32_t postEventNodeId);
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
@@ -143,28 +142,15 @@ private:
     PanDirection direction_;
     double distance_ = 0.0;
     double mouseDistance_ = 0.0;
-    std::map<int32_t, Offset> touchPointsDistance_;
-
-    struct PanRecognizerInfo {
-        Offset delta_;
-        double mainDelta_ = 0.0;
-        PanVelocity panVelocity_;
-        Offset averageDistance_;
-
-        void ResetInfo()
-        {
-            delta_.Reset();
-            panVelocity_.ResetAll();
-            averageDistance_.Reset();
-        }
-    };
-
-    TimeStamp time_;
-    Point globalPoint_;
-    PanRecognizerInfo touchInfoForPan;
-    PanRecognizerInfo axisInfoForPan;
-    InputEventType lastInputEventType_ = InputEventType::TOUCH_SCREEN;
     AxisEvent lastAxisEvent_;
+    Offset averageDistance_;
+    std::map<int32_t, Offset> touchPointsDistance_;
+    Offset delta_;
+    double mainDelta_ = 0.0;
+    PanVelocity panVelocity_;
+    TimeStamp time_;
+
+    Point globalPoint_;
     TouchEvent lastTouchEvent_;
     RefPtr<PanGestureOption> panGestureOption_;
     OnPanFingersFunc onChangeFingers_;

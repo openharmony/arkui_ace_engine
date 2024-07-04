@@ -687,7 +687,9 @@ GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindEndIdx(int32_t endLine) const
             }
         }
     }
-    return { .itemIdx = 0, .y = 0, .x = 0 };
+    return {
+        .itemIdx = 0, .y = 0, .x = 0
+    };
 }
 
 void GridLayoutInfo::ClearMapsToEnd(int32_t idx)
@@ -819,6 +821,58 @@ std::pair<GridLayoutInfo::HeightMapIt, float> GridLayoutInfo::SkipLinesAboveView
         ++it;
     }
     return { it, offset };
+}
+
+void GridLayoutInfo::UpdateStartIndexForExtralOffset(float mainGap, float mainSize)
+{
+    if (Negative(currentOffset_)) {
+        auto startLineHeight = lineHeightMap_.find(startMainLineIndex_);
+        CHECK_NULL_VOID(startLineHeight != lineHeightMap_.end());
+        auto currentEndOffset = currentOffset_ + startLineHeight->second + mainGap;
+        while (!Positive(currentEndOffset)) {
+            startMainLineIndex_++;
+            startLineHeight = lineHeightMap_.find(startMainLineIndex_);
+            if (startLineHeight == lineHeightMap_.end()) {
+                startMainLineIndex_--;
+                break;
+            }
+            currentOffset_ = currentEndOffset;
+            currentEndOffset += (startLineHeight->second + mainGap);
+        }
+    } else if (Positive(currentOffset_)) {
+        auto preLineHeight = lineHeightMap_.find(startMainLineIndex_ - 1);
+        CHECK_NULL_VOID(preLineHeight != lineHeightMap_.end());
+        auto preItemCurrentOffset = currentOffset_ - preLineHeight->second - mainGap;
+        while (Positive(preItemCurrentOffset)) {
+            startMainLineIndex_--;
+            preLineHeight = lineHeightMap_.find(startMainLineIndex_);
+            if (preLineHeight == lineHeightMap_.end()) {
+                startMainLineIndex_++;
+                break;
+            }
+            preItemCurrentOffset -= (preLineHeight->second + mainGap);
+            currentOffset_ = preItemCurrentOffset;
+        }
+    }
+    auto startLine = gridMatrix_.find(startMainLineIndex_);
+    CHECK_NULL_VOID(startLine != gridMatrix_.end() && (!startLine->second.empty()));
+    startIndex_ = startLine->second.begin()->second;
+    auto endLineHeight = lineHeightMap_.find(startMainLineIndex_);
+    CHECK_NULL_VOID(endLineHeight != lineHeightMap_.end());
+    endMainLineIndex_ = startMainLineIndex_;
+    auto currentEndOffset = currentOffset_ + endLineHeight->second + mainGap;
+    while (LessNotEqual(currentEndOffset, mainSize)) {
+        endMainLineIndex_++;
+        endLineHeight = lineHeightMap_.find(endMainLineIndex_);
+        if (endLineHeight == lineHeightMap_.end()) {
+            endMainLineIndex_--;
+            break;
+        }
+        currentEndOffset += (endLineHeight->second + mainGap);
+    }
+    auto endLine = gridMatrix_.find(endMainLineIndex_);
+    CHECK_NULL_VOID(endLine != gridMatrix_.end() && (!endLine->second.empty()));
+    endIndex_ = endLine->second.rbegin()->second;
 }
 
 float GridLayoutInfo::GetDistanceToBottom(float mainSize, float heightInView, float mainGap) const

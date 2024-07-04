@@ -348,6 +348,7 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
     RSRect dst = RSRect(dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetRight(), dstRect.GetBottom());
 
     auto pixelMap = pixelMap_->GetPixelMapSharedPtr();
+    CHECK_NULL_VOID(pixelMap);
     RSRect src = RSRect(0, 0, pixelMap->GetWidth(), pixelMap->GetHeight());
     recordingCanvas.AttachBrush(brush);
     recordingCanvas.DrawPixelMapRect(pixelMap, src, dst, options);

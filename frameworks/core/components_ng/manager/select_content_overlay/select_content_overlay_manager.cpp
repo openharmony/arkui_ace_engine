@@ -558,6 +558,7 @@ void SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, Clos
     CHECK_NULL_VOID(selectOverlayHolder_->GetOwnerId() == id);
     LOGI("SelectOverlay: Close selectoverlay by id %{public}d, reason %{public}d", id, reason);
     auto callback = selectOverlayHolder_->GetCallback();
+    CHECK_NULL_VOID(shareOverlayInfo_);
     auto menuType = shareOverlayInfo_->menuInfo.menuType;
     auto pattern = GetSelectHandlePattern(WeakClaim(this));
     RefPtr<OverlayInfo> info = nullptr;
@@ -606,8 +607,7 @@ void SelectContentOverlayManager::DestroySelectOverlayNode(const RefPtr<FrameNod
     auto parentFrameNode = DynamicCast<FrameNode>(parentNode);
     if (parentFrameNode) {
         auto pattern = overlay->GetPattern<SelectOverlayPattern>();
-        CHECK_NULL_VOID(pattern);
-        if (pattern->GetMode() == SelectOverlayMode::HANDLE_ONLY) {
+        if (pattern && pattern->GetMode() == SelectOverlayMode::HANDLE_ONLY) {
             parentFrameNode->SetOverlayNode(nullptr);
             overlay->SetParent(nullptr);
         }

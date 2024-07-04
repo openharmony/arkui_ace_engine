@@ -157,6 +157,10 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(const Layout
     } else {
         ApplyIndent(contentConstraint.maxSize.Width());
         paragraph_->Layout(contentConstraint.maxSize.Width());
+        if (autoWidth_) {
+            auto paragraphLongestLine = std::ceil(paragraph_->GetLongestLine());
+            paragraph_->Layout(std::min(static_cast<float>(paragraphLongestLine), paragraph_->GetMaxWidth()));
+        }
         contentWidth = ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph_);
         // calc inline status in advance
         auto widthOffSet = contentConstraint.selfIdealSize.Width().has_value()?

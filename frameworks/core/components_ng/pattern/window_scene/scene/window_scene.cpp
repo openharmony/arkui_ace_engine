@@ -24,15 +24,13 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::map<std::string, Rosen::RSAnimationTimingCurve> curveMap {
-    { "default",            Rosen::RSAnimationTimingCurve::DEFAULT            },
-    { "linear",             Rosen::RSAnimationTimingCurve::LINEAR             },
-    { "ease",               Rosen::RSAnimationTimingCurve::EASE               },
-    { "easeIn",             Rosen::RSAnimationTimingCurve::EASE_IN            },
-    { "easeOut",            Rosen::RSAnimationTimingCurve::EASE_OUT           },
-    { "easeInOut",          Rosen::RSAnimationTimingCurve::EASE_IN_OUT        },
-    { "spring",             Rosen::RSAnimationTimingCurve::SPRING             },
-    { "interactiveSpring",  Rosen::RSAnimationTimingCurve::INTERACTIVE_SPRING },
+const std::map<std::string, RefPtr<Curve>> curveMap {
+    { "default",            Curves::EASE_IN_OUT },
+    { "linear",             Curves::LINEAR      },
+    { "ease",               Curves::EASE        },
+    { "easeIn",             Curves::EASE_IN     },
+    { "easeOut",            Curves::EASE_OUT    },
+    { "easeInOut",          Curves::EASE_IN_OUT },
 };
 const uint32_t CLEAN_NODE_DELAY_TIME = 500;
 const int32_t ANIMATION_CONFIG_CURVE = 200;
@@ -174,15 +172,17 @@ void WindowScene::RegisterFocusCallback()
         ContainerScope scope(instanceId);
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
-        pipelineContext->PostAsyncEvent([weakThis]() {
-            auto self = weakThis.Upgrade();
-            CHECK_NULL_VOID(self);
-            auto host = self->GetHost();
-            CHECK_NULL_VOID(host);
-            auto focusHub = host->GetFocusHub();
-            CHECK_NULL_VOID(focusHub);
-            focusHub->SetParentFocusable(true);
-        }, "ArkUIWindowSceneRequestFocus", TaskExecutor::TaskType::UI);
+        pipelineContext->PostAsyncEvent(
+            [weakThis]() {
+                auto self = weakThis.Upgrade();
+                CHECK_NULL_VOID(self);
+                auto host = self->GetHost();
+                CHECK_NULL_VOID(host);
+                auto focusHub = host->GetFocusHub();
+                CHECK_NULL_VOID(focusHub);
+                focusHub->SetParentFocusable(true);
+            },
+            "ArkUIWindowSceneRequestFocus", TaskExecutor::TaskType::UI);
     };
     session_->SetNotifyUIRequestFocusFunc(requestFocusCallback);
 
@@ -190,15 +190,17 @@ void WindowScene::RegisterFocusCallback()
         ContainerScope scope(instanceId);
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
-        pipelineContext->PostAsyncEvent([weakThis]() {
-            auto self = weakThis.Upgrade();
-            CHECK_NULL_VOID(self);
-            auto host = self->GetHost();
-            CHECK_NULL_VOID(host);
-            auto focusHub = host->GetFocusHub();
-            CHECK_NULL_VOID(focusHub);
-            focusHub->SetParentFocusable(false);
-        }, "ArkUIWindowSceneLostFocus", TaskExecutor::TaskType::UI);
+        pipelineContext->PostAsyncEvent(
+            [weakThis]() {
+                auto self = weakThis.Upgrade();
+                CHECK_NULL_VOID(self);
+                auto host = self->GetHost();
+                CHECK_NULL_VOID(host);
+                auto focusHub = host->GetFocusHub();
+                CHECK_NULL_VOID(focusHub);
+                focusHub->SetParentFocusable(false);
+            },
+            "ArkUIWindowSceneLostFocus", TaskExecutor::TaskType::UI);
     };
     session_->SetNotifyUILostFocusFunc(lostFocusCallback);
 }
@@ -239,38 +241,32 @@ void WindowScene::BufferAvailableCallback()
     auto uiTask = [weakThis = WeakClaim(this)]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self && self->session_);
-
         CHECK_NULL_VOID(self->startingWindow_);
         const auto& config =
             Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
         if (config.enabled_) {
-            auto context = AceType::DynamicCast<RosenRenderContext>(self->startingWindow_->GetRenderContext());
+            auto context = self->startingWindow_->GetRenderContext();
             CHECK_NULL_VOID(context);
-            auto rsNode = context->GetRSNode();
-            CHECK_NULL_VOID(rsNode);
-            rsNode->MarkNodeGroup(true);
-            rsNode->SetAlpha(config.opacityStart_);
-            auto effect = Rosen::RSTransitionEffect::Create()->Opacity(config.opacityEnd_);
-            Rosen::RSAnimationTimingProtocol protocol;
-            protocol.SetDuration(config.duration_);
-            auto curve = Rosen::RSAnimationTimingCurve::DEFAULT;
+            context->SetMarkNodeGroup(true);
+            context->SetOpacity(config.opacityStart_);
+            RefPtr<Curve> curve = Curves::LINEAR;
             auto iter = curveMap.find(config.curve_);
             if (iter != curveMap.end()) {
                 curve = iter->second;
             }
-            Rosen::RSNode::Animate(protocol, curve, [rsNode, effect] {
-                AceAsyncTraceBegin(0, "StartingWindowExitAnimation");
-                rsNode->NotifyTransition(effect, false);
-            }, []() {
+            auto effect = AceType::MakeRefPtr<ChainedOpacityEffect>(config.opacityEnd_);
+            effect->SetAnimationOption(std::make_shared<AnimationOption>(curve, config.duration_));
+            context->UpdateChainedTransition(effect);
+            AceAsyncTraceBegin(0, "StartingWindowExitAnimation");
+            context->SetTransitionUserCallback([](bool) {
                 AceAsyncTraceEnd(0, "StartingWindowExitAnimation");
             });
         }
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        self->RemoveChild(host, self->startingWindow_, self->startingWindowName_);
+        self->RemoveChild(host, self->startingWindow_, self->startingWindowName_, true);
         self->startingWindow_.Reset();
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
             "[WMSMain] Remove starting window finished, id: %{public}d, node id: %{public}d, name: %{public}s",
             self->session_->GetPersistentId(), host->GetId(), self->session_->GetSessionInfo().bundleName_.c_str());

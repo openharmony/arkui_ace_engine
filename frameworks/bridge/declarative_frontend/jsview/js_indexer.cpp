@@ -378,6 +378,8 @@ void JSIndexer::SetPopupPosition(const JSCallbackInfo& args)
             (!yVal->IsString() && JSViewAbstract::ParseJsDimensionVp(yVal, y))) {
             yOpt = y;
         }
+    } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        return;
     }
     IndexerModel::GetInstance()->SetPopupPositionX(xOpt);
     IndexerModel::GetInstance()->SetPopupPositionY(yOpt);

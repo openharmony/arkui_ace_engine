@@ -248,7 +248,7 @@ class ContentItemStruct extends ViewPU {
     createIcon(v9 = null) {
         this.observeComponentCreation2((x9, y9) => {
             If.create();
-            if (this.icon != null && this.iconStyle != null) {
+            if (this.icon != null && this.iconStyle != null && ICON_SIZE_MAP.has(this.iconStyle)) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((c10, d10) => {
                         If.create();
@@ -1444,10 +1444,10 @@ export class ComposeListItem extends ViewPU {
                             if (m1) {
                                 let n1 = new ContentItemStruct(this, {}, undefined, l1, () => { }, { page: "library/src/main/ets/components/composelistitem.ets", line: 725 });
                                 ViewPU.create(n1);
-                                let o1 = () => {
+                                let c = () => {
                                     return {};
                                 };
-                                n1.paramsGenerator_ = o1;
+                                n1.paramsGenerator_ = c;
                             }
                             else {
                                 this.updateStateVarsOfChildByElmtId(l1, {});
@@ -1478,7 +1478,7 @@ export class ComposeListItem extends ViewPU {
                                     leftWidth: this.calculatedLeftWidth()
                                 }, undefined, a1, () => { }, { page: "library/src/main/ets/components/composelistitem.ets", line: 728 });
                                 ViewPU.create(c1);
-                                let d1 = () => {
+                                let b = () => {
                                     return {
                                         icon: this.contentItem?.icon,
                                         iconStyle: this.contentItem?.iconStyle,
@@ -1488,7 +1488,7 @@ export class ComposeListItem extends ViewPU {
                                         leftWidth: this.calculatedLeftWidth()
                                     };
                                 };
-                                c1.paramsGenerator_ = d1;
+                                c1.paramsGenerator_ = b;
                             }
                             else {
                                 this.updateStateVarsOfChildByElmtId(a1, {
@@ -1545,7 +1545,7 @@ export class ComposeListItem extends ViewPU {
                                     rightWidth: this.calculatedRightWidth()
                                 }, undefined, l, () => { }, { page: "library/src/main/ets/components/composelistitem.ets", line: 738 });
                                 ViewPU.create(n);
-                                let o = () => {
+                                let a = () => {
                                     return {
                                         icon: this.operateItem?.icon,
                                         subIcon: this.operateItem?.subIcon,
@@ -1565,7 +1565,7 @@ export class ComposeListItem extends ViewPU {
                                         rightWidth: this.calculatedRightWidth()
                                     };
                                 };
-                                n.paramsGenerator_ = o;
+                                n.paramsGenerator_ = a;
                             }
                             else {
                                 this.updateStateVarsOfChildByElmtId(l, {

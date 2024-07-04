@@ -150,6 +150,13 @@ void SetShadowOffset(ArkUINodeHandle node, ArkUI_Float32 offsetX, ArkUI_Float32 
     renderContext->RequestNextFrame();
 }
 
+void SetLabel(ArkUINodeHandle node, ArkUI_CharPtr label)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    currentNode->SetLabel(std::string(label));
+}
+
 void SetShadowAlpha(ArkUINodeHandle node, ArkUI_Float32 alpha)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
@@ -454,7 +461,7 @@ namespace NodeModifier {
 const ArkUIRenderNodeModifier* GetRenderNodeModifier()
 {
     static const ArkUIRenderNodeModifier modifier = { AppendChild, InsertChildAfter, RemoveChild, ClearChildren,
-        SetClipToFrame, SetRotation, SetShadowColor, SetShadowOffset, SetShadowAlpha, SetShadowElevation,
+        SetClipToFrame, SetRotation, SetShadowColor, SetShadowOffset, SetLabel, SetShadowAlpha, SetShadowElevation,
         SetShadowRadius, Invalidate, SetScale, SetRenderNodeBackgroundColor, SetPivot, SetFrame, SetSize, SetOpacity,
         SetTranslate, SetBorderStyle, SetBorderWidth, SetBorderColor, SetBorderRadius, SetRectMask, SetCircleMask,
         SetRoundRectMask, SetOvalMask, SetCommandPathMask, SetPosition, SetMarkNodeGroup };

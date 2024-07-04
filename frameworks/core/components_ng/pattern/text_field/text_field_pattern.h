@@ -329,7 +329,6 @@ public:
         focusPattern.SetIsFocusActiveWhenFocused(true);
         return focusPattern;
     }
-
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void UpdateInputFilterErrorText(const std::string& errorText) override;
@@ -570,6 +569,14 @@ public:
         FocusHub::LostFocusToViewRoot();
         isKeyboardClosedByUser_ = false;
     }
+
+    void NotifyKeyboardClosed() override
+    {
+        if (HasFocus()) {
+            FocusHub::LostFocusToViewRoot();
+        }
+    }
+
     std::u16string GetLeftTextOfCursor(int32_t number) override;
     std::u16string GetRightTextOfCursor(int32_t number) override;
     int32_t GetTextIndexAtCursor() override;
@@ -657,16 +664,6 @@ public:
     MouseStatus GetMouseStatus() const
     {
         return mouseStatus_;
-    }
-
-    void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionItems)
-    {
-        menuOptionItems_ = std::move(menuOptionItems);
-    }
-
-    const std::vector<MenuOptionsParam>&& GetMenuOptionItems() const
-    {
-        return std::move(menuOptionItems_);
     }
 
     void UpdateEditingValueToRecord();
@@ -863,6 +860,7 @@ public:
     void StripNextLine(std::wstring& data);
     bool IsShowHandle();
     std::string GetCancelButton();
+    std::string GetPasswordIconPromptInformation(bool show);
     bool OnKeyEvent(const KeyEvent& event);
     int32_t GetLineCount() const;
     TextInputType GetKeyboard()
@@ -1279,7 +1277,8 @@ public:
         return showKeyBoardOnFocus_;
     }
 
-    void OnSelectionMenuOptionsUpdate(const std::vector<MenuOptionsParam> && menuOptionsItems);
+    void OnSelectionMenuOptionsUpdate(
+        const NG::OnCreateMenuCallback && onCreateMenuCallback, const NG::OnMenuItemClickCallback && onMenuItemClick);
 
     void SetSupportPreviewText(bool isSupported)
     {
@@ -1313,6 +1312,12 @@ public:
     {
         selectOverlay_->OnAncestorNodeChanged(flag);
     }
+
+    void GetSelectIndex(int32_t& start, int32_t& end) const override
+    {
+        start = selectController_->GetStartIndex();
+        end = selectController_->GetEndIndex();
+    }
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override
@@ -1343,6 +1348,7 @@ private:
     void InitLongPressEvent();
     void InitClickEvent();
     void InitDragDropEvent();
+    bool ProcessFocusIndexAction();
     std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragStart();
     std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragDrop();
     void ShowSelectAfterDragEvent();
@@ -1388,8 +1394,8 @@ private:
     // when moving one handle causes shift of textRect, update x position of the other handle
     void SetHandlerOnMoveDone();
     void OnDetachFromFrameNode(FrameNode* node) override;
-    void OnAttachContext(PipelineContext *context) override;
-    void OnDetachContext(PipelineContext *context) override;
+    void OnAttachContext(PipelineContext* context) override;
+    void OnDetachContext(PipelineContext* context) override;
     void UpdateSelectionByMouseDoubleClick();
 
     void AfterSelection();
@@ -1435,7 +1441,8 @@ private:
     void SetAccessibilityActionGetAndSetCaretPosition();
     void SetAccessibilityMoveTextAction();
     void SetAccessibilityScrollAction();
-    void SetAccessibilityDeleteAction();
+    void SetAccessibilityClearAction();
+    void SetAccessibilityPasswordIconAction();
 
     void UpdateCopyAllStatus();
     void RestorePreInlineStates();
@@ -1623,12 +1630,12 @@ private:
     int32_t dragTextEnd_ = 0;
     std::string dragValue_;
     RefPtr<FrameNode> dragNode_;
-    DragStatus dragStatus_ = DragStatus::NONE; // The status of the dragged initiator
+    DragStatus dragStatus_ = DragStatus::NONE;          // The status of the dragged initiator
     DragStatus dragRecipientStatus_ = DragStatus::NONE; // Drag the recipient's state
     RefPtr<Clipboard> clipboard_;
     std::vector<TextEditingValueNG> operationRecords_;
     std::vector<TextEditingValueNG> redoOperationRecords_;
-    std::vector<MenuOptionsParam> menuOptionItems_;
+    std::vector<NG::MenuOptionsParam> menuOptionItems_;
     BorderRadiusProperty borderRadius_;
     PasswordModeStyle passwordModeStyle_;
     SelectMenuInfo selectMenuInfo_;

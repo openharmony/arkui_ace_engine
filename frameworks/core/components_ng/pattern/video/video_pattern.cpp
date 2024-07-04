@@ -1417,7 +1417,7 @@ void VideoPattern::Pause()
         return;
     }
     auto ret = mediaPlayer_->Pause();
-    if (ret != -1) {
+    if (ret != -1 && !isPaused_) {
         isPaused_ = true;
         StartImageAnalyzer();
     }
@@ -1661,6 +1661,9 @@ VideoPattern::~VideoPattern()
 {
     if (renderContextForMediaPlayer_) {
         renderContextForMediaPlayer_->RemoveSurfaceChangedCallBack();
+    }
+    if (IsSupportImageAnalyzer()) {
+        DestroyAnalyzerOverlay();
     }
     if (!fullScreenNodeId_.has_value()) {
         return;

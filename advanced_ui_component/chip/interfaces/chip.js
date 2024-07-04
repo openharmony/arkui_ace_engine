@@ -1190,7 +1190,7 @@ export class ChipComponent extends ViewPU {
             return;
         }
         if (this.isHover) {
-            if (i3.type === TouchType.Down || i3.type == TouchType.Move) {
+            if (i3.type === TouchType.Down || i3.type === TouchType.Move) {
                 this.isShowPressedBackGroundColor = true;
             }
             else if (i3.type === TouchType.Up) {
@@ -1201,7 +1201,7 @@ export class ChipComponent extends ViewPU {
             }
         }
         else {
-            if (i3.type === TouchType.Down || i3.type == TouchType.Move) {
+            if (i3.type === TouchType.Down || i3.type === TouchType.Move) {
                 this.isShowPressedBackGroundColor = true;
             }
             else if (i3.type === TouchType.Up) {
@@ -1456,7 +1456,6 @@ export class ChipComponent extends ViewPU {
                     this.observeComponentCreation2((o1, p1) => {
                         Image.create(this.prefixIcon?.src);
                         Image.direction(this.chipDirection);
-                        Image.matchTextDirection(this.chipDirection == Direction.Ltr ? false : true);
                         Image.opacity(this.getChipNodeOpacity());
                         Image.size(this.getPrefixIconSize());
                         Image.fillColor(this.getPrefixIconFilledColor());
@@ -1518,7 +1517,6 @@ export class ChipComponent extends ViewPU {
                     this.observeComponentCreation2((v, w) => {
                         Image.create(this.getSuffixIconSrc());
                         Image.direction(this.chipDirection);
-                        Image.matchTextDirection(this.chipDirection == Direction.Ltr ? false : true);
                         Image.opacity(this.getChipNodeOpacity());
                         Image.size(this.getSuffixIconSize());
                         Image.fillColor(this.getSuffixIconFilledColor());
@@ -1552,7 +1550,7 @@ export class ChipComponent extends ViewPU {
                     }, Image);
                 });
             }
-            else if ((this.allowClose ?? true)) {
+            else if (this.allowClose ?? true) {
                 this.ifElseBranchUpdateFunction(2, () => {
                     this.observeComponentCreation2((q, r) => {
                         SymbolGlyph.create({

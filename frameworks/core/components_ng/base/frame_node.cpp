@@ -487,7 +487,7 @@ FrameNode::~FrameNode()
     if (IsOnMainTree()) {
         OnDetachFromMainTree(false);
     }
-    TriggerVisibleAreaChangeCallback(true);
+    TriggerVisibleAreaChangeCallback(0, true);
     CleanVisibleAreaUserCallback();
     CleanVisibleAreaInnerCallback();
     if (eventHub_) {
@@ -889,45 +889,6 @@ bool FrameNode::CheckAutoSave()
     return false;
 }
 
-void FrameNode::FocusToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
-{
-    bool enabled = true;
-    bool focusable = false;
-    bool focused = false;
-    bool defaultFocus = false;
-    bool groupDefaultFocus = false;
-    bool focusOnTouch = false;
-    int32_t tabIndex = 0;
-    auto focusHub = GetFocusHub();
-    if (filter.IsFastFilter()) {
-        if (filter.CheckFixedAttr(FIXED_ATTR_FOCUSABLE)) {
-            if (focusHub) {
-                focusable = focusHub->IsFocusable();
-                focused = focusHub->IsCurrentFocus();
-            }
-            json->Put("focusable", focusable);
-            json->Put("focused", focused);
-        }
-        return;
-    }
-    if (focusHub) {
-        enabled = focusHub->IsEnabled();
-        focusable = focusHub->IsFocusable();
-        focused = focusHub->IsCurrentFocus();
-        defaultFocus = focusHub->IsDefaultFocus();
-        groupDefaultFocus = focusHub->IsDefaultGroupFocus();
-        focusOnTouch = focusHub->IsFocusOnTouch().value_or(false);
-        tabIndex = focusHub->GetTabIndex();
-    }
-    json->PutExtAttr("enabled", enabled, filter);
-    json->PutFixedAttr("focusable", focusable, filter, FIXED_ATTR_FOCUSABLE);
-    json->PutFixedAttr("focused", focused, filter, FIXED_ATTR_FOCUSED);
-    json->PutExtAttr("defaultFocus", defaultFocus, filter);
-    json->PutExtAttr("groupDefaultFocus", groupDefaultFocus, filter);
-    json->PutExtAttr("focusOnTouch", focusOnTouch, filter);
-    json->PutExtAttr("tabIndex", tabIndex, filter);
-}
-
 void FrameNode::MouseToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     std::string hoverEffect = "HoverEffect.Auto";
@@ -1024,7 +985,7 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFil
     if (eventHub_) {
         eventHub_->ToJsonValue(json, filter);
     }
-    FocusToJsonValue(json, filter);
+    FocusHub::ToJsonValue(GetFocusHub(), json, filter);
     MouseToJsonValue(json, filter);
     TouchToJsonValue(json, filter);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -1112,7 +1073,9 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
     if (configurationChange.colorModeUpdate) {
         pattern_->OnColorConfigurationUpdate();
         if (colorModeUpdateCallback_) {
-            colorModeUpdateCallback_();
+            // copy it first in case of changing colorModeUpdateCallback_ in the callback
+            auto cb = colorModeUpdateCallback_;
+            cb();
         }
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1457,7 +1420,42 @@ bool FrameNode::IsFrameDisappear()
     return !curIsVisible || !curFrameIsActive;
 }
 
-void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
+bool FrameNode::IsFrameDisappear(uint64_t timestamp)
+{
+    auto context = GetContext();
+    CHECK_NULL_RETURN(context, true);
+    bool isFrameDisappear = !context->GetOnShow() || !IsOnMainTree() || !IsVisible();
+    if (isFrameDisappear) {
+        cachedIsFrameDisappear_ = { timestamp, true };
+        return true;
+    }
+
+    return IsFrameAncestorDisappear(timestamp);
+}
+
+bool FrameNode::IsFrameAncestorDisappear(uint64_t timestamp)
+{
+    bool curFrameIsActive = isActive_;
+    bool curIsVisible = IsVisible();
+    bool result = !curIsVisible || !curFrameIsActive;
+    RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame();
+    if (!parentUi) {
+        cachedIsFrameDisappear_ = { timestamp, result };
+        return result;
+    }
+
+    auto parentIsFrameDisappear = parentUi->cachedIsFrameDisappear_;
+    if (parentIsFrameDisappear.first == timestamp) {
+        result = result || parentIsFrameDisappear.second;
+        cachedIsFrameDisappear_ = { timestamp, result };
+        return result;
+    }
+    result = result || (parentUi->IsFrameAncestorDisappear(timestamp));
+    cachedIsFrameDisappear_ = { timestamp, result };
+    return result;
+}
+
+void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceDisappear)
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
@@ -1468,7 +1466,7 @@ void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
     auto& visibleAreaInnerCallback = eventHub_->GetVisibleAreaCallback(false);
 
     ProcessThrottledVisibleCallback();
-    if (forceDisappear || IsFrameDisappear()) {
+    if (forceDisappear || IsFrameDisappear(timestamp)) {
         if (!NearEqual(lastVisibleRatio_, VISIBLE_RATIO_MIN)) {
             ProcessAllVisibleCallback(
                 visibleAreaUserRatios, visibleAreaUserCallback, VISIBLE_RATIO_MIN, lastVisibleCallbackRatio_);
@@ -3487,7 +3485,7 @@ void FrameNode::Layout()
 bool FrameNode::SelfExpansive()
 {
     auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
-    return opts && opts->Expansive();
+    return opts && (opts->Expansive() || opts->switchToNone);
 }
 
 bool FrameNode::SelfExpansiveToKeyboard()

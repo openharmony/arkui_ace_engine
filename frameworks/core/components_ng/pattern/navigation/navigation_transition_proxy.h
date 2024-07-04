@@ -46,6 +46,7 @@ public:
         auto pattern = AceType::DynamicCast<NavDestinationPattern>(preDestination->GetPattern());
         CHECK_NULL_VOID(pattern);
         preContext_ = pattern->GetNavDestinationContext();
+        CHECK_NULL_VOID(preContext_);
         preContext_->SetNavPathInfo(pattern->GetNavPathInfo());
     }
 
@@ -55,6 +56,7 @@ public:
         auto pattern = AceType::DynamicCast<NavDestinationPattern>(topDestination->GetPattern());
         CHECK_NULL_VOID(pattern);
         topContext_ = pattern->GetNavDestinationContext();
+        CHECK_NULL_VOID(topContext_);
         topContext_->SetNavPathInfo(pattern->GetNavPathInfo());
     }
 

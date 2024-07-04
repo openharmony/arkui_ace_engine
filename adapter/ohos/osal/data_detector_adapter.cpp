@@ -39,12 +39,12 @@ constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
 const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
     { TextDataDetectType::PHONE_NUMBER, "phoneNum" }, { TextDataDetectType::URL, "url" },
     { TextDataDetectType::EMAIL, "email" }, { TextDataDetectType::ADDRESS, "location" },
-    { TextDataDetectType::DATETIME, "datetime" }
+    { TextDataDetectType::DATE_TIME, "datetime" }
 };
 const std::unordered_map<std::string, TextDataDetectType> TEXT_DETECT_MAP_REVERSE = {
     { "phoneNum", TextDataDetectType::PHONE_NUMBER }, { "url", TextDataDetectType::URL },
     { "email", TextDataDetectType::EMAIL }, { "location", TextDataDetectType::ADDRESS },
-    { "datetime", TextDataDetectType::DATETIME }
+    { "datetime", TextDataDetectType::DATE_TIME }
 };
 
 bool DataDetectorAdapter::ShowUIExtensionMenu(
@@ -165,7 +165,7 @@ void DataDetectorAdapter::SetWantParamaters(const AISpan& aiSpan, AAFwk::Want& w
     if (entityJson_.find(aiSpan.start) != entityJson_.end()) {
         want.SetParam("entityJson", entityJson_[aiSpan.start]);
     }
-    if (aiSpan.type == TextDataDetectType::DATETIME) {
+    if (aiSpan.type == TextDataDetectType::DATE_TIME) {
         want.SetParam("fullText", textForAI_);
         want.SetParam("offset", aiSpan.start);
     }
@@ -246,25 +246,29 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([result, weak, instanceID, startPos, info] {
-            ContainerScope scope(instanceID);
-            auto dataDetectorAdapter = weak.Upgrade();
-            CHECK_NULL_VOID(dataDetectorAdapter);
-            if (info.module != dataDetectorAdapter->textDetectTypes_) {
-                return;
-            }
-            dataDetectorAdapter->ParseAIResult(result, startPos);
-            auto host = dataDetectorAdapter->GetHost();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
-        }, "ArkUITextParseAIResult");
+        uiTaskExecutor.PostTask(
+            [result, weak, instanceID, startPos, info] {
+                ContainerScope scope(instanceID);
+                auto dataDetectorAdapter = weak.Upgrade();
+                CHECK_NULL_VOID(dataDetectorAdapter);
+                if (info.module != dataDetectorAdapter->textDetectTypes_) {
+                    return;
+                }
+                dataDetectorAdapter->ParseAIResult(result, startPos);
+                auto host = dataDetectorAdapter->GetHost();
+                CHECK_NULL_VOID(host);
+                host->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+            },
+            "ArkUITextParseAIResult");
     };
 
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-    uiTaskExecutor.PostTask([info, textFunc] {
-        TAG_LOGI(AceLogTag::ACE_TEXT, "Start entity detect using AI");
-        DataDetectorMgr::GetInstance().DataDetect(info, textFunc);
-    }, "ArkUITextInitDataDetect");
+    uiTaskExecutor.PostTask(
+        [info, textFunc] {
+            TAG_LOGI(AceLogTag::ACE_TEXT, "Start entity detect using AI");
+            DataDetectorMgr::GetInstance().DataDetect(info, textFunc);
+        },
+        "ArkUITextInitDataDetect");
 }
 
 void DataDetectorAdapter::ParseAIResult(const TextDataDetectResult& result, int32_t startPos)

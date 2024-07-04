@@ -14,6 +14,10 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_animator.h"
+#if !defined(PREVIEW)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
+
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_animator_function.h"
@@ -137,6 +141,9 @@ std::function<void()> GetEventCallback(const JSCallbackInfo& info, const std::st
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT(name);
         func->Execute();
+#if !defined(PREVIEW)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", name);
+#endif
     };
 }
 

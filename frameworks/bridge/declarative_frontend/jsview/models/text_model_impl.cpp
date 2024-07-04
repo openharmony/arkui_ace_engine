@@ -346,6 +346,5 @@ void TextModelImpl::SetOnDrop(NG::OnDragDropFunc&& onDrop)
     component->SetOnDropId(onDrop);
 }
 
-void TextModelImpl::SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) {}
 
 } // namespace OHOS::Ace::Framework

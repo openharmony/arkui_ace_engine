@@ -1477,4 +1477,30 @@ HWTEST_F(TabsAttrTestNg, BarGridAlign003, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(frameNode_->GetIndex(), 0);
 }
+
+/**
+ * @tc.name: TabsModelSetEdgeEffect001
+ * @tc.desc: test SetEdgeEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, TabsModelSetEdgeEffect001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs(BarPosition::START, 1);
+    model.SetEdgeEffect(EdgeEffect::SPRING);
+    EXPECT_EQ(frameNode_->GetTag(), V2::TABS_ETS_TAG);
+    EXPECT_EQ(swiperNode_->GetTag(), V2::SWIPER_ETS_TAG);
+    EXPECT_EQ(swiperPaintProperty_->GetEdgeEffect(), EdgeEffect::SPRING);
+    auto json = JsonUtil::Create(true);
+    frameNode_->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("edgeEffect"), "EdgeEffect::SPRING");
+
+    model.SetEdgeEffect(EdgeEffect::SPRING);
+    EXPECT_EQ(swiperPaintProperty_->GetEdgeEffect(), EdgeEffect::SPRING);
+
+    model.SetEdgeEffect(EdgeEffect::FADE);
+    EXPECT_EQ(swiperPaintProperty_->GetEdgeEffect(), EdgeEffect::FADE);
+
+    model.SetEdgeEffect(EdgeEffect::NONE);
+    EXPECT_EQ(swiperPaintProperty_->GetEdgeEffect(), EdgeEffect::NONE);
+}
 } // namespace OHOS::Ace::NG

@@ -466,10 +466,16 @@ void WebPattern::HandleFlingMove(const GestureEvent& event)
     if ((event.GetInputEventType() == InputEventType::AXIS) &&
         (event.GetSourceTool() == SourceTool::TOUCHPAD)) {
         CHECK_NULL_VOID(delegate_);
+        std::vector<int32_t> pressedCodes;
+        auto gesturePressedCodes = event.GetPressedKeyCodes();
+        for (auto pCode : gesturePressedCodes) {
+            pressedCodes.push_back(static_cast<int32_t>(pCode));
+        }
         auto localLocation = event.GetLocalLocation();
-        delegate_->HandleTouchpadFlingEvent(localLocation.GetX(), localLocation.GetY(),
-                                            event.GetVelocity().GetVelocityX(),
-                                            event.GetVelocity().GetVelocityY());
+        delegate_->WebHandleTouchpadFlingEvent(localLocation.GetX(), localLocation.GetY(),
+                                               event.GetVelocity().GetVelocityX(),
+                                               event.GetVelocity().GetVelocityY(),
+                                               pressedCodes);
     }
 }
 
@@ -478,8 +484,14 @@ void WebPattern::HandleDragMove(const GestureEvent& event)
     if (event.GetInputEventType() == InputEventType::AXIS) {
         CHECK_NULL_VOID(delegate_);
         auto localLocation = event.GetLocalLocation();
-        delegate_->HandleAxisEvent(localLocation.GetX(), localLocation.GetY(),
-            event.GetDelta().GetX() * DEFAULT_AXIS_RATIO, event.GetDelta().GetY() * DEFAULT_AXIS_RATIO);
+        std::vector<int32_t> pressedCodes;
+        auto gesturePressedCodes = event.GetPressedKeyCodes();
+        for (auto pCode : gesturePressedCodes) {
+            pressedCodes.push_back(static_cast<int32_t>(pCode));
+        }
+        delegate_->WebHandleAxisEvent(localLocation.GetX(), localLocation.GetY(),
+            event.GetDelta().GetX() * DEFAULT_AXIS_RATIO, event.GetDelta().GetY() * DEFAULT_AXIS_RATIO,
+            pressedCodes);
     }
 }
 
@@ -4075,7 +4087,7 @@ ScrollResult WebPattern::HandleScroll(RefPtr<NestableScrollContainer> parent, fl
     return { 0.0f, false };
 }
 
-bool WebPattern::HandleScrollVelocity(float velocity)
+bool WebPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child)
 {
     // If no parent object is specified, the nearest nested scrollable parent is used by default.
     return HandleScrollVelocity(GetNestedScrollParent(), velocity);
@@ -4902,6 +4914,20 @@ std::string WebPattern::EnumTypeToString(WebAccessibilityType type)
     return std::to_string(static_cast<int>(type));
 }
 
+std::string WebPattern::VectorIntToString(std::vector<int64_t>&& vec)
+{
+    std::string vecStr;
+    int vecLen = vec.size();
+    if (vecLen < 1) {
+        return vecStr;
+    }
+
+    for (int i = 0; i < vecLen - 1; ++i) {
+        vecStr += std::to_string(vec[i]) + " ";
+    }
+    return vecStr + std::to_string(vec[vecLen - 1]);
+}
+
 void WebPattern::WebNodeInfoToJsonValue(std::shared_ptr<OHOS::Ace::JsonValue>& jsonNodeArray,
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> webNodeInfo, std::string& nodeTag)
 {
@@ -4916,6 +4942,7 @@ void WebPattern::WebNodeInfoToJsonValue(std::shared_ptr<OHOS::Ace::JsonValue>& j
     JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::HINT, webNodeInfo->GetHint());
     JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::CONTENT, webNodeInfo->GetContent());
     JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::ERROR, webNodeInfo->GetError());
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::CHILD_IDS, VectorIntToString(webNodeInfo->GetChildIds()));
     JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::PARENT_ID, webNodeInfo->GetParentId(), -1);
     JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::GRID_ROWS, webNodeInfo->GetGridRows(), -1);
     JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::GRID_COLS, webNodeInfo->GetGridColumns(), -1);
@@ -5012,6 +5039,21 @@ void WebPattern::GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t
         TaskExecutor::TaskType::UI, WEB_ACCESSIBILITY_DELAY_TIME, "GetAllWebAccessibilityNodeInfos");
 }
 
+void WebPattern::RegisterWebComponentClickCallback(WebComponentClickCallback&& callback)
+{
+    CHECK_NULL_VOID(callback);
+    webComponentClickCallback_ = std::move(callback);
+    textBlurAccessibilityEnable_ = true;
+    SetAccessibilityState(true);
+}
+
+void WebPattern::UnregisterWebComponentClickCallback()
+{
+    webComponentClickCallback_ = nullptr;
+    textBlurAccessibilityEnable_ = false;
+    SetAccessibilityState(false);
+}
+
 void WebPattern::RequestFocus()
 {
     WebRequestFocus();
@@ -5071,25 +5113,28 @@ void WebPattern::DestroyAnalyzerOverlay()
     }
 }
 
+void WebPattern::OnAccessibilityHoverEvent(const PointF& point)
+{
+    CHECK_NULL_VOID(delegate_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto viewScale = pipelineContext->GetViewScale();
+    int32_t globalX = static_cast<int32_t>(point.GetX()) * viewScale;
+    int32_t globalY = static_cast<int32_t>(point.GetY()) * viewScale;
+    auto offset = GetCoordinatePoint().value_or(OffsetF());
+    globalX = static_cast<int32_t>(globalX - offset.GetX());
+    globalY = static_cast<int32_t>(globalY - offset.GetY());
+    delegate_->HandleAccessibilityHoverEvent(globalX, globalY);
+}
+
 void WebPattern::RegisterTextBlurCallback(TextBlurCallback&& callback)
 {
     CHECK_NULL_VOID(callback);
     textBlurCallback_ = std::move(callback);
     textBlurAccessibilityEnable_ = true;
     SetAccessibilityState(true);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto taskExecutor = pipelineContext->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    auto setAccessibilityStateTask = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        // web root node id
-        pattern->GetAccessibilityNodeById(-1);
-    };
-    taskExecutor->PostDelayedTask(setAccessibilityStateTask, TaskExecutor::TaskType::UI, WEB_ACCESSIBILITY_DELAY_TIME,
-        "RegisterTextBlurCallback");
 }
 
 void WebPattern::UnRegisterTextBlurCallback()

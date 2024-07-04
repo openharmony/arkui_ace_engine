@@ -1145,26 +1145,6 @@ HWTEST_F(SearchTestNg, SetCopyOption001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetMenuOptionItems001
- * @tc.desc: Set Menu Option Items
- * @tc.type: FUNC
- */
-HWTEST_F(SearchTestNg, SetMenuOptionItems001, TestSize.Level1)
-{
-    SearchModelNG searchModelInstance;
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    ASSERT_NE(textFieldChild, nullptr);
-    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
-    ASSERT_NE(textFieldLayoutProperty, nullptr);
-    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
-    ASSERT_NE(textFieldPattern, nullptr);
-    std::vector<MenuOptionsParam> menuOptionsParam;
-    searchModelInstance.SetMenuOptionItems(std::move(menuOptionsParam));
-}
-
-/**
  * @tc.name: SetOnSubmit001
  * @tc.desc: Set On Submit
  * @tc.type: FUNC

@@ -792,45 +792,36 @@ HWTEST_F(TabBarEventTestNg, ScrollableEvent001, TestSize.Level1)
     model.SetTabBarMode(TabBarMode::SCROLLABLE);
     // Set tabs width less than total barItems width, make tabBar scrollable
     const float tabsWidth  = BARITEM_SIZE * (TABCONTENT_NUMBER - 1);
-    const float scrollableDistance = BARITEM_SIZE;
     ViewAbstract::SetWidth(CalcLength(tabsWidth));
     CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
     CreateTabsDone(model);
 
     /**
-     * @tc.steps: step1. Make itemBar out of left Boundary
-     */
-    float outLeftOffset = 1.f;
-    tabBarPattern_->UpdateCurrentOffset(outLeftOffset);
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
-
-    /**
-     * @tc.steps: step2. Drag out of left Boundary
+     * @tc.steps: step1. Drag out of left Boundary
      * @tc.expected: The friction take effect
      */
+    float outOffset = 1.f;
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarPattern_->visibleItemPosition_[0] = { outOffset, outOffset + BARITEM_SIZE };
+    tabBarPattern_->visibleItemPosition_[2] = { outOffset + BARITEM_SIZE * 2, outOffset + tabsWidth };
     auto scrollable = tabBarPattern_->scrollableEvent_->GetScrollable();
     float dragOffset = 100.f;
     scrollable->UpdateScrollPosition(dragOffset, SCROLL_FROM_UPDATE);
-    EXPECT_GT(tabBarPattern_->currentOffset_, outLeftOffset);
-    EXPECT_LT(tabBarPattern_->currentOffset_, dragOffset - outLeftOffset);
+    EXPECT_GT(tabBarPattern_->currentDelta_, 0.0f);
+    EXPECT_LT(tabBarPattern_->currentDelta_, dragOffset);
 
     /**
-     * @tc.steps: step3. Make itemBar out of right Boundary
-     */
-    float outRightOffset = -(scrollableDistance + 1.f);
-    tabBarPattern_->currentOffset_ = outRightOffset;
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
-
-    /**
-     * @tc.steps: step4. Drag out of right Boundary
+     * @tc.steps: step2. Drag out of right Boundary
      * @tc.expected: The friction take effect
      */
+    tabBarPattern_->visibleItemPosition_.clear();
+    tabBarPattern_->visibleItemPosition_[1] = { -outOffset, -outOffset + BARITEM_SIZE };
+    tabBarPattern_->visibleItemPosition_[TABCONTENT_NUMBER - 1] =
+        { -outOffset + BARITEM_SIZE * 2, -outOffset + tabsWidth };
     dragOffset = -100.f;
     scrollable->UpdateScrollPosition(dragOffset, SCROLL_FROM_UPDATE);
-    EXPECT_LT(tabBarPattern_->currentOffset_, outRightOffset);
-    EXPECT_GT(tabBarPattern_->currentOffset_, dragOffset - outRightOffset);
+    EXPECT_LT(tabBarPattern_->currentDelta_, 0.0f);
+    EXPECT_GT(tabBarPattern_->currentDelta_, dragOffset);
 }
 
 /**
@@ -843,10 +834,8 @@ HWTEST_F(TabBarEventTestNg, ScrollableEvent002, TestSize.Level1)
     TabsModelNG model = CreateTabs();
     model.SetTabBarMode(TabBarMode::SCROLLABLE);
     // Set tabs width less than total barItems width, make scrollable
-    const float tabsWidth  = BARITEM_SIZE * (TABCONTENT_NUMBER - 1);
-    const float scrollableDistance = BARITEM_SIZE;
-    ViewAbstract::SetWidth(CalcLength(tabsWidth));
-    CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
+    ViewAbstract::SetWidth(CalcLength(BARITEM_SIZE));
+    CreateTabContentsWithBuilder(2);
     CreateTabsDone(model);
 
     /**
@@ -854,21 +843,29 @@ HWTEST_F(TabBarEventTestNg, ScrollableEvent002, TestSize.Level1)
      * @tc.expected: The scrollOffset not changed by AdjustOffset
      */
     auto scrollable = tabBarPattern_->scrollableEvent_->GetScrollable();
-    scrollable->UpdateScrollPosition(-scrollableDistance / 2, SCROLL_FROM_AXIS);
-    EXPECT_EQ(tabBarPattern_->currentOffset_, -scrollableDistance / 2);
+    scrollable->UpdateScrollPosition(-BARITEM_SIZE / 2, SCROLL_FROM_AXIS);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, -BARITEM_SIZE / 2);
 
     /**
      * @tc.steps: step2. Scroll to right out of Boundary
      * @tc.expected: Can not out of Boundary by AdjustOffset
      */
-    scrollable->UpdateScrollPosition(-scrollableDistance * 2, SCROLL_FROM_AXIS);
-    EXPECT_EQ(tabBarPattern_->currentOffset_, -scrollableDistance);
+    scrollable->UpdateScrollPosition(-BARITEM_SIZE * 2, SCROLL_FROM_AXIS);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 1);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
 
     /**
      * @tc.steps: step3. Scroll to left out of Boundary
      * @tc.expected: Can not out of Boundary by AdjustOffset
      */
-    scrollable->UpdateScrollPosition(scrollableDistance * 2, SCROLL_FROM_AXIS);
-    EXPECT_EQ(tabBarPattern_->currentOffset_, 0.f);
+    scrollable->UpdateScrollPosition(BARITEM_SIZE * 2, SCROLL_FROM_AXIS);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
+    EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
 }
 } // namespace OHOS::Ace::NG

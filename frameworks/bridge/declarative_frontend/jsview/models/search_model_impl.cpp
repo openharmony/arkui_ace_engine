@@ -176,11 +176,6 @@ void SearchModelImpl::SetCopyOption(const CopyOptions& copyOptions)
     JSViewSetProperty(&TextFieldComponent::SetCopyOption, copyOptions);
 }
 
-void SearchModelImpl::SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems)
-{
-    LOGI("only newPipeline supply");
-}
-
 void SearchModelImpl::SetFocusable(bool focusable)
 {
     auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();

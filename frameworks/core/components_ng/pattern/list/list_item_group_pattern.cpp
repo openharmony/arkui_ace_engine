@@ -155,11 +155,8 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     }
     auto cacheParam = layoutAlgorithm->GetCacheParam();
     if (cacheParam) {
-        if (cacheParam.value().forward) {
-            forwardCachedIndex_ = cacheParam.value().currCachedIndex;
-        } else {
-            backwardCachedIndex_ = cacheParam.value().currCachedIndex;
-        }
+        forwardCachedIndex_ = cacheParam.value().forwardCachedIndex;
+        backwardCachedIndex_ = cacheParam.value().backwardCachedIndex;
         layoutAlgorithm->SetCacheParam(std::nullopt);
     }
     auto listLayoutProperty = host->GetLayoutProperty<ListItemGroupLayoutProperty>();
@@ -363,19 +360,39 @@ void ListItemGroupPattern::CalculateItemStartIndex()
     itemStartIndex_ = itemStartIndex;
 }
 
-int32_t ListItemGroupPattern::GetForwardCachedIndex(int32_t cacheCount)
+void ListItemGroupPattern::UpdateActiveChildRange(bool forward, int32_t cacheCount)
 {
-    int32_t endIndex = itemPosition_.empty() ? -1 : itemPosition_.rbegin()->first;
-    int32_t limit = std::min(endIndex + cacheCount, itemTotalCount_ - 1);
-    forwardCachedIndex_ = std::clamp(forwardCachedIndex_, endIndex, limit);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (forward) {
+        host->SetActiveChildRange(-1, -1, 0, cacheCount);
+    } else {
+        int32_t index = itemTotalCount_ + itemStartIndex_;
+        host->SetActiveChildRange(index, index, cacheCount, 0);
+    }
+}
+
+int32_t ListItemGroupPattern::UpdateForwardCachedIndex(int32_t cacheCount, bool outOfView)
+{
+    int32_t endIndex = (outOfView || itemPosition_.empty()) ? -1 : itemPosition_.rbegin()->first;
+    int32_t limit = std::min(endIndex + cacheCount * lanes_, itemTotalCount_ - 1);
+    int32_t forwardCachedIndex = std::clamp(forwardCachedIndex_, endIndex, limit);
+    if (outOfView && forwardCachedIndex < forwardCachedIndex_) {
+        UpdateActiveChildRange(true, forwardCachedIndex + 1);
+    }
+    forwardCachedIndex_ = forwardCachedIndex;
     return forwardCachedIndex_;
 }
 
-int32_t ListItemGroupPattern::GetBackwardCachedIndex(int32_t cacheCount)
+int32_t ListItemGroupPattern::UpdateBackwardCachedIndex(int32_t cacheCount, bool outOfView)
 {
-    int32_t startIndex = itemPosition_.empty() ? itemTotalCount_ : itemPosition_.begin()->first;
-    int32_t limit = std::max(startIndex - cacheCount, 0);
-    backwardCachedIndex_ = std::clamp(backwardCachedIndex_, limit, startIndex);
+    int32_t startIndex = (outOfView || itemPosition_.empty()) ? itemTotalCount_ : itemPosition_.begin()->first;
+    int32_t limit = std::max(startIndex - cacheCount * lanes_, 0);
+    int32_t backwardCachedIndex = std::clamp(backwardCachedIndex_, limit, startIndex);
+    if (outOfView && backwardCachedIndex > backwardCachedIndex_) {
+        UpdateActiveChildRange(false, itemTotalCount_ - backwardCachedIndex);
+    }
+    backwardCachedIndex_ = backwardCachedIndex;
     return backwardCachedIndex_;
 }
 
@@ -397,11 +414,11 @@ void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint,
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_VOID(itemGroup);
-    int32_t currentIndex = forward ? GetForwardCachedIndex(cached) : GetBackwardCachedIndex(cacheCount);
     ListItemGroupCacheParam param = {
         .forward = forward,
         .cacheCount = cacheCount,
-        .currCachedIndex = currentIndex,
+        .forwardCachedIndex = forwardCachedIndex_,
+        .backwardCachedIndex = backwardCachedIndex_,
         .deadline = deadline,
     };
     itemGroup->SetCacheParam(param);

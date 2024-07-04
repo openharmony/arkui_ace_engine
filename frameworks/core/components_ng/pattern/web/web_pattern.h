@@ -109,6 +109,7 @@ public:
     using DefaultFileSelectorShowCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using WebNodeInfoCallback = const std::function<void(std::shared_ptr<JsonValue>& jsonNodeArray, int32_t webId)>;
     using TextBlurCallback = std::function<void(int64_t, const std::string)>;
+    using WebComponentClickCallback = std::function<void(int64_t, const std::string)>;
     WebPattern();
     WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController,
                RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
@@ -134,6 +135,7 @@ public:
         HINT,
         CONTENT,
         ERROR,
+        CHILD_IDS,
         PARENT_ID,
         GRID_ROWS,
         GRID_COLS,
@@ -397,7 +399,7 @@ public:
     }
     ScrollResult HandleScroll(float offset, int32_t source, NestedState state, float velocity = 0.f) override;
     ScrollResult HandleScroll(RefPtr<NestableScrollContainer> parent, float offset, int32_t source, NestedState state);
-    bool HandleScrollVelocity(float velocity) override;
+    bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
     bool HandleScrollVelocity(RefPtr<NestableScrollContainer> parent, float velocity);
     void OnScrollStartRecursive(float position, float velocity = 0.f) override;
     void OnScrollStartRecursive(std::vector<float> positions);
@@ -619,12 +621,16 @@ public:
     std::shared_ptr<Rosen::RSNode> GetSurfaceRSNode() const;
 
     void GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId);
+    void OnAccessibilityHoverEvent(const PointF& point) override;
     void RegisterTextBlurCallback(TextBlurCallback&& callback);
     void UnRegisterTextBlurCallback();
     TextBlurCallback GetTextBlurCallback() const
     {
         return textBlurCallback_;
     }
+    void RegisterWebComponentClickCallback(WebComponentClickCallback&& callback);
+    void UnregisterWebComponentClickCallback();
+    WebComponentClickCallback GetWebComponentClickCallback() const { return webComponentClickCallback_; }
 
 private:
     friend class WebContextSelectOverlay;
@@ -876,6 +882,7 @@ private:
                                 std::string& nodeTag);
     void GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId);
     std::string EnumTypeToString(WebAccessibilityType type);
+    std::string VectorIntToString(std::vector<int64_t>&& vec);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -1002,6 +1009,7 @@ private:
     std::optional<std::string> sharedRenderProcessToken_;
     bool textBlurAccessibilityEnable_ = false;
     TextBlurCallback textBlurCallback_ = nullptr;
+    WebComponentClickCallback webComponentClickCallback_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

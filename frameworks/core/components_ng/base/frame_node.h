@@ -165,7 +165,6 @@ public:
 
     void ProcessPropertyDiff()
     {
-        // TODO: modify done need to optimize.
         if (isPropertyDiffMarked_) {
             MarkModifyDone();
             MarkDirtyNode();
@@ -238,7 +237,7 @@ public:
         eventHub_->CleanVisibleAreaCallback(false);
     }
 
-    void TriggerVisibleAreaChangeCallback(bool forceDisappear = false);
+    void TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceDisappear = false);
 
     void SetOnSizeChangeCallback(OnSizeChangedFunc&& callback);
 
@@ -909,14 +908,6 @@ public:
     }
 
     bool CheckAccessibilityLevelNo() const {
-        auto property = GetAccessibilityProperty<NG::AccessibilityProperty>();
-        if (property) {
-            auto level = property->GetAccessibilityLevel();
-            if (level == NG::AccessibilityProperty::Level::NO ||
-                level == NG::AccessibilityProperty::Level::NO_HIDE_DESCENDANTS) {
-                return true;
-            }
-        }
         return false;
     }
 
@@ -1010,7 +1001,6 @@ private:
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
     void DumpOnSizeChangeInfo();
     bool CheckAutoSave() override;
-    void FocusToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void MouseToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void TouchToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
@@ -1023,6 +1013,8 @@ private:
         double lastVisibleRatio, bool isThrottled = false);
     void ProcessThrottledVisibleCallback();
     bool IsFrameDisappear();
+    bool IsFrameDisappear(uint64_t timestamp);
+    bool IsFrameAncestorDisappear(uint64_t timestamp);
     void ThrottledVisibleTask();
 
     void OnPixelRoundFinish(const SizeF& pixelGridRoundSize);
@@ -1154,6 +1146,7 @@ private:
 
     std::pair<uint64_t, OffsetF> cachedGlobalOffset_ = { 0, OffsetF() };
     std::pair<uint64_t, OffsetF> cachedTransformRelativeOffset_ = { 0, OffsetF() };
+    std::pair<uint64_t, bool> cachedIsFrameDisappear_ = { 0, false };
 
     struct onSizeChangeDumpInfo {
         int64_t onSizeChangeTimeStamp;

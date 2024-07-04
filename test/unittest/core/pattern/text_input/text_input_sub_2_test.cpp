@@ -361,4 +361,24 @@ HWTEST_F(TextFieldUXTest, testUnderlineColor007, TestSize.Level1)
      */
     EXPECT_EQ(pattern_->GetUnderlineColor(), theme->GetErrorUnderlineColor());
 }
+
+/**
+ * @tc.name: TextInputTypeToString007
+ * @tc.desc: Test TextInputTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputTypeToString007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize show number icon text input.
+     */
+    CreateTextField("", "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::URL);
+    });
+
+    /**
+     * @tc.steps: step2. Call TextInputTypeToString.
+     */
+    EXPECT_EQ(pattern_->TextInputTypeToString(), "InputType.URL");
+}
 } // namespace OHOS::Ace::NG

@@ -396,6 +396,7 @@ class RenderNode {
   private scaleValue: Vector2;
   private shadowColorValue: number;
   private shadowOffsetValue: Vector2;
+  private labelValue: string;
   private shadowAlphaValue: number;
   private shadowElevationValue: number;
   private shadowRadiusValue: number;
@@ -430,6 +431,7 @@ class RenderNode {
     this.scaleValue = { x: 1.0, y: 1.0 };
     this.shadowColorValue = 0;
     this.shadowOffsetValue = { x: 0, y: 0 };
+    this.labelValue = '';
     this.shadowAlphaValue = 0;
     this.shadowElevationValue = 0;
     this.shadowRadiusValue = 0;
@@ -522,6 +524,10 @@ class RenderNode {
       this.shadowOffsetValue.y = this.checkUndefinedOrNullWithDefaultValue<number>(offset.y, 0);
     }
     getUINativeModule().renderNode.setShadowOffset(this.nodePtr, this.shadowOffsetValue.x, this.shadowOffsetValue.y, this.lengthMetricsUnitValue);
+  }
+  set label(label: string) {
+    this.labelValue = this.checkUndefinedOrNullWithDefaultValue<string>(label, '');
+    getUINativeModule().renderNode.setLabel(this.nodePtr, this.labelValue);
   }
   set shadowAlpha(alpha: number) {
     this.shadowAlphaValue = this.checkUndefinedOrNullWithDefaultValue<number>(alpha, 0);
@@ -617,6 +623,9 @@ class RenderNode {
   }
   get shadowOffset(): Vector2 {
     return this.shadowOffsetValue;
+  }
+  get label(): string {
+    return this.labelValue;
   }
   get shadowAlpha(): number {
     return this.shadowAlphaValue;

@@ -58,6 +58,40 @@ public:
     {
         NG::MockPipelineContext::TearDown();
     }
+
+    sptr<FormRendererDispatcherImpl> GetFormRendererDispatcherImpl()
+    {
+        std::shared_ptr<UIContent> uiContent = UIContent::Create(nullptr, nullptr);
+        EXPECT_CALL(*((MockUIContent*)(uiContent.get())), ProcessPointerEvent(_)).WillRepeatedly(Return(true));
+        std::shared_ptr<FormRenderer> formRenderer = nullptr;
+        auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("GetFormRendererDispatcherImpl");
+        auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
+        sptr<FormRendererDispatcherImpl> renderDispatcher =
+            new FormRendererDispatcherImpl(uiContent, formRenderer, eventHandler);
+        return renderDispatcher;
+    }
+
+    sptr<FormRendererDelegateImpl> SurfaceCreateOnFormRendererDelegateImpl()
+    {
+        sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+        constexpr uint32_t createCode = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_CREATE);
+        std::string surfaceNodeName = "ArkTSCardNode";
+        struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceNodeName };
+        OHOS::AppExecFwk::FormJsInfo formJsInfo;
+        OHOS::AAFwk::Want want;
+        std::shared_ptr<Rosen::RSSurfaceNode> rsNode = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
+        MessageParcel createData;
+        createData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+        rsNode->SetId(1);
+        rsNode->Marshalling(createData);
+        createData.WriteParcelable(&formJsInfo);
+        createData.WriteParcelable(&want);
+        MessageParcel createReply;
+        MessageOption createOption;
+        auto createAns = renderDelegate->OnRemoteRequest(createCode, createData, createReply, createOption);
+        EXPECT_EQ(createAns, ERR_OK);
+        return renderDelegate;
+    }
 };
 
 /**
@@ -646,277 +680,12 @@ HWTEST_F(FormRenderTest, FormRenderTest017, TestSize.Level1)
 
 /**
  * @tc.name: FormRenderTest018
- * @tc.type: FUNC
- * Function: DispatchPointerEvent
- **@tc.desc: 1. system running normally
- *           2. test FormRendererDispatcherImpl
- */
-HWTEST_F(FormRenderTest, FormRenderTest018, TestSize.Level1)
-{
-    std::shared_ptr<UIContent> uiContent = UIContent::Create(nullptr, nullptr);
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderTest018");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
-    bool flag = false;
-    if (renderDispatcher != nullptr) {
-        std::shared_ptr<OHOS::MMI::PointerEvent> pointerEvent = OHOS::MMI::PointerEvent::Create();
-        pointerEvent->pointerAction_ = OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN;
-        SerializedGesture serializedGesture;
-        renderDispatcher->DispatchPointerEvent(pointerEvent, serializedGesture);
-        flag = true;
-    }
-    EXPECT_TRUE(flag);
-}
-
-/**
- * @tc.name: FormRenderTest019
- * @tc.type: FUNC
- * Function: DispatchPointerEvent
- **@tc.desc: 1. system running normally
- *           2. test FormRendererDispatcherImpl
- */
-HWTEST_F(FormRenderTest, FormRenderTest019, TestSize.Level1)
-{
-    std::shared_ptr<UIContent> uiContent = nullptr;
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderTest019");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
-    bool flag = false;
-    if (renderDispatcher != nullptr) {
-        std::shared_ptr<OHOS::MMI::PointerEvent> pointerEvent = OHOS::MMI::PointerEvent::Create();
-        pointerEvent->pointerAction_ = OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN;
-        SerializedGesture serializedGesture;
-        renderDispatcher->DispatchPointerEvent(pointerEvent, serializedGesture);
-        flag = true;
-    }
-    EXPECT_TRUE(flag);
-}
-
-/**
- * @tc.name: FormRenderTest020
- * @tc.type: FUNC
- * Function: DispatchPointerEvent
- **@tc.desc: 1. system running normally
- *           2. test FormRendererDispatcherImpl
- */
-HWTEST_F(FormRenderTest, FormRenderTest020, TestSize.Level1)
-{
-    std::shared_ptr<UIContent> uiContent = UIContent::Create(nullptr, nullptr);
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderTest020");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
-    bool flag = false;
-    if (renderDispatcher != nullptr) {
-        std::shared_ptr<OHOS::MMI::PointerEvent> pointerEvent = OHOS::MMI::PointerEvent::Create();
-        pointerEvent->pointerAction_ = OHOS::MMI::PointerEvent::POINTER_ACTION_UP;
-        SerializedGesture serializedGesture;
-        renderDispatcher->DispatchPointerEvent(pointerEvent, serializedGesture);
-        flag = true;
-    }
-    EXPECT_TRUE(flag);
-}
-
-/**
- * @tc.name: FormRenderTest021
- * @tc.type: FUNC
- * Function: DispatchPointerEvent
- **@tc.desc: 1. system running normally
- *           2. test FormRendererDispatcherImpl
- */
-HWTEST_F(FormRenderTest, FormRenderTest021, TestSize.Level1)
-{
-    std::shared_ptr<UIContent> uiContent = nullptr;
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderTest021");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
-    bool flag = false;
-    if (renderDispatcher != nullptr) {
-        std::shared_ptr<OHOS::MMI::PointerEvent> pointerEvent = OHOS::MMI::PointerEvent::Create();
-        pointerEvent->pointerAction_ = OHOS::MMI::PointerEvent::POINTER_ACTION_UP;
-        SerializedGesture serializedGesture;
-        renderDispatcher->DispatchPointerEvent(pointerEvent, serializedGesture);
-        flag = true;
-    }
-    EXPECT_TRUE(flag);
-}
-
-/**
- * @tc.name: FormRenderTest022
- * @tc.type: FUNC
- * Function: SetObscured
- **@tc.desc: 1. system running normally
- *           2. test FormRendererDispatcherImpl
- */
-HWTEST_F(FormRenderTest, FormRenderTest022, TestSize.Level1)
-{
-    // const std::shared_ptr<UIContent> uiContent = nullptr;
-    std::shared_ptr<UIContent> uiContent = UIContent::Create(nullptr, nullptr);
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderTest022");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
-    bool flag = false;
-    if (renderDispatcher != nullptr) {
-        renderDispatcher->SetObscured(true);
-        flag = true;
-    }
-    EXPECT_TRUE(flag);
-}
-
-/**
- * @tc.name: FormRenderTest023
- * @tc.type: FUNC
- * Function: OnAccessibilityChildTreeRegister
- **@tc.desc: 1. system running normally
- *           2. test FormRendererDispatcherImpl
- */
-HWTEST_F(FormRenderTest, FormRenderTest023, TestSize.Level1)
-{
-    std::shared_ptr<UIContent> uiContent = UIContent::Create(nullptr, nullptr);
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderTest023");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
-    bool flag = false;
-    uint32_t windowId = 1;
-    int32_t treeId = 11;
-    int64_t accessibilityId = 111;
-    if (renderDispatcher != nullptr) {
-        renderDispatcher->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
-        flag = true;
-    }
-    EXPECT_TRUE(flag);
-}
-
-/**
- * @tc.name: FormRenderTest024
- * @tc.type: FUNC
- * Function: OnAccessibilityChildTreeDeregister
- **@tc.desc: 1. system running normally
- *           2. test FormRendererDispatcherImpl
- */
-HWTEST_F(FormRenderTest, FormRenderTest024, TestSize.Level1)
-{
-    std::shared_ptr<UIContent> uiContent = UIContent::Create(nullptr, nullptr);
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderTest024");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
-    bool flag = false;
-    if (renderDispatcher != nullptr) {
-        renderDispatcher->OnAccessibilityChildTreeDeregister();
-        flag = true;
-    }
-    EXPECT_TRUE(flag);
-}
-
-/**
- * @tc.name: FormRenderTest025
- * @tc.type: FUNC
- * Function: OnAccessibilityDumpChildInfo
- **@tc.desc: 1. system running normally
- *           2. test FormRendererDispatcherImpl
- */
-HWTEST_F(FormRenderTest, FormRenderTest025, TestSize.Level1)
-{
-    std::shared_ptr<UIContent> uiContent = nullptr;
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderTest025");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
-    bool flag = false;
-    std::vector<std::string> params;
-    std::vector<std::string> info;
-    if (renderDispatcher != nullptr) {
-        renderDispatcher->OnAccessibilityDumpChildInfo(params, info);
-        flag = true;
-    }
-    EXPECT_TRUE(flag);
-}
-
-/**
- * @tc.name: FormRenderTest026
- * @tc.type: FUNC
- * Function: OnAccessibilityDumpChildInfo
- **@tc.desc: 1. system running normally
- *           2. test FormRendererDispatcherImpl
- */
-HWTEST_F(FormRenderTest, FormRenderTest026, TestSize.Level1)
-{
-    std::shared_ptr<UIContent> uiContent = UIContent::Create(nullptr, nullptr);
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderTest026");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
-    bool flag = false;
-    std::vector<std::string> params;
-    std::vector<std::string> info;
-    if (renderDispatcher != nullptr) {
-        renderDispatcher->OnAccessibilityDumpChildInfo(params, info);
-        flag = true;
-    }
-    EXPECT_TRUE(flag);
-}
-
-/**
- * @tc.name: FormRenderTest027
- * @tc.type: FUNC
- * Function: OnAccessibilityTransferHoverEvent
- **@tc.desc: 1. system running normally
- *           2. test FormRendererDispatcherImpl
- */
-HWTEST_F(FormRenderTest, FormRenderTest027, TestSize.Level1)
-{
-    std::shared_ptr<UIContent> uiContent = UIContent::Create(nullptr, nullptr);
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderTest027");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
-    bool flag = false;
-    float pointX = 1.1;
-    float pointY = 2.2;
-    int32_t sourceType = 1;
-    int32_t eventType = 2;
-    int64_t timeMs = 1000;
-    if (renderDispatcher != nullptr) {
-        renderDispatcher->OnAccessibilityTransferHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
-        flag = true;
-    }
-    EXPECT_TRUE(flag);
-}
-
-/**
- * @tc.name: FormRenderTest028
  * @tc.desc: test PreInitAddForm
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderTest, FormRenderTest028, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest018, TestSize.Level1)
 {
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("formRenderTest028");
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("formRenderTest018");
     ASSERT_TRUE(eventRunner);
     auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
     auto formRendererGroup = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
@@ -941,13 +710,13 @@ HWTEST_F(FormRenderTest, FormRenderTest028, TestSize.Level1)
 }
 
 /**
- * @tc.name: FormRenderTest029
+ * @tc.name: FormRenderTest019
  * @tc.desc: test AttachForm
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderTest, FormRenderTest029, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest019, TestSize.Level1)
 {
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("formRenderTest029");
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("formRenderTest019");
     ASSERT_TRUE(eventRunner);
     auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
     auto formRendererGroup = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
@@ -969,13 +738,13 @@ HWTEST_F(FormRenderTest, FormRenderTest029, TestSize.Level1)
 }
 
 /**
- * @tc.name: FormRenderTest030
+ * @tc.name: FormRenderTest020
  * @tc.desc: test AttachUIContent
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderTest, FormRenderTest030, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest020, TestSize.Level1)
 {
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("formRenderTest030");
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("formRenderTest020");
     ASSERT_TRUE(eventRunner);
     auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
     auto formRendererGroup = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
@@ -1000,13 +769,13 @@ HWTEST_F(FormRenderTest, FormRenderTest030, TestSize.Level1)
 }
 
 /**
- * @tc.name: FormRenderTest031
+ * @tc.name: FormRenderTest021
  * @tc.desc: test OnSurfaceReuse
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderTest, FormRenderTest031, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest021, TestSize.Level1)
 {
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("formRenderTest031");
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("formRenderTest021");
     ASSERT_TRUE(eventRunner);
     auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
     auto formRendererGroup = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
@@ -1036,13 +805,13 @@ HWTEST_F(FormRenderTest, FormRenderTest031, TestSize.Level1)
 }
 
 /**
- * @tc.name: FormRenderTest032
+ * @tc.name: FormRenderTest022
  * @tc.desc: test OnSurfaceDetach
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderTest, FormRenderTest032, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest022, TestSize.Level1)
 {
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("formRenderTest032");
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("formRenderTest022");
     ASSERT_TRUE(eventRunner);
     auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
     auto formRendererGroup = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
@@ -1068,4 +837,572 @@ HWTEST_F(FormRenderTest, FormRenderTest032, TestSize.Level1)
         WillOnce(Return(rsNode));
     formRenderer->OnSurfaceDetach();
 }
+
+/**
+ * @tc.name: FormRenderTest033
+ * @tc.desc: test FormRendererDispatcherImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest033, TestSize.Level1)
+{
+    sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
+    constexpr uint32_t code = static_cast<uint32_t>(IFormRendererDispatcher::Message::DISPATCH_POINTER_EVENT);
+    MessageParcel data;
+    data.WriteInterfaceToken(FormRendererDispatcherImpl::GetDescriptor());
+    std::shared_ptr<OHOS::MMI::PointerEvent> pointerEvent = OHOS::MMI::PointerEvent::Create();
+    pointerEvent->WriteToParcel(data);
+    MessageParcel reply;
+    MessageOption option;
+    if (renderDispatcher != nullptr) {
+        auto ans = renderDispatcher->OnRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(ans, ERR_OK);
+    }
+}
+
+/**
+ * @tc.name: FormRenderTest034
+ * @tc.desc: test FormRendererDispatcherImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest034, TestSize.Level1)
+{
+    sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
+    constexpr uint32_t code = static_cast<uint32_t>(IFormRendererDispatcher::Message::DISPATCH_POINTER_EVENT);
+    MessageParcel data;
+    data.WriteInterfaceToken(FormRendererDispatcherImpl::GetDescriptor());
+    MessageParcel reply;
+    MessageOption option;
+    if (renderDispatcher != nullptr) {
+        auto ans = renderDispatcher->OnRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(ans, ERR_INVALID_VALUE);
+    }
+}
+
+/**
+ * @tc.name: FormRenderTest035
+ * @tc.desc: test FormRendererDispatcherImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest035, TestSize.Level1)
+{
+    sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
+    constexpr uint32_t code = static_cast<uint32_t>(IFormRendererDispatcher::Message::SET_ALLOW_UPDATE);
+    MessageParcel data;
+    data.WriteInterfaceToken(FormRendererDispatcherImpl::GetDescriptor());
+    data.WriteBool(true);
+    MessageParcel reply;
+    MessageOption option;
+    if (renderDispatcher != nullptr) {
+        auto ans = renderDispatcher->OnRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(ans, ERR_OK);
+    }
+}
+
+/**
+ * @tc.name: FormRenderTest036
+ * @tc.desc: test FormRendererDispatcherImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest036, TestSize.Level1)
+{
+    sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
+    constexpr uint32_t code = static_cast<uint32_t>(IFormRendererDispatcher::Message::DISPATCH_SURFACE_CHANGE_EVENT);
+    MessageParcel data;
+    data.WriteInterfaceToken(FormRendererDispatcherImpl::GetDescriptor());
+    float width = 1.0;
+    float height = 1.0;
+    float borderWidth = 1.0;
+    data.WriteBool(width);
+    data.WriteBool(height);
+    data.WriteBool(borderWidth);
+    MessageParcel reply;
+    MessageOption option;
+    if (renderDispatcher != nullptr) {
+        auto ans = renderDispatcher->OnRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(ans, ERR_OK);
+    }
+}
+
+/**
+ * @tc.name: FormRenderTest037
+ * @tc.desc: test FormRendererDispatcherImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest037, TestSize.Level1)
+{
+    sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
+    constexpr uint32_t code = static_cast<uint32_t>(IFormRendererDispatcher::Message::SET_OBSCURED);
+    MessageParcel data;
+    data.WriteInterfaceToken(FormRendererDispatcherImpl::GetDescriptor());
+    data.WriteBool(true);
+    MessageParcel reply;
+    MessageOption option;
+    if (renderDispatcher != nullptr) {
+        auto ans = renderDispatcher->OnRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(ans, ERR_OK);
+    }
+}
+
+/**
+ * @tc.name: FormRenderTest038
+ * @tc.desc: test FormRendererDispatcherImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest038, TestSize.Level1)
+{
+    sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
+    constexpr uint32_t code =
+        static_cast<uint32_t>(IFormRendererDispatcher::Message::ACCESSIBILITY_CHILD_TREE_REGISTER);
+    MessageParcel data;
+    data.WriteInterfaceToken(FormRendererDispatcherImpl::GetDescriptor());
+    uint32_t windowId = 1;
+    int32_t treeId = 2;
+    int64_t accessibilityId = 3;
+    data.WriteUint32(windowId);
+    data.WriteUint32(treeId);
+    data.WriteUint64(accessibilityId);
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (renderDispatcher != nullptr) {
+        auto ans = renderDispatcher->OnRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(ans, ERR_OK);
+    }
+}
+
+/**
+ * @tc.name: FormRenderTest039
+ * @tc.desc: test FormRendererDispatcherImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest039, TestSize.Level1)
+{
+    sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
+    constexpr uint32_t code =
+        static_cast<uint32_t>(IFormRendererDispatcher::Message::ACCESSIBILITY_CHILD_TREE_DEREGISTER);
+    MessageParcel data;
+    data.WriteInterfaceToken(FormRendererDispatcherImpl::GetDescriptor());
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (renderDispatcher != nullptr) {
+        auto ans = renderDispatcher->OnRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(ans, ERR_OK);
+    }
+}
+
+/**
+ * @tc.name: FormRenderTest040
+ * @tc.desc: test FormRendererDispatcherImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest040, TestSize.Level1)
+{
+    sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
+    constexpr uint32_t code = static_cast<uint32_t>(IFormRendererDispatcher::Message::ACCESSIBILITY_DUMP_CHILD_INFO);
+    MessageParcel data;
+    data.WriteInterfaceToken(FormRendererDispatcherImpl::GetDescriptor());
+    const std::vector<std::string> params { "hello", "world" };
+    data.WriteStringVector(params);
+    MessageParcel reply;
+    MessageOption option;
+    if (renderDispatcher != nullptr) {
+        auto ans = renderDispatcher->OnRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(ans, ERR_OK);
+    }
+}
+
+/**
+ * @tc.name: FormRenderTest041
+ * @tc.desc: test FormRendererDispatcherImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest041, TestSize.Level1)
+{
+    sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
+    constexpr uint32_t code = static_cast<uint32_t>(IFormRendererDispatcher::Message::ACCESSIBILITY_DUMP_CHILD_INFO);
+    MessageParcel data;
+    data.WriteInterfaceToken(FormRendererDispatcherImpl::GetDescriptor());
+    data.WriteBool(true);
+    MessageParcel reply;
+    MessageOption option;
+    if (renderDispatcher != nullptr) {
+        auto ans = renderDispatcher->OnRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(ans, ERR_INVALID_VALUE);
+    }
+}
+
+/**
+ * @tc.name: FormRenderTest043
+ * @tc.desc: test FormRendererDispatcherImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest042, TestSize.Level1)
+{
+    sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
+    constexpr uint32_t code =
+        static_cast<uint32_t>(IFormRendererDispatcher::Message::ACCESSIBILITY_TRANSFER_HOVER_EVENT);
+    MessageParcel data;
+    data.WriteInterfaceToken(FormRendererDispatcherImpl::GetDescriptor());
+    float pointX = 0;
+    float pointY = 0;
+    int32_t sourceType = 0;
+    int32_t eventType = 0;
+    int64_t timeMs = 1;
+    data.WriteFloat(pointX);
+    data.WriteFloat(pointY);
+    data.WriteInt32(sourceType);
+    data.WriteInt32(eventType);
+    data.WriteInt64(timeMs);
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (renderDispatcher != nullptr) {
+        auto ans = renderDispatcher->OnRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(ans, ERR_OK);
+    }
+}
+
+/**
+ * @tc.name: FormRenderTest043
+ * @tc.desc: test FormRendererDispatcherImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest043, TestSize.Level1)
+{
+    sptr<FormRendererDispatcherImpl> renderDispatcher = GetFormRendererDispatcherImpl();
+    constexpr uint32_t code =
+        static_cast<uint32_t>(IFormRendererDispatcher::Message::ACCESSIBILITY_TRANSFER_HOVER_EVENT);
+    MessageParcel data;
+    data.WriteInterfaceToken(FormRendererDispatcherImpl::GetDescriptor());
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (renderDispatcher != nullptr) {
+        auto ans = renderDispatcher->OnRemoteRequest(code, data, reply, option);
+        EXPECT_EQ(ans, ERR_INVALID_VALUE);
+    }
+}
+
+/**
+ * @tc.name: FormRenderTest044
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest044, TestSize.Level1)
+{
+    auto renderDelegate = SurfaceCreateOnFormRendererDelegateImpl();
+    uint64_t surfaceId = 1;
+    OHOS::AppExecFwk::FormJsInfo formJsInfo;
+
+    constexpr uint32_t reUseCode = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_REUSE);
+    MessageParcel reUseData;
+    OHOS::AAFwk::Want want;
+    reUseData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    reUseData.WriteUint64(surfaceId);
+    reUseData.WriteParcelable(&formJsInfo);
+    reUseData.WriteParcelable(&want);
+    MessageParcel reUseReply;
+    MessageOption reUseOption;
+    auto reUseAns = renderDelegate->OnRemoteRequest(reUseCode, reUseData, reUseReply, reUseOption);
+    EXPECT_EQ(reUseAns, ERR_OK);
+}
+
+/**
+ * @tc.name: FormRenderTest045
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest045, TestSize.Level1)
+{
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+    constexpr uint32_t code = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_CREATE);
+
+    MessageParcel data;
+    data.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    MessageParcel reply;
+    MessageOption option;
+    auto ans = renderDelegate->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ans, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: FormRenderTest046
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest046, TestSize.Level1)
+{
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+    constexpr uint32_t code = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_CREATE);
+    std::string surfaceNodeName = "ArkTSCardNode";
+    struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceNodeName };
+    std::shared_ptr<Rosen::RSSurfaceNode> rsNode = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
+
+    MessageParcel data;
+    data.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    rsNode->Marshalling(data);
+    MessageParcel reply;
+    MessageOption option;
+    auto ans = renderDelegate->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ans, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: FormRenderTest047
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest047, TestSize.Level1)
+{
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+    constexpr uint32_t code = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_CREATE);
+    std::string surfaceNodeName = "ArkTSCardNode";
+    struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceNodeName };
+    OHOS::AppExecFwk::FormJsInfo formJsInfo;
+    std::shared_ptr<Rosen::RSSurfaceNode> rsNode = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
+
+    MessageParcel data;
+    data.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    rsNode->Marshalling(data);
+    data.WriteParcelable(&formJsInfo);
+    MessageParcel reply;
+    MessageOption option;
+    auto ans = renderDelegate->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ans, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: FormRenderTest048
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest048, TestSize.Level1)
+{
+    auto renderDelegate = SurfaceCreateOnFormRendererDelegateImpl();
+    uint64_t surfaceId = 2;
+    OHOS::AppExecFwk::FormJsInfo formJsInfo;
+
+    constexpr uint32_t reUseCode = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_REUSE);
+    MessageParcel reUseData;
+    OHOS::AAFwk::Want want;
+    reUseData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    reUseData.WriteUint64(surfaceId);
+    reUseData.WriteParcelable(&formJsInfo);
+    reUseData.WriteParcelable(&want);
+    MessageParcel reUseReply;
+    MessageOption reUseOption;
+    auto reUseAns = renderDelegate->OnRemoteRequest(reUseCode, reUseData, reUseReply, reUseOption);
+    EXPECT_EQ(reUseAns, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: FormRenderTest049
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest049, TestSize.Level1)
+{
+    auto renderDelegate = SurfaceCreateOnFormRendererDelegateImpl();
+    uint64_t surfaceId = 1;
+
+    constexpr uint32_t reUseCode = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_REUSE);
+    MessageParcel reUseData;
+    reUseData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    reUseData.WriteUint64(surfaceId);
+    MessageParcel reUseReply;
+    MessageOption reUseOption;
+    auto reUseAns = renderDelegate->OnRemoteRequest(reUseCode, reUseData, reUseReply, reUseOption);
+    EXPECT_EQ(reUseAns, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: FormRenderTest050
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest050, TestSize.Level1)
+{
+    auto renderDelegate = SurfaceCreateOnFormRendererDelegateImpl();
+    uint64_t surfaceId = 2;
+    OHOS::AppExecFwk::FormJsInfo formJsInfo;
+
+    constexpr uint32_t reUseCode = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_REUSE);
+    MessageParcel reUseData;
+    reUseData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    reUseData.WriteUint64(surfaceId);
+    reUseData.WriteParcelable(&formJsInfo);
+    MessageParcel reUseReply;
+    MessageOption reUseOption;
+    auto reUseAns = renderDelegate->OnRemoteRequest(reUseCode, reUseData, reUseReply, reUseOption);
+    EXPECT_EQ(reUseAns, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: FormRenderTest051
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest051, TestSize.Level1)
+{
+    auto renderDelegate = SurfaceCreateOnFormRendererDelegateImpl();
+    uint64_t surfaceId = 2;
+    OHOS::AppExecFwk::FormJsInfo formJsInfo;
+
+    constexpr uint32_t reUseCode = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_REUSE);
+    MessageParcel reUseData;
+    reUseData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    reUseData.WriteUint64(surfaceId);
+    reUseData.WriteParcelable(&formJsInfo);
+    MessageParcel reUseReply;
+    MessageOption reUseOption;
+    auto reUseAns = renderDelegate->OnRemoteRequest(reUseCode, reUseData, reUseReply, reUseOption);
+    EXPECT_EQ(reUseAns, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: FormRenderTest052
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest052, TestSize.Level1)
+{
+    auto renderDelegate = SurfaceCreateOnFormRendererDelegateImpl();
+    uint64_t surfaceId = 1;
+
+    constexpr uint32_t detachCode = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_FORMSURFACE_DETACH);
+    MessageParcel detachData;
+    detachData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    detachData.WriteUint64(surfaceId);
+    MessageParcel detachReply;
+    MessageOption detachOption;
+    auto reUseAns = renderDelegate->OnRemoteRequest(detachCode, detachData, detachReply, detachOption);
+    EXPECT_EQ(reUseAns, ERR_OK);
+}
+
+/**
+ * @tc.name: FormRenderTest053
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest053, TestSize.Level1)
+{
+    auto renderDelegate = SurfaceCreateOnFormRendererDelegateImpl();
+    uint64_t surfaceId = 1;
+
+    constexpr uint32_t releaseCode = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_RELEASE);
+    MessageParcel releaseData;
+    releaseData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    releaseData.WriteUint64(surfaceId);
+    MessageParcel releaseReply;
+    MessageOption releaseOption;
+    auto reUseAns = renderDelegate->OnRemoteRequest(releaseCode, releaseData, releaseReply, releaseOption);
+    EXPECT_EQ(reUseAns, ERR_OK);
+}
+
+/**
+ * @tc.name: FormRenderTest054
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest054, TestSize.Level1)
+{
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+
+    const std::string action = "just a unittest";
+    constexpr uint32_t actionCreateCode = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_ACTION_CREATE);
+    MessageParcel actionCreateData;
+    actionCreateData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    actionCreateData.WriteString(action);
+    MessageParcel actionCreateReply;
+    MessageOption actionCreateOption;
+    auto reUseAns =
+        renderDelegate->OnRemoteRequest(actionCreateCode, actionCreateData, actionCreateReply, actionCreateOption);
+    EXPECT_EQ(reUseAns, ERR_OK);
+}
+
+/**
+ * @tc.name: FormRenderTest055
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest055, TestSize.Level1)
+{
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+
+    const std::string code = "code in unittest";
+    const std::string msg = "code in unittest";
+    constexpr uint32_t errorCode = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_ERROR);
+    MessageParcel errorData;
+    errorData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    errorData.WriteString(code);
+    errorData.WriteString(msg);
+    MessageParcel errorReply;
+    MessageOption errorOption;
+    auto reUseAns = renderDelegate->OnRemoteRequest(errorCode, errorData, errorReply, errorOption);
+    EXPECT_EQ(reUseAns, ERR_OK);
+}
+
+/**
+ * @tc.name: FormRenderTest056
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest056, TestSize.Level1)
+{
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+
+    float width = 1.0;
+    float height = 1.0;
+    float borderWidth = 1.0;
+    constexpr uint32_t surfaceChangeCode = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_CHANGE);
+    MessageParcel surfaceChangeData;
+    surfaceChangeData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    surfaceChangeData.WriteFloat(width);
+    surfaceChangeData.WriteFloat(height);
+    surfaceChangeData.WriteFloat(borderWidth);
+    MessageParcel surfaceChangeReply;
+    MessageOption surfaceChangeOption;
+    auto reUseAns =
+        renderDelegate->OnRemoteRequest(surfaceChangeCode, surfaceChangeData, surfaceChangeReply, surfaceChangeOption);
+    EXPECT_EQ(reUseAns, ERR_OK);
+}
+
+/**
+ * @tc.name: FormRenderTest057
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest057, TestSize.Level1)
+{
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+
+    const std::vector<std::string> formLinkInfos;
+    constexpr uint32_t linkInfoUpdateChangeCode =
+        static_cast<uint32_t>(IFormRendererDelegate::Message::ON_FORM_LINK_INFO_UPDATE);
+    MessageParcel linkInfoUpdateData;
+    linkInfoUpdateData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    linkInfoUpdateData.WriteStringVector(formLinkInfos);
+    MessageParcel linkInfoUpdateReply;
+    MessageOption linkInfoUpdateOption;
+    auto reUseAns = renderDelegate->OnRemoteRequest(
+        linkInfoUpdateChangeCode, linkInfoUpdateData, linkInfoUpdateReply, linkInfoUpdateOption);
+    EXPECT_EQ(reUseAns, ERR_OK);
+}
+
+/**
+ * @tc.name: FormRenderTest058
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderTest, FormRenderTest058, TestSize.Level1)
+{
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+
+    constexpr uint32_t getRectCode =
+        static_cast<uint32_t>(IFormRendererDelegate::Message::ON_GET_RECT_RELATIVE_TO_WINDOW);
+    MessageParcel getRectData;
+    getRectData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    MessageParcel getRectReply;
+    MessageOption getRectOption;
+    auto reUseAns = renderDelegate->OnRemoteRequest(getRectCode, getRectData, getRectReply, getRectOption);
+    EXPECT_EQ(reUseAns, ERR_OK);
+}
+
 } // namespace OHOS::Ace

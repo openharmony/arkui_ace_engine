@@ -16,6 +16,9 @@
 #include "core/components_ng/pattern/search/search_pattern.h"
 
 #include <cstdint>
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "base/geometry/rect.h"
 #include "base/utils/system_properties.h"
@@ -160,8 +163,29 @@ bool SearchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     } else {
         cancelButtonSize_ = cancelButtonGeometryNode->GetFrameSize();
     }
-
+    SetAccessibilityClearAction();
     return true;
+}
+
+void SearchPattern::SetAccessibilityClearAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto cancelButtonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(CANCEL_BUTTON_INDEX));
+    CHECK_NULL_VOID(cancelButtonFrameNode);
+    auto textAccessibilityProperty = cancelButtonFrameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(textAccessibilityProperty);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto cleanNodeStyle = layoutProperty->GetCleanNodeStyleValue(CleanNodeStyle::INPUT);
+    auto hasContent = cleanNodeStyle == CleanNodeStyle::CONSTANT ||
+                        (cleanNodeStyle == CleanNodeStyle::INPUT && textFieldPattern->IsOperation());
+    textAccessibilityProperty->SetAccessibilityText(hasContent ? textFieldPattern->GetCancelButton() : "");
 }
 
 void SearchPattern::OnModifyDone()
@@ -643,6 +667,11 @@ void SearchPattern::OnClickButtonAndImage()
     searchEventHub->UpdateSubmitEvent(text);
     // close keyboard and select background color
     textFieldPattern->StopEditing();
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+    if (UiSessionManager::GetInstance().GetSearchEventRegistered()) {
+        UiSessionManager::GetInstance().ReportSearchEvent(text);
+    }
+#endif
 }
 
 void SearchPattern::OnClickCancelButton()

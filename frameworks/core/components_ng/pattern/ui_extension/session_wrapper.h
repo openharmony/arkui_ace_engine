@@ -84,7 +84,7 @@ public:
         const AAFwk::Want& want, const SessionConfig& config) = 0;
     virtual void DestroySession() = 0;
     virtual bool IsSessionValid() = 0;
-    virtual int32_t GetSessionId() = 0;
+    virtual int32_t GetSessionId() const = 0;
     virtual const std::shared_ptr<AAFwk::Want> GetWant() = 0;
 
     // Synchronous interface for event notify

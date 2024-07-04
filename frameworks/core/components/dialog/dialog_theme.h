@@ -529,6 +529,46 @@ public:
         return dialogInnerBorderColor_;
     }
 
+    double GetMinFontScaleForElderly() const
+    {
+        return minFontScaleForElderly_;
+    }
+
+    double GetDialogDefaultScale() const
+    {
+        return dialogDefaultScale_;
+    }
+
+    double GetContentMaxFontScale() const
+    {
+        return contentMaxFontScale_;
+    }
+
+    double GetContentLandscapeMaxFontScale() const
+    {
+        return contentLandscapeMaxFontScale_;
+    }
+
+    double GetButtonMaxFontScale() const
+    {
+        return buttonMaxFontScale_;
+    }
+
+    double GetButtonLandscapeMaxFontScale() const
+    {
+        return buttonLandscapeMaxFontScale_;
+    }
+
+    double GetTitleMaxFontScale() const
+    {
+        return titleMaxFontScale_;
+    }
+
+    const Dimension& GetDialogLandscapeHeightBoundary() const
+    {
+        return dialogLandscapeHeightBoundary_;
+    }
+
 protected:
     DialogTheme() = default;
 
@@ -557,6 +597,7 @@ private:
     Dimension dividerLength_;
     Dimension dividerBetweenButtonWidth_;
     Dimension backgroundBorderWidth_;
+    Dimension dialogLandscapeHeightBoundary_;
     Color buttonBackgroundColor_;
     Color buttonClickedColor_;
     Color buttonHighlightBgColor_;
@@ -572,6 +613,13 @@ private:
     double scaleEnd_ = 1.0;
     double opacityStart_ = 0.0;
     double opacityEnd_ = 1.0;
+    double minFontScaleForElderly_ = 1.75;
+    double dialogDefaultScale_ = 1.0;
+    double contentMaxFontScale_ = 3.2;
+    double contentLandscapeMaxFontScale_ = 2.0;
+    double buttonMaxFontScale_ = 3.2;
+    double buttonLandscapeMaxFontScale_ = 2.0;
+    double titleMaxFontScale_ = 2.0;
     int32_t animationDurationIn_ = 250;
     int32_t opacityAnimationDurIn_ = 150;
     int32_t animationDurationOut_ = 250;

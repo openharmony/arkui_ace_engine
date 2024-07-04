@@ -63,12 +63,14 @@ shared_ptr<JsValue> AppTerminate(const shared_ptr<JsRuntime>& runtime, const sha
     }
     auto uiTaskExecutor = delegate->GetUiTask();
     WeakPtr<PipelineBase> pipelineContextWeak(pipelineContext);
-    uiTaskExecutor.PostTask([pipelineContextWeak]() mutable {
-        auto pipelineContext = pipelineContextWeak.Upgrade();
-        if (pipelineContext) {
-            pipelineContext->Finish();
-        }
-    }, "ArkUIAppTerminate");
+    uiTaskExecutor.PostTask(
+        [pipelineContextWeak]() mutable {
+            auto pipelineContext = pipelineContextWeak.Upgrade();
+            if (pipelineContext) {
+                pipelineContext->Finish();
+            }
+        },
+        "ArkUIAppTerminate");
     return runtime->NewNull();
 }
 
@@ -95,15 +97,17 @@ shared_ptr<JsValue> AppSetImageCacheCount(const shared_ptr<JsRuntime>& runtime, 
         return runtime->NewNull();
     }
     WeakPtr<PipelineBase> pipelineContextWeak(pipelineContext);
-    taskExecutor->PostTask([ pipelineContextWeak, size ]() mutable {
-        auto pipelineContext = pipelineContextWeak.Upgrade();
-        if (pipelineContext) {
-            auto imageCache = pipelineContext->GetImageCache();
-            if (imageCache) {
-                imageCache->SetCapacity(size);
+    taskExecutor->PostTask(
+        [pipelineContextWeak, size]() mutable {
+            auto pipelineContext = pipelineContextWeak.Upgrade();
+            if (pipelineContext) {
+                auto imageCache = pipelineContext->GetImageCache();
+                if (imageCache) {
+                    imageCache->SetCapacity(size);
+                }
             }
-        }
-    }, TaskExecutor::TaskType::UI, "ArkUISetImageCacheCount");
+        },
+        TaskExecutor::TaskType::UI, "ArkUISetImageCacheCount");
     return runtime->NewNull();
 }
 
@@ -132,15 +136,17 @@ shared_ptr<JsValue> AppSetImageRawDataCacheSize(
         return runtime->NewNull();
     }
     WeakPtr<PipelineBase> pipelineContextWeak(pipelineContext);
-    taskExecutor->PostTask([ pipelineContextWeak, size ]() mutable {
-        auto pipelineContext = pipelineContextWeak.Upgrade();
-        if (pipelineContext) {
-            auto imageCache = pipelineContext->GetImageCache();
-            if (imageCache) {
-                imageCache->SetDataCacheLimit(size);
+    taskExecutor->PostTask(
+        [pipelineContextWeak, size]() mutable {
+            auto pipelineContext = pipelineContextWeak.Upgrade();
+            if (pipelineContext) {
+                auto imageCache = pipelineContext->GetImageCache();
+                if (imageCache) {
+                    imageCache->SetDataCacheLimit(size);
+                }
             }
-        }
-    }, TaskExecutor::TaskType::UI, "ArkUISetImageDataCacheSize");
+        },
+        TaskExecutor::TaskType::UI, "ArkUISetImageDataCacheSize");
     return runtime->NewNull();
 }
 

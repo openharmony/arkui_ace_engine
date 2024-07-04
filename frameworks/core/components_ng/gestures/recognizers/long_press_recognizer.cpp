@@ -63,7 +63,7 @@ void LongPressRecognizer::OnAccepted()
     }
     
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "LongPress accepted, tag = %{public}s, id = %{public}s",
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "LongPress accepted, tag = %{public}s, id = %{public}s",
         node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
     if (onAccessibilityEventFunc_) {
         onAccessibilityEventFunc_(AccessibilityEventType::LONG_PRESS);
@@ -122,8 +122,8 @@ void LongPressRecognizer::ThumbnailTimer(int32_t time)
 
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, LongPress %{public}d down, state: %{public}d", event.touchEventId,
-        event.id, refereeState_);
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d down, state: %{public}d",
+        event.touchEventId, event.id, refereeState_);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -168,7 +168,6 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     lastTouchEvent_ = event;
     UpdateFingerListInfo();
     auto pointsCount = GetValidFingersCount();
-
     if (pointsCount == fingers_) {
         refereeState_ = RefereeState::DETECTING;
         if (useCatchMode_) {
@@ -183,8 +182,8 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, LongPress %{public}d up, state: %{public}d", event.touchEventId,
-        event.id, refereeState_);
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d up, state: %{public}d",
+        event.touchEventId, event.id, refereeState_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
@@ -235,8 +234,8 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, LongPress %{public}d cancel, TPS:%{public}d", event.touchEventId,
-        event.id, static_cast<int32_t>(touchPoints_.size()));
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d cancel, TPS:%{public}d",
+        event.touchEventId, event.id, static_cast<int32_t>(touchPoints_.size()));
     if (refereeState_ == RefereeState::FAIL) {
         return;
     }

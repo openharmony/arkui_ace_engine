@@ -80,12 +80,13 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, 
             }
             // DoSetActiveChildRange uses int32_t , while other functions use uint32_t
             // need to convert
-            if ((start <= index) && (index <= end)) {
+            if (((start <= index) && (index <= end)) || ((end < start) && (index <= end || start <= index))) {
                 frameNode->SetActive(true);
             } else {
                 frameNode->SetActive(false);
             }
-            if ((start - cacheStart <= index) && (index <= end + cacheEnd)) {
+            if (((start - cacheStart <= index) && (index <= end + cacheEnd)) ||
+                ((end < start) && (index <= end + cacheEnd || start - cacheStart <= index))) {
                 return true;
             }
             // active node moved into L2 cached.

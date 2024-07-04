@@ -19,6 +19,9 @@
 #include <optional>
 #include <string>
 #include <utility>
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
@@ -27,6 +30,7 @@
 #include "base/subwindow/subwindow.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/common/layout/constants.h"
@@ -1735,6 +1739,9 @@ void ViewAbstract::DismissDialog()
         if (overlayManager->isMaskNode(dialogPattern->GetHost()->GetId())) {
             overlayManager->PopModalDialog(dialogPattern->GetHost()->GetId());
         }
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("onVisibleChange", "destroy");
+#endif
     }
 }
 
@@ -1759,15 +1766,23 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const Re
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
-    if (expandDisplay && menuParam.isShowInSubWindow && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
-        SubwindowManager::GetInstance()->ShowMenuNG(menuNode, menuParam, targetNode, offset);
-        return;
-    }
 
     auto pipelineContext = targetNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto overlayManager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
+
+    if (expandDisplay && menuParam.isShowInSubWindow) {
+        bool isShown = SubwindowManager::GetInstance()->GetShown();
+        if (!isShown) {
+            SubwindowManager::GetInstance()->ShowMenuNG(menuNode, menuParam, targetNode, offset);
+        } else {
+            auto menuNode = overlayManager->GetMenuNode(targetNode->GetId());
+            SubwindowManager::GetInstance()->HideMenuNG(menuNode, targetNode->GetId());
+        }
+        return;
+    }
+
     overlayManager->ShowMenu(targetNode->GetId(), offset, menuNode);
 }
 
@@ -1791,13 +1806,18 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
     CHECK_NULL_VOID(pipelineContext);
     auto overlayManager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    if (menuParam.type == MenuType::CONTEXT_MENU) {
+
+    auto containerId = pipelineContext->GetInstanceId();
+    RefPtr<Container> container = AceEngine::Get().GetContainer(containerId);
+    CHECK_NULL_VOID(container);
+
+    // contextMenu not use subWindow in such cases: not expandDisplay and not in UIExtendsion.
+    if (menuParam.type == MenuType::CONTEXT_MENU && (expandDisplay || container->IsUIExtensionWindow())) {
         SubwindowManager::GetInstance()->ShowMenuNG(
             std::move(buildFunc), std::move(previewBuildFunc), menuParam, targetNode, offset);
         return;
     }
-    if (menuParam.type == MenuType::MENU && expandDisplay && menuParam.isShowInSubWindow &&
-        targetNode->GetTag() != V2::SELECT_ETS_TAG) {
+    if (menuParam.type == MenuType::MENU && expandDisplay && menuParam.isShowInSubWindow) {
         bool isShown = SubwindowManager::GetInstance()->GetShown();
         if (!isShown) {
             SubwindowManager::GetInstance()->ShowMenuNG(

@@ -171,8 +171,16 @@ public:
         keepStatus_ = keepStatus;
     }
 
+    void UpdateCurrentStatus()
+    {
+        currentSelectedIndex_ = targetSelectedIndex_;
+        currentOverlongType_ = targetOverlongType_;
+    }
+
     void InitOverlongStatus(int32_t pageIndex);
     void CalcTargetSelectedIndex(int32_t currentPageIndex, int32_t targetPageIndex);
+    void CalcTargetSelectedIndexOnForward(int32_t currentPageIndex, int32_t targetPageIndex);
+    void CalcTargetSelectedIndexOnBackward(int32_t currentPageIndex, int32_t targetPageIndex);
     void CalcTargetOverlongStatus(int32_t currentPageIndex, int32_t targetPageIndex);
     void StopAnimation(bool ifImmediately) override;
 
@@ -191,6 +199,7 @@ private:
     int32_t CalcTargetIndexOnDrag() const;
     std::pair<float, float> CalcLongPointEndCenterXWithBlack(int32_t index, const LinearVector<float>& itemHalfSizes);
     float GetMoveRateOnAllMove() const;
+    int32_t GetBlackPointsAnimationDuration() const;
 
     RefPtr<AnimatablePropertyUint8> firstPointOpacity_;
     RefPtr<AnimatablePropertyUint8> newPointOpacity_;
@@ -224,6 +233,7 @@ private:
     bool isCustomSizeValue_ = false;
     bool isSwiperTouchDown_ = false;
     bool keepStatus_ = false;
+    bool blackPointsAnimEnd_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(OverlengthDotIndicatorModifier);
 };
 } // namespace OHOS::Ace::NG

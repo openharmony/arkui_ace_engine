@@ -54,13 +54,14 @@ RefPtr<ImageData> QueryDataFromCache(const ImageSourceInfo& src, bool& dataHit)
     std::shared_ptr<RSData> rsData = nullptr;
     rsData = ImageLoader::QueryImageDataFromImageCache(src);
     if (rsData) {
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s hit the memory Cache.", src.GetSrc().c_str());
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "%{private}s hit the memory Cache.", src.GetSrc().c_str());
         dataHit = true;
         return AceType::MakeRefPtr<NG::DrawingImageData>(rsData);
     }
     auto drawingData = ImageLoader::LoadDataFromCachedFile(src.GetSrc());
     if (drawingData) {
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s hit the disk Cache.", src.GetSrc().c_str());
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "%{private}s hit the disk Cache, and the data size is %{public}d.",
+            src.GetSrc().c_str(), static_cast<int32_t>(drawingData->GetSize()));
         auto data = std::make_shared<RSData>();
         data->BuildWithCopy(drawingData->GetData(), drawingData->GetSize());
         return AceType::MakeRefPtr<NG::DrawingImageData>(data);
@@ -170,7 +171,7 @@ void ImageLoadingContext::OnDataLoading()
 {
     if (!src_.GetIsConfigurationChange()) {
         if (auto obj = ImageProvider::QueryImageObjectFromCache(src_); obj) {
-            TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s Hit the Cache, not need Create imageObject.",
+            TAG_LOGD(AceLogTag::ACE_IMAGE, "%{private}s Hit the Cache, not need Create imageObject.",
                 src_.GetSrc().c_str());
             DataReadyCallback(obj);
             return;
@@ -226,7 +227,7 @@ bool ImageLoadingContext::Downloadable()
 void ImageLoadingContext::DownloadImage()
 {
     if (NotifyReadyIfCacheHit()) {
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s hit the Cache, not need DownLoad.", src_.GetSrc().c_str());
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "%{private}s hit the Cache, not need DownLoad.", src_.GetSrc().c_str());
         return;
     }
     PerformDownload();
@@ -287,18 +288,18 @@ void ImageLoadingContext::CacheDownloadedImage()
 
 void ImageLoadingContext::DownloadImageSuccess(const std::string& imageData)
 {
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "Download image successfully, srcInfo = %{public}s, ImageData length=%{public}zu",
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "Download image successfully, srcInfo = %{private}s, ImageData length=%{public}zu",
         GetSrc().ToString().c_str(), imageData.size());
     ACE_LAYOUT_SCOPED_TRACE("DownloadImageSuccess[src:%s]", GetSrc().ToString().c_str());
-    auto data = ImageData::MakeFromDataWithCopy(imageData.data(), imageData.size());
     if (!Positive(imageData.size())) {
         FailCallback("The length of imageData from netStack is not positive");
         return;
     }
+    auto data = ImageData::MakeFromDataWithCopy(imageData.data(), imageData.size());
     // if downloading is necessary, cache object, data to file
     RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(GetSourceInfo(), data);
     if (!imageObj) {
-        FailCallback("ImageObject null");
+        FailCallback("After download successful, imageObject Create fail");
         return;
     }
     imageDataCopy_ = imageData;
@@ -307,7 +308,7 @@ void ImageLoadingContext::DownloadImageSuccess(const std::string& imageData)
 
 void ImageLoadingContext::DownloadImageFailed(const std::string& errorMessage)
 {
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "Download image failed, the error message is %{public}s", errorMessage.c_str());
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "Download image failed, the error message is %{private}s", errorMessage.c_str());
     FailCallback(errorMessage);
 }
 
@@ -398,7 +399,7 @@ void ImageLoadingContext::FailCallback(const std::string& errorMsg)
     errorMsg_ = errorMsg;
     needErrorCallBack_ = true;
     CHECK_NULL_VOID(measureFinish_);
-    TAG_LOGW(AceLogTag::ACE_IMAGE, "Image LoadFail, source = %{public}s, reason: %{public}s", src_.ToString().c_str(),
+    TAG_LOGW(AceLogTag::ACE_IMAGE, "Image LoadFail, source = %{private}s, reason: %{public}s", src_.ToString().c_str(),
         errorMsg.c_str());
     if (Downloadable()) {
         ImageFileCache::GetInstance().EraseCacheFile(GetSourceInfo().GetSrc());

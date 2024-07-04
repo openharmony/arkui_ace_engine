@@ -721,6 +721,7 @@ void LayoutProperty::UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts)
     if (*safeAreaExpandOpts_ != opts) {
         *safeAreaExpandOpts_ = opts;
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+        safeAreaExpandOpts_->switchToNone = !opts.Expansive();
     }
 }
 
@@ -1283,8 +1284,12 @@ void LayoutProperty::CheckPositionLocalizedEdges(TextDirection layoutDirection)
     CHECK_NULL_VOID(target);
     EdgesParam edges;
     auto positionEdges = target->GetPositionEdgesValue(EdgesParam {});
-    edges.SetTop(positionEdges.top.value_or(Dimension(0.0)));
-    edges.SetBottom(positionEdges.bottom.value_or(Dimension(0.0)));
+    if (positionEdges.top.has_value()) {
+        edges.SetTop(positionEdges.top.value_or(Dimension(0.0)));
+    }
+    if (positionEdges.bottom.has_value()) {
+        edges.SetBottom(positionEdges.bottom.value_or(Dimension(0.0)));
+    }
     if (positionEdges.left.has_value()) {
         if (layoutDirection == TextDirection::RTL) {
             edges.SetRight(positionEdges.left.value_or(Dimension(0.0)));
@@ -1324,8 +1329,12 @@ void LayoutProperty::CheckOffsetLocalizedEdges(TextDirection layoutDirection)
     CHECK_NULL_VOID(target);
     EdgesParam edges;
     auto offsetEdges = target->GetOffsetEdgesValue(EdgesParam {});
-    edges.SetTop(offsetEdges.top.value_or(Dimension(0.0)));
-    edges.SetBottom(offsetEdges.bottom.value_or(Dimension(0.0)));
+    if (offsetEdges.top.has_value()) {
+        edges.SetTop(offsetEdges.top.value_or(Dimension(0.0)));
+    }
+    if (offsetEdges.bottom.has_value()) {
+        edges.SetBottom(offsetEdges.bottom.value_or(Dimension(0.0)));
+    }
     if (offsetEdges.left.has_value()) {
         if (layoutDirection == TextDirection::RTL) {
             edges.SetRight(offsetEdges.left.value_or(Dimension(0.0)));

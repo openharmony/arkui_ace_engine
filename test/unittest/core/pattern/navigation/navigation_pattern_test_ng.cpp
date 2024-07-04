@@ -596,14 +596,14 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_016, TestSize.Level1)
     ASSERT_NE(hub, nullptr);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
-    pattern->InitDragEvent(gestureHub);
-    ASSERT_NE(pattern->dragEvent_, nullptr);
+    pattern->InitPanEvent(gestureHub);
+    ASSERT_NE(pattern->panEvent_, nullptr);
     GestureEvent event;
-    pattern->dragEvent_->GetActionStartEventFunc()(event);
-    pattern->dragEvent_->GetActionUpdateEventFunc()(event);
-    pattern->dragEvent_->GetActionEndEventFunc()(event);
-    pattern->dragEvent_->GetActionCancelEventFunc()();
-    EXPECT_NE(pattern->dragEvent_, nullptr);
+    pattern->panEvent_->GetActionStartEventFunc()(event);
+    pattern->panEvent_->GetActionUpdateEventFunc()(event);
+    pattern->panEvent_->GetActionEndEventFunc()(event);
+    pattern->panEvent_->GetActionCancelEventFunc()();
+    EXPECT_NE(pattern->panEvent_, nullptr);
 }
 
 /**

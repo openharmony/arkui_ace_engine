@@ -905,11 +905,11 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     RefPtr<FrameNode> textNode = nullptr;
     RefPtr<OverlayManager> subWindowOverlayManager = nullptr;
     bool isMenuShow = false;
-    auto window = SubwindowManager::GetInstance()->ShowPreviewNG();
+    auto window = SubwindowManager::GetInstance()->ShowDragPreviewWindowNG();
     if (window) {
         subWindowOverlayManager = window->GetOverlayManager();
         CHECK_NULL_VOID(subWindowOverlayManager);
-        isMenuShow = subWindowOverlayManager->IsMenuShow();
+        isMenuShow = subWindowOverlayManager->IsMenuShow() || overlayManager->IsMenuShow();
     }
     if (isMenuShow) {
         dragDropManager->SetIsDragWithContextMenu(true);
@@ -918,11 +918,18 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         dragDropManager->SetIsDragWithContextMenu(false);
     }
     auto focusHub = frameNode->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    bool hasContextMenu = focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
+    bool hasContextMenu = focusHub == nullptr
+                              ? false : focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
     if (IsNeedSwitchToSubWindow() || isMenuShow) {
         imageNode = overlayManager->GetPixelMapContentNode();
         DragEventActuator::CreatePreviewNode(frameNode, imageNode);
+        auto originPoint = imageNode->GetPositionToScreen();
+        if (hasContextMenu || isMenuShow) {
+            auto previewDragMovePosition = dragDropManager->GetUpdateDragMovePosition();
+            DragEventActuator::UpdatePreviewPositionAndScale(imageNode, previewDragMovePosition + originPoint);
+            dragDropManager ->ResetContextMenuDragPosition();
+        }
+        
         auto frameTag = frameNode->GetTag();
         if (IsPixelMapNeedScale() && GetTextDraggable() && IsTextCategoryComponent(frameTag)) {
             auto textDragPattern = frameNode->GetPattern<TextDragBase>();
@@ -1013,7 +1020,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     ret = InteractionInterface::GetInstance()->StartDrag(dragData, GetDragCallback(pipeline, eventHub));
     if (ret != 0) {
         if (dragDropManager->IsNeedDisplayInSubwindow() && subWindowOverlayManager) {
-            SubwindowManager::GetInstance()->HidePreviewNG();
+            SubwindowManager::GetInstance()->HideDragPreviewWindowNG();
             overlayManager->RemovePixelMap();
         }
         TAG_LOGW(AceLogTag::ACE_DRAG, "Start drag failed, return value is %{public}d", ret);
@@ -1111,9 +1118,8 @@ int32_t GestureEventHub::RegisterCoordinationListener(const RefPtr<PipelineBase>
         CHECK_NULL_VOID(dragDropManager);
         auto taskScheduler = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
-        taskScheduler->PostTask([dragDropManager]() {
-            dragDropManager->HideDragPreviewOverlay();
-        }, TaskExecutor::TaskType::UI, "ArkUIGestureHideDragPreviewOverlay");
+        taskScheduler->PostTask([dragDropManager]() { dragDropManager->HideDragPreviewOverlay(); },
+            TaskExecutor::TaskType::UI, "ArkUIGestureHideDragPreviewOverlay");
     };
     return InteractionInterface::GetInstance()->RegisterCoordinationListener(callback);
 }
