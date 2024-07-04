@@ -338,6 +338,11 @@ struct ArkUIDimensionType {
     ArkUI_Int32 units;
 };
 
+struct ArkUIOptionalDimensionType {
+    ArkUI_Int32 isSet;
+    ArkUIDimensionType dimension;
+};
+
 struct ArkUIChainAnimationOptionsType {
     ArkUI_Float32 minSpace;
     ArkUI_Float32 maxSpace;
@@ -1102,6 +1107,16 @@ struct ArkUIOptionalCharPtr {
     ArkUI_CharPtr value;
 };
 
+struct ArkUIOptionalVoidPtr {
+    ArkUI_Int32 isSet;
+    void* value;
+};
+
+struct ArkUIOptionalBool {
+    ArkUI_Int32 isSet;
+    ArkUI_Bool value;
+};
+
 struct ArkUISwiperIndicator {
     ArkUISwiperIndicatorType type;
     ArkUI_Int32 dimUnit;
@@ -1256,6 +1271,20 @@ struct ArkUIDragPreViewOptions {
 struct ArkUIDragInteractionOptions {
     ArkUI_Bool isMultiSelectionEnabled;
     ArkUI_Bool defaultAnimationBeforeLifting;
+};
+
+struct ArkUINavigationTitlebarOptions {
+    ArkUIOptionalUint colorValue;
+    ArkUIOptionalInt blurStyle;
+    ArkUIOptionalInt barStyle;
+    ArkUIOptionalDimensionType paddingStart;
+    ArkUIOptionalDimensionType paddingEnd;
+};
+
+struct ArkUIBarItem {
+    ArkUIOptionalCharPtr text;
+    ArkUIOptionalCharPtr icon;
+    ArkUIOptionalBool isEnable;
 };
 
 struct ArkUICommonModifier {
@@ -2682,6 +2711,13 @@ struct ArkUINavDestinationModifier {
     void (*resetNavDestinationMode)(ArkUINodeHandle node);
     void (*setIgnoreLayoutSafeArea)(ArkUINodeHandle node, ArkUI_CharPtr typeStr, ArkUI_CharPtr edgesStr);
     void (*resetIgnoreLayoutSafeArea)(ArkUINodeHandle node);
+    void (*setTitle)(ArkUINodeHandle node, ArkUI_Bool hasSubTitle, ArkUI_Bool hasMainTitle,
+        ArkUI_CharPtr subTitle, ArkUI_CharPtr mainTitle, ArkUINavigationTitlebarOptions options);
+    void (*resetTitle)(ArkUINodeHandle node);
+    void (*setMenus)(ArkUINodeHandle node, ArkUIBarItem* items, ArkUI_Uint32 length);
+    void (*resetMenus)(ArkUINodeHandle node);
+    void (*setMenuItemAction)(ArkUINodeHandle node, void* action, ArkUI_Uint32 index);
+    void (*setMenuItemSymbol)(ArkUINodeHandle node, void* symbol, ArkUI_Uint32 index);
 };
 
 struct ArkUITextAreaModifier {
@@ -3295,6 +3331,13 @@ struct ArkUINavigationModifier {
     void (*resetNavBarWidth)(ArkUINodeHandle node);
     void (*setNavIgnoreLayoutSafeArea)(ArkUINodeHandle node, ArkUI_CharPtr typeStr, ArkUI_CharPtr edgesStr);
     void (*resetNavIgnoreLayoutSafeArea)(ArkUINodeHandle node);
+    void (*setNavTitle)(ArkUINodeHandle node, ArkUI_Bool hasSubTitle, ArkUI_Bool hasMainTitle,
+        ArkUI_CharPtr subTitle, ArkUI_CharPtr mainTitle, ArkUINavigationTitlebarOptions options);
+    void (*resetNavTitle)(ArkUINodeHandle node);
+    void (*setNavMenus)(ArkUINodeHandle node, ArkUIBarItem* items, ArkUI_Uint32 length);
+    void (*resetNavMenus)(ArkUINodeHandle node);
+    void (*setNavMenuItemAction)(ArkUINodeHandle node, void* action, ArkUI_Uint32 index);
+    void (*setNavMenuItemSymbol)(ArkUINodeHandle node, void* symbol, ArkUI_Uint32 index);
 };
 
 struct ArkUINavRouterModifier {
