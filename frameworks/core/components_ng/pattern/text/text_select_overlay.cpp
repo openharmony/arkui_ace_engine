@@ -355,11 +355,9 @@ void TextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchTyp
 {
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    if (IsTouchUp(sourceType, touchType)) {
+    if (IsTouchUp(sourceType, touchType) || IsMouseClickDown(sourceType, touchType)) {
         CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
         textPattern->ResetSelection();
-    } else if (IsMouseClickDown(sourceType, touchType)) {
-        CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
     }
 }
 
