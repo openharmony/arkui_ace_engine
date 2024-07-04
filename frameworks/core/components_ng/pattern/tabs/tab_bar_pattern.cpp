@@ -2779,7 +2779,7 @@ void TabBarPattern::HandleBottomTabBarAnimation(int32_t index)
         CHECK_NULL_VOID(tabsPattern);
         auto onChangeEvent = tabsPattern->GetChangeEvent();
         if (onChangeEvent) {
-            (*onChangeEvent)(index);
+            (*onChangeEvent)(preIndex, index);
         }
         auto onIndexChangeEvent = tabsPattern->GetIndexChangeEvent();
         if (onIndexChangeEvent) {
