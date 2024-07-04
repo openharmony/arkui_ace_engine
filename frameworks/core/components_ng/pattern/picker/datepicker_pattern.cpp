@@ -247,6 +247,7 @@ void DatePickerPattern::UpdateButtonStyles(const RefPtr<FrameNode>& buttonNode, 
         }
 
         datePickerColumnPattern->SetButtonBgColor(buttonBgColor);
+        datePickerColumnPattern->UpdateFocusColumnState(haveFocus);
         buttonLayoutProperty->UpdateBorderWidth(borderWidth);
         buttonRenderContext->UpdateBorderColor(borderColor);
         buttonRenderContext->UpdateBackgroundColor(buttonBgColor);
