@@ -2278,6 +2278,7 @@ export class CustomContentDialog extends ViewPU {
                         themeColorMode: this.themeColorMode,
                         fontSizeScale: this.__fontSizeScale,
                         minContentHeight: this.__minContentHeight,
+                        customStyle: false
                     }, undefined, elmtId, () => {
                     }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 860, col: 5 });
                     ViewPU.create(componentCall);
@@ -2294,7 +2295,8 @@ export class CustomContentDialog extends ViewPU {
                             theme: this.theme,
                             themeColorMode: this.themeColorMode,
                             fontSizeScale: this.fontSizeScale,
-                            minContentHeight: this.minContentHeight
+                            minContentHeight: this.minContentHeight,
+                            customStyle: false
                         };
                     };
                     componentCall.paramsGenerator_ = paramsLambda;
@@ -2465,7 +2467,7 @@ class CustomDialogContentComponent extends ViewPU {
         this.__buttonHeight = new ObservedPropertySimplePU(0, this, 'buttonHeight');
         this.__contentMaxHeight = new ObservedPropertyObjectPU('100%', this, 'contentMaxHeight');
         this.__fontSizeScale = new SynchedPropertySimpleTwoWayPU(params.fontSizeScale, this, 'fontSizeScale');
-        this.__customStyle = new ObservedPropertySimplePU(false, this, 'customStyle');
+        this.__customStyle = new ObservedPropertySimplePU(undefined, this, 'customStyle');
         this.__buttonMaxFontSize = new ObservedPropertyObjectPU({
             'id': -1,
             'type': 10002,
@@ -2913,7 +2915,7 @@ class CustomDialogContentComponent extends ViewPU {
                             ForEach.pop();
                         }
                     }, undefined, elmtId, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 993, col: 11 });
+                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 994 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -3013,12 +3015,15 @@ class CustomDialogContentComponent extends ViewPU {
 
     aboutToAppear() {
         this.updateFontScale();
-        if (this.controller) {
+        if (this.controller && this.customStyle === undefined) {
             let customController = this.controller;
             if (customController.arg_ && customController.arg_.customStyle &&
                 customController.arg_.customStyle === true) {
                 this.customStyle = true;
             }
+        }
+        if (this.customStyle === undefined) {
+            this.customStyle = false;
         }
         this.primaryTitleFontColorWithTheme = this.theme?.colors?.fontPrimary ?
         this.theme.colors.fontPrimary : {
@@ -3912,7 +3917,7 @@ export class LoadingDialog extends ViewPU {
                         fontSizeScale: this.__fontSizeScale,
                         minContentHeight: this.__minContentHeight,
                     }, undefined, elmtId, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 1543, col: 7 });
+                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 1547 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
