@@ -44,7 +44,7 @@ public:
      * @description: define get the current page inspector tree info interface
      * @return: result number
      */
-    virtual int32_t GetInspectorTree(const EventCallback& eventCallback) = 0;
+    virtual int32_t GetInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback) = 0;
 
     /**
      * @description: define SA process and current process connect interface
@@ -137,7 +137,8 @@ public:
     /**
      * @description: define reports inspector value to the proxy interface
      */
-    virtual void ReportInspectorTreeValue(const std::string& data) = 0;
+    virtual void ReportInspectorTreeValue(const std::string& data, int32_t partNum, bool isLastPart) = 0;
+    virtual void ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H

@@ -77,7 +77,7 @@ public:
      * @description: register a callback when get inspector tree
      * @param eventCallback callback to be performed
      */
-    void RegisterGetInspectorTreeCallback(const EventCallback& eventCallback);
+    void RegisterGetInspectorTreeCallback(const std::function<void(std::string, int32_t, bool)>& eventCallback);
 
     /**
      * @description: unregister the click callback last register
@@ -102,14 +102,14 @@ public:
     /**
      * @description: report whole inspectorTree for SA
      */
-    void ReportInspectorTreeValue(const std::string& data) override;
+    void ReportInspectorTreeValue(const std::string& data, int32_t partNum, bool isLastPart) override;
 
 private:
     EventCallback clickEventCallback_;
     EventCallback searchEventCallback_;
     EventCallback RouterChangeEventCallback_;
     EventCallback ComponentChangeEventCallback_;
-    EventCallback inspectorTreeCallback_;
+    std::function<void(std::string, int32_t, bool)> inspectorTreeCallback_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_REPORT_STUB_H

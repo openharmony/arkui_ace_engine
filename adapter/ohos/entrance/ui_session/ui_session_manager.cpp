@@ -18,7 +18,7 @@
 #include "adapter/ohos/entrance/ui_session/include/ui_service_hilog.h"
 namespace OHOS::Ace {
 std::mutex UiSessionManager::mutex_;
-
+constexpr int32_t ONCE_IPC_SEND_DATA_MAX_SIZE = 4096;
 UiSessionManager& UiSessionManager::GetInstance()
 {
     static UiSessionManager instance_;
@@ -175,7 +175,15 @@ void UiSessionManager::ReportInspectorTreeValue(const std::string& data)
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
-            reportService->ReportInspectorTreeValue(data);
+            int partSize = data.size() / ONCE_IPC_SEND_DATA_MAX_SIZE;
+            for (int i = 0; i <= partSize; i++) {
+                if (i != partSize) {
+                    reportService->ReportInspectorTreeValue(
+                        data.substr(i * ONCE_IPC_SEND_DATA_MAX_SIZE, ONCE_IPC_SEND_DATA_MAX_SIZE), i + 1, false);
+                } else {
+                    reportService->ReportInspectorTreeValue(data.substr(i * ONCE_IPC_SEND_DATA_MAX_SIZE), i + 1, true);
+                }
+            }
         } else {
             LOGW("report component event failed,process id:%{public}d", pair.first);
         }

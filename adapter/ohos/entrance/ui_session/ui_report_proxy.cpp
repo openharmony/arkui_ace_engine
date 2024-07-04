@@ -93,7 +93,7 @@ void UiReportProxy::ReportSearchEvent(const std::string& data)
     }
 }
 
-void UiReportProxy::ReportInspectorTreeValue(const std::string& data)
+void UiReportProxy::ReportInspectorTreeValue(const std::string& data, int32_t partNum, bool isLastPart)
 {
     MessageParcel messageData;
     MessageParcel reply;
@@ -103,6 +103,14 @@ void UiReportProxy::ReportInspectorTreeValue(const std::string& data)
         return;
     }
     if (!messageData.WriteString(data)) {
+        LOGW("ReportInspectorTreeValue write data  failed");
+        return;
+    }
+    if (!messageData.WriteInt32(partNum)) {
+        LOGW("ReportInspectorTreeValue write data  failed");
+        return;
+    }
+    if (!messageData.WriteBool(isLastPart)) {
         LOGW("ReportInspectorTreeValue write data  failed");
         return;
     }
