@@ -165,7 +165,6 @@ public:
 
     void ProcessPropertyDiff()
     {
-        // TODO: modify done need to optimize.
         if (isPropertyDiffMarked_) {
             MarkModifyDone();
             MarkDirtyNode();

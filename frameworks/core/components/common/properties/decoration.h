@@ -196,15 +196,15 @@ struct BrightnessOption {
         auto posRGBstr = "[0.0,0.0,0.0]";
         if (posRGB.size() > 1) {
             posRGBstr =
-                ("[" + std::to_string(posRGB[0]) + "," + std::to_string(posRGB[1]) + "," + std::to_string(posRGB[2]) + "]")
-                    .c_str();
+                ("[" + std::to_string(posRGB[0]) + "," + std::to_string(posRGB[1]) + "," +
+                std::to_string(posRGB[2]) + "]").c_str();
         }
         jsonBrightnessOption->Put("posRGB", posRGBstr);
         auto negRGBstr = "[0.0,0.0,0.0]";
         if (negRGB.size() > 1) {
             negRGBstr =
-                ("[" + std::to_string(negRGB[0]) + "," + std::to_string(negRGB[1]) + "," + std::to_string(negRGB[2]) + "]")
-                    .c_str();
+                ("[" + std::to_string(negRGB[0]) + "," + std::to_string(negRGB[1]) + "," +
+                std::to_string(negRGB[2]) + "]").c_str();
         }
         jsonBrightnessOption->Put("negRGB", negRGBstr);
         jsonBrightnessOption->Put("fraction", fraction);

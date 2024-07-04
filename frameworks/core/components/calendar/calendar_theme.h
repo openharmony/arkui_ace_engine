@@ -139,7 +139,7 @@ public:
             return theme;
         }
     private:
-        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CalendarTheme>& theme) const
+        void ParseCardTheme(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CalendarTheme>& theme) const
         {
             RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_CALENDAR);
             if (!pattern) {
@@ -173,7 +173,15 @@ public:
                 pattern->GetAttr<Color>("card_title_text_color", Color::BLACK);
             theme->cardCalendarTheme_.clickEffectColor =
                 pattern->GetAttr<Color>("card_switch_button_bg_color_clicked", Color::TRANSPARENT);
+        }
 
+        void ParseNormalTheme(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CalendarTheme>& theme) const
+        {
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_CALENDAR);
+            if (!pattern) {
+                LOGW("find pattern of calendar fail");
+                return;
+            }
             // Normal theme
             theme->calendarTheme_.dayColor =
                 pattern->GetAttr<Color>(CALENDAR_DAY_COLOR, DEFAULT_CALENDAR_DAY_COLOR);
@@ -192,7 +200,8 @@ public:
             theme->calendarTheme_.todayColor =
                 pattern->GetAttr<Color>(CALENDAR_TODAY_DAY_UNFOCUS_COLOR, DEFAULT_CALENDAR_TODAY_DAY_UNFOCUS_COLOR);
             theme->calendarTheme_.todayLunarColor =
-                pattern->GetAttr<Color>(CALENDAR_TODAY_LUNAR_UNFOCUS_COLOR, DEFAULT_CALENDAR_TODAY_LUNAR_UNFOCUS_COLOR);
+                pattern->GetAttr<Color>(CALENDAR_TODAY_LUNAR_UNFOCUS_COLOR,
+                                        DEFAULT_CALENDAR_TODAY_LUNAR_UNFOCUS_COLOR);
             theme->calendarTheme_.workDayMarkColor =
                 pattern->GetAttr<Color>(CALENDAR_WORK_MARK_COLOR, DEFAULT_CALENDAR_WORK_MARK_COLOR);
             theme->calendarTheme_.offDayMarkColor =
@@ -209,7 +218,16 @@ public:
                 CALENDAR_FOCUS_AREA_BACKGROUND_COLOR, DEFAULT_CALENDAR_FOCUS_AREA_BACKGROUND_COLOR);
             theme->calendarTheme_.blurAreaBackgroundColor = pattern->GetAttr<Color>(
                 CALENDAR_BLUR_AREA_BACKGROUND_COLOR, DEFAULT_CALENDAR_BLUR_AREA_BACKGROUND_COLOR);
-            // calendar picker
+        }
+
+        void ParseCalenderPickerFirstPart(const RefPtr<ThemeConstants>& themeConstants,
+            const RefPtr<CalendarTheme>& theme) const
+        {
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_CALENDAR);
+            if (!pattern) {
+                LOGW("find pattern of calendar fail");
+                return;
+            }
             theme->entryBorderColor_ = pattern->GetAttr<Color>("calendar_picker_entry_border_color", Color());
             theme->entryArrowColor_ = pattern->GetAttr<Color>("calendar_picker_entry_arrow_color", Color());
             theme->selectBackgroundColor_ = pattern->GetAttr<Color>(
@@ -244,6 +262,15 @@ public:
             theme->entryButtonWidth_ = pattern->GetAttr<Dimension>("calendar_picker_entry_button_width", 0.0_vp);
             theme->entryArrowHeight_ = pattern->GetAttr<Dimension>("calendar_picker_entry_arrow_height", 0.0_vp);
             theme->entryArrowwidth_ = pattern->GetAttr<Dimension>("calendar_picker_entry_arrow_width", 0.0_vp);
+        }
+        void ParseCalenderPickerSecondPart(const RefPtr<ThemeConstants>& themeConstants,
+            const RefPtr<CalendarTheme>& theme) const
+        {
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_CALENDAR);
+            if (!pattern) {
+                LOGW("find pattern of calendar fail");
+                return;
+            }
             theme->entryDateLeftRightMargin_ = pattern->GetAttr<Dimension>(
                 "calendar_picker_entry_date_left_right_margin", 0.0_vp);
             theme->entryDateTopBottomMargin_ = pattern->GetAttr<Dimension>(
@@ -269,6 +296,16 @@ public:
                 pattern->GetAttr<Dimension>("calendar_picker_title_large_row_height", 94.0_vp);
             theme->calendarTitleLargerRowHeight_ =
                 pattern->GetAttr<Dimension>("calendar_picker_title_larger_row_height", 106.0_vp);
+        }
+
+        void ParseCalenderPickerThirdPart(const RefPtr<ThemeConstants>& themeConstants,
+            const RefPtr<CalendarTheme>& theme) const
+        {
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_CALENDAR);
+            if (!pattern) {
+                LOGW("find pattern of calendar fail");
+                return;
+            }
             theme->calendarTitleRowTopPadding_ = pattern->GetAttr<Dimension>(
                 "calendar_picker_title_row_top_padding", 0.0_vp);
             theme->calendarTitleRowLeftRightPadding_ = pattern->GetAttr<Dimension>(
@@ -294,13 +331,28 @@ public:
             theme->dialogBorderRadius_ = pattern->GetAttr<Dimension>("calendar_picker_dialog_border_radius", 0.0_vp);
         }
 
-        void ParseNewPattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CalendarTheme>& theme) const
+        void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CalendarTheme>& theme) const
         {
             RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_CALENDAR);
             if (!pattern) {
                 LOGW("find pattern of calendar fail");
                 return;
             }
+            // Card theme
+            ParseCardTheme(themeConstants, theme);
+            // Normal theme
+            ParseNormalTheme(themeConstants, theme);
+            // calendar picker
+            ParseCalenderPickerFirstPart(themeConstants, theme);
+            ParseCalenderPickerSecondPart(themeConstants, theme);
+            ParseCalenderPickerThirdPart(themeConstants, theme);
+        }
+
+        void ParseCalendarThemePattern(const RefPtr<ThemeConstants>& themeConstants,
+            const RefPtr<CalendarTheme>& theme) const
+        {
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_CALENDAR);
+            CHECK_NULL_VOID(pattern);
             theme->calendarTheme_.weekFontSize = pattern->GetAttr<Dimension>("calendar_week_font_size", 14.0_fp);
             theme->calendarTheme_.dayFontSize = pattern->GetAttr<Dimension>("calendar_day_font_size", 18.0_fp);
             theme->calendarTheme_.lunarDayFontSize = pattern->GetAttr<Dimension>("calendar_lunar_font_size", 12.0_fp);
@@ -347,6 +399,13 @@ public:
             theme->calendarTheme_.underscoreLength = pattern->GetAttr<Dimension>("underscore_length", 20.0_vp);
             theme->calendarTheme_.scheduleMarkerRadius =
                 pattern->GetAttr<Dimension>("schedule_marker_radius", 2.0_vp);
+        }
+
+        void ParseCardCalendarThemePattern(const RefPtr<ThemeConstants>& themeConstants,
+            const RefPtr<CalendarTheme>& theme) const
+        {
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_CALENDAR);
+            CHECK_NULL_VOID(pattern);
             theme->cardCalendarTheme_.arrowHeight = pattern->GetAttr<Dimension>("arrow_height", 16.0_vp);
             theme->cardCalendarTheme_.arrowWidth = pattern->GetAttr<Dimension>("arrow_width", 16.0_vp);
             theme->cardCalendarTheme_.buttonHeight =
@@ -389,6 +448,17 @@ public:
                 pattern->GetAttr<Dimension>("schedule_marker_xaxis_offset", 22.0_vp);
             theme->cardCalendarTheme_.scheduleMarkerYAxisOffset =
                 pattern->GetAttr<Dimension>("schedule_marker_yaxis_offset", 40.0_vp);
+        }
+
+        void ParseNewPattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CalendarTheme>& theme) const
+        {
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_CALENDAR);
+            if (!pattern) {
+                LOGW("find pattern of calendar fail");
+                return;
+            }
+            ParseCalendarThemePattern(themeConstants, theme);
+            ParseCardCalendarThemePattern(themeConstants, theme);
             theme->cardCalendarTheme_.lunarHeight = pattern->GetAttr<Dimension>("lunar_height", 14.0_vp);
             theme->cardCalendarTheme_.underscoreWidth = pattern->GetAttr<Dimension>("underscore_width", 1.0_vp);
             theme->cardCalendarTheme_.underscoreLength = pattern->GetAttr<Dimension>("underscore_length", 20.0_vp);
