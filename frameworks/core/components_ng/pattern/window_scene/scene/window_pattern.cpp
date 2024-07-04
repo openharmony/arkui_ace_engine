@@ -333,8 +333,8 @@ void WindowPattern::CreateASStartingWindow()
     const auto& sessionInfo = session_->GetSessionInfo();
     // get atomic service resources
     OHOS::AppExecFwk::AtomicserviceEcologicalRuleManager::AtomicserviceIconInfo atomicserviceIconInfo;
-    OHOS::AppExecFwk::AtomicserviceEcologicalRuleManager::HagServiceablityClient::GetInstance()->GetAtomicserviceIconInfo(
-        sessionInfo.bundleName_, atomicserviceIconInfo);
+    OHOS::AppExecFwk::AtomicserviceEcologicalRuleManager::HagServiceablityClient::GetInstance()->
+        GetAtomicserviceIconInfo(sessionInfo.bundleName_, atomicserviceIconInfo);
     const auto& appNameInfo = atomicserviceIconInfo.GetAppName();
     const auto& eyelashRingIcon = atomicserviceIconInfo.GetEyelashRingIcon();
     const auto& circleIcon = atomicserviceIconInfo.GetCircleIcon();
