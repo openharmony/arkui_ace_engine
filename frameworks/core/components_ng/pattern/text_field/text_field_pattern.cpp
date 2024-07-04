@@ -6950,6 +6950,7 @@ void TextFieldPattern::CleanNodeResponseKeyEvent()
     InitEditingValueText("");
     CloseSelectOverlay();
     StartTwinkling();
+    UpdateCaretInfoToController();
     if (!HasFocus()) {
         auto focusHub = host->GetOrCreateFocusHub();
         focusHub->RequestFocusImmediately();
