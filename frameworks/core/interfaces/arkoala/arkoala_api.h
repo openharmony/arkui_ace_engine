@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 114
+#define ARKUI_FULL_API_VERSION 116
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 114
+#define ARKUI_NODE_API_VERSION 116
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -652,7 +652,8 @@ enum ArkUINodeType {
     ARKUI_SELECT,
     ARKUI_IMAGE_ANIMATOR,
     ARKUI_CIRCLE,
-    ARKUI_TAB_CONTENT
+    ARKUI_TAB_CONTENT,
+    ARKUI_NAVIGATION
 };
 
 enum ArkUIEventCategory {
@@ -2463,6 +2464,18 @@ struct ArkUIScrollModifier {
     ArkUINodeHandle (*getScroll)(ArkUINodeHandle node);
     void (*setScrollBarProxy)(ArkUINodeHandle node, ArkUINodeHandle proxy);
     void (*setScrollToIndex)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 smooth, ArkUI_Int32 align);
+    void (*setScrollOnScrollStart)(ArkUINodeHandle node, void* callback);
+    void (*resetScrollOnScrollStart)(ArkUINodeHandle node);
+    void (*setScrollOnScrollEnd)(ArkUINodeHandle node, void* callback);
+    void (*resetScrollOnScrollEnd)(ArkUINodeHandle node);
+    void (*setScrollOnScrollStop)(ArkUINodeHandle node, void* callback);
+    void (*resetScrollOnScrollStop)(ArkUINodeHandle node);
+    void (*setScrollOnScroll)(ArkUINodeHandle node, void* callback);
+    void (*resetScrollOnScroll)(ArkUINodeHandle node);
+    void (*setScrollOnScrollEdge)(ArkUINodeHandle node, void* callback);
+    void (*resetScrollOnScrollEdge)(ArkUINodeHandle node);
+    void (*setScrollOnDidScrollCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetScrollOnDidScroll)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemModifier {
@@ -2529,6 +2542,8 @@ struct ArkUITabsModifier {
     void (*resetAnimationDuration)(ArkUINodeHandle node);
     void (*setTabClip)(ArkUINodeHandle node, ArkUI_Bool clipEdge);
     void (*resetTabClip)(ArkUINodeHandle node);
+    void (*setTabEdgeEffect)(ArkUINodeHandle node, ArkUI_Uint32 edgeEffect);
+    void (*resetTabEdgeEffect)(ArkUINodeHandle node);
     void (*setTabWidthAuto)(ArkUINodeHandle node);
     void (*resetTabWidthAuto)(ArkUINodeHandle node);
     void (*setTabHeightAuto)(ArkUINodeHandle node);
@@ -4048,6 +4063,10 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorCopyOptions)(ArkUINodeHandle node);
     void (*setRichEditorCaretColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetRichEditorCaretColor)(ArkUINodeHandle node);
+    void (*setRichEditorOnSubmit)(ArkUINodeHandle node, void* callback);
+    void (*resetRichEditorOnSubmit)(ArkUINodeHandle node);
+    void (*setRichEditorAboutToIMEInput)(ArkUINodeHandle node, void* callback);
+    void (*resetRichEditorAboutToIMEInput)(ArkUINodeHandle node);
     void (*setOnReady)(ArkUINodeHandle node, void* callback);
     void (*resetOnReady)(ArkUINodeHandle node);
     void (*setOnDeleteComplete)(ArkUINodeHandle node, void* callback);
@@ -4200,6 +4219,7 @@ struct ArkUIRenderNodeModifier {
         ArkUI_Int32 unitValue);
     void (*setShadowColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*setShadowOffset)(ArkUINodeHandle node, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY, ArkUI_Int32 unitValue);
+    void (*setLabel)(ArkUINodeHandle node, ArkUI_CharPtr label);
     void (*setShadowAlpha)(ArkUINodeHandle node, ArkUI_Float32 alpha);
     void (*setShadowElevation)(ArkUINodeHandle node, ArkUI_Float32 elevation);
     void (*setShadowRadius)(ArkUINodeHandle node, ArkUI_Float32 radius);

@@ -450,7 +450,7 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
             selectController->MoveFirstHandleToContentRect(position, false);
             UpdateSecondHandleOffset();
         } else {
-            selectController->MoveSecondHandleToContentRect(position);
+            selectController->MoveSecondHandleToContentRect(position, false);
             UpdateFirstHandleOffset();
         }
     }

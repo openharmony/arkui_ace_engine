@@ -262,7 +262,7 @@ void TextContentModifier::PaintImage(RSCanvas& canvas, float x, float y)
     auto rectsForPlaceholders = pattern->GetRectsForPlaceholders();
     auto placeHolderIndexVector = pattern->GetPlaceHolderIndex();
     auto placeholdersSize = rectsForPlaceholders.size();
-    auto placeHolderIndexSize = placeHolderIndexVector.size();
+    auto placeHolderIndexSize = static_cast<int32_t>(placeHolderIndexVector.size());
     for (const auto& imageWeak : imageNodeList_) {
         auto imageChild = imageWeak.Upgrade();
         if (!imageChild) {
@@ -271,8 +271,8 @@ void TextContentModifier::PaintImage(RSCanvas& canvas, float x, float y)
         if (index >= placeholdersSize) {
             return;
         }
-        auto tmp = placeHolderIndexVector.at(index);
-        if (tmp >= placeHolderIndexSize) {
+        auto tmp = static_cast<int32_t>(placeHolderIndexVector.at(index));
+        if (tmp >= placeHolderIndexSize || tmp < 0) {
             return;
         }
         auto rect = rectsForPlaceholders.at(tmp);

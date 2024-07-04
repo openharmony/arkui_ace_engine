@@ -1265,6 +1265,7 @@ void RichEditorPattern::CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<S
     COPY_SPAN_STYLE_IF_PRESENT(source, target, LineHeight, PropertyInfo::LINEHEIGHT);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, LetterSpacing, PropertyInfo::LETTERSPACE);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, FontFeature, PropertyInfo::FONTFEATURE);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, TextShadow, PropertyInfo::TEXTSHADOW);
 }
 
 void RichEditorPattern::CopyTextSpanLineStyle(
@@ -1272,7 +1273,6 @@ void RichEditorPattern::CopyTextSpanLineStyle(
 {
     CHECK_NULL_VOID(source);
     CHECK_NULL_VOID(target);
-    COPY_SPAN_STYLE_IF_PRESENT(source, target, TextShadow, PropertyInfo::TEXTSHADOW);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, TextAlign, PropertyInfo::TEXT_ALIGN);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, WordBreak, PropertyInfo::WORD_BREAK);
     COPY_SPAN_STYLE_IF_PRESENT(source, target, LineBreakStrategy, PropertyInfo::LINE_BREAK_STRATEGY);
@@ -2272,7 +2272,14 @@ void RichEditorPattern::HandleClickEvent(GestureEvent& info)
     if (!focusHub->IsFocusable()) {
         return;
     }
+    CHECK_NULL_VOID(!selectOverlay_->IsClickAtHandle(info));
 
+    if (!HasFocus() && !focusHub->IsFocusOnTouch().value_or(true)) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleClickEvent fail when IsFocusOnTouch false");
+        CloseSelectOverlay();
+        StopTwinkling();
+        return;
+    }
     if (CheckTripClickEvent(info)) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "HandleTripleClickEvent");
         HandleTripleClickEvent(info);
@@ -2891,6 +2898,7 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
 
 Offset RichEditorPattern::ConvertGlobalToLocalOffset(const Offset& globalOffset)
 {
+    parentGlobalOffset_ = GetPaintRectGlobalOffset();
     auto localPoint = OffsetF(globalOffset.GetX(), globalOffset.GetY());
     selectOverlay_->RevertLocalPointWithTransform(localPoint);
     return Offset(localPoint.GetX(), localPoint.GetY());
@@ -4191,7 +4199,7 @@ void RichEditorPattern::FinishTextPreview()
     if (shouldInsertContent) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "insert preview text pos = %{public}d", previewStartPos);
         caretPosition_ = previewStartPos;
-        InsertValue(previewContent);
+        InsertValue(previewContent, true);
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -5855,6 +5863,7 @@ void RichEditorPattern::InitTouchEvent()
 
 void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
+    CHECK_NULL_VOID(!selectOverlay_->IsTouchAtHandle(info));
     auto touchInfo = info.GetTouches().front();
     auto touchType = touchInfo.GetTouchType();
     if (touchType == TouchType::DOWN) {

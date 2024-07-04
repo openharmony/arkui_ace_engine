@@ -418,6 +418,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         this.markNeedUpdate();
         this.elmtIdsDelayedUpdate.clear();
         this.monitorIdsDelayedUpdate.clear();
+        this.computedIdsDelayedUpdate.clear();
         stateMgmtProfiler.end();
     }
 

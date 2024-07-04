@@ -487,7 +487,7 @@ FrameNode::~FrameNode()
     if (IsOnMainTree()) {
         OnDetachFromMainTree(false);
     }
-    TriggerVisibleAreaChangeCallback(true);
+    TriggerVisibleAreaChangeCallback(0, true);
     CleanVisibleAreaUserCallback();
     CleanVisibleAreaInnerCallback();
     if (eventHub_) {
@@ -1420,7 +1420,42 @@ bool FrameNode::IsFrameDisappear()
     return !curIsVisible || !curFrameIsActive;
 }
 
-void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
+bool FrameNode::IsFrameDisappear(uint64_t timestamp)
+{
+    auto context = GetContext();
+    CHECK_NULL_RETURN(context, true);
+    bool isFrameDisappear = !context->GetOnShow() || !IsOnMainTree() || !IsVisible();
+    if (isFrameDisappear) {
+        cachedIsFrameDisappear_ = { timestamp, true };
+        return true;
+    }
+
+    return IsFrameAncestorDisappear(timestamp);
+}
+
+bool FrameNode::IsFrameAncestorDisappear(uint64_t timestamp)
+{
+    bool curFrameIsActive = isActive_;
+    bool curIsVisible = IsVisible();
+    bool result = !curIsVisible || !curFrameIsActive;
+    RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame();
+    if (!parentUi) {
+        cachedIsFrameDisappear_ = { timestamp, result };
+        return result;
+    }
+
+    auto parentIsFrameDisappear = parentUi->cachedIsFrameDisappear_;
+    if (parentIsFrameDisappear.first == timestamp) {
+        result = result || parentIsFrameDisappear.second;
+        cachedIsFrameDisappear_ = { timestamp, result };
+        return result;
+    }
+    result = result || (parentUi->IsFrameAncestorDisappear(timestamp));
+    cachedIsFrameDisappear_ = { timestamp, result };
+    return result;
+}
+
+void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceDisappear)
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
@@ -1431,7 +1466,7 @@ void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
     auto& visibleAreaInnerCallback = eventHub_->GetVisibleAreaCallback(false);
 
     ProcessThrottledVisibleCallback();
-    if (forceDisappear || IsFrameDisappear()) {
+    if (forceDisappear || IsFrameDisappear(timestamp)) {
         if (!NearEqual(lastVisibleRatio_, VISIBLE_RATIO_MIN)) {
             ProcessAllVisibleCallback(
                 visibleAreaUserRatios, visibleAreaUserCallback, VISIBLE_RATIO_MIN, lastVisibleCallbackRatio_);
@@ -3450,7 +3485,7 @@ void FrameNode::Layout()
 bool FrameNode::SelfExpansive()
 {
     auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
-    return opts && opts->Expansive();
+    return opts && (opts->Expansive() || opts->switchToNone);
 }
 
 bool FrameNode::SelfExpansiveToKeyboard()

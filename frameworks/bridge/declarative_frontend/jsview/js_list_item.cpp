@@ -106,7 +106,11 @@ void JSListItem::CreateForPartialUpdate(const JSCallbackInfo& args)
     }
 
     if (!isLazy) {
-        ListItemModel::GetInstance()->Create(nullptr, listItemStyle);
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            ListItemModel::GetInstance()->Create(nullptr, listItemStyle);
+        } else {
+            ListItemModel::GetInstance()->Create();
+        }
     } else {
         RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(arg0));
         auto listItemDeepRenderFunc = [execCtx = args.GetExecutionContext(),

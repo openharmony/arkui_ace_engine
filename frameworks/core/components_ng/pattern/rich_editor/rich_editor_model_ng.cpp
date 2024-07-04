@@ -116,6 +116,15 @@ void RichEditorModelNG::SetAboutToIMEInput(std::function<bool(const RichEditorIn
     eventHub->SetAboutToIMEInput(std::move(func));
 }
 
+void RichEditorModelNG::SetAboutToIMEInput(FrameNode* frameNode,
+    std::function<bool(const RichEditorInsertValue&)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetAboutToIMEInput(std::move(callback));
+}
+
 void RichEditorModelNG::SetOnIMEInputComplete(std::function<void(const RichEditorAbstractSpanResult&)>&& func)
 {
     CHECK_NULL_VOID(!isStyledStringMode_);
@@ -323,6 +332,15 @@ void RichEditorModelNG::SetOnSubmit(std::function<void(int32_t, NG::TextFieldCom
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSubmit(std::move(func));
+}
+
+void RichEditorModelNG::SetOnSubmit(FrameNode* frameNode,
+    std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSubmit(std::move(callback));
 }
 
 void RichEditorModelNG::SetOnWillChange(std::function<bool(const RichEditorChangeValue&)>&& func)

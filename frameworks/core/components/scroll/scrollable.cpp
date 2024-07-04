@@ -869,7 +869,8 @@ void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scro
             }
         });
     } else {
-        snapMotion_->Reset(currentPos_, scrollSnapDelta + currentPos_, scrollSnapVelocity, DEFAULT_OVER_SPRING_PROPERTY);
+        snapMotion_->Reset(
+            currentPos_, scrollSnapDelta + currentPos_, scrollSnapVelocity, DEFAULT_OVER_SPRING_PROPERTY);
     }
     if (scrollMotionFRCSceneCallback_) {
         scrollMotionFRCSceneCallback_(snapMotion_->GetCurrentVelocity(), NG::SceneStatus::START);

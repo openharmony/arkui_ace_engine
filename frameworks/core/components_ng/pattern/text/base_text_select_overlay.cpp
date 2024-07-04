@@ -41,8 +41,9 @@ void BaseTextSelectOverlay::ProcessOverlay(const OverlayRequest& request)
     CHECK_NULL_VOID(textBase);
     auto clipboard = textBase->GetClipboard();
     if (clipboard) {
-        if (OnlyAllowedPasteNonEmptyString()) {
-            clipboard->GetData([checkClipboard](const std::string& data) { checkClipboard(!data.empty()); });
+        auto mimeType = GetPasteMimeType();
+        if (!mimeType.empty()) {
+            clipboard->HasDataType(checkClipboard, mimeType);
             return;
         }
         clipboard->HasData(checkClipboard);
@@ -879,13 +880,16 @@ void BaseTextSelectOverlay::CalcHandleLevelMode(const RectF& firstLocalPaintRect
 
 void BaseTextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
 {
-    if (IsAncestorNodeStartAnimation(flag) || IsAncestorNodeStartScroll(flag) || IsAncestorNodeGeometryChange(flag) ||
-        IsAncestorNodeTransformChange(flag)) {
+    auto isStartScroll = IsAncestorNodeStartScroll(flag);
+    auto isSwitchToEmbed = isStartScroll || IsAncestorNodeStartAnimation(flag) || IsAncestorNodeGeometryChange(flag) ||
+                           IsAncestorNodeTransformChange(flag);
+    isSwitchToEmbed = isSwitchToEmbed && (!IsAncestorNodeEndScroll(flag) || HasThreeDimensionTransform());
+    if (isStartScroll) {
         HideMenu(true);
-        SwitchToEmbedMode();
-        return;
     }
-    if (IsAncestorNodeEndScroll(flag) && !HasThreeDimensionTransform()) {
+    if (isSwitchToEmbed) {
+        SwitchToEmbedMode();
+    } else {
         SwitchToOverlayMode();
     }
 }
@@ -964,7 +968,7 @@ bool BaseTextSelectOverlay::HasThreeDimensionTransform()
                         !NearEqual(rotateVector->v, 0);
         }
         if (hasTransformMatrix || hasRotate) {
-            return true;
+            return false;
         }
         parent = parent->GetAncestorNodeOfFrame(true);
     }

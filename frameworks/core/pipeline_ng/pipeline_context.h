@@ -199,7 +199,7 @@ public:
         const std::vector<double>& ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);
     void RemoveVisibleAreaChangeNode(int32_t nodeId);
 
-    void HandleVisibleAreaChangeEvent();
+    void HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp);
 
     void HandleSubwindow(bool isShow);
 

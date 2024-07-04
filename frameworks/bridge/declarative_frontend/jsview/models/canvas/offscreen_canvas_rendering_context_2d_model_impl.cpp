@@ -29,7 +29,6 @@
 #endif
 
 namespace OHOS::Ace::Framework {
-
 void OffscreenCanvasRenderingContext2DModelImpl::SetPattern(RefPtr<AceType> pattern)
 {
     pattern_ = AceType::DynamicCast<OffscreenCanvas>(pattern);

@@ -167,6 +167,11 @@ public:
         return tabBarParam_;
     }
 
+    void SetCustomTabBar(FrameNode* node)
+    {
+        tabBarParam_.SetCustomNode(node);
+    }
+
     void SetTabBarStyle(TabBarStyle tabBarStyle)
     {
         tabBarParam_.SetTabBarStyle(tabBarStyle);

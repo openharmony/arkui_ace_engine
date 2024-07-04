@@ -53,6 +53,13 @@ void MockClipBoard::HasData(const std::function<void(bool hasData)>& callback)
     }
 }
 
+void MockClipBoard::HasDataType(const std::function<void(bool hasData)>& callback, const std::string& mimeType)
+{
+    if (callback) {
+        callback(saveData.has_value());
+    }
+}
+
 void MockClipBoard::SetData(const std::string& data, CopyOptions /* copyOption */, bool /* isDragData */)
 {
     saveData = data;

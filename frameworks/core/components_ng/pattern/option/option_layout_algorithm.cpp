@@ -78,7 +78,9 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childConstraint.selfIdealSize.SetSize(idealSizePaste);
         auto securityLayoutProperty = DynamicCast<SecurityComponentLayoutProperty>(rowChild->GetLayoutProperty());
         CHECK_NULL_VOID(securityLayoutProperty);
-        securityLayoutProperty->UpdateBackgroundLeftPadding(Dimension(horInterval_));
+        auto leftPadding =
+            horInterval_ + securityLayoutProperty->GetLeftSpaceValue(Dimension(0.0f)).ConvertToPx();
+        securityLayoutProperty->UpdateBackgroundLeftPadding(Dimension(leftPadding));
         rowChild->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
         rowChild->Measure(childConstraint);
     }

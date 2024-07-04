@@ -94,4 +94,29 @@ HWTEST_F(UiEventTest, UiEventTest002, TestSize.Level1)
     bool result = UIEventFunc::Get().IsAvailable();
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: UiEventTest003
+ * @tc.desc: test UIEventFunc RegisterUIEventObserver/UnregisterUIEventObserver
+ * @tc.type: FUNC
+ */
+HWTEST_F(UiEventTest, UiEventTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters Call the function RegisterUIEventObserver.
+     */
+    std::string config = "configTest";
+    const std::shared_ptr<UIEventObserver> observer = nullptr;
+    UIEventFunc::RegisterUIEventObserver(config, observer);
+    bool result = UIEventFunc::Get().IsAvailable();
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps2: Call the function UnregisterUIEventObserver.
+     * @tc.expected: The function is run ok and IsAvailable() is true.
+     */
+    UIEventFunc::UnregisterUIEventObserver(observer);
+    bool result2 = UIEventFunc::Get().IsAvailable();
+    EXPECT_FALSE(result2);
+}
 } // namespace OHOS::Ace

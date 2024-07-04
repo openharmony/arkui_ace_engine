@@ -329,7 +329,6 @@ public:
         focusPattern.SetIsFocusActiveWhenFocused(true);
         return focusPattern;
     }
-
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void UpdateInputFilterErrorText(const std::string& errorText) override;
@@ -570,6 +569,14 @@ public:
         FocusHub::LostFocusToViewRoot();
         isKeyboardClosedByUser_ = false;
     }
+
+    void NotifyKeyboardClosed() override
+    {
+        if (HasFocus()) {
+            FocusHub::LostFocusToViewRoot();
+        }
+    }
+
     std::u16string GetLeftTextOfCursor(int32_t number) override;
     std::u16string GetRightTextOfCursor(int32_t number) override;
     int32_t GetTextIndexAtCursor() override;
@@ -853,6 +860,7 @@ public:
     void StripNextLine(std::wstring& data);
     bool IsShowHandle();
     std::string GetCancelButton();
+    std::string GetPasswordIconPromptInformation(bool show);
     bool OnKeyEvent(const KeyEvent& event);
     int32_t GetLineCount() const;
     TextInputType GetKeyboard()
@@ -1340,6 +1348,7 @@ private:
     void InitLongPressEvent();
     void InitClickEvent();
     void InitDragDropEvent();
+    bool ProcessFocusIndexAction();
     std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragStart();
     std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragDrop();
     void ShowSelectAfterDragEvent();
@@ -1432,7 +1441,8 @@ private:
     void SetAccessibilityActionGetAndSetCaretPosition();
     void SetAccessibilityMoveTextAction();
     void SetAccessibilityScrollAction();
-    void SetAccessibilityDeleteAction();
+    void SetAccessibilityClearAction();
+    void SetAccessibilityPasswordIconAction();
 
     void UpdateCopyAllStatus();
     void RestorePreInlineStates();

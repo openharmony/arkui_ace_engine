@@ -747,7 +747,11 @@ public:
                          bool fromOverlay = false);
     void HandleTouchCancel();
     void HandleTouchpadFlingEvent(const double& x, const double& y, const double& vx, const double& vy);
+    void WebHandleTouchpadFlingEvent(const double& x, const double& y,
+        const double& vx, const double& vy, const std::vector<int32_t>& pressedCodes);
     void HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY);
+    void WebHandleAxisEvent(const double& x, const double& y,
+        const double& deltaX, const double& deltaY, const std::vector<int32_t>& pressedCodes);
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
     bool WebOnKeyEvent(int32_t keyCode, int32_t keyAction, const std::vector<int32_t>& pressedCodes);
     void OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count);
@@ -789,6 +793,7 @@ public:
     {
         richtextData_ = richtextData;
     }
+    void HandleAccessibilityHoverEvent(int32_t x, int32_t y);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -1014,6 +1019,7 @@ private:
     void BindPopPageSuccessMethod();
     void BindIsPagePathInvalidMethod();
     void TextBlurReport(int64_t accessibilityId);
+    void WebComponentClickReport(int64_t accessibilityId);
 
 #ifdef OHOS_STANDARD_SYSTEM
     sptr<OHOS::Rosen::Window> CreateWindow();

@@ -513,11 +513,25 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (config.frameSizeChange) {
         ScheduleDisappearDelayTask();
     }
-    SetAccessibilityDeleteAction();
+    SetAccessibilityClearAction();
+    SetAccessibilityPasswordIconAction();
     return true;
 }
 
-void TextFieldPattern::SetAccessibilityDeleteAction()
+void TextFieldPattern::SetAccessibilityPasswordIconAction()
+{
+    if (IsInPasswordMode() && IsShowPasswordIcon()) {
+        auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
+        CHECK_NULL_VOID(passwordArea);
+        auto node = passwordArea->GetFrameNode();
+        CHECK_NULL_VOID(node);
+        auto textAccessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(textAccessibilityProperty);
+        textAccessibilityProperty->SetAccessibilityText(GetPasswordIconPromptInformation(passwordArea->IsObscured()));
+    }
+}
+
+void TextFieldPattern::SetAccessibilityClearAction()
 {
     if (IsShowCancelButtonMode()) {
         auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
@@ -631,6 +645,9 @@ void TextFieldPattern::UpdateCaretRect(bool isEditorValueChanged)
     if (IsSelected()) {
         selectController_->MoveFirstHandleToContentRect(selectController_->GetFirstHandleIndex());
         selectController_->MoveSecondHandleToContentRect(selectController_->GetSecondHandleIndex());
+        if (SelectOverlayIsOn()) {
+            selectOverlay_->UpdateAllHandlesOffset();
+        }
         return;
     }
     if (focusHub && !focusHub->IsCurrentFocus() && !obscuredChange_) {
@@ -1360,6 +1377,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool
     ResetObscureTickCountDown();
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
+    parentGlobalOffset_ = GetPaintRectGlobalOffset();
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     selectController_->MoveSecondHandleToContentRect(textSize);
     StopTwinkling();
@@ -1428,6 +1446,15 @@ std::string TextFieldPattern::GetCancelButton()
     auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(theme, "");
     return theme->GetCancelButton();
+}
+
+std::string TextFieldPattern::GetPasswordIconPromptInformation(bool show)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, "");
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(theme, "");
+    return show ? theme->GetShowPasswordPromptInformation() : theme->GetHiddenPasswordPromptInformation();
 }
 
 void TextFieldPattern::UpdateShowCountBorderStyle()
@@ -2946,29 +2973,14 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     }
     gestureHub->SetIsTextDraggable(false);
     isLongPress_ = true;
-    UpdateParam(info, shouldProcessOverlayAfterLayout);
     if (!focusHub->IsCurrentFocus()) {
         focusHub->RequestFocusImmediately();
     }
-    UpdateCaretInfoToController();
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void TextFieldPattern::UpdateParam(GestureEvent& info, bool shouldProcessOverlayAfterLayout)
-{
-    parentGlobalOffset_ = GetPaintRectGlobalOffset();
     auto localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
     if (selectController_->IsTouchAtLineEnd(localOffset)) {
         selectController_->UpdateCaretInfoByOffset(localOffset);
-        NotifyOnEditChanged(true);
-    }
-    if (isEdit_) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleLongPress:edit+longpress, show fixed caret");
-        isMoveCaretAnywhere_ = true;
-        selectController_->MoveCaretAnywhere(localOffset);
-        CloseSelectOverlay();
-        ShowCaretAndStopTwinkling();
-        return;
+    } else {
+        selectController_->UpdateSelectByOffset(localOffset);
     }
     if (IsSelected()) {
         StopTwinkling();
@@ -2979,6 +2991,7 @@ void TextFieldPattern::UpdateParam(GestureEvent& info, bool shouldProcessOverlay
     } else {
         ProcessOverlay({ .animation = true });
     }
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 bool TextFieldPattern::IsOnUnitByPosition(const Offset& globalOffset)
@@ -4459,11 +4472,11 @@ void TextFieldPattern::HandleCounterBorder()
     }
 }
 
-void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyboard)
+bool TextFieldPattern::ProcessFocusIndexAction()
 {
     if (focusIndex_ == FocuseIndex::CANCEL) {
         CleanNodeResponseKeyEvent();
-        return;
+        return false;
     }
     if (focusIndex_ == FocuseIndex::UNIT) {
         if (IsShowPasswordIcon()) {
@@ -4472,6 +4485,14 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
         if (IsShowUnit()) {
             UnitResponseKeyEvent();
         }
+        return false;
+    }
+    return true;
+}
+
+void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyboard)
+{
+    if (!ProcessFocusIndexAction()) {
         return;
     }
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "PerformAction  %{public}d", static_cast<int32_t>(action));
@@ -7275,6 +7296,7 @@ void TextFieldPattern::SetThemeAttr()
     } else {
         layoutProperty->UpdateTextColor(paintProperty->GetTextColorFlagByUserValue());
     }
+    inlineFocusState_ = false;
 }
 
 const Dimension& TextFieldPattern::GetAvoidSoftKeyboardOffset() const

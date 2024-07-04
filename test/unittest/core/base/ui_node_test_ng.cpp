@@ -236,6 +236,15 @@ HWTEST_F(UINodeTestNg, UINodeTestNg004, TestSize.Level1)
     testNode->parent_ = parent;
     auto result = ONE->GetFocusParent();
     EXPECT_EQ(result, nullptr);
+    /**
+     * @tc.steps: step5. get the label of node before and after config the node's label
+     * @tc.expected: the label before configuring is "", and the label after config is the configured label
+     */
+    auto labelBeforeConfig = ONE->GetLabel();
+    EXPECT_EQ(labelBeforeConfig, "");
+    ONE->SetLabel("LabelOne");
+    auto labelAfterConfig = ONE->GetLabel();
+    EXPECT_EQ(labelAfterConfig, "LabelOne");
 }
 
 /**
@@ -1642,8 +1651,8 @@ HWTEST_F(UINodeTestNg, UINodeTestNg047, TestSize.Level1)
      * @tc.expected: children_.size = 3
      */
     ONE->AddChild(TWO, 1, false);
-    const int32_t TEST_ID_THREE = 23;
-    auto testNode3 = TestNode::CreateTestNode(TEST_ID_THREE);
+    const int32_t testId3 = 23;
+    auto testNode3 = TestNode::CreateTestNode(testId3);
     ONE->AddChild(testNode, 1, false);
     ONE->AddChildBefore(testNode3, testNode2);
     EXPECT_EQ(ONE->children_.size(), 3);
@@ -1688,8 +1697,8 @@ HWTEST_F(UINodeTestNg, UINodeTestNg048, TestSize.Level1)
      * @tc.expected: children_.size = 3
      */
     ONE->AddChild(TWO, 1, false);
-    const int32_t TEST_ID_THREE = 23;
-    auto testNode3 = TestNode::CreateTestNode(TEST_ID_THREE);
+    const int32_t testId3 = 23;
+    auto testNode3 = TestNode::CreateTestNode(testId3);
     ONE->AddChild(testNode, 1, false);
     ONE->AddChildBefore(testNode3, testNode2);
     EXPECT_EQ(ONE->children_.size(), 3);

@@ -1340,4 +1340,27 @@ HWTEST_F(SearchTestTwoNg, UpdateInspectorId001, TestSize.Level1)
         EXPECT_TRUE(cancelImageFrameNode->GetInspectorIdValue() == result4);
     }
 }
+
+/**
+ * @tc.name: SearchTypeToString001
+ * @tc.desc: test search pattern UpdateInspectorId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, SearchTypeToString001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create frameNode and pattern.
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE, PLACEHOLDER, SEARCH_SVG);
+    searchModelInstance.SetType(TextInputType::URL);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+
+    /**
+     * @tc.step: step2.  Call SearchTypeToString.
+     */
+    EXPECT_EQ(pattern->SearchTypeToString(), "SearchType.URL");
+}
 } // namespace OHOS::Ace::NG

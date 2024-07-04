@@ -1213,11 +1213,13 @@ void WebDelegate::AddJavascriptInterface(const std::string& objectName, const st
             if (delegate->nweb_) {
                 // Async methods list is empty
                 std::vector<std::string> asyncMethodList;
-                // webcontroller not support object, so the object_id param assign
-                // error code
+                std::string permission;
+                // webcontroller not support object, so the object_id param
+                // assign error code
                 delegate->nweb_->RegisterArkJSfunction(
                     objectName, methodList, asyncMethodList,
-                    static_cast<int32_t>(JavaScriptObjIdErrorCode::WEBCONTROLLERERROR));
+                    static_cast<int32_t>(JavaScriptObjIdErrorCode::WEBCONTROLLERERROR),
+                    permission);
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebAddJsInterface");
@@ -4826,8 +4828,11 @@ void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEve
         CHECK_NULL_VOID(webNode);
         accessibilityId = webNode->GetAccessibilityId();
     }
-    if (eventType == AccessibilityEventType::FOCUS) {
+    if (eventType == AccessibilityEventType::FOCUS || eventType == AccessibilityEventType::CLICK) {
         TextBlurReport(accessibilityId);
+    }
+    if (eventType == AccessibilityEventType::CLICK) {
+        WebComponentClickReport(accessibilityId);
     }
     event.nodeId = accessibilityId;
     event.type = eventType;
@@ -4860,6 +4865,17 @@ void WebDelegate::TextBlurReport(int64_t accessibilityId)
             lastFocusInputId_ = accessibilityId;
         }
     }
+}
+
+void WebDelegate::WebComponentClickReport(int64_t accessibilityId)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    auto webAccessibilityNode = webPattern->GetAccessibilityNodeById(accessibilityId);
+    CHECK_NULL_VOID(webAccessibilityNode);
+    auto webComponentClickCallback = webPattern->GetWebComponentClickCallback();
+    CHECK_NULL_VOID(webComponentClickCallback);
+    webComponentClickCallback(accessibilityId, webAccessibilityNode->GetContent());
 }
 
 void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
@@ -5547,10 +5563,26 @@ void WebDelegate::HandleTouchpadFlingEvent(const double& x, const double& y, con
     }
 }
 
+void WebDelegate::WebHandleTouchpadFlingEvent(const double& x, const double& y,
+    const double& vx, const double& vy, const std::vector<int32_t>& pressedCodes)
+{
+    if (nweb_) {
+        nweb_->WebSendTouchpadFlingEvent(x, y, vx, vy, pressedCodes);
+    }
+}
+
 void WebDelegate::HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY)
 {
     if (nweb_) {
         nweb_->SendMouseWheelEvent(x, y, deltaX, deltaY);
+    }
+}
+
+void WebDelegate::WebHandleAxisEvent(const double& x, const double& y,
+    const double& deltaX, const double& deltaY, const std::vector<int32_t>& pressedCodes)
+{
+    if (nweb_) {
+        nweb_->WebSendMouseWheelEvent(x, y, deltaX, deltaY, pressedCodes);
     }
 }
 
@@ -5755,6 +5787,15 @@ bool WebDelegate::GetPendingSizeStatus()
     }
     return false;
 }
+
+void WebDelegate::HandleAccessibilityHoverEvent(int32_t x, int32_t y)
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->SendAccessibilityHoverEvent(x, y);
+    }
+}
+
 #endif
 
 std::string WebDelegate::GetUrlStringParam(const std::string& param, const std::string& name) const

@@ -68,6 +68,9 @@
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "canvas_napi/js_canvas.h"
+#if !defined(PREVIEW)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
@@ -3623,7 +3626,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
         auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc), node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("BuildMenu");
-            auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+            PipelineContext::SetCallBackNode(node);
             func->Execute();
         };
         ViewAbstractModel::GetInstance()->BindMenu({}, std::move(buildFunc), menuParam);
@@ -7295,8 +7298,13 @@ void JSViewAbstract::JsAccessibilityGroup(bool accessible)
     ViewAbstractModel::GetInstance()->SetAccessibilityGroup(accessible);
 }
 
-void JSViewAbstract::JsAccessibilityText(const std::string& text)
+void JSViewAbstract::JsAccessibilityText(const JSCallbackInfo& info)
 {
+    const JSRef<JSVal>& jsValue = info[0];
+    std::string text;
+    if (!ParseJsString(jsValue, text)) {
+        return;
+    }
     ViewAbstractModel::GetInstance()->SetAccessibilityText(text);
 }
 
@@ -7305,8 +7313,13 @@ void JSViewAbstract::JsAccessibilityTextHint(const std::string& text)
     ViewAbstractModel::GetInstance()->SetAccessibilityTextHint(text);
 }
 
-void JSViewAbstract::JsAccessibilityDescription(const std::string& description)
+void JSViewAbstract::JsAccessibilityDescription(const JSCallbackInfo& info)
 {
+    const JSRef<JSVal>& jsValue = info[0];
+    std::string description;
+    if (!ParseJsString(jsValue, description)) {
+        return;
+    }
     std::pair<bool, std::string> autoEventPair(false, "");
     std::pair<bool, std::string> descriptionPair(false, "");
     ParseAccessibilityDescriptionJson(description, autoEventPair, descriptionPair);
@@ -7452,6 +7465,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     }
     menuParam.type = NG::MenuType::CONTEXT_MENU;
     ViewAbstractModel::GetInstance()->BindContextMenu(responseType, buildFunc, menuParam, previewBuildFunc);
+    ViewAbstractModel::GetInstance()->BindDragWithContextMenuParams(menuParam);
 }
 
 bool ParseBindContentCoverIsShow(const JSCallbackInfo& info)
@@ -9405,6 +9419,9 @@ void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onClick");
         PipelineContext::SetCallBackNode(node);
         func->Execute(*tapInfo);
+#if !defined(PREVIEW)
+        JSInteractableView::ReportClickEvent(node);
+#endif
     };
     auto tmpOnTap = [func = std::move(onTap)](GestureEvent& info) { func(&info); };
     auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = targetNode](
@@ -9413,6 +9430,9 @@ void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onClick");
         PipelineContext::SetCallBackNode(node);
         func->Execute(*info);
+#if !defined(PREVIEW)
+        JSInteractableView::ReportClickEvent(node);
+#endif
     };
     ViewAbstractModel::GetInstance()->SetOnClick(std::move(tmpOnTap), std::move(onClick));
 }

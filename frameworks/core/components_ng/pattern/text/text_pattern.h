@@ -599,7 +599,6 @@ public:
     }
 
     size_t GetLineCount() const override;
-    bool DidExceedMaxLines() const override;
     TextLineMetrics GetLineMetrics(int32_t lineNumber) override;
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
 
@@ -660,7 +659,7 @@ protected:
     void HandleSelectionDown();
     void HandleSelection(bool isEmojiStart, int32_t end);
     double GetTextHeight(int32_t index, bool isNextLine);
-    int32_t GetTextLength();
+    int32_t GetActualTextLength();
     bool IsSelectableAndCopy();
     void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
 
@@ -755,6 +754,7 @@ private:
     void CreateModifier();
 
     bool IsLineBreakOrEndOfParagraph(int32_t pos) const;
+    bool DidExceedMaxLines() const override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     // SpanString
     void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);

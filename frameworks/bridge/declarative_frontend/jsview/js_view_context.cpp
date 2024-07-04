@@ -95,7 +95,7 @@ std::unordered_map<int32_t, std::string> BIND_SHEET_ERROR_MAP = {
     { ERROR_CODE_BIND_SHEET_CONTENT_ALREADY_EXIST, "The bindSheetContent already exists." },
     { ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND, "The bindSheetContent cannot be found." },
     { ERROR_CODE_TARGET_ID_NOT_EXIST, "The targetId does not exist." },
-    { ERROR_CODE_TARGET_NOT_ON_MAIN_TREE, "The node of targetId is not in the main tree." },
+    { ERROR_CODE_TARGET_NOT_ON_MAIN_TREE, "The node of targetId is not in the component tree." },
     { ERROR_CODE_TARGET_NOT_PAGE_CHILD,
         "The node of targetId is not a child of the page node or NavDestination node." },
     { ERROR_CODE_INTERNAL_ERROR, "Internal error." },

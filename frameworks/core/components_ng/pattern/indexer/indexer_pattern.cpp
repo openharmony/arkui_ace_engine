@@ -14,6 +14,9 @@
  */
 
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
 #include "base/geometry/dimension.h"
@@ -522,7 +525,7 @@ void IndexerPattern::OnTouchUp(const TouchEventInfo& info)
     }
     ResetStatus();
     ApplyIndexChanged(true, true, true);
-    OnSelect(true);
+    OnSelect();
 }
 
 void IndexerPattern::MoveIndexByOffset(const Offset& offset)
@@ -591,6 +594,7 @@ bool IndexerPattern::KeyIndexByStep(int32_t step)
     childPressIndex_ = -1;
     childHoverIndex_ = -1;
     ApplyIndexChanged(true, refreshBubble);
+    OnSelect();
     return nextSected >= 0;
 }
 
@@ -612,6 +616,7 @@ bool IndexerPattern::MoveIndexByStep(int32_t step)
     selected_ = nextSected;
     ResetStatus();
     ApplyIndexChanged(true, true);
+    OnSelect();
     return nextSected >= 0;
 }
 
@@ -626,6 +631,7 @@ bool IndexerPattern::MoveIndexBySearch(const std::string& searchStr)
     childHoverIndex_ = -1;
     childPressIndex_ = -1;
     ApplyIndexChanged(true, true);
+    OnSelect();
     return nextSelectIndex >= 0;
 }
 
@@ -669,7 +675,7 @@ void IndexerPattern::ResetStatus()
     popupClickedIndex_ = -1;
 }
 
-void IndexerPattern::OnSelect(bool changed)
+void IndexerPattern::OnSelect()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1570,6 +1576,9 @@ void IndexerPattern::OnListItemClick(int32_t index)
     auto onPopupSelected = indexerEventHub->GetOnPopupSelected();
     if (onPopupSelected) {
         onPopupSelected(index);
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onPopupSelected");
+#endif
     }
     ChangeListItemsSelectedStyle(index);
 }
@@ -1934,7 +1943,7 @@ void IndexerPattern::SetAccessibilityAction()
                 indexerPattern->selected_ = index;
                 indexerPattern->ResetStatus();
                 indexerPattern->ApplyIndexChanged(true, true, true);
-                indexerPattern->OnSelect(true);
+                indexerPattern->OnSelect();
             });
 
         accessibilityProperty->SetActionClearSelection(
@@ -1957,7 +1966,7 @@ void IndexerPattern::SetAccessibilityAction()
                 indexerPattern->selected_ = 0;
                 indexerPattern->ResetStatus();
                 indexerPattern->ApplyIndexChanged(true, false);
-                indexerPattern->OnSelect(false);
+                indexerPattern->OnSelect();
             });
     }
 }
