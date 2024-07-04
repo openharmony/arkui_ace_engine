@@ -88,25 +88,25 @@ class ComponentSnapshot {
         this.instanceId_ = instanceId;
         this.ohos_componentSnapshot = globalThis.requireNapi('arkui.componentSnapshot');
     }
-    get(id, callback) {
+    get(id, callback, options) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        if (typeof callback === 'undefined') {
-            let promise = this.ohos_componentSnapshot.get(id);
+        if (typeof callback !== 'function') {
+            let promise = this.ohos_componentSnapshot.get(id, callback);
             __JSScopeUtil__.restoreInstanceId();
             return promise;
         } else {
-            this.ohos_componentSnapshot.get(id, callback);
+            this.ohos_componentSnapshot.get(id, callback, options);
             __JSScopeUtil__.restoreInstanceId();
         }
     }
-    createFromBuilder(builder, callback) {
+    createFromBuilder(builder, callback, delay, checkImageStatus, options) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        if (typeof callback === 'undefined') {
-            let promise = this.ohos_componentSnapshot.createFromBuilder(builder);
+        if (typeof callback !== 'function') {
+            let promise = this.ohos_componentSnapshot.createFromBuilder(builder, callback, delay, checkImageStatus);
             __JSScopeUtil__.restoreInstanceId();
             return promise;
         } else {
-            this.ohos_componentSnapshot.createFromBuilder(builder, callback);
+            this.ohos_componentSnapshot.createFromBuilder(builder, callback, delay, checkImageStatus, options);
             __JSScopeUtil__.restoreInstanceId();
         }
     }
