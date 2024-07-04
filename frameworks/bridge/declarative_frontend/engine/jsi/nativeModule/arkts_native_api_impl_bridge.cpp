@@ -143,6 +143,19 @@ void RegisterRenderNodeBorderAndMaskAttributes(Local<panda::ObjectRef> renderNod
     renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPath"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetCommandPathMask));
 }
+void RegisterRenderNodeShapeClipAttributes(Local<panda::ObjectRef> renderNode, EcmaVM* vm)
+{
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRectClip"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetRectClip));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCircleClip"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetCircleClip));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRoundRectClip"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetRoundRectClip));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOvalClip"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetOvalClip));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPathClip"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetCommandPathClip));
+}
 } // namespace
 
 ArkUINativeModuleValue ArkUINativeModule::PreviewMockComponent(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -3353,6 +3366,7 @@ void ArkUINativeModule::RegisterRenderNodeAttributes(Local<panda::ObjectRef> obj
     renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMarkNodeGroup"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetMarkNodeGroup));
     RegisterRenderNodeBorderAndMaskAttributes(renderNode, vm);
+    RegisterRenderNodeShapeClipAttributes(renderNode, vm);
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "renderNode"), renderNode);
 }
 

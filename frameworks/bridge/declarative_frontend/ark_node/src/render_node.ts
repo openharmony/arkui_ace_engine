@@ -337,15 +337,12 @@ class ColorMetrics {
   }
 }
 
-class ShapeMask {
+class BaseShape {
   public rect: Rect | null = null;
   public roundRect: RoundRect | null = null;
   public circle: Circle | null = null;
   public oval: Rect | null = null;
   public path: CommandPath | null = null;
-  public fillColor: number = 0XFF000000;
-  public strokeColor: number = 0XFF000000;
-  public strokeWidth: number = 0;
   setRectShape(rect: Rect) {
     this.rect = rect;
     this.roundRect = null;
@@ -383,6 +380,14 @@ class ShapeMask {
   }
 }
 
+class ShapeClip extends BaseShape { }
+
+class ShapeMask extends BaseShape {
+  public fillColor: number = 0XFF000000;
+  public strokeColor: number = 0XFF000000;
+  public strokeWidth: number = 0;
+}
+
 class RenderNode {
   private childrenList: Array<RenderNode>;
   private nodePtr: NodePtr;
@@ -408,6 +413,7 @@ class RenderNode {
   private borderColorValue: EdgeColors;
   private borderRadiusValue: BorderRadiuses;
   private shapeMaskValue: ShapeMask;
+  private shapeClipValue: ShapeClip;
   private _nativeRef: NativeStrongRef;
   private _frameNode: WeakRef<FrameNode>;
   private lengthMetricsUnitValue: LengthMetricsUnit;
@@ -846,9 +852,9 @@ class RenderNode {
         this.nodePtr, circle.centerX, circle.centerY, circle.radius,
         this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
     } else if (this.shapeMaskValue.roundRect !== null) {
-      const reoundRect = this.shapeMask.roundRect;
-      const corners = reoundRect.corners;
-      const rect = reoundRect.rect;
+      const roundRect = this.shapeMask.roundRect;
+      const corners = roundRect.corners;
+      const rect = roundRect.rect;
       getUINativeModule().renderNode.setRoundRectMask(
         this.nodePtr,
         corners.topLeft.x,
@@ -879,6 +885,53 @@ class RenderNode {
   }
   get shapeMask(): ShapeMask {
     return this.shapeMaskValue;
+  }
+  set shapeClip(shapeClip: ShapeClip) {
+    if (shapeClip === undefined || shapeClip === null) {
+      this.shapeClipValue = new ShapeClip();
+    } else {
+      this.shapeClipValue = shapeClip;
+    }
+    if (this.shapeClipValue.rect !== null) {
+      const rectClip = this.shapeClipValue.rect;
+      getUINativeModule().renderNode.setRectClip(
+        this.nodePtr, rectClip.left, rectClip.top, rectClip.right, rectClip.bottom);
+    } else if (this.shapeClipValue.circle !== null) {
+      const circle = this.shapeClipValue.circle;
+      getUINativeModule().renderNode.setCircleClip(
+        this.nodePtr, circle.centerX, circle.centerY, circle.radius);
+    } else if (this.shapeClipValue.roundRect !== null) {
+      const roundRect = this.shapeClipValue.roundRect;
+      const corners = roundRect.corners;
+      const rect = roundRect.rect;
+      getUINativeModule().renderNode.setRoundRectClip(
+        this.nodePtr,
+        corners.topLeft.x,
+        corners.topLeft.y,
+        corners.topRight.x,
+        corners.topRight.y,
+        corners.bottomLeft.x,
+        corners.bottomLeft.y,
+        corners.bottomRight.x,
+        corners.bottomRight.y,
+        rect.left,
+        rect.top,
+        rect.right,
+        rect.bottom);
+    } else if (this.shapeClipValue.oval !== null) {
+      const oval = this.shapeClipValue.oval;
+      getUINativeModule().renderNode.setOvalClip(
+        this.nodePtr, oval.left, oval.top, oval.right, oval.bottom,
+      );
+    } else if (this.shapeClipValue.path !== null) {
+      const path = this.shapeClipValue.path;
+      getUINativeModule().renderNode.setPathClip(
+        this.nodePtr, path.commands);
+    }
+  }
+  get shapeClip(): ShapeClip {
+    this.shapeClipValue = this.shapeClipValue ? this.shapeClipValue : new ShapeClip();
+    return this.shapeMask;
   }
 }
 
