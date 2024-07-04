@@ -61,12 +61,14 @@ void UiSessionManager::ReportRouterChangeEvent(const std::string& data)
     }
 }
 
-void UiSessionManager::ReportComponentChangeEvent(const std::string& data)
+void UiSessionManager::ReportComponentChangeEvent(const std::string& key, const std::string& value)
 {
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
-        if (reportService != nullptr) {
-            reportService->ReportComponentChangeEvent(data);
+        if (reportService != nullptr && GetComponentChangeEventRegistered()) {
+            auto data = InspectorJsonUtil::Create();
+            data->Put(key.data(), value.data());
+            reportService->ReportComponentChangeEvent(data->ToString());
         } else {
             LOGW("report component event failed,process id:%{public}d", pair.first);
         }

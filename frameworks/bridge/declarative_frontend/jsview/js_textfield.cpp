@@ -19,6 +19,9 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#if !defined(PREVIEW)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
@@ -928,6 +931,9 @@ void JSTextField::CreateJsTextFieldCommonEvent(const JSCallbackInfo &info)
         JSRef<JSVal> dataObject = JSRef<JSVal>::Cast(object);
         JSRef<JSVal> param[2] = {keyEvent, dataObject};
         func->Execute(param);
+#if !defined(PREVIEW)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onSubmit");
+#endif
     };
     TextFieldModel::GetInstance()->SetOnSubmit(std::move(callback));
 }
@@ -1033,6 +1039,9 @@ void JSTextField::SetOnPaste(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onPaste");
         func->Execute(val, info);
+#if !defined(PREVIEW)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onPaste");
+#endif
     };
     TextFieldModel::GetInstance()->SetOnPasteWithEvent(std::move(onPaste));
 }
