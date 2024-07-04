@@ -4810,10 +4810,6 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
         preTargetIndex_.reset();
     }
 
-    if (currentIndex_ == nextIndex) {
-        return;
-    }
-
     if (isFinishAnimation_) {
         currentDelta_ = 0.0f;
         itemPosition_.clear();
@@ -4825,7 +4821,7 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
             pipeline->FlushUITasks();
         }
         isFinishAnimation_ = false;
-    } else {
+    } else if (currentIndex_ != nextIndex) {
         UpdateCurrentIndex(nextIndex);
         if (currentFocusIndex_ < currentIndex_ || currentFocusIndex_ >= currentIndex_ + GetDisplayCount()) {
             currentFocusIndex_ = currentIndex_;
