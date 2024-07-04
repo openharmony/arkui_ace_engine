@@ -206,6 +206,12 @@ RefPtr<FrameNode> TextFieldManagerNG::FindNavNode(const RefPtr<FrameNode>& textF
     auto parent = textField->GetAncestorNodeOfFrame();
     RefPtr<FrameNode> ret = nullptr;
     while (parent) {
+        // when the sheet showed in navdestination, sheet replaced navdestination to do avoid keyboard.
+        if (parent->GetHostTag() == V2::SHEET_WRAPPER_TAG) {
+            auto sheetNode = parent->GetChildAtIndex(0);
+            CHECK_NULL_RETURN(sheetNode, nullptr);
+            return AceType::DynamicCast<FrameNode>(sheetNode);
+        }
         if (parent->GetHostTag() == V2::NAVDESTINATION_VIEW_ETS_TAG ||
             parent->GetHostTag() == V2::NAVBAR_ETS_TAG) {
                 ret = parent;
