@@ -25,7 +25,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
-#include "core/components_ng/pattern/custom_paint/canvas_model_ng.h"
+#include "core/components_ng/pattern/canvas/canvas_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
