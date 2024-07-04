@@ -98,6 +98,17 @@ const std::map<std::pair<HandleType, SelectorAdjustPolicy>, MoveDirection> SELEC
     {{ HandleType::SECOND, SelectorAdjustPolicy::INCLUDE }, MoveDirection::FORWARD },
     {{ HandleType::SECOND, SelectorAdjustPolicy::EXCLUDE }, MoveDirection::BACKWARD }
 };
+struct CaretOffsetInfo {
+    // caret front offset info
+    OffsetF caretOffsetUp;
+    // caret end offset info
+    OffsetF caretOffsetDown;
+    // caret position offset info
+    OffsetF caretOffsetLine;
+    float caretHeightUp = 0.0f;
+    float caretHeightDown = 0.0f;
+    float caretHeightLine = 0.0f;
+};
 
 class RichEditorPattern
     : public TextPattern, public ScrollablePattern, public TextInputClient, public Magnifier, public SpanWatcher {
@@ -378,8 +389,11 @@ public:
     bool CursorMoveToParagraphEnd();
     bool CursorMoveHome();
     bool CursorMoveEnd();
-    float CalcLineHeightByPosition(int32_t position);
-    int32_t CalcMoveUpPos(OffsetF& caretOffsetUp, OffsetF& caretOffsetDown);
+    void CalcLineSidesIndexByPosition(int32_t& startIndex, int32_t& endIndex);
+    RectF CalcLineInfoByPosition();
+    CaretOffsetInfo GetCaretOffsetInfoByPosition();
+    int32_t CalcMoveUpPos(float& leadingMarginOffset);
+    int32_t CalcMoveDownPos(float& leadingMarginOffset);
     int32_t CalcLineBeginPosition();
     float GetTextThemeFontSize();
     int32_t CalcLineEndPosition();
