@@ -540,14 +540,34 @@ HWTEST_F(JsonUtilTest, JsonUtilTest020, TestSize.Level1)
      * @tc.steps: step1. construct the nullptr key.
      */
     const char* key = nullptr;
-    double value = 8;
-    JsonValue jsonValue;
+    double value = 8.0;
+    std::unique_ptr<JsonValue> jsonValue = JsonUtil::Create(false);
+    
     /**
      * @tc.steps: step2. get  results
      * @tc.expected: step2.  the results are correct.
      */
-    bool ret = jsonValue.Replace(key, value);
+    bool ret = jsonValue->Replace(key, value);
     EXPECT_FALSE(ret);
+
+    /**
+     * @tc.steps: step3. construct key(not exist) and value
+     * @tc.expected: step3. true
+     */
+    key = "aaa";
+    bool ret3 = jsonValue->Replace(key, value);
+    EXPECT_FALSE(ret3);
+
+    /**
+     * @tc.steps: step4. construct key(exist) and value
+     * @tc.expected: step3. true
+     */
+    double valueTmp = 8.0;
+    key = "aaa";
+    bool putRet = jsonValue->Put(key, valueTmp);
+    EXPECT_TRUE(putRet);
+    bool ret4 = jsonValue->Replace(key, value);
+    EXPECT_TRUE(ret4);
 }
 
 /**
@@ -562,13 +582,29 @@ HWTEST_F(JsonUtilTest, JsonUtilTest021, TestSize.Level1)
      */
     const char* key = nullptr;
     bool value = true;
-    JsonValue jsonValue;
+    std::unique_ptr<JsonValue> jsonValue = JsonUtil::Create(false);
     /**
      * @tc.steps: step2. get  results
      * @tc.expected: step2.  the results are correct.
      */
-    bool ret = jsonValue.Replace(key, value);
+    bool ret = jsonValue->Replace(key, value);
     EXPECT_FALSE(ret);
+
+    /**
+     * @tc.steps: step3. construct key(not exist) and value
+     * @tc.expected: step3. true
+     */
+    key = "aaa";
+    bool ret3 = jsonValue->Replace(key, value);
+    EXPECT_FALSE(ret3);
+
+     /**
+     * @tc.steps: step4. construct key(exist) and value
+     * @tc.expected: step3. true
+     */
+    jsonValue->Put(key, false);
+    bool ret4 = jsonValue->Replace(key, value);
+    EXPECT_TRUE(ret4);
 }
 
 /**
@@ -583,12 +619,12 @@ HWTEST_F(JsonUtilTest, JsonUtilTest022, TestSize.Level1)
      */
     const char* key = nullptr;
     const char* value = nullptr;
-    JsonValue jsonValue;
+    std::unique_ptr<JsonValue> jsonValue = JsonUtil::Create(false);
     /**
      * @tc.steps: step2. get  results
      * @tc.expected: step2.  the results are correct.
      */
-    bool ret = jsonValue.Replace(key, value);
+    bool ret = jsonValue->Replace(key, value);
     EXPECT_FALSE(ret);
 
     /**
@@ -598,11 +634,23 @@ HWTEST_F(JsonUtilTest, JsonUtilTest022, TestSize.Level1)
     const char* value2 = &c;
     const char* key2 = nullptr;
     /**
-     * @tc.steps: step2. get  results
-     * @tc.expected: step2.  the results are correct.
+     * @tc.steps: step4. get  results
+     * @tc.expected: step4.  the results are correct.
      */
-    bool ret2 = jsonValue.Replace(key2, value2);
+    bool ret2 = jsonValue->Replace(key2, value2);
     EXPECT_FALSE(ret2);
+
+     /**
+     * @tc.steps: step5. repalce key(not exist) and value
+     * @tc.expected: step5. repalce fail
+     */
+    const char* key3 = "aaa";
+    bool ret3 = jsonValue->Replace(key3, value2);
+    EXPECT_FALSE(ret3);
+    bool putRet = jsonValue->Put(key3, value2);
+    EXPECT_TRUE(putRet);
+    bool ret4 = jsonValue->Replace(key3, value2);
+    EXPECT_TRUE(ret4);
 }
 
 /**
@@ -617,13 +665,27 @@ HWTEST_F(JsonUtilTest, JsonUtilTest023, TestSize.Level1)
      */
     const char* key = nullptr;
     int32_t value = 5;
-    JsonValue jsonValue;
+    std::unique_ptr<JsonValue> jsonValue = JsonUtil::Create(false);
     /**
      * @tc.steps: step2. get  results
      * @tc.expected: step2.  the results are correct.
      */
-    bool ret = jsonValue.Replace(key, value);
+    bool ret = jsonValue->Replace(key, value);
     EXPECT_FALSE(ret);
+
+    /**
+     * @tc.steps: step3. repalce key(not exist) and value
+     * @tc.expected: step3. repalce fail
+     */
+    const char* key3 = "aaa";
+    bool ret3 = jsonValue->Replace(key3, value);
+    EXPECT_FALSE(ret3);
+    bool putRet = jsonValue->Put(key3, value);
+    EXPECT_TRUE(putRet);
+    std::string objStr = jsonValue->ToString();
+    EXPECT_TRUE(objStr.find("\"aaa\":5") != std::string::npos);
+    bool ret4 = jsonValue->Replace(key3, value);
+    EXPECT_TRUE(ret4);
 }
 
 /**
@@ -638,13 +700,32 @@ HWTEST_F(JsonUtilTest, JsonUtilTest024, TestSize.Level1)
      */
     const char* key = nullptr;
     const std::unique_ptr<JsonValue>& value = nullptr;
-    JsonValue jsonValue;
+    std::unique_ptr<JsonValue> jsonValue = JsonUtil::Create(false);
     /**
      * @tc.steps: step2. get  results
      * @tc.expected: step2.  the results are correct.
      */
-    bool ret = jsonValue.Replace(key, value);
+    bool ret = jsonValue->Replace(key, value);
     EXPECT_FALSE(ret);
+    std::unique_ptr<JsonValue> valueTmp = JsonUtil::Create(false);
+    bool ret2 = jsonValue->Replace(key, valueTmp);
+    EXPECT_FALSE(ret2);
+
+    /**
+     * @tc.steps: step3. construct key(not exist) and value
+     * @tc.expected: step3. true
+     */
+    key = "aaa";
+    bool ret3 = jsonValue->Replace(key, valueTmp);
+    EXPECT_FALSE(ret3);
+
+     /**
+     * @tc.steps: step4. construct key(exist) and value
+     * @tc.expected: step3. true
+     */
+    jsonValue->Put(key, valueTmp);
+    bool ret4 = jsonValue->Replace(key, valueTmp);
+    EXPECT_TRUE(ret4);
 }
 
 /**
@@ -669,7 +750,7 @@ HWTEST_F(JsonUtilTest, JsonUtilTest025, TestSize.Level1)
 
 /**
  * @tc.name: JsonUtilTest026
- * @tc.desc: Check json util int64_t GetInt64() for nullptr object_
+ * @tc.desc: Check json util int64_t GetInt64()
  * @tc.type: FUNC
  */
 HWTEST_F(JsonUtilTest, JsonUtilTest026, TestSize.Level1)
@@ -677,13 +758,40 @@ HWTEST_F(JsonUtilTest, JsonUtilTest026, TestSize.Level1)
     /**
      * @tc.steps: step1. construct the nullptr object_.
      */
-    JsonValue jsonValue(nullptr);
+    std::unique_ptr<JsonValue> jsonValue = JsonUtil::Create(false);
     /**
      * @tc.steps: step2. get  results
      * @tc.expected: step2.  the results are correct.
      */
-    int64_t ret = jsonValue.GetInt64();
+    int64_t ret = jsonValue->GetInt64();
     ASSERT_EQ(ret, 0);
+
+     /**
+     * @tc.steps: step3. get key(not exist)
+     * @tc.expected: step3. reture defalut value 0
+     */
+    const std::string key = "key-aaa";
+    int64_t ret3 = jsonValue->GetInt64(key, 0);
+    ASSERT_EQ(ret3, 0);
+
+    /**
+     * @tc.steps: step4. get key(exist) but value not a number
+     * @tc.expected: step4. reture defalut value 0
+     */
+    const char* keyPut = "key-aaa";
+    const char* value = "value-bbb";
+    jsonValue->Put(keyPut, value);
+    int64_t ret4 = jsonValue->GetInt64(key, 0);
+    ASSERT_EQ(ret4, 0);
+    
+     /**
+     * @tc.steps: step5. get key(exist) and value is a number
+     * @tc.expected: step5. reture value
+     */
+    keyPut = "key-number";
+    jsonValue->Put(keyPut, 100);
+    int64_t ret5 = jsonValue->GetInt64(keyPut, 0);
+    ASSERT_EQ(ret5, 100);
 }
 
 /**
@@ -1087,5 +1195,49 @@ HWTEST_F(JsonUtilTest, JsonUtilTest039, TestSize.Level1)
     bool ret3 = jsonValue.PutRef(std::move(value2));
     EXPECT_FALSE(ret2);
     EXPECT_FALSE(ret3);
+}
+
+/**
+ * @tc.name: JsonUtilTest040
+ * @tc.desc: Check json util int64_t GetUInt/GetInt/GetString
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsonUtilTest, JsonUtilTest040, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsonValue
+     */
+    std::unique_ptr<JsonValue> jsonValue = JsonUtil::Create(false);
+
+     /**
+     * @tc.steps: step2. get key(not exist)
+     * @tc.expected: step2. reture defalut value 0
+     */
+    const std::string key = "key-aaa";
+    int64_t ret3 = jsonValue->GetUInt(key, 0);
+    ASSERT_EQ(ret3, 0);
+
+    /**
+     * @tc.steps: step3. get key(exist) but value not a number
+     * @tc.expected: step3. reture defalut value 0
+     */
+    const char* keyPut = "key-aaa";
+    const char* value = "value-bbb";
+    jsonValue->Put(keyPut, value);
+    int64_t ret4 = jsonValue->GetUInt(key, 0);
+    int64_t ret42 = jsonValue->GetInt(key, 0);
+    ASSERT_EQ(ret4, 0);
+    ASSERT_EQ(ret42, 0);
+    
+     /**
+     * @tc.steps: step5. get key(exist) and value is a number
+     * @tc.expected: step5. reture value
+     */
+    keyPut = "key-number";
+    jsonValue->Put(keyPut, 100);
+    int64_t ret5 = jsonValue->GetUInt(keyPut, 0);
+    ASSERT_EQ(ret5, 100);
+    std::string ret52 = jsonValue->GetString(keyPut, "default");
+    ASSERT_EQ(ret52, "default");
 }
 } // namespace OHOS::Ace

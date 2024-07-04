@@ -1645,5 +1645,123 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg087, TestSize.Level1)
     EXPECT_NE(context_->activeNode_, frameNode_);
     EXPECT_NE(context_->focusNode_, frameNode_);
 }
+
+/**
+ * @tc.name: UITaskSchedulerTestNg007
+ * @tc.desc: Test AddLayoutNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg007, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create taskScheduler add layoutNode.
+     */
+    UITaskScheduler taskScheduler;
+    auto layoutNode = AceType::MakeRefPtr<FrameNode>("test", -1, AceType::MakeRefPtr<Pattern>(), false);
+
+    /**
+     * @tc.steps2: Call AddLayoutNode.
+     * @tc.expected: taskScheduler.layoutNodes_.size() = 1
+     */
+    taskScheduler.AddLayoutNode(layoutNode);
+    EXPECT_EQ(taskScheduler.layoutNodes_.size(), 1);
+}
+
+/**
+ * @tc.name: UITaskSchedulerTestNg008
+ * @tc.desc: Test SetLayoutNodeRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg008, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create taskScheduler add layoutNode.
+     */
+    UITaskScheduler taskScheduler;
+    auto layoutNode1 = AceType::MakeRefPtr<FrameNode>("test1", -1, AceType::MakeRefPtr<Pattern>(), false);
+    auto layoutNode2 = AceType::MakeRefPtr<FrameNode>("test2", -1, AceType::MakeRefPtr<Pattern>(), false);
+    auto layoutNode3 = AceType::MakeRefPtr<FrameNode>("test3", -1, AceType::MakeRefPtr<Pattern>(), false);
+    auto layoutNode4 = AceType::MakeRefPtr<FrameNode>("test4", -1, AceType::MakeRefPtr<Pattern>(), false);
+    layoutNode3->SetIsFind(true);
+    layoutNode2->SetOverlayNode(layoutNode4);
+    taskScheduler.AddLayoutNode(layoutNode1);
+    taskScheduler.AddLayoutNode(layoutNode2);
+    taskScheduler.AddLayoutNode(layoutNode3);
+
+    /**
+     * @tc.steps2: Call SetLayoutNodeRect.
+     */
+    taskScheduler.SetLayoutNodeRect();
+}
+
+/**
+ * @tc.name: UITaskSchedulerTestNg009
+ * @tc.desc: Test FlushPersistAfterLayoutTask/FlushAfterRenderTask/FlushAfterLayoutCallbackInImplicitAnimationTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg009, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create taskScheduler add layoutNode.
+     */
+    UITaskScheduler taskScheduler;
+    taskScheduler.AddPersistAfterLayoutTask([]() {});
+    taskScheduler.AddPersistAfterLayoutTask(nullptr);
+    taskScheduler.AddAfterRenderTask(nullptr);
+    taskScheduler.AddAfterRenderTask([]() {});
+
+    /**
+     * @tc.steps2: Call FlushPersistAfterLayoutTask/FlushAfterRenderTask/FlushAfterLayoutCallbackInImplicitAnimationTask
+     */
+    taskScheduler.FlushPersistAfterLayoutTask();
+    taskScheduler.FlushAfterRenderTask();
+    taskScheduler.FlushAfterLayoutCallbackInImplicitAnimationTask();
+    
+    /**
+     * @tc.steps3: Call FlushAfterLayoutCallbackInImplicitAnimationTask/FlushTask
+     */
+    taskScheduler.FlushTask(true);
+    taskScheduler.FlushTask(false);
+    taskScheduler.AddAfterLayoutTask([]() {}, true);
+    taskScheduler.AddAfterLayoutTask(nullptr, true);
+    taskScheduler.FlushAfterLayoutCallbackInImplicitAnimationTask();
+    taskScheduler.FlushTask(false);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg095
+ * @tc.desc: Test the function AddDirtyLayoutNode/AddDirtyRenderNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg095, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters,destroyed_ is false/true
+     */
+    auto frameNode1 = FrameNode::GetOrCreateFrameNode("test1", 1, nullptr);
+    auto frameNode2 = FrameNode::GetOrCreateFrameNode("test2", 2, nullptr);
+    context_->SetPredictNode(frameNode2);
+    context_->PipelineContext::AddDirtyLayoutNode(frameNode1);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg096
+ * @tc.desc: Test the function FlushFocusScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg096, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters,isNeedTriggerScroll_ is false
+     */
+    RefPtr<FocusManager> focusManager = context_->GetOrCreateFocusManager();
+    context_->PipelineContext::FlushFocusScroll();
+
+    /**
+     * @tc.steps2: initialize parameters,isNeedTriggerScroll_ is true
+     */
+    focusManager->SetNeedTriggerScroll(true);
+    context_->PipelineContext::FlushFocusScroll();
+}
 } // namespace NG
 } // namespace OHOS::Ace
