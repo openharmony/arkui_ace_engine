@@ -251,7 +251,7 @@ void ParseAnimatorOption(const RefPtr<Animator>& animator, ArkUIAnimatorOption* 
 {
     animator->SetDuration(option->duration);
     animator->SetIteration(option->iterations);
-    animator->SetAnimationDirection(static_cast<AnimationDirection>(option->direction));
+    animator->SetAnimationDirection(DIRECTION_LIST[option->direction > DIRECTION_LIST.size() ? 0 : option->direction]);
     animator->SetStartDelay(option->delay);
     animator->SetFillMode(static_cast<FillMode>(option->fill));
 
