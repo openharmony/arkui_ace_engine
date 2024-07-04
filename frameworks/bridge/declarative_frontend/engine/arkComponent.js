@@ -7377,6 +7377,39 @@ class RichEditorEnableDataDetectorModifier extends ModifierWithKey {
   }
 }
 RichEditorEnableDataDetectorModifier.identity = Symbol('richEditorEnableDataDetector');
+
+class RichEditorDataDetectorConfigModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetDataDetectorConfig(node);
+    } else {
+      getUINativeModule().richEditor.setDataDetectorConfig(node, this.value.types, this.value.onDetectResultUpdate);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.types, this.value.types) ||
+    !isBaseOrResourceEqual(this.stageValue.onDetectResultUpdate, this.value.onDetectResultUpdate);
+  }
+}
+RichEditorDataDetectorConfigModifier.identity = Symbol('richEditorDataDetectorConfig');
+
+class RichEditorOnIMEInputCompleteModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnIMEInputComplete(node);
+    } else {
+      getUINativeModule().richEditor.setOnIMEInputComplete(node, this.value);
+    }
+  }
+}
+RichEditorOnIMEInputCompleteModifier.identity = Symbol('richEditorOnIMEInputComplete');
+
 class RichEditorCopyOptionsModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -7412,6 +7445,20 @@ class RichEditorCaretColorModifier extends ModifierWithKey {
   }
 }
 RichEditorCaretColorModifier.identity = Symbol('richEditorCaretColor');
+
+class RichEditorOnSelectionChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnSelectionChange(node);
+    } else {
+      getUINativeModule().richEditor.setOnSelectionChange(node, this.value);
+    }
+  }
+}
+RichEditorOnSelectionChangeModifier.identity = Symbol('richEditorOnSelectionChange');
 
 class RichEditorOnSubmitModifier extends ModifierWithKey {
   constructor(value) {
@@ -7458,6 +7505,20 @@ class RichEditorSelectedBackgroundColorModifier extends ModifierWithKey {
   }
 }
 RichEditorSelectedBackgroundColorModifier.identity = Symbol('richEditorSelectedBackgroundColor');
+
+class RichEditorOnSelectModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnSelect(node);
+    } else {
+      getUINativeModule().richEditor.setOnSelect(node, this.value);
+    }
+  }
+}
+RichEditorOnSelectModifier.identity = Symbol('richEditorOnSelect');
 
 class RichEditorOnReadyModifier extends ModifierWithKey {
   constructor(value) {
@@ -7570,7 +7631,11 @@ class ArkRichEditorComponent extends ArkComponent {
     return this;
   }
   dataDetectorConfig(config) {
-    throw new Error('Method not implemented.');
+    let detectorConfig = new TextDataDetectorConfig();
+    detectorConfig.types = config.types;
+    detectorConfig.onDetectResultUpdate = config.onDetectResultUpdate;
+    modifierWithKey(this._modifiersWithKeys, RichEditorDataDetectorConfigModifier.identity, RichEditorDataDetectorConfigModifier, detectorConfig);
+    return this;
   }
   copyOptions(value) {
     modifierWithKey(this._modifiersWithKeys, RichEditorCopyOptionsModifier.identity, RichEditorCopyOptionsModifier, value);
@@ -7579,6 +7644,11 @@ class ArkRichEditorComponent extends ArkComponent {
 
   caretColor(value) {
     modifierWithKey(this._modifiersWithKeys, RichEditorCaretColorModifier.identity, RichEditorCaretColorModifier, value);
+    return this;
+  }
+
+  onSelectionChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnSelectionChangeModifier.identity, RichEditorOnSelectionChangeModifier, callback);
     return this;
   }
 
@@ -7601,7 +7671,8 @@ class ArkRichEditorComponent extends ArkComponent {
     return this;
   }
   onSelect(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnSelectModifier.identity, RichEditorOnSelectModifier, callback);
+    return this;
   }
   onSubmit(callback) {
     modifierWithKey(this._modifiersWithKeys, RichEditorOnSubmitModifier.identity, RichEditorOnSubmitModifier, callback);
@@ -7612,7 +7683,8 @@ class ArkRichEditorComponent extends ArkComponent {
     return this;
   }
   onIMEInputComplete(callback) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnIMEInputCompleteModifier.identity, RichEditorOnIMEInputCompleteModifier, callback);
+    return this;
   }
   aboutToDelete(callback) {
     throw new Error('Method not implemented.');
