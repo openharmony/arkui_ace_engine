@@ -17,11 +17,6 @@ import(
 if (is_ohos_standard_system) {
   config("window_scene_config") {
     visibility = [ ":*" ]
-
-    if (defined(global_parts_info) && defined(
-            global_parts_info.atomicservicedistribution_atomicservice_basic_engine)) {
-      include_dirs = [ "//vendor/huawei/atomicservicedistribution/hag_serviceability/interface/innerkits/include" ]
-    }
   }
 }
 

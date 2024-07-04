@@ -29,7 +29,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
 #include "hag_serviceability_client.h"
-using namespace OHOS::AppExecFwk::AtomicserviceEcologicalRuleManager;
 #endif
 
 namespace OHOS::Ace::NG {
@@ -333,8 +332,9 @@ void WindowPattern::CreateASStartingWindow()
     CHECK_NULL_VOID(session_);
     const auto& sessionInfo = session_->GetSessionInfo();
     // get atomic service resources
-    AtomicserviceIconInfo atomicserviceIconInfo;
-    HagServiceablityClient::GetInstance()->GetAtomicserviceIconInfo(sessionInfo.bundleName_, atomicserviceIconInfo);
+    OHOS::AppExecFwk::AtomicserviceEcologicalRuleManager::AtomicserviceIconInfo atomicserviceIconInfo;
+    OHOS::AppExecFwk::AtomicserviceEcologicalRuleManager::HagServiceablityClient::GetInstance()->GetAtomicserviceIconInfo(
+        sessionInfo.bundleName_, atomicserviceIconInfo);
     const auto& appNameInfo = atomicserviceIconInfo.GetAppName();
     const auto& eyelashRingIcon = atomicserviceIconInfo.GetEyelashRingIcon();
     const auto& circleIcon = atomicserviceIconInfo.GetCircleIcon();
