@@ -215,20 +215,18 @@ GridModelNG GridTestNg::CreateRepeatGrid(int32_t itemNumber, float itemHeight)
     auto model = CreateGrid();
 
     RepeatVirtualScrollModelNG repeatModel;
-    std::function<void (uint32_t)> createFunc = [this, itemHeight](uint32_t idx) {
-        CreateGridItem(FILL_VALUE, itemHeight);
-    };
-    std::function<void (const std::string&, uint32_t)> updateFunc = [this, itemHeight](const std::string& value, uint32_t idx) {
-        CreateGridItem(FILL_VALUE, itemHeight);
-    };
-    std::function<std::list<std::string> (uint32_t, uint32_t)> getKeys = [](uint32_t start, uint32_t end) {
+    std::function<void(uint32_t)> createFunc = [this, itemHeight](
+                                                   uint32_t idx) { CreateGridItem(FILL_VALUE, itemHeight); };
+    std::function<void(const std::string&, uint32_t)> updateFunc =
+        [this, itemHeight](const std::string& value, uint32_t idx) { CreateGridItem(FILL_VALUE, itemHeight); };
+    std::function<std::list<std::string>(uint32_t, uint32_t)> getKeys = [](uint32_t start, uint32_t end) {
         std::list<std::string> keys;
         for (uint32_t i = start; i <= end; ++i) {
             keys.emplace_back(std::to_string(i));
         }
         return keys;
     };
-    std::function<std::list<std::string> (uint32_t, uint32_t)> getTypes = [](uint32_t start, uint32_t end) {
+    std::function<std::list<std::string>(uint32_t, uint32_t)> getTypes = [](uint32_t start, uint32_t end) {
         std::list<std::string> keys;
         for (uint32_t i = start; i <= end; ++i) {
             keys.emplace_back("0");

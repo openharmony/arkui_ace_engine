@@ -109,7 +109,7 @@ HWTEST_F(GridAttrTestNg, Property002, TestSize.Level1)
     /**
      * @tc.cases: Invalid GapValue
      * @tc.expected: Gap would be null
-    */
+     */
     GridModelNG model = CreateGrid();
     model.SetRowsGap(Dimension(-5));
     model.SetColumnsGap(Dimension(-10));
@@ -633,9 +633,9 @@ HWTEST_F(GridAttrTestNg, BigItem001, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetRowsTemplate("1fr 1fr 1fr 1fr");
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateBigItem(1, 2, 1, 2);
-        CreateBigItem(NULL_VALUE, NULL_VALUE, 1, 3);
-        CreateBigItem(1, 3, NULL_VALUE, NULL_VALUE);
+    CreateBigItem(1, 2, 1, 2);
+    CreateBigItem(NULL_VALUE, NULL_VALUE, 1, 3);
+    CreateBigItem(1, 3, NULL_VALUE, NULL_VALUE);
     CreateGridItems(7);
     CreateDone(frameNode_);
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(ITEM_WIDTH, ITEM_HEIGHT, ITEM_WIDTH * 2, ITEM_HEIGHT * 2)));
@@ -664,9 +664,9 @@ HWTEST_F(GridAttrTestNg, BigItem002, TestSize.Level1)
      */
     GridModelNG model = CreateGrid();
     model.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        CreateBigRowItem(1, 2);
-        CreateBigRowItem(0, 2);
-        CreateBigRowItem(2, 3);
+    CreateBigRowItem(1, 2);
+    CreateBigRowItem(0, 2);
+    CreateBigRowItem(2, 3);
     CreateFixedItems(7);
     CreateDone(frameNode_);
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(0.f, ITEM_HEIGHT, ITEM_WIDTH, ITEM_HEIGHT * 2)));
@@ -695,9 +695,9 @@ HWTEST_F(GridAttrTestNg, BigItem003, TestSize.Level1)
      */
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateBigColItem(2, 3);
-        CreateBigColItem(0, 2);
-        CreateBigColItem(2, 1);
+    CreateBigColItem(2, 3);
+    CreateBigColItem(0, 2);
+    CreateBigColItem(2, 1);
     CreateFixedItems(7);
     CreateDone(frameNode_);
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(ITEM_WIDTH * 2, 0.f, ITEM_WIDTH * 2, ITEM_HEIGHT)));
@@ -726,7 +726,7 @@ HWTEST_F(GridAttrTestNg, BigItem004, TestSize.Level1)
      */
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateBigColItem(2, 3);
+    CreateBigColItem(2, 3);
     CreateFixedItems(7);
     CreateDone(frameNode_);
     EXPECT_TRUE(VerifyBigItemRect(0, RectF(ITEM_WIDTH * 2, 0.f, ITEM_WIDTH * 2, ITEM_HEIGHT))); // big item
