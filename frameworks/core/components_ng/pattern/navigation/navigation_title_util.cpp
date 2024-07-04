@@ -625,8 +625,8 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateSymbolDialog(
     CHECK_NULL_RETURN(iconNode, nullptr);
     auto symbolProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(symbolProperty, nullptr);
-    return AgingAdapationDialogUtil::ShowLongPressDialog(
-        message, symbolProperty->GetSymbolSourceInfoValue(), symbolProperty->GetSymbolColorListValue({}));
+    return AgingAdapationDialogUtil::ShowLongPressDialog(message, symbolProperty->GetSymbolSourceInfoValue(),
+        symbolProperty->GetSymbolColorListValue({}), symbolProperty->GetFontWeightValue(FontWeight::NORMAL));
 }
 
 void NavigationTitleUtil::SetAccessibility(const RefPtr<FrameNode>& node, const std::string& message)
