@@ -42,7 +42,7 @@ int32_t ContainerScope::DefaultId()
 {
     if (ContainerCount() > 0) {
         std::shared_lock<std::shared_mutex> lock(mutex_);
-        return *containerSet_.end();
+        return *containerSet_.rbegin();
     }
     return INSTANCE_ID_UNDEFINED;
 }
@@ -126,6 +126,9 @@ void ContainerScope::Remove(int32_t id)
 void ContainerScope::RemoveAndCheck(int32_t id)
 {
     Remove(id);
+    if (id == currentId_) {
+        UpdateCurrent(INSTANCE_ID_UNDEFINED);
+    }
     if (RecentActiveId() == id) {
         UpdateRecentActive(INSTANCE_ID_UNDEFINED);
     }
