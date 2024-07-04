@@ -82,6 +82,34 @@ class RichEditorCaretColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
+class RichEditorOnSubmitModifier extends ModifierWithKey<SubmitCallback> {
+  constructor(value: SubmitCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('richEditorOnSubmit');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnSubmit(node);
+    } else {
+      getUINativeModule().richEditor.setOnSubmit(node, this.value);
+    }
+  }
+}
+
+class RichEditorAboutToIMEInputModifier extends ModifierWithKey<(value: RichEditorInsertValue) => boolean> {
+  constructor(value: (value: RichEditorInsertValue) => boolean) {
+    super(value);
+  }
+  static identity = Symbol('richEditorAboutToIMEInput');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetAboutToIMEInput(node);
+    } else {
+      getUINativeModule().richEditor.setAboutToIMEInput(node, this.value);
+    }
+  }
+}
+
 class RichEditorOnReadyModifier extends ModifierWithKey<() => void> {
   constructor(value: () => void) {
     super(value);
@@ -223,8 +251,13 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
   onSelect(callback: (value: RichEditorSelection) => void): RichEditorAttribute {
     throw new Error('Method not implemented.');
   }
+  onSubmit(callback: SubmitCallback): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnSubmitModifier.identity, RichEditorOnSubmitModifier, callback);
+    return this;
+  }
   aboutToIMEInput(callback: (value: RichEditorInsertValue) => boolean): RichEditorAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, RichEditorAboutToIMEInputModifier.identity, RichEditorAboutToIMEInputModifier, callback);
+    return this;
   }
   onIMEInputComplete(callback: (value: RichEditorTextSpanResult) => void): RichEditorAttribute {
     throw new Error('Method not implemented.');

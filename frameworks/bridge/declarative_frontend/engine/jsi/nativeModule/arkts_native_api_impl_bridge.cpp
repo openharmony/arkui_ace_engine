@@ -1578,6 +1578,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetEnableDataDetector));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableDataDetector"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetEnableDataDetector));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSubmit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetOnSubmit));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSubmit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetOnSubmit));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAboutToIMEInput"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetAboutToIMEInput));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAboutToIMEInput"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetAboutToIMEInput));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCopyOptions"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetCopyOptions));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCopyOptions"),
