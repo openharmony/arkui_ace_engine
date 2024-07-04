@@ -57,10 +57,12 @@ private:
     void HandleTouchPullMove(const TouchEvent& touchEvent);
     float GetUpVelocity(const TouchEvent& lastMoveInfo,
         const TouchEvent& upEventInfo);
+    void RecordTouchEvent(const TouchEvent& touchEvent);
 
     ReportDataFunc reportDataFunc_ = nullptr;
     bool loadPageOn_ = false;
-    std::map<int32_t, TouchEvent> touchPoints_;
+    TouchEvent curTouchEvent_;
+    TouchEvent lastTouchEvent_;
     Offset averageDistance_;
     bool isInSilde = false;
 };

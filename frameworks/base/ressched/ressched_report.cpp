@@ -182,31 +182,37 @@ void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent)
     }
 }
 
+void ResSchedReport::RecordTouchEvent(const TouchEvent& touchEvent)
+{
+    if (curTouchEvent_.GetOffset() != touchEvent.GetOffset()) {
+        lastTouchEvent_ = curTouchEvent_;
+        curTouchEvent_ = touchEvent;
+    }
+}
+
 void ResSchedReport::HandleTouchDown(const TouchEvent& touchEvent)
 {
     std::unordered_map<std::string, std::string> payload;
     payload[NAME] = TOUCH;
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_DOWN_EVENT, payload);
-    touchPoints_[touchEvent.id] = touchEvent;
+    RecordTouchEvent(touchEvent);
 }
 
 void ResSchedReport::HandleTouchUp(const TouchEvent& touchEvent)
 {
     std::unordered_map<std::string, std::string> payload;
+    RecordTouchEvent(touchEvent);
     payload[NAME] = TOUCH;
     payload[UP_SPEED_KEY] = std::to_string(GetUpVelocity(touchPoints_[touchEvent.id], touchEvent));
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_UP_EVENT, payload);
-    touchPoints_.erase(touchEvent.id);
     isInSilde = false;
     averageDistance_.Reset();
 }
 
 void ResSchedReport::HandleTouchMove(const TouchEvent& touchEvent)
 {
-    int32_t id = touchEvent.id;
-    auto offsetCurrent = Offset(touchEvent.GetOffset().GetX(), touchEvent.GetOffset().GetY());
-    auto offsetPre = Offset(touchPoints_[id].GetOffset().GetX(), touchPoints_[id].GetOffset().GetY());
-    averageDistance_ += (offsetCurrent - offsetPre) / touchPoints_.size();
+    RecordTouchEvent(touchEvent);
+    averageDistance_ += curTouchEvent_.GetOffset() - lastTouchEvent_.GetOffset();
     if (averageDistance_.GetDistance() >= ResDefine::JUDGE_DISTANCE && !isInSilde) {
         std::unordered_map<std::string, std::string> payload;
         LoadAceApplicationContext(payload);
@@ -217,14 +223,13 @@ void ResSchedReport::HandleTouchMove(const TouchEvent& touchEvent)
 
 void ResSchedReport::HandleTouchCancel(const TouchEvent& touchEvent)
 {
-    touchPoints_.erase(touchEvent.id);
     isInSilde = false;
     averageDistance_.Reset();
 }
 
 void ResSchedReport::HandleTouchPullDown(const TouchEvent& touchEvent)
 {
-    touchPoints_[touchEvent.id] = touchEvent;
+    RecordTouchEvent(touchEvent);
 }
 
 void ResSchedReport::HandleTouchPullUp(const TouchEvent& touchEvent)
@@ -232,7 +237,6 @@ void ResSchedReport::HandleTouchPullUp(const TouchEvent& touchEvent)
     std::unordered_map<std::string, std::string> payload;
     payload[NAME] = TOUCH;
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_PULL_UP_EVENT, payload);
-    touchPoints_.erase(touchEvent.id);
     averageDistance_.Reset();
 }
 
@@ -244,14 +248,15 @@ void ResSchedReport::HandleTouchPullMove(const TouchEvent& touchEvent)
         reportDataFunc_(RES_TYPE_SLIDE, SLIDE_DETECTING, payload);
         isInSilde = true;
     }
+    RecordTouchEvent(touchEvent);
 }
 
 float ResSchedReport::GetUpVelocity(const TouchEvent& lastMoveInfo,
     const TouchEvent& upEventInfo)
 {
     float distance = sqrt(pow(lastMoveInfo.x - upEventInfo.x, SQUARE) + pow(lastMoveInfo.y - upEventInfo.y, SQUARE));
-    int64_t time = abs(lastMoveInfo.GetTimeStamp().time_since_epoch().count() -
-        upEventInfo.GetTimeStamp().time_since_epoch().count());
+    int64_t time = abs((int64_t)lastMoveInfo.GetTimeStamp().time_since_epoch().count() -
+        (int64_t)upEventInfo.GetTimeStamp().time_since_epoch().count());
     if (time < SECOND_UNIT) {
         return 0.0f;
     }
