@@ -3122,6 +3122,8 @@ let NativeEmbedStatus;
   NativeEmbedStatus['CREATE'] = 0;
   NativeEmbedStatus['UPDATE'] = 1;
   NativeEmbedStatus['DESTROY'] = 2;
+  NativeEmbedStatus['ENTER_BFCACHE'] = 3;
+  NativeEmbedStatus['LEAVE_BFCACHE'] = 4;
 })(NativeEmbedStatus || (NativeEmbedStatus = {}));
 
 let RenderMode;
