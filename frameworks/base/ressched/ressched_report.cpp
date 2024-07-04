@@ -184,10 +184,14 @@ void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent)
 
 void ResSchedReport::RecordTouchEvent(const TouchEvent& touchEvent, bool enforce)
 {
-    if (curTouchEvent_.GetOffset() != touchEvent.GetOffset()) {
+    if (enforce) {
+        lastTouchEvent_ = touchEvent;
+        curTouchEvent_ = touchEvent;
+    } else if (curTouchEvent_.GetOffset() != touchEvent.GetOffset()) {
         lastTouchEvent_ = curTouchEvent_;
         curTouchEvent_ = touchEvent;
     }
+
 }
 
 void ResSchedReport::HandleTouchDown(const TouchEvent& touchEvent)
@@ -195,7 +199,7 @@ void ResSchedReport::HandleTouchDown(const TouchEvent& touchEvent)
     std::unordered_map<std::string, std::string> payload;
     payload[NAME] = TOUCH;
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_DOWN_EVENT, payload);
-    RecordTouchEvent(touchEvent,true);
+    RecordTouchEvent(touchEvent, true);
 }
 
 void ResSchedReport::HandleTouchUp(const TouchEvent& touchEvent)
