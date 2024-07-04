@@ -983,7 +983,7 @@ bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM *vm, const Local<JSValueR
             if (!IsGetResourceByName(vm, jsValue)) {
                 return false;
             }
-            auto args = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
+            auto args = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, static_cast<int32_t>(Framework::ArkUIIndex::PARAMS)));
             if (!args->IsArray(vm)) {
                 return false;
             }
