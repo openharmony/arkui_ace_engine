@@ -3476,7 +3476,7 @@ bool TextPattern::DidExceedMaxLines() const
 TextLineMetrics TextPattern::GetLineMetrics(int32_t lineNumber)
 {
     CHECK_NULL_RETURN(pManager_, TextLineMetrics());
-    if (lineNumber < 0 || static_cast<size_t>(lineNumber) > GetLineCount()) {
+    if (lineNumber < 0 || static_cast<size_t>(lineNumber) > GetLineCount() - 1) {
         TAG_LOGI(AceLogTag::ACE_TEXT, "GetLineMetrics failed, lineNumber not between 0 and max lines:%{public}d",
             lineNumber);
         return TextLineMetrics();
