@@ -183,4 +183,14 @@ void UiSessionManager::ReportInspectorTreeValue(const std::string& data)
         }
     }
 }
+
+void UiSessionManager::OnRouterChange(const std::string& path, const std::string& event)
+{
+    if (GetRouterChangeEventRegistered()) {
+        auto value = InspectorJsonUtil::Create(true);
+        value->Put("path", path.c_str());
+        value->Put("event", event.c_str());
+        ReportRouterChangeEvent(value->ToString());
+    }
+}
 } // namespace OHOS::Ace

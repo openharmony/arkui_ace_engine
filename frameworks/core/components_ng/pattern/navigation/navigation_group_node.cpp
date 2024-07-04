@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 #include "base/log/ace_checker.h"
 #include "base/log/ace_performance_check.h"
 #include "base/memory/ace_type.h"
@@ -588,6 +591,9 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
         SetNeedSetInvisible(false);
     }
     isOnAnimation_ = true;
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+    UiSessionManager::GetInstance().OnRouterChange(navigationPathInfo_, "navigationPopPage");
+#endif
 }
 
 void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
@@ -767,6 +773,9 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                 nodeMap, endTime - startTime, navigation->GetNavigationPathInfo());
         });
     }
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+    UiSessionManager::GetInstance().OnRouterChange(navigationPathInfo_, "navigationPushPage");
+#endif
 }
 
 std::shared_ptr<AnimationUtils::Animation> NavigationGroupNode::BackButtonAnimation(

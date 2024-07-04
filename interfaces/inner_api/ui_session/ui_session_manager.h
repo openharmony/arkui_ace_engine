@@ -71,6 +71,7 @@ public:
     void SaveInspectorTreeFunction(InspectorFunction&& function);
     void SetClickEventRegistered(bool status);
     void SetSearchEventRegistered(bool status);
+    void OnRouterChange(const std::string& path, const std::string& event);
     void SetRouterChangeEventRegistered(bool status);
     void SetComponentChangeEventRegistered(bool status);
     bool GetClickEventRegistered();
