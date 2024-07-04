@@ -672,8 +672,8 @@ void NavigationPattern::CheckTopNavPathChange(
             auto hostNode = AceType::DynamicCast<NavigationGroupNode>(pattern->GetHost());
             CHECK_NULL_VOID(hostNode);
             hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_HIDE);
-            pattern->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, true, true);
             hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_WILL_DISAPPEAR);
+            pattern->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, true, true);
             hostNode->RemoveDialogDestination();
         });
         navigationStack_->ClearRecoveryList();
