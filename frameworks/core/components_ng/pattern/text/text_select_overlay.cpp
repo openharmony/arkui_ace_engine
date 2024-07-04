@@ -309,6 +309,7 @@ void TextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo
     BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
+    textPattern->CopySelectionMenuParams(overlayInfo);
     OnUpdateOnCreateMenuCallback(overlayInfo);
 }
 
