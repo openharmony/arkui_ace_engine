@@ -76,13 +76,8 @@ public:
             theme->selectedBackgroundColor_ = pattern->GetAttr<Color>("selected_background_color", Color(0xff007dff));
             theme->previewUnderlineColor_ = pattern->GetAttr<Color>("preview_underline_color", Color(0xff007dff));
             theme->previewUnderlineWidth_ = pattern->GetAttr<Dimension>("preview_underline_width", 2.0_vp);
-            RefPtr<ThemeStyle> textfieldPattern = themeConstants->GetPatternByName("textfield_pattern");
-            if (!textfieldPattern) {
-                LOGW("find pattern of textfield fail");
-                return;
-            }
-            auto textfieldShowHandle = textfieldPattern->GetAttr<std::string>("textfield_show_handle", "0");
-            theme->richeditorShowHandle_ = StringUtils::StringToInt(textfieldShowHandle);
+            auto showHandle = pattern->GetAttr<std::string>("rich_editor_show_handle", "0");
+            theme->richeditorShowHandle_ = StringUtils::StringToInt(showHandle);
             theme->textStyle_.SetTextColor(pattern->GetAttr<Color>("default_text_color", DEFAULT_TEXT_COLOR));
             theme->textStyle_.SetTextDecorationColor(pattern->GetAttr<Color>("default_text_color", DEFAULT_TEXT_COLOR));
         }
