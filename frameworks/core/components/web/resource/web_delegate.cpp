@@ -5563,10 +5563,26 @@ void WebDelegate::HandleTouchpadFlingEvent(const double& x, const double& y, con
     }
 }
 
+void WebDelegate::WebHandleTouchpadFlingEvent(const double& x, const double& y,
+    const double& vx, const double& vy, const std::vector<int32_t>& pressedCodes)
+{
+    if (nweb_) {
+        nweb_->WebSendTouchpadFlingEvent(x, y, vx, vy, pressedCodes);
+    }
+}
+
 void WebDelegate::HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY)
 {
     if (nweb_) {
         nweb_->SendMouseWheelEvent(x, y, deltaX, deltaY);
+    }
+}
+
+void WebDelegate::WebHandleAxisEvent(const double& x, const double& y,
+    const double& deltaX, const double& deltaY, const std::vector<int32_t>& pressedCodes)
+{
+    if (nweb_) {
+        nweb_->WebSendMouseWheelEvent(x, y, deltaX, deltaY, pressedCodes);
     }
 }
 

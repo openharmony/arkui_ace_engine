@@ -662,7 +662,11 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     info.SetTiltX(lastTouchEvent_.tiltX.value_or(0.0));
     info.SetTiltY(lastTouchEvent_.tiltY.value_or(0.0));
     info.SetPointerEvent(lastPointEvent_);
-    info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
+    if (inputEventType_ == InputEventType::AXIS) {
+        info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
+    } else {
+        info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
+    }
     return info;
 }
 
