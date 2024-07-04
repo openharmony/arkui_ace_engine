@@ -1281,6 +1281,10 @@ struct ArkUIDragPreViewOptions {
     ArkUI_Bool isBadgeNumber;
 };
 
+struct ArkUIDragPreview {
+    ArkUI_CharPtr inspectorId;
+};
+
 struct ArkUIDragInteractionOptions {
     ArkUI_Bool isMultiSelectionEnabled;
     ArkUI_Bool defaultAnimationBeforeLifting;
@@ -1720,6 +1724,8 @@ struct ArkUICommonModifier {
     void (*setBorderDashParams)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize);
     void (*getExpandSafeArea)(ArkUINodeHandle node, ArkUI_Uint32 (*values)[2]);
     void (*setTransition)(ArkUINodeHandle node, ArkUITransitionEffectOption* option);
+    void (*setDragPreview)(ArkUINodeHandle node, ArkUIDragPreview dragPreview);
+    void (*resetDragPreview)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {

@@ -3435,6 +3435,12 @@ void ViewAbstract::SetDragPreviewOptions(FrameNode* frameNode, const DragPreview
     frameNode->SetDragPreviewOptions(previewOption);
 }
 
+void ViewAbstract::SetDragPreview(FrameNode* frameNode, const DragDropInfo& dragDropInfo)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDragPreview(dragDropInfo);
+}
+
 void ViewAbstract::SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion)
 {
     CHECK_NULL_VOID(frameNode);

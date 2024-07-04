@@ -2400,6 +2400,23 @@ class DragPreviewOptionsModifier extends ModifierWithKey {
   }
 }
 DragPreviewOptionsModifier.identity = Symbol('dragPreviewOptions');
+class DragPreviewModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetDragPreview(node);
+    } else {
+      getUINativeModule().common.setDragPreview(node, this.value.inspetorId);
+    }
+  }
+
+  checkObjectDiff() {
+    return this.value.inspetorId !== this.stageValue.inspetorId;
+  }
+}
+DragPreviewModifier.identity = Symbol('dragPreview');
 class MouseResponseRegionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3910,6 +3927,12 @@ class ArkComponent {
     return this;
   }
   dragPreview(value) {
+    if (typeof value === 'string') {
+      let arkDragPreview = new ArkDragPreview();
+      arkDragPreview.inspetorId = value;
+      modifierWithKey(this._modifiersWithKeys, DragPreviewModifier.identity, DragPreviewModifier, arkDragPreview);
+      return this;
+    }
     throw new Error('Method not implemented.');
   }
   overlay(value, options) {
@@ -15100,6 +15123,16 @@ class ArkDragPreviewOptions {
       this.isMultiSelectionEnabled === another.isMultiSelectionEnabled &&
       this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting
     );
+  }
+}
+
+class ArkDragPreview {
+  constructor() {
+    this.inspectorId = undefined;
+  }
+
+  isEqual(another) {
+    return this.inspectorId === another.inspectorId;
   }
 }
 

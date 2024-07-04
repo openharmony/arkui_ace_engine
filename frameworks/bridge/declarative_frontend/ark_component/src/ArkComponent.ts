@@ -2552,6 +2552,24 @@ class DragPreviewOptionsModifier extends ModifierWithKey<ArkDragPreviewOptions> 
   }
 }
 
+class DragPreviewModifier extends ModifierWithKey<ArkDragPreview> {
+  constructor(value: ArkDragPreview) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('dragPreview');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetDragPreview(node);
+    } else {
+      getUINativeModule().common.setDragPreview(node, this.value.inspetorId);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return this.value.inspetorId !== this.stageValue.inspetorId;
+  }
+}
+
 class MouseResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | Rectangle> {
   constructor(value: Array<Rectangle> | Rectangle) {
     super(value);
@@ -4089,6 +4107,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   dragPreview(value: CustomBuilder | DragItemInfo | string): this {
+    if (typeof value === 'string') {
+      let arkDragPreview = new ArkDragPreview();
+      arkDragPreview.inspetorId = value;
+      modifierWithKey(this._modifiersWithKeys, DragPreviewModifier.identity, DragPreviewModifier, arkDragPreview);
+      return this;
+    }
     throw new Error('Method not implemented.');
   }
 
