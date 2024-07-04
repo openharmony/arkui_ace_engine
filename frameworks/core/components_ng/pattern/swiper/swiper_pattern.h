@@ -785,7 +785,7 @@ private:
     float GetDistanceToEdge() const;
     float MainSize() const;
     float GetMainContentSize() const;
-    void FireChangeEvent() const;
+    void FireChangeEvent(int32_t preIndex, int32_t currentIndex) const;
     void FireAnimationStartEvent(int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const;
     void FireAnimationEndEvent(int32_t currentIndex,
         const AnimationCallbackInfo& info, bool isInterrupt = false) const;
@@ -1022,8 +1022,6 @@ private:
     bool ParseTabsIsRtl();
 
     void PostIdleTask(const RefPtr<FrameNode>& frameNode);
-
-    void TabContentStateCallBack(int32_t oldIndex, int32_t nextIndex) const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
