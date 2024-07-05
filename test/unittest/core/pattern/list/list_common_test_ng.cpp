@@ -888,7 +888,7 @@ HWTEST_F(ListCommonTestNg, EventHub001, TestSize.Level1)
     /**
      * @tc.steps: step1. EXPECT_CALL DrawFrameNode, HandleOnItemDragStart will trigger it
      */
-    auto mockDragWindow = MockDragWindow::CreateDragWindow("", 0, 0, 0, 0);
+    auto mockDragWindow = MockDragWindow::CreateDragWindow("", 0, 0, 0, 0, 0);
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(mockDragWindow)), DrawFrameNode(_)).Times(2);
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(mockDragWindow)), MoveTo).Times(AnyNumber());
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(mockDragWindow)), Destroy).Times(AnyNumber());
