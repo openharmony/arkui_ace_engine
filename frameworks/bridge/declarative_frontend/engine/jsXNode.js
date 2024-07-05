@@ -517,7 +517,7 @@ class NodeAdapter {
         }
     }
     static attachNodeAdapter(adapter, node) {
-        getUINativeModule().nodeAdapter.attachNodeAdapter(adapter.nativePtr_, node.getNodePtr());
+        return getUINativeModule().nodeAdapter.attachNodeAdapter(adapter.nativePtr_, node.getNodePtr());
     }
     static detachNodeAdapter(node) {
         getUINativeModule().nodeAdapter.detachNodeAdapter(node.getNodePtr());
