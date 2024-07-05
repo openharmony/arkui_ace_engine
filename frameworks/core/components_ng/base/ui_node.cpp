@@ -1448,4 +1448,11 @@ void UINode::GetInspectorValue()
         item->GetInspectorValue();
     }
 }
+
+void UINode::NotifyWebPattern(bool isRegister)
+{
+    for (const auto& item : GetChildren()) {
+        item->NotifyWebPattern(isRegister);
+    }
+}
 } // namespace OHOS::Ace::NG

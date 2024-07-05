@@ -1745,6 +1745,20 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             TaskExecutor::TaskType::UI, "UiSessionGetInspectorTree");
     };
     UiSessionManager::GetInstance().SaveInspectorTreeFunction(callback);
+    auto webCallback = [weakContext = WeakPtr(pipeline)](bool isRegister) {
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [weakContext = WeakPtr(pipeline), isRegister]() {
+                auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+                CHECK_NULL_VOID(pipeline);
+                pipeline->NotifyAllWebPattern(isRegister);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionRegisterWebPattern");
+    };
+    UiSessionManager::GetInstance().SaveRegisterForWebFunction(webCallback);
     return errorCode;
 }
 

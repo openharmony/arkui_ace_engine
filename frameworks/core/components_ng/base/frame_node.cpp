@@ -4721,4 +4721,23 @@ void FrameNode::ProcessFrameNodeChangeFlag()
         pattern->OnFrameNodeChanged(changeFlag);
     }
 }
+
+void FrameNode::NotifyWebPattern(bool isRegister)
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(WEB_SUPPORTED)
+    if (GetTag() == V2::WEB_ETS_TAG) {
+        auto pattern = GetPattern<NG::WebPattern>();
+        CHECK_NULL_VOID(pattern);
+        if (isRegister) {
+            auto callback = [](int64_t accessibilityId, const std::string data) {
+                UiSessionManager::GetInstance().ReportWebUnfocusEvent(accessibilityId, data);
+            };
+            pattern->RegisterTextBlurCallback(callback);
+        } else {
+            pattern->UnRegisterTextBlurCallback();
+        }
+    }
+#endif
+    UINode::NotifyWebPattern(isRegister);
+}
 } // namespace OHOS::Ace::NG

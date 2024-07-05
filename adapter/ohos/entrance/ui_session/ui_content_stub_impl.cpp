@@ -47,6 +47,14 @@ int32_t UIContentServiceStubImpl::RegisterComponentChangeEventCallback(const Eve
     UiSessionManager::GetInstance().SetComponentChangeEventRegistered(true);
     return NO_ERROR;
 }
+
+int32_t UIContentServiceStubImpl::RegisterWebUnfocusEventCallback(
+    const std::function<void(int64_t accessibilityId, const std::string& data)>& eventCallback)
+{
+    UiSessionManager::GetInstance().NotifyAllWebPattern(true);
+    return NO_ERROR;
+}
+
 int32_t UIContentServiceStubImpl::UnregisterClickEventCallback()
 {
     UiSessionManager::GetInstance().SetClickEventRegistered(false);
@@ -65,6 +73,12 @@ int32_t UIContentServiceStubImpl::UnregisterRouterChangeEventCallback()
 int32_t UIContentServiceStubImpl::UnregisterComponentChangeEventCallback()
 {
     UiSessionManager::GetInstance().SetComponentChangeEventRegistered(false);
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceStubImpl::UnregisterWebUnfocusEventCallback()
+{
+    UiSessionManager::GetInstance().NotifyAllWebPattern(false);
     return NO_ERROR;
 }
 } // namespace OHOS::Ace
