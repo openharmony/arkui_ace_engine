@@ -317,9 +317,11 @@ void MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
         subTitleSize = theme->GetSubTitleFontSizeS();
         textHeightAdaptivePolicy = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
     }
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
+        titleLayoutProperty->UpdateHeightAdaptivePolicy(textHeightAdaptivePolicy);
+    }
     titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_SUBTITLE_FONT_SIZE);
     titleLayoutProperty->UpdateAdaptMaxFontSize(subTitleSize);
-    titleLayoutProperty->UpdateHeightAdaptivePolicy(textHeightAdaptivePolicy);
     titleLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
 
     subtitleNode->MarkModifyDone();
