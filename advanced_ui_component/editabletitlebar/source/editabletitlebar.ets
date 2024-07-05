@@ -261,8 +261,8 @@ export struct EditableTitleBar {
     .height(EditableTitleBar.totalHeight)
     .justifyContent(FlexAlign.Center)
     .margin({
-      // 'sys.float.titlebar_icon_background_space_horizontal' id,value: 4vp
-      start: LengthMetrics.vp(getNumberByResource(125831103) ?? 4),
+      // 'sys.float.titlebar_icon_background_space_horizontal' id,value: 8vp
+      start: LengthMetrics.vp(getNumberByResource(125831103) ?? 8),
     })
     .alignItems(HorizontalAlign.Start)
   }
@@ -410,7 +410,7 @@ struct ImageMenuItem {
     if (event.type === TouchType.Down) {
       this.isOnClick = true;
     }
-    if (event.type === TouchType.Up) {
+    if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
       if (this.fontSize >= this.minFontSize) {
         this.dialogController?.close()
       }
