@@ -345,7 +345,6 @@ void WindowScene::BufferAvailableCallbackForSnapshot()
         self->snapshotWindow_.Reset();
         self->session_->SetNeedSnapshot(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
             "[WMSMain] Remove snapshot window finished, id: %{public}d, node id: %{public}d, name: %{public}s",
             self->session_->GetPersistentId(), host->GetId(), self->session_->GetSessionInfo().bundleName_.c_str());
@@ -393,7 +392,7 @@ void WindowScene::OnActivation()
             CHECK_NULL_VOID(surfaceNode);
             self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            surfaceNode->SetBufferAvailableCallback(self->callback_);
+            surfaceNode->SetBufferAvailableCallback(self->coldStartCallback_);
         } else if (self->snapshotWindow_) {
             self->DisposeSnapShotAndBlankWindow();
         }
