@@ -140,9 +140,9 @@ void JSList::SetScrollBar(const JSCallbackInfo& info)
     ListModel::GetInstance()->SetScrollBar(displayMode);
 }
 
-void JSList::SetScrollBarColor(const std::string& color)
+void JSList::SetScrollBarColor(const JSCallbackInfo& info)
 {
-    auto scrollBarColor = JSScrollable::ParseBarColor(color);
+    auto scrollBarColor = JSScrollable::ParseBarColor(info);
     if (!scrollBarColor.empty()) {
         ListModel::GetInstance()->SetScrollBarColor(scrollBarColor);
     }
