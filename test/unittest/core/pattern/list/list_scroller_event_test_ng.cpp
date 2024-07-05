@@ -580,8 +580,8 @@ HWTEST_F(ListScrollerEventTestNg, Pattern005, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
     model.SetChainAnimation(true);
-    auto startFunc = GetDefaultSwiperBuilder(START_NODE_LEN);
-    CreateItemWithSwipe(startFunc, nullptr, V2::SwipeEdgeEffect::None);
+    auto startFunc = GetRowOrColBuilder(START_NODE_LEN, ITEM_HEIGHT);
+    CreateSwipeItems(startFunc, nullptr, V2::SwipeEdgeEffect::None, 1);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
 
