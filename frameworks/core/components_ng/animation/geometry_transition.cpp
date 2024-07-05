@@ -192,6 +192,10 @@ bool GeometryTransition::Update(const WeakPtr<FrameNode>& which, const WeakPtr<F
     } else {
         ret = false;
     }
+    auto whichNode = which.Upgrade();
+    if (ret && whichNode && whichNode != value.Upgrade()) {
+        whichNode->SetLayoutPriority(0);
+    }
     return ret;
 }
 
