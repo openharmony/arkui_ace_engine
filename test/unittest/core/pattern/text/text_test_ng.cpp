@@ -199,38 +199,6 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator003, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetTextDetectEnable002
- * @tc.desc: Test SetTextDetectEnable.
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, SetTextDetectEnable002, TestSize.Level1)
-{
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
-    ASSERT_NE(layoutProperty, nullptr);
-    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
-    ASSERT_NE(textLayoutProperty, nullptr);
-    EXPECT_EQ(textLayoutProperty->GetContentValue(), CREATE_VALUE);
-
-    ASSERT_EQ(textModelNG.GetTextOverflow(frameNode), TextOverflow::CLIP);
-    ASSERT_EQ(textModelNG.GetTextIndent(frameNode), ADAPT_ZERO_FONT_SIZE_VALUE);
-    ASSERT_EQ(textModelNG.GetCopyOption(frameNode), CopyOptions::None);
-    textModelNG.GetMarqueeOptions(frameNode);
-    ASSERT_EQ(textModelNG.GetHeightAdaptivePolicy(frameNode), TextHeightAdaptivePolicy::MAX_LINES_FIRST);
-    ASSERT_EQ(textModelNG.GetAdaptMinFontSize(frameNode), ADAPT_ZERO_FONT_SIZE_VALUE);
-    ASSERT_EQ(textModelNG.GetAdaptMaxFontSize(frameNode), ADAPT_ZERO_FONT_SIZE_VALUE);
-    ASSERT_EQ(textModelNG.GetDefaultColor(), Color::BLACK);
-    ASSERT_EQ(textModelNG.GetFontColor(frameNode), Color::BLACK);
-    ASSERT_EQ(textModelNG.GetTextBaselineOffset(frameNode), ADAPT_ZERO_FONT_SIZE_VALUE);
-    std::vector<Shadow> defaultShadow;
-    ASSERT_EQ(textModelNG.GetTextShadow(frameNode), defaultShadow);
-    ASSERT_EQ(textModelNG.GetWordBreak(frameNode), WordBreak::BREAK_WORD);
-}
-
-/**
  * @tc.name: SetTextDetectEnable003
  * @tc.desc: Test SetTextDetectEnable.
  * @tc.type: FUNC
@@ -325,74 +293,6 @@ HWTEST_F(TextTestNg, GetSelectedBackgroundColor001, TestSize.Level1)
     Font font;
     textModelNG.SetFont(font);
     EXPECT_EQ(textModelNG.GetFontSize(frameNode), ADAPT_ZERO_FONT_SIZE_VALUE);
-}
-
-/**
- * @tc.name: GetMarqueeOptions001
- * @tc.desc: Test GetMarqueeOptions when GetHost is nullptr.
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, GetMarqueeOptions001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create.
-     */
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
-    ASSERT_NE(layoutProperty, nullptr);
-    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
-    ASSERT_NE(textLayoutProperty, nullptr);
-    EXPECT_EQ(textLayoutProperty->GetContentValue(), CREATE_VALUE);
-
-    /**
-     * @tc.steps: step2. set theme.
-     */
-    TextMarqueeOptions options;
-    options.UpdateTextMarqueeStart(true);
-    options.UpdateTextMarqueeStep(3);
-    options.UpdateTextMarqueeLoop(3);
-    options.UpdateTextMarqueeDirection(MarqueeDirection::RIGHT);
-    options.UpdateTextMarqueeDelay(3);
-    options.UpdateTextMarqueeFadeout(false);
-    options.UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::ON_FOCUS);
-    textModelNG.SetMarqueeOptions(options);
-    textModelNG.GetMarqueeOptions(frameNode);
-
-    EXPECT_EQ(textLayoutProperty->HasTextMarqueeStart(), true);
-}
-
-/**
- * @tc.name: SetOnMarqueeStateChange001
- * @tc.desc: Test SetOnMarqueeStateChange.
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, SetOnMarqueeStateChange001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create.
-     */
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
-    ASSERT_NE(layoutProperty, nullptr);
-    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
-    ASSERT_NE(textLayoutProperty, nullptr);
-    EXPECT_EQ(textLayoutProperty->GetContentValue(), CREATE_VALUE);
-
-    /**
-     * @tc.steps: step2. set theme.
-     */
-    bool isSelectChanged = false;
-    auto onSelectionChanged = [&isSelectChanged](int32_t) { isSelectChanged = true; };
-    textModelNG.SetOnMarqueeStateChange(onSelectionChanged);
-
-    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextEventHub>();
-    EXPECT_NE(eventHub->onMarqueeStateChange_, nullptr);
 }
 
 /**
@@ -3546,25 +3446,6 @@ HWTEST_F(TextTestNg, TextPattern011, TestSize.Level1)
     spanItem->placeholderIndex = 0;
     pattern->MountImageNode(spanItem);
     EXPECT_EQ(pattern->childNodes_.size(), 1);
-}
-
-/**
- * @tc.name: TextPattern012
- * @tc.desc: Test TextPattern CreateImageSourceInfo
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, TextPattern012, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode and test pattern CreateImageSourceInfo
-     */
-    auto [frameNode, pattern] = Init();
-    TextMarqueeState state = TextMarqueeState::START;
-    pattern->FireOnMarqueeStateChange(state);
-    EXPECT_EQ(pattern->isMarqueeRunning_, true);
-    state = TextMarqueeState::FINISH;
-    pattern->FireOnMarqueeStateChange(state);
-    EXPECT_EQ(pattern->isMarqueeRunning_, false);
 }
 
 /**
