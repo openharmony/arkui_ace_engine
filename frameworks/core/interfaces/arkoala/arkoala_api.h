@@ -1306,7 +1306,8 @@ struct ArkUICommonModifier {
     void (*resetPositionEdges)(ArkUINodeHandle node);
     void (*setBorderStyle)(ArkUINodeHandle node, const ArkUI_Int32* styles, ArkUI_Int32 length);
     void (*resetBorderStyle)(ArkUINodeHandle node);
-    void (*setBackShadow)(ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length);
+    void (*setBackShadow)(
+        ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length, ArkUI_Int32 unit);
     void (*resetBackShadow)(ArkUINodeHandle node);
     void (*setHitTestBehavior)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetHitTestBehavior)(ArkUINodeHandle node);
