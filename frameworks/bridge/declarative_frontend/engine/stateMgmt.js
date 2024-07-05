@@ -2983,13 +2983,111 @@ class Utils {
  * limitations under the License.
  */
 class stateMgmtDFX {
+    static getObservedPropertyInfo(observedProp, isProfiler, changedTrackPropertyName) {
+        return {
+            decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(), changedTrackPropertyName: changedTrackPropertyName,
+            value: stateMgmtDFX.getRawValue(observedProp),
+            inRenderingElementId: stateMgmtDFX.inRenderingElementId.length === 0 ? -1 : stateMgmtDFX.inRenderingElementId[stateMgmtDFX.inRenderingElementId.length - 1],
+            dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() === 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, isProfiler),
+            owningView: observedProp.getOwningView(),
+            length: stateMgmtDFX.getRawValueLength(observedProp),
+            syncPeers: observedProp.dumpSyncPeers(isProfiler, changedTrackPropertyName)
+        };
+    }
+    static getType(item) {
+        try {
+            return Object.prototype.toString.call(item);
+        }
+        catch (e) {
+            stateMgmtConsole.warn(`Cannot get the type of current value, error message is: ${e.message}`);
+            return "unknown type";
+        }
+    }
+    /**
+     * Dump 10 items at most.
+     * If length > 10, the output will be the first 7 and last 3 items.
+     * eg: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+     * output: [0, 1, 2, 3, 4, 5, 6, '...', 9, 10, 11]
+     *
+     */
+    static dumpItems(arr) {
+        let dumpArr = arr.slice(0, stateMgmtDFX.DUMP_MAX_LENGTH);
+        if (arr.length > stateMgmtDFX.DUMP_MAX_LENGTH) {
+            dumpArr.splice(stateMgmtDFX.DUMP_MAX_LENGTH - stateMgmtDFX.DUMP_LAST_LENGTH, stateMgmtDFX.DUMP_LAST_LENGTH, '...', ...arr.slice(-stateMgmtDFX.DUMP_LAST_LENGTH));
+        }
+        return dumpArr.map(item => typeof item === 'object' ? this.getType(item) : item);
+    }
+    static dumpMap(map) {
+        let dumpKey = this.dumpItems(Array.from(map.keys()));
+        let dumpValue = this.dumpItems(Array.from(map.values()));
+        return dumpKey.map((item, index) => [item, dumpValue[index]]);
+    }
+    static dumpObjectProperty(value) {
+        let tempObj = {};
+        try {
+            Object.getOwnPropertyNames(value)
+                .slice(0, 50)
+                .forEach((varName) => {
+                const propertyValue = Reflect.get(value, varName);
+                tempObj[varName] = typeof propertyValue === 'object' ? this.getType(propertyValue) : propertyValue;
+            });
+        }
+        catch (e) {
+            stateMgmtConsole.warn(`can not dump Obj, error msg ${e.message}`);
+            return "unknown type";
+        }
+        return tempObj;
+    }
+    static getRawValue(observedProp) {
+        let wrappedValue = observedProp.getUnmonitored();
+        if (typeof wrappedValue !== 'object') {
+            return wrappedValue;
+        }
+        let rawObject = ObservedObject.GetRawObject(wrappedValue);
+        if (rawObject instanceof Map) {
+            return stateMgmtDFX.dumpMap(rawObject);
+        }
+        else if (rawObject instanceof Set) {
+            return stateMgmtDFX.dumpItems(Array.from(rawObject.values()));
+        }
+        else if (rawObject instanceof Array) {
+            return stateMgmtDFX.dumpItems(Array.from(rawObject));
+        }
+        else if (rawObject instanceof Date) {
+            return rawObject;
+        }
+        else {
+            return stateMgmtDFX.dumpObjectProperty(rawObject);
+        }
+    }
+    static getRawValueLength(observedProp) {
+        let wrappedValue = observedProp.getUnmonitored();
+        if (typeof wrappedValue !== 'object') {
+            return -1;
+        }
+        let rawObject = ObservedObject.GetRawObject(wrappedValue);
+        if (rawObject instanceof Map || rawObject instanceof Set) {
+            return rawObject.size;
+        }
+        else if (rawObject instanceof Array) {
+            return rawObject.length;
+        }
+        try {
+            return Object.getOwnPropertyNames(rawObject).length;
+        }
+        catch (e) {
+            return -1;
+        }
+    }
 }
 // enable profile
-stateMgmtDFX.enableProfiler_ = false;
-stateMgmtDFX.inRenderingElementId_ = new Array();
+stateMgmtDFX.enableProfiler = false;
+stateMgmtDFX.inRenderingElementId = new Array();
+stateMgmtDFX.DUMP_MAX_LENGTH = 10;
+stateMgmtDFX.DUMP_LAST_LENGTH = 3;
 function setProfilerStatus(profilerStatus) {
     stateMgmtConsole.warn(`${profilerStatus ? `start` : `stop`} stateMgmt Profiler`);
-    stateMgmtDFX.enableProfiler_ = profilerStatus;
+    stateMgmtDFX.enableProfiler = profilerStatus;
 }
 class DumpInfo {
     constructor() {
@@ -4591,57 +4689,25 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
             ? this.info().substring(0, this.info().length - '_prop_fake_state_source___'.length)
             : false;
     }
-    getRawObjectValue() {
-        let wrappedValue = this.getUnmonitored();
-        if (typeof wrappedValue !== 'object') {
-            return this.getUnmonitored();
-        }
-        let rawObject = ObservedObject.GetRawObject(wrappedValue);
-        if (rawObject instanceof Map) {
-            return MapInfo.toObject(rawObject).keyToValue;
-        }
-        else if (rawObject instanceof Set) {
-            return SetInfo.toObject(rawObject).values;
-        }
-        else if (rawObject instanceof Date) {
-            return DateInfo.toObject(rawObject).date;
-        }
-        return rawObject;
+    getOwningView() {
+        var _a, _b;
+        return { componentName: (_a = this.owningView_) === null || _a === void 0 ? void 0 : _a.constructor.name, id: (_b = this.owningView_) === null || _b === void 0 ? void 0 : _b.id__() };
     }
     dumpSyncPeers(isProfiler, changedTrackPropertyName) {
         let res = [];
         this.subscriberRefs_.forEach((subscriber) => {
-            var _a, _b;
             if ('debugInfo' in subscriber) {
                 const observedProp = subscriber;
-                let rawValue = observedProp.getRawObjectValue();
-                let syncPeer = {
-                    decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
-                    changedTrackPropertyName: changedTrackPropertyName,
-                    value: typeof rawValue === 'object' ? 'Only support to dump simple type: string, number, boolean, enum type' : rawValue,
-                    inRenderingElementId: stateMgmtDFX.inRenderingElementId_.length === 0 ? -1 : stateMgmtDFX.inRenderingElementId_[stateMgmtDFX.inRenderingElementId_.length - 1],
-                    dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, isProfiler),
-                    owningView: { componentName: (_a = observedProp.owningView_) === null || _a === void 0 ? void 0 : _a.constructor.name, id: (_b = observedProp.owningView_) === null || _b === void 0 ? void 0 : _b.id__() }
-                };
-                res.push(syncPeer);
+                res.push(stateMgmtDFX.getObservedPropertyInfo(observedProp, isProfiler, changedTrackPropertyName));
             }
         });
         return res;
     }
     onDumpProfiler(changedTrackPropertyName) {
-        var _a, _b, _c, _d;
+        var _a, _b;
         let res = new DumpInfo();
-        let rawValue = this.getRawObjectValue();
-        let observedPropertyInfo = {
-            decorator: this.debugInfoDecorator(), propertyName: this.info(), id: this.id__(), changedTrackPropertyName: changedTrackPropertyName,
-            value: typeof rawValue === 'object' ? 'Only support to dump simple type: string, number, boolean, enum type' : rawValue,
-            inRenderingElementId: stateMgmtDFX.inRenderingElementId_.length === 0 ? -1 : stateMgmtDFX.inRenderingElementId_[stateMgmtDFX.inRenderingElementId_.length - 1],
-            dependentElementIds: this.dumpDependentElmtIdsObj(typeof this.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(this.getUnmonitored()) : false, true),
-            owningView: { componentName: (_a = this.owningView_) === null || _a === void 0 ? void 0 : _a.constructor.name, id: (_b = this.owningView_) === null || _b === void 0 ? void 0 : _b.id__() },
-            syncPeers: this.dumpSyncPeers(true, changedTrackPropertyName)
-        };
-        res.viewInfo = { componentName: (_c = this.owningView_) === null || _c === void 0 ? void 0 : _c.constructor.name, id: (_d = this.owningView_) === null || _d === void 0 ? void 0 : _d.id__() };
-        res.observedPropertiesInfo.push(observedPropertyInfo);
+        res.viewInfo = { componentName: (_a = this.owningView_) === null || _a === void 0 ? void 0 : _a.constructor.name, id: (_b = this.owningView_) === null || _b === void 0 ? void 0 : _b.id__() };
+        res.observedPropertiesInfo.push(stateMgmtDFX.getObservedPropertyInfo(this, true, changedTrackPropertyName));
         if (this.owningView_) {
             try {
                 this.owningView_.sendStateInfo(JSON.stringify(res));
@@ -4724,7 +4790,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
                 this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElmtIdsByProperty_.getAllPropertyDependencies());
                 // send changed observed property to profiler
                 // only will be true when enable profiler
-                if (stateMgmtDFX.enableProfiler_) {
+                if (stateMgmtDFX.enableProfiler) {
                     
                     this.onDumpProfiler();
                 }
@@ -4756,7 +4822,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
                 this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElmtIdsByProperty_.getTrackedObjectPropertyDependencies(changedPropertyName, 'notifyTrackedObjectPropertyHasChanged'));
                 // send changed observed property to profiler
                 // only will be true when enable profiler
-                if (stateMgmtDFX.enableProfiler_) {
+                if (stateMgmtDFX.enableProfiler) {
                     
                     this.onDumpProfiler(changedPropertyName);
                 }
@@ -6658,7 +6724,7 @@ class ViewPU extends PUV2ViewBase {
             if (!this.isViewV3) {
                 // Enable PU state tracking only in PU @Components
                 this.currentlyRenderedElmtIdStack_.push(elmtId);
-                stateMgmtDFX.inRenderingElementId_.push(elmtId);
+                stateMgmtDFX.inRenderingElementId.push(elmtId);
             }
             // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria),
             // enable V2 object deep observation
@@ -6681,7 +6747,7 @@ class ViewPU extends PUV2ViewBase {
             }
             if (!this.isViewV3) {
                 this.currentlyRenderedElmtIdStack_.pop();
-                stateMgmtDFX.inRenderingElementId_.pop();
+                stateMgmtDFX.inRenderingElementId.pop();
             }
             ViewStackProcessor.StopGetAccessRecording();
             (_b = PUV2ViewBase.arkThemeScopeManager) === null || _b === void 0 ? void 0 : _b.onComponentCreateExit(elmtId);
@@ -7050,16 +7116,9 @@ class ViewPU extends PUV2ViewBase {
             .filter((varName) => varName.startsWith('__') && !varName.startsWith(ObserveV2.OB_PREFIX))
             .forEach((varName) => {
             const prop = Reflect.get(this, varName);
-            if ('debugInfoDecorator' in prop) {
+            if (typeof prop === 'object' && 'debugInfoDecorator' in prop) {
                 const observedProp = prop;
-                let rawValue = observedProp.getRawObjectValue();
-                let observedPropertyInfo = {
-                    decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
-                    value: typeof rawValue === 'object' ? 'Only support to dump simple type: string, number, boolean, enum type' : rawValue,
-                    dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, false),
-                    owningView: { componentName: this.constructor.name, id: this.id__() }, syncPeers: observedProp.dumpSyncPeers(false)
-                };
-                res.observedPropertiesInfo.push(observedPropertyInfo);
+                res.observedPropertiesInfo.push(stateMgmtDFX.getObservedPropertyInfo(observedProp, false));
             }
         });
         let resInfo = '';
