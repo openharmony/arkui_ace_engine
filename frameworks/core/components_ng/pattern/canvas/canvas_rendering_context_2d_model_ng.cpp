@@ -20,7 +20,7 @@
 #include "securec.h"
 
 #include "core/components/common/properties/paint_state.h"
-#include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
+#include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
 
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
