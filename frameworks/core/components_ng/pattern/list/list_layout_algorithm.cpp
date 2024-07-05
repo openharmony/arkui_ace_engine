@@ -172,6 +172,9 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         contentIdealSize.SetCrossSize(GetChildMaxCrossSize(layoutWrapper, axis_), axis_);
         crossMatchChild_ = true;
     }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && !mainSizeIsDefined_) {
+        contentMainSize_ = std::max(contentMainSize_, GetMainAxisSize(contentConstraint.minSize, axis_));
+    }
     contentIdealSize.SetMainSize(contentMainSize_, axis_);
     AddPaddingToSize(padding, contentIdealSize);
 
