@@ -1657,6 +1657,7 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
     if (!CheckSafeAreaIsExpand()) {
         delegate_->SetBoundsOrResize(drawSize_, offset, isKeyboardInSafeArea_);
+        IsNeedResizeVisibleViewport();
         isKeyboardInSafeArea_ = false;
     } else {
         TAG_LOGD(AceLogTag::ACE_WEB, "OnDirtyLayoutWrapperSwap safeArea is set, no need setbounds");
@@ -1739,6 +1740,7 @@ void WebPattern::OnAreaChangedInner()
         drawSize_ = size;
         drawSizeCache_ = drawSize_;
         delegate_->SetBoundsOrResize(drawSize_, resizeOffset, isKeyboardInSafeArea_);
+        IsNeedResizeVisibleViewport();
         isKeyboardInSafeArea_ = false;
     }
     if (renderMode_ != RenderMode::SYNC_RENDER) {
@@ -1751,6 +1753,7 @@ void WebPattern::OnAreaChangedInner()
     if (isInWindowDrag_)
         return;
     delegate_->SetBoundsOrResize(drawSize_, resizeOffset, isKeyboardInSafeArea_);
+    IsNeedResizeVisibleViewport();
     isKeyboardInSafeArea_ = false;
     if (renderMode_ == RenderMode::SYNC_RENDER) {
         UpdateSlideOffset(true);
@@ -2461,6 +2464,33 @@ void WebPattern::OfflineMode()
     }
     isUrlLoaded_ = true;
     OnWindowHide();
+}
+
+bool WebPattern::IsNeedResizeVisibleViewport()
+{
+    if (visibleViewportSize_.Width() < 0 || visibleViewportSize_.Height() < 0 ||
+        isVirtualKeyBoardShow_ != VkState::VK_SHOW || NearZero(lastKeyboardHeight_)) {
+        return false;
+    }
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, false);
+    int32_t height = context->GetRootRect().Height();
+    auto y = GetCoordinatePoint()->GetY();
+    if (GreatOrEqual(height, lastKeyboardHeight_ + y)) {
+        double newHeight = height - lastKeyboardHeight_ - y;
+        if (GreatOrEqual(newHeight, drawSize_.Height()) ||
+            NearEqual(newHeight, drawSize_.Height())) {
+            visibleViewportSize_.SetWidth(-1.0);
+            visibleViewportSize_.SetHeight(-1.0);
+        } else {
+            return false;
+        }
+    } else {
+        visibleViewportSize_.SetWidth(-1.0);
+        visibleViewportSize_.SetHeight(-1.0);
+    }
+    delegate_->ResizeVisibleViewport(visibleViewportSize_, false);
+    return true;
 }
 
 bool WebPattern::ProcessVirtualKeyBoardHide(int32_t width, int32_t height, bool safeAreaEnabled)

@@ -634,6 +634,7 @@ private:
     void CloseContextSelectionMenu();
     RectF ComputeMouseClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
     void RegistVirtualKeyBoardListener(const RefPtr<PipelineContext> &context);
+    bool IsNeedResizeVisibleViewport();
     bool ProcessVirtualKeyBoardHide(int32_t width, int32_t height, bool safeAreaEnabled);
     bool ProcessVirtualKeyBoardShow(int32_t width, int32_t height, double keyboard, bool safeAreaEnabled);
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
