@@ -215,7 +215,7 @@ export class EditableTitleBar extends ViewPU {
             Row.create();
             Row.flexShrink(0);
         }, Row);
-        this.leftIconLayout.bind(this)(this);
+        this.leftIconLayout.bind(this)();
         Row.pop();
         this.observeComponentCreation2((g9, h9) => {
             If.create();
@@ -225,7 +225,7 @@ export class EditableTitleBar extends ViewPU {
                         Row.create();
                         Row.flexShrink(0);
                     }, Row);
-                    this.imageItemLayout.bind(this)(this);
+                    this.imageItemLayout.bind(this)();
                     Row.pop();
                 });
             }
@@ -240,13 +240,13 @@ export class EditableTitleBar extends ViewPU {
             Row.width('100%');
             Row.flexShrink(1);
         }, Row);
-        this.titleLayout.bind(this)(this);
+        this.titleLayout.bind(this)();
         Row.pop();
         this.observeComponentCreation2((c9, d9) => {
             Row.create();
             Row.flexShrink(0);
         }, Row);
-        this.rightMenuItemsLayout.bind(this)(this);
+        this.rightMenuItemsLayout.bind(this)();
         Row.pop();
         Row.pop();
         Flex.pop();
@@ -255,7 +255,7 @@ export class EditableTitleBar extends ViewPU {
         {
             this.observeComponentCreation2((q8, r8) => {
                 if (r8) {
-                    let s8 = new ImageMenuItem(ViewPU.__proto__ !== NativeViewPartialUpdate && o8 instanceof PUV2ViewBase ? o8 : this, {
+                    let s8 = new ImageMenuItem(this, {
                         item: this.imageItem,
                         attribute: ItemType.Image,
                     }, undefined, q8, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 186, col: 5 });
@@ -287,7 +287,7 @@ export class EditableTitleBar extends ViewPU {
                     {
                         this.observeComponentCreation2((g8, h8) => {
                             if (h8) {
-                                let i8 = new ImageMenuItem(ViewPU.__proto__ !== NativeViewPartialUpdate && r7 instanceof PUV2ViewBase ? r7 : this, {
+                                let i8 = new ImageMenuItem(this, {
                                     item: {
                                         value: PUBLIC_BACK,
                                         isEnabled: true,
@@ -324,7 +324,7 @@ export class EditableTitleBar extends ViewPU {
                     {
                         this.observeComponentCreation2((x7, y7) => {
                             if (y7) {
-                                let z7 = new ImageMenuItem(ViewPU.__proto__ !== NativeViewPartialUpdate && r7 instanceof PUV2ViewBase ? r7 : this, {
+                                let z7 = new ImageMenuItem(this, {
                                     item: {
                                         value: PUBLIC_CANCEL,
                                         isEnabled: true,
@@ -365,7 +365,7 @@ export class EditableTitleBar extends ViewPU {
             Column.height(EditableTitleBar.totalHeight);
             Column.justifyContent(FlexAlign.Center);
             Column.margin({
-                start: LengthMetrics.vp(getNumberByResource(125831103) ?? 4),
+                start: LengthMetrics.vp(getNumberByResource(125831103) ?? 8),
             });
             Column.alignItems(HorizontalAlign.Start);
         }, Column);
@@ -431,7 +431,7 @@ export class EditableTitleBar extends ViewPU {
         {
             this.observeComponentCreation2((q6, r6) => {
                 if (r6) {
-                    let s6 = new EditableTitleBarMenuSection(ViewPU.__proto__ !== NativeViewPartialUpdate && o6 instanceof PUV2ViewBase ? o6 : this, {
+                    let s6 = new EditableTitleBarMenuSection(this, {
                         menuItems: this.menuItems,
                         onSave: this.onSave,
                         isSaveEnabled: this.isSaveIconRequired,
@@ -794,7 +794,7 @@ class ImageMenuItem extends ViewPU {
         if (p3.type === TouchType.Down) {
             this.isOnClick = true;
         }
-        if (p3.type === TouchType.Up) {
+        if (p3.type === TouchType.Up || p3.type === TouchType.Cancel) {
             if (this.fontSize >= this.minFontSize) {
                 this.dialogController?.close();
             }
@@ -1004,12 +1004,12 @@ class ImageMenuItem extends ViewPU {
             If.create();
             if (this.attribute === ItemType.Icon || this.attribute === ItemType.LeftIcon) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.IconBuilder.bind(this)(this);
+                    this.IconBuilder.bind(this)();
                 });
             }
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.ImageBuilder.bind(this)(this);
+                    this.ImageBuilder.bind(this)();
                 });
             }
         }, If);
