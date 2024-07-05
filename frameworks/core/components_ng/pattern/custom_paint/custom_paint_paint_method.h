@@ -369,7 +369,6 @@ protected:
     void GetSvgRect(const sk_sp<SkSVGDOM>& skiaDom, const Ace::CanvasImage& canvasImage,
         RSRect* srcRect, RSRect* dstRect);
 #endif
-    void DrawSvgImage(const Ace::CanvasImage& canvasImage);
     void PaintShadow(const RSPath& path, const Shadow& shadow, const RSBrush* brush = nullptr,
         const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr);
     void PaintImageShadow(const RSPath& path, const Shadow& shadow, const RSBrush* brush = nullptr,

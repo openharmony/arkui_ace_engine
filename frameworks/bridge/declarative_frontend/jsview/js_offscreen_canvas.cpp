@@ -276,6 +276,9 @@ napi_value JSOffscreenCanvas::OnSetWidth(napi_env env, napi_callback_info info)
     if (width_ != width) {
         width_ = width;
         offscreenCanvasPattern_->UpdateSize(width_, height_);
+        if (offscreenCanvasContext_ != nullptr) {
+            offscreenCanvasContext_->SetWidth(width_);
+        }
     }
     return nullptr;
 }
@@ -305,6 +308,9 @@ napi_value JSOffscreenCanvas::OnSetHeight(napi_env env, napi_callback_info info)
     if (height_ != height) {
         height_ = height;
         offscreenCanvasPattern_->UpdateSize(width_, height_);
+        if (offscreenCanvasContext_ != nullptr) {
+            offscreenCanvasContext_->SetHeight(height_);
+        }
     }
     return nullptr;
 }
@@ -453,6 +459,8 @@ napi_value JSOffscreenCanvas::CreateContext2d(napi_env env, double width, double
     offscreenCanvasContext_->SetInstanceId(Container::CurrentId());
     offscreenCanvasContext_->SetOffscreenPattern(offscreenCanvasPattern_);
     offscreenCanvasContext_->AddOffscreenCanvasPattern(offscreenCanvasPattern_);
+    offscreenCanvasContext_->SetWidth(width_);
+    offscreenCanvasContext_->SetHeight(height_);
     return thisVal;
 }
 } // namespace OHOS::Ace::Framework
