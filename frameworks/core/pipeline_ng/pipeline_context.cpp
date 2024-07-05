@@ -2660,6 +2660,7 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         if (!IsSkipShortcutAndFocusMove()) {
             return eventManager_->DispatchKeyboardShortcut(event);
         }
+        return false;
     }
 
     // process drag cancel
