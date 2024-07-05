@@ -810,7 +810,6 @@ void WebDelegate::Stop()
 
 void WebDelegate::UnregisterEvent()
 {
-    // TODO: add support for ng.
     auto context = DynamicCast<PipelineContext>(context_.Upgrade());
     if (!context) {
         return;
@@ -1573,7 +1572,6 @@ void WebDelegate::CreatePluginResource(
     const Size& size, const Offset& position, const WeakPtr<PipelineContext>& context)
 {
     state_ = State::CREATING;
-    // TODO: add ng pattern.
     auto webCom = webComponent_.Upgrade();
     if (!webCom) {
         state_ = State::CREATEFAILED;
@@ -1597,7 +1595,6 @@ void WebDelegate::CreatePluginResource(
         if (webDelegate == nullptr) {
             return;
         }
-        // TODO: add ng pattern.
         auto webCom = webDelegate->webComponent_.Upgrade();
         if (!webCom) {
             webDelegate->OnError(NTC_ERROR, "fail to call WebDelegate::SetSrc PostTask");
@@ -4198,7 +4195,6 @@ sptr<OHOS::Rosen::Window> WebDelegate::CreateWindow()
 
 void WebDelegate::RegisterWebEvent()
 {
-    // TODO: add support for ng.
     auto context = DynamicCast<PipelineContext>(context_.Upgrade());
     CHECK_NULL_VOID(context);
     auto resRegister = context->GetPlatformResRegister();
@@ -5048,8 +5044,7 @@ void WebDelegate::OnPageError(const std::string& param)
 
 void WebDelegate::OnMessage(const std::string& param)
 {
-    std::string removeQuotes;
-    removeQuotes = param;
+    std::string removeQuotes = param;
     removeQuotes.erase(std::remove(removeQuotes.begin(), removeQuotes.end(), '\"'), removeQuotes.end());
     if (onMessage_) {
         std::string paramMessage = std::string(R"(")").append(removeQuotes).append(std::string(R"(")"));

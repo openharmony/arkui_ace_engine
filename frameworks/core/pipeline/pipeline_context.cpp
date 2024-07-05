@@ -103,8 +103,8 @@ constexpr int64_t SEC_TO_NANOSEC = 1000000000;
 constexpr char JS_THREAD_NAME[] = "JS";
 constexpr char UI_THREAD_NAME[] = "UI";
 constexpr uint32_t DEFAULT_MODAL_COLOR = 0x00000000;
-constexpr float ZOOM_DISTANCE_DEFAULT = 50.0;       // TODO: Need confirm value
-constexpr float ZOOM_DISTANCE_MOVE_PER_WHEEL = 5.0; // TODO: Need confirm value
+constexpr float ZOOM_DISTANCE_DEFAULT = 50.0;
+constexpr float ZOOM_DISTANCE_MOVE_PER_WHEEL = 5.0;
 constexpr int32_t FLUSH_RELOAD_TRANSITION_DURATION_MS = 400;
 
 PipelineContext::TimeProvider g_defaultTimeProvider = []() -> uint64_t {
@@ -3004,7 +3004,6 @@ void PipelineContext::ProcessDragEvent(
     auto info = GestureEvent();
     info.SetGlobalPoint(globalPoint);
     auto preTargetDragDropNode = GetPreTargetRenderNode();
-
     if (targetDragDropNode == preTargetDragDropNode) {
         if (targetDragDropNode && targetDragDropNode->GetOnDragMove()) {
             auto renderList = renderNode->FindChildNodeOfClass<V2::RenderList>(globalPoint, globalPoint);

@@ -61,8 +61,6 @@ public:
 #else
     static std::shared_ptr<RSData> LoadDataFromCachedFile(const std::string& uri);
 #endif
-    // TODO: maybe it's more approriate to move these interfaces to [ImageCache] with definition in abstract layer and
-    // implementation in adapter layer
 #ifndef USE_ROSEN_DRAWING
     static sk_sp<SkData> QueryImageDataFromImageCache(const ImageSourceInfo& sourceInfo);
 #else
