@@ -109,7 +109,7 @@ public:
         return the affected UINode
         caller responsibility to detach this UINode from the UI tree!
     */
-    RefPtr<UINode> DropFromL1(std::string key);
+    RefPtr<UINode> DropFromL1(const std::string& key);
 
     int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& frameNode) const;
 

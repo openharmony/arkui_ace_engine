@@ -56,7 +56,7 @@ std::optional<std::string> RepeatVirtualScrollCaches::GetKey4Index(uint32_t inde
             return std::nullopt;
         }
     }
-    TAG_LOGE(AceLogTag::ACE_REPEAT,
+    TAG_LOGD(AceLogTag::ACE_REPEAT,
         "index %{public}d -> key '%{public}s'",
         static_cast<int32_t>(index), key4index_[index].c_str());
     return key4index_[index];
@@ -77,7 +77,6 @@ bool RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to)
     // optimism by merging the two calls into one
     const std::list<std::string> keysFrom = onGetKeys4Range_(from, to);
     const std::list<std::string> ttypesFrom = onGetTypes4Range_(from, to);
-    const auto fillerDefaultKey = std::string("__-+-__");
 
     if (keysFrom.size() == 0 || ttypesFrom.size() == 0 || keysFrom.size() != ttypesFrom.size()) {
         TAG_LOGE(AceLogTag::ACE_REPEAT,
@@ -364,7 +363,7 @@ bool RepeatVirtualScrollCaches::RebuildL1(const std::function<bool(int32_t index
     return modified;
 }
 
-RefPtr<UINode> RepeatVirtualScrollCaches::DropFromL1(std::string key)
+RefPtr<UINode> RepeatVirtualScrollCaches::DropFromL1(const std::string& key)
 {
     const auto& cacheItem4Key = GetCachedNode4Key(key);
     if (!cacheItem4Key.has_value()) {
