@@ -355,8 +355,8 @@ class BorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses> {
   }
 }
 
-class PositionModifier extends ModifierWithKey<Position | Edges> {
-  constructor(value: Position | Edges) {
+class PositionModifier extends ModifierWithKey<Position | Edges | LocalizedEdges> {
+  constructor(value: Position | Edges | LocalizedEdges) {
     super(value);
   }
   static identity: Symbol = Symbol('position');
@@ -364,25 +364,33 @@ class PositionModifier extends ModifierWithKey<Position | Edges> {
     if (reset) {
       getUINativeModule().common.resetPosition(node);
     } else {
-      let positionType = new ArkPositionType();
-      if (!positionType.parsePositionType(this.value)) {
+      if (isUndefined(this.value)) {
         getUINativeModule().common.resetPosition(node);
-      } else {
-        if (!positionType.useEdges) {
-          getUINativeModule().common.setPosition(node, positionType.useEdges, this.value.x, this.value.y);
-        } else {
-          getUINativeModule().common.setPosition(node, positionType.useEdges, this.value.top, this.value.left, this.value.bottom, this.value.right);
+      } else if (('x' in this.value) || ('y' in this.value)) {
+        getUINativeModule().common.setPosition(node, false, this.value.x, this.value.y);
+      } else if (('top' in this.value) || ('bottom' in this.value) || ('left' in this.value) || ('start' in this.value) || ('right' in this.value) || ('end' in this.value)) {
+        if (('start' in this.value)) {
+          this.value.left = this.value.start;
         }
+        if (('end' in this.value)) {
+          this.value.right = this.value.end;
+        }
+        getUINativeModule().common.setPosition(node, true, this.value.top, this.value.left, this.value.bottom, this.value.right);
+      } else {
+        getUINativeModule().common.resetPosition(node);
       }
     }
   }
+  
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.x, this.value.x) ||
       !isBaseOrResourceEqual(this.stageValue.y, this.value.y) ||
       !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
       !isBaseOrResourceEqual(this.stageValue.left, this.value.left) ||
       !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
-      !isBaseOrResourceEqual(this.stageValue.right, this.value.right);
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
+      !isBaseOrResourceEqual(this.stageValue.start, this.value.start) ||
+      !isBaseOrResourceEqual(this.stageValue.end, this.value.end);
   }
 }
 
@@ -1914,8 +1922,8 @@ class FocusOnTouchModifier extends ModifierWithKey<boolean> {
     }
   }
 }
-class OffsetModifier extends ModifierWithKey<Position | Edges> {
-  constructor(value: Position | Edges) {
+class OffsetModifier extends ModifierWithKey<Position | Edges | LocalizedEdges> {
+  constructor(value: Position | Edges | LocalizedEdges) {
     super(value);
   }
   static identity: Symbol = Symbol('offset');
@@ -1923,15 +1931,20 @@ class OffsetModifier extends ModifierWithKey<Position | Edges> {
     if (reset) {
       getUINativeModule().common.resetOffset(node);
     } else {
-      let positionType = new ArkPositionType();
-      if (!positionType.parsePositionType(this.value)) {
+      if (isUndefined(this.value)) {
         getUINativeModule().common.resetOffset(node);
-      } else {
-        if (!positionType.useEdges) {
-          getUINativeModule().common.setOffset(node, positionType.useEdges, this.value.x, this.value.y);
-        } else {
-          getUINativeModule().common.setOffset(node, positionType.useEdges, this.value.top, this.value.left, this.value.bottom, this.value.right);
+      } else if (('x' in this.value) || ('y' in this.value)) {
+        getUINativeModule().common.setOffset(node, false, this.value.x, this.value.y);
+      } else if (('top' in this.value) || ('bottom' in this.value) || ('left' in this.value) || ('start' in this.value) || ('right' in this.value) || ('end' in this.value)) {
+        if (('start' in this.value)) {
+          this.value.left = this.value.start;
         }
+        if (('end' in this.value)) {
+          this.value.right = this.value.end;
+        }
+        getUINativeModule().common.setOffset(node, true, this.value.top, this.value.left, this.value.bottom, this.value.right);
+      } else {
+        getUINativeModule().common.resetOffset(node);
       }
     }
   }
@@ -1942,12 +1955,14 @@ class OffsetModifier extends ModifierWithKey<Position | Edges> {
       !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
       !isBaseOrResourceEqual(this.stageValue.left, this.value.left) ||
       !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
-      !isBaseOrResourceEqual(this.stageValue.right, this.value.right);
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
+      !isBaseOrResourceEqual(this.stageValue.start, this.value.start) ||
+      !isBaseOrResourceEqual(this.stageValue.end, this.value.end);
   }
 }
 
-class MarkAnchorModifier extends ModifierWithKey<Position> {
-  constructor(value: Position) {
+class MarkAnchorModifier extends ModifierWithKey<Position | LocalizedPosition> {
+  constructor(value: Position | LocalizedPosition) {
     super(value);
   }
   static identity: Symbol = Symbol('markAnchor');
@@ -1955,13 +1970,25 @@ class MarkAnchorModifier extends ModifierWithKey<Position> {
     if (reset) {
       getUINativeModule().common.resetMarkAnchor(node);
     } else {
-      getUINativeModule().common.setMarkAnchor(node, this.value?.x, this.value?.y);
+      if (this.value === void 0) {
+        getUINativeModule().common.resetMarkAnchor(node);
+      } else {
+        if ('start' in this.value) {
+          this.value.x = this.value.start;
+        }
+        if ('top' in this.value) {
+          this.value.y = this.value.top;
+        }
+      }
+      getUINativeModule().common.setMarkAnchor(node, this.value.x, this.value.y);
     }
   }
 
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.x, this.value.x) ||
-      !isBaseOrResourceEqual(this.stageValue.y, this.value.y);
+      !isBaseOrResourceEqual(this.stageValue.y, this.value.y) ||
+      !isBaseOrResourceEqual(this.stageValue.start, this.value.start) ||
+      !isBaseOrResourceEqual(this.stageValue.top, this.value.top);
   }
 }
 class DefaultFocusModifier extends ModifierWithKey<boolean> {
