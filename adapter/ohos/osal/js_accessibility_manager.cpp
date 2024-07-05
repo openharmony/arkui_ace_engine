@@ -3848,7 +3848,7 @@ void JsAccessibilityManager::JsInteractionOperation::GetCursorPosition(const int
         CHECK_NULL_VOID(rootNode);
         auto uiExtensionNode = jsAccessibilityManager->FindNodeFromRootByExtensionId(rootNode, uiExtensionId);
         CHECK_NULL_VOID(uiExtensionNode);
-         auto accessibilityProperty = uiExtensionNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        auto accessibilityProperty = uiExtensionNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         CHECK_NULL_VOID(accessibilityProperty);
         auto callNumber = accessibilityProperty->ActActionGetIndex();
         callback.SetCursorPositionResult(callNumber, requestId);
