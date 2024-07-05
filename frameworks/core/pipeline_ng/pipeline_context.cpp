@@ -786,7 +786,8 @@ void PipelineContext::FlushFocusView()
     auto lastFocusViewHub = lastFocusView->GetFocusHub();
     CHECK_NULL_VOID(lastFocusViewHub);
     auto container = Container::Current();
-    if (container && (container->IsUIExtensionWindow() || container->IsDynamicRender())) {
+    if (container && (container->IsUIExtensionWindow() || container->IsDynamicRender()) &&
+        (!lastFocusView->IsRootScopeCurrentFocus())) {
         lastFocusView->SetIsViewRootScopeFocused(false);
     }
     if (lastFocusView && (!lastFocusView->IsRootScopeCurrentFocus() || !lastFocusView->GetIsViewHasFocused()) &&
