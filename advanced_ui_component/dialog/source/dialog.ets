@@ -146,7 +146,9 @@ export struct TipsDialog {
           }
           .padding({ top: $r('sys.float.padding_level8') })
         } else {
-          this.checkBoxPart();
+          WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
+            this.checkBoxPart();
+          }
         }
       });
     }
