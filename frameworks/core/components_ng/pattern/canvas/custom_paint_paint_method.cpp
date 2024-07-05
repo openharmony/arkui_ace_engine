@@ -162,22 +162,6 @@ bool CustomPaintPaintMethod::ParseFilter(std::string& filter, std::vector<Filter
     return true;
 }
 
-void CustomPaintPaintMethod::UpdateRecordingCanvas(float width, float height)
-{
-    rsCanvas_ = std::make_shared<RSRecordingCanvas>(width, height);
-    contentModifier_->UpdateCanvas(std::static_pointer_cast<RSRecordingCanvas>(rsCanvas_));
-    CHECK_NULL_VOID(rsCanvas_);
-    rsCanvas_->Save();
-    if (canvasCallback_) {
-        canvasCallback_(rsCanvas_.get(), width, height);
-    }
-}
-
-void CustomPaintPaintMethod::SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback)
-{
-    canvasCallback_ = callback;
-}
-
 bool CustomPaintPaintMethod::HasShadow() const
 {
     return !(NearZero(state_.shadow.GetOffset().GetX()) && NearZero(state_.shadow.GetOffset().GetY()) &&

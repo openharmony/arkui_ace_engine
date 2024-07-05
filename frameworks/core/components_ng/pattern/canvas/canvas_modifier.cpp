@@ -48,10 +48,11 @@ void CanvasModifier::onDraw(DrawingContext& drawingContext)
             drawCmdList->GetOpItemSize());
     }
     if (needResetSurface_) {
-        CHECK_NULL_VOID(renderContext_.Upgrade());
+        auto renderContext = renderContext_.Upgrade();
+        CHECK_NULL_VOID(renderContext);
         int surfaceWidth = static_cast<int>(drawCmdList->GetWidth());
         int surfaceHeight = static_cast<int>(drawCmdList->GetHeight());
-        renderContext_.Upgrade()->ResetSurface(surfaceWidth, surfaceHeight);
+        renderContext->ResetSurface(surfaceWidth, surfaceHeight);
         needResetSurface_ = false;
     }
     CHECK_EQUAL_VOID(drawCmdList->IsEmpty(), true);

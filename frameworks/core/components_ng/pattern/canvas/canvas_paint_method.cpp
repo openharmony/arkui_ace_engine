@@ -96,10 +96,7 @@ void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto pixelGridRoundSize = geometryNode->GetPixelGridRoundSize();
-    if (lastLayoutSize_ != pixelGridRoundSize) {
-        UpdateRecordingCanvas(pixelGridRoundSize.Width(), pixelGridRoundSize.Height());
-        lastLayoutSize_.SetSizeT(pixelGridRoundSize);
-    }
+    lastLayoutSize_.SetSizeT(pixelGridRoundSize);
     auto recordingCanvas = std::static_pointer_cast<RSRecordingCanvas>(rsCanvas_);
     CHECK_NULL_VOID(recordingCanvas);
     auto context = context_.Upgrade();
@@ -120,6 +117,23 @@ void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     FlushTask();
     CHECK_NULL_VOID(contentModifier_);
     contentModifier_->MarkModifierDirty();
+}
+
+void CanvasPaintMethod::UpdateRecordingCanvas(float width, float height)
+{
+    rsCanvas_ = std::make_shared<RSRecordingCanvas>(width, height);
+    contentModifier_->UpdateCanvas(std::static_pointer_cast<RSRecordingCanvas>(rsCanvas_));
+    CHECK_NULL_VOID(rsCanvas_);
+    rsCanvas_->Save();
+    if (canvasCallback_) {
+        canvasCallback_(rsCanvas_.get(), width, height);
+    }
+    needMarkDirty_ = true;
+}
+
+void CanvasPaintMethod::SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback)
+{
+    canvasCallback_ = callback;
 }
 
 void CanvasPaintMethod::ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj)

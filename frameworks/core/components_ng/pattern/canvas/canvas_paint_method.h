@@ -37,6 +37,8 @@ public:
 
     void GetFastTaskPool();
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
+    void UpdateRecordingCanvas(float width, float height);
+    void SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback);
 
 #ifndef USE_FAST_TASKPOOL
     void PushTask(const TaskFunc& task);

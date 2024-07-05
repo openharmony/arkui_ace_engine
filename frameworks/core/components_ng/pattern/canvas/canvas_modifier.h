@@ -32,8 +32,16 @@ public:
     ~CanvasModifier() override = default;
     void onDraw(DrawingContext& drawingContext) override;
     std::string GetDumpInfo();
-    bool needResetSurface_ = false;
-    WeakPtr<RenderContext> renderContext_ = nullptr;
+    
+    void SetRenderContext(const WeakPtr<RenderContext>& renderContext)
+    {
+        renderContext_ = renderContext;
+    }
+
+    void SetNeedResetSurface()
+    {
+        needResetSurface_ = true;
+    }
 
     void MarkModifierDirty()
     {
@@ -47,6 +55,8 @@ public:
     }
 
 private:
+    bool needResetSurface_ = false;
+    WeakPtr<RenderContext> renderContext_;
     RefPtr<PropertyBool> needRender_;
     std::shared_ptr<RSRecordingCanvas> rsRecordingCanvas_;
     SizeT<int32_t> recordingCanvasDrawSize_ = { 0.0f, 0.0f };
