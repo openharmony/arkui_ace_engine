@@ -49,19 +49,30 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
     initWindowMode_ = session_->GetWindowMode();
     session_->SetNeedSnapshot(true);
     RegisterLifecycleListener();
-    callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
+    coldStartCallback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
+        auto session = weakSession.promote();
+        CHECK_NULL_VOID(session);
+        session->SetBufferAvailable(true);
+        self->BufferAvailableCallback();
+        Rosen::SceneSessionManager::GetInstance().NotifyCompleteFirstFrameDrawing(session->GetPersistentId());
+    };
+    hotStartCallBack_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        auto session = weakSession.promote();
+        CHECK_NULL_VOID(session);
+        if (self->session_->IsAnco()) {
+            if (self->blankWindow_) {
+                self->self->BufferAvailableCallbackForBlank();
+            }
+            return;
+        }
         if (self->snapshotWindow_) {
             self->BufferAvailableCallbackForSnapshot();
         } else if (self->blankWindow_) {
             self->BufferAvailableCallbackForBlank();
-        } else {
-            auto session = weakSession.promote();
-            CHECK_NULL_VOID(session);
-            session->SetBufferAvailable(true);
-            self->BufferAvailableCallback();
-            Rosen::SceneSessionManager::GetInstance().NotifyCompleteFirstFrameDrawing(session->GetPersistentId());
         }
     };
 }
@@ -285,10 +296,9 @@ void WindowScene::BufferAvailableCallbackForBlank()
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self && self->session_);
 
-        auto contentContext = AceType::DynamicCast<RosenRenderContext>(self->appWindow_->GetRenderContext());
-        CHECK_NULL_VOID(contentContext && contentContext->GetRSNode());
-        auto rsNode = contentContext->GetRSNode();
-        rsNode->SetAlpha(1);
+        auto appWindowContext = AceType::DynamicCast<RosenRenderContext>(self->appWindow_->GetRenderContext());
+        CHECK_NULL_VOID(appWindowContext);
+        appWindowContext->SetOpacity(1);
 
         CHECK_NULL_VOID(self->blankWindow_);
         auto context = AceType::DynamicCast<RosenRenderContext>(self->blankWindow_->GetRenderContext());
@@ -333,6 +343,7 @@ void WindowScene::BufferAvailableCallbackForSnapshot()
 
         self->RemoveChild(host, self->snapshotWindow_, self->snapshotWindowName_);
         self->snapshotWindow_.Reset();
+        self->session_->SetNeedSnapshot(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
@@ -383,7 +394,7 @@ void WindowScene::OnActivation()
             self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             surfaceNode->SetBufferAvailableCallback(self->callback_);
-        } else {
+        } else if (self->snapshotWindow_) {
             self->DisposeSnapShotAndBlankWindow();
         }
     };
@@ -405,7 +416,7 @@ void WindowScene::DisposeSnapShotAndBlankWindow()
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
     AddChild(host, appWindow_, appWindowName_, 0);
-    surfaceNode->SetBufferAvailableCallback(callback_);
+    surfaceNode->SetBufferAvailableCallback(hotStartCallback_);
     if (NearEqual(frameSize.Width(), session_->GetSessionLastRect().width_, 1.0f) &&
         NearEqual(frameSize.Height(), session_->GetSessionLastRect().height_, 1.0f)) {
         return;
@@ -446,36 +457,13 @@ void WindowScene::OnConnect()
             "[WMSMain] Add app window finished, id: %{public}d, node id: %{public}d, name: %{public}s",
             self->session_->GetPersistentId(), host->GetId(), self->session_->GetSessionInfo().bundleName_.c_str());
 
-        surfaceNode->SetBufferAvailableCallback(self->callback_);
+        surfaceNode->SetBufferAvailableCallback(self->coldStartCallBack_);
     };
 
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneConnect", TaskExecutor::TaskType::UI);
-}
-
-void WindowScene::OnForeground()
-{
-    auto uiTask = [weakThis = WeakClaim(this)]() {
-        ACE_SCOPED_TRACE("WindowScene::OnForeground");
-        auto self = weakThis.Upgrade();
-        CHECK_NULL_VOID(self);
-        CHECK_NULL_VOID(self->session_);
-        if (self->session_->IsAnco()) {
-            return;
-        }
-        CHECK_NULL_VOID(self->snapshotWindow_);
-        auto host = self->GetHost();
-        CHECK_NULL_VOID(host);
-        self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    };
-
-    ContainerScope scope(instanceId_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneForeground", TaskExecutor::TaskType::UI);
 }
 
 void WindowScene::OnBackground()
@@ -551,6 +539,7 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         auto size = dirty->GetGeometryNode()->GetFrameSize();
         if (!(NearEqual(size.Width(), session_->GetSessionLastRect().width_, 1.0f) &&
             NearEqual(size.Height(), session_->GetSessionLastRect().height_, 1.0f)) && snapshotWindow_) {
+            ACE_SCOPED_TRACE("WindowScene::OnDirtyLayoutWrapperSwap");
             auto context = AceType::DynamicCast<RosenRenderContext>(appWindow_->GetRenderContext());
             CHECK_NULL_RETURN(context, false);
             auto rsNode = context->GetRSNode();
@@ -564,7 +553,7 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         }
         auto surfaceNode = session_->GetSurfaceNode();
         CHECK_NULL_RETURN(surfaceNode, false);
-        surfaceNode->SetBufferAvailableCallback(callback_);
+        surfaceNode->SetBufferAvailableCallback(hotStartCallback_);
         surfaceNode->SetIsNotifyUIBufferAvailable(true);
     }
     return false;
@@ -586,6 +575,7 @@ void WindowScene::CleanBlankOrSnapshotWindow()
         if (self->snapshotWindow_) {
             self->RemoveChild(host, self->snapshotWindow_, self->snapshotWindowName_);
             self->snapshotWindow_.Reset();
+            self->session_->SetNeedSnapshot(true);
         }
         if (self->blankWindow_) {
             self->RemoveChild(host, self->blankWindow_, self->blankWindowName_);
