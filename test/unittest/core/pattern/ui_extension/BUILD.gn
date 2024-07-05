@@ -58,11 +58,11 @@ ace_unittest("ui_extension_component_test_ng") {
       "window_manager:scene_session",
       "window_manager:scene_session_manager",
     ]
-  }
 
-  if (defined(global_parts_info) && defined(
-          global_parts_info.atomicservicedistribution_atomicservice_basic_engine)) {
-    external_deps += [ "atomicservice_basic_engine:hagserviceability_client" ]
-    defines += [ "ATOMIC_SERVICE_ATTRIBUTION_ENABLE" ]
+    if (defined(global_parts_info) && defined(
+            global_parts_info.atomicservicedistribution_atomicservice_basic_engine)) {
+      external_deps += [ "atomicservice_basic_engine:hagserviceability_client" ]
+      defines += [ "ATOMIC_SERVICE_ATTRIBUTION_ENABLE" ]
+    }
   }
 }
