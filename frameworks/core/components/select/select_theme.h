@@ -33,8 +33,7 @@ constexpr double SELECT_OPTION_LEFT_LENGTH = 16.0;
 constexpr double SELECT_OPTION_TOP_LENGTH = 15.0;
 constexpr double SELECT_OPTION_RIGHT_LENGTH = 16.0;
 constexpr double SELECT_OPTION_BOTTOM_LENGTH = 15.0;
-constexpr double NONE_SHADOW_VALUE = 6.0;
-constexpr double CONTENT_ALIGN_LEFT = 4.0;
+constexpr uint32_t CONTENT_ALIGN_LEFT = 4;
 constexpr Dimension VERTICAL_INTERVAL = 14.4_vp;
 constexpr Dimension MENU_END_ICON_WIDTH = 24.0_vp;
 constexpr Dimension MENU_END_ICON_HEIGHT = 24.0_vp;
@@ -288,17 +287,6 @@ public:
             theme->optionTextStyle_.SetTextDecoration(TextDecoration::NONE);
             theme->menuLargeMargin_ = pattern->GetAttr<Dimension>("menu_large_margin", theme->menuLargeMargin_);
             theme->menuMediumMargin_ = pattern->GetAttr<Dimension>("menu_medium_margin", theme->menuMediumMargin_);
-            theme->menuItemTopBottomMargin_ = pattern->GetAttr<Dimension>("menu_item_top_bottom_margin", 0.0_vp);
-            theme->menuItemLeftRightMargin_ = pattern->GetAttr<Dimension>("menu_item_left_right_margin", 0.0_vp);
-            theme->menuTargetSecuritySpace_ = pattern->GetAttr<Dimension>("menu_target_security_space", 8.0_vp);
-            theme->menuItemFocusedBgColor_ =
-                pattern->GetAttr<Color>("menu_item_focused_bg_color", Color::TRANSPARENT);
-            theme->menuItemFocusedTextColor_ =
-                pattern->GetAttr<Color>("menu_item_focused_text_color", Color(0xff182431));
-            theme->menuItemFocusedShadowStyle_ =
-                static_cast<uint32_t>(pattern->GetAttr<double>("menu_item_focused_shadow_style", NONE_SHADOW_VALUE));
-            theme->menuItemContentAlign_ =
-                static_cast<uint32_t>(pattern->GetAttr<double>("menu_item_content_align", CONTENT_ALIGN_LEFT));
         }
     };
 
@@ -417,13 +405,6 @@ public:
         theme->maxPaddingEnd_ = maxPaddingEnd_;
         theme->menuLargeMargin_ = menuLargeMargin_;
         theme->menuMediumMargin_ = menuMediumMargin_;
-        theme->menuItemTopBottomMargin_ = menuItemTopBottomMargin_;
-        theme->menuItemLeftRightMargin_ = menuItemLeftRightMargin_;
-        theme->menuTargetSecuritySpace_ = menuTargetSecuritySpace_;
-        theme->menuItemFocusedBgColor_ = menuItemFocusedBgColor_;
-        theme->menuItemFocusedTextColor_ = menuItemFocusedTextColor_;
-        theme->menuItemFocusedShadowStyle_ = menuItemFocusedShadowStyle_;
-        theme->menuItemContentAlign_ = menuItemContentAlign_;
     }
 
     const Color& GetSelectedColorText() const
@@ -1078,36 +1059,6 @@ public:
         return menuMediumMargin_;
     }
 
-    const Dimension& GetMenuItemTopBottomMargin() const
-    {
-        return menuItemTopBottomMargin_;
-    }
-
-    const Dimension& GetMenuItemLeftRightMargin() const
-    {
-        return menuItemLeftRightMargin_;
-    }
-
-    const Dimension& GetMenuTargetSecuritySpace() const
-    {
-        return menuTargetSecuritySpace_;
-    }
-
-    const Color& GetMenuItemFocusedBgColor() const
-    {
-        return menuItemFocusedBgColor_;
-    }
-
-    const Color& GetMenuItemFocusedTextColor() const
-    {
-        return menuItemFocusedTextColor_;
-    }
-
-    const uint32_t& GetMenuItemFocusedShadowStyle() const
-    {
-        return menuItemFocusedShadowStyle_;
-    }
-
     const uint32_t& GetMenuItemContentAlign() const
     {
         return menuItemContentAlign_;
@@ -1227,13 +1178,7 @@ private:
     std::unordered_map<ControlSize, Dimension> selectFontSizeMap_;
     Dimension menuLargeMargin_;
     Dimension menuMediumMargin_;
-    Dimension menuItemTopBottomMargin_;
-    Dimension menuItemLeftRightMargin_;
-    Dimension menuTargetSecuritySpace_;
-    Color menuItemFocusedBgColor_;
-    Color menuItemFocusedTextColor_;
-    uint32_t menuItemFocusedShadowStyle_;
-    uint32_t menuItemContentAlign_;
+    uint32_t menuItemContentAlign_ = CONTENT_ALIGN_LEFT;
 };
 
 } // namespace OHOS::Ace
