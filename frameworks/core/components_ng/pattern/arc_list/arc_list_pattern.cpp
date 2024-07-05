@@ -43,7 +43,7 @@ namespace {
 constexpr float ARC_LIST_VELOCITY_SCALE = 0.6f;
 constexpr float ARC_LIST_FRICTION = 0.8f;
 constexpr float FRICTION_SCALE = -4.2f;
-constexpr float DRAG_FIX_OFFSET_RATIO = 0.6f;
+constexpr float DRAG_FIX_OFFSET_RATIO = 0.85f;
 constexpr float ARC_LIST_DRAG_OVER_FRICTION = 0.5f;
 constexpr float ARC_LIST_ITEM_MOVE_THRESHOLD_RATIO = 0.4f;
 constexpr float FLOAT_TWO = 2.0f;
@@ -476,7 +476,7 @@ bool ArcListPattern::GetItemSnapPosition(int32_t nIndex, ItemSnapInfo& snapInfo)
 
 float ArcListPattern::FixScrollOffset(float offset, int32_t source)
 {
-    if (!GetIsDragging()) {
+    if (!GetIsDragging() || itemPosition_.empty()) {
         return offset;
     }
 
@@ -487,12 +487,16 @@ float ArcListPattern::FixScrollOffset(float offset, int32_t source)
     for (auto& pos : itemPosition_) {
         float height = pos.second.endPos - pos.second.startPos;
         float realHeight = height * pos.second.scale;
-        originTotal = height + spaceWidth_;
-        realTotal = realHeight + spaceWidth_;
+        originTotal += height + spaceWidth_;
+        realTotal += realHeight + spaceWidth_;
     }
+    originTotal -= spaceWidth_;
+    realTotal -= spaceWidth_;
 
-    float scale = (originTotal / realTotal - 1) * DRAG_FIX_OFFSET_RATIO + 1;
-    fixOffset = offset * scale;
+    if (GreatNotEqual(realTotal, 0.0f)) {
+        float scale = (originTotal / realTotal - 1) * DRAG_FIX_OFFSET_RATIO + 1;
+        fixOffset = offset * scale;
+    }
 
     return fixOffset;
 }

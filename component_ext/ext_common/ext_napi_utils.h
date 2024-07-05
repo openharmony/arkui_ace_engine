@@ -57,6 +57,8 @@ public:
     static bool ParseColor(napi_env env, napi_value value, Color& result);
     static RefPtr<ThemeConstants> GetThemeConstants(napi_env env, napi_value value);
     static std::unique_ptr<JsonValue> PutJsonValue(napi_env env, napi_value value, std::string& key);
+    static bool ParseLengthMetrics(napi_env env, napi_value param, CalcDimension& result);
+    static bool ParseColorMetrics(napi_env env, napi_value param, Color& result);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_COMPONENTEXT_EXT_COMMON_EXT_NAPI_UTILS_H

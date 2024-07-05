@@ -15,12 +15,14 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_MODEL_NG_H
+
+#include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_model.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT ListModelNG : public ListModel {
+class ACE_FORCE_EXPORT ListModelNG : public ListModel {
 public:
     void Create(bool isCreateArc = false) override;
     void SetSpace(const Dimension& space) override;
