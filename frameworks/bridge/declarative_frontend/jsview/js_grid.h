@@ -33,7 +33,7 @@ public:
     static void SetColumnsGap(const JSCallbackInfo& info);
     static void SetRowsGap(const JSCallbackInfo& info);
     static void SetScrollBar(const JSCallbackInfo& info);
-    static void SetScrollBarColor(const JSCallbackInfo& info);
+    static void SetScrollBarColor(const std::string& color);
     static void SetScrollBarWidth(const JSCallbackInfo& scrollWidth);
 
     static void JsOnScrollBarUpdate(const JSCallbackInfo& info);

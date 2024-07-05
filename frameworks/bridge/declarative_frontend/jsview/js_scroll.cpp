@@ -415,14 +415,17 @@ void JSScroll::SetScrollBarWidth(const JSCallbackInfo& args)
     ScrollModel::GetInstance()->SetScrollBarWidth(scrollBarWidth);
 }
 
-void JSScroll::SetScrollBarColor(const JSCallbackInfo& args)
+void JSScroll::SetScrollBarColor(const std::string& scrollBarColor)
 {
+    if (scrollBarColor.empty()) {
+        return;
+    }
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(theme);
     Color color(theme->GetForegroundColor());
-    JSViewAbstract::ParseJsColor(args[0], color);
+    Color::ParseColorString(scrollBarColor, color);
     ScrollModel::GetInstance()->SetScrollBarColor(color);
 }
 
