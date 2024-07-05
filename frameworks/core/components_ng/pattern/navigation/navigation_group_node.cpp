@@ -407,6 +407,10 @@ bool NavigationGroupNode::CheckCanHandleBack()
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't find destination node to process back press");
         return false;
     }
+    if (!navigationPattern->IsFinishInteractiveAnimation()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't handle back press during interactive animation");
+        return true;
+    }
     auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
     if (navDestinationPattern->OverlayOnBackPressed()) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navDestination's ovelay consume backPressed event: %{public}s",
