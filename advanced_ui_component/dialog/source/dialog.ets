@@ -870,6 +870,7 @@ export struct CustomContentDialog {
       themeColorMode: this.themeColorMode,
       fontSizeScale: this.fontSizeScale,
       minContentHeight: this.minContentHeight,
+      customStyle: false
     }).constraintSize({ maxHeight: '100%' });
   }
 }
@@ -970,7 +971,7 @@ struct CustomDialogContentComponent {
   @State buttonHeight: number = 0;
   @State contentMaxHeight: Length = '100%';
   @Link fontSizeScale: number;
-  @State customStyle: boolean = false;
+  @State customStyle: boolean | undefined = undefined;
   @State buttonMaxFontSize: Length = $r('sys.float.Body_L');
   @State buttonMinFontSize: Length = 9;
   @State primaryTitleMaxFontSize: Length = $r('sys.float.Title_S');
@@ -1056,11 +1057,14 @@ struct CustomDialogContentComponent {
 
   aboutToAppear(): void {
     this.updateFontScale();
-    if (this.controller) {
+    if (this.controller && this.customStyle === undefined) {
       let customController: CustomDialogControllerExtend = this.controller as CustomDialogControllerExtend;
       if (customController.arg_ && customController.arg_.customStyle && customController.arg_.customStyle === true) {
         this.customStyle = true;
       }
+    }
+    if (this.customStyle === undefined) {
+      this.customStyle = false;
     }
     this.primaryTitleFontColorWithTheme = this.theme?.colors?.fontPrimary ?
     this.theme.colors.fontPrimary : $r('sys.color.font_primary');
