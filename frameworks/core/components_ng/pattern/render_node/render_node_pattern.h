@@ -95,11 +95,28 @@ public:
         renderNodeModifier_->Modify();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
+    {
+        Pattern::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
+        
+        json->PutExtAttr("label", label_.c_str(), filter);
+    }
+
+    void SetLabel(const std::string& label)
+    {
+        label_ = label;
+    }
+
 private:
     void OnModifyDone() override;
 
     std::function<void(DrawingContext& context)> drawCallback_;
     RefPtr<RenderNodeModifier> renderNodeModifier_;
+    std::string label_;
 };
 } // namespace OHOS::Ace::NG
 
