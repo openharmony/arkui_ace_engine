@@ -535,13 +535,13 @@ HWTEST_F(GridLayoutInfoTest, OutOfEnd001, TestSize.Level1)
     info.currentOffset_ = -50.0f;
     info.totalHeightOfItemsInView_ = 500.0f;
     info.lastMainSize_ = 400.0f;
-    EXPECT_FALSE(info.IsOutOfEnd());
+    EXPECT_FALSE(info.IsOutOfEnd(0.0f, false));
 
     info.totalHeightOfItemsInView_ = 400.0f;
-    EXPECT_TRUE(info.IsOutOfEnd());
+    EXPECT_TRUE(info.IsOutOfEnd(0.0f, false));
 
     info.contentEndPadding_ = 200.0f;
-    EXPECT_FALSE(info.IsOutOfEnd());
+    EXPECT_FALSE(info.IsOutOfEnd(0.0f, false));
 }
 
 /**
