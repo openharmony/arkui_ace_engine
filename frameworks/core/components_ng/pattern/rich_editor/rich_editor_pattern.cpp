@@ -8352,13 +8352,13 @@ void RichEditorPattern::GetReplacedSpan(RichEditorChangeValue& changeValue, int3
     auto wInsertValue = StringUtils::ToWstring(insertValue);
     changeValue.SetRangeAfter({ innerPosition, innerPosition + wInsertValue.length()});
     std::wstring textTemp = wInsertValue;
-    if (!textStyle) {
-        if (!isCreate && textIndex && offsetInSpan && typingStyle_.has_value() && spanNode &&
-            !HasSameTypingStyle(spanNode)) {
-            textStyle = typingTextStyle_;
-            ++spanIndex; // create a new span When have a different typingStyle
+    if (!textStyle && !isCreate && spanNode) {
+        if (typingStyle_ && !HasSameTypingStyle(spanNode)) {
+            textStyle = typingTextStyle_; // create a new span When have a different typingStyle
+            bool insertInSpan = textIndex && offsetInSpan;
+            spanIndex = insertInSpan ? spanIndex + 1 : spanIndex;
             offsetInSpan = 0;
-        } else if (!isCreate && spanNode && spanNode->GetSpanItem()) {
+        } else {
             textTemp = StringUtils::ToWstring(spanNode->GetSpanItem()->content);
             textTemp.insert(offsetInSpan, wInsertValue);
         }
