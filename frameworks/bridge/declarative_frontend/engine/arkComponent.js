@@ -204,7 +204,12 @@ class BorderWidthModifier extends ModifierWithKey {
         getUINativeModule().common.setBorderWidth(node, this.value, this.value, this.value, this.value);
       }
       else {
-        getUINativeModule().common.setBorderWidth(node, this.value.top, this.value.right, this.value.bottom, this.value.left);
+        if ((Object.keys(this.value).indexOf('start') >= 0) ||
+            (Object.keys(this.value).indexOf('end') >= 0)) {
+          getUINativeModule().common.setBorderWidth(node, this.value.top, this.value.end, this.value.bottom, this.value.start);
+        } else {
+          getUINativeModule().common.setBorderWidth(node, this.value.top, this.value.right, this.value.bottom, this.value.left);
+        }
       }
     }
   }
@@ -213,6 +218,13 @@ class BorderWidthModifier extends ModifierWithKey {
       return !isResourceEqual(this.stageValue, this.value);
     }
     else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      if ((Object.keys(this.value).indexOf('start') >= 0) ||
+          (Object.keys(this.value).indexOf('end') >= 0)) {
+        return !(this.stageValue.start === this.value.start &&
+          this.stageValue.end === this.value.end &&
+          this.stageValue.top === this.value.top &&
+          this.stageValue.bottom === this.value.bottom);
+      }
       return !(this.stageValue.left === this.value.left &&
         this.stageValue.right === this.value.right &&
         this.stageValue.top === this.value.top &&
@@ -350,10 +362,15 @@ class BorderColorModifier extends ModifierWithKey {
     else {
       const valueType = typeof this.value;
       if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
-        getUINativeModule().common.setBorderColor(node, this.value, this.value, this.value, this.value);
+        getUINativeModule().common.setBorderColor(node, this.value, this.value, this.value, this.value, false);
       }
       else {
-        getUINativeModule().common.setBorderColor(node, this.value.top, this.value.right, this.value.bottom, this.value.left);
+        if ((Object.keys(this.value).indexOf('start') >= 0) ||
+            (Object.keys(this.value).indexOf('end') >= 0)) {
+          getUINativeModule().common.setBorderColor(node, this.value.top, this.value.end, this.value.bottom, this.value.start, true);
+        } else {
+          getUINativeModule().common.setBorderColor(node, this.value.top, this.value.right, this.value.bottom, this.value.left, false);
+        }
       }
     }
   }
@@ -362,6 +379,13 @@ class BorderColorModifier extends ModifierWithKey {
       return !isResourceEqual(this.stageValue, this.value);
     }
     else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      if ((Object.keys(this.value).indexOf('start') >= 0) ||
+          (Object.keys(this.value).indexOf('end') >= 0)) {
+        return !(this.stageValue.start === this.value.start &&
+          this.stageValue.end === this.value.end &&
+          this.stageValue.top === this.value.top &&
+          this.stageValue.bottom === this.value.bottom);
+      }
       return !(this.stageValue.left === this.value.left &&
         this.stageValue.right === this.value.right &&
         this.stageValue.top === this.value.top &&

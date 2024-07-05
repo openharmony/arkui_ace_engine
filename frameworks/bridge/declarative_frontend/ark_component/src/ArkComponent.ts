@@ -250,7 +250,7 @@ class WidthModifier extends ModifierWithKey<Length> {
 }
 
 class BorderWidthModifier extends ModifierWithKey<Length | EdgeWidths> {
-  constructor(value: Length | EdgeWidths) {
+  constructor(value: Length | EdgeWidths | LocalizedEdgeWidths) {
     super(value);
   }
   static identity: Symbol = Symbol('borderWidth');
@@ -261,11 +261,20 @@ class BorderWidthModifier extends ModifierWithKey<Length | EdgeWidths> {
       if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
         getUINativeModule().common.setBorderWidth(node, this.value, this.value, this.value, this.value);
       } else {
-        getUINativeModule().common.setBorderWidth(node,
-          (this.value as EdgeWidths).top,
-          (this.value as EdgeWidths).right,
-          (this.value as EdgeWidths).bottom,
-          (this.value as EdgeWidths).left);
+        if ((Object.keys(this.value).indexOf('start') >= 0) ||
+            (Object.keys(this.value).indexOf('end') >= 0)) {
+          getUINativeModule().common.setBorderWidth(node,
+            (this.value as LocalizedEdgeWidths).top,
+            (this.value as LocalizedEdgeWidths).end,
+            (this.value as LocalizedEdgeWidths).bottom,
+            (this.value as LocalizedEdgeWidths).start);
+        } else {
+          getUINativeModule().common.setBorderWidth(node,
+            (this.value as EdgeWidths).top,
+            (this.value as EdgeWidths).right,
+            (this.value as EdgeWidths).bottom,
+            (this.value as EdgeWidths).left);
+        }
       }
     }
   }
@@ -274,6 +283,13 @@ class BorderWidthModifier extends ModifierWithKey<Length | EdgeWidths> {
     if (isResource(this.stageValue) && isResource(this.value)) {
       return !isResourceEqual(this.stageValue, this.value);
     } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      if ((Object.keys(this.value).indexOf('start') >= 0) ||
+          (Object.keys(this.value).indexOf('end') >= 0)) {
+        return !((this.stageValue as LocalizedEdgeWidths).start === (this.value as LocalizedEdgeWidths).start &&
+          (this.stageValue as LocalizedEdgeWidths).end === (this.value as LocalizedEdgeWidths).end &&
+          (this.stageValue as LocalizedEdgeWidths).top === (this.value as LocalizedEdgeWidths).top &&
+          (this.stageValue as LocalizedEdgeWidths).bottom === (this.value as LocalizedEdgeWidths).bottom);
+      }
       return !((this.stageValue as EdgeWidths).left === (this.value as EdgeWidths).left &&
         (this.stageValue as EdgeWidths).right === (this.value as EdgeWidths).right &&
         (this.stageValue as EdgeWidths).top === (this.value as EdgeWidths).top &&
@@ -320,8 +336,8 @@ class ChainModeifier extends ModifierWithKey<Length> {
   }
 }
 
-class BorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses> {
-  constructor(value: Length | BorderRadiuses) {
+class BorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses | LocalizedBorderRadius> {
+  constructor(value: Length | BorderRadiuses | LocalizedBorderRadius) {
     super(value);
   }
   static identity: Symbol = Symbol('borderRadius');
@@ -332,11 +348,22 @@ class BorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses> {
       if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
         getUINativeModule().common.setBorderRadius(node, this.value, this.value, this.value, this.value);
       } else {
-        getUINativeModule().common.setBorderRadius(node,
-          (this.value as BorderRadiuses).topLeft,
-          (this.value as BorderRadiuses).topRight,
-          (this.value as BorderRadiuses).bottomLeft,
-          (this.value as BorderRadiuses).bottomRight);
+        if ((Object.keys(this.value).indexOf('topStart') >= 0) ||
+            (Object.keys(this.value).indexOf('topEnd') >= 0) ||
+            (Object.keys(this.value).indexOf('bottomStart') >= 0) ||
+            (Object.keys(this.value).indexOf('bottomEnd') >= 0)) {
+          getUINativeModule().common.setBorderRadius(node,
+            (this.value as LocalizedBorderRadius).topStart,
+            (this.value as LocalizedBorderRadius).topEnd,
+            (this.value as LocalizedBorderRadius).bottomStart,
+            (this.value as LocalizedBorderRadius).bottomEnd);
+        } else {
+          getUINativeModule().common.setBorderRadius(node,
+            (this.value as BorderRadiuses).topLeft,
+            (this.value as BorderRadiuses).topRight,
+            (this.value as BorderRadiuses).bottomLeft,
+            (this.value as BorderRadiuses).bottomRight);
+        }
       }
     }
   }
@@ -345,6 +372,15 @@ class BorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses> {
     if (isResource(this.stageValue) && isResource(this.value)) {
       return !isResourceEqual(this.stageValue, this.value);
     } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      if ((Object.keys(this.value).indexOf('topStart') >= 0) ||
+          (Object.keys(this.value).indexOf('topEnd') >= 0) ||
+          (Object.keys(this.value).indexOf('bottomStart') >= 0) ||
+          (Object.keys(this.value).indexOf('bottomEnd') >= 0)) {
+        return !((this.stageValue as LocalizedBorderRadius).topStart === (this.value as LocalizedBorderRadius).topStart &&
+          (this.stageValue as LocalizedBorderRadius).topEnd === (this.value as LocalizedBorderRadius).topEnd &&
+          (this.stageValue as LocalizedBorderRadius).bottomStart === (this.value as LocalizedBorderRadius).bottomStart &&
+          (this.stageValue as LocalizedBorderRadius).bottomEnd === (this.value as LocalizedBorderRadius).bottomEnd);
+      }
       return !((this.stageValue as BorderRadiuses).topLeft === (this.value as BorderRadiuses).topLeft &&
         (this.stageValue as BorderRadiuses).topRight === (this.value as BorderRadiuses).topRight &&
         (this.stageValue as BorderRadiuses).bottomLeft === (this.value as BorderRadiuses).bottomLeft &&
@@ -386,8 +422,8 @@ class PositionModifier extends ModifierWithKey<Position | Edges> {
   }
 }
 
-class BorderColorModifier extends ModifierWithKey<ResourceColor | EdgeColors> {
-  constructor(value: ResourceColor | EdgeColors) {
+class BorderColorModifier extends ModifierWithKey<ResourceColor | EdgeColors | LocalizedEdgeColors> {
+  constructor(value: ResourceColor | EdgeColors | LocalizedEdgeColors) {
     super(value);
   }
   static identity: Symbol = Symbol('borderColor');
@@ -399,9 +435,22 @@ class BorderColorModifier extends ModifierWithKey<ResourceColor | EdgeColors> {
       if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
         getUINativeModule().common.setBorderColor(node, this.value, this.value, this.value, this.value);
       } else {
-        getUINativeModule().common.setBorderColor(node, (this.value as EdgeColors).top,
-          (this.value as EdgeColors).right, (this.value as EdgeColors).bottom,
-          (this.value as EdgeColors).left);
+        if ((Object.keys(this.value).indexOf('start') >= 0) ||
+            (Object.keys(this.value).indexOf('end') >= 0)) {
+          getUINativeModule().common.setBorderColor(node,
+            (this.value as LocalizedEdgeColors).top,
+            (this.value as LocalizedEdgeColors).end,
+            (this.value as LocalizedEdgeColors).bottom,
+            (this.value as LocalizedEdgeColors).start,
+            true);
+        } else {
+          getUINativeModule().common.setBorderColor(node,
+            (this.value as EdgeColors).top,
+            (this.value as EdgeColors).right,
+            (this.value as EdgeColors).bottom,
+            (this.value as EdgeColors).left,
+            false);
+        }
       }
 
     }
@@ -411,6 +460,13 @@ class BorderColorModifier extends ModifierWithKey<ResourceColor | EdgeColors> {
     if (isResource(this.stageValue) && isResource(this.value)) {
       return !isResourceEqual(this.stageValue, this.value);
     } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      if ((Object.keys(this.value).indexOf('start') >= 0) ||
+          (Object.keys(this.value).indexOf('end') >= 0)) {
+        return !((this.stageValue as LocalizedEdgeColors).start === (this.value as LocalizedEdgeColors).start &&
+          (this.stageValue as LocalizedEdgeColors).end === (this.value as LocalizedEdgeColors).end &&
+          (this.stageValue as LocalizedEdgeColors).top === (this.value as LocalizedEdgeColors).top &&
+          (this.stageValue as LocalizedEdgeColors).bottom === (this.value as LocalizedEdgeColors).bottom);
+      }
       return !((this.stageValue as EdgeColors).left === (this.value as EdgeColors).left &&
         (this.stageValue as EdgeColors).right === (this.value as EdgeColors).right &&
         (this.stageValue as EdgeColors).top === (this.value as EdgeColors).top &&
@@ -3206,7 +3262,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  padding(value: Padding | Length): this {
+  padding(value: Padding | Length | LocalizedPadding): this {
     let arkValue = new ArkPadding();
     if (value !== null && value !== undefined) {
       if (isLengthType(value) || isResource(value)) {
@@ -3215,10 +3271,20 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         arkValue.bottom = <Length>value;
         arkValue.left = <Length>value;
       } else {
-        arkValue.top = (<Margin>value).top;
-        arkValue.right = (<Margin>value).right;
-        arkValue.bottom = (<Margin>value).bottom;
-        arkValue.left = (<Margin>value).left;
+        arkValue.top = value.top;
+        arkValue.bottom = value.bottom;
+        if (Object.keys(value).indexOf('right') >= 0) {
+          arkValue.right = value.right;
+        }
+        if (Object.keys(value).indexOf('end') >= 0) {
+          arkValue.right = value.end;
+        }
+        if (Object.keys(value).indexOf('left') >= 0) {
+          arkValue.left = value.left;
+        }
+        if (Object.keys(value).indexOf('start') >= 0) {
+          arkValue.left = value.start;
+        }
       }
       modifierWithKey(this._modifiersWithKeys, PaddingModifier.identity, PaddingModifier, arkValue);
     } else {
@@ -3227,7 +3293,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  margin(value: Margin | Length): this {
+  margin(value: Margin | Length | LocalizedMargin): this {
     let arkValue = new ArkPadding();
     if (value !== null && value !== undefined) {
       if (isLengthType(value) || isResource(value)) {
@@ -3236,10 +3302,20 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         arkValue.bottom = <Length>value;
         arkValue.left = <Length>value;
       } else {
-        arkValue.top = (<Margin>value).top;
-        arkValue.right = (<Margin>value).right;
-        arkValue.bottom = (<Margin>value).bottom;
-        arkValue.left = (<Margin>value).left;
+        arkValue.top = value.top;
+        arkValue.bottom = value.bottom;
+        if (Object.keys(value).indexOf('right') >= 0) {
+          arkValue.right = value.right;
+        }
+        if (Object.keys(value).indexOf('end') >= 0) {
+          arkValue.right = value.end;
+        }
+        if (Object.keys(value).indexOf('left') >= 0) {
+          arkValue.left = value.left;
+        }
+        if (Object.keys(value).indexOf('start') >= 0) {
+          arkValue.left = value.start;
+        }
       }
       modifierWithKey(this._modifiersWithKeys, MarginModifier.identity, MarginModifier, arkValue);
     } else {
