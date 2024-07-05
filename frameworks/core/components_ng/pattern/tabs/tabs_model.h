@@ -137,6 +137,7 @@ public:
     virtual void SetBarBackgroundColor(const Color& backgroundColor) = 0;
     virtual void SetClipEdge(bool clipEdge) = 0;
     virtual void SetScrollableBarModeOptions(const ScrollableBarModeOptions& option) = 0;
+    virtual void ResetScrollableBarModeOptions() = 0;
     virtual void SetBarGridAlign(const BarGridColumnOptions& BarGridColumnOptions) = 0;
     virtual void SetIsCustomAnimation(bool isCustom) {}
     virtual void SetOnCustomAnimation(TabsCustomAnimationEvent&& onCustomAnimation) {}

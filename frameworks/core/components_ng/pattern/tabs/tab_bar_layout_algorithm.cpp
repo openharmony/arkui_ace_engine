@@ -239,7 +239,13 @@ void TabBarLayoutAlgorithm::ConfigHorizontal(LayoutWrapper* layoutWrapper, const
         HandleFixedMode(layoutWrapper, frameSize, childCount);
     } else {
         // Handle scrollable mode
-        auto layoutStyle = layoutProperty->GetScrollableBarModeOptions().value_or(ScrollableBarModeOptions());
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+        CHECK_NULL_VOID(tabTheme);
+        ScrollableBarModeOptions defaultOptions;
+        defaultOptions.margin = tabTheme->GetTabBarDefaultMargin();
+        auto layoutStyle = layoutProperty->GetScrollableBarModeOptions().value_or(defaultOptions);
         scrollMargin_ = layoutStyle.margin.ConvertToPx();
         CheckMarqueeForScrollable(layoutWrapper, childCount);
         MeasureItemWidths(layoutWrapper, childCount);

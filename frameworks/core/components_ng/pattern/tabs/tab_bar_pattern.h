@@ -204,6 +204,8 @@ public:
 
     void UpdateSubTabBoard();
 
+    void GetColumnId(int32_t& selectedColumnId, int32_t& focusedColumnId);
+
     SelectedMode GetSelectedMode() const;
 
     void AddTabBarItemType(int32_t tabBarItemId, bool isBuilder)
@@ -439,6 +441,8 @@ private:
     void OnAttachToFrameNode() override;
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
 
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -451,6 +455,7 @@ private:
     void HandleHoverEvent(bool isHover);
     void HandleHoverOnEvent(int32_t index);
     void HandleMoveAway(int32_t index);
+    void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool OnKeyEventWithoutClick(const KeyEvent& event);
@@ -593,6 +598,8 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
     MarginProperty marginLeftOrRight_;
     MarginProperty marginTopOrBottom_;
+    bool isFocusSet_ = false;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 };
 } // namespace OHOS::Ace::NG
 
