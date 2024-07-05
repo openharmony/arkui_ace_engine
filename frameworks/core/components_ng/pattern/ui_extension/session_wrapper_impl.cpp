@@ -596,17 +596,8 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
         } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
             transaction = transactionController->GetRSTransaction();
         }
-        if (transaction) {
-            auto extensionCount = transaction->GetExtensionCount();
-            if (extensionCount == 0) {
-                // Update the pid when encounter the first UIextension.
-                transaction->SetParentPid(transaction->GetChildPid());
-                transaction->SetChildPid(AceApplicationInfo::GetInstance().GetPid());
-            }
-            transaction->SetExtensionCount(++extensionCount);
-            if (parentSession) {
-                transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
-            }
+        if (transaction && parentSession) {
+            transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
         }
     }
     session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),

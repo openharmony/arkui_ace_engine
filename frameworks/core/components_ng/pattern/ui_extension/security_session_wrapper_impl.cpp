@@ -614,12 +614,8 @@ void SecuritySessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
         } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
             transaction = transactionController->GetRSTransaction();
         }
-        if (transaction) {
-            transaction->SetParentPid(transaction->GetChildPid());
-            transaction->SetChildPid(AceApplicationInfo::GetInstance().GetPid());
-            if (parentSession) {
-                transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
-            }
+        if (transaction && parentSession) {
+            transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
         }
     }
     session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
