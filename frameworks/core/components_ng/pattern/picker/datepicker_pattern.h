@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
+#include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -562,15 +563,27 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
+        FocusPattern focusPattern(FocusType::NODE, true, FocusStyleType::CUSTOM_REGION);
         auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, FocusPattern());
+        CHECK_NULL_RETURN(pipeline, focusPattern);
         auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-        CHECK_NULL_RETURN(pickerTheme, FocusPattern());
-        auto focusColor = pickerTheme->GetFocusColor();
+        CHECK_NULL_RETURN(pickerTheme, focusPattern);
+        auto appTheme = pipeline->GetTheme<AppTheme>();
+        CHECK_NULL_RETURN(appTheme, focusPattern);
+
         FocusPaintParam focusPaintParams;
-        focusPaintParams.SetPaintColor(focusColor);
-        focusPaintParams.SetPaintWidth(FOCUS_PAINT_WIDTH);
-        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
+        if (appTheme->IsFocusBoxGlow()) {
+            focusPaintParams.SetPaintColor(appTheme->GetFocusBorderColor());
+            focusPaintParams.SetPaintWidth(appTheme->GetFocusBorderWidth());
+            focusPaintParams.SetFocusBoxGlow(true);
+        } else {
+            focusPaintParams.SetPaintColor(pickerTheme->GetFocusColor());
+            focusPaintParams.SetPaintWidth(FOCUS_PAINT_WIDTH);
+            focusPaintParams.SetFocusBoxGlow(false);
+        }
+        focusPattern.SetFocusPaintParams(focusPaintParams);
+
+        return focusPattern;
     }
 
     void ShowTitle(int32_t titleId);
@@ -604,6 +617,17 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
+    void InitFocusEvent();
+    void InitSelectorProps();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void GetInnerFocusButtonPaintRect(RoundRect& paintRect);
+    void UpdateFocusButtonState();
+    void SetHaveFocus(bool haveFocus);
+    void UpdateButtonStyles(const RefPtr<FrameNode>& buttonNode, const RefPtr<FrameNode>& columnNode,
+        const RefPtr<PickerTheme>& pickerTheme, bool haveFocus);
     PickerDate GetCurrentDateByMonthDaysColumn() const;
     PickerDate GetCurrentDateByYearMonthDayColumn() const;
     void OrderCurrentDateByYearMonthDayColumn(
@@ -634,6 +658,10 @@ private:
     double resizePickerItemHeight_;
     bool resizeFlag_ = false;
     bool isShowInDialog_ = false;
+    bool focusEventInitialized_ = false;
+    bool haveFocus_ = false;
+    Dimension selectorItemRadius_ = 8.0_vp;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
     EventMarker OnDialogAccept_;
     EventMarker OnDialogCancel_;
     EventMarker OnDialogChange_;

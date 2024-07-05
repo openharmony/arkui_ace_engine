@@ -605,9 +605,10 @@ HWTEST_F(ArcindexerPatternTestNg, ArcindexerPatternTestNg0019, TestSize.Level1)
     /**
      * @tc.steps: step1. call ShowBubble.
     */
-    pattern_->ShowBubble();
+    bool isShow = true;
+    pattern_->ShowBubble(isShow);
     pattern_->itemCount_ = 2;
-    pattern_->ShowBubble();
+    pattern_->ShowBubble(isShow);
 }
 
 /**

@@ -82,9 +82,9 @@ public:
         CHECK_NULL_RETURN(theme, FocusPattern());
 
         FocusPaintParam focusPaintParams;
-        focusPaintParams.SetPaintColor(theme->GetFocusColor());
-        focusPaintParams.SetPaintWidth(theme->GetFocusWidthVp());
-        focusPaintParams.SetFocusBoxGlow(true);
+        focusPaintParams.SetPaintColor(theme->GetFocusBorderColor());
+        focusPaintParams.SetPaintWidth(theme->GetFocusBorderWidth());
+        focusPaintParams.SetFocusBoxGlow(theme->IsFocusBoxGlow());
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
@@ -109,6 +109,11 @@ public:
     void InitDefaultParams();
 
     void OnAttachToFrameNode() override;
+
+    RatingModifier::RatingAnimationType GetHoverState() const
+    {
+        return state_;
+    }
 
 private:
     void UpdateRatingScore(double ratingScore);
@@ -161,9 +166,6 @@ private:
     void RecalculatedRatingScoreBasedOnEventPoint(double eventPointX, bool isDrag);
     bool IsIndicator();
     void FireBuilder();
-    void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
-    void HandleFocusEvent();
-    void HandleBlurEvent();
     RefPtr<FrameNode> BuildContentModifierNode();
 
     std::optional<RatingMakeCallback> makeFunc_;
@@ -206,7 +208,6 @@ private:
     bool isForegroundImageInfoFromTheme_ = false;
     bool isSecondaryImageInfoFromTheme_ = false;
     bool isBackgroundImageInfoFromTheme_ = false;
-    bool focusEventInitialized_ = false;
     // get XTS inspector value
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     ACE_DISALLOW_COPY_AND_MOVE(RatingPattern);

@@ -98,6 +98,7 @@ public:
             theme->borderWidth_ = pattern->GetAttr<Dimension>("popup_border_width", 0.0_vp);
             theme->minHeight_ = pattern->GetAttr<Dimension>("popup_min_height", 0.0_vp);
             theme->popupMaxColumns_ = static_cast<uint32_t>(pattern->GetAttr<double>("popup_max_columns", 0));
+            theme->bgThemeColorMode_ = static_cast<uint32_t>(pattern->GetAttr<double>("popup_bg_theme_color_mode", 0));
         }
     };
 
@@ -316,6 +317,11 @@ public:
         return popupMaxColumns_;
     }
 
+    uint32_t GetBgThemeColorMode() const
+    {
+        return bgThemeColorMode_;
+    }
+
 protected:
     PopupTheme() = default;
 
@@ -364,6 +370,7 @@ private:
     Dimension borderWidth_ = 0.0_vp;
     Dimension minHeight_ = 0.0_vp;
     uint32_t popupMaxColumns_ = 0;
+    uint32_t bgThemeColorMode_ = 0;
 };
 
 } // namespace OHOS::Ace

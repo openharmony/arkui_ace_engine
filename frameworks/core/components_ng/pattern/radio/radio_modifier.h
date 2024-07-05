@@ -223,6 +223,7 @@ private:
     Color focusedRingUnchecked_;
     Color focusedBgColor_;
     Dimension sizeFocused_;
+    Dimension sizeHover_;
     Dimension hotZoneHorizontalPadding_;
     Dimension defaultPadding_;
     float hoverDuration_ = 0.0f;

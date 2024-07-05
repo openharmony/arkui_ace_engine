@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,14 +15,16 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_MODEL_NG_H
+
+#include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_model.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT ListModelNG : public ListModel {
+class ACE_FORCE_EXPORT ListModelNG : public ListModel {
 public:
-    void Create() override;
+    void Create(bool isCreateArc = false) override;
     void SetSpace(const Dimension& space) override;
     void SetInitialIndex(int32_t initialIndex) override;
     RefPtr<ScrollControllerBase> CreateScrollController() override;
@@ -73,7 +75,15 @@ public:
     RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize() override;
 
     DisplayMode GetDisplayMode() const override;
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    void SetHeader(const RefPtr<FrameNode>& headerNode) override;
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) override;
+    static void SetDigitalCrownSensitivity(FrameNode* frameNode, CrownSensitivity sensitivity);
+    static CrownSensitivity GetDigitalCrownSensitivity(FrameNode* frameNode);
+#endif
+
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, bool isCreateArc = false);
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeType, bool smooth);
     static void SetInitialIndex(FrameNode* frameNode, int32_t initialIndex);
@@ -130,6 +140,7 @@ public:
         FrameNode* frameNode, float defaultSize, const std::vector<float>& mainSize);
     static void ResetListChildrenMainSize(FrameNode* frameNode);
     static int32_t GetInitialIndex(FrameNode* frameNode);
+    static void SetHeader(FrameNode* frameNode, FrameNode* headerNode);
 private:
     void AddDragFrameNodeToManager() const;
 };

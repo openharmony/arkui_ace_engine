@@ -28,14 +28,12 @@ RatingModifier::RatingModifier()
       useContentModifier_(AceType::MakeRefPtr<PropertyBool>(false)),
       contentOffset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
       contentSize_(AceType::MakeRefPtr<PropertySizeF>(SizeF())),
-      isFocused_(AceType::MakeRefPtr<PropertyBool>(false)),
       boardColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT))),
       reverse_(AceType::MakeRefPtr<PropertyBool>(false))
 {
     AttachProperty(needDraw_);
     AttachProperty(starNum_);
     AttachProperty(touchStar_);
-    AttachProperty(isFocused_);
     AttachProperty(drawScore_);
     AttachProperty(stepSize_);
     AttachProperty(useContentModifier_);

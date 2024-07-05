@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -274,30 +274,90 @@ public:
 
     RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize();
     void SetListChildrenMainSize(float defaultSize, const std::vector<float>& mainSize);
-    void OnChildrenSizeChanged(std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag);
+    virtual void OnChildrenSizeChanged(std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag);
     void ResetChildrenSize();
     bool ListChildrenSizeExist()
     {
         return static_cast<bool>(childrenSize_);
     }
-
     bool IsFadingEdge() const
     {
         return isFadingEdge_;
     }
+    inline int32_t GetItemStartIndex()
+    {
+        return itemStartIndex_;
+    }
 
-private:
-
+protected:
     bool IsNeedInitClickEventRecorder() const override
     {
         return true;
     }
 
+    void OnModifyDone() override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    virtual bool ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_t nextIndexInGroup);
+
+    void MarkDirtyNodeSelf();
+
+    bool IsOutOfBoundary(bool useCurrentDelta = true) override;
+    bool OnScrollCallback(float offset, int32_t source) override;
+    void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
+    void SetChainAnimationToPosMap();
+    void SetChainAnimationLayoutAlgorithm(
+        RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, const RefPtr<ListLayoutProperty>& listLayoutProperty);
+
+    void SetAccessibilityAction();
+
+    virtual void ReadThemeToFadingEdge();
+    virtual float FixScrollOffset(float offset, int32_t source)
+    {
+        return offset;
+    }
+    virtual void OnScrollVisibleContentChange(const RefPtr<ListEventHub>& listEventHub, bool indexChanged);
+    virtual float GetScrollUpdateFriction(float overScroll);
+    virtual ScrollAlign GetScrollToNodeAlign()
+    {
+        return ScrollAlign::AUTO;
+    }
+
+    bool isFadingEdge_ = false;
+
+    int32_t startIndex_ = -1;
+    int32_t endIndex_ = -1;
+    float startMainPos_ = 0.0f;
+    float endMainPos_ = 0.0f;
+    float spaceWidth_ = 0.0f;
+    float contentMainSize_ = 0.0f;
+    float contentStartOffset_ = 0.0f;
+    float contentEndOffset_ = 0.0f;
+
+    float currentDelta_ = 0.0f;
+    bool smooth_ = false;
+
+    std::optional<int32_t> jumpIndex_;
+    std::optional<int32_t> targetIndex_;
+    std::optional<float> predictSnapOffset_;
+    std::optional<float> predictSnapEndPos_;
+    ScrollAlign scrollAlign_ = ScrollAlign::START;
+    bool isNeedCheckOffset_ = false;
+
+    ListLayoutAlgorithm::PositionMap itemPosition_;
+    RefPtr<ListPositionMap> posMap_;
+    RefPtr<ListChildrenMainSize> childrenSize_;
+
+    RefPtr<ChainAnimation> chainAnimation_;
+
+    RefPtr<Scrollable> scrollable_;
+
+    int32_t itemStartIndex_ = 0;
+
+private:
+
     void OnScrollEndCallback() override;
 
-    void OnModifyDone() override;
     void ChangeAxis(RefPtr<UINode> node);
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     float CalculateTargetPos(float startPos, float endPos);
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -307,24 +367,16 @@ private:
     WeakPtr<FocusHub> GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarGroupIndex);
     WeakPtr<FocusHub> ScrollAndFindFocusNode(int32_t nextIndex, int32_t curIndex, int32_t& nextIndexInGroup,
         int32_t curIndexInGroup, int32_t moveStep, FocusStep step);
-    bool ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_t nextIndexInGroup);
     bool ScrollListItemGroupForFocus(int32_t nextIndex, int32_t& nextIndexInGroup, int32_t curIndexInGroup,
         int32_t moveStep, FocusStep step, bool isScrollIndex);
 
-    void MarkDirtyNodeSelf();
     SizeF GetContentSize() const;
     void ProcessEvent(bool indexChanged, float finalOffset, bool isJump, float prevStartOffset, float prevEndOffset);
     void CheckScrollable();
-    bool IsOutOfBoundary(bool useCurrentDelta = true) override;
-    bool OnScrollCallback(float offset, int32_t source) override;
-    void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void HandleScrollEffect(float offset);
     void StartDefaultOrCustomSpringMotion(float start, float end, const RefPtr<InterpolatingSpring>& curve);
     void UpdateScrollSnap();
     bool IsScrollSnapAlignCenter() const;
-    void SetChainAnimationToPosMap();
-    void SetChainAnimationLayoutAlgorithm(
-        RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, RefPtr<ListLayoutProperty> listLayoutProperty);
     bool NeedScrollSnapAlignEffect() const;
     ScrollAlign GetScrollAlignByScrollSnapAlign() const;
     bool GetListItemAnimatePos(float startPos, float endPos, ScrollAlign align, float& targetPos);
@@ -341,7 +393,6 @@ private:
         const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, float itemGroupTop);
 
     void DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper);
-    void SetAccessibilityAction();
     ListItemGroupPara GetListItemGroupParameter(const RefPtr<FrameNode>& node);
     bool IsListItemGroup(int32_t listIndex, RefPtr<FrameNode>& node);
     void GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) const;
@@ -353,12 +404,10 @@ private:
     float GetEndOverScrollOffset(float offset) const;
     RefPtr<ListContentModifier> listContentModifier_;
 
-    void ReadThemeToFadingEdge();
     void UpdateFadingEdge(const RefPtr<ListPaintMethod> paint);
     void UpdateFadeInfo(bool isFadingTop, bool isFadingBottom,
         float fadeFrameSize, const RefPtr<ListPaintMethod> paint);
     bool UpdateFadingForPadding(float fadeFrameSize);
-    bool isFadingEdge_ = false;
     bool isTopEdgeFading_ = false;
     bool isLowerEdgeFading_ = false;
     Axis fadingAxis_ = Axis::VERTICAL;
@@ -366,38 +415,19 @@ private:
     float endPercent_ = 1.0f;
 
     int32_t maxListItemIndex_ = 0;
-    int32_t startIndex_ = -1;
-    int32_t endIndex_ = -1;
     int32_t centerIndex_ = -1;
-    float startMainPos_ = 0.0f;
-    float endMainPos_ = 0.0f;
     float currentOffset_ = 0.0f;
-    float spaceWidth_ = 0.0f;
-    float contentMainSize_ = 0.0f;
-    float contentStartOffset_ = 0.0f;
-    float contentEndOffset_ = 0.0f;
 
-    float currentDelta_ = 0.0f;
     bool crossMatchChild_ = false;
-    bool smooth_ = false;
     float scrollSnapVelocity_ = 0.0f;
     bool snapTrigOnScrollStart_ = false;
 
-    std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
-    std::optional<int32_t> targetIndex_;
     std::optional<int32_t> targetIndexInGroup_;
-    std::optional<float> predictSnapOffset_;
-    std::optional<float> predictSnapEndPos_;
-    ScrollAlign scrollAlign_ = ScrollAlign::START;
     bool isScrollable_ = true;
     bool paintStateFlag_ = false;
     bool isFramePaintStateValid_ = false;
-    bool isNeedCheckOffset_ = false;
 
-    ListLayoutAlgorithm::PositionMap itemPosition_;
-    RefPtr<ListPositionMap> posMap_;
-    RefPtr<ListChildrenMainSize> childrenSize_;
     float listTotalHeight_ = 0.0f;
 
     std::map<int32_t, int32_t> lanesItemRange_;
@@ -405,7 +435,6 @@ private:
     int32_t lanes_ = 1;
     float laneGutter_ = 0.0f;
     // chain animation
-    RefPtr<ChainAnimation> chainAnimation_;
     bool dragFromSpring_ = false;
     RefPtr<SpringProperty> springProperty_;
     std::optional<ChainAnimationOptions> chainAnimationOptions_;
@@ -418,7 +447,6 @@ private:
 
     RefPtr<SpringMotion> scrollToIndexMotion_;
     RefPtr<SpringMotion> scrollSnapMotion_;
-    RefPtr<Scrollable> scrollable_;
 
     bool isScrollEnd_ = false;
     bool needReEstimateOffset_ = false;

@@ -31,6 +31,7 @@ group("advanced_ui_component") {
     "gridobjectsortcomponent/interfaces:gridobjectsortcomponent",
     "popup/interfaces:popup",
     "progressbutton/interfaces:progressbutton",
+    "qrcode/interfaces:qrcode",
     "segmentbutton/interfaces:segmentbutton",
     "selectionmenu/interfaces:selectionmenu",
     "selecttitlebar/interfaces:selecttitlebar",

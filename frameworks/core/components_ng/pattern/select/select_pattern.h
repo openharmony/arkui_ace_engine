@@ -204,7 +204,9 @@ private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-
+    void HandleFocusStyleTask(RefPtr<RenderContext> selectRenderContext, RefPtr<SelectTheme> selectTheme);
+    void HandleBlurStyleTask(RefPtr<RenderContext> selectRenderContext, RefPtr<SelectTheme> selectTheme);
+    void InitFocusEvent();
     bool HasRowNode() const
     {
         return rowId_.has_value();
@@ -312,6 +314,11 @@ private:
     Color selectDefaultBgColor_ = Color::TRANSPARENT;
     ControlSize controlSize_ = ControlSize::NORMAL;
     ACE_DISALLOW_COPY_AND_MOVE(SelectPattern);
+    bool bgColorModify_ = false;
+    bool scaleModify_ = false;
+    bool shadowModify_ = false;
+    bool focusTextColorModify_ = false;
+    bool isFocus_ = false;
 };
 
 } // namespace OHOS::Ace::NG

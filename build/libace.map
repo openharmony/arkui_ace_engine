@@ -328,6 +328,8 @@
       OHOS::Ace::NG::ViewStackProcessor::*;
       OHOS::Ace::DataAbilityHelperStandard::*;
       OHOS::Ace::DataProviderManagerStandard::*;
+      OHOS::Ace::NG::ListModelNG::*;
+      OHOS::Ace::NG::ListItemModelNG::*;
 
       "OHOS::Ace::ElementRegister::GetInstance()";
       "OHOS::Ace::ElementRegister::RemoveItemSilently(int)";
@@ -365,6 +367,8 @@
       vtable?for?OHOS::Ace::NG::TouchEventActuator;
       vtable?for?OHOS::Ace::NG::SwiperModelNG;
       vtable?for?OHOS::Ace::NG::IndexerModelNG;
+      vtable?for?OHOS::Ace::NG::ListModelNG;
+      vtable?for?OHOS::Ace::NG::ListItemModelNG;
 
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;

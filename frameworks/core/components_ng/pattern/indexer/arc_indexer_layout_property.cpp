@@ -21,9 +21,6 @@
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-const std::string DEFAULT_FAMILY = "HarmonyOS Sans";
-}
 void ArcIndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     LayoutProperty::ToJsonValue(json, filter);
@@ -46,7 +43,7 @@ void ArcIndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, con
     }
     json->PutExtAttr("arrayValue", jsonArrayValue, filter);
     auto fontFamily = std::vector<std::string>();
-    fontFamily.emplace_back(DEFAULT_FAMILY);
+    fontFamily.emplace_back("HarmonyOS Sans");
     auto defaultFont = TextStyle();
     defaultFont.SetFontStyle(FontStyle::NORMAL);
     defaultFont.SetFontSize(Dimension(ARC_INDEXER_ITEM_TEXT_SIZE, DimensionUnit::FP));
