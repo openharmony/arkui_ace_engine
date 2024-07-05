@@ -51,7 +51,7 @@ public:
     static void FirePageHide(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE);
     static void FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE);
 
-    RefPtr<FrameNode> GetLastPage();
+    virtual RefPtr<FrameNode> GetLastPage() const;
     RefPtr<FrameNode> GetPageById(int32_t pageId);
     const RefPtr<FrameNode> GetStageNode() const
     {
@@ -60,8 +60,8 @@ public:
 
     void ReloadStage();
 
-    RefPtr<FrameNode> GetLastPageWithTransition() const;
-    RefPtr<FrameNode> GetPrevPageWithTransition() const;
+    virtual RefPtr<FrameNode> GetLastPageWithTransition() const;
+    virtual RefPtr<FrameNode> GetPrevPageWithTransition() const;
 
     void SetStageInTrasition (bool stageInTrasition) {
         stageInTrasition_ = stageInTrasition;

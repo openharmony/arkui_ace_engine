@@ -58,8 +58,9 @@ template("ace_core_source_set") {
     platform = invoker.platform
     include_dirs = []
 
-    if (enable_split_mode && defined(vendor_configs.ace_advanced_split_mode)) {
-      include_dirs += vendor_configs.ace_advanced_split_mode_dirs
+    if (enable_split_mode &&
+        defined(vendor_configs.ace_engine_advanced_split_mode_dirs)) {
+      include_dirs += vendor_configs.ace_engine_advanced_split_mode_dirs
     }
 
     # add common source file needed by all product platform here

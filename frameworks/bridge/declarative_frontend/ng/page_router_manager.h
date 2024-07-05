@@ -224,6 +224,11 @@ protected:
     // page id manage
     int32_t GenerateNextPageId();
 
+    virtual int32_t GetLastPageIndex()
+    {
+        return static_cast<int32_t>(pageRouterStack_.size()) - 1;
+    }
+
     std::pair<int32_t, RefPtr<FrameNode>> FindPageInStack(const std::string& url, bool needIgnoreBegin = false);
     int32_t FindPageInRestoreStack(const std::string& url);
 

@@ -535,7 +535,7 @@ void StageManager::FireAutoSave(const RefPtr<FrameNode>& outPageNode, const RefP
     outPagePattern->ProcessAutoSave(onUIExtNodeDestroy, onUIExtNodeBindingCompleted);
 }
 
-RefPtr<FrameNode> StageManager::GetLastPage()
+RefPtr<FrameNode> StageManager::GetLastPage() const
 {
     CHECK_NULL_RETURN(stageNode_, nullptr);
     const auto& children = stageNode_->GetChildren();
