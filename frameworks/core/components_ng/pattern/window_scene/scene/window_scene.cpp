@@ -58,14 +58,14 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
         self->BufferAvailableCallback();
         Rosen::SceneSessionManager::GetInstance().NotifyCompleteFirstFrameDrawing(session->GetPersistentId());
     };
-    hotStartCallBack_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
+    hotStartCallback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
         auto session = weakSession.promote();
         CHECK_NULL_VOID(session);
         if (self->session_->IsAnco()) {
             if (self->blankWindow_) {
-                self->self->BufferAvailableCallbackForBlank();
+                self->BufferAvailableCallbackForBlank();
             }
             return;
         }
@@ -456,7 +456,7 @@ void WindowScene::OnConnect()
             "[WMSMain] Add app window finished, id: %{public}d, node id: %{public}d, name: %{public}s",
             self->session_->GetPersistentId(), host->GetId(), self->session_->GetSessionInfo().bundleName_.c_str());
 
-        surfaceNode->SetBufferAvailableCallback(self->coldStartCallBack_);
+        surfaceNode->SetBufferAvailableCallback(self->coldStartCallback_);
     };
 
     ContainerScope scope(instanceId_);
