@@ -206,7 +206,6 @@ void GridRowLayoutAlgorithm::CalcCrossAxisAlignment(LayoutWrapper* layoutWrapper
             if (alignSelf == FlexAlign::AUTO) {
                 alignSelf = gridRowAlignItem;
             }
-
         } else {
             alignSelf = gridRowAlignItem;
         }
