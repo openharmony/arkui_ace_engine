@@ -330,8 +330,9 @@ NG::PaddingPropertyF JSToggle::GetOldPadding(const JSCallbackInfo& info)
 
 NG::PaddingProperty JSToggle::GetNewPadding(const JSCallbackInfo& info)
 {
-    NG::PaddingProperty padding(
-        { NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp) });
+    NG::PaddingProperty padding({
+        NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp)
+    });
     if (info[0]->IsObject()) {
         std::optional<CalcDimension> left;
         std::optional<CalcDimension> right;
@@ -373,8 +374,9 @@ NG::PaddingProperty JSToggle::GetPadding(const std::optional<CalcDimension>& top
     const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
     const std::optional<CalcDimension>& right)
 {
-    NG::PaddingProperty padding(
-        { NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp) });
+    NG::PaddingProperty padding({
+        NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp)
+    });
     if (left.has_value() && left.value().IsNonNegative()) {
         padding.left = NG::CalcLength(left.value());
     }
