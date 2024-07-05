@@ -590,11 +590,10 @@ private:
     Dimension endReservedHeight_;   // this is reservedHeight on the end
     Dimension inactiveWidth_;
     Dimension activeWidth_;
-    Dimension normalWidth_;         // user-set width of the scrollbar
+    Dimension normalWidth_;
     Dimension themeNormalWidth_;
     Dimension touchWidth_;
     Dimension hoverWidth_;
-    double barWidth_ = 0.0;         // actual width of the scrollbar
 
     Dimension position_;
 

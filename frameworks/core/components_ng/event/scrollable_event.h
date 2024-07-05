@@ -171,10 +171,6 @@ public:
         clickJudgeCallback_ = std::move(clickJudgeCallback);
     }
 
-    void CollectScrollableTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        TouchTestResult& responseLinkResult);
-
 private:
     Axis axis_ = Axis::VERTICAL;
     bool enabled_ = true;
