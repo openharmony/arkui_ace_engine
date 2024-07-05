@@ -12,8 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/render/mock_canvas_image.h"
 #include "test/unittest/core/base/frame_node_test_ng.h"
 
+#include "frameworks/core/common/recorder/event_recorder.h"
+#include "frameworks/core/common/recorder/node_data_cache.h"
+#include "frameworks/core/components_ng/pattern/image/image_pattern.h"
 #include "frameworks/core/components_ng/pattern/stage/page_pattern.h"
 
 using namespace testing;
@@ -1229,5 +1234,755 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsFrameDisappear02, TestSize.Level1)
     parentNode->SetLayoutProperty(parentLayoutProperty);
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->IsFrameDisappear();
+}
+
+/**
+ * @tc.name: FrameNodeTriggerVisibleAreaChangeCallback01
+ * @tc.desc: Test the function TriggerVisibleAreaChangeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->onMainTree_ = true;
+    frameNode->isActive_ = true;
+    frameNode->isWindowBoundary_ = false;
+    auto context = frameNode->GetContext();
+    context->onShow_ = true;
+    VisibleCallbackInfo callbackInfo;
+    int32_t flag = 0;
+    const std::function<void(bool, double)>&& jsCallback = [&flag](bool isVisible, double radio) { flag++; };
+    callbackInfo.callback = jsCallback;
+    callbackInfo.period = 1;
+    frameNode->eventHub_->visibleAreaInnerCallback_ = callbackInfo;
+
+    /**
+     * @tc.steps: step2. create layoutProperty.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->propVisibility_ = VisibleType::VISIBLE;
+
+    /**
+     * @tc.steps: step3. call the function TriggerVisibleAreaChangeCallback.
+     */
+    std::vector<double> ratios = { 0, 1.0 };
+    frameNode->SetLayoutProperty(layoutProperty);
+    frameNode->TriggerVisibleAreaChangeCallback(false);
+    frameNode->ProcessAllVisibleCallback(ratios, callbackInfo, 1.0, 0.0, true);
+}
+
+/**
+ * @tc.name: FrameNodeThrottledVisibleTask01
+ * @tc.desc: Test the function ThrottledVisibleTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeThrottledVisibleTask01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->throttledCallbackOnTheWay_ = true;
+    frameNode->lastThrottledVisibleRatio_ = 0.0;
+    frameNode->isActive_ = true;
+    auto context = frameNode->GetContext();
+    context->onShow_ = false;
+    VisibleCallbackInfo callbackInfo;
+    int32_t flag = 0;
+    const std::function<void(bool, double)>&& jsCallback = [&flag](bool isVisible, double radio) { flag++; };
+    callbackInfo.callback = jsCallback;
+    callbackInfo.period = 1;
+    frameNode->eventHub_->throttledVisibleAreaCallback_ = callbackInfo;
+
+    /**
+     * @tc.steps: step2. create layoutProperty.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->propVisibility_ = VisibleType::VISIBLE;
+
+    /**
+     * @tc.steps: step3. call the function ThrottledVisibleTask.
+     */
+    frameNode->SetLayoutProperty(layoutProperty);
+    frameNode->ThrottledVisibleTask();
+}
+
+/**
+ * @tc.name: FrameNodeThrottledVisibleTask02
+ * @tc.desc: Test the function ThrottledVisibleTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeThrottledVisibleTask02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->throttledCallbackOnTheWay_ = true;
+    frameNode->lastThrottledVisibleRatio_ = 1.0;
+    frameNode->isActive_ = true;
+    auto context = frameNode->GetContext();
+    context->onShow_ = false;
+    VisibleCallbackInfo callbackInfo;
+    int32_t flag = 0;
+    const std::function<void(bool, double)>&& jsCallback = [&flag](bool isVisible, double radio) { flag++; };
+    callbackInfo.callback = jsCallback;
+    callbackInfo.period = 1;
+    frameNode->eventHub_->throttledVisibleAreaCallback_ = callbackInfo;
+
+    /**
+     * @tc.steps: step2. create layoutProperty.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->propVisibility_ = VisibleType::VISIBLE;
+
+    /**
+     * @tc.steps: step3. call the function ThrottledVisibleTask.
+     */
+    frameNode->SetLayoutProperty(layoutProperty);
+    frameNode->ThrottledVisibleTask();
+}
+
+/**
+ * @tc.name: FrameNodeThrottledVisibleTask03
+ * @tc.desc: Test the function ThrottledVisibleTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeThrottledVisibleTask03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->throttledCallbackOnTheWay_ = false;
+    VisibleCallbackInfo callbackInfo;
+    int32_t flag = 0;
+    const std::function<void(bool, double)>&& jsCallback = [&flag](bool isVisible, double radio) { flag++; };
+    callbackInfo.callback = jsCallback;
+    callbackInfo.period = 1;
+    frameNode->eventHub_->throttledVisibleAreaCallback_ = callbackInfo;
+
+    /**
+     * @tc.steps: step2. call the function ThrottledVisibleTask.
+     */
+    frameNode->ThrottledVisibleTask();
+}
+
+/**
+ * @tc.name: FrameNodeCreateLayoutTask01
+ * @tc.desc: Test the function CreateLayoutTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeCreateLayoutTask01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->isLayoutDirtyMarked_ = true;
+
+    /**
+     * @tc.steps: step2. create layoutProperty.
+     */
+    NG::RectF testRect = { 10.0f, 10.0f, 10.0f, 10.0f }; // 10.0f is the x, y, width and height of rect
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->SetLayoutRect(testRect);
+    layoutProperty->propVisibility_ = VisibleType::VISIBLE;
+
+    /**
+     * @tc.steps: step3. call the function CreateLayoutTask.
+     */
+    frameNode->SetLayoutProperty(layoutProperty);
+    frameNode->CreateLayoutTask(true);
+}
+
+/**
+ * @tc.name: FrameNodeCreateRenderTask01
+ * @tc.desc: Test the function CreateRenderTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeCreateRenderTask01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->isRenderDirtyMarked_ = true;
+    frameNode->UpdateInspectorId("123");
+    frameNode->renderContext_->UpdateAccessibilityFocus(true);
+    /**
+     * @tc.steps: step2. create layoutProperty.
+     */
+    NG::RectF testRect = { 10.0f, 10.0f, 10.0f, 10.0f }; // 10.0f is the x, y, width and height of rect
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->SetLayoutRect(testRect);
+    layoutProperty->propVisibility_ = VisibleType::VISIBLE;
+
+    /**
+     * @tc.steps: step3. call the function CreateRenderTask.
+     */
+    frameNode->SetLayoutProperty(layoutProperty);
+    frameNode->CreateRenderTask(true).value()();
+}
+
+/**
+ * @tc.name: FrameNodeCreateRenderTask02
+ * @tc.desc: Test the function CreateRenderTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeCreateRenderTask02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->isRenderDirtyMarked_ = true;
+    frameNode->renderContext_->UpdateAccessibilityFocus(true);
+    /**
+     * @tc.steps: step2. create layoutProperty.
+     */
+    NG::RectF testRect = { 10.0f, 10.0f, 10.0f, 10.0f }; // 10.0f is the x, y, width and height of rect
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->SetLayoutRect(testRect);
+    layoutProperty->propVisibility_ = VisibleType::VISIBLE;
+
+    /**
+     * @tc.steps: step3. call the function CreateRenderTask.
+     */
+    frameNode->SetLayoutProperty(layoutProperty);
+    frameNode->CreateRenderTask(false).value()();
+}
+
+/**
+ * @tc.name: FrameNodeGetParentGlobalOffset01
+ * @tc.desc: Test the function GetParentGlobalOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetParentGlobalOffset01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step3. call the function GetParentGlobalOffset.
+     */
+    EXPECT_EQ(frameNode->GetParentGlobalOffset().GetX(), 0.0f);
+    EXPECT_EQ(frameNode->GetParentGlobalOffset().GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: FrameNodeUpdateLayoutWrapper01
+ * @tc.desc: Test the function UpdateLayoutWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeUpdateLayoutWrapper01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto testNode = FrameNode::CreateFrameNode("test", 0, AceType::MakeRefPtr<Pattern>());
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(testNode, geometryNode, testNode->GetLayoutProperty());
+
+    /**
+     * @tc.steps: step2. create layoutProperty.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->propVisibility_ = VisibleType::GONE;
+    layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
+
+    /**
+     * @tc.steps: step3. call the function UpdateLayoutWrapper.
+     */
+    frameNode->SetLayoutProperty(layoutProperty);
+    frameNode->UpdateLayoutWrapper(layoutWrapper, false, true);
+}
+
+/**
+ * @tc.name: FrameNodeUpdateLayoutWrapper02
+ * @tc.desc: Test the function UpdateLayoutWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeUpdateLayoutWrapper02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. create layoutProperty.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->propVisibility_ = VisibleType::VISIBLE;
+    layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
+
+    /**
+     * @tc.steps: step3. call the function UpdateLayoutWrapper.
+     */
+    frameNode->SetLayoutProperty(layoutProperty);
+    frameNode->UpdateLayoutWrapper(nullptr, false, true);
+}
+
+/**
+ * @tc.name: FrameNodeGetContentModifier01
+ * @tc.desc: Test the function GetContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetContentModifier01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<ImagePattern>(), true);
+    frameNode->renderContext_->UpdateAccessibilityFocus(true);
+    frameNode->GetPattern<ImagePattern>()->image_ = AceType::MakeRefPtr<NG::MockCanvasImage>();
+
+    /**
+     * @tc.steps: step2. call the function GetContentModifier.
+     */
+    frameNode->GetContentModifier();
+    frameNode->renderContext_->UpdateAccessibilityFocus(false);
+    frameNode->GetContentModifier();
+}
+
+/**
+ * @tc.name: FrameNodeGetContentModifier02
+ * @tc.desc: Test the function GetContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetContentModifier02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<ImagePattern>(), true);
+    frameNode->renderContext_->UpdateAccessibilityFocus(true);
+    frameNode->GetPattern<ImagePattern>()->image_ = AceType::MakeRefPtr<NG::MockCanvasImage>();
+    frameNode->extensionHandler_ = AceType::MakeRefPtr<ExtensionHandler>();
+
+    /**
+     * @tc.steps: step2. call the function GetContentModifier.
+     */
+    frameNode->GetContentModifier();
+}
+
+/**
+ * @tc.name: FrameNodeGetContentModifier03
+ * @tc.desc: Test the function GetContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetContentModifier03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->renderContext_->UpdateAccessibilityFocus(true);
+    /**
+     * @tc.steps: step2. call the function GetContentModifier.
+     */
+    frameNode->GetContentModifier();
+}
+
+/**
+ * @tc.name: FrameNodePostIdleTask01
+ * @tc.desc: Test the function PostIdleTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodePostIdleTask01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    /**
+     * @tc.steps: step2. call the function PostIdleTask.
+     */
+    int32_t flag = 0;
+    std::function<void(int64_t, bool)>&& callback = [&flag](int64_t radio, bool isVisible) { flag++; };
+    frameNode->PostIdleTask(std::move(callback));
+}
+
+/**
+ * @tc.name: FrameNodeRebuildRenderContextTree01
+ * @tc.desc: Test the function RebuildRenderContextTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeRebuildRenderContextTree01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->needSyncRenderTree_ = true;
+    frameNode->overlayNode_ = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+
+    /**
+     * @tc.steps: step2. create layoutProperty.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->propVisibility_ = VisibleType::VISIBLE;
+
+    /**
+     * @tc.steps: step3. call the function RebuildRenderContextTree.
+     */
+    frameNode->overlayNode_->SetLayoutProperty(layoutProperty);
+    frameNode->RebuildRenderContextTree();
+
+    /**
+     * @tc.steps: step4. update layoutProperty and call the function RebuildRenderContextTree.
+     */
+    layoutProperty->propVisibility_ = VisibleType::INVISIBLE;
+    frameNode->overlayNode_->SetLayoutProperty(layoutProperty);
+    frameNode->RebuildRenderContextTree();
+
+    /**
+     * @tc.steps: step5. update overlayNode_ nullptr and call the function RebuildRenderContextTree.
+     */
+    frameNode->overlayNode_ = nullptr;
+    frameNode->RebuildRenderContextTree();
+}
+
+/**
+ * @tc.name: FrameNodeRebuildRenderContextTree02
+ * @tc.desc: Test the function RebuildRenderContextTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeRebuildRenderContextTree02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->needSyncRenderTree_ = true;
+    frameNode->overlayNode_ = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+
+    /**
+     * @tc.steps: step2. create layoutProperty.
+     */
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->propVisibility_ = VisibleType::INVISIBLE;
+
+    /**
+     * @tc.steps: step3. call the function RebuildRenderContextTree.
+     */
+    frameNode->overlayNode_->SetLayoutProperty(layoutProperty);
+    frameNode->RebuildRenderContextTree();
+}
+
+/**
+ * @tc.name: FrameNodeRebuildRenderContextTree03
+ * @tc.desc: Test the function RebuildRenderContextTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeRebuildRenderContextTree03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->needSyncRenderTree_ = true;
+    frameNode->overlayNode_ = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    frameNode->overlayNode_->layoutProperty_ = nullptr;
+
+    /**
+     * @tc.steps: step2. call the function RebuildRenderContextTree.
+     */
+    frameNode->RebuildRenderContextTree();
+}
+
+/**
+ * @tc.name: FrameNodeMarkModifyDone01
+ * @tc.desc: Test the function MarkModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeMarkModifyDone01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->isPrivacySensitive_ = true;
+    frameNode->isRestoreInfoUsed_ = false;
+    frameNode->restoreId_ = 1;
+    Recorder::EventRecorder::Get().componentEnable_ = true;
+    Recorder::EventRecorder::Get().eventSwitch_.componentEnable = true;
+    std::unordered_set<std::string> nodeSet;
+    nodeSet.emplace("abc");
+    Recorder::NodeDataCache::Get().mergedConfig_->shareNodes.emplace("test", nodeSet);
+
+    /**
+     * @tc.steps: step2. call the function MarkModifyDone.
+     */
+    frameNode->MarkModifyDone();
+}
+
+/**
+ * @tc.name: FrameNodeMarkModifyDone02
+ * @tc.desc: Test the function MarkModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeMarkModifyDone02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->isPrivacySensitive_ = true;
+    frameNode->isRestoreInfoUsed_ = false;
+    frameNode->restoreId_ = 1;
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    pipeline->privacySensitiveManager_ = nullptr;
+
+    /**
+     * @tc.steps: step2. call the function MarkModifyDone.
+     */
+    frameNode->MarkModifyDone();
+}
+
+/**
+ * @tc.name: FrameNodeMarkDirtyNode01
+ * @tc.desc: Test the function MarkDirtyNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeMarkDirtyNode01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->isPropertyDiffMarked_ = true;
+    auto testNode = FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    testNode->isPropertyDiffMarked_ = false;
+
+    /**
+     * @tc.steps: step2. call the function MarkDirtyNode.
+     */
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
+    testNode->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
+}
+
+/**
+ * @tc.name: FrameNodeGetAncestorNodeOfFrame01
+ * @tc.desc: Test the function GetAncestorNodeOfFrame
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetAncestorNodeOfFrame01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->isWindowBoundary_ = true;
+
+    /**
+     * @tc.steps: step2. call the function GetAncestorNodeOfFrame.
+     */
+    frameNode->GetAncestorNodeOfFrame(true);
+}
+
+/**
+ * @tc.name: FrameNodeGetFirstAutoFillContainerNode01
+ * @tc.desc: Test the function GetFirstAutoFillContainerNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetFirstAutoFillContainerNode01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. call the function GetFirstAutoFillContainerNode.
+     */
+    frameNode->GetFirstAutoFillContainerNode();
+}
+
+/**
+ * @tc.name: FrameNodeGetFirstAutoFillContainerNode02
+ * @tc.desc: Test the function GetFirstAutoFillContainerNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetFirstAutoFillContainerNode02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TABS_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto parentNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
+    parentNode->AddChild(frameNode);
+
+    /**
+     * @tc.steps: step2. call the function GetFirstAutoFillContainerNode.
+     */
+    frameNode->GetFirstAutoFillContainerNode();
+}
+
+/**
+ * @tc.name: FrameNodeGetFirstAutoFillContainerNode03
+ * @tc.desc: Test the function GetFirstAutoFillContainerNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetFirstAutoFillContainerNode03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TABS_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto parentNode = FrameNode::CreateFrameNode(V2::TABS_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
+    parentNode->AddChild(frameNode);
+
+    /**
+     * @tc.steps: step2. call the function GetFirstAutoFillContainerNode.
+     */
+    frameNode->GetFirstAutoFillContainerNode();
+}
+
+/**
+ * @tc.name: FrameNodeNotifyFillRequestSuccess01
+ * @tc.desc: Test the function NotifyFillRequestSuccess
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeNotifyFillRequestSuccess01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. call the function NotifyFillRequestSuccess.
+     */
+    auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
+    auto nodeWrap = PageNodeInfoWrap::CreatePageNodeInfoWrap();
+    frameNode->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_PASSWORD);
+    auto pattern = frameNode->pattern_;
+    frameNode->pattern_ = nullptr;
+    frameNode->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_PASSWORD);
+    frameNode->pattern_ = pattern;
+}
+
+/**
+ * @tc.name: FrameNodeNotifyFillRequestFailed01
+ * @tc.desc: Test the function NotifyFillRequestFailed
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeNotifyFillRequestFailed01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+
+    /**
+     * @tc.steps: step2. call the function NotifyFillRequestFailed.
+     */
+    auto pattern = frameNode->pattern_;
+    frameNode->pattern_ = nullptr;
+    frameNode->NotifyFillRequestFailed(1, "test", true);
+    frameNode->pattern_ = pattern;
+}
+
+/**
+ * @tc.name: FrameNodeMarkNeedRender01
+ * @tc.desc: Test the function MarkNeedRender
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeMarkNeedRender01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->isLayoutDirtyMarked_ = false;
+    frameNode->isRenderDirtyMarked_ = false;
+
+    /**
+     * @tc.steps: step2. call the function MarkNeedRender.
+     */
+    frameNode->MarkNeedRender(false);
+}
+
+/**
+ * @tc.name: FrameNodeOnGenerateOneDepthVisibleFrame01
+ * @tc.desc: Test the function OnGenerateOneDepthVisibleFrame
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeOnGenerateOneDepthVisibleFrame01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto childNode = FrameNode::CreateFrameNode("childNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->isLayoutNode_ = true;
+    frameNode->overlayNode_ = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+
+    /**
+     * @tc.steps: step2. call the function OnGenerateOneDepthVisibleFrame.
+     */
+    std::list<RefPtr<FrameNode>> children;
+    children.push_back(childNode);
+    frameNode->OnGenerateOneDepthVisibleFrame(children);
+}
+
+/**
+ * @tc.name: FrameNodeOnGenerateOneDepthVisibleFrame02
+ * @tc.desc: Test the function OnGenerateOneDepthVisibleFrame
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeOnGenerateOneDepthVisibleFrame02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto childNode = FrameNode::CreateFrameNode("childNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->isLayoutNode_ = true;
+    frameNode->overlayNode_ = nullptr;
+
+    /**
+     * @tc.steps: step2. call the function OnGenerateOneDepthVisibleFrame.
+     */
+    std::list<RefPtr<FrameNode>> children;
+    children.push_back(childNode);
+    frameNode->OnGenerateOneDepthVisibleFrame(children);
+}
+
+/**
+ * @tc.name: FrameNodeOnGenerateOneDepthVisibleFrameWithTransition01
+ * @tc.desc: Test the function OnGenerateOneDepthVisibleFrameWithTransition
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeOnGenerateOneDepthVisibleFrameWithTransition01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto childNode = FrameNode::CreateFrameNode("childNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->isLayoutNode_ = true;
+    frameNode->isActive_ = true;
+    frameNode->overlayNode_ = nullptr;
+
+    /**
+     * @tc.steps: step2. call the function OnGenerateOneDepthVisibleFrameWithTransition.
+     */
+    std::list<RefPtr<FrameNode>> children;
+    children.push_back(childNode);
+    frameNode->OnGenerateOneDepthVisibleFrameWithTransition(children);
+    frameNode->overlayNode_ = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    frameNode->OnGenerateOneDepthVisibleFrameWithTransition(children);
 }
 } // namespace OHOS::Ace::NG
