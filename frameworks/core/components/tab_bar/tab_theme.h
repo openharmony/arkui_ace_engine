@@ -83,10 +83,6 @@ public:
                 theme->horizontalBottomTabBarSpace_ =
                     pattern->GetAttr<Dimension>("horizontal_bottom_tab_bar_space", 0.0_vp);
                 theme->subTabBarHoverDuration_ = pattern->GetAttr<double>("sub_tab_bar_hover_duration", 0.0);
-                theme->subTabBarHoverToPressDuration_ =
-                    pattern->GetAttr<double>("sub_tab_bar_hover_to_press_duration", 0.0);
-                theme->tabContentAnimationDuration_ =
-                    pattern->GetAttr<double>("tab_content_animation_duration", 0.0);
 
                 ParseAttribute(theme, pattern);
             } else {
@@ -98,6 +94,10 @@ public:
     private:
         void ParseAttribute(const RefPtr<TabTheme>& theme, const RefPtr<ThemeStyle>& pattern) const
         {
+            theme->subTabBarHoverToPressDuration_ =
+                pattern->GetAttr<double>("sub_tab_bar_hover_to_press_duration", 0.0);
+            theme->tabContentAnimationDuration_ =
+                pattern->GetAttr<double>("tab_content_animation_duration", 0.0);
             theme->tabBarDefaultHeight_ = pattern->GetAttr<Dimension>("tab_bar_default_height", 0.0_vp);
             theme->bottomTabBarDefaultHeight_ =
                 pattern->GetAttr<Dimension>("bottom_tab_bar_default_height", 0.0_vp);
@@ -388,7 +388,6 @@ public:
     {
         return colorBottomTabSubBg_;
     }
-
     const Color& GetColorBottomTabSubBgBlur() const
     {
         return colorBottomTabSubBgBlur_;

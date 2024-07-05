@@ -209,11 +209,10 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     double menuSpacingBetweenText = theme->GetMenuSpacingWithText().ConvertToPx();
     double menuSpacingBetweenHandle = theme->GetHandleDiameter().ConvertToPx();
 
-    auto width = menuItem->GetGeometryNode()->GetMarginFrameSize().Width();
-    auto height = menuItem->GetGeometryNode()->GetMarginFrameSize().Height();
-
     // When the extended menu is displayed, the default menu becomes circular, but the position of the circle is aligned
     // with the end of the original menu.
+    auto width = menuItem->GetGeometryNode()->GetMarginFrameSize().Width();
+    auto height = menuItem->GetGeometryNode()->GetMarginFrameSize().Height();
     if (GreatNotEqual(width, height)) {
         menuWidth_ = width;
         menuHeight_ = height;

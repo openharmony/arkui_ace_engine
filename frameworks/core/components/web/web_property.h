@@ -570,8 +570,6 @@ public:
         postWebMessageImpl_ = postWebMessageImpl;
     }
 
-
-
     using GetDefaultUserAgentImpl = std::function<std::string()>;
     std::string GetDefaultUserAgent()
     {
