@@ -829,9 +829,13 @@ PipelineContext* UINode::GetContext()
     if (context_) {
         context = context_;
     } else {
-        context = PipelineContext::GetCurrentContextPtrSafely();
+        if (externalData_) {
+            context = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+        } else {
+            context = PipelineContext::GetCurrentContextPtrSafely();
+        }
     }
-    
+
     if (context && context->IsDestroyed()) {
         LOGW("Get context from node when the context is destroyed. The context_ of node is%{public}s nullptr",
             context_? " not" : "");

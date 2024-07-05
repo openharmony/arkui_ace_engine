@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 116
+#define ARKUI_FULL_API_VERSION 117
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 116
+#define ARKUI_NODE_API_VERSION 117
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -44,6 +44,11 @@ enum ArkUIAPIVariantKind {
     EXTENDED = 4,
     COUNT = EXTENDED + 1,
 };
+
+typedef enum {
+    ARKUI_NODE_FLAG_TS = 0,
+    ARKUI_NODE_FLAG_C = 1,
+} ArkUINodeFlag;
 
 typedef int ArkUI_Bool;
 typedef int ArkUI_Int32;

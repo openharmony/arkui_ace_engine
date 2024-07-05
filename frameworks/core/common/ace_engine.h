@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ACE_ENGINE_H
 
 #include <atomic>
+#include <cstdint>
 #include <memory>
 #include <mutex>
 #include <unordered_map>
@@ -52,6 +53,7 @@ public:
 
     void TriggerGarbageCollection();
     void NotifyContainers(const std::function<void(const RefPtr<Container>&)>& callback);
+    bool HasContainer(int32_t containerId) const;
 
 private:
     AceEngine();

@@ -199,7 +199,13 @@ void SetCustomCallback(ArkUIVMContext context, ArkUINodeHandle node, ArkUI_Int32
 
 ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 flags)
 {
-    auto* node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
+    ArkUINodeHandle node = nullptr;
+    if (flags == ARKUI_NODE_FLAG_C) {
+        ContainerScope Scope(Container::CurrentIdSafelyWithCheck());
+        node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
+    } else {
+        node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
+    }
     return node;
 }
 
