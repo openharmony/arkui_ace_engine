@@ -1738,6 +1738,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             [weakContext = WeakPtr(pipeline)]() {
                 auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
                 CHECK_NULL_VOID(pipeline);
+                ContainerScope scope(pipeline->GetInstanceId());
                 pipeline->GetInspectorTree();
                 UiSessionManager::GetInstance().WebTaskNumsChange(-1);
             },

@@ -150,7 +150,7 @@ void UiSessionManager::GetInspectorTree()
 
 void UiSessionManager::SaveInspectorTreeFunction(InspectorFunction&& function)
 {
-    inspectorFunction_ = function;
+    inspectorFunction_ = std::move(function);
 }
 
 void UiSessionManager::AddValueForTree(int32_t id, const std::string& value)
