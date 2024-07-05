@@ -157,7 +157,7 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
     }
 
     ArkUI_Int32 id = ARKUI_AUTO_GENERATE_NODE_ID;
-    auto* uiNode = impl->getBasicAPI()->createNode(nodes[nodeType], id, 0);
+    auto* uiNode = impl->getBasicAPI()->createNode(nodes[nodeType], id, ARKUI_NODE_FLAG_C);
     if (!uiNode) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node type: %{public}d can not find in full impl", type);
         return nullptr;

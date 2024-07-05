@@ -298,6 +298,7 @@ public:
     static int32_t SafelyId();
     static int32_t CurrentId();
     static int32_t CurrentIdSafely();
+    static int32_t CurrentIdSafelyWithCheck();
     static RefPtr<Container> Current();
     static RefPtr<Container> CurrentSafely();
     static RefPtr<Container> CurrentSafelyWithCheck();
