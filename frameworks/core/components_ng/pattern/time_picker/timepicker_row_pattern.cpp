@@ -73,6 +73,7 @@ void TimePickerRowPattern::SetButtonIdeaSize()
     CHECK_NULL_VOID(pickerTheme);
     auto children = host->GetChildren();
     auto height = pickerTheme->GetDividerSpacing();
+    CHECK_EQUAL_VOID(children.size(), 0);
     auto width = host->GetGeometryNode()->GetFrameSize().Width() / static_cast<float>(children.size());
     auto defaultWidth = height.ConvertToPx() * 2;
     if (width > defaultWidth) {
@@ -1050,6 +1051,7 @@ void TimePickerRowPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto dividerSpacing = pipeline->NormalizeToPx(pickerTheme->GetDividerSpacing());
     auto pickerThemeWidth = dividerSpacing * 2;
 
+    CHECK_EQUAL_VOID(childSize, 0);
     auto centerX = (frameWidth / childSize - pickerThemeWidth) / 2 +
                    pickerChild->GetGeometryNode()->GetFrameRect().Width() * focusKeyID_ +
                    PRESS_INTERVAL.ConvertToPx() * 2;
