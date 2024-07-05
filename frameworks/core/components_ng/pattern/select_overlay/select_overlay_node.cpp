@@ -473,18 +473,17 @@ RefPtr<FrameNode> BuildMoreOrBackButton(int32_t overlayId, bool isMoreButton)
             }
         }
         buttonLayoutProperty->UpdatePadding({ left, right, top, bottom });
-        button->GetOrCreateGestureEventHub()->SetUserOnClick([overlayId](GestureEvent& /*info*/) {
-            auto pipeline = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto overlayManager = pipeline->GetSelectOverlayManager();
-            CHECK_NULL_VOID(overlayManager);
-            auto selectOverlay = overlayManager->GetSelectOverlayNode(overlayId);
-            CHECK_NULL_VOID(selectOverlay);
-            // When click button , change to extensionMenu or change to the default menu(selectMenu_).
-            auto isMore = !selectOverlay->GetIsExtensionMenu();
-            selectOverlay->MoreOrBackAnimation(isMore);
-        });
     }
+    button->GetOrCreateGestureEventHub()->SetUserOnClick([overlayId, isMoreButton](GestureEvent& /*info*/) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetSelectOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        auto selectOverlay = overlayManager->GetSelectOverlayNode(overlayId);
+        CHECK_NULL_VOID(selectOverlay);
+        // When click button , change to extensionMenu or change to the default menu(selectMenu_).
+        selectOverlay->MoreOrBackAnimation(isMoreButton);
+    });
 
     button->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     button->MarkModifyDone();
@@ -871,6 +870,7 @@ void SelectOverlayNode::MoreAnimation()
     isExtensionMenu_ = true;
 
     extensionProperty->UpdateVisibility(VisibleType::VISIBLE);
+    backButtonProperty->UpdateVisibility(VisibleType::VISIBLE);
     extensionMenuStatus_ = FrameNodeStatus::VISIBLE;
     AnimationOption extensionOption;
     extensionOption.SetDuration(ANIMATION_DURATION2);
@@ -988,6 +988,7 @@ void SelectOverlayNode::BackAnimation()
         ContainerScope scope(id);
         selectMenuInnerProperty->UpdateVisibility(VisibleType::VISIBLE);
         extensionProperty->UpdateVisibility(VisibleType::GONE);
+        backButtonProperty->UpdateVisibility(VisibleType::GONE);
         auto selectOverlay = weak.Upgrade();
         CHECK_NULL_VOID(selectOverlay);
         selectOverlay->SetAnimationStatus(false);
@@ -1500,6 +1501,7 @@ void SelectOverlayNode::AddMenuItemByCreateMenuCallback(const std::shared_ptr<Se
             backButton_ = BuildMoreOrBackButton(GetId(), false);
             CHECK_NULL_VOID(backButton_);
             backButton_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            backButton_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
             backButton_->MountToParent(Claim(this));
         }
     }
@@ -1685,6 +1687,7 @@ void SelectOverlayNode::UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>
             backButton_ = BuildMoreOrBackButton(GetId(), false);
             CHECK_NULL_VOID(backButton_);
             backButton_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            backButton_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
             backButton_->MountToParent(Claim(this));
         }
     }
