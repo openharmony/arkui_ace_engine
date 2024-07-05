@@ -289,7 +289,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (fingersId_.find(event.id) != fingersId_.end()) {
         fingersId_.erase(event.id);
     }
-    UpdateTouchEventInfo(event);
+    UpdateTouchEventInfo(event, false);
 
     if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
         UpdateTouchPointInVelocityTracker(event, true);
@@ -368,7 +368,7 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         return;
     }
 
-    UpdateTouchEventInfo(event);
+    UpdateTouchEventInfo(event, true);
     if (refereeState_ == RefereeState::DETECTING) {
         auto result = IsPanGestureAccept();
         if (result == GestureAcceptResult::ACCEPT) {
@@ -919,7 +919,7 @@ void PanRecognizer::AddOverTimeTrace()
     firstInputTime_.reset();
 }
 
-void PanRecognizer::UpdateTouchEventInfo(const TouchEvent& event)
+void PanRecognizer::UpdateTouchEventInfo(const TouchEvent& event, bool updateVelocity)
 {
     globalPoint_ = Point(event.x, event.y);
     lastTouchEvent_ = event;
@@ -935,7 +935,10 @@ void PanRecognizer::UpdateTouchEventInfo(const TouchEvent& event)
         TAG_LOGD(AceLogTag::ACE_GESTURE, "Delta is x %{public}f, y %{public}f ", delta_.GetX(), delta_.GetY());
     }
     mainDelta_ = GetMainAxisDelta();
-    UpdateTouchPointInVelocityTracker(event.history.empty() ? event : event.history.back());
+    // if call UpdateTouchEventInfo when receive UP event, velocity will not consider UP event position
+    if (updateVelocity) {
+        UpdateTouchPointInVelocityTracker(event.history.empty() ? event : event.history.back());
+    }
     averageDistance_ += delta_ / static_cast<double>(touchPoints_.size());
     touchPoints_[event.id] = event;
     touchPointsDistance_[event.id] += delta_;
