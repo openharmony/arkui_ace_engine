@@ -79,7 +79,13 @@ struct GridLayoutInfo {
     // for overScroll at top
     void UpdateEndIndex(float overScrollOffset, float mainSize, float mainGap);
     bool IsOutOfStart() const;
-    bool IsOutOfEnd() const;
+    /**
+     * @brief Determine out of boundary condition for overScroll
+     *
+     * @param irregular whether running irregular layout.
+     * @return true if the end of content is above viewport.
+     */
+    bool IsOutOfEnd(float mainGap, bool irregular) const;
 
     void SwapItems(int32_t itemIndex, int32_t insertIndex);
     int32_t GetOriginalIndex() const;

@@ -48,6 +48,7 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         MeasureOnJump(mainSize);
         if (!NearZero(postJumpOffset_)) {
             gridLayoutInfo_.currentOffset_ = postJumpOffset_;
+            enableSkip_ = false;
             MeasureOnOffset(mainSize);
         }
     } else {
