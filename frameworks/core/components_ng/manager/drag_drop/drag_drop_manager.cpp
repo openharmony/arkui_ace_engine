@@ -659,6 +659,16 @@ void DragDropManager::ResetDragDropStatus(const Point& point, const DragDropRet&
     parentHitNodes_.clear();
     dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
 }
+void DragDropManager::DoDragReset()
+{
+    dragDropState_ = DragDropMgrState::IDLE;
+    preTargetFrameNode_ = nullptr;
+    draggedFrameNode_ = nullptr;
+    preMovePoint_ = Point(0, 0);
+    hasNotifiedTransformation_ = false;
+    badgeNumber_ = -1;
+    isDragWithContextMenu_ = false;
+}
 
 void DragDropManager::HandleOnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo,
     const RefPtr<FrameNode>& dragFrameNode)
@@ -701,14 +711,8 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
     const RefPtr<FrameNode>& node)
 {
     Point point = pointerEvent.GetPoint();
-    dragDropState_ = DragDropMgrState::IDLE;
-    preTargetFrameNode_ = nullptr;
-    draggedFrameNode_ = nullptr;
-    preMovePoint_ = Point(0, 0);
-    hasNotifiedTransformation_ = false;
-    badgeNumber_ = -1;
     dragDropPointerEvent_ = pointerEvent;
-    isDragWithContextMenu_ = false;
+    DoDragReset();
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
         if (IsDragged() && IsWindowConsumed()) {
@@ -907,6 +911,13 @@ void DragDropManager::RequireSummary()
     int32_t ret = InteractionInterface::GetInstance()->GetDragSummary(summary);
     if (ret != 0) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "RequireSummary: Interaction GetSummary failed: %{public}d", ret);
+    } else {
+        std::string summarys;
+        for (const auto& [udkey, recordSize] : summary) {
+            std::string str = udkey + "-" + std::to_string(recordSize) + ";";
+            summarys += str;
+        }
+        TAG_LOGD(AceLogTag::ACE_DRAG, "require summary: %{public}s", summarys.c_str());
     }
     std::string extraInfo;
     ret = InteractionInterface::GetInstance()->GetDragExtraInfo(extraInfo);
