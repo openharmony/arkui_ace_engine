@@ -288,6 +288,9 @@ public:
     void OnCustomKeyboardClose() override;
 
     void KeyboardReDispatch(std::shared_ptr<OHOS::NWeb::NWebKeyEvent> event, bool isUsed) override;
+
+    void OnCursorUpdate(double x, double y, double width, double height) override;
+
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;
