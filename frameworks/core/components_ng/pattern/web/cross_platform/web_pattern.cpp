@@ -1236,4 +1236,9 @@ void WebPattern::OnMetaViewportUpdate(bool value)
 {
     // cross platform is not support now;
 }
+
+void WebPattern::OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode)
+{
+    // cross platform is not support now;
+}
 } // namespace OHOS::Ace::NG

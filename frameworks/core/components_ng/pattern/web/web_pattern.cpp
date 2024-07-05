@@ -1684,7 +1684,9 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     drawSizeCache_ = drawSize_;
     auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
     if (!CheckSafeAreaIsExpand()) {
-        delegate_->SetBoundsOrResize(drawSize_, offset);
+        delegate_->SetBoundsOrResize(drawSize_, offset, isKeyboardInSafeArea_);
+        IsNeedResizeVisibleViewport();
+        isKeyboardInSafeArea_ = false;
     } else {
         TAG_LOGD(AceLogTag::ACE_WEB, "OnDirtyLayoutWrapperSwap safeArea is set, no need setbounds");
     }
@@ -1727,8 +1729,19 @@ void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, do
         if (NearEqual(newHeight, oldWebHeight)) {
             return;
         }
-        drawSize_.SetHeight(newHeight);
-        UpdateWebLayoutSize(width, height, true);
+        bool isUpdate = true;
+        if (keyBoardAvoidMode_ == WebKeyboardAvoidMode::RESIZE_VISUAL) {
+            visibleViewportSize_.SetWidth(drawSize_.Width());
+            visibleViewportSize_.SetHeight(newHeight);
+            isUpdate = false;
+        } else if (keyBoardAvoidMode_ == WebKeyboardAvoidMode::OVERLAYS_CONTENT) {
+            return;
+        } else {
+            drawSize_.SetHeight(newHeight);
+            visibleViewportSize_.SetWidth(-1.0);
+            visibleViewportSize_.SetHeight(-1.0);
+        }
+        UpdateWebLayoutSize(width, height, true, isUpdate);
     }
 }
 
@@ -1754,7 +1767,9 @@ void WebPattern::OnAreaChangedInner()
         areaChangeSize_ = size;
         drawSize_ = size;
         drawSizeCache_ = drawSize_;
-        delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
+        delegate_->SetBoundsOrResize(drawSize_, resizeOffset, isKeyboardInSafeArea_);
+        IsNeedResizeVisibleViewport();
+        isKeyboardInSafeArea_ = false;
     }
     if (renderMode_ != RenderMode::SYNC_RENDER) {
         if (webOffset_ == offset) {
@@ -1765,7 +1780,9 @@ void WebPattern::OnAreaChangedInner()
     UpdateTouchHandleForOverlay();
     if (isInWindowDrag_)
         return;
-    delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
+    delegate_->SetBoundsOrResize(drawSize_, resizeOffset, isKeyboardInSafeArea_);
+    IsNeedResizeVisibleViewport();
+    isKeyboardInSafeArea_ = false;
     if (renderMode_ == RenderMode::SYNC_RENDER) {
         UpdateSlideOffset(true);
     }
@@ -2106,6 +2123,11 @@ void WebPattern::OnTextAutosizingUpdate(bool isTextAutosizing)
     if (delegate_) {
         delegate_->UpdateTextAutosizing(isTextAutosizing);
     }
+}
+
+void WebPattern::OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode)
+{
+    keyBoardAvoidMode_ = mode;
 }
 
 bool WebPattern::IsRootNeedExportTexture()
@@ -2472,63 +2494,126 @@ void WebPattern::OfflineMode()
     OnWindowHide();
 }
 
+bool WebPattern::IsNeedResizeVisibleViewport()
+{
+    if (visibleViewportSize_.Width() < 0 || visibleViewportSize_.Height() < 0 ||
+        isVirtualKeyBoardShow_ != VkState::VK_SHOW || NearZero(lastKeyboardHeight_)) {
+        return false;
+    }
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, false);
+    int32_t height = context->GetRootRect().Height();
+    auto y = GetCoordinatePoint()->GetY();
+    if (GreatOrEqual(height, lastKeyboardHeight_ + y)) {
+        double newHeight = height - lastKeyboardHeight_ - y;
+        if (GreatOrEqual(newHeight, drawSize_.Height()) ||
+            NearEqual(newHeight, drawSize_.Height())) {
+            visibleViewportSize_.SetWidth(-1.0);
+            visibleViewportSize_.SetHeight(-1.0);
+        } else {
+            return false;
+        }
+    } else {
+        visibleViewportSize_.SetWidth(-1.0);
+        visibleViewportSize_.SetHeight(-1.0);
+    }
+    delegate_->ResizeVisibleViewport(visibleViewportSize_, false);
+    return true;
+}
+
+bool WebPattern::ProcessVirtualKeyBoardHide(int32_t width, int32_t height, bool safeAreaEnabled)
+{
+    isKeyboardInSafeArea_ = false;
+    if (safeAreaEnabled) {
+        isVirtualKeyBoardShow_ = VkState::VK_HIDE;
+        return false;
+    }
+    if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
+        return false;
+    }
+    drawSize_.SetSize(drawSizeCache_);
+    visibleViewportSize_.SetWidth(-1.0);
+    visibleViewportSize_.SetHeight(-1.0);
+    UpdateWebLayoutSize(width, height, false);
+    isVirtualKeyBoardShow_ = VkState::VK_HIDE;
+    return true;
+}
+
+bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, double keyboard, bool safeAreaEnabled)
+{
+    if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
+        drawSizeCache_.SetSize(drawSize_);
+    }
+    if (drawSize_.Height() <= (height - keyboard - GetCoordinatePoint()->GetY())) {
+        isVirtualKeyBoardShow_ = VkState::VK_SHOW;
+        return !safeAreaEnabled;
+    }
+    if (height - GetCoordinatePoint()->GetY() < keyboard) {
+        return !safeAreaEnabled;
+    }
+    if (!delegate_->NeedSoftKeyboard()) {
+        return false;
+    }
+    isVirtualKeyBoardShow_ = VkState::VK_SHOW;
+    if (layoutMode_ == WebLayoutMode::FIT_CONTENT) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "ProcessVirtualKeyBoardShow layoutMode is FIT_CONTENT");
+        lastKeyboardHeight_ = keyboard;
+        return true;
+    }
+    if (safeAreaEnabled) {
+        isKeyboardInSafeArea_ = true;
+        lastKeyboardHeight_ = keyboard;
+        return false;
+    }
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, false);
+    context->SetRootRect(width, height, 0);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, false);
+    taskExecutor->PostDelayedTask(
+        [weak = WeakClaim(this), width, height, keyboard, oldWebHeight = drawSize_.Height()]() {
+            auto webPattern = weak.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->UpdateLayoutAfterKeyboardShow(width, height, keyboard, oldWebHeight);
+        },
+        TaskExecutor::TaskType::UI, UPDATE_WEB_LAYOUT_DELAY_TIME, "ArkUIWebUpdateLayoutAfterKeyboardShow");
+    return true;
+}
+
 bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard)
 {
     CHECK_NULL_RETURN(delegate_, false);
     delegate_->SetVirtualKeyBoardArg(width, height, keyboard);
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaManager, false);
+    bool keyboardSafeAreaEnabled = safeAreaManager->KeyboardSafeAreaEnabled();
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "ProcessVirtualKeyBoard width:%{public}d, height:%{public}d, keyboard:%{public}f, safeArea:%{public}d",
+        width, height, keyboard, keyboardSafeAreaEnabled);
+
     if (!isFocus_ || !isVisible_) {
-        if (isVirtualKeyBoardShow_ == VkState::VK_SHOW) {
-            drawSize_.SetSize(drawSizeCache_);
-            UpdateWebLayoutSize(width, height, false);
-            UpdateOnFocusTextField(false);
-            isVirtualKeyBoardShow_ = VkState::VK_HIDE;
-        }
+        UpdateOnFocusTextField(false);
+        ProcessVirtualKeyBoardHide(width, height, keyboardSafeAreaEnabled);
         return false;
     }
+    UpdateOnFocusTextField(!NearZero(keyboard));
     if (NearZero(keyboard)) {
-        if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
-            return false;
-        }
-        drawSize_.SetSize(drawSizeCache_);
-        UpdateWebLayoutSize(width, height, false);
-        UpdateOnFocusTextField(false);
-        isVirtualKeyBoardShow_ = VkState::VK_HIDE;
+        return ProcessVirtualKeyBoardHide(width, height, keyboardSafeAreaEnabled);
     } else if (isVirtualKeyBoardShow_ != VkState::VK_SHOW || lastKeyboardHeight_ != keyboard) {
-        if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
-            drawSizeCache_.SetSize(drawSize_);
-        }
-        if (drawSizeCache_.Height() <= (height - keyboard - GetCoordinatePoint()->GetY())) {
-            isVirtualKeyBoardShow_ = VkState::VK_SHOW;
-            return true;
-        }
-        if (height - GetCoordinatePoint()->GetY() < keyboard) {
-            return true;
-        }
-        if (!delegate_->NeedSoftKeyboard()) {
-            return false;
-        }
-        isVirtualKeyBoardShow_ = VkState::VK_SHOW;
-        UpdateOnFocusTextField(true);
-        auto frameNode = GetHost();
-        CHECK_NULL_RETURN(frameNode, false);
-        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(context, false);
-        context->SetRootRect(width, height, 0);
-        auto taskExecutor = context->GetTaskExecutor();
-        CHECK_NULL_RETURN(taskExecutor, false);
-        taskExecutor->PostDelayedTask(
-            [weak = WeakClaim(this), width, height, keyboard, oldWebHeight = drawSize_.Height()]() {
-                auto webPattern = weak.Upgrade();
-                CHECK_NULL_VOID(webPattern);
-                webPattern->UpdateLayoutAfterKeyboardShow(width, height, keyboard, oldWebHeight);
-            },
-            TaskExecutor::TaskType::UI, UPDATE_WEB_LAYOUT_DELAY_TIME, "ArkUIWebUpdateLayoutAfterKeyboardShow");
+        return ProcessVirtualKeyBoardShow(width, height, keyboard, keyboardSafeAreaEnabled);
     }
-    return true;
+    return !keyboardSafeAreaEnabled;
 }
 
-void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard)
+void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard, bool isUpdate)
 {
     CHECK_NULL_VOID(delegate_);
     if (delegate_->ShouldVirtualKeyboardOverlay()) {
@@ -2542,13 +2627,16 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeybo
 
     // Scroll focused node into view when keyboard show.
     delegate_->SetBoundsOrResize(drawSize_, offset, isKeyboard);
+    delegate_->ResizeVisibleViewport(visibleViewportSize_, isKeyboard);
 
-    rect.SetSize(SizeF(drawSize_.Width(), drawSize_.Height()));
-    frameNode->GetRenderContext()->SyncGeometryProperties(rect);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    context->SetRootRect(width, height, 0);
+    if (isUpdate) {
+        rect.SetSize(SizeF(drawSize_.Width(), drawSize_.Height()));
+        frameNode->GetRenderContext()->SyncGeometryProperties(rect);
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->SetRootRect(width, height, 0);
+    }
 }
 
 void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)

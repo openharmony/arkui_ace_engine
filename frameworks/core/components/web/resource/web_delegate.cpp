@@ -5915,6 +5915,33 @@ void WebDelegate::SetBoundsOrResize(const Size& drawSize, const Offset& offset, 
     }
 }
 
+void WebDelegate::ResizeVisibleViewport(const Size& visibleSize, bool isKeyboard)
+{
+    double width = visibleSize.Width();
+    double height = visibleSize.Height();
+    if (NearEqual(resizeVisibleWidth_, width) && NearEqual(resizeVisibleHeight_, height)) {
+        return;
+    }
+    resizeVisibleWidth_ = width;
+    resizeVisibleHeight_ = height;
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), width, height, isKeyboard]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_ && !delegate->window_) {
+                delegate->nweb_->ResizeVisibleViewport(
+                    width < 0 ? 0 : std::ceil(width), height < 0 ? 0 : std::ceil(height), isKeyboard);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebResizeVisibleViewport");
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->DestroyAnalyzerOverlay();
+}
+
 Offset WebDelegate::GetWebRenderGlobalPos()
 {
     return offset_;
