@@ -231,7 +231,7 @@ export struct SubHeader {
           this.buttonBgColor =  $r('sys.color.interactive_pressed');
         }
       }
-      if (event.type === TouchType.Up) {
+      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
         if (this.operationType === OperationType.TEXT_ARROW) {
           this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
         }
@@ -853,7 +853,7 @@ struct SingleIconStyle {
         disabled: disabledStyle,
       })
       .onTouch((event) => {
-        if (event.type === TouchType.Down) {
+        if (event.type === TouchType.Down || TouchType.Cancel) {
           this.bgColor = $r('sys.color.interactive_pressed');
         }
         if (event.type === TouchType.Up) {
