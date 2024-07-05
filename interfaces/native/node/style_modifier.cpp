@@ -2455,7 +2455,7 @@ int32_t SetBackgroundImagePosition(ArkUI_NodeHandle node, const ArkUI_AttributeI
     }
     auto fullImpl = GetFullImpl();
     ArkUI_Float32 values[] = { item->value[NUM_0].f32, item->value[NUM_1].f32 };
-    int32_t unit = GetDefaultUnit(node, UNIT_VP);
+    int32_t unit = GetDefaultUnit(node, UNIT_PX);
     ArkUI_Int32 units[] = { unit, unit };
 
     fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundImagePosition(
@@ -2474,7 +2474,7 @@ const ArkUI_AttributeItem* GetBackgroundImagePosition(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
     ArkUIPositionOptions positionOption = { 0.0f, 0.0f };
-    ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_VP);
+    ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_PX);
     fullImpl->getNodeModifiers()->getCommonModifier()->getBackgroundImagePosition(node->uiNodeHandle,
         &positionOption, unit);
     g_numberValues[NUM_0].f32 = positionOption.x;
