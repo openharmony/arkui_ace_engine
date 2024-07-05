@@ -81,25 +81,25 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (isDefaultFontSize) {
             fontSizeInit = badgeTheme->GetBadgeAgeFontSize().ConvertToVp();
         } else {
-            fontSizeInit = badgeFontSize.value().Value();
+            fontSizeInit = badgeFontSize.ConvertToVp();
         }
 
         if (isDefaultBadgeSize) {
             badgeSizeInit = badgeTheme->GetBadgeAgeCircleSize().ConvertToVp();
         } else {
-            badgeSizeInit = badgeCircleSize.value().Value();
+            badgeSizeInit = badgeCircleSize.ConvertToVp();
         }
     } else {
         if (isDefaultFontSize) {
             fontSizeInit = badgeTheme->GetBadgeFontSize().ConvertToVp();
         } else {
-            fontSizeInit = badgeFontSize.value().Value();
+            fontSizeInit = badgeFontSize.ConvertToVp();
         }
 
         if (isDefaultBadgeSize) {
             badgeSizeInit = badgeTheme->GetBadgeCircleSize().ConvertToVp();
         } else {
-            badgeSizeInit = badgeCircleSize.value().Value();
+            badgeSizeInit = badgeCircleSize.ConvertToVp();
         }
     }
     
@@ -242,13 +242,13 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         if (isDefaultBadgeSize) {
             badgeSizeInit = badgeTheme->GetBadgeAgeCircleSize().ConvertToVp();
         } else {
-            badgeSizeInit = badgeCircleSize.value().Value();
+            badgeSizeInit = badgeCircleSize.ConvertToVp();
         }
     } else {
         if (isDefaultBadgeSize) {
             badgeSizeInit = badgeTheme->GetBadgeCircleSize().ConvertToVp();
         } else {
-            badgeSizeInit = badgeCircleSize.value().Value();
+            badgeSizeInit = badgeCircleSize.ConvertToVp();
         }
     }
 
