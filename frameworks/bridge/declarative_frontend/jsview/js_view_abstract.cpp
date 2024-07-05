@@ -3635,25 +3635,27 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsPadding(const JSCallbackInfo& info)
 {
-    ParseMarginOrPadding(info, false);
+    ParseMarginOrPadding(info, EdgeType::PADDING);
 }
 
 void JSViewAbstract::JsMargin(const JSCallbackInfo& info)
 {
-    ParseMarginOrPadding(info, true);
+    ParseMarginOrPadding(info, EdgeType::MARGIN);
 }
 
-void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin)
+void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType type)
 {
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT, JSCallbackInfoType::STRING,
         JSCallbackInfoType::NUMBER };
     auto jsVal = info[0];
     if (!CheckJSCallbackInfo("MarginOrPadding", jsVal, checkList)) {
         auto resetDimension = CalcDimension(0.0);
-        if (isMargin) {
+        if (type == EdgeType::MARGIN) {
             ViewAbstractModel::GetInstance()->SetMargin(resetDimension);
-        } else {
+        } else if (type == EdgeType::PADDING) {
             ViewAbstractModel::GetInstance()->SetPadding(resetDimension);
+        } else if (type == EdgeType::SAFE_AREA_PADDING) {
+            ViewAbstractModel::GetInstance()->ResetSafeAreaPadding();
         }
         return;
     }
@@ -3663,12 +3665,15 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMar
         ParseCommonMarginOrPaddingCorner(paddingObj, commonCalcDimension);
         if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
             commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
-            if (isMargin) {
+            if (type == EdgeType::MARGIN)  {
                 ViewAbstractModel::GetInstance()->SetMargins(commonCalcDimension.top, commonCalcDimension.bottom,
                     commonCalcDimension.left, commonCalcDimension.right);
-            } else {
+            } else if (type == EdgeType::PADDING) {
                 ViewAbstractModel::GetInstance()->SetPaddings(commonCalcDimension.top, commonCalcDimension.bottom,
                     commonCalcDimension.left, commonCalcDimension.right);
+            } else if (type == EdgeType::SAFE_AREA_PADDING) {
+                ViewAbstractModel::GetInstance()->SetSafeAreaPaddings(commonCalcDimension.top,
+                    commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right);
             }
             return;
         }
@@ -3679,10 +3684,12 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMar
         // use default value.
         length.Reset();
     }
-    if (isMargin) {
+    if (type == EdgeType::MARGIN) {
         ViewAbstractModel::GetInstance()->SetMargin(length);
-    } else {
+    } else if (type == EdgeType::PADDING) {
         ViewAbstractModel::GetInstance()->SetPadding(length);
+    } else if (type == EdgeType::SAFE_AREA_PADDING) {
+        ViewAbstractModel::GetInstance()->SetSafeAreaPadding(length);
     }
 }
 
@@ -8310,6 +8317,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("paddingBottom", &JSViewAbstract::SetPaddingBottom, opt);
     JSClass<JSViewAbstract>::StaticMethod("paddingLeft", &JSViewAbstract::SetPaddingLeft, opt);
     JSClass<JSViewAbstract>::StaticMethod("paddingRight", &JSViewAbstract::SetPaddingRight, opt);
+    JSClass<JSViewAbstract>::StaticMethod("safeAreaPadding", &JSViewAbstract::SetSafeAreaPadding, opt);
 
     JSClass<JSViewAbstract>::StaticMethod("foregroundColor", &JSViewAbstract::JsForegroundColor);
     JSClass<JSViewAbstract>::StaticMethod("foregroundEffect", &JSViewAbstract::JsForegroundEffect);
@@ -8799,6 +8807,11 @@ void JSViewAbstract::SetPaddingRight(const JSCallbackInfo& info)
         return;
     }
     ViewAbstractModel::GetInstance()->SetPaddings(std::nullopt, std::nullopt, std::nullopt, value);
+}
+
+void JSViewAbstract::SetSafeAreaPadding(const JSCallbackInfo& info)
+{
+    ParseMarginOrPadding(info, EdgeType::SAFE_AREA_PADDING);
 }
 
 void JSViewAbstract::SetColorBlend(Color color)

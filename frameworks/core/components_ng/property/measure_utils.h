@@ -46,10 +46,11 @@ OptionalSizeF ConvertToOptionalSize(
 SizeF ConstrainSize(const SizeF& size, const SizeF& minSize, const SizeF& maxSize);
 
 PaddingPropertyF ConvertToPaddingPropertyF(const std::unique_ptr<PaddingProperty>& padding,
-    const ScaleProperty& scaleProperty, float percentReference = -1.0f, bool roundPixel = true);
+    const ScaleProperty& scaleProperty, float percentReference = -1.0f, bool roundPixel = true,
+    bool nonNegative = false);
 
 PaddingPropertyF ConvertToPaddingPropertyF(const PaddingProperty& padding, const ScaleProperty& scaleProperty,
-    float percentReference = -1.0f, bool roundPixel = true);
+    float percentReference = -1.0f, bool roundPixel = true, bool nonNegative = false);
 
 MarginPropertyF ConvertToMarginPropertyF(const std::unique_ptr<MarginProperty>& margin,
     const ScaleProperty& scaleProperty, float percentReference = -1.0f, bool roundPixel = true);
@@ -131,9 +132,8 @@ ACE_FORCE_EXPORT OptionalSizeF CreateIdealSize(
  * @param needToConstrain constraint the result idealSize or not by min and max size in layoutConstraint.
  * @return SizeF the node size info.
  */
-OptionalSizeF CreateIdealSizeByPercentRef(
-    const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType, bool needToConstrain = false,
-    const std::unique_ptr<MeasureProperty>& rawConstraint = nullptr);
+OptionalSizeF CreateIdealSizeByPercentRef(const LayoutConstraintF& layoutConstraint, Axis axis, MeasureType measureType,
+    bool needToConstrain = false, const std::unique_ptr<MeasureProperty>& rawConstraint = nullptr);
 
 /**
  * @brief Create max size for children which is parent's max size minus margin and padding.
