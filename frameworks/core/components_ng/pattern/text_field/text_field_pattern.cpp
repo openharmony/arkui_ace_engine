@@ -465,6 +465,16 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     if (!IsDragging()) {
         dragParagraph_ = paragraph_;
+        do {
+            if (!dragNode_) {
+                break;
+            }
+            auto dragNodePattern = AceType::DynamicCast<TextDragPattern>(dragNode_->GetPattern());
+            if (!dragNodePattern) {
+                break;
+            }
+            dragNodePattern->UpdateParagraph(paragraph_);
+        } while (false);
     }
     auto textRect = textFieldLayoutAlgorithm->GetTextRect();
     if (!needToRefreshSelectOverlay_ ||
