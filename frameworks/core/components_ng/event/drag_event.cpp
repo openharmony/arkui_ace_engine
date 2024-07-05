@@ -526,7 +526,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
         dragDropManager->SetPrepareDragFrameNode(frameNode);
         bool isBindMenuPreview = gestureHub->GetPreviewMode() != MenuPreviewMode::NONE;
-        if (!isBindMenuPreview) {
+        if (!hasContextMenuUsingGesture && !isBindMenuPreview) {
             actuator->SetFilter(actuator);
         }
         auto manager = pipeline->GetOverlayManager();
