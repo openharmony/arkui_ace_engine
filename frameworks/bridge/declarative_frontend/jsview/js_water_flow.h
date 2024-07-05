@@ -48,7 +48,7 @@ protected:
     static void JsOnScrollIndex(const JSCallbackInfo& args);
 
     static void SetScrollBar(const JSCallbackInfo& info);
-    static void SetScrollBarColor(const JSCallbackInfo& info);
+    static void SetScrollBarColor(const std::string& color);
     static void SetScrollBarWidth(const JSCallbackInfo& scrollWidth);
 };
 } // namespace OHOS::Ace::Framework
