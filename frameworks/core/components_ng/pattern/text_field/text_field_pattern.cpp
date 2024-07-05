@@ -1725,6 +1725,7 @@ void TextFieldPattern::HandleTouchUp()
     if (magnifierController_->GetShowMagnifier() && !GetIsPreviewText()) {
         magnifierController_->UpdateShowMagnifier();
     }
+    ScheduleDisappearDelayTask();
 }
 
 void TextFieldPattern::HandleTouchMove(const TouchEventInfo& info)
@@ -5535,6 +5536,8 @@ void TextFieldPattern::ScheduleDisappearDelayTask()
 {
     auto scrollBar = GetScrollBar();
     if (scrollBar) {
+        scrollBar->SetPressed(false);
+        scrollBar->PlayScrollBarShrinkAnimation();
         scrollBar->ScheduleDisappearDelayTask();
     }
 }
