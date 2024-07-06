@@ -134,6 +134,11 @@ public:
         return menuWidth_;
     }
 
+    std::optional<float> GetMenuHeight() const
+    {
+        return menuHeight_;
+    }
+
     const RectF& GetHandleRegion(bool isFirst) const
     {
         if (isFirst) {

@@ -185,9 +185,8 @@ void SelectOverlayLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper)
     if ((!CheckInShowArea(*info_) || (!isNewAvoid && shouldInActiveByHandle)) && !info_->isUsingMouse) {
         menu->SetActive(false);
         return;
-    } else {
-        menu->SetActive(true);
     }
+    menu->SetActive(true);
     OffsetF menuOffset;
     if (info_->isUsingMouse) {
         menuOffset = CalculateCustomMenuByMouseOffset(layoutWrapper);
@@ -216,8 +215,9 @@ void SelectOverlayLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper)
     bool isReverse = IsReverseLayout(layoutWrapper);
     OffsetF buttonOffset;
     if (GreatNotEqual(menuSize.Width(), menuSize.Height())) {
-        buttonOffset = isReverse ? menuOffset :
-            OffsetF(menuOffset.GetX() + menuSize.Width() - buttonSize.Width(), menuOffset.GetY());
+        auto diffY = std::max((menuSize.Height() - buttonSize.Height()) / 2.0f, 0.0f);
+        buttonOffset = isReverse ? OffsetF(menuOffset.GetX(), menuOffset.GetY() + diffY) :
+            OffsetF(menuOffset.GetX() + menuSize.Width() - buttonSize.Width(), menuOffset.GetY() + diffY);
     } else {
         buttonOffset = menuOffset;
     }

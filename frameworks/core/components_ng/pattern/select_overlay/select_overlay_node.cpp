@@ -911,12 +911,6 @@ void SelectOverlayNode::MoreAnimation()
     selectOption.SetCurve(Curves::FRICTION);
     pipeline->FlushUITasks();
     AnimationUtils::OpenImplicitAnimation(selectOption, Curves::FRICTION, callback);
-    if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
-        auto geometryNode = selectMenuInner_->GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        auto selectMenuHeight = geometryNode->GetFrameSize().Height();
-        frameSize = CalcSize(CalcLength(toolbarHeight.ConvertToPx()), CalcLength(selectMenuHeight));
-    }
     selectProperty->UpdateUserDefinedIdealSize(frameSize);
     selectMenuInnerContext->UpdateTransformTranslate({ ANIMATION_TEXT_OFFSET.ConvertToPx(), 0.0f, 0.0f });
     selectMenu_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
@@ -955,7 +949,7 @@ void SelectOverlayNode::BackAnimation()
 
     isDoingAnimation_ = true;
     isExtensionMenu_ = false;
-    auto meanuWidth = pattern->GetMenuWidth();
+    auto menuWidth = pattern->GetMenuWidth();
 
     selectMenuInnerProperty->UpdateVisibility(VisibleType::VISIBLE);
 
@@ -981,7 +975,7 @@ void SelectOverlayNode::BackAnimation()
 
     auto toolbarHeight = textOverlayTheme->GetMenuToolbarHeight();
     auto frameSize =
-        CalcSize(CalcLength(meanuWidth.value_or(toolbarHeight.ConvertToPx())), CalcLength(toolbarHeight.ConvertToPx()));
+        CalcSize(CalcLength(menuWidth.value_or(toolbarHeight.ConvertToPx())), CalcLength(toolbarHeight.ConvertToPx()));
 
     FinishCallback callback = [selectMenuInnerProperty, extensionProperty, backButtonProperty,
                                   id = Container::CurrentId(), weak = WeakClaim(this)]() {
@@ -1004,7 +998,9 @@ void SelectOverlayNode::BackAnimation()
         auto geometryNode = selectMenu_->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         auto selectMenuHeight = geometryNode->GetFrameSize().Height();
-        frameSize = CalcSize(CalcLength(meanuWidth.value_or(selectMenuHeight)), CalcLength(selectMenuHeight));
+        auto menuHeight = pattern->GetMenuHeight();
+        frameSize = CalcSize(
+            CalcLength(menuWidth.value_or(selectMenuHeight)), CalcLength(menuHeight.value_or(selectMenuHeight)));
     }
     selectProperty->UpdateUserDefinedIdealSize(frameSize);
     selectMenuInnerContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
