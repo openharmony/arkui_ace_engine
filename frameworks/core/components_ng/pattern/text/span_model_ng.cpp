@@ -170,6 +170,36 @@ void SpanModelNG::ClearOnClick(UINode* uiNode)
     ACE_UPDATE_NODE_SPAN_PROPERTY(OnClickEvent, nullptr, PropertyInfo::NONE, uiNode);
 }
 
+void SpanModelNG::SetAccessibilityText(const std::string& text)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    CHECK_NULL_VOID(spanNode);
+    auto spanItem = spanNode->GetSpanItem();
+    CHECK_NULL_VOID(spanItem);
+    CHECK_NULL_VOID(spanItem->accessibilityProperty);
+    spanItem->accessibilityProperty->SetAccessibilityText(text);
+}
+
+void SpanModelNG::SetAccessibilityDescription(const std::string& description)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    CHECK_NULL_VOID(spanNode);
+    auto spanItem = spanNode->GetSpanItem();
+    CHECK_NULL_VOID(spanItem);
+    CHECK_NULL_VOID(spanItem->accessibilityProperty);
+    spanItem->accessibilityProperty->SetAccessibilityDescription(description);
+}
+
+void SpanModelNG::SetAccessibilityImportance(const std::string& importance)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    CHECK_NULL_VOID(spanNode);
+    auto spanItem = spanNode->GetSpanItem();
+    CHECK_NULL_VOID(spanItem);
+    CHECK_NULL_VOID(spanItem->accessibilityProperty);
+    spanItem->accessibilityProperty->SetAccessibilityLevel(importance);
+}
+
 void SpanModelNG::InitSpan(UINode* uiNode, const std::string& content)
 {
     ACE_UPDATE_NODE_SPAN_PROPERTY(Content, content, PropertyInfo::NONE, uiNode);
