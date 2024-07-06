@@ -9400,6 +9400,45 @@ class SpanInputModifier extends ModifierWithKey {
   }
 }
 SpanInputModifier.identity = Symbol('spanInput');
+class SpanAccessibilityTextModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().span.resetAccessibilityText(node);
+    } else {
+      getUINativeModule().span.setAccessibilityText(node, this.value);
+    }
+  }
+}
+SpanAccessibilityTextModifier.identity = Symbol('spanAccessibilityText');
+class SpanAccessibilityDescriptionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().span.resetAccessibilityDescription(node);
+    } else {
+      getUINativeModule().span.setAccessibilityDescription(node, this.value);
+    }
+  }
+}
+SpanAccessibilityDescriptionModifier.identity = Symbol('spanAccessibilityDescription');
+class SpanAccessibilityLevelModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().span.resetAccessibilityLevel(node);
+    } else {
+      getUINativeModule().span.setAccessibilityLevel(node, this.value);
+    }
+  }
+}
+SpanAccessibilityLevelModifier.identity = Symbol('spanAccessibilityLevel');
 class ArkSpanComponent {
   constructor(nativePtr, classType) {
     this._modifiersWithKeys = new Map();
@@ -9826,13 +9865,31 @@ class ArkSpanComponent {
     throw new Error('Method not implemented.');
   }
   accessibilityText(value) {
-    throw new Error('Method not implemented.');
+    if (typeof value === 'string') {
+      modifierWithKey(this._modifiersWithKeys, SpanAccessibilityTextModifier.identity, SpanAccessibilityTextModifier, value);
+    }
+    else {
+      modifierWithKey(this._modifiersWithKeys, SpanAccessibilityTextModifier.identity, SpanAccessibilityTextModifier, undefined);
+    }
+    return this;
   }
   accessibilityDescription(value) {
-    throw new Error('Method not implemented.');
+    if (typeof value === 'string') {
+      modifierWithKey(this._modifiersWithKeys, SpanAccessibilityDescriptionModifier.identity, SpanAccessibilityDescriptionModifier, value);
+    }
+    else {
+      modifierWithKey(this._modifiersWithKeys, SpanAccessibilityDescriptionModifier.identity, SpanAccessibilityDescriptionModifier, undefined);
+    }
+    return this;
   }
   accessibilityLevel(value) {
-    throw new Error('Method not implemented.');
+    if (typeof value === 'string') {
+      modifierWithKey(this._modifiersWithKeys, SpanAccessibilityLevelModifier.identity, SpanAccessibilityLevelModifier, value);
+    }
+    else {
+      modifierWithKey(this._modifiersWithKeys, SpanAccessibilityLevelModifier.identity, SpanAccessibilityLevelModifier, undefined);
+    }
+    return this;
   }
   obscured(reasons) {
     throw new Error('Method not implemented.');

@@ -82,6 +82,9 @@ public:
     static std::vector<Shadow> GetTextShadow(UINode* uiNode);
     static void SetOnClick(UINode* uiNode, GestureEventFunc&& click);
     static void ClearOnClick(UINode* uiNode);
+    static void SetAccessibilityText(UINode* uiNode, const std::string& text);
+    static void SetAccessibilityDescription(UINode* uiNode, const std::string& description);
+    static void SetAccessibilityImportance(UINode* uiNode, const std::string& importance);
     static std::vector<std::string> GetSpanFontFamily(UINode* uiNode);
 #ifdef USE_GRAPHIC_TEXT_GINE
     // impl in render/adapter/span_model_adapter.cpp
