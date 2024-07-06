@@ -593,4 +593,191 @@ HWTEST_F(ListGroupAlgTestNg, ListItemAlign002, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildX(groupNode, 0), 0);
 }
+
+/**
+ * @tc.name: ListGroupRepeatCacheCount001
+ * @tc.desc: ListItemGroup cacheCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    auto header = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+    groupModel.SetHeader(std::move(header));
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. Check Repeat frameCount
+     */
+    auto groupNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(groupNode->GetChildAtIndex(1));
+    EXPECT_NE(repeat, nullptr);
+    int32_t frameCount = repeat->FrameCount();
+    EXPECT_EQ(frameCount, 10);
+
+    /**
+     * @tc.steps: step2. Flush Idle Task
+     * @tc.expected: ListItem 4 is cached
+     */
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushIdleTask(listPattern);
+    int32_t childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 5);
+    auto cachedItem = groupNode->GetChildByIndex(4 + 1)->GetHostNode();
+    EXPECT_EQ(cachedItem->IsActive(), false);
+
+    /**
+     * @tc.steps: step3. Flush Idle Task
+     * @tc.expected: ListItem 1 and 7 is cached, ListItem 2,3,4,5,6 is active.
+     */
+    UpdateCurrentOffset(-300, SCROLL_FROM_JUMP);
+    FlushIdleTask(listPattern);
+    childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 7);
+    cachedItem = groupNode->GetChildByIndex(1 + 1)->GetHostNode();
+    EXPECT_EQ(cachedItem->IsActive(), false);
+    cachedItem = groupNode->GetChildByIndex(7 + 1)->GetHostNode();
+    EXPECT_EQ(cachedItem->IsActive(), false);
+}
+
+/**
+ * @tc.name: ListGroupRepeatCacheCount002
+ * @tc.desc: ListItemGroup lanes cacheCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    auto header = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+    groupModel.SetHeader(std::move(header));
+    CreateRepeatVirtualScrollNode(20, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. Check Repeat frameCount
+     */
+    auto groupNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(groupNode->GetChildAtIndex(1));
+    EXPECT_NE(repeat, nullptr);
+    int32_t frameCount = repeat->FrameCount();
+    EXPECT_EQ(frameCount, 20);
+
+    /**
+     * @tc.steps: step2. Flush Idle Task
+     * @tc.expected: ListItem 10,11 is cached
+     */
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushIdleTask(listPattern);
+    int32_t childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 10);
+    auto item8 = groupNode->GetChildByIndex(8 + 1)->GetHostNode();
+    EXPECT_EQ(item8->IsActive(), false);
+    auto item9 = groupNode->GetChildByIndex(9 + 1)->GetHostNode();
+    EXPECT_EQ(item9->IsActive(), false);
+
+    /**
+     * @tc.steps: step3. Flush Idle Task
+     * @tc.expected: ListItem 2,3,14,15 is cached, ListItem 4-13 active.
+     */
+    UpdateCurrentOffset(-300, SCROLL_FROM_JUMP);
+    FlushIdleTask(listPattern);
+    childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 14);
+    auto item2 = groupNode->GetChildByIndex(2 + 1)->GetHostNode();
+    EXPECT_EQ(item2->IsActive(), false);
+    auto item3 = groupNode->GetChildByIndex(3 + 1)->GetHostNode();
+    EXPECT_EQ(item3->IsActive(), false);
+    auto item14 = groupNode->GetChildByIndex(14 + 1)->GetHostNode();
+    EXPECT_EQ(item14->IsActive(), false);
+    auto item15 = groupNode->GetChildByIndex(15 + 1)->GetHostNode();
+    EXPECT_EQ(item15->IsActive(), false);
+}
+
+/**
+ * @tc.name: ListGroupRepeatCacheCount003
+ * @tc.desc: ListItemGroup lanes cacheCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount003, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2);
+    model.SetSticky(V2::StickyStyle::BOTH);
+    CreateRepeatVirtualScrollNode(3, [this](int32_t idx) {
+        ListItemGroupModelNG groupModel = CreateListItemGroup();
+        auto header = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+        groupModel.SetHeader(std::move(header));
+        CreateRepeatVirtualScrollNode(5, [this](int32_t idx) {
+            CreateListItem();
+            ViewStackProcessor::GetInstance()->Pop();
+            ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+        });
+    });
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. Check Repeat frameCount
+     */
+    auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_EQ(repeat->FrameCount(), 3);
+
+    /**
+     * @tc.steps: step2. Flush Idle Task
+     * @tc.expected: Group0 ListItem 4 is cached, Group1 ListItem1 is cached
+     */
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushIdleTask(listPattern);
+    // check group0
+    auto groupNode0 = AceType::DynamicCast<FrameNode>(frameNode_->GetChildByIndex(0));
+    auto repeat0 = AceType::DynamicCast<RepeatVirtualScrollNode>(groupNode0->GetChildAtIndex(1));
+    int32_t childrenCount = repeat0->GetChildren().size();
+    EXPECT_EQ(childrenCount, 5);
+    auto g0Item4 = groupNode0->GetChildByIndex(4 + 1)->GetHostNode();
+    EXPECT_EQ(g0Item4->IsActive(), false);
+    // check group1
+    auto groupNode1 = AceType::DynamicCast<FrameNode>(frameNode_->GetChildByIndex(1));
+    auto repeat1 = AceType::DynamicCast<RepeatVirtualScrollNode>(groupNode1->GetChildAtIndex(1));
+    childrenCount = repeat1->GetChildren().size();
+    EXPECT_EQ(childrenCount, 1);
+    auto g1Item0 = groupNode1->GetChildByIndex(0 + 1)->GetHostNode();
+    EXPECT_EQ(g1Item0->IsActive(), false);
+
+    /**
+     * @tc.steps: step3. Flush Idle Task
+     * @tc.expected: group0 item4 cached, group1 item0 cached, group2 item0-1 cached
+     */
+    UpdateCurrentOffset(-725);
+    FlushIdleTask(listPattern);
+    // check group 0
+    childrenCount = repeat0->GetChildren().size();
+    EXPECT_EQ(childrenCount, 1);
+    g0Item4 = groupNode0->GetChildByIndex(4 + 1)->GetHostNode();
+    EXPECT_EQ(g0Item4->IsActive(), false);
+    // check group 0
+    childrenCount = repeat1->GetChildren().size();
+    EXPECT_EQ(childrenCount, 5);
+    g1Item0 = groupNode1->GetChildByIndex(0 + 1)->GetHostNode();
+    EXPECT_EQ(g1Item0->IsActive(), false);
+    // check group 2
+    auto groupNode2 = AceType::DynamicCast<FrameNode>(frameNode_->GetChildByIndex(2));
+    auto repeat2 = AceType::DynamicCast<RepeatVirtualScrollNode>(groupNode2->GetChildAtIndex(1));
+    childrenCount = repeat2->GetChildren().size();
+    EXPECT_EQ(childrenCount, 2);
+    auto g2item0 = groupNode2->GetChildByIndex(0 + 1)->GetHostNode();
+    EXPECT_EQ(g2item0->IsActive(), false);
+    auto g2item1 = groupNode2->GetChildByIndex(1 + 1)->GetHostNode();
+    EXPECT_EQ(g2item1->IsActive(), false);
+}
 } // namespace OHOS::Ace::NG
