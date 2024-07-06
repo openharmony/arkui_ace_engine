@@ -253,7 +253,7 @@ private:
     float GetMainGap() const;
     float GetAllDelta();
     void CheckScrollable();
-    bool IsOutOfBoundary(bool useCurrentDelta = true) override;
+    bool IsOutOfBoundary(bool useCurrentDelta) override;
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     SizeF GetContentSize() const;
     void OnModifyDone() override;

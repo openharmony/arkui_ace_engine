@@ -741,4 +741,31 @@ HWTEST_F(GridOptionLayoutTestNg, LayoutOptions002, TestSize.Level1)
     EXPECT_EQ(GetChildRect(frameNode_, 4), RectF(0.f, ITEM_HEIGHT * 3, GRID_WIDTH, ITEM_HEIGHT));
     EXPECT_EQ(GetChildRect(frameNode_, 5), RectF()); // out of view
 }
+
+/**
+ * @tc.name: OutOfBounds001
+ * @tc.desc: Test LayoutOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, OutOfBounds001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetLayoutOptions({});
+    CreateFixedHeightItems(30, 200.0f);
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateDone(frameNode_);
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildRect(frameNode_, 29).Bottom(), GRID_HEIGHT);
+    EXPECT_FALSE(pattern_->IsOutOfBoundary(true));
+
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    UpdateCurrentOffset(-100.0f);
+    EXPECT_TRUE(pattern_->IsOutOfBoundary(true));
+
+    UpdateCurrentOffset(150.0f);
+    EXPECT_GT(GetChildRect(frameNode_, 29).Bottom(), GRID_HEIGHT);
+    EXPECT_FALSE(pattern_->IsOutOfBoundary(true));
+}
 } // namespace OHOS::Ace::NG
