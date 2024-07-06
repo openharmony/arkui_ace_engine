@@ -202,11 +202,6 @@ public:
         return tag_;
     }
 
-    const std::string& GetLabel() const
-    {
-        return label_;
-    }
-
     int32_t GetId() const
     {
         return nodeId_;
@@ -215,11 +210,6 @@ public:
     int64_t GetAccessibilityId() const
     {
         return accessibilityId_;
-    }
-
-    void SetLabel(const std::string& label)
-    {
-        label_ = label;
     }
 
     void SetDepth(int32_t depth)
@@ -789,7 +779,6 @@ private:
     int32_t hostRootId_ = 0;
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;
-    std::string label_;
     int64_t accessibilityId_ = -1;
     int32_t layoutPriority_ = 0;
     int32_t rootNodeId_ = 0; // host is Page or NavDestination
