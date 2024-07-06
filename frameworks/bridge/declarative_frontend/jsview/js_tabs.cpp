@@ -107,6 +107,7 @@ void JSTabs::SetOnChange(const JSCallbackInfo& info)
             return;
         }
         ACE_SCORING_EVENT("Tabs.onChange");
+        ACE_SCOPED_TRACE("Tabs.onChange index %d", tabsInfo->GetIndex());
         PipelineContext::SetCallBackNode(node);
         func->Execute(*tabsInfo);
     };
