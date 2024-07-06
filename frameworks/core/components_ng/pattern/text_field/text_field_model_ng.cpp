@@ -1362,7 +1362,7 @@ bool TextFieldModelNG::GetRequestKeyboardOnFocus(FrameNode* frameNode)
     bool value = false;
     CHECK_NULL_RETURN(frameNode, value);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    return pattern->GetNeedToRequestKeyboardOnFocus();
+    return pattern->NeedToRequestKeyboardOnFocus();
 }
 
 TextInputType TextFieldModelNG::GetType(FrameNode* frameNode)
