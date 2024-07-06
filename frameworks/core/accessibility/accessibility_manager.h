@@ -49,7 +49,8 @@ enum class AccessibilityVersion {
 
 class AccessibilityChildTreeCallback {
 public:
-    AccessibilityChildTreeCallback() = default;
+    explicit AccessibilityChildTreeCallback(int64_t accessibilityId) : accessibilityId_(accessibilityId)
+    {}
     virtual ~AccessibilityChildTreeCallback() = default;
     virtual bool OnRegister(uint32_t windowId, int32_t treeId) = 0;
     virtual bool OnDeregister() = 0;
@@ -63,9 +64,14 @@ public:
     {
         childTreeId_ = childTreeId;
     }
+    int64_t GetAccessibilityId() const
+    {
+        return accessibilityId_;
+    }
 
 private:
     int32_t childTreeId_ = 0;
+    int64_t accessibilityId_ = -1;
 };
 
 using VisibleRatioCallback = std::function<void(bool, double)>;
@@ -165,6 +171,14 @@ public:
     {
         isReg_ = state;
     }
+
+    int32_t GetTreeId() const
+    {
+        return treeId_;
+    }
+
+protected:
+    int32_t treeId_ = 0;
 
 private:
     AccessibilityVersion version_ = AccessibilityVersion::JS_VERSION;
