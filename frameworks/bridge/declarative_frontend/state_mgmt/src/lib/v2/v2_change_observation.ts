@@ -132,9 +132,9 @@ class ObserveV2 {
 
   // At the start of observeComponentCreation or
   // MonitorV2 observeObjectAccess
-  public startRecordDependencies(cmp: IView | MonitorV2 | ComputedV2 | PersistenceV2Impl, id: number): void {
+  public startRecordDependencies(cmp: IView | MonitorV2 | ComputedV2 | PersistenceV2Impl, id: number, doClearBinding: boolean = true): void {
     if (cmp != null) {
-      this.clearBinding(id);
+      doClearBinding && this.clearBinding(id);
       this.stackOfRenderedComponents_.push(id, cmp);
     }
   }

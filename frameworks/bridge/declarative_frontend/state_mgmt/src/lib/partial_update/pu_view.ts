@@ -1142,9 +1142,9 @@ abstract class ViewPU extends PUV2ViewBase
   public __mkRepeatAPI: <I>(arr: Array<I>) => RepeatAPI<I> = <I>(arr: Array<I>): RepeatAPI<I> => {
     // factory is for future extensions, currently always return the same
     const elmtId = this.getCurrentlyRenderedElmtId();
-    let repeat = this.elmtId2Repeat_.get(elmtId) as __RepeatPU<I>;
+    let repeat = this.elmtId2Repeat_.get(elmtId) as __Repeat<I>;
     if (!repeat) {
-        repeat = new __RepeatPU<I>(this, arr);
+        repeat = new __Repeat<I>(this, arr);
         this.elmtId2Repeat_.set(elmtId, repeat);
     } else {
         repeat.updateArr(arr);

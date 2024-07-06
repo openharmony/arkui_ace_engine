@@ -135,60 +135,70 @@ class __RepeatDefaultKeyGen {
 };
 
 // TBD comments
-interface __RepeatAPIConfig<T> {
+interface __RepeatConfig<T> {
+    owningView_? : ViewV2;
     arr?: Array<T>;
     itemGenFuncs?: { [type: string]: RepeatItemGenFunc<T> };
     keyGenFunc?: RepeatKeyGenFunc<T>;
     typeGenFunc?: RepeatTypeGenFunc<T>;
-    //
     totalCount?: number;
     templateOptions?: { [type: string]: RepeatTemplateOptions };
-    //
     mkRepeatItem?: (item: T, index?: number) => __RepeatItemFactoryReturn<T>;
     onMoveHandler?: OnMoveHandler;
 };
 
 // __Repeat implements ForEach with child re-use for both existing state observation
 // and deep observation , for non-virtual and virtual code paths (TODO)
-class __RepeatV2<T> implements RepeatAPI<T> {
-    private config: __RepeatAPIConfig<T> = {};
+class __Repeat<T> implements RepeatAPI<T> {
+    private config: __RepeatConfig<T> = {};
     private impl: __RepeatImpl<T> | __RepeatVirtualScrollImpl<T>;
     private isVirtualScroll = false;
 
-    constructor(arr: Array<T>) {
-        //console.log('__RepeatV2 ctor')
+    constructor(owningView: ViewV2 | ViewPU, arr: Array<T>) {
+        //console.log('__Repeat ctor')
+        this.config.owningView_= owningView instanceof ViewV2 ? owningView : undefined;
         this.config.arr = arr ?? [];
         this.config.itemGenFuncs = {};
-        this.config.keyGenFunc = __RepeatDefaultKeyGen.func;
+        this.config.keyGenFunc = __RepeatDefaultKeyGen.funcWithIndex;
         this.config.typeGenFunc= (() => '');
         this.config.totalCount = this.config.arr.length;
         this.config.templateOptions = {};
-        this.config.mkRepeatItem = this.mkRepeatItem;
+
+        // to be used with ViewV2
+        const mkRepeatItemV2 = (item: T, index?: number): __RepeatItemFactoryReturn<T> =>
+            new __RepeatItemV2(item as T, index);
+
+        // to be used with ViewPU
+        const mkRepeatItemPU = (item: T, index?: number): __RepeatItemFactoryReturn<T> =>
+            new __RepeatItemPU(owningView as ViewPU, item, index);
+
+        const isViewV2 = (this.config.owningView_ instanceof ViewV2);
+        this.config.mkRepeatItem = isViewV2 ? mkRepeatItemV2: mkRepeatItemPU;
     }
 
     public each(itemGenFunc: RepeatItemGenFunc<T>): RepeatAPI<T> {
-        //console.log('__RepeatV2.each()')
+        //console.log('__Repeat.each()')
         this.config.itemGenFuncs[''] = itemGenFunc;
-        this.config.templateOptions[''] = { ...this.defaultTemplateOptions() };
+        this.config.templateOptions[''] = this.normTemplateOptions({});
         return this;
     }
 
     public key(keyGenFunc: RepeatKeyGenFunc<T>): RepeatAPI<T> {
-        //console.log('__RepeatV2.key()')
-        this.config.keyGenFunc = keyGenFunc ?? __RepeatDefaultKeyGen.func;
+        //console.log('__Repeat.key()')
+        this.config.keyGenFunc = keyGenFunc;
         return this;
     }
 
     public virtualScroll(options? : { totalCount?: number }): RepeatAPI<T> {
-        //console.log('__RepeatV2.virtualScroll()')
-        this.config.totalCount = options?.totalCount ?? this.config.arr.length;
+        //console.log('__Repeat.virtualScroll()')
+        this.config.totalCount = this.normTotalCount(options?.totalCount);
         this.isVirtualScroll = true;
         return this;
     }
 
     // function to decide which template to use, each template has an id
     public templateId(typeFunc: RepeatTypeGenFunc<T>): RepeatAPI<T> {
-        //console.log('__RepeatV2.templateId()')
+        //console.log('__Repeat.templateId()')
         this.config.typeGenFunc = typeFunc;
         return this;
     }
@@ -197,22 +207,22 @@ class __RepeatV2<T> implements RepeatAPI<T> {
     public template(type: string, itemGenFunc: RepeatItemGenFunc<T>,
         options?: RepeatTemplateOptions): RepeatAPI<T>
     {
-        //console.log('__RepeatV2.template()')
+        //console.log('__Repeat.template()')
         this.config.itemGenFuncs[type] = itemGenFunc;
-        this.config.templateOptions[type] = { ...this.defaultTemplateOptions(), ...options };
+        this.config.templateOptions[type] = this.normTemplateOptions(options);
         return this;
     }
 
     public updateArr(arr: Array<T>): RepeatAPI<T> {
-        //console.log('__RepeatV2.updateArr()')
+        //console.log('__Repeat.updateArr()')
         this.config.arr = arr ?? [];
         return this;
     }
 
     public render(isInitialRender: boolean): void {
-        //console.log('__RepeatV2.render()')
+        //console.log('__Repeat.render()')
         if (!this.config.itemGenFuncs?.['']) {
-            throw new Error(`__RepeatV2 item builder function unspecified. Usage error`);
+            throw new Error(`__Repeat item builder function unspecified. Usage error`);
         }
         if (!this.isVirtualScroll) {
           // Repeat
@@ -225,32 +235,32 @@ class __RepeatV2<T> implements RepeatAPI<T> {
         }
     }
 
+    // drag and drop API
     public onMove(handler: OnMoveHandler): RepeatAPI<T> {
         this.config.onMoveHandler = handler;
         return this;
     }
 
-    private defaultTemplateOptions (): RepeatTemplateOptions {
-        return { cachedCount: 1 };
+    // normalize totalCount
+    private normTotalCount(totalCount: number): number {
+        const arrLen: number = this.config.arr.length;
+        if (Number.isInteger(totalCount) && totalCount > arrLen) {
+            return totalCount;
+        }
+        return arrLen;
     }
 
-    protected mkRepeatItem<T>(item: T, index?: number): __RepeatItemFactoryReturn<T> {
-        return new __RepeatItemV2(item as T, index);
+    // normalize template options
+    private normTemplateOptions(options: RepeatTemplateOptions): RepeatTemplateOptions {
+        if (options) {
+            const cachedCount: number = options.cachedCount;
+            if (Number.isInteger(cachedCount) && cachedCount >= 0) {
+                return options;
+            }
+        }
+        return { cachedCount: 1 };
     }
-}; // __RepeatV2<T>
+}; // __Repeat<T>
 
 // __Repeat implements ForEach with child re-use for both existing state observation
 // and deep observation , for non-virtual and virtual code paths (TODO)
-
-class __RepeatPU<T> extends __RepeatV2<T> implements RepeatAPI<T> {
-    private owningView_: ViewPU;
-
-    constructor(owningView: ViewPU, arr: Array<T>) {
-        super(arr);
-        this.owningView_ = owningView;
-    }
-
-    protected mkRepeatItem<T>(item: T, index?: number): __RepeatItemFactoryReturn<T> {
-        return new __RepeatItemPU(this.owningView_, item, index);
-    }
-}

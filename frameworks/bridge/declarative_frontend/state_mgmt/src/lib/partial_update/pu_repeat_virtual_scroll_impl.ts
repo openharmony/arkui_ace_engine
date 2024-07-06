@@ -23,18 +23,18 @@ class __RepeatVirtualScrollImpl<T> {
     private itemGenFuncs_: { [type: string]: RepeatItemGenFunc<T> };
     private keyGenFunc_?: RepeatKeyGenFunc<T>;
     private typeGenFunc_: RepeatTypeGenFunc<T>;
-    //
+
     private totalCount_: number;
     private templateOptions_: { [type: string]: RepeatTemplateOptions };
-    //
-    private mkRepeatItem_: (item: T, index?: number) =>__RepeatItemFactoryReturn<T>;
+
+    private mkRepeatItem_: (item: T, index?: number) => __RepeatItemFactoryReturn<T>;
     private onMoveHandler_?: OnMoveHandler;
 
-    /**/
-    constructor() {
-    }
+    // index <-> key maps
+    key4Index_ : Map<number, string> = new Map<number, string>();
+    index4Key_ : Map<string, number> = new Map<string, number>();
 
-    public render(config: __RepeatAPIConfig<T>, isInitialRender: boolean): void {
+    public render(config: __RepeatConfig<T>, isInitialRender: boolean): void {
         this.arr_ = config.arr;
         this.itemGenFuncs_ = config.itemGenFuncs;
         this.keyGenFunc_ = config.keyGenFunc;
@@ -47,14 +47,14 @@ class __RepeatVirtualScrollImpl<T> {
         this.onMoveHandler_ = config.onMoveHandler;
 
         if (isInitialRender) {
-            this.initialRender(ObserveV2.getCurrentRecordedId());
+            this.initialRender(config.owningView_, ObserveV2.getCurrentRecordedId());
         } else {
             this.reRender();
         }
     }
 
     /**/
-    private initialRender(repeatElmtId: number): void {
+    private initialRender(owningView: ViewV2, repeatElmtId: number): void {
         // Map key -> RepeatItem
         // added to closure of following lambdas
         const _repeatItem4Key = new Map<string, __RepeatItemFactoryReturn<T>>();
@@ -63,17 +63,17 @@ class __RepeatVirtualScrollImpl<T> {
         const onCreateNode = (forIndex: number): void => {
             stateMgmtConsole.debug(`__RepeatVirtualScrollImpl onCreateNode index ${forIndex} - start`);
             if (forIndex < 0) {
-                 // FIXME check also index < totalCount
+                // STATE_MGMT_NOTE check also index < totalCount
                 throw new Error(`__RepeatVirtualScrollImpl onCreateNode: for index=${forIndex} out of range error.`)
             }
 
             // create dependency array item [forIndex] -> Repeat
             // so Repeat updates when the array item changes
-            // FIXME observe dependencies, adding the array is insurgent for Array of objects
+            // STATE_MGMT_NOTE observe dependencies, adding the array is insurgent for Array of objects
             ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, forIndex.toString());
 
             const repeatItem = this.mkRepeatItem_(this.arr_[forIndex], forIndex);
-            const forKey = this.keyGenFunc_(this.arr_[forIndex], forIndex);
+            let forKey = this.getOrMakeKey4Index(forIndex);
             _repeatItem4Key.set(forKey, repeatItem);
 
             // execute the itemGen function
@@ -82,20 +82,20 @@ class __RepeatVirtualScrollImpl<T> {
         };
 
         const onUpdateNode = (fromKey: string, forIndex: number): void => {
-            if (!fromKey || fromKey=="" || forIndex < 0) {
-                // FIXME check also index < totalCount
+            if (!fromKey || fromKey == "" || forIndex < 0) {
+                // STATE_MGMT_NOTE check also index < totalCount
                 throw new Error(`__RepeatVirtualScrollImpl onUpdateNode: fromKey "${fromKey}", forIndex=${forIndex} invalid function input error.`)
             }
             // create dependency array item [forIndex] -> Repeat
             // so Repeat updates when the array item changes
-            // FIXME observe dependencies, adding the array is insurgent for Array of objects
+            // STATE_MGMT_NOTE observe dependencies, adding the array is insurgent for Array of objects
             ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, forIndex.toString());
             const repeatItem = _repeatItem4Key.get(fromKey);
             if (!repeatItem) {
                 stateMgmtConsole.error(`__RepeatVirtualScrollImpl onUpdateNode: fromKey "${fromKey}", forIndex=${forIndex}, can not find RepeatItem for key. Unrecoverable error`);
                 return;
             }
-            const forKey= this.keyGenFunc_(this.arr_[forIndex], forIndex);
+            const forKey = this.getOrMakeKey4Index(forIndex);
             stateMgmtConsole.debug(`__RepeatVirtualScrollImpl onUpdateNode: fromKey "${fromKey}", forIndex=${forIndex} forKey="${forKey}". Updating RepeatItem ...`);
             repeatItem.updateItem(this.arr_[forIndex]);
             repeatItem.updateIndex(forIndex);
@@ -105,8 +105,7 @@ class __RepeatVirtualScrollImpl<T> {
             _repeatItem4Key.delete(fromKey);
             _repeatItem4Key.set(forKey, repeatItem);
 
-            stateMgmtConsole.debug(`__RepeatVirtualScrollImpl onUpdateNode: fromKey "${fromKey}", forIndex=${forIndex} forKey="${forKey}". Initiating update synchronously (TODO)...`);
-            // FIXME request re-render right away!
+            stateMgmtConsole.debug(`__RepeatVirtualScrollImpl onUpdateNode: fromKey "${fromKey}", forIndex=${forIndex} forKey="${forKey}". Initiating UINodes update synchronously ...`);
             ObserveV2.getObserve().updateDirty2(true);
         };
 
@@ -114,13 +113,18 @@ class __RepeatVirtualScrollImpl<T> {
             stateMgmtConsole.debug(`__RepeatVirtualScrollImpl: onGetKeys4Range from ${from} to ${to} - start`);
 
             const result = new Array<string>();
+
+            // deep observe dependencies,
+            // create dependency array item [i] -> Repeat
+            // so Repeat updates when the array item or nested objects changes
+            // not enough: ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, i.toString());
+            ViewStackProcessor.StartGetAccessRecordingFor(repeatElmtId1);
+            ObserveV2.getObserve().startRecordDependencies(owningView, repeatElmtId1, false);
             for (let i = from; i <= to && i < this.arr_.length; i++) {
-                // create dependency array item [i] -> Repeat
-                // so Repeat updates when the array item changes
-                // FIXME observe dependencies, adding the array is insurgent for Array of objects
-                ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, i.toString());
-                result.push(this.keyGenFunc_(this.arr_[i], i));
+                result.push(this.getOrMakeKey4Index(i));
             }
+            ObserveV2.getObserve().stopRecordDependencies();
+            ViewStackProcessor.StopGetAccessRecording();
 
             stateMgmtConsole.debug(`__RepeatVirtualScrollImpl: onGetKeys4Range from ${from} to ${to} - returns ${result.toString()}`);
             return result;
@@ -128,12 +132,23 @@ class __RepeatVirtualScrollImpl<T> {
 
         const onGetTypes4Range = (from: number, to: number): Array<string> => {
             stateMgmtConsole.debug(`__RepeatVirtualScrollImpl: onGetTypes4Range from ${from} to ${to} - start`);
+
             const result = new Array<string>();
-            // FIXME observe dependencies, adding the array is insurgent for Array of objects
+            
+            // deep observe dependencies,
+            // create dependency array item [i] -> Repeat
+            // so Repeat updates when the array item or nested objects changes
+            // not enough: ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, i.toString());
+            ViewStackProcessor.StartGetAccessRecordingFor(repeatElmtId1);
+            ObserveV2.getObserve().startRecordDependencies(owningView, repeatElmtId1, false);
+
             for (let i = from; i <= to && i < this.arr_.length; i++) {
-                // ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, i.toString());
                 result.push(this.typeGenFunc_(this.arr_[i], i) ?? '');
             }
+            
+            ObserveV2.getObserve().stopRecordDependencies();
+            ViewStackProcessor.StopGetAccessRecording();
+
             stateMgmtConsole.debug(`__RepeatVirtualScrollImpl: onGetTypes4Range from ${from} to ${to} - returns ${result.toString()}`);
             return result;
         };
@@ -146,11 +161,13 @@ class __RepeatVirtualScrollImpl<T> {
             onGetKeys4Range,
             onGetTypes4Range
         });
-        stateMgmtConsole.debug(`__RepeatVirtualScrollImpl: initialRenderVirtualScroll 2`);
+        RepeatVirtualScrollNative.onMove(this.onMoveHandler_);
+        stateMgmtConsole.debug(`__RepeatVirtualScrollImpl: initialRenderVirtualScroll`);
     }
 
     private reRender() {
         stateMgmtConsole.debug(`__RepeatVirtualScrollImpl: reRender ...`);
+        this.purgeKeyCache();
         RepeatVirtualScrollNative.invalidateKeyCache(this.totalCount_);
         stateMgmtConsole.debug(`__RepeatVirtualScrollImpl: reRender - done`);
     }
@@ -162,4 +179,32 @@ class __RepeatVirtualScrollImpl<T> {
         itemFunc(repeatItem);
     }
 
+    /**
+     * maintain: index <-> key mapping
+     * create new key from keyGen function if not in cache
+     * check for duplicate key, and create random key if duplicate found
+     * @param forIndex
+     * @returns unique key
+     */
+    private getOrMakeKey4Index(forIndex: number): string {
+        let key = this.key4Index_.get(forIndex);
+        if (!key) {
+            key = this.keyGenFunc_(this.arr_[forIndex], forIndex);
+            const usedIndex = this.index4Key_.get(key);
+            if (usedIndex) {
+                // duplicate key
+                stateMgmtConsole.applicationError(`Repeat key gen function: Detected duplicate key ${key} for indices ${forIndex} and ${usedIndex}. \
+                            Generated random key will decrease Repeat performance. Correct the Key gen function in your application!`);
+                key = `___${forIndex}_+_${key}_+_${Math.random()}`;
+            }
+            this.key4Index_.set(forIndex, key);
+            this.index4Key_.set(key, forIndex);
+        }
+        return key;
+    }
+
+    private purgeKeyCache(): void {
+        this.key4Index_.clear()
+        this.index4Key_.clear();
+    }
 };
