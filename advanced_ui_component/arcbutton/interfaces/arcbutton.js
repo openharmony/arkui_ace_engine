@@ -482,7 +482,7 @@ __decorate([
     Local
 ], ArcButton.prototype, "isExceed", void 0);
 __decorate([
-    Monitor('options')
+    Monitor('options.resourceText', 'options.textSize', 'options.styleMode', 'options.status', 'options.backgroundColor', 'options.textColor')
 ], ArcButton.prototype, "optionsChange", null);
 __decorate([
     Monitor('btnColor')
@@ -505,13 +505,13 @@ class CircularCrossPointUtil {
         let lowerArcCircleCenterY = Constants.LOWER_ARC_CIRCLE_CENTER_Y;
         let upperArcCircleCenterX = Constants.UPPER_ARC_CIRCLE_CENTER_X;
         let chamferCircleR = Constants.CHAMFER_CIRCLE_R;
-        let upperArcCircle = new Circle(this.upperArcCircleR, lowerArcCircleCenterX, lowerArcCircleCenterY); //大圆
-        let lowerArcCircle = new Circle(lowerArcCircleR, upperArcCircleCenterX, this.upperArcCircleY); //小圆
+        let upperArcCircle = new ArcButtonCircle(this.upperArcCircleR, lowerArcCircleCenterX, lowerArcCircleCenterY); //大圆
+        let lowerArcCircle = new ArcButtonCircle(lowerArcCircleR, upperArcCircleCenterX, this.upperArcCircleY); //小圆
         let externalIntersections = this.findCircleIntersections(upperArcCircle, lowerArcCircle);
         if (externalIntersections.length > 1) {
             let intersection1 = externalIntersections[0];
             let intersection2 = externalIntersections[1];
-            let insideIntersections = this.findCircleIntersections(new Circle(this.upperArcCircleR - chamferCircleR, lowerArcCircleCenterX, lowerArcCircleCenterY), new Circle(lowerArcCircleR - chamferCircleR, upperArcCircleCenterX, this.upperArcCircleY));
+            let insideIntersections = this.findCircleIntersections(new ArcButtonCircle(this.upperArcCircleR - chamferCircleR, lowerArcCircleCenterX, lowerArcCircleCenterY), new ArcButtonCircle(lowerArcCircleR - chamferCircleR, upperArcCircleCenterX, this.upperArcCircleY));
             if (insideIntersections.length > 1) {
                 intersection1 = insideIntersections[0];
                 intersection2 = insideIntersections[1];
@@ -520,14 +520,14 @@ class CircularCrossPointUtil {
                     intersection1 = intersection2;
                     intersection2 = mid;
                 }
-                let tp1 = this.calculateIntersection(new Point(lowerArcCircleCenterX, lowerArcCircleCenterY), this.upperArcCircleR, new Point(intersection1.x, intersection1.y));
-                let tp2 = this.calculateIntersection(new Point(lowerArcCircleCenterX, lowerArcCircleCenterY), this.upperArcCircleR, new Point(intersection2.x, intersection2.y));
-                let tp3 = this.calculateIntersection(new Point(upperArcCircleCenterX, this.upperArcCircleY), lowerArcCircleR, new Point(intersection2.x, intersection2.y));
-                let tp4 = this.calculateIntersection(new Point(upperArcCircleCenterX, this.upperArcCircleY), lowerArcCircleR, new Point(intersection1.x, intersection1.y));
+                let tp1 = this.calculateIntersection(new ArcButtonPoint(lowerArcCircleCenterX, lowerArcCircleCenterY), this.upperArcCircleR, new ArcButtonPoint(intersection1.x, intersection1.y));
+                let tp2 = this.calculateIntersection(new ArcButtonPoint(lowerArcCircleCenterX, lowerArcCircleCenterY), this.upperArcCircleR, new ArcButtonPoint(intersection2.x, intersection2.y));
+                let tp3 = this.calculateIntersection(new ArcButtonPoint(upperArcCircleCenterX, this.upperArcCircleY), lowerArcCircleR, new ArcButtonPoint(intersection2.x, intersection2.y));
+                let tp4 = this.calculateIntersection(new ArcButtonPoint(upperArcCircleCenterX, this.upperArcCircleY), lowerArcCircleR, new ArcButtonPoint(intersection1.x, intersection1.y));
                 let width = this.calculateDistance(intersection1.x, intersection1.y, intersection2.x, intersection2.y) +
                     chamferCircleR * 2;
                 let height = (this.upperArcCircleR + lowerArcCircleR) - this.calculateDistance(lowerArcCircleCenterX, lowerArcCircleCenterY, upperArcCircleCenterX, this.upperArcCircleY);
-                let canvasLeftTop = new Point(intersection1.x - chamferCircleR, this.upperArcCircleY - lowerArcCircleR);
+                let canvasLeftTop = new ArcButtonPoint(intersection1.x - chamferCircleR, this.upperArcCircleY - lowerArcCircleR);
                 return new AllPoints(width, height, tp1, tp2, tp4, tp3, canvasLeftTop);
             }
         }
@@ -578,13 +578,13 @@ class CircularCrossPointUtil {
             let x2 = (-B - (B ** 2 - 4 * A * C) ** 0.5) / (2 * A);
             let y1 = m * x1 + b;
             let y2 = m * x2 + b;
-            resultPoint = [new Point(x1, y1), new Point(x2, y2)];
+            resultPoint = [new ArcButtonPoint(x1, y1), new ArcButtonPoint(x2, y2)];
         }
         else {
             let x1 = h;
             let y1 = k + (circleRadius ** 2 - (x1 - h) ** 2) ** 0.5;
             let y2 = k - (circleRadius ** 2 - (x1 - h) ** 2) ** 0.5;
-            resultPoint = [new Point(x1, y1), new Point(x1, y2)];
+            resultPoint = [new ArcButtonPoint(x1, y1), new ArcButtonPoint(x1, y2)];
         }
         let d1 = this.calculateDistance(resultPoint[0].x, resultPoint[0].y, point.x, point.y);
         let d2 = this.calculateDistance(resultPoint[1].x, resultPoint[1].y, point.x, point.y);
@@ -631,21 +631,21 @@ class CircularCrossPointUtil {
         let x2 = firstCircusCenterX + a * (secondCircusCenterX - firstCircusCenterX) / distance;
         let y2 = firstCircusCenterY + a * (secondCircusCenterY - firstCircusCenterY) / distance;
         // 交点
-        let intersection1 = new Point(x2 + h * (secondCircusCenterY - firstCircusCenterY) / distance, y2 -
+        let intersection1 = new ArcButtonPoint(x2 + h * (secondCircusCenterY - firstCircusCenterY) / distance, y2 -
             h * (secondCircusCenterX - firstCircusCenterX) / distance);
-        let intersection2 = new Point(x2 - h * (secondCircusCenterY - firstCircusCenterY) / distance, y2 +
+        let intersection2 = new ArcButtonPoint(x2 - h * (secondCircusCenterY - firstCircusCenterY) / distance, y2 +
             h * (secondCircusCenterX - firstCircusCenterX) / distance);
         return [intersection1, intersection2];
     }
 }
-class Circle {
+class ArcButtonCircle {
     constructor(radius, x, y) {
         this.radius = radius;
         this.x = x;
         this.y = y;
     }
 }
-class Point {
+class ArcButtonPoint {
     constructor(x, y) {
         this.x = x;
         this.y = y;
