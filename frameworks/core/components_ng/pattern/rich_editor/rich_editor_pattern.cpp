@@ -4953,6 +4953,7 @@ bool RichEditorPattern::CursorMoveLeft()
     } else {
         caretPosition = std::clamp((caretPosition_ - 1), 0, static_cast<int32_t>(GetTextContentLength()));
     }
+    AdjustSelectorForSymbol(caretPosition, HandleType::SECOND, SelectorAdjustPolicy::EXCLUDE);
     if (caretPosition_ == caretPosition) {
         return false;
     }
@@ -4979,6 +4980,7 @@ bool RichEditorPattern::CursorMoveRight()
     } else {
         caretPosition = std::clamp((caretPosition_ + 1), 0, static_cast<int32_t>(GetTextContentLength()));
     }
+    AdjustSelectorForSymbol(caretPosition, HandleType::SECOND, SelectorAdjustPolicy::INCLUDE);
     if (caretPosition_ == caretPosition) {
         return false;
     }
