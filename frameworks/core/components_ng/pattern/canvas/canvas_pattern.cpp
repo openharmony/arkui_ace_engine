@@ -58,57 +58,69 @@ RefPtr<NodePaintMethod> CanvasPattern::CreateNodePaintMethod()
 
 bool CanvasPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    bool pixelGridRoundSizeChange = false;
+    ACE_SCOPED_TRACE("CanvasPattern::OnDirtyLayoutWrapperSwap");
+    bool needReset = !(config.skipMeasure || dirty->SkipMeasureContent());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    context->AddAfterLayoutTask([weak = WeakClaim(this), config, needReset]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnSizeChanged(config, needReset);
+    });
+    return true;
+}
+
+void CanvasPattern::OnSizeChanged(const DirtySwapConfig& config, bool needReset)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
+    CHECK_NULL_VOID(geometryNode);
     SizeF currentPixelGridRoundSize = geometryNode->GetPixelGridRoundSize();
-    pixelGridRoundSizeChange = currentPixelGridRoundSize != dirtyPixelGridRoundSize_;
-    dirtyPixelGridRoundSize_ = currentPixelGridRoundSize;
+    bool pixelGridRoundSizeChange = currentPixelGridRoundSize != dirtyPixelGridRoundSize_;
     lastDirtyPixelGridRoundSize_ = dirtyPixelGridRoundSize_;
+    dirtyPixelGridRoundSize_ = currentPixelGridRoundSize;
 
-    if (config.skipMeasure || dirty->SkipMeasureContent()) {
-        return false;
+    // Canvas is first time onReady && Visibility is None
+    if (!needReset && (currentPixelGridRoundSize == SizeF { 0, 0 }) &&
+        (lastDirtyPixelGridRoundSize_ == SizeF { -1, -1 })) {
+        return;
     }
-    auto canvasEventHub = GetEventHub<CanvasEventHub>();
-    CHECK_NULL_RETURN(canvasEventHub, false);
+    // Visibility is None
+    if (!needReset && (currentPixelGridRoundSize == SizeF { 0, 0 })) {
+        CHECK_NULL_VOID(paintMethod_);
+        paintMethod_->UpdateRecordingCanvas(currentPixelGridRoundSize.Width(), currentPixelGridRoundSize.Height());
+        return;
+    }
+    // constraint is unchanged
+    if (!needReset) {
+        return;
+    }
 
-    if ((isCanvasInit_ == true) && (config.frameSizeChange || config.contentSizeChange)) {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
-            isCanvasInit_ = !pixelGridRoundSizeChange;
-        } else {
-            isCanvasInit_ = false;
+    needReset = config.frameSizeChange || config.contentSizeChange;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
+        needReset = needReset && pixelGridRoundSizeChange;
+    } else {
+        needReset = needReset || config.frameOffsetChange || config.contentOffsetChange;
+    }
+
+    if (needReset) {
+        if (IsSupportImageAnalyzerFeature() && imageAnalyzerManager_) {
+            imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
         }
-    } else if ((isCanvasInit_ == true) && (config.frameOffsetChange || config.contentOffsetChange)) {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
-            isCanvasInit_ = true;
-        } else {
-            isCanvasInit_ = false;
-        }
-    }
-
-    if (IsSupportImageAnalyzerFeature() && imageAnalyzerManager_) {
-        imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
-    }
-
-    if (!isCanvasInit_) {
         auto renderContext = host->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, false);
-        CHECK_NULL_RETURN(contentModifier_, false);
-        contentModifier_->needResetSurface_ = true;
-        contentModifier_->renderContext_ = renderContext;
-
-        auto context = PipelineContext::GetCurrentContext();
-        if (context) {
-            context->AddAfterLayoutTask([canvasEventHub]() {
-                    canvasEventHub->FireReadyEvent();
-                });
-        }
-        isCanvasInit_ = true;
-        return context != nullptr;
+        CHECK_NULL_VOID(renderContext);
+        CHECK_NULL_VOID(contentModifier_);
+        contentModifier_->SetNeedResetSurface();
+        contentModifier_->SetRenderContext(renderContext);
+        CHECK_NULL_VOID(paintMethod_);
+        paintMethod_->UpdateRecordingCanvas(currentPixelGridRoundSize.Width(), currentPixelGridRoundSize.Height());
+        auto canvasEventHub = GetEventHub<CanvasEventHub>();
+        CHECK_NULL_VOID(canvasEventHub);
+        canvasEventHub->FireReadyEvent();
     }
-    return false;
 }
 
 void CanvasPattern::SetAntiAlias(bool isEnabled)

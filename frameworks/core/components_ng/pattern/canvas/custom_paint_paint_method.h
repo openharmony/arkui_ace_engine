@@ -302,9 +302,6 @@ public:
         const ImageFit& imageFit);
     void DrawImage(const Ace::CanvasImage& canvasImage, double width, double height);
 
-    void UpdateRecordingCanvas(float width, float height);
-    void SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback);
-
 protected:
     std::optional<double> CalcTextScale(double maxIntrinsicWidth, std::optional<double> maxWidth);
     bool HasShadow() const;

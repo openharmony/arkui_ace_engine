@@ -86,7 +86,7 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest001, TestSize.Level1)
 
 /**
  * @tc.name: CanvasPatternTest002
- * @tc.desc: CanvasPattern::OnDirtyLayoutWrapperSwap
+ * @tc.desc: CanvasPattern::OnSizeChanged
  * @tc.type: FUNC
  */
 HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level1)
@@ -104,105 +104,83 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest002, TestSize.Level1)
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, nullptr);
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
     DirtySwapConfig config;
+    bool needReset;
 
     /**
-     * @tc.steps: step1. config.skipMeasure = false;
+     * @tc.steps: step1. needReset = false; dirtyPixelGridRoundSize_ = { 0, 0 }
      */
-    config.skipMeasure = false;
-    layoutWrapper->skipMeasureContent_ = std::make_optional(false);
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(pattern->isCanvasInit_);
+    needReset = false;
+    pattern->contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
+    pattern->dirtyPixelGridRoundSize_ = { -1, -1 };
+    pattern->OnSizeChanged(config, needReset);
+    ASSERT_NE(pattern->contentModifier_, nullptr);
+    auto contentModifier1 = pattern->contentModifier_;
+    EXPECT_FALSE(contentModifier1->needResetSurface_);
 
     /**
-     * @tc.steps: step2. config.skipMeasure = true;
+     * @tc.steps: step2. needReset = false; dirtyPixelGridRoundSize_ = { 1, 1 };
      */
-    config.skipMeasure = true;
-    layoutWrapper->skipMeasureContent_ = std::make_optional(false);
-    auto step02 = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(step02);
-
-    /**
-     * @tc.steps: step3. config.skipMeasure = false; dirty->SkipMeasureContent() = false;
-     */
-    config.skipMeasure = false;
-    layoutWrapper->skipMeasureContent_ = std::make_optional(false);
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(pattern->isCanvasInit_);
-
-    /**
-     * @tc.steps: step4. config.skipMeasure = false; dirty->SkipMeasureContent() = true;
-     */
-    config.skipMeasure = false;
-    layoutWrapper->skipMeasureContent_ = std::make_optional(true);
-    auto step04 = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(step04);
-
-    /**
-     * @tc.steps: step5. isCanvasInit_ = false;
-     */
-    config.skipMeasure = false;
-    layoutWrapper->skipMeasureContent_ = std::make_optional(false);
-    pattern->isCanvasInit_ = false;
+    needReset = false;
     config.frameSizeChange = false;
     config.contentSizeChange = false;
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(pattern->isCanvasInit_);
+    pattern->contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
+    pattern->dirtyPixelGridRoundSize_ = { 1, 1 };
+    pattern->OnSizeChanged(config, needReset);
+    ASSERT_NE(pattern->contentModifier_, nullptr);
+    auto contentModifier2 = pattern->contentModifier_;
+    EXPECT_FALSE(contentModifier2->needResetSurface_);
 
     /**
-     * @tc.steps: step6. isCanvasInit_ = true; config.frameSizeChange = false; config.contentSizeChange = false;
+     * @tc.steps: step3. needReset = true; dirtyPixelGridRoundSize_ = { 1, 1 };
      */
-    pattern->isCanvasInit_ = true;
+    needReset = false;
+    config.frameSizeChange = true;
+    config.contentSizeChange = true;
+    pattern->contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
+    pattern->dirtyPixelGridRoundSize_ = { 1, 1 };
+    pattern->OnSizeChanged(config, needReset);
+    ASSERT_NE(pattern->contentModifier_, nullptr);
+    auto contentModifier3 = pattern->contentModifier_;
+    EXPECT_FALSE(contentModifier3->needResetSurface_);
+
+    /**
+     * @tc.steps: step4. needReset = true; config.frameSizeChange = false; config.contentSizeChange = false;
+     */
+    needReset = true;
     config.frameSizeChange = false;
     config.contentSizeChange = false;
-    auto step06 = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(step06);
+    pattern->contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
+    pattern->dirtyPixelGridRoundSize_ = { -1, -1 };
+    pattern->OnSizeChanged(config, needReset);
+    ASSERT_NE(pattern->contentModifier_, nullptr);
+    auto contentModifier4 = pattern->contentModifier_;
+    EXPECT_FALSE(contentModifier4->needResetSurface_);
 
     /**
-     * @tc.steps: step7. isCanvasInit_ = true; config.frameSizeChange = true; config.contentSizeChange = false;
+     * @tc.steps: step5. needReset = true; config.frameSizeChange = true; config.contentSizeChange = false;
      */
-    pattern->isCanvasInit_ = true;
+    needReset = true;
     config.frameSizeChange = true;
     config.contentSizeChange = false;
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(pattern->isCanvasInit_);
+    pattern->contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
+    pattern->dirtyPixelGridRoundSize_ = { -1, -1 };
+    pattern->OnSizeChanged(config, needReset);
+    ASSERT_NE(pattern->contentModifier_, nullptr);
+    auto contentModifier5 = pattern->contentModifier_;
+    EXPECT_TRUE(contentModifier5->needResetSurface_);
 
     /**
-     * @tc.steps: step8. isCanvasInit_ = true; config.frameSizeChange = false; config.contentSizeChange = true;
+     * @tc.steps: step6. needReset = true; config.frameSizeChange = false; config.contentSizeChange = true;
      */
-    pattern->isCanvasInit_ = true;
+    needReset = true;
     config.frameSizeChange = false;
     config.contentSizeChange = true;
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(pattern->isCanvasInit_);
-    
-    /**
-     * @tc.steps: step9. isCanvasInit_ = true; config.frameOffsetChange = false; config.contentOffsetChange = false;
-     */
-    pattern->isCanvasInit_ = true;
-    config.frameSizeChange = false;
-    config.contentSizeChange = false;
-    config.frameOffsetChange = false;
-    config.contentOffsetChange = false;
-    auto step09 = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(step09);
-
-    /**
-     * @tc.steps: step10. isCanvasInit_ = true; config.frameOffsetChange = true; config.contentOffsetChange = false;
-     */
-    pattern->isCanvasInit_ = true;
-    config.frameOffsetChange = true;
-    config.contentOffsetChange = false;
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(pattern->isCanvasInit_);
-
-    /**
-     * @tc.steps: step11. isCanvasInit_ = true; config.frameOffsetChange = false; config.contentOffsetChange = true;
-     */
-    pattern->isCanvasInit_ = true;
-    config.frameOffsetChange = false;
-    config.contentOffsetChange = true;
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(pattern->isCanvasInit_);
+    pattern->contentModifier_ = AceType::MakeRefPtr<CanvasModifier>();
+    pattern->dirtyPixelGridRoundSize_ = { -1, -1 };
+    pattern->OnSizeChanged(config, needReset);
+    ASSERT_NE(pattern->contentModifier_, nullptr);
+    auto contentModifier6 = pattern->contentModifier_;
+    EXPECT_TRUE(contentModifier6->needResetSurface_);
 }
 
 /**

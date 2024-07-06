@@ -35,6 +35,7 @@ public:
 
     void FireReadyEvent() const
     {
+        ACE_SCOPED_TRACE("CanvasEventHub::FireReadyEvent");
         if (readyEvent_) {
             readyEvent_();
         }
