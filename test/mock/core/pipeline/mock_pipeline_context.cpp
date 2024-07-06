@@ -30,6 +30,7 @@ namespace {
 constexpr double DISPLAY_WIDTH = 720;
 constexpr double DISPLAY_HEIGHT = 1280;
 static std::list<PipelineContext::PredictTask> predictTasks_;
+static Rect windowRect_;
 } // namespace
 
 RefPtr<MockPipelineContext> MockPipelineContext::pipeline_;
@@ -44,6 +45,7 @@ void MockPipelineContext::SetUp()
     pipeline_->rootWidth_ = DISPLAY_WIDTH;
     pipeline_->rootHeight_ = DISPLAY_HEIGHT;
     pipeline_->SetupRootElement();
+    windowRect_ = { 0., 0., NG::DISPLAY_WIDTH, NG::DISPLAY_HEIGHT };
 }
 
 void MockPipelineContext::TearDown()
@@ -64,6 +66,11 @@ void MockPipelineContext::SetRootSize(double rootWidth, double rootHeight)
 {
     rootWidth_ = rootWidth;
     rootHeight_ = rootHeight;
+}
+
+void MockPipelineContext::SetCurrentWindowRect(Rect rect)
+{
+    windowRect_ = rect;
 }
 // mock_pipeline_context =======================================================
 
@@ -806,7 +813,7 @@ void PipelineBase::RequestFrame() {}
 
 Rect PipelineBase::GetCurrentWindowRect() const
 {
-    return { 0., 0., NG::DISPLAY_WIDTH, NG::DISPLAY_HEIGHT };
+    return NG::windowRect_;
 }
 
 void PipelineBase::SetTextFieldManager(const RefPtr<ManagerInterface>& manager)
