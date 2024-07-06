@@ -447,6 +447,7 @@ HWTEST_F(RichEditorEditTestNg, TestRichEditorCalcMoveUpPos001, TestSize.Level1)
     /**
      * @tc.steps: step1. declare and init variables.
      */
+    float lmSizeOffset = 0.0f;
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -456,19 +457,16 @@ HWTEST_F(RichEditorEditTestNg, TestRichEditorCalcMoveUpPos001, TestSize.Level1)
     /**
      * @tc.steps: step2. change parameter and call function.
      */
-    OffsetF caretOffsetUp(-5.0f, 5.0f);
-    OffsetF caretOffsetDown(5.0f, 10.0f);
-    richEditorPattern->CalcMoveUpPos(caretOffsetUp, caretOffsetDown);
-    EXPECT_NE(caretOffsetUp.x_, -5.0f);
-    EXPECT_NE(caretOffsetDown.x_, 5.0f);
+    richEditorPattern->CalcMoveUpPos(lmSizeOffset);
+    EXPECT_EQ(lmSizeOffset, 0.0f);
 }
 
 /**
- * @tc.name: TestRichEditorCalcLineHeightByPosition001
- * @tc.desc: test CalcLineHeightByPosition
+ * @tc.name: TestRichEditorCalcLineInfoByPosition001
+ * @tc.desc: test CalcLineInfoByPosition
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorEditTestNg, TestRichEditorCalcLineHeightByPosition001, TestSize.Level1)
+HWTEST_F(RichEditorEditTestNg, TestRichEditorCalcLineInfoByPosition001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. declare and init variables.
@@ -479,8 +477,8 @@ HWTEST_F(RichEditorEditTestNg, TestRichEditorCalcLineHeightByPosition001, TestSi
     richEditorPattern->CreateNodePaintMethod();
     EXPECT_NE(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    auto ret = richEditorPattern->CalcLineHeightByPosition(10);
-    EXPECT_EQ(ret, 0.0f);
+    auto ret = richEditorPattern->CalcLineInfoByPosition();
+    EXPECT_EQ(ret.Height(), 0.0f);
 }
 
 /**
