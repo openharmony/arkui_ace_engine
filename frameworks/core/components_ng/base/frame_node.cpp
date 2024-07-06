@@ -4684,6 +4684,9 @@ void FrameNode::OnSyncGeometryFrameFinish(const RectF& paintRect)
 {
     if (syncedFramePaintRect_.has_value() && syncedFramePaintRect_.value() != paintRect) {
         AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_GEOMETRY_CHANGE);
+        if (AnimationUtils::IsImplicitAnimationOpen()) {
+            AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_START_ANIMATION);
+        }
     }
     syncedFramePaintRect_ = paintRect;
 }
@@ -4729,6 +4732,22 @@ void FrameNode::ProcessFrameNodeChangeFlag()
     if (pattern) {
         pattern->OnFrameNodeChanged(changeFlag);
     }
+}
+
+void FrameNode::OnNodeTransformInfoUpdate(bool changed)
+{
+    if (!changed) {
+        return;
+    }
+    AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_TRANSFORM_CHANGE);
+    if (AnimationUtils::IsImplicitAnimationOpen()) {
+        AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_START_ANIMATION);
+    }
+}
+
+void FrameNode::OnNodeTransitionInfoUpdate()
+{
+    AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_TRANSITION_START);
 }
 
 void FrameNode::NotifyWebPattern(bool isRegister)

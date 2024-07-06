@@ -211,6 +211,7 @@ public:
     void OnHandleLevelModeChanged(HandleLevelMode mode) override
     {
         SetHandleLevelMode(mode);
+        UpdateAllHandlesOffset();
     }
     virtual void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag);
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info) override;
@@ -256,10 +257,13 @@ protected:
     bool IsAncestorNodeStartScroll(FrameNodeChangeInfoFlag flag);
     bool IsAncestorNodeEndScroll(FrameNodeChangeInfoFlag flag);
     bool IsAncestorNodeTransformChange(FrameNodeChangeInfoFlag flag);
+    bool IsAncestorNodeHasTransition(FrameNodeChangeInfoFlag flag);
     void SetEnableHandleLevel(bool enableHandleLevel)
     {
         enableHandleLevel_ = enableHandleLevel;
     }
+    void RegisterScrollingListener(const RefPtr<FrameNode> scrollableNode);
+    void OnHandleScrolling(const WeakPtr<FrameNode>& scrollingNode);
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;
@@ -285,6 +289,7 @@ private:
     bool enableHandleLevel_ = false;
     bool touchAtHandle_ = false;
     bool isChangeToOverlayModeAtEdge_ = true;
+    bool hasRegisterListener_ = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -600,7 +600,7 @@ private:
     void AddFrameNodeInfoToRsNode();
     // Use rect to update the drawRegion rect at index.
     void UpdateDrawRegion(uint32_t index, const std::shared_ptr<Rosen::RectF>& rect);
-    void NotifyHostTransformUpdated();
+    void NotifyHostTransformUpdated(bool changed = true);
 
     void InitAccessibilityFocusModidifer(const RoundRect&, const Color&, float);
 
