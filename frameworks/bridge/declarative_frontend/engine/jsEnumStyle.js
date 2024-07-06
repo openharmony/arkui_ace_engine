@@ -1226,6 +1226,7 @@ var ProtectedResourceType;
   ProtectedResourceType["MidiSysex"] = "TYPE_MIDI_SYSEX";
   ProtectedResourceType["VIDEO_CAPTURE"] = "TYPE_VIDEO_CAPTURE";
   ProtectedResourceType["AUDIO_CAPTURE"] = "TYPE_AUDIO_CAPTURE";
+  ProtectedResourceType["SENSORS"] = "TYPE_SENSORS";
 })(ProtectedResourceType || (ProtectedResourceType = {}));
 
 var ProgressType;
@@ -1291,6 +1292,13 @@ var EffectFillStyle;
   EffectFillStyle[EffectFillStyle["CUMULATIVE"] = 0] = "CUMULATIVE";
   EffectFillStyle[EffectFillStyle["ITERATIVE"] = 1] = "ITERATIVE";
 })(EffectFillStyle || (EffectFillStyle = {}));
+
+var WebKeyboardAvoidMode;
+(function (WebKeyboardAvoidMode) {
+  WebKeyboardAvoidMode[WebKeyboardAvoidMode["RESIZE_VISUAL"] = 0] = "RESIZE_VISUAL";
+  WebKeyboardAvoidMode[WebKeyboardAvoidMode["RESIZE_CONTENT"] = 1] = "RESIZE_CONTENT";
+  WebKeyboardAvoidMode[WebKeyboardAvoidMode["OVERLAYS_CONTENT"] = 2] = "OVERLAYS_CONTENT";
+})(WebKeyboardAvoidMode || (WebKeyboardAvoidMode = {}));
 
 class SymbolEffect {
 }
@@ -3170,6 +3178,8 @@ let NativeEmbedStatus;
   NativeEmbedStatus['CREATE'] = 0;
   NativeEmbedStatus['UPDATE'] = 1;
   NativeEmbedStatus['DESTROY'] = 2;
+  NativeEmbedStatus['ENTER_BFCACHE'] = 3;
+  NativeEmbedStatus['LEAVE_BFCACHE'] = 4;
 })(NativeEmbedStatus || (NativeEmbedStatus = {}));
 
 let RenderMode;

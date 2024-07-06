@@ -1562,7 +1562,7 @@ HWTEST_F(GridScrollerTestNg, ScrollBy001, TestSize.Level1)
     EXPECT_TRUE(pattern_->scrollStop_);
 
     pattern_->OutBoundaryCallback();
-    EXPECT_FALSE(pattern_->IsOutOfBoundary());
+    EXPECT_FALSE(pattern_->IsOutOfBoundary(true));
 
     /**
      * @tc.steps: step3. Test AnimateTo function

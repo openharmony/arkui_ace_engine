@@ -156,6 +156,27 @@ int32_t UIContentServiceProxy::RegisterComponentChangeEventCallback(const EventC
     return NO_ERROR;
 }
 
+int32_t UIContentServiceProxy::RegisterWebUnfocusEventCallback(
+    const std::function<void(int64_t accessibilityId, const std::string& data)>& eventCallback)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("RegisterWebUnfocusEventCallback write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("reportStub is nullptr,connect is not execute");
+    }
+    report_->RegisterWebUnfocusEventCallback(eventCallback);
+    if (Remote()->SendRequest(REGISTER_WEB_UNFOCUS_EVENT, data, reply, option) != ERR_NONE) {
+        LOGW("RegisterWebUnfocusEventCallback send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
 int32_t UIContentServiceProxy::UnregisterClickEventCallback()
 {
     MessageParcel data;
@@ -231,6 +252,26 @@ int32_t UIContentServiceProxy::UnregisterComponentChangeEventCallback()
     if (report_ == nullptr) {
         LOGW("reportStub is nullptr");
         return FAILED;
+    }
+    report_->UnregisterComponentChangeEventCallback();
+    if (Remote()->SendRequest(UNREGISTER_COMPONENT_EVENT, data, reply, option) != ERR_NONE) {
+        LOGW("UnregisterComponentChangeEventCallback send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::UnregisterWebUnfocusEventCallback()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("UnregisterComponentChangeEventCallback write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("reportStub is nullptr,connect is not execute");
     }
     report_->UnregisterComponentChangeEventCallback();
     if (Remote()->SendRequest(UNREGISTER_COMPONENT_EVENT, data, reply, option) != ERR_NONE) {

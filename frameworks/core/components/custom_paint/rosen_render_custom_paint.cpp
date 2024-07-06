@@ -649,6 +649,13 @@ double RosenRenderCustomPaint::MeasureTextInner(const MeasureContext& context)
     txtStyle.fontStyle = ConvertTxtFontStyle(context.fontStyle);
     FontWeight fontWeightStr = StringUtils::StringToFontWeight(context.fontWeight);
     txtStyle.fontWeight = ConvertTxtFontWeight(fontWeightStr);
+    auto fontWeightValue = (static_cast<int32_t>(
+            ConvertTxtFontWeight(fontWeightStr)) + 1) * 100;
+    auto pipelineContext = PipelineBase::GetCurrentContextSafely();
+    if (pipelineContext) {
+        fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
+    }
+    txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
     StringUtils::StringSplitter(context.fontFamily, ',', fontFamilies);
     txtStyle.fontFamilies = fontFamilies;
     if (context.letterSpacing.has_value()) {
@@ -693,17 +700,14 @@ bool RosenRenderCustomPaint::IsApplyIndent(const MeasureContext& context, double
 
 void RosenRenderCustomPaint::ApplyLineHeightInNumUnit(const MeasureContext& context, Rosen::TextStyle& txtStyle)
 {
-    auto lineHeight = context.lineHeight.value().Value();
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    if (pipelineContext) {
-        lineHeight = pipelineContext->NormalizeToPx(context.lineHeight.value());
-    }
+    auto lineHeight = context.lineHeight.value().ConvertToPx();
     txtStyle.heightOnly = true;
     if (!NearEqual(lineHeight, txtStyle.fontSize) && (lineHeight > 0.0) && (!NearZero(txtStyle.fontSize))) {
         txtStyle.heightScale = lineHeight / txtStyle.fontSize;
     } else {
         txtStyle.heightScale = 1;
         static const int32_t BEGIN_VERSION = 6;
+        auto pipelineContext = PipelineBase::GetCurrentContextSafely();
         auto isBeginVersion = pipelineContext && pipelineContext->GetMinPlatformVersion() >= BEGIN_VERSION;
         if (NearZero(lineHeight) || (!isBeginVersion && NearEqual(lineHeight, txtStyle.fontSize))) {
             txtStyle.heightOnly = false;

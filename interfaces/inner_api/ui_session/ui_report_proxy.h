@@ -52,6 +52,10 @@ public:
      */
     void ReportInspectorTreeValue(const std::string& data, int32_t partNum, bool isLastPart) override;
 
+    /**
+     * @description: notify stub side to report web unfocus value
+     */
+    void ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data) override;
     void OnComponentChange(const std::string& key, const std::string& value);
 
 private:

@@ -28,7 +28,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-// TODO timepicker style modification
 constexpr int32_t CHILD_WITH_AMPM_SIZE = 3;
 constexpr int32_t CHILD_WITHOUT_AMPM_SIZE = 2;
 constexpr uint32_t AM_PM_HOUR_12 = 12;
@@ -74,6 +73,7 @@ void TimePickerRowPattern::SetButtonIdeaSize()
     CHECK_NULL_VOID(pickerTheme);
     auto children = host->GetChildren();
     auto height = pickerTheme->GetDividerSpacing();
+    CHECK_EQUAL_VOID(children.size(), 0);
     auto width = host->GetGeometryNode()->GetFrameSize().Width() / static_cast<float>(children.size());
     auto defaultWidth = height.ConvertToPx() * 2;
     if (width > defaultWidth) {
@@ -760,7 +760,6 @@ void TimePickerRowPattern::GetAllChildNodeWithSecond()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (GetHour24() && host->GetChildren().size() == CHILD_WITH_AMPM_SIZE + 1) {
-        // if amPmTimeOrder is "10", amPm node is in slot 0, otherwise in slot 3
         host->RemoveChildAtIndex(amPmTimeOrder_ == "10" ? AMPMDEFAULTPOSITION : AMPM_FORWARD_WITHSECOND);
         amPmId_.reset();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1052,6 +1051,7 @@ void TimePickerRowPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto dividerSpacing = pipeline->NormalizeToPx(pickerTheme->GetDividerSpacing());
     auto pickerThemeWidth = dividerSpacing * 2;
 
+    CHECK_EQUAL_VOID(childSize, 0);
     auto centerX = (frameWidth / childSize - pickerThemeWidth) / 2 +
                    pickerChild->GetGeometryNode()->GetFrameRect().Width() * focusKeyID_ +
                    PRESS_INTERVAL.ConvertToPx() * 2;

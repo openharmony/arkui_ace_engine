@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_ADAPTER_IMPL_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_ADAPTER_IMPL_H
 
 #include <cstdint>
 #include <functional>
@@ -226,3 +227,4 @@ private:
 namespace OHOS::Ace::NodeAdapter {
 const ArkUINodeAdapterAPI* GetNodeAdapterAPI();
 } // namespace OHOS::Ace::NodeAdapter
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_ADAPTER_IMPL_H

@@ -68,18 +68,13 @@ void SearchLayoutAlgorithm::CancelImageMeasure(LayoutWrapper* layoutWrapper)
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
     auto constraint = layoutProperty->GetLayoutConstraint();
-    auto imageConstraint = imageLayoutProperty->GetLayoutConstraint();
     auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
     auto defaultImageHeight = static_cast<float>(searchTheme->GetIconSize().ConvertToPx());
-    auto iconStretchSize = (NearZero(defaultImageHeight) || !imageConstraint->maxSize.IsPositive()) &&
-                           !layoutProperty->HasCancelButtonUDSize();
     auto imageHeight = static_cast<float>(std::min(layoutProperty->HasCancelButtonUDSize() ?
         layoutProperty->GetCancelButtonUDSizeValue().ConvertToPx() : defaultImageHeight,
         searchHeight));
     CalcSize imageCalcSize;
-    if (iconStretchSize) {
-        imageCalcSize.SetWidth(CalcLength(imageHeight));
-    }
+    imageCalcSize.SetWidth(CalcLength(imageHeight));
     imageCalcSize.SetHeight(CalcLength(imageHeight));
     imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
@@ -215,18 +210,13 @@ void SearchLayoutAlgorithm::ImageMeasure(LayoutWrapper* layoutWrapper)
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
     auto constraint = layoutProperty->GetLayoutConstraint();
-    auto imageConstraint = imageLayoutProperty->GetLayoutConstraint();
     auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
     auto defaultImageHeight = searchTheme->GetIconSize().ConvertToPx();
-    auto iconStretchSize = (NearZero(defaultImageHeight) || !imageConstraint->maxSize.IsPositive()) &&
-        !layoutProperty->HasSearchIconUDSize();
     auto imageHeight = static_cast<float>(std::min(layoutProperty->HasSearchIconUDSize() ?
         layoutProperty->GetSearchIconUDSizeValue().ConvertToPx() : defaultImageHeight,
         searchHeight));
     CalcSize imageCalcSize;
-    if (iconStretchSize) {
-        imageCalcSize.SetWidth(CalcLength(imageHeight));
-    }
+    imageCalcSize.SetWidth(CalcLength(imageHeight));
     imageCalcSize.SetHeight(CalcLength(imageHeight));
     imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
 

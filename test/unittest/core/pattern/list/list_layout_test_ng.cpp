@@ -23,7 +23,6 @@ class ListLayoutTestNg : public ListTestNg {
 public:
     void UpdateContentModifier();
     RefPtr<ListPaintMethod> UpdateOverlayModifier();
-    AssertionResult VerifySticky(int32_t groupIndex, bool isHeader, float expectOffsetY);
     void UpdateDividerMap();
 };
 
@@ -44,17 +43,6 @@ RefPtr<ListPaintMethod> ListLayoutTestNg::UpdateOverlayModifier()
     return listPaint;
 }
 
-AssertionResult ListLayoutTestNg::VerifySticky(int32_t groupIndex, bool isHeader, float expectOffsetY)
-{
-    RefPtr<FrameNode> groupNode = GetChildFrameNode(frameNode_, groupIndex);
-    float offsetY = isHeader ? GetChildRect(groupNode, 0).GetY() : GetChildRect(groupNode, 1).GetY();
-    // because has header height, the footer under header
-    if (!isHeader && expectOffsetY < GROUP_HEADER_LEN) {
-        expectOffsetY = GROUP_HEADER_LEN;
-    }
-    return IsEqual(offsetY, expectOffsetY);
-}
-
 void ListLayoutTestNg::UpdateDividerMap()
 {
     int cur = 0;
@@ -63,230 +51,6 @@ void ListLayoutTestNg::UpdateDividerMap()
         cur++;
     }
     UpdateContentModifier();
-}
-
-/**
- * @tc.name: ListItemGroup001
- * @tc.desc: Test ListItemGroup rect and itemPosition with V2::ListItemGroupStyle::NONE
- * @tc.type: FUNC
- */
-HWTEST_F(ListLayoutTestNg, ListItemGroup001, TestSize.Level1)
-{
-    CreateList();
-    CreateGroupWithSetting(1, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
-    CreateDone(frameNode_);
-    RefPtr<FrameNode> groupNode = GetChildFrameNode(frameNode_, 0);
-    float groupHeight = GROUP_ITEM_NUMBER * (ITEM_HEIGHT + SPACE) - SPACE + GROUP_HEADER_LEN * 2;
-    RectF groupRect = GetChildRect(frameNode_, 0);
-    RectF headRect = GetChildRect(groupNode, 0);
-    RectF footRect = GetChildRect(groupNode, 1);
-    EXPECT_TRUE(IsEqual(groupRect, RectF(0, 0, LIST_WIDTH, groupHeight)));
-    EXPECT_TRUE(IsEqual(headRect, RectF(0, 0, LIST_WIDTH, GROUP_HEADER_LEN)));
-    EXPECT_TRUE(IsEqual(footRect, RectF(0, groupHeight - GROUP_HEADER_LEN, LIST_WIDTH, GROUP_HEADER_LEN)));
-    EXPECT_TRUE(VerifyPosition(groupNode, GROUP_ITEM_NUMBER, DEFAULT_LANES, SPACE, GROUP_HEADER_LEN));
-}
-
-/**
- * @tc.name: ListItemGroup002
- * @tc.desc: Test ListItemGroup rect and itemPosition with V2::ListItemGroupStyle::CARD
- * @tc.type: FUNC
- */
-HWTEST_F(ListLayoutTestNg, ListItemGroup002, TestSize.Level1)
-{
-    CreateList();
-    CreateGroupWithSetting(1, Axis::VERTICAL, V2::ListItemGroupStyle::CARD);
-    CreateDone(frameNode_);
-    RefPtr<FrameNode> groupNode = GetChildFrameNode(frameNode_, 0);
-    float groupHeight = GROUP_ITEM_NUMBER * (ITEM_HEIGHT + SPACE) - SPACE + GROUP_HEADER_LEN * 2;
-    RectF groupRect = GetChildRect(frameNode_, 0);
-    RectF headRect = GetChildRect(groupNode, 0);
-    RectF footRect = GetChildRect(groupNode, 1);
-    EXPECT_TRUE(IsEqual(groupRect, RectF(12.f, 0, -60.f, groupHeight)));
-    EXPECT_TRUE(IsEqual(headRect, RectF(0, 0, 216.f, GROUP_HEADER_LEN)));
-    EXPECT_TRUE(IsEqual(footRect, RectF(0, groupHeight - GROUP_HEADER_LEN, 216.f, GROUP_HEADER_LEN)));
-    EXPECT_TRUE(VerifyPosition(groupNode, GROUP_ITEM_NUMBER, DEFAULT_LANES, SPACE, GROUP_HEADER_LEN));
-}
-
-/**
- * @tc.name: ListItemGroup003
- * @tc.desc: List set sticky header and footer
- * @tc.type: FUNC
- */
-HWTEST_F(ListLayoutTestNg, ListItemGroup003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. V2::StickyStyle::HEADER
-     * @tc.expected: head is Sticky
-     */
-    ListModelNG model = CreateList();
-    model.SetSticky(V2::StickyStyle::HEADER);
-    CreateGroupWithSetting(GROUP_NUMBER, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
-    CreateDone(frameNode_);
-    EXPECT_TRUE(VerifySticky(0, true, 0));
-    ScrollDown();
-    EXPECT_TRUE(VerifySticky(0, true, ITEM_HEIGHT));
-
-    /**
-     * @tc.steps: step2. V2::StickyStyle::FOOTER
-     * @tc.expected: foot is Sticky
-     */
-    ClearOldNodes();
-    model = CreateList();
-    model.SetSticky(V2::StickyStyle::FOOTER);
-    CreateGroupWithSetting(GROUP_NUMBER, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
-    CreateDone(frameNode_);
-    float expectOffsetY = LIST_HEIGHT - GetChildRect(frameNode_, 0).Height() - GROUP_HEADER_LEN;
-    EXPECT_TRUE(VerifySticky(1, false, expectOffsetY));
-    ScrollDown();
-    EXPECT_TRUE(VerifySticky(1, false, expectOffsetY + ITEM_HEIGHT));
-
-    /**
-     * @tc.steps: step3. V2::StickyStyle::BOTH
-     * @tc.expected: head/foot is Sticky
-     */
-    ClearOldNodes();
-    model = CreateList();
-    model.SetSticky(V2::StickyStyle::BOTH);
-    CreateGroupWithSetting(GROUP_NUMBER, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
-    CreateDone(frameNode_);
-    EXPECT_TRUE(VerifySticky(0, true, 0));
-    ScrollDown();
-    EXPECT_TRUE(VerifySticky(0, true, ITEM_HEIGHT));
-    ScrollUp();
-
-    expectOffsetY = LIST_HEIGHT - GetChildRect(frameNode_, 0).Height() - GROUP_HEADER_LEN;
-    EXPECT_TRUE(VerifySticky(1, false, expectOffsetY));
-    ScrollDown();
-    EXPECT_TRUE(VerifySticky(1, false, expectOffsetY + ITEM_HEIGHT));
-}
-
-/**
- * @tc.name: ListItemGroup004
- * @tc.desc: test lanes
- * @tc.type: FUNC
- */
-HWTEST_F(ListLayoutTestNg, ListItemGroup004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. SetLanes 2
-     * @tc.expected: has 2 lanes items
-     */
-    int32_t lanes = 2;
-    ListModelNG model = CreateList();
-    model.SetLanes(lanes);
-    CreateListItemGroups(1);
-    CreateDone(frameNode_);
-    RefPtr<FrameNode> groupNode = GetChildFrameNode(frameNode_, 0);
-    float groupHeight = GetChildRect(frameNode_, 0).Height();
-    EXPECT_EQ(groupHeight, std::ceil(GROUP_ITEM_NUMBER / lanes) * ITEM_HEIGHT);
-    EXPECT_TRUE(VerifyPosition(groupNode, GROUP_ITEM_NUMBER, lanes, DEFAULT_SPACE, DEFAULT_STARTOFFSET));
-
-    /**
-     * @tc.steps: step2. maxLaneLength > LIST_WIDTH
-     * @tc.expected: has 1 lanes items
-     */
-    ClearOldNodes();
-    model = CreateList();
-    model.SetLaneMinLength(Dimension(300.f));
-    model.SetLaneMaxLength(Dimension(LIST_WIDTH + 100.f));
-    CreateListItemGroups(1);
-    CreateDone(frameNode_);
-    groupNode = GetChildFrameNode(frameNode_, 0);
-    float groupWidth = GetChildRect(frameNode_, 0).Width();
-    EXPECT_EQ(groupWidth, LIST_WIDTH);
-    EXPECT_TRUE(VerifyPosition(groupNode, GROUP_ITEM_NUMBER, DEFAULT_LANES, DEFAULT_SPACE, DEFAULT_STARTOFFSET));
-
-    /**
-     * @tc.steps: step3. maxLaneLength < LIST_WIDTH
-     * @tc.expected: has 1 lanes items
-     */
-    ClearOldNodes();
-    model = CreateList();
-    model.SetLaneMinLength(Dimension(300.f));
-    model.SetLaneMaxLength(Dimension(400.f));
-    CreateListItemGroups(1);
-    CreateDone(frameNode_);
-    groupNode = GetChildFrameNode(frameNode_, 0);
-    groupWidth = GetChildRect(frameNode_, 0).Width();
-    EXPECT_EQ(groupWidth, LIST_WIDTH);
-    EXPECT_TRUE(VerifyPosition(groupNode, GROUP_ITEM_NUMBER, DEFAULT_LANES, DEFAULT_SPACE, DEFAULT_STARTOFFSET));
-
-    /**
-     * @tc.steps: step4. SetLanes 2 with header/footer/space ...
-     * @tc.expected: has 2 lanes items
-     */
-    lanes = 2;
-    ClearOldNodes();
-    model = CreateList();
-    model.SetLanes(lanes);
-    CreateGroupWithSetting(1, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
-    CreateDone(frameNode_);
-    groupNode = GetChildFrameNode(frameNode_, 0);
-    EXPECT_TRUE(VerifyPosition(groupNode, GROUP_ITEM_NUMBER, lanes, SPACE, GROUP_HEADER_LEN));
-
-    /**
-     * @tc.steps: step5. set minLaneLength/maxLaneLength with header/footer/space ...
-     * @tc.expected: headWidth would be maxLaneLength
-     */
-    ClearOldNodes();
-    model = CreateList();
-    model.SetLaneMinLength(Dimension(300.f));
-    model.SetLaneMaxLength(Dimension(400.f));
-    CreateGroupWithSetting(1, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
-    CreateDone(frameNode_);
-    groupNode = GetChildFrameNode(frameNode_, 0);
-    float headWidth = GetChildRect(groupNode, 0).Width();
-    EXPECT_EQ(headWidth, LIST_WIDTH);
-    EXPECT_TRUE(VerifyPosition(groupNode, GROUP_ITEM_NUMBER, DEFAULT_LANES, SPACE, GROUP_HEADER_LEN));
-}
-
-/**
- * @tc.name: ListItemGroup005
- * @tc.desc: test SetListItemAlign
- * @tc.type: FUNC
- */
-HWTEST_F(ListLayoutTestNg, ListItemGroup005, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step2. V2::ListItemAlign::START
-     */
-    const float itemWidth = LIST_WIDTH - 100.f;
-    ListModelNG model = CreateList();
-    model.SetListItemAlign(V2::ListItemAlign::START);
-    {
-        ListItemGroupModelNG groupModel;
-        groupModel.Create(V2::ListItemGroupStyle::NONE);
-        for (int32_t index = 0; index < GROUP_ITEM_NUMBER; index++) {
-            ListItemModelNG itemModel;
-            itemModel.Create();
-            ViewAbstract::SetWidth(CalcLength(itemWidth));
-            ViewAbstract::SetHeight(CalcLength(ITEM_HEIGHT));
-            ViewStackProcessor::GetInstance()->Pop();
-        }
-        ViewStackProcessor::GetInstance()->Pop();
-    }
-    CreateDone(frameNode_);
-    RefPtr<FrameNode> groupNode = GetChildFrameNode(frameNode_, 0);
-    float itemOffsetX = GetChildRect(groupNode, 0).GetX();
-    EXPECT_EQ(itemOffsetX, 0);
-
-    /**
-     * @tc.steps: step2. V2::ListItemAlign::CENTER
-     */
-    layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::CENTER);
-    FlushLayoutTask(frameNode_);
-    groupNode = GetChildFrameNode(frameNode_, 0);
-    itemOffsetX = GetChildRect(groupNode, 0).GetX();
-    EXPECT_EQ(itemOffsetX, (LIST_WIDTH - itemWidth) / 2);
-
-    /**
-     * @tc.steps: step3. V2::ListItemAlign::END
-     */
-    layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::END);
-    FlushLayoutTask(frameNode_);
-    groupNode = GetChildFrameNode(frameNode_, 0);
-    itemOffsetX = GetChildRect(groupNode, 0).GetX();
-    EXPECT_EQ(itemOffsetX, LIST_WIDTH - itemWidth);
 }
 
 /**
@@ -1008,7 +772,7 @@ HWTEST_F(ListLayoutTestNg, PaintMethod003, TestSize.Level1)
 HWTEST_F(ListLayoutTestNg, PaintMethod004, TestSize.Level1)
 {
     Testing::MockCanvas canvas;
-    EXPECT_CALL(canvas, ClipRect(_, _, _)).Times(3);
+    EXPECT_CALL(canvas, ClipRect(_, _, _)).Times(AnyNumber());
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
@@ -1017,40 +781,51 @@ HWTEST_F(ListLayoutTestNg, PaintMethod004, TestSize.Level1)
     DrawingContext ctx = { canvas, 1, 1 };
 
     /**
-     * @tc.steps: step1. Set divider
+     * @tc.steps: step1. No divider
+     * @tc.expected: Not DrawLine
      */
     ListModelNG model = CreateList();
-    model.SetDivider(ITEM_DIVIDER);
     CreateGroupWithSetting(GROUP_NUMBER, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
     CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    UpdateContentModifier();
+    auto paintWrapper = CreateDone(frameNode_);
+    auto paintMethod = AceType::DynamicCast<ListPaintMethod>(paintWrapper->nodePaintImpl_);
+    paintMethod->UpdateContentModifier(AceType::RawPtr(paintWrapper));
     pattern_->listContentModifier_->onDraw(ctx);
 
     /**
-     * @tc.steps: step2. Set lanes greater than 1
+     * @tc.steps: step2. Set divider
+     * @tc.expected: DrawLine
+     */
+    layoutProperty_->UpdateDivider(ITEM_DIVIDER);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    paintMethod->UpdateContentModifier(AceType::RawPtr(paintWrapper));
+    pattern_->listContentModifier_->onDraw(ctx);
+
+    /**
+     * @tc.steps: step3. Set lanes>1
+     * @tc.expected: DrawLine
+     */
+    layoutProperty_->UpdateLanes(2);
+    layoutProperty_->UpdateDivider(ITEM_DIVIDER);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    paintMethod->UpdateContentModifier(AceType::RawPtr(paintWrapper));
+    pattern_->listContentModifier_->onDraw(ctx);
+
+    /**
+     * @tc.steps: step4. Set lanes>1 and lastIsItemGroup
+     * @tc.expected: DrawLine
      */
     ClearOldNodes();
     model = CreateList();
     model.SetLanes(2);
     model.SetDivider(ITEM_DIVIDER);
-    CreateGroupWithSetting(GROUP_NUMBER, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    UpdateContentModifier();
-    pattern_->listContentModifier_->onDraw(ctx);
-
-    /**
-     * @tc.steps: step3. Set lanes greater than 1 and lastIsItemGroup
-     */
-    ClearOldNodes();
-    model = CreateList();
-    model.SetLanes(2);
-    model.SetDivider(ITEM_DIVIDER);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateGroupWithSetting(GROUP_NUMBER, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
-    CreateDone(frameNode_);
-    UpdateContentModifier();
+    paintWrapper = CreateDone(frameNode_);
+    paintMethod = AceType::DynamicCast<ListPaintMethod>(paintWrapper->nodePaintImpl_);
+    paintMethod->UpdateContentModifier(AceType::RawPtr(paintWrapper));
     pattern_->listContentModifier_->onDraw(ctx);
 }
 

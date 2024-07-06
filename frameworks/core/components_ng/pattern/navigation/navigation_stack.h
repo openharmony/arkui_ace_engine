@@ -118,6 +118,7 @@ public:
     void Add(const std::string& name, const RefPtr<UINode>& navDestinationNode, NavRouteMode mode,
         const RefPtr<RouteInfo>& routeInfo = nullptr);
     RefPtr<UINode> Get();
+    std::string GetNavDesNameByIndex(int32_t index);
     bool Get(const std::string& name, RefPtr<UINode>& navDestinationNode, int32_t& index);
     bool GetFromPreBackup(const std::string& name, RefPtr<UINode>& navDestinationNode, int32_t& index);
     RefPtr<UINode> Get(int32_t index);

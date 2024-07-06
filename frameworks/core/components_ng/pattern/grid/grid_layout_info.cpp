@@ -148,11 +148,14 @@ bool GridLayoutInfo::IsOutOfStart() const
     return reachStart_ && Positive(currentOffset_);
 }
 
-bool GridLayoutInfo::IsOutOfEnd() const
+bool GridLayoutInfo::IsOutOfEnd(float mainGap, bool irregular) const
 {
-    auto atOrOutofStart = reachStart_ && NonNegative(currentOffset_);
-    auto endPos = currentOffset_ + totalHeightOfItemsInView_;
-    return !atOrOutofStart && (endIndex_ == childrenCount_ - 1) &&
+    const bool atOrOutOfStart = reachStart_ && NonNegative(currentOffset_);
+    if (irregular) {
+        return !atOrOutOfStart && Negative(GetDistanceToBottom(lastMainSize_, totalHeightOfItemsInView_, mainGap));
+    }
+    const float endPos = currentOffset_ + totalHeightOfItemsInView_;
+    return !atOrOutOfStart && (endIndex_ == childrenCount_ - 1) &&
            LessNotEqual(endPos, lastMainSize_ - contentEndPadding_);
 }
 
@@ -887,7 +890,7 @@ float GridLayoutInfo::GetDistanceToBottom(float mainSize, float heightInView, fl
         offset += it->second + mainGap;
         ++it;
     }
-    float bottomPos = offset + heightInView;
+    const float bottomPos = offset + heightInView;
     return bottomPos - mainSize;
 }
 

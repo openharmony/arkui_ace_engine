@@ -158,8 +158,8 @@ class NodeAdapter {
         }
     }
 
-    static attachNodeAdapter(adapter: NodeAdapter, node: FrameNode) {
-        getUINativeModule().nodeAdapter.attachNodeAdapter(adapter.nativePtr_, node.getNodePtr());
+    static attachNodeAdapter(adapter: NodeAdapter, node: FrameNode): boolean {
+        return getUINativeModule().nodeAdapter.attachNodeAdapter(adapter.nativePtr_, node.getNodePtr());
     }
 
     static detachNodeAdapter(node: FrameNode) {

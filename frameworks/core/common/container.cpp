@@ -81,6 +81,17 @@ RefPtr<Container> Container::CurrentSafelyWithCheck()
     return GetContainer(currentId);
 }
 
+int32_t Container::CurrentIdSafelyWithCheck()
+{
+    int32_t currentId = CurrentId();
+    if (currentId >= 0) {
+        if (AceEngine::Get().HasContainer(currentId)) {
+            return currentId;
+        }
+    }
+    return SafelyId();
+}
+
 RefPtr<Container> Container::GetContainer(int32_t containerId)
 {
     return AceEngine::Get().GetContainer(containerId);

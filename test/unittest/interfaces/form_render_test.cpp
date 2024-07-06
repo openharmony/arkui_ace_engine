@@ -680,277 +680,12 @@ HWTEST_F(FormRenderTest, FormRenderTest017, TestSize.Level1)
 
 /**
  * @tc.name: FormRenderTest018
- * @tc.type: FUNC
- * Function: DispatchPointerEvent
- **@tc.desc: 1. system running normally
- *           2. test FormRendererDispatcherImpl
- */
-HWTEST_F(FormRenderTest, FormRenderTest018, TestSize.Level1)
-{
-    std::shared_ptr<UIContent> uiContent = UIContent::Create(nullptr, nullptr);
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderTest018");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
-    bool flag = false;
-    if (renderDispatcher != nullptr) {
-        std::shared_ptr<OHOS::MMI::PointerEvent> pointerEvent = OHOS::MMI::PointerEvent::Create();
-        pointerEvent->pointerAction_ = OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN;
-        SerializedGesture serializedGesture;
-        renderDispatcher->DispatchPointerEvent(pointerEvent, serializedGesture);
-        flag = true;
-    }
-    EXPECT_TRUE(flag);
-}
-
-/**
- * @tc.name: FormRenderTest019
- * @tc.type: FUNC
- * Function: DispatchPointerEvent
- **@tc.desc: 1. system running normally
- *           2. test FormRendererDispatcherImpl
- */
-HWTEST_F(FormRenderTest, FormRenderTest019, TestSize.Level1)
-{
-    std::shared_ptr<UIContent> uiContent = nullptr;
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderTest019");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
-    bool flag = false;
-    if (renderDispatcher != nullptr) {
-        std::shared_ptr<OHOS::MMI::PointerEvent> pointerEvent = OHOS::MMI::PointerEvent::Create();
-        pointerEvent->pointerAction_ = OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN;
-        SerializedGesture serializedGesture;
-        renderDispatcher->DispatchPointerEvent(pointerEvent, serializedGesture);
-        flag = true;
-    }
-    EXPECT_TRUE(flag);
-}
-
-/**
- * @tc.name: FormRenderTest020
- * @tc.type: FUNC
- * Function: DispatchPointerEvent
- **@tc.desc: 1. system running normally
- *           2. test FormRendererDispatcherImpl
- */
-HWTEST_F(FormRenderTest, FormRenderTest020, TestSize.Level1)
-{
-    std::shared_ptr<UIContent> uiContent = UIContent::Create(nullptr, nullptr);
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderTest020");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
-    bool flag = false;
-    if (renderDispatcher != nullptr) {
-        std::shared_ptr<OHOS::MMI::PointerEvent> pointerEvent = OHOS::MMI::PointerEvent::Create();
-        pointerEvent->pointerAction_ = OHOS::MMI::PointerEvent::POINTER_ACTION_UP;
-        SerializedGesture serializedGesture;
-        renderDispatcher->DispatchPointerEvent(pointerEvent, serializedGesture);
-        flag = true;
-    }
-    EXPECT_TRUE(flag);
-}
-
-/**
- * @tc.name: FormRenderTest021
- * @tc.type: FUNC
- * Function: DispatchPointerEvent
- **@tc.desc: 1. system running normally
- *           2. test FormRendererDispatcherImpl
- */
-HWTEST_F(FormRenderTest, FormRenderTest021, TestSize.Level1)
-{
-    std::shared_ptr<UIContent> uiContent = nullptr;
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderTest021");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
-    bool flag = false;
-    if (renderDispatcher != nullptr) {
-        std::shared_ptr<OHOS::MMI::PointerEvent> pointerEvent = OHOS::MMI::PointerEvent::Create();
-        pointerEvent->pointerAction_ = OHOS::MMI::PointerEvent::POINTER_ACTION_UP;
-        SerializedGesture serializedGesture;
-        renderDispatcher->DispatchPointerEvent(pointerEvent, serializedGesture);
-        flag = true;
-    }
-    EXPECT_TRUE(flag);
-}
-
-/**
- * @tc.name: FormRenderTest022
- * @tc.type: FUNC
- * Function: SetObscured
- **@tc.desc: 1. system running normally
- *           2. test FormRendererDispatcherImpl
- */
-HWTEST_F(FormRenderTest, FormRenderTest022, TestSize.Level1)
-{
-    // const std::shared_ptr<UIContent> uiContent = nullptr;
-    std::shared_ptr<UIContent> uiContent = UIContent::Create(nullptr, nullptr);
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderTest022");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
-    bool flag = false;
-    if (renderDispatcher != nullptr) {
-        renderDispatcher->SetObscured(true);
-        flag = true;
-    }
-    EXPECT_TRUE(flag);
-}
-
-/**
- * @tc.name: FormRenderTest023
- * @tc.type: FUNC
- * Function: OnAccessibilityChildTreeRegister
- **@tc.desc: 1. system running normally
- *           2. test FormRendererDispatcherImpl
- */
-HWTEST_F(FormRenderTest, FormRenderTest023, TestSize.Level1)
-{
-    std::shared_ptr<UIContent> uiContent = UIContent::Create(nullptr, nullptr);
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderTest023");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
-    bool flag = false;
-    uint32_t windowId = 1;
-    int32_t treeId = 11;
-    int64_t accessibilityId = 111;
-    if (renderDispatcher != nullptr) {
-        renderDispatcher->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
-        flag = true;
-    }
-    EXPECT_TRUE(flag);
-}
-
-/**
- * @tc.name: FormRenderTest024
- * @tc.type: FUNC
- * Function: OnAccessibilityChildTreeDeregister
- **@tc.desc: 1. system running normally
- *           2. test FormRendererDispatcherImpl
- */
-HWTEST_F(FormRenderTest, FormRenderTest024, TestSize.Level1)
-{
-    std::shared_ptr<UIContent> uiContent = UIContent::Create(nullptr, nullptr);
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderTest024");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
-    bool flag = false;
-    if (renderDispatcher != nullptr) {
-        renderDispatcher->OnAccessibilityChildTreeDeregister();
-        flag = true;
-    }
-    EXPECT_TRUE(flag);
-}
-
-/**
- * @tc.name: FormRenderTest025
- * @tc.type: FUNC
- * Function: OnAccessibilityDumpChildInfo
- **@tc.desc: 1. system running normally
- *           2. test FormRendererDispatcherImpl
- */
-HWTEST_F(FormRenderTest, FormRenderTest025, TestSize.Level1)
-{
-    std::shared_ptr<UIContent> uiContent = nullptr;
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderTest025");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
-    bool flag = false;
-    std::vector<std::string> params;
-    std::vector<std::string> info;
-    if (renderDispatcher != nullptr) {
-        renderDispatcher->OnAccessibilityDumpChildInfo(params, info);
-        flag = true;
-    }
-    EXPECT_TRUE(flag);
-}
-
-/**
- * @tc.name: FormRenderTest026
- * @tc.type: FUNC
- * Function: OnAccessibilityDumpChildInfo
- **@tc.desc: 1. system running normally
- *           2. test FormRendererDispatcherImpl
- */
-HWTEST_F(FormRenderTest, FormRenderTest026, TestSize.Level1)
-{
-    std::shared_ptr<UIContent> uiContent = UIContent::Create(nullptr, nullptr);
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderTest026");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
-    bool flag = false;
-    std::vector<std::string> params;
-    std::vector<std::string> info;
-    if (renderDispatcher != nullptr) {
-        renderDispatcher->OnAccessibilityDumpChildInfo(params, info);
-        flag = true;
-    }
-    EXPECT_TRUE(flag);
-}
-
-/**
- * @tc.name: FormRenderTest027
- * @tc.type: FUNC
- * Function: OnAccessibilityTransferHoverEvent
- **@tc.desc: 1. system running normally
- *           2. test FormRendererDispatcherImpl
- */
-HWTEST_F(FormRenderTest, FormRenderTest027, TestSize.Level1)
-{
-    std::shared_ptr<UIContent> uiContent = UIContent::Create(nullptr, nullptr);
-    std::shared_ptr<FormRenderer> formRenderer = nullptr;
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("FormRenderTest027");
-    ASSERT_TRUE(eventRunner);
-    auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
-    sptr<FormRendererDispatcherImpl> renderDispatcher = new FormRendererDispatcherImpl(uiContent,
-        formRenderer, eventHandler);
-    bool flag = false;
-    float pointX = 1.1;
-    float pointY = 2.2;
-    int32_t sourceType = 1;
-    int32_t eventType = 2;
-    int64_t timeMs = 1000;
-    if (renderDispatcher != nullptr) {
-        renderDispatcher->OnAccessibilityTransferHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
-        flag = true;
-    }
-    EXPECT_TRUE(flag);
-}
-
-/**
- * @tc.name: FormRenderTest028
  * @tc.desc: test PreInitAddForm
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderTest, FormRenderTest028, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest018, TestSize.Level1)
 {
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("formRenderTest028");
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("formRenderTest018");
     ASSERT_TRUE(eventRunner);
     auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
     auto formRendererGroup = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
@@ -975,13 +710,13 @@ HWTEST_F(FormRenderTest, FormRenderTest028, TestSize.Level1)
 }
 
 /**
- * @tc.name: FormRenderTest029
+ * @tc.name: FormRenderTest019
  * @tc.desc: test AttachForm
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderTest, FormRenderTest029, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest019, TestSize.Level1)
 {
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("formRenderTest029");
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("formRenderTest019");
     ASSERT_TRUE(eventRunner);
     auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
     auto formRendererGroup = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
@@ -1003,13 +738,13 @@ HWTEST_F(FormRenderTest, FormRenderTest029, TestSize.Level1)
 }
 
 /**
- * @tc.name: FormRenderTest030
+ * @tc.name: FormRenderTest020
  * @tc.desc: test AttachUIContent
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderTest, FormRenderTest030, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest020, TestSize.Level1)
 {
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("formRenderTest030");
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("formRenderTest020");
     ASSERT_TRUE(eventRunner);
     auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
     auto formRendererGroup = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
@@ -1034,13 +769,13 @@ HWTEST_F(FormRenderTest, FormRenderTest030, TestSize.Level1)
 }
 
 /**
- * @tc.name: FormRenderTest031
+ * @tc.name: FormRenderTest021
  * @tc.desc: test OnSurfaceReuse
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderTest, FormRenderTest031, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest021, TestSize.Level1)
 {
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("formRenderTest031");
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("formRenderTest021");
     ASSERT_TRUE(eventRunner);
     auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
     auto formRendererGroup = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
@@ -1070,13 +805,13 @@ HWTEST_F(FormRenderTest, FormRenderTest031, TestSize.Level1)
 }
 
 /**
- * @tc.name: FormRenderTest032
+ * @tc.name: FormRenderTest022
  * @tc.desc: test OnSurfaceDetach
  * @tc.type: FUNC
  */
-HWTEST_F(FormRenderTest, FormRenderTest032, TestSize.Level1)
+HWTEST_F(FormRenderTest, FormRenderTest022, TestSize.Level1)
 {
-    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("formRenderTest032");
+    auto eventRunner = OHOS::AppExecFwk::EventRunner::Create("formRenderTest022");
     ASSERT_TRUE(eventRunner);
     auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
     auto formRendererGroup = FormRendererGroup::Create(nullptr, nullptr, eventHandler);

@@ -86,7 +86,6 @@ Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info)
     history = eventInfo->GetHistory();
     Local<ArrayRef> valueArray = ArrayRef::New(info->GetVM(), history.size());
     auto index = 0;
-    Local<ObjectRef> objRef = ObjectRef::New(info->GetVM());
     for (auto const &point : history) {
         Local<ObjectRef> touchObject = ObjectRef::New(info->GetVM());
         const OHOS::Ace::Offset& globalLocation = point.GetGlobalLocation();
@@ -111,6 +110,7 @@ Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info)
         touchObject->Set(info->GetVM(),
             ToJSValue("displayY"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY())));
 
+        Local<ObjectRef> objRef = ObjectRef::New(info->GetVM());
         objRef->Set(info->GetVM(), ToJSValue("touchObject"), (touchObject));
         objRef->Set(info->GetVM(), ToJSValue("size"), ToJSValue(point.GetSize()));
         objRef->Set(info->GetVM(), ToJSValue("force"), ToJSValue(static_cast<double>(point.GetForce())));

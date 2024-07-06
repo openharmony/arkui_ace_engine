@@ -91,7 +91,8 @@
                 "zlib",
                 "skia",
                 "libuv",
-                "background_task_mgr"
+                "background_task_mgr",
+                "atomicservice_basic_engine"
             ],
             "third_party": []
         },

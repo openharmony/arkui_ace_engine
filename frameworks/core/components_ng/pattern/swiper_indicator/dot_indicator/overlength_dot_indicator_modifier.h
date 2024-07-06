@@ -171,6 +171,12 @@ public:
         keepStatus_ = keepStatus;
     }
 
+    void UpdateCurrentStatus()
+    {
+        currentSelectedIndex_ = targetSelectedIndex_;
+        currentOverlongType_ = targetOverlongType_;
+    }
+
     void InitOverlongStatus(int32_t pageIndex);
     void CalcTargetSelectedIndex(int32_t currentPageIndex, int32_t targetPageIndex);
     void CalcTargetSelectedIndexOnForward(int32_t currentPageIndex, int32_t targetPageIndex);

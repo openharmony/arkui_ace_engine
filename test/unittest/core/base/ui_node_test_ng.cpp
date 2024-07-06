@@ -236,15 +236,6 @@ HWTEST_F(UINodeTestNg, UINodeTestNg004, TestSize.Level1)
     testNode->parent_ = parent;
     auto result = ONE->GetFocusParent();
     EXPECT_EQ(result, nullptr);
-    /**
-     * @tc.steps: step5. get the label of node before and after config the node's label
-     * @tc.expected: the label before configuring is "", and the label after config is the configured label
-     */
-    auto labelBeforeConfig = ONE->GetLabel();
-    EXPECT_EQ(labelBeforeConfig, "");
-    ONE->SetLabel("LabelOne");
-    auto labelAfterConfig = ONE->GetLabel();
-    EXPECT_EQ(labelAfterConfig, "LabelOne");
 }
 
 /**

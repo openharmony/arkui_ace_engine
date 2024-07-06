@@ -147,7 +147,7 @@ bool InputMethodManager::NeedSoftKeyboard() const
         return true;
     }
     auto pattern = currentFocusNode->GetPattern();
-    return pattern->NeedSoftKeyboard();
+    return pattern->NeedSoftKeyboard() && pattern->NeedToRequestKeyboardOnFocus();
 }
 
 void InputMethodManager::CloseKeyboard()

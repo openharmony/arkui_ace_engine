@@ -1455,8 +1455,8 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
             [eventHub, dragEvent, dragDropManager, eventManager, notifyMessage, id]() {
                 dragDropManager->SetDragResult(notifyMessage, dragEvent);
                 dragDropManager->SetDragBehavior(notifyMessage, dragEvent);
+                dragDropManager->DoDragReset();
                 dragDropManager->SetIsDragged(false);
-                dragDropManager->ResetDragging();
                 dragDropManager->SetDraggingPointer(-1);
                 dragDropManager->SetDraggingPressedState(false);
                 dragDropManager->ResetDragPreviewInfo();
@@ -1845,6 +1845,7 @@ void GestureEventHub::FireCustomerOnDragEnd(const RefPtr<PipelineBase>& context,
     CHECK_NULL_VOID(dragEvent);
     dragEvent->SetResult(DragRet::DRAG_FAIL);
     dragEvent->SetDragBehavior(DragBehavior::UNKNOWN);
+    dragDropManager->DoDragReset();
     dragDropManager->SetIsDragged(false);
     dragDropManager->ResetDragging();
     dragDropManager->SetDraggingPointer(-1);

@@ -768,6 +768,7 @@ void OnMultipleComplete(DragControllerAsyncCtx* asyncCtx)
     taskExecutor->PostTask(
         [asyncCtx]() {
             CHECK_NULL_VOID(asyncCtx);
+            ContainerScope scope(asyncCtx->instanceId);
             DragState dragState = DragState::PENDING;
             {
                 std::lock_guard<std::mutex> lock(asyncCtx->dragStateMutex);
@@ -802,6 +803,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
     taskExecutor->PostTask(
         [asyncCtx]() {
             CHECK_NULL_VOID(asyncCtx);
+            ContainerScope scope(asyncCtx->instanceId);
             DragState dragState = DragState::PENDING;
             {
                 std::lock_guard<std::mutex> lock(asyncCtx->dragStateMutex);
@@ -1689,7 +1691,7 @@ static napi_value DragControllerExport(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("DragPreview", classDragPreview),
     };
     NAPI_CALL(env, napi_define_properties(
-                       env, exports, sizeof(dragControllerDesc) / sizeof(dragControllerDesc[0]), dragControllerDesc));
+        env, exports, sizeof(dragControllerDesc) / sizeof(dragControllerDesc[0]), dragControllerDesc));
     return exports;
 }
 

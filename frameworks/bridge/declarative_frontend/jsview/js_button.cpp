@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 #if !defined(PREVIEW)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #endif
 
@@ -27,10 +28,10 @@
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
+#include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_button_theme.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/button_model_impl.h"
-#include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_button_theme.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace {
@@ -435,34 +436,15 @@ NG::PaddingProperty JSButton::GetNewPadding(const JSCallbackInfo& info)
             NG::CalcLength(defaultPadding.Top()), NG::CalcLength(defaultPadding.Bottom()) };
     }
     if (info[0]->IsObject()) {
-        std::optional<CalcDimension> left;
-        std::optional<CalcDimension> right;
-        std::optional<CalcDimension> top;
-        std::optional<CalcDimension> bottom;
+        CommonCalcDimension commonCalcDimension;
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
-
-        CalcDimension leftDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("left"), leftDimen)) {
-            left = leftDimen;
-        }
-        CalcDimension rightDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("right"), rightDimen)) {
-            right = rightDimen;
-        }
-        CalcDimension topDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("top"), topDimen)) {
-            top = topDimen;
-        }
-        CalcDimension bottomDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
-            bottom = bottomDimen;
-        }
-        if (left.has_value() || right.has_value() || top.has_value() || bottom.has_value()) {
-            padding = SetPaddings(top, bottom, left, right);
-            return padding;
+        JSViewAbstract::ParseCommonMarginOrPaddingCorner(paddingObj, commonCalcDimension);
+        if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
+            commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
+            return SetPaddings(commonCalcDimension.top, commonCalcDimension.bottom, commonCalcDimension.left,
+                commonCalcDimension.right);
         }
     }
-
     CalcDimension length(-1);
     ParseJsDimensionVp(info[0], length);
     if (length.IsNonNegative()) {
@@ -626,12 +608,19 @@ void JSButton::JsSize(const JSCallbackInfo& info)
 void JSButton::JsRadius(const JSCallbackInfo& info)
 {
     CalcDimension radius;
-    if (!ParseJsDimensionVpNG(info[0], radius)) {
-        ButtonModel::GetInstance()->ResetBorderRadius();
-    } else {
+    if (ParseJsDimensionVpNG(info[0], radius)) {
         ButtonModel::GetInstance()->SetBorderRadius(radius);
+    } else if (info[0]->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+        CalcDimension topLeft;
+        CalcDimension topRight;
+        CalcDimension bottomLeft;
+        CalcDimension bottomRight;
+        JSViewAbstract::ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
+        ButtonModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+    } else {
+        ButtonModel::GetInstance()->ResetBorderRadius();
     }
-    HandleDifferentRadius(info[0]);
 }
 
 void JSButton::JsBorder(const JSCallbackInfo& info)

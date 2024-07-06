@@ -128,4 +128,25 @@ void UiReportProxy::OnComponentChange(const std::string& key, const std::string&
     }
 }
 
+void UiReportProxy::ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option;
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("ReportWebUnfocusEvent write interface token failed");
+        return;
+    }
+    if (!messageData.WriteString(data)) {
+        LOGW("ReportWebUnfocusEvent write data  failed");
+        return;
+    }
+    if (!messageData.WriteInt64(accessibilityId)) {
+        LOGW("ReportWebUnfocusEvent write data  failed");
+        return;
+    }
+    if (Remote()->SendRequest(REPORT_WEB_UNFOCUS_EVENT, messageData, reply, option) != ERR_NONE) {
+        LOGW("ReportWebUnfocusEvent send request failed");
+    }
+}
 } // namespace OHOS::Ace

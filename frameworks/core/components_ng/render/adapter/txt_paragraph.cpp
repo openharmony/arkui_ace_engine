@@ -68,7 +68,7 @@ void TxtParagraph::CreateBuilder()
     Rosen::TypographyStyle style;
     style.textDirection = Constants::ConvertTxtTextDirection(paraStyle_.direction);
     style.textAlign = Constants::ConvertTxtTextAlign(paraStyle_.align);
-    style.maxLines = paraStyle_.maxLines;
+    style.maxLines = paraStyle_.maxLines == UINT32_MAX ? UINT32_MAX - 1 : paraStyle_.maxLines;
     style.fontSize = paraStyle_.fontSize; // Rosen style.fontSize
     style.ellipsisModal = static_cast<Rosen::EllipsisModal>(paraStyle_.ellipsisMode);
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle_.wordBreak);

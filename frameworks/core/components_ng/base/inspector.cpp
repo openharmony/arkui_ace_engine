@@ -156,7 +156,6 @@ void GetSpanInspector(
 
     InspectorFilter filter;
     parent->ToJsonValue(jsonObject, filter);
-    jsonObject->Put(INSPECTOR_LABEL, parent->GetLabel().c_str());
     jsonNode->PutRef(INSPECTOR_ATTRS, std::move(jsonObject));
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, parent->GetId());
@@ -212,7 +211,6 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
 
         InspectorFilter filter;
         parent->ToJsonValue(jsonObject, filter);
-        jsonObject->Put(INSPECTOR_LABEL, parent->GetLabel().c_str());
         jsonNode->PutRef(INSPECTOR_ATTRS, std::move(jsonObject));
     }
 
@@ -282,7 +280,6 @@ void GetSpanInspector(
 
     InspectorFilter filter;
     parent->ToJsonValue(jsonObject, filter);
-    jsonObject->Put(INSPECTOR_LABEL, parent->GetLabel().c_str());
     jsonNode->PutRef(INSPECTOR_ATTRS, std::move(jsonObject));
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, parent->GetId());
@@ -346,7 +343,6 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
     }
     auto jsonObject = JsonUtil::Create(true);
     parent->ToJsonValue(jsonObject, filter);
-    jsonObject->Put(INSPECTOR_LABEL, parent->GetLabel().c_str());
     jsonNode->PutRef(INSPECTOR_ATTRS, std::move(jsonObject));
     std::string jsonNodeStr = jsonNode->ToString();
     ConvertIllegalStr(jsonNodeStr);
@@ -477,7 +473,6 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key, const Inspe
     jsonNode->Put(INSPECTOR_DEBUGLINE, debugLine.c_str());
 
     inspectorElement->ToJsonValue(jsonAttrs, filter);
-    jsonAttrs->Put(INSPECTOR_LABEL, inspectorElement->GetLabel().c_str());
     jsonNode->PutRef(INSPECTOR_ATTRS, std::move(jsonAttrs));
     return jsonNode->ToString();
 }

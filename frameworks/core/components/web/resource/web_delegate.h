@@ -465,9 +465,8 @@ private:
 };
 
 class WebSurfaceCallback : public OHOS::SurfaceDelegate::ISurfaceCallback {
-
 public:
-    WebSurfaceCallback(const WeakPtr<WebDelegate>& delegate) : delegate_(delegate) {}
+    explicit WebSurfaceCallback(const WeakPtr<WebDelegate>& delegate) : delegate_(delegate) {}
     ~WebSurfaceCallback() = default;
 
     void OnSurfaceCreated(const OHOS::sptr<OHOS::Surface>& surface) override;
@@ -548,7 +547,7 @@ private:
 
 class NWebScreenLockCallbackImpl : public OHOS::NWeb::NWebScreenLockCallback {
 public:
-    NWebScreenLockCallbackImpl(const WeakPtr<PipelineBase>& context);
+    explicit NWebScreenLockCallbackImpl(const WeakPtr<PipelineBase>& context);
     ~NWebScreenLockCallbackImpl() = default;
 
     void Handle(bool key) override;
@@ -577,7 +576,7 @@ class GestureEventResultOhos : public GestureEventResult {
     DECLARE_ACE_TYPE(GestureEventResultOhos, GestureEventResult);
 
 public:
-    GestureEventResultOhos(std::shared_ptr<OHOS::NWeb::NWebGestureEventResult> result)
+    explicit GestureEventResultOhos(std::shared_ptr<OHOS::NWeb::NWebGestureEventResult> result)
         : result_(result) {}
 
     void SetGestureEventResult(bool result) override;
@@ -666,7 +665,6 @@ public:
     void Reload();
     void UpdateUrl(const std::string& url);
 #ifdef OHOS_STANDARD_SYSTEM
-    // TODO: add to separate this file into three file, base file, component impl and ng impl.
     void InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<NG::RenderSurface>& surface);
     void InitOHOSWeb(const WeakPtr<PipelineBase>& context);
     bool PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context);
@@ -895,6 +893,7 @@ public:
     void GLContextInit(void* window);
     sptr<OHOS::SurfaceDelegate> GetSurfaceDelegateClient();
     void SetBoundsOrResize(const Size& drawSize, const Offset& offset, bool isKeyboard = false);
+    void ResizeVisibleViewport(const Size& visibleSize, bool isKeyboard = false);
     Offset GetWebRenderGlobalPos();
     bool InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context);
     int GetWebId();
@@ -1199,6 +1198,8 @@ private:
     bool isSmoothDragResizeEnabled_ = false;
     double resizeWidth_ = 0.0;
     double resizeHeight_ = 0.0;
+    double resizeVisibleWidth_ = -1.0;
+    double resizeVisibleHeight_ = -1.0;
     OHOS::Ace::Rect currentArea_;
     NG::SafeAreaInsets systemSafeArea_;
     NG::SafeAreaInsets cutoutSafeArea_;

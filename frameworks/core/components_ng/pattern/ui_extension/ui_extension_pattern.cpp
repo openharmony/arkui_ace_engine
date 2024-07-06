@@ -88,6 +88,9 @@ UIExtensionPattern::UIExtensionPattern(
 UIExtensionPattern::~UIExtensionPattern()
 {
     UIEXT_LOGI("The %{public}smodal UIExtension is destroyed.", isModal_ ? "" : "non");
+    if (isModal_) {
+        LogoutModalUIExtension();
+    }
     NotifyDestroy();
     FireModalOnDestroy();
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -96,6 +99,17 @@ UIExtensionPattern::~UIExtensionPattern()
     CHECK_NULL_VOID(uiExtensionManager);
     uiExtensionManager->RecycleExtensionId(uiExtensionId_);
     uiExtensionManager->RemoveDestroyedUIExtension(GetNodeId());
+}
+
+void UIExtensionPattern::LogoutModalUIExtension()
+{
+    auto sessionId = GetSessionId();
+    UIEXT_LOGI("LogoutModalUIExtension sessionId %{public}d.", sessionId);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlay = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    overlay->ResetRootNode(-(sessionId));
 }
 
 RefPtr<LayoutAlgorithm> UIExtensionPattern::CreateLayoutAlgorithm()

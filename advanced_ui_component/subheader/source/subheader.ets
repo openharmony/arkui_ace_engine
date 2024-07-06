@@ -179,10 +179,11 @@ export struct SubHeader {
   @Prop contentPadding: LocalizedPadding;
   @State subHeaderMargin: LocalizedMargin = {
     start: LengthMetrics.resource($r('sys.float.margin_left')),
-    end: LengthMetrics.resource($r('sys.float.margin_right'))
+    end: LengthMetrics.resource($r('sys.float.margin_right')),
   };
   @Provide subHeaderTheme: SubHeaderTheme = new SubHeaderTheme();
   constraintWidth: number = 0;
+  paddingLeft: number = 2;
 
   onWillApplyTheme(theme: Theme) {
     this.subHeaderTheme.fontPrimaryColor = theme.colors.fontPrimary;
@@ -230,7 +231,7 @@ export struct SubHeader {
           this.buttonBgColor =  $r('sys.color.interactive_pressed');
         }
       }
-      if (event.type === TouchType.Up) {
+      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
         if (this.operationType === OperationType.TEXT_ARROW) {
           this.textArrowBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
         }
@@ -270,8 +271,12 @@ export struct SubHeader {
           this.leftArea();
         }
         .margin({
-          top: $r('sys.float.padding_level8'),
-          bottom: $r('sys.float.padding_level1'),
+          top: LengthMetrics.resource($r('sys.float.padding_level8')),
+          bottom: LengthMetrics.resource($r('sys.float.padding_level1')),
+        })
+        .padding({
+          start: LengthMetrics.resource($r('sys.float.margin_left')),
+          end: LengthMetrics.resource($r('sys.float.margin_right')),
         })
         .width('100%')
 
@@ -281,12 +286,16 @@ export struct SubHeader {
         .margin({
           bottom: $r('sys.float.padding_level4'),
         })
+        .padding({
+          // 'sys.float.margin_left' id,value: 16vp
+          start: LengthMetrics.vp((Util.getNumberByResource(125830936) ?? 16) - this.paddingLeft),
+          // 'sys.float.margin_right' id,value: 16vp
+          end: LengthMetrics.vp(Util.getNumberByResource(125830937) ?? 16),
+        })
         .justifyContent(FlexAlign.Start)
         .width('100%')
-        .rightAreaClickEvent()
       }
       .constraintSize({ minHeight: this.getMinHeight() })
-      .margin(this.contentMargin ?? this.subHeaderMargin)
       .padding(this.getAreaPadding())
     } else {
       Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.End }) {
@@ -589,8 +598,7 @@ export struct SubHeader {
               .focusable(true)
           }
           .padding({
-            start: LengthMetrics.resource(this.ageing ? $r('sys.float.padding_level0') :
-            $r('sys.float.padding_level1')),
+            start: LengthMetrics.resource($r('sys.float.padding_level1')),
             end: LengthMetrics.resource($r('sys.float.padding_level1')),
             top: LengthMetrics.resource($r('sys.float.padding_level2')),
             bottom: LengthMetrics.resource($r('sys.float.padding_level2')),
@@ -845,7 +853,7 @@ struct SingleIconStyle {
         disabled: disabledStyle,
       })
       .onTouch((event) => {
-        if (event.type === TouchType.Down) {
+        if (event.type === TouchType.Down || TouchType.Cancel) {
           this.bgColor = $r('sys.color.interactive_pressed');
         }
         if (event.type === TouchType.Up) {
@@ -907,8 +915,10 @@ class Util {
   private static readonly DEFAULT_VALUE: number = 0;
   private static readonly DEFAULT_BREAKPOINT_S: number = 600;
   private static readonly DEFAULT_BREAKPOINT_M: number = 840;
-  private static readonly CALCULATE_BREAKPOINT_S: number = this.getNumberByResource('breakpoint_horizontal_s');
-  private static readonly CALCULATE_BREAKPOINT_M: number = this.getNumberByResource('breakpoint_horizontal_m');
+  // 'sys.float.breakpoint_horizontal_s' id,value: 600vp
+  private static readonly CALCULATE_BREAKPOINT_S: number = this.getNumberByResource(125832765) ?? 600;
+  // 'sys.float.breakpoint_horizontal_m' id,value: 800vp
+  private static readonly CALCULATE_BREAKPOINT_M: number = this.getNumberByResource(125832766) ?? 840;
   public static readonly BREAKPOINT_S: number =
     this.CALCULATE_BREAKPOINT_S === this.DEFAULT_VALUE ? this.DEFAULT_BREAKPOINT_S : this.CALCULATE_BREAKPOINT_S;
   public static readonly BREAKPOINT_M: number =
@@ -945,17 +955,17 @@ class Util {
   /**
    * get resource size
    *
-   * @param resourceName resource name
+   * @param resourceName resource id
    * @returns resource size
    */
-  public static getNumberByResource(resourceName: string): number {
+  public static getNumberByResource(resourceId: number): number | null {
     try {
-      return resourceManager.getSystemResourceManager().getNumberByName(resourceName);
+      return resourceManager.getSystemResourceManager().getNumber(resourceId);
     } catch (error) {
       let code: number = (error as BusinessError).code;
       let message: string = (error as BusinessError).message;
       hilog.error(0x3900, 'Ace', `SubHeader getNumberByResource error, code: ${code}, message: ${message}`);
-      return Util.DEFAULT_VALUE;
+      return null;
     }
   }
 

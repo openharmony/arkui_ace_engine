@@ -315,8 +315,10 @@ namespace OHOS::Ace::NG {
         decltype(cachedItems_) cachedTemp(std::move(cachedItems_));
         std::map<int32_t, int32_t> indexChangedMap;
         CollectIndexChangedCount(indexChangedMap);
-        RepairDatasetItems(cachedTemp, cachedItems_, indexChangedMap);
-        RepairDatasetItems(expiringTemp, expiringTempItem_, indexChangedMap);
+        if (!indexChangedMap.empty()) {
+            RepairDatasetItems(cachedTemp, cachedItems_, indexChangedMap);
+            RepairDatasetItems(expiringTemp, expiringTempItem_, indexChangedMap);
+        }
         for (auto& [index, node] : expiringTempItem_) {
             expiringItem_.emplace(node.first, LazyForEachCacheChild(index, node.second));
         }

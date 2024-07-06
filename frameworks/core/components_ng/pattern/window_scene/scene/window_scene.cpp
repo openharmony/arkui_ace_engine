@@ -172,15 +172,17 @@ void WindowScene::RegisterFocusCallback()
         ContainerScope scope(instanceId);
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
-        pipelineContext->PostAsyncEvent([weakThis]() {
-            auto self = weakThis.Upgrade();
-            CHECK_NULL_VOID(self);
-            auto host = self->GetHost();
-            CHECK_NULL_VOID(host);
-            auto focusHub = host->GetFocusHub();
-            CHECK_NULL_VOID(focusHub);
-            focusHub->SetParentFocusable(true);
-        }, "ArkUIWindowSceneRequestFocus", TaskExecutor::TaskType::UI);
+        pipelineContext->PostAsyncEvent(
+            [weakThis]() {
+                auto self = weakThis.Upgrade();
+                CHECK_NULL_VOID(self);
+                auto host = self->GetHost();
+                CHECK_NULL_VOID(host);
+                auto focusHub = host->GetFocusHub();
+                CHECK_NULL_VOID(focusHub);
+                focusHub->SetParentFocusable(true);
+            },
+            "ArkUIWindowSceneRequestFocus", TaskExecutor::TaskType::UI);
     };
     session_->SetNotifyUIRequestFocusFunc(requestFocusCallback);
 
@@ -188,15 +190,17 @@ void WindowScene::RegisterFocusCallback()
         ContainerScope scope(instanceId);
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
-        pipelineContext->PostAsyncEvent([weakThis]() {
-            auto self = weakThis.Upgrade();
-            CHECK_NULL_VOID(self);
-            auto host = self->GetHost();
-            CHECK_NULL_VOID(host);
-            auto focusHub = host->GetFocusHub();
-            CHECK_NULL_VOID(focusHub);
-            focusHub->SetParentFocusable(false);
-        }, "ArkUIWindowSceneLostFocus", TaskExecutor::TaskType::UI);
+        pipelineContext->PostAsyncEvent(
+            [weakThis]() {
+                auto self = weakThis.Upgrade();
+                CHECK_NULL_VOID(self);
+                auto host = self->GetHost();
+                CHECK_NULL_VOID(host);
+                auto focusHub = host->GetFocusHub();
+                CHECK_NULL_VOID(focusHub);
+                focusHub->SetParentFocusable(false);
+            },
+            "ArkUIWindowSceneLostFocus", TaskExecutor::TaskType::UI);
     };
     session_->SetNotifyUILostFocusFunc(lostFocusCallback);
 }

@@ -46,6 +46,8 @@ class ACE_EXPORT DragWindow : public AceType {
 public:
     static RefPtr<DragWindow> CreateDragWindow(
         const std::string& windowName, int32_t x, int32_t y, uint32_t width, uint32_t height);
+    static RefPtr<DragWindow> CreateDragWindow(
+        const std::string& windowName, int32_t parentWindowId, int32_t x, int32_t y, uint32_t width, uint32_t height);
 
     static RefPtr<DragWindow> CreateTextDragWindow(
         const std::string& windowName, int32_t x, int32_t y, uint32_t width, uint32_t height);

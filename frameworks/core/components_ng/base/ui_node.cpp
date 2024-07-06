@@ -829,9 +829,13 @@ PipelineContext* UINode::GetContext()
     if (context_) {
         context = context_;
     } else {
-        context = PipelineContext::GetCurrentContextPtrSafely();
+        if (externalData_) {
+            context = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+        } else {
+            context = PipelineContext::GetCurrentContextPtrSafely();
+        }
     }
-    
+
     if (context && context->IsDestroyed()) {
         LOGW("Get context from node when the context is destroyed. The context_ of node is%{public}s nullptr",
             context_? " not" : "");
@@ -1446,6 +1450,13 @@ void UINode::GetInspectorValue()
 {
     for (const auto& item : GetChildren()) {
         item->GetInspectorValue();
+    }
+}
+
+void UINode::NotifyWebPattern(bool isRegister)
+{
+    for (const auto& item : GetChildren()) {
+        item->NotifyWebPattern(isRegister);
     }
 }
 } // namespace OHOS::Ace::NG

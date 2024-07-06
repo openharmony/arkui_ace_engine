@@ -697,23 +697,53 @@ HWTEST_F(ListAttrTestNg, AttrAlignListItem001, TestSize.Level1)
      * @tc.cases: case2. Set ListItemAlign::CENTER
      * @tc.expected: the item is align to center
      */
-    model = CreateList();
-    model.SetListItemAlign(V2::ListItemAlign::CENTER);
-    CreateListItem();
-    ViewAbstract::SetWidth(CalcLength(itemWidth));
-    CreateDone(frameNode_);
+    layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::CENTER);
+    FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildX(frameNode_, 0), (LIST_WIDTH - itemWidth) / 2);
 
     /**
      * @tc.cases: case3. Set ListItemAlign::END
      * @tc.expected: the item is align to end
      */
-    model = CreateList();
-    model.SetListItemAlign(V2::ListItemAlign::END);
+    layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::END);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), LIST_WIDTH - itemWidth);
+}
+
+/**
+ * @tc.name: AttrAlignListItem002
+ * @tc.desc: Test LayoutProperty about alignListItem in RTL Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrAlignListItem002, TestSize.Level1)
+{
+    /**
+     * @tc.cases: case1. Set item width smaller than LIST_WIDTH
+     * @tc.expected: the item default is align to start
+     */
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    const float itemWidth = LIST_WIDTH / 2;
+    CreateList();
     CreateListItem();
     ViewAbstract::SetWidth(CalcLength(itemWidth));
     CreateDone(frameNode_);
     EXPECT_EQ(GetChildX(frameNode_, 0), LIST_WIDTH - itemWidth);
+
+    /**
+     * @tc.cases: case2. Set ListItemAlign::CENTER
+     * @tc.expected: the item is align to center
+     */
+    layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::CENTER);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), (LIST_WIDTH - itemWidth) / 2);
+
+    /**
+     * @tc.cases: case3. Set ListItemAlign::END
+     * @tc.expected: the item is align to end
+     */
+    layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::END);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0);
 }
 
 /**

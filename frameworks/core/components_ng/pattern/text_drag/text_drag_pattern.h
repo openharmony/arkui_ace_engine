@@ -93,6 +93,11 @@ public:
         textDragData_ = data;
     }
 
+    void UpdateParagraph(const RefPtr<Paragraph>& paragraph)
+    {
+        paragraph_ = paragraph;
+    }
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         if (!overlayModifier_) {

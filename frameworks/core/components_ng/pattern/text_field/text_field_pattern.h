@@ -173,18 +173,21 @@ public:
     // TextField needs softkeyboard, override function.
     bool NeedSoftKeyboard() const override
     {
-        return needToRequestKeyboardOnFocus_;
+        return true;
     }
+
     void SetBlurOnSubmit(bool blurOnSubmit)
     {
         textInputBlurOnSubmit_ = blurOnSubmit;
         textAreaBlurOnSubmit_ = blurOnSubmit;
     }
+
     bool GetBlurOnSubmit()
     {
         return IsTextArea() ? textAreaBlurOnSubmit_ : textInputBlurOnSubmit_;
     }
-    bool GetNeedToRequestKeyboardOnFocus() const
+
+    bool NeedToRequestKeyboardOnFocus() const override
     {
         return needToRequestKeyboardOnFocus_;
     }
@@ -329,7 +332,6 @@ public:
         focusPattern.SetIsFocusActiveWhenFocused(true);
         return focusPattern;
     }
-
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void UpdateInputFilterErrorText(const std::string& errorText) override;
@@ -1349,6 +1351,7 @@ private:
     void InitLongPressEvent();
     void InitClickEvent();
     void InitDragDropEvent();
+    bool ProcessFocusIndexAction();
     std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragStart();
     std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragDrop();
     void ShowSelectAfterDragEvent();

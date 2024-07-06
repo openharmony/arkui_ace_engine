@@ -217,7 +217,7 @@ void APngImagePlayer::Resume()
     }
 }
 
-void APngImagePlayer::RenderFrame(const int32_t &index)
+void APngImagePlayer::RenderFrame(const int32_t& index)
 {
     auto context = context_.Upgrade();
     if (!context) {
@@ -226,47 +226,44 @@ void APngImagePlayer::RenderFrame(const int32_t &index)
     }
 
     auto taskExecutor = context->GetTaskExecutor();
-    taskExecutor->PostTask([weak = AceType::WeakClaim(this),
-                            index,
-                            dstWidth = dstWidth_,
-                            dstHeight = dstHeight_,
-                            taskExecutor] {
-                auto player = weak.Upgrade();
-                if (!player) {
-                    return;
-                }
+    taskExecutor->PostTask(
+        [weak = AceType::WeakClaim(this), index, dstWidth = dstWidth_, dstHeight = dstHeight_, taskExecutor] {
+            auto player = weak.Upgrade();
+            if (!player) {
+                return;
+            }
 
-                APngAnimatedFrameInfo *frameInfo = player->DecodeFrameImage(index);
-                if (!frameInfo || !frameInfo->image) {
-                    return;
-                }
+            APngAnimatedFrameInfo* frameInfo = player->DecodeFrameImage(index);
+            if (!frameInfo || !frameInfo->image) {
+                return;
+            }
 
 #ifndef USE_ROSEN_DRAWING
-                sk_sp<SkImage> skImage = frameInfo->image;
-                if (dstWidth > 0 && dstHeight > 0) {
-                    skImage = ImageProvider::ApplySizeToSkImage(skImage, dstWidth, dstHeight);
-                }
-                if (!skImage) {
-                    LOGW("animated player cannot get the %{public}d skImage!", index);
-                    return;
-                }
-                auto canvasImage = NG::CanvasImage::Create(&skImage);
+            sk_sp<SkImage> skImage = frameInfo->image;
+            if (dstWidth > 0 && dstHeight > 0) {
+                skImage = ImageProvider::ApplySizeToSkImage(skImage, dstWidth, dstHeight);
+            }
+            if (!skImage) {
+                LOGW("animated player cannot get the %{public}d skImage!", index);
+                return;
+            }
+            auto canvasImage = NG::CanvasImage::Create(&skImage);
 #else
-                std::shared_ptr<RSImage> dImage = frameInfo->image;
-                if (dstWidth > 0 && dstHeight > 0) {
-                    dImage = ImageProvider::ApplySizeToDrawingImage(dImage, dstWidth, dstHeight);
-                }
-                if (!dImage) {
-                    LOGW("animated player cannot get the %{public}d dImage!", index);
-                    return;
-                }
-                auto canvasImage = NG::CanvasImage::Create(&dImage);
+            std::shared_ptr<RSImage> dImage = frameInfo->image;
+            if (dstWidth > 0 && dstHeight > 0) {
+                dImage = ImageProvider::ApplySizeToDrawingImage(dImage, dstWidth, dstHeight);
+            }
+            if (!dImage) {
+                LOGW("animated player cannot get the %{public}d dImage!", index);
+                return;
+            }
+            auto canvasImage = NG::CanvasImage::Create(&dImage);
 #endif
 
-                taskExecutor->PostTask([callback = player->successCallback_, canvasImage,
-                                               source = player->imageSource_] { callback(source, canvasImage); },
-                                       TaskExecutor::TaskType::UI, "ArkUIImageAPngRenderSuccess");
-            },
+            taskExecutor->PostTask([callback = player->successCallback_, canvasImage,
+                                       source = player->imageSource_] { callback(source, canvasImage); },
+                TaskExecutor::TaskType::UI, "ArkUIImageAPngRenderSuccess");
+        },
         TaskExecutor::TaskType::IO, "ArkUIImageAPngRenderFrame");
 }
 
@@ -313,7 +310,7 @@ sk_sp<SkImage> APngImagePlayer::GetImage(const int32_t& index, bool extendToCanv
     return rawImage;
 }
 #else
-    // TODO Drawing : SkData::MakeWithProc
+    // Drawing : SkData::MakeWithProc
 #endif
 void APngImagePlayer::ClearCanvasRect(const APngAnimatedFrameInfo *frameInfo)
 {
@@ -821,9 +818,7 @@ APngAnimatedFrameInfo *APngImagePlayer::DecodeFrameImage(const int32_t& index)
 #endif
 
             blendFrameIndex_ = index;
-        }
-        // canvas is not ready
-        else {
+        } else { // canvas is not ready
             for (uint32_t i = (uint32_t) frameInfo->blendFromIndex; i <= (uint32_t) frameInfo->index; i++) {
                 if (i == frameInfo->index) {
                     if (!image) {

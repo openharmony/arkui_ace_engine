@@ -90,6 +90,8 @@ public:
         return false;
     }
 
+    virtual void ProcessSafeAreaPadding() {}
+
     virtual bool IsNeedPercent() const
     {
         return false;
@@ -109,6 +111,11 @@ public:
     virtual bool NeedSoftKeyboard() const
     {
         return false;
+    }
+
+    virtual bool NeedToRequestKeyboardOnFocus() const
+    {
+        return true;
     }
 
     virtual bool DefaultSupportDrag()

@@ -165,7 +165,6 @@ public:
 
     void ProcessPropertyDiff()
     {
-        // TODO: modify done need to optimize.
         if (isPropertyDiffMarked_) {
             MarkModifyDone();
             MarkDirtyNode();
@@ -741,6 +740,7 @@ public:
     {
         return renderContext_->HasPosition() || renderContext_->HasPositionEdges();
     }
+    void ProcessSafeAreaPadding();
 
     bool SkipMeasureContent() const override;
     float GetBaselineDistance() const override;
@@ -935,6 +935,7 @@ public:
     ChildrenListWithGuard GetAllChildren();
     OPINC_TYPE_E FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth);
     void GetInspectorValue() override;
+    void NotifyWebPattern(bool isRegister) override;
 
     FrameNodeChangeInfoFlag GetChangeInfoFlag()
     {
