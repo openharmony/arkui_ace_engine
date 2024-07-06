@@ -1413,7 +1413,7 @@ HWTEST_F(IndexerTestNg, OnModifyDone006, TestSize.Level1)
         model.SetItemSize(Dimension(10, DimensionUnit::VP));
     }, CREATE_ARRAY_1, 0);
 
-    EXPECT_EQ(pattern_->autoCollapse_, true);
+    EXPECT_EQ(pattern_->autoCollapse_, false);
     EXPECT_EQ(pattern_->fullArrayValue_.size(), CREATE_ARRAY_1.size());
     EXPECT_EQ(pattern_->arrayValue_.size(), CREATE_ARRAY_1.size());
     for (auto value : pattern_->arrayValue_) {
@@ -1450,7 +1450,7 @@ HWTEST_F(IndexerTestNg, OnModifyDone007, TestSize.Level1)
     dirtySwapConfig.skipLayout = false;
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
 
-    EXPECT_EQ(pattern_->autoCollapse_, true);
+    EXPECT_EQ(pattern_->autoCollapse_, false);
     EXPECT_EQ(pattern_->fullArrayValue_.size(), CREATE_ARRAY_1.size());
     EXPECT_EQ(pattern_->arrayValue_.size(), CREATE_ARRAY_1.size());
     for (auto value : pattern_->arrayValue_) {
