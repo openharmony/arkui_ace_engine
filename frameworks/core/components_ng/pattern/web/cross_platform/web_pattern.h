@@ -70,6 +70,13 @@ struct TouchHandleState {
 enum WebOverlayType { INSERT_OVERLAY, SELECTION_OVERLAY, INVALID_OVERLAY };
 } // namespace
 
+enum class WebInfoType : int32_t {
+    TYPE_MOBILE,
+    TYPE_TABLET,
+    TYPE_2IN1,
+    TYPE_UNKNOWN
+};
+
 class WebPattern : public Pattern, public SelectionHost {
     DECLARE_ACE_TYPE(WebPattern, Pattern, SelectionHost);
 
@@ -78,11 +85,15 @@ public:
     using SetHapPathCallback = std::function<void(const std::string&)>;
     using JsProxyCallback = std::function<void()>;
     using OnControllerAttachedCallback = std::function<void()>;
+    using PermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
+    using DefaultFileSelectorShowCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     WebPattern();
     WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController,
-                RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
+                RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
+                           const std::string& sharedRenderProcessToken = "");
     WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback,
-                RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
+                RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
+                           const std::string& sharedRenderProcessToken = "");
 
     ~WebPattern() override;
 
@@ -107,8 +118,6 @@ public:
     {
         return true;
     }
-
-    void UpdateSlideOffset() override;
 
     RefPtr<EventHub> CreateEventHub() override
     {
@@ -392,6 +401,25 @@ public:
         return false;
     }
 
+    void Backward();
+
+    void SetDefaultFileSelectorShowCallback(DefaultFileSelectorShowCallback&& Callback)
+    {
+        
+    }
+
+    WebInfoType GetWebInfoType();
+
+    void SetUpdateInstanceIdCallback(std::function<void(int32_t)> &&callabck)
+    {
+        
+    }
+
+    void SetSharedRenderProcessToken(const std::string& sharedRenderProcessToken)
+    {
+        sharedRenderProcessToken_ = sharedRenderProcessToken;
+    }
+
 private:
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
@@ -473,8 +501,9 @@ private:
     void ResetDragAction();
     void UpdateRelativeOffset();
     void InitSlideUpdateListener();
-    void CalculateHorizontalDrawRect(const SizeF frameSize);
-    void CalculateVerticalDrawRect(const SizeF frameSize);
+    void CalculateHorizontalDrawRect();
+    void CalculateVerticalDrawRect();
+    void UpdateSlideOffset(bool isNeedReset = false);
     void OnNativeEmbedModeEnabledUpdate(bool value);
     void OnNativeEmbedRuleTagUpdate(const std::string& tag);
     void OnNativeEmbedRuleTypeUpdate(const std::string& type);
@@ -561,6 +590,7 @@ private:
     int32_t rootLayerWidth_ = 0;
     int32_t rootLayerHeight_ = 0;
     bool richTextInit_ = false;
+    std::optional<std::string> sharedRenderProcessToken_;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG
