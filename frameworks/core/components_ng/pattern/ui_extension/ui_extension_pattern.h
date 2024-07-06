@@ -188,6 +188,7 @@ private:
     void OnColorConfigurationUpdate() override;
     void OnModifyDone() override;
     bool CheckConstraint();
+    void LogoutModalUIExtension();
 
     void InitKeyEvent(const RefPtr<FocusHub>& focusHub);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
