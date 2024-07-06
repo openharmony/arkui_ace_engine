@@ -272,7 +272,14 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     // with the end of the original menu.
     auto width = menuItem->GetGeometryNode()->GetMarginFrameSize().Width();
     auto height = menuItem->GetGeometryNode()->GetMarginFrameSize().Height();
-    if (GreatNotEqual(width, height)) {
+
+    auto backButton = layoutWrapper->GetOrCreateChildByIndex(1);
+    bool isBackButtonVisible = false;
+    if (backButton) {
+        isBackButtonVisible =
+            backButton->GetLayoutProperty()->GetVisibilityValue(VisibleType::INVISIBLE) == VisibleType::VISIBLE;
+    }
+    if (!isBackButtonVisible) {
         menuWidth_ = width;
         menuHeight_ = height;
     } else {
