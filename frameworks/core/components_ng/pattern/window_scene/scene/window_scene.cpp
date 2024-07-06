@@ -296,16 +296,11 @@ void WindowScene::BufferAvailableCallbackForBlank()
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self && self->session_);
 
-        auto appWindowContext = AceType::DynamicCast<RosenRenderContext>(self->appWindow_->GetRenderContext());
-        CHECK_NULL_VOID(appWindowContext);
-        appWindowContext->SetOpacity(1);
+        auto context = AceType::DynamicCast<RosenRenderContext>(self->appWindow_->GetRenderContext());
+        CHECK_NULL_VOID(context);
+        context->SetOpacity(1);
 
         CHECK_NULL_VOID(self->blankWindow_);
-        auto context = AceType::DynamicCast<RosenRenderContext>(self->blankWindow_->GetRenderContext());
-        CHECK_NULL_VOID(context);
-        auto blankRsNode = context->GetRSNode();
-        CHECK_NULL_VOID(blankRsNode);
-        blankRsNode->SetAlpha(1);
         auto effect = Rosen::RSTransitionEffect::Create()->Opacity(0);
         Rosen::RSAnimationTimingProtocol protocol;
         protocol.SetDuration(ANIMATION_CONFIG_CURVE);
@@ -338,9 +333,9 @@ void WindowScene::BufferAvailableCallbackForSnapshot()
         ACE_SCOPED_TRACE("WindowScene::BufferAvailableCallbackForSnapshot");
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self && self->session_);
+
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-
         self->RemoveChild(host, self->snapshotWindow_, self->snapshotWindowName_);
         self->snapshotWindow_.Reset();
         self->session_->SetNeedSnapshot(true);
@@ -541,9 +536,7 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             ACE_SCOPED_TRACE("WindowScene::OnDirtyLayoutWrapperSwap");
             auto context = AceType::DynamicCast<RosenRenderContext>(appWindow_->GetRenderContext());
             CHECK_NULL_RETURN(context, false);
-            auto rsNode = context->GetRSNode();
-            CHECK_NULL_RETURN(rsNode, false);
-            rsNode->SetAlpha(0);
+            context->SetOpacity(1);
             AddChild(host, appWindow_, appWindowName_, 0);
             CreateBlankWindow();
             AddChild(host, blankWindow_, blankWindowName_);
@@ -580,11 +573,9 @@ void WindowScene::CleanBlankOrSnapshotWindow()
             self->RemoveChild(host, self->blankWindow_, self->blankWindowName_);
             self->blankWindow_.Reset();
             self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
-            auto appWindowContext = AceType::DynamicCast<RosenRenderContext>(self->appWindow_->GetRenderContext());
-            CHECK_NULL_VOID(appWindowContext);
-            auto rsNode = appWindowContext->GetRSNode();
-            CHECK_NULL_VOID(rsNode);
-            rsNode->SetAlpha(1);
+            auto context = AceType::DynamicCast<RosenRenderContext>(self->appWindow_->GetRenderContext());
+            CHECK_NULL_VOID(context);
+            context->SetOpacity(1);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     });
