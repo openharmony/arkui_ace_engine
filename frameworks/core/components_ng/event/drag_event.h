@@ -270,6 +270,7 @@ public:
     void GetThumbnailPixelMapAsync(const RefPtr<GestureEventHub>& gestureHub);
     void SetResponseRegionFull();
     void ResetResponseRegion();
+    static void ResetDragStatus();
 
 private:
     void UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>& frameNode);
