@@ -141,7 +141,7 @@ public:
     void HideDragPreviewOverlay();
     void HideDragPreviewWindow(int32_t containerId);
     bool IsMSDPDragging() const;
-    void UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const Point& point);
+    void UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const OHOS::Ace::PointerEvent& pointerEvent);
     void UpdateNotifyDragEvent(
         RefPtr<NotifyDragEvent>& notifyEvent, const Point& point, const DragEventType dragEventType);
     bool CheckDragDropProxy(int64_t id) const;

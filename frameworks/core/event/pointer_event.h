@@ -89,6 +89,16 @@ struct PointerEvent final {
             return Point(x, y, x, y);
         }
     }
+
+    int32_t GetDisplayX() const
+    {
+        return displayX;
+    }
+
+    int32_t GetDisplayY() const
+    {
+        return displayY;
+    }
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_POINTER_EVENT_H

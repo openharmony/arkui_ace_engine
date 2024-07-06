@@ -992,7 +992,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest017, TestSize.Level1)
      * @tc.steps: step3. call UpdateDragEvent.
      * @tc.expected: pipeline is not null.
      */
-    dragDropManager->UpdateDragEvent(event, Point(1.0f, 1.0f));
+    dragDropManager->UpdateDragEvent(event, PointerEvent(1, 1));
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
 }
