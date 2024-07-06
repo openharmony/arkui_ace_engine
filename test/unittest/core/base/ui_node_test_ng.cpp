@@ -1194,7 +1194,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg043, TestSize.Level1)
     parent->UINode::DoRemoveChildInRenderTree(0, false);
     parent->UINode::DoRemoveChildInRenderTree(5, false);
     parent->UINode::GetFrameChildByIndex(0, false);
-    EXPECT_FALSE(parent->UINode::GetDisappearingChildById(""));
+    EXPECT_FALSE(parent->UINode::GetDisappearingChildById("", 0));
     EXPECT_FALSE(parent->UINode::GetFrameChildByIndex(5, false));
 }
 
