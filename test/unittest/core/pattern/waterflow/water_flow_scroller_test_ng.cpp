@@ -14,6 +14,7 @@
  */
 
 #include "water_flow_test_ng.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
 
@@ -539,6 +540,27 @@ HWTEST_F(WaterFlowScrollerTestNg, ScrollToIndex003, TestSize.Level1)
     pattern_->ScrollToIndex(29, true);
     FlushLayoutTask(frameNode_);
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, 2100.f);
+}
+
+/**
+ * @tc.name: ScrollToIndex004
+ * @tc.desc: Test ScrollToIndex while updating offset. Offset should be overriden
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, ScrollToIndex004, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateRandomItem(100);
+    });
+    pattern_->ScrollToIndex(80, false, ScrollAlign::AUTO);
+    UpdateCurrentOffset(-20.0f);
+    EXPECT_EQ(GetChildRect(frameNode_, 80).Bottom(), WATERFLOW_HEIGHT);
+
+    pattern_->UpdateCurrentOffset(-20.0f, SCROLL_FROM_UPDATE);
+    pattern_->ScrollToIndex(20, false, ScrollAlign::AUTO);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildRect(frameNode_, 20).GetY(), 0.0f);
 }
 
 /**
