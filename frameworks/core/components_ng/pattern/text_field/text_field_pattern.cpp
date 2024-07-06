@@ -5360,6 +5360,27 @@ std::string TextFieldPattern::GetFontSize() const
     return layoutProperty->GetFontSizeValue(theme->GetFontSize()).ToString();
 }
 
+std::string TextFieldPattern::GetMinFontSize() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "");
+    return layoutProperty->GetAdaptMinFontSize()->ToString();
+}
+
+std::string TextFieldPattern::GetMaxFontSize() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "");
+    return layoutProperty->GetAdaptMaxFontSize()->ToString();
+}
+
+std::string TextFieldPattern::GetTextIndent() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "");
+    return layoutProperty->GetTextIndent()->ToString();
+}
+
 Ace::FontStyle TextFieldPattern::GetItalicFontStyle() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
@@ -6259,35 +6280,49 @@ void TextFieldPattern::DumpInfo()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    DumpLog::GetInstance().AddDesc(std::string("Content:").append(GetTextValue()));
-    DumpLog::GetInstance().AddDesc(std::string("MaxLength:").append(std::to_string(GetMaxLength())));
-    DumpLog::GetInstance().AddDesc(std::string("InputFilter:").append(GetInputFilter()));
-    DumpLog::GetInstance().AddDesc(std::string("CopyOption:").append(GetCopyOptionString()));
-    DumpLog::GetInstance().AddDesc(std::string("TextAlign:").append(std::to_string((int32_t)GetTextAlign())));
-    DumpLog::GetInstance().AddDesc(std::string("CaretPosition:").append(std::to_string(GetCaretIndex())));
-    DumpLog::GetInstance().AddDesc(
-        std::string("enableKeyboardOnFocus:").append(std::to_string(needToRequestKeyboardOnFocus_)));
-    DumpLog::GetInstance().AddDesc(
+    auto& dumpLog = DumpLog::GetInstance();
+    dumpLog.AddDesc(std::string("Content:").append(GetTextValue()));
+    dumpLog.AddDesc(std::string("MaxLength:").append(std::to_string(GetMaxLength())));
+    dumpLog.AddDesc(std::string("fontSize:").append(GetFontSize()));
+    dumpLog.AddDesc(std::string("fontWeight:").append(V2::ConvertWrapFontWeightToStirng(GetFontWeight())));
+    dumpLog.AddDesc(std::string("fontFamily:").append(GetFontFamily()));
+    dumpLog.AddDesc(
+        std::string("fontStyle:")
+            .append(GetItalicFontStyle() == Ace::FontStyle::NORMAL ? "FontStyle.Normal" : "FontStyle.Italic"));
+    dumpLog.AddDesc(std::string("InputFilter:").append(GetInputFilter()));
+    dumpLog.AddDesc(std::string("lineHeight:").append(layoutProperty->GetLineHeight()->ToString()));
+    dumpLog.AddDesc(std::string("TextIndent:").append(GetTextIndent()));
+    dumpLog.AddDesc(std::string("showError:").append(GetErrorTextState() ? GetErrorTextString() : "undefined"));
+    dumpLog.AddDesc(std::string("CopyOption:").append(GetCopyOptionString()));
+    dumpLog.AddDesc(std::string("TextAlign:").append(V2::ConvertWrapTextAlignToString(GetTextAlign())));
+    dumpLog.AddDesc(std::string("CaretPosition:").append(std::to_string(GetCaretIndex())));
+    dumpLog.AddDesc(std::string("type:").append(TextInputTypeToString()));
+    dumpLog.AddDesc(std::string("enterKeyType:").append(TextInputActionToString()));
+    dumpLog.AddDesc(std::string("HasFocus:").append(std::to_string(HasFocus())));
+    dumpLog.AddDesc(std::string("enableKeyboardOnFocus:").append(std::to_string(needToRequestKeyboardOnFocus_)));
+    dumpLog.AddDesc(std::string("supportPreviewText:").append(std::to_string(GetSupportPreviewText())));
+    dumpLog.AddDesc(
         std::string("enableAutoFill:").append(std::to_string(layoutProperty->GetEnableAutoFillValue(true))));
-    DumpLog::GetInstance().AddDesc(std::string("HasFocus:").append(std::to_string(HasFocus())));
+    dumpLog.AddDesc(std::string("contentType:").append(TextContentTypeToString()));
+    dumpLog.AddDesc(std::string("style:").append(GetInputStyleString()));
 #if defined(ENABLE_STANDARD_INPUT)
     auto miscTextConfig = GetMiscTextConfig();
     CHECK_NULL_VOID(miscTextConfig.has_value());
     MiscServices::TextConfig textConfig = miscTextConfig.value();
-    DumpLog::GetInstance().AddDesc(std::string("RequestKeyboard calling window :")
+    dumpLog.AddDesc(std::string("RequestKeyboard calling window :")
                                        .append(std::to_string(textConfig.windowId))
                                        .append(std::string("inputType:"))
                                        .append(std::to_string(textConfig.inputAttribute.inputPattern))
                                        .append(std::string("enterKeyType:"))
                                        .append(std::to_string(textConfig.inputAttribute.enterKeyType)));
 #endif
-    DumpLog::GetInstance().AddDesc(textSelector_.ToString());
+    dumpLog.AddDesc(textSelector_.ToString());
     if (customKeyboard_ || customKeyboardBuilder_) {
-        DumpLog::GetInstance().AddDesc(std::string("CustomKeyboard: true")
+        dumpLog.AddDesc(std::string("CustomKeyboard: true")
                                            .append(", Attached: ")
                                            .append(std::to_string(isCustomKeyboardAttached_)));
     }
-    DumpLog::GetInstance().AddDesc(std::string("wordBreak:")
+    dumpLog.AddDesc(std::string("wordBreak:")
             .append(V2::ConvertWrapWordBreakToString(layoutProperty->GetWordBreak().value_or(WordBreak::BREAK_WORD))));
 }
 
@@ -6298,6 +6333,21 @@ void TextFieldPattern::DumpAdvanceInfo()
                                            .append(", Attached: ")
                                            .append(std::to_string(isCustomKeyboardAttached_)));
     }
+    DumpLog::GetInstance().AddDesc(std::string("MinFontSize:").append(GetMinFontSize()));
+    DumpLog::GetInstance().AddDesc(std::string("MaxFontSize:").append(GetMaxFontSize()));
+    DumpLog::GetInstance().AddDesc(std::string("from TextEngine paragraphs_ info :"));
+    DumpLog::GetInstance().AddDesc(std::string("GetTextWidth:")
+        .append(std::to_string(paragraph_->GetTextWidth()))
+        .append(" GetHeight:")
+        .append(std::to_string(paragraph_->GetHeight()))
+        .append(" GetMaxWidth:")
+        .append(std::to_string(paragraph_->GetMaxWidth()))
+        .append(" GetMaxIntrinsicWidth:")
+        .append(std::to_string(paragraph_->GetMaxIntrinsicWidth())));
+    DumpLog::GetInstance().AddDesc(std::string("GetLineCount:")
+        .append(std::to_string(paragraph_->GetLineCount()))
+        .append(" GetLongestLine:")
+        .append(std::to_string(paragraph_->GetLongestLine())));
 #if defined(ENABLE_STANDARD_INPUT)
     auto miscTextConfig = GetMiscTextConfig();
     CHECK_NULL_VOID(miscTextConfig.has_value());
@@ -6312,14 +6362,8 @@ void TextFieldPattern::DumpAdvanceInfo()
                                        .append(", height:")
                                        .append(std::to_string(cursorInfo.height)));
 #endif
-    DumpLog::GetInstance().AddDesc(std::string("textRect-->x:")
-                                       .append(std::to_string(textRect_.GetX()))
-                                       .append(" y:")
-                                       .append(std::to_string(textRect_.GetY())));
-    DumpLog::GetInstance().AddDesc(std::string("contentRect-->x:")
-                                       .append(std::to_string(contentRect_.GetX()))
-                                       .append(" y:")
-                                       .append(std::to_string(contentRect_.GetY())));
+    DumpLog::GetInstance().AddDesc(std::string("textRect: ").append(contentRect_.ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("contentRect: ").append(contentRect_.ToString()));
     DumpLog::GetInstance().AddDesc(textSelector_.ToString());
 }
 
