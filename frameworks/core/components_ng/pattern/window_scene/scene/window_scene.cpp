@@ -278,6 +278,7 @@ void WindowScene::BufferAvailableCallback()
         CHECK_NULL_VOID(host);
         self->RemoveChild(host, self->startingWindow_, self->startingWindowName_, true);
         self->startingWindow_.Reset();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
             "[WMSMain] Remove starting window finished, id: %{public}d, node id: %{public}d, name: %{public}s",
             self->session_->GetPersistentId(), host->GetId(), self->session_->GetSessionInfo().bundleName_.c_str());
@@ -536,7 +537,7 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             ACE_SCOPED_TRACE("WindowScene::OnDirtyLayoutWrapperSwap");
             auto context = AceType::DynamicCast<RosenRenderContext>(appWindow_->GetRenderContext());
             CHECK_NULL_RETURN(context, false);
-            context->SetOpacity(1);
+            context->SetOpacity(0);
             AddChild(host, appWindow_, appWindowName_, 0);
             CreateBlankWindow();
             AddChild(host, blankWindow_, blankWindowName_);
