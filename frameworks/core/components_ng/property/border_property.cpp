@@ -87,7 +87,7 @@ void BorderWidthPropertyT<Dimension>::ToJsonValue(std::unique_ptr<JsonValue>& js
 }
 
 void BorderWidthPropertyT<Dimension>::ToDashJsonValue(std::unique_ptr<JsonValue>& json,
-    std::unique_ptr<JsonValue>& borderJson, const InspectorFilter& filter, std::string keyValue) const
+    std::unique_ptr<JsonValue>& borderJson, const InspectorFilter& filter, const std::string& keyValue) const
 {
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {

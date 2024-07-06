@@ -390,8 +390,8 @@ void BorderProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     propBorderColor.value_or(BorderColorProperty()).ToJsonValue(json, jsonBorder, filter);
     propBorderWidth.value_or(BorderWidthProperty()).ToJsonValue(json, jsonBorder, filter);
     propBorderRadius.value_or(BorderRadiusProperty()).ToJsonValue(json, jsonBorder, filter);
-    propDashGap.value_or(BorderWidthProperty()).ToJsonValue(json, jsonBorder, filter, "dashGap");
-    propDashWidth.value_or(BorderWidthProperty()).ToJsonValue(json, jsonBorder, filter, "dashWidth");
+    propDashGap.value_or(BorderWidthProperty()).ToDashJsonValue(json, jsonBorder, filter, "dashGap");
+    propDashWidth.value_or(BorderWidthProperty()).ToDashJsonValue(json, jsonBorder, filter, "dashWidth");
 
     json->PutExtAttr("border", jsonBorder->ToString().c_str(), filter);
 }
