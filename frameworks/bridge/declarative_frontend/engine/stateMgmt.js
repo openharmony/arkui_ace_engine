@@ -6177,7 +6177,7 @@ class ViewPU extends PUV2ViewBase {
             const elmtId = this.getCurrentlyRenderedElmtId();
             let repeat = this.elmtId2Repeat_.get(elmtId);
             if (!repeat) {
-                repeat = new __RepeatPU(this, arr);
+                repeat = new __Repeat(this, arr);
                 this.elmtId2Repeat_.set(elmtId, repeat);
             }
             else {
@@ -7398,9 +7398,9 @@ class ObserveV2 {
     }
     // At the start of observeComponentCreation or
     // MonitorV2 observeObjectAccess
-    startRecordDependencies(cmp, id) {
+    startRecordDependencies(cmp, id, doClearBinding = true) {
         if (cmp != null) {
-            this.clearBinding(id);
+            doClearBinding && this.clearBinding(id);
             this.stackOfRenderedComponents_.push(id, cmp);
         }
     }
@@ -8695,7 +8695,7 @@ class ViewV2 extends PUV2ViewBase {
             const elmtId = ObserveV2.getCurrentRecordedId();
             let repeat = this.elmtId2Repeat_.get(elmtId);
             if (!repeat) {
-                repeat = new __RepeatV2(arr);
+                repeat = new __Repeat(this, arr);
                 this.elmtId2Repeat_.set(elmtId, repeat);
             }
             else {
@@ -9725,60 +9725,65 @@ __RepeatDefaultKeyGen.lastKey_ = 0;
 ;
 // __Repeat implements ForEach with child re-use for both existing state observation
 // and deep observation , for non-virtual and virtual code paths (TODO)
-class __RepeatV2 {
-    constructor(arr) {
+class __Repeat {
+    constructor(owningView, arr) {
         this.config = {};
         this.isVirtualScroll = false;
-        //console.log('__RepeatV2 ctor')
+        //console.log('__Repeat ctor')
+        this.config.owningView_ = owningView instanceof ViewV2 ? owningView : undefined;
         this.config.arr = arr !== null && arr !== void 0 ? arr : [];
         this.config.itemGenFuncs = {};
-        this.config.keyGenFunc = __RepeatDefaultKeyGen.func;
+        this.config.keyGenFunc = __RepeatDefaultKeyGen.funcWithIndex;
         this.config.typeGenFunc = (() => '');
         this.config.totalCount = this.config.arr.length;
         this.config.templateOptions = {};
-        this.config.mkRepeatItem = this.mkRepeatItem;
+        // to be used with ViewV2
+        const mkRepeatItemV2 = (item, index) => new __RepeatItemV2(item, index);
+        // to be used with ViewPU
+        const mkRepeatItemPU = (item, index) => new __RepeatItemPU(owningView, item, index);
+        const isViewV2 = (this.config.owningView_ instanceof ViewV2);
+        this.config.mkRepeatItem = isViewV2 ? mkRepeatItemV2 : mkRepeatItemPU;
     }
     each(itemGenFunc) {
-        //console.log('__RepeatV2.each()')
+        //console.log('__Repeat.each()')
         this.config.itemGenFuncs[''] = itemGenFunc;
-        this.config.templateOptions[''] = Object.assign({}, this.defaultTemplateOptions());
+        this.config.templateOptions[''] = this.normTemplateOptions({});
         return this;
     }
     key(keyGenFunc) {
-        //console.log('__RepeatV2.key()')
-        this.config.keyGenFunc = keyGenFunc !== null && keyGenFunc !== void 0 ? keyGenFunc : __RepeatDefaultKeyGen.func;
+        //console.log('__Repeat.key()')
+        this.config.keyGenFunc = keyGenFunc;
         return this;
     }
     virtualScroll(options) {
-        var _a;
-        //console.log('__RepeatV2.virtualScroll()')
-        this.config.totalCount = (_a = options === null || options === void 0 ? void 0 : options.totalCount) !== null && _a !== void 0 ? _a : this.config.arr.length;
+        //console.log('__Repeat.virtualScroll()')
+        this.config.totalCount = this.normTotalCount(options === null || options === void 0 ? void 0 : options.totalCount);
         this.isVirtualScroll = true;
         return this;
     }
     // function to decide which template to use, each template has an id
     templateId(typeFunc) {
-        //console.log('__RepeatV2.templateId()')
+        //console.log('__Repeat.templateId()')
         this.config.typeGenFunc = typeFunc;
         return this;
     }
     // template: id + builder function to render specific type of data item 
     template(type, itemGenFunc, options) {
-        //console.log('__RepeatV2.template()')
+        //console.log('__Repeat.template()')
         this.config.itemGenFuncs[type] = itemGenFunc;
-        this.config.templateOptions[type] = Object.assign(Object.assign({}, this.defaultTemplateOptions()), options);
+        this.config.templateOptions[type] = this.normTemplateOptions(options);
         return this;
     }
     updateArr(arr) {
-        //console.log('__RepeatV2.updateArr()')
+        //console.log('__Repeat.updateArr()')
         this.config.arr = arr !== null && arr !== void 0 ? arr : [];
         return this;
     }
     render(isInitialRender) {
         var _a, _b, _c;
-        //console.log('__RepeatV2.render()')
+        //console.log('__Repeat.render()')
         if (!((_a = this.config.itemGenFuncs) === null || _a === void 0 ? void 0 : _a[''])) {
-            throw new Error(`__RepeatV2 item builder function unspecified. Usage error`);
+            throw new Error(`__Repeat item builder function unspecified. Usage error`);
         }
         if (!this.isVirtualScroll) {
             // Repeat
@@ -9791,29 +9796,33 @@ class __RepeatV2 {
             this.impl.render(this.config, isInitialRender);
         }
     }
+    // drag and drop API
     onMove(handler) {
         this.config.onMoveHandler = handler;
         return this;
     }
-    defaultTemplateOptions() {
+    // normalize totalCount
+    normTotalCount(totalCount) {
+        const arrLen = this.config.arr.length;
+        if (Number.isInteger(totalCount) && totalCount > arrLen) {
+            return totalCount;
+        }
+        return arrLen;
+    }
+    // normalize template options
+    normTemplateOptions(options) {
+        if (options) {
+            const cachedCount = options.cachedCount;
+            if (Number.isInteger(cachedCount) && cachedCount >= 0) {
+                return options;
+            }
+        }
         return { cachedCount: 1 };
     }
-    mkRepeatItem(item, index) {
-        return new __RepeatItemV2(item, index);
-    }
 }
-; // __RepeatV2<T>
+; // __Repeat<T>
 // __Repeat implements ForEach with child re-use for both existing state observation
 // and deep observation , for non-virtual and virtual code paths (TODO)
-class __RepeatPU extends __RepeatV2 {
-    constructor(owningView, arr) {
-        super(arr);
-        this.owningView_ = owningView;
-    }
-    mkRepeatItem(item, index) {
-        return new __RepeatItemPU(this.owningView_, item, index);
-    }
-}
 /*
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -9987,8 +9996,10 @@ class __RepeatImpl {
 // Implements ForEach with child re-use for both existing state observation and
 // deep observation. For virtual-scroll code paths
 class __RepeatVirtualScrollImpl {
-    /**/
     constructor() {
+        // index <-> key maps
+        this.key4Index_ = new Map();
+        this.index4Key_ = new Map();
     }
     render(config, isInitialRender) {
         this.arr_ = config.arr;
@@ -10000,14 +10011,14 @@ class __RepeatVirtualScrollImpl {
         this.mkRepeatItem_ = config.mkRepeatItem;
         this.onMoveHandler_ = config.onMoveHandler;
         if (isInitialRender) {
-            this.initialRender(ObserveV2.getCurrentRecordedId());
+            this.initialRender(config.owningView_, ObserveV2.getCurrentRecordedId());
         }
         else {
             this.reRender();
         }
     }
     /**/
-    initialRender(repeatElmtId) {
+    initialRender(owningView, repeatElmtId) {
         // Map key -> RepeatItem
         // added to closure of following lambdas
         const _repeatItem4Key = new Map();
@@ -10015,15 +10026,15 @@ class __RepeatVirtualScrollImpl {
         const onCreateNode = (forIndex) => {
             
             if (forIndex < 0) {
-                // FIXME check also index < totalCount
+                // STATE_MGMT_NOTE check also index < totalCount
                 throw new Error(`__RepeatVirtualScrollImpl onCreateNode: for index=${forIndex} out of range error.`);
             }
             // create dependency array item [forIndex] -> Repeat
             // so Repeat updates when the array item changes
-            // FIXME observe dependencies, adding the array is insurgent for Array of objects
+            // STATE_MGMT_NOTE observe dependencies, adding the array is insurgent for Array of objects
             ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, forIndex.toString());
             const repeatItem = this.mkRepeatItem_(this.arr_[forIndex], forIndex);
-            const forKey = this.keyGenFunc_(this.arr_[forIndex], forIndex);
+            let forKey = this.getOrMakeKey4Index(forIndex);
             _repeatItem4Key.set(forKey, repeatItem);
             // execute the itemGen function
             this.initialRenderItem(repeatItem);
@@ -10031,19 +10042,19 @@ class __RepeatVirtualScrollImpl {
         };
         const onUpdateNode = (fromKey, forIndex) => {
             if (!fromKey || fromKey == "" || forIndex < 0) {
-                // FIXME check also index < totalCount
+                // STATE_MGMT_NOTE check also index < totalCount
                 throw new Error(`__RepeatVirtualScrollImpl onUpdateNode: fromKey "${fromKey}", forIndex=${forIndex} invalid function input error.`);
             }
             // create dependency array item [forIndex] -> Repeat
             // so Repeat updates when the array item changes
-            // FIXME observe dependencies, adding the array is insurgent for Array of objects
+            // STATE_MGMT_NOTE observe dependencies, adding the array is insurgent for Array of objects
             ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, forIndex.toString());
             const repeatItem = _repeatItem4Key.get(fromKey);
             if (!repeatItem) {
                 stateMgmtConsole.error(`__RepeatVirtualScrollImpl onUpdateNode: fromKey "${fromKey}", forIndex=${forIndex}, can not find RepeatItem for key. Unrecoverable error`);
                 return;
             }
-            const forKey = this.keyGenFunc_(this.arr_[forIndex], forIndex);
+            const forKey = this.getOrMakeKey4Index(forIndex);
             
             repeatItem.updateItem(this.arr_[forIndex]);
             repeatItem.updateIndex(forIndex);
@@ -10052,19 +10063,22 @@ class __RepeatVirtualScrollImpl {
             _repeatItem4Key.delete(fromKey);
             _repeatItem4Key.set(forKey, repeatItem);
             
-            // FIXME request re-render right away!
             ObserveV2.getObserve().updateDirty2(true);
         };
         const onGetKeys4Range = (from, to) => {
             
             const result = new Array();
+            // deep observe dependencies,
+            // create dependency array item [i] -> Repeat
+            // so Repeat updates when the array item or nested objects changes
+            // not enough: ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, i.toString());
+            ViewStackProcessor.StartGetAccessRecordingFor(repeatElmtId1);
+            ObserveV2.getObserve().startRecordDependencies(owningView, repeatElmtId1, false);
             for (let i = from; i <= to && i < this.arr_.length; i++) {
-                // create dependency array item [i] -> Repeat
-                // so Repeat updates when the array item changes
-                // FIXME observe dependencies, adding the array is insurgent for Array of objects
-                ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, i.toString());
-                result.push(this.keyGenFunc_(this.arr_[i], i));
+                result.push(this.getOrMakeKey4Index(i));
             }
+            ObserveV2.getObserve().stopRecordDependencies();
+            ViewStackProcessor.StopGetAccessRecording();
             
             return result;
         };
@@ -10072,11 +10086,17 @@ class __RepeatVirtualScrollImpl {
             var _a;
             
             const result = new Array();
-            // FIXME observe dependencies, adding the array is insurgent for Array of objects
+            // deep observe dependencies,
+            // create dependency array item [i] -> Repeat
+            // so Repeat updates when the array item or nested objects changes
+            // not enough: ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, i.toString());
+            ViewStackProcessor.StartGetAccessRecordingFor(repeatElmtId1);
+            ObserveV2.getObserve().startRecordDependencies(owningView, repeatElmtId1, false);
             for (let i = from; i <= to && i < this.arr_.length; i++) {
-                // ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, i.toString());
                 result.push((_a = this.typeGenFunc_(this.arr_[i], i)) !== null && _a !== void 0 ? _a : '');
             }
+            ObserveV2.getObserve().stopRecordDependencies();
+            ViewStackProcessor.StopGetAccessRecording();
             
             return result;
         };
@@ -10087,10 +10107,12 @@ class __RepeatVirtualScrollImpl {
             onGetKeys4Range,
             onGetTypes4Range
         });
+        RepeatVirtualScrollNative.onMove(this.onMoveHandler_);
         
     }
     reRender() {
         
+        this.purgeKeyCache();
         RepeatVirtualScrollNative.invalidateKeyCache(this.totalCount_);
         
     }
@@ -10100,6 +10122,33 @@ class __RepeatVirtualScrollImpl {
         const itemType = (_a = this.typeGenFunc_(repeatItem.item, repeatItem.index)) !== null && _a !== void 0 ? _a : '';
         const itemFunc = (_b = this.itemGenFuncs_[itemType]) !== null && _b !== void 0 ? _b : this.itemGenFuncs_[''];
         itemFunc(repeatItem);
+    }
+    /**
+     * maintain: index <-> key mapping
+     * create new key from keyGen function if not in cache
+     * check for duplicate key, and create random key if duplicate found
+     * @param forIndex
+     * @returns unique key
+     */
+    getOrMakeKey4Index(forIndex) {
+        let key = this.key4Index_.get(forIndex);
+        if (!key) {
+            key = this.keyGenFunc_(this.arr_[forIndex], forIndex);
+            const usedIndex = this.index4Key_.get(key);
+            if (usedIndex) {
+                // duplicate key
+                stateMgmtConsole.applicationError(`Repeat key gen function: Detected duplicate key ${key} for indices ${forIndex} and ${usedIndex}. \
+                            Generated random key will decrease Repeat performance. Correct the Key gen function in your application!`);
+                key = `___${forIndex}_+_${key}_+_${Math.random()}`;
+            }
+            this.key4Index_.set(forIndex, key);
+            this.index4Key_.set(key, forIndex);
+        }
+        return key;
+    }
+    purgeKeyCache() {
+        this.key4Index_.clear();
+        this.index4Key_.clear();
     }
 }
 ;
