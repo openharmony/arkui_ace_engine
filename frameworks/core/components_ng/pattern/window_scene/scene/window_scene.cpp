@@ -302,9 +302,9 @@ void WindowScene::BufferAvailableCallbackForBlank()
         context->SetOpacity(1);
 
         CHECK_NULL_VOID(self->blankWindow_);
-        auto context = AceType::DynamicCast<RosenRenderContext>(self->blankWindow_->GetRenderContext());
-        CHECK_NULL_VOID(context);
-        auto blankRsNode = context->GetRSNode();
+        auto blankWindowContext = AceType::DynamicCast<RosenRenderContext>(self->blankWindow_->GetRenderContext());
+        CHECK_NULL_VOID(blankWindowContext);
+        auto blankRsNode = blankWindowContext->GetRSNode();
         CHECK_NULL_VOID(blankRsNode);
         auto effect = Rosen::RSTransitionEffect::Create()->Opacity(0);
         Rosen::RSAnimationTimingProtocol protocol;
