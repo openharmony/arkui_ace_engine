@@ -1065,7 +1065,7 @@ std::string GetReplaceContentStr(
     auto item = panda::ArrayRef::GetValueAt(vm, params, static_cast<uint32_t>(index));
     if (type == "d") {
         if (item->IsNumber()) {
-            return std::to_string(item->ToNumber(vm)->Value());
+            return std::to_string(item->Int32Value(vm));
         }
     } else if (type == "s") {
         if (item->IsString(vm)) {
