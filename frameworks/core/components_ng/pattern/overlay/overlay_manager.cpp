@@ -685,13 +685,6 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
         AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     root->RemoveChild(node);
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto lastChild = AceType::DynamicCast<FrameNode>(root->GetLastChild());
-    if (lastChild) {
-        auto pattern = lastChild->GetPattern();
-        if (!AceType::InstanceOf<StagePattern>(pattern)) {
-            return;
-        }
-    }
 
     if (container->IsDialogContainer() || isShowInSubWindow) {
         SubwindowManager::GetInstance()->HideSubWindowNG();
