@@ -5938,8 +5938,10 @@ void RichEditorPattern::HandleTouchMove(const Offset& offset)
 bool RichEditorPattern::IsScrollBarPressed(const MouseInfo& info)
 {
     auto scrollBar = GetScrollBar();
+    bool isScrollBarShow = scrollBar && scrollBar->NeedPaint();
+    CHECK_NULL_RETURN(isScrollBarShow, false);
     Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
-    return scrollBar->InBarTouchRegion(point);
+    return scrollBar->InBarRectRegion(point);
 }
 
 void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
@@ -6149,9 +6151,9 @@ void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
         ResetSelection();
     }
     auto position = paragraphs_.GetIndex(textOffset);
-    float caretHeight = 0.0f;
-    OffsetF caretOffset = CalcCursorOffsetByPosition(caretPosition_, caretHeight);
     SetCaretPosition(position);
+    CalcAndRecordLastClickCaretInfo(textOffset);
+    auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
     selectedType_ = TextSpanType::TEXT;
     CHECK_NULL_VOID(overlayMod_);
     DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(caretOffset, caretHeight);
