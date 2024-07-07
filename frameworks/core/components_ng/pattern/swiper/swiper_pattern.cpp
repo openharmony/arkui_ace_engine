@@ -4398,6 +4398,9 @@ void SwiperPattern::SetLazyLoadIsLoop() const
 
 void SwiperPattern::PostIdleTask(const RefPtr<FrameNode>& frameNode)
 {
+    if (cachedItems_.empty()) {
+        return;
+    }
     auto pipelineContext = GetContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddPredictTask(

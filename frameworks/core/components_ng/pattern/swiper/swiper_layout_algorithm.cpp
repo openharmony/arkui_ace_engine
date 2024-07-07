@@ -223,7 +223,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else if (itemPositionInAnimation_.empty()) {
         int32_t startIndex = GetLoopIndex(GetStartIndex());
         int32_t endIndex = GetLoopIndex(GetEndIndex());
-        CheckCachedItem(startIndex, endIndex);
+        CheckCachedItem(startIndex, endIndex, layoutWrapper);
         if (isLoop_) {
             layoutWrapper->SetActiveChildRange(ActiveChildSets({ activeItems_, cachedItems_ }),
                 ActiveChildRange({ startIndex, endIndex, cachedCount_, cachedCount_ }));
@@ -243,7 +243,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         while (endIndex - 1 >= 0 && itemPositionInAnimation_.find(endIndex - 1) != itemPositionInAnimation_.end()) {
             endIndex--;
         }
-        CheckCachedItem(endIndex, startIndex);
+        CheckCachedItem(endIndex, startIndex, layoutWrapper);
         if (isLoop_) {
             layoutWrapper->SetActiveChildRange(ActiveChildSets({ activeItems_, cachedItems_ }),
                 ActiveChildRange({ endIndex, startIndex, cachedCount_, cachedCount_ }));
@@ -1404,8 +1404,11 @@ bool SwiperLayoutAlgorithm::IsNormalItem(const RefPtr<LayoutWrapper>& wrapper) c
     return true;
 }
 
-void SwiperLayoutAlgorithm::CheckCachedItem(int32_t startIndex, int32_t endIndex)
+void SwiperLayoutAlgorithm::CheckCachedItem(int32_t startIndex, int32_t endIndex, LayoutWrapper* layoutWrapper)
 {
+    if (!layoutWrapper) {
+        return;
+    }
     if (startIndex <= endIndex) {
         for (auto i = startIndex; i <= endIndex; ++i) {
             activeItems_.insert(i);
@@ -1420,29 +1423,24 @@ void SwiperLayoutAlgorithm::CheckCachedItem(int32_t startIndex, int32_t endIndex
     }
     auto cachedCount = cachedCount_;
     while (cachedCount > 0) {
-        --startIndex;
-        if (!isLoop_ && startIndex < 0) {
-            break;
+        if (isLoop_) {
+            startIndex = GetLoopIndex(startIndex - 1);
+            endIndex = GetLoopIndex(endIndex + 1);
+        } else {
+            startIndex = startIndex >= 0 ? startIndex - 1 : startIndex;
+            endIndex = endIndex < totalItemCount_ ? endIndex + 1 : endIndex;
         }
-        if (isLoop_ && startIndex < 0) {
-            startIndex = GetLoopIndex(startIndex);
+        if (startIndex >= 0) {
+            if (activeItems_.find(startIndex) == activeItems_.end()
+                && layoutWrapper->GetChildByIndex(startIndex) == nullptr) {
+                cachedItems_.insert(startIndex);
+            }
         }
-        if (activeItems_.find(startIndex) == activeItems_.end()) {
-            cachedItems_.insert(startIndex);
-        }
-        --cachedCount;
-    }
-    cachedCount = cachedCount_;
-    while (cachedCount > 0) {
-        ++endIndex;
-        if (!isLoop_ && endIndex >= totalItemCount_) {
-            break;
-        }
-        if (isLoop_ && endIndex >= totalItemCount_) {
-            endIndex = GetLoopIndex(endIndex);
-        }
-        if (activeItems_.find(endIndex) == activeItems_.end()) {
-            cachedItems_.insert(endIndex);
+        if (endIndex < totalItemCount_) {
+            if (activeItems_.find(endIndex) == activeItems_.end()
+                && layoutWrapper->GetChildByIndex(startIndex) == nullptr) {
+                cachedItems_.insert(endIndex);
+            }
         }
         --cachedCount;
     }
