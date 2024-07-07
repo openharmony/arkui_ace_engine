@@ -10031,7 +10031,7 @@ class __RepeatVirtualScrollImpl {
             // execute the itemGen function
             this.initialRenderItem(repeatItem);
             
-        };
+        }; // onCreateNode
         const onUpdateNode = (fromKey, forIndex) => {
             if (!fromKey || fromKey == "" || forIndex < 0) {
                 // STATE_MGMT_NOTE check also index < totalCount
@@ -10056,8 +10056,14 @@ class __RepeatVirtualScrollImpl {
             _repeatItem4Key.set(forKey, repeatItem);
             
             ObserveV2.getObserve().updateDirty2(true);
-        };
+        }; // onUpdateNode
         const onGetKeys4Range = (from, to) => {
+            if (to > this.totalCount_) {
+                stateMgmtConsole.applicationError(`Repeat with virtualScroll:  onGetKeys4Range from ${from} to ${to} > totalCount ${this.totalCount_} error! '
+                    Application fails to add more items to source data array. on time. Trying with corrected input parameters ...`);
+                to = this.totalCount_;
+                from = Math.min(to, from);
+            }
             
             const result = new Array();
             // deep observe dependencies,
@@ -10073,9 +10079,15 @@ class __RepeatVirtualScrollImpl {
             ViewStackProcessor.StopGetAccessRecording();
             
             return result;
-        };
+        }; // const onGetKeys4Range 
         const onGetTypes4Range = (from, to) => {
             var _a;
+            if (to > this.totalCount_) {
+                stateMgmtConsole.applicationError(`Repeat with virtualScroll:  onGetTypes4Range from ${from} to ${to} > totalCount ${this.totalCount_} error! '
+                    Application fails to add more items to source data array. on time. Trying with corrected input parameters ...`);
+                to = this.totalCount_;
+                from = Math.min(to, from);
+            }
             
             const result = new Array();
             // deep observe dependencies,
@@ -10085,13 +10097,18 @@ class __RepeatVirtualScrollImpl {
             ViewStackProcessor.StartGetAccessRecordingFor(repeatElmtId1);
             ObserveV2.getObserve().startRecordDependencies(owningView, repeatElmtId1, false);
             for (let i = from; i <= to && i < this.arr_.length; i++) {
-                result.push((_a = this.typeGenFunc_(this.arr_[i], i)) !== null && _a !== void 0 ? _a : '');
-            }
+                let ttype = (_a = this.typeGenFunc_(this.arr_[i], i)) !== null && _a !== void 0 ? _a : '';
+                if (!this.itemGenFuncs_[ttype]) {
+                    stateMgmtConsole.applicationError(`Repeat with virtual scroll. Factory function .templateId  returns template id '${ttype}'.` +
+                        (ttype == '') ? `Missing Repeat.each ` : `missing Repeat.template for id '${ttype}'` + `! Unrecoverable application error!"`);
+                }
+                result.push(ttype);
+            } // for
             ObserveV2.getObserve().stopRecordDependencies();
             ViewStackProcessor.StopGetAccessRecording();
             
             return result;
-        };
+        }; // const onGetTypes4Range
         
         RepeatVirtualScrollNative.create(this.totalCount_, Object.entries(this.templateOptions_), {
             onCreateNode,
@@ -10113,7 +10130,14 @@ class __RepeatVirtualScrollImpl {
         // execute the itemGen function
         const itemType = (_a = this.typeGenFunc_(repeatItem.item, repeatItem.index)) !== null && _a !== void 0 ? _a : '';
         const itemFunc = (_b = this.itemGenFuncs_[itemType]) !== null && _b !== void 0 ? _b : this.itemGenFuncs_[''];
-        itemFunc(repeatItem);
+        if (typeof itemFunc == "function") {
+            itemFunc(repeatItem);
+        }
+        else {
+            stateMgmtConsole.applicationError("Repeat with virtualScroll: "
+                + (itemType == '') ? "Missing Repeat.each " : `missing Repeat.template for id '${itemType}'`
+                + "! Unrecoverable application error!");
+        }
     }
     /**
      * maintain: index <-> key mapping
