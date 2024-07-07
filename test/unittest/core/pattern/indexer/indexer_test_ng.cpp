@@ -132,6 +132,7 @@ void IndexerTestNg::Create(
 {
     IndexerModelNG model;
     model.Create(arrayValue, selected);
+    model.SetAutoCollapse(false);
     if (callback) {
         callback(model);
     }

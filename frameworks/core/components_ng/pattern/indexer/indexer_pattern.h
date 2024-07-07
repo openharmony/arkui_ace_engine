@@ -221,8 +221,8 @@ private:
     float lastItemSize_ = -1.0f;
     bool lastIndexFromPress_ = false;
     bool selectChanged_ = false;
-    bool autoCollapse_ = false;
-    bool lastAutoCollapse_ = false;
+    bool autoCollapse_ = true;
+    bool lastAutoCollapse_ = true;
     bool enableHapticFeedback_ = true;
     float actualIndexerHeight_ = 0.0f;
     bool isNewHeightCalculated_ = false;
