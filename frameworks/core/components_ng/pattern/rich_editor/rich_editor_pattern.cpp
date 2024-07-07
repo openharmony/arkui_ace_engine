@@ -886,13 +886,18 @@ int32_t RichEditorPattern::AddSymbolSpan(const SymbolSpanOptions& options, bool 
 {
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "options=%{public}s", options.ToString().c_str());
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isPaste=%{public}d, index=%{public}d", isPaste, index);
+
+    RichEditorChangeValue changeValue;
+    CHECK_NULL_RETURN(BeforeAddSymbol(changeValue, options), -1);
     OperationRecord record;
     record.beforeCaretPosition = options.offset.value_or(static_cast<int32_t>(GetTextContentLength()));
     record.addText = " ";
     ClearRedoOperationRecords();
     record.afterCaretPosition = record.beforeCaretPosition + 1;
     AddOperationRecord(record);
-    return AddSymbolSpanOperation(options, isPaste, index);
+    auto ret = AddSymbolSpanOperation(options, isPaste, index);
+    AfterAddSymbol(changeValue);
+    return ret;
 }
 
 int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& options, bool isPaste, int32_t index)

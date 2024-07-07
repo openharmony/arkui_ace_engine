@@ -75,8 +75,8 @@ struct SymbolSpanStyle {
     std::string symbolColor;
     FONT_FEATURES_LIST fontFeature;
     int32_t fontWeight = 0;
-    uint32_t renderingStrategy;
-    uint32_t effectStrategy;
+    int32_t renderingStrategy = 0;
+    int32_t effectStrategy = 0;
 
     SymbolSpanStyle() {}
     SymbolSpanStyle(const TextStyle& style)
@@ -96,6 +96,25 @@ struct SymbolSpanStyle {
         fontWeight = static_cast<int32_t>(style.GetFontWeight());
         renderingStrategy = style.GetRenderStrategy();
         effectStrategy = style.GetEffectStrategy();
+    }
+
+    bool operator==(const SymbolSpanStyle& rhs) const
+    {
+        return fontSize == rhs.fontSize
+            && lineHeight == rhs.lineHeight
+            && letterSpacing == rhs.letterSpacing
+            && lineSpacing == rhs.lineSpacing
+            && symbolColor == rhs.symbolColor
+            && fontFeature == rhs.fontFeature
+            && fontFeature == rhs.fontFeature
+            && fontWeight == rhs.fontWeight
+            && renderingStrategy == rhs.renderingStrategy
+            && effectStrategy == rhs.effectStrategy;
+    }
+
+    bool operator!=(const SymbolSpanStyle& rhs) const
+    {
+        return !operator==(rhs);
     }
 };
 

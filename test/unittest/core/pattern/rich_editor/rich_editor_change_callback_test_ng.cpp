@@ -767,6 +767,147 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest012, TestSize.Lev
     }
 }
 
+/**
+ * @tc.name: ChangeTextCallbackTest013
+ * @tc.desc: test for callback onWillchange/onDidChange, add symbol span
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest013, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    InitContentChangeCallback(richEditorModel);
+
+    richEditorPattern->AddSymbolSpan(SYMBOL_SPAN_OPTIONS_1);
+
+    // check onWill rangeBefore
+    EXPECT_EQ(onWillRangeBefore.start, 0);
+    EXPECT_EQ(onWillRangeBefore.end, 0);
+
+    // check onWill span info
+    ASSERT_EQ(onWillReplacedSpans.size(), 0);
+    ASSERT_EQ(onWillReplacedImageSpans.size(), 0);
+    ASSERT_EQ(onWillReplacedSymbolSpans.size(), 1);
+
+    auto& spanResult = onWillReplacedSymbolSpans[0];
+    EXPECT_EQ(spanResult.spanIndex_, 0);
+    EXPECT_EQ(spanResult.offsetInSpan_, 0);
+    EXPECT_EQ(spanResult.eraseLength_, 2);
+    EXPECT_EQ(spanResult.spanRangeStart_, 0);
+    EXPECT_EQ(spanResult.spanRangeEnd_, 2);
+    EXPECT_EQ(spanResult.spanType_, SpanResultType::SYMBOL);
+    EXPECT_EQ(spanResult.symbolSpanStyle_, SymbolSpanStyle(TEXT_STYLE_1));
+
+    // check onDid rangeBefore
+    EXPECT_EQ(onDidRangeBefore, onWillRangeBefore);
+
+    // check onDid rangeAfter
+    EXPECT_EQ(onDidRangeAfter.start, 0);
+    EXPECT_EQ(onDidRangeAfter.end, 2);
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest014
+ * @tc.desc: test for callback onWillchange/onDidChange, add symbol span
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest014, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    InitContentChangeCallback(richEditorModel);
+
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+    richEditorPattern->AddSymbolSpan(SYMBOL_SPAN_OPTIONS_1);
+
+    // check onWill rangeBefore
+    EXPECT_EQ(onWillRangeBefore.start, 6);
+    EXPECT_EQ(onWillRangeBefore.end, 6);
+
+    // check onWill span info
+    ASSERT_EQ(onWillReplacedSpans.size(), 0);
+    ASSERT_EQ(onWillReplacedImageSpans.size(), 0);
+    ASSERT_EQ(onWillReplacedSymbolSpans.size(), 1);
+
+    auto& spanResult = onWillReplacedSymbolSpans[0];
+    EXPECT_EQ(spanResult.spanIndex_, 1);
+    EXPECT_EQ(spanResult.offsetInSpan_, 0);
+    EXPECT_EQ(spanResult.eraseLength_, 2);
+    EXPECT_EQ(spanResult.spanRangeStart_, 6);
+    EXPECT_EQ(spanResult.spanRangeEnd_, 8);
+    EXPECT_EQ(spanResult.spanType_, SpanResultType::SYMBOL);
+    EXPECT_EQ(spanResult.symbolSpanStyle_, SymbolSpanStyle(TEXT_STYLE_1));
+
+    // check onDid rangeBefore
+    EXPECT_EQ(onDidRangeBefore, onWillRangeBefore);
+
+    // check onDid rangeAfter
+    EXPECT_EQ(onDidRangeAfter.start, 6);
+    EXPECT_EQ(onDidRangeAfter.end, 8);
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest015
+ * @tc.desc: test for callback onWillchange/onDidChange, add symbol span
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest015, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    InitContentChangeCallback(richEditorModel);
+
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1); // add hello1
+    auto options = SYMBOL_SPAN_OPTIONS_1;
+    options.offset = 3;
+    richEditorPattern->AddSymbolSpan(options);
+
+    // check onWill rangeBefore
+    EXPECT_EQ(onWillRangeBefore.start, 3);
+    EXPECT_EQ(onWillRangeBefore.end, 3);
+
+    // check onWill span info
+    ASSERT_EQ(onWillReplacedSpans.size(), 0);
+    ASSERT_EQ(onWillReplacedImageSpans.size(), 0);
+    ASSERT_EQ(onWillReplacedSymbolSpans.size(), 1);
+
+    auto& spanResult = onWillReplacedSymbolSpans[0];
+    EXPECT_EQ(spanResult.spanIndex_, 1);
+    EXPECT_EQ(spanResult.offsetInSpan_, 0);
+    EXPECT_EQ(spanResult.eraseLength_, 2);
+    EXPECT_EQ(spanResult.spanRangeStart_, 3);
+    EXPECT_EQ(spanResult.spanRangeEnd_, 5);
+    EXPECT_EQ(spanResult.spanType_, SpanResultType::SYMBOL);
+    EXPECT_EQ(spanResult.symbolSpanStyle_, SymbolSpanStyle(TEXT_STYLE_1));
+
+    // check onDid rangeBefore
+    EXPECT_EQ(onDidRangeBefore, onWillRangeBefore);
+
+    // check onDid rangeAfter
+    EXPECT_EQ(onDidRangeAfter.start, 3);
+    EXPECT_EQ(onDidRangeAfter.end, 5);
+    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
+        ViewStackProcessor::GetInstance()->elementsStack_.pop();
+    }
+}
 
 /**
  * @tc.name: HandleOnEditChanged001
