@@ -36,9 +36,19 @@ void JSLayoutManager::GetLineMetrics(const JSCallbackInfo& args)
 {
     auto layoutInfoInterface = layoutInfoInterface_.Upgrade();
     CHECK_NULL_VOID(layoutInfoInterface);
-    int32_t lineNumber = 0;
-    JSViewAbstract::ParseJsInteger<int32_t>(args[0], lineNumber);
-    auto lineMetrics = layoutInfoInterface->GetLineMetrics(lineNumber);
+    if (args.Length() < 1 || args[0]->IsUndefined() || args[0]->IsNull() || !args[0]->IsNumber()) {
+        return;
+    }
+    if (double lineIndex = 0.0; !JSContainerBase::ParseJsDouble(args[0], lineIndex)
+        || lineIndex != static_cast<double>(static_cast<int>(lineIndex))) {
+        return;
+    }
+    int32_t lineIndex = 0;
+    JSViewAbstract::ParseJsInteger<int32_t>(args[0], lineIndex);
+    if (lineIndex < 0 || lineIndex >= layoutInfoInterface->GetLineCount()) {
+        return;
+    }
+    auto lineMetrics = layoutInfoInterface->GetLineMetrics(lineIndex);
     JSRef<JSObject> lineMetricsObj = JSRef<JSObject>::New();
     CreateJSLineMetrics(lineMetricsObj, lineMetrics);
     args.SetReturnValue(JSRef<JSVal>::Cast(lineMetricsObj));
