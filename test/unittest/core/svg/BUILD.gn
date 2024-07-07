@@ -86,6 +86,8 @@ ohos_unittest("parse_test_ng") {
     "$ace_root/test/mock/core/svg/mock_image_painter_utils.cpp",
     "$ace_root/test/mock/core/svg/mock_rosen_svg_painter.cpp",
     "$ace_root/test/mock/core/svg/mock_shared_transition_effect.cpp",
+    "$ace_root/test/mock/core/svg/mock_svg_fit_convertor.cpp",
+    "$ace_root/test/mock/core/svg/mock_svg_utils.cpp",
     "parse_test_ng.cpp",
     "parse_testtwo_ng.cpp",
   ]
@@ -175,6 +177,8 @@ ohos_unittest("svg_dom_test_ng") {
     "$ace_root/test/mock/core/svg/mock_image_painter_utils.cpp",
     "$ace_root/test/mock/core/svg/mock_rosen_svg_painter.cpp",
     "$ace_root/test/mock/core/svg/mock_shared_transition_effect.cpp",
+    "$ace_root/test/mock/core/svg/mock_svg_fit_convertor.cpp",
+    "$ace_root/test/mock/core/svg/mock_svg_utils.cpp",
     "svg_dom_test_ng.cpp",
   ]
 
