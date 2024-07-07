@@ -113,12 +113,12 @@ void RosenWindow::Init()
     }
 }
 
-void RosenWindow::FlushFrameRate(int32_t rate, bool isAnimatorStopped, int32_t rateType)
+void RosenWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType)
 {
     if (!rsWindow_ || rate < 0) {
         return;
     }
-    rsWindow_->FlushFrameRate(rate, isAnimatorStopped, rateType);
+    rsWindow_->FlushFrameRate(rate, animatorExpectedFrameRate, rateType);
 }
 
 void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
