@@ -811,6 +811,16 @@ public:
     void AddFrameNodeChangeListener(const RefPtr<FrameNode>& node);
     void RemoveFrameNodeChangeListener(const RefPtr<FrameNode>& node);
     void AddChangedFrameNode(const RefPtr<FrameNode>& node);
+    void SetForceSplitEnable(bool isForceSplit)
+    {
+        isForceSplit_ = isForceSplit;
+    }
+
+    bool GetForceSplitEnable() const
+    {
+        return isForceSplit_;
+    }
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -845,11 +855,6 @@ protected:
     RefPtr<FrameNode> GetContainerModalNode();
     void DoKeyboardAvoidAnimate(const KeyboardAnimationConfig& keyboardAnimationConfig, float keyboardHeight,
         const std::function<void()>& func);
-
-    bool GetForceSplitEnable() const
-    {
-        return isForceSplit_;
-    }
 
 private:
     void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type);

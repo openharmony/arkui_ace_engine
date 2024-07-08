@@ -2079,7 +2079,7 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
     std::advance(iter, popIndex);
     auto lastIter = pageRouterStack_.erase(iter);
     pageRouterStack_.emplace_back(WeakPtr<FrameNode>(AceType::DynamicCast<FrameNode>(popNode)));
-    popNode->MovePosition(pageRouterStack_.size() - 1);
+    popNode->MovePosition(GetLastPageIndex());
     for (auto iter = lastIter; iter != pageRouterStack_.end(); ++iter, ++popIndex) {
         auto pageNode = iter->Upgrade();
         if (!pageNode) {
