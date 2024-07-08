@@ -607,15 +607,19 @@ protected:
 
     void InitClickEventRecorder()
     {
-        if (clickCallback_) {
-            return;
-        }
-
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto gesture = host->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gesture);
-        if (!gesture->IsClickable()) {
+        if (!gesture->IsUserClickable()) {
+            if (clickCallback_) {
+                gesture->RemoveClickEvent(clickCallback_);
+                clickCallback_ = nullptr;
+            }
+            return;
+        }
+
+        if (clickCallback_) {
             return;
         }
 
