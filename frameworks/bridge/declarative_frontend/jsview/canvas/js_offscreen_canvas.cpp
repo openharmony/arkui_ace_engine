@@ -406,20 +406,25 @@ napi_value JSOffscreenCanvas::onGetContext(napi_env env, napi_callback_info info
         } else {
             return nullptr;
         }
-        if (argv[1] != nullptr) {
-            panda::Local<panda::ObjectRef> localValue = NapiValueToLocalValue(argv[1]);
-            JSObject jsObject(localValue);
-            offscreenCanvasSettings_ = jsObject.Unwrap<JSRenderingContextSettings>();
-            if (offscreenCanvasSettings_ != nullptr && offscreenCanvasContext_ != nullptr) {
-                bool anti = offscreenCanvasSettings_->GetAntialias();
-                offscreenCanvasContext_->SetAnti(anti);
-                offscreenCanvasContext_->SetAntiAlias();
-            }
-        }
+        SetAntiAlias(argv[1]);
         offscreenCanvasContext_->SetUnit(GetUnit());
         return contextObj;
     }
     return nullptr;
+}
+
+void JSOffscreenCanvas::SetAntiAlias(napi_value argv)
+{
+    if (argv != nullptr) {
+        panda::Local<panda::ObjectRef> localValue = NapiValueToLocalValue(argv);
+        JSObject jsObject(localValue);
+        offscreenCanvasSettings_ = jsObject.Unwrap<JSRenderingContextSettings>();
+        if (offscreenCanvasSettings_ != nullptr && offscreenCanvasContext_ != nullptr) {
+            bool anti = offscreenCanvasSettings_->GetAntialias();
+            offscreenCanvasContext_->SetAnti(anti);
+            offscreenCanvasContext_->SetAntiAlias();
+        }
+    }
 }
 
 napi_value JSOffscreenCanvas::CreateContext2d(napi_env env, double width, double height, const EcmaVM* vm)
