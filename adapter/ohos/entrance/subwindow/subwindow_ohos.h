@@ -62,8 +62,8 @@ public:
         const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) override;
     void ShowMenuNG(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
         const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) override;
-    bool ShowDragPreviewWindowNG() override;
-    void HideDragPreviewWindowNG() override;
+    bool ShowPreviewNG() override;
+    void HidePreviewNG() override;
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) override;
     void HideMenuNG(bool showPreviewAnimation, bool startDrag) override;
     void UpdateHideMenuOffsetNG(const NG::OffsetF& offset, bool isRedragStart) override;

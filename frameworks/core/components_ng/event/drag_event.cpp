@@ -263,7 +263,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 } else {
                     HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                     HideFilter();
-                    HideMenu(frameNode->GetId());
                     SubwindowManager::GetInstance()->HideMenuNG(false, true);
                 }
             }
@@ -1289,17 +1288,6 @@ void DragEventActuator::HideFilter()
     manager->RemoveFilterAnimation();
 }
 
-void DragEventActuator::HideMenu(int32_t targetId)
-{
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto manager = pipelineContext->GetOverlayManager();
-    CHECK_NULL_VOID(manager);
-    auto menuNode = manager->GetMenuNode(targetId);
-    CHECK_NULL_VOID(menuNode);
-    manager->HideMenu(menuNode, targetId);
-}
-
 void DragEventActuator::HidePixelMap(bool startDrag, double x, double y, bool showAnimation)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -1340,10 +1328,6 @@ void DragEventActuator::BindClickEvent(const RefPtr<FrameNode>& columnNode)
         } else {
             actuator->HidePixelMap();
             actuator->HideFilter();
-            auto frameNode = gestureHub->GetFrameNode();
-            if (frameNode) {
-                actuator->HideMenu(frameNode->GetId());
-            }
         }
     };
     auto columnGestureHub = columnNode->GetOrCreateGestureEventHub();
