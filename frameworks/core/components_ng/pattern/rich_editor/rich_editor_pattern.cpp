@@ -1392,7 +1392,7 @@ OffsetF RichEditorPattern::CalcCursorOffsetByPosition(
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, OffsetF(0, 0));
     auto rootOffset = pipeline->GetRootRect().GetOffset();
-    auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
+    auto textPaintOffset = richTextRect_.GetOffset();
     needLineHighest |= IsCustomSpanInCaretPos(position, downStreamFirst);
     auto startOffset = paragraphs_.ComputeCursorOffset(position, selectLineHeight, downStreamFirst, needLineHighest);
     auto children = host->GetChildren();
@@ -1427,12 +1427,9 @@ OffsetF RichEditorPattern::CalcCursorOffsetByPosition(
         }
     }
     auto caretOffset = startOffset + textPaintOffset + rootOffset;
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, caretOffset);
-    auto frameSize = geometryNode->GetFrameRect().GetSize();
     CHECK_NULL_RETURN(overlayMod_, caretOffset);
     float caretWidth = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretWidth();
-    caretOffset.SetX(std::clamp(caretOffset.GetX(), 0.0f, static_cast<float>(frameSize.Width()) - caretWidth));
+    caretOffset.SetX(std::clamp(caretOffset.GetX(), 0.0f, richTextRect_.Right() - caretWidth));
     return caretOffset;
 }
 
@@ -6570,11 +6567,11 @@ void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto rootOffset = pipeline->GetRootRect().GetOffset();
-    auto offset = host->GetPaintRectOffset();
+    auto richEditorPaintOffset = host->GetPaintRectOffset();
     if (selectOverlay_->HasRenderTransform()) {
-        offset = selectOverlay_->GetPaintOffsetWithoutTransform();
+        richEditorPaintOffset = selectOverlay_->GetPaintOffsetWithoutTransform();
     }
-    auto textPaintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+    auto globalOffset = richEditorPaintOffset - rootOffset;
     textSelector_.ReverseTextSelector();
     int32_t baseOffset = std::min(textSelector_.baseOffset, GetTextContentLength());
     int32_t destinationOffset = std::min(textSelector_.destinationOffset, GetTextContentLength());
@@ -6588,7 +6585,7 @@ void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
         auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
         // only show the second handle.
         secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretHeight };
-        secondHandleOffset = caretOffset + textPaintOffset - rootOffset;
+        secondHandleOffset = caretOffset + globalOffset;
     } else {
         float startSelectHeight = 0.0f;
         float endSelectHeight = 0.0f;
@@ -6596,8 +6593,8 @@ void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
         auto endOffset = CalcCursorOffsetByPosition(destinationOffset, endSelectHeight, false, false);
         firstHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), startSelectHeight };
         secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), endSelectHeight };
-        firstHandleOffset = startOffset + textPaintOffset - rootOffset;
-        secondHandleOffset = endOffset + textPaintOffset - rootOffset;
+        firstHandleOffset = startOffset + globalOffset;
+        secondHandleOffset = endOffset + globalOffset;
     }
     textSelector_.selectionBaseOffset = firstHandleOffset;
     textSelector_.selectionDestinationOffset = secondHandleOffset;
