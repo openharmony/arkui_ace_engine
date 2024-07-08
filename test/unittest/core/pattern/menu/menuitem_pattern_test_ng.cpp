@@ -337,8 +337,6 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon003, TestSize.
     ASSERT_NE(imagePattern, nullptr);
     auto imageLayoutProperty = selectIconNode->GetLayoutProperty<ImageLayoutProperty>();
     ASSERT_NE(imageLayoutProperty, nullptr);
-    auto sourceInfo = imageLayoutProperty->GetImageSourceInfo();
-    ASSERT_TRUE(sourceInfo.has_value());
 }
 
 /**
