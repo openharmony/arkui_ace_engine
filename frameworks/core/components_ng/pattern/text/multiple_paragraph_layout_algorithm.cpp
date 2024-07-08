@@ -91,7 +91,8 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
 
 void MultipleParagraphLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    BoxLayoutAlgorithm::Measure(layoutWrapper);
+    // child constraint has already been calculated by the UpdateParagraphBySpan method when triggering MeasureContent
+    BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
     auto baselineDistance = 0.0f;
     auto paragraph = GetSingleParagraph();
     if (paragraph) {

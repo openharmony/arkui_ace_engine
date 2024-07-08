@@ -303,6 +303,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
         if (gestureHub->GetTextDraggable() && !gestureHub->GetIsTextDraggable()) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "Text category component does not meet the drag condition, forbidden drag.");
+            dragDropManager->ResetDragging();
             return;
         }
        // Trigger drag start event set by user.
