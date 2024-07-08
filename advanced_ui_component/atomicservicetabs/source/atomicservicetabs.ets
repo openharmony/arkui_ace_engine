@@ -29,7 +29,7 @@ export struct AtomicServiceTabs {
   @Prop index?: number | undefined = 0;
   @Prop barOverlap?: boolean = true;
   controller?: TabsController = new TabsController();
-  onChange?: (index: number) => void;
+  onChange?: Callback<number>;
   onTabBarClick?: Callback<number>;
   onContentWillChange?: OnContentWillChangeCallback;
 
