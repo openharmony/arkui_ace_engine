@@ -22,6 +22,9 @@ const DIALOG_OFFSET_Y_FOR_BAR = -88;
 const DIALOG_OFFSET_Y_FOR_NONE = -44;
 const STANDARD_MIN_COMPONENT_HEIGHT = 82;
 const STANDARD_MAX_COMPONENT_HEIGHT = 94;
+const DIALOG_SHADOW_RADIUS = 16;
+const DIALOG_SHADOW_OFFSET_Y = 10;
+const DIALOG_SHADOW_COLOR = '#19000000';
 const TITLE_LINE_DISTANCE = 2;
 const TITLE_MAX_LINE = 2;
 const SUBTITLE_MAX_LINE = 1;
@@ -83,6 +86,12 @@ function dialogBuilder(k, l = null) {
     (l ? l : this).observeComponentCreation2((t1, u1, v1 = m) => {
         Flex.create();
         Flex.backgroundColor(v1.options.backgroundImage === undefined ? '#EBEEF5' : 'rgba(0,0,0,0)');
+        Flex.shadow({
+            radius: DIALOG_SHADOW_RADIUS,
+            offsetX: 0,
+            offsetY: DIALOG_SHADOW_OFFSET_Y,
+            color: DIALOG_SHADOW_COLOR
+        });
         Flex.height(STANDARD_MIN_COMPONENT_HEIGHT);
         Flex.width('100%');
         Flex.alignSelf(ItemAlign.End);
@@ -115,7 +124,8 @@ function dialogBuilder(k, l = null) {
     }, Row);
     (l ? l : this).observeComponentCreation2((m1, n1, o1 = m) => {
         SymbolGlyph.create({ "id": -1, "type": 40000, params: ['sys.symbol.xmark_circle_fill'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-        SymbolGlyph.fontColor([o1.options.iconStyle === IconStyle.DARK ? CLOSE_ICON_DARK_RESOURCE : CLOSE_ICON_LIGHT_RESOURCE]);
+        SymbolGlyph.fontColor([o1.options.iconStyle === IconStyle.DARK ?
+                CLOSE_ICON_DARK_RESOURCE : CLOSE_ICON_LIGHT_RESOURCE]);
         SymbolGlyph.borderRadius(CLOSE_BUTTON_BORDER_RADIUS);
         SymbolGlyph.width(CLOSE_BUTTON_ICON_SIZE);
         SymbolGlyph.height(CLOSE_BUTTON_ICON_SIZE);
@@ -155,7 +165,8 @@ function dialogBuilder(k, l = null) {
     Row.pop();
     (l ? l : this).observeComponentCreation2((g1, h1, i1 = m) => {
         Flex.create({
-            direction: i1.options.titlePosition === TitlePosition.BOTTOM ? FlexDirection.ColumnReverse : FlexDirection.Column,
+            direction: i1.options.titlePosition === TitlePosition.BOTTOM ?
+                FlexDirection.ColumnReverse : FlexDirection.Column,
             justifyContent: FlexAlign.Center
         });
         Flex.constraintSize({
@@ -224,8 +235,8 @@ export class InterstitialDialogAction {
                 autoCancel: false,
                 offset: {
                     dx: DIALOG_OFFSET_X,
-                    dy: this.bottomOffsetType === BottomOffset.OFFSET_FOR_BAR ? DIALOG_OFFSET_Y_FOR_BAR :
-                        DIALOG_OFFSET_Y_FOR_NONE
+                    dy: this.bottomOffsetType === BottomOffset.OFFSET_FOR_BAR ?
+                        DIALOG_OFFSET_Y_FOR_BAR : DIALOG_OFFSET_Y_FOR_NONE
                 },
                 alignment: DialogAlignment.Bottom,
                 transition: TransitionEffect.asymmetric(TransitionEffect.OPACITY.animation({ duration: 150, curve: Curve.Sharp })
