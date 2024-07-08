@@ -984,6 +984,7 @@ void PipelineContext::SetupRootElement()
         overlay->HideCustomPopups();
         SubwindowManager::GetInstance()->ClearToastInSubwindow();
         SubwindowManager::GetInstance()->ClearToastInSystemSubwindow();
+        overlay->UpdateCustomKeyboardPosition();
     };
     rootNode_->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
     AddOnAreaChangeNode(rootNode_->GetId());

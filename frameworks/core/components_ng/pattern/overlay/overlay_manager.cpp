@@ -4839,6 +4839,34 @@ void OverlayManager::PlayKeyboardTransition(const RefPtr<FrameNode>& customKeybo
     }
 }
 
+void OverlayManager::UpdateCustomKeyboardPosition()
+{
+    for (auto iter = customKeyboardMap_.begin(); iter != customKeyboardMap_.end(); iter++) {
+        auto customKeyboardNode = iter->second;
+        if (!customKeyboardNode) {
+            continue;
+        }
+        auto parent = customKeyboardNode->GetParent();
+        if (!parent) {
+            continue;
+        }
+        auto renderContext = customKeyboardNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto pipeline = PipelineContext::GetMainPipelineContext();
+        CHECK_NULL_VOID(pipeline);
+        auto pageNode = pipeline->GetStageManager()->GetLastPage();
+        CHECK_NULL_VOID(pageNode);
+        auto pageHeight = pageNode->GetGeometryNode()->GetFrameSize().Height();
+        auto keyboardHeight = customKeyboardNode->GetGeometryNode()->GetFrameSize().Height();
+        auto rootNode = rootNodeWeak_.Upgrade();
+        CHECK_NULL_VOID(rootNode);
+        auto finalOffset = rootNode->GetTag() == V2::STACK_ETS_TAG
+                               ? (pageHeight - keyboardHeight) - (pageHeight - keyboardHeight) / NUM_FLOAT_2
+                               : 0.0f;
+        renderContext->OnTransformTranslateUpdate({ 0.0f, finalOffset, 0.0f });
+    }
+}
+
 void OverlayManager::BindKeyboard(const std::function<void()>& keyboardBuilder, int32_t targetId)
 {
     if (customKeyboardMap_.find(targetId) != customKeyboardMap_.end()) {
