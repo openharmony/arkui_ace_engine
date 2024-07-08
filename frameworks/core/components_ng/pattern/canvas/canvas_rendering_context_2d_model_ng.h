@@ -45,6 +45,7 @@ public:
     void SetStrokePattern(const std::shared_ptr<Ace::Pattern>& pattern) override;
     void SetStrokeColor(const Color& color, bool colorFlag) override;
     void DrawImage(const ImageInfo& imageInfo) override;
+    void DrawSvgImage(const ImageInfo& imageInfo) override;
     void PutImageData(const Ace::ImageData& imageData) override;
     void CloseImageBitmap(const std::string& src) override;
     std::unique_ptr<Ace::ImageData> GetImageData(const ImageSize& imageSize) override;

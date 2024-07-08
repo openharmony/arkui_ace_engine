@@ -431,6 +431,58 @@ JSRenderImage* JSCanvasRenderer::UnwrapNapiImage(const EcmaVM* vm, const JSRef<J
     return jsImage;
 }
 
+void JSCanvasRenderer::DrawSvgImage(const JSCallbackInfo& info, JSRenderImage* jsImage)
+{
+    CanvasImage image;
+    ExtractInfoToImage(image, info, true);
+    image.instanceId = jsImage->GetInstanceId();
+
+    ImageInfo imageInfo;
+    imageInfo.image = image;
+    imageInfo.svgDom = jsImage->GetSvgDom();
+    CHECK_NULL_VOID(imageInfo.svgDom);
+    imageInfo.imageFit = jsImage->GetImageFit();
+    renderingContext2DModel_->DrawSvgImage(imageInfo);
+}
+
+void JSCanvasRenderer::DrawImage(const JSCallbackInfo& info, JSRenderImage* jsImage)
+{
+    CanvasImage image;
+    ExtractInfoToImage(image, info, true);
+    image.instanceId = jsImage->GetInstanceId();
+    ImageInfo imageInfo;
+
+#if !defined(PREVIEW)
+    imageInfo.pixelMap = jsImage->GetPixelMap();
+    CHECK_NULL_VOID(imageInfo.pixelMap);
+    imageInfo.image = image;
+    renderingContext2DModel_->DrawPixelMap(imageInfo);
+#else
+    image.src = jsImage->GetSrc();
+    image.imageData = jsImage->GetImageData();
+    imageInfo.image = image;
+    imageInfo.imgWidth = jsImage->GetWidth();
+    imageInfo.imgHeight = jsImage->GetHeight();
+    renderingContext2DModel_->DrawImage(imageInfo);
+#endif
+}
+
+void JSCanvasRenderer::DrawPixelMap(const JSCallbackInfo& info)
+{
+#if !defined(PREVIEW)
+    CanvasImage image;
+    ExtractInfoToImage(image, info, false);
+
+    ImageInfo imageInfo;
+    imageInfo.image = image;
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    CHECK_NULL_VOID(runtime);
+    imageInfo.pixelMap = CreatePixelMapFromNapiValue(info[0], runtime->GetNativeEngine());
+    CHECK_NULL_VOID(imageInfo.pixelMap);
+    renderingContext2DModel_->DrawPixelMap(imageInfo);
+#endif
+}
+
 // drawImage(image: ImageBitmap | PixelMap, dx: number, dy: number): void
 // drawImage(image: ImageBitmap | PixelMap, dx: number, dy: number, dw: number, dh: number): void
 // drawImage(image: ImageBitmap | PixelMap, sx: number, sy: number, sw: number, sh: number, dx: number,
@@ -438,51 +490,19 @@ JSRenderImage* JSCanvasRenderer::UnwrapNapiImage(const EcmaVM* vm, const JSRef<J
 void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
 {
     ContainerScope scope(instanceId_);
-    CanvasImage image;
-    ImageInfo imageInfo;
-    bool isImage = false;
     if (!info[0]->IsObject()) {
         return;
     }
-    JSRenderImage* jsImage = UnwrapNapiImage(info.GetVm(), info[0]);
-#if !defined(PREVIEW)
-    RefPtr<PixelMap> pixelMap = nullptr;
-    RefPtr<NG::SvgDomBase> svgDom = nullptr;
-    if ((jsImage && jsImage->IsSvg())) {
-        svgDom = jsImage->GetSvgDom();
-        CHECK_NULL_VOID(svgDom);
-        ImageFit imageFit = jsImage->GetImageFit();
-        isImage = true;
-        imageInfo.svgDom = svgDom;
-        imageInfo.isSvg = jsImage->IsSvg();
-        imageInfo.imageFit = imageFit;
-    } else {
-        if (jsImage) {
-            isImage = true;
-            pixelMap = jsImage->GetPixelMap();
+    auto* jsImage = UnwrapNapiImage(info.GetVm(), info[0]);
+    if (jsImage) {
+        if (jsImage->IsSvg()) {
+            DrawSvgImage(info, jsImage);
         } else {
-            auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-            CHECK_NULL_VOID(runtime);
-            pixelMap = CreatePixelMapFromNapiValue(info[0], runtime->GetNativeEngine());
+            DrawImage(info, jsImage);
         }
-        CHECK_NULL_VOID(pixelMap);
+    } else {
+        DrawPixelMap(info);
     }
-    imageInfo.isImage = false;
-    imageInfo.pixelMap = pixelMap;
-#else
-    CHECK_NULL_VOID(jsImage);
-    isImage = true;
-    image.src = jsImage->GetSrc();
-    image.imageData = jsImage->GetImageData();
-    imageInfo.imgWidth = jsImage->GetWidth();
-    imageInfo.imgHeight = jsImage->GetHeight();
-    imageInfo.isImage = true;
-#endif
-    ExtractInfoToImage(image, info, isImage);
-    image.instanceId = jsImage ? jsImage->GetInstanceId() : 0;
-    imageInfo.image = image;
-
-    renderingContext2DModel_->DrawImage(imageInfo);
 }
 
 void JSCanvasRenderer::ExtractInfoToImage(CanvasImage& image, const JSCallbackInfo& info, bool isImage)
@@ -540,7 +560,7 @@ void JSCanvasRenderer::JsCreatePattern(const JSCallbackInfo& info)
 {
     auto arg0 = info[0];
     if (arg0->IsObject()) {
-        JSRenderImage* jsImage = UnwrapNapiImage(info.GetVm(), info[0]);
+        auto* jsImage = UnwrapNapiImage(info.GetVm(), info[0]);
         CHECK_NULL_VOID(jsImage);
         std::string repeat;
         info.GetStringArg(1, repeat);

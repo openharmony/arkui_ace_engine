@@ -472,56 +472,6 @@ void CustomPaintPaintMethod::GetSvgRect(
 }
 #endif
 
-void CustomPaintPaintMethod::DrawSvgImage(const Ace::CanvasImage& canvasImage)
-{
-#ifndef ACE_UNITTEST
-    // Make the ImageSourceInfo
-    canvasImage_ = canvasImage;
-    loadingSource_ = ImageSourceInfo(canvasImage.src);
-    // get the ImageObject
-    auto context = PipelineBase::GetCurrentContext();
-    if (currentSource_ != loadingSource_) {
-        ImageProvider::FetchImageObject(loadingSource_, imageObjSuccessCallback_, uploadSuccessCallback_,
-            failedCallback_, context, true, true, true, onPostBackgroundTask_);
-    }
-
-    CHECK_NULL_VOID(skiaDom_);
-    // draw the svg
-    RSRect srcRect;
-    RSRect dstRect;
-    GetSvgRect(skiaDom_, canvasImage, &srcRect, &dstRect);
-    float scaleX = dstRect.GetWidth() / srcRect.GetWidth();
-    float scaleY = dstRect.GetHeight() / srcRect.GetHeight();
-    OffsetF startPoint =
-        OffsetF(dstRect.GetLeft(), dstRect.GetTop()) - OffsetF(srcRect.GetLeft() * scaleX, srcRect.GetTop() * scaleY);
-
-    CHECK_NULL_VOID(rsCanvas_);
-    rsCanvas_->Save();
-    if (rsCanvas_->GetDrawingType() == Rosen::Drawing::DrawingType::RECORDING) {
-        RSBitmap bitmap;
-        RSBrush brush;
-        RSBitmapFormat bitmapFormat = { RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_UNPREMUL };
-        bitmap.Build(rsCanvas_->GetWidth(), rsCanvas_->GetHeight(), bitmapFormat);
-        bitmap.ClearWithColor(RSColor::COLOR_TRANSPARENT);
-        auto rs_OffscreenCanvas = std::make_unique<RSCanvas>();
-        rs_OffscreenCanvas->Bind(bitmap);
-        rs_OffscreenCanvas->ClipRect(dstRect, RSClipOp::INTERSECT);
-        rs_OffscreenCanvas->Translate(startPoint.GetX(), startPoint.GetY());
-        rs_OffscreenCanvas->Scale(scaleX, scaleY);
-        rs_OffscreenCanvas->DrawSVGDOM(skiaDom_);
-        rsCanvas_->AttachBrush(brush);
-        rsCanvas_->DrawBitmap(bitmap, 0, 0);
-        rsCanvas_->DetachBrush();
-    } else {
-        rsCanvas_->ClipRect(dstRect, RSClipOp::INTERSECT);
-        rsCanvas_->Translate(startPoint.GetX(), startPoint.GetY());
-        rsCanvas_->Scale(scaleX, scaleY);
-        rsCanvas_->DrawSVGDOM(skiaDom_);
-    }
-    rsCanvas_->Restore();
-#endif
-}
-
 void CustomPaintPaintMethod::DrawSvgImage(
     RefPtr<SvgDomBase> svgDom, const Ace::CanvasImage& canvasImage, const ImageFit& imageFit)
 {
@@ -618,11 +568,6 @@ void CustomPaintPaintMethod::DrawImageInternal(
 void CustomPaintPaintMethod::DrawImage(const Ace::CanvasImage& canvasImage, double width, double height)
 {
 #ifndef ACE_UNITTEST
-    if (OHOS::Ace::StringUtils::EndWith(canvasImage.src, ".svg")) {
-        DrawSvgImage(canvasImage);
-        return;
-    }
-
     ContainerScope scope(canvasImage.instanceId);
     auto context = PipelineBase::GetCurrentContext();
     auto image = std::make_shared<RSImage>();
