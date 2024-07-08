@@ -2255,7 +2255,8 @@ bool AceContainer::endsWith(std::string str, std::string suffix)
     return str.substr(str.length() - suffix.length()) == suffix;
 }
 
-void AceContainer::SetFontScaleAndWeightScale(const ParsedConfig& parsedConfig)
+void AceContainer::SetFontScaleAndWeightScale(
+    const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange)
 {
     if (IsKeyboard()) {
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "Keyboard does not adjust font");
@@ -2265,12 +2266,14 @@ void AceContainer::SetFontScaleAndWeightScale(const ParsedConfig& parsedConfig)
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontScale: %{public}s", parsedConfig.fontScale.c_str());
         auto instanceId = instanceId_;
         SetFontScale(instanceId, StringUtils::StringToFloat(parsedConfig.fontScale));
+        configurationChange.fontScaleUpdate = true;
     }
     if (!parsedConfig.fontWeightScale.empty()) {
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontWeightScale: %{public}s",
             parsedConfig.fontWeightScale.c_str());
         auto instanceId = instanceId_;
         SetFontWeightScale(instanceId, StringUtils::StringToFloat(parsedConfig.fontWeightScale));
+        configurationChange.fontWeightScaleUpdate = true;
     }
 }
 
@@ -2376,7 +2379,7 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     if (!parsedConfig.mnc.empty()) {
         resConfig.SetMnc(StringUtils::StringToUint(parsedConfig.mnc));
     }
-    SetFontScaleAndWeightScale(parsedConfig);
+    SetFontScaleAndWeightScale(parsedConfig, configurationChange);
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);
     if (SystemProperties::GetResourceDecoupling()) {
