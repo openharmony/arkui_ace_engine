@@ -1609,4 +1609,109 @@ HWTEST_F(ListLayoutTestNg, ChildrenMainSize006, TestSize.Level1)
     EXPECT_TRUE(ScrollToIndex(8, false, ScrollAlign::END, 450.f));
     EXPECT_TRUE(ScrollToIndex(9, false, ScrollAlign::END, 650.f));
 }
+
+/**
+ * @tc.name: ListRepeatCacheCount001
+ * @tc.desc: List cacheCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. Check Repeat frameCount
+     */
+    auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_NE(repeat, nullptr);
+    int32_t frameCount = repeat->FrameCount();
+    EXPECT_EQ(frameCount, 10);
+
+    /**
+     * @tc.steps: step2. Flush Idle Task
+     * @tc.expected: ListItem 4 is cached
+     */
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushIdleTask(listPattern);
+    int32_t childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 5);
+    auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
+    EXPECT_EQ(cachedItem->IsActive(), false);
+
+    /**
+     * @tc.steps: step2. Flush Idle Task
+     * @tc.expected: ListItem 1 and 7 is cached, ListItem 2,3,4,5,6 is active.
+     */
+    UpdateCurrentOffset(-250);
+    FlushIdleTask(listPattern);
+    childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 7);
+    cachedItem = frameNode_->GetChildByIndex(1)->GetHostNode();
+    EXPECT_EQ(cachedItem->IsActive(), false);
+    cachedItem = frameNode_->GetChildByIndex(7)->GetHostNode();
+    EXPECT_EQ(cachedItem->IsActive(), false);
+}
+
+/**
+ * @tc.name: ListRepeatCacheCount002
+ * @tc.desc: List lanes cacheCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    CreateRepeatVirtualScrollNode(20, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. Check Repeat frameCount
+     */
+    auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_NE(repeat, nullptr);
+    int32_t frameCount = repeat->FrameCount();
+    EXPECT_EQ(frameCount, 20);
+
+    /**
+     * @tc.steps: step2. Flush Idle Task
+     * @tc.expected: ListItem 8,9 is cached
+     */
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushIdleTask(listPattern);
+    int32_t childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 10);
+    auto item8 = frameNode_->GetChildByIndex(8)->GetHostNode();
+    EXPECT_EQ(item8->IsActive(), false);
+    auto item9 = frameNode_->GetChildByIndex(9)->GetHostNode();
+    EXPECT_EQ(item9->IsActive(), false);
+
+    /**
+     * @tc.steps: step2. Flush Idle Task
+     * @tc.expected: ListItem 2,3,14,15 is cached, ListItem 4-13 active.
+     */
+    UpdateCurrentOffset(-250);
+    FlushIdleTask(listPattern);
+    childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 14);
+    auto item2 = frameNode_->GetChildByIndex(2)->GetHostNode();
+    EXPECT_EQ(item2->IsActive(), false);
+    auto item3 = frameNode_->GetChildByIndex(3)->GetHostNode();
+    EXPECT_EQ(item3->IsActive(), false);
+    auto item14 = frameNode_->GetChildByIndex(14)->GetHostNode();
+    EXPECT_EQ(item14->IsActive(), false);
+    auto item15 = frameNode_->GetChildByIndex(15)->GetHostNode();
+    EXPECT_EQ(item15->IsActive(), false);
+}
 } // namespace OHOS::Ace::NG

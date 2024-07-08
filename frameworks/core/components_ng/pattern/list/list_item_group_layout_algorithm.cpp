@@ -216,7 +216,7 @@ void ListItemGroupLayoutAlgorithm::SetActiveChildRange(LayoutWrapper* layoutWrap
         int32_t index = totalItemCount_ + itemStartIndex_;
         layoutWrapper->SetActiveChildRange(index, index, cacheCount * lanes_, 0);
     } else {
-        layoutWrapper->SetActiveChildRange(-1, -1, 0, cacheCount * lanes_);
+        layoutWrapper->SetActiveChildRange(-1, itemStartIndex_ - 1, 0, cacheCount * lanes_);
     }
 }
 

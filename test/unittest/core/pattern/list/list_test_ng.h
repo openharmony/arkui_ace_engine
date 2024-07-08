@@ -56,6 +56,8 @@
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_model_ng.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
@@ -110,6 +112,7 @@ public:
     void CreateGroupWithSettingChildrenMainSize(int32_t groupNumber);
     void CreateSwipeItems(std::function<void()> startAction, std::function<void()> endAction,
         V2::SwipeEdgeEffect effect, int32_t itemNumber = TOTAL_ITEM_NUMBER);
+    void CreateRepeatVirtualScrollNode(int32_t itemNumber, const std::function<void(uint32_t)>& createFunc);
     std::function<void()> GetRowOrColBuilder(float width, float height);
     std::function<void()> GetRowOrColBuilder(Dimension crossSize, Dimension mainSize);
 
@@ -126,6 +129,7 @@ public:
     void HandleDragEnd(int32_t index, float mainVelocity = SWIPER_SPEED_TH);
     void ScrollSnap(float offset, float velocity);
     void ScrollSnapForEqualHeightItem(float offset, float velocity);
+    void FlushIdleTask(const RefPtr<ListPattern>& listPattern);
 
     AssertionResult VerifyPosition(
         const RefPtr<FrameNode>& frameNode, int32_t viewItemNumber, int32_t lanes, float space, float startOffset);
