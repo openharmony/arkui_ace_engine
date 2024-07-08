@@ -54,7 +54,6 @@ public:
     {
         auto paintProperty = MakeRefPtr<ModelPaintProperty>();
         paintProperty->UpdatePaintProperty(this);
-        paintProperty->propCameraPosition_ = CloneCameraPosition();
         paintProperty->propCameraDistance_ = CloneCameraDistance();
         paintProperty->propCameraIsAngular_ = CloneCameraIsAngular();
         paintProperty->propCameraRotation_ = CloneCameraRotation();
@@ -110,7 +109,6 @@ public:
     void Reset() override
     {
         PaintProperty::Reset();
-        ResetCameraPosition();
         ResetCameraDistance();
         ResetCameraIsAngular();
         ResetCameraRotation();
@@ -174,8 +172,6 @@ public:
         UpdateNeedsImageTexturePathsSetup(true);
     }
 
-    DEFINE_NEEDS_SETUP_FLAG_TRIGGER_PROPERTY(
-        CameraPosition, Vec3, Camera, PROPERTY_UPDATE_RENDER);
     DEFINE_NEEDS_SETUP_FLAG_TRIGGER_PROPERTY(
         CameraDistance, AnimatableFloat, Camera, PROPERTY_UPDATE_RENDER);
     DEFINE_NEEDS_SETUP_FLAG_TRIGGER_PROPERTY(
