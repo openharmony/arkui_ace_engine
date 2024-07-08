@@ -3833,7 +3833,7 @@ void WebPattern::InitSelectPopupMenuViewOption(const std::vector<RefPtr<FrameNod
         }
         auto hub = option->GetEventHub<OptionEventHub>();
         CHECK_NULL_VOID(hub);
-        if (optionIndex >= 0 && optionIndex < items.size()) {
+        if (optionIndex >= 0 && static_cast<uint32_t>(optionIndex) < items.size()) {
             hub->SetEnabled(items[optionIndex]->GetIsEnabled());
             auto focusHub = option->GetFocusHub();
             if (focusHub) {
@@ -5021,7 +5021,7 @@ std::string WebPattern::EnumTypeToString(WebAccessibilityType type)
 std::string WebPattern::VectorIntToString(std::vector<int64_t>&& vec)
 {
     std::string vecStr;
-    int vecLen = vec.size();
+    uint32_t vecLen = vec.size();
     if (vecLen < 1) {
         return vecStr;
     }
