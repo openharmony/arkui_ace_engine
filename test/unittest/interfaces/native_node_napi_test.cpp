@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 #include "native_interface.h"
 #include "native_node_napi.h"
+#include "native_type.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -133,4 +134,147 @@ HWTEST_F(NativeNodeNapiTest, NativeNodeNapiTest009, TestSize.Level1)
     void* object = OH_ArkUI_QueryModuleInterfaceByName(
         static_cast<ArkUI_NativeAPIVariantKind>(ARKUI_NATIVE_GESTURE + 1), "");
     EXPECT_EQ(object, nullptr);
+}
+
+/**
+ * @tc.name: NavigationAPITest001
+ * @tc.desc: Test OH_ArkUI_GetNavigationId function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NavigationAPITest001, TestSize.Level1)
+{
+    auto ret = OH_ArkUI_GetNavigationId(nullptr, nullptr, 0, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NavigationAPITest002
+ * @tc.desc: Test OH_ArkUI_GetNavDestinationName function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NavigationAPITest002, TestSize.Level1)
+{
+    auto ret = OH_ArkUI_GetNavDestinationName(nullptr, nullptr, 0, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NavigationAPITest003
+ * @tc.desc: Test OH_ArkUI_GetNavStackLength function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NavigationAPITest003, TestSize.Level1)
+{
+    auto ret = OH_ArkUI_GetNavStackLength(nullptr, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NavigationAPITest004
+ * @tc.desc: Test OH_ArkUI_GetNavDestinationNameByIndex function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NavigationAPITest004, TestSize.Level1)
+{
+    auto ret = OH_ArkUI_GetNavDestinationNameByIndex(nullptr, 0, nullptr, 0, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NavigationAPITest005
+ * @tc.desc: Test OH_ArkUI_GetNavDestinationId function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NavigationAPITest005, TestSize.Level1)
+{
+    auto ret = OH_ArkUI_GetNavDestinationId(nullptr, nullptr, 0, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NavigationAPITest006
+ * @tc.desc: Test OH_ArkUI_GetNavDestinationState function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NavigationAPITest006, TestSize.Level1)
+{
+    auto ret = OH_ArkUI_GetNavDestinationState(nullptr, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NavigationAPITest007
+ * @tc.desc: Test OH_ArkUI_GetNavDestinationIndex function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NavigationAPITest007, TestSize.Level1)
+{
+    auto ret = OH_ArkUI_GetNavDestinationIndex(nullptr, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NavigationAPITest008
+ * @tc.desc: Test OH_ArkUI_GetNavDestinationParam function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NavigationAPITest008, TestSize.Level1)
+{
+    auto ret = OH_ArkUI_GetNavDestinationParam(nullptr);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: NavigationAPITest009
+ * @tc.desc: Test OH_ArkUI_GetRouterPageIndex function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NavigationAPITest009, TestSize.Level1)
+{
+    auto ret = OH_ArkUI_GetRouterPageIndex(nullptr, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NavigationAPITest010
+ * @tc.desc: Test OH_ArkUI_GetRouterPageName function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NavigationAPITest010, TestSize.Level1)
+{
+    auto ret = OH_ArkUI_GetRouterPageName(nullptr, nullptr, 0, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NavigationAPITest011
+ * @tc.desc: Test OH_ArkUI_GetRouterPagePath function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NavigationAPITest011, TestSize.Level1)
+{
+    auto ret = OH_ArkUI_GetRouterPagePath(nullptr, nullptr, 0, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NavigationAPITest012
+ * @tc.desc: Test OH_ArkUI_GetRouterPageState function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NavigationAPITest012, TestSize.Level1)
+{
+    auto ret = OH_ArkUI_GetRouterPageState(nullptr, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NavigationAPITest013
+ * @tc.desc: Test OH_ArkUI_GetRouterPageId function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NavigationAPITest013, TestSize.Level1)
+{
+    auto ret = OH_ArkUI_GetRouterPageId(nullptr, nullptr, 0, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
