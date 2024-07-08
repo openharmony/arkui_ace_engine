@@ -28,27 +28,23 @@ const DOUBLE_LINE_NUM: number = 2;
 const SINGLE_LINE_HEIGHT: number = 56;
 const DOUBLE_LINE_HEIGHT: number = 72;
 // 资源数值
-const BORDER_WIDTH: number = 2;
 const RESOURCE_TYPE_SYMBOL: number = 40000;
 // 左边尺寸常量
 const LEFT_ICON_SIZE: ResourceStr = '16vp';
 const LEFT_ICON_SIZE_NUMBER: number = 16;
 const LEFT_TEXT_NUMBER: number = 8;
 // 右边尺寸常量
-const BUTTON_ZONE_SIZE: number = 32;
-const BUTTON_HEIGHT: number = 28;
+const OPERATE_ITEM_LENGTH: number = 24;
 const ARROW_ICON_WIDTH: number = 12;
-const ARROW_ICON_HEIGHT: number = 24;
 const SINGLE_ICON_ZONE_SIZE: number = 28;
 const RIGHT_SINGLE_ICON_SIZE: ResourceStr = '24vp';
-const LOADING_SIZE: number = 24;
 const PADDING_LEVEL_2: number = 4;
 const MAX_RIGHT_WIDTH: Length = '34%';
 const MIN_FONT_SIZE: number = 1.75;
 const MIN_HOT_AREA_LENGTH: number = 40;
-const MULTI_ICON_REGION_WIDTH: number = 36;
+const MULTI_ICON_REGION_WIDTH: number = 37;
 const ICON_REGION_X: number = -9;
-const ICON_REGION_Y: number = -8;
+const ICON_REGION_Y: number = -6;
 const SINGLE_ICON_REGION_X: number = -12;
 const SINGLE_ICON_NUMBER: number = 1;
 
@@ -168,6 +164,8 @@ export struct SubHeader {
   // 内部变量
   @State textArrowBgColor: ResourceColor = $r('sys.color.ohos_id_color_sub_background_transparent');
   @State buttonBgColor: ResourceColor = $r('sys.color.ohos_id_color_sub_background_transparent');
+  @State buttonStyleWidth: number = 0;
+  @State buttonStyleHeight: number = 0;
   @State textArrowStyleWidth: number = 0;
   @State textArrowStyleHeight: number = 0;
   @State iconWidth: number = 0;
@@ -294,6 +292,7 @@ export struct SubHeader {
         })
         .justifyContent(FlexAlign.Start)
         .width('100%')
+        .rightAreaClickEvent()
       }
       .constraintSize({ minHeight: this.getMinHeight() })
       .padding(this.getAreaPadding())
@@ -322,7 +321,6 @@ export struct SubHeader {
       .margin(this.contentMargin ?? this.subHeaderMargin)
       .padding(this.getAreaPadding())
     }
-
   }
 
   onMeasureSize(selfLayoutInfo: GeometryInfo, children: Measurable[], constraint: ConstraintSizeOptions): SizeResult {
@@ -353,9 +351,8 @@ export struct SubHeader {
   private getRightAreaMaxWidth(): Length {
     if (this.operationType === OperationType.ICON_GROUP && (this.operationItem && this.operationItem.length > 0)) {
       return '100%';
-    } else {
-      return MAX_RIGHT_WIDTH;
     }
+    return MAX_RIGHT_WIDTH;
   }
 
   private getRightAreaMinWidth(): Length {
@@ -595,7 +592,6 @@ export struct SubHeader {
                 maxLines: DOUBLE_LINE_NUM,
                 fontColor: this.subHeaderTheme.fontButtonColor,
               })
-              .focusable(true)
           }
           .padding({
             start: LengthMetrics.resource($r('sys.float.padding_level1')),
@@ -609,27 +605,9 @@ export struct SubHeader {
           })
           .backgroundColor(this.buttonBgColor)
           .focusable(true)
-          .constraintSize({ minHeight: BUTTON_HEIGHT })
+          .constraintSize({ minHeight: OPERATE_ITEM_LENGTH })
           .justifyContent(FlexAlign.End)
           .borderRadius($r('sys.float.corner_radius_level4'))
-          .stateStyles({
-            focused: {
-              .border({
-                radius: $r('sys.float.corner_radius_level4'),
-                width: $r('sys.float.outline_extra_larger'),
-                color: this.subHeaderTheme.borderFocusColor,
-              })
-            },
-            pressed: pressedStyle,
-            disabled: disabledStyle,
-            normal: {
-              .border({
-                radius: $r('sys.float.corner_radius_level4'),
-                width: $r('sys.float.border_none'),
-                color: $r('sys.color.ohos_id_color_focused_outline_transparent'),
-              })
-            }
-          })
           .onHover((isHover: boolean) => {
             if (isHover) {
               this.buttonBgColor = this.subHeaderTheme.textArrowHoverBgColor;
@@ -637,12 +615,41 @@ export struct SubHeader {
               this.buttonBgColor = $r('sys.color.ohos_id_color_sub_background_transparent');
             }
           })
+          .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+            this.buttonStyleWidth = Number(newValue.width);
+            this.buttonStyleHeight = Number(newValue.height);
+          })
+
+          Text()
+            .focusable(true)
+            .width(this.buttonStyleWidth)
+            .height(this.buttonStyleHeight)
+            .hitTestBehavior(HitTestMode.None)
+            .stateStyles({
+              focused: {
+                .border({
+                  radius: $r('sys.float.corner_radius_level4'),
+                  width: $r('sys.float.outline_extra_larger'),
+                  color: this.subHeaderTheme.borderFocusColor,
+                })
+              },
+              pressed: pressedStyle,
+              disabled: disabledStyle,
+              normal: {
+                .border({
+                  radius: $r('sys.float.corner_radius_level4'),
+                  width: $r('sys.float.border_none'),
+                  color: $r('sys.color.ohos_id_color_focused_outline_transparent'),
+                })
+              }
+            })
         }
       }
       .focusable(true)
     }
     .margin({
       start: LengthMetrics.resource(this.ageing ? $r('sys.float.padding_level0') : $r('sys.float.padding_level4')),
+      bottom: LengthMetrics.resource(this.ageing ? $r('sys.float.padding_level0') : $r('sys.float.padding_level2')),
     })
     .justifyContent(FlexAlign.End)
   }
@@ -656,7 +663,6 @@ export struct SubHeader {
       return (this.ageing && this.icon) ? LengthMetrics.vp(LEFT_ICON_SIZE_NUMBER +
         LEFT_TEXT_NUMBER) : LengthMetrics.vp(0);
     }
-
   }
 
   @Builder
@@ -682,7 +688,7 @@ export struct SubHeader {
         .borderRadius($r('sys.float.corner_radius_level4'))
         .focusable(true)
         .backgroundColor(this.textArrowBgColor)
-        .constraintSize({ minHeight: BUTTON_ZONE_SIZE })
+        .constraintSize({ minHeight: OPERATE_ITEM_LENGTH })
         .padding({
           start: this.getTextArrowPaddingLeft(),
           top: this.ageing ? LengthMetrics.vp(0) : LengthMetrics.resource($r('sys.float.padding_level2')),
@@ -697,7 +703,7 @@ export struct SubHeader {
           Image($r('sys.media.ohos_ic_public_arrow_right'))
             .fillColor(this.subHeaderTheme.iconArrowColor)
             .width(ARROW_ICON_WIDTH)
-            .height(ARROW_ICON_HEIGHT)
+            .height(OPERATE_ITEM_LENGTH)
             .focusable(true)
             .draggable(false)
             .matchTextDirection(true)
@@ -706,11 +712,6 @@ export struct SubHeader {
         .height(this.textArrowStyleHeight)
         .width(this.textArrowStyleWidth)
         .hitTestBehavior(HitTestMode.None)
-        .border({
-          radius: $r('sys.float.corner_radius_level4'),
-          width: $r('sys.float.outline_extra_larger'),
-          color: $r('sys.color.interactive_focus'),
-        })
         .stateStyles({
           focused: {
             .border({
@@ -769,6 +770,7 @@ export struct SubHeader {
             })
               .margin({
                 start: LengthMetrics.resource($r('sys.float.padding_level4')),
+                bottom: LengthMetrics.resource($r('sys.float.padding_level3')),
               })
           } else {
             // 最大支持3个ICON,此场景不支持
@@ -784,8 +786,8 @@ export struct SubHeader {
   LoadingProcessStyle(): void {
     Row() {
       LoadingProgress()
-        .width(LOADING_SIZE)
-        .height(LOADING_SIZE)
+        .width(OPERATE_ITEM_LENGTH)
+        .height(OPERATE_ITEM_LENGTH)
         .color($r('sys.color.icon_secondary'))
     }
     .justifyContent(FlexAlign.End)
@@ -830,21 +832,20 @@ struct SingleIconStyle {
       .focusable(true)
       .width(SINGLE_ICON_ZONE_SIZE)
       .height(SINGLE_ICON_ZONE_SIZE)
-      .margin({
-        bottom: $r('sys.float.padding_level2'),
-      })
       .justifyContent(FlexAlign.Center)
-      .borderRadius($r('sys.float.corner_radius_level4'))
       .backgroundColor(this.bgColor)
       .stateStyles({
         normal: {
-          .border({ width: 0 })
-          .backgroundColor($r('sys.color.ohos_id_color_sub_background_transparent'))
+          .border({
+            radius: $r('sys.float.corner_radius_level4'),
+            width: $r('sys.float.border_none'),
+            color: $r('sys.color.ohos_id_color_sub_background_transparent'),
+          })
         },
         focused: {
           .border({
             radius: $r('sys.float.corner_radius_level4'),
-            width: BORDER_WIDTH,
+            width: $r('sys.float.outline_extra_larger'),
             color: this.subHeaderTheme.borderFocusColor,
             style: BorderStyle.Solid,
           })
