@@ -937,9 +937,11 @@ bool ArkTSUtils::ParseJsFontFamiliesFromResource(
     return true;
 }
 
-bool ArkTSUtils::ParseJsLengthMetrics(
-    const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension& result)
+bool ArkTSUtils::ParseJsLengthMetrics(const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result)
 {
+    if (!jsValue->IsObject(vm)) {
+        return false;
+    }
     auto jsObj = jsValue->ToObject(vm);
     auto value = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "value"));
     if (!value->IsNumber()) {

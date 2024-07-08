@@ -94,6 +94,8 @@ const std::string BLOOM_COLOR_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloo
 const std::string ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME = "sys.float.ohos_id_point_light_illuminated_border_width";
 using CalcDimenPair = std::pair<CalcDimension&, CalcDimension&>;
 
+enum ParseResult { LENGTHMETRICS_SUCCESS, DIMENSION_SUCCESS, FAIL };
+
 BorderStyle ConvertBorderStyle(int32_t value)
 {
     auto style = static_cast<BorderStyle>(value);
@@ -255,6 +257,33 @@ bool ParseCalcDimensions(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t offset,
         results.push_back(optCalcDimension);
     }
     return hasValue;
+}
+
+ParseResult ParseCalcDimensionsNG(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t offset, uint32_t count,
+    std::vector<std::optional<CalcDimension>>& results, const CalcDimension& defValue)
+{
+    auto end = offset + count;
+    auto argsNumber = runtimeCallInfo->GetArgsNumber();
+    if (end > argsNumber) {
+        return ParseResult::FAIL;
+    }
+    ParseResult res = ParseResult::FAIL;
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    for (uint32_t index = offset; index < end; index++) {
+        auto arg = runtimeCallInfo->GetCallArgRef(index);
+        std::optional<CalcDimension> optCalcDimension;
+        CalcDimension dimension(defValue);
+        // Parse string, '10abc' return false
+        if (ArkTSUtils::ParseJsDimensionVpNG(vm, arg, dimension, true)) {
+            optCalcDimension = dimension;
+            res = ParseResult::DIMENSION_SUCCESS;
+        } else if (ArkTSUtils::ParseJsLengthMetrics(vm, arg, dimension)) {
+            optCalcDimension = dimension;
+            res = ParseResult::LENGTHMETRICS_SUCCESS;
+        }
+        results.push_back(optCalcDimension);
+    }
+    return res;
 }
 
 void ResetCalcDimensions(std::vector<std::optional<CalcDimension>>& optDimensions)
@@ -1618,11 +1647,15 @@ ArkUINativeModuleValue CommonBridge::SetPosition(ArkUIRuntimeCallInfo* runtimeCa
     std::vector<std::optional<CalcDimension>> edges;
 
     if (useEdges) {
-        ParseCalcDimensions(runtimeCallInfo, NUM_2, NUM_4, edges, CalcDimension(0.0));
+        ParseResult res = ParseCalcDimensionsNG(runtimeCallInfo, NUM_2, NUM_4, edges, CalcDimension(0.0));
+        if (res == ParseResult::LENGTHMETRICS_SUCCESS && AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            // Swap left and right
+            std::swap(edges[NUM_1], edges[NUM_3]);
+        }
         PushDimensionsToVector(options, edges);
         GetArkUINodeModifiers()->getCommonModifier()->setPositionEdges(nativeNode, useEdges, options.data());
     } else {
-        ParseCalcDimensions(runtimeCallInfo, NUM_2, NUM_2, edges, CalcDimension(0.0));
+        ParseCalcDimensionsNG(runtimeCallInfo, NUM_2, NUM_2, edges, CalcDimension(0.0));
         PushDimensionsToVector(options, edges);
         GetArkUINodeModifiers()->getCommonModifier()->setPositionEdges(nativeNode, useEdges, options.data());
     }
@@ -3700,11 +3733,15 @@ ArkUINativeModuleValue CommonBridge::SetOffset(ArkUIRuntimeCallInfo* runtimeCall
     std::vector<std::optional<CalcDimension>> edges;
 
     if (useEdges) {
-        ParseCalcDimensions(runtimeCallInfo, NUM_2, NUM_4, edges, CalcDimension(0.0));
+        ParseResult res = ParseCalcDimensionsNG(runtimeCallInfo, NUM_2, NUM_4, edges, CalcDimension(0.0));
+        if (res == ParseResult::LENGTHMETRICS_SUCCESS && AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            // Swap left and right
+            std::swap(edges[NUM_1], edges[NUM_3]);
+        }
         PushDimensionsToVector(options, edges);
         GetArkUINodeModifiers()->getCommonModifier()->setOffsetEdges(nativeNode, useEdges, options.data());
     } else {
-        ParseCalcDimensions(runtimeCallInfo, NUM_2, NUM_2, edges, CalcDimension(0.0));
+        ParseCalcDimensionsNG(runtimeCallInfo, NUM_2, NUM_2, edges, CalcDimension(0.0));
         PushDimensionsToVector(options, edges);
         GetArkUINodeModifiers()->getCommonModifier()->setOffsetEdges(nativeNode, useEdges, options.data());
     }
@@ -3906,9 +3943,9 @@ ArkUINativeModuleValue CommonBridge::ResetMargin(ArkUIRuntimeCallInfo *runtimeCa
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue CommonBridge::SetMarkAnchor(ArkUIRuntimeCallInfo *runtimeCallInfo)
+ArkUINativeModuleValue CommonBridge::SetMarkAnchor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM *vm = runtimeCallInfo->GetVM();
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> xArg = runtimeCallInfo->GetCallArgRef(NUM_1);
@@ -3916,11 +3953,16 @@ ArkUINativeModuleValue CommonBridge::SetMarkAnchor(ArkUIRuntimeCallInfo *runtime
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     CalcDimension x(0.0, DimensionUnit::VP);
     CalcDimension y(0.0, DimensionUnit::VP);
-    bool hasX = ArkTSUtils::ParseJsDimensionNG(vm, xArg, x, DimensionUnit::VP);
-    bool hasY = ArkTSUtils::ParseJsDimensionNG(vm, yArg, y, DimensionUnit::VP);
-    if (hasX || hasY) {
-        GetArkUINodeModifiers()->getCommonModifier()->setMarkAnchor(nativeNode, x.Value(),
-            static_cast<int32_t>(x.Unit()), y.Value(), static_cast<int32_t>(y.Unit()));
+    bool useLengthMetrics = ArkTSUtils::ParseJsLengthMetrics(vm, xArg, x);
+    useLengthMetrics = ArkTSUtils::ParseJsLengthMetrics(vm, yArg, y) || useLengthMetrics;
+    if (useLengthMetrics && AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        x.SetValue(-x.Value());
+    }
+    bool hasX = useLengthMetrics || ArkTSUtils::ParseJsDimensionNG(vm, xArg, x, DimensionUnit::VP);
+    bool hasY = useLengthMetrics || ArkTSUtils::ParseJsDimensionNG(vm, yArg, y, DimensionUnit::VP);
+    if (useLengthMetrics || hasX || hasY) {
+        GetArkUINodeModifiers()->getCommonModifier()->setMarkAnchor(
+            nativeNode, x.Value(), static_cast<int32_t>(x.Unit()), y.Value(), static_cast<int32_t>(y.Unit()));
     } else {
         GetArkUINodeModifiers()->getCommonModifier()->resetMarkAnchor(nativeNode);
     }

@@ -317,15 +317,20 @@ class PositionModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().common.resetPosition(node);
     } else {
-      let positionType = new ArkPositionType();
-      if (!positionType.parsePositionType(this.value)) {
+      if (isUndefined(this.value)) {
         getUINativeModule().common.resetPosition(node);
-      } else {
-        if (!positionType.useEdges) {
-          getUINativeModule().common.setPosition(node, positionType.useEdges, this.value.x, this.value.y);
-        } else {
-          getUINativeModule().common.setPosition(node, positionType.useEdges, this.value.top, this.value.left, this.value.bottom, this.value.right);
+      } else if (('x' in this.value) || ('y' in this.value)) {
+        getUINativeModule().common.setPosition(node, false, this.value.x, this.value.y);
+      } else if (('top' in this.value) || ('bottom' in this.value) || ('left' in this.value) || ('start' in this.value) || ('right' in this.value) || ('end' in this.value)) {
+        if (('start' in this.value)) {
+          this.value.left = this.value.start;
         }
+        if (('end' in this.value)) {
+          this.value.right = this.value.end;
+        }
+        getUINativeModule().common.setPosition(node, true, this.value.top, this.value.left, this.value.bottom, this.value.right);
+      } else {
+        getUINativeModule().common.resetPosition(node);
       }
     }
   }
@@ -335,7 +340,9 @@ class PositionModifier extends ModifierWithKey {
       !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
       !isBaseOrResourceEqual(this.stageValue.left, this.value.left) ||
       !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
-      !isBaseOrResourceEqual(this.stageValue.right, this.value.right);
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
+      !isBaseOrResourceEqual(this.stageValue.start, this.value.start) ||
+      !isBaseOrResourceEqual(this.stageValue.end, this.value.end);
   }
 }
 PositionModifier.identity = Symbol('position');
@@ -1836,15 +1843,20 @@ class OffsetModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().common.resetOffset(node);
     } else {
-      let positionType = new ArkPositionType();
-      if (!positionType.parsePositionType(this.value)) {
+      if (isUndefined(this.value)) {
         getUINativeModule().common.resetOffset(node);
-      } else {
-        if (!positionType.useEdges) {
-          getUINativeModule().common.setOffset(node, positionType.useEdges, this.value.x, this.value.y);
-        } else {
-          getUINativeModule().common.setOffset(node, positionType.useEdges, this.value.top, this.value.left, this.value.bottom, this.value.right);
+      } else if (('x' in this.value) || ('y' in this.value)) {
+        getUINativeModule().common.setOffset(node, false, this.value.x, this.value.y);
+      } else if (('top' in this.value) || ('bottom' in this.value) || ('left' in this.value) || ('start' in this.value) || ('right' in this.value) || ('end' in this.value)) {
+        if (('start' in this.value)) {
+          this.value.left = this.value.start;
         }
+        if (('end' in this.value)) {
+          this.value.right = this.value.end;
+        }
+        getUINativeModule().common.setOffset(node, true, this.value.top, this.value.left, this.value.bottom, this.value.right);
+      } else {
+        getUINativeModule().common.resetOffset(node);
       }
     }
   }
@@ -1854,7 +1866,9 @@ class OffsetModifier extends ModifierWithKey {
       !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
       !isBaseOrResourceEqual(this.stageValue.left, this.value.left) ||
       !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
-      !isBaseOrResourceEqual(this.stageValue.right, this.value.right);
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
+      !isBaseOrResourceEqual(this.stageValue.start, this.value.start) ||
+      !isBaseOrResourceEqual(this.stageValue.end, this.value.end);
   }
 }
 OffsetModifier.identity = Symbol('offset');
@@ -1863,18 +1877,28 @@ class MarkAnchorModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    let _a, _b;
     if (reset) {
       getUINativeModule().common.resetMarkAnchor(node);
     }
     else {
-      getUINativeModule().common.setMarkAnchor(node, (_a = this.value) === null ||
-      _a === void 0 ? void 0 : _a.x, (_b = this.value) === null || _b === void 0 ? void 0 : _b.y);
+      if (this.value === void 0) {
+        getUINativeModule().common.resetMarkAnchor(node);
+      } else {
+        if ('start' in this.value) {
+          this.value.x = this.value.start;
+        }
+        if ('top' in this.value) {
+          this.value.y = this.value.top;
+        }
+      }
+      getUINativeModule().common.setMarkAnchor(node, this.value.x, this.value.y);
     }
   }
   checkObjectDiff() {
     return !isBaseOrResourceEqual(this.stageValue.x, this.value.x) ||
-      !isBaseOrResourceEqual(this.stageValue.y, this.value.y);
+      !isBaseOrResourceEqual(this.stageValue.y, this.value.y) ||
+      !isBaseOrResourceEqual(this.stageValue.start, this.value.start) ||
+      !isBaseOrResourceEqual(this.stageValue.top, this.value.top);
   }
 }
 MarkAnchorModifier.identity = Symbol('markAnchor');
@@ -14057,15 +14081,6 @@ class ArkBorderColor {
       this.bottomColor === another.bottomColor);
   }
 }
-class ArkPosition {
-  constructor() {
-    this.x = undefined;
-    this.y = undefined;
-  }
-  isEqual(another) {
-    return this.x === another.x && this.y === another.y;
-  }
-}
 class ArkBorderWidth {
   constructor() {
     this.left = undefined;
@@ -14435,38 +14450,7 @@ class ArkPadding {
       this.left === another.left);
   }
 }
-class ArkPositionType {
-  constructor() {
-    this.useEdges = false;
-    this.x = undefined;
-    this.y = undefined;
-    this.top = undefined;
-    this.left = undefined;
-    this.right = undefined;
-    this.bottom = undefined;
-  }
 
-  parsePositionType(value) {
-    if (isUndefined(value)) {
-      return false;
-    }
-    if (('x' in value) || ('y' in value)) {
-      this.useEdges = false;
-      this.x = value.x;
-      this.y = value.y;
-      return true;
-    } else if (('top' in value) || ('left' in value) || ('bottom' in value) || ('right' in value)) {
-      this.useEdges = true;
-      this.top = value.top;
-      this.left = value.left;
-      this.bottom = value.bottom;
-      this.right = value.right;
-      return true;
-    } else {
-      return false;
-    }
-  }
-}
 class ArkBarMode {
   isEqual(another) {
     return (this.barMode === another.barMode) && (this.options === another.options);
