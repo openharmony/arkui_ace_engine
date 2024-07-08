@@ -113,7 +113,7 @@ void IndexerPattern::InitArrayValue(bool& autoCollapseModeChanged, bool& itemCou
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(false);
+    auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(true);
     if (!isNewHeightCalculated_) {
         autoCollapseModeChanged = autoCollapse != lastAutoCollapse_;
         lastAutoCollapse_ = autoCollapse;
