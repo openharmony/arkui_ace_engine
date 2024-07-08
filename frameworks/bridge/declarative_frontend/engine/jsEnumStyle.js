@@ -201,6 +201,15 @@ var ImageFit;
   ImageFit[ImageFit["Auto"] = 3] = "Auto";
   ImageFit[ImageFit["None"] = 5] = "None";
   ImageFit[ImageFit["ScaleDown"] = 6] = "ScaleDown";
+  ImageFit[ImageFit["TOP_START"] = 7] = "TOP_START";
+  ImageFit[ImageFit["TOP"] = 8] = "TOP";
+  ImageFit[ImageFit["TOP_END"] = 9] = "TOP_END";
+  ImageFit[ImageFit["START"] = 10] = "START";
+  ImageFit[ImageFit["CENTER"] = 11] = "CENTER";
+  ImageFit[ImageFit["END"] = 12] = "END";
+  ImageFit[ImageFit["BOTTOM_START"] = 13] = "BOTTOM_START";
+  ImageFit[ImageFit["BOTTOM"] = 14] = "BOTTOM";
+  ImageFit[ImageFit["BOTTOM_END"] = 15] = "BOTTOM_END";
 })(ImageFit || (ImageFit = {}));
 
 var DynamicRangeMode ;
