@@ -477,6 +477,7 @@ public:
     {
         return canExpand_;
     }
+    float GetSelectMenuWidthFromTheme();
 protected:
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);

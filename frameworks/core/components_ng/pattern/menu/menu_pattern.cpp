@@ -71,7 +71,7 @@ constexpr double MOUNT_MENU_FINAL_SCALE = 0.95f;
 constexpr double SEMI_CIRCLE_ANGEL = 90.0f;
 constexpr Dimension PADDING = 4.0_vp;
 constexpr Dimension MENU_DEFAULT_RADIUS = 20.0_vp;
-
+constexpr Dimension OPTION_MARGIN = 8.0_vp;
 
 void UpdateFontStyle(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
     RefPtr<MenuItemPattern>& itemPattern, bool& contentChanged, bool& labelChanged)
@@ -257,7 +257,7 @@ void MenuPattern::OnModifyDone()
         BorderRadiusProperty borderRadius = menuLayoutProperty->GetBorderRadiusValue();
         UpdateBorderRadius(host, borderRadius);
     }
-
+    UpdateMenuBorderAndBackgroundBlur();
     SetAccessibilityAction();
 
     if (previewMode_ != MenuPreviewMode::NONE) {
@@ -279,9 +279,9 @@ void MenuPattern::UpdateMenuBorderAndBackgroundBlur()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     if (!renderContext->HasBorderColor()) {
         BorderColorProperty borderColor;
@@ -1702,4 +1702,24 @@ void MenuPattern::OnItemPressed(const RefPtr<FrameNode>& parent, int32_t index, 
     }
 }
 
+float MenuPattern::GetSelectMenuWidthFromTheme()
+{
+    RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
+    CHECK_NULL_RETURN(columnInfo, MIN_SELECT_MENU_WIDTH.ConvertToPx());
+    auto parent = columnInfo->GetParent();
+    CHECK_NULL_RETURN(parent, MIN_SELECT_MENU_WIDTH.ConvertToPx());
+    parent->BuildColumnWidth();
+    auto defaultWidth = static_cast<float>(columnInfo->GetWidth(COLUMN_NUM));
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, MIN_SELECT_MENU_WIDTH.ConvertToPx());
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, MIN_SELECT_MENU_WIDTH.ConvertToPx());
+    auto theme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, MIN_SELECT_MENU_WIDTH.ConvertToPx());
+    float finalWidth = (theme->GetMenuNormalWidth() + OPTION_MARGIN).ConvertToPx();
+    if (finalWidth < MIN_SELECT_MENU_WIDTH.ConvertToPx()) {
+        finalWidth = defaultWidth;
+    }
+    return finalWidth;
+}
 } // namespace OHOS::Ace::NG

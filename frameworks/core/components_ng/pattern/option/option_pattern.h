@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
 class OptionPattern : public Pattern {
@@ -131,7 +132,18 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        auto pipeline = PipelineBase::GetCurrentContext();
+        FocusPattern focusPattern{ FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        CHECK_NULL_RETURN(pipeline, focusPattern);
+        auto theme = pipeline->GetTheme<AppTheme>();
+        CHECK_NULL_RETURN(theme, focusPattern);
+
+        FocusPaintParam focusPaintParam;
+        focusPaintParam.SetPaintColor(theme->GetFocusBorderColor());
+        focusPaintParam.SetPaintWidth(theme->GetFocusBorderWidth());
+        focusPaintParam.SetFocusPadding(theme->GetFocusOutPaddingVp());
+        focusPaintParam.SetFocusBoxGlow(theme->IsFocusBoxGlow());
+        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, focusPaintParam};
     }
 
     void UpdateNextNodeDivider(bool needDivider);
