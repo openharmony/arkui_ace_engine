@@ -276,3 +276,7 @@ if ((defined(use_origin_scope) && use_origin_scope) ||
     (defined(force_scope) && force_scope)) {
   ace_common_defines += [ "USE_ORIGIN_SCOPE" ]
 }
+
+if (enable_split_mode) {
+  ace_common_defines += [ "ENABLE_SPLIT_MODE" ]
+}
