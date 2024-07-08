@@ -1225,26 +1225,6 @@ void TitleBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowS
         MountMenu(titleBarNode, true);
         titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     } while (0);
-    bool isTitleMenuNodeShow = false;
-    if (isTitleMenuNodeShow == titleBarNode->IsTitleMenuNodeShowing()) {
-        return;
-    }
-    if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE) {
-        isTitleMenuNodeShow = titleBarNode->IsTitleMenuNodeShowing();
-    }
-    if (titleBarNode->GetMenu()) {
-        auto buttonNode = titleBarNode->GetMenu()->GetLastChild();
-        CHECK_NULL_VOID(buttonNode);
-        auto barItemNode = buttonNode->GetFirstChild();
-        CHECK_NULL_VOID(barItemNode);
-        auto barItemFrameNode = AceType::DynamicCast<BarItemNode>(barItemNode);
-        CHECK_NULL_VOID(barItemFrameNode);
-        if (barItemFrameNode->IsMoreItemNode() && isTitleMenuNodeShow) {
-            auto eventHub = barItemFrameNode->GetEventHub<BarItemEventHub>();
-            CHECK_NULL_VOID(eventHub);
-            eventHub->FireItemAction();
-        }
-    }
 }
 
 void TitleBarPattern::UpdateBackgroundStyle(RefPtr<FrameNode>& host)

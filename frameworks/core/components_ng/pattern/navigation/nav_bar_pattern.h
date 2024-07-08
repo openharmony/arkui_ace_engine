@@ -192,7 +192,6 @@ private:
     std::optional<int32_t> landscapeMenuNodeId_;
     RefPtr<FrictionMotion> motion_;
     RefPtr<Animator> controller_;
-    bool isTitleMenuNodeShowing_ = false;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
     int32_t maxMenuNums_ = -1;
     float avoidKeyboardOffset_ = 0.0f;

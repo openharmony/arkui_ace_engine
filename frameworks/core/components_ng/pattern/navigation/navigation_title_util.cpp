@@ -140,7 +140,6 @@ void NavigationTitleUtil::BuildMoreItemNodeAction(const RefPtr<FrameNode>& butto
     auto context = PipelineContext::GetCurrentContext();
     auto clickCallback = [weakContext = WeakPtr<PipelineContext>(context), id = barItemNode->GetId(),
                              weakMenu = WeakPtr<FrameNode>(barMenuNode),
-                             weakBarItemNode = WeakPtr<BarItemNode>(barItemNode),
                              weakTitleBarNode = WeakPtr<TitleBarNode>(titleBarNode)]() {
         auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
@@ -150,23 +149,7 @@ void NavigationTitleUtil::BuildMoreItemNodeAction(const RefPtr<FrameNode>& butto
 
         auto menu = weakMenu.Upgrade();
         CHECK_NULL_VOID(menu);
-
-        auto menuNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
-        CHECK_NULL_VOID(menuNode);
-
         overlayManager->ShowMenu(id, OffsetF(0.0f, 0.0f), menu);
-
-        auto titleBarNode = weakTitleBarNode.Upgrade();
-        CHECK_NULL_VOID(titleBarNode);
-        titleBarNode->SetIsTitleMenuNodeShowing(true);
-        auto hidMenuCallback = [weakTitleBarNode = WeakPtr<TitleBarNode>(titleBarNode)]() {
-            auto titleBarNode = weakTitleBarNode.Upgrade();
-            CHECK_NULL_VOID(titleBarNode);
-            titleBarNode->SetIsTitleMenuNodeShowing(false);
-        };
-        auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
-        CHECK_NULL_VOID(menuWrapperPattern);
-        menuWrapperPattern->RegisterMenuDisappearCallback(hidMenuCallback);
     };
     eventHub->SetItemAction(clickCallback);
 

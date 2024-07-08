@@ -599,31 +599,9 @@ HWTEST_F(NavBarTestNg, NavBarPattern005, TestSize.Level1)
     ASSERT_NE(barItemNode, nullptr);
     barItemNode->MountToParent(buttonNode);
     barItemNode->SetIsMoreItemNode(true);
-    navBarNode_->SetIsTitleMenuNodeShowing(true);
-
-    bool isItemActionFired = false;
-    auto barItemEventHub = barItemNode->GetEventHub<BarItemEventHub>();
-    ASSERT_NE(barItemEventHub, nullptr);
-    barItemEventHub->SetItemAction([&]() { isItemActionFired = true; });
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-
-    /**
-     * @tc.steps: step3. call OnWindowSizeChanged func when PrevMenuIsCustom is true
-     * @tc.expected: Set isItemActionFired is true
-     */
-    navBarNode_->UpdatePrevMenuIsCustom(true);
-    navBarpattern_->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::ROTATION);
-    EXPECT_TRUE(isItemActionFired);
-
-    /**
-     * @tc.steps: step4. call OnWindowSizeChanged func when PrevMenuIsCustom is false
-     * @tc.expected: isItemActionFired is true
-     */
-    navBarNode_->UpdatePrevMenuIsCustom(false);
-    navBarpattern_->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::ROTATION);
-    EXPECT_TRUE(isItemActionFired);
 }
 
 /**
