@@ -135,6 +135,8 @@ public:
         int32_t currentClickedPosition = INVALID_VALUE;
         bool isPreviewTextInputting = false;
         bool exitPreviewBySelf = false;
+        bool hasDiff = false;
+        PreviewRange replacedRange;
         std::string deltaStr;
         RefPtr<SpanItem> previewTextSpan;
         RefPtr<SpanNode> beforeSpanNode = nullptr;
@@ -169,6 +171,8 @@ public:
             beforeSpanNode = nullptr;
             afterSpanNode = nullptr;
             isSplitSpan = false;
+            hasDiff = false;
+            replacedRange.Set(INVALID_VALUE, INVALID_VALUE);
         }
 
         bool IsValid() const
@@ -181,7 +185,11 @@ public:
 
     bool InitPreviewText(const std::string& previewTextValue, const PreviewRange range);
 
+    bool ReplacePreviewText(const std::string& previewTextValue, const PreviewRange& range);
+
     bool UpdatePreviewText(const std::string& previewTextValue, const PreviewRange range);
+
+    const PreviewTextInfo GetPreviewTextInfo() const;
 
     void HandlePreviewTextStyle(RefPtr<SpanNode>& spanNode,
         RefPtr<SpanNode>& beforeSpanNode, RefPtr<SpanNode>& afterSpanNode);
@@ -338,6 +346,7 @@ public:
     void InsertValueOperation(
         const std::string& insertValue, OperationRecord* const record = nullptr, bool isIME = true);
     void DeleteSelectOperation(OperationRecord* const record);
+    void DeleteByRange(OperationRecord* const record, int32_t start, int32_t end, bool needNotifyImf = true);
     void InsertValueAfterBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, RefPtr<SpanNode>& spanNode,
         const TextInsertValueInfo& info, const std::string& insertValue, bool isIME = true);
     void InsertDiffStyleValueInSpan(

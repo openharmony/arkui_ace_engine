@@ -158,7 +158,7 @@ void RichEditorOverlayModifier::PaintPreviewTextDecoration(DrawingContext& drawi
     auto pattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(pattern);
 
-    auto previewTextDecorationColor = ToRSColor(previewTextDecorationColor_->Get());
+    auto previewTextDecorationColor = caretColor_->Get();
     auto previewTextUnderlineWidth = previewTextUnderlineWidth_->Get();
     auto roundRectRadius = previewTextUnderlineWidth / 2;
     auto previewTextRects = pattern->GetPreviewTextRects();

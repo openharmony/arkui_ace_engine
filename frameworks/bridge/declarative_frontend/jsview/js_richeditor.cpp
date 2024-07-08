@@ -1667,6 +1667,23 @@ void JSRichEditorController::GetSpansInfo(const JSCallbackInfo& args)
     args.SetReturnValue(CreateJSSpansInfo(value));
 }
 
+void JSRichEditorBaseController::GetPreviewTextInfo(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_VOID(controller);
+    auto info = controller->GetPreviewTextInfo();
+    args.SetReturnValue(CreateJSPreviewTextInfo(info));
+}
+
+JSRef<JSObject> JSRichEditorBaseController::CreateJSPreviewTextInfo(const PreviewTextInfo& info)
+{
+    auto resultObj = JSRef<JSObject>::New();
+    resultObj->SetProperty<std::string>("value", info.value.value_or(""));
+    resultObj->SetProperty<int32_t>("offset", info.offset.value_or(0));
+    return resultObj;
+}
+
 void JSRichEditorController::DeleteSpans(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
@@ -1782,6 +1799,7 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::CustomMethod("getTypingStyle", &JSRichEditorController::GetTypingStyle);
     JSClass<JSRichEditorController>::CustomMethod("setTypingStyle", &JSRichEditorController::SetTypingStyle);
     JSClass<JSRichEditorController>::CustomMethod("getSpans", &JSRichEditorController::GetSpansInfo);
+    JSClass<JSRichEditorController>::CustomMethod("getPreviewText", &JSRichEditorController::GetPreviewTextInfo);
     JSClass<JSRichEditorController>::CustomMethod("getParagraphs", &JSRichEditorController::GetParagraphsInfo);
     JSClass<JSRichEditorController>::CustomMethod("deleteSpans", &JSRichEditorController::DeleteSpans);
     JSClass<JSRichEditorController>::CustomMethod("setSelection", &JSRichEditorController::SetSelection);
@@ -2563,6 +2581,8 @@ void JSRichEditorStyledStringController::JSBind(BindingTarget globalObj)
         "setTypingStyle", &JSRichEditorStyledStringController::SetTypingStyle);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(
         "getSelection", &JSRichEditorStyledStringController::GetSelection);
+    JSClass<JSRichEditorStyledStringController>::CustomMethod(
+        "getPreviewText", &JSRichEditorStyledStringController::GetPreviewTextInfo);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(
         "setSelection", &JSRichEditorStyledStringController::SetSelection);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(

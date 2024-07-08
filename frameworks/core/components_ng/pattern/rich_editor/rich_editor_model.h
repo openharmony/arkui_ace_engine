@@ -240,6 +240,19 @@ struct PlaceholderOptions {
     }
 };
 
+struct PreviewTextInfo {
+    std::optional<std::string> value;
+    std::optional<int32_t> offset;
+
+    std::string ToString() const
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        JSON_STRING_PUT_OPTIONAL_STRING(jsonValue, value);
+        JSON_STRING_PUT_OPTIONAL_INT(jsonValue, offset);
+        return jsonValue->ToString();
+    }
+};
+
 class ACE_EXPORT RichEditorBaseControllerBase : public AceType {
     DECLARE_ACE_TYPE(RichEditorBaseControllerBase, AceType);
 
@@ -253,6 +266,7 @@ public:
     virtual void SetSelection(int32_t selectionStart, int32_t selectionEnd,
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) = 0;
     virtual WeakPtr<NG::LayoutInfoInterface> GetLayoutInfoInterface() = 0;
+    virtual const PreviewTextInfo GetPreviewTextInfo() const = 0;
 };
 
 class ACE_EXPORT RichEditorControllerBase : virtual public RichEditorBaseControllerBase {

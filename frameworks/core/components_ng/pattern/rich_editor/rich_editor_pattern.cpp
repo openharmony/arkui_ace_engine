@@ -4038,8 +4038,7 @@ void RichEditorPattern::HandlePreviewTextStyle(
 bool RichEditorPattern::InitPreviewText(const std::string& previewTextValue, const PreviewRange range)
 {
     if (range.start != -1 || range.end != -1) {
-        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "bad PreviewRange");
-        return false;
+        return ReplacePreviewText(previewTextValue, range);
     }
     previewTextRecord_.isPreviewTextInputting = true;
     if (!textSelector_.SelectNothing()) {
@@ -4072,6 +4071,33 @@ bool RichEditorPattern::InitPreviewText(const std::string& previewTextValue, con
     auto length = static_cast<int32_t>(StringUtils::ToWstring(previewTextValue).length());
     previewTextRecord_.endOffset = previewTextRecord_.startOffset + length;
     return true;
+}
+
+bool RichEditorPattern::ReplacePreviewText(const std::string& previewTextValue, const PreviewRange& range)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ReplacePreviewText");
+    if (range.start < 0 || range.end < range.start || range.end > GetTextContentLength()) {
+        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "bad PreviewRange");
+        return false;
+    }
+    previewTextRecord_.replacedRange = range;
+    previewTextRecord_.hasDiff = true;
+    previewTextRecord_.startOffset = range.start;
+    previewTextRecord_.endOffset = range.end;
+    InsertValue(previewTextValue, true);
+    previewTextRecord_.hasDiff = false;
+    return true;
+}
+
+void RichEditorPattern::DeleteByRange(OperationRecord* const record, int32_t start, int32_t end, bool needNotifyImf)
+{
+    auto length = end - start;
+    CHECK_NULL_VOID(length > 0);
+    SetCaretPosition(start, needNotifyImf);
+    std::wstring deleteText = DeleteForwardOperation(length);
+    if (record && deleteText.length() != 0) {
+        record->deleteText = StringUtils::ToString(deleteText);
+    }
 }
 
 bool RichEditorPattern::UpdatePreviewText(const std::string& previewTextValue, const PreviewRange range)
@@ -4163,6 +4189,16 @@ bool RichEditorPattern::CallbackAfterSetPreviewText(int32_t& delta)
         eventHub->FireOnDeleteComplete();
     }
     return true;
+}
+
+const PreviewTextInfo RichEditorPattern::GetPreviewTextInfo() const
+{
+    PreviewTextInfo info;
+    if (previewTextRecord_.previewTextSpan) {
+        info.value = previewTextRecord_.previewTextSpan->content;
+        info.offset = previewTextRecord_.startOffset;
+    }
+    return info;
 }
 
 void RichEditorPattern::MergeSpanContent(RefPtr<SpanItem>& target, RefPtr<SpanItem>& source, bool isTargetFirst)
@@ -4331,7 +4367,7 @@ void RichEditorPattern::InsertValue(const std::string& insertValue, bool isIME)
     bool allowImeInput = isIME ? BeforeIMEInsertValue(insertValue) : true;
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "allowContentChange=%{public}d, allowImeInput=%{public}d",
         allowContentChange, allowImeInput);
-    CHECK_NULL_VOID(allowContentChange && allowImeInput);
+    CHECK_NULL_VOID(allowContentChange && allowImeInput || previewTextRecord_.hasDiff);
 
     ClearRedoOperationRecords();
     InsertValueOperation(insertValue, &record, isIME);
@@ -4347,14 +4383,14 @@ void RichEditorPattern::InsertValueOperation(const std::string& insertValue, Ope
 {
     bool isSelector = textSelector_.IsValid();
     if (isSelector) {
-        SetCaretPosition(textSelector_.GetTextStart());
+        DeleteByRange(record, textSelector_.GetTextStart(), textSelector_.GetTextEnd());
+        CloseSelectOverlay();
+        ResetSelection();
+    } else if (previewTextRecord_.hasDiff) {
+        DeleteByRange(record, previewTextRecord_.replacedRange.start, previewTextRecord_.replacedRange.start, false);
     }
-
     TextInsertValueInfo info;
     CalcInsertValueObj(info);
-    if (isSelector) {
-        DeleteSelectOperation(record);
-    }
     if (!caretVisible_) {
         StartTwinkling();
     }
