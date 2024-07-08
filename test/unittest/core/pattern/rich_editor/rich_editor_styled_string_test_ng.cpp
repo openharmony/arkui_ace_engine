@@ -852,6 +852,7 @@ HWTEST_F(RichEditorStyledStringTestNg, CustomSpan001, TestSize.Level1)
      * @tc.steps: step4. calculate caret and handles with customSpan
      */
     richEditorPattern->caretPosition_ = 1;
+    richEditorPattern->richTextRect_.SetSize({ 200.f, 200.f });
     auto [caretOffset, caretHeight] = richEditorPattern->CalculateCaretOffsetAndHeight();
     EXPECT_EQ(caretOffset, OffsetF(100.f, 0));
     EXPECT_EQ(caretHeight, 50.0f);
