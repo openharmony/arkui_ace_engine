@@ -155,6 +155,8 @@ public:
     void SetSliderValue(double value, int32_t mode);
 
 private:
+    void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
     void CalcSliderValue();
     void CancelExceptionValue(float& min, float& max, float& step);
@@ -203,6 +205,7 @@ private:
     bool MoveStep(int32_t stepCount);
 
     bool IsSliderVisible();
+    void RegisterVisibleAreaChange();
     void OnWindowHide() override;
     void OnWindowShow() override;
     void StartAnimation();
@@ -262,6 +265,8 @@ private:
     bool axisFlag_ = false; // Wheel operation flag
     bool focusFlag_ = false;
     bool panMoveFlag_ = false;
+    bool hasVisibleChangeRegistered_ = false;
+    bool isVisibleArea_ = true;
     bool isVisible_ = true;
     bool isShow_ = true;
     SliderModelNG::SliderInteraction sliderInteractionMode_ = SliderModelNG::SliderInteraction::SLIDE_AND_CLICK;
