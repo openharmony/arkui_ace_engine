@@ -1289,14 +1289,14 @@ ArkUINativeModuleValue SearchBridge::SetOnChange(ArkUIRuntimeCallInfo* runtimeCa
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const std::string&, TextRange&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func)](const std::string& changeValue, TextRange& range) {
+    std::function<void(const std::string&, PreviewText&)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](const std::string& changeValue, PreviewText& previewText) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        const char* keys[] = { "start", "end" };
-        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, range.start),
-            panda::NumberRef::New(vm, range.end) };
+        const char* keys[] = { "offset", "value" };
+        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, previewText.offset),
+            panda::StringRef::NewFromUtf8(vm, previewText.value.c_str()) };
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = {
             panda::StringRef::NewFromUtf8(vm, changeValue.c_str()), eventObject };

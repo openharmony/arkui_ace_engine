@@ -49,7 +49,7 @@ public:
     void SetCopyOption(const CopyOptions& copyOptions) override;
     void SetHeight(const Dimension& height) override;
     void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override;
-    void SetOnChange(std::function<void(const std::string&, TextRange&)>&& onChange) override;
+    void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& onChange) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     void SetOnScroll(std::function<void(float, float)>&& func) override;
     void SetOnCopy(std::function<void(const std::string&)>&& func) override;
@@ -125,7 +125,7 @@ public:
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
     static void SetOnSubmit(FrameNode* frameNode, std::function<void(const std::string&)>&& onSubmit);
-    static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&, TextRange&)>&& onChange);
+    static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&, PreviewText&)>&& onChange);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnCut(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnPasteWithEvent(FrameNode* frameNode,
