@@ -43,7 +43,9 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             break;
         }
         case REPORT_INSPECTOR_VALUE: {
-            ReportInspectorTreeValue(result);
+            int32_t partNum = data.ReadInt32();
+            bool isLastPart = data.ReadBool();
+            ReportInspectorTreeValue(result, partNum, isLastPart);
             break;
         }
         case REPORT_WEB_UNFOCUS_EVENT: {
@@ -87,10 +89,10 @@ void UiReportStub::ReportSearchEvent(const std::string& data)
     }
 }
 
-void UiReportStub::ReportInspectorTreeValue(const std::string& data)
+void UiReportStub::ReportInspectorTreeValue(const std::string& data, int32_t partNum, bool isLastPart)
 {
     if (inspectorTreeCallback_ != nullptr) {
-        inspectorTreeCallback_(data);
+        inspectorTreeCallback_(data, partNum, isLastPart);
     }
 }
 
@@ -106,7 +108,8 @@ void UiReportStub::RegisterClickEventCallback(const EventCallback& eventCallback
     clickEventCallback_ = std::move(eventCallback);
 }
 
-void UiReportStub::RegisterGetInspectorTreeCallback(const EventCallback& eventCallback)
+void UiReportStub::RegisterGetInspectorTreeCallback(
+    const std::function<void(std::string, int32_t, bool)>& eventCallback)
 {
     inspectorTreeCallback_ = std::move(eventCallback);
 }

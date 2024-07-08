@@ -25,7 +25,7 @@ namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UIContentServiceProxy : public IRemoteProxy<IUiContentService> {
 public:
     explicit UIContentServiceProxy(const sptr<IRemoteObject>& impl) : IRemoteProxy<IUiContentService>(impl) {};
-    virtual int32_t GetInspectorTree(const EventCallback& eventCallback) override;
+    virtual int32_t GetInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback) override;
     virtual int32_t Connect() override;
     virtual int32_t RegisterClickEventCallback(const EventCallback& eventCallback) override;
     virtual int32_t RegisterRouterChangeEventCallback(const EventCallback& eventCallback) override;
