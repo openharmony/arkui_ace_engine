@@ -55,6 +55,7 @@ enum SelectSpanType : int32_t {
     TYPESPAN,
     TYPEIMAGE,
     TYPESYMBOLSPAN,
+    TYPEBUILDERSPAN,
 };
 
 enum RichEditorLeadingRange : int32_t {

@@ -792,6 +792,7 @@ public:
     bool AdjustSelectorForSymbol(int32_t& index, HandleType handleType, SelectorAdjustPolicy policy);
     bool AdjustSelectorForEmoji(int32_t& index, HandleType handleType, SelectorAdjustPolicy policy);
     void UpdateSelector(int32_t start, int32_t end);
+    void UpdateSelectionType(const SelectionInfo& textSelectInfo);
     std::list<RefPtr<SpanItem>>::iterator GetSpanIter(int32_t index);
 
     void DumpAdvanceInfo() override {}
@@ -903,6 +904,7 @@ private:
     std::string GetPlaceHolderInJson() const;
     std::string GetTextColorInJson(const std::optional<Color>& value) const;
     void SetResultObjectText(ResultObject& resultObject, const RefPtr<SpanItem>& spanItem) override;
+    SelectionInfo GetAdjustedSelectionInfo(const SelectionInfo& textSelectInfo);
 
     void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
     {
