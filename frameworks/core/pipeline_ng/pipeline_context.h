@@ -196,7 +196,8 @@ public:
     void AddVisibleAreaChangeNode(const int32_t nodeId);
 
     void AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node,
-        const std::vector<double>& ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);
+        const std::vector<double>& ratio, const VisibleRatioCallback& callback, bool isUserCallback = true,
+        bool isCalculateInnerClip = false);
     void RemoveVisibleAreaChangeNode(int32_t nodeId);
 
     void HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp);

@@ -1464,39 +1464,72 @@ void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceD
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(eventHub_);
+
+    ProcessThrottledVisibleCallback();
+    auto hasInnerCallback = eventHub_->HasVisibleAreaCallback(false);
+    auto hasUserCallback = eventHub_->HasVisibleAreaCallback(true);
+    if (!hasInnerCallback && !hasUserCallback) {
+        return;
+    }
+
     auto& visibleAreaUserRatios = eventHub_->GetVisibleAreaRatios(true);
     auto& visibleAreaUserCallback = eventHub_->GetVisibleAreaCallback(true);
     auto& visibleAreaInnerRatios = eventHub_->GetVisibleAreaRatios(false);
     auto& visibleAreaInnerCallback = eventHub_->GetVisibleAreaCallback(false);
 
-    ProcessThrottledVisibleCallback();
     if (forceDisappear || IsFrameDisappear(timestamp)) {
         if (!NearEqual(lastVisibleRatio_, VISIBLE_RATIO_MIN)) {
             ProcessAllVisibleCallback(
                 visibleAreaUserRatios, visibleAreaUserCallback, VISIBLE_RATIO_MIN, lastVisibleCallbackRatio_);
-            ProcessAllVisibleCallback(
-                visibleAreaInnerRatios, visibleAreaInnerCallback, VISIBLE_RATIO_MIN, lastVisibleCallbackRatio_);
             lastVisibleRatio_ = VISIBLE_RATIO_MIN;
+        }
+        if (!NearEqual(lastInnerVisibleRatio_, VISIBLE_RATIO_MIN)) {
+            ProcessAllVisibleCallback(visibleAreaInnerRatios, visibleAreaInnerCallback, VISIBLE_RATIO_MIN,
+                lastInnerVisibleCallbackRatio_, false, true);
+            lastInnerVisibleRatio_ = VISIBLE_RATIO_MIN;
         }
         return;
     }
 
-    if (!eventHub_->HasImmediatelyVisibleCallback()) {
-        return;
+    if (hasInnerCallback) {
+        RectF frameRect;
+        RectF visibleRect;
+        RectF visibleInnerRect;
+        GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
+        ProcessVisibleAreaChangeEvent(visibleInnerRect, frameRect,
+            visibleAreaInnerRatios, visibleAreaInnerCallback, false);
+        if (hasUserCallback) {
+            ProcessVisibleAreaChangeEvent(visibleRect, frameRect,
+                visibleAreaUserRatios, visibleAreaUserCallback, true);
+        }
+    } else {
+        RectF frameRect;
+        RectF visibleRect;
+        GetVisibleRect(visibleRect, frameRect);
+        ProcessVisibleAreaChangeEvent(visibleRect, frameRect,
+            visibleAreaUserRatios, visibleAreaUserCallback, true);
     }
+}
 
-    RectF frameRect;
-    RectF visibleRect;
-    GetVisibleRect(visibleRect, frameRect);
+void FrameNode::ProcessVisibleAreaChangeEvent(const RectF& visibleRect, const RectF& frameRect,
+    const std::vector<double>& visibleAreaRatios, VisibleCallbackInfo& visibleAreaCallback, bool isUser)
+{
     double currentVisibleRatio =
         std::clamp(CalculateCurrentVisibleRatio(visibleRect, frameRect), VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
-    if (!NearEqual(currentVisibleRatio, lastVisibleRatio_)) {
-        auto lastVisibleCallbackRatio = lastVisibleCallbackRatio_;
-        ProcessAllVisibleCallback(
-            visibleAreaUserRatios, visibleAreaUserCallback, currentVisibleRatio, lastVisibleCallbackRatio);
-        ProcessAllVisibleCallback(
-            visibleAreaInnerRatios, visibleAreaInnerCallback, currentVisibleRatio, lastVisibleCallbackRatio);
-        lastVisibleRatio_ = currentVisibleRatio;
+    if (isUser) {
+        if (!NearEqual(currentVisibleRatio, lastVisibleRatio_)) {
+            auto lastVisibleCallbackRatio = lastVisibleCallbackRatio_;
+            ProcessAllVisibleCallback(
+                visibleAreaRatios, visibleAreaCallback, currentVisibleRatio, lastVisibleCallbackRatio);
+            lastVisibleRatio_ = currentVisibleRatio;
+        }
+    } else {
+        if (!NearEqual(currentVisibleRatio, lastInnerVisibleRatio_)) {
+            auto lastVisibleCallbackRatio = lastInnerVisibleCallbackRatio_;
+            ProcessAllVisibleCallback(visibleAreaRatios, visibleAreaCallback, currentVisibleRatio,
+                lastVisibleCallbackRatio, false, true);
+            lastInnerVisibleRatio_ = currentVisibleRatio;
+        }
     }
 }
 
@@ -1509,11 +1542,13 @@ double FrameNode::CalculateCurrentVisibleRatio(const RectF& visibleRect, const R
 }
 
 void FrameNode::ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
-    VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio, double lastVisibleRatio, bool isThrottled)
+    VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio, double lastVisibleRatio,
+    bool isThrottled, bool isInner)
 {
     bool isHandled = false;
     bool isVisible = false;
-    double* lastVisibleCallbackRatio = isThrottled ? &lastThrottledVisibleCbRatio_ : &lastVisibleCallbackRatio_;
+    double* lastVisibleCallbackRatio = isThrottled ? &lastThrottledVisibleCbRatio_ :
+        (isInner ? &lastInnerVisibleCallbackRatio_ : &lastVisibleCallbackRatio_);
 
     for (const auto& callbackRatio : visibleAreaUserRatios) {
         if (GreatNotEqual(currentVisibleRatio, callbackRatio) && LessOrEqual(lastVisibleRatio, callbackRatio)) {
@@ -4356,6 +4391,49 @@ void FrameNode::GetVisibleRect(RectF& visibleRect, RectF& frameRect) const
         }
         frameRect = ApplyFrameNodeTranformToRect(frameRect, parentUi);
         parentUi = parentUi->GetAncestorNodeOfFrame(true);
+    }
+}
+
+void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect) const
+{
+    visibleRect = GetPaintRectWithTransform();
+    frameRect = visibleRect;
+    visibleInnerRect = visibleRect;
+    RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(true);
+    if (!IsOnMainTree() || !parentUi) {
+        visibleRect.SetWidth(0.0f);
+        visibleRect.SetHeight(0.0f);
+        visibleInnerRect.SetWidth(0.0f);
+        visibleInnerRect.SetHeight(0.0f);
+        return;
+    }
+
+    while (parentUi) {
+        visibleRect = ApplyFrameNodeTranformToRect(visibleRect, parentUi);
+        auto parentRect = parentUi->GetPaintRectWithTransform();
+        if (!visibleRect.IsEmpty()) {
+            visibleRect = visibleRect.Constrain(parentRect);
+        }
+
+        if (isCalculateInnerVisibleRectClip_) {
+            visibleInnerRect = ApplyFrameNodeTranformToRect(visibleInnerRect, parentUi);
+            auto parentContext = parentUi->GetRenderContext();
+            if (!visibleInnerRect.IsEmpty() && ((parentContext && parentContext->GetClipEdge().value_or(false)) ||
+                parentUi->IsWindowBoundary() || parentUi->GetTag() == V2::ROOT_ETS_TAG)) {
+                visibleInnerRect = visibleInnerRect.Constrain(parentRect);
+            }
+        }
+
+        if (visibleRect.IsEmpty() && (!isCalculateInnerVisibleRectClip_ || visibleInnerRect.IsEmpty())) {
+            visibleInnerRect = visibleRect;
+            return;
+        }
+        frameRect = ApplyFrameNodeTranformToRect(frameRect, parentUi);
+        parentUi = parentUi->GetAncestorNodeOfFrame(true);
+    }
+
+    if (!isCalculateInnerVisibleRectClip_) {
+        visibleInnerRect = visibleRect;
     }
 }
 

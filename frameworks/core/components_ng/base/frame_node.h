@@ -227,8 +227,10 @@ public:
         }
     }
 
-    void SetVisibleAreaInnerCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback)
+    void SetVisibleAreaInnerCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback,
+        bool isCalculateInnerClip = false)
     {
+        isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
         eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, false);
     }
 
@@ -871,6 +873,7 @@ public:
     }
 
     void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
+    void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect) const;
 
     void AttachContext(PipelineContext* context, bool recursive = false) override;
     void DetachContext(bool recursive = false) override;
@@ -1010,9 +1013,11 @@ private:
     bool GetTouchable() const;
     bool OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config);
 
+    void ProcessVisibleAreaChangeEvent(const RectF& visibleRect, const RectF& frameRect,
+        const std::vector<double>& visibleAreaRatios, VisibleCallbackInfo& visibleAreaCallback, bool isUser);
     void ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
         VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio,
-        double lastVisibleRatio, bool isThrottled = false);
+        double lastVisibleRatio, bool isThrottled = false, bool isInner = false);
     void ProcessThrottledVisibleCallback();
     bool IsFrameDisappear();
     bool IsFrameDisappear(uint64_t timestamp);
@@ -1104,7 +1109,9 @@ private:
     bool isFirstBuilding_ = true;
 
     double lastVisibleRatio_ = 0.0;
+    double lastInnerVisibleRatio_ = 0.0;
     double lastVisibleCallbackRatio_ = 0.0;
+    double lastInnerVisibleCallbackRatio_ = 0.0;
     double lastThrottledVisibleRatio_ = 0.0;
     double lastThrottledVisibleCbRatio_ = 0.0;
     int64_t lastThrottledTriggerTime_ = 0;
@@ -1137,6 +1144,7 @@ private:
     bool isDisallowDropForcedly_ = false;
     bool isGeometryTransitionIn_ = false;
     bool isLayoutNode_ = false;
+    bool isCalculateInnerVisibleRectClip_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 

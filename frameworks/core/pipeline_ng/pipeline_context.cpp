@@ -2807,7 +2807,8 @@ void PipelineContext::AddVisibleAreaChangeNode(const int32_t nodeId)
 }
 
 void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node,
-    const std::vector<double>& ratios, const VisibleRatioCallback& callback, bool isUserCallback)
+    const std::vector<double>& ratios, const VisibleRatioCallback& callback, bool isUserCallback,
+    bool isCalculateInnerClip)
 {
     CHECK_NULL_VOID(node);
     VisibleCallbackInfo addInfo;
@@ -2817,7 +2818,7 @@ void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node,
     if (isUserCallback) {
         node->SetVisibleAreaUserCallback(ratios, addInfo);
     } else {
-        node->SetVisibleAreaInnerCallback(ratios, addInfo);
+        node->SetVisibleAreaInnerCallback(ratios, addInfo, isCalculateInnerClip);
     }
 }
 
