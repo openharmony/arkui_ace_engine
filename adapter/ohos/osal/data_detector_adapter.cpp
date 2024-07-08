@@ -76,6 +76,7 @@ bool DataDetectorAdapter::ShowUIExtensionMenu(
     auto onReceive = GetOnReceive(aiRect, targetNode);
     auto pattern = uiExtNode_->GetPattern<NG::UIExtensionPattern>();
     CHECK_NULL_RETURN(pattern, false);
+    pattern->SetModalFlag(false);
     pattern->SetOnReceiveCallback(std::move(onReceive));
     uiExtNode_->MarkModifyDone();
     return true;
@@ -96,6 +97,10 @@ std::function<void(const AAFwk::WantParams&)> DataDetectorAdapter::GetOnReceive(
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
+        const std::string& closeMenu = wantParams.GetStringParam("closeMenu");
+        if (closeMenu == "true") {
+            overlayManager->CloseUIExtensionMenu(targetNode->GetId());
+        }
         const std::string& action = wantParams.GetStringParam("action");
         if (!action.empty() && dataDetectorAdapter->onClickMenu_) {
             dataDetectorAdapter->onClickMenu_(action);
@@ -105,9 +110,7 @@ std::function<void(const AAFwk::WantParams&)> DataDetectorAdapter::GetOnReceive(
             auto abilityParams = wantParams.GetWantParams("abilityParams");
             dataDetectorAdapter->StartAbilityByType(abilityType, abilityParams);
         }
-        const std::string& closeMenu = wantParams.GetStringParam("closeMenu");
         if (closeMenu == "true") {
-            overlayManager->CloseUIExtensionMenu(targetNode->GetId());
             return;
         }
         const std::string& longestContent = wantParams.GetStringParam("longestContent");
