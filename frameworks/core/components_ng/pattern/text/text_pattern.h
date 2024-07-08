@@ -554,6 +554,7 @@ public:
 
     void OnSensitiveStyleChange(bool isSensitive) override;
 
+    bool IsSetObscured();
     bool IsSensitiveEnalbe();
 
     void InitCustomSpanPlaceholderInfo(const std::vector<CustomSpanPlaceholderInfo>& customSpanPlaceholder)

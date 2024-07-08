@@ -799,6 +799,9 @@ public:
     std::string GetCaretColor() const;
     std::string GetPlaceholderColor() const;
     std::string GetFontSize() const;
+    std::string GetMinFontSize() const;
+    std::string GetMaxFontSize() const;
+    std::string GetTextIndent() const;
     Ace::FontStyle GetItalicFontStyle() const;
     FontWeight GetFontWeight() const;
     std::string GetFontFamily() const;

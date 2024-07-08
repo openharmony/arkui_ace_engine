@@ -2674,22 +2674,12 @@ void TextPattern::AddImageToSpanItem(const RefPtr<UINode>& child)
 
 void TextPattern::DumpAdvanceInfo()
 {
-    auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProp);
-    DumpLog::GetInstance().AddDesc(std::string("Content: ").append(textLayoutProp->GetContent().value_or(" ")));
-    DumpLog::GetInstance().AddDesc(
-        std::string("FontColor: ")
-            .append((textStyle_.has_value() ? textStyle_->GetTextColor() : Color::BLACK).ColorToString()));
+    DumpLog::GetInstance().AddDesc(std::string("contentRect :").append(contentRect_.ToString()));
     DumpLog::GetInstance().AddDesc(
         std::string("FontSize: ")
             .append(
             (textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(
                 DIMENSION_VALUE, DimensionUnit::FP)).ToString()));
-    DumpLog::GetInstance().AddDesc(std::string("contentRect-->x:")
-                                       .append(std::to_string(contentRect_.GetX()))
-                                       .append(" y:")
-                                       .append(std::to_string(contentRect_.GetY())));
-    DumpLog::GetInstance().AddDesc(std::string("Selection: ").append("(").append(textSelector_.ToString()).append(")"));
     if (SystemProperties::GetDebugEnabled() && pManager_) {
         DumpLog::GetInstance().AddDesc(std::string("from TextEngine paragraphs_ info :"));
         DumpLog::GetInstance().AddDesc(
@@ -2717,24 +2707,42 @@ void TextPattern::DumpInfo()
 {
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
-    DumpLog::GetInstance().AddDesc(std::string("Content: ").append(textLayoutProp->GetContent().value_or(" ")));
-    DumpLog::GetInstance().AddDesc(
-        std::string("FontColor: ")
-            .append((textStyle_.has_value() ? textStyle_->GetTextColor() : Color::BLACK).ColorToString()));
-    DumpLog::GetInstance().AddDesc(
+    auto& dumpLog = DumpLog::GetInstance();
+    if (!IsSetObscured()) {
+        dumpLog.AddDesc(std::string("Content: ").append(textLayoutProp->GetContent().value_or(" ")));
+    }
+    dumpLog.AddDesc(std::string("FontColor: ")
+                        .append((textStyle_.has_value() ? textStyle_->GetTextColor() : Color::BLACK).ColorToString()));
+    dumpLog.AddDesc(
         std::string("FontSize: ")
             .append((textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(DIMENSION_VALUE, DimensionUnit::FP))
                         .ToString()));
-    DumpLog::GetInstance().AddDesc(std::string("Selection: ").append("(").append(textSelector_.ToString()).append(")"));
-    DumpLog::GetInstance().AddDesc(
+    dumpLog.AddDesc(std::string("FontWeight: ").append(StringUtils::ToString(textStyle_->GetFontWeight())));
+    dumpLog.AddDesc(std::string("FontStyle: ").append(StringUtils::ToString(textStyle_->GetFontStyle())));
+    dumpLog.AddDesc(std::string("LineHeight: ").append(textStyle_->GetLineHeight().ToString()));
+    dumpLog.AddDesc(std::string("LineSpacing: ").append(textStyle_->GetLineSpacing().ToString()));
+    dumpLog.AddDesc(std::string("BaselineOffset: ").append(textStyle_->GetBaselineOffset().ToString()));
+    dumpLog.AddDesc(std::string("TextIndent: ").append(textStyle_->GetTextIndent().ToString()));
+    dumpLog.AddDesc(std::string("LetterSpacing: ").append(textStyle_->GetLetterSpacing().ToString()));
+    dumpLog.AddDesc(std::string("TextOverflow: ").append(StringUtils::ToString(textStyle_->GetTextOverflow())));
+    dumpLog.AddDesc(std::string("TextAlign: ").append(StringUtils::ToString(textStyle_->GetTextAlign())));
+    dumpLog.AddDesc(std::string("WordBreak: ").append(StringUtils::ToString(textStyle_->GetWordBreak())));
+    dumpLog.AddDesc(std::string("TextCase: ").append(StringUtils::ToString(textStyle_->GetTextCase())));
+    dumpLog.AddDesc(std::string("EllipsisMode: ").append(StringUtils::ToString(textStyle_->GetEllipsisMode())));
+    dumpLog.AddDesc(std::string("Selection: ").append("(").append(textSelector_.ToString()).append(")"));
+    dumpLog.AddDesc(
         std::string("LineBreakStrategy: ").append(GetLineBreakStrategyInJson(textStyle_->GetLineBreakStrategy())));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (renderContext->HasForegroundColor()) {
-        DumpLog::GetInstance().AddDesc(
+        dumpLog.AddDesc(
             std::string("ForegroundColor: ").append(renderContext->GetForegroundColorValue().ColorToString()));
+    }
+    if (SystemProperties::GetDebugEnabled()) {
+        dumpLog.AddDesc(std::string("-----DumpAdvanceInfo-----"));
+        DumpAdvanceInfo();
     }
 }
 
@@ -3466,6 +3474,18 @@ bool TextPattern::DidExceedMaxLines() const
 {
     CHECK_NULL_RETURN(pManager_, false);
     return pManager_->DidExceedMaxLines();
+}
+
+bool TextPattern::IsSetObscured()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
+    bool ifHaveObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
+        [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
+    return ifHaveObscured;
 }
 
 TextLineMetrics TextPattern::GetLineMetrics(int32_t lineNumber)
