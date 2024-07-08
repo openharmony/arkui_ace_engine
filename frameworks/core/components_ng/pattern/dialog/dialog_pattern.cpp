@@ -1377,6 +1377,7 @@ void DialogPattern::UpdateDeviceOrientation(const DeviceOrientation& deviceOrien
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        CHECK_NULL_VOID(buttonContainer_);
         buttonContainer_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         deviceOrientation_ = deviceOrientation;
     }
