@@ -903,7 +903,6 @@ public:
     void NotifyTransformInfoChanged()
     {
         isLocalRevertMatrixAvailable_ = false;
-        AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_TRANSFORM_CHANGE);
     }
 
     void AddPredictLayoutNode(const RefPtr<FrameNode>& node)
@@ -955,6 +954,8 @@ public:
     void RegisterNodeChangeListener();
     void UnregisterNodeChangeListener();
     void ProcessFrameNodeChangeFlag();
+    void OnNodeTransformInfoUpdate(bool changed);
+    void OnNodeTransitionInfoUpdate();
 
 protected:
     void DumpInfo() override;

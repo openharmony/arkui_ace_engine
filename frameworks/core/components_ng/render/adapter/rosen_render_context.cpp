@@ -361,7 +361,9 @@ void RosenRenderContext::SetPivot(float xPivot, float yPivot, float zPivot)
 {
     // change pivot without animation
     CHECK_NULL_VOID(rsNode_);
+    auto changed = true;
     if (pivotProperty_) {
+        changed = pivotProperty_->Get().x_ != xPivot || pivotProperty_->Get().y_ != yPivot;
         pivotProperty_->Set({ xPivot, yPivot });
     } else {
         pivotProperty_ = std::make_shared<Rosen::RSProperty<Rosen::Vector2f>>(Rosen::Vector2f(xPivot, yPivot));
@@ -369,7 +371,7 @@ void RosenRenderContext::SetPivot(float xPivot, float yPivot, float zPivot)
         rsNode_->AddModifier(modifier);
     }
     rsNode_->SetPivotZ(zPivot);
-    NotifyHostTransformUpdated();
+    NotifyHostTransformUpdated(changed);
 }
 
 void RosenRenderContext::SetTransitionPivot(const SizeF& frameSize, bool transitionIn)
@@ -1739,9 +1741,14 @@ void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& tran
 {
     CHECK_NULL_VOID(rsNode_);
     auto translateVec = MarshallTranslate(translate);
-    if (AnimationUtils::IsImplicitAnimationOpen() && translateXYUserModifier_ && GetHost()) {
-        auto preTranslate =
+    auto changed = true;
+    Rosen::Vector2f preTranslate;
+    if (translateXYUserModifier_) {
+        preTranslate =
             GetAnimatablePropertyStagingValue<Rosen::RSTranslateModifier, Rosen::Vector2f>(translateXYUserModifier_);
+        changed = !NearEqual(preTranslate[0], translateVec.x) || !NearEqual(preTranslate[1], translateVec.y);
+    }
+    if (AnimationUtils::IsImplicitAnimationOpen() && translateXYUserModifier_ && GetHost()) {
         if (!(NearEqual(preTranslate[0], translateVec.x) && NearEqual(preTranslate[1], translateVec.y))) {
             auto host = GetHost();
             ACE_SCOPED_TRACE("translate from (%f, %f) to (%f, %f), id:%d, tag:%s", preTranslate[0], preTranslate[1],
@@ -1752,7 +1759,7 @@ void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& tran
         translateXYUserModifier_, { translateVec.x, translateVec.y });
     SetAnimatableProperty<Rosen::RSTranslateZModifier, float>(translateZUserModifier_, translateVec.z);
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
-    NotifyHostTransformUpdated();
+    NotifyHostTransformUpdated(changed);
     RequestNextFrame();
 }
 
@@ -5567,6 +5574,9 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
             },
             false);
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnNodeTransitionInfoUpdate();
 }
 
 void RosenRenderContext::RemoveDefaultTransition()
@@ -6255,11 +6265,12 @@ void RosenRenderContext::UpdateDrawRegion(uint32_t index, const std::shared_ptr<
     rsNode_->SetDrawRegion(result);
 }
 
-void RosenRenderContext::NotifyHostTransformUpdated()
+void RosenRenderContext::NotifyHostTransformUpdated(bool changed)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->NotifyTransformInfoChanged();
+    host->OnNodeTransformInfoUpdate(changed);
 }
 
 void RosenRenderContext::SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate)

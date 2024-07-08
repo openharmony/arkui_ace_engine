@@ -112,6 +112,9 @@ bool TextSelectOverlay::CheckAndAdjustHandle(RectF& paintRect)
         clip = true;
     }
     if (!renderContext->GetClipEdge().value_or(clip)) {
+        if (handleLevelMode_ == HandleLevelMode::EMBED) {
+            return true;
+        }
         auto contentRect = textPattern->GetTextContentRect();
         auto localPaintRect = paintRect;
         localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
@@ -122,7 +125,9 @@ bool TextSelectOverlay::CheckAndAdjustHandle(RectF& paintRect)
     }
     auto contentRect = textPattern->GetTextContentRect();
     RectF visibleContentRect(contentRect.GetOffset() + textPattern->GetTextPaintOffset(), contentRect.GetSize());
-    visibleContentRect = GetVisibleRect(host, visibleContentRect);
+    if (handleLevelMode_ == HandleLevelMode::OVERLAY) {
+        visibleContentRect = GetVisibleRect(host, visibleContentRect);
+    }
     return CheckAndAdjustHandleWithContent(visibleContentRect, paintRect);
 }
 
