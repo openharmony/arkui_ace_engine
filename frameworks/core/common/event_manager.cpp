@@ -550,14 +550,38 @@ void EventManager::FlushTouchEventsBegin(const std::list<TouchEvent>& touchEvent
 
 void EventManager::FlushTouchEventsEnd(const std::list<TouchEvent>& touchEvents)
 {
+    bool isResampled = false;
     for (auto iter = touchEvents.begin(); iter != touchEvents.end(); ++iter) {
         const auto result = touchTestResults_.find((*iter).id);
         if (result != touchTestResults_.end()) {
             for (auto entry = result->second.rbegin(); entry != result->second.rend(); ++entry) {
                 (*entry)->OnFlushTouchEventsEnd();
             }
+            // only when no up received situation, the test result can be found
+            if ((*iter).history.size() != 0) {
+                // for resample case, the history list must not be empty
+                isResampled = true;
+            }
         }
     }
+
+    if (!isResampled) {
+        // for no-resample case, we do not request a new frame, let the FlushVsync itself to do it as needed.
+        return;
+    }
+
+    // request new frame for the cases we do the resampling for more than one touch events
+    auto container = Container::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    // Since we cache the received touch move events and process them in FlushVsync, requesting a new frame
+    // when we cache them can not ensure that the frames are continuous afterwhile dure the whole touch access,
+    // as there are some situation where no any dirty generated after FlushVsync,  which will not request new frame
+    // by FlushVsync itself, this is not friendly for some components, like UIExtension, which relies on the events
+    // dispatching on host to resend the touchs to the supplier, so we also need to request a new frame after all
+    // resampled touch move events are actually dispatched.
+    pipeline->RequestFrame();
 }
 
 void EventManager::PostEventFlushTouchEventEnd(const TouchEvent& touchEvent)
