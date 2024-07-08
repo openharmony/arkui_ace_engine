@@ -132,9 +132,9 @@ class ObserveV2 {
 
   // At the start of observeComponentCreation or
   // MonitorV2 observeObjectAccess
-  public startRecordDependencies(cmp: IView | MonitorV2 | ComputedV2 | PersistenceV2Impl, id: number): void {
+  public startRecordDependencies(cmp: IView | MonitorV2 | ComputedV2 | PersistenceV2Impl, id: number, doClearBinding: boolean = true): void {
     if (cmp != null) {
-      this.clearBinding(id);
+      doClearBinding && this.clearBinding(id);
       this.stackOfRenderedComponents_.push(id, cmp);
     }
   }
@@ -585,15 +585,15 @@ class ObserveV2 {
   public constructMonitor(owningObject: Object, owningObjectName: string): void {
     let watchProp = Symbol.for(MonitorV2.WATCH_PREFIX + owningObjectName);
     if (owningObject && (typeof owningObject === 'object') && owningObject[watchProp]) {
-      Object.entries(owningObject[watchProp]).forEach(([monitorFuncName, monitorFunc]) => {
-        if (monitorFunc && monitorFuncName && typeof monitorFunc === 'function') {
-          const monitor = new MonitorV2(owningObject, monitorFuncName, monitorFunc as (m: IMonitor) => void);
+      Object.entries(owningObject[watchProp]).forEach(([pathString, monitorFunc]) => {
+        if (monitorFunc && pathString && typeof monitorFunc === 'function') {
+          const monitor = new MonitorV2(owningObject, pathString, monitorFunc as (m: IMonitor) => void);
           monitor.InitRun();
           const refs = owningObject[ObserveV2.MONITOR_REFS] ??= {};
           // store a reference inside owningObject
           // thereby MonitorV2 will share lifespan as owning @ComponentV2 or @ObservedV2
           // remember: id2cmp only has a WeakRef to MonitorV2 obj
-          refs[monitorFuncName] = monitor;
+          refs[monitorFunc.name] = monitor;
         }
         // FIXME Else handle error
       });

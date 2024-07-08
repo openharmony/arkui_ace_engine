@@ -68,7 +68,9 @@ void TextFieldSelectOverlay::UpdatePattern(const OverlayRequest& request)
     CHECK_NULL_VOID(pattern);
     bool isRequestSelectAll = (static_cast<uint32_t>(request.requestCode) & REQUEST_SELECT_ALL) == REQUEST_SELECT_ALL;
     auto selectController = pattern->GetTextSelectController();
-    selectController->CalculateHandleOffset();
+    if ((request.requestCode & REQUEST_SELECT_ALL) != REQUEST_SELECT_ALL) {
+        selectController->CalculateHandleOffset();
+    }
     if (pattern->IsSelected() && selectController->IsHandleSamePosition()) {
         SetIsSingleHandle(true);
         selectController->UpdateCaretIndex(selectController->GetFirstHandleIndex());

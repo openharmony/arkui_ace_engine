@@ -68,6 +68,10 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             UnregisterComponentChangeEventCallbackInner(data, reply, option);
             break;
         }
+        case UNREGISTER_WEB_UNFOCUS_EVENT: {
+            UnregisterWebUnfocusEventCallbackInner(data, reply, option);
+            break;
+        }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -121,6 +125,13 @@ int32_t UiContentStub::RegisterComponentChangeEventCallbackInner(
     return NO_ERROR;
 }
 
+int32_t UiContentStub::RegisterWebUnfocusEventCallbackInner(
+    MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    reply.WriteInt32(RegisterWebUnfocusEventCallback(nullptr));
+    return NO_ERROR;
+}
+
 int32_t UiContentStub::UnregisterClickEventCallbackInner(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
@@ -146,6 +157,13 @@ int32_t UiContentStub::UnregisterComponentChangeEventCallbackInner(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     reply.WriteInt32(UnregisterComponentChangeEventCallback());
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::UnregisterWebUnfocusEventCallbackInner(
+    MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    reply.WriteInt32(UnregisterWebUnfocusEventCallback());
     return NO_ERROR;
 }
 } // namespace OHOS::Ace

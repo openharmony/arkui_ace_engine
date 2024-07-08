@@ -2983,13 +2983,111 @@ class Utils {
  * limitations under the License.
  */
 class stateMgmtDFX {
+    static getObservedPropertyInfo(observedProp, isProfiler, changedTrackPropertyName) {
+        return {
+            decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(), changedTrackPropertyName: changedTrackPropertyName,
+            value: stateMgmtDFX.getRawValue(observedProp),
+            inRenderingElementId: stateMgmtDFX.inRenderingElementId.length === 0 ? -1 : stateMgmtDFX.inRenderingElementId[stateMgmtDFX.inRenderingElementId.length - 1],
+            dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() === 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, isProfiler),
+            owningView: observedProp.getOwningView(),
+            length: stateMgmtDFX.getRawValueLength(observedProp),
+            syncPeers: observedProp.dumpSyncPeers(isProfiler, changedTrackPropertyName)
+        };
+    }
+    static getType(item) {
+        try {
+            return Object.prototype.toString.call(item);
+        }
+        catch (e) {
+            stateMgmtConsole.warn(`Cannot get the type of current value, error message is: ${e.message}`);
+            return "unknown type";
+        }
+    }
+    /**
+     * Dump 10 items at most.
+     * If length > 10, the output will be the first 7 and last 3 items.
+     * eg: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+     * output: [0, 1, 2, 3, 4, 5, 6, '...', 9, 10, 11]
+     *
+     */
+    static dumpItems(arr) {
+        let dumpArr = arr.slice(0, stateMgmtDFX.DUMP_MAX_LENGTH);
+        if (arr.length > stateMgmtDFX.DUMP_MAX_LENGTH) {
+            dumpArr.splice(stateMgmtDFX.DUMP_MAX_LENGTH - stateMgmtDFX.DUMP_LAST_LENGTH, stateMgmtDFX.DUMP_LAST_LENGTH, '...', ...arr.slice(-stateMgmtDFX.DUMP_LAST_LENGTH));
+        }
+        return dumpArr.map(item => typeof item === 'object' ? this.getType(item) : item);
+    }
+    static dumpMap(map) {
+        let dumpKey = this.dumpItems(Array.from(map.keys()));
+        let dumpValue = this.dumpItems(Array.from(map.values()));
+        return dumpKey.map((item, index) => [item, dumpValue[index]]);
+    }
+    static dumpObjectProperty(value) {
+        let tempObj = {};
+        try {
+            Object.getOwnPropertyNames(value)
+                .slice(0, 50)
+                .forEach((varName) => {
+                const propertyValue = Reflect.get(value, varName);
+                tempObj[varName] = typeof propertyValue === 'object' ? this.getType(propertyValue) : propertyValue;
+            });
+        }
+        catch (e) {
+            stateMgmtConsole.warn(`can not dump Obj, error msg ${e.message}`);
+            return "unknown type";
+        }
+        return tempObj;
+    }
+    static getRawValue(observedProp) {
+        let wrappedValue = observedProp.getUnmonitored();
+        if (typeof wrappedValue !== 'object') {
+            return wrappedValue;
+        }
+        let rawObject = ObservedObject.GetRawObject(wrappedValue);
+        if (rawObject instanceof Map) {
+            return stateMgmtDFX.dumpMap(rawObject);
+        }
+        else if (rawObject instanceof Set) {
+            return stateMgmtDFX.dumpItems(Array.from(rawObject.values()));
+        }
+        else if (rawObject instanceof Array) {
+            return stateMgmtDFX.dumpItems(Array.from(rawObject));
+        }
+        else if (rawObject instanceof Date) {
+            return rawObject;
+        }
+        else {
+            return stateMgmtDFX.dumpObjectProperty(rawObject);
+        }
+    }
+    static getRawValueLength(observedProp) {
+        let wrappedValue = observedProp.getUnmonitored();
+        if (typeof wrappedValue !== 'object') {
+            return -1;
+        }
+        let rawObject = ObservedObject.GetRawObject(wrappedValue);
+        if (rawObject instanceof Map || rawObject instanceof Set) {
+            return rawObject.size;
+        }
+        else if (rawObject instanceof Array) {
+            return rawObject.length;
+        }
+        try {
+            return Object.getOwnPropertyNames(rawObject).length;
+        }
+        catch (e) {
+            return -1;
+        }
+    }
 }
 // enable profile
-stateMgmtDFX.enableProfiler_ = false;
-stateMgmtDFX.inRenderingElementId_ = new Array();
+stateMgmtDFX.enableProfiler = false;
+stateMgmtDFX.inRenderingElementId = new Array();
+stateMgmtDFX.DUMP_MAX_LENGTH = 10;
+stateMgmtDFX.DUMP_LAST_LENGTH = 3;
 function setProfilerStatus(profilerStatus) {
     stateMgmtConsole.warn(`${profilerStatus ? `start` : `stop`} stateMgmt Profiler`);
-    stateMgmtDFX.enableProfiler_ = profilerStatus;
+    stateMgmtDFX.enableProfiler = profilerStatus;
 }
 class DumpInfo {
     constructor() {
@@ -4591,57 +4689,25 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
             ? this.info().substring(0, this.info().length - '_prop_fake_state_source___'.length)
             : false;
     }
-    getRawObjectValue() {
-        let wrappedValue = this.getUnmonitored();
-        if (typeof wrappedValue !== 'object') {
-            return this.getUnmonitored();
-        }
-        let rawObject = ObservedObject.GetRawObject(wrappedValue);
-        if (rawObject instanceof Map) {
-            return MapInfo.toObject(rawObject).keyToValue;
-        }
-        else if (rawObject instanceof Set) {
-            return SetInfo.toObject(rawObject).values;
-        }
-        else if (rawObject instanceof Date) {
-            return DateInfo.toObject(rawObject).date;
-        }
-        return rawObject;
+    getOwningView() {
+        var _a, _b;
+        return { componentName: (_a = this.owningView_) === null || _a === void 0 ? void 0 : _a.constructor.name, id: (_b = this.owningView_) === null || _b === void 0 ? void 0 : _b.id__() };
     }
     dumpSyncPeers(isProfiler, changedTrackPropertyName) {
         let res = [];
         this.subscriberRefs_.forEach((subscriber) => {
-            var _a, _b;
             if ('debugInfo' in subscriber) {
                 const observedProp = subscriber;
-                let rawValue = observedProp.getRawObjectValue();
-                let syncPeer = {
-                    decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
-                    changedTrackPropertyName: changedTrackPropertyName,
-                    value: typeof rawValue === 'object' ? 'Only support to dump simple type: string, number, boolean, enum type' : rawValue,
-                    inRenderingElementId: stateMgmtDFX.inRenderingElementId_.length === 0 ? -1 : stateMgmtDFX.inRenderingElementId_[stateMgmtDFX.inRenderingElementId_.length - 1],
-                    dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, isProfiler),
-                    owningView: { componentName: (_a = observedProp.owningView_) === null || _a === void 0 ? void 0 : _a.constructor.name, id: (_b = observedProp.owningView_) === null || _b === void 0 ? void 0 : _b.id__() }
-                };
-                res.push(syncPeer);
+                res.push(stateMgmtDFX.getObservedPropertyInfo(observedProp, isProfiler, changedTrackPropertyName));
             }
         });
         return res;
     }
     onDumpProfiler(changedTrackPropertyName) {
-        var _a, _b, _c, _d;
+        var _a, _b;
         let res = new DumpInfo();
-        let rawValue = this.getRawObjectValue();
-        let observedPropertyInfo = {
-            decorator: this.debugInfoDecorator(), propertyName: this.info(), id: this.id__(), changedTrackPropertyName: changedTrackPropertyName,
-            value: typeof rawValue === 'object' ? 'Only support to dump simple type: string, number, boolean, enum type' : rawValue,
-            inRenderingElementId: stateMgmtDFX.inRenderingElementId_.length === 0 ? -1 : stateMgmtDFX.inRenderingElementId_[stateMgmtDFX.inRenderingElementId_.length - 1],
-            dependentElementIds: this.dumpDependentElmtIdsObj(typeof this.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(this.getUnmonitored()) : false, true),
-            owningView: { componentName: (_a = this.owningView_) === null || _a === void 0 ? void 0 : _a.constructor.name, id: (_b = this.owningView_) === null || _b === void 0 ? void 0 : _b.id__() },
-            syncPeers: this.dumpSyncPeers(true, changedTrackPropertyName)
-        };
-        res.viewInfo = { componentName: (_c = this.owningView_) === null || _c === void 0 ? void 0 : _c.constructor.name, id: (_d = this.owningView_) === null || _d === void 0 ? void 0 : _d.id__() };
-        res.observedPropertiesInfo.push(observedPropertyInfo);
+        res.viewInfo = { componentName: (_a = this.owningView_) === null || _a === void 0 ? void 0 : _a.constructor.name, id: (_b = this.owningView_) === null || _b === void 0 ? void 0 : _b.id__() };
+        res.observedPropertiesInfo.push(stateMgmtDFX.getObservedPropertyInfo(this, true, changedTrackPropertyName));
         if (this.owningView_) {
             try {
                 this.owningView_.sendStateInfo(JSON.stringify(res));
@@ -4724,7 +4790,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
                 this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElmtIdsByProperty_.getAllPropertyDependencies());
                 // send changed observed property to profiler
                 // only will be true when enable profiler
-                if (stateMgmtDFX.enableProfiler_) {
+                if (stateMgmtDFX.enableProfiler) {
                     
                     this.onDumpProfiler();
                 }
@@ -4756,7 +4822,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
                 this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElmtIdsByProperty_.getTrackedObjectPropertyDependencies(changedPropertyName, 'notifyTrackedObjectPropertyHasChanged'));
                 // send changed observed property to profiler
                 // only will be true when enable profiler
-                if (stateMgmtDFX.enableProfiler_) {
+                if (stateMgmtDFX.enableProfiler) {
                     
                     this.onDumpProfiler(changedPropertyName);
                 }
@@ -6111,7 +6177,7 @@ class ViewPU extends PUV2ViewBase {
             const elmtId = this.getCurrentlyRenderedElmtId();
             let repeat = this.elmtId2Repeat_.get(elmtId);
             if (!repeat) {
-                repeat = new __RepeatPU(this, arr);
+                repeat = new __Repeat(this, arr);
                 this.elmtId2Repeat_.set(elmtId, repeat);
             }
             else {
@@ -6658,7 +6724,7 @@ class ViewPU extends PUV2ViewBase {
             if (!this.isViewV3) {
                 // Enable PU state tracking only in PU @Components
                 this.currentlyRenderedElmtIdStack_.push(elmtId);
-                stateMgmtDFX.inRenderingElementId_.push(elmtId);
+                stateMgmtDFX.inRenderingElementId.push(elmtId);
             }
             // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria),
             // enable V2 object deep observation
@@ -6681,7 +6747,7 @@ class ViewPU extends PUV2ViewBase {
             }
             if (!this.isViewV3) {
                 this.currentlyRenderedElmtIdStack_.pop();
-                stateMgmtDFX.inRenderingElementId_.pop();
+                stateMgmtDFX.inRenderingElementId.pop();
             }
             ViewStackProcessor.StopGetAccessRecording();
             (_b = PUV2ViewBase.arkThemeScopeManager) === null || _b === void 0 ? void 0 : _b.onComponentCreateExit(elmtId);
@@ -7050,16 +7116,9 @@ class ViewPU extends PUV2ViewBase {
             .filter((varName) => varName.startsWith('__') && !varName.startsWith(ObserveV2.OB_PREFIX))
             .forEach((varName) => {
             const prop = Reflect.get(this, varName);
-            if ('debugInfoDecorator' in prop) {
+            if (typeof prop === 'object' && 'debugInfoDecorator' in prop) {
                 const observedProp = prop;
-                let rawValue = observedProp.getRawObjectValue();
-                let observedPropertyInfo = {
-                    decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
-                    value: typeof rawValue === 'object' ? 'Only support to dump simple type: string, number, boolean, enum type' : rawValue,
-                    dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, false),
-                    owningView: { componentName: this.constructor.name, id: this.id__() }, syncPeers: observedProp.dumpSyncPeers(false)
-                };
-                res.observedPropertiesInfo.push(observedPropertyInfo);
+                res.observedPropertiesInfo.push(stateMgmtDFX.getObservedPropertyInfo(observedProp, false));
             }
         });
         let resInfo = '';
@@ -7339,9 +7398,9 @@ class ObserveV2 {
     }
     // At the start of observeComponentCreation or
     // MonitorV2 observeObjectAccess
-    startRecordDependencies(cmp, id) {
+    startRecordDependencies(cmp, id, doClearBinding = true) {
         if (cmp != null) {
-            this.clearBinding(id);
+            doClearBinding && this.clearBinding(id);
             this.stackOfRenderedComponents_.push(id, cmp);
         }
     }
@@ -7767,17 +7826,17 @@ class ObserveV2 {
     constructMonitor(owningObject, owningObjectName) {
         let watchProp = Symbol.for(MonitorV2.WATCH_PREFIX + owningObjectName);
         if (owningObject && (typeof owningObject === 'object') && owningObject[watchProp]) {
-            Object.entries(owningObject[watchProp]).forEach(([monitorFuncName, monitorFunc]) => {
+            Object.entries(owningObject[watchProp]).forEach(([pathString, monitorFunc]) => {
                 var _a;
                 var _b;
-                if (monitorFunc && monitorFuncName && typeof monitorFunc === 'function') {
-                    const monitor = new MonitorV2(owningObject, monitorFuncName, monitorFunc);
+                if (monitorFunc && pathString && typeof monitorFunc === 'function') {
+                    const monitor = new MonitorV2(owningObject, pathString, monitorFunc);
                     monitor.InitRun();
                     const refs = (_a = owningObject[_b = ObserveV2.MONITOR_REFS]) !== null && _a !== void 0 ? _a : (owningObject[_b] = {});
                     // store a reference inside owningObject
                     // thereby MonitorV2 will share lifespan as owning @ComponentV2 or @ObservedV2
                     // remember: id2cmp only has a WeakRef to MonitorV2 obj
-                    refs[monitorFuncName] = monitor;
+                    refs[monitorFunc.name] = monitor;
                 }
                 // FIXME Else handle error
             });
@@ -8636,7 +8695,7 @@ class ViewV2 extends PUV2ViewBase {
             const elmtId = ObserveV2.getCurrentRecordedId();
             let repeat = this.elmtId2Repeat_.get(elmtId);
             if (!repeat) {
-                repeat = new __RepeatV2(arr);
+                repeat = new __Repeat(this, arr);
                 this.elmtId2Repeat_.set(elmtId, repeat);
             }
             else {
@@ -9666,60 +9725,65 @@ __RepeatDefaultKeyGen.lastKey_ = 0;
 ;
 // __Repeat implements ForEach with child re-use for both existing state observation
 // and deep observation , for non-virtual and virtual code paths (TODO)
-class __RepeatV2 {
-    constructor(arr) {
+class __Repeat {
+    constructor(owningView, arr) {
         this.config = {};
         this.isVirtualScroll = false;
-        //console.log('__RepeatV2 ctor')
+        //console.log('__Repeat ctor')
+        this.config.owningView_ = owningView instanceof ViewV2 ? owningView : undefined;
         this.config.arr = arr !== null && arr !== void 0 ? arr : [];
         this.config.itemGenFuncs = {};
-        this.config.keyGenFunc = __RepeatDefaultKeyGen.func;
+        this.config.keyGenFunc = __RepeatDefaultKeyGen.funcWithIndex;
         this.config.typeGenFunc = (() => '');
         this.config.totalCount = this.config.arr.length;
         this.config.templateOptions = {};
-        this.config.mkRepeatItem = this.mkRepeatItem;
+        // to be used with ViewV2
+        const mkRepeatItemV2 = (item, index) => new __RepeatItemV2(item, index);
+        // to be used with ViewPU
+        const mkRepeatItemPU = (item, index) => new __RepeatItemPU(owningView, item, index);
+        const isViewV2 = (this.config.owningView_ instanceof ViewV2);
+        this.config.mkRepeatItem = isViewV2 ? mkRepeatItemV2 : mkRepeatItemPU;
     }
     each(itemGenFunc) {
-        //console.log('__RepeatV2.each()')
+        //console.log('__Repeat.each()')
         this.config.itemGenFuncs[''] = itemGenFunc;
-        this.config.templateOptions[''] = Object.assign({}, this.defaultTemplateOptions());
+        this.config.templateOptions[''] = this.normTemplateOptions({});
         return this;
     }
     key(keyGenFunc) {
-        //console.log('__RepeatV2.key()')
-        this.config.keyGenFunc = keyGenFunc !== null && keyGenFunc !== void 0 ? keyGenFunc : __RepeatDefaultKeyGen.func;
+        //console.log('__Repeat.key()')
+        this.config.keyGenFunc = keyGenFunc;
         return this;
     }
     virtualScroll(options) {
-        var _a;
-        //console.log('__RepeatV2.virtualScroll()')
-        this.config.totalCount = (_a = options === null || options === void 0 ? void 0 : options.totalCount) !== null && _a !== void 0 ? _a : this.config.arr.length;
+        //console.log('__Repeat.virtualScroll()')
+        this.config.totalCount = this.normTotalCount(options === null || options === void 0 ? void 0 : options.totalCount);
         this.isVirtualScroll = true;
         return this;
     }
     // function to decide which template to use, each template has an id
     templateId(typeFunc) {
-        //console.log('__RepeatV2.templateId()')
+        //console.log('__Repeat.templateId()')
         this.config.typeGenFunc = typeFunc;
         return this;
     }
     // template: id + builder function to render specific type of data item 
     template(type, itemGenFunc, options) {
-        //console.log('__RepeatV2.template()')
+        //console.log('__Repeat.template()')
         this.config.itemGenFuncs[type] = itemGenFunc;
-        this.config.templateOptions[type] = Object.assign(Object.assign({}, this.defaultTemplateOptions()), options);
+        this.config.templateOptions[type] = this.normTemplateOptions(options);
         return this;
     }
     updateArr(arr) {
-        //console.log('__RepeatV2.updateArr()')
+        //console.log('__Repeat.updateArr()')
         this.config.arr = arr !== null && arr !== void 0 ? arr : [];
         return this;
     }
     render(isInitialRender) {
         var _a, _b, _c;
-        //console.log('__RepeatV2.render()')
+        //console.log('__Repeat.render()')
         if (!((_a = this.config.itemGenFuncs) === null || _a === void 0 ? void 0 : _a[''])) {
-            throw new Error(`__RepeatV2 item builder function unspecified. Usage error`);
+            throw new Error(`__Repeat item builder function unspecified. Usage error`);
         }
         if (!this.isVirtualScroll) {
             // Repeat
@@ -9732,29 +9796,33 @@ class __RepeatV2 {
             this.impl.render(this.config, isInitialRender);
         }
     }
+    // drag and drop API
     onMove(handler) {
         this.config.onMoveHandler = handler;
         return this;
     }
-    defaultTemplateOptions() {
+    // normalize totalCount
+    normTotalCount(totalCount) {
+        const arrLen = this.config.arr.length;
+        if (Number.isInteger(totalCount) && totalCount > arrLen) {
+            return totalCount;
+        }
+        return arrLen;
+    }
+    // normalize template options
+    normTemplateOptions(options) {
+        if (options) {
+            const cachedCount = options.cachedCount;
+            if (Number.isInteger(cachedCount) && cachedCount >= 0) {
+                return options;
+            }
+        }
         return { cachedCount: 1 };
     }
-    mkRepeatItem(item, index) {
-        return new __RepeatItemV2(item, index);
-    }
 }
-; // __RepeatV2<T>
+; // __Repeat<T>
 // __Repeat implements ForEach with child re-use for both existing state observation
 // and deep observation , for non-virtual and virtual code paths (TODO)
-class __RepeatPU extends __RepeatV2 {
-    constructor(owningView, arr) {
-        super(arr);
-        this.owningView_ = owningView;
-    }
-    mkRepeatItem(item, index) {
-        return new __RepeatItemPU(this.owningView_, item, index);
-    }
-}
 /*
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -9928,8 +9996,10 @@ class __RepeatImpl {
 // Implements ForEach with child re-use for both existing state observation and
 // deep observation. For virtual-scroll code paths
 class __RepeatVirtualScrollImpl {
-    /**/
     constructor() {
+        // index <-> key maps
+        this.key4Index_ = new Map();
+        this.index4Key_ = new Map();
     }
     render(config, isInitialRender) {
         this.arr_ = config.arr;
@@ -9941,14 +10011,14 @@ class __RepeatVirtualScrollImpl {
         this.mkRepeatItem_ = config.mkRepeatItem;
         this.onMoveHandler_ = config.onMoveHandler;
         if (isInitialRender) {
-            this.initialRender(ObserveV2.getCurrentRecordedId());
+            this.initialRender(config.owningView_, ObserveV2.getCurrentRecordedId());
         }
         else {
             this.reRender();
         }
     }
     /**/
-    initialRender(repeatElmtId) {
+    initialRender(owningView, repeatElmtId) {
         // Map key -> RepeatItem
         // added to closure of following lambdas
         const _repeatItem4Key = new Map();
@@ -9956,15 +10026,15 @@ class __RepeatVirtualScrollImpl {
         const onCreateNode = (forIndex) => {
             
             if (forIndex < 0) {
-                // FIXME check also index < totalCount
+                // STATE_MGMT_NOTE check also index < totalCount
                 throw new Error(`__RepeatVirtualScrollImpl onCreateNode: for index=${forIndex} out of range error.`);
             }
             // create dependency array item [forIndex] -> Repeat
             // so Repeat updates when the array item changes
-            // FIXME observe dependencies, adding the array is insurgent for Array of objects
+            // STATE_MGMT_NOTE observe dependencies, adding the array is insurgent for Array of objects
             ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, forIndex.toString());
             const repeatItem = this.mkRepeatItem_(this.arr_[forIndex], forIndex);
-            const forKey = this.keyGenFunc_(this.arr_[forIndex], forIndex);
+            let forKey = this.getOrMakeKey4Index(forIndex);
             _repeatItem4Key.set(forKey, repeatItem);
             // execute the itemGen function
             this.initialRenderItem(repeatItem);
@@ -9972,19 +10042,19 @@ class __RepeatVirtualScrollImpl {
         };
         const onUpdateNode = (fromKey, forIndex) => {
             if (!fromKey || fromKey == "" || forIndex < 0) {
-                // FIXME check also index < totalCount
+                // STATE_MGMT_NOTE check also index < totalCount
                 throw new Error(`__RepeatVirtualScrollImpl onUpdateNode: fromKey "${fromKey}", forIndex=${forIndex} invalid function input error.`);
             }
             // create dependency array item [forIndex] -> Repeat
             // so Repeat updates when the array item changes
-            // FIXME observe dependencies, adding the array is insurgent for Array of objects
+            // STATE_MGMT_NOTE observe dependencies, adding the array is insurgent for Array of objects
             ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, forIndex.toString());
             const repeatItem = _repeatItem4Key.get(fromKey);
             if (!repeatItem) {
                 stateMgmtConsole.error(`__RepeatVirtualScrollImpl onUpdateNode: fromKey "${fromKey}", forIndex=${forIndex}, can not find RepeatItem for key. Unrecoverable error`);
                 return;
             }
-            const forKey = this.keyGenFunc_(this.arr_[forIndex], forIndex);
+            const forKey = this.getOrMakeKey4Index(forIndex);
             
             repeatItem.updateItem(this.arr_[forIndex]);
             repeatItem.updateIndex(forIndex);
@@ -9993,19 +10063,22 @@ class __RepeatVirtualScrollImpl {
             _repeatItem4Key.delete(fromKey);
             _repeatItem4Key.set(forKey, repeatItem);
             
-            // FIXME request re-render right away!
             ObserveV2.getObserve().updateDirty2(true);
         };
         const onGetKeys4Range = (from, to) => {
             
             const result = new Array();
+            // deep observe dependencies,
+            // create dependency array item [i] -> Repeat
+            // so Repeat updates when the array item or nested objects changes
+            // not enough: ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, i.toString());
+            ViewStackProcessor.StartGetAccessRecordingFor(repeatElmtId1);
+            ObserveV2.getObserve().startRecordDependencies(owningView, repeatElmtId1, false);
             for (let i = from; i <= to && i < this.arr_.length; i++) {
-                // create dependency array item [i] -> Repeat
-                // so Repeat updates when the array item changes
-                // FIXME observe dependencies, adding the array is insurgent for Array of objects
-                ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, i.toString());
-                result.push(this.keyGenFunc_(this.arr_[i], i));
+                result.push(this.getOrMakeKey4Index(i));
             }
+            ObserveV2.getObserve().stopRecordDependencies();
+            ViewStackProcessor.StopGetAccessRecording();
             
             return result;
         };
@@ -10013,11 +10086,17 @@ class __RepeatVirtualScrollImpl {
             var _a;
             
             const result = new Array();
-            // FIXME observe dependencies, adding the array is insurgent for Array of objects
+            // deep observe dependencies,
+            // create dependency array item [i] -> Repeat
+            // so Repeat updates when the array item or nested objects changes
+            // not enough: ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, i.toString());
+            ViewStackProcessor.StartGetAccessRecordingFor(repeatElmtId1);
+            ObserveV2.getObserve().startRecordDependencies(owningView, repeatElmtId1, false);
             for (let i = from; i <= to && i < this.arr_.length; i++) {
-                // ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, i.toString());
                 result.push((_a = this.typeGenFunc_(this.arr_[i], i)) !== null && _a !== void 0 ? _a : '');
             }
+            ObserveV2.getObserve().stopRecordDependencies();
+            ViewStackProcessor.StopGetAccessRecording();
             
             return result;
         };
@@ -10028,10 +10107,12 @@ class __RepeatVirtualScrollImpl {
             onGetKeys4Range,
             onGetTypes4Range
         });
+        RepeatVirtualScrollNative.onMove(this.onMoveHandler_);
         
     }
     reRender() {
         
+        this.purgeKeyCache();
         RepeatVirtualScrollNative.invalidateKeyCache(this.totalCount_);
         
     }
@@ -10041,6 +10122,33 @@ class __RepeatVirtualScrollImpl {
         const itemType = (_a = this.typeGenFunc_(repeatItem.item, repeatItem.index)) !== null && _a !== void 0 ? _a : '';
         const itemFunc = (_b = this.itemGenFuncs_[itemType]) !== null && _b !== void 0 ? _b : this.itemGenFuncs_[''];
         itemFunc(repeatItem);
+    }
+    /**
+     * maintain: index <-> key mapping
+     * create new key from keyGen function if not in cache
+     * check for duplicate key, and create random key if duplicate found
+     * @param forIndex
+     * @returns unique key
+     */
+    getOrMakeKey4Index(forIndex) {
+        let key = this.key4Index_.get(forIndex);
+        if (!key) {
+            key = this.keyGenFunc_(this.arr_[forIndex], forIndex);
+            const usedIndex = this.index4Key_.get(key);
+            if (usedIndex) {
+                // duplicate key
+                stateMgmtConsole.applicationError(`Repeat key gen function: Detected duplicate key ${key} for indices ${forIndex} and ${usedIndex}. \
+                            Generated random key will decrease Repeat performance. Correct the Key gen function in your application!`);
+                key = `___${forIndex}_+_${key}_+_${Math.random()}`;
+            }
+            this.key4Index_.set(forIndex, key);
+            this.index4Key_.set(key, forIndex);
+        }
+        return key;
+    }
+    purgeKeyCache() {
+        this.key4Index_.clear();
+        this.index4Key_.clear();
     }
 }
 ;

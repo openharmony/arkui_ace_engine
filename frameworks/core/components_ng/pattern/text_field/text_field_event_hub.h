@@ -149,7 +149,8 @@ public:
         if (onChange_) {
             TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On change %{private}s", value.c_str());
             TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On change %{private}d", range.start);
-            onChange_(value, range);
+            auto onChange = onChange_;
+            onChange(value, range);
         }
         lastValue_ = value;
         lastPreviewRange_ = range;

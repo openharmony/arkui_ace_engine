@@ -51,8 +51,14 @@ public:
         const OnMenuItemClickCallback&& onMenuItemClick) override;
 
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
+    static void SetTextDetectConfig(FrameNode* frameNode, const std::string& value,
+        std::function<void(const std::string&)>&& onResult);
+    static void SetOnIMEInputComplete(FrameNode* frameNode,
+        std::function<void(const RichEditorAbstractSpanResult&)>&& callback);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions& copyOptions);
+    static void SetOnSelectionChange(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback);
     static void SetCaretColor(FrameNode* frameNode, const Color& color);
+    static void SetOnSelect(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback);
     static void SetOnReady(FrameNode* frameNode, std::function<void()>&& callback);
     static void SetOnDeleteComplete(FrameNode* frameNode, std::function<void()>&& callback);
     static void SetOnEditingChange(FrameNode* frameNode, std::function<void(const bool&)>&& callback);
@@ -63,6 +69,8 @@ public:
     void SetEnterKeyType(TextInputAction value) override;
     static void SetEnterKeyType(FrameNode* frameNode, const TextInputAction& action);
     void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override;
+    static void SetOnSubmit(FrameNode* frameNode, std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& callback);
+    static void SetAboutToIMEInput(FrameNode* frameNode, std::function<bool(const RichEditorInsertValue&)>&& callback);
 
 private:
     void SetDraggable(bool draggable);

@@ -185,9 +185,8 @@ void SelectOverlayLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper)
     if ((!CheckInShowArea(*info_) || (!isNewAvoid && shouldInActiveByHandle)) && !info_->isUsingMouse) {
         menu->SetActive(false);
         return;
-    } else {
-        menu->SetActive(true);
     }
+    menu->SetActive(true);
     OffsetF menuOffset;
     if (info_->isUsingMouse) {
         menuOffset = CalculateCustomMenuByMouseOffset(layoutWrapper);
@@ -216,8 +215,9 @@ void SelectOverlayLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper)
     bool isReverse = IsReverseLayout(layoutWrapper);
     OffsetF buttonOffset;
     if (GreatNotEqual(menuSize.Width(), menuSize.Height())) {
-        buttonOffset = isReverse ? menuOffset :
-            OffsetF(menuOffset.GetX() + menuSize.Width() - buttonSize.Width(), menuOffset.GetY());
+        auto diffY = std::max((menuSize.Height() - buttonSize.Height()) / 2.0f, 0.0f);
+        buttonOffset = isReverse ? OffsetF(menuOffset.GetX(), menuOffset.GetY() + diffY) :
+            OffsetF(menuOffset.GetX() + menuSize.Width() - buttonSize.Width(), menuOffset.GetY() + diffY);
     } else {
         buttonOffset = menuOffset;
     }
@@ -268,12 +268,18 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     double menuSpacingBetweenText = theme->GetMenuSpacingWithText().ConvertToPx();
     double menuSpacingBetweenHandle = theme->GetHandleDiameter().ConvertToPx();
 
+    // When the extended menu is displayed, the default menu becomes circular, but the position of the circle is aligned
+    // with the end of the original menu.
     auto width = menuItem->GetGeometryNode()->GetMarginFrameSize().Width();
     auto height = menuItem->GetGeometryNode()->GetMarginFrameSize().Height();
 
-    // When the extended menu is displayed, the default menu becomes circular, but the position of the circle is aligned
-    // with the end of the original menu.
-    if (GreatNotEqual(width, height)) {
+    auto backButton = layoutWrapper->GetOrCreateChildByIndex(1);
+    bool isBackButtonVisible = false;
+    if (backButton) {
+        isBackButtonVisible =
+            backButton->GetLayoutProperty()->GetVisibilityValue(VisibleType::INVISIBLE) == VisibleType::VISIBLE;
+    }
+    if (!isBackButtonVisible) {
         menuWidth_ = width;
         menuHeight_ = height;
     } else {

@@ -393,6 +393,7 @@ void DatePickerColumnPattern::FlushCurrentOptions(
     auto showOptionCount = datePickerPattern->GetShowCount();
     uint32_t totalOptionCount = datePickerPattern->GetOptionCount(host);
     uint32_t currentIndex = host->GetPattern<DatePickerColumnPattern>()->GetCurrentIndex();
+    CHECK_EQUAL_VOID(totalOptionCount, 0);
     currentIndex = currentIndex % totalOptionCount;
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
 

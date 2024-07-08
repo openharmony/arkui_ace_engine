@@ -2156,28 +2156,6 @@ HWTEST_F(TextFieldPatternTest, TextPattern090, TestSize.Level0)
 }
 
 /**
- * @tc.name: TextPattern091
- * @tc.desc: test testInput text UpdateParam
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTest, TextPattern091, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. create target node.
-     */
-    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER);
-    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
-    ASSERT_NE(textFieldNode, nullptr);
-    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(pattern, nullptr);
-    GestureEvent info;
-    pattern->selectController_->firstHandleInfo_.index = 1;
-    pattern->selectController_->secondHandleInfo_.index = 2;
-    pattern->UpdateParam(info, true);
-}
-
-/**
  * @tc.name: TextPattern092
  * @tc.desc: test testInput text ScheduleCursorTwinkling
  * @tc.type: FUNC

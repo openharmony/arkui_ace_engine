@@ -523,46 +523,31 @@ void SessionWrapperImpl::OnAccessibilityEvent(const Accessibility::Accessibility
 /************************************************** End: The interface for responsing provider ************************/
 
 /************************************************ Begin: The interface about the accessibility ************************/
-bool SessionWrapperImpl::TransferExecuteAction(
-    int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset)
-{
-    CHECK_NULL_RETURN(session_, false);
-    return OHOS::Rosen::WSError::WS_OK == session_->TransferExecuteAction(elementId, actionArguments, action, offset);
-}
-
-void SessionWrapperImpl::SearchExtensionElementInfoByAccessibilityId(
-    int64_t elementId, int32_t mode, int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
-{
-    CHECK_NULL_VOID(session_);
-    session_->TransferSearchElementInfo(elementId, mode, baseParent, output);
-}
-
-void SessionWrapperImpl::SearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
-    std::list<Accessibility::AccessibilityElementInfo>& output)
-{
-    CHECK_NULL_VOID(session_);
-    session_->TransferSearchElementInfosByText(elementId, text, baseParent, output);
-}
-
-void SessionWrapperImpl::FindFocusedElementInfo(
-    int64_t elementId, int32_t focusType, int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
-{
-    CHECK_NULL_VOID(session_);
-    session_->TransferFindFocusedElementInfo(elementId, focusType, baseParent, output);
-}
-
-void SessionWrapperImpl::FocusMoveSearch(
-    int64_t elementId, int32_t direction, int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
-{
-    CHECK_NULL_VOID(session_);
-    session_->TransferFocusMoveSearch(elementId, direction, baseParent, output);
-}
-
 void SessionWrapperImpl::TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
     int32_t eventType, int64_t timeMs)
 {
     CHECK_NULL_VOID(session_);
     session_->TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+}
+
+void SessionWrapperImpl::TransferAccessibilityChildTreeRegister(
+    uint32_t windowId, int32_t treeId, int64_t accessibilityId)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+}
+
+void SessionWrapperImpl::TransferAccessibilityChildTreeDeregister()
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferAccessibilityChildTreeUnregister();
+}
+
+void SessionWrapperImpl::TransferAccessibilityDumpChildInfo(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    CHECK_NULL_VOID(session_);
+    session_->TransferAccessibilityDumpChildInfo(params, info);
 }
 /************************************************ End: The interface about the accessibility **************************/
 

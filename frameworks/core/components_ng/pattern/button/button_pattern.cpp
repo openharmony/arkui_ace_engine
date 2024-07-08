@@ -71,6 +71,10 @@ bool ButtonPattern::NeedAgingUpdateText(RefPtr<ButtonLayoutProperty>& layoutProp
     CHECK_NULL_RETURN(buttonTheme, false);
     auto fontScale = pipeline->GetFontScale();
 
+    if (layoutProperty->HasType() && layoutProperty->GetType() == ButtonType::CIRCLE) {
+        return false;
+    }
+
     if (layoutProperty->HasLabel() && layoutProperty->GetLabel()->empty()) {
         return false;
     }

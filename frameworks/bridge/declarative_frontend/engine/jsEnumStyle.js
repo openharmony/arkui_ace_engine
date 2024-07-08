@@ -1226,6 +1226,7 @@ var ProtectedResourceType;
   ProtectedResourceType["MidiSysex"] = "TYPE_MIDI_SYSEX";
   ProtectedResourceType["VIDEO_CAPTURE"] = "TYPE_VIDEO_CAPTURE";
   ProtectedResourceType["AUDIO_CAPTURE"] = "TYPE_AUDIO_CAPTURE";
+  ProtectedResourceType["SENSORS"] = "TYPE_SENSORS";
 })(ProtectedResourceType || (ProtectedResourceType = {}));
 
 var ProgressType;
@@ -1291,6 +1292,13 @@ var EffectFillStyle;
   EffectFillStyle[EffectFillStyle["CUMULATIVE"] = 0] = "CUMULATIVE";
   EffectFillStyle[EffectFillStyle["ITERATIVE"] = 1] = "ITERATIVE";
 })(EffectFillStyle || (EffectFillStyle = {}));
+
+var WebKeyboardAvoidMode;
+(function (WebKeyboardAvoidMode) {
+  WebKeyboardAvoidMode[WebKeyboardAvoidMode["RESIZE_VISUAL"] = 0] = "RESIZE_VISUAL";
+  WebKeyboardAvoidMode[WebKeyboardAvoidMode["RESIZE_CONTENT"] = 1] = "RESIZE_CONTENT";
+  WebKeyboardAvoidMode[WebKeyboardAvoidMode["OVERLAYS_CONTENT"] = 2] = "OVERLAYS_CONTENT";
+})(WebKeyboardAvoidMode || (WebKeyboardAvoidMode = {}));
 
 class SymbolEffect {
 }
@@ -2052,6 +2060,7 @@ var LaunchMode;
   LaunchMode[LaunchMode.STANDARD = 0] = "STANDARD";
   LaunchMode[LaunchMode.MOVE_TO_TOP_SINGLETON = 1] = "MOVE_TO_TOP_SINGLETON";
   LaunchMode[LaunchMode.POP_TO_SINGLETON = 2] = "POP_TO_SINGLETON";
+  LaunchMode[LaunchMode.NEW_INSTANCE = 3] = "NEW_INSTANCE";
 })(LaunchMode || (LaunchMode = {}));
 
 class NavPathInfo {
@@ -2061,6 +2070,7 @@ class NavPathInfo {
     this.onPop = onPop;
     this.index = -1;
     this.needUpdate = false;
+    this.needBuildNewInstance = false;
   }
 }
 
@@ -2107,11 +2117,10 @@ class NavPathStack {
     for (let i = this.popArray.length - 1; i >= 0; i--) {
       if (name === this.popArray[i].name) {
         let info = this.popArray.splice(i, 1);
-        this.pathArray[this.pathArray.length - 1].index = info[0].index;
-        return;
+        return info[0].index;
       }
     }
-    this.pathArray[this.pathArray.length - 1].index = -1; // add new navdestination
+    return -1; // add new navdestination
   }
   setNativeStack(stack) {
     this.nativeStack = stack;
@@ -2126,8 +2135,9 @@ class NavPathStack {
     return this.parentStack;
   }
   pushName(name, param) {
-    this.pathArray.push(new NavPathInfo(name, param));
-    this.findInPopArray(name);
+    let info = new NavPathInfo(name, param);
+    info.index = this.findInPopArray(name);
+    this.pathArray.push(info);
     this.isReplace = 0;
     this.nativeStack?.onStateChanged();
   }
@@ -2135,12 +2145,14 @@ class NavPathStack {
     this.pushPath(info, animated);
   }
   pushPathByName(name, param, onPop, animated) {
+    let info = undefined;
     if (onPop === undefined || typeof onPop === 'boolean') {
-      this.pathArray.push(new NavPathInfo(name, param));
+      info = new NavPathInfo(name, param);
     } else {
-      this.pathArray.push(new NavPathInfo(name, param, onPop));
+      info = new NavPathInfo(name, param, onPop);
     }
-    this.findInPopArray(name);
+    info.index = this.findInPopArray(name);
+    this.pathArray.push(info);
     this.isReplace = 0;
     if (typeof onPop === 'boolean') {
       this.animated = onPop;
@@ -2158,7 +2170,6 @@ class NavPathStack {
     } else {
       info = new NavPathInfo(name, param, onPop);
     }
-    this.pathArray.push(info);
     this.isReplace = 0;
     if (typeof onPop === 'boolean') {
       this.animated = onPop;
@@ -2170,12 +2181,12 @@ class NavPathStack {
 
     let promise = this.nativeStack?.onPushDestination(info);
     if (!promise) {
-      this.pathArray.pop();
       return new Promise((resolve, reject) => {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
-    this.findInPopArray(name);
+    info.index = this.findInPopArray(name);
+    this.pathArray.push(info);
     this.nativeStack?.onStateChanged();
     return promise;
   }
@@ -2223,9 +2234,11 @@ class NavPathStack {
     if (ret) {
       return;
     }
+    info.index = this.findInPopArray(info.name);
+    if (launchMode === LaunchMode.NEW_INSTANCE) {
+      info.needBuildNewInstance = true;
+    }
     this.pathArray.push(info);
-    let name = this.pathArray[this.pathArray.length - 1].name;
-    this.findInPopArray(name);
     this.isReplace = 0;
     this.animated = animated;
     this.nativeStack?.onStateChanged();
@@ -2236,18 +2249,19 @@ class NavPathStack {
     if (ret) {
       return promiseRet;
     }
-    this.pathArray.push(info);
     this.isReplace = 0;
     this.animated = animated;
     let promise = this.nativeStack?.onPushDestination(info);
     if (!promise) {
-      this.pathArray.pop();
       return new Promise((resolve, reject) => {
         reject({ message: 'Internal error.', code: 100001 });
       })
     }
-    let name = this.pathArray[this.pathArray.length - 1].name;
-    this.findInPopArray(name);
+    info.index = this.findInPopArray(info.name);
+    if (launchMode === LaunchMode.NEW_INSTANCE) {
+      info.needBuildNewInstance = true;
+    }
+    this.pathArray.push(info);
     this.nativeStack?.onStateChanged();
     return promise;
   }
@@ -3164,6 +3178,8 @@ let NativeEmbedStatus;
   NativeEmbedStatus['CREATE'] = 0;
   NativeEmbedStatus['UPDATE'] = 1;
   NativeEmbedStatus['DESTROY'] = 2;
+  NativeEmbedStatus['ENTER_BFCACHE'] = 3;
+  NativeEmbedStatus['LEAVE_BFCACHE'] = 4;
 })(NativeEmbedStatus || (NativeEmbedStatus = {}));
 
 let RenderMode;

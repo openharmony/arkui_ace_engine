@@ -19,6 +19,9 @@
 #include <optional>
 #include <string>
 #include <utility>
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
@@ -511,6 +514,52 @@ void ViewAbstract::SetPadding(const PaddingProperty& value)
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, value);
+}
+
+void ViewAbstract::SetSafeAreaPadding(const CalcLength& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    PaddingProperty padding;
+    padding.SetEdges(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, padding);
+}
+
+void ViewAbstract::SetSafeAreaPadding(const PaddingProperty& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, value);
+}
+
+void ViewAbstract::ResetSafeAreaPadding()
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_RESET_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding);
+}
+
+void ViewAbstract::SetSafeAreaPadding(FrameNode* frameNode, const CalcLength& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    PaddingProperty padding;
+    padding.SetEdges(value);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, padding, frameNode);
+}
+
+void ViewAbstract::SetSafeAreaPadding(FrameNode* frameNode, const PaddingProperty& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, value, frameNode);
+}
+
+void ViewAbstract::ResetSafeAreaPadding(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, frameNode);
 }
 
 void ViewAbstract::SetMargin(const CalcLength& value)
@@ -1736,6 +1785,9 @@ void ViewAbstract::DismissDialog()
         if (overlayManager->isMaskNode(dialogPattern->GetHost()->GetId())) {
             overlayManager->PopModalDialog(dialogPattern->GetHost()->GetId());
         }
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("onVisibleChange", "destroy");
+#endif
     }
 }
 
@@ -1760,15 +1812,23 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const Re
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
-    if (expandDisplay && menuParam.isShowInSubWindow) {
-        SubwindowManager::GetInstance()->ShowMenuNG(menuNode, menuParam, targetNode, offset);
-        return;
-    }
 
     auto pipelineContext = targetNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto overlayManager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
+
+    if (expandDisplay && menuParam.isShowInSubWindow) {
+        bool isShown = SubwindowManager::GetInstance()->GetShown();
+        if (!isShown) {
+            SubwindowManager::GetInstance()->ShowMenuNG(menuNode, menuParam, targetNode, offset);
+        } else {
+            auto menuNode = overlayManager->GetMenuNode(targetNode->GetId());
+            SubwindowManager::GetInstance()->HideMenuNG(menuNode, targetNode->GetId());
+        }
+        return;
+    }
+
     overlayManager->ShowMenu(targetNode->GetId(), offset, menuNode);
 }
 

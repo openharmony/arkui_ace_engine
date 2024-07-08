@@ -81,7 +81,7 @@ frameworks/core/components_ng/pattern/common_view/  @yangfan229
 frameworks/core/components_ng/pattern/container_modal/  @benb365 @qsluochen
 frameworks/core/components_ng/pattern/counter/  @xuqinfeng1996
 frameworks/core/components_ng/pattern/custom/  @yan-shuifeng
-frameworks/core/components_ng/pattern/custom_paint/  @keerecles
+frameworks/core/components_ng/pattern/canvas/  @keerecles
 frameworks/core/components_ng/pattern/data_panel/  @zhoulianhai5
 frameworks/core/components_ng/pattern/dialog/  @luoying_ace_admin
 frameworks/core/components_ng/pattern/divider/  @luoying_ace_admin

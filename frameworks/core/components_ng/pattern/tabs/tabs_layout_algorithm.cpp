@@ -71,6 +71,9 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // Measure swiper.
     auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(SWIPER_INDEX);
+    if (swiperWrapper) {
+        swiperWrapper->GetLayoutProperty()->UpdateLayoutDirection(layoutProperty->GetNonAutoLayoutDirection());
+    }
     SizeF swiperSize;
     if (swiperWrapper && swiperWrapper->GetHostNode() && swiperWrapper->GetHostNode()->TotalChildCount() > 0) {
         swiperSize = MeasureSwiper(layoutProperty, swiperWrapper, idealSize, tabBarSize, dividerStrokeWidth);

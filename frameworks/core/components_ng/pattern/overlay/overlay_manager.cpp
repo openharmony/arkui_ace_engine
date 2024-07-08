@@ -1098,7 +1098,9 @@ void OverlayManager::ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper
     auto outterMenuPattern = outterMenu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(outterMenuPattern);
     bool isShow = outterMenuPattern->GetDisappearAnimation();
-    if (menuWrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
+    bool isPreviewModeNone = menuWrapperPattern->GetPreviewMode() == MenuPreviewMode::NONE;
+    if (!isPreviewModeNone
+        || (isPreviewModeNone && IsContextMenuBindedOnOrigNode() && !showPreviewAnimation && startDrag)) {
         if (!showPreviewAnimation) {
             CleanPreviewInSubWindow();
         } else {
@@ -1124,6 +1126,24 @@ void OverlayManager::ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper
     }
     // start animation immediately
     pipeline->RequestFrame();
+}
+
+// check if there is a bound menu on the current floating node on the main window
+bool OverlayManager::IsContextMenuBindedOnOrigNode()
+{
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_RETURN(mainPipeline, false);
+    auto dragDropManager = mainPipeline->GetDragDropManager();
+    CHECK_NULL_RETURN(dragDropManager, false);
+    auto draggingNode = dragDropManager->GetPrepareDragFrameNode().Upgrade();
+    CHECK_NULL_RETURN(draggingNode, false);
+    auto eventHub = draggingNode->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, false);
+    auto frameNode = eventHub->GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto focusHub = frameNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    return focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
 }
 
 void OverlayManager::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,

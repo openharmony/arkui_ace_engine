@@ -59,7 +59,6 @@ public:
     void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) override;
     void SetTextDetectEnable(bool value) override;
     void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) override;
-    // TODO: add extra event for text.
     void SetOnClick(std::function<void(BaseEventInfo* info)>&& click) override;
     void ClearOnClick() override;
     void SetRemoteMessage(std::function<void()>&& event) override;

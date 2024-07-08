@@ -192,7 +192,8 @@ public:
     static void ParseBorderColor(const JSRef<JSVal>& args);
     static void JsPadding(const JSCallbackInfo& info);
     static void JsMargin(const JSCallbackInfo& info);
-    static void ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin);
+    static void SetSafeAreaPadding(const JSCallbackInfo& info);
+    static void ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType type);
     static void ParseMarginOrPaddingCorner(JSRef<JSObject> obj, std::optional<CalcDimension>& top,
         std::optional<CalcDimension>& bottom, std::optional<CalcDimension>& left, std::optional<CalcDimension>& right);
     static void ParseLocalizedMarginOrLocalizedPaddingCorner(
@@ -419,9 +420,9 @@ public:
     static void JsPrivacySensitive(const JSCallbackInfo& info);
 
     static void JsAccessibilityGroup(bool accessible);
-    static void JsAccessibilityText(const std::string& text);
+    static void JsAccessibilityText(const JSCallbackInfo& info);
     static void JsAccessibilityTextHint(const std::string& text);
-    static void JsAccessibilityDescription(const std::string& description);
+    static void JsAccessibilityDescription(const JSCallbackInfo& info);
     static void JsAccessibilityImportance(const std::string& importance);
     static void JsAccessibilityLevel(const std::string& level);
     static void JsAllowDrop(const JSCallbackInfo& info);

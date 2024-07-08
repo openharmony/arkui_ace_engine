@@ -19,12 +19,12 @@
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/js_object_template.h"
-#include "core/interfaces/native/node/node_api.h"
 #include "bridge/declarative_frontend/frontend_delegate_declarative.h"
-#include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
+#include "bridge/declarative_frontend/jsview/canvas/js_canvas_image_data.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG {
 using ArkUIRuntimeCallInfo = panda::JsiRuntimeCallInfo;

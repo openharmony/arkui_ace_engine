@@ -487,7 +487,7 @@ FrameNode::~FrameNode()
     if (IsOnMainTree()) {
         OnDetachFromMainTree(false);
     }
-    TriggerVisibleAreaChangeCallback(true);
+    TriggerVisibleAreaChangeCallback(0, true);
     CleanVisibleAreaUserCallback();
     CleanVisibleAreaInnerCallback();
     if (eventHub_) {
@@ -742,6 +742,10 @@ void FrameNode::DumpCommonInfo()
     if (layoutProperty_->GetPaddingProperty()) {
         DumpLog::GetInstance().AddDesc(
             std::string("Padding: ").append(layoutProperty_->GetPaddingProperty()->ToString().c_str()));
+    }
+    if (layoutProperty_->GetSafeAreaPaddingProperty()) {
+        DumpLog::GetInstance().AddDesc(std::string("SafeArea Padding: ")
+                                           .append(layoutProperty_->GetSafeAreaPaddingProperty()->ToString().c_str()));
     }
     if (layoutProperty_->GetBorderWidthProperty()) {
         DumpLog::GetInstance().AddDesc(
@@ -1420,7 +1424,42 @@ bool FrameNode::IsFrameDisappear()
     return !curIsVisible || !curFrameIsActive;
 }
 
-void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
+bool FrameNode::IsFrameDisappear(uint64_t timestamp)
+{
+    auto context = GetContext();
+    CHECK_NULL_RETURN(context, true);
+    bool isFrameDisappear = !context->GetOnShow() || !IsOnMainTree() || !IsVisible();
+    if (isFrameDisappear) {
+        cachedIsFrameDisappear_ = { timestamp, true };
+        return true;
+    }
+
+    return IsFrameAncestorDisappear(timestamp);
+}
+
+bool FrameNode::IsFrameAncestorDisappear(uint64_t timestamp)
+{
+    bool curFrameIsActive = isActive_;
+    bool curIsVisible = IsVisible();
+    bool result = !curIsVisible || !curFrameIsActive;
+    RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame();
+    if (!parentUi) {
+        cachedIsFrameDisappear_ = { timestamp, result };
+        return result;
+    }
+
+    auto parentIsFrameDisappear = parentUi->cachedIsFrameDisappear_;
+    if (parentIsFrameDisappear.first == timestamp) {
+        result = result || parentIsFrameDisappear.second;
+        cachedIsFrameDisappear_ = { timestamp, result };
+        return result;
+    }
+    result = result || (parentUi->IsFrameAncestorDisappear(timestamp));
+    cachedIsFrameDisappear_ = { timestamp, result };
+    return result;
+}
+
+void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceDisappear)
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
@@ -1431,7 +1470,7 @@ void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
     auto& visibleAreaInnerCallback = eventHub_->GetVisibleAreaCallback(false);
 
     ProcessThrottledVisibleCallback();
-    if (forceDisappear || IsFrameDisappear()) {
+    if (forceDisappear || IsFrameDisappear(timestamp)) {
         if (!NearEqual(lastVisibleRatio_, VISIBLE_RATIO_MIN)) {
             ProcessAllVisibleCallback(
                 visibleAreaUserRatios, visibleAreaUserCallback, VISIBLE_RATIO_MIN, lastVisibleCallbackRatio_);
@@ -3469,6 +3508,11 @@ bool FrameNode::ParentExpansive()
     return parentOpts && parentOpts->Expansive();
 }
 
+void FrameNode::ProcessSafeAreaPadding()
+{
+    pattern_->ProcessSafeAreaPadding();
+}
+
 void FrameNode::UpdateFocusState()
 {
     auto focusHub = GetFocusHub();
@@ -4621,10 +4665,6 @@ void FrameNode::TriggerShouldParallelInnerWith(
 
 void FrameNode::GetInspectorValue()
 {
-    auto jsonItem = JsonUtil::Create(true);
-    auto rect = geometryNode_->GetFrameRect();
-    jsonItem->Put("x", rect.GetX());
-    jsonItem->Put("y", rect.GetY());
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST)
     if (GetTag() == V2::WEB_ETS_TAG) {
         UiSessionManager::GetInstance().WebTaskNumsChange(1);
@@ -4636,7 +4676,6 @@ void FrameNode::GetInspectorValue()
         };
         pattern->GetAllWebAccessibilityNodeInfos(cb, GetId());
     }
-    UiSessionManager::GetInstance().AddValueForTree(GetId(), jsonItem->ToString());
 #endif
     UINode::GetInspectorValue();
 }
@@ -4690,5 +4729,24 @@ void FrameNode::ProcessFrameNodeChangeFlag()
     if (pattern) {
         pattern->OnFrameNodeChanged(changeFlag);
     }
+}
+
+void FrameNode::NotifyWebPattern(bool isRegister)
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(WEB_SUPPORTED)
+    if (GetTag() == V2::WEB_ETS_TAG) {
+        auto pattern = GetPattern<NG::WebPattern>();
+        CHECK_NULL_VOID(pattern);
+        if (isRegister) {
+            auto callback = [](int64_t accessibilityId, const std::string data) {
+                UiSessionManager::GetInstance().ReportWebUnfocusEvent(accessibilityId, data);
+            };
+            pattern->RegisterTextBlurCallback(callback);
+        } else {
+            pattern->UnRegisterTextBlurCallback();
+        }
+    }
+#endif
+    UINode::NotifyWebPattern(isRegister);
 }
 } // namespace OHOS::Ace::NG

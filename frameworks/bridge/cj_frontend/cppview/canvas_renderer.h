@@ -25,7 +25,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components/custom_paint/custom_paint_component.h"
 #include "core/components_ng/pattern/canvas/canvas_rendering_context_2d_model_ng.h"
-#include "frameworks/core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
+#include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
 
 namespace OHOS::Ace::Framework {
 

@@ -117,11 +117,26 @@ void JSRepeatVirtualScroll::InvalidateKeyCache(const JSCallbackInfo& info)
     RepeatVirtualScrollModel::GetInstance()->InvalidateKeyCache(totalCount);
 }
 
+void JSRepeatVirtualScroll::OnMove(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        RepeatVirtualScrollModel::GetInstance()->OnMove(nullptr);
+        return;
+    }
+    auto onMove = [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(info[0])]
+        (int32_t from, int32_t to) {
+            auto params = ConvertToJSValues(from, to);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+        };
+    RepeatVirtualScrollModel::GetInstance()->OnMove(std::move(onMove));
+}
+
 void JSRepeatVirtualScroll::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRepeatVirtualScroll>::Declare("RepeatVirtualScrollNative");
     JSClass<JSRepeatVirtualScroll>::StaticMethod("create", &JSRepeatVirtualScroll::Create);
     JSClass<JSRepeatVirtualScroll>::StaticMethod("invalidateKeyCache", &JSRepeatVirtualScroll::InvalidateKeyCache);
+    JSClass<JSRepeatVirtualScroll>::StaticMethod("onMove", &JSRepeatVirtualScroll::OnMove);
     JSClass<JSRepeatVirtualScroll>::Bind<>(globalObj);
 }
 

@@ -49,6 +49,8 @@ void SkiaSvgDom::FitImage(SkCanvas* canvas, const ImageFit& imageFit, const Size
     double scaleY = 1.0;
     float tx = 0.0;
     float ty = 0.0;
+    float addTx = 0.0f;
+    float addTy = 0.0f;
     constexpr float HALF = 0.5;
     const size_t RADII_SIZE = 4; // 4 corners for round rectangle
 
@@ -56,7 +58,7 @@ void SkiaSvgDom::FitImage(SkCanvas* canvas, const ImageFit& imageFit, const Size
         layout_ = layout;
     }
     if (!layout_.IsEmpty() && (svgSize_.IsValid() && !svgSize_.IsInfinite())) {
-        ApplyImageFit(imageFit, scaleX, scaleY);
+        ApplyImageFit(imageFit, scaleX, scaleY, addTx, addTy);
     }
 
     auto rect = SkRect::MakeWH(layout_.Width(), layout_.Height());
@@ -76,6 +78,9 @@ void SkiaSvgDom::FitImage(SkCanvas* canvas, const ImageFit& imageFit, const Size
     if (svgSize_.IsValid() && !svgSize_.IsInfinite() && !layout_.IsEmpty()) {
         tx = (layout_.Width() - svgSize_.Width() * scaleX) * HALF;
         ty = (layout_.Height() - svgSize_.Height() * scaleY) * HALF;
+
+        tx += addTx;
+        ty += addTy;
     }
 
     canvas->translate(tx, ty);

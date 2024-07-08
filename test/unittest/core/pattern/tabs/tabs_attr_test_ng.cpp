@@ -1494,6 +1494,9 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetEdgeEffect001, TestSize.Level1)
     frameNode_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("edgeEffect"), "EdgeEffect::SPRING");
 
+    model.SetEdgeEffect(EdgeEffect::SPRING);
+    EXPECT_EQ(swiperPaintProperty_->GetEdgeEffect(), EdgeEffect::SPRING);
+
     model.SetEdgeEffect(EdgeEffect::FADE);
     EXPECT_EQ(swiperPaintProperty_->GetEdgeEffect(), EdgeEffect::FADE);
 

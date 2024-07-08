@@ -14,6 +14,19 @@
  */
 
 #include "list_test_ng.h"
+#include "test/mock/base/mock_drag_window.h"
+#include "core/components/common/properties/shadow_config.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/syntax/for_each_model_ng.h"
+#include "core/components_ng/syntax/for_each_node.h"
+#include "core/components_ng/syntax/lazy_for_each_model_ng.h"
+#include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
+#include "core/components_ng/syntax/syntax_item.h"
+#include "test/unittest/core/syntax/mock_lazy_for_each_actuator.h"
+#include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 
 namespace OHOS::Ace::NG {
 
@@ -875,7 +888,7 @@ HWTEST_F(ListCommonTestNg, EventHub001, TestSize.Level1)
     /**
      * @tc.steps: step1. EXPECT_CALL DrawFrameNode, HandleOnItemDragStart will trigger it
      */
-    auto mockDragWindow = MockDragWindow::CreateDragWindow("", 0, 0, 0, 0);
+    auto mockDragWindow = MockDragWindow::CreateDragWindow("", 0, 0, 0, 0, 0);
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(mockDragWindow)), DrawFrameNode(_)).Times(2);
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(mockDragWindow)), MoveTo).Times(AnyNumber());
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(mockDragWindow)), Destroy).Times(AnyNumber());
@@ -907,13 +920,21 @@ HWTEST_F(ListCommonTestNg, EventHub001, TestSize.Level1)
     EXPECT_EQ(eventHub_->draggedIndex_, 0);
 
     /**
-     * @tc.steps: step3. HandleOnItemDrag to cancel
+     * @tc.steps: step4. HandleOnItemDrag to cancel
      */
     eventHub_->HandleOnItemDragStart(info);
     EXPECT_EQ(eventHub_->draggedIndex_, 2);
     eventHub_->HandleOnItemDragUpdate(info);
     eventHub_->HandleOnItemDragCancel();
     EXPECT_EQ(eventHub_->draggedIndex_, 0);
+
+    /**
+     * @tc.steps: step5. Not drag on listItem
+     * @tc.expected: Will not take effect
+     */
+    info.SetGlobalPoint(Point(LIST_WIDTH + 1.f, LIST_HEIGHT));
+    eventHub_->HandleOnItemDragStart(info);
+    EXPECT_EQ(eventHub_->draggedIndex_, -1);
 }
 
 /**
@@ -1184,6 +1205,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag002, TestSize.Level1)
     info.SetOffsetY(51.0);
     info.SetGlobalPoint(Point(0.f, 351.f));
     dragManager->HandleOnItemDragUpdate(info);
+    dragManager->HandleScrollCallback();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(dragManager->scrolling_);
     EXPECT_TRUE(pattern_->animator_->IsRunning());
@@ -1204,6 +1226,7 @@ HWTEST_F(ListCommonTestNg, ForEachDrag002, TestSize.Level1)
     info.SetOffsetY(-51.0);
     info.SetGlobalPoint(Point(0.f, 49.f));
     dragManager->HandleOnItemDragUpdate(info);
+    dragManager->HandleScrollCallback();
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(dragManager->scrolling_);
     EXPECT_TRUE(pattern_->animator_->IsRunning());
@@ -1615,5 +1638,82 @@ HWTEST_F(ListCommonTestNg, LazyForEachDrag002, TestSize.Level1)
     dragManager->HandleOnItemDragEnd(info);
     EXPECT_EQ(actualFrom, -1);
     EXPECT_EQ(actualTo, -1);
+}
+
+/**
+ * @tc.name: HandleOnItemLongPress001
+ * @tc.desc: Test HandleOnItemLongPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, HandleOnItemLongPress001, TestSize.Level1)
+{
+    auto onMoveEvent = [](int32_t from, int32_t to) {};
+    CreateForEachList(3, 1, onMoveEvent);
+    CreateDone(frameNode_);
+
+    auto dragManager = GetForEachItemDragManager(0);
+    GestureEvent info;
+    dragManager->HandleOnItemLongPress(info);
+    EXPECT_EQ(dragManager->prevScale_, VectorF(1.f, 1.f));
+    EXPECT_EQ(dragManager->prevShadow_, ShadowConfig::NoneShadow);
+
+    auto listItem = dragManager->GetHost();
+    auto renderContext = listItem->GetRenderContext();
+    renderContext->UpdateTransformScale(VectorF(2.f, 2.f));
+    renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowXS);
+    dragManager->HandleOnItemLongPress(info);
+    EXPECT_EQ(dragManager->prevScale_, VectorF(2.f, 2.f));
+    EXPECT_EQ(dragManager->prevShadow_, ShadowConfig::DefaultShadowXS);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: Test OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    CreateList();
+    CreateListItemGroups(1, V2::ListItemGroupStyle::CARD);
+    CreateListItemGroups(1, V2::ListItemGroupStyle::NONE);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. CARD
+     */
+    auto firstGroup = GetChildFrameNode(frameNode_, 0);
+    auto firstGroupRender = firstGroup->GetRenderContext();
+    auto firstGroupPattern = firstGroup->GetPattern();
+    auto firstGroupItem = GetChildFrameNode(firstGroup, 0);
+    auto firstGroupItemRender = firstGroupItem->GetRenderContext();
+    auto firstGroupItemPattern = firstGroupItem->GetPattern();
+    EXPECT_EQ(firstGroupRender->GetBackgroundColor(), Color::WHITE);
+    EXPECT_EQ(firstGroupItemRender->GetBackgroundColor(), Color::WHITE);
+    auto listItemTheme = MockPipelineContext::pipeline_->GetTheme<ListItemTheme>();
+    listItemTheme->defaultColor_ = Color::RED;
+    listItemTheme->itemDefaultColor_ = Color::RED;
+    firstGroupPattern->OnColorConfigurationUpdate();
+    firstGroupItemPattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(firstGroupRender->GetBackgroundColor(), Color::RED);
+    EXPECT_EQ(firstGroupItemRender->GetBackgroundColor(), Color::RED);
+
+    /**
+     * @tc.steps: step1. NONE
+     */
+    auto secondGroup = GetChildFrameNode(frameNode_, 1);
+    auto secondGroupRender = secondGroup->GetRenderContext();
+    auto secondGroupPattern = secondGroup->GetPattern();
+    auto secondGroupItem = GetChildFrameNode(secondGroup, 0);
+    auto secondGroupItemRender = secondGroupItem->GetRenderContext();
+    auto secondGroupItemPattern = secondGroupItem->GetPattern();
+    EXPECT_FALSE(secondGroupRender->GetBackgroundColor().has_value());
+    EXPECT_FALSE(secondGroupItemRender->GetBackgroundColor().has_value());
+    secondGroupPattern->OnColorConfigurationUpdate();
+    secondGroupItemPattern->OnColorConfigurationUpdate();
+    EXPECT_FALSE(secondGroupRender->GetBackgroundColor().has_value());
+    EXPECT_FALSE(secondGroupItemRender->GetBackgroundColor().has_value());
+    // reset theme
+    listItemTheme->defaultColor_ = Color::WHITE;
+    listItemTheme->itemDefaultColor_ = Color::WHITE;
 }
 } // namespace OHOS::Ace::NG

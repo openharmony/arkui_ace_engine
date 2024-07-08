@@ -122,6 +122,8 @@ void ImageAnalyzerManager::UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
 
 void ImageAnalyzerManager::DestroyAnalyzerOverlay()
 {
+    ReleaseImageAnalyzer();
+    
     if (!isAnalyzerOverlayBuild_) {
         return;
     }
@@ -266,7 +268,8 @@ bool ImageAnalyzerManager::UpdateVideoConfig(const PixelMapInfo& info)
     }
 
     bool shouldUpdateSize = analyzerUIConfig_.contentWidth != info.width ||
-                            analyzerUIConfig_.contentHeight != info.height;
+                            analyzerUIConfig_.contentHeight != info.height ||
+                            analyzerUIConfig_.overlayOffset != info.overlayOffset;
     if (shouldUpdateSize) {
         analyzerUIConfig_.UpdateFromInfo(info);
     }

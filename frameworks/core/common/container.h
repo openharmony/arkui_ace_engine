@@ -298,6 +298,7 @@ public:
     static int32_t SafelyId();
     static int32_t CurrentId();
     static int32_t CurrentIdSafely();
+    static int32_t CurrentIdSafelyWithCheck();
     static RefPtr<Container> Current();
     static RefPtr<Container> CurrentSafely();
     static RefPtr<Container> CurrentSafelyWithCheck();
@@ -521,7 +522,10 @@ public:
     static bool GreatOrEqualAPITargetVersion(PlatformVersion version)
     {
         auto container = Current();
-        CHECK_NULL_RETURN(container, false);
+        if (!container) {
+            auto apiTargetVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
+            return apiTargetVersion >= static_cast<int32_t>(version);
+        }
         auto apiTargetVersion = container->GetApiTargetVersion();
         return apiTargetVersion >= static_cast<int32_t>(version);
     }

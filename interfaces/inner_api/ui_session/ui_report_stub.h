@@ -80,6 +80,13 @@ public:
     void RegisterGetInspectorTreeCallback(const EventCallback& eventCallback);
 
     /**
+     * @description: register a callback when get inspector tree
+     * @param eventCallback callback to be performed
+     */
+    void RegisterWebUnfocusEventCallback(
+        const std::function<void(int64_t accessibilityId, const std::string& data)>& eventCallback);
+
+    /**
      * @description: unregister the click callback last register
      */
     void UnregisterClickEventCallback();
@@ -104,12 +111,18 @@ public:
      */
     void ReportInspectorTreeValue(const std::string& data) override;
 
+    /**
+     * @description: report web unfocus value for SA
+     */
+    void ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data) override;
+
 private:
     EventCallback clickEventCallback_;
     EventCallback searchEventCallback_;
     EventCallback RouterChangeEventCallback_;
     EventCallback ComponentChangeEventCallback_;
     EventCallback inspectorTreeCallback_;
+    std::function<void(int64_t accessibilityId, const std::string& data)> unfocusEvent_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_REPORT_STUB_H

@@ -28,7 +28,11 @@
 #include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
+#include "frameworks/core/components_ng/base/inspector.h"
+#endif
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/log/ace_performance_monitor.h"
@@ -593,7 +597,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         }
     }
     HandleOnAreaChangeEvent(nanoTimestamp);
-    HandleVisibleAreaChangeEvent();
+    HandleVisibleAreaChangeEvent(nanoTimestamp);
     if (isNeedFlushMouseEvent_) {
         FlushMouseEvent();
         isNeedFlushMouseEvent_ = false;
@@ -2762,7 +2766,6 @@ MouseEvent ConvertAxisToMouse(const AxisEvent& event)
 void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode>& node)
 {
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
-    scaleEvent.id = AXIS_BASE_ID + event.id;
 
     auto dragManager = GetDragDropManager();
     if (dragManager && !dragManager->IsDragged()) {
@@ -2783,7 +2786,6 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
         isBeforeDragHandleAxis_ = false;
     }
 
-    scaleEvent.id = event.id;
     if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
         eventManager_->AxisTest(scaleEvent, node);
         eventManager_->DispatchAxisEventNG(scaleEvent);
@@ -2824,7 +2826,7 @@ void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId)
     onVisibleAreaChangeNodeIds_.erase(nodeId);
 }
 
-void PipelineContext::HandleVisibleAreaChangeEvent()
+void PipelineContext::HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp)
 {
     ACE_FUNCTION_TRACE();
     if (onVisibleAreaChangeNodeIds_.empty()) {
@@ -2832,7 +2834,7 @@ void PipelineContext::HandleVisibleAreaChangeEvent()
     }
     auto nodes = FrameNode::GetNodesById(onVisibleAreaChangeNodeIds_);
     for (auto&& frameNode : nodes) {
-        frameNode->TriggerVisibleAreaChangeCallback();
+        frameNode->TriggerVisibleAreaChangeCallback(nanoTimestamp);
     }
 }
 
@@ -3138,7 +3140,7 @@ void PipelineContext::FlushWindowStateChangedCallback(bool isShow)
             ++iter;
         }
     }
-    HandleVisibleAreaChangeEvent();
+    HandleVisibleAreaChangeEvent(GetTimeFromExternalTimer());
     HandleSubwindow(isShow);
 }
 
@@ -3345,6 +3347,21 @@ void PipelineContext::AddPersistAfterLayoutTask(std::function<void()>&& task)
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
 {
     taskScheduler_->AddAfterRenderTask(std::move(task));
+}
+
+void PipelineContext::AddSafeAreaPaddingProcessTask(FrameNode* node)
+{
+    taskScheduler_->AddSafeAreaPaddingProcessTask(node);
+}
+
+void PipelineContext::RemoveSafeAreaPaddingProcessTask(FrameNode* node)
+{
+    taskScheduler_->RemoveSafeAreaPaddingProcessTask(node);
+}
+
+void PipelineContext::FlushSafeAreaPaddingProcess()
+{
+    taskScheduler_->FlushSafeAreaPaddingProcess();
 }
 
 void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo)
@@ -3918,6 +3935,13 @@ void PipelineContext::RegisterFocusCallback()
 
 void PipelineContext::GetInspectorTree()
 {
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+    bool needThrow = false;
+    NG::InspectorFilter filter;
+    filter.AddFilterAttr("content");
+    auto nodeInfos = NG::Inspector::GetInspector(false, filter, needThrow);
+    UiSessionManager::GetInstance().AddValueForTree(0, nodeInfos);
+#endif
     rootNode_->GetInspectorValue();
 }
 
@@ -3963,5 +3987,10 @@ void PipelineContext::CleanNodeChangeFlag()
             frameNode->ClearChangeInfoFlag();
         }
     }
+}
+
+void PipelineContext::NotifyAllWebPattern(bool isRegister)
+{
+    rootNode_->NotifyWebPattern(isRegister);
 }
 } // namespace OHOS::Ace::NG

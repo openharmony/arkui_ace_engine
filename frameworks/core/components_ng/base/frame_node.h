@@ -165,7 +165,6 @@ public:
 
     void ProcessPropertyDiff()
     {
-        // TODO: modify done need to optimize.
         if (isPropertyDiffMarked_) {
             MarkModifyDone();
             MarkDirtyNode();
@@ -238,7 +237,7 @@ public:
         eventHub_->CleanVisibleAreaCallback(false);
     }
 
-    void TriggerVisibleAreaChangeCallback(bool forceDisappear = false);
+    void TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceDisappear = false);
 
     void SetOnSizeChangeCallback(OnSizeChangedFunc&& callback);
 
@@ -741,6 +740,7 @@ public:
     {
         return renderContext_->HasPosition() || renderContext_->HasPositionEdges();
     }
+    void ProcessSafeAreaPadding();
 
     bool SkipMeasureContent() const override;
     float GetBaselineDistance() const override;
@@ -935,6 +935,7 @@ public:
     ChildrenListWithGuard GetAllChildren();
     OPINC_TYPE_E FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth);
     void GetInspectorValue() override;
+    void NotifyWebPattern(bool isRegister) override;
 
     FrameNodeChangeInfoFlag GetChangeInfoFlag()
     {
@@ -1014,6 +1015,8 @@ private:
         double lastVisibleRatio, bool isThrottled = false);
     void ProcessThrottledVisibleCallback();
     bool IsFrameDisappear();
+    bool IsFrameDisappear(uint64_t timestamp);
+    bool IsFrameAncestorDisappear(uint64_t timestamp);
     void ThrottledVisibleTask();
 
     void OnPixelRoundFinish(const SizeF& pixelGridRoundSize);
@@ -1145,6 +1148,7 @@ private:
 
     std::pair<uint64_t, OffsetF> cachedGlobalOffset_ = { 0, OffsetF() };
     std::pair<uint64_t, OffsetF> cachedTransformRelativeOffset_ = { 0, OffsetF() };
+    std::pair<uint64_t, bool> cachedIsFrameDisappear_ = { 0, false };
 
     struct onSizeChangeDumpInfo {
         int64_t onSizeChangeTimeStamp;

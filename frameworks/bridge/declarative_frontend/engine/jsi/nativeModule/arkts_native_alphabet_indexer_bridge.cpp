@@ -745,7 +745,7 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetAutoCollapse(ArkUIRuntimeCallIn
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> autoCollapseArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    bool autoCollapse = false;
+    bool autoCollapse = true;
     if (autoCollapseArg->IsBoolean()) {
         autoCollapse = autoCollapseArg->ToBoolean(vm)->Value();
     }

@@ -679,7 +679,7 @@ private:
     std::weak_ptr<OHOS::AbilityRuntime::Context> GetRuntimeContextInner() const;
 
     void RegisterStopDragCallback(int32_t pointerId, StopDragCallback&& stopDragCallback);
-    void SetFontScaleAndWeightScale(const ParsedConfig& parsedConfig);
+    void SetFontScaleAndWeightScale(const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange);
     void ReleaseResourceAdapter();
     void FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPtr<ViewDataWrap> &viewDataWrap);
 

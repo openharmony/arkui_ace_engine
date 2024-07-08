@@ -383,6 +383,16 @@ public:
     bool IsTopNavDestination(const RefPtr<UINode>& node) const;
     void TryRestoreSystemBarStyle(const RefPtr<WindowManager>& windowManager);
 
+    bool IsFinishInteractiveAnimation() const
+    {
+        return isFinishInteractiveAnimation_;
+    }
+
+    bool IsCurTopNewInstance() const
+    {
+        return isCurTopNewInstance_;
+    }
+
 private:
     void UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host);
     void UpdateSystemBarStyleOnFullPageStateChange(const RefPtr<WindowManager>& windowManager);
@@ -496,6 +506,7 @@ private:
     bool isDividerDraggable_ = true;
     bool isAnimated_ = false;
     bool isReplace_ = false;
+    bool isFinishInteractiveAnimation_ = true;
     int32_t lastPreIndex_ = false;
     std::shared_ptr<NavigationController> navigationController_;
     std::map<int32_t, std::function<void(bool)>> onStateChangeMap_;
@@ -506,6 +517,7 @@ private:
     WeakPtr<UINode> parentNode_;
     int32_t preStackSize_ = 0;
     bool isRightToLeft_ = false;
+    bool isCurTopNewInstance_ = false;
 };
 
 } // namespace OHOS::Ace::NG

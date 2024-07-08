@@ -1244,4 +1244,27 @@ HWTEST_F(BaseUtilsTest, StringExpressionTest006, TestSize.Level1)
     EXPECT_FALSE(StringExpression::CalculateExpImpl(
         rpnexp, [](const Dimension& dim) -> double { return dim.Value(); }, result, opRes));
 }
+
+/**
+ * @tc.name: StringExpressionTest007
+ * @tc.desc: ConvertDal2Rpn: ReplaceSignNumberWithUnit()/FilterCalcSpecialString
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest007, TestSize.Level1)
+{
+    // replace sign number with unit with formula == ""
+    std::string formula = "";
+    std::vector<std::string> ret = StringExpression::ConvertDal2Rpn(formula);
+    EXPECT_EQ(formula, "");
+    EXPECT_EQ(ret.size(), 0);
+
+    // replace sign number with unit normal case
+    formula = "+1.1px";
+    std::vector<std::string> ret2 = StringExpression::ConvertDal2Rpn(formula);
+    EXPECT_EQ(ret2.size(), 0);
+
+    formula = "calc(2 * 3 - (2 + 3) / 5 + 6 / 2 + (1 + 2))";
+    std::vector<std::string> ret3 = StringExpression::ConvertDal2Rpn(formula);
+    EXPECT_EQ(ret3.size(), 17);
+}
 } // namespace OHOS::Ace

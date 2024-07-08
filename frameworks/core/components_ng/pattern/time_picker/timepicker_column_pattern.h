@@ -306,6 +306,7 @@ public:
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void SetDividerHeight(uint32_t showOptionCount);
     void ChangeTextStyle(uint32_t index, uint32_t showOptionCount, const RefPtr<TextLayoutProperty>& textLayoutProperty,
@@ -366,6 +367,10 @@ private:
     void AddHotZoneRectToText();
     void InitTextFontFamily();
     void InitHapticController(const RefPtr<FrameNode>& host);
+    void RegisterWindowStateChangedCallback();
+    void UnregisterWindowStateChangedCallback();
+    void OnWindowHide() override;
+    void OnWindowShow() override;
     double mainVelocity_ = 0.0;
     float localDownDistance_ = 0.0f;
     Color pressColor_;
@@ -415,6 +420,7 @@ private:
     bool hasUserDefinedDisappearFontFamily_ = false;
     bool hasUserDefinedNormalFontFamily_ = false;
     bool hasUserDefinedSelectedFontFamily_ = false;
+    bool isShow_ = true;
     std::shared_ptr<ITimepickerAudioHaptic> hapticController_ = nullptr;
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnPattern);
 };

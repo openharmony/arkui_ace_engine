@@ -142,7 +142,8 @@ public:
         gridLayoutInfo_.irregularItemsPosition_.clear();
     }
 
-    void SetIrregular(bool value) {
+    void SetIrregular(bool value)
+    {
         irregular_ = value;
     }
 
@@ -183,8 +184,7 @@ public:
 
     void OnAnimateStop() override;
 
-    void AnimateTo(
-        float position, float duration, const RefPtr<Curve> &curve, bool smooth, bool canOverScroll = false,
+    void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll = false,
         bool useTotalOffset = true) override;
     void ScrollTo(float position) override;
 
@@ -220,15 +220,15 @@ public:
     {
         return true;
     }
-    
-    std::optional<GridPredictLayoutParam> GetPredictLayoutParam() const
+
+    const std::list<int32_t>& GetPreloadItemList() const
     {
-        return predictLayoutParam_;
+        return preloadItemList_;
     }
 
-    void SetPredictLayoutParam(std::optional<GridPredictLayoutParam> param)
+    void SetPreloadItemList(std::list<int32_t>&& list)
     {
-        predictLayoutParam_ = param;
+        preloadItemList_ = std::move(list);
     }
 
     std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems() override;
@@ -253,7 +253,7 @@ private:
     float GetMainGap() const;
     float GetAllDelta();
     void CheckScrollable();
-    bool IsOutOfBoundary(bool useCurrentDelta = true) override;
+    bool IsOutOfBoundary(bool useCurrentDelta) override;
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     SizeF GetContentSize() const;
     void OnModifyDone() override;
@@ -317,7 +317,7 @@ private:
     GridItemIndexInfo curFocusIndexInfo_;
     GridLayoutInfo scrollGridLayoutInfo_;
     GridLayoutInfo gridLayoutInfo_;
-    std::optional<GridPredictLayoutParam> predictLayoutParam_;
+    std::list<int32_t> preloadItemList_; // list of GridItems to build preemptively in IdleTask
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);
 };
 

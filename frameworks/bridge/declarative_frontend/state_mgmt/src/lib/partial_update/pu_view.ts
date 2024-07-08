@@ -686,7 +686,7 @@ abstract class ViewPU extends PUV2ViewBase
       if (!this.isViewV3) {
         // Enable PU state tracking only in PU @Components
         this.currentlyRenderedElmtIdStack_.push(elmtId);
-        stateMgmtDFX.inRenderingElementId_.push(elmtId);
+        stateMgmtDFX.inRenderingElementId.push(elmtId);
       }
 
       // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria),
@@ -713,7 +713,7 @@ abstract class ViewPU extends PUV2ViewBase
       }
       if (!this.isViewV3) {
         this.currentlyRenderedElmtIdStack_.pop();
-        stateMgmtDFX.inRenderingElementId_.pop();
+        stateMgmtDFX.inRenderingElementId.pop();
       }
       ViewStackProcessor.StopGetAccessRecording();
 
@@ -1117,16 +1117,9 @@ abstract class ViewPU extends PUV2ViewBase
       .filter((varName: string) => varName.startsWith('__') && !varName.startsWith(ObserveV2.OB_PREFIX))
       .forEach((varName) => {
         const prop: any = Reflect.get(this, varName);
-        if ('debugInfoDecorator' in prop) {
+        if (typeof prop === 'object' && 'debugInfoDecorator' in prop) {
           const observedProp: ObservedPropertyAbstractPU<any> = prop as ObservedPropertyAbstractPU<any>;
-          let rawValue: any = observedProp.getRawObjectValue();
-          let observedPropertyInfo: ObservedPropertyInfo<any> = {
-            decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
-            value: typeof rawValue === 'object' ? 'Only support to dump simple type: string, number, boolean, enum type' : rawValue,
-            dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, false),
-            owningView: { componentName: this.constructor.name, id: this.id__() }, syncPeers: observedProp.dumpSyncPeers(false)
-          };
-          res.observedPropertiesInfo.push(observedPropertyInfo);
+          res.observedPropertiesInfo.push(stateMgmtDFX.getObservedPropertyInfo(observedProp, false));
         }
       });
     let resInfo: string = '';
@@ -1149,9 +1142,9 @@ abstract class ViewPU extends PUV2ViewBase
   public __mkRepeatAPI: <I>(arr: Array<I>) => RepeatAPI<I> = <I>(arr: Array<I>): RepeatAPI<I> => {
     // factory is for future extensions, currently always return the same
     const elmtId = this.getCurrentlyRenderedElmtId();
-    let repeat = this.elmtId2Repeat_.get(elmtId) as __RepeatPU<I>;
+    let repeat = this.elmtId2Repeat_.get(elmtId) as __Repeat<I>;
     if (!repeat) {
-        repeat = new __RepeatPU<I>(this, arr);
+        repeat = new __Repeat<I>(this, arr);
         this.elmtId2Repeat_.set(elmtId, repeat);
     } else {
         repeat.updateArr(arr);

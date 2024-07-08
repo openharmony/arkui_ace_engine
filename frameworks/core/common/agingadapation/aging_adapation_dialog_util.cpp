@@ -74,8 +74,8 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
     return CreateCustomDialog(columnNode);
 }
 
-RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
-    const std::string& message, const SymbolSourceInfo& symbolSourceInfo, const std::vector<Color>& symbolColorList)
+RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(const std::string& message,
+    const SymbolSourceInfo& symbolSourceInfo, const std::vector<Color>& symbolColorList, FontWeight fontWeight)
 {
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(context, nullptr);
@@ -91,6 +91,7 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
     symbolProperty->UpdateSymbolSourceInfo(symbolSourceInfo);
     symbolColorList.empty() ? symbolProperty->UpdateSymbolColorList({ dialogTheme->GetDialogIconColor() })
                             : symbolProperty->UpdateSymbolColorList(symbolColorList);
+    symbolProperty->UpdateFontWeight(fontWeight);
     MarginProperty symbolMargin;
     Dimension dialogHeight;
     if (message.empty()) {

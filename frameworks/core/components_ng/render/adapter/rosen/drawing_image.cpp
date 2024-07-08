@@ -326,10 +326,11 @@ bool DrawingImage::DrawWithRecordingCanvas(RSCanvas& canvas, const BorderRadiusA
     for (int i = 0; i < 4; i++) {
         pointRadius[i] = radius[i];
     }
-    Rosen::Drawing::AdaptiveImageInfo rsImageInfo =
-        {static_cast<int32_t>(config.imageFit_), static_cast<int32_t>(config.imageRepeat_),
-         {pointRadius[0], pointRadius[1], pointRadius[2], pointRadius[3]}, 1.0, GetUniqueID(),
-        GetCompressWidth(), GetCompressHeight()};
+    Rosen::Drawing::AdaptiveImageInfo rsImageInfo = {
+        static_cast<int32_t>(config.imageFit_), static_cast<int32_t>(config.imageRepeat_),
+        {pointRadius[0], pointRadius[1], pointRadius[2], pointRadius[3]}, 1.0, GetUniqueID(),
+        GetCompressWidth(), GetCompressHeight()
+    };
     auto data = GetCompressData();
     recordingCanvas.AttachBrush(brush);
     recordingCanvas.DrawImageWithParm(GetImage(), std::move(data), rsImageInfo, options);

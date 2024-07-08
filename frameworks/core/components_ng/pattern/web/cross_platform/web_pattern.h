@@ -340,6 +340,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleTag, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleType, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverlayScrollbarEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAvoidMode, WebKeyboardAvoidMode);
     void RequestFullScreen();
     void ExitFullScreen();
     bool IsFullScreen() const
@@ -454,6 +455,7 @@ private:
     void OnTextAutosizingUpdate(bool isTextAutosizing);
     void OnMetaViewportUpdate(bool value);
     void OnOverlayScrollbarEnabledUpdate(bool value);
+    void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
 
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);

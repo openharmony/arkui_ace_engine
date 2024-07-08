@@ -101,6 +101,14 @@ void RichEditorModelNG::SetOnSelect(std::function<void(const BaseEventInfo*)>&& 
     eventHub->SetOnSelect(std::move(func));
 }
 
+void RichEditorModelNG::SetOnSelect(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelect(std::move(callback));
+}
+
 void RichEditorModelNG::SetOnSelectionChange(std::function<void(const BaseEventInfo*)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
@@ -116,12 +124,30 @@ void RichEditorModelNG::SetAboutToIMEInput(std::function<bool(const RichEditorIn
     eventHub->SetAboutToIMEInput(std::move(func));
 }
 
+void RichEditorModelNG::SetAboutToIMEInput(FrameNode* frameNode,
+    std::function<bool(const RichEditorInsertValue&)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetAboutToIMEInput(std::move(callback));
+}
+
 void RichEditorModelNG::SetOnIMEInputComplete(std::function<void(const RichEditorAbstractSpanResult&)>&& func)
 {
     CHECK_NULL_VOID(!isStyledStringMode_);
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnIMEInputComplete(std::move(func));
+}
+
+void RichEditorModelNG::SetOnIMEInputComplete(FrameNode* frameNode,
+    std::function<void(const RichEditorAbstractSpanResult&)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnIMEInputComplete(std::move(callback));
 }
 
 void RichEditorModelNG::SetAboutToDelete(std::function<bool(const RichEditorDeleteValue&)>&& func)
@@ -244,6 +270,24 @@ void RichEditorModelNG::SetTextDetectConfig(const std::string& value,
     pattern->SetOnResult(std::move(onResult));
 }
 
+void RichEditorModelNG::SetTextDetectConfig(FrameNode* frameNode, const std::string& value,
+    std::function<void(const std::string&)>&& onResult)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetTextDetectTypes(value);
+    pattern->SetOnResult(std::move(onResult));
+}
+
+void RichEditorModelNG::SetOnSelectionChange(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelectionChange(std::move(callback));
+}
+
 void RichEditorModelNG::SetTextDetectEnable(FrameNode* frameNode, bool value)
 {
     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
@@ -323,6 +367,15 @@ void RichEditorModelNG::SetOnSubmit(std::function<void(int32_t, NG::TextFieldCom
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSubmit(std::move(func));
+}
+
+void RichEditorModelNG::SetOnSubmit(FrameNode* frameNode,
+    std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSubmit(std::move(callback));
 }
 
 void RichEditorModelNG::SetOnWillChange(std::function<bool(const RichEditorChangeValue&)>&& func)

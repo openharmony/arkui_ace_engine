@@ -1738,12 +1738,27 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             [weakContext = WeakPtr(pipeline)]() {
                 auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
                 CHECK_NULL_VOID(pipeline);
+                ContainerScope scope(pipeline->GetInstanceId());
                 pipeline->GetInspectorTree();
                 UiSessionManager::GetInstance().WebTaskNumsChange(-1);
             },
             TaskExecutor::TaskType::UI, "UiSessionGetInspectorTree");
     };
     UiSessionManager::GetInstance().SaveInspectorTreeFunction(callback);
+    auto webCallback = [weakContext = WeakPtr(pipeline)](bool isRegister) {
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [weakContext = WeakPtr(pipeline), isRegister]() {
+                auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+                CHECK_NULL_VOID(pipeline);
+                pipeline->NotifyAllWebPattern(isRegister);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionRegisterWebPattern");
+    };
+    UiSessionManager::GetInstance().SaveRegisterForWebFunction(webCallback);
     return errorCode;
 }
 
@@ -2907,24 +2922,6 @@ void UIContentImpl::RecoverForm(const std::string& statusData)
     return pipeline->OnFormRecover(statusData);
 }
 
-void UIContentImpl::RemoveOldPopInfoIfExsited(bool isShowInSubWindow, int32_t nodeId)
-{
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto overlayManager = pipeline->GetOverlayManager();
-    if (isShowInSubWindow) {
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
-        CHECK_NULL_VOID(subwindow);
-        overlayManager = subwindow->GetOverlayManager();
-    }
-
-    CHECK_NULL_VOID(overlayManager);
-    if (overlayManager->HasPopupInfo(nodeId)) {
-        LOGD("Target node id=%{public}d has old popup info, erase it", nodeId);
-        overlayManager->ErasePopupInfo(nodeId);
-    }
-}
-
 RefPtr<PopupParam> UIContentImpl::CreateCustomPopupParam(bool isShow, const CustomPopupUIExtensionConfig& config)
 {
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
@@ -3005,10 +3002,6 @@ void UIContentImpl::OnPopupStateChange(
 
     LOGD("Created custom popup is invisible");
     ContainerScope scope(instanceId_);
-    auto taskExecutor = Container::CurrentTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostDelayedTask([config, nodeId]() { RemoveOldPopInfoIfExsited(config.isShowInSubWindow, nodeId); },
-        TaskExecutor::TaskType::UI, 100, "ArkUIRemoveOldPopupInfo"); // delay 100ms
     customPopupConfigMap_.erase(nodeId);
     popupUIExtensionRecords_.erase(nodeId);
 }
@@ -3094,7 +3087,6 @@ void UIContentImpl::DestroyCustomPopupUIExtension(int32_t nodeId)
             CHECK_NULL_VOID(targetNode);
             auto popupParam = CreateCustomPopupParam(false, config);
             NG::ViewAbstract::BindPopup(popupParam, targetNode, nullptr);
-            RemoveOldPopInfoIfExsited(config.isShowInSubWindow, nodeId);
             customPopupConfigMap_.erase(nodeId);
             popupUIExtensionRecords_.erase(nodeId);
         },

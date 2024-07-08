@@ -101,6 +101,7 @@ const std::string RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
 const std::string RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
 const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
 const std::string RESOURCE_CLIPBOARD_READ_WRITE = "TYPE_CLIPBOARD_READ_WRITE";
+const std::string RESOURCE_SENSORS = "TYPE_SENSORS";
 const std::string DEFAULT_CANONICAL_ENCODING_NAME = "UTF-8";
 constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
 
@@ -395,6 +396,9 @@ std::vector<std::string> WebPermissionRequestOhos::GetResources() const
         if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::CLIPBOARD_READ_WRITE) {
             resources.push_back(RESOURCE_CLIPBOARD_READ_WRITE);
         }
+        if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::SENSORS) {
+            resources.push_back(RESOURCE_SENSORS);
+        }
     }
     return resources;
 }
@@ -414,6 +418,8 @@ void WebPermissionRequestOhos::Grant(std::vector<std::string>& resources) const
                 resourcesId |= OHOS::NWeb::NWebAccessRequest::Resources::MIDI_SYSEX;
             } else if (res == RESOURCE_CLIPBOARD_READ_WRITE) {
                 resourcesId |= OHOS::NWeb::NWebAccessRequest::Resources::CLIPBOARD_READ_WRITE;
+            } else if (res == RESOURCE_SENSORS) {
+                resourcesId |= OHOS::NWeb::NWebAccessRequest::Resources::SENSORS;
             }
         }
         request_->Agree(resourcesId);
@@ -804,7 +810,6 @@ void WebDelegate::Stop()
 
 void WebDelegate::UnregisterEvent()
 {
-    // TODO: add support for ng.
     auto context = DynamicCast<PipelineContext>(context_.Upgrade());
     if (!context) {
         return;
@@ -1567,7 +1572,6 @@ void WebDelegate::CreatePluginResource(
     const Size& size, const Offset& position, const WeakPtr<PipelineContext>& context)
 {
     state_ = State::CREATING;
-    // TODO: add ng pattern.
     auto webCom = webComponent_.Upgrade();
     if (!webCom) {
         state_ = State::CREATEFAILED;
@@ -1591,7 +1595,6 @@ void WebDelegate::CreatePluginResource(
         if (webDelegate == nullptr) {
             return;
         }
-        // TODO: add ng pattern.
         auto webCom = webDelegate->webComponent_.Upgrade();
         if (!webCom) {
             webDelegate->OnError(NTC_ERROR, "fail to call WebDelegate::SetSrc PostTask");
@@ -4192,7 +4195,6 @@ sptr<OHOS::Rosen::Window> WebDelegate::CreateWindow()
 
 void WebDelegate::RegisterWebEvent()
 {
-    // TODO: add support for ng.
     auto context = DynamicCast<PipelineContext>(context_.Upgrade());
     CHECK_NULL_VOID(context);
     auto resRegister = context->GetPlatformResRegister();
@@ -4828,7 +4830,7 @@ void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEve
         CHECK_NULL_VOID(webNode);
         accessibilityId = webNode->GetAccessibilityId();
     }
-    if (eventType == AccessibilityEventType::FOCUS) {
+    if (eventType == AccessibilityEventType::FOCUS || eventType == AccessibilityEventType::CLICK) {
         TextBlurReport(accessibilityId);
     }
     if (eventType == AccessibilityEventType::CLICK) {
@@ -5042,8 +5044,7 @@ void WebDelegate::OnPageError(const std::string& param)
 
 void WebDelegate::OnMessage(const std::string& param)
 {
-    std::string removeQuotes;
-    removeQuotes = param;
+    std::string removeQuotes = param;
     removeQuotes.erase(std::remove(removeQuotes.begin(), removeQuotes.end(), '\"'), removeQuotes.end());
     if (onMessage_) {
         std::string paramMessage = std::string(R"(")").append(removeQuotes).append(std::string(R"(")"));
@@ -5563,10 +5564,26 @@ void WebDelegate::HandleTouchpadFlingEvent(const double& x, const double& y, con
     }
 }
 
+void WebDelegate::WebHandleTouchpadFlingEvent(const double& x, const double& y,
+    const double& vx, const double& vy, const std::vector<int32_t>& pressedCodes)
+{
+    if (nweb_) {
+        nweb_->WebSendTouchpadFlingEvent(x, y, vx, vy, pressedCodes);
+    }
+}
+
 void WebDelegate::HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY)
 {
     if (nweb_) {
         nweb_->SendMouseWheelEvent(x, y, deltaX, deltaY);
+    }
+}
+
+void WebDelegate::WebHandleAxisEvent(const double& x, const double& y,
+    const double& deltaX, const double& deltaY, const std::vector<int32_t>& pressedCodes)
+{
+    if (nweb_) {
+        nweb_->WebSendMouseWheelEvent(x, y, deltaX, deltaY, pressedCodes);
     }
 }
 
@@ -5891,6 +5908,33 @@ void WebDelegate::SetBoundsOrResize(const Size& drawSize, const Offset& offset, 
     } else {
         Resize(drawSize.Width(), drawSize.Height(), isKeyboard);
     }
+}
+
+void WebDelegate::ResizeVisibleViewport(const Size& visibleSize, bool isKeyboard)
+{
+    double width = visibleSize.Width();
+    double height = visibleSize.Height();
+    if (NearEqual(resizeVisibleWidth_, width) && NearEqual(resizeVisibleHeight_, height)) {
+        return;
+    }
+    resizeVisibleWidth_ = width;
+    resizeVisibleHeight_ = height;
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), width, height, isKeyboard]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_ && !delegate->window_) {
+                delegate->nweb_->ResizeVisibleViewport(
+                    width < 0 ? 0 : std::ceil(width), height < 0 ? 0 : std::ceil(height), isKeyboard);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebResizeVisibleViewport");
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->DestroyAnalyzerOverlay();
 }
 
 Offset WebDelegate::GetWebRenderGlobalPos()

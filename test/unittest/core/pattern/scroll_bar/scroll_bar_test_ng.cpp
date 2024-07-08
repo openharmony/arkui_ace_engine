@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+
 #include "base/geometry/offset.h"
 #define private public
 #define protected public
@@ -25,6 +26,7 @@
 
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
@@ -35,8 +37,8 @@
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
-#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
@@ -84,6 +86,11 @@ protected:
 void ScrollBarTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_SCROLL_BAR);
+    auto scrollBarTheme = ScrollBarTheme::Builder().Build(themeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(scrollBarTheme));
 }
 
 void ScrollBarTestNg::TearDownTestSuite()
@@ -217,6 +224,12 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest001, TestSize.Level1)
     EXPECT_EQ(ret, false);
     auto expectDistance = SCROLL_BAR_SELF_SIZE.Height() - SCROLL_BAR_CHILD_HEIGHT; // 1036
     EXPECT_EQ(pattern_->scrollableDistance_, expectDistance);
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(DumpLog::GetInstance().description_.size(), 10);
+    EXPECT_EQ(DumpLog::GetInstance().description_[0], "Axis: VERTICAL\n");
+    EXPECT_EQ(DumpLog::GetInstance().description_[1], "outerScrollBarState: OFF\n");
+    EXPECT_EQ(DumpLog::GetInstance().description_[2], "panDirection: VERTICAL\n");
+    DumpLog::GetInstance().description_.clear();
 }
 
 /**
@@ -230,12 +243,6 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. Create scrollBar and initialize related properties.
      */
-    MockPipelineContext::SetUp();
-    auto context = MockPipelineContext::GetCurrent();
-    ASSERT_NE(context, nullptr);
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    context->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ScrollBarTheme>()));
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = CONTAINER_SIZE;
     layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
@@ -263,6 +270,12 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest002, TestSize.Level1)
      * @tc.expected: step3. Compare return value with expected value.
      */
     pattern_->OnModifyDone();
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(DumpLog::GetInstance().description_.size(), 10);
+    EXPECT_EQ(DumpLog::GetInstance().description_[0], "Axis: HORIZONTAL\n");
+    EXPECT_EQ(DumpLog::GetInstance().description_[1], "outerScrollBarState: AUTO\n");
+    EXPECT_EQ(DumpLog::GetInstance().description_[2], "panDirection: HORIZONTAL\n");
+    DumpLog::GetInstance().description_.clear();
     EXPECT_EQ(pattern_->axis_, Axis::HORIZONTAL);
     auto callback = pattern_->scrollPositionCallback_;
     EXPECT_NE(callback, nullptr);
@@ -519,6 +532,10 @@ HWTEST_F(ScrollBarTestNg, PerformActionTest001, TestSize.Level1)
     pattern_->axis_ = Axis::NONE;
     pattern_->scrollableDistance_ = 0.0;
     pattern_->SetAccessibilityAction();
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(DumpLog::GetInstance().description_.size(), 10);
+    EXPECT_EQ(DumpLog::GetInstance().description_[0], "Axis: NONE\n");
+    DumpLog::GetInstance().description_.clear();
 
     /**
      * @tc.steps: step3. When scrollBar Axis is NONE and scrollable distance is 0, call the callback function in
@@ -886,6 +903,10 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest012, TestSize.Level1)
     EXPECT_EQ(pattern_->scrollableEvent_->InBarRegion(localPoint, source), false);
 
     pattern_->panRecognizer_ = nullptr;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(DumpLog::GetInstance().description_.size(), 10);
+    EXPECT_EQ(DumpLog::GetInstance().description_[2], "panDirection is null\n");
+    DumpLog::GetInstance().description_.clear();
     pattern_->scrollableEvent_->BarCollectTouchTarget(
         coordinateOffset, getEventTargetImpl, result, frameNode, nullptr, responseLinkResult);
     EXPECT_EQ(result.size(), size + 1);
@@ -990,6 +1011,10 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest015, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->controlDistance_, 0);
     EXPECT_EQ(pattern_->opacity_, 0);
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(DumpLog::GetInstance().description_.size(), 10);
+    EXPECT_EQ(DumpLog::GetInstance().description_[1], "outerScrollBarState: ON\n");
+    DumpLog::GetInstance().description_.clear();
 
     /**
      * @tc.steps: case2. controlDistance_ > 0
@@ -2376,5 +2401,51 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest083, TestSize.Level1)
     scrollPaint->UpdateOverlayModifier(&paintWrapper);
     EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
     Container::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ScrollBarTest084
+ * @tc.desc: Test UpdateOverlayModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest084, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create scrollbar without child
+     */
+    const int32_t apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    int32_t directionValue = static_cast<int32_t>(Axis::VERTICAL);
+    int32_t stateValue = static_cast<int32_t>(DisplayMode::ON);
+    CreateScrollBarWithoutChild(true, false, directionValue, stateValue);
+
+    auto scrollableEvent = pattern_->scrollableEvent_;
+    auto scrollBar = pattern_->scrollBar_;
+    scrollBar->SetScrollable(true);
+    pattern_->CreateScrollBarOverlayModifier();
+    EXPECT_FALSE(scrollableEvent->InBarRegion(PointF(1.f, 1.f), SourceType::MOUSE));
+    EXPECT_FALSE(scrollableEvent->InBarRegion(PointF(1.f, 1.f), SourceType::TOUCH));
+    EXPECT_EQ(scrollBar->displayMode_, DisplayMode::ON);
+
+    GetEventTargetImpl GetEventTargetImpl;
+    TouchTestResult result, responseLinkResult;
+    scrollableEvent->BarCollectTouchTarget(
+        OffsetF(1.f, 1.f), GetEventTargetImpl, result, frameNode_, nullptr, responseLinkResult);
+    EXPECT_EQ(result.size(), 1);
+
+    /**
+     * @tc.steps: step2. set displayMode DisplayMode::AUTO
+     * @tc.expected: opacity is UINT8_MAX.
+     */
+    pattern_->SetScrollBar(DisplayMode::AUTO);
+    EXPECT_EQ(pattern_->scrollBarOverlayModifier_->GetOpacity(), UINT8_MAX);
+
+    /**
+     * @tc.steps: step3. set displayMode DisplayMode::OFF
+     * @tc.expected: opacity is 0.
+     */
+    pattern_->SetScrollBar(DisplayMode::OFF);
+    EXPECT_EQ(pattern_->scrollBarOverlayModifier_->GetOpacity(), 0);
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
 }
 } // namespace OHOS::Ace::NG

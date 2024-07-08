@@ -178,7 +178,9 @@ public:
             currentIndex_ += count;
             return;
         }
-
+        if (currentIndex_ > 0 && currLane_ == 0) {
+            estimateHeight_ += spaceWidth_;
+        }
         bool hasGroup = false;
         int32_t startIndex = std::max(currentIndex_, startIndex_);
         int32_t endIndex = std::min(currentIndex_ + count - 1, endIndex_);
@@ -188,14 +190,8 @@ public:
             int32_t curr = GetLines(lanes, startIndex_ - currentIndex_);
             estimateOffset_ = estimateHeight_ + (averageHeight + spaceWidth_) * curr;
             estimateOffset_ = CalculateOffset(node, averageHeight);
-            if (startIndex_ > 0) {
-                estimateOffset_ -= spaceWidth_;
-            }
         }
-        estimateHeight_ += (averageHeight + spaceWidth_) * GetLines(lanes, count);
-        if (currentIndex_ > 0) {
-            estimateHeight_ -= spaceWidth_;
-        }
+        estimateHeight_ += (averageHeight + spaceWidth_) * GetLines(lanes, count) - spaceWidth_;
         currentIndex_ += count;
     }
 

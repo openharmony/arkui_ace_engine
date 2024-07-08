@@ -218,8 +218,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         return;
     }
     auto focusHub = frameNode->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    bool hasContextMenuUsingGesture = focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
+    bool hasContextMenuUsingGesture = focusHub == nullptr
+                              ? false : focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
     dragDropManager->SetPreDragStatus(PreDragStatus::ACTION_DETECTING_STATUS);
     auto actionStart = [weak = WeakClaim(this), this](GestureEvent& info) {
         auto actuator = weak.Upgrade();
@@ -301,7 +301,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 actuator->UpdatePreviewOptionFromModifier(frameNode);
             }
         }
-
+        if (gestureHub->GetTextDraggable() && !gestureHub->GetIsTextDraggable()) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "Text category component does not meet the drag condition, forbidden drag.");
+            return;
+        }
        // Trigger drag start event set by user.
         CHECK_NULL_VOID(actuator->userCallback_);
         auto userActionStart = actuator->userCallback_->GetActionStartEventFunc();
@@ -1101,8 +1104,8 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     imageNode->CreateLayoutTask();
     FlushSyncGeometryNodeTasks();
     auto focusHub = frameNode->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    bool hasContextMenu = focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
+    bool hasContextMenu = focusHub == nullptr
+                              ? false : focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
     ShowPixelMapAnimation(imageNode, frameNode, hasContextMenu);
     TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent set pixelMap success.");
     SetPreviewDefaultAnimateProperty(imageNode);

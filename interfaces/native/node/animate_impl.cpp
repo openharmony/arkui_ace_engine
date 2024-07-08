@@ -113,6 +113,8 @@ ArkUIAnimatorOption* ConvertAnimatorOption(ArkUI_AnimatorOption* option)
     if (option->easing) {
         animatorOption->easing = option->easing->curve;
         animatorOption->curveType = option->easing->type;
+    } else {
+        animatorOption->easing = nullptr;
     }
 
     if (option->expectedFrameRateRange) {

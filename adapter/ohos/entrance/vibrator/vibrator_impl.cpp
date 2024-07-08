@@ -12,8 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
-
+#include "core/components_ng/pattern/indexer/vibrator_impl.h"
 #include <vector>
 
 #include "vibrator_agent.h"

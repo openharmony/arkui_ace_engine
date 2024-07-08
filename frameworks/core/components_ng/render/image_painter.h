@@ -44,6 +44,8 @@ public:
 
 private:
     RefPtr<CanvasImage> canvasImage_;
+    static void ApplyImageAlignmentFit(
+        ImageFit imageFit, const SizeF& rawPicSize, const SizeF& dstSize, RectF& srcRect, RectF& dstRect);
 };
 
 } // namespace OHOS::Ace::NG

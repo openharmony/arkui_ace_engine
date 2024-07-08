@@ -465,6 +465,16 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     if (!IsDragging()) {
         dragParagraph_ = paragraph_;
+        do {
+            if (!dragNode_) {
+                break;
+            }
+            auto dragNodePattern = AceType::DynamicCast<TextDragPattern>(dragNode_->GetPattern());
+            if (!dragNodePattern) {
+                break;
+            }
+            dragNodePattern->UpdateParagraph(paragraph_);
+        } while (false);
     }
     auto textRect = textFieldLayoutAlgorithm->GetTextRect();
     if (!needToRefreshSelectOverlay_ ||
@@ -513,11 +523,25 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (config.frameSizeChange) {
         ScheduleDisappearDelayTask();
     }
-    SetAccessibilityDeleteAction();
+    SetAccessibilityClearAction();
+    SetAccessibilityPasswordIconAction();
     return true;
 }
 
-void TextFieldPattern::SetAccessibilityDeleteAction()
+void TextFieldPattern::SetAccessibilityPasswordIconAction()
+{
+    if (IsInPasswordMode() && IsShowPasswordIcon()) {
+        auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
+        CHECK_NULL_VOID(passwordArea);
+        auto node = passwordArea->GetFrameNode();
+        CHECK_NULL_VOID(node);
+        auto textAccessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(textAccessibilityProperty);
+        textAccessibilityProperty->SetAccessibilityText(GetPasswordIconPromptInformation(passwordArea->IsObscured()));
+    }
+}
+
+void TextFieldPattern::SetAccessibilityClearAction()
 {
     if (IsShowCancelButtonMode()) {
         auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
@@ -631,6 +655,9 @@ void TextFieldPattern::UpdateCaretRect(bool isEditorValueChanged)
     if (IsSelected()) {
         selectController_->MoveFirstHandleToContentRect(selectController_->GetFirstHandleIndex());
         selectController_->MoveSecondHandleToContentRect(selectController_->GetSecondHandleIndex());
+        if (SelectOverlayIsOn()) {
+            selectOverlay_->UpdateAllHandlesOffset();
+        }
         return;
     }
     if (focusHub && !focusHub->IsCurrentFocus() && !obscuredChange_) {
@@ -1431,6 +1458,15 @@ std::string TextFieldPattern::GetCancelButton()
     return theme->GetCancelButton();
 }
 
+std::string TextFieldPattern::GetPasswordIconPromptInformation(bool show)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, "");
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(theme, "");
+    return show ? theme->GetShowPasswordPromptInformation() : theme->GetHiddenPasswordPromptInformation();
+}
+
 void TextFieldPattern::UpdateShowCountBorderStyle()
 {
     auto host = GetHost();
@@ -1699,6 +1735,7 @@ void TextFieldPattern::HandleTouchUp()
     if (magnifierController_->GetShowMagnifier() && !GetIsPreviewText()) {
         magnifierController_->UpdateShowMagnifier();
     }
+    ScheduleDisappearDelayTask();
 }
 
 void TextFieldPattern::HandleTouchMove(const TouchEventInfo& info)
@@ -4446,11 +4483,11 @@ void TextFieldPattern::HandleCounterBorder()
     }
 }
 
-void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyboard)
+bool TextFieldPattern::ProcessFocusIndexAction()
 {
     if (focusIndex_ == FocuseIndex::CANCEL) {
         CleanNodeResponseKeyEvent();
-        return;
+        return false;
     }
     if (focusIndex_ == FocuseIndex::UNIT) {
         if (IsShowPasswordIcon()) {
@@ -4459,6 +4496,14 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
         if (IsShowUnit()) {
             UnitResponseKeyEvent();
         }
+        return false;
+    }
+    return true;
+}
+
+void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyboard)
+{
+    if (!ProcessFocusIndexAction()) {
         return;
     }
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "PerformAction  %{public}d", static_cast<int32_t>(action));
@@ -5501,6 +5546,8 @@ void TextFieldPattern::ScheduleDisappearDelayTask()
 {
     auto scrollBar = GetScrollBar();
     if (scrollBar) {
+        scrollBar->SetPressed(false);
+        scrollBar->PlayScrollBarShrinkAnimation();
         scrollBar->ScheduleDisappearDelayTask();
     }
 }
@@ -6950,6 +6997,7 @@ void TextFieldPattern::CleanNodeResponseKeyEvent()
     InitEditingValueText("");
     CloseSelectOverlay();
     StartTwinkling();
+    UpdateCaretInfoToController();
     if (!HasFocus()) {
         auto focusHub = host->GetOrCreateFocusHub();
         focusHub->RequestFocusImmediately();

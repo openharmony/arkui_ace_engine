@@ -226,6 +226,8 @@ public:
     bool AvoidKeyboard(bool isFocusOnPage = true);
     // expand the SafeArea of expansive nodes, which are previously recorded during Layout traversal
     void ExpandSafeArea();
+    ExpandEdges GetAccumulatedSafeAreaExpand(bool includingSelf = false);
+    void ResetSafeAreaPadding();
 
     bool SkipSyncGeometryNode() const
     {
@@ -250,6 +252,8 @@ protected:
     OffsetF ExpandIntoKeyboard();
     bool CheckValidSafeArea();
     float GetPageCurrentOffset();
+    bool AccumulateExpandCacheHit(ExpandEdges& totalExpand);
+    void GetAccumulatedSafeAreaExpandHelper(RectF& adjustingRect, ExpandEdges& totalExpand);
 
     WeakPtr<FrameNode> hostNode_;
 

@@ -1113,7 +1113,7 @@ HWTEST_F(GridScrollerTestNg, PositionController009, TestSize.Level1)
      */
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, SCROLL_FIXED_VELOCITY_009);
     EXPECT_FALSE(pattern_->fixedVelocityMotion_);
-    
+
     /**
      * @tc.steps: step4. Scroll to the bottom edge
      * expected: 1.Fixed Verify is is non-zero.
@@ -1202,7 +1202,7 @@ HWTEST_F(GridScrollerTestNg, PositionController010, TestSize.Level1)
      */
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, SCROLL_FIXED_VELOCITY_010);
     EXPECT_FALSE(pattern_->fixedVelocityMotion_);
-    
+
     /**
      * @tc.steps: step4. Scroll to the bottom edge
      * expected: 1.Fixed Verify is is non-zero.
@@ -1234,7 +1234,7 @@ HWTEST_F(GridScrollerTestNg, PositionController010, TestSize.Level1)
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, SCROLL_FIXED_VELOCITY_010);
     EXPECT_TRUE(pattern_->fixedVelocityMotion_);
     EXPECT_EQ(pattern_->fixedVelocityMotion_->GetCurrentVelocity(), SCROLL_FIXED_VELOCITY_010);
-        
+
     /**
      * @tc.steps: step7. 1. Set offset time
      *                   2. Set changed count
@@ -1562,7 +1562,7 @@ HWTEST_F(GridScrollerTestNg, ScrollBy001, TestSize.Level1)
     EXPECT_TRUE(pattern_->scrollStop_);
 
     pattern_->OutBoundaryCallback();
-    EXPECT_FALSE(pattern_->IsOutOfBoundary());
+    EXPECT_FALSE(pattern_->IsOutOfBoundary(true));
 
     /**
      * @tc.steps: step3. Test AnimateTo function

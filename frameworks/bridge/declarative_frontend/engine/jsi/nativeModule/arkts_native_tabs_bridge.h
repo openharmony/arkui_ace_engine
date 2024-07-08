@@ -56,6 +56,8 @@ public:
     static ArkUINativeModuleValue ResetBarPosition(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTabClip(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetTabClip(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetTabEdgeEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetTabEdgeEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetWidthAuto(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetWidthAuto(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetHeightAuto(ArkUIRuntimeCallInfo* runtimeCallInfo);

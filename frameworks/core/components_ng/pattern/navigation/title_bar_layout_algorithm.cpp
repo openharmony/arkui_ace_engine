@@ -52,31 +52,27 @@ constexpr int32_t MENU_OFFSET_RATIO = 9;
 constexpr double SUBTITLE_MAX_HEIGHT_RADIO = 0.35;
 } // namespace
 
-void TitleBarLayoutAlgorithm::BackButtonLayout(const RefPtr<FrameNode>& backButtonNode,
-    const RefPtr<LayoutProperty>& buttonLayoutProperty)
+void TitleBarLayoutAlgorithm::BackButtonLayout(LayoutWrapper* layoutWrapper)
+{
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(layoutWrapper->GetHostNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    CHECK_NULL_VOID(backButtonNode);
+    auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty();
+    CHECK_NULL_VOID(backButtonLayoutProperty);
+    PaddingProperty padding;
+    padding.SetEdges(CalcLength(MENU_BUTTON_PADDING));
+    backButtonLayoutProperty->UpdatePadding(padding);
+}
+
+void TitleBarLayoutAlgorithm::UpdateIconSize(const RefPtr<FrameNode>& backButtonNode)
 {
     auto backButtonImageNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetChildren().front());
     CHECK_NULL_VOID(backButtonImageNode);
-    auto menuPadding = MENU_BUTTON_PADDING;
-    if (backButtonImageNode->GetTag() == V2::IMAGE_ETS_TAG) {
-        auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
-        CHECK_NULL_VOID(backButtonImageLayoutProperty);
-        backButtonImageLayoutProperty->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(backIconWidth_), CalcLength(backIconHeight_)));
-    } else if (backButtonImageNode->GetTag() == V2::SYMBOL_ETS_TAG) {
-        auto symbolProperty = backButtonImageNode->GetLayoutProperty<TextLayoutProperty>();
-        auto symbolSourceInfo = symbolProperty->GetSymbolSourceInfo();
-        auto theme = NavigationGetTheme();
-        CHECK_NULL_VOID(theme);
-        if (symbolSourceInfo.has_value() && symbolSourceInfo.value().GetUnicode() == theme->GetBackSymbolId()) {
-            menuPadding = BACK_BUTTON_SYMBOL_PADDING;
-        }
-    }
-
-    PaddingProperty padding;
-    padding.SetEdges(CalcLength(menuPadding), CalcLength(menuPadding), CalcLength(MENU_BUTTON_PADDING),
-        CalcLength(MENU_BUTTON_PADDING));
-    buttonLayoutProperty->UpdatePadding(padding);
+    auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(backButtonImageLayoutProperty);
+    backButtonImageLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(backIconWidth_), CalcLength(backIconHeight_)));
 }
 
 void TitleBarLayoutAlgorithm::MeasureBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
@@ -108,7 +104,7 @@ void TitleBarLayoutAlgorithm::MeasureBackButton(LayoutWrapper* layoutWrapper, co
             return;
         }
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            BackButtonLayout(backButtonNode, backButtonLayoutProperty);
+            UpdateIconSize(backButtonNode);
             constraint.selfIdealSize = OptionalSizeF(static_cast<float>(backButtonWidth_.ConvertToPx()),
                 static_cast<float>(backButtonWidth_.ConvertToPx()));
             backButtonWrapper->Measure(constraint);
@@ -132,7 +128,7 @@ void TitleBarLayoutAlgorithm::MeasureBackButton(LayoutWrapper* layoutWrapper, co
 
     backButtonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        BackButtonLayout(backButtonNode, backButtonLayoutProperty);
+        UpdateIconSize(backButtonNode);
         constraint.selfIdealSize = OptionalSizeF(static_cast<float>(backButtonWidth_.ConvertToPx()),
             static_cast<float>(backButtonWidth_.ConvertToPx()));
         backButtonWrapper->Measure(constraint);
@@ -485,6 +481,7 @@ void TitleBarLayoutAlgorithm::ShowBackButtonLayout(LayoutWrapper* layoutWrapper,
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         backButtonHeight = backButtonHeight_;
         paddingLeft = paddingLeft_;
+        BackButtonLayout(layoutWrapper);
     }
     float dividerOffset = 2.0f;
     auto offsetY = (titleHeight - backButtonHeight) / dividerOffset;

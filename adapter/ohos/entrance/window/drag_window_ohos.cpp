@@ -243,6 +243,32 @@ RefPtr<DragWindow> DragWindow::CreateDragWindow(
     return window;
 }
 
+RefPtr<DragWindow> DragWindow::CreateDragWindow(
+    const std::string& windowName, int32_t parentWindowId, int32_t x, int32_t y, uint32_t width, uint32_t height)
+{
+    int32_t halfWidth = static_cast<int32_t>(width) / 2;
+    int32_t halfHeight = static_cast<int32_t>(height) / 2;
+
+    OHOS::sptr<OHOS::Rosen::WindowOption> option = new OHOS::Rosen::WindowOption();
+    option->SetWindowRect({ x - halfWidth, y - halfHeight, width, height });
+    option->SetHitOffset(halfWidth, halfHeight);
+    option->SetWindowType(OHOS::Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
+    option->SetWindowMode(OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING);
+    option->SetParentId(parentWindowId);
+    option->SetFocusable(false);
+    OHOS::sptr<OHOS::Rosen::Window> dragWindow = OHOS::Rosen::Window::Create(windowName, option);
+    CHECK_NULL_RETURN(dragWindow, nullptr);
+
+    OHOS::Rosen::WMError ret = dragWindow->Show();
+    if (ret != OHOS::Rosen::WMError::WM_OK) {
+        TAG_LOGE(AceLogTag::ACE_DRAG, "DragWindow CreateDragWindow, drag window Show() failed, ret: %d", ret);
+    }
+
+    auto window = AceType::MakeRefPtr<DragWindowOhos>(dragWindow);
+    window->SetSize(width, height);
+    return window;
+}
+
 RefPtr<DragWindow> DragWindow::CreateTextDragWindow(
     const std::string& windowName, int32_t x, int32_t y, uint32_t width, uint32_t height)
 {

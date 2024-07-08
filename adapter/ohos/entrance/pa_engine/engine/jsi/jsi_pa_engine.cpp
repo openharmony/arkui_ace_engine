@@ -1438,7 +1438,6 @@ void JsiPaEngine::OnVisibilityChanged(const std::map<int64_t, int32_t>& formEven
 int32_t JsiPaEngine::OnAcquireFormState(const OHOS::AAFwk::Want& want)
 {
     shared_ptr<JsRuntime> runtime = GetJsRuntime();
-
     const std::vector<shared_ptr<JsValue>>& argv = { WantToJsValue(want) };
     auto func = GetPaFunc("onAcquireFormState");
 

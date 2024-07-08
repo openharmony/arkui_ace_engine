@@ -112,11 +112,22 @@ bool TextSelectOverlay::CheckAndAdjustHandle(RectF& paintRect)
         clip = true;
     }
     if (!renderContext->GetClipEdge().value_or(clip)) {
-        return true;
+        auto contentRect = textPattern->GetTextContentRect();
+        auto localPaintRect = paintRect;
+        localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
+        auto visibleContentRect = contentRect.CombineRectT(localPaintRect);
+        visibleContentRect.SetOffset(visibleContentRect.GetOffset() + textPattern->GetTextPaintOffset());
+        visibleContentRect = GetVisibleRect(host, visibleContentRect);
+        return CheckAndAdjustHandleWithContent(visibleContentRect, paintRect);
     }
     auto contentRect = textPattern->GetTextContentRect();
     RectF visibleContentRect(contentRect.GetOffset() + textPattern->GetTextPaintOffset(), contentRect.GetSize());
     visibleContentRect = GetVisibleRect(host, visibleContentRect);
+    return CheckAndAdjustHandleWithContent(visibleContentRect, paintRect);
+}
+
+bool TextSelectOverlay::CheckAndAdjustHandleWithContent(const RectF& visibleContentRect, RectF& paintRect)
+{
     PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
     PointF topPoint = { paintRect.Left(), paintRect.Top() + BOX_EPSILON };
     bool bottomInRegion = visibleContentRect.IsInRegion(bottomPoint);
@@ -309,6 +320,7 @@ void TextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo
     BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
+    textPattern->CopySelectionMenuParams(overlayInfo);
     OnUpdateOnCreateMenuCallback(overlayInfo);
 }
 
@@ -332,7 +344,8 @@ void TextSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType t
 void TextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
     BaseTextSelectOverlay::OnCloseOverlay(menuType, reason, info);
-    if (reason == CloseReason::CLOSE_REASON_HOLD_BY_OTHER || reason == CloseReason::CLOSE_REASON_TOOL_BAR) {
+    if (reason == CloseReason::CLOSE_REASON_HOLD_BY_OTHER || reason == CloseReason::CLOSE_REASON_TOOL_BAR ||
+        reason == CloseReason::CLOSE_REASON_BACK_PRESSED) {
         auto textPattern = GetPattern<TextPattern>();
         CHECK_NULL_VOID(textPattern);
         textPattern->ResetSelection();
@@ -343,11 +356,9 @@ void TextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchTyp
 {
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    if (IsTouchUp(sourceType, touchType)) {
+    if (IsTouchUp(sourceType, touchType) || IsMouseClickDown(sourceType, touchType)) {
         CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
         textPattern->ResetSelection();
-    } else if (IsMouseClickDown(sourceType, touchType)) {
-        CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
     }
 }
 

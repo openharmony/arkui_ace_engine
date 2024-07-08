@@ -17,6 +17,9 @@
 
 #include <optional>
 #include <string>
+#if !defined(PREVIEW)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
@@ -452,6 +455,9 @@ void JSRichEditor::SetOnIMEInputComplete(const JSCallbackInfo& args)
                         const NG::RichEditorAbstractSpanResult& textSpanResult) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         func->Execute(textSpanResult);
+#if !defined(PREVIEW)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onIMEInputComplete");
+#endif
     };
     RichEditorModel::GetInstance()->SetOnIMEInputComplete(std::move(callback));
 }
@@ -955,6 +961,9 @@ void JSRichEditor::SetOnPaste(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onPaste");
         PipelineContext::SetCallBackNode(node);
         func->Execute(info);
+#if !defined(PREVIEW)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onPaste");
+#endif
     };
     RichEditorModel::GetInstance()->SetOnPaste(std::move(onPaste));
 }

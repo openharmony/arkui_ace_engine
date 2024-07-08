@@ -53,6 +53,13 @@ protected:
     void RegisterLifecycleListener();
     void UnregisterLifecycleListener();
 
+#ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
+    RefPtr<FrameNode> BuildTextNode(const std::string& appNameInfo);
+    RefPtr<FrameNode> BuildAnimateNode(const std::string& base64Resource);
+    RefPtr<FrameNode> BuildStaticImageNode(const std::string& base64Resource);
+    void CreateASStartingWindow();
+#endif
+
     void CreateAppWindow();
     void CreateBlankWindow();
     void CreateStartingWindow();
@@ -62,7 +69,7 @@ protected:
     void AddChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
         const std::string& nodeType, int32_t index = DEFAULT_NODE_SLOT);
     void RemoveChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
-        const std::string& nodeType);
+        const std::string& nodeType, bool allowTransition = false);
 
     virtual void OnActivation() {}
     virtual void OnConnect() {}

@@ -4565,6 +4565,44 @@ void RosenRenderContext::ClipWithRect(const RectF& rectF)
 #endif
 }
 
+void RosenRenderContext::ClipWithRoundRect(const RoundRect& roundRect)
+{
+    CHECK_NULL_VOID(rsNode_);
+    RSRoundRect rsRoundRect;
+
+    RSRect rsRect(roundRect.GetRect().Left(), roundRect.GetRect().Top(), roundRect.GetRect().Right(),
+        roundRect.GetRect().Bottom());
+    rsRoundRect.SetRect(rsRect);
+
+    EdgeF edge = roundRect.GetCornerRadius(RoundRect::TOP_LEFT_POS);
+    rsRoundRect.SetCornerRadius(RSRoundRect::TOP_LEFT_POS, edge.x, edge.y);
+    edge = roundRect.GetCornerRadius(RoundRect::TOP_RIGHT_POS);
+    rsRoundRect.SetCornerRadius(RSRoundRect::TOP_RIGHT_POS, edge.x, edge.y);
+    edge = roundRect.GetCornerRadius(RoundRect::BOTTOM_LEFT_POS);
+    rsRoundRect.SetCornerRadius(RSRoundRect::BOTTOM_LEFT_POS, edge.x, edge.y);
+    edge = roundRect.GetCornerRadius(RoundRect::BOTTOM_RIGHT_POS);
+    rsRoundRect.SetCornerRadius(RSRoundRect::BOTTOM_RIGHT_POS, edge.x, edge.y);
+    RSRecordingPath rsPath;
+    rsPath.AddRoundRect(rsRoundRect);
+    rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(rsPath));
+}
+
+void RosenRenderContext::ClipWithOval(const RectF& rectF)
+{
+    CHECK_NULL_VOID(rsNode_);
+    RSRecordingPath rsPath;
+    rsPath.AddOval({ rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height() });
+    rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(rsPath));
+}
+
+void RosenRenderContext::ClipWithCircle(const Circle& circle)
+{
+    CHECK_NULL_VOID(rsNode_);
+    RSRecordingPath rsPath;
+    rsPath.AddCircle(circle.GetAxisX().Value(), circle.GetAxisY().Value(), circle.GetRadius().Value());
+    rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(rsPath));
+}
+
 void RosenRenderContext::ClipWithRRect(const RectF& rectF, const RadiusF& radiusF)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -6010,6 +6048,12 @@ void RosenRenderContext::SetOpacity(float opacity)
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetAlpha(opacity);
+}
+
+void RosenRenderContext::SetOpacityMultiplier(float opacity)
+{
+    CHECK_NULL_VOID(rsNode_);
+    SetAnimatableProperty<Rosen::RSAlphaModifier, float>(alphaModifier_, opacity);
 }
 
 void RosenRenderContext::SetTranslate(float translateX, float translateY, float translateZ)

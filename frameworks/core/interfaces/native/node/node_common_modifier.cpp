@@ -660,8 +660,18 @@ void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, Ar
     ArkUI_Float32 valueY, BackgroundImagePosition& bgImgPosition)
 {
     OHOS::Ace::AnimationOption option;
-    bgImgPosition.SetSizeX(AnimatableDimension(valueX, typeX, option));
-    bgImgPosition.SetSizeY(AnimatableDimension(valueY, typeY, option));
+    auto animatableDimensionX = AnimatableDimension(valueX, typeX, option);
+    auto animatableDimensionY = AnimatableDimension(valueY, typeY, option);
+    if (typeX == DimensionUnit::VP || typeX == DimensionUnit::FP) {
+        animatableDimensionX.SetValue(animatableDimensionX.ConvertToPx());
+        animatableDimensionX.SetUnit(DimensionUnit::PX);
+    }
+    if (typeY == DimensionUnit::VP || typeY == DimensionUnit::FP) {
+        animatableDimensionY.SetValue(animatableDimensionY.ConvertToPx());
+        animatableDimensionY.SetUnit(DimensionUnit::PX);
+    }
+    bgImgPosition.SetSizeX(animatableDimensionX);
+    bgImgPosition.SetSizeY(animatableDimensionY);
 }
 
 void SetBackgroundColor(ArkUINodeHandle node, uint32_t color)
@@ -1006,7 +1016,7 @@ bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
  * shadows[4] : ShadowType, shadows[5] : Color, shadows[6] : IsFilled
  * @param length shadows length
  */
-void SetBackShadow(ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length)
+void SetBackShadow(ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1023,8 +1033,11 @@ void SetBackShadow(ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, Ark
     }
     auto blurRadius = shadows[NUM_0].f32;                          // BlurRadius
     auto hasColorValue = static_cast<int32_t>(shadows[NUM_1].i32); // 1: has ColorStrategy; 2: has Color
-    auto offsetX = shadows[NUM_2].f32;                             // OffsetX
-    auto offsetY = shadows[NUM_3].f32;                             // OffsetY
+    
+    // OffsetX
+    auto offsetX = Dimension(shadows[NUM_2].f32, static_cast<OHOS::Ace::DimensionUnit>(unit)).ConvertToPx();
+    // OffsetY
+    auto offsetY = Dimension(shadows[NUM_3].f32, static_cast<OHOS::Ace::DimensionUnit>(unit)).ConvertToPx();
     auto shadowType = shadows[NUM_4].i32;                          // ShadowType
     auto color = static_cast<uint32_t>(shadows[NUM_5].u32);        // Color
     auto isFilled = static_cast<uint32_t>(shadows[NUM_6].i32);     // IsFilled
@@ -6640,9 +6653,14 @@ void ResetOnVisibleAreaChange(ArkUINodeHandle node)
 
 void ResetOnClick(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::DisableOnClick(frameNode);
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    if (uiNode->GetTag() == "Span") {
+        SpanModelNG::ClearOnClick(uiNode);
+    } else {
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
+        ViewAbstract::DisableOnClick(frameNode);
+    }
 }
 
 void ResetOnTouch(ArkUINodeHandle node)

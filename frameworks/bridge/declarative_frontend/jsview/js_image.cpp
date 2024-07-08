@@ -17,6 +17,9 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
+#if !defined(PREVIEW)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 #include "base/utils/utils.h"
 
 #if !defined(PREVIEW)
@@ -213,6 +216,9 @@ void JSImage::OnComplete(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Image.onComplete");
             func->Execute(info);
+#if !defined(PREVIEW)
+            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Image.onComplete");
+#endif
         };
         ImageModel::GetInstance()->SetOnComplete(std::move(onComplete));
     }
@@ -228,6 +234,9 @@ void JSImage::OnError(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Image.onError");
             func->Execute(info);
+#if !defined(PREVIEW)
+            UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Image.onError");
+#endif
         };
 
         ImageModel::GetInstance()->SetOnError(onError);

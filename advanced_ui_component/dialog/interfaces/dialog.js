@@ -2180,6 +2180,7 @@ export class CustomContentDialog extends ViewPU {
         this.secondaryTitle = undefined;
         this.contentBuilder = undefined;
         this.contentAreaPadding = undefined;
+        this.localizedContentAreaPadding = undefined;
         this.buttons = undefined;
         this.theme = new CustomThemeImpl({});
         this.themeColorMode = ThemeColorMode.SYSTEM;
@@ -2204,6 +2205,9 @@ export class CustomContentDialog extends ViewPU {
         }
         if (params.contentAreaPadding !== undefined) {
             this.contentAreaPadding = params.contentAreaPadding;
+        }
+        if (params.localizedContentAreaPadding !== undefined) {
+            this.localizedContentAreaPadding = params.localizedContentAreaPadding;
         }
         if (params.buttons !== undefined) {
             this.buttons = params.buttons;
@@ -2273,11 +2277,13 @@ export class CustomContentDialog extends ViewPU {
                             this.contentBuilder();
                         },
                         contentAreaPadding: this.contentAreaPadding,
+                        localizedContentAreaPadding: this.localizedContentAreaPadding,
                         buttons: this.buttons,
                         theme: this.theme,
                         themeColorMode: this.themeColorMode,
                         fontSizeScale: this.__fontSizeScale,
                         minContentHeight: this.__minContentHeight,
+                        customStyle: false
                     }, undefined, elmtId, () => {
                     }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 860, col: 5 });
                     ViewPU.create(componentCall);
@@ -2290,11 +2296,13 @@ export class CustomContentDialog extends ViewPU {
                                 this.contentBuilder();
                             },
                             contentAreaPadding: this.contentAreaPadding,
+                            localizedContentAreaPadding: this.localizedContentAreaPadding,
                             buttons: this.buttons,
                             theme: this.theme,
                             themeColorMode: this.themeColorMode,
                             fontSizeScale: this.fontSizeScale,
-                            minContentHeight: this.minContentHeight
+                            minContentHeight: this.minContentHeight,
+                            customStyle: false
                         };
                     };
                     componentCall.paramsGenerator_ = paramsLambda;
@@ -2454,6 +2462,7 @@ class CustomDialogContentComponent extends ViewPU {
         this.controller = undefined;
         this.primaryTitle = undefined;
         this.secondaryTitle = undefined;
+        this.localizedContentAreaPadding = undefined;
         this.contentBuilder = this.defaultContentBuilder;
         this.buttons = undefined;
         this.contentAreaPadding = undefined;
@@ -2465,7 +2474,7 @@ class CustomDialogContentComponent extends ViewPU {
         this.__buttonHeight = new ObservedPropertySimplePU(0, this, 'buttonHeight');
         this.__contentMaxHeight = new ObservedPropertyObjectPU('100%', this, 'contentMaxHeight');
         this.__fontSizeScale = new SynchedPropertySimpleTwoWayPU(params.fontSizeScale, this, 'fontSizeScale');
-        this.__customStyle = new ObservedPropertySimplePU(false, this, 'customStyle');
+        this.__customStyle = new ObservedPropertySimplePU(undefined, this, 'customStyle');
         this.__buttonMaxFontSize = new ObservedPropertyObjectPU({
             'id': -1,
             'type': 10002,
@@ -2535,6 +2544,9 @@ class CustomDialogContentComponent extends ViewPU {
         }
         if (params.secondaryTitle !== undefined) {
             this.secondaryTitle = params.secondaryTitle;
+        }
+        if (params.localizedContentAreaPadding !== undefined) {
+            this.localizedContentAreaPadding = params.localizedContentAreaPadding;
         }
         if (params.contentBuilder !== undefined) {
             this.contentBuilder = params.contentBuilder;
@@ -2913,7 +2925,7 @@ class CustomDialogContentComponent extends ViewPU {
                             ForEach.pop();
                         }
                     }, undefined, elmtId, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 993, col: 11 });
+                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 994 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -3013,12 +3025,15 @@ class CustomDialogContentComponent extends ViewPU {
 
     aboutToAppear() {
         this.updateFontScale();
-        if (this.controller) {
+        if (this.controller && this.customStyle === undefined) {
             let customController = this.controller;
             if (customController.arg_ && customController.arg_.customStyle &&
                 customController.arg_.customStyle === true) {
                 this.customStyle = true;
             }
+        }
+        if (this.customStyle === undefined) {
+            this.customStyle = false;
         }
         this.primaryTitleFontColorWithTheme = this.theme?.colors?.fontPrimary ?
         this.theme.colors.fontPrimary : {
@@ -3069,6 +3084,9 @@ class CustomDialogContentComponent extends ViewPU {
     }
 
     getContentPadding() {
+        if (this.localizedContentAreaPadding) {
+            return this.localizedContentAreaPadding;
+        }
         if (this.contentAreaPadding) {
             return this.contentAreaPadding;
         }
@@ -3912,7 +3930,7 @@ export class LoadingDialog extends ViewPU {
                         fontSizeScale: this.__fontSizeScale,
                         minContentHeight: this.__minContentHeight,
                     }, undefined, elmtId, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 1543, col: 7 });
+                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 1547 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {

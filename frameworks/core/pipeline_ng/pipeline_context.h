@@ -199,7 +199,7 @@ public:
         const std::vector<double>& ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);
     void RemoveVisibleAreaChangeNode(int32_t nodeId);
 
-    void HandleVisibleAreaChangeEvent();
+    void HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp);
 
     void HandleSubwindow(bool isShow);
 
@@ -265,6 +265,9 @@ public:
 
     void AddAfterRenderTask(std::function<void()>&& task);
 
+    void AddSafeAreaPaddingProcessTask(FrameNode* node);
+    void RemoveSafeAreaPaddingProcessTask(FrameNode* node);
+
     void AddDragWindowVisibleTask(std::function<void()>&& task)
     {
         dragWindowVisibleCallback_ = std::move(task);
@@ -273,6 +276,7 @@ public:
     void FlushOnceVsyncTask() override;
 
     void FlushDirtyNodeUpdate();
+    void FlushSafeAreaPaddingProcess();
 
     void SetRootRect(double width, double height, double offset) override;
 
@@ -803,7 +807,7 @@ public:
         lastVsyncEndTimestamp_ = lastVsyncEndTimestamp;
     }
     void GetInspectorTree();
-
+    void NotifyAllWebPattern(bool isRegister);
     void AddFrameNodeChangeListener(const RefPtr<FrameNode>& node);
     void RemoveFrameNodeChangeListener(const RefPtr<FrameNode>& node);
     void AddChangedFrameNode(const RefPtr<FrameNode>& node);

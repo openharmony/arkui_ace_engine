@@ -543,12 +543,12 @@ bool TabBarPattern::OnKeyEvent(const KeyEvent& event)
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    CHECK_NULL_RETURN(swiperController_, false);
+    swiperController_->FinishAnimation();
     auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     auto indicator = tabBarLayoutProperty->GetIndicatorValue(0);
-
     if (event.code == (tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL
-                              ? KeyCode::KEY_DPAD_LEFT
-                              : KeyCode::KEY_DPAD_UP) ||
+                        ? KeyCode::KEY_DPAD_LEFT : KeyCode::KEY_DPAD_UP) ||
         event.IsShiftWith(KeyCode::KEY_TAB)) {
         if (indicator <= 0) {
             return false;
@@ -558,8 +558,7 @@ bool TabBarPattern::OnKeyEvent(const KeyEvent& event)
         return true;
     }
     if (event.code == (tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL
-                              ? KeyCode::KEY_DPAD_RIGHT
-                              : KeyCode::KEY_DPAD_DOWN) ||
+                        ? KeyCode::KEY_DPAD_RIGHT : KeyCode::KEY_DPAD_DOWN) ||
         event.code == KeyCode::KEY_TAB) {
         if (indicator >= host->TotalChildCount() - MASK_COUNT - 1) {
             return false;
@@ -1310,7 +1309,6 @@ void TabBarPattern::PlayMaskAnimation(float selectedImageSize,
             MaskAnimationFinish(host, unselectedIndex, false);
         }
     });
-
     AnimationUtils::AddKeyFrame(HALF_PROGRESS, [weak = AceType::WeakClaim(this), selectedIndex, unselectedIndex,
         selectedImageSize, originalSelectedMaskOffset, unselectedImageSize, originalUnselectedMaskOffset]() {
         auto tabBar = weak.Upgrade();
@@ -1321,7 +1319,6 @@ void TabBarPattern::PlayMaskAnimation(float selectedImageSize,
                 INVALID_RATIO, false);
         }
     });
-
     AnimationUtils::AddKeyFrame(FULL_PROGRESS, [weak = AceType::WeakClaim(this), selectedIndex, unselectedIndex,
         selectedImageSize, originalSelectedMaskOffset, unselectedImageSize, originalUnselectedMaskOffset]() {
         auto tabBar = weak.Upgrade();
@@ -1332,7 +1329,6 @@ void TabBarPattern::PlayMaskAnimation(float selectedImageSize,
                 HALF_MASK_RADIUS_RATIO, false);
         }
     });
-
     AnimationUtils::CloseImplicitAnimation();
 }
 
@@ -2227,7 +2223,6 @@ void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& i
         return;
     }
     indicatorStyle = indicatorStyles_[indicator_];
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
@@ -2236,11 +2231,9 @@ void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& i
     if (NonPositive(indicatorStyle.width.Value())) {
         indicatorStyle.width = Dimension(layoutProperty->GetIndicatorRect(indicator_).Width());
     }
-
     if ((!isTouchingSwiper_ && !isAnimating_) || axis_ != Axis::HORIZONTAL) {
         return;
     }
-
     if (LessOrEqual(turnPageRate_, 0.0f)) {
         turnPageRate_ = 0.0f;
     }
@@ -2666,28 +2659,21 @@ void TabBarPattern::ApplyTurnPageRateToIndicator(float turnPageRate)
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (swiperStartIndex_ < 0 || swiperStartIndex_ >= static_cast<int32_t>(tabBarStyles_.size()) ||
-        tabBarStyles_[swiperStartIndex_] != TabBarStyle::SUBTABBATSTYLE ||
-        swiperStartIndex_ >= static_cast<int32_t>(selectedModes_.size()) ||
-        selectedModes_[swiperStartIndex_] != SelectedMode::INDICATOR) {
-        return;
-    }
-
+    CHECK_NULL_VOID(IsValidIndex(swiperStartIndex_));
     auto index = swiperStartIndex_ + 1;
-    if (index >= static_cast<int32_t>(tabBarStyles_.size())) {
+    auto isRtl = ParseTabsIsRtl();
+    if (index >= static_cast<int32_t>(tabBarStyles_.size()) && !isRtl) {
         swiperStartIndex_--;
         index--;
         turnPageRate += 1.0f;
     }
+    if (isRtl && (index == static_cast<int32_t>(tabBarStyles_.size()) || NearEqual(turnPageRate, 1.0f))) {
+        return;
+    }
     if (Negative(turnPageRate)) {
         turnPageRate = 0.0f;
     }
-    if (index < 0 || index >= static_cast<int32_t>(tabBarStyles_.size()) ||
-        tabBarStyles_[index] != TabBarStyle::SUBTABBATSTYLE || index >= static_cast<int32_t>(selectedModes_.size()) ||
-        selectedModes_[index] != SelectedMode::INDICATOR) {
-        return;
-    }
-
+    CHECK_NULL_VOID(IsValidIndex(index));
     if (GreatOrEqual(turnPageRate, 1.0f)) {
         turnPageRate_ = 1.0f;
     } else if (LessOrEqual(turnPageRate, 0.0f)) {
@@ -2700,13 +2686,20 @@ void TabBarPattern::ApplyTurnPageRateToIndicator(float turnPageRate)
         }
         turnPageRate_ = turnPageRate;
     }
-
     auto originalPaintRect = layoutProperty->GetIndicatorRect(swiperStartIndex_);
     auto targetPaintRect = layoutProperty->GetIndicatorRect(index);
     auto paintRectDiff = std::abs(targetPaintRect.GetX() + targetPaintRect.Width() / 2 - originalPaintRect.GetX() -
                                   originalPaintRect.Width() / 2);
 
     currentIndicatorOffset_ = originalPaintRect.GetX() + originalPaintRect.Width() / 2 + paintRectDiff * turnPageRate_;
+    if (isRtl) {
+        auto originalPaintRect = layoutProperty->GetIndicatorRect(swiperStartIndex_ + 1);
+        auto targetPaintRect = layoutProperty->GetIndicatorRect(swiperStartIndex_ >= 0 ? swiperStartIndex_ : 0);
+        auto paintRectDiff = std::abs(targetPaintRect.GetX() + targetPaintRect.Width() / HALF_OF_WIDTH -
+                                      originalPaintRect.GetX() - originalPaintRect.Width() / HALF_OF_WIDTH);
+        currentIndicatorOffset_ =
+            originalPaintRect.GetX() + originalPaintRect.Width() / HALF_OF_WIDTH + paintRectDiff * (1 - turnPageRate_);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -2779,7 +2772,7 @@ void TabBarPattern::HandleBottomTabBarAnimation(int32_t index)
         CHECK_NULL_VOID(tabsPattern);
         auto onChangeEvent = tabsPattern->GetChangeEvent();
         if (onChangeEvent) {
-            (*onChangeEvent)(index);
+            (*onChangeEvent)(preIndex, index);
         }
         auto onIndexChangeEvent = tabsPattern->GetIndexChangeEvent();
         if (onIndexChangeEvent) {
@@ -2951,5 +2944,27 @@ void TabBarPattern::SetMarginVP(MarginProperty& marginLeftOrRight, MarginPropert
     marginTopOrBottom.right = CalcLength(Dimension(RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
     marginTopOrBottom.top = CalcLength(Dimension(RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
     marginTopOrBottom.bottom = CalcLength(Dimension(RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
+}
+
+bool TabBarPattern::ParseTabsIsRtl()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto tabsNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_RETURN(tabsNode, false);
+    auto tabLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
+    CHECK_NULL_RETURN(tabLayoutProperty, false);
+    auto isRTL = tabLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    return isRTL;
+}
+
+bool TabBarPattern::IsValidIndex(int32_t index)
+{
+    if (index < 0 || index >= static_cast<int32_t>(tabBarStyles_.size()) ||
+        tabBarStyles_[index] != TabBarStyle::SUBTABBATSTYLE || index >= static_cast<int32_t>(selectedModes_.size()) ||
+        selectedModes_[index] != SelectedMode::INDICATOR) {
+        return false;
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG
