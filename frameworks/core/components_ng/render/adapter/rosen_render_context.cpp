@@ -543,8 +543,7 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
 void RosenRenderContext::SetFrameWithoutAnimation(const RectF& paintRect)
 {
     CHECK_NULL_VOID(rsNode_ && paintRect.IsValid());
-    RSNode::ExecuteWithoutAnimation(
-        [&]() { rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height()); });
+    RSNode::ExecuteWithoutAnimation([&]() { SyncGeometryFrame(paintRect); });
 }
 
 void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, bool /* isRound */, uint8_t /* flag */)
