@@ -1739,5 +1739,6 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternUpdateColumnChildPosition002,
      */
     textPickerColumnPattern_->SetYLast(1.0);
     textPickerColumnPattern_->UpdateColumnChildPosition(1.0);
+    EXPECT_EQ(textPickerColumnPattern_->scrollDelta_, 0.0f);
 }
 } // namespace OHOS::Ace::NG
