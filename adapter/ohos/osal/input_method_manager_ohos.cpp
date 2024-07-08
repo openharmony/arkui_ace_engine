@@ -162,6 +162,7 @@ void InputMethodManager::CloseKeyboard()
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Ime Not Shown, No need to close keyboard");
         return;
     }
+    textFieldManager->SetNeedToRequestKeyboard(false);
 #if defined(ENABLE_STANDARD_INPUT)
     // If pushpage, close it
     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "PageChange CloseKeyboard FrameNode notNeedSoftKeyboard.");

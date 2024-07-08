@@ -2503,8 +2503,8 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
     bool needToResetKeyboard = false;
     // check unspecified  for first time entrance
     if (keyboard_ != layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED)) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d Keyboard type changed to %{public}d",
-            tmpHost->GetId(), layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED));
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d Keyboard type %{public}d changed to %{public}d",
+            tmpHost->GetId(), (int)keyboard_, layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED));
         keyboard_ = layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED);
         needToResetKeyboard = true;
     }
@@ -4640,9 +4640,18 @@ void TextFieldPattern::RequestKeyboardOnFocus()
     }
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
-    pipeline->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    textFieldManager->SetNeedToRequestKeyboard(true);
+    pipeline->AddAfterLayoutTask([weak = WeakClaim(this), manager = WeakPtr<TextFieldManagerNG>(textFieldManager)]() {
         auto textField = weak.Upgrade();
         CHECK_NULL_VOID(textField);
+        auto textFieldManager = manager.Upgrade();
+        if (textFieldManager && !textFieldManager->GetNeedToRequestKeyboard()) {
+            // already call close keyboard after text field get focus, so dont request keyboard now
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Already call close before attach, no need to request");
+            return;
+        }
         if (!textField->RequestKeyboard(false, true, true)) {
             return;
         }
