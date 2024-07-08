@@ -1373,9 +1373,9 @@ double TextPattern::GetTextHeight(int32_t index, bool isNextLine)
         } else {
             auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_RETURN(textLayoutProperty, 0);
-            auto maxLines = textLayoutProperty->GetMaxLinesValue(Infinity<float>());
+            auto maxLines = textLayoutProperty->GetMaxLinesValue(Infinity<uint32_t>());
             if ((index <= endIndex && startIndex != 0) ||
-                ((lineNumber + 1) == maxLines && lineNumber != 0)) {
+                ((lineNumber + 1) == static_cast<int32_t>(maxLines) && lineNumber != 0)) {
                 return GetLineMetrics(lineNumber - 1).height;
             }
         }
