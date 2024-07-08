@@ -171,9 +171,10 @@ void ImagePattern::TriggerFirstVisibleAreaChange()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     RectF frameRect;
+    RectF visibleInnerRect;
     RectF visibleRect;
-    host->GetVisibleRect(visibleRect, frameRect);
-    OnVisibleAreaChange(GreatNotEqual(visibleRect.Width(), 0.0) && GreatNotEqual(visibleRect.Height(), 0.0));
+    host->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
+    OnVisibleAreaChange(GreatNotEqual(visibleInnerRect.Width(), 0.0) && GreatNotEqual(visibleInnerRect.Height(), 0.0));
 }
 
 void ImagePattern::PrepareAnimation(const RefPtr<CanvasImage>& image)
@@ -227,7 +228,7 @@ void ImagePattern::RegisterVisibleAreaChange()
     CHECK_NULL_VOID(host);
     // add visibleAreaChangeNode(inner callback)
     std::vector<double> ratioList = {0.0};
-    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
 }
 
 void ImagePattern::CheckHandles(SelectHandleInfo& handleInfo)
