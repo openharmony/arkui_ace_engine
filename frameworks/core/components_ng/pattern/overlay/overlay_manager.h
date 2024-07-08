@@ -462,6 +462,7 @@ public:
     void BindKeyboard(const std::function<void()>& keyboardBuilder, int32_t targetId);
     void BindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_t targetId);
     void CloseKeyboard(int32_t targetId);
+    void UpdateCustomKeyboardPosition();
 
     RefPtr<UINode> FindWindowScene(RefPtr<FrameNode> targetNode);
 
