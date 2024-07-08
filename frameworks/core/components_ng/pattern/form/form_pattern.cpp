@@ -764,7 +764,10 @@ void FormPattern::UpdateTimeLimitFontCfg()
 
     Dimension fontSize(GetTimeLimitFontSize());
     if (!NearEqual(textLayoutProperty->GetFontSize().value(), fontSize)) {
+        TAG_LOGD(AceLogTag::ACE_FORM, "UpdateFontSize:%{public}f.", fontSize.Value());
         textLayoutProperty->UpdateFontSize(fontSize);
+        textNode->MarkModifyDone();
+        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
