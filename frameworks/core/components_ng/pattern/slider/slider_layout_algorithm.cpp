@@ -125,6 +125,7 @@ float SliderLayoutAlgorithm::CalculateSliderWidth(
     auto sliderWidth = static_cast<float>(theme->GetMeasureContentDefaultWidth().ConvertToPx());
     sliderWidth = std::max(sliderWidth, trackThickness_);
     if (mode == SliderModel::SliderMode::OUTSET) {
+        sliderWidth = static_cast<float>(theme->GetMeasureContentOutsetWidth().ConvertToPx());
         sliderWidth = std::max(sliderWidth, blockHotWidth);
         sliderWidth = std::max(sliderWidth, blockWidth + static_cast<float>(hotBlockShadowWidth.ConvertToPx()) / HALF);
     }
