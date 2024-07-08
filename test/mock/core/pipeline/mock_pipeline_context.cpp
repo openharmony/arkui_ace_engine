@@ -460,7 +460,7 @@ void PipelineContext::DumpPipelineInfo() const {}
 void PipelineContext::AddVisibleAreaChangeNode(int32_t nodeId) {}
 
 void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, const std::vector<double>& ratio,
-    const VisibleRatioCallback& callback, bool isUserCallback)
+    const VisibleRatioCallback& callback, bool isUserCallback, bool isCalculateInnerClip)
 {
     CHECK_NULL_VOID(callback);
     callback(false, 0.0);
