@@ -245,24 +245,25 @@ RefPtr<NodePaintMethod> TextFieldPattern::CreateNodePaintMethod()
     }
     auto textFieldOverlayModifier = AceType::DynamicCast<TextFieldOverlayModifier>(GetScrollBarOverlayModifier());
     if (!textFieldOverlayModifier) {
-        textFieldOverlayModifier =
+        textFieldOverlayModifier_ =
             AceType::MakeRefPtr<TextFieldOverlayModifier>(WeakClaim(this), GetScrollEdgeEffect());
-        SetScrollBarOverlayModifier(textFieldOverlayModifier);
+        SetScrollBarOverlayModifier(textFieldOverlayModifier_);
     }
     if (isCustomFont_) {
         textFieldContentModifier_->SetIsCustomFont(true);
     }
-    auto paint = MakeRefPtr<TextFieldPaintMethod>(WeakClaim(this), textFieldOverlayModifier, textFieldContentModifier_);
+    auto paint =
+        MakeRefPtr<TextFieldPaintMethod>(WeakClaim(this), textFieldOverlayModifier_, textFieldContentModifier_);
     auto scrollBar = GetScrollBar();
     if (scrollBar) {
         paint->SetScrollBar(scrollBar);
         if (scrollBar->NeedPaint()) {
-            textFieldOverlayModifier->SetRect(scrollBar->GetActiveRect());
+            textFieldOverlayModifier_->SetRect(scrollBar->GetActiveRect());
         } else if (IsNormalInlineState() && !HasFocus()) {
             auto inlineScrollRect = scrollBar->GetActiveRect();
             CalcInlineScrollRect(inlineScrollRect);
-            textFieldOverlayModifier->SetRect(inlineScrollRect);
-            textFieldOverlayModifier->SetOpacity(0);
+            textFieldOverlayModifier_->SetRect(inlineScrollRect);
+            textFieldOverlayModifier_->SetOpacity(0);
         }
     }
     auto host = GetHost();
@@ -278,7 +279,7 @@ RefPtr<NodePaintMethod> TextFieldPattern::CreateNodePaintMethod()
         RectF boundsRect(contentOffset.GetX(), frameOffset.GetY(), errorTextWidth,
             errorParagraph_->GetHeight() + ERROR_TEXT_TOP_MARGIN.ConvertToPx() +
                 ERROR_TEXT_BOTTOM_MARGIN.ConvertToPx() + frameSize.Height());
-        textFieldOverlayModifier->SetBoundsRect(boundsRect);
+        textFieldOverlayModifier_->SetBoundsRect(boundsRect);
     } else {
         if (NearEqual(maxFrameOffsetY_, 0.0f) && NearEqual(maxFrameHeight_, 0.0f)) {
             maxFrameOffsetY_ = frameOffset.GetY();
@@ -288,7 +289,7 @@ RefPtr<NodePaintMethod> TextFieldPattern::CreateNodePaintMethod()
                                                                              : maxFrameOffsetY_ - frameOffset.GetY();
         maxFrameHeight_ = LessOrEqual(frameSize.Height(), maxFrameHeight_) ? maxFrameHeight_ : frameSize.Height();
         RectF boundsRect(frameOffset.GetX(), maxFrameOffsetY_, frameSize.Width(), maxFrameHeight_);
-        textFieldOverlayModifier->SetBoundsRect(boundsRect);
+        textFieldOverlayModifier_->SetBoundsRect(boundsRect);
     }
     return paint;
 }
@@ -487,6 +488,10 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 
     if (textFieldContentModifier_) {
         textFieldContentModifier_->ContentChange();
+    }
+
+    if (textFieldOverlayModifier_) {
+        textFieldOverlayModifier_->ContentChange();
     }
 
     auto oldParentGlobalOffset = parentGlobalOffset_;

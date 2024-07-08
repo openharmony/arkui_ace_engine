@@ -53,6 +53,7 @@ TextFieldOverlayModifier::TextFieldOverlayModifier(
     changePreviewTextRects_ = AceType::MakeRefPtr<PropertyBool>(false);
     previewTextDecorationColor_ = AceType::MakeRefPtr<PropertyColor>(Color());
     previewTextStyle_ = PreviewTextStyle::NORMAL;
+    contentChange_ = AceType::MakeRefPtr<PropertyBool>(false);
 
     AttachProperty(cursorColor_);
     AttachProperty(cursorWidth_);
@@ -72,6 +73,13 @@ TextFieldOverlayModifier::TextFieldOverlayModifier(
     AttachProperty(showPreviewText_);
     AttachProperty(changePreviewTextRects_);
     AttachProperty(previewTextDecorationColor_);
+    AttachProperty(contentChange_);
+}
+
+void TextFieldOverlayModifier::ContentChange()
+{
+    CHECK_NULL_VOID(contentChange_);
+    contentChange_->Set(!contentChange_->Get());
 }
 
 void TextFieldOverlayModifier::SetFirstHandleOffset(const OffsetF& offset)
