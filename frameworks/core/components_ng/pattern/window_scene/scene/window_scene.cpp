@@ -32,8 +32,8 @@ const std::map<std::string, RefPtr<Curve>> curveMap {
     { "easeOut",            Curves::EASE_OUT    },
     { "easeInOut",          Curves::EASE_IN_OUT },
 };
-const uint32_t CLEAN_NODE_DELAY_TIME = 500;
-const int32_t ANIMATION_CONFIG_CURVE = 200;
+const uint32_t CLEAN_WINDOW_DELAY_TIME = 500;
+const int32_t ANIMATION_DURATION = 200;
 } // namespace
 
 WindowScene::WindowScene(const sptr<Rosen::Session>& session)
@@ -308,7 +308,7 @@ void WindowScene::BufferAvailableCallbackForBlank()
         CHECK_NULL_VOID(blankRsNode);
         auto effect = Rosen::RSTransitionEffect::Create()->Opacity(0);
         Rosen::RSAnimationTimingProtocol protocol;
-        protocol.SetDuration(ANIMATION_CONFIG_CURVE);
+        protocol.SetDuration(ANIMATION_DURATION);
         auto curve = Rosen::RSAnimationTimingCurve::LINEAR;
         Rosen::RSNode::Animate(protocol, curve, [blankRsNode, effect] {
             AceAsyncTraceBegin(0, "BlankWindowExitAnimation");
@@ -585,6 +585,6 @@ void WindowScene::CleanBlankOrSnapshotWindow()
         }
     });
     taskExecutor->PostDelayedTask(
-        deleteWindowTask_, TaskExecutor::TaskType::UI, CLEAN_NODE_DELAY_TIME, "ArkUICleanBlankOrSnapshotWindow");
+        deleteWindowTask_, TaskExecutor::TaskType::UI, CLEAN_WINDOW_DELAY_TIME, "ArkUICleanBlankOrSnapshotWindow");
 }
 } // namespace OHOS::Ace::NG
