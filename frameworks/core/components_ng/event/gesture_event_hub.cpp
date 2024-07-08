@@ -901,11 +901,11 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     RefPtr<FrameNode> textNode = nullptr;
     RefPtr<OverlayManager> subWindowOverlayManager = nullptr;
     bool isMenuShow = false;
-    auto window = SubwindowManager::GetInstance()->ShowDragPreviewWindowNG();
+    auto window = SubwindowManager::GetInstance()->ShowPreviewNG();
     if (window) {
         subWindowOverlayManager = window->GetOverlayManager();
         CHECK_NULL_VOID(subWindowOverlayManager);
-        isMenuShow = subWindowOverlayManager->IsMenuShow() || overlayManager->IsMenuShow();
+        isMenuShow = subWindowOverlayManager->IsMenuShow();
     }
     if (isMenuShow) {
         dragDropManager->SetIsDragWithContextMenu(true);
@@ -1016,7 +1016,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     ret = InteractionInterface::GetInstance()->StartDrag(dragData, GetDragCallback(pipeline, eventHub));
     if (ret != 0) {
         if (dragDropManager->IsNeedDisplayInSubwindow() && subWindowOverlayManager) {
-            SubwindowManager::GetInstance()->HideDragPreviewWindowNG();
+            SubwindowManager::GetInstance()->HidePreviewNG();
             overlayManager->RemovePixelMap();
         }
         TAG_LOGW(AceLogTag::ACE_DRAG, "Start drag failed, return value is %{public}d", ret);

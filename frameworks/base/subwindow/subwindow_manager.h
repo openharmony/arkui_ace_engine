@@ -62,8 +62,8 @@ public:
     const RefPtr<Subwindow>& GetCurrentWindow();
     Rect GetParentWindowRect();
 
-    RefPtr<Subwindow> ShowDragPreviewWindowNG();
-    void HideDragPreviewWindowNG();
+    RefPtr<Subwindow> ShowPreviewNG();
+    void HidePreviewNG();
     void ShowMenu(const RefPtr<Component>& newComponent);
     void ShowMenuNG(const RefPtr<NG::FrameNode>& menuNode, const NG::MenuParam& menuParam,
         const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset);

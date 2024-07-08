@@ -151,7 +151,7 @@ void DragDropManager::HideDragPreviewOverlay()
     CHECK_NULL_VOID(manager);
     manager->RemovePixelMap();
     manager->RemoveGatherNode();
-    SubwindowManager::GetInstance()->HideDragPreviewWindowNG();
+    SubwindowManager::GetInstance()->HidePreviewNG();
 }
 
 void DragDropManager::HideDragPreviewWindow(int32_t containerId)
@@ -162,7 +162,7 @@ void DragDropManager::HideDragPreviewWindow(int32_t containerId)
     CHECK_NULL_VOID(overlayManager);
     overlayManager->RemovePixelMap();
     overlayManager->RemoveGatherNode();
-    SubwindowManager::GetInstance()->HideDragPreviewWindowNG();
+    SubwindowManager::GetInstance()->HidePreviewNG();
 }
 
 RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
@@ -497,7 +497,7 @@ void DragDropManager::TransDragWindowToDragFwk(int32_t windowContainerId)
     auto overlayManager = subwindow->GetOverlayManager();
     overlayManager->RemovePixelMap();
     overlayManager->RemoveGatherNode();
-    SubwindowManager::GetInstance()->HideDragPreviewWindowNG();
+    SubwindowManager::GetInstance()->HidePreviewNG();
     info_.scale = -1.0;
 }
 
@@ -608,17 +608,6 @@ void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::st
     preTimeStamp_ = static_cast<uint64_t>(
         std::chrono::duration_cast<std::chrono::milliseconds>(pointerEvent.time.time_since_epoch()).count());
     SetIsWindowConsumed(false);
-
-    SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(OffsetF(static_cast<float>(point.GetX()),
-        static_cast<float>(point.GetY())));
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto overlay = pipeline->GetOverlayManager();
-    CHECK_NULL_VOID(overlay);
-    overlay->UpdateContextMenuDisappearPosition(OffsetF(static_cast<float>(point.GetX()),
-        static_cast<float>(point.GetY())));
-
     UpdateVelocityTrackerPoint(point, false);
     UpdateDragListener(point);
     auto dragFrameNode = FindDragFrameNodeByPosition(
