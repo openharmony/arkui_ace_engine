@@ -9990,6 +9990,11 @@ class __RepeatVirtualScrollImpl {
         // index <-> key maps
         this.key4Index_ = new Map();
         this.index4Key_ = new Map();
+        // Map key -> RepeatItem
+        // added to closure of following lambdas
+        this.repeatItem4Key_ = new Map();
+        // RepeatVirtualScrollNode elmtId
+        this.repeatElmtId_ = -1;
     }
     render(config, isInitialRender) {
         this.arr_ = config.arr;
@@ -10014,56 +10019,56 @@ class __RepeatVirtualScrollImpl {
     }
     /**/
     initialRender(owningView, repeatElmtId) {
-        // Map key -> RepeatItem
-        // added to closure of following lambdas
-        const _repeatItem4Key = new Map();
-        const repeatElmtId1 = repeatElmtId;
+        this.repeatElmtId_ = repeatElmtId;
         const onCreateNode = (forIndex) => {
             
             if (forIndex < 0 || forIndex >= this.totalCount_ || forIndex >= this.arr_.length) {
                 // STATE_MGMT_NOTE check also index < totalCount
-                throw new Error(`__RepeatVirtualScrollImpl (${repeatElmtId1}) onCreateNode: for index=${forIndex}  \
+                throw new Error(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onCreateNode: for index=${forIndex}  \
                     with data array length ${this.arr_.length}, totalCount=${this.totalCount_}  out of range error.`);
             }
             // create dependency array item [forIndex] -> Repeat
             // so Repeat updates when the array item changes
             // STATE_MGMT_NOTE observe dependencies, adding the array is insurgent for Array of objects
-            ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, forIndex.toString());
+            ObserveV2.getObserve().addRef4Id(this.repeatElmtId_, this.arr_, forIndex.toString());
             const repeatItem = this.mkRepeatItem_(this.arr_[forIndex], forIndex);
             let forKey = this.getOrMakeKey4Index(forIndex);
-            _repeatItem4Key.set(forKey, repeatItem);
+            this.repeatItem4Key_.set(forKey, repeatItem);
             // execute the itemGen function
             this.initialRenderItem(repeatItem);
             
         }; // onCreateNode
         const onUpdateNode = (fromKey, forIndex) => {
             if (!fromKey || fromKey === '' || forIndex < 0 || forIndex >= this.totalCount_ || forIndex >= this.arr_.length) {
-                throw new Error(`__RepeatVirtualScrollImpl (${repeatElmtId1}) onUpdateNode: fromKey "${fromKey}", \
+                throw new Error(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onUpdateNode: fromKey "${fromKey}", \
                     forIndex=${forIndex}, with data array length ${this.arr_.length}, totalCount=${this.totalCount_}, invalid function input error.`);
             }
             // create dependency array item [forIndex] -> Repeat
             // so Repeat updates when the array item changes
             // STATE_MGMT_NOTE observe dependencies, adding the array is insurgent for Array of objects
-            ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, forIndex.toString());
-            const repeatItem = _repeatItem4Key.get(fromKey);
+            ObserveV2.getObserve().addRef4Id(this.repeatElmtId_, this.arr_, forIndex.toString());
+            const repeatItem = this.repeatItem4Key_.get(fromKey);
             if (!repeatItem) {
-                stateMgmtConsole.error(`__RepeatVirtualScrollImpl onUpdateNode: fromKey "${fromKey}", forIndex=${forIndex}, can not find RepeatItem for key. Unrecoverable error`);
+                stateMgmtConsole.error(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onUpdateNode: fromKey "${fromKey}", forIndex=${forIndex}, can not find RepeatItem for key. Unrecoverable error`);
                 return;
             }
             const forKey = this.getOrMakeKey4Index(forIndex);
             
-            repeatItem.updateItem(this.arr_[forIndex]);
-            repeatItem.updateIndex(forIndex);
             // update Map according to made update:
             // del fromKey entry and add forKey
-            _repeatItem4Key.delete(fromKey);
-            _repeatItem4Key.set(forKey, repeatItem);
-            
-            ObserveV2.getObserve().updateDirty2(true);
+            this.repeatItem4Key_.delete(fromKey);
+            this.repeatItem4Key_.set(forKey, repeatItem);
+            if (repeatItem.item !== this.arr_[forIndex] || repeatItem.index !== forIndex) {
+                // repeatItem needs update, will trigger partial update to using UINodes:
+                repeatItem.updateItem(this.arr_[forIndex]);
+                repeatItem.updateIndex(forIndex);
+                
+                ObserveV2.getObserve().updateDirty2(true);
+            }
         }; // onUpdateNode
         const onGetKeys4Range = (from, to) => {
             if (to > this.totalCount_ || to > this.arr_.length) {
-                stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId ${repeatElmtId1}:  onGetKeys4Range from ${from} to ${to} \
+                stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId ${this.repeatElmtId_}:  onGetKeys4Range from ${from} to ${to} \
                     with data array length ${this.arr_.length}, totalCount=${this.totalCount_} \
                     Error!. Application fails to add more items to source data array. on time. Trying with corrected input parameters ...`);
                 to = this.totalCount_;
@@ -10074,21 +10079,40 @@ class __RepeatVirtualScrollImpl {
             // deep observe dependencies,
             // create dependency array item [i] -> Repeat
             // so Repeat updates when the array item or nested objects changes
-            // not enough: ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, i.toString());
-            ViewStackProcessor.StartGetAccessRecordingFor(repeatElmtId1);
-            ObserveV2.getObserve().startRecordDependencies(owningView, repeatElmtId1, false);
+            // not enough: ObserveV2.getObserve().addRef4Id(this.repeatElmtId_, this.arr_, i.toString());
+            ViewStackProcessor.StartGetAccessRecordingFor(this.repeatElmtId_);
+            ObserveV2.getObserve().startRecordDependencies(owningView, this.repeatElmtId_, false);
             for (let i = from; i <= to && i < this.arr_.length; i++) {
                 result.push(this.getOrMakeKey4Index(i));
             }
             ObserveV2.getObserve().stopRecordDependencies();
             ViewStackProcessor.StopGetAccessRecording();
+            let needsRerender = false;
+            result.forEach((key, index) => {
+                const forIndex = index + from;
+                // if repeatItem exists, and needs update then do the update, and call sync update as well
+                // thereby ensure cached items are up-to-date on C++ side. C++ does not need to request update 
+                // from TS side 
+                const repeatItem4Key = this.repeatItem4Key_.get(key);
+                // make sure the index is up-to-date
+                if (repeatItem4Key && (repeatItem4Key.item !== this.arr_[forIndex] || repeatItem4Key.index !== forIndex)) {
+                    // repeatItem needs update, will trigger partial update to using UINodes:
+                    repeatItem4Key.updateItem(this.arr_[forIndex]);
+                    repeatItem4Key.updateIndex(forIndex);
+                    needsRerender = true;
+                }
+            }); // forEach
+            if (needsRerender) {
+                
+                ObserveV2.getObserve().updateDirty2(true);
+            }
             
             return result;
         }; // const onGetKeys4Range 
         const onGetTypes4Range = (from, to) => {
             var _a;
             if (to > this.totalCount_ || to > this.arr_.length) {
-                stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId: ${repeatElmtId1}:  onGetTypes4Range from ${from} to ${to} \
+                stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId: ${this.repeatElmtId_}:  onGetTypes4Range from ${from} to ${to} \
                   with data array length ${this.arr_.length}, totalCount=${this.totalCount_} \
                   Error! Application fails to add more items to source data array.on time.Trying with corrected input parameters ...`);
                 to = this.totalCount_;
@@ -10099,13 +10123,13 @@ class __RepeatVirtualScrollImpl {
             // deep observe dependencies,
             // create dependency array item [i] -> Repeat
             // so Repeat updates when the array item or nested objects changes
-            // not enough: ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, i.toString());
-            ViewStackProcessor.StartGetAccessRecordingFor(repeatElmtId1);
-            ObserveV2.getObserve().startRecordDependencies(owningView, repeatElmtId1, false);
+            // not enough: ObserveV2.getObserve().addRef4Id(this.repeatElmtId_, this.arr_, i.toString());
+            ViewStackProcessor.StartGetAccessRecordingFor(this.repeatElmtId_);
+            ObserveV2.getObserve().startRecordDependencies(owningView, this.repeatElmtId_, false);
             for (let i = from; i <= to && i < this.arr_.length; i++) {
                 let ttype = (_a = this.typeGenFunc_(this.arr_[i], i)) !== null && _a !== void 0 ? _a : '';
                 if (!this.itemGenFuncs_[ttype]) {
-                    stateMgmtConsole.applicationError(`Repeat with virtual scroll. Factory function .templateId  returns template id '${ttype}'.` +
+                    stateMgmtConsole.applicationError(`Repeat with virtual scroll elmtId: ${this.repeatElmtId_}. Factory function .templateId  returns template id '${ttype}'.` +
                         (ttype == '') ? `Missing Repeat.each ` : `missing Repeat.template for id '${ttype}'` + `! Unrecoverable application error!"`);
                 }
                 result.push(ttype);
@@ -10140,7 +10164,7 @@ class __RepeatVirtualScrollImpl {
             itemFunc(repeatItem);
         }
         else {
-            stateMgmtConsole.applicationError("Repeat with virtualScroll: "
+            stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId ${this.repeatElmtId_}: `
                 + (itemType == '') ? "Missing Repeat.each " : `missing Repeat.template for id '${itemType}'`
                 + "! Unrecoverable application error!");
         }
@@ -10159,7 +10183,7 @@ class __RepeatVirtualScrollImpl {
             const usedIndex = this.index4Key_.get(key);
             if (usedIndex) {
                 // duplicate key
-                stateMgmtConsole.applicationError(`Repeat key gen function: Detected duplicate key ${key} for indices ${forIndex} and ${usedIndex}. \
+                stateMgmtConsole.applicationError(`Repeat key gen function elmtId ${this.repeatElmtId_}: Detected duplicate key ${key} for indices ${forIndex} and ${usedIndex}. \
                             Generated random key will decrease Repeat performance. Correct the Key gen function in your application!`);
                 key = `___${forIndex}_+_${key}_+_${Math.random()}`;
             }
