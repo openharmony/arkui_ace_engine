@@ -238,10 +238,14 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
         return;
     }
     canvas.Save();
-    RSBrush brush;
-    brush.SetAntiAlias(true);
-    brush.SetColor(ToRSColor(cursorColor_->Get()));
-    canvas.AttachBrush(brush);
+
+    RSPen pen;
+    pen.SetAntiAlias(true);
+    float cursorWidth = static_cast<float>(cursorWidth_->Get());
+    pen.SetWidth(cursorWidth);
+    pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+    pen.SetColor(ToRSColor(cursorColor_->Get()));
+    canvas.AttachPen(pen);
     auto paintOffset = contentOffset_->Get();
     float clipRectHeight = 0.0f;
     clipRectHeight = paintOffset.GetY() + contentSize_->Get().Height();
@@ -251,10 +255,15 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
             (LessOrEqual(contentSize_->Get().Width(), 0.0) ? cursorWidth_->Get() : 0.0f),
         clipRectHeight);
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
+
     auto caretRect = textFieldPattern->GetCaretRect();
-    canvas.DrawRect(RSRect(caretRect.GetX(), caretRect.GetY(),
-        caretRect.GetX() + (static_cast<float>(cursorWidth_->Get())), caretRect.GetY() + caretRect.Height()));
-    canvas.DetachBrush();
+    float midPosX = caretRect.GetX() + cursorWidth / 2;
+    float startPosY = caretRect.GetY();
+    float endPosY = caretRect.GetY() + caretRect.Height();
+    float roundCapRadius = static_cast<float>(cursorWidth_->Get()) / 2;
+    canvas.DrawLine(RSPoint(midPosX, startPosY + roundCapRadius),
+        RSPoint(midPosX, endPosY - roundCapRadius));
+    canvas.DetachPen();
     canvas.Restore();
 }
 
