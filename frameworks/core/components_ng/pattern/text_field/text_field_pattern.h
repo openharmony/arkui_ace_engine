@@ -1509,7 +1509,7 @@ private:
     bool CheckAutoFillType(const AceAutoFillType& aceAutoFillAllType, bool isFromKeyBoard = false);
     bool GetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType);
     void SetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType);
-    AceAutoFillType GetAutoFillType();
+    AceAutoFillType GetAutoFillType(bool isNeedToHitType = true);
     bool IsAutoFillPasswordType(const AceAutoFillType& autoFillType);
     void DoProcessAutoFill();
     void KeyboardContentTypeToInputType();

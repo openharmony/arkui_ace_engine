@@ -2300,7 +2300,7 @@ void TextFieldPattern::SetAutoFillTriggeredStateByType(const AceAutoFillType& au
     }
 }
 
-AceAutoFillType TextFieldPattern::GetAutoFillType()
+AceAutoFillType TextFieldPattern::GetAutoFillType(bool isNeedToHitType)
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, AceAutoFillType::ACE_UNSPECIFIED);
@@ -2314,10 +2314,10 @@ AceAutoFillType TextFieldPattern::GetAutoFillType()
         if (IsAutoFillPasswordType(aceInputType)) {
             return aceInputType;
         } else {
-            return GetHintType();
+            return isNeedToHitType ? GetHintType() : AceAutoFillType::ACE_UNSPECIFIED;
         }
     }
-    return GetHintType();
+    return isNeedToHitType ? GetHintType() : AceAutoFillType::ACE_UNSPECIFIED;
 }
 
 bool TextFieldPattern::CheckAutoFill(bool isFromKeyBoard)
