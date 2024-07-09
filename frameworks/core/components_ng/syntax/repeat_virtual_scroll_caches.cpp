@@ -571,7 +571,7 @@ bool RepeatVirtualScrollCaches::Purge()
  * given key return the index position (reverse lookup)
  * invalidated keys (after Repeat rerender/ data change)
  * are keys for which no index exists anymore,
- * method returns int max value for these.
+ * method returns uint max value for these.
  * int max value causes that distance from active range is max
  * these keys will be selected for update first.
  */
@@ -583,7 +583,7 @@ uint32_t RepeatVirtualScrollCaches::GetIndex4Key(const std::string& key) const
     }
     // key is no longer used
     // return max uint32_t value
-    return std::numeric_limits<uint32_t>::max();
+    return UINT32_MAX;
 }
 
 std::optional<std::string> RepeatVirtualScrollCaches::GetTType4Index(uint32_t index)
@@ -629,7 +629,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::GetCachedNode4Key4Ttype(
 /**
  *  for given index return distance from active range,
  *  or 0 if within active range
- *  distance is int max for invalidated keys
+ *  distance is uint max for invalidated keys
  *
  * instead of just using previous active range
  * use the ranges informed by previous two SetActiveRaneg calls.
@@ -637,16 +637,14 @@ RefPtr<UINode> RepeatVirtualScrollCaches::GetCachedNode4Key4Ttype(
  * Items left 'behind' when scrolling get larger distance and are more
  * likely updated or purged from L2 cache.
  */
-int32_t RepeatVirtualScrollCaches::GetDistanceFromRange(uint32_t index) const
+uint32_t RepeatVirtualScrollCaches::GetDistanceFromRange(uint32_t index) const
 {
-    // index too big to cast into int32_t
-    if (index > static_cast<uint32_t>(INT32_MAX)) {
-        TAG_LOGE(AceLogTag::ACE_REPEAT, "index with value:%{public}d is too big to cast into int32_t", index);
-        return 0;
+    // distance is uint max for invalidated keys
+    if(index == UINT32_MAX){
+        return UINT32_MAX;
     }
-    int32_t castedIndex = static_cast<int32_t>(index);
-    int32_t last[2] = { lastActiveRanges_[0].first, lastActiveRanges_[0].second };
-    int32_t prev[2] = { lastActiveRanges_[1].first, lastActiveRanges_[1].second };
+    uint32_t last[2] = { lastActiveRanges_[0].first, lastActiveRanges_[0].second };
+    uint32_t prev[2] = { lastActiveRanges_[1].first, lastActiveRanges_[1].second };
 
     // this is experimental optimization, based on scrolling detection
     // here we assume this is a scrolling, if previous range and last range has
@@ -654,25 +652,25 @@ int32_t RepeatVirtualScrollCaches::GetDistanceFromRange(uint32_t index) const
 
     // if scrolling up, return 0 for any lower index
     if (last[0] < prev[0] && prev[0] < last[1]) {
-        if (castedIndex < last[0]) {
+        if (index < last[0]) {
             return 0;
         }
     }
 
     // if scrolling down, return 0 for any greater index
     if (last[0] < prev[1] && prev[1] < last[1]) {
-        if (castedIndex > last[1]) {
+        if (index > last[1]) {
             return 0;
         }
     }
 
     // this is not scrolling
-    if (castedIndex < last[0]) {
-        return last[0] - castedIndex;
+    if (index < last[0]) {
+        return last[0] - index;
     }
 
-    if (castedIndex > last[1]) {
-        return castedIndex - last[1];
+    if (index > last[1]) {
+        return index - last[1];
     }
 
     return 0;
