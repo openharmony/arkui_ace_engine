@@ -69,7 +69,7 @@ build_component_ng("render_ng") {
     "adapter/rosen_window.cpp",
   ]
 
-  if (enable_split_mode &&
+  if (ace_engine_feature_enable_split_mode &&
       defined(vendor_configs.ace_engine_advanced_split_mode_render)) {
     sources += vendor_configs.ace_engine_advanced_split_mode_render
   } else {

@@ -57,7 +57,7 @@ declare_args() {
   use_origin_scope = false
 
   # Enable split_mode support
-  enable_split_mode = false
+  ace_engine_feature_enable_split_mode = false
 }
 
 enable_dump_drawcmd = false
@@ -277,6 +277,6 @@ if ((defined(use_origin_scope) && use_origin_scope) ||
   ace_common_defines += [ "USE_ORIGIN_SCOPE" ]
 }
 
-if (enable_split_mode) {
+if (ace_engine_feature_enable_split_mode) {
   ace_common_defines += [ "ENABLE_SPLIT_MODE" ]
 }

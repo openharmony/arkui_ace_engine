@@ -31,7 +31,7 @@ build_component_ng("base_ng") {
     "view_partial_update_model_ng.cpp",
     "view_stack_processor.cpp",
   ]
-  if (enable_split_mode &&
+  if (ace_engine_feature_enable_split_mode &&
       defined(vendor_configs.ace_engine_advanced_split_mode)) {
     sources += vendor_configs.ace_engine_advanced_split_mode
   } else {
