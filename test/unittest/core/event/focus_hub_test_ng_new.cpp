@@ -25,9 +25,9 @@ namespace OHOS::Ace::NG {
  */
 HWTEST_F(FocusHubTestNg, FocusHubTestNg0043, TestSize.Level1)
 {
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto frameNode2 = AceType::MakeRefPtr<FrameNode>(V2::ROW_COMPONENT_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto nodeParent = AceType::MakeRefPtr<FrameNode>(V2::BLANK_ETS_TAG, -1, AceType::MakeRefPtr<FlexLayoutPattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto frameNode2 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_COMPONENT_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto nodeParent = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BLANK_ETS_TAG, -1, AceType::MakeRefPtr<FlexLayoutPattern>());
     frameNode->GetOrCreateFocusHub();
     frameNode2->GetOrCreateFocusHub();
     nodeParent->GetOrCreateFocusHub();
@@ -57,9 +57,9 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0043, TestSize.Level1)
  */
 HWTEST_F(FocusHubTestNg, FocusHubTestNg0044, TestSize.Level1)
 {
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto frameNode2 = AceType::MakeRefPtr<FrameNode>(V2::ROW_COMPONENT_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto nodeParent = AceType::MakeRefPtr<FrameNode>(V2::BLANK_ETS_TAG, -1, AceType::MakeRefPtr<FlexLayoutPattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto frameNode2 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_COMPONENT_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto nodeParent = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BLANK_ETS_TAG, -1, AceType::MakeRefPtr<FlexLayoutPattern>());
     frameNode->GetOrCreateFocusHub();
     frameNode2->GetOrCreateFocusHub();
     nodeParent->GetOrCreateFocusHub();
@@ -90,13 +90,13 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0045, TestSize.Level1)
     /**
      * @tc.steps: step1. Create frameNode.
      */
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     eventHub->AttachHost(frameNode);
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
     ASSERT_NE(focusHub, nullptr);
     focusHub->currentFocus_ = true;
-    auto parentNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto parentNode = FrameNodeOnTree::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
     auto parentFocusHub = parentNode->GetOrCreateFocusHub();
     parentFocusHub->focusType_ = FocusType::SCOPE;
     frameNode->parent_ = AceType::WeakClaim(AceType::RawPtr(parentNode));
@@ -114,7 +114,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0046, TestSize.Level1)
     /**
      * @tc.steps: step1. Create frameNode.
      */
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     eventHub->AttachHost(frameNode);
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
@@ -123,7 +123,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0046, TestSize.Level1)
     ASSERT_NE(context, nullptr);
     context->isFocusActive_ = true;
     focusHub->isFocusUnit_ = true;
-    auto parentNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto parentNode = FrameNodeOnTree::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
     auto parentFocusHub = parentNode->GetOrCreateFocusHub();
     parentFocusHub->focusType_ = FocusType::SCOPE;
     frameNode->parent_ = AceType::WeakClaim(AceType::RawPtr(parentNode));
@@ -143,8 +143,8 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0047, TestSize.Level1)
     /**
      * @tc.steps: step1. Create frameNode.
      */
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto frameNode1 = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto frameNode1 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto eventHub1 = AceType::MakeRefPtr<EventHub>();
     eventHub->AttachHost(frameNode);
@@ -177,9 +177,9 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0048, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<AppTheme>()));
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto child = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
-    auto child2 = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    auto child2 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
     child->GetOrCreateFocusHub();
     child2->GetOrCreateFocusHub();
     frameNode->AddChild(child);
@@ -217,9 +217,9 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0049, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<AppTheme>()));
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto child = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
-    auto child2 = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    auto child2 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
     child->GetOrCreateFocusHub();
     child2->GetOrCreateFocusHub();
     frameNode->AddChild(child);
@@ -263,13 +263,13 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0050, TestSize.Level1)
     /**
      * @tc.steps: step1. Create frameNode.
      */
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     eventHub->AttachHost(frameNode);
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
     ASSERT_NE(focusHub, nullptr);
     focusHub->currentFocus_ = true;
-    auto parentNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto parentNode = FrameNodeOnTree::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
     auto parentFocusHub = parentNode->GetOrCreateFocusHub();
     parentFocusHub->focusType_ = FocusType::SCOPE;
     frameNode->parent_ = AceType::WeakClaim(AceType::RawPtr(parentNode));
@@ -290,7 +290,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0051, TestSize.Level1)
     /**
      * @tc.steps: step1. Create frameNode.
      */
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     eventHub->AttachHost(frameNode);
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
@@ -311,7 +311,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0052, TestSize.Level1)
     /**
      * @tc.steps: step1. Create frameNode.
      */
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     eventHub->AttachHost(frameNode);
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
@@ -319,7 +319,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0052, TestSize.Level1)
     std::list<RefPtr<FocusHub>> focusNodes;
     auto itNewFocusNode = focusHub->FlushChildrenFocusHub(focusNodes);
     EXPECT_EQ(itNewFocusNode, focusNodes.end());
-    auto parentNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto parentNode = FrameNodeOnTree::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
     auto parentFocusHub = parentNode->GetOrCreateFocusHub();
     parentFocusHub->focusType_ = FocusType::SCOPE;
     frameNode->parent_ = AceType::WeakClaim(AceType::RawPtr(parentNode));
@@ -339,9 +339,9 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0053, TestSize.Level1)
     /**
      * @tc.steps: step1. Create frameNode.
      */
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto child = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
-    auto child2 = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    auto child2 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
     child->GetOrCreateFocusHub();
     child2->GetOrCreateFocusHub();
     frameNode->AddChild(child);
@@ -368,9 +368,9 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0054, TestSize.Level1)
     /**
      * @tc.steps: step1. Create frameNode.
      */
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto child = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
-    auto child2 = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    auto child2 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
     child->GetOrCreateFocusHub();
     child2->GetOrCreateFocusHub();
     frameNode->AddChild(child);
@@ -395,8 +395,8 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0055, TestSize.Level1)
     /**
      * @tc.steps: step1. Create frameNode.
      */
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto frameNode1 = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto frameNode1 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto eventHub1 = AceType::MakeRefPtr<EventHub>();
     eventHub->AttachHost(frameNode);
@@ -433,8 +433,8 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0056, TestSize.Level1)
     /**
      * @tc.steps: step1. Create frameNode.
      */
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto child = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
     child->GetOrCreateFocusHub();
     frameNode->AddChild(child);
     auto eventHub = AceType::MakeRefPtr<EventHub>();
@@ -463,10 +463,10 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0057, TestSize.Level1)
     /**
      * @tc.steps: step1. Create frameNode.
      */
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto frameNode2 = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
-    auto child = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
-    auto child2 = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto frameNode2 = FrameNodeOnTree::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    auto child2 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
     child->GetOrCreateFocusHub();
     child2->GetOrCreateFocusHub();
     frameNode->AddChild(child);
@@ -515,7 +515,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0059, TestSize.Level1)
     /**
      * @tc.steps1: create focusHub and construct allNodes.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     frameNode->geometryNode_->SetFrameSize(SizeF(20, 20));
@@ -525,25 +525,25 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0059, TestSize.Level1)
 
     auto focus1 = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim<EventHub>(nullptr), FocusType::NODE, true);
 
-    auto frameNode2 = FrameNode::CreateFrameNode("frameNode2", 102, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode2 = FrameNodeOnTree::CreateFrameNode("frameNode2", 102, AceType::MakeRefPtr<ButtonPattern>());
     frameNode2->GetOrCreateFocusHub();
     auto focusHub2 = frameNode2->GetFocusHub();
     frameNode2->geometryNode_->SetFrameOffset(OffsetF(15, 15));
     frameNode2->geometryNode_->SetFrameSize(SizeF(30, 30));
 
-    auto frameNode3 = FrameNode::CreateFrameNode("frameNode3", 103, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode3 = FrameNodeOnTree::CreateFrameNode("frameNode3", 103, AceType::MakeRefPtr<ButtonPattern>());
     frameNode3->GetOrCreateFocusHub();
     auto focusHub3 = frameNode3->GetFocusHub();
     frameNode3->geometryNode_->SetFrameOffset(OffsetF(20, 20));
     frameNode3->geometryNode_->SetFrameSize(SizeF(30, 30));
 
-    auto frameNode4 = FrameNode::CreateFrameNode("frameNode4", 104, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode4 = FrameNodeOnTree::CreateFrameNode("frameNode4", 104, AceType::MakeRefPtr<ButtonPattern>());
     frameNode4->GetOrCreateFocusHub();
     auto focusHub4 = frameNode4->GetFocusHub();
     frameNode4->geometryNode_->SetFrameOffset(OffsetF(10, 20));
     frameNode4->geometryNode_->SetFrameSize(SizeF(20, 20));
 
-    auto frameNode5 = FrameNode::CreateFrameNode("frameNode5", 105, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode5 = FrameNodeOnTree::CreateFrameNode("frameNode5", 105, AceType::MakeRefPtr<ButtonPattern>());
     frameNode5->GetOrCreateFocusHub();
     auto focusHub5 = frameNode5->GetFocusHub();
     frameNode5->geometryNode_->SetFrameOffset(OffsetF(20, 20));
@@ -577,12 +577,12 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0064, TestSize.Level1)
     /**
      * @tc.steps1: create focusHub and construct allNodes.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
 
-    auto frameNode1 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode1 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode1->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetFocusHub();
 
@@ -617,24 +617,24 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0065, TestSize.Level1)
     /**
      * @tc.steps1: create focusHub and construct allNodes.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
 
-    auto frameNode1 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode1 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode1->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetFocusHub();
 
-    auto frameNode2 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode2 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode2->GetOrCreateFocusHub();
     auto focusHub2 = frameNode2->GetFocusHub();
 
-    auto frameNode3 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode3 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode3->GetOrCreateFocusHub();
     auto focusHub3 = frameNode3->GetFocusHub();
 
-    auto frameNode4 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode4 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode4->GetOrCreateFocusHub();
     auto focusHub4 = frameNode4->GetFocusHub();
 
@@ -666,24 +666,24 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0066, TestSize.Level1)
     /**
      * @tc.steps1: create focusHub and construct allNodes.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
 
-    auto frameNode1 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode1 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode1->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetFocusHub();
 
-    auto frameNode2 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode2 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode2->GetOrCreateFocusHub();
     auto focusHub2 = frameNode2->GetFocusHub();
 
-    auto frameNode3 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode3 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode3->GetOrCreateFocusHub();
     auto focusHub3 = frameNode3->GetFocusHub();
 
-    auto frameNode4 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode4 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode4->GetOrCreateFocusHub();
     auto focusHub4 = frameNode4->GetFocusHub();
 
@@ -715,20 +715,20 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0067, TestSize.Level1)
     /**
      * @tc.steps1: create focusHub and construct allNodes.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
 
-    auto frameNode1 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode1 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode1->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetFocusHub();
 
-    auto frameNode2 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode2 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode2->GetOrCreateFocusHub();
     auto focusHub2 = frameNode2->GetFocusHub();
 
-    auto frameNode3 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode3 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode3->GetOrCreateFocusHub();
     auto focusHub3 = frameNode3->GetFocusHub();
 
@@ -757,24 +757,24 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0068, TestSize.Level1)
     /**
      * @tc.steps1: create focusHub and construct allNodes.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
 
-    auto frameNode1 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode1 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode1->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetFocusHub();
 
-    auto frameNode2 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode2 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode2->GetOrCreateFocusHub();
     auto focusHub2 = frameNode2->GetFocusHub();
 
-    auto frameNode3 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode3 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode3->GetOrCreateFocusHub();
     auto focusHub3 = frameNode3->GetFocusHub();
 
-    auto frameNode4 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode4 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode4->GetOrCreateFocusHub();
     auto focusHub4 = frameNode4->GetFocusHub();
 
@@ -814,7 +814,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0069, TestSize.Level1)
     /**
      * @tc.steps1: create focusHub and construct allNodes.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -836,12 +836,12 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0070, TestSize.Level1)
     /**
      * @tc.steps1: create focusHub and construct allNodes.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
 
-    auto frameNode1 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode1 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode1->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetFocusHub();
 
@@ -865,7 +865,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0071, TestSize.Level1)
     /**
      * @tc.steps1: create focusHub and construct allNodes.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -887,16 +887,16 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0072, TestSize.Level1)
     /**
      * @tc.steps1: create focusHub and construct allNodes.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
 
-    auto frameNode1 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode1 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode1->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetFocusHub();
 
-    auto frameNode2 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode2 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode2->GetOrCreateFocusHub();
     auto focusHub2 = frameNode2->GetFocusHub();
 
@@ -931,12 +931,12 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0073, TestSize.Level1)
     /**
      * @tc.steps1: create focusHub and construct allNodes.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
 
-    auto frameNode1 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode1 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode1->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetFocusHub();
 
@@ -965,7 +965,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0074, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<AppTheme>()));
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -990,7 +990,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0075, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<AppTheme>()));
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -1014,12 +1014,12 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0076, TestSize.Level1)
     /**
      * @tc.steps1: create focusHub and construct allNodes.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
 
-    auto frameNode1 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode1 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode1->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetFocusHub();
 
@@ -1041,7 +1041,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0077, TestSize.Level1)
     /**
      * @tc.steps1: create focusHub and construct allNodes.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -1061,12 +1061,12 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0078, TestSize.Level1)
     /**
      * @tc.steps1: create focusHub and construct allNodes.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
 
-    auto frameNode1 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode1 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode1->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetFocusHub();
     focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
@@ -1085,12 +1085,12 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0079, TestSize.Level1)
     /**
      * @tc.steps1: create focusHub and construct allNodes.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
 
-    auto frameNode1 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode1 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode1->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetFocusHub();
     auto res = focusHub->TryRequestFocus(focusHub1, RectF(), FocusStep::LEFT);
@@ -1107,24 +1107,24 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0080, TestSize.Level1)
     /**
      * @tc.steps1: create focusHub and construct allNodes.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
 
-    auto frameNode1 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode1 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode1->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetFocusHub();
 
-    auto frameNode2 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode2 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode2->GetOrCreateFocusHub();
     auto focusHub2 = frameNode2->GetFocusHub();
 
-    auto frameNode3 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode3 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode3->GetOrCreateFocusHub();
     auto focusHub3 = frameNode3->GetFocusHub();
 
-    auto frameNode4 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode4 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode4->GetOrCreateFocusHub();
     auto focusHub4 = frameNode4->GetFocusHub();
 
@@ -1160,16 +1160,16 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0081, TestSize.Level1)
     /**
      * @tc.steps1: create focusHub and construct allNodes.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
 
-    auto frameNode1 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode1 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode1->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetFocusHub();
 
-    auto frameNode2 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode2 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode2->GetOrCreateFocusHub();
     auto focusHub2 = frameNode2->GetFocusHub();
 
@@ -1195,7 +1195,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0083, TestSize.Level1)
     /**
      * @tc.steps1: create focusHub and construct allNodes.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -1214,8 +1214,8 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0084, TestSize.Level1)
     /**
      * @tc.steps: step1. Create frameNode.
      */
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto frameNode1 = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto frameNode1 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto eventHub1 = AceType::MakeRefPtr<EventHub>();
     eventHub->AttachHost(frameNode);
@@ -1263,11 +1263,11 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0089, TestSize.Level1)
     /**
      * @tc.steps1: create focusHub and parentName != V2::ROOT_ETS_TAG.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
-    auto frameNode1 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode1 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode1->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetFocusHub();
     focusHub->focusType_ = FocusType::SCOPE;
@@ -1289,13 +1289,13 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0091, TestSize.Level1)
     /**
      * @tc.steps: step1. Create frameNode.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     eventHub->AttachHost(frameNode);
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
-    auto frameNode1 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode1 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode1->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetFocusHub();
     focusHub->focusStyleType_ = FocusStyleType::CUSTOM_REGION;
@@ -1322,11 +1322,11 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0092, TestSize.Level1)
     /**
      * @tc.steps1: create focusHub and parentName = V2::ROOT_ETS_TAG.
      */
-    auto frameNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode(V2::ROOT_ETS_TAG, 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
-    auto frameNode1 = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode1 = FrameNodeOnTree::CreateFrameNode(V2::ROOT_ETS_TAG, 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode1->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetFocusHub();
     focusHub->focusType_ = FocusType::SCOPE;
@@ -1348,11 +1348,11 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0093, TestSize.Level1)
     /**
      * @tc.steps: step1. Create frameNode.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
-    auto frameNode1 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode1 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode1->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetFocusHub();
     focusHub->focusType_ = FocusType::SCOPE;
@@ -1379,11 +1379,11 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0094, TestSize.Level1)
     /**
      * @tc.steps1: initialize parameters.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
-    auto frameNode1 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode1 = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode1->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetFocusHub();
     frameNode->children_.push_back(frameNode1);
@@ -1415,9 +1415,9 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0096, TestSize.Level1)
     /**
      * @tc.steps: step1. Create frameNode.
      */
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto child = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
-    auto child2 = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto child = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    auto child2 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
     child->GetOrCreateFocusHub();
     child2->GetOrCreateFocusHub();
     frameNode->AddChild(child);
@@ -1451,15 +1451,15 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0097, TestSize.Level1)
     /**
      * @tc.steps1: create focusHub and construct allNodes.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
-    auto frameNode1 = FrameNode::CreateFrameNode("123", 123, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode1 = FrameNodeOnTree::CreateFrameNode("123", 123, AceType::MakeRefPtr<ButtonPattern>());
     frameNode1->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetFocusHub();
     frameNode1->propInspectorId_ = "123";
-    auto frameNode2 = FrameNode::CreateFrameNode("frameNode", 102, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode2 = FrameNodeOnTree::CreateFrameNode("frameNode", 102, AceType::MakeRefPtr<ButtonPattern>());
     frameNode2->GetOrCreateFocusHub();
     auto focusHub2 = frameNode2->GetFocusHub();
     frameNode->children_.push_back(frameNode2);
@@ -1480,11 +1480,11 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0098, TestSize.Level1)
     /**
      * @tc.steps1: initialize parameters.
      */
-    auto frameNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode(V2::ROOT_ETS_TAG, 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
-    auto frameNode1 = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode1 = FrameNodeOnTree::CreateFrameNode(V2::ROOT_ETS_TAG, 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode1->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetFocusHub();
     focusHub->focusType_ = FocusType::SCOPE;
@@ -1534,7 +1534,7 @@ HWTEST_F(FocusHubTestNg, LostFocusToViewRoot001, TestSize.Level1)
     /**
      * @tc.steps1: create focusHub and construct allNodes.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
      /**
@@ -1554,7 +1554,7 @@ HWTEST_F(FocusHubTestNg, SetEnabled001, TestSize.Level1)
     /**
      * @tc.steps1: create focusHub and construct allNodes.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
@@ -1611,18 +1611,18 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0102, TestSize.Level1)
     /**
      * @tc.steps1: create focusHub and construct allNodes.
      */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 102, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 102, AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
 
-    auto textFieldNode = FrameNode::CreateFrameNode("frameNode", 103, AceType::MakeRefPtr<TextFieldPattern>());
+    auto textFieldNode = FrameNodeOnTree::CreateFrameNode("frameNode", 103, AceType::MakeRefPtr<TextFieldPattern>());
     textFieldNode->GetOrCreateFocusHub();
     auto textFieldFocusHub = textFieldNode->GetFocusHub();
     ASSERT_NE(textFieldNode, nullptr);
     ASSERT_FALSE(focusHub->ScrollByOffsetToParent(textFieldNode));
 
-    auto listNode = FrameNode::CreateFrameNode("frameNode", 104, AceType::MakeRefPtr<ListPattern>());
+    auto listNode = FrameNodeOnTree::CreateFrameNode("frameNode", 104, AceType::MakeRefPtr<ListPattern>());
     listNode->GetOrCreateFocusHub();
     auto listFocusHub = listNode->GetFocusHub();
     ASSERT_NE(listFocusHub, nullptr);
@@ -1640,11 +1640,11 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0103, TestSize.Level1)
     /**
      * @tc.steps: step1. Create frameNode.
      */
-    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 105,
+    auto frameNode = FrameNodeOnTree::CreateFrameNode(V2::COLUMN_ETS_TAG, 105,
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    auto child = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+    auto child = FrameNodeOnTree::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         106, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    auto child2 = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+    auto child2 = FrameNodeOnTree::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         107, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     child->MountToParent(frameNode);
     child2->MountToParent(frameNode);
@@ -1670,11 +1670,11 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0104, TestSize.Level1)
     /**
      * @tc.steps: step1. Create frameNode.
      */
-    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 108,
+    auto frameNode = FrameNodeOnTree::CreateFrameNode(V2::COLUMN_ETS_TAG, 108,
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    auto child = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+    auto child = FrameNodeOnTree::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         109, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    auto child2 = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+    auto child2 = FrameNodeOnTree::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         110, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     child->MountToParent(frameNode);
     child2->MountToParent(frameNode);
@@ -1706,11 +1706,11 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0105, TestSize.Level1)
     /**
      * @tc.steps: step1. Create frameNode.
      */
-    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 111,
+    auto frameNode = FrameNodeOnTree::CreateFrameNode(V2::COLUMN_ETS_TAG, 111,
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    auto child = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+    auto child = FrameNodeOnTree::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         112, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    auto child2 = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+    auto child2 = FrameNodeOnTree::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         113, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     child->MountToParent(frameNode);
     child2->MountToParent(frameNode);
@@ -1736,11 +1736,11 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0106, TestSize.Level1)
     /**
      * @tc.steps: step1. Create frameNode.
      */
-    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 114,
+    auto frameNode = FrameNodeOnTree::CreateFrameNode(V2::COLUMN_ETS_TAG, 114,
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    auto child = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+    auto child = FrameNodeOnTree::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         115, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    auto child2 = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+    auto child2 = FrameNodeOnTree::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         116, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     child->MountToParent(frameNode);
     child2->MountToParent(frameNode);
@@ -1772,11 +1772,11 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0107, TestSize.Level1)
     /**
      * @tc.steps: step1. Create frameNode.
      */
-    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 117,
+    auto frameNode = FrameNodeOnTree::CreateFrameNode(V2::COLUMN_ETS_TAG, 117,
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    auto child = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+    auto child = FrameNodeOnTree::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         118, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    auto child2 = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+    auto child2 = FrameNodeOnTree::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         119, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     child->MountToParent(frameNode);
     child2->MountToParent(frameNode);
