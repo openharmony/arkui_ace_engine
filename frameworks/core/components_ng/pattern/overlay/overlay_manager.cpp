@@ -4039,6 +4039,34 @@ void OverlayManager::UpdateBindSheetByUIContext(
     return;
 }
 
+void OverlayManager::UpdateSheetRender(
+    const RefPtr<FrameNode>& sheetPageNode, NG::SheetStyle& sheetStyle, bool isPartialUpdate)
+{
+    CHECK_NULL_VOID(sheetPageNode);
+    auto sheetRenderContext = sheetPageNode->GetRenderContext();
+    CHECK_NULL_VOID(sheetRenderContext);
+    auto pipeline = sheetPageNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    SetSheetBackgroundColor(sheetPageNode, sheetTheme, sheetStyle);
+    if (sheetStyle.backgroundBlurStyle.has_value()) {
+        SetSheetBackgroundBlurStyle(sheetPageNode, sheetStyle.backgroundBlurStyle.value());
+    }
+    SetSheetBorderWidth(sheetPageNode, sheetTheme, sheetStyle);
+    if (sheetStyle.borderStyle.has_value()) {
+        sheetRenderContext->UpdateBorderStyle(sheetStyle.borderStyle.value());
+    }
+    if (sheetStyle.borderColor.has_value()) {
+        sheetRenderContext->UpdateBorderColor(sheetStyle.borderColor.value());
+    }
+    if (sheetStyle.shadow.has_value()) {
+        sheetRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
+    } else if (!isPartialUpdate) {
+        sheetRenderContext->UpdateBackShadow(ShadowConfig::NoneShadow);
+    }
+}
+
 void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& sheetStyle,
     int32_t targetId, bool isStartByUIContext, bool isPartialUpdate,
     std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
@@ -4055,32 +4083,13 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::She
     }
     auto pipeline = sheetNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
-    CHECK_NULL_VOID(sheetTheme);
-    SetSheetBackgroundColor(sheetNode, sheetTheme, sheetStyle, isPartialUpdate);
-    auto topModalRenderContext = sheetNode->GetRenderContext();
-    CHECK_NULL_VOID(topModalRenderContext);
-    if (sheetStyle.backgroundBlurStyle.has_value()) {
-        SetSheetBackgroundBlurStyle(sheetNode, sheetStyle.backgroundBlurStyle.value());
-    }
-    SetSheetBorderWidth(sheetNode, sheetTheme, sheetStyle, isPartialUpdate);
-    if (sheetStyle.borderStyle.has_value()) {
-        topModalRenderContext->UpdateBorderStyle(sheetStyle.borderStyle.value());
-    }
-    if (sheetStyle.borderColor.has_value()) {
-        topModalRenderContext->UpdateBorderColor(sheetStyle.borderColor.value());
-    }
-    if (sheetStyle.shadow.has_value()) {
-        topModalRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
-    } else if (!isPartialUpdate) {
-        topModalRenderContext->UpdateBackShadow(ShadowConfig::NoneShadow);
-    }
+    UpdateSheetRender(sheetNode, sheetStyle, isPartialUpdate);
     auto maskNode = GetSheetMask(sheetNode);
     if (maskNode) {
         UpdateSheetMask(maskNode, sheetNode, sheetStyle, isPartialUpdate);
     }
     auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
-
+    CHECK_NULL_VOID(sheetNodePattern);
     if (isStartByUIContext) {
         auto currentStyle = UpdateSheetStyle(sheetNode, sheetStyle, isPartialUpdate);
         sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -4103,6 +4112,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::She
         pipeline->FlushUITasks();
         ComputeSheetOffset(sheetStyle, sheetNode);
     }
+    sheetNode->MarkModifyDone();
     auto sheetType = sheetNodePattern->GetSheetType();
     if (sheetType != SheetType::SHEET_POPUP && !sheetNodePattern->GetDismissProcess()) {
         PlaySheetTransition(sheetNode, true, false);
@@ -4209,28 +4219,7 @@ void OverlayManager::SetSheetProperty(
     std::function<void(const float)>&& onTypeDidChange,
     std::function<void()>&& sheetSpringBack)
 {
-    auto sheetRenderContext = sheetPageNode->GetRenderContext();
-    CHECK_NULL_VOID(sheetRenderContext);
-    if (sheetStyle.backgroundColor.has_value()) {
-        sheetPageNode->GetRenderContext()->UpdateBackgroundColor(sheetStyle.backgroundColor.value());
-    }
-    if (sheetStyle.backgroundBlurStyle.has_value()) {
-        SetSheetBackgroundBlurStyle(sheetPageNode, sheetStyle.backgroundBlurStyle.value());
-    }
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
-    CHECK_NULL_VOID(sheetTheme);
-    SetSheetBorderWidth(sheetPageNode, sheetTheme, sheetStyle);
-    if (sheetStyle.borderStyle.has_value()) {
-        sheetRenderContext->UpdateBorderStyle(sheetStyle.borderStyle.value());
-    }
-    if (sheetStyle.borderColor.has_value()) {
-        sheetRenderContext->UpdateBorderColor(sheetStyle.borderColor.value());
-    }
-    if (sheetStyle.shadow.has_value()) {
-        sheetRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
-    }
+    UpdateSheetRender(sheetPageNode, sheetStyle, true);
     auto sheetNodePattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetNodePattern);
     sheetNodePattern->UpdateOnAppear(std::move(onAppear));
