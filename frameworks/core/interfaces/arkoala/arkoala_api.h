@@ -1326,6 +1326,17 @@ struct ArkUIDragInteractionOptions {
     ArkUI_Bool defaultAnimationBeforeLifting;
 };
 
+struct ArkUIDragPreViewAndInteractionOptions {
+    bool isScaleEnabled = false;
+    bool defaultAnimationBeforeLifting = false;
+    bool isMultiSelectionEnabled = false;
+    bool isNumberBadgeEnabled = false;
+    bool isDefaultShadowEnabled = false;
+    bool isDefaultRadiusEnabled = false;
+    ArkUI_Int32 badgeNumber = 0;
+    bool isShowBadge = true;
+};
+
 struct ArkUI_DialogDismissEvent;
 typedef ArkUI_DialogDismissEvent* ArkUIDialogDismissEvent;
 
@@ -1768,6 +1779,7 @@ struct ArkUICommonModifier {
     void (*setFocusBoxStyle)(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Float32 valueStrokeWidth,
         ArkUI_Uint32 valueColor, ArkUI_Uint32 hasValue);
     void (*resetFocusBoxStyle)(ArkUINodeHandle node);
+    void (*setDisAllowDrop)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
@@ -4832,6 +4844,12 @@ typedef struct {
     ArkUINodeAdapterHandle (*getNodeAdapter)(ArkUINodeHandle host);
 } ArkUINodeAdapterAPI;
 
+typedef struct {
+    void (*setDragPreview)(ArkUINodeHandle node, void* dragPreview);
+    void (*setDragEventStrictReportingEnabledWithNode)(bool enabled);
+    void (*setDragEventStrictReportingEnabledWithContext)(ArkUI_Int32 instanceId, bool enabled);
+} ArkUIDragAdapterAPI;
+
 /**
  * An API to control an implementation. When making changes modifying binary
  * layout, i.e. adding new events - increase ARKUI_NODE_API_VERSION above for binary
@@ -4848,6 +4866,7 @@ struct ArkUIFullNodeAPI {
     const ArkUIDialogAPI* (*getDialogAPI)();
     const ArkUIExtendedNodeAPI* (*getExtendedAPI)();
     const ArkUINodeAdapterAPI* (*getNodeAdapterAPI)();
+    const ArkUIDragAdapterAPI* (*getDragAdapterAPI)();
 };
 
 struct ArkUIAnyAPI {
