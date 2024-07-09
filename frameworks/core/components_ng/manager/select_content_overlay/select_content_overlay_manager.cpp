@@ -571,7 +571,7 @@ void SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, Clos
     auto selectOverlayNode = selectOverlayNode_.Upgrade();
     auto menuNode = menuNode_.Upgrade();
     auto handleNode = handleNode_.Upgrade();
-    if (animation) {
+    if (animation && !shareOverlayInfo_->isUsingMouse) {
         ClearAllStatus();
         DestroySelectOverlayNodeWithAnimation(selectOverlayNode);
         DestroySelectOverlayNodeWithAnimation(menuNode);
