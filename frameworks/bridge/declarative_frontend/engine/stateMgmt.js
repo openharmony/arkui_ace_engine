@@ -2143,7 +2143,7 @@ class stateMgmtConsole {
         // aceConsole.error(...args)
     }
     static applicationError(...args) {
-        aceConsole.error(LogTag.STATE_MGMT, `FIX THIS APPLICATION ERROR \n`, ...args);
+        aceConsole.error(LogTag.STATE_MGMT, `FIX THIS APPLICATION ERROR: `, ...args);
     }
     static applicationWarn(...args) {
         aceConsole.warn(LogTag.STATE_MGMT, ...args);
@@ -2287,7 +2287,7 @@ class SubscribableHandler {
             this.owningProperties_.add(subscriber.id__());
         }
         else {
-            stateMgmtConsole.warn(`SubscribableHandler: addOwningProperty: undefined subscriber. - Internal error?`);
+            stateMgmtConsole.warn(`SubscribableHandler: addOwningProperty: undefined subscriber.`);
         }
     }
     /*
@@ -2580,7 +2580,7 @@ class ObservedObject extends ExtendableProxy {
         if (ObservedObject.IsObservedObject(obj)) {
             stateMgmtConsole.error('ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already');
         }
-        if (objectOwningProperty !== undefined) {
+        if (objectOwningProperty) {
             this[SubscribableHandler.SUBSCRIBE] = objectOwningProperty;
         }
     } // end of constructor
@@ -2648,7 +2648,7 @@ class ObservedObject extends ExtendableProxy {
      * @returns false if given object is not an ObservedObject
      */
     static addOwningProperty(obj, subscriber) {
-        if (!ObservedObject.IsObservedObject(obj) || subscriber === undefined) {
+        if (!ObservedObject.IsObservedObject(obj) || !subscriber) {
             return false;
         }
         obj[SubscribableHandler.SUBSCRIBE] = subscriber;
@@ -5719,7 +5719,7 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
                 }
                 stack.pop();
             });
-            return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
+            return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, undefined) : copy;
         }
     }
 }
