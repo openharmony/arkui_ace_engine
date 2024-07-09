@@ -1333,6 +1333,59 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerDialogViewShow002, TestSize.Leve
 }
 
 /**
+ * @tc.name: TimePickerModelNGTest001
+ * @tc.desc: Test TimePickerModelNG CreateFrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestUpdate, TimePickerModelNGTest001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create timePickerModelNG.
+     */
+    CreateTimePickerColumnNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    TimePickerModelNG timePickerModelNG;
+    /**
+     * @tc.step: step1. create TimepickerNode.
+     * @tc.expected: timePickerNode is not NULL.
+     */
+    auto timePickerNode = timePickerModelNG.CreateFrameNode(frameNode->GetId());
+    EXPECT_NE(timePickerNode, nullptr);
+}
+
+/**
+ * @tc.name: TimePickerModelNGTest002
+ * @tc.desc: Test TimePickerModelNG SetTimePickerDialogShow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestUpdate, TimePickerModelNGTest002, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create timePickerModelNG.
+     */
+    CreateTimePickerColumnNode();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    TimePickerDialogModelNG timePickerDialogModelNG;
+
+    PickerDialogInfo pickerDialog;
+    NG::TimePickerSettingData settingData;
+    std::function<void()> onCancel = []() {};
+    std::function<void(const std::string&)> onAccept = [](const std::string&) {};
+    std::function<void(const std::string&)> onChange = [](const std::string&) {};
+    TimePickerDialogEvent timePickerDialogEvent;
+    std::vector<ButtonInfo> buttonInfos;
+
+    timePickerDialogModelNG.SetTimePickerDialogShow(pickerDialog, settingData, std::move(onCancel),
+        std::move(onAccept), std::move(onChange), timePickerDialogEvent, buttonInfos);
+    ASSERT_NE(frameNode, nullptr);
+}
+
+/**
  * @tc.name: CreateFrameNode001
  * @tc.desc: Test TimePickerPatternTestUpdate CreateFrameNode.
  * @tc.type: FUNC
