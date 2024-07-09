@@ -9676,15 +9676,13 @@ void JSViewAbstract::JsOnChildTouchTest(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsForegroundColor(const JSCallbackInfo& info)
 {
-    Color foregroundColor;
+    Color foregroundColor = Color::TRANSPARENT;
     ForegroundColorStrategy strategy;
     if (ParseJsColorStrategy(info[0], strategy)) {
         ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(strategy);
         return;
     }
-    if (!ParseJsColor(info[0], foregroundColor)) {
-        return;
-    }
+    ParseJsColor(info[0], foregroundColor);
     ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
 }
 
