@@ -277,6 +277,7 @@ private:
     void ShowSelectOverlay(const OverlayRequest& request, bool hasClipboardData);
     void GetHandlePoints(const RectF& handleRect, std::vector<PointF>& points, bool handleOnTop);
     bool IsPointsInRegion(const std::vector<PointF>& points, const RectF& regionRect);
+    bool CheckAndUpdateHostGlobalPaintRect();
     bool isSingleHandle_ = false;
     bool isShowPaste_ = false;
     bool isShowMenu_ = true;
@@ -290,6 +291,7 @@ private:
     bool touchAtHandle_ = false;
     bool isChangeToOverlayModeAtEdge_ = true;
     bool hasRegisterListener_ = false;
+    RectF globalPaintRect_;
 };
 
 } // namespace OHOS::Ace::NG

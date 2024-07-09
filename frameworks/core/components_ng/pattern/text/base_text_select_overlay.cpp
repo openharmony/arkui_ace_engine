@@ -68,6 +68,7 @@ void BaseTextSelectOverlay::ShowSelectOverlay(const OverlayRequest& request, boo
         CHECK_NULL_VOID(host);
         host->RegisterNodeChangeListener();
         RegisterScrollingListener(nullptr);
+        CheckAndUpdateHostGlobalPaintRect();
     }
     auto manager = SelectContentOverlayManager::GetOverlayManager(Claim(this));
     CHECK_NULL_VOID(manager);
@@ -892,8 +893,11 @@ void BaseTextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
     auto isStartAnimation = IsAncestorNodeStartAnimation(flag);
     auto isTransformChanged = IsAncestorNodeTransformChange(flag);
     auto isStartTransition = IsAncestorNodeHasTransition(flag);
-    auto isSwitchToEmbed = isStartScroll || isStartAnimation || isTransformChanged || isStartTransition ||
-                           IsAncestorNodeGeometryChange(flag);
+    auto isSwitchToEmbed = isStartScroll || isStartAnimation || isTransformChanged || isStartTransition;
+    // parent size changes but the child does not change.
+    if (IsAncestorNodeGeometryChange(flag)) {
+        isSwitchToEmbed = isSwitchToEmbed || CheckAndUpdateHostGlobalPaintRect();
+    }
     isSwitchToEmbed = isSwitchToEmbed && (!IsAncestorNodeEndScroll(flag) || HasThreeDimensionTransform());
     if (isStartScroll || isStartAnimation || isTransformChanged || isStartTransition) {
         HideMenu(true);
@@ -1055,5 +1059,17 @@ void BaseTextSelectOverlay::OnHandleScrolling(const WeakPtr<FrameNode>& scrollin
     } else {
         hasRegisterListener_ = false;
     }
+}
+
+bool BaseTextSelectOverlay::CheckAndUpdateHostGlobalPaintRect()
+{
+    auto host = GetOwner();
+    CHECK_NULL_RETURN(host, false);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto framePaintRect = RectF(host->GetTransformRelativeOffset(), geometryNode->GetFrameSize());
+    auto changed = globalPaintRect_ != framePaintRect;
+    globalPaintRect_ = framePaintRect;
+    return changed;
 }
 } // namespace OHOS::Ace::NG
