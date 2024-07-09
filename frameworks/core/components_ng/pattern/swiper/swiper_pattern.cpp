@@ -4108,13 +4108,15 @@ void SwiperPattern::SetDigitStartAndEndProperty(const RefPtr<FrameNode>& indicat
     CHECK_NULL_VOID(swiperDigitalParameters);
     bool isRtl = GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (swiperDigitalParameters->dimStart.has_value()) {
-        auto dimValue = swiperDigitalParameters->dimStart.value();
+        auto dimValue = swiperDigitalParameters->dimStart.value().Value() >= 0.0 ?
+                        swiperDigitalParameters->dimStart.value() : Dimension(0.0, DimensionUnit::VP);
         isRtl ? layoutProperty->UpdateRight(dimValue) : layoutProperty->UpdateLeft(dimValue);
         isRtl ? swiperLayoutProperty->UpdateRight(dimValue)
               : swiperLayoutProperty->UpdateLeft(swiperDigitalParameters->dimLeft.value_or(0.0_vp));
         ;
     } else if (swiperDigitalParameters->dimEnd.has_value()) {
-        auto dimValue = swiperDigitalParameters->dimEnd.value();
+        auto dimValue = swiperDigitalParameters->dimEnd.value().Value() >= 0.0 ?
+                        swiperDigitalParameters->dimEnd.value() : Dimension(0.0, DimensionUnit::VP);
         isRtl ? layoutProperty->UpdateLeft(dimValue) : layoutProperty->UpdateRight(dimValue);
         isRtl ? swiperLayoutProperty->UpdateLeft(dimValue)
               : swiperLayoutProperty->UpdateRight(swiperDigitalParameters->dimRight.value_or(0.0_vp));
