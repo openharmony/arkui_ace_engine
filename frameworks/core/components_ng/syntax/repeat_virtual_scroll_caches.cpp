@@ -233,7 +233,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::UpdateFromL2(uint32_t forIndex)
 
     // call TS to do the RepeatItem update
     onUpdateNode_(oldKey.value(), forIndex);
-    
+
     TAG_LOGD(AceLogTag::ACE_REPEAT,
         "for index %{public}d, from old key %{public}s requesting TS to update child UINodes -done ",
         static_cast<int32_t>(forIndex), oldKey.value().c_str());
@@ -354,7 +354,7 @@ bool RepeatVirtualScrollCaches::RebuildL1(const std::function<bool(int32_t index
             continue;
         }
         const auto& cacheItem = node4key_[key];
-        int32_t index = indexIter->second;
+        int32_t index = static_cast<int32_t>(indexIter->second);
         if (cbFunc(index, cacheItem.item)) {
             activeNodeKeysInL1_.emplace(key);
         } else {
@@ -639,6 +639,12 @@ RefPtr<UINode> RepeatVirtualScrollCaches::GetCachedNode4Key4Ttype(
  */
 int32_t RepeatVirtualScrollCaches::GetDistanceFromRange(uint32_t index) const
 {
+    // index too big to cast into int32_t
+    if (index > static_cast<uint32_t>(INT32_MAX)) {
+        TAG_LOGE(AceLogTag::ACE_REPEAT, "index with value:%{public}d is too big to cast into int32_t", index);
+        return 0;
+    }
+    int32_t castedIndex = static_cast<int32_t>(index);
     int32_t last[2] = { lastActiveRanges_[0].first, lastActiveRanges_[0].second };
     int32_t prev[2] = { lastActiveRanges_[1].first, lastActiveRanges_[1].second };
 
@@ -648,25 +654,25 @@ int32_t RepeatVirtualScrollCaches::GetDistanceFromRange(uint32_t index) const
 
     // if scrolling up, return 0 for any lower index
     if (last[0] < prev[0] && prev[0] < last[1]) {
-        if (index < last[0]) {
+        if (castedIndex < last[0]) {
             return 0;
         }
     }
 
     // if scrolling down, return 0 for any greater index
     if (last[0] < prev[1] && prev[1] < last[1]) {
-        if (index > last[1]) {
+        if (castedIndex > last[1]) {
             return 0;
         }
     }
 
     // this is not scrolling
-    if (index < last[0]) {
-        return last[0] - index;
+    if (castedIndex < last[0]) {
+        return last[0] - castedIndex;
     }
 
-    if (index > last[1]) {
-        return index - last[1];
+    if (castedIndex > last[1]) {
+        return castedIndex - last[1];
     }
 
     return 0;

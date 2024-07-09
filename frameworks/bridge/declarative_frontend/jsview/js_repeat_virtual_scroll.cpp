@@ -41,6 +41,22 @@ namespace OHOS::Ace::Framework {
 
 void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
 {
+    int8_t numberIndex = 0;
+    int8_t arrayIndex = 1;
+    int8_t objectIndex = 2;
+    if (!info[numberIndex]->IsNumber()) {
+        TAG_LOGE(AceLogTag::ACE_REPEAT, "info[0] should be number but isn't.");
+        return;
+    }
+    if (!info[arrayIndex]->IsArray()) {
+        TAG_LOGE(AceLogTag::ACE_REPEAT, "info[1] should be array but isn't.");
+        return;
+    }
+    if (!info[objectIndex]->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_REPEAT, "info[2] should be object but isn't.");
+        return;
+    }
+
     // arg 0
     auto totalCount = info[0]->ToNumber<uint32_t>();
 
@@ -49,13 +65,42 @@ void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
     std::map<std::string, uint32_t> templateCachedCountMap;
     for (size_t i = 0; i < templateOptsArray->Length(); i++) {
         JSRef<JSArray> pair = templateOptsArray->GetValueAt(i);
+        if (!pair->GetValueAt(0)->IsString()) {
+            TAG_LOGW(AceLogTag::ACE_REPEAT, "pair->GetValueAt(0) should be string but isn't.");
+            continue;
+        }
+        if (!pair->GetValueAt(1)->IsObject()) {
+            TAG_LOGW(AceLogTag::ACE_REPEAT, "pair->GetValueAt(1) should be object but isn't.");
+            continue;
+        }
         auto type = pair->GetValueAt(0)->ToString();
         auto opts = JSRef<JSObject>::Cast(pair->GetValueAt(1));
+        if (!opts->GetProperty("cachedCount")->IsNumber()) {
+            TAG_LOGW(AceLogTag::ACE_REPEAT, "opts->GetProperty(\"cachedCount\") should be number but isn't.");
+            continue;
+        }
         templateCachedCountMap[type] = opts->GetProperty("cachedCount")->ToNumber<uint32_t>();
     }
 
     // arg 2
     auto handlers = JSRef<JSObject>::Cast(info[2]);
+    if (!handlers->GetProperty("onCreateNode")->IsFunction()) {
+        TAG_LOGE(AceLogTag::ACE_REPEAT, "handlers->GetProperty(\"onCreateNode\") should be function but isn't.");
+        return;
+    }
+    if (!handlers->GetProperty("onUpdateNode")->IsFunction()) {
+        TAG_LOGE(AceLogTag::ACE_REPEAT, "handlers->GetProperty(\"onUpdateNode\") should be function but isn't.");
+        return;
+    }
+    if (!handlers->GetProperty("onGetKeys4Range")->IsFunction()) {
+        TAG_LOGE(AceLogTag::ACE_REPEAT, "handlers->GetProperty(\"onGetKeys4Range\") should be function but isn't.");
+        return;
+    }
+    if (!handlers->GetProperty("onGetTypes4Range")->IsFunction()) {
+        TAG_LOGE(AceLogTag::ACE_REPEAT, "handlers->GetProperty(\"onGetTypes4Range\") should be function but isn't.");
+        return;
+    }
+
     auto onCreateNode = [execCtx = info.GetExecutionContext(), func = JSFUNC(handlers, "onCreateNode")](
                             uint32_t forIndex) -> void {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -77,6 +122,10 @@ void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
         auto params = ConvertToJSValues(from, to);
         JSRef<JSVal> jsVal = func->Call(JSRef<JSObject>(), params.size(), params.data());
         // convert js-array to std::list
+        if (!jsVal->IsArray()) {
+            TAG_LOGW(AceLogTag::ACE_REPEAT, "jsVal should be array but isn't.");
+            return list;
+        }
         JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(jsVal);
         for (size_t i = 0; i < jsArr->Length(); i++) {
             list.emplace_back(jsArr->GetValueAt(i)->ToString());
@@ -92,6 +141,10 @@ void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
         JSRef<JSVal> jsVal = func->Call(JSRef<JSObject>(), params.size(), params.data());
 
         // convert js-array to std::list
+        if (!jsVal->IsArray()) {
+            TAG_LOGW(AceLogTag::ACE_REPEAT, "jsVal should be array but isn't.");
+            return list;
+        }
         JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(jsVal);
         for (size_t i = 0; i < jsArr->Length(); i++) {
             list.emplace_back(jsArr->GetValueAt(i)->ToString());
@@ -100,21 +153,19 @@ void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
     };
 
     RepeatVirtualScrollModel::GetInstance()->Create(
-        totalCount,
-        templateCachedCountMap,
-        onCreateNode,
-        onUpdateNode,
-        onGetKeys4Range,
-        onGetTypes4Range
-    );
+        totalCount, templateCachedCountMap, onCreateNode, onUpdateNode, onGetKeys4Range, onGetTypes4Range);
 }
 
 void JSRepeatVirtualScroll::InvalidateKeyCache(const JSCallbackInfo& info)
 {
     ACE_SCOPED_TRACE("RepeatVirtualScroll:InvalidateKeyCache");
     TAG_LOGD(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll::InvalidateKeyCache");
-    auto totalCount = info[0]->ToNumber<uint32_t>();
-    RepeatVirtualScrollModel::GetInstance()->InvalidateKeyCache(totalCount);
+    if (info[0]->IsNumber()) {
+        auto totalCount = info[0]->ToNumber<uint32_t>();
+        RepeatVirtualScrollModel::GetInstance()->InvalidateKeyCache(totalCount);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_REPEAT, "info[0] should be number but isn't.");
+    }
 }
 
 void JSRepeatVirtualScroll::OnMove(const JSCallbackInfo& info)
@@ -123,11 +174,11 @@ void JSRepeatVirtualScroll::OnMove(const JSCallbackInfo& info)
         RepeatVirtualScrollModel::GetInstance()->OnMove(nullptr);
         return;
     }
-    auto onMove = [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(info[0])]
-        (int32_t from, int32_t to) {
-            auto params = ConvertToJSValues(from, to);
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
-        };
+    auto onMove = [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(info[0])](
+                      int32_t from, int32_t to) {
+        auto params = ConvertToJSValues(from, to);
+        func->Call(JSRef<JSObject>(), params.size(), params.data());
+    };
     RepeatVirtualScrollModel::GetInstance()->OnMove(std::move(onMove));
 }
 
