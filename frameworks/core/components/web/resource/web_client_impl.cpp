@@ -1206,4 +1206,12 @@ void WebClientImpl::KeyboardReDispatch(
     ContainerScope scope(delegate->GetInstanceId());
     delegate->KeyboardReDispatch(event, isUsed);
 }
+
+void WebClientImpl::ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->ReportDynamicFrameLossEvent(sceneId, isStart);
+}
 } // namespace OHOS::Ace
