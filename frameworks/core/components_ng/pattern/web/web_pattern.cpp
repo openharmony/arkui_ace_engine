@@ -2549,7 +2549,8 @@ bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, doubl
         return !safeAreaEnabled;
     }
     if (height - GetCoordinatePoint()->GetY() < keyboard) {
-        return !safeAreaEnabled;
+        TAG_LOGI(AceLogTag::ACE_WEB, "ProcessVirtualKeyBoardShow Complete occlusion");
+        return true;
     }
     if (!delegate_->NeedSoftKeyboard()) {
         return false;
