@@ -47,7 +47,7 @@ export struct ToolBar {
   @ObjectLink toolBarList: ToolBarOptions
   controller: TabsController = new TabsController();
   @Prop activateIndex: number = -1
-  @Prop moreText: string = "更多"
+  @Prop moreText: ResourceStr = $r('sys.string.ohos_toolbar_more');
   @State menuContent: MenuController[] = [];
   toolBarItemBackground: Resource[] = []
   @State itemBackground: Resource = $r('sys.color.ohos_id_color_toolbar_bg')
