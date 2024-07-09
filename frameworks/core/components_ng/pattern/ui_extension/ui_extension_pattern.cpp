@@ -754,7 +754,7 @@ void UIExtensionPattern::DispatchDisplayArea(bool isForce)
 
 void UIExtensionPattern::HandleDragEvent(const PointerEvent& info)
 {
-    const auto pointerEvent = info.rawPointerEvent;
+    auto pointerEvent = info.rawPointerEvent;
     CHECK_NULL_VOID(pointerEvent);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -771,6 +771,7 @@ void UIExtensionPattern::HandleDragEvent(const PointerEvent& info)
     } else {
         Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale, udegree);
     }
+    Platform::UpdatePointerAction(pointerEvent, info.action);
     DispatchPointerEvent(pointerEvent);
 }
 
