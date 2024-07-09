@@ -420,7 +420,7 @@ public:
     }
 
     SheetType GetSheetType();
-    bool IsPhoneOrFold();
+    bool IsPhoneInLandScape();
     ScrollSizeMode GetScrollSizeMode();
     void GetSheetTypeWithAuto(SheetType& sheetType);
     void GetSheetTypeWithPopup(SheetType& sheetType);

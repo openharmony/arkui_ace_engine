@@ -4580,7 +4580,7 @@ void OverlayManager::CheckDeviceInLandscape(NG::SheetStyle& sheetStyle, RefPtr<F
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
     if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM &&
-        sheetPattern->IsPhoneOrFold()) {
+        sheetPattern->IsPhoneInLandScape()) {
         statusBarHeight = 0.0f;
     }
 }

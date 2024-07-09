@@ -378,8 +378,8 @@ float SheetPresentationLayoutAlgorithm::GetWidthByScreenSizeType(const SizeF& ma
     CHECK_NULL_RETURN(sheetPattern, width);
     switch (sheetType_) {
         case SheetType::SHEET_BOTTOM:
-            if (sheetPattern->IsPhoneOrFold()) {
-                width = SHEET_LANDSCAPE_WIDTH.ConvertToPx();
+            if (sheetPattern->IsPhoneInLandScape()) {
+                width = std::min(static_cast<float>(SHEET_LANDSCAPE_WIDTH.ConvertToPx()), maxSize.Width());
                 break;
             }
         case SheetType::SHEET_BOTTOM_FREE_WINDOW:
