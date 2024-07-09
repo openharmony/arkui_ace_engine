@@ -463,13 +463,7 @@ void MenuPattern::RemoveParentHoverStyle()
     auto menuItemPattern = menuItemParent->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(menuItemPattern);
     menuItemPattern->SetIsSubMenuShowed(false);
-
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    menuItemPattern->SetBgBlendColor(Color::TRANSPARENT);
-    menuItemPattern->PlayBgColorAnimation();
+    menuItemPattern->OnHover(false);
 }
 
 void MenuPattern::UpdateMenuItemChildren(RefPtr<UINode>& host)
@@ -1637,7 +1631,7 @@ float MenuPattern::GetSelectMenuWidth()
     return finalWidth;
 }
 
-void MenuPattern::OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press)
+void MenuPattern::OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover)
 {
     CHECK_NULL_VOID(parent);
     if (parent->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
@@ -1672,7 +1666,7 @@ void MenuPattern::OnItemPressed(const RefPtr<UINode>& parent, int32_t index, boo
         auto props = DynamicCast<FrameNode>(nextNode)->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(props);
         // need save needDivider property due to some items shoud not have divide in not pressed state
-        props->UpdatePress(press);
+        hover ? props->UpdateHover(press) : props->UpdatePress(press);
         nextNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
     if (index > 0) {
