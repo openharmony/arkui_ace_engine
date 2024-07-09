@@ -3462,7 +3462,7 @@ void TextFieldPattern::KeyboardContentTypeToInputType()
     if (keyboard_ != TextInputType::UNSPECIFIED) {
         return;
     }
-    auto autoFillType = GetAutoFillType();
+    auto autoFillType = GetAutoFillType(false);
     static std::unordered_map<AceAutoFillType, TextInputType> keyBoardMap = {
         { AceAutoFillType::ACE_PASSWORD, TextInputType::VISIBLE_PASSWORD},
         { AceAutoFillType::ACE_USER_NAME, TextInputType::USER_NAME },
