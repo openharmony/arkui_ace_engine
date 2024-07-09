@@ -19,6 +19,7 @@
 #include <condition_variable>
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <mutex>
 #include <optional>
 #include <string>
@@ -39,6 +40,12 @@ struct DownloadCondition {
     std::optional<bool> downloadSuccess;
 };
 
+struct DownloadResult {
+    std::string dataOut;
+    std::string errorMsg;
+    std::optional<bool> downloadSuccess;
+};
+
 class DownloadManager {
 public:
     static DownloadManager* GetInstance();
@@ -46,9 +53,12 @@ public:
     virtual ~DownloadManager() = default;
 
     virtual bool Download(const std::string& url, std::vector<uint8_t>& dataOut);
-    virtual bool DownloadAsync(DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId);
-    virtual bool DownloadSync(DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId);
-    virtual bool RemoveDownloadTask(const std::string& url);
+    virtual bool Download(const std::string& url, const std::shared_ptr<DownloadResult>& result);
+    virtual bool DownloadAsync(
+        DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId, int32_t nodeId);
+    virtual bool DownloadSync(
+        DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId, int32_t nodeId);
+    virtual bool RemoveDownloadTask(const std::string& url, int32_t nodeId);
 
 private:
     static std::unique_ptr<DownloadManager> instance_;

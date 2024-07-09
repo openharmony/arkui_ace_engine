@@ -145,7 +145,7 @@ public:
     std::shared_ptr<RSData> LoadImageData(
         const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
 #endif
-    static bool DownloadImage(DownloadCallback&& downloadCallback, const std::string& src, bool sync);
+    static bool DownloadImage(DownloadCallback&& downloadCallback, const std::string& src, bool sync, int32_t nodeId);
 };
 
 class InternalImageLoader final : public ImageLoader {
