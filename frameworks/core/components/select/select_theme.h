@@ -1399,7 +1399,7 @@ private:
     Dimension optionSelectedBorderWidth_;
     Dimension optionNormalWidth_;
     Dimension selectedFontSizeText;
-    Dimension selectNormalLeftRightMargin_;
+    Dimension selectNormalLeftRightMargin_  = 8.0_vp;
 };
 
 } // namespace OHOS::Ace
