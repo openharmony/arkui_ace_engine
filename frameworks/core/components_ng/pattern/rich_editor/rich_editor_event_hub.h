@@ -217,7 +217,7 @@ private:
     std::list<RichEditorAbstractSpanResult> richEditorDeleteSpans_;
 };
 
-class RichEditorChangeValue : public BaseEventInfo {
+class ACE_FORCE_EXPORT RichEditorChangeValue : public BaseEventInfo {
     DECLARE_ACE_TYPE(RichEditorChangeValue, BaseEventInfo)
 public:
     RichEditorChangeValue() : BaseEventInfo("RichEditorChangeValue") {}
