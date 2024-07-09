@@ -1937,4 +1937,25 @@ void EventManager::MockCancelEventAndDispatch(const AxisEvent& axisEvent)
     mockedEvent.id = static_cast<int32_t>(axisTouchTestResults_.begin()->first);
     DispatchTouchEvent(mockedEvent);
 }
+#if defined(IOS_PLATFORM)
+
+bool EventManager::TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
+    TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend, const std::string& target)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    TouchTestResult hitTestResult;
+    TouchTestResult responseLinkResult;
+    const NG::PointF point { touchPoint.x, touchPoint.y };
+    frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id, responseLinkResult);
+    for (const auto& entry : hitTestResult) {
+        if (entry) {
+            auto frameNodeInfo = entry->GetAttachedNode().Upgrade();
+            if (frameNodeInfo && frameNodeInfo->GetTag().compare(target) == 0) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+#endif
 } // namespace OHOS::Ace
