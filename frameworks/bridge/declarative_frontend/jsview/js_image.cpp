@@ -278,8 +278,21 @@ bool JSImage::CheckIsCard()
     return container->IsFormRender() && !container->IsDynamicRender();
 }
 
+bool JSImage::CheckResetImage(const JSCallbackInfo& info)
+{
+    int32_t parseRes = -1;
+    if (info.Length() < 1 || !ParseJsInteger(info[0], parseRes)) {
+        return false;
+    }
+    ImageModel::GetInstance()->ResetImage();
+    return true;
+}
+
 void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
 {
+    if (CheckResetImage(info)) {
+        return;
+    }
     bool isCard = CheckIsCard();
 
     // Interim programme

@@ -219,6 +219,11 @@ var DynamicRangeMode ;
   DynamicRangeMode [DynamicRangeMode ["STANDARD"] = 2] = "STANDARD";
 })(DynamicRangeMode  || (DynamicRangeMode  = {}));
 
+var ImageContent;
+(function (ImageContent) {
+  ImageContent[ImageContent["EMPTY"] = 0] = "EMPTY";
+})(ImageContent || (ImageContent = {}));
+
 var ImageRepeat;
 (function (ImageRepeat) {
   ImageRepeat[ImageRepeat["NoRepeat"] = 0] = "NoRepeat";
