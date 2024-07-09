@@ -1430,6 +1430,7 @@ private:
     void OnTextInputActionUpdate(TextInputAction value);
 
     void Delete(int32_t start, int32_t end);
+    void CheckAndUpdateRecordBeforeOperation();
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     bool CursorInContentRegion();

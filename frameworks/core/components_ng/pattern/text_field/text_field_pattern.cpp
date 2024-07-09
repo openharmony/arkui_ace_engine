@@ -396,11 +396,22 @@ TextFieldPattern::~TextFieldPattern()
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d Pattern Destructor", host->GetId());
 }
 
+void TextFieldPattern::CheckAndUpdateRecordBeforeOperation()
+{
+    if (operationRecords_.size() == 0 ||
+        operationRecords_.back().caretPosition != selectController_->GetCaretIndex()) {
+        // record the state before the operation
+        // or caret position change
+        UpdateEditingValueToRecord();
+    }
+}
+
 void TextFieldPattern::BeforeCreateLayoutWrapper()
 {
     while (!inputOperations_.empty()) {
         auto operation = inputOperations_.front();
         inputOperations_.pop();
+        CheckAndUpdateRecordBeforeOperation();
         switch (operation) {
             case InputOperation::INSERT: {
                 InsertValueOperation(insertValueOperations_.front());
