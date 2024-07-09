@@ -962,7 +962,6 @@ protected:
 
 private:
     OPINC_TYPE_E IsOpIncValidNode(const SizeF& boundary, int32_t childNumber = 0);
-    static int GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t thresh);
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;
     void UpdateLayoutPropertyFlag() override;
