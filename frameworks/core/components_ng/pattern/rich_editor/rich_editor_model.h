@@ -76,6 +76,7 @@ struct UpdateSpanStyle {
         updateFontFamily.reset();
         updateTextDecoration.reset();
         updateTextDecorationColor.reset();
+        updateTextDecorationStyle.reset();
         updateTextShadows.reset();
         updateFontFeature.reset();
 
@@ -101,6 +102,7 @@ struct UpdateSpanStyle {
     std::optional<std::vector<std::string>> updateFontFamily = std::nullopt;
     std::optional<TextDecoration> updateTextDecoration = std::nullopt;
     std::optional<Color> updateTextDecorationColor = std::nullopt;
+    std::optional<TextDecorationStyle> updateTextDecorationStyle = std::nullopt;
     std::optional<std::vector<Shadow>> updateTextShadows = std::nullopt;
     std::optional<NG::FONT_FEATURES_LIST> updateFontFeature = std::nullopt;
 
@@ -129,6 +131,7 @@ struct UpdateSpanStyle {
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, updateFontWeight);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, updateTextDecoration);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, updateTextDecorationColor);
+        JSON_STRING_PUT_OPTIONAL_INT(jsonValue, updateTextDecorationStyle);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, updateSymbolRenderingStrategy);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, updateSymbolEffectStrategy);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, updateImageWidth);

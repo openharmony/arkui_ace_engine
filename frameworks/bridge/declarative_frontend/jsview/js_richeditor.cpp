@@ -42,6 +42,7 @@
 #include "bridge/declarative_frontend/jsview/models/richeditor_model_impl.h"
 #include "bridge/declarative_frontend/style_string/js_span_string.h"
 #include "core/common/resource/resource_object.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -212,6 +213,7 @@ JSRef<JSObject> JSRichEditor::CreateJSTextStyleResult(const TextStyleResult& tex
     JSRef<JSObject> decorationObj = JSRef<JSObject>::New();
     decorationObj->SetProperty<int32_t>("type", textStyleResult.decorationType);
     decorationObj->SetProperty<std::string>("color", textStyleResult.decorationColor);
+    decorationObj->SetProperty<int32_t>("style", textStyleResult.decorationStyle);
     textStyleObj->SetPropertyObject("decoration", decorationObj);
     textStyleObj->SetProperty<int32_t>("textAlign", textStyleResult.textAlign);
     JSRef<JSArray> leadingMarginArray = JSRef<JSArray>::New();
@@ -624,6 +626,7 @@ JSRef<JSVal> JSRichEditor::CreateJsOnIMEInputComplete(const NG::RichEditorAbstra
     spanPositionObj->SetProperty<int32_t>("spanIndex", textSpanResult.GetSpanIndex());
     decorationObj->SetProperty<int32_t>("type", static_cast<int32_t>(textSpanResult.GetTextDecoration()));
     decorationObj->SetProperty<std::string>("color", textSpanResult.GetColor());
+    decorationObj->SetProperty<int32_t>("style", static_cast<int32_t>(textSpanResult.GetTextDecorationStyle()));
     textStyleObj->SetProperty<std::string>("fontColor", textSpanResult.GetFontColor());
     textStyleObj->SetProperty<std::string>("fontFeature", UnParseFontFeatureSetting(textSpanResult.GetFontFeatures()));
     textStyleObj->SetProperty<double>("fontSize", textSpanResult.GetFontSize());
@@ -824,6 +827,7 @@ void JSRichEditor::CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::R
     JSRef<JSObject> decorationObj = JSRef<JSObject>::New();
     decorationObj->SetProperty<int32_t>("type", (int32_t)(spanResult.GetTextDecoration()));
     decorationObj->SetProperty<std::string>("color", spanResult.GetColor());
+    decorationObj->SetProperty<int32_t>("style", (int32_t)(spanResult.GetTextDecorationStyle()));
     textStyleObj->SetProperty<std::string>("fontColor", spanResult.GetFontColor());
     textStyleObj->SetProperty<std::string>("fontFeature", UnParseFontFeatureSetting(spanResult.GetFontFeatures()));
     textStyleObj->SetProperty<double>("fontSize", spanResult.GetFontSize());
@@ -2210,6 +2214,12 @@ void JSRichEditorBaseController::ParseTextDecoration(
             style.SetTextDecorationColor(decorationColor);
             updateSpanStyle.hasResourceDecorationColor = false;
         }
+        JSRef<JSVal> textDecorationStyle = decorationObject->GetProperty("style");
+        if (!textDecorationStyle->IsNull() && !textDecorationStyle->IsUndefined()) {
+            updateSpanStyle.updateTextDecorationStyle =
+                static_cast<TextDecorationStyle>(textDecorationStyle->ToNumber<int32_t>());
+            style.SetTextDecorationStyle(static_cast<TextDecorationStyle>(textDecorationStyle->ToNumber<int32_t>()));
+        }
     }
     if (!updateSpanStyle.updateTextDecorationColor.has_value() && updateSpanStyle.updateTextColor.has_value()) {
         updateSpanStyle.updateTextDecorationColor = style.GetTextColor();
@@ -2280,6 +2290,10 @@ JSRef<JSObject> JSRichEditorBaseController::CreateTypingStyleResult(const struct
     }
     if (typingStyle.updateTextDecorationColor.has_value()) {
         decorationObj->SetProperty<std::string>("color", typingStyle.updateTextDecorationColor.value().ColorToString());
+    }
+    if (typingStyle.updateTextDecorationStyle.has_value()) {
+        decorationObj->SetProperty<int32_t>("style",
+            static_cast<int32_t>(typingStyle.updateTextDecorationStyle.value()));
     }
     if (typingStyle.updateTextDecoration.has_value() || typingStyle.updateTextDecorationColor.has_value()) {
         tyingStyleObj->SetPropertyObject("decoration", decorationObj);
