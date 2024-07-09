@@ -614,6 +614,7 @@ void ImagePattern::LoadImage(
 
 void ImagePattern::LoadAltImage(const ImageSourceInfo& altImageSourceInfo)
 {
+    CHECK_NULL_VOID(GetNeedLoadAlt());
     LoadNotifier altLoadNotifier(CreateDataReadyCallbackForAlt(), CreateLoadSuccessCallbackForAlt(), nullptr);
     if (!altLoadingCtx_ || altLoadingCtx_->GetSourceInfo() != altImageSourceInfo ||
         (altLoadingCtx_ && altImageSourceInfo.IsSvg())) {

@@ -337,6 +337,16 @@ public:
         return loadInVipChannel_;
     }
 
+    bool GetNeedLoadAlt()
+    {
+        return needLoadAlt_;
+    }
+
+    void SetNeedLoadAlt(bool needLoadAlt)
+    {
+        needLoadAlt_ = needLoadAlt;
+    }
+
     void SetLoadInVipChannel(bool loadInVipChannel)
     {
         loadInVipChannel_ = loadInVipChannel;
@@ -483,6 +493,7 @@ private:
 
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::LOW;
+    bool needLoadAlt_ = true;
 
     RefPtr<ImageLoadingContext> loadingCtx_;
     RefPtr<CanvasImage> image_;
