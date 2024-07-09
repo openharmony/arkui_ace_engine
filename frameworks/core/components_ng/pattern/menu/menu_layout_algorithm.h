@@ -141,7 +141,8 @@ private:
     std::list<RefPtr<LayoutWrapper>> GetOptionsLayoutWrappper(LayoutWrapper* layoutWrapper);
 
     OffsetF GetPositionWithPlacement(const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition);
-    void InitTargetSizeAndPosition(const LayoutWrapper* layoutWrapper, const RefPtr<MenuPattern>& menuPattern);
+    void InitTargetSizeAndPosition(const LayoutWrapper* layoutWrapper, bool isContextMenu,
+        const RefPtr<MenuPattern>& menuPattern);
     OffsetF GetChildPosition(const SizeF& childSize, bool didNeedArrow = false);
     OffsetF FitToScreen(const OffsetF& position, const SizeF& childSize, bool didNeedArrow = false);
     bool CheckPosition(const OffsetF& position, const SizeF& childSize);

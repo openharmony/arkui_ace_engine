@@ -488,16 +488,22 @@ void MenuWrapperPattern::CheckAndShowAnimation()
 
 bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    auto expandDisplay = theme->GetExpandDisplay();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_RETURN(pipelineContext, false);
-
-    auto containerId = pipelineContext->GetInstanceId();
-    isShowInSubWindow_ = containerId >= MIN_SUBCONTAINER_ID;
-
-    if (isShowInSubWindow_ && !IsHide()) {
+    auto menuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+    CHECK_NULL_RETURN(menuNode, false);
+    auto menuPattern = AceType::DynamicCast<MenuPattern>(menuNode->GetPattern());
+    CHECK_NULL_RETURN(menuPattern, false);
+    // copy menu pattern properties to rootMenu
+    auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    isShowInSubWindow_ = layoutProperty->GetShowInSubWindowValue(true);
+    if ((IsContextMenu() && !IsHide()) || ((expandDisplay && isShowInSubWindow_) && !IsHide())) {
         SetHotAreas(dirty);
     }
     CheckAndShowAnimation();
@@ -506,7 +512,13 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
 
 void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
-    if (layoutWrapper->GetAllChildrenWithBuild().empty()) {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto expandDisplay = theme->GetExpandDisplay();
+    if ((layoutWrapper->GetAllChildrenWithBuild().empty() || !IsContextMenu()) &&
+        !(expandDisplay && isShowInSubWindow_)) {
         return;
     }
     auto layoutProps = layoutWrapper->GetLayoutProperty();
