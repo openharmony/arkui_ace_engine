@@ -92,7 +92,6 @@ constexpr double DEFAULT_MAX_ROTATION_ANGLE = 360.0;
 const std::string BLOOM_RADIUS_SYS_RES_NAME = "sys.float.ohos_id_point_light_bloom_radius";
 const std::string BLOOM_COLOR_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloom_color";
 const std::string ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME = "sys.float.ohos_id_point_light_illuminated_border_width";
-using CalcDimenPair = std::pair<CalcDimension&, CalcDimension&>;
 
 enum ParseResult { LENGTHMETRICS_SUCCESS, DIMENSION_SUCCESS, FAIL };
 
@@ -1440,29 +1439,74 @@ void SetBorderWidthArray(const EcmaVM* vm, const Local<JSValueRef>& args, ArkUI_
     }
 }
 
+bool ParseLocalizedBorderWidth(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen)
+{
+    if (ArkTSUtils::ParseJsLengthMetrics(vm, value, dimen)) {
+        if (LessOrEqual(dimen.Value(), 0.0)) {
+            dimen.SetValue(0.0);
+            dimen.SetUnit(DimensionUnit::VP);
+        }
+        return true;
+    }
+    return false;
+}
+
+void SetBorderWidthArrayByDimen(CalcDimension& borderDimension, ArkUI_Float32 values[], int units[], int index)
+{
+    values[index] = borderDimension.Value();
+    units[index] = static_cast<int>(borderDimension.Unit());
+}
+
 ArkUINativeModuleValue CommonBridge::SetBorderWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    Local<JSValueRef> leftArgs = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> topArgs = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> rightArgs = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> topArgs = runtimeCallInfo->GetCallArgRef(NUM_3);
-    Local<JSValueRef> bottomArgs = runtimeCallInfo->GetCallArgRef(NUM_4);
+    Local<JSValueRef> bottomArgs = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> leftArgs = runtimeCallInfo->GetCallArgRef(NUM_4);
     if (leftArgs->IsUndefined() && rightArgs->IsUndefined() && topArgs->IsUndefined() && bottomArgs->IsUndefined()) {
         GetArkUINodeModifiers()->getCommonModifier()->resetBorderWidth(nativeNode);
         return panda::JSValueRef::Undefined(vm);
+    }
+
+    CalcDimension top;
+    CalcDimension right;
+    CalcDimension bottom;
+    CalcDimension left;
+    bool isLengthMetrics = false;
+
+    if (topArgs->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedBorderWidth(vm, topArgs, top);
+    }
+    if (rightArgs->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedBorderWidth(vm, rightArgs, right);
+    }
+    if (bottomArgs->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedBorderWidth(vm, bottomArgs, bottom);
+    }
+    if (leftArgs->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedBorderWidth(vm, leftArgs, left);
     }
 
     uint32_t size = SIZE_OF_FOUR;
     ArkUI_Float32 values[size];
     int units[size];
 
-    SetBorderWidthArray(vm, leftArgs, values, units, NUM_0);
-    SetBorderWidthArray(vm, rightArgs, values, units, NUM_1);
-    SetBorderWidthArray(vm, topArgs, values, units, NUM_2);
-    SetBorderWidthArray(vm, bottomArgs, values, units, NUM_3);
+    if (isLengthMetrics) {
+        auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+        SetBorderWidthArrayByDimen(top, values, units, NUM_0);
+        SetBorderWidthArrayByDimen(isRightToLeft ? left : right, values, units, NUM_1);
+        SetBorderWidthArrayByDimen(bottom, values, units, NUM_2);
+        SetBorderWidthArrayByDimen(isRightToLeft ? right : left, values, units, NUM_3);
+    } else {
+        SetBorderWidthArray(vm, topArgs, values, units, NUM_0);
+        SetBorderWidthArray(vm, rightArgs, values, units, NUM_1);
+        SetBorderWidthArray(vm, bottomArgs, values, units, NUM_2);
+        SetBorderWidthArray(vm, leftArgs, values, units, NUM_3);
+    }
 
     GetArkUINodeModifiers()->getCommonModifier()->setBorderWidth(nativeNode, values, units, size);
     return panda::JSValueRef::Undefined(vm);
@@ -1489,10 +1533,10 @@ bool ParseLocalizedBorderRadius(const EcmaVM* vm, const Local<JSValueRef>& value
     return false;
 }
 
-void ParseMirrorDimen(ArkUI_Float32 values[], int units[], int idx, bool isMirror, CalcDimenPair calcDimens)
+void ParseMirrorDimen(ArkUI_Float32 values[], int units[], int idx, CalcDimension& calcDimen)
 {
-    values[idx] = isMirror ? calcDimens.second.Value() : calcDimens.first.Value();
-    units[idx] = isMirror ? static_cast<int>(calcDimens.second.Unit()) : static_cast<int>(calcDimens.first.Unit());
+    values[idx] = calcDimen.Value();
+    units[idx] = static_cast<int>(calcDimen.Unit());
 }
 
 ArkUINativeModuleValue CommonBridge::SetBorderRadius(ArkUIRuntimeCallInfo *runtimeCallInfo)
@@ -1536,10 +1580,10 @@ ArkUINativeModuleValue CommonBridge::SetBorderRadius(ArkUIRuntimeCallInfo *runti
     ArkUI_Float32 values[SIZE_OF_FOUR];
     int units[SIZE_OF_FOUR];
     bool isMirror = isLengthMetrics && AceApplicationInfo::GetInstance().IsRightToLeft();
-    ParseMirrorDimen(values, units, NUM_0, isMirror, CalcDimenPair(topLeft, topRight));
-    ParseMirrorDimen(values, units, NUM_1, isMirror, CalcDimenPair(topRight, topLeft));
-    ParseMirrorDimen(values, units, NUM_2, isMirror, CalcDimenPair(bottomLeft, bottomRight));
-    ParseMirrorDimen(values, units, NUM_3, isMirror, CalcDimenPair(bottomRight, bottomLeft));
+    ParseMirrorDimen(values, units, NUM_0, isMirror ? topRight : topLeft);
+    ParseMirrorDimen(values, units, NUM_1, isMirror ? topLeft : topRight);
+    ParseMirrorDimen(values, units, NUM_2, isMirror ? bottomRight : bottomLeft);
+    ParseMirrorDimen(values, units, NUM_3, isMirror ? bottomLeft : bottomRight);
     GetArkUINodeModifiers()->getCommonModifier()->setBorderRadius(nativeNode, values, units, SIZE_OF_FOUR);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -1712,31 +1756,37 @@ ArkUINativeModuleValue CommonBridge::SetBorderColor(ArkUIRuntimeCallInfo *runtim
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(NUM_3);
-    Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    Local<JSValueRef> isLocalizedArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto isLocalized = (isLocalizedArg->IsBoolean()) ? isLocalizedArg->ToBoolean(vm)->Value() : false;
 
-    Color leftColor;
-    Color rightColor;
     Color topColor;
+    Color rightColor;
     Color bottomColor;
+    Color leftColor;
 
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, leftArg, leftColor)) {
-        leftColor.SetValue(COLOR_ALPHA_VALUE);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, topArg, topColor)) {
+        topColor.SetValue(COLOR_ALPHA_VALUE);
     }
     if (!ArkTSUtils::ParseJsColorAlpha(vm, rightArg, rightColor)) {
         rightColor.SetValue(COLOR_ALPHA_VALUE);
     }
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, topArg, topColor)) {
-        topColor.SetValue(COLOR_ALPHA_VALUE);
-    }
     if (!ArkTSUtils::ParseJsColorAlpha(vm, bottomArg, bottomColor)) {
         bottomColor.SetValue(COLOR_ALPHA_VALUE);
     }
-    GetArkUINodeModifiers()->getCommonModifier()->setBorderColor(nativeNode, leftColor.GetValue(),
-        rightColor.GetValue(), topColor.GetValue(), bottomColor.GetValue());
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, leftArg, leftColor)) {
+        leftColor.SetValue(COLOR_ALPHA_VALUE);
+    }
+    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    GetArkUINodeModifiers()->getCommonModifier()->setBorderColor(nativeNode,
+        topColor.GetValue(),
+        (isRightToLeft && isLocalized) ? leftColor.GetValue() : rightColor.GetValue(),
+        bottomColor.GetValue(),
+        (isRightToLeft && isLocalized) ? rightColor.GetValue() : leftColor.GetValue());
     return panda::JSValueRef::Undefined(vm);
 }
 
