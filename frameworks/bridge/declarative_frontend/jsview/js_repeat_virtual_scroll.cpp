@@ -45,15 +45,15 @@ void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
     int8_t arrayIndex = 1;
     int8_t objectIndex = 2;
     if (!info[numberIndex]->IsNumber()) {
-        TAG_LOGE(AceLogTag::ACE_REPEAT, "info[0] should be number but isn't.");
+        TAG_LOGW(AceLogTag::ACE_REPEAT, "info[0] should be number.");
         return;
     }
     if (!info[arrayIndex]->IsArray()) {
-        TAG_LOGE(AceLogTag::ACE_REPEAT, "info[1] should be array but isn't.");
+        TAG_LOGW(AceLogTag::ACE_REPEAT, "info[1] should be array.");
         return;
     }
     if (!info[objectIndex]->IsObject()) {
-        TAG_LOGE(AceLogTag::ACE_REPEAT, "info[2] should be object but isn't.");
+        TAG_LOGW(AceLogTag::ACE_REPEAT, "info[2] should be object.");
         return;
     }
 
@@ -66,17 +66,17 @@ void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
     for (size_t i = 0; i < templateOptsArray->Length(); i++) {
         JSRef<JSArray> pair = templateOptsArray->GetValueAt(i);
         if (!pair->GetValueAt(0)->IsString()) {
-            TAG_LOGW(AceLogTag::ACE_REPEAT, "pair->GetValueAt(0) should be string but isn't.");
+            TAG_LOGW(AceLogTag::ACE_REPEAT, "pair->GetValueAt(0) should be string.");
             continue;
         }
         if (!pair->GetValueAt(1)->IsObject()) {
-            TAG_LOGW(AceLogTag::ACE_REPEAT, "pair->GetValueAt(1) should be object but isn't.");
+            TAG_LOGW(AceLogTag::ACE_REPEAT, "pair->GetValueAt(1) should be object.");
             continue;
         }
         auto type = pair->GetValueAt(0)->ToString();
         auto opts = JSRef<JSObject>::Cast(pair->GetValueAt(1));
         if (!opts->GetProperty("cachedCount")->IsNumber()) {
-            TAG_LOGW(AceLogTag::ACE_REPEAT, "opts->GetProperty(\"cachedCount\") should be number but isn't.");
+            TAG_LOGW(AceLogTag::ACE_REPEAT, "opts->GetProperty(\"cachedCount\") should be number.");
             continue;
         }
         templateCachedCountMap[type] = opts->GetProperty("cachedCount")->ToNumber<uint32_t>();
@@ -85,19 +85,19 @@ void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
     // arg 2
     auto handlers = JSRef<JSObject>::Cast(info[2]);
     if (!handlers->GetProperty("onCreateNode")->IsFunction()) {
-        TAG_LOGE(AceLogTag::ACE_REPEAT, "handlers->GetProperty(\"onCreateNode\") should be function but isn't.");
+        TAG_LOGW(AceLogTag::ACE_REPEAT, "handlers->GetProperty(\"onCreateNode\") should be function.");
         return;
     }
     if (!handlers->GetProperty("onUpdateNode")->IsFunction()) {
-        TAG_LOGE(AceLogTag::ACE_REPEAT, "handlers->GetProperty(\"onUpdateNode\") should be function but isn't.");
+        TAG_LOGW(AceLogTag::ACE_REPEAT, "handlers->GetProperty(\"onUpdateNode\") should be function.");
         return;
     }
     if (!handlers->GetProperty("onGetKeys4Range")->IsFunction()) {
-        TAG_LOGE(AceLogTag::ACE_REPEAT, "handlers->GetProperty(\"onGetKeys4Range\") should be function but isn't.");
+        TAG_LOGW(AceLogTag::ACE_REPEAT, "handlers->GetProperty(\"onGetKeys4Range\") should be function.");
         return;
     }
     if (!handlers->GetProperty("onGetTypes4Range")->IsFunction()) {
-        TAG_LOGE(AceLogTag::ACE_REPEAT, "handlers->GetProperty(\"onGetTypes4Range\") should be function but isn't.");
+        TAG_LOGW(AceLogTag::ACE_REPEAT, "handlers->GetProperty(\"onGetTypes4Range\") should be function.");
         return;
     }
 
@@ -123,7 +123,7 @@ void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
         JSRef<JSVal> jsVal = func->Call(JSRef<JSObject>(), params.size(), params.data());
         // convert js-array to std::list
         if (!jsVal->IsArray()) {
-            TAG_LOGW(AceLogTag::ACE_REPEAT, "jsVal should be array but isn't.");
+            TAG_LOGW(AceLogTag::ACE_REPEAT, "jsVal should be array.");
             return list;
         }
         JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(jsVal);
@@ -142,7 +142,7 @@ void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
 
         // convert js-array to std::list
         if (!jsVal->IsArray()) {
-            TAG_LOGW(AceLogTag::ACE_REPEAT, "jsVal should be array but isn't.");
+            TAG_LOGW(AceLogTag::ACE_REPEAT, "jsVal should be array.");
             return list;
         }
         JSRef<JSArray> jsArr = JSRef<JSArray>::Cast(jsVal);
@@ -164,7 +164,7 @@ void JSRepeatVirtualScroll::InvalidateKeyCache(const JSCallbackInfo& info)
         auto totalCount = info[0]->ToNumber<uint32_t>();
         RepeatVirtualScrollModel::GetInstance()->InvalidateKeyCache(totalCount);
     } else {
-        TAG_LOGE(AceLogTag::ACE_REPEAT, "info[0] should be number but isn't.");
+        TAG_LOGW(AceLogTag::ACE_REPEAT, "info[0] should be number.");
     }
 }
 
