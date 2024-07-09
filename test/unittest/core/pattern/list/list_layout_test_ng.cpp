@@ -73,7 +73,7 @@ HWTEST_F(ListLayoutTestNg, GetOverScrollOffset001, TestSize.Level1)
     expectOffset = { 0, -ITEM_HEIGHT };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
 
-    ScrollDown();
+    ScrollTo(ITEM_HEIGHT);
     offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT);
     expectOffset = { ITEM_HEIGHT, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
@@ -95,7 +95,7 @@ HWTEST_F(ListLayoutTestNg, GetOverScrollOffset001, TestSize.Level1)
     expectOffset = { 0, -ITEM_HEIGHT };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
 
-    ScrollDown();
+    ScrollTo(ITEM_HEIGHT);
     offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT);
     expectOffset = { ITEM_HEIGHT, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
@@ -118,7 +118,7 @@ HWTEST_F(ListLayoutTestNg, GetOverScrollOffset001, TestSize.Level1)
     expectOffset = { 0, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
 
-    ScrollDown();
+    UpdateCurrentOffset(-ITEM_HEIGHT);
     offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT);
     expectOffset = { 0, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
@@ -985,11 +985,11 @@ HWTEST_F(ListLayoutTestNg, Pattern003, TestSize.Level1)
     EXPECT_NE(scrollable, nullptr);
     scrollable->isTouching_ = true;
     EXPECT_FALSE(pattern_->OutBoundaryCallback());
-    ScrollUp();
+    UpdateCurrentOffset(ITEM_HEIGHT);
     EXPECT_TRUE(pattern_->OutBoundaryCallback());
-    ScrollDown(2);
+    ScrollTo(ITEM_HEIGHT * 2);
     EXPECT_FALSE(pattern_->OutBoundaryCallback());
-    ScrollDown(2);
+    UpdateCurrentOffset(-ITEM_HEIGHT * 2);
     EXPECT_TRUE(pattern_->OutBoundaryCallback());
 
     ClearOldNodes();
@@ -1004,7 +1004,7 @@ HWTEST_F(ListLayoutTestNg, Pattern003, TestSize.Level1)
     scrollable->isTouching_ = true;
     EXPECT_NE(pattern_->springProperty_, nullptr);
     EXPECT_NE(pattern_->chainAnimation_, nullptr);
-    ScrollUp();
+    UpdateCurrentOffset(ITEM_HEIGHT);
     EXPECT_TRUE(pattern_->OutBoundaryCallback());
     EXPECT_TRUE(pattern_->dragFromSpring_);
 }
@@ -1388,10 +1388,10 @@ HWTEST_F(ListLayoutTestNg, ListPattern_GetItemRectInGroup001, TestSize.Level1)
      * @tc.steps: step1. Init List then slide List by Scroller.
      */
     ListModelNG model = CreateList();
-    model.SetInitialIndex(1);
-    CreateListItemGroups(TOTAL_ITEM_NUMBER);
+    CreateListItemGroup(V2::ListItemGroupStyle::NONE);
+    CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-    pattern_->ScrollBy(ITEM_HEIGHT * 2);
+    pattern_->ScrollTo(ITEM_HEIGHT * 2);
     FlushLayoutTask(frameNode_);
 
     /**
@@ -1401,23 +1401,22 @@ HWTEST_F(ListLayoutTestNg, ListPattern_GetItemRectInGroup001, TestSize.Level1)
     EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(-1, 0), Rect()));
     EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(2, -1), Rect()));
     EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(0, 0), Rect()));
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(TOTAL_ITEM_NUMBER - 1, 0), Rect()));
     EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(1, 0), Rect()));
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(1, GROUP_ITEM_NUMBER), Rect()));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(0, TOTAL_ITEM_NUMBER), Rect()));
 
     /**
      * @tc.steps: step3. Get valid group item Rect.
      * @tc.expected: Return actual Rect when input valid group index.
      */
     EXPECT_TRUE(IsEqual(
-        pattern_->GetItemRectInGroup(2, 0), Rect(0, 0, FILL_LENGTH.Value() * LIST_WIDTH, ITEM_HEIGHT)));
+        pattern_->GetItemRectInGroup(0, 2), Rect(0, 0, FILL_LENGTH.Value() * LIST_WIDTH, ITEM_HEIGHT)));
 
     /**
      * @tc.steps: step4. Get valid ListItemGroup Rect.
      * @tc.expected: Return actual Rect when input valid index.
      */
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2),
-        Rect(0, 0, FILL_LENGTH.Value() * LIST_WIDTH, ITEM_HEIGHT * GROUP_ITEM_NUMBER)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0),
+        Rect(0, -ITEM_HEIGHT * 2, LIST_WIDTH, ITEM_HEIGHT * TOTAL_ITEM_NUMBER)));
 }
 
 /**
