@@ -2114,10 +2114,12 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     if (!focusHub->IsFocusable()) {
         return;
     }
+    auto firstGetFocus = false;
     if (!HasFocus()) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d request focus currently", host->GetId());
+        firstGetFocus = true;
         if (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately()) {
             CloseSelectOverlay(true);
             StopTwinkling();
@@ -2140,7 +2142,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     } else if (clickTimes == CLICK_DOUBLE) {
         HandleDoubleClickEvent(info); // 注册手势事件
     } else {
-        HandleSingleClickEvent(info);
+        HandleSingleClickEvent(info, firstGetFocus);
     }
     if (ResetObscureTickCountDown()) {
         auto host = GetHost();
@@ -2176,7 +2178,7 @@ int32_t TextFieldPattern::CheckClickLocation(GestureEvent& info)
     return 0;
 }
 
-void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
+void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetFocus)
 {
     if (mouseStatus_ != MouseStatus::NONE && IsNormalInlineState()) {
         return;
@@ -2198,7 +2200,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     SetIsSingleHandle(true);
     bool needCloseOverlay = true;
     if (RepeatClickCaret(info.GetLocalLocation(), lastCaretIndex, lastCaretRect) &&
-        info.GetSourceDevice() != SourceType::MOUSE) {
+        info.GetSourceDevice() != SourceType::MOUSE && !firstGetFocus) {
         if (needSelectAll_) {
             HandleOnSelectAll(false);
         } else {
