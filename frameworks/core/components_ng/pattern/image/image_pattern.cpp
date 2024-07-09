@@ -602,6 +602,7 @@ void ImagePattern::LoadImage(
         TAG_LOGD(AceLogTag::ACE_IMAGE, "start loading image %{public}s", src.ToString().c_str());
     }
     loadingCtx_->SetLoadInVipChannel(GetLoadInVipChannel());
+    loadingCtx_->SetNodeId(GetHost()->GetId());
     if (onProgressCallback_) {
         loadingCtx_->SetOnProgressCallback(std::move(onProgressCallback_));
     }
@@ -1406,34 +1407,24 @@ void ImagePattern::OnIconConfigurationUpdate()
     OnConfigurationUpdate();
 }
 
-void ImagePattern::ClearImageCache()
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto imageCache = pipeline->GetImageCache();
-    CHECK_NULL_VOID(imageCache);
-    imageCache->Clear();
-}
-
 void ImagePattern::OnConfigurationUpdate()
 {
-    ClearImageCache();
     CHECK_NULL_VOID(loadingCtx_);
 
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    src.GenerateCacheKey();
     UpdateInternalResource(src);
-    src.SetIsConfigurationChange(true);
 
     LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag(),
         imageLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE));
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
         auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
+        altImageSourceInfo.GenerateCacheKey();
         if (altLoadingCtx_ && altLoadingCtx_->GetSourceInfo() == altImageSourceInfo) {
             altLoadingCtx_.Reset();
         }
-        altImageSourceInfo.SetIsConfigurationChange(true);
         LoadAltImage(altImageSourceInfo);
     }
 }

@@ -230,7 +230,7 @@ void ImageFileCache::WriteCacheFile(
         if (iter != fileNameToFileInfoPos_.end()) {
             auto infoIter = iter->second;
             // either suffix not specified, or fileName ends with the suffix
-            if (suffix == "" || EndsWith(infoIter->fileName, suffix)) {
+            if (suffix.empty() || EndsWith(infoIter->fileName, suffix)) {
                 TAG_LOGI(AceLogTag::ACE_IMAGE, "file has been wrote %{private}s", infoIter->fileName.c_str());
                 return;
             }

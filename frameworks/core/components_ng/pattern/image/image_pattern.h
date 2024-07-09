@@ -456,7 +456,6 @@ private:
     void OnDirectionConfigurationUpdate() override;
     void OnIconConfigurationUpdate() override;
     void OnConfigurationUpdate();
-    void ClearImageCache();
     void LoadImage(const ImageSourceInfo& src, const PropertyChangeFlag& propertyChangeFlag, VisibleType visibleType);
     void LoadAltImage(const ImageSourceInfo& altImageSourceInfo);
 
