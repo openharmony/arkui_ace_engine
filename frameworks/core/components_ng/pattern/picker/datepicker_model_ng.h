@@ -67,7 +67,7 @@ public:
     static LunarDate getSelectedDate(FrameNode* frameNode);
     static uint32_t getBackgroundColor(FrameNode* frameNode);
     static void SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme);
-
+    static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();

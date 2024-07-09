@@ -744,15 +744,11 @@ RefPtr<FrameNode> CalendarDialogView::CreateOptionsNode(
     buttonConfirmNode->MountToParent(contentRow);
     UpdateDefaultFocusByButtonInfo(contentRow, buttonConfirmNode, buttonCancelNode);
 
-    auto event = [weakDialogNode = WeakPtr<FrameNode>(dialogNode),
-                 weakPipelineContext = WeakPtr<PipelineContext>(pipelineContext)](const GestureEvent& /* info */) {
-        auto dialogNode = weakDialogNode.Upgrade();
-        CHECK_NULL_VOID(dialogNode);
-        auto pipelineContext = weakPipelineContext.Upgrade();
-        CHECK_NULL_VOID(pipelineContext);
-        auto overlayManager = pipelineContext->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->CloseDialog(dialogNode);
+    auto pattern = dateNode->GetPattern<CalendarDialogPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto closeDiaglogEvent = CloseDiaglogEvent(dateNode, dialogNode);
+    auto event = [func = std::move(closeDiaglogEvent)](const GestureEvent& /* info */) {
+        func();
     };
     for (const auto& child : contentRow->GetChildren()) {
         auto firstChild = AceType::DynamicCast<FrameNode>(child);
@@ -762,6 +758,28 @@ RefPtr<FrameNode> CalendarDialogView::CreateOptionsNode(
     }
     contentRow->AddChild(CreateDividerNode(), 1);
     return contentRow;
+}
+
+std::function<void()> CalendarDialogView::CloseDiaglogEvent(const RefPtr<FrameNode>& frameNode,
+    const RefPtr<FrameNode>& dialogNode)
+{
+    auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    pickerPattern->SetIsShowInDialog(true);
+    auto event = [weak = WeakPtr<FrameNode>(dialogNode),
+        weakPickerPattern = WeakPtr<DatePickerPattern>(pickerPattern)]() {
+        auto dialogNode = weak.Upgrade();
+        CHECK_NULL_VOID(dialogNode);
+        auto pickerPattern = weakPickerPattern.Upgrade();
+        CHECK_NULL_VOID(pickerPattern);
+
+        if (pickerPattern->GetIsShowInDialog()) {
+            auto pipeline = PipelineContext::GetCurrentContext();
+            auto overlayManager = pipeline->GetOverlayManager();
+            overlayManager->CloseDialog(dialogNode);
+        }
+    };
+    pickerPattern->updateFontConfigurationEvent(event);
+    return event;
 }
 
 void CalendarDialogView::UpdateOptionLayoutProps(

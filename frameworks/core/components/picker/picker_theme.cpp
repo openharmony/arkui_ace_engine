@@ -15,6 +15,8 @@
 
 #include "core/components/picker/picker_theme.h"
 
+constexpr double DEFAULT_LIMIT_WIDTH = 640.0;
+
 namespace OHOS::Ace {
 void PickerTheme::Builder::Parse(const RefPtr<ThemeStyle>& style, const RefPtr<PickerTheme>& theme) const
 {
@@ -105,5 +107,17 @@ void PickerTheme::Builder::Parse(const RefPtr<ThemeStyle>& style, const RefPtr<P
     auto showCountPortrait = static_cast<int32_t>(pattern->GetAttr<double>("picker_show_count_portrait", 5));
     theme->showCountPortrait_ =
         showCountPortrait < 0 ? theme->showCountPortrait_ : static_cast<uint32_t>(showCountPortrait);
+    theme->deviceHeightLimit_ = pattern->GetAttr<double>("picker_device_height_limit", DEFAULT_LIMIT_WIDTH);
+    theme->gradientHeightLimit_ = pattern->GetAttr<Dimension>("picker_gradient_limit", 54.0_vp);
+    theme->dividerSpacingHeightLimit_ = pattern->GetAttr<Dimension>("picker_divider_spacing_limit", 64.0_vp);
+    theme->pickerDialogFontPadding_ = pattern->GetAttr<Dimension>("picker_divider_spacing_padding", 8.0_vp);
+    theme->selectedTextStyle_ = pattern->GetAttr<Dimension>("picker_select_Font_limit", 40.0_vp);
+    theme->normalTextStyle_ = pattern->GetAttr<Dimension>("picker_normal_Font_limit", 32.0_vp);
+    theme->disappearTextStyle_ = pattern->GetAttr<Dimension>("picker_disappear_Font_limit", 28.0_vp);
+    theme->pickerDialogNormalFontScale_ = pattern->GetAttr<double>("picker_dialog_normal", 1.0f);
+    theme->pickerDialogMaxOneFontScale_ = pattern->GetAttr<double>("picker_dialog_maxone", 1.75f);
+    theme->pickerDialogMaxTwoFontScale_ = pattern->GetAttr<double>("picker_dialog_maxtwo", 2.0f);
+    theme->pickerDialogMaxThirdFontScale_ = pattern->GetAttr<double>("picker_dialog_maxthird", 3.2f);
+    theme->titleFontScaleLimit_ = pattern->GetAttr<double>("picker_dialog_max", 1.45f);
 }
 } // namespace OHOS::Ace

@@ -40,7 +40,6 @@ CanvasDrawFunction DatePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     CHECK_NULL_RETURN(theme, nullptr);
     auto dividerColor = theme->GetDividerColor();
 
-    auto dividerSpacing = pipeline->NormalizeToPx(theme->GetDividerSpacing());
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);
     auto frameRect = geometryNode->GetFrameRect();
@@ -51,7 +50,11 @@ CanvasDrawFunction DatePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     CHECK_NULL_RETURN(pickerNode, nullptr);
     auto layoutProperty = pickerNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
-
+    auto dividerSpacing = pipeline->NormalizeToPx(theme->GetDividerSpacing());
+    auto datePickerPattern = pickerNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_RETURN(datePickerPattern, nullptr);
+    auto fontScale = datePickerPattern->GetPaintDividerSpacing();
+    dividerSpacing = dividerSpacing * fontScale;
     return [weak = WeakClaim(this), dividerLineWidth = DIVIDER_LINE_WIDTH, layoutProperty, frameRect, dividerSpacing,
                dividerColor, enabled = enabled_, pattern = pattern_](RSCanvas& canvas) {
         PaddingPropertyF padding = layoutProperty->CreatePaddingAndBorder();

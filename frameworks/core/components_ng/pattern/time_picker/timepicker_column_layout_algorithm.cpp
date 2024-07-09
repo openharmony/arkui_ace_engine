@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -28,6 +29,7 @@ constexpr float ITEM_HEIGHT_HALF = 2.0f;
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
 constexpr int32_t HIDENODE = 3;
 constexpr double PERCENT_100 = 100.0;
+constexpr double PERCENT_120 = 1.2f;
 
 GradientColor CreatePercentGradientColor(float percent, Color color)
 {
@@ -46,14 +48,28 @@ void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(columnNode);
     auto blendNode = DynamicCast<FrameNode>(columnNode->GetParent());
     CHECK_NULL_VOID(blendNode);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_VOID(stackNode);
+    auto pickerNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_VOID(pickerNode);
+    auto timePickerPattern = pickerNode->GetPattern<TimePickerRowPattern>();
     SizeF frameSize = { -1.0f, -1.0f };
 
     uint32_t showCount_ = pickerTheme->GetShowCountPortrait() + BUFFER_NODE_NUMBER;
     if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
         showCount_ = pickerTheme->GetShowCountLandscape() + BUFFER_NODE_NUMBER;
     }
-    auto height = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * (showCount_ - HIDENODE) +
-                                     pickerTheme->GetDividerSpacing().ConvertToPx());
+
+    if (timePickerPattern->GetIsUserSetDividerSpacingFont()) {
+        dividerSpacingFontScale_ = ReCalcItemHeightScale(timePickerPattern->GetDividerSpacing());
+    }
+
+    if (timePickerPattern->GetIsUserSetGradientFont()) {
+        gradientFontScale_ = ReCalcItemHeightScale(timePickerPattern->GetGradientHeight(), false);
+    }
+    auto height = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * gradientFontScale_ *
+        (showCount_ - HIDENODE) + pickerTheme->GetDividerSpacing().ConvertToPx() * dividerSpacingFontScale_);
+    timePickerPattern->SetPaintDividerSpacing(dividerSpacingFontScale_);
     auto layoutConstraint = blendNode->GetLayoutProperty()->GetLayoutConstraint();
     CHECK_NULL_VOID(layoutConstraint);
     auto width = layoutConstraint->parentIdealSize.Width();
@@ -73,7 +89,8 @@ void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         child->Measure(layoutChildConstraint);
     }
     MeasureText(layoutWrapper, frameSize);
-    auto gradientPercent = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx()) / frameSize.Height();
+    auto gradientPercent = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() *
+        gradientFontScale_) / frameSize.Height();
     InitGradient(gradientPercent, blendNode, columnNode);
 }
 
@@ -119,9 +136,10 @@ void TimePickerColumnLayoutAlgorithm::ChangeAmPmTextStyle(uint32_t index, uint32
     auto layoutChildConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
     if (index == selectedIndex) {
-        frameSize.SetHeight(static_cast<float>(pickerTheme->GetDividerSpacing().ConvertToPx()));
+        frameSize.SetHeight(
+            static_cast<float>(pickerTheme->GetDividerSpacing().ConvertToPx() * dividerSpacingFontScale_));
     } else {
-        frameSize.SetHeight(static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx()));
+        frameSize.SetHeight(static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() * gradientFontScale_));
     }
     layoutChildConstraint.selfIdealSize = { frameSize.Width(), frameSize.Height() };
     childLayoutWrapper->Measure(layoutChildConstraint);
@@ -143,9 +161,10 @@ void TimePickerColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, size);
     auto children = layoutWrapper->GetAllChildrenWithBuild();
     uint32_t halfCount = layoutWrapper->GetTotalChildCount() / 2;
-    float childStartCoordinate = static_cast<float>(pickerItemHeight_ / ITEM_HEIGHT_HALF -
-                                                    pickerTheme->GetGradientHeight().ConvertToPx() * halfCount -
-                                                    pickerTheme->GetDividerSpacing().ConvertToPx() / ITEM_HEIGHT_HALF);
+    float childStartCoordinate = static_cast<float>(
+        pickerItemHeight_ / ITEM_HEIGHT_HALF -
+        pickerTheme->GetGradientHeight().ConvertToPx() * gradientFontScale_ * halfCount -
+        pickerTheme->GetDividerSpacing().ConvertToPx() * dividerSpacingFontScale_ / ITEM_HEIGHT_HALF);
     uint32_t i = 0;
     uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     for (const auto& child : children) {
@@ -160,6 +179,68 @@ void TimePickerColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         child->Layout();
         childStartCoordinate += childSize.Height();
     }
+}
+
+bool TimePickerColumnLayoutAlgorithm::NeedAdaptForAging()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, false);
+
+    if (GreatOrEqual(pipeline->GetFontScale(), pickerTheme->GetMaxOneFontScale())) {
+        return true;
+    }
+    return false;
+}
+
+const Dimension TimePickerColumnLayoutAlgorithm::AdjustFontSizeScale(const Dimension& fontSizeValue, double fontScale)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, fontSizeValue);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, fontSizeValue);
+
+    double adjustedScale = std::clamp(fontScale, pickerTheme->GetNormalFontScale(), pickerTheme->GetMaxTwoFontScale());
+    auto result = 0.0_vp;
+    if (!NearZero(fontScale)) {
+        result =  fontSizeValue / fontScale * adjustedScale;
+    }
+    return result;
+}
+
+float TimePickerColumnLayoutAlgorithm::ReCalcItemHeightScale(const Dimension& userSetHeight, bool isDividerSpacing)
+{
+    auto fontScale = 1.0f;
+
+    if (NeedAdaptForAging()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, fontScale);
+        auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+        CHECK_NULL_RETURN(pickerTheme, fontScale);
+        auto systemFontScale = static_cast<double>(pipeline->GetFontScale());
+        auto themePadding = pickerTheme->GetPickerDialogFontPadding();
+        auto userSetHeightValue = AdjustFontSizeScale(userSetHeight, systemFontScale).ConvertToPx();
+        double adjustedScale =
+            std::clamp(systemFontScale, pickerTheme->GetNormalFontScale(), pickerTheme->GetMaxTwoFontScale());
+        if (!NearZero(adjustedScale)) {
+            userSetHeightValue =
+                userSetHeightValue / adjustedScale * PERCENT_120 + (themePadding.ConvertToPx() * DIVIDER_SIZE);
+        } else {
+            return fontScale;
+        }
+
+        auto themeHeightLimit =
+            isDividerSpacing ? pickerTheme->GetDividerSpacingLimit() : pickerTheme->GetGradientHeightLimit();
+        auto themeHeight = isDividerSpacing ? pickerTheme->GetDividerSpacing() : pickerTheme->GetGradientHeight();
+        if (GreatOrEqualCustomPrecision(userSetHeightValue, themeHeightLimit.ConvertToPx())) {
+            userSetHeightValue = themeHeightLimit.ConvertToPx();
+        } else {
+            userSetHeightValue = std::max(userSetHeightValue, themeHeight.ConvertToPx());
+        }
+        fontScale = std::max(static_cast<float>(userSetHeightValue / themeHeight.ConvertToPx()), fontScale);
+    }
+    return fontScale;
 }
 
 } // namespace OHOS::Ace::NG

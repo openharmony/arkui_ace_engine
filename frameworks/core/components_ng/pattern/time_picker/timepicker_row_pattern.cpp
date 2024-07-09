@@ -410,6 +410,10 @@ void TimePickerRowPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool
     }
 }
 
+void TimePickerRowPattern::OnFontConfigurationUpdate()
+{
+    closeDialogEvent_();
+}
 void TimePickerRowPattern::OnLanguageConfigurationUpdate()
 {
     FlushAmPmFormatString();
