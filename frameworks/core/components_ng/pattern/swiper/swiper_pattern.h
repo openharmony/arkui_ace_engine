@@ -1017,7 +1017,7 @@ private:
 
     std::optional<RefPtr<UINode>> FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode = true) const;
     bool NeedForceMeasure() const;
-    void SetIndicatorChangeIndexStatus(bool withAnimation);
+    void SetIndicatorChangeIndexStatus(bool withAnimation, std::optional<int32_t> startIndex = std::nullopt);
     void SetIndicatorJumpIndex(std::optional<int32_t> jumpIndex);
     bool ParseTabsIsRtl();
 

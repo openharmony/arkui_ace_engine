@@ -2643,12 +2643,9 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
     auto velocity = info.GetMainVelocity();
     UpdateDragFRCSceneInfo(velocity, SceneStatus::RUNNING);
     UpdateNodeRate();
-    auto mainDelta = static_cast<float>(info.GetMainDelta());
     if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD) {
         isTouchPad_ = true;
     }
-    ProcessDelta(mainDelta, contentMainSize_, mainDeltaSum_);
-    mainDeltaSum_ += mainDelta;
 
     PointF dragPoint(
         static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
@@ -2657,6 +2654,10 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
         isTouchPad_ = false;
         return;
     }
+
+    auto mainDelta = static_cast<float>(info.GetMainDelta());
+    ProcessDelta(mainDelta, contentMainSize_, mainDeltaSum_);
+    mainDeltaSum_ += mainDelta;
 
     if (IsAutoLinear() && AutoLinearIsOutOfBoundary(static_cast<float>(mainDelta))) {
         return;
@@ -2932,6 +2933,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         translate = -translate;
     }
     if (NearZero(translate)) {
+        SetIndicatorChangeIndexStatus(false, GetLoopIndex(currentIndex_));
         OnAnimationTranslateZero(nextIndex, stopAutoPlay);
         return;
     }
@@ -5671,7 +5673,7 @@ int32_t SwiperPattern::GetMaxDisplayCount() const
     return maxDisplayCount;
 }
 
-void SwiperPattern::SetIndicatorChangeIndexStatus(bool withAnimation)
+void SwiperPattern::SetIndicatorChangeIndexStatus(bool withAnimation, std::optional<int32_t> startIndex)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -5685,6 +5687,7 @@ void SwiperPattern::SetIndicatorChangeIndexStatus(bool withAnimation)
     CHECK_NULL_VOID(indicatorPattern);
 
     indicatorPattern->SetChangeIndexWithAnimation(withAnimation);
+    indicatorPattern->SetStartIndex(startIndex);
 }
 
 void SwiperPattern::SetIndicatorJumpIndex(std::optional<int32_t> jumpIndex)
