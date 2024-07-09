@@ -122,6 +122,8 @@ public:
     TextDecoration GetTextDecoration() const;
     void SetColor(const std::string& color);
     const std::string& GetColor() const;
+    void SetTextDecorationStyle(TextDecorationStyle textDecorationStyle);
+    TextDecorationStyle GetTextDecorationStyle() const;
     void SetValuePixelMap(const RefPtr<PixelMap>& valuePixelMap);
     const RefPtr<PixelMap>& GetValuePixelMap() const;
     void SetValueResourceStr(const std::string valueResourceStr);
@@ -181,6 +183,7 @@ private:
     std::string fontFamily_;
     TextDecoration textDecoration_;
     std::string color_;
+    TextDecorationStyle textDecorationStyle_;
     RefPtr<PixelMap> valuePixelMap_;
     std::string valueResourceStr_;
     int32_t width_ = 0;

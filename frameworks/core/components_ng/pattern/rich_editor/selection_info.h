@@ -131,6 +131,7 @@ struct TextStyleResult {
     std::string fontFamily;
     int32_t decorationType = 0;
     std::string decorationColor;
+    int32_t decorationStyle = 0;
     int32_t textAlign = 0;
     int32_t wordBreak = static_cast<int32_t>(WordBreak::BREAK_WORD);
     int32_t lineBreakStrategy = static_cast<int32_t>(LineBreakStrategy::GREEDY);
