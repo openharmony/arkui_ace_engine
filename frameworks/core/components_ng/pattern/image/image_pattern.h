@@ -376,6 +376,8 @@ private:
         void DrawToRSCanvas(
             RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) override
         {}
+        void DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) override
+        {}
         int32_t GetWidth() const override
         {
             return 0;
