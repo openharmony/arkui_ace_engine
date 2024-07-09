@@ -2008,7 +2008,7 @@ OffsetF MenuLayoutAlgorithm::FitToScreen(const OffsetF& position, const SizeF& c
     OffsetF afterOffsetPosition;
     auto originPosition = position;
 
-    if (NearEqual(positionOffset_, OffsetF(0.0f, 0.0f)) && (!didNeedArrow || arrowPlacement_ == Placement::NONE)) {
+    if (NearEqual(positionOffset_, OffsetF(0.0f, 0.0f))) {
         afterOffsetPosition = AddTargetSpace(originPosition);
     } else {
         afterOffsetPosition = AddOffset(originPosition);
