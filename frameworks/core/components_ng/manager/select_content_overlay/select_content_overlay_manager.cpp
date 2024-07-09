@@ -464,6 +464,10 @@ void SelectContentOverlayManager::MountNodeToRoot(const RefPtr<FrameNode>& overl
             slot = index;
             break;
         }
+        if (it->GetTag() == V2::TEXTINPUT_ETS_TAG) {
+            slot = index;
+            break;
+        }
         index++;
     }
 
