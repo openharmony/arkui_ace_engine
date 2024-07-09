@@ -34,19 +34,19 @@ const picker = requireNapi('multimedia.cameraPicker');
 const filePicker = requireNapi('file.picker');
 const atomicServiceWebNapi = requireInternal('atomicservice.AtomicServiceWeb');
 
-class Error {
-    constructor(e11, f11) {
-        this.code = e11;
-        this.message = f11;
+class AsError {
+    constructor(m11, n11) {
+        this.code = m11;
+        this.message = n11;
     }
 }
 
 class JsApiConfig {
-    constructor(a11, b11, c11, d11) {
-        this.apiName = a11;
-        this.minVersion = b11;
-        this.maxVersion = c11;
-        this.requiredFieldNames = d11;
+    constructor(i11, j11, k11, l11) {
+        this.apiName = i11;
+        this.minVersion = j11;
+        this.maxVersion = k11;
+        this.requiredFieldNames = l11;
     }
 }
 
@@ -56,54 +56,53 @@ const UPLOAD_IMAGE_CACHE_DIR = '/cache/';
 const JAVA_SCRIPT_PROXY_OBJECT_NAME = 'atomicServiceProxy';
 const JAVA_SCRIPT_PROXY_API_NAME_LIST = ['invokeJsApi'];
 const ATOMIC_SERVICE_JS_API_MAP = new Map();
-const registerJsApi = (v10, w10, x10, y10, z10) => {
-    ATOMIC_SERVICE_JS_API_MAP.set(v10, new JsApiConfig(w10, x10, y10, z10));
+const registerJsApi = (d11, e11, f11, g11, h11) => {
+    ATOMIC_SERVICE_JS_API_MAP.set(d11, new JsApiConfig(e11, f11, g11, h11));
 };
 const MAX_VERSION = '99.99.99';
 const ATOMIC_SERVICE_JS_SDK_CURRENT_VERSION = '1.0.0';
 const PERMISSION_APPROXIMATELY_LOCATION = 'ohos.permission.APPROXIMATELY_LOCATION';
-const SYSTEM_INTERNAL_ERROR = new Error(500, 'System internal error.');
-const JS_API_INVALID_INVOKE_ERROR = new Error(200001, 'Invalid invoke.');
+const SYSTEM_INTERNAL_ERROR = new AsError(500, 'System internal error.');
+const JS_API_INVALID_INVOKE_ERROR = new AsError(200001, 'Invalid invoke.');
 const PARAM_REQUIRED_ERROR_CODE = 200002;
 const PARAM_NUMBER_POSITIVE_ERROR_CODE = 200003;
-const ROUTER_PARAM_MODE_INVALID_ERROR = new Error(200004, 'Param mode is invalid.');
-const BACK_URL_NOT_EXIST_OR_OPENED_ERROR = new Error(200005, 'Url is not exist or opened, can not be back.');
+const ROUTER_PARAM_MODE_INVALID_ERROR = new AsError(200004, 'Param mode is invalid.');
+const BACK_URL_NOT_EXIST_OR_OPENED_ERROR = new AsError(200005, 'Url is not exist or opened, can not be back.');
 const NAV_PATH_STACK_NOT_EXIST_ERROR_CODE = 200006;
-const POP_PATH_NAME_NOT_EXIST_ERROR = new Error(200007, 'Name is not exist or opened, can not be pop.');
-const POP_PATH_PARAM_INDEX_INVALID_ERROR = new Error(200008, 'Param index is invalid.');
-const POP_PATH_INDEX_OUT_OF_RANGE_ERROR = new Error(200009, 'The Index is out of range.');
-const UPLOAD_IMAGE_FILES_REQUIRED_ERROR = new Error(200010, 'Param files is required.');
+const POP_PATH_NAME_NOT_EXIST_ERROR = new AsError(200007, 'Name is not exist or opened, can not be pop.');
+const POP_PATH_PARAM_INDEX_INVALID_ERROR = new AsError(200008, 'Param index is invalid.');
+const POP_PATH_INDEX_OUT_OF_RANGE_ERROR = new AsError(200009, 'The Index is out of range.');
+const UPLOAD_IMAGE_FILES_REQUIRED_ERROR = new AsError(200010, 'Param files is required.');
 const UPLOAD_IMAGE_FILE_NOT_EXIST_ERROR_CODE = 200011;
-const UPLOAD_IMAGE_FILES_URI_REQUIRED_ERROR = new Error(200012, 'Param uri of files is required.');
-const UPLOAD_FILE_ERROR = new Error(200013, 'Upload file error.');
-const IMAGE_CAN_NOT_PREVIEW_ERROR = new Error(200014, 'The filePath can not preview.');
-const NETWORK_NO_ACTIVE_ERROR = new Error(200015, 'The network is not active.');
-{
-    registerJsApi('router.pushUrl', 'pushUrl', '1.0.0', MAX_VERSION, ['url']);
-    registerJsApi('router.replaceUrl', 'replaceUrl', '1.0.0', MAX_VERSION, ['url']);
-    registerJsApi('router.back', 'backUrl', '1.0.0', MAX_VERSION, []);
-    registerJsApi('router.clear', 'clearUrl', '1.0.0', MAX_VERSION, []);
-    registerJsApi('navPathStack.pushPath', 'pushPath', '1.0.0', MAX_VERSION, ['name']);
-    registerJsApi('navPathStack.replacePath', 'replacePath', '1.0.0', MAX_VERSION, ['name']);
-    registerJsApi('navPathStack.pop', 'popPath', '1.0.0', MAX_VERSION, []);
-    registerJsApi('navPathStack.clear', 'clearPath', '1.0.0', MAX_VERSION, []);
-    registerJsApi('asWeb.postMessage', 'postMessage', '1.0.0', MAX_VERSION, ['data']);
-    registerJsApi('asWeb.getEnv', 'getEnv', '1.0.0', MAX_VERSION, []);
-    registerJsApi('asWeb.checkJsApi', 'checkJsApi', '1.0.0', MAX_VERSION, ['jsApiList']);
-    registerJsApi('cameraPicker.pick', 'pickCamera', '1.0.0', MAX_VERSION, ['mediaTypes', 'cameraPosition']);
-    registerJsApi('photoViewPicker.select', 'selectPhoto', '1.0.0', MAX_VERSION, []);
-    registerJsApi('filePreview.openPreview', 'openPreview', '1.0.0', MAX_VERSION, ['uri']);
-    registerJsApi('request.uploadFile', 'uploadFile', '1.0.0', MAX_VERSION, ['url', 'files']);
-    registerJsApi('request.downloadFile', 'downloadFile', '1.0.0', MAX_VERSION, ['url']);
-    registerJsApi('connection.getNetworkType', 'getNetworkType', '1.0.0', MAX_VERSION, []);
-    registerJsApi('location.getLocation', 'getLocation', '1.0.0', MAX_VERSION, []);
-}
+const UPLOAD_IMAGE_FILES_URI_REQUIRED_ERROR = new AsError(200012, 'Param uri of files is required.');
+const UPLOAD_FILE_ERROR = new AsError(200013, 'Upload file error.');
+const IMAGE_CAN_NOT_PREVIEW_ERROR = new AsError(200014, 'The filePath can not preview.');
+const NETWORK_NO_ACTIVE_ERROR = new AsError(200015, 'The network is not active.');
+
+registerJsApi('router.pushUrl', 'pushUrl', '1.0.0', MAX_VERSION, ['url']);
+registerJsApi('router.replaceUrl', 'replaceUrl', '1.0.0', MAX_VERSION, ['url']);
+registerJsApi('router.back', 'backUrl', '1.0.0', MAX_VERSION, []);
+registerJsApi('router.clear', 'clearUrl', '1.0.0', MAX_VERSION, []);
+registerJsApi('navPathStack.pushPath', 'pushPath', '1.0.0', MAX_VERSION, ['name']);
+registerJsApi('navPathStack.replacePath', 'replacePath', '1.0.0', MAX_VERSION, ['name']);
+registerJsApi('navPathStack.pop', 'popPath', '1.0.0', MAX_VERSION, []);
+registerJsApi('navPathStack.clear', 'clearPath', '1.0.0', MAX_VERSION, []);
+registerJsApi('asWeb.postMessage', 'postMessage', '1.0.0', MAX_VERSION, ['data']);
+registerJsApi('asWeb.getEnv', 'getEnv', '1.0.0', MAX_VERSION, []);
+registerJsApi('asWeb.checkJsApi', 'checkJsApi', '1.0.0', MAX_VERSION, ['jsApiList']);
+registerJsApi('cameraPicker.pick', 'pickCamera', '1.0.0', MAX_VERSION, ['mediaTypes', 'cameraPosition']);
+registerJsApi('photoViewPicker.select', 'selectPhoto', '1.0.0', MAX_VERSION, []);
+registerJsApi('filePreview.openPreview', 'openPreview', '1.0.0', MAX_VERSION, ['uri']);
+registerJsApi('request.uploadFile', 'uploadFile', '1.0.0', MAX_VERSION, ['url', 'files']);
+registerJsApi('request.downloadFile', 'downloadFile', '1.0.0', MAX_VERSION, ['url']);
+registerJsApi('connection.getNetworkType', 'getNetworkType', '1.0.0', MAX_VERSION, []);
+registerJsApi('location.getLocation', 'getLocation', '1.0.0', MAX_VERSION, []);
 
 export class AtomicServiceWeb extends ViewPU {
-    constructor(o10, p10, q10, r10 = -1, s10 = undefined, t10) {
-        super(o10, q10, r10, t10);
-        if (typeof s10 === "function") {
-            this.paramsGenerator_ = s10;
+    constructor(s10, t10, u10, v10 = -1, w10 = undefined, x10) {
+        super(s10, u10, v10, x10);
+        if (typeof w10 === "function") {
+            this.paramsGenerator_ = w10;
         }
         this.src = undefined;
         this.navPathStack = undefined;
@@ -117,58 +116,58 @@ export class AtomicServiceWeb extends ViewPU {
         };
         this.onPageEnd = () => {
         };
-        this.context = getContext(this);
+        this.context = this.getUIContext().getHostContext();
         this.controller = new web_webview.WebviewController();
         this.schemeHandler = new web_webview.WebSchemeHandler();
         this.atomicService = undefined;
         this.atomicServiceProxy = undefined;
-        this.setInitiallyProvidedValue(p10);
+        this.setInitiallyProvidedValue(t10);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(n10) {
-        if (n10.src !== undefined) {
-            this.src = n10.src;
+    setInitiallyProvidedValue(r10) {
+        if (r10.src !== undefined) {
+            this.src = r10.src;
         }
-        if (n10.navPathStack !== undefined) {
-            this.navPathStack = n10.navPathStack;
+        if (r10.navPathStack !== undefined) {
+            this.navPathStack = r10.navPathStack;
         }
-        if (n10.onMessage !== undefined) {
-            this.onMessage = n10.onMessage;
+        if (r10.onMessage !== undefined) {
+            this.onMessage = r10.onMessage;
         }
-        if (n10.onErrorReceive !== undefined) {
-            this.onErrorReceive = n10.onErrorReceive;
+        if (r10.onErrorReceive !== undefined) {
+            this.onErrorReceive = r10.onErrorReceive;
         }
-        if (n10.onHttpErrorReceive !== undefined) {
-            this.onHttpErrorReceive = n10.onHttpErrorReceive;
+        if (r10.onHttpErrorReceive !== undefined) {
+            this.onHttpErrorReceive = r10.onHttpErrorReceive;
         }
-        if (n10.onPageBegin !== undefined) {
-            this.onPageBegin = n10.onPageBegin;
+        if (r10.onPageBegin !== undefined) {
+            this.onPageBegin = r10.onPageBegin;
         }
-        if (n10.onPageEnd !== undefined) {
-            this.onPageEnd = n10.onPageEnd;
+        if (r10.onPageEnd !== undefined) {
+            this.onPageEnd = r10.onPageEnd;
         }
-        if (n10.context !== undefined) {
-            this.context = n10.context;
+        if (r10.context !== undefined) {
+            this.context = r10.context;
         }
-        if (n10.controller !== undefined) {
-            this.controller = n10.controller;
+        if (r10.controller !== undefined) {
+            this.controller = r10.controller;
         }
-        if (n10.schemeHandler !== undefined) {
-            this.schemeHandler = n10.schemeHandler;
+        if (r10.schemeHandler !== undefined) {
+            this.schemeHandler = r10.schemeHandler;
         }
-        if (n10.atomicService !== undefined) {
-            this.atomicService = n10.atomicService;
+        if (r10.atomicService !== undefined) {
+            this.atomicService = r10.atomicService;
         }
-        if (n10.atomicServiceProxy !== undefined) {
-            this.atomicServiceProxy = n10.atomicServiceProxy;
+        if (r10.atomicServiceProxy !== undefined) {
+            this.atomicServiceProxy = r10.atomicServiceProxy;
         }
     }
 
-    updateStateVars(m10) {
+    updateStateVars(q10) {
     }
 
-    purgeVariableDependenciesOnElmtId(l10) {
+    purgeVariableDependenciesOnElmtId(p10) {
     }
 
     aboutToBeDeleted() {
@@ -188,7 +187,7 @@ export class AtomicServiceWeb extends ViewPU {
     }
 
     initialRender() {
-        this.observeComponentCreation2((b10, c10) => {
+        this.observeComponentCreation2((g10, h10) => {
             Web.create({ src: this.src, controller: this.controller });
             Web.zoomAccess(false);
             Web.overviewModeAccess(false);
@@ -200,16 +199,16 @@ export class AtomicServiceWeb extends ViewPU {
             Web.onPageEnd(this.onPageEnd);
             Web.onControllerAttached(() => {
                 this.registerJavaScriptProxy();
-                this.schemeHandler.onRequestStart((j10) => {
-                    return !this.checkUrl(j10.getRequestUrl());
+                this.schemeHandler.onRequestStart((o10) => {
+                    return !this.checkUrl(o10.getRequestUrl());
                 });
                 this.controller.setWebSchemeHandler('https', this.schemeHandler);
             });
-            Web.onOverrideUrlLoading((h10) => {
-                return !this.checkUrl(h10.getRequestUrl());
+            Web.onOverrideUrlLoading((m10) => {
+                return !this.checkUrl(m10.getRequestUrl());
             });
-            Web.onLoadIntercept(g10 => {
-                return !this.checkUrl(g10.data.getRequestUrl());
+            Web.onLoadIntercept(l10 => {
+                return !this.checkUrl(l10.data.getRequestUrl());
             });
         }, Web);
     }
@@ -218,20 +217,20 @@ export class AtomicServiceWeb extends ViewPU {
         try {
             this.controller.registerJavaScriptProxy(this.atomicServiceProxy, JAVA_SCRIPT_PROXY_OBJECT_NAME,
                 JAVA_SCRIPT_PROXY_API_NAME_LIST);
-        } catch (y9) {
-            let z9 = y9;
-            console.error(`AtomicServiceWeb registerJavaScriptProxy failed, code is ${z9.code}, message is ${z9.message}`);
+        } catch (d10) {
+            let e10 = d10;
+            console.error(`AtomicServiceWeb registerJavaScriptProxy failed, code is ${e10.code}, message is ${e10.message}`);
         }
     }
 
-    cutUrl(q1) {
-        if (q1) {
-            let a2 = q1.indexOf('?');
-            if (a2 > -1) {
-                return q1.substring(0, a2);
+    cutUrl(b10) {
+        if (b10) {
+            let c10 = b10.indexOf('?');
+            if (c10 > -1) {
+                return b10.substring(0, c10);
             }
         }
-        return q1;
+        return b10;
     }
 
     checkUrl(q1) {
@@ -261,173 +260,173 @@ export class AtomicServiceWeb extends ViewPU {
 }
 
 class AtomicServiceProxy {
-    constructor(r9) {
-        this.atomicService = r9;
+    constructor(z9) {
+        this.atomicService = z9;
     }
 
-    invokeJsApi(m9, n9) {
+    invokeJsApi(u9, v9) {
         try {
-            n9 = n9 || {};
-            if (!m9 || !ATOMIC_SERVICE_JS_API_MAP.has(m9)) {
-                this.atomicService.errorWithCodeAndMsg(JS_API_INVALID_INVOKE_ERROR, n9);
+            v9 = v9 || {};
+            if (!u9 || !ATOMIC_SERVICE_JS_API_MAP.has(u9)) {
+                this.atomicService.errorWithCodeAndMsg(JS_API_INVALID_INVOKE_ERROR, v9);
                 return;
             }
-            this.atomicService.logOptions(m9, n9);
-            let p9 = ATOMIC_SERVICE_JS_API_MAP.get(m9);
-            if (!this.atomicService.checkRequiredFieldInOptions(p9, n9)) {
+            this.atomicService.logOptions(u9, v9);
+            let x9 = ATOMIC_SERVICE_JS_API_MAP.get(u9);
+            if (!this.atomicService.checkRequiredFieldInOptions(x9, v9)) {
                 return;
             }
-            let q9 = this.atomicService;
-            q9[p9?.apiName](n9);
-        } catch (o9) {
-            this.atomicService.error(o9, n9);
+            let y9 = this.atomicService;
+            y9[x9?.apiName](v9);
+        } catch (w9) {
+            this.atomicService.error(w9, v9);
         }
     }
 }
 
 class AtomicService {
-    constructor(i9, j9, k9) {
+    constructor(q9, r9, s9) {
         this.messageDataList = [];
         this.onMessage = () => {
         };
-        this.context = i9;
-        this.navPathStack = j9;
-        this.onMessage = k9 ? k9 : this.onMessage;
+        this.context = q9;
+        this.navPathStack = r9;
+        this.onMessage = s9 ? s9 : this.onMessage;
     }
 
-    success(g9, h9) {
-        h9?.callback && h9?.callback(undefined, g9);
+    success(o9, p9) {
+        p9?.callback && p9?.callback(undefined, o9);
     }
 
-    error(e9, f9) {
-        f9?.callback && f9?.callback(new Error(e9.code ? e9.code : SYSTEM_INTERNAL_ERROR.code,
-            e9.message ? e9.message : SYSTEM_INTERNAL_ERROR.message));
+    error(m9, n9) {
+        n9?.callback && n9?.callback(new AsError(m9.code ? m9.code : SYSTEM_INTERNAL_ERROR.code,
+            m9.message ? m9.message : SYSTEM_INTERNAL_ERROR.message));
     }
 
-    errorWithCodeAndMsg(c9, d9) {
-        d9?.callback && d9?.callback(c9);
+    errorWithCodeAndMsg(k9, l9) {
+        l9?.callback && l9?.callback(k9);
     }
 
-    consoleLog(b9) {
+    consoleLog(j9) {
         if (LOG_ENABLE) {
-            console.log(`${LOG_PREFIX} ${b9}`);
+            console.log(`${LOG_PREFIX} ${j9}`);
         }
     }
 
-    consoleError(a9) {
+    consoleError(i9) {
         if (LOG_ENABLE) {
-            console.error(`${LOG_PREFIX} ${a9}`);
+            console.error(`${LOG_PREFIX} ${i9}`);
         }
     }
 
-    logOptions(y8, z8) {
-        this.consoleLog(`${y8} options=${JSON.stringify(z8)}`);
+    logOptions(g9, h9) {
+        this.consoleLog(`${g9} options=${JSON.stringify(h9)}`);
     }
 
-    checkParamRequired(v8, w8, x8) {
-        if (w8 === undefined || w8 === null || w8 === '') {
-            this.errorWithCodeAndMsg(new Error(PARAM_REQUIRED_ERROR_CODE, `Param ${v8} is required.`), x8);
+    checkParamRequired(d9, e9, f9) {
+        if (e9 === undefined || e9 === null || e9 === '') {
+            this.errorWithCodeAndMsg(new AsError(PARAM_REQUIRED_ERROR_CODE, `Param ${d9} is required.`), f9);
             return false;
         }
         return true;
     }
 
-    checkNumberParamPositive(s8, t8, u8) {
-        if (t8 <= 0) {
-            this.errorWithCodeAndMsg(new Error(PARAM_NUMBER_POSITIVE_ERROR_CODE,
-                `Param ${s8} must be a positive number.`), u8);
+    checkNumberParamPositive(a9, b9, c9) {
+        if (b9 <= 0) {
+            this.errorWithCodeAndMsg(new AsError(PARAM_NUMBER_POSITIVE_ERROR_CODE,
+                `Param ${a9} must be a positive number.`), c9);
             return false;
         }
         return true;
     }
 
-    checkRequiredFieldInOptions(n8, o8) {
-        if (!n8) {
+    checkRequiredFieldInOptions(v8, w8) {
+        if (!v8) {
             return false;
         }
-        if (!n8.requiredFieldNames) {
+        if (!v8.requiredFieldNames) {
             return true;
         }
-        let p8 = o8;
-        for (let i3 = 0; i3 < n8.requiredFieldNames.length; i3++) {
-            let m3 = n8.requiredFieldNames[i3];
-            if (!this.checkParamRequired(m3, p8[m3], o8)) {
+        let x8 = w8;
+        for (let y8 = 0; y8 < v8.requiredFieldNames.length; y8++) {
+            let z8 = v8.requiredFieldNames[y8];
+            if (!this.checkParamRequired(z8, x8[z8], w8)) {
                 return false;
             }
         }
         return true;
     }
 
-    checkRouterMode(l8, m8) {
-        if (!l8 || l8 === 'Single' || l8 === 'Standard') {
+    checkRouterMode(t8, u8) {
+        if (!t8 || t8 === 'Single' || t8 === 'Standard') {
             return true;
         }
-        this.errorWithCodeAndMsg(ROUTER_PARAM_MODE_INVALID_ERROR, m8);
+        this.errorWithCodeAndMsg(ROUTER_PARAM_MODE_INVALID_ERROR, u8);
         return false;
     }
 
-    parseRouterMode(k8) {
-        return k8 === 'Single' ? router.RouterMode.Single : router.RouterMode.Standard;
+    parseRouterMode(s8) {
+        return s8 === 'Single' ? router.RouterMode.Single : router.RouterMode.Standard;
     }
 
-    getRouterIndexByDelta(g8) {
-        let h8 = parseInt(router.getLength());
-        for (let i8 = h8; i8 > 0; i8--) {
-            let j8 = router.getStateByIndex(i8);
-            if (j8?.name && g8-- == 0) {
-                return i8;
+    getRouterIndexByDelta(o8) {
+        let p8 = Number.parseInt(router.getLength());
+        for (let q8 = p8; q8 > 0; q8--) {
+            let r8 = router.getStateByIndex(q8);
+            if (r8?.name && o8-- == 0) {
+                return q8;
             }
         }
         return 1;
     }
 
-    checkBackUrlExists(a8, b8) {
-        let c8 = parseInt(router.getLength());
-        for (let d8 = c8; d8 > 0; d8--) {
-            let e8 = router.getStateByIndex(d8);
-            if (e8?.name) {
-                let f8 = e8?.path + e8?.name;
-                if (f8 === a8) {
+    checkBackUrlExists(i8, j8) {
+        let k8 = Number.parseInt(router.getLength());
+        for (let l8 = k8; l8 > 0; l8--) {
+            let m8 = router.getStateByIndex(l8);
+            if (m8?.name) {
+                let n8 = m8?.path + m8?.name;
+                if (n8 === i8) {
                     return true;
                 }
             }
         }
-        this.errorWithCodeAndMsg(BACK_URL_NOT_EXIST_OR_OPENED_ERROR, b8);
+        this.errorWithCodeAndMsg(BACK_URL_NOT_EXIST_OR_OPENED_ERROR, j8);
         return false;
     }
 
-    checkNavPathStack(y7, z7) {
+    checkNavPathStack(g8, h8) {
         if (!this.navPathStack) {
-            this.errorWithCodeAndMsg(new Error(NAV_PATH_STACK_NOT_EXIST_ERROR_CODE,
-                `Current page is not NavDestination, not support ${y7}().`), z7);
+            this.errorWithCodeAndMsg(new AsError(NAV_PATH_STACK_NOT_EXIST_ERROR_CODE,
+                `Current page is not NavDestination, not support ${g8}().`), h8);
             return false;
         }
         return true;
     }
 
-    getNavPathIndexByDelta(w7) {
-        let x7 = this.navPathStack?.getAllPathName();
-        if (!x7 || x7.length == 0) {
+    getNavPathIndexByDelta(e8) {
+        let f8 = this.navPathStack?.getAllPathName();
+        if (!f8 || f8.length == 0) {
             return -1;
         }
-        return x7.length > w7 ? (x7.length - w7 - 1) : -1;
+        return f8.length > e8 ? (f8.length - e8 - 1) : -1;
     }
 
-    onPopHandler(u7, v7) {
-        if (!u7?.info || !v7) {
+    onPopHandler(c8, d8) {
+        if (!c8?.info || !d8) {
             return;
         }
-        v7(new OnPopEvent(u7.info.name, u7.info.param, u7.result));
+        d8(new OnPopEvent(c8.info.name, c8.info.param, c8.result));
     }
 
     getCurrentNavPathInfo() {
-        let s7 = this.navPathStack?.getAllPathName();
-        let t7 = (s7 && s7.length > 0) ?
-            new NavPathInfo(s7[s7.length - 1], s7.length - 1) : new NavPathInfo(undefined, -1);
-        if (t7.index >= 0) {
-            t7.param = this.navPathStack?.getParamByIndex(t7.index);
+        let a8 = this.navPathStack?.getAllPathName();
+        let b8 = (a8 && a8.length > 0) ?
+            new NavPathInfo(a8[a8.length - 1], a8.length - 1) : new NavPathInfo(undefined, -1);
+        if (b8.index >= 0) {
+            b8.param = this.navPathStack?.getParamByIndex(b8.index);
         }
-        return t7;
+        return b8;
     }
 
     notifyMessage() {
@@ -438,485 +437,486 @@ class AtomicService {
         this.messageDataList = [];
     }
 
-    isJsApiEnable(q7) {
-        if (!q7) {
+    isJsApiEnable(z7) {
+        if (!z7) {
             return false;
         }
-        if (this.compareVersion(q7.minVersion, ATOMIC_SERVICE_JS_SDK_CURRENT_VERSION) &&
-        this.compareVersion(ATOMIC_SERVICE_JS_SDK_CURRENT_VERSION, q7.maxVersion)) {
+        if (this.compareVersion(z7.minVersion, ATOMIC_SERVICE_JS_SDK_CURRENT_VERSION) &&
+        this.compareVersion(ATOMIC_SERVICE_JS_SDK_CURRENT_VERSION, z7.maxVersion)) {
             return true;
         }
         return false;
     }
 
-    compareVersion(h7, i7) {
-        if (!h7 || !i7) {
+    compareVersion(p7, q7) {
+        if (!p7 || !q7) {
             return false;
         }
-        let j7 = h7.split('.').map(p7 => parseInt(p7));
-        let k7 = i7.split('.').map(o7 => parseInt(o7));
-        for (let n7 = 0; n7 < j7.length && n7 < k7.length; n7++) {
-            if (j7[n7] < k7[n7]) {
+        let r7 = p7.split('.').map(y7 => Number.parseInt(y7));
+        let s7 = q7.split('.').map(x7 => Number.parseInt(x7));
+        const t7 = Math.max(r7.length, s7.length);
+        for (let w7 = 0; w7 < t7; w7++) {
+            if (r7[w7] < s7[w7]) {
                 return true;
-            } else if (j7[n7] > k7[n7]) {
+            } else if (r7[w7] > s7[w7]) {
                 return false;
             }
         }
-        if (j7.length < k7.length) {
+        if (r7.length < s7.length) {
             return true;
         }
-        if (j7.length > k7.length) {
+        if (r7.length > s7.length) {
             return false;
         }
         return true;
     }
 
-    getUri(g7) {
-        if (!g7 || g7.startsWith('file://')) {
-            return g7;
+    getUri(o7) {
+        if (!o7 || o7.startsWith('file://')) {
+            return o7;
         }
-        return fileUri.getUriFromPath(g7);
+        return fileUri.getUriFromPath(o7);
     }
 
-    async checkUploadFile(w6) {
-        if (!w6.files || w6.files.length <= 0) {
-            this.errorWithCodeAndMsg(UPLOAD_IMAGE_FILES_REQUIRED_ERROR, w6);
+    async checkUploadFile(e7) {
+        if (!e7.files || e7.files.length <= 0) {
+            this.errorWithCodeAndMsg(UPLOAD_IMAGE_FILES_REQUIRED_ERROR, e7);
             return new CheckUploadFileResult(false);
         }
-        let x6 = new Map();
-        for (let y6 = 0; y6 < w6.files?.length; y6++) {
-            let z6 = w6.files[y6];
-            if (!z6.uri) {
-                this.errorWithCodeAndMsg(UPLOAD_IMAGE_FILES_URI_REQUIRED_ERROR, w6);
+        let f7 = new Map();
+        for (let g7 = 0; g7 < e7.files?.length; g7++) {
+            let h7 = e7.files[g7];
+            if (!h7.uri) {
+                this.errorWithCodeAndMsg(UPLOAD_IMAGE_FILES_URI_REQUIRED_ERROR, e7);
                 return new CheckUploadFileResult(false);
             }
-            if (!z6.uri.startsWith('file://') && !fs.accessSync(z6.uri, fs.AccessModeType.EXIST)) {
-                this.errorWithCodeAndMsg(new Error(UPLOAD_IMAGE_FILE_NOT_EXIST_ERROR_CODE,
-                    `File uri ${z6.uri} is not exist.`), w6);
+            if (!h7.uri.startsWith('file://') && !fs.accessSync(h7.uri, fs.AccessModeType.EXIST)) {
+                this.errorWithCodeAndMsg(new AsError(UPLOAD_IMAGE_FILE_NOT_EXIST_ERROR_CODE,
+                    `File uri ${h7.uri} is not exist.`), e7);
                 return new CheckUploadFileResult(false);
             }
-            let a7 = z6.uri;
-            let b7 = z6.uri;
-            if (b7.indexOf(UPLOAD_IMAGE_CACHE_DIR) < 0) {
-                let c7 = true;
-                let d7 = b7.startsWith('file://') ? b7 : fileUri.getUriFromPath(z6.uri);
-                b7 = this.context.cacheDir + '/' + b7.substring(b7.lastIndexOf('/') + 1);
-                await fs.copy(d7, fileUri.getUriFromPath(b7)).catch((f7) => {
-                    this.error(f7, w6);
-                    c7 = false;
+            let i7 = h7.uri;
+            let j7 = h7.uri;
+            if (j7.indexOf(UPLOAD_IMAGE_CACHE_DIR) < 0) {
+                let k7 = true;
+                let l7 = j7.startsWith('file://') ? j7 : fileUri.getUriFromPath(h7.uri);
+                j7 = this.context.cacheDir + '/' + j7.substring(j7.lastIndexOf('/') + 1);
+                await fs.copy(l7, fileUri.getUriFromPath(j7)).catch((n7) => {
+                    this.error(n7, e7);
+                    k7 = false;
                 });
-                if (!c7) {
-                    this.errorWithCodeAndMsg(UPLOAD_FILE_ERROR, w6);
+                if (!k7) {
+                    this.errorWithCodeAndMsg(UPLOAD_FILE_ERROR, e7);
                     return new CheckUploadFileResult(false);
                 }
             }
-            z6.uri = 'internal://' + b7.substring(b7.indexOf(UPLOAD_IMAGE_CACHE_DIR) + 1);
-            x6.set(b7, a7);
+            h7.uri = 'internal://' + j7.substring(j7.indexOf(UPLOAD_IMAGE_CACHE_DIR) + 1);
+            f7.set(j7, i7);
         }
-        return new CheckUploadFileResult(true, x6);
+        return new CheckUploadFileResult(true, f7);
     }
 
-    convertToRequestData(s6) {
-        let t6 = [];
-        if (s6) {
-            s6.forEach(v6 => {
-                if (!v6.name || !v6.value) {
+    convertToRequestData(a7) {
+        let b7 = [];
+        if (a7) {
+            a7.forEach(d7 => {
+                if (!d7.name || !d7.value) {
                     return;
                 }
-                t6.push({ name: v6.name, value: v6.value });
+                b7.push({ name: d7.name, value: d7.value });
             });
         }
-        return t6;
+        return b7;
     }
 
-    convertToFile(o6) {
-        let p6 = [];
-        if (o6) {
-            o6.forEach(r6 => {
-                p6.push({
-                    filename: r6.filename,
-                    name: r6.name,
-                    uri: r6.uri,
-                    type: r6.type
+    convertToFile(w6) {
+        let x6 = [];
+        if (w6) {
+            w6.forEach(z6 => {
+                x6.push({
+                    filename: z6.filename,
+                    name: z6.name,
+                    uri: z6.uri,
+                    type: z6.type
                 });
             });
         }
-        return p6;
+        return x6;
     }
 
-    handleUploadFileResult(h6, i6, j6) {
-        let k6 = [];
-        if (h6) {
-            h6.forEach(m6 => {
-                let n6 = m6.path ? i6.get(m6.path) : m6.path;
-                k6.push(new UploadFileTaskState(n6 ? n6 : m6.path, m6.responseCode, m6.message));
+    handleUploadFileResult(p6, q6, r6) {
+        let s6 = [];
+        if (p6) {
+            p6.forEach(u6 => {
+                let v6 = u6.path ? q6.get(u6.path) : u6.path;
+                s6.push(new UploadFileTaskState(v6 ? v6 : u6.path, u6.responseCode, u6.message));
             });
         }
-        this.success(new UploadFileResult(k6), j6);
+        this.success(new UploadFileResult(s6), r6);
     }
 
-    parseFileNameFromUrl(e6) {
-        if (!e6) {
+    parseFileNameFromUrl(m6) {
+        if (!m6) {
             return '';
         }
-        let f6 = e6.split('?')[0];
-        if (f6.indexOf('/') < 0) {
+        let n6 = m6.split('?')[0];
+        if (n6.indexOf('/') < 0) {
             return '';
         }
-        let g6 = f6.lastIndexOf('/');
-        if (g6 == (f6.length - 1)) {
+        let o6 = n6.lastIndexOf('/');
+        if (o6 == (n6.length - 1)) {
             return '';
         }
-        return f6.substring(g6 + 1);
+        return n6.substring(o6 + 1);
     }
 
-    saveDownloadFile(r5, s5, t5, u5) {
-        let v5 = new filePicker.DocumentViewPicker();
-        v5.save({
-            newFileNames: [s5]
-        }).then(z5 => {
-            let a6 = z5[0];
-            fs.copy(fileUri.getUriFromPath(r5), a6).then(() => {
-                u5 && u5(a6);
-            }).catch((d6) => {
-                this.error(d6, t5);
+    saveDownloadFile(z5, a6, b6, c6) {
+        let d6 = new filePicker.DocumentViewPicker();
+        d6.save({
+            newFileNames: [a6]
+        }).then(h6 => {
+            let i6 = h6[0];
+            fs.copy(fileUri.getUriFromPath(z5), i6).then(() => {
+                c6 && c6(i6);
+            }).catch((l6) => {
+                this.error(l6, b6);
             });
-        }).catch((y5) => {
-            this.error(y5, t5);
+        }).catch((g6) => {
+            this.error(g6, b6);
         });
     }
 
-    checkAccessToken(n5) {
-        let o5 = bundleManager.getBundleInfoForSelfSync(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
-        let p5 = o5.appInfo.accessTokenId;
-        let q5 = abilityAccessCtrl.createAtManager();
-        return q5.checkAccessToken(p5, n5);
+    checkAccessToken(v5) {
+        let w5 = bundleManager.getBundleInfoForSelfSync(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
+        let x5 = w5.appInfo.accessTokenId;
+        let y5 = abilityAccessCtrl.createAtManager();
+        return y5.checkAccessToken(x5, v5);
     }
 
-    checkPermissions(b5, c5) {
-        this.checkAccessToken(b5).then(g5 => {
-            if (g5 == abilityAccessCtrl.GrantStatus.PERMISSION_GRANTED) {
-                c5(undefined);
+    checkPermissions(j5, k5) {
+        this.checkAccessToken(j5).then(o5 => {
+            if (o5 == abilityAccessCtrl.GrantStatus.PERMISSION_GRANTED) {
+                k5(undefined);
             } else {
-                let h5 = abilityAccessCtrl.createAtManager();
-                h5.requestPermissionsFromUser(this.context, [b5]).then(l5 => {
-                    for (let m5 = 0; m5 < l5.authResults.length; m5++) {
-                        if (l5.authResults[m5] != 0) {
+                let p5 = abilityAccessCtrl.createAtManager();
+                p5.requestPermissionsFromUser(this.context, [j5]).then(t5 => {
+                    for (let u5 = 0; u5 < t5.authResults.length; u5++) {
+                        if (t5.authResults[u5] != 0) {
                             return;
                         }
                     }
-                    c5(undefined);
-                }).catch((k5) => {
-                    c5(k5);
+                    k5(undefined);
+                }).catch((s5) => {
+                    k5(s5);
                 });
             }
-        }).catch((f5) => {
-            c5(f5);
+        }).catch((n5) => {
+            k5(n5);
         });
     }
 }
 
 class AtomicServiceApi extends AtomicService {
-    constructor(y4, z4, a5) {
-        super(y4, z4, a5);
+    constructor(g5, h5, i5) {
+        super(g5, h5, i5);
     }
 
-    pushUrl(u4) {
-        if (!this.checkRouterMode(u4.mode, u4)) {
+    pushUrl(c5) {
+        if (!this.checkRouterMode(c5.mode, c5)) {
             return;
         }
-        router.pushUrl({ url: u4.url, params: u4.params }, this.parseRouterMode(u4.mode)).then(() => {
-            this.success(new PushUrlResult(), u4);
-        }).catch((x4) => {
-            this.error(x4, u4);
+        router.pushUrl({ url: c5.url, params: c5.params }, this.parseRouterMode(c5.mode)).then(() => {
+            this.success(new PushUrlResult(), c5);
+        }).catch((f5) => {
+            this.error(f5, c5);
         });
     }
 
-    replaceUrl(q4) {
-        if (!this.checkRouterMode(q4.mode, q4)) {
+    replaceUrl(y4) {
+        if (!this.checkRouterMode(y4.mode, y4)) {
             return;
         }
-        router.replaceUrl({ url: q4.url, params: q4.params }, this.parseRouterMode(q4.mode)).then(() => {
-            this.success(new ReplaceUrlResult(), q4);
-        }).catch((t4) => {
-            this.error(t4, q4);
+        router.replaceUrl({ url: y4.url, params: y4.params }, this.parseRouterMode(y4.mode)).then(() => {
+            this.success(new ReplaceUrlResult(), y4);
+        }).catch((b5) => {
+            this.error(b5, y4);
         });
     }
 
-    backUrl(p4) {
-        if (p4.url) {
-            if (!this.checkBackUrlExists(p4.url, p4)) {
+    backUrl(x4) {
+        if (x4.url) {
+            if (!this.checkBackUrlExists(x4.url, x4)) {
                 return;
             }
-            router.back({ url: p4.url, params: p4.params });
-            this.success(new BackUrlResult(), p4);
+            router.back({ url: x4.url, params: x4.params });
+            this.success(new BackUrlResult(), x4);
+        } else if (x4.index || x4.index === 0) {
+            if (!this.checkNumberParamPositive('index', x4.index, x4)) {
+                return;
+            }
+            router.back(x4.index, x4.params);
+            this.success(new BackUrlResult(), x4);
+        } else if (x4.delta || x4.delta === 0) {
+            if (!this.checkNumberParamPositive('delta', x4.delta, x4)) {
+                return;
+            }
+            router.back(this.getRouterIndexByDelta(x4.delta), x4.params);
+            this.success(new BackUrlResult(), x4);
+        } else {
+            router.back();
+            this.success(new BackUrlResult(), x4);
+        }
+    }
+
+    clearUrl(w4) {
+        router.clear();
+        this.success(new ClearUrlResult(), w4);
+    }
+
+    pushPath(u4) {
+        if (!this.checkNavPathStack('navPathStack.pushPath', u4)) {
+            return;
+        }
+        this.navPathStack?.pushPath({
+            name: u4.name,
+            param: u4.param,
+            onPop: v4 => this.onPopHandler(v4, u4.onPop)
+        }, u4.animated);
+        this.success(new PushPathResult(), u4);
+    }
+
+    replacePath(s4) {
+        if (!this.checkNavPathStack('navPathStack.replacePath', s4)) {
+            return;
+        }
+        this.navPathStack?.replacePath({
+            name: s4.name,
+            param: s4.param,
+            onPop: t4 => this.onPopHandler(t4, s4.onPop)
+        }, s4.animated);
+        this.success(new ReplacePathResult(), s4);
+    }
+
+    popPath(p4) {
+        if (!this.checkNavPathStack('navPathStack.pop', p4)) {
+            return;
+        }
+        if (p4.name) {
+            let r4 = this.navPathStack?.popToName(p4.name, p4.result, p4.animated);
+            if (r4 === undefined || r4 === -1) {
+                this.errorWithCodeAndMsg(POP_PATH_NAME_NOT_EXIST_ERROR, p4);
+                return;
+            }
         } else if (p4.index || p4.index === 0) {
-            if (!this.checkNumberParamPositive('index', p4.index, p4)) {
+            if (p4.index < -1) {
+                this.errorWithCodeAndMsg(POP_PATH_PARAM_INDEX_INVALID_ERROR, p4);
                 return;
             }
-            router.back(p4.index, p4.params);
-            this.success(new BackUrlResult(), p4);
+            if (p4.index > this.getCurrentNavPathInfo().index) {
+                this.errorWithCodeAndMsg(POP_PATH_INDEX_OUT_OF_RANGE_ERROR, p4);
+                return;
+            }
+            this.navPathStack?.popToIndex(p4.index, p4.result, p4.animated);
         } else if (p4.delta || p4.delta === 0) {
             if (!this.checkNumberParamPositive('delta', p4.delta, p4)) {
                 return;
             }
-            router.back(this.getRouterIndexByDelta(p4.delta), p4.params);
-            this.success(new BackUrlResult(), p4);
+            this.navPathStack?.popToIndex(this.getNavPathIndexByDelta(p4.delta), p4.result, p4.animated);
         } else {
-            router.back();
-            this.success(new BackUrlResult(), p4);
+            this.navPathStack?.pop(p4.result, p4.animated);
         }
+        let q4 = this.getCurrentNavPathInfo();
+        this.success(new PopPathResult(q4.name, q4.index, q4.param), p4);
     }
 
-    clearUrl(o4) {
-        router.clear();
-        this.success(new ClearUrlResult(), o4);
-    }
-
-    pushPath(m4) {
-        if (!this.checkNavPathStack('navPathStack.pushPath', m4)) {
+    clearPath(o4) {
+        if (!this.checkNavPathStack('navPathStack.clear', o4)) {
             return;
         }
-        this.navPathStack?.pushPath({
-            name: m4.name,
-            param: m4.param,
-            onPop: n4 => this.onPopHandler(n4, m4.onPop)
-        }, m4.animated);
-        this.success(new PushPathResult(), m4);
+        this.navPathStack?.clear(o4.animated);
+        this.success(new ClearPathResult(), o4);
     }
 
-    replacePath(k4) {
-        if (!this.checkNavPathStack('navPathStack.replacePath', k4)) {
-            return;
-        }
-        this.navPathStack?.replacePath({
-            name: k4.name,
-            param: k4.param,
-            onPop: l4 => this.onPopHandler(l4, k4.onPop)
-        }, k4.animated);
-        this.success(new ReplacePathResult(), k4);
+    postMessage(n4) {
+        n4.data && this.messageDataList.push(n4.data);
+        this.success(new PostMessageResult(), n4);
     }
 
-    popPath(h4) {
-        if (!this.checkNavPathStack('navPathStack.pop', h4)) {
-            return;
-        }
-        if (h4.name) {
-            let j4 = this.navPathStack?.popToName(h4.name, h4.result, h4.animated);
-            if (j4 === undefined || j4 === -1) {
-                this.errorWithCodeAndMsg(POP_PATH_NAME_NOT_EXIST_ERROR, h4);
-                return;
-            }
-        } else if (h4.index || h4.index === 0) {
-            if (h4.index < -1) {
-                this.errorWithCodeAndMsg(POP_PATH_PARAM_INDEX_INVALID_ERROR, h4);
-                return;
-            }
-            if (h4.index > this.getCurrentNavPathInfo().index) {
-                this.errorWithCodeAndMsg(POP_PATH_INDEX_OUT_OF_RANGE_ERROR, h4);
-                return;
-            }
-            this.navPathStack?.popToIndex(h4.index, h4.result, h4.animated);
-        } else if (h4.delta || h4.delta === 0) {
-            if (!this.checkNumberParamPositive('delta', h4.delta, h4)) {
-                return;
-            }
-            this.navPathStack?.popToIndex(this.getNavPathIndexByDelta(h4.delta), h4.result, h4.animated);
-        } else {
-            this.navPathStack?.pop(h4.result, h4.animated);
-        }
-        let i4 = this.getCurrentNavPathInfo();
-        this.success(new PopPathResult(i4.name, i4.index, i4.param), h4);
+    getEnv(l4) {
+        let m4 = new GetEnvResult();
+        m4.deviceType = deviceInfo.deviceType;
+        m4.brand = deviceInfo.brand;
+        m4.productModel = deviceInfo.productModel;
+        m4.osFullName = deviceInfo.osFullName;
+        this.success(m4, l4);
     }
 
-    clearPath(g4) {
-        if (!this.checkNavPathStack('navPathStack.clear', g4)) {
-            return;
-        }
-        this.navPathStack?.clear(g4.animated);
-        this.success(new ClearPathResult(), g4);
-    }
-
-    postMessage(c3) {
-        c3.data && this.messageDataList.push(c3.data);
-        this.success(new PostMessageResult(), c3);
-    }
-
-    getEnv(e4) {
-        let f4 = new GetEnvResult();
-        f4.deviceType = deviceInfo.deviceType;
-        f4.brand = deviceInfo.brand;
-        f4.productModel = deviceInfo.productModel;
-        f4.osFullName = deviceInfo.osFullName;
-        this.success(f4, e4);
-    }
-
-    checkJsApi(a4) {
-        let b4 = new Map();
-        a4.jsApiList?.forEach(d4 => {
-            b4[d4] = this.isJsApiEnable(ATOMIC_SERVICE_JS_API_MAP.get(d4));
+    checkJsApi(h4) {
+        let i4 = new Map();
+        h4.jsApiList?.forEach(k4 => {
+            i4[k4] = this.isJsApiEnable(ATOMIC_SERVICE_JS_API_MAP.get(k4));
         });
-        this.success(new CheckJsApiResult(b4), a4);
+        this.success(new CheckJsApiResult(i4), h4);
     }
 
-    pickCamera(v3) {
-        picker.pick(this.context, v3.mediaTypes, {
-            cameraPosition: v3.cameraPosition,
-            saveUri: v3.saveUri,
-            videoDuration: v3.videoDuration
-        }).then((z3) => {
-            this.success(new PickCameraResult(z3.resultCode, z3.resultUri, z3.mediaType), v3);
-        }).catch((y3) => {
-            this.error(y3, v3);
+    pickCamera(c4) {
+        picker.pick(this.context, c4.mediaTypes, {
+            cameraPosition: c4.cameraPosition,
+            saveUri: c4.saveUri,
+            videoDuration: c4.videoDuration
+        }).then((g4) => {
+            this.success(new PickCameraResult(g4.resultCode, g4.resultUri, g4.mediaType), c4);
+        }).catch((f4) => {
+            this.error(f4, c4);
         });
     }
 
-    selectPhoto(p3) {
-        let q3 = new photoAccessHelper.PhotoViewPicker();
-        q3.select({
-            MIMEType: p3.mimeType,
-            maxSelectNumber: p3.maxSelectNumber,
-            isPhotoTakingSupported: p3.isPhotoTakingSupported,
-            isEditSupported: p3.isEditSupported,
-            isSearchSupported: p3.isSearchSupported,
+    selectPhoto(w3) {
+        let x3 = new photoAccessHelper.PhotoViewPicker();
+        x3.select({
+            MIMEType: w3.mimeType,
+            maxSelectNumber: w3.maxSelectNumber,
+            isPhotoTakingSupported: w3.isPhotoTakingSupported,
+            isEditSupported: w3.isEditSupported,
+            isSearchSupported: w3.isSearchSupported,
             recommendationOptions: {
-                recommendationType: p3.recommendationType
+                recommendationType: w3.recommendationType
             },
-            preselectedUris: p3.preselectedUris
-        }).then((u3) => {
-            this.success(new SelectPhotoResult(u3.photoUris, u3.isOriginalPhoto), p3);
-        }).catch((t3) => {
-            this.error(t3, p3);
+            preselectedUris: w3.preselectedUris
+        }).then((b4) => {
+            this.success(new SelectPhotoResult(b4.photoUris, b4.isOriginalPhoto), w3);
+        }).catch((a4) => {
+            this.error(a4, w3);
         });
     }
 
-    openPreview(g3) {
-        let h3 = this.getUri(g3.uri);
-        filePreview.canPreview(this.context, h3).then((l3) => {
-            if (!l3) {
-                this.errorWithCodeAndMsg(IMAGE_CAN_NOT_PREVIEW_ERROR, g3);
+    openPreview(n3) {
+        let o3 = this.getUri(n3.uri);
+        filePreview.canPreview(this.context, o3).then((s3) => {
+            if (!s3) {
+                this.errorWithCodeAndMsg(IMAGE_CAN_NOT_PREVIEW_ERROR, n3);
                 return;
             }
             filePreview.openPreview(this.context, {
-                uri: h3,
-                mimeType: g3.mimeType,
-                title: g3.title
+                uri: o3,
+                mimeType: n3.mimeType,
+                title: n3.title
             }).then(() => {
-                this.success(new OpenPreviewResult(), g3);
-            }).catch((o3) => {
-                this.error(o3, g3);
+                this.success(new OpenPreviewResult(), n3);
+            }).catch((v3) => {
+                this.error(v3, n3);
             });
-        }).catch((k3) => {
-            this.error(k3, g3);
+        }).catch((r3) => {
+            this.error(r3, n3);
         });
     }
 
-    uploadFile(s2) {
-        this.checkUploadFile(s2).then(w2 => {
-            if (!w2.checkResult) {
+    uploadFile(z2) {
+        this.checkUploadFile(z2).then(d3 => {
+            if (!d3.checkResult) {
                 return;
             }
-            let x2 = {
-                url: s2.url,
-                header: s2.header,
-                method: s2.method,
-                files: this.convertToFile(s2.files),
-                data: this.convertToRequestData(s2.data)
+            let e3 = {
+                url: z2.url,
+                header: z2.header,
+                method: z2.method,
+                files: this.convertToFile(z2.files),
+                data: this.convertToRequestData(z2.data)
             };
-            this.consoleLog('uploadFile uploadConfig=' + JSON.stringify(x2));
-            request.uploadFile(this.context, x2).then((b3) => {
-                b3.on('complete', (f3) => {
-                    this.handleUploadFileResult(f3, w2.uriMap, s2);
+            this.consoleLog('uploadFile uploadConfig=' + JSON.stringify(e3));
+            request.uploadFile(this.context, e3).then((i3) => {
+                i3.on('complete', (m3) => {
+                    this.handleUploadFileResult(m3, d3.uriMap, z2);
                 });
-                b3.on('fail', (e3) => {
-                    this.handleUploadFileResult(e3, w2.uriMap, s2);
+                i3.on('fail', (l3) => {
+                    this.handleUploadFileResult(l3, d3.uriMap, z2);
                 });
-            }).catch((a3) => {
-                this.error(a3, s2);
+            }).catch((h3) => {
+                this.error(h3, z2);
             });
-        }).catch((v2) => {
-            this.error(v2, s2);
+        }).catch((c3) => {
+            this.error(c3, z2);
         });
     }
 
-    downloadFile(f2) {
-        let g2 = f2.fileName ? f2.fileName : this.parseFileNameFromUrl(f2.url);
-        let h2 = `${util.generateRandomUUID().replaceAll('-', '')}`;
-        let i2 = `${this.context.cacheDir}/${h2}`;
+    downloadFile(m2) {
+        let n2 = m2.fileName ? m2.fileName : this.parseFileNameFromUrl(m2.url);
+        let o2 = `${util.generateRandomUUID().replaceAll('-', '')}`;
+        let p2 = `${this.context.cacheDir}/${o2}`;
         request.downloadFile(this.context, {
-            url: f2.url,
-            header: f2.header ? f2.header : new Object(),
-            filePath: i2,
-            enableMetered: f2.enableMetered,
-            enableRoaming: f2.enableRoaming,
-            networkType: f2.networkType,
+            url: m2.url,
+            header: m2.header ? m2.header : new Object(),
+            filePath: p2,
+            enableMetered: m2.enableMetered,
+            enableRoaming: m2.enableRoaming,
+            networkType: m2.networkType,
             background: false
-        }).then((m2) => {
-            m2.on('complete', () => {
-                this.saveDownloadFile(i2, g2, f2, r2 => {
-                    this.success(new DownloadFileResult(r2), f2);
+        }).then((t2) => {
+            t2.on('complete', () => {
+                this.saveDownloadFile(p2, n2, m2, y2 => {
+                    this.success(new DownloadFileResult(y2), m2);
                 });
             });
-            m2.on('fail', y2 => {
-                this.errorWithCodeAndMsg(new Error(y2, 'File download fail.'), f2);
+            t2.on('fail', w2 => {
+                this.errorWithCodeAndMsg(new AsError(w2, 'File download fail.'), m2);
             });
-        }).catch((l2) => {
-            this.error(l2, f2);
+        }).catch((s2) => {
+            this.error(s2, m2);
         });
     }
 
-    getNetworkType(v1) {
-        connection.getDefaultNet().then(z1 => {
-            if (!z1 || z1.netId === 0) {
-                this.errorWithCodeAndMsg(NETWORK_NO_ACTIVE_ERROR, v1);
+    getNetworkType(c2) {
+        connection.getDefaultNet().then(g2 => {
+            if (!g2 || g2.netId === 0) {
+                this.errorWithCodeAndMsg(NETWORK_NO_ACTIVE_ERROR, c2);
                 return;
             }
-            connection.getNetCapabilities(z1).then(n2 => {
-                let t2 = new GetNetworkTypeResult(n2.bearerTypes, n2.networkCap, n2.linkUpBandwidthKbps,
-                    n2.linkDownBandwidthKbps);
-                this.success(t2, v1);
+            connection.getNetCapabilities(g2).then(k2 => {
+                let l2 = new GetNetworkTypeResult(k2.bearerTypes, k2.networkCap, k2.linkUpBandwidthKbps,
+                    k2.linkDownBandwidthKbps);
+                this.success(l2, c2);
             }).catch((j2) => {
-                this.error(j2, v1);
+                this.error(j2, c2);
             });
-        }).catch((y1) => {
-            this.error(y1, v1);
+        }).catch((f2) => {
+            this.error(f2, c2);
         });
     }
 
-    getLocation(n1) {
-        this.checkPermissions(PERMISSION_APPROXIMATELY_LOCATION, p1 => {
-            if (p1) {
-                this.error(p1, n1);
+    getLocation(u1) {
+        this.checkPermissions(PERMISSION_APPROXIMATELY_LOCATION, w1 => {
+            if (w1) {
+                this.error(w1, u1);
                 return;
             }
             geoLocationManager.getCurrentLocation({
-                priority: n1.priority,
-                scenario: n1.scenario,
-                maxAccuracy: n1.maxAccuracy,
-                timeoutMs: n1.timeoutMs
-            }).then(t1 => {
-                let u1 =
-                    new GetLocationResult(t1.latitude, t1.longitude, t1.altitude, t1.accuracy, t1.speed, t1.timeStamp,
-                        t1.direction, t1.timeSinceBoot, t1.additions, t1.additionSize);
-                this.success(u1, n1);
-            }).catch((s1) => {
-                this.error(s1, n1);
+                priority: u1.priority,
+                scenario: u1.scenario,
+                maxAccuracy: u1.maxAccuracy,
+                timeoutMs: u1.timeoutMs
+            }).then(a2 => {
+                let b2 =
+                    new GetLocationResult(a2.latitude, a2.longitude, a2.altitude, a2.accuracy, a2.speed, a2.timeStamp,
+                        a2.direction, a2.timeSinceBoot, a2.additions, a2.additionSize);
+                this.success(b2, u1);
+            }).catch((z1) => {
+                this.error(z1, u1);
             });
         });
     }
 }
 
 class NavPathInfo {
-    constructor(l1, m1) {
-        this.name = l1;
-        this.index = m1;
+    constructor(s1, t1) {
+        this.name = s1;
+        this.index = t1;
     }
 }
 
 class CheckUploadFileResult {
-    constructor(j1, k1) {
-        this.checkResult = j1;
-        this.uriMap = k1;
+    constructor(q1, r1) {
+        this.checkResult = q1;
+        this.uriMap = r1;
     }
 }
 
@@ -948,10 +948,10 @@ class ClearUrlResult {
 }
 
 class OnPopEvent {
-    constructor(g1, h1, i1) {
-        this.name = g1;
-        this.param = h1;
-        this.result = i1;
+    constructor(n1, o1, p1) {
+        this.name = n1;
+        this.param = o1;
+        this.result = p1;
     }
 }
 
@@ -971,10 +971,10 @@ class PopPathOptions extends BaseOptions {
 }
 
 class PopPathResult {
-    constructor(d1, e1, f1) {
-        this.name = d1;
-        this.index = e1;
-        this.param = f1;
+    constructor(k1, l1, m1) {
+        this.name = k1;
+        this.index = l1;
+        this.param = m1;
     }
 }
 
@@ -991,34 +991,34 @@ class PostMessageResult {
 }
 
 export class OnMessageEvent {
-    constructor(c2) {
-        this.data = c2;
+    constructor(j1) {
+        this.data = j1;
     }
 }
 
 export class OnErrorReceiveEvent {
-    constructor(r4, v4) {
-        this.request = r4;
-        this.error = v4;
+    constructor(h1, i1) {
+        this.request = h1;
+        this.error = i1;
     }
 }
 
 export class OnHttpErrorReceiveEvent {
-    constructor(r3, w3) {
-        this.request = r3;
-        this.response = w3;
+    constructor(f1, g1) {
+        this.request = f1;
+        this.response = g1;
     }
 }
 
 export class OnPageBeginEvent {
-    constructor(e2) {
-        this.url = e2;
+    constructor(e1) {
+        this.url = e1;
     }
 }
 
 export class OnPageEndEvent {
-    constructor(d2) {
-        this.url = d2;
+    constructor(d1) {
+        this.url = d1;
     }
 }
 

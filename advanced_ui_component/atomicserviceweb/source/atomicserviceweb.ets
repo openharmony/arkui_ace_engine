@@ -31,7 +31,7 @@ import picker from '@ohos.multimedia.cameraPicker';
 import filePicker from '@ohos.file.picker';
 import { BusinessError } from '@ohos.base';
 
-class Error {
+class AsError {
   public code: number;
   public message: string;
 
@@ -69,43 +69,41 @@ const MAX_VERSION = '99.99.99';
 const ATOMIC_SERVICE_JS_SDK_CURRENT_VERSION = '1.0.0';
 const PERMISSION_APPROXIMATELY_LOCATION: Permissions = 'ohos.permission.APPROXIMATELY_LOCATION';
 
-const SYSTEM_INTERNAL_ERROR: Error = new Error(500, 'System internal error.');
-const JS_API_INVALID_INVOKE_ERROR: Error = new Error(200001, 'Invalid invoke.');
+const SYSTEM_INTERNAL_ERROR: AsError = new AsError(500, 'System internal error.');
+const JS_API_INVALID_INVOKE_ERROR: AsError = new AsError(200001, 'Invalid invoke.');
 const PARAM_REQUIRED_ERROR_CODE: number = 200002;
 const PARAM_NUMBER_POSITIVE_ERROR_CODE: number = 200003;
-const ROUTER_PARAM_MODE_INVALID_ERROR: Error = new Error(200004, 'Param mode is invalid.');
-const BACK_URL_NOT_EXIST_OR_OPENED_ERROR: Error = new Error(200005, 'Url is not exist or opened, can not be back.');
+const ROUTER_PARAM_MODE_INVALID_ERROR: AsError = new AsError(200004, 'Param mode is invalid.');
+const BACK_URL_NOT_EXIST_OR_OPENED_ERROR: AsError = new AsError(200005, 'Url is not exist or opened, can not be back.');
 const NAV_PATH_STACK_NOT_EXIST_ERROR_CODE: number = 200006;
-const POP_PATH_NAME_NOT_EXIST_ERROR: Error = new Error(200007, 'Name is not exist or opened, can not be pop.');
-const POP_PATH_PARAM_INDEX_INVALID_ERROR: Error = new Error(200008, 'Param index is invalid.');
-const POP_PATH_INDEX_OUT_OF_RANGE_ERROR: Error = new Error(200009, 'The Index is out of range.');
-const UPLOAD_IMAGE_FILES_REQUIRED_ERROR: Error = new Error(200010, 'Param files is required.');
+const POP_PATH_NAME_NOT_EXIST_ERROR: AsError = new AsError(200007, 'Name is not exist or opened, can not be pop.');
+const POP_PATH_PARAM_INDEX_INVALID_ERROR: AsError = new AsError(200008, 'Param index is invalid.');
+const POP_PATH_INDEX_OUT_OF_RANGE_ERROR: AsError = new AsError(200009, 'The Index is out of range.');
+const UPLOAD_IMAGE_FILES_REQUIRED_ERROR: AsError = new AsError(200010, 'Param files is required.');
 const UPLOAD_IMAGE_FILE_NOT_EXIST_ERROR_CODE: number = 200011;
-const UPLOAD_IMAGE_FILES_URI_REQUIRED_ERROR: Error = new Error(200012, 'Param uri of files is required.');
-const UPLOAD_FILE_ERROR: Error = new Error(200013, 'Upload file error.');
-const IMAGE_CAN_NOT_PREVIEW_ERROR: Error = new Error(200014, 'The filePath can not preview.');
-const NETWORK_NO_ACTIVE_ERROR: Error = new Error(200015, 'The network is not active.');
+const UPLOAD_IMAGE_FILES_URI_REQUIRED_ERROR: AsError = new AsError(200012, 'Param uri of files is required.');
+const UPLOAD_FILE_ERROR: AsError = new AsError(200013, 'Upload file error.');
+const IMAGE_CAN_NOT_PREVIEW_ERROR: AsError = new AsError(200014, 'The filePath can not preview.');
+const NETWORK_NO_ACTIVE_ERROR: AsError = new AsError(200015, 'The network is not active.');
 
-{
-  registerJsApi('router.pushUrl', 'pushUrl', '1.0.0', MAX_VERSION, ['url']);
-  registerJsApi('router.replaceUrl', 'replaceUrl', '1.0.0', MAX_VERSION, ['url']);
-  registerJsApi('router.back', 'backUrl', '1.0.0', MAX_VERSION, []);
-  registerJsApi('router.clear', 'clearUrl', '1.0.0', MAX_VERSION, []);
-  registerJsApi('navPathStack.pushPath', 'pushPath', '1.0.0', MAX_VERSION, ['name']);
-  registerJsApi('navPathStack.replacePath', 'replacePath', '1.0.0', MAX_VERSION, ['name']);
-  registerJsApi('navPathStack.pop', 'popPath', '1.0.0', MAX_VERSION, []);
-  registerJsApi('navPathStack.clear', 'clearPath', '1.0.0', MAX_VERSION, []);
-  registerJsApi('asWeb.postMessage', 'postMessage', '1.0.0', MAX_VERSION, ['data']);
-  registerJsApi('asWeb.getEnv', 'getEnv', '1.0.0', MAX_VERSION, []);
-  registerJsApi('asWeb.checkJsApi', 'checkJsApi', '1.0.0', MAX_VERSION, ['jsApiList']);
-  registerJsApi('cameraPicker.pick', 'pickCamera', '1.0.0', MAX_VERSION, ['mediaTypes', 'cameraPosition']);
-  registerJsApi('photoViewPicker.select', 'selectPhoto', '1.0.0', MAX_VERSION, []);
-  registerJsApi('filePreview.openPreview', 'openPreview', '1.0.0', MAX_VERSION, ['uri']);
-  registerJsApi('request.uploadFile', 'uploadFile', '1.0.0', MAX_VERSION, ['url', 'files']);
-  registerJsApi('request.downloadFile', 'downloadFile', '1.0.0', MAX_VERSION, ['url']);
-  registerJsApi('connection.getNetworkType', 'getNetworkType', '1.0.0', MAX_VERSION, []);
-  registerJsApi('location.getLocation', 'getLocation', '1.0.0', MAX_VERSION, []);
-}
+registerJsApi('router.pushUrl', 'pushUrl', '1.0.0', MAX_VERSION, ['url']);
+registerJsApi('router.replaceUrl', 'replaceUrl', '1.0.0', MAX_VERSION, ['url']);
+registerJsApi('router.back', 'backUrl', '1.0.0', MAX_VERSION, []);
+registerJsApi('router.clear', 'clearUrl', '1.0.0', MAX_VERSION, []);
+registerJsApi('navPathStack.pushPath', 'pushPath', '1.0.0', MAX_VERSION, ['name']);
+registerJsApi('navPathStack.replacePath', 'replacePath', '1.0.0', MAX_VERSION, ['name']);
+registerJsApi('navPathStack.pop', 'popPath', '1.0.0', MAX_VERSION, []);
+registerJsApi('navPathStack.clear', 'clearPath', '1.0.0', MAX_VERSION, []);
+registerJsApi('asWeb.postMessage', 'postMessage', '1.0.0', MAX_VERSION, ['data']);
+registerJsApi('asWeb.getEnv', 'getEnv', '1.0.0', MAX_VERSION, []);
+registerJsApi('asWeb.checkJsApi', 'checkJsApi', '1.0.0', MAX_VERSION, ['jsApiList']);
+registerJsApi('cameraPicker.pick', 'pickCamera', '1.0.0', MAX_VERSION, ['mediaTypes', 'cameraPosition']);
+registerJsApi('photoViewPicker.select', 'selectPhoto', '1.0.0', MAX_VERSION, []);
+registerJsApi('filePreview.openPreview', 'openPreview', '1.0.0', MAX_VERSION, ['uri']);
+registerJsApi('request.uploadFile', 'uploadFile', '1.0.0', MAX_VERSION, ['url', 'files']);
+registerJsApi('request.downloadFile', 'downloadFile', '1.0.0', MAX_VERSION, ['url']);
+registerJsApi('connection.getNetworkType', 'getNetworkType', '1.0.0', MAX_VERSION, []);
+registerJsApi('location.getLocation', 'getLocation', '1.0.0', MAX_VERSION, []);
 
 @Component
 export struct AtomicServiceWeb {
@@ -121,7 +119,7 @@ export struct AtomicServiceWeb {
   };
   public onPageEnd?: Callback<OnPageEndEvent> = () => {
   };
-  private context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
+  private context: common.UIAbilityContext = this.getUIContext().getHostContext() as common.UIAbilityContext;
   private controller: web_webview.WebviewController = new web_webview.WebviewController();
   private schemeHandler: web_webview.WebSchemeHandler = new web_webview.WebSchemeHandler();
   private atomicService?: AtomicService;
@@ -242,11 +240,11 @@ class AtomicService {
   }
 
   error<T>(err: BusinessError, options: BaseOptions<T>,): void {
-    options?.callback && options?.callback(new Error(err.code ? err.code : SYSTEM_INTERNAL_ERROR.code,
+    options?.callback && options?.callback(new AsError(err.code ? err.code : SYSTEM_INTERNAL_ERROR.code,
       err.message ? err.message : SYSTEM_INTERNAL_ERROR.message));
   }
 
-  errorWithCodeAndMsg<T>(error: Error, options: BaseOptions<T>): void {
+  errorWithCodeAndMsg<T>(error: AsError, options: BaseOptions<T>): void {
     options?.callback && options?.callback(error);
   }
 
@@ -268,7 +266,7 @@ class AtomicService {
 
   checkParamRequired<V, T>(paramKey: string, paramValue: V, options: BaseOptions<T>): boolean {
     if (paramValue === undefined || paramValue === null || paramValue === '') {
-      this.errorWithCodeAndMsg(new Error(PARAM_REQUIRED_ERROR_CODE, `Param ${paramKey} is required.`), options);
+      this.errorWithCodeAndMsg(new AsError(PARAM_REQUIRED_ERROR_CODE, `Param ${paramKey} is required.`), options);
       return false;
     }
     return true;
@@ -276,7 +274,7 @@ class AtomicService {
 
   checkNumberParamPositive<T>(paramKey: string, paramValue: number, options: BaseOptions<T>): boolean {
     if (paramValue <= 0) {
-      this.errorWithCodeAndMsg(new Error(PARAM_NUMBER_POSITIVE_ERROR_CODE,
+      this.errorWithCodeAndMsg(new AsError(PARAM_NUMBER_POSITIVE_ERROR_CODE,
         `Param ${paramKey} must be a positive number.`), options);
       return false;
     }
@@ -313,7 +311,7 @@ class AtomicService {
   }
 
   getRouterIndexByDelta(delta: number): number {
-    let length: number = parseInt(router.getLength());
+    let length: number = Number.parseInt(router.getLength());
     for (let i = length; i > 0; i--) {
       let state = router.getStateByIndex(i);
       if (state?.name && delta-- == 0) {
@@ -324,7 +322,7 @@ class AtomicService {
   }
 
   checkBackUrlExists<T>(url: string, options: BaseOptions<T>): boolean {
-    let length: number = parseInt(router.getLength());
+    let length: number = Number.parseInt(router.getLength());
     for (let i = length; i > 0; i--) {
       let state = router.getStateByIndex(i);
       if (state?.name) {
@@ -340,7 +338,7 @@ class AtomicService {
 
   checkNavPathStack<T>(apiName: string, options: BaseOptions<T>): boolean {
     if (!this.navPathStack) {
-      this.errorWithCodeAndMsg(new Error(NAV_PATH_STACK_NOT_EXIST_ERROR_CODE,
+      this.errorWithCodeAndMsg(new AsError(NAV_PATH_STACK_NOT_EXIST_ERROR_CODE,
         `Current page is not NavDestination, not support ${apiName}().`), options);
       return false;
     }
@@ -395,9 +393,10 @@ class AtomicService {
     if (!lowVersion || !highVersion) {
       return false;
     }
-    let v1 = lowVersion.split('.').map(m => parseInt(m));
-    let v2 = highVersion.split('.').map(m => parseInt(m));
-    for (let i = 0; i < v1.length && i < v2.length; i++) {
+    let v1 = lowVersion.split('.').map(m => Number.parseInt(m));
+    let v2 = highVersion.split('.').map(m => Number.parseInt(m));
+    const maxLength = Math.max(v1.length, v2.length);
+    for (let i = 0; i < maxLength; i++) {
       if (v1[i] < v2[i]) {
         return true;
       } else if (v1[i] > v2[i]) {
@@ -433,7 +432,7 @@ class AtomicService {
         return new CheckUploadFileResult(false);
       }
       if (!file.uri.startsWith('file://') && !fs.accessSync(file.uri, fs.AccessModeType.EXIST)) {
-        this.errorWithCodeAndMsg(new Error(UPLOAD_IMAGE_FILE_NOT_EXIST_ERROR_CODE,
+        this.errorWithCodeAndMsg(new AsError(UPLOAD_IMAGE_FILE_NOT_EXIST_ERROR_CODE,
           `File uri ${file.uri} is not exist.`), options);
         return new CheckUploadFileResult(false);
       }
@@ -806,7 +805,7 @@ class AtomicServiceApi extends AtomicService {
         });
       });
       downloadTask.on('fail', errCode => {
-        this.errorWithCodeAndMsg(new Error(errCode, 'File download fail.'), options);
+        this.errorWithCodeAndMsg(new AsError(errCode, 'File download fail.'), options);
       });
     }).catch((err: BusinessError) => {
       this.error(err, options);
@@ -876,7 +875,7 @@ class CheckUploadFileResult {
 }
 
 class BaseOptions<T> {
-  public callback?: (err: Error | undefined, res?: T) => void;
+  public callback?: (err: AsError | undefined, res?: T) => void;
 }
 
 class PushUrlOptions extends BaseOptions<PushUrlResult> {
