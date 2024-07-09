@@ -4147,6 +4147,8 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
             }
             auto stepItems = swiper->IsSwipeByGroup() ? displayCount : 1;
             swiper->targetIndex_ = swiper->CheckTargetIndex(swiper->currentIndex_ + stepItems);
+            ACE_SCOPED_TRACE("Swiper autoPlay delayTime %d targetIndex %d isVisibleArea_ %d isWindowShow_ %d",
+                delayTime, swiper->targetIndex_.value(), swiper->isVisibleArea_, swiper->isWindowShow_);
             swiper->MarkDirtyNodeSelf();
             auto pipeline = PipelineContext::GetCurrentContext();
             if (pipeline) {
@@ -4193,7 +4195,7 @@ void SwiperPattern::RegisterVisibleAreaChange()
 bool SwiperPattern::NeedAutoPlay() const
 {
     bool reachEnd = GetLoopIndex(CurrentIndex()) >= TotalCount() - 1 && !IsLoop();
-    return IsAutoPlay() && !reachEnd && isVisibleArea_ && !isIndicatorLongPress_;
+    return IsAutoPlay() && !reachEnd && NeedStartAutoPlay() && !isIndicatorLongPress_;
 }
 
 void SwiperPattern::TriggerAnimationEndOnSwipeToLeft()
