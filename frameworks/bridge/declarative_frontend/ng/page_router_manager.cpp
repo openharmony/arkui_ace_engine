@@ -1446,11 +1446,16 @@ RefPtr<FrameNode> PageRouterManager::CreatePage(int32_t pageId, const RouterPage
 #if !defined(PREVIEW)
     if (keyInfo.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
         // deal with @bundle url
+        // @bundle format: @bundle:bundleName/moduleName/pagePath/fileName(without file extension)
+        // @bundle example: @bundle:com.example.applicationHsp/hsp/ets/pages/Index
+        // only moduleName and lastPagePath/fileName is needed: hsppages/Index
         size_t bundleEndPos = keyInfo.find('/');
         size_t moduleStartPos = bundleEndPos + 1;
         size_t moduleEndPos = keyInfo.find('/', moduleStartPos);
         std::string moduleName = keyInfo.substr(moduleStartPos, moduleEndPos - moduleStartPos);
-        keyInfo = keyInfo.substr(moduleEndPos + 1);
+        size_t fileNameStartPos = keyInfo.rfind('/');
+        size_t pageInfoStartPos = keyInfo.rfind('/', fileNameStartPos - 1);
+        keyInfo = keyInfo.substr(pageInfoStartPos + 1);
         keyInfo = moduleName + keyInfo;
     }
 #endif
