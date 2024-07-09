@@ -9049,6 +9049,17 @@ class ViewV2 extends PUV2ViewBase {
         // FIXME check this also works for root @ComponentV2
         return (this.getParent()) ? this.getParent().localStorage_ : new LocalStorage({ /* empty */});
     }
+    /**
+     * @function observeRecycleComponentCreation
+     * @description custom node recycle creation not supported for V2. So a dummy function is implemented to report
+     * an error message
+     * @param name custom node name
+     * @param recycleUpdateFunc custom node recycle update which can be converted to a normal update function
+     * @return void
+     */
+    observeRecycleComponentCreation(name, recycleUpdateFunc) {
+        stateMgmtConsole.error(`${this.debugInfo__()}: Recycle not supported for ComponentV2 instances`);
+    }
     debugInfoDirtDescendantElementIdsInternal(depth = 0, recursive = false, counter) {
         let retVaL = `\n${'  '.repeat(depth)}|--${this.constructor.name}[${this.id__()}]: {`;
         retVaL += `ViewV2 keeps no info about dirty elmtIds`;
