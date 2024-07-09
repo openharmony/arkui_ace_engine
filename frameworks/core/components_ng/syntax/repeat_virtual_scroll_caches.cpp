@@ -640,7 +640,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::GetCachedNode4Key4Ttype(
 uint32_t RepeatVirtualScrollCaches::GetDistanceFromRange(uint32_t index) const
 {
     // distance is uint max for invalidated keys
-    if(index == UINT32_MAX){
+    if (index == UINT32_MAX) {
         return UINT32_MAX;
     }
     uint32_t last[2] = { lastActiveRanges_[0].first, lastActiveRanges_[0].second };
