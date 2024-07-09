@@ -567,11 +567,6 @@ build_component_ng("pattern_ng") {
     external_deps += vendor_configs.ace_engine_ext_extra_deps
   }
 
-  if (enable_split_mode &&
-      defined(vendor_configs.ace_engine_advanced_split_mode)) {
-    sources += vendor_configs.ace_engine_advanced_split_mode
-  }
-
   if (is_ohos_standard_system) {
     external_deps += [
       "graphic_2d:librender_service_client",

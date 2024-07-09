@@ -2041,6 +2041,8 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
+    auto stageManager = pipelineContext->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
     TAG_LOGI(AceLogTag::ACE_ROUTER,
         "router replace in new lifecycle(API version > 11), replace mode: %{public}d, url: %{public}s",
         static_cast<int32_t>(info.routerMode), info.url.c_str());
@@ -2060,7 +2062,13 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
         }
         if (pageInfo.second) {
             // find page in stack, move position and update params.
+#if defined(ENABLE_SPLIT_MODE)
+            stageManager->SetIsNewPageReplacing(true);
+#endif
             MovePageToFront(pageInfo.first, pageInfo.second, info, false, true, false);
+#if defined(ENABLE_SPLIT_MODE)
+            stageManager->SetIsNewPageReplacing(false);
+#endif
             popIndex = popIndex - 1;
             findPage = true;
         } else {
@@ -2074,7 +2082,13 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
     }
     if (!findPage) {
         isNewPageReplacing_ = true;
+#if defined(ENABLE_SPLIT_MODE)
+        stageManager->SetIsNewPageReplacing(true);
+#endif
         LoadPage(GenerateNextPageId(), info, true, false);
+#if defined(ENABLE_SPLIT_MODE)
+        stageManager->SetIsNewPageReplacing(false);
+#endif
         isNewPageReplacing_ = false;
     }
     if (popIndex < 0 || popNode == GetCurrentPageNode() || GetPageIndex(popNode) != popIndex) {
@@ -2093,7 +2107,13 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
         auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
         pagePattern->GetPageInfo()->SetPageIndex(popIndex + 1);
     }
+#if defined(ENABLE_SPLIT_MODE)
+    stageManager->SetIsNewPageReplacing(true);
+#endif
     PopPage("", false, false);
+#if defined(ENABLE_SPLIT_MODE)
+    stageManager->SetIsNewPageReplacing(false);
+#endif
 }
 
 void PageRouterManager::RestoreOhmUrl(const RouterPageInfo& target, std::function<void()>&& finishCallback,
