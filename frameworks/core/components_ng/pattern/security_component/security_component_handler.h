@@ -73,7 +73,7 @@ private:
     static bool InitBaseInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
     static bool InitChildInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
     static bool CheckSecurityComponentStatus(const RefPtr<UINode>& root, std::vector<RectF>& rect, int32_t secNodeId);
-    static bool CheckRectIntersect(const RectF& dest, std::vector<RectF>& origin);
+    static bool CheckRectIntersect(const RectF& dest, const std::vector<RectF>& origin);
     static bool IsSecurityComponent(RefPtr<FrameNode>& node);
     static bool CheckComponentCoveredStatus(int32_t secNodeId);
     static bool IsContextTransparent(const RefPtr<FrameNode>& frameNode);

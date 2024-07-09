@@ -42,12 +42,6 @@ static std::vector<uintptr_t> g_callList = {
 
 const std::set<std::string> LAYOUT_TAGS = { "__Common__", "__Recycle__" };
 
-const std::set<std::string> CONTAINER_COMPONENT_TAGS = { "Flex", "Stack", "Row", "Column", "WindowScene", "root",
-    "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent", "ColumnSplit",
-    "FolderStack", "GridCol", "GridRow", "RelativeContainer", "RowSplit", "List", "Scroll", "WaterFlow",
-    "SideBarContainer", "Refresh", "Navigator", "ListItemGroup", "ListItem", "Hyperlink", "FormLink", "FlowItem",
-    "Counter" };
-
 SecurityComponentProbe SecurityComponentHandler::probe;
 SecurityComponent::SecCompUiRegister uiRegister(g_callList, &SecurityComponentHandler::probe);
 
@@ -556,9 +550,15 @@ bool SecurityComponentHandler::IsContextTransparent(const RefPtr<FrameNode>& fra
 
 bool SecurityComponentHandler::CheckContainerTags(const RefPtr<FrameNode>& frameNode)
 {
+    static std::set<std::string> containerComponentTags = { "Flex", "Stack", "Row", "Column", "WindowScene", "root",
+        "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent", "ColumnSplit",
+        "FolderStack", "GridCol", "GridRow", "RelativeContainer", "RowSplit", "List", "Scroll", "WaterFlow",
+        "SideBarContainer", "Refresh", "Navigator", "ListItemGroup", "ListItem", "Hyperlink", "FormLink", "FlowItem",
+        "Counter" };
+
     const RefPtr<RenderContext> renderContext = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
-    if (CONTAINER_COMPONENT_TAGS.find(frameNode->GetTag()) != CONTAINER_COMPONENT_TAGS.end() &&
+    if (containerComponentTags.find(frameNode->GetTag()) != containerComponentTags.end() &&
         renderContext->GetBackgroundColor()->ColorToString().compare("#00000000") == 0) {
         return true;
     }
@@ -593,9 +593,9 @@ bool SecurityComponentHandler::CheckSecurityComponentStatus(const RefPtr<UINode>
     return res;
 }
 
-bool SecurityComponentHandler::CheckRectIntersect(const RectF& dest, std::vector<RectF>& origin)
+bool SecurityComponentHandler::CheckRectIntersect(const RectF& dest, const std::vector<RectF>& origin)
 {
-    for (auto originRect : origin) {
+    for (const auto& originRect : origin) {
         if (originRect.IsInnerIntersectWith(dest)) {
             return true;
         }
