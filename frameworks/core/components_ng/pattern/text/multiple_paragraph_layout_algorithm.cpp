@@ -517,7 +517,7 @@ void MultipleParagraphLayoutAlgorithm::AddTextSpanToParagraph(const RefPtr<SpanI
 {
     spanTextLength += static_cast<int32_t>(StringUtils::ToWstring(child->content).length());
     child->position = spanTextLength;
-    child->UpdateParagraph(frameNode, paragraph, isSpanStringMode_);
+    child->UpdateParagraph(frameNode, paragraph, isSpanStringMode_, PlaceholderStyle(), isMarquee_);
 }
 
 void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>& imageSpanItem,
