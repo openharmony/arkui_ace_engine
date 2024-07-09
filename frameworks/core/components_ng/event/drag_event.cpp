@@ -223,7 +223,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     dragDropManager->SetPreDragStatus(PreDragStatus::ACTION_DETECTING_STATUS);
     auto actionStart = [weak = WeakClaim(this), this](GestureEvent& info) {
         auto actuator = weak.Upgrade();
-        CHECK_NULL_VOID(actuator);
+        if (!actuator) {
+            DragEventActuator::ResetDragStatus();
+            return;
+        }
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto dragDropManager = pipeline->GetDragDropManager();
@@ -378,7 +381,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         dragDropManager->SetHasGatherNode(false);
         dragDropManager->SetBadgeNumber(-1);
         auto actuator = weak.Upgrade();
-        CHECK_NULL_VOID(actuator);
+        if (!actuator) {
+            DragEventActuator::ResetDragStatus();
+            return;
+        }
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         auto frameNode = gestureHub->GetFrameNode();
@@ -703,6 +709,19 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     SequencedRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     result.emplace_back(SequencedRecognizer_);
     result.emplace_back(previewLongPressRecognizer_);
+}
+
+void DragEventActuator::ResetDragStatus()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->RemovePreviewBadgeNode();
+    overlayManager->RemoveGatherNode();
+    overlayManager->RemovePixelMap();
+    overlayManager->RemoveEventColumn();
+    overlayManager->RemoveFilter();
 }
 
 void DragEventActuator::SetDragDampStartPointInfo(const Point& point, int32_t pointerId)
