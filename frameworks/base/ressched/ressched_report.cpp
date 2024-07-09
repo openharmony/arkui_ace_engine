@@ -21,7 +21,7 @@
 #define LIKELY(x) __builtin_expect(!!(x), 1)
 
 namespace OHOS::Ace {
-namespace {
+namespace Ressched {
 constexpr uint32_t RES_TYPE_CLICK_RECOGNIZE = 9;
 constexpr uint32_t RES_TYPE_PUSH_PAGE       = 10;
 constexpr uint32_t RES_TYPE_SLIDE           = 11;
@@ -36,8 +36,7 @@ constexpr int32_t CLICK_EVENT               = 2;
 constexpr int32_t TOUCH_UP_EVENT            = 3;
 constexpr int32_t TOUCH_PULL_UP_EVENT = 4;
 constexpr int32_t SLIDE_DETECTING = 2;
-constexpr int32_t SECOND_UNIT = 1000;
-constexpr int32_t DISTANCE_UNIT = 1000 * 1000;
+constexpr int32_t MILL_SECOND_UNIT = 1000 * 1000;
 constexpr int32_t AUTO_PLAY_ON_EVENT = 5;
 constexpr int32_t AUTO_PLAY_OFF_EVENT = 6;
 constexpr int32_t PUSH_PAGE_START_EVENT = 0;
@@ -76,6 +75,8 @@ void LoadAceApplicationContext(std::unordered_map<std::string, std::string>& pay
 }
 }
 
+using namespace Ressched;
+
 ResSchedReport& ResSchedReport::GetInstance()
 {
     static ResSchedReport instance;
@@ -85,7 +86,7 @@ ResSchedReport& ResSchedReport::GetInstance()
 void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_map<std::string, std::string>& param)
 {
     std::unordered_map<std::string, std::string> payload = param;
-    payload[NAME] = name;
+    payload[Ressched::NAME] = name;
     if (!reportDataFunc_) {
         reportDataFunc_ = LoadReportDataFunc();
     }
@@ -196,7 +197,7 @@ void ResSchedReport::RecordTouchEvent(const TouchEvent& touchEvent, bool enforce
 void ResSchedReport::HandleTouchDown(const TouchEvent& touchEvent)
 {
     std::unordered_map<std::string, std::string> payload;
-    payload[NAME] = TOUCH;
+    payload[Ressched::NAME] = TOUCH;
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_DOWN_EVENT, payload);
     RecordTouchEvent(touchEvent, true);
 }
@@ -205,7 +206,7 @@ void ResSchedReport::HandleTouchUp(const TouchEvent& touchEvent)
 {
     std::unordered_map<std::string, std::string> payload;
     RecordTouchEvent(touchEvent);
-    payload[NAME] = TOUCH;
+    payload[Ressched::NAME] = TOUCH;
     payload[UP_SPEED_KEY] = std::to_string(GetUpVelocity(lastTouchEvent_, curTouchEvent_));
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_UP_EVENT, payload);
     isInSilde = false;
@@ -238,7 +239,7 @@ void ResSchedReport::HandleTouchPullDown(const TouchEvent& touchEvent)
 void ResSchedReport::HandleTouchPullUp(const TouchEvent& touchEvent)
 {
     std::unordered_map<std::string, std::string> payload;
-    payload[NAME] = TOUCH;
+    payload[Ressched::NAME] = TOUCH;
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_PULL_UP_EVENT, payload);
     averageDistance_.Reset();
 }
@@ -260,10 +261,10 @@ float ResSchedReport::GetUpVelocity(const TouchEvent& lastMoveInfo,
     float distance = sqrt(pow(lastMoveInfo.x - upEventInfo.x, SQUARE) + pow(lastMoveInfo.y - upEventInfo.y, SQUARE));
     int64_t time = std::abs(lastMoveInfo.GetTimeStamp().time_since_epoch().count() -
         upEventInfo.GetTimeStamp().time_since_epoch().count());
-    if (time < SECOND_UNIT) {
+    if (time < MILL_SECOND_UNIT) {
         return 0.0f;
     }
-    return distance * DISTANCE_UNIT / (time / SECOND_UNIT); //unit: pixel/ms
+    return distance * dpi_ / (time / MILL_SECOND_UNIT); //unit: pixel/ms
 }
 
 void ResSchedReport::LoadPageEvent(int32_t value)
@@ -277,7 +278,7 @@ void ResSchedReport::LoadPageEvent(int32_t value)
     }
 
     std::unordered_map<std::string, std::string> payload;
-    payload[NAME] = LOAD_PAGE;
+    payload[Ressched::NAME] = LOAD_PAGE;
     LoadAceApplicationContext(payload);
     ResSchedDataReport(RES_TYPE_LOAD_PAGE, value, payload);
 }
@@ -286,7 +287,7 @@ ResSchedReportScope::ResSchedReportScope(const std::string& name,
     const std::unordered_map<std::string, std::string>& param) : name_(name), payload_(param)
 {
     name_ = name;
-    payload_[NAME] = name;
+    payload_[Ressched::NAME] = name;
     LoadAceApplicationContext(payload_);
     if (name_ == PUSH_PAGE) {
         ResSchedReport::GetInstance().ResSchedDataReport(RES_TYPE_PUSH_PAGE, PUSH_PAGE_START_EVENT, payload_);

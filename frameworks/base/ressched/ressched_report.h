@@ -22,6 +22,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/event/touch_event.h"
+#include "code/pipline_ng/pipline_context.h"
 #include "base/geometry/offset.h"
 
 namespace OHOS::Ace {
@@ -65,6 +66,7 @@ private:
     TouchEvent lastTouchEvent_;
     Offset averageDistance_;
     bool isInSilde = false;
+    double dpi_ = PiplineBase::GetCurrentDensity();
 };
 
 class ACE_EXPORT ResSchedReportScope final {
