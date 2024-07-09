@@ -111,15 +111,15 @@ const NETWORK_NO_ACTIVE_ERROR: Error = new Error(200015, 'The network is not act
 export struct AtomicServiceWeb {
   public src: ResourceStr | undefined = undefined;
   public navPathStack?: NavPathStack;
-  public onMessage?: (event: OnMessageEvent) => void = () => {
+  public onMessage?: Callback<OnMessageEvent> = () => {
   };
-  public onErrorReceive?: (event?: OnErrorReceiveEvent) => void = () => {
+  public onErrorReceive?: Callback<OnErrorReceiveEvent> = () => {
   };
-  public onHttpErrorReceive?: (event?: OnHttpErrorReceiveEvent) => void = () => {
+  public onHttpErrorReceive?: Callback<OnHttpErrorReceiveEvent> = () => {
   };
-  public onPageBegin?: (event?: OnPageBeginEvent) => void = () => {
+  public onPageBegin?: Callback<OnPageBeginEvent> = () => {
   };
-  public onPageEnd?: (event?: OnPageEndEvent) => void = () => {
+  public onPageEnd?: Callback<OnPageEndEvent> = () => {
   };
   private context: common.UIAbilityContext = getContext(this) as common.UIAbilityContext;
   private controller: web_webview.WebviewController = new web_webview.WebviewController();
