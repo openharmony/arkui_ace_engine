@@ -5421,6 +5421,8 @@ void WebDelegate::OnPageVisible(const std::string& url)
 {
     if (onPageVisibleV2_) {
         onPageVisibleV2_(std::make_shared<PageVisibleEvent>(url));
+    } else {
+        TAG_LOGI(AceLogTag::ACE_WEB, "The developer has not registered this OnPageVisible event");
     }
 }
 

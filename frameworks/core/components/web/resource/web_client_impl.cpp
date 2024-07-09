@@ -813,6 +813,7 @@ void WebClientImpl::OnWindowExitByJS()
 
 void WebClientImpl::OnPageVisible(const std::string& url)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebClientImpl::OnPageVisible override enter");
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());
