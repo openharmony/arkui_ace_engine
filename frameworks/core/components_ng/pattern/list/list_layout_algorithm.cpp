@@ -996,7 +996,6 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
             // adjust offset. If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
             if (!canOverScroll_ || jumpIndex_.has_value()) {
                 currentOffset_ = currentEndPos + contentEndOffset_ - contentMainSize_;
-                adjustOffset_ = currentOffset_;
             }
         }
     }
@@ -1062,7 +1061,6 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
         }
         if (!canOverScroll_ || jumpIndex_.has_value()) {
             currentOffset_ = currentStartPos - contentStartOffset_;
-            adjustOffset_ = currentOffset_;
         }
         endMainPos_ = currentStartPos - contentStartOffset_ + contentMainSize_;
         startMainPos_ = currentStartPos - contentStartOffset_;
@@ -2104,6 +2102,7 @@ std::pair<int32_t, float> ListLayoutAlgorithm::GetSnapStartIndexAndPos()
                 NearEqual(GetEndPosition(), prevContentMainSize_ - prevContentEndOffset_) && !canOverScroll_) {
                 startIndex = pos.first;
                 startPos = contentStartOffset_;
+                adjustOffset_ = pos.second.startPos - prevContentStartOffset_;
             }
             break;
         }
@@ -2124,6 +2123,7 @@ std::pair<int32_t, float> ListLayoutAlgorithm::GetSnapEndIndexAndPos()
             if ((GetStartIndex() == 0) && NearEqual(GetStartPosition(), prevContentStartOffset_) && !canOverScroll_) {
                 endIndex = pos->first;
                 endPos = prevContentMainSize_ - contentEndOffset_;
+                adjustOffset_ = pos->second.endPos + prevContentEndOffset_ - prevContentMainSize_;
             }
             break;
         }
