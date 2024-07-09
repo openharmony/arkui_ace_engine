@@ -39,6 +39,8 @@ public:
     virtual bool GetImeShow() const { return false; } // exclude uiExtension
     virtual void SetUIExtensionImeShow(bool imeShow) {}
     virtual bool HasKeyboard() const { return false; } // include uiExtension
+    virtual bool GetNeedToRequestKeyboard() {return true;}
+    virtual void SetNeedToRequestKeyboard(bool val) {}
 };
 
 } // namespace OHOS::Ace
