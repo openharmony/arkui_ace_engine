@@ -84,7 +84,7 @@ void SheetCoverageTestNg::SetSheetType(RefPtr<SheetPresentationPattern> sheetPat
     auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     SheetStyle sheetStyle;
-    sheetStyle.sheetType = sheetType;    // 设置想要的类型
+    sheetStyle.sheetType = sheetType;
     layoutProperty->propSheetStyle_ = sheetStyle;
     sheetPattern->sheetThemeType_ = "popup";
     Rect windowRect = { 0.0f, 0.0f, SHEET_PC_DEVICE_WIDTH_BREAKPOINT.ConvertToPx(), 0.0f };
