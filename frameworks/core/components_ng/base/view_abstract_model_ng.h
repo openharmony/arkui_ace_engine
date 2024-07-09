@@ -433,19 +433,19 @@ public:
     void SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset) override
     {
         CHECK_NULL_VOID(borderImage);
-        if (bitset | BorderImage::SOURCE_BIT) {
+        if (bitset & BorderImage::SOURCE_BIT) {
             ViewAbstract::SetBorderImageSource(borderImage->GetSrc());
         }
-        if (bitset | BorderImage::OUTSET_BIT) {
+        if (bitset & BorderImage::OUTSET_BIT) {
             ViewAbstract::SetHasBorderImageOutset(true);
         }
-        if (bitset | BorderImage::SLICE_BIT) {
+        if (bitset & BorderImage::SLICE_BIT) {
             ViewAbstract::SetHasBorderImageSlice(true);
         }
-        if (bitset | BorderImage::REPEAT_BIT) {
+        if (bitset & BorderImage::REPEAT_BIT) {
             ViewAbstract::SetHasBorderImageRepeat(true);
         }
-        if (bitset | BorderImage::WIDTH_BIT) {
+        if (bitset & BorderImage::WIDTH_BIT) {
             ViewAbstract::SetHasBorderImageWidth(true);
         }
         ViewAbstract::SetBorderImage(borderImage);
