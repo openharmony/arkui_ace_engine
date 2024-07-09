@@ -177,7 +177,7 @@ void JSImage::SetObjectFit(const JSCallbackInfo& args)
     }
     int32_t parseRes = 2;
     ParseJsInteger(args[0], parseRes);
-    if (parseRes < static_cast<int32_t>(ImageFit::FILL) || parseRes > static_cast<int32_t>(ImageFit::SCALE_DOWN)) {
+    if (parseRes < static_cast<int32_t>(ImageFit::FILL) || parseRes > static_cast<int32_t>(ImageFit::BOTTOM_END)) {
         parseRes = 2;
     }
     auto fit = static_cast<ImageFit>(parseRes);
