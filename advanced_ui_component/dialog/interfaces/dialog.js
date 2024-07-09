@@ -347,7 +347,11 @@ export class TipsDialog extends ViewPU {
                                             });
                                         } else {
                                             this.ifElseBranchUpdateFunction(2, () => {
+                                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                    WithTheme.create({ theme: this.theme, colorMode: this.themeColorMode });
+                                                }, WithTheme);
                                                 this.checkBoxPart.bind(this)(parent ? parent : this);
+                                                WithTheme.pop();
                                             });
                                         }
                                     }, If);
