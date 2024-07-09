@@ -85,6 +85,8 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
         auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
         tabBarPattern->SetMaskAnimationByCreate(true);
         tabBarPattern->UpdateImageColor(index);
+        tabBarPattern->UpdateSymbolStats(index, -1);
+        tabBarPattern->UpdateSymbolStats(-1, preIndex);
     }
 }
 
