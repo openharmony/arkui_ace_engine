@@ -179,8 +179,7 @@ void SearchPattern::SetAccessibilityClearAction()
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
-
-    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto layoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto cleanNodeStyle = layoutProperty->GetCleanNodeStyleValue(CleanNodeStyle::INPUT);
     auto hasContent = cleanNodeStyle == CleanNodeStyle::CONSTANT ||
