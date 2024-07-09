@@ -141,6 +141,7 @@ interface __RepeatConfig<T> {
     itemGenFuncs?: { [type: string]: RepeatItemGenFunc<T> };
     keyGenFunc?: RepeatKeyGenFunc<T>;
     typeGenFunc?: RepeatTypeGenFunc<T>;
+    totalCountSpecified?: boolean;
     totalCount?: number;
     templateOptions?: { [type: string]: RepeatTemplateOptions };
     mkRepeatItem?: (item: T, index?: number) => __RepeatItemFactoryReturn<T>;
@@ -160,6 +161,7 @@ class __Repeat<T> implements RepeatAPI<T> {
         this.config.itemGenFuncs = {};
         this.config.keyGenFunc = __RepeatDefaultKeyGen.funcWithIndex;
         this.config.typeGenFunc= (() => '');
+        this.config.totalCountSpecified= false;
         this.config.totalCount = this.config.arr.length;
         this.config.templateOptions = {};
 
@@ -187,7 +189,12 @@ class __Repeat<T> implements RepeatAPI<T> {
     }
 
     public virtualScroll(options? : { totalCount?: number }): RepeatAPI<T> {
-        this.config.totalCount = this.normTotalCount(options?.totalCount);
+        if (options && options.totalCount && Number.isInteger(options.totalCount)) {
+            this.config.totalCount = options.totalCount;
+            this.config.totalCountSpecified= true;
+        } else {
+            this.config.totalCountSpecified= false;
+        }
         this.isVirtualScroll = true;
         return this;
     }
@@ -231,17 +238,6 @@ class __Repeat<T> implements RepeatAPI<T> {
     public onMove(handler: OnMoveHandler): RepeatAPI<T> {
         this.config.onMoveHandler = handler;
         return this;
-    }
-
-    // normalize totalCount
-    private normTotalCount(totalCount: number): number {
-        const arrLen: number = this.config.arr.length;
-        if (Number.isInteger(totalCount) && totalCount >= 0) {
-            // 0 <= totalCount
-            // totalCount is allowed smaller than data array length
-            return totalCount;
-        }
-        return arrLen;
     }
 
     // normalize template options

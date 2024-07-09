@@ -9734,6 +9734,7 @@ class __Repeat {
         this.config.itemGenFuncs = {};
         this.config.keyGenFunc = __RepeatDefaultKeyGen.funcWithIndex;
         this.config.typeGenFunc = (() => '');
+        this.config.totalCountSpecified = false;
         this.config.totalCount = this.config.arr.length;
         this.config.templateOptions = {};
         // to be used with ViewV2
@@ -9753,7 +9754,13 @@ class __Repeat {
         return this;
     }
     virtualScroll(options) {
-        this.config.totalCount = this.normTotalCount(options === null || options === void 0 ? void 0 : options.totalCount);
+        if (options && options.totalCount && Number.isInteger(options.totalCount)) {
+            this.config.totalCount = options.totalCount;
+            this.config.totalCountSpecified = true;
+        }
+        else {
+            this.config.totalCountSpecified = false;
+        }
         this.isVirtualScroll = true;
         return this;
     }
@@ -9792,16 +9799,6 @@ class __Repeat {
     onMove(handler) {
         this.config.onMoveHandler = handler;
         return this;
-    }
-    // normalize totalCount
-    normTotalCount(totalCount) {
-        const arrLen = this.config.arr.length;
-        if (Number.isInteger(totalCount) && totalCount >= 0) {
-            // 0 <= totalCount
-            // totalCount is allowed smaller than data array length
-            return totalCount;
-        }
-        return arrLen;
     }
     // normalize template options
     normTemplateOptions(options) {
@@ -9989,6 +9986,7 @@ class __RepeatImpl {
 // deep observation. For virtual-scroll code paths
 class __RepeatVirtualScrollImpl {
     constructor() {
+        this.totalCountSpecified = false;
         // index <-> key maps
         this.key4Index_ = new Map();
         this.index4Key_ = new Map();
@@ -9998,7 +9996,12 @@ class __RepeatVirtualScrollImpl {
         this.itemGenFuncs_ = config.itemGenFuncs;
         this.keyGenFunc_ = config.keyGenFunc;
         this.typeGenFunc_ = config.typeGenFunc;
-        this.totalCount_ = config.totalCount;
+        // if totalCountSpecified==false, then need to create dependency on array length 
+        // so when array length changes, will update totalCount
+        this.totalCountSpecified = config.totalCountSpecified;
+        this.totalCount_ = (!this.totalCountSpecified || config.totalCount < 0)
+            ? this.arr_.length
+            : config.totalCount;
         this.templateOptions_ = config.templateOptions;
         this.mkRepeatItem_ = config.mkRepeatItem;
         this.onMoveHandler_ = config.onMoveHandler;
@@ -10017,9 +10020,10 @@ class __RepeatVirtualScrollImpl {
         const repeatElmtId1 = repeatElmtId;
         const onCreateNode = (forIndex) => {
             
-            if (forIndex < 0) {
+            if (forIndex < 0 || forIndex >= this.totalCount_ || forIndex >= this.arr_.length) {
                 // STATE_MGMT_NOTE check also index < totalCount
-                throw new Error(`__RepeatVirtualScrollImpl onCreateNode: for index=${forIndex} out of range error.`);
+                throw new Error(`__RepeatVirtualScrollImpl (${repeatElmtId1}) onCreateNode: for index=${forIndex}  \
+                    with data array length ${this.arr_.length}, totalCount=${this.totalCount_}  out of range error.`);
             }
             // create dependency array item [forIndex] -> Repeat
             // so Repeat updates when the array item changes
@@ -10033,9 +10037,9 @@ class __RepeatVirtualScrollImpl {
             
         }; // onCreateNode
         const onUpdateNode = (fromKey, forIndex) => {
-            if (!fromKey || fromKey == "" || forIndex < 0) {
-                // STATE_MGMT_NOTE check also index < totalCount
-                throw new Error(`__RepeatVirtualScrollImpl onUpdateNode: fromKey "${fromKey}", forIndex=${forIndex} invalid function input error.`);
+            if (!fromKey || fromKey === '' || forIndex < 0 || forIndex >= this.totalCount_ || forIndex >= this.arr_.length) {
+                throw new Error(`__RepeatVirtualScrollImpl (${repeatElmtId1}) onUpdateNode: fromKey "${fromKey}", \
+                    forIndex=${forIndex}, with data array length ${this.arr_.length}, totalCount=${this.totalCount_}, invalid function input error.`);
             }
             // create dependency array item [forIndex] -> Repeat
             // so Repeat updates when the array item changes
@@ -10058,9 +10062,10 @@ class __RepeatVirtualScrollImpl {
             ObserveV2.getObserve().updateDirty2(true);
         }; // onUpdateNode
         const onGetKeys4Range = (from, to) => {
-            if (to > this.totalCount_) {
-                stateMgmtConsole.applicationError(`Repeat with virtualScroll:  onGetKeys4Range from ${from} to ${to} > totalCount ${this.totalCount_} error! '
-                    Application fails to add more items to source data array. on time. Trying with corrected input parameters ...`);
+            if (to > this.totalCount_ || to > this.arr_.length) {
+                stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId ${repeatElmtId1}:  onGetKeys4Range from ${from} to ${to} \
+                    with data array length ${this.arr_.length}, totalCount=${this.totalCount_} \
+                    Error!. Application fails to add more items to source data array. on time. Trying with corrected input parameters ...`);
                 to = this.totalCount_;
                 from = Math.min(to, from);
             }
@@ -10082,9 +10087,10 @@ class __RepeatVirtualScrollImpl {
         }; // const onGetKeys4Range 
         const onGetTypes4Range = (from, to) => {
             var _a;
-            if (to > this.totalCount_) {
-                stateMgmtConsole.applicationError(`Repeat with virtualScroll:  onGetTypes4Range from ${from} to ${to} > totalCount ${this.totalCount_} error! '
-                    Application fails to add more items to source data array. on time. Trying with corrected input parameters ...`);
+            if (to > this.totalCount_ || to > this.arr_.length) {
+                stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId: ${repeatElmtId1}:  onGetTypes4Range from ${from} to ${to} \
+                  with data array length ${this.arr_.length}, totalCount=${this.totalCount_} \
+                  Error! Application fails to add more items to source data array.on time.Trying with corrected input parameters ...`);
                 to = this.totalCount_;
                 from = Math.min(to, from);
             }
@@ -10130,7 +10136,7 @@ class __RepeatVirtualScrollImpl {
         // execute the itemGen function
         const itemType = (_a = this.typeGenFunc_(repeatItem.item, repeatItem.index)) !== null && _a !== void 0 ? _a : '';
         const itemFunc = (_b = this.itemGenFuncs_[itemType]) !== null && _b !== void 0 ? _b : this.itemGenFuncs_[''];
-        if (typeof itemFunc == "function") {
+        if (typeof itemFunc === "function") {
             itemFunc(repeatItem);
         }
         else {
