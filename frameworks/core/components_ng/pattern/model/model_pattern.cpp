@@ -71,6 +71,9 @@ void ModelPattern::OnModifyDone()
 
 bool ModelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    if (config.skipMeasure && config.skipLayout) {
+        return false;
+    }
     CHECK_NULL_RETURN(modelAdapter_, false);
     auto host = GetHost();
     CHECK_NULL_RETURN(dirty, false);
