@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/overlength_dot_indicator_modifier.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
 #include "base/utils/utils.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -322,13 +323,12 @@ void OverlengthDotIndicatorModifier::UpdateSelectedCenterXOnDrag(const LinearVec
     }
 
     if (touchBottomTypeLoop_ != TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
-        overlongSelectedEndCenterX_.first =
-            overlongSelectedStartCenterX_.first +
-            (overlongSelectedStartCenterX_.second - overlongSelectedStartCenterX_.first) * leftMoveRate;
+        auto dragTargetCenterX = (overlongSelectedEndCenterX_.second + overlongSelectedEndCenterX_.first) * HALF_FLOAT;
+        overlongSelectedEndCenterX_.first = overlongSelectedStartCenterX_.first +
+                                            (dragTargetCenterX - overlongSelectedStartCenterX_.first) * leftMoveRate;
 
-        overlongSelectedEndCenterX_.second =
-            overlongSelectedStartCenterX_.first +
-            (overlongSelectedStartCenterX_.second - overlongSelectedStartCenterX_.first) * (1.0f - rightMoveRate);
+        overlongSelectedEndCenterX_.second = overlongSelectedStartCenterX_.second +
+                                             (dragTargetCenterX - overlongSelectedStartCenterX_.second) * rightMoveRate;
     } else {
         auto leftDistance = overlongSelectedEndCenterX_.first - overlongSelectedStartCenterX_.first;
         auto rightDistance = overlongSelectedEndCenterX_.second - overlongSelectedStartCenterX_.second;
@@ -628,6 +628,34 @@ void OverlengthDotIndicatorModifier::StopAnimation(bool ifImmediately)
     ifNeedFinishCallback_ = false;
 }
 
+void OverlengthDotIndicatorModifier::InitOverlongSelectedIndex(int32_t pageIndex)
+{
+    if (pageIndex < maxDisplayCount_ - 1 - THIRD_POINT_INDEX) {
+        targetSelectedIndex_ = pageIndex;
+        return;
+    }
+
+    if (pageIndex >= maxDisplayCount_ - 1 - THIRD_POINT_INDEX && pageIndex < realItemCount_ - 1 - THIRD_POINT_INDEX) {
+        targetSelectedIndex_ = maxDisplayCount_ - 1 - THIRD_POINT_INDEX;
+        return;
+    }
+
+    if (pageIndex >= maxDisplayCount_ - 1 - THIRD_POINT_INDEX && pageIndex == realItemCount_ - 1 - THIRD_POINT_INDEX) {
+        targetSelectedIndex_ = maxDisplayCount_ - 1 - THIRD_POINT_INDEX;
+        return;
+    }
+
+    if (pageIndex >= maxDisplayCount_ - 1 - THIRD_POINT_INDEX && pageIndex == realItemCount_ - 1 - SECOND_POINT_INDEX) {
+        targetSelectedIndex_ = maxDisplayCount_ - 1 - SECOND_POINT_INDEX;
+        return;
+    }
+
+    if (pageIndex >= maxDisplayCount_ - 1 - THIRD_POINT_INDEX && pageIndex == realItemCount_ - 1) {
+        targetSelectedIndex_ = maxDisplayCount_ - 1;
+        return;
+    }
+}
+
 void OverlengthDotIndicatorModifier::InitOverlongStatus(int32_t pageIndex)
 {
     if (pageIndex < maxDisplayCount_ - 1 - THIRD_POINT_INDEX) {
@@ -692,7 +720,8 @@ void OverlengthDotIndicatorModifier::CalcTargetSelectedIndex(int32_t currentPage
 
 void OverlengthDotIndicatorModifier::CalcTargetOverlongStatus(int32_t currentPageIndex, int32_t targetPageIndex)
 {
-    if (currentPageIndex == targetPageIndex || currentOverlongType_ == OverlongType::NONE) {
+    if (currentPageIndex == targetPageIndex || currentOverlongType_ == OverlongType::NONE || keepStatus_) {
+        AdjustTargetStatus(targetPageIndex);
         return;
     }
 
@@ -894,6 +923,45 @@ std::pair<LinearVector<float>, std::pair<float, float>> OverlengthDotIndicatorMo
     return std::make_pair(indicatorCenterX, longPointCenterX);
 }
 
+void OverlengthDotIndicatorModifier::AdjustTargetStatus(int32_t targetPageIndex)
+{
+    targetSelectedIndex_ = SwiperIndicatorUtils::GetLoopIndex(targetSelectedIndex_, maxDisplayCount_);
+    if (targetPageIndex == 0 || targetPageIndex == SECOND_POINT_INDEX || targetPageIndex == THIRD_POINT_INDEX) {
+        targetSelectedIndex_ = targetPageIndex;
+        targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+        return;
+    }
+
+    if (targetPageIndex == realItemCount_ - 1) {
+        targetSelectedIndex_ = maxDisplayCount_ - 1;
+        targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+        return;
+    }
+
+    if (targetPageIndex == realItemCount_ - 1 - SECOND_POINT_INDEX) {
+        targetSelectedIndex_ = maxDisplayCount_ - 1 - SECOND_POINT_INDEX;
+        targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+        return;
+    }
+
+    if (targetPageIndex == realItemCount_ - 1 - THIRD_POINT_INDEX) {
+        targetSelectedIndex_ = maxDisplayCount_ - 1 - THIRD_POINT_INDEX;
+        targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+        return;
+    }
+
+    if (targetPageIndex > THIRD_POINT_INDEX && targetSelectedIndex_ < THIRD_POINT_INDEX) {
+        InitOverlongSelectedIndex(targetPageIndex);
+        return;
+    }
+
+    if (targetPageIndex < realItemCount_ - 1 - THIRD_POINT_INDEX &&
+        targetSelectedIndex_ > maxDisplayCount_ - 1 - THIRD_POINT_INDEX) {
+        InitOverlongSelectedIndex(targetPageIndex);
+        return;
+    }
+}
+
 void OverlengthDotIndicatorModifier::CalcTargetSelectedIndexOnForward(int32_t currentPageIndex, int32_t targetPageIndex)
 {
     auto step = std::abs(targetPageIndex - currentPageIndex);
@@ -918,6 +986,7 @@ void OverlengthDotIndicatorModifier::CalcTargetSelectedIndexOnForward(int32_t cu
     }
 
     targetSelectedIndex_ = currentSelectedIndex_ + step;
+    AdjustTargetStatus(targetPageIndex);
 }
 
 void OverlengthDotIndicatorModifier::CalcTargetSelectedIndexOnBackward(
@@ -945,6 +1014,7 @@ void OverlengthDotIndicatorModifier::CalcTargetSelectedIndexOnBackward(
     }
 
     targetSelectedIndex_ = currentSelectedIndex_ - step;
+    AdjustTargetStatus(targetPageIndex);
 }
 
 } // namespace OHOS::Ace::NG
