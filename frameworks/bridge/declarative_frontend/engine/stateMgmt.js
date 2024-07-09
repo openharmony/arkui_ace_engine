@@ -4735,13 +4735,11 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
             }
         }
         this.subscriberRefs_.forEach((subscriber) => {
-            if (subscriber) {
-                if ('syncPeerHasChanged' in subscriber) {
-                    subscriber.syncPeerHasChanged(this);
-                }
-                else {
-                    stateMgmtConsole.warn(`${this.debugInfo()}: notifyPropertyHasChangedPU: unknown subscriber ID 'subscribedId' error!`);
-                }
+            if (subscriber && typeof subscriber === 'object' && 'syncPeerHasChanged' in subscriber) {
+                subscriber.syncPeerHasChanged(this);
+            }
+            else {
+                stateMgmtConsole.warn(`${this.debugInfo()}: notifyPropertyHasChangedPU: unknown subscriber ID 'subscribedId' error!`);
             }
         });
         
