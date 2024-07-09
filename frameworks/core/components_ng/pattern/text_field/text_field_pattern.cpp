@@ -1714,7 +1714,7 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
     if (enableTouchAndHoverEffect_ && !isMousePressed_) {
         auto lastCaretIndex = selectController_->GetCaretIndex();
         auto lastCaretRect = selectController_->GetCaretRect();
-        isTouchCaret_ = RepeatClickCaret(offset, lastCaretIndex, lastCaretRect);
+        isTouchCaret_ = !IsSelected() && RepeatClickCaret(offset, lastCaretIndex, lastCaretRect);
         isTouchPreviewText_ = GetTouchInnerPreviewText(offset);
         if (isTouchCaret_) {
             CloseSelectOverlay(true);
