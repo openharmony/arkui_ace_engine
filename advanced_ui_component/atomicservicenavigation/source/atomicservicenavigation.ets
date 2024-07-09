@@ -24,7 +24,7 @@ export struct AtomicServiceNavigation {
   @Prop hideTitleBar?: boolean;
   @Prop navBarWidth?: Length;
   @Prop mode?: NavigationMode;
-  @BuilderParam navDestinationBuilder?: navDestinationBuilder = this.defaultNavDestinationBuilder;
+  @BuilderParam navDestinationBuilder?: NavDestinationBuilder = this.defaultNavDestinationBuilder;
   @Prop navBarWidthRange?: [Dimension, Dimension];
   @Prop minContentWidth?: Dimension;
   stateChangeCallback?: Callback<boolean>;
@@ -65,4 +65,4 @@ export interface TitleOptions {
   barStyle?: BarStyle
 }
 
-export type navDestinationBuilder = (name: string, param?: Object) => void;
+export type NavDestinationBuilder = (name: string, param?: Object) => void;
