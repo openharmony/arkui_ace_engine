@@ -20,7 +20,7 @@ export struct AtomicServiceNavigation {
   @State navPathStack?: NavPathStack = new NavPathStack();
   @BuilderParam navigationContent?: Callback<void>;
   @Prop title?: ResourceStr;
-  @Prop titleOptions?: TitleOptions = { isBlurEnable: true };
+  @Prop titleOptions?: TitleOptions = { isBlurEnabled: true };
   @Prop hideTitleBar?: boolean;
   @Prop navBarWidth?: Length;
   @Prop mode?: NavigationMode;
@@ -42,7 +42,7 @@ export struct AtomicServiceNavigation {
     }
     .title(this.title, {
       backgroundColor: this.titleOptions?.backgroundColor,
-      backgroundBlurStyle: this.titleOptions?.isBlurEnable ? BlurStyle.COMPONENT_THICK : BlurStyle.NONE,
+      backgroundBlurStyle: this.titleOptions?.isBlurEnabled ? BlurStyle.COMPONENT_THICK : BlurStyle.NONE,
       barStyle: this.titleOptions?.barStyle
     })
     .titleMode(NavigationTitleMode.Mini)
@@ -61,7 +61,7 @@ export struct AtomicServiceNavigation {
 
 export interface TitleOptions {
   backgroundColor?: ResourceColor,
-  isBlurEnable?: boolean,
+  isBlurEnabled?: boolean,
   barStyle?: BarStyle
 }
 
