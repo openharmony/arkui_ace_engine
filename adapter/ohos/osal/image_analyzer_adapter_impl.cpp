@@ -80,7 +80,7 @@ void* ImageAnalyzerAdapterImpl::ConvertPixmapNapi(const RefPtr<PixelMap>& pixelM
     napi_ref napiValueRef = nullptr;
     napi_create_reference(env_, napiValue, 1, &napiValueRef);
     napi_close_handle_scope(env_, scope);
-    return napiValue;
+    return napiValueRef;
 #else
     return nullptr;
 #endif
