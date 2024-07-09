@@ -544,8 +544,6 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
     float positionX = (selectArea.Left() + selectArea.Right() - menuWidth) / 2.0f;
     auto hasKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f);
-    auto bottomLimitOffsetY = hasKeyboard ? std::max(keyboardInsert.start - safeSpacing - menuHeight, (double)topArea)
-                                          : safeAreaManager->GetSafeArea().bottom_.start - menuHeight;
     auto downHandle = info_->handleReverse ? info_->firstHandle : info_->secondHandle;
     auto downHandleIsReallyShow = hasKeyboard ? ((LessOrEqual((double)downHandle.paintRect.Bottom(),
         (double)keyboardInsert.start)) ? true : false) : downHandle.isShow;
@@ -556,6 +554,11 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(
     auto selectAreaTop = upHandle.isShow ? upPaint.Top() : selectArea.Top();
     auto viewPort = pipeline->GetRootRect();
     auto selectAndRootRectArea = selectArea.IntersectRectT(viewPort);
+    auto safeAreaBottom = safeAreaManager->GetSafeArea().bottom_.start;
+    auto menuAvoidBottomY = GreatNotEqual(safeAreaBottom, 0.0f) ? (safeAreaBottom - menuHeight)
+        : (viewPort.Bottom() - menuHeight);
+    auto bottomLimitOffsetY = hasKeyboard ? std::max(keyboardInsert.start - safeSpacing - menuHeight, (double)topArea)
+        : menuAvoidBottomY;
 
     AvoidStrategyMember avoidStrategyMember;
     avoidStrategyMember.menuHeight = menuHeight;
