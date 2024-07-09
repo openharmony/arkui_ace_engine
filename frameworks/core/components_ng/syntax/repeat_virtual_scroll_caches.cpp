@@ -641,7 +641,7 @@ int32_t RepeatVirtualScrollCaches::GetDistanceFromRange(uint32_t index) const
 {
     // index too big to cast into int32_t
     if (index > static_cast<uint32_t>(INT32_MAX)) {
-        TAG_LOGE(AceLogTag::ACE_REPEAT, "index with value:%{public}d is too big to cast into int32_t", index);
+        TAG_LOGW(AceLogTag::ACE_REPEAT, "index with value:%{public}d is too big to cast into int32_t", index);
         return 0;
     }
     int32_t castedIndex = static_cast<int32_t>(index);
