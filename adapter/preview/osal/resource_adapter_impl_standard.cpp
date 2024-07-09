@@ -532,4 +532,12 @@ uint32_t ResourceAdapterImpl::GetSymbolByName(const char* resName) const
     }
     return result;
 }
+
+ColorMode ResourceAdapterImpl::GetResourceColorMode() const
+{
+    CHECK_NULL_RETURN(resourceManager_, ColorMode::LIGHT);
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    resourceManager_->GetResConfig(*resConfig);
+    return resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK ? ColorMode::DARK : ColorMode::LIGHT;
+}
 } // namespace OHOS::Ace

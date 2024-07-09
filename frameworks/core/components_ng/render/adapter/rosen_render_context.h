@@ -54,6 +54,7 @@ class FocusStateModifier;
 class PageTransitionEffect;
 class OverlayTextModifier;
 class GradientStyleModifier;
+class PipelineContext;
 class RosenRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext)
 public:
@@ -264,6 +265,7 @@ public:
     bool DoTextureExport(uint64_t surfaceId) override;
     bool StopTextureExport() override;
     void SetSurfaceRotation(bool isLock) override;
+    PipelineContext* GetPipelineContext() const;
 
     RectF GetPaintRectWithTransform() override;
 

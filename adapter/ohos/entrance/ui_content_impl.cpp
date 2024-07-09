@@ -131,7 +131,7 @@ bool IsNeedAvoidWindowMode(OHOS::Rosen::Window* rsWindow)
             mode == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
 }
 
-void AddMccAndMncToResConfig(
+void AddResConfigInfo(
     const std::shared_ptr<OHOS::AbilityRuntime::Context>& context, ResourceConfiguration& aceResCfg)
 {
     if (!context || !context->GetResourceManager()) {
@@ -142,6 +142,7 @@ void AddMccAndMncToResConfig(
     resourceManager->GetResConfig(*resConfig);
     aceResCfg.SetMcc(resConfig->GetMcc());
     aceResCfg.SetMnc(resConfig->GetMnc());
+    aceResCfg.SetAppHasDarkRes(resConfig->GetAppDarkRes());
 }
 
 void AddSetAppColorModeToResConfig(
@@ -1082,7 +1083,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
     aceResCfg.SetColorMode(SystemProperties::GetColorMode());
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
-    AddMccAndMncToResConfig(context, aceResCfg);
+    AddResConfigInfo(context, aceResCfg);
     AddSetAppColorModeToResConfig(context, aceResCfg);
     if (isDynamicRender_) {
         if (std::regex_match(hapPath_, std::regex(".*\\.hap"))) {
@@ -1571,7 +1572,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
     aceResCfg.SetColorMode(SystemProperties::GetColorMode());
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
-    AddMccAndMncToResConfig(context, aceResCfg);
+    AddResConfigInfo(context, aceResCfg);
     AddSetAppColorModeToResConfig(context, aceResCfg);
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);

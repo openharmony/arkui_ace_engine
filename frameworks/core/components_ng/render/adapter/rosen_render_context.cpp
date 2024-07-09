@@ -175,8 +175,19 @@ Rosen::Gravity GetRosenGravity(RenderFit renderFit)
     return idx != -1 ? gravityMap[idx].value : Rosen::Gravity::DEFAULT;
 }
 
+ColorMode GetResourceColorMode(PipelineContext* pipeline)
+{
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, ColorMode::LIGHT);
+    auto themeConstants = themeManager->GetThemeConstants();
+    CHECK_NULL_RETURN(themeConstants, ColorMode::LIGHT);
+    auto resourceAdapter = themeConstants->GetResourceAdapter();
+    CHECK_NULL_RETURN(resourceAdapter, ColorMode::LIGHT);
+    return resourceAdapter->GetResourceColorMode();
+}
+
 std::shared_ptr<Rosen::RSFilter> CreateRSMaterialFilter(
-    const BlurStyleOption& blurStyleOption, const RefPtr<PipelineBase>& pipeline)
+    const BlurStyleOption& blurStyleOption, PipelineContext* pipeline)
 {
     auto blurStyleTheme = pipeline->GetTheme<BlurStyleTheme>();
     if (!blurStyleTheme) {
@@ -185,7 +196,7 @@ std::shared_ptr<Rosen::RSFilter> CreateRSMaterialFilter(
     }
     ThemeColorMode colorMode = blurStyleOption.colorMode;
     if (blurStyleOption.colorMode == ThemeColorMode::SYSTEM) {
-        colorMode = SystemProperties::GetColorMode() == ColorMode::DARK ? ThemeColorMode::DARK : ThemeColorMode::LIGHT;
+        colorMode = GetResourceColorMode(pipeline) == ColorMode::DARK ? ThemeColorMode::DARK : ThemeColorMode::LIGHT;
     }
     auto blurParam = blurStyleTheme->GetBlurParameter(blurStyleOption.blurStyle, colorMode);
     CHECK_NULL_RETURN(blurParam, nullptr);
@@ -895,7 +906,7 @@ bool RosenRenderContext::HasValidBgImageResizable()
 void RosenRenderContext::SetBackBlurFilter()
 {
     CHECK_NULL_VOID(rsNode_);
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = GetPipelineContext();
     CHECK_NULL_VOID(context);
     const auto& background = GetBackground();
     CHECK_NULL_VOID(background);
@@ -921,7 +932,7 @@ void RosenRenderContext::SetBackBlurFilter()
 void RosenRenderContext::SetFrontBlurFilter()
 {
     CHECK_NULL_VOID(rsNode_);
-    auto context = PipelineBase::GetCurrentContextSafely();
+    auto context = GetPipelineContext();
     CHECK_NULL_VOID(context);
     const auto& foreground = GetForeground();
     CHECK_NULL_VOID(foreground);
@@ -6286,5 +6297,14 @@ void RosenRenderContext::OnAttractionEffectUpdate(const AttractionEffect& effect
     Rosen::Vector2f destinationPoint(effect.destinationX.ConvertToPx(), effect.destinationY.ConvertToPx());
     rsNode_->SetAttractionEffect(effect.fraction, destinationPoint);
     RequestNextFrame();
+}
+
+PipelineContext* RosenRenderContext::GetPipelineContext() const
+{
+    auto host = GetHost();
+    if (host) {
+        return host->GetContextWithCheck();
+    }
+    return PipelineContext::GetCurrentContextPtrSafelyWithCheck();
 }
 } // namespace OHOS::Ace::NG
