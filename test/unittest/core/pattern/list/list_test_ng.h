@@ -113,13 +113,10 @@ public:
     void CreateSwipeItems(std::function<void()> startAction, std::function<void()> endAction,
         V2::SwipeEdgeEffect effect, int32_t itemNumber = TOTAL_ITEM_NUMBER);
     void CreateRepeatVirtualScrollNode(int32_t itemNumber, const std::function<void(uint32_t)>& createFunc);
-    std::function<void()> GetRowOrColBuilder(float width, float height);
+    std::function<void()> GetRowOrColBuilder(float crossSize, float mainSize);
     std::function<void()> GetRowOrColBuilder(Dimension crossSize, Dimension mainSize);
 
     void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
-    float GetInterval();
-    void ScrollUp(float itemNumber = 1);
-    void ScrollDown(float itemNumber = 1);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
     void ScrollToIndex(int32_t index, bool smooth, ScrollAlign align);
     void ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align);
@@ -131,13 +128,6 @@ public:
     void ScrollSnapForEqualHeightItem(float offset, float velocity);
     void FlushIdleTask(const RefPtr<ListPattern>& listPattern);
 
-    AssertionResult VerifyPosition(
-        const RefPtr<FrameNode>& frameNode, int32_t viewItemNumber, int32_t lanes, float space, float startOffset);
-    AssertionResult VerifyItemPosition(
-        const RefPtr<FrameNode>& frameNode, int32_t viewItemNumber, int32_t lanes, float space, int32_t initialIndex);
-    AssertionResult VerifyGroupItemPosition(
-        const RefPtr<FrameNode>& frameNode, int32_t viewItemNumber, int32_t lanes, float space, float startOffset);
-    AssertionResult IsEqualTotalOffset(float expectOffset);
     AssertionResult ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, float expectOffset);
     AssertionResult JumpToItemInGroup(
         int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align, float expectOffset);
