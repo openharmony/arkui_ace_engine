@@ -1049,7 +1049,16 @@ void DatePickerDialogView::CreateSingleDateNode(const RefPtr<FrameNode>& dateNod
         blendYearNode->MountToParent(stackYearNode);
         auto layoutProperty = stackYearNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
-        layoutProperty->UpdateVisibility(VisibleType::GONE);
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            auto blendYearNodeLayoutProperty = blendYearNode->GetLayoutProperty<LayoutProperty>();
+            CHECK_NULL_VOID(blendYearNodeLayoutProperty);
+            blendYearNodeLayoutProperty->UpdateVisibility(VisibleType::GONE);
+            auto buttonYearNodeLayoutProperty = buttonYearNode->GetLayoutProperty<LayoutProperty>();
+            CHECK_NULL_VOID(buttonYearNodeLayoutProperty);
+            buttonYearNodeLayoutProperty->UpdateVisibility(VisibleType::GONE);
+        } else {
+            layoutProperty->UpdateVisibility(VisibleType::GONE);
+        }
         stackYearNode->MountToParent(dateNode);
         yearColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
