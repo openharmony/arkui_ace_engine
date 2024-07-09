@@ -3208,13 +3208,17 @@ void TextPattern::UpdateSelectionType(const SelectionInfo& selection)
     auto list = selection.GetSelection().resultObjects;
     bool imageSelected = false;
     bool textSelected = false;
+    bool builderSelected = false;
     for (const auto& obj : list) {
         if (obj.type == SelectSpanType::TYPEIMAGE) {
             imageSelected = true;
         } else if (obj.type == SelectSpanType::TYPESPAN) {
             textSelected = true;
+        } else if (obj.type == SelectSpanType::TYPEBUILDERSPAN) {
+            builderSelected = true;
         }
-        if (imageSelected && textSelected) {
+        if ((imageSelected && textSelected) || (builderSelected && textSelected) ||
+            (imageSelected && builderSelected)) {
             selectedType_ = TextSpanType::MIXED;
             return;
         }
@@ -3223,6 +3227,8 @@ void TextPattern::UpdateSelectionType(const SelectionInfo& selection)
         selectedType_ = TextSpanType::IMAGE;
     } else if (textSelected) {
         selectedType_ = TextSpanType::TEXT;
+    } else if (builderSelected) {
+        selectedType_ = TextSpanType::BUILDER;
     }
 
     TAG_LOGD(AceLogTag::ACE_TEXT, "UpdateSelectionSpanType, selectedType_: %{public}d", selectedType_.value());

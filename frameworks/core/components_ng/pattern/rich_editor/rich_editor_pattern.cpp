@@ -6216,6 +6216,27 @@ void RichEditorPattern::FireOnSelect(int32_t selectStart, int32_t selectEnd)
     UpdateSelectionType(textSelectInfo);
 }
 
+void RichEditorPattern::UpdateSelectionType(const SelectionInfo& textSelectInfo)
+{
+    TextPattern::UpdateSelectionType(GetAdjustedSelectionInfo(textSelectInfo));
+}
+
+SelectionInfo RichEditorPattern::GetAdjustedSelectionInfo(const SelectionInfo& textSelectInfo)
+{
+    auto selection = textSelectInfo.GetSelection();
+    auto resultObjects = selection.resultObjects;
+    std::for_each(resultObjects.begin(), resultObjects.end(), [](ResultObject& object) {
+        if (object.type == SelectSpanType::TYPEIMAGE && object.valueString == " " && object.valuePixelMap == nullptr) {
+            object.type = SelectSpanType::TYPEBUILDERSPAN;
+        }
+    });
+    SelectionInfo adjustedInfo;
+    adjustedInfo.SetSelectionStart(selection.selection[RichEditorSpanRange::RANGESTART]);
+    adjustedInfo.SetSelectionEnd(selection.selection[RichEditorSpanRange::RANGEEND]);
+    adjustedInfo.SetResultObjectList(resultObjects);
+    return adjustedInfo;
+}
+
 void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
 {
     auto tmpHost = GetHost();
