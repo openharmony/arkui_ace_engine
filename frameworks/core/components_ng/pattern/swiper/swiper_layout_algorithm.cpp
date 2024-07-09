@@ -140,6 +140,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto axis = swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     // calculate main size.
     auto contentConstraint = swiperLayoutProperty->GetContentLayoutConstraint().value();
+    swiperLayoutProperty->ResetIgnorePrevMarginAndNextMargin();
     auto isSingleCase = CheckIsSingleCase(swiperLayoutProperty);
     OptionalSizeF contentIdealSize;
     if (isSingleCase) {
