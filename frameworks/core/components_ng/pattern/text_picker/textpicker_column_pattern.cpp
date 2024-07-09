@@ -1326,6 +1326,12 @@ double TextPickerColumnPattern::GetUpCandidateDistance(int32_t index, int32_t ne
 {
     double distance = 0.0;
     double val = 0.0;
+    // the index of last element in optionProperties_. return -1 while the arraySize equals 0.
+    auto maxIndex = static_cast<int32_t>(optionProperties_.size()) - 1;
+    auto minIndex = 0;
+    if (index > maxIndex || index < minIndex || nextIndex > maxIndex || nextIndex < minIndex) {
+        return distance;
+    }
     if (columnkind_ == TEXT) {
         if (dir == ScrollDirection::UP) {
             distance = -optionProperties_[nextIndex].height;
