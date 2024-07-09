@@ -69,7 +69,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
             pipeline->OnIdle(std::min(ts, timeStampNanos) + refreshPeriod);
-            JankFrameReport::GetInstance().JankFrameRecord(std::min(ts, timeStampNanos), window->GetWindowName());
+            JankFrameReport::GetInstance().JankFrameRecord(timeStampNanos, window->GetWindowName());
             if (FrameReport::GetInstance().GetEnable()) {
                 FrameReport::GetInstance().FlushEnd();
             }
