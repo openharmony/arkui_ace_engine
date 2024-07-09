@@ -681,8 +681,6 @@ private:
     void FireModalPageHide();
 
     void SetSheetBackgroundBlurStyle(const RefPtr<FrameNode>& sheetNode, const BlurStyleOption& bgBlurStyle);
-    void SetSheetBorderWidth(const RefPtr<FrameNode>& sheetNode, const RefPtr<SheetTheme>& sheetTheme,
-        const NG::SheetStyle& sheetStyle, bool isPartialUpdate = false);
     void SetSheetBackgroundColor(const RefPtr<FrameNode>& sheetNode, const RefPtr<SheetTheme>& sheetTheme,
         const NG::SheetStyle& sheetStyle, bool isPartialUpdate = false);
 

@@ -303,6 +303,41 @@ void SheetPresentationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipeline->RemoveOnAreaChangeNode(targetNode->GetId());
 }
 
+void SheetPresentationPattern::SetSheetBorderWidth(bool isPartialUpdate)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    auto sheetType = GetSheetType();
+    auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (sheetStyle.borderWidth.has_value()) {
+        auto sheetRadius = sheetTheme->GetSheetRadius();
+        auto borderWidth = sheetStyle.borderWidth.value();
+        BorderRadiusProperty borderRadius;
+        if ((sheetType == SheetType::SHEET_CENTER) || (sheetType == SheetType::SHEET_POPUP)) {
+            borderRadius.SetRadius(sheetRadius);
+        } else {
+            borderRadius = BorderRadiusProperty(sheetRadius, sheetRadius, 0.0_vp, 0.0_vp);
+            borderWidth.bottomDimen = 0.0_vp;
+        }
+        renderContext->UpdateBorderRadius(borderRadius);
+        layoutProperty->UpdateBorderWidth(borderWidth);
+        renderContext->UpdateBorderWidth(borderWidth);
+    } else if (renderContext->GetBorderWidth().has_value() && !isPartialUpdate) {
+        BorderWidthProperty borderWidth;
+        borderWidth.SetBorderWidth(0.0_vp);
+        layoutProperty->UpdateBorderWidth(borderWidth);
+        renderContext->UpdateBorderWidth(borderWidth);
+    }
+}
+
 // initial drag gesture event
 void SheetPresentationPattern::InitPanEvent()
 {
@@ -1531,8 +1566,12 @@ void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
+    if (sheetType_ != sheetType) {
+        sheetType_ = sheetType;
+        SetSheetBorderWidth();
+    }
     auto windowManager = pipelineContext->GetWindowManager();
     if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
         host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
