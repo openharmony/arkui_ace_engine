@@ -54,6 +54,7 @@ constexpr size_t OPTION_ACCEPT_BUTTON_INDEX = 1;
 
 void CalendarDialogPattern::OnFontConfigurationUpdate()
 {
+    CHECK_NULL_VOID(closeDialogEvent_);
     closeDialogEvent_();
 }
 

@@ -183,7 +183,7 @@ void TimePickerColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 bool TimePickerColumnLayoutAlgorithm::NeedAdaptForAging()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, false);
@@ -196,7 +196,7 @@ bool TimePickerColumnLayoutAlgorithm::NeedAdaptForAging()
 
 const Dimension TimePickerColumnLayoutAlgorithm::AdjustFontSizeScale(const Dimension& fontSizeValue, double fontScale)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, fontSizeValue);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, fontSizeValue);
@@ -214,7 +214,7 @@ float TimePickerColumnLayoutAlgorithm::ReCalcItemHeightScale(const Dimension& us
     auto fontScale = 1.0f;
 
     if (NeedAdaptForAging()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, fontScale);
         auto pickerTheme = pipeline->GetTheme<PickerTheme>();
         CHECK_NULL_RETURN(pickerTheme, fontScale);

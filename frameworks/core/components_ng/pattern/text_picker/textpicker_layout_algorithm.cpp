@@ -302,7 +302,7 @@ void TextPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 bool TextPickerLayoutAlgorithm::NeedAdaptForAging()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, false);
@@ -315,7 +315,7 @@ bool TextPickerLayoutAlgorithm::NeedAdaptForAging()
 
 const Dimension TextPickerLayoutAlgorithm::AdjustFontSizeScale(const Dimension& fontSizeValue, double fontScale)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, fontSizeValue);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, fontSizeValue);
@@ -334,7 +334,7 @@ float TextPickerLayoutAlgorithm::ReCalcItemHeightScale(const Dimension& userSetH
     auto fontScale = 1.0f;
 
     if (NeedAdaptForAging()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, fontScale);
         auto pickerTheme = pipeline->GetTheme<PickerTheme>();
         CHECK_NULL_RETURN(pickerTheme, fontScale);

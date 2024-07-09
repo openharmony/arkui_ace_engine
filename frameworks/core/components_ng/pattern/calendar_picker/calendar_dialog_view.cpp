@@ -773,7 +773,7 @@ std::function<void()> CalendarDialogView::CloseDiaglogEvent(const RefPtr<FrameNo
         CHECK_NULL_VOID(pickerPattern);
 
         if (pickerPattern->GetIsShowInDialog()) {
-            auto pipeline = PipelineContext::GetCurrentContext();
+            auto pipeline = dialogNode->GetCurrentContext();
             auto overlayManager = pipeline->GetOverlayManager();
             overlayManager->CloseDialog(dialogNode);
         }

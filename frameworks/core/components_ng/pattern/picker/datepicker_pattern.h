@@ -97,7 +97,9 @@ public:
 
     void OnFontConfigurationUpdate() override
     {
-        closeDialogEvent_();
+        if (closeDialogEvent_) {
+            closeDialogEvent_();
+        }
     }
 
     void OnLanguageConfigurationUpdate() override;

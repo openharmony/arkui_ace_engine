@@ -15,6 +15,7 @@
 
 #include "core/components/picker/picker_theme.h"
 
+//In landscape mode, if the height is below 640, no aging adaptation will be performed
 constexpr double DEFAULT_LIMIT_WIDTH = 640.0;
 
 namespace OHOS::Ace {

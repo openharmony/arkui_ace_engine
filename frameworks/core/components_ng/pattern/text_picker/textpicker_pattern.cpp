@@ -106,6 +106,7 @@ void TextPickerPattern::OnLanguageConfigurationUpdate()
 
 void TextPickerPattern::OnFontConfigurationUpdate()
 {
+    CHECK_NULL_VOID(closeDialogEvent_);
     closeDialogEvent_();
 }
 
