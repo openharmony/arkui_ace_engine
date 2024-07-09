@@ -152,7 +152,7 @@ void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
     auto length = styledString_->GetLength();
     styledString_->ReplaceSpanString(0, length, value);
     SetCaretPosition(styledString_->GetLength());
-    MoveCaretToContentRect(false);
+    MoveCaretToContentRect();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -2554,8 +2554,7 @@ void RichEditorPattern::CalcCaretInfoByClick(const Offset& touchOffset)
     auto [lastClickOffset, caretHeight] = CalcAndRecordLastClickCaretInfo(textOffset);
     CHECK_NULL_VOID(overlayMod_);
     DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(lastClickOffset, caretHeight);
-
-    MoveCaretToContentRect(lastClickOffset, caretHeight);
+    MoveCaretToContentRect();
 }
 
 std::pair<OffsetF, float> RichEditorPattern::CalcAndRecordLastClickCaretInfo(const Offset& textOffset)
@@ -2916,7 +2915,7 @@ void RichEditorPattern::HandleSelect(GestureEvent& info, int32_t selectStart, in
     }
     FireOnSelect(selectStart, selectEnd);
     SetCaretPosition(std::min(selectEnd, GetTextContentLength()));
-    MoveCaretToContentRect(false);
+    MoveCaretToContentRect();
     CalculateHandleOffsetAndShowOverlay();
     if (IsShowSelectMenuUsingMouse()) {
         CloseSelectOverlay();
@@ -7302,10 +7301,9 @@ void RichEditorPattern::MoveSecondHandle(float offset)
     }
 }
 
-void RichEditorPattern::MoveCaretToContentRect(bool downStreamFirst)
+void RichEditorPattern::MoveCaretToContentRect()
 {
-    float caretHeight = 0.0f;
-    auto caretOffset = CalcCursorOffsetByPosition(caretPosition_, caretHeight, downStreamFirst);
+    auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
     MoveCaretToContentRect(caretOffset, caretHeight);
 }
 
