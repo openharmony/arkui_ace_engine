@@ -17,7 +17,7 @@
 #
 
 from src.beans.base_bean import BaseBean
-from src.keywords import hittest_node_keyword
+from src.keywords import hittest_node_keyword, get_sample_key, get_sample_value
 from src.utils.log_wrapper import log_info
 from src.utils.value_parser import get_value_as_int, get_value_as_str
 
@@ -39,22 +39,23 @@ class FrameNode(BaseBean):
     def __init__(self, node_dump_str):
         super().__init__()
         self.original_str = node_dump_str
-        self.nodeId = get_value_as_int(node_dump_str, hittest_node_keyword['nodeId'].key,
-                                       hittest_node_keyword['nodeId'].value_separator_count)
-        self.parentId = get_value_as_int(node_dump_str, hittest_node_keyword['parentId'].key,
-                                         hittest_node_keyword['parentId'].value_separator_count)
-        self.tag = get_value_as_str(node_dump_str, hittest_node_keyword['tag'].key,
-                                    hittest_node_keyword['tag'].value_separator_count)
-        self.com_id = get_value_as_str(node_dump_str, hittest_node_keyword['comId'].key,
-                                       hittest_node_keyword['comId'].value_separator_count)
-        self.monopolizeEvents = get_value_as_int(node_dump_str, hittest_node_keyword['monopolizeEvents'].key,
-                                                 hittest_node_keyword['monopolizeEvents'].value_separator_count)
-        self.isHit = get_value_as_int(node_dump_str, hittest_node_keyword['isHit'].key,
-                                      hittest_node_keyword['isHit'].value_separator_count)
-        self.hitTestMode = get_value_as_int(node_dump_str, hittest_node_keyword['hitTestMode'].key,
-                                            hittest_node_keyword['hitTestMode'].value_separator_count)
-        self.responseRegion = get_value_as_str(node_dump_str, hittest_node_keyword['responseRegion'].key,
-                                               hittest_node_keyword['responseRegion'].value_separator_count, True)
+        self.nodeId = get_value_as_int(node_dump_str, get_sample_key(hittest_node_keyword, 'nodeId'),
+                                       get_sample_value(hittest_node_keyword, 'nodeId'))
+        self.parentId = get_value_as_int(node_dump_str, get_sample_key(hittest_node_keyword, 'parentId'),
+                                         get_sample_value(hittest_node_keyword, 'parentId'))
+        self.tag = get_value_as_str(node_dump_str, get_sample_key(hittest_node_keyword, 'tag'),
+                                    get_sample_value(hittest_node_keyword, 'tag'))
+        self.com_id = get_value_as_str(node_dump_str, get_sample_key(hittest_node_keyword, 'comId'),
+                                       get_sample_value(hittest_node_keyword, 'comId'))
+        self.monopolizeEvents = get_value_as_int(node_dump_str,
+                                                 get_sample_key(hittest_node_keyword, 'monopolizeEvents'),
+                                                 get_sample_value(hittest_node_keyword, 'monopolizeEvents'))
+        self.isHit = get_value_as_int(node_dump_str, get_sample_key(hittest_node_keyword, 'isHit'),
+                                      get_sample_value(hittest_node_keyword, 'isHit'))
+        self.hitTestMode = get_value_as_int(node_dump_str, get_sample_key(hittest_node_keyword, 'hitTestMode'),
+                                            get_sample_value(hittest_node_keyword, 'hitTestMode'))
+        self.responseRegion = get_value_as_str(node_dump_str, get_sample_key(hittest_node_keyword, 'responseRegion'),
+                                               get_sample_value(hittest_node_keyword, 'responseRegion'), True)
         self.check_parse_result()
 
     def check_parse_result(self):

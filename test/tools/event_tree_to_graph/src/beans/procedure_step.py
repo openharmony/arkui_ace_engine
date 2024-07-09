@@ -17,7 +17,7 @@
 #
 
 from src.beans.base_bean import BaseBean
-from src.keywords import event_procedure_keyword
+from src.keywords import event_procedure_keyword, get_sample_key, get_sample_value
 from src.utils.log_wrapper import log_info
 from src.utils.value_parser import get_value_as_str
 
@@ -34,14 +34,14 @@ class ProcedureStep(BaseBean):
     def __init__(self, input_str):
         super().__init__()
         self.original_str = input_str
-        self.procedure = get_value_as_str(input_str, event_procedure_keyword['procedure'].key,
-                                          event_procedure_keyword['procedure'].value_separator_count)
-        self.state = get_value_as_str(input_str, event_procedure_keyword['state'].key,
-                                      event_procedure_keyword['state'].value_separator_count)
-        self.disposal = get_value_as_str(input_str, event_procedure_keyword['disposal'].key,
-                                         event_procedure_keyword['disposal'].value_separator_count)
-        self.timestamp = get_value_as_str(input_str, event_procedure_keyword['timestamp'].key,
-                                          event_procedure_keyword['timestamp'].value_separator_count, True)
+        self.procedure = get_value_as_str(input_str, get_sample_key(event_procedure_keyword, 'procedure'),
+                                          get_sample_value(event_procedure_keyword, 'procedure'))
+        self.state = get_value_as_str(input_str, get_sample_key(event_procedure_keyword, 'state'),
+                                      get_sample_value(event_procedure_keyword, 'state'))
+        self.disposal = get_value_as_str(input_str, get_sample_key(event_procedure_keyword, 'disposal'),
+                                         get_sample_value(event_procedure_keyword, 'disposal'))
+        self.timestamp = get_value_as_str(input_str, get_sample_key(event_procedure_keyword, 'timestamp'),
+                                          get_sample_value(event_procedure_keyword, 'timestamp'), True)
         self.check_parse_result()
 
     def check_parse_result(self):

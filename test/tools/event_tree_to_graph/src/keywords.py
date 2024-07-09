@@ -134,3 +134,25 @@ event_procedure_keyword = {
     "distance": KeyValueSample("distance: 7.5"),
     "fingers": KeyValueSample("fingers: 1")
 }
+
+
+def get_dict_value(input_dict, key):
+    if input_dict is None or key is None or len(key) == 0:
+        return None
+    if key not in input_dict:
+        return None
+    return input_dict[key]
+
+
+def get_sample_key(input_dict, name):
+    sample = get_dict_value(input_dict, name)
+    if sample is None:
+        return None
+    return sample.key
+
+
+def get_sample_value(input_dict, name):
+    sample = get_dict_value(input_dict, name)
+    if sample is None:
+        return None
+    return sample.value
