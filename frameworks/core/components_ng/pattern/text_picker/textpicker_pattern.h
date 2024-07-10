@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_paint_method.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
+#include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -175,17 +176,27 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
+        FocusPattern focusPattern(FocusType::NODE, true, FocusStyleType::CUSTOM_REGION);
         auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, FocusPattern());
+        CHECK_NULL_RETURN(pipeline, focusPattern);
         auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-        CHECK_NULL_RETURN(pickerTheme, FocusPattern());
+        CHECK_NULL_RETURN(pickerTheme, focusPattern);
         auto focusColor = pickerTheme->GetFocusColor();
+        auto appTheme = pipeline->GetTheme<AppTheme>();
+        CHECK_NULL_RETURN(appTheme, focusPattern);
 
         FocusPaintParam focusPaintParams;
-        focusPaintParams.SetPaintColor(focusColor);
-        focusPaintParams.SetPaintWidth(TEXT_FOCUS_PAINT_WIDTH);
-
-        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
+        if (appTheme->IsFocusBoxGlow()) {
+            focusPaintParams.SetPaintColor(appTheme->GetFocusBorderColor());
+            focusPaintParams.SetPaintWidth(appTheme->GetFocusBorderWidth());
+            focusPaintParams.SetFocusBoxGlow(true);
+        } else {
+            focusPaintParams.SetPaintColor(focusColor);
+            focusPaintParams.SetPaintWidth(TEXT_FOCUS_PAINT_WIDTH);
+            focusPaintParams.SetFocusBoxGlow(false);
+        }
+        focusPattern.SetFocusPaintParams(focusPaintParams);
+        return focusPattern;
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -372,6 +383,19 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
+    void InitFocusEvent();
+    void InitSelectorProps();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void GetInnerFocusButtonPaintRect(RoundRect& paintRect);
+    void UpdateFocusButtonState();
+    void SetHaveFocus(bool haveFocus);
+    void UpdateButtonStyles(const RefPtr<FrameNode>& buttonNode, const RefPtr<FrameNode>& columnNode,
+        const RefPtr<PickerTheme>& pickerTheme, bool haveFocus);
+    void GetFocusPaintRect(const RefPtr<PipelineBase>& pipeline, const RefPtr<FrameNode>& pickerChild,
+        const RefPtr<FrameNode>& columnNode, RoundRect& paintRect, const uint32_t& childSize);
     double CalculateHeight();
 
     void InitDisabled();
@@ -398,6 +422,10 @@ private:
     int32_t focusKeyID_ = 0;
     double defaultPickerItemHeight_;
     double resizePickerItemHeight_;
+    bool focusEventInitialized_ = false;
+    bool haveFocus_ = false;
+    Dimension selectorItemRadius_ = 8.0_vp;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
     uint32_t selectedIndex_ = 0;
     std::vector<NG::RangeContent> range_;
     std::vector<NG::RangeContent> options_;
