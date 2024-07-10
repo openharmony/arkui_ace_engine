@@ -346,7 +346,7 @@ ArkUINativeModuleValue DataPanelBridge::SetContentModifierBuilder(ArkUIRuntimeCa
             auto context = NapiValueToLocalValue(Container::Current()->GetFrontend()->GetContextValue());
             auto obj = panda::ObjectRef::New(vm);
             auto valueArray = panda::ArrayRef::New(vm, config.values_.size());
-            for (int i = 0; i<config.values_.size(); i++) {
+            for (uint32_t i = 0; i < config.values_.size(); ++i) {
                 panda::ArrayRef::SetValueAt(vm, valueArray, i, panda::NumberRef::New(vm, config.values_[i]));
             }
             obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "values"), valueArray);
