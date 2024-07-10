@@ -6815,6 +6815,12 @@ void WebDelegate::OnAreaChange(const OHOS::Ace::Rect& area)
         return;
     }
     currentArea_ = area;
+    if (nweb_) {
+        double offsetX = 0;
+        double offsetY = 0;
+        UpdateScreenOffSet(offsetX, offsetY);
+        nweb_->SetScreenOffSet(offsetX, offsetY);
+    }
     OnSafeInsetsChange();
 }
 
@@ -6904,6 +6910,13 @@ void WebDelegate::KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEv
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     webPattern->KeyboardReDispatch(event, isUsed);
+}
+
+void WebDelegate::OnCursorUpdate(double x, double y, double width, double height)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnCursorUpdate(x, y, width, height);
 }
 
 void WebDelegate::OnSafeInsetsChange()

@@ -606,6 +606,14 @@ public:
     void AttachCustomKeyboard();
     void CloseCustomKeyboard();
     void KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed);
+    void OnCursorUpdate(double x, double y, double width, double height)
+    {
+        cursorInfo_ = RectF(x, y, width, height);
+    }
+    RectF GetCaretRect() const override
+    {
+        return cursorInfo_;
+    }
     void OnAttachContext(PipelineContext *context) override;
     void OnDetachContext(PipelineContext *context) override;
     void SetUpdateInstanceIdCallback(std::function<void(int32_t)> &&callabck);
@@ -854,6 +862,7 @@ private:
     void RegisterVisibleAreaChangeCallback(const RefPtr<PipelineContext> &context);
     bool CheckSafeAreaIsExpand();
     bool CheckSafeAreaKeyBoard();
+    bool IsDialogNested();
     void SelectCancel() const;
     std::string GetSelectInfo() const;
     void UpdateRunQuickMenuSelectInfo(SelectOverlayInfo& selectInfo,
@@ -947,6 +956,7 @@ private:
     RefPtr<WebContextMenuParam> contextMenuParam_ = nullptr;
     RefPtr<ContextMenuResult> contextMenuResult_ = nullptr;
     RectF selectArea_;
+    RectF cursorInfo_;
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> quickMenuCallback_ = nullptr;
     SelectMenuInfo selectMenuInfo_;
     bool selectOverlayDragging_ = false;

@@ -43,6 +43,7 @@
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
@@ -2541,10 +2542,15 @@ bool WebPattern::ProcessVirtualKeyBoardHide(int32_t width, int32_t height, bool 
 
 bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, double keyboard, bool safeAreaEnabled)
 {
+    if (IsDialogNested()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "ProcessVirtualKeyBoardShow, dialog nested, web don't consume keyboard event.");
+        isKeyboardInSafeArea_ = true;
+        return false;
+    }
     if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
         drawSizeCache_.SetSize(drawSize_);
     }
-    if (drawSize_.Height() <= (height - keyboard - GetCoordinatePoint()->GetY())) {
+    if (drawSizeCache_.Height() <= (height - keyboard - GetCoordinatePoint()->GetY())) {
         isVirtualKeyBoardShow_ = VkState::VK_SHOW;
         return !safeAreaEnabled;
     }
@@ -4364,6 +4370,22 @@ RefPtr<NestableScrollContainer> WebPattern::SearchParent(Axis scrollAxis)
         }
     }
     return nullptr;
+}
+
+bool WebPattern::IsDialogNested()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
+        RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+        if (!frameNode) {
+            continue;
+        }
+        if (frameNode->GetPattern<DialogPattern>()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void WebPattern::OnRootLayerChanged(int width, int height)
