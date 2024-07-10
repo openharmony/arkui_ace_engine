@@ -125,8 +125,8 @@ RefPtr<Container> Container::GetFoucsed()
 {
     RefPtr<Container> foucsContainer;
     AceEngine::Get().NotifyContainers([&foucsContainer](const RefPtr<Container>& container) {
-        auto pipeline = container->GetPipelineContext();
-        if (pipeline && pipeline->GetOnFoucs()) {
+        auto pipeline = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+        if (pipeline && pipeline->IsWindowFocused()) {
             foucsContainer = container;
         }
     });
