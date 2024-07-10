@@ -85,6 +85,7 @@
 #include "core/image/image_source_info.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/text/text_emoji_processor.h"
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
 #include "parameters.h"
@@ -1435,8 +1436,10 @@ void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
         return;
     }
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On copy, text selector %{public}s", selectController_->ToString().c_str());
-    auto value =
-        contentController_->GetSelectedValue(selectController_->GetStartIndex(), selectController_->GetEndIndex());
+    auto start = selectController_->GetStartIndex();
+    auto end = selectController_->GetEndIndex();
+    GetEmojiSubStringRange(start, end);
+    auto value = contentController_->GetSelectedValue(start, end);
     if (value.empty()) {
         return;
     }
@@ -1623,6 +1626,7 @@ void TextFieldPattern::HandleOnCut()
     }
     auto start = selectController_->GetStartIndex();
     auto end = selectController_->GetEndIndex();
+    GetEmojiSubStringRange(start, end);
     SwapIfLarger(start, end);
     if (!IsSelected() || IsInPasswordMode()) {
         return;
@@ -1860,13 +1864,15 @@ std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::strin
         pattern->textFieldContentModifier_->ChangeDragStatus();
         auto contentController = pattern->contentController_;
         auto selectController = pattern->selectController_;
-        pattern->dragTextStart_ = selectController->GetStartIndex();
-        pattern->dragTextEnd_ = selectController->GetEndIndex();
-        std::string beforeStr = contentController->GetValueBeforeIndex(selectController->GetStartIndex());
-        std::string selectedStr =
-            contentController->GetSelectedValue(selectController->GetStartIndex(), selectController->GetEndIndex());
+        auto start = selectController->GetStartIndex();
+        auto end = selectController->GetEndIndex();
+        pattern->GetEmojiSubStringRange(start, end);
+        pattern->dragTextStart_ = start;
+        pattern->dragTextEnd_ = end;
+        std::string beforeStr = contentController->GetValueBeforeIndex(start);
+        std::string selectedStr = contentController->GetSelectedValue(start, end);
         pattern->dragValue_ = selectedStr;
-        std::string afterStr = contentController->GetValueAfterIndex(selectController->GetEndIndex());
+        std::string afterStr = contentController->GetValueAfterIndex(end);
         pattern->dragContents_ = { beforeStr, selectedStr, afterStr };
         itemInfo.extraInfo = selectedStr;
         RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
@@ -3819,6 +3825,7 @@ void TextFieldPattern::InsertValueOperation(const SourceAndValueInfo& info)
     CHECK_NULL_VOID(layoutProperty);
     auto start = selectController_->GetStartIndex();
     auto end = selectController_->GetEndIndex();
+    GetEmojiSubStringRange(start, end);
     auto caretStart = IsSelected() ? start : selectController_->GetCaretIndex();
     if (isIME) {
         auto isInsert = BeforeIMEInsertValue(insertValue, caretStart);
@@ -4777,12 +4784,21 @@ void TextFieldPattern::HandleOnDelete(bool backward)
     }
 }
 
+void TextFieldPattern::GetEmojiSubStringRange(int32_t& start, int32_t& end)
+{
+    TextEmojiSubStringRange range = TextEmojiProcessor::CalSubWstringRange(
+        start, end - start, GetWideText(), true);
+    start = range.startIndex;
+    end = range.endIndex;
+}
+
 void TextFieldPattern::DeleteBackward(int32_t length)
 {
     ResetObscureTickCountDown();
     if (IsSelected()) {
         auto start = selectController_->GetStartIndex();
         auto end = selectController_->GetEndIndex();
+        GetEmojiSubStringRange(start, end);
         auto value = contentController_->GetSelectedValue(start, end);
         auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::BACKWARD, end);
         CHECK_NULL_VOID(isDelete);
@@ -4847,6 +4863,7 @@ void TextFieldPattern::DeleteForward(int32_t length)
     if (IsSelected()) {
         auto start = selectController_->GetStartIndex();
         auto end = selectController_->GetEndIndex();
+        GetEmojiSubStringRange(start, end);
         auto value = contentController_->GetSelectedValue(start, end);
         auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::FORWARD, start);
         CHECK_NULL_VOID(isDelete);
