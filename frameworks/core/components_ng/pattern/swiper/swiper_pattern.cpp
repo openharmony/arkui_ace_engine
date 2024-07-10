@@ -203,7 +203,7 @@ void SwiperPattern::OnIndexChange()
 void SwiperPattern::StopAndResetSpringAnimation()
 {
     if (springAnimationIsRunning_) {
-        AnimationUtils::StopAnimation(springAnimation_);
+        StopSpringAnimationImmediately();
         currentDelta_ = 0.0f;
         itemPosition_.clear();
         isVoluntarilyClear_ = true;
@@ -1359,7 +1359,7 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
 void SwiperPattern::StopSpringAnimationAndFlushImmediately()
 {
     if (springAnimationIsRunning_) {
-        AnimationUtils::StopAnimation(springAnimation_);
+        StopSpringAnimationImmediately();
         currentDelta_ = 0.0f;
         itemPosition_.clear();
         isVoluntarilyClear_ = true;
@@ -1404,7 +1404,7 @@ void SwiperPattern::SwipeTo(int32_t index)
     }
     StopFadeAnimation();
     if (springAnimationIsRunning_) {
-        AnimationUtils::StopAnimation(springAnimation_);
+        StopSpringAnimationImmediately();
         jumpIndex_ = currentIndex_;
         springAnimationIsRunning_ = false;
         MarkDirtyNodeSelf();
@@ -1795,6 +1795,27 @@ void SwiperPattern::StopTranslateAnimation()
 
         OnTranslateFinish(propertyAnimationIndex_, false, isFinishAnimation_, true);
     }
+}
+
+void SwiperPattern::StopSpringAnimationImmediately()
+{
+    AnimationOption option;
+    option.SetCurve(Curves::LINEAR);
+    option.SetDuration(0);
+    translateAnimation_ = AnimationUtils::StartAnimation(option, [weak = WeakClaim(this)]() {
+        auto swiper = weak.Upgrade();
+        CHECK_NULL_VOID(swiper);
+        auto host = swiper->GetHost();
+        CHECK_NULL_VOID(host);
+        host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, swiper->currentIndexOffset_);
+    });
+    PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
+    AceAsyncTraceEnd(0, TRAILING_ANIMATION);
+    TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper finish spring animation offset %{public}f",
+        currentIndexOffset_);
+    ACE_SCOPED_TRACE("Swiper finish spring animation offset %f", currentIndexOffset_);
+    isTouchDownSpringAnimation_ = false;
+    OnSpringAndFadeAnimationFinish();
 }
 
 void SwiperPattern::StopSpringAnimation()
