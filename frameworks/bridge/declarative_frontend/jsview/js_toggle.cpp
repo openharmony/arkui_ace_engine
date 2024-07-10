@@ -145,7 +145,10 @@ void JSToggle::JsWidth(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        JSViewAbstract::JsWidth(info[0]);
+        return;
+    }
     JsWidth(info[0]);
 }
 
@@ -176,7 +179,10 @@ void JSToggle::JsHeight(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        JSViewAbstract::JsHeight(info[0]);
+        return;
+    }
     JsHeight(info[0]);
 }
 
