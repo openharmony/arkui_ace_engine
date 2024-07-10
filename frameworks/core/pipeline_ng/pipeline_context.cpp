@@ -234,7 +234,7 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
     if (IsDestroyed()) {
-        LOGI("cannot add dirty layout node as the pipeline context is destroyed.");
+        LOGW("Cannot add dirty layout node as the pipeline context is destroyed.");
         return;
     }
     if (!dirty->GetInspectorIdValue("").empty()) {
@@ -277,7 +277,7 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
     if (IsDestroyed()) {
-        LOGI("cannot add dirty render node as the pipeline context is destroyed.");
+        LOGW("Cannot add dirty render node as the pipeline context is destroyed.");
         return;
     }
     if (!dirty->GetInspectorIdValue("").empty()) {
@@ -521,6 +521,10 @@ void PipelineContext::FlushOnceVsyncTask()
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
+    if (IsDestroyed()) {
+        LOGW("Cannot flush vsync as the pipeline context is destroyed.");
+        return;
+    }
     ACE_SCOPED_TRACE_COMMERCIAL("UIVsyncTask[timestamp:%" PRIu64 "][vsyncID:%" PRIu64 "][instanceID:%d]", nanoTimestamp,
         static_cast<uint64_t>(frameCount), instanceId_);
     window_->Lock();
