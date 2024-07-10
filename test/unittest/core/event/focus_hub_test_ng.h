@@ -44,6 +44,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "test/unittest/core/event/frame_node_on_tree.h"
 
 namespace OHOS::Ace::NG {
 namespace {

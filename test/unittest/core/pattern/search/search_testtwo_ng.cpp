@@ -630,6 +630,7 @@ HWTEST_F(SearchTestTwoNg, Pattern023, TestSize.Level1)
     ASSERT_NE(textFieldFrameNode, nullptr);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
+    frameNode->onMainTree_ = true;
 
     /**
      * @tc.step: step2. create column layout.

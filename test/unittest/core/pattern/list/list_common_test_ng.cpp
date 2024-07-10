@@ -58,8 +58,10 @@ void ListCommonTestNg::CreateFocusableListItems(int32_t itemNumber)
         {
             ButtonModelNG buttonModelNG;
             buttonModelNG.CreateWithLabel("label");
+            ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
             ViewStackProcessor::GetInstance()->Pop();
         }
+        ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }

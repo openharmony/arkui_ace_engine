@@ -24,6 +24,7 @@ public:
     AssertionResult IsEqualNextFocusNode(FocusStep step,
         const RefPtr<FrameNode>& currentNode, const RefPtr<FrameNode>& expectNextNode);
     void OnKeyEvent(KeyCode keyCode, KeyAction keyAction);
+    void SetOnMainTree();
 };
 
 AssertionResult SwiperCommonTestNg::IsEqualNextFocusNode(FocusStep step,
@@ -39,6 +40,19 @@ AssertionResult SwiperCommonTestNg::IsEqualNextFocusNode(FocusStep step,
         return AssertionFailure() << "Next focusNode is not as expected";
     }
     return AssertionSuccess();
+}
+
+void SwiperCommonTestNg::SetOnMainTree()
+{
+    if (indicatorNode_) {
+        indicatorNode_->onMainTree_ = true;
+    }
+    if (leftArrowNode_) {
+        leftArrowNode_->onMainTree_ = true;
+    }
+    if (rightArrowNode_) {
+        rightArrowNode_->onMainTree_ = true;
+    }
 }
 
 void SwiperCommonTestNg::OnKeyEvent(KeyCode keyCode, KeyAction keyAction)
@@ -403,6 +417,7 @@ HWTEST_F(SwiperCommonTestNg, FocusStep001, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
+    SetOnMainTree();
 
     /**
      * @tc.cases: GetNextFocusNode from indicatorNode_
@@ -448,6 +463,7 @@ HWTEST_F(SwiperCommonTestNg, FocusStep002, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
+    SetOnMainTree();
 
     /**
      * @tc.cases: GetNextFocusNode from indicatorNode_
@@ -493,6 +509,7 @@ HWTEST_F(SwiperCommonTestNg, FocusStep003, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
+    SetOnMainTree();
 
     /**
      * @tc.cases: LoopIndex is first item(index:0)
@@ -549,6 +566,7 @@ HWTEST_F(SwiperCommonTestNg, FocusStep004, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
+    SetOnMainTree();
 
     /**
      * @tc.cases: LoopIndex is last item(index:0)
@@ -609,6 +627,7 @@ HWTEST_F(SwiperCommonTestNg, FocusStep006, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
+    SetOnMainTree();
     
     /**
      * @tc.cases: GetNextFocusNode from leftArrowNode_

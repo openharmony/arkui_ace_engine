@@ -127,8 +127,10 @@ void GridTestNg::CreateFocusableGridItems(int32_t itemNumber, float width, float
         {
             ButtonModelNG buttonModelNG;
             buttonModelNG.CreateWithLabel("label");
+            ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
             ViewStackProcessor::GetInstance()->Pop();
         }
+        ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
