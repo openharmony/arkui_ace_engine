@@ -217,8 +217,14 @@ void ComponentSnapshot::Create(
     auto executor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
     if (flag) {
-        pipeline->FlushUITasks();
-        pipeline->FlushMessages();
+        executor->PostTask(
+            [node]() {
+                auto pipeline = node->GetContext();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->FlushUITasks();
+                pipeline->FlushMessages();
+            },
+            TaskExecutor::TaskType::UI, "ArkUIComponentSnapshotFlushUITasks", PriorityType::VIP);
     }
     PostDelayedTaskOfBuiler(executor, std::move(callback), node, enableInspector, pipeline, param);
 }
