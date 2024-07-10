@@ -3369,4 +3369,14 @@ void UIContentImpl::SetStatusBarItemColor(uint32_t color)
     CHECK_NULL_VOID(appBar);
     appBar->SetStatusBarItemColor(IsDarkColor(color));
 }
+
+void UIContentImpl::SetForceSplitEnable(bool isForceSplit)
+{
+    ContainerScope scope(instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    context->SetForceSplitEnable(isForceSplit);
+}
 } // namespace OHOS::Ace

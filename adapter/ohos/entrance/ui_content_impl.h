@@ -326,6 +326,8 @@ public:
 
     void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
 
+    void SetForceSplitEnable(bool isForceSplit) override;
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
