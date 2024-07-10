@@ -180,8 +180,12 @@ public:
     // scrollBar
     virtual void UpdateScrollBarOffset() = 0;
     void SetScrollBar(const std::unique_ptr<ScrollBarProperty>& property);
+    
+    virtual RefPtr<ScrollBar> CreateScrollBar();
     void SetScrollBar(DisplayMode displayMode);
     void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy);
+
+    virtual RefPtr<ScrollBarOverlayModifier> CreateOverlayModifier();
     void CreateScrollBarOverlayModifier();
 
     float GetScrollableDistance() const
