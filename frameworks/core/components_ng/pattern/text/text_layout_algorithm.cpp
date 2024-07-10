@@ -120,6 +120,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(textLayoutProperty, std::nullopt);
 
     if (textStyle.GetTextOverflow() == TextOverflow::MARQUEE) { // create a paragraph with all text in 1 line
+        isMarquee_ = true;
         return BuildTextRaceParagraph(textStyle, textLayoutProperty, contentConstraint, layoutWrapper);
     }
 
@@ -616,12 +617,14 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     textStyle.SetMaxLines(1);
     textStyle.SetTextIndent(Dimension(0.0f));
 
+    std::string content = layoutProperty->GetContent().value_or("");
+    std::replace(content.begin(), content.end(), '\n', ' ');
     if (!textStyle.GetAdaptTextSize()) {
-        if (!CreateParagraph(textStyle, layoutProperty->GetContent().value_or(""), layoutWrapper)) {
+        if (!CreateParagraph(textStyle, content, layoutWrapper)) {
             return std::nullopt;
         }
     } else {
-        if (!AdaptMinTextSize(textStyle, layoutProperty->GetContent().value_or(""), contentConstraint, layoutWrapper)) {
+        if (!AdaptMinTextSize(textStyle, content, contentConstraint, layoutWrapper)) {
             return std::nullopt;
         }
     }
