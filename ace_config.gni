@@ -58,6 +58,9 @@ declare_args() {
 
   # Enable ace_engine circular screen
   ace_engine_feature_enable_digital_crown = false
+
+  # Enable ace_engine circle feature
+  ace_engine_enable_circle_feature = true
 }
 
 enable_dump_drawcmd = false

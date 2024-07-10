@@ -559,6 +559,14 @@ build_component_ng("pattern_ng") {
     "waterflow/water_flow_sections.cpp",
   ]
 
+  if (ace_engine_enable_circle_feature) {
+    sources += [
+      "arc_scroll/arc_scroll_paint_method.cpp",
+      "arc_scroll/inner/arc_scroll_bar.cpp",
+      "arc_scroll/inner/arc_scroll_bar_overlay_modifier.cpp",
+    ]
+  }
+
   external_deps = []
   deps = [ "container_modal/interfaces:customtitle" ]
 
