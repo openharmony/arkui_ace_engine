@@ -77,10 +77,14 @@ void UiSessionManager::ReportComponentChangeEvent(const std::string& key, const 
 
 void UiSessionManager::ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data)
 {
+    auto jsonValue = InspectorJsonUtil::Create(true);
+    jsonValue->Put("id", accessibilityId);
+    jsonValue->Put("$type", "web");
+    jsonValue->Put("text", data.c_str());
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
-            reportService->ReportWebUnfocusEvent(accessibilityId, data);
+            reportService->ReportWebUnfocusEvent(accessibilityId, jsonValue->ToString());
         } else {
             LOGW("report web unfocus event failed,process id:%{public}d", pair.first);
         }
@@ -227,6 +231,19 @@ void UiSessionManager::OnRouterChange(const std::string& path, const std::string
         value->Put("path", path.c_str());
         value->Put("event", event.c_str());
         ReportRouterChangeEvent(value->ToString());
+    }
+}
+
+void UiSessionManager::SaveBaseInfo(const std::string& info)
+{
+    baseInfo_ = info;
+}
+
+void UiSessionManager::SendBaseInfo(int32_t processId)
+{
+    auto reportService = iface_cast<ReportService>(reportObjectMap_[processId]);
+    if (reportService != nullptr) {
+        reportService->SendBaseInfo(baseInfo_);
     }
 }
 } // namespace OHOS::Ace

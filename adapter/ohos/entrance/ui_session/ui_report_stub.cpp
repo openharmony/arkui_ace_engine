@@ -53,6 +53,10 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             ReportWebUnfocusEvent(accessibilityId, result);
             break;
         }
+        case SEND_BASE_INFO: {
+            SendBaseInfo(result);
+            break;
+        }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -101,6 +105,18 @@ void UiReportStub::ReportWebUnfocusEvent(int64_t accessibilityId, const std::str
     if (unfocusEvent_ != nullptr) {
         unfocusEvent_(accessibilityId, data);
     }
+}
+
+void UiReportStub::SendBaseInfo(const std::string& data)
+{
+    if (sendBaseInfoCallback_ != nullptr) {
+        sendBaseInfoCallback_(data);
+    }
+}
+
+void UiReportStub::RegisterGetBaseInfoCallback(const EventCallback& eventCallback)
+{
+    sendBaseInfoCallback_ = std::move(eventCallback);
 }
 
 void UiReportStub::RegisterClickEventCallback(const EventCallback& eventCallback)

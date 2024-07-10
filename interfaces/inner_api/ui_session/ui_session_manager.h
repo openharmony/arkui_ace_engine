@@ -82,6 +82,9 @@ public:
     bool GetRouterChangeEventRegistered();
     bool GetComponentChangeEventRegistered();
     bool GetWebFocusRegistered();
+    void SaveBaseInfo(const std::string& info);
+    void SendBaseInfo(int32_t processId);
+
 private:
     static std::mutex mutex_;
     std::map<int32_t, sptr<IRemoteObject>> reportObjectMap_;
@@ -94,6 +97,7 @@ private:
     NotifyAllWebFunction notifyWebFunction_ = 0;
     std::shared_ptr<InspectorJsonValue> jsonValue_ = nullptr;
     int32_t webTaskNums = 0;
+    std::string baseInfo_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_SESSION_MANAGER_H
