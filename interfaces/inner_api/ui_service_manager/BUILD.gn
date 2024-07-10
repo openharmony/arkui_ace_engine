@@ -38,9 +38,9 @@ ohos_shared_library("ui_service_mgr") {
   sources = [
     "$ace_root/adapter/ohos/services/uiservice/src/ui_service_mgr_client.cpp",
     "$ace_root/adapter/ohos/services/uiservice/src/ui_service_mgr_proxy.cpp",
+    "$ace_root/adapter/ohos/services/uiservice/src/ui_service_mgr_xcollie.cpp",
     "$ace_root/adapter/ohos/services/uiservice/src/ui_service_proxy.cpp",
     "$ace_root/adapter/ohos/services/uiservice/src/ui_service_stub.cpp",
-    "$ace_root/adapter/ohos/services/uiservice/src/ui_service_mgr_xcollie.cpp",
   ]
 
   configs = [
