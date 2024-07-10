@@ -48,6 +48,7 @@ build_component("web") {
       "opengles:libGLES",
       "webview:libnweb",
       "window_manager:libwm",
+      "egl:libEGL"
     ]
   }
 }
