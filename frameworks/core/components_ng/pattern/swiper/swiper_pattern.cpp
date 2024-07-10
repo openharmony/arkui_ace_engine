@@ -1981,6 +1981,9 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         auto pattern = weak.Upgrade();
         if (pattern) {
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
+                if (!pattern->CheckSwiperPanEvent(info.GetMainDelta())) {
+                    return;
+                }
                 if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
                     pattern->ShowPrevious();
                 } else if (LessNotEqual(info.GetMainDelta(), 0.0)) {
