@@ -870,7 +870,7 @@ void DragDropManager::OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefP
     auto point = pointerEvent.GetPoint();
     auto eventHub = dragFrameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    UpdateDragEvent(event, point);
+    UpdateDragEvent(event, pointerEvent);
     auto extraParams = eventHub->GetDragExtraParams(extraInfo_, point, DragEventType::DROP);
     eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_DROP, event, extraParams);
     eventHub->HandleInternalOnDrop(event, extraParams);
@@ -1026,6 +1026,8 @@ void DragDropManager::FireOnDragEvent(
     event->SetY((double)point.GetY());
     event->SetScreenX((double)point.GetScreenX());
     event->SetScreenY((double)point.GetScreenY());
+    event->SetDisplayX((double)pointerEvent.GetDisplayX());
+    event->SetDisplayY((double)pointerEvent.GetDisplayY());
     event->SetVelocity(velocityTracker_.GetVelocity());
     event->SetSummary(summaryMap_);
     event->SetPreviewRect(GetDragWindowRect(point));
@@ -1388,12 +1390,15 @@ void DragDropManager::UpdateNotifyDragEvent(
     }
 }
 
-void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const Point& point)
+void DragDropManager::UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const OHOS::Ace::PointerEvent& pointerEvent)
 {
+    auto point = pointerEvent.GetPoint();
     event->SetX(point.GetX());
     event->SetY(point.GetY());
     event->SetScreenX(point.GetScreenX());
     event->SetScreenY(point.GetScreenY());
+    event->SetDisplayX((double)pointerEvent.GetDisplayX());
+    event->SetDisplayY((double)pointerEvent.GetDisplayY());
     event->SetVelocity(velocityTracker_.GetVelocity());
     event->SetSummary(summaryMap_);
     event->SetPreviewRect(GetDragWindowRect(point));
