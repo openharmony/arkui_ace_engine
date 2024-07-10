@@ -280,9 +280,9 @@ void ListTestNg::ScrollToEdge(ScrollEdgeType scrollEdgeType)
     FlushLayoutTask(frameNode_);
 }
 
-void ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
+void ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
 {
-    pattern_->ScrollToIndex(index, smooth, align);
+    pattern_->ScrollToIndex(index, smooth, align, extraOffset);
     FlushLayoutTask(frameNode_);
     if (smooth) {
         auto iter = pattern_->itemPosition_.find(index);
@@ -294,6 +294,9 @@ void ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
             }
         } else {
             pattern_->GetListItemAnimatePos(iter->second.startPos, iter->second.endPos, align, targetPos);
+        }
+        if (extraOffset.has_value()) {
+            targetPos += extraOffset.value();
         }
         if (!NearZero(targetPos)) {
             float endValue = pattern_->GetFinalPosition();

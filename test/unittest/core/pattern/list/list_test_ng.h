@@ -118,7 +118,7 @@ public:
 
     void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
-    void ScrollToIndex(int32_t index, bool smooth, ScrollAlign align);
+    void ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset = std::nullopt);
     void ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align);
     void DragSwiperItem(int32_t index, float mainDelta, float mainVelocity = SWIPER_SPEED_TH);
     void HandleDragStart(int32_t index);

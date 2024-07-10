@@ -1877,14 +1877,14 @@ bool GridPattern::AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWr
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto extraOffset = GetExtraOffset();
-    auto success = true;
+    bool success = true;
     if (UseIrregularLayout()) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
         auto size = GridLayoutUtils::GetItemSize(&gridLayoutInfo_, RawPtr(host), *targetIndex_);
         targetPos = gridLayoutInfo_.GetAnimatePosIrregular(*targetIndex_, size.rows, align, mainGap);
         if (Negative(targetPos)) {
-            return false;
+            success = false;
         }
     } else {
         auto gridScrollLayoutAlgorithm =
@@ -1893,12 +1893,12 @@ bool GridPattern::AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWr
         // Based on the index, align gets the position to scroll to
         success = scrollGridLayoutInfo_.GetGridItemAnimatePos(
             gridLayoutInfo_, targetIndex_.value(), align, mainGap, targetPos);
-        if (!success) {
-            if (extraOffset.has_value()) {
-                targetPos = GetTotalOffset();
-            } else {
-                return false;
-            }
+    }
+    if (!success) {
+        if (extraOffset.has_value()) {
+            targetPos = GetTotalOffset();
+        } else {
+            return false;
         }
     }
 
