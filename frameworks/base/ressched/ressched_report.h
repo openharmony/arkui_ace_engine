@@ -22,7 +22,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/event/touch_event.h"
-#include "code/pipline_ng/pipline_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "base/geometry/offset.h"
 
 namespace OHOS::Ace {
