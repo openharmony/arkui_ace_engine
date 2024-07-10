@@ -172,7 +172,7 @@ void StageManager::PageChangeCloseKeyboard()
 #endif
 }
 
-bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition)
+bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition, bool  /*isPush*/)
 {
     CHECK_NULL_RETURN(stageNode_, false);
     CHECK_NULL_RETURN(node, false);
