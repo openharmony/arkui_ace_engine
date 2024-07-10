@@ -251,6 +251,7 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
     auto task = [themeId, manager, themeStyle = WeakPtr<ResourceThemeStyle>(theme)]() -> void {
         constexpr char OHFlag[] = "ohos_"; // fit with resource/base/theme.json and pattern.json
         auto theme = themeStyle.Upgrade();
+        CHECK_NULL_VOID(theme);
         auto ret = manager->GetThemeById(themeId, theme->rawAttrs_);
         for (size_t i = 0; i < sizeof(PATTERN_MAP) / sizeof(PATTERN_MAP[0]); i++) {
             ResourceThemeStyle::RawAttrMap attrMap;
@@ -264,11 +265,13 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
         }
 
         if (theme->patternAttrs_.empty() && theme->rawAttrs_.empty()) {
+            theme->SetPromiseValue();
             return ;
         }
 
         theme->ParseContent();
         theme->patternAttrs_.clear();
+        theme->SetPromiseValue();
     };
     taskExecutor->PostTask(task, TaskExecutor::TaskType::BACKGROUND, "ArkUILoadTheme");
 
