@@ -3470,10 +3470,8 @@ ArkUINativeModuleValue CommonBridge::SetForegroundColor(ArkUIRuntimeCallInfo *ru
             return panda::JSValueRef::Undefined(vm);
         }
     }
-    Color foregroundColor;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, foregroundColor)) {
-        return panda::JSValueRef::Undefined(vm);
-    }
+    Color foregroundColor = Color::TRANSPARENT;
+    ArkTSUtils::ParseJsColorAlpha(vm, colorArg, foregroundColor);
     GetArkUINodeModifiers()->getCommonModifier()->setForegroundColor(nativeNode, true, foregroundColor.GetValue());
     return panda::JSValueRef::Undefined(vm);
 }
