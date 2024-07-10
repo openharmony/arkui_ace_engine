@@ -1763,5 +1763,20 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg096, TestSize.Level1)
     focusManager->SetNeedTriggerScroll(true);
     context_->PipelineContext::FlushFocusScroll();
 }
+
+/**
+ * @tc.name: PipelineContextTestNg097
+ * @tc.desc: Test the function RegisterTouchEventListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg097, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters,construct changeInfoListeners_
+     */
+    std::shared_ptr<ITouchEventCallback> touchEventCallback = nullptr;
+    context_->RegisterTouchEventListener(touchEventCallback);
+    ASSERT_EQ(context_->listenerVector_.size(), 0);
+}
 } // namespace NG
 } // namespace OHOS::Ace
