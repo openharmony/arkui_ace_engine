@@ -73,6 +73,7 @@ constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
 constexpr int32_t IMAGE_POINTER_CUSTOM_CHANNEL = 4;
 constexpr int32_t TOUCH_EVENT_MAX_SIZE = 5;
 constexpr int32_t KEYEVENT_MAX_NUM = 1000;
+constexpr float SELECT_MENE_HEIGHT = 140.0f;
 const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] = {
     { OHOS::NWeb::CursorType::CT_CROSS, MouseFormat::CROSS },
     { OHOS::NWeb::CursorType::CT_HAND, MouseFormat::HAND_POINTING },
@@ -1500,6 +1501,8 @@ void WebPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 
 void WebPattern::HandleFocusEvent()
 {
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "WebPattern::HandleFocusEvent needOnFocus: %{public}d.", needOnFocus_);
     CHECK_NULL_VOID(delegate_);
     isFocus_ = true;
     if (needOnFocus_) {
@@ -1512,6 +1515,8 @@ void WebPattern::HandleFocusEvent()
 
 void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
 {
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "WebPattern::HandleBlurEvent selectPopupMenuShowing: %{public}d.", selectPopupMenuShowing_);
     CHECK_NULL_VOID(delegate_);
     isFocus_ = false;
     if (!selectPopupMenuShowing_) {
@@ -3140,7 +3145,8 @@ void WebPattern::DragDropSelectionMenu()
 RectF WebPattern::ComputeClippedSelectionBounds(
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startHandle,
-    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endHandle)
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endHandle,
+    bool& isNewAvoid)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     if (!pipeline) {
@@ -3150,24 +3156,40 @@ RectF WebPattern::ComputeClippedSelectionBounds(
     auto offset = GetCoordinatePoint().value_or(OffsetF());
     float selectX = params->GetSelectX();
     float selectY = params->GetSelectY();
+    float selectWidth = params->GetSelectWidth();
+    float selectHeight = params->GetSelectXHeight();
     float viewPortX = static_cast<float>((startHandle->GetViewPortX() + endHandle->GetViewPortX())) / 2;
     float viewPortY = static_cast<float>((startHandle->GetViewPortY() + endHandle->GetViewPortY())) / 2;
-    if (LessOrEqual(GetHostFrameSize().value_or(SizeF()).Height(), selectY)) {
-        selectY = GetHostFrameSize().value_or(SizeF()).Height();
-    } else if (LessOrEqual(static_cast<float>(selectY + params->GetSelectXHeight()), 0)) {
-        selectY = 0;
+    auto frameHeight = GetHostFrameSize().value_or(SizeF()).Height();
+    isNewAvoid = true;
+    if (LessOrEqual(frameHeight, selectY + viewPortY) || LessOrEqual(selectY + selectHeight, 0)) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "Selected area not visible, Do not display menu");
+        isNewAvoid = false;
+        return RectF();
+    } else if (LessOrEqual(selectY, 0) && LessOrEqual(frameHeight, selectY + viewPortY + selectHeight)) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "Center menu display");
+        return RectF(offset.GetX(), offset.GetY(), drawSize_.Width(), drawSize_.Height());
     }
 
-    if (viewPortX) {
-        selectX += viewPortX;
+    float radius = 0.0;
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    if (theme) {
+        radius = theme->GetHandleHotZoneRadius().ConvertToPx();
     }
-    if (viewPortY) {
-        selectY += viewPortY;
+    if (LessOrEqual(frameHeight, selectY + viewPortY + startHandle->GetEdgeHeight())) {
+        selectX = startHandle->GetX() + offset.GetX();
+        selectY = startHandle->GetY() + offset.GetY() - radius - startHandle->GetEdgeHeight() - SELECT_MENE_HEIGHT;
+        selectWidth = SelectHandleInfo::GetDefaultLineWidth().ConvertToPx();
+    } else if (LessOrEqual(selectY + selectHeight - endHandle->GetEdgeHeight(), 0)) {
+        selectX = endHandle->GetX() + offset.GetX();
+        selectY = endHandle->GetY() + offset.GetY() + radius;
+        selectWidth = SelectHandleInfo::GetDefaultLineWidth().ConvertToPx();
+    } else {
+        selectX = selectX + viewPortX + offset.GetX();
+        selectY = selectY + viewPortY + offset.GetY() - SELECT_MENE_HEIGHT - radius;
     }
-    selectX += offset.GetX();
-    selectY += offset.GetY();
-    TAG_LOGI(AceLogTag::ACE_WEB, "SelectionBounds selectX:%{public}f, selectY:%{public}f", selectX, selectY);
-    return RectF(selectX, selectY, 0, 0);
+    TAG_LOGI(AceLogTag::ACE_WEB, "SelectionBounds pos: (%{public}f, %{public}f)", selectX, selectY);
+    return RectF(selectX, selectY, selectWidth, SELECT_MENE_HEIGHT);
 }
 
 void WebPattern::QuickMenuIsNeedNewAvoid(
@@ -3190,7 +3212,7 @@ void WebPattern::QuickMenuIsNeedNewAvoid(
             selectArea_ = selectInfo.selectArea;
         } else {
             selectInfo.selectArea =
-                ComputeClippedSelectionBounds(params, startHandle, endHandle);
+                ComputeClippedSelectionBounds(params, startHandle, endHandle, selectInfo.isNewAvoid);
         }
     }
 }
