@@ -61,6 +61,7 @@ def get_value_as_float(input_str, keyword, value_separator_count=0, is_last=Fals
         return None
     return float(sub_str)
 
+
 def get_value_as_str(input_str, keyword, value_separator_count=0, is_last=False):
     sub_str = get_sub_str(input_str, keyword, value_separator_count, is_last)
     if sub_str is None:
@@ -95,6 +96,6 @@ def pack_string_until_next_keyword(texts, start_index, start_keyword, end_keywor
                 break
         if reach_end:
             break
-        pack_result += "\n" + line
+        pack_result = f'{pack_result}\n{line}'
         current_index += 1
     return [pack_result, current_index]

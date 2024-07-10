@@ -18,7 +18,9 @@
 
 # 预处理输入文件，去除多余信息，生成一个中间文件
 import os
-from src.keywords import keywords_dict
+import stat
+
+from src.keywords import keywords_dict, get_dict_value
 from src.utils.log_wrapper import log_info
 
 
@@ -32,20 +34,24 @@ def handle_file_preprocess(input_file, output_file):
             print(f"删除文件 {output_file} 时发生错误：{e}")
 
     # 打开原始文件和目标文件
-    with open(input_file, 'r', encoding='utf-8') as infile, open(output_file, 'w', encoding='utf-8') as outfile:
-        # 遍历输入文件的每一行
-        for line in infile:
-            # 查找'EventTreeDumpInfo'的位置
-            index = line.find(keywords_dict['EventTreeDumpInfo'])
-            # 如果找到了'EventTreeDumpInfo: '
-            if index != -1:
-                new_index = index + len(keywords_dict['EventTreeDumpInfo'])
-                # 从'EventTreeDumpInfo'开始截取直到行末
-                newline = line[new_index:]
-                # 将处理后的行写入临时文件
-                outfile.write(newline)
-            else:
-                # 否则直接写入临时文件
-                outfile.write(line)
+    with open(input_file, 'r', encoding='utf-8') as infile:
+        flags = os.O_WRONLY | os.O_CREAT
+        mode = stat.S_IWUSR | stat.S_IRUSR
+        with os.fdopen(os.open(output_file, flags, mode), 'w') as outfile:
+            event_tree_dump_info_key = get_dict_value(keywords_dict, 'EventTreeDumpInfo')
+            # 遍历输入文件的每一行
+            for line in infile:
+                # 查找'EventTreeDumpInfo'的位置
+                index = line.find(event_tree_dump_info_key)
+                # 如果找到了'EventTreeDumpInfo: '
+                if index != -1:
+                    new_index = index + len(event_tree_dump_info_key)
+                    # 从'EventTreeDumpInfo'开始截取直到行末
+                    newline = line[new_index:]
+                    # 将处理后的行写入临时文件
+                    outfile.write(newline)
+                else:
+                    # 否则直接写入临时文件
+                    outfile.write(line)
     log_info("输入文件预处理完成：" + input_file + "->" + output_file)
 

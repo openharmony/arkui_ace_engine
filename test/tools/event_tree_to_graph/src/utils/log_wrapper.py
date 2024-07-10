@@ -23,18 +23,9 @@ from logging import handlers
 class LogWrapper:
     logger = None
 
-    # log levels definition
-    log_levels = {
-        'debug': logging.DEBUG,
-        'info': logging.INFO,
-        'warning': logging.WARNING,
-        'error': logging.ERROR,
-        'critical': logging.CRITICAL
-    }
-
     def __init__(self):
         self.logger = logging.getLogger('log.txt')
-        self.logger.setLevel(self.log_levels['debug'])
+        self.logger.setLevel(logging.DEBUG)
         # max 1M
         file_handler = handlers.RotatingFileHandler(filename='log.txt', maxBytes=1 * 1024 * 1024, backupCount=3,
                                                     encoding='utf-8')
