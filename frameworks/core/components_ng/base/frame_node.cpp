@@ -4626,7 +4626,7 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
     } else if (status == OPINC_SUGGESTED_OR_EXCLUDED) {
         return OPINC_SUGGESTED_OR_EXCLUDED;
     } else if (status == OPINC_PARENT_POSSIBLE) {
-        int count = GetTotalChildCountWithoutExpand();
+        int count = GetTotalChildCountWithoutExpanded();
         for (int i = 0; i < count; i++) {
             auto child = GetOrCreateChildByIndex(i, false);
             if (!child) {

@@ -118,7 +118,6 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto childGeometryNode = childWrapper->GetGeometryNode();
     CHECK_NULL_VOID(childGeometryNode);
     auto size = geometryNode->GetFrameSize();
-
     auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
     auto padding = layoutProperty->CreatePaddingAndBorder();
     viewSize_ = size;
