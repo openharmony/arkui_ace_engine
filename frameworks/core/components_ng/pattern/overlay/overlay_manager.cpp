@@ -388,7 +388,8 @@ void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapper
     UpdateHoverImageDisappearScaleAndPosition(menuWrapperPattern, previewPattern);
 }
 
-void UpdateContextMenuDisappearPositionAnimation(const RefPtr<FrameNode>& menu, const NG::OffsetF& offset)
+void UpdateContextMenuDisappearPositionAnimation(const RefPtr<FrameNode>& menu, const NG::OffsetF& offset,
+    float menuScale)
 {
     CHECK_NULL_VOID(menu);
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
@@ -408,15 +409,17 @@ void UpdateContextMenuDisappearPositionAnimation(const RefPtr<FrameNode>& menu, 
     auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
 
+    auto scaleAfter = LessNotEqual(menuScale, 0.0) ? 1.0f : menuScale;
     auto springMotionResponse = menuTheme->GetPreviewDisappearSpringMotionResponse();
     auto springMotionDampingFraction = menuTheme->GetPreviewDisappearSpringMotionDampingFraction();
     AnimationOption positionOption;
     auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
     positionOption.SetCurve(motion);
-    AnimationUtils::Animate(positionOption, [menuRenderContext, menuPosition]() {
+    AnimationUtils::Animate(positionOption, [menuRenderContext, menuPosition, scaleAfter]() {
         CHECK_NULL_VOID(menuRenderContext);
         menuRenderContext->UpdatePosition(
             OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
+        menuRenderContext->UpdateTransformScale(VectorF(scaleAfter, scaleAfter));
     });
 }
 
@@ -586,7 +589,7 @@ void FireMenuDisappear(AnimationOption& option, const RefPtr<MenuWrapperPattern>
 }
 } // namespace
 
-void OverlayManager::UpdateContextMenuDisappearPosition(const NG::OffsetF& offset, bool isRedragStart)
+void OverlayManager::UpdateContextMenuDisappearPosition(const NG::OffsetF& offset, float menuScale, bool isRedragStart)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -608,7 +611,7 @@ void OverlayManager::UpdateContextMenuDisappearPosition(const NG::OffsetF& offse
     for (const auto& child : rootNode->GetChildren()) {
         auto node = DynamicCast<FrameNode>(child);
         if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
-            UpdateContextMenuDisappearPositionAnimation(node, overlayManager->GetUpdateDragMoveVector());
+            UpdateContextMenuDisappearPositionAnimation(node, overlayManager->GetUpdateDragMoveVector(), menuScale);
         }
     }
 }

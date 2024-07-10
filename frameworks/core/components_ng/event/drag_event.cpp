@@ -80,6 +80,7 @@ constexpr Dimension BADGE_RELATIVE_OFFSET = 8.0_vp;
 constexpr float DEFAULT_OPACITY = 0.95f;
 constexpr float MIN_OPACITY { 0.0f };
 constexpr float MAX_OPACITY { 1.0f };
+constexpr float MENU_DRAG_SCALE = 0.05f;
 #if defined(PIXEL_MAP_SUPPORTED)
 constexpr int32_t CREATE_PIXELMAP_TIME = 80;
 #endif
@@ -748,22 +749,27 @@ void DragEventActuator::HandleDragDampingMove(const Point& point, int32_t pointe
         return;
     }
     auto startPoint = dragDropManager->GetDragDampStartPoint();
-    auto delta = Point(point.GetX(), point.GetY()) - startPoint;
     //get the number with VP unit
     auto distance = SystemProperties::GetDragStartPanDistanceThreshold();
-    if (delta.GetDistance() > Dimension(distance, DimensionUnit::VP).ConvertToPx()) {
+    auto dragPanDistance = Dimension(distance, DimensionUnit::VP).ConvertToPx();
+    auto dragStartDampingRatio = SystemProperties::GetDragStartDampingRatio();
+    auto dragTotalDistance = dragDropManager->GetUpdateDragMovePosition();
+    auto delta = Offset(dragTotalDistance.GetX(), dragTotalDistance.GetY());
+    // delta.GetDistance(): pixelMap real move distance
+    if (delta.GetDistance() > dragPanDistance * dragStartDampingRatio) {
         return;
     }
-    auto dragStartDampingRatio = SystemProperties::GetDragStartDampingRatio();
+    // linear decrease for menu scale from 100% to 95% within drag damping range
+    auto previewMenuSacle = 1.0f - delta.GetDistance() / (dragPanDistance * dragStartDampingRatio) * MENU_DRAG_SCALE;
     auto updateOffset =
         OffsetF(dragStartDampingRatio * point.GetX() + (1 - dragStartDampingRatio) * startPoint.GetX(),
             dragStartDampingRatio * point.GetY() + (1 - dragStartDampingRatio) * startPoint.GetY());
     if (isRedragStart && !isRedragStart_) {
         isRedragStart_ = true;
-        SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, true);
+        SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, true);
         dragDropManager->UpdateDragMovePosition(updateOffset, true);
     } else {
-        SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, false);
+        SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, false);
         dragDropManager->UpdateDragMovePosition(updateOffset, false);
     }
     SubwindowManager::GetInstance()->UpdatePreviewPosition();

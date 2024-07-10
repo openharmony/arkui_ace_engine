@@ -323,7 +323,8 @@ public:
     void RemoveFilterAnimation();
     void RemoveEventColumn();
     void UpdatePixelMapPosition(bool isSubwindowOverlay = false);
-    void UpdateContextMenuDisappearPosition(const NG::OffsetF& offset, bool isRedragStart = false);
+    void UpdateContextMenuDisappearPosition(const NG::OffsetF& offset, float menuScale = 1.0f,
+	    bool isRedragStart = false);
     void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
         const NG::OffsetF& offset);
 
