@@ -5240,13 +5240,13 @@ void WebPattern::DestroyAnalyzerOverlay()
     }
 }
 
-void WebPattern::OnAccessibilityHoverEvent(const PointF& point)
+bool WebPattern::OnAccessibilityHoverEvent(const PointF& point)
 {
-    CHECK_NULL_VOID(delegate_);
+    CHECK_NULL_RETURN(delegate_, false);
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(host, false);
     auto pipelineContext = host->GetContextRefPtr();
-    CHECK_NULL_VOID(pipelineContext);
+    CHECK_NULL_RETURN(pipelineContext, false);
     auto viewScale = pipelineContext->GetViewScale();
     int32_t globalX = static_cast<int32_t>(point.GetX()) * viewScale;
     int32_t globalY = static_cast<int32_t>(point.GetY()) * viewScale;
@@ -5254,6 +5254,7 @@ void WebPattern::OnAccessibilityHoverEvent(const PointF& point)
     globalX = static_cast<int32_t>(globalX - offset.GetX());
     globalY = static_cast<int32_t>(globalY - offset.GetY());
     delegate_->HandleAccessibilityHoverEvent(globalX, globalY);
+    return true;
 }
 
 void WebPattern::RegisterTextBlurCallback(TextBlurCallback&& callback)
