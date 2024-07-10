@@ -14,7 +14,7 @@
  */
 
 import { Drawer } from '../../components/Drawer';
-import { RadioBlock, SliderBlock } from 'components';
+import { RadioBlock, SliderBlock } from 'common';
 import promptAction from '@ohos.promptAction';
 
 @Component
