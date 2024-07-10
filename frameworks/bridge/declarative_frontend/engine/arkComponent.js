@@ -2880,6 +2880,16 @@ function parseWithDefaultNumber(val, defaultValue) {
   else { return defaultValue; }
 }
 function modifierWithKey(modifiers, identity, modifierClass, value) {
+  if (typeof modifiers.isFrameNode === "function" && modifiers.isFrameNode()) {
+    if (!modifierClass.instance) {
+      modifierClass.instance = new modifierClass(value);
+    }
+    else {
+      modifierClass.instance.stageValue = value;
+    }
+    modifiers.set(identity, modifierClass.instance);
+    return;
+  }
   const item = modifiers.get(identity);
   if (item) {
     item.stageValue = value;
@@ -2893,6 +2903,7 @@ function modifierWithKey(modifiers, identity, modifierClass, value) {
 class ObservedMap {
   constructor() {
       this.map_ = new Map();
+      this.isFrameNode_ = false;
   }
   clear() {
       this.map_.clear();
@@ -2933,8 +2944,11 @@ class ObservedMap {
   get [Symbol.toStringTag]() {
       return 'ObservedMapTag';
   }
-  setOnChange(callback) {
-      this.changeCallback = callback;
+  setFrameNode(isFrameNode) {
+    this.isFrameNode_ = isFrameNode
+  }
+  isFrameNode() {
+    return this.isFrameNode_;
   }
 }
 
@@ -2958,7 +2972,8 @@ class ArkComponent {
         if (this._instanceId !== -1) {
           __JSScopeUtil__.restoreInstanceId();
         }
-      })
+      });
+      this._modifiersWithKeys.setFrameNode(true);
     } else if (classType === ModifierType.EXPOSE_MODIFIER || classType === ModifierType.STATE) {
       this._modifiersWithKeys = new ObservedMap();
     } else {
