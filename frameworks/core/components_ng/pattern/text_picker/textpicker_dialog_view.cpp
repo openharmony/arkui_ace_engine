@@ -43,7 +43,6 @@ const int32_t THIRD_DIVEDER_NODE_INDEX = 5;
 const int32_t BACKWARD_BUTTON_DIVEDER_INDEX = 2;
 const int32_t FORWAED_BUTTON_DIVEDER_INDEX = 4;
 const int32_t CONFIRM_BUTTON_DIVEDER_INDEX = 6;
-constexpr uint8_t PIXEL_ROUND = 18;
 constexpr size_t ACCEPT_BUTTON_INDEX = 0;
 constexpr size_t CANCEL_BUTTON_INDEX = 1;
 constexpr size_t BACKWARD_BUTTON_INDEX = 2;
@@ -173,7 +172,6 @@ void TextPickerDialogView::OptionsCreateNode(const RefPtr<TextPickerPattern>& te
             auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
             layoutProperty->UpdateAlignment(Alignment::CENTER);
             layoutProperty->UpdateLayoutWeight(1);
-            columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
             stackNode->MountToParent(textPickerNode);
         }
     }

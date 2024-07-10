@@ -38,7 +38,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float PICKER_MAXFONTSCALE = 1.0f;
 const int32_t BUFFER_NODE_NUMBER = 2;
-constexpr uint8_t PIXEL_ROUND = 18;
 
 void SetDialogProperties(DialogProperties& properties, TextPickerDialog& textPickerDialog,
                          const RefPtr<DialogTheme>& theme)
@@ -101,7 +100,6 @@ void TextPickerModelNG::Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnK
         columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
-        columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
         stackNode->MountToParent(textPickerNode);
     }
     stack->Push(textPickerNode);
@@ -440,7 +438,6 @@ void TextPickerModelNG::SetUnCascadeColumns(const std::vector<NG::TextCascadePic
             columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
             layoutProperty->UpdateAlignment(Alignment::CENTER);
-            columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
             stackNode->MountToParent(AceType::Claim(frameNode));
         }
     }
@@ -480,7 +477,6 @@ void TextPickerModelNG::SetCascadeColumns(const std::vector<NG::TextCascadePicke
             columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
             layoutProperty->UpdateAlignment(Alignment::CENTER);
-            columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
             stackNode->MountToParent(AceType::Claim<NG::FrameNode>(frameNode));
         }
     }
@@ -837,7 +833,6 @@ void TextPickerModelNG::SetRange(FrameNode* frameNode, const std::vector<NG::Ran
         columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
-        columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
         stackNode->MountToParent(AceType::Claim(frameNode));
     }
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
@@ -878,7 +873,6 @@ void TextPickerModelNG::SetUnCascadeColumnsNode(FrameNode* frameNode,
             columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
             layoutProperty->UpdateAlignment(Alignment::CENTER);
-            columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
             stackNode->MountToParent(AceType::Claim(frameNode));
         }
     }
@@ -918,7 +912,6 @@ void TextPickerModelNG::SetCascadeColumnsNode(FrameNode* frameNode,
             columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
             layoutProperty->UpdateAlignment(Alignment::CENTER);
-            columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
             stackNode->MountToParent(AceType::Claim(frameNode));
         }
     }
