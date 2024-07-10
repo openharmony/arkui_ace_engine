@@ -8867,7 +8867,9 @@ void RichEditorPattern::BeforeRedo(
             RichEditorDeleteDirection::FORWARD);
     } else if (record.addText.has_value()) {
         innerPosition = std::min(innerPosition, record.afterCaretPosition);
-        GetReplacedSpan(changeValue, innerPosition, record.addText.value(), innerPosition, std::nullopt, std::nullopt);
+        int32_t innerAddPosition = record.afterCaretPosition - record.addText.value().length();
+        GetReplacedSpan(changeValue, innerAddPosition, record.addText.value(), innerPosition,
+            std::nullopt, std::nullopt);
     }
 }
 
