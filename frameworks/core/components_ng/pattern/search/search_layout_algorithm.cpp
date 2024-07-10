@@ -711,46 +711,21 @@ void SearchLayoutAlgorithm::LayoutTextField(const LayoutSearchParams& params)
     auto layoutProperty = DynamicCast<SearchLayoutProperty>(params.layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto padding = layoutProperty->CreatePaddingAndBorder();
-    auto dividerSideSpace = params.searchTheme->GetDividerSideSpace().ConvertToPx();
-    auto dividerWidth = params.searchTheme->GetSearchDividerWidth().ConvertToPx();
 
     auto textFieldWrapper = params.layoutWrapper->GetOrCreateChildByIndex(TEXTFIELD_INDEX);
     CHECK_NULL_VOID(textFieldWrapper);
     auto textFieldGeometryNode = textFieldWrapper->GetGeometryNode();
     CHECK_NULL_VOID(textFieldGeometryNode);
+
+    auto hostGeometryNode = params.layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(hostGeometryNode);
+
     auto textFieldHorizontalOffset = 0;
-
-    auto searchButtonWrapper = params.layoutWrapper->GetOrCreateChildByIndex(BUTTON_INDEX);
-    CHECK_NULL_VOID(searchButtonWrapper);
-    auto searchButtonGeometryNode = searchButtonWrapper->GetGeometryNode();
-    auto searchButtonFrameSize = searchButtonGeometryNode->GetFrameSize();
-    auto searchButtonHorizontalOffset = searchButtonGeometryNode->GetMarginFrameOffset().GetX();
-
-    auto cancelButtonWrapper = params.layoutWrapper->GetOrCreateChildByIndex(CANCEL_BUTTON_INDEX);
-    CHECK_NULL_VOID(cancelButtonWrapper);
-    auto cancelButtonGeometryNode = cancelButtonWrapper->GetGeometryNode();
-    auto cancelButtonFrameWidth = cancelButtonGeometryNode->GetFrameSize().Width();
-
-    auto searchButtonEvent = searchButtonWrapper->GetHostNode()->GetEventHub<ButtonEventHub>();
-
-    auto style = params.layoutProperty->GetCancelButtonStyle().value_or(CancelButtonStyle::INPUT);
     if (params.isRTL) {
-        if (searchButtonEvent->IsEnabled()) {
-            if (style != CancelButtonStyle::INVISIBLE) {
-                textFieldHorizontalOffset = searchButtonHorizontalOffset + searchButtonFrameSize.Width() +
-                    TWO * dividerSideSpace + dividerWidth + searchIconLeftSpace + cancelButtonFrameWidth;
-            } else {
-                textFieldHorizontalOffset =
-                    searchButtonHorizontalOffset + searchButtonFrameSize.Width() + searchIconLeftSpace;
-            }
-        } else {
-            if (style != CancelButtonStyle::INVISIBLE) {
-                textFieldHorizontalOffset =
-                    searchButtonHorizontalOffset + cancelButtonFrameWidth + searchIconRightSpace;
-            } else {
-                textFieldHorizontalOffset = searchButtonHorizontalOffset + searchIconRightSpace;
-            }
-        }
+        auto rightOffset = searchIconWidth + searchIconLeftSpace
+            + searchIconRightSpace + padding.right.value_or(0.0f);
+        textFieldHorizontalOffset = hostGeometryNode->GetFrameSize().Width()
+            - rightOffset - textFieldGeometryNode->GetFrameSize().Width();
     } else {
         textFieldHorizontalOffset = searchIconWidth + searchIconLeftSpace
             + searchIconRightSpace + padding.left.value_or(0.0f);
