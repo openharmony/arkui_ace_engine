@@ -44,8 +44,8 @@ public:
 protected:
     void OnParseStyle();
     void OnParseResourceMedia(const std::string& attrName, const std::string& attrValue);
-    std::promise promise_;
-    std::shared_future future_ = promise_.get_future();
+    std::promise<void> promise_;
+    std::shared_future<void> future_ = promise_.get_future();
 private:
     RawAttrMap rawAttrs_; // key and value read from global resource api.
     RawPatternMap patternAttrs_;
