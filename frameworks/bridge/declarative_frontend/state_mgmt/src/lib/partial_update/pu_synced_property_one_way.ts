@@ -472,7 +472,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
         }
         stack.pop();
       });
-      return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
+      return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, undefined) : copy;
     }
   }
 }
