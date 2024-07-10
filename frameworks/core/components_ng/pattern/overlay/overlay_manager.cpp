@@ -142,6 +142,8 @@ constexpr int32_t DUMP_LOG_DEPTH_2 = 2;
 
 constexpr int32_t EVENT_COLUMN_SLOT = -2;
 
+const float MINIMUM_AMPLITUDE_RATION = 0.08f;
+
 // UIExtensionComponent Transform param key
 #if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
 constexpr char WANT_PARAM_UIEXTNODE_ANGLE_KEY[] = "modalUIExtNodeAngle";
@@ -576,6 +578,7 @@ void FireMenuDisappear(AnimationOption& option, const RefPtr<MenuWrapperPattern>
     CHECK_NULL_VOID(menuNode);
     auto menuRenderContext = menuNode->GetRenderContext();
     CHECK_NULL_VOID(menuRenderContext);
+    MENU_ANIMATION_CURVE->UpdateMinimumAmplitudeRatio(MINIMUM_AMPLITUDE_RATION);
     option.SetCurve(MENU_ANIMATION_CURVE);
     AnimationUtils::Animate(option, [menuRenderContext]() {
         if (menuRenderContext) {
