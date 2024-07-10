@@ -111,7 +111,7 @@ bool ParseJsDouble(const EcmaVM *vm, const Local<JSValueRef> &value, double &res
         return true;
     }
     if (value->IsString(vm)) {
-        return StringUtils::StringToDouble(value->ToString(vm)->ToString(), result);
+        return StringUtils::StringToDouble(value->ToString(vm)->ToString(vm), result);
     }
 
     return false;
@@ -124,7 +124,7 @@ bool ParseJsInt32(const EcmaVM *vm, const Local<JSValueRef> &value, int32_t &res
         return true;
     }
     if (value->IsString(vm)) {
-        result = StringUtils::StringToInt(value->ToString(vm)->ToString());
+        result = StringUtils::StringToInt(value->ToString(vm)->ToString(vm));
         return true;
     }
 
@@ -138,7 +138,7 @@ void ParseJsAngle(const EcmaVM *vm, const Local<JSValueRef> &value, std::optiona
         return;
     }
     if (value->IsString(vm)) {
-        angle = static_cast<float>(StringUtils::StringToDegree(value->ToString(vm)->ToString()));
+        angle = static_cast<float>(StringUtils::StringToDegree(value->ToString(vm)->ToString(vm)));
         return;
     }
     return;
@@ -194,7 +194,7 @@ void ParseGradientColorStops(const EcmaVM *vm, const Local<JSValueRef> &value, s
 bool ParseJsShadowColorStrategy(const EcmaVM *vm, const Local<JSValueRef> &value, ShadowColorStrategy& strategy)
 {
     if (value->IsString(vm)) {
-        std::string colorStr = value->ToString(vm)->ToString();
+        std::string colorStr = value->ToString(vm)->ToString(vm);
         if (colorStr.compare("average") == 0) {
             strategy = ShadowColorStrategy::AVERAGE;
             return true;
@@ -354,7 +354,7 @@ bool ParseBorderImageRepeat(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t& off
     auto repeatHasValue = repeatArg->IsString(vm);
     auto repeatValue = BorderImageRepeat::STRETCH;
     if (repeatHasValue) {
-        auto repeatStr = repeatArg->ToString(vm)->ToString();
+        auto repeatStr = repeatArg->ToString(vm)->ToString(vm);
         if (repeatStr == "Repeat") {
             repeatValue = BorderImageRepeat::REPEAT;
         } else if (repeatStr == "Round") {
@@ -383,7 +383,7 @@ bool ParseBorderImageFill(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t& offse
     }
     auto fillArg = runtimeCallInfo->GetCallArgRef(offset);
     auto hasValue = fillArg->IsBoolean();
-    auto fill = (hasValue) ? fillArg->BooleaValue() : false;
+    auto fill = (hasValue) ? fillArg->BooleaValue(runtimeCallInfo->GetVM()) : false;
     options.push_back(ArkUIStringAndFloat {static_cast<double>(hasValue), nullptr });
     options.push_back(ArkUIStringAndFloat {static_cast<double>(fill), nullptr });
     offset += NUM_1;
@@ -430,7 +430,7 @@ void ParseBorderImageLinearGradient(ArkUINodeHandle node,
 
     std::vector<ArkUIInt32orFloat32> colors;
     ParseGradientColorStops(vm, colorsArg, colors);
-    auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue() : false;
+    auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue(runtimeCallInfo->GetVM()) : false;
     options.push_back({.i32 = static_cast<ArkUI_Int32>(repeating)});
     GetArkUINodeModifiers()->getCommonModifier()->setBorderImageGradient(node,
         options.data(), options.size(), colors.data(), colors.size());
@@ -450,7 +450,7 @@ bool ParseBorderImageSource(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t& off
     offset += NUM_1;
     auto vm = runtimeCallInfo->GetVM();
     if (sourceArg->IsString(vm)) {
-        src = sourceArg->ToString(vm)->ToString();
+        src = sourceArg->ToString(vm)->ToString(vm);
         bitsets |= BorderImage::SOURCE_BIT;
     } else {
         if (ArkTSUtils::ParseJsMedia(vm, sourceArg, src)) {
@@ -1106,10 +1106,10 @@ bool ParseAxisDimensionVp(const EcmaVM *vm, const Local<JSValueRef> &jsValue, Ca
     }
     if (jsValue->IsString(vm)) {
         if (checkIllegal) {
-            return StringUtils::StringToDimensionWithUnitNG(jsValue->ToString(vm)->ToString(), result,
+            return StringUtils::StringToDimensionWithUnitNG(jsValue->ToString(vm)->ToString(vm), result,
                 DimensionUnit::VP);
         }
-        result = StringUtils::StringToCalcDimension(jsValue->ToString(vm)->ToString(), false, DimensionUnit::VP);
+        result = StringUtils::StringToCalcDimension(jsValue->ToString(vm)->ToString(vm), false, DimensionUnit::VP);
         return true;
     }
     return false;
@@ -1125,7 +1125,7 @@ void ParseDirection(EcmaVM *vm, const Local<JSValueRef> &directionArg, float &va
 void GetJsAngle(const EcmaVM* vm, const Local<JSValueRef>& angleArg, std::optional<float>& angle)
 {
     if (angleArg->IsString(vm)) {
-        angle = static_cast<float>(StringUtils::StringToDegree(angleArg->ToString(vm)->ToString()));
+        angle = static_cast<float>(StringUtils::StringToDegree(angleArg->ToString(vm)->ToString(vm)));
     } else if (angleArg->IsNumber()) {
         angle = static_cast<float>(angleArg->ToNumber(vm)->Value());
     } else {
@@ -1314,7 +1314,7 @@ void ParseResizableCalcDimensions(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_
 bool ParseJsAlignRule(const EcmaVM* vm, const Local<JSValueRef> &arg, std::string& anchor, ArkUI_Int32 &direction)
 {
     if (arg->IsString(vm)) {
-        std::string directionString = arg->ToString(vm)->ToString();
+        std::string directionString = arg->ToString(vm)->ToString(vm);
         if (directionString.empty()) {
             return false;
         }
@@ -1348,8 +1348,8 @@ bool ParseResponseRegion(const EcmaVM* vm, const Local<JSValueRef>& jsValue, Ark
         CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
         CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
         CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
-        auto s1 = width->ToString(vm)->ToString();
-        auto s2 = height->ToString(vm)->ToString();
+        auto s1 = width->ToString(vm)->ToString(vm);
+        auto s2 = height->ToString(vm)->ToString(vm);
         if (s1.find('-') != std::string::npos) {
             width = ToJSValue("100%");
         }
@@ -1933,7 +1933,7 @@ ArkUINativeModuleValue CommonBridge::SetBorderStyle(ArkUIRuntimeCallInfo *runtim
     auto bottomArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     auto leftArg = runtimeCallInfo->GetCallArgRef(NUM_6);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if ((!typeArg->IsBoolean()) || (!typeArg->BooleaValue())) {
+    if ((!typeArg->IsBoolean()) || (!typeArg->BooleaValue(vm))) {
         int32_t styles[] = { static_cast<int32_t>(BorderStyle::SOLID) };
         GetArkUINodeModifiers()->getCommonModifier()->setBorderStyle(nativeNode, styles,
             (sizeof(styles) / sizeof(styles[NUM_0])));
@@ -2019,7 +2019,7 @@ ArkUINativeModuleValue CommonBridge::SetShadow(ArkUIRuntimeCallInfo *runtimeCall
         shadows[NUM_1].i32 = type;
         shadows[NUM_5].u32 = color;
     }
-    shadows[NUM_6].i32 = fillArg->IsBoolean() ? fillArg->BooleaValue() : false;
+    shadows[NUM_6].i32 = fillArg->IsBoolean() ? fillArg->BooleaValue(vm) : false;
     GetArkUINodeModifiers()->getCommonModifier()->setBackShadow(nativeNode, shadows,
         (sizeof(shadows) / sizeof(shadows[NUM_0])), NUM_0);
     return panda::JSValueRef::Undefined(vm);
@@ -2180,7 +2180,7 @@ ArkUINativeModuleValue CommonBridge::SetHueRotate(ArkUIRuntimeCallInfo *runtimeC
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::optional<float> degree;
     if (secondArg->IsString(vm)) {
-        degree = static_cast<float>(StringUtils::StringToDegree(secondArg->ToString(vm)->ToString()));
+        degree = static_cast<float>(StringUtils::StringToDegree(secondArg->ToString(vm)->ToString(vm)));
     } else if (secondArg->IsNumber()) {
         degree = static_cast<float>(secondArg->ToNumber(vm)->Value());
     } else {
@@ -2464,7 +2464,7 @@ ArkUINativeModuleValue CommonBridge::SetLinearGradient(ArkUIRuntimeCallInfo *run
 
     std::vector<ArkUIInt32orFloat32> colors;
     ParseGradientColorStops(vm, colorsArg, colors);
-    auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue() : false;
+    auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue(vm) : false;
     values.push_back({.i32 = static_cast<ArkUI_Float32>(repeating)});
     GetArkUINodeModifiers()->getCommonModifier()->setLinearGradient(nativeNode, values.data(), values.size(),
         colors.data(), colors.size());
@@ -2500,7 +2500,7 @@ ArkUINativeModuleValue CommonBridge::SetSweepGradient(ArkUIRuntimeCallInfo *runt
     ParseGradientAngle(vm, rotationArg, values);
     std::vector<ArkUIInt32orFloat32> colors;
     ParseGradientColorStops(vm, colorsArg, colors);
-    auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue() : false;
+    auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue(vm) : false;
     values.push_back({.i32 = static_cast<ArkUI_Int32>(repeating)});
     GetArkUINodeModifiers()->getCommonModifier()->setSweepGradient(nativeNode, values.data(), values.size(),
         colors.data(), colors.size());
@@ -2536,7 +2536,7 @@ ArkUINativeModuleValue CommonBridge::SetRadialGradient(ArkUIRuntimeCallInfo *run
     values.push_back({.i32 = static_cast<ArkUI_Int32>(radius.Unit())});
     std::vector<ArkUIInt32orFloat32> colors;
     ParseGradientColorStops(vm, colorsArg, colors);
-    auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue() : false;
+    auto repeating = repeatingArg->IsBoolean() ? repeatingArg->BooleaValue(vm) : false;
     values.push_back({.i32 = static_cast<ArkUI_Int32>(repeating)});
     GetArkUINodeModifiers()->getCommonModifier()->setRadialGradient(nativeNode, values.data(), values.size(),
         colors.data(), colors.size());
@@ -2568,7 +2568,7 @@ ArkUINativeModuleValue CommonBridge::SetOverlay(ArkUIRuntimeCallInfo* runtimeCal
 
     std::optional<std::string> text;
     if (valueArg->IsString(vm)) {
-        text = valueArg->ToString(vm)->ToString();
+        text = valueArg->ToString(vm)->ToString(vm);
     }
     int32_t align = ALIGNMENT_TOP_LEFT;
     auto hasAlign = ArkTSUtils::ParseJsInteger(vm, alignArg, align);
@@ -3009,7 +3009,7 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImage(ArkUIRuntimeCallInfo *ru
         repeatIndex = repeatArg->ToNumber(vm)->Value();
     }
     if (srcArg->IsString(vm)) {
-        src = srcArg->ToString(vm)->ToString();
+        src = srcArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImage(
             nativeNode, src.c_str(), bundle.c_str(), module.c_str(), repeatIndex);
     } else if (ArkTSUtils::ParseJsMedia(vm, srcArg, src)) {
@@ -3198,7 +3198,7 @@ ArkUINativeModuleValue CommonBridge::SetGeometryTransition(ArkUIRuntimeCallInfo 
         GetArkUINodeModifiers()->getCommonModifier()->resetGeometryTransition(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    std::string id = idArg->ToString(vm)->ToString();
+    std::string id = idArg->ToString(vm)->ToString(vm);
     ArkUIGeometryTransitionOptions options = {false, static_cast<int32_t>(TransitionHierarchyStrategy::ADAPTIVE)};
     if (followArg->IsBoolean()) {
         options.follow = followArg->ToBoolean(vm)->Value();
@@ -3461,7 +3461,7 @@ ArkUINativeModuleValue CommonBridge::SetForegroundColor(ArkUIRuntimeCallInfo *ru
     auto colorArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (colorArg->IsString(vm)) {
-        std::string colorStr = colorArg->ToString(vm)->ToString();
+        std::string colorStr = colorArg->ToString(vm)->ToString(vm);
         colorStr.erase(std::remove(colorStr.begin(), colorStr.end(), ' '), colorStr.end());
         std::transform(colorStr.begin(), colorStr.end(), colorStr.begin(), ::tolower);
         if (colorStr.compare("invert") == 0) {
@@ -3500,7 +3500,7 @@ ArkUINativeModuleValue CommonBridge::SetMotionPath(ArkUIRuntimeCallInfo *runtime
     auto rotatableArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     std::string pathStringValue;
     if (pathArg->IsString(vm)) {
-        pathStringValue = pathArg->ToString(vm)->ToString();
+        pathStringValue = pathArg->ToString(vm)->ToString(vm);
     }
     float fromValue = (fromArg->IsNumber()) ? fromArg->ToNumber(vm)->Value() : 0.0f;
     float toValue = (toArg->IsNumber()) ? toArg->ToNumber(vm)->Value() : 1.0f;
@@ -3728,7 +3728,7 @@ ArkUINativeModuleValue CommonBridge::SetAccessibilityLevel(ArkUIRuntimeCallInfo*
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsString(vm)) {
-        std::string stringValue = secondArg->ToString(vm)->ToString();
+        std::string stringValue = secondArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getCommonModifier()->setAccessibilityLevel(nativeNode, stringValue.c_str());
     } else {
         GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityLevel(nativeNode);
@@ -3754,7 +3754,7 @@ ArkUINativeModuleValue CommonBridge::SetAccessibilityDescription(ArkUIRuntimeCal
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsString(vm)) {
-        std::string stringValue = secondArg->ToString(vm)->ToString();
+        std::string stringValue = secondArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getCommonModifier()->setAccessibilityDescription(nativeNode, stringValue.c_str());
     } else {
         GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityDescription(nativeNode);
@@ -4065,7 +4065,7 @@ ArkUINativeModuleValue CommonBridge::SetAccessibilityText(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsString(vm)) {
-        std::string stringValue = secondArg->ToString(vm)->ToString();
+        std::string stringValue = secondArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getCommonModifier()->setAccessibilityText(nativeNode, stringValue.c_str());
     } else {
         GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityText(nativeNode);
@@ -4176,7 +4176,7 @@ ArkUINativeModuleValue CommonBridge::SetDirection(ArkUIRuntimeCallInfo* runtimeC
     std::string dir;
     int32_t direction = NUM_3;
     if (secondArg->IsString(vm)) {
-        dir = secondArg->ToString(vm)->ToString();
+        dir = secondArg->ToString(vm)->ToString(vm);
         if (dir == "Ltr") {
             direction = NUM_0;
         } else if (dir == "Rtl") {
@@ -4217,9 +4217,9 @@ ArkUINativeModuleValue CommonBridge::SetLayoutWeight(ArkUIRuntimeCallInfo* runti
         }
     } else if (secondArg->IsString(vm)) {
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            layoutWeight = StringUtils::StringToFloat(secondArg->ToString(vm)->ToString());
+            layoutWeight = StringUtils::StringToFloat(secondArg->ToString(vm)->ToString(vm));
         } else {
-            layoutWeight = StringUtils::StringToInt(secondArg->ToString(vm)->ToString());
+            layoutWeight = StringUtils::StringToInt(secondArg->ToString(vm)->ToString(vm));
         }
     }
     GetArkUINodeModifiers()->getCommonModifier()->setLayoutWeight(nativeNode, layoutWeight);
@@ -4437,14 +4437,14 @@ ArkUINativeModuleValue CommonBridge::SetExpandSafeArea(ArkUIRuntimeCallInfo *run
     uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
     uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
     if (secondArg->IsString(vm)) {
-        typeCppStr = secondArg->ToString(vm)->ToString();
+        typeCppStr = secondArg->ToString(vm)->ToString(vm);
         safeAreaType = ParseStrToUint(typeCppStr);
     } else {
         safeAreaType = NG::SAFE_AREA_TYPE_ALL;
     }
 
     if (thirdArg->IsString(vm)) {
-        edgesCppStr = thirdArg->ToString(vm)->ToString();
+        edgesCppStr = thirdArg->ToString(vm)->ToString(vm);
         safeAreaEdge = ParseStrToUint(edgesCppStr);
     } else {
         safeAreaEdge = NG::SAFE_AREA_EDGE_ALL;
@@ -4525,7 +4525,7 @@ ArkUINativeModuleValue CommonBridge::SetFlexBasis(ArkUIRuntimeCallInfo* runtimeC
         flexBasis.value = secondArg->ToNumber(vm)->Value();
         GetArkUINodeModifiers()->getCommonModifier()->setFlexBasis(nativeNode, &flexBasis);
     } else if (secondArg->IsString(vm)) {
-        tempValueStr = secondArg->ToString(vm)->ToString();
+        tempValueStr = secondArg->ToString(vm)->ToString(vm);
         flexBasis.valueStr = tempValueStr.c_str();
         GetArkUINodeModifiers()->getCommonModifier()->setFlexBasis(nativeNode, &flexBasis);
     } else {
@@ -4565,7 +4565,7 @@ ArkUINativeModuleValue CommonBridge::SetAllowDrop(ArkUIRuntimeCallInfo* runtimeC
     std::vector<const char*> strList;
     for (size_t i = 0; i < length; i++) {
         Local<JSValueRef> objValue = allowDropArray->GetValueAt(vm, secondArg, i);
-        keepStr[i] = objValue->ToString(vm)->ToString();
+        keepStr[i] = objValue->ToString(vm)->ToString(vm);
         strList.push_back(keepStr[i].c_str());
     }
     GetArkUINodeModifiers()->getCommonModifier()->setAllowDrop(nativeNode, strList.data(), strList.size());
@@ -4590,7 +4590,7 @@ ArkUINativeModuleValue CommonBridge::SetId(ArkUIRuntimeCallInfo* runtimeCallInfo
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsString(vm)) {
-        std::string stringValue = secondArg->ToString(vm)->ToString();
+        std::string stringValue = secondArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getCommonModifier()->setId(nativeNode, stringValue.c_str());
     } else {
         GetArkUINodeModifiers()->getCommonModifier()->resetId(nativeNode);
@@ -4616,7 +4616,7 @@ ArkUINativeModuleValue CommonBridge::SetKey(ArkUIRuntimeCallInfo* runtimeCallInf
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsString(vm)) {
-        std::string stringValue = secondArg->ToString(vm)->ToString();
+        std::string stringValue = secondArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getCommonModifier()->setKey(nativeNode, stringValue.c_str());
     } else {
         GetArkUINodeModifiers()->getCommonModifier()->resetKey(nativeNode);
@@ -5511,7 +5511,7 @@ ArkUINativeModuleValue CommonBridge::SetKeyBoardShortCut(ArkUIRuntimeCallInfo* r
         OHOS::Ace::FunctionKey functionkey = static_cast<OHOS::Ace::FunctionKey>(valueArg->Int32Value(vm));
         stringValue = JSViewAbstract::GetFunctionKeyName(functionkey);
     } else {
-        stringValue = valueArg->ToString(vm)->ToString();
+        stringValue = valueArg->ToString(vm)->ToString(vm);
     }
     Local<panda::ArrayRef> keysArray = static_cast<Local<panda::ArrayRef>>(keysArg);
     auto arrLength = keysArray->Length(vm);
@@ -5918,7 +5918,7 @@ void CommonBridge::SetGestureTag(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t
     Local<JSValueRef> gestureTagArg = runtimeCallInfo->GetCallArgRef(argNumber);
     if (!gestureTagArg.IsNull() && !gestureTagArg->IsUndefined()) {
         auto gesturePtr = Referenced::Claim(reinterpret_cast<Gesture*>(gesture));
-        gesturePtr->SetTag(gestureTagArg->ToString(vm)->ToString());
+        gesturePtr->SetTag(gestureTagArg->ToString(vm)->ToString(vm));
     }
 }
 
@@ -7079,7 +7079,7 @@ ArkUINativeModuleValue CommonBridge::RemoveGestureByTag(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> gestureTagArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     if (!gestureTagArg.IsNull() && !gestureTagArg->IsUndefined()) {
-        auto tag = gestureTagArg->ToString(vm)->ToString();
+        auto tag = gestureTagArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getGestureModifier()->removeGestureFromNodeByTag(nativeNode, tag.c_str());
     }
     return panda::JSValueRef::Undefined(vm);
@@ -7197,7 +7197,7 @@ ArkUINativeModuleValue CommonBridge::SetFocusScopeId(ArkUIRuntimeCallInfo* runti
     if (!idArg->IsString(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
-    auto id = idArg->ToString(vm)->ToString();
+    auto id = idArg->ToString(vm)->ToString(vm);
     bool isGroup = false;
     if (isGroupArg->IsBoolean()) {
         isGroup = isGroupArg->ToBoolean(vm)->Value();
@@ -7231,7 +7231,7 @@ ArkUINativeModuleValue CommonBridge::SetFocusScopePriority(ArkUIRuntimeCallInfo*
     if (!scopeIdArg->IsString(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
-    auto scopeId = scopeIdArg->ToString(vm)->ToString();
+    auto scopeId = scopeIdArg->ToString(vm)->ToString(vm);
     int32_t priority = 0;
     if (priorityArg->IsNumber()) {
         priority = priorityArg->Int32Value(vm);

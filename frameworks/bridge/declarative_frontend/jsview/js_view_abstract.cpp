@@ -8510,11 +8510,11 @@ void AddInvalidateFunc(JSRef<JSObject> jsDrawModifier, NG::FrameNode* frameNode)
         CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
         Local<JSValueRef> thisObj = info->GetFunctionRef();
         auto thisObjRef = panda::Local<panda::ObjectRef>(thisObj);
-        if (thisObjRef->GetNativePointerFieldCount() < 1) {
+        if (thisObjRef->GetNativePointerFieldCount(vm) < 1) {
             return panda::JSValueRef::Undefined(vm);
         }
 
-        auto* weak = reinterpret_cast<NG::NativeWeakRef*>(thisObjRef->GetNativePointerField(0));
+        auto* weak = reinterpret_cast<NG::NativeWeakRef*>(thisObjRef->GetNativePointerField(vm, 0));
         if (weak->Invalid()) {
             return panda::JSValueRef::Undefined(vm);
         }
