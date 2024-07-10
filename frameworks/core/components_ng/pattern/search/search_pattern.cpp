@@ -1331,12 +1331,11 @@ void SearchPattern::ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json, c
     // icon size
     auto searchIconGeometryNode = searchIconFrameNode->GetGeometryNode();
     CHECK_NULL_VOID(searchIconGeometryNode);
-    auto searchIconFrameSize = Dimension(searchIconGeometryNode->GetFrameSize().Width()).ConvertToVp();
+    auto searchIconFrameSize = searchIconGeometryNode->GetFrameSize().Width();
     auto searchLayoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(searchLayoutProperty);
-    auto searchIconSize =
-        searchLayoutProperty->GetSearchIconUDSizeValue(Dimension(searchIconFrameSize, DimensionUnit::VP));
-    searchIconJson->Put("size", Dimension(searchIconSize).ToString().c_str());
+    auto searchIconSize = searchLayoutProperty->GetSearchIconUDSizeValue(Dimension(searchIconFrameSize)).ConvertToPx();
+    searchIconJson->Put("size", Dimension(searchIconSize, DimensionUnit::PX).ToString().c_str());
 
     if (searchIconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
         auto symbolLayoutProperty = searchIconFrameNode->GetLayoutProperty<TextLayoutProperty>();
@@ -1388,12 +1387,12 @@ void SearchPattern::ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json,
     // icon size
     auto cancelIconGeometryNode = cancelImageFrameNode->GetGeometryNode();
     CHECK_NULL_VOID(cancelIconGeometryNode);
-    auto cancelIconFrameSize = Dimension(cancelIconGeometryNode->GetFrameSize().Width()).ConvertToVp();
+    auto cancelIconFrameSize = cancelIconGeometryNode->GetFrameSize().Width();
     auto searchLayoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(searchLayoutProperty);
     auto cancelIconSize =
-        searchLayoutProperty->GetCancelButtonUDSizeValue(Dimension(cancelIconFrameSize, DimensionUnit::VP));
-    cancelIconJson->Put("size", Dimension(cancelIconSize).ToString().c_str());
+        searchLayoutProperty->GetCancelButtonUDSizeValue(Dimension(cancelIconFrameSize)).ConvertToPx();
+    cancelIconJson->Put("size", Dimension(cancelIconSize, DimensionUnit::PX).ToString().c_str());
     if (cancelImageFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
         auto symbolLayoutProperty = cancelImageFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolLayoutProperty);
