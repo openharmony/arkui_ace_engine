@@ -109,7 +109,7 @@ void ArcScrollBar::SetRoundTrickRegion(
 
     double activeSize = 0.0;
     if (LessOrEqual(estimatedHeight, 0.0)) {
-        TAG_LOGE(AceLogTag::ACE_SCROLL_BAR, ("estimatedHeight:%{public}1f", estimatedHeight);
+        TAG_LOGE(AceLogTag::ACE_SCROLL_BAR, "estimatedHeight:%{public}1f", estimatedHeight);
         return;
     } else {
         activeSize = barRegionSize * (mainSize / estimatedHeight) - GetOutBoundary();
