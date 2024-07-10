@@ -3597,13 +3597,13 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     height = selectController_->GetCaretRect().Bottom() + windowRect.Top() +
              textPaintOffset.GetY() + offset - positionY;
 
+    GetInlinePositionYAndHeight(positionY, height);
+
     auto manager = pipeline->GetSafeAreaManager();
     if (manager) {
         auto keyboardOffset = manager->GetKeyboardOffset();
         positionY -= keyboardOffset;
     }
-
-    GetInlinePositionYAndHeight(positionY, height);
 
     TAG_LOGI(
         AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d MiscTextConfig positionY: %{public}f, height: %{public}f",
@@ -3638,18 +3638,14 @@ void TextFieldPattern::GetInlinePositionYAndHeight(double& positionY, double& he
         auto offset = AVOID_OFFSET.ConvertToPx();
         auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
         PaddingProperty userPadding;
-        MarginProperty userMargin;
         if (paintProperty->HasPaddingByUser()) {
             userPadding = paintProperty->GetPaddingByUserValue();
         } else {
             userPadding.top = CalcLength(theme->GetPadding().Top());
         }
-        if (paintProperty->HasMarginByUser()) {
-            userMargin = paintProperty->GetMarginByUserValue();
-        }
-        auto topMargin = userPadding.top->GetDimension().ConvertToPx() + userMargin.top->GetDimension().ConvertToPx();
+        auto topPadding = userPadding.top->GetDimension().ConvertToPx();
         auto safeBoundary = theme->GetInlineBorderWidth().ConvertToPx() * 2;
-        positionY += static_cast<double>(inlineMeasureItem_.inlineSizeHeight) + safeBoundary + topMargin;
+        positionY += static_cast<double>(inlineMeasureItem_.inlineSizeHeight) + safeBoundary + topPadding;
         height = offset;
     }
 }
