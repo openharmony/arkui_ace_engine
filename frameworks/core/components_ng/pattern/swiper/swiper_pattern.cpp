@@ -2482,17 +2482,6 @@ void SwiperPattern::UpdateAnimationProperty(float velocity)
     moveDirection_ = velocity <= 0;
 }
 
-void SwiperPattern::OnTouchTestHit(SourceType hitTestType)
-{
-    // in mouse hover test case.
-    if (hitTestType == SourceType::MOUSE) {
-        return;
-    }
-    if (!isTouchDown_) {
-        isTouchDown_ = true;
-    }
-}
-
 void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     if (info.GetTouches().empty()) {
