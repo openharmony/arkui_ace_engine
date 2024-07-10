@@ -33,7 +33,6 @@ const int32_t DIVIDER_ROWS_THREE = 3;
 const int32_t MARGIN_HALF = 2;
 const int32_t BUFFER_NODE_NUMBER = 2;
 constexpr Dimension PICKER_DIALOG_MARGIN_FORM_EDGE = 24.0_vp;
-constexpr uint8_t PIXEL_ROUND = 18;
 constexpr size_t ACCEPT_BUTTON_INDEX = 0;
 constexpr size_t CANCEL_BUTTON_INDEX = 1;
 } // namespace
@@ -130,7 +129,6 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateLayoutWeight(1);
         stackHourNode->MountToParent(timePickerNode);
-        hourColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
     if (!hasMinuteNode) {
         auto stackMinuteNode = CreateStackNode();
@@ -143,7 +141,6 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateLayoutWeight(1);
         stackMinuteNode->MountToParent(timePickerNode);
-        minuteColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
     timePickerRowPattern->SetHasSecond(settingData.showSecond);
     auto it = timePickerProperty.find("selected");
