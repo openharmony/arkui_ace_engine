@@ -4438,9 +4438,8 @@ void SwiperPattern::PostIdleTask(const RefPtr<FrameNode>& frameNode)
                 }
                 cachedItems.erase(it++);
             }
-
+            pattern->SetCachedItems(cachedItems);
             if (!cachedItems.empty()) {
-                pattern->SetCachedItems(cachedItems);
                 pattern->PostIdleTask(frameNode);
             }
         });
