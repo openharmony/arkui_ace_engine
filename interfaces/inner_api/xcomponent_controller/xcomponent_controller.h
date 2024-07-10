@@ -19,6 +19,7 @@
 #include <memory>
 
 typedef struct napi_value__* napi_value;
+typedef struct napi_env__* napi_env;
 
 namespace OHOS::Ace {
 #ifndef ACE_EXPORT
@@ -44,7 +45,8 @@ public:
      * @brief Get xcomponentController from napiValue converted by jsXComponentController
      *
      */
-    static std::shared_ptr<XComponentController> GetXComponentControllerFromNapiValue(napi_value napiValue);
+    static std::shared_ptr<XComponentController> GetXComponentControllerFromNapiValue(napi_env env,
+        napi_value napiValue);
     XComponentController() = default;
     virtual ~XComponentController() = default;
 

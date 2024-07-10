@@ -24,7 +24,7 @@ ArkUINativeModuleValue RowSplitBridge::SetResizable(ArkUIRuntimeCallInfo *runtim
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     bool resizable = false;
     if (resizableArg->IsBoolean()) {
-        resizable = resizableArg->ToBoolean(vm)->BooleaValue();
+        resizable = resizableArg->ToBoolean(vm)->BooleaValue(vm);
     }
     GetArkUINodeModifiers()->getRowSplitModifier()->setRowSplitResizable(nativeNode, resizable);
     return panda::JSValueRef::Undefined(vm);

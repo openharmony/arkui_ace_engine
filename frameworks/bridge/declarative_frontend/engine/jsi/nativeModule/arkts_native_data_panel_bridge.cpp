@@ -76,7 +76,7 @@ bool ConvertGradientColor(const EcmaVM* vm, const Local<JSValueRef>& itemParam, 
         return ConvertResourceColor(vm, itemParam, gradient);
     }
     Framework::JSLinearGradient* jsLinearGradient =
-        static_cast<Framework::JSLinearGradient*>(itemParam->ToObject(vm)->GetNativePointerField(0));
+        static_cast<Framework::JSLinearGradient*>(itemParam->ToObject(vm)->GetNativePointerField(vm, 0));
     if (!jsLinearGradient) {
         return ConvertResourceColor(vm, itemParam, gradient);
     }
@@ -298,9 +298,9 @@ ArkUINativeModuleValue DataPanelBridge::SetDataPanelStrokeWidth(ArkUIRuntimeCall
         strokeWidth = theme->GetThickness();
     }
 
-    if (jsValue->IsString(vm) && (jsValue->ToString(vm)->ToString().empty() ||
+    if (jsValue->IsString(vm) && (jsValue->ToString(vm)->ToString(vm).empty() ||
         !StringUtils::StringToDimensionWithUnitNG(
-        jsValue->ToString(vm)->ToString(), strokeWidth))) {
+        jsValue->ToString(vm)->ToString(vm), strokeWidth))) {
         strokeWidth = theme->GetThickness();
     }
 

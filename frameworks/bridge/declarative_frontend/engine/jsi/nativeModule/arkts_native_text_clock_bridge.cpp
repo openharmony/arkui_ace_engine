@@ -165,7 +165,7 @@ ArkUINativeModuleValue TextClockBridge::SetFontWeight(ArkUIRuntimeCallInfo* runt
         if (fontWeightArg->IsNumber()) {
             fontWeight = std::to_string(fontWeightArg->Int32Value(vm));
         } else if (fontWeightArg->IsString(vm)) {
-            fontWeight = fontWeightArg->ToString(vm)->ToString();
+            fontWeight = fontWeightArg->ToString(vm)->ToString(vm);
         }
     }
     GetArkUINodeModifiers()->getTextClockModifier()->setFontWeight(nativeNode, fontWeight.c_str());
@@ -218,7 +218,7 @@ ArkUINativeModuleValue TextClockBridge::SetFontFeature(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsString(vm)) {
-        auto value = secondArg->ToString(vm)->ToString();
+        auto value = secondArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getTextClockModifier()->setFontFeature(nativeNode, value.c_str());
     } else {
         GetArkUINodeModifiers()->getTextClockModifier()->resetFontFeature(nativeNode);
@@ -350,7 +350,7 @@ ArkUINativeModuleValue TextClockBridge::SetDateTimeOptions(ArkUIRuntimeCallInfo*
     ZeroPrefixType hourType = ZeroPrefixType::AUTO;
     std::string hour = TEXTCLOCK_DATE_TIME_OPTIONS_HOUR;
     if (hourArg->IsString(vm)) {
-        std::string hour = hourArg->ToString(vm)->ToString();
+        std::string hour = hourArg->ToString(vm)->ToString(vm);
         if (hour == TEXTCLOCK_DATE_TIME_OPTIONS_TWO_DIGIT_VAL) {
             hourType = ZeroPrefixType::SHOW;
         } else if (hour == TEXTCLOCK_DATE_TIME_OPTIONS_NUMERIC_VAL) {

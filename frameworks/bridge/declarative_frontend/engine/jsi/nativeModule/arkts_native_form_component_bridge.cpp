@@ -98,7 +98,7 @@ ArkUINativeModuleValue FormComponentBridge::SetModuleName(ArkUIRuntimeCallInfo* 
     if (moduleNameArg->IsNull() || moduleNameArg->IsUndefined()) {
         GetArkUINodeModifiers()->getFormComponentModifier()->resetModuleName(nativeNode);
     } else {
-        std::string moduleName = moduleNameArg->ToString(vm)->ToString();
+        std::string moduleName = moduleNameArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getFormComponentModifier()->setModuleName(nativeNode, moduleName.c_str());
     }
     return panda::JSValueRef::Undefined(vm);

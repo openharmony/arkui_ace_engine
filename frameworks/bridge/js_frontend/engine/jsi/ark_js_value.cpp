@@ -60,7 +60,7 @@ std::string ArkJSValue::ToString(shared_ptr<JsRuntime> runtime)
     }
     Local<StringRef> string = value_->ToString(vm);
     if (!CheckException(pandaRuntime, string)) {
-        return string->ToString();
+        return string->ToString(vm);
     }
     LOGE("ArkJSValue::ToString occurs exception, return empty string directly");
     return "";
@@ -71,7 +71,7 @@ bool ArkJSValue::ToBoolean(shared_ptr<JsRuntime> runtime)
     shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     LocalScope scope(pandaRuntime->GetEcmaVm());
     if (!CheckException(pandaRuntime)) {
-        return value_->BooleaValue();
+        return value_->BooleaValue(pandaRuntime->GetEcmaVm());
     }
     LOGE("ArkJSValue::ToBoolean occurs exception, return false directly");
     return false;
@@ -406,7 +406,7 @@ std::string ArkJSValue::GetJsonString(const shared_ptr<JsRuntime>& runtime)
         LOGE("ArkJSValue::GetJsonString occurs exception, return empty string directly");
         return "";
     }
-    return valueStr->ToString();
+    return valueStr->ToString(pandaRuntime->GetEcmaVm());
 }
 
 bool ArkJSValue::CheckException(const shared_ptr<ArkJSRuntime> &runtime) const

@@ -900,7 +900,7 @@ Local<JSValueRef> JSTextField::JsKeepEditableState(panda::JsiRuntimeCallInfo *in
 {
     Local<JSValueRef> thisObj = info->GetThisRef();
     auto eventInfo = static_cast<NG::TextFieldCommonEvent*>(
-        panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+        panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(info->GetVM(), 0));
     if (eventInfo) {
         eventInfo->SetKeepEditable(true);
     }
