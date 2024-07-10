@@ -1451,6 +1451,7 @@ function setButtonProperties(buttonOptions: ButtonOptions, controller?: CustomDi
  * get resource size
  *
  * @param resourceId resource id
+ * @param defaultValue default value
  * @returns resource size
  */
 function getNumberByResourceId(resourceId: number, defaultValue: number): number {
@@ -1473,6 +1474,7 @@ function getNumberByResourceId(resourceId: number, defaultValue: number): number
  * get enum number
  *
  * @param resourceId resource id
+ * @param defaultValue default value
  * @returns number
  */
 function getEnumNumberByResourceId(resourceId: number, defaultValue: number): number {
