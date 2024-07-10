@@ -66,7 +66,7 @@ private:
     TouchEvent lastTouchEvent_;
     Offset averageDistance_;
     bool isInSilde = false;
-    double dpi_ = PiplineBase::GetCurrentDensity();
+    double dpi_ = PipelineBase::GetCurrentDensity();
 };
 
 class ACE_EXPORT ResSchedReportScope final {
