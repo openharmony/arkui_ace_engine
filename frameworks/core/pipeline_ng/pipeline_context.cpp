@@ -1412,6 +1412,7 @@ void PipelineContext::UpdateSizeChangeReason(
 void PipelineContext::SetEnableKeyBoardAvoidMode(bool value)
 {
     safeAreaManager_->SetKeyBoardAvoidMode(value);
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "keyboardAvoid Mode update:%{public}d", value);
 }
 
 bool PipelineContext::IsEnableKeyBoardAvoidMode()

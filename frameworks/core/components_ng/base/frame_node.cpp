@@ -678,6 +678,12 @@ void FrameNode::DumpSafeAreaInfo()
     if (layoutProperty_->GetSafeAreaInsets()) {
         DumpLog::GetInstance().AddDesc(layoutProperty_->GetSafeAreaInsets()->ToString());
     }
+    if (SelfOrParentExpansive()) {
+        DumpLog::GetInstance().AddDesc(std::string("selfAdjust: ")
+                                           .append(geometryNode_->GetSelfAdjust().ToString().c_str())
+                                           .append(",parentAdjust: ")
+                                           .append(geometryNode_->GetParentAdjust().ToString().c_str()));
+    }
     CHECK_NULL_VOID(GetTag() == V2::PAGE_ETS_TAG);
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -688,7 +694,11 @@ void FrameNode::DumpSafeAreaInfo()
                                        .append(std::string(", isNeedAvoidWindow: ").c_str())
                                        .append(std::to_string(manager->IsNeedAvoidWindow()))
                                        .append(std::string(", isFullScreen: ").c_str())
-                                       .append(std::to_string(manager->IsFullScreen())));
+                                       .append(std::to_string(manager->IsFullScreen()))
+                                       .append(std::string(", isKeyboardAvoidMode").c_str())
+                                       .append(std::to_string(manager->KeyboardSafeAreaEnabled()))
+                                       .append(std::string(", isUseCutout").c_str())
+                                       .append(std::to_string(pipeline->GetUseCutout())));
 }
 
 void FrameNode::DumpAlignRulesInfo()
