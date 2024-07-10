@@ -193,7 +193,7 @@ Rect SubwindowManager::GetParentWindowRect()
     return currentSubwindow_->GetParentWindowRect();
 }
 
-RefPtr<Subwindow> SubwindowManager::ShowPreviewNG()
+RefPtr<Subwindow> SubwindowManager::ShowDragPreviewWindowNG()
 {
     auto containerId = Container::CurrentId();
     auto subwindow =
@@ -204,7 +204,7 @@ RefPtr<Subwindow> SubwindowManager::ShowPreviewNG()
         CHECK_NULL_RETURN(subwindow->GetIsRosenWindowCreate(), nullptr);
         AddSubwindow(containerId, subwindow);
     }
-    if (!subwindow->ShowPreviewNG()) {
+    if (!subwindow->ShowDragPreviewWindowNG()) {
         return nullptr;
     }
     return subwindow;
@@ -246,11 +246,11 @@ void SubwindowManager::ShowMenuNG(std::function<void()>&& buildFunc, std::functi
     subwindow->ShowMenuNG(std::move(buildFunc), std::move(previewBuildFunc), menuParam, targetNode, offset);
 }
 
-void SubwindowManager::HidePreviewNG()
+void SubwindowManager::HideDragPreviewWindowNG()
 {
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
-        subwindow->HidePreviewNG();
+        subwindow->HideDragPreviewWindowNG();
     }
 }
 
@@ -272,11 +272,11 @@ void SubwindowManager::HideMenuNG(bool showPreviewAnimation, bool startDrag)
     }
 }
 
-void SubwindowManager::UpdateHideMenuOffsetNG(const NG::OffsetF& offset, bool isRedragStart)
+void SubwindowManager::UpdateHideMenuOffsetNG(const NG::OffsetF& offset, float menuScale, bool isRedragStart)
 {
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
-        subwindow->UpdateHideMenuOffsetNG(offset, isRedragStart);
+        subwindow->UpdateHideMenuOffsetNG(offset, menuScale, isRedragStart);
     }
 }
 

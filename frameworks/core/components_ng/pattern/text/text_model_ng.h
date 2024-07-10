@@ -59,7 +59,6 @@ public:
     void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) override;
     void SetTextDetectEnable(bool value) override;
     void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) override;
-    // TODO: add extra event for text.
     void SetOnClick(std::function<void(BaseEventInfo* info)>&& click) override;
     void ClearOnClick() override;
     void SetRemoteMessage(std::function<void()>&& event) override;
@@ -71,7 +70,6 @@ public:
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
     void SetDraggable(bool draggable) override;
-    void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems) override;
     void BindSelectionMenu(TextSpanType& spanType, TextResponseType& responseType, std::function<void()>& buildFunc,
         SelectMenuParam& menuParam) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
@@ -80,7 +78,8 @@ public:
     void SetFontFeature(const FONT_FEATURES_LIST& value) override;
     void SetMarqueeOptions(const TextMarqueeOptions& options) override;
     void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) override;
-    void SetSelectionMenuOptions(const std::vector<MenuOptionsParam>&& menuOptionsItems) override;
+    void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& content);
     static void InitText(FrameNode* frameNode, std::string& value);
@@ -116,7 +115,7 @@ public:
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetTextDetectConfig(FrameNode* frameNode, const std::string& value);
-    static void SetOnDetectResultUpdate(FrameNode* frameNode,  std::function<void(const std::string&)>&& onResult);
+    static void SetOnDetectResultUpdate(FrameNode* frameNode, std::function<void(const std::string&)>&& onResult);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
     static void SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_StyledString* value);
     static std::vector<std::string> GetFontFamily(FrameNode* frameNode);
@@ -157,8 +156,8 @@ public:
     static void ResetSelectedBackgroundColor(FrameNode* frameNode);
     static void SetTextSelection(FrameNode* frameNode, int32_t startIndex, int32_t endIndex);
     static void SetTextSelectableMode(FrameNode* frameNode, TextSelectableMode value);
-    static void SetTextDetectConfig(FrameNode* frameNode, const std::string& value,
-        std::function<void(const std::string&)>&& onResult);
+    static void SetTextDetectConfig(
+        FrameNode* frameNode, const std::string& value, std::function<void(const std::string&)>&& onResult);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);
 };

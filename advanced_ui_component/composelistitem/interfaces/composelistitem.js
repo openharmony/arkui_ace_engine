@@ -248,7 +248,7 @@ class ContentItemStruct extends ViewPU {
     createIcon(v9 = null) {
         this.observeComponentCreation2((x9, y9) => {
             If.create();
-            if (this.icon != null && this.iconStyle != null) {
+            if (this.icon != null && this.iconStyle != null && ICON_SIZE_MAP.has(this.iconStyle)) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((c10, d10) => {
                         If.create();
@@ -823,19 +823,22 @@ class OperateItemStruct extends ViewPU {
         this.observeComponentCreation2((x5, y5) => {
             Button.createWithChild({ type: ButtonType.Normal });
             Button.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
-            Button.hitTestBehavior(HitTestMode.Block);
+            Button.hitTestBehavior(HitTestMode.Transparent);
             Button.backgroundColor(Color.Transparent);
             Button.height(OPERATEITEM_ICONLIKE_SIZE);
             Button.width(OPERATEITEM_ARROW_WIDTH);
             Button.onFocus(() => {
                 this.parentCanFocus = false;
             });
+            Button.stateEffect(this.arrow?.action !== undefined);
             Button.onTouch((d6) => {
-                if (d6.type === TouchType.Down) {
-                    this.parentCanTouch = false;
-                }
-                if (d6.type === TouchType.Up || d6.type === TouchType.Cancel) {
-                    this.parentCanTouch = true;
+                if (this.arrow?.action !== undefined) {
+                    if (d6.type === TouchType.Down) {
+                        this.parentCanTouch = false;
+                    }
+                    if (d6.type === TouchType.Up || d6.type === TouchType.Cancel) {
+                        this.parentCanTouch = true;
+                    }
                 }
             });
             Button.onHover((c6) => {
@@ -980,7 +983,7 @@ class OperateItemStruct extends ViewPU {
     createTextArrow(v3 = null) {
         this.observeComponentCreation2((g4, h4) => {
             Button.createWithChild({ type: ButtonType.Normal });
-            Button.hitTestBehavior(HitTestMode.Block);
+            Button.hitTestBehavior(HitTestMode.Transparent);
             Button.labelStyle({
                 maxLines: TEXT_MAX_LINE
             });
@@ -990,12 +993,15 @@ class OperateItemStruct extends ViewPU {
             Button.onFocus(() => {
                 this.parentCanFocus = false;
             });
+            Button.stateEffect(this.arrow?.action !== undefined);
             Button.onTouch((m4) => {
-                if (m4.type === TouchType.Down) {
-                    this.parentCanTouch = false;
-                }
-                if (m4.type === TouchType.Up || m4.type === TouchType.Cancel) {
-                    this.parentCanTouch = true;
+                if (this.arrow?.action !== undefined) {
+                    if (m4.type === TouchType.Down) {
+                        this.parentCanTouch = false;
+                    }
+                    if (m4.type === TouchType.Up || m4.type === TouchType.Cancel) {
+                        this.parentCanTouch = true;
+                    }
                 }
             });
             Button.onHover((l4) => {
@@ -1444,10 +1450,10 @@ export class ComposeListItem extends ViewPU {
                             if (m1) {
                                 let n1 = new ContentItemStruct(this, {}, undefined, l1, () => { }, { page: "library/src/main/ets/components/composelistitem.ets", line: 725 });
                                 ViewPU.create(n1);
-                                let o1 = () => {
+                                let c = () => {
                                     return {};
                                 };
-                                n1.paramsGenerator_ = o1;
+                                n1.paramsGenerator_ = c;
                             }
                             else {
                                 this.updateStateVarsOfChildByElmtId(l1, {});
@@ -1478,7 +1484,7 @@ export class ComposeListItem extends ViewPU {
                                     leftWidth: this.calculatedLeftWidth()
                                 }, undefined, a1, () => { }, { page: "library/src/main/ets/components/composelistitem.ets", line: 728 });
                                 ViewPU.create(c1);
-                                let d1 = () => {
+                                let b = () => {
                                     return {
                                         icon: this.contentItem?.icon,
                                         iconStyle: this.contentItem?.iconStyle,
@@ -1488,7 +1494,7 @@ export class ComposeListItem extends ViewPU {
                                         leftWidth: this.calculatedLeftWidth()
                                     };
                                 };
-                                c1.paramsGenerator_ = d1;
+                                c1.paramsGenerator_ = b;
                             }
                             else {
                                 this.updateStateVarsOfChildByElmtId(a1, {
@@ -1545,7 +1551,7 @@ export class ComposeListItem extends ViewPU {
                                     rightWidth: this.calculatedRightWidth()
                                 }, undefined, l, () => { }, { page: "library/src/main/ets/components/composelistitem.ets", line: 738 });
                                 ViewPU.create(n);
-                                let o = () => {
+                                let a = () => {
                                     return {
                                         icon: this.operateItem?.icon,
                                         subIcon: this.operateItem?.subIcon,
@@ -1565,7 +1571,7 @@ export class ComposeListItem extends ViewPU {
                                         rightWidth: this.calculatedRightWidth()
                                     };
                                 };
-                                n.paramsGenerator_ = o;
+                                n.paramsGenerator_ = a;
                             }
                             else {
                                 this.updateStateVarsOfChildByElmtId(l, {

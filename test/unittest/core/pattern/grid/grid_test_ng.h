@@ -56,6 +56,8 @@ public:
     void TearDown() override;
     void GetGrid();
     GridModelNG CreateGrid();
+    GridModelNG CreateRepeatGrid(int32_t itemNumber, float itemHeight);
+
     /**
      * @param height -2 corresponds to 100% height
      */
@@ -66,10 +68,8 @@ public:
     void CreateFocusableGridItems(int32_t itemNumber = 10, float width = NULL_VALUE, float height = NULL_VALUE,
         GridItemStyle gridItemStyle = GridItemStyle::NONE);
     void CreateFixedItems(int32_t itemNumber, GridItemStyle gridItemStyle = GridItemStyle::NONE);
-    void CreateFixedHeightItems(
-        int32_t itemNumber, float height, GridItemStyle gridItemStyle = GridItemStyle::NONE);
-    void CreateFixedWidthItems(
-        int32_t itemNumber, float width, GridItemStyle gridItemStyle = GridItemStyle::NONE);
+    void CreateFixedHeightItems(int32_t itemNumber, float height, GridItemStyle gridItemStyle = GridItemStyle::NONE);
+    void CreateFixedWidthItems(int32_t itemNumber, float width, GridItemStyle gridItemStyle = GridItemStyle::NONE);
     void CreateBigItem(int32_t rowStart = NULL_VALUE, int32_t rowEnd = NULL_VALUE, int32_t colStart = NULL_VALUE,
         int32_t colEnd = NULL_VALUE, float width = NULL_VALUE, float height = NULL_VALUE);
     void CreateBigColItem(int32_t colStart, int32_t colEnd);

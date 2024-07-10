@@ -146,7 +146,7 @@ struct ContentItemStruct {
 
   @Builder
   createIcon() {
-    if (this.icon != null && this.iconStyle != null) {
+    if (this.icon != null && this.iconStyle != null && ICON_SIZE_MAP.has(this.iconStyle)) {
       if (this.iconStyle <= IconType.PREVIEW) {
         Image(this.icon)
           .objectFit(ImageFit.Contain)
@@ -402,19 +402,22 @@ struct OperateItemStruct {
         .draggable(false)
     }
     .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
-    .hitTestBehavior(HitTestMode.Block)
+    .hitTestBehavior(HitTestMode.Transparent)
     .backgroundColor(Color.Transparent)
     .height(OPERATEITEM_ICONLIKE_SIZE)
     .width(OPERATEITEM_ARROW_WIDTH)
     .onFocus(() => {
       this.parentCanFocus = false;
     })
+    .stateEffect(this.arrow?.action !== undefined)
     .onTouch((event: TouchEvent) => {
-      if (event.type === TouchType.Down) {
-        this.parentCanTouch = false;
-      }
-      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.parentCanTouch = true;
+      if (this.arrow?.action !== undefined) {
+        if (event.type === TouchType.Down) {
+          this.parentCanTouch = false;
+        }
+        if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+          this.parentCanTouch = true;
+        }
       }
     })
     .onHover((isHover: boolean) => {
@@ -567,7 +570,7 @@ struct OperateItemStruct {
         end: LengthMetrics.vp(LISTITEM_PADDING)
       })
     }
-    .hitTestBehavior(HitTestMode.Block)
+    .hitTestBehavior(HitTestMode.Transparent)
     .labelStyle({
       maxLines: TEXT_MAX_LINE
     })
@@ -577,12 +580,15 @@ struct OperateItemStruct {
     .onFocus(() => {
       this.parentCanFocus = false;
     })
+    .stateEffect(this.arrow?.action !== undefined)
     .onTouch((event: TouchEvent) => {
-      if (event.type === TouchType.Down) {
-        this.parentCanTouch = false;
-      }
-      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.parentCanTouch = true;
+      if (this.arrow?.action !== undefined) {
+        if (event.type === TouchType.Down) {
+          this.parentCanTouch = false;
+        }
+        if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+          this.parentCanTouch = true;
+        }
       }
     })
     .onHover((isHover: boolean) => {

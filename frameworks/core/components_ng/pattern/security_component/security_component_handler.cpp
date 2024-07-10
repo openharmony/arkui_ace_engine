@@ -20,9 +20,11 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -37,6 +39,8 @@ static std::vector<uintptr_t> g_callList = {
     reinterpret_cast<uintptr_t>(SecurityComponentHandler::UpdateSecurityComponent),
     reinterpret_cast<uintptr_t>(SecurityComponentHandler::ReportSecurityComponentClickEventInner)
 };
+
+const std::set<std::string> LAYOUT_TAGS = { "__Common__", "__Recycle__" };
 
 SecurityComponentProbe SecurityComponentHandler::probe;
 SecurityComponent::SecCompUiRegister uiRegister(g_callList, &SecurityComponentHandler::probe);
@@ -321,6 +325,25 @@ double SecurityComponentHandler::CalculateCurrentVisibleRatio(const RectF& visib
     return visibleRect.Width() * visibleRect.Height() / (renderRect.Width() * renderRect.Height());
 }
 
+bool SecurityComponentHandler::GetWindowSceneWindowId(RefPtr<FrameNode>& node, uint32_t& windId)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto parent = node->GetParent();
+    while (parent != nullptr && parent->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
+        parent = parent->GetParent();
+    }
+    CHECK_NULL_RETURN(parent, false);
+    auto windowSceneFrameNode = AceType::DynamicCast<FrameNode>(parent);
+    CHECK_NULL_RETURN(windowSceneFrameNode, false);
+    auto windowScene = windowSceneFrameNode->GetPattern<SystemWindowScene>();
+    CHECK_NULL_RETURN(windowScene, false);
+    auto session = windowScene->GetSession();
+    CHECK_NULL_RETURN(session, false);
+
+    windId = static_cast<uint32_t>(session->GetPersistentId());
+    return true;
+}
+
 bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
     RefPtr<FrameNode>& node)
 {
@@ -363,6 +386,9 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
     uint32_t windId = container->GetWindowId();
     if (pipeline->IsFocusWindowIdSetted()) {
         windId = pipeline->GetFocusWindowId();
+    }
+    if (container->IsScenceBoardWindow()) {
+        GetWindowSceneWindowId(node, windId);
     }
     buttonInfo.windowId_ = static_cast<int32_t>(windId);
     return true;
@@ -503,6 +529,99 @@ int32_t SecurityComponentHandler::UnregisterSecurityComponent(int32_t& scId)
     return ret;
 }
 
+bool SecurityComponentHandler::IsContextTransparent(const RefPtr<FrameNode>& frameNode)
+{
+    const RefPtr<RenderContext> renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    if (renderContext->GetOpacity().has_value() && renderContext->GetOpacity().value() == 0.0) {
+        return true;
+    }
+    if (static_cast<int32_t>(layoutProperty->GetVisibility().value_or(VisibleType::VISIBLE)) != 0) {
+        return true;
+    }
+    if (LAYOUT_TAGS.find(frameNode->GetTag()) != LAYOUT_TAGS.end() &&
+        renderContext->GetBackgroundColor()->ColorToString().compare("#00000000") == 0) {
+        return true;
+    }
+    return false;
+}
+
+bool SecurityComponentHandler::CheckContainerTags(const RefPtr<FrameNode>& frameNode)
+{
+    static std::set<std::string> containerComponentTags = { "Flex", "Stack", "Row", "Column", "WindowScene", "root",
+        "Swiper", "Grid", "GridItem", "page", "stage", "FormComponent", "Tabs", "TabContent", "ColumnSplit",
+        "FolderStack", "GridCol", "GridRow", "RelativeContainer", "RowSplit", "List", "Scroll", "WaterFlow",
+        "SideBarContainer", "Refresh", "Navigator", "ListItemGroup", "ListItem", "Hyperlink", "FormLink", "FlowItem",
+        "Counter" };
+
+    const RefPtr<RenderContext> renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    if (containerComponentTags.find(frameNode->GetTag()) != containerComponentTags.end() &&
+        renderContext->GetBackgroundColor()->ColorToString().compare("#00000000") == 0) {
+        return true;
+    }
+    return false;
+}
+
+bool SecurityComponentHandler::CheckSecurityComponentStatus(const RefPtr<UINode>& root, std::vector<RectF>& rect,
+    int32_t secNodeId)
+{
+    bool res = false;
+    RectF paintRect;
+
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(root);
+    if (frameNode) {
+        paintRect = frameNode->GetTransformRectRelativeToWindow();
+        if (IsSecurityComponent(frameNode) && (frameNode->GetId() == secNodeId)) {
+            return CheckRectIntersect(paintRect, rect);
+        }
+    }
+    auto& children = root->GetChildren();
+    for (auto child = children.rbegin(); child != children.rend(); ++child) {
+        auto node = AceType::DynamicCast<NG::FrameNode>(*child);
+        if (node && IsContextTransparent(node)) {
+            continue;
+        }
+        res |= CheckSecurityComponentStatus(*child, rect, secNodeId);
+    }
+
+    if (frameNode && frameNode->GetTag() != V2::SHEET_WRAPPER_TAG && !CheckContainerTags(frameNode)) {
+        rect.push_back(paintRect);
+    }
+    return res;
+}
+
+bool SecurityComponentHandler::CheckRectIntersect(const RectF& dest, const std::vector<RectF>& origin)
+{
+    for (const auto& originRect : origin) {
+        if (originRect.IsInnerIntersectWith(dest)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool SecurityComponentHandler::IsSecurityComponent(RefPtr<FrameNode>& node)
+{
+    return node->GetTag() == V2::LOCATION_BUTTON_ETS_TAG || node->GetTag() == V2::PASTE_BUTTON_ETS_TAG ||
+           node->GetTag() == V2::SAVE_BUTTON_ETS_TAG;
+}
+
+bool SecurityComponentHandler::CheckComponentCoveredStatus(int32_t secNodeId)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    RefPtr<UINode> root = pipeline->GetRootElement();
+    CHECK_NULL_RETURN(root, false);
+    std::vector<NG::RectF> rect;
+    if (CheckSecurityComponentStatus(root, rect, secNodeId)) {
+        return true;
+    }
+    return false;
+}
+
 int32_t SecurityComponentHandler::ReportSecurityComponentClickEventInner(int32_t& scId,
     RefPtr<FrameNode>& node, SecCompClickEvent& event,
     Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback)
@@ -546,6 +665,10 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
     secEvent.point.timestamp =
         static_cast<uint64_t>(time.time_since_epoch().count()) / SECOND_TO_MILLISECOND;
 #endif
+    if (CheckComponentCoveredStatus(node->GetId())) {
+        LOGW("Security component is covered by another component.");
+        return -1;
+    }
 
     return ReportSecurityComponentClickEventInner(scId, node, secEvent, std::move(callback));
 }
@@ -564,6 +687,10 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
     if (data.size() > 0) {
         secEvent.extraInfo.data = data.data();
         secEvent.extraInfo.dataSize = data.size();
+    }
+    if (CheckComponentCoveredStatus(node->GetId())) {
+        LOGW("Security component is covered by another component.");
+        return -1;
     }
     return ReportSecurityComponentClickEventInner(scId, node, secEvent, std::move(callback));
 }

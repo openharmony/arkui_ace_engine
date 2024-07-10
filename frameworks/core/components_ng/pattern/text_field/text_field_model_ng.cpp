@@ -523,14 +523,6 @@ void TextFieldModelNG::SetCopyOption(CopyOptions copyOption)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CopyOptions, copyOption);
 }
 
-void TextFieldModelNG::SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
-    textFieldPattern->SetMenuOptionItems(std::move(menuOptionsItems));
-}
-
 void TextFieldModelNG::AddDragFrameNodeToManager() const
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -1370,7 +1362,7 @@ bool TextFieldModelNG::GetRequestKeyboardOnFocus(FrameNode* frameNode)
     bool value = false;
     CHECK_NULL_RETURN(frameNode, value);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    return pattern->GetNeedToRequestKeyboardOnFocus();
+    return pattern->NeedToRequestKeyboardOnFocus();
 }
 
 TextInputType TextFieldModelNG::GetType(FrameNode* frameNode)
@@ -1639,7 +1631,6 @@ void TextFieldModelNG::SetOnEditChanged(FrameNode* frameNode, std::function<void
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnEditChanged(std::move(func));
 }
-
 
 void TextFieldModelNG::SetCustomKeyboard(FrameNode* frameNode, FrameNode* customKeyboard, bool supportAvoidance)
 {
@@ -1958,11 +1949,12 @@ void TextFieldModelNG::SetOnDidDeleteEvent(FrameNode* frameNode,
     eventHub->SetOnDidDeleteEvent(std::move(func));
 }
 
-void TextFieldModelNG::SetSelectionMenuOptions(const std::vector<MenuOptionsParam>&& menuOptionsItems)
+void TextFieldModelNG::SetSelectionMenuOptions(
+    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
 {
     auto textFieldPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
-    textFieldPattern->OnSelectionMenuOptionsUpdate(std::move(menuOptionsItems));
+    textFieldPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 void TextFieldModelNG::SetEnablePreviewText(FrameNode* frameNode, bool enablePreviewText)
 {

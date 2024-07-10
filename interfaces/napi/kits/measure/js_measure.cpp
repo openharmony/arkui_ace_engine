@@ -102,7 +102,7 @@ static std::string HandleStringType(napi_value ParameterNApi, napi_env env)
     return ParameterStr;
 }
 
-static std::optional<Dimension> HandleDimensionType(napi_value ParameterNApi, napi_env env)
+static std::optional<Dimension> HandleDimensionType(napi_value ParameterNApi, napi_env env, DimensionUnit defaultUnit)
 {
     size_t ret = 0;
     std::string ParameterStr;
@@ -113,13 +113,13 @@ static std::optional<Dimension> HandleDimensionType(napi_value ParameterNApi, na
         double ParameterValue;
         napi_get_value_double(env, ParameterNApi, &ParameterValue);
         Parameter.SetValue(ParameterValue);
-        Parameter.SetUnit(DimensionUnit::VP);
+        Parameter.SetUnit(defaultUnit);
     } else if (valueType == napi_string) {
         size_t ParameterLen = GetParamLen(env, ParameterNApi) + 1;
         std::unique_ptr<char[]> ParameterTemp = std::make_unique<char[]>(ParameterLen);
         napi_get_value_string_utf8(env, ParameterNApi, ParameterTemp.get(), ParameterLen, &ret);
         ParameterStr = ParameterTemp.get();
-        Parameter = StringUtils::StringToDimensionWithUnit(ParameterStr, DimensionUnit::VP);
+        Parameter = StringUtils::StringToDimensionWithUnit(ParameterStr, defaultUnit);
     } else if (valueType == napi_object) {
         ResourceInfo recv;
         if (!ParseResourceParam(env, ParameterNApi, recv)) {
@@ -131,7 +131,7 @@ static std::optional<Dimension> HandleDimensionType(napi_value ParameterNApi, na
         if (!ParseIntegerToString(recv, ParameterStr)) {
             return std::nullopt;
         }
-        Parameter = StringUtils::StringToDimensionWithUnit(ParameterStr, DimensionUnit::VP);
+        Parameter = StringUtils::StringToDimensionWithUnit(ParameterStr, defaultUnit);
     } else {
         return std::nullopt;
     }
@@ -166,8 +166,8 @@ static napi_value JSMeasureText(napi_env env, napi_callback_info info)
     } else {
         return nullptr;
     }
-    std::optional<Dimension> fontSizeNum = HandleDimensionType(fontSizeNApi, env);
-    std::optional<Dimension> letterSpace = HandleDimensionType(letterSpacingNApi, env);
+    std::optional<Dimension> fontSizeNum = HandleDimensionType(fontSizeNApi, env, DimensionUnit::FP);
+    std::optional<Dimension> letterSpace = HandleDimensionType(letterSpacingNApi, env, DimensionUnit::VP);
     int32_t fontStyle = HandleIntStyle(fontStyleNApi, env);
     std::string textContent = HandleStringType(textContentNApi, env);
     std::string fontWeight = HandleStringType(fontWeightNApi, env);
@@ -249,12 +249,17 @@ static void SetMeasureTextNapiProperty(
 static void SetContextProperty(
     std::map<std::string, napi_value>& contextParamMap, MeasureContext& context, napi_env& env)
 {
-    std::optional<Dimension> fontSizeNum = HandleDimensionType(contextParamMap["fontSizeNApi"], env);
-    std::optional<Dimension> letterSpace = HandleDimensionType(contextParamMap["letterSpacingNApi"], env);
-    std::optional<Dimension> constraintWidth = HandleDimensionType(contextParamMap["constraintWidthNApi"], env);
-    std::optional<Dimension> lineHeight = HandleDimensionType(contextParamMap["lineHeightNApi"], env);
-    std::optional<Dimension> baselineOffset = HandleDimensionType(contextParamMap["baselineOffsetNApi"], env);
-    std::optional<Dimension> textIndent = HandleDimensionType(contextParamMap["textIndentNApi"], env);
+    std::optional<Dimension> fontSizeNum = HandleDimensionType(contextParamMap["fontSizeNApi"], env, DimensionUnit::FP);
+    std::optional<Dimension> letterSpace =
+        HandleDimensionType(contextParamMap["letterSpacingNApi"], env, DimensionUnit::VP);
+    std::optional<Dimension> constraintWidth =
+        HandleDimensionType(contextParamMap["constraintWidthNApi"], env, DimensionUnit::VP);
+    std::optional<Dimension> lineHeight =
+        HandleDimensionType(contextParamMap["lineHeightNApi"], env, DimensionUnit::VP);
+    std::optional<Dimension> baselineOffset =
+        HandleDimensionType(contextParamMap["baselineOffsetNApi"], env, DimensionUnit::VP);
+    std::optional<Dimension> textIndent =
+        HandleDimensionType(contextParamMap["textIndentNApi"], env, DimensionUnit::VP);
 
     int32_t fontStyle = HandleIntStyle(contextParamMap["fontStyleNApi"], env);
     int32_t textAlign = HandleIntStyle(contextParamMap["textAlignNApi"], env);

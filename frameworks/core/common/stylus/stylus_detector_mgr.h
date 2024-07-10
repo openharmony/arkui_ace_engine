@@ -42,8 +42,9 @@ public:
     static StylusDetectorMgr* GetInstance();
 
     bool IsEnable() override;
-    bool RegisterStylusInteractionListener(const std::shared_ptr<IStylusDetectorCallback>& callback) override;
-    void UnRegisterStylusInteractionListener() override;
+    bool RegisterStylusInteractionListener(
+        const std::string& bundleName, const std::shared_ptr<IStylusDetectorCallback>& callback) override;
+    void UnRegisterStylusInteractionListener(const std::string& bundleName) override;
     bool Notify(const NotifyInfo& notifyInfo) override;
 
     bool IsNeedInterceptedTouchEvent(const TouchEvent& touchEvent);

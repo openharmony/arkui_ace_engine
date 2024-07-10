@@ -73,7 +73,6 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("style", &JSTextField::SetInputStyle);
     JSClass<JSTextInput>::StaticMethod("hoverEffect", &JSTextField::JsHoverEffect);
     JSClass<JSTextInput>::StaticMethod("copyOption", &JSTextField::SetCopyOption);
-    JSClass<JSTextInput>::StaticMethod("textMenuOptions", &JSTextField::JsMenuOptionsExtension);
     JSClass<JSTextInput>::StaticMethod("foregroundColor", &JSTextField::SetForegroundColor);
     JSClass<JSTextInput>::StaticMethod("showUnit", &JSTextField::SetShowUnit);
     JSClass<JSTextInput>::StaticMethod("showError", &JSTextField::SetShowError);
@@ -127,7 +126,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("onDidInsert", &JSTextField::OnDidInsertValue);
     JSClass<JSTextInput>::StaticMethod("onWillDelete", &JSTextField::OnWillDelete);
     JSClass<JSTextInput>::StaticMethod("onDidDelete", &JSTextField::OnDidDelete);
-    JSClass<JSTextInput>::StaticMethod("selectionMenuOptions", &JSTextField::SelectionMenuOptions);
+    JSClass<JSTextInput>::StaticMethod("editMenuOptions", &JSTextField::EditMenuOptions);
     JSClass<JSTextInput>::StaticMethod("enablePreviewText", &JSTextField::SetEnablePreviewText);
     JSClass<JSTextInput>::InheritAndBind<JSViewAbstract>(globalObj);
 }

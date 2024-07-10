@@ -149,10 +149,10 @@ T JsiValue::ToNumber() const
 template<typename T>
 T* JsiObject::Unwrap() const
 {
-    if (GetHandle()->GetNativePointerFieldCount() < 1) {
+    if (GetHandle()->GetNativePointerFieldCount(GetEcmaVM()) < 1) {
         return nullptr;
     }
-    return static_cast<T*>(GetHandle()->GetNativePointerField(INSTANCE));
+    return static_cast<T*>(GetHandle()->GetNativePointerField(GetEcmaVM(), INSTANCE));
 }
 
 template<typename T>
@@ -185,11 +185,11 @@ T JsiObject::GetPropertyValue(const char* prop, T defaultValue) const
     Local<StringRef> stringRef = panda::StringRef::NewFromUtf8(vm, prop);
     Local<JSValueRef> valueRef = GetHandle()->Get(vm, stringRef);
     if constexpr (std::is_same<T, bool>::value) {
-        return valueRef->IsBoolean() ? valueRef->BooleaValue() : defaultValue;
+        return valueRef->IsBoolean() ? valueRef->BooleaValue(vm) : defaultValue;
     } else if constexpr (std::is_arithmetic<T>::value) {
         return valueRef->IsNumber() ? JsiValueConvertor::fromJsiValue<T>(vm, valueRef) : defaultValue;
     } else if constexpr (std::is_same_v<T, std::string>) {
-        return valueRef->IsString(vm) ? valueRef->ToString(vm)->ToString() : defaultValue;
+        return valueRef->IsString(vm) ? valueRef->ToString(vm)->ToString(vm) : defaultValue;
     } else {
         LOGW("Get property value failed.");
     }
@@ -206,11 +206,11 @@ T JsiObject::GetPropertyValue(int32_t propertyIndex, T defaultValue) const
     Local<StringRef> stringRef = panda::ExternalStringCache::GetCachedString(vm, propertyIndex);
     Local<JSValueRef> valueRef = GetHandle()->Get(vm, stringRef);
     if constexpr (std::is_same<T, bool>::value) {
-        return valueRef->IsBoolean() ? valueRef->BooleaValue() : defaultValue;
+        return valueRef->IsBoolean() ? valueRef->BooleaValue(vm) : defaultValue;
     } else if constexpr (std::is_arithmetic<T>::value) {
         return valueRef->IsNumber() ? JsiValueConvertor::fromJsiValue<T>(vm, valueRef) : defaultValue;
     } else if constexpr (std::is_same_v<T, std::string>) {
-        return valueRef->IsString(vm) ? valueRef->ToString(vm)->ToString() : defaultValue;
+        return valueRef->IsString(vm) ? valueRef->ToString(vm)->ToString(vm) : defaultValue;
     } else {
         LOGW("Get property value failed.");
     }
@@ -236,7 +236,7 @@ T* JsiCallbackInfo::UnwrapArg(size_t index) const
     if (arg.IsEmpty() || !arg->IsObject(info_->GetVM())) {
         return nullptr;
     }
-    return static_cast<T*>(arg->ToEcmaObject(info_->GetVM())->GetNativePointerField(0));
+    return static_cast<T*>(arg->ToEcmaObject(info_->GetVM())->GetNativePointerField(info_->GetVM(), 0));
 }
 
 template<typename... Args>

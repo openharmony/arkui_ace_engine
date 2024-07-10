@@ -1267,7 +1267,6 @@ void DatePickerPattern::HandleSolarYearChange(bool isAdd, uint32_t index)
 {
     auto date = GetCurrentDate();
     bool leapYear = PickerDate::IsLeapYear(date.GetYear());
-
     if (date.GetMonth() == 2 && !leapYear && date.GetDay() > 28) { // invalidate of 2th month
         date.SetDay(28); // the max day of the 2th month of none leap year is 28
     }

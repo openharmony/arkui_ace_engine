@@ -106,12 +106,18 @@ public:
         return tabBarStyle_;
     }
 
+    void SetCustomNode(FrameNode* node)
+    {
+        node_ = node;
+    }
+
 private:
     std::string text_;
     std::string icon_;
     std::optional<TabBarSymbol> symbol_;
     TabBarBuilderFunc builder_;
     TabBarStyle tabBarStyle_;
+    FrameNode* node_ = nullptr;
 };
 
 enum class AnimationType {
@@ -140,12 +146,15 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         auto layoutAlgorithm = MakeRefPtr<TabBarLayoutAlgorithm>();
-        layoutAlgorithm->SetChildrenMainSize(childrenMainSize_);
-        layoutAlgorithm->SetCurrentOffset(currentOffset_);
-        layoutAlgorithm->SetIndicator(indicator_);
+        layoutAlgorithm->SetCurrentDelta(currentDelta_);
         layoutAlgorithm->SetTabBarStyle(tabBarStyle_);
-        layoutAlgorithm->SetNeedSetCentered(needSetCentered_);
-        layoutAlgorithm->SetScrollMargin(scrollMargin_);
+        if (targetIndex_) {
+            layoutAlgorithm->SetTargetIndex(targetIndex_);
+        } else if (jumpIndex_) {
+            layoutAlgorithm->SetJumpIndex(jumpIndex_);
+        }
+        layoutAlgorithm->SetVisibleItemPosition(visibleItemPosition_);
+        layoutAlgorithm->SetCanOverScroll(canOverScroll_);
         return layoutAlgorithm;
     }
 
@@ -173,11 +182,6 @@ public:
         focusPaintParams.SetPaintWidth(tabTheme->GetActiveIndicatorWidth());
         focusPaintParams.SetPaintColor(focusTheme->GetColor());
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
-    }
-
-    void SetChildrenMainSize(float childrenMainSize)
-    {
-        childrenMainSize_ = childrenMainSize;
     }
 
     void SetIndicator(int32_t indicator)
@@ -236,8 +240,8 @@ public:
         return tabBarStyle_;
     }
 
-    void PlayTabBarTranslateAnimation(int32_t targetIndex);
-    void StopTabBarTranslateAnimation();
+    void TriggerTranslateAnimation(int32_t currentIndex, int32_t targetIndex);
+
     void HandleBottomTabBarChange(int32_t index);
 
     bool GetChangeByClick() const
@@ -449,6 +453,7 @@ public:
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* node) override;
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -494,8 +499,11 @@ private:
     int32_t CalculateSelectedIndex(const Offset& info);
 
     void PlayPressAnimation(int32_t index, const Color& pressColor, AnimationType animationType);
-    void PlayTranslateAnimation(float startPos, float endPos, float targetCurrentOffset);
+    void PlayTabBarTranslateAnimation(AnimationOption option, float targetCurrentOffset);
+    void PlayIndicatorTranslateAnimation(AnimationOption option, RectF originalPaintRect, RectF targetPaintRect,
+        float targetOffset);
     void StopTranslateAnimation();
+    float CalculateTargetOffset(int32_t targetIndex);
     void UpdateIndicatorCurrentOffset(float offset);
 
     void GetInnerFocusPaintRect(RoundRect& paintRect);
@@ -510,13 +518,11 @@ private:
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect);
     bool IsOutOfBoundary();
     void SetAccessibilityAction();
-    void AdjustFocusPosition();
     void TabBarClickEvent(int32_t index) const;
     void OnCustomContentTransition(int32_t fromIndex, int32_t toIndex);
     void ApplyTurnPageRateToIndicator(float turnPageRate);
     bool CheckSwiperDisable() const;
     void SetSwiperCurve(const RefPtr<Curve>& curve) const;
-    void AdjustOffset(double& offset) const;
     void InitTurnPageRateEvent();
     void GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset);
     void CalculateIndicatorStyle(
@@ -524,8 +530,6 @@ private:
     Color GetTabBarBackgroundColor() const;
     float GetLeftPadding() const;
     void HandleBottomTabBarAnimation(int32_t index);
-    void TriggerTranslateAnimation(
-        const RefPtr<TabBarLayoutProperty>& layoutProperty, int32_t index, int32_t indicator);
     void UpdatePaintIndicator(int32_t indicator, bool needMarkDirty);
     bool IsNeedUpdateFontWeight(int32_t index);
     std::pair<float, float> GetOverScrollInfo(const SizeF& size);
@@ -534,6 +538,10 @@ private:
     void AddMaskItemClickEvent();
     void TabBarSuitAging();
     void SetMarginVP(MarginProperty& marginLeftOrRight, MarginProperty& marginTopOrBottom);
+    bool CanScroll() const;
+    bool ParseTabsIsRtl();
+    bool IsValidIndex(int32_t index);
+
     std::map<int32_t, RefPtr<ClickEvent>> clickEvents_;
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -547,25 +555,20 @@ private:
     AnimationStartEventPtr animationStartEvent_;
     AnimationEndEventPtr animationEndEvent_;
 
-    float currentOffset_ = 0.0f;
-    float childrenMainSize_ = 0.0f;
     float bigScale_ = 0.0f;
     float largeScale_ = 0.0f;
     float maxScale_ = 0.0f;
     int32_t indicator_ = 0;
     int32_t focusIndicator_ = 0;
     Axis axis_ = Axis::HORIZONTAL;
-    std::vector<OffsetF> tabItemOffsets_;
     std::unordered_map<int32_t, bool> tabBarType_;
     std::optional<int32_t> animationDuration_;
 
     std::shared_ptr<AnimationUtils::Animation> tabbarIndicatorAnimation_;
     std::shared_ptr<AnimationUtils::Animation> translateAnimation_;
-    std::shared_ptr<AnimationUtils::Animation> tabBarTranslateAnimation_;
 
     bool indicatorAnimationIsRunning_ = false;
     bool translateAnimationIsRunning_ = false;
-    bool tabBarTranslateAnimationIsRunning_ = false;
 
     bool isRTL_ = false;
 
@@ -599,13 +602,19 @@ private:
     std::vector<bool> gradientRegions_ = {false, false, false, false};
     bool isAnimating_ = false;
     bool changeByClick_ = false;
-    bool needSetCentered_ = false;
     float scrollMargin_ = 0.0f;
     bool isFirstLayout_ = true;
     std::optional<int32_t> animationTargetIndex_;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<WindowSizeChangeReason> windowSizeChangeReason_;
     std::pair<double, double> prevRootSize_;
+
+    std::optional<int32_t> jumpIndex_;
+    std::optional<int32_t> targetIndex_;
+    float currentDelta_ = 0.0f;
+    float currentOffset_ = 0.0f;
+    std::map<int32_t, ItemInfo> visibleItemPosition_;
+    bool canOverScroll_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
     MarginProperty marginLeftOrRight_;
     MarginProperty marginTopOrBottom_;

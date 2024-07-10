@@ -224,8 +224,7 @@ void DrawIndicator(RenderContext& context, const RenderRingInfo& trackInfo, cons
 void RosenRenderArcTrack::Paint(RenderContext& context, const Offset& offset)
 {
     RenderRingInfo data = paintData_;
-    Rect dataRegion_;
-    dataRegion_ =
+    Rect dataRegion =
         Rect(offset.GetX() + 20, offset.GetY() + 2, GetLayoutSize().Width() - 40, GetLayoutSize().Height() - 4);
     // now depend on box to clip
     if (data.center.GetX() < 0.0 || data.center.GetY() < 0.0) {
@@ -280,7 +279,7 @@ void RosenRenderArcTrack::Paint(RenderContext& context, const Offset& offset)
         DrawGauge(context, data);
         data.startDegree = paintData_.startDegree;
         data.sweepDegree = paintData_.sweepDegree * ratio;
-        DrawIndicator(context, data, markedText_, markedTextColor_, dataRegion_);
+        DrawIndicator(context, data, markedText_, markedTextColor_, dataRegion);
     }
 }
 

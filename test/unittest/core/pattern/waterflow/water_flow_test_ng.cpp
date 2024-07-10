@@ -157,8 +157,10 @@ void WaterFlowTestNg::CreateFocusableItem(int32_t number)
             ButtonModelNG buttonModelNG;
             std::list<RefPtr<Component>> buttonChildren;
             buttonModelNG.CreateWithLabel({ .label = "label" }, buttonChildren);
+            ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
             ViewStackProcessor::GetInstance()->Pop();
         }
+        ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
         ViewStackProcessor::GetInstance()->Pop();
     }
 }

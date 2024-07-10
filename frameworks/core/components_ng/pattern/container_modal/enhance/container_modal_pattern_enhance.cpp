@@ -241,6 +241,7 @@ void ContainerModalPatternEnhance::SetContainerButtonHide(bool hideSplit, bool h
         minimizeBtn->MarkDirtyNode();
     }
     auto closeBtn = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, CLOSE_BUTTON_INDEX));
+    InitTitleRowLayoutProperty(GetCustomTitleRow());
 }
 
 void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t height)

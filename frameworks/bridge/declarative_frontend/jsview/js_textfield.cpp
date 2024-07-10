@@ -19,6 +19,9 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#if !defined(PREVIEW)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
@@ -897,7 +900,7 @@ Local<JSValueRef> JSTextField::JsKeepEditableState(panda::JsiRuntimeCallInfo *in
 {
     Local<JSValueRef> thisObj = info->GetThisRef();
     auto eventInfo = static_cast<NG::TextFieldCommonEvent*>(
-        panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+        panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(info->GetVM(), 0));
     if (eventInfo) {
         eventInfo->SetKeepEditable(true);
     }
@@ -928,6 +931,9 @@ void JSTextField::CreateJsTextFieldCommonEvent(const JSCallbackInfo &info)
         JSRef<JSVal> dataObject = JSRef<JSVal>::Cast(object);
         JSRef<JSVal> param[2] = {keyEvent, dataObject};
         func->Execute(param);
+#if !defined(PREVIEW)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onSubmit");
+#endif
     };
     TextFieldModel::GetInstance()->SetOnSubmit(std::move(callback));
 }
@@ -1033,6 +1039,9 @@ void JSTextField::SetOnPaste(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onPaste");
         func->Execute(val, info);
+#if !defined(PREVIEW)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onPaste");
+#endif
     };
     TextFieldModel::GetInstance()->SetOnPasteWithEvent(std::move(onPaste));
 }
@@ -1064,16 +1073,6 @@ void JSTextField::SetCopyOption(const JSCallbackInfo& info)
         copyOptions = static_cast<CopyOptions>(emunNumber);
     }
     TextFieldModel::GetInstance()->SetCopyOption(copyOptions);
-}
-
-void JSTextField::JsMenuOptionsExtension(const JSCallbackInfo& info)
-{
-    auto jsValue = info[0];
-    if (jsValue->IsArray()) {
-        std::vector<NG::MenuOptionsParam> menuOptionsItems;
-        JSViewAbstract::ParseMenuOptions(info, JSRef<JSArray>::Cast(jsValue), menuOptionsItems);
-        TextFieldModel::GetInstance()->SetMenuOptionItems(std::move(menuOptionsItems));
-    }
 }
 
 void JSTextField::SetShowUnderline(const JSCallbackInfo& info)
@@ -1722,13 +1721,12 @@ void JSTextField::OnDidDelete(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetOnDidDeleteEvent(std::move(callback));
 }
 
-void JSTextField::SelectionMenuOptions(const JSCallbackInfo& info)
+void JSTextField::EditMenuOptions(const JSCallbackInfo& info)
 {
-    std::vector<NG::MenuOptionsParam> menuOptionsItems;
-    if (!JSViewAbstract::ParseSelectionMenuOptions(info, menuOptionsItems)) {
-        return;
-    }
-    TextFieldModel::GetInstance()->SetSelectionMenuOptions(std::move(menuOptionsItems));
+    NG::OnCreateMenuCallback onCreateMenuCallback;
+    NG::OnMenuItemClickCallback onMenuItemClick;
+    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick);
+    TextFieldModel::GetInstance()->SetSelectionMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 
 void JSTextField::SetEnablePreviewText(const JSCallbackInfo& info)

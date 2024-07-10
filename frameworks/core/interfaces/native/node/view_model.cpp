@@ -25,7 +25,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
-#include "core/components_ng/pattern/custom_paint/canvas_model_ng.h"
+#include "core/components_ng/pattern/canvas/canvas_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
@@ -70,6 +70,7 @@
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
+#include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
@@ -259,6 +260,7 @@ void* createComponentRootNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = CommonViewModelNG::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
     frameNode->IncRefCount();
     TAG_LOGD(AceLogTag::ACE_NATIVE_NODE, "createComponentRootNode: frameNode %{public}p", AceType::RawPtr(frameNode));
     return AceType::RawPtr(frameNode);
@@ -333,6 +335,13 @@ void* createCustomNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode("Custom", nodeId, AceType::MakeRefPtr<Pattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createNavigationNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = NavigationModelNG::CreateFrameNode(nodeId);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
@@ -529,6 +538,7 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         createImageAnimatorNode,
         createCircleNode,
         createTabContentNode,
+        createNavigationNode,
     };
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);
@@ -601,7 +611,7 @@ void InsertChildAfter(void* parentNode, void* childNode, void* siblingNode)
     CHECK_NULL_VOID(childNode);
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
-    
+
     if (AceType::InstanceOf<GroupNode>(parent)) {
         auto* groupNode = AceType::DynamicCast<GroupNode>(parent);
         groupNode->AddChildToGroup(AceType::Claim(child));

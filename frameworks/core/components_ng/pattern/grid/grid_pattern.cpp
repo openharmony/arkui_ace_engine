@@ -76,7 +76,7 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     }
 
     // If only set one of rowTemplate and columnsTemplate, use scrollable layout algorithm.
-    bool disableSkip = IsOutOfBoundary() || ScrollablePattern::AnimateRunning();
+    bool disableSkip = IsOutOfBoundary(true) || ScrollablePattern::AnimateRunning();
     if (UseIrregularLayout()) {
         auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(gridLayoutInfo_, CanOverScroll(GetScrollSource()));
         algo->SetEnableSkip(!disableSkip);
@@ -314,7 +314,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
 
     // check edgeEffect is not springEffect
     if (!HandleEdgeEffect(offset, source, GetContentSize())) {
-        if (IsOutOfBoundary()) {
+        if (IsOutOfBoundary(true)) {
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
         return false;
@@ -1302,8 +1302,8 @@ void GridPattern::OnAnimateStop()
     }
 }
 
-void GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve> &curve, bool smooth,
-                            bool canOverScroll, bool useTotalOffset)
+void GridPattern::AnimateTo(
+    float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll, bool useTotalOffset)
 {
     if (!isConfigScrollable_) {
         return;
@@ -1524,20 +1524,13 @@ void GridPattern::MoveItems(int32_t itemIndex, int32_t insertIndex)
     }
 }
 
-bool GridPattern::IsOutOfBoundary(bool useCurrentDelta)
+bool GridPattern::IsOutOfBoundary(bool /*useCurrentDelta*/)
 {
-    auto scrollable = GetAlwaysEnabled() || (gridLayoutInfo_.startIndex_ > 0) ||
-                      (gridLayoutInfo_.endIndex_ < gridLayoutInfo_.childrenCount_ - 1) ||
-                      GreatNotEqual(gridLayoutInfo_.totalHeightOfItemsInView_, gridLayoutInfo_.lastMainSize_);
-
-    bool outOfEnd = false;
-    if (UseIrregularLayout()) {
-        outOfEnd = gridLayoutInfo_.offsetEnd_;
-    } else {
-        outOfEnd = gridLayoutInfo_.IsOutOfEnd();
-    }
-
-    return scrollable && (gridLayoutInfo_.IsOutOfStart() || outOfEnd);
+    const bool scrollable = GetAlwaysEnabled() || (gridLayoutInfo_.startIndex_ > 0) ||
+                            (gridLayoutInfo_.endIndex_ < gridLayoutInfo_.childrenCount_ - 1) ||
+                            GreatNotEqual(gridLayoutInfo_.totalHeightOfItemsInView_, gridLayoutInfo_.lastMainSize_);
+    return scrollable &&
+           (gridLayoutInfo_.IsOutOfStart() || gridLayoutInfo_.IsOutOfEnd(GetMainGap(), UseIrregularLayout()));
 }
 
 float GridPattern::GetEndOffset()
@@ -1884,14 +1877,14 @@ bool GridPattern::AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWr
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto extraOffset = GetExtraOffset();
-    auto success = true;
+    bool success = true;
     if (UseIrregularLayout()) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
         auto size = GridLayoutUtils::GetItemSize(&gridLayoutInfo_, RawPtr(host), *targetIndex_);
         targetPos = gridLayoutInfo_.GetAnimatePosIrregular(*targetIndex_, size.rows, align, mainGap);
         if (Negative(targetPos)) {
-            return false;
+            success = false;
         }
     } else {
         auto gridScrollLayoutAlgorithm =
@@ -1900,12 +1893,12 @@ bool GridPattern::AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWr
         // Based on the index, align gets the position to scroll to
         success = scrollGridLayoutInfo_.GetGridItemAnimatePos(
             gridLayoutInfo_, targetIndex_.value(), align, mainGap, targetPos);
-        if (!success) {
-            if (extraOffset.has_value()) {
-                targetPos = GetTotalOffset();
-            } else {
-                return false;
-            }
+    }
+    if (!success) {
+        if (extraOffset.has_value()) {
+            targetPos = GetTotalOffset();
+        } else {
+            return false;
         }
     }
 

@@ -146,7 +146,9 @@ export struct TipsDialog {
           }
           .padding({ top: $r('sys.float.padding_level8') })
         } else {
-          this.checkBoxPart();
+          WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
+            this.checkBoxPart();
+          }
         }
       });
     }
@@ -698,7 +700,9 @@ export struct ConfirmDialog {
         if (index === this.textIndex) {
           this.textBuilder();
         } else if (index === this.checkboxIndex) {
-          this.checkBoxBuilder();
+          WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
+            this.checkBoxBuilder();
+          }
         }
       });
     }
@@ -848,6 +852,7 @@ export struct CustomContentDialog {
   secondaryTitle?: ResourceStr;
   @BuilderParam contentBuilder: () => void;
   contentAreaPadding?: Padding;
+  localizedContentAreaPadding?: LocalizedPadding;
   buttons?: ButtonOptions[];
   theme?: Theme | CustomTheme = new CustomThemeImpl({});
   themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
@@ -863,11 +868,13 @@ export struct CustomContentDialog {
         this.contentBuilder();
       },
       contentAreaPadding: this.contentAreaPadding,
+      localizedContentAreaPadding: this.localizedContentAreaPadding,
       buttons: this.buttons,
       theme: this.theme,
       themeColorMode: this.themeColorMode,
       fontSizeScale: this.fontSizeScale,
       minContentHeight: this.minContentHeight,
+      customStyle: false
     }).constraintSize({ maxHeight: '100%' });
   }
 }
@@ -952,6 +959,7 @@ struct CustomDialogContentComponent {
   controller?: CustomDialogController;
   primaryTitle?: ResourceStr;
   secondaryTitle?: ResourceStr;
+  localizedContentAreaPadding?: LocalizedPadding;
   @BuilderParam contentBuilder: () => void = this.defaultContentBuilder;
   buttons?: ButtonOptions[];
   contentAreaPadding?: Padding;
@@ -968,7 +976,7 @@ struct CustomDialogContentComponent {
   @State buttonHeight: number = 0;
   @State contentMaxHeight: Length = '100%';
   @Link fontSizeScale: number;
-  @State customStyle: boolean = false;
+  @State customStyle: boolean | undefined = undefined;
   @State buttonMaxFontSize: Length = $r('sys.float.Body_L');
   @State buttonMinFontSize: Length = 9;
   @State primaryTitleMaxFontSize: Length = $r('sys.float.Title_S');
@@ -995,13 +1003,19 @@ struct CustomDialogContentComponent {
           }) {
             ForEach([this.titleIndex, this.contentIndex, this.buttonIndex], (index: number) => {
               if (index === this.titleIndex) {
-                this.titleBuilder();
+                WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
+                  this.titleBuilder();
+                }
               } else if (index === this.contentIndex) {
                 Column() {
-                  this.contentBuilder();
+                  WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
+                    this.contentBuilder();
+                  }
                 }.padding(this.getContentPadding())
               } else {
-                this.ButtonBuilder();
+                WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
+                  this.ButtonBuilder();
+                }
               }
             });
           }
@@ -1048,11 +1062,14 @@ struct CustomDialogContentComponent {
 
   aboutToAppear(): void {
     this.updateFontScale();
-    if (this.controller) {
+    if (this.controller && this.customStyle === undefined) {
       let customController: CustomDialogControllerExtend = this.controller as CustomDialogControllerExtend;
       if (customController.arg_ && customController.arg_.customStyle && customController.arg_.customStyle === true) {
         this.customStyle = true;
       }
+    }
+    if (this.customStyle === undefined) {
+      this.customStyle = false;
     }
     this.primaryTitleFontColorWithTheme = this.theme?.colors?.fontPrimary ?
     this.theme.colors.fontPrimary : $r('sys.color.font_primary');
@@ -1095,7 +1112,10 @@ struct CustomDialogContentComponent {
    *
    * @returns content padding
    */
-  private getContentPadding(): Padding {
+  private getContentPadding(): Padding | LocalizedPadding {
+    if (this.localizedContentAreaPadding) {
+      return this.localizedContentAreaPadding;
+    }
     if (this.contentAreaPadding) {
       return this.contentAreaPadding;
     }

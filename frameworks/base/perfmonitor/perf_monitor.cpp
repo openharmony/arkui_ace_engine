@@ -513,25 +513,21 @@ void PerfMonitor::ReportPerfEvent(PerfEventType type, DataBase& data)
 bool PerfMonitor::IsExceptResponseTime(int64_t time, const std::string& sceneId)
 {
     int64_t currentRealTimeNs = GetCurrentRealTimeNs();
-    bool isCheckResponse = (sceneId == PerfConstants::APP_LIST_FLING) ||
-        (sceneId == PerfConstants::SCREEN_ROTATION_ANI) ||
-        (sceneId == PerfConstants::SHOW_INPUT_METHOD_ANIMATION) ||
-        (sceneId == PerfConstants::HIDE_INPUT_METHOD_ANIMATION) ||
-        (sceneId == PerfConstants::VOLUME_BAR_SHOW) ||
-        (sceneId == PerfConstants::APP_TRANSITION_TO_OTHER_APP) ||
-        (sceneId == PerfConstants::APP_TRANSITION_FROM_OTHER_APP) ||
-        (sceneId == PerfConstants::PC_APP_CENTER_GESTURE_OPERATION) ||
-        (sceneId == PerfConstants::PC_GESTURE_TO_RECENT) ||
-        (sceneId == PerfConstants::PC_SHORTCUT_SHOW_DESKTOP) ||
-        (sceneId == PerfConstants::PC_SHORTCUT_RESTORE_DESKTOP) ||
-        (sceneId == PerfConstants::PC_SHOW_DESKTOP_GESTURE_OPERATION) ||
-        (sceneId == PerfConstants::PC_ALT_TAB_TO_RECENT) ||
-        (sceneId == PerfConstants::PC_SHORTCUT_TO_RECENT) ||
-        (sceneId == PerfConstants::PC_EXIT_RECENT) ||
-        (sceneId == PerfConstants::PC_SHORTCUT_TO_APP_CENTER) ||
-        (sceneId == PerfConstants::PC_SHORTCUT_TO_APP_CENTER_ON_RECENT) ||
-        (sceneId == PerfConstants::PC_SHORTCUT_EXIT_APP_CENTER);
-    if (isCheckResponse) {
+    static set<std::string> exceptSceneSet = {
+        PerfConstants::APP_LIST_FLING, PerfConstants::SCREEN_ROTATION_ANI,
+        PerfConstants::SHOW_INPUT_METHOD_ANIMATION, PerfConstants::HIDE_INPUT_METHOD_ANIMATION,
+        PerfConstants::APP_TRANSITION_FROM_OTHER_APP, PerfConstants::APP_TRANSITION_TO_OTHER_APP,
+        PerfConstants::VOLUME_BAR_SHOW, PerfConstants::PC_APP_CENTER_GESTURE_OPERATION,
+        PerfConstants::PC_GESTURE_TO_RECENT, PerfConstants::PC_SHORTCUT_SHOW_DESKTOP,
+        PerfConstants::PC_ALT_TAB_TO_RECENT, PerfConstants::PC_SHOW_DESKTOP_GESTURE_OPERATION,
+        PerfConstants::PC_SHORTCUT_RESTORE_DESKTOP, PerfConstants::PC_SHORTCUT_TO_RECENT,
+        PerfConstants::PC_EXIT_RECENT, PerfConstants::PC_SHORTCUT_TO_APP_CENTER_ON_RECENT,
+        PerfConstants::PC_SHORTCUT_TO_APP_CENTER, PerfConstants::PC_SHORTCUT_EXIT_APP_CENTER,
+        PerfConstants::WINDOW_TITLE_BAR_MINIMIZED,
+        PerfConstants::APP_EXIT_FROM_WINDOW_TITLE_BAR_CLOSED,
+        PerfConstants::LAUNCHER_APP_LAUNCH_FROM_OTHER
+    };
+    if (exceptSceneSet.find(sceneId) != exceptSceneSet.end()) {
         return true;
     }
     if ((sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH && currentRealTimeNs - time > RESPONSE_TIMEOUT)

@@ -151,6 +151,7 @@ public:
     void SetPixelMap(const RefPtr<DragEventActuator>& actuator);
     void SetEventColumn(const RefPtr<DragEventActuator>& actuator);
     void HideFilter();
+    void HideMenu(int32_t targetId);
     void HidePixelMap(bool startDrag = false, double x = 0, double y = 0, bool showAnimation = true);
     void HideEventColumn();
     void BindClickEvent(const RefPtr<FrameNode>& columnNode);
@@ -269,6 +270,7 @@ public:
     void GetThumbnailPixelMapAsync(const RefPtr<GestureEventHub>& gestureHub);
     void SetResponseRegionFull();
     void ResetResponseRegion();
+    static void ResetDragStatus();
 
 private:
     void UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>& frameNode);

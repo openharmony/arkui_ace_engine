@@ -457,6 +457,7 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
     }
     if (info.Length() > 1) {
         ParseBackgroundOptions(info[1], options.bgOptions);
+        ParseBarOptions(info[1], options.brOptions);
     }
     NavigationModel::GetInstance()->SetTitlebarOptions(std::move(options));
 }

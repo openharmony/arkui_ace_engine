@@ -205,7 +205,9 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
             },
             TaskExecutor::TaskType::UI, "ArkUIGridItemDragStart");
     };
-    NG::ComponentSnapshot::Create(customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
+    SnapshotParam param;
+    param.delay = CREATE_PIXELMAP_TIME;
+    NG::ComponentSnapshot::Create(customNode, std::move(callback), false, param);
 #else
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);

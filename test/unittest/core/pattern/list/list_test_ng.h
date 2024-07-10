@@ -20,7 +20,6 @@
 #include <optional>
 
 #include "gtest/gtest.h"
-#include "test/mock/base/mock_drag_window.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -30,27 +29,18 @@
 #include "core/components_ng/property/safe_area_insets.h"
 #define private public
 #define protected public
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "bridge/common/utils/utils.h"
-#include "core/components/button/button_theme.h"
-#include "core/components/list/list_theme.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/button/button_model_ng.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
@@ -66,15 +56,9 @@
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
-#include "core/components_ng/syntax/for_each_model_ng.h"
-#include "core/components_ng/syntax/for_each_node.h"
-#include "core/components_ng/syntax/lazy_for_each_model_ng.h"
-#include "core/components_ng/syntax/lazy_for_each_node.h"
-#include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
-#include "core/components_ng/syntax/syntax_item.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_model_ng.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_v2/list/list_properties.h"
-#include "test/unittest/core/syntax/mock_lazy_for_each_actuator.h"
-#include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -102,6 +86,9 @@ constexpr float DEFAULT_STARTOFFSET = 0.f;
 constexpr float SPACE = 10.f;
 constexpr float STROKE_WIDTH = 5.f;
 const V2::ItemDivider ITEM_DIVIDER = { Dimension(STROKE_WIDTH), Dimension(10), Dimension(20), Color(0x000000) };
+constexpr int32_t HEADER_INDEX = 0;
+constexpr int32_t FOOTER_INDEX = 1;
+
 
 class ListTestNg : public TestNG {
 public:
@@ -123,17 +110,15 @@ public:
     void CreateGroupWithSetting(int32_t groupNumber, Axis axis, V2::ListItemGroupStyle listItemGroupStyle,
         int32_t itemNumber = GROUP_ITEM_NUMBER);
     void CreateGroupWithSettingChildrenMainSize(int32_t groupNumber);
-    void CreateItemWithSwipe(
-        std::function<void()> startAction, std::function<void()> endAction, V2::SwipeEdgeEffect effect);
-    std::function<void()> GetDefaultSwiperBuilder(float crossSize);
-    std::function<void()> GetDefaultHeaderBuilder();
+    void CreateSwipeItems(std::function<void()> startAction, std::function<void()> endAction,
+        V2::SwipeEdgeEffect effect, int32_t itemNumber = TOTAL_ITEM_NUMBER);
+    void CreateRepeatVirtualScrollNode(int32_t itemNumber, const std::function<void(uint32_t)>& createFunc);
+    std::function<void()> GetRowOrColBuilder(float crossSize, float mainSize);
+    std::function<void()> GetRowOrColBuilder(Dimension crossSize, Dimension mainSize);
 
     void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
-    float GetInterval();
-    void ScrollUp(float itemNumber = 1);
-    void ScrollDown(float itemNumber = 1);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
-    void ScrollToIndex(int32_t index, bool smooth, ScrollAlign align);
+    void ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset = std::nullopt);
     void ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align);
     void DragSwiperItem(int32_t index, float mainDelta, float mainVelocity = SWIPER_SPEED_TH);
     void HandleDragStart(int32_t index);
@@ -141,14 +126,8 @@ public:
     void HandleDragEnd(int32_t index, float mainVelocity = SWIPER_SPEED_TH);
     void ScrollSnap(float offset, float velocity);
     void ScrollSnapForEqualHeightItem(float offset, float velocity);
+    void FlushIdleTask(const RefPtr<ListPattern>& listPattern);
 
-    AssertionResult VerifyPosition(
-        const RefPtr<FrameNode>& frameNode, int32_t viewItemNumber, int32_t lanes, float space, float startOffset);
-    AssertionResult VerifyItemPosition(
-        const RefPtr<FrameNode>& frameNode, int32_t viewItemNumber, int32_t lanes, float space, int32_t initialIndex);
-    AssertionResult VerifyGroupItemPosition(
-        const RefPtr<FrameNode>& frameNode, int32_t viewItemNumber, int32_t lanes, float space, float startOffset);
-    AssertionResult IsEqualTotalOffset(float expectOffset);
     AssertionResult ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, float expectOffset);
     AssertionResult JumpToItemInGroup(
         int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align, float expectOffset);

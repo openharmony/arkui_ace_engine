@@ -14,6 +14,9 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_radio.h"
+#if !defined(PREVIEW)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -368,6 +371,9 @@ void JSRadio::OnChange(const JSCallbackInfo& args)
         PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(check));
         func->ExecuteJS(1, &newJSVal);
+#if !defined(PREVIEW)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Radio.onChange");
+#endif
     };
     RadioModel::GetInstance()->SetOnChange(std::move(onChange));
     args.ReturnSelf();

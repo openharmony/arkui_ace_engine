@@ -270,6 +270,11 @@ public:
         return clickEventActuator_ != nullptr;
     }
 
+    bool IsUserClickable() const
+    {
+        return clickEventActuator_ != nullptr && clickEventActuator_->IsUserClickable();
+    }
+
     bool IsAccessibilityClickable();
     bool IsAccessibilityLongClickable();
 
@@ -556,6 +561,16 @@ public:
         return previewMode_;
     }
 
+    void SetContextMenuShowStatus(bool contextMenuShowStatus)
+    {
+        contextMenuShowStatus_ = contextMenuShowStatus;
+    }
+
+    bool GetContextMenuShowStatus()
+    {
+        return contextMenuShowStatus_;
+    }
+
     void SetPixelMap(RefPtr<PixelMap> pixelMap)
     {
         pixelMap_ = pixelMap;
@@ -748,6 +763,8 @@ private:
     GestureRecognizerJudgeFunc gestureRecognizerJudgeFunc_;
 
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
+    // the value from show parameter of context menu, which is controlled by caller manually
+    bool contextMenuShowStatus_  = false;
     bool isDragForbidden_ = false;
     bool textDraggable_ = false;
     bool isTextDraggable_ = false;

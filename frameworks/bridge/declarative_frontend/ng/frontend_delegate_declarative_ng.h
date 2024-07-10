@@ -19,6 +19,7 @@
 #include "base/memory/ace_type.h"
 #include "base/thread/cancelable_callback.h"
 #include "base/utils/measure_util.h"
+#include "core/components_ng/render/snapshot_param.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 #include "frameworks/bridge/common/manifest/manifest_parser.h"
 #include "frameworks/bridge/common/utils/pipeline_context_holder.h"
@@ -216,11 +217,12 @@ public:
     void HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback) override {}
 
     void GetSnapshot(const std::string& componentId,
-        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback) override;
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+        const NG::SnapshotOptions& options) override;
 
     void CreateSnapshot(std::function<void()>&& customBuilder,
         std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
-        bool enableInspector) override;
+        bool enableInspector, const NG::SnapshotParam& param) override;
 
     void AddFrameNodeToOverlay(
         const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt) override;

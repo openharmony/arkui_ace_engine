@@ -16,6 +16,9 @@
 #include "core/components_ng/pattern/search/search_pattern.h"
 
 #include <cstdint>
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "base/geometry/rect.h"
 #include "base/utils/system_properties.h"
@@ -160,8 +163,28 @@ bool SearchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     } else {
         cancelButtonSize_ = cancelButtonGeometryNode->GetFrameSize();
     }
-
+    SetAccessibilityClearAction();
     return true;
+}
+
+void SearchPattern::SetAccessibilityClearAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto cancelButtonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(CANCEL_BUTTON_INDEX));
+    CHECK_NULL_VOID(cancelButtonFrameNode);
+    auto textAccessibilityProperty = cancelButtonFrameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(textAccessibilityProperty);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    auto layoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto cleanNodeStyle = layoutProperty->GetCleanNodeStyleValue(CleanNodeStyle::INPUT);
+    auto hasContent = cleanNodeStyle == CleanNodeStyle::CONSTANT ||
+                        (cleanNodeStyle == CleanNodeStyle::INPUT && textFieldPattern->IsOperation());
+    textAccessibilityProperty->SetAccessibilityText(hasContent ? textFieldPattern->GetCancelButton() : "");
 }
 
 void SearchPattern::OnModifyDone()
@@ -264,6 +287,15 @@ void SearchPattern::SetSearchFieldAccessibilityAction()
         CHECK_NULL_VOID(callBack);
         GestureEvent gestureEvent;
         callBack(gestureEvent);
+    });
+
+    auto textAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    textAccessibilityProperty->SetActionSetText([host](const std::string& value) {
+        auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+        CHECK_NULL_VOID(textFieldFrameNode);
+        auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(textFieldPattern);
+        textFieldPattern->InsertValue(value);
     });
 }
 
@@ -634,6 +666,11 @@ void SearchPattern::OnClickButtonAndImage()
     searchEventHub->UpdateSubmitEvent(text);
     // close keyboard and select background color
     textFieldPattern->StopEditing();
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+    if (UiSessionManager::GetInstance().GetSearchEventRegistered()) {
+        UiSessionManager::GetInstance().ReportSearchEvent(text);
+    }
+#endif
 }
 
 void SearchPattern::OnClickCancelButton()
@@ -1624,23 +1661,11 @@ void SearchPattern::CreateOrUpdateImage(int32_t index, const std::string& src, b
 {
     CHECK_NULL_VOID(GetSearchNode());
     imageClickListener_ = nullptr;
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_VOID(searchTheme);
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
     HandleImageLayoutProperty(frameNode, index, src, bundleName, moduleName);
     auto imageRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(imageRenderContext);
-    auto imageOriginHeight = searchTheme->GetIconHeight().ConvertToPx();
-    double imageScale = 0.0;
-    if (!NearZero(imageOriginHeight)) {
-        imageScale = (index == IMAGE_INDEX ? GetSearchNode()->GetSearchIconSize().ConvertToPx()
-                                           : GetSearchNode()->GetCancelIconSize().ConvertToPx()) /
-                     imageOriginHeight;
-    }
-    imageRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
     auto parentInspector = GetSearchNode()->GetInspectorIdValue("");
     frameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + parentInspector);
     auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
@@ -1839,23 +1864,6 @@ void SearchPattern::UpdateIconSize(int32_t index, const Dimension& value)
         auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(symbolLayoutProperty);
         symbolLayoutProperty->UpdateFontSize(value);
-    } else {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto searchTheme = pipeline->GetTheme<SearchTheme>();
-        CHECK_NULL_VOID(searchTheme);
-        auto imageRenderContext = iconFrameNode->GetRenderContext();
-        CHECK_NULL_VOID(imageRenderContext);
-
-        auto imageOriginHeight = GetSearchNode()->GetCancelIconSize().ConvertToPx();
-        if (index == IMAGE_INDEX) {
-            imageOriginHeight = GetSearchNode()->GetSearchIconSize().ConvertToPx();
-        }
-        double imageScale = 0.0;
-        if (!NearZero(imageOriginHeight)) {
-            imageScale = value.ConvertToPx() / imageOriginHeight;
-        }
-        imageRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
     }
     iconFrameNode->MarkModifyDone();
     iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

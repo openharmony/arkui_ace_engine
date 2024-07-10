@@ -65,6 +65,13 @@ enum class WebLayoutMode {
     FIT_CONTENT,
 };
 
+enum class WebKeyboardAvoidMode : int32_t {
+    RESIZE_VISUAL = 0,
+    RESIZE_CONTENT,
+    OVERLAYS_CONTENT,
+    DEFAULT
+};
+
 struct WebMenuOptionsParam {
     std::vector<NG::MenuOptionsParam> menuOption;
     bool operator==(const WebMenuOptionsParam& webMenuOption) const
@@ -569,8 +576,6 @@ public:
     {
         postWebMessageImpl_ = postWebMessageImpl;
     }
-
-
 
     using GetDefaultUserAgentImpl = std::function<std::string()>;
     std::string GetDefaultUserAgent()

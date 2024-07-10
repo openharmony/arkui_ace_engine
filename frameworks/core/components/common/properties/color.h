@@ -137,14 +137,7 @@ public:
 
     static Color ColorFromString(const std::string& str);
 
-    std::string ToString() const
-    {
-        return "[ARGB]("
-            + std::to_string(colorValue_.argb.alpha) + ", "
-            + std::to_string(colorValue_.argb.red) + ", "
-            + std::to_string(colorValue_.argb.green) + ", "
-            + std::to_string(colorValue_.argb.blue) + ")";
-    }
+    std::string ToString() const;
 
 private:
     constexpr explicit Color(ColorParam colorValue) : colorValue_(colorValue) {}

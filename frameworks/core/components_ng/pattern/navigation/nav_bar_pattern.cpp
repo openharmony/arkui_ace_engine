@@ -94,15 +94,6 @@ void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<B
             offset = navBarPattern->GetShowMenuOffset(barItemNode, menuNode);
         }
         overlayManager->ShowMenu(id, offset, menu);
-        navBarNode->SetIsTitleMenuNodeShowing(true);
-        auto hidMenuCallback = [weakNavBarNode = WeakPtr<NavBarNode>(navBarNode)]() {
-            auto navBarNode = weakNavBarNode.Upgrade();
-            CHECK_NULL_VOID(navBarNode);
-            navBarNode->SetIsTitleMenuNodeShowing(false);
-        };
-        auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
-        CHECK_NULL_VOID(menuWrapperPattern);
-        menuWrapperPattern->RegisterMenuDisappearCallback(hidMenuCallback);
     };
     eventHub->SetItemAction(clickCallback);
 
@@ -394,46 +385,6 @@ void NavBarPattern::OnAttachToFrameNode()
     }
 }
 
-void NavBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
-{
-    if (isHideTitlebar_ || titleMode_ != NavigationTitleMode::FREE) {
-        gestureHub->RemovePanEvent(panEvent_);
-        return;
-    }
-
-    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleOnDragStart(info.GetOffsetY());
-    };
-
-    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleOnDragUpdate(info.GetOffsetY());
-    };
-
-    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleOnDragEnd();
-    };
-
-    auto actionCancelTask = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleOnDragEnd();
-    };
-
-    if (!panEvent_) {
-        panEvent_ = MakeRefPtr<PanEvent>(std::move(actionStartTask), std::move(actionUpdateTask),
-            std::move(actionEndTask), std::move(actionCancelTask));
-    }
-
-    PanDirection panDirection = { .type = PanDirection::VERTICAL };
-    gestureHub->SetPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
-}
-
 void NavBarPattern::HandleOnDragStart(float offset)
 {
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
@@ -560,27 +511,6 @@ void NavBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
         BuildMenu(navBarNode, titleBarNode);
         titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     } while (0);
-    if (isTitleMenuNodeShowing_ == navBarNode->IsTitleMenuNodeShowing()) {
-        return;
-    }
-    if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE) {
-        isTitleMenuNodeShowing_ = navBarNode->IsTitleMenuNodeShowing();
-    }
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
-    CHECK_NULL_VOID(titleBarNode);
-    if (titleBarNode->GetMenu()) {
-        auto buttonNode = titleBarNode->GetMenu()->GetLastChild();
-        CHECK_NULL_VOID(buttonNode);
-        auto barItemNode = buttonNode->GetFirstChild();
-        CHECK_NULL_VOID(barItemNode);
-        auto barItemFrameNode = AceType::DynamicCast<BarItemNode>(barItemNode);
-        CHECK_NULL_VOID(barItemFrameNode);
-        if (barItemFrameNode->IsMoreItemNode() && isTitleMenuNodeShowing_) {
-            auto eventHub = barItemFrameNode->GetEventHub<BarItemEventHub>();
-            CHECK_NULL_VOID(eventHub);
-            eventHub->FireItemAction();
-        }
-    }
 }
 
 void NavBarPattern::OnDetachFromFrameNode(FrameNode* frameNode)

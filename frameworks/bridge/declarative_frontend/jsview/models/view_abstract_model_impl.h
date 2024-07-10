@@ -50,6 +50,11 @@ public:
     void SetPadding(const CalcDimension& value) override;
     void SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override;
+    void SetSafeAreaPadding(const CalcDimension& value) override {}
+    void SetSafeAreaPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
+        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override
+    {}
+    void ResetSafeAreaPadding() override {}
     void SetMargin(const CalcDimension& value) override;
     void SetMargins(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override;
@@ -248,6 +253,7 @@ public:
 
     void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) override;
+    void BindDragWithContextMenuParams(const NG::MenuParam& menuParam) override {};
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,

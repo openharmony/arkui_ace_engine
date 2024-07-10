@@ -1186,7 +1186,9 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest042, TestSize.Level1)
      * @tc.expected: retFlag is false.
      */
     GestureEvent event;
+    dragDropManager->SetIsDragWithContextMenu(true);
     dragDropManager->DoDragStartAnimation(overlayManager, event);
+    dragDropManager->TransDragWindowToDragFwk(111);
     bool retFlag = dragDropManager->GetDragPreviewInfo(overlayManager, dragDropManager->info_);
     EXPECT_FALSE(retFlag);
 
@@ -1211,7 +1213,6 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest042, TestSize.Level1)
     retFlag = dragDropManager->IsNeedScaleDragPreview();
     EXPECT_FALSE(retFlag);
 }
-
 /**
  * @tc.name: DragDropManagerTest043
  * @tc.desc: Test DoDragMoveAnimate

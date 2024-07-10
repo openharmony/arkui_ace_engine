@@ -300,6 +300,9 @@ public:
     }
 
 private:
+    void LayoutSwiperIndicator(
+        LayoutWrapper* layoutWrapper, const RefPtr<SwiperLayoutProperty>& swiperLayoutProperty,
+        const PaddingPropertyF& padding);
     void MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
     void MeasureTabsCustomAnimation(LayoutWrapper* layoutWrapper);
     void MeasureSwiperCustomAnimation(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
@@ -331,7 +334,7 @@ private:
     float GetChildMainAxisSize(
         const RefPtr<LayoutWrapper>& childWrapper, const RefPtr<SwiperLayoutProperty>& swiperProperty, Axis axis);
 
-    void CheckCachedItem();
+    void CheckCachedItem(int32_t startIndex, int32_t endIndex, LayoutWrapper* layoutWrapper);
 
     bool isLoop_ = true;
     float prevMargin_ = 0.0f;

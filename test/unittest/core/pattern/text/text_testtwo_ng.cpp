@@ -741,12 +741,9 @@ HWTEST_F(TextTestTwoNg, ShowSelectOverlay004, TestSize.Level1)
     pattern->copyOption_ = CopyOptions::InApp;
     pattern->textForDisplay_ = "test";
     pattern->textSelector_.Update(0, 20);
-    std::vector<MenuOptionsParam> menuOptionItems;
-    MenuOptionsParam menuOptionItem1;
-    menuOptionItem1.content = "test1";
-    menuOptionItem1.action = [](const std::string&) {};
-    menuOptionItems.emplace_back(menuOptionItem1);
-    pattern->menuOptionItems_ = menuOptionItems;
+    OnCreateMenuCallback onCreateMenuCallback;
+    OnMenuItemClickCallback onMenuItemClick;
+    pattern->selectOverlay_->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 
     /**
      * @tc.steps: step2. call ShowSelectOverlay function

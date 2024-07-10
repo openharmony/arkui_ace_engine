@@ -52,12 +52,12 @@ public:
         return true;
     }
 
-    bool GetNeedToRequestKeyboardOnFocus()
+    bool NeedToRequestKeyboardOnFocus() const override
     {
         auto pattern = textField_->GetPattern();
         CHECK_NULL_RETURN(pattern, false);
         auto curPattern = DynamicCast<TextFieldPattern>(pattern);
-        return curPattern->GetNeedToRequestKeyboardOnFocus();
+        return curPattern->NeedToRequestKeyboardOnFocus();
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -193,6 +193,7 @@ private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
     void SetAccessibilityAction();
+    void SetAccessibilityClearAction();
     void SetSearchFieldAccessibilityAction();
     void InitButtonAndImageClickEvent();
     void InitCancelButtonClickEvent();

@@ -69,6 +69,9 @@ typedef struct ArkUI_Animator* ArkUI_AnimatorHandle;
 typedef struct ArkUI_AnimatorEvent ArkUI_AnimatorEvent;
 typedef struct ArkUI_AnimatorOnFrameEvent ArkUI_AnimatorOnFrameEvent;
 
+
+typedef struct ArkUI_TransitionEffect ArkUI_TransitionEffect;
+
 /**
  * @brief Implements the native animation APIs provided by ArkUI.
  *
@@ -309,6 +312,17 @@ ArkUI_CurveHandle OH_ArkUI_Curve_CreateInterpolatingSpring(float velocity, float
 ArkUI_CurveHandle OH_ArkUI_Curve_CreateCustomCurve(
     void* userData, float (*interpolate)(float fraction, void* userdata));
 void OH_ArkUI_Curve_DisposeCurve(ArkUI_CurveHandle curveHandle);
+
+ArkUI_TransitionEffect* OH_ArkUI_CreateOpacityTransitionEffect(float opacity);
+ArkUI_TransitionEffect* OH_ArkUI_CreateTranslationTransitionEffect(ArkUI_TranslationOptions* translate);
+ArkUI_TransitionEffect* OH_ArkUI_CreateScaleTransitionEffect(ArkUI_ScaleOptions* scale);
+ArkUI_TransitionEffect* OH_ArkUI_CreateRotationTransitionEffect(ArkUI_RotationOptions* rotate);
+ArkUI_TransitionEffect* OH_ArkUI_CreateMovementTransitionEffect(ArkUI_TransitionEdge move);
+ArkUI_TransitionEffect* OH_ArkUI_CreateAsymmetricTransitionEffect(
+    ArkUI_TransitionEffect* appear, ArkUI_TransitionEffect* disappear);
+void OH_ArkUI_TransitionEffect_Dispose(ArkUI_TransitionEffect* effect);
+int32_t OH_ArkUI_TransitionEffect_Combine(ArkUI_TransitionEffect* effect, ArkUI_TransitionEffect* combine);
+int32_t OH_ArkUI_TransitionEffect_SetAnimation(ArkUI_TransitionEffect* effect, ArkUI_AnimateOption* animation);
 #ifdef __cplusplus
 };
 #endif

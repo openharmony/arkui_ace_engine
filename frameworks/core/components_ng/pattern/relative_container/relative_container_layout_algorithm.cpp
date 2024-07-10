@@ -124,15 +124,13 @@ void RelativeContainerLayoutAlgorithm::UpdateSizeWhenChildrenEmpty(LayoutWrapper
     CHECK_NULL_VOID(layoutWrapper);
     auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(relativeContainerLayoutProperty);
-    const auto& calcLayoutConstraint = relativeContainerLayoutProperty->GetCalcLayoutConstraint();
-    if (!calcLayoutConstraint) {
-        const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
-        CHECK_NULL_VOID(layoutConstraint.has_value());
-        auto idealSize = CreateIdealSizeByPercentRef(layoutConstraint.value(), Axis::FREE, MeasureType::MATCH_PARENT)
+    const auto& layoutConstraint = relativeContainerLayoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint.has_value());
+    auto idealSize = CreateIdealSizeByPercentRef(layoutConstraint.value(), Axis::FREE, MeasureType::MATCH_PARENT)
                              .ConvertToSizeT();
-        layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize.IsPositive() ? idealSize : SizeF(0.0f, 0.0f));
-        return;
-    }
+    layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize.IsPositive() ? idealSize : SizeF(0.0f, 0.0f));
+    const auto& calcLayoutConstraint = relativeContainerLayoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_VOID(calcLayoutConstraint);
     auto selfIdealSize = calcLayoutConstraint->selfIdealSize;
     padding_ = relativeContainerLayoutProperty->CreatePaddingAndBorder();
     if (selfIdealSize->Width()->GetDimension().Unit() == DimensionUnit::AUTO) {

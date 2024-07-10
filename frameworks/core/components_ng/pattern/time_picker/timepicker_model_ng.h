@@ -29,6 +29,7 @@ public:
     void SetSelectedTime(const PickerTime& value) override;
     void SetOnChange(TimeChangeEvent&& onChange) override;
     void SetHour24(bool isUseMilitaryTime) override;
+    void SetIsEnableHapticFeedback(bool isEnableHapticFeedback) override;
     void SetDateTimeOptions(ZeroPrefixType& hourType,
         ZeroPrefixType& minuteType, ZeroPrefixType& secondType) override;
     void SetWheelModeEnabled(bool wheelModeEnabled) override;
@@ -54,15 +55,17 @@ public:
     static void SetDateTimeOptions(FrameNode* frameNode, ZeroPrefixType& hourType,
         ZeroPrefixType& minuteType, ZeroPrefixType& secondType);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetIsEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback);
     static PickerTextStyle getSelectedTextStyle(FrameNode* frameNode);
     static PickerTextStyle getNormalTextStyle(FrameNode* frameNode);
     static PickerTextStyle getDisappearTextStyle(FrameNode* frameNode);
     static PickerTime getTimepickerSelected(FrameNode* frameNode);
     static uint32_t getTimepickerBackgroundColor(FrameNode* frameNode);
     static int32_t getTimepickerUseMilitaryTime(FrameNode* frameNode);
+    static int32_t getEnableHapticFeedback(FrameNode* frameNode);
     static void SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme);
     static void SetWheelModeEnabled(FrameNode* frameNode, bool wheelModeEnabled);
-
+    static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();

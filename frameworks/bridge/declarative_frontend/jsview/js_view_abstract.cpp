@@ -68,6 +68,9 @@
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "canvas_napi/js_canvas.h"
+#if !defined(PREVIEW)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
@@ -109,7 +112,9 @@ namespace {
 const std::string RESOURCE_TOKEN_PATTERN = "(app|sys|\\[.+?\\])\\.(\\S+?)\\.(\\S+)";
 const std::string RESOURCE_NAME_PATTERN = "\\[(.+?)\\]";
 constexpr int32_t DIRECTION_COUNT = 4;
-}
+constexpr char JS_TEXT_MENU_ID_CLASS_NAME[] = "TextMenuItemId";
+constexpr int NUM1 = 1;
+} // namespace
 
 std::unique_ptr<ViewAbstractModel> ViewAbstractModel::instance_ = nullptr;
 std::mutex ViewAbstractModel::mutex_;
@@ -396,15 +401,27 @@ std::string GetReplaceContentStr(int pos, const std::string& type, JSRef<JSArray
     JSRef<JSVal> item = params->GetValueAt(pos + containCount);
     if (type == "d") {
         if (item->IsNumber()) {
-            return std::to_string(item->ToNumber<uint32_t>());
+            return std::to_string(item->ToNumber<int32_t>());
+        } else if (item->IsObject()) {
+            int32_t result = 0;
+            JSViewAbstract::ParseJsInteger(item, result);
+            return std::to_string(result);
         }
     } else if (type == "s") {
         if (item->IsString()) {
             return item->ToString();
+        } else if (item->IsObject()) {
+            std::string result;
+            JSViewAbstract::ParseJsString(item, result);
+            return result;
         }
     } else if (type == "f") {
         if (item->IsNumber()) {
             return std::to_string(item->ToNumber<float>());
+        } else if (item->IsObject()) {
+            double result = 0.0;
+            JSViewAbstract::ParseJsDouble(item, result);
+            return std::to_string(result);
         }
     }
     return std::string();
@@ -2469,7 +2486,7 @@ void JSViewAbstract::JsOverlay(const JSCallbackInfo& info)
             CHECK_NULL_VOID(builderFunc);
             auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
             auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc),
-                              node = targetNode]() {
+                                 node = targetNode]() {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 ACE_SCORING_EVENT("Overlay");
                 PipelineContext::SetCallBackNode(node);
@@ -3388,7 +3405,7 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
         RefPtr<JsFunction> jsAboutToAppearFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(aboutToAppearValue));
         auto aboutToAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToAppearFunc),
-                            node = frameNode]() {
+                                 node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("aboutToAppear");
             PipelineContext::SetCallBackNode(node);
@@ -3402,7 +3419,7 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
         RefPtr<JsFunction> jsAboutToDisAppearFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(aboutToDisAppearValue));
         auto aboutToDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToDisAppearFunc),
-                               node = frameNode]() {
+                                    node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("aboutToDisappear");
             PipelineContext::SetCallBackNode(node);
@@ -3478,8 +3495,9 @@ void ParseContentPreviewAnimationOptionsParam(const JSCallbackInfo& info, const 
             menuParam.hasPreviewTransitionEffect = true;
             menuParam.previewTransition = ParseChainedTransition(obj, info.GetExecutionContext());
         }
-        if (menuParam.previewMode != MenuPreviewMode::CUSTOM || menuParam.hasPreviewTransitionEffect ||
-            menuParam.hasTransitionEffect) {
+        if (menuParam.previewMode != MenuPreviewMode::CUSTOM ||
+            menuParam.hasPreviewTransitionEffect || menuParam.hasTransitionEffect ||
+            menuParam.contextMenuRegisterType == NG::ContextMenuRegisterType::CUSTOM_TYPE) {
             return;
         }
         auto hoverScaleProperty = animationOptionsObj->GetProperty("hoverScale");
@@ -3608,7 +3626,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
         auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc), node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("BuildMenu");
-            auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+            PipelineContext::SetCallBackNode(node);
             func->Execute();
         };
         ViewAbstractModel::GetInstance()->BindMenu({}, std::move(buildFunc), menuParam);
@@ -3617,25 +3635,27 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsPadding(const JSCallbackInfo& info)
 {
-    ParseMarginOrPadding(info, false);
+    ParseMarginOrPadding(info, EdgeType::PADDING);
 }
 
 void JSViewAbstract::JsMargin(const JSCallbackInfo& info)
 {
-    ParseMarginOrPadding(info, true);
+    ParseMarginOrPadding(info, EdgeType::MARGIN);
 }
 
-void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin)
+void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType type)
 {
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT, JSCallbackInfoType::STRING,
         JSCallbackInfoType::NUMBER };
     auto jsVal = info[0];
     if (!CheckJSCallbackInfo("MarginOrPadding", jsVal, checkList)) {
         auto resetDimension = CalcDimension(0.0);
-        if (isMargin) {
+        if (type == EdgeType::MARGIN) {
             ViewAbstractModel::GetInstance()->SetMargin(resetDimension);
-        } else {
+        } else if (type == EdgeType::PADDING) {
             ViewAbstractModel::GetInstance()->SetPadding(resetDimension);
+        } else if (type == EdgeType::SAFE_AREA_PADDING) {
+            ViewAbstractModel::GetInstance()->ResetSafeAreaPadding();
         }
         return;
     }
@@ -3645,12 +3665,15 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMar
         ParseCommonMarginOrPaddingCorner(paddingObj, commonCalcDimension);
         if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
             commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
-            if (isMargin) {
+            if (type == EdgeType::MARGIN)  {
                 ViewAbstractModel::GetInstance()->SetMargins(commonCalcDimension.top, commonCalcDimension.bottom,
                     commonCalcDimension.left, commonCalcDimension.right);
-            } else {
+            } else if (type == EdgeType::PADDING) {
                 ViewAbstractModel::GetInstance()->SetPaddings(commonCalcDimension.top, commonCalcDimension.bottom,
                     commonCalcDimension.left, commonCalcDimension.right);
+            } else if (type == EdgeType::SAFE_AREA_PADDING) {
+                ViewAbstractModel::GetInstance()->SetSafeAreaPaddings(commonCalcDimension.top,
+                    commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right);
             }
             return;
         }
@@ -3661,10 +3684,12 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMar
         // use default value.
         length.Reset();
     }
-    if (isMargin) {
+    if (type == EdgeType::MARGIN) {
         ViewAbstractModel::GetInstance()->SetMargin(length);
-    } else {
+    } else if (type == EdgeType::PADDING) {
         ViewAbstractModel::GetInstance()->SetPadding(length);
+    } else if (type == EdgeType::SAFE_AREA_PADDING) {
+        ViewAbstractModel::GetInstance()->SetSafeAreaPadding(length);
     }
 }
 
@@ -4001,39 +4026,6 @@ void JSViewAbstract::ParseOuterBorderWidth(const JSRef<JSVal>& args)
         ViewAbstractModel::GetInstance()->SetOuterBorderWidth(leftDimen, rightDimen, topDimen, bottomDimen);
     } else {
         return;
-    }
-}
-
-void JSViewAbstract::ParseMenuOptions(
-    const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items)
-{
-    auto length = jsArray->Length();
-    for (size_t i = 0; i < length; i++) {
-        auto item = jsArray->GetValueAt(i);
-        if (!item->IsObject()) {
-            continue;
-        }
-        auto itemObject = JSRef<JSObject>::Cast(item);
-        NG::MenuOptionsParam menuOptionItem;
-        std::string value;
-        std::string icon;
-        auto menuOptionsValue = itemObject->GetProperty("content");
-        auto menuOptionsIcon = itemObject->GetProperty("icon");
-
-        if (!ParseJsString(menuOptionsValue, value)) {
-            return;
-        }
-        ParseJsMedia(menuOptionsIcon, icon);
-        menuOptionItem.content = value;
-        menuOptionItem.icon = icon;
-
-        auto itemActionValue = itemObject->GetProperty("action");
-        if (itemActionValue->IsFunction()) {
-            JsEventCallback<void(const std::string&)> callback(
-                info.GetExecutionContext(), JSRef<JSFunc>::Cast(itemActionValue));
-            menuOptionItem.action = callback;
-        }
-        items.emplace_back(menuOptionItem);
     }
 }
 
@@ -4409,9 +4401,6 @@ void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args)
 {
     CalcDimension borderRadius;
     if (ParseJsDimensionVp(args, borderRadius)) {
-        if (borderRadius.Unit() == DimensionUnit::PERCENT) {
-            borderRadius.Reset();
-        }
         ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
@@ -4448,11 +4437,7 @@ void JSViewAbstract::ParseOuterBorderRadius(const JSRef<JSVal>& args)
 
 void JSViewAbstract::GetBorderRadius(const char* key, JSRef<JSObject>& object, CalcDimension& radius)
 {
-    if (ParseJsDimensionVp(object->GetProperty(key), radius)) {
-        if ((radius.Unit() == DimensionUnit::PERCENT)) {
-            radius.Reset();
-        }
-    }
+    ParseJsDimensionVp(object->GetProperty(key), radius);
 }
 
 void JSViewAbstract::GetBorderRadiusByLengthMetrics(const char* key, JSRef<JSObject>& object, CalcDimension& radius)
@@ -4460,9 +4445,6 @@ void JSViewAbstract::GetBorderRadiusByLengthMetrics(const char* key, JSRef<JSObj
     if (object->HasProperty(key) && object->GetProperty(key)->IsObject()) {
         JSRef<JSObject> startObj = JSRef<JSObject>::Cast(object->GetProperty(key));
         ParseJsLengthMetrics(startObj, radius);
-        if ((radius.Unit() == DimensionUnit::PERCENT)) {
-            radius.Reset();
-        }
     }
 }
 
@@ -4798,8 +4780,8 @@ void JSViewAbstract::JsForegroundBrightness(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[0]);
         ParseBrightnessOption(jsOption, option);
-     }
-   SetFgDynamicBrightness(option);
+    }
+    SetFgDynamicBrightness(option);
 }
 
 void JSViewAbstract::JsWindowBlur(const JSCallbackInfo& info)
@@ -5743,9 +5725,9 @@ void JSViewAbstract::SetTabBarSymbolOptionApply(const JSCallbackInfo& info, TabB
         RefPtr<JsFunction> jsFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
         auto onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                            modifierNormal = std::move(modifierNormalObj),
-                            modifierSelected = std::move(modifierSelectedObj)](
-                            WeakPtr<NG::FrameNode> frameNode, std::string type) {
+                           modifierNormal = std::move(modifierNormalObj),
+                           modifierSelected = std::move(modifierSelectedObj)](
+                           WeakPtr<NG::FrameNode> frameNode, std::string type) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto node = frameNode.Upgrade();
             CHECK_NULL_VOID(node);
@@ -6395,7 +6377,7 @@ void JSViewAbstract::JsOnSizeChange(const JSCallbackInfo& info)
 
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onSizeChanged = [execCtx = info.GetExecutionContext(), func = std::move(jsOnSizeChangeFunction),
-                            node = frameNode](const NG::RectF& oldRect, const NG::RectF& rect) {
+                             node = frameNode](const NG::RectF& oldRect, const NG::RectF& rect) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onSizeChange");
         PipelineContext::SetCallBackNode(node);
@@ -7323,8 +7305,13 @@ void JSViewAbstract::JsAccessibilityGroup(bool accessible)
     ViewAbstractModel::GetInstance()->SetAccessibilityGroup(accessible);
 }
 
-void JSViewAbstract::JsAccessibilityText(const std::string& text)
+void JSViewAbstract::JsAccessibilityText(const JSCallbackInfo& info)
 {
+    const JSRef<JSVal>& jsValue = info[0];
+    std::string text;
+    if (!ParseJsString(jsValue, text)) {
+        return;
+    }
     ViewAbstractModel::GetInstance()->SetAccessibilityText(text);
 }
 
@@ -7333,8 +7320,13 @@ void JSViewAbstract::JsAccessibilityTextHint(const std::string& text)
     ViewAbstractModel::GetInstance()->SetAccessibilityTextHint(text);
 }
 
-void JSViewAbstract::JsAccessibilityDescription(const std::string& description)
+void JSViewAbstract::JsAccessibilityDescription(const JSCallbackInfo& info)
 {
+    const JSRef<JSVal>& jsValue = info[0];
+    std::string description;
+    if (!ParseJsString(jsValue, description)) {
+        return;
+    }
     std::pair<bool, std::string> autoEventPair(false, "");
     std::pair<bool, std::string> descriptionPair(false, "");
     ParseAccessibilityDescriptionJson(description, autoEventPair, descriptionPair);
@@ -7476,9 +7468,11 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
 
     if (responseType != ResponseType::LONG_PRESS) {
         menuParam.previewMode = MenuPreviewMode::NONE;
+        menuParam.isShowHoverImage = false;
     }
     menuParam.type = NG::MenuType::CONTEXT_MENU;
     ViewAbstractModel::GetInstance()->BindContextMenu(responseType, buildFunc, menuParam, previewBuildFunc);
+    ViewAbstractModel::GetInstance()->BindDragWithContextMenuParams(menuParam);
 }
 
 bool ParseBindContentCoverIsShow(const JSCallbackInfo& info)
@@ -7774,7 +7768,7 @@ void JSViewAbstract::ParseSheetStyle(
     Shadow shadow;
     auto shadowValue = paramObj->GetProperty("shadow");
     if ((shadowValue->IsObject() || shadowValue->IsNumber()) && ParseShadowProps(shadowValue, shadow)) {
-            sheetStyle.shadow = shadow;
+        sheetStyle.shadow = shadow;
     }
 
     auto widthValue = paramObj->GetProperty("width");
@@ -8322,6 +8316,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("paddingBottom", &JSViewAbstract::SetPaddingBottom, opt);
     JSClass<JSViewAbstract>::StaticMethod("paddingLeft", &JSViewAbstract::SetPaddingLeft, opt);
     JSClass<JSViewAbstract>::StaticMethod("paddingRight", &JSViewAbstract::SetPaddingRight, opt);
+    JSClass<JSViewAbstract>::StaticMethod("safeAreaPadding", &JSViewAbstract::SetSafeAreaPadding, opt);
 
     JSClass<JSViewAbstract>::StaticMethod("foregroundColor", &JSViewAbstract::JsForegroundColor);
     JSClass<JSViewAbstract>::StaticMethod("foregroundEffect", &JSViewAbstract::JsForegroundEffect);
@@ -8515,11 +8510,11 @@ void AddInvalidateFunc(JSRef<JSObject> jsDrawModifier, NG::FrameNode* frameNode)
         CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
         Local<JSValueRef> thisObj = info->GetFunctionRef();
         auto thisObjRef = panda::Local<panda::ObjectRef>(thisObj);
-        if (thisObjRef->GetNativePointerFieldCount() < 1) {
+        if (thisObjRef->GetNativePointerFieldCount(vm) < 1) {
             return panda::JSValueRef::Undefined(vm);
         }
 
-        auto* weak = reinterpret_cast<NG::NativeWeakRef*>(thisObjRef->GetNativePointerField(0));
+        auto* weak = reinterpret_cast<NG::NativeWeakRef*>(thisObjRef->GetNativePointerField(vm, 0));
         if (weak->Invalid()) {
             return panda::JSValueRef::Undefined(vm);
         }
@@ -8811,6 +8806,11 @@ void JSViewAbstract::SetPaddingRight(const JSCallbackInfo& info)
         return;
     }
     ViewAbstractModel::GetInstance()->SetPaddings(std::nullopt, std::nullopt, std::nullopt, value);
+}
+
+void JSViewAbstract::SetSafeAreaPadding(const JSCallbackInfo& info)
+{
+    ParseMarginOrPadding(info, EdgeType::SAFE_AREA_PADDING);
 }
 
 void JSViewAbstract::SetColorBlend(Color color)
@@ -9432,6 +9432,9 @@ void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onClick");
         PipelineContext::SetCallBackNode(node);
         func->Execute(*tapInfo);
+#if !defined(PREVIEW)
+        JSInteractableView::ReportClickEvent(node);
+#endif
     };
     auto tmpOnTap = [func = std::move(onTap)](GestureEvent& info) { func(&info); };
     auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = targetNode](
@@ -9440,6 +9443,9 @@ void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onClick");
         PipelineContext::SetCallBackNode(node);
         func->Execute(*info);
+#if !defined(PREVIEW)
+        JSInteractableView::ReportClickEvent(node);
+#endif
     };
     ViewAbstractModel::GetInstance()->SetOnClick(std::move(tmpOnTap), std::move(onClick));
 }
@@ -10406,56 +10412,174 @@ void JSViewAbstract::JsCompositingFilter(const JSCallbackInfo& info)
     auto compositingFilter = CreateRSFilterFromNapiValue(info[0]);
     ViewAbstractModel::GetInstance()->SetCompositingFilter(compositingFilter);
 }
+void JSViewAbstract::ParseOnCreateMenu(
+    const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, NG::OnCreateMenuCallback& onCreateMenuCallback)
+{
+    if (jsFunc.IsEmpty() || !jsFunc->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsOnCreateMenu = AceType::MakeRefPtr<JsEventFunction<std::vector<NG::MenuItemParam>, 1>>(
+        JSRef<JSFunc>::Cast(jsFunc), CreateJsSystemMenuItems);
+    auto jsCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnCreateMenu),
+                          instanceId = Container::CurrentId(), node = frameNode](
+                          const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
+        ContainerScope scope(instanceId);
+        std::vector<NG::MenuOptionsParam> menuParams;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, menuParams);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, menuParams);
+        pipelineContext->UpdateCurrentActiveNode(node);
+        auto menuItem = func->ExecuteWithValue(systemMenuItems);
+        if (!menuItem->IsArray()) {
+            return menuParams;
+        }
+        auto menuItemsArray = JSRef<JSArray>::Cast(menuItem);
+        for (size_t i = 0; i <= menuItemsArray->Length(); i++) {
+            auto menuItem = menuItemsArray->GetValueAt(i);
+            if (!menuItem->IsObject()) {
+                continue;
+            }
+            auto menuItemObject = JSRef<JSObject>::Cast(menuItem);
+            NG::MenuOptionsParam menuOptionsParam;
+            auto jsContent = menuItemObject->GetProperty("content");
+            std::string content;
+            ParseJsString(jsContent, content);
+            menuOptionsParam.content = content;
+            auto jsStartIcon = menuItemObject->GetProperty("icon");
+            std::string icon;
+            ParseJsMedia(jsStartIcon, icon);
+            menuOptionsParam.icon = icon;
+            auto jsTextMenuId = menuItemObject->GetProperty("id");
+            std::string id;
+            if (jsTextMenuId->IsObject()) {
+                auto textMenuIdObject = JSRef<JSObject>::Cast(jsTextMenuId);
+                auto jsId = textMenuIdObject->GetProperty("id_");
+                ParseJsString(jsId, id);
+            }
+            menuOptionsParam.id = id;
+            menuParams.emplace_back(menuOptionsParam);
+        }
+        return menuParams;
+    };
+    onCreateMenuCallback = jsCallback;
+}
 
-bool JSViewAbstract::ParseSelectionMenuOptions(const JSCallbackInfo& info, std::vector<NG::MenuOptionsParam>& items)
+JSRef<JSVal> JSViewAbstract::CreateJsSystemMenuItems(const std::vector<NG::MenuItemParam>& systemMenuItems)
+{
+    JSRef<JSArray> systemMenuItemsArray = JSRef<JSArray>::New();
+    uint32_t idx = 0;
+    for (const auto& item : systemMenuItems) {
+        systemMenuItemsArray->SetValueAt(idx++, CreateJsTextMenuItem(item));
+    }
+    return systemMenuItemsArray;
+}
+
+bool JSViewAbstract::ParseEditMenuOptions(const JSCallbackInfo& info, NG::OnCreateMenuCallback& onCreateMenuCallback,
+    NG::OnMenuItemClickCallback& onMenuItemClick)
 {
     auto tmpInfo = info[0];
-    if (info.Length() != 1 || tmpInfo->IsUndefined() || tmpInfo->IsNull() || !tmpInfo->IsArray()) {
+    if (info.Length() != 1 || !tmpInfo->IsObject()) {
         return false;
     }
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto menuItamArray = JSRef<JSArray>::Cast(tmpInfo);
-    for (size_t i = 0; i < menuItamArray->Length(); i++) {
-        NG::MenuOptionsParam menuOption;
-        auto menuItem = menuItamArray->GetValueAt(i);
-        if (!menuItem->IsObject()) {
-            return false;
-        }
-        auto menuItemObject = JSRef<JSObject>::Cast(menuItem);
-        auto jsContent = menuItemObject->GetProperty("content");
-        auto jsStartIcon = menuItemObject->GetProperty("startIcon");
-        std::string content;
-        if (!ParseJsMedia(jsContent, content)) {
-            return false;
-        }
-        menuOption.content = content;
-        std::string icon;
-        if (ParseJsMedia(jsStartIcon, icon)) {
-            menuOption.icon = icon;
-        }
-        auto jsAction = menuItemObject->GetProperty("action");
-        if (jsAction.IsEmpty() || !jsAction->IsFunction()) {
-            return false;
-        }
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(jsAction));
-        auto jsCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                            instanceId = Container::CurrentId(), node = frameNode](int32_t start, int32_t end) {
-            ContainerScope scope(instanceId);
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->UpdateCurrentActiveNode(node);
-            auto textRangeObj = JSRef<JSObject>::New();
-            textRangeObj->SetPropertyObject("start", JSRef<JSVal>::Make(ToJSValue(start)));
-            textRangeObj->SetPropertyObject("end", JSRef<JSVal>::Make(ToJSValue(end)));
-            auto param = JSRef<JSVal>::Cast(textRangeObj);
-            pipelineContext->SetCallBackNode(node);
-            func->ExecuteJS(1, &param);
-        };
-        menuOption.actionRange = std::move(jsCallback);
-        items.push_back(menuOption);
+    auto menuOptionsObject = JSRef<JSObject>::Cast(tmpInfo);
+    auto jsValueOnCreateMenu = menuOptionsObject->GetProperty("onCreateMenu");
+    ParseOnCreateMenu(info, jsValueOnCreateMenu, onCreateMenuCallback);
+
+    auto jsValue = menuOptionsObject->GetProperty("onMenuItemClick");
+    if (jsValue.IsEmpty() || !jsValue->IsFunction()) {
+        return false;
     }
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(jsValue));
+    auto jsCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                          onMenuItemCallback = std::move(CreateJsOnMenuItemClick), instanceId = Container::CurrentId(),
+                          node = frameNode](NG::MenuItemParam menuOptionsParam) -> bool {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(node);
+        auto paramArray = onMenuItemCallback(menuOptionsParam);
+        if (paramArray->Length() != 2) {
+            return false;
+        }
+        JSRef<JSVal> params[2];
+        params[0] = JSRef<JSVal>::Cast(paramArray->GetValueAt(0));
+        params[1] = JSRef<JSVal>::Cast(paramArray->GetValueAt(1));
+        auto ret = func->ExecuteJS(2, params);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean();
+        }
+        return false;
+    };
+    onMenuItemClick = jsCallback;
     return true;
+}
+
+JSRef<JSObject> JSViewAbstract::CreateJsTextMenuId(const std::string& id)
+{
+    JSRef<JSObject> empty;
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, empty);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, empty);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+
+    napi_value global;
+    napi_status ret = napi_get_global(env, &global);
+    if (ret != napi_ok) {
+        return empty;
+    }
+    napi_value constructor;
+    ret = napi_get_named_property(env, global, JS_TEXT_MENU_ID_CLASS_NAME, &constructor);
+    if (ret != napi_ok) {
+        return empty;
+    }
+
+    napi_value obj;
+    napi_value menuId = nullptr;
+
+    ret = napi_create_string_utf8(env, id.c_str(), id.length(), &menuId);
+    if (ret != napi_ok) {
+        return empty;
+    }
+    ret = napi_new_instance(env, constructor, NUM1, &menuId, &obj);
+    if (ret != napi_ok) {
+        return empty;
+    }
+
+    JSRef<JSVal> value = JsConverter::ConvertNapiValueToJsVal(obj);
+    if (!value->IsObject()) {
+        return empty;
+    }
+
+    return JSRef<JSObject>::Cast(value);
+}
+
+JSRef<JSArray> JSViewAbstract::CreateJsOnMenuItemClick(const NG::MenuItemParam& menuItemParam)
+{
+    JSRef<JSArray> params = JSRef<JSArray>::New();
+    params->SetValueAt(0, CreateJsTextMenuItem(menuItemParam));
+    params->SetValueAt(1, CreateJsTextRange(menuItemParam));
+    return params;
+}
+
+JSRef<JSVal> JSViewAbstract::CreateJsTextMenuItem(const NG::MenuItemParam& menuItemParam)
+{
+    JSRef<JSObject> TextMenuItem = JSRef<JSObject>::New();
+    TextMenuItem->SetProperty<std::string>("content", menuItemParam.menuOptionsParam.content.value_or(""));
+    JSRef<JSObject> obj = CreateJsTextMenuId(menuItemParam.menuOptionsParam.id);
+    TextMenuItem->SetPropertyObject("id", obj);
+    return JSRef<JSVal>::Cast(TextMenuItem);
+}
+
+JSRef<JSVal> JSViewAbstract::CreateJsTextRange(const NG::MenuItemParam& menuItemParam)
+{
+    JSRef<JSObject> textRange = JSRef<JSObject>::New();
+    textRange->SetProperty<int32_t>("start", menuItemParam.start);
+    textRange->SetProperty<int32_t>("end", menuItemParam.end);
+    return JSRef<JSVal>::Cast(textRange);
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ParseJsMedia(void* value, void* resource)

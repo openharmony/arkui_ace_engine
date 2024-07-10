@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
@@ -256,6 +259,16 @@ void RichEditorAbstractSpanResult::SetColor(const std::string& color)
 const std::string& RichEditorAbstractSpanResult::GetColor() const
 {
     return color_;
+}
+
+void RichEditorAbstractSpanResult::SetTextDecorationStyle(TextDecorationStyle textDecorationStyle)
+{
+    textDecorationStyle_ = textDecorationStyle;
+}
+
+TextDecorationStyle RichEditorAbstractSpanResult::GetTextDecorationStyle() const
+{
+    return textDecorationStyle_;
 }
 
 void RichEditorAbstractSpanResult::SetValuePixelMap(const RefPtr<PixelMap>& valuePixelMap)
@@ -502,8 +515,12 @@ void RichEditorEventHub::SetOnDeleteComplete(std::function<void()>&& func)
 }
 void RichEditorEventHub::FireOnDeleteComplete()
 {
-    if (onDeleteComplete_)
+    if (onDeleteComplete_) {
         onDeleteComplete_();
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Radio.onChange");
+#endif
+    }
 }
 
 std::string RichEditorEventHub::GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType type)

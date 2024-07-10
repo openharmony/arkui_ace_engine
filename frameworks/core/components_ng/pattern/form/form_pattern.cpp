@@ -764,7 +764,10 @@ void FormPattern::UpdateTimeLimitFontCfg()
 
     Dimension fontSize(GetTimeLimitFontSize());
     if (!NearEqual(textLayoutProperty->GetFontSize().value(), fontSize)) {
+        TAG_LOGD(AceLogTag::ACE_FORM, "UpdateFontSize:%{public}f.", fontSize.Value());
         textLayoutProperty->UpdateFontSize(fontSize);
+        textNode->MarkModifyDone();
+        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -1239,9 +1242,18 @@ void FormPattern::InitFormManagerDelegate()
     formManagerBridge_->AddGetRectRelativeToWindowCallback(
         [weak = WeakClaim(this), instanceID](int32_t &top, int32_t &left) {
             ContainerScope scope(instanceID);
-            auto formPattern = weak.Upgrade();
-            CHECK_NULL_VOID(formPattern);
-            formPattern->GetRectRelativeToWindow(top, left);
+            auto form = weak.Upgrade();
+            CHECK_NULL_VOID(form);
+            auto host = form->GetHost();
+            CHECK_NULL_VOID(host);
+            auto uiTaskExecutor =
+                SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            uiTaskExecutor.PostSyncTask([weak, instanceID, &top, &left] {
+                ContainerScope scope(instanceID);
+                auto form = weak.Upgrade();
+                CHECK_NULL_VOID(form);
+                form->GetRectRelativeToWindow(top, left);
+                }, "ArkUIFormGetRectRelativeToWindow");
         });
 
     formManagerBridge_->AddEnableFormCallback(

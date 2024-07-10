@@ -702,8 +702,9 @@ void ContainerModalPattern::InitLayoutProperty()
     contentProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(1.0, DimensionUnit::PERCENT)));
     buttonsRowProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto buttonHeight = (CONTAINER_TITLE_HEIGHT == titleHeight_) ? CONTAINER_TITLE_HEIGHT : titleHeight_;
     buttonsRowProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(buttonHeight)));
     buttonsRowProperty->UpdateMainAxisAlign(FlexAlign::FLEX_END);
     buttonsRowProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
 
@@ -733,8 +734,15 @@ void ContainerModalPattern::InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRo
 CalcLength ContainerModalPattern::GetControlButtonRowWidth()
 {
     auto row = GetControlButtonRow();
-    int32_t buttonNum = row->GetChildren().size();
-
+    // default
+    int32_t buttonNum = 0;
+    const auto& children = row->GetChildren();
+    for (const auto& child : children) {
+        auto childButton = AceType::DynamicCast<FrameNode>(child);
+        if (childButton && childButton->IsVisible()) {
+            buttonNum++;
+        }
+    }
     return CalcLength(TITLE_ELEMENT_MARGIN_HORIZONTAL * (buttonNum - 1) + TITLE_BUTTON_SIZE * buttonNum +
                       TITLE_PADDING_START + TITLE_PADDING_END);
 }
@@ -768,7 +776,7 @@ void ContainerModalPattern::InitButtonsLayoutProperty()
     auto isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     auto buttons = buttonsRow->GetChildren();
     for (uint64_t index = 0; index < buttons.size(); index++) {
-        auto space = (index == CLOSE_BUTTON_INDEX) ? TITLE_PADDING_END : TITLE_ELEMENT_MARGIN_HORIZONTAL;
+        auto space = (index == buttons.size() - 1) ? TITLE_PADDING_END : TITLE_ELEMENT_MARGIN_HORIZONTAL;
         MarginProperty margin;
         if (isRtl) {
             margin.left = CalcLength(space);

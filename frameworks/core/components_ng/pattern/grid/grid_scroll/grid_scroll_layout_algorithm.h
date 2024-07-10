@@ -161,8 +161,7 @@ private:
     void LayoutForwardCachedLine(LayoutWrapper* layoutWrapper, int32_t cacheCount);
     void CreateCachedChildConstraint(LayoutWrapper* layoutWrapper, float mainSize, float crossSize);
 
-    static void PostIdleTask(RefPtr<FrameNode> frameNode, const GridPredictLayoutParam& param);
-    static bool PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint);
+    static bool PredictBuildItem(const RefPtr<FrameNode>& host, int32_t itemIdx, const GridPredictLayoutParam& param);
     static void SyncGeometry(RefPtr<LayoutWrapper>& wrapper);
     void CompleteItemCrossPosition(LayoutWrapper* layoutWrapper, std::map<int32_t, int32_t> items);
     /**

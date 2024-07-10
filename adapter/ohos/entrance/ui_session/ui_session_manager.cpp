@@ -18,7 +18,7 @@
 #include "adapter/ohos/entrance/ui_session/include/ui_service_hilog.h"
 namespace OHOS::Ace {
 std::mutex UiSessionManager::mutex_;
-
+constexpr int32_t ONCE_IPC_SEND_DATA_MAX_SIZE = 4096;
 UiSessionManager& UiSessionManager::GetInstance()
 {
     static UiSessionManager instance_;
@@ -61,14 +61,28 @@ void UiSessionManager::ReportRouterChangeEvent(const std::string& data)
     }
 }
 
-void UiSessionManager::ReportComponentChangeEvent(const std::string& data)
+void UiSessionManager::ReportComponentChangeEvent(const std::string& key, const std::string& value)
+{
+    for (auto pair : reportObjectMap_) {
+        auto reportService = iface_cast<ReportService>(pair.second);
+        if (reportService != nullptr && GetComponentChangeEventRegistered()) {
+            auto data = InspectorJsonUtil::Create();
+            data->Put(key.data(), value.data());
+            reportService->ReportComponentChangeEvent(data->ToString());
+        } else {
+            LOGW("report component event failed,process id:%{public}d", pair.first);
+        }
+    }
+}
+
+void UiSessionManager::ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data)
 {
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
-            reportService->ReportComponentChangeEvent(data);
+            reportService->ReportWebUnfocusEvent(accessibilityId, data);
         } else {
-            LOGW("report component event failed,process id:%{public}d", pair.first);
+            LOGW("report web unfocus event failed,process id:%{public}d", pair.first);
         }
     }
 }
@@ -148,7 +162,7 @@ void UiSessionManager::GetInspectorTree()
 
 void UiSessionManager::SaveInspectorTreeFunction(InspectorFunction&& function)
 {
-    inspectorFunction_ = function;
+    inspectorFunction_ = std::move(function);
 }
 
 void UiSessionManager::AddValueForTree(int32_t id, const std::string& value)
@@ -175,10 +189,44 @@ void UiSessionManager::ReportInspectorTreeValue(const std::string& data)
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
-            reportService->ReportInspectorTreeValue(data);
+            int partSize = data.size() / ONCE_IPC_SEND_DATA_MAX_SIZE;
+            for (int i = 0; i <= partSize; i++) {
+                if (i != partSize) {
+                    reportService->ReportInspectorTreeValue(
+                        data.substr(i * ONCE_IPC_SEND_DATA_MAX_SIZE, ONCE_IPC_SEND_DATA_MAX_SIZE), i + 1, false);
+                } else {
+                    reportService->ReportInspectorTreeValue(data.substr(i * ONCE_IPC_SEND_DATA_MAX_SIZE), i + 1, true);
+                }
+            }
         } else {
             LOGW("report component event failed,process id:%{public}d", pair.first);
         }
+    }
+}
+
+void UiSessionManager::NotifyAllWebPattern(bool isRegister)
+{
+    webFocusEventRegistered = isRegister;
+    notifyWebFunction_(isRegister);
+}
+
+void UiSessionManager::SaveRegisterForWebFunction(NotifyAllWebFunction&& function)
+{
+    notifyWebFunction_ = std::move(function);
+}
+
+bool UiSessionManager::GetWebFocusRegistered()
+{
+    return webFocusEventRegistered;
+}
+
+void UiSessionManager::OnRouterChange(const std::string& path, const std::string& event)
+{
+    if (GetRouterChangeEventRegistered()) {
+        auto value = InspectorJsonUtil::Create(true);
+        value->Put("path", path.c_str());
+        value->Put("event", event.c_str());
+        ReportRouterChangeEvent(value->ToString());
     }
 }
 } // namespace OHOS::Ace

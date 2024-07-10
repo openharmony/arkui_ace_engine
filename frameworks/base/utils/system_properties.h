@@ -293,6 +293,11 @@ public:
         return textTraceEnable_;
     }
 
+    static bool GetSyntaxTraceEnabled()
+    {
+        return syntaxTraceEnable_;
+    }
+
     static bool GetAccessTraceEnabled()
     {
         return accessTraceEnable_;
@@ -548,6 +553,7 @@ private:
     static bool syncDebugTraceEnable_;
     static bool pixelRoundEnable_;
     static bool textTraceEnable_;
+    static bool syntaxTraceEnable_;
     static bool accessTraceEnable_;
     static bool accessibilityEnabled_;
     static uint32_t canvasDebugMode_;

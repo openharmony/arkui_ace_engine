@@ -133,6 +133,12 @@ void UIObserverHandler::NotifyDidClick(
     didClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
 }
 
+void UIObserverHandler::NotifyTabContentStateUpdate(const TabContentInfo& info)
+{
+    CHECK_NULL_VOID(tabContentStateHandleFunc_);
+    tabContentStateHandleFunc_(info);
+}
+
 std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const RefPtr<AceType>& node)
 {
     CHECK_NULL_RETURN(node, nullptr);
@@ -296,6 +302,11 @@ void UIObserverHandler::SetWillClickFunc(WillClickHandleFunc func)
 void UIObserverHandler::SetDidClickFunc(DidClickHandleFunc func)
 {
     didClickHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetHandleTabContentStateUpdateFunc(TabContentStateHandleFunc func)
+{
+    tabContentStateHandleFunc_ = func;
 }
 
 napi_value UIObserverHandler::GetUIContextValue()

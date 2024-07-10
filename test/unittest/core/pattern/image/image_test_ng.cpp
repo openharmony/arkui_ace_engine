@@ -645,7 +645,7 @@ HWTEST_F(ImageTestNg, ImagePaintMethod001, TestSize.Level1)
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
 
     auto overlayPaintMethod = imagePaintMethod.GetOverlayDrawFunction(&paintWrapper);
-    EXPECT_TRUE(overlayPaintMethod);
+    EXPECT_FALSE(overlayPaintMethod);
     EXPECT_TRUE(imagePaintMethod.selected_);
 
     MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
@@ -1484,14 +1484,14 @@ HWTEST_F(ImageTestNg, CopyOption001, TestSize.Level1)
     EXPECT_TRUE(pattern->clickEvent_ && pattern->longPressEvent_ && pattern->mouseEvent_);
 
     // emulate long press to open select overlay and click to close it
-    EXPECT_FALSE(pattern->selectOverlay_);
+    EXPECT_FALSE(pattern->isSelected_);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     gestureHub->ActLongClick();
-    EXPECT_TRUE(pattern->selectOverlay_);
+    EXPECT_TRUE(pattern->isSelected_);
 
     // close selectOverlay
     gestureHub->ActClick();
-    EXPECT_FALSE(pattern->selectOverlay_);
+    EXPECT_FALSE(pattern->isSelected_);
 
     pattern->SetCopyOption(CopyOptions::None);
     frameNode->MarkModifyDone();
@@ -1504,26 +1504,26 @@ HWTEST_F(ImageTestNg, CopyOption001, TestSize.Level1)
     // should close selectOverlay when pattern is deleted
     gestureHub->ActLongClick();
     pattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
-    EXPECT_FALSE(pattern->selectOverlay_);
+    EXPECT_FALSE(pattern->isSelected_);
 
     gestureHub->ActLongClick();
-    EXPECT_TRUE(pattern->selectOverlay_);
+    EXPECT_TRUE(pattern->isSelected_);
 
     // shouldn't close selectOverlay when VisibleChange(true) triggers
     pattern->OnVisibleChange(true);
-    EXPECT_TRUE(pattern->selectOverlay_);
+    EXPECT_TRUE(pattern->isSelected_);
 
     pattern->OnVisibleChange(false);
-    EXPECT_FALSE(pattern->selectOverlay_);
+    EXPECT_FALSE(pattern->isSelected_);
 
     pattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
     pattern->OnVisibleChange(true);
-    EXPECT_FALSE(pattern->selectOverlay_);
+    EXPECT_FALSE(pattern->isSelected_);
 
     pattern->image_ = nullptr;
     pattern->altImage_ = AceType::MakeRefPtr<MockCanvasImage>();
     pattern->OnVisibleChange(true);
-    EXPECT_FALSE(pattern->selectOverlay_);
+    EXPECT_FALSE(pattern->isSelected_);
 }
 
 /**

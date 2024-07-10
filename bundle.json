@@ -65,6 +65,7 @@
                 "init",
                 "image_framework",
                 "player_framework",
+                "audio_framework",
                 "access_token",
                 "input",
                 "webview",
@@ -90,7 +91,8 @@
                 "zlib",
                 "skia",
                 "libuv",
-                "background_task_mgr"
+                "background_task_mgr",
+                "atomicservice_basic_engine"
             ],
             "third_party": []
         },

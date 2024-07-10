@@ -269,7 +269,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     }
 
     bool isFrameNode = false;
-    bool isFirstCreate = false;
     if (static_cast<int32_t>(columnNode->GetChildren().size()) == 0) {
         if (tabBarParam.GetSymbol().has_value()) {
             iconNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
@@ -290,7 +289,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         columnNode->MountToParent(tabBarNode, position);
         iconNode->MountToParent(columnNode);
         textNode->MountToParent(columnNode);
-        isFirstCreate = true;
     } else {
         if (tabBarStyle == TabBarStyle::SUBTABBATSTYLE && tabContentPattern->HasSubTabBarStyleNode()) {
             isFrameNode = true;
@@ -303,7 +301,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
             auto icon = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
                 ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
             columnNode->ReplaceChild(oldIcon, icon);
-                isFirstCreate = true;
         } else if (!tabBarParam.GetIcon().empty() && oldIcon->GetTag() != V2::IMAGE_ETS_TAG) {
             auto icon = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
                 ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -389,7 +386,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         if (myIndex == indicator) {
             tabBarPattern->SetImageColorOnIndex(indicator);
             symbolProperty->UpdateSymbolColorList({tabTheme->GetBottomTabSymbolOn()});
-            if (modifierOnApply != nullptr && isFirstCreate) {
+            if (modifierOnApply != nullptr) {
                 modifierOnApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)), "normal");
                 UpdateDefaultSymbol(tabTheme, symbolProperty);
                 symbolProperty->UpdateSymbolColorList({tabTheme->GetBottomTabSymbolOn()});
@@ -491,6 +488,16 @@ void TabContentModelNG::SetIndicator(const IndicatorStyle& indicator)
     auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
     CHECK_NULL_VOID(frameNodePattern);
     frameNodePattern->SetIndicatorStyle(indicator);
+}
+
+void TabContentModelNG::SetCustomTabBar(FrameNode* node, FrameNode* tabBar)
+{
+    CHECK_NULL_VOID(node);
+    CHECK_NULL_VOID(tabBar);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetTabBarStyle(TabBarStyle::NOSTYLE);
+    frameNodePattern->SetCustomTabBar(tabBar);
 }
 
 void TabContentModelNG::SetBoard(const BoardStyle& board)

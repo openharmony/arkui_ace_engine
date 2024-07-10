@@ -848,11 +848,8 @@ HWTEST_F(TabsEventTestNg, TabBarPatternHandleMouseEvent001, TestSize.Level1)
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     auto info = MouseInfo();
     Offset s1(0.1, 0.1);
-    OffsetF c1(0.1f, 0.1f);
-    OffsetF c2(0.2f, 0.2f);
     info.SetLocalLocation(s1);
-    tabBarPattern_->tabItemOffsets_.emplace_back(c1);
-    tabBarPattern_->tabItemOffsets_.emplace_back(c2);
+    tabBarPattern_->visibleItemPosition_[0] = { 0.1f, 0.2f };
 
     /**
      * @tc.steps: step2. Test function HandleMouseEvent.
@@ -892,11 +889,8 @@ HWTEST_F(TabsEventTestNg, TabBarPatternHandleMouseEvent002, TestSize.Level1)
     }
 
     Offset s1(0.1, 0.1);
-    OffsetF c1(0.1f, 0.1f);
-    OffsetF c2(0.2f, 0.2f);
     info.SetLocalLocation(s1);
-    tabBarPattern_->tabItemOffsets_.emplace_back(c1);
-    tabBarPattern_->tabItemOffsets_.emplace_back(c2);
+    tabBarPattern_->visibleItemPosition_[0] = { 0.1f, 0.2f };
     tabBarPattern_->HandleMouseEvent(info);
 }
 
@@ -924,11 +918,9 @@ HWTEST_F(TabsEventTestNg, TabBarPatternHandleMouseEvent003, TestSize.Level1)
     }
     Offset s1(0.2, 0.2);
     Offset s2(0.3, 0.3);
-    OffsetF c1(0.1f, 0.1f);
-    OffsetF c2(0.2f, 0.2f);
-    OffsetF c3(0.3f, 0.3f);
     info.SetLocalLocation(s1);
-    tabBarPattern_->tabItemOffsets_ = { c1, c2, c3 };
+    tabBarPattern_->visibleItemPosition_[0] = { 0.1f, 0.2f };
+    tabBarPattern_->visibleItemPosition_[1] = { 0.2f, 0.3f };
     for (int i = 0; i <= 1; i++) {
         tabBarPattern_->HandleMouseEvent(info);
         info.SetLocalLocation(s2);
@@ -979,7 +971,8 @@ HWTEST_F(TabsEventTestNg, TabBarPatternHandleTouchEvent001, TestSize.Level1)
     TouchLocationInfo touchLocationInfo(1);
     touchLocationInfo.SetTouchType(TouchType::DOWN);
     touchLocationInfo.SetLocalLocation(Offset(0.f, 0.f));
-    tabBarPattern_->tabItemOffsets_ = { { -1.0f, -1.0f }, { 1.0f, 1.0f }, { 2.0f, 2.0f } };
+    tabBarPattern_->visibleItemPosition_[0] = { -1.0f, 1.0f };
+    tabBarPattern_->visibleItemPosition_[1] = { 1.0f, 2.0f };
     tabBarPattern_->HandleTouchEvent(touchLocationInfo);
     EXPECT_EQ(tabBarNode_->TotalChildCount(), 3);
 }
@@ -996,10 +989,7 @@ HWTEST_F(TabsEventTestNg, TabBarPatternHandleHoverEvent001, TestSize.Level1)
     CreateTabsDone(model);
     bool isHover = true;
     std::optional<int32_t> hoverIndex_test(0);
-    OffsetF c1(0.1f, 0.1f);
-    OffsetF c2(0.2f, 0.2f);
-    tabBarPattern_->tabItemOffsets_.emplace_back(c1);
-    tabBarPattern_->tabItemOffsets_.emplace_back(c2);
+    tabBarPattern_->visibleItemPosition_[0] = { 0.1f, 0.2f };
     tabBarPattern_->hoverIndex_ = hoverIndex_test;
     tabBarPattern_->touchingIndex_ = hoverIndex_test;
 
@@ -1046,10 +1036,7 @@ HWTEST_F(TabsEventTestNg, TabBarPatternHandleHoverOnEvent001, TestSize.Level1)
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
     std::optional<int32_t> hoverIndex_test(0);
-    OffsetF c1(0.1f, 0.1f);
-    OffsetF c2(0.2f, 0.2f);
-    tabBarPattern_->tabItemOffsets_.emplace_back(c1);
-    tabBarPattern_->tabItemOffsets_.emplace_back(c2);
+    tabBarPattern_->visibleItemPosition_[0] = { 0.1f, 0.2f };
     tabBarPattern_->hoverIndex_ = hoverIndex_test;
     tabBarPattern_->touchingIndex_ = hoverIndex_test;
 
@@ -1149,7 +1136,8 @@ HWTEST_F(TabsEventTestNg, TabBarPatternHandleTouchEvent002, TestSize.Level1)
     TouchLocationInfo touchLocationInfo(1);
     touchLocationInfo.SetTouchType(TouchType::DOWN);
     touchLocationInfo.SetLocalLocation(Offset(0.f, 0.f));
-    tabBarPattern_->tabItemOffsets_ = { { -1.0f, -1.0f }, { 1.0f, 1.0f }, { 2.0f, 2.0f } };
+    tabBarPattern_->visibleItemPosition_[0] = { -1.0f, 1.0f };
+    tabBarPattern_->visibleItemPosition_[1] = { 1.0f, 2.0f };
     tabBarPattern_->HandleTouchEvent(touchLocationInfo);
     EXPECT_EQ(tabBarNode_->TotalChildCount(), 3);
 }
@@ -1227,14 +1215,12 @@ HWTEST_F(TabsEventTestNg, TabBarPatternHandleMouseEvent004, TestSize.Level1)
     }
     Offset s1(0.1, 0.1);
     Offset s2(0.4, 0.4);
-    OffsetF c1(0.1f, 0.1f);
-    OffsetF c2(0.2f, 0.2f);
-    OffsetF c3(0.3f, 0.3f);
-    OffsetF c4(0.4f, 0.4f);
     info.SetLocalLocation(s1);
     ASSERT_EQ(tabBarPattern_->CalculateSelectedIndex(info.GetLocalLocation()), 0);
     tabBarPattern_->hoverIndex_.emplace(1);
-    tabBarPattern_->tabItemOffsets_ = { c1, c2, c3, c4 };
+    tabBarPattern_->visibleItemPosition_[0] = { 0.1f, 0.2f };
+    tabBarPattern_->visibleItemPosition_[1] = { 0.2f, 0.3f };
+    tabBarPattern_->visibleItemPosition_[2] = { 0.3f, 0.4f };
     IndicatorStyle indicatorStyle1;
     IndicatorStyle indicatorStyle2;
     IndicatorStyle indicatorStyle3;
@@ -1335,7 +1321,8 @@ HWTEST_F(TabsEventTestNg, TabBarPatternHandleTouchEvent004, TestSize.Level1)
     TouchLocationInfo touchLocationInfo(1);
     touchLocationInfo.SetTouchType(TouchType::DOWN);
     touchLocationInfo.SetLocalLocation(Offset(1.0f, 1.0f));
-    tabBarPattern_->tabItemOffsets_ = { { -1.0f, -1.0f }, { 1.0f, 1.0f }, { 2.0f, 2.0f } };
+    tabBarPattern_->visibleItemPosition_[0] = { -1.0f, 1.0f };
+    tabBarPattern_->visibleItemPosition_[1] = { 1.0f, 2.0f };
     for (int i = 0; i <= 1; i++) {
         tabBarPattern_->HandleTouchEvent(touchLocationInfo);
         touchLocationInfo.SetLocalLocation(Offset(-1.0f, -1.0f));
@@ -1495,17 +1482,17 @@ HWTEST_F(TabsEventTestNg, SetOnChangeEvent002, TestSize.Level1)
      */
     pattern_->onIndexChangeEvent_ = nullptr;
     pattern_->SetOnIndexChangeEvent([](const BaseEventInfo* info) {});
-    swiperPattern_->FireChangeEvent();
+    swiperPattern_->FireChangeEvent(0, 1);
     tabBarPattern_->isMaskAnimationByCreate_ = true;
-    swiperPattern_->FireChangeEvent();
+    swiperPattern_->FireChangeEvent(0, 1);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    swiperPattern_->FireChangeEvent();
+    swiperPattern_->FireChangeEvent(0, 1);
     tabBarPattern_->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
     tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    swiperPattern_->FireChangeEvent();
+    swiperPattern_->FireChangeEvent(0, 1);
     EXPECT_EQ(tabBarLayoutProperty_->GetAxisValue(Axis::HORIZONTAL), Axis::HORIZONTAL);
     tabBarPattern_->changeByClick_ = true;
-    swiperPattern_->FireChangeEvent();
+    swiperPattern_->FireChangeEvent(0, 1);
     pattern_->SetOnTabBarClickEvent([](const BaseEventInfo* info) {});
     auto onTabBarClickEvent = pattern_->GetTabBarClickEvent();
     (*onTabBarClickEvent)(1);
@@ -1623,5 +1610,34 @@ HWTEST_F(TabsEventTestNg, TabsControllerPreloadItems001, TestSize.Level1)
     swiperController_->SetPreloadFinishCallback(onPreloadFinish);
     swiperController_->PreloadItems(indexSet);
     EXPECT_EQ(code, ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: ObserverTestNg001
+ * @tc.desc: Test the operation of Observer
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsEventTestNg, ObserverTestNg001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: steps2. Init tabContent state update callback the swipe to 1
+     * @tc.expected: steps2. Check state value.
+     */
+    UIObserverHandler::TabContentStateHandleFunc func = [](const TabContentInfo& info) {
+        if (info.index == 0) {
+            EXPECT_EQ(info.state, TabContentState::ON_HIDE);
+        } else if (info.index == 1) {
+            EXPECT_EQ(info.state, TabContentState::ON_SHOW);
+        }
+    };
+    UIObserverHandler::GetInstance().SetHandleTabContentStateUpdateFunc(func);
+
+    swiperController_->SwipeTo(1);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
 }
 } // namespace OHOS::Ace::NG

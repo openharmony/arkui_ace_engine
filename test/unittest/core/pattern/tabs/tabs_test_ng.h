@@ -53,6 +53,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_bar_item_accessibility_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
@@ -114,6 +115,8 @@ constexpr float BARITEM_SIZE = 10.f;
 constexpr float BIG_FONT_SIZE_SCALE = 1.75f;
 constexpr float LARGE_FONT_SIZE_SCALE = 2.0f;
 constexpr float MAX_FONT_SIZE_SCALE = 3.2f;
+constexpr double BIG_DIALOG_WIDTH = 216.0;
+constexpr double MAX_DIALOG_WIDTH = 256.0;
 
 class TabsTestNg : public TestNG {
 public:

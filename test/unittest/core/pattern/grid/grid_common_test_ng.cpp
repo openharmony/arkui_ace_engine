@@ -54,7 +54,7 @@ void GridCommonTestNg::MouseSelect(Offset start, Offset end)
         info.SetRawGlobalLocation(end);
         pattern_->HandleDragUpdate(info);
     }
-    pattern_->HandleDragEnd(info);
+    pattern_->HandleDragEnd();
 }
 
 int32_t GridCommonTestNg::FindFocusNodeIndex(RefPtr<FocusHub>& focusNode)
@@ -271,9 +271,9 @@ HWTEST_F(GridCommonTestNg, MouseSelect004, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetRowsTemplate("1fr 1fr 1fr 1fr");
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateBigItem(1, 2, 1, 2);
-        CreateBigItem(NULL_VALUE, NULL_VALUE, 1, 3);
-        CreateBigItem(1, 3, NULL_VALUE, NULL_VALUE);
+    CreateBigItem(1, 2, 1, 2);
+    CreateBigItem(NULL_VALUE, NULL_VALUE, 1, 3);
+    CreateBigItem(1, 3, NULL_VALUE, NULL_VALUE);
     CreateGridItems(7);
     CreateDone(frameNode_);
     MouseSelect(LEFT_BOTTOM, RIGHT_TOP);

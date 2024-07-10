@@ -84,7 +84,9 @@ public:
     }
 
 private:
-    void BackButtonLayout(const RefPtr<FrameNode>& backButtonNode, const RefPtr<LayoutProperty>& buttonLayoutProperty);
+    void BackButtonLayout(LayoutWrapper* layoutWrapper);
+
+    void UpdateIconSize(const RefPtr<FrameNode>& backButtonNode);
 
     void MeasureBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty);
@@ -121,9 +123,10 @@ private:
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, float subtitleHeight);
     float ChangeOffsetByDirection(LayoutWrapper* layoutWrapper,
         const RefPtr<NG::GeometryNode>& childGeometryNode, float offsetX) const;
+    float ParseCalcDimensionToPx(const std::optional<CalcDimension>& value, const SizeF& titleBarSize);
 
     // set variables from theme
-    void InitializeTheme();
+    void InitializeTheme(const RefPtr<TitleBarNode>& titleBarNode, const SizeF& titleBarSize);
 
     Dimension maxPaddingStart_;
     Dimension maxPaddingEnd_;
@@ -135,8 +138,6 @@ private:
     Dimension backButtonHeight_;
     Dimension backIconWidth_;
     Dimension backIconHeight_;
-    Dimension marginLeft_;
-    Dimension marginRight_;
     Dimension menuCompPadding_;
     Dimension paddingTopTwolines_;
     Dimension titleSpaceVertical_;
@@ -154,7 +155,8 @@ private:
     float singleLineTitleHeight_ = 0.0f;
     float doubleLineTitleBarHeight_ = 0.0f;
     float navTitleSpaceVertical_ = 0.0f;
-    float navLeftMargin_ = 0.0f;
+    float paddingLeft_ = 0.0f;
+    float paddingRight_ = 0.0f;
     float navBackIconWidth_ = 0.0f;
     float navButtonPadding_ = 0.0f;
     float navHorizontalMargin_ = 0.0f;

@@ -257,6 +257,90 @@ class ScrollInitializeModifier extends ModifierWithKey<Scroller> {
     }
   }
 }
+class ScrollOnScrollStartModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('scrollOnScrollStart');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollOnScrollStart(node);
+    } else {
+      getUINativeModule().scroll.setScrollOnScrollStart(node, this.value);
+    }
+  }
+}
+
+class ScrollOnScrollEndModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('scrollOnScrollEnd');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollOnScrollEnd(node);
+    } else {
+      getUINativeModule().scroll.setScrollOnScrollEnd(node, this.value);
+    }
+  }
+}
+
+class ScrollOnScrollStopModifier extends ModifierWithKey<() => void> {
+  constructor(value: () => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('scrollOnScrollStop');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollOnScrollStop(node);
+    } else {
+      getUINativeModule().scroll.setScrollOnScrollStop(node, this.value);
+    }
+  }
+}
+
+class ScrollOnScrollModifier extends ModifierWithKey<(xOffset: number, yOffset: number) => void> {
+  constructor(value: (xOffset: number, yOffset: number) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('scrollOnScroll');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollOnScrollModifier(node);
+    } else {
+      getUINativeModule().scroll.setScrollOnScrollModifier(node, this.value);
+    }
+  }
+}
+
+class ScrollOnScrollEdgeModifier extends ModifierWithKey<(side: Edge) => void> {
+  constructor(value: (side: Edge) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('scrollOnScrollEdge');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollOnScrollEdge(node);
+    } else {
+      getUINativeModule().scroll.setScrollOnScrollEdge(node, this.value);
+    }
+  }
+}
+
+class ScrollOnDidScrollModifier extends ModifierWithKey<(xOffset: number, 
+                                                         yOffset: number, scrollState: ScrollState) => void> {
+  constructor(value: (xOffset: number, yOffset: number, scrollState: ScrollState) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('scrollOnDidScroll');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scroll.resetScrollOnDidScroll(node);
+    } else {
+      getUINativeModule().scroll.setScrollOnDidScroll(node, this.value);
+    }
+  }
+}
 
 class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
@@ -276,19 +360,24 @@ class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
     return this;
   }
   onScroll(event: (xOffset: number, yOffset: number) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ScrollOnScrollModifier.identity, ScrollOnScrollModifier, event);
+    return this;
   }
   onScrollEdge(event: (side: Edge) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ScrollOnScrollEdgeModifier.identity, ScrollOnScrollEdgeModifier, event);
+    return this;
   }
   onScrollStart(event: () => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ScrollOnScrollStartModifier.identity, ScrollOnScrollStartModifier, event);
+    return this;
   }
   onScrollEnd(event: () => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ScrollOnScrollEndModifier.identity, ScrollOnScrollEndModifier, event);
+    return this;
   }
   onScrollStop(event: () => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ScrollOnScrollStopModifier.identity, ScrollOnScrollStopModifier, event);
+    return this;
   }
   enablePaging(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ScrollEnablePagingModifier.identity, ScrollEnablePagingModifier, value);
@@ -320,6 +409,12 @@ class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
   onScrollFrameBegin(event: (offset: number, state: ScrollState) => { offsetRemain: number; }): this {
     throw new Error('Method not implemented.');
   }
+
+  onDidScroll(callback: (xOffset: number, yOffset: number, scrollState: ScrollState) => void): this {
+    modifierWithKey(this._modifiersWithKeys, ScrollOnDidScrollModifier.identity, ScrollOnDidScrollModifier, callback);
+    return this;
+  }
+
   nestedScroll(value: NestedScrollOptions): ScrollAttribute {
     let options = new ArkNestedScrollOptions();
     if (value) {

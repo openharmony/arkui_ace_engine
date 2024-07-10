@@ -227,8 +227,8 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     pixelStretchEffect(options: PixelStretchEffectOptions): this;
     keyboardShortcut(value: string | FunctionKey, keys: Array<ModifierKey>, action?: () => void): this;
     accessibilityGroup(value: boolean): this;
-    accessibilityText(value: string): this;
-    accessibilityDescription(value: string): this;
+    accessibilityText(value: string | Resource): this;
+    accessibilityDescription(value: string | Resource): this;
     accessibilityLevel(value: string): this;
     obscured(reasons: Array<ObscuredReasons>): this;
     reuseId(id: string): this;
@@ -655,8 +655,8 @@ declare class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     pixelStretchEffect(options: PixelStretchEffectOptions): this;
     keyboardShortcut(value: string | FunctionKey, keys: Array<ModifierKey>, action?: () => void): this;
     accessibilityGroup(value: boolean): this;
-    accessibilityText(value: string): this;
-    accessibilityDescription(value: string): this;
+    accessibilityText(value: string | Resource): this;
+    accessibilityDescription(value: string | Resource): this;
     accessibilityLevel(value: string): this;
     obscured(reasons: Array<ObscuredReasons>): this;
     reuseId(id: string): this;
@@ -1702,8 +1702,8 @@ declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute
     pixelStretchEffect(options: PixelStretchEffectOptions): this;
     keyboardShortcut(value: string | FunctionKey, keys: ModifierKey[], action?: () => void): this;
     accessibilityGroup(value: boolean): this;
-    accessibilityText(value: string): this;
-    accessibilityDescription(value: string): this;
+    accessibilityText(value: string | Resource): this;
+    accessibilityDescription(value: string | Resource): this;
     accessibilityLevel(value: string): this;
     obscured(reasons: ObscuredReasons[]): this;
     reuseId(id: string): this;
@@ -1857,6 +1857,7 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     barBackgroundBlurStyle(value: BlurStyle): TabsAttribute;
     barGridAlign(value: BarGridColumnOptions): TabsAttribute;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
+    edgeEffect(value: EdgeEffect): TabsAttribute;
 }
 declare class ArkTabContentComponent extends ArkComponent implements TabContentAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

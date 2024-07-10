@@ -46,6 +46,7 @@ public:
         auto pattern = AceType::DynamicCast<NavDestinationPattern>(preDestination->GetPattern());
         CHECK_NULL_VOID(pattern);
         preContext_ = pattern->GetNavDestinationContext();
+        CHECK_NULL_VOID(preContext_);
         preContext_->SetNavPathInfo(pattern->GetNavPathInfo());
     }
 
@@ -55,6 +56,7 @@ public:
         auto pattern = AceType::DynamicCast<NavDestinationPattern>(topDestination->GetPattern());
         CHECK_NULL_VOID(pattern);
         topContext_ = pattern->GetNavDestinationContext();
+        CHECK_NULL_VOID(topContext_);
         topContext_->SetNavPathInfo(pattern->GetNavPathInfo());
     }
 
@@ -70,8 +72,10 @@ public:
             return;
         }
         if (hasFinished_ || !finishCallback_) {
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "not support to finish custom animation more than once");
             return;
         }
+        hasFinished_ = true;
         finishCallback_();
         if (endCallback_) {
             endCallback_(true);
@@ -165,8 +169,10 @@ public:
     void FinishInteractiveAnimation()
     {
         if (!interactive_ || hasFinished_) {
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "not support to finish interactive animation more than once");
             return;
         }
+        hasFinished_ = true;
         isSuccess_ = true;
         AnimationUtils::ContinueInteractiveAnimation(interactiveAnimation_);
     }
@@ -174,8 +180,10 @@ public:
     void CancelInteractiveAnimation()
     {
         if (!interactive_ || hasFinished_) {
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "not support to cancel interactive animation more than once");
             return;
         }
+        hasFinished_ = true;
         isSuccess_ = false;
         AnimationUtils::ReverseInteractiveAnimation(interactiveAnimation_);
     }

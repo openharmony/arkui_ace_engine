@@ -1041,6 +1041,14 @@
     },
     {
         "first_introduced": "12",
+        "name": "OH_ArkUI_SwiperIndicator_SetMaxDisplayCount"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_SwiperIndicator_GetMaxDisplayCount"
+    },
+    {
+        "first_introduced": "12",
         "name": "OH_ArkUI_DrawableDescriptor_CreateFromPixelMap"
     },
     {
@@ -1649,6 +1657,110 @@
     },
     {
         "first_introduced": "12",
+        "name": "OH_ArkUI_NodeEvent_GetNumberValue"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeEvent_GetStringValue"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_NodeEvent_SetReturnNumberValue"
+    },
+    {
+        "first_introduced": "12",
         "name": "OH_ArkUI_PointerEvent_SetStopPropagation"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CreateOpacityTransitionEffect"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CreateTranslationTransitionEffect"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CreateScaleTransitionEffect"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CreateRotationTransitionEffect"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CreateMovementTransitionEffect"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_CreateAsymmetricTransitionEffect"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_TransitionEffect_Dispose"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_TransitionEffect_Combine"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_TransitionEffect_SetAnimation"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetContextByNode"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetNavigationId"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetNavDestinationName"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetNavStackLength"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetNavDestinationNameByIndex"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetNavDestinationId"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetNavDestinationState"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetNavDestinationIndex"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetNavDestinationParam"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetRouterPageIndex"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetRouterPageName"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetRouterPagePath"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetRouterPageState"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetRouterPageId"
     }
 ]

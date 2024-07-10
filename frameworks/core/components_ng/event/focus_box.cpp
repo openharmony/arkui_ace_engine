@@ -34,4 +34,24 @@ bool FocusBox::HasCustomStyle() const
 {
     return paintStyle_.has_value();
 }
+
+std::unique_ptr<JsonValue> FocusBox::ToJsonValue(const FocusBox& box)
+{
+    if (!box.HasCustomStyle()) {
+        return nullptr;
+    }
+    auto json = JsonUtil::Create(false);
+    if (json) {
+        if (box.paintStyle_->strokeColor) {
+            json->Put("strokeColor", box.paintStyle_->strokeColor.value().ToString().c_str());
+        }
+        if (box.paintStyle_->strokeWidth) {
+            json->Put("strokeWidth", box.paintStyle_->strokeWidth.value().ToString().c_str());
+        }
+        if (box.paintStyle_->margin) {
+            json->Put("margin", box.paintStyle_->margin.value().ToString().c_str());
+        }
+    }
+    return json;
+}
 } // namespace OHOS::Ace::NG

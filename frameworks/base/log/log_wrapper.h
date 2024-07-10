@@ -191,6 +191,7 @@ enum AceLogTag : uint8_t {
     ACE_WINDOW,               // C0394E
     ACE_LIBUV,                // C0394F
     ACE_SECURITYUIEXTENSION,  // C03950
+    ACE_INPUTKEYFLOW,         // C03951
 
     FORM_RENDER = 255, // C039FF FormRenderer
     END = 256,         // Last one, do not use

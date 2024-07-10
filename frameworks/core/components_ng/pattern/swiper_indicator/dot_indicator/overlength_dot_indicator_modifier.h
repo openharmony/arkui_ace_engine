@@ -166,8 +166,22 @@ public:
         isSwiperTouchDown_ = isSwiperTouchDown;
     }
 
+    void SetKeepStatus(bool keepStatus)
+    {
+        keepStatus_ = keepStatus;
+    }
+
+    void UpdateCurrentStatus()
+    {
+        currentSelectedIndex_ = targetSelectedIndex_;
+        currentOverlongType_ = targetOverlongType_;
+    }
+
     void InitOverlongStatus(int32_t pageIndex);
+    void InitOverlongSelectedIndex(int32_t pageIndex);
     void CalcTargetSelectedIndex(int32_t currentPageIndex, int32_t targetPageIndex);
+    void CalcTargetSelectedIndexOnForward(int32_t currentPageIndex, int32_t targetPageIndex);
+    void CalcTargetSelectedIndexOnBackward(int32_t currentPageIndex, int32_t targetPageIndex);
     void CalcTargetOverlongStatus(int32_t currentPageIndex, int32_t targetPageIndex);
     void StopAnimation(bool ifImmediately) override;
 
@@ -179,13 +193,15 @@ private:
     void CalcTargetStatusOnAllPointMoveBackward(const LinearVector<float>& itemHalfSizes);
     std::pair<LinearVector<float>, std::pair<float, float>> CalcIndicatorCenterX(
         const LinearVector<float>& itemHalfSizes, int32_t selectedIndex, OverlongType overlongType, int32_t pageIndex);
-    LinearVector<float> CalcIndicatorSize(const LinearVector<float>& itemHalfSizes, int32_t selectedIndex,
-        OverlongType overlongType, int32_t pageIndex, bool isWidth);
+    LinearVector<float> CalcIndicatorSize(
+        const LinearVector<float>& itemHalfSizes, OverlongType overlongType, int32_t pageIndex, bool isWidth);
     void UpdateSelectedCenterXOnDrag(const LinearVector<float>& itemHalfSizes);
     void UpdateUnselectedCenterXOnDrag();
     int32_t CalcTargetIndexOnDrag() const;
     std::pair<float, float> CalcLongPointEndCenterXWithBlack(int32_t index, const LinearVector<float>& itemHalfSizes);
     float GetMoveRateOnAllMove() const;
+    int32_t GetBlackPointsAnimationDuration() const;
+    void AdjustTargetStatus(int32_t targetPageIndex);
 
     RefPtr<AnimatablePropertyUint8> firstPointOpacity_;
     RefPtr<AnimatablePropertyUint8> newPointOpacity_;
@@ -218,6 +234,8 @@ private:
     TouchBottomTypeLoop touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     bool isCustomSizeValue_ = false;
     bool isSwiperTouchDown_ = false;
+    bool keepStatus_ = false;
+    bool blackPointsAnimEnd_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(OverlengthDotIndicatorModifier);
 };
 } // namespace OHOS::Ace::NG

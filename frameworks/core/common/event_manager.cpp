@@ -108,10 +108,6 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         refereeNG_->ForceCleanGestureReferee();
         CleanGestureEventHub();
     }
-    if (frameNode->HaveSecurityComponent()) {
-        std::vector<NG::RectF> rect;
-        frameNode->CheckSecurityComponentStatus(rect);
-    }
     if (!needAppend && touchTestResults_.empty()) {
         NG::NGGestureRecognizer::ResetGlobalTransCfg();
     }
@@ -209,10 +205,10 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
             .append(std::to_string(item.second.depth))
             .append(" };");
     }
-    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "InputTracking id:%{public}d, touch test hitted node info: %{public}s",
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "InputTracking id:%{public}d, touch test hitted node info: %{public}s",
         touchPoint.touchEventId, resultInfo.c_str());
     if (touchTestResultInfo.empty()) {
-        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "Touch test result is empty.");
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "Touch test result is empty.");
         std::list<std::pair<int32_t, std::string>> dumpList;
         eventTree_.Dump(dumpList, 0, DUMP_START_NUMBER);
         int32_t dumpCount = 0;
@@ -300,7 +296,7 @@ void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result, 
                 .append(" };");
         }
     }
-    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "%{public}s", hittedRecognizerTypeInfo.c_str());
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "%{public}s", hittedRecognizerTypeInfo.c_str());
     if (hittedRecognizerInfo.empty()) {
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Hitted recognizer info is empty.");
         std::list<std::pair<int32_t, std::string>> dumpList;
@@ -367,10 +363,6 @@ void EventManager::TouchTest(
     }
     // collect
     const NG::PointF point { event.x, event.y };
-    if (frameNode->HaveSecurityComponent()) {
-        std::vector<NG::RectF> rect;
-        frameNode->CheckSecurityComponentStatus(rect);
-    }
     // For root node, the parent local point is the same as global point.
     TouchTestResult hitTestResult;
     TouchTestResult responseLinkResult;
@@ -558,14 +550,38 @@ void EventManager::FlushTouchEventsBegin(const std::list<TouchEvent>& touchEvent
 
 void EventManager::FlushTouchEventsEnd(const std::list<TouchEvent>& touchEvents)
 {
+    bool isResampled = false;
     for (auto iter = touchEvents.begin(); iter != touchEvents.end(); ++iter) {
         const auto result = touchTestResults_.find((*iter).id);
         if (result != touchTestResults_.end()) {
             for (auto entry = result->second.rbegin(); entry != result->second.rend(); ++entry) {
                 (*entry)->OnFlushTouchEventsEnd();
             }
+            // only when no up received situation, the test result can be found
+            if ((*iter).history.size() != 0) {
+                // for resample case, the history list must not be empty
+                isResampled = true;
+            }
         }
     }
+
+    if (!isResampled) {
+        // for no-resample case, we do not request a new frame, let the FlushVsync itself to do it as needed.
+        return;
+    }
+
+    // request new frame for the cases we do the resampling for more than one touch events
+    auto container = Container::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    // Since we cache the received touch move events and process them in FlushVsync, requesting a new frame
+    // when we cache them can not ensure that the frames are continuous afterwhile dure the whole touch access,
+    // as there are some situation where no any dirty generated after FlushVsync,  which will not request new frame
+    // by FlushVsync itself, this is not friendly for some components, like UIExtension, which relies on the events
+    // dispatching on host to resend the touchs to the supplier, so we also need to request a new frame after all
+    // resampled touch move events are actually dispatched.
+    pipeline->RequestFrame();
 }
 
 void EventManager::PostEventFlushTouchEventEnd(const TouchEvent& touchEvent)
@@ -640,6 +656,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     }
 
     if (point.type == TouchType::DOWN) {
+        refereeNG_->CleanGestureRefereeState(event.id);
         // add gesture snapshot to dump
         for (const auto& target : iter->second) {
             AddGestureSnapshot(point.id, 0, target);
@@ -1040,10 +1057,6 @@ void EventManager::MouseTest(
     CHECK_NULL_VOID(frameNode);
     const NG::PointF point { event.x, event.y };
     TouchTestResult testResult;
-    if (frameNode->HaveSecurityComponent()) {
-        std::vector<NG::RectF> rect;
-        frameNode->CheckSecurityComponentStatus(rect);
-    }
 
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         if ((event.action == MouseAction::MOVE && event.button != MouseButton::NONE_BUTTON) ||
@@ -1867,7 +1880,7 @@ void EventManager::CheckAndLogLastReceivedEventInfo(int32_t eventId, bool logImm
 {
     if (logImmediately) {
         if (SystemProperties::GetDebugEnabled()) {
-            TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
+            TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
                 "Received new event id=%{public}d in ace_container, lastEventInfo: id:%{public}d", eventId,
                 lastReceivedEvent_.eventId);
         }
@@ -1878,7 +1891,7 @@ void EventManager::CheckAndLogLastReceivedEventInfo(int32_t eventId, bool logImm
     if (lastReceivedEvent_.lastLogTimeStamp != 0 &&
         (currentTime - lastReceivedEvent_.lastLogTimeStamp) > EVENT_CLEAR_DURATION * TRANSLATE_NS_TO_MS) {
         if (SystemProperties::GetDebugEnabled()) {
-            TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
+            TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
                 "Received new event id=%{public}d has been more than a second since the last one event "
                 "received "
                 "in ace_container, lastEventInfo: id:%{public}d",

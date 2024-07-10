@@ -320,14 +320,14 @@ bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRe
     if (!jsBundleName->IsString(vm) || !jsModuleName->IsString(vm) || !jsPagePath->IsString(vm)) {
         return false;
     }
-    bundleName = jsBundleName->ToString(vm)->ToString();
-    moduleName = jsModuleName->ToString(vm)->ToString();
-    pagePath = jsPagePath->ToString(vm)->ToString();
+    bundleName = jsBundleName->ToString(vm)->ToString(vm);
+    moduleName = jsModuleName->ToString(vm)->ToString(vm);
+    pagePath = jsPagePath->ToString(vm)->ToString(vm);
     bool ohmUrlValid = false;
     if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "ohmUrl"))) {
         auto jsOhmUrl = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "ohmUrl"));
         if (jsOhmUrl->IsString(vm)) {
-            ohmUrl = jsOhmUrl->ToString(vm)->ToString();
+            ohmUrl = jsOhmUrl->ToString(vm)->ToString(vm);
             if (ohmUrl.find(OHMURL_START_TAG) == std::string::npos) {
                 ohmUrl = OHMURL_START_TAG + ohmUrl;
                 ohmUrlValid = true;
@@ -345,7 +345,7 @@ bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRe
     if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"))) {
         auto integratedHsp = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"));
         if (integratedHsp->IsString(vm)) {
-            integratedHspName = integratedHsp->ToString(vm)->ToString();
+            integratedHspName = integratedHsp->ToString(vm)->ToString(vm);
         }
     }
     if (integratedHspName == "true") {
@@ -356,7 +356,7 @@ bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRe
     if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"))) {
         auto pageFullPathInfo = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"));
         if (pageFullPathInfo->IsString(vm)) {
-            pageFullPath = pageFullPathInfo->ToString(vm)->ToString();
+            pageFullPath = pageFullPathInfo->ToString(vm)->ToString(vm);
         }
     }
 
@@ -817,7 +817,7 @@ void JsiDeclarativeEngineInstance::DestroyRootViewHandle(int32_t pageId)
             return;
         }
         panda::Local<panda::ObjectRef> rootView = iter->second.ToLocal(arkRuntime->GetEcmaVm());
-        auto* jsView = static_cast<JSView*>(rootView->GetNativePointerField(0));
+        auto* jsView = static_cast<JSView*>(rootView->GetNativePointerField(arkRuntime->GetEcmaVm(), 0));
         if (jsView != nullptr) {
             jsView->Destroy(nullptr);
         }
@@ -837,7 +837,7 @@ void JsiDeclarativeEngineInstance::DestroyAllRootViewHandle()
     for (const auto& pair : rootViewMap_) {
         auto globalRootView = pair.second;
         panda::Local<panda::ObjectRef> rootView = globalRootView.ToLocal(arkRuntime->GetEcmaVm());
-        auto* jsView = static_cast<JSView*>(rootView->GetNativePointerField(0));
+        auto* jsView = static_cast<JSView*>(rootView->GetNativePointerField(arkRuntime->GetEcmaVm(), 0));
         if (jsView != nullptr) {
             jsView->Destroy(nullptr);
         }
@@ -860,7 +860,7 @@ void JsiDeclarativeEngineInstance::FlushReload()
     for (const auto& pair : rootViewMap_) {
         auto globalRootView = pair.second;
         panda::Local<panda::ObjectRef> rootView = globalRootView.ToLocal(arkRuntime->GetEcmaVm());
-        auto* jsView = static_cast<JSView*>(rootView->GetNativePointerField(0));
+        auto* jsView = static_cast<JSView*>(rootView->GetNativePointerField(arkRuntime->GetEcmaVm(), 0));
         if (jsView != nullptr) {
             jsView->MarkNeedUpdate();
         }
@@ -1212,6 +1212,12 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     if (nativeEngine_ == nullptr) {
         nativeEngine_ = new ArkNativeEngine(vm, static_cast<void*>(this));
     }
+    EngineTask(sharedRuntime);
+    return result;
+}
+
+void JsiDeclarativeEngine::EngineTask(bool sharedRuntime)
+{
     engineInstance_->SetNativeEngine(nativeEngine_);
     engineInstance_->InitJsObject();
     if (!sharedRuntime) {
@@ -1222,8 +1228,6 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         RegisterWorker();
         engineInstance_->RegisterFaPlugin();
     }
-
-    return result;
 }
 
 void JsiDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
@@ -1234,18 +1238,20 @@ void JsiDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
         if (delegate == nullptr) {
             return;
         }
-        delegate->PostJsTask([weakEngine, needSync, id]() {
-            auto jsEngine = weakEngine.Upgrade();
-            if (jsEngine == nullptr) {
-                return;
-            }
-            auto nativeEngine = jsEngine->GetNativeEngine();
-            if (nativeEngine == nullptr) {
-                return;
-            }
-            ContainerScope scope(id);
-            nativeEngine->Loop(LOOP_NOWAIT, needSync);
-        }, "ArkUISetNativeEngineLoop");
+        delegate->PostJsTask(
+            [weakEngine, needSync, id]() {
+                auto jsEngine = weakEngine.Upgrade();
+                if (jsEngine == nullptr) {
+                    return;
+                }
+                auto nativeEngine = jsEngine->GetNativeEngine();
+                if (nativeEngine == nullptr) {
+                    return;
+                }
+                ContainerScope scope(id);
+                nativeEngine->Loop(LOOP_NOWAIT, needSync);
+            },
+            "ArkUISetNativeEngineLoop");
     };
     nativeEngine_->SetPostTask(postTask);
 }
@@ -1317,7 +1323,7 @@ void JsiDeclarativeEngine::RegisterOffWorkerFunc()
 void JsiDeclarativeEngine::RegisterAssetFunc()
 {
     auto weakDelegate = WeakPtr(engineInstance_->GetDelegate());
-    auto && assetFunc = [weakDelegate](const std::string& uri, uint8_t** buff, size_t* buffSize,
+    auto&& assetFunc = [weakDelegate](const std::string& uri, uint8_t** buff, size_t* buffSize,
         std::vector<uint8_t>& content, std::string& ami, bool& useSecureMem, bool isRestricted) {
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
@@ -1467,7 +1473,8 @@ bool JsiDeclarativeEngine::UpdateRootComponent()
 {
     if (!JsiDeclarativeEngine::obj_.IsEmpty()) {
         LOGI("update rootComponent start");
-        Framework::UpdateRootComponent(JsiDeclarativeEngine::obj_.ToLocal());
+        Framework::UpdateRootComponent(reinterpret_cast<NativeEngine*>(runtime_)->GetEcmaVm(),
+                                       JsiDeclarativeEngine::obj_.ToLocal());
         // Clear the global object to avoid load this obj next time
         JsiDeclarativeEngine::obj_.FreeGlobalHandleAddr();
         JsiDeclarativeEngine::obj_.Empty();
@@ -1808,7 +1815,7 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
     shared_ptr<ArkJSRuntime> arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     arkRuntime->AddRootView(rootView);
 #endif
-    Framework::UpdateRootComponent(ret->ToObject(vm));
+    Framework::UpdateRootComponent(vm, ret->ToObject(vm));
     JSViewStackProcessor::JsStopGetAccessRecording();
     return true;
 }

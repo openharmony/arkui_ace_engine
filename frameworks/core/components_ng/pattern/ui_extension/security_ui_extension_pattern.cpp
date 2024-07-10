@@ -188,6 +188,7 @@ void SecurityUIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     PLATFORM_LOGI("The ability KeyAsync %{public}d.", isKeyAsync_);
     MountPlaceholderNode();
     SessionConfig config;
+    config.uiExtensionUsage = UIExtensionUsage::CONSTRAINED_EMBEDDED;
     sessionWrapper_->CreateSession(want, config);
     NotifyForeground();
 }

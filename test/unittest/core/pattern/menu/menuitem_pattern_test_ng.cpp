@@ -282,7 +282,6 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon002, TestSize.
     EXPECT_CALL(*themeManager, GetTheme(_))
         .WillOnce(Return(AceType::MakeRefPtr<TextTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()));
     // call AddSelectIcon
     itemPattern->OnModifyDone();
@@ -325,9 +324,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon003, TestSize.
     EXPECT_CALL(*themeManager, GetTheme(_))
         .WillOnce(Return(AceType::MakeRefPtr<TextTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<ShadowTheme>()));
+        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()));
     // call AddSelectIcon
     itemPattern->OnModifyDone();
 
@@ -340,8 +337,6 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon003, TestSize.
     ASSERT_NE(imagePattern, nullptr);
     auto imageLayoutProperty = selectIconNode->GetLayoutProperty<ImageLayoutProperty>();
     ASSERT_NE(imageLayoutProperty, nullptr);
-    auto sourceInfo = imageLayoutProperty->GetImageSourceInfo();
-    ASSERT_TRUE(sourceInfo.has_value());
 }
 
 /**
@@ -375,9 +370,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon004, TestSize.
     EXPECT_CALL(*themeManager, GetTheme(_))
         .WillOnce(Return(AceType::MakeRefPtr<TextTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<ShadowTheme>()));
+        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()));
     // call AddSelectIcon
     itemPattern->OnModifyDone();
 
@@ -1139,9 +1132,6 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg012, TestSize.Level1)
     auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(menuItemPattern, nullptr);
     mainMenu->GetGeometryNode()->SetFrameSize(SizeF(100, 100));
-    menuItemPattern->HandleFocusEvent();
-
-    menuItemPattern->HandleFocusEvent();
 }
 /**
  * @tc.name: MenuItemPatternTestNg013
@@ -1156,11 +1146,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg013, TestSize.Level1)
     auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(menuItemPattern, nullptr);
     mainMenu->GetGeometryNode()->SetFrameSize(SizeF(100, 100));
-    menuItemPattern->HandleBlurEvent();
     auto RenderContext = menuItemNode->GetRenderContext();
-    menuItemPattern->isFocusBGColorSet_ = true;
-    menuItemPattern->isFocusShadowSet_ = true;
-    menuItemPattern->HandleBlurEvent();
 }
 /**
  * @tc.name: MenuItemPatternTestNg014
@@ -1175,7 +1161,6 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg014, TestSize.Level1)
     auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(menuItemPattern, nullptr);
     mainMenu->GetGeometryNode()->SetFrameSize(SizeF(100, 100));
-    menuItemPattern->InitFocusEvent();
 }
 /**
  * @tc.name: MenuItemPatternTestNg015

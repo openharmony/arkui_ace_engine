@@ -232,18 +232,11 @@ void GridItemPattern::InitDisableStyle()
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<GridItemTheme>();
     CHECK_NULL_VOID(theme);
-    auto userDefineOpacity = renderContext->GetOpacityValue(1.0);
-
+    float opacity = 1.0f;
     if (!eventHub->IsDeveloperEnabled()) {
-        enableOpacity_ = renderContext->GetOpacityValue(1.0);
-        lastOpacity_ = enableOpacity_.value() * theme->GetGridItemDisabledAlpha();
-    } else if (enableOpacity_.has_value() && userDefineOpacity == lastOpacity_) {
-        lastOpacity_ = enableOpacity_.value();
-        enableOpacity_.reset();
-    } else {
-        lastOpacity_ = userDefineOpacity;
+        opacity = theme->GetGridItemDisabledAlpha();
     }
-    renderContext->UpdateOpacity(lastOpacity_);
+    renderContext->SetOpacityMultiplier(opacity);
 }
 
 void GridItemPattern::InitFocusPaintRect(const RefPtr<FocusHub>& focusHub)
@@ -310,9 +303,6 @@ void GridItemPattern::DumpAdvanceInfo()
     property->GetColumnEnd().has_value()
         ? DumpLog::GetInstance().AddDesc("ColumnEnd:" + std::to_string(property->GetColumnEnd().value()))
         : DumpLog::GetInstance().AddDesc("ColumnEnd:null");
-    enableOpacity_.has_value()
-        ? DumpLog::GetInstance().AddDesc("enableOpacity:" + std::to_string(enableOpacity_.value()))
-        : DumpLog::GetInstance().AddDesc("enableOpacity:null");
     selectable_ ? DumpLog::GetInstance().AddDesc("selectable:true")
                 : DumpLog::GetInstance().AddDesc("selectable:false");
     isSelected_ ? DumpLog::GetInstance().AddDesc("isSelected:true")

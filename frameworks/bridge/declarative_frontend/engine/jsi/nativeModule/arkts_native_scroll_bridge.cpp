@@ -469,4 +469,236 @@ ArkUINativeModuleValue ScrollBridge::ResetScrollInitialize(ArkUIRuntimeCallInfo*
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue ScrollBridge::SetScrollOnScrollStart(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getScrollModifier()->resetScrollOnScrollStart(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+
+    std::function<void()> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        func->Call(vm, func.ToLocal(), nullptr, 0);
+    };
+    GetArkUINodeModifiers()->getScrollModifier()->setScrollOnScrollStart(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ScrollBridge::ResetScrollOnScrollStart(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getScrollModifier()->resetScrollOnScrollStart(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ScrollBridge::SetScrollOnScrollEnd(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getScrollModifier()->resetScrollOnScrollEnd(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(void)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        func->Call(vm, func.ToLocal(), nullptr, 0);
+    };
+    GetArkUINodeModifiers()->getScrollModifier()->setScrollOnScrollEnd(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ScrollBridge::ResetScrollOnScrollEnd(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getScrollModifier()->resetScrollOnScrollEnd(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ScrollBridge::SetScrollOnScrollStop(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getScrollModifier()->resetScrollOnScrollStop(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(void)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        func->Call(vm, func.ToLocal(), nullptr, 0);
+    };
+    GetArkUINodeModifiers()->getScrollModifier()->setScrollOnScrollStop(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ScrollBridge::ResetScrollOnScrollStop(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getScrollModifier()->resetScrollOnScrollStop(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ScrollBridge::SetScrollOnScroll(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getScrollModifier()->resetScrollOnScroll(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(OHOS::Ace::Dimension, OHOS::Ace::Dimension)> callback =
+        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+        OHOS::Ace::Dimension xOffset, OHOS::Ace::Dimension yOffset) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+
+        panda::Local<panda::NumberRef> xOffsetParam = panda::NumberRef::New(
+            vm, static_cast<int32_t>(xOffset.ConvertToVp()));
+        panda::Local<panda::NumberRef> yOffsetParam = panda::NumberRef::New(
+            vm, static_cast<int32_t>(yOffset.ConvertToVp()));
+        panda::Local<panda::JSValueRef> params[2] = { xOffsetParam, yOffsetParam }; // 2: Array .length
+        func->Call(vm, func.ToLocal(), params, 2); // 2: Array length
+    };
+    GetArkUINodeModifiers()->getScrollModifier()->setScrollOnScroll(nativeNode,
+        reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ScrollBridge::ResetScrollOnScroll(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getScrollModifier()->resetScrollOnScroll(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ScrollBridge::SetScrollOnScrollEdge(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getScrollModifier()->resetScrollOnScrollEdge(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(OHOS::Ace::NG::ScrollEdge)> callback =
+        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+        OHOS::Ace::NG::ScrollEdge edge) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+
+        panda::Local<panda::NumberRef> edgeParam = panda::NumberRef::New(vm, static_cast<int32_t>(edge));
+        panda::Local<panda::JSValueRef> params[1] = { edgeParam }; // 1: Array length
+        func->Call(vm, func.ToLocal(), params, 1); // 1: Array length
+    };
+    GetArkUINodeModifiers()->getScrollModifier()->setScrollOnScrollEdge(nativeNode,
+        reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ScrollBridge::ResetScrollOnScrollEdge(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getScrollModifier()->resetScrollOnScrollEdge(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ScrollBridge::SetScrollOnDidScroll(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getScrollModifier()->resetScrollOnDidScroll(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(Dimension, Dimension, ScrollState)> callback =
+        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+        Dimension xOffset, Dimension yOffset, ScrollState state) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+
+        panda::Local<panda::NumberRef> xOffsetParam = panda::NumberRef::New(
+            vm, static_cast<int32_t>(xOffset.ConvertToVp()));
+        panda::Local<panda::NumberRef> yOffsetParam = panda::NumberRef::New(
+            vm, static_cast<int32_t>(yOffset.ConvertToVp()));
+        panda::Local<panda::NumberRef> stateParam = panda::NumberRef::New(vm, static_cast<int32_t>(state));
+         // 3: Array length
+        panda::Local<panda::JSValueRef> params[3] = { xOffsetParam, yOffsetParam, stateParam };
+        func->Call(vm, func.ToLocal(), params, 3); // 3: Array length
+    };
+    GetArkUINodeModifiers()->getScrollModifier()->setScrollOnDidScrollCallBack(nativeNode,
+        reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ScrollBridge::ResetScrollOnDidScroll(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getScrollModifier()->resetScrollOnDidScroll(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

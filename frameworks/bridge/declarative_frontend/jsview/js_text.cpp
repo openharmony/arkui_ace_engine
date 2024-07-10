@@ -19,6 +19,10 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#if !defined(PREVIEW)
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
@@ -575,6 +579,17 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
             ACE_SCORING_EVENT("Text.onClick");
             PipelineContext::SetCallBackNode(node);
             func->Execute(*clickInfo);
+#if !defined(PREVIEW)
+            std::string label = "";
+            if (!node.Invalid()) {
+                auto pattern = node.GetRawPtr()->GetPattern();
+                CHECK_NULL_VOID(pattern);
+                auto layoutProperty = pattern->GetLayoutProperty<NG::TextLayoutProperty>();
+                CHECK_NULL_VOID(layoutProperty);
+                label = layoutProperty->GetContent().value_or("");
+            }
+            JSInteractableView::ReportClickEvent(node, label);
+#endif
         };
         TextModel::GetInstance()->SetOnClick(std::move(onClick));
 
@@ -795,18 +810,6 @@ void JSText::JsDraggable(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetDraggable(tmpInfo->ToBoolean());
 }
 
-void JSText::JsMenuOptionsExtension(const JSCallbackInfo& info)
-{
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto tmpInfo = info[0];
-        if (tmpInfo->IsArray()) {
-            std::vector<NG::MenuOptionsParam> menuOptionsItems;
-            JSViewAbstract::ParseMenuOptions(info, JSRef<JSArray>::Cast(tmpInfo), menuOptionsItems);
-            TextModel::GetInstance()->SetMenuOptionItems(std::move(menuOptionsItems));
-        }
-    }
-}
-
 void JSText::JsEnableDataDetector(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -974,7 +977,6 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("onDrop", &JSText::JsOnDrop);
     JSClass<JSText>::StaticMethod("focusable", &JSText::JsFocusable);
     JSClass<JSText>::StaticMethod("draggable", &JSText::JsDraggable);
-    JSClass<JSText>::StaticMethod("textMenuOptions", &JSText::JsMenuOptionsExtension);
     JSClass<JSText>::StaticMethod("enableDataDetector", &JSText::JsEnableDataDetector);
     JSClass<JSText>::StaticMethod("dataDetectorConfig", &JSText::JsDataDetectorConfig);
     JSClass<JSText>::StaticMethod("bindSelectionMenu", &JSText::BindSelectionMenu);
@@ -984,7 +986,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("foregroundColor", &JSText::SetForegroundColor);
     JSClass<JSText>::StaticMethod("marqueeOptions", &JSText::SetMarqueeOptions);
     JSClass<JSText>::StaticMethod("onMarqueeStateChange", &JSText::SetOnMarqueeStateChange);
-    JSClass<JSText>::StaticMethod("selectionMenuOptions", &JSText::SelectionMenuOptions);
+    JSClass<JSText>::StaticMethod("editMenuOptions", &JSText::EditMenuOptions);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -1163,12 +1165,11 @@ void JSText::SetOnMarqueeStateChange(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetOnMarqueeStateChange(std::move(onMarqueeStateChange));
 }
 
-void JSText::SelectionMenuOptions(const JSCallbackInfo& info)
+void JSText::EditMenuOptions(const JSCallbackInfo& info)
 {
-    std::vector<NG::MenuOptionsParam> menuOptionsItems;
-    if (!JSViewAbstract::ParseSelectionMenuOptions(info, menuOptionsItems)) {
-        return;
-    }
-    TextModel::GetInstance()->SetSelectionMenuOptions(std::move(menuOptionsItems));
+    NG::OnCreateMenuCallback onCreateMenuCallback;
+    NG::OnMenuItemClickCallback onMenuItemClick;
+    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick);
+    TextModel::GetInstance()->SetSelectionMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 } // namespace OHOS::Ace::Framework

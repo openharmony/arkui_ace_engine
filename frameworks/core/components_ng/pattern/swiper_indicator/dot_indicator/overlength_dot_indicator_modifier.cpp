@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/overlength_dot_indicator_modifier.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
 #include "base/utils/utils.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -161,6 +162,11 @@ void OverlengthDotIndicatorModifier::UpdateShrinkPaintProperty(const OffsetF& ma
     longPointDilateRatio_->Set(NORMAL_FADING_RATIO);
     backgroundWidthDilateRatio_->Set(NORMAL_FADING_RATIO);
     backgroundHeightDilateRatio_->Set(NORMAL_FADING_RATIO);
+
+    if (blackPointsAnimEnd_) {
+        currentSelectedIndex_ = targetSelectedIndex_;
+        currentOverlongType_ = targetOverlongType_;
+    }
 }
 
 void OverlengthDotIndicatorModifier::UpdateNormalPaintProperty(const OffsetF& margin,
@@ -193,14 +199,23 @@ std::pair<float, float> OverlengthDotIndicatorModifier::CalcLongPointEndCenterXW
     return std::make_pair(longPointLeftEndCenterX, longPointRightEndCenterX);
 }
 
+int32_t OverlengthDotIndicatorModifier::GetBlackPointsAnimationDuration() const
+{
+    if (InstanceOf<InterpolatingSpring>(headCurve_)) {
+        return BLACK_POINT_DURATION;
+    }
+
+    return animationDuration_;
+}
+
 void OverlengthDotIndicatorModifier::PlayBlackPointsAnimation(const LinearVector<float>& itemHalfSizes)
 {
     AnimationOption blackPointOption;
     auto pointMoveCurve = AceType::MakeRefPtr<CubicCurve>(BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY,
         CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING);
     blackPointOption.SetCurve(pointMoveCurve);
-    blackPointOption.SetDuration(BLACK_POINT_DURATION);
-    
+    blackPointOption.SetDuration(GetBlackPointsAnimationDuration());
+
     vectorBlackPointCenterX_->Set(animationStartCenterX_);
     unselectedIndicatorWidth_->Set(animationStartIndicatorWidth_);
     unselectedIndicatorHeight_->Set(animationStartIndicatorHeight_);
@@ -209,6 +224,7 @@ void OverlengthDotIndicatorModifier::PlayBlackPointsAnimation(const LinearVector
     isSelectedColorAnimEnd_ = false;
     isTouchBottomLoop_ = true;
     auto longPointEndCenterX = CalcLongPointEndCenterXWithBlack(targetSelectedIndex_, itemHalfSizes);
+    blackPointsAnimEnd_ = false;
     AnimationUtils::StartAnimation(blackPointOption, [&]() {
         vectorBlackPointCenterX_->Set(animationEndCenterX_);
         unselectedIndicatorWidth_->Set(animationEndIndicatorWidth_);
@@ -223,13 +239,16 @@ void OverlengthDotIndicatorModifier::PlayBlackPointsAnimation(const LinearVector
     }, [weak = WeakClaim(this)]() {
         auto modifier = weak.Upgrade();
         CHECK_NULL_VOID(modifier);
-        modifier->currentSelectedIndex_ = modifier->targetSelectedIndex_;
-        modifier->currentOverlongType_ = modifier->targetOverlongType_;
+        if (!modifier->blackPointsAnimEnd_) {
+            modifier->currentSelectedIndex_ = modifier->targetSelectedIndex_;
+            modifier->currentOverlongType_ = modifier->targetOverlongType_;
+            modifier->blackPointsAnimEnd_ = true;
+        }
     });
 }
 
-LinearVector<float> OverlengthDotIndicatorModifier::CalcIndicatorSize(const LinearVector<float>& itemHalfSizes,
-    int32_t selectedIndex, OverlongType overlongType, int32_t pageIndex, bool isWidth)
+LinearVector<float> OverlengthDotIndicatorModifier::CalcIndicatorSize(
+    const LinearVector<float>& itemHalfSizes, OverlongType overlongType, int32_t pageIndex, bool isWidth)
 {
     auto unselectedIndicatorRadius = isWidth ? itemHalfSizes[0] : itemHalfSizes[1];
     LinearVector<float> indicatorSize(maxDisplayCount_ + 1);
@@ -304,13 +323,12 @@ void OverlengthDotIndicatorModifier::UpdateSelectedCenterXOnDrag(const LinearVec
     }
 
     if (touchBottomTypeLoop_ != TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
-        overlongSelectedEndCenterX_.first =
-            overlongSelectedStartCenterX_.first +
-            (overlongSelectedStartCenterX_.second - overlongSelectedStartCenterX_.first) * leftMoveRate;
+        auto dragTargetCenterX = (overlongSelectedEndCenterX_.second + overlongSelectedEndCenterX_.first) * HALF_FLOAT;
+        overlongSelectedEndCenterX_.first = overlongSelectedStartCenterX_.first +
+                                            (dragTargetCenterX - overlongSelectedStartCenterX_.first) * leftMoveRate;
 
-        overlongSelectedEndCenterX_.second =
-            overlongSelectedStartCenterX_.first +
-            (overlongSelectedStartCenterX_.second - overlongSelectedStartCenterX_.first) * (1.0f - rightMoveRate);
+        overlongSelectedEndCenterX_.second = overlongSelectedStartCenterX_.second +
+                                             (dragTargetCenterX - overlongSelectedStartCenterX_.second) * rightMoveRate;
     } else {
         auto leftDistance = overlongSelectedEndCenterX_.first - overlongSelectedStartCenterX_.first;
         auto rightDistance = overlongSelectedEndCenterX_.second - overlongSelectedStartCenterX_.second;
@@ -398,28 +416,26 @@ void OverlengthDotIndicatorModifier::CalcTargetStatusOnLongPointMove(const Linea
         CalcIndicatorCenterX(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_);
     animationEndCenterX_ = endCenterX.first;
     overlongSelectedEndCenterX_ = endCenterX.second;
-    animationStartIndicatorWidth_ =
-        CalcIndicatorSize(itemHalfSizes, currentSelectedIndex_, currentOverlongType_, animationStartIndex_, true);
+    animationStartIndicatorWidth_ = CalcIndicatorSize(itemHalfSizes, currentOverlongType_, animationStartIndex_, true);
     animationStartIndicatorHeight_ =
-        CalcIndicatorSize(itemHalfSizes, currentSelectedIndex_, currentOverlongType_, animationStartIndex_, false);
+        CalcIndicatorSize(itemHalfSizes, currentOverlongType_, animationStartIndex_, false);
 
-    animationEndIndicatorWidth_ =
-        CalcIndicatorSize(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_, true);
-    animationEndIndicatorHeight_ =
-        CalcIndicatorSize(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_, false);
+    animationEndIndicatorWidth_ = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, animationEndIndex_, true);
+    animationEndIndicatorHeight_ = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, animationEndIndex_, false);
 
-    animationStartCenterX_.resize(maxDisplayCount_);
-    animationEndCenterX_.resize(maxDisplayCount_);
-    animationStartIndicatorWidth_.resize(maxDisplayCount_);
-    animationStartIndicatorHeight_.resize(maxDisplayCount_);
-    animationEndIndicatorWidth_.resize(maxDisplayCount_);
-    animationEndIndicatorHeight_.resize(maxDisplayCount_);
+    if (touchBottomTypeLoop_ != TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
+        animationStartCenterX_.resize(maxDisplayCount_);
+        animationEndCenterX_.resize(maxDisplayCount_);
+        animationStartIndicatorWidth_.resize(maxDisplayCount_);
+        animationStartIndicatorHeight_.resize(maxDisplayCount_);
+        animationEndIndicatorWidth_.resize(maxDisplayCount_);
+        animationEndIndicatorHeight_.resize(maxDisplayCount_);
+    }
 
-    UpdateUnselectedCenterXOnDrag();
-    UpdateSelectedCenterXOnDrag(itemHalfSizes);
-
-    if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT ||
-        gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
+    if (isSwiperTouchDown_ && (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT ||
+                                  gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT)) {
+        UpdateUnselectedCenterXOnDrag();
+        UpdateSelectedCenterXOnDrag(itemHalfSizes);
         targetSelectedIndex_ = currentSelectedIndex_;
         targetOverlongType_ = currentOverlongType_;
     }
@@ -430,10 +446,8 @@ void OverlengthDotIndicatorModifier::CalcTargetStatusOnAllPointMoveForward(const
     auto targetCenterX =
         CalcIndicatorCenterX(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_);
     overlongSelectedEndCenterX_ = targetCenterX.second;
-    auto targetIndicatorWidth =
-        CalcIndicatorSize(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_, true);
-    auto targetIndicatorHeight =
-        CalcIndicatorSize(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_, false);
+    auto targetIndicatorWidth = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, animationEndIndex_, true);
+    auto targetIndicatorHeight = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, animationEndIndex_, false);
 
     float itemSpacePx = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
     // calc new point current position
@@ -479,10 +493,8 @@ void OverlengthDotIndicatorModifier::CalcTargetStatusOnAllPointMoveBackward(cons
     auto targetCenterX =
         CalcIndicatorCenterX(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_);
     overlongSelectedEndCenterX_ = targetCenterX.second;
-    auto targetIndicatorWidth =
-        CalcIndicatorSize(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_, true);
-    auto targetIndicatorHeight =
-        CalcIndicatorSize(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_, false);
+    auto targetIndicatorWidth = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, animationEndIndex_, true);
+    auto targetIndicatorHeight = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, animationEndIndex_, false);
 
     float itemSpacePx = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
     // calc new point current position
@@ -521,8 +533,8 @@ void OverlengthDotIndicatorModifier::CalcTargetStatusOnAllPointMoveBackward(cons
 
 void OverlengthDotIndicatorModifier::CalcAnimationEndCenterX(const LinearVector<float>& itemHalfSizes)
 {
-    if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT ||
-        gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
+    if (isSwiperTouchDown_ && (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT ||
+                                  gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT)) {
         animationEndIndex_ = CalcTargetIndexOnDrag();
     }
 
@@ -540,10 +552,9 @@ void OverlengthDotIndicatorModifier::CalcAnimationEndCenterX(const LinearVector<
         return;
     }
 
-    animationStartIndicatorWidth_ =
-        CalcIndicatorSize(itemHalfSizes, currentSelectedIndex_, currentOverlongType_, animationStartIndex_, true);
+    animationStartIndicatorWidth_ = CalcIndicatorSize(itemHalfSizes, currentOverlongType_, animationStartIndex_, true);
     animationStartIndicatorHeight_ =
-        CalcIndicatorSize(itemHalfSizes, currentSelectedIndex_, currentOverlongType_, animationStartIndex_, false);
+        CalcIndicatorSize(itemHalfSizes, currentOverlongType_, animationStartIndex_, false);
     animationEndCenterX_.resize(maxDisplayCount_ + 1);
     animationEndIndicatorWidth_.resize(maxDisplayCount_ + 1);
     animationEndIndicatorHeight_.resize(maxDisplayCount_ + 1);
@@ -562,6 +573,8 @@ void OverlengthDotIndicatorModifier::PlayIndicatorAnimation(const OffsetF& margi
     const LinearVector<float>& itemHalfSizes, GestureState gestureState, TouchBottomTypeLoop touchBottomTypeLoop)
 {
     StopAnimation(false);
+    currentSelectedIndex_ = targetSelectedIndex_;
+    currentOverlongType_ = targetOverlongType_;
     isTouchBottomLoop_ = false;
     animationState_ = TouchBottomAnimationStage::STAGE_NONE;
     normalMargin_ = margin;
@@ -596,6 +609,7 @@ void OverlengthDotIndicatorModifier::StopAnimation(bool ifImmediately)
         });
     }
 
+    blackPointsAnimEnd_ = true;
     AnimationOption option;
     option.SetDuration(0);
     option.SetCurve(Curves::LINEAR);
@@ -612,8 +626,34 @@ void OverlengthDotIndicatorModifier::StopAnimation(bool ifImmediately)
     longPointLeftAnimEnd_ = true;
     longPointRightAnimEnd_ = true;
     ifNeedFinishCallback_ = false;
-    currentSelectedIndex_ = targetSelectedIndex_;
-    currentOverlongType_ = targetOverlongType_;
+}
+
+void OverlengthDotIndicatorModifier::InitOverlongSelectedIndex(int32_t pageIndex)
+{
+    if (pageIndex < maxDisplayCount_ - 1 - THIRD_POINT_INDEX) {
+        targetSelectedIndex_ = pageIndex;
+        return;
+    }
+
+    if (pageIndex >= maxDisplayCount_ - 1 - THIRD_POINT_INDEX && pageIndex < realItemCount_ - 1 - THIRD_POINT_INDEX) {
+        targetSelectedIndex_ = maxDisplayCount_ - 1 - THIRD_POINT_INDEX;
+        return;
+    }
+
+    if (pageIndex >= maxDisplayCount_ - 1 - THIRD_POINT_INDEX && pageIndex == realItemCount_ - 1 - THIRD_POINT_INDEX) {
+        targetSelectedIndex_ = maxDisplayCount_ - 1 - THIRD_POINT_INDEX;
+        return;
+    }
+
+    if (pageIndex >= maxDisplayCount_ - 1 - THIRD_POINT_INDEX && pageIndex == realItemCount_ - 1 - SECOND_POINT_INDEX) {
+        targetSelectedIndex_ = maxDisplayCount_ - 1 - SECOND_POINT_INDEX;
+        return;
+    }
+
+    if (pageIndex >= maxDisplayCount_ - 1 - THIRD_POINT_INDEX && pageIndex == realItemCount_ - 1) {
+        targetSelectedIndex_ = maxDisplayCount_ - 1;
+        return;
+    }
 }
 
 void OverlengthDotIndicatorModifier::InitOverlongStatus(int32_t pageIndex)
@@ -666,60 +706,22 @@ void OverlengthDotIndicatorModifier::InitOverlongStatus(int32_t pageIndex)
 
 void OverlengthDotIndicatorModifier::CalcTargetSelectedIndex(int32_t currentPageIndex, int32_t targetPageIndex)
 {
-    if (currentPageIndex == targetPageIndex) {
+    if (currentPageIndex == targetPageIndex || keepStatus_) {
         return;
     }
 
-    auto step = std::abs(targetPageIndex - currentPageIndex);
-    auto rightThirdIndicatorIndex = maxDisplayCount_ - 1 - THIRD_POINT_INDEX;
-    auto rightSecondPageIndex = realItemCount_ - 1 - SECOND_POINT_INDEX;
     if (currentPageIndex < targetPageIndex) {
-        if (currentSelectedIndex_ == rightThirdIndicatorIndex) {
-            if (targetPageIndex < rightSecondPageIndex) {
-                step = 0;
-            } else {
-                step = targetPageIndex - currentPageIndex;
-            }
-        } else if (currentSelectedIndex_ < rightThirdIndicatorIndex) {
-            if (targetPageIndex < rightSecondPageIndex) {
-                step = std::min(targetPageIndex - currentPageIndex, rightThirdIndicatorIndex - currentSelectedIndex_);
-            } else if (targetPageIndex == rightSecondPageIndex) {
-                step = rightThirdIndicatorIndex - currentSelectedIndex_ + 1;
-            } else {
-                step = rightThirdIndicatorIndex - currentSelectedIndex_ + THIRD_POINT_INDEX;
-            }
-        } else {
-            step = targetPageIndex - currentPageIndex;
-        }
-
-        targetSelectedIndex_ = currentSelectedIndex_ + step;
+        CalcTargetSelectedIndexOnForward(currentPageIndex, targetPageIndex);
         return;
     }
 
-    if (currentSelectedIndex_ > THIRD_POINT_INDEX) {
-        if (targetPageIndex > SECOND_POINT_INDEX) {
-            step = std::min(currentPageIndex - targetPageIndex, currentSelectedIndex_ - THIRD_POINT_INDEX);
-        } else if (targetPageIndex == SECOND_POINT_INDEX) {
-            step = currentSelectedIndex_ - SECOND_POINT_INDEX;
-        } else {
-            step = currentSelectedIndex_ - LEFT_FIRST_POINT_INDEX;
-        }
-    } else if (currentSelectedIndex_ == THIRD_POINT_INDEX) {
-        if (targetPageIndex > SECOND_POINT_INDEX) {
-            step = 0;
-        } else {
-            step = currentPageIndex - targetPageIndex;
-        }
-    } else {
-        step = currentPageIndex - targetPageIndex;
-    }
-
-    targetSelectedIndex_ = currentSelectedIndex_ - step;
+    CalcTargetSelectedIndexOnBackward(currentPageIndex, targetPageIndex);
 }
 
 void OverlengthDotIndicatorModifier::CalcTargetOverlongStatus(int32_t currentPageIndex, int32_t targetPageIndex)
 {
-    if (currentPageIndex == targetPageIndex || currentOverlongType_ == OverlongType::NONE) {
+    if (currentPageIndex == targetPageIndex || currentOverlongType_ == OverlongType::NONE || keepStatus_) {
+        AdjustTargetStatus(targetPageIndex);
         return;
     }
 
@@ -769,7 +771,13 @@ void OverlengthDotIndicatorModifier::CalcTargetOverlongStatus(int32_t currentPag
         if (targetSelectedIndex_ > THIRD_POINT_INDEX) {
             targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
         } else if (targetSelectedIndex_ == THIRD_POINT_INDEX) {
-            targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT;
+            if (targetPageIndex > THIRD_POINT_INDEX) {
+                targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT;
+            } else {
+                targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+            }
+        } else {
+            targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
         }
     } else {
         if (targetSelectedIndex_ > THIRD_POINT_INDEX) {
@@ -913,6 +921,100 @@ std::pair<LinearVector<float>, std::pair<float, float>> OverlengthDotIndicatorMo
     }
 
     return std::make_pair(indicatorCenterX, longPointCenterX);
+}
+
+void OverlengthDotIndicatorModifier::AdjustTargetStatus(int32_t targetPageIndex)
+{
+    targetSelectedIndex_ = SwiperIndicatorUtils::GetLoopIndex(targetSelectedIndex_, maxDisplayCount_);
+    if (targetPageIndex == 0 || targetPageIndex == SECOND_POINT_INDEX || targetPageIndex == THIRD_POINT_INDEX) {
+        targetSelectedIndex_ = targetPageIndex;
+        targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+        return;
+    }
+
+    if (targetPageIndex == realItemCount_ - 1) {
+        targetSelectedIndex_ = maxDisplayCount_ - 1;
+        targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+        return;
+    }
+
+    if (targetPageIndex == realItemCount_ - 1 - SECOND_POINT_INDEX) {
+        targetSelectedIndex_ = maxDisplayCount_ - 1 - SECOND_POINT_INDEX;
+        targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+        return;
+    }
+
+    if (targetPageIndex == realItemCount_ - 1 - THIRD_POINT_INDEX) {
+        targetSelectedIndex_ = maxDisplayCount_ - 1 - THIRD_POINT_INDEX;
+        targetOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+        return;
+    }
+
+    if (targetPageIndex > THIRD_POINT_INDEX && targetSelectedIndex_ < THIRD_POINT_INDEX) {
+        InitOverlongSelectedIndex(targetPageIndex);
+        return;
+    }
+
+    if (targetPageIndex < realItemCount_ - 1 - THIRD_POINT_INDEX &&
+        targetSelectedIndex_ > maxDisplayCount_ - 1 - THIRD_POINT_INDEX) {
+        InitOverlongSelectedIndex(targetPageIndex);
+        return;
+    }
+}
+
+void OverlengthDotIndicatorModifier::CalcTargetSelectedIndexOnForward(int32_t currentPageIndex, int32_t targetPageIndex)
+{
+    auto step = std::abs(targetPageIndex - currentPageIndex);
+    auto rightThirdIndicatorIndex = maxDisplayCount_ - 1 - THIRD_POINT_INDEX;
+    auto rightSecondPageIndex = realItemCount_ - 1 - SECOND_POINT_INDEX;
+    if (currentSelectedIndex_ == rightThirdIndicatorIndex) {
+        if (targetPageIndex < rightSecondPageIndex) {
+            step = 0;
+        } else {
+            step = targetPageIndex - currentPageIndex;
+        }
+    } else if (currentSelectedIndex_ < rightThirdIndicatorIndex) {
+        if (targetPageIndex < rightSecondPageIndex) {
+            step = std::min(targetPageIndex - currentPageIndex, rightThirdIndicatorIndex - currentSelectedIndex_);
+        } else if (targetPageIndex == rightSecondPageIndex) {
+            step = rightThirdIndicatorIndex - currentSelectedIndex_ + 1;
+        } else {
+            step = rightThirdIndicatorIndex - currentSelectedIndex_ + THIRD_POINT_INDEX;
+        }
+    } else {
+        step = targetPageIndex - currentPageIndex;
+    }
+
+    targetSelectedIndex_ = currentSelectedIndex_ + step;
+    AdjustTargetStatus(targetPageIndex);
+}
+
+void OverlengthDotIndicatorModifier::CalcTargetSelectedIndexOnBackward(
+    int32_t currentPageIndex, int32_t targetPageIndex)
+{
+    auto step = std::abs(targetPageIndex - currentPageIndex);
+    if (currentSelectedIndex_ > THIRD_POINT_INDEX) {
+        if (targetPageIndex > SECOND_POINT_INDEX) {
+            step = std::min(currentPageIndex - targetPageIndex, currentSelectedIndex_ - THIRD_POINT_INDEX);
+        } else if (targetPageIndex == SECOND_POINT_INDEX) {
+            step = currentSelectedIndex_ - SECOND_POINT_INDEX;
+        } else {
+            step = currentSelectedIndex_ - LEFT_FIRST_POINT_INDEX;
+        }
+    } else if (currentSelectedIndex_ == THIRD_POINT_INDEX) {
+        if (targetPageIndex > SECOND_POINT_INDEX) {
+            step = 0;
+        } else if (targetPageIndex == SECOND_POINT_INDEX) {
+            step = SECOND_POINT_INDEX;
+        } else {
+            step = THIRD_POINT_INDEX;
+        }
+    } else {
+        step = currentPageIndex - targetPageIndex;
+    }
+
+    targetSelectedIndex_ = currentSelectedIndex_ - step;
+    AdjustTargetStatus(targetPageIndex);
 }
 
 } // namespace OHOS::Ace::NG

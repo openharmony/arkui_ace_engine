@@ -14,8 +14,10 @@
  */
 
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
-#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/log/dump_log.h"
@@ -34,6 +36,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
+#include "core/components_ng/pattern/indexer/vibrator_impl.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
@@ -82,7 +85,7 @@ void IndexerPattern::OnModifyDone()
         removeBubble = !isPopup_;
     }
     // Remove bubble if auto-collapse mode switched on/off or if items count changed
-    removeBubble |= autoCollapseModeChanged || itemCountChanged;
+    removeBubble = removeBubble || autoCollapseModeChanged || itemCountChanged;
     if (removeBubble) {
         RemoveBubble();
     }
@@ -110,10 +113,10 @@ void IndexerPattern::InitArrayValue(bool& autoCollapseModeChanged, bool& itemCou
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(true);
     if (!isNewHeightCalculated_) {
-        auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(false);
-        autoCollapseModeChanged = autoCollapse != autoCollapse_;
-        autoCollapse_ = autoCollapse;
+        autoCollapseModeChanged = autoCollapse != lastAutoCollapse_;
+        lastAutoCollapse_ = autoCollapse;
         auto newArray = layoutProperty->GetArrayValue().value_or(std::vector<std::string>());
         bool arrayValueChanged = newArray.size() != fullArrayValue_.size() || newArray != fullArrayValue_;
         if (arrayValueChanged || autoCollapseModeChanged) {
@@ -123,7 +126,7 @@ void IndexerPattern::InitArrayValue(bool& autoCollapseModeChanged, bool& itemCou
     }
     auto propSelect = layoutProperty->GetSelected().value();
     if (fullArrayValue_.size() > 0) {
-        if (autoCollapse_) {
+        if (autoCollapse) {
             sharpItemCount_ = fullArrayValue_.at(0) == StringUtils::Str16ToStr8(INDEXER_STR_SHARP) ? 1 : 0;
             CollapseArrayValue();
             if ((lastCollapsingMode_ == IndexerCollapsingMode::SEVEN ||
@@ -183,7 +186,7 @@ bool IndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty
     CHECK_NULL_RETURN(indexerLayoutAlgorithm, false);
     itemSizeRender_ = indexerLayoutAlgorithm->GetItemSizeRender();
     auto height = indexerLayoutAlgorithm->GetActualHeight();
-    if (actualIndexerHeight_ != height && autoCollapse_) {
+    if (actualIndexerHeight_ != height && lastAutoCollapse_) {
         actualIndexerHeight_ = height;
         isNewHeightCalculated_ = true;
         auto hostNode = dirty->GetHostNode();
@@ -219,13 +222,13 @@ void IndexerPattern::BuildArrayValueItems()
     for (auto indexerItem : arrayValue_) {
         arrayValueStrs.push_back(indexerItem.first);
     }
-    layoutProperty->UpdateArrayValue(arrayValueStrs);
+    layoutProperty->UpdateActualArrayValue(arrayValueStrs);
 }
 
 void IndexerPattern::BuildFullArrayValue()
 {
     arrayValue_.clear();
-    
+    autoCollapse_ = false;
     for (auto indexerLetter : fullArrayValue_) {
         arrayValue_.push_back(std::pair(indexerLetter, false));
     }
@@ -306,6 +309,7 @@ void IndexerPattern::ApplySevenPlusOneMode(int32_t fullArraySize)
         arrayValue_.push_back(std::pair(fullArrayValue_.at(lastIndex), false));
         lastPushedIndex = lastIndex;
     }
+    autoCollapse_ = true;
 }
 
 void IndexerPattern::ApplyFivePlusOneMode(int32_t fullArraySize)
@@ -341,6 +345,7 @@ void IndexerPattern::ApplyFivePlusOneMode(int32_t fullArraySize)
         arrayValue_.push_back(std::pair(fullArrayValue_.at(lastIndex), false));
         lastPushedIndex = lastIndex;
     }
+    autoCollapse_ = true;
 }
 
 int32_t IndexerPattern::GetAutoCollapseIndex(int32_t propSelect)
@@ -522,7 +527,7 @@ void IndexerPattern::OnTouchUp(const TouchEventInfo& info)
     }
     ResetStatus();
     ApplyIndexChanged(true, true, true);
-    OnSelect(true);
+    OnSelect();
 }
 
 void IndexerPattern::MoveIndexByOffset(const Offset& offset)
@@ -591,6 +596,7 @@ bool IndexerPattern::KeyIndexByStep(int32_t step)
     childPressIndex_ = -1;
     childHoverIndex_ = -1;
     ApplyIndexChanged(true, refreshBubble);
+    OnSelect();
     return nextSected >= 0;
 }
 
@@ -612,6 +618,7 @@ bool IndexerPattern::MoveIndexByStep(int32_t step)
     selected_ = nextSected;
     ResetStatus();
     ApplyIndexChanged(true, true);
+    OnSelect();
     return nextSected >= 0;
 }
 
@@ -626,6 +633,7 @@ bool IndexerPattern::MoveIndexBySearch(const std::string& searchStr)
     childHoverIndex_ = -1;
     childPressIndex_ = -1;
     ApplyIndexChanged(true, true);
+    OnSelect();
     return nextSelectIndex >= 0;
 }
 
@@ -669,7 +677,7 @@ void IndexerPattern::ResetStatus()
     popupClickedIndex_ = -1;
 }
 
-void IndexerPattern::OnSelect(bool changed)
+void IndexerPattern::OnSelect()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1570,6 +1578,9 @@ void IndexerPattern::OnListItemClick(int32_t index)
     auto onPopupSelected = indexerEventHub->GetOnPopupSelected();
     if (onPopupSelected) {
         onPopupSelected(index);
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onPopupSelected");
+#endif
     }
     ChangeListItemsSelectedStyle(index);
 }
@@ -1934,7 +1945,7 @@ void IndexerPattern::SetAccessibilityAction()
                 indexerPattern->selected_ = index;
                 indexerPattern->ResetStatus();
                 indexerPattern->ApplyIndexChanged(true, true, true);
-                indexerPattern->OnSelect(true);
+                indexerPattern->OnSelect();
             });
 
         accessibilityProperty->SetActionClearSelection(
@@ -1957,7 +1968,7 @@ void IndexerPattern::SetAccessibilityAction()
                 indexerPattern->selected_ = 0;
                 indexerPattern->ResetStatus();
                 indexerPattern->ApplyIndexChanged(true, false);
-                indexerPattern->OnSelect(false);
+                indexerPattern->OnSelect();
             });
     }
 }

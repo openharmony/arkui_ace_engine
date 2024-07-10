@@ -93,7 +93,7 @@ void UiReportProxy::ReportSearchEvent(const std::string& data)
     }
 }
 
-void UiReportProxy::ReportInspectorTreeValue(const std::string& data)
+void UiReportProxy::ReportInspectorTreeValue(const std::string& data, int32_t partNum, bool isLastPart)
 {
     MessageParcel messageData;
     MessageParcel reply;
@@ -103,6 +103,14 @@ void UiReportProxy::ReportInspectorTreeValue(const std::string& data)
         return;
     }
     if (!messageData.WriteString(data)) {
+        LOGW("ReportInspectorTreeValue write data  failed");
+        return;
+    }
+    if (!messageData.WriteInt32(partNum)) {
+        LOGW("ReportInspectorTreeValue write data  failed");
+        return;
+    }
+    if (!messageData.WriteBool(isLastPart)) {
         LOGW("ReportInspectorTreeValue write data  failed");
         return;
     }
@@ -120,4 +128,25 @@ void UiReportProxy::OnComponentChange(const std::string& key, const std::string&
     }
 }
 
+void UiReportProxy::ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option;
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("ReportWebUnfocusEvent write interface token failed");
+        return;
+    }
+    if (!messageData.WriteString(data)) {
+        LOGW("ReportWebUnfocusEvent write data  failed");
+        return;
+    }
+    if (!messageData.WriteInt64(accessibilityId)) {
+        LOGW("ReportWebUnfocusEvent write data  failed");
+        return;
+    }
+    if (Remote()->SendRequest(REPORT_WEB_UNFOCUS_EVENT, messageData, reply, option) != ERR_NONE) {
+        LOGW("ReportWebUnfocusEvent send request failed");
+    }
+}
 } // namespace OHOS::Ace

@@ -55,28 +55,30 @@ int32_t SecurityComponentProbe::GetComponentInfo(int32_t nodeId, std::string& co
         return -1;
     }
     int taskRes;
-    taskExec_.value().PostSyncTask([nodeId, &compInfoStr, &taskRes] {
-        auto node = AceType::DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetNodeById(nodeId));
-        if (!node) {
-            LOGW("node do not exist.");
-            taskRes = -1;
-            return;
-        }
+    taskExec_.value().PostSyncTask(
+        [nodeId, &compInfoStr, &taskRes] {
+            auto node = AceType::DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetNodeById(nodeId));
+            if (!node) {
+                LOGW("node do not exist.");
+                taskRes = -1;
+                return;
+            }
 
-        if ((node->GetTag() != V2::LOCATION_BUTTON_ETS_TAG) && (node->GetTag() != V2::PASTE_BUTTON_ETS_TAG) &&
-            (node->GetTag() != V2::SAVE_BUTTON_ETS_TAG)) {
-            LOGW("node is not security component.");
-            taskRes = -1;
-            return;
-        }
-        Security::SecurityComponent::SecCompType scType;
-        if (!SecurityComponentHandler::InitButtonInfo(compInfoStr, node, scType)) {
-            LOGW("node init info failed.");
-            taskRes = -1;
-            return;
-        }
-        taskRes = 0;
-    }, "ArkUISecurityComponentInitButtonInfo");
+            if ((node->GetTag() != V2::LOCATION_BUTTON_ETS_TAG) && (node->GetTag() != V2::PASTE_BUTTON_ETS_TAG) &&
+                (node->GetTag() != V2::SAVE_BUTTON_ETS_TAG)) {
+                LOGW("node is not security component.");
+                taskRes = -1;
+                return;
+            }
+            Security::SecurityComponent::SecCompType scType;
+            if (!SecurityComponentHandler::InitButtonInfo(compInfoStr, node, scType)) {
+                LOGW("node init info failed.");
+                taskRes = -1;
+                return;
+            }
+            taskRes = 0;
+        },
+        "ArkUISecurityComponentInitButtonInfo");
     tmux_.unlock();
     return taskRes;
 }

@@ -56,7 +56,7 @@ void DialogContainer::InitializeTouchEventCallback()
                                     const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
-            [context, event, markProcess, id]() {
+            [context, event, markProcess]() {
                 context->OnTouchEvent(event);
                 context->NotifyDispatchTouchEventDismiss(event);
                 CHECK_NULL_VOID(markProcess);
@@ -75,7 +75,7 @@ void DialogContainer::InitializeMouseEventCallback()
                                     const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
-            [context, event, markProcess, id]() {
+            [context, event, markProcess]() {
                 context->OnMouseEvent(event);
                 CHECK_NULL_VOID(markProcess);
                 markProcess();
@@ -93,7 +93,7 @@ void DialogContainer::InitializeAxisEventCallback()
                                    const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
-            [context, event, markProcess, id]() {
+            [context, event, markProcess]() {
                 context->OnAxisEvent(event);
                 CHECK_NULL_VOID(markProcess);
                 markProcess();

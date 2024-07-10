@@ -271,10 +271,6 @@ MenuLayoutAlgorithm::MenuLayoutAlgorithm(int32_t id, const std::string& tag) : t
     if (LessOrEqual(previewScale_, 0.0f)) {
         previewScale_ = 1.0f;
     }
-
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    targetSecurity_ = static_cast<float>(theme->GetMenuTargetSecuritySpace().ConvertToPx());
 }
 
 MenuLayoutAlgorithm::~MenuLayoutAlgorithm()
@@ -564,18 +560,15 @@ void MenuLayoutAlgorithm::ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, 
         position -= wrapperOffset;
     }
 
-    auto menuPattern = menu->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    bool isSubMenu = menuPattern->IsSubMenu() || menuPattern->IsSelectOverlaySubMenu();
-    if ((menuPattern->IsContextMenu() || (isSubMenu && Container::CurrentId() >= MIN_SUBCONTAINER_ID) ||
-            hierarchicalParameters_) &&
-        (targetTag_ != V2::SELECT_ETS_TAG)) {
+    auto pipelineContext = wrapper->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto containerId = pipelineContext->GetInstanceId();
+    bool isShowInSubWindow = containerId >= MIN_SUBCONTAINER_ID;
+    if (isShowInSubWindow) {
         // no need to modify for context menu, because context menu wrapper is full screen.
         return;
     }
     // minus wrapper offset in floating window
-    auto pipelineContext = GetCurrentPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
     auto windowManager = pipelineContext->GetWindowManager();
     auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL;
     if (isContainerModal) {
@@ -600,10 +593,14 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuPattern);
     auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(menuLayoutProperty);
-    auto isShowInSubWindow = menuLayoutProperty->GetShowInSubWindowValue(true);
+
+    auto pipelineContext = menuNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto containerId = pipelineContext->GetInstanceId();
+    bool isShowInSubWindow = containerId >= MIN_SUBCONTAINER_ID;
     InitHierarchicalParameters(isShowInSubWindow, menuPattern);
     if (!targetTag_.empty()) {
-        InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu(), menuPattern);
+        InitTargetSizeAndPosition(layoutWrapper, menuPattern);
     }
     Initialize(layoutWrapper);
 
@@ -1950,18 +1947,16 @@ OffsetF MenuLayoutAlgorithm::GetMenuWrapperOffset(const LayoutWrapper* layoutWra
 }
 
 void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
-    const LayoutWrapper* layoutWrapper, bool isContextMenu, const RefPtr<MenuPattern>& menuPattern)
+    const LayoutWrapper* layoutWrapper, const RefPtr<MenuPattern>& menuPattern)
 {
     CHECK_NULL_VOID(layoutWrapper);
     CHECK_NULL_VOID(menuPattern);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
     dumpInfo_.targetNode = targetNode->GetTag();
-    auto geometryNode = targetNode->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(props);
-    bool expandDisplay = menuPattern->GetMenuExpandDisplay();
+
     if (props->GetIsRectInTargetValue(false)) {
         targetSize_ = props->GetTargetSizeValue(SizeF());
         targetOffset_ = props->GetMenuOffsetValue(OffsetF());
@@ -1972,12 +1967,14 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
     dumpInfo_.targetSize = targetSize_;
     dumpInfo_.targetOffset = targetOffset_;
     menuPattern->SetTargetSize(targetSize_);
-    auto pipelineContext = GetCurrentPipelineContext();
+
+    auto menuNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(menuNode);
+    auto pipelineContext = menuNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        expandDisplay = true;
-    }
-    if (((isContextMenu && expandDisplay) || hierarchicalParameters_) && (targetTag_ != V2::SELECT_ETS_TAG)) {
+    auto containerId = pipelineContext->GetInstanceId();
+    bool isShowInSubWindow = containerId >= MIN_SUBCONTAINER_ID;
+    if (isShowInSubWindow) {
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
         float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());
         float windowsOffsetY = static_cast<float>(windowGlobalRect.GetOffset().GetY());
@@ -2007,7 +2004,7 @@ OffsetF MenuLayoutAlgorithm::FitToScreen(const OffsetF& position, const SizeF& c
     OffsetF afterOffsetPosition;
     auto originPosition = position;
 
-    if (NearEqual(positionOffset_, OffsetF(0.0f, 0.0f)) && (!didNeedArrow || arrowPlacement_ == Placement::NONE)) {
+    if (NearEqual(positionOffset_, OffsetF(0.0f, 0.0f))) {
         afterOffsetPosition = AddTargetSpace(originPosition);
     } else {
         afterOffsetPosition = AddOffset(originPosition);
@@ -2465,17 +2462,18 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementRightBottom(
 
 void MenuLayoutAlgorithm::InitHierarchicalParameters(bool isShowInSubWindow, const RefPtr<MenuPattern>& menuPattern)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    auto expandDisplay = theme->GetExpandDisplay();
     CHECK_NULL_VOID(menuPattern);
     auto menuWrapperNode = menuPattern->GetMenuWrapper();
     CHECK_NULL_VOID(menuWrapperNode);
     auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
-    auto containerId = Container::CurrentIdSafely();
+    auto pipelineContext = menuWrapperNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto expandDisplay = theme->GetExpandDisplay();
+    auto containerId = pipelineContext->GetInstanceId();
+
     if (expandDisplay && !isShowInSubWindow) {
         if (containerId >= MIN_SUBCONTAINER_ID && menuWrapperPattern->IsSelectMenu()) {
             hierarchicalParameters_ = true;
@@ -2487,14 +2485,13 @@ void MenuLayoutAlgorithm::InitHierarchicalParameters(bool isShowInSubWindow, con
 
     hierarchicalParameters_ = expandDisplay;
 
-    RefPtr<Container> container = Container::Current();
+    RefPtr<Container> container = AceEngine::Get().GetContainer(containerId);
     if (containerId >= MIN_SUBCONTAINER_ID) {
         auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
         container = AceEngine::Get().GetContainer(parentContainerId);
     }
     CHECK_NULL_VOID(container);
-    auto wrapperPipline = menuWrapperNode->GetContext();
-    auto wrapperRect = wrapperPipline ? wrapperPipline->GetDisplayWindowRectInfo() : Rect();
+    auto wrapperRect = pipelineContext->GetDisplayWindowRectInfo();
     auto mainPipline = DynamicCast<PipelineContext>(container->GetPipelineContext());
     auto mainRect = mainPipline ? mainPipline->GetDisplayWindowRectInfo() : Rect();
     if (wrapperRect.IsValid() && mainRect.IsValid() && wrapperRect != mainRect) {

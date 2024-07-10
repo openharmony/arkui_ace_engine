@@ -14,6 +14,12 @@
  */
 
 #include "list_test_ng.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "core/components/button/button_theme.h"
+#include "core/components/list/list_theme.h"
+#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
+#include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 
 namespace OHOS::Ace::NG {
 void ListTestNg::SetUpTestSuite()
@@ -62,6 +68,7 @@ void ListTestNg::TearDown()
     paintProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
     ClearOldNodes();  // Each testcase will create new list at begin
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
 }
 
 void ListTestNg::GetList()
@@ -118,7 +125,7 @@ void ListTestNg::CreateListItemGroups(int32_t groupNumber, V2::ListItemGroupStyl
 {
     for (int32_t index = 0; index < groupNumber; index++) {
         CreateListItemGroup(listItemGroupStyle);
-        CreateListItems(GROUP_ITEM_NUMBER);
+        CreateListItems(GROUP_ITEM_NUMBER, static_cast<V2::ListItemStyle>(listItemGroupStyle));
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
@@ -147,8 +154,8 @@ void ListTestNg::CreateGroupWithSetting(
     int32_t groupNumber, Axis axis, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber)
 {
     for (int32_t index = 0; index < groupNumber; index++) {
-        auto header = GetDefaultHeaderBuilder();
-        auto footer = GetDefaultHeaderBuilder();
+        auto header = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+        auto footer = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
         ListItemGroupModelNG groupModel = CreateListItemGroup(listItemGroupStyle);
         groupModel.SetSpace(Dimension(SPACE));
         groupModel.SetDivider(ITEM_DIVIDER);
@@ -163,8 +170,8 @@ void ListTestNg::CreateGroupWithSetting(
 void ListTestNg::CreateGroupWithSettingChildrenMainSize(int32_t groupNumber)
 {
     for (int32_t index = 0; index < groupNumber; ++index) {
-        auto header = GetDefaultHeaderBuilder();
-        auto footer = GetDefaultHeaderBuilder();
+        auto header = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+        auto footer = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
         ListItemGroupModelNG groupModel = CreateListItemGroup();
         groupModel.SetSpace(Dimension(SPACE));
         groupModel.SetDivider(ITEM_DIVIDER);
@@ -212,47 +219,52 @@ void ListTestNg::CreateGroupWithItem(int32_t groupNumber, Axis axis)
     }
 }
 
-void ListTestNg::CreateItemWithSwipe(
-    std::function<void()> startAction, std::function<void()> endAction, V2::SwipeEdgeEffect effect)
+void ListTestNg::CreateSwipeItems(
+    std::function<void()> startAction, std::function<void()> endAction,
+    V2::SwipeEdgeEffect effect, int32_t itemNumber)
 {
-    ListItemModelNG itemModel = CreateListItem();
-    itemModel.SetSwiperAction(std::move(startAction), std::move(endAction), nullptr, effect);
-    if (startAction) {
-        itemModel.SetDeleteArea(
-            std::move(startAction), nullptr, nullptr, nullptr, nullptr, Dimension(DELETE_AREA_DISTANCE), true);
-    }
-    if (endAction) {
-        itemModel.SetDeleteArea(
-            std::move(endAction), nullptr, nullptr, nullptr, nullptr, Dimension(DELETE_AREA_DISTANCE), false);
-    }
-    {
-        RowModelNG rowModel;
-        rowModel.Create(std::nullopt, nullptr, "");
-        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
-        ViewAbstract::SetHeight(CalcLength(ITEM_HEIGHT));
+    for (int32_t index = 0; index < itemNumber; index++) {
+        ListItemModelNG itemModel = CreateListItem();
+        itemModel.SetSwiperAction(nullptr, nullptr, nullptr, effect);
+        if (startAction) {
+            itemModel.SetDeleteArea(
+                std::move(startAction), nullptr, nullptr, nullptr, nullptr, Dimension(DELETE_AREA_DISTANCE), true);
+        }
+        if (endAction) {
+            itemModel.SetDeleteArea(
+                std::move(endAction), nullptr, nullptr, nullptr, nullptr, Dimension(DELETE_AREA_DISTANCE), false);
+        }
+        {
+            Axis axis = layoutProperty_->GetListDirection().value_or(Axis::VERTICAL);
+            float mainSize = axis == Axis::VERTICAL ? ITEM_HEIGHT : ITEM_WIDTH;
+            GetRowOrColBuilder(FILL_LENGTH, Dimension(mainSize))();
+            ViewStackProcessor::GetInstance()->Pop();
+        }
         ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
-    ViewStackProcessor::GetInstance()->Pop();
-    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
 }
 
-std::function<void()> ListTestNg::GetDefaultSwiperBuilder(float crossSize)
+std::function<void()> ListTestNg::GetRowOrColBuilder(float crossSize, float mainSize)
 {
-    return [crossSize]() {
-        RowModelNG rowModel;
-        rowModel.Create(std::nullopt, nullptr, "");
-        ViewAbstract::SetWidth(CalcLength(crossSize));
-        ViewAbstract::SetHeight(CalcLength(ITEM_HEIGHT));
-    };
+    return GetRowOrColBuilder(Dimension(crossSize), Dimension(mainSize));
 }
 
-std::function<void()> ListTestNg::GetDefaultHeaderBuilder()
+std::function<void()> ListTestNg::GetRowOrColBuilder(Dimension crossSize, Dimension mainSize)
 {
-    return []() {
-        RowModelNG rowModel;
-        rowModel.Create(std::nullopt, nullptr, "");
-        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
-        ViewAbstract::SetHeight(CalcLength(GROUP_HEADER_LEN));
+    Axis axis = layoutProperty_->GetListDirection().value_or(Axis::VERTICAL);
+    return [axis, mainSize, crossSize]() {
+        if (axis == Axis::VERTICAL) {
+            RowModelNG rowModel;
+            rowModel.Create(std::nullopt, nullptr, "");
+            ViewAbstract::SetWidth(CalcLength(crossSize));
+            ViewAbstract::SetHeight(CalcLength(mainSize));
+        } else {
+            ColumnModelNG colModel;
+            colModel.Create(Dimension(0), nullptr, "");
+            ViewAbstract::SetWidth(CalcLength(mainSize));
+            ViewAbstract::SetHeight(CalcLength(crossSize));
+        }
     };
 }
 
@@ -262,42 +274,15 @@ void ListTestNg::UpdateCurrentOffset(float offset, int32_t source)
     FlushLayoutTask(frameNode_);
 }
 
-float ListTestNg::GetInterval()
-{
-    float space = layoutProperty_->GetSpace().has_value() ? layoutProperty_->GetSpace().value().ConvertToPx() : 0.f;
-    float strokeWidth = layoutProperty_->GetDivider().has_value()
-                            ? layoutProperty_->GetDivider().value().strokeWidth.ConvertToPx()
-                            : 0.f;
-    return std::max(space, strokeWidth);
-}
-
-void ListTestNg::ScrollUp(float itemNumber)
-{
-    Axis axis = pattern_->GetAxis();
-    float itemMainLength = (axis == Axis::VERTICAL) ? ITEM_HEIGHT : ITEM_WIDTH;
-    float offset = (itemMainLength + GetInterval()) * itemNumber;
-    pattern_->UpdateCurrentOffset(offset, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
-}
-
-void ListTestNg::ScrollDown(float itemNumber)
-{
-    Axis axis = pattern_->GetAxis();
-    float itemMainLength = (axis == Axis::VERTICAL) ? ITEM_HEIGHT : ITEM_WIDTH;
-    float offset = -(itemMainLength + GetInterval()) * itemNumber;
-    pattern_->UpdateCurrentOffset(offset, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
-}
-
 void ListTestNg::ScrollToEdge(ScrollEdgeType scrollEdgeType)
 {
     pattern_->ScrollToEdge(scrollEdgeType, false);
     FlushLayoutTask(frameNode_);
 }
 
-void ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
+void ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
 {
-    pattern_->ScrollToIndex(index, smooth, align);
+    pattern_->ScrollToIndex(index, smooth, align, extraOffset);
     FlushLayoutTask(frameNode_);
     if (smooth) {
         auto iter = pattern_->itemPosition_.find(index);
@@ -309,6 +294,9 @@ void ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
             }
         } else {
             pattern_->GetListItemAnimatePos(iter->second.startPos, iter->second.endPos, align, targetPos);
+        }
+        if (extraOffset.has_value()) {
+            targetPos += extraOffset.value();
         }
         if (!NearZero(targetPos)) {
             float endValue = pattern_->GetFinalPosition();
@@ -340,7 +328,8 @@ void ListTestNg::HandleDragStart(int32_t index)
 {
     GestureEvent info;
     auto itemPattern = GetChildPattern<ListItemPattern>(frameNode_, index);
-    itemPattern->HandleDragStart(info);
+    auto handleDragStart = itemPattern->panEvent_->GetActionStartEventFunc();
+    handleDragStart(info);
 }
 
 void ListTestNg::HandleDragUpdate(int32_t index, float mainDelta)
@@ -348,7 +337,8 @@ void ListTestNg::HandleDragUpdate(int32_t index, float mainDelta)
     GestureEvent info;
     info.SetMainDelta(mainDelta);
     auto itemPattern = GetChildPattern<ListItemPattern>(frameNode_, index);
-    itemPattern->HandleDragUpdate(info);
+    auto handleDragUpdate = itemPattern->panEvent_->GetActionUpdateEventFunc();
+    handleDragUpdate(info);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
 }
@@ -358,7 +348,8 @@ void ListTestNg::HandleDragEnd(int32_t index, float mainVelocity)
     GestureEvent info;
     info.SetMainVelocity(mainVelocity);
     auto itemPattern = GetChildPattern<ListItemPattern>(frameNode_, index);
-    itemPattern->HandleDragEnd(info);
+    auto handleDragEnd = itemPattern->panEvent_->GetActionEndEventFunc();
+    handleDragEnd(info);
     // curOffset_ would be NodeSize or Zero
     EXPECT_NE(itemPattern->springMotion_, nullptr);
     double position = itemPattern->springMotion_->GetEndValue();
@@ -430,85 +421,6 @@ void ListTestNg::ScrollSnap(float offset, float velocity)
     endValue -= pattern_->scrollableEvent_->GetScrollable()->GetSnapFinalPosition();
     pattern_->ScrollBy(endValue);
     FlushLayoutTask(frameNode_);
-}
-
-AssertionResult ListTestNg::VerifyPosition(
-    const RefPtr<FrameNode>& frameNode, int32_t viewItemNumber, int32_t lanes, float space, float startOffset)
-{
-    bool isGroup = frameNode->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
-    if (isGroup) {
-        return VerifyGroupItemPosition(frameNode, viewItemNumber, lanes, space, startOffset);
-    } else {
-        Axis axis = pattern_->GetAxis();
-        float itemMainLength = (axis == Axis::VERTICAL) ? ITEM_HEIGHT : ITEM_WIDTH;
-        float itemSpaceLength = itemMainLength + space;
-        int32_t initialIndex = std::floor(startOffset / itemSpaceLength) * lanes;
-        return VerifyItemPosition(frameNode, viewItemNumber, lanes, space, initialIndex);
-    }
-}
-
-AssertionResult ListTestNg::VerifyItemPosition(
-    const RefPtr<FrameNode>& frameNode, int32_t viewItemNumber, int32_t lanes, float space, int32_t initialIndex)
-{
-    if (lanes < 1) {
-        return AssertionFailure() << "lanes < 1";
-    }
-    Axis axis = pattern_->GetAxis();
-    float itemMainLength = (axis == Axis::VERTICAL) ? ITEM_HEIGHT : ITEM_WIDTH;
-    float itemSpaceLength = itemMainLength + space;
-    auto itemPosition = frameNode->GetPattern<ListPattern>()->GetItemPosition();
-    if (itemPosition.size() != static_cast<size_t>(viewItemNumber)) {
-        return AssertionFailure() << "The itemPosition size is not equal to viewItemNumber"
-                                  << " itemPosition: " << itemPosition.size() << " viewItemNumber: " << viewItemNumber;
-    }
-    for (int32_t index = 0; index < viewItemNumber; index++) {
-        int32_t itemIndex = index + initialIndex;
-        float startPos = itemPosition[itemIndex].startPos;
-        float endPos = itemPosition[itemIndex].endPos;
-        float expectStartPos = (index / lanes) * itemSpaceLength;
-        float expectEndPos = expectStartPos + itemMainLength;
-        if (!NearEqual(startPos, expectStartPos) || !NearEqual(endPos, expectEndPos)) {
-            return AssertionFailure() << "At itemPosition Index: " << itemIndex << " ItemPosition: (" << startPos
-                                      << " - " << endPos << ")"
-                                      << " != expectPosition: (" << expectStartPos << " - " << expectEndPos << ")";
-        }
-    }
-    return AssertionSuccess();
-}
-
-AssertionResult ListTestNg::VerifyGroupItemPosition(
-    const RefPtr<FrameNode>& frameNode, int32_t viewItemNumber, int32_t lanes, float space, float startOffset)
-{
-    if (lanes < 1) {
-        return AssertionFailure() << "lanes < 1";
-    }
-    Axis axis = pattern_->GetAxis();
-    float itemMainLength = (axis == Axis::VERTICAL) ? ITEM_HEIGHT : ITEM_WIDTH;
-    float itemSpaceLength = itemMainLength + space;
-    auto itemPosition = frameNode->GetPattern<ListItemGroupPattern>()->GetItemPosition();
-    if (itemPosition.size() != static_cast<size_t>(viewItemNumber)) {
-        return AssertionFailure() << "The itemPosition size is not equal to viewItemNumber"
-                                  << " itemPosition: " << itemPosition.size() << " viewItemNumber: " << viewItemNumber;
-    }
-    for (int32_t index = 0; index < viewItemNumber; index++) {
-        int32_t itemIndex = index;
-        float startPos = itemPosition[itemIndex].startPos;
-        float endPos = itemPosition[itemIndex].endPos;
-        float expectStartPos = (index / lanes) * itemSpaceLength + startOffset;
-        float expectEndPos = expectStartPos + itemMainLength;
-        if (!NearEqual(startPos, expectStartPos) || !NearEqual(endPos, expectEndPos)) {
-            return AssertionFailure() << "At itemPosition Index: " << itemIndex << " ItemPosition: (" << startPos
-                                      << " - " << endPos << ")"
-                                      << " != expectPosition: (" << expectStartPos << " - " << expectEndPos << ")";
-        }
-    }
-    return AssertionSuccess();
-}
-
-AssertionResult ListTestNg::IsEqualTotalOffset(float expectOffset)
-{
-    FlushLayoutTask(frameNode_);
-    return IsEqual(pattern_->GetTotalOffset(), expectOffset);
 }
 
 AssertionResult ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, float expectOffset)
@@ -612,5 +524,42 @@ void ListTestNg::ScrollTo(float position)
 {
     pattern_->ScrollTo(position);
     FlushLayoutTask(frameNode_);
+}
+
+void ListTestNg::CreateRepeatVirtualScrollNode(int32_t itemNumber, const std::function<void(uint32_t)>& createFunc)
+{
+    RepeatVirtualScrollModelNG repeatModel;
+    std::function<void(const std::string&, uint32_t)> updateFunc =
+        [&createFunc](const std::string& value, uint32_t idx) {
+            createFunc(idx);
+        };
+    std::function<std::list<std::string>(uint32_t, uint32_t)> getKeys = [](uint32_t start, uint32_t end) {
+        std::list<std::string> keys;
+        for (uint32_t i = start; i <= end; ++i) {
+            keys.emplace_back(std::to_string(i));
+        }
+        return keys;
+    };
+    std::function<std::list<std::string>(uint32_t, uint32_t)> getTypes = [](uint32_t start, uint32_t end) {
+        std::list<std::string> keys;
+        for (uint32_t i = start; i <= end; ++i) {
+            keys.emplace_back("0");
+        }
+        return keys;
+    };
+    repeatModel.Create(itemNumber, {}, createFunc, updateFunc, getKeys, getTypes);
+}
+
+void ListTestNg::FlushIdleTask(const RefPtr<ListPattern>& listPattern)
+{
+    int32_t tryCount = 10;
+    auto predictParam = listPattern->GetPredictLayoutParamV2();
+    while (predictParam && tryCount > 0) {
+        const int64_t time = GetSysTimestamp();
+        PipelineContext::GetCurrentContext()->OnIdle(time + 16 * 1000000); // 16 * 1000000: 16ms
+        FlushLayoutTask(frameNode_);
+        predictParam = listPattern->GetPredictLayoutParamV2();
+        tryCount--;
+    }
 }
 } // namespace OHOS::Ace::NG

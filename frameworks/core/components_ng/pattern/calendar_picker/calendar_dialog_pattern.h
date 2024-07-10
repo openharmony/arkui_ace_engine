@@ -34,6 +34,7 @@ public:
     CalendarDialogPattern() : LinearLayoutPattern(true) {};
     ~CalendarDialogPattern() override = default;
 
+    void OnFontConfigurationUpdate() override;
     bool IsAtomicNode() const override
     {
         return true;
@@ -90,6 +91,11 @@ public:
     bool GetHoverState() const
     {
         return hoverState_;
+    }
+
+    void updateFontConfigurationEvent(const std::function<void()>& closeDialogEvent)
+    {
+        closeDialogEvent_ = closeDialogEvent;
     }
 
     void GetCalendarMonthData(int32_t year, int32_t month, ObtainedMonth& calendarMonthData);
@@ -160,6 +166,7 @@ private:
     RefPtr<InputEvent> hoverListener_ = nullptr;
     ACE_DISALLOW_COPY_AND_MOVE(CalendarDialogPattern);
     bool hasTabKeyDown_ = false;
+    std::function<void()> closeDialogEvent_;
 };
 } // namespace OHOS::Ace::NG
 

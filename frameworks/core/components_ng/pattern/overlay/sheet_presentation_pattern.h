@@ -420,7 +420,7 @@ public:
     }
 
     SheetType GetSheetType();
-    bool IsPhoneOrFold();
+    bool IsPhoneInLandScape();
     ScrollSizeMode GetScrollSizeMode();
     void GetSheetTypeWithAuto(SheetType& sheetType);
     void GetSheetTypeWithPopup(SheetType& sheetType);
@@ -565,7 +565,7 @@ public:
         NestedState state = NestedState::GESTURE, float velocity = 0.f) override;
     void OnScrollStartRecursive(float position, float dragVelocity = 0.0f) override;
     void OnScrollEndRecursive (const std::optional<float>& velocity) override;
-    bool HandleScrollVelocity(float velocity) override;
+    bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
     ScrollResult HandleScrollWithSheet(float scrollOffset);
 
     bool IsSheetBottomStyle()

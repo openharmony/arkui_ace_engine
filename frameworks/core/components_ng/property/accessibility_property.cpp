@@ -184,7 +184,7 @@ bool AccessibilityProperty::HoverTestRecursive(
     AccessibilityHoverTestPath& path,
     std::unique_ptr<HoverTestDebugTraceInfo>& debugInfo)
 {
-    if (!node->IsActive() || node->IsInternal() || node->GetBypass()) {
+    if (!node->IsActive() || node->IsInternal()) {
         return false;
     }
     if (debugInfo != nullptr) {

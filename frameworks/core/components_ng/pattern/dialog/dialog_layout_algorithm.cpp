@@ -86,8 +86,12 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     gridCount_ = dialogProp->GetGridCount().value_or(-1);
     isShowInSubWindow_ = dialogProp->GetShowInSubWindowValue(false);
     isModal_ = dialogProp->GetIsModal().value_or(true);
-    isSuitableForElderly_ = dialogPattern->GetIsSuitableForAging();
-    if (dialogPattern->GetNeeedUpdateOrientation()) {
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    isSuitableForElderly_ = dialogPattern->GetIsSuitableForAging() &&
+                            windowManager->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING &&
+                            GreatOrEqual(pipeline->GetFontScale(), 1.75f);
+    if (isSuitableForElderly_ || GreatOrEqual(pipeline->GetFontScale(), 1.75f)) {
         dialogPattern->UpdateDeviceOrientation(SystemProperties::GetDeviceOrientation());
     }
     UpdateSafeArea();
@@ -228,12 +232,7 @@ void DialogLayoutAlgorithm::AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper
                 scrollPropery->UpdateAlignment(Alignment::CENTER);
             }
         } else {
-            bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-            if (!isRtl) {
-                scrollPropery->UpdateAlignment(Alignment::CENTER_LEFT);
-            } else {
-                scrollPropery->UpdateAlignment(Alignment::CENTER_RIGHT);
-            }
+            scrollPropery->UpdateAlignment(Alignment::CENTER_LEFT);
         }
     }
 }
@@ -486,11 +485,6 @@ void DialogLayoutAlgorithm::ProcessMaskRect(
     auto width = maskRect->GetWidth();
     auto height = maskRect->GetHeight();
     auto offset = maskRect->GetOffset();
-    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    if (isRtl) {
-        Dimension offsetX = Dimension(offset.GetX().Value() * (-1));
-        offset.SetX(offsetX);
-    }
     if (width.IsNegative()) {
         width = FULLSCREEN;
     }

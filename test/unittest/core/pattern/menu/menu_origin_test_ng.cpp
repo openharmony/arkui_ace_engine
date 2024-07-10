@@ -102,6 +102,7 @@ const std::vector<SelectParam> CREATE_VALUE = { { "content1", "icon1" }, { "cont
     { "", "icon3" }, { "", "" } };
 const std::vector<SelectParam> CREATE_VALUE_NEW = { { "content1_new", "" }, { "", "icon4_new" },
     { "", "" }, { "", "icon4_new" } };
+const V2::ItemDivider ITEM_DIVIDER = { Dimension(5.f), Dimension(10), Dimension(20), Color(0x000000) };
 } // namespace
 class MenuTestNg : public testing::Test {
 public:
@@ -438,13 +439,12 @@ HWTEST_F(MenuTestNg, DesktopMenuPattern001, TestSize.Level1)
 
 /**
  * @tc.name: MenuAccessibilityPropertyIsScrollable001
- * @tc.desc: Test IsScrollable of menuAccessibilityProperty.
+ * @tc.desc: Test menuAccessibilityProperty::IsScrollable
  * @tc.type: FUNC
  */
 HWTEST_F(MenuTestNg, MenuAccessibilityPropertyIsScrollable001, TestSize.Level1)
 {
     InitMenuTestNg();
-
     EXPECT_FALSE(menuAccessibilityProperty_->IsScrollable());
 
     auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
@@ -457,17 +457,36 @@ HWTEST_F(MenuTestNg, MenuAccessibilityPropertyIsScrollable001, TestSize.Level1)
     scroll->MountToParent(menuFrameNode_, 0);
     scroll->MarkModifyDone();
     EXPECT_TRUE(menuAccessibilityProperty_->IsScrollable());
+
+    scrollPattern->SetAxis(Axis::NONE);
+    EXPECT_FALSE(menuAccessibilityProperty_->IsScrollable());
+    scrollPattern->scrollableDistance_ = 0.0f;
+    EXPECT_FALSE(menuAccessibilityProperty_->IsScrollable());
+    /**
+     * @tc.steps: step1. Create Menu and test firstchild not SCROLL.
+     */
+    RefPtr<FrameNode> menuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(menuNode, nullptr);
+    RefPtr<MenuAccessibilityProperty> menuAccessibility =
+        menuNode->GetAccessibilityProperty<MenuAccessibilityProperty>();
+    ASSERT_NE(menuAccessibility, nullptr);
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    textNode->MountToParent(menuNode, 0);
+    EXPECT_FALSE(menuAccessibility->IsScrollable());
 }
 
 /**
  * @tc.name: MenuAccessibilityPropertyGetSupportAction001
- * @tc.desc: Test GetSupportAction of menuAccessibilityProperty.
+ * @tc.desc: Test MenuAccessibilityProperty::SetSpecificSupportAction
  * @tc.type: FUNC
  */
 HWTEST_F(MenuTestNg, MenuAccessibilityPropertyGetSupportAction001, TestSize.Level1)
 {
     InitMenuTestNg();
-
     auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
     scrollPattern->SetAxis(Axis::VERTICAL);
@@ -487,6 +506,36 @@ HWTEST_F(MenuTestNg, MenuAccessibilityPropertyGetSupportAction001, TestSize.Leve
         actions |= 1UL << static_cast<uint32_t>(action);
     }
     EXPECT_EQ(actions, expectActions);
+    /**
+     * @tc.steps: step1. test IsAtTop and IsAtBottom.
+     */
+    scrollPattern->scrollableDistance_ = -1.0;
+    scrollPattern->currentOffset_ = 0.0f;
+    menuAccessibilityProperty_->SetSpecificSupportAction();
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
+    EXPECT_EQ(menuAccessibilityProperty_->supportActions_, expectActions);
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
+    scrollPattern->SetAxis(Axis::NONE);
+    scrollPattern->scrollableDistance_ = 0.0f;
+    menuAccessibilityProperty_->SetSpecificSupportAction();
+    EXPECT_EQ(menuAccessibilityProperty_->supportActions_, expectActions);
+    /**
+     * @tc.steps: step2. Create Menu and test firstchild not SCROLL.
+     */
+    RefPtr<FrameNode> menuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(menuNode, nullptr);
+    RefPtr<MenuAccessibilityProperty> menuAccessibility =
+        menuNode->GetAccessibilityProperty<MenuAccessibilityProperty>();
+    ASSERT_NE(menuAccessibility, nullptr);
+    menuAccessibility->SetSpecificSupportAction();
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    textNode->MountToParent(menuNode, 0);
+    menuAccessibility->SetSpecificSupportAction();
+    EXPECT_EQ(menuAccessibility->supportActions_, (0));
 }
 
 /**
@@ -639,7 +688,7 @@ HWTEST_F(MenuTestNg, MenuLayoutPropertyTestNg008, TestSize.Level1)
 
 /**
  * @tc.name: MenuLayoutPropertyTestNg009
- * @tc.desc: Verify ToJsonValue.
+ * @tc.desc: Verify MenuLayoutProperty::ToJsonValue.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuTestNg, MenuLayoutPropertyTestNg009, TestSize.Level1)
@@ -651,10 +700,20 @@ HWTEST_F(MenuTestNg, MenuLayoutPropertyTestNg009, TestSize.Level1)
     property.UpdateFontSize(Dimension(25.0f));
     property.UpdateFontColor(Color::RED);
     property.UpdateFontWeight(FontWeight::BOLD);
+    property.UpdateItemDivider(ITEM_DIVIDER);
+    property.UpdateItemGroupDivider(ITEM_DIVIDER);
+    property.UpdateExpandingMode(SubMenuExpandingMode::EMBEDDED);
 
     auto json = JsonUtil::Create(true);
     property.ToJsonValue(json, filter);
     auto fontJsonObject = json->GetObject("font");
+    EXPECT_EQ(json->GetString("title"), "title");
+    EXPECT_EQ(json->GetString("offset"), OffsetF(25.0f, 30.0f).ToString());
+    EXPECT_EQ(json->GetString("fontSize"), Dimension(25.0f).ToString());
+    EXPECT_EQ(json->GetString("fontColor"), Color::RED.ColorToString());
+    EXPECT_EQ(fontJsonObject->GetString("weight"), V2::ConvertWrapFontWeightToStirng(FontWeight::BOLD));
+    property.UpdateExpandingMode(SubMenuExpandingMode::STACK);
+    property.ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("title"), "title");
     EXPECT_EQ(json->GetString("offset"), OffsetF(25.0f, 30.0f).ToString());
     EXPECT_EQ(json->GetString("fontSize"), Dimension(25.0f).ToString());
@@ -1110,7 +1169,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNgSetMenuPlacement002, TestSize.Level1)
 
 /**
  * @tc.name: MenuPaintMethodTestNg001
- * @tc.desc: Verify UpdateArrowPath.
+ * @tc.desc: Verify MenuPaintMethod::GetOverlayDrawFunction.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuTestNg, MenuPaintMethodTestNg001, TestSize.Level1)
@@ -1120,6 +1179,10 @@ HWTEST_F(MenuTestNg, MenuPaintMethodTestNg001, TestSize.Level1)
      */
     RefPtr<MenuPaintProperty> paintProp = AceType::MakeRefPtr<MenuPaintProperty>();
     RefPtr<MenuPaintMethod> paintMethod = AceType::MakeRefPtr<MenuPaintMethod>();
+    PaintWrapper* paintWrapperNoMenu = GetPaintWrapper(paintProp);
+    paintMethod->GetOverlayDrawFunction(paintWrapperNoMenu);
+    delete paintWrapperNoMenu;
+    paintWrapperNoMenu = nullptr;
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
@@ -1154,11 +1217,11 @@ HWTEST_F(MenuTestNg, MenuPaintMethodTestNg001, TestSize.Level1)
 }
 
 /**
- * @tc.name: MenuPaintMethodTestNg003
- * @tc.desc: Verify GetOverlayDrawFunction.
+ * @tc.name: MenuPaintMethodTestNg002
+ * @tc.desc: Verify MenuPaintMethod::UpdateArrowPath.
  * @tc.type: FUNC
  */
-HWTEST_F(MenuTestNg, MenuPaintMethodTestNg003, TestSize.Level1)
+HWTEST_F(MenuTestNg, MenuPaintMethodTestNg002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. prepare paint method object.

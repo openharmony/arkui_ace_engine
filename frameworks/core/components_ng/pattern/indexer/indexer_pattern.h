@@ -119,7 +119,7 @@ private:
     bool MoveIndexBySearch(const std::string& searchStr);
     void ApplyIndexChanged(
         bool isTextNodeInTree, bool refreshBubble = true, bool fromTouchUp = false, bool indexerSizeChanged = false);
-    void OnSelect(bool changed = false);
+    void OnSelect();
     int32_t GetSkipChildIndex(int32_t step);
     int32_t GetFocusChildIndex(const std::string& searchStr);
 
@@ -221,7 +221,8 @@ private:
     float lastItemSize_ = -1.0f;
     bool lastIndexFromPress_ = false;
     bool selectChanged_ = false;
-    bool autoCollapse_ = false;
+    bool autoCollapse_ = true;
+    bool lastAutoCollapse_ = true;
     bool enableHapticFeedback_ = true;
     float actualIndexerHeight_ = 0.0f;
     bool isNewHeightCalculated_ = false;

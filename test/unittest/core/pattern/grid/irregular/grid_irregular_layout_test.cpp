@@ -279,8 +279,8 @@ HWTEST_F(GridIrregularLayoutTest, Measure005, TestSize.Level1)
     model.SetColumnsGap(Dimension { 5.0f });
     model.SetRowsGap(Dimension { 1.0f });
     CreateFixedItems(8);
-        ViewAbstract::SetWidth(CalcLength(610.0f));
-        ViewAbstract::SetHeight(CalcLength(1000.0f));
+    ViewAbstract::SetWidth(CalcLength(610.0f));
+    ViewAbstract::SetHeight(CalcLength(1000.0f));
     CreateDone(frameNode_);
     auto& info = pattern_->gridLayoutInfo_;
     EXPECT_EQ(info.currentOffset_, 0.0f);
@@ -756,10 +756,10 @@ HWTEST_F(GridIrregularLayoutTest, JumpCenter001, TestSize.Level1)
     model.SetLayoutOptions(GetOptionDemo12());
     model.SetRowsGap(Dimension { 5.0f });
     model.SetEdgeEffect(EdgeEffect::NONE, true);
-        CreateFixedHeightItems(1, 605.0f);
-        CreateFixedHeightItems(1, 300.0f);
-        CreateFixedHeightItems(1, 1825.0f);
-        CreateFixedHeightItems(4, 300.0f);
+    CreateFixedHeightItems(1, 605.0f);
+    CreateFixedHeightItems(1, 300.0f);
+    CreateFixedHeightItems(1, 1825.0f);
+    CreateFixedHeightItems(4, 300.0f);
     CreateDone(frameNode_);
     pattern_->ScrollToIndex(2, false, ScrollAlign::CENTER);
     FlushLayoutTask(frameNode_);
@@ -781,10 +781,10 @@ HWTEST_F(GridIrregularLayoutTest, TargetPos001, TestSize.Level1)
     model.SetLayoutOptions(GetOptionDemo12());
     model.SetRowsGap(Dimension { 5.0f });
     model.SetEdgeEffect(EdgeEffect::NONE, true);
-        CreateFixedHeightItems(1, 605.0f);
-        CreateFixedHeightItems(1, 300.0f);
-        CreateFixedHeightItems(1, 1825.0f);
-        CreateFixedHeightItems(4, 300.0f);
+    CreateFixedHeightItems(1, 605.0f);
+    CreateFixedHeightItems(1, 300.0f);
+    CreateFixedHeightItems(1, 1825.0f);
+    CreateFixedHeightItems(4, 300.0f);
     CreateDone(frameNode_);
 
     pattern_->ScrollToIndex(2, true, ScrollAlign::CENTER);
@@ -823,13 +823,12 @@ HWTEST_F(GridIrregularLayoutTest, TargetPos002, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo10());
     model.SetEdgeEffect(EdgeEffect::NONE, true);
-        CreateFixedHeightItems(3, 300.0f);
-        CreateFixedHeightItems(1, 600.0f);
-        CreateFixedHeightItems(1, 300.0f);
-        CreateFixedHeightItems(1, 600.0f);
-        CreateFixedHeightItems(1, 300.0f);
+    CreateFixedHeightItems(3, 300.0f);
+    CreateFixedHeightItems(1, 600.0f);
+    CreateFixedHeightItems(1, 300.0f);
+    CreateFixedHeightItems(1, 600.0f);
+    CreateFixedHeightItems(1, 300.0f);
     CreateDone(frameNode_);
-
 
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     FlushLayoutTask(frameNode_);
@@ -852,10 +851,10 @@ HWTEST_F(GridIrregularLayoutTest, JumpAuto001, TestSize.Level1)
     model.SetLayoutOptions(GetOptionDemo12());
     model.SetRowsGap(Dimension { 5.0f });
     model.SetEdgeEffect(EdgeEffect::NONE, true);
-        CreateFixedHeightItems(1, 605.0f);
-        CreateFixedHeightItems(1, 300.0f);
-        CreateFixedHeightItems(1, 1825.0f);
-        CreateFixedHeightItems(4, 300.0f);
+    CreateFixedHeightItems(1, 605.0f);
+    CreateFixedHeightItems(1, 300.0f);
+    CreateFixedHeightItems(1, 1825.0f);
+    CreateFixedHeightItems(4, 300.0f);
     CreateDone(frameNode_);
 
     pattern_->ScrollToIndex(2, false, ScrollAlign::AUTO);
@@ -890,10 +889,10 @@ HWTEST_F(GridIrregularLayoutTest, ToEdge001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo12());
     model.SetEdgeEffect(EdgeEffect::NONE, true);
-        CreateFixedHeightItems(1, 600.0f);
-        CreateFixedHeightItems(1, 300.0f);
-        CreateFixedHeightItems(1, 1800.0f);
-        CreateFixedHeightItems(4, 300.0f);
+    CreateFixedHeightItems(1, 600.0f);
+    CreateFixedHeightItems(1, 300.0f);
+    CreateFixedHeightItems(1, 1800.0f);
+    CreateFixedHeightItems(4, 300.0f);
     CreateDone(frameNode_);
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     FlushLayoutTask(frameNode_);
@@ -1236,13 +1235,13 @@ HWTEST_F(GridIrregularLayoutTest, Integrated002, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo13());
     model.SetColumnsGap(Dimension { 5.0f });
-        CreateFixedHeightItems(1, 300.0f);
-        CreateFixedHeightItems(1, 100.0f);
-        CreateFixedHeightItems(1, 200.0f);
-        CreateFixedHeightItems(1, 600.0f);
+    CreateFixedHeightItems(1, 300.0f);
+    CreateFixedHeightItems(1, 100.0f);
+    CreateFixedHeightItems(1, 200.0f);
+    CreateFixedHeightItems(1, 600.0f);
     CreateGridItems(5, -2, 100.0f);
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
-        ViewAbstract::SetHeight(CalcLength(300.0f));
+    ViewAbstract::SetHeight(CalcLength(300.0f));
     CreateDone(frameNode_);
     auto& info = pattern_->gridLayoutInfo_;
     EXPECT_EQ(info.startIndex_, 0);
@@ -1337,13 +1336,13 @@ HWTEST_F(GridIrregularLayoutTest, GetOverScrollOffset001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo13());
     model.SetColumnsGap(Dimension { 5.0f });
-        CreateFixedHeightItems(1, 300.0f);
-        CreateFixedHeightItems(1, 100.0f);
-        CreateFixedHeightItems(1, 200.0f);
-        CreateFixedHeightItems(1, 600.0f);
+    CreateFixedHeightItems(1, 300.0f);
+    CreateFixedHeightItems(1, 100.0f);
+    CreateFixedHeightItems(1, 200.0f);
+    CreateFixedHeightItems(1, 600.0f);
     CreateGridItems(5, -2, 100.0f);
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
-        ViewAbstract::SetHeight(CalcLength(300.0f));
+    ViewAbstract::SetHeight(CalcLength(300.0f));
     CreateDone(frameNode_);
     EXPECT_TRUE(pattern_->irregular_);
     auto& info = pattern_->gridLayoutInfo_;
@@ -1420,7 +1419,7 @@ HWTEST_F(GridIrregularLayoutTest, TemplateChange001, TestSize.Level1)
     model.SetLayoutOptions(GetOptionDemo6());
     model.SetColumnsGap(Dimension { 1.0f });
     model.SetRowsGap(Dimension { 10.0f });
-        CreateFixedHeightItems(12, 500.0f);
+    CreateFixedHeightItems(12, 500.0f);
     CreateDone(frameNode_);
     const auto& info = pattern_->gridLayoutInfo_;
     // only know 3 items
@@ -1460,11 +1459,11 @@ HWTEST_F(GridIrregularLayoutTest, TemplateChange002, TestSize.Level1)
     model.SetLayoutOptions(GetOptionDemo13());
     model.SetColumnsGap(Dimension { 1.0f });
     model.SetRowsGap(Dimension { 5.0f });
-        CreateFixedHeightItems(1, 910.0f);
-        CreateFixedHeightItems(1, 300.0f);
-        CreateFixedHeightItems(1, 605.0f);
-        CreateFixedHeightItems(1, 1825.0f);
-        CreateFixedHeightItems(5, 300.0f);
+    CreateFixedHeightItems(1, 910.0f);
+    CreateFixedHeightItems(1, 300.0f);
+    CreateFixedHeightItems(1, 605.0f);
+    CreateFixedHeightItems(1, 1825.0f);
+    CreateFixedHeightItems(5, 300.0f);
     CreateDone(frameNode_);
     const auto& info = pattern_->gridLayoutInfo_;
     // only know 1 item
@@ -1498,11 +1497,11 @@ HWTEST_F(GridIrregularLayoutTest, TemplateChange003, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo13());
     model.SetColumnsGap(Dimension { 1.0f });
-        CreateFixedHeightItems(1, 900.0f);
-        CreateFixedHeightItems(1, 300.0f);
-        CreateFixedHeightItems(1, 600.0f);
-        CreateFixedHeightItems(1, 1800.0f);
-        CreateFixedHeightItems(5, 300.0f);
+    CreateFixedHeightItems(1, 900.0f);
+    CreateFixedHeightItems(1, 300.0f);
+    CreateFixedHeightItems(1, 600.0f);
+    CreateFixedHeightItems(1, 1800.0f);
+    CreateFixedHeightItems(5, 300.0f);
     CreateDone(frameNode_);
     pattern_->ScrollToIndex(3, false, ScrollAlign::CENTER);
     FlushLayoutTask(frameNode_);
@@ -1530,12 +1529,12 @@ HWTEST_F(GridIrregularLayoutTest, DeleteItem001, TestSize.Level1)
     model.SetLayoutOptions(GetOptionDemo13());
     model.SetColumnsGap(Dimension { 1.0f });
     model.SetRowsGap(Dimension { 5.0f });
-        CreateFixedHeightItems(1, 910.0f);
-        CreateFixedHeightItems(1, 300.0f);
-        CreateFixedHeightItems(1, 605.0f);
-        CreateFixedHeightItems(1, 1825.0f);
-        CreateFixedHeightItems(5, 300.0f);
-        ViewAbstract::SetHeight(CalcLength(200.0f));
+    CreateFixedHeightItems(1, 910.0f);
+    CreateFixedHeightItems(1, 300.0f);
+    CreateFixedHeightItems(1, 605.0f);
+    CreateFixedHeightItems(1, 1825.0f);
+    CreateFixedHeightItems(5, 300.0f);
+    ViewAbstract::SetHeight(CalcLength(200.0f));
     CreateDone(frameNode_);
     const auto& info = pattern_->gridLayoutInfo_;
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
@@ -1598,10 +1597,10 @@ HWTEST_F(GridIrregularLayoutTest, Horizontal001, TestSize.Level1)
     model.SetLayoutOptions(GetOptionDemo14());
     model.SetRowsGap(Dimension { 1.0f });
     model.SetColumnsGap(Dimension { 5.0f });
-        CreateFixedWidthItems(1, 910.0f);
-        CreateFixedWidthItems(1, 300.0f);
-        CreateFixedWidthItems(20, 605.0f);
-        CreateFixedWidthItems(8, 300.0f);
+    CreateFixedWidthItems(1, 910.0f);
+    CreateFixedWidthItems(1, 300.0f);
+    CreateFixedWidthItems(20, 605.0f);
+    CreateFixedWidthItems(8, 300.0f);
     CreateDone(frameNode_);
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     FlushLayoutTask(frameNode_);
@@ -1630,10 +1629,10 @@ HWTEST_F(GridIrregularLayoutTest, ConstraintChange001, TestSize.Level1)
     model.SetLayoutOptions(GetOptionDemo14());
     model.SetRowsGap(Dimension { 1.0f });
     model.SetColumnsGap(Dimension { 5.0f });
-        CreateFixedWidthItems(1, 910.0f);
-        CreateFixedWidthItems(1, 300.0f);
-        CreateFixedWidthItems(20, 605.0f);
-        CreateFixedWidthItems(8, 300.0f);
+    CreateFixedWidthItems(1, 910.0f);
+    CreateFixedWidthItems(1, 300.0f);
+    CreateFixedWidthItems(20, 605.0f);
+    CreateFixedWidthItems(8, 300.0f);
     CreateDone(frameNode_);
     EXPECT_EQ(GetChildSize(frameNode_, 0).Height(), 399.5f);
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(400.0f)));
@@ -1654,9 +1653,9 @@ HWTEST_F(GridIrregularLayoutTest, OverScroll001, TestSize.Level1)
     model.SetLayoutOptions(GetOptionDemo12());
     model.SetColumnsGap(Dimension { 1.0f });
     model.SetEdgeEffect(EdgeEffect::NONE, true);
-        CreateFixedHeightItems(1, 600.0f);
-        CreateFixedHeightItems(1, 300.0f);
-        CreateFixedHeightItems(1, 1800.0f);
+    CreateFixedHeightItems(1, 600.0f);
+    CreateFixedHeightItems(1, 300.0f);
+    CreateFixedHeightItems(1, 1800.0f);
     CreateGridItems(4, -2, 300.0f);
     CreateDone(frameNode_);
 
@@ -1704,13 +1703,13 @@ HWTEST_F(GridIrregularLayoutTest, OverScroll002, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo13());
     model.SetColumnsGap(Dimension { 5.0f });
-        CreateFixedHeightItems(1, 300.0f);
-        CreateFixedHeightItems(1, 100.0f);
-        CreateFixedHeightItems(1, 200.0f);
-        CreateFixedHeightItems(1, 600.0f);
+    CreateFixedHeightItems(1, 300.0f);
+    CreateFixedHeightItems(1, 100.0f);
+    CreateFixedHeightItems(1, 200.0f);
+    CreateFixedHeightItems(1, 600.0f);
     CreateGridItems(5, -2, 100.0f);
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
-        ViewAbstract::SetHeight(CalcLength(300.0f));
+    ViewAbstract::SetHeight(CalcLength(300.0f));
     CreateDone(frameNode_);
     auto& info = pattern_->gridLayoutInfo_;
     pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
@@ -1732,13 +1731,13 @@ HWTEST_F(GridIrregularLayoutTest, OverScroll003, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
     model.SetLayoutOptions(GetOptionDemo13());
     model.SetColumnsGap(Dimension { 5.0f });
-        CreateFixedHeightItems(1, 300.0f);
-        CreateFixedHeightItems(1, 100.0f);
-        CreateFixedHeightItems(1, 200.0f);
-        CreateFixedHeightItems(1, 600.0f);
+    CreateFixedHeightItems(1, 300.0f);
+    CreateFixedHeightItems(1, 100.0f);
+    CreateFixedHeightItems(1, 200.0f);
+    CreateFixedHeightItems(1, 600.0f);
     CreateGridItems(5, -2, 100.0f);
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
-        ViewAbstract::SetHeight(CalcLength(300.0f));
+    ViewAbstract::SetHeight(CalcLength(300.0f));
     CreateDone(frameNode_);
     auto& info = pattern_->gridLayoutInfo_;
     pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
@@ -1824,5 +1823,90 @@ HWTEST_F(GridIrregularLayoutTest, GetEndOffset001, TestSize.Level1)
     EXPECT_EQ(info.endMainLineIndex_, 9);
     // last item should match up with the bottom again
     EXPECT_EQ(pattern_->GetEndOffset(), GRID_HEIGHT - ITEM_HEIGHT);
+}
+
+/**
+ * @tc.name: Delete001
+ * @tc.desc: Test deleting items
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, Delete001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo15());
+    model.SetColumnsGap(Dimension { 5.0f });
+    CreateFixedHeightItems(1, 300.0f);
+    CreateFixedHeightItems(1, 200.0f);
+    CreateGridItems(5, -2, 100.0f);
+    CreateFixedHeightItems(1, 200.0f);
+    CreateGridItems(9, -2, 100.0f);
+    CreateDone(frameNode_);
+
+    pattern_->ScrollToIndex(9, false, ScrollAlign::CENTER);
+    FlushLayoutTask(frameNode_);
+    const auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_15);
+
+    frameNode_->RemoveChildAtIndex(9);
+    layoutProperty_->UpdateLayoutOptions(GetOptionDemo16());
+    frameNode_->ChildrenUpdatedFrom(0);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_16);
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 14);
+
+    pattern_->ScrollToIndex(0, false, ScrollAlign::CENTER);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 13);
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_16);
+
+    frameNode_->ChildrenUpdatedFrom(9);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 13);
+
+    UpdateCurrentOffset(-300.0f);
+    EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_16);
+}
+
+/**
+ * @tc.name: Add001
+ * @tc.desc: Test adding items
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, Add001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(GetOptionDemo15());
+    model.SetColumnsGap(Dimension { 5.0f });
+    CreateFixedHeightItems(1, 300.0f);
+    CreateFixedHeightItems(1, 200.0f);
+    CreateGridItems(5, -2, 100.0f);
+    CreateFixedHeightItems(1, 200.0f);
+    CreateGridItems(9, -2, 100.0f);
+    CreateDone(frameNode_);
+
+    pattern_->ScrollToIndex(9, false, ScrollAlign::CENTER);
+    FlushLayoutTask(frameNode_);
+    const auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 16);
+
+    AddFixedHeightItems(5, 100.0f);
+    frameNode_->ChildrenUpdatedFrom(17);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 16);
+
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info.startIndex_, 3);
+    EXPECT_EQ(info.endIndex_, 21);
 }
 } // namespace OHOS::Ace::NG

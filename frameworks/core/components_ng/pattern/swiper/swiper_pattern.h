@@ -700,9 +700,19 @@ public:
         return requestLongPredict_;
     }
 
+    bool IsPropertyAnimationRunning() const
+    {
+        return usePropertyAnimation_;
+    }
+
     bool IsTouchDown() const
     {
         return isTouchDown_;
+    }
+
+    bool IsTouchDownOnOverlong() const
+    {
+        return isTouchDownOnOverlong_;
     }
 
 protected:
@@ -775,7 +785,7 @@ private:
     float GetDistanceToEdge() const;
     float MainSize() const;
     float GetMainContentSize() const;
-    void FireChangeEvent() const;
+    void FireChangeEvent(int32_t preIndex, int32_t currentIndex) const;
     void FireAnimationStartEvent(int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const;
     void FireAnimationEndEvent(int32_t currentIndex,
         const AnimationCallbackInfo& info, bool isInterrupt = false) const;
@@ -904,7 +914,12 @@ private:
 
     ScrollResult HandleScrollParentFirst(float offset, int32_t source, NestedState state, float velocity = 0.f);
 
-    bool HandleScrollVelocity(float velocity) override;
+    bool NestedScrollOutOfBoundary() override
+    {
+        return IsOutOfBoundary();
+    }
+
+    bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
 
     void OnScrollStartRecursive(float position, float velocity = 0.f) override;
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
@@ -1002,7 +1017,7 @@ private:
 
     std::optional<RefPtr<UINode>> FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode = true) const;
     bool NeedForceMeasure() const;
-    void SetIndicatorChangeIndexStatus(bool withAnimation);
+    void SetIndicatorChangeIndexStatus(bool withAnimation, std::optional<int32_t> startIndex = std::nullopt);
     void SetIndicatorJumpIndex(std::optional<int32_t> jumpIndex);
     bool ParseTabsIsRtl();
 
@@ -1075,6 +1090,7 @@ private:
      */
     bool childScrolling_ = false;
     bool isTouchDown_ = false;
+    bool isTouchDownOnOverlong_ = false;
     std::optional<bool> preLoop_;
 
     Axis direction_ = Axis::HORIZONTAL;

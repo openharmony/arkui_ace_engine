@@ -229,7 +229,7 @@ void RosenRenderTextOverlay::PaintMagnifier(RenderContext& context)
 
     SkRRect ScaleRrect =
         SkRRect::MakeRectXY(SkRect::MakeXYWH(globalX * viewScale, globalY * viewScale,
-                                NormalizeToPx(MAGNIFIER_WIDTH) * viewScale, NormalizeToPx(MAGNIFIER_WIDTH) * viewScale),
+            NormalizeToPx(MAGNIFIER_WIDTH) * viewScale, NormalizeToPx(MAGNIFIER_WIDTH) * viewScale),
             NormalizeToPx(MAGNIFIER_WIDTH) * viewScale, NormalizeToPx(MAGNIFIER_WIDTH) * viewScale);
 
     canvas->save();

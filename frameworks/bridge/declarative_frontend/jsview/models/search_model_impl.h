@@ -48,7 +48,6 @@ public:
     void SetTextColor(const Color& color) override {}
     void SetTextAlign(const TextAlign& textAlign) override;
     void SetCopyOption(const CopyOptions& copyOptions) override;
-    void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) override;
     void SetFocusable(bool focusable) override;
     void SetFocusNode(bool isFocusNode) override;
     void SetHeight(const Dimension& value) override;

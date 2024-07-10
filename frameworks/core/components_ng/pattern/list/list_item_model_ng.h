@@ -27,6 +27,7 @@ class ACE_EXPORT ListItemModelNG : public ListItemModel {
 public:
     void Create(std::function<void(int32_t)>&& deepRenderFunc, V2::ListItemStyle listItemStyle) override;
     void Create() override;
+    void OnDidPop() override;
     void SetBorderRadius(const Dimension& borderRadius) override {}
     void SetType(const std::string& type) override {}
     void SetIsLazyCreating(bool isLazy) override {}

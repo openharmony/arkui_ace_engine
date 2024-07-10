@@ -77,9 +77,9 @@ public:
         return pageInfo_ ? pageInfo_->GetPageUrl() : "";
     }
 
-    void OnShow();
+    virtual void OnShow();
 
-    void OnHide();
+    virtual void OnHide();
 
     bool OnBackPressed();
 
@@ -218,7 +218,7 @@ public:
         visibilityChangeCallback_ = std::move(callback);
     }
 
-private:
+protected:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;

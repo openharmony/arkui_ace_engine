@@ -1206,12 +1206,12 @@ typedef enum {
      * the upper left corner of the component. This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .value[0].f32: position along the x-axis, in vp. \n
-     * .value[1].f32: position along the y-axis, in vp. \n
+     * .value[0].f32: position along the x-axis, in px. \n
+     * .value[1].f32: position along the y-axis, in px. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].f32: position along the x-axis, in vp. \n
-     * .value[1].f32: position along the y-axis, in vp. \n
+     * .value[0].f32: position along the x-axis, in px. \n
+     * .value[1].f32: position along the y-axis, in px. \n
      *
      */
     NODE_BACKGROUND_IMAGE_POSITION,
@@ -1597,6 +1597,8 @@ typedef enum {
      *
      */
     NODE_ACCESSIBILITY_VALUE = 91,
+    
+    
     /**
      * @brief 定义控制组件扩展其安全区域，支持属性设置，属性重置和属性获取。
      *
@@ -1613,16 +1615,29 @@ typedef enum {
      */
     NODE_EXPAND_SAFE_AREA = 92,
     /**
-     * @brief 定义控制组件触发可视区域面积变更事件的可视区域面积占组件本身面积的比例。
+     * @brief Defines the visible area ratio (visible area/total area of the component) threshold for invoking the
+     * visible area change event of the component.
      *
-     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
-     * .value[...].f32：占比数值，输入范围0-1
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[...].f32: threshold array. The value range is 0 to 1.
      * \n
-     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
-     * .value[...].f32：占比数值；\n。 \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[...].f32: threshold array. \n
      *
      */
-    NODE_VISIBLE_AREA_CHANGE_RADIO = 93,
+    NODE_VISIBLE_AREA_CHANGE_RATIO = 93,
+
+    /**
+     * @brief 定义组件插入和删除时显示过渡动效，支持属性设置，属性获取。
+     *
+     * 属性设置方法{@link ArkUI_AttributeItem}参数格式： \n
+     * .object：参数类型为{@link ArkUI_TransitionEffect}。 \n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式： \n
+     * .object：参数类型为{@link ArkUI_TransitionEffect}。 \n
+     *
+     */
+    NODE_TRANSITION = 94,
 
     /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
@@ -4521,6 +4536,18 @@ typedef enum {
     NODE_SWIPER_SWIPE_TO_INDEX,
 
     /**
+    * @brief Set to disable component navigation point interactions.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].i32: Set to disable component navigation point interaction, set to true to indicate the navigation point
+    * is interactive, default value is true.\n
+    * \n
+    * The return value of the attribute acquisition method {@link ArkUI_AttributeItem} format: \n
+    * .value[0].i32: Set to disable component navigation point interactions. \n
+    */
+    NODE_SWIPER_INDICATOR_INTERACTIVE,
+
+    /**
      * @brief: Set the delineation component of the ListItem, supporting property settings, property resets, and
      * property acquisition interfaces.
      *
@@ -5208,31 +5235,40 @@ typedef enum {
      */
     NODE_ON_TOUCH_INTERCEPT,
     /**
-     * @brief 组件可见区域变化事件。
+     * @brief Defines the visible area change event.
      *
-     * 触发该事件的条件：组件可见面积与自身面积的比值接近设置的阈值时触发回调。\n
-     * 传入参数{@link ArkUI_AttributeItem}格式： \n
-     * .value[0...].f32: 阈值数组，阈值表示组件可见面积与组件自身面积的比值。每个阈值的取值范围均为[0.0, 1.0]\n
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * {@link ArkUI_NodeComponentEvent}中包含2个参数：\n
-     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：组件可见面积与自身面积的比值与上次变化相比的情况，变大为1，变小为0。\n
-     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>：触发回调时组件可见面积与自身面积的比值。\n
+     * This event is triggered when the ratio of the component's visible area to its total area is greater than or less
+     * than the threshold.
+     * Before registering this event, you must set <b>NODE_VISIBLE_AREA_CHANGE_RATIO</b>. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains two parameters:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: how the ratio of the component's visible area to its total area
+     * changes compared to the previous one. The value <b>1</b> indicates an increase, and <b>0</b> indicates a
+     * decrease. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: ratio of the component's visible area to its total area when this
+     * callback is invoked. \n
      */
     NODE_EVENT_ON_VISIBLE_AREA_CHANGE,
     /**
-     * @brief 鼠标进入或退出组件事件。
+     * @brief Defines the event triggered when the mouse pointer is moved over or away from the component.
      *
-     * 触发该事件的条件：鼠标进入或退出组件时触发回调。\n
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * {@link ArkUI_NodeComponentEvent}中包含1个参数：\n
-     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>：鼠标是否悬浮在组件上，鼠标进入时为1，退出时为0。\n
+      \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: whether the mouse pointer is hovered over the component.
+     * The value <b>1</b> indicates that the mouse pointer is hovered over the component, and <b>0</b> indicates that
+     * the mouse pointer is moved away from the component. \n
      */
     NODE_ON_HOVER,
     /**
-     * @brief 组件点击事件。
+     * @brief Defines the click event.
      *
-     * 触发该事件的条件：组件被鼠标按键点击或者鼠标在组件上悬浮移动时触发该回调。\n
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_UIInputEvent}。\n
+     * This event is triggered when the component is clicked by a mouse device button or when the mouse pointer moves
+     * within the component. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_UIInputEvent}. \n
      */
     NODE_ON_MOUSE,
     /**
@@ -5443,6 +5479,44 @@ typedef enum {
      */
     NODE_TEXT_INPUT_ON_CONTENT_SCROLL,
     /**
+     * @brief 定义在将要输入时，触发回调的枚举值。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：插入的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：插入的值。
+     * @return 在返回true时，表示正常插入，返回false时，表示不插入。
+     * 可通过OH_ArKUI_NodeEvent_SetReturnValue设置返回值。\n
+     */
+    NODE_TEXT_INPUT_ON_WILL_INSERT = 7009,
+    /**
+     * @brief 定义在输入完成时，触发回调的枚举值。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：插入的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：插入的值。
+     */
+    NODE_TEXT_INPUT_ON_DID_INSERT = 7010,
+    /**
+     * @brief 定义在将要删除时，触发回调的枚举值。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：删除的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为1的value.i32：删除值的方向。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：删除的值。
+     * @return 在返回true时，表示正常插入，返回false时，表示不插入。\n
+     * 可通过OH_ArKUI_NodeEvent_SetReturnValue设置返回值。\n
+     */
+    NODE_TEXT_INPUT_ON_WILL_DELETE = 7011,
+    /**
+     * @brief 定义在删除完成时，触发回调的枚举值。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：删除的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为1的value.i32：删除值的方向。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：删除的值。
+     */
+    NODE_TEXT_INPUT_ON_DID_DELETE = 7012,
+    /**
      * @brief Defines the event triggered when the input in the text box changes.
      *
       \n
@@ -5532,7 +5606,44 @@ typedef enum {
      *
      */
     NODE_TEXT_AREA_ON_CONTENT_SIZE_CHANGE,
-
+/**
+     * @brief 定义在将要输入时，触发回调的枚举值。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：插入的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：插入的值。
+     * @return 在返回true时，表示正常插入，返回false时，表示不插入。
+     * 可通过OH_ArKUI_NodeEvent_SetReturnValue设置返回值。\n
+     */
+    NODE_TEXT_AREA_ON_WILL_INSERT = 8008,
+    /**
+     * @brief 定义在输入完成时，触发回调的枚举值。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：插入的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：插入的值。
+     */
+    NODE_TEXT_AREA_ON_DID_INSERT = 8009,
+    /**
+     * @brief 定义在将要删除时，触发回调的枚举值。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：删除的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为1的value.i32：删除值的方向。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：删除的值。
+     * @return 在返回true时，表示正常插入，返回false时，表示不插入。\n
+     * 可通过OH_ArKUI_NodeEvent_SetReturnValue设置返回值。\n
+     */
+    NODE_TEXT_AREA_ON_WILL_DELETE = 8010,
+    /**
+     * @brief 定义在删除完成时，触发回调的枚举值。
+     *
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为0的value.f32：删除的值的位置信息。\n
+     * 通过OH_ArkUI_NodeEvent_GetNumberValue获取到index为1的value.i32：删除值的方向。\n
+     * 通过OH_ArkUI_NodeEvent_GetStringValue获取到index为0的buffer字符串：删除的值。
+     */
+    NODE_TEXT_AREA_ON_DID_DELETE = 8011,
     /**
      * @brief Defines the event triggered when the selected status of the <b>ARKUI_NODE_CHECKBOX</b> component changes.
      *
@@ -6066,10 +6177,52 @@ ArkUI_StringAsyncEvent* OH_ArkUI_NodeEvent_GetStringAsyncEvent(ArkUI_NodeEvent* 
 void* OH_ArkUI_NodeEvent_GetUserData(ArkUI_NodeEvent* event);
 
 /**
- * @brief Defines the dirty area flag passed in the <b>::markDirty</b> API.
+ * @brief 获取组件回调事件的数字类型参数。
  *
+ * @param event 组件事件指针。
+ * @param index 返回值索引。
+ * @param value 具体返回值。
+ * @return 错误码。
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
+ *         {@link ARKUI_ERROR_CODE_NODE_EVENT_PARAM_INVALID} 组件事件中参数长度超限。
+ *         {@link ARKUI_ERROR_CODE_NODE_EVENT_NO_RETURN} 组件事件不支持返回值。
  * @since 12
  */
+int32_t OH_ArkUI_NodeEvent_GetNumberValue(ArkUI_NodeEvent* event, int32_t index, ArkUI_NumberValue* value);
+
+    /**
+ * @brief 获取组件回调事件的字符串类型参数，字符串数据仅在事件回调过程中有效，需要在事件回调外使用建议进行额外拷贝处理。
+ *
+ * @param event 组件事件指针。
+ * @param index 返回值索引。
+ * @param string 字符串数组的指针。
+ * @param stringSize 字符串数组的长度。
+ * @return 错误码。
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
+ *         {@link ARKUI_ERROR_CODE_NODE_EVENT_PARAM_INDEX_OUT_OF_RANGE} 组件事件中参数长度超限。
+ *         {@link ARKUI_ERROR_CODE_NODE_EVENT_PARAM_INVALID} 组件事件中不存在该数据。
+ * @since 12
+ */
+int32_t OH_ArkUI_NodeEvent_GetStringValue(ArkUI_NodeEvent* event, int32_t index, char** string, int32_t* stringSize);
+
+/**
+    * @brief 设置组件回调事件的返回值。
+    *
+    * @param event 组件事件指针。
+    * @param value 事件数字类型数组。
+    * @param size 数组长度。
+    * @return 错误码。
+    *         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
+    *         {@link ARKUI_ERROR_CODE_NODE_EVENT_NO_RETURN} 组件事件不支持返回值。
+    * @since 12
+    */
+int32_t OH_ArkUI_NodeEvent_SetReturnNumberValue(ArkUI_NodeEvent* event, ArkUI_NumberValue* value, int32_t size);
+
+/**
+    * @brief Defines the dirty area flag passed in the <b>::markDirty</b> API.
+    *
+    * @since 12
+    */
 typedef enum {
     /**
      * @brief Remeasure.
@@ -7093,6 +7246,17 @@ int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen(ArkUI_NodeHandle nod
 * @since 12
 */
 int32_t OH_ArkUI_List_CloseAllSwipeActions(ArkUI_NodeHandle node, void* userData, void (*onFinish)(void* userData));
+
+/**
+* @brief Obtain the UIContext pointer to the page where the node is located.
+*
+* @param node The node.
+* @return The UIContext pointer.
+*         If a null pointer is returned, it may be because the node is empty.
+* @since 12
+*/
+ArkUI_ContextHandle OH_ArkUI_GetContextByNode(ArkUI_NodeHandle node);
+
 #ifdef __cplusplus
 };
 #endif

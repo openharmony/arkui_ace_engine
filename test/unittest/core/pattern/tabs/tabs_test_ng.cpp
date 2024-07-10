@@ -15,6 +15,7 @@
 
 #include "tabs_test_ng.h"
 #include "core/components/dialog/dialog_theme.h"
+#include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {}
@@ -26,6 +27,14 @@ void TabsTestNg::SetUpTestSuite()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dialogTheme));
+    auto agingAdapationDialogTheme = AceType::MakeRefPtr<AgingAdapationDialogTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(AgingAdapationDialogTheme::TypeId()))
+        .WillRepeatedly(Return(agingAdapationDialogTheme));
+    agingAdapationDialogTheme->bigFontSizeScale_ = BIG_FONT_SIZE_SCALE;
+    agingAdapationDialogTheme->largeFontSizeScale_ = LARGE_FONT_SIZE_SCALE;
+    agingAdapationDialogTheme->maxFontSizeScale_ = MAX_FONT_SIZE_SCALE;
+    agingAdapationDialogTheme->bigDialogWidth_ = BIG_DIALOG_WIDTH;
+    agingAdapationDialogTheme->maxDialogWidth_ = MAX_DIALOG_WIDTH;
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_TAB);
     auto tabTheme = TabTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(TabTheme::TypeId())).WillRepeatedly(Return(tabTheme));
@@ -493,7 +502,7 @@ HWTEST_F(TabsTestNg, TabPatternOnModifyDone001, TestSize.Level1)
      * @tc.expected: step3. related function is called.
      */
     pattern_->OnModifyDone();
-    pattern_->onChangeEvent_ = std::make_shared<ChangeEvent>();
+    pattern_->onChangeEvent_ = std::make_shared<ChangeEventWithPreIndex>();
     pattern_->OnModifyDone();
 }
 
@@ -513,19 +522,19 @@ HWTEST_F(TabsTestNg, SetOnIndexChangeEvent001, TestSize.Level1)
     CreateTabsDone(model);
 
     /**
-     * @tc.steps: step3. invoke OnModifyDone and onChangeEvent_.
+     * @tc.steps: step3. invoke OnModifyDone and onIndexChangeEvent_.
      * @tc.expected: step3. related function is called.
      */
     pattern_->onIndexChangeEvent_ = std::make_shared<ChangeEvent>();
     pattern_->SetOnIndexChangeEvent([](const BaseEventInfo* info) {});
     pattern_->onIndexChangeEvent_ = nullptr;
     pattern_->SetOnIndexChangeEvent([](const BaseEventInfo* info) {});
-    swiperPattern_->FireChangeEvent();
+    swiperPattern_->FireChangeEvent(0, 1);
 }
 
 /**
 * @tc.name: InitScrollable001
-* @tc.desc: test AdjustFocusPosition
+* @tc.desc: test InitScrollable001
 * @tc.type: FUNC
 */
 HWTEST_F(TabsTestNg, InitScrollable001, TestSize.Level1)
@@ -539,46 +548,13 @@ HWTEST_F(TabsTestNg, InitScrollable001, TestSize.Level1)
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     /**
-    * @tc.steps: step2. Clear tabitemOffsets_ InitScrollable is called after data in
+    * @tc.steps: step2. Clear visibleItemPosition_ InitScrollable is called after data in
     * @tc.expected: TabItem Offsets_ Value is empty
     */
-    tabBarPattern_->tabItemOffsets_.clear();
+    tabBarPattern_->visibleItemPosition_.clear();
     tabBarPattern_->InitScrollable(gestureHub);
     tabBarPattern_->axis_ = Axis::VERTICAL;
-    ASSERT_TRUE(tabBarPattern_->tabItemOffsets_.empty());
-}
-
-/**
-* @tc.name: AdjustFocusPosition005
-* @tc.desc: test AdjustFocusPosition
-* @tc.type: FUNC
-*/
-HWTEST_F(TabsTestNg, AdjustFocusPosition005, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs(BarPosition::END);
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-
-    tabBarPattern_->focusIndicator_ = -10;
-    tabBarPattern_->AdjustFocusPosition();
-    /**
-    * @tc.steps: steps2. GetScopeFocusAlgorithm
-    * @tc.expected: steps2. Check the result of GetScopeFocusAlgorithm
-    */
-    tabBarPattern_->AdjustFocusPosition();
-    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    tabBarPattern_->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
-    tabBarPattern_->axis_ = Axis::HORIZONTAL;
-    tabBarPattern_->tabItemOffsets_.clear();
-    OffsetF c1(-1.0f, -1.0f);
-    tabBarPattern_->tabItemOffsets_.emplace_back(c1);
-    tabBarPattern_->focusIndicator_ = 0;
-    tabBarPattern_->AdjustFocusPosition();
-    EXPECT_EQ(tabBarPattern_->GetTabBarStyle(), TabBarStyle::SUBTABBATSTYLE);
-    tabBarPattern_->axis_ = Axis::VERTICAL;
-    tabBarPattern_->focusIndicator_ = -2;
-    tabBarPattern_->AdjustFocusPosition();
-    EXPECT_EQ(tabBarPattern_->GetTabBarStyle(), TabBarStyle::SUBTABBATSTYLE);
+    ASSERT_TRUE(tabBarPattern_->visibleItemPosition_.empty());
 }
 
 /**
@@ -789,7 +765,7 @@ HWTEST_F(TabsTestNg, CustomAnimationTest001, TestSize.Level1)
     tabBarLayoutProperty_->UpdateAxis(Axis::VERTICAL);
     EXPECT_EQ(tabBarLayoutProperty_->GetAxisValue(), Axis::VERTICAL);
     tabBarPattern_->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
-    tabBarPattern_->tabItemOffsets_ = { { 0.0f, 0.0f }, { 10.0f, 10.0f } };
+    tabBarPattern_->visibleItemPosition_[0] = { 0.0f, 10.0f };
     swiperLayoutProperty_->UpdateIndex(INDEX_ONE);
     GestureEvent info;
     Offset offset(1, 1);

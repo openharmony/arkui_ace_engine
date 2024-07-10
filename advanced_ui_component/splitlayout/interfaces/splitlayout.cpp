@@ -22,8 +22,8 @@ extern const char _binary_splitlayout_abc_start[];
 extern const char _binary_splitlayout_abc_end[];
 
 // Napi get abc code function
-extern "C" __attribute__((visibility("default")))
-void NAPI_arkui_advanced_SplitLayout_GetABCCode(const char **buf, int *buflen)
+extern "C" __attribute__((visibility("default"))) void NAPI_arkui_advanced_SplitLayout_GetABCCode(
+    const char **buf, int *buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_splitlayout_abc_start;

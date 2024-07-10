@@ -162,6 +162,11 @@ void SpanModelNG::ClearOnClick()
     ACE_UPDATE_SPAN_PROPERTY(OnClickEvent, nullptr, PropertyInfo::NONE);
 }
 
+void SpanModelNG::ClearOnClick(UINode* uiNode)
+{
+    ACE_UPDATE_NODE_SPAN_PROPERTY(OnClickEvent, nullptr, PropertyInfo::NONE, uiNode);
+}
+
 void SpanModelNG::InitSpan(UINode* uiNode, const std::string& content)
 {
     ACE_UPDATE_NODE_SPAN_PROPERTY(Content, content, PropertyInfo::NONE, uiNode);

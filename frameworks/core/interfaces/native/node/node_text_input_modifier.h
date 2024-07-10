@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_TEXT_INPUT_MODIFIER_H
+#define FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_TEXT_INPUT_MODIFIER_H
 
 #include "core/interfaces/native/node/node_api.h"
 
@@ -28,7 +29,11 @@ namespace OHOS::Ace::NG::NodeModifier {
     void SetOnTextInputContentSizeChange(ArkUINodeHandle node, void* extraParam);
     void SetOnTextInputInputFilterError(ArkUINodeHandle node, void* extraParam);
     void SetTextInputOnTextContentScroll(ArkUINodeHandle node, void* extraParam);
-    
+    void SetTextInputOnWillInsert(ArkUINodeHandle node, void* extraParam);
+    void SetTextInputOnDidInsert(ArkUINodeHandle node, void* extraParam);
+    void SetTextInputOnWillDelete(ArkUINodeHandle node, void* extraParam);
+    void SetTextInputOnDidDelete(ArkUINodeHandle node, void* extraParam);
+
     void ResetOnTextInputChange(ArkUINodeHandle node);
     void ResetTextInputOnSubmit(ArkUINodeHandle node);
     void ResetOnTextInputCut(ArkUINodeHandle node);
@@ -40,3 +45,4 @@ namespace OHOS::Ace::NG::NodeModifier {
     void ResetTextInputOnTextContentScroll(ArkUINodeHandle node);
 
 } // namespace OHOS::Ace::NG::NodeModifier
+#endif // FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_TEXT_INPUT_MODIFIER_H

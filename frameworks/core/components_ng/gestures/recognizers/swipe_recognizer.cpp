@@ -75,7 +75,7 @@ void SwipeRecognizer::OnAccepted()
     firstInputTime_.reset();
 
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Swipe accepted, tag = %{public}s, id = %{public}s",
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Swipe accepted, tag = %{public}s, id = %{public}s",
         node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
     refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onAction_);
@@ -99,7 +99,7 @@ void SwipeRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         firstInputTime_ = event.time;
     }
 
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, swipe %{public}d down, state: %{public}d", event.touchEventId,
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, swipe %{public}d down, state: %{public}d", event.touchEventId,
         event.id, refereeState_);
     if (fingers_ > MAX_SWIPE_FINGERS) {
         Adjudicate(Claim(this), GestureDisposal::REJECT);
@@ -138,7 +138,7 @@ void SwipeRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, swipe axis start, state: %{public}d", event.touchEventId,
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, swipe axis start, state: %{public}d", event.touchEventId,
         refereeState_);
     if (direction_.type == SwipeDirection::NONE) {
         Adjudicate(Claim(this), GestureDisposal::REJECT);
@@ -157,7 +157,7 @@ void SwipeRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void SwipeRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, swipe %{public}d up, state: %{public}d", event.touchEventId,
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, swipe %{public}d up, state: %{public}d", event.touchEventId,
         event.id, refereeState_);
     if (fingersId_.find(event.id) != fingersId_.end()) {
         fingersId_.erase(event.id);
@@ -202,8 +202,8 @@ void SwipeRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void SwipeRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
-    TAG_LOGI(
-        AceLogTag::ACE_GESTURE, "Id:%{public}d, swipe axis end, state: %{public}d", event.touchEventId, refereeState_);
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, swipe axis end, state: %{public}d",
+        event.touchEventId, refereeState_);
     globalPoint_ = Point(event.x, event.y);
     touchPoints_[event.id] = TouchEvent();
     UpdateTouchPointWithAxisEvent(event);
@@ -316,7 +316,7 @@ void SwipeRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 
 void SwipeRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, swipe %{public}d cancel", event.touchEventId, event.id);
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, swipe %{public}d cancel", event.touchEventId, event.id);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -329,7 +329,7 @@ void SwipeRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void SwipeRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Id:%{public}d, swipe axis cancel", event.touchEventId);
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, swipe axis cancel", event.touchEventId);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;

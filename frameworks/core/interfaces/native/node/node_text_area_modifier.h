@@ -29,6 +29,10 @@ namespace OHOS::Ace::NG::NodeModifier {
     void SetOnTextAreaInputFilterError(ArkUINodeHandle node, void* extraParam);
     void SetTextAreaOnTextContentScroll(ArkUINodeHandle node, void* extraParam);
     void SetTextAreaOnSubmit(ArkUINodeHandle node, void* extraParam);
+    void SetTextAreaOnWillInsertValue(ArkUINodeHandle node, void* extraParam);
+    void SetTextAreaOnDidInsertValue(ArkUINodeHandle node, void* extraParam);
+    void SetTextAreaOnWillDeleteValue(ArkUINodeHandle node, void* extraParam);
+    void SetTextAreaOnDidDeleteValue(ArkUINodeHandle node, void* extraParam);
 
     void ResetOnTextAreaChange(ArkUINodeHandle node);
     void ResetOnTextAreaPaste(ArkUINodeHandle node);

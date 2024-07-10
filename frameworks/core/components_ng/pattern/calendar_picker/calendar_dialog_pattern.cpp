@@ -51,6 +51,13 @@ constexpr size_t ACCEPT_BUTTON_BACKGROUND_COLOR_INDEX = 3;
 constexpr size_t OPTION_CANCEL_BUTTON_INDEX = 0;
 constexpr size_t OPTION_ACCEPT_BUTTON_INDEX = 1;
 } // namespace
+
+void CalendarDialogPattern::OnFontConfigurationUpdate()
+{
+    CHECK_NULL_VOID(closeDialogEvent_);
+    closeDialogEvent_();
+}
+
 void CalendarDialogPattern::OnModifyDone()
 {
     LinearLayoutPattern::OnModifyDone();

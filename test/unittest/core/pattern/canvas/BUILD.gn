@@ -19,4 +19,5 @@ ace_unittest("canvas_test_ng") {
     "canvas_custom_paint_method_test_ng.cpp",
     "canvas_test_ng.cpp",
   ]
+  external_deps = [ "bounds_checking_function:libsec_shared" ]
 }
