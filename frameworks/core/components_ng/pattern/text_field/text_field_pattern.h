@@ -833,7 +833,7 @@ public:
     int32_t CheckClickLocation(GestureEvent& info);
     void HandleDoubleClickEvent(GestureEvent& info);
     void HandleTripleClickEvent(GestureEvent& info);
-    void HandleSingleClickEvent(GestureEvent& info);
+    void HandleSingleClickEvent(GestureEvent& info, bool firstGetFocus = false);
 
     void HandleSelectionUp();
     void HandleSelectionDown();

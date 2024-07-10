@@ -72,6 +72,7 @@ public:
     bool CheckTouchInHostNode(const PointF& touchPoint) override;
     void OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode) override;
     bool CheckRestartHiddenHandleTask(int32_t requestCode) override;
+    std::optional<RectF> GetAncestorNodeViewPort() override;
     RefPtr<SelectOverlayCallback> GetCallback() override
     {
         return AceType::Claim(this);
@@ -247,7 +248,6 @@ protected:
 
     RectF ConvertPaintInfoToRect(const SelectHandlePaintInfo& paintInfo);
     void SetTransformPaintInfo(SelectHandleInfo& handleInfo, const RectF& localHandleRect);
-    std::optional<RectF> GetAncestorNodeViewPort();
     bool CheckHandleCanPaintInHost(const RectF& firstRect, const RectF& secondRect);
     virtual RectF GetFirstHandleLocalPaintRect();
     virtual RectF GetSecondHandleLocalPaintRect();

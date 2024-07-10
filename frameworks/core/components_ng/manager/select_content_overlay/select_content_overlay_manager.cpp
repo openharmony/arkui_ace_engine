@@ -962,4 +962,15 @@ bool SelectContentOverlayManager::IsTouchAtHandle(const PointF& localPoint, cons
     }
     return selectOverlayNode->IsInSelectedOrSelectOverlayArea(globalPoint);
 }
+
+void SelectContentOverlayManager::UpdateViewPort()
+{
+    auto menuNode = menuNode_.Upgrade();
+    CHECK_NULL_VOID(menuNode);
+    CHECK_NULL_VOID(selectOverlayHolder_);
+    CHECK_NULL_VOID(shareOverlayInfo_);
+    shareOverlayInfo_->ancestorViewPort = selectOverlayHolder_->GetAncestorNodeViewPort();
+    menuNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
 } // namespace OHOS::Ace::NG
