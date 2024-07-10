@@ -1970,11 +1970,17 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE &&
         scalePoint.type != TouchType::HOVER_MOVE) {
         eventManager_->GetEventTreeRecord().AddTouchPoint(scalePoint);
-        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
-            "InputTracking id:%{public}d, fingerId:%{public}d, x=%{public}f y=%{public}f type=%{public}d, "
-            "inject=%{public}d",
-            scalePoint.touchEventId, scalePoint.id, scalePoint.x, scalePoint.y, (int)scalePoint.type,
-            scalePoint.isInjected);
+        if (SystemProperties::GetAceCommercialLogEnabled()) {
+            TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+                "InputTracking id:%{public}d, fingerId:%{public}d, type=%{public}d, inject=%{public}d",
+                scalePoint.touchEventId, scalePoint.id, (int)scalePoint.type, scalePoint.isInjected);
+        } else {
+            TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+                "InputTracking id:%{public}d, fingerId:%{public}d, x=%{public}.3f, y=%{public}.3f type=%{public}d, "
+                "inject=%{public}d",
+                scalePoint.touchEventId, scalePoint.id, scalePoint.x, scalePoint.y, (int)scalePoint.type,
+                scalePoint.isInjected);
+        }
     }
 
     if (scalePoint.type == TouchType::MOVE) {
