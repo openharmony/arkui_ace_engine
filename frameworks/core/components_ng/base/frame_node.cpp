@@ -1138,6 +1138,7 @@ void FrameNode::OnDetachFromMainTree(bool recursive)
     eventHub_->FireOnDetach();
     pattern_->OnDetachFromMainTree();
     eventHub_->FireOnDisappear();
+    CHECK_NULL_VOID(renderContext_);
     renderContext_->OnNodeDisappear(recursive);
 }
 
