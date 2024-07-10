@@ -56,7 +56,7 @@ std::optional<std::string> RepeatVirtualScrollCaches::GetKey4Index(uint32_t inde
             return std::nullopt;
         }
     }
-    TAG_LOGE(AceLogTag::ACE_REPEAT,
+    TAG_LOGD(AceLogTag::ACE_REPEAT,
         "index %{public}d -> key '%{public}s'",
         static_cast<int32_t>(index), key4index_[index].c_str());
     return key4index_[index];
@@ -70,6 +70,10 @@ bool RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to)
     if (from > to) {
         return false;
     }
+    if ((key4index_.size()==0) && (to>=lastActiveRanges_[0].first) && (from<=lastActiveRanges_[0].second)) {
+        // following a key4index_/ttype4index_ purge fetch the whole range
+        to= (to < lastActiveRanges_[0].second) ? lastActiveRanges_[0].second : to;
+    }
 
     TAG_LOGD(AceLogTag::ACE_REPEAT, "from:%{public}d, to:%{public}d", (int)from, (int)to);
 
@@ -77,9 +81,8 @@ bool RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to)
     // optimism by merging the two calls into one
     const std::list<std::string> keysFrom = onGetKeys4Range_(from, to);
     const std::list<std::string> ttypesFrom = onGetTypes4Range_(from, to);
-    const auto fillerDefaultKey = std::string("__-+-__");
 
-    if (keysFrom.size() == 0 || ttypesFrom.size() == 0 || keysFrom.size() != ttypesFrom.size()) {
+    if ((keysFrom.size() == 0) || (ttypesFrom.size() == 0) || (keysFrom.size() != ttypesFrom.size())) {
         TAG_LOGE(AceLogTag::ACE_REPEAT,
             "fail to fetch keys and/or ttyypes: requested range %{public}d - %{public}d. "
             "Received number of keys: %{public}d, of ttypes: %{public}d",
@@ -96,6 +99,12 @@ bool RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to)
     for (const auto& key : keysFrom) {
         key4index_[from1] = key;
         index4Key_[key] = from1;
+
+        const auto cacheItemIter = node4key_.find(key);
+        if (cacheItemIter != node4key_.end()) {
+            // TS onGetKeys4Range_ has made any needed updates for this key -> UINode
+            cacheItemIter->second.isValid=true;
+        }
         TAG_LOGD(AceLogTag::ACE_REPEAT, "   ... index %{public}d -> key '%{public}s'",
             static_cast<int32_t>(from1), key.c_str());
         from1++;
@@ -149,9 +158,12 @@ RefPtr<UINode> RepeatVirtualScrollCaches::GetCachedNode4Index(uint32_t index)
         return nullptr;
     }
 
-    // scenario: same key, same ttype, but index might have changed
-    // can update the UINode on TS side:
     if (!node4Key.value().isValid) {
+        // impossible situation: TS onKeyIndex shoul;d have updated repeatItem.index already!
+        TAG_LOGW(AceLogTag::ACE_REPEAT,
+            "index %{public}d -> %{public}s, templateId %{public}s, "
+            "found UINode %{public}s marked inValid. Internal error!",
+            static_cast<int32_t>(index), key.value().c_str(), ttype.value().c_str(), DumpUINode(uiNode).c_str());
         UpdateSameKeyItem(key.value(), index);
         node4key_[key.value()].isValid = true;
     }
@@ -179,20 +191,17 @@ void RepeatVirtualScrollCaches::InvalidateKeyAndTTypeCaches()
     ttype4index_.clear();
     index4ttype_.clear();
     // mark all cached UINodes need to update.
-    // STATE_MGMT_NOTE: its rather inefficient to require TS to update
-    // all UINodes
+    // TS onKey4Index will fetch key-> RepeatItem and uupdate RepeatItem.index if changed
+    // Call UpdateDirty2 to make partial updates right away
+    // Therefore, on return GetKeys4Range can set node4key -> CacheItem back to isValid.true
+    // for all retained keys.
     for (auto& [key, item] : node4key_) {
         item.isValid = false;
     }
 
-    // request new index -> key and index -> ttype
-    // only fetch keys for the active range
-    // note the updated key -> index reverse lookup is used
-    // to decide if a key is still used and its UINode
-    // should be packed. If key is not in the reverse map then
-    // its UINode is subject to update.
-    //
-    FetchMoreKeysTTypes(lastActiveRanges_[0].first, lastActiveRanges_[0].second);
+    // we do not request new index <-> because we are still
+    // inside observed Repeat rerender.
+    // instead for FetchMoreKeysTTypes will fetch the entire range
 }
 
 /**
@@ -364,7 +373,7 @@ bool RepeatVirtualScrollCaches::RebuildL1(const std::function<bool(int32_t index
     return modified;
 }
 
-RefPtr<UINode> RepeatVirtualScrollCaches::DropFromL1(std::string key)
+RefPtr<UINode> RepeatVirtualScrollCaches::DropFromL1(const std::string& key)
 {
     const auto& cacheItem4Key = GetCachedNode4Key(key);
     if (!cacheItem4Key.has_value()) {

@@ -119,7 +119,7 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, 
     }
 }
 
-void RepeatVirtualScrollNode::DropFromL1(std::string key)
+void RepeatVirtualScrollNode::DropFromL1(const std::string& key)
 {
     RefPtr<UINode> node = caches_.DropFromL1(key);
     if (node == nullptr) {
