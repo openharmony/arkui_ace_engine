@@ -74,6 +74,12 @@ public:
         }
         bool isRtl = direction_ == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft()
                                                        : direction_ == TextDirection::RTL;
+        auto offsetNotRtl = GreatOrEqual(actualSize_.Width(), actualSize_.Height())
+                                ? (isSelect_->Get() ? actualSize_.Width() - actualSize_.Height() : 0.0f)
+                                : (isSelect_->Get() ? actualSize_.Width() - actualTrackRadius_ : actualTrackRadius_);
+        auto offsetIsRtl = GreatOrEqual(actualSize_.Width(), actualSize_.Height())
+                               ? (isSelect_->Get() ? 0.0f : actualSize_.Width() - actualSize_.Height())
+                               : (isSelect_->Get() ? actualTrackRadius_ : actualSize_.Width() - actualTrackRadius_);
         AnimationOption colorOption = AnimationOption();
         colorOption.SetDuration(colorAnimationDuration_);
         colorOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
@@ -87,13 +93,18 @@ public:
         float newPointOffset = 0.0f;
         if (!isDragEvent_) {
             if (isRtl) {
-                newPointOffset = isSelect_->Get() ? 0.0f : actualSize_.Width() - actualSize_.Height();
+                newPointOffset = offsetIsRtl;
             } else {
-                newPointOffset = isSelect_->Get() ? actualSize_.Width() - actualSize_.Height() : 0.0f;
+                newPointOffset = offsetNotRtl;
             }
         } else {
-            newPointOffset = std::clamp(
-                dragOffsetX_->Get() - offset_->Get().GetX(), 0.0f, actualSize_.Width() - actualSize_.Height());
+            if (GreatOrEqual(actualSize_.Width(), actualSize_.Height())) {
+                newPointOffset = std::clamp(
+                    dragOffsetX_->Get() - offset_->Get().GetX(), 0.0f, actualSize_.Width() - actualSize_.Height());
+            } else {
+                newPointOffset = std::clamp(dragOffsetX_->Get() - offset_->Get().GetX(), actualTrackRadius_,
+                    actualSize_.Width() - actualTrackRadius_);
+            }
         }
         AnimationUtils::Animate(pointOption, [&]() { pointOffset_->Set(newPointOffset); });
     }
@@ -114,6 +125,7 @@ public:
     float GetSwitchWidth(const SizeF& contentSize) const;
     void DrawFocusBoard(RSCanvas& canvas, const OffsetF& offset, const SizeF& size, double& actualGap);
     void DrawRectCircle(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize, double& actualGap);
+    float CalcActualWidth(float width, float height, double actualGap, double defaultWidthGap);
 
     void SetUserActiveColor(const Color& color)
     {
@@ -237,7 +249,7 @@ public:
 
     float GetPointRadius()
     {
-        return animatePointRadius_->Get();
+        return pointRadius_;
     }
 
     void SetInactiveColor(const Color& color)
@@ -252,7 +264,12 @@ public:
 
     float GetTrackRadius()
     {
-        return animateTrackRadius_->Get();
+        return actualTrackRadius_;
+    }
+
+    void SetActualTrackRadius(float borderRadius)
+    {
+        actualTrackRadius_ = borderRadius;
     }
 
 private:
@@ -275,6 +292,7 @@ private:
     bool isDragEvent_ = false;
     bool isFirstCreated_ = true;
     bool showHoverEffect_ = true;
+    float actualTrackRadius_ = 0.0f;
 
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;

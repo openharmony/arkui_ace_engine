@@ -98,6 +98,18 @@ void SwitchModifier::InitializeParam()
     pointAnimationDuration_ = switchTheme->GetPointAnimationDuration();
 }
 
+float SwitchModifier::CalcActualWidth(float width, float height, double actualGap, double defaultWidthGap)
+{
+    float result = 0.0f;
+    if (GreatOrEqual(width, height)) {
+        result = (pointRadius_ * NUM_TWO > height ? (width - (actualGap * NUM_TWO)) : width) + defaultWidthGap;
+    } else {
+        result = (pointRadius_ > actualTrackRadius_ ? (width + (pointRadius_ - actualTrackRadius_) * NUM_TWO) : width) +
+                 defaultWidthGap;
+    }
+    return result;
+}
+
 void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset, const SizeF& contentSize)
 {
     auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -130,7 +142,7 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
         defaultWidth - (switchTheme->GetWidth() - switchTheme->GetHotZoneHorizontalPadding() * 2).ConvertToPx();
     auto defaultHeightGap =
         defaultHeight - (switchTheme->GetHeight() - hotZoneVerticalPadding * 2).ConvertToPx();
-    actualWidth_ = (pointRadius_ * NUM_TWO > height ? (width - (actualGap * NUM_TWO)) : width) + defaultWidthGap;
+    actualWidth_ = CalcActualWidth(width, height, actualGap, defaultWidthGap);
     actualHeight_ = (pointRadius_ * NUM_TWO > height ? pointRadius_ * NUM_TWO : height) + defaultHeightGap;
     if ((animateTrackRadius_->Get() < 0) && (animateTrackRadius_->Get() < 0)) {
         hoverRadius_ = hoverRadius_ * height /
@@ -187,7 +199,11 @@ void SwitchModifier::DrawRectCircle(RSCanvas& canvas, const OffsetF& contentOffs
     canvas.AttachBrush(brush);
 
     RSPoint point;
-    point.SetX(xOffset + actualGap + pointRadius_ + pointOffset_->Get());
+    if (GreatOrEqual(contentSize.Width(), contentSize.Height())) {
+        point.SetX(xOffset + actualGap + pointRadius_ + pointOffset_->Get());
+    } else {
+        point.SetX(xOffset + pointOffset_->Get());
+    }
     point.SetY(yOffset + radius);
     canvas.DrawCircle(point, pointRadius_);
     canvas.DetachBrush();

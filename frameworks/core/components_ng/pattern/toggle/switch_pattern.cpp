@@ -616,9 +616,17 @@ void SwitchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
         radio = pointRadius + focusPaintPadding;
         offsetX = offset_.GetX() - focusPaintPadding - (pointRadius - height_ / NUMBER_TWO);
         offsetY = offset_.GetY() - focusPaintPadding - (pointRadius - height_ / NUMBER_TWO);
+        if (width_ < height_) {
+            width = width_ + (pointRadius - trackRadius + focusPaintPadding) * NUMBER_TWO;
+            offsetX = offset_.GetX() - (pointRadius - trackRadius + focusPaintPadding);
+        }
     } else {
         if (SWITCH_ERROR_RADIUS != trackRadius) {
             radio = trackRadius + focusPaintPadding;
+        }
+        if (width_ < height_ && pointRadius > trackRadius) {
+            width = width_ + (pointRadius - trackRadius + focusPaintPadding) * NUMBER_TWO;
+            offsetX = offset_.GetX() - (pointRadius - trackRadius + focusPaintPadding);
         }
     }
     auto Rect = RectF(offsetX, offsetY, width, height);

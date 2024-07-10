@@ -57,6 +57,42 @@ public:
         return switchModifier_;
     }
 
+    void UpdateBoundsRect(PaintWrapper* paintWrapper, float pointRadius, double actualTrackRadius)
+    {
+        CHECK_NULL_VOID(switchModifier_);
+        auto size = paintWrapper->GetContentSize();
+        auto offset = paintWrapper->GetContentOffset();
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+        auto horizontalPadding = switchTheme->GetHotZoneHorizontalPadding().ConvertToPx();
+        auto verticalPadding = switchTheme->GetHotZoneVerticalPadding().ConvertToPx();
+        auto actualGap = radiusGap_.ConvertToPx() * size.Height() /
+                        (switchTheme->GetHeight().ConvertToPx() - verticalPadding * 2);
+        auto horizontalIncrement = 0.0;
+        auto verticalIncrement = 0.0;
+        auto actualPointRadius = pointRadius == SWITCH_ERROR_RADIUS ? size.Height() / NUM_TWO - actualGap : pointRadius;
+        if (GreatOrEqual(size.Width(), size.Height())) {
+            horizontalIncrement =
+                (actualPointRadius * NUM_TWO > size.Height()) ? (actualPointRadius - size.Height() / NUM_TWO) : 0.0;
+            verticalIncrement =
+                (actualPointRadius * NUM_TWO > size.Height()) ? (actualPointRadius - size.Height() / NUM_TWO) : 0.0;
+        } else {
+            horizontalIncrement =
+                (actualPointRadius > actualTrackRadius) ? (actualPointRadius - actualTrackRadius) : 0.0;
+            verticalIncrement =
+                (actualPointRadius * NUM_TWO > size.Height()) ? (actualPointRadius - size.Height() / NUM_TWO) : 0.0;
+        }
+        horizontalPadding += horizontalIncrement;
+        verticalPadding += verticalIncrement;
+        float boundsRectOriginX = offset.GetX() - horizontalPadding;
+        float boundsRectOriginY = offset.GetY() - verticalPadding;
+        float boundsRectWidth = size.Width() + 2 * horizontalPadding;
+        float boundsRectHeight = size.Height() + 2 * verticalPadding;
+        RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
+        switchModifier_->SetBoundsRect(boundsRect);
+    }
+
     void UpdateContentModifier(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_VOID(switchModifier_);
@@ -76,11 +112,11 @@ public:
             pointRadius = paintProperty->GetPointRadius().value().ConvertToPx();
         }
         switchModifier_->SetPointRadius(pointRadius);
+        auto trackRadius = SWITCH_ERROR_RADIUS;
         if (paintProperty->HasTrackBorderRadius()) {
-            switchModifier_->SetTrackRadius(paintProperty->GetTrackBorderRadius().value().ConvertToPx());
-        } else {
-            switchModifier_->SetTrackRadius(SWITCH_ERROR_RADIUS);
+            trackRadius = paintProperty->GetTrackBorderRadius().value().ConvertToPx();
         }
+        switchModifier_->SetTrackRadius(trackRadius);
         auto size = paintWrapper->GetContentSize();
         auto offset = paintWrapper->GetContentOffset();
         switchModifier_->SetSize(size);
@@ -92,20 +128,16 @@ public:
         switchModifier_->SetDragOffsetX(dragOffsetX_);
         switchModifier_->SetIsDragEvent(isDragEvent_);
         switchModifier_->SetShowHoverEffect(showHoverEffect_);
+        auto actualTrackRadius = 0.0;
+        if (GreatOrEqual(trackRadius, 0.0) && LessOrEqual(trackRadius, std::min(size.Width(), size.Height()) / 2.0)) {
+            // 2.0f is used to calculate half of the width.
+            actualTrackRadius = trackRadius;
+        } else {
+            actualTrackRadius = size.Width() / 2.0; // 2.0f is used to calculate half of the width.
+        }
+        switchModifier_->SetActualTrackRadius(actualTrackRadius);
         switchModifier_->UpdateAnimatableProperty();
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto switchTheme = pipeline->GetTheme<SwitchTheme>();
-        auto horizontalPadding = switchTheme->GetHotZoneHorizontalPadding().ConvertToPx();
-        auto verticalPadding = switchTheme->GetHotZoneVerticalPadding().ConvertToPx();
-        horizontalPadding += (pointRadius * NUM_TWO > size.Height()) ? (pointRadius - size.Height() / NUM_TWO) : 0.0;
-        verticalPadding += (pointRadius * NUM_TWO > size.Height()) ? (pointRadius - size.Height() / NUM_TWO) : 0.0;
-        float boundsRectOriginX = offset.GetX() - horizontalPadding;
-        float boundsRectOriginY = offset.GetY() - verticalPadding;
-        float boundsRectWidth = size.Width() + 2 * horizontalPadding;
-        float boundsRectHeight = size.Height() + 2 * verticalPadding;
-        RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
-        switchModifier_->SetBoundsRect(boundsRect);
+        UpdateBoundsRect(paintWrapper, pointRadius, actualTrackRadius);
         paintWrapper->FlushContentModifier();
     }
 
