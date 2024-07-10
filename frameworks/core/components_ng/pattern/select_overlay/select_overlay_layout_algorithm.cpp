@@ -279,7 +279,12 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
         isBackButtonVisible =
             backButton->GetLayoutProperty()->GetVisibilityValue(VisibleType::INVISIBLE) == VisibleType::VISIBLE;
     }
-    if (!isBackButtonVisible) {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, OffsetF());
+    auto selectOverlayNode = DynamicCast<SelectOverlayNode>(host);
+    CHECK_NULL_RETURN(selectOverlayNode, OffsetF());
+    auto isExtensionMEnu = selectOverlayNode->GetIsExtensionMenu();
+    if (!isBackButtonVisible && !isExtensionMEnu) {
         menuWidth_ = width;
         menuHeight_ = height;
     } else {
