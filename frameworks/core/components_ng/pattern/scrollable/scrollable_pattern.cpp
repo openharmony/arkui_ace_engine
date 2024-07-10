@@ -2367,8 +2367,8 @@ void ScrollablePattern::SuggestOpIncGroup(bool flag)
         CHECK_NULL_VOID(parent);
         parent->SetSuggestOpIncActivatedOnce();
         // get 1st layer
-        std::string path(host->GetHostTag());
-        frameNode->FindSuggestOpIncNode(path, host->GetGeometryNode()->GetFrameSize(), 0);
+        std::string path("\\>");
+        host->FindSuggestOpIncNode(path, host->GetGeometryNode()->GetFrameSize(), 0);
     }
 }
 
