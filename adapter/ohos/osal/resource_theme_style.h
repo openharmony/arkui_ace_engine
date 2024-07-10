@@ -37,7 +37,8 @@ public:
 
     void ParseContent() override;
     void CheckThemeStyleLoaded() override;
-    void SetPromiseValue() {
+    void SetPromiseValue() 
+    {
         promise_.set_value();
     }
 protected:
