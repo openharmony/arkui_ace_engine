@@ -57,18 +57,23 @@ ohos_shared_library("arcalphabetindexer") {
   ]
   include_dirs += additional_include_dirs
 
-  deps = [ "$ace_root/build:libace_compatible" ]
-
   external_deps = [
     "bounds_checking_function:libsec_static",
     "hilog:libhilog",
     "napi:ace_napi",
   ]
 
+  deps = []
   if (use_mingw_win || use_mac || use_linux) {
-    deps += [ ":gen_obj_src_arkui_arcalphabetindexer_abc_preview" ]
+    deps += [
+      "$ace_root/build:libace_compatible",
+      ":gen_obj_src_arkui_arcalphabetindexer_abc_preview"
+    ]
   } else {
-    deps += [ ":gen_obj_src_arkui_arcalphabetindexer_abc" ]
+    deps += [
+      "$ace_root/build:libace_compatible",
+      ":gen_obj_src_arkui_arcalphabetindexer_abc"
+    ]
     external_deps += [
       "ets_runtime:libark_jsruntime",
       "napi:ace_container_scope",
