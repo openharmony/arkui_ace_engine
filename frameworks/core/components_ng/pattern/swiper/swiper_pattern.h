@@ -539,6 +539,7 @@ public:
     void StopAutoPlay();
     void StartAutoPlay();
     void StopTranslateAnimation();
+    void StopSpringAnimationImmediately();
     void StopSpringAnimation();
     void DumpAdvanceInfo() override;
     int32_t GetLoopIndex(int32_t originalIndex) const;
