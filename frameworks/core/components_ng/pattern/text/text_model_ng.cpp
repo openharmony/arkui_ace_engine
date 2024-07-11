@@ -479,6 +479,16 @@ void TextModelNG::SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& val
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMaxFontSize, value, frameNode);
 }
 
+void TextModelNG::SetMinFontScale(FrameNode* frameNode, const float value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, value, frameNode);
+}
+
+void TextModelNG::SetMaxFontScale(FrameNode* frameNode, const float value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, value, frameNode);
+}
+
 void TextModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontFamily, value, frameNode);

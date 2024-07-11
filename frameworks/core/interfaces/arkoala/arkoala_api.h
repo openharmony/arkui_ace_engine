@@ -1912,6 +1912,10 @@ struct ArkUITextModifier {
     void (*resetTextOnCopy)(ArkUINodeHandle node);
     void (*setTextOnTextSelectionChange)(ArkUINodeHandle node, void* callback);
     void (*resetTextOnTextSelectionChange)(ArkUINodeHandle node);
+    void (*setTextMinFontScale)(ArkUINodeHandle node, ArkUI_Float32 number);
+    void (*resetTextMinFontScale)(ArkUINodeHandle node);
+    void (*setTextMaxFontScale)(ArkUINodeHandle node, ArkUI_Float32 number);
+    void (*resetTextMaxFontScale)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
