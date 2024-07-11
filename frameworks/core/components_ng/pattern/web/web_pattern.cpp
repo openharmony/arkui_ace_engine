@@ -3299,7 +3299,6 @@ bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange type: %{public}d", type);
     if (isHoverExit_ && type == OHOS::NWeb::CursorType::CT_NONE) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "OnCursorChange isHoverExit_ is true type: %{public}d", type);
         TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange reciving unexpected hide command");
         return false;
     }
