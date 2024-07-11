@@ -693,25 +693,25 @@ void JSSearch::OnSubmit(const JSCallbackInfo& info)
     SearchModel::GetInstance()->SetOnSubmit(std::move(callback));
 }
 
-JSRef<JSVal> JSSearch::CreateJsOnChangeObj(const TextRange& textRange)
+JSRef<JSVal> JSSearch::CreateJsOnChangeObj(const PreviewText& previewText)
 {
-    JSRef<JSObject> range = JSRef<JSObject>::New();
-    range->SetPropertyObject("start", JSRef<JSVal>::Make(ToJSValue(textRange.start)));
-    range->SetPropertyObject("end", JSRef<JSVal>::Make(ToJSValue(textRange.end)));
-    return JSRef<JSVal>::Cast(range);
+    JSRef<JSObject> previewTextObj = JSRef<JSObject>::New();
+    previewTextObj->SetProperty<int32_t>("offset", previewText.offset);
+    previewTextObj->SetProperty<std::string>("value", previewText.value);
+    return JSRef<JSVal>::Cast(previewTextObj);
 }
 
 void JSSearch::OnChange(const JSCallbackInfo& info)
 {
     auto jsValue = info[0];
     CHECK_NULL_VOID(jsValue->IsFunction());
-    auto jsChangeFunc = AceType::MakeRefPtr<JsCitedEventFunction<TextRange, 2>>(
+    auto jsChangeFunc = AceType::MakeRefPtr<JsCitedEventFunction<PreviewText, 2>>(
         JSRef<JSFunc>::Cast(jsValue), CreateJsOnChangeObj);
     auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsChangeFunc)](
-        const std::string& val, TextRange& range) {
+        const std::string& val, PreviewText& previewText) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onChange");
-        func->Execute(val, range);
+        func->Execute(val, previewText);
     };
     SearchModel::GetInstance()->SetOnChange(std::move(onChange));
 }

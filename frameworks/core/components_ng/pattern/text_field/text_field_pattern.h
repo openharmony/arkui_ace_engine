@@ -1307,6 +1307,16 @@ public:
         return hasPreviewText_ ? previewTextEnd_ : selectController_->GetCaretIndex();
     }
 
+    std::string GetPreviewTextValue() const
+    {
+        return contentController_->GetSelectedValue(GetPreviewTextStart(), GetPreviewTextEnd());
+    }
+
+    std::string GetBodyTextValue() const
+    {
+        return hasPreviewText_ ? bodyTextInPreivewing_ : GetTextValue();
+    }
+
     bool IsPressSelectedBox()
     {
         return isPressSelectedBox_;
@@ -1727,11 +1737,12 @@ private:
     bool isFocusTextColorSet_ = false;
     bool isFocusPlaceholderColorSet_ = false;
     Dimension previewUnderlineWidth_ = 2.0_vp;
-    bool hasSupportedPreviewText_ = false;
+    bool hasSupportedPreviewText_ = true;
     bool hasPreviewText_ = false;
     std::queue<PreviewTextInfo> previewTextOperation_;
     int32_t previewTextStart_ = -1;
     int32_t previewTextEnd_ = -1;
+    std::string bodyTextInPreivewing_;
     PreviewRange lastCursorRange_ = {};
     bool showKeyBoardOnFocus_ = true;
     bool isTextSelectionMenuShow_ = true;

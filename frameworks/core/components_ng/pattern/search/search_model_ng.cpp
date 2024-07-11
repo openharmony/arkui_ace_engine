@@ -447,7 +447,7 @@ void SearchModelNG::SetOnSubmit(std::function<void(const std::string&)>&& onSubm
     eventHub->SetOnSubmit(std::move(onSubmit));
 }
 
-void SearchModelNG::SetOnChange(std::function<void(const std::string&, TextRange&)>&& onChange)
+void SearchModelNG::SetOnChange(std::function<void(const std::string&, PreviewText&)>&& onChange)
 {
     auto searchTextField = GetSearchTextFieldFrameNode();
     CHECK_NULL_VOID(searchTextField);
@@ -458,9 +458,9 @@ void SearchModelNG::SetOnChange(std::function<void(const std::string&, TextRange
     auto pattern = frameNode->GetPattern<SearchPattern>();
     CHECK_NULL_VOID(pattern);
     auto searchChangeFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)),
-        onChange](const std::string& value, TextRange& range) {
+        onChange](const std::string& value, PreviewText& previewText) {
         if (onChange) {
-            onChange(value, range);
+            onChange(value, previewText);
         }
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -681,7 +681,9 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
     pattern->InitSurfaceChangedCallback();
     pattern->InitSurfacePositionChangedCallback();
     pattern->SetTextFadeoutCapacity(true);
-    pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
+    if (pipeline->GetHasPreviewTextOption()) {
+        pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
+    }
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
     auto renderContext = frameNode->GetRenderContext();
@@ -1422,7 +1424,7 @@ void SearchModelNG::SetOnSubmit(FrameNode* frameNode, std::function<void(const s
     eventHub->SetOnSubmit(std::move(onSubmit));
 }
 
-void SearchModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const std::string&, TextRange&)>&& onChange)
+void SearchModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const std::string&, PreviewText&)>&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
     auto searchTextField = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
@@ -1431,7 +1433,18 @@ void SearchModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const s
     CHECK_NULL_VOID(eventHub);
     auto pattern = frameNode->GetPattern<SearchPattern>();
     CHECK_NULL_VOID(pattern);
-    eventHub->SetOnChange(std::move(onChange));
+    auto searchChangeFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)),
+        onChange](const std::string& value, PreviewText& previewText) {
+        if (onChange) {
+            onChange(value, previewText);
+        }
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto searchPattern = AceType::DynamicCast<SearchPattern>(pattern);
+        CHECK_NULL_VOID(searchPattern);
+        searchPattern->UpdateChangeEvent(value);
+    };
+    eventHub->SetOnChange(std::move(searchChangeFunc));
 }
 
 void SearchModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func)

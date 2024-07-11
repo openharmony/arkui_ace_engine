@@ -1703,8 +1703,10 @@ void TextFieldPattern::FireEventHubOnChange(const std::string& text)
 
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
-    TextRange range {};
-    eventHub->FireOnChange(text, range);
+    PreviewText previewText;
+    previewText.offset = GetPreviewTextStart();
+    previewText.value = GetPreviewTextValue();
+    eventHub->FireOnChange(text, previewText);
 }
 
 void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
@@ -2839,19 +2841,16 @@ bool TextFieldPattern::FireOnTextChangeEvent()
         }
     }
     auto textCache = layoutProperty->GetValueValue("");
-    auto rangeCache = layoutProperty->GetPreviewRangeValue({GetPreviewTextStart(), GetPreviewTextEnd()});
-    TextRange curPreviewRange = {GetPreviewTextStart(), GetPreviewTextEnd()};
-    if (textCache == contentController_->GetTextValue() && rangeCache == curPreviewRange) {
+    auto previewTextCache = layoutProperty->GetPreviewTextValue({GetPreviewTextStart(), ""});
+    PreviewText curPreviewText = {GetPreviewTextStart(), GetPreviewTextValue()};
+    if (textCache == contentController_->GetTextValue() && previewTextCache == curPreviewText) {
         return false;
     }
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
     AutoFillValueChanged();
     auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, false);
-    bool hasPreviewTextOption = pipeline->GetHasPreviewTextOption();
-    if (!GetIsPreviewText() || hasPreviewTextOption) {
-        AddTextFireOnChange();
-    }
+    AddTextFireOnChange();
     auto context = host->GetContextRefPtr();
     CHECK_NULL_RETURN(context, false);
     auto taskExecutor = context->GetTaskExecutor();
@@ -2888,11 +2887,11 @@ void TextFieldPattern::AddTextFireOnChange()
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateValue(pattern->GetTextContentController()->GetTextValue());
-        TextRange range;
-        range.start = pattern->GetPreviewTextStart();
-        range.end = pattern->GetPreviewTextEnd();
-        layoutProperty->UpdatePreviewRange(range);
-        eventHub->FireOnChange(pattern->GetTextContentController()->GetTextValue(), range);
+        PreviewText previewText;
+        previewText.offset = pattern->GetPreviewTextStart();
+        previewText.value = pattern->GetPreviewTextValue();
+        layoutProperty->UpdatePreviewText(previewText);
+        eventHub->FireOnChange(pattern->GetBodyTextValue(), previewText);
     });
 }
 
@@ -7472,6 +7471,9 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    if (!hasPreviewText_) {
+        bodyTextInPreivewing_ = GetTextValue();
+    }
     auto rangeStart = info.range.start;
     auto rangeEnd = info.range.end;
     auto start = GetPreviewTextStart();
@@ -7540,6 +7542,7 @@ void TextFieldPattern::FinishTextPreviewOperation()
     }
 
     hasPreviewText_ = false;
+    bodyTextInPreivewing_ = "";
     previewTextStart_ = PREVIEW_TEXT_RANGE_DEFAULT;
     previewTextEnd_ = PREVIEW_TEXT_RANGE_DEFAULT;
     auto host = GetHost();

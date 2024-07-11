@@ -54,7 +54,7 @@ public:
     virtual void SetHeight(const Dimension& height);
     virtual void SetBackBorder() {};
     virtual void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit);
-    virtual void SetOnChange(std::function<void(const std::string&, TextRange&)>&& onChange);
+    virtual void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& onChange);
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) = 0;
     virtual void SetOnScroll(std::function<void(float, float)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(const std::string&)>&& func);
