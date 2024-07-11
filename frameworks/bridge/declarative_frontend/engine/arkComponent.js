@@ -6334,7 +6334,7 @@ class ImageBorderModifier extends ModifierWithKey {
       let rightColor;
       let topColor;
       let bottomColor;
-      if (!isUndefined(this.value.color) && this.value.color != null) {
+      if (!isUndefined(this.value.color) && this.value.color !== null) {
         if (isNumber(this.value.color) || isString(this.value.color) || isResource(this.value.color)) {
           leftColor = this.value.color;
           rightColor = this.value.color;
@@ -6351,7 +6351,7 @@ class ImageBorderModifier extends ModifierWithKey {
       let topRight;
       let bottomLeft;
       let bottomRight;
-      if (!isUndefined(this.value.radius) && this.value.radius != null) {
+      if (!isUndefined(this.value.radius) && this.value.radius !== null) {
         if (isNumber(this.value.radius) || isString(this.value.radius) || isResource(this.value.radius)) {
           topLeft = this.value.radius;
           topRight = this.value.radius;
@@ -6368,7 +6368,7 @@ class ImageBorderModifier extends ModifierWithKey {
       let styleRight;
       let styleBottom;
       let styleLeft;
-      if (!isUndefined(this.value.style) && this.value.style != null) {
+      if (!isUndefined(this.value.style) && this.value.style !== null) {
         if (isNumber(this.value.style) || isString(this.value.style) || isResource(this.value.style)) {
           styleTop = this.value.style;
           styleRight = this.value.style;
