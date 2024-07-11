@@ -1153,7 +1153,7 @@ ArkUINativeModuleValue TextBridge::ResetOnTextSelectionChange(ArkUIRuntimeCallIn
 ArkUINativeModuleValue TextBridge::SetMarqueeOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> startArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> fromStartArg = runtimeCallInfo->GetCallArgRef(NUM_2);
@@ -1178,16 +1178,18 @@ ArkUINativeModuleValue TextBridge::SetMarqueeOptions(ArkUIRuntimeCallInfo* runti
 
     bool isValid = startArg->IsBoolean() || fromStartArg->IsBoolean() || stepArg->IsNumber() || loopArg->IsNumber()
         || delayArg->IsNumber() || fadeoutArg->IsBoolean() || marqueeStartPolicyArg->IsNumber();
-
-    isValid ? GetArkUINodeModifiers()->getTextModifier()->setTextMarqueeOptions(nativeNode, textMarqueeOptions.get())
-        : GetArkUINodeModifiers()->getTextModifier()->resetTextMarqueeOptions(nativeNode);
+    if (isValid) {
+        GetArkUINodeModifiers()->getTextModifier()->setTextMarqueeOptions(nativeNode, textMarqueeOptions.get());
+    } else {
+        GetArkUINodeModifiers()->getTextModifier()->resetTextMarqueeOptions(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
 ArkUINativeModuleValue TextBridge::ResetMarqueeOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextModifier()->resetTextMarqueeOptions(nativeNode);
@@ -1197,7 +1199,7 @@ ArkUINativeModuleValue TextBridge::ResetMarqueeOptions(ArkUIRuntimeCallInfo* run
 ArkUINativeModuleValue TextBridge::SetOnMarqueeStateChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
@@ -1224,7 +1226,7 @@ ArkUINativeModuleValue TextBridge::SetOnMarqueeStateChange(ArkUIRuntimeCallInfo*
 ArkUINativeModuleValue TextBridge::ResetOnMarqueeStateChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextModifier()->resetOnMarqueeStateChange(nativeNode);
