@@ -122,10 +122,11 @@ void ArcIndexerPattern::InitTouchEvent ()
             if (!indexerPattern->AtArcHotArea(offset)) {
                 return;
             }
-            if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+            auto touchType = info.GetTouches().front().GetTouchType();
+            if (touchType == TouchType::DOWN) {
                 indexerPattern->isTouch_ = true;
                 indexerPattern->OnTouchDown(info);
-            } else if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+            } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
                 indexerPattern->isTouch_ = false;
                 indexerPattern->OnTouchUp(info);
             }
