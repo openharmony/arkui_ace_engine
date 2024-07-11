@@ -1135,18 +1135,18 @@ HWTEST_F(ListSwipeTestNg, SwiperItem020, TestSize.Level1)
     CreateDone(frameNode_);
     const RefPtr<ListItemPattern> listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, FIRSTITEM_INDEX);
     const float maxDistance = END_NODE_LEN + DELETE_AREA_DISTANCE;
+
     /**
      * @tc.steps: step1. Swipe end greater than maxDistance
      * @tc.expected: Can continue to move
      */
-    float moveDelta = -1;
     HandleDragStart(FIRSTITEM_INDEX);
     HandleDragUpdate(FIRSTITEM_INDEX, -maxDistance);
-    HandleDragUpdate(FIRSTITEM_INDEX, moveDelta);
     HandleDragEnd(FIRSTITEM_INDEX);
     EXPECT_EQ(curState, SwipeActionState::EXPANDED);
+
     OnFinishFunc onFinishCallBack;
-    listItemPattern->CloseSwipeAction(std::move(onFinishCallBack));
+    pattern_->positionController_->CloseAllSwipeActions(std::move(onFinishCallBack));
     EXPECT_EQ(curState, SwipeActionState::COLLAPSED);
 }
 
