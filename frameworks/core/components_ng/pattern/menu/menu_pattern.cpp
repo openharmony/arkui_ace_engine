@@ -1549,6 +1549,9 @@ void MenuPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (pattern->IsMenuScrollable()) {
+            return;
+        }
         auto offsetX = static_cast<float>(info.GetOffsetX());
         auto offsetY = static_cast<float>(info.GetOffsetY());
         auto offsetPerSecondX = info.GetVelocity().GetOffsetPerSecond().GetX();
@@ -1560,6 +1563,9 @@ void MenuPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionScrollEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (pattern->IsMenuScrollable()) {
+            return;
+        }
         auto offsetX = static_cast<float>(info.GetOffsetX());
         auto offsetY = static_cast<float>(info.GetOffsetY());
         auto offsetPerSecondX = info.GetVelocity().GetOffsetPerSecond().GetX();
@@ -1732,6 +1738,20 @@ RefPtr<UINode> MenuPattern::GetOutsideForEachMenuItem(const RefPtr<UINode>& forE
         return nullptr;
     }
 
+}
+
+bool MenuPattern::IsMenuScrollable() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto firstChild = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+    CHECK_NULL_RETURN(firstChild, false);
+    if (firstChild->GetTag() == V2::SCROLL_ETS_TAG) {
+        auto scrollPattern = firstChild->GetPattern<ScrollPattern>();
+        CHECK_NULL_RETURN(scrollPattern, false);
+        return scrollPattern->IsScrollable() && Positive(scrollPattern->GetScrollableDistance());
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace::NG
