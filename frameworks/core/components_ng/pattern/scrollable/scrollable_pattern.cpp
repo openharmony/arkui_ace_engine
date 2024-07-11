@@ -1142,15 +1142,13 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
             ContainerScope scope(id);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            if (pattern->isAnimationStop_) {
-                pattern->SetUiDvsyncSwitch(false);
-                pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
-                    SceneStatus::END);
-            }
+            pattern->SetUiDvsyncSwitch(false);
             useTotalOffset = true;
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
             AceAsyncTraceEnd(host->GetId(), (SCROLLER_ANIMATION + std::to_string(host->GetAccessibilityId())).c_str());
+            pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
+                SceneStatus::END);
             pattern->SetScrollEdgeType(ScrollEdgeType::SCROLL_NONE);
     });
     NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::START);
@@ -1186,13 +1184,10 @@ void ScrollablePattern::PlayCurveAnimation(
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             auto host = pattern->GetHost();
-            if (pattern->isAnimationStop_) {
-                pattern->SetUiDvsyncSwitch(false);
-                pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
-                    SceneStatus::END);
-            }
             CHECK_NULL_VOID(host);
+            pattern->SetUiDvsyncSwitch(false);
             AceAsyncTraceEnd(host->GetId(), (SCROLLER_ANIMATION + std::to_string(host->GetAccessibilityId())).c_str());
+            pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(), SceneStatus::END);
         });
     NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::START);
 }
