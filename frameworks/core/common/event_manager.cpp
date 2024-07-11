@@ -1675,6 +1675,10 @@ bool TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::Keyboa
 
 bool EventManager::DispatchKeyboardShortcut(const KeyEvent& event)
 {
+    auto container = Container::GetContainer(instanceId_);
+    if (container && container->GetUIContentType() == UIContentType::SECURITY_UI_EXTENSION) {
+        return false;
+    }
     if (event.action != KeyAction::DOWN) {
         return false;
     }
