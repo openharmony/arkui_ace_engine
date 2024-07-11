@@ -3630,6 +3630,18 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
     pipeline->AddAnimationClosure(bindSheetTask);
 }
 
+void OverlayManager::UpdateSheetMaskBackgroundColor(
+    const RefPtr<FrameNode>& maskNode, const RefPtr<RenderContext>& maskRenderContext, const SheetStyle& sheetStyle)
+{
+    if (sheetStyle.maskColor.has_value()) {
+        maskRenderContext->UpdateBackgroundColor(sheetStyle.maskColor.value());
+    } else {
+        maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
+            HitTestMode::HTMTRANSPARENT);
+        maskRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    }
+}
+
 void OverlayManager::InitSheetMask(
     const RefPtr<FrameNode>& maskNode, const RefPtr<FrameNode>& sheetNode, const SheetStyle& sheetStyle)
 {
@@ -3643,13 +3655,7 @@ void OverlayManager::InitSheetMask(
     CHECK_NULL_VOID(sheetLayoutProps);
     maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMDEFAULT);
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        if (sheetStyle.maskColor.has_value()) {
-            maskRenderContext->UpdateBackgroundColor(sheetStyle.maskColor.value());
-        } else {
-            maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
-                HitTestMode::HTMTRANSPARENT);
-            maskRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        }
+        UpdateSheetMaskBackgroundColor(maskNode, maskRenderContext, sheetStyle);
     } else {
         maskRenderContext->UpdateBackgroundColor(sheetStyle.maskColor.value_or(sheetTheme->GetMaskColor()));
         auto eventConfirmHub = maskNode->GetOrCreateGestureEventHub();
@@ -4315,13 +4321,7 @@ void OverlayManager::UpdateSheetMask(const RefPtr<FrameNode>& maskNode,
     maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMDEFAULT);
 
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        if (sheetStyle.maskColor.has_value()) {
-            maskRenderContext->UpdateBackgroundColor(sheetStyle.maskColor.value());
-        } else {
-            maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
-                HitTestMode::HTMTRANSPARENT);
-            maskRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        }
+        UpdateSheetMaskBackgroundColor(maskNode, maskRenderContext, sheetStyle);
     } else {
         if (sheetStyle.maskColor.has_value() || !isPartialUpdate) {
             maskRenderContext->UpdateBackgroundColor(sheetStyle.maskColor.value_or(sheetTheme->GetMaskColor()));
@@ -4349,15 +4349,9 @@ void OverlayManager::UpdateSheetMask(const RefPtr<FrameNode>& maskNode,
             return;
         }
 
-        if (!sheetStyle.interactive.has_value() && !isPartialUpdate) {
-            if (sheetNode->GetPattern<SheetPresentationPattern>()->GetSheetType() == SheetType::SHEET_POPUP) {
-                maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
-                    HitTestMode::HTMTRANSPARENT);
-                maskRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-                eventConfirmHub->RemoveClickEvent(iter->second);
-                sheetMaskClickEventMap_.erase(maskNodeId);
-            }
-        } else if (sheetStyle.interactive == true) {
+        if ((!sheetStyle.interactive.has_value() && !isPartialUpdate &&
+                sheetNode->GetPattern<SheetPresentationPattern>()->GetSheetType() == SheetType::SHEET_POPUP) ||
+            sheetStyle.interactive.value_or(false)) {
             maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
                 HitTestMode::HTMTRANSPARENT);
             maskRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);

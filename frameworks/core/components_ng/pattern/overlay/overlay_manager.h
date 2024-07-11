@@ -625,6 +625,8 @@ private:
         std::function<void()>&& sheetSpringBack = nullptr);
     SheetStyle UpdateSheetStyle(
         const RefPtr<FrameNode>& sheetNode, const SheetStyle& sheetStyle, bool isPartialUpdate);
+    void UpdateSheetMaskBackgroundColor(const RefPtr<FrameNode>& maskNode,
+        const RefPtr<RenderContext>& maskRenderContext, const SheetStyle& sheetStyle);
     void UpdateSheetMask(const RefPtr<FrameNode>& maskNode,
         const RefPtr<FrameNode>& sheetNode, const SheetStyle& sheetStyle, bool isPartialUpdate = false);
     void CleanViewContextMap(int32_t instanceId, int32_t sheetContentId)
