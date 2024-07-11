@@ -22,6 +22,10 @@ class ArkDatePickerComponent extends ArkComponent implements DatePickerAttribute
     modifierWithKey(this._modifiersWithKeys, DatePickerLunarModifier.identity, DatePickerLunarModifier, value);
     return this;
   }
+  digitalCrownSensitivity(value: Optional<CrownSensitivity>): DatePickerAttribute {
+    modifierWithKey(this._modifiersWithKeys, DatePickerDigitalCrownSensitivityModifier.identity, DatePickerDigitalCrownSensitivityModifier, value);
+    return this;
+  }
   disappearTextStyle(value: PickerTextStyle): DatePickerAttribute {
     modifierWithKey(this._modifiersWithKeys, DatePickerDisappearTextStyleModifier.identity,
       DatePickerDisappearTextStyleModifier, value);
@@ -63,6 +67,20 @@ class DatePickerLunarModifier extends ModifierWithKey<boolean> {
       getUINativeModule().datePicker.resetLunar(node);
     } else {
       getUINativeModule().datePicker.setLunar(node, this.value);
+    }
+  }
+}
+
+class DatePickerDigitalCrownSensitivityModifier extends ModifierWithKey<Optional<CrownSensitivity>> {
+  constructor(value: Optional<CrownSensitivity>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('digitalCrownSensitivity');
+  applyPeer(node: KNode, reset: boolean) {
+    if (reset) {
+      getUINativeModule().datePicker.resetDigitalCrownSensitivity(node);
+    } else {
+      getUINativeModule().datePicker.setDigitalCrownSensitivity(node, this.value);
     }
   }
 }

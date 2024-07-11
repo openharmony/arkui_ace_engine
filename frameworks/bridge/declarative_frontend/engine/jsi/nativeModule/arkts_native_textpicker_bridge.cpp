@@ -17,6 +17,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_type_define.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -116,7 +117,17 @@ ArkUINativeModuleValue TextPickerBridge::SetCanLoop(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> canLoopArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    auto context = reinterpret_cast<FrameNode*>(nativeNode)->GetContext();
+    CHECK_NULL_RETURN(context, panda::NativePointerRef::New(vm, nullptr));
+    auto themeManager = context->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, panda::JSValueRef::Undefined(vm));
+    auto pickerTheme = themeManager->GetTheme<PickerTheme>();
+
     bool canLoop = true;
+    if (pickerTheme->IsCircleDial()) {
+        canLoop = false;
+    }
+
     if (canLoopArg->IsBoolean()) {
         canLoop = canLoopArg->ToBoolean(vm)->Value();
     }
@@ -605,6 +616,35 @@ ArkUINativeModuleValue TextPickerBridge::ResetTextPickerEnableHapticFeedback(Ark
     auto textPickerModifier = modifiers->getTextPickerModifier();
     CHECK_NULL_RETURN(textPickerModifier, panda::NativePointerRef::New(vm, nullptr));
     textPickerModifier->resetTextPickerEnableHapticFeedback(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextPickerBridge::SetDigitalCrownSensitivity(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0: index of parameter frameNode
+    Local<JSValueRef> crownSensitivityArg = runtimeCallInfo->GetCallArgRef(1); // 1: index of parameter crown sensitivity
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    int32_t crownSensitivity = OHOS::Ace::NG::DEFAULT_CROWNSENSITIVITY;
+    if (crownSensitivityArg->IsNumber()) {
+        crownSensitivity = crownSensitivityArg->ToNumber(vm)->Value();
+    }
+    auto modifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(modifier, panda::NativePointerRef::New(vm, nullptr));
+    modifier->getTextPickerModifier()->setTextPickerDigitalCrownSensitivity(nativeNode, crownSensitivity);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextPickerBridge::ResetDigitalCrownSensitivity(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0: index of parameter frameNode
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    auto modifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(modifier, panda::NativePointerRef::New(vm, nullptr));
+    modifier->getTextPickerModifier()->resetTextPickerDigitalCrownSensitivity(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

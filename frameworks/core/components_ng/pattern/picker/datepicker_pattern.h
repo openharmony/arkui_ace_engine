@@ -763,6 +763,7 @@ public:
     void ColumnPatternInitHapticController();
     void ColumnPatternInitHapticController(const RefPtr<FrameNode>& columnNode);
 
+    void SetDigitalCrownSensitivity(int32_t crownSensitivity);
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -800,6 +801,16 @@ private:
     void ShowColumnByDatePickMode();
     void UpdateStackPropVisibility(const RefPtr<FrameNode>& stackNode,
         const VisibleType visibleType, const int32_t weight);
+#ifdef ARKUI_CIRCLE_FEATURE
+    void ClearFocus();
+    void SetDefaultFocus();
+#endif
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    void InitOnCrownEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnCrownEvent(const CrownEvent& event);
+#endif
+    void InitFocusKeyEvent();
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
@@ -885,6 +896,9 @@ private:
     bool isHapticChanged_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
+#ifdef ARKUI_CIRCLE_FEATURE
+    std::string selectedColumnId_;
+#endif
 };
 } // namespace OHOS::Ace::NG
 

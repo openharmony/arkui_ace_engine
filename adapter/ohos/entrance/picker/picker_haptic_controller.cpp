@@ -19,7 +19,11 @@
 namespace OHOS::Ace::NG {
 namespace {
 const std::string AUDIO_TEST_URI = "/system/etc/arkui/timepicker.ogg";
+#ifdef SUPPORT_DIGITAL_CROWN
+const std::string EFFECT_ID_NAME = "watchhaptic.feedback.crown.strength3";
+#else
 const std::string EFFECT_ID_NAME = "haptic.clock.timer";
+#endif
 constexpr size_t SPEED_THRESHOLD_156_MM_PER_SEC = 156;
 constexpr size_t SPEED_PLAY_ONCE_5_MM_PER_SEC = 5;
 } // namespace

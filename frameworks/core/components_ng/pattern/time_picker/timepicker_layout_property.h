@@ -43,6 +43,7 @@ public:
         value->propDisappearTextStyle_ = CloneDisappearTextStyle();
         value->propTextStyle_ = CloneTextStyle();
         value->propSelectedTextStyle_ = CloneSelectedTextStyle();
+        value->propDigitalCrownSensitivity_ = CloneDigitalCrownSensitivity();
         return value;
     }
 
@@ -53,6 +54,7 @@ public:
         ResetDisappearTextStyle();
         ResetTextStyle();
         ResetSelectedTextStyle();
+        ResetDigitalCrownSensitivity();
     }
 
     void FontAddJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -122,6 +124,12 @@ public:
             options->Put("second", TimeFormat::GetSecondFormat(GetPrefixSecondValue(0)).c_str());
         }
         json->PutExtAttr("dateTimeOptions", options, filter);
+        auto crownSensitivity = GetDigitalCrownSensitivity();
+        if (crownSensitivity.has_value()) {
+            json->PutExtAttr("digitalCrownSensitivity", std::to_string(crownSensitivity.value()).c_str(), filter);
+        } else {
+            json->PutExtAttr("digitalCrownSensitivity", std::to_string(DEFAULT_CROWNSENSITIVITY).c_str(), filter);
+        }
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsUseMilitaryTime, bool, PROPERTY_UPDATE_MEASURE);
@@ -162,7 +170,7 @@ public:
         SelectedTextStyle, FontFamily, SelectedFontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
         SelectedTextStyle, ItalicFontStyle, SelectedFontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
-
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DigitalCrownSensitivity, int32_t, PROPERTY_UPDATE_MEASURE);
 private:
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerLayoutProperty);
 };

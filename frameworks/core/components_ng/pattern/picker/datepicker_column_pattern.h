@@ -32,6 +32,13 @@
 #include "core/components_ng/pattern/picker/toss_animation_controller.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/common/vibrator/vibrator_utils.h"
+#include "core/event/crown_event.h"
+#endif
+#ifdef ARKUI_CIRCLE_FEATURE
+#include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
+#endif
 
 namespace OHOS::Ace::NG {
 
@@ -81,11 +88,19 @@ enum class DatePickerOptionIndex {
     COLUMN_INDEX_6,
 };
 
+#ifdef ARKUI_CIRCLE_FEATURE
+class DatePickerColumnPattern : public LinearLayoutPattern, public PickerColumnPatternCircleUtils<std::string> {
+#else
 class DatePickerColumnPattern : public LinearLayoutPattern {
+#endif
     DECLARE_ACE_TYPE(DatePickerColumnPattern, LinearLayoutPattern);
 
 public:
+#ifdef ARKUI_CIRCLE_FEATURE
+    DatePickerColumnPattern() : LinearLayoutPattern(true), PickerColumnPatternCircleUtils("") {};
+#else
     DatePickerColumnPattern() : LinearLayoutPattern(true) {};
+#endif
 
     ~DatePickerColumnPattern() override = default;
 
@@ -313,6 +328,16 @@ private:
     void HandleDragStart(const GestureEvent& event);
     void HandleDragMove(const GestureEvent& event);
     void HandleDragEnd();
+#ifdef ARKUI_CIRCLE_FEATURE
+    void SetSelectedMarkFocus();
+    void ToUpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme) override;
+#endif
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    void HandleCrownBeginEvent(const CrownEvent& event) override;
+    void HandleCrownMoveEvent(const CrownEvent& event) override;
+    void HandleCrownEndEvent(const CrownEvent& event) override;
+#endif
     void CreateAnimation();
     void CreateAnimation(double from, double to);
     void ScrollOption(double delta, bool isJump = false);

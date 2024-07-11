@@ -29,6 +29,9 @@
 #include "core/components_ng/pattern/text_picker/textpicker_paint_method.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
 
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 using EventCallback = std::function<void(bool)>;
@@ -391,6 +394,7 @@ public:
     }
 
     void SetCanLoop(bool isLoop);
+    void SetDigitalCrownSensitivity(int32_t crownSensitivity);
 
     bool GetCanLoop()
     {
@@ -525,6 +529,8 @@ public:
 
 private:
     void OnModifyDone() override;
+    void InitCrownAndKeyEvent();
+    void ToSetCallBack();
     void SetLayoutDirection(TextDirection textDirection);
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -545,7 +551,14 @@ private:
     void UpdateColumnButtonStyles(const RefPtr<FrameNode>& columnNode, bool haveFocus, bool needMarkDirty);
     const RefPtr<FrameNode> GetFocusButtonNode() const;
     double CalculateHeight();
-
+#ifdef ARKUI_CIRCLE_FEATURE
+    void ClearFocus();
+    void SetDefaultFocus();
+#endif
+#ifdef SUPPORT_DIGITAL_CROWN
+    void InitOnCrownEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnCrownEvent(const CrownEvent& event);
+#endif
     void InitDisabled();
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintFocusState();
@@ -622,7 +635,7 @@ private:
     bool isPicker_ = true;
     bool isFiredSelectsChange_ = false;
     std::optional<std::string> firedSelectsStr_;
-    
+
     ItemDivider divider_;
     bool customDividerFlag_ = false;
     Dimension value_;
@@ -640,6 +653,10 @@ private:
     bool isDisableTextStyleAnimation_ = false;
     bool isEnableHaptic_ = true;
     bool isHapticChanged_ = false;
+#ifdef ARKUI_CIRCLE_FEATURE
+    int32_t selectedColumnId_ = INVALID_SELECTED_COLUMN_INDEX;
+    int32_t needSelectedColumnId_ = INVALID_SELECTED_COLUMN_INDEX;
+#endif
 };
 } // namespace OHOS::Ace::NG
 

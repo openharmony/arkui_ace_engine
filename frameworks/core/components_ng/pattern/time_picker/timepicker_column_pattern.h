@@ -30,6 +30,13 @@
 #include "core/components_ng/pattern/time_picker/timepicker_column_layout_algorithm.h"
 #include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/pattern/time_picker/toss_animation_controller.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#include "core/common/vibrator/vibrator_utils.h"
+#endif
+#ifdef ARKUI_CIRCLE_FEATURE
+#include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
+#endif
 
 namespace OHOS::Ace::NG {
 
@@ -79,11 +86,19 @@ enum class TimePickerOptionIndex {
     COLUMN_INDEX_6,
 };
 
+#ifdef ARKUI_CIRCLE_FEATURE
+class TimePickerColumnPattern : public LinearLayoutPattern, public PickerColumnPatternCircleUtils<std::string> {
+#else
 class TimePickerColumnPattern : public LinearLayoutPattern {
+#endif
     DECLARE_ACE_TYPE(TimePickerColumnPattern, LinearLayoutPattern);
 
 public:
+#ifdef ARKUI_CIRCLE_FEATURE
+    TimePickerColumnPattern() : LinearLayoutPattern(true), PickerColumnPatternCircleUtils("") {};
+#else
     TimePickerColumnPattern() : LinearLayoutPattern(true) {};
+#endif
 
     ~TimePickerColumnPattern() override = default;
 
@@ -349,6 +364,16 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
+
+#ifdef ARKUI_CIRCLE_FEATURE
+    void SetSelectedMarkFocus();
+    void ToUpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme) override;
+#endif
+#ifdef SUPPORT_DIGITAL_CROWN
+    void HandleCrownBeginEvent(const CrownEvent& event) override;
+    void HandleCrownMoveEvent(const CrownEvent& event) override;
+    void HandleCrownEndEvent(const CrownEvent& event) override;
+#endif
     RefPtr<TouchEventImpl> CreateItemTouchEventListener();
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(const GestureEvent& event);

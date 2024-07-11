@@ -30,12 +30,35 @@ namespace {
 constexpr float DIVIDER_LINE_WIDTH = 1.0f;
 } // namespace
 
+#ifdef ARKUI_CIRCLE_FEATURE
+CanvasDrawFunction DatePickerPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    CanvasDrawFunction drawFunction = GetContentDrawFunctionL<DataPickerRowLayoutProperty>(paintWrapper, pipeline);
+    if (!drawFunction) {
+        return nullptr;
+    }
+
+    return [weak = WeakClaim(this), drawFunction](RSCanvas& canvas) {
+        auto picker = weak.Upgrade();
+        CHECK_NULL_VOID(picker);
+        drawFunction(canvas);
+    };
+}
+#endif
+
 CanvasDrawFunction DatePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
+#ifdef ARKUI_CIRCLE_FEATURE
+    if (theme->IsCircleDial()) {
+        return nullptr;
+    }
+#endif
     auto dividerColor = theme->GetDividerColor();
 
     const auto& geometryNode = paintWrapper->GetGeometryNode();

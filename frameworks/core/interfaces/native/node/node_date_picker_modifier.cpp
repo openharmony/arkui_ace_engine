@@ -427,6 +427,20 @@ void ResetEnableHapticFeedback(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     DatePickerModelNG::SetEnableHapticFeedback(frameNode, true);
 }
+
+void SetDatePickerDigitalCrownSensitivity(ArkUINodeHandle node, int32_t CrownSensitivity)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetDigitalCrownSensitivity(frameNode, CrownSensitivity);
+}
+
+void ResetDatePickerDigitalCrownSensitivity(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetDigitalCrownSensitivity(frameNode, DEFAULT_CROWNSENSITIVITY);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -464,6 +478,8 @@ const ArkUIDatePickerModifier* GetDatePickerModifier()
         .getEnableHapticFeedback = GetEnableHapticFeedback,
         .setEnableHapticFeedback = SetEnableHapticFeedback,
         .resetEnableHapticFeedback = ResetEnableHapticFeedback,
+        .setDatePickerDigitalCrownSensitivity = SetDatePickerDigitalCrownSensitivity,
+        .resetDatePickerDigitalCrownSensitivity = ResetDatePickerDigitalCrownSensitivity,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
