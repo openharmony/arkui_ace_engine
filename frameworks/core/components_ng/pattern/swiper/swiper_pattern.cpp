@@ -2216,7 +2216,16 @@ bool SwiperPattern::CheckOverScroll(float offset)
             }
             break;
         case EdgeEffect::NONE:
-            if (IsOutOfBoundary(offset)) {
+            if (IsHorizontalAndRightToLeft()) {
+                if (IsOutOfBoundary(-offset)) {
+                    auto realOffset = IsOutOfStart(offset) ? - itemPosition_.begin()->second.startPos :
+                        CalculateVisibleSize() - itemPosition_.rbegin()->second.endPos;
+                    currentDelta_ = currentDelta_ + realOffset;
+                    HandleSwiperCustomAnimation(realOffset);
+                    MarkDirtyNodeSelf();
+                    return true;
+                }
+            } else if (IsOutOfBoundary(offset)) {
                 auto realOffset = IsOutOfStart(offset) ? -itemPosition_.begin()->second.startPos
                                                        : CalculateVisibleSize() - itemPosition_.rbegin()->second.endPos;
                 currentDelta_ = currentDelta_ - realOffset;
@@ -2231,7 +2240,8 @@ bool SwiperPattern::CheckOverScroll(float offset)
 
 bool SwiperPattern::SpringOverScroll(float offset)
 {
-    bool outOfBounds = isTouchPad_ ? IsOutOfBoundary(offset) : IsOutOfBoundary();
+    auto roffset = IsHorizontalAndRightToLeft() ? -offset : offset;
+    bool outOfBounds = isTouchPad_ ? IsOutOfBoundary(roffset) : IsOutOfBoundary();
     if (!outOfBounds) {
         return false;
     }
@@ -2264,9 +2274,9 @@ bool SwiperPattern::SpringOverScroll(float offset)
 bool SwiperPattern::FadeOverScroll(float offset)
 {
     if (IsHorizontalAndRightToLeft()) {
-        if (IsOutOfBoundary(-fadeOffset_ + offset)) {
-            auto beginIndex = TotalCount() - GetDisplayCount();
-            auto rbeginIndex = GetDisplayCount() - 1;
+        if (IsOutOfBoundary(fadeOffset_ - offset)) {
+            auto rbeginIndex = TotalCount() - GetDisplayCount();
+            auto beginIndex = GetDisplayCount() - 1;
             auto onlyUpdateFadeOffset = (itemPosition_.begin()->first == beginIndex && offset < 0.0f) ||
                                         (itemPosition_.rbegin()->first == rbeginIndex && offset > 0.0f);
             if (!IsVisibleChildrenSizeLessThanSwiper() && !onlyUpdateFadeOffset) {
@@ -2280,7 +2290,7 @@ bool SwiperPattern::FadeOverScroll(float offset)
             CHECK_NULL_RETURN(host, false);
             if (itemPosition_.begin()->first == beginIndex || itemPosition_.rbegin()->first == rbeginIndex) {
                 auto remainOffset = GetDistanceToEdge();
-                fadeOffset_ += (-offset - remainOffset);
+                fadeOffset_ += (remainOffset - offset);
             }
             host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
             MarkDirtyNodeSelf();
@@ -3527,8 +3537,8 @@ bool SwiperPattern::IsOutOfBoundary(float mainOffset) const
         return false;
     }
     if (IsHorizontalAndRightToLeft()) {
-        auto beginIndex = TotalCount() - GetDisplayCount();
-        auto rbeginIndex = GetDisplayCount() - 1;
+        auto rbeginIndex = TotalCount() - GetDisplayCount();
+        auto beginIndex = GetDisplayCount() - 1;
         auto startPos = itemPosition_.begin()->second.startPos;
         startPos = NearZero(startPos, PX_EPSILON) ? 0.0 : startPos;
         auto isOutOfStart = itemPosition_.begin()->first == beginIndex && GreatNotEqual(startPos - mainOffset, 0.0);
