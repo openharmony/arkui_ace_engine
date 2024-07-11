@@ -211,6 +211,9 @@ void SetTouchEventType(int32_t orgAction, TouchEvent& event)
         case OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_EXIT:
             event.type = TouchType::HOVER_EXIT;
             return;
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_HOVER_CANCEL:
+            event.type = TouchType::HOVER_CANCEL;
+            return;
         default:
             LOGW("unknown type");
             return;

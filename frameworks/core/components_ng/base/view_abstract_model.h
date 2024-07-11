@@ -251,6 +251,7 @@ public:
     virtual void SetOnKeyPreIme(OnKeyPreImeFunc&& onKeyCallback) {}
     virtual void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) = 0;
     virtual void SetOnHover(OnHoverFunc&& onHoverEventFunc) = 0;
+    virtual void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) = 0;
     virtual void SetOnDelete(std::function<void()>&& onDeleteCallback) = 0;
     virtual void SetOnAppear(std::function<void()>&& onAppearCallback) = 0;
     virtual void SetOnAttach(std::function<void()>&& onAttachCallback) = 0;
@@ -288,6 +289,7 @@ public:
     virtual void DisableOnKeyEvent() = 0;
     virtual void DisableOnKeyPreIme() {}
     virtual void DisableOnHover() = 0;
+    virtual void DisableOnAccessibilityHover() = 0;
     virtual void DisableOnMouse() = 0;
     virtual void DisableOnAppear() = 0;
     virtual void DisableOnDisAppear() = 0;
