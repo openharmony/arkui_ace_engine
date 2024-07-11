@@ -249,6 +249,7 @@ public:
     void DeleteForwardOperation(int32_t length);
     void HandleOnDelete(bool backward) override;
     void CreateHandles() override;
+    void GetEmojiSubStringRange(int32_t& start, int32_t& end);
 
     int32_t SetPreviewText(const std::string& previewValue, const PreviewRange range) override;
     void FinishTextPreview() override;
