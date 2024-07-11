@@ -38,6 +38,12 @@ public:
             endIndex_ = itemPosition.rbegin()->first;
             float itemsSize = itemPosition.rbegin()->second.endPos - itemPosition.begin()->second.startPos + space;
             estimateItemHeight_ = itemsSize / itemPosition.size() - space;
+            for (const auto& pos : itemPosition) {
+                if (pos.second.groupInfo && pos.second.groupInfo.value().averageHeight > 0) {
+                    groupedItemHeight_ = pos.second.groupInfo.value().averageHeight;
+                    break;
+                }
+            }
         }
     }
 
