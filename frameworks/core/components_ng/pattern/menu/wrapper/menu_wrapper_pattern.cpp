@@ -152,6 +152,13 @@ void MenuWrapperPattern::HandleInteraction(const TouchEventInfo& info)
             }
             lastTouchItem_ = currentTouchItem_;
         }
+        if (!currentTouchItem_ && lastTouchItem_) {
+            auto lastMenuItemPattern = lastTouchItem_->GetPattern<MenuItemPattern>();
+            CHECK_NULL_VOID(lastMenuItemPattern);
+            lastMenuItemPattern->SetBgBlendColor(Color::TRANSPARENT);
+            lastMenuItemPattern->PlayBgColorAnimation(false);
+            lastTouchItem_ = nullptr;
+        }
     } else if (lastTouchItem_) {
         auto lastMenuItemPattern = lastTouchItem_->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(lastMenuItemPattern);
