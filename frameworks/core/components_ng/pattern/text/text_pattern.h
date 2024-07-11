@@ -666,7 +666,7 @@ protected:
 
     virtual bool CanStartAITask()
     {
-        return copyOption_ != CopyOptions::None && textDetectEnable_ && enabled_ && dataDetectorAdapter_;
+        return textDetectEnable_ && enabled_ && dataDetectorAdapter_;
     };
 
     void OnAttachToMainTree() override
