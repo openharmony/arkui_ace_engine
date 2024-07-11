@@ -42,6 +42,7 @@
 #include "base/log/event_report.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/time_util.h"
@@ -2899,6 +2900,7 @@ void PipelineContext::OnShow()
     CHECK_RUN_ON(UI);
     onShow_ = true;
     window_->OnShow();
+    PerfMonitor::GetPerfMonitor()->SetAppForeground(true);
     RequestFrame();
     FlushWindowStateChangedCallback(true);
     AccessibilityEvent event;
@@ -2916,6 +2918,7 @@ void PipelineContext::OnHide()
     }
     onShow_ = false;
     window_->OnHide();
+    PerfMonitor::GetPerfMonitor()->SetAppForeground(false);
     RequestFrame();
     OnVirtualKeyboardAreaChange(Rect());
     FlushWindowStateChangedCallback(false);
