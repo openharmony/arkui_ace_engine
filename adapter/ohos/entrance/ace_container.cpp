@@ -1143,14 +1143,15 @@ UIContentErrorCode AceContainer::RunPage(
         return UIContentErrorCode::NULL_URL;
     }
 
-    if (content.find('/') != std::string::npos && !isFormRender && !isNamedRouter &&
+    ContainerScope scope(instanceId);
+    auto front = container->GetFrontend();
+    CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
+
+    if (front->GetType() != FrontendType::DECLARATIVE_CJ && !isFormRender && !isNamedRouter &&
         isStageModel && !CheckUrlValid(content, container->GetHapPath())) {
         return UIContentErrorCode::INVALID_URL;
     }
 
-    ContainerScope scope(instanceId);
-    auto front = container->GetFrontend();
-    CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
     if (isNamedRouter) {
         return front->RunPageByNamedRouter(content, params);
     }
