@@ -186,18 +186,8 @@ public:
     bool IsPointInRect(const OffsetF& point, const OffsetF& leftBottom, const OffsetF& rightBottom,
         const OffsetF& rightTop, const OffsetF& leftTop);
 
-    void SetScrollableParentCallback();
-    void ResetScrollableParentCallback();
-    virtual void OnParentScrollStart();
-    virtual void OnParentScrollEnd() {};
-    virtual void OnParentScrolling();
-
     void OnSelectionMenuOptionsUpdate(
         const NG::OnCreateMenuCallback && onCreateMenuCallback, const NG::OnMenuItemClickCallback && onMenuItemClick);
-
-    void SetkeyBoardChangeCallback();
-    void RemoveKeyboardChangeCallback();
-    virtual void OnKeyboardChanged(bool isKeyboardShow);
 
     float GetHandleDiameter();
     VectorF GetHostScale();
@@ -285,8 +275,6 @@ private:
     bool isUsingMouse_ = false;
     OffsetF mouseMenuOffset_;
     WeakPtr<TextBase> hostTextBase_;
-    bool hasScrollableParent_ = true;
-    std::vector<int32_t> scrollableParentIds_;
     bool enableHandleLevel_ = false;
     bool touchAtHandle_ = false;
     bool isChangeToOverlayModeAtEdge_ = true;
