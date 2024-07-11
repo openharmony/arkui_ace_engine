@@ -5364,7 +5364,7 @@ bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, C
 
 bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
 {
-    if (jsValue->IsNumber()) {
+    if (jsValue->IsNumber() && jsValue->ToNumber<int64_t>() >= 0) {
         result = Color(ColorAlphaAdapt(jsValue->ToNumber<uint32_t>()));
         return true;
     }
@@ -5380,7 +5380,8 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
 bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result, const Color& defaultColor)
 {
     if (jsValue->IsNumber()) {
-        result = Color(ColorAlphaAdapt(jsValue->ToNumber<uint32_t>()));
+        result = jsValue->ToNumber<int64_t>() >= 0 ? Color(ColorAlphaAdapt(jsValue->ToNumber<uint32_t>())) :
+            defaultColor;
         return true;
     }
     if (jsValue->IsString()) {

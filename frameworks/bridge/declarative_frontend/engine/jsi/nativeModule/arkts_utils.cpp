@@ -73,7 +73,7 @@ uint32_t ArkTSUtils::ColorAlphaAdapt(uint32_t origin)
 
 bool ArkTSUtils::ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result)
 {
-    if (value->IsNumber()) {
+    if (value->IsNumber() && value->IntegerValue(vm) >= 0) {
         result = Color(value->Uint32Value(vm));
         return true;
     }
@@ -96,7 +96,7 @@ bool ArkTSUtils::ParseJsSymbolColorAlpha(const EcmaVM* vm, const Local<JSValueRe
     if (!value->IsNumber() && !value->IsString(vm) && !value->IsObject(vm)) {
         return false;
     }
-    if (value->IsNumber()) {
+    if (value->IsNumber() && value->IntegerValue(vm) >= 0) {
         result = Color(ColorAlphaAdapt(value->Uint32Value(vm)));
     } else if (value->IsString(vm)) {
         Color::ParseColorString(value->ToString(vm)->ToString(vm), result);
@@ -108,7 +108,7 @@ bool ArkTSUtils::ParseJsSymbolColorAlpha(const EcmaVM* vm, const Local<JSValueRe
 
 bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result)
 {
-    if (value->IsNumber()) {
+    if (value->IsNumber() && value->IntegerValue(vm) >= 0) {
         result = Color(ColorAlphaAdapt(value->Uint32Value(vm)));
         return true;
     }
@@ -128,7 +128,8 @@ bool ArkTSUtils::ParseJsColorAlpha(
         return false;
     }
     if (value->IsNumber()) {
-        result = Color(ColorAlphaAdapt(value->Uint32Value(vm)));
+        result = value->IntegerValue(vm) >= 0 ? Color(ColorAlphaAdapt(value->Uint32Value(vm))) :
+            defaultColor;
         return true;
     }
     if (value->IsString(vm)) {

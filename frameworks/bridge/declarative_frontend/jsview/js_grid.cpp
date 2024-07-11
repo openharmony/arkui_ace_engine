@@ -405,9 +405,9 @@ void JSGrid::SetScrollBar(const JSCallbackInfo& info)
     GridModel::GetInstance()->SetScrollBarMode(displayMode);
 }
 
-void JSGrid::SetScrollBarColor(const std::string& color)
+void JSGrid::SetScrollBarColor(const JSCallbackInfo& info)
 {
-    auto scrollBarColor = JSScrollable::ParseBarColor(color);
+    auto scrollBarColor = JSScrollable::ParseBarColor(info);
     if (!scrollBarColor.empty()) {
         GridModel::GetInstance()->SetScrollBarColor(scrollBarColor);
     }
