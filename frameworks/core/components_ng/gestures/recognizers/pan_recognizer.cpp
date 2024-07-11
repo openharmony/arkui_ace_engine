@@ -18,6 +18,7 @@
 #include "base/geometry/offset.h"
 #include "base/log/log.h"
 #include "base/log/log_wrapper.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/gestures/base_gesture_event.h"
@@ -138,6 +139,8 @@ void PanRecognizer::OnAccepted()
     refereeState_ = RefereeState::SUCCEED;
     ReportSlideOn();
     SendCallbackMsg(onActionStart_);
+    // only report the pan gesture starting for touch event
+    DispatchPanStartedToPerf(lastTouchEvent_);
     if (IsEnabled()) {
         isStartTriggered_ = true;
     }
@@ -942,5 +945,18 @@ void PanRecognizer::UpdateTouchEventInfo(const TouchEvent& event, bool updateVel
     touchPoints_[event.id] = event;
     touchPointsDistance_[event.id] += delta_;
     time_ = event.time;
+}
+
+void PanRecognizer::DispatchPanStartedToPerf(const TouchEvent& event)
+{
+    int64_t inputTime = event.time.time_since_epoch().count();
+    if (inputTime <= 0 || event.sourceType != SourceType::TOUCH) {
+        return;
+    }
+    PerfMonitor* pMonitor = PerfMonitor::GetPerfMonitor();
+    if (pMonitor == nullptr) {
+        return;
+    }
+    pMonitor->RecordInputEvent(FIRST_MOVE, PERF_TOUCH_EVENT, inputTime);
 }
 } // namespace OHOS::Ace::NG

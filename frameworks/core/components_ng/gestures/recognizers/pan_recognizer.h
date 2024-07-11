@@ -134,6 +134,8 @@ private:
 
     void AddOverTimeTrace();
 
+    void DispatchPanStartedToPerf(const TouchEvent& event);
+
     const TouchRestrict& GetTouchRestrict() const
     {
         return touchRestrict_;
