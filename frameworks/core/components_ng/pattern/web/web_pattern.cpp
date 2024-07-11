@@ -1860,6 +1860,10 @@ void WebPattern::OnMixedModeUpdate(MixedModeContent value)
 
 void WebPattern::OnZoomAccessEnabledUpdate(bool value)
 {
+    if ((layoutMode_ == WebLayoutMode::FIT_CONTENT) || isEmbedModeEnabled_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "Not allow to change zoom access.");
+        value = false;
+    }
     if (delegate_) {
         delegate_->UpdateSupportZoom(value);
     }
@@ -1987,6 +1991,10 @@ void WebPattern::OnBackgroundColorUpdate(int32_t value)
 
 void WebPattern::OnInitialScaleUpdate(float value)
 {
+    if ((layoutMode_ == WebLayoutMode::FIT_CONTENT) || isEmbedModeEnabled_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "Not allow to change zoom access.");
+        value = false;
+    }
     if (delegate_) {
         delegate_->UpdateInitialScale(value);
     }
@@ -2101,13 +2109,6 @@ void WebPattern::OnOverlayScrollbarEnabledUpdate(bool enable)
 {
     if (delegate_) {
         delegate_->UpdateOverlayScrollbarEnabled(enable);
-    }
-}
-
-void WebPattern::OnNativeEmbedModeEnabledUpdate(bool value)
-{
-    if (delegate_) {
-        delegate_->UpdateNativeEmbedModeEnabled(value);
     }
 }
 
@@ -2418,6 +2419,7 @@ void WebPattern::OnModifyDone()
         if (!webAccessibilityNode_) {
             webAccessibilityNode_ = AceType::MakeRefPtr<WebAccessibilityNode>(Claim(this));
         }
+        isEmbedModeEnabled_ = GetNativeEmbedModeEnabledValue(false);
         delegate_->UpdateNativeEmbedModeEnabled(GetNativeEmbedModeEnabledValue(false));
         delegate_->UpdateNativeEmbedRuleTag(GetNativeEmbedRuleTagValue(""));
         delegate_->UpdateNativeEmbedRuleType(GetNativeEmbedRuleTypeValue(""));

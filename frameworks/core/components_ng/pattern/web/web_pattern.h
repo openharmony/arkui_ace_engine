@@ -293,6 +293,10 @@ public:
 
     void SetRenderMode(RenderMode renderMode)
     {
+        if ((int)renderMode_ > -1) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "renderMode_ not allow to change.");
+            return;
+        }
         renderMode_ = renderMode;
     }
 
@@ -551,7 +555,12 @@ public:
     void OnScrollState(bool scrollState);
     void SetLayoutMode(WebLayoutMode mode)
     {
+        if (IsLayoutModeInit_) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "layoutMode not allow to change.");
+            return;
+        }
         layoutMode_ = mode;
+        IsLayoutModeInit_ = true;
     }
     WebLayoutMode GetLayoutMode() const
     {
@@ -717,7 +726,7 @@ private:
     void OnOverScrollModeUpdate(const int32_t value);
     void OnCopyOptionModeUpdate(const int32_t value);
     void OnMetaViewportUpdate(bool value);
-    void OnNativeEmbedModeEnabledUpdate(bool value);
+    void OnNativeEmbedModeEnabledUpdate(bool value) {};
     void OnNativeEmbedRuleTagUpdate(const std::string& tag);
     void OnNativeEmbedRuleTypeUpdate(const std::string& type);
     void OnTextAutosizingUpdate(bool isTextAutosizing);
@@ -909,7 +918,7 @@ private:
     PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
     OnOpenAppLinkCallback onOpenAppLinkCallback_ = nullptr;
     DefaultFileSelectorShowCallback defaultFileSelectorShowCallback_ = nullptr;
-    RenderMode renderMode_;
+    RenderMode renderMode_ = (RenderMode)(-1);
     bool incognitoMode_ = false;
     SetHapPathCallback setHapPathCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;
@@ -983,6 +992,8 @@ private:
     bool isNeedUpdateScrollAxis_ = true;
     bool isScrollStarted_ = false;
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
+    bool IsLayoutModeInit_ = false;
+    bool isEmbedModeEnabled_ = false;
     bool scrollState_ = false;
     Axis axis_ = Axis::FREE;
     Axis syncAxis_ = Axis::NONE;
