@@ -1532,6 +1532,7 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     if (args.Length() < 1) {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "args length invalid");
         return;
     }
     TextSpanOptions options;
@@ -1540,6 +1541,7 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
         && JSContainerBase::ParseJsString(args[0], spanValue)) {
         options.value = spanValue;
     } else {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "args error");
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(-1)));
         return;
     }
@@ -1581,6 +1583,8 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
     int32_t spanIndex = 0;
     if (richEditorController) {
         spanIndex = richEditorController->AddTextSpan(options);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "rich editor controller error");
     }
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(spanIndex)));
 }
