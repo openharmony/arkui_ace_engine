@@ -135,18 +135,17 @@ void OptionPattern::HandleFocusEvent()
         renderContext->UpdateBackShadow(Shadow::CreateShadow(shadowStyle));
         isFocusShadowSet_ = true;
     }
-    if (selected_ != index_) {
-        isFocusBGColorSet_ = true;
-        renderContext->UpdateBackgroundColor(selectTheme_->GetOptionFocusedBackgroundColor());
-        CHECK_NULL_VOID(text_);
-        auto context = text_->GetRenderContext();
-        CHECK_NULL_VOID(context);
-        context->UpdateForegroundColor(selectTheme_->GetOptionFocusedFontColor());
-        context->UpdateForegroundColorFlag(false);
-        context->ResetForegroundColorStrategy();
-        text_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        isFocusTextColorSet_ = true;
-    }
+
+    isFocusBGColorSet_ = true;
+    renderContext->UpdateBackgroundColor(selectTheme_->GetOptionFocusedBackgroundColor());
+    CHECK_NULL_VOID(text_);
+    auto context = text_->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->UpdateForegroundColor(selectTheme_->GetOptionFocusedFontColor());
+    context->UpdateForegroundColorFlag(false);
+    context->ResetForegroundColorStrategy();
+    text_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    isFocusTextColorSet_ = true;
 }
 
 void OptionPattern::HandleBlurEvent()
@@ -157,7 +156,11 @@ void OptionPattern::HandleBlurEvent()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (isFocusBGColorSet_) {
-        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        if (selected_ == index_) {
+            renderContext->UpdateBackgroundColor(selectTheme_->GetSelectedColor());
+        } else {
+            renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        }
         isFocusBGColorSet_ = false;
     }
     if (isFocusShadowSet_) {
@@ -169,7 +172,11 @@ void OptionPattern::HandleBlurEvent()
         CHECK_NULL_VOID(text_);
         auto context = text_->GetRenderContext();
         CHECK_NULL_VOID(context);
-        context->UpdateForegroundColor(GetFontColor());
+        if (selected_ == index_) {
+            context->UpdateForegroundColor(selectTheme_->GetSelectedColorText());
+        } else {
+            context->UpdateForegroundColor(GetFontColor());
+        }
         context->UpdateForegroundColorFlag(false);
         context->ResetForegroundColorStrategy();
         text_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
