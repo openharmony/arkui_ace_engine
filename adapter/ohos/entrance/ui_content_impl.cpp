@@ -1410,6 +1410,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     std::string moduleName = info != nullptr ? info->moduleName : "";
     auto appInfo = context->GetApplicationInfo();
     auto bundleName = info != nullptr ? info->bundleName : "";
+    auto abilityName = info != nullptr ? info->name : "";
     std::string moduleHapPath = info != nullptr ? info->hapPath : "";
     std::string resPath;
     std::string pageProfile;
@@ -1732,6 +1733,9 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     // set get inspector tree function for ui session manager
     auto callback = [weakContext = WeakPtr(pipeline)]() {
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+        if (pipeline == nullptr) {
+            pipeline = NG::PipelineContext::GetCurrentContextSafely();
+        }
         CHECK_NULL_VOID(pipeline);
         auto taskExecutor = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
@@ -1760,6 +1764,12 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             TaskExecutor::TaskType::UI, "UiSessionRegisterWebPattern");
     };
     UiSessionManager::GetInstance().SaveRegisterForWebFunction(webCallback);
+    UiSessionManager::GetInstance().SaveBaseInfo(std::string("bundleName:")
+                                                     .append(bundleName)
+                                                     .append(",moduleName:")
+                                                     .append(moduleName)
+                                                     .append(",abilityName:")
+                                                     .append(abilityName));
     return errorCode;
 }
 

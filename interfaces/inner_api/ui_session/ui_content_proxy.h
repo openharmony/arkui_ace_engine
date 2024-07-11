@@ -26,7 +26,7 @@ class ACE_FORCE_EXPORT UIContentServiceProxy : public IRemoteProxy<IUiContentSer
 public:
     explicit UIContentServiceProxy(const sptr<IRemoteObject>& impl) : IRemoteProxy<IUiContentService>(impl) {};
     virtual int32_t GetInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback) override;
-    virtual int32_t Connect() override;
+    virtual int32_t Connect(const EventCallback& eventCallback) override;
     virtual int32_t RegisterClickEventCallback(const EventCallback& eventCallback) override;
     virtual int32_t RegisterRouterChangeEventCallback(const EventCallback& eventCallback) override;
     virtual int32_t RegisterSearchEventCallback(const EventCallback& eventCallback) override;

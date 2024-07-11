@@ -95,6 +95,7 @@ int32_t UiContentStub::ConnectInner(MessageParcel& data, MessageParcel& reply, M
     }
     int32_t processId = data.ReadInt32();
     UiSessionManager::GetInstance().SaveReportStub(report, processId);
+    UiSessionManager::GetInstance().SendBaseInfo(processId);
     return NO_ERROR;
 }
 
@@ -121,7 +122,7 @@ int32_t UiContentStub::RegisterSearchEventCallbackInner(
 int32_t UiContentStub::RegisterComponentChangeEventCallbackInner(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
-    reply.WriteInt32(RegisterRouterChangeEventCallback(nullptr));
+    reply.WriteInt32(RegisterComponentChangeEventCallback(nullptr));
     return NO_ERROR;
 }
 

@@ -149,4 +149,22 @@ void UiReportProxy::ReportWebUnfocusEvent(int64_t accessibilityId, const std::st
         LOGW("ReportWebUnfocusEvent send request failed");
     }
 }
+
+void UiReportProxy::SendBaseInfo(const std::string& data)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option;
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendBaseInfo write interface token failed");
+        return;
+    }
+    if (!messageData.WriteString(data)) {
+        LOGW("SendBaseInfo write data  failed");
+        return;
+    }
+    if (Remote()->SendRequest(SEND_BASE_INFO, messageData, reply, option) != ERR_NONE) {
+        LOGW("SendBaseInfo send request failed");
+    }
+}
 } // namespace OHOS::Ace
