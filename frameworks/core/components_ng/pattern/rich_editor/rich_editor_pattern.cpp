@@ -6581,6 +6581,7 @@ void RichEditorPattern::CreateHandles()
 
 void RichEditorPattern::ShowHandles(const bool isNeedShowHandles)
 {
+    CHECK_NULL_VOID(HasFocus());
     if (!isNeedShowHandles) {
         auto info = GetSpansInfo(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), GetSpansMethod::ONSELECT);
         auto selResult = info.GetSelection().resultObjects;
@@ -7874,6 +7875,7 @@ void RichEditorPattern::HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& n
         "In OnDragEnded, the released location is in the current richEditor, id:%{public}d", host->GetId());
     if (HasFocus()) {
         RequestKeyboard(false, true, true);
+        HandleOnEditChanged(true);
     } else {
         focusHub->RequestFocusImmediately();
     }

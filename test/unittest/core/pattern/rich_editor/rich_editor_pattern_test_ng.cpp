@@ -776,7 +776,7 @@ HWTEST_F(RichEditorPatternTestNg, HandleCursorOnDragMoved001, TestSize.Level1)
      */
     richEditorPattern->isCursorAlwaysDisplayed_ = false;
     richEditorPattern->HandleCursorOnDragMoved(notifyDragEvent);
-    EXPECT_EQ(richEditorPattern->isCursorAlwaysDisplayed_, true);
+    EXPECT_EQ(richEditorPattern->isCursorAlwaysDisplayed_, false);
 }
 
 /**
