@@ -8385,10 +8385,8 @@ void RichEditorPattern::PerformAction(TextInputAction action, bool forceCloseKey
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // When the Enter key is triggered, perform a line feed operation.
-    // It will not exit the editing state, nor will it trigger the Enter key type callback.
     if (action == TextInputAction::NEW_LINE) {
         InsertValue("\n", true);
-        return;
     }
     // Enter key type callback
     TextFieldCommonEvent event;
