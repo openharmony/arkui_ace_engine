@@ -335,7 +335,7 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_RETURN(sheetTheme, nullptr);
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
-    if (pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale()) {
+    if (pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale() || sheetStyle.isTitleBuilder.value() == true) {
         layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT)));
     }
     MarginProperty margin;
