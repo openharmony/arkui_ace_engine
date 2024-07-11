@@ -479,6 +479,7 @@ private:
     bool ReachMoveLimit(const PointerEvent& pointerEvent, const Point& point);
     bool IsDropAllowed(const RefPtr<FrameNode>& dragFrameNode);
     bool IsUIExtensionShowPlaceholder(const RefPtr<NG::UINode>& node);
+    bool IsUIExtensionComponent(const RefPtr<NG::UINode>& node);
 
     std::map<int32_t, WeakPtr<FrameNode>> dragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
