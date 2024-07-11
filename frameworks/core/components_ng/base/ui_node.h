@@ -133,7 +133,7 @@ public:
     // int32_t second - index of the node
     std::pair<bool, int32_t> GetChildFlatIndex(int32_t id);
 
-    virtual const std::list<RefPtr<UINode>>& GetChildren() const
+    virtual const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const
     {
         return children_;
     }
