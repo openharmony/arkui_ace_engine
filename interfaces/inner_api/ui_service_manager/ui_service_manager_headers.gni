@@ -18,7 +18,7 @@ dataobs_manager_headers = {
     "ui_service_mgr_interface.h",
     "ui_service_interface.h",
     "ui_service_stub.h",
-    "ui_service_mgr_xcollie",
+    "ui_service_mgr_xcollie.h",
   ]
   header_base = "interfaces/inner_api/ui_service_manager/include"
 }
