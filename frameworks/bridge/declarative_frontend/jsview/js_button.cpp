@@ -662,6 +662,7 @@ CreateWithPara JSButton::ParseCreatePara(const JSCallbackInfo& info, bool hasLab
         para.optionSetFirst = true;
     }
     JSRef<JSObject> optionObj = JSRef<JSObject>::Cast(info[optionIndex]);
+    InitButtonOption(para);
     if (optionObj->GetProperty(JSButton::TYPE)->IsNumber()) {
         para.type = static_cast<ButtonType>(optionObj->GetProperty(JSButton::TYPE)->ToNumber<int32_t>());
     }
@@ -690,6 +691,18 @@ CreateWithPara JSButton::ParseCreatePara(const JSCallbackInfo& info, bool hasLab
     }
     ParseButtonRole(optionObj, para);
     return para;
+}
+
+void JSButton::InitButtonOption(CreateWithPara& param)
+{
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        return;
+    }
+    param.type = ButtonType::CAPSULE;
+    param.buttonStyleMode = ButtonStyleMode::EMPHASIZE;
+    param.stateEffect = true;
+    param.controlSize = ControlSize::NORMAL;
+    param.buttonRole = ButtonRole::NORMAL;
 }
 
 void JSButton::ParseButtonRole(const JSRef<JSObject>& optionObj, CreateWithPara& param)
