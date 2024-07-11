@@ -172,6 +172,16 @@ void TextModelNG::SetFontWeight(FrameNode* frameNode, Ace::FontWeight value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value, frameNode);
 }
 
+void TextModelNG::SetMinFontScale(const float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, value);
+}
+
+void TextModelNG::SetMaxFontScale(const float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, value);
+}
+
 void TextModelNG::SetFontWeight(Ace::FontWeight value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value);
