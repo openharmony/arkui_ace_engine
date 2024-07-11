@@ -877,4 +877,42 @@ HWTEST_F(WaterFlowSegmentCommonTest, Illegal003, TestSize.Level1)
     EXPECT_EQ(info_->endIndex_, -1);
     EXPECT_GT(info_->startIndex_, info_->endIndex_);
 }
+
+/**
+ * @tc.name: overScroll001
+ * @tc.desc: Layout WaterFlow with top margin and check overScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, overScroll001, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(37);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_7);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+
+    auto info = pattern_->layoutInfo_;
+
+    EXPECT_EQ(GetChildY(frameNode_, 0), 5.0f);
+    UpdateCurrentOffset(-2.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 3.0f);
+    EXPECT_FALSE(info->itemStart_);
+    UpdateCurrentOffset(3.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 5.0f);
+    EXPECT_TRUE(info->itemStart_);
+
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 36), 500.0f);
+    EXPECT_FALSE(info->offsetEnd_);
+    UpdateCurrentOffset(-4.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 36), 497.0f);
+    EXPECT_TRUE(info->offsetEnd_);
+}
 } // namespace OHOS::Ace::NG
