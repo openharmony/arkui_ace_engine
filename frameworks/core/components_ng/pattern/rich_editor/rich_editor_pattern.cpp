@@ -2313,7 +2313,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     hasClicked_ = true;
     lastClickTimeStamp_ = info.GetTimeStamp();
     if (info.GetSourceDevice() != SourceType::MOUSE && SelectOverlayIsOn() &&
-        BetweenSelectedPosition(info.GetGlobalLocation())) {
+        BetweenSelection(info.GetGlobalLocation())) {
         selectOverlay_->ProcessOverlay({.animation = true, .requestCode = REQUEST_RECREATE});
         return;
     }
@@ -6140,7 +6140,7 @@ void RichEditorPattern::HandleMouseRightButton(const MouseInfo& info)
         auto offsetY = static_cast<float>(info.GetGlobalLocation().GetY());
         selectionMenuOffsetByMouse_ = OffsetF(offsetX, offsetY);
         selectionMenuOffsetClick_ = OffsetF(offsetX, offsetY);
-        if (textSelector_.IsValid() && BetweenSelectedPosition(info.GetGlobalLocation())) {
+        if (textSelector_.IsValid() && BetweenSelection(info.GetGlobalLocation())) {
             ShowSelectOverlay(RectF(), RectF(), IsSelectAll(), TextResponseType::RIGHT_CLICK);
             isMousePressed_ = false;
             usingMouseRightButton_ = false;
