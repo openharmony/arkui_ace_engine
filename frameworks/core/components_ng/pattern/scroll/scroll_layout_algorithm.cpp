@@ -150,7 +150,9 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentOffset + alignmentPosition);
     childWrapper->Layout();
     auto frameNode = AceType::DynamicCast<FrameNode>(childWrapper);
-    (frameNode != nullptr) ? frameNode->MarkAndCheckNewOpIncNode() : 0;
+    if(frameNode) {
+        frameNode->MarkAndCheckNewOpIncNode();
+    }
 }
 
 void ScrollLayoutAlgorithm::UpdateScrollAlignment(Alignment& scrollAlignment)
