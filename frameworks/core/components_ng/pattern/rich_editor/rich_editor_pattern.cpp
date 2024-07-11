@@ -7940,12 +7940,12 @@ void RichEditorPattern::HandleOnCameraInput()
 
 bool RichEditorPattern::CanStartAITask()
 {
-    return TextPattern::CanStartAITask() && !HasFocus();
+    return TextPattern::CanStartAITask() && !HasFocus() && !isShowPlaceholder_;
 }
 
 bool RichEditorPattern::NeedShowAIDetect()
 {
-    return TextPattern::NeedShowAIDetect() && !HasFocus();
+    return TextPattern::NeedShowAIDetect() && !HasFocus() && !isShowPlaceholder_;
 }
 
 void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
