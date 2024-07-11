@@ -860,6 +860,10 @@ private:
     void HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void RegisterVisibleAreaChangeCallback(const RefPtr<PipelineContext> &context);
+    void SetMouseHoverExit(bool isHoverExit)
+    {
+        isHoverExit_ = isHoverExit;
+    }
     bool CheckSafeAreaIsExpand();
     bool CheckSafeAreaKeyBoard();
     bool IsDialogNested();
@@ -974,6 +978,7 @@ private:
     bool isWaiting_ = false;
     bool isDisableDrag_ = false;
     bool isMouseEvent_ = false;
+    bool isHoverExit_ = false;
     bool isVisible_ = true;
     bool isVisibleActiveEnable_ = true;
     bool isMemoryLevelEnable_ = true;

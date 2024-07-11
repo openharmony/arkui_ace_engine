@@ -768,6 +768,7 @@ void WebPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
         CHECK_NULL_VOID(pattern);
         MouseInfo info;
         info.SetAction(isHover ? MouseAction::HOVER : MouseAction::HOVER_EXIT);
+        pattern->SetMouseHoverExit(!isHover);
         if (!isHover) {
             TAG_LOGI(AceLogTag::ACE_WEB,
                 "Set cursor to pointer when mouse pointer is leave.");
@@ -816,10 +817,11 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
         }
         ResetDragAction();
     }
-
+    isHoverExit_ = false;
     if (info.GetAction() == MouseAction::HOVER_EXIT) {
         TAG_LOGI(AceLogTag::ACE_WEB,
             "Set cursor to pointer when mouse pointer is hover exit.");
+        isHoverExit_ = true;
         OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, nullptr);
     }
 
@@ -3296,6 +3298,11 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
 bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info)
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange type: %{public}d", type);
+    if (isHoverExit_ && type == OHOS::NWeb::CursorType::CT_NONE) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "OnCursorChange isHoverExit_ is true type: %{public}d", type);
+        TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange reciving unexpected hide command")
+        return false;
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto windowId = pipeline->GetWindowId();
