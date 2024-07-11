@@ -68,7 +68,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "canvas_napi/js_canvas.h"
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 #include "core/common/resource/resource_manager.h"
@@ -9439,7 +9439,7 @@ void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onClick");
         PipelineContext::SetCallBackNode(node);
         func->Execute(*tapInfo);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
         JSInteractableView::ReportClickEvent(node);
 #endif
     };
@@ -9450,7 +9450,7 @@ void JSViewAbstract::JsOnClick(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onClick");
         PipelineContext::SetCallBackNode(node);
         func->Execute(*info);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
         JSInteractableView::ReportClickEvent(node);
 #endif
     };
