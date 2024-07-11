@@ -5647,7 +5647,6 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
         if (!obj || typeof obj !== 'object') {
             return obj;
         }
-        let stack = new Array();
         let copiedObjects = new Map();
         return getDeepCopyOfObjectRecursive(obj);
         function getDeepCopyOfObjectRecursive(obj) {
@@ -5656,7 +5655,6 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
             }
             const alreadyCopiedObject = copiedObjects.get(obj);
             if (alreadyCopiedObject) {
-                let msg = `@Prop deepCopyObject: Found reference to already copied object: Path ${variable ? variable : 'unknown variable'}`;
                 
                 return alreadyCopiedObject;
             }
@@ -5666,9 +5664,7 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
                 Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
                 copiedObjects.set(obj, copy);
                 obj.forEach((setKey) => {
-                    stack.push({ name: setKey });
                     copy.add(getDeepCopyOfObjectRecursive(setKey));
-                    stack.pop();
                 });
             }
             else if (obj instanceof Map) {
@@ -5676,9 +5672,7 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
                 Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
                 copiedObjects.set(obj, copy);
                 obj.forEach((mapValue, mapKey) => {
-                    stack.push({ name: mapKey });
                     copy.set(mapKey, getDeepCopyOfObjectRecursive(mapValue));
-                    stack.pop();
                 });
             }
             else if (obj instanceof Date) {
@@ -5709,15 +5703,7 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
                 return obj;
             }
             Object.keys(obj).forEach((objKey) => {
-                stack.push({ name: objKey });
-                try {
-                    Reflect.set(copy, objKey, getDeepCopyOfObjectRecursive(obj[objKey]));
-                }
-                catch (error) {
-                    stateMgmtConsole.error('DeepCopy failed, will use shallow copy instead. Error message is:', error);
-                    copy[objKey] = obj[objKey];
-                }
-                stack.pop();
+                copy[objKey] = getDeepCopyOfObjectRecursive(obj[objKey]);
             });
             return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, undefined) : copy;
         }
