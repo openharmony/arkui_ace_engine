@@ -60,14 +60,12 @@ using namespace icu;
 struct LocaleProxy final {
     std::shared_ptr<SimpleDateFormat> simpleDateFormat_;
     std::shared_ptr<Calendar> calendar_;
-    std::shared_ptr<DateTimePatternGenerator> patternGenerator_;
 
     LocaleProxy(const char* language, const char* countryOrRegion, const char* variant, const char* keywordsAndValues)
         : instance(language, countryOrRegion, variant, keywordsAndValues)
     {
         simpleDateFormat_ = nullptr;
         calendar_ = nullptr;
-        patternGenerator_ = nullptr;
     }
     ~LocaleProxy() = default;
 
@@ -105,20 +103,6 @@ struct LocaleProxy final {
             calendar_.reset(temp);
         }
         return calendar_;
-    }
-
-    std::shared_ptr<DateTimePatternGenerator> GetTimePatternGenerator(const Locale& locale)
-    {
-        std::lock_guard<std::mutex> lock(proxyMutex_);
-        if (patternGenerator_) {
-            return patternGenerator_;
-        }
-        UErrorCode status = U_ZERO_ERROR;
-        auto temp = DateTimePatternGenerator::createInstance(locale, status);
-        if (U_SUCCESS(status)) {
-            patternGenerator_.reset(temp);
-        }
-        return patternGenerator_;
     }
 };
 
@@ -384,9 +368,10 @@ const std::string Localization::FormatDateTime(DateTime dateTime, const std::str
     UDate date = calendar->getTime(status);
     CHECK_RETURN(status, "");
 
-    auto patternGenerator = locale_->GetTimePatternGenerator(locale_->instance);
-    CHECK_NULL_RETURN(patternGenerator, "");
+    auto patternGenerator = DateTimePatternGenerator::createInstance(locale_->instance, status);
+    CHECK_RETURN(status, "");
     UnicodeString pattern = patternGenerator->getBestPattern(UnicodeString(format.c_str()), status);
+    delete patternGenerator;
     CHECK_RETURN(status, "");
 
     auto simpleDateFormat = locale_->GetSimpleDateFormat(locale_->instance);
