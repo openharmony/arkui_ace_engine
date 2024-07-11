@@ -1299,8 +1299,7 @@ void ListLayoutAlgorithm::LayoutItem(RefPtr<LayoutWrapper>& wrapper, int32_t ind
         crossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize);
     }
     auto chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(index) : 0.0f;
-    auto layoutDirection = wrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
-    if (layoutDirection == TextDirection::RTL) {
+    if (isReverse_) {
         if (axis_ == Axis::VERTICAL) {
             auto size = wrapper->GetGeometryNode()->GetMarginFrameSize();
             offset = offset + OffsetF(crossSize - crossOffset - size.Width(), pos.startPos + chainOffset);
@@ -1349,6 +1348,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     totalItemCount_ = layoutWrapper->GetTotalChildCount();
     listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
     int32_t startIndex = GetStartIndex();
+    isReverse_ = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::RTL;
 
     totalOffset_ += currentOffset_;
     FixPredictSnapOffset(listLayoutProperty);
