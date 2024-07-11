@@ -402,7 +402,7 @@ void UpdateContextMenuDisappearPositionAnimation(const RefPtr<FrameNode>& menu, 
     CHECK_NULL_VOID(menuRenderContext);
     auto menuPattern = menuChild->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    auto menuPosition = menuPattern->GetEndOffset();
+    auto menuPosition = menuChild->GetGeometryNode()->GetFrameOffset();
     menuPosition += offset;
     menuPattern->SetEndOffset(menuPosition);
 
