@@ -1981,6 +1981,9 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         auto pattern = weak.Upgrade();
         if (pattern) {
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
+                if (!pattern->CheckSwiperPanEvent(info.GetMainDelta())) {
+                    return;
+                }
                 if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
                     pattern->ShowPrevious();
                 } else if (LessNotEqual(info.GetMainDelta(), 0.0)) {
@@ -2643,12 +2646,9 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
     auto velocity = info.GetMainVelocity();
     UpdateDragFRCSceneInfo(velocity, SceneStatus::RUNNING);
     UpdateNodeRate();
-    auto mainDelta = static_cast<float>(info.GetMainDelta());
     if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD) {
         isTouchPad_ = true;
     }
-    ProcessDelta(mainDelta, contentMainSize_, mainDeltaSum_);
-    mainDeltaSum_ += mainDelta;
 
     PointF dragPoint(
         static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
@@ -2657,6 +2657,10 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
         isTouchPad_ = false;
         return;
     }
+
+    auto mainDelta = static_cast<float>(info.GetMainDelta());
+    ProcessDelta(mainDelta, contentMainSize_, mainDeltaSum_);
+    mainDeltaSum_ += mainDelta;
 
     if (IsAutoLinear() && AutoLinearIsOutOfBoundary(static_cast<float>(mainDelta))) {
         return;
@@ -2932,6 +2936,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         translate = -translate;
     }
     if (NearZero(translate)) {
+        SetIndicatorChangeIndexStatus(false, GetLoopIndex(currentIndex_));
         OnAnimationTranslateZero(nextIndex, stopAutoPlay);
         return;
     }
@@ -4147,6 +4152,8 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
             }
             auto stepItems = swiper->IsSwipeByGroup() ? displayCount : 1;
             swiper->targetIndex_ = swiper->CheckTargetIndex(swiper->currentIndex_ + stepItems);
+            ACE_SCOPED_TRACE("Swiper autoPlay delayTime %d targetIndex %d isVisibleArea_ %d isWindowShow_ %d",
+                delayTime, swiper->targetIndex_.value(), swiper->isVisibleArea_, swiper->isWindowShow_);
             swiper->MarkDirtyNodeSelf();
             auto pipeline = PipelineContext::GetCurrentContext();
             if (pipeline) {
@@ -4193,7 +4200,7 @@ void SwiperPattern::RegisterVisibleAreaChange()
 bool SwiperPattern::NeedAutoPlay() const
 {
     bool reachEnd = GetLoopIndex(CurrentIndex()) >= TotalCount() - 1 && !IsLoop();
-    return IsAutoPlay() && !reachEnd && isVisibleArea_ && !isIndicatorLongPress_;
+    return IsAutoPlay() && !reachEnd && NeedStartAutoPlay() && !isIndicatorLongPress_;
 }
 
 void SwiperPattern::TriggerAnimationEndOnSwipeToLeft()
@@ -4398,6 +4405,9 @@ void SwiperPattern::SetLazyLoadIsLoop() const
 
 void SwiperPattern::PostIdleTask(const RefPtr<FrameNode>& frameNode)
 {
+    if (cachedItems_.empty()) {
+        return;
+    }
     auto pipelineContext = GetContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddPredictTask(
@@ -4428,9 +4438,8 @@ void SwiperPattern::PostIdleTask(const RefPtr<FrameNode>& frameNode)
                 }
                 cachedItems.erase(it++);
             }
-
+            pattern->SetCachedItems(cachedItems);
             if (!cachedItems.empty()) {
-                pattern->SetCachedItems(cachedItems);
                 pattern->PostIdleTask(frameNode);
             }
         });
@@ -5671,7 +5680,7 @@ int32_t SwiperPattern::GetMaxDisplayCount() const
     return maxDisplayCount;
 }
 
-void SwiperPattern::SetIndicatorChangeIndexStatus(bool withAnimation)
+void SwiperPattern::SetIndicatorChangeIndexStatus(bool withAnimation, std::optional<int32_t> startIndex)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -5685,6 +5694,7 @@ void SwiperPattern::SetIndicatorChangeIndexStatus(bool withAnimation)
     CHECK_NULL_VOID(indicatorPattern);
 
     indicatorPattern->SetChangeIndexWithAnimation(withAnimation);
+    indicatorPattern->SetStartIndex(startIndex);
 }
 
 void SwiperPattern::SetIndicatorJumpIndex(std::optional<int32_t> jumpIndex)

@@ -21,8 +21,8 @@
 import os
 
 from src.beans.dump_result import DumpResult
-from src.keywords import keywords_dict
-from src.utils.log_wrapper import log_warning, log_info, log_error
+from src.keywords import keywords_dict, get_dict_value
+from src.utils.log_wrapper import  log_error
 
 
 class ContentParser:
@@ -57,7 +57,7 @@ class ContentParser:
     def pre_check_event_tree_count(self, file_content):
         event_tree_count = 0
         for line in file_content.split('\n'):
-            index = line.find(keywords_dict['event tree'])
+            index = line.find(get_dict_value(keywords_dict, 'event tree'))
             if index != -1:
                 event_tree_count += 1
         return event_tree_count

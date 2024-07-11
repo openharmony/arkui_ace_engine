@@ -1112,11 +1112,27 @@ void ScrollablePattern::AnimateTo(
     pipeline->RequestFrame();
 }
 
+void ScrollablePattern::OnAnimateFinish()
+{
+    useTotalOffset_ = true;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (isAnimationStop_) {
+        SetUiDvsyncSwitch(false);
+        AceAsyncTraceEnd(host->GetId(), (SCROLLER_ANIMATION + std::to_string(host->GetAccessibilityId())).c_str());
+    }
+    if (animateToTraceFlag_) {
+        animateToTraceFlag_ = false;
+        AceAsyncTraceEnd(host->GetId(), TRAILING_ANIMATION);
+    }
+    NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::END);
+}
+
 void ScrollablePattern::PlaySpringAnimation(float position, float velocity, float mass, float stiffness, float damping,
                                             bool useTotalOffset)
 {
     if (!springOffsetProperty_) {
-        InitSpringOffsetProperty(useTotalOffset);
+        InitSpringOffsetProperty();
         CHECK_NULL_VOID(springOffsetProperty_);
     }
     scrollableEvent_->SetAnimateVelocityCallback([weakScroll = AceType::WeakClaim(this)]() -> double {
@@ -1129,6 +1145,7 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
     auto curve = AceType::MakeRefPtr<InterpolatingSpring>(velocity, mass, stiffness, damping);
     InitOption(option, CUSTOM_ANIMATION_DURATION, curve);
     isAnimationStop_ = false;
+    useTotalOffset_ = useTotalOffset;
     AnimationUtils::ExecuteWithoutAnimation([this]() { springOffsetProperty_->Set(GetTotalOffset()); });
     springAnimation_ = AnimationUtils::StartAnimation(
         option,
@@ -1138,17 +1155,11 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
             pattern->SetUiDvsyncSwitch(true);
             pattern->springOffsetProperty_->Set(position);
         },
-        [weak = AceType::WeakClaim(this), id = Container::CurrentId(), &useTotalOffset]() {
+        [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->SetUiDvsyncSwitch(false);
-            useTotalOffset = true;
-            auto host = pattern->GetHost();
-            CHECK_NULL_VOID(host);
-            AceAsyncTraceEnd(host->GetId(), (SCROLLER_ANIMATION + std::to_string(host->GetAccessibilityId())).c_str());
-            pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
-                SceneStatus::END);
+            pattern->OnAnimateFinish();
             pattern->SetScrollEdgeType(ScrollEdgeType::SCROLL_NONE);
     });
     NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::START);
@@ -1183,45 +1194,52 @@ void ScrollablePattern::PlayCurveAnimation(
             ContainerScope scope(id);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            auto host = pattern->GetHost();
-            CHECK_NULL_VOID(host);
-            pattern->SetUiDvsyncSwitch(false);
-            AceAsyncTraceEnd(host->GetId(), (SCROLLER_ANIMATION + std::to_string(host->GetAccessibilityId())).c_str());
-            pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(), SceneStatus::END);
+            pattern->OnAnimateFinish();
         });
     NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::START);
 }
 
-void ScrollablePattern::InitSpringOffsetProperty(bool useTotalOffset)
+float ScrollablePattern::GetScrollDelta(float offset, bool& stopAnimation)
+{
+    auto context = GetContext();
+    CHECK_NULL_RETURN(context, 0.0f);
+    uint64_t currentVsync = context->GetVsyncTime();
+    uint64_t diff = currentVsync - lastVsyncTime_;
+    if (diff < MAX_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
+        currentVelocity_ = (offset - lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
+        NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, currentVelocity_, SceneStatus::RUNNING);
+    }
+    stopAnimation = NearEqual(finalPosition_, offset, SPRING_ACCURACY);
+    if (stopAnimation) {
+        offset = finalPosition_;
+    }
+    if (NearEqual(offset, lastPosition_, 1.0) && !animateToTraceFlag_) {
+        animateToTraceFlag_ = true;
+        auto host = GetHost();
+        auto id = host ? host->GetId() : 0;
+        AceAsyncTraceBegin(id, TRAILING_ANIMATION);
+    }
+    auto delta = useTotalOffset_ ? GetTotalOffset() - offset : lastPosition_ - offset;
+    lastVsyncTime_ = currentVsync;
+    lastPosition_ = offset;
+    return delta;
+}
+
+void ScrollablePattern::InitSpringOffsetProperty()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto propertyCallback = [weak = AceType::WeakClaim(this), useTotalOffset](float offset) {
+    auto propertyCallback = [weak = AceType::WeakClaim(this)](float offset) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (pattern->isAnimationStop_) {
             return;
         }
-        auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        uint64_t currentVsync = context->GetVsyncTime();
-        uint64_t diff = currentVsync - pattern->lastVsyncTime_;
-        if (diff < MAX_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
-            pattern->currentVelocity_ = (offset - pattern->lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
-            pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->currentVelocity_,
-                SceneStatus::RUNNING);
-        }
-        auto stopAnimation = NearEqual(pattern->finalPosition_, offset, SPRING_ACCURACY);
-        if (stopAnimation) {
-            offset = pattern->finalPosition_;
-        }
-        auto delta = useTotalOffset ? pattern->GetTotalOffset() - offset : pattern->lastPosition_ - offset;
-        pattern->lastVsyncTime_ = currentVsync;
-        pattern->lastPosition_ = offset;
-        if (!pattern->UpdateCurrentOffset(delta,
-            SCROLL_FROM_ANIMATION_CONTROLLER) || stopAnimation) {
+        bool stopAnimation = false;
+        auto delta = pattern->GetScrollDelta(offset, stopAnimation);
+        if (!pattern->UpdateCurrentOffset(delta, SCROLL_FROM_ANIMATION_CONTROLLER) || stopAnimation) {
             pattern->StopAnimation(pattern->springAnimation_);
         }
     };
@@ -1241,24 +1259,9 @@ void ScrollablePattern::InitCurveOffsetProperty()
         if (pattern->isAnimationStop_) {
             return;
         }
-        auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        uint64_t currentVsync = context->GetVsyncTime();
-        uint64_t diff = currentVsync - pattern->lastVsyncTime_;
-        if (diff < MAX_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
-            pattern->currentVelocity_ = (offset - pattern->lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
-            pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->currentVelocity_,
-                SceneStatus::RUNNING);
-        }
-        auto stopAnimation = NearEqual(pattern->finalPosition_, offset, SPRING_ACCURACY);
-        if (stopAnimation) {
-            offset = pattern->finalPosition_;
-        }
-        pattern->lastVsyncTime_ = currentVsync;
-        pattern->lastPosition_ = offset;
-        pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
-            SceneStatus::RUNNING);
-        if (!pattern->UpdateCurrentOffset(pattern->GetTotalOffset() - offset, SCROLL_FROM_ANIMATION_CONTROLLER) ||
+        bool stopAnimation = false;
+        auto delta = pattern->GetScrollDelta(offset, stopAnimation);
+        if (!pattern->UpdateCurrentOffset(delta, SCROLL_FROM_ANIMATION_CONTROLLER) ||
             stopAnimation || pattern->isAnimateOverScroll_) {
             if (pattern->isAnimateOverScroll_) {
                 pattern->isAnimateOverScroll_ = false;

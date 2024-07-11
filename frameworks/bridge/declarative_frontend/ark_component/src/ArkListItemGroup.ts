@@ -93,7 +93,7 @@ class ArkListItemGroupComponent extends ArkComponent implements ListItemGroupAtt
     return this;
   }
   allowChildTypes(): string[] {
-    return ["ListItem"];
+    return ['ListItem'];
   }
 }
 

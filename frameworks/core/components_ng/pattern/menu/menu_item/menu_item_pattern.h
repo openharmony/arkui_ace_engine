@@ -217,6 +217,7 @@ public:
         return isStackSubmenuHeader_;
     }
     RefPtr<FrameNode> FindTouchedEmbeddedMenuItem(const OffsetF& position);
+    void OnHover(bool isHover);
 
 protected:
     void RegisterOnKeyEvent();
@@ -229,7 +230,6 @@ private:
     void RegisterOnClick();
     void RegisterOnHover();
     virtual void OnTouch(const TouchEventInfo& info);
-    void OnHover(bool isHover);
     virtual bool OnKeyEvent(const KeyEvent& event);
     void OnClick();
 

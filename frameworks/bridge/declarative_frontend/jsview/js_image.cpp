@@ -177,7 +177,7 @@ void JSImage::SetObjectFit(const JSCallbackInfo& args)
     }
     int32_t parseRes = 2;
     ParseJsInteger(args[0], parseRes);
-    if (parseRes < static_cast<int32_t>(ImageFit::FILL) || parseRes > static_cast<int32_t>(ImageFit::SCALE_DOWN)) {
+    if (parseRes < static_cast<int32_t>(ImageFit::FILL) || parseRes > static_cast<int32_t>(ImageFit::BOTTOM_END)) {
         parseRes = 2;
     }
     auto fit = static_cast<ImageFit>(parseRes);
@@ -278,8 +278,21 @@ bool JSImage::CheckIsCard()
     return container->IsFormRender() && !container->IsDynamicRender();
 }
 
+bool JSImage::CheckResetImage(const JSCallbackInfo& info)
+{
+    int32_t parseRes = -1;
+    if (info.Length() < 1 || !ParseJsInteger(info[0], parseRes)) {
+        return false;
+    }
+    ImageModel::GetInstance()->ResetImage();
+    return true;
+}
+
 void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
 {
+    if (CheckResetImage(info)) {
+        return;
+    }
     bool isCard = CheckIsCard();
 
     // Interim programme

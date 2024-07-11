@@ -28,6 +28,11 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 
 namespace OHOS::Ace::Framework {
+    const std::vector<float> DEFAULT_COLORFILTER_MATRIX = {
+    1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f
+    };
+
 void JSImageSpan::Create(const JSCallbackInfo& info)
 {
     if (!Container::IsCurrentUseNewPipeline()) {
@@ -132,6 +137,55 @@ void JSImageSpan::SetBaselineOffset(const JSCallbackInfo& info)
     NG::ImageSpanView::SetBaselineOffset(value.GetDimensionContainsNegative());
 }
 
+void JSImageSpan::SetColorFilter(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
+        return;
+    }
+    auto tmpInfo = info[0];
+    if (!tmpInfo->IsArray() && !tmpInfo->IsObject()) {
+        ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
+        return;
+    }
+    if (tmpInfo->IsObject() && !tmpInfo->IsArray()) {
+        auto drawingColorFilter = CreateDrawingColorFilter(tmpInfo);
+        if (drawingColorFilter) {
+            ImageModel::GetInstance()->SetDrawingColorFilter(drawingColorFilter);
+            return;
+        }
+        JSColorFilter* colorFilter;
+        if (!tmpInfo->IsUndefined() && !tmpInfo->IsNull()) {
+            colorFilter = JSRef<JSObject>::Cast(tmpInfo)->Unwrap<JSColorFilter>();
+        } else {
+            ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
+            return;
+        }
+        if (colorFilter && colorFilter->GetColorFilterMatrix().size() == COLOR_FILTER_MATRIX_SIZE) {
+            ImageModel::GetInstance()->SetColorFilterMatrix(colorFilter->GetColorFilterMatrix());
+            return;
+        }
+        ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
+        return;
+    }
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(tmpInfo);
+    if (array->Length() != COLOR_FILTER_MATRIX_SIZE) {
+        ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
+        return;
+    }
+    std::vector<float> colorfilter;
+    for (size_t i = 0; i < array->Length(); i++) {
+        JSRef<JSVal> value = array->GetValueAt(i);
+        if (value->IsNumber()) {
+            colorfilter.emplace_back(value->ToNumber<float>());
+        } else {
+            ImageModel::GetInstance()->SetColorFilterMatrix(DEFAULT_COLORFILTER_MATRIX);
+            return;
+        }
+    }
+    ImageModel::GetInstance()->SetColorFilterMatrix(colorfilter);
+}
+
 void JSImageSpan::JSBind(BindingTarget globalObj)
 {
     JSClass<JSImageSpan>::Declare("ImageSpan");
@@ -145,6 +199,7 @@ void JSImageSpan::JSBind(BindingTarget globalObj)
     JSClass<JSImageSpan>::StaticMethod("onError", &JSImageSpan::OnError);
     JSClass<JSImageSpan>::StaticMethod("border", &JSImage::JsBorder);
     JSClass<JSImageSpan>::StaticMethod("borderRadius", &JSImage::JsBorderRadius);
+    JSClass<JSImageSpan>::StaticMethod("colorFilter", &JSImageSpan::SetColorFilter, opt);
     JSClass<JSImageSpan>::StaticMethod("baselineOffset", &JSImageSpan::SetBaselineOffset);
     JSClass<JSImageSpan>::InheritAndBind<JSViewAbstract>(globalObj);
 }

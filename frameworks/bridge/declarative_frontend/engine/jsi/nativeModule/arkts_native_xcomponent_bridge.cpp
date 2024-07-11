@@ -117,19 +117,19 @@ ArkUINativeModuleValue XComponentBridge::SetXComponentInitialize(ArkUIRuntimeCal
         if (jsXComponentController) {
             jsXComponentController->SetInstanceId(Container::CurrentId());
             Framework::XComponentClient::GetInstance().AddControllerToJSXComponentControllersMap(
-                idArg->ToString(vm)->ToString(), jsXComponentController);
+                idArg->ToString(vm)->ToString(vm), jsXComponentController);
             xcomponentController = jsXComponentController->GetController();
         }
     }
     XComponentType xcomponentType = XComponentType::SURFACE;
     if (typeArg->IsString(vm)) {
-        xcomponentType = ConvertToXComponentType(typeArg->ToString(vm)->ToString());
+        xcomponentType = ConvertToXComponentType(typeArg->ToString(vm)->ToString(vm));
     } else if (typeArg->IsNumber()) {
         xcomponentType = static_cast<XComponentType>(typeArg->Int32Value(vm));
     }
-    std::string libraryName = librarynameArg->IsString(vm) ? librarynameArg->ToString(vm)->ToString() : "";
+    std::string libraryName = librarynameArg->IsString(vm) ? librarynameArg->ToString(vm)->ToString(vm) : "";
     GetArkUINodeModifiers()->getXComponentModifier()->setXComponentId(
-        nativeNode, idArg->ToString(vm)->ToString().c_str());
+        nativeNode, idArg->ToString(vm)->ToString(vm).c_str());
     GetArkUINodeModifiers()->getXComponentModifier()->setXComponentType(
         nativeNode, static_cast<int32_t>(xcomponentType));
     GetArkUINodeModifiers()->getXComponentModifier()->setXComponentLibraryname(nativeNode, libraryName.c_str());

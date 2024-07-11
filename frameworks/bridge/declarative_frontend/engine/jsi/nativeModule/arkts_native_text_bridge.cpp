@@ -62,7 +62,7 @@ ArkUINativeModuleValue TextBridge::SetFontWeight(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsString(vm)) {
-        std::string weight = secondArg->ToString(vm)->ToString();
+        std::string weight = secondArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getTextModifier()->setFontWeightStr(nativeNode, weight.c_str());
     } else {
         GetArkUINodeModifiers()->getTextModifier()->resetFontWeight(nativeNode);
@@ -787,7 +787,7 @@ ArkUINativeModuleValue TextBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
         if (weightArg->IsNumber()) {
             weight = std::to_string(weightArg->Int32Value(vm));
         } else if (weightArg->IsString(vm)) {
-            weight = weightArg->ToString(vm)->ToString();
+            weight = weightArg->ToString(vm)->ToString(vm);
         }
     }
     fontInfo.fontWeight = static_cast<uint8_t>(Framework::ConvertStrToFontWeight(weight));
@@ -937,7 +937,7 @@ ArkUINativeModuleValue TextBridge::SetFontFeature(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsString(vm)) {
-        auto value = secondArg->ToString(vm)->ToString();
+        auto value = secondArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getTextModifier()->setTextFontFeature(nativeNode, value.c_str());
     } else {
         GetArkUINodeModifiers()->getTextModifier()->resetTextFontFeature(nativeNode);

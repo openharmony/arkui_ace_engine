@@ -31,6 +31,28 @@ public:
     static void SetUpTestCase() {};
 
     static void TearDownTestCase() {};
+
+    sptr<FormRendererDelegateImpl> SurfaceCreateOnFormRendererDelegateImpl()
+    {
+        sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+        constexpr uint32_t createCode = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_CREATE);
+        std::string surfaceNodeName = "ArkTSCardNode";
+        struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceNodeName };
+        OHOS::AppExecFwk::FormJsInfo formJsInfo;
+        OHOS::AAFwk::Want want;
+        std::shared_ptr<Rosen::RSSurfaceNode> rsNode = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
+        MessageParcel createData;
+        createData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+        rsNode->SetId(1);
+        rsNode->Marshalling(createData);
+        createData.WriteParcelable(&formJsInfo);
+        createData.WriteParcelable(&want);
+        MessageParcel createReply;
+        MessageOption createOption;
+        auto createAns = renderDelegate->OnRemoteRequest(createCode, createData, createReply, createOption);
+        EXPECT_EQ(createAns, ERR_OK);
+        return renderDelegate;
+    }
 };
 
 /*
@@ -181,4 +203,330 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_007, TestSize.Le
     EXPECT_EQ(renderDelegate->OnGetRectRelativeToWindow(top, left), ERR_OK);
     GTEST_LOG_(INFO) << "FormRenderDelegateImplTest_007 end";
 }
+
+/**
+ * @tc.name: FormRenderDelegateImplTest_008
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_008, TestSize.Level1)
+{
+    auto renderDelegate = SurfaceCreateOnFormRendererDelegateImpl();
+    uint64_t surfaceId = 1;
+    OHOS::AppExecFwk::FormJsInfo formJsInfo;
+
+    constexpr uint32_t reUseCode = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_REUSE);
+    MessageParcel reUseData;
+    OHOS::AAFwk::Want want;
+    reUseData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    reUseData.WriteUint64(surfaceId);
+    reUseData.WriteParcelable(&formJsInfo);
+    reUseData.WriteParcelable(&want);
+    MessageParcel reUseReply;
+    MessageOption reUseOption;
+    auto reUseAns = renderDelegate->OnRemoteRequest(reUseCode, reUseData, reUseReply, reUseOption);
+    EXPECT_EQ(reUseAns, ERR_OK);
+}
+
+/**
+ * @tc.name: FormRenderDelegateImplTest_009
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_009, TestSize.Level1)
+{
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+    constexpr uint32_t code = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_CREATE);
+
+    MessageParcel data;
+    data.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    MessageParcel reply;
+    MessageOption option;
+    auto ans = renderDelegate->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ans, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: FormRenderDelegateImplTest_010
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_010, TestSize.Level1)
+{
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+    constexpr uint32_t code = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_CREATE);
+    std::string surfaceNodeName = "ArkTSCardNode";
+    struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceNodeName };
+    std::shared_ptr<Rosen::RSSurfaceNode> rsNode = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
+
+    MessageParcel data;
+    data.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    rsNode->Marshalling(data);
+    MessageParcel reply;
+    MessageOption option;
+    auto ans = renderDelegate->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ans, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: FormRenderDelegateImplTest_011
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_011, TestSize.Level1)
+{
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+    constexpr uint32_t code = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_CREATE);
+    std::string surfaceNodeName = "ArkTSCardNode";
+    struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = surfaceNodeName };
+    OHOS::AppExecFwk::FormJsInfo formJsInfo;
+    std::shared_ptr<Rosen::RSSurfaceNode> rsNode = OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true);
+
+    MessageParcel data;
+    data.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    rsNode->Marshalling(data);
+    data.WriteParcelable(&formJsInfo);
+    MessageParcel reply;
+    MessageOption option;
+    auto ans = renderDelegate->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ans, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: FormRenderDelegateImplTest_012
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_012, TestSize.Level1)
+{
+    auto renderDelegate = SurfaceCreateOnFormRendererDelegateImpl();
+    uint64_t surfaceId = 2;
+    OHOS::AppExecFwk::FormJsInfo formJsInfo;
+
+    constexpr uint32_t reUseCode = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_REUSE);
+    MessageParcel reUseData;
+    OHOS::AAFwk::Want want;
+    reUseData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    reUseData.WriteUint64(surfaceId);
+    reUseData.WriteParcelable(&formJsInfo);
+    reUseData.WriteParcelable(&want);
+    MessageParcel reUseReply;
+    MessageOption reUseOption;
+    auto reUseAns = renderDelegate->OnRemoteRequest(reUseCode, reUseData, reUseReply, reUseOption);
+    EXPECT_EQ(reUseAns, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: FormRenderDelegateImplTest_013
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_013, TestSize.Level1)
+{
+    auto renderDelegate = SurfaceCreateOnFormRendererDelegateImpl();
+    uint64_t surfaceId = 1;
+
+    constexpr uint32_t reUseCode = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_REUSE);
+    MessageParcel reUseData;
+    reUseData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    reUseData.WriteUint64(surfaceId);
+    MessageParcel reUseReply;
+    MessageOption reUseOption;
+    auto reUseAns = renderDelegate->OnRemoteRequest(reUseCode, reUseData, reUseReply, reUseOption);
+    EXPECT_EQ(reUseAns, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: FormRenderDelegateImplTest_014
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_014, TestSize.Level1)
+{
+    auto renderDelegate = SurfaceCreateOnFormRendererDelegateImpl();
+    uint64_t surfaceId = 2;
+    OHOS::AppExecFwk::FormJsInfo formJsInfo;
+
+    constexpr uint32_t reUseCode = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_REUSE);
+    MessageParcel reUseData;
+    reUseData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    reUseData.WriteUint64(surfaceId);
+    reUseData.WriteParcelable(&formJsInfo);
+    MessageParcel reUseReply;
+    MessageOption reUseOption;
+    auto reUseAns = renderDelegate->OnRemoteRequest(reUseCode, reUseData, reUseReply, reUseOption);
+    EXPECT_EQ(reUseAns, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: FormRenderDelegateImplTest_015
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_015, TestSize.Level1)
+{
+    auto renderDelegate = SurfaceCreateOnFormRendererDelegateImpl();
+    uint64_t surfaceId = 2;
+    OHOS::AppExecFwk::FormJsInfo formJsInfo;
+
+    constexpr uint32_t reUseCode = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_REUSE);
+    MessageParcel reUseData;
+    reUseData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    reUseData.WriteUint64(surfaceId);
+    reUseData.WriteParcelable(&formJsInfo);
+    MessageParcel reUseReply;
+    MessageOption reUseOption;
+    auto reUseAns = renderDelegate->OnRemoteRequest(reUseCode, reUseData, reUseReply, reUseOption);
+    EXPECT_EQ(reUseAns, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: FormRenderDelegateImplTest_016
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_016, TestSize.Level1)
+{
+    auto renderDelegate = SurfaceCreateOnFormRendererDelegateImpl();
+    uint64_t surfaceId = 1;
+
+    constexpr uint32_t detachCode = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_FORMSURFACE_DETACH);
+    MessageParcel detachData;
+    detachData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    detachData.WriteUint64(surfaceId);
+    MessageParcel detachReply;
+    MessageOption detachOption;
+    auto reUseAns = renderDelegate->OnRemoteRequest(detachCode, detachData, detachReply, detachOption);
+    EXPECT_EQ(reUseAns, ERR_OK);
+}
+
+/**
+ * @tc.name: FormRenderDelegateImplTest_017
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_017, TestSize.Level1)
+{
+    auto renderDelegate = SurfaceCreateOnFormRendererDelegateImpl();
+    uint64_t surfaceId = 1;
+
+    constexpr uint32_t releaseCode = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_RELEASE);
+    MessageParcel releaseData;
+    releaseData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    releaseData.WriteUint64(surfaceId);
+    MessageParcel releaseReply;
+    MessageOption releaseOption;
+    auto reUseAns = renderDelegate->OnRemoteRequest(releaseCode, releaseData, releaseReply, releaseOption);
+    EXPECT_EQ(reUseAns, ERR_OK);
+}
+
+/**
+ * @tc.name: FormRenderDelegateImplTest_018
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_018, TestSize.Level1)
+{
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+
+    const std::string action = "just a unittest";
+    constexpr uint32_t actionCreateCode = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_ACTION_CREATE);
+    MessageParcel actionCreateData;
+    actionCreateData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    actionCreateData.WriteString(action);
+    MessageParcel actionCreateReply;
+    MessageOption actionCreateOption;
+    auto reUseAns =
+        renderDelegate->OnRemoteRequest(actionCreateCode, actionCreateData, actionCreateReply, actionCreateOption);
+    EXPECT_EQ(reUseAns, ERR_OK);
+}
+
+/**
+ * @tc.name: FormRenderDelegateImplTest_019
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_019, TestSize.Level1)
+{
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+
+    const std::string code = "code in unittest";
+    const std::string msg = "code in unittest";
+    constexpr uint32_t errorCode = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_ERROR);
+    MessageParcel errorData;
+    errorData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    errorData.WriteString(code);
+    errorData.WriteString(msg);
+    MessageParcel errorReply;
+    MessageOption errorOption;
+    auto reUseAns = renderDelegate->OnRemoteRequest(errorCode, errorData, errorReply, errorOption);
+    EXPECT_EQ(reUseAns, ERR_OK);
+}
+
+/**
+ * @tc.name: FormRenderDelegateImplTest_020
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_020, TestSize.Level1)
+{
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+
+    float width = 1.0;
+    float height = 1.0;
+    float borderWidth = 1.0;
+    constexpr uint32_t surfaceChangeCode = static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_CHANGE);
+    MessageParcel surfaceChangeData;
+    surfaceChangeData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    surfaceChangeData.WriteFloat(width);
+    surfaceChangeData.WriteFloat(height);
+    surfaceChangeData.WriteFloat(borderWidth);
+    MessageParcel surfaceChangeReply;
+    MessageOption surfaceChangeOption;
+    auto reUseAns =
+        renderDelegate->OnRemoteRequest(surfaceChangeCode, surfaceChangeData, surfaceChangeReply, surfaceChangeOption);
+    EXPECT_EQ(reUseAns, ERR_OK);
+}
+
+/**
+ * @tc.name: FormRenderDelegateImplTest_021
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_021, TestSize.Level1)
+{
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+
+    const std::vector<std::string> formLinkInfos;
+    constexpr uint32_t linkInfoUpdateChangeCode =
+        static_cast<uint32_t>(IFormRendererDelegate::Message::ON_FORM_LINK_INFO_UPDATE);
+    MessageParcel linkInfoUpdateData;
+    linkInfoUpdateData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    linkInfoUpdateData.WriteStringVector(formLinkInfos);
+    MessageParcel linkInfoUpdateReply;
+    MessageOption linkInfoUpdateOption;
+    auto reUseAns = renderDelegate->OnRemoteRequest(
+        linkInfoUpdateChangeCode, linkInfoUpdateData, linkInfoUpdateReply, linkInfoUpdateOption);
+    EXPECT_EQ(reUseAns, ERR_OK);
+}
+
+/**
+ * @tc.name: FormRenderDelegateImplTest_022
+ * @tc.desc: test FormRendererDelegateImpl OnRemoteRequest event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_022, TestSize.Level1)
+{
+    sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
+
+    constexpr uint32_t getRectCode =
+        static_cast<uint32_t>(IFormRendererDelegate::Message::ON_GET_RECT_RELATIVE_TO_WINDOW);
+    MessageParcel getRectData;
+    getRectData.WriteInterfaceToken(FormRendererDelegateImpl::GetDescriptor());
+    MessageParcel getRectReply;
+    MessageOption getRectOption;
+    auto reUseAns = renderDelegate->OnRemoteRequest(getRectCode, getRectData, getRectReply, getRectOption);
+    EXPECT_EQ(reUseAns, ERR_OK);
+}
+
 }

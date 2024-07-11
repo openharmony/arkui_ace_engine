@@ -160,12 +160,12 @@ HWTEST_F(ListScrollerEventTestNg, Event002, TestSize.Level1)
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
 
-    ScrollDown();
+    ScrollTo(ITEM_HEIGHT);
     EXPECT_EQ(startIndex, 1);
     EXPECT_EQ(endIndex, 4);
     EXPECT_EQ(centerIndex, 2);
 
-    ScrollDown();
+    ScrollTo(ITEM_HEIGHT * 2);
     EXPECT_EQ(startIndex, 2);
     EXPECT_EQ(endIndex, 5);
     EXPECT_EQ(centerIndex, 3);
@@ -194,7 +194,7 @@ HWTEST_F(ListScrollerEventTestNg, Event003, TestSize.Level1)
      * @tc.steps: step2. Scroll to middle.
      */
     isTrigger = false;
-    ScrollDown();
+    ScrollTo(ITEM_HEIGHT);
     EXPECT_FALSE(isTrigger);
 
     /**
@@ -206,7 +206,7 @@ HWTEST_F(ListScrollerEventTestNg, Event003, TestSize.Level1)
      * @tc.steps: step4. Scroll up to start
      */
     isTrigger = false;
-    ScrollUp(2);
+    ScrollTo(0.f);
     EXPECT_TRUE(isTrigger);
 }
 
@@ -227,7 +227,7 @@ HWTEST_F(ListScrollerEventTestNg, Event004, TestSize.Level1)
     /**
      * @tc.steps: step1. Scroll down to end
      */
-    ScrollDown(3);
+    ScrollTo(ITEM_HEIGHT * 3);
     EXPECT_TRUE(isTrigger);
 }
 
@@ -306,11 +306,11 @@ HWTEST_F(ListScrollerEventTestNg, Event007, TestSize.Level1)
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
 
-    ScrollDown();
+    ScrollTo(ITEM_HEIGHT);
     EXPECT_EQ(startIndex, 1);
     EXPECT_EQ(endIndex, 4);
 
-    ScrollDown();
+    ScrollTo(ITEM_HEIGHT * 2);
     EXPECT_EQ(startIndex, 2);
     EXPECT_EQ(endIndex, 5);
 }
@@ -599,7 +599,7 @@ HWTEST_F(ListScrollerEventTestNg, Pattern005, TestSize.Level1)
     EXPECT_TRUE(pattern_->scrollAbort_);
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
     EXPECT_TRUE(pattern_->scrollAbort_);
-    EXPECT_TRUE(IsEqualTotalOffset(0));
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
     EXPECT_TRUE(pattern_->AnimateStoped());
 
     /**

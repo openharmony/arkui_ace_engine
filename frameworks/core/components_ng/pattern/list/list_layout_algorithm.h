@@ -163,7 +163,7 @@ public:
 
     float GetCurrentOffset() const
     {
-        return currentOffset_ - adjustOffset_;
+        return currentOffset_ + adjustOffset_;
     }
 
     void SetIsNeedCheckOffset(bool isNeedCheckOffset)

@@ -20,11 +20,11 @@ export struct AtomicServiceNavigation {
   @State navPathStack?: NavPathStack = new NavPathStack();
   @BuilderParam navigationContent?: Callback<void>;
   @Prop title?: ResourceStr;
-  @Prop titleOptions?: TitleOptions = { isEnableBlur: true };
+  @Prop titleOptions?: TitleOptions = { isBlurEnabled: true };
   @Prop hideTitleBar?: boolean;
   @Prop navBarWidth?: Length;
   @Prop mode?: NavigationMode;
-  @BuilderParam navDestinationBuilder?: (name: string, param?: Object) => void = this.defaultNavDestinationBuilder;
+  @BuilderParam navDestinationBuilder?: NavDestinationBuilder = this.defaultNavDestinationBuilder;
   @Prop navBarWidthRange?: [Dimension, Dimension];
   @Prop minContentWidth?: Dimension;
   stateChangeCallback?: Callback<boolean>;
@@ -42,7 +42,7 @@ export struct AtomicServiceNavigation {
     }
     .title(this.title, {
       backgroundColor: this.titleOptions?.backgroundColor,
-      backgroundBlurStyle: this.titleOptions?.isEnableBlur ? BlurStyle.COMPONENT_THICK : BlurStyle.NONE,
+      backgroundBlurStyle: this.titleOptions?.isBlurEnabled ? BlurStyle.COMPONENT_THICK : BlurStyle.NONE,
       barStyle: this.titleOptions?.barStyle
     })
     .titleMode(NavigationTitleMode.Mini)
@@ -61,6 +61,8 @@ export struct AtomicServiceNavigation {
 
 export interface TitleOptions {
   backgroundColor?: ResourceColor,
-  isEnableBlur?: boolean,
+  isBlurEnabled?: boolean,
   barStyle?: BarStyle
 }
+
+export type NavDestinationBuilder = (name: string, param?: Object) => void;

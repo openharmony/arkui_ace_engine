@@ -25,6 +25,8 @@ namespace OHOS::Ace::NG {
 namespace {
 const char DOM_SVG_SRC_VIEW_BOX[] = "viewBox";
 constexpr float HALF = 0.5f;
+constexpr float DEFAULT_SVG_WIDTH = 300.0f;
+constexpr float DEFAULT_SVG_HEIGHT = 150.0f;
 }
 
 SvgSvg::SvgSvg() : SvgGroup() {}
@@ -61,8 +63,8 @@ void SvgSvg::AdjustContentAreaByViewBox(RSCanvas& canvas, const Size& viewPort)
     auto svgSize = GetSize();
     auto viewBox = GetViewBox();
     if (LessOrEqual(viewBox.Width(), 0.0) || LessOrEqual(viewBox.Height(), 0.0)) {
-        RSRect clipRect(0.0f, 0.0f, LessNotEqual(svgSize.Width(), 0.0) ? viewPort.Width() : svgSize.Width(),
-            LessNotEqual(svgSize.Height(), 0.0) ? viewPort.Height() : svgSize.Height());
+        RSRect clipRect(0.0f, 0.0f, LessNotEqual(svgSize.Width(), 0.0) ? DEFAULT_SVG_WIDTH : svgSize.Width(),
+            LessNotEqual(svgSize.Height(), 0.0) ? DEFAULT_SVG_HEIGHT : svgSize.Height());
         canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
         return;
     }

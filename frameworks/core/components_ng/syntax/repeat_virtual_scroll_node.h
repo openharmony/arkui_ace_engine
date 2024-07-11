@@ -172,7 +172,7 @@ private:
 
     // drop UINode with given key from L1 but keep in L2
     // detach from tree and request tree sync
-    void DropFromL1(std::string key);
+    void DropFromL1(const std::string& key);
 
     // RepeatVirtualScrollNode is not instance of FrameNode
     // needs to propagate active state to all items inside

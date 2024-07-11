@@ -334,7 +334,7 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert008, TestSize.Level1)
 {
     auto spanString = AceType::MakeRefPtr<SpanString>("段落标题\n正文第一段开始");
     SpanParagraphStyle spanParagraphStyle;
-    spanParagraphStyle.align = TextAlign::START;
+    spanParagraphStyle.align = TextAlign::CENTER;
     // default max lines 4
     spanParagraphStyle.maxLines = 4;
     spanParagraphStyle.wordBreak = WordBreak::BREAK_ALL;
@@ -350,10 +350,10 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert008, TestSize.Level1)
     SpanToHtml convert;
     auto out = convert.ToHtml(*spanString);
     std::string result =
-        "<div ><p style=\"text-indent: 23.00px;word-break: break_all;text-overflow: ellipsis;\"><span "
-        "style=\"font-size: 16.00fp;font-style: normal;font-weight: normal;color: #000000FF;font-family: HarmonyOS "
-        "Sans;\">段落标题</span></p><span style=\"font-size: 16.00fp;font-style: normal;font-weight: normal;color: "
-        "#000000FF;font-family: HarmonyOS Sans;\">正文第一段开始</span></div>";
+        "<div ><p style=\"text-align: center;text-indent: 23.00px;word-break: break_all;text-overflow: ellipsis;\">"
+        "<span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: #000000FF;font-family: "
+        "HarmonyOS Sans;\">段落标题</span></p><span style=\"font-size: 16.00px;font-style: normal;font-weight: "
+        "normal;color: #000000FF;font-family: HarmonyOS Sans;\">正文第一段开始</span></div>";
     EXPECT_EQ(out, result);
 }
 
@@ -366,10 +366,10 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert009, TestSize.Level1)
     SpanToHtml convert;
     auto out = convert.ToHtml(*spanString);
     std::string result =
-        "<div ><span style=\"font-size: 16.00fp;font-style: normal;font-weight: normal;color: #000000FF;font-family: "
-        "HarmonyOS Sans;vertical-align: 20.00px;\">向上到顶</span><span style=\"font-size: 16.00fp;font-style: "
+        "<div ><span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: #000000FF;font-family: "
+        "HarmonyOS Sans;vertical-align: 20.00px;\">向上到顶</span><span style=\"font-size: 16.00px;font-style: "
         "normal;font-weight: normal;color: #000000FF;font-family: HarmonyOS Sans;vertical-align: "
-        "10.00px;\">适中</span><span style=\"font-size: 16.00fp;font-style: normal;font-weight: normal;color: "
+        "10.00px;\">适中</span><span style=\"font-size: 16.00px;font-style: normal;font-weight: normal;color: "
         "#000000FF;font-family: HarmonyOS Sans;\">向下到底</span></div>";
     EXPECT_EQ(out, result);
 }

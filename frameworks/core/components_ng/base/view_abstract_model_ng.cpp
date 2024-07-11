@@ -487,15 +487,16 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
 {
     auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(targetNode);
-    auto buildNodeFunc = [buildFunc]() -> RefPtr<UINode> {
-        NG::ScopedViewStackProcessor builderViewStackProcess;
+    auto instanceId = sheetStyle.instanceId.has_value() ? sheetStyle.instanceId.value() : Container::CurrentId();
+    auto buildNodeFunc = [buildFunc, instanceId]() -> RefPtr<UINode> {
+        NG::ScopedViewStackProcessor builderViewStackProcess(instanceId);
         buildFunc();
         auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         return customNode;
     };
-    auto buildTitleNodeFunc = [titleBuildFunc]() -> RefPtr<UINode> {
+    auto buildTitleNodeFunc = [titleBuildFunc, instanceId]() -> RefPtr<UINode> {
         CHECK_NULL_RETURN(titleBuildFunc, nullptr);
-        NG::ScopedViewStackProcessor builderViewStackProcess;
+        NG::ScopedViewStackProcessor builderViewStackProcess(instanceId);
         titleBuildFunc();
         auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         return customNode;
@@ -509,21 +510,20 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
     CHECK_NULL_VOID(overlayManager);
 
     // delete Sheet when target node destroy
-    auto destructor =
-        [id = targetNode->GetId(), rootNodeId = targetNode->GetRootNodeId(),
-            rootNodeType = targetNode->GetRootNodeType(), showInPage = sheetStyle.showInPage.value_or(false),
-            instanceId = sheetStyle.instanceId.has_value() ? sheetStyle.instanceId.value() : Container::CurrentId()]() {
-            ContainerScope scope(instanceId);
-            auto pipeline = NG::PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto overlayManager = pipeline->GetOverlayManager();
-            if (showInPage) {
-                TAG_LOGD(AceLogTag::ACE_SHEET, "To showInPage, get overlayManager from GetOverlayFromPage");
-                overlayManager = SheetManager::GetOverlayFromPage(rootNodeId, rootNodeType);
-            }
-            CHECK_NULL_VOID(overlayManager);
-            overlayManager->DeleteModal(id);
-        };
+    auto destructor = [id = targetNode->GetId(), rootNodeId = targetNode->GetRootNodeId(),
+                          rootNodeType = targetNode->GetRootNodeType(),
+                          showInPage = sheetStyle.showInPage.value_or(false), instanceId]() {
+        ContainerScope scope(instanceId);
+        auto pipeline = NG::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        if (showInPage) {
+            TAG_LOGD(AceLogTag::ACE_SHEET, "To showInPage, get overlayManager from GetOverlayFromPage");
+            overlayManager = SheetManager::GetOverlayFromPage(rootNodeId, rootNodeType);
+        }
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->DeleteModal(id);
+    };
     targetNode->PushDestroyCallback(destructor);
 
     overlayManager->BindSheet(isShow, std::move(callback), std::move(buildNodeFunc), std::move(buildTitleNodeFunc),

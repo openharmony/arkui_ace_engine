@@ -144,6 +144,8 @@ private:
     }
 
     static RefPtr<FrameNode> CreateMenuNode(const std::shared_ptr<SelectOverlayInfo>& info);
+    static std::pair<std::vector<MenuOptionsParam>, bool> HandleCollaborationMenuItem(
+        const std::vector<MenuOptionsParam>& params);
 
     void NotifyUpdateToolBar(bool itemChanged);
 

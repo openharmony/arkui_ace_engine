@@ -503,8 +503,8 @@ class ImageTransitionModifier extends ModifierWithKey<object> {
   }
 }
 
-class ImageSrcModifier extends ModifierWithKey<ResourceStr | PixelMap | DrawableDescriptor> {
-  constructor(value: ResourceStr | PixelMap | DrawableDescriptor) {
+class ImageSrcModifier extends ModifierWithKey<ResourceStr | PixelMap | DrawableDescriptor | ImageContent> {
+  constructor(value: ResourceStr | PixelMap | DrawableDescriptor | ImageContent) {
     super(value);
   }
   static identity: Symbol = Symbol('imageShowSrc');

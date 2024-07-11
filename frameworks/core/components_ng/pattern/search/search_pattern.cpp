@@ -16,9 +16,6 @@
 #include "core/components_ng/pattern/search/search_pattern.h"
 
 #include <cstdint>
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/geometry/rect.h"
 #include "base/utils/system_properties.h"
@@ -179,8 +176,7 @@ void SearchPattern::SetAccessibilityClearAction()
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
-
-    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto layoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto cleanNodeStyle = layoutProperty->GetCleanNodeStyleValue(CleanNodeStyle::INPUT);
     auto hasContent = cleanNodeStyle == CleanNodeStyle::CONSTANT ||
@@ -667,11 +663,6 @@ void SearchPattern::OnClickButtonAndImage()
     searchEventHub->UpdateSubmitEvent(text);
     // close keyboard and select background color
     textFieldPattern->StopEditing();
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
-    if (UiSessionManager::GetInstance().GetSearchEventRegistered()) {
-        UiSessionManager::GetInstance().ReportSearchEvent(text);
-    }
-#endif
 }
 
 void SearchPattern::OnClickCancelButton()

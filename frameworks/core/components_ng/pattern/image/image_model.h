@@ -68,6 +68,7 @@ public:
     virtual void SetOnError(std::function<void(const LoadImageFailEvent &info)> &&callback) = 0;
     virtual void SetSvgAnimatorFinishEvent(std::function<void()> &&callback) = 0;
     virtual void Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixMap) = 0;
+    virtual void ResetImage() = 0;
     virtual void CreateAnimation(const std::vector<ImageProperties>& imageList,
         int32_t duration, int32_t iteration) = 0;
     virtual void SetImageSourceSize(const std::pair<Dimension, Dimension> &size) = 0;

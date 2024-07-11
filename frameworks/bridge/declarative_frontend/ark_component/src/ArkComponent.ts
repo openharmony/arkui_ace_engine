@@ -34,6 +34,7 @@ type AttributeModifierWithKey = ModifierWithKey<number | string | boolean | obje
 class ObservedMap {
   private map_: Map<Symbol, AttributeModifierWithKey>;
   private changeCallback: ((key: Symbol, value: AttributeModifierWithKey) => void) | undefined;
+  private isFrameNode_: boolean = false;
 
   constructor() {
     this.map_ = new Map();
@@ -85,6 +86,12 @@ class ObservedMap {
     if (this.changeCallback === undefined) {
       this.changeCallback = callback;
     }
+  }
+  public setFrameNode(isFrameNode: boolean) {
+    this.isFrameNode_ = isFrameNode
+  }
+  public isFrameNode(): boolean {
+    return this.isFrameNode_;
   }
 }
 
@@ -3013,6 +3020,15 @@ function modifierWithKey<T extends number | string | boolean | object, M extends
   modifierClass: new (value: T) => M,
   value: T
 ) {
+  if (typeof (modifiers as ObservedMap).isFrameNode === "function" && (modifiers as ObservedMap).isFrameNode()) {
+    if (!(modifierClass as any).instance) {
+      (modifierClass as any).instance = new modifierClass(value);
+    } else {
+      (modifierClass as any).instance.stageValue = value;
+    }
+    modifiers.set(identity, (modifierClass as any).instance);
+    return;
+  }
   const item = modifiers.get(identity);
   if (item) {
     item.stageValue = value;
@@ -3056,7 +3072,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         if (this._instanceId !== -1) {
           __JSScopeUtil__.restoreInstanceId();
         }
-      })
+      });
+      (this._modifiersWithKeys as ObservedMap).setFrameNode(true);
     } else if (classType === ModifierType.EXPOSE_MODIFIER || classType === ModifierType.STATE) {
       this._modifiersWithKeys = new ObservedMap();
     } else {

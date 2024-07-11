@@ -530,6 +530,11 @@ public:
         return acePerformanceMonitorEnable_;
     }
 
+    static bool GetAceCommercialLogEnabled()
+    {
+        return aceCommercialLogEnable_;
+    }
+
     static std::string GetAtomicServiceBundleName();
 
     static std::pair<float, float> GetDarkModeBrightnessPercent()
@@ -604,6 +609,7 @@ private:
     static bool sideBarContainerBlurEnable_;
     static bool stateManagerEnable_;
     static bool acePerformanceMonitorEnable_;
+    static bool aceCommercialLogEnable_;
     static bool faultInjectEnabled_;
     static bool imageFrameworkEnable_;
     static std::pair<float, float> brightUpPercent_;

@@ -26,7 +26,7 @@ from src.beans.state_history import StateHistory
 #   procedure: HandleTouchDown, timestamp: 2017-08-25 15:00:22.247
 #   procedure: HandleTouchUp, timestamp: 2017-08-25 15:00:22.295
 
-from src.keywords import event_procedure_keyword
+from src.keywords import event_procedure_keyword, get_sample_key, get_sample_value
 from src.utils.log_wrapper import log_info, log_error
 from src.utils.value_parser import get_value_as_int, get_value_as_str, get_value_as_float
 from typing import List
@@ -67,30 +67,30 @@ class EventNode(BaseBean):
         # parse frame node info
         # frameNodeId: 84, type: TouchEventActuator, depth: 0, id: 0xf072b240, parentId: 0x0
         frame_node_str = texts[0]
-        self.frameNodeId = get_value_as_int(frame_node_str, event_procedure_keyword['frameNodeId'].key,
-                                            event_procedure_keyword['frameNodeId'].value_separator_count)
-        self.type = get_value_as_str(frame_node_str, event_procedure_keyword['type'].key,
-                                     event_procedure_keyword['type'].value_separator_count)
-        self.depth = get_value_as_int(frame_node_str, event_procedure_keyword['depth'].key,
-                                      event_procedure_keyword['depth'].value_separator_count)
-        self.address = get_value_as_str(frame_node_str, event_procedure_keyword['id'].key,
-                                        event_procedure_keyword['id'].value_separator_count)
-        self.parentId = get_value_as_str(frame_node_str, event_procedure_keyword['parentId'].key,
-                                         event_procedure_keyword['parentId'].value_separator_count)
-        self.duration = get_value_as_int(frame_node_str, event_procedure_keyword['duration'].key,
-                                         event_procedure_keyword['duration'].value_separator_count)
-        self.custom_info = get_value_as_str(frame_node_str, event_procedure_keyword['customInfo'].key,
-                                            event_procedure_keyword['customInfo'].value_separator_count)
-        self.direction = get_value_as_int(frame_node_str, event_procedure_keyword['direction'].key,
-                                          event_procedure_keyword['direction'].value_separator_count)
-        self.distance = get_value_as_float(frame_node_str, event_procedure_keyword['distance'].key,
-                                           event_procedure_keyword['distance'].value_separator_count)
-        self.isForDrag = get_value_as_int(frame_node_str, event_procedure_keyword['isForDrag'].key,
-                                          event_procedure_keyword['isForDrag'].value_separator_count)
-        self.repeat = get_value_as_int(frame_node_str, event_procedure_keyword['repeat'].key,
-                                       event_procedure_keyword['repeat'].value_separator_count)
-        self.fingers = get_value_as_int(frame_node_str, event_procedure_keyword['fingers'].key,
-                                        event_procedure_keyword['fingers'].value_separator_count)
+        self.frameNodeId = get_value_as_int(frame_node_str, get_sample_key(event_procedure_keyword, 'frameNodeId'),
+                                            get_sample_value(event_procedure_keyword, 'frameNodeId'))
+        self.type = get_value_as_str(frame_node_str, get_sample_key(event_procedure_keyword, 'type'),
+                                     get_sample_value(event_procedure_keyword, 'type'))
+        self.depth = get_value_as_int(frame_node_str, get_sample_key(event_procedure_keyword, 'depth'),
+                                      get_sample_key(event_procedure_keyword, 'depth'))
+        self.address = get_value_as_str(frame_node_str, get_sample_key(event_procedure_keyword, 'id'),
+                                        get_sample_key(event_procedure_keyword, 'id'))
+        self.parentId = get_value_as_str(frame_node_str, get_sample_key(event_procedure_keyword, 'parentId'),
+                                         get_sample_key(event_procedure_keyword, 'parentId'))
+        self.duration = get_value_as_int(frame_node_str, get_sample_key(event_procedure_keyword, 'duration'),
+                                         get_sample_key(event_procedure_keyword, 'duration'))
+        self.custom_info = get_value_as_str(frame_node_str, get_sample_key(event_procedure_keyword, 'customInfo'),
+                                            get_sample_key(event_procedure_keyword, 'customInfo'))
+        self.direction = get_value_as_int(frame_node_str, get_sample_key(event_procedure_keyword, 'direction'),
+                                          get_sample_key(event_procedure_keyword, 'direction'))
+        self.distance = get_value_as_float(frame_node_str, get_sample_key(event_procedure_keyword, 'distance'),
+                                           get_sample_key(event_procedure_keyword, 'distance'))
+        self.isForDrag = get_value_as_int(frame_node_str, get_sample_key(event_procedure_keyword, 'isForDrag'),
+                                          get_sample_key(event_procedure_keyword, 'isForDrag'))
+        self.repeat = get_value_as_int(frame_node_str, get_sample_key(event_procedure_keyword, 'repeat'),
+                                       get_sample_key(event_procedure_keyword, 'repeat'))
+        self.fingers = get_value_as_int(frame_node_str, get_sample_key(event_procedure_keyword, 'fingers'),
+                                        get_sample_key(event_procedure_keyword, 'fingers'))
         # parse state history
         self.parse_state_history(texts, 1)
         self.check_parse_result()

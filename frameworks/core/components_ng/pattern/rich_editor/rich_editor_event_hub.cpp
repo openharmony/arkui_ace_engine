@@ -261,6 +261,16 @@ const std::string& RichEditorAbstractSpanResult::GetColor() const
     return color_;
 }
 
+void RichEditorAbstractSpanResult::SetTextDecorationStyle(TextDecorationStyle textDecorationStyle)
+{
+    textDecorationStyle_ = textDecorationStyle;
+}
+
+TextDecorationStyle RichEditorAbstractSpanResult::GetTextDecorationStyle() const
+{
+    return textDecorationStyle_;
+}
+
 void RichEditorAbstractSpanResult::SetValuePixelMap(const RefPtr<PixelMap>& valuePixelMap)
 {
     valuePixelMap_ = valuePixelMap;

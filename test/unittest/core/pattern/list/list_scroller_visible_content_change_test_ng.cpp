@@ -484,7 +484,7 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange007, 
 
     startExpect = { 0, 1, 0 };
     endExpect = { 1, 1, 1 };
-    ScrollDown();
+    ScrollTo(ITEM_HEIGHT);
     EXPECT_TRUE(IsEqual(startInfo, startExpect));
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
 
@@ -561,7 +561,7 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange008, 
 
     startExpect = { 0, 1, 0};
     endExpect = { 1, 1, 1 };
-    ScrollDown();
+    ScrollTo(ITEM_HEIGHT);
     EXPECT_TRUE(IsEqual(startInfo, startExpect));
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
 
@@ -640,7 +640,7 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange009, 
 
     startExpect = { 0, 1, 0 };
     endExpect = { 1, 1, 1 };
-    ScrollDown();
+    ScrollTo(ITEM_HEIGHT);
     EXPECT_TRUE(IsEqual(startInfo, startExpect));
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
 
@@ -720,7 +720,7 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange010, 
 
     startExpect = { 0, 1, 0 };
     endExpect = { 1, 1, 1 };
-    ScrollDown();
+    ScrollTo(ITEM_HEIGHT);
     EXPECT_TRUE(IsEqual(startInfo, startExpect));
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
 
@@ -800,7 +800,7 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange011, 
 
     startExpect = { 0, 1, 0};
     endExpect = { 1, 1, 1 };
-    ScrollDown();
+    ScrollTo(ITEM_HEIGHT);
     EXPECT_TRUE(IsEqual(startInfo, startExpect));
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
 
@@ -879,7 +879,7 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange012, 
 
     startExpect = { 0, 1, 0};
     endExpect = { 1, 1, 1 };
-    ScrollDown();
+    ScrollTo(ITEM_HEIGHT);
     EXPECT_TRUE(IsEqual(startInfo, startExpect));
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
 

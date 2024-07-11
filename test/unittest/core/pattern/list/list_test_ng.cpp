@@ -245,9 +245,9 @@ void ListTestNg::CreateSwipeItems(
     }
 }
 
-std::function<void()> ListTestNg::GetRowOrColBuilder(float width, float height)
+std::function<void()> ListTestNg::GetRowOrColBuilder(float crossSize, float mainSize)
 {
-    return GetRowOrColBuilder(Dimension(width), Dimension(height));
+    return GetRowOrColBuilder(Dimension(crossSize), Dimension(mainSize));
 }
 
 std::function<void()> ListTestNg::GetRowOrColBuilder(Dimension crossSize, Dimension mainSize)
@@ -274,42 +274,15 @@ void ListTestNg::UpdateCurrentOffset(float offset, int32_t source)
     FlushLayoutTask(frameNode_);
 }
 
-float ListTestNg::GetInterval()
-{
-    float space = layoutProperty_->GetSpace().has_value() ? layoutProperty_->GetSpace().value().ConvertToPx() : 0.f;
-    float strokeWidth = layoutProperty_->GetDivider().has_value()
-                            ? layoutProperty_->GetDivider().value().strokeWidth.ConvertToPx()
-                            : 0.f;
-    return std::max(space, strokeWidth);
-}
-
-void ListTestNg::ScrollUp(float itemNumber)
-{
-    Axis axis = pattern_->GetAxis();
-    float itemMainLength = (axis == Axis::VERTICAL) ? ITEM_HEIGHT : ITEM_WIDTH;
-    float offset = (itemMainLength + GetInterval()) * itemNumber;
-    pattern_->UpdateCurrentOffset(offset, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
-}
-
-void ListTestNg::ScrollDown(float itemNumber)
-{
-    Axis axis = pattern_->GetAxis();
-    float itemMainLength = (axis == Axis::VERTICAL) ? ITEM_HEIGHT : ITEM_WIDTH;
-    float offset = -(itemMainLength + GetInterval()) * itemNumber;
-    pattern_->UpdateCurrentOffset(offset, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
-}
-
 void ListTestNg::ScrollToEdge(ScrollEdgeType scrollEdgeType)
 {
     pattern_->ScrollToEdge(scrollEdgeType, false);
     FlushLayoutTask(frameNode_);
 }
 
-void ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
+void ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
 {
-    pattern_->ScrollToIndex(index, smooth, align);
+    pattern_->ScrollToIndex(index, smooth, align, extraOffset);
     FlushLayoutTask(frameNode_);
     if (smooth) {
         auto iter = pattern_->itemPosition_.find(index);
@@ -321,6 +294,9 @@ void ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
             }
         } else {
             pattern_->GetListItemAnimatePos(iter->second.startPos, iter->second.endPos, align, targetPos);
+        }
+        if (extraOffset.has_value()) {
+            targetPos += extraOffset.value();
         }
         if (!NearZero(targetPos)) {
             float endValue = pattern_->GetFinalPosition();
@@ -445,85 +421,6 @@ void ListTestNg::ScrollSnap(float offset, float velocity)
     endValue -= pattern_->scrollableEvent_->GetScrollable()->GetSnapFinalPosition();
     pattern_->ScrollBy(endValue);
     FlushLayoutTask(frameNode_);
-}
-
-AssertionResult ListTestNg::VerifyPosition(
-    const RefPtr<FrameNode>& frameNode, int32_t viewItemNumber, int32_t lanes, float space, float startOffset)
-{
-    bool isGroup = frameNode->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
-    if (isGroup) {
-        return VerifyGroupItemPosition(frameNode, viewItemNumber, lanes, space, startOffset);
-    } else {
-        Axis axis = pattern_->GetAxis();
-        float itemMainLength = (axis == Axis::VERTICAL) ? ITEM_HEIGHT : ITEM_WIDTH;
-        float itemSpaceLength = itemMainLength + space;
-        int32_t initialIndex = std::floor(startOffset / itemSpaceLength) * lanes;
-        return VerifyItemPosition(frameNode, viewItemNumber, lanes, space, initialIndex);
-    }
-}
-
-AssertionResult ListTestNg::VerifyItemPosition(
-    const RefPtr<FrameNode>& frameNode, int32_t viewItemNumber, int32_t lanes, float space, int32_t initialIndex)
-{
-    if (lanes < 1) {
-        return AssertionFailure() << "lanes < 1";
-    }
-    Axis axis = pattern_->GetAxis();
-    float itemMainLength = (axis == Axis::VERTICAL) ? ITEM_HEIGHT : ITEM_WIDTH;
-    float itemSpaceLength = itemMainLength + space;
-    auto itemPosition = frameNode->GetPattern<ListPattern>()->GetItemPosition();
-    if (itemPosition.size() != static_cast<size_t>(viewItemNumber)) {
-        return AssertionFailure() << "The itemPosition size is not equal to viewItemNumber"
-                                  << " itemPosition: " << itemPosition.size() << " viewItemNumber: " << viewItemNumber;
-    }
-    for (int32_t index = 0; index < viewItemNumber; index++) {
-        int32_t itemIndex = index + initialIndex;
-        float startPos = itemPosition[itemIndex].startPos;
-        float endPos = itemPosition[itemIndex].endPos;
-        float expectStartPos = (index / lanes) * itemSpaceLength;
-        float expectEndPos = expectStartPos + itemMainLength;
-        if (!NearEqual(startPos, expectStartPos) || !NearEqual(endPos, expectEndPos)) {
-            return AssertionFailure() << "At itemPosition Index: " << itemIndex << " ItemPosition: (" << startPos
-                                      << " - " << endPos << ")"
-                                      << " != expectPosition: (" << expectStartPos << " - " << expectEndPos << ")";
-        }
-    }
-    return AssertionSuccess();
-}
-
-AssertionResult ListTestNg::VerifyGroupItemPosition(
-    const RefPtr<FrameNode>& frameNode, int32_t viewItemNumber, int32_t lanes, float space, float startOffset)
-{
-    if (lanes < 1) {
-        return AssertionFailure() << "lanes < 1";
-    }
-    Axis axis = pattern_->GetAxis();
-    float itemMainLength = (axis == Axis::VERTICAL) ? ITEM_HEIGHT : ITEM_WIDTH;
-    float itemSpaceLength = itemMainLength + space;
-    auto itemPosition = frameNode->GetPattern<ListItemGroupPattern>()->GetItemPosition();
-    if (itemPosition.size() != static_cast<size_t>(viewItemNumber)) {
-        return AssertionFailure() << "The itemPosition size is not equal to viewItemNumber"
-                                  << " itemPosition: " << itemPosition.size() << " viewItemNumber: " << viewItemNumber;
-    }
-    for (int32_t index = 0; index < viewItemNumber; index++) {
-        int32_t itemIndex = index;
-        float startPos = itemPosition[itemIndex].startPos;
-        float endPos = itemPosition[itemIndex].endPos;
-        float expectStartPos = (index / lanes) * itemSpaceLength + startOffset;
-        float expectEndPos = expectStartPos + itemMainLength;
-        if (!NearEqual(startPos, expectStartPos) || !NearEqual(endPos, expectEndPos)) {
-            return AssertionFailure() << "At itemPosition Index: " << itemIndex << " ItemPosition: (" << startPos
-                                      << " - " << endPos << ")"
-                                      << " != expectPosition: (" << expectStartPos << " - " << expectEndPos << ")";
-        }
-    }
-    return AssertionSuccess();
-}
-
-AssertionResult ListTestNg::IsEqualTotalOffset(float expectOffset)
-{
-    FlushLayoutTask(frameNode_);
-    return IsEqual(pattern_->GetTotalOffset(), expectOffset);
 }
 
 AssertionResult ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, float expectOffset)

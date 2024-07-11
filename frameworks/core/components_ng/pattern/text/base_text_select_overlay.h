@@ -72,6 +72,7 @@ public:
     bool CheckTouchInHostNode(const PointF& touchPoint) override;
     void OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode) override;
     bool CheckRestartHiddenHandleTask(int32_t requestCode) override;
+    std::optional<RectF> GetAncestorNodeViewPort() override;
     RefPtr<SelectOverlayCallback> GetCallback() override
     {
         return AceType::Claim(this);
@@ -247,7 +248,6 @@ protected:
 
     RectF ConvertPaintInfoToRect(const SelectHandlePaintInfo& paintInfo);
     void SetTransformPaintInfo(SelectHandleInfo& handleInfo, const RectF& localHandleRect);
-    std::optional<RectF> GetAncestorNodeViewPort();
     bool CheckHandleCanPaintInHost(const RectF& firstRect, const RectF& secondRect);
     virtual RectF GetFirstHandleLocalPaintRect();
     virtual RectF GetSecondHandleLocalPaintRect();
@@ -277,6 +277,7 @@ private:
     void ShowSelectOverlay(const OverlayRequest& request, bool hasClipboardData);
     void GetHandlePoints(const RectF& handleRect, std::vector<PointF>& points, bool handleOnTop);
     bool IsPointsInRegion(const std::vector<PointF>& points, const RectF& regionRect);
+    bool CheckAndUpdateHostGlobalPaintRect();
     bool isSingleHandle_ = false;
     bool isShowPaste_ = false;
     bool isShowMenu_ = true;
@@ -290,6 +291,7 @@ private:
     bool touchAtHandle_ = false;
     bool isChangeToOverlayModeAtEdge_ = true;
     bool hasRegisterListener_ = false;
+    RectF globalPaintRect_;
 };
 
 } // namespace OHOS::Ace::NG
