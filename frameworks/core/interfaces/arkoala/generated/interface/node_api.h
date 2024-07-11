@@ -18,16 +18,17 @@
 
 #include "arkoala_api_generated.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers();
+    const GENERATED_ArkUIFullNodeAPI* GENERATED_GetFullAPI();
+
     inline const struct GENERATED_ArkUINodeModifiers* GetGeneratedNodeModifiers() {
         return GENERATED_GetArkUINodeModifiers();
-    };
+    }
+
+    inline const struct GENERATED_ArkUIFullNodeAPI* GetFullAPI() {
+        return GENERATED_GetFullAPI();
+    }
 }
-};
 
 #endif // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NODE_API_H

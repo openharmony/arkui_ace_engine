@@ -2190,11 +2190,13 @@ ArkUIFullNodeAPI impl_full = {
 /* clang-format on */
 } // namespace ApiImpl
 
+#ifdef INCLUDE_GENERATED_SOURCES
 namespace GeneratedModifier {
     const GENERATED_ArkUIBasicNodeAPI* GENERATED_GetBasicAPI();
     const GENERATED_ArkUIFullNodeAPI* GENERATED_GetFullAPI();
     const GENERATED_ArkUIExtendedNodeAPI* GENERATED_GetExtendedAPI();
 }
+#endif
 } // namespace OHOS::Ace::NG
 
 extern "C" {

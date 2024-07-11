@@ -559,9 +559,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             nullptr,
             nullptr,
             nullptr,
-            OHOS::Ace::NG::GeneratedEvents::GENERATED_GetArkUiEventsAPI,
+            GeneratedEvents::GENERATED_GetArkUiEventsAPI,
             GENERATED_GetExtendedAPI,
-            OHOS::Ace::NG::GeneratedEvents::GENERATED_SetArkUiEventsAPI
+            GeneratedEvents::GENERATED_SetArkUiEventsAPI
         };
         return &fullAPIImpl;
     }

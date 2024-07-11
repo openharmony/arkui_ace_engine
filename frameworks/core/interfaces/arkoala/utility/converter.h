@@ -162,7 +162,7 @@ namespace OHOS::Ace::NG::Converter
     }
 
     template<>
-    inline const char* Convert(const Ark_Resource& src) {
+    inline Ark_CharPtr Convert(const Ark_Resource& src) {
         LOGE("ARKOALA Converter -> Resource support (String) is not implemented.");
         return "ResUns";
     }
@@ -185,7 +185,7 @@ namespace OHOS::Ace::NG::Converter
     }
 
     template<>
-    inline const char* Convert(const Ark_String& src) {
+    inline Ark_CharPtr Convert(const Ark_String& src) {
         return src.chars;
     }
 
@@ -215,11 +215,16 @@ namespace OHOS::Ace::NG::Converter
     }
 
     template<typename To, typename From>
-    To ConvertOrDefault(const From& value, To defaultValue) {
+    std::optional<To> OptConvert(const From& value) {
         std::optional<To> opt;
         AssignTo(opt, value);
-        return opt.value_or(defaultValue);
-    };
+        return std::move(opt);
+    }
+
+    template<typename To, typename From>
+    To ConvertOrDefault(const From& value, To defaultValue) {
+        return OptConvert<To, From>(value).value_or(defaultValue);
+    }
 } // namespace OHOS::Ace::NG::Converter
 
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_CONVERTER_H

@@ -73,6 +73,7 @@ namespace OHOS::Ace::NG {
         Ark_NodeHandle createGridColNode(Ark_Int32 nodeId);
         Ark_NodeHandle createRadioNode(Ark_Int32 nodeId);
         Ark_NodeHandle createTabContentNode(Ark_Int32 nodeId);
+        Ark_NodeHandle createImageAnimatorNode(ArkUI_Int32 nodeId);
 
         void SetCallbackMethod(ArkUIAPICallbackMethod* method);
     } // namespace ViewModel
@@ -122,7 +123,6 @@ namespace OHOS::Ace::NG {
                 case GENERATED_ARKUI_NAVIGATION: return ViewModel::createNavigationNode(id);
                 case GENERATED_ARKUI_WATER_FLOW: return ViewModel::createWaterFlowNode(id);
                 case GENERATED_ARKUI_FLOW_ITEM: return ViewModel::createFlowItemNode(id);
-                case GENERATED_ARKUI_CIRCLE: return ViewModel::createCircleNode(id);
                 case GENERATED_ARKUI_RELATIVE_CONTAINER: return ViewModel::createRelativeContainerNode(id);
                 case GENERATED_ARKUI_GRID: return ViewModel::createGridNode(id);
                 case GENERATED_ARKUI_TABS: return ViewModel::createTabsNode(id);
@@ -134,6 +134,8 @@ namespace OHOS::Ace::NG {
                 case GENERATED_ARKUI_GRID_ROW: return ViewModel::createGridRowNode(id);
                 case GENERATED_ARKUI_GRID_COL: return ViewModel::createGridColNode(id);
                 case GENERATED_ARKUI_RADIO: return ViewModel::createRadioNode(id);
+                case GENERATED_ARKUI_IMAGE_ANIMATOR: return ViewModel::createRadioNode(id);
+                case GENERATED_ARKUI_CIRCLE: return ViewModel::createCircleNode(id);
                 case GENERATED_ARKUI_TABCONTENT: return ViewModel::createTabContentNode(id);
                 default: return nullptr;
             }

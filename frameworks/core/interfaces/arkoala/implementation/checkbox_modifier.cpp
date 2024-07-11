@@ -13,26 +13,93 @@
  * limitations under the License.
  */
 
-#include "arkoala_api_generated.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     namespace CheckboxInterfaceModifier {
         void _setCheckboxOptionsImpl(Ark_NativePointer node, const Opt_CheckboxOptions* options) {
+            if (options->tag != ARK_TAG_UNDEFINED) {
+                auto frameNode = reinterpret_cast<FrameNode*>(node);
+                CHECK_NULL_VOID(frameNode);
+                auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+                CHECK_NULL_VOID(eventHub);
+
+                auto name = Converter::OptConvert<Ark_CharPtr>(options->value.name);
+                if (name) {
+                    eventHub->SetName(name.value());
+                }
+
+                auto group = Converter::OptConvert<Ark_CharPtr>(options->value.group);
+                if (group) {
+                    eventHub->SetGroupName(group.value());
+                }
+            }
         }
     } // CheckboxInterfaceModifier
     namespace CheckboxAttributeModifier {
         void SelectImpl(Ark_NativePointer node, Ark_Boolean value) {
+            auto frameNode = reinterpret_cast<FrameNode*>(node);
+            CHECK_NULL_VOID(frameNode);
+            CheckBoxModelNG::SetSelect(frameNode, static_cast<bool>(value));
         }
+
         void SelectedColorImpl(Ark_NativePointer node, const ResourceColor* value) {
+            auto frameNode = reinterpret_cast<FrameNode *>(node);
+            CHECK_NULL_VOID(frameNode);
+            auto color = Converter::OptConvert<Color>(*value);
+            if (color) {
+                CheckBoxModelNG::SetSelectedColor(frameNode, color.value());
+            }
         }
+
         void ShapeImpl(Ark_NativePointer node, Ark_Int32 value) {
+            auto frameNode = reinterpret_cast<FrameNode*>(node);
+            CHECK_NULL_VOID(frameNode);
+            CheckBoxModelNG::SetCheckboxStyle(frameNode, static_cast<CheckBoxStyle>(value));
         }
+
         void UnselectedColorImpl(Ark_NativePointer node, const ResourceColor* value) {
+            auto frameNode = reinterpret_cast<FrameNode *>(node);
+            CHECK_NULL_VOID(frameNode);
+            auto color = Converter::OptConvert<Color>(*value);
+            if (color) {
+                CheckBoxModelNG::SetUnSelectedColor(frameNode, color.value());
+            }
         }
+
         void MarkImpl(Ark_NativePointer node, const MarkStyle* value) {
+            auto frameNode = reinterpret_cast<FrameNode *>(node);
+            CHECK_NULL_VOID(frameNode);
+
+            auto color = Converter::OptConvert<Color>(value->strokeColor);
+            if (color) {
+                CheckBoxModelNG::SetCheckMarkColor(frameNode, color.value());
+            }
+
+            auto size = Converter::OptConvert<Dimension>(value->size);
+            if (size) {
+                CheckBoxModelNG::SetCheckMarkSize(frameNode, size.value());
+            }
+
+            auto width = Converter::OptConvert<Dimension>(value->strokeWidth);
+            if (width) {
+                CheckBoxModelNG::SetCheckMarkWidth(frameNode, width.value());
+            }
         }
+
         void OnChangeImpl(Ark_NativePointer node, Ark_Function callback) {
+            auto frameNode = reinterpret_cast<FrameNode *>(node);
+            CHECK_NULL_VOID(frameNode);
+            auto onEvent = [frameNode](const bool value) {
+                GetFullAPI()->getEventsAPI()->getCheckboxEventsReceiver()->onChange(frameNode->GetId(), value);
+            };
+
+            CheckBoxModelNG::SetOnChange(frameNode, std::move(onEvent));
         }
+
         void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier) {
         }
     } // CheckboxAttributeModifier

@@ -18,26 +18,30 @@
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "base/log/log_wrapper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BlankInterface {
-void _setBlankOptionsImpl(
-    Ark_NativePointer node,
-    const Opt_Type_BlankInterface__setBlankOptions_Arg0 *min) {
-  auto frameNode = reinterpret_cast<FrameNode *>(node);
-  std::tuple<Ark_Float32, Ark_Int32> dimension = Converter::ConvertOrDefault(
-      *min, std::make_tuple(0.0f, (int)DimensionUnit::PX));
-  BlankModelNG::SetBlankMin(
-      frameNode, CalcDimension(std::get<0>(dimension),
-                               (DimensionUnit)std::get<1>(dimension)));
+void _setBlankOptionsImpl(Ark_NativePointer node, const Opt_Type_BlankInterface__setBlankOptions_Arg0 *min) {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    std::tuple<Ark_Float32, Ark_Int32> dimension = Converter::ConvertOrDefault(
+        *min, std::make_tuple(0.0f, (int)DimensionUnit::PX));
+    BlankModelNG::SetBlankMin(
+        frameNode, CalcDimension(std::get<0>(dimension),
+                                (DimensionUnit)std::get<1>(dimension)));
 }
 } // BlankInterface
 
 namespace BlankAttribute {
-void ColorImpl(Ark_NativePointer node,
-                              const ResourceColor *value) {
-  auto frameNode = reinterpret_cast<FrameNode *>(node);
-  BlankModelNG::SetColor(frameNode, Converter::ConvertOrDefault(*value, Color()));
+void ColorImpl(Ark_NativePointer node, const ResourceColor *value) {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto color = Converter::OptConvert<Color>(*value);
+    if (color) {
+        BlankModelNG::SetColor(frameNode, color.value());
+        LOGI("#### BlankAttribute::Color impl: color is %{public}s", color.value().ToString().c_str());
+    } else {
+        LOGI("#### BlankAttribute::Color impl: color is empty");
+    }
 }
 } // BlankAttribute
 
