@@ -1015,7 +1015,6 @@ void WebPattern::HandleOnDropMove(const RefPtr<OHOS::Ace::DragEvent>& info)
     }
 
     CHECK_NULL_VOID(delegate_);
-    delegate_->OnContextMenuHide("");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContextRefPtr();
@@ -1203,6 +1202,8 @@ bool WebPattern::NotifyStartDragTask()
     CHECK_NULL_RETURN(eventHub, false);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, false);
+    CHECK_NULL_RETURN(delegate_, false);
+    delegate_->OnContextMenuHide("");
     // received web kernel drag callback, enable drag
     frameNode->SetDraggable(true);
     gestureHub->SetPixelMap(delegate_->GetDragPixelMap());
