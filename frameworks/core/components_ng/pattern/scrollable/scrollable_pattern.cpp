@@ -611,10 +611,6 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
         scrollEffect_ = springEffect;
         gestureHub->AddScrollEdgeEffect(GetAxis(), scrollEffect_);
     }
-    CHECK_NULL_VOID(scrollableEvent_);
-    auto scrollable = scrollableEvent_->GetScrollable();
-    CHECK_NULL_VOID(scrollable);
-    scrollable->StopSpringAnimation();
     if (edgeEffect == EdgeEffect::FADE && !scrollEffect_) {
         auto fadeEdgeEffect = AceType::MakeRefPtr<ScrollFadeEffect>(Color::GRAY);
         CHECK_NULL_VOID(fadeEdgeEffect);
@@ -630,7 +626,13 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
         scrollEffect_ = fadeEdgeEffect;
         gestureHub->AddScrollEdgeEffect(GetAxis(), scrollEffect_);
     }
+    CHECK_NULL_VOID(scrollableEvent_);
+    auto scrollable = scrollableEvent_->GetScrollable();
+    CHECK_NULL_VOID(scrollable);
     scrollable->SetEdgeEffect(edgeEffect);
+    if (edgeEffect != EdgeEffect::SPRING) {
+        scrollable->StopSpringAnimation();
+    }
 }
 
 void ScrollablePattern::HandleFadeEffect(float offset, int32_t source, const SizeF& size,
