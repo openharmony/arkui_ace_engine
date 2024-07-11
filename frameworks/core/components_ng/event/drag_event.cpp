@@ -398,6 +398,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         if (!hasContextMenuUsingGesture && !contextMenuShowStatus) {
             if (gestureHub->GetTextDraggable()) {
                 if (gestureHub->GetIsTextDraggable()) {
+                    actuator->HideEventColumn();
                     actuator->textPixelMap_ = nullptr;
                     actuator->HideTextAnimation();
                 }
