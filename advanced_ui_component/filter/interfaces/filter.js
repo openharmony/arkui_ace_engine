@@ -140,6 +140,7 @@ class GradientMask extends ViewPU {
     this.observeComponentCreation((b18, c18) => {
       ViewStackProcessor.StartGetAccessRecordingFor(b18);
       Column.create();
+      Column.blendMode(BlendMode.DST_OUT)
       Column.width(GRADIENT_WIDTH);
       Column.height(LIST_ROW_HEIGHT);
       if (!c18) {
@@ -1997,6 +1998,7 @@ export class Filter extends ViewPU {
           this.observeComponentCreation((u6, v6) => {
             ViewStackProcessor.StartGetAccessRecordingFor(u6);
             Stack.create({ alignContent: Alignment.End });
+            Stack.blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN)
             if (!v6) {
               Stack.pop();
             }
