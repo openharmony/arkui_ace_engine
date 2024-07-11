@@ -93,6 +93,7 @@ void SideBarContainerPattern::OnAttachToFrameNode()
     userSetSidebarWidth_ = layoutProperty->GetSideBarWidth().value_or(SIDEBAR_WIDTH_NEGATIVE);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
     auto sideBarTheme = pipelineContext->GetTheme<SideBarTheme>();
     if (sideBarTheme && sideBarTheme->GetSideBarUnfocusEffectEnable()) {
         pipelineContext->AddWindowFocusChangedCallback(host->GetId());
@@ -1358,5 +1359,13 @@ void SideBarContainerPattern::ShowDialogWithNode()
     dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(text, imageInfo_);
 
     isDialogShow_ = true;
+}
+
+void SideBarContainerPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE) {
+        TAG_LOGI(AceLogTag::ACE_SIDEBAR, "mark need retrieve sidebar property because of window rotation or resize");
+        MarkNeedInitRealSideBarWidth(true);
+    }
 }
 } // namespace OHOS::Ace::NG
