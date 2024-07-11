@@ -154,7 +154,7 @@ void TextPickerColumnPattern::OnMiddleButtonTouchMove()
 
 void TextPickerColumnPattern::OnMiddleButtonTouchUp()
 {
-    PlayPressAnimation(Color::TRANSPARENT);
+    PlayPressAnimation(buttonBgColor_);
 }
 
 int32_t TextPickerColumnPattern::GetMiddleButtonIndex()
@@ -307,7 +307,7 @@ void TextPickerColumnPattern::HandleMouseEvent(bool isHover)
     if (isHover) {
         PlayPressAnimation(hoverColor_);
     } else {
-        PlayPressAnimation(Color::TRANSPARENT);
+        PlayPressAnimation(buttonBgColor_);
     }
     isHover_ = isHover;
 }
@@ -740,8 +740,12 @@ void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
 {
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
-    textLayoutProperty->UpdateTextColor(
-        textPickerLayoutProperty->GetSelectedColor().value_or(pickerTheme->GetOptionStyle(true, false).GetTextColor()));
+    auto selectTextThemeColor = pickerTheme->GetOptionStyle(true, false).GetTextColor();
+    auto selectTextColor = textPickerLayoutProperty->GetSelectedColor().value_or(selectTextThemeColor);
+    if (isFocusColumn_ && selectTextColor == selectTextThemeColor) {
+        selectTextColor = pickerTheme->GetOptionStyle(true, true).GetTextColor();
+    }
+    textLayoutProperty->UpdateTextColor(selectTextColor);
     if (textPickerLayoutProperty->HasSelectedFontSize()) {
         textLayoutProperty->UpdateFontSize(textPickerLayoutProperty->GetSelectedFontSize().value());
     } else {

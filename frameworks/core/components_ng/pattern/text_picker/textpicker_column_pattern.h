@@ -352,6 +352,19 @@ public:
         return isDownScroll_;
     }
 
+    void SetButtonBgColor(const Color& color)
+    {
+        buttonBgColor_ = color;
+    }
+
+    void UpdateFocusColumnState(bool haveFocus)
+    {
+        if (isFocusColumn_ != haveFocus) {
+            isFocusColumn_ = haveFocus;
+            FlushCurrentOptions();
+        }
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -429,11 +442,13 @@ private:
     bool IsTextFadeOut();
     void UpdateTexOverflow(bool isSel, const RefPtr<TextLayoutProperty>& textLayoutProperty);
 
+    bool isFocusColumn_ = false;
     bool isTossing_ = false;
     bool isTextFadeOut_ = false;
     float localDownDistance_ = 0.0f;
     Color pressColor_;
     Color hoverColor_;
+    Color buttonBgColor_ = Color::TRANSPARENT;
     EventCallback EventCallback_;
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
