@@ -449,24 +449,53 @@ public:
                GetBorderBottom();
     }
 
+    double GetPercentReferenceWidth() const
+    {
+        auto host = GetHost();
+        if (host && host->GetGeometryNode() && host->GetGeometryNode()->GetParentLayoutConstraint().has_value()) {
+            return host->GetGeometryNode()->GetParentLayoutConstraint()->percentReference.Width();
+        }
+        return 0.0f;
+    }
+
     float GetBorderLeft() const
     {
-        return lastBorderWidth_.leftDimen.value_or(Dimension(0.0f)).ConvertToPx();
+        auto leftBorderWidth = lastBorderWidth_.leftDimen.value_or(Dimension(0.0f));
+        auto percentReferenceWidth = GetPercentReferenceWidth();
+        if (leftBorderWidth.Unit() == DimensionUnit::PERCENT && percentReferenceWidth > 0) {
+            return leftBorderWidth.Value() * percentReferenceWidth;
+        }
+        return leftBorderWidth.ConvertToPx();
     }
 
     float GetBorderTop() const
     {
-        return lastBorderWidth_.topDimen.value_or(Dimension(0.0f)).ConvertToPx();
+        auto topBorderWidth = lastBorderWidth_.topDimen.value_or(Dimension(0.0f));
+        auto percentReferenceWidth = GetPercentReferenceWidth();
+        if (topBorderWidth.Unit() == DimensionUnit::PERCENT && percentReferenceWidth > 0) {
+            return topBorderWidth.Value() * percentReferenceWidth;
+        }
+        return topBorderWidth.ConvertToPx();
     }
 
     float GetBorderBottom() const
     {
-        return lastBorderWidth_.bottomDimen.value_or(Dimension(0.0f)).ConvertToPx();
+        auto bottomBorderWidth = lastBorderWidth_.bottomDimen.value_or(Dimension(0.0f));
+        auto percentReferenceWidth = GetPercentReferenceWidth();
+        if (bottomBorderWidth.Unit() == DimensionUnit::PERCENT && percentReferenceWidth > 0) {
+            return bottomBorderWidth.Value() * percentReferenceWidth;
+        }
+        return bottomBorderWidth.ConvertToPx();
     }
 
     float GetBorderRight() const
     {
-        return lastBorderWidth_.rightDimen.value_or(Dimension(0.0f)).ConvertToPx();
+        auto rightBorderWidth = lastBorderWidth_.rightDimen.value_or(Dimension(0.0f));
+        auto percentReferenceWidth = GetPercentReferenceWidth();
+        if (rightBorderWidth.Unit() == DimensionUnit::PERCENT && percentReferenceWidth > 0) {
+            return rightBorderWidth.Value() * percentReferenceWidth;
+        }
+        return rightBorderWidth.ConvertToPx();
     }
 
     const RectF& GetTextRect() override
