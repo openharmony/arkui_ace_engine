@@ -159,9 +159,8 @@ public:
 
     void ClearToastInSubwindow();
     void ClearToast();
-    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft,
-        const ToastShowMode& showMode = ToastShowMode::DEFAULT, int32_t alignment = -1,
-        std::optional<DimensionOffset> offset = std::nullopt);
+    void ShowToast(const NG::ToastInfo& toastInfo, const std::function<void(int32_t)>& callback);
+    void CloseToast(int32_t toastId, const std::function<void(int32_t)>& callback);
 
     std::unordered_map<int32_t, RefPtr<FrameNode>> GetDialogMap()
     {
