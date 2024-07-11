@@ -14,8 +14,8 @@
 import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
-import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 import("//foundation/arkui/ace_engine/adapter/preview/build/config.gni")
+import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 
 component_ext_path = "${ace_root}/component_ext"
 additional_include_dirs = [ "${ace_root}" ]
@@ -29,15 +29,15 @@ es2abc_gen_abc("gen_arkui_arcalphabetindexer_abc") {
 }
 
 gen_obj("arkui_arcalphabetindexer_abc") {
-  input = get_label_info(":gen_arkui_arcalphabetindexer_abc", "target_out_dir") +
-          "/arkui_arcalphabetindexer.abc"
+  input = get_label_info(":gen_arkui_arcalphabetindexer_abc",
+                         "target_out_dir") + "/arkui_arcalphabetindexer.abc"
   output = target_out_dir + "arkui_arcalphabetindexer_abc.o"
   snapshot_dep = [ ":gen_arkui_arcalphabetindexer_abc" ]
 }
 
 gen_obj("arkui_arcalphabetindexer_abc_preview") {
-  input = get_label_info(":gen_arkui_arcalphabetindexer_abc", "target_out_dir") +
-          "/arkui_arcalphabetindexer.abc"
+  input = get_label_info(":gen_arkui_arcalphabetindexer_abc",
+                         "target_out_dir") + "/arkui_arcalphabetindexer.abc"
   output = target_out_dir + "/arkui_arcalphabetindexer_abc.c"
   snapshot_dep = [ ":gen_arkui_arcalphabetindexer_abc" ]
 }
@@ -60,9 +60,9 @@ ohos_shared_library("arcalphabetindexer") {
   deps = [ "$ace_root/build:libace_compatible" ]
 
   external_deps = [
+    "bounds_checking_function:libsec_static",
     "hilog:libhilog",
     "napi:ace_napi",
-    "bounds_checking_function:libsec_static",
   ]
 
   if (use_mingw_win || use_mac || use_linux) {
