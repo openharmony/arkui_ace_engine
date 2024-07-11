@@ -323,7 +323,8 @@ public:
     void RemoveFilterAnimation();
     void RemoveEventColumn();
     void UpdatePixelMapPosition(bool isSubwindowOverlay = false);
-    void UpdateContextMenuDisappearPosition(const NG::OffsetF& offset, bool isRedragStart = false);
+    void UpdateContextMenuDisappearPosition(const NG::OffsetF& offset, float menuScale = 1.0f,
+	    bool isRedragStart = false);
     void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
         const NG::OffsetF& offset);
 
@@ -462,6 +463,7 @@ public:
     void BindKeyboard(const std::function<void()>& keyboardBuilder, int32_t targetId);
     void BindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_t targetId);
     void CloseKeyboard(int32_t targetId);
+    void UpdateCustomKeyboardPosition();
 
     RefPtr<UINode> FindWindowScene(RefPtr<FrameNode> targetNode);
 
@@ -611,6 +613,7 @@ private:
         const RefPtr<FrameNode>& targetNode, bool isStartByUIContext);
     RefPtr<FrameNode> CreateSheetMask(const RefPtr<FrameNode>& sheetPageNode,
         const RefPtr<FrameNode>& targetNode, NG::SheetStyle& sheetStyle);
+    void UpdateSheetRender(const RefPtr<FrameNode>& sheetPageNode, NG::SheetStyle& sheetStyle, bool isPartialUpdate);
     void UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& sheetStyle,
         int32_t targetId, bool isStartByUIContext = false, bool isPartialUpdate = false,
         std::function<void()>&& onAppear = nullptr, std::function<void()>&& onDisappear = nullptr,
@@ -659,9 +662,9 @@ private:
     void ShowMenuAnimation(const RefPtr<FrameNode>& menu);
     void SetPatternFirstShow(const RefPtr<FrameNode>& menu);
     void PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
-    void ClearMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation = true, bool startDrag = false);
     void ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper, AnimationOption& option,
         bool showPreviewAnimation, bool startDrag);
+    bool IsContextMenuBindedOnOrigNode();
     void OpenDialogAnimation(const RefPtr<FrameNode>& node);
     void CloseDialogAnimation(const RefPtr<FrameNode>& node);
     void SetDialogTransitionEffect(const RefPtr<FrameNode>& node);

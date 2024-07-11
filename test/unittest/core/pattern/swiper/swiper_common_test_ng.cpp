@@ -24,6 +24,7 @@ public:
     AssertionResult IsEqualNextFocusNode(FocusStep step,
         const RefPtr<FrameNode>& currentNode, const RefPtr<FrameNode>& expectNextNode);
     void OnKeyEvent(KeyCode keyCode, KeyAction keyAction);
+    void SetOnMainTree();
 };
 
 AssertionResult SwiperCommonTestNg::IsEqualNextFocusNode(FocusStep step,
@@ -39,6 +40,19 @@ AssertionResult SwiperCommonTestNg::IsEqualNextFocusNode(FocusStep step,
         return AssertionFailure() << "Next focusNode is not as expected";
     }
     return AssertionSuccess();
+}
+
+void SwiperCommonTestNg::SetOnMainTree()
+{
+    if (indicatorNode_) {
+        indicatorNode_->onMainTree_ = true;
+    }
+    if (leftArrowNode_) {
+        leftArrowNode_->onMainTree_ = true;
+    }
+    if (rightArrowNode_) {
+        rightArrowNode_->onMainTree_ = true;
+    }
 }
 
 void SwiperCommonTestNg::OnKeyEvent(KeyCode keyCode, KeyAction keyAction)
@@ -403,6 +417,7 @@ HWTEST_F(SwiperCommonTestNg, FocusStep001, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
+    SetOnMainTree();
 
     /**
      * @tc.cases: GetNextFocusNode from indicatorNode_
@@ -448,6 +463,7 @@ HWTEST_F(SwiperCommonTestNg, FocusStep002, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
+    SetOnMainTree();
 
     /**
      * @tc.cases: GetNextFocusNode from indicatorNode_
@@ -493,6 +509,7 @@ HWTEST_F(SwiperCommonTestNg, FocusStep003, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
+    SetOnMainTree();
 
     /**
      * @tc.cases: LoopIndex is first item(index:0)
@@ -549,6 +566,7 @@ HWTEST_F(SwiperCommonTestNg, FocusStep004, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
+    SetOnMainTree();
 
     /**
      * @tc.cases: LoopIndex is last item(index:0)
@@ -609,6 +627,7 @@ HWTEST_F(SwiperCommonTestNg, FocusStep006, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
+    SetOnMainTree();
     
     /**
      * @tc.cases: GetNextFocusNode from leftArrowNode_
@@ -1007,5 +1026,66 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest003, TestSize.Level1)
         EXPECT_EQ(GetChildOffset(frameNode_, i).GetX(), offset);
         offset += itemWidth;
     }
+}
+
+/**
+ * @tc.name: IsAtStartEnd001
+ * @tc.desc: Test IsAtStart IsAtEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, IsAtStartEnd001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Loop is true
+     * @tc.expected: There are no start or end
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetLoop(true);
+    });
+    EXPECT_FALSE(pattern_->IsAtStart());
+    EXPECT_FALSE(pattern_->IsAtEnd());
+
+    /**
+     * @tc.steps: step2. Empty items
+     * @tc.expected: There are no start or end
+     */
+    Create([](SwiperModelNG model) {
+        model.SetLoop(false);
+    });
+    EXPECT_FALSE(pattern_->IsAtStart());
+    EXPECT_FALSE(pattern_->IsAtEnd());
+}
+
+/**
+ * @tc.name: IsAtStartEnd002
+ * @tc.desc: Test IsAtStart IsAtEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, IsAtStartEnd002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. At start
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetLoop(false);
+    });
+    EXPECT_TRUE(pattern_->IsAtStart());
+    EXPECT_FALSE(pattern_->IsAtEnd());
+
+    /**
+     * @tc.steps: step2. Change currentIndex to middle item
+     * @tc.expected: Not at start or end
+     */
+    ChangeIndex(1);
+    EXPECT_FALSE(pattern_->IsAtStart());
+    EXPECT_FALSE(pattern_->IsAtEnd());
+
+    /**
+     * @tc.steps: step3. Change currentIndex to end item
+     * @tc.expected: At end
+     */
+    ChangeIndex(ITEM_NUMBER - 1);
+    EXPECT_FALSE(pattern_->IsAtStart());
+    EXPECT_TRUE(pattern_->IsAtEnd());
 }
 } // namespace OHOS::Ace::NG

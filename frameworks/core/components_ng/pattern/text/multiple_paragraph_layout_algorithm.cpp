@@ -91,7 +91,8 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
 
 void MultipleParagraphLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    BoxLayoutAlgorithm::Measure(layoutWrapper);
+    // child constraint has already been calculated by the UpdateParagraphBySpan method when triggering MeasureContent
+    BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
     auto baselineDistance = 0.0f;
     auto paragraph = GetSingleParagraph();
     if (paragraph) {
@@ -517,7 +518,7 @@ void MultipleParagraphLayoutAlgorithm::AddTextSpanToParagraph(const RefPtr<SpanI
 {
     spanTextLength += static_cast<int32_t>(StringUtils::ToWstring(child->content).length());
     child->position = spanTextLength;
-    child->UpdateParagraph(frameNode, paragraph, isSpanStringMode_);
+    child->UpdateParagraph(frameNode, paragraph, isSpanStringMode_, PlaceholderStyle(), isMarquee_);
 }
 
 void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>& imageSpanItem,

@@ -273,6 +273,9 @@ struct BorderWidthPropertyT<Dimension> {
     void ToJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson,
         const InspectorFilter& filter, bool isOutline = false) const;
 
+    void ToDashJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson,
+        const InspectorFilter& filter, const std::string& keyValue) const;
+
     std::string ToString() const;
 };
 

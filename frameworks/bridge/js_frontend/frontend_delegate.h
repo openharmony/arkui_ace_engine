@@ -161,8 +161,8 @@ public:
     // ----------------
     // system.measure
     // ----------------
-    virtual double MeasureText(const MeasureContext& context) = 0;
-    virtual Size MeasureTextSize(const MeasureContext& context) = 0;
+    virtual double MeasureText(MeasureContext context) = 0;
+    virtual Size MeasureTextSize(MeasureContext context) = 0;
 
     // ----------------
     // system.prompt

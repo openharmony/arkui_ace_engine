@@ -41,8 +41,9 @@ void BaseTextSelectOverlay::ProcessOverlay(const OverlayRequest& request)
     CHECK_NULL_VOID(textBase);
     auto clipboard = textBase->GetClipboard();
     if (clipboard) {
-        if (OnlyAllowedPasteNonEmptyString()) {
-            clipboard->GetData([checkClipboard](const std::string& data) { checkClipboard(!data.empty()); });
+        auto mimeType = GetPasteMimeType();
+        if (!mimeType.empty()) {
+            clipboard->HasDataType(checkClipboard, mimeType);
             return;
         }
         clipboard->HasData(checkClipboard);
@@ -62,9 +63,13 @@ void BaseTextSelectOverlay::ShowSelectOverlay(const OverlayRequest& request, boo
         auto secondLocalRect = GetSecondHandleLocalPaintRect();
         CalcHandleLevelMode(firstLocalRect, secondLocalRect);
     }
-    auto host = GetOwner();
-    CHECK_NULL_VOID(host);
-    host->RegisterNodeChangeListener();
+    if (enableHandleLevel_) {
+        auto host = GetOwner();
+        CHECK_NULL_VOID(host);
+        host->RegisterNodeChangeListener();
+        RegisterScrollingListener(nullptr);
+        CheckAndUpdateHostGlobalPaintRect();
+    }
     auto manager = SelectContentOverlayManager::GetOverlayManager(Claim(this));
     CHECK_NULL_VOID(manager);
     manager->Show(request.animation, request.requestCode);
@@ -300,6 +305,9 @@ RectF BaseTextSelectOverlay::GetVisibleContentRect()
     CHECK_NULL_RETURN(geometryNode, visibleContentRect);
     auto paintOffset = host->GetTransformRelativeOffset();
     visibleContentRect = RectF(geometryNode->GetContentOffset() + paintOffset, geometryNode->GetContentSize());
+    if (enableHandleLevel_ && handleLevelMode_ == HandleLevelMode::EMBED) {
+        return visibleContentRect;
+    }
     return GetVisibleRect(pattern->GetHost(), visibleContentRect);
 }
 
@@ -782,9 +790,11 @@ VectorF BaseTextSelectOverlay::GetHostScale()
 
 void BaseTextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
-    auto host = GetOwner();
-    CHECK_NULL_VOID(host);
-    host->UnregisterNodeChangeListener();
+    if (enableHandleLevel_) {
+        auto host = GetOwner();
+        CHECK_NULL_VOID(host);
+        host->UnregisterNodeChangeListener();
+    }
 }
 
 void BaseTextSelectOverlay::SetHandleLevelMode(HandleLevelMode mode)
@@ -879,13 +889,22 @@ void BaseTextSelectOverlay::CalcHandleLevelMode(const RectF& firstLocalPaintRect
 
 void BaseTextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
 {
-    if (IsAncestorNodeStartAnimation(flag) || IsAncestorNodeStartScroll(flag) || IsAncestorNodeGeometryChange(flag) ||
-        IsAncestorNodeTransformChange(flag)) {
-        HideMenu(true);
-        SwitchToEmbedMode();
-        return;
+    auto isStartScroll = IsAncestorNodeStartScroll(flag);
+    auto isStartAnimation = IsAncestorNodeStartAnimation(flag);
+    auto isTransformChanged = IsAncestorNodeTransformChange(flag);
+    auto isStartTransition = IsAncestorNodeHasTransition(flag);
+    auto isSwitchToEmbed = isStartScroll || isStartAnimation || isTransformChanged || isStartTransition;
+    // parent size changes but the child does not change.
+    if (IsAncestorNodeGeometryChange(flag)) {
+        isSwitchToEmbed = isSwitchToEmbed || CheckAndUpdateHostGlobalPaintRect();
     }
-    if (IsAncestorNodeEndScroll(flag) && !HasThreeDimensionTransform()) {
+    isSwitchToEmbed = isSwitchToEmbed && (!IsAncestorNodeEndScroll(flag) || HasThreeDimensionTransform());
+    if (isStartScroll || isStartAnimation || isTransformChanged || isStartTransition) {
+        HideMenu(true);
+    }
+    if (isSwitchToEmbed) {
+        SwitchToEmbedMode();
+    } else {
         SwitchToOverlayMode();
     }
 }
@@ -913,6 +932,11 @@ bool BaseTextSelectOverlay::IsAncestorNodeEndScroll(FrameNodeChangeInfoFlag flag
 bool BaseTextSelectOverlay::IsAncestorNodeTransformChange(FrameNodeChangeInfoFlag flag)
 {
     return ((flag & FRAME_NODE_CHANGE_TRANSFORM_CHANGE) == FRAME_NODE_CHANGE_TRANSFORM_CHANGE);
+}
+
+bool BaseTextSelectOverlay::IsAncestorNodeHasTransition(FrameNodeChangeInfoFlag flag)
+{
+    return ((flag & FRAME_NODE_CHANGE_TRANSITION_START) == FRAME_NODE_CHANGE_TRANSITION_START);
 }
 
 bool BaseTextSelectOverlay::IsTouchAtHandle(const TouchEventInfo& info)
@@ -964,7 +988,7 @@ bool BaseTextSelectOverlay::HasThreeDimensionTransform()
                         !NearEqual(rotateVector->v, 0);
         }
         if (hasTransformMatrix || hasRotate) {
-            return true;
+            return false;
         }
         parent = parent->GetAncestorNodeOfFrame(true);
     }
@@ -977,5 +1001,75 @@ bool BaseTextSelectOverlay::CheckSwitchToMode(HandleLevelMode mode)
         return false;
     }
     return true;
+}
+
+void BaseTextSelectOverlay::OnSelectionMenuOptionsUpdate(
+    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
+{
+    onCreateMenuCallback_ = onCreateMenuCallback;
+    onMenuItemClick_ = onMenuItemClick;
+}
+
+void BaseTextSelectOverlay::RegisterScrollingListener(const RefPtr<FrameNode> scrollableNode)
+{
+    if (hasRegisterListener_) {
+        return;
+    }
+    auto scrollingNode = scrollableNode;
+    if (!scrollingNode) {
+        auto host = GetOwner();
+        CHECK_NULL_VOID(host);
+        scrollingNode = host->GetAncestorNodeOfFrame(true);
+        while (scrollingNode) {
+            if (scrollingNode->GetTag() == V2::SWIPER_ETS_TAG) {
+                break;
+            }
+            scrollingNode = scrollingNode->GetAncestorNodeOfFrame(true);
+        }
+    }
+    if (scrollingNode) {
+        auto pattern = scrollingNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        auto scrollCallback = [weak = WeakClaim(this), scrollNode = WeakClaim(AceType::RawPtr(scrollableNode))] {
+            auto overlay = weak.Upgrade();
+            CHECK_NULL_VOID(overlay);
+            overlay->OnHandleScrolling(scrollNode);
+        };
+        auto scrollListener = AceType::MakeRefPtr<ScrollingListener>(scrollCallback);
+        pattern->RegisterScrollingListener(scrollListener);
+        hasRegisterListener_ = true;
+    }
+}
+
+void BaseTextSelectOverlay::OnHandleScrolling(const WeakPtr<FrameNode>& scrollingNode)
+{
+    if (SelectOverlayIsOn()) {
+        HideMenu(true);
+        auto taskExecutor = Container::CurrentTaskExecutor();
+        taskExecutor->PostTask(
+            [weak = WeakClaim(this), scrollingNode] {
+                auto overlay = weak.Upgrade();
+                CHECK_NULL_VOID(overlay);
+                overlay->hasRegisterListener_ = false;
+                if (overlay->SelectOverlayIsOn()) {
+                    overlay->RegisterScrollingListener(scrollingNode.Upgrade());
+                }
+            },
+            TaskExecutor::TaskType::UI, "RegisterScrollingListener");
+    } else {
+        hasRegisterListener_ = false;
+    }
+}
+
+bool BaseTextSelectOverlay::CheckAndUpdateHostGlobalPaintRect()
+{
+    auto host = GetOwner();
+    CHECK_NULL_RETURN(host, false);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto framePaintRect = RectF(host->GetTransformRelativeOffset(), geometryNode->GetFrameSize());
+    auto changed = globalPaintRect_ != framePaintRect;
+    globalPaintRect_ = framePaintRect;
+    return changed;
 }
 } // namespace OHOS::Ace::NG

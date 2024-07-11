@@ -129,9 +129,14 @@ public:
         return defaultMenuEndOffset_;
     }
 
-    float GetMenuWidth() const
+    std::optional<float> GetMenuWidth() const
     {
-        return menuWidth_.value_or(0);
+        return menuWidth_;
+    }
+
+    std::optional<float> GetMenuHeight() const
+    {
+        return menuHeight_;
     }
 
     const RectF& GetHandleRegion(bool isFirst) const
@@ -252,6 +257,7 @@ private:
     bool closedByGlobalTouchEvent_ = false;
     SelectOverlayMode overlayMode_ = SelectOverlayMode::ALL;
     bool isSimulateOnClick_ = false;
+    bool clickConsumeBySimulate_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayPattern);
 };

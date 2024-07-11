@@ -109,6 +109,7 @@ public:
     using DefaultFileSelectorShowCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using WebNodeInfoCallback = const std::function<void(std::shared_ptr<JsonValue>& jsonNodeArray, int32_t webId)>;
     using TextBlurCallback = std::function<void(int64_t, const std::string)>;
+    using WebComponentClickCallback = std::function<void(int64_t, const std::string)>;
     WebPattern();
     WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController,
                RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
@@ -134,6 +135,7 @@ public:
         HINT,
         CONTENT,
         ERROR,
+        CHILD_IDS,
         PARENT_ID,
         GRID_ROWS,
         GRID_COLS,
@@ -463,6 +465,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SmoothDragResizeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverlayScrollbarEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAvoidMode, WebKeyboardAvoidMode);
 
     bool IsFocus() const
     {
@@ -488,7 +491,8 @@ public:
     RectF ComputeClippedSelectionBounds(
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startHandle,
-        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endHandle);
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endHandle,
+        bool& isNewAvoid);
     void OnQuickMenuDismissed();
     void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
@@ -603,6 +607,14 @@ public:
     void AttachCustomKeyboard();
     void CloseCustomKeyboard();
     void KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed);
+    void OnCursorUpdate(double x, double y, double width, double height)
+    {
+        cursorInfo_ = RectF(x, y, width, height);
+    }
+    RectF GetCaretRect() const override
+    {
+        return cursorInfo_;
+    }
     void OnAttachContext(PipelineContext *context) override;
     void OnDetachContext(PipelineContext *context) override;
     void SetUpdateInstanceIdCallback(std::function<void(int32_t)> &&callabck);
@@ -619,12 +631,16 @@ public:
     std::shared_ptr<Rosen::RSNode> GetSurfaceRSNode() const;
 
     void GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId);
+    bool OnAccessibilityHoverEvent(const PointF& point) override;
     void RegisterTextBlurCallback(TextBlurCallback&& callback);
     void UnRegisterTextBlurCallback();
     TextBlurCallback GetTextBlurCallback() const
     {
         return textBlurCallback_;
     }
+    void RegisterWebComponentClickCallback(WebComponentClickCallback&& callback);
+    void UnregisterWebComponentClickCallback();
+    WebComponentClickCallback GetWebComponentClickCallback() const { return webComponentClickCallback_; }
 
 private:
     friend class WebContextSelectOverlay;
@@ -633,8 +649,11 @@ private:
     void CloseContextSelectionMenu();
     RectF ComputeMouseClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
     void RegistVirtualKeyBoardListener(const RefPtr<PipelineContext> &context);
+    bool IsNeedResizeVisibleViewport();
+    bool ProcessVirtualKeyBoardHide(int32_t width, int32_t height, bool safeAreaEnabled);
+    bool ProcessVirtualKeyBoardShow(int32_t width, int32_t height, double keyboard, bool safeAreaEnabled);
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
-    void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard);
+    void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard, bool isUpdate = true);
     void UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
@@ -706,6 +725,7 @@ private:
     void WindowDrag(int32_t width, int32_t height);
     void OnSmoothDragResizeEnabledUpdate(bool value);
     void OnOverlayScrollbarEnabledUpdate(bool enable);
+    void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
     int GetWebId();
 
     void InitEvent();
@@ -843,6 +863,7 @@ private:
     void RegisterVisibleAreaChangeCallback(const RefPtr<PipelineContext> &context);
     bool CheckSafeAreaIsExpand();
     bool CheckSafeAreaKeyBoard();
+    bool IsDialogNested();
     void SelectCancel() const;
     std::string GetSelectInfo() const;
     void UpdateRunQuickMenuSelectInfo(SelectOverlayInfo& selectInfo,
@@ -876,6 +897,7 @@ private:
                                 std::string& nodeTag);
     void GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId);
     std::string EnumTypeToString(WebAccessibilityType type);
+    std::string VectorIntToString(std::vector<int64_t>&& vec);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -912,6 +934,9 @@ private:
     std::shared_ptr<FullScreenEnterEvent> fullScreenExitHandler_ = nullptr;
     bool needOnFocus_ = false;
     Size drawSize_;
+    Size visibleViewportSize_{-1.0, -1.0};
+    bool isKeyboardInSafeArea_ = false;
+    WebKeyboardAvoidMode keyBoardAvoidMode_ = WebKeyboardAvoidMode::DEFAULT;
     Size rootLayerChangeSize_;
     Size drawSizeCache_;
     Size areaChangeSize_;
@@ -932,6 +957,7 @@ private:
     RefPtr<WebContextMenuParam> contextMenuParam_ = nullptr;
     RefPtr<ContextMenuResult> contextMenuResult_ = nullptr;
     RectF selectArea_;
+    RectF cursorInfo_;
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> quickMenuCallback_ = nullptr;
     SelectMenuInfo selectMenuInfo_;
     bool selectOverlayDragging_ = false;
@@ -1002,6 +1028,7 @@ private:
     std::optional<std::string> sharedRenderProcessToken_;
     bool textBlurAccessibilityEnable_ = false;
     TextBlurCallback textBlurCallback_ = nullptr;
+    WebComponentClickCallback webComponentClickCallback_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

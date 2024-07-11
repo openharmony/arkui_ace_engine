@@ -320,9 +320,12 @@ void SelectPattern::RegisterOnPress()
     auto host = GetHost();
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
-        auto host = pattern->GetHost();
-        auto theme = host->GetContextRefPtr()->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContextRefPtr();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<SelectTheme>();
         auto touchType = info.GetTouches().front().GetTouchType();
         const auto& renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
@@ -624,7 +627,7 @@ void SelectPattern::SetOptionBgColor(const Color& color)
 {
     optionBgColor_ = color;
     for (size_t i = 0; i < options_.size(); ++i) {
-        if (i == selected_ && selectedBgColor_.has_value()) {
+        if (static_cast<int32_t>(i) == selected_ && selectedBgColor_.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<OptionPattern>();
@@ -637,7 +640,7 @@ void SelectPattern::SetOptionFontSize(const Dimension& value)
 {
     optionFont_.FontSize = value;
     for (size_t i = 0; i < options_.size(); ++i) {
-        if (i == selected_ && selectedFont_.FontSize.has_value()) {
+        if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontSize.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<OptionPattern>();
@@ -650,7 +653,7 @@ void SelectPattern::SetOptionItalicFontStyle(const Ace::FontStyle& value)
 {
     optionFont_.FontStyle = value;
     for (size_t i = 0; i < options_.size(); ++i) {
-        if (i == selected_ && selectedFont_.FontStyle.has_value()) {
+        if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontStyle.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<OptionPattern>();
@@ -663,7 +666,7 @@ void SelectPattern::SetOptionFontWeight(const FontWeight& value)
 {
     optionFont_.FontWeight = value;
     for (size_t i = 0; i < options_.size(); ++i) {
-        if (i == selected_ && selectedFont_.FontWeight.has_value()) {
+        if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontWeight.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<OptionPattern>();
@@ -676,7 +679,7 @@ void SelectPattern::SetOptionFontFamily(const std::vector<std::string>& value)
 {
     optionFont_.FontFamily = value;
     for (size_t i = 0; i < options_.size(); ++i) {
-        if (i == selected_ && selectedFont_.FontFamily.has_value()) {
+        if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontFamily.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<OptionPattern>();
@@ -689,7 +692,7 @@ void SelectPattern::SetOptionFontColor(const Color& color)
 {
     optionFont_.FontColor = color;
     for (size_t i = 0; i < options_.size(); ++i) {
-        if (i == selected_ && selectedFont_.FontColor.has_value()) {
+        if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontColor.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<OptionPattern>();

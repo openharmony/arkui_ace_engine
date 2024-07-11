@@ -87,6 +87,7 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pinch %{public}d down, begin to detect pinch,"
         "state: %{public}d", event.touchEventId, event.id, refereeState_);
+    touchPoints_[event.id] = event;
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -103,7 +104,6 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         fingersId_.insert(event.id);
     }
     activeFingers_.emplace_back(event.id);
-    touchPoints_[event.id] = event;
     lastTouchEvent_ = event;
 
     if (static_cast<int32_t>(activeFingers_.size()) >= fingers_ && refereeState_ != RefereeState::FAIL) {
@@ -205,11 +205,11 @@ void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 
 void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
+    touchPoints_[event.id] = event;
     if (!IsActiveFinger(event.id)) {
         return;
     }
 
-    touchPoints_[event.id] = event;
     lastTouchEvent_ = event;
     currentDev_ = ComputeAverageDeviation();
     time_ = event.time;

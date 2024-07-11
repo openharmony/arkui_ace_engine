@@ -171,7 +171,14 @@ public:
         keepStatus_ = keepStatus;
     }
 
+    void UpdateCurrentStatus()
+    {
+        currentSelectedIndex_ = targetSelectedIndex_;
+        currentOverlongType_ = targetOverlongType_;
+    }
+
     void InitOverlongStatus(int32_t pageIndex);
+    void InitOverlongSelectedIndex(int32_t pageIndex);
     void CalcTargetSelectedIndex(int32_t currentPageIndex, int32_t targetPageIndex);
     void CalcTargetSelectedIndexOnForward(int32_t currentPageIndex, int32_t targetPageIndex);
     void CalcTargetSelectedIndexOnBackward(int32_t currentPageIndex, int32_t targetPageIndex);
@@ -194,6 +201,7 @@ private:
     std::pair<float, float> CalcLongPointEndCenterXWithBlack(int32_t index, const LinearVector<float>& itemHalfSizes);
     float GetMoveRateOnAllMove() const;
     int32_t GetBlackPointsAnimationDuration() const;
+    void AdjustTargetStatus(int32_t targetPageIndex);
 
     RefPtr<AnimatablePropertyUint8> firstPointOpacity_;
     RefPtr<AnimatablePropertyUint8> newPointOpacity_;

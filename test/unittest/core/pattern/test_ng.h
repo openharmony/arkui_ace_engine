@@ -128,7 +128,7 @@ public:
 
     RefPtr<FrameNode> GetChildFrameNode(const RefPtr<FrameNode>& frameNode, int32_t index)
     {
-        return AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(index));
+        return AceType::DynamicCast<FrameNode>(frameNode->GetChildByIndex(index));
     }
 
     RefPtr<FocusHub> GetChildFocusHub(const RefPtr<FrameNode>& frameNode, int32_t index)

@@ -371,4 +371,44 @@ HWTEST_F(GridLayoutRangeTest, ChangeTemplate001, TestSize.Level1)
     EXPECT_EQ(info.currentOffset_, 10.0f);
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 29)->IsActive());
 }
+
+/**
+ * @tc.name: Cache001
+ * @tc.desc: Test Grid preload items
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutRangeTest, Cache001, TestSize.Level1)
+{
+    GridModelNG model = CreateRepeatGrid(50, 200.0f);
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    model.SetLayoutOptions({});
+    model.SetCachedCount(2); // 2 lines
+    CreateDone(frameNode_);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 50);
+    EXPECT_EQ(frameNode_->GetChildren().size(), 1);
+    const auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 11);
+    const std::list<int32_t> preloadList = { 12, 13, 14, 15, 16, 17 };
+    for (const int32_t i : preloadList) {
+        EXPECT_FALSE(frameNode_->GetChildByIndex(i));
+    }
+    EXPECT_EQ(pattern_->preloadItemList_, preloadList);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_TRUE(pattern_->preloadItemList_.empty());
+    for (const int32_t i : preloadList) {
+        EXPECT_TRUE(frameNode_->GetChildByIndex(i));
+    }
+    pattern_->ScrollToIndex(49);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info.startIndex_, 39);
+    const std::list<int32_t> preloadList2 = { 38, 37, 36, 35, 34, 33 };
+    EXPECT_EQ(pattern_->preloadItemList_, preloadList2);
+    const int64_t time = GetSysTimestamp();
+    PipelineContext::GetCurrentContext()->OnIdle(time - 1);
+    // no time to execute
+    EXPECT_EQ(pattern_->preloadItemList_, preloadList2);
+}
 } // namespace OHOS::Ace::NG

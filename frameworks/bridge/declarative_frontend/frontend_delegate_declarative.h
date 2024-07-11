@@ -191,8 +191,8 @@ public:
         return manifestParser_->GetWindowConfig();
     }
 
-    double MeasureText(const MeasureContext& context) override;
-    Size MeasureTextSize(const MeasureContext& context) override;
+    double MeasureText(MeasureContext context) override;
+    Size MeasureTextSize(MeasureContext context) override;
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
         const NG::ToastShowMode& showMode = NG::ToastShowMode::DEFAULT, int32_t alignment = -1,

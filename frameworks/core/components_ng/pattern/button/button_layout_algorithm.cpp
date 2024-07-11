@@ -352,6 +352,10 @@ bool ButtonLayoutAlgorithm::IsAging(LayoutWrapper* layoutWrapper)
     auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(buttonLayoutProperty, false);
 
+    if (buttonLayoutProperty->HasType() && buttonLayoutProperty->GetType() == ButtonType::CIRCLE) {
+        return false;
+    }
+
     if (buttonLayoutProperty->HasLabel() && buttonLayoutProperty->GetLabel()->empty()) {
         return false;
     }

@@ -28,7 +28,7 @@ class NodeAdapter {
     onAttachToNode?: (target: FrameNode) => void;
     onDetachFromNode?: () => void;
     onGetChildId?: (index: number) => number;
-    onCreateNewChild?: (index: number) => FrameNode;
+    onCreateChild?: (index: number) => FrameNode;
     onDisposeChild?: (id: number, node: FrameNode) => void;
     onUpdateChild?: (id: number, node: FrameNode) => void;
 
@@ -38,7 +38,7 @@ class NodeAdapter {
         getUINativeModule().nodeAdapter.setCallbacks(this.nativePtr_, this,
             this.onAttachToNodePtr, this.onDetachFromNodePtr,
             this.onGetChildId !== undefined ? this.onGetChildId : undefined,
-            this.onCreateNewChild !== undefined ? this.onCreateNewNodePtr : undefined,
+            this.onCreateChild !== undefined ? this.onCreateNewNodePtr : undefined,
             this.onDisposeChild !== undefined ? this.onDisposeNodePtr : undefined,
             this.onUpdateChild !== undefined ? this.onUpdateNodePtr : undefined
         );
@@ -113,6 +113,9 @@ class NodeAdapter {
     }
 
     onDetachFromNodePtr(): void {
+        if (this === undefined) {
+            return;
+        }
         if (this.onDetachFromNode !== undefined) {
             this.onDetachFromNode();
         }
@@ -124,8 +127,8 @@ class NodeAdapter {
     }
 
     onCreateNewNodePtr(index: number): NodePtr {
-        if (this.onCreateNewChild !== undefined) {
-            let node = this.onCreateNewChild(index);
+        if (this.onCreateChild !== undefined) {
+            let node = this.onCreateChild(index);
             if (!this.nodeRefs_.includes(node)) {
                 this.nodeRefs_.push(node);
             }
@@ -158,8 +161,8 @@ class NodeAdapter {
         }
     }
 
-    static attachNodeAdapter(adapter: NodeAdapter, node: FrameNode) {
-        getUINativeModule().nodeAdapter.attachNodeAdapter(adapter.nativePtr_, node.getNodePtr());
+    static attachNodeAdapter(adapter: NodeAdapter, node: FrameNode): boolean {
+        return getUINativeModule().nodeAdapter.attachNodeAdapter(adapter.nativePtr_, node.getNodePtr());
     }
 
     static detachNodeAdapter(node: FrameNode) {

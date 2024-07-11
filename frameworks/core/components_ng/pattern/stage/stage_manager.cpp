@@ -17,12 +17,15 @@
 
 #include <unordered_map>
 
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 #include "base/geometry/ng/size_t.h"
 #include "base/log/ace_checker.h"
 #include "base/log/ace_performance_check.h"
-#include "base/perfmonitor/perf_monitor.h"
-#include "base/perfmonitor/perf_constants.h"
 #include "base/memory/referenced.h"
+#include "base/perfmonitor/perf_constants.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
@@ -169,7 +172,7 @@ void StageManager::PageChangeCloseKeyboard()
 #endif
 }
 
-bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition)
+bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition, bool  /*isPush*/)
 {
     CHECK_NULL_RETURN(stageNode_, false);
     CHECK_NULL_RETURN(node, false);
@@ -188,6 +191,9 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
         CHECK_NULL_RETURN(pageInfo, false);
         auto pagePath = pageInfo->GetFullPath();
         ACE_SCOPED_TRACE_COMMERCIAL("Router Main Page: %s", pagePath.c_str());
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+        UiSessionManager::GetInstance().OnRouterChange(pagePath, "routerPushPage");
+#endif
     }
     if (needTransition) {
         pipeline->FlushPipelineImmediately();
@@ -218,7 +224,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
 
     auto pagePattern = node->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
-    stagePattern_->currentPageIndex_ = pagePattern->GetPageInfo()->GetPageId();
+    stagePattern_->SetCurrentPageIndex(pagePattern->GetPageInfo()->GetPageId());
     if (AceChecker::IsPerformanceCheckEnabled()) {
         // After completing layout tasks at all nodes on the page, perform performance testing and management
         pipeline->AddAfterLayoutTask([weakStage = WeakClaim(this), weakNode = WeakPtr<FrameNode>(node), startTime]() {
@@ -529,7 +535,7 @@ void StageManager::FireAutoSave(const RefPtr<FrameNode>& outPageNode, const RefP
     outPagePattern->ProcessAutoSave(onUIExtNodeDestroy, onUIExtNodeBindingCompleted);
 }
 
-RefPtr<FrameNode> StageManager::GetLastPage()
+RefPtr<FrameNode> StageManager::GetLastPage() const
 {
     CHECK_NULL_RETURN(stageNode_, nullptr);
     const auto& children = stageNode_->GetChildren();

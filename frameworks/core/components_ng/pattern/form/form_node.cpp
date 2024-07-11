@@ -78,8 +78,8 @@ std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, co
 
 class FormAccessibilityChildTreeCallback : public AccessibilityChildTreeCallback {
 public:
-    explicit FormAccessibilityChildTreeCallback(const WeakPtr<FormNode> &weakFormNode)
-        : AccessibilityChildTreeCallback(), weakFormNode_(weakFormNode)
+    FormAccessibilityChildTreeCallback(const WeakPtr<FormNode> &weakFormNode, int64_t accessibilityId)
+        : AccessibilityChildTreeCallback(accessibilityId), weakFormNode_(weakFormNode)
     {}
 
     ~FormAccessibilityChildTreeCallback() override = default;
@@ -253,7 +253,8 @@ void FormNode::InitializeFormAccessibility()
     CHECK_NULL_VOID(pipeline);
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
-    accessibilityChildTreeCallback_ = std::make_shared<FormAccessibilityChildTreeCallback>(WeakClaim(this));
+    accessibilityChildTreeCallback_ = std::make_shared<FormAccessibilityChildTreeCallback>(
+        WeakClaim(this), GetAccessibilityId());
     accessibilityManager->RegisterAccessibilityChildTreeCallback(GetAccessibilityId(), accessibilityChildTreeCallback_);
 
 }

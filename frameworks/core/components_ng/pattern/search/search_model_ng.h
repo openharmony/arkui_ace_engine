@@ -47,10 +47,9 @@ public:
     void SetTextColor(const Color& color) override;
     void SetTextAlign(const TextAlign& textAlign) override;
     void SetCopyOption(const CopyOptions& copyOptions) override;
-    void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems) override;
     void SetHeight(const Dimension& height) override;
     void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override;
-    void SetOnChange(std::function<void(const std::string&, TextRange&)>&& onChange) override;
+    void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& onChange) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     void SetOnScroll(std::function<void(float, float)>&& func) override;
     void SetOnCopy(std::function<void(const std::string&)>&& func) override;
@@ -82,7 +81,8 @@ public:
     void UpdateInspectorId(const std::string& key) override;
     void SetDragPreviewOptions(const NG::DragPreviewOption option) override;
     void SetSelectedBackgroundColor(const Color& value) override;
-    void SetSelectionMenuOptions(const std::vector<MenuOptionsParam>&& menuOptionsItems) override;
+    void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
     void SetEnablePreviewText(bool enablePreviewText) override;
     static RefPtr<SearchNode> CreateFrameNode(int32_t nodeId);
     static void SetTextValue(FrameNode* frameNode, const std::optional<std::string>& value);
@@ -125,7 +125,7 @@ public:
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
     static void SetOnSubmit(FrameNode* frameNode, std::function<void(const std::string&)>&& onSubmit);
-    static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&, TextRange&)>&& onChange);
+    static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&, PreviewText&)>&& onChange);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnCut(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnPasteWithEvent(FrameNode* frameNode,

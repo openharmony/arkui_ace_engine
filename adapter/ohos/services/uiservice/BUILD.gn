@@ -63,11 +63,15 @@ template("uiservice_static") {
       "access_token:libtokenid_sdk",
       "c_utils:utils",
       "eventhandler:libeventhandler",
-      "hicollie:libhicollie",
       "hilog:libhilog",
       "ipc:ipc_core",
       "safwk:system_ability_fwk",
     ]
+
+    if (uiservice_xcollie_enable) {
+      external_deps += [ "hicollie:libhicollie" ]
+      defines += [ "UISERVICE_MGR_XCOLLIE_ENABLE" ]
+    }
   }
 }
 

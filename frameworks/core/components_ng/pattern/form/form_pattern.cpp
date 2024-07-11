@@ -61,6 +61,7 @@ namespace {
 constexpr double FORM_CLICK_OPEN_LIMIT_DISTANCE = 20.0;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_3S = 3000;
+constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_EXTRA = 200;
 constexpr uint32_t DELAY_TIME_FOR_DELETE_IMAGE_NODE = 100;
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double NON_TRANSPARENT_VAL = 1.0;
@@ -314,6 +315,28 @@ void FormPattern::TakeSurfaceCaptureForUI()
         needSnapshotAgain_ = true;
         return;
     }
+
+    if (formChildrenNodeMap_.find(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE)
+        == formChildrenNodeMap_.end()) {
+        SnapshotSurfaceNode();
+        return;
+    }
+    UpdateChildNodeOpacity(FormChildNodeType::FORM_SURFACE_NODE, NON_TRANSPARENT_VAL);
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostDelayedTask(
+        [weak = WeakClaim(this)] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->SnapshotSurfaceNode();
+        },
+        DELAY_TIME_FOR_FORM_SNAPSHOT_EXTRA, "ArkUIFormDelaySnapshotSurfaceNode");
+}
+ 
+void FormPattern::SnapshotSurfaceNode()
+{
     auto externalContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
     CHECK_NULL_VOID(externalContext);
     auto rsNode = externalContext->GetRSNode();
@@ -402,10 +425,11 @@ void FormPattern::DeleteImageNodeAfterRecover(bool needHandleCachedClick)
     RemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
 
     // set frs node non transparent
-    auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
-    CHECK_NULL_VOID(externalRenderContext);
-    externalRenderContext->SetOpacity(NON_TRANSPARENT_VAL);
-    TAG_LOGI(AceLogTag::ACE_FORM, "delete imageNode and setOpacity:1");
+    if (formChildrenNodeMap_.find(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE)
+        == formChildrenNodeMap_.end()) {
+        UpdateChildNodeOpacity(FormChildNodeType::FORM_SURFACE_NODE, NON_TRANSPARENT_VAL);
+        TAG_LOGI(AceLogTag::ACE_FORM, "delete imageNode and setOpacity:1");
+    }
 
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     auto parent = host->GetParent();
@@ -468,7 +492,10 @@ void FormPattern::UpdateImageNode()
     auto externalContext = DynamicCast<NG::RosenRenderContext>(imageNode->GetRenderContext());
     CHECK_NULL_VOID(externalContext);
     externalContext->SetVisible(true);
-
+    if (formChildrenNodeMap_.find(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE)
+        != formChildrenNodeMap_.end()) {
+        externalContext->SetOpacity(TRANSPARENT_VAL);
+    }
     imageNode->MarkModifyDone();
     imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
@@ -764,7 +791,11 @@ void FormPattern::UpdateTimeLimitFontCfg()
 
     Dimension fontSize(GetTimeLimitFontSize());
     if (!NearEqual(textLayoutProperty->GetFontSize().value(), fontSize)) {
+        TAG_LOGD(AceLogTag::ACE_FORM, "bundleName = %{public}s, id: %{public}" PRId64 ", UpdateFontSize:%{public}f.",
+            cardInfo_.bundleName.c_str(), cardInfo_.id, fontSize.Value());
         textLayoutProperty->UpdateFontSize(fontSize);
+        textNode->MarkModifyDone();
+        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -816,11 +847,18 @@ void FormPattern::LoadDisableFormStyle(const RequestFormInfo& info, bool isRefre
     CHECK_NULL_VOID(layoutProperty);
     auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
     layoutProperty->UpdateVisibility(visible);
+
+    UpdateChildNodeOpacity(FormChildNodeType::FORM_SURFACE_NODE, TRANSPARENT_VAL);
+    UpdateChildNodeOpacity(FormChildNodeType::FORM_STATIC_IMAGE_NODE, TRANSPARENT_VAL);
+    UpdateChildNodeOpacity(FormChildNodeType::FORM_SKELETON_NODE, TRANSPARENT_VAL);
 }
 
 void FormPattern::RemoveDisableFormStyle(const RequestFormInfo& info)
 {
     if (!IsMaskEnableForm(info)) {
+        UpdateChildNodeOpacity(FormChildNodeType::FORM_SURFACE_NODE, NON_TRANSPARENT_VAL);
+        UpdateChildNodeOpacity(FormChildNodeType::FORM_STATIC_IMAGE_NODE, NON_TRANSPARENT_VAL);
+        UpdateChildNodeOpacity(FormChildNodeType::FORM_SKELETON_NODE, CONTENT_BG_OPACITY);
         RemoveFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE);
         RemoveFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
         return;
@@ -865,7 +903,9 @@ void FormPattern::LoadFormSkeleton(bool isRefresh)
         renderContext->UpdateBackBlurStyle(styleOption);
         renderContext->UpdateBackgroundColor(isDarkMode ?
             Color(CONTENT_BG_COLOR_DARK) : Color(CONTENT_BG_COLOR_LIGHT));
-        renderContext->UpdateOpacity(CONTENT_BG_OPACITY);
+        double opacity = formChildrenNodeMap_.find(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE)
+            != formChildrenNodeMap_.end() ? TRANSPARENT_VAL : CONTENT_BG_OPACITY;
+        renderContext->SetOpacity(opacity);
     }
     columnNode->MarkModifyDone();
     columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1239,9 +1279,18 @@ void FormPattern::InitFormManagerDelegate()
     formManagerBridge_->AddGetRectRelativeToWindowCallback(
         [weak = WeakClaim(this), instanceID](int32_t &top, int32_t &left) {
             ContainerScope scope(instanceID);
-            auto formPattern = weak.Upgrade();
-            CHECK_NULL_VOID(formPattern);
-            formPattern->GetRectRelativeToWindow(top, left);
+            auto form = weak.Upgrade();
+            CHECK_NULL_VOID(form);
+            auto host = form->GetHost();
+            CHECK_NULL_VOID(host);
+            auto uiTaskExecutor =
+                SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            uiTaskExecutor.PostSyncTask([weak, instanceID, &top, &left] {
+                ContainerScope scope(instanceID);
+                auto form = weak.Upgrade();
+                CHECK_NULL_VOID(form);
+                form->GetRectRelativeToWindow(top, left);
+                }, "ArkUIFormGetRectRelativeToWindow");
         });
 
     formManagerBridge_->AddEnableFormCallback(
@@ -1293,7 +1342,8 @@ void FormPattern::AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node
     externalRenderContext->SetBounds(cardInfo_.borderWidth, cardInfo_.borderWidth, boundWidth, boundHeight);
 
     bool isRecover = want.GetBoolParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM, false);
-    if (isRecover) {
+    if (isRecover || formChildrenNodeMap_.find(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE)
+        != formChildrenNodeMap_.end()) {
         TAG_LOGI(AceLogTag::ACE_FORM, "surfaceNode: %{public}s setOpacity:0", std::to_string(node->GetId()).c_str());
         externalRenderContext->SetOpacity(TRANSPARENT_VAL);
     }
@@ -1800,5 +1850,23 @@ bool FormPattern::IsMaskEnableForm(const RequestFormInfo& info)
     return info.shape == FORM_SHAPE_CIRCLE || info.renderingMode ==
         static_cast<int32_t>(OHOS::AppExecFwk::Constants::RenderingMode::SINGLE_COLOR) ||
         info.dimension == static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_1);
+}
+
+void FormPattern::UpdateChildNodeOpacity(FormChildNodeType formChildNodeType, double opacity)
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "formChildNodeType: %{public}d, opacity: %{public}f.",
+        static_cast<int32_t>(formChildNodeType), opacity);
+    if (formChildNodeType == FormChildNodeType::FORM_SURFACE_NODE) {
+        auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
+        CHECK_NULL_VOID(externalRenderContext);
+        externalRenderContext->OnOpacityUpdate(opacity);
+    } else if (formChildNodeType == FormChildNodeType::FORM_STATIC_IMAGE_NODE ||
+        formChildNodeType == FormChildNodeType::FORM_SKELETON_NODE) {
+        auto childNode = GetFormChildNode(formChildNodeType);
+        CHECK_NULL_VOID(childNode);
+        auto renderContext = DynamicCast<NG::RosenRenderContext>(childNode->GetRenderContext());
+        CHECK_NULL_VOID(renderContext);
+        renderContext->OnOpacityUpdate(opacity);
+    }
 }
 } // namespace OHOS::Ace::NG

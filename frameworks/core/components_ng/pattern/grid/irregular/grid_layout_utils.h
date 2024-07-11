@@ -21,6 +21,8 @@
 #include "core/components_ng/pattern/grid/grid_layout_options.h"
 
 namespace OHOS::Ace::NG {
+class GridPattern;
+
 class GridLayoutUtils {
 public:
     /**
@@ -33,6 +35,20 @@ public:
      * IMPORTANT: Output assumes [row] represents mainSize and [column] represents crossSize.
      */
     static GridItemSize GetItemSize(const GridLayoutInfo* info, const LayoutWrapper* wrapper, int32_t idx);
+
+    /**
+     * @brief Add a task to preload GridItems when Pipeline is idle.
+     *
+     * @param pattern of this Grid component.
+     * @param items list of GridItems to preload.
+     * @param buildCb callback to build a GridItem.
+     */
+    static void PreloadGridItems(
+        const RefPtr<GridPattern>& pattern, std::list<int32_t>&& items, const BuildGridItemCallback& buildCb);
+
+private:
+    // helper to add the GridItem build task to Pipeline
+    static void PreloadGridItemsHelper(const RefPtr<GridPattern>& pattern, const BuildGridItemCallback& buildCb);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_LAYOUT_UTILS_H

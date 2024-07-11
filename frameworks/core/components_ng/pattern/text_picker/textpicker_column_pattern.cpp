@@ -1326,6 +1326,12 @@ double TextPickerColumnPattern::GetUpCandidateDistance(int32_t index, int32_t ne
 {
     double distance = 0.0;
     double val = 0.0;
+    // the index of last element in optionProperties_. return -1 while the arraySize equals 0.
+    auto maxIndex = static_cast<int32_t>(optionProperties_.size()) - 1;
+    auto minIndex = 0;
+    if (index > maxIndex || index < minIndex || nextIndex > maxIndex || nextIndex < minIndex) {
+        return distance;
+    }
     if (columnkind_ == TEXT) {
         if (dir == ScrollDirection::UP) {
             distance = -optionProperties_[nextIndex].height;
@@ -1630,7 +1636,7 @@ void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
     int32_t step = param->itemIndex - middleIndex;
     auto overFirst = static_cast<int32_t>(currentIndex_) + step < 0 && step < 0;
     auto overLast =
-        static_cast<int32_t>(currentIndex_) + step > (GetOptionCount() ? GetOptionCount() - 1 : 0) && step > 0;
+        (static_cast<int32_t>(currentIndex_) + step > static_cast<int32_t>(GetOptionCount()) - 1) && step > 0;
     if (NotLoopOptions() && (overscroller_.IsOverScroll() || overFirst || overLast)) {
         return;
     }

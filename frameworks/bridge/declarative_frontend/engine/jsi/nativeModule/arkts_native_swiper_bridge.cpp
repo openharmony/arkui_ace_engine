@@ -211,11 +211,11 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperDisplayCount(ArkUIRuntimeCallInfo*
     if (valueArg->IsNumber() || valueArg->IsString(vm)) {
         Local<JSValueRef> typeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_TYPE_INDEX);
         std::string displayCountValue;
-        std::string type = typeArg->ToString(vm)->ToString();
+        std::string type = typeArg->ToString(vm)->ToString(vm);
         if (type == "number") {
             displayCountValue = std::to_string(valueArg->Int32Value(vm));
         } else {
-            displayCountValue = valueArg->ToString(vm)->ToString();
+            displayCountValue = valueArg->ToString(vm)->ToString(vm);
         }
         GetArkUINodeModifiers()->getSwiperModifier()->setSwiperDisplayCount(
             nativeNode, displayCountValue.c_str(), type.c_str());
@@ -333,7 +333,7 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperCurve(ArkUIRuntimeCallInfo* runtim
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
     if (valueArg->IsString(vm)) {
-        std::string curve = valueArg->ToString(vm)->ToString();
+        std::string curve = valueArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getSwiperModifier()->setSwiperCurve(nativeNode, curve.c_str());
     } else {
         GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperCurve(nativeNode);
@@ -671,12 +671,12 @@ std::string GetSwiperDigitIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaV
     std::string digitFontSize = ArkTSUtils::ParseJsDimension(vm, digitFontSizeArg, calc, DimensionUnit::FP, false)
                                     ? std::to_string(calc.Value()) + GetDimensionUnitString(calc.Unit())
                                     : "-";
-    std::string digitFontWeight = digitFontWeightArg->ToString(vm)->ToString();
+    std::string digitFontWeight = digitFontWeightArg->ToString(vm)->ToString(vm);
     std::string selectedDigitFontSize =
         ArkTSUtils::ParseJsDimension(vm, selectedDigitFontSizeArg, calc, DimensionUnit::FP, false)
             ? std::to_string(calc.Value()) + GetDimensionUnitString(calc.Unit())
             : "-";
-    std::string selectedDigitFontWeight = selectedDigitFontWeightArg->ToString(vm)->ToString();
+    std::string selectedDigitFontWeight = selectedDigitFontWeightArg->ToString(vm)->ToString(vm);
     std::string left = GetStringByValueRef(vm, leftArg);
     std::string top = GetStringByValueRef(vm, topArg);
     std::string right = GetStringByValueRef(vm, rightArg);
@@ -694,7 +694,7 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperIndicator(ArkUIRuntimeCallInfo* ru
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
 
-    std::string type = valueArg->ToString(vm)->ToString();
+    std::string type = valueArg->ToString(vm)->ToString(vm);
     std::string indicatorStr = "";
     if (type == "boolean") {
         Local<JSValueRef> indicatorArg = runtimeCallInfo->GetCallArgRef(INDICATOR_VALUE_INDEX);

@@ -301,6 +301,9 @@ public:
     virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
     virtual void ResetBackBlurStyle() {}
     virtual void ClipWithRect(const RectF& rectF) {}
+    virtual void ClipWithRoundRect(const RoundRect& roundRect) {}
+    virtual void ClipWithOval(const RectF& rectF) {}
+    virtual void ClipWithCircle(const Circle& circle) {}
     virtual void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) {}
     virtual void RemoveClipWithRRect() {}
 
@@ -698,6 +701,9 @@ public:
     }
 
     virtual void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) {}
+
+    // The additional opacity will be multiplied with the base opacity.
+    virtual void SetOpacityMultiplier(float opacity) {}
 
 protected:
     RenderContext() = default;

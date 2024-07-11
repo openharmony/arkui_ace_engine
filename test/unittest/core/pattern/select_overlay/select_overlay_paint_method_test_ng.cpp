@@ -1626,4 +1626,57 @@ HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateOverlayModifier006, TestSize.Leve
     EXPECT_EQ(selectOverlayPaintMethod->circlesAndBackArrowIsShown_, true);
     EXPECT_EQ(overlayModifier->circlesAndBackArrowOpacity_->Get(), 1.0);
 }
+
+/**
+ * @tc.name: UpdateOverlayModifier007
+ * @tc.desc: Test select_ovelay_paint_method UpdateOverlayModifier when reverse layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPaintMethodTestNg, UpdateOverlayModifier007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize properties.
+     */
+    SelectOverlayInfo selectInfo;
+    auto menuOptionItems = GetMenuOptionItems();
+    selectInfo.menuOptionItems = menuOptionItems;
+    selectInfo.singleLineHeight = NODE_ID;
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    auto layoutProps = selectOverlayNode->GetLayoutProperty();
+    ASSERT_NE(layoutProps, nullptr);
+    layoutProps->UpdateLayoutDirection(TextDirection::RTL);
+    EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    const float offsetX = 120.5f;
+    const float offsetY = 30.5f;
+    pattern->defaultMenuStartOffset_ = OffsetF(offsetX, offsetY);
+    auto paintProperty = pattern->CreatePaintProperty();
+    ASSERT_NE(paintProperty, nullptr);
+    RefPtr<NodePaintMethod> paintMethod = pattern->CreateNodePaintMethod();
+    EXPECT_NE(paintMethod, nullptr);
+    auto selectOverlayPaintMethod = AceType::DynamicCast<SelectOverlayPaintMethod>(paintMethod);
+    EXPECT_NE(selectOverlayPaintMethod, nullptr);
+
+    /**
+     * @tc.steps: step2. call UpdateOverlayModifier.
+     * @tc.expected: the status value is correct and reverse layout offset is not NULL.
+     */
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    auto overlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(overlayTheme, nullptr);
+
+    auto overlayModifier = pattern->selectOverlayModifier_;
+    ASSERT_NE(overlayModifier, nullptr);
+    PaintWrapper paintWrapper(nullptr, AceType::MakeRefPtr<GeometryNode>(), paintProperty);
+    selectOverlayPaintMethod->UpdateOverlayModifier(&paintWrapper);
+    ASSERT_NE(overlayModifier->menuOptionOffset_, nullptr);
+    EXPECT_TRUE(overlayModifier->isReverse_);
+}
 } // namespace OHOS::Ace::NG

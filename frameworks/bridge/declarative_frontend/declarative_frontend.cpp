@@ -26,6 +26,8 @@
 #include "core/common/thread_checker.h"
 #include "core/components/navigator/navigator_component.h"
 #include "frameworks/bridge/card_frontend/form_frontend_delegate_declarative.h"
+#include "frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.h"
+
 namespace OHOS::Ace {
 namespace {
 
@@ -603,7 +605,7 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
             return jsEngine->PreloadNamedRouter(name, std::move(loadFinishCallback));
         };
 
-        auto pageRouterManager = AceType::MakeRefPtr<NG::PageRouterManager>();
+        auto pageRouterManager = NG::PageRouterManagerFactory::CreateManager();
         pageRouterManager->SetLoadJsCallback(std::move(loadPageCallback));
         pageRouterManager->SetLoadJsByBufferCallback(std::move(loadPageByBufferCallback));
         pageRouterManager->SetLoadNamedRouterCallback(std::move(loadNamedRouterCallback));

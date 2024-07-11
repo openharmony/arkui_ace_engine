@@ -165,7 +165,6 @@ public:
 
     void ProcessPropertyDiff()
     {
-        // TODO: modify done need to optimize.
         if (isPropertyDiffMarked_) {
             MarkModifyDone();
             MarkDirtyNode();
@@ -228,8 +227,10 @@ public:
         }
     }
 
-    void SetVisibleAreaInnerCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback)
+    void SetVisibleAreaInnerCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback,
+        bool isCalculateInnerClip = false)
     {
+        isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
         eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, false);
     }
 
@@ -238,7 +239,7 @@ public:
         eventHub_->CleanVisibleAreaCallback(false);
     }
 
-    void TriggerVisibleAreaChangeCallback(bool forceDisappear = false);
+    void TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceDisappear = false);
 
     void SetOnSizeChangeCallback(OnSizeChangedFunc&& callback);
 
@@ -741,6 +742,7 @@ public:
     {
         return renderContext_->HasPosition() || renderContext_->HasPositionEdges();
     }
+    void ProcessSafeAreaPadding();
 
     bool SkipMeasureContent() const override;
     float GetBaselineDistance() const override;
@@ -871,6 +873,7 @@ public:
     }
 
     void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
+    void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect) const;
 
     void AttachContext(PipelineContext* context, bool recursive = false) override;
     void DetachContext(bool recursive = false) override;
@@ -900,7 +903,6 @@ public:
     void NotifyTransformInfoChanged()
     {
         isLocalRevertMatrixAvailable_ = false;
-        AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_TRANSFORM_CHANGE);
     }
 
     void AddPredictLayoutNode(const RefPtr<FrameNode>& node)
@@ -935,6 +937,7 @@ public:
     ChildrenListWithGuard GetAllChildren();
     OPINC_TYPE_E FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth);
     void GetInspectorValue() override;
+    void NotifyWebPattern(bool isRegister) override;
 
     FrameNodeChangeInfoFlag GetChangeInfoFlag()
     {
@@ -951,6 +954,8 @@ public:
     void RegisterNodeChangeListener();
     void UnregisterNodeChangeListener();
     void ProcessFrameNodeChangeFlag();
+    void OnNodeTransformInfoUpdate(bool changed);
+    void OnNodeTransitionInfoUpdate();
 
 protected:
     void DumpInfo() override;
@@ -1009,11 +1014,15 @@ private:
     bool GetTouchable() const;
     bool OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config);
 
+    void ProcessVisibleAreaChangeEvent(const RectF& visibleRect, const RectF& frameRect,
+        const std::vector<double>& visibleAreaRatios, VisibleCallbackInfo& visibleAreaCallback, bool isUser);
     void ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
         VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio,
-        double lastVisibleRatio, bool isThrottled = false);
+        double lastVisibleRatio, bool isThrottled = false, bool isInner = false);
     void ProcessThrottledVisibleCallback();
     bool IsFrameDisappear();
+    bool IsFrameDisappear(uint64_t timestamp);
+    bool IsFrameAncestorDisappear(uint64_t timestamp);
     void ThrottledVisibleTask();
 
     void OnPixelRoundFinish(const SizeF& pixelGridRoundSize);
@@ -1101,7 +1110,9 @@ private:
     bool isFirstBuilding_ = true;
 
     double lastVisibleRatio_ = 0.0;
+    double lastInnerVisibleRatio_ = 0.0;
     double lastVisibleCallbackRatio_ = 0.0;
+    double lastInnerVisibleCallbackRatio_ = 0.0;
     double lastThrottledVisibleRatio_ = 0.0;
     double lastThrottledVisibleCbRatio_ = 0.0;
     int64_t lastThrottledTriggerTime_ = 0;
@@ -1134,6 +1145,7 @@ private:
     bool isDisallowDropForcedly_ = false;
     bool isGeometryTransitionIn_ = false;
     bool isLayoutNode_ = false;
+    bool isCalculateInnerVisibleRectClip_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 
@@ -1145,6 +1157,7 @@ private:
 
     std::pair<uint64_t, OffsetF> cachedGlobalOffset_ = { 0, OffsetF() };
     std::pair<uint64_t, OffsetF> cachedTransformRelativeOffset_ = { 0, OffsetF() };
+    std::pair<uint64_t, bool> cachedIsFrameDisappear_ = { 0, false };
 
     struct onSizeChangeDumpInfo {
         int64_t onSizeChangeTimeStamp;

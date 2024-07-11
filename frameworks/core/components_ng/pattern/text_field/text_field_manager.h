@@ -117,6 +117,16 @@ public:
         keyboardChangeCallbackMap_.erase(id);
     }
 
+    void SetNeedToRequestKeyboard(bool val) override
+    {
+        needToRequestKeyboard_ = val;
+    }
+
+    bool GetNeedToRequestKeyboard() override
+    {
+        return needToRequestKeyboard_;
+    }
+
 private:
     bool ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
     RefPtr<FrameNode> FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField);
@@ -134,6 +144,7 @@ private:
     int32_t onFocusTextFieldId = -1;
     std::unordered_map<int32_t, std::function<void(bool, bool)>> keyboardChangeCallbackMap_;
     float lastKeyboardOffset_ = 0.0f;
+    bool needToRequestKeyboard_ = true;
 };
 
 } // namespace OHOS::Ace::NG

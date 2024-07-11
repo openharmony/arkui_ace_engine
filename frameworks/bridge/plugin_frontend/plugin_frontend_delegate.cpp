@@ -912,13 +912,21 @@ int32_t PluginFrontendDelegate::GetVersionCode() const
     return manifestParser_->GetAppInfo()->GetVersionCode();
 }
 
-double PluginFrontendDelegate::MeasureText(const MeasureContext& context)
+double PluginFrontendDelegate::MeasureText(MeasureContext context)
 {
+    if (context.isFontSizeUseDefaultUnit && context.fontSize.has_value() &&
+        !AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        context.fontSize = Dimension(context.fontSize->Value(), DimensionUnit::VP);
+    }
     return MeasureUtil::MeasureText(context);
 }
 
-Size PluginFrontendDelegate::MeasureTextSize(const MeasureContext& context)
+Size PluginFrontendDelegate::MeasureTextSize(MeasureContext context)
 {
+    if (context.isFontSizeUseDefaultUnit && context.fontSize.has_value() &&
+        !AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        context.fontSize = Dimension(context.fontSize->Value(), DimensionUnit::VP);
+    }
     return MeasureUtil::MeasureTextSize(context);
 }
 

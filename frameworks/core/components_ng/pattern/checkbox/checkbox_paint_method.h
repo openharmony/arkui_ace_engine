@@ -38,18 +38,8 @@ public:
         return checkboxModifier_;
     }
 
-    void UpdateContentModifier(PaintWrapper* paintWrapper) override
+    void UpdateCheckboxColors(const RefPtr<CheckBoxPaintProperty>& paintProperty)
     {
-        CHECK_NULL_VOID(checkboxModifier_);
-        checkboxModifier_->InitializeParam();
-        CHECK_NULL_VOID(paintWrapper);
-        auto size = paintWrapper->GetContentSize();
-        auto offset = paintWrapper->GetContentOffset();
-        float strokePaintSize = size.Width();
-        auto paintProperty = DynamicCast<CheckBoxPaintProperty>(paintWrapper->GetPaintProperty());
-        if (paintProperty->GetCheckBoxSelect().has_value()) {
-            checkboxModifier_->SetIsSelect(paintProperty->GetCheckBoxSelectValue());
-        }
         if (paintProperty->HasCheckBoxSelectedColor()) {
             checkboxModifier_->SetUserActiveColor(paintProperty->GetCheckBoxSelectedColorValue());
         }
@@ -62,6 +52,20 @@ public:
         if (paintProperty->HasCheckBoxCheckMarkColor()) {
             checkboxModifier_->SetPointColor(paintProperty->GetCheckBoxCheckMarkColorValue());
         }
+    }
+
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override
+    {
+        CHECK_NULL_VOID(checkboxModifier_);
+        checkboxModifier_->InitializeParam();
+        CHECK_NULL_VOID(paintWrapper);
+        auto size = paintWrapper->GetContentSize();
+        float strokePaintSize = size.Width();
+        auto paintProperty = DynamicCast<CheckBoxPaintProperty>(paintWrapper->GetPaintProperty());
+        if (paintProperty->GetCheckBoxSelect().has_value()) {
+            checkboxModifier_->SetIsSelect(paintProperty->GetCheckBoxSelectValue());
+        }
+        UpdateCheckboxColors(paintProperty);
         if (paintProperty->HasCheckBoxCheckMarkSize()) {
             if (paintProperty->GetCheckBoxCheckMarkSizeValue().ConvertToPx() >= 0) {
                 strokePaintSize = paintProperty->GetCheckBoxCheckMarkSizeValue().ConvertToPx();
@@ -81,6 +85,7 @@ public:
         }
 
         checkboxModifier_->SetSize(size);
+        auto offset = paintWrapper->GetContentOffset();
         checkboxModifier_->SetOffset(offset);
         checkboxModifier_->SetEnabled(enabled_);
         checkboxModifier_->SetTouchHoverAnimationType(touchHoverType_);

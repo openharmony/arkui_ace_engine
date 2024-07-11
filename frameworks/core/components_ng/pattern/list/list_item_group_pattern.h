@@ -207,8 +207,9 @@ public:
     void ResetChildrenSize();
 
     void CalculateItemStartIndex();
-    int32_t GetForwardCachedIndex(int32_t cacheCount);
-    int32_t GetBackwardCachedIndex(int32_t cacheCount);
+    void UpdateActiveChildRange(bool forward, int32_t cacheCount);
+    int32_t UpdateForwardCachedIndex(int32_t cacheCount, bool outOfView);
+    int32_t UpdateBackwardCachedIndex(int32_t cacheCount, bool outOfView);
     void LayoutCache(const LayoutConstraintF& constraint, bool forward, int64_t deadline, int32_t cached);
 private:
     bool IsNeedInitClickEventRecorder() const override
@@ -243,7 +244,7 @@ private:
     std::set<int32_t> pressedItem_;
     bool layouted_ = false;
 
-    int32_t backwardCachedIndex_ = -1;
+    int32_t backwardCachedIndex_ = INT_MAX;
     int32_t forwardCachedIndex_ = -1;
 
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;

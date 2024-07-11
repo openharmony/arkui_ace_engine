@@ -45,7 +45,7 @@ public:
     static void JsBorderStyle(const JSCallbackInfo& info);
     static void JsBorderRadius(const JSCallbackInfo& info);
     static void OnSubmit(const JSCallbackInfo& info);
-    static JSRef<JSVal> CreateJsOnChangeObj(const TextRange& textRange);
+    static JSRef<JSVal> CreateJsOnChangeObj(const PreviewText& previewText);
     static void OnChange(const JSCallbackInfo& info);
     static void SetOnTextSelectionChange(const JSCallbackInfo& info);
     static void SetOnScroll(const JSCallbackInfo& info);
@@ -61,7 +61,6 @@ public:
     static void OnWillDelete(const JSCallbackInfo& info);
     static void OnDidDelete(const JSCallbackInfo& info);
     static void SetIconStyle(const JSCallbackInfo& info);
-    static void JsMenuOptionsExtension(const JSCallbackInfo& info);
     static void SetSelectionMenuHidden(const JSCallbackInfo& info);
     static void SetCustomKeyboard(const JSCallbackInfo& info);
     static void SetEnterKeyType(const JSCallbackInfo& info);
@@ -81,7 +80,7 @@ public:
     static void SetTextIndent(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static void SetDragPreviewOptions(const JSCallbackInfo& info);
-    static void SelectionMenuOptions(const JSCallbackInfo& info);
+    static void EditMenuOptions(const JSCallbackInfo& info);
     static void SetEnablePreviewText(const JSCallbackInfo& info);
 };
 

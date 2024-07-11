@@ -93,6 +93,7 @@ public:
     void OnWindowShow() override;
     void OnWindowHide() override;
     void OnVisibleChange(bool visible) override;
+    void OnAreaChangedInner() override;
     void OnMountToParentDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -147,17 +148,15 @@ public:
         return isShowPlaceholder_;
     }
 
-    virtual void SearchExtensionElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
-        std::list<Accessibility::AccessibilityElementInfo>& output) override;
-    virtual void SearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
-        std::list<Accessibility::AccessibilityElementInfo>& output) override;
-    virtual void FindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
-        Accessibility::AccessibilityElementInfo& output) override;
-    virtual void FocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
-        Accessibility::AccessibilityElementInfo& output) override;
-    virtual bool TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int64_t offset) override;
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset);
+    void SetModalFlag(bool isModal)
+    {
+        isModal_ = isModal;
+    }
+    void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
+    void OnAccessibilityChildTreeDeregister();
+    void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
+    void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
 
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
@@ -188,11 +187,13 @@ private:
     void OnColorConfigurationUpdate() override;
     void OnModifyDone() override;
     bool CheckConstraint();
+    void LogoutModalUIExtension();
 
     void InitKeyEvent(const RefPtr<FocusHub>& focusHub);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void InitHoverEvent(const RefPtr<InputEventHub>& inputHub);
+    void InitializeAccessibility();
     bool HandleKeyEvent(const KeyEvent& event);
     void HandleFocusEvent();
     void HandleBlurEvent();
@@ -213,6 +214,7 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
     std::shared_ptr<MMI::PointerEvent> lastPointerEvent_ = nullptr;
+    std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_;
 
     std::function<void()> onModalDestroy_;
     std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)> onModalRemoteReadyCallback_;

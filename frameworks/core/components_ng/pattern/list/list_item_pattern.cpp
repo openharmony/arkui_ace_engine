@@ -196,6 +196,19 @@ void ListItemPattern::SetEndNode(const RefPtr<NG::UINode>& endNode)
     }
 }
 
+void ListItemPattern::OnDidPop()
+{
+    if (endNodeIndex_ >= 0 && endNodeIndex_ < childNodeIndex_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto endNode = host->GetChildAtIndex(endNodeIndex_);
+        CHECK_NULL_VOID(endNode);
+        endNode->MovePosition(-1);
+        endNodeIndex_ = host->GetChildIndexById(endNode->GetId());
+        childNodeIndex_--;
+    }
+}
+
 SizeF ListItemPattern::GetContentSize() const
 {
     auto host = GetHost();

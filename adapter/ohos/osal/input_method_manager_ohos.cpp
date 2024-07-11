@@ -103,9 +103,15 @@ void InputMethodManager::ProcessKeyboard(const RefPtr<NG::FrameNode>& curFocusNo
         windowFocus_.reset();
         auto callback = pipeline->GetWindowFocusCallback();
         if (callback) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Trigger Window Focus Callback");
             callback();
-            return;
+        } else {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "No Window Focus Callback");
+            if (!pipeline->NeedSoftKeyboard()) {
+                HideKeyboardAcrossProcesses();
+            }
         }
+        return;
     }
 
     if (curFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||
@@ -141,7 +147,7 @@ bool InputMethodManager::NeedSoftKeyboard() const
         return true;
     }
     auto pattern = currentFocusNode->GetPattern();
-    return pattern->NeedSoftKeyboard();
+    return pattern->NeedSoftKeyboard() && pattern->NeedToRequestKeyboardOnFocus();
 }
 
 void InputMethodManager::CloseKeyboard()
@@ -153,8 +159,10 @@ void InputMethodManager::CloseKeyboard()
     auto textFieldManager = pipeline->GetTextFieldManager();
     CHECK_NULL_VOID(textFieldManager);
     if (!textFieldManager->GetImeShow()) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Ime Not Shown, No need to close keyboard");
         return;
     }
+    textFieldManager->SetNeedToRequestKeyboard(false);
 #if defined(ENABLE_STANDARD_INPUT)
     // If pushpage, close it
     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "PageChange CloseKeyboard FrameNode notNeedSoftKeyboard.");

@@ -387,6 +387,8 @@ void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<C
 #endif
     if (!hrefClipPath_.empty()) {
         OnClipPath(canvas, viewPort);
+    } else if (isRootNode_) {
+        AdjustContentAreaByViewBox(canvas, viewPort);
     }
     if (!transform_.empty() || !animateTransform_.empty()) {
         OnTransform(canvas, viewPort);

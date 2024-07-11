@@ -328,6 +328,11 @@ bool IsAcePerformanceMonitorEnabled()
     return system::GetParameter("const.logsystem.versiontype", "commercial") == "beta" ||
            system::GetBoolParameter("persist.ace.performance.monitor.enabled", false);
 }
+
+bool IsAceCommercialLogEnable()
+{
+    return system::GetParameter("const.logsystem.versiontype", "commercial") == "commercial";
+}
 } // namespace
 
 float ReadDragStartDampingRatio()
@@ -420,6 +425,7 @@ bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
 std::pair<float, float> SystemProperties::brightUpPercent_ = GetPercent();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
 bool SystemProperties::acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
+bool SystemProperties::aceCommercialLogEnable_ = IsAceCommercialLogEnable();
 bool SystemProperties::faultInjectEnabled_  = IsFaultInjectEnabled();
 bool SystemProperties::opincEnabled_ = IsOpIncEnabled();
 float SystemProperties::dragStartDampingRatio_ = ReadDragStartDampingRatio();

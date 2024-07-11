@@ -1201,32 +1201,10 @@ HWTEST_F(TitleBarTestNg, OnWindowSizeChanged001, TestSize.Level1)
     ASSERT_NE(barItemNode, nullptr);
     barItemNode->MountToParent(buttonNode);
     barItemNode->SetIsMoreItemNode(true);
-    frameNode_->SetIsTitleMenuNodeShowing(true);
 
     auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
     ASSERT_NE(titleBarLayoutProperty, nullptr);
     titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
-
-    bool isItemActionFired = false;
-    auto barItemEventHub = barItemNode->GetEventHub<BarItemEventHub>();
-    ASSERT_NE(barItemEventHub, nullptr);
-    barItemEventHub->SetItemAction([&]() { isItemActionFired = true; });
-
-    /**
-     * @tc.steps: step3. call OnWindowSizeChanged func when PrevMenuIsCustom is true
-     * @tc.expected: Set isItemActionFired is true
-     */
-    frameNode_->UpdatePrevMenuIsCustom(true);
-    titleBarPattern_->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::ROTATION);
-    EXPECT_TRUE(isItemActionFired);
-
-    /**
-     * @tc.steps: step4. call OnWindowSizeChanged func when PrevMenuIsCustom is false
-     * @tc.expected: isItemActionFired is true
-     */
-    frameNode_->UpdatePrevMenuIsCustom(false);
-    titleBarPattern_->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::ROTATION);
-    EXPECT_TRUE(isItemActionFired);
 }
 
 /**
@@ -1364,13 +1342,11 @@ HWTEST_F(TitleBarTestNg, OnWindowSizeChanged002, TestSize.Level1)
     titleBarLayoutProperty->propTitleBarParentType_ = TitleBarParentType::NAV_DESTINATION;
     titleBarPattern_->maxMenuNums_ = 0;
     titleBarNode->propPrevMenuIsCustom_ = false;
-    titleBarNode->SetIsTitleMenuNodeShowing(true);
     WindowSizeChangeReason type = WindowSizeChangeReason::DRAG;
 
     EXPECT_EQ(titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR),
         TitleBarParentType::NAV_DESTINATION);
     EXPECT_FALSE(titleBarNode->GetPrevMenuIsCustomValue(false));
-    EXPECT_TRUE(titleBarNode->IsTitleMenuNodeShowing());
     EXPECT_FALSE(type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE);
     ASSERT_EQ(titleBarNode->GetMenu(), nullptr);
     titleBarPattern_->OnWindowSizeChanged(100, 100, type);
@@ -1384,7 +1360,6 @@ HWTEST_F(TitleBarTestNg, OnWindowSizeChanged002, TestSize.Level1)
     EXPECT_EQ(titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR),
         TitleBarParentType::NAV_DESTINATION);
     EXPECT_FALSE(titleBarNode->GetPrevMenuIsCustomValue(false));
-    EXPECT_TRUE(titleBarNode->IsTitleMenuNodeShowing());
     EXPECT_FALSE(type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE);
     ASSERT_NE(titleBarNode->GetMenu(), nullptr);
     titleBarPattern_->OnWindowSizeChanged(100, 100, type);
@@ -1405,7 +1380,6 @@ HWTEST_F(TitleBarTestNg, OnWindowSizeChanged003, TestSize.Level1)
     titleBarLayoutProperty->propTitleBarParentType_ = TitleBarParentType::NAV_DESTINATION;
     titleBarPattern_->maxMenuNums_ = 0;
     titleBarNode->propPrevMenuIsCustom_ = true;
-    titleBarNode->SetIsTitleMenuNodeShowing(true);
     WindowSizeChangeReason type = WindowSizeChangeReason::RESIZE;
     titleBarNode->menu_ = FrameNode::CreateFrameNode("Menu", 101, AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto buttonNode = FrameNode::CreateFrameNode("Button", 201, AceType::MakeRefPtr<ButtonPattern>());
@@ -1415,7 +1389,6 @@ HWTEST_F(TitleBarTestNg, OnWindowSizeChanged003, TestSize.Level1)
     EXPECT_EQ(titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR),
         TitleBarParentType::NAV_DESTINATION);
     EXPECT_TRUE(titleBarNode->GetPrevMenuIsCustomValue(false));
-    EXPECT_TRUE(titleBarNode->IsTitleMenuNodeShowing());
     EXPECT_EQ(type, WindowSizeChangeReason::RESIZE);
     ASSERT_NE(titleBarNode->GetMenu(), nullptr);
     titleBarPattern_->OnWindowSizeChanged(100, 100, type);
@@ -1425,15 +1398,12 @@ HWTEST_F(TitleBarTestNg, OnWindowSizeChanged003, TestSize.Level1)
     EXPECT_EQ(titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR),
         TitleBarParentType::NAV_DESTINATION);
     EXPECT_TRUE(titleBarNode->GetPrevMenuIsCustomValue(false));
-    EXPECT_TRUE(titleBarNode->IsTitleMenuNodeShowing());
     EXPECT_EQ(type, WindowSizeChangeReason::ROTATION);
     titleBarPattern_->OnWindowSizeChanged(100, 100, type);
 
-    titleBarNode->SetIsTitleMenuNodeShowing(false);
     EXPECT_EQ(titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR),
         TitleBarParentType::NAV_DESTINATION);
     EXPECT_TRUE(titleBarNode->GetPrevMenuIsCustomValue(false));
-    EXPECT_FALSE(titleBarNode->IsTitleMenuNodeShowing());
     titleBarPattern_->OnWindowSizeChanged(100, 100, type);
 
     titleBarLayoutProperty->propTitleBarParentType_ = TitleBarParentType::NAVBAR;

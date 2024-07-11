@@ -831,57 +831,71 @@ export class ChipComponent extends ViewPU {
         return c4;
     }
 
-    toVp(v3) {
-        if (v3 === void (0)) {
+    toVp(a4) {
+        if (a4 === void (0)) {
             return Number.NEGATIVE_INFINITY;
         }
-        switch (typeof (v3)) {
+        switch (typeof (a4)) {
             case 'number':
-                return v3;
+                return a4;
             case 'object':
                 try {
-                    if (v3.id !== -1) {
-                        return px2vp(getContext(this).resourceManager.getNumber(v3.id));
+                    if (a4.id !== -1) {
+                        return getContext(this).resourceManager.getNumber(a4.id);
                     }
                     else {
-                        return px2vp(getContext(this)
+                        return getContext(this)
                             .resourceManager
-                            .getNumberByName((v3.params[0]).split('.')[2]));
+                            .getNumberByName((a4.params[0]).split('.')[2]);
                     }
                 }
-                catch (a4) {
-                    return Number.NEGATIVE_INFINITY;
+                catch (b4) {
+                    try {
+                        if (a4.id !== -1) {
+                            return this.parseStringToVp(getContext(this).resourceManager.getStringSync(a4.id));
+                        }
+                        else {
+                            return this.parseStringToVp(getContext(this).resourceManager
+                                .getStringByNameSync((a4.params[0]).split('.')[2]));
+                        }
+                    }
+                    catch (c4) {
+                        return Number.NEGATIVE_INFINITY;
+                    }
                 }
             case 'string':
-                let w3 = new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$", "i");
-                let x3 = v3.match(w3);
-                if (!x3) {
-                    return Number.NEGATIVE_INFINITY;
-                }
-                let y3 = Number(x3?.[1] ?? 0);
-                let z3 = x3?.[2] ?? 'vp';
-                switch (z3.toLowerCase()) {
-                    case 'px':
-                        y3 = px2vp(y3);
-                        break;
-                    case 'fp':
-                        y3 = px2vp(fp2px(y3));
-                        break;
-                    case 'lpx':
-                        y3 = px2vp(lpx2px(y3));
-                        break;
-                    case '%':
-                        y3 = Number.NEGATIVE_INFINITY;
-                        break;
-                    case 'vp':
-                        break;
-                    default:
-                        break;
-                }
-                return y3;
+                return this.parseStringToVp(a4);
             default:
                 return Number.NEGATIVE_INFINITY;
         }
+    }
+    parseStringToVp(v3) {
+        let w3 = new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i');
+        let x3 = v3.match(w3);
+        if (!x3) {
+            return Number.NEGATIVE_INFINITY;
+        }
+        let y3 = Number(x3?.[1] ?? 0);
+        let z3 = x3?.[2] ?? 'vp';
+        switch (z3.toLowerCase()) {
+            case 'px':
+                y3 = px2vp(y3);
+                break;
+            case 'fp':
+                y3 = px2vp(fp2px(y3));
+                break;
+            case 'lpx':
+                y3 = px2vp(lpx2px(y3));
+                break;
+            case '%':
+                y3 = Number.NEGATIVE_INFINITY;
+                break;
+            case 'vp':
+                break;
+            default:
+                break;
+        }
+        return y3;
     }
 
     getLabelMargin() {
@@ -1190,7 +1204,7 @@ export class ChipComponent extends ViewPU {
             return;
         }
         if (this.isHover) {
-            if (i3.type === TouchType.Down || i3.type == TouchType.Move) {
+            if (i3.type === TouchType.Down || i3.type === TouchType.Move) {
                 this.isShowPressedBackGroundColor = true;
             }
             else if (i3.type === TouchType.Up) {
@@ -1201,7 +1215,7 @@ export class ChipComponent extends ViewPU {
             }
         }
         else {
-            if (i3.type === TouchType.Down || i3.type == TouchType.Move) {
+            if (i3.type === TouchType.Down || i3.type === TouchType.Move) {
                 this.isShowPressedBackGroundColor = true;
             }
             else if (i3.type === TouchType.Up) {
@@ -1456,7 +1470,6 @@ export class ChipComponent extends ViewPU {
                     this.observeComponentCreation2((o1, p1) => {
                         Image.create(this.prefixIcon?.src);
                         Image.direction(this.chipDirection);
-                        Image.matchTextDirection(this.chipDirection == Direction.Ltr ? false : true);
                         Image.opacity(this.getChipNodeOpacity());
                         Image.size(this.getPrefixIconSize());
                         Image.fillColor(this.getPrefixIconFilledColor());
@@ -1518,7 +1531,6 @@ export class ChipComponent extends ViewPU {
                     this.observeComponentCreation2((v, w) => {
                         Image.create(this.getSuffixIconSrc());
                         Image.direction(this.chipDirection);
-                        Image.matchTextDirection(this.chipDirection == Direction.Ltr ? false : true);
                         Image.opacity(this.getChipNodeOpacity());
                         Image.size(this.getSuffixIconSize());
                         Image.fillColor(this.getSuffixIconFilledColor());
@@ -1552,7 +1564,7 @@ export class ChipComponent extends ViewPU {
                     }, Image);
                 });
             }
-            else if ((this.allowClose ?? true)) {
+            else if (this.allowClose ?? true) {
                 this.ifElseBranchUpdateFunction(2, () => {
                     this.observeComponentCreation2((q, r) => {
                         SymbolGlyph.create({

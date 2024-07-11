@@ -709,11 +709,13 @@ private:
     void ProcessNavBarReactOnStart();
     float ProcessNavBarReactOnUpdate(float offset);
     void ProcessNavBarReactOnEnd();
-    void InitSpringOffsetProperty(bool useTotalOffset = true);
+    void InitSpringOffsetProperty();
     void InitCurveOffsetProperty();
+    void OnAnimateFinish();
     void StopAnimation(std::shared_ptr<AnimationUtils::Animation> animation);
     void PauseAnimation(std::shared_ptr<AnimationUtils::Animation> animation);
     void InitOption(AnimationOption &option, float duration, const RefPtr<Curve>& curve);
+    float GetScrollDelta(float offset, bool& stopAnimation);
 
     void OnAttachToFrameNode() override;
     void AttachAnimatableProperty(RefPtr<Scrollable> scrollable);
@@ -860,6 +862,8 @@ private:
     float currentVelocity_ = 0.0f;
     float lastPosition_ = 0.0f;
     float finalPosition_ = 0.0f;
+    bool useTotalOffset_ = true;
+    bool animateToTraceFlag_ = false;
     std::optional<float> extraOffset_;
 
     RefPtr<Animator> hotzoneAnimator_;

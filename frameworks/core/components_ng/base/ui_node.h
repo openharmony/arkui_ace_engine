@@ -101,7 +101,7 @@ public:
     void GetCurrentChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
 
     void GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const;
-    void Clean(bool cleanDirectly = false, bool allowTransition = false);
+    void Clean(bool cleanDirectly = false, bool allowTransition = false, int32_t branchId = -1);
     void RemoveChildAtIndex(int32_t index);
     RefPtr<UINode> GetChildAtIndex(int32_t index) const;
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
@@ -403,7 +403,7 @@ public:
     }
 
     // utility function for adding child to disappearingChildren_
-    void AddDisappearingChild(const RefPtr<UINode>& child, uint32_t index = UINT32_MAX);
+    void AddDisappearingChild(const RefPtr<UINode>& child, uint32_t index = UINT32_MAX, int32_t branchId = -1);
     // utility function for removing child from disappearingChildren_, return true if child is removed
     bool RemoveDisappearingChild(const RefPtr<UINode>& child);
     // return if we are in parent's disappearing children
@@ -411,7 +411,7 @@ public:
     {
         return isDisappearing_;
     }
-    RefPtr<UINode> GetDisappearingChildById(const std::string& id) const;
+    RefPtr<UINode> GetDisappearingChildById(const std::string& id, int32_t branchId) const;
 
     // These two interfaces are only used for fast preview.
     // FastPreviewUpdateChild: Replace the old child at the specified slot with the new created node.
@@ -703,6 +703,8 @@ public:
     }
 
     virtual void GetInspectorValue();
+    virtual void NotifyWebPattern(bool isRegister);
+    void GetContainerComponentText(std::string& text);
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
@@ -765,13 +767,13 @@ protected:
     virtual void PaintDebugBoundary(bool flag) {}
 
     PipelineContext* context_ = nullptr;
-
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
 
     std::list<RefPtr<UINode>> children_;
-    std::list<std::pair<RefPtr<UINode>, uint32_t>> disappearingChildren_;
+    // disappearingChild、index、branchId
+    std::list<std::tuple<RefPtr<UINode>, uint32_t, int32_t>> disappearingChildren_;
     std::unique_ptr<PerformanceCheckNode> nodeInfo_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";

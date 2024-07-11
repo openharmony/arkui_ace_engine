@@ -248,7 +248,7 @@ class ContentItemStruct extends ViewPU {
     createIcon(v9 = null) {
         this.observeComponentCreation2((x9, y9) => {
             If.create();
-            if (this.icon != null && this.iconStyle != null) {
+            if (this.icon != null && this.iconStyle != null && ICON_SIZE_MAP.has(this.iconStyle)) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((c10, d10) => {
                         If.create();
@@ -823,14 +823,18 @@ class OperateItemStruct extends ViewPU {
         this.observeComponentCreation2((x5, y5) => {
             Button.createWithChild({ type: ButtonType.Normal });
             Button.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
-            Button.hitTestBehavior(HitTestMode.Block);
+            Button.hitTestBehavior(HitTestMode.Transparent);
             Button.backgroundColor(Color.Transparent);
             Button.height(OPERATEITEM_ICONLIKE_SIZE);
             Button.width(OPERATEITEM_ARROW_WIDTH);
             Button.onFocus(() => {
                 this.parentCanFocus = false;
             });
+            Button.stateEffect(this.arrow?.action !== undefined);
             Button.onTouch((d6) => {
+                if (this.arrow?.action === undefined) {
+                    return;
+                }
                 if (d6.type === TouchType.Down) {
                     this.parentCanTouch = false;
                 }
@@ -838,9 +842,13 @@ class OperateItemStruct extends ViewPU {
                     this.parentCanTouch = true;
                 }
             });
+            Button.hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None);
             Button.onHover((c6) => {
+                if (this.arrow?.action === undefined) {
+                    return;
+                }
                 this.parentCanHover = false;
-                if (c6 && this.parentFrontColor === this.hoveringColor) {
+                if (c6) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
                 if (!c6) {
@@ -980,7 +988,7 @@ class OperateItemStruct extends ViewPU {
     createTextArrow(v3 = null) {
         this.observeComponentCreation2((g4, h4) => {
             Button.createWithChild({ type: ButtonType.Normal });
-            Button.hitTestBehavior(HitTestMode.Block);
+            Button.hitTestBehavior(HitTestMode.Transparent);
             Button.labelStyle({
                 maxLines: TEXT_MAX_LINE
             });
@@ -990,7 +998,11 @@ class OperateItemStruct extends ViewPU {
             Button.onFocus(() => {
                 this.parentCanFocus = false;
             });
+            Button.stateEffect(this.arrow?.action !== undefined);
             Button.onTouch((m4) => {
+                if (this.arrow?.action === undefined) {
+                    return;
+                }
                 if (m4.type === TouchType.Down) {
                     this.parentCanTouch = false;
                 }
@@ -998,9 +1010,13 @@ class OperateItemStruct extends ViewPU {
                     this.parentCanTouch = true;
                 }
             });
+            Button.hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None);
             Button.onHover((l4) => {
+                if (this.arrow?.action === undefined) {
+                    return;
+                }
                 this.parentCanHover = false;
-                if (l4 && this.parentFrontColor === this.hoveringColor) {
+                if (l4) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
                 if (!l4) {
@@ -1444,10 +1460,10 @@ export class ComposeListItem extends ViewPU {
                             if (m1) {
                                 let n1 = new ContentItemStruct(this, {}, undefined, l1, () => { }, { page: "library/src/main/ets/components/composelistitem.ets", line: 725 });
                                 ViewPU.create(n1);
-                                let o1 = () => {
+                                let c = () => {
                                     return {};
                                 };
-                                n1.paramsGenerator_ = o1;
+                                n1.paramsGenerator_ = c;
                             }
                             else {
                                 this.updateStateVarsOfChildByElmtId(l1, {});
@@ -1478,7 +1494,7 @@ export class ComposeListItem extends ViewPU {
                                     leftWidth: this.calculatedLeftWidth()
                                 }, undefined, a1, () => { }, { page: "library/src/main/ets/components/composelistitem.ets", line: 728 });
                                 ViewPU.create(c1);
-                                let d1 = () => {
+                                let b = () => {
                                     return {
                                         icon: this.contentItem?.icon,
                                         iconStyle: this.contentItem?.iconStyle,
@@ -1488,7 +1504,7 @@ export class ComposeListItem extends ViewPU {
                                         leftWidth: this.calculatedLeftWidth()
                                     };
                                 };
-                                c1.paramsGenerator_ = d1;
+                                c1.paramsGenerator_ = b;
                             }
                             else {
                                 this.updateStateVarsOfChildByElmtId(a1, {
@@ -1545,7 +1561,7 @@ export class ComposeListItem extends ViewPU {
                                     rightWidth: this.calculatedRightWidth()
                                 }, undefined, l, () => { }, { page: "library/src/main/ets/components/composelistitem.ets", line: 738 });
                                 ViewPU.create(n);
-                                let o = () => {
+                                let a = () => {
                                     return {
                                         icon: this.operateItem?.icon,
                                         subIcon: this.operateItem?.subIcon,
@@ -1565,7 +1581,7 @@ export class ComposeListItem extends ViewPU {
                                         rightWidth: this.calculatedRightWidth()
                                     };
                                 };
-                                n.paramsGenerator_ = o;
+                                n.paramsGenerator_ = a;
                             }
                             else {
                                 this.updateStateVarsOfChildByElmtId(l, {

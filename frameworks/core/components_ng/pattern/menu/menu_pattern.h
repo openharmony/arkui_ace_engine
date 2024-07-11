@@ -477,7 +477,7 @@ public:
 
     BorderRadiusProperty CalcIdealBorderRadius(const BorderRadiusProperty& borderRadius, const SizeF& menuSize);
 
-    void OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press);
+    void OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover = false);
     
     void BlockFurtherExpand()
     {

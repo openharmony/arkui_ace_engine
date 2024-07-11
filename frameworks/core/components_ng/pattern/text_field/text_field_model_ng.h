@@ -60,7 +60,7 @@ public:
     void SetOnEditChanged(std::function<void(bool)>&& func) override;
     void SetOnSubmit(std::function<void(int32_t)>&& func) override {};
     void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override;
-    void SetOnChange(std::function<void(const std::string&, TextRange&)>&& func) override;
+    void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& func) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     void SetOnSecurityStateChange(std::function<void(bool)>&& func) override;
     void SetOnContentScroll(std::function<void(float, float)>&& func) override;
@@ -69,7 +69,6 @@ public:
     void SetOnPaste(std::function<void(const std::string&)>&& func) override;
     void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func) override;
     void SetCopyOption(CopyOptions copyOption) override;
-    void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems) override;
     static void ProcessDefaultStyleAndBehaviors(const RefPtr<FrameNode>& frameNode);
     void ResetMaxLength() override;
     void SetForegroundColor(const Color& value) override;
@@ -118,7 +117,8 @@ public:
     void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func) override;
     void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) override;
     void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) override;
-    void SetSelectionMenuOptions(const std::vector<MenuOptionsParam>&& menuOptionsItems) override;
+    void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
     void SetEnablePreviewText(bool enablePreviewText) override;
 
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
@@ -173,7 +173,7 @@ public:
     static void SetShowCounter(FrameNode* frameNode, bool value);
     static void SetShowError(FrameNode* frameNode, const std::string& errorText, bool visible);
     static void SetCounterType(FrameNode* frameNode, int32_t value);
-    static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&, TextRange&)>&& func);
+    static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&, PreviewText&)>&& func);
     static void SetOnContentSizeChange(FrameNode* frameNode, std::function<void(float, float)>&& func);
     static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);
     static void SetTextFieldText(FrameNode* frameNode, const std::string& value);

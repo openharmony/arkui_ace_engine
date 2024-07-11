@@ -20,7 +20,7 @@
 #include "securec.h"
 
 #include "core/components/common/properties/paint_state.h"
-#include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
+#include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
 
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
@@ -119,15 +119,13 @@ void CanvasRenderingContext2DModelNG::SetStrokeColor(const Color& color, bool co
 void CanvasRenderingContext2DModelNG::DrawImage(const ImageInfo& imageInfo)
 {
     CHECK_NULL_VOID(pattern_);
-    if (imageInfo.isImage) {
-        pattern_->DrawImage(imageInfo.image, imageInfo.imgWidth, imageInfo.imgHeight);
-        return;
-    }
-    if (imageInfo.isSvg) {
-        pattern_->DrawSvgImage(imageInfo.svgDom, imageInfo.image, imageInfo.imageFit);
-        return;
-    }
-    pattern_->DrawPixelMap(imageInfo.pixelMap, imageInfo.image);
+    pattern_->DrawImage(imageInfo.image, imageInfo.imgWidth, imageInfo.imgHeight);
+}
+
+void CanvasRenderingContext2DModelNG::DrawSvgImage(const ImageInfo& imageInfo)
+{
+    CHECK_NULL_VOID(pattern_);
+    pattern_->DrawSvgImage(imageInfo.svgDom, imageInfo.image, imageInfo.imageFit);
 }
 
 void CanvasRenderingContext2DModelNG::PutImageData(const Ace::ImageData& imageData)

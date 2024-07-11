@@ -68,7 +68,7 @@ void TxtParagraph::CreateBuilder()
     Rosen::TypographyStyle style;
     style.textDirection = Constants::ConvertTxtTextDirection(paraStyle_.direction);
     style.textAlign = Constants::ConvertTxtTextAlign(paraStyle_.align);
-    style.maxLines = paraStyle_.maxLines;
+    style.maxLines = paraStyle_.maxLines == UINT32_MAX ? UINT32_MAX - 1 : paraStyle_.maxLines;
     style.fontSize = paraStyle_.fontSize; // Rosen style.fontSize
     style.ellipsisModal = static_cast<Rosen::EllipsisModal>(paraStyle_.ellipsisMode);
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle_.wordBreak);
@@ -671,7 +671,7 @@ bool TxtParagraph::IsIndexInEmoji(int32_t index, int32_t& emojiStart, int32_t& e
     CHECK_NULL_RETURN(paragrah, false);
     int32_t start = 0;
     int32_t end = 0;
-    if (!GetWordBoundary(index, start, end) || index > end) {
+    if (!GetWordBoundary(index, start, end)) {
         return false;
     }
     std::vector<RectF> selectedRects;

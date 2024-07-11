@@ -539,6 +539,7 @@ public:
     void StopAutoPlay();
     void StartAutoPlay();
     void StopTranslateAnimation();
+    void StopSpringAnimationImmediately();
     void StopSpringAnimation();
     void DumpAdvanceInfo() override;
     int32_t GetLoopIndex(int32_t originalIndex) const;
@@ -710,6 +711,11 @@ public:
         return isTouchDown_;
     }
 
+    bool IsTouchDownOnOverlong() const
+    {
+        return isTouchDownOnOverlong_;
+    }
+
 protected:
     void MarkDirtyNodeSelf();
 
@@ -780,7 +786,7 @@ private:
     float GetDistanceToEdge() const;
     float MainSize() const;
     float GetMainContentSize() const;
-    void FireChangeEvent() const;
+    void FireChangeEvent(int32_t preIndex, int32_t currentIndex) const;
     void FireAnimationStartEvent(int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const;
     void FireAnimationEndEvent(int32_t currentIndex,
         const AnimationCallbackInfo& info, bool isInterrupt = false) const;
@@ -1012,13 +1018,11 @@ private:
 
     std::optional<RefPtr<UINode>> FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode = true) const;
     bool NeedForceMeasure() const;
-    void SetIndicatorChangeIndexStatus(bool withAnimation);
+    void SetIndicatorChangeIndexStatus(bool withAnimation, std::optional<int32_t> startIndex = std::nullopt);
     void SetIndicatorJumpIndex(std::optional<int32_t> jumpIndex);
     bool ParseTabsIsRtl();
 
     void PostIdleTask(const RefPtr<FrameNode>& frameNode);
-
-    void TabContentStateCallBack(int32_t oldIndex, int32_t nextIndex) const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -1074,7 +1078,7 @@ private:
     bool isInit_ = true;
     bool hasVisibleChangeRegistered_ = false;
     bool isVisible_ = true;
-    bool isVisibleArea_ = false;
+    bool isVisibleArea_ = true;
     bool isWindowShow_ = true;
     bool IsCustomSize_ = false;
     bool indicatorIsBoolean_ = true;
@@ -1087,6 +1091,7 @@ private:
      */
     bool childScrolling_ = false;
     bool isTouchDown_ = false;
+    bool isTouchDownOnOverlong_ = false;
     std::optional<bool> preLoop_;
 
     Axis direction_ = Axis::HORIZONTAL;

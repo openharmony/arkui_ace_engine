@@ -1706,5 +1706,61 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_TransitionEffect_SetAnimation"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetContextByNode"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetNavigationId"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetNavDestinationName"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetNavStackLength"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetNavDestinationNameByIndex"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetNavDestinationId"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetNavDestinationState"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetNavDestinationIndex"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetNavDestinationParam"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetRouterPageIndex"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetRouterPageName"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetRouterPagePath"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetRouterPageState"
+    },
+    {
+        "first_introduced": "12",
+        "name": "OH_ArkUI_GetRouterPageId"
     }
 ]

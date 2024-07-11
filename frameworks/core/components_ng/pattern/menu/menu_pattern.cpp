@@ -69,6 +69,7 @@ const RefPtr<InterpolatingSpring> STACK_MENU_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, STACK_MENU_DAMPING);
 const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 280.0f, 30.0f);
+const float MINIMUM_AMPLITUDE_RATION = 0.08f;
 
 constexpr double MOUNT_MENU_FINAL_SCALE = 0.95f;
 constexpr double SEMI_CIRCLE_ANGEL = 90.0f;
@@ -377,27 +378,6 @@ void InnerMenuPattern::OnModifyDone()
     auto uiNode = AceType::DynamicCast<UINode>(host);
     UpdateMenuItemChildren(uiNode);
     SetAccessibilityAction();
-
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto pipeLineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeLineContext);
-    auto menuTheme = pipeLineContext->GetTheme<NG::MenuTheme>();
-    CHECK_NULL_VOID(menuTheme);
-
-    if (!renderContext->HasBorderColor()) {
-        BorderColorProperty borderColorProperty;
-        borderColorProperty.SetColor(menuTheme->GetBorderColor());
-        renderContext->UpdateBorderColor(borderColorProperty);
-    }
-
-    if (!renderContext->HasBorderWidth()) {
-        auto layoutProperty = host->GetLayoutProperty<MenuLayoutProperty>();
-        BorderWidthProperty widthProp;
-        widthProp.SetBorderWidth(menuTheme->GetBorderWidth());
-        layoutProperty->UpdateBorderWidth(widthProp);
-        renderContext->UpdateBorderWidth(widthProp);
-    }
 }
 
 // close menu on touch up
@@ -484,13 +464,7 @@ void MenuPattern::RemoveParentHoverStyle()
     auto menuItemPattern = menuItemParent->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(menuItemPattern);
     menuItemPattern->SetIsSubMenuShowed(false);
-
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    menuItemPattern->SetBgBlendColor(Color::TRANSPARENT);
-    menuItemPattern->PlayBgColorAnimation();
+    menuItemPattern->OnHover(false);
 }
 
 void MenuPattern::UpdateMenuItemChildren(RefPtr<UINode>& host)
@@ -589,25 +563,19 @@ void MenuPattern::UpdateSelectParam(const std::vector<SelectParam>& params)
 
 void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position) const
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    auto expandDisplay = theme->GetExpandDisplay();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto rootMenuPattern = AceType::DynamicCast<MenuPattern>(host->GetPattern());
-    CHECK_NULL_VOID(rootMenuPattern);
-    // copy menu pattern properties to rootMenu
-    auto layoutProperty = rootMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    bool isShowInSubWindow = layoutProperty->GetShowInSubWindowValue(true);
     auto wrapper = GetMenuWrapper();
     CHECK_NULL_VOID(wrapper);
     if (wrapper->GetTag() == V2::SELECT_OVERLAY_ETS_TAG) {
         return;
     }
-    if (((IsContextMenu() || (expandDisplay && isShowInSubWindow))) && (targetTag_ != V2::SELECT_ETS_TAG)) {
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto containerId = pipelineContext->GetInstanceId();
+    bool isShowInSubWindow = containerId >= MIN_SUBCONTAINER_ID;
+    if (isShowInSubWindow) {
         SubwindowManager::GetInstance()->HideMenuNG(wrapper, targetId_);
         return;
     }
@@ -616,7 +584,7 @@ void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position) const
         return;
     }
 
-    auto overlayManager = pipeline->GetOverlayManager();
+    auto overlayManager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->HideMenu(wrapper, targetId_, isMenuOnTouch);
     overlayManager->EraseMenuInfo(targetId_);
@@ -1360,7 +1328,7 @@ void MenuPattern::ShowMenuDisappearAnimation()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto menuContext = host->GetRenderContext();
-
+    MENU_ANIMATION_CURVE->UpdateMinimumAmplitudeRatio(MINIMUM_AMPLITUDE_RATION);
     auto menuPosition = GetEndOffset();
     AnimationOption option = AnimationOption();
     option.SetCurve(MENU_ANIMATION_CURVE);
@@ -1664,7 +1632,7 @@ float MenuPattern::GetSelectMenuWidth()
     return finalWidth;
 }
 
-void MenuPattern::OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press)
+void MenuPattern::OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover)
 {
     CHECK_NULL_VOID(parent);
     if (parent->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
@@ -1699,7 +1667,7 @@ void MenuPattern::OnItemPressed(const RefPtr<UINode>& parent, int32_t index, boo
         auto props = DynamicCast<FrameNode>(nextNode)->GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(props);
         // need save needDivider property due to some items shoud not have divide in not pressed state
-        props->UpdatePress(press);
+        hover ? props->UpdateHover(press) : props->UpdatePress(press);
         nextNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
     if (index > 0) {

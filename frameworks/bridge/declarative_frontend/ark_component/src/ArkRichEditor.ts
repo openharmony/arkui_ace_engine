@@ -31,6 +31,38 @@ class RichEditorEnableDataDetectorModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class RichEditorDataDetectorConfigModifier extends ModifierWithKey<TextDataDetectorConfig> {
+  constructor(value: TextDataDetectorConfig) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('richEditorDataDetectorConfig');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetDataDetectorConfig(node);
+    } else {
+      getUINativeModule().richEditor.setDataDetectorConfig(node, this.value.types, this.value.onDetectResultUpdate);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.types, this.value.types) ||
+    !isBaseOrResourceEqual(this.stageValue.onDetectResultUpdate, this.value.onDetectResultUpdate);
+  }
+}
+
+class RichEditorOnIMEInputCompleteModifier extends ModifierWithKey<(value:RichEditorTextSpanResult) => void> {
+  constructor(value: (value:RichEditorTextSpanResult) => void) {
+    super(value);
+  }
+  static identity = Symbol('richEditorOnIMEInputComplete');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnIMEInputComplete(node);
+    } else {
+      getUINativeModule().richEditor.setOnIMEInputComplete(node, this.value);
+    }
+  }
+}
+
 class RichEditorCopyOptionsModifier extends ModifierWithKey<CopyOptions> {
   constructor(value: CopyOptions) {
     super(value);
@@ -65,6 +97,20 @@ class RichEditorSelectedBackgroundColorModifier extends ModifierWithKey<Resource
   }
 }
 
+class RichEditorOnSelectionChangeModifier extends ModifierWithKey<(value: RichEditorRange) => void> {
+  constructor(value: (value: RichEditorRange) => void) {
+    super(value);
+  }
+  static identity = Symbol('richEditorOnSelectionChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnSelectionChange(node);
+    } else {
+      getUINativeModule().richEditor.setOnSelectionChange(node, this.value);
+    }
+  }
+}
+
 class RichEditorCaretColorModifier extends ModifierWithKey<ResourceColor> {
   constructor(value: ResourceColor) {
     super(value);
@@ -79,6 +125,48 @@ class RichEditorCaretColorModifier extends ModifierWithKey<ResourceColor> {
   }
   checkObjectDiff(): boolean {
     return this.stageValue !== this.value;
+  }
+}
+
+class RichEditorOnSelectModifier extends ModifierWithKey<(value: RichEditorSelection) => void> {
+  constructor(value: (value: RichEditorSelection) => void) {
+    super(value);
+  }
+  static identity = Symbol('richEditorOnSelect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnSelect(node);
+    } else {
+      getUINativeModule().richEditor.setOnSelect(node, this.value);
+    }
+  }
+}
+
+class RichEditorOnSubmitModifier extends ModifierWithKey<SubmitCallback> {
+  constructor(value: SubmitCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('richEditorOnSubmit');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetOnSubmit(node);
+    } else {
+      getUINativeModule().richEditor.setOnSubmit(node, this.value);
+    }
+  }
+}
+
+class RichEditorAboutToIMEInputModifier extends ModifierWithKey<(value: RichEditorInsertValue) => boolean> {
+  constructor(value: (value: RichEditorInsertValue) => boolean) {
+    super(value);
+  }
+  static identity = Symbol('richEditorAboutToIMEInput');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetAboutToIMEInput(node);
+    } else {
+      getUINativeModule().richEditor.setAboutToIMEInput(node, this.value);
+    }
   }
 }
 
@@ -192,8 +280,12 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
     return this;
   }
 
-  dataDetectorConfig(config: any): RichEditorAttribute {
-    throw new Error('Method not implemented.');
+  dataDetectorConfig(config: any): this {
+    let detectorConfig = new TextDataDetectorConfig();
+    detectorConfig.types = config.type;
+    detectorConfig.onDetectResultUpdate = config.onDetectResultUpdate;
+    modifierWithKey(this._modifiersWithKeys, RichEditorDataDetectorConfigModifier.identity, RichEditorDataDetectorConfigModifier, detectorConfig);
+    return this;
   }
 
   copyOptions(value: CopyOptions): RichEditorAttribute {
@@ -221,13 +313,24 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
     return this;
   }
   onSelect(callback: (value: RichEditorSelection) => void): RichEditorAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnSelectModifier.identity, RichEditorOnSelectModifier, callback);
+    return this;
+  }
+  onSubmit(callback: SubmitCallback): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnSubmitModifier.identity, RichEditorOnSubmitModifier, callback);
+    return this;
+  }
+  onSelectionChange(callback: (value: RichEditorRange) => void): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnSelectionChangeModifier.identity, RichEditorOnSelectionChangeModifier, callback);
+    return this;
   }
   aboutToIMEInput(callback: (value: RichEditorInsertValue) => boolean): RichEditorAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, RichEditorAboutToIMEInputModifier.identity, RichEditorAboutToIMEInputModifier, callback);
+    return this;
   }
   onIMEInputComplete(callback: (value: RichEditorTextSpanResult) => void): RichEditorAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, RichEditorOnIMEInputCompleteModifier.identity, RichEditorOnIMEInputCompleteModifier, callback);
+    return this;
   }
   aboutToDelete(callback: (value: RichEditorDeleteValue) => boolean): RichEditorAttribute {
     throw new Error('Method not implemented.');

@@ -97,8 +97,6 @@ public:
     void DeregisterInteractionOperation();
     bool SendAccessibilitySyncEvent(
         const AccessibilityEvent& accessibilityEvent, Accessibility::AccessibilityEventInfo eventInfo);
-    bool SendExtensionAccessibilitySyncEvent(
-        const AccessibilityEvent& accessibilityEvent, const Accessibility::AccessibilityEventInfo& eventInfo);
     bool TransferAccessibilityAsyncEvent(
         const Accessibility::AccessibilityEventInfo& eventInfo,
         int64_t uiExtensionOffset) override;
@@ -369,7 +367,6 @@ private:
     WeakPtr<NG::FrameNode> lastFrameNode_;
     mutable std::mutex childTreeCallbackMapMutex_;
     std::unordered_map<int64_t, std::shared_ptr<AccessibilityChildTreeCallback>> childTreeCallbackMap_;
-    int32_t treeId_ = 0;
     int64_t parentElementId_ = INVALID_PARENT_ID;
     uint32_t parentWindowId_ = 0;
     std::function<void(int32_t&, int32_t&)> getParentRectHandler_;

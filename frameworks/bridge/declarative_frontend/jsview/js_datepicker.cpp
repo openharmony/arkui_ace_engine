@@ -1323,8 +1323,12 @@ void JSTimePicker::Loop(const JSCallbackInfo& info)
     TimePickerModel::GetInstance()->SetWheelModeEnabled(isLoop);
 }
 
-void JSTimePicker::EnableHapticFeedback(bool isEnableHapticFeedback)
+void JSTimePicker::EnableHapticFeedback(const JSCallbackInfo& info)
 {
+    bool isEnableHapticFeedback = true;
+    if (info[0]->IsBoolean()) {
+        isEnableHapticFeedback = info[0]->ToBoolean();
+    }
     TimePickerModel::GetInstance()->SetIsEnableHapticFeedback(isEnableHapticFeedback);
 }
 
@@ -1604,7 +1608,7 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
                           node = targetNode](const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             std::vector<std::string> keys;
-            keys = { "hour", "minute" };
+            keys = { "year", "month", "day", "hour", "minute", "second" };
             ACE_SCORING_EVENT("DatePickerDialog.onChange");
             PipelineContext::SetCallBackNode(node);
             func->Execute(keys, info);
@@ -1712,6 +1716,15 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
     if ((shadowValue->IsObject() || shadowValue->IsNumber()) && JSViewAbstract::ParseShadowProps(shadowValue, shadow)) {
         pickerDialog.shadow = shadow;
     }
+    auto formatValue = paramObject->GetProperty("format");
+    bool showSecond = false;
+    if (formatValue->IsNumber()) {
+        auto displayedFormat = static_cast<TimePickerFormat>(formatValue->ToNumber<int32_t>());
+        if (displayedFormat == TimePickerFormat::HOUR_MINUTE_SECOND) {
+            showSecond = true;
+        }
+    }
+    settingData.showSecond = showSecond;
     TimePickerDialogEvent timePickerDialogEvent { nullptr, nullptr, nullptr, nullptr };
     TimePickerDialogAppearEvent(info, timePickerDialogEvent);
     TimePickerDialogDisappearEvent(info, timePickerDialogEvent);

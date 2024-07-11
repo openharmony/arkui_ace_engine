@@ -589,13 +589,21 @@ void FrontendDelegateDeclarativeNG::GetUIFontConfig(FontConfigJsonInfo& fontConf
     pipelineContextHolder_.Get()->GetUIFontConfig(fontConfigJsonInfo);
 }
 
-double FrontendDelegateDeclarativeNG::MeasureText(const MeasureContext& context)
+double FrontendDelegateDeclarativeNG::MeasureText(MeasureContext context)
 {
+    if (context.isFontSizeUseDefaultUnit && context.fontSize.has_value() &&
+        !AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        context.fontSize = Dimension(context.fontSize->Value(), DimensionUnit::VP);
+    }
     return MeasureUtil::MeasureText(context);
 }
 
-Size FrontendDelegateDeclarativeNG::MeasureTextSize(const MeasureContext& context)
+Size FrontendDelegateDeclarativeNG::MeasureTextSize(MeasureContext context)
 {
+    if (context.isFontSizeUseDefaultUnit && context.fontSize.has_value() &&
+        !AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        context.fontSize = Dimension(context.fontSize->Value(), DimensionUnit::VP);
+    }
     return MeasureUtil::MeasureTextSize(context);
 }
 
