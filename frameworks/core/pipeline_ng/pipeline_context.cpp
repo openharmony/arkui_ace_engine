@@ -844,13 +844,18 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 void PipelineContext::FlushFrameRate()
 {
     frameRateManager_->SetAnimateRate(window_->GetAnimateExpectedRate());
-    bool currAnimationStatus = scheduleTasks_.empty() ? true : false;
-    if (frameRateManager_->IsRateChanged() || currAnimationStatus != lastAnimationStatus_) {
+    int32_t currAnimatorExpectedFrameRate = GetOrCreateUIDisplaySyncManager()->GetAnimatorRate();
+    if (frameRateManager_->IsRateChanged() || currAnimatorExpectedFrameRate != lastAnimatorExpectedFrameRate_) {
         auto [rate, rateType] = frameRateManager_->GetExpectedRate();
-        ACE_SCOPED_TRACE("FlushFrameRate Expected frameRate = %d frameRateType = %d", rate, rateType);
-        window_->FlushFrameRate(rate, currAnimationStatus, rateType);
+        ACE_SCOPED_TRACE("FlushFrameRate Expected frameRate = %d frameRateType = %d "
+            "currAnimatorExpectedFrameRate = %d, lastAnimatorExpectedFrameRate = %d",
+            rate, rateType, currAnimatorExpectedFrameRate, lastAnimatorExpectedFrameRate_);
+        TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "FlushFrameRate Expected frameRate = %{public}d "
+            "frameRateType = %{public}d currAnimatorExpectedFrameRate = %{public}d, lastRate = %{public}d",
+            rate, rateType, currAnimatorExpectedFrameRate, lastAnimatorExpectedFrameRate_);
+        window_->FlushFrameRate(rate, currAnimatorExpectedFrameRate, rateType);
         frameRateManager_->SetIsRateChanged(false);
-        lastAnimationStatus_ = currAnimationStatus;
+        lastAnimatorExpectedFrameRate_ = currAnimatorExpectedFrameRate;
     }
 }
 
