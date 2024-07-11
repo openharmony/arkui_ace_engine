@@ -31,6 +31,10 @@
 #include "core/components_ng/pattern/picker/toss_animation_controller.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
+#include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -80,11 +84,11 @@ enum class DatePickerOptionIndex {
     COLUMN_INDEX_6,
 };
 
-class DatePickerColumnPattern : public LinearLayoutPattern {
+class DatePickerColumnPattern : public LinearLayoutPattern, public PickerColumnPatternUtils<std::string> {
     DECLARE_ACE_TYPE(DatePickerColumnPattern, LinearLayoutPattern);
 
 public:
-    DatePickerColumnPattern() : LinearLayoutPattern(true) {};
+    DatePickerColumnPattern() : LinearLayoutPattern(true), PickerColumnPatternUtils("") {};
 
     ~DatePickerColumnPattern() override = default;
 
@@ -317,6 +321,11 @@ private:
     void HandleDragStart(const GestureEvent& event);
     void HandleDragMove(const GestureEvent& event);
     void HandleDragEnd();
+#ifdef SUPPORT_DIGITAL_CROWN
+    void HandleCrownBeginEvent(const CrownEvent& event) override;
+    void HandleCrownMoveEvent(const CrownEvent& event) override;
+    void HandleCrownEndEvent() override;
+#endif
     void CreateAnimation();
     void CreateAnimation(double from, double to);
     void ScrollOption(double delta, bool isJump = false);
@@ -340,6 +349,7 @@ private:
     Dimension LinearFontSize(const Dimension& startFontSize, const Dimension& endFontSize, double percent);
     void SetAccessibilityAction();
     DimensionRect CalculateHotZone(int32_t index, int32_t midSize, float middleChildHeight, float otherChildHeight);
+    void ToUpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme) override;
     void AddHotZoneRectToText();
     float localDownDistance_ = 0.0f;
     RefPtr<TouchEventImpl> touchListener_;

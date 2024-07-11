@@ -605,7 +605,7 @@ public:
     void SetFocusDisable();
     void SetFocusEnable();
     static const std::string GetFormatString(PickerDateF data);
-
+    void SetDigitalCrownSensitivity(int32_t crownSensitivity);
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -636,6 +636,12 @@ private:
     void FillLunarMonthDaysOptions(const LunarDate& current, RefPtr<FrameNode>& monthDaysColumn);
     void AdjustSolarStartEndDate();
     void AdjustLunarStartEndDate();
+    void ClearFocus();
+    void SetDefaultFocus();
+#ifdef SUPPORT_DIGITAL_CROWN
+    void InitOnCrownEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnCrownEvent(const CrownEvent& event);
+#endif
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
@@ -695,6 +701,7 @@ private:
     bool isForceUpdate_ = false;
     std::optional<std::string> firedDateStr_;
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
+    std::string selectedColumnId_;
 };
 } // namespace OHOS::Ace::NG
 

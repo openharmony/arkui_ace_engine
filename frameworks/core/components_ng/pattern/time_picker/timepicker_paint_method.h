@@ -23,14 +23,18 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
+#include "core/components_ng/pattern/picker_utils/picker_paint_method_utils.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT TimePickerPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(TimePickerPaintMethod, NodePaintMethod)
+class ACE_EXPORT TimePickerPaintMethod : public PickerPaintMethodUtils, public NodePaintMethod {
+    DECLARE_ACE_TYPE(TimePickerPaintMethod, NodePaintMethod);
+
 public:
     TimePickerPaintMethod() = default;
     ~TimePickerPaintMethod() override = default;
+
+    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
     void PaintDisable(RSCanvas& canvas, double X, double Y);

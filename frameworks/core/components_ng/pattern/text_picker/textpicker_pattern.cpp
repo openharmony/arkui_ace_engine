@@ -294,13 +294,68 @@ void TextPickerPattern::GetInnerFocusButtonPaintRect(RoundRect& paintRect)
     paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, radius, radius);
 }
 
+void TextPickerPattern::ClearFocus()
+{
+    if (selectedColumnId_ == INVALID_SELECTED_COLUMN_INDEX) {
+        needSelectedColumnId_ = 0;
+        return;
+    }
+    const auto& frameNodes = GetColumnNodes();
+    auto it = frameNodes.find(selectedColumnId_);
+    if (it != frameNodes.end()) {
+        auto textPickerColumnPattern = it->second->GetPattern<TextPickerColumnPattern>();
+        CHECK_NULL_VOID(textPickerColumnPattern);
+        textPickerColumnPattern->SetSelectedMark(false, false);
+    }
+    needSelectedColumnId_ = selectedColumnId_;
+    selectedColumnId_ = INVALID_SELECTED_COLUMN_INDEX;
+}
+
+void TextPickerPattern::SetDefaultFocus()
+{
+    std::function<void(int32_t& focusId)>  call = [weak = WeakClaim(this)](int32_t& focusId) {
+        LOGD("pickers notify id=%d", focusId);
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->selectedColumnId_ < 0) {
+            pattern->selectedColumnId_ = focusId;
+            return;
+        }
+
+        const auto& frameNodes = pattern->GetColumnNodes();
+        auto it = frameNodes.find(pattern->selectedColumnId_);
+        if (it != frameNodes.end()) {
+            auto textPickerColumnPattern = it->second->GetPattern<TextPickerColumnPattern>();
+            CHECK_NULL_VOID(textPickerColumnPattern);
+            textPickerColumnPattern->SetSelectedMark(false, false);
+            pattern->selectedColumnId_ = focusId;
+        }
+    };
+
+    const auto& frameNodes = GetColumnNodes();
+    int32_t index = 0;
+    for (const auto& it : frameNodes) {
+        CHECK_NULL_VOID(it.second);
+        auto textPickerColumnPattern = it.second->GetPattern<TextPickerColumnPattern>();
+        CHECK_NULL_VOID(textPickerColumnPattern);
+        textPickerColumnPattern->SetSelectedMarkId(index);
+        textPickerColumnPattern->SetSelectedMarkListener(call);
+        if (index == needSelectedColumnId_) {
+            textPickerColumnPattern->SetSelectedMark(true, false);
+            selectedColumnId_ = needSelectedColumnId_;
+        }
+        index++;
+    }
+    needSelectedColumnId_ = INVALID_SELECTED_COLUMN_INDEX;
+}
+
 void TextPickerPattern::OnModifyDone()
 {
     if (isFiredSelectsChange_) {
         isFiredSelectsChange_ = false;
         return;
     }
-
+    ClearFocus();
     OnColumnsBuilding();
     FlushOptions();
     CalculateHeight();
@@ -322,9 +377,92 @@ void TextPickerPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
+#ifdef SUPPORT_DIGITAL_CROWN
+    InitOnCrownEvent(focusHub);
+#endif
     InitDisabled();
     InitFocusEvent();
     InitSelectorProps();
+    SetDefaultFocus();
+}
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void TextPickerPattern::InitOnCrownEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onCrowEvent = [wp = WeakClaim(this)](const CrownEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnCrownEvent(event);
+        }
+        return false;
+    };
+
+    focusHub->SetOnCrownEventInternal(std::move(onCrowEvent));
+}
+
+bool TextPickerPattern::OnCrownEvent(const CrownEvent& event)
+{
+    if (event.action == OHOS::Ace::CrownAction::BEGIN ||
+        event.action == OHOS::Ace::CrownAction::UPDATE ||
+        event.action == OHOS::Ace::CrownAction::END) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto focusHub = host->GetFocusHub();
+        CHECK_NULL_RETURN(focusHub, false);
+
+        RefPtr<TextPickerColumnPattern> crownPickerColumnPattern;
+        auto&& children = host->GetChildren();
+        for (const auto& child : children) {
+            auto stackNode = DynamicCast<FrameNode>(child);
+            if (!stackNode) {
+                continue;
+            }
+            auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+            if (!blendNode) {
+                continue;
+            }
+            auto childNode = DynamicCast<FrameNode>(blendNode->GetLastChild());
+            if (!childNode) {
+                continue;
+            }
+            auto pickerColumnPattern = childNode->GetPattern<TextPickerColumnPattern>();
+            if (!pickerColumnPattern) {
+                continue;
+            }
+            auto columnID =  pickerColumnPattern->GetselectedColumnId();
+            LOGD("columnID=%{public}d, selectedColumnId_=%{public}d, IsCrownEventEnded=%{public}d",
+                columnID, selectedColumnId_, static_cast<int>(pickerColumnPattern->IsCrownEventEnded()));
+            if (!pickerColumnPattern->IsCrownEventEnded()) {
+                crownPickerColumnPattern = pickerColumnPattern;
+                break;
+            } else if (columnID == selectedColumnId_) {
+                crownPickerColumnPattern= pickerColumnPattern;
+            }
+        }
+        if (crownPickerColumnPattern != nullptr) {
+            return crownPickerColumnPattern->OnCrownEvent(event);
+        }
+    }
+    return false;
+}
+#endif
+
+void TextPickerPattern::SetDigitalCrownSensitivity(int32_t crownSensitivity)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto&& children = host->GetChildren();
+    for (const auto& child : children) {
+        auto stackNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(stackNode);
+        auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(blendNode);
+        auto childNode = DynamicCast<FrameNode>(blendNode->GetLastChild());
+        CHECK_NULL_VOID(childNode);
+        auto pickerColumnPattern = childNode->GetPattern<TextPickerColumnPattern>();
+        CHECK_NULL_VOID(pickerColumnPattern);
+        pickerColumnPattern->SetDigitalCrownSensitivity(crownSensitivity);
+    }
 }
 
 void TextPickerPattern::SetEventCallback(EventCallback&& value)
