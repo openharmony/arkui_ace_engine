@@ -2489,7 +2489,7 @@ bool RichEditorPattern::HandleUserGestureEvent(
 
 void RichEditorPattern::HandleOnlyImageSelected(const Offset& globalOffset, bool isFingerSelected)
 {
-    if (IsSelected() && (!isFingerSelected || IsHandlesShow())) {
+    if (IsSelected() && (!isFingerSelected || selectOverlay_->IsBothHandlesShow())) {
         return;
     }
     auto textRect = GetTextRect();
@@ -2510,7 +2510,7 @@ void RichEditorPattern::HandleOnlyImageSelected(const Offset& globalOffset, bool
         isOnlyImageDrag_ = true;
         showSelect_ = false;
         CalculateHandleOffsetAndShowOverlay();
-        if (IsHandlesShow()) {
+        if (selectOverlay_->IsBothHandlesShow()) {
             TextPattern::CloseSelectOverlay(false);
         }
     }
@@ -6090,9 +6090,6 @@ void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
     UseHostToUpdateTextFieldManager();
     MoveCaretAndStartFocus(textOffset);
     CalcCaretInfoByClick(info.GetLocalLocation());
-    if (IsShowHandle()) {
-        CloseSelectOverlay();
-    }
 }
 
 void RichEditorPattern::HandleMouseLeftButtonRelease(const MouseInfo& info)
@@ -6261,6 +6258,10 @@ void RichEditorPattern::HandleMouseEvent(const MouseInfo& info)
     auto frameId = tmpHost->GetId();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    if (selectOverlay_->IsHandleShow()) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Close selectOverlay when handle is showing");
+        CloseSelectOverlay();
+    }
     auto scrollBar = GetScrollBar();
     if (scrollBar && (scrollBar->IsHover() || scrollBar->IsPressed())) {
         pipeline->SetMouseStyleHoldNode(frameId);
@@ -6594,7 +6595,7 @@ void RichEditorPattern::ShowHandles()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (!selectOverlay_->IsHandlesShow() && !selectOverlay_->SelectOverlayIsCreating()) {
+    if (!selectOverlay_->IsBothHandlesShow() && !selectOverlay_->SelectOverlayIsCreating()) {
         showSelect_ = true;
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         selectOverlay_->ProcessOverlay({.animation = false});
@@ -6689,7 +6690,7 @@ bool RichEditorPattern::IsSingleHandle()
 
 bool RichEditorPattern::IsHandlesShow()
 {
-    return selectOverlay_->IsHandlesShow();
+    return selectOverlay_->IsBothHandlesShow();
 }
 
 void RichEditorPattern::ResetSelection()
