@@ -2294,9 +2294,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     TouchTestResult& responseLinkResult, bool isDispatch)
 {
     if (!isActive_ || !eventHub_->IsEnabled()) {
-        if (SystemProperties::GetDebugEnabled()) {
-            TAG_LOGD(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test", GetTag().c_str());
-        }
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test", GetTag().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
     auto& translateIds = NGGestureRecognizer::GetGlobalTransIds();
