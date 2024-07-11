@@ -23,7 +23,7 @@ var __decorate = this && this.__decorate || function(e, t, o, i) {
 };
 const KeyCode = requireNapi("multimodalInput.keyCode").KeyCode;
 const MeasureText = requireNapi("measure");
-const PUBLIC_MORE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAOxAAADsQBlSsOGwAABEZJREFUeNrt3D1rFFEUBuAxhmAhFlYpUohYiYWFRcAmKAhWK2pjo1iKf8BCMIKFf8BarCyMhVj4VZhGSKEg2FqJyCKWIhYWnstMINgYsh+cmfs88BICydxw7jmzu2HvNg0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADBN+3r6dx+LXIqsRpa7FF8j48hm5Fn3Peo9mAEYRdYjJ3f582Vj7nZfUe/eDsCRyMPI2h5/fyNyI/JDT6v3Tvt7sBllE15ETkxwjeORi5G3ke/6W737MgBnI68jh6ZwrcORq5HnhkC9+zAA5YXXy8jBKV5zKXIu8jjyS7+rd+YBeNVtyrSVO9PRyBM9r94LSTfjWuTUDK9/eYIXeENUbb0zDsBi5PYc1rmj79U74wCszuih+F/ljrSi/+uud8YBGA10rayqrnfGAVgb6FpZVV3vjAOwPNC1sqq63hkHYGWga2VVdb0XKt/8Rf1fd70zDsB4jmt5u3Tl9a59AMb6v+56ZxyArYGulVXV9c44ABtzXOup/q+73hkH4N2cHio/Rj7r/7rrnXEAfkfuz2Gddb2v3ln/DfpgxneLzaY9xE3l9c46AH8iVyI/Z3Dt8nB/Xc+rd5H5QMy3yJemPVs6zY0edc9HUe/0Z4I/dQ/N5Vjd0oTXKp9QcKFpD2qj3r0YgO1NeRM507TH6/bifeR85IMeV++d+vTBWOV9JDcjt5rdv6uw3M3uRR7pa/Xu+wBsOxA53bTnTP/3UX1b3fNQ1BsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKqyr6d/97HIpchqZLlL8TUyjmxGnnXfo96DGYBRZD1ycpc/XzbmbvcV9e7tAByJPIys7fH3NyI3Ij/0tHrvtL8Hm1E24UXkxATXOB65GHkb+a6/1bsvA3A28jpyaArXOhy5GnluCNS7DwNQXni9jByc4jWXIucijyO/9Lt6Zx6AV92mTFu5Mx2NPNHz6r2QdDOuRU7N8PqXJ3iBN0TV1jvjACxGbs9hnTv6Xr0zDsDqjB6K/1XuSCv6v+56ZxyA0UDXyqrqemccgLWBrpVV1fXOOADLA10rq6rrnXEAVga6VlZV13uh8s1f1P911zvjAIznuJa3S1de79oHYKz/6653xgHYGuhaWVVd74wDsDHHtZ7q/7rrnXEA3s3pofJj5LP+r7veGQfgd+T+HNZZ1/vqnfXfoA9mfLfYbNpD3FRe76wD8CdyJfJzBtcuD/fX9bx6F5kPxHyLfGnas6XT3OhR93wU9U5/JvhT99BcjtUtTXit8gkFF5r2oDbq3YsB2N6UN5EzTXu8bi/eR85HPuhx9d6pTx+MVd5HcjNyq9n9uwrL3exe5JG+Vu++D8C2A5HTTXvO9H8f1bfVPQ9FvQEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgCn7C9HjBtwWfXpKAAAAAElFTkSuQmCC";
+const PUBLIC_MORE = { "id": -1, "type": 20000, params: ['sys.media.ohos_ic_public_more'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
 export class TabTitleBar extends ViewPU {
   constructor(e, t, o, i = -1) {
     super(e, o, i);
@@ -84,6 +84,7 @@ export class TabTitleBar extends ViewPU {
     this.observeComponentCreation(((e, t) => {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
       Column.create();
+      Column.blendMode(BlendMode.DST_OUT);
       Column.width(TabTitleBar.gradientMaskWidth);
       Column.height(TabTitleBar.totalHeight);
       t || Column.pop();
@@ -172,6 +173,7 @@ export class TabTitleBar extends ViewPU {
       Stack.create({
         alignContent: Alignment.End
       });
+      Stack.blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN)
       t || Stack.pop();
       ViewStackProcessor.StopGetAccessRecording()
     }));
@@ -583,6 +585,13 @@ class CollapsibleMenuSection extends ViewPU {
           Image.create(PUBLIC_MORE);
           Image.width(ImageMenuItem.imageSize);
           Image.height(ImageMenuItem.imageSize);
+          Image.fillColor({
+            'id': -1,
+            'type': 10001,
+            params: ['sys.color.icon_primary'],
+            'bundleName': '__harDefaultBundleName__',
+            'moduleName': '__harDefaultModuleName__'
+          });
           Image.focusable(!0);
           t || Image.pop();
           ViewStackProcessor.StopGetAccessRecording()
