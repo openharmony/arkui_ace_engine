@@ -491,7 +491,7 @@ class UIContext {
             __JSScopeUtil__.restoreInstanceId();
             return null;
         }
-        let xNode = globalThis.requireNapi('arkui.node');
+        let xNode = globalThis.__getArkUINode__();
         let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
         if (!node) {
             node = xNode.FrameNodeUtils.createFrameNode(this, nodePtr);
@@ -503,7 +503,7 @@ class UIContext {
     getFrameNodeByNodeId(id) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let nodePtr = getUINativeModule().getFrameNodeById(id);
-        let xNode = globalThis.requireNapi('arkui.node');
+        let xNode = globalThis.__getArkUINode__();
         let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
         if (!node) {
             node = xNode.FrameNodeUtils.createFrameNode(this, nodePtr);
@@ -519,7 +519,7 @@ class UIContext {
             __JSScopeUtil__.restoreInstanceId();
             return null;
         }
-        let xNode = globalThis.requireNapi('arkui.node');
+        let xNode = globalThis.__getArkUINode__();
         let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
         if (!node) {
             node = xNode.FrameNodeUtils.createFrameNode(this, nodePtr);
@@ -1093,3 +1093,12 @@ function __checkRegexValid__(pattern) {
         return result;
     }
 }
+
+function __getArkUINode__() {
+    if(globalThis.__XNode__ === undefined) {
+        globalThis.__XNode__ = globalThis.requireNapi('arkui.node');
+    }
+    return globalThis.__XNode__;
+}
+
+globalThis.__getArkUINode__ = __getArkUINode__;
