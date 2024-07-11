@@ -90,6 +90,7 @@ const std::string OH_DEFAULT_COPY = "OH_DEFAULT_COPY";
 const std::string OH_DEFAULT_PASTE = "OH_DEFAULT_PASTE";
 const std::string OH_DEFAULT_SELECT_ALL = "OH_DEFAULT_SELECT_ALL";
 const std::string OH_DEFAULT_CAMERA_INPUT = "OH_DEFAULT_CAMERA_INPUT";
+const std::string OH_DEFAULT_COLLABORATION_SERVICE = "OH_DEFAULT_COLLABORATION_SERVICE";
 
 void SetResponseRegion(RefPtr<FrameNode>& node)
 {
@@ -1711,6 +1712,21 @@ void SelectOverlayNode::LandscapeMenuAddMenuOptions(const std::vector<MenuOption
         }
         button->MountToParent(selectMenuInner_);
     }
+}
+
+std::pair<std::vector<MenuOptionsParam>, bool> SelectOverlayNode::HandleCollaborationMenuItem(
+    const std::vector<MenuOptionsParam>& params)
+{
+    std::vector<MenuOptionsParam> newParams;
+    bool needCollaboration = false;
+    for (const auto& item : params) {
+        if (item.id == OH_DEFAULT_COLLABORATION_SERVICE) {
+            needCollaboration = true;
+            continue;
+        }
+        newParams.push_back(item);
+    }
+    return { newParams, needCollaboration };
 }
 
 RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<SelectOverlayInfo>& info)
