@@ -2269,7 +2269,12 @@ void TextFieldPattern::DoProcessAutoFill()
 {
     bool isPopup = false;
     auto isSuccess = ProcessAutoFill(isPopup);
-    if (!isPopup && isSuccess) {
+    auto context = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(context);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    auto isImeShow = textFieldManager && textFieldManager->GetImeShow();
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "isImeShow:%{public}d", isImeShow);
+    if (!isPopup && isSuccess && !isImeShow) {
         needToRequestKeyboardInner_ = false;
     } else if (RequestKeyboard(false, true, true)) {
         NotifyOnEditChanged(true);
@@ -4686,6 +4691,10 @@ void TextFieldPattern::RequestKeyboardOnFocus()
         if (textFieldManager && !textFieldManager->GetNeedToRequestKeyboard()) {
             // already call close keyboard after text field get focus, so dont request keyboard now
             TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Already call close before attach, no need to request");
+            return;
+        }
+        if (!textField->needToRequestKeyboardInner_) {
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Not need to requestKeyboard inner");
             return;
         }
         if (!textField->RequestKeyboard(false, true, true)) {
