@@ -50,7 +50,7 @@ std::optional<SelectHandleInfo> TextSelectOverlay::GetFirstHandleInfo()
     handleInfo.paintRect = textPattern->GetTextSelector().firstHandle;
     handleInfo.isShow = CheckAndAdjustHandle(handleInfo.paintRect);
 
-    auto localPaintRect = handleInfo.paintRect;
+    auto localPaintRect = textPattern->GetTextSelector().firstHandle;
     localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
     handleInfo.localPaintRect = localPaintRect;
     SetTransformPaintInfo(handleInfo, localPaintRect);
@@ -65,7 +65,7 @@ std::optional<SelectHandleInfo> TextSelectOverlay::GetSecondHandleInfo()
     handleInfo.paintRect = textPattern->GetTextSelector().secondHandle;
     handleInfo.isShow = CheckAndAdjustHandle(handleInfo.paintRect);
 
-    auto localPaintRect = handleInfo.paintRect;
+    auto localPaintRect = textPattern->GetTextSelector().secondHandle;
     localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
     handleInfo.localPaintRect = localPaintRect;
     SetTransformPaintInfo(handleInfo, localPaintRect);
