@@ -22,7 +22,7 @@
 #include <regex>
 #include <string>
 #include <utility>
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -1324,7 +1324,7 @@ void TextFieldPattern::HandleBlurEvent()
     ClearFocusStyle();
     RemoveIsFocusActiveUpdateEvent();
     isCursorAlwaysDisplayed_ = false;
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     if (UiSessionManager::GetInstance().GetSearchEventRegistered()) {
         auto data = JsonUtil::Create();
         data->Put("event", "onTextSearch");
@@ -1333,6 +1333,7 @@ void TextFieldPattern::HandleBlurEvent()
         data->Put("inputType", static_cast<int16_t>(GetKeyboard()));
         data->Put("text", GetTextValue().data());
         data->Put("position", host->GetGeometryNode()->GetFrameRect().ToString().data());
+        // report all use textfield component unfocus event,more than just the search box
         UiSessionManager::GetInstance().ReportSearchEvent(data->ToString());
     }
 #endif

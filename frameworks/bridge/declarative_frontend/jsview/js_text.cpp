@@ -19,7 +19,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
@@ -619,7 +619,7 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
             ACE_SCORING_EVENT("Text.onClick");
             PipelineContext::SetCallBackNode(node);
             func->Execute(*clickInfo);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             std::string label = "";
             if (!node.Invalid()) {
                 auto pattern = node.GetRawPtr()->GetPattern();
