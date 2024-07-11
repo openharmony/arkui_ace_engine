@@ -22,6 +22,9 @@
 #include <regex>
 #include <string>
 #include <utility>
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -1321,6 +1324,18 @@ void TextFieldPattern::HandleBlurEvent()
     ClearFocusStyle();
     RemoveIsFocusActiveUpdateEvent();
     isCursorAlwaysDisplayed_ = false;
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+    if (UiSessionManager::GetInstance().GetSearchEventRegistered()) {
+        auto data = JsonUtil::Create();
+        data->Put("event", "onTextSearch");
+        data->Put("id", host->GetId());
+        data->Put("$type", host->GetTag().data());
+        data->Put("inputType", static_cast<int16_t>(GetKeyboard()));
+        data->Put("text", GetTextValue().data());
+        data->Put("position", host->GetGeometryNode()->GetFrameRect().ToString().data());
+        UiSessionManager::GetInstance().ReportSearchEvent(data->ToString());
+    }
+#endif
 }
 
 bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)

@@ -704,6 +704,7 @@ public:
 
     virtual void GetInspectorValue();
     virtual void NotifyWebPattern(bool isRegister);
+    void GetContainerComponentText(std::string& text);
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()

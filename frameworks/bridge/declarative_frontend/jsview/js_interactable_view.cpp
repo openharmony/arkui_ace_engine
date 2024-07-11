@@ -407,9 +407,14 @@ void JSInteractableView::ReportClickEvent(const WeakPtr<NG::FrameNode>& node, co
     if (UiSessionManager::GetInstance().GetClickEventRegistered()) {
         auto data = JsonUtil::Create();
         data->Put("event", "onClick");
+        std::string content = text;
         if (!node.Invalid()) {
             data->Put("id", node.GetRawPtr()->GetId());
-            data->Put("text", text.data());
+            auto children = node.GetRawPtr()->GetChildren();
+            if (!children.empty()) {
+                node.GetRawPtr()->GetContainerComponentText(content);
+            }
+            data->Put("text", content.data());
             data->Put("position", node.GetRawPtr()->GetGeometryNode()->GetFrameRect().ToString().data());
         }
         UiSessionManager::GetInstance().ReportClickEvent(data->ToString());
