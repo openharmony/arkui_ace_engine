@@ -239,6 +239,13 @@ if (!defined(global_parts_info) ||
   form_fwk_enable = false
 }
 
+if (defined(global_parts_info) &&
+    defined(global_parts_info.hiviewdfx_hicollie)) {
+  uiservice_xcollie_enable = true
+} else {
+  uiservice_xcollie_enable = false
+}
+
 ace_platforms = []
 
 _ace_adapter_dir = rebase_path("$ace_root/adapter", root_build_dir)
