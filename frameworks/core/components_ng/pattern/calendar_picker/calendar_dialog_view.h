@@ -88,8 +88,6 @@ private:
     static void CreateChildNode(const RefPtr<FrameNode>& contentColumn,
         const RefPtr<FrameNode>& dialogNode, const DialogProperties& dialogProperties);
     static void InitCalendarProperty(const RefPtr<FrameNode>& calendarNode);
-    static std::function<void()> CloseDiaglogEvent(const RefPtr<FrameNode>& frameNode,
-        const RefPtr<FrameNode>& dialogNode);
 };
 } // namespace OHOS::Ace::NG
 
