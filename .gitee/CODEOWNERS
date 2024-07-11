@@ -1,4 +1,7 @@
 # Code owners for ArkUI ace_engine
+[Config Files]
+.clang-format @arkui_architecture
+
 [OpenHarmony adapter]
 adapter/ohos/ @sunfei2021
 adapter/ohos/sa_profile/ @lushi1202
