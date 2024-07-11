@@ -6004,6 +6004,23 @@ void SetTransition(ArkUINodeHandle node, ArkUITransitionEffectOption* option)
     ViewAbstract::SetChainedTransition(frameNode, transitionEffectOption);
 }
 
+void SetDragPreview(ArkUINodeHandle node, ArkUIDragPreview dragPreview)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::DragDropInfo dragPreviewInfo;
+    dragPreviewInfo.inspectorId = dragPreview.inspectorId;
+    ViewAbstract::SetDragPreview(frameNode, dragPreviewInfo);
+}
+
+void ResetDragPreview(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::DragDropInfo dragPreviewInfo;
+    ViewAbstract::SetDragPreview(frameNode, dragPreviewInfo);
+}
+
 void GetExpandSafeArea(ArkUINodeHandle node, ArkUI_Uint32 (*values)[2])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -6117,7 +6134,8 @@ const ArkUICommonModifier* GetCommonModifier()
         SetAccessibilityValue, GetAccessibilityValue, ResetAccessibilityValue, SetAccessibilityActions,
         ResetAccessibilityActions, GetAccessibilityActions, SetAccessibilityRole, ResetAccessibilityRole,
         GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
-        SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition };
+        SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition, SetDragPreview,
+        ResetDragPreview };
 
     return &modifier;
 }

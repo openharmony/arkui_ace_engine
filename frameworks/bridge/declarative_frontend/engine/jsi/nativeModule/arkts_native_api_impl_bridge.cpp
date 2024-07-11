@@ -763,6 +763,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetDragPreviewOptions));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDragPreviewOptions"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetDragPreviewOptions));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDragPreview"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetDragPreview));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDragPreview"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetDragPreview));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setResponseRegion"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetResponseRegion));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetResponseRegion"),
