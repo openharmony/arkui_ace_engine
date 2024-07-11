@@ -6155,17 +6155,16 @@ Local<panda::ObjectRef> CommonBridge::CreateCommonGestureEventInfo(EcmaVM* vm, G
         panda::NumberRef::New(vm, info.GetVelocity().GetVelocityValue() / density),
         panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
-    if (info.GetTiltX().has_value()) {
-        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
-            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltX().value())));
-    }
-    if (info.GetTiltY().has_value()) {
-        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"),
-            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltY().value())));
-    }
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltX().value_or(0.0f))));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltY().value_or(0.0f))));
     auto fingerArr = CreateFingerListArray(vm, info);
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "fingerList"), fingerArr);
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "target"), FrameNodeBridge::CreateEventTargetObject(vm, info));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "axisVertical"), panda::NumberRef::New(vm, info.GetVerticalAxis()));
+    obj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "axisHorizontal"), panda::NumberRef::New(vm, info.GetHorizontalAxis()));
     obj->SetNativePointerFieldCount(vm, 1);
     obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
     return obj;
