@@ -1473,8 +1473,7 @@ bool JsiDeclarativeEngine::UpdateRootComponent()
 {
     if (!JsiDeclarativeEngine::obj_.IsEmpty()) {
         LOGI("update rootComponent start");
-        Framework::UpdateRootComponent(reinterpret_cast<NativeEngine*>(runtime_)->GetEcmaVm(),
-                                       JsiDeclarativeEngine::obj_.ToLocal());
+        Framework::UpdateRootComponent(obj_.GetEcmaVM(), JsiDeclarativeEngine::obj_.ToLocal());
         // Clear the global object to avoid load this obj next time
         JsiDeclarativeEngine::obj_.FreeGlobalHandleAddr();
         JsiDeclarativeEngine::obj_.Empty();
