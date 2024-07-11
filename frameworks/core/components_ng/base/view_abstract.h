@@ -266,6 +266,7 @@ public:
     static void SetOnTouch(TouchEventFunc &&touchEventFunc);
     static void SetOnMouse(OnMouseEventFunc &&onMouseEventFunc);
     static void SetOnHover(OnHoverFunc &&onHoverEventFunc);
+    static void SetOnAccessibilityHover(OnAccessibilityHoverFunc &&onAccessibilityHoverEventFunc);
     static void SetHoverEffect(HoverEffectType hoverEffect);
     static void SetHoverEffectAuto(HoverEffectType hoverEffect);
     static void SetEnabled(bool enabled);
@@ -376,6 +377,7 @@ public:
     static void DisableOnTouch();
     static void DisableOnKeyEvent();
     static void DisableOnHover();
+    static void DisableOnAccessibilityHover();
     static void DisableOnMouse();
     static void DisableOnAppear();
     static void DisableOnDisAppear();
