@@ -107,6 +107,11 @@ void TextPickerModelNG::Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnK
     }
     stack->Push(textPickerNode);
     options_.clear();
+
+    if (pickerTheme->IsCircleDial()) {
+        auto renderContext = textPickerNode->GetRenderContext();
+        renderContext->UpdateBackgroundColor(pickerTheme->GetBackgroundColor());
+    }
 }
 
 void TextPickerModelNG::SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme)
@@ -135,8 +140,12 @@ void TextPickerModelNG::SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTh
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Weight, normalStyle.GetFontWeight());
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontFamily, normalStyle.GetFontFamilies());
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontStyle, normalStyle.GetFontStyle());
-
+#ifdef SUPPORT_DIGITAL_CROWN
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, CanLoop, false);
+#else
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, CanLoop, true);
+#endif
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DigitalCrownSensitivity, DEFAULT_CROWNSENSITIVITY);
 }
 
 RefPtr<FrameNode> TextPickerModelNG::CreateColumnNode(uint32_t columnKind, uint32_t showCount)
@@ -277,6 +286,16 @@ void TextPickerModelNG::SetCanLoop(const bool value)
     CHECK_NULL_VOID(textPickerPattern);
     textPickerPattern->SetCanLoop(value);
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, CanLoop, value);
+}
+
+void TextPickerModelNG::SetDigitalCrownSensitivity(int32_t crownSensitivity)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetDigitalCrownSensitivity(crownSensitivity);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DigitalCrownSensitivity, crownSensitivity, frameNode);
 }
 
 void TextPickerModelNG::SetBackgroundColor(const Color& color)
@@ -476,6 +495,11 @@ void TextPickerModelNG::MultiInit(const RefPtr<PickerTheme> pickerTheme)
     showCount_ = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     stack->Push(textPickerNode);
     rangeValue_.clear();
+
+    if (pickerTheme->IsCircleDial()) {
+        auto renderContext = textPickerNode->GetRenderContext();
+        renderContext->UpdateBackgroundColor(pickerTheme->GetBackgroundColor());
+    }
 }
 
 void TextPickerModelNG::SetIsCascade(bool isCascade)
@@ -763,6 +787,14 @@ int32_t TextPickerModelNG::GetCanLoop(FrameNode* frameNode)
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_RETURN(textPickerPattern, 1);
     return textPickerPattern->GetCanLoop();
+}
+
+void TextPickerModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity)
+{
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetDigitalCrownSensitivity(crownSensitivity);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DigitalCrownSensitivity, crownSensitivity, frameNode);
 }
 
 void TextPickerModelNG::SetSelecteds(FrameNode* frameNode, const std::vector<uint32_t>& values)
@@ -1079,6 +1111,8 @@ void TextPickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontStyle, normalStyle.GetFontStyle(), frameNode);
 
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, CanLoop, true, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DigitalCrownSensitivity, DEFAULT_CROWNSENSITIVITY,
+        frameNode);
 }
 
 std::string TextPickerModelNG::getTextPickerValue(FrameNode* frameNode)

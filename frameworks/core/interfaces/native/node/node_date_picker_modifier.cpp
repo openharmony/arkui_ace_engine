@@ -390,6 +390,21 @@ void ResetSelectedDate(ArkUINodeHandle node)
 
     DatePickerModelNG::SetSelectedDate(frameNode, pickerDate);
 }
+
+void SetDatePickerDigitalCrownSensitivity(ArkUINodeHandle node, int32_t CrownSensitivity)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetDigitalCrownSensitivity(frameNode, CrownSensitivity);
+}
+
+void ResetDatePickerDigitalCrownSensitivity(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetDigitalCrownSensitivity(frameNode, DEFAULT_CROWNSENSITIVITY);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -400,8 +415,7 @@ const ArkUIDatePickerModifier* GetDatePickerModifier()
         GetDisappearTextStyle, SetDisappearTextStyle, ResetDisappearTextStyle, GetLunar, SetLunar, ResetLunar,
         GetStartDate, SetStartDate, ResetStartDate, GetEndDate, SetEndDate, ResetEndDate, GetSelectedDate,
         SetSelectedDate, ResetSelectedDate, GetDatePickerBackgroundColor, SetDatePickerBackgroundColor,
-        ResetDatePickerBackgroundColor };
-
+        ResetDatePickerBackgroundColor, SetDatePickerDigitalCrownSensitivity, ResetDatePickerDigitalCrownSensitivity };
     return &modifier;
 }
 

@@ -2611,6 +2611,8 @@ struct ArkUITimepickerModifier {
     void (*setTimepickerDateTimeOptions)(
         ArkUINodeHandle node, ArkUI_Int32 hourType, ArkUI_Int32 minuteType, ArkUI_Int32 secondType);
     void (*resetTimepickerDateTimeOptions)(ArkUINodeHandle node);
+    void (*setTimePickerDigitalCrownSensitivity)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetTimePickerDigitalCrownSensitivity)(ArkUINodeHandle node);
 };
 
 struct ArkUIVideoModifier {
@@ -4156,6 +4158,8 @@ struct ArkUITextPickerModifier {
     ArkUI_Int32 (*getTextPickerCanLoop)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextPickerDefaultPickerItemHeight)(ArkUINodeHandle node, ArkUI_Int32 dUnit);
     void (*resetTextPickerDividerNull)(ArkUINodeHandle node);
+    void (*setTextPickerDigitalCrownSensitivity)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetTextPickerDigitalCrownSensitivity)(ArkUINodeHandle node);
 };
 
 struct ArkUITextTimerModifier {
@@ -4275,6 +4279,8 @@ struct ArkUIDatePickerModifier {
     ArkUI_Uint32 (*getDatePickerBackgroundColor)(ArkUINodeHandle node);
     void (*setDatePickerBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetDatePickerBackgroundColor)(ArkUINodeHandle node);
+    void (*setDatePickerDigitalCrownSensitivity)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetDatePickerDigitalCrownSensitivity)(ArkUINodeHandle node);
 };
 
 struct ArkUISpanModifier {

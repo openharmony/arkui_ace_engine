@@ -30,6 +30,11 @@
 #include "core/components_ng/pattern/text_picker/textpicker_overscroll.h"
 #include "core/components_ng/pattern/text_picker/textpicker_paint_method.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#include "core/common/vibrator/vibrator_utils.h"
+#endif
+#include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
 
 namespace OHOS::Ace::NG {
 using EventCallback = std::function<void(bool)>;
@@ -78,11 +83,11 @@ enum class OptionIndex {
     COLUMN_INDEX_6
 };
 
-class TextPickerColumnPattern : public LinearLayoutPattern {
+class TextPickerColumnPattern : public LinearLayoutPattern, public PickerColumnPatternUtils<int32_t> {
     DECLARE_ACE_TYPE(TextPickerColumnPattern, LinearLayoutPattern);
 
 public:
-    TextPickerColumnPattern() : LinearLayoutPattern(true) {};
+    TextPickerColumnPattern() : LinearLayoutPattern(true), PickerColumnPatternUtils(-1) {};
 
     ~TextPickerColumnPattern() override = default;
 
@@ -361,7 +366,12 @@ private:
 
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
-
+#ifdef SUPPORT_DIGITAL_CROWN
+    void HandleCrownBeginEvent(const CrownEvent& event) override;
+    void HandleCrownMoveEvent(const CrownEvent& event) override;
+    void HandleCrownEndEvent(const CrownEvent& event) override;
+#endif
+    void ToUpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme) override;
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(const GestureEvent& event);
     void HandleDragMove(const GestureEvent& event);
@@ -431,6 +441,7 @@ private:
     bool SpringCurveTailMoveProcess(bool useRebound, double& dragDelta);
     void SpringCurveTailEndProcess(bool useRebound, bool stopMove);
 
+    bool isFocusColumn_ = false;
     bool isTossing_ = false;
     float localDownDistance_ = 0.0f;
     Color pressColor_;

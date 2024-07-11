@@ -45,6 +45,7 @@ public:
     static void SetOnChange(FrameNode* frameNode, TimeChangeEvent&& onChange);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
 
+    void SetDigitalCrownSensitivity(int32_t crownSensitivity) override;
     static void SetSelectedTime(FrameNode* frameNode, const PickerTime& value);
     static void SetDisappearTextStyle(
         FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
@@ -67,6 +68,8 @@ public:
     static void SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme);
     static void SetWheelModeEnabled(FrameNode* frameNode, bool wheelModeEnabled);
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
+    static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity);
+
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();

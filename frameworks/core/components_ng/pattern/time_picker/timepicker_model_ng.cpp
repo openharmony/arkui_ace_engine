@@ -108,6 +108,11 @@ void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool h
     }
     timePickerRowPattern->SetHasSecond(hasSecond);
     stack->Push(timePickerNode);
+
+    if (pickerTheme->IsCircleDial()) {
+        auto renderContext = timePickerNode->GetRenderContext();
+        renderContext->UpdateBackgroundColor(pickerTheme->GetBackgroundColor());
+    }
 }
 
 RefPtr<FrameNode> TimePickerModelNG::CreateStackNode()
@@ -585,6 +590,8 @@ void TimePickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Weight, normalStyle.GetFontWeight(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontFamily, normalStyle.GetFontFamilies(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontStyle, normalStyle.GetFontStyle(), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DigitalCrownSensitivity, DEFAULT_CROWNSENSITIVITY,
+        frameNode);
 }
 
 void TimePickerModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
@@ -755,4 +762,22 @@ void TimePickerModelNG::HasUserDefinedOpacity()
     CHECK_NULL_VOID(renderContext);
     timePickerRowPattern->SetUserDefinedOpacity(renderContext->GetOpacityValue(1.0));
 }
+void TimePickerModelNG::SetDigitalCrownSensitivity(int32_t crownSensitivity)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerPattern);
+    timePickerPattern->SetDigitalCrownSensitivity(crownSensitivity);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DigitalCrownSensitivity, crownSensitivity, frameNode);
+}
+
+void TimePickerModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity)
+{
+    auto timePickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerPattern);
+    timePickerPattern->SetDigitalCrownSensitivity(crownSensitivity);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DigitalCrownSensitivity, crownSensitivity, frameNode);
+}
+
 } // namespace OHOS::Ace::NG

@@ -38,6 +38,7 @@ public:
     void SetBackgroundColor(const Color& color) override;
     void SetChangeEvent(ChangeEvent&& onChange) override {};
     void HasUserDefinedOpacity() override {};
+    void SetDigitalCrownSensitivity(int32_t value) override {};
 };
 
 class TimePickerDialogModelImpl : public TimePickerDialogModel {
