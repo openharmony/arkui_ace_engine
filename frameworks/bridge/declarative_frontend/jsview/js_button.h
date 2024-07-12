@@ -71,6 +71,7 @@ private:
         const std::optional<CalcDimension>& right);
     static CreateWithPara ParseCreatePara(const JSCallbackInfo& info, bool hasLabel);
     static void ParseButtonRole(const JSRef<JSObject>& optionObj, CreateWithPara& param);
+    static void InitButtonOption(CreateWithPara& param);
     static bool isLabelButton_;
 };
 } // namespace OHOS::Ace::Framework
