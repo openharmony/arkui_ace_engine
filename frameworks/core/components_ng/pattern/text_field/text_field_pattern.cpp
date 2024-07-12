@@ -5583,7 +5583,7 @@ void TextFieldPattern::CreateErrorParagraph(const std::string& content)
     std::string errorText = content;
     ParagraphStyle paraStyle {
         .direction = TextFieldLayoutAlgorithm::GetTextDirection(contentController_->GetTextValue()),
-        .align = TextAlign::START,
+        .align = errorTextStyle.GetTextAlign(),
         .maxLines = 1,
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .textOverflow = TextOverflow::ELLIPSIS,
