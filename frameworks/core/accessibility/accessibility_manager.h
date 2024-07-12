@@ -56,6 +56,7 @@ public:
     virtual bool OnDeregister() = 0;
     virtual bool OnSetChildTree(int32_t childWindowId, int32_t childTreeId) = 0;
     virtual bool OnDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
+    virtual void OnClearRegisterFlag() = 0;
     int32_t GetChildTreeId() const
     {
         return childTreeId_;
