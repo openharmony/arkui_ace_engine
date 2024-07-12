@@ -109,7 +109,7 @@ void SearchPattern::UpdateFocusTextColor(const RefPtr<FrameNode>& imageHost)
     CHECK_NULL_VOID(searchTheme);
     auto focusTextColor_ = searchTheme->GetFocusTextColor();
 
-     auto host = GetHost();
+    auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
