@@ -864,6 +864,10 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
             overlayManager->OnShowMenuAnimationFinished(menuWK, weak, id);
+            menuWK.Upgrade()->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE,
+                WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
+                static_cast<int32_t>(AccessibilityEventType::PAGE_CHANGE));
         });
 
     if (wrapperPattern->GetPreviewMode() == MenuPreviewMode::CUSTOM) {
@@ -1011,6 +1015,12 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
         ContainerScope scope(id);
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID(overlayManager);
+        auto menuWrapper = menuWK.Upgrade();
+        menuWrapper->OnAccessibilityEvent(
+            AccessibilityEventType::PAGE_CHANGE,
+            WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
+            static_cast<int32_t>(AccessibilityEventType::PAGE_CHANGE));
         overlayManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weak, id);
     });
     ShowMenuClearAnimation(menu, option, showPreviewAnimation, startDrag);
