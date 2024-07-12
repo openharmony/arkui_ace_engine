@@ -1113,6 +1113,11 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         MarkModifyDone();
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
+    if (configurationChange.fontScaleUpdate) {
+        pattern_->OnFontScaleConfigurationUpdate();
+        MarkModifyDone();
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void FrameNode::NotifyVisibleChange(bool isVisible)

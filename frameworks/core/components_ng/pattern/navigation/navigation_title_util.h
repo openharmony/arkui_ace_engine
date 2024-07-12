@@ -75,6 +75,11 @@ private:
     static RefPtr<FrameNode> CreatePopupDialogNode(
         const RefPtr<FrameNode> targetNode, const std::vector<NG::BarItem>& menuItems, int32_t index);
     static RefPtr<FrameNode> CreateSymbolDialog(const std::string& message, const RefPtr<FrameNode>& targetNode);
+
+    static void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameNode>& menuNode,
+        const std::vector<NG::BarItem>& menuItems);
+    static void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameNode>& menuNode,
+        const std::vector<NG::BarItem>& menuItems);
 };
 
 } // namespace OHOS::Ace::NG
