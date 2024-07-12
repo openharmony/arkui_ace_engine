@@ -112,6 +112,7 @@ public:
     virtual void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) = 0;
     virtual void SetSelectionMenuOptions(
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
+    virtual void SetResponseRegion(bool isUserSetResponseRegion) {};
 
 private:
     static std::unique_ptr<TextModel> instance_;

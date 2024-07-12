@@ -80,6 +80,7 @@ public:
     void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) override;
     void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
+    void SetResponseRegion(bool isUserSetResponseRegion) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& content);
     static void InitText(FrameNode* frameNode, std::string& value);

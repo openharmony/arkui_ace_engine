@@ -925,6 +925,12 @@ void JSText::SetFontFeature(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
 }
 
+void JSText::JsResponseRegion(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsResponseRegion(info);
+    TextModel::GetInstance()->SetResponseRegion(true);
+}
+
 void JSText::JSBind(BindingTarget globalObj)
 {
     JSClass<JSText>::Declare("Text");
@@ -987,6 +993,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("marqueeOptions", &JSText::SetMarqueeOptions);
     JSClass<JSText>::StaticMethod("onMarqueeStateChange", &JSText::SetOnMarqueeStateChange);
     JSClass<JSText>::StaticMethod("editMenuOptions", &JSText::EditMenuOptions);
+    JSClass<JSText>::StaticMethod("responseRegion", &JSText::JsResponseRegion);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

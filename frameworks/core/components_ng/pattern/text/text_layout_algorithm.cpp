@@ -373,6 +373,8 @@ void TextLayoutAlgorithm::CreateParagraphDrag(
     TextStyle dragTextStyle = textStyle;
     Color color = textStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_TRANSPARENCY);
     dragTextStyle.SetTextColor(color);
+    Color textDecorationColor = textStyle.GetTextDecorationColor().ChangeAlpha(DRAGGED_TEXT_TRANSPARENCY);
+    dragTextStyle.SetTextDecorationColor(textDecorationColor);
     std::vector<TextStyle> textStyles { textStyle, dragTextStyle, textStyle };
 
     CHECK_NULL_VOID(paragraph);

@@ -2977,10 +2977,6 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
     CHECK_NULL_RETURN(geometryNode, paintMethod);
     auto frameSize = geometryNode->GetFrameSize();
 
-    auto gestureHub = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_RETURN(gestureHub, paintMethod);
-    std::vector<DimensionRect> hotZoneRegions;
-    DimensionRect hotZoneRegion;
     auto clip = false;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         clip = true;
@@ -2993,10 +2989,8 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
             contentRect_.GetY() + static_cast<float>(pManager_->GetHeight() + std::fabs(baselineOffset_));
         boundsRect.SetWidth(boundsWidth);
         boundsRect.SetHeight(boundsHeight);
-
-        hotZoneRegion.SetSize(DimensionSize(Dimension(std::max(boundsWidth, frameSize.Width())),
-            Dimension(std::max(frameSize.Height(), boundsRect.Height()))));
-
+        
+        SetResponseRegion(frameSize, boundsRect.GetSize());
         ProcessBoundRectByTextShadow(boundsRect);
         ProcessBoundRectByTextMarquee(boundsRect);
         if ((LessNotEqual(frameSize.Width(), boundsRect.Width()) ||
@@ -3011,11 +3005,26 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
         }
         overlayMod_->SetBoundsRect(boundsRect);
     } else {
-        hotZoneRegion.SetSize(DimensionSize(Dimension(frameSize.Width()), Dimension(frameSize.Height())));
+        SetResponseRegion(frameSize, frameSize);
     }
+    return paintMethod;
+}
+
+void TextPattern::SetResponseRegion(const SizeF& frameSize, const SizeF& boundsSize)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (isUserSetResponseRegion_) {
+        return;
+    }
+    std::vector<DimensionRect> hotZoneRegions;
+    DimensionRect hotZoneRegion;
+    hotZoneRegion.SetSize(DimensionSize(Dimension(std::max(boundsSize.Width(), frameSize.Width())),
+        Dimension(std::max(frameSize.Height(), boundsSize.Height()))));
     hotZoneRegions.emplace_back(hotZoneRegion);
     gestureHub->SetResponseRegion(hotZoneRegions);
-    return paintMethod;
 }
 
 void TextPattern::CreateModifier()
