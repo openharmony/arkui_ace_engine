@@ -241,7 +241,7 @@ void ResourceAdapterImplV2::UpdateConfig(const ResourceConfiguration& config, bo
 RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
 {
     CheckThemeId(themeId);
-    auto theme = AceType::MakeRefPtr<ResourceThemeStyle>(AceType::Claim(this));
+    auto theme = AceType::MakeRefPtr(AceType::Claim(this));
 
     auto manager = GetResourceManager();
     if (manager) {
