@@ -18,7 +18,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -528,7 +528,7 @@ void JSSelect::OnSelected(const JSCallbackInfo& info)
         params[0] = JSRef<JSVal>::Make(ToJSValue(index));
         params[1] = JSRef<JSVal>::Make(ToJSValue(value));
         func->ExecuteJS(2, params);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
         UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Select.onSelect");
 #endif
     };

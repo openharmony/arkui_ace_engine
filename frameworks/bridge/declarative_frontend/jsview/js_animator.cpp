@@ -14,7 +14,7 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_animator.h"
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -141,7 +141,7 @@ std::function<void()> GetEventCallback(const JSCallbackInfo& info, const std::st
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT(name);
         func->Execute();
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
         UiSessionManager::GetInstance().ReportComponentChangeEvent("event", name);
 #endif
     };

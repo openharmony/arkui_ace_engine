@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -168,7 +168,7 @@ void CounterModelNG::SetOnInc(CounterEventFunc&& onInc)
     auto gestureHub = addNode->GetOrCreateGestureEventHub();
     GestureEventFunc gestureEventFunc = [clickEvent = std::move(onInc)](GestureEvent& /*unused*/) {
                         clickEvent();
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
                         UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onInc");
 #endif
                     };
@@ -186,7 +186,7 @@ void CounterModelNG::SetOnDec(CounterEventFunc&& onDec)
     auto gestureHub = subNode->GetOrCreateGestureEventHub();
     GestureEventFunc gestureEventFunc = [clickEvent = std::move(onDec)](GestureEvent& /*unused*/) {
                         clickEvent();
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
                         UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onDec");
 #endif
                     };
