@@ -70,7 +70,7 @@ public:
      * function returns children_
      * function runs as part of idle task
      */
-    const std::list<RefPtr<UINode>>& GetChildren() const override;
+    const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override;
 
     /**
      * scenario: called by layout informs:

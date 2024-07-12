@@ -323,7 +323,7 @@ int32_t RepeatVirtualScrollNode::GetFrameNodeIndex(const RefPtr<FrameNode>& node
     return caches_.GetFrameNodeIndex(node);
 }
 
-const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildren() const
+const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildren(bool /*notDetach*/) const
 {
     if (!children_.empty()) {
         TAG_LOGD(AceLogTag::ACE_REPEAT, "GetChildren just returns non-empty children_");
