@@ -573,6 +573,7 @@ public:
 
     bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
         bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId) override;
+    bool IsNeedToCreatePopupWindow(const AceAutoFillType &autoFillType) override;
     bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish,
         const std::function<void()>& onUIExtNodeBindingCompleted) override;
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
