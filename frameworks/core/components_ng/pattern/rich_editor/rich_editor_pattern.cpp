@@ -6010,12 +6010,13 @@ bool RichEditorPattern::IsScrollBarPressed(const MouseInfo& info)
 
 void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
 {
-    if (blockPress_ || !leftMousePress_) {
-        if (blockPress_) {
-            dragBoxes_ = GetTextBoxes();
-        }
+    ACE_SCOPED_TRACE("RichEditorHandleMouseLeftButtonMove");
+    if (blockPress_) {
+        ACE_SCOPED_TRACE("RichEditorUpdateDragBoxes");
+        dragBoxes_ = GetTextBoxes();
         return;
     }
+    CHECK_NULL_VOID(leftMousePress_);
 
     auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
@@ -6027,9 +6028,8 @@ void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
 
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    if (!focusHub->IsCurrentFocus()) {
-        return;
-    }
+    CHECK_NULL_VOID(focusHub->IsCurrentFocus());
+
     mouseStatus_ = MouseStatus::MOVE;
     if (isFirstMouseSelect_) {
         int32_t extend = paragraphs_.GetIndex(textOffset);
