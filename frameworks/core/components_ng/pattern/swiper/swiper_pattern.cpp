@@ -3302,9 +3302,11 @@ void SwiperPattern::PlayTranslateAnimation(
         PropertyUnit::PIXEL_POSITION);
 
     AnimationOption option;
+    auto duration = GetDuration();
+    bool finishAnimation = (duration == 0);
     motionVelocity_ = velocity / (endPos - startPos);
     option.SetCurve(GetCurveIncludeMotion());
-    option.SetDuration(GetDuration());
+    option.SetDuration(duration);
     auto iter = frameRateRange_.find(SwiperDynamicSyncSceneType::ANIMATE);
     if (iter != frameRateRange_.end()) {
         TAG_LOGI(AceLogTag::ACE_SWIPER,
@@ -3337,9 +3339,12 @@ void SwiperPattern::PlayTranslateAnimation(
                 swiper->GetLoopIndex(swiper->currentIndex_), swiper->GetLoopIndex(nextIndex), info);
             swiper->FireAndCleanScrollingListener();
         },
-        [weak, nextIndex, restartAutoPlay]() {
+        [weak, nextIndex, restartAutoPlay, finishAnimation]() {
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
+            if (finishAnimation && swiper->translateAnimationIsRunning_) {
+                swiper->isFinishAnimation_ = true;
+            }
             swiper->targetIndex_.reset();
             swiper->OnTranslateAnimationFinish();
         });
