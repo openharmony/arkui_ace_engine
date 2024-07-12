@@ -15,13 +15,6 @@
 
 #include "arc_list_test_ng.h"
 
-#define CHECK_NULL_VOID_2(ptr) \
-    do {                           \
-        if (!(ptr)) {              \
-            printf(#ptr" is nullptr");                \
-        }                          \
-    } while (0)
-
 namespace OHOS::Ace::NG {
 void ArcListTestNg::SetUpTestSuite()
 {
@@ -45,9 +38,6 @@ void ArcListTestNg::SetUpTestSuite()
     listItemTheme->hoverAnimationDuration_ = hoverAnimationDuration;
     listItemTheme->hoverToPressAnimationDuration_ = hoverToPressAnimationDuration;
     listItemTheme->disabledAlpha_ = disabledAlpha;
-    // listItemTheme->defaultColor_ = Color::WHITE;
-    // listItemTheme->defaultLeftMargin_ = GROUP_MARGIN;
-    // listItemTheme->defaultRightMargin_ = GROUP_MARGIN;
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(AnyNumber());
 }
@@ -74,9 +64,7 @@ void ArcListTestNg::GetList()
 {
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
-    CHECK_NULL_VOID_2(frameNode_);
     pattern_ = frameNode_->GetPattern<ArcListPattern>();
-    CHECK_NULL_VOID_2(pattern_);
 
     eventHub_ = frameNode_->GetEventHub<ListEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<ArcListLayoutProperty>();
@@ -160,8 +148,7 @@ void ArcListTestNg::CreateListItemsWithSize(std::vector<SizeT<Dimension>>& itemS
     }
 }
 
-void ArcListTestNg::CreateListItemsWithSize(int32_t itemNumber, SizeT<Dimension> itemSize
-    , V2::ListItemStyle listItemStyle)
+void ArcListTestNg::CreateListItemsWithSize(int32_t itemNumber, SizeT<Dimension> itemSize, V2::ListItemStyle listItemStyle)
 {
     for (int32_t index = 0; index < itemNumber; index++) {
         CreateListItemWithSize(itemSize, listItemStyle);
@@ -185,24 +172,6 @@ ListItemModelNG ArcListTestNg::CreateListItemWithSize(SizeT<Dimension> itemSize,
     return itemModel;
 }
 
-// void ArcListTestNg::CreateListItemGroups(int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle)
-// {
-//     for (int32_t index = 0; index < groupNumber; index++) {
-//         CreateListItemGroup(listItemGroupStyle);
-//         CreateListItems(GROUP_ITEM_NUMBER);
-//         ViewStackProcessor::GetInstance()->Pop();
-//         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-//     }
-// }
-
-// ListItemGroupModelNG ArcListTestNg::CreateListItemGroup(V2::ListItemGroupStyle listItemGroupStyle)
-// {
-//     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
-//     ListItemGroupModelNG groupModel;
-//     groupModel.Create(listItemGroupStyle);
-//     return groupModel;
-// }
-
 void ArcListTestNg::CreateItemWithSize(int32_t itemNumber, SizeT<Dimension> itemSize)
 {
     for (int32_t index = 0; index < itemNumber; ++index) {
@@ -213,75 +182,6 @@ void ArcListTestNg::CreateItemWithSize(int32_t itemNumber, SizeT<Dimension> item
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
 }
-
-// void ArcListTestNg::CreateGroupWithSetting(
-//     int32_t groupNumber, Axis axis, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber)
-// {
-//     for (int32_t index = 0; index < groupNumber; index++) {
-//         auto header = GetDefaultHeaderBuilder();
-//         auto footer = GetDefaultHeaderBuilder();
-//         ListItemGroupModelNG groupModel = CreateListItemGroup(listItemGroupStyle);
-//         groupModel.SetSpace(Dimension(SPACE));
-//         groupModel.SetDivider(ITEM_DIVIDER);
-//         groupModel.SetHeader(std::move(header));
-//         groupModel.SetFooter(std::move(footer));
-//         CreateListItems(itemNumber, static_cast<V2::ListItemStyle>(listItemGroupStyle));
-//         ViewStackProcessor::GetInstance()->Pop();
-//         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-//     }
-// }
-
-// void ArcListTestNg::CreateGroupWithSettingChildrenMainSize(int32_t groupNumber)
-// {
-//     for (int32_t index = 0; index < groupNumber; ++index) {
-//         auto header = GetDefaultHeaderBuilder();
-//         auto footer = GetDefaultHeaderBuilder();
-//         ListItemGroupModelNG groupModel = CreateListItemGroup();
-//         groupModel.SetSpace(Dimension(SPACE));
-//         groupModel.SetDivider(ITEM_DIVIDER);
-//         groupModel.SetHeader(std::move(header));
-//         groupModel.SetFooter(std::move(footer));
-
-//         auto childrenSize = groupModel.GetOrCreateListChildrenMainSize();
-//         childrenSize->UpdateDefaultSize(ITEM_HEIGHT);
-//         const int32_t itemNumber = 2;
-//         childrenSize->ChangeData(1, itemNumber, { 50.f, 200.f });
-//         CreateListItems(1);
-//         CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(50.f)));
-//         CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(200.f)));
-//         CreateListItems(1);
-//         ViewStackProcessor::GetInstance()->Pop();
-//         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-//     }
-// }
-
-// void ArcListTestNg::CreateGroupChildrenMainSize(int32_t groupNumber)
-// {
-//     for (int32_t index = 0; index < groupNumber; index++) {
-//         ListItemGroupModelNG groupModel = CreateListItemGroup();
-//         auto childrenSize = groupModel.GetOrCreateListChildrenMainSize();
-//         childrenSize->UpdateDefaultSize(ITEM_HEIGHT);
-//         const int32_t itemNumber = 2;
-//         childrenSize->ChangeData(1, itemNumber, { 50.f, 200.f });
-//         CreateListItems(1);
-//         CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(50.f)));
-//         CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(200.f)));
-//         CreateListItems(1);
-//         ViewStackProcessor::GetInstance()->Pop();
-//         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-//     }
-// }
-
-// void ArcListTestNg::CreateGroupWithItem(int32_t groupNumber, Axis axis)
-// {
-//     for (int32_t index = 0; index < groupNumber; index++) {
-//         if (index & 1) {
-//             CreateListItems(1);
-//         } else {
-//             CreateListItemGroups(1);
-//         }
-//     }
-// }
 
 void ArcListTestNg::CreateItemWithSwipe(
     std::function<void()> startAction, std::function<void()> endAction, V2::SwipeEdgeEffect effect)
@@ -336,9 +236,6 @@ void ArcListTestNg::UpdateCurrentOffset(float offset, int32_t source)
 float ArcListTestNg::GetInterval()
 {
     float space = layoutProperty_->GetSpace().has_value() ? layoutProperty_->GetSpace().value().ConvertToPx() : 0.f;
-    // float strokeWidth = layoutProperty_->GetDivider().has_value()
-    //                         ? layoutProperty_->GetDivider().value().strokeWidth.ConvertToPx()
-    //                         : 0.f;
     return std::max(space, 0.f);
 }
 
@@ -371,16 +268,8 @@ void ArcListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
     pattern_->ScrollToIndex(index, smooth, align);
     FlushLayoutTask(frameNode_);
     if (smooth) {
-        auto iter = pattern_->itemPosition_.find(index);
         float targetPos = 0.0f;
-        if (iter->second.isGroup) {
-            // if (!pattern_->GetListItemGroupAnimatePosWithoutIndexInGroup(index, iter->second.startPos,
-            //     iter->second.endPos, align, targetPos)) {
-            //     return;
-            // }
-        } else {
-            // pattern_->GetListItemAnimatePos(iter->second.startPos, iter->second.endPos, align, targetPos);
-        }
+
         if (!NearZero(targetPos)) {
             float endValue = pattern_->GetFinalPosition();
             pattern_->ScrollTo(endValue);
@@ -388,17 +277,6 @@ void ArcListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
         }
     }
 }
-
-// void ArcListTestNg::ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align)
-// {
-//     pattern_->ScrollToItemInGroup(index, indexInGroup, smooth, align);
-//     FlushLayoutTask(frameNode_);
-//     if (smooth) {
-//         float endValue = pattern_->GetFinalPosition();
-//         pattern_->ScrollTo(endValue);
-//         FlushLayoutTask(frameNode_);
-//     }
-// }
 
 void ArcListTestNg::DragSwiperItem(int32_t index, float mainDelta, float mainVelocity)
 {
@@ -505,16 +383,11 @@ void ArcListTestNg::ScrollSnap(float offset, float velocity)
 AssertionResult ArcListTestNg::VerifyPosition(
     const RefPtr<FrameNode>& frameNode, int32_t viewItemNumber, int32_t lanes, float space, float startOffset)
 {
-    // bool isGroup = frameNode->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
-    // if (isGroup) {
-    //     // return VerifyGroupItemPosition(frameNode, viewItemNumber, lanes, space, startOffset);
-    // } else {
-        Axis axis = pattern_->GetAxis();
-        float itemMainLength = (axis == Axis::VERTICAL) ? ITEM_HEIGHT : ITEM_WIDTH;
-        float itemSpaceLength = itemMainLength + space;
-        int32_t initialIndex = std::floor(startOffset / itemSpaceLength) * lanes;
-        return VerifyItemPosition(frameNode, viewItemNumber, lanes, space, initialIndex);
-    // }
+    Axis axis = pattern_->GetAxis();
+    float itemMainLength = (axis == Axis::VERTICAL) ? ITEM_HEIGHT : ITEM_WIDTH;
+    float itemSpaceLength = itemMainLength + space;
+    int32_t initialIndex = std::floor(startOffset / itemSpaceLength) * lanes;
+    return VerifyItemPosition(frameNode, viewItemNumber, lanes, space, initialIndex);
 }
 
 AssertionResult ArcListTestNg::VerifyItemPosition(
@@ -546,35 +419,6 @@ AssertionResult ArcListTestNg::VerifyItemPosition(
     return AssertionSuccess();
 }
 
-// AssertionResult ArcListTestNg::VerifyGroupItemPosition(
-//     const RefPtr<FrameNode>& frameNode, int32_t viewItemNumber, int32_t lanes, float space, float startOffset)
-// {
-//     if (lanes < 1) {
-//         return AssertionFailure() << "lanes < 1";
-//     }
-//     Axis axis = pattern_->GetAxis();
-//     float itemMainLength = (axis == Axis::VERTICAL) ? ITEM_HEIGHT : ITEM_WIDTH;
-//     float itemSpaceLength = itemMainLength + space;
-//     auto itemPosition = frameNode->GetPattern<ListItemGroupPattern>()->GetItemPosition();
-//     if (itemPosition.size() != static_cast<size_t>(viewItemNumber)) {
-//         return AssertionFailure() << "The itemPosition size is not equal to viewItemNumber"
-//                                   << " itemPosition: " << itemPosition.size() << " viewItemNumber: " << viewItemNumber;
-//     }
-//     for (int32_t index = 0; index < viewItemNumber; index++) {
-//         int32_t itemIndex = index;
-//         float startPos = itemPosition[itemIndex].startPos;
-//         float endPos = itemPosition[itemIndex].endPos;
-//         float expectStartPos = (index / lanes) * itemSpaceLength + startOffset;
-//         float expectEndPos = expectStartPos + itemMainLength;
-//         if (!NearEqual(startPos, expectStartPos) || !NearEqual(endPos, expectEndPos)) {
-//             return AssertionFailure() << "At itemPosition Index: " << itemIndex << " ItemPosition: (" << startPos
-//                                       << " - " << endPos << ")"
-//                                       << " != expectPosition: (" << expectStartPos << " - " << expectEndPos << ")";
-//         }
-//     }
-//     return AssertionSuccess();
-// }
-
 AssertionResult ArcListTestNg::IsEqualTotalOffset(float expectOffset)
 {
     FlushLayoutTask(frameNode_);
@@ -589,14 +433,8 @@ AssertionResult ArcListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollA
     FlushLayoutTask(frameNode_);
     if (smooth) {
         // Because can not get targetPos, use source code
-        auto iter = pattern_->itemPosition_.find(index);
         float targetPos = 0.0f;
-        if (iter->second.isGroup) {
-            // pattern_->GetListItemGroupAnimatePosWithoutIndexInGroup(index, iter->second.startPos,
-            //     iter->second.endPos, align, targetPos);
-        } else {
-            // pattern_->GetListItemAnimatePos(iter->second.startPos, iter->second.endPos, align, targetPos);
-        }
+
         if (!NearZero(targetPos)) {
             // Straight to the end of the anmiation, use ScrollTo replace AnimateTo
             float finalPosition = pattern_->GetFinalPosition();
@@ -612,38 +450,6 @@ AssertionResult ArcListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollA
     return IsEqual(currentOffset, expectOffset);
 }
 
-// AssertionResult ArcListTestNg::JumpToItemInGroup(
-//     int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align, float expectOffset)
-// {
-//     auto controller = pattern_->positionController_;
-//     float startOffset = pattern_->GetTotalOffset();
-//     controller->JumpToItemInGroup(index, indexInGroup, smooth, align);
-//     FlushLayoutTask(frameNode_);
-//     if (smooth) {
-//         // Because can not get targetPos, use source code
-//         auto iter = pattern_->itemPosition_.find(index);
-//         float targetPos = 0.0f;
-//         if (iter->second.isGroup) {
-//             pattern_->GetListItemGroupAnimatePosWithIndexInGroup(index, indexInGroup,
-//                 iter->second.startPos, align, targetPos);
-//         } else {
-//             pattern_->GetListItemAnimatePos(iter->second.startPos, iter->second.endPos, align, targetPos);
-//         }
-//         if (!NearZero(targetPos)) {
-//             // Straight to the end of the anmiation, use ScrollTo replace AnimateTo
-//             float finalPosition = pattern_->GetFinalPosition();
-//             float totalHeight = pattern_->GetTotalHeight();
-//             finalPosition = std::clamp(finalPosition, 0.f, totalHeight); // limit scrollDistance
-//             pattern_->ScrollTo(finalPosition);
-//             FlushLayoutTask(frameNode_);
-//         }
-//     }
-//     float currentOffset = pattern_->GetTotalOffset();
-//     pattern_->ScrollTo(startOffset); // reset offset before return
-//     FlushLayoutTask(frameNode_);
-//     return IsEqual(currentOffset, expectOffset);
-// }
-
 // Get all listItem that in or not in listItemGroup
 std::vector<RefPtr<FrameNode>> ArcListTestNg::GetALLItem()
 {
@@ -651,17 +457,6 @@ std::vector<RefPtr<FrameNode>> ArcListTestNg::GetALLItem()
     auto children = frameNode_->GetChildren();
     for (auto child : children) {
         auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
-        // if (childFrameNode->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
-        //     auto group = child->GetChildren();
-        //     for (auto item : group) {
-        //         auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
-        //         if (itemFrameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
-        //             listItems.emplace_back(itemFrameNode);
-        //         }
-        //     }
-        // } else if (childFrameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
-        //     listItems.emplace_back(childFrameNode);
-        // }
         if (childFrameNode->GetTag() == V2::ARC_LIST_ITEM_ETS_TAG) {
             listItems.emplace_back(childFrameNode);
         }

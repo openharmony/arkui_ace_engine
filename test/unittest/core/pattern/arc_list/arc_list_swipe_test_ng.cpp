@@ -285,7 +285,8 @@ HWTEST_F(ArcListSwipeTestNg, SwiperItem002, TestSize.Level1)
     DragSwiperItem(listItemIndex, obviousSwipeDelta);
     endNodeRect = GetChildRect(listItem, endNodeIndex);
     itemNodeRect = GetChildRect(listItem, itemNodeIndex);
-    expectEndNodeRect = RectF(LIST_WIDTH * ARC_LIST_ITER_SCALE - END_NODE_LEN + obviousSwipeDelta, 0, END_NODE_LEN, ITEM_HEIGHT);
+    expectEndNodeRect = RectF(LIST_WIDTH * ARC_LIST_ITER_SCALE - END_NODE_LEN + obviousSwipeDelta
+        , 0, END_NODE_LEN, ITEM_HEIGHT);
     expectItemNodeRect = itemNodeInitialRect;
     EXPECT_TRUE(IsEqual(endNodeRect, expectEndNodeRect));
     EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));

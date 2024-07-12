@@ -501,18 +501,10 @@ HWTEST_F(ArcListLayoutTestNg, FixPredictSnapOffset001, TestSize.Level1)
 
     // For check FixPredictSnapOffset switch cover, in this case predictSnapEndPos_ is not set.
     pattern_->SetPredictSnapOffset(100.0);
-    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm = AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
     EXPECT_TRUE(NearEqual(listLayoutAlgorithm->GetPredictSnapEndPosition().value_or(-0.001), -0.001));
-
-    // EXPECT_EQ(pattern_->GetTotalOffset(), -MID_OFFSET);
-
-    // // Before scroll, call SetPredictSnapOffset to set value.
-    // listLayoutAlgorithm->SetPredictSnapOffset(100.0);
-
-    // // Scroll over list height.
-    // ScrollTo(800);
-    // EXPECT_EQ(pattern_->GetTotalOffset(), 50);
 }
 
 /**
@@ -533,7 +525,8 @@ HWTEST_F(ArcListLayoutTestNg, FixPredictSnapOffset002, TestSize.Level1)
     CreateDone(frameNode_);
 
     pattern_->SetPredictSnapOffset(100.0);
-    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm = AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
     EXPECT_EQ(pattern_->GetTotalOffset(), -185);
 
@@ -557,7 +550,8 @@ HWTEST_F(ArcListLayoutTestNg, OnItemPositionAddOrUpdate001, TestSize.Level1)
     CreateDone(frameNode_);
 
     pattern_->SetPredictSnapOffset(100.0);
-    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm = AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
 
     // Before scroll, call SetPredictSnapOffset to set value.
     listLayoutAlgorithm->SetPredictSnapOffset(100.0);
@@ -584,7 +578,8 @@ HWTEST_F(ArcListLayoutTestNg, OnItemPositionAddOrUpdate002, TestSize.Level1)
     // Call SetPredictSnapOffset twice to cover more switch(the init value check switch).
     pattern_->SetPredictSnapOffset(100.0);
 
-    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm = AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
 
     // Before scroll, call SetPredictSnapOffset to set value.
     listLayoutAlgorithm->SetPredictSnapOffset(100.0);
@@ -611,7 +606,8 @@ HWTEST_F(ArcListLayoutTestNg, MeasureList001, TestSize.Level1)
     CreateDone(frameNode_);
 
     pattern_->SetPredictSnapOffset(100.0);
-    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm = AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
+        AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
 
     // For check MeasureList switch cover, in this case targetIndexStaged_ is not set.
     listLayoutAlgorithm->SetPredictSnapOffset(100.0);

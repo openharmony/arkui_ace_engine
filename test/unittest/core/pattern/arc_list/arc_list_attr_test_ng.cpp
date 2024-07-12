@@ -533,7 +533,8 @@ HWTEST_F(ArcListAttrTestNg, AttrScrollSnapAlign001, TestSize.Level1)
     // To take into account the item scaling of the arc list, adjust the value according to the scaling.
     float dis1 = 0.f;
     float dis2 = ITEM_HEIGHT;
-    float scale = (2.0 / (ArcListLayoutAlgorithm::GetNearScale(dis1) + ArcListLayoutAlgorithm::GetNearScale(dis2)) - 1) *           DRAG_FIX_OFFSET_RATIO + 1;
+    float scale = (2.0 / (ArcListLayoutAlgorithm::GetNearScale(dis1) 
+        + ArcListLayoutAlgorithm::GetNearScale(dis2)) - 1) * DRAG_FIX_OFFSET_RATIO + 1;
     float off = offset * scale;
 
     EXPECT_EQ(pattern_->GetTotalOffset(), -MID_OFFSET - off);

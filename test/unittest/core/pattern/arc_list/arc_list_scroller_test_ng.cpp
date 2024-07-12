@@ -316,7 +316,7 @@ HWTEST_F(ArcListScrollerTestNg, PositionController001, TestSize.Level1)
      * @tc.steps: step2. Test ScrollBy
      */
     controller->ScrollBy(ITEM_WIDTH, ITEM_HEIGHT, false);
-    EXPECT_TRUE(IsEqualTotalOffset(-ITEM_HEIGHT/2.f));
+    EXPECT_TRUE(IsEqualTotalOffset(-ITEM_HEIGHT / 2.f));
     controller->ScrollBy(ITEM_WIDTH, -ITEM_HEIGHT, false);
     EXPECT_TRUE(IsEqualTotalOffset(-MID_OFFSET));
 
@@ -443,7 +443,6 @@ HWTEST_F(ArcListScrollerTestNg, PositionController008, TestSize.Level1)
      * expected: 1.The direction to VERTICAL
      *           2.The current Offset is 0
      */
-    // model.SetListDirection(Axis::VERTICAL);
     CreateListItems(itemNumber);
     CreateDone(frameNode_);
     auto controller = pattern_->positionController_;
@@ -541,7 +540,6 @@ HWTEST_F(ArcListScrollerTestNg, PositionController009, TestSize.Level1)
      * expected: 1.The direction to VERTICAL
      *           2.The current Offset is 0
      */
-    // model.SetListDirection(Axis::VERTICAL);
     CreateListItems(itemNumber);
     CreateDone(frameNode_);
     auto controller = pattern_->positionController_;
@@ -809,7 +807,8 @@ HWTEST_F(ArcListScrollerTestNg, Pattern013, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     float offsetX = LIST_WIDTH * (1 - ARC_LIST_ITER_SCALE) / 2.0;
     float offsetY = LIST_HEIGHT * (1 - ARC_LIST_ITER_SCALE);
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(offsetX, -LIST_HEIGHT / 2.0, LIST_WIDTH * ARC_LIST_ITER_SCALE, LIST_HEIGHT * ARC_LIST_ITER_SCALE)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(offsetX, -LIST_HEIGHT / 2.0
+        , LIST_WIDTH * ARC_LIST_ITER_SCALE, LIST_HEIGHT * ARC_LIST_ITER_SCALE)));
 
     /**
      * @tc.steps: step4. swipe forward 3 listItem
@@ -821,7 +820,8 @@ HWTEST_F(ArcListScrollerTestNg, Pattern013, TestSize.Level1)
      * @tc.steps: step5. swipe backward 2.5 listItem
      */
     ScrollTo(LIST_HEIGHT);
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(1), Rect(offsetX, -offsetY, LIST_WIDTH * ARC_LIST_ITER_SCALE, LIST_HEIGHT * ARC_LIST_ITER_SCALE)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(1), Rect(offsetX, -offsetY, LIST_WIDTH * ARC_LIST_ITER_SCALE
+        , LIST_HEIGHT * ARC_LIST_ITER_SCALE)));
 
     /**
      * @tc.cases: bottomOffset == topOffset > 0
