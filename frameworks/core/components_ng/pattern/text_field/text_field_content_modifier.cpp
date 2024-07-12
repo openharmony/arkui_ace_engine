@@ -44,12 +44,6 @@ const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
     FontWeight::W400,
 };
 constexpr float ROUND_VALUE = 0.5f;
-constexpr float RACE_MOVE_PERCENT_MIN = 0.0f;
-constexpr float RACE_MOVE_PERCENT_MAX = 100.0f;
-constexpr uint32_t RACE_DURATION = 2000;
-constexpr float RACE_SPACE_WIDTH = 48.0f;
-constexpr float RACE_DURATION_RATIO = 85.0f;
-constexpr float RACE_DURATION_SCALE = 4.0f;
 constexpr Dimension DEFAULT_FADEOUT_VP = 16.0_vp;
 
 inline FontWeight ConvertFontWeight(FontWeight fontWeight)
@@ -169,7 +163,6 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     fontFamilyString_ = AceType::MakeRefPtr<PropertyString>("");
     fontReady_ = AceType::MakeRefPtr<PropertyBool>(false);
     contentChange_ = AceType::MakeRefPtr<PropertyBool>(false);
-    racePercentFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
     AttachProperty(contentOffset_);
     AttachProperty(contentSize_);
     AttachProperty(textValue_);
@@ -185,7 +178,6 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     AttachProperty(fontFamilyString_);
     AttachProperty(fontReady_);
     AttachProperty(contentChange_);
-    AttachProperty(racePercentFloat_);
 }
 
 void TextFieldContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
@@ -562,52 +554,6 @@ void TextFieldContentModifier::UpdateTextDecorationMeasureFlag(PropertyChangeFla
     }
 }
 
-void TextFieldContentModifier::StartTextRace()
-{
-    if (textRacing_) {
-        return;
-    }
-
-    textRacing_ = true;
-
-    textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    if (pipeline) {
-        textRaceSpaceWidth_ *= pipeline->GetDipScale();
-    }
-
-    auto duration = GetTextFadeDuration();
-    AnimationOption option = AnimationOption();
-    RefPtr<Curve> curve = MakeRefPtr<LinearCurve>();
-    option.SetDuration(duration);
-    option.SetDelay(0);
-    option.SetCurve(curve);
-    option.SetIteration(-1);
-    raceAnimation_ = AnimationUtils::StartAnimation(option, [&]() { racePercentFloat_->Set(RACE_MOVE_PERCENT_MAX); });
-}
-
-void TextFieldContentModifier::StopTextRace()
-{
-    if (!textRacing_) {
-        return;
-    }
-
-    if (raceAnimation_) {
-        AnimationUtils::StopAnimation(raceAnimation_);
-    }
-
-    textRacing_ = false;
-    racePercentFloat_->Set(RACE_MOVE_PERCENT_MIN);
-}
-
-float TextFieldContentModifier::GetTextRacePercent()
-{
-    if (racePercentFloat_) {
-        return racePercentFloat_->Get();
-    }
-    return 0;
-}
-
 void TextFieldContentModifier::DoNormalDraw(DrawingContext& context)
 {
     auto& canvas = context.canvas;
@@ -719,42 +665,26 @@ void TextFieldContentModifier::DrawTextFadeout(DrawingContext& context)
     auto contentOffset = contentOffset_->Get();
     auto contentRect = frameNode->GetGeometryNode()->GetContentRect();
     auto contentRectX = contentRect.GetX();
-    auto textRectX = textFieldPattern->GetTextRect().GetX();
+    auto textRect = textFieldPattern->GetTextRect();
+    auto textRectX = textRect.GetX();
     auto textWidth = paragraph->GetTextWidth();
     auto leftFadeOn = false;
     auto rigthFadeOn = false;
     auto gradientPercent = DEFAULT_FADEOUT_VP.ConvertToPx() / context.width;
-    auto textFadeRect = contentRect;
+    auto textFadeRect = RectF(contentRect.GetX(), contentOffset.GetY(), contentRect.Width(),
+        std::max(textRect.Height(), contentRect.Height()));
     AdjustTextFadeRect(textFadeRect);
+
     RSRect clipTextInnerRect = RSRect(textFadeRect.GetX(), textFadeRect.GetY(),
         textFadeRect.Width() + textFadeRect.GetX(), textFadeRect.GetY() + textFadeRect.Height());
     canvas.ClipRect(clipTextInnerRect, RSClipOp::INTERSECT);
 
-    if (!textRacing_) {
-        if (GreatNotEqual(textWidth, contentRect.Width())) {
-            leftFadeOn = LessNotEqual(textRectX, contentRectX);
-            rigthFadeOn = GreatNotEqual((textRectX + textWidth), contentRect.Right());
-        }
-        paragraph->Paint(canvas, textRectX, contentOffset.GetY());
-    } else {
-        float textRacePercent = GetTextRacePercent();
-        float paragraph1Offset = (textWidth + textRaceSpaceWidth_) * textRacePercent / RACE_MOVE_PERCENT_MAX * -1;
-        auto textStartX = textRectX + paragraph1Offset;
+    paragraph->Paint(canvas, textRectX, contentOffset.GetY());
 
-        if ((paragraph1Offset + textWidth) > 0) {
-            leftFadeOn = true;
-            rigthFadeOn = GreatNotEqual(textStartX + textWidth, contentRect.Right());
-            paragraph->Paint(canvas, textStartX, contentOffset.GetY());
-        }
-        float paragraph2Offset = paragraph1Offset + (textWidth + textRaceSpaceWidth_);
-        if (paragraph2Offset < contentRect.Width()) {
-            textStartX = textRectX + paragraph2Offset;
-            rigthFadeOn = true;
-            if (!leftFadeOn) {
-                leftFadeOn = LessNotEqual(textStartX, contentRect.Left());
-            }
-            paragraph->Paint(canvas, textStartX, contentOffset.GetY());
-        }
+    auto textIndent = std::max(textFieldPattern->GetTextIndent(), 0.0f);
+    if (GreatNotEqual(textWidth + textIndent, contentRect.Width())) {
+        leftFadeOn = LessNotEqual(textRectX, contentRectX);
+        rigthFadeOn = GreatNotEqual((textRectX + textWidth + textIndent), contentRect.Right());
     }
     UpdateTextFadeout(canvas, textFadeRect, gradientPercent, leftFadeOn, rigthFadeOn);
 }
@@ -765,19 +695,6 @@ void TextFieldContentModifier::AdjustTextFadeRect(RectF& textFadeRect)
 
     textFadeRect -= OffsetF(TEXT_FADE_ADJUST_PX, TEXT_FADE_ADJUST_PX);
     textFadeRect += SizeF((TEXT_FADE_ADJUST_PX + TEXT_FADE_ADJUST_PX), (TEXT_FADE_ADJUST_PX + TEXT_FADE_ADJUST_PX));
-}
-
-float TextFieldContentModifier::GetTextFadeDuration() const
-{
-    auto duration = RACE_DURATION;
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
-    CHECK_NULL_RETURN(textFieldPattern, duration);
-    auto paragraph = textFieldPattern->GetParagraph();
-    CHECK_NULL_RETURN(paragraph, duration);
-    duration = static_cast<int32_t>(std::abs(paragraph->GetTextWidth() + textRaceSpaceWidth_) * RACE_DURATION_RATIO);
-    duration /= RACE_DURATION_SCALE;
-
-    return duration;
 }
 
 void TextFieldContentModifier::UpdateTextFadeout(

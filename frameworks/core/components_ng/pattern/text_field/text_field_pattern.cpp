@@ -527,6 +527,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (config.frameSizeChange) {
         ScheduleDisappearDelayTask();
     }
+    textIndent_ = textFieldLayoutAlgorithm->GetTextIndent();
     return true;
 }
 
