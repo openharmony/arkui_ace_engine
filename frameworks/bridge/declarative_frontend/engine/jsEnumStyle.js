@@ -1166,7 +1166,7 @@ var PlaybackSpeed;
 
 var MixedMode;
 (function (MixedMode) {
-  MixedMode[MixedMode["ALL"] = 0] = "All";
+  MixedMode[MixedMode["All"] = 0] = "All";
   MixedMode[MixedMode["Compatible"] = 1] = "Compatible";
   MixedMode[MixedMode["None"] = 2] = "None";
 })(MixedMode || (MixedMode = {}));
