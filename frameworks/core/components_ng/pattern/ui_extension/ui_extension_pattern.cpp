@@ -475,6 +475,7 @@ void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     ContainerScope scope(instanceId_);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveOnAreaChangeNode(id);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->UnregisterSurfacePositionChangedCallback(callbackId_);
 }
