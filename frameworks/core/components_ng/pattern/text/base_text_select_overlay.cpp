@@ -902,11 +902,17 @@ void BaseTextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
     if (isStartScroll || isStartAnimation || isTransformChanged || isStartTransition) {
         HideMenu(true);
     }
-    if (isSwitchToEmbed) {
-        SwitchToEmbedMode();
-    } else {
-        SwitchToOverlayMode();
-    }
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAfterRenderTask([weak = WeakClaim(this), isSwitchToEmbed]() {
+        auto overlay = weak.Upgrade();
+        CHECK_NULL_VOID(overlay);
+        if (isSwitchToEmbed) {
+            overlay->SwitchToEmbedMode();
+        } else {
+            overlay->SwitchToOverlayMode();
+        }
+    });
 }
 
 bool BaseTextSelectOverlay::IsAncestorNodeStartAnimation(FrameNodeChangeInfoFlag flag)
