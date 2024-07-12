@@ -100,11 +100,6 @@ public:
         }
     }
 
-    bool HasCallback() const
-    {
-        return static_cast<bool>(callback_);
-    }
-
     void UpdateShouldDismiss(std::function<void()>&& shouldDismiss)
     {
         shouldDismiss_ = std::move(shouldDismiss);

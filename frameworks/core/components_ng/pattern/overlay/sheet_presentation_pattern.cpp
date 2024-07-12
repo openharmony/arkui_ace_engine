@@ -1307,6 +1307,7 @@ void SheetPresentationPattern::BubbleStyleSheetTransition(bool isTransitionIn)
                 overlayManager->DestroySheet(node, pattern->GetSheetKey());
                 pattern->FireCallback("false");
             });
+        overlayManager->CleanSheet(host, GetSheetKey());
     }
 }
 
@@ -1448,10 +1449,8 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
     } else {
         host->OnAccessibilityEvent(
             AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-        if (sheetPattern->HasCallback()) {
-            sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
-                HitTestMode::HTMTRANSPARENT);
-        }
+        sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
+            HitTestMode::HTMTRANSPARENT);
         animation_ = AnimationUtils::StartAnimation(
             option,
             [context, this]() {
@@ -1461,6 +1460,9 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
                 }
             },
             option.GetOnFinishEvent());
+        const auto& overlayManager = GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->CleanSheet(host, GetSheetKey());
     }
 }
 

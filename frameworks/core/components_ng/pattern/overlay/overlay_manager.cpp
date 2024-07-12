@@ -3079,8 +3079,7 @@ bool OverlayManager::SheetPageExitProcess(const RefPtr<FrameNode>& topModalNode)
     }
     auto maskNode = GetSheetMask(topModalNode);
     if (maskNode) {
-        PlaySheetMaskTransition(
-            maskNode, false, topModalNode->GetPattern<SheetPresentationPattern>()->HasCallback());
+        PlaySheetMaskTransition(maskNode, false);
     }
     auto sheetType = topModalNode->GetPattern<SheetPresentationPattern>()->GetSheetType();
     if (sheetType == SheetType::SHEET_POPUP) {
@@ -3722,7 +3721,7 @@ void OverlayManager::CloseSheet(const SheetKey& sheetKey)
     ModalPageLostFocus(sheetNode);
     auto maskNode = GetSheetMask(sheetNode);
     if (maskNode) {
-        PlaySheetMaskTransition(maskNode, false, sheetNode->GetPattern<SheetPresentationPattern>()->HasCallback());
+        PlaySheetMaskTransition(maskNode, false);
     }
     auto sheetType = sheetNode->GetPattern<SheetPresentationPattern>()->GetSheetType();
     if (sheetType == SheetType::SHEET_POPUP) {
@@ -3951,10 +3950,7 @@ void OverlayManager::PlaySheetTransition(
                 overlayManager->RemoveChildWithService(root, sheetParent);
                 root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             });
-        if (sheetPattern->HasCallback()) {
-            sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
-                HitTestMode::HTMTRANSPARENT);
-        }
+        sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
         AnimationUtils::Animate(
             option,
             [context, sheetMaxHeight]() {
@@ -4288,7 +4284,7 @@ RefPtr<FrameNode> OverlayManager::CreateSheetMask(const RefPtr<FrameNode>& sheet
     auto pipeline = sheetPageNode->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     pipeline->FlushUITasks();
-    PlaySheetMaskTransition(maskNode, true, sheetPageNode->GetPattern<SheetPresentationPattern>()->HasCallback());
+    PlaySheetMaskTransition(maskNode, true);
     ComputeSheetOffset(sheetStyle, sheetPageNode);
     return maskNode;
 }
@@ -4413,7 +4409,7 @@ void OverlayManager::PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode,
     }
 }
 
-void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool isTransitionIn, bool needTransparent)
+void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool isTransitionIn)
 {
     AnimationOption option;
     const RefPtr<InterpolatingSpring> curve =
@@ -4441,10 +4437,7 @@ void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool is
                 auto root = overlayManager->FindWindowScene(mask);
                 CHECK_NULL_VOID(root);
             });
-        if (needTransparent) {
-            maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
-                HitTestMode::HTMTRANSPARENT);
-        }
+        maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
         context->OpacityAnimation(option, 1.0, 0.0);
     }
 }
@@ -4670,7 +4663,7 @@ void OverlayManager::ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPt
     }
 }
 
-void OverlayManager::DestroySheet(const RefPtr<FrameNode>& sheetNode, const SheetKey& sheetKey)
+void OverlayManager::CleanSheet(const RefPtr<FrameNode>& sheetNode, const SheetKey& sheetKey)
 {
     if (modalStack_.empty()) {
         return;
@@ -4688,20 +4681,24 @@ void OverlayManager::DestroySheet(const RefPtr<FrameNode>& sheetNode, const Shee
     if (mapSheetNode->GetPattern<SheetPresentationPattern>()->GetTargetId() != sheetKey.targetId) {
         return;
     }
-    auto rootNode = FindWindowScene(sheetNode);
-    CHECK_NULL_VOID(rootNode);
-    auto root = DynamicCast<FrameNode>(rootNode);
     ModalPageLostFocus(mapSheetNode);
-    sheetNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
-    auto sheetParent = DynamicCast<FrameNode>(sheetNode->GetParent());
-    CHECK_NULL_VOID(sheetParent);
-    RemoveChildWithService(root, sheetParent);
-    root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     sheetMap_.erase(sheetKey);
     CleanViewContextMap(Container::CurrentId(), sheetKey.contentId);
     RemoveSheetNode(sheetNode);
     FireModalPageHide();
     SaveLastModalNode();
+}
+
+void OverlayManager::DestroySheet(const RefPtr<FrameNode>& sheetNode, const SheetKey& sheetKey)
+{
+    auto rootNode = FindWindowScene(sheetNode);
+    CHECK_NULL_VOID(rootNode);
+    auto root = DynamicCast<FrameNode>(rootNode);
+    sheetNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
+    auto sheetParent = DynamicCast<FrameNode>(sheetNode->GetParent());
+    CHECK_NULL_VOID(sheetParent);
+    RemoveChildWithService(root, sheetParent);
+    root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void OverlayManager::DeleteModal(int32_t targetId, bool needOnWillDisappear)
