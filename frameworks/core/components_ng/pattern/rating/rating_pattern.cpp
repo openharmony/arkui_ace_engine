@@ -501,9 +501,17 @@ void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto ratingTheme = pipeline->GetTheme<RatingTheme>();
     CHECK_NULL_VOID(ratingTheme);
     auto radius = ratingTheme->GetFocusBorderRadius();
+    auto focusButtonRect = RectF(static_cast<float>(wholeStarNum) * singleStarWidth_ + offsetLeft, offsetTop,
+        singleStarWidth_, singleStarHeight);
+    auto focusSpace = ratingTheme->GetFocusSpace().ConvertToPx();
+    focusButtonRect -= OffsetF(focusSpace, focusSpace);
+    focusButtonRect += SizeF(focusSpace + focusSpace, focusSpace + focusSpace);
+    PaintFocusRect(paintRect, focusButtonRect, radius);
+}
 
-    paintRect.SetRect(RectF(static_cast<float>(wholeStarNum) * singleStarWidth_ + offsetLeft, offsetTop,
-        singleStarWidth_, singleStarHeight));
+void RatingPattern::PaintFocusRect(RoundRect& paintRect, RectF& focusButtonRect, Dimension& radius)
+{
+    paintRect.SetRect(focusButtonRect);
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
         static_cast<RSScalar>(radius.ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
@@ -611,6 +619,11 @@ void RatingPattern::SetModifierFocus(bool isFocus)
 {
     isfocus_ = isFocus;
     if (isfocus_) {
+        auto pipline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipline);
+        if (!pipline->GetIsFocusActive()) {
+            return;
+        }
         state_ = RatingModifier::RatingAnimationType::FOCUS;
     } else {
         state_ = RatingModifier::RatingAnimationType::NONE;
