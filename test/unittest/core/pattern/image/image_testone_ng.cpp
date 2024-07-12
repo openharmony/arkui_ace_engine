@@ -1703,6 +1703,8 @@ void ImageModelNGTest001_MixedProperties02(ImageModelNG &image)
 
     auto fitOriginalSize = ImageModelNG::GetFitOriginalSize(frameNode);
     EXPECT_EQ(fitOriginalSize, false);
+
+    ImageModelNG::SetBackBorder(frameNode);
 }
 
 void ImageModelNGTest001_MixedProperties03(ImageModelNG &image)
@@ -1713,6 +1715,7 @@ void ImageModelNGTest001_MixedProperties03(ImageModelNG &image)
 
     image.EnableAnalyzer(false);
     ImageModelNG::EnableAnalyzer(frameNode, true);
+    imagePattern->SetImageType(ImagePattern::ImageType::ANIMATION);
     ImageModelNG::ResetImageSrc(frameNode);
     auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo();
     ASSERT_EQ(imageSourceInfo->GetSrc(), "");
@@ -1759,5 +1762,42 @@ HWTEST_F(ImageTestOneNg, ImageModelNGTest001, TestSize.Level1)
     ImageModelNGTest001_MixedProperties02(image);
     ImageModelNGTest001_MixedProperties03(image);
     frameNode->MarkModifyDone();
+}
+
+/**
+ * @tc.name: ImagePatternTest001
+ * @tc.desc: Test ImagePattern related method calls.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestOneNg, ImagePatternTest001, TestSize.Level1)
+{
+    CreatePixelMapAnimator(1);
+    auto [frameNode, imageLayoutProperty, imagePattern, imageRenderProperty] = GetCompoment();
+    auto contain = "CONTAIN";
+    auto cover = "COVER";
+    auto fill = "FILL";
+    auto fitWidth = "FITWIDTH";
+    auto fitHeight = "FITHEIGHT";
+    auto none = "NONE";
+    auto scaleDown = "SCALE_DOWN";
+    auto topLeft = "TOP_LEFT";
+    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::CONTAIN), contain);
+    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::COVER), cover);
+    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::FILL), fill);
+    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::FITWIDTH), fitWidth);
+    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::FITHEIGHT), fitHeight);
+    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::NONE), none);
+    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::SCALE_DOWN), scaleDown);
+    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::TOP_LEFT), topLeft);
+    EXPECT_EQ(imagePattern->GetImageFitStr(ImageFit::START), cover);
+
+    auto noRepeat = "NO_REPEAT";
+    auto repeat = "REPEAT_XY";
+    auto repeatX = "REPEAT_X";
+    auto repeatY = "REPEAT_Y";
+    EXPECT_EQ(imagePattern->GetImageRepeatStr(ImageRepeat::NO_REPEAT), noRepeat);
+    EXPECT_EQ(imagePattern->GetImageRepeatStr(ImageRepeat::REPEAT), repeat);
+    EXPECT_EQ(imagePattern->GetImageRepeatStr(ImageRepeat::REPEAT_X), repeatX);
+    EXPECT_EQ(imagePattern->GetImageRepeatStr(ImageRepeat::REPEAT_Y), repeatY);
 }
 } // namespace OHOS::Ace::NG
