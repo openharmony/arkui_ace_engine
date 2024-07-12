@@ -43,6 +43,7 @@
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/picker/date_time_animation_controller.h"
@@ -1663,6 +1664,117 @@ HWTEST_F(DatePickerTestUpdate, DataPickerViewUpdate007, TestSize.Level1)
     EXPECT_EQ(limitEndDate_.GetYear(), pickerProperty->GetSelectedDate()->year);
     EXPECT_EQ(limitEndDate_.GetMonth(), pickerProperty->GetSelectedDate()->month);
     EXPECT_EQ(limitEndDate_.GetDay(), pickerProperty->GetSelectedDate()->day);
+}
+
+/**
+ * @tc.name: DatePickerModelNGTest001
+ * @tc.desc: Test SetSelectedTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, DatePickerModelNGTest001, TestSize.Level1)
+{
+    CreateDatePickerColumnNode();
+    DatePickerModelNG datePickerModelNG;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    PickerTextStyle value;
+
+    datePickerModelNG.SetSelectedTextStyle(theme, value);
+    EXPECT_TRUE(pickerProperty->HasSelectedFontSize());
+    datePickerModelNG.SetSelectedTextStyle(frameNode, theme, value);
+    EXPECT_TRUE(pickerProperty->HasSelectedFontSize());
+}
+
+/**
+ * @tc.name: DatePickerPatternTest001
+ * @tc.desc: Test FillLunarMonthDaysOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, DatePickerPatternTest001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create datePickerPattern.
+     */
+    CreateDatePickerColumnNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    RefPtr<FrameNode> monthDaysColumn = datePickerPattern->GetColumn(columnNode_->GetId());
+    LunarDate lunarDate;
+    /**
+     * @tc.step: step2. Set default date.
+     * @tc.expected: the result of CurrentIndex is correct.
+     */
+    lunarDate.year = 1900;
+    lunarDate.month = 12;
+    lunarDate.day = 1;
+    lunarDate.isLeapMonth = false;
+    datePickerPattern->FillLunarMonthDaysOptions(lunarDate, monthDaysColumn);
+    EXPECT_NE(columnPattern_->GetCurrentIndex(), 0);
+    /**
+     * @tc.step: step3. Set lunar date.
+     * @tc.expected: the result of CurrentIndex is correct.
+     */
+    lunarDate.year = 1903;
+    lunarDate.month = 5;
+    lunarDate.day = 1;
+    lunarDate.isLeapMonth = true;
+    datePickerPattern->FillLunarMonthDaysOptions(lunarDate, monthDaysColumn);
+    EXPECT_NE(columnPattern_->GetCurrentIndex(), 0);
+}
+
+/**
+ * @tc.name: DatePickerDialogViewTest001
+ * @tc.desc: Test SwitchPickerPage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, DatePickerDialogViewTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create pickeDialog.
+     */
+    DatePickerSettingData settingData;
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = true;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto dateNode = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(0));
+    auto pickerRow = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(1));
+    auto monthDaysNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(0));
+    auto timePickerNode = AceType::DynamicCast<NG::FrameNode>(pickerRow->GetChildAtIndex(1));
+    /**
+     * @tc.steps: step2.call CreateButtonNodeForAging.
+     * @tc.expected:CreateButtonNodeForAging is executed correctly.
+     */
+    auto contentColumn = AceType::DynamicCast<NG::FrameNode>(customNode);
+    RefPtr<DateTimeAnimationController> animationController = AceType::MakeRefPtr<DateTimeAnimationController>();
+    DatePickerDialogView::isUserSetFont_ = false;
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->fontScale_ = 2.0f;
+    DatePickerDialogView::SwitchPickerPage(pickerStack, contentColumn, animationController, true);
+    EXPECT_TRUE(DatePickerDialogView::switchFlag_);
+    DatePickerDialogView::SwitchPickerPage(pickerStack, contentColumn, animationController, false);
+    EXPECT_FALSE(DatePickerDialogView::switchFlag_);
 }
 
 /**
