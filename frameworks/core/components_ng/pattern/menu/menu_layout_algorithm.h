@@ -52,7 +52,8 @@ class MenuPattern;
 class MenuLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(MenuLayoutAlgorithm, BoxLayoutAlgorithm)
 public:
-    MenuLayoutAlgorithm(int32_t id, const std::string& tag);
+    MenuLayoutAlgorithm(int32_t id, const std::string& tag,
+        const std::optional<OffsetF>& lastPosition = std::nullopt);
     MenuLayoutAlgorithm() = default;
     ~MenuLayoutAlgorithm() override;
 
@@ -210,7 +211,9 @@ private:
 
     void CalculateIdealSize(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint,
         PaddingPropertyF padding, SizeF& idealSize, RefPtr<FrameNode> parentItem);
+    void TranslateOptions(LayoutWrapper* layoutWrapper);
 
+    std::optional<OffsetF> lastPosition_;
     OffsetF targetOffset_;
     SizeF targetSize_;
     Placement placement_ = Placement::BOTTOM_LEFT;

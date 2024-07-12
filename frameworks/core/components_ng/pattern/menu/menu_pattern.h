@@ -498,6 +498,10 @@ public:
     {
         lastSelectedItem_ = lastSelectedItem;
     }
+    void UpdateLastPosition(std::optional<OffsetF> lastPosition)
+    {
+        lastPosition_ = lastPosition;
+    }
 
     void SetIsEmbedded()
     {
@@ -586,6 +590,7 @@ private:
     bool hasAnimation_ = true;
     bool needHideAfterTouch_ = true;
 
+    std::optional<OffsetF> lastPosition_;
     OffsetF originOffset_;
     OffsetF endOffset_;
     OffsetF previewOriginOffset_;

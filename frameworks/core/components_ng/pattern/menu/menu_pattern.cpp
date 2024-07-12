@@ -857,7 +857,7 @@ RefPtr<LayoutAlgorithm> MenuPattern::CreateLayoutAlgorithm()
         case MenuType::SELECT_OVERLAY_SUB_MENU:
             return MakeRefPtr<SubMenuLayoutAlgorithm>();
         default:
-            return MakeRefPtr<MenuLayoutAlgorithm>(targetId_, targetTag_);
+            return MakeRefPtr<MenuLayoutAlgorithm>(targetId_, targetTag_, lastPosition_);
     }
 }
 
