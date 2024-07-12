@@ -1937,6 +1937,7 @@ void VideoPattern::OnWindowHide()
 {
 #if defined(OHOS_PLATFORM)
     if (!BackgroundTaskHelper::GetInstance().HasBackgroundTask()) {
+        autoPlay_ = false;
         Pause();
     }
 #else
