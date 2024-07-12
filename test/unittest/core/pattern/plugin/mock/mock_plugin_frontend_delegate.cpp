@@ -229,8 +229,7 @@ double PluginFrontendDelegate::MeasureText(const MeasureContext& context)
     return 0;
 }
 
-void PluginFrontendDelegate::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
-    const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
+void PluginFrontendDelegate::ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback)
 {}
 
 void PluginFrontendDelegate::ShowDialog(const std::string& title, const std::string& message,

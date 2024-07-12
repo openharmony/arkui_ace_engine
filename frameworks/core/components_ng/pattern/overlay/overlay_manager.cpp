@@ -1146,8 +1146,7 @@ bool OverlayManager::IsContextMenuBindedOnOrigNode()
     return focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
 }
 
-void OverlayManager::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
-    bool isRightToLeft, const ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
+void OverlayManager::ShowToast(const NG::ToastInfo& toastInfo, const std::function<void(int32_t)>& callback)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast enter");
     auto context = PipelineContext::GetCurrentContext();
@@ -1160,7 +1159,6 @@ void OverlayManager::ShowToast(const std::string& message, int32_t duration, con
         rootNode->RemoveChild(toastNodeWeak.Upgrade());
     }
     toastMap_.clear();
-    ToastInfo toastInfo = {message, duration, bottom, isRightToLeft, showMode, alignment, offset};
     auto toastNode = ToastView::CreateToastNode(toastInfo);
     CHECK_NULL_VOID(toastNode);
     auto toastId = toastNode->GetId();
@@ -1169,7 +1167,37 @@ void OverlayManager::ShowToast(const std::string& message, int32_t duration, con
     toastNode->MountToParent(rootNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     toastMap_[toastId] = toastNode;
-    OpenToastAnimation(toastNode, duration);
+    if (callback != nullptr) {
+        auto callbackToastId = ((toastId << 3) | // 3 : Use the last 3 bits of callbackToastId to store showMode
+                                (static_cast<int32_t>(toastInfo.showMode) & 0b111));
+        callback(callbackToastId);
+    }
+    OpenToastAnimation(toastNode, toastInfo.duration);
+}
+
+void OverlayManager::CloseToast(int32_t toastId, const std::function<void(int32_t)>& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "close toast enter");
+    if (!callback) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "Parameters of CloseToast are incomplete because of no callback.");
+        callback(ERROR_CODE_INTERNAL_ERROR);
+        return;
+    }
+    auto rootNode = rootNodeWeak_.Upgrade();
+    if (!rootNode) {
+        callback(ERROR_CODE_INTERNAL_ERROR);
+        return;
+    }
+    for (auto [id, toastNodeWeak] : toastMap_) {
+        if (id == toastId) {
+            rootNode->RemoveChild(toastNodeWeak.Upgrade());
+            rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            toastMap_.erase(id);
+            callback(ERROR_CODE_NO_ERROR);
+            return;
+        }
+    }
+    callback(ERROR_CODE_TOAST_NOT_FOUND);
 }
 
 void OverlayManager::OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int32_t duration)

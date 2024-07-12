@@ -1566,28 +1566,44 @@ Size FrontendDelegateDeclarative::MeasureTextSize(MeasureContext context)
     return MeasureUtil::MeasureTextSize(context);
 }
 
-void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
-    const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
+void FrontendDelegateDeclarative::ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast enter");
-    int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
-    bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    NG::ToastInfo updatedToastInfo = toastInfo;
+    updatedToastInfo.duration = std::clamp(toastInfo.duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
+    updatedToastInfo.isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::IsCurrentUseNewPipeline()) {
-        auto task = [durationTime, message, bottom, isRightToLeft, showMode, alignment, offset,
-                        containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+        auto task = [updatedToastInfo, callbackParam = std::move(callback), containerId = Container::CurrentId()](
+                        const RefPtr<NG::OverlayManager>& overlayManager) {
             CHECK_NULL_VOID(overlayManager);
             ContainerScope scope(containerId);
-            overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode, alignment, offset);
+            overlayManager->ShowToast(
+                updatedToastInfo, std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
         };
         MainWindowOverlay(std::move(task), "ArkUIOverlayShowToast");
         return;
     }
     auto pipeline = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     taskExecutor_->PostTask(
-        [durationTime, message, bottom, isRightToLeft, context = pipeline] {
-            ToastComponent::GetInstance().Show(context, message, durationTime, bottom, isRightToLeft);
+        [updatedToastInfo, context = pipeline] {
+            ToastComponent::GetInstance().Show(context, updatedToastInfo.message, updatedToastInfo.duration,
+                updatedToastInfo.bottom, updatedToastInfo.isRightToLeft);
         },
         TaskExecutor::TaskType::UI, "ArkUIShowToast");
+}
+
+void FrontendDelegateDeclarative::CloseToast(const int32_t toastId, std::function<void(int32_t)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "close toast enter");
+    auto currentId = Container::CurrentId();
+    ContainerScope scope(currentId);
+
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->CloseToast(toastId, std::move(callback));
 }
 
 void FrontendDelegateDeclarative::SetToastStopListenerCallback(std::function<void()>&& stopCallback)
