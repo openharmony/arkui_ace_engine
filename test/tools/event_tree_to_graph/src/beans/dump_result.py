@@ -33,7 +33,7 @@ class DumpResult(BaseBean):
         self.check_parse_result()
         if self.is_succeed():
             self.update_tree_info()
-        print('parse result: ' + self.to_string())
+        log_info('parse result: ' + self.to_string())
 
     def parse_event_trees(self, input_str):
         if input_str is None or len(input_str) == 0:
