@@ -82,7 +82,8 @@ public:
     }
 
     virtual void DestroyView() {}
-    virtual bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node, uint32_t autoFillSessionId)
+    virtual bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
+        uint32_t autoFillSessionId, bool isNative = true)
     {
         return false;
     }
@@ -246,7 +247,7 @@ public:
     {
         return false;
     }
-    
+
     virtual void SetIsFormRender(bool isFormRender) {};
 
     const std::string& GetCardHapPath() const
@@ -482,13 +483,13 @@ public:
     }
 
     virtual bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
-        bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId)
+        bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true)
     {
         return false;
     }
 
     virtual bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish = nullptr,
-        const std::function<void()>& onUIExtNodeBindingCompleted = nullptr)
+        const std::function<void()>& onUIExtNodeBindingCompleted = nullptr, bool isNative = true)
     {
         return false;
     }

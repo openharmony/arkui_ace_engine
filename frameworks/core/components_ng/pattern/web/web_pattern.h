@@ -25,6 +25,7 @@
 #include "base/thread/cancelable_callback.h"
 #include "base/utils/utils.h"
 #include "base/geometry/axis.h"
+#include "base/web/webview/ohos_nweb/include/nweb_autofill.h"
 #include "base/web/webview/ohos_nweb/include/nweb_handler.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/components/dialog/dialog_properties.h"
@@ -188,6 +189,13 @@ public:
 
 
     void OnModifyDone() override;
+
+    std::vector<RefPtr<PageNodeInfoWrap>> GetVirtualPageNodeInfo() override;
+
+    void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
+        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
+
+    void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) override;
 
     void SetWebSrc(const std::string& webSrc)
     {
@@ -527,6 +535,16 @@ public:
     {
         isCurrentStartHandleDragging_ = isStartHandle;
     }
+    void ParseViewDataNumber(const std::string& key, int32_t value,
+        RefPtr<PageNodeInfoWrap> node, RectT<float>& rect, float viewScale);
+    void ParseNWebViewDataNode(std::unique_ptr<JsonValue> child,
+        std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, int32_t nodeId);
+    void ParseNWebViewDataJson(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson,
+        std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, OHOS::NWeb::NWebAutofillEvent& eventType);
+    void HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
+    bool RequestAutoFill(AceAutoFillType autoFillType);
+    bool RequestAutoSave();
+    bool UpdateAutoFillPopup();
     void UpdateSelectHandleInfo();
     bool IsSelectHandleReverse();
     void OnCompleteSwapWithNewSize();
@@ -1010,6 +1028,8 @@ private:
     bool textBlurAccessibilityEnable_ = false;
     TextBlurCallback textBlurCallback_ = nullptr;
     WebComponentClickCallback webComponentClickCallback_ = nullptr;
+    uint32_t autoFillSessionId_ = 0;
+    std::vector<RefPtr<PageNodeInfoWrap>> pageNodeInfo_;
 };
 } // namespace OHOS::Ace::NG
 

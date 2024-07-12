@@ -61,6 +61,8 @@
 #include "core/common/ace_engine_ext.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/common/udmf/unified_data.h"
+#include "page_node_info.h"
+#include "auto_fill_type.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -162,6 +164,35 @@ std::string ParseTextJsonValue(const std::string& textJson)
     }
     return "";
 }
+
+const std::map<std::string, AceAutoFillType> NWEB_AUTOFILL_TYPE_TO_ACE = {
+    {OHOS::NWeb::NWEB_AUTOFILL_NAME, AceAutoFillType::ACE_PERSON_FULL_NAME},
+    {OHOS::NWeb::NWEB_AUTOFILL_FAMILY_NAME, AceAutoFillType::ACE_PERSON_LAST_NAME},
+    {OHOS::NWeb::NWEB_AUTOFILL_GIVEN_NAME, AceAutoFillType::ACE_PERSON_FIRST_NAME},
+    {OHOS::NWeb::NWEB_AUTOFILL_NICKNAME, AceAutoFillType::ACE_NICKNAME},
+    {OHOS::NWeb::NWEB_AUTOFILL_EMAIL, AceAutoFillType::ACE_EMAIL_ADDRESS},
+    {OHOS::NWeb::NWEB_AUTOFILL_STREET_ADDRESS, AceAutoFillType::ACE_FULL_STREET_ADDRESS},
+    {OHOS::NWeb::NWEB_AUTOFILL_ID_CARD_NUMBER, AceAutoFillType::ACE_ID_CARD_NUMBER},
+    {OHOS::NWeb::NWEB_AUTOFILL_TEL_NATIONAL, AceAutoFillType::ACE_PHONE_NUMBER},
+};
+
+const std::map<AceAutoFillType, std::string> ACE_AUTOFILL_TYPE_TO_NWEB = {
+    {AceAutoFillType::ACE_PERSON_FULL_NAME, OHOS::NWeb::NWEB_AUTOFILL_NAME},
+    {AceAutoFillType::ACE_PERSON_LAST_NAME, OHOS::NWeb::NWEB_AUTOFILL_FAMILY_NAME},
+    {AceAutoFillType::ACE_PERSON_FIRST_NAME, OHOS::NWeb::NWEB_AUTOFILL_GIVEN_NAME},
+    {AceAutoFillType::ACE_NICKNAME, OHOS::NWeb::NWEB_AUTOFILL_NICKNAME},
+    {AceAutoFillType::ACE_EMAIL_ADDRESS, OHOS::NWeb::NWEB_AUTOFILL_EMAIL},
+    {AceAutoFillType::ACE_FULL_STREET_ADDRESS, OHOS::NWeb::NWEB_AUTOFILL_STREET_ADDRESS},
+    {AceAutoFillType::ACE_ID_CARD_NUMBER, OHOS::NWeb::NWEB_AUTOFILL_ID_CARD_NUMBER},
+    {AceAutoFillType::ACE_PHONE_NUMBER, OHOS::NWeb::NWEB_AUTOFILL_TEL_NATIONAL},
+};
+
+const std::map<std::string, OHOS::NWeb::NWebAutofillEvent> NWEB_AUTOFILL_EVENTS = {
+    {OHOS::NWeb::NWEB_AUTOFILL_EVENT_SAVE, OHOS::NWeb::NWebAutofillEvent::SAVE},
+    {OHOS::NWeb::NWEB_AUTOFILL_EVENT_FILL, OHOS::NWeb::NWebAutofillEvent::FILL},
+    {OHOS::NWeb::NWEB_AUTOFILL_EVENT_UPDATE, OHOS::NWeb::NWebAutofillEvent::UPDATE},
+    {OHOS::NWeb::NWEB_AUTOFILL_EVENT_CLOSE, OHOS::NWeb::NWebAutofillEvent::CLOSE},
+};
 } // namespace
 
 constexpr int32_t SINGLE_CLICK_NUM = 1;
@@ -3093,6 +3124,188 @@ void WebPattern::QuickMenuIsNeedNewAvoid(
 void WebPattern::OnQuickMenuDismissed()
 {
     CloseSelectOverlay();
+}
+
+std::vector<RefPtr<PageNodeInfoWrap>> WebPattern::GetVirtualPageNodeInfo()
+{
+    return pageNodeInfo_;
+}
+
+void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
+    RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "called");
+    CHECK_NULL_VOID(viewDataWrap);
+    auto nodeInfoWraps = viewDataWrap->GetPageNodeInfoWraps();
+    auto jsonNode = JsonUtil::Create(true);
+    for (const auto& nodeInfoWrap : nodeInfoWraps) {
+        if (nodeInfoWrap == nullptr) {
+            continue;
+        }
+        auto type = nodeInfoWrap->GetAutoFillType();
+        // white list check
+        if (ACE_AUTOFILL_TYPE_TO_NWEB.count(type) != 0) {
+            std::string key = ACE_AUTOFILL_TYPE_TO_NWEB.at(type);
+            jsonNode->Put(key.c_str(), nodeInfoWrap->GetValue().c_str());
+        }
+    }
+    delegate_->NotifyAutoFillViewData(jsonNode->ToString());
+}
+
+void WebPattern::NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent, bool isPopup)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "called, errCode:%{public}d", errCode);
+}
+
+void WebPattern::ParseViewDataNumber(const std::string& key, int32_t value,
+    RefPtr<PageNodeInfoWrap> node, RectT<float>& rect, float viewScale)
+{
+    CHECK_NULL_VOID(viewScale > 0);
+    std::optional<OffsetF> offset = GetCoordinatePoint();
+    if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_FOCUS) {
+        node->SetIsFocus(static_cast<bool>(value));
+    } else if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_RECT_X) {
+        float x = value / viewScale;
+        rect.SetLeft(x + offset.value_or(OffsetF()).GetX());
+    } else if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_RECT_Y) {
+        float y = value / viewScale;
+        rect.SetTop(y + offset.value_or(OffsetF()).GetY());
+    } else if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_RECT_W) {
+        rect.SetWidth(value / viewScale);
+    } else if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_RECT_H) {
+        rect.SetHeight(value / viewScale);
+    }
+}
+
+void WebPattern::ParseNWebViewDataNode(std::unique_ptr<JsonValue> child,
+    std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, int32_t nodeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    float viewScale = pipelineContext->GetViewScale();
+    CHECK_NULL_VOID(viewScale > 0);
+
+    RefPtr<PageNodeInfoWrap> node = PageNodeInfoWrap::CreatePageNodeInfoWrap();
+    std::string attribute = child->GetKey();
+    // white list check
+    if (NWEB_AUTOFILL_TYPE_TO_ACE.count(attribute) != 0) {
+        AceAutoFillType type = NWEB_AUTOFILL_TYPE_TO_ACE.at(attribute);
+        node->SetAutoFillType(type);
+    } else {
+        return;
+    }
+
+    RectT<float> rect;
+    int32_t len = child->GetArraySize();
+    for (int32_t index = 0; index < len; index++) {
+        auto object = child->GetArrayItem(index);
+        if (object == nullptr || !object->IsObject()) {
+            continue;
+        }
+        for (auto child = object->GetChild(); child && !child->IsNull(); child = child->GetNext()) {
+            if (child->IsString()) {
+                std::string key = child->GetKey();
+                std::string value = child->GetString();
+                node->SetValue(value);
+            } else if (child->IsNumber()) {
+                ParseViewDataNumber(child->GetKey(), child->GetInt(), node, rect, viewScale);
+            }
+        }
+    }
+    NG::RectF rectF;
+    rectF.SetRect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+    node->SetPageNodeRect(rectF);
+    node->SetId(nodeId);
+    node->SetDepth(-1);
+    nodeInfos.emplace_back(node);
+}
+
+void WebPattern::ParseNWebViewDataJson(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson,
+    std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, OHOS::NWeb::NWebAutofillEvent& eventType)
+{
+    auto sourceJson = JsonUtil::ParseJsonString(viewDataJson->GetString());
+    if (sourceJson == nullptr || sourceJson->IsNull()) {
+        return;
+    }
+
+    int32_t nodeId = 1;
+    int32_t len = sourceJson->GetArraySize();
+    for (int32_t index = 0; index < len; index++) {
+        auto object = sourceJson->GetArrayItem(index);
+        if (object == nullptr || !object->IsObject()) {
+            continue;
+        }
+        auto child = object->GetChild();
+        if (child == nullptr || child->IsNull()) {
+            continue;
+        }
+        if (child->IsString()) {
+            std::string value = child->GetString();
+            if (NWEB_AUTOFILL_EVENTS.count(value) != 0) {
+                OHOS::NWeb::NWebAutofillEvent event = NWEB_AUTOFILL_EVENTS.at(value);
+                eventType = event;
+            }
+        } else if (child->IsArray()) {
+            ParseNWebViewDataNode(std::move(child), nodeInfos, nodeId);
+            nodeId++;
+        }
+    }
+}
+
+void WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "called");
+    std::vector<RefPtr<PageNodeInfoWrap>> nodeInfos;
+    OHOS::NWeb::NWebAutofillEvent eventType = OHOS::NWeb::NWebAutofillEvent::UNKNOWN;
+    ParseNWebViewDataJson(viewDataJson, nodeInfos, eventType);
+    pageNodeInfo_ = nodeInfos;
+    if (eventType == OHOS::NWeb::NWebAutofillEvent::SAVE) {
+        RequestAutoSave();
+    } else if (eventType == OHOS::NWeb::NWebAutofillEvent::FILL) {
+        for (const auto& nodeInfo : nodeInfos) {
+            if (nodeInfo->GetIsFocus()) {
+                RequestAutoFill(static_cast<AceAutoFillType>(nodeInfo->GetAutoFillType()));
+                break;
+            }
+        }
+    } else if (eventType == OHOS::NWeb::NWebAutofillEvent::UPDATE) {
+        UpdateAutoFillPopup();
+    } else if (eventType == OHOS::NWeb::NWebAutofillEvent::CLOSE) {
+        // do nothing, popup is automically cancel when losing focus
+    }
+}
+
+bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "called");
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    bool isPopup = false;
+    return container->RequestAutoFill(host, autoFillType, false, isPopup, autoFillSessionId_, false);
+}
+
+bool WebPattern::RequestAutoSave()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "called");
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    return container->RequestAutoSave(host, nullptr, nullptr, false);
+}
+
+bool WebPattern::UpdateAutoFillPopup()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "called");
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    return container->UpdatePopupUIExtension(host, autoFillSessionId_, false);
 }
 
 void WebPattern::UpdateSelectHandleInfo()

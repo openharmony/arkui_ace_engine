@@ -818,6 +818,7 @@ public:
         }
     }
 
+    std::vector<RefPtr<PageNodeInfoWrap>> GetVirtualPageNodeInfo();
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
     void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false);

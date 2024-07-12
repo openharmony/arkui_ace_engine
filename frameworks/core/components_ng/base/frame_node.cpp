@@ -1554,7 +1554,7 @@ void FrameNode::ThrottledVisibleTask()
     GetVisibleRect(visibleRect, frameRect);
     double ratio = IsFrameDisappear() ? VISIBLE_RATIO_MIN
                                       : std::clamp(CalculateCurrentVisibleRatio(visibleRect, frameRect),
-                                      VISIBLE_RATIO_MIN, 
+                                      VISIBLE_RATIO_MIN,
                                       VISIBLE_RATIO_MAX);
     if (NearEqual(ratio, lastThrottledVisibleRatio_)) {
         throttledCallbackOnTheWay_ = false;
@@ -1995,6 +1995,14 @@ RefPtr<FrameNode> FrameNode::GetFirstAutoFillContainerNode()
         parent = parent->GetParent();
     }
     return AceType::DynamicCast<FrameNode>(parent);
+}
+
+std::vector<RefPtr<PageNodeInfoWrap>> FrameNode::GetVirtualPageNodeInfo()
+{
+    if (pattern_) {
+        return pattern_->GetVirtualPageNodeInfo();
+    }
+    return std::vector<RefPtr<PageNodeInfoWrap>> {};
 }
 
 void FrameNode::NotifyFillRequestSuccess(

@@ -1205,8 +1205,8 @@ bool AceContainer::UpdatePage(int32_t instanceId, int32_t pageId, const std::str
 class FillRequestCallback : public AbilityRuntime::IFillRequestCallback {
 public:
     FillRequestCallback(WeakPtr<NG::PipelineContext> pipelineContext, const RefPtr<NG::FrameNode>& node,
-        AceAutoFillType autoFillType)
-        : pipelineContext_(pipelineContext), node_(node), autoFillType_(autoFillType) {}
+        AceAutoFillType autoFillType, bool isNative = true)
+        : pipelineContext_(pipelineContext), node_(node), autoFillType_(autoFillType), isNative_(isNative) {}
     virtual ~FillRequestCallback() = default;
     void OnFillRequestSuccess(const AbilityBase::ViewData& viewData) override
     {
@@ -1217,6 +1217,19 @@ public:
         CHECK_NULL_VOID(taskExecutor);
         auto viewDataWrap = ViewDataWrap::CreateViewDataWrap(viewData);
         CHECK_NULL_VOID(viewDataWrap);
+        if (!isNative_) {
+            auto node = node_.Upgrade();
+            CHECK_NULL_VOID(node);
+            taskExecutor->PostTask(
+                [viewDataWrap, node, autoFillType = autoFillType_]() {
+                    if (node) {
+                        node->NotifyFillRequestSuccess(viewDataWrap, nullptr, autoFillType);
+                    }
+                },
+                TaskExecutor::TaskType::UI, "ArkUINotifyWebFillRequestSuccess");
+            return;
+        }
+
         taskExecutor->PostTask(
             [viewDataWrap, pipelineContext, autoFillType = autoFillType_]() {
                 if (pipelineContext) {
@@ -1247,9 +1260,11 @@ private:
     WeakPtr<NG::PipelineContext> pipelineContext_ = nullptr;
     WeakPtr<NG::FrameNode> node_ = nullptr;
     AceAutoFillType autoFillType_ = AceAutoFillType::ACE_UNSPECIFIED;
+    bool isNative_ = true;
 };
 
-bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node, uint32_t autoFillSessionId)
+bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
+    uint32_t autoFillSessionId, bool isNative)
 {
     CHECK_NULL_RETURN(node, false);
     CHECK_NULL_RETURN(uiWindow_, false);
@@ -1262,6 +1277,11 @@ bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node, uin
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
     CHECK_NULL_RETURN(viewDataWrapOhos, false);
     auto viewData = viewDataWrapOhos->GetViewData();
+    if (!isNative) {
+        std::vector<AbilityBase::PageNodeInfo> nodeInfos;
+        OverwritePageNodeInfo(node, nodeInfos);
+        viewData.nodes = nodeInfos;
+    }
     AbilityRuntime::AutoFillManager::GetInstance().UpdateCustomPopupUIExtension(autoFillSessionId, viewData);
     return true;
 }
@@ -1325,8 +1345,40 @@ void AceContainer::FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPt
     }
 }
 
+void AceContainer::OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& node,
+    std::vector<AbilityBase::PageNodeInfo>& nodeInfos)
+{
+    std::vector<RefPtr<PageNodeInfoWrap>> infos = node->GetVirtualPageNodeInfo();
+    for (const auto& info : infos) {
+        AbilityBase::PageNodeInfo node;
+        node.id = info->GetId();
+        node.depth = -1;
+        node.autoFillType = static_cast<AbilityBase::AutoFillType>(info->GetAutoFillType());
+        node.isFocus = info->GetIsFocus();
+        NG::RectF rectF = info->GetPageNodeRect();
+        node.rect.left = rectF.GetX();
+        node.rect.top = rectF.GetY();
+        node.rect.width = rectF.Width();
+        node.rect.height = rectF.Height();
+        nodeInfos.emplace_back(node);
+    }
+}
+
+void FillAutoFillCustomConfig(const RefPtr<NG::FrameNode>& node,
+    AbilityRuntime::AutoFill::AutoFillCustomConfig& customConfig)
+{
+    CHECK_NULL_VOID(node);
+    AbilityRuntime::AutoFill::PopupSize popupSize;
+    popupSize.height = POPUPSIZE_HEIGHT;
+    popupSize.width = POPUPSIZE_WIDTH;
+    customConfig.targetSize = popupSize;
+    customConfig.isShowInSubWindow = false;
+    customConfig.nodeId = node->GetId();
+    customConfig.isEnableArrow = false;
+}
+
 bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
-    bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId)
+    bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative)
 {
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, autoFillType: %{public}d", static_cast<int32_t>(autoFillType));
     auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
@@ -1342,7 +1394,7 @@ bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFil
     auto autoFillContainerNode = node->GetFirstAutoFillContainerNode();
     uiContentImpl->DumpViewData(autoFillContainerNode, viewDataWrap, true);
     FillAutoFillViewData(node, viewDataWrap);
-    auto callback = std::make_shared<FillRequestCallback>(pipelineContext, node, autoFillType);
+    auto callback = std::make_shared<FillRequestCallback>(pipelineContext, node, autoFillType, isNative);
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
     CHECK_NULL_RETURN(viewDataWrapOhos, false);
     auto viewData = viewDataWrapOhos->GetViewData();
@@ -1352,14 +1404,13 @@ bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFil
         callback->OnFillRequestSuccess(viewData);
         return true;
     }
-    AbilityRuntime::AutoFill::PopupSize popupSize;
-    popupSize.height = POPUPSIZE_HEIGHT;
-    popupSize.width = POPUPSIZE_WIDTH;
+    if (!isNative) {
+        std::vector<AbilityBase::PageNodeInfo> nodeInfos;
+        OverwritePageNodeInfo(node, nodeInfos);
+        viewData.nodes = nodeInfos;
+    }
     AbilityRuntime::AutoFill::AutoFillCustomConfig customConfig;
-    customConfig.targetSize = popupSize;
-    customConfig.isShowInSubWindow = false;
-    customConfig.nodeId = node->GetId();
-    customConfig.isEnableArrow = false;
+    FillAutoFillCustomConfig(node, customConfig);
     AbilityRuntime::AutoFill::AutoFillRequest autoFillRequest;
     autoFillRequest.config = customConfig;
     autoFillRequest.autoFillType = static_cast<AbilityBase::AutoFillType>(autoFillType);
@@ -1416,7 +1467,7 @@ private:
 };
 
 bool AceContainer::RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish,
-    const std::function<void()>& onUIExtNodeBindingCompleted)
+    const std::function<void()>& onUIExtNodeBindingCompleted, bool isNative)
 {
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
     CHECK_NULL_RETURN(uiWindow_, false);
@@ -1432,6 +1483,11 @@ bool AceContainer::RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std:
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
     CHECK_NULL_RETURN(viewDataWrapOhos, false);
     auto viewData = viewDataWrapOhos->GetViewData();
+    if (!isNative) {
+        std::vector<AbilityBase::PageNodeInfo> nodeInfos;
+        OverwritePageNodeInfo(node, nodeInfos);
+        viewData.nodes = nodeInfos;
+    }
     AbilityRuntime::AutoFill::AutoFillRequest autoFillRequest;
     autoFillRequest.viewData = viewData;
     autoFillRequest.autoFillCommand = AbilityRuntime::AutoFill::AutoFillCommand::SAVE;
