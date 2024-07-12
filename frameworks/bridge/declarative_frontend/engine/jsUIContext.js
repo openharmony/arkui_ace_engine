@@ -1093,12 +1093,3 @@ function __checkRegexValid__(pattern) {
         return result;
     }
 }
-
-function __getArkUINode__() {
-    if(globalThis.__XNode__ === undefined) {
-        globalThis.__XNode__ = globalThis.requireNapi('arkui.node');
-    }
-    return globalThis.__XNode__;
-}
-
-globalThis.__getArkUINode__ = __getArkUINode__;
