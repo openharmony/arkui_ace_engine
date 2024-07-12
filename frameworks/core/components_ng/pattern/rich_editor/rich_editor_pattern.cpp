@@ -6236,7 +6236,11 @@ void RichEditorPattern::FireOnSelect(int32_t selectStart, int32_t selectEnd)
 
 void RichEditorPattern::UpdateSelectionType(const SelectionInfo& textSelectInfo)
 {
-    TextPattern::UpdateSelectionType(GetAdjustedSelectionInfo(textSelectInfo));
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        TextPattern::UpdateSelectionType(GetAdjustedSelectionInfo(textSelectInfo));
+    } else {
+        TextPattern::UpdateSelectionType(textSelectInfo);
+    }
 }
 
 SelectionInfo RichEditorPattern::GetAdjustedSelectionInfo(const SelectionInfo& textSelectInfo)
