@@ -1885,4 +1885,106 @@ HWTEST_F(DatePickerTestUpdate, DisappearTextStyle001, TestSize.Level1)
     EXPECT_EQ(selectedStyle.GetFontSize(), pickerProperty->GetDisappearFontSize().value());
     EXPECT_EQ(Ace::FontWeight::MEDIUM, pickerProperty->GetDisappearWeight().value());
 }
+
+/**
+ * @tc.name: ShowContentRowButton001
+ * @tc.desc: Test DatePickerTestUpdate ShowContentRowButton.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, ShowContentRowButton001, TestSize.Level1)
+{
+    bool isFirstPage = true;
+    CreateDatePickerColumnNode();
+    DatePickerDialogView::ShowContentRowButton(columnNode_, isFirstPage);
+}
+
+/**
+ * @tc.name: ShowContentRowButton002
+ * @tc.desc: Test DatePickerTestUpdate ShowContentRowButton.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, ShowContentRowButton002, TestSize.Level1)
+{
+    bool isFirstPage = false;
+    CreateDatePickerColumnNode();
+    DatePickerDialogView::ShowContentRowButton(columnNode_, isFirstPage);
+}
+
+/**
+ * @tc.name: UpdateNextButtonMargin001
+ * @tc.desc: Test DatePickerTestUpdate UpdateNextButtonMargin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, UpdateNextButtonMargin001, TestSize.Level1)
+{
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    CHECK_NULL_VOID(buttonNode);
+    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    RefPtr<ButtonLayoutProperty> buttonLayoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(layoutProperty);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    DatePickerDialogView::UpdateNextButtonMargin(buttonLayoutProperty);
+}
+
+/**
+ * @tc.name: HandleMouseEvent001
+ * @tc.desc: Test DatePickerTestUpdate HandleMouseEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, HandleMouseEvent001, TestSize.Level1)
+{
+    bool isHover = true;
+    auto titleButtonRow = DatePickerDialogView::CreateTitleButtonRowNode();
+    DatePickerDialogView::HandleMouseEvent(titleButtonRow, isHover);
+}
+
+/**
+ * @tc.name: HandleMouseEvent002
+ * @tc.desc: Test DatePickerTestUpdate HandleMouseEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, HandleMouseEvent002, TestSize.Level1)
+{
+    bool isHover = false;
+    auto titleButtonRow = DatePickerDialogView::CreateTitleButtonRowNode();
+    DatePickerDialogView::HandleMouseEvent(titleButtonRow, isHover);
+}
+
+/**
+ * @tc.name: HandleLunarDayChange001
+ * @tc.desc: Test DatePickerTestUpdate HandleLunarDayChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, HandleLunarDayChange001, TestSize.Level1)
+{
+    uint32_t index = 0;
+    bool isAdd = true;
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    datePickerPattern->HandleLunarDayChange(isAdd, index);
+}
+
+/**
+ * @tc.name: HandleLunarDayChange002
+ * @tc.desc: Test DatePickerTestUpdate HandleLunarDayChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, HandleLunarDayChange002, TestSize.Level1)
+{
+    uint32_t index = 0;
+    bool isAdd = false;
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    datePickerPattern->HandleLunarDayChange(isAdd, index);
+}
 } // namespace OHOS::Ace::NG
