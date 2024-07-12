@@ -107,16 +107,6 @@ public:
 
     void SetNavContentAvoidKeyboardOffset(RefPtr<FrameNode> navNode, float avoidKeyboardOffset);
 
-    void AddKeyboardChangeCallback(int32_t id, std::function<void(bool, bool)>&& callback)
-    {
-        keyboardChangeCallbackMap_.emplace(id, std::move(callback));
-    }
-
-    void RemoveKeyboardChangeCallback(int32_t id)
-    {
-        keyboardChangeCallbackMap_.erase(id);
-    }
-
     void SetNeedToRequestKeyboard(bool val) override
     {
         needToRequestKeyboard_ = val;
@@ -131,7 +121,6 @@ private:
     bool ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
     RefPtr<FrameNode> FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField);
     RefPtr<FrameNode> FindNavNode(const RefPtr<FrameNode>& textField);
-    void NotifyKeyboardChangedCallback(bool isShowKeyboard);
 
     bool hasMove_ = false;
     bool imeShow_ = false;
@@ -142,8 +131,6 @@ private:
     WeakPtr<Pattern> onFocusTextField_;
     WeakPtr<FrameNode> weakNavNode_;
     int32_t onFocusTextFieldId = -1;
-    std::unordered_map<int32_t, std::function<void(bool, bool)>> keyboardChangeCallbackMap_;
-    float lastKeyboardOffset_ = 0.0f;
     bool needToRequestKeyboard_ = true;
 };
 
