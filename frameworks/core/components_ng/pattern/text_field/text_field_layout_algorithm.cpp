@@ -968,7 +968,7 @@ bool TextFieldLayoutAlgorithm::AddAdaptFontSizeAndAnimations(TextStyle& textStyl
     CHECK_NULL_RETURN(pattern, false);
     bool hasHeightOverride = textStyle.HasHeightOverride();
     auto lineHeight = textStyle.GetLineHeight();
-    SetAdaptFontSizeLineHeight(lineHeight);
+    SetAdaptFontSizeLineHeight(lineHeight, textStyle);
     textStyle.SetLineHeight(Dimension(), false);
     bool result = false;
     switch (layoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST)) {
@@ -1024,16 +1024,12 @@ bool TextFieldLayoutAlgorithm::AdaptInlineFocusFontSize(TextStyle& textStyle, co
 {
     double maxFontSize = 0.0;
     double minFontSize = 0.0;
-    if (!GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint)) {
-        return false;
-    }
+    GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint);
     if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
         return CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper, false);
     }
     double stepSize = 0.0;
-    if (!GetAdaptFontSizeStep(textStyle, stepSize, stepUnit, contentConstraint)) {
-        return false;
-    }
+    GetAdaptFontSizeStep(textStyle, stepSize, stepUnit, contentConstraint);
     auto tag = static_cast<int32_t>((maxFontSize - minFontSize) / stepSize);
     auto length = tag + 1 + (GreatNotEqual(maxFontSize, minFontSize + stepSize * tag) ? 1 : 0);
     int32_t left = 0;
@@ -1093,16 +1089,12 @@ bool TextFieldLayoutAlgorithm::AdaptInlineFocusMinFontSize(TextStyle& textStyle,
 {
     double maxFontSize = 0.0;
     double minFontSize = 0.0;
-    if (!GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint)) {
-        return false;
-    }
+    GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint);
     if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
         return CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper, false);
     }
     double stepSize = 0.0;
-    if (!GetAdaptFontSizeStep(textStyle, stepSize, stepUnit, contentConstraint)) {
-        return false;
-    }
+    GetAdaptFontSizeStep(textStyle, stepSize, stepUnit, contentConstraint);
     auto textFieldLayoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textFieldLayoutProperty, false);
     auto maxViewLines = textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
