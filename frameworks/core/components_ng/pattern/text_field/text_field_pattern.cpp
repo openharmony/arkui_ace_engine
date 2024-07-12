@@ -2241,9 +2241,9 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
     bool needCloseOverlay = true;
     bool isRepeatClickCaret =
         RepeatClickCaret(info.GetLocalLocation(), lastCaretIndex, lastCaretRect) && !firstGetFocus;
-    bool IsNormalInlineOrEmpty = IsNormalInlineState() || contentController_->IsEmpty();
+    bool isInlineSelectAllOrEmpty = inlineSelectAllFlag_ || contentController_->IsEmpty();
     do {
-        if (info.GetSourceDevice() == SourceType::MOUSE || (!isRepeatClickCaret && IsNormalInlineOrEmpty)) {
+        if (info.GetSourceDevice() == SourceType::MOUSE || (!isRepeatClickCaret && isInlineSelectAllOrEmpty)) {
             break;
         }
         if (GetNakedCharPosition() >= 0) {
