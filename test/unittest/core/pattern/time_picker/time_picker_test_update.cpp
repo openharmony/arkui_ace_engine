@@ -1483,4 +1483,85 @@ HWTEST_F(TimePickerPatternTestUpdate, SetDateTimeOptions001, TestSize.Level1)
     TimePickerModelNG::SetDateTimeOptions(frameNode, hideType, showType, hideType);
 }
 
+/**
+ * @tc.name: GetSecondFormatString001
+ * @tc.desc: Test TimePickerPatternTestUpdate GetSecondFormatString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestUpdate, GetSecondFormatString001, TestSize.Level1)
+{
+    uint32_t second = 0;
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(pickerFrameNode, nullptr);
+    pickerFrameNode->MarkModifyDone();
+
+    auto timePickerRowPattern = pickerFrameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->GetSecondFormatString(second);
+}
+
+/**
+ * @tc.name: OnAroundButtonClick001
+ * @tc.desc: Test TimePickerPatternTestUpdate OnAroundButtonClick.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestUpdate, OnAroundButtonClick001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(pickerFrameNode, nullptr);
+    pickerFrameNode->MarkModifyDone();
+    auto timePickerRowPattern = pickerFrameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    columnNode_ = allChildNode["minute"].Upgrade();
+    ASSERT_NE(columnNode_, nullptr);
+    columnPattern_ = columnNode_->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(columnPattern_, nullptr);
+    auto host = timePickerRowPattern->GetHost();
+    EXPECT_NE(host, nullptr);
+
+    auto childSize = static_cast<int32_t>(host->GetChildren().size());
+    for (int32_t i = 0; i < childSize; i++) {
+        RefPtr<FrameNode> childNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(i));
+        CHECK_NULL_VOID(childNode);
+
+        RefPtr<TimePickerEventParam> param = AceType::MakeRefPtr<TimePickerEventParam>();
+        param->instance_ = childNode;
+        param->itemIndex_ = i;
+        param->itemTotalCounts_ = childSize;
+        columnPattern_->OnAroundButtonClick(param);
+    }
+}
+
+/**
+ * @tc.name: OnWindowHide001
+ * @tc.desc: Test TimePickerPatternTestUpdate OnWindowHide.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestUpdate, OnWindowHide001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(pickerFrameNode, nullptr);
+    pickerFrameNode->MarkModifyDone();
+    auto timePickerRowPattern = pickerFrameNode->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->UpdateAllChildNode();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    columnNode_ = allChildNode["minute"].Upgrade();
+    ASSERT_NE(columnNode_, nullptr);
+    columnPattern_ = columnNode_->GetPattern<TimePickerColumnPattern>();
+    ASSERT_NE(columnPattern_, nullptr);
+
+    columnPattern_->OnWindowHide();
+}
 } // namespace OHOS::Ace::NG
