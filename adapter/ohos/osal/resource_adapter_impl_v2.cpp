@@ -241,36 +241,38 @@ void ResourceAdapterImplV2::UpdateConfig(const ResourceConfiguration& config, bo
 RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
 {
     CheckThemeId(themeId);
-    auto manager = GetResourceManager();
-    CHECK_NULL_RETURN(manager, nullptr);
-    auto context = NG::PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_RETURN(context, nullptr);
-    auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_RETURN(taskExecutor, nullptr);
     auto theme = AceType::MakeRefPtr<ResourceThemeStyle>(AceType::Claim(this));
-    auto task = [themeId, manager, themeStyle = WeakPtr<ResourceThemeStyle>(theme)]() -> void {
-        constexpr char OHFlag[] = "ohos_"; // fit with resource/base/theme.json and pattern.json
-        auto theme = themeStyle.Upgrade();
-        auto ret = manager->GetThemeById(themeId, theme->rawAttrs_);
-        for (size_t i = 0; i < sizeof(PATTERN_MAP) / sizeof(PATTERN_MAP[0]); i++) {
-            ResourceThemeStyle::RawAttrMap attrMap;
-            std::string patternTag = PATTERN_MAP[i];
-            std::string patternName = std::string(OHFlag) + PATTERN_MAP[i];
-            ret = manager->GetPatternByName(patternName.c_str(), attrMap);
-            if (attrMap.empty()) {
-                continue;
+
+    auto manager = GetResourceManager();
+    if (manager) {
+        auto context = NG::PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_RETURN(context, nullptr);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_RETURN(taskExecutor, nullptr);
+        auto task = [themeId, manager, themeStyle = WeakPtr<ResourceThemeStyle>(theme)]() -> void {
+            constexpr char OHFlag[] = "ohos_"; // fit with resource/base/theme.json and pattern.json
+            auto theme = themeStyle.Upgrade();
+            auto ret = manager->GetThemeById(themeId, theme->rawAttrs_);
+            for (size_t i = 0; i < sizeof(PATTERN_MAP) / sizeof(PATTERN_MAP[0]); i++) {
+                ResourceThemeStyle::RawAttrMap attrMap;
+                std::string patternTag = PATTERN_MAP[i];
+                std::string patternName = std::string(OHFlag) + PATTERN_MAP[i];
+                ret = manager->GetPatternByName(patternName.c_str(), attrMap);
+                if (attrMap.empty()) {
+                    continue;
+                }
+                theme->patternAttrs_[patternTag] = attrMap;
             }
-            theme->patternAttrs_[patternTag] = attrMap;
-        }
 
-        if (theme->patternAttrs_.empty() && theme->rawAttrs_.empty()) {
-            return ;
-        }
+            if (theme->patternAttrs_.empty() && theme->rawAttrs_.empty()) {
+                return ;
+            }
 
-        theme->ParseContent();
-        theme->patternAttrs_.clear();
-    };
-    taskExecutor->PostTask(task, TaskExecutor::TaskType::BACKGROUND, "ArkUILoadTheme");
+            theme->ParseContent();
+            theme->patternAttrs_.clear();
+        };
+        taskExecutor->PostTask(task, TaskExecutor::TaskType::BACKGROUND, "ArkUILoadTheme");
+    }
 
     return theme;
 }
