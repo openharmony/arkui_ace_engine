@@ -91,13 +91,22 @@ void SideBarContainerPattern::OnAttachToFrameNode()
     auto layoutProperty = host->GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     userSetSidebarWidth_ = layoutProperty->GetSideBarWidth().value_or(SIDEBAR_WIDTH_NEGATIVE);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
     auto sideBarTheme = pipelineContext->GetTheme<SideBarTheme>();
     if (sideBarTheme && sideBarTheme->GetSideBarUnfocusEffectEnable()) {
         pipelineContext->AddWindowFocusChangedCallback(host->GetId());
     }
+}
+
+void SideBarContainerPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
+    pipeline->RemoveWindowFocusChangedCallback(frameNode->GetId());
 }
 
 void SideBarContainerPattern::OnUpdateShowSideBar(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty)
@@ -1363,9 +1372,7 @@ void SideBarContainerPattern::ShowDialogWithNode()
 
 void SideBarContainerPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
-    if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE) {
-        TAG_LOGI(AceLogTag::ACE_SIDEBAR, "mark need retrieve sidebar property because of window rotation or resize");
-        MarkNeedInitRealSideBarWidth(true);
-    }
+    TAG_LOGI(AceLogTag::ACE_SIDEBAR, "mark need retrieve sidebar property because of window rotation or resize");
+    MarkNeedInitRealSideBarWidth(true);
 }
 } // namespace OHOS::Ace::NG

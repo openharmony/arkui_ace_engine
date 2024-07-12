@@ -154,6 +154,7 @@ private:
     void WindowFocus(bool isFocus);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
     void OnColorConfigurationUpdate() override;
     void UpdateAnimDir();
