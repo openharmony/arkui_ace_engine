@@ -19,6 +19,7 @@ import promptAction from '@ohos.promptAction';
 
 @Component
 export struct ButtonBootcamp {
+  @Require @Prop title: ResourceStr;
   @State showParameters: boolean = false
   @State enableBtnType: boolean = false
   @State btnType: ButtonType = ButtonType.Capsule
@@ -44,7 +45,7 @@ export struct ButtonBootcamp {
   build() {
     NavDestination() {
       Drawer({
-        title: '按钮/Button',
+        title: this.title,
         showParameters: $showParameters,
         content: () => {
           this.Content()
@@ -202,6 +203,8 @@ export struct ButtonBootcamp {
 @Component
 struct ButtonBootcampPreviewer {
   build() {
-    ButtonBootcamp()
+    ButtonBootcamp({
+      title: '按钮/Button'
+    })
   }
 }
