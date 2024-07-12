@@ -1132,12 +1132,15 @@ void TabBarPattern::HandleBottomTabBarChange(int32_t index)
     }
     if (preIndex != index && (tabBarStyles_[preIndex] == TabBarStyle::BOTTOMTABBATSTYLE ||
                                    tabBarStyles_[index] == TabBarStyle::BOTTOMTABBATSTYLE)) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto childCount = host->TotalChildCount() - MASK_COUNT;
         int32_t selectedIndex = -1;
         int32_t unselectedIndex = -1;
-        if (tabBarStyles_[preIndex] == TabBarStyle::BOTTOMTABBATSTYLE && CheckSvg(preIndex)) {
+        if (preIndex < childCount && tabBarStyles_[preIndex] == TabBarStyle::BOTTOMTABBATSTYLE && CheckSvg(preIndex)) {
             unselectedIndex = preIndex;
         }
-        if (tabBarStyles_[index] == TabBarStyle::BOTTOMTABBATSTYLE && CheckSvg(index)) {
+        if (index < childCount && tabBarStyles_[index] == TabBarStyle::BOTTOMTABBATSTYLE && CheckSvg(index)) {
             selectedIndex = index;
         }
         HandleBottomTabBarClick(selectedIndex, unselectedIndex);
