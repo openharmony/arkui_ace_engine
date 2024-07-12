@@ -14,7 +14,6 @@
 import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
-import("//foundation/arkui/ace_engine/adapter/preview/build/config.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 
 component_ext_path = "${ace_root}/component_ext"

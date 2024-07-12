@@ -119,6 +119,9 @@ void ArcIndexerPattern::InitTouchEvent ()
             auto offset = info.GetTouches().front().GetLocalLocation();
             auto indexerPattern = weak.Upgrade();
             CHECK_NULL_VOID(indexerPattern);
+            if (!indexerPattern->atomicAnimateOp_) {
+                return;
+            }
             if (!indexerPattern->AtArcHotArea(offset)) {
                 return;
             }
@@ -234,17 +237,22 @@ void ArcIndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     }
     auto onActionStart = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            if (info.GetInputEventType() == InputEventType::AXIS) {
-                return;
-            }
-            pattern->MoveIndexByOffset(info.GetLocalLocation());
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->atomicAnimateOp_) {
+            return;
         }
+        if (info.GetInputEventType() == InputEventType::AXIS) {
+            return;
+        }
+        pattern->MoveIndexByOffset(info.GetLocalLocation());
     };
 
     auto onActionUpdate = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (!pattern->atomicAnimateOp_) {
+            return;
+        }
         if (info.GetInputEventType() == InputEventType::AXIS) {
             if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
                 pattern->MoveIndexByStep(-1);
