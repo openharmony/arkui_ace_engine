@@ -242,12 +242,12 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
 {
     CheckThemeId(themeId);
     auto manager = GetResourceManager();
-    auto theme = AceType::MakeRefPtr<ResourceThemeStyle>(AceType::Claim(this));
-    CHECK_NULL_RETURN(manager, theme);
+    CHECK_NULL_RETURN(manager, nullptr);
     auto context = NG::PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_RETURN(context, theme);
+    CHECK_NULL_RETURN(context, nullptr);
     auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_RETURN(taskExecutor, theme);
+    CHECK_NULL_RETURN(taskExecutor, nullptr);
+    auto theme = AceType::MakeRefPtr<ResourceThemeStyle>(AceType::Claim(this));
     auto task = [themeId, manager, themeStyle = WeakPtr<ResourceThemeStyle>(theme)]() -> void {
         constexpr char OHFlag[] = "ohos_"; // fit with resource/base/theme.json and pattern.json
         auto theme = themeStyle.Upgrade();
