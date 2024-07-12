@@ -152,6 +152,14 @@ class ModifierWithKey {
     }
     return false;
   }
+  applyStageImmediately(node, component) {
+    this.value = this.stageValue;
+    if (this.stageValue === undefined || this.stageValue === null) {
+      this.applyPeer(node, true, component);
+      return;
+    }
+    this.applyPeer(node, false, component);
+  }
   applyPeer(node, reset, component) { }
   checkObjectDiff() {
     return true;
@@ -2897,7 +2905,7 @@ function parseWithDefaultNumber(val, defaultValue) {
   else { return defaultValue; }
 }
 function modifierWithKey(modifiers, identity, modifierClass, value) {
-  if (typeof modifiers.isFrameNode === "function" && modifiers.isFrameNode()) {
+  if (typeof modifiers.isFrameNode === 'function' && modifiers.isFrameNode()) {
     if (!modifierClass.instance) {
       modifierClass.instance = new modifierClass(value);
     }
@@ -2962,7 +2970,7 @@ class ObservedMap {
       return 'ObservedMapTag';
   }
   setFrameNode(isFrameNode) {
-    this.isFrameNode_ = isFrameNode
+    this.isFrameNode_ = isFrameNode;
   }
   isFrameNode() {
     return this.isFrameNode_;
@@ -2984,7 +2992,7 @@ class ArkComponent {
         if (this.nativePtr !== -1) {
           __JSScopeUtil__.syncInstanceId(this._instanceId);
         }
-        value.applyStage(this.nativePtr, this);
+        value.applyStageImmediately(this.nativePtr, this);
         getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
         if (this._instanceId !== -1) {
           __JSScopeUtil__.restoreInstanceId();
