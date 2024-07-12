@@ -127,8 +127,8 @@ void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end)
         if (isFirstPoint_) {
             oriDelta = delta_;
         } else {
-            Offset lastMoveEvent = Platform::GetTouchEventOriginOffset(lastTrackPoint);
-            Offset upEvent = Platform::GetTouchEventOriginOffset(event);
+            Offset lastMoveEvent = lastTrackPoint.GetOffset();
+            Offset upEvent = event.GetOffset();
             oriDelta = upEvent - lastMoveEvent;
         }
         if (oriDelta.IsZero() && (diffTime.count() < range)) {
