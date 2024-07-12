@@ -859,10 +859,13 @@ void LayoutProperty::UpdateGeometryTransition(const std::string& id,
         // unregister node from old geometry transition
         geometryTransitionOld->Update(host_, nullptr);
         // register node into new geometry transition
-        if (geometryTransitionNew) {
-            geometryTransitionNew->Update(nullptr, host_);
+        if (geometryTransitionNew && !geometryTransitionNew->Update(nullptr, host_)) {
+            TAG_LOGE(AceLogTag::ACE_GEOMETRY_TRANSITION, "redundant node%{public}d has same geoid", host->GetId());
         }
     } else if (geometryTransitionNew) {
+        if (geometryTransitionNew->IsInAndOutValid()) {
+            TAG_LOGE(AceLogTag::ACE_GEOMETRY_TRANSITION, "redundant node%{public}d has same geoid", host->GetId());
+        }
         geometryTransitionNew->Build(host_, true);
     }
     geometryTransition_ = geometryTransitionNew;
