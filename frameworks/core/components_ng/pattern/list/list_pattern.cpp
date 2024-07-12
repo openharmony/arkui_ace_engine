@@ -862,7 +862,7 @@ float ListPattern::GetStartOverScrollOffset(float offset) const
 {
     float startOffset = 0.0f;
     float ChainDelta = chainAnimation_ ? chainAnimation_->GetValuePredict(0, -offset) : 0.f;
-    auto startPos = startMainPos_ + ChainDelta;
+    auto startPos = startMainPos_ + ChainDelta - currentDelta_;
     auto newStartPos = startPos + offset;
     if (startPos > contentStartOffset_ && newStartPos > contentStartOffset_) {
         startOffset = offset;
@@ -886,7 +886,7 @@ float ListPattern::GetEndOverScrollOffset(float offset) const
 {
     float endOffset = 0.0f;
     float ChainDelta = chainAnimation_ ? chainAnimation_->GetValuePredict(endIndex_, -offset) : 0.f;
-    auto endPos = endMainPos_ + ChainDelta;
+    auto endPos = endMainPos_ + ChainDelta - currentDelta_;
     auto contentEndPos = contentMainSize_ - contentEndOffset_;
     if (GreatNotEqual(contentEndPos, endMainPos_ - startMainPos_) && !IsScrollSnapAlignCenter()) {
         endPos = startMainPos_ + contentEndPos;

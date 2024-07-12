@@ -1967,7 +1967,8 @@ bool ScrollablePattern::HandleOutBoundary(float& offset, int32_t source, NestedS
     if (state == NestedState::CHILD_SCROLL) {
         return NestedScrollOutOfBoundary();
     }
-    if (!NestedScrollOutOfBoundary()) {
+    auto nestedScroll = GetNestedScroll();
+    if (!NestedScrollOutOfBoundary() && nestedScroll.NeedParent()) {
         for (auto ancestor = GetNestedScrollParent(); ancestor != nullptr;
             ancestor = ancestor->GetNestedScrollParent()) {
             if (ancestor->NestedScrollOutOfBoundary()) {
@@ -1977,30 +1978,32 @@ bool ScrollablePattern::HandleOutBoundary(float& offset, int32_t source, NestedS
                 SetCanOverScroll(NearZero(offset));
                 return true;
             }
+            auto ancestorNestedScroll = ancestor->GetNestedScroll();
+            if (!ancestorNestedScroll.NeedParent()) {
+                break;
+            }
         }
         return false;
     }
-    HandleSelfOutBoundary(offset, source);
-    return true;
+    return HandleSelfOutBoundary(offset, source);
 }
 
-void ScrollablePattern::HandleSelfOutBoundary(float& offset, int32_t source)
+bool ScrollablePattern::HandleSelfOutBoundary(float& offset, int32_t source)
 {
     auto overOffsets = GetOverScrollOffset(offset);
     auto overOffset = 0.f;
     auto oppositeOverOffset = 0.f;
-    if (IsAtTop()) {
+    if (Negative(offset)) {
         overOffset += overOffsets.start;
         offset -= overOffset;
-        if (!NearZero(overOffsets.end)) {
-            oppositeOverOffset = overOffsets.end;
-        }
-    } else if (IsAtBottom()) {
+        oppositeOverOffset = overOffsets.end;
+    } else {
         overOffset += overOffsets.end;
         offset -= overOffset;
-        if (!NearZero(overOffsets.start)) {
-            oppositeOverOffset = overOffsets.start;
-        }
+        oppositeOverOffset = overOffsets.start;
+    }
+    if (NearZero(overOffset)) {
+        return false;
     }
     ScrollResult result = { 0.f, false};
     auto parent = GetNestedScrollParent();
@@ -2018,6 +2021,7 @@ void ScrollablePattern::HandleSelfOutBoundary(float& offset, int32_t source)
             }
             case NestedScrollMode::PARENT_FIRST: {
                 result = parent->HandleScroll(offset, source, NestedState::CHILD_SCROLL, GetVelocity());
+                offset = 0.f;
                 break;
             }
             case NestedScrollMode::PARALLEL: {
@@ -2031,6 +2035,7 @@ void ScrollablePattern::HandleSelfOutBoundary(float& offset, int32_t source)
     offset += result.remain;
     SetCanOverScroll(NearZero(offset));
     offset += overOffset;
+    return true;
 }
 
 ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, NestedState state, float velocity)
@@ -2042,7 +2047,10 @@ ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, Neste
     auto parent = GetNestedScrollParent();
     auto initOffset = offset;
     if (!HandleOutBoundary(offset, source, state, result)) {
-        if (parent && !IsScrollSnap() &&
+        if (NearZero(offset)) {
+            ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
+            ExecuteScrollFrameBegin(offset, scrollState);
+        } else if (parent && !IsScrollSnap() &&
                 ((offset < 0 && nestedScroll.forward == NestedScrollMode::PARENT_FIRST) ||
                     (offset > 0 && nestedScroll.backward == NestedScrollMode::PARENT_FIRST))) {
             result = HandleScrollParentFirst(offset, source, state);
@@ -2069,6 +2077,7 @@ bool ScrollablePattern::HandleScrollVelocity(float velocity,  const RefPtr<Nesta
 {
     // if scrollable try to over scroll when it is at the boundary,
     // scrollable does not start fling animation.
+    SetNestedScrolling(false);
     SetScrollOriginChild(AceType::WeakClaim(AceType::RawPtr(child)));
     auto edgeEffect = GetEdgeEffect();
     auto needFlingAtEdge = !(((IsAtTop() && Positive(velocity)) || (IsAtBottom() && Negative(velocity))));
@@ -2087,6 +2096,7 @@ bool ScrollablePattern::HandleScrollVelocity(float velocity,  const RefPtr<Nesta
         }
         return false;
     }
+    SetCanOverScroll(true);
     return HandleOverScroll(velocity) || GetEdgeEffect() == EdgeEffect::FADE;
 }
 
@@ -2105,6 +2115,10 @@ bool ScrollablePattern::HandleScrollableOverScroll(float velocity)
     for (auto ancestor = GetNestedScrollParent(); ancestor != nullptr; ancestor = ancestor->GetNestedScrollParent()) {
         if (ancestor->NestedScrollOutOfBoundary()) {
             result = ancestor->HandleScrollVelocity(velocity, Claim(this));
+            break;
+        }
+        auto ancestorNestedScroll = ancestor->GetNestedScroll();
+        if (!ancestorNestedScroll.NeedParent()) {
             break;
         }
     }
@@ -2176,7 +2190,7 @@ void ScrollablePattern::ExecuteScrollFrameBegin(float& mainDelta, ScrollState st
 void ScrollablePattern::OnScrollStartRecursive(float position, float velocity)
 {
     OnScrollStartRecursiveInner(position, velocity);
-    nestedScrolling_ = true;
+    SetNestedScrolling(true);
 }
 
 void ScrollablePattern::OnScrollStartRecursiveInner(float position, float velocity)
@@ -2193,8 +2207,21 @@ void ScrollablePattern::OnScrollStartRecursiveInner(float position, float veloci
 void ScrollablePattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 {
     OnScrollEndRecursiveInner(velocity);
+    SetNestedScrolling(false);
     CheckRestartSpring(false);
-    nestedScrolling_ = false;
+}
+
+void ScrollablePattern::SetNestedScrolling(bool nestedScrolling)
+{
+    CHECK_NULL_VOID(scrollableEvent_);
+    auto scrollable = scrollableEvent_->GetScrollable();
+    CHECK_NULL_VOID(scrollable);
+    scrollable->SetNestedScrolling(nestedScrolling);
+    // Sliding the touchPad is an axis event, and the parent of the nested scroll cannot respond to TouchDown,
+    // so the scrollable animation stops when the nested scroll scroll start.
+    if (nestedScrolling) {
+        scrollable->StopScrollable();
+    }
 }
 
 void ScrollablePattern::OnScrollEndRecursiveInner(const std::optional<float>& velocity)
