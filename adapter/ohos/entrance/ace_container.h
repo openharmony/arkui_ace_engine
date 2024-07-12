@@ -44,7 +44,6 @@
 #include "core/common/router_recover_record.h"
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/pipeline_context.h"
-#include "interfaces/inner_api/ace/constants.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -178,16 +177,6 @@ public:
     RefPtr<PlatformResRegister> GetPlatformResRegister() const override
     {
         return resRegister_;
-    }
-
-    UIContentType GetUIContentType() const
-    {
-        return uIContentType_;
-    }
-
-    void SetUIContentType(UIContentType uIContentType)
-    {
-        uIContentType_ = uIContentType;
     }
 
     RefPtr<PipelineBase> GetPipelineContext() const override
@@ -743,7 +732,6 @@ private:
     mutable std::mutex cardTokensMutex_;
 
     std::string webHapPath_;
-    UIContentType uIContentType_ = UIContentType::UNDEFINED;
 
     bool installationFree_ = false;
     SharePanelCallback sharePanelCallback_ = nullptr;
