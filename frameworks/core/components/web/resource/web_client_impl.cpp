@@ -1215,4 +1215,12 @@ void WebClientImpl::OnCursorUpdate(double x, double y, double width, double heig
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnCursorUpdate(x, y, width, height);
 }
+
+void WebClientImpl::ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->ReportDynamicFrameLossEvent(sceneId, isStart);
+}
 } // namespace OHOS::Ace
