@@ -28,6 +28,7 @@ enum class MonitorTag {
     COMPONENT_UPDATE,
     JS_CALLBACK,
     STATIC_API,
+    OTHER,
 };
 
 enum class MonitorStatus {
@@ -40,6 +41,7 @@ enum class MonitorStatus {
 #define COMPONENT_UPDATE_DURATION() ScopedMonitor scopedMonitor(MonitorTag::COMPONENT_UPDATE)
 #define JS_CALLBACK_DURATION() ScopedMonitor scopedMonitor(MonitorTag::JS_CALLBACK)
 #define STATIC_API_DURATION() ScopedMonitor scopedMonitor(MonitorTag::STATIC_API)
+#define OTHER_DURATION() ScopedMonitor scopedMonitor(MonitorTag::OTHER)
 
 typedef std::chrono::steady_clock::time_point TimePoint;
 
