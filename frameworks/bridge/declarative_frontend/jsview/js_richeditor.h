@@ -90,6 +90,8 @@ private:
         const NG::RichEditorAbstractSpanResult& spanResult);
     static void SetSymbolChangeSpanResult(JSRef<JSObject>& resultObj,
         const NG::RichEditorAbstractSpanResult& spanResult);
+    static void SetJSSpanResultObject(JSRef<JSObject>& resultObj, const ResultObject& resultObject);
+    static void SetJSDeleteSpan(JSRef<JSObject>& spanResultObj, const NG::RichEditorAbstractSpanResult& it);
 };
 
 class JSRichEditorBaseController : public Referenced {
