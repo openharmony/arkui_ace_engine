@@ -367,8 +367,11 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
     }
     bool doModeSwitchAnimationInAnotherTask = modeChange && !isFirstTimeLayout && !hostNode->IsOnModeSwitchAnimation();
     if (doModeSwitchAnimationInAnotherTask) {
-        // When the window is folded or expanded, no mode switching animation occurs.
-        doModeSwitchAnimationInAnotherTask &= !navigationPattern->IsFoldStateChange();
+        // If screen-fold-state changed, no need to do mode switch animation.
+        doModeSwitchAnimationInAnotherTask =
+            !navigationPattern->IsFoldStateChange() && doModeSwitchAnimationInAnotherTask;
+        // Only when navigation-mode changed, it is necessary to update the current screen-fold-state.
+        navigationPattern->UpdateFoldState();
     }
     if (!doModeSwitchAnimationInAnotherTask) {
         navigationPattern->SetNavigationMode(usrNavigationMode);

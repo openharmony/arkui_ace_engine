@@ -326,11 +326,7 @@ bool NavigationPattern::IsFoldStateChange()
     auto displayInfo = container->GetDisplayInfo();
     CHECK_NULL_RETURN(displayInfo, false);
     auto foldStatus = displayInfo->GetFoldStatus();
-    if (foldStatus != currentfoldStatus_) {
-        currentfoldStatus_ = foldStatus;
-        return true;
-    }
-    return false;
+    return foldStatus != currentfoldStatus_;
 }
 
 void NavigationPattern::UpdateFoldState()
