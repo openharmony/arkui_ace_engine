@@ -291,14 +291,7 @@ public:
         return onOpenAppLinkCallback_;
     }
 
-    void SetRenderMode(RenderMode renderMode)
-    {
-        if ((int)renderMode_ > -1) {
-            TAG_LOGI(AceLogTag::ACE_WEB, "renderMode_ not allow to change.");
-            return;
-        }
-        renderMode_ = renderMode;
-    }
+    void SetRenderMode(RenderMode renderMode);
 
     RenderMode GetRenderMode()
     {
@@ -553,15 +546,7 @@ public:
     Offset GetDragOffset() const;
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
     void OnScrollState(bool scrollState);
-    void SetLayoutMode(WebLayoutMode mode)
-    {
-        if (IsLayoutModeInit_) {
-            TAG_LOGI(AceLogTag::ACE_WEB, "layoutMode not allow to change.");
-            return;
-        }
-        layoutMode_ = mode;
-        IsLayoutModeInit_ = true;
-    }
+    void SetLayoutMode(WebLayoutMode mode);
     WebLayoutMode GetLayoutMode() const
     {
         return layoutMode_;
@@ -918,7 +903,7 @@ private:
     PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
     OnOpenAppLinkCallback onOpenAppLinkCallback_ = nullptr;
     DefaultFileSelectorShowCallback defaultFileSelectorShowCallback_ = nullptr;
-    RenderMode renderMode_ = (RenderMode)(-1);
+    RenderMode renderMode_;
     bool incognitoMode_ = false;
     SetHapPathCallback setHapPathCallback_ = nullptr;
     JsProxyCallback jsProxyCallback_ = nullptr;
@@ -992,7 +977,6 @@ private:
     bool isNeedUpdateScrollAxis_ = true;
     bool isScrollStarted_ = false;
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
-    bool IsLayoutModeInit_ = false;
     bool isEmbedModeEnabled_ = false;
     bool scrollState_ = false;
     Axis axis_ = Axis::FREE;

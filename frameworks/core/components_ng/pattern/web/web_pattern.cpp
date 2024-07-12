@@ -1861,8 +1861,9 @@ void WebPattern::OnMixedModeUpdate(MixedModeContent value)
 void WebPattern::OnZoomAccessEnabledUpdate(bool value)
 {
     if ((layoutMode_ == WebLayoutMode::FIT_CONTENT) || isEmbedModeEnabled_) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "Not allow to change zoom access.");
-        value = false;
+        TAG_LOGI(
+            AceLogTag::ACE_WEB, "When layoutMode is fit-content or EmbedMode is on, Not allow to update zoom access.");
+        return;
     }
     if (delegate_) {
         delegate_->UpdateSupportZoom(value);
@@ -1992,8 +1993,8 @@ void WebPattern::OnBackgroundColorUpdate(int32_t value)
 void WebPattern::OnInitialScaleUpdate(float value)
 {
     if ((layoutMode_ == WebLayoutMode::FIT_CONTENT) || isEmbedModeEnabled_) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "Not allow to change zoom access.");
-        value = false;
+        TAG_LOGI(AceLogTag::ACE_WEB, "When layoutMode is fit-content or EmbedMode is on, Not allow to update scale.");
+        return;
     }
     if (delegate_) {
         delegate_->UpdateInitialScale(value);
@@ -2359,7 +2360,12 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateBlockNetworkImage(!GetOnLineImageAccessEnabledValue(true));
         delegate_->UpdateLoadsImagesAutomatically(GetImageAccessEnabledValue(true));
         delegate_->UpdateMixedContentMode(GetMixedModeValue(MixedModeContent::MIXED_CONTENT_NEVER_ALLOW));
-        delegate_->UpdateSupportZoom(GetZoomAccessEnabledValue(true));
+        isEmbedModeEnabled_ = GetNativeEmbedModeEnabledValue(false);
+        if ((layoutMode_ == WebLayoutMode::FIT_CONTENT) || isEmbedModeEnabled_) {
+            delegate_->UpdateSupportZoom(false);
+        } else {
+            delegate_->UpdateSupportZoom(GetZoomAccessEnabledValue(true));
+        }
         delegate_->UpdateDomStorageEnabled(GetDomStorageAccessEnabledValue(false));
         delegate_->UpdateGeolocationEnabled(GetGeolocationAccessEnabledValue(true));
         delegate_->UpdateCacheMode(GetCacheModeValue(WebCacheMode::DEFAULT));
@@ -2419,7 +2425,6 @@ void WebPattern::OnModifyDone()
         if (!webAccessibilityNode_) {
             webAccessibilityNode_ = AceType::MakeRefPtr<WebAccessibilityNode>(Claim(this));
         }
-        isEmbedModeEnabled_ = GetNativeEmbedModeEnabledValue(false);
         delegate_->UpdateNativeEmbedModeEnabled(GetNativeEmbedModeEnabledValue(false));
         delegate_->UpdateNativeEmbedRuleTag(GetNativeEmbedRuleTagValue(""));
         delegate_->UpdateNativeEmbedRuleType(GetNativeEmbedRuleTypeValue(""));
@@ -4355,6 +4360,28 @@ void WebPattern::OnScrollState(bool scrollState)
             0,
             0);
     }
+}
+
+void WebPattern::SetLayoutMode(WebLayoutMode mode)
+{
+    static bool isInit = false;
+    if (isInit) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "layoutMode not allow to change.");
+        return;
+    }
+    layoutMode_ = mode;
+    isInit = true;
+}
+
+void WebPattern::SetRenderMode(RenderMode renderMode)
+{
+    static bool isInit = false;
+    if (isInit) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "renderMode not allow to change.");
+        return;
+    }
+    renderMode_ = renderMode;
+    isInit = true;
 }
 
 Axis WebPattern::GetParentAxis()
