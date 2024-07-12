@@ -76,12 +76,6 @@ constexpr int8_t HALF_OF_WIDTH = 2;
 
 constexpr float MAX_FLING_VELOCITY = 4200.0f;
 const auto DurationCubicCurve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
-constexpr double TAB_BAR_MARGIN_LEFTANDRIGHT = 12.0;
-constexpr double RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT = 0.0;
-constexpr double TAB_BAR_HEIGHTANDWIDTH_MIDDLEFONT = 72.0;
-constexpr double TAB_BAR_HEIGHTANDWIDTH_BIGESTFONT = 104.0;
-constexpr double TAB_BAR_UNDER_LINE_DISTANCE = 4.0;
-
 const std::string TAB_BAR_PROPERTY_NAME = "tabBar";
 const std::string INDICATOR_OFFSET_PROPERTY_NAME = "indicatorOffset";
 const std::string INDICATOR_WIDTH_PROPERTY_NAME = "translateWidth";
@@ -1940,26 +1934,12 @@ void TabBarPattern::UpdateSubTabBoard()
     auto selectedColumnId = columnNode->GetId();
     auto pipelineContext = GetHost()->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto fontscale = pipelineContext->GetFontScale();
-    SetMarginVP(marginLeftOrRight_, marginTopOrBottom_);
-    TabBarSuitAging();
     for (auto& iter : visibleItemPosition_) {
         auto columnFrameNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(iter.first));
         CHECK_NULL_VOID(columnFrameNode);
         auto renderContext = columnFrameNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         if (tabBarStyles_[indicator_] == TabBarStyle::SUBTABBATSTYLE) {
-            auto textNode = AceType::DynamicCast<FrameNode>(columnFrameNode->GetChildren().back());
-            CHECK_NULL_VOID(textNode);
-            auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-            CHECK_NULL_VOID(textLayoutProperty);
-            if (GreatOrEqual(fontscale, bigScale_) && LessOrEqual(fontscale, largeScale_)) {
-                textLayoutProperty->UpdateMargin(marginLeftOrRight_);
-            } else if (GreatOrEqual(fontscale, largeScale_) && LessOrEqual(fontscale, maxScale_)) {
-                textLayoutProperty->UpdateMargin(marginLeftOrRight_);
-            } else {
-                textLayoutProperty->UpdateMargin(marginTopOrBottom_);
-            }
             if (selectedModes_[indicator_] == SelectedMode::BOARD && columnFrameNode->GetId() == selectedColumnId &&
                 axis == Axis::HORIZONTAL) {
                 renderContext->UpdateBackgroundColor(indicatorStyles_[indicator_].color);
@@ -2185,7 +2165,6 @@ RefPtr<NodePaintMethod> TabBarPattern::CreateNodePaintMethod()
     IndicatorStyle indicatorStyle;
     OffsetF indicatorOffset = { currentIndicatorOffset_, tabBarItemRect.GetY() };
     GetIndicatorStyle(indicatorStyle, indicatorOffset);
-    indicatorStyle.marginTop = Dimension(TAB_BAR_UNDER_LINE_DISTANCE);
     indicatorOffset.AddX(-indicatorStyle.width.ConvertToPx() / HALF_OF_WIDTH);
     auto hasIndicator = std::count(selectedModes_.begin(), selectedModes_.end(), SelectedMode::INDICATOR) ==
         static_cast<int32_t>(selectedModes_.size()) && !NearZero(tabBarItemRect.Height());
@@ -2901,52 +2880,6 @@ bool TabBarPattern::ContentWillChange(int32_t currentIndex, int32_t comingIndex)
         return ret.has_value() ? ret.value() : true;
     }
     return true;
-}
-void TabBarPattern::TabBarSuitAging()
-{
-    auto tabBarNode = GetHost();
-    CHECK_NULL_VOID(tabBarNode);
-    auto tabbarproperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
-    CHECK_NULL_VOID(tabbarproperty);
-    auto pipelineContext = GetHost()->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto fontscale = pipelineContext->GetFontScale();
-    auto MiddleFontWidthAndHeight = Dimension(TAB_BAR_HEIGHTANDWIDTH_MIDDLEFONT, DimensionUnit::VP);
-    auto BigFontWidthAndHeight = Dimension(TAB_BAR_HEIGHTANDWIDTH_BIGESTFONT, DimensionUnit::VP);
-    auto calcMiddleFont = NG::CalcLength(MiddleFontWidthAndHeight);
-    auto calcBigFont = NG::CalcLength(BigFontWidthAndHeight);
-    if (tabBarStyles_[indicator_] != TabBarStyle::SUBTABBATSTYLE) {
-        return;
-    }
-    if (GreatOrEqual(fontscale, bigScale_) && LessOrEqual(fontscale, largeScale_)) {
-        if (tabbarproperty->GetAxis() == Axis::VERTICAL) {
-            tabbarproperty->UpdateUserDefinedIdealSize(CalcSize(calcMiddleFont, std::nullopt));
-            tabbarproperty->UpdateTabBarWidth(MiddleFontWidthAndHeight);
-        } else {
-            tabbarproperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, calcMiddleFont));
-            tabbarproperty->UpdateTabBarHeight(MiddleFontWidthAndHeight);
-        }
-    }
-    if (GreatNotEqual(fontscale, largeScale_) && LessOrEqual(fontscale, maxScale_)) {
-        if (tabbarproperty->GetAxis() == Axis::VERTICAL) {
-            tabbarproperty->UpdateUserDefinedIdealSize(CalcSize(calcBigFont, std::nullopt));
-            tabbarproperty->UpdateTabBarWidth(BigFontWidthAndHeight);
-        } else {
-            tabbarproperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, calcBigFont));
-            tabbarproperty->UpdateTabBarHeight(BigFontWidthAndHeight);
-        }
-    }
-}
-void TabBarPattern::SetMarginVP(MarginProperty& marginLeftOrRight, MarginProperty& marginTopOrBottom)
-{
-    marginLeftOrRight.left = CalcLength(Dimension(TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
-    marginLeftOrRight.right = CalcLength(Dimension(TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
-    marginLeftOrRight.top = CalcLength(Dimension(RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
-    marginLeftOrRight.bottom = CalcLength(Dimension(RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
-    marginTopOrBottom.left = CalcLength(Dimension(RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
-    marginTopOrBottom.right = CalcLength(Dimension(RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
-    marginTopOrBottom.top = CalcLength(Dimension(RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
-    marginTopOrBottom.bottom = CalcLength(Dimension(RESTORE_TAB_BAR_MARGIN_LEFTANDRIGHT, DimensionUnit::VP));
 }
 
 bool TabBarPattern::ParseTabsIsRtl()

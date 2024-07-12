@@ -118,7 +118,13 @@ private:
     void UpdateHorizontalPadding(LayoutWrapper* layoutWrapper, float horizontalPadding) const;
     void MeasureMask(LayoutWrapper* layoutWrapper) const;
     void UpdateChildMarginProperty(float rightMargin, float leftMargin, const RefPtr<LayoutWrapper>& childWrapper);
-
+    void SetTabBarMargin(RefPtr<LayoutWrapper> childWrapper, int index);
+    int32_t CalcTabBarContentLetterNums(LayoutWrapper* layoutWrapper);
+    bool IsSetMinMaxFontSize(
+        LayoutWrapper* layoutWrapper, RefPtr<PipelineContext> pipelineContext);
+    void tabBarFixAging(LayoutWrapper* layoutWrapper, SizeT<float>& frameSize);
+    double GetTabBarMaxFontSize(LayoutWrapper* layoutWrapper);
+    void SetFixAgingFrameSize(LayoutWrapper* layoutWrapper, SizeT<float>& frameSize);
     bool isRTL_ = false;
     Axis axis_ = Axis::NONE;
     TabBarStyle tabBarStyle_;
@@ -138,6 +144,13 @@ private:
     bool isBarAdaptiveHeight_ = false;
     bool useItemWidth_ = true;
     bool canOverScroll_ = false;
+    float bigFontSizeScale_ = 0.0f;
+    float largeFontSizeScale_ = 0.0f;
+    float maxFontSizeScale_ = 0.0f;
+    float originFontSizeScale_ = 0.0f;
+    Dimension leftAndRightMargin_ = 0.0_vp;
+    Dimension indicatorStyleMarginTop_ = 0.0_vp;
+    float fontscale_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 
