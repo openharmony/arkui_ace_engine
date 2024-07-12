@@ -874,7 +874,18 @@ RefPtr<NG::FrameNode> GetFramenodeByAccessibilityId(const RefPtr<NG::FrameNode>&
     while (!nodes.empty()) {
         auto current = nodes.front();
         nodes.pop();
-        const auto& children = current->GetChildren();
+        std::list<RefPtr<NG::UINode>> children = current->GetChildren();
+
+        auto fnode = AceType::DynamicCast<NG::FrameNode>(current);
+        if (fnode != nullptr) {
+            auto property = fnode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+            auto virtualNode = property->GetAccessibilityVirtualNode();
+            if (virtualNode != nullptr) {
+                children.clear();
+                children.push_back(virtualNode);
+            }
+        }
+
         for (const auto& child : children) {
             frameNode = AceType::DynamicCast<NG::FrameNode>(Referenced::RawPtr(child));
             if (frameNode != nullptr && !frameNode->CheckAccessibilityLevelNo()) {
@@ -2809,6 +2820,30 @@ static void DumpTreeNodeInfoNG(
     DumpLog::GetInstance().Print(depth, node->GetTag(), childSize);
 }
 
+void JsAccessibilityManager::DumpTreeAccessibilityNodeNG(const RefPtr<NG::UINode>& uiNodeParent, int32_t depth,
+    int64_t nodeID, const CommonProperty& commonProperty)
+{
+    CHECK_NULL_VOID(uiNodeParent);
+    auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(uiNodeParent);
+    auto uiNodeChildren = uiNodeParent->GetChildren();
+    auto vNode = GetFramenodeByAccessibilityId(virtualFrameNode, nodeID);
+    if (!vNode) {
+        if (uiNodeChildren.size() == 0) {
+            return;
+        }
+    }
+    std::vector<int64_t> children;
+    for (const auto& item : uiNodeChildren) {
+        GetFrameNodeChildren(item, children, commonProperty.pageId);
+    }
+    if (vNode != nullptr) {
+        DumpTreeNodeInfoNG(vNode, depth + 1, commonProperty, children.size());
+    }
+    for (const auto& item : uiNodeChildren) {
+        DumpTreeAccessibilityNodeNG(item, depth + 1, item->GetAccessibilityId(), commonProperty);
+    }
+}
+
 void JsAccessibilityManager::DumpTreeNG(const RefPtr<NG::FrameNode>& parent, int32_t depth,
     int64_t nodeID, const CommonProperty& commonProperty)
 {
@@ -2832,11 +2867,7 @@ void JsAccessibilityManager::DumpTreeNG(const RefPtr<NG::FrameNode>& parent, int
         auto virtualNode = AceType::DynamicCast<NG::FrameNode>(uiVirtualNode);
         CHECK_NULL_VOID(virtualNode);
         hasVirtualNode = true;
-        DumpTreeNodeInfoNG(virtualNode, depth + 1, commonProperty, children.size());
-        for (const auto& item : uiVirtualNode->GetChildren()) {
-            auto frameChild = AceType::DynamicCast<NG::FrameNode>(item);
-            DumpTreeNodeInfoNG(frameChild, depth + 1, commonProperty, children.size());
-        }
+        DumpTreeAccessibilityNodeNG(uiVirtualNode, depth+1, virtualNode->GetAccessibilityId(), commonProperty);
     }
     if (IsExtensionComponent(node) && !IsUIExtensionShowPlaceholder(node)) {
         std::list<AccessibilityElementInfo> extensionElementInfos;
