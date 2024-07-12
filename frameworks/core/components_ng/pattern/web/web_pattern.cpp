@@ -4896,7 +4896,7 @@ void WebPattern::RegisterVisibleAreaChangeCallback(const RefPtr<PipelineContext>
         webPattern->OnVisibleAreaChange(visible);
     };
     std::vector<double> ratioList = {0.0, 1.0};
-    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
 }
 
 bool WebPattern::CheckSafeAreaIsExpand()
