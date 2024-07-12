@@ -117,8 +117,6 @@ public:
         attributes_[attr] = value;
     }
 
-    virtual void CheckThemeStyleLoaded() const {}
-    
     template<typename T>
     T GetAttr(const std::string& attr, const T& errorValue) const
     {
