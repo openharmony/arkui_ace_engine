@@ -86,7 +86,6 @@ private:
     void PlayVerticalScrollEntryAnimation(float swiperWidth, float startPosj, RefPtr<FrameNode>& frameNode);
 
     void PlayScrollScaleAnimation(float scale, RefPtr<RenderContext>& renderContext);
-    void PlayScrollOffsetAnimation(float translate, bool horizontal, RefPtr<RenderContext>& renderContext);
     void PlayScrollBlurAnimation(float blur, RefPtr<RenderContext>& renderContext);
     void PlayScrollAlpahAnimation(float alpha, RefPtr<RenderContext>& renderContext);
     void PlayScrollBackgroundAnimation(const Color& color, RefPtr<RenderContext>& renderContext);
@@ -113,12 +112,17 @@ private:
     bool IsScrollOverCritical();
     Color GetBackgroundColorValue(const RefPtr<FrameNode>& frameNode);
     std::shared_ptr<AnimationUtils::Animation> Animation(bool exit, AnimationParam& param);
-   
+    void ResetBackcolor();
+
     Color preNodeBackgroundColor_;
+    Color entryNodeBackground_;
+    Color parentNodeBackground_;
     OffsetF offset_;
     std::vector<std::shared_ptr<AnimationUtils::Animation>> animationVector_;
     std::vector<AnimationFinishType> animationFinishList_;
     std::vector<std::shared_ptr<AnimationUtils::Animation>> scrollAnimationVector_;
+    std::map<WeakPtr<FrameNode>, Color> exitNodes_;
+    std::map<WeakPtr<FrameNode>, Color> entryNodes_;
     float horizontalExitNodeScale_ = 0;
     float horizontalExitNodeBlur_ = 0;
     float horizontalExitNodeOpacity_ = 0;
@@ -131,6 +135,9 @@ private:
     float verticalExitNodeOpacity_ = 0;
     float verticalEntryNodeScale_ = 0;
     float verticalEntryNodeOpacity_ = 0;
+    bool hasGetExitColor_ = false;
+    bool hasGetEntryColor_ = false;
+    bool hasChangeColor_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_ARC_SWIPER_PATTERN_H
