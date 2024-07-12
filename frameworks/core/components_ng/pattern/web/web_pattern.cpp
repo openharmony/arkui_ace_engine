@@ -303,8 +303,6 @@ void WebPattern::OnAttachToFrameNode()
     SetRotation(pipeline->GetTransformHint());
 
     host->GetRenderContext()->SetClipToFrame(true);
-    auto color = GetSystemColor();
-    host->GetRenderContext()->UpdateBackgroundColor(color);
     if (!renderContextForSurface_) {
         renderContextForSurface_ = RenderContext::Create();
         static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
@@ -312,8 +310,6 @@ void WebPattern::OnAttachToFrameNode()
         CHECK_NULL_VOID(renderContextForSurface_);
         renderContextForSurface_->InitContext(false, param);
     }
-    CHECK_NULL_VOID(renderContextForSurface_);
-    renderContextForSurface_->UpdateBackgroundColor(color);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
 
@@ -2432,6 +2428,16 @@ void WebPattern::OnModifyDone()
             delegate_->SetAccessibilityState(true);
         }
         delegate_->UpdateSmoothDragResizeEnabled(GetSmoothDragResizeEnabledValue(false));
+    }
+
+    if (!GetBackgroundColor()) {
+        auto darkMode = GetDarkModeValue(webData_ ? (WebDarkMode::Auto) : (WebDarkMode::Off));
+        if (GetForceDarkAccessValue(false) &&
+            (darkMode == WebDarkMode::On || ((darkMode == WebDarkMode::Auto) && (GetSystemColor() == Color::BLACK)))) {
+            UpdateBackgroundColorRightNow((Color::BLACK).GetValue());
+        } else {
+            UpdateBackgroundColorRightNow((Color::WHITE).GetValue());
+        }
     }
 
     // Initialize events such as keyboard, focus, etc.
