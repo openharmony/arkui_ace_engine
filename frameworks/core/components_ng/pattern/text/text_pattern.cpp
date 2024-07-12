@@ -213,7 +213,7 @@ void TextPattern::CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& care
 
 void TextPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
 {
-    auto textContentGlobalOffset = parentGlobalOffset_ + contentRect_.GetOffset();
+    auto textContentGlobalOffset = selectOverlay_->GetHandleGlobalOffset() + contentRect_.GetOffset();
     auto paragraphPaintOffset = textContentGlobalOffset - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
 
     // calculate firstHandleOffset, secondHandleOffset and handlePaintSize
@@ -2003,14 +2003,12 @@ std::vector<RectF> TextPattern::GetTextBoxes()
 
 OffsetF TextPattern::GetParentGlobalOffset() const
 {
+    selectOverlay_->UpdateHandleGlobalOffset();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, {});
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, {});
     auto rootOffset = pipeline->GetRootRect().GetOffset();
-    if (selectOverlay_->HasRenderTransform()) {
-        return selectOverlay_->GetPaintOffsetWithoutTransform() - rootOffset;
-    }
     return host->GetPaintRectOffset() - rootOffset;
 }
 
