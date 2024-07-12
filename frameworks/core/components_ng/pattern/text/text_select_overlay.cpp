@@ -311,11 +311,11 @@ void TextSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlay
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     menuInfo.showCopyAll = !textPattern->IsSelectAll();
+    menuInfo.showCopy = !textPattern->GetTextSelector().SelectNothing();
     if (dirtyFlag == DIRTY_COPY_ALL_ITEM) {
         return;
     }
     menuInfo.menuIsShow = IsShowMenu();
-    menuInfo.showCopy = !textPattern->GetTextSelector().SelectNothing();
     menuInfo.showCut = false;
     menuInfo.showPaste = false;
 }

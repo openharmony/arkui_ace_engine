@@ -347,6 +347,7 @@ void SelectContentOverlayManager::MarkInfoChange(SelectOverlayDirtyFlag dirty)
             selectOverlayHolder_->OnUpdateMenuInfo(menuInfo, DIRTY_COPY_ALL_ITEM);
             auto oldMenuInfo = menuPattern->GetSelectMenuInfo();
             oldMenuInfo.showCopyAll = menuInfo.showCopyAll;
+            oldMenuInfo.showCopy = menuInfo.showCopy;
             menuPattern->UpdateSelectMenuInfo(oldMenuInfo);
         }
         if ((dirty & DIRTY_SELECT_TEXT) == DIRTY_SELECT_TEXT) {
