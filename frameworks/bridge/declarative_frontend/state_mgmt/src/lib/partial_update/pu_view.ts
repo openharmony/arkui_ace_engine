@@ -877,7 +877,6 @@ abstract class ViewPU extends PUV2ViewBase
       this.setActiveInternal(false);
     } else {
       this.resetRecycleCustomNode();
-      stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: recycleNode must have a parent`);
     }
   }
 
