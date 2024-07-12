@@ -29,6 +29,10 @@
 #include "core/components_ng/pattern/time_picker/timepicker_column_layout_algorithm.h"
 #include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/pattern/time_picker/toss_animation_controller.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
+#include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -78,11 +82,11 @@ enum class TimePickerOptionIndex {
     COLUMN_INDEX_6,
 };
 
-class TimePickerColumnPattern : public LinearLayoutPattern {
+class TimePickerColumnPattern : public LinearLayoutPattern, public PickerColumnPatternUtils<std::string> {
     DECLARE_ACE_TYPE(TimePickerColumnPattern, LinearLayoutPattern);
 
 public:
-    TimePickerColumnPattern() : LinearLayoutPattern(true) {};
+    TimePickerColumnPattern() : LinearLayoutPattern(true), PickerColumnPatternUtils("") {};
 
     ~TimePickerColumnPattern() override = default;
 
@@ -316,6 +320,12 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
+#ifdef SUPPORT_DIGITAL_CROWN
+    void HandleCrownBeginEvent(const CrownEvent& event) override;
+    void HandleCrownMoveEvent(const CrownEvent& event) override;
+    void HandleCrownEndEvent() override;
+#endif
+    void ToUpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme) override;
     RefPtr<TouchEventImpl> CreateItemTouchEventListener();
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(const GestureEvent& event);

@@ -295,7 +295,7 @@ void DatePickerPattern::OnModifyDone()
         isFiredDateChange_ = false;
         return;
     }
-
+    ClearFocus();
     isForceUpdate_ = false;
     InitDisabled();
     if (ShowMonthDays()) {
@@ -320,9 +320,13 @@ void DatePickerPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     if (focusHub) {
         InitOnKeyEvent(focusHub);
+#ifdef SUPPORT_DIGITAL_CROWN
+        InitOnCrownEvent(focusHub);
+#endif
     }
     InitFocusEvent();
     InitSelectorProps();
+    SetDefaultFocus();
 }
 
 void DatePickerPattern::InitDisabled()
@@ -2392,4 +2396,133 @@ void DatePickerPattern::SetFocusEnable()
 
     focusHub->SetFocusable(true);
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void DatePickerPattern::InitOnCrownEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onCrowEvent = [wp = WeakClaim(this)](const CrownEvent& event)->bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnCrownEvent(event);
+        }
+        return false;
+    };
+
+    focusHub->SetOnCrownEventInternal(std::move(onCrowEvent));
+}
+
+bool DatePickerPattern::OnCrownEvent(const CrownEvent& event)
+{
+    if (event.action == OHOS::Ace::CrownAction::BEGIN ||
+        event.action == OHOS::Ace::CrownAction::UPDATE ||
+        event.action == OHOS::Ace::CrownAction::END) {
+        RefPtr<DatePickerColumnPattern> crownPickerColumnPattern;
+        for (auto& iter : datePickerColumns_) {
+            auto column = iter.Upgrade();
+            if (!column) {
+                continue;
+            }
+            auto pickerColumnPattern = column->GetPattern<DatePickerColumnPattern>();
+            if (!pickerColumnPattern) {
+                continue;
+            }
+            auto columnID =  pickerColumnPattern->GetselectedColumnId();
+            LOGD("DatePickerPattern::timePickerColumns selectedColumnId_=%{public}s, columnID=%{public}s",
+                selectedColumnId_.c_str(), columnID.c_str());
+            if (!pickerColumnPattern->IsCrownEventEnded()) {
+                crownPickerColumnPattern = pickerColumnPattern;
+                break;
+            } else if (columnID == selectedColumnId_) {
+                crownPickerColumnPattern = pickerColumnPattern;
+            }
+        }
+        if (crownPickerColumnPattern != nullptr) {
+            return crownPickerColumnPattern->OnCrownEvent(event);
+        }
+    }
+
+    return false;
+}
+#endif
+
+void DatePickerPattern::ClearFocus()
+{
+    if (!selectedColumnId_.empty()) {
+        const auto& allChildNode = GetAllChildNode();
+        auto it = allChildNode.find(selectedColumnId_);
+        if (it != allChildNode.end()) {
+            auto tmpPattern = it->second->GetPattern<DatePickerColumnPattern>();
+            CHECK_NULL_VOID(tmpPattern);
+            tmpPattern->SetSelectedMark(false, false);
+        }
+        selectedColumnId_ = "";
+    }
+}
+
+void DatePickerPattern::SetDefaultFocus()
+{
+    std::function<void(std::string& focusId)> call =  [weak = WeakClaim(this)](std::string& focusId) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->selectedColumnId_.empty()) {
+            pattern->selectedColumnId_ = focusId;
+            return;
+        }
+        const auto& allChildNode = pattern->GetAllChildNode();
+        auto it = allChildNode.find(pattern->selectedColumnId_);
+        if (it != allChildNode.end()) {
+            auto tmpPattern = it->second->GetPattern<DatePickerColumnPattern>();
+            tmpPattern->SetSelectedMark(false, false);
+        }
+
+        pattern->selectedColumnId_ = focusId;
+    };
+
+    const auto& allChildNode = GetAllChildNode();
+    static const std::string year = "year";
+    auto it = allChildNode.find(year);
+    if (it != allChildNode.end()) {
+        auto tmpPattern = it->second->GetPattern<DatePickerColumnPattern>();
+        tmpPattern->SetSelectedMarkId(year);
+        tmpPattern->SetSelectedMarkListener(call);
+
+        tmpPattern->SetSelectedMark(true, false);
+        selectedColumnId_ = year;
+    }
+
+    static const std::string month = "month";
+    it = allChildNode.find(month);
+    if (it != allChildNode.end()) {
+        auto tmpPattern = it->second->GetPattern<DatePickerColumnPattern>();
+        tmpPattern->SetSelectedMarkId(month);
+        tmpPattern->SetSelectedMarkListener(call);
+    }
+
+    static const std::string day = "day";
+    it = allChildNode.find(day);
+    if (it != allChildNode.end()) {
+        auto tmpPattern = it->second->GetPattern<DatePickerColumnPattern>();
+        tmpPattern->SetSelectedMarkId(day);
+        tmpPattern->SetSelectedMarkListener(call);
+    }
+}
+
+void DatePickerPattern::SetDigitalCrownSensitivity(int32_t crownSensitivity)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto&& children = host->GetChildren();
+    for (const auto& child : children) {
+        auto stackNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(stackNode);
+        auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(blendNode);
+        auto childNode = DynamicCast<FrameNode>(blendNode->GetLastChild());
+        CHECK_NULL_VOID(childNode);
+        auto pickerColumnPattern = childNode->GetPattern<DatePickerColumnPattern>();
+        CHECK_NULL_VOID(pickerColumnPattern);
+        pickerColumnPattern->SetDigitalCrownSensitivity(crownSensitivity);
+    }
+}
+
 } // namespace OHOS::Ace::NG

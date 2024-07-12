@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 108
+#define ARKUI_FULL_API_VERSION 109
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 108
+#define ARKUI_NODE_API_VERSION 109
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 7
@@ -2106,6 +2106,8 @@ struct ArkUITimepickerModifier {
     void (*setTimepickerDateTimeOptions)(
         ArkUINodeHandle node, ArkUI_Int32 hourType, ArkUI_Int32 minuteType, ArkUI_Int32 secondType);
     void (*resetTimepickerDateTimeOptions)(ArkUINodeHandle node);
+    void (*setTimePickerDigitalCrownSensitivity)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetTimePickerDigitalCrownSensitivity)(ArkUINodeHandle node);
 };
 
 struct ArkUIVideoModifier {
@@ -3468,6 +3470,8 @@ struct ArkUITextPickerModifier {
     void (*setTextPickerGradientHeight)(ArkUINodeHandle node, ArkUI_Float32 dVal, ArkUI_Int32 dUnit);
     void (*resetTextPickerGradientHeight)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextPickerSelectedSize)(ArkUINodeHandle node);
+    void (*setTextPickerDigitalCrownSensitivity)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetTextPickerDigitalCrownSensitivity)(ArkUINodeHandle node);
 };
 
 struct ArkUITextTimerModifier {
@@ -3575,6 +3579,8 @@ struct ArkUIDatePickerModifier {
     ArkUI_Uint32 (*getDatePickerBackgroundColor)(ArkUINodeHandle node);
     void (*setDatePickerBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetDatePickerBackgroundColor)(ArkUINodeHandle node);
+    void (*setDatePickerDigitalCrownSensitivity)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetDatePickerDigitalCrownSensitivity)(ArkUINodeHandle node);
 };
 
 struct ArkUISpanModifier {
