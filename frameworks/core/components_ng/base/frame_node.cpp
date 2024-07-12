@@ -1637,7 +1637,7 @@ void FrameNode::ProcessThrottledVisibleCallback()
     }
 }
 
-void FrameNode::SetActive(bool active)
+void FrameNode::SetActive(bool active, bool needRebuildRenderContext)
 {
     bool activeChanged = false;
     if (active && !isActive_) {
@@ -1650,14 +1650,23 @@ void FrameNode::SetActive(bool active)
         isActive_ = false;
         activeChanged = true;
     }
-    if (activeChanged) {
-        auto parent = GetAncestorNodeOfFrame();
-        if (parent) {
-            parent->MarkNeedSyncRenderTree();
+    CHECK_NULL_VOID(activeChanged);
+    auto parent = GetAncestorNodeOfFrame();
+    if (parent) {
+        parent->MarkNeedSyncRenderTree();
+        if (needRebuildRenderContext) {
+            auto pipeline = GetContext();
+            CHECK_NULL_VOID(pipeline);
+            auto task = [weak = AceType::WeakClaim(AceType::RawPtr(parent))]() {
+                auto parent = weak.Upgrade();
+                CHECK_NULL_VOID(parent);
+                parent->RebuildRenderContextTree();
+            };
+            pipeline->AddAfterLayoutTask(task);
         }
-        if (isActive_ && SystemProperties::GetDeveloperModeOn()) {
-            PaintDebugBoundary(SystemProperties::GetDebugBoundaryEnabled());
-        }
+    }
+    if (isActive_ && SystemProperties::GetDeveloperModeOn()) {
+        PaintDebugBoundary(SystemProperties::GetDebugBoundaryEnabled());
     }
 }
 
@@ -1675,7 +1684,7 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread)
     UpdateLayoutPropertyFlag();
     SetSkipSyncGeometryNode(false);
     if (layoutProperty_->GetLayoutRect()) {
-        SetActive(true);
+        SetActive(true, true);
         Measure(std::nullopt);
         Layout();
     } else {
