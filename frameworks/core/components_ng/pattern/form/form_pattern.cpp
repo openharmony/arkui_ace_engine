@@ -790,7 +790,8 @@ void FormPattern::UpdateTimeLimitFontCfg()
     CHECK_NULL_VOID(textLayoutProperty);
 
     Dimension fontSize(GetTimeLimitFontSize());
-    if (!NearEqual(textLayoutProperty->GetFontSize().value(), fontSize)) {
+    if (!textLayoutProperty->GetFontSize().has_value() ||
+        !NearEqual(textLayoutProperty->GetFontSize().value(), fontSize)) {
         TAG_LOGD(AceLogTag::ACE_FORM, "bundleName = %{public}s, id: %{public}" PRId64 ", UpdateFontSize:%{public}f.",
             cardInfo_.bundleName.c_str(), cardInfo_.id, fontSize.Value());
         textLayoutProperty->UpdateFontSize(fontSize);
@@ -1747,7 +1748,8 @@ void FormPattern::OnLanguageConfigurationUpdate()
     textLayoutProperty->UpdateContent(content);
 
     Dimension fontSize(GetTimeLimitFontSize());
-    if (!NearEqual(textLayoutProperty->GetFontSize().value(), fontSize)) {
+    if (!textLayoutProperty->GetFontSize().has_value() ||
+        !NearEqual(textLayoutProperty->GetFontSize().value(), fontSize)) {
         textLayoutProperty->UpdateFontSize(fontSize);
     }
 }
