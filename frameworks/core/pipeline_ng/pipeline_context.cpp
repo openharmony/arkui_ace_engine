@@ -4042,7 +4042,7 @@ void PipelineContext::NotifyAllWebPattern(bool isRegister)
 {
     rootNode_->NotifyWebPattern(isRegister);
 }
-#if defined(IOS_PLATFORM)
+#if defined(SUPPORT_TOUCH_TARGET_TEST)
 
 bool PipelineContext::OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe, const std::string& target)
 {
@@ -4051,9 +4051,9 @@ bool PipelineContext::OnTouchTargetHitTest(const TouchEvent& point, bool isSubPi
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
-        bool isTouchWeb = eventManager_->TouchTargetHitTest(
+        bool isTouchTarget = eventManager_->TouchTargetHitTest(
             scalePoint, rootNode_, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe, target);
-        return isTouchWeb;
+        return isTouchTarget;
     }
     return false;
 }

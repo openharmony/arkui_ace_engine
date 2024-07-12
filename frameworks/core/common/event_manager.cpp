@@ -2062,7 +2062,7 @@ void EventManager::MockCancelEventAndDispatch(const AxisEvent& axisEvent)
     mockedEvent.id = static_cast<int32_t>(axisTouchTestResults_.begin()->first);
     DispatchTouchEvent(mockedEvent);
 }
-#if defined(IOS_PLATFORM)
+#if defined(SUPPORT_TOUCH_TARGET_TEST)
 
 bool EventManager::TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
     TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend, const std::string& target)
