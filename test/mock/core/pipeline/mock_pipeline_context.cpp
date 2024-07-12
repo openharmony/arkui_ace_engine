@@ -133,6 +133,8 @@ RefPtr<PipelineContext> PipelineContext::GetContextByContainerId(int32_t /* cont
 
 void PipelineContext::AddWindowFocusChangedCallback(int32_t nodeId) {}
 
+void PipelineContext::RemoveWindowFocusChangedCallback(int32_t nodeId) {}
+
 void PipelineContext::SetupRootElement()
 {
     rootNode_ = FrameNode::CreateFrameNodeWithTree(
