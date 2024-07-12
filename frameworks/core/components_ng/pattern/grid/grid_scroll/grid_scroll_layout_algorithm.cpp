@@ -497,7 +497,6 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
         // Complete the gridLayoutInfo to get a complete set of data from 0 to targetIndex for the GridView. Make sure
         // that the index of the matrix_ and heightMap_ is incremented from 0 to targetIndex and sequentially
         SupplyAllData2ZeroIndex(mainSize, crossSize, layoutWrapper);
-        gridLayoutInfo_.targetIndex_.reset();
     }
     if (enableSkipping_) {
         SkipLargeOffset(mainSize, layoutWrapper);
@@ -548,11 +547,16 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
         }
     }
     layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
-    if (gridLayoutInfo_.extraOffset_.has_value()) {
-        gridLayoutInfo_.UpdateStartIndexForExtralOffset(mainGap_, mainSize);
-        ACE_SCOPED_TRACE(
-            "UpdateStartIndexForExtralOffset startIndex:%d, endIndex:%d, currentOffset:%f, mainSize:%f, mainGap:%f",
-            gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_, gridLayoutInfo_.currentOffset_, mainSize, mainGap_);
+    if (gridLayoutInfo_.targetIndex_.has_value()) {
+        gridLayoutInfo_.targetIndex_.reset();
+    } else {
+        if (gridLayoutInfo_.extraOffset_.has_value()) {
+            gridLayoutInfo_.UpdateStartIndexForExtralOffset(mainGap_, mainSize);
+            ACE_SCOPED_TRACE(
+                "UpdateStartIndexForExtralOffset startIndex:%d, endIndex:%d, currentOffset:%f, mainSize:%f, mainGap:%f",
+                gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_, gridLayoutInfo_.currentOffset_, mainSize,
+                mainGap_);
+        }
     }
 }
 
@@ -1082,7 +1086,7 @@ void GridScrollLayoutAlgorithm::UpdateCurrentOffsetForJumpTo(float mainSize)
                 AceLogTag::ACE_GRID, "can not find jumpIndex in Grid Matrix :%{public}d", gridLayoutInfo_.jumpIndex_);
         }
     }
-    if (gridLayoutInfo_.extraOffset_.has_value()) {
+    if (gridLayoutInfo_.extraOffset_.has_value() && !gridLayoutInfo_.targetIndex_.has_value()) {
         gridLayoutInfo_.currentOffset_ += gridLayoutInfo_.extraOffset_.value();
     }
 }
@@ -1910,6 +1914,15 @@ void GridScrollLayoutAlgorithm::SupplyAllData2ZeroIndex(float mainSize, float cr
         do {
             lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
         } while (!(LessNotEqual(lineHeight, 0.0) || IsIndexInMatrix(targetIndex.value(), targetLineIndex)));
+        if (gridLayoutInfo_.extraOffset_.has_value() && Negative(gridLayoutInfo_.extraOffset_.value())) {
+            auto extraOffset = 0.f;
+            extraOffset = -gridLayoutInfo_.extraOffset_.value();
+            auto heightForExtralOffset = lineHeight;
+            while (GreatOrEqual(extraOffset, heightForExtralOffset) && !Negative(lineHeight)) {
+                lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
+                heightForExtralOffset += lineHeight;
+            }
+        }
     }
 
     // Once the data is completed, the global variables need to be returned

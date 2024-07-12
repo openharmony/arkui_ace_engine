@@ -1836,6 +1836,9 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
     CHECK_NULL_VOID(host);
     int32_t totalChildCount = host->TotalChildCount();
     if (((index >= 0) && (index < totalChildCount)) || (index == LAST_ITEM)) {
+        if (extraOffset.has_value()) {
+            gridLayoutInfo_.extraOffset_ = -extraOffset.value();
+        }
         if (smooth) {
             SetExtraOffset(extraOffset);
             targetIndex_ = index;
@@ -1843,9 +1846,6 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         } else {
             UpdateStartIndex(index, align);
-            if (extraOffset.has_value()) {
-                gridLayoutInfo_.extraOffset_ = -extraOffset.value();
-            }
         }
     }
     FireAndCleanScrollingListener();
