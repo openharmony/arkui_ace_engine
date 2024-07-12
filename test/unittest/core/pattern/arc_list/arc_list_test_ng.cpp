@@ -269,7 +269,6 @@ void ArcListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
     FlushLayoutTask(frameNode_);
     if (smooth) {
         float targetPos = 0.0f;
-
         if (!NearZero(targetPos)) {
             float endValue = pattern_->GetFinalPosition();
             pattern_->ScrollTo(endValue);
@@ -380,45 +379,6 @@ void ArcListTestNg::ScrollSnap(float offset, float velocity)
     FlushLayoutTask(frameNode_);
 }
 
-AssertionResult ArcListTestNg::VerifyPosition(
-    const RefPtr<FrameNode>& frameNode, int32_t viewItemNumber, int32_t lanes, float space, float startOffset)
-{
-    Axis axis = pattern_->GetAxis();
-    float itemMainLength = (axis == Axis::VERTICAL) ? ITEM_HEIGHT : ITEM_WIDTH;
-    float itemSpaceLength = itemMainLength + space;
-    int32_t initialIndex = std::floor(startOffset / itemSpaceLength) * lanes;
-    return VerifyItemPosition(frameNode, viewItemNumber, lanes, space, initialIndex);
-}
-
-AssertionResult ArcListTestNg::VerifyItemPosition(
-    const RefPtr<FrameNode>& frameNode, int32_t viewItemNumber, int32_t lanes, float space, int32_t initialIndex)
-{
-    if (lanes < 1) {
-        return AssertionFailure() << "lanes < 1";
-    }
-    Axis axis = pattern_->GetAxis();
-    float itemMainLength = (axis == Axis::VERTICAL) ? ITEM_HEIGHT : ITEM_WIDTH;
-    float itemSpaceLength = itemMainLength + space;
-    auto itemPosition = frameNode->GetPattern<ArcListPattern>()->GetItemPosition();
-    if (itemPosition.size() != static_cast<size_t>(viewItemNumber)) {
-        return AssertionFailure() << "The itemPosition size is not equal to viewItemNumber"
-                                  << " itemPosition: " << itemPosition.size() << " viewItemNumber: " << viewItemNumber;
-    }
-    for (int32_t index = 0; index < viewItemNumber; index++) {
-        int32_t itemIndex = index + initialIndex;
-        float startPos = itemPosition[itemIndex].startPos;
-        float endPos = itemPosition[itemIndex].endPos;
-        float expectStartPos = (index / lanes) * itemSpaceLength;
-        float expectEndPos = expectStartPos + itemMainLength;
-        if (!NearEqual(startPos, expectStartPos) || !NearEqual(endPos, expectEndPos)) {
-            return AssertionFailure() << "At itemPosition Index: " << itemIndex << " ItemPosition: (" << startPos
-                                      << " - " << endPos << ")"
-                                      << " != expectPosition: (" << expectStartPos << " - " << expectEndPos << ")";
-        }
-    }
-    return AssertionSuccess();
-}
-
 AssertionResult ArcListTestNg::IsEqualTotalOffset(float expectOffset)
 {
     FlushLayoutTask(frameNode_);
@@ -434,7 +394,6 @@ AssertionResult ArcListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollA
     if (smooth) {
         // Because can not get targetPos, use source code
         float targetPos = 0.0f;
-
         if (!NearZero(targetPos)) {
             // Straight to the end of the anmiation, use ScrollTo replace AnimateTo
             float finalPosition = pattern_->GetFinalPosition();

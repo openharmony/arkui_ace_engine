@@ -1084,9 +1084,9 @@ HWTEST_F(ArcListAttrTestNg, SetEdgeEffectCallback003, TestSize.Level1)
     CreateDone(frameNode_);
     RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
     EXPECT_EQ(scrollEdgeEffect->currentPositionCallback_(), 0);
-    EXPECT_EQ(scrollEdgeEffect->leadingCallback_(), 400);
+    EXPECT_EQ(scrollEdgeEffect->leadingCallback_(), LIST_HEIGHT);
     EXPECT_EQ(scrollEdgeEffect->trailingCallback_(), 0.0);
-    EXPECT_EQ(scrollEdgeEffect->initLeadingCallback_(), 400);
+    EXPECT_EQ(scrollEdgeEffect->initLeadingCallback_(), LIST_HEIGHT);
     EXPECT_EQ(scrollEdgeEffect->initTrailingCallback_(), 0.0);
 }
 
@@ -1134,7 +1134,7 @@ HWTEST_F(ArcListAttrTestNg, FadingEdge002, TestSize.Level1)
     model.SetSpace(Dimension(10.f));
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-    EXPECT_EQ(pattern_->GetTotalOffset(), -150);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -150.f);
     EXPECT_EQ(pattern_->startMainPos_, 150.f);
     EXPECT_EQ(pattern_->endMainPos_, 690.f);
 
