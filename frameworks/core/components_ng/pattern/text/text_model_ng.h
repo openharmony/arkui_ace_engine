@@ -115,6 +115,8 @@ public:
     static void SetEllipsisMode(FrameNode* frameNode, EllipsisMode value);
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
+    static void SetMarqueeOptions(FrameNode* frameNode, const TextMarqueeOptions& options);
+    static void SetOnMarqueeStateChange(FrameNode* frameNode, std::function<void(int32_t)>&& func);
     static void SetTextDetectConfig(FrameNode* frameNode, const std::string& value);
     static void SetOnDetectResultUpdate(FrameNode* frameNode,  std::function<void(const std::string&)>&& onResult);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
