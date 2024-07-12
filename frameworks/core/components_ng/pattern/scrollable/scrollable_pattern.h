@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/scrollable/refresh_coordination.h"
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 #include "core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -78,6 +79,12 @@ public:
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override;
+
+    void CreateAnalyzerOverlay(const RefPtr<FrameNode> node);
+
+    void UpdateFadingEdge(const RefPtr<ScrollablePaintMethod>& paint);
+    
+    void UpdateFadeInfo(bool isFadingTop, bool isFadingBottom, const RefPtr<ScrollablePaintMethod>& paint);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void OnWindowHide() override;

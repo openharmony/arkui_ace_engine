@@ -152,7 +152,7 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
 
 RefPtr<NodePaintMethod> WaterFlowPattern::CreateNodePaintMethod()
 {
-    auto paint = MakeRefPtr<WaterFlowPaintMethod>();
+    auto paint = MakeRefPtr<WaterFlowPaintMethod>(GetAxis() == Axis::HORIZONTAL);
     if (!contentModifier_) {
         contentModifier_ = AceType::MakeRefPtr<WaterFlowContentModifier>();
     }
@@ -166,6 +166,7 @@ RefPtr<NodePaintMethod> WaterFlowPattern::CreateNodePaintMethod()
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
         paint->SetEdgeEffect(scrollEffect);
     }
+    UpdateFadingEdge(paint);
     return paint;
 }
 
@@ -189,6 +190,12 @@ void WaterFlowPattern::OnModifyDone()
     }
     SetAccessibilityAction();
     Register2DragDropManager();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto overlayNode = host->GetOverlayNode();
+    if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
+        CreateAnalyzerOverlay(host);
+    }
 }
 
 void WaterFlowPattern::TriggerModifyDone()
@@ -561,6 +568,9 @@ bool WaterFlowPattern::NeedRender()
     auto property = host->GetLayoutProperty();
     CHECK_NULL_RETURN(host, false);
     needRender = property->GetPaddingProperty() != nullptr || needRender;
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, needRender);
+    needRender = needRender || paintProperty->GetFadingEdge().value_or(false);
     return needRender;
 }
 

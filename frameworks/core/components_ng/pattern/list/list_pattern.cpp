@@ -93,6 +93,10 @@ void ListPattern::OnModifyDone()
     if (IsNeedInitClickEventRecorder()) {
         Pattern::InitClickEventRecorder();
     }
+    auto overlayNode = host->GetOverlayNode();
+    if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
+        CreateAnalyzerOverlay(host);
+    }
 }
 
 void ListPattern::ChangeAxis(RefPtr<UINode> node)
@@ -333,6 +337,7 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     paint->SetLaneGutter(laneGutter_);
     paint->SetItemsPosition(itemPosition_, pressedItem_);
     paint->SetContentModifier(listContentModifier_);
+    UpdateFadingEdge(paint);
     return paint;
 }
 

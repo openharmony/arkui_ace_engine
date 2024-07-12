@@ -108,7 +108,7 @@ void GridPattern::BeforeCreateLayoutWrapper()
 
 RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
 {
-    auto paint = MakeRefPtr<GridPaintMethod>(GetScrollBar());
+    auto paint = MakeRefPtr<GridPaintMethod>(GetAxis() == Axis::HORIZONTAL, GetScrollBar());
     CHECK_NULL_RETURN(paint, nullptr);
     CreateScrollBarOverlayModifier();
     paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
@@ -116,6 +116,11 @@ RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
         paint->SetEdgeEffect(scrollEffect);
     }
+    if (!gridContentModifier_) {
+        gridContentModifier_ = AceType::MakeRefPtr<GridContentModifier>();
+    }
+    paint->SetContentModifier(gridContentModifier_);
+    UpdateFadingEdge(paint);
     return paint;
 }
 
@@ -160,6 +165,10 @@ void GridPattern::OnModifyDone()
     Register2DragDropManager();
     if (IsNeedInitClickEventRecorder()) {
         Pattern::InitClickEventRecorder();
+    }
+    auto overlayNode = host->GetOverlayNode();
+    if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
+        CreateAnalyzerOverlay(host);
     }
 }
 
@@ -426,7 +435,9 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CheckScrollable();
     MarkSelectedItems();
     isInitialized_ = true;
-    return false;
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    return paintProperty->GetFadingEdge().value_or(false);
 }
 
 void GridPattern::CheckScrollable()
