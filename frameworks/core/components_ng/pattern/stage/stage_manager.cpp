@@ -85,6 +85,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
                 CHECK_NULL_VOID(stageManager);
                 stageManager->SetStageInTrasition(false);
                 page->GetRenderContext()->RemoveClipWithRRect();
+                page->GetRenderContext()->ResetPageTransitionEffect();
             });
         return;
     }
