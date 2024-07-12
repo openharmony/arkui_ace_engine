@@ -268,8 +268,8 @@ protected:
     std::optional<bool> needForceMeasureAndLayout_;
 
 private:
-    void AdjustChildren(const OffsetF& offset);
-    void AdjustChild(RefPtr<UINode> node, const OffsetF& offset);
+    void AdjustChildren(const OffsetF& offset, bool parentScrollable);
+    void AdjustChild(RefPtr<UINode> node, const OffsetF& offset, bool parentScrollable);
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutWrapper);
 };
