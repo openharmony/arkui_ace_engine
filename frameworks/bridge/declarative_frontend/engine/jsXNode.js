@@ -535,9 +535,26 @@ class NodeAdapter {
         }
     }
     static attachNodeAdapter(adapter, node) {
+        if (node === null || node === undefined) {
+            return false;
+        }
+        if (!node.isModifiable()) {
+            return false;
+        }
+        if (node.attribute_ !==  undefined) {
+            if (node.attribute_.allowChildCount !== undefined) {
+                const allowCount = node.attribute_.allowChildCount();
+                if (allowCount <= 1) {
+                    return false;
+                }
+            }
+        }
         return getUINativeModule().nodeAdapter.attachNodeAdapter(adapter.nativePtr_, node.getNodePtr());
     }
     static detachNodeAdapter(node) {
+        if (node === null || node === undefined) {
+            return;
+        }
         getUINativeModule().nodeAdapter.detachNodeAdapter(node.getNodePtr());
     }
 }
