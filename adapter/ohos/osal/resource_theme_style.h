@@ -36,7 +36,7 @@ public:
     ~ResourceThemeStyle() override = default;
 
     void ParseContent() override;
-    void CheckThemeStyleLoaded() override;
+    void CheckThemeStyleLoaded() const override;
     void SetPromiseValue() {
         promise_.set_value();
     }
