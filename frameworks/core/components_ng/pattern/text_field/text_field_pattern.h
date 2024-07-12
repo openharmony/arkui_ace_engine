@@ -249,6 +249,7 @@ public:
     void DeleteForwardOperation(int32_t length);
     void HandleOnDelete(bool backward) override;
     void CreateHandles() override;
+    void GetEmojiSubStringRange(int32_t& start, int32_t& end);
 
     int32_t SetPreviewText(const std::string& previewValue, const PreviewRange range) override;
     void FinishTextPreview() override;
@@ -833,7 +834,7 @@ public:
     int32_t CheckClickLocation(GestureEvent& info);
     void HandleDoubleClickEvent(GestureEvent& info);
     void HandleTripleClickEvent(GestureEvent& info);
-    void HandleSingleClickEvent(GestureEvent& info);
+    void HandleSingleClickEvent(GestureEvent& info, bool firstGetFocus = false);
 
     void HandleSelectionUp();
     void HandleSelectionDown();
@@ -1306,6 +1307,16 @@ public:
         return hasPreviewText_ ? previewTextEnd_ : selectController_->GetCaretIndex();
     }
 
+    std::string GetPreviewTextValue() const
+    {
+        return contentController_->GetSelectedValue(GetPreviewTextStart(), GetPreviewTextEnd());
+    }
+
+    std::string GetBodyTextValue() const
+    {
+        return hasPreviewText_ ? bodyTextInPreivewing_ : GetTextValue();
+    }
+
     bool IsPressSelectedBox()
     {
         return isPressSelectedBox_;
@@ -1433,6 +1444,7 @@ private:
     void OnTextInputActionUpdate(TextInputAction value);
 
     void Delete(int32_t start, int32_t end);
+    void CheckAndUpdateRecordBeforeOperation();
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     bool CursorInContentRegion();
@@ -1512,7 +1524,7 @@ private:
     bool CheckAutoFillType(const AceAutoFillType& aceAutoFillAllType, bool isFromKeyBoard = false);
     bool GetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType);
     void SetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType);
-    AceAutoFillType GetAutoFillType();
+    AceAutoFillType GetAutoFillType(bool isNeedToHitType = true);
     bool IsAutoFillPasswordType(const AceAutoFillType& autoFillType);
     void DoProcessAutoFill();
     void KeyboardContentTypeToInputType();
@@ -1725,11 +1737,12 @@ private:
     bool isFocusTextColorSet_ = false;
     bool isFocusPlaceholderColorSet_ = false;
     Dimension previewUnderlineWidth_ = 2.0_vp;
-    bool hasSupportedPreviewText_ = false;
+    bool hasSupportedPreviewText_ = true;
     bool hasPreviewText_ = false;
     std::queue<PreviewTextInfo> previewTextOperation_;
     int32_t previewTextStart_ = -1;
     int32_t previewTextEnd_ = -1;
+    std::string bodyTextInPreivewing_;
     PreviewRange lastCursorRange_ = {};
     bool showKeyBoardOnFocus_ = true;
     bool isTextSelectionMenuShow_ = true;

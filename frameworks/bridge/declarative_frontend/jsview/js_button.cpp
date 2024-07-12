@@ -14,10 +14,8 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #endif
 
 #include "base/geometry/dimension.h"
@@ -511,16 +509,8 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onClick");
         PipelineContext::SetCallBackNode(node);
         func->Execute(info);
-#if !defined(PREVIEW)
-        std::string label = "";
-        if (!node.Invalid()) {
-            auto pattern = node.GetRawPtr()->GetPattern();
-            CHECK_NULL_VOID(pattern);
-            auto layoutProperty = pattern->GetLayoutProperty<NG::ButtonLayoutProperty>();
-            CHECK_NULL_VOID(layoutProperty);
-            label = layoutProperty->GetLabel().value_or("");
-        }
-        JSInteractableView::ReportClickEvent(node, label);
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+        JSInteractableView::ReportClickEvent(node);
 #endif
     };
     auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = targetNode](
@@ -529,16 +519,8 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onClick");
         PipelineContext::SetCallBackNode(node);
         func->Execute(*info);
-#if !defined(PREVIEW)
-        std::string label = "";
-        if (!node.Invalid()) {
-            auto pattern = node.GetRawPtr()->GetPattern();
-            CHECK_NULL_VOID(pattern);
-            auto layoutProperty = pattern->GetLayoutProperty<NG::ButtonLayoutProperty>();
-            CHECK_NULL_VOID(layoutProperty);
-            label = layoutProperty->GetLabel().value_or("");
-        }
-        JSInteractableView::ReportClickEvent(node, label);
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+        JSInteractableView::ReportClickEvent(node);
 #endif
     };
 

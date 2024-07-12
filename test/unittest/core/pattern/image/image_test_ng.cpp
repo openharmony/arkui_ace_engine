@@ -880,6 +880,55 @@ HWTEST_F(ImageTestNg, ImageSvgTest001, TestSize.Level1)
     EXPECT_EQ(imagePattern->altLoadingCtx_->GetSourceInfo().GetSrc(), RESOURCE_URL);
 }
 
+/**
+ * @tc.name: ImageModelNGTest001 enterspace
+ * @tc.desc: Test Image related method calls.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageModelNGTest001, TestSize.Level1) {
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    image.SetCopyOption(frameNode, CopyOptions::InApp);
+    EXPECT_EQ(imagePattern->copyOption_, CopyOptions::InApp);
+
+    image.SetInitialSrc(frameNode, IMAGE_SRC_URL, BUNDLE_NAME, MODULE_NAME, false);
+    auto getImageSourceInfo = imageLayoutProperty->GetImageSourceInfo();
+    ASSERT_EQ(getImageSourceInfo.has_value(), true);
+    const auto& moduleName = getImageSourceInfo->GetModuleName();
+    const auto& src = getImageSourceInfo->GetSrc();
+    ASSERT_EQ(moduleName, MODULE_NAME);
+    ASSERT_EQ(src, IMAGE_SRC_URL);
+
+    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->image_->SetPaintConfig(ImagePaintConfig());
+    ImagePaintMethod imagePaintMethod(imagePattern->image_, true);
+    ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
+    auto& config = imagePaintMethod.canvasImage_->paintConfig_;
+    auto drawingColorFilter = config->colorFilter_.colorFilterDrawing_;
+
+    image.SetAlt(frameNode, ImageSourceInfo { RESOURCE_URL });
+    image.SetDrawingColorFilter(frameNode, drawingColorFilter);
+    image.SetColorFilterMatrix(frameNode, COLOR_FILTER_DEFAULT);
+
+    frameNode->MarkModifyDone();
+    ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
+    image.ResetAutoResize(frameNode);
+    EXPECT_EQ(imageLayoutProperty->GetAutoResize().value(), imagePattern->GetDefaultAutoResize());
+}
+
 
 /**
  * @tc.name: ImageColorFilterTest001

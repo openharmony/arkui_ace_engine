@@ -51,6 +51,7 @@ enum class TouchType : size_t {
     HOVER_ENTER,
     HOVER_MOVE,
     HOVER_EXIT,
+    HOVER_CANCEL,
     UNKNOWN,
 };
 

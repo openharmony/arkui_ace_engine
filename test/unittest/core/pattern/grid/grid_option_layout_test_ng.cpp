@@ -710,6 +710,34 @@ HWTEST_F(GridOptionLayoutTestNg, LayoutOptions001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SyncLayoutBeforeSpring001
+ * @tc.desc: Test SyncLayoutBeforeSpring's invariant
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, SyncLayoutBeforeSpring001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test OnModifyDone
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetLayoutOptions({});
+    CreateFixedItems(10);
+    CreateDone(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 9), 400.0f);
+
+    pattern_->gridLayoutInfo_.currentOffset_ = -100.0f;
+    pattern_->gridLayoutInfo_.synced_ = false;
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    // in a realistic scenario, this function only gets called during spring animation.
+    // here we only test the invariant that overScroll is enabled during the sync layout before spring animation.
+    pattern_->SyncLayoutBeforeSpring();
+    EXPECT_EQ(GetChildY(frameNode_, 9), 300.0f);
+    EXPECT_TRUE(pattern_->gridLayoutInfo_.synced_);
+    EXPECT_FALSE(pattern_->forceOverScroll_);
+}
+
+/**
  * @tc.name: LayoutOptions002
  * @tc.desc: Test LayoutOptions
  * @tc.type: FUNC

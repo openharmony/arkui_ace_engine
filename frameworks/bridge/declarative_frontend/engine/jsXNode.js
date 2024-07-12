@@ -414,7 +414,7 @@ class NodeAdapter {
         this.count_ = 0;
         this.nativeRef_ = getUINativeModule().nodeAdapter.createAdapter();
         this.nativePtr_ = this.nativeRef_.getNativeHandle();
-        getUINativeModule().nodeAdapter.setCallbacks(this.nativePtr_, this, this.onAttachToNodePtr, this.onDetachFromNodePtr, this.onGetChildId !== undefined ? this.onGetChildId : undefined, this.onCreateNewChild !== undefined ? this.onCreateNewNodePtr : undefined, this.onDisposeChild !== undefined ? this.onDisposeNodePtr : undefined, this.onUpdateChild !== undefined ? this.onUpdateNodePtr : undefined);
+        getUINativeModule().nodeAdapter.setCallbacks(this.nativePtr_, this, this.onAttachToNodePtr, this.onDetachFromNodePtr, this.onGetChildId !== undefined ? this.onGetChildId : undefined, this.onCreateChild !== undefined ? this.onCreateNewNodePtr : undefined, this.onDisposeChild !== undefined ? this.onDisposeNodePtr : undefined, this.onUpdateChild !== undefined ? this.onUpdateNodePtr : undefined);
     }
     dispose() {
         let hostNode = this.attachedNodeRef_.deref();
@@ -425,6 +425,9 @@ class NodeAdapter {
         this.nativePtr_ = null;
     }
     set totalNodeCount(count) {
+        if (count < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.setTotalNodeCount(this.nativePtr_, count);
         this.count_ = count;
     }
@@ -435,15 +438,27 @@ class NodeAdapter {
         getUINativeModule().nodeAdapter.notifyItemReloaded(this.nativePtr_);
     }
     reloadItem(start, count) {
+        if (start < 0 || count < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.notifyItemChanged(this.nativePtr_, start, count);
     }
     removeItem(start, count) {
+        if (start < 0 || count < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.notifyItemRemoved(this.nativePtr_, start, count);
     }
     insertItem(start, count) {
+        if (start < 0 || count < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.notifyItemInserted(this.nativePtr_, start, count);
     }
     moveItem(from, to) {
+        if (from < 0 || to < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.notifyItemMoved(this.nativePtr_, from, to);
     }
     getAllAvailableItems() {
@@ -475,6 +490,9 @@ class NodeAdapter {
         }
     }
     onDetachFromNodePtr() {
+        if (this === undefined) {
+            return;
+        }
         if (this.onDetachFromNode !== undefined) {
             this.onDetachFromNode();
         }
@@ -485,8 +503,8 @@ class NodeAdapter {
         this.nodeRefs_.splice(0, this.nodeRefs_.length);
     }
     onCreateNewNodePtr(index) {
-        if (this.onCreateNewChild !== undefined) {
-            let node = this.onCreateNewChild(index);
+        if (this.onCreateChild !== undefined) {
+            let node = this.onCreateChild(index);
             if (!this.nodeRefs_.includes(node)) {
                 this.nodeRefs_.push(node);
             }

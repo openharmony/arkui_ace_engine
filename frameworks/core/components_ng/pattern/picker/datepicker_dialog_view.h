@@ -133,7 +133,7 @@ private:
         const RefPtr<FrameNode> &dateNode, const RefPtr<FrameNode> &dialogNode,
         const RefPtr<FrameNode> &contentColumn, std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
-    static bool NeedadaptForAging();
+    static bool NeedAdaptForAging();
     static RefPtr<FrameNode> CreateButtonNodeForAging(const DatePickerSettingData& settingData,
         const RefPtr<FrameNode>& timePickerNode, const RefPtr<FrameNode>& monthAndDayNode,
         const RefPtr<FrameNode>& datePickerNode, const std::vector<ButtonInfo>& buttonInfos,
@@ -152,10 +152,23 @@ private:
     static bool GetIsUserSetTextProperties(const PickerTextProperties& properties);
     static void SetAnimationProperty(const RefPtr<FrameNode>& pickerStack,
         const RefPtr<FrameNode>& contentColumn, const RefPtr<DateTimeAnimationController>& animationController);
+    static std::function<void()> CloseDiaglogEvent(const RefPtr<FrameNode>& dateNode,
+        const RefPtr<FrameNode>& dialogNode);
+    static const Dimension ConvertFontSizeLimit(const Dimension& fontSizeValue,
+        const Dimension& fontSizeLimit, bool isUserSetFont = false);
+    static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue,
+        const Dimension& fontSizeLimit = 0.0_vp, bool isUserSetFont = false);
+    static const Dimension ConvertTitleFontScaleValue(const Dimension& fontSizeValue);
+    static const Dimension AdjustFontSizeScale(const Dimension& fontSizeValue, double fontScale);
+    static void GetUserSettingLimit();
+
     static bool switchTimePickerFlag_;
     static bool switchDatePickerFlag_;
     static bool isShowTime_;
     static bool isUserSetFont_;
+    static Dimension selectedTextStyleFont_;
+    static Dimension normalTextStyleFont_;
+    static Dimension disappearTextStyleFont_;
 };
 } // namespace OHOS::Ace::NG
 

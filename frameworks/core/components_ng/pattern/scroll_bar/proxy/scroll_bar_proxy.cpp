@@ -178,7 +178,7 @@ void ScrollBarProxy::NotifyScrollBar(const WeakPtr<ScrollablePattern>& weakScrol
         }
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && !scrollBar->HasChild()) {
             scrollBar->UpdateScrollBarOffset();
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         } else {
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         }

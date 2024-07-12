@@ -19,7 +19,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
@@ -184,6 +184,46 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
 void JSText::SetFontWeight(const std::string& value)
 {
     TextModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
+}
+
+void JSText::SetMinFontScale(const JSCallbackInfo& info)
+{
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    float minFontSizeDefault = theme->GetTextStyle().GetMinFontScale();
+    if (info.Length() < 1) {
+        TextModel::GetInstance()->SetMinFontScale(minFontSizeDefault);
+        return;
+    }
+    JSRef<JSVal> jValue = info[0];
+    double minFontScale;
+    if (ParseJsDouble(jValue, minFontScale) && GreatOrEqual(minFontScale, 0.0f)) {
+        TextModel::GetInstance()->SetMinFontScale(static_cast<float>(minFontScale));
+        return;
+    }
+    TextModel::GetInstance()->SetMinFontScale(minFontSizeDefault);
+}
+
+void JSText::SetMaxFontScale(const JSCallbackInfo& info)
+{
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    float maxFontSizeDefault = theme->GetTextStyle().GetMaxFontScale();
+    if (info.Length() < 1) {
+        TextModel::GetInstance()->SetMaxFontScale(maxFontSizeDefault);
+        return;
+    }
+    JSRef<JSVal> jValue = info[0];
+    double maxFontScale;
+    if (ParseJsDouble(jValue, maxFontScale) && GreatOrEqual(maxFontScale, 0.0f)) {
+        TextModel::GetInstance()->SetMaxFontScale(static_cast<float>(maxFontScale));
+        return;
+    }
+    TextModel::GetInstance()->SetMaxFontScale(maxFontSizeDefault);
 }
 
 void JSText::SetForegroundColor(const JSCallbackInfo& info)
@@ -579,7 +619,7 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
             ACE_SCORING_EVENT("Text.onClick");
             PipelineContext::SetCallBackNode(node);
             func->Execute(*clickInfo);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             std::string label = "";
             if (!node.Invalid()) {
                 auto pattern = node.GetRawPtr()->GetPattern();
@@ -937,6 +977,8 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("textShadow", &JSText::SetTextShadow, opt);
     JSClass<JSText>::StaticMethod("fontSize", &JSText::SetFontSize, opt);
     JSClass<JSText>::StaticMethod("fontWeight", &JSText::SetFontWeight, opt);
+    JSClass<JSText>::StaticMethod("minFontScale", &JSText::SetMinFontScale, opt);
+    JSClass<JSText>::StaticMethod("maxFontScale", &JSText::SetMaxFontScale, opt);
     JSClass<JSText>::StaticMethod("wordBreak", &JSText::SetWordBreak, opt);
     JSClass<JSText>::StaticMethod("lineBreakStrategy", &JSText::SetLineBreakStrategy, opt);
     JSClass<JSText>::StaticMethod("ellipsisMode", &JSText::SetEllipsisMode, opt);

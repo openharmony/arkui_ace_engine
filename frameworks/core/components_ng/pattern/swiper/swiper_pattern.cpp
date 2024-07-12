@@ -203,7 +203,7 @@ void SwiperPattern::OnIndexChange()
 void SwiperPattern::StopAndResetSpringAnimation()
 {
     if (springAnimationIsRunning_) {
-        AnimationUtils::StopAnimation(springAnimation_);
+        StopSpringAnimationImmediately();
         currentDelta_ = 0.0f;
         itemPosition_.clear();
         isVoluntarilyClear_ = true;
@@ -1359,7 +1359,7 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
 void SwiperPattern::StopSpringAnimationAndFlushImmediately()
 {
     if (springAnimationIsRunning_) {
-        AnimationUtils::StopAnimation(springAnimation_);
+        StopSpringAnimationImmediately();
         currentDelta_ = 0.0f;
         itemPosition_.clear();
         isVoluntarilyClear_ = true;
@@ -1404,7 +1404,7 @@ void SwiperPattern::SwipeTo(int32_t index)
     }
     StopFadeAnimation();
     if (springAnimationIsRunning_) {
-        AnimationUtils::StopAnimation(springAnimation_);
+        StopSpringAnimationImmediately();
         jumpIndex_ = currentIndex_;
         springAnimationIsRunning_ = false;
         MarkDirtyNodeSelf();
@@ -1797,6 +1797,27 @@ void SwiperPattern::StopTranslateAnimation()
     }
 }
 
+void SwiperPattern::StopSpringAnimationImmediately()
+{
+    AnimationOption option;
+    option.SetCurve(Curves::LINEAR);
+    option.SetDuration(0);
+    translateAnimation_ = AnimationUtils::StartAnimation(option, [weak = WeakClaim(this)]() {
+        auto swiper = weak.Upgrade();
+        CHECK_NULL_VOID(swiper);
+        auto host = swiper->GetHost();
+        CHECK_NULL_VOID(host);
+        host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, swiper->currentIndexOffset_);
+    });
+    PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
+    AceAsyncTraceEnd(0, TRAILING_ANIMATION);
+    TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper finish spring animation offset %{public}f",
+        currentIndexOffset_);
+    ACE_SCOPED_TRACE("Swiper finish spring animation offset %f", currentIndexOffset_);
+    isTouchDownSpringAnimation_ = false;
+    OnSpringAndFadeAnimationFinish();
+}
+
 void SwiperPattern::StopSpringAnimation()
 {
     AnimationUtils::StopAnimation(springAnimation_);
@@ -1981,6 +2002,9 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         auto pattern = weak.Upgrade();
         if (pattern) {
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
+                if (!pattern->CheckSwiperPanEvent(info.GetMainDelta())) {
+                    return;
+                }
                 if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
                     pattern->ShowPrevious();
                 } else if (LessNotEqual(info.GetMainDelta(), 0.0)) {
@@ -4110,13 +4134,15 @@ void SwiperPattern::SetDigitStartAndEndProperty(const RefPtr<FrameNode>& indicat
     CHECK_NULL_VOID(swiperDigitalParameters);
     bool isRtl = GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (swiperDigitalParameters->dimStart.has_value()) {
-        auto dimValue = swiperDigitalParameters->dimStart.value();
+        auto dimValue = swiperDigitalParameters->dimStart.value().Value() >= 0.0 ?
+                        swiperDigitalParameters->dimStart.value() : Dimension(0.0, DimensionUnit::VP);
         isRtl ? layoutProperty->UpdateRight(dimValue) : layoutProperty->UpdateLeft(dimValue);
         isRtl ? swiperLayoutProperty->UpdateRight(dimValue)
               : swiperLayoutProperty->UpdateLeft(swiperDigitalParameters->dimLeft.value_or(0.0_vp));
         ;
     } else if (swiperDigitalParameters->dimEnd.has_value()) {
-        auto dimValue = swiperDigitalParameters->dimEnd.value();
+        auto dimValue = swiperDigitalParameters->dimEnd.value().Value() >= 0.0 ?
+                        swiperDigitalParameters->dimEnd.value() : Dimension(0.0, DimensionUnit::VP);
         isRtl ? layoutProperty->UpdateLeft(dimValue) : layoutProperty->UpdateRight(dimValue);
         isRtl ? swiperLayoutProperty->UpdateLeft(dimValue)
               : swiperLayoutProperty->UpdateRight(swiperDigitalParameters->dimRight.value_or(0.0_vp));
@@ -4435,9 +4461,8 @@ void SwiperPattern::PostIdleTask(const RefPtr<FrameNode>& frameNode)
                 }
                 cachedItems.erase(it++);
             }
-
+            pattern->SetCachedItems(cachedItems);
             if (!cachedItems.empty()) {
-                pattern->SetCachedItems(cachedItems);
                 pattern->PostIdleTask(frameNode);
             }
         });

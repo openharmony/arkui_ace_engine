@@ -594,7 +594,10 @@ public:
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
 
-    virtual void OnAccessibilityHoverEvent(const PointF& point) {}
+    virtual bool OnAccessibilityHoverEvent(const PointF& point)
+    {
+        return false;
+    }
 
 protected:
     virtual void OnAttachToFrameNode() {}

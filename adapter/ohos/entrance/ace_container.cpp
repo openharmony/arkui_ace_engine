@@ -798,10 +798,15 @@ void AceContainer::InitializeCallback()
         ContainerScope scope(id);
         context->CheckAndLogLastReceivedTouchEventInfo(event.touchEventId, event.type);
         auto touchTask = [context, event, markProcess, node]() {
-            if (node) {
-                context->OnTouchEvent(event, node);
+            if (event.type == TouchType::HOVER_ENTER || event.type == TouchType::HOVER_MOVE ||
+                event.type == TouchType::HOVER_EXIT || event.type == TouchType::HOVER_CANCEL) {
+                context->OnAccessibilityHoverEvent(event, node);
             } else {
-                context->OnTouchEvent(event);
+                if (node) {
+                    context->OnTouchEvent(event, node);
+                } else {
+                    context->OnTouchEvent(event);
+                }
             }
             CHECK_NULL_VOID(markProcess);
             markProcess();
@@ -1143,14 +1148,15 @@ UIContentErrorCode AceContainer::RunPage(
         return UIContentErrorCode::NULL_URL;
     }
 
-    if (content.find('/') != std::string::npos && !isFormRender && !isNamedRouter &&
+    ContainerScope scope(instanceId);
+    auto front = container->GetFrontend();
+    CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
+
+    if (front->GetType() != FrontendType::DECLARATIVE_CJ && !isFormRender && !isNamedRouter &&
         isStageModel && !CheckUrlValid(content, container->GetHapPath())) {
         return UIContentErrorCode::INVALID_URL;
     }
 
-    ContainerScope scope(instanceId);
-    auto front = container->GetFrontend();
-    CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
     if (isNamedRouter) {
         return front->RunPageByNamedRouter(content, params);
     }

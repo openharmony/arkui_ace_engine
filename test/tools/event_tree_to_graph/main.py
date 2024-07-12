@@ -33,6 +33,7 @@ def usage():
     print('         <output>: ouput image file\n')
     return
 
+
 def parse_args():
     parser = argparse.ArgumentParser(description="")
     parser.add_argument("-i", type=str, default="input.txt", help="input the dump source file")
@@ -45,9 +46,7 @@ def parse_args():
     return argument
 
 
-"""
-python main.py -i input.txt -o dump_temp.txt
-"""
+# python main.py -i input.txt
 if __name__ == '__main__':
     # 解析参数
     args = parse_args()

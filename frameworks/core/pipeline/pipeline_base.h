@@ -168,6 +168,8 @@ public:
     // Called by ohos AceContainer when touch event received.
     virtual void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false) {}
 
+    virtual void OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
+
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
     virtual bool OnKeyEvent(const KeyEvent& event) = 0;
@@ -1274,6 +1276,11 @@ public:
     virtual bool OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe = false,
         const std::string& target = "") = 0;
 #endif
+    virtual bool IsWindowFocused() const
+    {
+        return false;
+    }
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1432,7 +1439,7 @@ private:
     int64_t formAnimationStartTime_ = 0;
     bool isFormAnimation_ = false;
     bool halfLeading_ = false;
-    bool hasSupportedPreviewText_ = false;
+    bool hasSupportedPreviewText_ = true;
     bool hasPreviewTextOption_ = false;
     bool useCutout_ = false;
     uint64_t vsyncTime_ = 0;

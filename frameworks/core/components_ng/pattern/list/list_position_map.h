@@ -104,10 +104,6 @@ public:
     void UpdatePosMapStart(float delta, float& listCurrentPos, float space, int32_t startIndex, float startPos)
     {
         listCurrentPos += delta;
-        if (startIndex == 0) {
-            listCurrentPos = -startPos;
-            return;
-        }
         auto it = posMap_.find(startIndex);
         if (it == posMap_.begin() || it == posMap_.end()) {
             return;

@@ -225,7 +225,7 @@ ArkUINativeModuleValue MenuItemBridge::SetSelectIcon(ArkUIRuntimeCallInfo* runti
     if (inputArg->IsBoolean()) {
         isShow = inputArg->ToBoolean(vm)->Value();
     } else if (inputArg->IsString(vm)) {
-        icon = inputArg->ToString(vm)->ToString();
+        icon = inputArg->ToString(vm)->ToString(vm);
         isShow = true;
     } else if (ArkTSUtils::ParseJsMedia(vm, inputArg, icon)) {
         isShow = true;

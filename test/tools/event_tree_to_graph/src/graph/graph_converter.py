@@ -16,9 +16,9 @@
 # limitations under the License.
 #
 
-from typing import List
+import os.path
 
-# convert the dump result into graphical representation
+from typing import List
 
 from graphviz import Digraph
 
@@ -26,6 +26,7 @@ from src.beans.event_node import EventNode
 from src.beans.event_procedures import EventProcedures
 from src.beans.event_scope import EventScope
 from src.beans.event_tree import EventTree
+from src.keywords import get_dict_value
 
 output_folder = 'output'
 
@@ -41,9 +42,9 @@ def reset_output_dir():
 def draw_title_and_touch_points(tree: EventTree, tree_name, dot):
     touch_points = tree.touch_points
     current_index = 0
-    touch_points_info = "event tree " + str(tree.tree_id) + '\n'
+    touch_points_info = f'event tree {str(tree.tree_id)} \n'
     for touch_point in touch_points:
-        touch_points_info += touch_point.to_summary_string() + '\n'
+        touch_points_info = f'{touch_points_info} {touch_point.to_summary_string}\n'
         current_index += 1
     touch_points_info.rstrip('\n')
     if current_index != 0:
@@ -77,15 +78,19 @@ def build_event_node_tree(scope: EventScope):
     # # append child nodes to their parent's `children` attribute based on `parentId`
     for item in flatten_frame_nodes:
         if item.parentId is not None and item.parentId != 0 and len(item.parentId) > 6:
-            node_map[item.parentId].append_child(node_map[item.address])
+            parent = get_dict_value(node_map, item.parentId)
+            if parent is not None:
+                child = get_dict_value(node_map, item.address)
+                parent.append_child(child)
         else:
-            result.append(node_map[item.address])
+            child = get_dict_value(node_map, item.address)
+            result.append(child)
     return result
 
 
 # draw node relationships recursively
-def draw_event_scop_tree_recursively(node_tree: List[ParentChildrenPair], parent_node_name: str, graph: Digraph,
-                                     is_show_detail):
+def draw_event_scope_tree_recursively(node_tree: List[ParentChildrenPair], parent_node_name: str, graph: Digraph,
+                                      is_show_detail):
     for item in node_tree:
         node_name = item.get_address()
         node_label = item.item_self.get_summary_string()
@@ -95,23 +100,24 @@ def draw_event_scop_tree_recursively(node_tree: List[ParentChildrenPair], parent
         if parent_node_name is not None:
             graph.edge(parent_node_name, node_name)
         if len(item.children) > 0:
-            draw_event_scop_tree_recursively(item.children, node_name, graph, is_show_detail)
+            draw_event_scope_tree_recursively(item.children, node_name, graph, is_show_detail)
 
 
 def draw_event_procedures(tree: EventTree, tree_name, dot, is_show_detail):
     event_procedures: EventProcedures = tree.event_procedures
     if event_procedures is None:
         return
-    tag = str(tree.tree_id) + ' event procedures'
+    tag = f'{str(tree.tree_id)} event procedures'
     sub_graph = Digraph(comment=tag)
     for scope in event_procedures.event_scopes:
-        sub_scope_graph = Digraph(comment=tag + ' event scope ' + str(scope.finger))
+        comment = f'event scope {str(scope.finger)}'
+        sub_scope_graph = Digraph(comment=comment)
         node_tree = build_event_node_tree(scope)
         # treat finger as root node of subgraph
-        scope_root_node_name = 'finger ' + str(scope.finger)
+        scope_root_node_name = f'finger {str(scope.finger)}'
         sub_scope_graph.node(scope_root_node_name, scope_root_node_name)
         dot.edge(tree_name, scope_root_node_name)
-        draw_event_scop_tree_recursively(node_tree, scope_root_node_name, sub_scope_graph, is_show_detail)
+        draw_event_scope_tree_recursively(node_tree, scope_root_node_name, sub_scope_graph, is_show_detail)
         sub_graph.subgraph(sub_scope_graph)
     dot.subgraph(sub_graph)
 
@@ -123,15 +129,17 @@ def generate_event_trees_graph(dump_result, is_show_detail):
     # draw every event tree into file
     for tree in dump_result.event_trees:
         # create a graph
-        dot = Digraph(comment='event dump' + str(current_index))
+        comment = f'event dump {str(current_index)}'
+        dot = Digraph(comment=comment)
         # draw touch points info
-        tree_name = 'event tree ' + str(tree.tree_id)
+        tree_name = f'event tree {str(tree.tree_id)}'
         draw_title_and_touch_points(tree, tree_name, dot)
         # draw event procedures
         draw_event_procedures(tree, tree_name, dot, is_show_detail)
         # save or show directly
         # dot.view()
         # or save to file
-        out_graph_file_name = output_folder + '/view_tree_' + str(tree.tree_id)
+        out_graph_file_name = f'/view_tree_{str(tree.tree_id)}'
+        out_graph_file_name = os.path.join(output_folder, out_graph_file_name)
         dot.render(out_graph_file_name, format='svg', cleanup=True, view=False)
         current_index += 1

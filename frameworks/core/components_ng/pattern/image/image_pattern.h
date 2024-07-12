@@ -337,6 +337,16 @@ public:
         return loadInVipChannel_;
     }
 
+    bool GetNeedLoadAlt()
+    {
+        return needLoadAlt_;
+    }
+
+    void SetNeedLoadAlt(bool needLoadAlt)
+    {
+        needLoadAlt_ = needLoadAlt;
+    }
+
     void SetLoadInVipChannel(bool loadInVipChannel)
     {
         loadInVipChannel_ = loadInVipChannel;
@@ -446,7 +456,6 @@ private:
     void OnDirectionConfigurationUpdate() override;
     void OnIconConfigurationUpdate() override;
     void OnConfigurationUpdate();
-    void ClearImageCache();
     void LoadImage(const ImageSourceInfo& src, const PropertyChangeFlag& propertyChangeFlag, VisibleType visibleType);
     void LoadAltImage(const ImageSourceInfo& altImageSourceInfo);
 
@@ -483,6 +492,7 @@ private:
 
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::LOW;
+    bool needLoadAlt_ = true;
 
     RefPtr<ImageLoadingContext> loadingCtx_;
     RefPtr<CanvasImage> image_;

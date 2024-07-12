@@ -24,7 +24,7 @@
 #include "input_method_controller.h"
 #include "parameters.h"
 
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 #include "base/geometry/ng/offset_t.h"
@@ -43,6 +43,7 @@
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
@@ -73,6 +74,7 @@ constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
 constexpr int32_t IMAGE_POINTER_CUSTOM_CHANNEL = 4;
 constexpr int32_t TOUCH_EVENT_MAX_SIZE = 5;
 constexpr int32_t KEYEVENT_MAX_NUM = 1000;
+constexpr float SELECT_MENE_HEIGHT = 140.0f;
 const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] = {
     { OHOS::NWeb::CursorType::CT_CROSS, MouseFormat::CROSS },
     { OHOS::NWeb::CursorType::CT_HAND, MouseFormat::HAND_POINTING },
@@ -323,7 +325,7 @@ void WebPattern::OnAttachToFrameNode()
         }
     });
     UpdateTransformHintChangedCallbackId(callbackId);
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     if (UiSessionManager::GetInstance().GetWebFocusRegistered()) {
         auto callback = [](int64_t accessibilityId, const std::string data) {
             UiSessionManager::GetInstance().ReportWebUnfocusEvent(accessibilityId, data);
@@ -350,7 +352,7 @@ void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     if (HasTransformHintChangedCallbackId()) {
         pipeline->UnregisterTransformHintChangedCallback(transformHintChangedCallbackId_.value_or(-1));
     }
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     if (UiSessionManager::GetInstance().GetWebFocusRegistered()) {
         UnRegisterTextBlurCallback();
     }
@@ -767,6 +769,7 @@ void WebPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
         CHECK_NULL_VOID(pattern);
         MouseInfo info;
         info.SetAction(isHover ? MouseAction::HOVER : MouseAction::HOVER_EXIT);
+        pattern->SetMouseHoverExit(!isHover);
         if (!isHover) {
             TAG_LOGI(AceLogTag::ACE_WEB,
                 "Set cursor to pointer when mouse pointer is leave.");
@@ -815,10 +818,11 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
         }
         ResetDragAction();
     }
-
+    isHoverExit_ = false;
     if (info.GetAction() == MouseAction::HOVER_EXIT) {
         TAG_LOGI(AceLogTag::ACE_WEB,
             "Set cursor to pointer when mouse pointer is hover exit.");
+        isHoverExit_ = true;
         OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, nullptr);
     }
 
@@ -1013,7 +1017,6 @@ void WebPattern::HandleOnDropMove(const RefPtr<OHOS::Ace::DragEvent>& info)
     }
 
     CHECK_NULL_VOID(delegate_);
-    delegate_->OnContextMenuHide("");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContextRefPtr();
@@ -1201,6 +1204,8 @@ bool WebPattern::NotifyStartDragTask()
     CHECK_NULL_RETURN(eventHub, false);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, false);
+    CHECK_NULL_RETURN(delegate_, false);
+    delegate_->OnContextMenuHide("");
     // received web kernel drag callback, enable drag
     frameNode->SetDraggable(true);
     gestureHub->SetPixelMap(delegate_->GetDragPixelMap());
@@ -1500,6 +1505,8 @@ void WebPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 
 void WebPattern::HandleFocusEvent()
 {
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "WebPattern::HandleFocusEvent needOnFocus: %{public}d.", needOnFocus_);
     CHECK_NULL_VOID(delegate_);
     isFocus_ = true;
     if (needOnFocus_) {
@@ -1512,6 +1519,8 @@ void WebPattern::HandleFocusEvent()
 
 void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
 {
+    TAG_LOGD(AceLogTag::ACE_WEB,
+        "WebPattern::HandleBlurEvent selectPopupMenuShowing: %{public}d.", selectPopupMenuShowing_);
     CHECK_NULL_VOID(delegate_);
     isFocus_ = false;
     if (!selectPopupMenuShowing_) {
@@ -2541,10 +2550,15 @@ bool WebPattern::ProcessVirtualKeyBoardHide(int32_t width, int32_t height, bool 
 
 bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, double keyboard, bool safeAreaEnabled)
 {
+    if (IsDialogNested()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "ProcessVirtualKeyBoardShow, dialog nested, web don't consume keyboard event.");
+        isKeyboardInSafeArea_ = true;
+        return false;
+    }
     if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
         drawSizeCache_.SetSize(drawSize_);
     }
-    if (drawSize_.Height() <= (height - keyboard - GetCoordinatePoint()->GetY())) {
+    if (drawSizeCache_.Height() <= (height - keyboard - GetCoordinatePoint()->GetY())) {
         isVirtualKeyBoardShow_ = VkState::VK_SHOW;
         return !safeAreaEnabled;
     }
@@ -3140,7 +3154,8 @@ void WebPattern::DragDropSelectionMenu()
 RectF WebPattern::ComputeClippedSelectionBounds(
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startHandle,
-    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endHandle)
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endHandle,
+    bool& isNewAvoid)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     if (!pipeline) {
@@ -3150,24 +3165,40 @@ RectF WebPattern::ComputeClippedSelectionBounds(
     auto offset = GetCoordinatePoint().value_or(OffsetF());
     float selectX = params->GetSelectX();
     float selectY = params->GetSelectY();
+    float selectWidth = params->GetSelectWidth();
+    float selectHeight = params->GetSelectXHeight();
     float viewPortX = static_cast<float>((startHandle->GetViewPortX() + endHandle->GetViewPortX())) / 2;
     float viewPortY = static_cast<float>((startHandle->GetViewPortY() + endHandle->GetViewPortY())) / 2;
-    if (LessOrEqual(GetHostFrameSize().value_or(SizeF()).Height(), selectY)) {
-        selectY = GetHostFrameSize().value_or(SizeF()).Height();
-    } else if (LessOrEqual(static_cast<float>(selectY + params->GetSelectXHeight()), 0)) {
-        selectY = 0;
+    auto frameHeight = GetHostFrameSize().value_or(SizeF()).Height();
+    isNewAvoid = true;
+    if (LessOrEqual(frameHeight, selectY + viewPortY) || LessOrEqual(selectY + selectHeight, 0)) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "Selected area not visible, Do not display menu");
+        isNewAvoid = false;
+        return RectF();
+    } else if (LessOrEqual(selectY, 0) && LessOrEqual(frameHeight, selectY + viewPortY + selectHeight)) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "Center menu display");
+        return RectF(offset.GetX(), offset.GetY(), drawSize_.Width(), drawSize_.Height());
     }
 
-    if (viewPortX) {
-        selectX += viewPortX;
+    float radius = 0.0;
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    if (theme) {
+        radius = theme->GetHandleHotZoneRadius().ConvertToPx();
     }
-    if (viewPortY) {
-        selectY += viewPortY;
+    if (LessOrEqual(frameHeight, selectY + viewPortY + startHandle->GetEdgeHeight())) {
+        selectX = startHandle->GetX() + offset.GetX();
+        selectY = startHandle->GetY() + offset.GetY() - radius - startHandle->GetEdgeHeight() - SELECT_MENE_HEIGHT;
+        selectWidth = SelectHandleInfo::GetDefaultLineWidth().ConvertToPx();
+    } else if (LessOrEqual(selectY + selectHeight - endHandle->GetEdgeHeight(), 0)) {
+        selectX = endHandle->GetX() + offset.GetX();
+        selectY = endHandle->GetY() + offset.GetY() + radius;
+        selectWidth = SelectHandleInfo::GetDefaultLineWidth().ConvertToPx();
+    } else {
+        selectX = selectX + viewPortX + offset.GetX();
+        selectY = selectY + viewPortY + offset.GetY() - SELECT_MENE_HEIGHT - radius;
     }
-    selectX += offset.GetX();
-    selectY += offset.GetY();
-    TAG_LOGI(AceLogTag::ACE_WEB, "SelectionBounds selectX:%{public}f, selectY:%{public}f", selectX, selectY);
-    return RectF(selectX, selectY, 0, 0);
+    TAG_LOGI(AceLogTag::ACE_WEB, "SelectionBounds pos: (%{public}f, %{public}f)", selectX, selectY);
+    return RectF(selectX, selectY, selectWidth, SELECT_MENE_HEIGHT);
 }
 
 void WebPattern::QuickMenuIsNeedNewAvoid(
@@ -3190,7 +3221,7 @@ void WebPattern::QuickMenuIsNeedNewAvoid(
             selectArea_ = selectInfo.selectArea;
         } else {
             selectInfo.selectArea =
-                ComputeClippedSelectionBounds(params, startHandle, endHandle);
+                ComputeClippedSelectionBounds(params, startHandle, endHandle, selectInfo.isNewAvoid);
         }
     }
 }
@@ -3290,6 +3321,10 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
 bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info)
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange type: %{public}d", type);
+    if (isHoverExit_ && type == OHOS::NWeb::CursorType::CT_NONE) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange reciving unexpected hide command");
+        return false;
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto windowId = pipeline->GetWindowId();
@@ -4366,6 +4401,22 @@ RefPtr<NestableScrollContainer> WebPattern::SearchParent(Axis scrollAxis)
     return nullptr;
 }
 
+bool WebPattern::IsDialogNested()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
+        RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+        if (!frameNode) {
+            continue;
+        }
+        if (frameNode->GetPattern<DialogPattern>()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void WebPattern::OnRootLayerChanged(int width, int height)
 {
     if ((rootLayerWidth_ == width) && (rootLayerHeight_ == height)) {
@@ -5218,13 +5269,13 @@ void WebPattern::DestroyAnalyzerOverlay()
     }
 }
 
-void WebPattern::OnAccessibilityHoverEvent(const PointF& point)
+bool WebPattern::OnAccessibilityHoverEvent(const PointF& point)
 {
-    CHECK_NULL_VOID(delegate_);
+    CHECK_NULL_RETURN(delegate_, false);
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_RETURN(host, false);
     auto pipelineContext = host->GetContextRefPtr();
-    CHECK_NULL_VOID(pipelineContext);
+    CHECK_NULL_RETURN(pipelineContext, false);
     auto viewScale = pipelineContext->GetViewScale();
     int32_t globalX = static_cast<int32_t>(point.GetX()) * viewScale;
     int32_t globalY = static_cast<int32_t>(point.GetY()) * viewScale;
@@ -5232,6 +5283,7 @@ void WebPattern::OnAccessibilityHoverEvent(const PointF& point)
     globalX = static_cast<int32_t>(globalX - offset.GetX());
     globalY = static_cast<int32_t>(globalY - offset.GetY());
     delegate_->HandleAccessibilityHoverEvent(globalX, globalY);
+    return true;
 }
 
 void WebPattern::RegisterTextBlurCallback(TextBlurCallback&& callback)

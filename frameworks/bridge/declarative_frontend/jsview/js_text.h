@@ -36,6 +36,8 @@ public:
     static void GetFontInfo(const JSCallbackInfo& info, Font& font);
     static void SetFontSize(const JSCallbackInfo& info);
     static void SetFontWeight(const std::string& value);
+    static void SetMinFontScale(const JSCallbackInfo& info);
+    static void SetMaxFontScale(const JSCallbackInfo& info);
     static void SetTextColor(const JSCallbackInfo& info);
     static void SetTextShadow(const JSCallbackInfo& info);
     static void SetTextOverflow(const JSCallbackInfo& info);

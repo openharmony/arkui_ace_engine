@@ -1653,6 +1653,11 @@ void TabBarPattern::OnTabBarIndexChange(int32_t index)
         tabBarPattern->ResetIndicatorAnimationState();
         auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
         CHECK_NULL_VOID(tabBarLayoutProperty);
+        auto preIndex = tabBarPattern->GetImageColorOnIndex().value_or(tabBarPattern->indicator_);
+        if (preIndex == index) {
+            tabBarPattern->SetMaskAnimationByCreate(false);
+            return;
+        }
         if (!tabBarPattern->IsMaskAnimationByCreate()) {
             tabBarPattern->HandleBottomTabBarChange(index);
         }
@@ -1810,11 +1815,6 @@ void TabBarPattern::UpdateImageColor(int32_t indicator)
         auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
         CHECK_NULL_VOID(imageNode);
         if (imageNode->GetTag() != V2::IMAGE_ETS_TAG) {
-            if (indicator == index) {
-                UpdateSymbolStats(index, -1);
-            } else {
-                UpdateSymbolStats(-1, index);
-            }
             index++;
             continue;
         }

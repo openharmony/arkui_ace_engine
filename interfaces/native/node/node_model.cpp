@@ -423,24 +423,6 @@ void UnregisterOnEvent()
     g_eventReceiver = nullptr;
 }
 
-void SetNodeEvent(ArkUINodeEvent* innerEvent)
-{
-    auto nativeNodeEventType = GetNativeNodeEventType(innerEvent);
-    auto eventType = static_cast<ArkUI_NodeEventType>(nativeNodeEventType);
-    auto* nodePtr = reinterpret_cast<ArkUI_NodeHandle>(innerEvent->extraParam);
-    auto extraData = reinterpret_cast<ExtraData*>(nodePtr->extraData);
-    auto innerEventExtraParam = extraData->eventMap.find(eventType);
-    if (g_compatibleEventReceiver) {
-        ArkUI_CompatibleNodeEvent nodeEvent;
-        nodeEvent.node = nodePtr;
-        nodeEvent.eventId = innerEventExtraParam->second->targetId;
-        if (ConvertEvent(innerEvent, &nodeEvent)) {
-            g_compatibleEventReceiver(&nodeEvent);
-            ConvertEventResult(&nodeEvent, innerEvent);
-        }
-    }
-}
-
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
 {
     if (!innerEvent) {
@@ -487,7 +469,15 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
         }
         HandleNodeEvent(&event);
     }
-    SetNodeEvent(innerEvent);
+    if (g_compatibleEventReceiver) {
+        ArkUI_CompatibleNodeEvent event;
+        event.node = nodePtr;
+        event.eventId = innerEventExtraParam->second->targetId;
+        if (ConvertEvent(innerEvent, &event)) {
+            g_compatibleEventReceiver(&event);
+            ConvertEventResult(&event, innerEvent);
+        }
+    }
 }
 
 int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent)

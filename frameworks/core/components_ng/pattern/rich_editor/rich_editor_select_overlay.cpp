@@ -416,11 +416,16 @@ void RichEditorSelectOverlay::UpdateMenuOffset()
     manager->MarkInfoChange(DIRTY_SELECT_AREA | DIRTY_ALL_MENU_ITEM);
 }
 
-bool RichEditorSelectOverlay::IsHandlesShow()
+bool RichEditorSelectOverlay::IsBothHandlesShow()
 {
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_RETURN(manager, false);
     return manager->IsHandlesShow();
+}
+
+bool RichEditorSelectOverlay::IsHandleShow()
+{
+    return IsBothHandlesShow() || IsSingleHandleShow();
 }
 
 void RichEditorSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)

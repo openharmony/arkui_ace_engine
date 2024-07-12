@@ -27,7 +27,7 @@
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UIContentServiceStubImpl : public UiContentStub {
 public:
-    int32_t Connect() override
+    int32_t Connect(const EventCallback& eventCallback) override
     {
         return 0;
     }

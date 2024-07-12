@@ -1881,7 +1881,7 @@ float MenuLayoutAlgorithm::HorizontalLayout(const SizeF& size, float position, b
     // line up right side of menu with right boundary of the screen
     if (size.Width() < wrapperWidth) {
         if (isSelectMenu) {
-            return position;
+            return position + margin_;
         }
         return wrapperWidth - size.Width();
     }
@@ -2004,7 +2004,7 @@ OffsetF MenuLayoutAlgorithm::FitToScreen(const OffsetF& position, const SizeF& c
     OffsetF afterOffsetPosition;
     auto originPosition = position;
 
-    if (NearEqual(positionOffset_, OffsetF(0.0f, 0.0f)) && (!didNeedArrow || arrowPlacement_ == Placement::NONE)) {
+    if (NearEqual(positionOffset_, OffsetF(0.0f, 0.0f))) {
         afterOffsetPosition = AddTargetSpace(originPosition);
     } else {
         afterOffsetPosition = AddOffset(originPosition);

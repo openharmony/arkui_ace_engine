@@ -32,7 +32,6 @@ constexpr int32_t CHILD_WITH_AMPM_SIZE = 3;
 constexpr int32_t CHILD_WITHOUT_AMPM_SIZE = 2;
 constexpr uint32_t AM_PM_HOUR_12 = 12;
 constexpr uint32_t AM_PM_HOUR_11 = 11;
-constexpr uint8_t PIXEL_ROUND = 18;
 const int32_t AM_PM_COUNT = 3;
 const Dimension PRESS_INTERVAL = 4.0_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
@@ -181,7 +180,6 @@ void TimePickerRowPattern::CreateAmPmNode()
         buttonNode->MountToParent(stackAmPmNode);
         auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         amPmColumnNode->MountToParent(columnBlendNode);
-        amPmColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
         columnBlendNode->MountToParent(stackAmPmNode);
         auto layoutProperty = stackAmPmNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
@@ -233,7 +231,6 @@ void TimePickerRowPattern::CreateOrDeleteSecondNode()
             secondColumnNode->MountToParent(columnBlendNode);
             columnBlendNode->MarkModifyDone();
             columnBlendNode->MountToParent(stackSecondNode);
-            secondColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
             auto layoutProperty = stackSecondNode->GetLayoutProperty<LayoutProperty>();
             layoutProperty->UpdateAlignment(Alignment::CENTER);
             layoutProperty->UpdateLayoutWeight(1);
@@ -410,6 +407,11 @@ void TimePickerRowPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool
     }
 }
 
+void TimePickerRowPattern::OnFontConfigurationUpdate()
+{
+    CHECK_NULL_VOID(closeDialogEvent_);
+    closeDialogEvent_();
+}
 void TimePickerRowPattern::OnLanguageConfigurationUpdate()
 {
     FlushAmPmFormatString();
@@ -436,7 +438,6 @@ void TimePickerRowPattern::OnLanguageConfigurationUpdate()
         auto layoutProperty = AceType::DynamicCast<FrameNode>(amPmNode)->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateLayoutWeight(1);
-        AceType::DynamicCast<FrameNode>(amPmNode)->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     auto buttonConfirmNode = weakButtonConfirm_.Upgrade();

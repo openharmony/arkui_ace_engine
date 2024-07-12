@@ -82,7 +82,8 @@ constexpr double ROUND_UNIT = 360.0;
 constexpr TextDirection DEFAULT_COMMON_DIRECTION = TextDirection::AUTO;
 constexpr int32_t DEFAULT_COMMON_LAYOUTWEIGHT = 0;
 constexpr int32_t MAX_ALIGN_VALUE = 8;
-constexpr int32_t DEFAULT_GRIDSPAN = 0;
+// default gridSpan is 1 on doc
+constexpr int32_t DEFAULT_GRIDSPAN = 1;
 constexpr uint32_t DEFAULT_ALIGN_RULES_SIZE = 6;
 constexpr uint8_t DEFAULT_SAFE_AREA_TYPE = 0b111;
 constexpr uint8_t DEFAULT_SAFE_AREA_EDGE = 0b1111;
@@ -6003,6 +6004,23 @@ void SetTransition(ArkUINodeHandle node, ArkUITransitionEffectOption* option)
     ViewAbstract::SetChainedTransition(frameNode, transitionEffectOption);
 }
 
+void SetDragPreview(ArkUINodeHandle node, ArkUIDragPreview dragPreview)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::DragDropInfo dragPreviewInfo;
+    dragPreviewInfo.inspectorId = dragPreview.inspectorId;
+    ViewAbstract::SetDragPreview(frameNode, dragPreviewInfo);
+}
+
+void ResetDragPreview(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::DragDropInfo dragPreviewInfo;
+    ViewAbstract::SetDragPreview(frameNode, dragPreviewInfo);
+}
+
 void GetExpandSafeArea(ArkUINodeHandle node, ArkUI_Uint32 (*values)[2])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -6116,7 +6134,8 @@ const ArkUICommonModifier* GetCommonModifier()
         SetAccessibilityValue, GetAccessibilityValue, ResetAccessibilityValue, SetAccessibilityActions,
         ResetAccessibilityActions, GetAccessibilityActions, SetAccessibilityRole, ResetAccessibilityRole,
         GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
-        SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition };
+        SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition, SetDragPreview,
+        ResetDragPreview };
 
     return &modifier;
 }

@@ -56,6 +56,11 @@ public:
      * @description: notify stub side to report web unfocus value
      */
     void ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data) override;
+
+    /**
+     * @description: notify stub side to report web unfocus value
+     */
+    void SendBaseInfo(const std::string& data) override;
     void OnComponentChange(const std::string& key, const std::string& value);
 
 private:

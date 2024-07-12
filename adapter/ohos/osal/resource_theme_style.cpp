@@ -200,4 +200,11 @@ void ResourceThemeStyle::OnParseResourceMedia(const std::string& attrName, const
     }
     attributes_[attrName] = { .type = ThemeConstantsType::STRING, .value = mediaPath };
 }
+
+void ResourceThemeStyle::CheckThemeStyleLoaded()
+{
+    if (future_.valid()) {
+        future_.wait();
+    }
+}
 } // namespace OHOS::Ace

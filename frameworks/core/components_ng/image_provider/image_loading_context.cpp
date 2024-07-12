@@ -72,8 +72,7 @@ RefPtr<ImageData> QueryDataFromCache(const ImageSourceInfo& src, bool& dataHit)
 } // namespace
 
 ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad)
-    : src_(src), notifiers_(std::move(loadNotifier)),
-    containerId_(Container::CurrentId()), syncLoad_(syncLoad)
+    : src_(src), notifiers_(std::move(loadNotifier)), containerId_(Container::CurrentId()), syncLoad_(syncLoad)
 {
     stateManager_ = MakeRefPtr<ImageStateManager>(WeakClaim(this));
 
@@ -85,15 +84,14 @@ ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& src, LoadNotifie
 
 ImageLoadingContext::~ImageLoadingContext()
 {
-    // cancel background task
-    if (Downloadable()) {
-        RemoveDownloadTask(src_.GetSrc());
-    }
     if (!syncLoad_) {
         auto state = stateManager_->GetCurrentState();
         if (state == ImageLoadingState::DATA_LOADING) {
             // cancel CreateImgObj task
             ImageProvider::CancelTask(src_.GetKey(), WeakClaim(this));
+            if (Downloadable()) {
+                DownloadManager::GetInstance()->RemoveDownloadTask(src_.GetSrc(), nodeId_);
+            }
         } else if (state == ImageLoadingState::MAKE_CANVAS_IMAGE) {
             // cancel MakeCanvasImage task
             if (InstanceOf<StaticImageObject>(imageObj_)) {
@@ -169,14 +167,6 @@ void ImageLoadingContext::SetOnProgressCallback(
 
 void ImageLoadingContext::OnDataLoading()
 {
-    if (!src_.GetIsConfigurationChange()) {
-        if (auto obj = ImageProvider::QueryImageObjectFromCache(src_); obj) {
-            TAG_LOGD(AceLogTag::ACE_IMAGE, "%{private}s Hit the Cache, not need Create imageObject.",
-                src_.GetSrc().c_str());
-            DataReadyCallback(obj);
-            return;
-        }
-    }
     if (Downloadable()) {
         if (syncLoad_) {
             DownloadImage();
@@ -191,7 +181,6 @@ void ImageLoadingContext::OnDataLoading()
         return;
     }
     ImageProvider::CreateImageObject(src_, WeakClaim(this), syncLoad_);
-    src_.SetIsConfigurationChange(false);
 }
 
 bool ImageLoadingContext::NotifyReadyIfCacheHit()
@@ -260,7 +249,7 @@ void ImageLoadingContext::PerformDownload()
     downloadCallback.cancelCallback = downloadCallback.failCallback;
     if (onProgressCallback_) {
         downloadCallback.onProgressCallback = [weak = AceType::WeakClaim(this)](
-            uint32_t dlTotal, uint32_t dlNow, bool async, int32_t instanceId) {
+                                                  uint32_t dlTotal, uint32_t dlNow, bool async, int32_t instanceId) {
             ContainerScope scope(instanceId);
             auto callback = [weak = weak, dlTotal = dlTotal, dlNow = dlNow]() {
                 auto ctx = weak.Upgrade();
@@ -270,12 +259,7 @@ void ImageLoadingContext::PerformDownload()
             async ? NG::ImageUtils::PostToUI(callback, "ArkUIImageDownloadOnProcess") : callback();
         };
     }
-    NetworkImageLoader::DownloadImage(std::move(downloadCallback), src_.GetSrc(), syncLoad_);
-}
-
-bool ImageLoadingContext::RemoveDownloadTask(const std::string& src)
-{
-    return DownloadManager::GetInstance()->RemoveDownloadTask(src);
+    NetworkImageLoader::DownloadImage(std::move(downloadCallback), src_.GetSrc(), syncLoad_, nodeId_);
 }
 
 void ImageLoadingContext::CacheDownloadedImage()

@@ -464,6 +464,10 @@ void SelectContentOverlayManager::MountNodeToRoot(const RefPtr<FrameNode>& overl
             slot = index;
             break;
         }
+        if (it->GetTag() == V2::TEXTINPUT_ETS_TAG) {
+            slot = index;
+            break;
+        }
         index++;
     }
 
@@ -571,7 +575,7 @@ void SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, Clos
     auto selectOverlayNode = selectOverlayNode_.Upgrade();
     auto menuNode = menuNode_.Upgrade();
     auto handleNode = handleNode_.Upgrade();
-    if (animation) {
+    if (animation && !shareOverlayInfo_->isUsingMouse) {
         ClearAllStatus();
         DestroySelectOverlayNodeWithAnimation(selectOverlayNode);
         DestroySelectOverlayNodeWithAnimation(menuNode);
@@ -958,4 +962,15 @@ bool SelectContentOverlayManager::IsTouchAtHandle(const PointF& localPoint, cons
     }
     return selectOverlayNode->IsInSelectedOrSelectOverlayArea(globalPoint);
 }
+
+void SelectContentOverlayManager::UpdateViewPort()
+{
+    auto menuNode = menuNode_.Upgrade();
+    CHECK_NULL_VOID(menuNode);
+    CHECK_NULL_VOID(selectOverlayHolder_);
+    CHECK_NULL_VOID(shareOverlayInfo_);
+    shareOverlayInfo_->ancestorViewPort = selectOverlayHolder_->GetAncestorNodeViewPort();
+    menuNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
 } // namespace OHOS::Ace::NG

@@ -921,7 +921,7 @@ bool TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandl
         aiRect = textSelector_.firstHandle.CombineRectT(textSelector_.secondHandle);
     }
 
-    return dataDetectorAdapter_->ShowUIExtensionMenu(aiSpan, aiRect, host);
+    return dataDetectorAdapter_->ShowUIExtensionMenu(aiSpan, aiRect, host, IsSelectableAndCopy());
 }
 
 void TextPattern::HandleDoubleClickEvent(GestureEvent& info)
@@ -991,7 +991,7 @@ void TextPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
         RectF textContentRect = contentRect;
         textContentRect.SetTop(contentRect.GetY() - std::min(baselineOffset, 0.0f));
         textContentRect.SetHeight(contentRect.Height() - std::max(baselineOffset, 0.0f));
-        if (textPattern->GetCopyOptions() == CopyOptions::None &&
+        if (textPattern->GetCopyOptions() == CopyOptions::None && !textPattern->NeedShowAIDetect() &&
             !textPattern->CheckClickedOnSpanOrText(textContentRect, localLocation)) {
             return GestureJudgeResult::REJECT;
         }
@@ -2153,7 +2153,7 @@ void TextPattern::InitCopyOption()
             gestureEventHub->SetTextDraggable(false);
         }
     }
-    if (onClick_ || IsSelectableAndCopy()) {
+    if (onClick_ || IsSelectableAndCopy() || CanStartAITask()) {
         InitClickEvent(gestureEventHub);
     }
     auto eventHub = host->GetEventHub<EventHub>();
@@ -3064,8 +3064,7 @@ void TextPattern::RemoveAreaChangeInner()
 
 bool TextPattern::NeedShowAIDetect()
 {
-    return textDetectEnable_ && IsSelectableAndCopy() && enabled_ &&
-           !dataDetectorAdapter_->aiSpanMap_.empty();
+    return textDetectEnable_ && enabled_ && !dataDetectorAdapter_->aiSpanMap_.empty();
 }
 
 void TextPattern::BindSelectionMenu(TextSpanType spanType, TextResponseType responseType,

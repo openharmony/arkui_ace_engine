@@ -191,6 +191,8 @@ public:
     void MarkIgnorePrevMarginAndNextMargin()
     {
         ignorePrevMarginAndNextMargin_ = true;
+        propPrevMargin_ = Dimension(0.0_px);
+        propNextMargin_ = Dimension(0.0_px);
     }
 
     float GetCalculatedPrevMargin() const

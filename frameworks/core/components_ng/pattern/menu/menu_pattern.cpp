@@ -69,6 +69,7 @@ const RefPtr<InterpolatingSpring> STACK_MENU_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, STACK_MENU_DAMPING);
 const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 280.0f, 30.0f);
+const float MINIMUM_AMPLITUDE_RATION = 0.08f;
 
 constexpr double MOUNT_MENU_FINAL_SCALE = 0.95f;
 constexpr double SEMI_CIRCLE_ANGEL = 90.0f;
@@ -1327,7 +1328,7 @@ void MenuPattern::ShowMenuDisappearAnimation()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto menuContext = host->GetRenderContext();
-
+    MENU_ANIMATION_CURVE->UpdateMinimumAmplitudeRatio(MINIMUM_AMPLITUDE_RATION);
     auto menuPosition = GetEndOffset();
     AnimationOption option = AnimationOption();
     option.SetCurve(MENU_ANIMATION_CURVE);
@@ -1548,6 +1549,9 @@ void MenuPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (pattern->IsMenuScrollable()) {
+            return;
+        }
         auto offsetX = static_cast<float>(info.GetOffsetX());
         auto offsetY = static_cast<float>(info.GetOffsetY());
         auto offsetPerSecondX = info.GetVelocity().GetOffsetPerSecond().GetX();
@@ -1559,6 +1563,9 @@ void MenuPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionScrollEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (pattern->IsMenuScrollable()) {
+            return;
+        }
         auto offsetX = static_cast<float>(info.GetOffsetX());
         auto offsetY = static_cast<float>(info.GetOffsetY());
         auto offsetPerSecondX = info.GetVelocity().GetOffsetPerSecond().GetX();
@@ -1731,6 +1738,20 @@ RefPtr<UINode> MenuPattern::GetOutsideForEachMenuItem(const RefPtr<UINode>& forE
         return nullptr;
     }
 
+}
+
+bool MenuPattern::IsMenuScrollable() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto firstChild = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+    CHECK_NULL_RETURN(firstChild, false);
+    if (firstChild->GetTag() == V2::SCROLL_ETS_TAG) {
+        auto scrollPattern = firstChild->GetPattern<ScrollPattern>();
+        CHECK_NULL_RETURN(scrollPattern, false);
+        return scrollPattern->IsScrollable() && Positive(scrollPattern->GetScrollableDistance());
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace::NG

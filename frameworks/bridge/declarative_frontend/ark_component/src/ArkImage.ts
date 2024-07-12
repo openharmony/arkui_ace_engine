@@ -375,7 +375,7 @@ class ImageBorderModifier extends ModifierWithKey<BorderOptions> {
       let widthRight;
       let widthTop;
       let widthBottom;
-      if (!isUndefined(this.value.width) && this.value.width != null) {
+      if (!isUndefined(this.value.width) && this.value.width !== null) {
         if (isNumber(this.value.width) || isString(this.value.width) || isResource(this.value.width)) {
           widthLeft = this.value.width;
           widthRight = this.value.width;
@@ -392,7 +392,7 @@ class ImageBorderModifier extends ModifierWithKey<BorderOptions> {
       let rightColor;
       let topColor;
       let bottomColor;
-      if (!isUndefined(this.value.color) && this.value.color != null) {
+      if (!isUndefined(this.value.color) && this.value.color !== null) {
         if (isNumber(this.value.color) || isString(this.value.color) || isResource(this.value.color)) {
           leftColor = this.value.color;
           rightColor = this.value.color;
@@ -409,7 +409,7 @@ class ImageBorderModifier extends ModifierWithKey<BorderOptions> {
       let topRight;
       let bottomLeft;
       let bottomRight;
-      if (!isUndefined(this.value.radius) && this.value.radius != null) {
+      if (!isUndefined(this.value.radius) && this.value.radius !== null) {
         if (isNumber(this.value.radius) || isString(this.value.radius) || isResource(this.value.radius)) {
           topLeft = this.value.radius;
           topRight = this.value.radius;
@@ -503,8 +503,8 @@ class ImageTransitionModifier extends ModifierWithKey<object> {
   }
 }
 
-class ImageSrcModifier extends ModifierWithKey<ResourceStr | PixelMap | DrawableDescriptor> {
-  constructor(value: ResourceStr | PixelMap | DrawableDescriptor) {
+class ImageSrcModifier extends ModifierWithKey<ResourceStr | PixelMap | DrawableDescriptor | ImageContent> {
+  constructor(value: ResourceStr | PixelMap | DrawableDescriptor | ImageContent) {
     super(value);
   }
   static identity: Symbol = Symbol('imageShowSrc');
