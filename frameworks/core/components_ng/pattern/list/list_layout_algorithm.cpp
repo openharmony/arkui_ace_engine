@@ -1335,6 +1335,16 @@ void ListLayoutAlgorithm::ProcessCacheCount(LayoutWrapper* layoutWrapper, int32_
     }
 }
 
+std::optional<ListItemGroupLayoutInfo> ListLayoutAlgorithm::GetListItemGroupLayoutInfo(
+    const RefPtr<LayoutWrapper>& wrapper) const
+{
+    auto layoutAlgorithmWrapper = wrapper->GetLayoutAlgorithm(true);
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, std::nullopt);
+    auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(itemGroup, std::nullopt);
+    return itemGroup->GetLayoutInfo();
+}
+
 void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -1360,6 +1370,11 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         pos.second.startPos -= currentOffset_;
         pos.second.endPos -= currentOffset_;
+        if (pos.second.isGroup) {
+            pos.second.groupInfo = GetListItemGroupLayoutInfo(wrapper);
+        } else {
+            pos.second.groupInfo.reset();
+        }
         LayoutItem(wrapper, pos.first, pos.second, startIndex, crossSize);
         if (expandSafeArea_ || wrapper->CheckNeedForceMeasureAndLayout()) {
             wrapper->Layout();

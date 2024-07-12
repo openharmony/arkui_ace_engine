@@ -804,30 +804,13 @@ void ListPattern::GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) con
     if (itemPosition_.empty()) {
         return;
     }
-    bool firstIsGroup = startIndex_ == 0 && itemPosition_.begin()->second.isGroup;
-    bool lastIsGroup = endIndex_ == maxListItemIndex_ && itemPosition_.rbegin()->second.isGroup;
-    if (!firstIsGroup && !lastIsGroup) {
-        return;
+    if (startIndex_ == 0 && itemPosition_.begin()->second.isGroup) {
+        auto& groupInfo = itemPosition_.begin()->second.groupInfo;
+        groupAtStart = groupInfo && groupInfo.value().atStart;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    std::list<RefPtr<FrameNode>> childrens;
-    host->GenerateOneDepthVisibleFrame(childrens);
-    if (childrens.empty()) {
-        return;
-    }
-    if (firstIsGroup) {
-        auto itemGroup = (*childrens.begin())->GetPattern<ListItemGroupPattern>();
-        if (itemGroup) {
-            groupAtStart = itemGroup->GetDisplayStartIndexInGroup() == 0;
-        }
-    }
-    if (lastIsGroup) {
-        auto itemGroup = (*childrens.rbegin())->GetPattern<ListItemGroupPattern>();
-        if (itemGroup) {
-            groupAtEnd = itemGroup->GetDisplayEndIndexInGroup() == itemGroup->GetEndIndexInGroup() ||
-                         LessOrEqual(itemPosition_.rbegin()->second.endPos, contentMainSize_);
-        }
+    if (endIndex_ == maxListItemIndex_ && itemPosition_.rbegin()->second.isGroup) {
+        auto& groupInfo = itemPosition_.rbegin()->second.groupInfo;
+        groupAtStart = groupInfo && groupInfo.value().atEnd;
     }
 }
 
@@ -1814,8 +1797,14 @@ void ListPattern::CalculateCurrentOffset(float delta, const ListLayoutAlgorithm:
     for (auto& [index, pos] : recycledItemPosition) {
         itemPos.try_emplace(index, pos);
     }
-    posMap_->UpdatePosMapStart(
-        delta, currentOffset_, spaceWidth_, itemPos.begin()->first, itemPos.begin()->second.startPos);
+    float startPos = itemPos.begin()->second.startPos;
+    int32_t startIndex = itemPos.begin()->first;
+    auto& groupInfo = itemPos.begin()->second.groupInfo;
+    if (startIndex == 0 && (!groupInfo || groupInfo.value().atStart)) {
+        currentOffset_ = -startPos;
+    } else {
+        posMap_->UpdatePosMapStart(delta, currentOffset_, spaceWidth_, startIndex, startPos);
+    }
     for (auto& [index, pos] : itemPos) {
         float height = pos.endPos - pos.startPos;
         posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height });
