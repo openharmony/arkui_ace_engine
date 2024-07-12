@@ -421,6 +421,7 @@ private:
     bool hasUserDefinedNormalFontFamily_ = false;
     bool hasUserDefinedSelectedFontFamily_ = false;
     bool isShow_ = true;
+    bool isEnableHaptic_ = true;
     std::shared_ptr<ITimepickerAudioHaptic> hapticController_ = nullptr;
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnPattern);
 };

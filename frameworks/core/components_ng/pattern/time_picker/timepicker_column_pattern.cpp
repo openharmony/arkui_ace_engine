@@ -148,11 +148,18 @@ void TimePickerColumnPattern::InitHapticController(const RefPtr<FrameNode>& host
     CHECK_NULL_VOID(stackNode);
     auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
     CHECK_NULL_VOID(parentNode);
-    auto timePickerLayoutProperty = parentNode->GetLayoutProperty<TimePickerLayoutProperty>();
-    CHECK_NULL_VOID(timePickerLayoutProperty);
-    hapticController_ = nullptr;
-    if (timePickerLayoutProperty->GetIsEnableHapticFeedbackValue(true)) {
-        hapticController_ = TimepickerAudioHapticFactory::GetInstance();
+    auto timePickerRowPattern = parentNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    if (timePickerRowPattern->GetIsEnableHaptic()) {
+        isEnableHaptic_ = true;
+        if (!hapticController_) {
+            hapticController_ = TimepickerAudioHapticFactory::GetInstance();
+        }
+    } else {
+        isEnableHaptic_ = false;
+        if (hapticController_) {
+            hapticController_->Stop();
+        }
     }
 }
 
@@ -1188,7 +1195,7 @@ bool TimePickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropert
         currentIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount; // index reduce one
     }
     SetCurrentIndex(currentIndex);
-    if (hapticController_) {
+    if (hapticController_ && isEnableHaptic_) {
         hapticController_->PlayOnce();
     }
     FlushCurrentOptions(isDown, isUpatePropertiesOnly);
@@ -1203,7 +1210,9 @@ void TimePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 {
     int32_t dragDelta = offsetY - yLast_;
     if (hapticController_ && isShow_) {
-        hapticController_->HandleDelta(dragDelta);
+        if (isEnableHaptic_) {
+            hapticController_->HandleDelta(dragDelta);
+        }
     }
     yLast_ = offsetY;
     if (!CanMove(LessNotEqual(dragDelta, 0))) {
