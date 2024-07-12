@@ -57,7 +57,7 @@ void ArcListTestNg::TearDown()
     layoutProperty_ = nullptr;
     paintProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
-    ClearOldNodes();  // Each testcase will create new arc_list at begin
+    ClearOldNodes(); // Each testcase will create new arc_list at begin
 }
 
 void ArcListTestNg::GetList()
@@ -110,8 +110,8 @@ void ArcListTestNg::AddHeader(ListModelNG* model)
 {
     auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
     const char* tag = V2::ARC_LIST_ETS_TAG;
-    RefPtr<FrameNode> frameNode = FrameNode::GetOrCreateFrameNode(
-        tag, nodeId, []() { return AceType::MakeRefPtr<ArcListPattern>(); });
+    RefPtr<FrameNode> frameNode =
+        FrameNode::GetOrCreateFrameNode(tag, nodeId, []() { return AceType::MakeRefPtr<ArcListPattern>(); });
     model->SetHeader(frameNode);
 }
 
@@ -148,7 +148,8 @@ void ArcListTestNg::CreateListItemsWithSize(std::vector<SizeT<Dimension>>& itemS
     }
 }
 
-void ArcListTestNg::CreateListItemsWithSize(int32_t itemNumber, SizeT<Dimension> itemSize, V2::ListItemStyle listItemStyle)
+void ArcListTestNg::CreateListItemsWithSize(
+    int32_t itemNumber, SizeT<Dimension> itemSize, V2::ListItemStyle listItemStyle)
 {
     for (int32_t index = 0; index < itemNumber; index++) {
         CreateListItemWithSize(itemSize, listItemStyle);

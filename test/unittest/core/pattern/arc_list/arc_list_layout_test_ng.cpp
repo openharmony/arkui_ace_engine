@@ -452,9 +452,9 @@ HWTEST_F(ArcListLayoutTestNg, ChildrenMainSize006, TestSize.Level1)
 HWTEST_F(ArcListLayoutTestNg, GetNearScale001, TestSize.Level1)
 {
     EXPECT_TRUE(NearEqual(ArcListLayoutAlgorithm::GetNearScale(150.0), 0.780000));
-    EXPECT_TRUE(NearEqual(ArcListLayoutAlgorithm::GetNearScale(-135.0), 0.820000));;
+    EXPECT_TRUE(NearEqual(ArcListLayoutAlgorithm::GetNearScale(-135.0), 0.820000));
     EXPECT_TRUE(NearEqual(ArcListLayoutAlgorithm::GetNearScale(141.0), 0.780000));
-    EXPECT_TRUE(NearEqual(ArcListLayoutAlgorithm::GetNearScale(-132.0), 0.820000));;
+    EXPECT_TRUE(NearEqual(ArcListLayoutAlgorithm::GetNearScale(-132.0), 0.820000));
     EXPECT_TRUE(NearEqual(ArcListLayoutAlgorithm::GetNearScale(120.0), 0.871304));
     EXPECT_TRUE(NearEqual(ArcListLayoutAlgorithm::GetNearScale(95.0), 0.966250));
     EXPECT_TRUE(NearEqual(ArcListLayoutAlgorithm::GetNearScale(10.0), 1.077872));

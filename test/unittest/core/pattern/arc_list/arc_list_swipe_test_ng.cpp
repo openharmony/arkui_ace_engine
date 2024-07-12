@@ -56,9 +56,8 @@ void ArcListSwipeTestNg::CreateWithSwipeAction(
     CreateList();
     ListItemModelNG itemModel = CreateListItem();
     itemModel.SetSwiperAction(nullptr, nullptr, std::move(onOffsetChange), effect);
-    itemModel.SetDeleteArea(std::move(item.builderAction), std::move(item.onDelete),
-        std::move(item.onEnterDeleteArea), std::move(item.onExitDeleteArea), std::move(item.onStateChange),
-        item.actionAreaDistance, isStartArea);
+    itemModel.SetDeleteArea(std::move(item.builderAction), std::move(item.onDelete), std::move(item.onEnterDeleteArea),
+        std::move(item.onExitDeleteArea), std::move(item.onStateChange), item.actionAreaDistance, isStartArea);
     {
         RowModelNG rowModel;
         rowModel.Create(std::nullopt, nullptr, "");
@@ -285,8 +284,8 @@ HWTEST_F(ArcListSwipeTestNg, SwiperItem002, TestSize.Level1)
     DragSwiperItem(listItemIndex, obviousSwipeDelta);
     endNodeRect = GetChildRect(listItem, endNodeIndex);
     itemNodeRect = GetChildRect(listItem, itemNodeIndex);
-    expectEndNodeRect = RectF(LIST_WIDTH * ARC_LIST_ITER_SCALE - END_NODE_LEN + obviousSwipeDelta
-        , 0, END_NODE_LEN, ITEM_HEIGHT);
+    expectEndNodeRect =
+        RectF(LIST_WIDTH * ARC_LIST_ITER_SCALE - END_NODE_LEN + obviousSwipeDelta, 0, END_NODE_LEN, ITEM_HEIGHT);
     expectItemNodeRect = itemNodeInitialRect;
     EXPECT_TRUE(IsEqual(endNodeRect, expectEndNodeRect));
     EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));

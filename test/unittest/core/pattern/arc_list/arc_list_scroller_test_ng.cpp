@@ -68,8 +68,8 @@ HWTEST_F(ArcListScrollerTestNg, ScrollToIndex002, TestSize.Level1)
     CreateDone(frameNode_);
     int32_t index = 2;
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, ITEM_HEIGHT * index - MID_OFFSET));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER,
-                              ITEM_HEIGHT * index - (LIST_HEIGHT - ITEM_HEIGHT) / 2));
+    EXPECT_TRUE(
+        ScrollToIndex(index, false, ScrollAlign::CENTER, ITEM_HEIGHT * index - (LIST_HEIGHT - ITEM_HEIGHT) / 2));
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, ITEM_HEIGHT * index - MID_OFFSET));
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, ITEM_HEIGHT * index - MID_OFFSET));
     EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::START, -MID_OFFSET));
@@ -95,19 +95,16 @@ HWTEST_F(ArcListScrollerTestNg, ScrollToIndex003, TestSize.Level1)
     int32_t index = 9;
     float scrollToStartDistance = ITEM_HEIGHT * index; // 900.f
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, scrollToStartDistance - MID_OFFSET));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER,
-                              scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT) / 2));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END,
-                              scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT) + MID_OFFSET));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO,
-                              scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT) + MID_OFFSET));
+    EXPECT_TRUE(
+        ScrollToIndex(index, false, ScrollAlign::CENTER, scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT) / 2));
+    EXPECT_TRUE(ScrollToIndex(
+        index, false, ScrollAlign::END, scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT) + MID_OFFSET));
+    EXPECT_TRUE(ScrollToIndex(
+        index, false, ScrollAlign::AUTO, scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT) + MID_OFFSET));
     EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::START, -MID_OFFSET));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::CENTER,
-                              -MID_OFFSET));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::END,
-                              -MID_OFFSET));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::AUTO,
-                              -MID_OFFSET));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::CENTER, -MID_OFFSET));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::END, -MID_OFFSET));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::AUTO, -MID_OFFSET));
 }
 
 /**
@@ -185,19 +182,16 @@ HWTEST_F(ArcListScrollerTestNg, ScrollToIndex008, TestSize.Level1)
     int32_t index = 12;
     float scrollToStartDistance = (ITEM_HEIGHT + SPACE) * index; // 1320.f
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, scrollToStartDistance - MID_OFFSET));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER,
-                              scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT) / 2));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END,
-                              scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT) + MID_OFFSET));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO,
-                              scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT) + MID_OFFSET));
+    EXPECT_TRUE(
+        ScrollToIndex(index, false, ScrollAlign::CENTER, scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT) / 2));
+    EXPECT_TRUE(ScrollToIndex(
+        index, false, ScrollAlign::END, scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT) + MID_OFFSET));
+    EXPECT_TRUE(ScrollToIndex(
+        index, false, ScrollAlign::AUTO, scrollToStartDistance - (LIST_HEIGHT - ITEM_HEIGHT) + MID_OFFSET));
     EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::START, -MID_OFFSET));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::CENTER,
-                              -MID_OFFSET));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::END,
-                              -MID_OFFSET));
-    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::AUTO,
-                              -MID_OFFSET));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::CENTER, -MID_OFFSET));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::END, -MID_OFFSET));
+    EXPECT_TRUE(ScrollToIndex(index, true, ScrollAlign::AUTO, -MID_OFFSET));
 }
 
 /**
@@ -243,7 +237,7 @@ HWTEST_F(ArcListScrollerTestNg, ScrollToIndex013, TestSize.Level1)
     CreateItemWithSize(4, itemSize);
     CreateDone(frameNode_);
 
-     /**
+    /**
      * @tc.cases: bottomOffset > topOffset > 0
      * @tc.expected: top Align
      */
@@ -423,7 +417,7 @@ HWTEST_F(ArcListScrollerTestNg, PositionController007, TestSize.Level1)
 namespace {
 constexpr float SCROLL_FIXED_VELOCITY_008 = 400.f;
 constexpr float OFFSET_TIME_008 = 200.f;
-constexpr int32_t TIME_CHANGED_COUNTS_008 = 20 *10;
+constexpr int32_t TIME_CHANGED_COUNTS_008 = 20 * 10;
 } // namespace
 /**
  * @tc.name: PositionController008
@@ -807,8 +801,8 @@ HWTEST_F(ArcListScrollerTestNg, Pattern013, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     float offsetX = LIST_WIDTH * (1 - ARC_LIST_ITER_SCALE) / 2.0;
     float offsetY = LIST_HEIGHT * (1 - ARC_LIST_ITER_SCALE);
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(offsetX, -LIST_HEIGHT / 2.0
-        , LIST_WIDTH * ARC_LIST_ITER_SCALE, LIST_HEIGHT * ARC_LIST_ITER_SCALE)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0),
+        Rect(offsetX, -LIST_HEIGHT / 2.0, LIST_WIDTH * ARC_LIST_ITER_SCALE, LIST_HEIGHT * ARC_LIST_ITER_SCALE)));
 
     /**
      * @tc.steps: step4. swipe forward 3 listItem
@@ -820,8 +814,8 @@ HWTEST_F(ArcListScrollerTestNg, Pattern013, TestSize.Level1)
      * @tc.steps: step5. swipe backward 2.5 listItem
      */
     ScrollTo(LIST_HEIGHT);
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(1), Rect(offsetX, -offsetY, LIST_WIDTH * ARC_LIST_ITER_SCALE
-        , LIST_HEIGHT * ARC_LIST_ITER_SCALE)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(1),
+        Rect(offsetX, -offsetY, LIST_WIDTH * ARC_LIST_ITER_SCALE, LIST_HEIGHT * ARC_LIST_ITER_SCALE)));
 
     /**
      * @tc.cases: bottomOffset == topOffset > 0

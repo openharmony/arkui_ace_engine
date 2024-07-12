@@ -326,7 +326,7 @@ HWTEST_F(ArcListAttrTestNg, AttrSpace001, TestSize.Level1)
      */
     ListModelNG model = CreateList();
     model.SetSpace(Dimension(SPACE));
-    CreateListItems(TOTAL_ITEM_NUMBER);;
+    CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 1), GetChildHeight(frameNode_, 0) + MID_OFFSET + SPACE);
 }
@@ -342,7 +342,7 @@ HWTEST_F(ArcListAttrTestNg, AttrSpace002, TestSize.Level1)
     ListModelNG model = CreateListWithHeader();
     AddHeader(&model);
     model.SetSpace(Dimension(SPACE));
-    CreateListItems(TOTAL_ITEM_NUMBER);;
+    CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
     // Now node 0 is header, there is no space between node 0 and node 1.
     EXPECT_EQ(GetChildY(frameNode_, 1), GetChildHeight(frameNode_, 0) + MID_OFFSET);
@@ -361,7 +361,7 @@ HWTEST_F(ArcListAttrTestNg, AttrSpace003, TestSize.Level1)
      */
     ListModelNG model = CreateList();
     model.SetSpace(Dimension(LIST_HEIGHT));
-    CreateListItems(TOTAL_ITEM_NUMBER);;
+    CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 1), GetChildHeight(frameNode_, 0) + MID_OFFSET);
 
@@ -371,7 +371,7 @@ HWTEST_F(ArcListAttrTestNg, AttrSpace003, TestSize.Level1)
      */
     model = CreateList();
     model.SetSpace(Dimension(-1));
-    CreateListItems(TOTAL_ITEM_NUMBER);;
+    CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 1), GetChildHeight(frameNode_, 0) + MID_OFFSET);
 }
@@ -533,8 +533,8 @@ HWTEST_F(ArcListAttrTestNg, AttrScrollSnapAlign001, TestSize.Level1)
     // To take into account the item scaling of the arc list, adjust the value according to the scaling.
     float dis1 = 0.f;
     float dis2 = ITEM_HEIGHT;
-    float scale = (2.0 / (ArcListLayoutAlgorithm::GetNearScale(dis1) 
-        + ArcListLayoutAlgorithm::GetNearScale(dis2)) - 1) * DRAG_FIX_OFFSET_RATIO + 1;
+    float scale = (2.0 / (ArcListLayoutAlgorithm::GetNearScale(dis1) + ArcListLayoutAlgorithm::GetNearScale(dis2)) - 1) *
+        DRAG_FIX_OFFSET_RATIO + 1;
     float off = offset * scale;
 
     EXPECT_EQ(pattern_->GetTotalOffset(), -MID_OFFSET - off);
@@ -549,7 +549,7 @@ HWTEST_F(ArcListAttrTestNg, AttrScrollSnapAlign002, TestSize.Level1)
 {
     ListModelNG model = CreateList();
     ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
-    CreateListItems(TOTAL_ITEM_NUMBER);;
+    CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), -MID_OFFSET);
 
@@ -578,7 +578,7 @@ HWTEST_F(ArcListAttrTestNg, AttrScrollSnapAlign002, TestSize.Level1)
 HWTEST_F(ArcListAttrTestNg, AttrScrollSnapAlign003, TestSize.Level1)
 {
     ListModelNG model = CreateList();
-    CreateListItems(2);;
+    CreateListItems(2);
     CreateDone(frameNode_);
     const float defaultOffset = -(LIST_HEIGHT - ITEM_HEIGHT) / 2;
     EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
@@ -620,7 +620,7 @@ HWTEST_F(ArcListAttrTestNg, AttrScrollSnapAlign004, TestSize.Level1)
      * @tc.steps: stpe1. set item(index:1) height:150.f
      */
     ListModelNG model = CreateList();
-    CreateListItems(2);;
+    CreateListItems(2);
     CreateDone(frameNode_);
     GetChildLayoutProperty<ArcListItemLayoutProperty>(frameNode_, 1)
         ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(ITEM_HEIGHT * 1.5)));
@@ -873,7 +873,7 @@ HWTEST_F(ArcListAttrTestNg, SetListChildrenMainSize001, TestSize.Level1)
     CreateListItems(count);
     CreateDone(frameNode_);
 
-    std::vector<float> mainSize = {10, 20, 30};
+    std::vector<float> mainSize = { 10, 20, 30 };
     float defaultSize = 50;
     pattern_->SetListChildrenMainSize(defaultSize, mainSize);
 

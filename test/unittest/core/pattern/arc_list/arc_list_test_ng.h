@@ -37,30 +37,32 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/unittest/core/pattern/test_ng.h"
+#include "test/unittest/core/syntax/mock_lazy_for_each_actuator.h"
+#include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 
 #include "bridge/common/utils/utils.h"
 #include "core/components/button/button_theme.h"
-#include "core/components/list/arc_list_theme.h"
 #include "core/components/list/arc_list_item_theme.h"
+#include "core/components/list/arc_list_theme.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/arc_list/arc_list_item_pattern.h"
+#include "core/components_ng/pattern/arc_list/arc_list_layout_algorithm.h"
+#include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
+#include "core/components_ng/pattern/list/list_accessibility_property.h"
+#include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_model.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
-#include "core/components_ng/pattern/arc_list/arc_list_item_pattern.h"
-#include "core/components_ng/pattern/arc_list/arc_list_layout_algorithm.h"
-#include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
-#include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
-#include "core/components_ng/pattern/list/list_accessibility_property.h"
 #include "core/components_ng/syntax/for_each_model_ng.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
@@ -68,8 +70,6 @@
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/components_ng/syntax/syntax_item.h"
 #include "core/components_v2/list/list_properties.h"
-#include "test/unittest/core/syntax/mock_lazy_for_each_actuator.h"
-#include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -117,12 +117,12 @@ public:
     ListItemModelNG CreateListItem(V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE);
     void CreateListItems(int32_t itemNumber, V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE);
 
-    void CreateListItemsWithSize(int32_t itemNumber, SizeT<Dimension> itemSize
-        , V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE);
-    void CreateListItemsWithSize(std::vector<SizeT<Dimension>>& itemSizes
-        , V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE);
-    ListItemModelNG CreateListItemWithSize(SizeT<Dimension> itemSize
-        , V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE);
+    void CreateListItemsWithSize(
+        int32_t itemNumber, SizeT<Dimension> itemSize, V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE);
+    void CreateListItemsWithSize(
+        std::vector<SizeT<Dimension>>& itemSizes, V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE);
+    ListItemModelNG CreateListItemWithSize(
+        SizeT<Dimension> itemSize, V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE);
 
     void CreateItemWithSize(int32_t itemNumber, SizeT<Dimension> itemSize);
     void CreateItemWithSwipe(
