@@ -53,6 +53,8 @@ HWTEST_F(AnimatorTestNg, Test001, TestSize.Level1)
     aimatorModel.AddEventListener(nullptr, Framework::EventOperation::CANCEL, "-1");
     aimatorModel.AddEventListener(nullptr, Framework::EventOperation::FINISH, "-1");
     aimatorModel.AddEventListener(nullptr, Framework::EventOperation::NONE, "-1");
+    auto eventOperation = static_cast<Framework::EventOperation>(7); // 7 is not a valid EventOperation.
+    aimatorModel.AddEventListener(nullptr, eventOperation, "-1");
 
     auto event = []() {};
     aimatorModel.AddEventListener(event, Framework::EventOperation::START, "-1");
@@ -61,6 +63,7 @@ HWTEST_F(AnimatorTestNg, Test001, TestSize.Level1)
     aimatorModel.AddEventListener(event, Framework::EventOperation::CANCEL, "-1");
     aimatorModel.AddEventListener(event, Framework::EventOperation::FINISH, "-1");
     aimatorModel.AddEventListener(event, Framework::EventOperation::NONE, "-1");
+    aimatorModel.AddEventListener(event, eventOperation, "-1");
 
     EXPECT_TRUE(true);
 }
