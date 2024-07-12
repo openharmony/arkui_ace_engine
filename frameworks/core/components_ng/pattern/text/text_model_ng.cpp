@@ -1080,4 +1080,11 @@ void TextModelNG::SetSelectionMenuOptions(
     CHECK_NULL_VOID(textPattern);
     textPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
+
+void TextModelNG::SetResponseRegion(bool isUserSetResponseRegion)
+{
+    auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetIsUserSetResponseRegion(isUserSetResponseRegion);
+}
 } // namespace OHOS::Ace::NG
