@@ -313,23 +313,12 @@ bool TextContentModifier::DrawImage(const RefPtr<FrameNode>& imageNode, RSCanvas
     RectF imageRect(rect.Left() + x + marginLeft, rect.Top() + y + marginTop,
         geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
     const auto config = canvasImage->GetPaintConfig();
-    if (config.isSvg_) {
-        ImagePainter imagePainter(canvasImage);
-        OffsetF offset(0, 0);
-        SizeF contentSize(geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
-        auto clipRect = RSRect(0, 0, geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
-        canvas.Save();
-        canvas.Translate(rect.Left() + x + marginLeft, rect.Top() + y + marginTop);
-        canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
-        imagePainter.DrawSVGImage(canvas, offset, contentSize);
-        canvas.Restore();
-    } else {
-        auto pixelMapImage = DynamicCast<PixelMapImage>(canvasImage);
-        if (!pixelMapImage) {
-            return false;
-        }
-        pixelMapImage->DrawRect(canvas, ToRSRect(imageRect));
-    }
+    SizeF imageSize(canvasImage->GetWidth(), canvasImage->GetHeight());
+    SizeF contentSize(geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
+    RectF srcRect;
+    RectF dstRect;
+    ImagePainter::ApplyImageFit(config.imageFit_, imageSize, contentSize, srcRect, dstRect);
+    canvasImage->DrawRect(canvas, ToRSRect(srcRect), ToRSRect(imageRect));
     return true;
 }
 
