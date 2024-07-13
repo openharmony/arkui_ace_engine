@@ -363,7 +363,12 @@ bool SecuritySessionWrapperImpl::NotifyFocusStateSync(bool focusState)
 
 bool SecuritySessionWrapperImpl::NotifyBackPressedSync()
 {
-    return false;
+    CHECK_NULL_RETURN(session_, false);
+    bool isConsumed = false;
+    session_->TransferBackPressedEventForConsumed(isConsumed);
+    PLATFORM_LOGI("BackPressed, persistentid = %{public}d and %{public}s consumed.",
+        GetSessionId(), isConsumed ? "is" : "is not");
+    return isConsumed;
 }
 
 bool SecuritySessionWrapperImpl::NotifyPointerEventSync(
