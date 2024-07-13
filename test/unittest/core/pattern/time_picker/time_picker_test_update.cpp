@@ -1232,12 +1232,13 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerDialogView025, TestSize.Level1)
     auto testval3 = layoutProperty->GetFontSizeValue();
     EXPECT_EQ(testval3, Dimension(100));
 }
+
 /**
- * @tc.name: TimePickerDialogView026
- * @tc.desc: Test UpdateButtonStyle.
+ * @tc.name: getRadius
+ * @tc.desc: 提供TimePickerDialogView026用例使用
  * @tc.type: FUNC
  */
-HWTEST_F(TimePickerPatternTestUpdate, TimePickerDialogView026, TestSize.Level1)
+NG::BorderRadiusProperty getRadius()
 {
     NG::BorderRadiusProperty radius;
     CalcDimension radiusCalc(100, static_cast<DimensionUnit>(1));
@@ -1246,6 +1247,16 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerDialogView026, TestSize.Level1)
     radius.radiusBottomLeft = radiusCalc;
     radius.radiusBottomRight = radiusCalc;
     radius.multiValued = true;
+    return radius;
+}
+
+/**
+ * @tc.name: TimePickerDialogView026
+ * @tc.desc: Test UpdateButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestUpdate, TimePickerDialogView026, TestSize.Level1)
+{
     uint32_t color = 0;
     Color colorVal = Color(color);
     std::vector<ButtonInfo> buttonInfos;
@@ -1256,7 +1267,7 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerDialogView026, TestSize.Level1)
     info1.fontColor = Color::GREEN;
     info1.fontFamily = { "unknown" };
     info1.backgroundColor = colorVal;
-    info1.borderRadius = radius;
+    info1.borderRadius = getRadius();
     info2.fontSize = Dimension(0);
     info2.fontColor = Color::FOREGROUND;
     info3.fontSize = Dimension(1);
