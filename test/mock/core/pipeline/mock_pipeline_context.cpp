@@ -25,7 +25,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 #ifdef SUPPORT_DIGITAL_CROWN
-#include "core/core/event/crown_event.h"
+#include "core/event/crown_event.h"
 #endif
 
 namespace OHOS::Ace::NG {
