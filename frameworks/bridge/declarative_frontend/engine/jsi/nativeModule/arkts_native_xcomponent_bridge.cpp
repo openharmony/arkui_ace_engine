@@ -24,6 +24,8 @@
 
 namespace OHOS::Ace::NG {
 
+enum ArgIndices{ ARG_FIRST = 0, ARG_ID = 1, ARG_TYPE = 2, ARG_IMAGE_AI_OPTIONS = 3, ARG_LIBRARY_NAME = 4, ARG_CONTROLLER = 5 };
+
 XComponentType XComponentBridge::ConvertToXComponentType(const std::string& type)
 {
     if (type == "surface") {
@@ -46,8 +48,8 @@ XComponentType XComponentBridge::ConvertToXComponentType(const std::string& type
 void XComponentBridge::SetControllerCallback(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> controllerArg = runtimeCallInfo->GetCallArgRef(5);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
+    Local<JSValueRef> controllerArg = runtimeCallInfo->GetCallArgRef(ARG_CONTROLLER);
     auto* frameNode = reinterpret_cast<FrameNode*>(firstArg->ToNativePointer(vm)->Value());
     auto object = controllerArg->ToObject(vm);
     auto createdFunc = object->Get(vm, panda::StringRef::NewFromUtf8(vm, "onSurfaceCreated"));
@@ -98,10 +100,10 @@ ArkUINativeModuleValue XComponentBridge::SetXComponentInitialize(ArkUIRuntimeCal
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> idArg = runtimeCallInfo->GetCallArgRef(1);
-    Local<JSValueRef> typeArg = runtimeCallInfo->GetCallArgRef(2);
-    Local<JSValueRef> librarynameArg = runtimeCallInfo->GetCallArgRef(4);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
+    Local<JSValueRef> idArg = runtimeCallInfo->GetCallArgRef(ARG_ID);
+    Local<JSValueRef> typeArg = runtimeCallInfo->GetCallArgRef(ARG_TYPE);
+    Local<JSValueRef> librarynameArg = runtimeCallInfo->GetCallArgRef(ARG_LIBRARY_NAME);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (!idArg->IsString(vm)) {
         return panda::JSValueRef::Undefined(vm);
@@ -145,7 +147,7 @@ ArkUINativeModuleValue XComponentBridge::SetXComponentInitialize(ArkUIRuntimeCal
 void XComponentBridge::HandlerDetachCallback(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
     auto detachCallback = [](const std::string& xcomponentId) {
         Framework::XComponentClient::GetInstance().DeleteControllerFromJSXComponentControllersMap(xcomponentId);
         Framework::XComponentClient::GetInstance().DeleteFromJsValMapById(xcomponentId);
@@ -157,8 +159,8 @@ void XComponentBridge::HandlerDetachCallback(ArkUIRuntimeCallInfo *runtimeCallIn
 void XComponentBridge::HandlerImageAIOptions(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> imageAIOptionsArg = runtimeCallInfo->GetCallArgRef(3);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
+    Local<JSValueRef> imageAIOptionsArg = runtimeCallInfo->GetCallArgRef(ARG_IMAGE_AI_OPTIONS);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (imageAIOptionsArg->IsObject(vm)) {
         auto engine = EngineHelper::GetCurrentEngine();
@@ -183,8 +185,8 @@ ArkUINativeModuleValue XComponentBridge::SetBackgroundColor(ArkUIRuntimeCallInfo
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(ARG_ID);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
@@ -199,7 +201,7 @@ ArkUINativeModuleValue XComponentBridge::ResetBackgroundColor(ArkUIRuntimeCallIn
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentBackgroundColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -209,8 +211,8 @@ ArkUINativeModuleValue XComponentBridge::SetOpacity(ArkUIRuntimeCallInfo *runtim
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(ARG_ID);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     double opacity;
     if (!ArkTSUtils::ParseJsDouble(vm, secondArg, opacity)) {
@@ -225,7 +227,7 @@ ArkUINativeModuleValue XComponentBridge::ResetOpacity(ArkUIRuntimeCallInfo *runt
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentOpacity(nativeNode);
     return panda::JSValueRef::Undefined(vm);
