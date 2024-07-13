@@ -492,6 +492,18 @@ void SecurityUIExtensionPattern::FireOnTerminatedCallback(
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnTerminatedCallback(code, wantWrap);
     state_ = AbilityState::DESTRUCTION;
+    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
+        sessionWrapper_->DestroySession();
+    }
+}
+
+void SecurityUIExtensionPattern::FireOnErrorCallback(
+    int32_t code, const std::string& name, const std::string& message)
+{
+    PlatformPattern::FireOnErrorCallback(code, name, message);
+    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
+        sessionWrapper_->DestroySession();
+    }
 }
 
 void SecurityUIExtensionPattern::FireOnReceiveCallback(const AAFwk::WantParams& params)
