@@ -517,7 +517,7 @@ public:
         selectOverlayDragging_ = selectOverlayDragging;
     }
     void UpdateLocale();
-    void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height, bool isNeedReset);
+    void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height);
     void SetSelectPopupMenuShowing(bool showing)
     {
         selectPopupMenuShowing_ = showing;
@@ -753,8 +753,8 @@ private:
     void WebRequestFocus();
     void ResetDragAction();
     void InitSlideUpdateListener();
-    void CalculateHorizontalDrawRect(bool isNeedReset);
-    void CalculateVerticalDrawRect(bool isNeedReset);
+    void CalculateHorizontalDrawRect();
+    void CalculateVerticalDrawRect();
     void InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub);
     bool CheckZoomStatus(const double& curScale);
     bool ZoomOutAndIn(const double& curScale, double& scale);
@@ -866,7 +866,7 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> beginTouchHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle);
     double GetNewScale(double& scale) const;
-    void UpdateSlideOffset(bool isNeedReset = false);
+    void UpdateSlideOffset();
     void ClearKeyEventByKeyCode(int32_t keyCode);
     void SetRotation(uint32_t rotation);
     Color GetSystemColor() const;
