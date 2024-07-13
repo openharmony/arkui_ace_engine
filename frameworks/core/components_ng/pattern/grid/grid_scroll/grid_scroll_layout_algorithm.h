@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_SCROLL_GRID_SCROLL_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_SCROLL_GRID_SCROLL_LAYOUT_ALGORITHM_H
 
-#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
@@ -106,6 +105,8 @@ private:
     int32_t MeasureChildPlaced(const SizeF& frameSize, int32_t itemIndex, int32_t crossStart,
         LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& childLayoutWrapper);
     bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstraint) const;
+    bool CheckNeedMeasureWhenStretch(
+        const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstraint) const;
     void MeasureChild(LayoutWrapper* layoutWrapper, const SizeF& frameSize,
         const RefPtr<LayoutWrapper>& childLayoutWrapper, int32_t crossStart, int32_t crossSpan);
 
@@ -178,6 +179,8 @@ private:
 
     bool CheckLastLineItemFullyShowed(LayoutWrapper* layoutWrapper);
 
+    bool IsIrregularLine(int32_t lineIndex) const override;
+
 protected:
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;
@@ -204,6 +207,7 @@ private:
     bool expandSafeArea_ = false;
     bool canOverScroll_ = false;
     bool enableSkipping_ = true; // enables skipping lines on a large offset change.
+    bool clearStretch_ = false;
     GridLayoutInfo scrollGridLayoutInfo_;
 
     // Map structure: [index, crossPosition], store cross position of each item.

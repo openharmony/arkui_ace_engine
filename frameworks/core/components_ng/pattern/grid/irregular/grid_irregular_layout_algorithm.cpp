@@ -55,6 +55,10 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         MeasureOnOffset(mainSize);
     }
 
+    if (props->GetAlignItems().value_or(GridItemAlignment::DEFAULT) == GridItemAlignment::STRETCH) {
+        GridLayoutBaseAlgorithm::AdjustChildrenHeight(layoutWrapper);
+    }
+
     UpdateLayoutInfo();
     wrapper_->SetCacheCount(static_cast<int32_t>(props->GetCachedCountValue(1) * gridLayoutInfo_.crossCount_));
 }
@@ -583,5 +587,21 @@ void GridIrregularLayoutAlgorithm::MeasureToTarget()
     } else {
         filler.FillToTarget(param, *info.targetIndex_, info.startMainLineIndex_);
     }
+}
+
+bool GridIrregularLayoutAlgorithm::IsIrregularLine(int32_t lineIndex) const
+{
+    const auto& line = gridLayoutInfo_.gridMatrix_.find(lineIndex);
+    if (line == gridLayoutInfo_.gridMatrix_.end() || line->second.empty()) {
+        return true;
+    }
+    auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
+    auto opts = &props->GetLayoutOptions().value();
+    for (const auto& item : line->second) {
+        if (!item.second || opts->irregularIndexes.find(std::abs(item.second)) != opts->irregularIndexes.end()) {
+            return true;
+        }
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG
