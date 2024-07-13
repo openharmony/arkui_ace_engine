@@ -159,6 +159,23 @@ public:
     {
         isClickEvent_ = isClickEvent;
     }
+
+    void SetPreviousOrientation()
+    {
+        previousOrientation_ = SystemProperties::GetDeviceOrientation();
+    }
+
+    bool CheckOrientationChange()
+    {
+        auto pipeline = GetContext();
+        CHECK_NULL_RETURN(pipeline, true);
+        return (!(SystemProperties::GetDeviceOrientation() == previousOrientation_)
+                    ? Dimension(pipeline->GetRootWidth()).ConvertToVp() < deviceHeightLimit
+                    : Dimension(pipeline->GetRootHeight()).ConvertToVp() < deviceHeightLimit);
+    }
+
+    static constexpr const double deviceHeightLimit = 640.0;
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
@@ -193,6 +210,7 @@ private:
     bool goTo_ = false;
     bool isClickEvent_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(CalendarPattern);
+    DeviceOrientation previousOrientation_;
 };
 } // namespace OHOS::Ace::NG
 

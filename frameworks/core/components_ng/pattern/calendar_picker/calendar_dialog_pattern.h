@@ -97,6 +97,20 @@ public:
     CalendarMonth GetLastMonth(const CalendarMonth& calendarMonth);
     void SetOptionsButtonUpdateColorFlags(size_t index, bool isUpdate);
 
+    void SetCurrentButtonInfo(const std::vector<ButtonInfo>& buttonInfos)
+    {
+        currentButtonInfos_ = buttonInfos;
+    }
+
+    void SetCurrentSettingData(const CalendarSettingData& settingData)
+    {
+        currentSettingData_ = settingData;
+    }
+
+    void OnLanguageConfigurationUpdate() override;
+
+    void OnDirectionConfigurationUpdate() override;
+
 private:
     void OnModifyDone() override;
     void InitClickEvent();
@@ -160,6 +174,8 @@ private:
     RefPtr<InputEvent> hoverListener_ = nullptr;
     ACE_DISALLOW_COPY_AND_MOVE(CalendarDialogPattern);
     bool hasTabKeyDown_ = false;
+    std::vector<ButtonInfo> currentButtonInfos_;
+    CalendarSettingData currentSettingData_;
 };
 } // namespace OHOS::Ace::NG
 

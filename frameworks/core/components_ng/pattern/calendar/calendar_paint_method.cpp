@@ -48,7 +48,6 @@ constexpr int32_t TEXT_END_INDEX = 2;
 constexpr int32_t WEEK_TEXT_END_INDEX = 3;
 constexpr double WEEKEND_TRANSPARENT = 0x7D;
 constexpr Dimension CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT = 4.0_vp;
-constexpr double DEVICE_HEIGHT_LIMIT = 640.0;
 
 std::unique_ptr<RSParagraph> GetTextParagraph(const std::string& text, const RSTextStyle& textStyle)
 {
@@ -674,7 +673,7 @@ void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& 
 
     auto fontSizeScale = pipelineContext->GetFontScale();
     if (fontSizeScale < theme->GetCalendarPickerLargeScale() ||
-        Dimension(pipelineContext->GetRootHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
+        Dimension(pipelineContext->GetRootHeight()).ConvertToVp() < CalendarPattern::deviceHeightLimit) {
         calendarDayKeyFocusedWidth_ = theme->GetCalendarDayKeyFocusedWidth().ConvertToPx();
     } else {
         calendarDayKeyFocusedWidth_ = theme->GetCalendarLargeDayKeyFocusedWidth().ConvertToPx();

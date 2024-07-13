@@ -21,6 +21,7 @@
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/calendar/calendar_model_ng.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -1274,5 +1275,92 @@ void CalendarDialogPattern::OnEnterKeyEvent(const KeyEvent& event)
             gesture->ActClick();
         }
     }
+}
+
+void CalendarDialogPattern::OnLanguageConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto calendarNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(CALENDAR_NODE_INDEX));
+    CHECK_NULL_VOID(calendarNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(calendarNode->GetFirstChild());
+    CHECK_NULL_VOID(swiperNode);
+
+    for (auto&& child : swiperNode->GetChildren()) {
+        auto monthFrameNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(monthFrameNode);
+        auto pipelineContext = GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+        CHECK_NULL_VOID(theme);
+
+        auto fontSizeScale = pipelineContext->GetFontScale();
+        auto fontSize = theme->GetCalendarDayFontSize();
+        if (AceApplicationInfo::GetInstance().GetLanguage() != "zh") {
+            ACE_UPDATE_NODE_PAINT_PROPERTY(
+                CalendarPaintProperty, WeekFontSize, theme->GetCalendarSmallDayFontSize(), monthFrameNode);
+        } else {
+            if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarDialogView::CheckOrientationChange()) {
+                ACE_UPDATE_NODE_PAINT_PROPERTY(CalendarPaintProperty, WeekFontSize, fontSize, monthFrameNode);
+            } else {
+                fontSizeScale = fontSizeScale > theme->GetCalendarPickerLargerScale()
+                                    ? theme->GetCalendarPickerLargerScale()
+                                    : fontSizeScale;
+                ACE_UPDATE_NODE_PAINT_PROPERTY(
+                    CalendarPaintProperty, WeekFontSize, fontSize * fontSizeScale, monthFrameNode);
+            }
+        }
+        monthFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void CalendarDialogPattern::OnDirectionConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto titleNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(TITLE_NODE_INDEX));
+    CHECK_NULL_VOID(titleNode);
+    auto layoutProps = titleNode->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    auto pipelineContext = GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(calendarTheme);
+    auto calendarNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(CALENDAR_NODE_INDEX));
+    CHECK_NULL_VOID(calendarNode);
+    auto calendarLayoutProperty = calendarNode->GetLayoutProperty();
+    CHECK_NULL_VOID(calendarLayoutProperty);
+    CalendarDialogView::UpdateIdealSize(calendarTheme, layoutProps, calendarLayoutProperty);
+
+    auto swiperNode = AceType::DynamicCast<FrameNode>(calendarNode->GetFirstChild());
+    CHECK_NULL_VOID(swiperNode);
+    for (auto&& child : swiperNode->GetChildren()) {
+        auto monthFrameNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(monthFrameNode);
+        auto monthPattern = monthFrameNode->GetPattern<CalendarMonthPattern>();
+        CHECK_NULL_VOID(monthPattern);
+        CalendarDialogView::UpdatePaintProperties(monthFrameNode, currentSettingData_);
+        monthPattern->UpdateColRowSpace();
+        monthFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+
+    if (host->GetTotalChildCount() > OPTIONS_NODE_INDEX) {
+        auto contentRow = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(OPTIONS_NODE_INDEX));
+        CHECK_NULL_VOID(contentRow);
+        size_t buttonIndex = OPTION_CANCEL_BUTTON_INDEX;
+        for (auto&& child : contentRow->GetChildren()) {
+            auto buttonNode = AceType::DynamicCast<FrameNode>(child);
+            CHECK_NULL_VOID(buttonNode);
+            CalendarDialogView::UpdateButtons(buttonNode, buttonIndex, currentButtonInfos_);
+            buttonIndex++;
+        }
+    }
+
+    auto wrapperNode = host->GetParent();
+    CHECK_NULL_VOID(wrapperNode);
+    auto dialogNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetParent());
+    CHECK_NULL_VOID(dialogNode);
+    dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    CalendarDialogView::SetPreviousOrientation();
 }
 } // namespace OHOS::Ace::NG

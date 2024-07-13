@@ -19,6 +19,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -26,7 +27,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t CALENDAR_WEEK_DAYS = 7;
 constexpr Dimension CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT = 4.0_vp;
-constexpr double DEVICE_HEIGHT_LIMIT = 640.0;
 } // namespace
 void CalendarMonthPattern::OnAttachToFrameNode()
 {
@@ -49,8 +49,7 @@ Dimension CalendarMonthPattern::GetDaySize(const RefPtr<CalendarTheme>& theme)
     auto pipeline = GetHost()->GetContext();
     CHECK_NULL_RETURN(pipeline, theme->GetCalendarPickerDayWidthOrHeight());
     auto fontSizeScale = pipeline->GetFontScale();
-    if (fontSizeScale < theme->GetCalendarPickerLargeScale() ||
-        Dimension(pipeline->GetRootHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarDialogView::CheckOrientationChange()) {
         return theme->GetCalendarPickerDayWidthOrHeight();
     } else {
         return theme->GetCalendarPickerDayLargeWidthOrHeight();
