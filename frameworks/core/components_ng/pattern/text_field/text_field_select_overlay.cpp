@@ -109,7 +109,7 @@ void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason
     CloseMagnifier();
     if (CloseReason::CLOSE_REASON_BACK_PRESSED == reason) {
         OnResetTextSelection();
-        if (info && info->CanBackPressed()) {
+        if (info && info->isSingleHandle) {
             pattern->OnBackPressed();
         }
     }
