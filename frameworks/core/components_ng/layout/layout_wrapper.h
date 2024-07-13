@@ -161,7 +161,7 @@ public:
     RefPtr<FrameNode> GetHostNode() const;
     virtual const std::string& GetHostTag() const = 0;
     virtual bool IsActive() const = 0;
-    virtual void SetActive(bool active = true) = 0;
+    virtual void SetActive(bool active = true, bool needRebuildRenderContext = false) = 0;
 
     bool IsRootMeasureNode() const
     {

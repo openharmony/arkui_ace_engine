@@ -344,7 +344,7 @@ public:
 
     virtual void OnNotifyMemoryLevel(int32_t level) {}
 
-    virtual void SetActive(bool active);
+    virtual void SetActive(bool active, bool needRebuildRenderContext = false);
 
     virtual void SetJSViewActive(bool active, bool isLazyForEachNode = false);
 
