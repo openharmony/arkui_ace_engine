@@ -412,16 +412,26 @@ bool SecurityUIExtensionPattern::HandleKeyEvent(const KeyEvent& event)
 void SecurityUIExtensionPattern::HandleFocusEvent()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     if (pipeline->GetIsFocusActive()) {
         DispatchFocusActiveEvent(true);
     }
     DispatchFocusState(true);
+    auto uiExtensionManager = pipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
+    uiExtensionManager->RegisterSecurityUIExtensionInFocus(
+        WeakClaim(this), sessionWrapper_);
 }
 
 void SecurityUIExtensionPattern::HandleBlurEvent()
 {
     DispatchFocusActiveEvent(false);
     DispatchFocusState(false);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto uiExtensionManager = pipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
+    uiExtensionManager->RegisterSecurityUIExtensionInFocus(nullptr, nullptr);
 }
 
 void SecurityUIExtensionPattern::DispatchFocusActiveEvent(bool isFocusActive)
