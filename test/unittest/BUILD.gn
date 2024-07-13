@@ -57,6 +57,7 @@ config("ace_unittest_config") {
     "$root_out_dir/arkui/framework",
     "//third_party/icu/icu4c/source/common",
     "//foundation/window/window_manager/interfaces/innerkits",
+    "//third_party/bounds_checking_function/include",
   ]
 
   cflags_cc = [
@@ -66,14 +67,18 @@ config("ace_unittest_config") {
     "-Wno-non-c-typedef-for-linkage",
     "-fvisibility-inlines-hidden",
   ]
-
+  if (ace_engine_feature_enable_digital_crown) {
+    cflags_cc += [ "-DSUPPORT_DIGITAL_CROWN" ]
+  }
   cflags = [
     "-fvisibility=hidden",
     "-fdata-sections",
     "-ffunction-sections",
     "-g",
   ]
-
+  if (ace_engine_feature_enable_digital_crown) {
+    cflags += [ "-DSUPPORT_DIGITAL_CROWN" ]
+  }
   ldflags = [ "-Wl,--gc-sections,--as-needed" ]
 
   if (ace_engine_feature_enable_coverage) {

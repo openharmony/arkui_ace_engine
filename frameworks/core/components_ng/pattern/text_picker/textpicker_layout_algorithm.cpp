@@ -211,7 +211,9 @@ void TextPickerLayoutAlgorithm::ChangeTextStyle(uint32_t index, uint32_t showOpt
 void TextPickerLayoutAlgorithm::UpdateContentSize(const SizeF& size, const RefPtr<LayoutWrapper> layoutWrapper)
 {
     SizeF frameSize = size;
-    auto contentWrapper = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto contentWrapper = layoutProperty->CreateChildConstraint();
     auto children = layoutWrapper->GetAllChildrenWithBuild();
     CHECK_NULL_VOID(!children.empty());
     for (const auto& child : children) {
@@ -256,17 +258,17 @@ void TextPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             static_cast<float>(size.Height() / ITEM_HEIGHT_HALF - defaultPickerItemHeight_ * PICKER_HEIGHT_HALF);
         halfDisplayCounts_ =
             std::clamp(static_cast<int32_t>(
-                           std::ceil((size.Height() / ITEM_HEIGHT_HALF - defaultPickerItemHeight_ / ITEM_HEIGHT_HALF) /
-                                     defaultPickerItemHeight_)),
-                0, MAX_HALF_DISPLAY_COUNT);
+                std::ceil((size.Height() / ITEM_HEIGHT_HALF - defaultPickerItemHeight_ / ITEM_HEIGHT_HALF) /
+                ((defaultPickerItemHeight_ != 0) ? defaultPickerItemHeight_ : 1.0f))), 0, MAX_HALF_DISPLAY_COUNT);
     } else {
         childStartCoordinate += static_cast<float>(pickerItemHeight_ / ITEM_HEIGHT_HALF -
                                     pickerTheme->GetGradientHeight().ConvertToPx() * (ITEM_HEIGHT_HALF + 1) -
                                     pickerTheme->GetDividerSpacing().ConvertToPx() / ITEM_HEIGHT_HALF);
+        auto gradientHeight = pickerTheme->GetGradientHeight().ConvertToPx();
         halfDisplayCounts_ = std::clamp(
             static_cast<int32_t>(std::ceil((pickerItemHeight_ / ITEM_HEIGHT_HALF -
-                                               pickerTheme->GetDividerSpacing().ConvertToPx() / ITEM_HEIGHT_HALF) /
-                                           pickerTheme->GetGradientHeight().ConvertToPx())),
+                pickerTheme->GetDividerSpacing().ConvertToPx() / ITEM_HEIGHT_HALF) /
+                    (gradientHeight != 0 ? gradientHeight : 1.0f))),
             0, MAX_HALF_DISPLAY_COUNT);
     }
     int32_t i = 0;
