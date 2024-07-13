@@ -404,6 +404,7 @@ void UpdateContextMenuDisappearPositionAnimation(const RefPtr<FrameNode>& menu, 
     CHECK_NULL_VOID(menuPattern);
     auto menuPosition = menuChild->GetGeometryNode()->GetFrameOffset();
     menuPosition += offset;
+    menuChild->GetGeometryNode()->SetFrameOffset(menuPosition);
     menuPattern->SetEndOffset(menuPosition);
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -421,7 +422,10 @@ void UpdateContextMenuDisappearPositionAnimation(const RefPtr<FrameNode>& menu, 
         CHECK_NULL_VOID(menuRenderContext);
         menuRenderContext->UpdatePosition(
             OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
-        menuRenderContext->UpdateTransformScale(VectorF(scaleAfter, scaleAfter));
+        // menuScale default value is 1.0f, only update menu scale with not the default value
+        if (scaleAfter != 1.0f) {
+            menuRenderContext->UpdateTransformScale(VectorF(scaleAfter, scaleAfter));
+        }
     });
 }
 
@@ -5978,17 +5982,33 @@ void OverlayManager::UpdateGatherNodeToTop()
 RefPtr<FrameNode> OverlayManager::GetPixelMapContentNode(bool isSubwindowOverlay) const
 {
     if (isSubwindowOverlay) {
-        auto rootNode = rootNodeWeak_.Upgrade();
-        CHECK_NULL_RETURN(rootNode, nullptr);
-        auto menuWrapperNode = AceType::DynamicCast<FrameNode>(rootNode->GetFirstChild());
-        CHECK_NULL_RETURN(menuWrapperNode, nullptr);
-        auto imageNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetLastChild());
+        RefPtr<FrameNode> imageNode = GetPixelMapContentNodeForSubwindow();
         return imageNode;
     }
     auto column = pixmapColumnNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(column, nullptr);
     auto imageNode = AceType::DynamicCast<FrameNode>(column->GetFirstChild());
     return imageNode;
+}
+
+RefPtr<FrameNode> OverlayManager::GetPixelMapContentNodeForSubwindow() const
+{
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(rootNode, nullptr);
+    for (const auto& child : rootNode->GetChildren()) {
+        auto node = DynamicCast<FrameNode>(child);
+        if (node && node->GetTag() != V2::MENU_WRAPPER_ETS_TAG) {
+            continue;
+        }
+        for (auto& childNode : node->GetChildren()) {
+            auto frameNode = DynamicCast<FrameNode>(childNode);
+            if (frameNode &&
+                (frameNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || frameNode->GetTag() == V2::IMAGE_ETS_TAG)) {
+                return frameNode;
+            }
+        }
+    }
+    return nullptr;
 }
 
 void OverlayManager::UpdatePixelMapPosition(bool isSubwindowOverlay)

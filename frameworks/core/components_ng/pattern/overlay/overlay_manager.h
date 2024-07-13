@@ -274,6 +274,8 @@ public:
 
     RefPtr<FrameNode> GetPixelMapContentNode(bool isSubwindowOverlay = false) const;
 
+    RefPtr<FrameNode> GetPixelMapContentNodeForSubwindow() const;
+
     RefPtr<FrameNode> GetPixelMapBadgeNode() const;
 
     bool GetHasFilter()
