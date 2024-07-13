@@ -8395,7 +8395,7 @@ void RichEditorPattern::PerformAction(TextInputAction action, bool forceCloseKey
     auto eventHub = host->GetEventHub<RichEditorEventHub>();
     eventHub->FireOnSubmit(static_cast<int32_t>(action), event);
     // If the developer wants to keep editing, editing will not stop
-    if (event.IsKeepEditable()) {
+    if (event.IsKeepEditable() || action == TextInputAction::NEW_LINE) {
         return;
     }
     // Exit the editing state
