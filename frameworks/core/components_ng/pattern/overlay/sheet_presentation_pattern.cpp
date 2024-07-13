@@ -89,6 +89,7 @@ void SheetPresentationPattern::OnModifyDone()
     }
     InitPanEvent();
     InitPageHeight();
+    InitScrollProps();
 }
 
 // check device is phone, fold status, screen's height less than width
@@ -143,6 +144,20 @@ void SheetPresentationPattern::InitPageHeight()
     CHECK_NULL_VOID(sheetTheme);
     sheetThemeType_ = sheetTheme->GetSheetType();
     scrollSizeMode_ = GetScrollSizeMode();
+}
+
+void SheetPresentationPattern::InitScrollProps()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto scrollNode = DynamicCast<FrameNode>(host->GetChildAtIndex(1));
+    CHECK_NULL_VOID(scrollNode);
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(scrollPattern);
+
+    // real-time refresh should set scroll always enabled,
+    // because sheet will be not draggable when sheet init height is less than content height
+    scrollPattern->SetAlwaysEnabled(scrollSizeMode_ == ScrollSizeMode::CONTINUOUS);
 }
 
 bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(

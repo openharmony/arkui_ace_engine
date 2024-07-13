@@ -591,6 +591,7 @@ private:
     void OnColorConfigurationUpdate() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
+    void InitScrollProps();
     void InitPageHeight();
     void TranslateTo(float height);
     void SetColumnMinSize(bool reset = false);
