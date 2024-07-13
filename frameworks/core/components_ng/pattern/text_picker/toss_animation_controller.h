@@ -64,6 +64,9 @@ public:
     }
 
     double GetTossOffset() const;
+
+    bool GetTossPlaying() const;
+    void SetTossPlaying();
 private:
     double GetCurrentTime() const;
     void CreatePropertyCallback();
@@ -76,6 +79,7 @@ private:
     int32_t showCount_ = 0;
     double end_ = 0.0;
     bool isManualStopToss_ = false;
+    bool isTossPlaying_ = false;
     WeakPtr<TextPickerColumnPattern> column_;
     WeakPtr<PipelineContext> pipeline_;
     RefPtr<NodeAnimatablePropertyFloat> property_;
