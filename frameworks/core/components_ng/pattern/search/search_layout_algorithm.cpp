@@ -335,6 +335,7 @@ void SearchLayoutAlgorithm::SelfMeasure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
+    UpdateClipBounds(layoutWrapper, searchHeight);
     // update search height
     constraint->selfIdealSize.SetHeight(searchHeight);
     auto searchWidth = CalcSearchWidth(constraint.value(), layoutWrapper);
@@ -759,5 +760,36 @@ void SearchLayoutAlgorithm::LayoutTextField(const LayoutSearchParams& params)
     auto textFieldVerticalOffset = (params.searchFrameHeight - textFieldGeometryNode->GetFrameSize().Height()) / 2;
     textFieldGeometryNode->SetMarginFrameOffset(OffsetF(textFieldHorizontalOffset, textFieldVerticalOffset));
     textFieldWrapper->Layout();
+}
+
+void SearchLayoutAlgorithm::UpdateClipBounds(LayoutWrapper* layoutWrapper, float height)
+{
+    if (!IsFixedHeightMode(layoutWrapper)) {
+        return;
+    }
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto layoutProperty = AceType::DynamicCast<SearchLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->HasSearchIconUDSize() && !layoutProperty->HasCancelButtonUDSize()) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto searchTheme = pipeline->GetTheme<SearchTheme>();
+        CHECK_NULL_VOID(searchTheme);
+        auto defaultImageHeight = searchTheme->GetIconSize().ConvertToPx();
+        auto isClip = LessNotEqual(height, defaultImageHeight);
+        renderContext->SetClipToBounds(isClip);
+        return;
+    }
+    auto isClip = false;
+    if (layoutProperty->HasSearchIconUDSize()) {
+        isClip = isClip || LessNotEqual(height, layoutProperty->GetSearchIconUDSizeValue().ConvertToPx());
+    }
+    if (layoutProperty->HasCancelButtonUDSize()) {
+        isClip = isClip || LessNotEqual(height, layoutProperty->GetCancelButtonUDSizeValue().ConvertToPx());
+    }
+    renderContext->SetClipToBounds(isClip);
 }
 } // namespace OHOS::Ace::NG

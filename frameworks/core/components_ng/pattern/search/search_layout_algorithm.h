@@ -70,6 +70,7 @@ private:
     void LayoutCancelButton(const LayoutSearchParams& params);
     void LayoutCancelImage(const LayoutSearchParams& params);
     void LayoutTextField(const LayoutSearchParams& params);
+    void UpdateClipBounds(LayoutWrapper* layoutWrapper, float height);
 
     ACE_DISALLOW_COPY_AND_MOVE(SearchLayoutAlgorithm);
 };

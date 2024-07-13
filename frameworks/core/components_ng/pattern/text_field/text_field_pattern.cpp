@@ -2147,6 +2147,7 @@ void TextFieldPattern::InitClickEvent()
 void TextFieldPattern::HandleClickEvent(GestureEvent& info)
 {
     CHECK_NULL_VOID(!IsDragging());
+    parentGlobalOffset_ = GetPaintRectGlobalOffset();
     if (selectOverlay_->IsClickAtHandle(info)) {
         return;
     }
@@ -4648,10 +4649,6 @@ void TextFieldPattern::UpdateInputFilterErrorText(const std::string& errorText)
 }
 
 void TextFieldPattern::OnValueChanged(bool needFireChangeEvent, bool needFireSelectChangeEvent) {}
-
-void TextFieldPattern::OnAreaChangedInner()
-{
-}
 
 void TextFieldPattern::OnHandleAreaChanged()
 {
