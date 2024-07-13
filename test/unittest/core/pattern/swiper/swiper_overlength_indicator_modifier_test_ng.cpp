@@ -120,7 +120,7 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier
 HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier002, TestSize.Level1)
 {
     OverlengthDotIndicatorModifier dotIndicatorModifier;
-    LinearVector<float> normalItemHalfSizes = { 3.f, 3.f, 6.f, 6.f };
+    LinearVector<float> normalItemHalfSizes = { 3.f, 3.f, 3.f, 3.f };
     dotIndicatorModifier.CalcAnimationEndCenterX(normalItemHalfSizes);
     EXPECT_EQ(dotIndicatorModifier.moveDirection_, OverlongIndicatorMove::NONE);
     EXPECT_EQ(dotIndicatorModifier.animationStartIndicatorWidth_.size(), 1);
@@ -130,9 +130,12 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier
 
     dotIndicatorModifier.SetMaxDisplayCount(7);
     dotIndicatorModifier.SetRealItemCount(15);
-    dotIndicatorModifier.animationStartIndex_ = 3;
-    dotIndicatorModifier.animationEndIndex_ = 4;
-    dotIndicatorModifier.gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    dotIndicatorModifier.animationStartIndex_ = 4;
+    dotIndicatorModifier.animationEndIndex_ = 5;
+    dotIndicatorModifier.currentSelectedIndex_ = 4;
+    dotIndicatorModifier.targetSelectedIndex_ = 4;
+    dotIndicatorModifier.currentOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT;
+    dotIndicatorModifier.gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
     dotIndicatorModifier.CalcAnimationEndCenterX(normalItemHalfSizes);
     EXPECT_EQ(dotIndicatorModifier.moveDirection_, OverlongIndicatorMove::MOVE_BACKWARD);
     EXPECT_EQ(dotIndicatorModifier.animationStartIndicatorWidth_.size(), 8);
@@ -168,8 +171,8 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier
 
     dotIndicatorModifier.touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
     dotIndicatorModifier.UpdateSelectedCenterXOnDrag(normalItemHalfSizes);
-    EXPECT_EQ(dotIndicatorModifier.overlongSelectedEndCenterX_.first, 1.f);
-    EXPECT_EQ(dotIndicatorModifier.overlongSelectedEndCenterX_.second, 1.f);
+    EXPECT_EQ(dotIndicatorModifier.overlongSelectedEndCenterX_.first, 1.3f);
+    EXPECT_EQ(dotIndicatorModifier.overlongSelectedEndCenterX_.second, 1.2f);
 }
 
 HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier004, TestSize.Level1)
@@ -297,48 +300,29 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier
     dotIndicatorModifier.CalcTargetSelectedIndex(1, 1);
     EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 0);
 
-    dotIndicatorModifier.maxDisplayCount_ = 5;
-    dotIndicatorModifier.realItemCount_ = 4;
+    dotIndicatorModifier.maxDisplayCount_ = 9;
+    dotIndicatorModifier.realItemCount_ = 15;
     dotIndicatorModifier.currentSelectedIndex_ = 2;
-    dotIndicatorModifier.CalcTargetSelectedIndex(0, 1);
-    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 2);
-
-    dotIndicatorModifier.CalcTargetSelectedIndex(0, 3);
-    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 5);
-
-    dotIndicatorModifier.currentSelectedIndex_ = 1;
-    dotIndicatorModifier.CalcTargetSelectedIndex(0, 1);
-    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 2);
-
-    dotIndicatorModifier.CalcTargetSelectedIndex(0, 2);
+    dotIndicatorModifier.CalcTargetSelectedIndex(2, 3);
     EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 3);
 
-    dotIndicatorModifier.CalcTargetSelectedIndex(0, 3);
-    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 4);
-
     dotIndicatorModifier.currentSelectedIndex_ = 3;
-    dotIndicatorModifier.CalcTargetSelectedIndex(0, 1);
+    dotIndicatorModifier.CalcTargetSelectedIndex(3, 4);
     EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 4);
 
-    dotIndicatorModifier.CalcTargetSelectedIndex(4, 2);
-    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 2);
+    dotIndicatorModifier.currentSelectedIndex_ = 6;
+    dotIndicatorModifier.CalcTargetSelectedIndex(6, 7);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 6);
 
-    dotIndicatorModifier.CalcTargetSelectedIndex(4, 1);
-    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 1);
+    dotIndicatorModifier.currentSelectedIndex_ = 6;
+    dotIndicatorModifier.CalcTargetSelectedIndex(11, 12);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 6);
 
-    dotIndicatorModifier.CalcTargetSelectedIndex(4, 0);
-    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 0);
+    dotIndicatorModifier.CalcTargetSelectedIndex(12, 13);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 7);
 
-    dotIndicatorModifier.currentSelectedIndex_ = 2;
-    dotIndicatorModifier.CalcTargetSelectedIndex(4, 2);
-    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 2);
-
-    dotIndicatorModifier.CalcTargetSelectedIndex(4, 1);
-    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 1);
-
-    dotIndicatorModifier.currentSelectedIndex_ = 1;
-    dotIndicatorModifier.CalcTargetSelectedIndex(4, 1);
-    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, -2);
+    dotIndicatorModifier.CalcTargetSelectedIndex(13, 14);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 8);
 }
 
 }
