@@ -3010,6 +3010,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     isTouchCaret_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleLongPress %{public}d", host->GetId());
     bool shouldProcessOverlayAfterLayout = false;
     if (ResetObscureTickCountDown()) {
         shouldProcessOverlayAfterLayout = true;
@@ -3778,6 +3779,7 @@ bool TextFieldPattern::RequestCustomKeyboard()
     CHECK_NULL_RETURN(customKeyboard_ || customKeyboardBuilder_, false);
     auto frameNode = GetHost();
     CHECK_NULL_RETURN(frameNode, false);
+    ACE_LAYOUT_SCOPED_TRACE("RequestCustomKeyboard[id:%d]", frameNode->GetId());
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, false);
     auto overlayManager = pipeline->GetOverlayManager();
@@ -6397,6 +6399,13 @@ void TextFieldPattern::DumpAdvanceInfo()
                                            .append(", Attached: ")
                                            .append(std::to_string(isCustomKeyboardAttached_)));
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    DumpLog::GetInstance().AddDesc(std::string("FontColor: ").append(GetTextColor()));
+    DumpLog::GetInstance().AddDesc(
+        std::string("autoWidth: ").append(std::to_string(layoutProperty->GetWidthAutoValue(false))));
     DumpLog::GetInstance().AddDesc(std::string("MinFontSize:").append(GetMinFontSize()));
     DumpLog::GetInstance().AddDesc(std::string("MaxFontSize:").append(GetMaxFontSize()));
     DumpLog::GetInstance().AddDesc(std::string("from TextEngine paragraphs_ info :"));

@@ -4925,6 +4925,7 @@ void OverlayManager::BindKeyboard(const std::function<void()>& keyboardBuilder, 
     if (!customKeyboard) {
         return;
     }
+    ACE_LAYOUT_SCOPED_TRACE("BindKeyboard[targetId:%d]", targetId);
     customKeyboard->MountToParent(rootNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     customKeyboardMap_[targetId] = customKeyboard;
@@ -4942,6 +4943,7 @@ void OverlayManager::BindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_
     if (customKeyboardMap_.find(targetId) != customKeyboardMap_.end()) {
         return;
     }
+    ACE_LAYOUT_SCOPED_TRACE("BindKeyboardWithNode[targetId:%d]", targetId);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     auto customKeyboard = KeyboardView::CreateKeyboardWithNode(targetId, keyboard);
@@ -4960,6 +4962,7 @@ void OverlayManager::CloseKeyboard(int32_t targetId)
     if (it == customKeyboardMap_.end()) {
         return;
     }
+    ACE_LAYOUT_SCOPED_TRACE("CloseKeyboard[targetId:%d]", targetId);
     auto customKeyboard = it->second;
     CHECK_NULL_VOID(customKeyboard);
     auto pattern = customKeyboard->GetPattern<KeyboardPattern>();
