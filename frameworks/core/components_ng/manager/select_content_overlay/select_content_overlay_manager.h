@@ -87,7 +87,6 @@ public:
     float GetHandleDiameter();
     void ConvertPointRelativeToNode(const RefPtr<FrameNode>& node, PointF& point);
     bool IsTouchAtHandle(const PointF& localPoint, const PointF& globalPoint);
-    void UpdateViewPort();
 
 private:
     void SetHolder(const RefPtr<SelectOverlayHolder>& holder);

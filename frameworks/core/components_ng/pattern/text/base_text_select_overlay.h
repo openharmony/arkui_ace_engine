@@ -91,6 +91,7 @@ public:
     void UpdateAllHandlesOffset();
     void UpdateFirstHandleOffset();
     void UpdateSecondHandleOffset();
+    void UpdateViewPort();
     bool IsShowMouseMenu();
     bool IsCurrentMenuVisibile();
     bool IsHandleReverse();
@@ -203,6 +204,7 @@ public:
     {
         SetHandleLevelMode(mode);
         UpdateAllHandlesOffset();
+        UpdateViewPort();
     }
     virtual void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag);
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info) override;
