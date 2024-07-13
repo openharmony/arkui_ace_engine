@@ -810,7 +810,7 @@ void ListPattern::GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) con
     }
     if (endIndex_ == maxListItemIndex_ && itemPosition_.rbegin()->second.isGroup) {
         auto& groupInfo = itemPosition_.rbegin()->second.groupInfo;
-        groupAtStart = groupInfo && groupInfo.value().atEnd;
+        groupAtEnd = groupInfo && groupInfo.value().atEnd;
     }
 }
 
