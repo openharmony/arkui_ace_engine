@@ -110,7 +110,6 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, 
             }
             return false;
         });
-
     if (needSync) {
         UINode::MarkNeedSyncRenderTree(false);
         children_.clear();
@@ -174,7 +173,6 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(
             }
             return false;
         });
-
     if (needSync) {
         UINode::MarkNeedSyncRenderTree(false);
         children_.clear();
