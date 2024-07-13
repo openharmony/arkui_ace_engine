@@ -488,7 +488,7 @@ public:
         return false;
     }
 
-    virtual bool IsNeedToCreatePopupWindow(const AceAutoFillType &autoFillType)
+    virtual bool IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType)
     {
         return false;
     }

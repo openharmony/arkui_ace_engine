@@ -1375,7 +1375,7 @@ bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFil
     return true;
 }
 
-bool AceContainer::IsNeedToCreatePopupWindow(const AceAutoFillType &autoFillType)
+bool AceContainer::IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType)
 {
     return AbilityRuntime::AutoFillManager::GetInstance().IsNeedToCreatePopupWindow(
         static_cast<AbilityBase::AutoFillType>(autoFillType));
