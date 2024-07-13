@@ -102,6 +102,7 @@ public:
         CHECK_NULL_VOID(stackNode_);
         host->RemoveChildAndReturnIndex(stackNode_);
         passwordNode_.Reset();
+        areaRect_.Reset();
     }
 
     const RefPtr<FrameNode> GetFrameNode() override;
@@ -157,6 +158,7 @@ public:
         CHECK_NULL_VOID(host);
         CHECK_NULL_VOID(unitNode_);
         host->RemoveChildAndReturnIndex(unitNode_);
+        areaRect_.Reset();
     }
 
 private:
