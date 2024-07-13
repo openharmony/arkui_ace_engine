@@ -1622,10 +1622,6 @@ void SearchPattern::CreateCancelIcon()
 
 void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool isFromModifier)
 {
-    LOGE("tyty CreateOrUpdateSymbol index:%{public}d,isCreateNode:%{public}d,isFromModifier:%{public}d",
-        index,
-        isCreateNode,
-        isFromModifier);
     CHECK_NULL_VOID(GetSearchNode());
     imageClickListener_ = nullptr;
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -1687,7 +1683,6 @@ void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool 
 
 void SearchPattern::CreateOrUpdateImage(int32_t index, bool isCreateNode)
 {
-    LOGE("tyty CreateOrUpdateImage index:%{public}d,isCreateNode:%{public}d ", index, isCreateNode);
     CHECK_NULL_VOID(GetSearchNode());
     imageClickListener_ = nullptr;
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -1822,16 +1817,10 @@ void SearchPattern::SetCancelSymbolIcon()
 
 void SearchPattern::UpdateImageIconNode(int32_t index)
 {
-    LOGE("tyty UpdateImageIconNode-index:%{public}d", index);
     bool isCurSymbolNode = IsSymbolIcon(index);
     if (isCurSymbolNode) {
-        // 需切换节点
-        LOGE("tyty 需切换节点-CreateOrUpdateImage");
         CreateOrUpdateImage(index, false);
     } else {
-        // 直接更新属性
-        // image更新src,symbol直接更新modifier
-        LOGE("tyty 直接更新属性-UpdateImageIconProperties");
         auto frameNode = GetHost();
         CHECK_NULL_VOID(frameNode);
         auto iconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(index));
@@ -1843,23 +1832,16 @@ void SearchPattern::UpdateImageIconNode(int32_t index)
 
 void SearchPattern::UpdateSymbolIconNode(int32_t index)
 {
-    LOGE("tyty UpdateSymbolIconNode-index:%{public}d", index);
     bool isCurSymbolNode = IsSymbolIcon(index);
     if (!isCurSymbolNode) {
-        // 需切换节点,并更新modifier
-        LOGE("tyty 需切换节点-CreateOrUpdateSymbol");
         CreateOrUpdateSymbol(index, false, true);
     } else {
-        // 直接更新属性
-        // image更新src,symbol直接更新modifier
-        LOGE("tyty 直接更新属性-AppplySymbolModifier");
         AppplySymbolModifier(index);
     }
 }
 
 void SearchPattern::AppplySymbolModifier(int32_t index)
 {
-    LOGE("tyty AppplySymbolModifier:%{public}d", index);
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     auto iconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(index));
@@ -1894,9 +1876,6 @@ void SearchPattern::UpdateImageIconProperties(RefPtr<FrameNode>& iconFrameNode, 
     if (iconFrameNode->GetTag() == V2::IMAGE_ETS_TAG) {
         auto iconOptions = index == IMAGE_INDEX ? GetSearchNode()->GetSearchImageIconOptions()
                                                 : GetSearchNode()->GetCancelImageIconOptions();
-        LOGE("tyty UpdateImageIconProperties index：%{public}d,iconOptions:%{public}s,",
-            index,
-            iconOptions.ToString().c_str());
         auto imageLayoutProperty = iconFrameNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         ImageSourceInfo imageSourceInfo("");

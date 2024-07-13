@@ -1053,7 +1053,7 @@ HWTEST_F(SearchTestNg, SetCancelImageIcon001, TestSize.Level1)
     searchModelInstance.SetCancelImageIcon(iconOptions);
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     ASSERT_STREQ(imageLayoutProperty->GetImageSourceInfo()->GetSrc().c_str(), "/common/icon.png");
-    EXPECT_EQ(searchLayoutProperty->GetCancelIconUDSize(), 14.0_vp);
+    EXPECT_EQ(searchLayoutProperty->GetCancelButtonUDSize(), 14.0_vp);
     EXPECT_EQ(imageRenderProperty->GetSvgFillColor(), Color::RED);
 }
 
@@ -1071,7 +1071,7 @@ HWTEST_F(SearchTestNg, SetCancelIconSymbolGlyphModofier001, TestSize.Level1)
         EXPECT_NE(node, nullptr);
     };
     SearchModelNG searchModelInstance;
-    searchModelInstance.SetSearchSymbolIcon(onApply);
+    searchModelInstance.SetCancelSymbolIcon(onApply);
     auto search = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(search, nullptr);
     auto pipeline = PipelineBase::GetCurrentContext();

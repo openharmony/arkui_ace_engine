@@ -140,10 +140,9 @@ void SetSearchCancelButton(ArkUINodeHandle node,
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetCancelButtonStyle(frameNode, static_cast<CancelButtonStyle>(style));
-    NG::IconOptions cancelInconOptions = NG::IconOptions(
+    NG::IconOptions cancelIconOptions = NG::IconOptions(
         Color(color), Dimension(size->value, static_cast<DimensionUnit>(size->unit)), std::string(src), "", "");
-    LOGI("tyty SetSearchCancelButton:%{public}s", cancelInconOptions.ToString().c_str());
-    SearchModelNG::SetCancelImageIcon(frameNode, cancelInconOptions);
+    SearchModelNG::SetCancelImageIcon(frameNode, cancelIconOptions);
 }
 
 void ResetSearchCancelButton(ArkUINodeHandle node)
@@ -202,7 +201,6 @@ void SetSearchSearchIcon(ArkUINodeHandle node, const struct ArkUIIconOptionsStru
 
     NG::IconOptions cancelInconOptions = NG::IconOptions(
         iconColor, Dimension(value->value, static_cast<DimensionUnit>(value->unit)), std::string(value->src), "", "");
-    LOGI("tyty SetSearchSearchIcon:%{public}s", cancelInconOptions.ToString().c_str());
     SearchModelNG::SetSearchImageIcon(frameNode, cancelInconOptions);
 }
 

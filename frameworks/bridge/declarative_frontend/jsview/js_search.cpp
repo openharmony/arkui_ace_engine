@@ -334,25 +334,20 @@ void JSSearch::SetSearchIcon(const JSCallbackInfo& info)
 
 void JSSearch::SetCancelDefaultIcon()
 {
-    LOGE("tyty SetCancelDefaultIcon");
     SearchModel::GetInstance()->SetCancelDefaultIcon();
 }
 
 void JSSearch::SetCancelSymbolIcon(const JSCallbackInfo& info)
 {
-    LOGE("tyty SetCancelSymbolIcon");
     std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
     auto param = JSRef<JSObject>::Cast(info[0]);
     auto iconProp = param->GetProperty("icon");
-
     SetSymbolOptionApply(info, iconSymbol, iconProp);
     SearchModel::GetInstance()->SetCancelSymbolIcon(iconSymbol);
 }
 
 void JSSearch::SetCancelImageIcon(const JSCallbackInfo& info)
 {
-
-    LOGE("tyty SetCancelImageIcon");
     auto param = JSRef<JSObject>::Cast(info[0]);
     auto theme = GetTheme<SearchTheme>();
     CHECK_NULL_VOID(theme);
@@ -382,36 +377,23 @@ void JSSearch::SetCancelImageIcon(const JSCallbackInfo& info)
 
     // set icon color
     Color iconColor = theme->GetSearchIconColor();
-    LOGI("tyty cancel-ParseJsColor%{public}s", iconColor.ToString().c_str());
     auto iconColorProp = iconParam->GetProperty("color");
     if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() && ParseJsColor(iconColorProp, iconColor)) {
-
-        NG::IconOptions cancelInconOptions = NG::IconOptions(iconColor, iconSize, iconSrc, "", "");
-        LOGI("tyty cancelInconOptions:%{public}s", cancelInconOptions.ToString().c_str());
-
-        SearchModel::GetInstance()->SetCancelImageIcon(cancelInconOptions);
+        NG::IconOptions cancelIconOptions = NG::IconOptions(iconColor, iconSize, iconSrc, "", "");
+        SearchModel::GetInstance()->SetCancelImageIcon(cancelIconOptions);
     } else {
         NG::IconOptions cancelInconOptions = NG::IconOptions(iconSize, iconSrc, "", "");
-        LOGI("tyty cancelInconOptions:%{public}s", cancelInconOptions.ToString().c_str());
-
-        SearchModel::GetInstance()->SetCancelImageIcon(cancelInconOptions);
+        SearchModel::GetInstance()->SetCancelImageIcon(cancelIconOptions);
     }
-
-    NG::IconOptions cancelInconOptions = NG::IconOptions(iconColor, iconSize, iconSrc, "", "");
-    LOGI("tyty cancelInconOptions:%{public}s", cancelInconOptions.ToString().c_str());
-
-    SearchModel::GetInstance()->SetCancelImageIcon(cancelInconOptions);
 }
 
 void JSSearch::SetSearchDefaultIcon()
 {
-    LOGE("tyty SetSearchDefaultIcon");
     SearchModel::GetInstance()->SetSearchDefaultIcon();
 }
 
 void JSSearch::SetSearchSymbolIcon(const JSCallbackInfo& info)
 {
-    LOGE("tyty SetSearchSymbolIcon");
     std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
     SetSymbolOptionApply(info, iconSymbol, info[0]);
     SearchModel::GetInstance()->SetSearchSymbolIcon(iconSymbol);
@@ -419,7 +401,6 @@ void JSSearch::SetSearchSymbolIcon(const JSCallbackInfo& info)
 
 void JSSearch::SetSearchImageIcon(const JSCallbackInfo& info)
 {
-    LOGE("tyty SetSearchImageIcon");
     auto param = JSRef<JSObject>::Cast(info[0]);
     auto theme = GetTheme<SearchTheme>();
     CHECK_NULL_VOID(theme);
@@ -443,7 +424,6 @@ void JSSearch::SetSearchImageIcon(const JSCallbackInfo& info)
     }
     // set icon color
     Color colorVal = theme->GetSearchIconColor();
-    LOGI("tyty search ParseJsColor%{public}s", colorVal.ToString().c_str());
     auto colorProp = param->GetProperty("color");
     if (!colorProp->IsUndefined() && !colorProp->IsNull() && ParseJsColor(colorProp, colorVal)) {
         ParseJsColor(colorProp, colorVal);
@@ -452,9 +432,8 @@ void JSSearch::SetSearchImageIcon(const JSCallbackInfo& info)
     std::string bundleName;
     std::string moduleName;
     GetJsMediaBundleInfo(srcPathProp, bundleName, moduleName);
-    NG::IconOptions searchInconOptions = NG::IconOptions(colorVal, size, src, bundleName, moduleName);
-    LOGI("tyty js-searchInconOptions:%{public}s", searchInconOptions.ToString().c_str());
-    SearchModel::GetInstance()->SetSearchImageIcon(searchInconOptions);
+    NG::IconOptions searchIconOptions = NG::IconOptions(colorVal, size, src, bundleName, moduleName);
+    SearchModel::GetInstance()->SetSearchImageIcon(searchIconOptions);
 }
 
 static CancelButtonStyle ConvertStrToCancelButtonStyle(const std::string& value)
