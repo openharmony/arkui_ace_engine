@@ -31,13 +31,9 @@ gen_obj("arkui_arcalphabetindexer_abc") {
   input = get_label_info(":gen_arkui_arcalphabetindexer_abc",
                          "target_out_dir") + "/arkui_arcalphabetindexer.abc"
   output = target_out_dir + "arkui_arcalphabetindexer_abc.o"
-  snapshot_dep = [ ":gen_arkui_arcalphabetindexer_abc" ]
-}
-
-gen_obj("arkui_arcalphabetindexer_abc_preview") {
-  input = get_label_info(":gen_arkui_arcalphabetindexer_abc",
-                         "target_out_dir") + "/arkui_arcalphabetindexer.abc"
-  output = target_out_dir + "/arkui_arcalphabetindexer_abc.c"
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
+    output = target_out_dir + "arkui_arcalphabetindexer_abc.c"
+  }
   snapshot_dep = [ ":gen_arkui_arcalphabetindexer_abc" ]
 }
 
@@ -62,17 +58,12 @@ ohos_shared_library("arcalphabetindexer") {
     "napi:ace_napi",
   ]
 
-  deps = []
+  deps = [
+    ":gen_obj_src_arkui_arcalphabetindexer_abc",
+    "$ace_root/build:libace_compatible",
+  ]
   if (use_mingw_win || use_mac || use_linux) {
-    deps += [
-      ":gen_obj_src_arkui_arcalphabetindexer_abc_preview",
-      "$ace_root/build:libace_compatible",
-    ]
   } else {
-    deps += [
-      ":gen_obj_src_arkui_arcalphabetindexer_abc",
-      "$ace_root/build:libace_compatible",
-    ]
     external_deps += [
       "ets_runtime:libark_jsruntime",
       "napi:ace_container_scope",
