@@ -1347,6 +1347,9 @@ void FormPattern::AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node
         != formChildrenNodeMap_.end()) {
         TAG_LOGI(AceLogTag::ACE_FORM, "surfaceNode: %{public}s setOpacity:0", std::to_string(node->GetId()).c_str());
         externalRenderContext->SetOpacity(TRANSPARENT_VAL);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_FORM, "surfaceNode: %{public}s setOpacity:1", std::to_string(node->GetId()).c_str());
+        externalRenderContext->SetOpacity(NON_TRANSPARENT_VAL);
     }
 
     auto renderContext = host->GetRenderContext();
