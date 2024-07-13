@@ -2362,12 +2362,27 @@ void SwiperPattern::HandleTouchBottomLoop()
                                                      gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT));
     if (followTouchBottom) {
         if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT) {
-            touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+            if (IsHorizontalAndRightToLeft()) {
+                touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+            } else {
+                touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+            }
         } else if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
-            touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+            if (IsHorizontalAndRightToLeft()) {
+                touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+            } else {
+                touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+            }
         }
         return;
     }
+
+    if (IsHorizontalAndRightToLeft()) {
+        currentFirstIndex = TotalCount() - 1 - currentFirstIndex;
+        currentIndex = TotalCount() - 1 - currentIndex;
+        commTouchBottom = (currentFirstIndex == TotalCount() - 1);
+    }
+
     bool leftReleaseTouchBottom =
         (commTouchBottom && (currentIndex == 0 && gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT));
     bool rightReleaseTouchBottom = ((currentFirstIndex == 0) && (currentIndex == TotalCount() - 1) &&
@@ -2399,16 +2414,22 @@ void SwiperPattern::CalculateGestureState(float additionalOffset, float currentT
         }
     }
 
+    auto currentFirstIndex = GetLoopIndex(currentFirstIndex_);
+    auto needTurn = needTurn_;
+    if (IsHorizontalAndRightToLeft() && currentFirstIndex == TotalCount() - 1 && GetLoopIndex(currentIndex_) == 0) {
+        needTurn = true;
+    }
+
     if (GreatNotEqual(additionalOffset, 0.0f)) {
         gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
         needTurn_ = false;
     } else if (LessNotEqual(additionalOffset, 0.0f)) {
         gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
         needTurn_ = false;
-    } else if (GetLoopIndex(currentFirstIndex_) >= GetLoopIndex(currentIndex_)) {
-        gestureState_ = needTurn_ ? GestureState::GESTURE_STATE_FOLLOW_LEFT : GestureState::GESTURE_STATE_FOLLOW_RIGHT;
-    } else if (GetLoopIndex(currentFirstIndex_) < GetLoopIndex(currentIndex_)) {
-        gestureState_ = needTurn_ ? GestureState::GESTURE_STATE_FOLLOW_RIGHT : GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    } else if (currentFirstIndex >= GetLoopIndex(currentIndex_)) {
+        gestureState_ = needTurn ? GestureState::GESTURE_STATE_FOLLOW_LEFT : GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    } else if (currentFirstIndex < GetLoopIndex(currentIndex_)) {
+        gestureState_ = needTurn ? GestureState::GESTURE_STATE_FOLLOW_RIGHT : GestureState::GESTURE_STATE_FOLLOW_LEFT;
     }
     return;
 }
