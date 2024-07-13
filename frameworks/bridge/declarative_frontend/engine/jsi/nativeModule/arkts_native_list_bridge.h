@@ -17,6 +17,7 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_LIST_BRIDGE_H
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
+#include "bridge/declarative_frontend/jsview/js_scroller.h"
 
 namespace OHOS::Ace::NG {
 class ListBridge {
@@ -71,6 +72,11 @@ public:
     static ArkUINativeModuleValue ResetInitialIndex(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSpace(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetSpace(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetInitialScroller(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetInitialScroller(ArkUIRuntimeCallInfo* runtimeCallInfo);
+
+private:
+    static void SetScroller(ArkUIRuntimeCallInfo* runtimeCallInfo, RefPtr<Framework::JSScroller> jsScroller);
 };
 } // namespace OHOS::Ace::NG
 
