@@ -2844,7 +2844,7 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     auto textCache = layoutProperty->GetValueValue("");
     auto previewTextCache = layoutProperty->GetPreviewTextValue({GetPreviewTextStart(), ""});
     PreviewText curPreviewText = {GetPreviewTextStart(), GetPreviewTextValue()};
-    if (textCache == contentController_->GetTextValue() && previewTextCache == curPreviewText) {
+    if (textCache == contentController_->GetTextValue() && previewTextCache.value == curPreviewText.value) {
         return false;
     }
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, contentController_->GetTextValue());
