@@ -319,6 +319,25 @@ bool NavigationPattern::IsTopNavDestination(const RefPtr<UINode>& node) const
     return navDestination == node;
 }
 
+bool NavigationPattern::IsFoldStateChange()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto displayInfo = container->GetDisplayInfo();
+    CHECK_NULL_RETURN(displayInfo, false);
+    auto foldStatus = displayInfo->GetFoldStatus();
+    return foldStatus != currentfoldStatus_;
+}
+
+void NavigationPattern::UpdateFoldState()
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto displayInfo = container->GetDisplayInfo();
+    CHECK_NULL_VOID(displayInfo);
+    currentfoldStatus_ = displayInfo->GetFoldStatus();
+}
+
 void NavigationPattern::UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host)
 {
     CHECK_NULL_VOID(host);
