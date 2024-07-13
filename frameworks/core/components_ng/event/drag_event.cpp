@@ -769,12 +769,15 @@ void DragEventActuator::HandleDragDampingMove(const Point& point, int32_t pointe
     if (isRedragStart && !isRedragStart_) {
         isRedragStart_ = true;
         SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, true);
+        UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, true);
         dragDropManager->UpdateDragMovePosition(updateOffset, true);
     } else {
         SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, false);
+        UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, false);
         dragDropManager->UpdateDragMovePosition(updateOffset, false);
     }
     SubwindowManager::GetInstance()->UpdatePreviewPosition();
+    UpdatePreviewPosition();
 }
 
 void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
@@ -1325,7 +1328,33 @@ void DragEventActuator::HideMenu(int32_t targetId)
     CHECK_NULL_VOID(manager);
     auto menuNode = manager->GetMenuNode(targetId);
     CHECK_NULL_VOID(menuNode);
+    TAG_LOGI(AceLogTag::ACE_DRAG, "will hide menu, tagetNode id %{public}d menuNode id %{public}d.",
+        targetId, menuNode->GetId());
     manager->HideMenu(menuNode, targetId);
+}
+
+void DragEventActuator::UpdateHideMenuOffsetNG(const NG::OffsetF& offset, float menuScale, bool isRedragStart)
+{
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlay = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    if (overlay->IsContextMenuDragHideFinished()) {
+        return;
+    }
+    overlay->UpdateContextMenuDisappearPosition(offset, menuScale, isRedragStart);
+}
+
+void DragEventActuator::UpdatePreviewPosition()
+{
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlay = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    if (overlay->GetHasPixelMap()) {
+        return;
+    }
+    overlay->UpdatePixelMapPosition(true);
 }
 
 void DragEventActuator::HidePixelMap(bool startDrag, double x, double y, bool showAnimation)

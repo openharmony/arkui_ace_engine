@@ -534,7 +534,7 @@ public:
 
     void OnTouchOutside() const
     {
-        LOGI("window is touching outside. instance id is %{public}d", instanceId_);
+        TAG_LOGI(AceLogTag::ACE_MENU, "window is touching outside. instance id is %{public}d", instanceId_);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
         auto taskExecutor = container->GetTaskExecutor();
