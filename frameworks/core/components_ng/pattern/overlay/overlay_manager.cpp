@@ -6337,14 +6337,9 @@ void OverlayManager::RemoveChildWithService(const RefPtr<UINode>& rootNode, cons
     CHECK_NULL_VOID(node);
     auto pipeline = rootNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetInstallationFree()) {
-        // it is in atomicservice
-        auto parent = node->GetParent();
-        CHECK_NULL_VOID(parent);
-        parent->RemoveChild(node);
-    } else {
-        rootNode->RemoveChild(node);
-    }
+    auto parent = node->GetParent();
+    CHECK_NULL_VOID(parent);
+    parent->RemoveChild(node);
 }
  
 void OverlayManager::SetNodeBeforeAppbar(const RefPtr<NG::UINode>& rootNode, const RefPtr<FrameNode>& node)
