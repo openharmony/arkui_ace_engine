@@ -609,6 +609,7 @@ private:
     void DismissSheetShadow(const RefPtr<RenderContext>& context);
     void ClipSheetNode();
     void CreatePropertyCallback();
+    void IsCustomDetentsChanged(SheetStyle sheetStyle);
     std::string GetPopupStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
     std::string GetCenterStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
     std::string GetBottomStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
@@ -675,6 +676,7 @@ private:
 
     WeakPtr<OverlayManager> overlayManager_ = nullptr;
 
+    std::vector<SheetHeight> preDetents_;
     std::vector<float> sheetDetentHeight_;
     std::vector<float> unSortedSheetDentents_;
 
