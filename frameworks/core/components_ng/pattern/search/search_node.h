@@ -185,7 +185,7 @@ public:
         return cancelButtonId_.value();
     }
 
- 	    Dimension& GetSearchImageIconSize()
+    Dimension& GetSearchImageIconSize()
     {
         return searchImageIconOptions_.GetSize().value();
     }

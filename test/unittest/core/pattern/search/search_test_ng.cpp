@@ -1155,7 +1155,7 @@ HWTEST_F(SearchTestNg, Create001, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     auto searchIconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
     ASSERT_NE(searchIconFrameNode, nullptr);
-    EXPECT_EQ(searchIconFrameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    EXPECT_EQ(searchIconFrameNode->GetTag(), V2::SYMBOL_ETS_TAG);
     auto cancelIconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
     ASSERT_NE(cancelIconFrameNode, nullptr);
     EXPECT_EQ(cancelIconFrameNode->GetTag(), V2::SYMBOL_ETS_TAG);

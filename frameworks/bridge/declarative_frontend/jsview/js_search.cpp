@@ -382,7 +382,7 @@ void JSSearch::SetCancelImageIcon(const JSCallbackInfo& info)
         NG::IconOptions cancelIconOptions = NG::IconOptions(iconColor, iconSize, iconSrc, "", "");
         SearchModel::GetInstance()->SetCancelImageIcon(cancelIconOptions);
     } else {
-        NG::IconOptions cancelInconOptions = NG::IconOptions(iconSize, iconSrc, "", "");
+        NG::IconOptions cancelIconOptions = NG::IconOptions(iconSize, iconSrc, "", "");
         SearchModel::GetInstance()->SetCancelImageIcon(cancelIconOptions);
     }
 }

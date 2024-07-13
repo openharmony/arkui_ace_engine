@@ -1595,6 +1595,9 @@ void SearchPattern::InitCancelIconColorSize()
 void SearchPattern::CreateSearchIcon(const std::string& src)
 {
     CHECK_NULL_VOID(GetSearchNode());
+    if (GetSearchNode()->HasSearchIconNodeCreated()) {
+        return;
+    }
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
         src.empty()) {
         CreateOrUpdateSymbol(IMAGE_INDEX, !GetSearchNode()->HasSearchIconNodeCreated(), false);
@@ -1603,14 +1606,14 @@ void SearchPattern::CreateSearchIcon(const std::string& src)
         CreateOrUpdateImage(IMAGE_INDEX, !GetSearchNode()->HasSearchIconNodeCreated());
     }
     GetSearchNode()->UpdateHasSearchIconNodeCreated(true);
-    if (src.empty()) {
-        return;
-    }
 }
 
 void SearchPattern::CreateCancelIcon()
 {
     CHECK_NULL_VOID(GetSearchNode());
+    if (GetSearchNode()->HasCancelIconNodeCreated()) {
+        return;
+    }
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         CreateOrUpdateSymbol(CANCEL_IMAGE_INDEX, !GetSearchNode()->HasCancelIconNodeCreated(), false);
     } else {
@@ -1629,9 +1632,9 @@ void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool 
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
+    auto iconFrameNode = FrameNode::GetOrCreateFrameNode(
         V2::SYMBOL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
-    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    auto layoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
     layoutProperty->UpdateSymbolSourceInfo(index == IMAGE_INDEX ? SymbolSourceInfo(searchTheme->GetSearchSymbolId())
                                                                 : SymbolSourceInfo(searchTheme->GetCancelSymbolId()));
     layoutProperty->UpdateFontSize(
@@ -1639,45 +1642,29 @@ void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool 
     layoutProperty->UpdateSymbolColorList({index == IMAGE_INDEX ? GetSearchNode()->GetSearchSymbolIconColor()
                                                                 : GetSearchNode()->GetCancelSymbolIconColor()});
     auto parentInspector = GetSearchNode()->GetInspectorIdValue("");
-    frameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + parentInspector);
+    iconFrameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + parentInspector);
 
     if (isFromModifier) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto searchLayoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
-        if (index == IMAGE_INDEX) {
-            auto iconSymbol = searchLayoutProperty->GetSearchIconSymbol();
-            if (iconSymbol != nullptr) {
-                iconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(frameNode)));
-            }
-        } else {
-            auto iconSymbol = searchLayoutProperty->GetCancelIconSymbol();
-            if (iconSymbol != nullptr) {
-                iconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(frameNode)));
-            }
-        }
-        // reset symbol effect
-        auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
-        symbolEffectOptions.SetIsTxtActive(false);
-        layoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+        UpdateSymbolIconProperties(iconFrameNode, index);
     }
+
     if (isCreateNode) {
-        frameNode->MountToParent(GetSearchNode());
+        iconFrameNode->MountToParent(GetSearchNode());
         if (index == CANCEL_IMAGE_INDEX) {
-            auto cancelButtonEvent = frameNode->GetEventHub<ButtonEventHub>();
+            auto cancelButtonEvent = iconFrameNode->GetEventHub<ButtonEventHub>();
             CHECK_NULL_VOID(cancelButtonEvent);
             cancelButtonEvent->SetEnabled(false);
         }
-        frameNode->MarkModifyDone();
+        iconFrameNode->MarkModifyDone();
     } else {
         auto oldFrameNode = AceType::DynamicCast<FrameNode>(GetSearchNode()->GetChildAtIndex(index));
         CHECK_NULL_VOID(oldFrameNode);
-        GetSearchNode()->ReplaceChild(oldFrameNode, frameNode);
+        GetSearchNode()->ReplaceChild(oldFrameNode, iconFrameNode);
         if (index == CANCEL_IMAGE_INDEX) {
             UpdateIconChangeEvent();
         }
-        frameNode->MarkModifyDone();
-        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        iconFrameNode->MarkModifyDone();
+        iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -1689,27 +1676,27 @@ void SearchPattern::CreateOrUpdateImage(int32_t index, bool isCreateNode)
     CHECK_NULL_VOID(pipeline);
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+    auto iconFrameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    UpdateImageIconProperties(frameNode, index);
+    UpdateImageIconProperties(iconFrameNode, index);
     if (isCreateNode) {
-        frameNode->MountToParent(GetSearchNode());
+        iconFrameNode->MountToParent(GetSearchNode());
         if (index == CANCEL_IMAGE_INDEX) {
-            auto cancelButtonEvent = frameNode->GetEventHub<ButtonEventHub>();
+            auto cancelButtonEvent = iconFrameNode->GetEventHub<ButtonEventHub>();
             CHECK_NULL_VOID(cancelButtonEvent);
             cancelButtonEvent->SetEnabled(false);
         }
-        frameNode->MarkModifyDone();
+        iconFrameNode->MarkModifyDone();
     } else {
         auto oldFrameNode = AceType::DynamicCast<FrameNode>(GetSearchNode()->GetChildAtIndex(index));
         CHECK_NULL_VOID(oldFrameNode);
-        GetSearchNode()->ReplaceChild(oldFrameNode, frameNode);
+        GetSearchNode()->ReplaceChild(oldFrameNode, iconFrameNode);
         if (index == CANCEL_IMAGE_INDEX) {
             UpdateIconChangeEvent();
         }
-        frameNode->MarkModifyDone();
-        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        iconFrameNode->MarkModifyDone();
+        iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -1836,38 +1823,13 @@ void SearchPattern::UpdateSymbolIconNode(int32_t index)
     if (!isCurSymbolNode) {
         CreateOrUpdateSymbol(index, false, true);
     } else {
-        AppplySymbolModifier(index);
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto iconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(index));
+        UpdateSymbolIconProperties(iconFrameNode, index);
+        iconFrameNode->MarkModifyDone();
+        iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
-}
-
-void SearchPattern::AppplySymbolModifier(int32_t index)
-{
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto iconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(index));
-    CHECK_NULL_VOID(iconFrameNode);
-    if (iconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
-        auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        if (index == IMAGE_INDEX) {
-            auto iconSymbol = layoutProperty->GetSearchIconSymbol();
-            if (iconSymbol != nullptr) {
-                iconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconFrameNode)));
-            }
-        } else {
-            auto iconSymbol = layoutProperty->GetCancelIconSymbol();
-            if (iconSymbol != nullptr) {
-                iconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconFrameNode)));
-            }
-        }
-        // reset symbol effect
-        auto symbollayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
-        auto symbolEffectOptions = symbollayoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
-        symbolEffectOptions.SetIsTxtActive(false);
-        symbollayoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
-    }
-    iconFrameNode->MarkModifyDone();
-    iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SearchPattern::UpdateImageIconProperties(RefPtr<FrameNode>& iconFrameNode, int32_t index)
@@ -1914,6 +1876,31 @@ void SearchPattern::UpdateImageIconProperties(RefPtr<FrameNode>& iconFrameNode, 
         imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
         imageRenderProperty->UpdateSvgFillColor(iconOptions.GetColor().value_or(searchTheme->GetSearchIconColor()));
     }
+}
+
+void SearchPattern::UpdateSymbolIconProperties(RefPtr<FrameNode>& iconFrameNode, int32_t index)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(iconFrameNode);
+    auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (index == IMAGE_INDEX) {
+        auto iconSymbol = layoutProperty->GetSearchIconSymbol();
+        if (iconSymbol != nullptr) {
+            iconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconFrameNode)));
+        }
+    } else {
+        auto iconSymbol = layoutProperty->GetCancelIconSymbol();
+        if (iconSymbol != nullptr) {
+            iconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconFrameNode)));
+        }
+    }
+    // reset symbol effect
+    auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    auto symbolEffectOptions = symbolLayoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+    symbolEffectOptions.SetIsTxtActive(false);
+    symbolLayoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
 }
 
 bool SearchPattern::IsSymbolIcon(int32_t index)

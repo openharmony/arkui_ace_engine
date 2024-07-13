@@ -260,7 +260,7 @@ private:
     void UpdateImageIconProperties(RefPtr<FrameNode>& frameNode, int32_t index);
     void UpdateImageIconNode(int32_t index);
     void UpdateSymbolIconNode(int32_t index);
-    void AppplySymbolModifier(int32_t index);
+    void UpdateSymbolIconProperties(RefPtr<FrameNode>& frameNode, int32_t index);
 
     void CreateOrUpdateSymbol(int32_t index, bool isCreateNode);
     void CreateOrUpdateImage(int32_t index, const std::string& src, bool isCreateNode, const std::string& bundleName,
