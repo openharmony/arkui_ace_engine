@@ -83,6 +83,7 @@ constexpr Dimension MAX_DIAMETER = 3.5_vp;
 constexpr Dimension MIN_DIAMETER = 1.5_vp;
 constexpr Dimension MIN_ARROWHEAD_DIAMETER = 2.0_vp;
 constexpr Dimension ANIMATION_TEXT_OFFSET = 12.0_vp;
+constexpr Dimension OVERLAY_MAX_WIDTH = 280.0_vp;
 constexpr float AGING_MIN_SCALE = 1.75f;
 
 const std::string OH_DEFAULT_CUT = "OH_DEFAULT_CUT";
@@ -399,7 +400,8 @@ RefPtr<FrameNode> BuildCreateMenuItemButton(const MenuOptionsParam& menuOptionsP
     auto top = CalcLength(padding.Top().ConvertToPx());
     auto bottom = CalcLength(padding.Bottom().ConvertToPx());
     contentWidth = contentWidth + padding.Left().ConvertToPx() + padding.Right().ConvertToPx();
-    CHECK_NULL_RETURN(GreatOrEqual(remainderWidth, contentWidth), nullptr);
+    CHECK_NULL_RETURN(GreatOrEqual(remainderWidth, contentWidth) || menuOptionsParam.isFirstOption, nullptr);
+    contentWidth = std::min(contentWidth, remainderWidth);
 
     auto button = FrameNode::GetOrCreateFrameNode("SelectMenuButton", ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ButtonPattern>(); });
@@ -413,6 +415,8 @@ RefPtr<FrameNode> BuildCreateMenuItemButton(const MenuOptionsParam& menuOptionsP
     textLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
     textLayoutProperty->UpdateTextColor(textStyle.GetTextColor());
     textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
+    textLayoutProperty->UpdateMaxLines(1);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     text->MarkModifyDone();
 
     // Update button property.
@@ -1164,10 +1168,17 @@ void SelectOverlayNode::CreatExtensionMenu(std::vector<OptionParam>&& params)
 void SelectOverlayNode::AddCreateMenuExtensionMenuOptions(const std::vector<MenuOptionsParam>& menuOptionItems,
     const std::shared_ptr<SelectOverlayInfo>& info, int32_t startIndex)
 {
-    CHECK_NULL_VOID(!extensionMenu_);
     std::vector<OptionParam> params;
-    auto id = GetId();
+    AddCreateMenuExtensionMenuParams(menuOptionItems, info, startIndex, params);
+    CreatExtensionMenu(std::move(params));
+}
+
+void SelectOverlayNode::AddCreateMenuExtensionMenuParams(const std::vector<MenuOptionsParam>& menuOptionItems,
+    const std::shared_ptr<SelectOverlayInfo>& info, int32_t startIndex, std::vector<OptionParam>& params)
+{
+    CHECK_NULL_VOID(!extensionMenu_);
     const auto systemCallback = GetSystemCallback(info);
+    auto id = GetId();
     int32_t itemNum = 0;
     for (auto item : menuOptionItems) {
         if (itemNum < startIndex) {
@@ -1206,10 +1217,13 @@ void SelectOverlayNode::AddCreateMenuExtensionMenuOptions(const std::vector<Menu
                 newOverlayManager->HideOptionMenu(true);
             }
         };
-        params.emplace_back(item.content.value_or("null"), item.icon.value_or(" "), callback);
+        auto param = OptionParam(item.content.value_or("null"), item.icon.value_or(" "), callback);
+        if (item.id == OH_DEFAULT_PASTE) {
+            param.isPasteOption = true;
+        }
+        params.emplace_back(param);
         itemNum++;
     }
-    CreatExtensionMenu(std::move(params));
 }
 
 void SelectOverlayNode::CreateToolBar()
@@ -1293,12 +1307,15 @@ void SelectOverlayNode::GetDefaultButtonAndMenuWidth(float& maxWidth)
     CHECK_NULL_VOID(pipeline);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
-    auto selectOverlayMaxWidth = textOverlayTheme->GetSelectOverlayMaxWidth().ConvertToPx();
+    auto selectOverlayMaxWidth = OVERLAY_MAX_WIDTH.ConvertToPx();
 
     const auto& menuPadding = textOverlayTheme->GetMenuPadding();
 
-    maxWidth = selectOverlayMaxWidth - menuPadding.Left().ConvertToPx() - menuPadding.Right().ConvertToPx() -
-               textOverlayTheme->GetMoreButtonHeight().ConvertToPx();
+    auto backButtonWidth = textOverlayTheme->GetMenuToolbarHeight().ConvertToPx() - menuPadding.Top().ConvertToPx() -
+                           menuPadding.Bottom().ConvertToPx();
+
+    maxWidth =
+        selectOverlayMaxWidth - menuPadding.Left().ConvertToPx() - menuPadding.Right().ConvertToPx() - backButtonWidth;
 }
 
 bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocatedSize)
@@ -1514,7 +1531,7 @@ int32_t SelectOverlayNode::AddCreateMenuItems(
     const auto systemCallback = GetSystemCallback(info);
     float remainderWidth = maxWidth;
     int32_t index = -1;
-    for (const auto& item : menuItems) {
+    for (auto item : menuItems) {
         auto callback = systemCallback.find(item.id);
         RefPtr<FrameNode> button;
         if (item.id == "OH_DEFAULT_PASTE") {
@@ -1540,6 +1557,7 @@ int32_t SelectOverlayNode::AddCreateMenuItems(
             }
 #endif
         } else {
+            item.isFirstOption = index == -1;
             button = BuildCreateMenuItemButton(item, callback != systemCallback.end() ? callback->second : nullptr,
                 info->onCreateCallback, id, remainderWidth);
             if (button) {
@@ -1651,7 +1669,7 @@ void SelectOverlayNode::UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>
     CHECK_NULL_VOID(selectMenuInner_);
     selectMenuInner_->Clean();
     selectMenuInner_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    if (isExtensionMenu_) {
+    if (isExtensionMenu_ && info->menuInfo.menuIsShow) {
         MoreOrBackAnimation(false);
     }
     auto selectProperty = selectMenu_->GetLayoutProperty();

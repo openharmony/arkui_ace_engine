@@ -908,7 +908,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
             optionNode = OptionView::CreateMenuOption(optionsHasSymbol, params, i);
         } else {
             optionNode = OptionView::CreateMenuOption(
-                optionsHasIcon, params[i].value, params[i].action, i, params[i].icon);
+                optionsHasIcon, { params[i].value, params[i].isPasteOption }, params[i].action, i, params[i].icon);
         }
         if (!optionNode) {
             continue;
