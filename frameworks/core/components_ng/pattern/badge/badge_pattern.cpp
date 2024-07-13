@@ -166,13 +166,17 @@ void BadgePattern::DumpInfo()
     auto badgeTextColor = layoutProperty->GetBadgeTextColor();
     auto badgeFontSize = layoutProperty->GetBadgeFontSize();
     if (badgeCount.has_value()) {
+        const int32_t maxCountNum = 99;
+        auto badgeMaxCount = layoutProperty->GetBadgeMaxCount().value_or(maxCountNum);
         DumpLog::GetInstance().AddDesc(std::string("badgeCount: ").append(std::to_string(badgeCount.value())));
+        DumpLog::GetInstance().AddDesc(std::string("badgeMaxCount: ").append(std::to_string(badgeMaxCount)));
     }
     if (badgeValue.has_value()) {
         if (badgeValue.value().empty()) {
             DumpLog::GetInstance().AddDesc(std::string("badgeValue is empty"));
+        } else {
+            DumpLog::GetInstance().AddDesc(std::string("badgeValue: ").append(badgeValue.value()));
         }
-        DumpLog::GetInstance().AddDesc(std::string("badgeValue: ").append(badgeValue.value()));
     }
     DumpLog::GetInstance().AddDesc(std::string("badgeTextColor: ").append(badgeTextColor.value().ToString()));
     DumpLog::GetInstance().AddDesc(std::string("circleSize: ").append(std::to_string(circleSize->ConvertToPx())));
