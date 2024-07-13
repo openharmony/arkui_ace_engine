@@ -1033,6 +1033,55 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest017, TestSize.Level1)
     EXPECT_EQ(cancel, nodeInfo);
 }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+/**
+ * @tc.name: TextPickerPatternTest018
+ * @tc.desc: test OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest018, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto focusHub = frameNode->GetEventHub<NG::TextPickerEventHub>()->GetOrCreateFocusHub();
+    frameNode->MarkModifyDone();
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+
+    CrownEvent crownEvent;
+    crownEvent.action = OHOS::Ace::CrownAction::BEGIN;
+    EXPECT_TRUE(focusHub->ProcessOnCrownEventInternal(crownEvent));
+    crownEvent.action = OHOS::Ace::CrownAction::UPDATE;
+    EXPECT_TRUE(focusHub->ProcessOnCrownEventInternal(crownEvent));
+    crownEvent.action = OHOS::Ace::CrownAction::END;
+    EXPECT_TRUE(focusHub->ProcessOnCrownEventInternal(crownEvent));
+}
+#endif // SUPPORT_DIGITAL_CROWN
+
+/**
+ * @tc.name: TextPickerPatternTest019
+ * @tc.desc: Test SetDigitalCrownSensitivity.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest019, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(node, nullptr);
+    InitTextPickerPatternTestNg();
+    TextPickerModelNG::SetDigitalCrownSensitivity(node, INVALID_CROWNSENSITIVITY);
+    TextPickerModelNG::GetInstance()->SetDigitalCrownSensitivity(INVALID_CROWNSENSITIVITY);
+    EXPECT_NE(textPickerColumnPattern_->GetDigitalCrownSensitivity(), INVALID_CROWNSENSITIVITY);
+    TextPickerModelNG::GetInstance()->SetDigitalCrownSensitivity(DEFAULT_CROWNSENSITIVITY);
+    EXPECT_EQ(textPickerColumnPattern_->GetDigitalCrownSensitivity(), DEFAULT_CROWNSENSITIVITY);
+    TextPickerModelNG::GetInstance()->SetDigitalCrownSensitivity(2);
+    EXPECT_EQ(textPickerColumnPattern_->GetDigitalCrownSensitivity(), 2);
+}
+
 /**
  * @tc.name: TextPickerColumnPatternOnClickEventTest001
  * @tc.desc: test OnTouchEvent

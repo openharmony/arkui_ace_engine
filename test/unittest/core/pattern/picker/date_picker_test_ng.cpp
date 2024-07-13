@@ -1500,6 +1500,35 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DatePickerPaintTest009
+ * @tc.desc: Test GetContentDrawFunction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerPaintTest009, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    ASSERT_NE(pickerPaintProperty, nullptr);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    auto datePickerPaintMethod =
+        AceType::MakeRefPtr<DatePickerPaintMethod>(AceType::WeakClaim(AceType::RawPtr(datePickerPattern)));
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, pickerPaintProperty);
+    auto canvasDrawFunction = datePickerPaintMethod->GetContentDrawFunction(paintWrapper);
+    ASSERT_EQ(canvasDrawFunction, nullptr);
+}
+
+/**
  * @tc.name: DatePickerAlgorithmTest001
  * @tc.desc: Test Measure.
  * @tc.type: FUNC
@@ -2529,6 +2558,35 @@ HWTEST_F(DatePickerTestNg, DatePickerTest017, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DatePickerPatternTest018
+ * @tc.desc: test InitOnCrownEvent callback
+ * @tc.type: FUNC
+ */
+#ifdef SUPPORT_DIGITAL_CROWN
+HWTEST_F(DatePickerTestNg, DatePickerPatternTest018, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create picker framenode and pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    CrownEvent crownEvent;
+    crownEvent.action = OHOS::Ace::CrownAction::BEGIN;
+    EXPECT_TRUE(focusHub->ProcessOnCrownEventInternal(crownEvent));
+    crownEvent.action = OHOS::Ace::CrownAction::UPDATE;
+    EXPECT_TRUE(focusHub->ProcessOnCrownEventInternal(crownEvent));
+    crownEvent.action = OHOS::Ace::CrownAction::END;
+    EXPECT_TRUE(focusHub->ProcessOnCrownEventInternal(crownEvent));
+}
+#endif
+/**
  * @tc.name: PerformActionTest001
  * @tc.desc: DatePicker Accessibility PerformAction test ScrollForward and ScrollBackward.
  * @tc.type: FUNC
@@ -3456,6 +3514,63 @@ HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest020, TestSize.Level1)
     EXPECT_EQ(responseRegion.GetHeight().Value(),
         (height - SECLECTED_TEXTNODE_HEIGHT - MIDDLE_OF_COUNTS * OTHER_TEXTNODE_HEIGHT) / MIDDLE_OF_COUNTS);
 }
+
+/**
+ * @tc.name: DatePickerColumnPatternTest021
+ * @tc.desc: Test DatePickerColumnPattern GetDigitalCrownSensitivity and SetDigitalCrownSensitivity.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest021, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(node, nullptr);
+    frameNode->MarkModifyDone();
+    auto stackNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(stackNode, nullptr);
+    auto blendNode = AceType::DynamicCast<FrameNode>(stackNode->GetLastChild());
+    ASSERT_NE(blendNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(blendNode->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    columnNode->MarkModifyDone();
+    auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    columnPattern->OnAttachToFrameNode();
+    EXPECT_NE(columnPattern->GetDigitalCrownSensitivity(), INVALID_CROWNSENSITIVITY);
+    EXPECT_EQ(columnPattern->GetDigitalCrownSensitivity(), DEFAULT_CROWNSENSITIVITY);
+    DatePickerModelNG::GetInstance()->SetDigitalCrownSensitivity(2);
+    DatePickerModelNG::SetDigitalCrownSensitivity(node, 2);
+    EXPECT_EQ(columnPattern->GetDigitalCrownSensitivity(), 2);
+}
+
+/**
+ * @tc.name: DatePickerColumnPatternTest022
+ * @tc.desc: Test DatePickerColumnPattern GetDigitalCrownSensitivity and ToUpdateSelectedTextProperties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerColumnPatternTest022, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto stackNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(stackNode, nullptr);
+    auto blendNode = AceType::DynamicCast<FrameNode>(stackNode->GetLastChild());
+    ASSERT_NE(blendNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(blendNode->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    columnNode->MarkModifyDone();
+    auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    columnPattern->OnAttachToFrameNode();
+    columnPattern->ToUpdateSelectedTextProperties(theme);
+}
+
 /**
  * @tc.name: DataPickerDialogViewUpdateButtonStyles001
  * @tc.desc: Test UpdateButtonStyle.
@@ -3481,7 +3596,7 @@ HWTEST_F(DatePickerTestNg, DataPickerDialogViewUpdateButtonStyles001, TestSize.L
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_VOID(buttonNode);
     auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    
+
     auto renderContext = buttonNode->GetRenderContext();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
