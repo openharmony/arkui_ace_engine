@@ -1689,15 +1689,12 @@ HWTEST_F(TimePickerPatternTestUpdate, ShowForAging001, TestSize.Level1)
 {
     TimePickerSettingData settingData;
     settingData.properties.disappearTextStyle_.textColor = Color::RED;
-    //settingData.properties.disappearTextStyle_.fontSize = Dimension(0);
     settingData.properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
 
     settingData.properties.normalTextStyle_.textColor = Color::RED;
-    //settingData.properties.normalTextStyle_.fontSize = Dimension(0);
     settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
 
     settingData.properties.selectedTextStyle_.textColor = Color::RED;
-    //settingData.properties.selectedTextStyle_.fontSize = Dimension(0);
     settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
     settingData.isUseMilitaryTime = false;
 
