@@ -56,6 +56,7 @@ public:
     // JsAccessibilityManager overrides functions.
     void InitializeCallback() override;
     void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) override;
+    void UpdateVirtualNodeFocus() override;
     void SetCardViewParams(const std::string& key, bool focus) override;
     void HandleComponentPostBinding() override;
     void RegisterSubWindowInteractionOperation(int windowId) override;

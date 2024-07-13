@@ -612,6 +612,9 @@ private:
         std::unique_ptr<HoverTestDebugTraceInfo>& debugInfo
     );
 
+    static bool ProcessHoverTestRecursive(const PointF& noOffsetPoint, const RefPtr<FrameNode>& node,
+        AccessibilityHoverTestPath& path, std::unique_ptr<HoverTestDebugTraceInfo>& debugInfo, bool hitTarget);
+
     static std::unique_ptr<JsonValue> CreateNodeSearchInfo(const RefPtr<FrameNode>& node, const PointF& parentPoint);
 
     /*

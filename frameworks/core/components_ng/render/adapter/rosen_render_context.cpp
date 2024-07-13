@@ -2502,7 +2502,8 @@ void RosenRenderContext::SetOuterBorderStyle(const BorderStyleProperty& value)
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnAccessibilityFocusUpdate(bool isAccessibilityFocus)
+void RosenRenderContext::OnAccessibilityFocusUpdate(
+    bool isAccessibilityFocus, const int64_t accessibilityIdForVirtualNode)
 {
     auto uiNode = GetHost();
     CHECK_NULL_VOID(uiNode);
@@ -2512,8 +2513,15 @@ void RosenRenderContext::OnAccessibilityFocusUpdate(bool isAccessibilityFocus)
     } else {
         ClearAccessibilityFocus();
     }
-    uiNode->OnAccessibilityEvent(isAccessibilityFocus ? AccessibilityEventType::ACCESSIBILITY_FOCUSED
-                                                      : AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED);
+    if (accessibilityIdForVirtualNode == INVALID_PARENT_ID) {
+        uiNode->OnAccessibilityEvent(isAccessibilityFocus ? AccessibilityEventType::ACCESSIBILITY_FOCUSED
+                                                          : AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED);
+    } else {
+        uiNode->OnAccessibilityEventForVirtualNode(isAccessibilityFocus
+                                                       ? AccessibilityEventType::ACCESSIBILITY_FOCUSED
+                                                       : AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED,
+            accessibilityIdForVirtualNode);
+    }
 }
 
 void RosenRenderContext::OnAccessibilityFocusRectUpdate(RectT<int32_t> accessibilityFocusRect)

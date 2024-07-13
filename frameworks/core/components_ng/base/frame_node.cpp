@@ -2974,6 +2974,19 @@ void FrameNode::OnAccessibilityEvent(
     }
 }
 
+void FrameNode::OnAccessibilityEventForVirtualNode(AccessibilityEventType eventType, int64_t accessibilityId)
+{
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        AccessibilityEvent event;
+        event.type = eventType;
+        event.windowContentChangeTypes = WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID;
+        event.nodeId = accessibilityId;
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SendEventToAccessibility(event);
+    }
+}
+
 void FrameNode::OnAccessibilityEvent(
     AccessibilityEventType eventType, std::string beforeText, std::string latestContent)
 {
@@ -3647,6 +3660,9 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
     layoutAlgorithm_.Reset();
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    pipeline->SendUpdateVirtualNodeFocusEvent();
     return true;
 }
 

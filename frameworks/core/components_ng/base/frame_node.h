@@ -451,6 +451,8 @@ public:
         AccessibilityEventType eventType, WindowsContentChangeTypes windowsContentChangeType =
                                               WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID) const;
 
+    void OnAccessibilityEventForVirtualNode(AccessibilityEventType eventType, int64_t accessibilityId);
+
     void OnAccessibilityEvent(
         AccessibilityEventType eventType, std::string beforeText, std::string latestContent);
 
@@ -912,6 +914,19 @@ public:
 
     bool CheckAccessibilityLevelNo() const {
         return false;
+    }
+
+    RectF GetVirtualNodeTransformRectRelativeToWindow()
+    {
+        auto parentUinode = GetVirtualNodeParent().Upgrade();
+        CHECK_NULL_RETURN(parentUinode, RectF {});
+        auto parentFrame = AceType::DynamicCast<FrameNode>(parentUinode);
+        CHECK_NULL_RETURN(parentFrame, RectF {});
+        auto parentRect = parentFrame->GetTransformRectRelativeToWindow();
+        auto currentRect = GetTransformRectRelativeToWindow();
+        currentRect.SetTop(currentRect.Top() + parentRect.Top());
+        currentRect.SetLeft(currentRect.Left() + parentRect.Left());
+        return currentRect;
     }
 
     // this method will check the cache state and return the cached revert matrix preferentially,
