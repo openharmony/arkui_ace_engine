@@ -28,29 +28,13 @@ es2abc_gen_abc("gen_arkui_arclist_abc") {
   extra_args = [ "--module" ]
 }
 
-gen_obj("arkui_arclist_js") {
-  input = "arkui_arclist.js"
-  output = target_out_dir + "/arkui_arclist_js.o"
-  snapshot_dep = []
-}
-
 gen_obj("arkui_arclist_abc") {
-  input =
-      get_label_info(":gen_arkui_arclist_abc", "target_out_dir") + "/arkui_arclist.abc"
+  input = get_label_info(":gen_arkui_arclist_abc", "target_out_dir") +
+          "/arkui_arclist.abc"
   output = target_out_dir + "/arkui_arclist_abc.o"
-  snapshot_dep = [ ":gen_arkui_arclist_abc" ]
-}
-
-gen_obj("arkui_arclist_js_preview") {
-  input = "arkui_arclist.js"
-  output = target_out_dir + "/arkui_arclist_js.c"
-  snapshot_dep = []
-}
-
-gen_obj("arkui_arclist_abc_preview") {
-  input =
-      get_label_info(":gen_arkui_arclist_abc", "target_out_dir") + "/arkui_arclist.abc"
-  output = target_out_dir + "/arkui_arclist_abc.c"
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
+    output = target_out_dir + "arkui_arclist_abc.c"
+  }
   snapshot_dep = [ ":gen_arkui_arclist_abc" ]
 }
 
@@ -69,7 +53,10 @@ ohos_shared_library("arclist") {
   ]
   include_dirs += additional_include_dirs
 
-  deps = []
+  deps = [
+    ":gen_obj_src_arkui_arclist_abc",
+    "$ace_root/build:libace_compatible",
+  ]
   external_deps = [
     "bounds_checking_function:libsec_static",
     "hilog:libhilog",
@@ -77,19 +64,7 @@ ohos_shared_library("arclist") {
   ]
 
   if (use_mingw_win || use_mac || use_linux) {
-    deps += [
-      ":gen_obj_src_arkui_arclist_js_preview",
-      ":gen_obj_src_arkui_arclist_abc_preview",
-    ]
-    if (use_mingw_win || use_linux) {
-      deps += [ "$ace_root/build:libace_compatible", ]
-    }
   } else {
-    deps += [
-      "$ace_root/build:libace_compatible",
-      ":gen_obj_src_arkui_arclist_js",
-      ":gen_obj_src_arkui_arclist_abc",
-    ]
     external_deps += [
       "ets_runtime:libark_jsruntime",
       "napi:ace_container_scope",
