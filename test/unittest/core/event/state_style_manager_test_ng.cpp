@@ -21,11 +21,13 @@
 
 #define private public
 #define protected public
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 #include "core/components_ng/event/state_style_manager.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/event/ace_events.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -211,6 +213,11 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest003, TestSize.Level1)
     EXPECT_EQ(true, hasScrollingParent);
 }
 
+/**
+ * @tc.name: StateStyleTest004
+ * @tc.desc: Create StateStyleManager and execute its functions.
+ * @tc.type: FUNC
+ */
 HWTEST_F(StateStyleManagerTestNg, StateStyleTest004, TestSize.Level1)
 {
     /**
@@ -258,6 +265,11 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest004, TestSize.Level1)
     EXPECT_EQ(false, stateStyleMgr->IsCurrentStateOn(UI_STATE_PRESSED));
 }
 
+/**
+ * @tc.name: StateStyleTest005
+ * @tc.desc: Create StateStyleManager and execute its functions.
+ * @tc.type: FUNC
+ */
 HWTEST_F(StateStyleManagerTestNg, StateStyleTest005, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
@@ -285,7 +297,12 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest005, TestSize.Level1)
     EXPECT_EQ(false, stateStyleMgr->IsCurrentStateOn(UI_STATE_PRESSED));
 }
 
-HWTEST_F(StateStyleManagerTestNg, HandleTouchDown, TestSize.Level1)
+/**
+ * @tc.name: StateStyleTest006
+ * @tc.desc: Test HandleTouchDown function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StateStyleManagerTestNg, StateStyleTest006, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
@@ -312,7 +329,12 @@ HWTEST_F(StateStyleManagerTestNg, HandleTouchDown, TestSize.Level1)
     EXPECT_EQ(true, stateStyleMgr->IsPressedStatePending());
 }
 
-HWTEST_F(StateStyleManagerTestNg, HandleTouchUp, TestSize.Level1)
+/**
+ * @tc.name: StateStyleTest007
+ * @tc.desc: Test HandleTouchUp function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StateStyleManagerTestNg, StateStyleTest007, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
@@ -341,7 +363,12 @@ HWTEST_F(StateStyleManagerTestNg, HandleTouchUp, TestSize.Level1)
     EXPECT_EQ(true, stateStyleMgr->IsCurrentStateOn(UI_STATE_PRESSED));
 }
 
-HWTEST_F(StateStyleManagerTestNg, PostPressStyleTask, TestSize.Level1)
+/**
+ * @tc.name: StateStyleTest008
+ * @tc.desc: Test PostPressStyleTask function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StateStyleManagerTestNg, StateStyleTest008, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
@@ -363,7 +390,12 @@ HWTEST_F(StateStyleManagerTestNg, PostPressStyleTask, TestSize.Level1)
     EXPECT_EQ(true, stateStyleMgr->IsCurrentStateOn(UI_STATE_PRESSED));
 }
 
-HWTEST_F(StateStyleManagerTestNg, PostPressCancelStyleTask, TestSize.Level1)
+/**
+ * @tc.name: StateStyleTest009
+ * @tc.desc: Test PostPressCancelStyleTask function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StateStyleManagerTestNg, StateStyleTest009, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
@@ -398,5 +430,96 @@ HWTEST_F(StateStyleManagerTestNg, PostPressCancelStyleTask, TestSize.Level1)
     stateStyleMgr->ResetPressedCancelPendingState();
     stateStyleMgr->PostPressCancelStyleTask(1);
     EXPECT_EQ(false, stateStyleMgr->IsCurrentStateOn(UI_STATE_PRESSED));
+}
+
+/**
+ * @tc.name: StateStyleTest010
+ * @tc.desc: Test HandleTouchUp function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StateStyleManagerTestNg, StateStyleTest010, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
+    auto parent = AceType::MakeRefPtr<FrameNode>(V2::LIST_ETS_TAG, -1, AceType::MakeRefPtr<ListPattern>());
+    frameNode->SetParent(parent);
+
+    stateStyleMgr->PendingPressedState();
+    stateStyleMgr->SetSupportedStates(UI_STATE_PRESSED);
+    stateStyleMgr->SetCurrentUIState(UI_STATE_PRESSED, true);
+    stateStyleMgr->hasScrollingParent_ = true;
+    stateStyleMgr->HandleTouchUp();
+    EXPECT_NE(parent, nullptr);
+}
+
+/**
+ * @tc.name: StateStyleTest011
+ * @tc.desc: Test CleanScrollingParentListener function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StateStyleManagerTestNg, StateStyleTest011, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
+    auto parent = AceType::MakeRefPtr<FrameNode>(V2::LIST_ETS_TAG, -1, AceType::MakeRefPtr<ListPattern>());
+    frameNode->SetParent(parent);
+
+    stateStyleMgr->PendingPressedState();
+    stateStyleMgr->SetSupportedStates(UI_STATE_PRESSED);
+    stateStyleMgr->SetCurrentUIState(UI_STATE_PRESSED, true);
+    stateStyleMgr->CleanScrollingParentListener();
+    EXPECT_NE(parent, nullptr);
+}
+
+/**
+ * @tc.name: StateStyleTest012
+ * @tc.desc: Test CleanScrollingParentListener function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StateStyleManagerTestNg, StateStyleTest012, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
+
+    stateStyleMgr->PendingPressedState();
+    stateStyleMgr->SetSupportedStates(UI_STATE_PRESSED);
+    stateStyleMgr->SetCurrentUIState(UI_STATE_PRESSED, true);
+    stateStyleMgr->CleanScrollingParentListener();
+    EXPECT_NE(frameNode, nullptr);
+}
+
+/**
+ * @tc.name: StateStyleTest013
+ * @tc.desc: Test CleanScrollingParentListener function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StateStyleManagerTestNg, StateStyleTest013, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
+    auto pagePattern = AceType::MakeRefPtr<Pattern>();
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern);
+    frameNode->SetParent(pageNode);
+
+    stateStyleMgr->PendingPressedState();
+    stateStyleMgr->SetSupportedStates(UI_STATE_PRESSED);
+    stateStyleMgr->SetCurrentUIState(UI_STATE_PRESSED, true);
+    stateStyleMgr->CleanScrollingParentListener();
+    EXPECT_NE(pageNode, nullptr);
+}
+
+/**
+ * @tc.name: StateStyleTest014
+ * @tc.desc: Test Transform function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StateStyleManagerTestNg, StateStyleTest014, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
+    PointF current = { 1.1f, 1.0f };
+    RefPtr<FrameNode> node;
+    stateStyleMgr->Transform(current, node);
+    EXPECT_NE(frameNode, nullptr);
 }
 } // namespace OHOS::Ace::NG
