@@ -186,6 +186,8 @@ public:
         sptr<OHOS::Rosen::Window>& rsWindow);
     static bool OnBackPressed(int32_t instanceId);
 
+    void SetFontScaleAndWeightScale(int32_t instanceId);
+
 private:
     void InitPipelineContext(std::shared_ptr<Window> window, int32_t instanceId, double density, int32_t width,
         int32_t height, uint32_t windowId);

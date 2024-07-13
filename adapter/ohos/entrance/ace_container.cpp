@@ -1969,26 +1969,6 @@ bool AceContainer::IsTransparentBg() const
     return bgColor == Color::TRANSPARENT || bgOpacity == transparentOpacity;
 }
 
-void AceContainer::SetFontScale(int32_t instanceId, float fontScale)
-{
-    auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_VOID(container);
-    ContainerScope scope(instanceId);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->SetFontScale(fontScale);
-}
-
-void AceContainer::SetFontWeightScale(int32_t instanceId, float fontWeightScale)
-{
-    auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_VOID(container);
-    ContainerScope scope(instanceId);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->SetFontWeightScale(fontWeightScale);
-}
-
 bool AceContainer::ParseThemeConfig(const std::string& themeConfig)
 {
     std::regex pattern("\"font\":(\\d+)");

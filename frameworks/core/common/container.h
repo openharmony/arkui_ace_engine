@@ -544,6 +544,8 @@ public:
 
     template<ContainerType type>
     static int32_t GenerateId();
+    static void SetFontScale(int32_t instanceId, float fontScale);
+    static void SetFontWeightScale(int32_t instanceId, float fontScale);
 
     int32_t GetApiTargetVersion() const
     {

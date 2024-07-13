@@ -589,4 +589,12 @@ bool DialogContainer::OnBackPressed(int32_t instanceId)
 {
     return DialogContainer::CloseWindow(instanceId);
 }
+
+void DialogContainer::SetFontScaleAndWeightScale(int32_t instanceId)
+{
+    float fontScale = SystemProperties::GetFontScale();
+    float fontWeightScale = SystemProperties::GetFontWeightScale();
+    Container::SetFontScale(instanceId, fontScale);
+    Container::SetFontWeightScale(instanceId, fontWeightScale);
+}
 } // namespace OHOS::Ace::Platform

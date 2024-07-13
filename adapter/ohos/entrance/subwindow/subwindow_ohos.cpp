@@ -1168,7 +1168,9 @@ void SubwindowOhos::ShowToastForService(const std::string& message, int32_t dura
             "update ace view width : %{public}d,  height : %{public}d, density : %{public}f,childContainerId : "
             "%{public}d",
             width, height, density, childContainerId);
-
+        auto container = Platform::DialogContainer::GetContainer(childContainerId);
+        CHECK_NULL_VOID(container);
+        container->SetFontScaleAndWeightScale(childContainerId);
         Platform::DialogContainer::ShowToastDialogWindow(childContainerId, posX, posY, width, height, true);
         Platform::DialogContainer::ShowToast(childContainerId, message, duration, bottom);
     };
@@ -1245,6 +1247,9 @@ void SubwindowOhos::ShowDialogForService(const std::string& title, const std::st
         }
         auto childContainerId = subwindowOhos->GetChildContainerId();
         ContainerScope scope(childContainerId);
+        auto container = Platform::DialogContainer::GetContainer(childContainerId);
+        CHECK_NULL_VOID(container);
+        container->SetFontScaleAndWeightScale(childContainerId);
         Platform::DialogContainer::ShowToastDialogWindow(childContainerId, posX, posY, width, height);
         Platform::DialogContainer::ShowDialog(childContainerId, title, message, buttons, autoCancel,
             std::move(const_cast<std::function<void(int32_t, int32_t)>&&>(callbackParam)), callbacks);
@@ -1456,6 +1461,9 @@ void SubwindowOhos::ShowActionMenuForService(
         }
         auto childContainerId = subwindowOhos->GetChildContainerId();
         ContainerScope scope(childContainerId);
+        auto container = Platform::DialogContainer::GetContainer(childContainerId);
+        CHECK_NULL_VOID(container);
+        container->SetFontScaleAndWeightScale(childContainerId);
         Platform::DialogContainer::ShowToastDialogWindow(childContainerId, posX, posY, width, height);
         Platform::DialogContainer::ShowActionMenu(childContainerId, title, button,
             std::move(const_cast<std::function<void(int32_t, int32_t)>&&>(callbackParam)));
