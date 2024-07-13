@@ -82,6 +82,12 @@ public:
     static void SetDragPreviewOptions(const JSCallbackInfo& info);
     static void EditMenuOptions(const JSCallbackInfo& info);
     static void SetEnablePreviewText(const JSCallbackInfo& info);
+    static void SetSearchDefaultIcon();
+    static void SetSearchSymbolIcon(const JSCallbackInfo& info);
+    static void SetSearchImageIcon(const JSCallbackInfo& info);
+    static void SetCancelDefaultIcon();
+    static void SetCancelSymbolIcon(const JSCallbackInfo& info);
+    static void SetCancelImageIcon(const JSCallbackInfo& info);
 };
 
 class JSSearchController final : public Referenced {

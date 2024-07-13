@@ -46,6 +46,7 @@ constexpr int32_t ERROR = -1;
 // The focus state requires an 2vp inner stroke, which should be indented by 1vp when drawn.
 constexpr Dimension FOCUS_OFFSET = 1.0_vp;
 constexpr Dimension UP_AND_DOWN_PADDING = 8.0_vp;
+constexpr Dimension SYMBOL_ICON_HEIGHT = 16.0_fp;
 constexpr float HOVER_OPACITY = 0.05f;
 constexpr float TOUCH_OPACITY = 0.1f;
 constexpr int32_t HOVER_TO_TOUCH_DURATION = 100;
@@ -1563,19 +1564,32 @@ std::string SearchPattern::SymbolColorToString(std::vector<Color>& colors) const
 
 void SearchPattern::InitIconColorSize()
 {
+    InitSearchIconColorSize();
+    InitCancelIconColorSize();
+}
+
+void SearchPattern::InitSearchIconColorSize()
+{
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
-    GetSearchNode()->SetSearchIconSize(searchTheme->GetIconHeight());
-    GetSearchNode()->SetCancelIconSize(searchTheme->GetIconHeight());
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        GetSearchNode()->SetCancelIconColor(searchTheme->GetSymbolIconColor());
-        GetSearchNode()->SetSearchIconColor(searchTheme->GetSymbolIconColor());
-    } else {
-        GetSearchNode()->SetCancelIconColor(searchTheme->GetSearchIconColor());
-        GetSearchNode()->SetSearchIconColor(searchTheme->GetSearchIconColor());
-    }
+    GetSearchNode()->SetSearchSymbolIconColor(Color(searchTheme->GetSymbolIconColor()));
+    GetSearchNode()->SetSearchSymbolIconSize(SYMBOL_ICON_HEIGHT);
+    GetSearchNode()->SetSearchImageIconColor(Color(searchTheme->GetSearchIconColor()));
+    GetSearchNode()->SetSearchImageIconSize(searchTheme->GetIconHeight());
+}
+
+void SearchPattern::InitCancelIconColorSize()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(searchTheme);
+    GetSearchNode()->SetCancelSymbolIconColor(Color(searchTheme->GetSymbolIconColor()));
+    GetSearchNode()->SetCancelSymbolIconSize(SYMBOL_ICON_HEIGHT);
+    GetSearchNode()->SetCancelImageIconColor(Color(searchTheme->GetSearchIconColor()));
+    GetSearchNode()->SetCancelImageIconSize(searchTheme->GetIconHeight());
 }
 
 void SearchPattern::CreateSearchIcon(const std::string& src)
@@ -1583,30 +1597,35 @@ void SearchPattern::CreateSearchIcon(const std::string& src)
     CHECK_NULL_VOID(GetSearchNode());
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
         src.empty()) {
-        CreateOrUpdateSymbol(IMAGE_INDEX, !GetSearchNode()->HasSearchIconNodeCreated());
+        CreateOrUpdateSymbol(IMAGE_INDEX, !GetSearchNode()->HasSearchIconNodeCreated(), false);
     } else {
-        CreateOrUpdateImage(IMAGE_INDEX, src, !GetSearchNode()->HasSearchIconNodeCreated(), "", "");
+        GetSearchNode()->SetSearchImageIconOptions(IconOptions(src));
+        CreateOrUpdateImage(IMAGE_INDEX, !GetSearchNode()->HasSearchIconNodeCreated());
     }
     GetSearchNode()->UpdateHasSearchIconNodeCreated(true);
     if (src.empty()) {
         return;
     }
-    UpdateIconNode(IMAGE_INDEX, src, "", "");
 }
 
 void SearchPattern::CreateCancelIcon()
 {
     CHECK_NULL_VOID(GetSearchNode());
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        CreateOrUpdateSymbol(CANCEL_IMAGE_INDEX, !GetSearchNode()->HasCancelIconNodeCreated());
+        CreateOrUpdateSymbol(CANCEL_IMAGE_INDEX, !GetSearchNode()->HasCancelIconNodeCreated(), false);
     } else {
-        CreateOrUpdateImage(CANCEL_IMAGE_INDEX, "", !GetSearchNode()->HasCancelIconNodeCreated(), "", "");
+        GetSearchNode()->SetCancelImageIconOptions(IconOptions());
+        CreateOrUpdateImage(CANCEL_IMAGE_INDEX, !GetSearchNode()->HasCancelIconNodeCreated());
     }
     GetSearchNode()->UpdateHasCancelIconNodeCreated(true);
 }
 
-void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode)
+void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool isFromModifier)
 {
+    LOGE("tyty CreateOrUpdateSymbol index:%{public}d,isCreateNode:%{public}d,isFromModifier:%{public}d",
+        index,
+        isCreateNode,
+        isFromModifier);
     CHECK_NULL_VOID(GetSearchNode());
     imageClickListener_ = nullptr;
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -1620,13 +1639,32 @@ void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode)
     layoutProperty->UpdateSymbolSourceInfo(index == IMAGE_INDEX ? SymbolSourceInfo(searchTheme->GetSearchSymbolId())
                                                                 : SymbolSourceInfo(searchTheme->GetCancelSymbolId()));
     layoutProperty->UpdateFontSize(
-        index == IMAGE_INDEX ? GetSearchNode()->GetSearchIconSize() : GetSearchNode()->GetCancelIconSize());
-    layoutProperty->UpdateSymbolColorList(
-        { index == IMAGE_INDEX ? GetSearchNode()->GetSearchIconColor() : GetSearchNode()->GetCancelIconColor() });
-
+        index == IMAGE_INDEX ? GetSearchNode()->GetSearchSymbolIconSize() : GetSearchNode()->GetCancelSymbolIconSize());
+    layoutProperty->UpdateSymbolColorList({index == IMAGE_INDEX ? GetSearchNode()->GetSearchSymbolIconColor()
+                                                                : GetSearchNode()->GetCancelSymbolIconColor()});
     auto parentInspector = GetSearchNode()->GetInspectorIdValue("");
     frameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + parentInspector);
 
+    if (isFromModifier) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto searchLayoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
+        if (index == IMAGE_INDEX) {
+            auto iconSymbol = searchLayoutProperty->GetSearchIconSymbol();
+            if (iconSymbol != nullptr) {
+                iconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(frameNode)));
+            }
+        } else {
+            auto iconSymbol = searchLayoutProperty->GetCancelIconSymbol();
+            if (iconSymbol != nullptr) {
+                iconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(frameNode)));
+            }
+        }
+        // reset symbol effect
+        auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+        symbolEffectOptions.SetIsTxtActive(false);
+        layoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+    }
     if (isCreateNode) {
         frameNode->MountToParent(GetSearchNode());
         if (index == CANCEL_IMAGE_INDEX) {
@@ -1647,22 +1685,19 @@ void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode)
     }
 }
 
-void SearchPattern::CreateOrUpdateImage(int32_t index, const std::string& src, bool isCreateNode,
-    const std::string& bundleName, const std::string& moduleName)
+void SearchPattern::CreateOrUpdateImage(int32_t index, bool isCreateNode)
 {
+    LOGE("tyty CreateOrUpdateImage index:%{public}d,isCreateNode:%{public}d ", index, isCreateNode);
     CHECK_NULL_VOID(GetSearchNode());
     imageClickListener_ = nullptr;
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(searchTheme);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    HandleImageLayoutProperty(frameNode, index, src, bundleName, moduleName);
-    auto imageRenderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(imageRenderContext);
-    auto parentInspector = GetSearchNode()->GetInspectorIdValue("");
-    frameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + parentInspector);
-    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(imageRenderProperty);
-    imageRenderProperty->UpdateSvgFillColor(
-        index == IMAGE_INDEX ? GetSearchNode()->GetSearchIconColor() : GetSearchNode()->GetCancelIconColor());
+    UpdateImageIconProperties(frameNode, index);
     if (isCreateNode) {
         frameNode->MountToParent(GetSearchNode());
         if (index == CANCEL_IMAGE_INDEX) {
@@ -1681,70 +1716,78 @@ void SearchPattern::CreateOrUpdateImage(int32_t index, const std::string& src, b
         frameNode->MarkModifyDone();
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
-}
-
-void SearchPattern::HandleImageLayoutProperty(RefPtr<FrameNode>& frameNode, int32_t index, const std::string& src,
-    const std::string& bundleName, const std::string& moduleName)
-{
-    CHECK_NULL_VOID(GetSearchNode());
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    ImageSourceInfo imageSourceInfo("");
-    auto iconTheme = pipeline->GetTheme<IconTheme>();
-    CHECK_NULL_VOID(iconTheme);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_VOID(searchTheme);
-    if (src.empty()) {
-        imageSourceInfo.SetResourceId(
-            index == IMAGE_INDEX ? InternalResource::ResourceId::SEARCH_SVG : InternalResource::ResourceId::CLOSE_SVG);
-        auto iconPath = iconTheme->GetIconPath(
-            index == IMAGE_INDEX ? InternalResource::ResourceId::SEARCH_SVG : InternalResource::ResourceId::CLOSE_SVG);
-        imageSourceInfo.SetSrc(iconPath,
-            index == IMAGE_INDEX ? GetSearchNode()->GetSearchIconColor() : GetSearchNode()->GetCancelIconColor());
-    } else {
-        imageSourceInfo.SetSrc(src);
-    }
-    if (index == IMAGE_INDEX) {
-        imageSourceInfo.SetBundleName(bundleName);
-        imageSourceInfo.SetModuleName(moduleName);
-    }
-    imageSourceInfo.SetFillColor(
-        index == IMAGE_INDEX ? GetSearchNode()->GetSearchIconColor() : GetSearchNode()->GetCancelIconColor());
-    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
-    imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    CalcSize imageCalcSize((CalcLength(searchTheme->GetIconHeight())), CalcLength(searchTheme->GetIconHeight()));
-    imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
-}
-
-void SearchPattern::SetSearchIconSize(const Dimension& value)
-{
-    UpdateIconSize(IMAGE_INDEX, value);
 }
 
 void SearchPattern::SetSearchSrcPath(
     const std::string& src, const std::string& bundleName, const std::string& moduleName)
 {
-    UpdateIconNode(IMAGE_INDEX, src, bundleName, moduleName);
+    CHECK_NULL_VOID(GetSearchNode());
+    auto &imageIconOptions = GetSearchNode()->GetSearchImageIconOptions();
+    imageIconOptions.UpdateSrc(std::string(src), std::string(bundleName), std::string(moduleName));
+    UpdateImageIconNode(IMAGE_INDEX);
+}
+
+void SearchPattern::SetSearchIconSize(const Dimension& value)
+{
+    CHECK_NULL_VOID(GetSearchNode());
+    auto& imageIconOptions = GetSearchNode()->GetSearchImageIconOptions();
+    imageIconOptions.UpdateSize(Dimension(value));
+    UpdateImageIconNode(IMAGE_INDEX);
 }
 
 void SearchPattern::SetSearchIconColor(const Color& color)
 {
-    UpdateIconColor(IMAGE_INDEX, color);
+    CHECK_NULL_VOID(GetSearchNode());
+    auto& imageIconOptions = GetSearchNode()->GetSearchImageIconOptions();
+    imageIconOptions.UpdateColor(Color(color));
+    UpdateImageIconNode(IMAGE_INDEX);
+}
+
+void SearchPattern::SetSearchImageIcon(IconOptions& iconOptions)
+{
+    CHECK_NULL_VOID(GetSearchNode());
+    auto& imageIconOptions = GetSearchNode()->GetSearchImageIconOptions();
+    if (iconOptions.GetColor().has_value()) {
+        imageIconOptions.UpdateColor(iconOptions.GetColor().value());
+    }
+    if (iconOptions.GetSize().has_value()) {
+        imageIconOptions.UpdateSize(iconOptions.GetSize().value());
+    }
+    if (iconOptions.GetSrc().has_value()) {
+        imageIconOptions.UpdateSrc(iconOptions.GetSrc().value_or(""),
+            iconOptions.GetBundleName().value_or(""),
+            iconOptions.GetModuleName().value_or(""));
+    }
+    UpdateImageIconNode(IMAGE_INDEX);
+}
+
+void SearchPattern::SetSearchSymbolIcon()
+{
+    UpdateSymbolIconNode(IMAGE_INDEX);
 }
 
 void SearchPattern::SetCancelIconSize(const Dimension& value)
 {
-    UpdateIconSize(CANCEL_IMAGE_INDEX, value);
+    CHECK_NULL_VOID(GetSearchNode());
+    auto& imageIconOptions = GetSearchNode()->GetCancelImageIconOptions();
+    imageIconOptions.UpdateSize(Dimension(value));
+    UpdateImageIconNode(CANCEL_IMAGE_INDEX);
 }
 
 void SearchPattern::SetCancelIconColor(const Color& color)
 {
-    UpdateIconColor(CANCEL_IMAGE_INDEX, color);
+    CHECK_NULL_VOID(GetSearchNode());
+    auto &imageIconOptions = GetSearchNode()->GetCancelImageIconOptions();
+    imageIconOptions.UpdateColor(Color(color));
+    UpdateImageIconNode(CANCEL_IMAGE_INDEX);
 }
 
 void SearchPattern::SetRightIconSrcPath(const std::string& src)
 {
-    UpdateIconNode(CANCEL_IMAGE_INDEX, src, "", "");
+    CHECK_NULL_VOID(GetSearchNode());
+    auto &imageIconOptions = GetSearchNode()->GetCancelImageIconOptions();
+    imageIconOptions.UpdateSrc(std::string(src), "", "");
+    UpdateImageIconNode(CANCEL_IMAGE_INDEX);
 }
 
 void SearchPattern::SetCancelButtonStyle(const CancelButtonStyle& style)
@@ -1754,114 +1797,143 @@ void SearchPattern::SetCancelButtonStyle(const CancelButtonStyle& style)
     UpdateChangeEvent(textFieldPattern->GetTextValue(), static_cast<int16_t>(style));
 }
 
-void SearchPattern::UpdateIconNode(
-    int32_t index, const std::string& src, const std::string& bundleName, const std::string& moduleName)
+void SearchPattern::SetCancelImageIcon(IconOptions& iconOptions)
 {
+    CHECK_NULL_VOID(GetSearchNode());
+    auto &imageIconOptions = GetSearchNode()->GetCancelImageIconOptions();
+    if (iconOptions.GetColor().has_value()) {
+        imageIconOptions.UpdateColor(iconOptions.GetColor().value());
+    }
+    if (iconOptions.GetSize().has_value()) {
+        imageIconOptions.UpdateSize(iconOptions.GetSize().value());
+    }
+    if (iconOptions.GetSrc().has_value()) {
+        imageIconOptions.UpdateSrc(iconOptions.GetSrc().value(),
+            iconOptions.GetBundleName().value_or(""),
+            iconOptions.GetModuleName().value_or(""));
+    }
+    UpdateImageIconNode(CANCEL_IMAGE_INDEX);
+}
+
+void SearchPattern::SetCancelSymbolIcon()
+{
+    UpdateSymbolIconNode(CANCEL_IMAGE_INDEX);
+}
+
+void SearchPattern::UpdateImageIconNode(int32_t index)
+{
+    LOGE("tyty UpdateImageIconNode-index:%{public}d", index);
     bool isCurSymbolNode = IsSymbolIcon(index);
-    bool isNeedSymbolNode =
-        src.empty() && AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE);
-    if (isCurSymbolNode != isNeedSymbolNode) {
-        if (isNeedSymbolNode) {
-            CreateOrUpdateSymbol(index, false);
-        } else {
-            CreateOrUpdateImage(index, src, false, bundleName, moduleName);
-        }
+    if (isCurSymbolNode) {
+        // 需切换节点
+        LOGE("tyty 需切换节点-CreateOrUpdateImage");
+        CreateOrUpdateImage(index, false);
     } else {
-        UpdateIconSrc(index, src);
+        // 直接更新属性
+        // image更新src,symbol直接更新modifier
+        LOGE("tyty 直接更新属性-UpdateImageIconProperties");
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto iconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(index));
+        UpdateImageIconProperties(iconFrameNode, index);
+        iconFrameNode->MarkModifyDone();
+        iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
-void SearchPattern::UpdateIconSrc(int32_t index, const std::string& src)
+void SearchPattern::UpdateSymbolIconNode(int32_t index)
 {
+    LOGE("tyty UpdateSymbolIconNode-index:%{public}d", index);
+    bool isCurSymbolNode = IsSymbolIcon(index);
+    if (!isCurSymbolNode) {
+        // 需切换节点,并更新modifier
+        LOGE("tyty 需切换节点-CreateOrUpdateSymbol");
+        CreateOrUpdateSymbol(index, false, true);
+    } else {
+        // 直接更新属性
+        // image更新src,symbol直接更新modifier
+        LOGE("tyty 直接更新属性-AppplySymbolModifier");
+        AppplySymbolModifier(index);
+    }
+}
+
+void SearchPattern::AppplySymbolModifier(int32_t index)
+{
+    LOGE("tyty AppplySymbolModifier:%{public}d", index);
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     auto iconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(index));
     CHECK_NULL_VOID(iconFrameNode);
     if (iconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
-        auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(symbolLayoutProperty);
-        if (src.empty()) {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto searchTheme = pipeline->GetTheme<SearchTheme>();
-            CHECK_NULL_VOID(searchTheme);
-
-            auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
-            symbolLayoutProperty->UpdateSymbolSourceInfo(index == IMAGE_INDEX
-                                                             ? SymbolSourceInfo(searchTheme->GetSearchSymbolId())
-                                                             : SymbolSourceInfo(searchTheme->GetCancelSymbolId()));
+        auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        if (index == IMAGE_INDEX) {
+            auto iconSymbol = layoutProperty->GetSearchIconSymbol();
+            if (iconSymbol != nullptr) {
+                iconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconFrameNode)));
+            }
+        } else {
+            auto iconSymbol = layoutProperty->GetCancelIconSymbol();
+            if (iconSymbol != nullptr) {
+                iconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconFrameNode)));
+            }
         }
-    } else {
+        // reset symbol effect
+        auto symbollayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
+        auto symbolEffectOptions = symbollayoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+        symbolEffectOptions.SetIsTxtActive(false);
+        symbollayoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+    }
+    iconFrameNode->MarkModifyDone();
+    iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchPattern::UpdateImageIconProperties(RefPtr<FrameNode>& iconFrameNode, int32_t index)
+{
+    CHECK_NULL_VOID(iconFrameNode);
+    if (iconFrameNode->GetTag() == V2::IMAGE_ETS_TAG) {
+        auto iconOptions = index == IMAGE_INDEX ? GetSearchNode()->GetSearchImageIconOptions()
+                                                : GetSearchNode()->GetCancelImageIconOptions();
+        LOGE("tyty UpdateImageIconProperties index：%{public}d,iconOptions:%{public}s,",
+            index,
+            iconOptions.ToString().c_str());
         auto imageLayoutProperty = iconFrameNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
-        auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
-        if (src.empty()) {
+        ImageSourceInfo imageSourceInfo("");
+        auto imageSourceInfoOp = imageLayoutProperty->GetImageSourceInfo();
+        if (imageSourceInfoOp.has_value()) {
+            imageSourceInfo = imageSourceInfoOp.value();
+        }
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto searchTheme = pipeline->GetTheme<SearchTheme>();
+        CHECK_NULL_VOID(searchTheme);
+        auto iconTheme = pipeline->GetTheme<IconTheme>();
+        CHECK_NULL_VOID(iconTheme);
+        if (iconOptions.GetSrc().value_or("").empty()) {
             imageSourceInfo.SetResourceId(index == IMAGE_INDEX ? InternalResource::ResourceId::SEARCH_SVG
                                                                : InternalResource::ResourceId::CLOSE_SVG);
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto iconPath = pipeline->GetTheme<IconTheme>()->GetIconPath(index == IMAGE_INDEX
-                                                                             ? InternalResource::ResourceId::SEARCH_SVG
-                                                                             : InternalResource::ResourceId::CLOSE_SVG);
-            auto color = pipeline->GetTheme<SearchTheme>()->GetSearchIconColor();
-            imageSourceInfo.SetSrc(iconPath, color);
+            auto iconPath = iconTheme->GetIconPath(index == IMAGE_INDEX ? InternalResource::ResourceId::SEARCH_SVG
+                                                                        : InternalResource::ResourceId::CLOSE_SVG);
+            imageSourceInfo.SetSrc(iconPath, iconOptions.GetColor().value_or(searchTheme->GetSearchIconColor()));
         } else {
-            imageSourceInfo.SetSrc(src);
+            imageSourceInfo.SetSrc(iconOptions.GetSrc().value());
         }
+        imageSourceInfo.SetBundleName(iconOptions.GetBundleName().value_or(""));
+        imageSourceInfo.SetModuleName(iconOptions.GetModuleName().value_or(""));
+        imageSourceInfo.SetFillColor(iconOptions.GetColor().value_or(searchTheme->GetSearchIconColor()));
         imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    }
-    iconFrameNode->MarkModifyDone();
-    iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-}
+        CalcSize imageCalcSize(CalcLength(iconOptions.GetSize().value_or(searchTheme->GetIconHeight())),
+            CalcLength(iconOptions.GetSize().value_or(searchTheme->GetIconHeight())));
 
-void SearchPattern::UpdateIconColor(int32_t index, const Color& color)
-{
-    CHECK_NULL_VOID(GetSearchNode());
-    auto iconFrameNode = AceType::DynamicCast<FrameNode>(GetSearchNode()->GetChildAtIndex(index));
-    CHECK_NULL_VOID(iconFrameNode);
-    if (index == IMAGE_INDEX) {
-        GetSearchNode()->SetSearchIconColor(color);
-    } else {
-        GetSearchNode()->SetCancelIconColor(color);
-    }
-
-    if (iconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
-        auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(symbolLayoutProperty);
-        symbolLayoutProperty->UpdateSymbolColorList({ color });
-    } else {
-        auto imageLayoutProperty = iconFrameNode->GetLayoutProperty<ImageLayoutProperty>();
-        CHECK_NULL_VOID(imageLayoutProperty);
-        auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
-        if (imageSourceInfo.IsSvg()) {
-            imageSourceInfo.SetFillColor(color);
-            imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-
-            auto imageRenderProperty = iconFrameNode->GetPaintProperty<ImageRenderProperty>();
-            CHECK_NULL_VOID(imageRenderProperty);
-            imageRenderProperty->UpdateSvgFillColor(color);
-        }
-    }
-    iconFrameNode->MarkModifyDone();
-    iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-}
-
-void SearchPattern::UpdateIconSize(int32_t index, const Dimension& value)
-{
-    CHECK_NULL_VOID(GetSearchNode());
-    auto iconFrameNode = AceType::DynamicCast<FrameNode>(GetSearchNode()->GetChildAtIndex(index));
-    CHECK_NULL_VOID(iconFrameNode);
-    if (iconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
-        auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(symbolLayoutProperty);
-        symbolLayoutProperty->UpdateFontSize(value);
-    }
-    iconFrameNode->MarkModifyDone();
-    iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    if (index == IMAGE_INDEX) {
-        GetSearchNode()->SetSearchIconSize(value);
-    } else {
-        GetSearchNode()->SetCancelIconSize(value);
+        imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
+        auto parentInspector = GetSearchNode()->GetInspectorIdValue("");
+        iconFrameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + parentInspector);
+        auto imageRenderProperty = iconFrameNode->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(imageRenderProperty);
+        imageSourceInfo.SetFillColor(iconOptions.GetColor().value_or(searchTheme->GetSearchIconColor()));
+        imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+        imageRenderProperty->UpdateSvgFillColor(iconOptions.GetColor().value_or(searchTheme->GetSearchIconColor()));
     }
 }
 
