@@ -19,12 +19,12 @@ ace_unittest("arc_list_test_ng") {
     "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
     "$ace_root/frameworks/bridge/common/utils/utils.cpp",
     "$ace_root/frameworks/bridge/js_frontend/engine/common/js_constants.cpp",
-    "arc_list_test_ng.cpp",
     "arc_list_attr_test_ng.cpp",
     "arc_list_common_test_ng.cpp",
     "arc_list_layout_test_ng.cpp",
-    "arc_list_scroller_test_ng.cpp",
     "arc_list_scroller_event_test_ng.cpp",
+    "arc_list_scroller_test_ng.cpp",
     "arc_list_swipe_test_ng.cpp",
+    "arc_list_test_ng.cpp",
   ]
 }

@@ -16,6 +16,7 @@ group("core_pattern_unittest") {
   deps = [
     "animator:animator_test_ng",
     "app_bar:app_bar_test_ng",
+    "arc_list:arc_list_test_ng",
     "badge:badge_test_ng",
     "blank:blank_test_ng",
     "bubble:bubble_test_ng",
@@ -49,7 +50,6 @@ group("core_pattern_unittest") {
     "linear_layout:linear_layout_test_ng",
     "linear_split:linear_split_test_ng",
     "list:list_test_ng",
-    "arc_list:arc_list_test_ng",
     "loading_progress:loading_progress_test_ng",
     "marquee:marquee_test_ng",
     "menu:menu_test_ng",
