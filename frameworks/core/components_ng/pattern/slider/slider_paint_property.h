@@ -156,6 +156,18 @@ public:
             slideRange->Put("to", std::to_string(slideRangeValues.value()->GetToValue()).c_str());
             json->PutExtAttr("slideRange", slideRange, filter);
         }
+#ifdef SUPPORT_DIGITAL_CROWN
+        static const std::array<std::string, 3> SLIDER_CROWN_SENSITIVITY_TO_STRING = {
+            "CrownSensitivity.LOW",
+            "CrownSensitivity.MEDIUM",
+            "CrownSensitivity.HIGH",
+        };
+        json->PutExtAttr("digitalCrownSensitivity",
+            SLIDER_CROWN_SENSITIVITY_TO_STRING
+                .at(static_cast<int>(GetDigitalCrownSensitivityValue(CrownSensitivity::MEDIUM)))
+                .c_str(),
+            filter);
+#endif
     }
 
     SizeF GetBlockSizeValue(const SizeF& defaultValue)
@@ -202,6 +214,10 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SliderMode, SliderModel::SliderMode, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         SliderPaintStyle, ValidSlideRange, RefPtr<SliderModel::SliderValidRange>, PROPERTY_UPDATE_RENDER)
+#ifdef SUPPORT_DIGITAL_CROWN
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        SliderPaintStyle, DigitalCrownSensitivity, CrownSensitivity, PROPERTY_UPDATE_RENDER)
+#endif
     ACE_DEFINE_PROPERTY_GROUP(SliderTipStyle, SliderTipStyle)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderTipStyle, ShowTips, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderTipStyle, Padding, Dimension, PROPERTY_UPDATE_RENDER)

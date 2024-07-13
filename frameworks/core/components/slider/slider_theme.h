@@ -45,6 +45,9 @@ public:
         static constexpr Dimension OUTSET_HOT_BLOCK_SHADOW_WIDTH = 4.0_vp;
         static constexpr Dimension INSET_HOT_BLOCK_SHADOW_WIDTH = 6.0_vp;
         static constexpr Dimension FOCUS_SIDE_DISTANCE = 2.0_vp;
+#ifdef SUPPORT_DIGITAL_CROWN
+        static constexpr double CROWN_DISPLAY_CONTROL_RATIO = 2.1;
+#endif
 
         RefPtr<SliderTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
@@ -103,6 +106,10 @@ public:
                 theme->blockShadowColor_ = pattern->GetAttr<Color>("block_shadow_color", BLOCK_SHADOW_COLOR);
                 theme->controlFocusFrame_ = pattern->GetAttr<double>("control_focus_frame", 0.0);
                 theme->scaleValue_ = pattern->GetAttr<double>("scale_value", 1.0);
+#ifdef SUPPORT_DIGITAL_CROWN
+                theme->crownDisplayControlRatio_ =
+                    pattern->GetAttr<double>("crown_display_control_ratio", CROWN_DISPLAY_CONTROL_RATIO);
+#endif
             } else {
                 LOGW("find pattern of slider fail");
             }
@@ -275,6 +282,13 @@ public:
         return measureContentOutsetWidth_;
     }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    double GetCrownDisplayControlRatio() const
+    {
+        return crownDisplayControlRatio_;
+    }
+#endif
+
 protected:
     SliderTheme() = default;
 
@@ -321,6 +335,9 @@ private:
     double moveAnimationDuration_ = 0.0;
     double controlFocusFrame_ = 0.0;
     double scaleValue_ = 1.0;
+#ifdef SUPPORT_DIGITAL_CROWN
+    double crownDisplayControlRatio_ = 1.0;
+#endif
 };
 
 } // namespace OHOS::Ace

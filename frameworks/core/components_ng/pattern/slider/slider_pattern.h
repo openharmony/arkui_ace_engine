@@ -167,6 +167,18 @@ public:
 
     void SetSliderValue(double value, int32_t mode);
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    void SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
+    {
+        crownSensitivity_ = sensitivity;
+    }
+
+    CrownSensitivity GetDigitalCrownSensitivity()
+    {
+        return crownSensitivity_;
+    }
+#endif
+
 private:
     void OnModifyDone() override;
     void CalcSliderValue();
@@ -215,7 +227,13 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState();
     bool MoveStep(int32_t stepCount);
-
+#ifdef SUPPORT_DIGITAL_CROWN
+    void InitDigitalCrownEvent(const RefPtr<FocusHub>& focusHub);
+    void HandleCrownEvent(const CrownEvent& event);
+    double GetCrownRotatePx(const CrownEvent& event) const;
+    void HandleCrownAction(double mainDelta);
+    void StartVibrateFeedback();
+#endif
     bool IsSliderVisible();
     void OnWindowHide() override;
     void OnWindowShow() override;
@@ -294,6 +312,14 @@ private:
     float trackThickness_ = 0.0f;
     SizeF blockHotSize_;
     SizeF blockSize_;
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
+    double crownDisplayControlRatio_ = 1.0;
+    double crownMovingLength_ = 0.0;
+    int32_t crownEventNum_ = 0;
+    bool reachBoundary_ = false;
+#endif
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ClickEvent> clickListener_;
