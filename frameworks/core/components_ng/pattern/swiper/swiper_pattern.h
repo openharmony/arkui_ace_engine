@@ -922,7 +922,7 @@ private:
 
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
 
-    void OnScrollStartRecursive(float position, float velocity = 0.f) override;
+    void OnScrollStartRecursive(float position, float velocity) override;
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
 
     /**

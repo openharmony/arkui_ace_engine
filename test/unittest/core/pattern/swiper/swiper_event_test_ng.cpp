@@ -593,7 +593,7 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll008, TestSize.Level1)
     eventHub_->SetGestureSwipeEvent([&](int32_t index, const AnimationCallbackInfo& info) {
         ++callCount;
     });
-    pattern_->OnScrollStartRecursive(0.0f);
+    pattern_->OnScrollStartRecursive(0.0f, 0.0f);
     pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     pattern_->HandleScroll(-5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     pattern_->HandleScroll(-2.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
@@ -609,8 +609,10 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollVelocity001, TestSize.Level
 {
     CreateWithItem([](SwiperModelNG model) {});
     pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
+    pattern_->childScrolling_ = true;
     auto res = pattern_->HandleScrollVelocity(5.0f);
     EXPECT_TRUE(res);
+    EXPECT_FALSE(pattern_->childScrolling_);
 
     pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDisableSwipe(true);
     res = pattern_->HandleScrollVelocity(5.0f);
@@ -636,9 +638,11 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollVelocity002, TestSize.Level
         .backward = NestedScrollMode::SELF_FIRST,
     };
     pattern_->SetNestedScroll(nestedOpt);
+    pattern_->childScrolling_ = true;
 
     auto res = pattern_->HandleScrollVelocity(5.0f);
     EXPECT_TRUE(res);
+    EXPECT_FALSE(pattern_->childScrolling_);
     // shouldn't be passed parent
     pattern_->nestedScroll_ = {
         .forward = NestedScrollMode::SELF_ONLY,
@@ -682,8 +686,10 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollVelocity003, TestSize.Level
         .backward = NestedScrollMode::SELF_FIRST,
     };
     pattern_->SetNestedScroll(nestedOpt);
+    pattern_->childScrolling_ = true;
     auto res = pattern_->HandleScrollVelocity(5.0f);
     EXPECT_FALSE(res);
+    EXPECT_FALSE(pattern_->childScrolling_);
 
     // change EdgeEffect to Spring and redo
     // should consume velocity
@@ -693,7 +699,9 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollVelocity003, TestSize.Level
     EXPECT_CALL(*mockScroll, HandleScrollVelocity).Times(2).WillRepeatedly(Return(false));
 
     pattern_->parent_ = mockScroll;
+    pattern_->childScrolling_ = true;
     res = pattern_->HandleScrollVelocity(5.0f);
+    EXPECT_FALSE(pattern_->childScrolling_);
     EXPECT_TRUE(res);
 }
 
@@ -868,7 +876,7 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternOnScrollStart001, TestSize.Level1)
     pattern_->currentIndex_ = 3;
     EXPECT_EQ(pattern_->gestureSwipeIndex_, 0);
 
-    pattern_->OnScrollStartRecursive(5.0f);
+    pattern_->OnScrollStartRecursive(5.0f, 0.0f);
     EXPECT_TRUE(pattern_->childScrolling_);
     EXPECT_EQ(pattern_->gestureSwipeIndex_, 3);
 }

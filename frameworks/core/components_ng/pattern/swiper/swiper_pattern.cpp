@@ -4894,7 +4894,7 @@ void SwiperPattern::UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus)
     host->AddFRCSceneInfo(SWIPER_DRAG_SCENE, speed, sceneStatus);
 }
 
-void SwiperPattern::OnScrollStartRecursive(float position, float velocity)
+void SwiperPattern::OnScrollStartRecursive(float position, float /* velocity */)
 {
     SetIsNestedInterrupt(false);
     if (IsDisableSwipe()) {
@@ -4953,6 +4953,7 @@ bool SwiperPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableSc
         return false;
     }
 
+    DestructSetter<bool> scope(childScrolling_, false);
     // haven't reached edge
     if (GetDistanceToEdge() > 0.0f || IsLoop()) {
         HandleDragEnd(velocity);
