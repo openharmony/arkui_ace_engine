@@ -100,7 +100,6 @@ public:
     void ChangeIndex(int32_t index);
 
     void InitCaptureTest();
-    void CreateWithCustomAnimation();
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<SwiperPattern> pattern_;

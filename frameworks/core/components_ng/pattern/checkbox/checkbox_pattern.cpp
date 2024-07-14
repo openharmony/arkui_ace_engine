@@ -197,7 +197,7 @@ void CheckBoxPattern::InitClickEvent()
         CHECK_NULL_VOID(checkboxPattern);
         if (info.GetSourceDevice() == SourceType::TOUCH &&
             (info.IsPreventDefault() || checkboxPattern->isTouchPreventDefault_)) {
-            TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox preventDefault successfully");
+            TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "checkbox preventDefault successfully");
             checkboxPattern->isTouchPreventDefault_ = false;
             return;
         }
@@ -258,7 +258,7 @@ void CheckBoxPattern::InitMouseEvent()
 
 void CheckBoxPattern::HandleMouseEvent(bool isHover)
 {
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox on hover %{public}d", isHover);
+    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "checkbox on hover %{public}d", isHover);
     isHover_ = isHover;
     if (isHover) {
         touchHoverType_ = TouchHoverAnimationType::HOVER;
@@ -342,7 +342,7 @@ void CheckBoxPattern::OnClick()
     if (UseContentModifier()) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox onclick");
+    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "checkbox onclick");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
@@ -362,7 +362,7 @@ void CheckBoxPattern::OnTouchDown()
     if (UseContentModifier()) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox touch down %{public}d", isHover_);
+    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "checkbox touch down %{public}d", isHover_);
     if (isHover_) {
         touchHoverType_ = TouchHoverAnimationType::HOVER_TO_PRESS;
     } else {
@@ -379,7 +379,7 @@ void CheckBoxPattern::OnTouchUp()
     if (UseContentModifier()) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox touch up %{public}d", isHover_);
+    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "checkbox touch up %{public}d", isHover_);
     if (isHover_) {
         touchHoverType_ = TouchHoverAnimationType::PRESS_TO_HOVER;
     } else {
@@ -539,7 +539,12 @@ void CheckBoxPattern::StartEnterAnimation()
         eventHub->SetEnabled(true);
     }
     AnimationUtils::Animate(
-        option, [&]() { renderContext->UpdateOpacity(1); }, nullptr);
+        option,
+        [&]() {
+            TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "check enter animation");
+            renderContext->UpdateOpacity(1);
+        },
+        nullptr);
 }
 
 void CheckBoxPattern::StartExitAnimation()
@@ -551,7 +556,12 @@ void CheckBoxPattern::StartExitAnimation()
     const auto& renderContext = builderNode_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     AnimationUtils::Animate(
-        option, [&]() { renderContext->UpdateOpacity(0); }, nullptr);
+        option,
+        [&]() {
+            TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "check exit animation");
+            renderContext->UpdateOpacity(0);
+        },
+        nullptr);
     const auto& eventHub = builderNode_->GetEventHub<EventHub>();
     if (eventHub) {
         eventHub->SetEnabled(false);

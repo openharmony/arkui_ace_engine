@@ -104,6 +104,12 @@ void TextPickerPattern::OnLanguageConfigurationUpdate()
     cancelNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void TextPickerPattern::OnFontConfigurationUpdate()
+{
+    CHECK_NULL_VOID(closeDialogEvent_);
+    closeDialogEvent_();
+}
+
 void TextPickerPattern::SetButtonIdeaSize()
 {
     auto host = GetHost();

@@ -308,6 +308,8 @@ public:
         }
     }
 
+    void OnColorConfigurationUpdate() override;
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;

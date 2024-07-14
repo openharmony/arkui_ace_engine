@@ -26,7 +26,8 @@ static const std::unordered_set<std::string> g_touchPreventDefPattern = { "Check
 Local<JSValueRef> JsStopPropagation(panda::JsiRuntimeCallInfo *info)
 {
     Local<JSValueRef> thisObj = info->GetThisRef();
-    auto eventInfo = static_cast<BaseEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+    auto eventInfo = static_cast<BaseEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
+        info->GetVM(), 0));
     if (eventInfo) {
         eventInfo->SetStopPropagation(true);
     }
@@ -36,7 +37,8 @@ Local<JSValueRef> JsStopPropagation(panda::JsiRuntimeCallInfo *info)
 Local<JSValueRef> JsPreventDefault(panda::JsiRuntimeCallInfo *info)
 {
     Local<JSValueRef> thisObj = info->GetThisRef();
-    auto eventInfo = static_cast<BaseEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+    auto eventInfo = static_cast<BaseEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
+        info->GetVM(), 0));
     if (eventInfo) {
         eventInfo->SetPreventDefault(true);
     }
@@ -46,7 +48,8 @@ Local<JSValueRef> JsPreventDefault(panda::JsiRuntimeCallInfo *info)
 Local<JSValueRef> JsClickPreventDefault(panda::JsiRuntimeCallInfo *info)
 {
     Local<JSValueRef> thisObj = info->GetThisRef();
-    auto eventInfo = static_cast<BaseEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+    auto eventInfo = static_cast<BaseEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
+        info->GetVM(), 0));
     if (eventInfo) {
         auto patternName = eventInfo->GetPatternName();
         if (g_clickPreventDefPattern.find(patternName.c_str()) == g_clickPreventDefPattern.end()) {
@@ -62,7 +65,8 @@ Local<JSValueRef> JsClickPreventDefault(panda::JsiRuntimeCallInfo *info)
 Local<JSValueRef> JsTouchPreventDefault(panda::JsiRuntimeCallInfo *info)
 {
     Local<JSValueRef> thisObj = info->GetThisRef();
-    auto eventInfo = static_cast<BaseEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+    auto eventInfo = static_cast<BaseEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
+        info->GetVM(), 0));
     if (eventInfo) {
         auto patternName = eventInfo->GetPatternName();
         if (g_touchPreventDefPattern.find(patternName.c_str()) == g_touchPreventDefPattern.end()) {
@@ -78,7 +82,8 @@ Local<JSValueRef> JsTouchPreventDefault(panda::JsiRuntimeCallInfo *info)
 Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info)
 {
     Local<JSValueRef> thisObj = info->GetThisRef();
-    auto eventInfo = static_cast<TouchEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+    auto eventInfo = static_cast<TouchEventInfo*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
+        info->GetVM(), 0));
     if (!eventInfo) {
         return JSValueRef::Undefined(info->GetVM());
     }
@@ -86,7 +91,6 @@ Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info)
     history = eventInfo->GetHistory();
     Local<ArrayRef> valueArray = ArrayRef::New(info->GetVM(), history.size());
     auto index = 0;
-    Local<ObjectRef> objRef = ObjectRef::New(info->GetVM());
     for (auto const &point : history) {
         Local<ObjectRef> touchObject = ObjectRef::New(info->GetVM());
         const OHOS::Ace::Offset& globalLocation = point.GetGlobalLocation();
@@ -111,6 +115,7 @@ Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info)
         touchObject->Set(info->GetVM(),
             ToJSValue("displayY"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY())));
 
+        Local<ObjectRef> objRef = ObjectRef::New(info->GetVM());
         objRef->Set(info->GetVM(), ToJSValue("touchObject"), (touchObject));
         objRef->Set(info->GetVM(), ToJSValue("size"), ToJSValue(point.GetSize()));
         objRef->Set(info->GetVM(), ToJSValue("force"), ToJSValue(static_cast<double>(point.GetForce())));

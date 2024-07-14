@@ -71,7 +71,7 @@ private:
     bool showHoliday_ = true;
     bool showLunar_ = false;
     bool isCalendarDialog_ = false;
-    uint32_t startOfWeek_ = 64;
+    int32_t startOfWeek_ = 64;
 
     // Default it exists 5 weeks in a month.
     int32_t rowCount_ = 5;

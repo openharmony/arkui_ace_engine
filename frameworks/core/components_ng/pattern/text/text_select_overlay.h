@@ -35,6 +35,7 @@ public:
     bool PreProcessOverlay(const OverlayRequest& request) override;
     bool CheckHandleVisible(const RectF& paintRect) override;
     bool CheckAndAdjustHandle(RectF& paintRect);
+    bool CheckAndAdjustHandleWithContent(const RectF& contentRect, RectF& paintRect);
     void OnResetTextSelection() override;
     RectF GetFirstHandleLocalPaintRect() override;
     RectF GetSecondHandleLocalPaintRect() override;
@@ -57,11 +58,23 @@ public:
     void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) override;
     void OnHandleLevelModeChanged(HandleLevelMode mode) override;
 
+    void UpdateHandleGlobalOffset()
+    {
+        HasRenderTransform();
+        handleGlobalOffset_ = GetPaintOffsetWithoutTransform();
+    }
+
+    const OffsetF& GetHandleGlobalOffset() const
+    {
+        return handleGlobalOffset_;
+    }
+
 protected:
     virtual void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle);
     bool selectTextUseTopHandle = false;
 
 private:
+    OffsetF handleGlobalOffset_;
     ACE_DISALLOW_COPY_AND_MOVE(TextSelectOverlay);
 };
 

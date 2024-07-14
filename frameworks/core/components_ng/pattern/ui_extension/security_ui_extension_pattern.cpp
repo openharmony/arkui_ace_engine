@@ -412,16 +412,26 @@ bool SecurityUIExtensionPattern::HandleKeyEvent(const KeyEvent& event)
 void SecurityUIExtensionPattern::HandleFocusEvent()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     if (pipeline->GetIsFocusActive()) {
         DispatchFocusActiveEvent(true);
     }
     DispatchFocusState(true);
+    auto uiExtensionManager = pipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
+    uiExtensionManager->RegisterSecurityUIExtensionInFocus(
+        WeakClaim(this), sessionWrapper_);
 }
 
 void SecurityUIExtensionPattern::HandleBlurEvent()
 {
     DispatchFocusActiveEvent(false);
     DispatchFocusState(false);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto uiExtensionManager = pipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
+    uiExtensionManager->RegisterSecurityUIExtensionInFocus(nullptr, nullptr);
 }
 
 void SecurityUIExtensionPattern::DispatchFocusActiveEvent(bool isFocusActive)
@@ -482,6 +492,18 @@ void SecurityUIExtensionPattern::FireOnTerminatedCallback(
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnTerminatedCallback(code, wantWrap);
     state_ = AbilityState::DESTRUCTION;
+    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
+        sessionWrapper_->DestroySession();
+    }
+}
+
+void SecurityUIExtensionPattern::FireOnErrorCallback(
+    int32_t code, const std::string& name, const std::string& message)
+{
+    PlatformPattern::FireOnErrorCallback(code, name, message);
+    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
+        sessionWrapper_->DestroySession();
+    }
 }
 
 void SecurityUIExtensionPattern::FireOnReceiveCallback(const AAFwk::WantParams& params)

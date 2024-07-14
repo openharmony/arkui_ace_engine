@@ -861,7 +861,9 @@ void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<Fram
     if (menuParam.previewMode != MenuPreviewMode::NONE || isAllowedDrag) {
         SetFilter(targetNode, wrapperNode);
     }
-    if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.previewMode == MenuPreviewMode::NONE ||
+    if (menuParam.previewMode == MenuPreviewMode::IMAGE ||
+        (menuParam.previewMode == MenuPreviewMode::NONE && menuParam.menuBindType == MenuBindingType::LONG_PRESS &&
+            isAllowedDrag) ||
         menuParam.isShowHoverImage) {
         SetPixelMap(targetNode, wrapperNode, hoverImageStackNode, previewNode, menuParam);
     }

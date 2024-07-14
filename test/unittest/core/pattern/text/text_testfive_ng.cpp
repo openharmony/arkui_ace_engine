@@ -361,4 +361,134 @@ HWTEST_F(TextTestFiveNg, TextContentModifier035, TestSize.Level1)
     }
     textPattern->pManager_->Reset();
 }
+
+/**
+ * @tc.name: GetSpansInfoInStyledString001
+ * @tc.desc: test text_pattern.cpp GetSpansInfoInStyledString function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, GetSpansInfoInStyledString001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textSpanNode = CreateSpanNodeWithSetDefaultProperty(TEXT_FOR_AI);
+    ASSERT_NE(textSpanNode, nullptr);
+    textPattern->AddChildSpanItem(textSpanNode);
+    ImageSpanNodeProperty firstProperty { .imageSrc = std::make_optional("image") };
+    auto imageSpanNode = CreateImageSpanNode(firstProperty);
+    ASSERT_NE(imageSpanNode, nullptr);
+    textPattern->AddChildSpanItem(imageSpanNode);
+
+    auto resultObjects = textPattern->GetSpansInfoInStyledString(0, TEXT_SIZE_INT);
+    ASSERT_NE(resultObjects.size(), 0);
+}
+
+/**
+ * @tc.name: GetSpansInfo001
+ * @tc.desc: test text_pattern.cpp GetSpansInfo function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, GetSpansInfo001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    auto spanString = AceType::MakeRefPtr<SpanString>(TEXT_CONTENT);
+    ASSERT_NE(spanString, nullptr);
+    textPattern->SetStyledString(spanString);
+
+    auto selectionInfo = textPattern->GetSpansInfo(0, 0, GetSpansMethod::GETSPANS);
+    ASSERT_NE(selectionInfo.selection_.resultObjects.size(), 0);
+
+    selectionInfo = textPattern->GetSpansInfo(-1, 0, GetSpansMethod::GETSPANS);
+    ASSERT_NE(selectionInfo.selection_.resultObjects.size(), 0);
+
+    selectionInfo = textPattern->GetSpansInfo(0, -1, GetSpansMethod::GETSPANS);
+    ASSERT_NE(selectionInfo.selection_.resultObjects.size(), 0);
+
+    selectionInfo = textPattern->GetSpansInfo(-1, -1, GetSpansMethod::GETSPANS);
+    ASSERT_NE(selectionInfo.selection_.resultObjects.size(), 0);
+
+    selectionInfo = textPattern->GetSpansInfo(1, 0, GetSpansMethod::GETSPANS);
+    ASSERT_NE(selectionInfo.selection_.resultObjects.size(), 0);
+
+    selectionInfo = textPattern->GetSpansInfo(-1, -1, static_cast<GetSpansMethod>(-1));
+    ASSERT_NE(selectionInfo.selection_.resultObjects.size(), 0);
+}
+
+/**
+ * @tc.name: GetSelectedText001
+ * @tc.desc: test text_pattern.cpp GetSelectedText function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, GetSelectedText001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    auto textSpanNode1 = CreateSpanNodeWithSetDefaultProperty(CREATE_VALUE);
+    ASSERT_NE(textSpanNode1, nullptr);
+    textPattern->AddChildSpanItem(textSpanNode1);
+    auto textSpanNode2 = CreateSpanNodeWithSetDefaultProperty(CREATE_VALUE);
+    ASSERT_NE(textSpanNode2, nullptr);
+    textSpanNode2->UpdateContent(1);
+    textPattern->AddChildSpanItem(textSpanNode2);
+    auto textSpanNode3 = CreateSpanNodeWithSetDefaultProperty(CREATE_VALUE);
+    ASSERT_NE(textSpanNode3, nullptr);
+    textSpanNode3->UpdateContent(1);
+    textSpanNode3->spanItem_->position = 1;
+    textPattern->AddChildSpanItem(textSpanNode3);
+    auto textSpanNode4 = CreateSpanNodeWithSetDefaultProperty(CREATE_VALUE);
+    ASSERT_NE(textSpanNode4, nullptr);
+    textSpanNode4->spanItem_->placeholderIndex = 0;
+    textPattern->AddChildSpanItem(textSpanNode4);
+    auto textSpanNode5 = CreateSpanNodeWithSetDefaultProperty(CREATE_VALUE);
+    ASSERT_NE(textSpanNode5, nullptr);
+    textSpanNode5->spanItem_->position = 1;
+    textSpanNode5->spanItem_->placeholderIndex = 0;
+    textPattern->AddChildSpanItem(textSpanNode5);
+    auto textSpanNode6 = CreateSpanNodeWithSetDefaultProperty(CREATE_VALUE);
+    ASSERT_NE(textSpanNode6, nullptr);
+    textSpanNode6->spanItem_->position = 1;
+    textPattern->AddChildSpanItem(textSpanNode6);
+
+    auto selectedText = textPattern->GetSelectedText(0, 10);
+    ASSERT_EQ(selectedText, "");
+}
+
+/**
+ * @tc.name: GetTextHeight001
+ * @tc.desc: test text_pattern.cpp GetTextHeight function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, GetTextHeight001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    ASSERT_NE(textPattern->pManager_, nullptr);
+
+    Offset globalOffset;
+    globalOffset.SetX(0);
+    globalOffset.SetY(5);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects { RectF(0, 0, 5, 5) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+    EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(2));
+    textPattern->pManager_->AddParagraph(
+        { .paragraph = paragraph, .start = 0, .end = 2 });
+    textPattern->pManager_->AddParagraph(
+        { .paragraph = paragraph, .start = 2, .end = 4 });
+
+    EXPECT_EQ(textPattern->GetTextHeight(0, false), 0.0);
+    EXPECT_EQ(textPattern->GetTextHeight(0, true), 0.0);
+}
 } // namespace OHOS::Ace::NG

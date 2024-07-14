@@ -160,7 +160,9 @@ public:
         return true;
     }
 
-    static void ShowToast(int32_t instanceId, const std::string& message, int32_t duration, const std::string& bottom);
+    static void ShowToast(int32_t instanceId, const std::string& message, int32_t duration, const std::string& bottom,
+        std::function<void(int32_t)>&& callback);
+    static void CloseToast(int32_t instanceId, const int32_t toastId, std::function<void(int32_t)>&& callback);
     static void ShowDialog(int32_t instanceId, const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks);

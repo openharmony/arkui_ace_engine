@@ -357,6 +357,38 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
 #endif
 }
 
+void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect)
+{
+#ifndef USE_ROSEN_DRAWING
+    auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
+    CHECK_NULL_VOID(rsCanvas);
+    auto skCanvas = rsCanvas->ExportSkCanvas();
+    CHECK_NULL_VOID(skCanvas);
+    
+    auto recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
+    CHECK_NULL_VOID(recordingCanvas);
+    SkPaint paint;
+    SkSamplingOptions option;
+    SkRect dst { dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetRight(), dstRect.GetBottom() };
+
+    CHECK_NULL_VOID(pixelMap_);
+    auto pixelMap = pixelMap_->GetPixelMapSharedPtr();
+    recordingCanvas->DrawPixelMapRect(pixelMap, dst, option, &paint);
+#else
+    auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
+    RSBrush brush;
+    RSSamplingOptions options;
+    RSRect dst = RSRect(dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetRight(), dstRect.GetBottom());
+
+    auto pixelMap = pixelMap_->GetPixelMapSharedPtr();
+    CHECK_NULL_VOID(pixelMap);
+    RSRect src = RSRect(srcRect.GetLeft(), srcRect.GetTop(), srcRect.GetRight(), srcRect.GetBottom());
+    recordingCanvas.AttachBrush(brush);
+    recordingCanvas.DrawPixelMapRect(pixelMap, src, dst, options);
+    recordingCanvas.DetachBrush();
+#endif
+}
+
 void PixelMapImage::Cache(const std::string& key)
 {
     auto pipeline = PipelineContext::GetCurrentContext();

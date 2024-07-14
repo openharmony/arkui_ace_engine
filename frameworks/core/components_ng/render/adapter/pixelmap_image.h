@@ -47,6 +47,7 @@ public:
         RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) override;
     void DrawToRSCanvasWithBrush(
         RSCanvas& canvas, RSBrush& brush, const RSRect& srcRect, const RSRect& dstRect);
+    void DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) override;
     void DrawRect(RSCanvas& canvas, const RSRect& dstRect);
 
     bool DrawImageNine(

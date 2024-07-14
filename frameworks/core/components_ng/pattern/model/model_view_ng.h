@@ -25,24 +25,11 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT ModelViewNG : public ModelView {
 public:
-    ModelViewNG();
     void Create(const ModelViewContext& context) override;
     void SetBackground(const std::string& value) override;
     void SetModelSource(const std::string& value) override;
     void SetHandleCameraMove(bool value) override;
-    void SetTransparent(bool value) override;
-    void SetCameraPosition(AnimatableFloat x, AnimatableFloat y, AnimatableFloat z,
-        AnimatableFloat distance, bool isAngular) override;
-    void SetCameraRotation(Quaternion quat) override;
-    void SetCameraFrustum(float zNear, float zFar, float fovDegrees) override;
-    void SetCameraLookAt(Vec3 lookAtVec) override;
-    void SetCameraUp(Vec3 upVec) override;
-    void AddLight(const RefPtr<ModelLight>& light) override;
-    void AddGeometry(const std::shared_ptr<Render3D::Geometry>& shape) override;
-    void AddGLTFAnimation(const std::shared_ptr<Render3D::GLTFAnimation>& animation) override;
     void AddCustomRender(const std::shared_ptr<Render3D::CustomRenderDescriptor>& customRender) override;
-    void SetWidth(Dimension& width) override;
-    void SetHeight(Dimension& height) override;
     void SetRenderWidth(Dimension& width) override;
     void SetRenderHeight(Dimension& height) override;
     void SetRenderFrameRate(float rate) override;
@@ -53,9 +40,6 @@ public:
 
     static void AddShaderInputBuffer(FrameNode* frameNode, const std::shared_ptr<Render3D::ShaderInputBuffer>& buffer);
 private:
-    void PerformCameraUpdate();
-    void PerformLightUpdate();
-
     // Camera and lights animations are done from the frontend with Animatable types.
     WeakPtr<FrameNode> frameNode_;
     ModelPosition cameraPosition_;

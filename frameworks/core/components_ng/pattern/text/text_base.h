@@ -150,6 +150,12 @@ public:
         return textSelector_;
     }
 
+    virtual void GetSelectIndex(int32_t& start, int32_t& end) const
+    {
+        start = textSelector_.GetTextStart();
+        end = textSelector_.GetTextEnd();
+    }
+
     virtual const Dimension& GetAvoidSoftKeyboardOffset() const
     {
         return avoidKeyboardOffset_;

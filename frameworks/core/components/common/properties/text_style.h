@@ -744,40 +744,7 @@ public:
         return symbolEffectOptions_;
     }
 
-    std::string ToString() const
-    {
-        auto jsonValue = JsonUtil::Create(true);
-        JSON_STRING_PUT_STRINGABLE(jsonValue, fontSize_);
-        JSON_STRING_PUT_STRINGABLE(jsonValue, lineHeight_);
-        JSON_STRING_PUT_STRINGABLE(jsonValue, baselineOffset_);
-        JSON_STRING_PUT_STRINGABLE(jsonValue, wordSpacing_);
-        JSON_STRING_PUT_STRINGABLE(jsonValue, textIndent_);
-        JSON_STRING_PUT_STRINGABLE(jsonValue, letterSpacing_);
-        JSON_STRING_PUT_STRINGABLE(jsonValue, lineSpacing_);
-
-        JSON_STRING_PUT_INT(jsonValue, fontWeight_);
-        JSON_STRING_PUT_INT(jsonValue, fontStyle_);
-        JSON_STRING_PUT_INT(jsonValue, textBaseline_);
-        JSON_STRING_PUT_INT(jsonValue, textOverflow_);
-        JSON_STRING_PUT_INT(jsonValue, verticalAlign_);
-        JSON_STRING_PUT_INT(jsonValue, textAlign_);
-        JSON_STRING_PUT_INT(jsonValue, textDecorationStyle_);
-        JSON_STRING_PUT_INT(jsonValue, textDecoration_);
-        JSON_STRING_PUT_INT(jsonValue, whiteSpace_);
-        JSON_STRING_PUT_INT(jsonValue, wordBreak_);
-        JSON_STRING_PUT_INT(jsonValue, textCase_);
-        JSON_STRING_PUT_INT(jsonValue, ellipsisMode_);
-        JSON_STRING_PUT_INT(jsonValue, lineBreakStrategy_);
-
-        std::stringstream ss;
-        std::for_each(renderColors_.begin(), renderColors_.end(), [&ss](const Color& c) { ss << c.ToString() << ","; });
-        jsonValue->Put("renderColors", ss.str().c_str());
-        JSON_STRING_PUT_INT(jsonValue, renderStrategy_);
-        JSON_STRING_PUT_INT(jsonValue, effectStrategy_);
-        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, symbolEffectOptions_);
-
-        return jsonValue->ToString();
-    }
+    std::string ToString() const;
 
 private:
     std::vector<std::string> fontFamilies_;
@@ -817,8 +784,8 @@ private:
     bool adaptHeight_ = false; // whether adjust text size with height.
     bool allowScale_ = true;
     bool halfLeading_ = false;
-    float minFontScale_ = 0.85f;
-    float maxFontScale_ = 3.20f;
+    float minFontScale_ = 0.0f;
+    float maxFontScale_ = static_cast<float>(INT32_MAX);
 
     // for Symbol
     std::vector<Color> renderColors_;

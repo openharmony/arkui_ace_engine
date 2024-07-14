@@ -81,6 +81,11 @@ void ClipboardImpl::HasData(const std::function<void(bool hasData)>& callback)
         TaskExecutor::TaskType::UI, "ArkUIClipboardHasData");
 }
 
+void ClipboardImpl::HasDataType(const std::function<void(bool hasData)>& callback, const std::string& mimeType)
+{
+    HasData(callback);
+}
+
 void ClipboardImpl::SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions copyOption)
 {
     if (!taskExecutor_ || !callbackSetClipboardPixmapData_) {

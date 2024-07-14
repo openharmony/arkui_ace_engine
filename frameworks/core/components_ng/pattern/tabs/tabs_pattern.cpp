@@ -23,9 +23,9 @@
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/tab_bar/tabs_event.h"
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
-#include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
@@ -64,8 +64,8 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
 
-    ChangeEvent changeEvent([weak = WeakClaim(this), tabBarNode, tabBarPattern, jsEvent = std::move(event)](
-                                int32_t index) {
+    ChangeEventWithPreIndex changeEvent([weak = WeakClaim(this), tabBarNode, tabBarPattern, jsEvent = std::move(event)](
+                                            int32_t preIndex, int32_t currentIndex) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (tabBarPattern->IsMaskAnimationExecuted()) {
@@ -75,17 +75,18 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         CHECK_NULL_VOID(tabsNode);
         auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
         CHECK_NULL_VOID(tabsLayoutProperty);
-        tabsLayoutProperty->UpdateIndex(index);
-        tabBarPattern->OnTabBarIndexChange(index);
+        tabsLayoutProperty->UpdateIndex(currentIndex);
+        tabBarPattern->OnTabBarIndexChange(currentIndex);
+        pattern->FireTabContentStateCallback(preIndex, currentIndex);
 
         /* js callback */
         if (jsEvent && tabsNode->IsOnMainTree()) {
-            pattern->RecordChangeEvent(index);
+            pattern->RecordChangeEvent(currentIndex);
             auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);
             context->AddAfterLayoutTask(
-                [index, jsEvent]() {
-                    TabContentChangeEvent eventInfo(index);
+                [currentIndex, jsEvent]() {
+                    TabContentChangeEvent eventInfo(currentIndex);
                     jsEvent(&eventInfo);
                 }, true);
         }
@@ -94,10 +95,38 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
     if (onChangeEvent_) {
         (*onChangeEvent_).swap(changeEvent);
     } else {
-        onChangeEvent_ = std::make_shared<ChangeEvent>(changeEvent);
+        onChangeEvent_ = std::make_shared<ChangeEventWithPreIndex>(changeEvent);
         auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(eventHub);
-        eventHub->AddOnChangeEvent(onChangeEvent_);
+        eventHub->AddOnChangeEventWithPreIndex(onChangeEvent_);
+    }
+}
+
+void TabsPattern::FireTabContentStateCallback(int32_t oldIndex, int32_t nextIndex) const
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    std::string id = tabsNode->GetInspectorId().value_or("");
+    int32_t uniqueId = tabsNode->GetId();
+    auto swiperNode = tabsNode->GetTabs();
+    CHECK_NULL_VOID(swiperNode);
+
+    auto oldTabContent = swiperNode->GetChildAtIndex(oldIndex);
+    if (oldTabContent) {
+        std::string oldTabContentId = oldTabContent->GetInspectorId().value_or("");
+        int32_t oldTabContentUniqueId = oldTabContent->GetId();
+        TabContentInfo oldTabContentInfo(oldTabContentId, oldTabContentUniqueId, TabContentState::ON_HIDE, oldIndex,
+            id, uniqueId);
+        UIObserverHandler::GetInstance().NotifyTabContentStateUpdate(oldTabContentInfo);
+    }
+
+    auto nextTabContent = swiperNode->GetChildAtIndex(nextIndex);
+    if (nextTabContent) {
+        std::string nextTabContentId = nextTabContent->GetInspectorId().value_or("");
+        int32_t nextTabContentUniqueId = nextTabContent->GetId();
+        TabContentInfo nextTabContentInfo(nextTabContentId, nextTabContentUniqueId, TabContentState::ON_SHOW, nextIndex,
+            id, uniqueId);
+        UIObserverHandler::GetInstance().NotifyTabContentStateUpdate(nextTabContentInfo);
     }
 }
 

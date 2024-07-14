@@ -42,6 +42,12 @@ public:
         return index == selectedIndex;
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
+    {
+        AccessibilityProperty::ToJsonValue(json, filter);
+        json->PutExtAttr("label", GetGroupText(true).c_str(), filter);
+    }
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(TabBarItemAccessibilityProperty);
 };

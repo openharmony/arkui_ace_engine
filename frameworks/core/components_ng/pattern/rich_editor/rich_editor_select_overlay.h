@@ -32,6 +32,7 @@ public:
     bool CheckHandleVisible(const RectF& paintRect) override;
     void OnResetTextSelection() override;
     void AfterCloseOverlay() override;
+    void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag) override;
 
     // override SelectOverlayHolder
     std::optional<SelectHandleInfo> GetFirstHandleInfo() override;
@@ -44,13 +45,15 @@ public:
     // override SelectOverlayCallback
     void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type) override;
     void OnHandleMove(const RectF& rect, bool isFirst) override;
+    void GetLocalPointWithTransform(OffsetF& localPoint);
     void OnHandleMoveDone(const RectF& rect, bool isFirst) override;
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info = nullptr) override;
     void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) override;
     std::optional<SelectOverlayInfo> GetSelectOverlayInfo();
     bool IsSingleHandleShow();
     void UpdateMenuOffset();
-    bool IsHandlesShow();
+    bool IsBothHandlesShow();
+    bool IsHandleShow();
 
 private:
     void RemoveAreaChangeInner();

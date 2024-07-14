@@ -45,8 +45,13 @@ CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     auto layoutProperty = pickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
 
+    auto textPickerPattern = pickerNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, nullptr);
+    auto fontScale = textPickerPattern->GetPaintDividerSpacing();
+
     return
-        [weak = WeakClaim(this), layoutProperty, frameRect, enabled = enabled_, pattern = pattern_](RSCanvas& canvas) {
+        [weak = WeakClaim(this), layoutProperty, frameRect,
+            fontScale, enabled = enabled_, pattern = pattern_](RSCanvas& canvas) {
             auto picker = weak.Upgrade();
             CHECK_NULL_VOID(picker);
             auto textPickerPattern = DynamicCast<TextPickerPattern>(pattern.Upgrade());
@@ -56,9 +61,9 @@ CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
             RectF contentRect = { padding.left.value_or(0), padding.top.value_or(0),
                 frameRect.Width() - padding.Width(), frameRect.Height() - padding.Height() };
 
-            double dividerHeight = picker->defaultPickerItemHeight_;
+            double dividerHeight = picker->defaultPickerItemHeight_ * fontScale;
             if (textPickerPattern->GetResizeFlag()) {
-                dividerHeight = textPickerPattern->GetResizePickerItemHeight();
+                dividerHeight = textPickerPattern->GetResizePickerItemHeight() * fontScale;
             }
 
             if (contentRect.Width() >= 0.0f && (contentRect.Height() >= dividerHeight)) {

@@ -512,13 +512,19 @@ HWTEST_F(NavBarTestNg, NarBarPattern002, TestSize.Level1)
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = AceType::MakeRefPtr<FrameNode>(frameTag, nodeId, AceType::MakeRefPtr<Pattern>());
 
+    auto navigationGroupNode = FrameNode::CreateFrameNode("NavigationGroupNode", 33,
+        AceType::MakeRefPtr<NavigationPattern>());
+    EXPECT_NE(navigationGroupNode, nullptr);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    EXPECT_NE(navigationPattern, nullptr);
+
     GestureEvent info;
     auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
-    navBarpattern_->InitPanEvent(gestureHub);
-    auto panEvent = navBarpattern_->panEvent_;
+    navigationPattern->InitPanEvent(gestureHub);
+    auto panEvent = navigationPattern->panEvent_;
     EXPECT_NE(panEvent, nullptr);
 }
 
@@ -593,31 +599,9 @@ HWTEST_F(NavBarTestNg, NavBarPattern005, TestSize.Level1)
     ASSERT_NE(barItemNode, nullptr);
     barItemNode->MountToParent(buttonNode);
     barItemNode->SetIsMoreItemNode(true);
-    navBarNode_->SetIsTitleMenuNodeShowing(true);
-
-    bool isItemActionFired = false;
-    auto barItemEventHub = barItemNode->GetEventHub<BarItemEventHub>();
-    ASSERT_NE(barItemEventHub, nullptr);
-    barItemEventHub->SetItemAction([&]() { isItemActionFired = true; });
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-
-    /**
-     * @tc.steps: step3. call OnWindowSizeChanged func when PrevMenuIsCustom is true
-     * @tc.expected: Set isItemActionFired is true
-     */
-    navBarNode_->UpdatePrevMenuIsCustom(true);
-    navBarpattern_->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::ROTATION);
-    EXPECT_TRUE(isItemActionFired);
-
-    /**
-     * @tc.steps: step4. call OnWindowSizeChanged func when PrevMenuIsCustom is false
-     * @tc.expected: isItemActionFired is true
-     */
-    navBarNode_->UpdatePrevMenuIsCustom(false);
-    navBarpattern_->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::ROTATION);
-    EXPECT_TRUE(isItemActionFired);
 }
 
 /**
@@ -1151,9 +1135,15 @@ HWTEST_F(NavBarTestNg, NavBarPattern021, TestSize.Level1)
     navBarPattern->isHideTitlebar_ = true;
     navBarPattern->titleMode_ = NavigationTitleMode::MINI;
 
+    auto navigationGroupNode = FrameNode::CreateFrameNode("NavigationGroupNode", 33,
+        AceType::MakeRefPtr<NavigationPattern>());
+    EXPECT_NE(navigationGroupNode, nullptr);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    EXPECT_NE(navigationPattern, nullptr);
+
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-    navBarPattern->InitPanEvent(gestureHub);
+    navigationPattern->InitPanEvent(gestureHub);
 }
 
 /**

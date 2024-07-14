@@ -1669,7 +1669,7 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest048, TestSize.Level1)
     /**
      * @tc.steps: step3. Call AdjustChildren().
      */
-    layoutWrapper->AdjustChildren(OffsetF(0, 10));
+    layoutWrapper->AdjustChildren(OffsetF(0, 10), false);
     EXPECT_FALSE(rowFrameNode1->GetLayoutProperty()->GetSafeAreaExpandOpts());
 }
 

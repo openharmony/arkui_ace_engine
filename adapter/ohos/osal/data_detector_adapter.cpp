@@ -39,16 +39,16 @@ constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
 const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
     { TextDataDetectType::PHONE_NUMBER, "phoneNum" }, { TextDataDetectType::URL, "url" },
     { TextDataDetectType::EMAIL, "email" }, { TextDataDetectType::ADDRESS, "location" },
-    { TextDataDetectType::DATETIME, "datetime" }
+    { TextDataDetectType::DATE_TIME, "datetime" }
 };
 const std::unordered_map<std::string, TextDataDetectType> TEXT_DETECT_MAP_REVERSE = {
     { "phoneNum", TextDataDetectType::PHONE_NUMBER }, { "url", TextDataDetectType::URL },
     { "email", TextDataDetectType::EMAIL }, { "location", TextDataDetectType::ADDRESS },
-    { "datetime", TextDataDetectType::DATETIME }
+    { "datetime", TextDataDetectType::DATE_TIME }
 };
 
 bool DataDetectorAdapter::ShowUIExtensionMenu(
-    const AISpan& aiSpan, NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode)
+    const AISpan& aiSpan, NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode, bool isShowSelectText)
 {
     ModalUIExtensionCallbacks callbacks;
     callbacks.onResult = [onClickMenu = onClickMenu_](int32_t code, const AAFwk::Want& want) {
@@ -69,6 +69,7 @@ bool DataDetectorAdapter::ShowUIExtensionMenu(
     };
     AAFwk::Want want;
     want.SetElementName(uiExtensionBundleName_, uiExtensionAbilityName_);
+    want.SetParam("isShowSelectText", isShowSelectText);
     SetWantParamaters(aiSpan, want);
 
     uiExtNode_ = NG::UIExtensionModelNG::Create(want, callbacks);
@@ -76,6 +77,7 @@ bool DataDetectorAdapter::ShowUIExtensionMenu(
     auto onReceive = GetOnReceive(aiRect, targetNode);
     auto pattern = uiExtNode_->GetPattern<NG::UIExtensionPattern>();
     CHECK_NULL_RETURN(pattern, false);
+    pattern->SetModalFlag(false);
     pattern->SetOnReceiveCallback(std::move(onReceive));
     uiExtNode_->MarkModifyDone();
     return true;
@@ -96,6 +98,10 @@ std::function<void(const AAFwk::WantParams&)> DataDetectorAdapter::GetOnReceive(
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
+        const std::string& closeMenu = wantParams.GetStringParam("closeMenu");
+        if (closeMenu == "true") {
+            overlayManager->CloseUIExtensionMenu(targetNode->GetId());
+        }
         const std::string& action = wantParams.GetStringParam("action");
         if (!action.empty() && dataDetectorAdapter->onClickMenu_) {
             dataDetectorAdapter->onClickMenu_(action);
@@ -105,9 +111,7 @@ std::function<void(const AAFwk::WantParams&)> DataDetectorAdapter::GetOnReceive(
             auto abilityParams = wantParams.GetWantParams("abilityParams");
             dataDetectorAdapter->StartAbilityByType(abilityType, abilityParams);
         }
-        const std::string& closeMenu = wantParams.GetStringParam("closeMenu");
         if (closeMenu == "true") {
-            overlayManager->CloseUIExtensionMenu(targetNode->GetId());
             return;
         }
         const std::string& longestContent = wantParams.GetStringParam("longestContent");
@@ -165,7 +169,7 @@ void DataDetectorAdapter::SetWantParamaters(const AISpan& aiSpan, AAFwk::Want& w
     if (entityJson_.find(aiSpan.start) != entityJson_.end()) {
         want.SetParam("entityJson", entityJson_[aiSpan.start]);
     }
-    if (aiSpan.type == TextDataDetectType::DATETIME) {
+    if (aiSpan.type == TextDataDetectType::DATE_TIME) {
         want.SetParam("fullText", textForAI_);
         want.SetParam("offset", aiSpan.start);
     }

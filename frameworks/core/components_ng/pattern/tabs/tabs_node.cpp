@@ -95,6 +95,7 @@ void TabsNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
     json->PutExtAttr("barBackgroundBlurStyle",
         BAR_BLURSTYLE[static_cast<int32_t>(GetBarBackgroundBlurStyle())].c_str(), filter);
     json->PutExtAttr("animationMode", GetAnimationMode().c_str(), filter);
+    json->PutExtAttr("edgeEffect", GetEdgeEffect().c_str(), filter);
 
     auto barGridAlignJson = JsonUtil::Create(true);
     auto barGridAlign = GetBarGridAlign();
@@ -275,6 +276,34 @@ std::string TabsNode::GetAnimationMode() const
             break;
         default:
             ret = "AnimationMode.CONTENT_FIRST";
+            break;
+    }
+    return ret;
+}
+
+std::string TabsNode::GetEdgeEffect() const
+{
+    std::string ret = "EdgeEffect::SPRING";
+    if (!swiperId_.has_value()) {
+        return ret;
+    }
+    auto swiperNode = GetFrameNode(V2::SWIPER_ETS_TAG, swiperId_.value());
+    CHECK_NULL_RETURN(swiperNode, ret);
+    auto paintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, ret);
+    EdgeEffect edgeEffect = paintProperty->GetEdgeEffect().value();
+    switch (edgeEffect) {
+        case EdgeEffect::SPRING:
+            ret = "EdgeEffect::SPRING";
+            break;
+        case EdgeEffect::FADE:
+            ret = "EdgeEffect::FADE";
+            break;
+        case EdgeEffect::NONE:
+            ret = "EdgeEffect::NONE";
+            break;
+        default:
+            ret = "EdgeEffect::SPRING";
             break;
     }
     return ret;

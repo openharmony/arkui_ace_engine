@@ -316,4 +316,27 @@ HWTEST_F(MenuExpandTestNg, MenuExpandTestNg005, TestSize.Level1)
     subMenuPattern->SetSubMenuShow();
     EXPECT_TRUE(subMenuPattern->isSubMenuShow_);
 }
+
+/**
+ * @tc.name: MenuExpandTestNg006
+ * @tc.desc: Test ParseMenuRadius.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuExpandTestNg, MenuExpandTestNg006, TestSize.Level1)
+{
+    menuItemPattern_->expandingMode_ = SubMenuExpandingMode::EMBEDDED;
+    EXPECT_EQ(menuItemPattern_->GetExpandingMode(), SubMenuExpandingMode::EMBEDDED);
+
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu = FrameNode::CreateFrameNode(
+        V2::SELECT_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    mainMenu->MountToParent(wrapperNode);
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    auto menuPattern = mainMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    wrapperPattern->hasCustomRadius_ = true;
+    MenuParam param;
+    menuItemPattern_->ParseMenuRadius(param);
+}
 } // namespace OHOS::Ace::NG

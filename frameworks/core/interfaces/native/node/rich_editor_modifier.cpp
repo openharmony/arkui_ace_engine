@@ -38,6 +38,44 @@ void ResetRichEditorDetectEnable(ArkUINodeHandle node)
     RichEditorModelNG::SetTextDetectEnable(frameNode, DEFAULT_ENABLE_TEXT_DETECTOR);
 }
 
+void SetRichEditorDataDetectorConfigWithEvent(ArkUINodeHandle node, ArkUI_CharPtr types, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string strValue = types;
+    std::function<void(const std::string&)>* onResult = nullptr;
+    if (callback) {
+        onResult = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+    }
+    RichEditorModelNG::SetTextDetectConfig(frameNode, strValue, std::move(*onResult));
+}
+
+void ResetRichEditorDataDetectorConfigWithEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetTextDetectConfig(frameNode, "", nullptr);
+}
+
+void SetRichEditorOnIMEInputComplete(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onIMEInputComplete = reinterpret_cast<std::function<void(RichEditorAbstractSpanResult)>*>(callback);
+        RichEditorModelNG::SetOnIMEInputComplete(frameNode, std::move(*onIMEInputComplete));
+    } else {
+        RichEditorModelNG::SetOnIMEInputComplete(frameNode, nullptr);
+    }
+}
+
+void ResetRichEditorOnIMEInputComplete(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetOnIMEInputComplete(frameNode, nullptr);
+}
+
 void SetRichEditorCopyOptions(ArkUINodeHandle node, ArkUI_Int32 copyOptionsValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -52,6 +90,25 @@ void ResetRichEditorCopyOptions(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     CopyOptions defaultCopyOptions = CopyOptions::Distributed;
     RichEditorModelNG::SetCopyOption(frameNode, defaultCopyOptions);
+}
+
+void SetRichEditorOnSelectionChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onSelectionChange = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+        RichEditorModelNG::SetOnSelectionChange(frameNode, std::move(*onSelectionChange));
+    } else {
+        RichEditorModelNG::SetOnSelectionChange(frameNode, nullptr);
+    }
+}
+
+void ResetRichEditorOnSelectionChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetOnSelectionChange(frameNode, nullptr);
 }
 
 void SetRichEditorCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color)
@@ -71,6 +128,63 @@ void ResetRichEditorCaretColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RichEditorModelNG::SetCaretColor(frameNode, caretColor);
+}
+
+void SetRichEditorOnSelect(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onSelect = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+        RichEditorModelNG::SetOnSelect(frameNode, std::move(*onSelect));
+    } else {
+        RichEditorModelNG::SetOnSelect(frameNode, nullptr);
+    }
+}
+
+void ResetRichEditorOnSelect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetOnSelect(frameNode, nullptr);
+}
+
+void SetRichEditorOnSubmit(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onSubmit = reinterpret_cast<std::function<void(int32_t, NG::TextFieldCommonEvent&)>*>(callback);
+        RichEditorModelNG::SetOnSubmit(frameNode, std::move(*onSubmit));
+    } else {
+        RichEditorModelNG::SetOnSubmit(frameNode, nullptr);
+    }
+}
+
+void ResetRichEditorOnSubmit(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetOnSubmit(frameNode, nullptr);
+}
+
+void SetRichEditorAboutToIMEInput(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto aboutToIMEInput = reinterpret_cast<std::function<bool(const RichEditorInsertValue&)>*>(callback);
+        RichEditorModelNG::SetAboutToIMEInput(frameNode, std::move(*aboutToIMEInput));
+    } else {
+        RichEditorModelNG::SetAboutToIMEInput(frameNode, nullptr);
+    }
+}
+
+void ResetRichEditorAboutToIMEInput(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetAboutToIMEInput(frameNode, nullptr);
 }
 
 void SetRichEditorOnReady(ArkUINodeHandle node, void* callback)
@@ -225,7 +339,12 @@ namespace NodeModifier {
 const ArkUIRichEditorModifier* GetRichEditorModifier()
 {
     static const ArkUIRichEditorModifier modifier = { SetRichEditorDetectEnable, ResetRichEditorDetectEnable,
-        SetRichEditorCopyOptions, ResetRichEditorCopyOptions, SetRichEditorCaretColor, ResetRichEditorCaretColor,
+        SetRichEditorDataDetectorConfigWithEvent, ResetRichEditorDataDetectorConfigWithEvent,
+        SetRichEditorOnIMEInputComplete, ResetRichEditorOnIMEInputComplete,
+        SetRichEditorCopyOptions, ResetRichEditorCopyOptions, SetRichEditorOnSelectionChange,
+        ResetRichEditorOnSelectionChange, SetRichEditorCaretColor, ResetRichEditorCaretColor,
+        SetRichEditorOnSelect, ResetRichEditorOnSelect,
+        SetRichEditorOnSubmit, ResetRichEditorOnSubmit, SetRichEditorAboutToIMEInput, ResetRichEditorAboutToIMEInput,
         SetRichEditorOnReady, ResetRichEditorOnReady, SetRichEditorOnDeleteComplete, ResetRichEditorOnDeleteComplete,
         SetRichEditorOnEditingChange, ResetRichEditorOnEditingChange,
         SetRichEditorSelectedBackgroundColor, ResetRichEditorSelectedBackgroundColor, SetRichEditorOnPaste,

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "gtest/gtest.h"
+#include "test/unittest/core/pattern/test_ng.h"
 
 #define private public
 #define protected public
@@ -66,9 +66,11 @@ constexpr Color NORMAL_COLOR = Color(0xff0000ff);
 constexpr Color ERROR_COLOR = Color();
 const std::optional<int32_t> INDICATOR_TYPE_TICK = 0;
 const OHOS::Ace::NG::TouchHoverAnimationType INVALID_TOUCH_HOVER_ANIMARION_TYPE = TouchHoverAnimationType(100);
+constexpr double NUM_TWO = 2.0;
+const SizeF CHILD_FRAME_SIZE = SizeF(50.0, 50.0);
 } // namespace
 
-class RadioTestNg : public testing::Test {
+class RadioTestNg : public TestNG {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
@@ -1800,5 +1802,192 @@ HWTEST_F(RadioTestNg, RadioPatternTest037, TestSize.Level1)
      */
     pattern->SetBuilderFunc(node);
     pattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: RadioReverseLayout001
+ * @tc.desc: Test for layout method of RadioLayoutAlgorithm to get the offset in the RTL scene,
+             when Width and height are not set in the front end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioReverseLayout001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node and add Image child.
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto radioLayoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(radioLayoutProperty, nullptr);
+    radioLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    frameNode->MarkModifyDone();
+
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto childNode = pattern->builderChildNode_;
+    ASSERT_NE(childNode, nullptr);
+    auto hostGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(frameNode, hostGeometryNode, radioLayoutProperty);
+    auto childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> childWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(childNode, childGeometryNode, childNode->GetLayoutProperty());
+    RadioLayoutAlgorithm radioLayoutAlgorithm;
+    LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.maxSize = SizeF(1000.0, 1000.0);
+    layoutConstraintSize.minSize = SizeF(0, 0);
+    ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize);
+    layoutWrapper.AppendChild(childWrapper);
+
+    /**
+     * @tc.steps: step2. Measure Radio node Content size and child size.
+     */
+    layoutWrapper.GetGeometryNode()->SetFrameSize(CONTENT_SIZE);
+    childWrapper->GetGeometryNode()->SetFrameSize(CHILD_FRAME_SIZE);
+
+    /**
+     * @tc.steps: step3. layout child node.
+     */
+    NG::OffsetF child_offset;
+    auto align = Alignment::CENTER;
+    child_offset.SetX((1.0 + align.GetHorizontal()) * (CONTENT_SIZE.Width() - CHILD_FRAME_SIZE.Width()) / NUM_TWO);
+    child_offset.SetY((1.0 + align.GetVertical()) * (CONTENT_SIZE.Height() - CHILD_FRAME_SIZE.Height()) / NUM_TWO);
+    radioLayoutAlgorithm.Layout(&layoutWrapper);
+    EXPECT_TRUE(IsEqual(childWrapper->GetGeometryNode()->GetMarginFrameOffset(), child_offset));
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: RadioReverseLayout002
+ * @tc.desc: Test for layout method of RadioLayoutAlgorithm to get the offset in the RTL scene,
+             when Width and height are set in the front end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioReverseLayout002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node and add Image child.
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto radioLayoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(radioLayoutProperty, nullptr);
+    radioLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    frameNode->MarkModifyDone();
+
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto childNode = pattern->builderChildNode_;
+    ASSERT_NE(childNode, nullptr);
+    auto hostGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(frameNode, hostGeometryNode, radioLayoutProperty);
+    auto childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> childWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(childNode, childGeometryNode, childNode->GetLayoutProperty());
+    RadioLayoutAlgorithm radioLayoutAlgorithm;
+    LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.maxSize = SizeF(1000.0, 1000.0);
+    layoutConstraintSize.minSize = SizeF(0, 0);
+    layoutConstraintSize.selfIdealSize.SetWidth(COMPONENT_WIDTH);
+    layoutConstraintSize.selfIdealSize.SetHeight(COMPONENT_HEIGHT);
+    ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize);
+    layoutWrapper.AppendChild(childWrapper);
+
+    /**
+     * @tc.steps: step2. Measure Radio node Content size and child size.
+     */
+    layoutWrapper.GetGeometryNode()->SetFrameSize(CONTENT_SIZE);
+    childWrapper->GetGeometryNode()->SetFrameSize(CHILD_FRAME_SIZE);
+
+    /**
+     * @tc.steps: step3. layout child node.
+     */
+    NG::OffsetF child_offset;
+    auto align = Alignment::CENTER;
+    child_offset.SetX((1.0 + align.GetHorizontal()) * (CONTENT_SIZE.Width() - CHILD_FRAME_SIZE.Width()) / NUM_TWO);
+    child_offset.SetY((1.0 + align.GetVertical()) * (CONTENT_SIZE.Height() - CHILD_FRAME_SIZE.Height()) / NUM_TWO);
+    radioLayoutAlgorithm.Layout(&layoutWrapper);
+    EXPECT_TRUE(IsEqual(childWrapper->GetGeometryNode()->GetMarginFrameOffset(), child_offset));
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: RadioReverseLayout003
+ * @tc.desc: Test for layout method of RadioLayoutAlgorithm to get the offset in the RTL scene,
+             when Width and height are set in the front end and child node is customBuilder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioReverseLayout003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node and add customNode child.
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
+    auto radioFunc = RadioBuilder();
+    radioModelNG.SetBuilder(std::move(radioFunc));
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto radioLayoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(radioLayoutProperty, nullptr);
+    radioLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(radioPaintProperty, nullptr);
+    int32_t CustomIndicatorType = 2;
+    radioPaintProperty->UpdateRadioIndicator(CustomIndicatorType);
+
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    frameNode->MarkModifyDone();
+
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto childNode = pattern->builderChildNode_;
+    ASSERT_NE(childNode, nullptr);
+    auto hostGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper(frameNode, hostGeometryNode, radioLayoutProperty);
+    auto childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> childWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(childNode, childGeometryNode, childNode->GetLayoutProperty());
+    RadioLayoutAlgorithm radioLayoutAlgorithm;
+    LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.maxSize = SizeF(1000.0, 1000.0);
+    layoutConstraintSize.minSize = SizeF(0, 0);
+    layoutConstraintSize.selfIdealSize.SetWidth(COMPONENT_WIDTH);
+    layoutConstraintSize.selfIdealSize.SetHeight(COMPONENT_HEIGHT);
+    ASSERT_NE(layoutWrapper.layoutProperty_, nullptr);
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize);
+    layoutWrapper.AppendChild(childWrapper);
+
+    /**
+     * @tc.steps: step2. Measure Radio node Content size and child size.
+     */
+    layoutWrapper.GetGeometryNode()->SetFrameSize(CONTENT_SIZE);
+    childWrapper->GetGeometryNode()->SetFrameSize(CHILD_FRAME_SIZE);
+
+    /**
+     * @tc.steps: step3. layout child node.
+     */
+    NG::OffsetF child_offset;
+    auto align = Alignment::CENTER;
+    child_offset.SetX((1.0 + align.GetHorizontal()) * (CONTENT_SIZE.Width() - CHILD_FRAME_SIZE.Width()) / NUM_TWO);
+    child_offset.SetY((1.0 + align.GetVertical()) * (CONTENT_SIZE.Height() - CHILD_FRAME_SIZE.Height()) / NUM_TWO);
+    radioLayoutAlgorithm.Layout(&layoutWrapper);
+    EXPECT_TRUE(IsEqual(childWrapper->GetGeometryNode()->GetMarginFrameOffset(), child_offset));
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG

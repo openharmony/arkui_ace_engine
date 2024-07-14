@@ -70,7 +70,7 @@ public:
     static void JsHoverEffect(const JSCallbackInfo& info);
     static void SetOnEditChanged(const JSCallbackInfo& info);
     static void SetOnSubmit(const JSCallbackInfo& info);
-    static JSRef<JSVal> CreateJsOnChangeObj(const TextRange& textRange);
+    static JSRef<JSVal> CreateJsOnChangeObj(const PreviewText& previewText);
     static void SetOnChange(const JSCallbackInfo& info);
     static void SetOnTextSelectionChange(const JSCallbackInfo& info);
     static void SetOnSecurityStateChange(const JSCallbackInfo& info);
@@ -88,7 +88,6 @@ public:
     static void OnDidDelete(const JSCallbackInfo& info);
     static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,
         const Border& boxBorder, const RefPtr<TextFieldTheme>& textFieldTheme);
-    static void JsMenuOptionsExtension(const JSCallbackInfo& info);
     static void SetForegroundColor(const JSCallbackInfo& info);
     static void SetPasswordIcon(const JSCallbackInfo& info);
     static void SetShowUnit(const JSCallbackInfo& info);
@@ -123,7 +122,7 @@ public:
     static void SetFontFeature(const JSCallbackInfo& info);
     static void SetTextOverflow(const JSCallbackInfo& info);
     static void SetTextIndent(const JSCallbackInfo& info);
-    static void SelectionMenuOptions(const JSCallbackInfo& info);
+    static void EditMenuOptions(const JSCallbackInfo& info);
     static void SetEnablePreviewText(const JSCallbackInfo& info);
 };
 

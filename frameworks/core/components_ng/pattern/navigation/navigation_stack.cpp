@@ -219,6 +219,14 @@ RefPtr<UINode> NavigationStack::Get(int32_t index)
     return navPathList_[index].second;
 }
 
+std::string NavigationStack::GetNavDesNameByIndex(int32_t index)
+{
+    if (index < 0 || index >= Size()) {
+        return "";
+    }
+    return navPathList_[index].first;
+}
+
 bool NavigationStack::GetFromPreBackup(const std::string& name, RefPtr<UINode>& navDestinationNode, int32_t& index)
 {
     // from bottom to top

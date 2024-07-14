@@ -508,4 +508,92 @@ HWTEST_F(WaterFlowTestNg, EstimateContentHeight001, TestSize.Level1)
     EXPECT_EQ(info->endIndex_, TOTAL_LINE_NUMBER * 4 - 1);
     EXPECT_EQ(info->EstimateContentHeight(), info->maxHeight_);
 }
+
+/**
+ * @tc.name: ScrollToIndex004
+ * @tc.desc: Test ScrollToIndex with extraOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ScrollToIndex004, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateItem(30);
+    });
+
+    /**
+     * @tc.steps: step1. scrollToIndex without animation
+     * @tc.expected: GetTotalOffset is right
+     */
+    std::optional<float> extraOffset = 0.f;
+    pattern_->ScrollToIndex(2, false, ScrollAlign::START, extraOffset);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 100.f);
+
+    extraOffset = -200.f;
+    pattern_->ScrollToIndex(2, false, ScrollAlign::START, extraOffset);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 0.f);
+
+    pattern_->ScrollToIndex(27, false, ScrollAlign::START, extraOffset);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 1500.f);
+
+    pattern_->ScrollToIndex(LAST_ITEM, false, ScrollAlign::END, extraOffset);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 1300.f);
+
+    extraOffset = 200.f;
+    pattern_->ScrollToIndex(2, false, ScrollAlign::START, extraOffset);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 300.f);
+
+    pattern_->ScrollToIndex(27, false, ScrollAlign::END, extraOffset);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 1500.f);
+
+    pattern_->ScrollToIndex(LAST_ITEM, false, ScrollAlign::END, extraOffset);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 1500.f);
+}
+
+/**
+ * @tc.name: ScrollToIndex005
+ * @tc.desc: Test ScrollToIndex with extraOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ScrollToIndex005, TestSize.Level1)
+{
+    Create([](WaterFlowModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateItem(30);
+    });
+
+    /**
+     * @tc.steps: step1. scrollToIndex with animation
+     * @tc.expected: finalPosition_ is right
+     */
+    std::optional<float> extraOffset = 0.f;
+    pattern_->ScrollToIndex(2, true, ScrollAlign::START, extraOffset);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), 100.f);
+
+    extraOffset = -200.f;
+    pattern_->ScrollToIndex(2, true, ScrollAlign::START, extraOffset);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), -100.f);
+
+    pattern_->ScrollToIndex(27, true, ScrollAlign::START, extraOffset);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), 1800.f);
+
+    extraOffset = 200.f;
+    pattern_->ScrollToIndex(2, true, ScrollAlign::END, extraOffset);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), -400.f);
+
+    pattern_->ScrollToIndex(27, true, ScrollAlign::END, extraOffset);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->GetFinalPosition(), 1600.f);
+}
 } // namespace OHOS::Ace::NG

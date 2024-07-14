@@ -301,6 +301,9 @@ public:
     virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
     virtual void ResetBackBlurStyle() {}
     virtual void ClipWithRect(const RectF& rectF) {}
+    virtual void ClipWithRoundRect(const RoundRect& roundRect) {}
+    virtual void ClipWithOval(const RectF& rectF) {}
+    virtual void ClipWithCircle(const Circle& circle) {}
     virtual void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) {}
     virtual void RemoveClipWithRRect() {}
 
@@ -458,7 +461,8 @@ public:
 
     virtual void ClearAccessibilityFocus() {};
 
-    virtual void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) {};
+    virtual void OnAccessibilityFocusUpdate(
+        bool isAccessibilityFocus, const int64_t accessibilityIdForVirtualNode = -2100000) {};
     virtual void OnAccessibilityFocusRectUpdate(RectT<int32_t> accessibilityFocusRect) {};
 
     virtual void OnMouseSelectUpdate(bool isSelected, const Color& fillColor, const Color& strokeColor) {}
@@ -637,7 +641,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Motion, MotionPath, MotionPathOption)
 
     // accessibility
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocus, bool);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP_FOR_VIRTUAL_NODE(AccessibilityFocus, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocusRect, RectT<int32_t>);
 
     // useEffect
@@ -698,6 +702,9 @@ public:
     }
 
     virtual void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) {}
+
+    // The additional opacity will be multiplied with the base opacity.
+    virtual void SetOpacityMultiplier(float opacity) {}
 
 protected:
     RenderContext() = default;

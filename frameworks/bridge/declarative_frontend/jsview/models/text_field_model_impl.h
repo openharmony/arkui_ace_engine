@@ -59,7 +59,7 @@ public:
     void SetOnEditChanged(std::function<void(bool)>&& func) override;
     void SetOnSubmit(std::function<void(int32_t)>&& func) override;
     void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override {};
-    void SetOnChange(std::function<void(const std::string&, TextRange&)>&& func) override;
+    void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& func) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override {};
     void SetOnSecurityStateChange(std::function<void(bool)>&& func) override {};
     void SetOnContentScroll(std::function<void(float, float)>&& func) override {};
@@ -68,7 +68,6 @@ public:
     void SetOnPaste(std::function<void(const std::string&)>&& func) override;
     void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func) override {};
     void SetCopyOption(CopyOptions copyOption) override;
-    void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) override;
     void ResetMaxLength() override {};
     static void InitTextInputDefaultStyle();
     void SetForegroundColor(const Color& value) override {};

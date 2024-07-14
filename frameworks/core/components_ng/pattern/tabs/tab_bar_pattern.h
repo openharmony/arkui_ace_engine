@@ -106,12 +106,18 @@ public:
         return tabBarStyle_;
     }
 
+    void SetCustomNode(FrameNode* node)
+    {
+        node_ = node;
+    }
+
 private:
     std::string text_;
     std::string icon_;
     std::optional<TabBarSymbol> symbol_;
     TabBarBuilderFunc builder_;
     TabBarStyle tabBarStyle_;
+    FrameNode* node_ = nullptr;
 };
 
 enum class AnimationType {
@@ -530,9 +536,9 @@ private:
     void RemoveTabBarEventCallback();
     void AddTabBarEventCallback();
     void AddMaskItemClickEvent();
-    void TabBarSuitAging();
-    void SetMarginVP(MarginProperty& marginLeftOrRight, MarginProperty& marginTopOrBottom);
     bool CanScroll() const;
+    bool ParseTabsIsRtl();
+    bool IsValidIndex(int32_t index);
 
     std::map<int32_t, RefPtr<ClickEvent>> clickEvents_;
     RefPtr<LongPressEvent> longPressEvent_;
@@ -608,8 +614,6 @@ private:
     std::map<int32_t, ItemInfo> visibleItemPosition_;
     bool canOverScroll_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
-    MarginProperty marginLeftOrRight_;
-    MarginProperty marginTopOrBottom_;
 };
 } // namespace OHOS::Ace::NG
 

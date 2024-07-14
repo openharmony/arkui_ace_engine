@@ -237,6 +237,7 @@
       OHOS::Ace::NG::RichEditorAbstractSpanResult::*;
       OHOS::Ace::NG::RichEditorInsertValue::*;
       OHOS::Ace::NG::RichEditorDeleteValue::*;
+      OHOS::Ace::NG::RichEditorChangeValue::*;
       OHOS::Ace::TabController::*;
       OHOS::Ace::ParseFontFeatureSettings*;
       OHOS::Ace::StorageProxy::*;

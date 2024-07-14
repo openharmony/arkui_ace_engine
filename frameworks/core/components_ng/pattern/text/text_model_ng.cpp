@@ -172,6 +172,16 @@ void TextModelNG::SetFontWeight(FrameNode* frameNode, Ace::FontWeight value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value, frameNode);
 }
 
+void TextModelNG::SetMinFontScale(const float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, value);
+}
+
+void TextModelNG::SetMaxFontScale(const float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, value);
+}
+
 void TextModelNG::SetFontWeight(Ace::FontWeight value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value);
@@ -369,14 +379,6 @@ void TextModelNG::SetDraggable(bool draggable)
     frameNode->SetDraggable(draggable);
 }
 
-void TextModelNG::SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto textPattern = frameNode->GetPattern<TextPattern>();
-    textPattern->SetMenuOptionItems(std::move(menuOptionsItems));
-}
-
 void TextModelNG::SetOnCopy(std::function<void(const std::string&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextEventHub>();
@@ -475,6 +477,16 @@ void TextModelNG::SetDraggable(FrameNode* frameNode, bool draggable)
 void TextModelNG::SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMaxFontSize, value, frameNode);
+}
+
+void TextModelNG::SetMinFontScale(FrameNode* frameNode, const float value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, value, frameNode);
+}
+
+void TextModelNG::SetMaxFontScale(FrameNode* frameNode, const float value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, value, frameNode);
 }
 
 void TextModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value)
@@ -1061,10 +1073,18 @@ void TextModelNG::SetOnTextSelectionChange(FrameNode* frameNode, std::function<v
     eventHub->SetOnSelectionChange(std::move(func));
 }
 
-void TextModelNG::SetSelectionMenuOptions(const std::vector<MenuOptionsParam>&& menuOptionsItems)
+void TextModelNG::SetSelectionMenuOptions(
+    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
 {
     auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    textPattern->OnSelectionMenuOptionsUpdate(std::move(menuOptionsItems));
+    textPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
+
+void TextModelNG::SetResponseRegion(bool isUserSetResponseRegion)
+{
+    auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetIsUserSetResponseRegion(isUserSetResponseRegion);
 }
 } // namespace OHOS::Ace::NG

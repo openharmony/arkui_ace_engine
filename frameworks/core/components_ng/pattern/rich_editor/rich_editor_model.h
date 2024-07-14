@@ -76,6 +76,7 @@ struct UpdateSpanStyle {
         updateFontFamily.reset();
         updateTextDecoration.reset();
         updateTextDecorationColor.reset();
+        updateTextDecorationStyle.reset();
         updateTextShadows.reset();
         updateFontFeature.reset();
 
@@ -101,6 +102,7 @@ struct UpdateSpanStyle {
     std::optional<std::vector<std::string>> updateFontFamily = std::nullopt;
     std::optional<TextDecoration> updateTextDecoration = std::nullopt;
     std::optional<Color> updateTextDecorationColor = std::nullopt;
+    std::optional<TextDecorationStyle> updateTextDecorationStyle = std::nullopt;
     std::optional<std::vector<Shadow>> updateTextShadows = std::nullopt;
     std::optional<NG::FONT_FEATURES_LIST> updateFontFeature = std::nullopt;
 
@@ -129,6 +131,7 @@ struct UpdateSpanStyle {
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, updateFontWeight);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, updateTextDecoration);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, updateTextDecorationColor);
+        JSON_STRING_PUT_OPTIONAL_INT(jsonValue, updateTextDecorationStyle);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, updateSymbolRenderingStrategy);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, updateSymbolEffectStrategy);
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, updateImageWidth);
@@ -240,6 +243,19 @@ struct PlaceholderOptions {
     }
 };
 
+struct PreviewTextInfo {
+    std::optional<std::string> value;
+    std::optional<int32_t> offset;
+
+    std::string ToString() const
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        JSON_STRING_PUT_OPTIONAL_STRING(jsonValue, value);
+        JSON_STRING_PUT_OPTIONAL_INT(jsonValue, offset);
+        return jsonValue->ToString();
+    }
+};
+
 class ACE_EXPORT RichEditorBaseControllerBase : public AceType {
     DECLARE_ACE_TYPE(RichEditorBaseControllerBase, AceType);
 
@@ -253,6 +269,7 @@ public:
     virtual void SetSelection(int32_t selectionStart, int32_t selectionEnd,
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) = 0;
     virtual WeakPtr<NG::LayoutInfoInterface> GetLayoutInfoInterface() = 0;
+    virtual const PreviewTextInfo GetPreviewTextInfo() const = 0;
 };
 
 class ACE_EXPORT RichEditorControllerBase : virtual public RichEditorBaseControllerBase {
@@ -317,7 +334,9 @@ public:
     virtual void SetOnDidChange(std::function<void(const NG::RichEditorChangeValue&)>&& func) = 0;
     virtual void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
-    virtual void SetSelectionMenuOptions(const std::vector<NG::MenuOptionsParam>&& menuOptionsItems) {};
+    virtual void SetSelectionMenuOptions(
+        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
+
 private:
     static std::unique_ptr<RichEditorModel> instance_;
     static std::mutex mutex_;

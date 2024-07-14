@@ -132,11 +132,27 @@ private:
     static void SetFirstDialogButtonActive(RefPtr<UINode>& contentRow);
     static void SetSecondDialogButtonActive(RefPtr<UINode>& contentRow);
     static void SetThirdDialogButtonActive(RefPtr<UINode>& contentRow);
+    static std::function<void()> CloseDiaglogEvent(const RefPtr<TextPickerPattern>& textPickerPattern,
+        const RefPtr<FrameNode>& dialogNode);
+
     static void SetDividerNodeActive(RefPtr<UINode>& contentRow, bool firstDivider,
         bool secondDivider, bool thirdDivider);
     static void SetSingleDividerNodeActive(RefPtr<FrameNode>& dividerNode, bool dividerActive);
+    static const Dimension ConvertFontSizeLimit(const Dimension& fontSizeValue,
+        const Dimension& fontSizeLimit, bool isUserSetFont = false);
+    static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue,
+        const Dimension& fontSizeLimit = 0.0_vp, bool isUserSetFont = false);
+    static const Dimension AdjustFontSizeScale(const Dimension& fontSizeValue, double fontScale);
+    static void GetUserSettingLimit();
+    static bool NeedAdaptForAging();
+    static void SetTextDisappearProperties(const RefPtr<PickerTheme>& pickerTheme,
+        const PickerTextProperties& properties);
     static WeakPtr<FrameNode> dialogNode_;
     static uint32_t dialogNodePage_;
+    static Dimension selectedTextStyleFont_;
+    static Dimension normalTextStyleFont_;
+    static Dimension disappearTextStyleFont_;
+
 };
 } // namespace OHOS::Ace::NG
 

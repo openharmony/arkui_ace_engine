@@ -28,6 +28,7 @@ group("core_unittest") {
     "pipeline:pipeline_context_test_ng",
     "property:core_property_unittest",
     "render:core_render_unittest",
+    "rosen:arkui_rosen_render_context_test",
     "svg:core_svg_unittest",
     "syntax:core_syntax_unittest",
   ]
@@ -134,6 +135,7 @@ group("linux_core_unittest") {
     "pattern/time_picker:time_picker_test_ng",
     "pattern/toggle:toggle_test_ng",
     "pattern/video:video_test_ng",
+    "pattern/view_context:view_context_test_ng",
     "pattern/waterflow:water_flow_test_original",
     "pattern/waterflow:water_flow_test_segmented",
     "pattern/waterflow:water_flow_test_sw",

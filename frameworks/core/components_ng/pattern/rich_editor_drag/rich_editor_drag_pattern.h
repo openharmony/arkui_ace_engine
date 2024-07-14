@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_overlay_modifier.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_paint_method.h"
@@ -62,6 +63,15 @@ public:
     void Initialize(const TextDragData& data)
     {
         textDragData_ = data;
+    }
+
+    Dimension GetDragCornerRadius() override
+    {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, TEXT_DRAG_RADIUS);
+        auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
+        CHECK_NULL_RETURN(richEditorTheme, TEXT_DRAG_RADIUS);
+        return richEditorTheme->GetDragCornerRadius();
     }
 
 protected:

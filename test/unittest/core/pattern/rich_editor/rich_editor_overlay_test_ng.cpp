@@ -1319,8 +1319,9 @@ HWTEST_F(RichEditorOverlayTestNg, SelectionMenuOptionsTest001, TestSize.Level1)
     menuOptionsParam3.content = "按钮3";
     menuOptionsParam3.icon = TEST_IMAGE_SOURCE;
     menuOptionsItems.push_back(menuOptionsParam3);
-    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(menuOptionsItems));
-    EXPECT_EQ(richEditorPattern->menuOptionItems_.size(), 3);
+    OnCreateMenuCallback onCreateMenuCallback;
+    OnMenuItemClickCallback onMenuItemClick;
+    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 
 /**
@@ -1346,7 +1347,92 @@ HWTEST_F(RichEditorOverlayTestNg, SelectionMenuOptionsTest002, TestSize.Level1)
     NG::MenuOptionsParam menuOptionsParam3;
     menuOptionsParam3.content = "按钮3";
     menuOptionsItems.push_back(menuOptionsParam3);
-    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(menuOptionsItems));
-    EXPECT_EQ(richEditorPattern->menuOptionItems_.size(), 3);
+    OnCreateMenuCallback onCreateMenuCallback;
+    OnMenuItemClickCallback onMenuItemClick;
+    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
+
+/**
+ * @tc.name: HandleLevel001
+ * @tc.desc: Test RichEditorPattern Handle Level OnFrameNodeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, HandleLevel001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get rich editor pattern instance, then add text span
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
+
+    /**
+     * @tc.steps: step2. request focus
+     */
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
+
+    /**
+     * @tc.step: step3. show overlay
+     */
+    richEditorPattern->OnModifyDone();
+    richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
+    richEditorPattern->textSelector_.Update(0, 2);
+
+    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
+    richEditorPattern->ShowSelectOverlay(
+        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
+    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
+
+    /**
+     * @tc.steps: step3. mark framnode changed.
+     */
+    richEditorNode_->AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_START_SCROLL);
+    richEditorNode_->ProcessFrameNodeChangeFlag();
+    EXPECT_EQ(richEditorPattern->selectOverlay_->handleLevelMode_, HandleLevelMode::EMBED);
+}
+
+/**
+ * @tc.name: HandleLevel002
+ * @tc.desc: Test RichEditorPattern Handle Level on FrameNode changed finish.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, HandleLevel002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get rich editor pattern instance, then add text span
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
+
+    /**
+     * @tc.steps: step2. request focus
+     */
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
+
+    /**
+     * @tc.step: step3. show overlay
+     */
+    richEditorPattern->OnModifyDone();
+    richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
+    richEditorPattern->textSelector_.Update(0, 2);
+
+    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
+    richEditorPattern->ShowSelectOverlay(
+        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
+    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
+
+    /**
+     * @tc.steps: step3. mark framnode change finish.
+     */
+    richEditorNode_->AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_END_SCROLL);
+    richEditorNode_->ProcessFrameNodeChangeFlag();
+    EXPECT_EQ(richEditorPattern->selectOverlay_->handleLevelMode_, HandleLevelMode::OVERLAY);
 }
 } // namespace OHOS::Ace::NG

@@ -47,7 +47,7 @@ export struct ToolBar {
   @ObjectLink toolBarList: ToolBarOptions
   controller: TabsController = new TabsController();
   @Prop activateIndex: number = -1
-  @Prop moreText: string = "更多"
+  @Prop moreText: ResourceStr = $r('sys.string.ohos_toolbar_more');
   @State menuContent: MenuController[] = [];
   toolBarItemBackground: Resource[] = []
   @State itemBackground: Resource = $r('sys.color.ohos_id_color_toolbar_bg')
@@ -71,6 +71,7 @@ export struct ToolBar {
         .fillColor(this.iconPrimaryColor)
         .margin({ top: 8, bottom: 2 })
         .objectFit(ImageFit.Contain)
+        .draggable(false)
       Text(this.moreText)
         .fontColor(this.fontPrimaryColor)
         .fontSize($r('sys.float.ohos_id_text_size_caption'))
@@ -91,6 +92,7 @@ export struct ToolBar {
         .opacity((this.toolBarList[index]?.state === 2) ? 0.4 : 1)
         .margin({ top: 8, bottom: 2 })
         .objectFit(ImageFit.Contain)
+        .draggable(false)
       Text(this.toolBarList[index]?.content)
         .fontColor(this.activateIndex === index && !(this.toolBarList[index]?.state === 2)
           ? this.fontActivatedPrimaryColor : this.fontPrimaryColor)

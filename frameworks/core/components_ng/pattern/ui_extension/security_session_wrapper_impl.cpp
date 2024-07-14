@@ -340,7 +340,7 @@ bool SecuritySessionWrapperImpl::IsSessionValid()
     return session_ != nullptr;
 }
 
-int32_t SecuritySessionWrapperImpl::GetSessionId()
+int32_t SecuritySessionWrapperImpl::GetSessionId() const
 {
     return session_ ? session_->GetPersistentId() : 0;
 }
@@ -363,7 +363,12 @@ bool SecuritySessionWrapperImpl::NotifyFocusStateSync(bool focusState)
 
 bool SecuritySessionWrapperImpl::NotifyBackPressedSync()
 {
-    return false;
+    CHECK_NULL_RETURN(session_, false);
+    bool isConsumed = false;
+    session_->TransferBackPressedEventForConsumed(isConsumed);
+    PLATFORM_LOGI("BackPressed, persistentid = %{public}d and %{public}s consumed.",
+        GetSessionId(), isConsumed ? "is" : "is not");
+    return isConsumed;
 }
 
 bool SecuritySessionWrapperImpl::NotifyPointerEventSync(
@@ -541,47 +546,25 @@ void SecuritySessionWrapperImpl::OnAccessibilityEvent(
     const Accessibility::AccessibilityEventInfo& info, int64_t offset)
 {}
 
-bool SecuritySessionWrapperImpl::TransferExecuteAction(int64_t elementId,
-    const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset)
-{
-    CHECK_NULL_RETURN(session_, false);
-    return OHOS::Rosen::WSError::WS_OK == session_->TransferExecuteAction(
-        elementId, actionArguments, action, offset);
-}
-
-void SecuritySessionWrapperImpl::SearchExtensionElementInfoByAccessibilityId(int64_t elementId,
-    int32_t mode, int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
-{
-    CHECK_NULL_VOID(session_);
-    session_->TransferSearchElementInfo(elementId, mode, baseParent, output);
-}
-
-void SecuritySessionWrapperImpl::SearchElementInfosByText(int64_t elementId, const std::string& text,
-    int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
-{
-    CHECK_NULL_VOID(session_);
-    session_->TransferSearchElementInfosByText(elementId, text, baseParent, output);
-}
-
-void SecuritySessionWrapperImpl::FindFocusedElementInfo(int64_t elementId,
-    int32_t focusType, int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
-{
-    CHECK_NULL_VOID(session_);
-    session_->TransferFindFocusedElementInfo(elementId, focusType, baseParent, output);
-}
-
-void SecuritySessionWrapperImpl::FocusMoveSearch(int64_t elementId,
-    int32_t direction, int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
-{
-    CHECK_NULL_VOID(session_);
-    session_->TransferFocusMoveSearch(elementId, direction, baseParent, output);
-}
-
 void SecuritySessionWrapperImpl::TransferAccessibilityHoverEvent(float pointX,
     float pointY, int32_t sourceType, int32_t eventType, int64_t timeMs)
 {
     CHECK_NULL_VOID(session_);
     session_->TransferAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+}
+
+void SecuritySessionWrapperImpl::TransferAccessibilityChildTreeRegister(
+    uint32_t windowId, int32_t treeId, int64_t accessibilityId)
+{
+}
+
+void SecuritySessionWrapperImpl::TransferAccessibilityChildTreeDeregister()
+{
+}
+
+void SecuritySessionWrapperImpl::TransferAccessibilityDumpChildInfo(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
 }
 /************************ End: The interface about the accessibility **************************/
 
@@ -614,12 +597,8 @@ void SecuritySessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
         } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
             transaction = transactionController->GetRSTransaction();
         }
-        if (transaction) {
-            transaction->SetParentPid(transaction->GetChildPid());
-            transaction->SetChildPid(AceApplicationInfo::GetInstance().GetPid());
-            if (parentSession) {
-                transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
-            }
+        if (transaction && parentSession) {
+            transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
         }
     }
     session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),

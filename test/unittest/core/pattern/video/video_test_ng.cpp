@@ -953,6 +953,14 @@ HWTEST_F(VideoTestNg, VideoAccessibilityPropertyTest002, TestSize.Level1)
     pattern->Stop();
     accessibilityValue = videoAccessibilitProperty->GetAccessibilityValue();
     EXPECT_EQ(accessibilityValue.current, 0);
+
+    /**
+     * @tc.steps: step2. call FullScreen
+     * @tc.expected: step2. GetAccessibilityValue (pattern->IsFullScreen() == true) will be called
+     */
+    pattern->FullScreen();
+    EXPECT_TRUE(pattern->GetFullScreenNode() != nullptr);
+    accessibilityValue = videoAccessibilitProperty->GetAccessibilityValue();
 }
 
 /**

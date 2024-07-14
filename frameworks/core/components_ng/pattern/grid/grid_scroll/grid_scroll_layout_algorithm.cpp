@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
+#include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -86,8 +87,10 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (SystemProperties::GetGridCacheEnabled()) {
         FillCacheLineAtEnd(mainSize, crossSize, layoutWrapper);
         if (!predictBuildList_.empty()) {
-            PostIdleTask(layoutWrapper->GetHostNode(),
-                { predictBuildList_, cachedChildConstraint_, itemsCrossSize_, crossGap_ });
+            GridLayoutUtils::PreloadGridItems(layoutWrapper->GetHostNode()->GetPattern<GridPattern>(),
+                std::move(predictBuildList_),
+                [param = GridPredictLayoutParam { cachedChildConstraint_, itemsCrossSize_, crossGap_ }](
+                    const RefPtr<FrameNode>& host, int32_t itemIdx) { return PredictBuildItem(host, itemIdx, param); });
             predictBuildList_.clear();
         }
     }
@@ -494,7 +497,6 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
         // Complete the gridLayoutInfo to get a complete set of data from 0 to targetIndex for the GridView. Make sure
         // that the index of the matrix_ and heightMap_ is incremented from 0 to targetIndex and sequentially
         SupplyAllData2ZeroIndex(mainSize, crossSize, layoutWrapper);
-        gridLayoutInfo_.targetIndex_.reset();
     }
     if (enableSkipping_) {
         SkipLargeOffset(mainSize, layoutWrapper);
@@ -545,11 +547,16 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
         }
     }
     layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
-    if (gridLayoutInfo_.extraOffset_.has_value()) {
-        gridLayoutInfo_.UpdateStartIndexForExtralOffset(mainGap_, mainSize);
-        ACE_SCOPED_TRACE(
-            "UpdateStartIndexForExtralOffset startIndex:%d, endIndex:%d, currentOffset:%f, mainSize:%f, mainGap:%f",
-            gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_, gridLayoutInfo_.currentOffset_, mainSize, mainGap_);
+    if (gridLayoutInfo_.targetIndex_.has_value()) {
+        gridLayoutInfo_.targetIndex_.reset();
+    } else {
+        if (gridLayoutInfo_.extraOffset_.has_value()) {
+            gridLayoutInfo_.UpdateStartIndexForExtralOffset(mainGap_, mainSize);
+            ACE_SCOPED_TRACE(
+                "UpdateStartIndexForExtralOffset startIndex:%d, endIndex:%d, currentOffset:%f, mainSize:%f, mainGap:%f",
+                gridLayoutInfo_.startIndex_, gridLayoutInfo_.endIndex_, gridLayoutInfo_.currentOffset_, mainSize,
+                mainGap_);
+        }
     }
 }
 
@@ -589,7 +596,7 @@ void GridScrollLayoutAlgorithm::ReloadFromUpdateIdxToStartIndex(
     const int32_t currentItemIndex = gridLayoutInfo_.startIndex_;
     auto firstItem = layoutWrapper->GetHostNode()->GetChildrenUpdated();
     gridLayoutInfo_.startIndex_ = firstItem;
-    //first "-1" means trying to fill from last line;second "-1" because it will fill next line in FillNewLineBackward
+    // first "-1" means trying to fill from last line;second "-1" because it will fill next line in FillNewLineBackward
     currentMainLineIndex_ = std::max(updateLineIndex - 1, 0) - 1;
     gridLayoutInfo_.endIndex_ = firstItem - 1;
 
@@ -1079,7 +1086,7 @@ void GridScrollLayoutAlgorithm::UpdateCurrentOffsetForJumpTo(float mainSize)
                 AceLogTag::ACE_GRID, "can not find jumpIndex in Grid Matrix :%{public}d", gridLayoutInfo_.jumpIndex_);
         }
     }
-    if (gridLayoutInfo_.extraOffset_.has_value()) {
+    if (gridLayoutInfo_.extraOffset_.has_value() && !gridLayoutInfo_.targetIndex_.has_value()) {
         gridLayoutInfo_.currentOffset_ += gridLayoutInfo_.extraOffset_.value();
     }
 }
@@ -1907,6 +1914,15 @@ void GridScrollLayoutAlgorithm::SupplyAllData2ZeroIndex(float mainSize, float cr
         do {
             lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
         } while (!(LessNotEqual(lineHeight, 0.0) || IsIndexInMatrix(targetIndex.value(), targetLineIndex)));
+        if (gridLayoutInfo_.extraOffset_.has_value() && Negative(gridLayoutInfo_.extraOffset_.value())) {
+            auto extraOffset = 0.f;
+            extraOffset = -gridLayoutInfo_.extraOffset_.value();
+            auto heightForExtralOffset = lineHeight;
+            while (GreatOrEqual(extraOffset, heightForExtralOffset) && !Negative(lineHeight)) {
+                lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
+                heightForExtralOffset += lineHeight;
+            }
+        }
     }
 
     // Once the data is completed, the global variables need to be returned
@@ -2107,73 +2123,30 @@ void GridScrollLayoutAlgorithm::CompleteItemCrossPosition(
     }
 }
 
-void GridScrollLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const GridPredictLayoutParam& param)
+bool GridScrollLayoutAlgorithm::PredictBuildItem(
+    const RefPtr<FrameNode>& host, int32_t itemIdx, const GridPredictLayoutParam& param)
 {
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<GridPattern>();
-    CHECK_NULL_VOID(pattern);
-    if (pattern->GetPredictLayoutParam()) {
-        pattern->SetPredictLayoutParam(param);
-        return;
-    }
-    pattern->SetPredictLayoutParam(param);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    context->AddPredictTask([weak = WeakClaim(RawPtr(frameNode))](int64_t deadline, bool canUseLongPredictTask) {
-        ACE_SCOPED_TRACE("Grid predict");
-        auto frameNode = weak.Upgrade();
-        CHECK_NULL_VOID(frameNode);
-        auto pattern = frameNode->GetPattern<GridPattern>();
-        CHECK_NULL_VOID(pattern);
-        if (!pattern->GetPredictLayoutParam().has_value()) {
-            return;
-        }
-        Axis axis = pattern->GetAxis();
-        bool needMarkDirty = false;
-        auto param = pattern->GetPredictLayoutParam().value();
-        auto firstItem = param.items.begin();
-        if (pattern->IsPredictOutOfRange(*firstItem)) {
-            param.items.clear();
-        }
-        for (auto it = param.items.begin(); it != param.items.end();) {
-            if (GetSysTimestamp() > deadline) {
-                break;
-            }
-            auto wrapper = frameNode->GetOrCreateChildByIndex(*it, false, true);
-            CHECK_NULL_BREAK(wrapper);
-            auto itemProperty = DynamicCast<GridItemLayoutProperty>(wrapper->GetLayoutProperty());
-            CHECK_NULL_BREAK(itemProperty);
-            int32_t crossSpan = itemProperty->GetCrossSpan(axis);
-            int32_t crossStart = itemProperty->GetCrossStart(axis);
-            auto constraint = param.layoutConstraint;
-            if (crossSpan > 1) {
-                float itemCrossSize = param.crossGap * (crossSpan - 1);
-                for (int32_t index = 0; index < crossSpan; ++index) {
-                    int32_t crossIndex = (crossStart + index) % static_cast<int32_t>(param.itemsCrossSizes.size());
-                    if (crossIndex >= 0 && crossIndex < static_cast<int32_t>(param.itemsCrossSizes.size())) {
-                        itemCrossSize += param.itemsCrossSizes.at(crossIndex);
-                    }
-                }
-                constraint.maxSize.SetCrossSize(itemCrossSize, axis);
-                constraint.selfIdealSize.SetCrossSize(itemCrossSize, axis);
-            }
-            needMarkDirty = PredictBuildItem(wrapper, constraint) || needMarkDirty;
-            param.items.erase(it++);
-        }
-        if (needMarkDirty) {
-            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        }
-        pattern->SetPredictLayoutParam(std::nullopt);
-        if (!param.items.empty() && !needMarkDirty) {
-            GridScrollLayoutAlgorithm::PostIdleTask(frameNode, param);
-            pattern->SetPredictLayoutParam(param);
-        }
-    });
-}
-
-bool GridScrollLayoutAlgorithm::PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint)
-{
+    // build callback
+    CHECK_NULL_RETURN(host, false);
+    auto wrapper = host->GetOrCreateChildByIndex(itemIdx, false, true);
     CHECK_NULL_RETURN(wrapper, false);
+    auto itemProperty = DynamicCast<GridItemLayoutProperty>(wrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(itemProperty, false);
+    const Axis axis = host->GetPattern<GridPattern>()->GetAxis();
+    int32_t crossSpan = itemProperty->GetCrossSpan(axis);
+    int32_t crossStart = itemProperty->GetCrossStart(axis);
+    auto constraint = param.layoutConstraint;
+    if (crossSpan > 1) {
+        float itemCrossSize = param.crossGap * (crossSpan - 1);
+        for (int32_t index = 0; index < crossSpan; ++index) {
+            int32_t crossIndex = (crossStart + index) % static_cast<int32_t>(param.itemsCrossSizes.size());
+            if (crossIndex >= 0 && crossIndex < static_cast<int32_t>(param.itemsCrossSizes.size())) {
+                itemCrossSize += param.itemsCrossSizes.at(crossIndex);
+            }
+        }
+        constraint.maxSize.SetCrossSize(itemCrossSize, axis);
+        constraint.selfIdealSize.SetCrossSize(itemCrossSize, axis);
+    }
     wrapper->SetActive(false);
     auto frameNode = wrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, false);

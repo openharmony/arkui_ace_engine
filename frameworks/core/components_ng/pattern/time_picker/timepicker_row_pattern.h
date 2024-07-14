@@ -72,12 +72,27 @@ public:
         weakButtonConfirm_ = buttonConfirmNode;
     }
 
+    void updateFontConfigurationEvent(const std::function<void()>& closeDialogEvent)
+    {
+        closeDialogEvent_ = closeDialogEvent;
+    }
+
+    void SetIsShowInDialog(bool isShowInDialog)
+    {
+        isShowInDialog_ = isShowInDialog;
+    }
+
+    bool GetIsShowInDialog() const
+    {
+        return isShowInDialog_;
+    }
     void SetCancelNode(WeakPtr<FrameNode> buttonCancelNode)
     {
         weakButtonCancel_ = buttonCancelNode;
     }
 
     void OnLanguageConfigurationUpdate() override;
+    void OnFontConfigurationUpdate() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
@@ -464,6 +479,54 @@ public:
         return hasUserDefinedSelectedFontFamily_;
     }
 
+    void SetTextProperties(const PickerTextProperties& properties)
+    {
+        if (properties.disappearTextStyle_.fontSize.has_value() && properties.disappearTextStyle_.fontSize->IsValid()) {
+            isUserSetGradientFont_ = true;
+            gradientHeight_ = properties.disappearTextStyle_.fontSize.value();
+        }
+
+        if (properties.normalTextStyle_.fontSize.has_value() && properties.normalTextStyle_.fontSize->IsValid()) {
+            isUserSetGradientFont_ = true;
+            gradientHeight_ = std::max(properties.normalTextStyle_.fontSize.value(), gradientHeight_);
+        }
+
+        if (properties.selectedTextStyle_.fontSize.has_value() && properties.selectedTextStyle_.fontSize->IsValid()) {
+            isUserSetDividerSpacingFont_ = true;
+            dividerSpacing_ = properties.selectedTextStyle_.fontSize.value();
+        }
+    }
+
+    bool GetIsUserSetDividerSpacingFont()
+    {
+        return isUserSetDividerSpacingFont_;
+    }
+
+    bool GetIsUserSetGradientFont()
+    {
+        return isUserSetGradientFont_;
+    }
+
+    Dimension GetDividerSpacing()
+    {
+        return dividerSpacing_;
+    }
+
+    Dimension GetGradientHeight()
+    {
+        return gradientHeight_;
+    }
+
+    void SetPaintDividerSpacing(float& value)
+    {
+        paintDividerSpacing_ = value;
+    }
+
+    float GetPaintDividerSpacing()
+    {
+        return paintDividerSpacing_;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -512,7 +575,7 @@ private:
     std::optional<int32_t> DividerId_;
     WeakPtr<FrameNode> weakButtonConfirm_;
     WeakPtr<FrameNode> weakButtonCancel_;
-
+    std::function<void()> closeDialogEvent_;
     bool hasSecond_ = false;
     bool wheelModeEnabled_ = true;
     std::vector<WeakPtr<FrameNode>> timePickerColumns_;
@@ -535,6 +598,12 @@ private:
     std::string amPmTimeOrder_;
     bool isAmPmTimeOrderUpdate_ = false;
     bool isPreLanguageUg_ = false;
+    bool isShowInDialog_ = false;
+    bool isUserSetDividerSpacingFont_ = false;
+    bool isUserSetGradientFont_ = false;
+    Dimension gradientHeight_;
+    Dimension dividerSpacing_;
+    float paintDividerSpacing_ = 1.0f;
 };
 } // namespace OHOS::Ace::NG
 

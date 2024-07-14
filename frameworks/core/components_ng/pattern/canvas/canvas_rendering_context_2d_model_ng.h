@@ -17,8 +17,8 @@
 #define FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CANVAS_CANVAS_RENDERING_CONTEXT_2D_MODEL_NG_H
 
 #include "base/utils/macros.h"
+#include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components_ng/pattern/canvas/rendering_context_2d_model.h"
-#include "core/components_ng/pattern/custom_paint/canvas_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -45,6 +45,7 @@ public:
     void SetStrokePattern(const std::shared_ptr<Ace::Pattern>& pattern) override;
     void SetStrokeColor(const Color& color, bool colorFlag) override;
     void DrawImage(const ImageInfo& imageInfo) override;
+    void DrawSvgImage(const ImageInfo& imageInfo) override;
     void PutImageData(const Ace::ImageData& imageData) override;
     void CloseImageBitmap(const std::string& src) override;
     std::unique_ptr<Ace::ImageData> GetImageData(const ImageSize& imageSize) override;

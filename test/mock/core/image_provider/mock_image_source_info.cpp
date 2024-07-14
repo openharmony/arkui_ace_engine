@@ -262,4 +262,6 @@ void ImageSourceInfo::SetModuleName(const std::string& moduleName)
 {
     moduleName_ = moduleName;
 }
+
+void ImageSourceInfo::GenerateCacheKey() {}
 } // namespace OHOS::Ace

@@ -1020,7 +1020,11 @@ HWTEST_F(OverlayTestNg, ToastTest003, TestSize.Level1)
      * @tc.steps: step2. call ShowToast.
      * @tc.expected: toastMap_ is empty
      */
-    overlay->ShowToast(MESSAGE, DURATION, BOTTOMSTRING, true);
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE,
+        .duration = DURATION,
+        .bottom = BOTTOMSTRING,
+        .isRightToLeft = true };
+    overlay->ShowToast(toastInfo, nullptr);
     EXPECT_FALSE(overlay->toastMap_.empty());
     overlay->ClearToast();
     EXPECT_TRUE(overlay->toastMap_.empty());
@@ -1281,7 +1285,12 @@ HWTEST_F(OverlayTestNg, ToastShowModeTest001, TestSize.Level1)
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     MockPipelineContext::GetCurrent()->rootNode_ = rootNode;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->ShowToast(MESSAGE, DURATION, BOTTOMSTRING, true, ToastShowMode::TOP_MOST);
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE,
+        .duration = DURATION,
+        .bottom = BOTTOMSTRING,
+        .showMode = NG::ToastShowMode::TOP_MOST,
+        .isRightToLeft = true };
+    overlayManager->ShowToast(toastInfo, nullptr);
     EXPECT_FALSE(overlayManager->toastMap_.empty());
     /**
      * @tc.steps: step2. Test Toast showMode and offset.
@@ -1328,7 +1337,9 @@ HWTEST_F(OverlayTestNg, ToastTest001, TestSize.Level1)
      */
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->ShowToast(MESSAGE, DURATION, BOTTOMSTRING, true);
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    overlayManager->ShowToast(toastInfo, nullptr);
     EXPECT_TRUE(overlayManager->toastMap_.empty());
     /**
      * @tc.steps: step2. call PopToast.
@@ -1365,7 +1376,9 @@ HWTEST_F(OverlayTestNg, ToastTest002, TestSize.Level1)
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     MockPipelineContext::GetCurrent()->rootNode_ = rootNode;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->ShowToast(MESSAGE, DURATION, BOTTOMSTRING, true);
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    overlayManager->ShowToast(toastInfo, nullptr);
     EXPECT_TRUE(overlayManager->toastMap_.empty());
     /**
      * @tc.steps: step2. call PopToast.

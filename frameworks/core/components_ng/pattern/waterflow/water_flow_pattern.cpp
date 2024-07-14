@@ -606,6 +606,7 @@ void WaterFlowPattern::SetLayoutMode(LayoutMode mode)
 {
     if (!layoutInfo_ || mode != layoutInfo_->Mode()) {
         layoutInfo_ = WaterFlowLayoutInfoBase::Create(mode);
+        MarkDirtyNodeSelf();
     }
     // footer index only set during first AddFooter call
     if (footer_.Upgrade()) {

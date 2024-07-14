@@ -168,6 +168,12 @@ const ImageSpanOptions IMAGE_SPAN_OPTIONS_1 = {
     .imagePixelMap = std::nullopt,
     .imageAttribute = IMAGE_SPAN_ATTRIBUTE_1
 };
+const SymbolSpanOptions SYMBOL_SPAN_OPTIONS_1 = {
+    .offset = std::nullopt,
+    .symbolId = 0,
+    .style = TEXT_STYLE_1,
+    .resourceObject = nullptr
+};
 } // namespace
 
 struct TestCursorItem {

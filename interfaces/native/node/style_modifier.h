@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_STYLE_MODIFIER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_STYLE_MODIFIER_H
 
 #include "native_node.h"
 #include "native_type.h"
@@ -29,3 +30,4 @@ const ArkUI_AttributeItem* GetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAtt
 int32_t ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type);
 
 }; // namespace OHOS::Ace::NodeModel
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_STYLE_MODIFIER_H

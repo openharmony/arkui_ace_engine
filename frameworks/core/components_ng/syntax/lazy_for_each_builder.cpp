@@ -315,8 +315,10 @@ namespace OHOS::Ace::NG {
         decltype(cachedItems_) cachedTemp(std::move(cachedItems_));
         std::map<int32_t, int32_t> indexChangedMap;
         CollectIndexChangedCount(indexChangedMap);
-        RepairDatasetItems(cachedTemp, cachedItems_, indexChangedMap);
-        RepairDatasetItems(expiringTemp, expiringTempItem_, indexChangedMap);
+        if (!indexChangedMap.empty()) {
+            RepairDatasetItems(cachedTemp, cachedItems_, indexChangedMap);
+            RepairDatasetItems(expiringTemp, expiringTempItem_, indexChangedMap);
+        }
         for (auto& [index, node] : expiringTempItem_) {
             expiringItem_.emplace(node.first, LazyForEachCacheChild(index, node.second));
         }
@@ -622,7 +624,7 @@ namespace OHOS::Ace::NG {
     bool LazyForEachBuilder::PreBuild(int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint,
         bool canRunLongPredictTask)
     {
-        ACE_SCOPED_TRACE("expiringItem_ count:[%zu]", expiringItem_.size());
+        ACE_SYNTAX_SCOPED_TRACE("expiringItem_ count:[%zu]", expiringItem_.size());
         outOfBoundaryNodes_.clear();
         if (itemConstraint && !canRunLongPredictTask) {
             return false;

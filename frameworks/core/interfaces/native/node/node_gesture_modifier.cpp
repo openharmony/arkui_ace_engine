@@ -26,6 +26,8 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "interfaces/native/event/ui_input_event_impl.h"
+#include "interfaces/native/ui_input_event.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -400,19 +402,22 @@ void setGestureInterrupterToNode(
     ArkUINodeHandle node, ArkUI_Int32 (*interrupter)(ArkUIGestureInterruptInfo* interrupterInfo))
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    auto onGestureJudgeBegin = [interrupter](
-        const RefPtr<NG::GestureInfo>& gestureInfo,
-        const std::shared_ptr<BaseGestureEvent>& info)-> GestureJudgeResult {
-        ArkUIAPIEventGestureAsyncEvent* gestureEvent = new ArkUIAPIEventGestureAsyncEvent();
+    auto onGestureJudgeBegin = [interrupter](const RefPtr<NG::GestureInfo>& gestureInfo,
+                                   const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
+        ArkUIAPIEventGestureAsyncEvent gestureEvent;
         ArkUITouchEvent rawInputEvent;
-        GetBaseGestureEvent(gestureEvent, rawInputEvent, info);
+        GetBaseGestureEvent(&gestureEvent, rawInputEvent, info);
         ArkUIGestureInterruptInfo interruptInfo;
         interruptInfo.isSystemGesture = gestureInfo->IsSystemGesture();
         interruptInfo.systemRecognizerType = static_cast<ArkUI_Int32>(gestureInfo->GetType());
-        interruptInfo.event = gestureEvent;
+        interruptInfo.event = &gestureEvent;
         interruptInfo.userData = gestureInfo->GetUserData();
+        ArkUI_UIInputEvent inputEvent { ARKUI_UIINPUTEVENT_TYPE_TOUCH, C_TOUCH_EVENT_ID,
+            &rawInputEvent };
+        ArkUIGestureEvent arkUIGestureEvent { gestureEvent, nullptr };
+        interruptInfo.inputEvent = &inputEvent;
+        interruptInfo.gestureEvent = &arkUIGestureEvent;
         auto result = interrupter(&interruptInfo);
-        delete gestureEvent;
         return static_cast<GestureJudgeResult>(result);
     };
     ViewAbstract::SetOnGestureJudgeBegin(frameNode, std::move(onGestureJudgeBegin));

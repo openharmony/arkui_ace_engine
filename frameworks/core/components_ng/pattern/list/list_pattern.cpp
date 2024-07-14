@@ -238,7 +238,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         if (lanesLayoutAlgorithm->GetLanes() != lanes_) {
             auto item = swiperItem_.Upgrade();
             if (item) {
-                item->SwiperReset();
+                item->ResetSwipeStatus();
             }
         }
         lanes_ = lanesLayoutAlgorithm->GetLanes();
@@ -464,12 +464,12 @@ bool ListPattern::UpdateStartListItemIndex()
     auto startWrapper = host->GetOrCreateChildByIndex(startIndex_);
     int32_t startArea = -1;
     int32_t startItemIndexInGroup = -1;
-    bool startFlagChanged = false;
+    bool startFlagChanged = (startInfo_.index != startIndex_);
     bool startIsGroup = startWrapper && startWrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     if (startIsGroup) {
         auto startPattern = startWrapper->GetHostNode()->GetPattern<ListItemGroupPattern>();
         VisibleContentInfo startGroupInfo = startPattern->GetStartListItemIndex();
-        startFlagChanged = (startInfo_.index != startIndex_) || (startInfo_.area != startGroupInfo.area) ||
+        startFlagChanged = startFlagChanged || (startInfo_.area != startGroupInfo.area) ||
                            (startInfo_.indexInGroup != startGroupInfo.indexInGroup);
         startArea = startGroupInfo.area;
         startItemIndexInGroup = startGroupInfo.indexInGroup;
@@ -485,12 +485,12 @@ bool ListPattern::UpdateEndListItemIndex()
     auto endWrapper = host->GetOrCreateChildByIndex(endIndex_);
     int32_t endArea = -1;
     int32_t endItemIndexInGroup = -1;
-    bool endFlagChanged = false;
+    bool endFlagChanged = (endInfo_.index != endIndex_);
     bool endIsGroup = endWrapper && endWrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     if (endIsGroup) {
         auto endPattern = endWrapper->GetHostNode()->GetPattern<ListItemGroupPattern>();
         VisibleContentInfo endGroupInfo = endPattern->GetEndListItemIndex();
-        endFlagChanged = (endInfo_.index != endIndex_) || (endInfo_.area != endGroupInfo.area) ||
+        endFlagChanged = endFlagChanged || (endInfo_.area != endGroupInfo.area) ||
                          (endInfo_.indexInGroup != endGroupInfo.indexInGroup);
         endArea = endGroupInfo.area;
         endItemIndexInGroup = endGroupInfo.indexInGroup;
@@ -546,7 +546,7 @@ void ListPattern::ProcessEvent(
     if (onScrollVisibleContentChange) {
         bool startChanged = UpdateStartListItemIndex();
         bool endChanged = UpdateEndListItemIndex();
-        if (indexChanged || startChanged || endChanged) {
+        if (startChanged || endChanged) {
             onScrollVisibleContentChange(startInfo_, endInfo_);
         }
     }
@@ -804,30 +804,13 @@ void ListPattern::GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) con
     if (itemPosition_.empty()) {
         return;
     }
-    bool firstIsGroup = startIndex_ == 0 && itemPosition_.begin()->second.isGroup;
-    bool lastIsGroup = endIndex_ == maxListItemIndex_ && itemPosition_.rbegin()->second.isGroup;
-    if (!firstIsGroup && !lastIsGroup) {
-        return;
+    if (startIndex_ == 0 && itemPosition_.begin()->second.isGroup) {
+        auto& groupInfo = itemPosition_.begin()->second.groupInfo;
+        groupAtStart = groupInfo && groupInfo.value().atStart;
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    std::list<RefPtr<FrameNode>> childrens;
-    host->GenerateOneDepthVisibleFrame(childrens);
-    if (childrens.empty()) {
-        return;
-    }
-    if (firstIsGroup) {
-        auto itemGroup = (*childrens.begin())->GetPattern<ListItemGroupPattern>();
-        if (itemGroup) {
-            groupAtStart = itemGroup->GetDisplayStartIndexInGroup() == 0;
-        }
-    }
-    if (lastIsGroup) {
-        auto itemGroup = (*childrens.rbegin())->GetPattern<ListItemGroupPattern>();
-        if (itemGroup) {
-            groupAtEnd = itemGroup->GetDisplayEndIndexInGroup() == itemGroup->GetEndIndexInGroup() ||
-                         LessOrEqual(itemPosition_.rbegin()->second.endPos, contentMainSize_);
-        }
+    if (endIndex_ == maxListItemIndex_ && itemPosition_.rbegin()->second.isGroup) {
+        auto& groupInfo = itemPosition_.rbegin()->second.groupInfo;
+        groupAtEnd = groupInfo && groupInfo.value().atEnd;
     }
 }
 
@@ -1032,7 +1015,7 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
         ProcessDragStart(offset);
         auto item = swiperItem_.Upgrade();
         if (item) {
-            item->SwiperReset();
+            item->ResetSwipeStatus();
         }
         FireOnScrollStart();
         return true;
@@ -1814,8 +1797,14 @@ void ListPattern::CalculateCurrentOffset(float delta, const ListLayoutAlgorithm:
     for (auto& [index, pos] : recycledItemPosition) {
         itemPos.try_emplace(index, pos);
     }
-    posMap_->UpdatePosMapStart(
-        delta, currentOffset_, spaceWidth_, itemPos.begin()->first, itemPos.begin()->second.startPos);
+    float startPos = itemPos.begin()->second.startPos;
+    int32_t startIndex = itemPos.begin()->first;
+    auto& groupInfo = itemPos.begin()->second.groupInfo;
+    if (startIndex == 0 && (!groupInfo || groupInfo.value().atStart)) {
+        currentOffset_ = -startPos;
+    } else {
+        posMap_->UpdatePosMapStart(delta, currentOffset_, spaceWidth_, startIndex, startPos);
+    }
     for (auto& [index, pos] : itemPos) {
         float height = pos.endPos - pos.startPos;
         posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height });
@@ -2155,7 +2144,7 @@ void ListPattern::SetSwiperItem(WeakPtr<ListItemPattern> swiperItem)
         if (swiperItem != swiperItem_) {
             auto item = swiperItem_.Upgrade();
             if (item) {
-                item->SwiperReset();
+                item->ResetSwipeStatus();
             }
             swiperItem_ = std::move(swiperItem);
         }

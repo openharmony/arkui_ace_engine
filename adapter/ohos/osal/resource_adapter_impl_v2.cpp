@@ -99,7 +99,9 @@ RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
     auto context = aceContainer->GetAbilityContextByModule(bundleName, moduleName);
     if (context) {
         auto resourceManager = context->GetResourceManager();
-        newResourceAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(resourceManager);
+        auto resourceAdapterV2 = AceType::MakeRefPtr<ResourceAdapterImplV2>(resourceManager);
+        resourceAdapterV2->SetAppHasDarkRes(aceContainer->GetResourceConfiguration().GetAppHasDarkRes());
+        newResourceAdapter = resourceAdapterV2;
     } else {
         newResourceAdapter = ResourceAdapter::CreateV2();
         auto resourceInfo = aceContainer->GetResourceInfo();
@@ -136,6 +138,7 @@ ResourceAdapterImplV2::ResourceAdapterImplV2(
         sysResourceManager_->UpdateResConfig(*resConfig);
     }
     resConfig_ = resConfig;
+    appHasDarkRes_ = resourceInfo.GetResourceConfiguration().GetAppHasDarkRes();
 }
 
 void ResourceAdapterImplV2::Init(const ResourceInfo& resourceInfo)
@@ -152,6 +155,7 @@ void ResourceAdapterImplV2::Init(const ResourceInfo& resourceInfo)
     sysResourceManager_ = newResMgr;
     packagePathStr_ = (hapPath.empty() || IsDirExist(resPath)) ? resPath : std::string();
     resConfig_ = resConfig;
+    appHasDarkRes_ = resourceInfo.GetResourceConfiguration().GetAppHasDarkRes();
 }
 
 bool ResourceAdapterImplV2::NeedUpdateResConfig(const std::shared_ptr<Global::Resource::ResConfig>& oldResConfig,
@@ -778,5 +782,20 @@ void ResourceAdapterImplV2::UpdateColorMode(ColorMode colorMode)
     auto resConfig = aceContainer->GetResourceConfiguration();
     resConfig.SetColorMode(colorMode);
     UpdateConfig(resConfig, false);
+}
+
+ColorMode ResourceAdapterImplV2::GetResourceColorMode() const
+{
+    CHECK_NULL_RETURN(resConfig_, ColorMode::LIGHT);
+    if (resConfig_->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK && !resConfig_->GetAppColorMode() &&
+        !appHasDarkRes_) {
+        return ColorMode::LIGHT;
+    }
+    return resConfig_->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK ? ColorMode::DARK : ColorMode::LIGHT;
+}
+
+void ResourceAdapterImplV2::SetAppHasDarkRes(bool hasDarkRes)
+{
+    appHasDarkRes_ = hasDarkRes;
 }
 } // namespace OHOS::Ace

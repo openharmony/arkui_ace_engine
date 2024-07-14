@@ -33,6 +33,8 @@
     AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetSvgTraceEnabled(), fmt, ##__VA_ARGS__)
 #define ACE_TEXT_SCOPED_TRACE(fmt, ...) \
     AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetTextTraceEnabled(), fmt, ##__VA_ARGS__)
+#define ACE_SYNTAX_SCOPED_TRACE(fmt, ...) \
+    AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetSyntaxTraceEnabled(), fmt, ##__VA_ARGS__)
 #define ACE_ACCESS_SCOPED_TRACE(fmt, ...) \
     AceScopedTraceFlag aceScopedTraceFlag(SystemProperties::GetAccessTraceEnabled(), fmt, ##__VA_ARGS__)
 #define ACE_LAYOUT_SCOPED_TRACE(fmt, ...) \

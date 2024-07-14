@@ -192,7 +192,8 @@ public:
     static void ParseBorderColor(const JSRef<JSVal>& args);
     static void JsPadding(const JSCallbackInfo& info);
     static void JsMargin(const JSCallbackInfo& info);
-    static void ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin);
+    static void SetSafeAreaPadding(const JSCallbackInfo& info);
+    static void ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType type);
     static void ParseMarginOrPaddingCorner(JSRef<JSObject> obj, std::optional<CalcDimension>& top,
         std::optional<CalcDimension>& bottom, std::optional<CalcDimension>& left, std::optional<CalcDimension>& right);
     static void ParseLocalizedMarginOrLocalizedPaddingCorner(
@@ -247,6 +248,7 @@ public:
     static void JsHoverEffect(const JSCallbackInfo& info);
     static void JsOnMouse(const JSCallbackInfo& info);
     static void JsOnHover(const JSCallbackInfo& info);
+    static void JsOnAccessibilityHover(const JSCallbackInfo& info);
     static void JsOnClick(const JSCallbackInfo& info);
     static void JsOnGestureJudgeBegin(const JSCallbackInfo& args);
     static void JsOnTouchIntercept(const JSCallbackInfo& info);
@@ -419,9 +421,9 @@ public:
     static void JsPrivacySensitive(const JSCallbackInfo& info);
 
     static void JsAccessibilityGroup(bool accessible);
-    static void JsAccessibilityText(const std::string& text);
+    static void JsAccessibilityText(const JSCallbackInfo& info);
     static void JsAccessibilityTextHint(const std::string& text);
-    static void JsAccessibilityDescription(const std::string& description);
+    static void JsAccessibilityDescription(const JSCallbackInfo& info);
     static void JsAccessibilityImportance(const std::string& importance);
     static void JsAccessibilityLevel(const std::string& level);
     static void JsAllowDrop(const JSCallbackInfo& info);
@@ -440,8 +442,6 @@ public:
     static void JsGestureModifier(const JSCallbackInfo& info);
     static void JsCustomProperty(const JSCallbackInfo& info);
 
-    static void ParseMenuOptions(
-        const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items);
     static void JsBackgroundImageResizable(const JSCallbackInfo& info);
     static void JsSetDragEventStrictReportingEnabled(const JSCallbackInfo& info);
     static void SetSymbolOptionApply(const JSCallbackInfo& info,
@@ -598,7 +598,8 @@ public:
     static bool ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius);
     static void ParseCommonBorderRadiusProps(const JSRef<JSObject>& object, NG::BorderRadiusProperty& radius);
     static void ParseBorderRadiusProps(const JSRef<JSObject>& object, NG::BorderRadiusProperty& radius);
-    static bool ParseSelectionMenuOptions(const JSCallbackInfo& info, std::vector<NG::MenuOptionsParam>& items);
+    static bool ParseEditMenuOptions(const JSCallbackInfo& info, NG::OnCreateMenuCallback& onCreateMenuCallback,
+        NG::OnMenuItemClickCallback& onMenuItemClick);
     static void SetDialogProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
     static std::function<void(NG::DrawingContext& context)> GetDrawCallback(
         const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);
@@ -615,6 +616,14 @@ public:
 
 private:
     static bool ParseJSMediaInternal(const JSRef<JSObject>& jsValue, std::string& result);
+
+    static void ParseOnCreateMenu(
+        const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, NG::OnCreateMenuCallback& onCreateMenuCallback);
+    static JSRef<JSVal> CreateJsTextMenuItem(const NG::MenuItemParam& menuItemParam);
+    static JSRef<JSVal> CreateJsTextRange(const NG::MenuItemParam& menuItemParam);
+    static JSRef<JSObject> CreateJsTextMenuId(const std::string& id);
+    static JSRef<JSArray> CreateJsOnMenuItemClick(const NG::MenuItemParam& menuItemParam);
+    static JSRef<JSVal> CreateJsSystemMenuItems(const std::vector<NG::MenuItemParam>& systemMenuItems);
 };
 } // namespace OHOS::Ace::Framework
 #endif // JS_VIEW_ABSTRACT_H

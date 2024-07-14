@@ -31,6 +31,7 @@ public:
     static void SetColor(const JSCallbackInfo& info);
     static void Pop();
     static void JsSetDraggable(bool draggable);
+    static void JsResponseRegion(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

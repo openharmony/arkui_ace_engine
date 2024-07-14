@@ -843,6 +843,42 @@ HWTEST_F(WaterFlowSegmentCommonTest, Multi001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Multi001
+ * @tc.desc: Test spring bounce-back offset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, Spring001, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(400.f));
+            model.SetEdgeEffect(EdgeEffect::SPRING, true);
+            CreateRandomItem(37);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_7);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 5.0f);
+    pattern_->SetAnimateCanOverScroll(true);
+
+    UpdateCurrentOffset(10.0f);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 14.5485096f); // friction is applied on delta
+    const auto& info = pattern_->layoutInfo_;
+    EXPECT_FLOAT_EQ(info->TopFinalPos() - info->CurrentPos(), -9.54851f);
+
+    UpdateCurrentOffset(-10.0f);
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildRect(frameNode_, 36).Bottom(), 400.0f);
+    UpdateCurrentOffset(-10.0f);
+    EXPECT_EQ(GetChildRect(frameNode_, 36).Bottom(), 390.0f);
+    EXPECT_EQ(info->BottomFinalPos(400.0f) - info->CurrentPos(), 7.0f);
+}
+
+/**
  * @tc.name: Illegal003
  * @tc.desc: Layout WaterFlow without items.
  * @tc.type: FUNC
@@ -876,5 +912,43 @@ HWTEST_F(WaterFlowSegmentCommonTest, Illegal003, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->endIndex_, -1);
     EXPECT_GT(info_->startIndex_, info_->endIndex_);
+}
+
+/**
+ * @tc.name: overScroll001
+ * @tc.desc: Layout WaterFlow with top margin and check overScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, overScroll001, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(37);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_7);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+
+    auto info = pattern_->layoutInfo_;
+
+    EXPECT_EQ(GetChildY(frameNode_, 0), 5.0f);
+    UpdateCurrentOffset(-2.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 3.0f);
+    EXPECT_FALSE(info->itemStart_);
+    UpdateCurrentOffset(3.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 5.0f);
+    EXPECT_TRUE(info->itemStart_);
+
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 36), 500.0f);
+    EXPECT_FALSE(info->offsetEnd_);
+    UpdateCurrentOffset(-4.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 36), 497.0f);
+    EXPECT_TRUE(info->offsetEnd_);
 }
 } // namespace OHOS::Ace::NG

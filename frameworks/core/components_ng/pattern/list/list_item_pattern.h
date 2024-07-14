@@ -117,6 +117,8 @@ public:
         return endNodeIndex_ >= 0;
     }
 
+    void OnDidPop();
+
     ListItemSwipeIndex GetSwiperIndex()
     {
         return swiperIndex_;
@@ -132,7 +134,7 @@ public:
 
     void SetSwiperItemForList();
 
-    void SwiperReset(bool isCloseSwipeAction = false);
+    void ResetSwipeStatus(bool calledByUser = false);
 
     static float CalculateFriction(float gamma);
 
@@ -248,8 +250,8 @@ private:
     void SetAccessibilityAction();
     void DoDeleteAnimation(bool isRightDelete);
     void FireSwipeActionOffsetChange(float oldOffset, float newOffset);
-    void FireSwipeActionStateChange(SwipeActionState newState);
-    void ResetToItemChild();
+    void FireSwipeActionStateChange(ListItemSwipeIndex newSwiperIndex);
+    void UpdateClickJudgeCallback();
     bool ClickJudgeVertical(const SizeF& size, double xOffset, double yOffset);
     void ResetNodeSize()
     {
@@ -257,7 +259,6 @@ private:
         endNodeSize_ = 0.0f;
     }
     bool IsRTLAndVertical() const;
-    float SetReverseValue(float offset);
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     V2::ListItemStyle listItemStyle_ = V2::ListItemStyle::NONE;
@@ -301,6 +302,7 @@ private:
     std::optional<double> enableOpacity_;
     OnFinishFunc onFinishEvent_;
     bool isLayouted_ = false;
+    bool springMotionTraceFlag_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListItemPattern);
 };

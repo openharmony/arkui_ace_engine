@@ -81,6 +81,17 @@ RefPtr<Container> Container::CurrentSafelyWithCheck()
     return GetContainer(currentId);
 }
 
+int32_t Container::CurrentIdSafelyWithCheck()
+{
+    int32_t currentId = CurrentId();
+    if (currentId >= 0) {
+        if (AceEngine::Get().HasContainer(currentId)) {
+            return currentId;
+        }
+    }
+    return SafelyId();
+}
+
 RefPtr<Container> Container::GetContainer(int32_t containerId)
 {
     return AceEngine::Get().GetContainer(containerId);
@@ -114,8 +125,8 @@ RefPtr<Container> Container::GetFoucsed()
 {
     RefPtr<Container> foucsContainer;
     AceEngine::Get().NotifyContainers([&foucsContainer](const RefPtr<Container>& container) {
-        auto pipeline = container->GetPipelineContext();
-        if (pipeline && pipeline->GetOnFoucs()) {
+        auto pipeline = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+        if (pipeline && pipeline->IsWindowFocused()) {
             foucsContainer = container;
         }
     });

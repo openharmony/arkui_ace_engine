@@ -17,6 +17,9 @@
 
 #include <optional>
 #include <string>
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
@@ -109,14 +112,13 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("onCut", &JSSearch::SetOnCut);
     JSClass<JSSearch>::StaticMethod("onPaste", &JSSearch::SetOnPaste);
     JSClass<JSSearch>::StaticMethod("copyOption", &JSSearch::SetCopyOption);
-    JSClass<JSSearch>::StaticMethod("textMenuOptions", &JSSearch::JsMenuOptionsExtension);
     JSClass<JSSearch>::StaticMethod("selectionMenuHidden", &JSSearch::SetSelectionMenuHidden);
     JSClass<JSSearch>::StaticMethod("customKeyboard", &JSSearch::SetCustomKeyboard);
     JSClass<JSSearch>::StaticMethod("enterKeyType", &JSSearch::SetEnterKeyType);
     JSClass<JSSearch>::StaticMethod("maxLength", &JSSearch::SetMaxLength);
     JSClass<JSSearch>::StaticMethod("type", &JSSearch::SetType);
     JSClass<JSSearch>::StaticMethod("dragPreviewOptions", &JSSearch::SetDragPreviewOptions);
-    JSClass<JSSearch>::StaticMethod("selectionMenuOptions", &JSSearch::SelectionMenuOptions);
+    JSClass<JSSearch>::StaticMethod("editMenuOptions", &JSSearch::EditMenuOptions);
     JSBindMore();
     JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
 }
@@ -691,25 +693,25 @@ void JSSearch::OnSubmit(const JSCallbackInfo& info)
     SearchModel::GetInstance()->SetOnSubmit(std::move(callback));
 }
 
-JSRef<JSVal> JSSearch::CreateJsOnChangeObj(const TextRange& textRange)
+JSRef<JSVal> JSSearch::CreateJsOnChangeObj(const PreviewText& previewText)
 {
-    JSRef<JSObject> range = JSRef<JSObject>::New();
-    range->SetPropertyObject("start", JSRef<JSVal>::Make(ToJSValue(textRange.start)));
-    range->SetPropertyObject("end", JSRef<JSVal>::Make(ToJSValue(textRange.end)));
-    return JSRef<JSVal>::Cast(range);
+    JSRef<JSObject> previewTextObj = JSRef<JSObject>::New();
+    previewTextObj->SetProperty<int32_t>("offset", previewText.offset);
+    previewTextObj->SetProperty<std::string>("value", previewText.value);
+    return JSRef<JSVal>::Cast(previewTextObj);
 }
 
 void JSSearch::OnChange(const JSCallbackInfo& info)
 {
     auto jsValue = info[0];
     CHECK_NULL_VOID(jsValue->IsFunction());
-    auto jsChangeFunc = AceType::MakeRefPtr<JsCitedEventFunction<TextRange, 2>>(
+    auto jsChangeFunc = AceType::MakeRefPtr<JsCitedEventFunction<PreviewText, 2>>(
         JSRef<JSFunc>::Cast(jsValue), CreateJsOnChangeObj);
     auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsChangeFunc)](
-        const std::string& val, TextRange& range) {
+        const std::string& val, PreviewText& previewText) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onChange");
-        func->Execute(val, range);
+        func->Execute(val, previewText);
     };
     SearchModel::GetInstance()->SetOnChange(std::move(onChange));
 }
@@ -777,6 +779,9 @@ void JSSearch::SetOnPaste(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onPaste");
         func->Execute(val, info);
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onPaste");
+#endif
     };
     SearchModel::GetInstance()->SetOnPasteWithEvent(std::move(onPaste));
 }
@@ -877,15 +882,6 @@ void JSSearch::OnDidDelete(const JSCallbackInfo& info)
         func->ExecuteWithValue(deleteValue);
     };
     SearchModel::GetInstance()->SetOnDidDeleteEvent(std::move(callback));
-}
-
-void JSSearch::JsMenuOptionsExtension(const JSCallbackInfo& info)
-{
-    if (info[0]->IsArray()) {
-        std::vector<NG::MenuOptionsParam> menuOptionsItems;
-        JSViewAbstract::ParseMenuOptions(info, JSRef<JSArray>::Cast(info[0]), menuOptionsItems);
-        SearchModel::GetInstance()->SetMenuOptionItems(std::move(menuOptionsItems));
-    }
 }
 
 void JSSearch::SetSelectionMenuHidden(const JSCallbackInfo& info)
@@ -1077,13 +1073,12 @@ void JSSearch::SetLineHeight(const JSCallbackInfo& info)
     SearchModel::GetInstance()->SetLineHeight(value);
 }
 
-void JSSearch::SelectionMenuOptions(const JSCallbackInfo& info)
+void JSSearch::EditMenuOptions(const JSCallbackInfo& info)
 {
-    std::vector<NG::MenuOptionsParam> menuOptionsItems;
-    if (!JSViewAbstract::ParseSelectionMenuOptions(info, menuOptionsItems)) {
-        return;
-    }
-    SearchModel::GetInstance()->SetSelectionMenuOptions(std::move(menuOptionsItems));
+    NG::OnCreateMenuCallback onCreateMenuCallback;
+    NG::OnMenuItemClickCallback onMenuItemClick;
+    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick);
+    SearchModel::GetInstance()->SetSelectionMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 
 void JSSearch::SetEnablePreviewText(const JSCallbackInfo& info)

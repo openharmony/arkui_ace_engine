@@ -20,7 +20,9 @@
 #include <map>
 #include <vector>
 
+#include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
+
 namespace OHOS::Ace {
     class StagePkgContextInfo : public AceType {
         DECLARE_ACE_TYPE(StagePkgContextInfo, AceType);
@@ -28,6 +30,8 @@ public:
     StagePkgContextInfo() = default;
     ~StagePkgContextInfo() = default;
     void SetPkgContextInfoAndAliasMap(const std::map<std::string, std::string>& map);
+    void AliasMap(std::unique_ptr<JsonValue>& item,
+        std::vector<std::vector<std::string>>& pkgContextInfoList, const std::string& moduleName);
     void SetPkgNameList(const std::map<std::string, std::string>& map);
     const std::map<std::string, std::string>& GetPkgNameMap() const;
     const std::map<std::string, std::string>& GetPkgAliasMap() const;

@@ -140,6 +140,7 @@ public:
     static void SetOnContentDidScroll(FrameNode* frameNode, ContentDidScrollEvent&& onContentDidScroll);
     static void SetCustomContentTransition(FrameNode* frameNode, SwiperContentAnimatedTransition& transition);
     static RefPtr<SwiperController> GetOrCreateSwiperController(FrameNode* frameNode);
+    static bool GetIndicatorInteractive(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

@@ -48,7 +48,7 @@ void EventHub::OnDetachContext(PipelineContext *context)
     }
 
     if (HasVisibleAreaCallback(true) || HasVisibleAreaCallback(false)) {
-        host->TriggerVisibleAreaChangeCallback(true);
+        host->TriggerVisibleAreaChangeCallback(0, true);
         context->RemoveVisibleAreaChangeNode(host->GetId());
     }
 }
@@ -274,7 +274,6 @@ bool EventHub::IsFireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
         || info->GetResult() == DragRet::DRAG_DEFAULT
         || info->GetResult() == DragRet::ENABLE_DROP
         || info->GetResult() == DragRet::DISABLE_DROP;
-    return true;
 }
 
 void EventHub::HandleInternalOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)

@@ -224,7 +224,7 @@ void SelectOverlayPattern::UpdateHandleHotZone()
 
 void SelectOverlayPattern::HandleOnClick(GestureEvent& /*info*/)
 {
-    if (!info_->isSingleHandle) {
+    if (!info_->isSingleHandle || clickConsumeBySimulate_) {
         return;
     }
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
@@ -261,6 +261,7 @@ void SelectOverlayPattern::HandleTouchEvent(const TouchEventInfo& info)
         isSimulateOnClick_ = false;
         GestureEvent gestureEvent;
         HandleOnClick(gestureEvent);
+        clickConsumeBySimulate_ = true;
     }
 }
 
@@ -276,6 +277,7 @@ void SelectOverlayPattern::HandleTouchDownEvent(const TouchEventInfo& info)
     } else if (secondHandleRegion_.IsInRegion(point)) {
         isSecondHandleTouchDown_ = true;
     }
+    clickConsumeBySimulate_ = false;
     if ((isFirstHandleTouchDown_ || isSecondHandleTouchDown_) && info_->enableHandleLevel &&
         info_->handleLevelMode == HandleLevelMode::EMBED) {
         auto host = DynamicCast<SelectOverlayNode>(GetHost());

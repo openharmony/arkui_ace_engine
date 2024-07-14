@@ -73,6 +73,7 @@ public:
     void SetPreviewTextRects(bool value);
     void SetPreviewTextDecorationColor(const Color& value);
     void SetPreviewTextStyle(PreviewTextStyle style);
+    void ContentChange();
 
 private:
     void PaintSelection(DrawingContext& context) const;
@@ -112,6 +113,7 @@ private:
     RefPtr<PropertyBool> changeSelectedRects_;
     RefPtr<PropertyBool> showPreviewText_;
     RefPtr<PropertyBool> changePreviewTextRects_;
+    RefPtr<PropertyBool> contentChange_;
     RefPtr<PropertyColor> previewTextDecorationColor_;
     RectF textRect_;
     MagnifierPainter magnifierPainter_;

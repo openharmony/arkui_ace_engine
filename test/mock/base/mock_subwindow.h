@@ -35,11 +35,11 @@ public:
     MOCK_METHOD5(ShowMenuNG,
         void(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
             const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset));
-    MOCK_METHOD0(ShowPreviewNG, bool());
-    MOCK_METHOD0(HidePreviewNG, void());
+    MOCK_METHOD0(ShowDragPreviewWindowNG, bool());
+    MOCK_METHOD0(HideDragPreviewWindowNG, void());
     MOCK_METHOD2(HideMenuNG, void(const RefPtr<NG::FrameNode>& menu, int32_t targetId));
     MOCK_METHOD2(HideMenuNG, void(bool showPreviewAnimation, bool startDrag));
-    MOCK_METHOD2(UpdateHideMenuOffsetNG, void(const NG::OffsetF& offset, bool isRedragStart));
+    MOCK_METHOD3(UpdateHideMenuOffsetNG, void(const NG::OffsetF& offset, float meunuScale, bool isRedragStart));
     MOCK_METHOD2(ContextMenuSwitchDragPreviewAnimationtNG, void(const RefPtr<NG::FrameNode>& dragPreviewNode,
         const NG::OffsetF& offset));
     MOCK_METHOD2(ShowPopup, void(const RefPtr<Component>& newComponent, bool disableTouchEvent));
@@ -64,8 +64,8 @@ public:
     MOCK_CONST_METHOD0(GetUIExtensionHostWindowRect, Rect());
     MOCK_CONST_METHOD0(CheckHostWindowStatus, bool());
     MOCK_METHOD0(ClearToast, void());
-    MOCK_METHOD6(ShowToast, void(const std::string& message, int32_t duration, const std::string& bottom,
-        const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset));
+    MOCK_METHOD2(ShowToast, void(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback));
+    MOCK_METHOD2(CloseToast, void(int32_t toastId, std::function<void(int32_t)>&& callback));
     MOCK_METHOD6(ShowDialog,
         void(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
             bool autoCancel, std::function<void(int32_t, int32_t)>&& callback, const std::set<std::string>& callbacks));

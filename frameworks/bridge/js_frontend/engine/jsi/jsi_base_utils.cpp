@@ -306,7 +306,7 @@ std::string JsiBaseUtils::GetSourceCodeInfo(
     uint32_t column = pos.second;
     Local<panda::FunctionRef> function(std::static_pointer_cast<ArkJSValue>(errorFunc)->GetValue(arkJsRuntime));
     Local<panda::StringRef> sourceCode = function->GetSourceCode(arkJsRuntime->GetEcmaVm(), line);
-    std::string sourceCodeStr = sourceCode->ToString();
+    std::string sourceCodeStr = sourceCode->ToString(arkJsRuntime->GetEcmaVm());
     if (sourceCodeStr.empty()) {
         return "";
     }

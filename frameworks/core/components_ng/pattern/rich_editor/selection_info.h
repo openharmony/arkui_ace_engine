@@ -55,6 +55,7 @@ enum SelectSpanType : int32_t {
     TYPESPAN,
     TYPEIMAGE,
     TYPESYMBOLSPAN,
+    TYPEBUILDERSPAN,
 };
 
 enum RichEditorLeadingRange : int32_t {
@@ -75,8 +76,8 @@ struct SymbolSpanStyle {
     std::string symbolColor;
     FONT_FEATURES_LIST fontFeature;
     int32_t fontWeight = 0;
-    uint32_t renderingStrategy;
-    uint32_t effectStrategy;
+    int32_t renderingStrategy = 0;
+    int32_t effectStrategy = 0;
 
     SymbolSpanStyle() {}
     SymbolSpanStyle(const TextStyle& style)
@@ -97,6 +98,25 @@ struct SymbolSpanStyle {
         renderingStrategy = style.GetRenderStrategy();
         effectStrategy = style.GetEffectStrategy();
     }
+
+    bool operator==(const SymbolSpanStyle& rhs) const
+    {
+        return fontSize == rhs.fontSize
+            && lineHeight == rhs.lineHeight
+            && letterSpacing == rhs.letterSpacing
+            && lineSpacing == rhs.lineSpacing
+            && symbolColor == rhs.symbolColor
+            && fontFeature == rhs.fontFeature
+            && fontFeature == rhs.fontFeature
+            && fontWeight == rhs.fontWeight
+            && renderingStrategy == rhs.renderingStrategy
+            && effectStrategy == rhs.effectStrategy;
+    }
+
+    bool operator!=(const SymbolSpanStyle& rhs) const
+    {
+        return !operator==(rhs);
+    }
 };
 
 struct TextStyleResult {
@@ -111,10 +131,11 @@ struct TextStyleResult {
     std::string fontFamily;
     int32_t decorationType = 0;
     std::string decorationColor;
+    int32_t decorationStyle = 0;
     int32_t textAlign = 0;
     int32_t wordBreak = static_cast<int32_t>(WordBreak::BREAK_WORD);
     int32_t lineBreakStrategy = static_cast<int32_t>(LineBreakStrategy::GREEDY);
-    std::string leadingMarginSize[2] = { "0.0", "0.0" };
+    std::string leadingMarginSize[2] = { "0.00px", "0.00px" };
 };
 
 struct ImageStyleResult {
@@ -130,6 +151,7 @@ struct ResultObject {
     SelectSpanType type = SelectSpanType::TYPESPAN;
     int32_t offsetInSpan[2] = { 0, 0 };
     std::string valueString;
+    std::string previewText;
     RefPtr<PixelMap> valuePixelMap;
     TextStyleResult textStyle;
     ImageStyleResult imageStyle;
@@ -206,7 +228,7 @@ public:
 struct ParagraphInfo {
     // style
     RefPtr<PixelMap> leadingMarginPixmap;
-    std::string leadingMarginSize[2] = { "0.0", "0.0" };
+    std::string leadingMarginSize[2] = { "0.00px", "0.00px" };
     int32_t textAlign = 0;
     int32_t wordBreak = static_cast<int32_t>(WordBreak::BREAK_WORD);
     int32_t lineBreakStrategy = static_cast<int32_t>(LineBreakStrategy::GREEDY);

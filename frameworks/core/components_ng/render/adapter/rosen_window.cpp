@@ -66,14 +66,14 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             CHECK_NULL_VOID(window);
             int64_t refreshPeriod = window->GetVSyncPeriod();
             window->OnVsync(static_cast<uint64_t>(timeStampNanos), static_cast<uint64_t>(frameCount));
+            ArkUIPerfMonitor::GetInstance().FinishPerf();
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
             pipeline->OnIdle(std::min(ts, timeStampNanos) + refreshPeriod);
-            JankFrameReport::GetInstance().JankFrameRecord(std::min(ts, timeStampNanos), window->GetWindowName());
+            JankFrameReport::GetInstance().JankFrameRecord(timeStampNanos, window->GetWindowName());
             if (FrameReport::GetInstance().GetEnable()) {
                 FrameReport::GetInstance().FlushEnd();
             }
-            ArkUIPerfMonitor::GetInstance().FinishPerf();
             pipeline->UpdateLastVsyncEndTimestamp(GetSysTimestamp());
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
@@ -113,12 +113,12 @@ void RosenWindow::Init()
     }
 }
 
-void RosenWindow::FlushFrameRate(int32_t rate, bool isAnimatorStopped, int32_t rateType)
+void RosenWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType)
 {
     if (!rsWindow_ || rate < 0) {
         return;
     }
-    rsWindow_->FlushFrameRate(rate, isAnimatorStopped, rateType);
+    rsWindow_->FlushFrameRate(rate, animatorExpectedFrameRate, rateType);
 }
 
 void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
