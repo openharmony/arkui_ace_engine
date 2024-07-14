@@ -293,7 +293,7 @@ void SwiperPattern::ResetOnForceMeasure()
     StopTranslateAnimation();
     StopSpringAnimation();
     StopFadeAnimation();
-    StopIndicatorAnimation();
+    StopIndicatorAnimation(true);
     currentOffset_ = 0.0f;
     mainSizeIsMeasured_ = false;
     currentDelta_ = 0.0f;
