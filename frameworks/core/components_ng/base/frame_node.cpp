@@ -4644,27 +4644,6 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
     return OPINC_SUGGESTED_OR_EXCLUDED;
 }
 
-int FrameNode::GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t thresh)
-{
-    CHECK_NULL_RETURN(host, 0);
-    auto total = 0;
-    auto childSize = host->GetTotalChildCount();
-    if (childSize < 1) {
-        return 1;
-    }
-    for (auto i = 0; i < childSize; i++) {
-        auto child = AceType::DynamicCast<FrameNode>(host->GetChildByIndex(i));
-        if (!child) {
-            continue;
-        }
-        total += GetValidLeafChildNumber(child, thresh);
-        if (total >= thresh) {
-            return total;
-        }
-    }
-    return total;
-}
-
 void FrameNode::MarkAndCheckNewOpIncNode()
 {
     auto parent = GetAncestorNodeOfFrame();
@@ -4685,6 +4664,27 @@ void FrameNode::MarkAndCheckNewOpIncNode()
             MarkSuggestOpIncGroup(true, true);
         }
     }
+}
+
+int FrameNode::GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t thresh)
+{
+    CHECK_NULL_RETURN(host, 0);
+    auto total = 0;
+    auto childSize = host->GetTotalChildCount();
+    if (childSize < 1) {
+        return 1;
+    }
+    for (auto i = 0; i < childSize; i++) {
+        auto child = AceType::DynamicCast<FrameNode>(host->GetChildByIndex(i));
+        if (!child) {
+            continue;
+        }
+        total += GetValidLeafChildNumber(child, thresh);
+        if (total >= thresh) {
+            return total;
+        }
+    }
+    return total;
 }
 
 void FrameNode::TriggerShouldParallelInnerWith(
