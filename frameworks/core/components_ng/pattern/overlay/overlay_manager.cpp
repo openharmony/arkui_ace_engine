@@ -114,7 +114,6 @@ constexpr int32_t SHEET_HALF_SIZE = 2;
 const RefPtr<Curve> SHOW_SCALE_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.38f, 1.33f, 0.6f, 1.0f);
 
 constexpr int32_t ROOT_MIN_NODE = 1;
-constexpr int32_t TOAST_MIN_NODE = 2;
 constexpr int32_t ATOMIC_SERVICE_MIN_SIZE = 2;
 
 //  OVERLAY_EXISTS:  overlay was removed
@@ -2757,6 +2756,47 @@ int32_t OverlayManager::GetPopupIdByNode(const RefPtr<FrameNode>& overlay)
     return targetId;
 }
 
+int32_t OverlayManager::RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, RefPtr<NG::FrameNode>& overlay,
+    RefPtr<Pattern>& pattern, bool isBackPressed, bool isPageRouter)
+{
+    auto currentIndex = rootNode->GetChildren().size() - 1;
+    while (InstanceOf<ToastPattern>(pattern)) {
+        // still have nodes on root expect stage and toast node.
+        if (currentIndex > 0) {
+            currentIndex = currentIndex - 1;
+            overlay = DynamicCast<FrameNode>(rootNode->GetChildAtIndex(currentIndex));
+            CHECK_NULL_RETURN(overlay, OVERLAY_EXISTS);
+            pattern = overlay->GetPattern();
+        } else {
+            return OVERLAY_EXISTS;
+        }
+    }
+    CHECK_EQUAL_RETURN(overlay->GetTag(), V2::STAGE_ETS_TAG, OVERLAY_EXISTS);
+    CHECK_EQUAL_RETURN(overlay->GetTag(), V2::OVERLAY_ETS_TAG, OVERLAY_EXISTS);
+    // close dialog with animation
+    if (InstanceOf<DialogPattern>(pattern)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && isPageRouter) {
+            return OVERLAY_EXISTS;
+        }
+        auto dialogPattern = DynamicCast<DialogPattern>(pattern);
+        CHECK_NULL_RETURN(dialogPattern, OVERLAY_EXISTS);
+        if (dialogPattern->ShouldDismiss()) {
+            SetDismissDialogId(overlay->GetId());
+            dialogPattern->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK));
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss");
+            return OVERLAY_REMOVE;
+        }
+        return RemoveDialog(overlay, isBackPressed, isPageRouter) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
+    }
+    if (InstanceOf<BubblePattern>(pattern)) {
+        return RemoveBubble(overlay) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
+    }
+    if (InstanceOf<MenuWrapperPattern>(pattern)) {
+        return RemoveMenu(overlay) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
+    }
+    return OVERLAY_NOTHING;
+}
+
 bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
 {
     auto rootNode = rootNodeWeak_.Upgrade();
@@ -2769,15 +2809,19 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
         // stage node is at index 0, remove overlay at last
         auto overlay = GetOverlayFrameNode();
         CHECK_NULL_RETURN(overlay, false);
-        auto ret = ExceptComponent(rootNode, overlay, isBackPressed, isPageRouter);
+        auto pattern = overlay->GetPattern();
+        auto ret = RemoveOverlayCommon(rootNode, overlay, pattern, isBackPressed, isPageRouter);
         if (ret == OVERLAY_REMOVE) {
             return true;
         } else if (ret == OVERLAY_EXISTS) {
             return false;
-        } else {
-            // nothing
         }
-
+        ret = ExceptComponent(rootNode, overlay, isBackPressed, isPageRouter);
+        if (ret == OVERLAY_REMOVE) {
+            return true;
+        } else if (ret == OVERLAY_EXISTS) {
+            return false;
+        }
         // remove navDestination in navigation first
         do {
             CHECK_NULL_BREAK(rootNode->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG);
@@ -2793,7 +2837,6 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
                 return RemoveModalInOverlay();
             }
         }
-        auto pattern = overlay->GetPattern();
         if (!InstanceOf<KeyboardPattern>(pattern)) {
             if (overlay->GetTag() != V2::SHEET_WRAPPER_TAG) {
                 rootNode->RemoveChild(overlay);
@@ -2834,49 +2877,12 @@ RefPtr<FrameNode> OverlayManager::GetOverlayFrameNode()
 int32_t OverlayManager::ExceptComponent(const RefPtr<NG::UINode>& rootNode, RefPtr<NG::FrameNode>& overlay,
     bool isBackPressed, bool isPageRouter)
 {
-    // close dialog with animation
     auto pattern = overlay->GetPattern();
-    if (InstanceOf<ToastPattern>(pattern)) {
-        // still have nodes on root expect stage and toast node.
-        if (rootNode->GetChildren().size() > TOAST_MIN_NODE) {
-            // If the current node is a toast, the last second overlay's node should be processed.
-            overlay = DynamicCast<FrameNode>(rootNode->GetChildAtIndex(rootNode->GetChildren().size()
-                                                                                            - TOAST_MIN_NODE));
-            CHECK_NULL_RETURN(overlay, OVERLAY_EXISTS);
-            pattern = overlay->GetPattern();
-        } else {
-            return OVERLAY_EXISTS;
-        }
-    }
-
-    CHECK_EQUAL_RETURN(overlay->GetTag(),  V2::OVERLAY_ETS_TAG, OVERLAY_EXISTS);
-
-    if (InstanceOf<DialogPattern>(pattern)) {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && isPageRouter) {
-            return OVERLAY_EXISTS;
-        }
-        auto dialogPattern = DynamicCast<DialogPattern>(pattern);
-        CHECK_NULL_RETURN(dialogPattern, OVERLAY_EXISTS);
-        if (dialogPattern->ShouldDismiss()) {
-            SetDismissDialogId(overlay->GetId());
-            dialogPattern->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK));
-            TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss");
-            return OVERLAY_REMOVE;
-        }
-        return RemoveDialog(overlay, isBackPressed, isPageRouter) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
-    }
-    if (InstanceOf<BubblePattern>(pattern)) {
-        return RemoveBubble(overlay) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
-    }
-    if (InstanceOf<MenuWrapperPattern>(pattern)) {
-        return RemoveMenu(overlay) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
-    }
     if (InstanceOf<VideoFullScreenPattern>(pattern)) {
         auto videoPattern = DynamicCast<VideoFullScreenPattern>(pattern);
         CHECK_NULL_RETURN(videoPattern, OVERLAY_EXISTS);
         return videoPattern->ExitFullScreen() ? OVERLAY_REMOVE : OVERLAY_EXISTS;
     }
-
     // OVERLAY_REMOVE if popup was removed, OVERLAY_NOTHING if not handle it
     if (overlay->GetTag() == V2::SHEET_WRAPPER_TAG) {
         return WebBackward(overlay);
@@ -3180,24 +3186,12 @@ bool OverlayManager::RemoveOverlayInSubwindow()
     // remove the overlay node just mounted in subwindow
     auto overlay = DynamicCast<FrameNode>(rootNode->GetLastChild());
     CHECK_NULL_RETURN(overlay, false);
-    // close dialog with animation
     auto pattern = overlay->GetPattern();
-    if (InstanceOf<DialogPattern>(pattern)) {
-        auto dialogPattern = DynamicCast<DialogPattern>(pattern);
-        CHECK_NULL_RETURN(dialogPattern, false);
-        if (dialogPattern->ShouldDismiss()) {
-            SetDismissDialogId(overlay->GetId());
-            dialogPattern->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK));
-            TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss");
-            return true;
-        }
-        return RemoveDialog(overlay, false);
-    }
-    if (InstanceOf<BubblePattern>(pattern)) {
-        return RemovePopupInSubwindow(pattern, overlay, rootNode);
-    }
-    if (InstanceOf<MenuWrapperPattern>(pattern)) {
-        return RemoveMenu(overlay);
+    auto ret = RemoveOverlayCommon(rootNode, overlay, pattern, false, false);
+    if (ret == OVERLAY_EXISTS) {
+        return false;
+    } else if (ret == OVERLAY_REMOVE) {
+        return true;
     }
     rootNode->RemoveChild(overlay);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
