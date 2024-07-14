@@ -694,6 +694,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     placeholderCount_++;
     if (updateCaret) {
         SetCaretPosition(insertIndex + spanItem->content.length());
+        MoveCaretToContentRect();
     }
     ResetSelectionAfterAddSpan(isPaste);
     AfterAddImage(changeValue);
