@@ -2680,7 +2680,6 @@ void RichEditorPattern::HandleFocusEvent()
     if (host && textDetectEnable_ && !dataDetectorAdapter_->aiSpanMap_.empty()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
-    dataDetectorAdapter_->CancelAITask();
     UseHostToUpdateTextFieldManager();
     if (previewLongPress_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "if preview and longpress: keep preview state");
@@ -7804,12 +7803,12 @@ void RichEditorPattern::HandleOnCameraInput()
 
 bool RichEditorPattern::CanStartAITask()
 {
-    return TextPattern::CanStartAITask() && !HasFocus() && !isShowPlaceholder_;
+    return TextPattern::CanStartAITask() && !isEditing_ && !isShowPlaceholder_;
 }
 
 bool RichEditorPattern::NeedShowAIDetect()
 {
-    return TextPattern::NeedShowAIDetect() && !HasFocus() && !isShowPlaceholder_;
+    return TextPattern::NeedShowAIDetect() && !isEditing_ && !isShowPlaceholder_;
 }
 
 void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -8202,8 +8201,12 @@ void RichEditorPattern::HandleOnEditChanged(bool isEditing)
     isEditing_ = isEditing;
     eventHub->FireOnEditingChange(isEditing);
     if (isEditing) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "enter edit state, reset previewLongPress_");
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "enter edit state, reset previewLongPress_ and cancel AI task");
         previewLongPress_ = false;
+        dataDetectorAdapter_->CancelAITask();
+    } else if (CanStartAITask()) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "leave edit state, start AI task");
+        dataDetectorAdapter_->StartAITask();
     }
 }
 
