@@ -3111,7 +3111,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
 
     auto pipeline = PipelineContext::GetCurrentContext();
     if (pipeline) {
-        pipeline->AddAfterRenderTask([weak = WeakClaim(this), info, nextIndex = GetLoopIndex(nextIndex)]() {
+        pipeline->AddAfterLayoutTask([weak = WeakClaim(this), info, nextIndex = GetLoopIndex(nextIndex)]() {
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
             swiper->FireAnimationStartEvent(swiper->GetLoopIndex(swiper->currentIndex_), nextIndex, info);
