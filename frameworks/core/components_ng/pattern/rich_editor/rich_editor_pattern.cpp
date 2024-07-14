@@ -5495,14 +5495,14 @@ void RichEditorPattern::HandleOnUndoAction()
     }
     if (value.addText.has_value() && value.deleteText.has_value()) {
         SetCaretPosition(value.afterCaretPosition);
-        DeleteBackwardOperation(StringUtils::ToWstring(value.addText.value_or("")).length());
+        DeleteBackwardOperation(TextEmojiProcessor::GetCharacterNum(value.addText.value_or("")));
         InsertValueOperation(value.deleteText.value_or(""));
         AfterChangeText(changeValue);
         return;
     }
     if (value.addText.has_value()) {
         SetCaretPosition(value.afterCaretPosition);
-        DeleteBackwardOperation(StringUtils::ToWstring(value.addText.value_or("")).length());
+        DeleteBackwardOperation(TextEmojiProcessor::GetCharacterNum(value.addText.value_or("")));
     }
     if (value.deleteText.has_value()) {
         SetCaretPosition(value.afterCaretPosition);
