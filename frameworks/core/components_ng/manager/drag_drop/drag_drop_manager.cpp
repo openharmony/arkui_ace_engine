@@ -61,6 +61,10 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
     SetIsDragged(true);
     isDragCancel_ = false;
 #if !defined(PREVIEW)
+    if (GetWindowId() == -1) {
+        const float windowScale = GetWindowScale();
+        pixelMap->Scale(windowScale, windowScale, AceAntiAliasingOption::HIGH);
+    }
     CreateDragWindow(info, pixelMap->GetWidth(), pixelMap->GetHeight());
     CHECK_NULL_RETURN(dragWindow_, nullptr);
     dragWindow_->DrawPixelMap(pixelMap);
@@ -104,18 +108,55 @@ RefPtr<DragDropProxy> DragDropManager::CreateTextDragDropProxy()
 void DragDropManager::CreateDragWindow(const GestureEvent& info, uint32_t width, uint32_t height)
 {
 #if !defined(PREVIEW)
-    // The window manager currently does not support creating child windows within child windows,
-    // so the main window is used here
-    auto container = Container::GetContainer(CONTAINER_ID_DIVIDE_SIZE);
-    CHECK_NULL_VOID(container);
-    int32_t windowX = static_cast<int32_t>(info.GetGlobalPoint().GetX());
-    int32_t windowY = static_cast<int32_t>(info.GetGlobalPoint().GetY());
+    const int32_t windowId = GetWindowId();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    float windowScale = GetWindowScale();
+    Rect rect = Rect(0, 0, 0, 0);
+    if (!isDragWindowSubWindow_ || NearEqual(windowScale, 1.0f)) {
+        rect = pipeline->GetDisplayWindowRectInfo();
+    }
+    if (isDragWindowShow_) {
+        windowScale = 1.0f;
+    }
+    const int32_t windowY = static_cast<int32_t>(info.GetGlobalPoint().GetY() * windowScale);
+    const int32_t windowX = static_cast<int32_t>(info.GetGlobalPoint().GetX() * windowScale);
     dragWindow_ = DragWindow::CreateDragWindow(
-        "APP_DRAG_WINDOW", container->GetWindowId(), windowX, windowY, width, height);
-    if (!dragWindow_) {
+        { "APP_DRAG_WINDOW", windowX + rect.Left(), windowY + rect.Top(), width, height, windowId });
+    if (dragWindow_) {
+        dragWindow_->SetOffset(rect.Left(), rect.Top());
+    } else {
         TAG_LOGW(AceLogTag::ACE_DRAG, "Create drag window failed!");
     }
 #endif
+}
+
+int32_t DragDropManager::GetWindowId()
+{
+    auto windowId = -1;
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, windowId);
+
+    if (!container->IsSceneBoardEnabled()) {
+        isDragWindowSubWindow_ = false;
+        return windowId;
+    }
+
+    if (!container->IsMainWindow()) {
+        // The window manager currently does not support creating child windows within child windows,
+        // so the main window is used here
+        container = Container::GetContainer(CONTAINER_ID_DIVIDE_SIZE);
+        CHECK_NULL_RETURN(container, windowId);
+        if (!container->IsMainWindow()) {
+            isDragWindowSubWindow_ = false;
+            return windowId;
+        }
+    }
+
+    windowId = container->GetWindowId();
+    isDragWindowSubWindow_ = true;
+
+    return windowId;
 }
 
 RefPtr<FrameNode> DragDropManager::CreateDragRootNode(const RefPtr<UINode>& customNode)
@@ -1069,11 +1110,14 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
 
-    UpdateDragWindowPosition(static_cast<int32_t>(globalX), static_cast<int32_t>(globalY));
+    const float windowScale = isDragWindowSubWindow_ ? 1.0f : GetWindowScale();
+    const float windowX = globalX * windowScale;
+    const float windowY = globalY * windowScale;
+    UpdateDragWindowPosition(static_cast<int32_t>(windowX), static_cast<int32_t>(windowY));
 
     OHOS::Ace::ItemDragInfo itemDragInfo;
-    itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(globalX, DimensionUnit::PX)));
-    itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
+    itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(windowX, DimensionUnit::PX)));
+    itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(windowY, DimensionUnit::PX)));
 
     // use -1 for grid item not in eventGrid
     auto getDraggedIndex = [draggedGrid = draggedGridFrameNode_, draggedIndex, dragType](
@@ -1127,10 +1171,13 @@ void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t dragge
     dragDropState_ = DragDropMgrState::IDLE;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    const float windowScale = isDragWindowSubWindow_ ? 1.0f : GetWindowScale();
+    const float windowX = globalX * windowScale;
+    const float windowY = globalY * windowScale;
 
     OHOS::Ace::ItemDragInfo itemDragInfo;
-    itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(globalX, DimensionUnit::PX)));
-    itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
+    itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(windowX, DimensionUnit::PX)));
+    itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(windowY, DimensionUnit::PX)));
 
     auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY);
     if (!dragFrameNode) {
