@@ -382,6 +382,8 @@ float TextFieldLayoutAlgorithm::CalculateContentWidth(const LayoutConstraintF& c
     if (minSize.has_value()) {
         auto minWidth = minSize.value().Width();
         paragraph_->Layout(std::max(std::ceil(paragraph_->GetLongestLine()) + indent_, minWidth));
+    } else if (autoWidth_) {
+        paragraph_->Layout(std::ceil(paragraph_->GetLongestLine()) + indent_);
     } else {
         paragraph_->Layout(std::max(std::ceil(paragraph_->GetLongestLine()) + indent_, textFieldWidth));
     }
