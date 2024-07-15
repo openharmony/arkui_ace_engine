@@ -1866,7 +1866,7 @@ class ListNodeDataSource extends BasicDataSource {
   public modifyNodeId: number = -1;
   private currentOperation?: MenuOperation;
   private expandAndCollapseInfo: Map<number, NodeStatus> = new Map<number, NodeStatus>();
-  public loadedNodeIdAndIndexMap: Map<number, number> = new Map<number, number>(); // [currentNodeId, index]
+  public loadedNodeIdAndIndexMap: Map<number, number> = new Map<number, number>();
   private isTouchDown: boolean = false;
   private appEventBus: TreeListener = TreeListenerManager.getInstance().getTreeListener();
   /* parameter of the drag event. */
@@ -2133,10 +2133,10 @@ class ListNodeDataSource extends BasicDataSource {
           this.changeNodeStatus(index);
         }
         this.listNode.splice(i + 1, 0, addNodeInfo);
-        this.listNode[i + 1].setTitleAndInputTextStatus(true); // false->true: realize inner Interaction.
+        this.listNode[i + 1].setTitleAndInputTextStatus(true);
         this.listNode[i + 1].setNodeIsShow(true);
         this.listNode[i + 1].setListItemHeight(LIST_ITEM_HEIGHT);
-        this.setImageSource(i + 1, InteractionStatus.Edit); // Normal->Edit : realize inner Interaction.
+        this.setImageSource(i + 1, InteractionStatus.Edit);
         this.currentOperation = MenuOperation.ADD_NODE;
         this.notifyDataAdd(i + 1);
         this.notificationNodeInfo(i + 1, this.currentOperation);
