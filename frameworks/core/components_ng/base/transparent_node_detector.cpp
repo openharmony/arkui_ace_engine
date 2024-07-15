@@ -28,13 +28,6 @@ TransparentNodeDetector& TransparentNodeDetector::GetInstance()
     return instance;
 }
 
-TransparentNodeDetector::TransparentNodeDetector()
-{
-}
-
-TransparentNodeDetector::~TransparentNodeDetector()
-{
-}
 
 void TransparentNodeDetector::PostCheckNodeTransparentTask(const RefPtr<FrameNode>& node, uint8_t detectCount)
 {
