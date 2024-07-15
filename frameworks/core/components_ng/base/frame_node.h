@@ -488,7 +488,7 @@ public:
 
     bool PaintRectWithTransformJudge();
 
-    bool IsOutOfTouchTestRegionOptionalJudge(const PointF& parentLocalPoint, int32_t sourceType);
+    bool IsOutOfTouchTestRegionJudge(const PointF& parentLocalPoint, int32_t sourceType);
 
     bool IsLayoutDirtyMarked() const
     {
