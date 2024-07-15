@@ -1311,4 +1311,55 @@ HWTEST_F(EventManagerTestNg, EventManagerTest072, TestSize.Level1)
     auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, pagePattern);
     EXPECT_FALSE(eventManager->IsSkipEventNode(pageNode));
 }
+
+/**
+ * @tc.name: EventManagerAccessibilityHoverTest001
+ * @tc.desc: Test MouseTest (frameNode)
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerAccessibilityHoverTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Call MouseTest with MouseAction::WINDOW_LEAVE
+     * @tc.expected: currHoverTestResults_ is empty
+     */
+    TouchEvent event;
+    const int nodeId = 10008;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, nodeId, nullptr);
+    TouchRestrict touchRestrict;
+
+    event.type = TouchType::HOVER_EXIT;
+    auto hoverEventTarget = AceType::MakeRefPtr<HoverEventTarget>(V2::LOCATION_BUTTON_ETS_TAG, nodeId);
+    eventManager->curAccessibilityHoverResults_.push_back(hoverEventTarget);
+    ASSERT_FALSE(eventManager->curAccessibilityHoverResults_.empty());
+    eventManager->AccessibilityHoverTest(event, frameNode, touchRestrict);
+    ASSERT_TRUE(eventManager->curAccessibilityHoverResults_.empty());
+
+    /**
+     * @tc.steps: step3. Call MouseTest with MouseAction::WINDOW_ENTER
+     * @tc.expected: lastHoverTestResults_ is empty
+     */
+    event.type = TouchType::HOVER_ENTER;
+    eventManager->lastAccessibilityHoverResults_.push_back(hoverEventTarget);
+    ASSERT_FALSE(eventManager->lastAccessibilityHoverResults_.empty());
+    eventManager->AccessibilityHoverTest(event, frameNode, touchRestrict);
+    ASSERT_TRUE(eventManager->lastAccessibilityHoverResults_.empty());
+
+    /**
+     * @tc.steps: step4. Call MouseTest with MouseAction::HOVER
+     * @tc.expected: lastHoverTestResults_ is empty and currHoverTestResults_ is empty
+     */
+    event.type = TouchType::HOVER_MOVE;
+    eventManager->lastAccessibilityHoverResults_.push_back(hoverEventTarget);
+    eventManager->AccessibilityHoverTest(event, frameNode, touchRestrict);
+    ASSERT_TRUE(eventManager->lastAccessibilityHoverResults_.empty());
+    ASSERT_TRUE(eventManager->curAccessibilityHoverResults_.empty());
+}
 } // namespace OHOS::Ace::NG
