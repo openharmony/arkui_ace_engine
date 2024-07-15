@@ -224,6 +224,7 @@ void StylusDetectorMgr::RemoveTextFieldFrameNode(const int32_t id)
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
         auto bundleName = container->GetBundleName();
+        isRegistered_ = false;
         UnRegisterStylusInteractionListener(bundleName);
     }
 }
