@@ -1093,6 +1093,9 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
 
 void ListLayoutAlgorithm::ReMeasureListItemGroup(LayoutWrapper* layoutWrapper, bool forwardLayout)
 {
+    if (targetIndex_) {
+        return;
+    }
     if (forwardLayout) {
         if (itemPosition_.begin()->second.isGroup) {
             AdjustPostionForListItemGroup(layoutWrapper, axis_, GetStartIndex(), forwardLayout);
