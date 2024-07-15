@@ -194,6 +194,11 @@ public:
         return clickMenuItemId_;
     }
 
+    void SetOnClickAIMenuItem(std::function<void()> onClickAIMenuItem)
+    {
+        onClickAIMenuItem_ = onClickAIMenuItem;
+    }
+
     void OnVisibleChange(bool isVisible) override;
     void InitLongPressEvent();
     void UpdateNeedDivider(bool need);
@@ -282,6 +287,7 @@ private:
     bool isHovered_ = false;
     bool isExpanded_ = false;
     int32_t clickMenuItemId_ = -1;
+    std::function<void()> onClickAIMenuItem_ = nullptr;
     int32_t index_ = 0;
 
     std::function<void()> subBuilderFunc_ = nullptr;

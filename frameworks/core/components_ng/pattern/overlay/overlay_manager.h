@@ -481,12 +481,12 @@ public:
         const ModalUIExtensionConfig& config);
     void CloseModalUIExtension(int32_t sessionId);
 
-    RefPtr<FrameNode> BindUIExtensionToMenu(const RefPtr<FrameNode>& uiExtNode,
-        const RefPtr<NG::FrameNode>& targetNode, const std::string& longestContent, int32_t menuSize);
-    SizeF CaculateMenuSize(const RefPtr<FrameNode>& menuNode, const std::string& longestContent, int32_t menuSize);
-    bool ShowUIExtensionMenu(const RefPtr<NG::FrameNode>& uiExtNode, const NG::RectF& aiRect,
-        const std::string& longestContent, int32_t menuSize, const RefPtr<NG::FrameNode>& targetNode);
-    void CloseUIExtensionMenu(int32_t targetId);
+    RefPtr<FrameNode> BuildAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions);
+    RefPtr<FrameNode> CreateAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions,
+        const RefPtr<FrameNode>& targetNode);
+    bool ShowAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions,
+        const RectF& aiRect, const RefPtr<FrameNode>& targetNode);
+    void CloseAIEntityMenu(int32_t targetId);
 
     void MarkDirty(PropertyChangeFlag flag);
     void MarkDirtyOverlay();
