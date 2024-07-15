@@ -331,7 +331,7 @@ void SearchModelNG::SetPlaceholderFont(const Font& font)
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     if (font.fontSize) {
-        textFieldLayoutProperty->UpdatePlaceholderFontSize(font.fontSize.value());
+        textFieldLayoutProperty->UpdatePlaceholderFontSize(ConvertTextFontScaleValue(font.fontSize.value()));
     }
     if (font.fontStyle) {
         textFieldLayoutProperty->UpdatePlaceholderItalicFontStyle(font.fontStyle.value());
@@ -367,7 +367,7 @@ void SearchModelNG::SetTextFont(const Font& font)
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     if (font.fontSize) {
-        textFieldLayoutProperty->UpdateFontSize(font.fontSize.value());
+        textFieldLayoutProperty->UpdateFontSize(ConvertTextFontScaleValue(font.fontSize.value()));
     }
     if (font.fontStyle) {
         textFieldLayoutProperty->UpdateItalicFontStyle(font.fontStyle.value());
@@ -739,8 +739,28 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
     if (pipeline->GetHasPreviewTextOption()) {
         pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
     }
+    TextFieldUpdateContext(frameNode);
+    if (!hasTextFieldNode) {
+        auto pattern = parentNode->GetPattern<SearchPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetTextFieldNode(frameNode);
+        frameNode->MountToParent(parentNode);
+    }
+}
+
+void SearchModelNG::TextFieldUpdateContext(const RefPtr<FrameNode>& frameNode)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
+    auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textFieldPaintProperty);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+
     auto renderContext = frameNode->GetRenderContext();
     textFieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
     textFieldPaintProperty->UpdateCursorWidth(textFieldTheme->GetCursorWidth());
@@ -748,12 +768,8 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
     textFieldLayoutProperty->UpdatePadding(padding);
     pattern->SetEnableTouchAndHoverEffect(true);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    if (!hasTextFieldNode) {
-        auto pattern = parentNode->GetPattern<SearchPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetTextFieldNode(frameNode);
-        frameNode->MountToParent(parentNode);
-    }
+
+    UpdateTextFieldFontValue(frameNode);
 }
 
 void SearchModelNG::RequestKeyboardOnFocus(bool needToRequest)
@@ -1031,7 +1047,7 @@ void SearchModelNG::SetPlaceholderFont(FrameNode* frameNode, const Font& font)
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     if (font.fontSize) {
-        textFieldLayoutProperty->UpdatePlaceholderFontSize(font.fontSize.value());
+        textFieldLayoutProperty->UpdatePlaceholderFontSize(ConvertTextFontScaleValue(font.fontSize.value()));
     }
     if (font.fontStyle) {
         textFieldLayoutProperty->UpdatePlaceholderItalicFontStyle(font.fontStyle.value());
@@ -1165,7 +1181,7 @@ void SearchModelNG::SetTextFont(FrameNode* frameNode, const Font& font)
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     if (font.fontSize) {
-        textFieldLayoutProperty->UpdateFontSize(font.fontSize.value());
+        textFieldLayoutProperty->UpdatePlaceholderFontSize(ConvertTextFontScaleValue(font.fontSize.value()));
     }
     if (font.fontStyle) {
         textFieldLayoutProperty->UpdateItalicFontStyle(font.fontStyle.value());
@@ -1740,5 +1756,38 @@ void SearchModelNG::SetEnablePreviewText(FrameNode* frameNode, bool enablePrevie
     auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSupportPreviewText(enablePreviewText);
+}
+
+const Dimension SearchModelNG::ConvertTextFontScaleValue(const Dimension& fontSizeValue)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, fontSizeValue);
+
+    float fontScale = pipeline->GetFontScale();
+    if (fontScale == 0) {
+        return fontSizeValue;
+    }
+
+    if (GreatOrEqualCustomPrecision(fontScale, MAX_FONT_SCALE)) {
+        if (fontSizeValue.Unit() != DimensionUnit::VP) {
+            return Dimension(fontSizeValue / fontScale * MAX_FONT_SCALE);
+        }
+    }
+    return fontSizeValue;
+}
+
+void SearchModelNG::UpdateTextFieldFontValue(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+
+    Dimension fontSize = textFieldTheme->GetFontSize();
+
+    textFieldLayoutProperty->UpdateFontSize(ConvertTextFontScaleValue(fontSize));
 }
 } // namespace OHOS::Ace::NG
