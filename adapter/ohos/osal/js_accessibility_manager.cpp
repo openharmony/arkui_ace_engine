@@ -67,6 +67,8 @@ constexpr int32_t CARD_NODE_ID_RATION = 10000;
 constexpr int32_t CARD_ROOT_NODE_ID_RATION = 1000;
 constexpr int32_t CARD_BASE = 100000;
 
+const std::string ACTION_ARGU_SCROLL_STUB = "scrolltype"; // wait for change
+
 struct ActionTable {
     AceAction aceAction;
     ActionType action;
@@ -80,13 +82,18 @@ struct AccessibilityActionParam {
     bool setSelectionDir = false;
     int32_t setCursorIndex = -1;
     TextMoveUnit moveUnit = TextMoveUnit::STEP_CHARACTER;
+    AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_DEFAULT;
 };
 
 const std::map<Accessibility::ActionType, std::function<bool(const AccessibilityActionParam& param)>> ACTIONS = {
     { ActionType::ACCESSIBILITY_ACTION_SCROLL_FORWARD,
-        [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionScrollForward(); } },
+        [](const AccessibilityActionParam& param) {
+            return param.accessibilityProperty->ActActionScrollForward(param.scrollType);
+        } },
     { ActionType::ACCESSIBILITY_ACTION_SCROLL_BACKWARD,
-        [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionScrollBackward(); } },
+        [](const AccessibilityActionParam& param) {
+            return param.accessibilityProperty->ActActionScrollBackward(param.scrollType);
+        } },
     { ActionType::ACCESSIBILITY_ACTION_SET_TEXT,
         [](const AccessibilityActionParam& param) {
             return param.accessibilityProperty->ActActionSetText(param.setTextArgument);
@@ -2385,6 +2392,13 @@ void JsAccessibilityManager::ProcessParameters(
     if (op == ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_POSITION) {
         paramsMap[ACTION_ARGU_SET_OFFSET] = params[EVENT_DUMP_ACTION_PARAM_INDEX];
     }
+
+    if ((op == ActionType::ACCESSIBILITY_ACTION_SCROLL_FORWARD) ||
+        (op == ActionType::ACCESSIBILITY_ACTION_SCROLL_BACKWARD)) {
+        if (params.size() > EVENT_DUMP_PARAM_LENGTH_LOWER) {
+            paramsMap = { { ACTION_ARGU_SCROLL_STUB, params[EVENT_DUMP_ACTION_PARAM_INDEX] } };
+        }
+    }
 }
 
 bool TransferExecuteAction(int64_t elementId, const RefPtr<NG::FrameNode>& node,
@@ -3622,6 +3636,17 @@ bool conversionDirection(std::string dir)
     return false;
 }
 
+inline void getArgumentByKey(const std::map<std::string, std::string> &actionArguments, const std::string checkKey,
+    int32_t &argument)
+{
+    auto iter = actionArguments.find(checkKey);
+    if (iter != actionArguments.end()) {
+        std::stringstream strArguments;
+        strArguments << iter->second;
+        strArguments >> argument;
+    }
+}
+
 bool ActAccessibilityAction(Accessibility::ActionType action, const std::map<std::string, std::string> actionArguments,
     RefPtr<NG::AccessibilityProperty> accessibilityProperty)
 {
@@ -3677,6 +3702,18 @@ bool ActAccessibilityAction(Accessibility::ActionType action, const std::map<std
         }
         param.setCursorIndex = position;
     }
+
+    if ((action == ActionType::ACCESSIBILITY_ACTION_SCROLL_FORWARD) ||
+        (action == ActionType::ACCESSIBILITY_ACTION_SCROLL_BACKWARD)) {
+        int32_t scrollType = static_cast<int32_t>(AccessibilityScrollType::SCROLL_DEFAULT);
+        getArgumentByKey(actionArguments, ACTION_ARGU_SCROLL_STUB, scrollType);
+        if ((scrollType < static_cast<int32_t>(AccessibilityScrollType::SCROLL_DEFAULT)) ||
+            (scrollType > static_cast<int32_t>(AccessibilityScrollType::SCROLL_MAX_TYPE))) {
+            scrollType = static_cast<int32_t>(AccessibilityScrollType::SCROLL_DEFAULT);
+        }
+        param.scrollType = static_cast<AccessibilityScrollType>(scrollType);
+    }
+
     auto accessibiltyAction = ACTIONS.find(action);
     if (accessibiltyAction != ACTIONS.end()) {
         param.accessibilityProperty = accessibilityProperty;

@@ -197,6 +197,13 @@ struct AceCollectionItemInfo {
     int32_t columnSpan = 0;
 };
 
+enum class AccessibilityScrollType : int32_t {
+    SCROLL_DEFAULT = -1, // no parameter trans, do not add enum before
+    SCROLL_HALF = 0,
+    SCROLL_FULL = 1,
+    SCROLL_MAX_TYPE = SCROLL_FULL, // for check parameter, do not add enum after
+};
+
 bool CheckBetterRect(const Rect& nodeRect, int direction, const Rect& itemRect, const Rect& tempBest);
 
 } // namespace OHOS::Ace
