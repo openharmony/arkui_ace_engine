@@ -333,7 +333,7 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (layoutDirection == TextDirection::RTL) {
         auto parentSize = geometryNode->GetFrameSize();
         auto width = parentSize.Width();
-        auto childSize = childGeometryNode->GetFrameSize();
+        auto childSize = childGeometryNode->GetMarginFrameSize();
         childGeometryNode->SetMarginFrameOffset(OffsetF(width - childSize.Width(), 0.0f));
     } else {
         childGeometryNode->SetMarginFrameOffset(OffsetF());
