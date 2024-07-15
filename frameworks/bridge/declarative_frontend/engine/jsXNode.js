@@ -393,6 +393,9 @@ class JSBuilderNode extends BaseNode {
         this.updateNodePtr(nodePtr);
         this.updateInstanceId(instanceId);
     }
+    observeRecycleComponentCreation(name, recycleUpdateFunc) {
+        throw new Error('custom component in @Builder used by BuilderNode does not support @Reusable');
+    }
 }
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
