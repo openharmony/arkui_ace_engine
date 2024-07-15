@@ -4925,7 +4925,7 @@ void SwiperPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
         return;
     }
     // in case child didn't call swiper's HandleScrollVelocity
-    if (!AnimationRunning()) {
+    if (!DuringTranslateAnimation()) {
         HandleDragEnd(velocity.value_or(0.0f));
     }
     SetIsNestedInterrupt(false);
@@ -4942,7 +4942,7 @@ void SwiperPattern::NotifyParentScrollEnd()
     }
 }
 
-inline bool SwiperPattern::AnimationRunning() const
+inline bool SwiperPattern::DuringTranslateAnimation() const
 {
     return (springAnimation_ && springAnimationIsRunning_) || targetIndex_ || usePropertyAnimation_;
 }
@@ -4978,7 +4978,7 @@ ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedSta
     if (IsDisableSwipe()) {
         return { offset, true };
     }
-    if (source == SCROLL_FROM_ANIMATION && AnimationRunning()) {
+    if (source == SCROLL_FROM_ANIMATION && DuringTranslateAnimation()) {
         // deny conflicting animation from child
         return { offset, true };
     }
