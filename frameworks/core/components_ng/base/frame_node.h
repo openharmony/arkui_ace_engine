@@ -486,6 +486,10 @@ public:
 
     virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t sourceType);
 
+    bool PaintRectWithTransformJudge();
+
+    bool IsOutOfTouchTestRegionOptionalJudge(const PointF& parentLocalPoint, int32_t sourceType);
+
     bool IsLayoutDirtyMarked() const
     {
         return isLayoutDirtyMarked_;
