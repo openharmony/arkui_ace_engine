@@ -244,7 +244,7 @@ void SpanNode::DumpInfo()
 }
 
 int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
-    bool isSpanStringMode, PlaceholderStyle /*placeholderStyle*/)
+    bool isSpanStringMode, PlaceholderStyle /*placeholderStyle*/, bool isMarquee)
 {
     CHECK_NULL_RETURN(builder, -1);
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -263,7 +263,7 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     }
     textStyle.SetHalfLeading(pipelineContext->GetHalfLeading());
 
-    auto spanContent = GetSpanContent(content);
+    auto spanContent = GetSpanContent(content, isMarquee);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, -1);
     textStyle.SetTextBackgroundStyle(backgroundStyle);
@@ -494,13 +494,16 @@ void SpanItem::UpdateContentTextStyle(
     builder->PopStyle();
 }
 
-std::string SpanItem::GetSpanContent(const std::string& rawContent)
+std::string SpanItem::GetSpanContent(const std::string& rawContent, bool isMarquee)
 {
     std::string data;
     if (needRemoveNewLine) {
         data = rawContent.substr(0, rawContent.length() - 1);
     } else {
         data = rawContent;
+    }
+    if (isMarquee) {
+        std::replace(data.begin(), data.end(), '\n', ' ');
     }
     return data;
 }
@@ -902,7 +905,7 @@ RefPtr<ImageSpanItem> ImageSpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32
 }
 
 int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */, const RefPtr<Paragraph>& builder,
-    bool /* isSpanStringMode */, PlaceholderStyle placeholderStyle)
+    bool /* isSpanStringMode */, PlaceholderStyle placeholderStyle, bool /* isMarquee*/)
 {
     CHECK_NULL_RETURN(builder, -1);
     PlaceholderRun run;
@@ -1002,7 +1005,7 @@ void SpanItem::GetIndex(int32_t& start, int32_t& end) const
 }
 
 int32_t PlaceholderSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */, const RefPtr<Paragraph>& builder,
-    bool /* isSpanStringMode */, PlaceholderStyle placeholderStyle)
+    bool /* isSpanStringMode */, PlaceholderStyle placeholderStyle, bool /* isMarquee*/)
 {
     CHECK_NULL_RETURN(builder, -1);
     textStyle = TextStyle();

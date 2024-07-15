@@ -477,39 +477,10 @@ RefPtr<AceContainer> AceContainer::GetContainer(int32_t instanceId)
     return aceContainer;
 }
 
-bool AceContainer::OnBackPressed(int32_t instanceId)
+bool AceContainer::RemoveOverlayBySubwindowManager(int32_t instanceId)
 {
-    auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN(container, false);
-    // When the container is for overlay, it need close the overlay first.
-    if (container->IsSubContainer()) {
-#ifdef NG_BUILD
-        LOGI("back press for remove overlay node");
-        ContainerScope scope(instanceId);
-        auto subPipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-        CHECK_NULL_RETURN(subPipelineContext, false);
-        auto overlayManager = subPipelineContext->GetOverlayManager();
-        CHECK_NULL_RETURN(overlayManager, false);
-        return overlayManager->RemoveOverlayInSubwindow();
-#else
-        if (container->IsUseNewPipeline()) {
-            LOGI("back press for remove overlay node");
-            ContainerScope scope(instanceId);
-            auto subPipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-            CHECK_NULL_RETURN(subPipelineContext, false);
-            auto overlayManager = subPipelineContext->GetOverlayManager();
-            CHECK_NULL_RETURN(overlayManager, false);
-            return overlayManager->RemoveOverlayInSubwindow();
-        }
-        SubwindowManager::GetInstance()->CloseMenu();
-        LOGI("Menu consumed backpressed event");
-        return true;
-#endif
-    }
-    // remove overlay through SubwindowManager if subwindow unfocused.
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
     if (subwindow) {
-        LOGI("subwindow consumed backpressed event");
         if (subwindow->GetShown()) {
             auto subContainerId = SubwindowManager::GetInstance()->GetSubContainerId(instanceId);
             if (subContainerId < 0) {
@@ -520,6 +491,48 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
             CHECK_NULL_RETURN(overlayManager, false);
             return overlayManager->RemoveOverlayInSubwindow();
         }
+    }
+    return false;
+}
+
+bool AceContainer::OnBackPressed(int32_t instanceId)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, false);
+    // When the container is for overlay, it need close the overlay first.
+    if (container->IsSubContainer()) {
+#ifdef NG_BUILD
+        TAG_LOGI(AceLogTag::ACE_UIEVENT, "back press for remove overlay node");
+        ContainerScope scope(instanceId);
+        auto subPipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+        CHECK_NULL_RETURN(subPipelineContext, false);
+        auto overlayManager = subPipelineContext->GetOverlayManager();
+        CHECK_NULL_RETURN(overlayManager, false);
+        return overlayManager->RemoveOverlayInSubwindow();
+#else
+        if (container->IsUseNewPipeline()) {
+            TAG_LOGI(AceLogTag::ACE_UIEVENT, "back press for remove overlay node");
+            ContainerScope scope(instanceId);
+            auto subPipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_RETURN(subPipelineContext, false);
+            auto overlayManager = subPipelineContext->GetOverlayManager();
+            CHECK_NULL_RETURN(overlayManager, false);
+            if (overlayManager->RemoveOverlayInSubwindow()) {
+                TAG_LOGI(AceLogTag::ACE_UIEVENT, "subwindow consumed backpressed event");
+                return true;
+            }
+            instanceId = SubwindowManager::GetInstance()->GetParentContainerId(instanceId);
+        } else {
+            SubwindowManager::GetInstance()->CloseMenu();
+            TAG_LOGI(AceLogTag::ACE_UIEVENT, "Menu consumed backpressed event");
+            return true;
+        }
+#endif
+    }
+    // remove overlay through SubwindowManager if subwindow unfocused.
+    if (RemoveOverlayBySubwindowManager(instanceId)) {
+        TAG_LOGI(AceLogTag::ACE_UIEVENT, "subwindow consumed backpressed event");
+        return true;
     }
     ContainerScope scope(instanceId);
     auto context = container->GetPipelineContext();
@@ -798,10 +811,15 @@ void AceContainer::InitializeCallback()
         ContainerScope scope(id);
         context->CheckAndLogLastReceivedTouchEventInfo(event.touchEventId, event.type);
         auto touchTask = [context, event, markProcess, node]() {
-            if (node) {
-                context->OnTouchEvent(event, node);
+            if (event.type == TouchType::HOVER_ENTER || event.type == TouchType::HOVER_MOVE ||
+                event.type == TouchType::HOVER_EXIT || event.type == TouchType::HOVER_CANCEL) {
+                context->OnAccessibilityHoverEvent(event, node);
             } else {
-                context->OnTouchEvent(event);
+                if (node) {
+                    context->OnTouchEvent(event, node);
+                } else {
+                    context->OnTouchEvent(event);
+                }
             }
             CHECK_NULL_VOID(markProcess);
             markProcess();
@@ -1143,14 +1161,15 @@ UIContentErrorCode AceContainer::RunPage(
         return UIContentErrorCode::NULL_URL;
     }
 
-    if (content.find('/') != std::string::npos && !isFormRender && !isNamedRouter &&
+    ContainerScope scope(instanceId);
+    auto front = container->GetFrontend();
+    CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
+
+    if (front->GetType() != FrontendType::DECLARATIVE_CJ && !isFormRender && !isNamedRouter &&
         isStageModel && !CheckUrlValid(content, container->GetHapPath())) {
         return UIContentErrorCode::INVALID_URL;
     }
 
-    ContainerScope scope(instanceId);
-    auto front = container->GetFrontend();
-    CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
     if (isNamedRouter) {
         return front->RunPageByNamedRouter(content, params);
     }
@@ -1424,6 +1443,12 @@ bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFil
     isPopup = result.isPopup;
     autoFillSessionId = result.autoFillSessionId;
     return true;
+}
+
+bool AceContainer::IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType)
+{
+    return AbilityRuntime::AutoFillManager::GetInstance().IsNeedToCreatePopupWindow(
+        static_cast<AbilityBase::AutoFillType>(autoFillType));
 }
 
 class SaveRequestCallback : public AbilityRuntime::ISaveRequestCallback {
@@ -2019,26 +2044,6 @@ bool AceContainer::IsTransparentBg() const
     return bgColor == Color::TRANSPARENT || bgOpacity == transparentOpacity;
 }
 
-void AceContainer::SetFontScale(int32_t instanceId, float fontScale)
-{
-    auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_VOID(container);
-    ContainerScope scope(instanceId);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->SetFontScale(fontScale);
-}
-
-void AceContainer::SetFontWeightScale(int32_t instanceId, float fontWeightScale)
-{
-    auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_VOID(container);
-    ContainerScope scope(instanceId);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->SetFontWeightScale(fontWeightScale);
-}
-
 bool AceContainer::ParseThemeConfig(const std::string& themeConfig)
 {
     std::regex pattern("\"font\":(\\d+)");
@@ -2311,7 +2316,8 @@ bool AceContainer::endsWith(std::string str, std::string suffix)
     return str.substr(str.length() - suffix.length()) == suffix;
 }
 
-void AceContainer::SetFontScaleAndWeightScale(const ParsedConfig& parsedConfig)
+void AceContainer::SetFontScaleAndWeightScale(
+    const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange)
 {
     if (IsKeyboard()) {
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "Keyboard does not adjust font");
@@ -2321,12 +2327,14 @@ void AceContainer::SetFontScaleAndWeightScale(const ParsedConfig& parsedConfig)
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontScale: %{public}s", parsedConfig.fontScale.c_str());
         auto instanceId = instanceId_;
         SetFontScale(instanceId, StringUtils::StringToFloat(parsedConfig.fontScale));
+        configurationChange.fontScaleUpdate = true;
     }
     if (!parsedConfig.fontWeightScale.empty()) {
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontWeightScale: %{public}s",
             parsedConfig.fontWeightScale.c_str());
         auto instanceId = instanceId_;
         SetFontWeightScale(instanceId, StringUtils::StringToFloat(parsedConfig.fontWeightScale));
+        configurationChange.fontWeightScaleUpdate = true;
     }
 }
 
@@ -2432,7 +2440,7 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     if (!parsedConfig.mnc.empty()) {
         resConfig.SetMnc(StringUtils::StringToUint(parsedConfig.mnc));
     }
-    SetFontScaleAndWeightScale(parsedConfig);
+    SetFontScaleAndWeightScale(parsedConfig, configurationChange);
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);
     if (SystemProperties::GetResourceDecoupling()) {

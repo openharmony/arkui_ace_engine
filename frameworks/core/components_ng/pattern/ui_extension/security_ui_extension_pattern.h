@@ -80,6 +80,8 @@ public:
     void RegisterVisibleAreaChange();
     void DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type);
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
+    void FireOnErrorCallback(
+        int32_t code, const std::string& name, const std::string& message) override;
 
     void FireOnRemoteReadyCallback();
     void FireBindModalCallback();

@@ -84,6 +84,9 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
 
     ACE_FUNCTION_TRACE();
     CHECK_NULL_VOID(frameNode);
+    if (!curAccessibilityHoverResults_.empty()) {
+        MockHoverCancelEventAndDispatch(touchPoint);
+    }
     // collect
     TouchTestResult hitTestResult;
     const NG::PointF point { touchPoint.x, touchPoint.y };
@@ -550,14 +553,38 @@ void EventManager::FlushTouchEventsBegin(const std::list<TouchEvent>& touchEvent
 
 void EventManager::FlushTouchEventsEnd(const std::list<TouchEvent>& touchEvents)
 {
+    bool isResampled = false;
     for (auto iter = touchEvents.begin(); iter != touchEvents.end(); ++iter) {
         const auto result = touchTestResults_.find((*iter).id);
         if (result != touchTestResults_.end()) {
             for (auto entry = result->second.rbegin(); entry != result->second.rend(); ++entry) {
                 (*entry)->OnFlushTouchEventsEnd();
             }
+            // only when no up received situation, the test result can be found
+            if ((*iter).history.size() != 0) {
+                // for resample case, the history list must not be empty
+                isResampled = true;
+            }
         }
     }
+
+    if (!isResampled) {
+        // for no-resample case, we do not request a new frame, let the FlushVsync itself to do it as needed.
+        return;
+    }
+
+    // request new frame for the cases we do the resampling for more than one touch events
+    auto container = Container::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    // Since we cache the received touch move events and process them in FlushVsync, requesting a new frame
+    // when we cache them can not ensure that the frames are continuous afterwhile dure the whole touch access,
+    // as there are some situation where no any dirty generated after FlushVsync,  which will not request new frame
+    // by FlushVsync itself, this is not friendly for some components, like UIExtension, which relies on the events
+    // dispatching on host to resend the touchs to the supplier, so we also need to request a new frame after all
+    // resampled touch move events are actually dispatched.
+    pipeline->RequestFrame();
 }
 
 void EventManager::PostEventFlushTouchEventEnd(const TouchEvent& touchEvent)
@@ -1024,6 +1051,25 @@ void EventManager::LogPrintMouseTest()
         currNode ? currNode->GetTag().c_str() : "NULL", currNode ? currNode->GetId() : -1);
 }
 
+void EventManager::AccessibilityHoverTest(
+    const TouchEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (downFingerIds_.empty()) {
+        MockCancelEventAndDispatch(event);
+        refereeNG_->CleanAll();
+        touchTestResults_.clear();
+        downFingerIds_.clear();
+    }
+    const NG::PointF point { event.x, event.y };
+    TouchTestResult testResult;
+    TouchTestResult responseLinkResult;
+    frameNode->TouchTest(
+        point, point, point, touchRestrict, testResult, event.id, responseLinkResult);
+    SetResponseLinkRecognizers(testResult, responseLinkResult);
+    UpdateAccessibilityHoverNode(event, testResult);
+}
+
 void EventManager::MouseTest(
     const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict)
 {
@@ -1035,8 +1081,11 @@ void EventManager::MouseTest(
     TouchTestResult testResult;
 
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        if ((event.action == MouseAction::MOVE && event.button != MouseButton::NONE_BUTTON) ||
-            event.pullAction == MouseAction::PULL_MOVE) {
+        if (event.pullAction == MouseAction::PULL_MOVE) {
+            UpdateHoverNode(event, testResult);
+            LogPrintMouseTest();
+            return;
+        } else if ((event.action == MouseAction::MOVE && event.button != MouseButton::NONE_BUTTON)) {
             testResult = mouseTestResults_[event.GetPointerId(event.id)];
         } else {
             TouchTestResult responseLinkResult;
@@ -1059,6 +1108,33 @@ void EventManager::MouseTest(
     }
     UpdateHoverNode(event, testResult);
     LogPrintMouseTest();
+}
+
+void EventManager::UpdateAccessibilityHoverNode(const TouchEvent& event, const TouchTestResult& testResult)
+{
+    HoverTestResult hoverTestResult;
+    for (const auto& result : testResult) {
+        auto hoverResult = AceType::DynamicCast<HoverEventTarget>(result);
+        if (hoverResult && hoverResult->IsAccessibilityHoverTarget()) {
+            hoverTestResult.emplace_back(hoverResult);
+        }
+    }
+    if (event.type == TouchType::HOVER_EXIT) {
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "Exit hover by HOVER_EXIT event.");
+        lastAccessibilityHoverResults_ = std::move(curAccessibilityHoverResults_);
+        curAccessibilityHoverResults_.clear();
+    } else if (event.type == TouchType::HOVER_CANCEL) {
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "Cancel hover by HOVER_CANCEL event.");
+        lastAccessibilityHoverResults_ = std::move(curAccessibilityHoverResults_);
+        curAccessibilityHoverResults_.clear();
+    } else if (event.type == TouchType::HOVER_ENTER) {
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "Enter hover by HOVER_ENTER event.");
+        lastAccessibilityHoverResults_.clear();
+        curAccessibilityHoverResults_ = std::move(hoverTestResult);
+    } else {
+        lastAccessibilityHoverResults_ = std::move(curAccessibilityHoverResults_);
+        curAccessibilityHoverResults_ = std::move(hoverTestResult);
+    }
 }
 
 void EventManager::UpdateHoverNode(const MouseEvent& event, const TouchTestResult& testResult)
@@ -1237,6 +1313,55 @@ bool EventManager::DispatchMouseHoverEventNG(const MouseEvent& event)
         }
     }
     return true;
+}
+
+void EventManager::DispatchAccessibilityHoverEventNG(const TouchEvent& event)
+{
+    auto lastHoverEndNode = lastAccessibilityHoverResults_.begin();
+    auto currHoverEndNode = curAccessibilityHoverResults_.begin();
+    RefPtr<HoverEventTarget> lastHoverEndNodeTarget;
+    uint32_t iterCountLast = 0;
+    uint32_t iterCountCurr = 0;
+    for (const auto& hoverResult : lastAccessibilityHoverResults_) {
+        // get valid part of previous hover nodes while it's not in current hover nodes. Those nodes exit hover
+        // there may have some nodes in curAccessibilityHoverResults_ but intercepted
+        iterCountLast++;
+        if (lastHoverEndNode != curAccessibilityHoverResults_.end()) {
+            lastHoverEndNode++;
+        }
+        if (std::find(curAccessibilityHoverResults_.begin(), curAccessibilityHoverResults_.end(), hoverResult) ==
+            curAccessibilityHoverResults_.end()) {
+            hoverResult->HandleAccessibilityHoverEvent(false, event);
+        }
+        if ((iterCountLast >= lastAccessibilityHoverDispatchLength_) && (lastAccessibilityHoverDispatchLength_ != 0)) {
+            lastHoverEndNodeTarget = hoverResult;
+            break;
+        }
+    }
+    lastAccessibilityHoverDispatchLength_ = 0;
+    for (const auto& hoverResult : curAccessibilityHoverResults_) {
+        // get valid part of current hover nodes while it's not in previous hover nodes. Those nodes are new hover
+        // the valid part stops at first interception
+        iterCountCurr++;
+        if (currHoverEndNode != curAccessibilityHoverResults_.end()) {
+            currHoverEndNode++;
+        }
+        if (std::find(lastAccessibilityHoverResults_.begin(), lastHoverEndNode, hoverResult) == lastHoverEndNode) {
+            hoverResult->HandleAccessibilityHoverEvent(true, event);
+        }
+        if (hoverResult == lastHoverEndNodeTarget) {
+            lastAccessibilityHoverDispatchLength_ = iterCountCurr;
+            break;
+        }
+    }
+    for (auto hoverResultIt = lastAccessibilityHoverResults_.begin(); hoverResultIt != lastHoverEndNode;
+         ++hoverResultIt) {
+        // there may have previous hover nodes in the invalid part of current hover nodes. Those nodes exit hover also
+        if (std::find(currHoverEndNode, curAccessibilityHoverResults_.end(), *hoverResultIt) !=
+            curAccessibilityHoverResults_.end()) {
+            (*hoverResultIt)->HandleAccessibilityHoverEvent(false, event);
+        }
+    }
 }
 
 void EventManager::AxisTest(const AxisEvent& event, const RefPtr<RenderNode>& renderNode)
@@ -1651,6 +1776,10 @@ bool TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::Keyboa
 
 bool EventManager::DispatchKeyboardShortcut(const KeyEvent& event)
 {
+    auto container = Container::GetContainer(instanceId_);
+    if (container && container->GetUIContentType() == UIContentType::SECURITY_UI_EXTENSION) {
+        return false;
+    }
     if (event.action != KeyAction::DOWN) {
         return false;
     }
@@ -1936,5 +2065,15 @@ void EventManager::MockCancelEventAndDispatch(const AxisEvent& axisEvent)
     mockedEvent.action = AxisAction::CANCEL;
     mockedEvent.id = static_cast<int32_t>(axisTouchTestResults_.begin()->first);
     DispatchTouchEvent(mockedEvent);
+}
+
+void EventManager::MockHoverCancelEventAndDispatch(const TouchEvent& touchPoint)
+{
+    lastAccessibilityHoverResults_ = std::move(curAccessibilityHoverResults_);
+    curAccessibilityHoverResults_.clear();
+    TouchEvent mockedEvent = touchPoint;
+    mockedEvent.isMocked = true;
+    mockedEvent.type = TouchType::HOVER_CANCEL;
+    DispatchAccessibilityHoverEventNG(mockedEvent);
 }
 } // namespace OHOS::Ace

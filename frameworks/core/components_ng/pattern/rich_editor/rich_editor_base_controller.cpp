@@ -80,4 +80,11 @@ void RichEditorBaseController::SetSelection(
     CHECK_NULL_VOID(richEditorPattern);
     richEditorPattern->SetSelection(selectionStart, selectionEnd, options, isForward);
 }
+
+const PreviewTextInfo RichEditorBaseController::GetPreviewTextInfo() const
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(richEditorPattern, PreviewTextInfo());
+    return richEditorPattern->GetPreviewTextInfo();
+}
 } // namespace OHOS::Ace::NG

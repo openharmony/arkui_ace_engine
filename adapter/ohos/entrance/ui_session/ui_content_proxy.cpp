@@ -21,13 +21,17 @@
 
 namespace OHOS::Ace {
 
-int32_t UIContentServiceProxy::GetInspectorTree(const EventCallback& eventCallback)
+int32_t UIContentServiceProxy::GetInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         LOGW("GetInspectorTree write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("reportStub is nullptr");
         return FAILED;
     }
     report_->RegisterGetInspectorTreeCallback(eventCallback);
@@ -38,7 +42,7 @@ int32_t UIContentServiceProxy::GetInspectorTree(const EventCallback& eventCallba
     return NO_ERROR;
 }
 
-int32_t UIContentServiceProxy::Connect()
+int32_t UIContentServiceProxy::Connect(const EventCallback& eventCallback)
 {
     MessageParcel data;
     MessageParcel reply;
@@ -53,6 +57,7 @@ int32_t UIContentServiceProxy::Connect()
         LOGW("connect failed,create reportStub failed");
         return FAILED;
     }
+    report_->RegisterGetBaseInfoCallback(eventCallback);
     if (!data.WriteRemoteObject(report_)) {
         LOGW("write reportStub failed");
         return FAILED;
@@ -78,7 +83,8 @@ int32_t UIContentServiceProxy::RegisterClickEventCallback(const EventCallback& e
         return FAILED;
     }
     if (report_ == nullptr) {
-        LOGW("reportStub is nullptr,connect is not execute");
+        LOGW("reportStub is nullptr");
+        return FAILED;
     }
     report_->RegisterClickEventCallback(eventCallback);
     if (Remote()->SendRequest(REGISTER_CLICK_EVENT, data, reply, option) != ERR_NONE) {
@@ -98,7 +104,8 @@ int32_t UIContentServiceProxy::RegisterSearchEventCallback(const EventCallback& 
         return FAILED;
     }
     if (report_ == nullptr) {
-        LOGW("reportStub is nullptr,connect is not execute");
+        LOGW("reportStub is nullptr");
+        return FAILED;
     }
     report_->RegisterSearchEventCallback(eventCallback);
     if (Remote()->SendRequest(REGISTER_SEARCH_EVENT, data, reply, option) != ERR_NONE) {
@@ -118,7 +125,8 @@ int32_t UIContentServiceProxy::RegisterRouterChangeEventCallback(const EventCall
         return FAILED;
     }
     if (report_ == nullptr) {
-        LOGW("reportStub is nullptr,connect is not execute");
+        LOGW("reportStub is nullptr");
+        return FAILED;
     }
     report_->RegisterRouterChangeEventCallback(eventCallback);
     if (Remote()->SendRequest(REGISTER_ROUTER_CHANGE_EVENT, data, reply, option) != ERR_NONE) {
@@ -138,11 +146,33 @@ int32_t UIContentServiceProxy::RegisterComponentChangeEventCallback(const EventC
         return FAILED;
     }
     if (report_ == nullptr) {
-        LOGW("reportStub is nullptr,connect is not execute");
+        LOGW("reportStub is nullptr");
+        return FAILED;
     }
     report_->RegisterComponentChangeEventCallback(eventCallback);
     if (Remote()->SendRequest(REGISTER_COMPONENT_EVENT, data, reply, option) != ERR_NONE) {
         LOGW("RegisterComponentChangeEventCallback send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::RegisterWebUnfocusEventCallback(
+    const std::function<void(int64_t accessibilityId, const std::string& data)>& eventCallback)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("RegisterWebUnfocusEventCallback write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("reportStub is nullptr,connect is not execute");
+    }
+    report_->RegisterWebUnfocusEventCallback(eventCallback);
+    if (Remote()->SendRequest(REGISTER_WEB_UNFOCUS_EVENT, data, reply, option) != ERR_NONE) {
+        LOGW("RegisterWebUnfocusEventCallback send request failed");
         return REPLY_ERROR;
     }
     return NO_ERROR;
@@ -158,7 +188,8 @@ int32_t UIContentServiceProxy::UnregisterClickEventCallback()
         return FAILED;
     }
     if (report_ == nullptr) {
-        LOGW("reportStub is nullptr,connect is not execute");
+        LOGW("reportStub is nullptr");
+        return FAILED;
     }
     report_->UnregisterClickEventCallback();
     if (Remote()->SendRequest(UNREGISTER_CLICK_EVENT, data, reply, option) != ERR_NONE) {
@@ -178,7 +209,8 @@ int32_t UIContentServiceProxy::UnregisterSearchEventCallback()
         return FAILED;
     }
     if (report_ == nullptr) {
-        LOGW("reportStub is nullptr,connect is not execute");
+        LOGW("reportStub is nullptr");
+        return FAILED;
     }
     report_->UnregisterSearchEventCallback();
     if (Remote()->SendRequest(UNREGISTER_SEARCH_EVENT, data, reply, option) != ERR_NONE) {
@@ -198,7 +230,8 @@ int32_t UIContentServiceProxy::UnregisterRouterChangeEventCallback()
         return FAILED;
     }
     if (report_ == nullptr) {
-        LOGW("reportStub is nullptr,connect is not execute");
+        LOGW("reportStub is nullptr");
+        return FAILED;
     }
     report_->UnregisterRouterChangeEventCallback();
     if (Remote()->SendRequest(UNREGISTER_ROUTER_CHANGE_EVENT, data, reply, option) != ERR_NONE) {
@@ -209,6 +242,27 @@ int32_t UIContentServiceProxy::UnregisterRouterChangeEventCallback()
 }
 
 int32_t UIContentServiceProxy::UnregisterComponentChangeEventCallback()
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("UnregisterComponentChangeEventCallback write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("reportStub is nullptr");
+        return FAILED;
+    }
+    report_->UnregisterComponentChangeEventCallback();
+    if (Remote()->SendRequest(UNREGISTER_COMPONENT_EVENT, data, reply, option) != ERR_NONE) {
+        LOGW("UnregisterComponentChangeEventCallback send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceProxy::UnregisterWebUnfocusEventCallback()
 {
     MessageParcel data;
     MessageParcel reply;

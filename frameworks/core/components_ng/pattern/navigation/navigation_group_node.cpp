@@ -15,7 +15,7 @@
 
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 #include "base/log/ace_checker.h"
@@ -407,6 +407,10 @@ bool NavigationGroupNode::CheckCanHandleBack()
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't find destination node to process back press");
         return false;
     }
+    if (!navigationPattern->IsFinishInteractiveAnimation()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't handle back press during interactive animation");
+        return true;
+    }
     auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
     if (navDestinationPattern->OverlayOnBackPressed()) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navDestination's ovelay consume backPressed event: %{public}s",
@@ -591,7 +595,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
         SetNeedSetInvisible(false);
     }
     isOnAnimation_ = true;
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     UiSessionManager::GetInstance().OnRouterChange(navigationPathInfo_, "navigationPopPage");
 #endif
 }
@@ -773,7 +777,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                 nodeMap, endTime - startTime, navigation->GetNavigationPathInfo());
         });
     }
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     UiSessionManager::GetInstance().OnRouterChange(navigationPathInfo_, "navigationPushPage");
 #endif
 }

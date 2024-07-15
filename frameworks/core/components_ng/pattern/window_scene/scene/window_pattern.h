@@ -53,6 +53,13 @@ protected:
     void RegisterLifecycleListener();
     void UnregisterLifecycleListener();
 
+#ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
+    RefPtr<FrameNode> BuildTextNode(const std::string& appNameInfo);
+    RefPtr<FrameNode> BuildAnimateNode(const std::string& base64Resource);
+    RefPtr<FrameNode> BuildStaticImageNode(const std::string& base64Resource);
+    void CreateASStartingWindow();
+#endif
+
     void CreateAppWindow();
     void CreateBlankWindow();
     void CreateStartingWindow();
@@ -83,7 +90,8 @@ protected:
 
     sptr<Rosen::Session> session_;
     int32_t instanceId_ = Container::CurrentId();
-    std::function<void()> callback_;
+    std::function<void()> coldStartCallback_;
+    std::function<void()> hotStartCallback_;
     std::function<void(const Rosen::Vector4f&)> boundsChangedCallback_;
 
 private:

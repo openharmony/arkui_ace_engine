@@ -71,6 +71,7 @@ void JSHyperlink::JSBind(BindingTarget globalObj)
     JSClass<JSHyperlink>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
 
     JSClass<JSHyperlink>::StaticMethod("draggable", &JSHyperlink::JsSetDraggable);
+    JSClass<JSHyperlink>::StaticMethod("responseRegion", &JSHyperlink::JsResponseRegion);
     JSClass<JSHyperlink>::Inherit<JSInteractableView>();
 
     JSClass<JSHyperlink>::InheritAndBind<JSViewAbstract>(globalObj);
@@ -115,6 +116,12 @@ void JSHyperlink::Pop()
 void JSHyperlink::JsSetDraggable(bool draggable)
 {
     HyperlinkModel::GetInstance()->SetDraggable(draggable);
+}
+
+void JSHyperlink::JsResponseRegion(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsResponseRegion(info);
+    HyperlinkModel::GetInstance()->SetResponseRegion(true);
 }
 
 } // namespace OHOS::Ace::Framework

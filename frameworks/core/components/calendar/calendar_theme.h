@@ -281,6 +281,8 @@ public:
             theme->calendarPickerDayLargeWidthOrHeight_ =
                 pattern->GetAttr<Dimension>("calendar_picker_day_large_width_height", 40.0_vp);
             theme->calendarDayFontSize_ = pattern->GetAttr<Dimension>("calendar_picker_day_font_size", 0.0_vp);
+            theme->calendarSmallWeekFontSize_ =
+                pattern->GetAttr<Dimension>("calendar_picker_small_day_font_size", 14.0_vp);
             theme->distanceBetweenContainterAndDate_ = pattern->GetAttr<Dimension>(
                 "calendar_picker_distance_between_container_and_date", 0.0_vp);
             theme->distanceBetweenTitleAndDate_ = pattern->GetAttr<Dimension>(
@@ -325,6 +327,8 @@ public:
                 pattern->GetAttr<Dimension>("calendar_picker_action_large_row_height", 48.0_vp);
             theme->calendarDayRadius_ = pattern->GetAttr<Dimension>("calendar_picker_day_radius", 0.0_vp);
             theme->calendarDayKeyFocusedWidth_ = pattern->GetAttr<Dimension>("calendar_day_key_focused_width", 0.0_vp);
+            theme->calendarLargeDayKeyFocusedWidth_ =
+                pattern->GetAttr<Dimension>("calendar_large_day_key_focused_width", 44.0_vp);
             theme->calendarDayKeyFocusedPenWidth_ = pattern->GetAttr<Dimension>(
                 "calendar_day_key_focused_pen_width", 0.0_vp);
             theme->entryFontSize_ = pattern->GetAttr<Dimension>("calendar_picker_entry_font_size", 0.0_fp);
@@ -562,6 +566,11 @@ public:
         return calendarDayFontSize_;
     }
 
+    const Dimension& GetCalendarSmallDayFontSize() const
+    {
+        return calendarSmallWeekFontSize_;
+    }
+
     const Dimension& GetDistanceBetweenContainterAndDate() const
     {
         return distanceBetweenContainterAndDate_;
@@ -660,6 +669,11 @@ public:
     const Dimension& GetCalendarDayKeyFocusedWidth() const
     {
         return calendarDayKeyFocusedWidth_;
+    }
+
+    const Dimension& GetCalendarLargeDayKeyFocusedWidth() const
+    {
+        return calendarLargeDayKeyFocusedWidth_;
     }
 
     const Dimension& GetCalendarDayKeyFocusedPenWidth() const
@@ -801,6 +815,7 @@ private:
     Dimension calendarPickerDayWidthOrHeight_;
     Dimension calendarPickerDayLargeWidthOrHeight_;
     Dimension calendarDayFontSize_;
+    Dimension calendarSmallWeekFontSize_;
     Dimension distanceBetweenContainterAndDate_;
     Dimension distanceBetweenTitleAndDate_;
     Dimension dalendarContainerHeight_;
@@ -821,6 +836,7 @@ private:
     Dimension calendarActionLargeRowHeight_;
     Dimension calendarDayRadius_;
     Dimension calendarDayKeyFocusedWidth_;
+    Dimension calendarLargeDayKeyFocusedWidth_;
     Dimension calendarDayKeyFocusedPenWidth_;
     Dimension entryFontSize_;
     Dimension dialogBorderRadius_;

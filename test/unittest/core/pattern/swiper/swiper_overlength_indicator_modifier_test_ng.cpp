@@ -17,9 +17,6 @@
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/overlength_dot_indicator_paint_method.h"
 namespace OHOS::Ace::NG {
-namespace {
-constexpr double DEAFULT_INDICATOR_WIDTH = 5.3333334922790527;
-} // namespace
 
 class SwiperOverLengthIndicatorModifierTestNg : public SwiperTestNg {
 public:
@@ -36,9 +33,8 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, SwiperOverLengthIndicatorGetCo
         model.SetDirection(Axis::VERTICAL);
         model.SetIndicatorType(SwiperIndicatorType::DOT);
     });
-    RefPtr<OverlengthDotIndicatorModifier> modifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
-    RefPtr<OverlengthDotIndicatorPaintMethod> paintMethod =
-        AceType::MakeRefPtr<OverlengthDotIndicatorPaintMethod>(modifier);
+    auto modifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    auto paintMethod = AceType::MakeRefPtr<OverlengthDotIndicatorPaintMethod>(modifier);
     paintMethod->SetMaxDisplayCount(7);
     auto geometryNode = frameNode_->GetGeometryNode();
     auto paintProperty = indicatorNode_->GetPaintProperty<DotIndicatorPaintProperty>();
@@ -52,9 +48,8 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, SwiperOverLengthIndicatorGetCo
      * @tc.steps: step3. call GetContentModifier.
      */
     paintMethod->UpdateContentModifier(&paintWrapper);
-    RefPtr<Modifier> ptrModifier = paintMethod->GetContentModifier(&paintWrapper);
-    RefPtr<OverlengthDotIndicatorModifier> overLengthModifier =
-        AceType::DynamicCast<OverlengthDotIndicatorModifier>(ptrModifier);
+    auto ptrModifier = paintMethod->GetContentModifier(&paintWrapper);
+    auto overLengthModifier = AceType::DynamicCast<OverlengthDotIndicatorModifier>(ptrModifier);
     ASSERT_NE(overLengthModifier, nullptr);
     EXPECT_EQ(overLengthModifier->maxDisplayCount_, 7);
     EXPECT_FALSE(overLengthModifier->isHover_);
@@ -81,14 +76,8 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier
     dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
     EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
 
-    LinearVector<float> vectorBlackPointCenterX;
-    vectorBlackPointCenterX.emplace_back(20.f);
-    LinearVector<float> normalItemHalfSizes;
-    // ITEM_HALF_WIDTH == SELECTED_ITEM_HALF_WIDTH, ITEM_HALF_HEIGHT == SELECTED_ITEM_HALF_HEIGHT.
-    normalItemHalfSizes.emplace_back(20.f);
-    normalItemHalfSizes.emplace_back(20.f);
-    normalItemHalfSizes.emplace_back(20.f);
-    normalItemHalfSizes.emplace_back(20.f);
+    LinearVector<float> vectorBlackPointCenterX = { 20.f };
+    LinearVector<float> normalItemHalfSizes = { 20.f, 20.f, 20.f, 20.f };
 
     dotIndicatorModifier.UpdateShrinkPaintProperty(OffsetF(50.0, 60.0), normalItemHalfSizes, { 1.f, 1.f });
     dotIndicatorModifier.onDraw(context);
@@ -106,14 +95,9 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier
     EXPECT_EQ(dotIndicatorModifier.longPointLeftCenterX_->Get(), 1.f);
     EXPECT_EQ(dotIndicatorModifier.longPointRightCenterX_->Get(), 1.f);
 
-    // ITEM_HALF_WIDTH == SELECTED_ITEM_HALF_WIDTH, ITEM_HALF_HEIGHT < SELECTED_ITEM_HALF_HEIGHT.
     dotIndicatorModifier.normalToHoverIndex_ = 1.0;
     dotIndicatorModifier.hoverToNormalIndex_ = 0.0;
-    LinearVector<float> normalItemHalfSizesSecond;
-    normalItemHalfSizesSecond.emplace_back(20.f);
-    normalItemHalfSizesSecond.emplace_back(25.f);
-    normalItemHalfSizesSecond.emplace_back(20.f);
-    normalItemHalfSizesSecond.emplace_back(15.f);
+    LinearVector<float> normalItemHalfSizesSecond = { 20.f, 25.f, 20.f, 15.f };
     dotIndicatorModifier.longPointLeftAnimEnd_ = false;
     dotIndicatorModifier.UpdateShrinkPaintProperty(OffsetF(50.0, 60.0), normalItemHalfSizesSecond, { 2.f, 2.f });
     dotIndicatorModifier.maxDisplayCount_ = 7;
@@ -136,33 +120,32 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier
 HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier002, TestSize.Level1)
 {
     OverlengthDotIndicatorModifier dotIndicatorModifier;
-    LinearVector<float> normalItemHalfSizes;
-    normalItemHalfSizes.emplace_back(8.f);
-    normalItemHalfSizes.emplace_back(8.f);
-    normalItemHalfSizes.emplace_back(16.f);
-    normalItemHalfSizes.emplace_back(16.f);
+    LinearVector<float> normalItemHalfSizes = { 3.f, 3.f, 3.f, 3.f };
     dotIndicatorModifier.CalcAnimationEndCenterX(normalItemHalfSizes);
     EXPECT_EQ(dotIndicatorModifier.moveDirection_, OverlongIndicatorMove::NONE);
-    EXPECT_EQ(dotIndicatorModifier.animationStartIndicatorWidth_.size(), 0);
-    EXPECT_EQ(dotIndicatorModifier.animationStartIndicatorHeight_.size(), 0);
-    EXPECT_EQ(dotIndicatorModifier.animationEndIndicatorWidth_.size(), 0);
-    EXPECT_EQ(dotIndicatorModifier.animationEndIndicatorHeight_.size(), 0);
+    EXPECT_EQ(dotIndicatorModifier.animationStartIndicatorWidth_.size(), 1);
+    EXPECT_EQ(dotIndicatorModifier.animationStartIndicatorHeight_.size(), 1);
+    EXPECT_EQ(dotIndicatorModifier.animationEndIndicatorWidth_.size(), 1);
+    EXPECT_EQ(dotIndicatorModifier.animationEndIndicatorHeight_.size(), 1);
 
     dotIndicatorModifier.SetMaxDisplayCount(7);
     dotIndicatorModifier.SetRealItemCount(15);
-    dotIndicatorModifier.animationStartIndex_ = 3;
-    dotIndicatorModifier.animationEndIndex_ = 4;
-    dotIndicatorModifier.gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    dotIndicatorModifier.animationStartIndex_ = 4;
+    dotIndicatorModifier.animationEndIndex_ = 5;
+    dotIndicatorModifier.currentSelectedIndex_ = 4;
+    dotIndicatorModifier.targetSelectedIndex_ = 4;
+    dotIndicatorModifier.currentOverlongType_ = OverlongType::LEFT_FADEOUT_RIGHT_FADEOUT;
+    dotIndicatorModifier.gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
     dotIndicatorModifier.CalcAnimationEndCenterX(normalItemHalfSizes);
     EXPECT_EQ(dotIndicatorModifier.moveDirection_, OverlongIndicatorMove::MOVE_BACKWARD);
     EXPECT_EQ(dotIndicatorModifier.animationStartIndicatorWidth_.size(), 8);
-    EXPECT_DOUBLE_EQ(dotIndicatorModifier.animationStartIndicatorWidth_[0], DEAFULT_INDICATOR_WIDTH);
+    EXPECT_DOUBLE_EQ(dotIndicatorModifier.animationStartIndicatorWidth_[0], 2.f);
     EXPECT_EQ(dotIndicatorModifier.animationStartIndicatorHeight_.size(), 8);
-    EXPECT_DOUBLE_EQ(dotIndicatorModifier.animationStartIndicatorHeight_[0], DEAFULT_INDICATOR_WIDTH);
+    EXPECT_DOUBLE_EQ(dotIndicatorModifier.animationStartIndicatorHeight_[0], 2.f);
     EXPECT_EQ(dotIndicatorModifier.animationEndIndicatorWidth_.size(), 8);
-    EXPECT_DOUBLE_EQ(dotIndicatorModifier.animationEndIndicatorWidth_[0], DEAFULT_INDICATOR_WIDTH);
+    EXPECT_DOUBLE_EQ(dotIndicatorModifier.animationEndIndicatorWidth_[0], 2.f);
     EXPECT_EQ(dotIndicatorModifier.animationEndIndicatorHeight_.size(), 8);
-    EXPECT_DOUBLE_EQ(dotIndicatorModifier.animationEndIndicatorHeight_[0], DEAFULT_INDICATOR_WIDTH);
+    EXPECT_DOUBLE_EQ(dotIndicatorModifier.animationEndIndicatorHeight_[0], 2.f);
 }
 
 HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier003, TestSize.Level1)
@@ -176,20 +159,11 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier
     dotIndicatorModifier.overlongSelectedStartCenterX_ = { 1.f, 1.f };
     dotIndicatorModifier.currentSelectedIndex_ = 0;
     dotIndicatorModifier.targetSelectedIndex_ = 1;
-    LinearVector<float> animationEndCenterX;
-    animationEndCenterX.emplace_back(20.f);
-    animationEndCenterX.emplace_back(25.f);
+    LinearVector<float> animationEndCenterX = { 20.f, 25.f };
     dotIndicatorModifier.animationEndCenterX_ = animationEndCenterX;
-    LinearVector<float> animationStartCenterX;
-    animationStartCenterX.emplace_back(10.f);
-    animationStartCenterX.emplace_back(25.f);
+    LinearVector<float> animationStartCenterX = { 10.f, 25.f };
     dotIndicatorModifier.animationStartCenterX_ = animationStartCenterX;
-    LinearVector<float> normalItemHalfSizes;
-    // ITEM_HALF_WIDTH == SELECTED_ITEM_HALF_WIDTH, ITEM_HALF_HEIGHT == SELECTED_ITEM_HALF_HEIGHT.
-    normalItemHalfSizes.emplace_back(20.f);
-    normalItemHalfSizes.emplace_back(20.f);
-    normalItemHalfSizes.emplace_back(20.f);
-    normalItemHalfSizes.emplace_back(20.f);
+    LinearVector<float> normalItemHalfSizes = { 20.f, 20.f, 20.f, 20.f };
     dotIndicatorModifier.UpdateSelectedCenterXOnDrag(normalItemHalfSizes);
     EXPECT_EQ(dotIndicatorModifier.overlongSelectedEndCenterX_.first, 1.4f);
     EXPECT_EQ(dotIndicatorModifier.overlongSelectedEndCenterX_.second, 1.6f);
@@ -197,8 +171,8 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier
 
     dotIndicatorModifier.touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
     dotIndicatorModifier.UpdateSelectedCenterXOnDrag(normalItemHalfSizes);
-    EXPECT_EQ(dotIndicatorModifier.overlongSelectedEndCenterX_.first, 1.f);
-    EXPECT_EQ(dotIndicatorModifier.overlongSelectedEndCenterX_.second, 1.f);
+    EXPECT_EQ(dotIndicatorModifier.overlongSelectedEndCenterX_.first, 1.3f);
+    EXPECT_EQ(dotIndicatorModifier.overlongSelectedEndCenterX_.second, 1.2f);
 }
 
 HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier004, TestSize.Level1)
@@ -208,13 +182,9 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier
     dotIndicatorModifier.blackPointCenterMoveRate_ = 0.7f;
     dotIndicatorModifier.currentSelectedIndex_ = 0;
     dotIndicatorModifier.targetSelectedIndex_ = 1;
-    LinearVector<float> animationEndCenterX;
-    animationEndCenterX.emplace_back(20.f);
-    animationEndCenterX.emplace_back(25.f);
+    LinearVector<float> animationEndCenterX = { 20.f, 25.f };
     dotIndicatorModifier.animationEndCenterX_ = animationEndCenterX;
-    LinearVector<float> animationStartCenterX;
-    animationStartCenterX.emplace_back(10.f);
-    animationStartCenterX.emplace_back(25.f);
+    LinearVector<float> animationStartCenterX = { 10.f, 25.f };
     dotIndicatorModifier.animationStartCenterX_ = animationStartCenterX;
     dotIndicatorModifier.UpdateUnselectedCenterXOnDrag();
     EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 1);
@@ -253,36 +223,16 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier
     OverlengthDotIndicatorModifier dotIndicatorModifier;
     dotIndicatorModifier.maxDisplayCount_ = 3;
     dotIndicatorModifier.isSelectedColorAnimEnd_ = true;
-    LinearVector<float> itemHalfSizes;
-    itemHalfSizes.emplace_back(20.f);
-    itemHalfSizes.emplace_back(20.f);
+    LinearVector<float> itemHalfSizes = { 20.f, 20.f };
     dotIndicatorModifier.PlayBlackPointsAnimation(itemHalfSizes);
     EXPECT_FALSE(dotIndicatorModifier.isSelectedColorAnimEnd_);
 
     dotIndicatorModifier.maxDisplayCount_ = 6;
-    LinearVector<float> animationEndCenterX;
-    animationEndCenterX.emplace_back(20.f);
-    animationEndCenterX.emplace_back(25.f);
-    animationEndCenterX.emplace_back(30.f);
-    animationEndCenterX.emplace_back(35.f);
-    animationEndCenterX.emplace_back(40.f);
-    animationEndCenterX.emplace_back(45.f);
+    LinearVector<float> animationEndCenterX = { 20.f, 25.f, 30.f, 35.f, 40.f, 45.f };
     dotIndicatorModifier.animationEndCenterX_ = animationEndCenterX;
-    LinearVector<float> animationStartCenterX;
-    animationStartCenterX.emplace_back(10.f);
-    animationStartCenterX.emplace_back(15.f);
-    animationStartCenterX.emplace_back(20.f);
-    animationStartCenterX.emplace_back(25.f);
-    animationStartCenterX.emplace_back(30.f);
-    animationStartCenterX.emplace_back(35.f);
+    LinearVector<float> animationStartCenterX = { 10.f, 15.f, 20.f, 25.f, 30.f, 35.f };
     dotIndicatorModifier.animationStartCenterX_ = animationStartCenterX;
-    LinearVector<float> animationStartIndicatorWidth;
-    animationStartIndicatorWidth.emplace_back(5.f);
-    animationStartIndicatorWidth.emplace_back(10.f);
-    animationStartIndicatorWidth.emplace_back(20.f);
-    animationStartIndicatorWidth.emplace_back(20.f);
-    animationStartIndicatorWidth.emplace_back(10.f);
-    animationStartIndicatorWidth.emplace_back(5.f);
+    LinearVector<float> animationStartIndicatorWidth = { 5.f, 10.f, 20.f, 20.f, 10.f, 5.f };
     dotIndicatorModifier.animationStartIndicatorWidth_ = animationStartIndicatorWidth;
     dotIndicatorModifier.animationStartIndicatorHeight_ = animationStartIndicatorWidth;
     dotIndicatorModifier.unselectedIndicatorWidth_->Set(animationStartIndicatorWidth);
@@ -304,9 +254,7 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier
 HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier007, TestSize.Level1)
 {
     OverlengthDotIndicatorModifier dotIndicatorModifier;
-    LinearVector<float> itemHalfSizes;
-    itemHalfSizes.emplace_back(20.f);
-    itemHalfSizes.emplace_back(20.f);
+    LinearVector<float> itemHalfSizes = { 20.f, 20.f };
     GestureState gestureState = GestureState::GESTURE_STATE_FOLLOW_LEFT;
     TouchBottomTypeLoop touchBottomTypeLoop = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
     OffsetF margin = OffsetF(20.f, 25.f);
@@ -352,48 +300,29 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier
     dotIndicatorModifier.CalcTargetSelectedIndex(1, 1);
     EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 0);
 
-    dotIndicatorModifier.maxDisplayCount_ = 5;
-    dotIndicatorModifier.realItemCount_ = 4;
+    dotIndicatorModifier.maxDisplayCount_ = 9;
+    dotIndicatorModifier.realItemCount_ = 15;
     dotIndicatorModifier.currentSelectedIndex_ = 2;
-    dotIndicatorModifier.CalcTargetSelectedIndex(0, 1);
-    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 2);
-
-    dotIndicatorModifier.CalcTargetSelectedIndex(0, 3);
-    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 5);
-
-    dotIndicatorModifier.currentSelectedIndex_ = 1;
-    dotIndicatorModifier.CalcTargetSelectedIndex(0, 1);
-    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 2);
-
-    dotIndicatorModifier.CalcTargetSelectedIndex(0, 2);
+    dotIndicatorModifier.CalcTargetSelectedIndex(2, 3);
     EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 3);
 
-    dotIndicatorModifier.CalcTargetSelectedIndex(0, 3);
-    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 4);
-
     dotIndicatorModifier.currentSelectedIndex_ = 3;
-    dotIndicatorModifier.CalcTargetSelectedIndex(0, 1);
+    dotIndicatorModifier.CalcTargetSelectedIndex(3, 4);
     EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 4);
 
-    dotIndicatorModifier.CalcTargetSelectedIndex(4, 2);
-    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 2);
+    dotIndicatorModifier.currentSelectedIndex_ = 6;
+    dotIndicatorModifier.CalcTargetSelectedIndex(6, 7);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 6);
 
-    dotIndicatorModifier.CalcTargetSelectedIndex(4, 1);
-    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 1);
+    dotIndicatorModifier.currentSelectedIndex_ = 6;
+    dotIndicatorModifier.CalcTargetSelectedIndex(11, 12);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 6);
 
-    dotIndicatorModifier.CalcTargetSelectedIndex(4, 0);
-    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 0);
+    dotIndicatorModifier.CalcTargetSelectedIndex(12, 13);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 7);
 
-    dotIndicatorModifier.currentSelectedIndex_ = 2;
-    dotIndicatorModifier.CalcTargetSelectedIndex(4, 2);
-    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 2);
-
-    dotIndicatorModifier.CalcTargetSelectedIndex(4, 1);
-    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, -1);
-
-    dotIndicatorModifier.currentSelectedIndex_ = 1;
-    dotIndicatorModifier.CalcTargetSelectedIndex(4, 1);
-    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, -2);
+    dotIndicatorModifier.CalcTargetSelectedIndex(13, 14);
+    EXPECT_EQ(dotIndicatorModifier.targetSelectedIndex_, 8);
 }
 
 }

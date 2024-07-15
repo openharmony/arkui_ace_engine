@@ -19,7 +19,7 @@
 #include <optional>
 #include <string>
 #include <utility>
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -516,6 +516,52 @@ void ViewAbstract::SetPadding(const PaddingProperty& value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, value);
 }
 
+void ViewAbstract::SetSafeAreaPadding(const CalcLength& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    PaddingProperty padding;
+    padding.SetEdges(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, padding);
+}
+
+void ViewAbstract::SetSafeAreaPadding(const PaddingProperty& value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, value);
+}
+
+void ViewAbstract::ResetSafeAreaPadding()
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_RESET_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding);
+}
+
+void ViewAbstract::SetSafeAreaPadding(FrameNode* frameNode, const CalcLength& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    PaddingProperty padding;
+    padding.SetEdges(value);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, padding, frameNode);
+}
+
+void ViewAbstract::SetSafeAreaPadding(FrameNode* frameNode, const PaddingProperty& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, value, frameNode);
+}
+
+void ViewAbstract::ResetSafeAreaPadding(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, SafeAreaPadding, frameNode);
+}
+
 void ViewAbstract::SetMargin(const CalcLength& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -847,6 +893,13 @@ void ViewAbstract::DisableOnHover()
     eventHub->ClearUserOnHover();
 }
 
+void ViewAbstract::DisableOnAccessibilityHover()
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnAccessibilityHover();
+}
+
 void ViewAbstract::DisableOnMouse()
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
@@ -1049,6 +1102,13 @@ void ViewAbstract::SetOnHover(OnHoverFunc&& onHoverEventFunc)
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetHoverEvent(std::move(onHoverEventFunc));
+}
+
+void ViewAbstract::SetOnAccessibilityHover(OnAccessibilityHoverFunc &&onAccessibilityHoverEventFunc)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetAccessibilityHoverEvent(std::move(onAccessibilityHoverEventFunc));
 }
 
 void ViewAbstract::SetHoverEffect(HoverEffectType hoverEffect)
@@ -1739,7 +1799,7 @@ void ViewAbstract::DismissDialog()
         if (overlayManager->isMaskNode(dialogPattern->GetHost()->GetId())) {
             overlayManager->PopModalDialog(dialogPattern->GetHost()->GetId());
         }
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
         UiSessionManager::GetInstance().ReportComponentChangeEvent("onVisibleChange", "destroy");
 #endif
     }
@@ -3387,6 +3447,12 @@ void ViewAbstract::SetDragPreviewOptions(FrameNode* frameNode, const DragPreview
 {
     CHECK_NULL_VOID(frameNode);
     frameNode->SetDragPreviewOptions(previewOption);
+}
+
+void ViewAbstract::SetDragPreview(FrameNode* frameNode, const DragDropInfo& dragDropInfo)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDragPreview(dragDropInfo);
 }
 
 void ViewAbstract::SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion)

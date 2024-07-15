@@ -78,7 +78,8 @@ public:
         }
         aiDetectInitialized_ = false;
     }
-    bool ShowUIExtensionMenu(const AISpan& aiSpan, NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode);
+    bool ShowUIExtensionMenu(
+        const AISpan& aiSpan, NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode, bool isShowSelectText = true);
     void ResponseBestMatchItem(const AISpan& aiSpan);
     void StartAbilityByType(const std::string& type, AAFwk::WantParams& wantParams);
 

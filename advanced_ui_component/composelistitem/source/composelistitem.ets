@@ -402,14 +402,18 @@ struct OperateItemStruct {
         .draggable(false)
     }
     .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
-    .hitTestBehavior(HitTestMode.Block)
+    .hitTestBehavior(HitTestMode.Transparent)
     .backgroundColor(Color.Transparent)
     .height(OPERATEITEM_ICONLIKE_SIZE)
     .width(OPERATEITEM_ARROW_WIDTH)
     .onFocus(() => {
       this.parentCanFocus = false;
     })
+    .stateEffect(this.arrow?.action !== undefined)
     .onTouch((event: TouchEvent) => {
+      if (this.arrow?.action === undefined) {
+        return;
+      }
       if (event.type === TouchType.Down) {
         this.parentCanTouch = false;
       }
@@ -417,9 +421,13 @@ struct OperateItemStruct {
         this.parentCanTouch = true;
       }
     })
+    .hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None)
     .onHover((isHover: boolean) => {
+      if (this.arrow?.action === undefined) {
+        return;
+      }
       this.parentCanHover = false
-      if (isHover && this.parentFrontColor === this.hoveringColor) {
+      if (isHover) {
         this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
       }
       if (!isHover) {
@@ -567,7 +575,7 @@ struct OperateItemStruct {
         end: LengthMetrics.vp(LISTITEM_PADDING)
       })
     }
-    .hitTestBehavior(HitTestMode.Block)
+    .hitTestBehavior(HitTestMode.Transparent)
     .labelStyle({
       maxLines: TEXT_MAX_LINE
     })
@@ -577,7 +585,11 @@ struct OperateItemStruct {
     .onFocus(() => {
       this.parentCanFocus = false;
     })
+    .stateEffect(this.arrow?.action !== undefined)
     .onTouch((event: TouchEvent) => {
+      if (this.arrow?.action === undefined) {
+        return;
+      }
       if (event.type === TouchType.Down) {
         this.parentCanTouch = false;
       }
@@ -585,9 +597,13 @@ struct OperateItemStruct {
         this.parentCanTouch = true;
       }
     })
+    .hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None)
     .onHover((isHover: boolean) => {
+      if (this.arrow?.action === undefined) {
+        return;
+      }
       this.parentCanHover = false
-      if (isHover && this.parentFrontColor === this.hoveringColor) {
+      if (isHover) {
         this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
       }
       if (!isHover) {
@@ -611,7 +627,7 @@ struct OperateItemStruct {
         this.createImage()
       } else if (this.icon != null && this.text != null) {
         this.createText()
-        this.createIcon({icon: this.icon})
+        this.createIcon({ icon: this.icon })
       } else if (this.arrow != null && this.text == null) {
         this.createArrow()
       } else if (this.arrow != null && this.text != null) {
@@ -625,9 +641,9 @@ struct OperateItemStruct {
       } else if (this.switch != null) {
         this.createSwitch()
       } else if (this.icon != null) {
-        this.createIcon({icon: this.icon})
+        this.createIcon({ icon: this.icon })
         if (this.subIcon != null) {
-          this.createIcon({icon: this.subIcon});
+          this.createIcon({ icon: this.subIcon });
         }
       }
     }

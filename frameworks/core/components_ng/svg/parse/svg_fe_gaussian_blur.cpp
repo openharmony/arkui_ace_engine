@@ -33,8 +33,11 @@ void SvgFeGaussianBlur::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFil
     std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
 {
     imageFilter = MakeImageFilter(feAttr_.in, imageFilter, resultHash);
+    RSRect filterRect(effectFilterArea_.Left(), effectFilterArea_.Top(),
+        effectFilterArea_.Width(), effectFilterArea_.Height());
     imageFilter = RSRecordingImageFilter::CreateBlurImageFilter(
-        gaussianBlurAttr_.stdDeviationX, gaussianBlurAttr_.stdDeviationY, RSTileMode::DECAL, imageFilter);
+        gaussianBlurAttr_.stdDeviationX, gaussianBlurAttr_.stdDeviationY,
+        RSTileMode::DECAL, imageFilter, RSImageBlurType::GAUSS, filterRect);
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
     RegisterResult(feAttr_.result, imageFilter, resultHash);
 }

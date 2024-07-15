@@ -203,6 +203,8 @@ private:
     RefPtr<FrameNode> GetFormChildNode(FormChildNodeType formChildNodeType) const;
     double GetTimeLimitFontSize();
     bool IsMaskEnableForm(const RequestFormInfo &info);
+    void UpdateChildNodeOpacity(FormChildNodeType formChildNodeType, double opacity);
+    void SnapshotSurfaceNode();
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     RefPtr<RenderContext> externalRenderContext_;
 

@@ -269,6 +269,8 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
     CHECK_NULL_VOID(contentRenderContext);
     contentRenderContext_ = contentRenderContext;
     UpdateBgBlurStyle(contentRenderContext, props);
+    bool isCustomBorder = props.borderRadius.has_value() || props.borderWidth.has_value() ||
+        props.borderStyle.has_value() || props.borderColor.has_value();
     BorderRadiusProperty radius;
     if (props.borderRadius.has_value()) {
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -281,20 +283,25 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
     } else {
         radius.SetRadius(dialogTheme_->GetRadius().GetX());
         contentRenderContext->UpdateBorderRadius(radius);
+        if (!isCustomBorder && dialogTheme_->GetDialogDoubleBorderEnable()) {
+            contentRenderContext->UpdateOuterBorderRadius(radius);
+        }
     }
-    if (dialogTheme_->GetDialogDoubleBorderEnable()) {
-        contentRenderContext->UpdateOuterBorderRadius(radius);
-    }
-    auto layoutProps = contentNode->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_VOID(layoutProps);
     if (props.borderWidth.has_value()) {
+        auto layoutProps = contentNode->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_VOID(layoutProps);
         layoutProps->UpdateBorderWidth(props.borderWidth.value());
         contentRenderContext->UpdateBorderWidth(props.borderWidth.value());
     } else {
         BorderWidthProperty borderWidth;
-        if (dialogTheme_->GetDialogDoubleBorderEnable()) {
+        if (!isCustomBorder && dialogTheme_->GetDialogDoubleBorderEnable()) {
+            auto layoutProps = contentNode->GetLayoutProperty<LinearLayoutProperty>();
+            CHECK_NULL_VOID(layoutProps);
             borderWidth.SetBorderWidth(Dimension(dialogTheme_->GetDialogInnerBorderWidth()));
             layoutProps->UpdateBorderWidth(borderWidth);
+            BorderWidthProperty outerWidthProp;
+            outerWidthProp.SetBorderWidth(Dimension(dialogTheme_->GetDialogOuterBorderWidth()));
+            contentRenderContext->UpdateOuterBorderWidth(outerWidthProp);
         } else {
             Dimension width = dialogTheme_->GetBackgroudBorderWidth();
             borderWidth.SetBorderWidth(width);
@@ -302,11 +309,6 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
         contentRenderContext->UpdateBorderWidth(borderWidth);
     }
     contentNodeMap_[DialogContentNode::BORDERWIDTH] = contentNode;
-    if (dialogTheme_->GetDialogDoubleBorderEnable()) {
-        BorderWidthProperty outerWidthProp;
-        outerWidthProp.SetBorderWidth(Dimension(dialogTheme_->GetDialogOuterBorderWidth()));
-        contentRenderContext->UpdateOuterBorderWidth(outerWidthProp);
-    }
     if (props.borderStyle.has_value()) {
         contentRenderContext->UpdateBorderStyle(props.borderStyle.value());
     }
@@ -314,18 +316,16 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
         contentRenderContext->UpdateBorderColor(props.borderColor.value());
     } else {
         BorderColorProperty borderColor;
-        if (dialogTheme_->GetDialogDoubleBorderEnable()) {
+        if (!isCustomBorder && dialogTheme_->GetDialogDoubleBorderEnable()) {
             borderColor.SetColor(dialogTheme_->GetDialogInnerBorderColor());
+            BorderColorProperty outerColorProp;
+            outerColorProp.SetColor(dialogTheme_->GetDialogOuterBorderColor());
+            contentRenderContext->UpdateOuterBorderColor(outerColorProp);
         } else {
             Color color = dialogTheme_->GetBackgroudBorderColor();
             borderColor.SetColor(color);
         }
         contentRenderContext->UpdateBorderColor(borderColor);
-    }
-    if (dialogTheme_->GetDialogDoubleBorderEnable()) {
-        BorderColorProperty outerColorProp;
-        outerColorProp.SetColor(dialogTheme_->GetDialogOuterBorderColor());
-        contentRenderContext->UpdateBorderColor(outerColorProp);
     }
     if (props.shadow.has_value()) {
         contentRenderContext->UpdateBackShadow(props.shadow.value());
@@ -1357,10 +1357,17 @@ bool DialogPattern::NeedsButtonDirectionChange(const std::vector<ButtonInfo>& bu
             MeasureContext measureContext;
             measureContext.textContent = textDisplay;
             measureContext.fontSize = buttonTextSize;
+            auto pipeline = GetContext();
+            CHECK_NULL_RETURN(pipeline, false);
+            if (isSuitableForElderly_ && pipeline->GetFontScale() >= dialogTheme_->GetTitleMaxFontScale() &&
+                SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+                measureContext.fontSize =
+                    Dimension(buttonTextSize.Value() * dialogTheme_->GetTitleMaxFontScale(), DimensionUnit::VP);
+            }
             auto fontweight = StringUtils::FontWeightToString(FontWeight::MEDIUM);
             measureContext.fontWeight = fontweight;
             Size measureSize = MeasureUtil::MeasureTextSize(measureContext);
-            if (GreatNotEqual(measureSize.Width(), textFarmeSize.Width())) {
+            if (measureSize.Width() != textFarmeSize.Width()) {
                 return true;
             }
         }
@@ -1377,6 +1384,7 @@ void DialogPattern::UpdateDeviceOrientation(const DeviceOrientation& deviceOrien
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        CHECK_NULL_VOID(buttonContainer_);
         buttonContainer_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         deviceOrientation_ = deviceOrientation;
     }
@@ -1460,6 +1468,20 @@ void DialogPattern::UpdateTextFontScale()
                 textProp->UpdateMargin(margin);
             }
         }
+    }
+}
+
+void DialogPattern::UpdateFontScale()
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetFontScale() != fontScaleForElderly_) {
+        OnFontConfigurationUpdate();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkModifyDone();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        fontScaleForElderly_ = pipeline->GetFontScale();
     }
 }
 

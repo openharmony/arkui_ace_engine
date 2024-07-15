@@ -71,7 +71,10 @@ void JsNavigationTransitionProxy::GetToContentInfo(const JSCallbackInfo& args)
 void JsNavigationTransitionProxy::FinishTransition(const JSCallbackInfo& info)
 {
     if (proxy_) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "fire custom animation finish");
         proxy_->FireFinishCallback();
+    } else {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "finish interactive animation failed");
     }
 }
 
@@ -149,8 +152,10 @@ void JsNavigationTransitionProxy::GetInteractive(const JSCallbackInfo& info)
 void JsNavigationTransitionProxy::CancelAnimation(const JSCallbackInfo& info)
 {
     if (proxy_ == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "cancel interactive animation failed");
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "fire cancel interactive animation");
     proxy_->CancelInteractiveAnimation();
 }
 

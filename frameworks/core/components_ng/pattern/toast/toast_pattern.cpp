@@ -32,25 +32,6 @@ namespace {
 constexpr int32_t API_VERSION_9 = 9;
 constexpr Dimension ADAPT_TOAST_MIN_FONT_SIZE = 12.0_fp;
 
-size_t GetLineCount(const RefPtr<FrameNode>& textNode)
-{
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textLayoutProperty, 0.0f);
-    auto layoutConstraint = textLayoutProperty->GetLayoutConstraint();
-
-    auto textLayoutWrapper = textNode->CreateLayoutWrapper();
-    CHECK_NULL_RETURN(textLayoutWrapper, 0.0f);
-    textLayoutWrapper->Measure(layoutConstraint);
-    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(textLayoutWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(layoutAlgorithmWrapper, 0);
-    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(textLayoutAlgorithm, 0);
-    auto paragraph = textLayoutAlgorithm->GetSingleParagraph();
-    CHECK_NULL_RETURN(paragraph, 0);
-    auto paragLineCount = paragraph->GetLineCount();
-    return paragLineCount;
-}
-
 // get main window's pipeline
 RefPtr<PipelineContext> GetMainPipelineContext()
 {
@@ -180,10 +161,6 @@ void ToastPattern::BeforeCreateLayoutWrapper()
     auto textNode = DynamicCast<FrameNode>(toastNode->GetFirstChild());
     CHECK_NULL_VOID(textNode);
     UpdateTextSizeConstraint(textNode);
-    // TextAlign should be START when lines of text are greater than 1
-    if (GetLineCount(textNode) > 1) {
-        textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextAlign(TextAlign::START);
-    }
 }
 
 void ToastPattern::UpdateToastSize(const RefPtr<FrameNode>& toast)

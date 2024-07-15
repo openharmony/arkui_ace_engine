@@ -340,6 +340,22 @@ bool DrawingImage::DrawWithRecordingCanvas(RSCanvas& canvas, const BorderRadiusA
     return false;
 #endif
 }
+
+void DrawingImage::DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    auto& recordingCanvas = static_cast<Rosen::Drawing::RecordingCanvas&>(canvas);
+    RSBrush brush;
+    RSSamplingOptions options;
+    RSRect dst = RSRect(dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetRight(), dstRect.GetBottom());
+    RSRect src = RSRect(srcRect.GetLeft(), srcRect.GetTop(), srcRect.GetRight(), srcRect.GetBottom());
+    recordingCanvas.AttachBrush(brush);
+    auto imagePtr = GetImage();
+    recordingCanvas.DrawImageRect(*imagePtr, src, dst, options);
+    recordingCanvas.DetachBrush();
+#else // !ENABLE_ROSEN_BACKEND
+#endif
+}
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {

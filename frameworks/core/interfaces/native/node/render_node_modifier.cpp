@@ -152,9 +152,11 @@ void SetShadowOffset(ArkUINodeHandle node, ArkUI_Float32 offsetX, ArkUI_Float32 
 
 void SetLabel(ArkUINodeHandle node, ArkUI_CharPtr label)
 {
-    auto* currentNode = reinterpret_cast<UINode*>(node);
+    auto* currentNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     CHECK_NULL_VOID(currentNode);
-    currentNode->SetLabel(std::string(label));
+    auto pattern = currentNode->GetPattern<NG::RenderNodePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetLabel(std::string(label));
 }
 
 void SetShadowAlpha(ArkUINodeHandle node, ArkUI_Float32 alpha)

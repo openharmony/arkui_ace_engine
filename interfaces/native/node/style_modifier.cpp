@@ -130,8 +130,20 @@ constexpr int32_t OBJECT_FIT_COVER = 2;
 constexpr int32_t OBJECT_FIT_AUTO = 3;
 constexpr int32_t OBJECT_FIT_NONE = 5;
 constexpr int32_t OBJECT_FIT_SCALE_DOWN = 6;
+constexpr int32_t OBJECT_FIT_NONE_ALIGN_TOP_START = 7;
+constexpr int32_t OBJECT_FIT_NONE_ALIGN_TOP = 8;
+constexpr int32_t OBJECT_FIT_NONE_ALIGN_TOP_END = 9;
+constexpr int32_t OBJECT_FIT_NONE_ALIGN_START = 10;
+constexpr int32_t OBJECT_FIT_NONE_ALIGN_CENTER = 11;
+constexpr int32_t OBJECT_FIT_NONE_ALIGN_END = 12;
+constexpr int32_t OBJECT_FIT_NONE_ALIGN_BOTTOM_START = 13;
+constexpr int32_t OBJECT_FIT_NONE_ALIGN_BOTTOM = 14;
+constexpr int32_t OBJECT_FIT_NONE_ALIGN_BOTTOM_END = 15;
 const std::vector<int32_t> OBJECT_FIT_ARRAY = { OBJECT_FIT_CONTAIN, OBJECT_FIT_COVER, OBJECT_FIT_AUTO,
-    OBJECT_FIT_FILL, OBJECT_FIT_SCALE_DOWN, OBJECT_FIT_NONE };
+    OBJECT_FIT_FILL, OBJECT_FIT_SCALE_DOWN, OBJECT_FIT_NONE,
+    OBJECT_FIT_NONE_ALIGN_TOP_START, OBJECT_FIT_NONE_ALIGN_TOP, OBJECT_FIT_NONE_ALIGN_TOP_END,
+    OBJECT_FIT_NONE_ALIGN_START, OBJECT_FIT_NONE_ALIGN_CENTER, OBJECT_FIT_NONE_ALIGN_END,
+    OBJECT_FIT_NONE_ALIGN_BOTTOM_START, OBJECT_FIT_NONE_ALIGN_BOTTOM, OBJECT_FIT_NONE_ALIGN_BOTTOM_END };
 constexpr int32_t IMAGE_SPAN_ALIGNMENT_BASELINE = 4;
 constexpr int32_t IMAGE_SPAN_ALIGNMENT_BOTTOM = 3;
 constexpr int32_t IMAGE_SPAN_ALIGNMENT_CENTER = 2;
@@ -2045,7 +2057,8 @@ int32_t SetShadow(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     auto* fullImpl = GetFullImpl();
     ArkUIInt32orFloat32 shadows[NUM_1] = { {.i32 = ArkUI_ShadowStyle::ARKUI_SHADOW_STYLE_OUTER_DEFAULT_XS} };
     shadows[NUM_0].i32 = item->value[0].i32;
-    fullImpl->getNodeModifiers()->getCommonModifier()->setBackShadow(node->uiNodeHandle, shadows, ALLOW_SIZE_1);
+    ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_VP);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setBackShadow(node->uiNodeHandle, shadows, ALLOW_SIZE_1, unit);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -2103,7 +2116,8 @@ int32_t SetCustomShadow(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (length > NUM_6) {
         shadows[NUM_6].i32 = item->value[NUM_6].i32;
     }
-    fullImpl->getNodeModifiers()->getCommonModifier()->setBackShadow(node->uiNodeHandle, shadows, ALLOW_SIZE_7);
+    ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_VP);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setBackShadow(node->uiNodeHandle, shadows, ALLOW_SIZE_7, unit);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -2441,7 +2455,7 @@ int32_t SetBackgroundImagePosition(ArkUI_NodeHandle node, const ArkUI_AttributeI
     }
     auto fullImpl = GetFullImpl();
     ArkUI_Float32 values[] = { item->value[NUM_0].f32, item->value[NUM_1].f32 };
-    int32_t unit = GetDefaultUnit(node, UNIT_VP);
+    int32_t unit = GetDefaultUnit(node, UNIT_PX);
     ArkUI_Int32 units[] = { unit, unit };
 
     fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundImagePosition(
@@ -2460,7 +2474,7 @@ const ArkUI_AttributeItem* GetBackgroundImagePosition(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
     ArkUIPositionOptions positionOption = { 0.0f, 0.0f };
-    ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_VP);
+    ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_PX);
     fullImpl->getNodeModifiers()->getCommonModifier()->getBackgroundImagePosition(node->uiNodeHandle,
         &positionOption, unit);
     g_numberValues[NUM_0].f32 = positionOption.x;
@@ -9680,7 +9694,8 @@ int32_t SetObjectFit(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (actualSize < 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (item->value[0].i32 < 0 || item->value[0].i32 > static_cast<int32_t>(ARKUI_OBJECT_FIT_NONE)) {
+    if (item->value[0].i32 < 0 || item->value[0].i32 >
+        static_cast<int32_t>(ARKUI_OBJECT_FIT_NONE_AND_ALIGN_BOTTOM_END)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     fullImpl->getNodeModifiers()->getImageModifier()->setObjectFit(

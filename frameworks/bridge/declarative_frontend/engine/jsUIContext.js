@@ -491,7 +491,7 @@ class UIContext {
             __JSScopeUtil__.restoreInstanceId();
             return null;
         }
-        let xNode = globalThis.requireNapi('arkui.node');
+        let xNode = globalThis.__getArkUINode__();
         let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
         if (!node) {
             node = xNode.FrameNodeUtils.createFrameNode(this, nodePtr);
@@ -503,7 +503,7 @@ class UIContext {
     getFrameNodeByNodeId(id) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let nodePtr = getUINativeModule().getFrameNodeById(id);
-        let xNode = globalThis.requireNapi('arkui.node');
+        let xNode = globalThis.__getArkUINode__();
         let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
         if (!node) {
             node = xNode.FrameNodeUtils.createFrameNode(this, nodePtr);
@@ -519,7 +519,7 @@ class UIContext {
             __JSScopeUtil__.restoreInstanceId();
             return null;
         }
-        let xNode = globalThis.requireNapi('arkui.node');
+        let xNode = globalThis.__getArkUINode__();
         let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
         if (!node) {
             node = xNode.FrameNodeUtils.createFrameNode(this, nodePtr);
@@ -905,6 +905,19 @@ class PromptAction {
     showToast(options) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.ohos_prompt.showToast(options);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    openToast(options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let promise = this.ohos_prompt.openToast(options);
+        __JSScopeUtil__.restoreInstanceId();
+        return promise;
+    }
+
+    closeToast(toastId) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_prompt.closeToast(toastId);
         __JSScopeUtil__.restoreInstanceId();
     }
 

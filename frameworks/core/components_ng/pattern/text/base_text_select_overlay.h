@@ -72,6 +72,7 @@ public:
     bool CheckTouchInHostNode(const PointF& touchPoint) override;
     void OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode) override;
     bool CheckRestartHiddenHandleTask(int32_t requestCode) override;
+    std::optional<RectF> GetAncestorNodeViewPort() override;
     RefPtr<SelectOverlayCallback> GetCallback() override
     {
         return AceType::Claim(this);
@@ -90,6 +91,7 @@ public:
     void UpdateAllHandlesOffset();
     void UpdateFirstHandleOffset();
     void UpdateSecondHandleOffset();
+    void UpdateViewPort();
     bool IsShowMouseMenu();
     bool IsCurrentMenuVisibile();
     bool IsHandleReverse();
@@ -185,18 +187,8 @@ public:
     bool IsPointInRect(const OffsetF& point, const OffsetF& leftBottom, const OffsetF& rightBottom,
         const OffsetF& rightTop, const OffsetF& leftTop);
 
-    void SetScrollableParentCallback();
-    void ResetScrollableParentCallback();
-    virtual void OnParentScrollStart();
-    virtual void OnParentScrollEnd() {};
-    virtual void OnParentScrolling();
-
     void OnSelectionMenuOptionsUpdate(
         const NG::OnCreateMenuCallback && onCreateMenuCallback, const NG::OnMenuItemClickCallback && onMenuItemClick);
-
-    void SetkeyBoardChangeCallback();
-    void RemoveKeyboardChangeCallback();
-    virtual void OnKeyboardChanged(bool isKeyboardShow);
 
     float GetHandleDiameter();
     VectorF GetHostScale();
@@ -211,6 +203,8 @@ public:
     void OnHandleLevelModeChanged(HandleLevelMode mode) override
     {
         SetHandleLevelMode(mode);
+        UpdateAllHandlesOffset();
+        UpdateViewPort();
     }
     virtual void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag);
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info) override;
@@ -246,7 +240,6 @@ protected:
 
     RectF ConvertPaintInfoToRect(const SelectHandlePaintInfo& paintInfo);
     void SetTransformPaintInfo(SelectHandleInfo& handleInfo, const RectF& localHandleRect);
-    std::optional<RectF> GetAncestorNodeViewPort();
     bool CheckHandleCanPaintInHost(const RectF& firstRect, const RectF& secondRect);
     virtual RectF GetFirstHandleLocalPaintRect();
     virtual RectF GetSecondHandleLocalPaintRect();
@@ -256,10 +249,13 @@ protected:
     bool IsAncestorNodeStartScroll(FrameNodeChangeInfoFlag flag);
     bool IsAncestorNodeEndScroll(FrameNodeChangeInfoFlag flag);
     bool IsAncestorNodeTransformChange(FrameNodeChangeInfoFlag flag);
+    bool IsAncestorNodeHasTransition(FrameNodeChangeInfoFlag flag);
     void SetEnableHandleLevel(bool enableHandleLevel)
     {
         enableHandleLevel_ = enableHandleLevel;
     }
+    void RegisterScrollingListener(const RefPtr<FrameNode> scrollableNode);
+    void OnHandleScrolling(const WeakPtr<FrameNode>& scrollingNode);
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;
@@ -273,6 +269,7 @@ private:
     void ShowSelectOverlay(const OverlayRequest& request, bool hasClipboardData);
     void GetHandlePoints(const RectF& handleRect, std::vector<PointF>& points, bool handleOnTop);
     bool IsPointsInRegion(const std::vector<PointF>& points, const RectF& regionRect);
+    bool CheckAndUpdateHostGlobalPaintRect();
     bool isSingleHandle_ = false;
     bool isShowPaste_ = false;
     bool isShowMenu_ = true;
@@ -280,11 +277,11 @@ private:
     bool isUsingMouse_ = false;
     OffsetF mouseMenuOffset_;
     WeakPtr<TextBase> hostTextBase_;
-    bool hasScrollableParent_ = true;
-    std::vector<int32_t> scrollableParentIds_;
     bool enableHandleLevel_ = false;
     bool touchAtHandle_ = false;
     bool isChangeToOverlayModeAtEdge_ = true;
+    bool hasRegisterListener_ = false;
+    RectF globalPaintRect_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -222,6 +222,7 @@ enum class TextSpanType : int32_t {
     TEXT = 0,
     IMAGE,
     MIXED,
+    BUILDER,
     NONE,
 };
 

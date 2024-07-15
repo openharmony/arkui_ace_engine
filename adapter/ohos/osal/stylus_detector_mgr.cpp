@@ -28,6 +28,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+#include "core/components_ng/pattern/search/search_text_field.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -51,6 +52,12 @@ void StylusDetectorMgr::StylusDetectorCallBack::RequestFocus(int32_t nodeId)
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
+    if (frameNode->GetTag() == V2::SEARCH_Field_ETS_TAG) {
+        auto searchTextFieldPattern = frameNode->GetPattern<NG::SearchTextFieldPattern>();
+        CHECK_NULL_VOID(searchTextFieldPattern);
+        focusHub = searchTextFieldPattern->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+    }
     if (!focusHub->IsCurrentFocus()) {
         focusHub->RequestFocusImmediately();
     }
@@ -59,7 +66,7 @@ void StylusDetectorMgr::StylusDetectorCallBack::RequestFocus(int32_t nodeId)
     }
     auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    bool needToRequestKeyBoardOnFocus = pattern->GetNeedToRequestKeyboardOnFocus();
+    bool needToRequestKeyBoardOnFocus = pattern->NeedToRequestKeyboardOnFocus();
     if (!needToRequestKeyBoardOnFocus) {
         pattern->RequestKeyboard(false, true, true);
     }

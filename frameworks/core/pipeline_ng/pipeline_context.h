@@ -134,6 +134,8 @@ public:
 
     void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false) override;
 
+    void OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) override;
+
     void OnMouseEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) override;
 
     void OnAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node) override;
@@ -196,7 +198,8 @@ public:
     void AddVisibleAreaChangeNode(const int32_t nodeId);
 
     void AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node,
-        const std::vector<double>& ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);
+        const std::vector<double>& ratio, const VisibleRatioCallback& callback, bool isUserCallback = true,
+        bool isCalculateInnerClip = false);
     void RemoveVisibleAreaChangeNode(int32_t nodeId);
 
     void HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp);
@@ -265,6 +268,9 @@ public:
 
     void AddAfterRenderTask(std::function<void()>&& task);
 
+    void AddSafeAreaPaddingProcessTask(FrameNode* node);
+    void RemoveSafeAreaPaddingProcessTask(FrameNode* node);
+
     void AddDragWindowVisibleTask(std::function<void()>&& task)
     {
         dragWindowVisibleCallback_ = std::move(task);
@@ -273,6 +279,7 @@ public:
     void FlushOnceVsyncTask() override;
 
     void FlushDirtyNodeUpdate();
+    void FlushSafeAreaPaddingProcess();
 
     void SetRootRect(double width, double height, double offset) override;
 
@@ -803,10 +810,24 @@ public:
         lastVsyncEndTimestamp_ = lastVsyncEndTimestamp;
     }
     void GetInspectorTree();
-
+    void NotifyAllWebPattern(bool isRegister);
     void AddFrameNodeChangeListener(const RefPtr<FrameNode>& node);
     void RemoveFrameNodeChangeListener(const RefPtr<FrameNode>& node);
     void AddChangedFrameNode(const RefPtr<FrameNode>& node);
+    void SetForceSplitEnable(bool isForceSplit)
+    {
+        isForceSplit_ = isForceSplit;
+    }
+
+    bool GetForceSplitEnable() const
+    {
+        return isForceSplit_;
+    }
+
+    bool IsWindowFocused() const override
+    {
+        return isWindowHasFocused_ && GetOnFoucs();
+    }
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -841,11 +862,6 @@ protected:
     RefPtr<FrameNode> GetContainerModalNode();
     void DoKeyboardAvoidAnimate(const KeyboardAnimationConfig& keyboardAnimationConfig, float keyboardHeight,
         const std::function<void()>& func);
-
-    bool GetForceSplitEnable() const
-    {
-        return isForceSplit_;
-    }
 
 private:
     void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type);
@@ -1051,7 +1067,7 @@ private:
     std::vector<std::shared_ptr<ITouchEventCallback>> listenerVector_;
     bool customTitleSettedShow_ = true;
     bool isShowTitle_ = false;
-    bool lastAnimationStatus_ = true;
+    int32_t lastAnimatorExpectedFrameRate_ = -1;
     bool isDoKeyboardAvoidAnimate_ = true;
     bool isForceSplit_ = false;
 

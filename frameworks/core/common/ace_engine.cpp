@@ -143,6 +143,13 @@ RefPtr<Container> AceEngine::GetContainer(int32_t instanceId)
     }
 }
 
+bool AceEngine::HasContainer(int32_t containerId) const
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    auto iter = containerMap_.find(containerId);
+    return iter != containerMap_.end();
+}
+
 void AceEngine::RegisterToWatchDog(int32_t instanceId, const RefPtr<TaskExecutor>& taskExecutor, bool useUIAsJSThread)
 {
     CHECK_NULL_VOID(watchDog_);

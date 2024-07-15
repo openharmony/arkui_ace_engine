@@ -68,7 +68,7 @@ const char INSPECTOR_VISIBILITY[] = "visibility";
 const uint32_t LONG_PRESS_DELAY = 1000;
 RectF deviceRect;
 
-RefPtr<UINode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::string& key)
+RefPtr<UINode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::string& key, bool notDetach = false)
 {
     std::queue<RefPtr<UINode>> elements;
     elements.push(root);
@@ -80,7 +80,7 @@ RefPtr<UINode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::strin
             return current;
         }
 
-        const auto& children = current->GetChildren();
+        const auto& children = current->GetChildren(notDetach);
         for (const auto& child : children) {
             elements.push(child);
         }
@@ -156,7 +156,6 @@ void GetSpanInspector(
 
     InspectorFilter filter;
     parent->ToJsonValue(jsonObject, filter);
-    jsonObject->Put(INSPECTOR_LABEL, parent->GetLabel().c_str());
     jsonNode->PutRef(INSPECTOR_ATTRS, std::move(jsonObject));
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, parent->GetId());
@@ -212,7 +211,6 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
 
         InspectorFilter filter;
         parent->ToJsonValue(jsonObject, filter);
-        jsonObject->Put(INSPECTOR_LABEL, parent->GetLabel().c_str());
         jsonNode->PutRef(INSPECTOR_ATTRS, std::move(jsonObject));
     }
 
@@ -282,7 +280,6 @@ void GetSpanInspector(
 
     InspectorFilter filter;
     parent->ToJsonValue(jsonObject, filter);
-    jsonObject->Put(INSPECTOR_LABEL, parent->GetLabel().c_str());
     jsonNode->PutRef(INSPECTOR_ATTRS, std::move(jsonObject));
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, parent->GetId());
@@ -346,7 +343,6 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
     }
     auto jsonObject = JsonUtil::Create(true);
     parent->ToJsonValue(jsonObject, filter);
-    jsonObject->Put(INSPECTOR_LABEL, parent->GetLabel().c_str());
     jsonNode->PutRef(INSPECTOR_ATTRS, std::move(jsonObject));
     std::string jsonNodeStr = jsonNode->ToString();
     ConvertIllegalStr(jsonNodeStr);
@@ -430,11 +426,11 @@ std::string GetInspectorInfo(std::vector<RefPtr<NG::UINode>> children, int32_t p
 
 std::set<RefPtr<FrameNode>> Inspector::offscreenNodes;
 
-RefPtr<FrameNode> Inspector::GetFrameNodeByKey(const std::string& key)
+RefPtr<FrameNode> Inspector::GetFrameNodeByKey(const std::string& key, bool notDetach)
 {
     if (!offscreenNodes.empty()) {
         for (auto node : offscreenNodes) {
-            auto frameNode = AceType::DynamicCast<FrameNode>(GetInspectorByKey(node, key));
+            auto frameNode = AceType::DynamicCast<FrameNode>(GetInspectorByKey(node, key, notDetach));
             if (frameNode) {
                 return frameNode;
             }
@@ -477,7 +473,6 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key, const Inspe
     jsonNode->Put(INSPECTOR_DEBUGLINE, debugLine.c_str());
 
     inspectorElement->ToJsonValue(jsonAttrs, filter);
-    jsonAttrs->Put(INSPECTOR_LABEL, inspectorElement->GetLabel().c_str());
     jsonNode->PutRef(INSPECTOR_ATTRS, std::move(jsonAttrs));
     return jsonNode->ToString();
 }

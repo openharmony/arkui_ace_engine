@@ -14,7 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -200,7 +200,7 @@ void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onClick");
         PipelineContext::SetCallBackNode(node);
         func->Execute(info);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
         ReportClickEvent(node);
 #endif
     };
@@ -210,7 +210,7 @@ void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onClick");
         PipelineContext::SetCallBackNode(node);
         func->Execute(*info);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
         ReportClickEvent(node);
 #endif
     };
@@ -401,15 +401,20 @@ std::function<void()> JSInteractableView::GetRemoteMessageEventCallback(const JS
     return eventCallback;
 }
 
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 void JSInteractableView::ReportClickEvent(const WeakPtr<NG::FrameNode>& node, const std::string text)
 {
     if (UiSessionManager::GetInstance().GetClickEventRegistered()) {
         auto data = JsonUtil::Create();
         data->Put("event", "onClick");
+        std::string content = text;
         if (!node.Invalid()) {
             data->Put("id", node.GetRawPtr()->GetId());
-            data->Put("text", text.data());
+            auto children = node.GetRawPtr()->GetChildren();
+            if (!children.empty()) {
+                node.GetRawPtr()->GetContainerComponentText(content);
+            }
+            data->Put("text", content.data());
             data->Put("position", node.GetRawPtr()->GetGeometryNode()->GetFrameRect().ToString().data());
         }
         UiSessionManager::GetInstance().ReportClickEvent(data->ToString());

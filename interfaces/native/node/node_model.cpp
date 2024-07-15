@@ -157,7 +157,7 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
     }
 
     ArkUI_Int32 id = ARKUI_AUTO_GENERATE_NODE_ID;
-    auto* uiNode = impl->getBasicAPI()->createNode(nodes[nodeType], id, 0);
+    auto* uiNode = impl->getBasicAPI()->createNode(nodes[nodeType], id, ARKUI_NODE_FLAG_C);
     if (!uiNode) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node type: %{public}d can not find in full impl", type);
         return nullptr;
@@ -423,24 +423,6 @@ void UnregisterOnEvent()
     g_eventReceiver = nullptr;
 }
 
-void SetNodeEvent(ArkUINodeEvent* innerEvent)
-{
-    auto nativeNodeEventType = GetNativeNodeEventType(innerEvent);
-    auto eventType = static_cast<ArkUI_NodeEventType>(nativeNodeEventType);
-    auto* nodePtr = reinterpret_cast<ArkUI_NodeHandle>(innerEvent->extraParam);
-    auto extraData = reinterpret_cast<ExtraData*>(nodePtr->extraData);
-    auto innerEventExtraParam = extraData->eventMap.find(eventType);
-    if (g_compatibleEventReceiver) {
-        ArkUI_CompatibleNodeEvent nodeEvent;
-        nodeEvent.node = nodePtr;
-        nodeEvent.eventId = innerEventExtraParam->second->targetId;
-        if (ConvertEvent(innerEvent, &nodeEvent)) {
-            g_compatibleEventReceiver(&nodeEvent);
-            ConvertEventResult(&nodeEvent, innerEvent);
-        }
-    }
-}
-
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
 {
     if (!innerEvent) {
@@ -487,7 +469,15 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
         }
         HandleNodeEvent(&event);
     }
-    SetNodeEvent(innerEvent);
+    if (g_compatibleEventReceiver) {
+        ArkUI_CompatibleNodeEvent event;
+        event.node = nodePtr;
+        event.eventId = innerEventExtraParam->second->targetId;
+        if (ConvertEvent(innerEvent, &event)) {
+            g_compatibleEventReceiver(&event);
+            ConvertEventResult(&event, innerEvent);
+        }
+    }
 }
 
 int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent)

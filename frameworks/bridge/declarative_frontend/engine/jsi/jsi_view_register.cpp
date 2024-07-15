@@ -32,7 +32,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "bridge/declarative_frontend/frontend_delegate_declarative.h"
 #include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
-#include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
+#include "bridge/declarative_frontend/jsview/canvas/js_canvas_image_data.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "core/common/card_scope.h"
 #include "core/common/container.h"
@@ -192,9 +192,9 @@ void UpdatePageLifeCycleFunctions(RefPtr<NG::FrameNode> pageNode, JSView* view)
     });
 }
 
-void UpdateCardRootComponent(const panda::Local<panda::ObjectRef>& obj)
+void UpdateCardRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectRef>& obj)
 {
-    auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
+    auto* view = static_cast<JSView*>(obj->GetNativePointerField(vm, 0));
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return;
     }
@@ -253,7 +253,7 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtim
     if (container && container->IsDynamicRender()) {
         LOGD("load dynamic component card");
         panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
-        UpdateCardRootComponent(obj);
+        UpdateCardRootComponent(vm, obj);
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -306,7 +306,7 @@ panda::Local<panda::JSValueRef> JsRegisterNamedRoute(panda::JsiRuntimeCallInfo* 
         panda::Local<panda::FunctionRef> objSupplier = firstArg;
         std::vector<Local<JSValueRef>> argv;
         auto obj = objSupplier->Call(vm, JSNApi::GetGlobalObject(vm), argv.data(), 0);
-        UpdateCardRootComponent(obj->ToObject(vm));
+        UpdateCardRootComponent(vm, obj->ToObject(vm));
         return panda::JSValueRef::Undefined(vm);
     }
 #endif
@@ -320,8 +320,8 @@ panda::Local<panda::JSValueRef> JsRegisterNamedRoute(panda::JsiRuntimeCallInfo* 
     }
 
     JsiDeclarativeEngine::AddToNamedRouterMap(vm,
-        panda::Global<panda::FunctionRef>(vm, Local<panda::FunctionRef>(firstArg)), secondArg->ToString(vm)->ToString(),
-        thirdArg->ToObject(vm));
+        panda::Global<panda::FunctionRef>(vm, Local<panda::FunctionRef>(firstArg)),
+        secondArg->ToString(vm)->ToString(vm), thirdArg->ToObject(vm));
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -340,7 +340,7 @@ panda::Local<panda::JSValueRef> JsNavigationRegister(panda::JsiRuntimeCallInfo* 
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "name is invalid");
         return panda::JSValueRef::Undefined(vm);
     }
-    std::string name = nameProp->ToString(vm)->ToString();
+    std::string name = nameProp->ToString(vm)->ToString(vm);
     Local<JSValueRef> builderProp = runtimeCallInfo->GetCallArgRef(1);
     if (!builderProp->IsObject(vm)) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "get builder object failed: %{public}s", name.c_str());
@@ -374,7 +374,7 @@ panda::Local<panda::JSValueRef> JSPostCardAction(panda::JsiRuntimeCallInfo* runt
     }
 
     panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
-    auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
+    auto* view = static_cast<JSView*>(obj->GetNativePointerField(vm, 0));
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -384,7 +384,7 @@ panda::Local<panda::JSValueRef> JSPostCardAction(panda::JsiRuntimeCallInfo* runt
         return panda::JSValueRef::Undefined(vm);
     }
     auto valueStr = panda::Local<panda::StringRef>(value);
-    auto action = valueStr->ToString();
+    auto action = valueStr->ToString(vm);
 
 #if !defined(NG_BUILD)
     int64_t cardId = view->GetCardId();
@@ -421,7 +421,7 @@ panda::Local<panda::JSValueRef> JsLoadEtsCard(panda::JsiRuntimeCallInfo* runtime
     }
 
     panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
-    UpdateCardRootComponent(obj);
+    UpdateCardRootComponent(vm, obj);
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -438,7 +438,7 @@ panda::Local<panda::JSValueRef> JsPreviewerComponent(panda::JsiRuntimeCallInfo* 
     if (obj->IsUndefined()) {
         return panda::JSValueRef::Undefined(vm);
     }
-    UpdateRootComponent(obj.ToLocal());
+    UpdateRootComponent(vm, obj.ToLocal());
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -473,7 +473,7 @@ panda::Local<panda::JSValueRef> JsStorePreviewComponents(panda::JsiRuntimeCallIn
         if (!componentName->IsString(vm)) {
             return panda::JSValueRef::Undefined(vm);
         }
-        std::string name = componentName->ToString(vm)->ToString();
+        std::string name = componentName->ToString(vm)->ToString(vm);
         Local<JSValueRef> componentObj = runtimeCallInfo->GetCallArgRef(++index);
         if (componentObj->IsUndefined()) {
             return panda::JSValueRef::Undefined(vm);
@@ -515,7 +515,7 @@ panda::Local<panda::JSValueRef> JsGetI18nResource(panda::JsiRuntimeCallInfo* run
     }
 
     std::vector<std::string> splitStr;
-    std::string str = firstArg->ToString(vm)->ToString();
+    std::string str = firstArg->ToString(vm)->ToString(vm);
     StringUtils::SplitStr(str, ".", splitStr);
     if (splitStr.size() != 2) {
         return panda::JSValueRef::Undefined(vm);
@@ -539,14 +539,14 @@ panda::Local<panda::JSValueRef> JsGetI18nResource(panda::JsiRuntimeCallInfo* run
                     continue;
                 }
                 auto itemVal = panda::Local<panda::StringRef>(subItemVal);
-                arrayResult.emplace_back(itemVal->ToString());
+                arrayResult.emplace_back(itemVal->ToString(vm));
             }
             ReplacePlaceHolderArray(resultStr, arrayResult);
         } else if (secondArg->IsObject(vm)) {
             auto value = panda::JSON::Stringify(vm, secondArg);
             if (value->IsString(vm)) {
                 auto valueStr = panda::Local<panda::StringRef>(value);
-                std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(valueStr->ToString());
+                std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(valueStr->ToString(vm));
                 ReplacePlaceHolder(resultStr, argsPtr);
             }
         } else if (secondArg->IsNumber()) {
@@ -573,7 +573,7 @@ panda::Local<panda::JSValueRef> JsGetMediaResource(panda::JsiRuntimeCallInfo* ru
         return panda::JSValueRef::Undefined(vm);
     }
 
-    std::string targetMediaFileName = firstArg->ToString(vm)->ToString();
+    std::string targetMediaFileName = firstArg->ToString(vm)->ToString(vm);
     std::string filePath = JsiDeclarativeEngineInstance::GetMediaResource(targetMediaFileName);
     return panda::StringRef::NewFromUtf8(vm, filePath.c_str());
 }
@@ -693,7 +693,7 @@ panda::Local<panda::JSValueRef> JsGetFilteredInspectorTree(panda::JsiRuntimeCall
                 return panda::StringRef::NewFromUtf8(vm, "");
             }
             auto itemVal = panda::Local<panda::StringRef>(subItemVal);
-            filter.AddFilterAttr(itemVal->ToString());
+            filter.AddFilterAttr(itemVal->ToString(vm));
         }
     }
     bool needThrow = false;
@@ -729,7 +729,7 @@ panda::Local<panda::JSValueRef> JsGetFilteredInspectorTreeById(panda::JsiRuntime
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "invalid param type");
         return panda::StringRef::NewFromUtf8(vm, "");
     }
-    std::string key = firstArg->ToString(vm)->ToString();
+    std::string key = firstArg->ToString(vm)->ToString(vm);
     filter.SetFilterID(key);
 
     // get depth
@@ -761,7 +761,7 @@ panda::Local<panda::JSValueRef> JsGetFilteredInspectorTreeById(panda::JsiRuntime
                 return panda::StringRef::NewFromUtf8(vm, "");
             }
             auto itemVal = panda::Local<panda::StringRef>(subItemVal);
-            filter.AddFilterAttr(itemVal->ToString());
+            filter.AddFilterAttr(itemVal->ToString(vm));
         }
     }
     bool needThrow = false;
@@ -789,7 +789,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorByKey(panda::JsiRuntimeCallInfo* r
     if (!container) {
         return panda::JSValueRef::Undefined(vm);
     }
-    std::string key = firstArg->ToString(vm)->ToString();
+    std::string key = firstArg->ToString(vm)->ToString(vm);
     if (container->IsUseNewPipeline()) {
         auto resultStr = NG::Inspector::GetInspectorNodeByKey(key);
         return panda::StringRef::NewFromUtf8(vm, resultStr.c_str());
@@ -823,9 +823,9 @@ panda::Local<panda::JSValueRef> JsSendEventByKey(panda::JsiRuntimeCallInfo* runt
         return panda::JSValueRef::Undefined(vm);
     }
 
-    std::string key = firstArg->ToString(vm)->ToString();
+    std::string key = firstArg->ToString(vm)->ToString(vm);
     auto action = runtimeCallInfo->GetCallArgRef(1)->Int32Value(vm);
-    auto params = runtimeCallInfo->GetCallArgRef(2)->ToString(vm)->ToString();
+    auto params = runtimeCallInfo->GetCallArgRef(2)->ToString(vm)->ToString(vm);
     if (container->IsUseNewPipeline()) {
         auto result = NG::Inspector::SendEventByKey(key, action, params);
         return panda::BooleanRef::New(vm, result);
@@ -1181,7 +1181,7 @@ panda::Local<panda::JSValueRef> SetAppBackgroundColor(panda::JsiRuntimeCallInfo*
     if (!firstArg->IsString(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
-    std::string backgroundColorStr = firstArg->ToString(vm)->ToString();
+    std::string backgroundColorStr = firstArg->ToString(vm)->ToString(vm);
     auto container = Container::Current();
     if (!container) {
         return panda::JSValueRef::Undefined(vm);
@@ -1205,7 +1205,7 @@ panda::Local<panda::JSValueRef> RequestFocus(panda::JsiRuntimeCallInfo* runtimeC
     if (argc < 1 || !firstArg->IsString(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
-    std::string inspectorKey = firstArg->ToString(vm)->ToString();
+    std::string inspectorKey = firstArg->ToString(vm)->ToString(vm);
 
     bool result = false;
     auto pipelineContext = PipelineContext::GetCurrentContext();

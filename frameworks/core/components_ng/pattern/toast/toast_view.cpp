@@ -139,7 +139,7 @@ void ToastView::UpdateTextContext(const RefPtr<FrameNode>& textNode)
         textContext->UpdateOuterBorderWidth(outerWidthProp);
         BorderColorProperty outerColorProp;
         outerColorProp.SetColor(toastTheme->GetToastOuterBorderColor());
-        textContext->UpdateBorderColor(outerColorProp);
+        textContext->UpdateOuterBorderColor(outerColorProp);
     }
     textContext->UpdateBackShadow(ShadowConfig::DefaultShadowL);
     textContext->UpdateClipEdge(false);

@@ -227,8 +227,10 @@ public:
         }
     }
 
-    void SetVisibleAreaInnerCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback)
+    void SetVisibleAreaInnerCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback,
+        bool isCalculateInnerClip = false)
     {
+        isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
         eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, false);
     }
 
@@ -448,6 +450,8 @@ public:
     void OnAccessibilityEvent(
         AccessibilityEventType eventType, WindowsContentChangeTypes windowsContentChangeType =
                                               WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID) const;
+
+    void OnAccessibilityEventForVirtualNode(AccessibilityEventType eventType, int64_t accessibilityId);
 
     void OnAccessibilityEvent(
         AccessibilityEventType eventType, std::string beforeText, std::string latestContent);
@@ -734,12 +738,13 @@ public:
         return isActive_;
     }
 
-    void SetActive(bool active = true) override;
+    void SetActive(bool active = true, bool needRebuildRenderContext = false) override;
 
     bool IsOutOfLayout() const override
     {
         return renderContext_->HasPosition() || renderContext_->HasPositionEdges();
     }
+    void ProcessSafeAreaPadding();
 
     bool SkipMeasureContent() const override;
     float GetBaselineDistance() const override;
@@ -871,6 +876,7 @@ public:
     }
 
     void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
+    void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect) const;
 
     void AttachContext(PipelineContext* context, bool recursive = false) override;
     void DetachContext(bool recursive = false) override;
@@ -900,7 +906,6 @@ public:
     void NotifyTransformInfoChanged()
     {
         isLocalRevertMatrixAvailable_ = false;
-        AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_TRANSFORM_CHANGE);
     }
 
     void AddPredictLayoutNode(const RefPtr<FrameNode>& node)
@@ -910,6 +915,19 @@ public:
 
     bool CheckAccessibilityLevelNo() const {
         return false;
+    }
+
+    RectF GetVirtualNodeTransformRectRelativeToWindow()
+    {
+        auto parentUinode = GetVirtualNodeParent().Upgrade();
+        CHECK_NULL_RETURN(parentUinode, RectF {});
+        auto parentFrame = AceType::DynamicCast<FrameNode>(parentUinode);
+        CHECK_NULL_RETURN(parentFrame, RectF {});
+        auto parentRect = parentFrame->GetTransformRectRelativeToWindow();
+        auto currentRect = GetTransformRectRelativeToWindow();
+        currentRect.SetTop(currentRect.Top() + parentRect.Top());
+        currentRect.SetLeft(currentRect.Left() + parentRect.Left());
+        return currentRect;
     }
 
     // this method will check the cache state and return the cached revert matrix preferentially,
@@ -935,6 +953,7 @@ public:
     ChildrenListWithGuard GetAllChildren();
     OPINC_TYPE_E FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth);
     void GetInspectorValue() override;
+    void NotifyWebPattern(bool isRegister) override;
 
     FrameNodeChangeInfoFlag GetChangeInfoFlag()
     {
@@ -951,6 +970,8 @@ public:
     void RegisterNodeChangeListener();
     void UnregisterNodeChangeListener();
     void ProcessFrameNodeChangeFlag();
+    void OnNodeTransformInfoUpdate(bool changed);
+    void OnNodeTransitionInfoUpdate();
 
 protected:
     void DumpInfo() override;
@@ -1009,9 +1030,11 @@ private:
     bool GetTouchable() const;
     bool OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config);
 
+    void ProcessVisibleAreaChangeEvent(const RectF& visibleRect, const RectF& frameRect,
+        const std::vector<double>& visibleAreaRatios, VisibleCallbackInfo& visibleAreaCallback, bool isUser);
     void ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
         VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio,
-        double lastVisibleRatio, bool isThrottled = false);
+        double lastVisibleRatio, bool isThrottled = false, bool isInner = false);
     void ProcessThrottledVisibleCallback();
     bool IsFrameDisappear();
     bool IsFrameDisappear(uint64_t timestamp);
@@ -1103,7 +1126,9 @@ private:
     bool isFirstBuilding_ = true;
 
     double lastVisibleRatio_ = 0.0;
+    double lastInnerVisibleRatio_ = 0.0;
     double lastVisibleCallbackRatio_ = 0.0;
+    double lastInnerVisibleCallbackRatio_ = 0.0;
     double lastThrottledVisibleRatio_ = 0.0;
     double lastThrottledVisibleCbRatio_ = 0.0;
     int64_t lastThrottledTriggerTime_ = 0;
@@ -1136,6 +1161,7 @@ private:
     bool isDisallowDropForcedly_ = false;
     bool isGeometryTransitionIn_ = false;
     bool isLayoutNode_ = false;
+    bool isCalculateInnerVisibleRectClip_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 

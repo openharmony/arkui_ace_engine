@@ -31,6 +31,7 @@
 #include "base/notification/eventhandler/interfaces/inner_api/event_handler.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/web/render_web.h"
@@ -101,7 +102,7 @@ const std::string RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
 const std::string RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
 const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
 const std::string RESOURCE_CLIPBOARD_READ_WRITE = "TYPE_CLIPBOARD_READ_WRITE";
-const std::string RESOURCE_SENSORS = "TYPE_SENSORS";
+const std::string RESOURCE_SENSOR = "TYPE_SENSOR";
 const std::string DEFAULT_CANONICAL_ENCODING_NAME = "UTF-8";
 constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
 
@@ -397,7 +398,7 @@ std::vector<std::string> WebPermissionRequestOhos::GetResources() const
             resources.push_back(RESOURCE_CLIPBOARD_READ_WRITE);
         }
         if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::SENSORS) {
-            resources.push_back(RESOURCE_SENSORS);
+            resources.push_back(RESOURCE_SENSOR);
         }
     }
     return resources;
@@ -418,7 +419,7 @@ void WebPermissionRequestOhos::Grant(std::vector<std::string>& resources) const
                 resourcesId |= OHOS::NWeb::NWebAccessRequest::Resources::MIDI_SYSEX;
             } else if (res == RESOURCE_CLIPBOARD_READ_WRITE) {
                 resourcesId |= OHOS::NWeb::NWebAccessRequest::Resources::CLIPBOARD_READ_WRITE;
-            } else if (res == RESOURCE_SENSORS) {
+            } else if (res == RESOURCE_SENSOR) {
                 resourcesId |= OHOS::NWeb::NWebAccessRequest::Resources::SENSORS;
             }
         }
@@ -810,7 +811,6 @@ void WebDelegate::Stop()
 
 void WebDelegate::UnregisterEvent()
 {
-    // TODO: add support for ng.
     auto context = DynamicCast<PipelineContext>(context_.Upgrade());
     if (!context) {
         return;
@@ -1573,7 +1573,6 @@ void WebDelegate::CreatePluginResource(
     const Size& size, const Offset& position, const WeakPtr<PipelineContext>& context)
 {
     state_ = State::CREATING;
-    // TODO: add ng pattern.
     auto webCom = webComponent_.Upgrade();
     if (!webCom) {
         state_ = State::CREATEFAILED;
@@ -1597,7 +1596,6 @@ void WebDelegate::CreatePluginResource(
         if (webDelegate == nullptr) {
             return;
         }
-        // TODO: add ng pattern.
         auto webCom = webDelegate->webComponent_.Upgrade();
         if (!webCom) {
             webDelegate->OnError(NTC_ERROR, "fail to call WebDelegate::SetSrc PostTask");
@@ -4217,7 +4215,6 @@ sptr<OHOS::Rosen::Window> WebDelegate::CreateWindow()
 
 void WebDelegate::RegisterWebEvent()
 {
-    // TODO: add support for ng.
     auto context = DynamicCast<PipelineContext>(context_.Upgrade());
     CHECK_NULL_VOID(context);
     auto resRegister = context->GetPlatformResRegister();
@@ -4853,25 +4850,28 @@ void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEve
         CHECK_NULL_VOID(webNode);
         accessibilityId = webNode->GetAccessibilityId();
     }
-    if (eventType == AccessibilityEventType::FOCUS || eventType == AccessibilityEventType::CLICK) {
-        TextBlurReport(accessibilityId);
+    if (eventType == AccessibilityEventType::FOCUS) {
+        TextBlurReportByFocusEvent(accessibilityId);
     }
     if (eventType == AccessibilityEventType::CLICK) {
         WebComponentClickReport(accessibilityId);
+    }
+    if (eventType == AccessibilityEventType::BLUR) {
+        TextBlurReportByBlurEvent(accessibilityId);
     }
     event.nodeId = accessibilityId;
     event.type = eventType;
     context->SendEventToAccessibility(event);
 }
 
-void WebDelegate::TextBlurReport(int64_t accessibilityId)
+void WebDelegate::TextBlurReportByFocusEvent(int64_t accessibilityId)
 {
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     auto textBlurCallback = webPattern->GetTextBlurCallback();
     CHECK_NULL_VOID(textBlurCallback);
     auto lastFocusNode = webPattern->GetAccessibilityNodeById(lastFocusInputId_);
-    if (lastFocusNode && lastFocusInputId_ != accessibilityId) {
+    if (lastFocusNode && lastFocusNode->GetIsEditable() && lastFocusInputId_ != accessibilityId) {
         if (lastFocusNode->GetIsPassword()) {
             TAG_LOGW(AceLogTag::ACE_WEB, "the input type is password, do not report");
         } else {
@@ -4879,13 +4879,14 @@ void WebDelegate::TextBlurReport(int64_t accessibilityId)
             if (!blurText.empty()) {
                 TAG_LOGD(AceLogTag::ACE_WEB, "report text blur, the content length is %{public}u",
                     static_cast<int32_t>(blurText.length()));
-                textBlurCallback(accessibilityId, blurText);
+                textBlurCallback(lastFocusInputId_, blurText);
+                lastFocusReportId_ = lastFocusInputId_;
             }
         }
     }
     if (accessibilityId != 0) {
         auto focusNode = webPattern->GetAccessibilityNodeById(accessibilityId);
-        if (focusNode && focusNode->GetIsEditable()) {
+        if (focusNode) {
             // record last editable focus id
             lastFocusInputId_ = accessibilityId;
         }
@@ -4901,6 +4902,23 @@ void WebDelegate::WebComponentClickReport(int64_t accessibilityId)
     auto webComponentClickCallback = webPattern->GetWebComponentClickCallback();
     CHECK_NULL_VOID(webComponentClickCallback);
     webComponentClickCallback(accessibilityId, webAccessibilityNode->GetContent());
+}
+
+void WebDelegate::TextBlurReportByBlurEvent(int64_t accessibilityId)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    auto textBlurCallback = webPattern->GetTextBlurCallback();
+    CHECK_NULL_VOID(textBlurCallback);
+    auto blurNode = webPattern->GetAccessibilityNodeById(accessibilityId);
+    if (blurNode && blurNode->GetIsEditable() && lastFocusReportId_ != accessibilityId) {
+        std::string blurText = blurNode->GetContent();
+        if (!blurNode->GetIsPassword() && !blurText.empty()) {
+            TAG_LOGD(AceLogTag::ACE_WEB, "report text blur, the content length is %{public}u",
+                static_cast<int32_t>(blurText.length()));
+            textBlurCallback(accessibilityId, blurText);
+        }
+    }
 }
 
 void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
@@ -4922,6 +4940,20 @@ void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequ
                     AceType::MakeRefPtr<WebError>(error->ErrorInfo(), error->ErrorCode())));
         },
         TaskExecutor::TaskType::JS, "ArkUIWebErrorReceive");
+}
+
+void WebDelegate::ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart)
+{
+    if (sceneId == "") {
+        TAG_LOGE(AceLogTag::ACE_WEB, "sceneId is null, do not report.");
+        return;
+    }
+    ACE_SCOPED_TRACE("ReportDynamicFrameLossEvent, sceneId: %s, isStart: %u", sceneId.c_str(), isStart);
+    if (isStart) {
+        PerfMonitor::GetPerfMonitor()->Start(sceneId, PerfActionType::FIRST_MOVE, "");
+    } else {
+        PerfMonitor::GetPerfMonitor()->End(sceneId, false);
+    }
 }
 
 void WebDelegate::OnHttpErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
@@ -5067,8 +5099,7 @@ void WebDelegate::OnPageError(const std::string& param)
 
 void WebDelegate::OnMessage(const std::string& param)
 {
-    std::string removeQuotes;
-    removeQuotes = param;
+    std::string removeQuotes = param;
     removeQuotes.erase(std::remove(removeQuotes.begin(), removeQuotes.end(), '\"'), removeQuotes.end());
     if (onMessage_) {
         std::string paramMessage = std::string(R"(")").append(removeQuotes).append(std::string(R"(")"));
@@ -5424,6 +5455,8 @@ void WebDelegate::OnPageVisible(const std::string& url)
 {
     if (onPageVisibleV2_) {
         onPageVisibleV2_(std::make_shared<PageVisibleEvent>(url));
+    } else {
+        TAG_LOGI(AceLogTag::ACE_WEB, "The developer has not registered this OnPageVisible event");
     }
 }
 
@@ -5956,6 +5989,33 @@ void WebDelegate::SetBoundsOrResize(const Size& drawSize, const Offset& offset, 
     } else {
         Resize(drawSize.Width(), drawSize.Height(), isKeyboard);
     }
+}
+
+void WebDelegate::ResizeVisibleViewport(const Size& visibleSize, bool isKeyboard)
+{
+    double width = visibleSize.Width();
+    double height = visibleSize.Height();
+    if (NearEqual(resizeVisibleWidth_, width) && NearEqual(resizeVisibleHeight_, height)) {
+        return;
+    }
+    resizeVisibleWidth_ = width;
+    resizeVisibleHeight_ = height;
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), width, height, isKeyboard]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_ && !delegate->window_) {
+                delegate->nweb_->ResizeVisibleViewport(
+                    width < 0 ? 0 : std::ceil(width), height < 0 ? 0 : std::ceil(height), isKeyboard);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebResizeVisibleViewport");
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->DestroyAnalyzerOverlay();
 }
 
 Offset WebDelegate::GetWebRenderGlobalPos()
@@ -6815,6 +6875,12 @@ void WebDelegate::OnAreaChange(const OHOS::Ace::Rect& area)
         return;
     }
     currentArea_ = area;
+    if (nweb_) {
+        double offsetX = 0;
+        double offsetY = 0;
+        UpdateScreenOffSet(offsetX, offsetY);
+        nweb_->SetScreenOffSet(offsetX, offsetY);
+    }
     OnSafeInsetsChange();
 }
 
@@ -6904,6 +6970,13 @@ void WebDelegate::KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEv
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     webPattern->KeyboardReDispatch(event, isUsed);
+}
+
+void WebDelegate::OnCursorUpdate(double x, double y, double width, double height)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnCursorUpdate(x, y, width, height);
 }
 
 void WebDelegate::OnSafeInsetsChange()

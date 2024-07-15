@@ -89,7 +89,8 @@ void ImageAnalyzerManager::CreateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
     analyzerUIConfig_.onAnalyzed = std::nullopt;
 }
 
-void ImageAnalyzerManager::UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap)
+void ImageAnalyzerManager::UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap,
+    const NG::OffsetF& offset)
 {
     if (!isAnalyzerOverlayBuild_) {
         return;
@@ -106,6 +107,12 @@ void ImageAnalyzerManager::UpdateAnalyzerOverlay(const RefPtr<OHOS::Ace::PixelMa
     }
 
     CHECK_NULL_VOID(pixelMap);
+    if (holder_ == ImageAnalyzerHolder::VIDEO_CUSTOM) {
+        analyzerUIConfig_.pixelMapWidth = pixelMap->GetWidth();
+        analyzerUIConfig_.pixelMapHeight = pixelMap->GetHeight();
+        analyzerUIConfig_.overlayOffset = offset;
+    }
+
     if (holder_ != ImageAnalyzerHolder::IMAGE) {
         analyzerUIConfig_.contentWidth = pixelMap->GetWidth();
         analyzerUIConfig_.contentHeight = pixelMap->GetHeight();

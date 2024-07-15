@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 116
+#define ARKUI_FULL_API_VERSION 118
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 116
+#define ARKUI_NODE_API_VERSION 118
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -44,6 +44,11 @@ enum ArkUIAPIVariantKind {
     EXTENDED = 4,
     COUNT = EXTENDED + 1,
 };
+
+typedef enum {
+    ARKUI_NODE_FLAG_TS = 0,
+    ARKUI_NODE_FLAG_C = 1,
+} ArkUINodeFlag;
 
 typedef int ArkUI_Bool;
 typedef int ArkUI_Int32;
@@ -1276,6 +1281,10 @@ struct ArkUIDragPreViewOptions {
     ArkUI_Bool isBadgeNumber;
 };
 
+struct ArkUIDragPreview {
+    ArkUI_CharPtr inspectorId;
+};
+
 struct ArkUIDragInteractionOptions {
     ArkUI_Bool isMultiSelectionEnabled;
     ArkUI_Bool defaultAnimationBeforeLifting;
@@ -1306,7 +1315,8 @@ struct ArkUICommonModifier {
     void (*resetPositionEdges)(ArkUINodeHandle node);
     void (*setBorderStyle)(ArkUINodeHandle node, const ArkUI_Int32* styles, ArkUI_Int32 length);
     void (*resetBorderStyle)(ArkUINodeHandle node);
-    void (*setBackShadow)(ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length);
+    void (*setBackShadow)(
+        ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length, ArkUI_Int32 unit);
     void (*resetBackShadow)(ArkUINodeHandle node);
     void (*setHitTestBehavior)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetHitTestBehavior)(ArkUINodeHandle node);
@@ -1714,6 +1724,8 @@ struct ArkUICommonModifier {
     void (*setBorderDashParams)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize);
     void (*getExpandSafeArea)(ArkUINodeHandle node, ArkUI_Uint32 (*values)[2]);
     void (*setTransition)(ArkUINodeHandle node, ArkUITransitionEffectOption* option);
+    void (*setDragPreview)(ArkUINodeHandle node, ArkUIDragPreview dragPreview);
+    void (*resetDragPreview)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
@@ -1900,6 +1912,10 @@ struct ArkUITextModifier {
     void (*resetTextOnCopy)(ArkUINodeHandle node);
     void (*setTextOnTextSelectionChange)(ArkUINodeHandle node, void* callback);
     void (*resetTextOnTextSelectionChange)(ArkUINodeHandle node);
+    void (*setTextMinFontScale)(ArkUINodeHandle node, ArkUI_Float32 number);
+    void (*resetTextMinFontScale)(ArkUINodeHandle node);
+    void (*setTextMaxFontScale)(ArkUINodeHandle node, ArkUI_Float32 number);
+    void (*resetTextMaxFontScale)(ArkUINodeHandle node);
 };
 
 struct ArkUIButtonModifier {
@@ -2027,6 +2043,7 @@ struct ArkUIImageModifier {
     void (*analyzerConfig)(ArkUINodeHandle node, void* config);
     void (*setDrawingColorFilter)(ArkUINodeHandle node, void* colorFilter);
     void* (*getDrawingColorFilter)(ArkUINodeHandle node);
+    void (*resetImageContent)(ArkUINodeHandle node);
     void (*resetImageSrc)(ArkUINodeHandle node);
     void (*setInitialPixelMap)(ArkUINodeHandle node, ArkUI_Int64 pixelMap);
     void (*setAltSourceInfo)(ArkUINodeHandle node, const ArkUIImageSourceInfo* sourceInfo);
@@ -3176,6 +3193,8 @@ struct ArkUIImageSpanModifier {
     void (*resetImageSpanOnComplete)(ArkUINodeHandle node);
     void (*setImageSpanOnError)(ArkUINodeHandle node, void* callback);
     void (*resetImageSpanOnError)(ArkUINodeHandle node);
+    void (*setImageSpanColorFilter)(ArkUINodeHandle node, const ArkUI_Float32* array, ArkUI_Int32 length);
+    void (*resetImageSpanColorFilter)(ArkUINodeHandle node);
 };
 
 struct ArkUIMenuModifier {
@@ -4059,10 +4078,18 @@ struct ArkUIColumnSplitModifier {
 struct ArkUIRichEditorModifier {
     void (*setRichEditorEnableDataDetector)(ArkUINodeHandle node, ArkUI_Uint32 enableDataDetector);
     void (*resetRichEditorEnableDataDetector)(ArkUINodeHandle node);
+    void (*setRichEditorDataDetectorConfigWithEvent)(ArkUINodeHandle node, ArkUI_CharPtr types, void* callback);
+    void (*resetRichEditorDataDetectorConfigWithEvent)(ArkUINodeHandle node);
+    void (*setRichEditorOnIMEInputComplete)(ArkUINodeHandle node, void* callback);
+    void (*resetRichEditorOnIMEInputComplete)(ArkUINodeHandle node);
     void (*setRichEditorCopyOptions)(ArkUINodeHandle node, ArkUI_Int32 copyOptionsValue);
     void (*resetRichEditorCopyOptions)(ArkUINodeHandle node);
+    void (*setRichEditorOnSelectionChange)(ArkUINodeHandle node, void* callback);
+    void (*resetRichEditorOnSelectionChange)(ArkUINodeHandle node);
     void (*setRichEditorCaretColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetRichEditorCaretColor)(ArkUINodeHandle node);
+    void (*setRichEditorOnSelect)(ArkUINodeHandle node, void* callback);
+    void (*resetRichEditorOnSelect)(ArkUINodeHandle node);
     void (*setRichEditorOnSubmit)(ArkUINodeHandle node, void* callback);
     void (*resetRichEditorOnSubmit)(ArkUINodeHandle node);
     void (*setRichEditorAboutToIMEInput)(ArkUINodeHandle node, void* callback);

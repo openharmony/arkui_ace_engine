@@ -43,7 +43,6 @@ private:
     void MeasureRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint);
     void CheckNeedExpandContent(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint);
     void UpdateSelfSize(LayoutWrapper* layoutWrapper, float width, float itemHeight, float expandableHeight);
-    void UpdateOverlay(RefPtr<FrameNode> frameNode);
     float GetDividerStroke(LayoutWrapper* layoutWrapper);
 
     float horInterval_ = 0.0f;

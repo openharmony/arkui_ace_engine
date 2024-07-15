@@ -515,8 +515,9 @@ void GetCallBackDataForJs(DragControllerAsyncCtx* asyncCtx, const DragNotifyMsg&
         napi_close_handle_scope(asyncCtx->env, scope);
         return;
     }
+    auto vm = reinterpret_cast<NativeEngine*>(asyncCtx->env)->GetEcmaVm();
     auto* jsDragEvent =
-        static_cast<Framework::JsDragEvent*>(Local<panda::ObjectRef>(localRef)->GetNativePointerField(0));
+        static_cast<Framework::JsDragEvent*>(Local<panda::ObjectRef>(localRef)->GetNativePointerField(vm, 0));
     CHECK_NULL_VOID(jsDragEvent);
     auto dragEvent = AceType::MakeRefPtr<DragEvent>();
     CHECK_NULL_VOID(dragEvent);
@@ -1691,7 +1692,7 @@ static napi_value DragControllerExport(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("DragPreview", classDragPreview),
     };
     NAPI_CALL(env, napi_define_properties(
-                       env, exports, sizeof(dragControllerDesc) / sizeof(dragControllerDesc[0]), dragControllerDesc));
+        env, exports, sizeof(dragControllerDesc) / sizeof(dragControllerDesc[0]), dragControllerDesc));
     return exports;
 }
 

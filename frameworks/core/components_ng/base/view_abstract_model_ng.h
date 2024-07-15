@@ -217,6 +217,28 @@ public:
         ViewAbstract::SetPadding(paddings);
     }
 
+    void ResetSafeAreaPadding() override
+    {
+        ViewAbstract::ResetSafeAreaPadding();
+    }
+
+    void SetSafeAreaPadding(const CalcDimension& value) override
+    {
+        if (value.Unit() == DimensionUnit::CALC) {
+            ViewAbstract::SetSafeAreaPadding(NG::CalcLength(value.CalcValue()));
+        } else {
+            // padding must great or equal zero.
+            ViewAbstract::SetSafeAreaPadding(NG::CalcLength(value.IsNonNegative() ? value : CalcDimension()));
+        }
+    }
+
+    void SetSafeAreaPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
+        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override
+    {
+        NG::PaddingProperty paddings = NG::ConvertToCalcPaddingProperty(top, bottom, left, right);
+        ViewAbstract::SetSafeAreaPadding(paddings);
+    }
+
     void SetMargin(const CalcDimension& value) override
     {
         if (value.Unit() == DimensionUnit::CALC) {
@@ -433,19 +455,19 @@ public:
     void SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset) override
     {
         CHECK_NULL_VOID(borderImage);
-        if (bitset | BorderImage::SOURCE_BIT) {
+        if (bitset & BorderImage::SOURCE_BIT) {
             ViewAbstract::SetBorderImageSource(borderImage->GetSrc());
         }
-        if (bitset | BorderImage::OUTSET_BIT) {
+        if (bitset & BorderImage::OUTSET_BIT) {
             ViewAbstract::SetHasBorderImageOutset(true);
         }
-        if (bitset | BorderImage::SLICE_BIT) {
+        if (bitset & BorderImage::SLICE_BIT) {
             ViewAbstract::SetHasBorderImageSlice(true);
         }
-        if (bitset | BorderImage::REPEAT_BIT) {
+        if (bitset & BorderImage::REPEAT_BIT) {
             ViewAbstract::SetHasBorderImageRepeat(true);
         }
-        if (bitset | BorderImage::WIDTH_BIT) {
+        if (bitset & BorderImage::WIDTH_BIT) {
             ViewAbstract::SetHasBorderImageWidth(true);
         }
         ViewAbstract::SetBorderImage(borderImage);
@@ -894,6 +916,11 @@ public:
         ViewAbstract::SetOnHover(std::move(onHoverEventFunc));
     }
 
+    void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) override
+    {
+        ViewAbstract::SetOnAccessibilityHover(std::move(onAccessibilityHoverEventFunc));
+    }
+
     void SetOnDelete(std::function<void()>&& onDeleteCallback) override {}
 
     void SetOnAppear(std::function<void()>&& onAppearCallback) override
@@ -1240,6 +1267,11 @@ public:
     void DisableOnHover() override
     {
         ViewAbstract::DisableOnHover();
+    }
+
+    void DisableOnAccessibilityHover() override
+    {
+        ViewAbstract::DisableOnAccessibilityHover();
     }
 
     void DisableOnMouse() override

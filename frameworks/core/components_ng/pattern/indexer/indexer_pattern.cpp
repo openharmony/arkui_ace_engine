@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -85,7 +85,7 @@ void IndexerPattern::OnModifyDone()
         removeBubble = !isPopup_;
     }
     // Remove bubble if auto-collapse mode switched on/off or if items count changed
-    removeBubble |= autoCollapseModeChanged || itemCountChanged;
+    removeBubble = removeBubble || autoCollapseModeChanged || itemCountChanged;
     if (removeBubble) {
         RemoveBubble();
     }
@@ -113,10 +113,10 @@ void IndexerPattern::InitArrayValue(bool& autoCollapseModeChanged, bool& itemCou
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(true);
     if (!isNewHeightCalculated_) {
-        auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(false);
-        autoCollapseModeChanged = autoCollapse != autoCollapse_;
-        autoCollapse_ = autoCollapse;
+        autoCollapseModeChanged = autoCollapse != lastAutoCollapse_;
+        lastAutoCollapse_ = autoCollapse;
         auto newArray = layoutProperty->GetArrayValue().value_or(std::vector<std::string>());
         bool arrayValueChanged = newArray.size() != fullArrayValue_.size() || newArray != fullArrayValue_;
         if (arrayValueChanged || autoCollapseModeChanged) {
@@ -126,7 +126,7 @@ void IndexerPattern::InitArrayValue(bool& autoCollapseModeChanged, bool& itemCou
     }
     auto propSelect = layoutProperty->GetSelected().value();
     if (fullArrayValue_.size() > 0) {
-        if (autoCollapse_) {
+        if (autoCollapse) {
             sharpItemCount_ = fullArrayValue_.at(0) == StringUtils::Str16ToStr8(INDEXER_STR_SHARP) ? 1 : 0;
             CollapseArrayValue();
             if ((lastCollapsingMode_ == IndexerCollapsingMode::SEVEN ||
@@ -186,7 +186,7 @@ bool IndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty
     CHECK_NULL_RETURN(indexerLayoutAlgorithm, false);
     itemSizeRender_ = indexerLayoutAlgorithm->GetItemSizeRender();
     auto height = indexerLayoutAlgorithm->GetActualHeight();
-    if (actualIndexerHeight_ != height && autoCollapse_) {
+    if (actualIndexerHeight_ != height && lastAutoCollapse_) {
         actualIndexerHeight_ = height;
         isNewHeightCalculated_ = true;
         auto hostNode = dirty->GetHostNode();
@@ -222,13 +222,13 @@ void IndexerPattern::BuildArrayValueItems()
     for (auto indexerItem : arrayValue_) {
         arrayValueStrs.push_back(indexerItem.first);
     }
-    layoutProperty->UpdateArrayValue(arrayValueStrs);
+    layoutProperty->UpdateActualArrayValue(arrayValueStrs);
 }
 
 void IndexerPattern::BuildFullArrayValue()
 {
     arrayValue_.clear();
-    
+    autoCollapse_ = false;
     for (auto indexerLetter : fullArrayValue_) {
         arrayValue_.push_back(std::pair(indexerLetter, false));
     }
@@ -309,6 +309,7 @@ void IndexerPattern::ApplySevenPlusOneMode(int32_t fullArraySize)
         arrayValue_.push_back(std::pair(fullArrayValue_.at(lastIndex), false));
         lastPushedIndex = lastIndex;
     }
+    autoCollapse_ = true;
 }
 
 void IndexerPattern::ApplyFivePlusOneMode(int32_t fullArraySize)
@@ -344,6 +345,7 @@ void IndexerPattern::ApplyFivePlusOneMode(int32_t fullArraySize)
         arrayValue_.push_back(std::pair(fullArrayValue_.at(lastIndex), false));
         lastPushedIndex = lastIndex;
     }
+    autoCollapse_ = true;
 }
 
 int32_t IndexerPattern::GetAutoCollapseIndex(int32_t propSelect)
@@ -1576,7 +1578,7 @@ void IndexerPattern::OnListItemClick(int32_t index)
     auto onPopupSelected = indexerEventHub->GetOnPopupSelected();
     if (onPopupSelected) {
         onPopupSelected(index);
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
         UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onPopupSelected");
 #endif
     }

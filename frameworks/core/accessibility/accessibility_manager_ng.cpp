@@ -154,18 +154,19 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
         currentHovering = currentNodesHovering.back().Upgrade();
         currentHoveringId = currentHovering->GetId();
     }
-    DeliverAccessibilityHoverEvent(currentHovering, point);
-    if (lastHoveringId != INVALID_NODE_ID && lastHoveringId != currentHoveringId) {
-        lastHovering->OnAccessibilityEvent(AccessibilityEventType::HOVER_EXIT_EVENT);
-        NotifyHoverEventToNodeSession(lastHovering, root, point,
-            sourceType, AccessibilityHoverEventType::EXIT, time);
-    }
-    if (currentHoveringId != INVALID_NODE_ID) {
-        if (currentHoveringId != lastHoveringId && (!IgnoreCurrentHoveringNode(currentHovering))) {
-            currentHovering->OnAccessibilityEvent(AccessibilityEventType::HOVER_ENTER_EVENT);
+    if (!DeliverAccessibilityHoverEvent(currentHovering, point)) {
+        if (lastHoveringId != INVALID_NODE_ID && lastHoveringId != currentHoveringId) {
+            lastHovering->OnAccessibilityEvent(AccessibilityEventType::HOVER_EXIT_EVENT);
+            NotifyHoverEventToNodeSession(lastHovering, root, point,
+                sourceType, AccessibilityHoverEventType::EXIT, time);
         }
-        NotifyHoverEventToNodeSession(currentHovering, root, point,
-            sourceType, eventType, time);
+        if (currentHoveringId != INVALID_NODE_ID) {
+            if (currentHoveringId != lastHoveringId && (!IgnoreCurrentHoveringNode(currentHovering))) {
+                currentHovering->OnAccessibilityEvent(AccessibilityEventType::HOVER_ENTER_EVENT);
+            }
+            NotifyHoverEventToNodeSession(currentHovering, root, point,
+                sourceType, eventType, time);
+        }
     }
 
     hoverState_.nodesHovering = std::move(currentNodesHovering);
@@ -174,12 +175,12 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
     hoverState_.idle = eventType == AccessibilityHoverEventType::EXIT;
 }
 
-void AccessibilityManagerNG::DeliverAccessibilityHoverEvent(const RefPtr<FrameNode>& hoverNode, const PointF& point)
+bool AccessibilityManagerNG::DeliverAccessibilityHoverEvent(const RefPtr<FrameNode>& hoverNode, const PointF& point)
 {
-    CHECK_NULL_VOID(hoverNode);
+    CHECK_NULL_RETURN(hoverNode, false);
     auto hoverNodePattern = hoverNode->GetPattern();
-    CHECK_NULL_VOID(hoverNodePattern);
-    hoverNodePattern->OnAccessibilityHoverEvent(point);
+    CHECK_NULL_RETURN(hoverNodePattern, false);
+    return hoverNodePattern->OnAccessibilityHoverEvent(point);
 }
 
 bool AccessibilityManagerNG::IgnoreCurrentHoveringNode(const RefPtr<FrameNode> &node)

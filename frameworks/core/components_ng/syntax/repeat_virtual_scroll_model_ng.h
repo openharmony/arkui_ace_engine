@@ -38,6 +38,8 @@ public:
         const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetTypes4Range) override;
 
     void InvalidateKeyCache(uint32_t totalCount) override;
+
+    void OnMove(std::function<void(int32_t, int32_t)>&& onMove) override;
 };
 
 } // namespace OHOS::Ace::NG

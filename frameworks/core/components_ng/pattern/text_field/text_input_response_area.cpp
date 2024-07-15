@@ -568,6 +568,7 @@ void CleanNodeResponseArea::ClearArea()
     CHECK_NULL_VOID(cleanNode_);
     host->RemoveChildAndReturnIndex(cleanNode_);
     cleanNode_.Reset();
+    areaRect_.Reset();
 }
 
 void CleanNodeResponseArea::Refresh()

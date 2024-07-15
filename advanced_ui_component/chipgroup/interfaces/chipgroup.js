@@ -35,7 +35,7 @@ const defaultTheme = {
         selectedFillColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
     },
     chipGroupSpace: { itemSpace: 8, startSpace: 16, endSpace: 16 },
-    chipGroupPadding: { top: 0, bottom: 0 }
+    chipGroupPadding: { top: 14, bottom: 14 }
 };
 const iconGroupSuffixTheme = {
     backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_button_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
@@ -51,10 +51,8 @@ const iconGroupSuffixTheme = {
 };
 var ChipGroupHeight;
 (function (ChipGroupHeight) {
-    ChipGroupHeight[ChipGroupHeight["NORMAL"] = 64] = "NORMAL";
-    ChipGroupHeight[ChipGroupHeight["SMALL"] = 52] = "SMALL";
-    ChipGroupHeight[ChipGroupHeight["DEFAULT"] = 64] = "DEFAULT";
-    ChipGroupHeight[ChipGroupHeight["AMEND"] = 32] = "AMEND";
+    ChipGroupHeight[ChipGroupHeight["NORMAL"] = 36] = "NORMAL";
+    ChipGroupHeight[ChipGroupHeight["SMALL"] = 28] = "SMALL";
 })(ChipGroupHeight || (ChipGroupHeight = {}));
 function parseDimension(uiContext, value, isValid, defaultValue) {
     if (value === void (0) || value === null) {
@@ -396,8 +394,8 @@ export class ChipGroup extends ViewPU {
     }
     getChipSize() {
         if (this.itemStyle && this.itemStyle.size) {
-            if (typeof this.itemStyle.size == 'object') {
-                if (!this.itemStyle.size.width || !this.itemStyle.size.height) {
+            if (typeof this.itemStyle.size === 'object') {
+                if (!this.itemStyle.size.width || !this.itemStyle.size.height || !this.itemStyle.size) {
                     return defaultTheme.itemStyle.size;
                 }
             }
@@ -407,7 +405,7 @@ export class ChipGroup extends ViewPU {
     }
     getFontColor() {
         if (this.itemStyle && this.itemStyle.fontColor) {
-            if (typeof this.itemStyle.fontColor == 'object') {
+            if (typeof this.itemStyle.fontColor === 'object') {
                 let temp = this.itemStyle.fontColor;
                 if (temp == undefined || temp == null) {
                     return defaultTheme.itemStyle.fontColor;
@@ -423,7 +421,7 @@ export class ChipGroup extends ViewPU {
     }
     getSelectedFontColor() {
         if (this.itemStyle && this.itemStyle.selectedFontColor) {
-            if (typeof this.itemStyle.selectedFontColor == 'object') {
+            if (typeof this.itemStyle.selectedFontColor === 'object') {
                 let temp = this.itemStyle.selectedFontColor;
                 if (temp == undefined || temp == null) {
                     return defaultTheme.itemStyle.selectedFontColor;
@@ -451,7 +449,7 @@ export class ChipGroup extends ViewPU {
     }
     getBackgroundColor() {
         if (this.itemStyle && this.itemStyle.backgroundColor) {
-            if (typeof this.itemStyle.backgroundColor == 'object') {
+            if (typeof this.itemStyle.backgroundColor === 'object') {
                 let temp = this.itemStyle.backgroundColor;
                 if (temp == undefined || temp == null) {
                     return defaultTheme.itemStyle.backgroundColor;
@@ -467,7 +465,7 @@ export class ChipGroup extends ViewPU {
     }
     getSelectedBackgroundColor() {
         if (this.itemStyle && this.itemStyle.selectedBackgroundColor) {
-            if (typeof this.itemStyle.selectedBackgroundColor == 'object') {
+            if (typeof this.itemStyle.selectedBackgroundColor === 'object') {
                 let temp = this.itemStyle.selectedBackgroundColor;
                 if (temp == undefined || temp == null) {
                     return defaultTheme.itemStyle.selectedBackgroundColor;
@@ -540,32 +538,22 @@ export class ChipGroup extends ViewPU {
             }
         }
         else if (typeof this.chipSize === 'object') {
-            return this.chipSize.height + ChipGroupHeight.AMEND;
+            return this.chipSize.height;
         }
         else {
-            return ChipGroupHeight.DEFAULT;
-        }
-    }
-    getIconGroupSuffixHeight() {
-        if (typeof this.chipSize === 'string') {
-            if (this.chipSize === ChipSize.SMALL) {
-                return iconGroupSuffixTheme.smallBackgroundSize;
-            }
-            else {
-                return iconGroupSuffixTheme.normalBackgroundSize;
-            }
-        }
-        else if (typeof this.chipSize === 'object') {
-            return this.chipSize.height + ChipGroupHeight.AMEND;
-        }
-        else {
-            return ChipGroupHeight.DEFAULT;
+            return ChipGroupHeight.NORMAL;
         }
     }
     getPaddingTop() {
+        if (!this.chipGroupPadding || !this.chipGroupPadding.top) {
+            return defaultTheme.chipGroupPadding.top;
+        }
         return parseDimension(this.getUIContext(), this.chipGroupPadding.top, isValidDimensionNoPercentageString, defaultTheme.chipGroupPadding.top);
     }
     getPaddingBottom() {
+        if (!this.chipGroupPadding || !this.chipGroupPadding.bottom) {
+            return defaultTheme.chipGroupPadding.bottom;
+        }
         return parseDimension(this.getUIContext(), this.chipGroupPadding.bottom, isValidDimensionNoPercentageString, defaultTheme.chipGroupPadding.bottom);
     }
     initialRender() {
@@ -573,11 +561,12 @@ export class ChipGroup extends ViewPU {
             Row.create();
             Row.align(Alignment.End);
             Row.width("100%");
-            Row.height(this.getChipGroupHeight() + this.getPaddingTop() + this.getPaddingTop());
+            Row.height(this.getChipGroupHeight() + this.getPaddingTop() + this.getPaddingBottom());
             Row.padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() });
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create();
+            Stack.height(this.getChipGroupHeight() + this.getPaddingTop() + this.getPaddingBottom());
             Stack.layoutWeight(1);
             Stack.blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN);
             Stack.alignContent(Alignment.End);
@@ -588,6 +577,7 @@ export class ChipGroup extends ViewPU {
             Scroll.scrollBar(BarState.Off);
             Scroll.align(Alignment.Start);
             Scroll.width('100%');
+            Scroll.clip(false);
             Scroll.onScroll(() => {
                 this.isReachEnd = this.scroller.isAtEnd();
             });
@@ -629,11 +619,11 @@ export class ChipGroup extends ViewPU {
                                         }
                                     }
                                     else {
-                                        if (!this.isMultiple()) {
-                                            this.selectedIndexes = [];
-                                        }
                                         if (!this.selectedIndexes || this.selectedIndexes.length === 0) {
                                             this.selectedIndexes = this.getSelectedIndexes();
+                                        }
+                                        if (!this.isMultiple()) {
+                                            this.selectedIndexes = [];
                                         }
                                         this.selectedIndexes.push(index);
                                     }
@@ -662,7 +652,7 @@ export class ChipGroup extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Stack.create();
                         Stack.width(iconGroupSuffixTheme.normalBackgroundSize);
-                        Stack.height(this.getIconGroupSuffixHeight());
+                        Stack.height(this.getChipGroupHeight() + this.getPaddingTop() + this.getPaddingBottom());
                         Stack.linearGradient({ angle: 90, colors: colorStops });
                         Stack.blendMode(BlendMode.DST_IN, BlendApplyType.OFFSCREEN);
                         Stack.hitTestBehavior(HitTestMode.None);

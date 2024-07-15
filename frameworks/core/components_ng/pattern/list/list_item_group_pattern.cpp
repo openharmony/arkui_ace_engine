@@ -365,7 +365,7 @@ void ListItemGroupPattern::UpdateActiveChildRange(bool forward, int32_t cacheCou
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (forward) {
-        host->SetActiveChildRange(-1, -1, 0, cacheCount);
+        host->SetActiveChildRange(-1, itemStartIndex_ - 1, 0, cacheCount);
     } else {
         int32_t index = itemTotalCount_ + itemStartIndex_;
         host->SetActiveChildRange(index, index, cacheCount, 0);

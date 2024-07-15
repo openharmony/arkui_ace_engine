@@ -253,7 +253,7 @@ private:
     float GetMainGap() const;
     float GetAllDelta();
     void CheckScrollable();
-    bool IsOutOfBoundary(bool useCurrentDelta = true) override;
+    bool IsOutOfBoundary(bool useCurrentDelta) override;
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     SizeF GetContentSize() const;
     void OnModifyDone() override;
@@ -285,6 +285,11 @@ private:
     void MarkDirtyNodeSelf();
     void OnScrollEndCallback() override;
 
+    /**
+     * @brief preform a layout if LayoutInfo is out of sync before calculating spring positions.
+     * INVARIANT: overScroll always enabled in the scope of this function. Because this function only runs in the
+     * context of spring animation.
+     */
     void SyncLayoutBeforeSpring();
 
     void FireOnScrollStart() override;
@@ -300,6 +305,7 @@ private:
     bool isConfigScrollable_ = false;
 
     bool scrollable_ = true;
+    bool forceOverScroll_ = false;
 
     float endHeight_ = 0.0f;
     bool isLeftStep_ = false;

@@ -17,7 +17,7 @@
 
 #include <unordered_map>
 
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 #include "base/geometry/ng/size_t.h"
@@ -85,6 +85,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
                 CHECK_NULL_VOID(stageManager);
                 stageManager->SetStageInTrasition(false);
                 page->GetRenderContext()->RemoveClipWithRRect();
+                page->GetRenderContext()->ResetPageTransitionEffect();
             });
         return;
     }
@@ -172,7 +173,7 @@ void StageManager::PageChangeCloseKeyboard()
 #endif
 }
 
-bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition)
+bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition, bool  /*isPush*/)
 {
     CHECK_NULL_RETURN(stageNode_, false);
     CHECK_NULL_RETURN(node, false);
@@ -191,7 +192,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
         CHECK_NULL_RETURN(pageInfo, false);
         auto pagePath = pageInfo->GetFullPath();
         ACE_SCOPED_TRACE_COMMERCIAL("Router Main Page: %s", pagePath.c_str());
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
         UiSessionManager::GetInstance().OnRouterChange(pagePath, "routerPushPage");
 #endif
     }
@@ -535,7 +536,7 @@ void StageManager::FireAutoSave(const RefPtr<FrameNode>& outPageNode, const RefP
     outPagePattern->ProcessAutoSave(onUIExtNodeDestroy, onUIExtNodeBindingCompleted);
 }
 
-RefPtr<FrameNode> StageManager::GetLastPage()
+RefPtr<FrameNode> StageManager::GetLastPage() const
 {
     CHECK_NULL_RETURN(stageNode_, nullptr);
     const auto& children = stageNode_->GetChildren();
@@ -619,5 +620,14 @@ void StageManager::AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, cons
     auto destFullPath = destPageInfo->GetFullPath();
 
     ACE_SCOPED_TRACE_COMMERCIAL("Router Page from %s to %s", srcFullPath.c_str(), destFullPath.c_str());
+}
+
+void StageManager::SyncPageSafeArea(const RefPtr<FrameNode>& lastPage, PropertyChangeFlag changeFlag)
+{
+    CHECK_NULL_VOID(lastPage);
+    lastPage->MarkDirtyNode(changeFlag);
+    auto overlay = lastPage->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(overlay);
+    overlay->MarkDirtyOverlay();
 }
 } // namespace OHOS::Ace::NG

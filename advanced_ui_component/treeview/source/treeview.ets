@@ -679,7 +679,7 @@ export class TreeListener {
   public on(type: TreeListenType, callback: (callbackParam: CallbackParam) => void): void {
     if (Array.isArray(type)) {
       for (let i = 0, l = type.length; i < l; i++) {
-        this.on((type as Array<TreeListenType>)[i], callback);
+        this.on((type as TreeListenType[])[i], callback);
       }
     } else {
       (this._events[type] || (this._events[type] = [])).push(callback);
@@ -728,7 +728,7 @@ export class TreeListener {
     }
     if (Array.isArray(type)) {
       for (let i: number = 0, l: number = type.length; i < l; i++) {
-        this.off((type as Array<TreeListenType>)[i], callback);
+        this.off((type as TreeListenType[])[i], callback);
       }
     }
     let cbs: [(callbackParam: CallbackParam) => void] = this._events[type];
@@ -757,7 +757,7 @@ export class TreeListener {
    */
   public emit(event: TreeListenType, argument: CallbackParam) {
     if (this._once_events[event]) {
-      let cbs_once: Array<(callbackParam: CallbackParam) => void> = Array.from<(callbackParam: CallbackParam) => void>(this._once_events[event]);
+      let cbs_once: ((callbackParam: CallbackParam) => void)[] = Array.from<(callbackParam: CallbackParam) => void>(this._once_events[event]);
       if (cbs_once) {
         for (let i: number = 0, l: number = cbs_once.length; i < l; i++) {
           try {
@@ -769,7 +769,7 @@ export class TreeListener {
         this._once_events[event] = null;
       }
     } else if (this._events[event]) {
-      let cbs_on: Array<(callbackParam: CallbackParam) => void> = Array.from<(callbackParam: CallbackParam) => void>(this._events[event]);
+      let cbs_on: ((callbackParam: CallbackParam) => void)[] = Array.from<(callbackParam: CallbackParam) => void>(this._events[event]);
       if (cbs_on) {
         for (let i: number = 0, l: number = cbs_on.length; i < l; i++) {
           try {
@@ -1585,12 +1585,12 @@ export class TreeController {
     return this.listNodeDataSource;
   }
 
-  public getClickNodeChildrenInfo(): Array<nodeInfo> {
+  public getClickNodeChildrenInfo(): nodeInfo[] {
     let clickNodeId: number = this.listNodeDataSource.getClickNodeId();
     return this.listNodeUtils.getClickNodeChildrenInfo(clickNodeId);
   }
 
-  public getChildrenId(): Array<number> {
+  public getChildrenId(): number[] {
     let clickNodeId: number = this.listNodeDataSource.getClickNodeId();
     return this.listNodeUtils.getClickChildId(clickNodeId);
   }
@@ -1892,7 +1892,7 @@ class ListNodeDataSource extends BasicDataSource {
   private lastDelayHighLightIndex: number = this.INITIAL_INVALID_VALUE;
   //record last passing node Id in HighLight event.
   private lastDelayHighLightId: number = this.INITIAL_INVALID_VALUE;
-  private nodeIdAndSubtitleMap: Map<number, ResourceStr> = new Map<number, ResourceStr>(); // [currentNodeId, subtitle]
+  private nodeIdAndSubtitleMap: Map<number, ResourceStr> = new Map<number, ResourceStr>();
   private flag: Flag = Flag.NONE;
   private selectedParentNodeId: number = this.INITIAL_INVALID_VALUE;
   private selectedParentNodeSubtitle: ResourceStr = '';
@@ -3331,7 +3331,7 @@ export struct TreeViewInner {
             .focusable(true)
             .width('100%')
             .gesture(
-              TapGesture({ count: 2 })// doubleClick
+              TapGesture({ count: 2 })
                 .onAction((event: GestureEvent) => {
                   this.listNodeDataSource.expandAndCollapseNode(
                     findCurrentNodeIndex(this.listNodeDataSource, this.item.getNodeCurrentNodeId()));
@@ -3459,7 +3459,7 @@ export class NodeItem {
   public nodeLevel: number;
   public parentNodeId: number;
   public currentNodeId: number;
-  public children: Array<NodeItem>;
+  public children: NodeItem[];
   public data: NodeParam;
 
   constructor(data: NodeParam) {
@@ -3846,7 +3846,7 @@ export class ListNodeUtils {
   }
 
   traverseNodeDF(callback: (currentNode: NodeItem) => boolean, root: NodeItem = this._root) {
-    let stack: Array<NodeItem> = [];
+    let stack: NodeItem[] = [];
     let found: boolean = false;
     stack.unshift(root);
     let currentNode: NodeItem = stack.shift() as NodeItem;
@@ -3860,7 +3860,7 @@ export class ListNodeUtils {
   }
 
   traverseNodeBF(callback: (currentNode: NodeItem) => boolean) {
-    let queue: Array<NodeItem> = [];
+    let queue: NodeItem[] = [];
     let found: boolean = false;
     queue.push(this._root);
     let currentNode: NodeItem = queue.shift() as NodeItem;
@@ -3933,13 +3933,13 @@ export class ListNodeUtils {
       if (parent.nodeLevel > this.maxNodeLevel) {
         throw new Error('ListNodeUtils[addNode]: The level of the tree view cannot exceed 50.');
       }
-      currentNode.nodeLevel = parent.nodeLevel + 1; // nodeLevel
+      currentNode.nodeLevel = parent.nodeLevel + 1;
       currentNode.parentNodeId = parentNodeId;
       currentNode.currentNodeId = currentNodeId;
       parent.children.push(currentNode);
       parent.getChildNodeInfo().isHasChildNode = true;
       parent.getChildNodeInfo().childNum = parent.children.length;
-      parent.getChildNodeInfo().allChildNum += 1; // childNum
+      parent.getChildNodeInfo().allChildNum += 1;
       parent.addImageCollapse(parent.getChildNodeInfo().isHasChildNode);
       this.updateParentChildNum(parent, true, 1);
       return this;
@@ -3948,7 +3948,7 @@ export class ListNodeUtils {
     }
   }
 
-  findNodeIndex(children: Array<NodeItem>, currentNodeId: number) {
+  findNodeIndex(children: NodeItem[], currentNodeId: number) {
     let index: number = this.INITIAL_INVALID_VALUE;
     for (let i: number = 0, len: number = children.length; i < len; i++) {
       if (children[i].currentNodeId === currentNodeId) {
@@ -4130,7 +4130,7 @@ export class ListNodeUtils {
    */
   dragTraverseNodeDF(callback: (node: NodeItem, listNode: NodeInfo[]) => boolean,
                      root: NodeItem = this._root, listNode: NodeInfo[]) {
-    let stack: Array<NodeItem> = [];
+      let stack: NodeItem[] = [];
     let found: boolean = false;
     stack.unshift(root);
     let currentNode: NodeItem = stack.shift() as NodeItem;

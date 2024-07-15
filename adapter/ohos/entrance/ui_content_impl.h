@@ -326,6 +326,8 @@ public:
 
     void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
 
+    void SetForceSplitEnable(bool isForceSplit) override;
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -344,7 +346,6 @@ private:
     void OnPopupStateChange(const std::string& event, const CustomPopupUIExtensionConfig& config, int32_t nodeId);
     void SetCustomPopupConfig(int32_t nodeId, const CustomPopupUIExtensionConfig& config, int32_t popupId);
 
-    static void RemoveOldPopInfoIfExsited(bool isShowInSubWindow, int32_t nodeId);
     void RenderLayoutBoundary(bool isDebugBoundary);
     static void EnableSystemParameterTraceLayoutCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterTraceInputEventCallback(const char* key, const char* value, void* context);

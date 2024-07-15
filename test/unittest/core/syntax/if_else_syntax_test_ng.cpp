@@ -217,20 +217,36 @@ HWTEST_F(IfElseSyntaxTestNg, IfElseSyntaxTest007, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     ASSERT_NE(frameNode->GetLayoutProperty(), nullptr);
     frameNode->UpdateInspectorId("node1");
-    ifElseNode->AddDisappearingChild(frameNode);
+    auto frameNode2 = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode2, nullptr);
+    ASSERT_NE(frameNode2->GetLayoutProperty(), nullptr);
+    frameNode2->UpdateInspectorId("node2");
+    ifElseNode->branchId_ = 0;
+    ifElseNode->AddDisappearingChild(frameNode, -1, 0);
+    ifElseNode->branchId_ = 1;
+    ifElseNode->AddDisappearingChild(frameNode2, -1, 1);
 
     /**
-     * @tc.steps: step2. Try to reuse "node1".
+     * @tc.steps: step2. IfElse is branch 0 again. Try to reuse "node1".
      * @tc.expected: node1 can be reused, return value is true.
      */
+    ifElseNode->branchId_ = 0;
     bool result1 = ifElseNode->TryRetake("node1");
     EXPECT_TRUE(result1);
+    EXPECT_TRUE(ifElseNode->GetChildren().size() == 1 && ifElseNode->GetChildAtIndex(0) == frameNode);
 
     /**
-     * @tc.steps: step3. Try to reuse "node2".
-     * @tc.expected: node2 is not in disappearingChildren so it can't be reused, return value is false.
+     * @tc.steps: step3. Try to reuse "node10".
+     * @tc.expected: node10 is not in disappearingChildren so it can't be reused, return value is false.
      */
-    bool result2 = ifElseNode->TryRetake("node2");
+    bool result2 = ifElseNode->TryRetake("node10");
     EXPECT_FALSE(result2);
+
+    /**
+     * @tc.steps: step4. Try to reuse "node2".
+     * @tc.expected: node2 branch is not same with branchId of ifElse, return value is false.
+     */
+    bool result3 = ifElseNode->TryRetake("node2");
+    EXPECT_FALSE(result3);
 }
 } // namespace OHOS::Ace::NG

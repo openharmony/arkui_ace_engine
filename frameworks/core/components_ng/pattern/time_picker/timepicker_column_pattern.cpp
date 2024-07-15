@@ -449,6 +449,7 @@ void TimePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextC
     auto timePickerLayoutProperty = parentNode->GetLayoutProperty<TimePickerLayoutProperty>();
     CHECK_NULL_VOID(timePickerLayoutProperty);
     uint32_t currentIndex = host->GetPattern<TimePickerColumnPattern>()->GetCurrentIndex();
+    CHECK_EQUAL_VOID(totalOptionCount, 0);
     currentIndex = currentIndex % totalOptionCount;
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
     auto child = host->GetChildren();

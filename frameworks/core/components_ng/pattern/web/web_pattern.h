@@ -473,6 +473,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SmoothDragResizeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverlayScrollbarEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAvoidMode, WebKeyboardAvoidMode);
 
     bool IsFocus() const
     {
@@ -498,7 +499,8 @@ public:
     RectF ComputeClippedSelectionBounds(
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startHandle,
-        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endHandle);
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endHandle,
+        bool& isNewAvoid);
     void OnQuickMenuDismissed();
     void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
@@ -623,6 +625,14 @@ public:
     void AttachCustomKeyboard();
     void CloseCustomKeyboard();
     void KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed);
+    void OnCursorUpdate(double x, double y, double width, double height)
+    {
+        cursorInfo_ = RectF(x, y, width, height);
+    }
+    RectF GetCaretRect() const override
+    {
+        return cursorInfo_;
+    }
     void OnAttachContext(PipelineContext *context) override;
     void OnDetachContext(PipelineContext *context) override;
     void SetUpdateInstanceIdCallback(std::function<void(int32_t)> &&callabck);
@@ -639,7 +649,7 @@ public:
     std::shared_ptr<Rosen::RSNode> GetSurfaceRSNode() const;
 
     void GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId);
-    void OnAccessibilityHoverEvent(const PointF& point) override;
+    bool OnAccessibilityHoverEvent(const PointF& point) override;
     void RegisterTextBlurCallback(TextBlurCallback&& callback);
     void UnRegisterTextBlurCallback();
     TextBlurCallback GetTextBlurCallback() const
@@ -657,8 +667,11 @@ private:
     void CloseContextSelectionMenu();
     RectF ComputeMouseClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
     void RegistVirtualKeyBoardListener(const RefPtr<PipelineContext> &context);
+    bool IsNeedResizeVisibleViewport();
+    bool ProcessVirtualKeyBoardHide(int32_t width, int32_t height, bool safeAreaEnabled);
+    bool ProcessVirtualKeyBoardShow(int32_t width, int32_t height, double keyboard, bool safeAreaEnabled);
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
-    void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard);
+    void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard, bool isUpdate = true);
     void UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
@@ -730,6 +743,7 @@ private:
     void WindowDrag(int32_t width, int32_t height);
     void OnSmoothDragResizeEnabledUpdate(bool value);
     void OnOverlayScrollbarEnabledUpdate(bool enable);
+    void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
     int GetWebId();
 
     void InitEvent();
@@ -865,8 +879,13 @@ private:
     void HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void RegisterVisibleAreaChangeCallback(const RefPtr<PipelineContext> &context);
+    void SetMouseHoverExit(bool isHoverExit)
+    {
+        isHoverExit_ = isHoverExit;
+    }
     bool CheckSafeAreaIsExpand();
     bool CheckSafeAreaKeyBoard();
+    bool IsDialogNested();
     void SelectCancel() const;
     std::string GetSelectInfo() const;
     void UpdateRunQuickMenuSelectInfo(SelectOverlayInfo& selectInfo,
@@ -937,6 +956,9 @@ private:
     std::shared_ptr<FullScreenEnterEvent> fullScreenExitHandler_ = nullptr;
     bool needOnFocus_ = false;
     Size drawSize_;
+    Size visibleViewportSize_{-1.0, -1.0};
+    bool isKeyboardInSafeArea_ = false;
+    WebKeyboardAvoidMode keyBoardAvoidMode_ = WebKeyboardAvoidMode::DEFAULT;
     Size rootLayerChangeSize_;
     Size drawSizeCache_;
     Size areaChangeSize_;
@@ -957,6 +979,7 @@ private:
     RefPtr<WebContextMenuParam> contextMenuParam_ = nullptr;
     RefPtr<ContextMenuResult> contextMenuResult_ = nullptr;
     RectF selectArea_;
+    RectF cursorInfo_;
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> quickMenuCallback_ = nullptr;
     SelectMenuInfo selectMenuInfo_;
     bool selectOverlayDragging_ = false;
@@ -974,6 +997,7 @@ private:
     bool isWaiting_ = false;
     bool isDisableDrag_ = false;
     bool isMouseEvent_ = false;
+    bool isHoverExit_ = false;
     bool isVisible_ = true;
     bool isVisibleActiveEnable_ = true;
     bool isMemoryLevelEnable_ = true;

@@ -185,9 +185,8 @@ void SelectOverlayLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper)
     if ((!CheckInShowArea(*info_) || (!isNewAvoid && shouldInActiveByHandle)) && !info_->isUsingMouse) {
         menu->SetActive(false);
         return;
-    } else {
-        menu->SetActive(true);
     }
+    menu->SetActive(true);
     OffsetF menuOffset;
     if (info_->isUsingMouse) {
         menuOffset = CalculateCustomMenuByMouseOffset(layoutWrapper);
@@ -216,8 +215,9 @@ void SelectOverlayLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper)
     bool isReverse = IsReverseLayout(layoutWrapper);
     OffsetF buttonOffset;
     if (GreatNotEqual(menuSize.Width(), menuSize.Height())) {
-        buttonOffset = isReverse ? menuOffset :
-            OffsetF(menuOffset.GetX() + menuSize.Width() - buttonSize.Width(), menuOffset.GetY());
+        auto diffY = std::max((menuSize.Height() - buttonSize.Height()) / 2.0f, 0.0f);
+        buttonOffset = isReverse ? OffsetF(menuOffset.GetX(), menuOffset.GetY() + diffY) :
+            OffsetF(menuOffset.GetX() + menuSize.Width() - buttonSize.Width(), menuOffset.GetY() + diffY);
     } else {
         buttonOffset = menuOffset;
     }
@@ -268,12 +268,23 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     double menuSpacingBetweenText = theme->GetMenuSpacingWithText().ConvertToPx();
     double menuSpacingBetweenHandle = theme->GetHandleDiameter().ConvertToPx();
 
+    // When the extended menu is displayed, the default menu becomes circular, but the position of the circle is aligned
+    // with the end of the original menu.
     auto width = menuItem->GetGeometryNode()->GetMarginFrameSize().Width();
     auto height = menuItem->GetGeometryNode()->GetMarginFrameSize().Height();
 
-    // When the extended menu is displayed, the default menu becomes circular, but the position of the circle is aligned
-    // with the end of the original menu.
-    if (GreatNotEqual(width, height)) {
+    auto backButton = layoutWrapper->GetOrCreateChildByIndex(1);
+    bool isBackButtonVisible = false;
+    if (backButton) {
+        isBackButtonVisible =
+            backButton->GetLayoutProperty()->GetVisibilityValue(VisibleType::INVISIBLE) == VisibleType::VISIBLE;
+    }
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, OffsetF());
+    auto selectOverlayNode = DynamicCast<SelectOverlayNode>(host);
+    CHECK_NULL_RETURN(selectOverlayNode, OffsetF());
+    auto isExtensionMEnu = selectOverlayNode->GetIsExtensionMenu();
+    if (!isBackButtonVisible && !isExtensionMEnu) {
         menuWidth_ = width;
         menuHeight_ = height;
     } else {
@@ -538,8 +549,6 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
     float positionX = (selectArea.Left() + selectArea.Right() - menuWidth) / 2.0f;
     auto hasKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f);
-    auto bottomLimitOffsetY = hasKeyboard ? std::max(keyboardInsert.start - safeSpacing - menuHeight, (double)topArea)
-                                          : safeAreaManager->GetSafeArea().bottom_.start - menuHeight;
     auto downHandle = info_->handleReverse ? info_->firstHandle : info_->secondHandle;
     auto downHandleIsReallyShow = hasKeyboard ? ((LessOrEqual((double)downHandle.paintRect.Bottom(),
         (double)keyboardInsert.start)) ? true : false) : downHandle.isShow;
@@ -550,6 +559,11 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(
     auto selectAreaTop = upHandle.isShow ? upPaint.Top() : selectArea.Top();
     auto viewPort = pipeline->GetRootRect();
     auto selectAndRootRectArea = selectArea.IntersectRectT(viewPort);
+    auto safeAreaBottom = safeAreaManager->GetSafeArea().bottom_.start;
+    auto menuAvoidBottomY = GreatNotEqual(safeAreaBottom, 0.0f) ? (safeAreaBottom - menuHeight)
+        : (viewPort.Bottom() - menuHeight);
+    auto bottomLimitOffsetY = hasKeyboard ? std::max(keyboardInsert.start - safeSpacing - menuHeight, (double)topArea)
+        : menuAvoidBottomY;
 
     AvoidStrategyMember avoidStrategyMember;
     avoidStrategyMember.menuHeight = menuHeight;

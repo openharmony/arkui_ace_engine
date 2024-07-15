@@ -444,9 +444,12 @@ void XComponentPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    CHECK_NULL_VOID(handlingSurfaceRenderContext_);
     auto bkColor = renderContext->GetBackgroundColor();
-    if (bkColor.has_value() && handlingSurfaceRenderContext_) {
+    if (bkColor.has_value() && bkColor.value() != Color::BLACK) {
         handlingSurfaceRenderContext_->UpdateBackgroundColor(Color::TRANSPARENT);
+    } else {
+        handlingSurfaceRenderContext_->UpdateBackgroundColor(Color::BLACK);
     }
 #ifdef PLATFORM_VIEW_SUPPORTED
     if (type_ == XComponentType::PLATFORM_VIEW) {
@@ -1371,12 +1374,12 @@ void XComponentPattern::SetHandlingRenderContextForSurface(const RefPtr<RenderCo
     renderContext->AddChild(handlingSurfaceRenderContext_, 0);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         auto paintRect = AdjustPaintRect(
-            localPosition_.GetX(), localPosition_.GetY(), drawSize_.Width(), drawSize_.Height(), true);
+            localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height(), true);
         handlingSurfaceRenderContext_->SetBounds(
             paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     } else {
         handlingSurfaceRenderContext_->SetBounds(
-            localPosition_.GetX(), localPosition_.GetY(), drawSize_.Width(), drawSize_.Height());
+            localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height());
     }
 }
 

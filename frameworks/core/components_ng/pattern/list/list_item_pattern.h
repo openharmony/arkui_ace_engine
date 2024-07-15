@@ -117,6 +117,8 @@ public:
         return endNodeIndex_ >= 0;
     }
 
+    void OnDidPop();
+
     ListItemSwipeIndex GetSwiperIndex()
     {
         return swiperIndex_;

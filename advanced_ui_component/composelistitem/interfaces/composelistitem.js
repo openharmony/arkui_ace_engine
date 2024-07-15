@@ -823,14 +823,18 @@ class OperateItemStruct extends ViewPU {
         this.observeComponentCreation2((x5, y5) => {
             Button.createWithChild({ type: ButtonType.Normal });
             Button.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
-            Button.hitTestBehavior(HitTestMode.Block);
+            Button.hitTestBehavior(HitTestMode.Transparent);
             Button.backgroundColor(Color.Transparent);
             Button.height(OPERATEITEM_ICONLIKE_SIZE);
             Button.width(OPERATEITEM_ARROW_WIDTH);
             Button.onFocus(() => {
                 this.parentCanFocus = false;
             });
+            Button.stateEffect(this.arrow?.action !== undefined);
             Button.onTouch((d6) => {
+                if (this.arrow?.action === undefined) {
+                    return;
+                }
                 if (d6.type === TouchType.Down) {
                     this.parentCanTouch = false;
                 }
@@ -838,9 +842,13 @@ class OperateItemStruct extends ViewPU {
                     this.parentCanTouch = true;
                 }
             });
+            Button.hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None);
             Button.onHover((c6) => {
+                if (this.arrow?.action === undefined) {
+                    return;
+                }
                 this.parentCanHover = false;
-                if (c6 && this.parentFrontColor === this.hoveringColor) {
+                if (c6) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
                 if (!c6) {
@@ -980,7 +988,7 @@ class OperateItemStruct extends ViewPU {
     createTextArrow(v3 = null) {
         this.observeComponentCreation2((g4, h4) => {
             Button.createWithChild({ type: ButtonType.Normal });
-            Button.hitTestBehavior(HitTestMode.Block);
+            Button.hitTestBehavior(HitTestMode.Transparent);
             Button.labelStyle({
                 maxLines: TEXT_MAX_LINE
             });
@@ -990,7 +998,11 @@ class OperateItemStruct extends ViewPU {
             Button.onFocus(() => {
                 this.parentCanFocus = false;
             });
+            Button.stateEffect(this.arrow?.action !== undefined);
             Button.onTouch((m4) => {
+                if (this.arrow?.action === undefined) {
+                    return;
+                }
                 if (m4.type === TouchType.Down) {
                     this.parentCanTouch = false;
                 }
@@ -998,9 +1010,13 @@ class OperateItemStruct extends ViewPU {
                     this.parentCanTouch = true;
                 }
             });
+            Button.hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None);
             Button.onHover((l4) => {
+                if (this.arrow?.action === undefined) {
+                    return;
+                }
                 this.parentCanHover = false;
-                if (l4 && this.parentFrontColor === this.hoveringColor) {
+                if (l4) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
                 if (!l4) {

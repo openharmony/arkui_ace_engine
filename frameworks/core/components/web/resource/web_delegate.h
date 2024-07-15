@@ -465,9 +465,8 @@ private:
 };
 
 class WebSurfaceCallback : public OHOS::SurfaceDelegate::ISurfaceCallback {
-
 public:
-    WebSurfaceCallback(const WeakPtr<WebDelegate>& delegate) : delegate_(delegate) {}
+    explicit WebSurfaceCallback(const WeakPtr<WebDelegate>& delegate) : delegate_(delegate) {}
     ~WebSurfaceCallback() = default;
 
     void OnSurfaceCreated(const OHOS::sptr<OHOS::Surface>& surface) override;
@@ -548,7 +547,7 @@ private:
 
 class NWebScreenLockCallbackImpl : public OHOS::NWeb::NWebScreenLockCallback {
 public:
-    NWebScreenLockCallbackImpl(const WeakPtr<PipelineBase>& context);
+    explicit NWebScreenLockCallbackImpl(const WeakPtr<PipelineBase>& context);
     ~NWebScreenLockCallbackImpl() = default;
 
     void Handle(bool key) override;
@@ -577,7 +576,7 @@ class GestureEventResultOhos : public GestureEventResult {
     DECLARE_ACE_TYPE(GestureEventResultOhos, GestureEventResult);
 
 public:
-    GestureEventResultOhos(std::shared_ptr<OHOS::NWeb::NWebGestureEventResult> result)
+    explicit GestureEventResultOhos(std::shared_ptr<OHOS::NWeb::NWebGestureEventResult> result)
         : result_(result) {}
 
     void SetGestureEventResult(bool result) override;
@@ -666,7 +665,6 @@ public:
     void Reload();
     void UpdateUrl(const std::string& url);
 #ifdef OHOS_STANDARD_SYSTEM
-    // TODO: add to separate this file into three file, base file, component impl and ng impl.
     void InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<NG::RenderSurface>& surface);
     void InitOHOSWeb(const WeakPtr<PipelineBase>& context);
     bool PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context);
@@ -803,6 +801,7 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response);
     RefPtr<WebResponse> OnInterceptRequest(const std::shared_ptr<BaseEventInfo>& info);
     bool IsEmptyOnInterceptRequest();
+    void ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart);
     void RecordWebEvent(Recorder::EventType eventType, const std::string& param) const;
     void OnPageStarted(const std::string& param);
     void OnPageFinished(const std::string& param);
@@ -897,6 +896,7 @@ public:
     void GLContextInit(void* window);
     sptr<OHOS::SurfaceDelegate> GetSurfaceDelegateClient();
     void SetBoundsOrResize(const Size& drawSize, const Offset& offset, bool isKeyboard = false);
+    void ResizeVisibleViewport(const Size& visibleSize, bool isKeyboard = false);
     Offset GetWebRenderGlobalPos();
     bool InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context);
     int GetWebId();
@@ -999,6 +999,8 @@ public:
 
     void KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed);
 
+    void OnCursorUpdate(double x, double y, double width, double height);
+
     void CloseCustomKeyboard()
     {
         if (keyboardHandler_) {
@@ -1020,8 +1022,9 @@ private:
     void BindRouterBackMethod();
     void BindPopPageSuccessMethod();
     void BindIsPagePathInvalidMethod();
-    void TextBlurReport(int64_t accessibilityId);
+    void TextBlurReportByFocusEvent(int64_t accessibilityId);
     void WebComponentClickReport(int64_t accessibilityId);
+    void TextBlurReportByBlurEvent(int64_t accessibilityId);
 
 #ifdef OHOS_STANDARD_SYSTEM
     sptr<OHOS::Rosen::Window> CreateWindow();
@@ -1201,6 +1204,8 @@ private:
     bool isSmoothDragResizeEnabled_ = false;
     double resizeWidth_ = 0.0;
     double resizeHeight_ = 0.0;
+    double resizeVisibleWidth_ = -1.0;
+    double resizeVisibleHeight_ = -1.0;
     OHOS::Ace::Rect currentArea_;
     NG::SafeAreaInsets systemSafeArea_;
     NG::SafeAreaInsets cutoutSafeArea_;
@@ -1210,6 +1215,7 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler_ = nullptr;
     std::string sharedRenderProcessToken_;
     int64_t lastFocusInputId_ = 0;
+    int64_t lastFocusReportId_ = 0;
 #endif
 };
 

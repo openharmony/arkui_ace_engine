@@ -97,6 +97,11 @@ public:
     virtual void SetMargin(const CalcDimension& value) = 0;
     virtual void SetMargins(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) = 0;
+    virtual void ResetSafeAreaPadding() = 0;
+    virtual void SetSafeAreaPadding(const CalcDimension& value) = 0;
+    virtual void SetSafeAreaPaddings(const std::optional<CalcDimension>& top,
+        const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
+        const std::optional<CalcDimension>& right) = 0;
     virtual void SetBorderRadius(const Dimension& value) = 0;
     virtual void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
@@ -251,6 +256,7 @@ public:
     virtual void SetOnKeyPreIme(OnKeyPreImeFunc&& onKeyCallback) {}
     virtual void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) = 0;
     virtual void SetOnHover(OnHoverFunc&& onHoverEventFunc) = 0;
+    virtual void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) = 0;
     virtual void SetOnDelete(std::function<void()>&& onDeleteCallback) = 0;
     virtual void SetOnAppear(std::function<void()>&& onAppearCallback) = 0;
     virtual void SetOnAttach(std::function<void()>&& onAttachCallback) = 0;
@@ -288,6 +294,7 @@ public:
     virtual void DisableOnKeyEvent() = 0;
     virtual void DisableOnKeyPreIme() {}
     virtual void DisableOnHover() = 0;
+    virtual void DisableOnAccessibilityHover() = 0;
     virtual void DisableOnMouse() = 0;
     virtual void DisableOnAppear() = 0;
     virtual void DisableOnDisAppear() = 0;

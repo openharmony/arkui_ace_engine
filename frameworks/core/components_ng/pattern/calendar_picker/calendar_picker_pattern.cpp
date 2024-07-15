@@ -346,9 +346,6 @@ void CalendarPickerPattern::ResetTextStateByNode(const RefPtr<FrameNode>& textFr
 {
     CHECK_NULL_VOID(textFrameNode);
     textFrameNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
@@ -357,7 +354,8 @@ void CalendarPickerPattern::ResetTextStateByNode(const RefPtr<FrameNode>& textFr
     CHECK_NULL_VOID(pipeline);
     RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(calendarTheme);
-    textLayoutProperty->UpdateTextColor(layoutProperty->GetColor().value_or(calendarTheme->GetEntryFontColor()));
+    textFrameNode->GetRenderContext()->UpdateForegroundColor(
+        layoutProperty->GetColor().value_or(calendarTheme->GetEntryFontColor()));
     textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -871,9 +869,7 @@ void CalendarPickerPattern::HandleTextFocusEvent(int32_t index)
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
     textFrameNode->GetRenderContext()->UpdateBackgroundColor(theme->GetSelectBackgroundColor());
-    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateTextColor(Color::WHITE);
+    textFrameNode->GetRenderContext()->UpdateForegroundColor(Color::WHITE);
     textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 

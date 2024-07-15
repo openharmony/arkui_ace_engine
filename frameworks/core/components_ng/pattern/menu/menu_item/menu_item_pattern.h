@@ -217,6 +217,7 @@ public:
         return isStackSubmenuHeader_;
     }
     RefPtr<FrameNode> FindTouchedEmbeddedMenuItem(const OffsetF& position);
+    void OnHover(bool isHover);
 
 protected:
     void RegisterOnKeyEvent();
@@ -229,21 +230,17 @@ private:
     void RegisterOnClick();
     void RegisterOnHover();
     virtual void OnTouch(const TouchEventInfo& info);
-    void OnHover(bool isHover);
     virtual bool OnKeyEvent(const KeyEvent& event);
     void OnClick();
 
     void RegisterWrapperMouseEvent();
 
-    void UpdateMargin();
     void AddSelectIcon(RefPtr<FrameNode>& row);
     void UpdateIcon(RefPtr<FrameNode>& row, bool isStart);
     void AddExpandIcon(RefPtr<FrameNode>& row);
     void AddClickableArea();
     void UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel);
     void UpdateTexOverflow(RefPtr<TextLayoutProperty>& textProperty);
-    bool IsTextFadeOut();
-    void UpdateFont(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<SelectTheme>& theme, bool isLabel);
     void AddStackSubMenuHeader(RefPtr<FrameNode>& menuNode);
     RefPtr<FrameNode> GetClickableArea();
     void UpdateDisabledStyle();
@@ -265,10 +262,6 @@ private:
     void ParseMenuRadius(MenuParam& param);
     void ModifyDivider();
 
-    void InitFocusEvent();
-    void HandleFocusEvent();
-    void HandleBlurEvent();
-
     void UpdateSymbolNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon);
     void UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon);
     void UpdateSymbolIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>& iconNode, ImageSourceInfo& iconSrc,
@@ -280,16 +273,12 @@ private:
 
     RefPtr<InputEvent> wrapperMouseEvent_;
 
-    bool isTextFadeOut_ = false;
     bool isSelected_ = false;
     bool isSubMenuShowed_ = false;
     bool isSubMenuHovered_ = false;
 
     bool isChanged_ = false;
     bool isHovered_ = false;
-    bool isFocused_ = false;
-    bool isFocusShadowSet_ = false;
-    bool isFocusBGColorSet_ = false;
     bool isExpanded_ = false;
     int32_t clickMenuItemId_ = -1;
     int32_t index_ = 0;

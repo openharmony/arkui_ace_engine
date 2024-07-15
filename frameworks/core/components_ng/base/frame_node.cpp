@@ -17,7 +17,7 @@
 
 #include <cstdint>
 
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
@@ -678,6 +678,12 @@ void FrameNode::DumpSafeAreaInfo()
     if (layoutProperty_->GetSafeAreaInsets()) {
         DumpLog::GetInstance().AddDesc(layoutProperty_->GetSafeAreaInsets()->ToString());
     }
+    if (SelfOrParentExpansive()) {
+        DumpLog::GetInstance().AddDesc(std::string("selfAdjust: ")
+                                           .append(geometryNode_->GetSelfAdjust().ToString().c_str())
+                                           .append(",parentAdjust: ")
+                                           .append(geometryNode_->GetParentAdjust().ToString().c_str()));
+    }
     CHECK_NULL_VOID(GetTag() == V2::PAGE_ETS_TAG);
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -688,7 +694,11 @@ void FrameNode::DumpSafeAreaInfo()
                                        .append(std::string(", isNeedAvoidWindow: ").c_str())
                                        .append(std::to_string(manager->IsNeedAvoidWindow()))
                                        .append(std::string(", isFullScreen: ").c_str())
-                                       .append(std::to_string(manager->IsFullScreen())));
+                                       .append(std::to_string(manager->IsFullScreen()))
+                                       .append(std::string(", isKeyboardAvoidMode").c_str())
+                                       .append(std::to_string(manager->KeyboardSafeAreaEnabled()))
+                                       .append(std::string(", isUseCutout").c_str())
+                                       .append(std::to_string(pipeline->GetUseCutout())));
 }
 
 void FrameNode::DumpAlignRulesInfo()
@@ -742,6 +752,10 @@ void FrameNode::DumpCommonInfo()
     if (layoutProperty_->GetPaddingProperty()) {
         DumpLog::GetInstance().AddDesc(
             std::string("Padding: ").append(layoutProperty_->GetPaddingProperty()->ToString().c_str()));
+    }
+    if (layoutProperty_->GetSafeAreaPaddingProperty()) {
+        DumpLog::GetInstance().AddDesc(std::string("SafeArea Padding: ")
+                                           .append(layoutProperty_->GetSafeAreaPaddingProperty()->ToString().c_str()));
     }
     if (layoutProperty_->GetBorderWidthProperty()) {
         DumpLog::GetInstance().AddDesc(
@@ -1134,6 +1148,7 @@ void FrameNode::OnDetachFromMainTree(bool recursive)
     eventHub_->FireOnDetach();
     pattern_->OnDetachFromMainTree();
     eventHub_->FireOnDisappear();
+    CHECK_NULL_VOID(renderContext_);
     renderContext_->OnNodeDisappear(recursive);
 }
 
@@ -1460,39 +1475,72 @@ void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceD
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(eventHub_);
+
+    ProcessThrottledVisibleCallback();
+    auto hasInnerCallback = eventHub_->HasVisibleAreaCallback(false);
+    auto hasUserCallback = eventHub_->HasVisibleAreaCallback(true);
+    if (!hasInnerCallback && !hasUserCallback) {
+        return;
+    }
+
     auto& visibleAreaUserRatios = eventHub_->GetVisibleAreaRatios(true);
     auto& visibleAreaUserCallback = eventHub_->GetVisibleAreaCallback(true);
     auto& visibleAreaInnerRatios = eventHub_->GetVisibleAreaRatios(false);
     auto& visibleAreaInnerCallback = eventHub_->GetVisibleAreaCallback(false);
 
-    ProcessThrottledVisibleCallback();
     if (forceDisappear || IsFrameDisappear(timestamp)) {
         if (!NearEqual(lastVisibleRatio_, VISIBLE_RATIO_MIN)) {
             ProcessAllVisibleCallback(
                 visibleAreaUserRatios, visibleAreaUserCallback, VISIBLE_RATIO_MIN, lastVisibleCallbackRatio_);
-            ProcessAllVisibleCallback(
-                visibleAreaInnerRatios, visibleAreaInnerCallback, VISIBLE_RATIO_MIN, lastVisibleCallbackRatio_);
             lastVisibleRatio_ = VISIBLE_RATIO_MIN;
+        }
+        if (!NearEqual(lastInnerVisibleRatio_, VISIBLE_RATIO_MIN)) {
+            ProcessAllVisibleCallback(visibleAreaInnerRatios, visibleAreaInnerCallback, VISIBLE_RATIO_MIN,
+                lastInnerVisibleCallbackRatio_, false, true);
+            lastInnerVisibleRatio_ = VISIBLE_RATIO_MIN;
         }
         return;
     }
 
-    if (!eventHub_->HasImmediatelyVisibleCallback()) {
-        return;
+    if (hasInnerCallback) {
+        RectF frameRect;
+        RectF visibleRect;
+        RectF visibleInnerRect;
+        GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
+        ProcessVisibleAreaChangeEvent(visibleInnerRect, frameRect,
+            visibleAreaInnerRatios, visibleAreaInnerCallback, false);
+        if (hasUserCallback) {
+            ProcessVisibleAreaChangeEvent(visibleRect, frameRect,
+                visibleAreaUserRatios, visibleAreaUserCallback, true);
+        }
+    } else {
+        RectF frameRect;
+        RectF visibleRect;
+        GetVisibleRect(visibleRect, frameRect);
+        ProcessVisibleAreaChangeEvent(visibleRect, frameRect,
+            visibleAreaUserRatios, visibleAreaUserCallback, true);
     }
+}
 
-    RectF frameRect;
-    RectF visibleRect;
-    GetVisibleRect(visibleRect, frameRect);
+void FrameNode::ProcessVisibleAreaChangeEvent(const RectF& visibleRect, const RectF& frameRect,
+    const std::vector<double>& visibleAreaRatios, VisibleCallbackInfo& visibleAreaCallback, bool isUser)
+{
     double currentVisibleRatio =
         std::clamp(CalculateCurrentVisibleRatio(visibleRect, frameRect), VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
-    if (!NearEqual(currentVisibleRatio, lastVisibleRatio_)) {
-        auto lastVisibleCallbackRatio = lastVisibleCallbackRatio_;
-        ProcessAllVisibleCallback(
-            visibleAreaUserRatios, visibleAreaUserCallback, currentVisibleRatio, lastVisibleCallbackRatio);
-        ProcessAllVisibleCallback(
-            visibleAreaInnerRatios, visibleAreaInnerCallback, currentVisibleRatio, lastVisibleCallbackRatio);
-        lastVisibleRatio_ = currentVisibleRatio;
+    if (isUser) {
+        if (!NearEqual(currentVisibleRatio, lastVisibleRatio_)) {
+            auto lastVisibleCallbackRatio = lastVisibleCallbackRatio_;
+            ProcessAllVisibleCallback(
+                visibleAreaRatios, visibleAreaCallback, currentVisibleRatio, lastVisibleCallbackRatio);
+            lastVisibleRatio_ = currentVisibleRatio;
+        }
+    } else {
+        if (!NearEqual(currentVisibleRatio, lastInnerVisibleRatio_)) {
+            auto lastVisibleCallbackRatio = lastInnerVisibleCallbackRatio_;
+            ProcessAllVisibleCallback(visibleAreaRatios, visibleAreaCallback, currentVisibleRatio,
+                lastVisibleCallbackRatio, false, true);
+            lastInnerVisibleRatio_ = currentVisibleRatio;
+        }
     }
 }
 
@@ -1505,11 +1553,13 @@ double FrameNode::CalculateCurrentVisibleRatio(const RectF& visibleRect, const R
 }
 
 void FrameNode::ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
-    VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio, double lastVisibleRatio, bool isThrottled)
+    VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio, double lastVisibleRatio,
+    bool isThrottled, bool isInner)
 {
     bool isHandled = false;
     bool isVisible = false;
-    double* lastVisibleCallbackRatio = isThrottled ? &lastThrottledVisibleCbRatio_ : &lastVisibleCallbackRatio_;
+    double* lastVisibleCallbackRatio = isThrottled ? &lastThrottledVisibleCbRatio_ :
+        (isInner ? &lastInnerVisibleCallbackRatio_ : &lastVisibleCallbackRatio_);
 
     for (const auto& callbackRatio : visibleAreaUserRatios) {
         if (GreatNotEqual(currentVisibleRatio, callbackRatio) && LessOrEqual(lastVisibleRatio, callbackRatio)) {
@@ -1598,7 +1648,7 @@ void FrameNode::ProcessThrottledVisibleCallback()
     }
 }
 
-void FrameNode::SetActive(bool active)
+void FrameNode::SetActive(bool active, bool needRebuildRenderContext)
 {
     bool activeChanged = false;
     if (active && !isActive_) {
@@ -1611,14 +1661,23 @@ void FrameNode::SetActive(bool active)
         isActive_ = false;
         activeChanged = true;
     }
-    if (activeChanged) {
-        auto parent = GetAncestorNodeOfFrame();
-        if (parent) {
-            parent->MarkNeedSyncRenderTree();
+    CHECK_NULL_VOID(activeChanged);
+    auto parent = GetAncestorNodeOfFrame();
+    if (parent) {
+        parent->MarkNeedSyncRenderTree();
+        if (needRebuildRenderContext) {
+            auto pipeline = GetContext();
+            CHECK_NULL_VOID(pipeline);
+            auto task = [weak = AceType::WeakClaim(AceType::RawPtr(parent))]() {
+                auto parent = weak.Upgrade();
+                CHECK_NULL_VOID(parent);
+                parent->RebuildRenderContextTree();
+            };
+            pipeline->AddAfterLayoutTask(task);
         }
-        if (isActive_ && SystemProperties::GetDeveloperModeOn()) {
-            PaintDebugBoundary(SystemProperties::GetDebugBoundaryEnabled());
-        }
+    }
+    if (isActive_ && SystemProperties::GetDeveloperModeOn()) {
+        PaintDebugBoundary(SystemProperties::GetDebugBoundaryEnabled());
     }
 }
 
@@ -1636,7 +1695,7 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread)
     UpdateLayoutPropertyFlag();
     SetSkipSyncGeometryNode(false);
     if (layoutProperty_->GetLayoutRect()) {
-        SetActive(true);
+        SetActive(true, true);
         Measure(std::nullopt);
         Layout();
     } else {
@@ -2262,9 +2321,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     TouchTestResult& responseLinkResult, bool isDispatch)
 {
     if (!isActive_ || !eventHub_->IsEnabled()) {
-        if (SystemProperties::GetDebugEnabled()) {
-            TAG_LOGD(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test", GetTag().c_str());
-        }
+        TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test", GetTag().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
     auto& translateIds = NGGestureRecognizer::GetGlobalTransIds();
@@ -2512,6 +2569,9 @@ std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t s
             auto y = ConvertToPx(region.GetOffset().GetY(), scaleProperty, rect.Height());
             auto width = ConvertToPx(region.GetWidth(), scaleProperty, rect.Width());
             auto height = ConvertToPx(region.GetHeight(), scaleProperty, rect.Height());
+            if (!x.has_value() || !y.has_value() || !width.has_value() || !height.has_value()) {
+                continue;
+            }
             RectF mouseRegion(rect.GetOffset().GetX() + x.value(), rect.GetOffset().GetY() + y.value(), width.value(),
                 height.value());
             responseRegionList.emplace_back(mouseRegion);
@@ -2523,6 +2583,9 @@ std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t s
         auto y = ConvertToPx(region.GetOffset().GetY(), scaleProperty, rect.Height());
         auto width = ConvertToPx(region.GetWidth(), scaleProperty, rect.Width());
         auto height = ConvertToPx(region.GetHeight(), scaleProperty, rect.Height());
+        if (!x.has_value() || !y.has_value() || !width.has_value() || !height.has_value()) {
+            continue;
+        }
         RectF responseRegion(
             rect.GetOffset().GetX() + x.value(), rect.GetOffset().GetY() + y.value(), width.value(), height.value());
         responseRegionList.emplace_back(responseRegion);
@@ -2923,6 +2986,19 @@ void FrameNode::OnAccessibilityEvent(
         event.windowContentChangeTypes = windowsContentChangeType;
         event.nodeId = GetAccessibilityId();
         auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SendEventToAccessibility(event);
+    }
+}
+
+void FrameNode::OnAccessibilityEventForVirtualNode(AccessibilityEventType eventType, int64_t accessibilityId)
+{
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        AccessibilityEvent event;
+        event.type = eventType;
+        event.windowContentChangeTypes = WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID;
+        event.nodeId = accessibilityId;
+        auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->SendEventToAccessibility(event);
     }
@@ -3512,6 +3588,11 @@ bool FrameNode::ParentExpansive()
     return parentOpts && parentOpts->Expansive();
 }
 
+void FrameNode::ProcessSafeAreaPadding()
+{
+    pattern_->ProcessSafeAreaPadding();
+}
+
 void FrameNode::UpdateFocusState()
 {
     auto focusHub = GetFocusHub();
@@ -3596,6 +3677,9 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
     layoutAlgorithm_.Reset();
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    pipeline->SendUpdateVirtualNodeFocusEvent();
     return true;
 }
 
@@ -4358,6 +4442,49 @@ void FrameNode::GetVisibleRect(RectF& visibleRect, RectF& frameRect) const
     }
 }
 
+void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect) const
+{
+    visibleRect = GetPaintRectWithTransform();
+    frameRect = visibleRect;
+    visibleInnerRect = visibleRect;
+    RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(true);
+    if (!IsOnMainTree() || !parentUi) {
+        visibleRect.SetWidth(0.0f);
+        visibleRect.SetHeight(0.0f);
+        visibleInnerRect.SetWidth(0.0f);
+        visibleInnerRect.SetHeight(0.0f);
+        return;
+    }
+
+    while (parentUi) {
+        visibleRect = ApplyFrameNodeTranformToRect(visibleRect, parentUi);
+        auto parentRect = parentUi->GetPaintRectWithTransform();
+        if (!visibleRect.IsEmpty()) {
+            visibleRect = visibleRect.Constrain(parentRect);
+        }
+
+        if (isCalculateInnerVisibleRectClip_) {
+            visibleInnerRect = ApplyFrameNodeTranformToRect(visibleInnerRect, parentUi);
+            auto parentContext = parentUi->GetRenderContext();
+            if (!visibleInnerRect.IsEmpty() && ((parentContext && parentContext->GetClipEdge().value_or(false)) ||
+                parentUi->IsWindowBoundary() || parentUi->GetTag() == V2::ROOT_ETS_TAG)) {
+                visibleInnerRect = visibleInnerRect.Constrain(parentRect);
+            }
+        }
+
+        if (visibleRect.IsEmpty() && (!isCalculateInnerVisibleRectClip_ || visibleInnerRect.IsEmpty())) {
+            visibleInnerRect = visibleRect;
+            return;
+        }
+        frameRect = ApplyFrameNodeTranformToRect(frameRect, parentUi);
+        parentUi = parentUi->GetAncestorNodeOfFrame(true);
+    }
+
+    if (!isCalculateInnerVisibleRectClip_) {
+        visibleInnerRect = visibleRect;
+    }
+}
+
 bool FrameNode::IsContextTransparent()
 {
     ACE_SCOPED_TRACE("Transparent detection");
@@ -4664,11 +4791,7 @@ void FrameNode::TriggerShouldParallelInnerWith(
 
 void FrameNode::GetInspectorValue()
 {
-    auto jsonItem = JsonUtil::Create(true);
-    auto rect = geometryNode_->GetFrameRect();
-    jsonItem->Put("x", rect.GetX());
-    jsonItem->Put("y", rect.GetY());
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     if (GetTag() == V2::WEB_ETS_TAG) {
         UiSessionManager::GetInstance().WebTaskNumsChange(1);
         auto pattern = GetPattern<NG::WebPattern>();
@@ -4679,7 +4802,6 @@ void FrameNode::GetInspectorValue()
         };
         pattern->GetAllWebAccessibilityNodeInfos(cb, GetId());
     }
-    UiSessionManager::GetInstance().AddValueForTree(GetId(), jsonItem->ToString());
 #endif
     UINode::GetInspectorValue();
 }
@@ -4688,6 +4810,9 @@ void FrameNode::OnSyncGeometryFrameFinish(const RectF& paintRect)
 {
     if (syncedFramePaintRect_.has_value() && syncedFramePaintRect_.value() != paintRect) {
         AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_GEOMETRY_CHANGE);
+        if (AnimationUtils::IsImplicitAnimationOpen()) {
+            AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_START_ANIMATION);
+        }
     }
     syncedFramePaintRect_ = paintRect;
 }
@@ -4733,5 +4858,40 @@ void FrameNode::ProcessFrameNodeChangeFlag()
     if (pattern) {
         pattern->OnFrameNodeChanged(changeFlag);
     }
+}
+
+void FrameNode::OnNodeTransformInfoUpdate(bool changed)
+{
+    if (!changed) {
+        return;
+    }
+    AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_TRANSFORM_CHANGE);
+    if (AnimationUtils::IsImplicitAnimationOpen()) {
+        AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_START_ANIMATION);
+    }
+}
+
+void FrameNode::OnNodeTransitionInfoUpdate()
+{
+    AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_TRANSITION_START);
+}
+
+void FrameNode::NotifyWebPattern(bool isRegister)
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(WEB_SUPPORTED) && defined(OHOS_PLATFORM)
+    if (GetTag() == V2::WEB_ETS_TAG) {
+        auto pattern = GetPattern<NG::WebPattern>();
+        CHECK_NULL_VOID(pattern);
+        if (isRegister) {
+            auto callback = [](int64_t accessibilityId, const std::string data) {
+                UiSessionManager::GetInstance().ReportWebUnfocusEvent(accessibilityId, data);
+            };
+            pattern->RegisterTextBlurCallback(callback);
+        } else {
+            pattern->UnRegisterTextBlurCallback();
+        }
+    }
+#endif
+    UINode::NotifyWebPattern(isRegister);
 }
 } // namespace OHOS::Ace::NG

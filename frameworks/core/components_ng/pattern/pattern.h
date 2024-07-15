@@ -90,6 +90,8 @@ public:
         return false;
     }
 
+    virtual void ProcessSafeAreaPadding() {}
+
     virtual bool IsNeedPercent() const
     {
         return false;
@@ -109,6 +111,11 @@ public:
     virtual bool NeedSoftKeyboard() const
     {
         return false;
+    }
+
+    virtual bool NeedToRequestKeyboardOnFocus() const
+    {
+        return true;
     }
 
     virtual bool DefaultSupportDrag()
@@ -591,7 +598,10 @@ public:
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
 
-    virtual void OnAccessibilityHoverEvent(const PointF& point) {}
+    virtual bool OnAccessibilityHoverEvent(const PointF& point)
+    {
+        return false;
+    }
 
 protected:
     virtual void OnAttachToFrameNode() {}
@@ -604,15 +614,19 @@ protected:
 
     void InitClickEventRecorder()
     {
-        if (clickCallback_) {
-            return;
-        }
-
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto gesture = host->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gesture);
-        if (!gesture->IsClickable()) {
+        if (!gesture->IsUserClickable()) {
+            if (clickCallback_) {
+                gesture->RemoveClickEvent(clickCallback_);
+                clickCallback_ = nullptr;
+            }
+            return;
+        }
+
+        if (clickCallback_) {
             return;
         }
 

@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_EXTENED_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_EXTENED_H
 
 #include "drawable_descriptor.h"
 #include "native_node.h"
@@ -174,3 +175,4 @@ ArkUI_NodeHandle GetNextSibling(ArkUI_NodeHandle node);
 ArkUI_NodeHandle GetParent(ArkUI_NodeHandle node);
 int32_t RemoveAllChildren(ArkUI_NodeHandle parentNode);
 } // namespace OHOS::Ace::NodeModel
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_EXTENED_H

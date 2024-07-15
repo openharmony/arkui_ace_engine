@@ -66,6 +66,8 @@ private:
     TouchEvent lastTouchEvent_;
     bool isFlushTouchEventsEnd_ = false;
     bool isPinchEnd_ = false;
+    // The fingers are lifted completely in the last pinch gesture
+    bool isLastPinchFinished_ = true;
     AxisEvent lastAxisEvent_;
 };
 
