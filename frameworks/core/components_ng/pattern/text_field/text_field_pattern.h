@@ -1314,7 +1314,7 @@ public:
     }
 
     void OnSelectionMenuOptionsUpdate(
-        const NG::OnCreateMenuCallback && onCreateMenuCallback, const NG::OnMenuItemClickCallback && onMenuItemClick);
+        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick);
 
     void SetSupportPreviewText(bool isSupported)
     {
@@ -1580,6 +1580,8 @@ private:
     void UpdateParam(GestureEvent& info, bool shouldProcessOverlayAfterLayout);
     void ShowCaretAndStopTwinkling();
     void OnCaretMoveDone(const TouchEventInfo& info);
+    void HandleCrossPlatformInBlurEvent();
+    void ModifyInnerStateInBlurEvent();
 
     void TwinklingByFocus();
 
