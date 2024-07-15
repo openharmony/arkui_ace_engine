@@ -38,6 +38,12 @@ group("linux_unittest") {
   ]
 }
 
+config("ace_circle_config") {
+  if (ace_engine_enable_circle_feature) {
+    cflags_cc = [ "-DARKUI_CIRCLE_FEATURE" ]
+  }
+}
+
 config("ace_coverage_config") {
   cflags = []
   ldflags = []
@@ -58,6 +64,8 @@ config("ace_unittest_config") {
     "//third_party/icu/icu4c/source/common",
     "//foundation/window/window_manager/interfaces/innerkits",
   ]
+
+  configs = [ ":ace_circle_config" ]
 
   cflags_cc = [
     "-Wno-unused-private-field",
@@ -339,6 +347,10 @@ ohos_source_set("ace_base") {
     "$ace_root/frameworks/base/utils/utf.cpp",
     "$ace_root/frameworks/base/utils/utils.cpp",
   ]
+
+  if (ace_engine_enable_circle_feature) {
+    sources += [ "$ace_root/frameworks/base/geometry/arc_round.cpp" ]
+  }
 
   deps = [
     "$ace_root/frameworks/core/components/theme:build_theme_code",
@@ -1098,6 +1110,14 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/test/mock/core/pattern/mock_indexer_vibrator.cpp",
     "$ace_root/test/mock/core/pattern/mock_web_pattern.cpp",
   ]
+
+  if (ace_engine_enable_circle_feature) {
+    sources += [
+      "$ace_root/frameworks/core/components_ng/pattern/arc_scroll/arc_scroll_paint_method.cpp",
+      "$ace_root/frameworks/core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.cpp",
+      "$ace_root/frameworks/core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.cpp",
+    ]
+  }
 
   deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
   external_deps = [ "bounds_checking_function:libsec_static" ]
