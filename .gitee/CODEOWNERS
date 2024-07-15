@@ -150,6 +150,7 @@ frameworks/core/components_ng/pattern/root/  @zhoutianer
 frameworks/core/components_ng/pattern/scroll/  @rongShao-Z
 frameworks/core/components_ng/pattern/scroll_bar/  @rongShao-Z
 frameworks/core/components_ng/pattern/scrollable/  @yeyinglong_admin
+frameworks/core/components_ng/pattern/scrollable/nestabe_scroll_container.h  @zhoutianer
 frameworks/core/components_ng/pattern/search/  @jyj_0306
 frameworks/core/components_ng/pattern/security_component/  @
 frameworks/core/components_ng/pattern/select/  @fredtt
