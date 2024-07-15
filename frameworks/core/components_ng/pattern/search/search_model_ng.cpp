@@ -666,7 +666,7 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
     auto textValue = pattern->GetTextValue();
     if (textFieldLayoutProperty) {
         if (value.has_value() && value.value() != textValue) {
-            pattern->InitEditingValueText(value.value());
+            pattern->InitValueText(value.value());
         }
         textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
         textFieldLayoutProperty->UpdateMaxLines(1);
@@ -918,7 +918,7 @@ void SearchModelNG::SetTextValue(FrameNode* frameNode, const std::optional<std::
     auto textValue = pattern->GetTextValue();
     if (textFieldLayoutProperty) {
         if (value.has_value() && value.value() != textValue) {
-            pattern->InitEditingValueText(value.value());
+            pattern->InitValueText(value.value());
         }
     }
 }

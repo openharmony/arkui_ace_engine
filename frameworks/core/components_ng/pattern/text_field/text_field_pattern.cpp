@@ -3150,7 +3150,7 @@ void TextFieldPattern::InitEditingValueText(std::string content)
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
-void TextFieldPattern::InitValueText(std::string content)
+void TextFieldPattern::InitValueText(const std::string& content)
 {
     auto initContent = content;
     if (GetIsPreviewText()) {
