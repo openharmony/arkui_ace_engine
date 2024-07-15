@@ -25,7 +25,7 @@ public:
     static constexpr uint8_t MAX_DETECT_COUNT = 2;
 
     static TransparentNodeDetector& GetInstance();
-    void PostCheckNodeTransparentTask(const RefPtr<FrameNode>& node, uint8_t detectCount);
+    void PostCheckNodeTransparentTask(const RefPtr<FrameNode>& node, uint8_t detectCount = MAX_DETECT_COUNT);
 private:
     TransparentNodeDetector() = default;
     ~TransparentNodeDetector() = default;
