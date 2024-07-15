@@ -2631,6 +2631,7 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
     if (!hasTabsAncestor_) {
         PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_SCROLL, PerfActionType::FIRST_MOVE, "");
     }
+    ACE_SCOPED_TRACE_COMMERCIAL("%s drag start", hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG);
     UpdateDragFRCSceneInfo(info.GetMainVelocity(), SceneStatus::START);
 
     StopAnimationOnScrollStart(
@@ -2707,6 +2708,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     if (!hasTabsAncestor_) {
         PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_SCROLL, false);
     }
+    ACE_SCOPED_TRACE_COMMERCIAL("%s drag end", hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG);
     isTouchDown_ = false;
     isTouchDownOnOverlong_ = false;
     if (!CheckSwiperPanEvent(dragVelocity)) {
@@ -3038,7 +3040,8 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         TAG_LOGI(AceLogTag::ACE_SWIPER,
             "Swiper finish property translate animation with offsetX: %{public}f, offsetY: %{public}f",
             finalOffset.GetX(), finalOffset.GetY());
-        ACE_SCOPED_TRACE("Swiper finish property animation X: %f, Y: %f", finalOffset.GetX(), finalOffset.GetY());
+        ACE_SCOPED_TRACE_COMMERCIAL("%s finish property animation, X: %f, Y: %f",
+            swiper->hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG, finalOffset.GetX(), finalOffset.GetY());
         swiper->OnPropertyTranslateAnimationFinish(offset);
     };
     // initial translate info.
@@ -3070,7 +3073,8 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         TAG_LOGI(AceLogTag::ACE_SWIPER,
             "Swiper start property translate animation with offsetX: %{public}f, offsetY: %{public}f", offset.GetX(),
             offset.GetY());
-        ACE_SCOPED_TRACE("Swiper start property animation, X: %f, Y: %f", offset.GetX(), offset.GetY());
+        ACE_SCOPED_TRACE_COMMERCIAL("%s start property animation, X: %f, Y: %f",
+            swiperPattern->hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG, offset.GetX(), offset.GetY());
         for (auto& item : swiperPattern->itemPosition_) {
             auto frameNode = item.second.node;
             if (frameNode) {
@@ -3335,6 +3339,8 @@ void SwiperPattern::PlayTranslateAnimation(
             host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, endPos);
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
+            ACE_SCOPED_TRACE_COMMERCIAL("%s start translate animation",
+                swiper->hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG);
             AnimationCallbackInfo info;
             info.velocity = Dimension(velocity, DimensionUnit::PX).ConvertToVp();
             info.currentOffset = swiper->GetCustomPropertyOffset() +
@@ -3352,6 +3358,8 @@ void SwiperPattern::PlayTranslateAnimation(
         [weak, nextIndex, restartAutoPlay, finishAnimation]() {
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
+            ACE_SCOPED_TRACE_COMMERCIAL("%s finish translate animation",
+                swiper->hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG);
             if (finishAnimation && swiper->translateAnimationIsRunning_) {
                 swiper->isFinishAnimation_ = true;
             }
@@ -3539,9 +3547,10 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
         [weak = AceType::WeakClaim(this), dragVelocity, host, delta]() {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
             TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper start spring animation");
-            ACE_SCOPED_TRACE("Swiper start spring animation");
             auto swiperPattern = weak.Upgrade();
             CHECK_NULL_VOID(swiperPattern);
+            ACE_SCOPED_TRACE_COMMERCIAL("%s start spring animation",
+                swiperPattern->hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG);
             swiperPattern->springAnimationIsRunning_ = true;
             swiperPattern->OnSpringAnimationStart(static_cast<float>(dragVelocity));
             host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, delta);
@@ -3553,7 +3562,9 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
             CHECK_NULL_VOID(swiperPattern);
             TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper finish spring animation offset %{public}f",
                 swiperPattern->currentIndexOffset_);
-            ACE_SCOPED_TRACE("Swiper finish spring animation offset %f", swiperPattern->currentIndexOffset_);
+            ACE_SCOPED_TRACE_COMMERCIAL("%s finish spring animation, offset: %f",
+                swiperPattern->hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG,
+                swiperPattern->currentIndexOffset_);
             swiperPattern->springAnimationIsRunning_ = false;
             swiperPattern->isTouchDownSpringAnimation_ = false;
             swiperPattern->OnSpringAndFadeAnimationFinish();
