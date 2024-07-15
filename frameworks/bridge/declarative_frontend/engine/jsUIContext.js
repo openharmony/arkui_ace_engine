@@ -439,6 +439,9 @@ class UIContext {
 
     getAtomicServiceBar() {
         const bundleMgr = globalThis.requireNapi('bundle.bundleManager');
+        if (!bundleMgr || !bundleMgr.BundleFlag) {
+            return undefined;
+        }
         let data = bundleMgr.getBundleInfoForSelfSync(bundleMgr.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
         if (data.appInfo.bundleType == 1) {
             this.atomServiceBar = new AtomicServiceBar(this.instanceId_);
