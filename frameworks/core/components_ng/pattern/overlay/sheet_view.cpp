@@ -244,10 +244,11 @@ RefPtr<FrameNode> SheetView::BuildMainTitle(RefPtr<FrameNode> sheetNode, NG::She
     CHECK_NULL_RETURN(titleProp, nullptr);
     auto titleTextFontSize = sheetTheme->GetTitleTextFontSize();
     titleTextFontSize.SetUnit(DimensionUnit::FP);
-    titleProp->UpdateMaxLines(SHEET_TITLE_MAX_LINES);
+    titleProp->UpdateMaxLines(SHEET_MAIN_TITLE_MAX_LINES);
     titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     titleProp->UpdateAdaptMaxFontSize(titleTextFontSize);
-    titleProp->UpdateAdaptMinFontSize(titleTextFontSize);
+    titleProp->UpdateAdaptMinFontSize(MIN_MAIN_TITLE_FONT_SIZE);
+    titleProp->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
     if (sheetStyle.sheetTitle.has_value()) {
         titleProp->UpdateContent(sheetStyle.sheetTitle.value());
     }
@@ -284,10 +285,11 @@ RefPtr<FrameNode> SheetView::BuildSubTitle(RefPtr<FrameNode> sheetNode, NG::Shee
     CHECK_NULL_RETURN(titleProp, nullptr);
     auto titleTextFontSize = sheetTheme->GetSubtitleTextFontSize();
     titleTextFontSize.SetUnit(DimensionUnit::VP);
-    titleProp->UpdateMaxLines(SHEET_TITLE_MAX_LINES);
+    titleProp->UpdateMaxLines(SHEET_SUB_TITLE_MAX_LINES);
     titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     titleProp->UpdateAdaptMaxFontSize(titleTextFontSize);
-    titleProp->UpdateAdaptMinFontSize(titleTextFontSize);
+    titleProp->UpdateAdaptMinFontSize(MIN_SUB_TITLE_FONT_SIZE);
+    titleProp->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
     if (sheetStyle.sheetSubtitle.has_value()) {
         titleProp->UpdateContent(sheetStyle.sheetSubtitle.value());
     }
@@ -309,14 +311,21 @@ RefPtr<FrameNode> SheetView::BuildSubTitle(RefPtr<FrameNode> sheetNode, NG::Shee
     return subtitleRow;
 }
 
-void SheetView::GetTitlePaddingPos(PaddingProperty& padding)
+void SheetView::GetTitlePaddingPos(PaddingProperty& padding, const RefPtr<FrameNode>& sheetNode)
 {
+    CHECK_NULL_VOID(sheetNode);
+    auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(sheetLayoutProperty);
+    auto showCloseIcon = sheetLayoutProperty->GetSheetStyleValue().showCloseIcon.value_or(true);
+
     // The title bar area is reserved for the close button area size by default.
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-            padding.left = CalcLength(SHEET_CLOSE_ICON_TITLE_SPACE_NEW + SHEET_CLOSE_ICON_WIDTH);
+            padding.left = CalcLength(showCloseIcon ?
+                SHEET_CLOSE_ICON_TITLE_SPACE_NEW + SHEET_CLOSE_ICON_WIDTH : 0.0_vp);
         } else {
-            padding.right = CalcLength(SHEET_CLOSE_ICON_TITLE_SPACE_NEW + SHEET_CLOSE_ICON_WIDTH);
+            padding.right = CalcLength(showCloseIcon ?
+                SHEET_CLOSE_ICON_TITLE_SPACE_NEW + SHEET_CLOSE_ICON_WIDTH : 0.0_vp);
         }
     } else {
         padding.right = CalcLength(SHEET_CLOSE_ICON_TITLE_SPACE + SHEET_CLOSE_ICON_WIDTH);
@@ -343,7 +352,7 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
     margin.bottom = CalcLength(SHEET_DOUBLE_TITLE_BOTTON_PADDING);
     layoutProperty->UpdateMargin(margin);
     PaddingProperty padding;
-    GetTitlePaddingPos(padding);
+    GetTitlePaddingPos(padding, sheetNode);
     layoutProperty->UpdatePadding(padding);
     auto columnProps = titleColumn->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(columnProps, nullptr);

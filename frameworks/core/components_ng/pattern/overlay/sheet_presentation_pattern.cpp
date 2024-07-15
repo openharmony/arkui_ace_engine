@@ -174,6 +174,7 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
     UpdateFontScaleStatus();
     UpdateDragBarStatus();
     UpdateCloseIconStatus();
+    UpdateTitlePadding();
     UpdateSheetTitle();
     ClipSheetNode();
     CheckBuilderChange();
@@ -930,6 +931,38 @@ float SheetPresentationPattern::GetCloseIconPosX(const SizeF& sheetSize, const R
     return closeIconX;
 }
 
+void SheetPresentationPattern::UpdateTitlePadding()
+{
+    if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->GetSheetStyleValue().isTitleBuilder.has_value()) {
+        return;
+    }
+
+    auto operationNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+    CHECK_NULL_VOID(operationNode);
+    auto titleNode = DynamicCast<FrameNode>(operationNode->GetChildAtIndex(1));
+    CHECK_NULL_VOID(titleNode);
+    auto titleLayoutProperty = DynamicCast<LinearLayoutProperty>(titleNode->GetLayoutProperty());
+    CHECK_NULL_VOID(titleLayoutProperty);
+    auto showCloseIcon = layoutProperty->GetSheetStyleValue().showCloseIcon.value_or(true);
+    PaddingProperty padding;
+    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        padding.left = CalcLength(showCloseIcon ? SHEET_CLOSE_ICON_TITLE_SPACE_NEW + SHEET_CLOSE_ICON_WIDTH : 0.0_vp);
+    } else {
+        padding.right = CalcLength(showCloseIcon ? SHEET_CLOSE_ICON_TITLE_SPACE_NEW + SHEET_CLOSE_ICON_WIDTH : 0.0_vp);
+    }
+
+    titleLayoutProperty->UpdatePadding(padding);
+    titleNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void SheetPresentationPattern::UpdateCloseIconStatus()
 {
     if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -1238,6 +1271,12 @@ void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType)
     if (IsFold() && !sheetTheme->IsOnlyBottom()) {
 #endif
         sheetType = SheetType::SHEET_CENTER;
+        auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto sheetStyle = layoutProperty->GetSheetStyleValue();
+        if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_POPUP) {
+            sheetType = SheetType::SHEET_POPUP;
+        }
     } else {
         if (LessNotEqual(rootHeight, rootWidth)) {
             sheetType = SheetType::SHEET_BOTTOMLANDSPACE;
