@@ -109,6 +109,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     if (lastDownFingerNumber_ == 0 && refereeNG_->QueryAllDone()) {
         MockCancelEventAndDispatch(touchPoint);
         refereeNG_->ForceCleanGestureReferee();
+        refereeNG_->CleanAll();
         CleanGestureEventHub();
     }
     if (!needAppend && touchTestResults_.empty()) {
