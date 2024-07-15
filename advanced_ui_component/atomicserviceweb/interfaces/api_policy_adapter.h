@@ -29,7 +29,11 @@ public:
     void SetCheckUrlFunc(CheckUrlFunc& func);
 
 private:
+#ifdef __WIN32
+    HMODULE handle = nullptr;
+#else
     void *handle = nullptr;
+#endif
     CheckUrlFunc func = nullptr;
 };
 

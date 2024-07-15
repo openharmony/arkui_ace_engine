@@ -14,35 +14,47 @@
  */
 
 #include "api_policy_adapter.h"
-#ifdef _WIN32
+#ifdef __WIN32
 #include <windows.h>
-#define APIENTRY __stdcall
-#define APIENTRY_WIN32 __stdcall
-#define APIENTRY_WIN64 __stdcall
 #else
 #include <dlfcn.h>
 #endif
 
 ApiPolicyAdapter::ApiPolicyAdapter()
 {
+#ifdef __WIN32
+    handle = LoadLibrary(TEXT("/system/lib64/platformsdk/libapipolicy_client.z.so"));
+    if (!handle) {
+        return;
+    }
+    func = (CheckUrlFunc)GetProcAddress(handle, "CheckUrl");
+#else
     handle = dlopen("/system/lib64/platformsdk/libapipolicy_client.z.so", RTLD_NOW);
     if (!handle) {
         return;
     }
     func = reinterpret_cast<CheckUrlFunc>(dlsym(handle, "CheckUrl"));
+#endif
 }
 
 ApiPolicyAdapter::~ApiPolicyAdapter()
 {
+#ifdef __WIN32
+    if (handle) {
+        FreeLibrary(handle);
+        handle = nullptr;
+    }
+#else
     if (handle) {
         dlclose(handle);
         handle = nullptr;
     }
+#endif
 }
 
 int32_t ApiPolicyAdapter::CheckUrl(const std::string& bundleName, const std::string& domainType, const std::string& url)
 {
-    int32_t res = -1;
+    int32_t res = 0;
     if (func == nullptr) {
         return res;
     }
