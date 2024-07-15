@@ -5411,7 +5411,6 @@ int32_t OverlayManager::CreateModalUIExtension(
     const ModalUIExtensionConfig& config)
 {
     isProhibitBack_ = config.isProhibitBack;
-    SetIsAllowedBeCovered(config.isAllowedBeCovered);
     auto uiExtNode = ModalUIExtension::Create(want, callbacks, config.isAsyncModalBinding);
     if (!HandleUIExtNodeTransform(want, uiExtNode)) {
         return 0;
@@ -5425,6 +5424,7 @@ int32_t OverlayManager::CreateModalUIExtension(
         ModalStyle modalStyle;
         modalStyle.modalTransition = NG::ModalTransition::NONE;
         modalStyle.isUIExtension = true;
+        SetIsAllowedBeCovered(config.isAllowedBeCovered);
         // Convert the sessionId into a negative number to distinguish it from the targetId of other modal pages
         BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, nullptr, nullptr,
             ContentCoverParam(), nullptr, -(sessionId));

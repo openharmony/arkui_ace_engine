@@ -601,6 +601,8 @@ void SecurityUIExtensionPattern::OnMountToParentDone()
         PLATFORM_LOGI("Frame node status is normal.");
         return;
     }
+
+    PLATFORM_LOGI("OnMountToParentDone");
     auto wantWrap = GetWantWrap();
     CHECK_NULL_VOID(wantWrap);
     UpdateWant(wantWrap);
