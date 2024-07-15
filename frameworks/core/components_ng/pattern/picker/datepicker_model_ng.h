@@ -42,6 +42,7 @@ public:
     void SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value) override;
     void SetBackgroundColor(const Color& color) override;
     void SetChangeEvent(DateChangeEvent&& onChange) override;
+    void SetDigitalCrownSensitivity(int32_t crownSensitivity) override;
     static void SetSelectedTextStyle(
         FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
     static void SetNormalTextStyle(
@@ -64,7 +65,7 @@ public:
     static LunarDate getSelectedDate(FrameNode* frameNode);
     static uint32_t getBackgroundColor(FrameNode* frameNode);
     static void SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme);
-
+    static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity);
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();

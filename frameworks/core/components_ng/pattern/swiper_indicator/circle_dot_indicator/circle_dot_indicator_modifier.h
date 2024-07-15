@@ -85,8 +85,7 @@ public:
                                           const LinearVector<float>& vectorBlackPointAngle,
                                           const LinearVector<float>& vectorBlackPointRadius,
                                           const std::pair<float, float>& longPointAngle);
-    void UpdateTouchBottomAnimation(TouchBottomType touchBottomType,
-                                    const LinearVector<float> &vectorBlackPointCenterX,
+    void UpdateTouchBottomAnimation(const LinearVector<float> &vectorBlackPointCenterX,
                                     const std::pair<float, float> &longPointCenterX,
                                     float backgroundOffset);
 
@@ -197,6 +196,16 @@ public:
         return initState_;
     }
 
+    void SetTouchBottomRate(float touchBottomRate)
+    {
+        touchBottomRate_ = touchBottomRate;
+    }
+
+    void SetTouchBottomType(TouchBottomType touchBottomType)
+    {
+        touchBottomType_ = touchBottomType;
+    }
+
 private:
     void PlayBlackPointsAnimation(const LinearVector<float>& vectorBlackPointAngle,
                                   const LinearVector<float>& vectorBlackPointRadius);
@@ -204,6 +213,7 @@ private:
         GestureState gestureState, const LinearVector<float>& vectorBlackPointAngle);
     std::vector<GradientColor> GetMaskColor() const;
     Gradient SortGradientColorsByOffset(const Gradient& gradient) const;
+    std::pair<PointF, PointF> GetArcPoint(const ContentProperty& contentProperty) const;
 
     RefPtr<AnimatablePropertyColor> backgroundColor_;
     RefPtr<AnimatablePropertyVectorFloat> vectorBlackPointAngle_;
@@ -229,6 +239,7 @@ private:
     float centerX_ = 0.0;
     float centerY_ = 0.0;
     float circleRadius_ = 0.0;
+    float touchBottomRate_ = 0.0f;
     int32_t indicatorStartIndex_ = 0;
     bool initState_ = true;
 

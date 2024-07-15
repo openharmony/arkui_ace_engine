@@ -127,6 +127,7 @@ void SelectPattern::OnModifyDone()
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->UpdateSelectIndex(selected_);
+    InitFocusEvent();
 }
 
 void SelectPattern::OnAfterModifyDone()
@@ -390,6 +391,112 @@ void SelectPattern::CreateSelectedCallback()
     }
 }
 
+void SelectPattern::InitFocusEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    auto focusTask = [weak = WeakClaim(this), selectRenderContext = renderContext,
+        theme = selectTheme]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleFocusStyleTask(selectRenderContext, theme);
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+    auto blurTask = [weak = WeakClaim(this), selectRenderContext = renderContext,
+        theme = selectTheme]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurStyleTask(selectRenderContext, theme);
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+}
+
+void SelectPattern::HandleFocusStyleTask(RefPtr<RenderContext> selectRenderContext, RefPtr<SelectTheme> selectTheme)
+{
+    auto && graphics = selectRenderContext->GetOrCreateGraphics();
+    auto && transform = selectRenderContext->GetOrCreateTransform();
+    CHECK_NULL_VOID(graphics);
+    CHECK_NULL_VOID(transform);
+
+    Shadow shadow = Shadow::CreateShadow(static_cast<ShadowStyle>(selectTheme->GetSelectNormalShadow()));
+    if (!graphics->HasBackShadow() || graphics->GetBackShadowValue() == shadow) {
+        shadowModify_ = true;
+        ShadowStyle shadowStyle = static_cast<ShadowStyle>(selectTheme->GetSelectFocusedShadow());
+        selectRenderContext->UpdateBackShadow(Shadow::CreateShadow(shadowStyle));
+    }
+    float scaleFocus = selectTheme->GetSelectFocusedScale();
+    VectorF scale(scaleFocus, scaleFocus);
+    if (!transform->HasTransformScale() || transform->GetTransformScale() == scale) {
+        scaleModify_ = true;
+        selectRenderContext->SetScale(scaleFocus, scaleFocus);
+    }
+    Color color;
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        color = selectTheme->GetBackgroundColor();
+    } else {
+        color = selectTheme->GetButtonBackgroundColor();
+    }
+    bgColorModify_ = selectRenderContext->GetBackgroundColor() == color;
+    if (bgColorModify_) {
+        selectRenderContext->UpdateBackgroundColor(selectTheme->GetSelectFocusedBackground());
+    }
+    auto props = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    focusTextColorModify_ = props->GetTextColor() == selectTheme->GetFontColor();
+    if (focusTextColorModify_) {
+        props->UpdateTextColor(selectTheme->GetSelectFocusTextColor());
+        auto textRenderContext = text_->GetRenderContext();
+        CHECK_NULL_VOID(textRenderContext);
+        textRenderContext->UpdateForegroundColor(selectTheme->GetSelectFocusTextColor());
+        text_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    isFocus_ = true;
+}
+
+void SelectPattern::HandleBlurStyleTask(RefPtr<RenderContext> selectRenderContext, RefPtr<SelectTheme> selectTheme)
+{
+    if (shadowModify_) {
+        ShadowStyle shadowStyle = static_cast<ShadowStyle>(selectTheme->GetSelectNormalShadow());
+        Shadow shadow = Shadow::CreateShadow(shadowStyle);
+        selectRenderContext->UpdateBackShadow(shadow);
+        shadowModify_ = false;
+    }
+
+    if (scaleModify_) {
+        scaleModify_ = false;
+        selectRenderContext->SetScale(1.0f, 1.0f);
+    }
+    if (bgColorModify_) {
+        bgColorModify_ = false;
+        Color color;
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            color = selectTheme->GetBackgroundColor();
+        } else {
+            color = selectTheme->GetButtonBackgroundColor();
+        }
+        selectRenderContext->UpdateBackgroundColor(color);
+    }
+    if (focusTextColorModify_) {
+        focusTextColorModify_ = false;
+        auto props = text_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(props);
+        props->UpdateTextColor(selectTheme->GetFontColor());
+        auto textRenderContext = text_->GetRenderContext();
+        CHECK_NULL_VOID(textRenderContext);
+        textRenderContext->UpdateForegroundColor(selectTheme->GetFontColor());
+        text_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    isFocus_ = false;
+}
+
 void SelectPattern::RegisterOnKeyEvent()
 {
     auto host = GetHost();
@@ -479,6 +586,12 @@ void SelectPattern::SetSelected(int32_t index)
     }
     UpdateLastSelectedProps(index);
     selected_ = index;
+    for (size_t i = 0; i < options_.size(); ++i) {
+        auto pattern = options_[i]->GetPattern<OptionPattern>();
+        if (pattern) {
+            pattern->SetSelected(selected_);
+        }
+    }
 }
 
 void SelectPattern::AddOptionNode(const RefPtr<FrameNode>& option)
@@ -553,6 +666,22 @@ void SelectPattern::BuildChild()
     // set bgColor and border
     auto renderContext = select->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    if (!renderContext->HasBorderColor()) {
+        BorderColorProperty borderColor;
+        borderColor.SetColor(theme->GetSelectNormalBorderColor());
+        renderContext->UpdateBorderColor(borderColor);
+    }
+    if (!renderContext->HasBorderWidth()) {
+        auto layoutProperty = select->GetLayoutProperty();
+        BorderWidthProperty borderWidth;
+        borderWidth.SetBorderWidth(theme->GetSelectNormalBorderWidth());
+        layoutProperty->UpdateBorderWidth(borderWidth);
+        renderContext->UpdateBorderWidth(borderWidth);
+    }
+    if (!renderContext->HasBackShadow()) {
+        ShadowStyle shadowStyle = static_cast<ShadowStyle>(theme->GetSelectNormalShadow());
+        renderContext->UpdateBackShadow(Shadow::CreateShadow(shadowStyle));
+    }
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
     } else {
@@ -799,7 +928,8 @@ void SelectPattern::UpdateLastSelectedProps(int32_t index)
         lastSelected->SetFontSize(newSelected->GetFontSize());
         lastSelected->SetItalicFontStyle(newSelected->GetItalicFontStyle());
         lastSelected->SetFontWeight(newSelected->GetFontWeight());
-
+        lastSelected->SetBorderColor(newSelected->GetBorderColor());
+        lastSelected->SetBorderWidth(newSelected->GetBorderWidth());
         lastSelected->SetBgColor(newSelected->GetBgColor());
         lastSelected->UpdateNextNodeDivider(true);
         if (selected_ != 0) {
@@ -838,6 +968,9 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
     }
     if (selectedFont_.FontSize.has_value()) {
         newSelected->SetFontSize(selectedFont_.FontSize.value());
+    } else {
+        auto selectedFontSizeText = theme->GetSelectFontSizeText();
+        newSelected->SetFontSize(selectedFontSizeText);
     }
     if (selectedFont_.FontStyle.has_value()) {
         newSelected->SetItalicFontStyle(selectedFont_.FontStyle.value());
@@ -851,6 +984,8 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
         auto selectedColor = theme->GetSelectedColor();
         newSelected->SetBgColor(selectedColor);
     }
+    newSelected->SetBorderColor(theme->GetOptionSelectedBorderColor());
+    newSelected->SetBorderWidth(theme->GetOptionSelectedBorderWidth());
     newSelected->UpdateNextNodeDivider(false);
     auto newSelectedNode = newSelected->GetHost();
     CHECK_NULL_VOID(newSelectedNode);
@@ -1428,5 +1563,16 @@ void SelectPattern::SetLayoutDirection(TextDirection value)
 ControlSize SelectPattern::GetControlSize()
 {
     return controlSize_;
+}
+
+Dimension SelectPattern::GetSelectLeftRightMargin()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, SELECT_MARGIN_VP);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, SELECT_MARGIN_VP);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(selectTheme, SELECT_MARGIN_VP);
+    return selectTheme->GetSelectNormalLeftRightMargin();
 }
 } // namespace OHOS::Ace::NG

@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
+#include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -145,7 +146,18 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        auto pipeline = PipelineBase::GetCurrentContext();
+        FocusPattern focusPattern{ FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        CHECK_NULL_RETURN(pipeline, focusPattern);
+        auto theme = pipeline->GetTheme<AppTheme>();
+        CHECK_NULL_RETURN(theme, focusPattern);
+
+        FocusPaintParam focusPaintParam;
+        focusPaintParam.SetPaintColor(theme->GetFocusBorderColor());
+        focusPaintParam.SetPaintWidth(theme->GetFocusBorderWidth());
+        focusPaintParam.SetFocusPadding(theme->GetFocusOutPaddingVp());
+        focusPaintParam.SetFocusBoxGlow(theme->IsFocusBoxGlow());
+        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, focusPaintParam};
     }
 
     // update selected option props
@@ -198,13 +210,16 @@ public:
     void SetControlSize(const ControlSize& controlSize);
     ControlSize GetControlSize();
     void SetLayoutDirection(TextDirection value);
+    Dimension GetSelectLeftRightMargin();
 
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-
+    void HandleFocusStyleTask(RefPtr<RenderContext> selectRenderContext, RefPtr<SelectTheme> selectTheme);
+    void HandleBlurStyleTask(RefPtr<RenderContext> selectRenderContext, RefPtr<SelectTheme> selectTheme);
+    void InitFocusEvent();
     bool HasRowNode() const
     {
         return rowId_.has_value();
@@ -312,6 +327,11 @@ private:
     Color selectDefaultBgColor_ = Color::TRANSPARENT;
     ControlSize controlSize_ = ControlSize::NORMAL;
     ACE_DISALLOW_COPY_AND_MOVE(SelectPattern);
+    bool bgColorModify_ = false;
+    bool scaleModify_ = false;
+    bool shadowModify_ = false;
+    bool focusTextColorModify_ = false;
+    bool isFocus_ = false;
 };
 
 } // namespace OHOS::Ace::NG

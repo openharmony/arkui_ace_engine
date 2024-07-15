@@ -170,9 +170,12 @@ void ToastView::UpdateTextContext(const RefPtr<FrameNode>& textNode)
     textContext->UpdateClipEdge(false);
 
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        textContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        auto defaultBGcolor = toastTheme->GetDefaultBGColor();
+        textContext->UpdateBackgroundColor(defaultBGcolor);
+
         BlurStyleOption styleOption;
         styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+        styleOption.colorMode = static_cast<ThemeColorMode>(toastTheme->GetBgThemeColorMode());
         textContext->UpdateBackBlurStyle(styleOption);
     } else {
         auto toastBackgroundColor = toastTheme->GetBackgroundColor();

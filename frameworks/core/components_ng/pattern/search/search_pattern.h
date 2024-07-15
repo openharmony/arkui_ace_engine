@@ -130,6 +130,7 @@ public:
 
     void UpdateChangeEvent(const std::string& value, int16_t style = -1);
 
+    void UpdateFocusTextColor(const RefPtr<FrameNode>& imageHost);
     void SetCancelButtonNode(const RefPtr<FrameNode>& cancelButtonNode)
     {
         cancelButtonNode_ = cancelButtonNode;
@@ -210,7 +211,10 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState(bool recoverFlag = false);
+    void PaintSearchFocusState();
     void GetInnerFocusPaintRect(RoundRect& paintRect);
+    void GetSearchFocusPaintRadius(float& radiusTopLeft, float& radiusTopRight,
+        float& radiusBottomLeft, float& radiusBottomRight);
     void RequestKeyboard();
     // Init touch and hover event
     void InitTextFieldValueChangeEvent();
@@ -266,6 +270,7 @@ private:
     void UpdateIconSrc(int32_t index, const std::string& src);
     void UpdateIconColor(int32_t index, const Color& color);
     void UpdateIconSize(int32_t index, const Dimension& value);
+    Color GetDefaultIconColor(int32_t index);
 
     uint32_t GetMaxLength() const;
     std::string SearchTypeToString() const;
@@ -300,18 +305,21 @@ private:
     bool isSearchButtonHover_ = false;
     bool isSearchButtonEnabled_ = false;
     bool focusBoxGlow_ = false;
+    bool isFocusPlaceholderColorSet_ = false;
+    bool isFocusBgColorSet_ = false;
+    bool isFocusIconColorSet_ = false;
+    bool isFocusTextColorSet_ = false;
     Color searchHoverColor_;
     Color searchTouchColor_;
     Color searchNormalColor_;
-    Color focusBorderColor_;
     Color focusBgColor_;
     Color focusIconColor_;
     Color normalIconColor_;
     Color focusTextColor_;
     Color normalTextColor_;
+    Color focusPlaceholderColor_;
+    Color normalPlaceholderColor_;
     Color transparentColor_ = Color::TRANSPARENT;
-    Dimension focusBorderWidth_;
-    Dimension focusBorderPadding_;
 
     RefPtr<FrameNode> cancelButtonNode_;
     RefPtr<FrameNode> buttonNode_;

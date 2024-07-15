@@ -408,6 +408,53 @@ std::pair<float, float> TabBarPattern::GetOverScrollInfo(const SizeF& size)
     return std::make_pair(overScroll, mainSize);
 }
 
+void TabBarPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto focusTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->isFocusSet_ = true;
+        pattern->AddIsFocusActiveUpdateEvent();
+        pattern->UpdateSubTabBoard();
+        pattern->UpdateTextColorAndFontWeight(pattern->indicator_);
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->isFocusSet_ = false;
+        pattern->RemoveIsFocusActiveUpdateEvent();
+        pattern->UpdateSubTabBoard();
+        pattern->UpdateTextColorAndFontWeight(pattern->indicator_);
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+}
+
+void TabBarPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->isFocusSet_ = isFocusAcitve;
+            pattern->UpdateSubTabBoard();
+            pattern->UpdateTextColorAndFontWeight(pattern->indicator_);
+        };
+    }
+
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void TabBarPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
+}
+
 void TabBarPattern::InitTouch(const RefPtr<GestureEventHub>& gestureHub)
 {
     if (touchEvent_) {
@@ -712,6 +759,8 @@ void TabBarPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     if (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE || tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE) {
         if (isFirstFocus_) {
             focusIndicator_ = indicator;
+            UpdateSubTabBoard();
+            UpdateTextColorAndFontWeight(indicator_);
         } else {
             indicator = focusIndicator_;
         }
@@ -754,7 +803,8 @@ void TabBarPattern::PaintFocusState(bool needMarkDirty)
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->PaintInnerFocusState(focusRect);
-
+    UpdateSubTabBoard();
+    UpdateTextColorAndFontWeight(indicator_);
     if (needMarkDirty) {
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
@@ -796,6 +846,7 @@ void TabBarPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
+    InitFocusEvent(focusHub);
     SetAccessibilityAction();
     UpdateSubTabBoard();
     needSetCentered_ = true;
@@ -1777,7 +1828,9 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
     CHECK_NULL_VOID(tabBarNode);
     auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(indicator));
     CHECK_NULL_VOID(columnNode);
-    auto selectedColumnId = columnNode->GetId();
+    int32_t selectedColumnId = 0;
+    int32_t focusedColumnId = 0;
+    GetColumnId(selectedColumnId, focusedColumnId);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
@@ -1795,13 +1848,20 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         auto isSelected = columnNode->GetId() == selectedColumnId;
+        auto isFocused = columnNode->GetId() == focusedColumnId;
         if (index >= 0 && index < static_cast<int32_t>(labelStyles_.size())) {
-            if (isSelected) {
-                textLayoutProperty->UpdateTextColor(labelStyles_[index].selectedColor.has_value() ?
-                    labelStyles_[index].selectedColor.value() : tabTheme->GetSubTabTextOnColor());
+            if (isFocused && isFocusSet_) {
+                textLayoutProperty->UpdateTextColor(labelStyles_[index].selectedColor.has_value()
+                                                        ? labelStyles_[index].selectedColor.value()
+                                                        : tabTheme->GetSubTabTextFocusedColor());
+            } else if (isSelected) {
+                textLayoutProperty->UpdateTextColor(labelStyles_[index].selectedColor.has_value()
+                                                        ? labelStyles_[index].selectedColor.value()
+                                                        : tabTheme->GetSubTabTextOnColor());
             } else {
-                textLayoutProperty->UpdateTextColor(labelStyles_[index].unselectedColor.has_value() ?
-                    labelStyles_[index].unselectedColor.value() : tabTheme->GetSubTabTextOffColor());
+                textLayoutProperty->UpdateTextColor(labelStyles_[index].unselectedColor.has_value()
+                                                        ? labelStyles_[index].unselectedColor.value()
+                                                        : tabTheme->GetSubTabTextOffColor());
             }
         }
         if (IsNeedUpdateFontWeight(index)) {
@@ -1952,6 +2012,20 @@ void TabBarPattern::UpdateSymbolEffect(int32_t index)
     }
 }
 
+void TabBarPattern::GetColumnId(int32_t& selectedColumnId, int32_t& focusedColumnId)
+{
+    auto tabBarNode = GetHost();
+    CHECK_NULL_VOID(tabBarNode);
+    auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(indicator_));
+    CHECK_NULL_VOID(columnNode);
+    selectedColumnId = columnNode->GetId();
+    auto focusedColumnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(focusIndicator_));
+    CHECK_NULL_VOID(focusedColumnNode);
+    focusedColumnId = focusedColumnNode->GetId();
+}
+
 void TabBarPattern::UpdateSubTabBoard()
 {
     auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
@@ -1964,13 +2038,13 @@ void TabBarPattern::UpdateSubTabBoard()
     }
     auto tabBarNode = GetHost();
     CHECK_NULL_VOID(tabBarNode);
-    auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(indicator_));
-    CHECK_NULL_VOID(columnNode);
-    auto selectedColumnId = columnNode->GetId();
+    int32_t selectedColumnId = 0;
+    int32_t focusedColumnId = 0;
+    GetColumnId(selectedColumnId, focusedColumnId);
     auto pipelineContext = GetHost()->GetContext();
     CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
     auto fontscale = pipelineContext->GetFontScale();
     SetMarginVP(marginLeftOrRight_, marginTopOrBottom_);
     TabBarSuitAging();
@@ -1996,7 +2070,9 @@ void TabBarPattern::UpdateSubTabBoard()
                 axis == Axis::HORIZONTAL) {
                 renderContext->UpdateBackgroundColor(indicatorStyles_[indicator_].color);
             } else {
-                renderContext->UpdateBackgroundColor(Color::BLACK.BlendOpacity(0.0f));
+                renderContext->UpdateBackgroundColor((columnFrameNode->GetId() == focusedColumnId && isFocusSet_)
+                                                         ? tabTheme->GetTabBarFocusedColor()
+                                                         : Color::BLACK.BlendOpacity(0.0f));
             }
             columnFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }

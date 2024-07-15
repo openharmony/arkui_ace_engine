@@ -67,6 +67,11 @@ class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute
       this._modifiersWithKeys, TextpickerGradientHeightModifier.identity, TextpickerGradientHeightModifier, value);
     return this;
   }
+  digitalCrownSensitivity(sensitivity: Optional<CrownSensitivity>): this {
+    modifierWithKey(
+      this._modifiersWithKeys, TextpickerDigitalCrownSensitivityModifier.identity, TextpickerDigitalCrownSensitivityModifier, value);
+    return this;
+  }
 }
 
 class TextpickerCanLoopModifier extends ModifierWithKey<boolean> {
@@ -79,6 +84,20 @@ class TextpickerCanLoopModifier extends ModifierWithKey<boolean> {
       getUINativeModule().textpicker.resetCanLoop(node);
     } else {
       getUINativeModule().textpicker.setCanLoop(node, this.value);
+    }
+  }
+}
+
+class TextpickerDigitalCrownSensitivityModifier extends ModifierWithKey<Optional<CrownSensitivity>> {
+  constructor(value: Optional<CrownSensitivity>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textpickerDigitalCrownSensitivity');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textpicker.resetDigitalCrownSensitivity(node);
+    } else {
+      getUINativeModule().textpicker.setDigitalCrownSensitivity(node, this.value);
     }
   }
 }

@@ -68,6 +68,7 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     useContentModifier_ = AceType::MakeRefPtr<PropertyBool>(false);
     isHover_ = AceType::MakeRefPtr<PropertyBool>(false);
     isPress_ = AceType::MakeRefPtr<PropertyBool>(false);
+    isFocus_ = AceType::MakeRefPtr<PropertyBool>(false);
     // others
     UpdateData(parameters);
     UpdateThemeColor();
@@ -99,6 +100,7 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     AttachProperty(blockType_);
     AttachProperty(isHover_);
     AttachProperty(isPress_);
+    AttachProperty(isFocus_);
 
     InitializeShapeProperty();
 }
@@ -177,6 +179,9 @@ void SliderContentModifier::DrawBackground(DrawingContext& context)
         colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
         pos.emplace_back(gradientColors[i].GetDimension().Value());
     }
+    if (sliderMode_->Get() != static_cast<int32_t>(SliderModel::SliderMode::INSET)) {
+        isEnlarge_ = isPress_->Get() || isHover_->Get() || isFocus_->Get();
+    }
     RSRect trackRect = GetTrackRect();
     auto direction = static_cast<Axis>(directionAxis_->Get());
     RSPoint startPoint;
@@ -202,9 +207,8 @@ void SliderContentModifier::DrawBackground(DrawingContext& context)
 #endif
     }
     canvas.AttachBrush(brush);
-    isPressOrHover_ = isPress_->Get() || isHover_->Get();
-    RSRoundRect roundRect(trackRect, isPressOrHover_ ? trackBorderRadius * scaleValue_ : trackBorderRadius,
-        isPressOrHover_ ? trackBorderRadius * scaleValue_ : trackBorderRadius);
+    RSRoundRect roundRect(trackRect, isEnlarge_ ? trackBorderRadius * scaleValue_ : trackBorderRadius,
+        isEnlarge_ ? trackBorderRadius * scaleValue_ : trackBorderRadius);
     canvas.DrawRoundRect(roundRect);
     canvas.DetachBrush();
     canvas.Save();
@@ -324,7 +328,7 @@ void SliderContentModifier::DrawDefaultBlock(DrawingContext& context)
         canvas.AttachPen(pen);
     }
     canvas.DrawCircle(
-        ToRSPoint(PointF(blockCenter.GetX(), blockCenter.GetY())), isPressOrHover_ ? radius * scaleValue_ : radius);
+        ToRSPoint(PointF(blockCenter.GetX(), blockCenter.GetY())), isEnlarge_ ? radius * scaleValue_ : radius);
     canvas.DetachBrush();
     if (!NearEqual(borderWidth, .0f) && LessNotEqual(borderWidth * HALF, blockRadius)) {
         canvas.DetachPen();
@@ -350,7 +354,7 @@ void SliderContentModifier::DrawHoverOrPress(DrawingContext& context)
     float diameter = std::min(blockSize.Width(), blockSize.Height());
     auto penRadius = (diameter + hotCircleShadowWidth_) * HALF;
     auto blockCenter = GetBlockCenter();
-    canvas.DrawCircle(ToRSPoint(blockCenter), isPressOrHover_ ? penRadius * scaleValue_ : penRadius);
+    canvas.DrawCircle(ToRSPoint(blockCenter), isEnlarge_ ? penRadius * scaleValue_ : penRadius);
     canvas.DetachPen();
 }
 
@@ -515,6 +519,7 @@ RSRect SliderContentModifier::GetTrackRect()
         stepSize = trackThickness;
     }
     RSRect rect;
+    auto calculatedThickness = isEnlarge_ ? trackThickness * HALF * scaleValue_ : trackThickness * HALF;
     if (direction == Axis::HORIZONTAL) {
         if (sliderMode_->Get() == static_cast<int32_t>(SliderModel::SliderMode::OUTSET)) {
             rect.SetLeft(backStart.GetX() - stepSize * HALF);
@@ -526,12 +531,11 @@ RSRect SliderContentModifier::GetTrackRect()
             rect.SetLeft(backStart.GetX());
             rect.SetRight(backEnd.GetX());
         }
-        rect.SetTop(backStart.GetY() - (isPressOrHover_ ? trackThickness * HALF * scaleValue_ : trackThickness * HALF));
-        rect.SetBottom(
-            backEnd.GetY() + (isPressOrHover_ ? trackThickness * HALF * scaleValue_ : trackThickness * HALF));
+        rect.SetTop(backStart.GetY() - calculatedThickness);
+        rect.SetBottom(backEnd.GetY() + calculatedThickness);
     } else {
-        rect.SetLeft(backStart.GetX() - trackThickness * HALF);
-        rect.SetRight(backEnd.GetX() + trackThickness * HALF);
+        rect.SetLeft(backStart.GetX() - calculatedThickness);
+        rect.SetRight(backEnd.GetX() + calculatedThickness);
         if (sliderMode_->Get() == static_cast<int32_t>(SliderModel::SliderMode::OUTSET)) {
             rect.SetTop(backStart.GetY() - stepSize * HALF);
             rect.SetBottom(backEnd.GetY() + stepSize * HALF);

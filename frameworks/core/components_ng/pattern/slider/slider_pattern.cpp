@@ -854,8 +854,21 @@ void SliderPattern::GetInsetAndNoneInnerFocusPaintRect(RoundRect& paintRect)
             height += static_cast<float>(focusDistance.ConvertToPx()) / HALF;
         }
     }
-    paintRect.SetRect(RectF(offsetX, offsetY, width, height));
-    paintRect.SetCornerRadius(focusRadius);
+    UpdatePaintRect(theme, sliderMode, paintRect, RectF(offsetX, offsetY, width, height), focusRadius);
+}
+
+void SliderPattern::UpdatePaintRect(RefPtr<SliderTheme> theme, SliderModel::SliderMode& sliderMode,
+    RoundRect& paintRect, const RectF& rect, float rectRadius)
+{
+    if (theme->GetControlFocusFrame() == CONTROL_FOCUS_FRAME) {
+        if (sliderMode == SliderModel::SliderMode::INSET) {
+            paintRect.SetRect(rect);
+            paintRect.SetCornerRadius(rectRadius);
+        }
+    } else {
+        paintRect.SetRect(rect);
+        paintRect.SetCornerRadius(rectRadius);
+    }
 }
 
 void SliderPattern::PaintFocusState()
@@ -1407,6 +1420,8 @@ void SliderPattern::UpdateTipState()
         bubbleFlag_ = showBubble;
         UpdateBubble();
     }
+    CHECK_NULL_VOID(sliderContentModifier_);
+    sliderContentModifier_->SetIsFocused(isFocusActive_);
 }
 
 void SliderPattern::OnIsFocusActiveUpdate(bool isFocusActive)
@@ -1424,6 +1439,8 @@ void SliderPattern::OnIsFocusActiveUpdate(bool isFocusActive)
         UpdateBubble();
         UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+    CHECK_NULL_VOID(sliderContentModifier_);
+    sliderContentModifier_->SetIsFocused(isFocusActive);
 }
 
 void SliderPattern::AddIsFocusActiveUpdateEvent()

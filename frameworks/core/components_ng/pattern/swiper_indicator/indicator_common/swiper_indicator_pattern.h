@@ -129,6 +129,7 @@ public:
         }
         paintMethod->SetIsTouchBottom(touchBottomType_);
         paintMethod->SetMouseClickIndex(mouseClickIndex_);
+        paintMethod->SetTouchBottomRate(swiperPattern->GetTouchBottomRate());
         mouseClickIndex_ = std::nullopt;
         return paintMethod;
     }

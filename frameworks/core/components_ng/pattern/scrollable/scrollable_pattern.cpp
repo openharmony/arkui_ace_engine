@@ -35,6 +35,11 @@
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+#ifdef ARKUI_CIRCLE_FEATURE
+#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
+#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
+#endif // ARKUI_CIRCLE_FEATURE
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
@@ -460,6 +465,9 @@ void ScrollablePattern::AddScrollEvent()
     gestureHub->AddScrollableEvent(scrollableEvent_);
     InitTouchEvent(gestureHub);
     RegisterWindowStateChangedCallback();
+#ifdef SUPPORT_DIGITAL_CROWN
+    scrollable->ListenDigitalCrownEvent(host);
+#endif
 }
 
 void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -694,6 +702,18 @@ void ScrollablePattern::InitScrollBarGestureEvent()
         });
 }
 
+#ifdef ARKUI_CIRCLE_FEATURE
+RefPtr<ScrollBar> ScrollablePattern::CreateScrollBar()
+{
+    return AceType::MakeRefPtr<ArcScrollBar>();
+}
+#else
+RefPtr<ScrollBar> ScrollablePattern::CreateScrollBar()
+{
+    return AceType::MakeRefPtr<ScrollBar>();
+}
+#endif // ARKUI_CIRCLE_FEATURE
+
 void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
 {
     auto host = GetHost();
@@ -713,7 +733,8 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
     }
     DisplayMode oldDisplayMode = DisplayMode::OFF;
     if (!scrollBar_) {
-        scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
+        scrollBar_ = CreateScrollBar();
+        CHECK_NULL_VOID(scrollBar_);
         RegisterScrollBarEventTask();
     } else {
         oldDisplayMode = scrollBar_->GetDisplayMode();
@@ -870,11 +891,24 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
     scrollBarProxy_ = scrollBarProxy;
 }
 
+#ifdef ARKUI_CIRCLE_FEATURE
+RefPtr<ScrollBarOverlayModifier> ScrollablePattern::CreateOverlayModifier()
+{
+    return AceType::MakeRefPtr<ArcScrollBarOverlayModifier>();
+}
+#else
+RefPtr<ScrollBarOverlayModifier> ScrollablePattern::CreateOverlayModifier()
+{
+    return AceType::MakeRefPtr<ScrollBarOverlayModifier>();
+}
+#endif // ARKUI_CIRCLE_FEATURE
+
 void ScrollablePattern::CreateScrollBarOverlayModifier()
 {
     CHECK_NULL_VOID(scrollBar_ && scrollBar_->NeedPaint());
     CHECK_NULL_VOID(!scrollBarOverlayModifier_);
-    scrollBarOverlayModifier_ = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
+    scrollBarOverlayModifier_ = CreateOverlayModifier();
+    CHECK_NULL_VOID(scrollBarOverlayModifier_);
     scrollBarOverlayModifier_->SetRect(scrollBar_->GetActiveRect());
     scrollBarOverlayModifier_->SetPositionMode(scrollBar_->GetPositionMode());
 }

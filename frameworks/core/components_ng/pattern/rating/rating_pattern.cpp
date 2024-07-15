@@ -178,7 +178,7 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
         ratingModifier_ = AceType::MakeRefPtr<RatingModifier>();
     }
     auto starNum = ratingLayoutProperty->GetStarsValue(themeStarNum_);
-    auto defaultPaintMethod = MakeRefPtr<RatingPaintMethod>(ratingModifier_, starNum, state_, false);
+    auto defaultPaintMethod = MakeRefPtr<RatingPaintMethod>(WeakClaim(this), ratingModifier_, starNum, state_, false);
     CHECK_NULL_RETURN(ratingLayoutProperty, defaultPaintMethod);
     CHECK_NULL_RETURN(foregroundImageCanvas_, defaultPaintMethod);
     CHECK_NULL_RETURN(secondaryImageCanvas_, defaultPaintMethod);
@@ -209,7 +209,7 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
     auto direction = ratingLayoutProperty->GetLayoutDirection();
     auto reverse = direction == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft() :
         direction == TextDirection::RTL;
-    auto paintMethod = MakeRefPtr<RatingPaintMethod>(ratingModifier_, starNum, state_, reverse);
+    auto paintMethod = MakeRefPtr<RatingPaintMethod>(WeakClaim(this), ratingModifier_, starNum, state_, reverse);
     paintMethod->UpdateFocusState(isfocus_, focusRatingScore_);
     return paintMethod;
 }
@@ -462,42 +462,6 @@ void RatingPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
     gestureHub->AddClickEvent(clickEvent_);
 }
 
-void RatingPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
-{
-    if (focusEventInitialized_) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    CHECK_NULL_VOID(focusHub);
-    auto focusTask = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->HandleFocusEvent();
-        }
-    };
-    focusHub->SetOnFocusInternal(focusTask);
-    auto blurTask = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleBlurEvent();
-    };
-    focusHub->SetOnBlurInternal(blurTask);
-    focusEventInitialized_ = true;
-}
-
-void RatingPattern::HandleFocusEvent()
-{
-    CHECK_NULL_VOID(ratingModifier_);
-    ratingModifier_->SetIsFocused(true);
-}
-
-void RatingPattern::HandleBlurEvent()
-{
-    CHECK_NULL_VOID(ratingModifier_);
-    ratingModifier_->SetIsFocused(false);
-}
-
 void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
     auto host = GetHost();
@@ -529,14 +493,25 @@ void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
         double starNum = property->GetStarsValue(themeStarNum_);
         wholeStarNum = starNum - wholeStarNum - 1;
     }
+    auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
+    CHECK_NULL_VOID(ratingRenderProperty);
+    ratingRenderProperty->UpdateTouchStar(wholeStarNum);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto ratingTheme = pipeline->GetTheme<RatingTheme>();
     CHECK_NULL_VOID(ratingTheme);
     auto radius = ratingTheme->GetFocusBorderRadius();
+    auto focusButtonRect = RectF(static_cast<float>(wholeStarNum) * singleStarWidth_ + offsetLeft, offsetTop,
+        singleStarWidth_, singleStarHeight);
+    auto focusSpace = ratingTheme->GetFocusSpace().ConvertToPx();
+    focusButtonRect -= OffsetF(focusSpace, focusSpace);
+    focusButtonRect += SizeF(focusSpace + focusSpace, focusSpace + focusSpace);
+    PaintFocusRect(paintRect, focusButtonRect, radius);
+}
 
-    paintRect.SetRect(RectF(static_cast<float>(wholeStarNum) * singleStarWidth_ + offsetLeft, offsetTop,
-        singleStarWidth_, singleStarHeight));
+void RatingPattern::PaintFocusRect(RoundRect& paintRect, RectF& focusButtonRect, Dimension& radius)
+{
+    paintRect.SetRect(focusButtonRect);
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
         static_cast<RSScalar>(radius.ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
@@ -642,6 +617,17 @@ void RatingPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 
 void RatingPattern::SetModifierFocus(bool isFocus)
 {
+    isfocus_ = isFocus;
+    if (isfocus_) {
+        auto pipline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipline);
+        if (!pipline->GetIsFocusActive()) {
+            return;
+        }
+        state_ = RatingModifier::RatingAnimationType::FOCUS;
+    } else {
+        state_ = RatingModifier::RatingAnimationType::NONE;
+    }
     ratingModifier_->SetIsFocus(isFocus);
     MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -705,9 +691,17 @@ void RatingPattern::InitMouseEvent()
 void RatingPattern::HandleHoverEvent(bool isHover)
 {
     isHover_ = isHover;
-    state_ = isHover_ ? RatingModifier::RatingAnimationType::HOVER : RatingModifier::RatingAnimationType::NONE;
+    if (isfocus_) {
+        state_ = RatingModifier::RatingAnimationType::FOCUS;
+    } else {
+        state_ = isHover_ ? RatingModifier::RatingAnimationType::HOVER : RatingModifier::RatingAnimationType::NONE;
+    }
+
     if (!isHover) {
         UpdateRatingScore(lastRatingScore_);
+        auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
+        CHECK_NULL_VOID(ratingRenderProperty);
+        ratingRenderProperty->UpdateTouchStar(lastRatingScore_);
     }
     MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -862,7 +856,6 @@ void RatingPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
-    InitFocusEvent(focusHub);
 }
 
 // XTS inspector code

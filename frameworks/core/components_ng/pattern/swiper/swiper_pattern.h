@@ -680,6 +680,7 @@ protected:
 
     float GetCustomPropertyOffset() const;
     float GetCustomPropertyTargetOffset() const;
+    float CalculateVisibleSize() const;
 
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     SwiperLayoutAlgorithm::PositionMap itemPosition_;
@@ -693,7 +694,7 @@ protected:
     bool usePropertyAnimation_ = false;
     bool stopIndicatorAnimation_ = true;
     bool isFinishAnimation_ = false;
-
+    bool isDragging_ = false;
     float motionVelocity_ = 0.0f;
     float currentIndexOffset_ = 0.0f;
 
@@ -744,9 +745,11 @@ private:
     void PlayFadeAnimation();
 
     // use property animation feature
+    virtual void ResetAnimationParam() {};
+    virtual void PlayScrollAnimation() {};
     virtual void ClearAnimationFinishList() {};
-    virtual void InitialFrameNodePropertyAnimation(const RefPtr<FrameNode>& frameNode, const OffsetF& offset);
-    virtual void CancelFrameNodePropertyAnimation(const RefPtr<FrameNode>& frameNode);
+    virtual void InitialFrameNodePropertyAnimation(const OffsetF& offset, RefPtr<FrameNode>& frameNode);
+    virtual void CancelFrameNodePropertyAnimation(RefPtr<FrameNode>& frameNode);
     virtual void PlayPropertyTranslateAnimation(
         float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false);
     void UpdateOffsetAfterPropertyAnimation(float offset);
@@ -777,7 +780,6 @@ private:
     float GetItemSpace() const;
     float GetPrevMargin() const;
     float GetNextMargin() const;
-    float CalculateVisibleSize() const;
     int32_t CurrentIndex() const;
     int32_t CalculateDisplayCount() const;
     int32_t CalculateCount(
@@ -1040,7 +1042,6 @@ private:
     bool IsCustomSize_ = false;
     bool indicatorIsBoolean_ = true;
     bool isAtHotRegion_ = false;
-    bool isDragging_ = false;
     bool needTurn_ = false;
     bool isParentHiddenChange_ = false;
     /**

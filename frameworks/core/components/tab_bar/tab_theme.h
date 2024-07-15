@@ -54,6 +54,8 @@ public:
                 theme->subTabIndicatorHeight_ = pattern->GetAttr<Dimension>("subtab_indicator_height", 0.0_vp);
                 theme->subTabTextOnColor_ = pattern->GetAttr<Color>("subtab_text_on_color", Color::WHITE);
                 theme->subTabTextOffColor_ = pattern->GetAttr<Color>("subtab_text_off_color", Color::WHITE);
+                theme->subTabTextFocusedColor_ =
+                    pattern->GetAttr<Color>("subtab_text_focused_color", theme->subTabTextOffColor_);
                 theme->subTabIndicatorGap_ = pattern->GetAttr<Dimension>("subtab_indicator_gap", 0.0_vp);
                 theme->subTabHorizontalPadding_ = pattern->GetAttr<Dimension>("subtab_horizontal_padding", 0.0_vp);
                 theme->subTabTopPadding_ = pattern->GetAttr<Dimension>("subtab_top_padding", 0.0_vp);
@@ -102,6 +104,8 @@ public:
             theme->bottomTabBarDefaultHeight_ =
                 pattern->GetAttr<Dimension>("bottom_tab_bar_default_height", 0.0_vp);
             theme->tabBarDefaultWidth_ = pattern->GetAttr<Dimension>("tab_bar_default_width", 0.0_vp);
+            theme->tabBarDefaultMargin_ = pattern->GetAttr<Dimension>("tab_bar_margin_width", 0.0_vp);
+            theme->tabBarFocusedColor_ = pattern->GetAttr<Color>("tab_bar_focused_color", Color::TRANSPARENT);
             theme->subTabBarMinWidth_ = pattern->GetAttr<Dimension>("sub_tab_bar_min_width", 0.0_vp);
             theme->dividerColor_ = pattern->GetAttr<Color>("divider_color", Color::BLACK);
             theme->tabBarShadowMargin_ = pattern->GetAttr<Dimension>("tab_bar_shadow_margin", 0.0_vp);
@@ -217,6 +221,11 @@ public:
     const Color& GetSubTabTextOffColor() const
     {
         return subTabTextOffColor_;
+    }
+
+    const Color& GetSubTabTextFocusedColor() const
+    {
+        return subTabTextFocusedColor_;
     }
 
     const Dimension& GetSubTabIndicatorHeight() const
@@ -364,6 +373,11 @@ public:
         return tabBarDefaultWidth_;
     }
 
+    const Dimension& GetTabBarDefaultMargin() const
+    {
+        return tabBarDefaultMargin_;
+    }
+
     const Dimension& GetSubTabBarMinWidth() const
     {
         return subTabBarMinWidth_;
@@ -372,6 +386,11 @@ public:
     const Color& GetDividerColor() const
     {
         return dividerColor_;
+    }
+
+    const Color& GetTabBarFocusedColor() const
+    {
+        return tabBarFocusedColor_;
     }
 
     const Dimension& GetTabBarShadowMargin() const
@@ -446,6 +465,7 @@ private:
     Dimension focusIndicatorVerticalPadding_;
     Color subTabTextOnColor_;
     Color subTabTextOffColor_;
+    Color subTabTextFocusedColor_;
     Dimension subTabIndicatorHeight_;
     Dimension subTabIndicatorGap_;
     Dimension subTabHorizontalPadding_;
@@ -476,6 +496,8 @@ private:
     Dimension bottomTabBarDefaultHeight_;
     Dimension tabBarDefaultWidth_;
     Dimension subTabBarMinWidth_;
+    Dimension tabBarDefaultMargin_;
+    Color tabBarFocusedColor_;
     Color dividerColor_;
     Dimension tabBarShadowMargin_;
     Dimension tabBarGradientWidth_;

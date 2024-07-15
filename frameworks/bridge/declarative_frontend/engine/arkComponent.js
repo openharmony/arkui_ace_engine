@@ -10194,6 +10194,36 @@ class TextOnTextSelectionChangeModifier extends ModifierWithKey {
   }
 }
 TextOnTextSelectionChangeModifier.identity = Symbol('textOnTextSelectionChange');
+class TextMarqueeOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetMarqueeOptions(node);
+    } else {
+      getUINativeModule().text.setMarqueeOptions(node, this.value.start, this.value.fromStart, this.value.step,
+        this.value.loop, this.value.delay, this.value.fadeout, this.value.marqueeStartPolicy);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextMarqueeOptionsModifier.identity = Symbol('textMarqueeOptions');
+class TextOnMarqueeStateChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetOnMarqueeStateChange(node);
+    } else {
+      getUINativeModule().text.setOnMarqueeStateChange(node, this.value);
+    }
+  }
+}
+TextOnMarqueeStateChangeModifier.identity = Symbol('textOnMarqueeStateChange');
 
 class ArkTextComponent extends ArkComponent {
   constructor(nativePtr, classType) {
@@ -10358,6 +10388,16 @@ class ArkTextComponent extends ArkComponent {
   onTextSelectionChange(callback) {
     modifierWithKey(this._modifiersWithKeys, TextOnTextSelectionChangeModifier.identity,
       TextOnTextSelectionChangeModifier, callback);
+    return this;
+  }
+  marqueeOptions(value) {
+    modifierWithKey(this._modifiersWithKeys, TextMarqueeOptionsModifier.identity,
+      TextMarqueeOptionsModifier, value);
+    return this;
+  }
+  onMarqueeStateChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, TextOnMarqueeStateChangeModifier.identity,
+      TextOnMarqueeStateChangeModifier, callback);
     return this;
   }
 }
@@ -16639,6 +16679,10 @@ class ArkTimePickerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TimepickerLoopModifier.identity, TimepickerLoopModifier, value);
     return this;
   }
+  digitalCrownSensitivity(value) {
+    modifierWithKey(this._modifiersWithKeys, TimepickerDigitalCrownSensitivityModifier.identity, TimepickerDigitalCrownSensitivityModifier, value);
+    return this;
+  }
   useMilitaryTime(value) {
     modifierWithKey(this._modifiersWithKeys, TimepickerUseMilitaryTimeModifier.identity, TimepickerUseMilitaryTimeModifier, value);
     return this;
@@ -16663,6 +16707,22 @@ class ArkTimePickerComponent extends ArkComponent {
     return this;
   }
 }
+
+class TimepickerDigitalCrownSensitivityModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().timepicker.resetDigitalCrownSensitivity(node);
+    }
+    else {
+      getUINativeModule().timepicker.setDigitalCrownSensitivity(node, this.value);
+    }
+  }
+}
+TimepickerDigitalCrownSensitivityModifier.identity = Symbol('DigitalCrownSensitivity');
+
 class TimepickerTextStyleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -16858,6 +16918,10 @@ class ArkTextPickerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextpickerCanLoopModifier.identity, TextpickerCanLoopModifier, value);
     return this;
   }
+  digitalCrownSensitivity(value) {
+    modifierWithKey(this._modifiersWithKeys, TextpickerDigitalCrownSensitivityModifier.identity, TextpickerDigitalCrownSensitivityModifier, value);
+    return this;
+  }
   disappearTextStyle(value) {
     modifierWithKey(this._modifiersWithKeys, TextpickerDisappearTextStyleModifier.identity, TextpickerDisappearTextStyleModifier, value);
     return this;
@@ -16906,6 +16970,22 @@ class TextpickerCanLoopModifier extends ModifierWithKey {
   }
 }
 TextpickerCanLoopModifier.identity = Symbol('textpickerCanLoop');
+
+class TextpickerDigitalCrownSensitivityModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textpicker.resetDigitalCrownSensitivity(node);
+    }
+    else {
+      getUINativeModule().textpicker.setDigitalCrownSensitivity(node, this.value);
+    }
+  }
+}
+TextpickerDigitalCrownSensitivityModifier.identity = Symbol('TextpickerDigitalCrownSensitivity');
+
 class TextpickerSelectedIndexModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -20106,6 +20186,10 @@ class ArkDatePickerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, DatePickerLunarModifier.identity, DatePickerLunarModifier, value);
     return this;
   }
+  digitalCrownSensitivity(value) {
+    modifierWithKey(this._modifiersWithKeys, DatePickerDigitalCrownSensitivityModifier.identity, DatePickerDigitalCrownSensitivityModifier, value);
+    return this;
+  }
   disappearTextStyle(value) {
     modifierWithKey(this._modifiersWithKeys, DatePickerDisappearTextStyleModifier.identity, DatePickerDisappearTextStyleModifier, value);
     return this;
@@ -20129,6 +20213,22 @@ class ArkDatePickerComponent extends ArkComponent {
     return this;
   }
 }
+
+class DatePickerDigitalCrownSensitivityModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().datePicker.resetDigitalCrownSensitivity(node);
+    }
+    else {
+      getUINativeModule().datePicker.setDigitalCrownSensitivity(node, this.value);
+    }
+  }
+}
+DatePickerDigitalCrownSensitivityModifier.identity = Symbol('DigitalCrownSensitivity');
+
 class DatePickerLunarModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

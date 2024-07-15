@@ -170,6 +170,10 @@ build_component_ng("pattern_ng") {
     "image/image_pattern.cpp",
     "image_animator/image_animator_model_ng.cpp",
     "image_animator/image_animator_pattern.cpp",
+    "indexer/arc_indexer_content_modifier.cpp",
+    "indexer/arc_indexer_layout_algorithm.cpp",
+    "indexer/arc_indexer_layout_property.cpp",
+    "indexer/arc_indexer_pattern.cpp",
     "indexer/indexer_accessibility_property.cpp",
     "indexer/indexer_layout_algorithm.cpp",
     "indexer/indexer_layout_property.cpp",
@@ -554,6 +558,14 @@ build_component_ng("pattern_ng") {
     "waterflow/water_flow_pattern.cpp",
     "waterflow/water_flow_sections.cpp",
   ]
+
+  if (ace_engine_enable_circle_feature) {
+    sources += [
+      "arc_scroll/arc_scroll_paint_method.cpp",
+      "arc_scroll/inner/arc_scroll_bar.cpp",
+      "arc_scroll/inner/arc_scroll_bar_overlay_modifier.cpp",
+    ]
+  }
 
   external_deps = []
   deps = [ "container_modal/interfaces:customtitle" ]

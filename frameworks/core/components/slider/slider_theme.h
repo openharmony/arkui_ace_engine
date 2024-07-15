@@ -76,6 +76,8 @@ public:
                     pattern->GetAttr<Dimension>("bubble_to_circle_center_distance", BUBBLE_TO_CIRCLE_CENTER_DISTANCE);
                 theme->measureContentDefaultWidth_ =
                     pattern->GetAttr<Dimension>("measure_content_default_width", MEASURE_CONTENT_DEFAULT_WIDTH);
+                theme->measureContentOutsetWidth_ =
+                    pattern->GetAttr<Dimension>("measure_content_outset_width", MEASURE_CONTENT_DEFAULT_WIDTH);
                 theme->outsetHotBlockShadowWidth_ =
                     pattern->GetAttr<Dimension>("outset_hot_block_shadow_width", OUTSET_HOT_BLOCK_SHADOW_WIDTH);
                 theme->insetHotBlockShadowWidth_ =
@@ -268,6 +270,11 @@ public:
         return scaleValue_;
     }
 
+    Dimension GetMeasureContentOutsetWidth() const
+    {
+        return measureContentOutsetWidth_;
+    }
+
 protected:
     SliderTheme() = default;
 
@@ -294,6 +301,7 @@ private:
     Dimension tipTextPadding_;
     Dimension bubbleToCircleCenterDistance_;
     Dimension measureContentDefaultWidth_;
+    Dimension measureContentOutsetWidth_;
     Color blockColor_;
     Color blockHoverColor_;
     Color blockPressedColor_;

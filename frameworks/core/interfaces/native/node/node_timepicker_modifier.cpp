@@ -313,6 +313,20 @@ ArkUI_Int32 GetTimepickerUseMilitaryTime(ArkUINodeHandle node)
     return TimePickerModelNG::getTimepickerUseMilitaryTime(frameNode);
 }
 
+void SetTimePickerDigitalCrownSensitivity(ArkUINodeHandle node, int32_t CrownSensitivity)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetDigitalCrownSensitivity(frameNode, CrownSensitivity);
+}
+
+void ResetTimePickerDigitalCrownSensitivity(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetDigitalCrownSensitivity(frameNode, DEFAULT_CROWNSENSITIVITY);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -325,8 +339,7 @@ const ArkUITimepickerModifier* GetTimepickerModifier()
         ResetTimepickerDisappearTextStyle, ResetTimepickerTextStyle, ResetTimepickerSelectedTextStyle,
         ResetTimepickerBackgroundColor, GetTimepickerUseMilitaryTime, SetTimepickerUseMilitaryTime,
         ResetTimepickerUseMilitaryTime, SetTimepickerLoop, ResetTimepickerLoop, SetTimepickerDateTimeOptions,
-        ResetTimepickerDateTimeOptions };
-
+        ResetTimepickerDateTimeOptions, SetTimePickerDigitalCrownSensitivity, ResetTimePickerDigitalCrownSensitivity };
     return &modifier;
 }
 

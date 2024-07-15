@@ -61,7 +61,34 @@ RefPtr<FrameNode> Create(int32_t index)
     props->UpdatePress(false);
     return node;
 }
+
+Alignment ConvertTxtTextAlign(bool IsRightToLeft, TextAlign textAlign)
+{
+    Alignment convertValue;
+    switch (textAlign) {
+        case TextAlign::LEFT:
+            convertValue = Alignment::CENTER_LEFT;
+            break;
+        case TextAlign::CENTER:
+            convertValue = Alignment::CENTER;
+            break;
+        case TextAlign::RIGHT:
+            convertValue = Alignment::CENTER_RIGHT;
+            break;
+        case TextAlign::START:
+            convertValue = IsRightToLeft ? Alignment::CENTER_RIGHT : Alignment::CENTER_LEFT;
+            break;
+        case TextAlign::END:
+            convertValue = IsRightToLeft ? Alignment::CENTER_LEFT : Alignment::CENTER_RIGHT;
+            break;
+        default:
+            break;
+    }
+    return convertValue;
+}
+
 } // namespace
+
 
 RefPtr<FrameNode> OptionView::CreateText(const std::string& value, const RefPtr<FrameNode>& parent)
 {
@@ -87,9 +114,18 @@ RefPtr<FrameNode> OptionView::CreateText(const std::string& value, const RefPtr<
     auto textRenderContext = textNode->GetRenderContext();
     textRenderContext->UpdateForegroundColor(theme->GetMenuFontColor());
     textProperty->UpdateContent(value);
+    auto padding = theme->GetOptionContentNormalLeftRightPadding();
+    PaddingProperty textPadding;
+    textPadding.left = CalcLength(padding);
+    textPadding.right = CalcLength(padding);
+    textProperty->UpdatePadding(textPadding);
+    auto layoutDirection = textProperty->GetNonAutoLayoutDirection();
+    auto IsRightToLeft = layoutDirection == TextDirection::RTL ? true : false;
+    auto textAlign = static_cast<TextAlign>(theme->GetOptionContentNormalAlign());
+    auto convertValue = ConvertTxtTextAlign(IsRightToLeft, textAlign);
+    textProperty->UpdateAlignment(convertValue);
     textNode->MountToParent(parent);
     textNode->MarkModifyDone();
-
     return textNode;
 }
 

@@ -33,6 +33,22 @@ const uint32_t FLAG_SELECTED_FONTSIZE = 0x0020;
 const uint32_t FLAG_DISAPPEAR_WEIGHT = 0x0040;
 const uint32_t FLAG_WEIGHT = 0x0080;
 const uint32_t FLAG_SELECTED_WEIGHT = 0x0100;
+constexpr double PICKER_ANGULAR_VELOCITY_FACTOR  = 532 / 360.0 * 0.013;
+constexpr float PICKER_ANGULAR_VELOCITY_SLOW = 0.1f;
+constexpr float PICKER_ANGULAR_VELOCITY_MEDIUM = 0.3f;
+constexpr float PICKER_ANGULAR_VELOCITY_FAST = 0.8f;
+constexpr float PICKER_DISPLAY_CONTROL_RATIO_VERY_SLOW = 5.27f;
+constexpr float PICKER_DISPLAY_CONTROL_RATIO_SLOW = 2.75f;
+constexpr float PICKER_DISPLAY_CONTROL_RATIO_MEDIUM = 2.70f;
+constexpr float PICKER_DISPLAY_CONTROL_RATIO_FAST = 2.43f;
+constexpr float PICKER_CROWN_SENSITIVITY_LOW = 0.8f;
+constexpr float PICKER_CROWN_SENSITIVITY_MEDIUM = 1.0f;
+constexpr float PICKER_CROWN_SENSITIVITY_HIGH = 1.2f;
+constexpr uint32_t PICKER_SELECT_AVERAGE = 2;
+constexpr int32_t INVALID_CROWNSENSITIVITY = -1;
+constexpr int32_t DEFAULT_CROWNSENSITIVITY = 1;
+constexpr int32_t INVALID_SELECTED_COLUMN_INDEX = -1;
+
 struct PickerTextStyle {
     std::optional<Color> textColor;
     std::optional<Dimension> fontSize;
@@ -75,6 +91,7 @@ struct DatePickerSettingData {
     std::map<std::string, PickerTime> timePickerProperty;
     PickerTextProperties properties;
     DateTimeType dateTimeOptions;
+    int32_t crownSensitivity;
 };
 
 struct TextPickerSettingData {
@@ -83,6 +100,7 @@ struct TextPickerSettingData {
     uint32_t columnKind;
     Dimension height;
     bool canLoop = true;
+    int32_t crownSensitivity;
     PickerTextProperties properties;
     std::vector<uint32_t> selectedValues;
     std::vector<std::string> values;
@@ -95,6 +113,7 @@ struct TimePickerSettingData {
     PickerDate dialogTitleDate;
     PickerTextProperties properties;
     DateTimeType dateTimeOptions;
+    int32_t crownSensitivity;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PICKER_PICKER_TYPE_DEFINE_H

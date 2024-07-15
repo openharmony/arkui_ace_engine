@@ -124,6 +124,10 @@ public:
 
     void SetBarColor(Color barColor);
 
+    RefPtr<PropertyColor> GetBarColor()
+    {
+        return barColor_;
+    }
     void SetPositionMode(const PositionMode& positionMode)
     {
         positionMode_ = positionMode;
@@ -133,6 +137,16 @@ public:
     {
         isScrollable_ = isScrollable;
     }
+
+protected:
+    std::shared_ptr<AnimationUtils::Animation> hoverAnimation_;
+
+#ifdef ARKUI_CIRCLE_FEATURE
+    bool GetScrollable()
+    {
+        return isScrollable_;
+    }
+#endif
 
 private:
     Offset GetHoverOffset(const Size& size) const;
@@ -147,7 +161,6 @@ private:
     RefPtr<PropertyColor> barColor_;
     ACE_DISALLOW_COPY_AND_MOVE(ScrollBarOverlayModifier);
 
-    std::shared_ptr<AnimationUtils::Animation> hoverAnimation_;
     std::shared_ptr<AnimationUtils::Animation> opacityAnimation_;
     std::shared_ptr<AnimationUtils::Animation> adaptAnimation_;
     HoverAnimationType hoverAnimatingType_ = HoverAnimationType::NONE;

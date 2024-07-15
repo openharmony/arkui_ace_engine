@@ -30,19 +30,24 @@ namespace {
 constexpr uint32_t ITEM_PADDING = 3;
 constexpr uint32_t SELECTED_ITEM_PADDING = 4;
 constexpr uint32_t ACTIVE_ITEM_ANGLE = 5;
+constexpr uint32_t ITEM_MINOR_PADDING = 6;
+constexpr uint32_t ITEM_MINI_PADDING = 7;
 
 constexpr Dimension ITEM_SHRINK_DIAMETER = 5.0_vp;
 constexpr Dimension SLECTED_ITEM_SHRINK_DIAMETER = 5.0_vp;
 constexpr Dimension CONTAINER_SHRINK_DIAMETER = 16.0_vp;
 constexpr float ITEM_SHRINK_PADDING = 5.0;
+constexpr float ITEM_SHRINK_MINOR_PADDING = 4.5;
+constexpr float ITEM_SHRINK_MINI_PADDING = 4.0;
 constexpr float SELECTED_ITEM_SHRINK_PADDING = 7.0;
 constexpr float ACTIVE_ITEM_SHRINK_ANGLE = 4.0;
-constexpr float BACKGROUND_OFFSET = 3.0;
 
 constexpr Dimension ITEM_DILATE_DIAMETER = 8.0_vp;
 constexpr Dimension SLECTED_ITEM_DILATE_DIAMETER = 8.0_vp;
 constexpr Dimension CONTAINER_DILATE_DIAMETER = 24.0_vp;
 constexpr float ITEM_DILATE_PADDING = 10.0;
+constexpr float ITEM_DILATE_MINOR_PADDING = 9.0;
+constexpr float ITEM_DILATE_MINI_PADDING = 8.0;
 constexpr float SELECTED_ITEM_DILATE_PADDING = 14.0;
 constexpr float ACTIVE_ITEM_DILATE_ANGLE = 8.0;
 constexpr double QUARTER_CIRCLE_ANGLE = 90.0;
@@ -56,9 +61,11 @@ constexpr Dimension ITEM_DILATE_MINOR_DIAMETER = 6.0_vp;
 constexpr Dimension ITEM_DILATE_MINI_DIAMETER = 4.0_vp;
 constexpr int32_t LEFT_SECOND_DOT_INDEX = 1;
 constexpr int32_t LEFT_THIRD_DOT_INDEX = 2;
+constexpr int32_t RIGHT_THIRD_DOT_INDEX = 12;
 constexpr int32_t RIGHT_SECOND_DOT_INDEX = 13;
 constexpr int32_t RIGHT_FIRST_DOT_INDEX = 14;
 constexpr int32_t HALF_DIVISOR = 2;
+constexpr int32_t DIPLOID = 2;
 constexpr int32_t ACTUAL_SUBTRACT_INDEX = 1;
 } // namespace
 
@@ -94,11 +101,12 @@ void CircleDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWra
     circleDotIndicatorModifier_->SetCenterX(centerX);
     circleDotIndicatorModifier_->SetCenterY(centerY);
     circleDotIndicatorModifier_->SetCircleRadius(centerR);
+    circleDotIndicatorModifier_->SetTouchBottomRate(touchBottomRate_);
+    circleDotIndicatorModifier_->SetTouchBottomType(touchBottomType_);
 
     if (isLongPressed_) {
         PaintPressIndicator(paintWrapper);
         circleDotIndicatorModifier_->SetIsPressed(true);
-        UpdateBackground(paintWrapper);
     } else {
         PaintNormalIndicator(paintWrapper);
         circleDotIndicatorModifier_->SetIsPressed(false);
@@ -141,8 +149,14 @@ void CircleDotIndicatorPaintMethod::PaintPressIndicator(const PaintWrapper* pain
     itemSizes.emplace_back(ITEM_DILATE_PADDING);
     itemSizes.emplace_back(SELECTED_ITEM_DILATE_PADDING);
     itemSizes.emplace_back(ACTIVE_ITEM_DILATE_ANGLE);
+    itemSizes.emplace_back(ITEM_DILATE_MINOR_PADDING);
+    itemSizes.emplace_back(ITEM_DILATE_MINI_PADDING);
 
     longPointAngle_ = CalculatePointAngle(itemSizes, currentIndex_);
+    if (touchBottomType_ != TouchBottomType::NONE) {
+        UpdateBackground(paintWrapper);
+        return;
+    }
     if (circleDotIndicatorModifier_->GetIsPressed()) {
         circleDotIndicatorModifier_->PlayIndicatorAnimation(vectorBlackPointAngle_, vectorBlackPointRadius_,
                                                             longPointAngle_, gestureState_);
@@ -226,16 +240,19 @@ float CircleDotIndicatorPaintMethod::CalculateBlackPointRotateAngle(int32_t indi
         if (isLongPressed_) {
             itemPadding = ITEM_DILATE_PADDING;
         }
-        return -((itemCount_ - MAX_INDICATOR_DOT_COUNT) / HALF_DIVISOR - indicatorStartIndex) * itemPadding;
+        auto rotateAngle = -((itemCount_ - MAX_INDICATOR_DOT_COUNT) / HALF_DIVISOR - indicatorStartIndex) * itemPadding;
+        if (itemCount_ % HALF_DIVISOR == 0) {
+            rotateAngle = rotateAngle - itemPadding / HALF_DIVISOR;
+        }
+        return rotateAngle;
     } else {
         return 0.0;
     }
 }
 
-int32_t CircleDotIndicatorPaintMethod::CalculateIndicatorStartIndex()
+int32_t CircleDotIndicatorPaintMethod::CalculateIndicatorStartIndex(int32_t priorIndicatorIndex)
 {
     if (itemCount_ > MAX_INDICATOR_DOT_COUNT) {
-        auto priorIndicatorIndex = circleDotIndicatorModifier_->GetIndicatorStartIndex();
         int32_t indicatorStartIndex = priorIndicatorIndex;
         if ((!isLongPressed_ && gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) ||
             (isLongPressed_ && gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT)) {
@@ -257,6 +274,7 @@ int32_t CircleDotIndicatorPaintMethod::CalculateIndicatorStartIndex()
             }
         }
         circleDotIndicatorModifier_->SetIndicatorStartIndex(indicatorStartIndex);
+        indicatorStartIndex_ = indicatorStartIndex;
         return indicatorStartIndex;
     } else {
         return 0;
@@ -278,7 +296,72 @@ int32_t CircleDotIndicatorPaintMethod::CalculateInitIndicatorPosition()
         circleDotIndicatorModifier_->SetInitState(false);
         circleDotIndicatorModifier_->SetIndicatorStartIndex(indicatorStartIndex);
     }
+    indicatorStartIndex_ = indicatorStartIndex;
     return indicatorStartIndex;
+}
+
+void CircleDotIndicatorPaintMethod::SetFadeOutState(int32_t indicatorStartIndex)
+{
+    if (itemCount_ > MAX_INDICATOR_DOT_COUNT) {
+        if (indicatorStartIndex > 0 && indicatorStartIndex < itemCount_ - MAX_INDICATOR_DOT_COUNT) {
+            // fadeOut bilateral
+            fadeOutState_ = FadeOutState::FADE_OUT_BILATERAL;
+        } else if (indicatorStartIndex == 0) {
+            // fadeOut right
+            fadeOutState_ = FadeOutState::FADE_OUT_RIGHT;
+        } else {
+            // fadeOut left
+            fadeOutState_ = FadeOutState::FADE_OUT_LEFT;
+        }
+    } else {
+        // fadeOut none
+        fadeOutState_ = FadeOutState::FADE_OUT_NONE;
+    }
+}
+
+float CircleDotIndicatorPaintMethod::GetFadeOutPadding(float dotPaddingAngle,
+                                                       int32_t itemIndex,
+                                                       int32_t currentIndex,
+                                                       const LinearVector<float>& itemSizes,
+                                                       int32_t symbol)
+{
+    float dotPaddingAngleSum = dotPaddingAngle;
+    float itemPadding = itemSizes[ITEM_PADDING];
+    float itemMinorPadding = itemSizes[ITEM_MINOR_PADDING];
+    float itemMiniPadding = itemSizes[ITEM_MINI_PADDING];
+    if (fadeOutState_ == FadeOutState::FADE_OUT_NONE) {
+        return dotPaddingAngleSum;
+    }
+    if (fadeOutState_ == FadeOutState::FADE_OUT_LEFT || fadeOutState_ == FadeOutState::FADE_OUT_BILATERAL) {
+        if (currentIndex == indicatorStartIndex_ + LEFT_THIRD_DOT_INDEX) {
+            if (itemIndex > indicatorStartIndex_) {
+                dotPaddingAngleSum = dotPaddingAngle - symbol * (itemPadding - itemMiniPadding);
+            }
+        } else if (currentIndex > indicatorStartIndex_ + LEFT_THIRD_DOT_INDEX) {
+            if (itemIndex == indicatorStartIndex_ + LEFT_SECOND_DOT_INDEX) {
+                dotPaddingAngleSum = dotPaddingAngle - symbol * (itemPadding - itemMiniPadding);
+            } else if (itemIndex > indicatorStartIndex_ + LEFT_SECOND_DOT_INDEX) {
+                dotPaddingAngleSum =
+                    dotPaddingAngle - symbol * (itemPadding * DIPLOID - itemMinorPadding - itemMiniPadding);
+            }
+        }
+    }
+    if (fadeOutState_ == FadeOutState::FADE_OUT_RIGHT || fadeOutState_ == FadeOutState::FADE_OUT_BILATERAL) {
+        if (currentIndex == indicatorStartIndex_ + RIGHT_THIRD_DOT_INDEX) {
+            if (itemIndex > indicatorStartIndex_ + RIGHT_SECOND_DOT_INDEX) {
+                dotPaddingAngleSum = dotPaddingAngleSum - symbol * (itemPadding - itemMiniPadding);
+            }
+        } else if (currentIndex < indicatorStartIndex_ + RIGHT_THIRD_DOT_INDEX) {
+            if (itemIndex == indicatorStartIndex_ + RIGHT_SECOND_DOT_INDEX) {
+                dotPaddingAngleSum = dotPaddingAngleSum - symbol * (itemPadding - itemMinorPadding);
+            }
+            if (itemIndex > indicatorStartIndex_ + RIGHT_SECOND_DOT_INDEX) {
+                dotPaddingAngleSum =
+                    dotPaddingAngleSum - symbol * (itemPadding * DIPLOID - itemMinorPadding - itemMiniPadding);
+            }
+        }
+    }
+    return dotPaddingAngleSum;
 }
 
 std::pair<float, float> CircleDotIndicatorPaintMethod::CalculatePointAngle(
@@ -292,12 +375,15 @@ std::pair<float, float> CircleDotIndicatorPaintMethod::CalculatePointAngle(
     if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
         index = startCurrentIndex;
     }
+    auto priorIndicatorIndex = circleDotIndicatorModifier_->GetIndicatorStartIndex();
     int32_t indicatorStartIndex = 0;
-    if (circleDotIndicatorModifier_->GetInitState()) {
+    if (circleDotIndicatorModifier_->GetInitState() || currentIndex_ < priorIndicatorIndex ||
+        currentIndex_ >= priorIndicatorIndex + MAX_INDICATOR_DOT_COUNT) {
         indicatorStartIndex = CalculateInitIndicatorPosition();
     } else {
-        indicatorStartIndex = CalculateIndicatorStartIndex();
+        indicatorStartIndex = CalculateIndicatorStartIndex(priorIndicatorIndex);
     }
+    SetFadeOutState(indicatorStartIndex);
     vectorBlackPointAngle_.resize(itemCount_);
     vectorBlackPointRadius_.resize(itemCount_);
     float offset = CalculateBlackPointRotateAngle(indicatorStartIndex);
@@ -323,6 +409,8 @@ std::tuple<std::pair<float, float>, LinearVector<float>> CircleDotIndicatorPaint
         itemSizes.emplace_back(ITEM_SHRINK_PADDING);
         itemSizes.emplace_back(SELECTED_ITEM_SHRINK_PADDING);
         itemSizes.emplace_back(ACTIVE_ITEM_SHRINK_ANGLE);
+        itemSizes.emplace_back(ITEM_SHRINK_MINOR_PADDING);
+        itemSizes.emplace_back(ITEM_SHRINK_MINI_PADDING);
     } else {
         itemSizes.emplace_back(static_cast<float>(ITEM_DILATE_DIAMETER.ConvertToPx()) * 0.5);
         itemSizes.emplace_back(static_cast<float>(SLECTED_ITEM_DILATE_DIAMETER.ConvertToPx()) * 0.5);
@@ -330,6 +418,8 @@ std::tuple<std::pair<float, float>, LinearVector<float>> CircleDotIndicatorPaint
         itemSizes.emplace_back(ITEM_DILATE_PADDING);
         itemSizes.emplace_back(SELECTED_ITEM_DILATE_PADDING);
         itemSizes.emplace_back(ACTIVE_ITEM_DILATE_ANGLE);
+        itemSizes.emplace_back(ITEM_DILATE_MINOR_PADDING);
+        itemSizes.emplace_back(ITEM_DILATE_MINI_PADDING);
     }
 
     auto longPointAngle = CalculatePointAngle(itemSizes, currentIndex_);
@@ -347,7 +437,7 @@ int32_t CircleDotIndicatorPaintMethod::GetHalfIndex()
     return (itemCount_ - 1) / 2;
 }
 
-std::pair<int32_t, int32_t> CircleDotIndicatorPaintMethod::GetLongPointAngle(
+std::pair<float, float> CircleDotIndicatorPaintMethod::GetLongPointAngle(
     const LinearVector<float>& itemSizes, int32_t currentIndex, int32_t indicatorStartIndex)
 {
     float dotActiveAngle = itemSizes[ACTIVE_ITEM_ANGLE];
@@ -384,17 +474,18 @@ float CircleDotIndicatorPaintMethod::GetAllPointArcAngle(const LinearVector<floa
     } else {
         allPointArcAngle = (itemCount_ - ITEM_THREE_NUM) * dotPaddingAngle + dotActivePaddingAngle * 2;
     }
-    return allPointArcAngle;
+    return GetFadeOutPadding(allPointArcAngle, itemCount_ - 1, currentIndex, itemSizes, 1);
 }
 
-float CircleDotIndicatorPaintMethod::GetBlackPointAngle(
-    const LinearVector<float>& itemSizes, int32_t index, int32_t currentIndex, float offset)
+float CircleDotIndicatorPaintMethod::GetBlackPointAngle(const LinearVector<float>& itemSizes,
+                                                        int32_t index,
+                                                        int32_t currentIndex,
+                                                        float offset)
 {
     float dotPaddingAngle = itemSizes[ITEM_PADDING];
     float dotActivePaddingAngle = itemSizes[SELECTED_ITEM_PADDING];
     float dotActiveAngle = itemSizes[ACTIVE_ITEM_ANGLE];
     float allPointArcAngle = GetAllPointArcAngle(itemSizes, currentIndex);
-
     float itemCenterAngle = 0.0;
     int32_t itemIndex = index;
     int32_t halIndex = GetHalfIndex();
@@ -403,30 +494,36 @@ float CircleDotIndicatorPaintMethod::GetBlackPointAngle(
             itemCenterAngle = 0.0;
         } else if (currentIndex == 0) {
             if (itemIndex == 0) {
-                itemCenterAngle = (allPointArcAngle / 2) - (dotActiveAngle / 2);
+                itemCenterAngle = (allPointArcAngle / HALF_DIVISOR) - (dotActiveAngle / HALF_DIVISOR);
             } else {
-                itemCenterAngle = (allPointArcAngle / 2) - (dotActiveAngle / 2) -
-                    dotActivePaddingAngle - (itemIndex -1) * dotPaddingAngle;
+                itemCenterAngle = (allPointArcAngle / 2) - (dotActiveAngle / 2) - // 2: half of angle
+                                  dotActivePaddingAngle - (itemIndex - 1) * dotPaddingAngle; // 1: exclude one point
             }
         } else if (itemIndex == currentIndex) {
-            itemCenterAngle = (allPointArcAngle / 2) - (itemIndex -1) * dotPaddingAngle - dotActivePaddingAngle;
+            itemCenterAngle = (allPointArcAngle / 2) - // 2: half of angle
+                              (itemIndex - 1) * dotPaddingAngle - dotActivePaddingAngle; //1: exclude one point
         } else if (itemIndex > currentIndex) {
-            itemCenterAngle = (allPointArcAngle / 2) - (itemIndex -2) * dotPaddingAngle - dotActivePaddingAngle * 2;
+            itemCenterAngle = (allPointArcAngle / 2) - (itemIndex - 2) * dotPaddingAngle - // 2: half of angle
+                              dotActivePaddingAngle * 2; // 2: diploid
         } else {
-            itemCenterAngle = (allPointArcAngle / 2) - itemIndex * dotPaddingAngle;
+            itemCenterAngle = (allPointArcAngle / 2) - itemIndex * dotPaddingAngle; // 2: half of angle
         }
+        itemCenterAngle = GetFadeOutPadding(itemCenterAngle, itemIndex, currentIndex, itemSizes, -1); // -1: minus sybol
     } else {
         if (itemIndex == 0) {
-            itemCenterAngle = (dotActiveAngle / 2) + dotActivePaddingAngle +
-                (itemIndex -1) * dotPaddingAngle - (allPointArcAngle / 2);
+            itemCenterAngle = (dotActiveAngle / 2) + dotActivePaddingAngle + // 2: half of angle
+                              (itemIndex - 1) * dotPaddingAngle - // 1: exclude one point
+                              (allPointArcAngle / 2); // 2: half of angle
         } else if (itemIndex == currentIndex) {
-            itemCenterAngle = (itemIndex - 1) * dotPaddingAngle + dotActivePaddingAngle - (allPointArcAngle / 2);
+            itemCenterAngle = (itemIndex - 1) * dotPaddingAngle + dotActivePaddingAngle - // 1: exclude one point
+                              (allPointArcAngle / 2); // 2: half of angle
         } else if (itemIndex > currentIndex) {
-            itemCenterAngle =
-                (itemIndex - ITEM_TWO_NUM) * dotPaddingAngle + dotActivePaddingAngle * 2 - (allPointArcAngle / 2);
+            itemCenterAngle = (itemIndex - ITEM_TWO_NUM) * dotPaddingAngle +
+                              dotActivePaddingAngle * 2 - (allPointArcAngle / 2); // 2: half of angle
         } else {
-            itemCenterAngle = itemIndex * dotPaddingAngle - (allPointArcAngle / 2);
+            itemCenterAngle = itemIndex * dotPaddingAngle - (allPointArcAngle / 2); // 2: half of angle
         }
+        itemCenterAngle = GetFadeOutPadding(itemCenterAngle, itemIndex, currentIndex, itemSizes, 1); // 1: plus sybol
         itemCenterAngle = -itemCenterAngle;
     }
     return itemCenterAngle + offset;
@@ -497,26 +594,32 @@ std::pair<int32_t, int32_t> CircleDotIndicatorPaintMethod::GetStartAndEndIndex(i
 
 void CircleDotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWrapper)
 {
-    if (touchBottomType_ == TouchBottomType::NONE) {
-        return;
+    auto tempLongAngle = longPointAngle_;
+    auto tempvector = vectorBlackPointAngle_;
+    float itemChangeValue = (ITEM_PADDING * touchBottomRate_) / HALF_DIVISOR;
+    int displayAreaCount = itemCount_;
+    if (itemCount_ >= MAX_INDICATOR_DOT_COUNT) {
+        displayAreaCount = MAX_INDICATOR_DOT_COUNT;
     }
-    float offset = 0.0;
-    auto offSetPoint = vectorBlackPointAngle_;
-    if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
-        for (size_t indexLeft = 0; indexLeft < currentIndex_; indexLeft++) {
-            offSetPoint[indexLeft] -= BACKGROUND_OFFSET / itemCount_;
-            offset -= BACKGROUND_OFFSET / itemCount_;
+    float longAngleChangeValue = (displayAreaCount-1) * itemChangeValue;
+
+    if (touchBottomType_ == TouchBottomType::END) {
+        for (int32_t indexLeft = tempvector.size() - displayAreaCount; indexLeft < tempvector.size(); indexLeft++) {
+            tempvector[indexLeft] -= (indexLeft-(tempvector.size() - displayAreaCount)) * itemChangeValue;
+        }
+        longAngleChangeValue *= -1;
+    }
+
+    if (touchBottomType_ == TouchBottomType::START) {
+        for (int32_t indexRight = displayAreaCount - 1; indexRight >= 0; indexRight--) {
+            tempvector[indexRight] += (displayAreaCount-1 -indexRight) * itemChangeValue;
         }
     }
 
-    if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT) {
-        for (size_t indexRight = itemCount_ - 1; indexRight > currentIndex_; indexRight--) {
-            offSetPoint[indexRight] += BACKGROUND_OFFSET / itemCount_;
-            offset += BACKGROUND_OFFSET / itemCount_;
-        }
-    }
-
-    circleDotIndicatorModifier_->UpdateTouchBottomAnimation(touchBottomType_, offSetPoint, longPointAngle_, offset);
-    return;
+    tempLongAngle.first += longAngleChangeValue;
+    tempLongAngle.second += longAngleChangeValue;
+    float backgroundOffset = (displayAreaCount-1) * itemChangeValue;
+    circleDotIndicatorModifier_->UpdateTouchBottomAnimation(tempvector, tempLongAngle,
+        backgroundOffset);
 }
 } // namespace OHOS::Ace::NG

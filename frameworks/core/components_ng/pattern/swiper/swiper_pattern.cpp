@@ -1769,6 +1769,7 @@ void SwiperPattern::InitSwiperController()
         auto swiperNode = swiper->GetHost();
         CHECK_NULL_VOID(swiperNode);
         TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper ShowNext, id:%{public}d", swiperNode->GetId());
+        swiper->ResetAnimationParam();
         swiper->ShowNext();
     });
 
@@ -1778,6 +1779,7 @@ void SwiperPattern::InitSwiperController()
         auto swiperNode = swiper->GetHost();
         CHECK_NULL_VOID(swiperNode);
         TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper ShowPrevious, id:%{public}d", swiperNode->GetId());
+        swiper->ResetAnimationParam();
         swiper->ShowPrevious();
     });
 
@@ -2122,6 +2124,7 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
     currentDelta_ = currentDelta_ - offset;
     currentIndexOffset_ += offset;
     if (isDragging_ || childScrolling_) {
+        PlayScrollAnimation();
         AnimationCallbackInfo callbackInfo;
         callbackInfo.currentOffset =
             GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
@@ -2129,7 +2132,6 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
             callbackInfo.currentOffset =
                 GetCustomPropertyOffset() + Dimension(-currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
         }
-
         FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
     }
     HandleSwiperCustomAnimation(offset);
@@ -2154,6 +2156,7 @@ bool SwiperPattern::CheckOverScroll(float offset)
                 auto realOffset = IsOutOfStart(offset) ? - itemPosition_.begin()->second.startPos :
                     CalculateVisibleSize() - itemPosition_.rbegin()->second.endPos;
                 currentDelta_ = currentDelta_ - realOffset;
+                PlayScrollAnimation();
                 HandleSwiperCustomAnimation(realOffset);
                 MarkDirtyNodeSelf();
                 return true;
@@ -2545,6 +2548,7 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
     isDragging_ = true;
     isTouchDown_ = true;
     mainDeltaSum_ = 0.0f;
+    ResetAnimationParam();
     // in drag process, close lazy feature.
     SetLazyLoadFeature(false);
     StopFadeAnimation();
@@ -2849,13 +2853,13 @@ bool SwiperPattern::CheckDragOutOfBoundary(double dragVelocity)
     return false;
 }
 
-void SwiperPattern::InitialFrameNodePropertyAnimation(const RefPtr<FrameNode>& frameNode, const OffsetF& offset)
+void SwiperPattern::InitialFrameNodePropertyAnimation(const OffsetF& offset, RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     frameNode->GetRenderContext()->UpdateTranslateInXY(offset);
 }
 
-void SwiperPattern::CancelFrameNodePropertyAnimation(const RefPtr<FrameNode>& frameNode)
+void SwiperPattern::CancelFrameNodePropertyAnimation(RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     frameNode->GetRenderContext()->CancelTranslateXYAnimation();
@@ -3033,7 +3037,7 @@ void SwiperPattern::OnPropertyTranslateAnimationFinish(const OffsetF& offset)
     for (auto& item : itemPositionInAnimation_) {
         auto frameNode = item.second.node;
         if (frameNode) {
-            frameNode->GetRenderContext()->UpdateTranslateInXY(OffsetF());
+            InitialFrameNodePropertyAnimation(OffsetF(), frameNode);
         }
         item.second.finalOffset = OffsetF();
     }
@@ -3083,7 +3087,7 @@ void SwiperPattern::StopPropertyTranslateAnimation(
             continue;
         }
         currentOffset = frameNode->GetRenderContext()->GetTranslateXYProperty();
-        InitialFrameNodePropertyAnimation(frameNode, OffsetF());
+        InitialFrameNodePropertyAnimation(OffsetF(), frameNode);
         item.second.finalOffset = OffsetF();
     }
     itemPositionInAnimation_.clear();

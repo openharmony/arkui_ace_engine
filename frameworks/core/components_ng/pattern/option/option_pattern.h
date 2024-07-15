@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
 class OptionPattern : public Pattern {
@@ -96,7 +97,14 @@ public:
     void SetFontWeight(const FontWeight& value);
     void SetFontFamily(const std::vector<std::string>& value);
     void SetFontColor(const Color& color);
-
+    void SetSelected(int32_t selected)
+    {
+        selected_ = selected;
+    }
+    void SetBorderColor(const Color& color);
+    Color GetBorderColor();
+    void SetBorderWidth(const Dimension& value);
+    Dimension GetBorderWidth();
     Color GetBgColor();
     // get font props
     Dimension GetFontSize();
@@ -124,7 +132,18 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        auto pipeline = PipelineBase::GetCurrentContext();
+        FocusPattern focusPattern{ FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        CHECK_NULL_RETURN(pipeline, focusPattern);
+        auto theme = pipeline->GetTheme<AppTheme>();
+        CHECK_NULL_RETURN(theme, focusPattern);
+
+        FocusPaintParam focusPaintParam;
+        focusPaintParam.SetPaintColor(theme->GetFocusBorderColor());
+        focusPaintParam.SetPaintWidth(theme->GetFocusBorderWidth());
+        focusPaintParam.SetFocusPadding(theme->GetFocusOutPaddingVp());
+        focusPaintParam.SetFocusBoxGlow(theme->IsFocusBoxGlow());
+        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, focusPaintParam};
     }
 
     void UpdateNextNodeDivider(bool needDivider);
@@ -224,7 +243,9 @@ private:
     bool UpdateOptionFocus(KeyCode code);
     void SetAccessibilityAction();
     void UpdatePasteFontColor(const Color& fontColor);
-
+    void InitFocusEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
     std::optional<Color> bgColor_;
 
     // src of icon image, used in XTS inspector
@@ -245,6 +266,12 @@ private:
     bool hasOptionWidth_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(OptionPattern);
+    bool isFocused_ = false;
+    bool isFocusBGColorSet_ = false;
+    bool isFocusTextColorSet_ = false;
+    bool focusEventInitialized_ = false;
+    bool isFocusShadowSet_ = false;
+    int32_t selected_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

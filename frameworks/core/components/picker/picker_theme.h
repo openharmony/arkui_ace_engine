@@ -28,10 +28,15 @@
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
+#include "core/components_ng/pattern/picker/picker_type_define.h"
 
 namespace OHOS::Ace {
 namespace {
 constexpr Dimension DIVIDER_THICKNESS = 1.0_px;
+constexpr uint32_t FOCUS_AREA_TYPE_IMPL = 1;
 } // namespace
 
 class PickerTheme final : public virtual Theme {
@@ -42,6 +47,20 @@ public:
     public:
         Builder() = default;
         ~Builder() = default;
+
+        void SetDigitalCrownSensitivity(const RefPtr<PickerTheme>& theme, const RefPtr<ThemeStyle>& themeStyle) const
+        {
+#ifdef SUPPORT_DIGITAL_CROWN
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("picker_pattern", nullptr);
+            if (pattern) {
+                auto sensitivity = pattern->GetAttr<int>("picker_crown_sensitivity",
+                    OHOS::Ace::NG::DEFAULT_CROWNSENSITIVITY);
+                if (sensitivity >= 0 && sensitivity <= static_cast<int32_t>(OHOS::Ace::CrownSensitivity::HIGH)) {
+                    theme->crownSensitivity_ = sensitivity;
+                }
+            }
+#endif
+        }
 
         RefPtr<PickerTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
@@ -64,6 +83,7 @@ public:
             theme->rotateInterval_ = 15.0; // when rotate 15.0 angle handle scroll of picker column.
             theme->dividerThickness_ = DIVIDER_THICKNESS;
             Parse(themeStyle, theme);
+            InitializeSelectorItemStyles(theme, themeStyle);
             return theme;
         }
 
@@ -124,6 +144,9 @@ public:
                     pattern->GetAttr<Dimension>("picker_normal_option_min_font_size", 0.0_fp));
                 theme->disappearOptionStyle_.SetMaxLines(1);
                 theme->disappearOptionStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
+                theme->backgroundColor_ = pattern->GetAttr<Color>("picker_background_color", Color(0xffffffff));
+                theme->showCircleDial_= static_cast<bool>(pattern->GetAttr<int>("picker_digital_circle", 0));
+                SetDigitalCrownSensitivity(theme, themeStyle);
             }
 
             theme->focusOptionStyle_.SetFontSize(pattern->GetAttr<Dimension>("picker_focus_option_font_size", 0.0_fp));
@@ -137,6 +160,36 @@ public:
 
             if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
                 theme->focusOptionStyle_ = theme->selectedOptionStyle_; // focus style the same with selected on phone
+            }
+        }
+
+        void InitializeSelectorItemStyles(const RefPtr<PickerTheme>& theme, const RefPtr<ThemeStyle>& themeStyle) const
+        {
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("picker_pattern", nullptr);
+            if (pattern) {
+                theme->focusImplType_ = static_cast<uint32_t>(pattern->GetAttr<int>("picker_focus_area_type", 0));
+                theme->selectorItemRadius_ = pattern->GetAttr<Dimension>("picker_selector_item_radius", 8.0_vp);
+                theme->selectorItemSpace_ = pattern->GetAttr<Dimension>("picker_selector_item_space", 4.0_vp);
+                theme->selectorItemBorderWidth_ =
+                    pattern->GetAttr<Dimension>("picker_selector_item_border_width", 0.0_vp);
+                theme->selectorItemFocusBorderWidth_ =
+                    pattern->GetAttr<Dimension>("picker_selector_item_focus_border_width", 0.0_vp);
+                theme->selectorItemBorderColor_ =
+                    pattern->GetAttr<Color>("picker_selector_item_border_color", Color::TRANSPARENT);
+                theme->selectorItemFocusBorderColor_ =
+                    pattern->GetAttr<Color>("picker_selector_item_focus_border_color", Color::TRANSPARENT);
+                theme->selectorItemFocusBgColor_ =
+                    pattern->GetAttr<Color>("picker_selector_item_focus_bg_color", Color::TRANSPARENT);
+                theme->selectorItemNormalBgColor_ =
+                    pattern->GetAttr<Color>("picker_selector_item_normal_bg_color", Color::TRANSPARENT);
+
+                if (FOCUS_AREA_TYPE_IMPL == theme->focusImplType_) {
+                    theme->focusOptionStyle_.SetFontSize(pattern->GetAttr<Dimension>(
+                        "picker_focus_option_font_size", theme->selectedOptionStyle_.GetFontSize()));
+                    theme->focusOptionStyle_.SetTextColor(pattern->GetAttr<Color>(
+                        "picker_focus_option_text_color", theme->selectedOptionStyle_.GetTextColor()));
+                    theme->dividerColor_ = pattern->GetAttr<Color>("picker_select_divider_color", Color::TRANSPARENT);
+                }
             }
         }
 
@@ -194,7 +247,21 @@ public:
         theme->lunarswitchTextSize_ = lunarswitchTextSize_;
         theme->defaultStartDate_ = defaultStartDate_;
         theme->defaultEndDate_ = defaultEndDate_;
+        cloneSelectorProps(theme);
         return theme;
+    }
+
+    void cloneSelectorProps(RefPtr<PickerTheme> theme) const
+    {
+        theme->focusImplType_ = focusImplType_;
+        theme->selectorItemRadius_ = selectorItemRadius_;
+        theme->selectorItemSpace_ = selectorItemSpace_;
+        theme->selectorItemBorderWidth_ = selectorItemBorderWidth_;
+        theme->selectorItemFocusBorderWidth_ = selectorItemFocusBorderWidth_;
+        theme->selectorItemBorderColor_ = selectorItemBorderColor_;
+        theme->selectorItemFocusBorderColor_ = selectorItemFocusBorderColor_;
+        theme->selectorItemFocusBgColor_ = selectorItemFocusBgColor_;
+        theme->selectorItemNormalBgColor_ = selectorItemNormalBgColor_;
     }
 
     const TextStyle& GetOptionStyle(bool selected, bool focus) const
@@ -451,6 +518,66 @@ public:
         return paddingVertical_;
     }
 
+    bool NeedButtonFocusAreaType() const
+    {
+        return focusImplType_ == FOCUS_AREA_TYPE_IMPL;
+    }
+
+    const Dimension& GetSelectorItemRadius() const
+    {
+        return selectorItemRadius_;
+    }
+
+    const Dimension& GetSelectorItemSpace() const
+    {
+        return selectorItemSpace_;
+    }
+
+    const Dimension& GetSelectorItemBorderWidth() const
+    {
+        return selectorItemBorderWidth_;
+    }
+
+    const Dimension& GetSelectorItemFocusBorderWidth() const
+    {
+        return selectorItemFocusBorderWidth_;
+    }
+
+    const Color& GetSelectorItemBorderColor() const
+    {
+        return selectorItemBorderColor_;
+    }
+
+    const Color& GetSelectorItemFocusBorderColor() const
+    {
+        return selectorItemFocusBorderColor_;
+    }
+
+    const Color& GetSelectorItemFocusBgColor() const
+    {
+        return selectorItemFocusBgColor_;
+    }
+
+    const Color& GetSelectorItemNormalBgColor() const
+    {
+        return selectorItemNormalBgColor_;
+    }
+
+    const Color& GetBackgroundColor() const
+    {
+        return backgroundColor_;
+    }
+
+    int32_t GetDigitalCrownSensitivity() const
+    {
+        return crownSensitivity_;
+    }
+
+    bool IsCircleDial() const
+    {
+        return showCircleDial_;
+    }
+
 private:
     PickerTheme() = default;
 
@@ -458,6 +585,9 @@ private:
     Color hoverColor_;
     Color pressColor_;
     Color lunarswitchTextColor_;
+    Color backgroundColor_;
+    int32_t crownSensitivity_ = OHOS::Ace::NG::DEFAULT_CROWNSENSITIVITY;
+    bool showCircleDial_ = false;
 
     Radius focusRadius_;
     uint32_t showOptionCount_ = 0;
@@ -519,6 +649,17 @@ private:
 
     uint32_t showCountLandscape_ = 3;
     uint32_t showCountPortrait_ = 5;
+
+    uint32_t focusImplType_ = 0;
+
+    Dimension selectorItemRadius_;
+    Dimension selectorItemSpace_;
+    Dimension selectorItemBorderWidth_;
+    Dimension selectorItemFocusBorderWidth_;
+    Color selectorItemBorderColor_;
+    Color selectorItemFocusBorderColor_;
+    Color selectorItemFocusBgColor_;
+    Color selectorItemNormalBgColor_;
 };
 
 } // namespace OHOS::Ace

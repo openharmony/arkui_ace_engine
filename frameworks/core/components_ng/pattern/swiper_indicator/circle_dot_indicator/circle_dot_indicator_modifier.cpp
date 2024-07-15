@@ -34,6 +34,14 @@ constexpr float CENTER_BEZIER_CURVE_STIFFNESS = 1.0f;
 constexpr float CENTER_BEZIER_CURVE_DAMPING = 1.0f;
 constexpr float MASK_END_RATIO = 0.25f;
 
+constexpr int32_t OBTAIN_OPPOSITE = -1;
+constexpr int32_t TOUCH_BOTTOM_ANIMATION_DURATION = 100;
+constexpr float TOUCH_BOTTOM_CURVE_VELOCITY = 0.1f;
+constexpr float TOUCH_BOTTOM_CURVE_MASS = 0.2f;
+constexpr float TOUCH_BOTTOM_CURVE_STIFFNESS = 0.48f;
+constexpr float TOUCH_BOTTOM_CURVE_DAMPING = 1.0f;
+constexpr float QUARTER = 0.25f;
+
 constexpr int32_t BLACK_POINT_DURATION = 400;
 constexpr int32_t LONG_POINT_DURATION = 400;
 
@@ -56,7 +64,7 @@ constexpr Dimension DEFAULT_CONTAINER_BORDER_WIDTH = 16.0_vp;
 constexpr Dimension DEFAULT_ITEM_RADIUS = 2.5_vp;
 constexpr Dimension DEFAULT_ITEM_SELECT_WIDTH = 5.0_vp;
 constexpr int32_t MAX_INDICATOR_DOT_COUNT = 15;
-constexpr int32_t HALF_DIVISOR = 2;
+constexpr float HALF_DIVISOR = 2.0f;
 } // namespace
 
 CircleDotIndicatorModifier::CircleDotIndicatorModifier()
@@ -111,27 +119,11 @@ void CircleDotIndicatorModifier::onDraw(DrawingContext& context)
     PaintContent(context, contentProperty);
 }
 
-void CircleDotIndicatorModifier::PaintBackground(DrawingContext& context, const ContentProperty& contentProperty)
+std::pair<PointF, PointF> CircleDotIndicatorModifier::GetArcPoint(const ContentProperty& contentProperty) const
 {
-    RSCanvas& canvas = context.canvas;
-    CHECK_NULL_VOID(contentProperty.backgroundColor.GetAlpha());
-    float dotPaddingAngle = contentProperty.dotPaddingAngle;
-    float dotActivePaddingAngle = contentProperty.dotActivePaddingAngle;
-    float containerBorderWidth = contentProperty.containerBorderWidth;
-    float dotActiveAngle = contentProperty.dotActiveAngle;
-    auto itemSize = contentProperty.vectorBlackPointAngle.size();
-    if (itemSize > MAX_INDICATOR_DOT_COUNT) {
-        itemSize = MAX_INDICATOR_DOT_COUNT;
-    }
-    float allPointArcAngle = GetAllPointArcAngle(itemSize, dotPaddingAngle, dotActivePaddingAngle, dotActiveAngle);
-    RSPen pen;
-    pen.SetAntiAlias(true);
-    pen.SetWidth(containerBorderWidth);
-    pen.SetColor(contentProperty.backgroundColor.GetValue());
-    pen.SetCapStyle(ToRSCapStyle(LineCap::ROUND));
-    float startAngle = 0;
     PointF startPoint;
     PointF endPoint;
+    float containerBorderWidth = contentProperty.containerBorderWidth;
     // The number 2 represents multiplying by 2 times or dividing equally
     if (axis_ == Axis::HORIZONTAL) {
         startPoint.SetX(centerX_ - circleRadius_ + containerBorderWidth / HALF_DIVISOR);
@@ -144,16 +136,51 @@ void CircleDotIndicatorModifier::PaintBackground(DrawingContext& context, const 
         endPoint.SetX(centerY_ + circleRadius_ - (containerBorderWidth / HALF_DIVISOR));
         endPoint.SetY(centerX_ + circleRadius_ - (containerBorderWidth / HALF_DIVISOR));
     }
-    if (arcDirection_ == SwiperArcDirection::SIX_CLOCK_DIRECTION) {
-        startAngle = QUARTER_CIRCLE_ANGLE + (allPointArcAngle / HALF_DIVISOR) + backgroundOffset_;
-    } else if (arcDirection_ == SwiperArcDirection::THREE_CLOCK_DIRECTION) {
-        startAngle = allPointArcAngle / HALF_DIVISOR + backgroundOffset_;
+    return std::make_pair(startPoint, endPoint);
+}
+
+void CircleDotIndicatorModifier::PaintBackground(DrawingContext& context, const ContentProperty& contentProperty)
+{
+    RSCanvas& canvas = context.canvas;
+    CHECK_NULL_VOID(contentProperty.backgroundColor.GetAlpha());
+    float dotPaddingAngle = contentProperty.dotPaddingAngle;
+    float dotActivePaddingAngle = contentProperty.dotActivePaddingAngle;
+    float width = contentProperty.containerBorderWidth;
+    if (touchBottomType_ != TouchBottomType::NONE) {
+        width -= QUARTER * touchBottomRate_ * width;
     } else {
-        startAngle = HALF_CIRCLE_ANGLE + (allPointArcAngle / HALF_DIVISOR) + backgroundOffset_;
+        backgroundOffset_ = 0;
     }
+    float dotActiveAngle = contentProperty.dotActiveAngle;
+    auto itemSize = contentProperty.vectorBlackPointAngle.size();
+    if (itemSize > MAX_INDICATOR_DOT_COUNT) {
+        itemSize = MAX_INDICATOR_DOT_COUNT + ITEM_TWO_NUM;
+    }
+    float allPointArcAngle = GetAllPointArcAngle(itemSize, dotPaddingAngle, dotActivePaddingAngle, dotActiveAngle);
+    RSPen pen;
+    pen.SetAntiAlias(true);
+    pen.SetWidth(width);
+    pen.SetColor(contentProperty.backgroundColor.GetValue());
+    pen.SetCapStyle(ToRSCapStyle(LineCap::ROUND));
+    float startAngle = 0;
+    if (arcDirection_ == SwiperArcDirection::SIX_CLOCK_DIRECTION) {
+        startAngle = QUARTER_CIRCLE_ANGLE + (allPointArcAngle / HALF_DIVISOR);
+    } else if (arcDirection_ == SwiperArcDirection::THREE_CLOCK_DIRECTION) {
+        startAngle = allPointArcAngle / HALF_DIVISOR;
+    } else {
+        startAngle = HALF_CIRCLE_ANGLE + (allPointArcAngle / HALF_DIVISOR);
+    }
+
+    float drawAngle = - (allPointArcAngle + backgroundOffset_);
+    if (touchBottomType_ == TouchBottomType::START) {
+        startAngle = startAngle - allPointArcAngle;
+        drawAngle *= OBTAIN_OPPOSITE;
+    }
+    auto drawPoint = GetArcPoint(contentProperty);
     canvas.AttachPen(pen);
     canvas.DrawArc(
-        { startPoint.GetX(), startPoint.GetY(), endPoint.GetX(), endPoint.GetY() }, startAngle, -allPointArcAngle);
+        { drawPoint.first.GetX(), drawPoint.first.GetY(), drawPoint.second.GetX(), drawPoint.second.GetY() },
+        startAngle, drawAngle);
     canvas.DetachPen();
     canvas.Restore();
 }
@@ -175,21 +202,23 @@ float CircleDotIndicatorModifier::GetAllPointArcAngle(int32_t itemSize, float do
     return allPointArcAngle;
 }
 
-void CircleDotIndicatorModifier::UpdateTouchBottomAnimation(TouchBottomType touchBottomType,
-                                                            const LinearVector<float>& vectorBlackPointCenterX,
+void CircleDotIndicatorModifier::UpdateTouchBottomAnimation(const LinearVector<float>& vectorBlackPointCenterX,
                                                             const std::pair<float, float>& longPointCenterX,
                                                             float backgroundOffset)
 {
+    StopAnimation();
     AnimationOption option;
-    option.SetDuration(COMPONENT_SHRINK_ANIMATION_DURATION);
-    option.SetCurve(Curves::FRICTION);
-    touchBottomType_ = touchBottomType;
+    option.SetDuration(TOUCH_BOTTOM_ANIMATION_DURATION);
+    option.SetCurve(AceType::MakeRefPtr<CubicCurve>(TOUCH_BOTTOM_CURVE_VELOCITY, TOUCH_BOTTOM_CURVE_MASS,
+        TOUCH_BOTTOM_CURVE_STIFFNESS, TOUCH_BOTTOM_CURVE_DAMPING));
 
     AnimationUtils::Animate(option, [weak = WeakClaim(this),
                                     vectorBlackPointCenterX, longPointCenterX, backgroundOffset]() {
         auto modifier = weak.Upgrade();
         CHECK_NULL_VOID(modifier);
         modifier->SetBackgroundOffset(backgroundOffset);
+        modifier->dotActiveStartAngle_->Set(longPointCenterX.first);
+        modifier->dotActiveEndAngle_->Set(longPointCenterX.second);
         modifier->vectorBlackPointAngle_->Set(vectorBlackPointCenterX);
     });
 }

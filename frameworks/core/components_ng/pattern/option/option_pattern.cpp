@@ -39,6 +39,7 @@ namespace {
     constexpr Dimension MIN_OPTION_WIDTH = 56.0_vp;
     constexpr Dimension OPTION_MARGIN = 8.0_vp;
     constexpr int32_t COLUMN_NUM = 2;
+    constexpr Dimension BORDER_DEFAULT_WIDTH = 0.0_vp;
 } // namespace
 
 void OptionPattern::OnAttachToFrameNode()
@@ -79,6 +80,108 @@ void OptionPattern::OnModifyDone()
         UpdatePasteFontColor(selectTheme_->GetMenuFontColor());
     }
     SetAccessibilityAction();
+    auto layoutProp = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProp);
+    if (!layoutProp->GetMarginProperty()) {
+        MarginProperty margin;
+        auto verticalMargin = CalcLength(selectTheme_->GetOptionNormalTopBottomMargin());
+        margin.SetEdges(CalcLength(0.0), CalcLength(0.0), verticalMargin, verticalMargin);
+        layoutProp->UpdateMargin(margin);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    InitFocusEvent();
+}
+
+void OptionPattern::InitFocusEvent()
+{
+    if (focusEventInitialized_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto focusTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleFocusEvent();
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+    focusEventInitialized_ = true;
+}
+
+void OptionPattern::HandleFocusEvent()
+{
+    isFocused_ = true;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto && graphics = renderContext->GetOrCreateGraphics();
+    auto && transform = renderContext->GetOrCreateTransform();
+    CHECK_NULL_VOID(graphics);
+    CHECK_NULL_VOID(transform);
+
+    Shadow shadow = Shadow::CreateShadow(static_cast<ShadowStyle>(NONE_SHADOW_VALUE));
+    if (!graphics->HasBackShadow() || graphics->GetBackShadowValue() == shadow) {
+        ShadowStyle shadowStyle = static_cast<ShadowStyle>(selectTheme_->GetOptionFocusedShadow());
+        renderContext->UpdateBackShadow(Shadow::CreateShadow(shadowStyle));
+        isFocusShadowSet_ = true;
+    }
+
+    isFocusBGColorSet_ = true;
+    renderContext->UpdateBackgroundColor(selectTheme_->GetOptionFocusedBackgroundColor());
+    CHECK_NULL_VOID(text_);
+    auto context = text_->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->UpdateForegroundColor(selectTheme_->GetOptionFocusedFontColor());
+    context->UpdateForegroundColorFlag(false);
+    context->ResetForegroundColorStrategy();
+    text_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    isFocusTextColorSet_ = true;
+}
+
+void OptionPattern::HandleBlurEvent()
+{
+    isFocused_ = false;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (isFocusBGColorSet_) {
+        if (selected_ == index_) {
+            renderContext->UpdateBackgroundColor(selectTheme_->GetSelectedColor());
+        } else {
+            renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        }
+        isFocusBGColorSet_ = false;
+    }
+    if (isFocusShadowSet_) {
+        renderContext->ResetBackShadow();
+        renderContext->SetShadowRadius(0.0f);
+        isFocusShadowSet_ = false;
+    }
+    if (isFocusTextColorSet_) {
+        CHECK_NULL_VOID(text_);
+        auto context = text_->GetRenderContext();
+        CHECK_NULL_VOID(context);
+        if (selected_ == index_) {
+            context->UpdateForegroundColor(selectTheme_->GetSelectedColorText());
+        } else {
+            context->UpdateForegroundColor(GetFontColor());
+        }
+        context->UpdateForegroundColorFlag(false);
+        context->ResetForegroundColorStrategy();
+        text_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        isFocusTextColorSet_ = false;
+    }
 }
 
 void OptionPattern::UpdatePasteFontColor(const Color& fontColor)
@@ -383,6 +486,42 @@ void OptionPattern::SetFontColor(const Color& color)
     context->ResetForegroundColorStrategy();
 }
 
+void OptionPattern::SetBorderColor(const Color& color)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    BorderColorProperty borderColor;
+    borderColor.SetColor(color);
+    renderContext->UpdateBorderColor(borderColor);
+}
+
+void OptionPattern::SetBorderWidth(const Dimension& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(value);
+    auto layoutProp = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProp);
+    layoutProp->UpdateBorderWidth(borderWidth);
+    renderContext->UpdateBorderWidth(borderWidth);
+}
+
+Color OptionPattern::GetBorderColor()
+{
+    return Color::TRANSPARENT;
+}
+
+Dimension OptionPattern::GetBorderWidth()
+{
+    return BORDER_DEFAULT_WIDTH;
+}
+    
 std::string OptionPattern::InspectorGetFont()
 {
     CHECK_NULL_RETURN(text_, "");

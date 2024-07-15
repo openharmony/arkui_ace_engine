@@ -171,9 +171,7 @@ public:
 
     void SetHoverState(const RatingAnimationType& state)
     {
-        RatingAnimationType proxyState = isFocus_? RatingAnimationType::FOCUS : state;
-
-        if (state_ == proxyState) {
+        if (state_ == state) {
             return;
         }
         state_ = state;
@@ -188,7 +186,7 @@ public:
                 SetBoardColor(LinearColor(ratingTheme->GetHoverColor()), hoverDuration, Curves::FRICTION);
                 break;
             case RatingAnimationType::FOCUS:
-                SetBoardColor(LinearColor(Color::WHITE), hoverDuration, Curves::FRICTION);
+                SetBoardColor(LinearColor(ratingTheme->GetFocusColor()), hoverDuration, Curves::FRICTION);
                 break;
             case RatingAnimationType::HOVERTOPRESS:
                 SetBoardColor(LinearColor(ratingTheme->GetPressColor()), pressDuration, Curves::SHARP);
@@ -214,13 +212,6 @@ public:
         }
     }
 
-    void SetIsFocused(bool isFocused)
-    {
-        if (isFocused_) {
-            isFocused_->Set(isFocused);
-        }
-    }
-
 private:
     // others
     RatingAnimationType state_ = RatingAnimationType::NONE;
@@ -240,7 +231,6 @@ private:
     RefPtr<PropertyBool> useContentModifier_;
     RefPtr<PropertyOffsetF> contentOffset_;
     RefPtr<PropertySizeF> contentSize_;
-    RefPtr<PropertyBool> isFocused_;
     // animatable property
     RefPtr<AnimatablePropertyColor> boardColor_;
     RefPtr<PropertyBool> reverse_;

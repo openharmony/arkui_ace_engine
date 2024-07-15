@@ -46,6 +46,7 @@ public:
                 return theme;
             }
             ParsePattern(themeConstants, theme);
+            Parse(themeConstants, theme);
             return theme;
         }
     private:
@@ -55,7 +56,6 @@ public:
             if (!toastPattern) {
                 return;
             }
-
             theme->minWidth_ = toastPattern->GetAttr<Dimension>("toast_content_min_width", 0.0_vp);
             theme->minHeight_ = toastPattern->GetAttr<Dimension>("toast_content_min_height", 0.0_vp);
             theme->bottom_ = toastPattern->GetAttr<Dimension>("toast_bottom", 0.0_vp);
@@ -102,6 +102,17 @@ public:
                     toastPattern->GetAttr<Dimension>("toast_border_radius", 24.0_vp));
             }
         }
+        void Parse(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<ToastTheme>& theme) const
+        {
+            RefPtr<ThemeStyle> toastPattern = themeConstants->GetPatternByName(THEME_PATTERN_TOAST);
+            if (!toastPattern) {
+                return;
+            }
+
+            theme->defaultBGColor_ = toastPattern->GetAttr<Color>("toast_default_bg_color", Color::TRANSPARENT);
+            theme->bgThemeColorMode_ =
+                static_cast<uint32_t>(toastPattern->GetAttr<double>("toast_bg_theme_color_mode", 0));
+        }
     };
 
     ~ToastTheme() override = default;
@@ -129,6 +140,11 @@ public:
     const Color& GetBackgroundColor() const
     {
         return backgroundColor_;
+    }
+
+    Color GetDefaultBGColor() const
+    {
+        return defaultBGColor_;
     }
 
     const TextStyle& GetTextStyle() const
@@ -181,6 +197,11 @@ public:
         return shadowNormal_;
     }
 
+    uint32_t GetBgThemeColorMode() const
+    {
+        return bgThemeColorMode_;
+    }
+
 protected:
     ToastTheme() = default;
 
@@ -198,8 +219,10 @@ private:
     Dimension borderWidth_;
     uint32_t textMaxLines_ = 1;
     uint32_t shadowNormal_ = 6;  // no shadow
+    uint32_t bgThemeColorMode_ = 0;
     Edge marging_;
     Color blurStyleTextColor_;
+    Color defaultBGColor_;
 };
 
 } // namespace OHOS::Ace

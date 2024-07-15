@@ -23,7 +23,6 @@
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/swiper/swiper_controller.h"
-#include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
@@ -35,8 +34,8 @@
 #include "core/components_ng/pattern/tabs/tab_content_model.h"
 #include "core/event/mouse_event.h"
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
-#include "frameworks/core/components/focus_animation/focus_animation_theme.h"
 #include "frameworks/core/components_ng/event/focus_hub.h"
+#include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -170,12 +169,12 @@ public:
         FocusPaintParam focusPaintParams;
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, FocusPattern());
-        auto focusTheme = pipeline->GetTheme<FocusAnimationTheme>();
-        CHECK_NULL_RETURN(focusTheme, FocusPattern());
-        auto tabTheme = pipeline->GetTheme<TabTheme>();
-        CHECK_NULL_RETURN(tabTheme, FocusPattern());
-        focusPaintParams.SetPaintWidth(tabTheme->GetActiveIndicatorWidth());
-        focusPaintParams.SetPaintColor(focusTheme->GetColor());
+        auto appTheme = pipeline->GetTheme<AppTheme>();
+        CHECK_NULL_RETURN(appTheme, FocusPattern());
+
+        focusPaintParams.SetPaintWidth(appTheme->GetFocusBorderWidth());
+        focusPaintParams.SetPaintColor(appTheme->GetFocusBorderColor());
+        focusPaintParams.SetFocusBoxGlow(appTheme->IsFocusBoxGlow());
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
@@ -204,6 +203,8 @@ public:
     void UpdateSymbolEffect(int32_t index);
 
     void UpdateSubTabBoard();
+
+    void GetColumnId(int32_t& selectedColumnId, int32_t& focusedColumnId);
 
     SelectedMode GetSelectedMode() const;
 
@@ -440,6 +441,8 @@ private:
     void OnAttachToFrameNode() override;
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
 
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -452,6 +455,7 @@ private:
     void HandleHoverEvent(bool isHover);
     void HandleHoverOnEvent(int32_t index);
     void HandleMoveAway(int32_t index);
+    void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool OnKeyEventWithoutClick(const KeyEvent& event);
@@ -594,6 +598,8 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
     MarginProperty marginLeftOrRight_;
     MarginProperty marginTopOrBottom_;
+    bool isFocusSet_ = false;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 };
 } // namespace OHOS::Ace::NG
 
