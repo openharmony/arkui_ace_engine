@@ -787,7 +787,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
 #endif
 #if !defined(ACE_UNITTEST)
     TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(curNode,
-        TransparentNodeDetector::MAX_DETECT_COUNT);
+);
 #endif
 }
 
