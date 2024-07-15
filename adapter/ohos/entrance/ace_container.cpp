@@ -1394,6 +1394,12 @@ bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFil
     return true;
 }
 
+bool AceContainer::IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType)
+{
+    return AbilityRuntime::AutoFillManager::GetInstance().IsNeedToCreatePopupWindow(
+        static_cast<AbilityBase::AutoFillType>(autoFillType));
+}
+
 class SaveRequestCallback : public AbilityRuntime::ISaveRequestCallback {
 public:
     SaveRequestCallback(WeakPtr<NG::PipelineContext> pipelineContext, const std::function<void()>& onFinish)
