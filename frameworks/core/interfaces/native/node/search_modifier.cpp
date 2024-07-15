@@ -23,6 +23,7 @@
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
+#include "core/components_ng/pattern/search/search_node.h"
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -139,11 +140,9 @@ void SetSearchCancelButton(ArkUINodeHandle node,
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetCancelButtonStyle(frameNode, static_cast<CancelButtonStyle>(style));
-    SearchModelNG::SetCancelIconSize(frameNode,
-        Dimension(size->value, static_cast<DimensionUnit>(size->unit)));
-    SearchModelNG::SetCancelIconColor(frameNode, Color(color));
-    std::string srcStr = std::string(src);
-    SearchModelNG::SetRightIconSrcPath(frameNode, srcStr);
+    NG::IconOptions cancelIconOptions = NG::IconOptions(
+        Color(color), Dimension(size->value, static_cast<DimensionUnit>(size->unit)), std::string(src), "", "");
+    SearchModelNG::SetCancelImageIcon(frameNode, cancelIconOptions);
 }
 
 void ResetSearchCancelButton(ArkUINodeHandle node)
@@ -195,11 +194,14 @@ void SetSearchSearchIcon(ArkUINodeHandle node, const struct ArkUIIconOptionsStru
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SearchModelNG::SetSearchSrcPath(frameNode, value->src);
-    SearchModelNG::SetSearchIconSize(frameNode, Dimension(value->value, static_cast<DimensionUnit>(value->unit)));
+    Color iconColor;
     if (value->color != INVALID_COLOR_VALUE) {
-        SearchModelNG::SetSearchIconColor(frameNode, Color(value->color));
+        iconColor = Color(value->color);
     }
+
+    NG::IconOptions cancelInconOptions = NG::IconOptions(
+        iconColor, Dimension(value->value, static_cast<DimensionUnit>(value->unit)), std::string(value->src), "", "");
+    SearchModelNG::SetSearchImageIcon(frameNode, cancelInconOptions);
 }
 
 void ResetSearchSearchIcon(ArkUINodeHandle node)

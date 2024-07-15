@@ -44,6 +44,7 @@ const std::string INSPECTOR_PREFIX = "__SearchField__";
 const std::vector<std::string> SPECICALIZED_INSPECTOR_INDEXS = { "", "Image__", "CancelImage__", "CancelButton__",
     "Button__" };
 const std::string DROP_TYPE_STYLED_STRING = "ApplicationDefinedType";
+constexpr Dimension ICON_HEIGHT = 16.0_vp;
 
 void UpdateInnerInspector(FrameNode* frameNode, const std::string& key)
 {
@@ -195,6 +196,33 @@ void SearchModelNG::SetSearchSrcPath(
     pattern->SetSearchSrcPath(src, bundleName, moduleName);
 }
 
+void SearchModelNG::SetSearchDefaultIcon()
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->InitSearchIconColorSize();
+    pattern->CreateSearchIcon("");
+}
+
+void SearchModelNG::SetSearchImageIcon(IconOptions &iconOptions)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSearchImageIcon(iconOptions);
+    ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconUDSize, iconOptions.GetSize().value());
+}
+
+void SearchModelNG::SetSearchSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->SetSearchIconSymbol(iconSymbol);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSearchSymbolIcon();
+}
+
 void SearchModelNG::SetRightIconSrcPath(const std::string& src)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>();
@@ -223,6 +251,33 @@ void SearchModelNG::SetCancelIconColor(const Color& color)
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCancelIconColor(color);
+}
+
+void SearchModelNG::SetCancelDefaultIcon()
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->InitCancelIconColorSize();
+    pattern->CreateCancelIcon();
+}
+
+void SearchModelNG::SetCancelImageIcon(IconOptions &iconOptions)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCancelImageIcon(iconOptions);
+    ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonUDSize, iconOptions.GetSize().value());
+}
+
+void SearchModelNG::SetCancelSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->SetCancelIconSymbol(iconSymbol);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCancelSymbolIcon();
 }
 
 void SearchModelNG::SetSearchButtonFontSize(const Dimension& value)
@@ -666,7 +721,7 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
     auto textValue = pattern->GetTextValue();
     if (textFieldLayoutProperty) {
         if (value.has_value() && value.value() != textValue) {
-            pattern->InitEditingValueText(value.value());
+            pattern->InitValueText(value.value());
         }
         textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
         textFieldLayoutProperty->UpdateMaxLines(1);
@@ -918,7 +973,7 @@ void SearchModelNG::SetTextValue(FrameNode* frameNode, const std::optional<std::
     auto textValue = pattern->GetTextValue();
     if (textFieldLayoutProperty) {
         if (value.has_value() && value.value() != textValue) {
-            pattern->InitEditingValueText(value.value());
+            pattern->InitValueText(value.value());
         }
     }
 }
@@ -1014,6 +1069,16 @@ void SearchModelNG::SetSearchIconColor(FrameNode* frameNode, const Color& color)
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
     pattern->SetSearchIconColor(color);
+}
+
+void SearchModelNG::SetSearchImageIcon(FrameNode *frameNode, IconOptions &iconOptions)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSearchImageIcon(iconOptions);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        SearchLayoutProperty, SearchIconUDSize, iconOptions.GetSize().value_or(ICON_HEIGHT), frameNode);
 }
 
 void SearchModelNG::SetSearchButton(FrameNode* frameNode, const std::string& text)
@@ -1205,6 +1270,17 @@ void SearchModelNG::SetRightIconSrcPath(FrameNode* frameNode, const std::string&
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
     pattern->SetRightIconSrcPath(src);
+}
+
+void SearchModelNG::SetCancelImageIcon(FrameNode *frameNode, IconOptions &iconOptions)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCancelImageIcon(iconOptions);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        SearchLayoutProperty, CancelButtonUDSize, iconOptions.GetSize().value_or(ICON_HEIGHT), frameNode);
 }
 
 void SearchModelNG::SetSearchEnterKeyType(FrameNode* frameNode, TextInputAction value)

@@ -489,6 +489,11 @@ public:
         return false;
     }
 
+    virtual bool IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType)
+    {
+        return false;
+    }
+
     virtual bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish = nullptr,
         const std::function<void()>& onUIExtNodeBindingCompleted = nullptr)
     {
@@ -545,6 +550,8 @@ public:
 
     template<ContainerType type>
     static int32_t GenerateId();
+    static void SetFontScale(int32_t instanceId, float fontScale);
+    static void SetFontWeightScale(int32_t instanceId, float fontScale);
 
     int32_t GetApiTargetVersion() const
     {

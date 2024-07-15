@@ -1394,6 +1394,12 @@ bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFil
     return true;
 }
 
+bool AceContainer::IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType)
+{
+    return AbilityRuntime::AutoFillManager::GetInstance().IsNeedToCreatePopupWindow(
+        static_cast<AbilityBase::AutoFillType>(autoFillType));
+}
+
 class SaveRequestCallback : public AbilityRuntime::ISaveRequestCallback {
 public:
     SaveRequestCallback(WeakPtr<NG::PipelineContext> pipelineContext, const std::function<void()>& onFinish)
@@ -1980,26 +1986,6 @@ bool AceContainer::IsTransparentBg() const
     std::string bgOpacity = bgColor.ColorToString().substr(0, 3);
     std::string transparentOpacity = "#00";
     return bgColor == Color::TRANSPARENT || bgOpacity == transparentOpacity;
-}
-
-void AceContainer::SetFontScale(int32_t instanceId, float fontScale)
-{
-    auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_VOID(container);
-    ContainerScope scope(instanceId);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->SetFontScale(fontScale);
-}
-
-void AceContainer::SetFontWeightScale(int32_t instanceId, float fontWeightScale)
-{
-    auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_VOID(container);
-    ContainerScope scope(instanceId);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->SetFontWeightScale(fontWeightScale);
 }
 
 bool AceContainer::ParseThemeConfig(const std::string& themeConfig)

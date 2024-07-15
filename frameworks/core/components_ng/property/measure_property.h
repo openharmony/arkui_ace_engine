@@ -530,6 +530,12 @@ struct PaddingPropertyT<float> {
         return !left.has_value() && !right.has_value() && !top.has_value() && !bottom.has_value();
     }
 
+    bool HasValue() const
+    {
+        return (left && !NearZero(left.value())) || (right && !NearZero(right.value())) ||
+            (top && !NearZero(top.value())) || (bottom && !NearZero(bottom.value()));
+    }
+
     PaddingPropertyT<float> Plus(const PaddingPropertyT<float>& another, bool skipNullOpt = true)
     {
         return Calculate(another, skipNullOpt, true);

@@ -438,8 +438,6 @@ public:
     static sptr<OHOS::Rosen::Window> GetUIWindow(int32_t instanceId);
     static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);
     static OHOS::AbilityRuntime::Context* GetRuntimeContext(int32_t instanceId);
-    static void SetFontScale(int32_t instanceId, float fontScale);
-    static void SetFontWeightScale(int32_t instanceId, float fontScale);
     static void SetWindowStyle(int32_t instanceId, WindowModal windowModal, ColorScheme colorScheme);
     static std::pair<RouterRecoverRecord, UIContentErrorCode> RestoreRouterStack(
         int32_t instanceId, const std::string& contentInfo, ContentInfoType type);
@@ -563,6 +561,7 @@ public:
 
     bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
         bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId) override;
+    bool IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType) override;
     bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish,
         const std::function<void()>& onUIExtNodeBindingCompleted) override;
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;

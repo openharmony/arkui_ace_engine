@@ -35,6 +35,12 @@ public:
     void SetSearchIconColor(const Color& color) override;
     void SetSearchSrcPath(
         const std::string& src, const std::string& bundleName, const std::string& moduleName) override;
+    void SetSearchSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol) override;
+    void SetSearchDefaultIcon() override;
+    void SetSearchImageIcon(NG::IconOptions& iconOptions) override;
+    void SetCancelSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol) override;
+    void SetCancelDefaultIcon() override;
+    void SetCancelImageIcon(NG::IconOptions& iconOptions) override;
     void SetRightIconSrcPath(const std::string& src) override;
     void SetCancelButtonStyle(CancelButtonStyle cancelButtonStyle) override;
     void SetCancelIconSize(const Dimension& value) override;
@@ -99,6 +105,7 @@ public:
     static void SetSearchIconSize(FrameNode* frameNode, const Dimension& value);
     static void SetSearchSrcPath(FrameNode* frameNode, const std::string& src);
     static void SetSearchIconColor(FrameNode* frameNode, const Color& color);
+    static void SetSearchImageIcon(FrameNode* frameNode, IconOptions& iconOptions);
     static void SetSearchButton(FrameNode* frameNode, const std::string& text);
     static void SetSearchButtonFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetSearchButtonFontColor(FrameNode* frameNode, const Color& color);
@@ -114,6 +121,7 @@ public:
     static void SetCancelIconColor(FrameNode* frameNode, const Color& color);
     static void SetCancelIconSize(FrameNode* frameNode, const Dimension& value);
     static void SetCancelButtonStyle(FrameNode* frameNode, CancelButtonStyle style);
+    static void SetCancelImageIcon(FrameNode* frameNode, IconOptions& iconOptions);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
     static void SetSearchEnterKeyType(FrameNode* frameNode, TextInputAction value);
     static void SetId(FrameNode* frameNode, const std::string& key);
