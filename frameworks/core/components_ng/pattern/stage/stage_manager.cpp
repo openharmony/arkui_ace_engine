@@ -622,12 +622,27 @@ void StageManager::AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, cons
     ACE_SCOPED_TRACE_COMMERCIAL("Router Page from %s to %s", srcFullPath.c_str(), destFullPath.c_str());
 }
 
-void StageManager::SyncPageSafeArea(const RefPtr<FrameNode>& lastPage, PropertyChangeFlag changeFlag)
+void StageManager::SyncPageSafeArea(bool keyboardSafeArea)
 {
+    auto changeType = keyboardSafeArea ? PROPERTY_UPDATE_LAYOUT : PROPERTY_UPDATE_MEASURE;
+    auto lastPage = GetLastPageWithTransition();
     CHECK_NULL_VOID(lastPage);
-    lastPage->MarkDirtyNode(changeFlag);
-    auto overlay = lastPage->GetPattern<PagePattern>();
-    CHECK_NULL_VOID(overlay);
-    overlay->MarkDirtyOverlay();
+    lastPage->MarkDirtyNode(changeType);
+    auto lastPageOverlay = lastPage->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(lastPageOverlay);
+    lastPageOverlay->MarkDirtyOverlay();
+
+    auto prevPage = GetPrevPageWithTransition();
+    CHECK_NULL_VOID(prevPage);
+    auto prevPageOverlay = prevPage->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(prevPageOverlay);
+    prevPageOverlay->MarkDirtyOverlay();
+}
+
+bool StageManager::CheckPageFocus()
+{
+    auto pageNode = GetLastPage();
+    CHECK_NULL_RETURN(pageNode, true);
+    return pageNode->GetFocusHub() && pageNode->GetFocusHub()->IsCurrentFocus();
 }
 } // namespace OHOS::Ace::NG
