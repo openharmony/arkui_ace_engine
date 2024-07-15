@@ -1623,17 +1623,16 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback053, TestSize
     FRAME_NODE2->SetOpIncGroupCheckedThrough(false);
     EXPECT_TRUE(FRAME_NODE2->MarkSuggestOpIncGroup(true, true));
 }
-} // namespace OHOS::Ace::NG
 
 /**
- * @tc.name: FrameNodeTestNg_IsOutOfTouchTestRegionJudge0054
+ * @tc.name: FrameNodeTestNg_IsOutOfTouchTestRegionJudge054
  * @tc.desc: Test frame node method IsOutOfTouchTestRegionJudge
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeTestNg, FrameNodeIsOutOfTouchTestRegionJudge0025, TestSize.Level1)
+HWTEST_F(FrameNodeTestNg, FrameNodeIsOutOfTouchTestRegionJudge054, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. callback IsOutOfTouchTestRegion.
+     * @tc.steps: step1. callback IsOutOfTouchTestRegionJudge.
      * @tc.expected: expect The function return value is true.
      */
     PointF pointF;
@@ -1646,3 +1645,4 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsOutOfTouchTestRegionJudge0025, TestSize.Lev
     EXPECT_FALSE(test1);
     EXPECT_TRUE(test2);
 }
+} // namespace OHOS::Ace::NG

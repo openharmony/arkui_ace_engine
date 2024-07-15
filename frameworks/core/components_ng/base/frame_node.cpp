@@ -2293,10 +2293,10 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentRevertPoint, int32_t 
     return false;
 }
 
-bool FrameNode::PaintRectWithTransformJudge() 
+bool FrameNode::PaintRectWithTransformJudge()
 {
     auto paintRectWithTransform = renderContext_->GetPaintRectWithTransform();
-    if (NearZero( paintRectWithTransform.Width() || NearZero(paintRectWithTransform.Height()) )) {
+    if (NearZero(paintRectWithTransform.Width() || NearZero(paintRectWithTransform.Height()))) {
         return true;
     }
     return false;
@@ -2394,7 +2394,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     }
     {
         ACE_DEBUG_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
-        bool isOutOfRegion = IsOutOfTouchTestRegionJudge(parentRevertPoint, static_cast<int32_t>(touchRestrict.sourceType));
+        bool isOutOfRegion = IsOutOfTouchTestRegionJudge(parentRevertPoint,
+            static_cast<int32_t>(touchRestrict.sourceType));
         AddFrameNodeSnapshot(!isOutOfRegion, parentId, responseRegionList);
         if ((!isDispatch) && isOutOfRegion) {
             return HitTestResult::OUT_OF_REGION;
