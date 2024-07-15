@@ -2072,10 +2072,10 @@ var MarqueeUpdateStrategy;
 
 var LaunchMode;
 (function (LaunchMode) {
-  LaunchMode[LaunchMode.STANDARD = 0] = "STANDARD";
-  LaunchMode[LaunchMode.MOVE_TO_TOP_SINGLETON = 1] = "MOVE_TO_TOP_SINGLETON";
-  LaunchMode[LaunchMode.POP_TO_SINGLETON = 2] = "POP_TO_SINGLETON";
-  LaunchMode[LaunchMode.NEW_INSTANCE = 3] = "NEW_INSTANCE";
+  LaunchMode[LaunchMode.STANDARD = 0] = 'STANDARD';
+  LaunchMode[LaunchMode.MOVE_TO_TOP_SINGLETON = 1] = 'MOVE_TO_TOP_SINGLETON';
+  LaunchMode[LaunchMode.POP_TO_SINGLETON = 2] = 'POP_TO_SINGLETON';
+  LaunchMode[LaunchMode.NEW_INSTANCE = 3] = 'NEW_INSTANCE';
 })(LaunchMode || (LaunchMode = {}));
 
 class NavPathInfo {
