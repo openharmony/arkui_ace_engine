@@ -318,7 +318,7 @@ RefPtr<NG::FrameNode> StylusDetectorMgr::FindTextInputFrameNodeByPosition(float 
         auto globalFrameRect = geometryNode->GetFrameRect() + NG::SizeF(0, HOT_AREA_ADJUST_SIZE.ConvertToPx() * 2);
         globalFrameRect.SetOffset(frameNode->CalculateCachedTransformRelativeOffset(nanoTimestamp) +
                                   NG::OffsetF(0, -HOT_AREA_ADJUST_SIZE.ConvertToPx()));
-        if (globalFrameRect.IsInRegion(point)) {
+        if (globalFrameRect.IsInRegion(point) && !IsHitCleanNodeResponseArea(point, frameNode, nanoTimestamp)) {
             hitFrameNodes.insert(frameNode);
         }
     }
@@ -343,5 +343,31 @@ RefPtr<NG::FrameNode> StylusDetectorMgr::FindTextInputFrameNodeByPosition(float 
 bool StylusDetectorMgr::IsStylusTouchEvent(const TouchEvent& touchEvent) const
 {
     return touchEvent.sourceTool == SourceTool::PEN && touchEvent.type == TouchType::DOWN;
+}
+
+bool StylusDetectorMgr::IsHitCleanNodeResponseArea(
+    const NG::PointF& point, const RefPtr<NG::FrameNode>& frameNode, uint64_t nanoTimestamp)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    if (frameNode->GetTag() != V2::TEXTINPUT_ETS_TAG) {
+        return false;
+    }
+
+    auto textFieldPattern = frameNode->GetPattern<NG::TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, false);
+    auto responseArea = textFieldPattern->GetCleanNodeResponseArea();
+    CHECK_NULL_RETURN(responseArea, false);
+    auto cleanNodeResponseArea = AceType::DynamicCast<NG::CleanNodeResponseArea>(responseArea);
+    if (!cleanNodeResponseArea->IsShow()) {
+        return false;
+    }
+
+    auto cleanNodeFrameNode = cleanNodeResponseArea->GetFrameNode();
+    CHECK_NULL_RETURN(cleanNodeFrameNode, false);
+    auto cleanNodeGeometryNode = cleanNodeFrameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(cleanNodeGeometryNode, false);
+    auto globalFrameRect = cleanNodeGeometryNode->GetFrameRect();
+    globalFrameRect.SetOffset(cleanNodeFrameNode->CalculateCachedTransformRelativeOffset(nanoTimestamp));
+    return globalFrameRect.IsInRegion(point);
 }
 } // namespace OHOS::Ace
