@@ -50,9 +50,7 @@ ohos_shared_library("atomicserviceweb") {
   if (use_mingw_win || use_mac || use_linux) {
     deps = [ ":gen_obj_src_atomicserviceweb_abc_preview" ]
   } else {
-    deps = [
-      ":atomicserviceweb_abc"
-    ]
+    deps = [ ":atomicserviceweb_abc" ]
   }
 
   external_deps = [
