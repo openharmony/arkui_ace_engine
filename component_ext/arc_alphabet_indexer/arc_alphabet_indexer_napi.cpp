@@ -17,15 +17,8 @@
 #include "ext_napi_utils.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 
-extern const char _binary_arkui_arcalphabetindexer_js_start[];
 extern const char _binary_arkui_arcalphabetindexer_abc_start[];
-#if !defined(IOS_PLATFORM)
-extern const char _binary_arkui_arcalphabetindexer_js_end[];
 extern const char _binary_arkui_arcalphabetindexer_abc_end[];
-#else
-extern const char* _binary_arkui_arcalphabetindexer_js_end;
-extern const char* _binary_arkui_arcalphabetindexer_abc_end;
-#endif
 
 namespace OHOS::Ace {
 namespace {
@@ -93,20 +86,7 @@ napi_value ExportArcAlphabetIndexer(napi_env env, napi_value exports)
 
 } // namespace OHOS::Ace
 
-extern "C" __attribute__((visibility("default"))) void NAPI_arkui_ArcAlphabetIndexer_GetJSCode(const char** buf,
-    int* bufLen)
-{
-    if (buf != nullptr) {
-        *buf = _binary_arkui_arcalphabetindexer_js_start;
-    }
-
-    if (bufLen != nullptr) {
-        *bufLen = _binary_arkui_arcalphabetindexer_js_end - _binary_arkui_arcalphabetindexer_js_start;
-    }
-}
-
-// arkui_arcalphabetindexer JS register
-extern "C" __attribute__((visibility("default"))) void NAPI_arkui_ArcAlphabetIndexer_GetABCCode(const char** buf,
+extern "C" ACE_FORCE_EXPORT void NAPI_arkui_ArcAlphabetIndexer_GetABCCode(const char** buf,
     int* buflen)
 {
     if (buf != nullptr) {

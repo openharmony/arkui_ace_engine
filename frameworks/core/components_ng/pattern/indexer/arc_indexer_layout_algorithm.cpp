@@ -74,6 +74,7 @@ void ArcIndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto childCount = layoutWrapper->GetTotalChildCount();
     if (layoutProperty->GetIsPopupValue(false)) {
         const auto& child = layoutWrapper->GetChildByIndex(childCount - 1);
+        CHECK_NULL_VOID(child);
         auto offset = GetPositionOfPopupNode(layoutWrapper);
         child->GetHostNode()->GetRenderContext()->UpdatePosition(offset);
         child->Layout();
@@ -81,6 +82,7 @@ void ArcIndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     for (int32_t i = 0; i < childCount; i++) {
         const auto& child = layoutWrapper->GetChildByIndex(i);
+        CHECK_NULL_VOID(child);
         auto offset = CalcArcItemPosition(i);
         child->GetHostNode()->GetRenderContext()->UpdatePosition(offset);
         child->Layout();
