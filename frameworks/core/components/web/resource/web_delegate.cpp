@@ -2734,8 +2734,9 @@ void WebDelegate::RegisterSurfaceOcclusionChangeFun()
     }
     auto ret = OHOS::Rosen::RSInterfaces::GetInstance().RegisterSurfaceOcclusionChangeCallback(
         surfaceNodeId_,
-        [weak = WeakClaim(this), weakContext = context_](float visibleRatio) {
+        [weak = WeakClaim(this)](float visibleRatio) {
             auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
             auto context = delegate->context_.Upgrade();
             CHECK_NULL_VOID(context);
             context->GetTaskExecutor()->PostTask(
