@@ -848,7 +848,7 @@ bool DragDropManager::CheckRemoteData(
     std::string remoteUdKey = udKey;
     auto isRemoteData = UdmfClient::GetInstance()->GetRemoteStatus(remoteUdKey);
     if (isRemoteData) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Stop drag with motion drag action, target device id : %{public}d.",
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Stop drag with motion drag action, target device id : %{private}d.",
             pointerEvent.deviceId);
         TryGetDataBackGround(dragFrameNode, pointerEvent, udKey);
     }
