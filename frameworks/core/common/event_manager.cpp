@@ -729,6 +729,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
 
 void EventManager::CleanRecognizersForDragBegin(TouchEvent& touchEvent)
 {
+    downFingerIds_.erase(touchEvent.id);
     // send cancel to all recognizer
     for (const auto& iter : touchTestResults_) {
         touchEvent.id = iter.first;
@@ -738,7 +739,6 @@ void EventManager::CleanRecognizersForDragBegin(TouchEvent& touchEvent)
     }
     touchTestResults_.clear();
     refereeNG_->CleanRedundanceScope();
-    return;
 }
 
 void EventManager::DispatchTouchEventToTouchTestResult(TouchEvent touchEvent,
