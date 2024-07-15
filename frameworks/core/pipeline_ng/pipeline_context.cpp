@@ -2587,6 +2587,17 @@ void PipelineContext::FlushMouseEvent()
     if (!lastMouseEvent_ || lastMouseEvent_->action == MouseAction::WINDOW_LEAVE) {
         return;
     }
+    auto container = Container::Current();
+    if (container) {
+        int32_t sourceType = 0;
+        auto result = container->GetCurPointerEventSourceType(sourceType);
+        if (result) {
+            TAG_LOGI(AceLogTag::ACE_MOUSE,
+                "FlushMouseEvent: last pointer event sourceType:%{public}d last mouse event time:%{public}" PRIu64
+                " current time %{public}" PRId64 "",
+                sourceType, lastMouseEvent_->time.time_since_epoch().count(), GetSysTimestamp());
+        }
+    }
     MouseEvent event;
     event.x = lastMouseEvent_->x;
     event.y = lastMouseEvent_->y;
