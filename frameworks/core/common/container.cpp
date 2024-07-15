@@ -182,6 +182,26 @@ bool Container::IsIdAvailable(int32_t id)
     return !AceEngine::Get().GetContainer(id);
 }
 
+void Container::SetFontScale(int32_t instanceId, float fontScale)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->SetFontScale(fontScale);
+}
+
+void Container::SetFontWeightScale(int32_t instanceId, float fontWeightScale)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->SetFontWeightScale(fontWeightScale);
+}
+
 template<>
 int32_t Container::GenerateId<PLUGIN_SUBCONTAINER>()
 {
