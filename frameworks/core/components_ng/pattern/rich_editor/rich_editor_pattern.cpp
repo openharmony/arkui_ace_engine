@@ -7668,8 +7668,10 @@ std::string RichEditorPattern::GetPositionSpansText(int32_t position, int32_t& s
             }
             // we should use the wide string deal to avoid crash
             auto wideText = StringUtils::ToWstring(obj.valueString);
-            sstream << StringUtils::ToString(
-                wideText.substr(obj.offsetInSpan[0], obj.offsetInSpan[1] - obj.offsetInSpan[0]));
+            if (obj.offsetInSpan[0] < wideText.length() && obj.offsetInSpan[1] <= wideText.length()) {
+                sstream << StringUtils::ToString(
+                    wideText.substr(obj.offsetInSpan[0], obj.offsetInSpan[1] - obj.offsetInSpan[0]));
+            }
         }
     }
 
