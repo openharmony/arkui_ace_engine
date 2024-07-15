@@ -937,7 +937,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             CHECK_NULL_VOID(textDragPattern);
             auto dragNode = textDragPattern->MoveDragNode();
             if (dragNode) {
-                auto dragNodeOffset = dragNode->GetOffsetInScreen();
+                auto dragNodeOffset = dragNode->GetPaintRectOffset();
                 DragEventActuator::UpdatePreviewPositionAndScale(imageNode, dragNodeOffset);
             }
         }
@@ -1032,6 +1032,12 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         auto gatherNode = DragEventActuator::GetOrCreateGatherNode(overlayManager,
             dragEventActuator_, gatherNodeChildrenInfo);
         DragEventActuator::MountGatherNode(subWindowOverlayManager, frameNode, gatherNode, gatherNodeChildrenInfo);
+        DragEventActuator::UpdatePreviewPositionAndScale(
+            imageNode, imageNode->GetOffsetInSubwindow(window->GetRect().GetOffset()));
+        if (textNode) {
+            DragEventActuator::UpdatePreviewPositionAndScale(
+                textNode, textNode->GetOffsetInSubwindow(window->GetRect().GetOffset()));
+        }
         DragEventActuator::MountPixelMap(subWindowOverlayManager, eventHub->GetGestureEventHub(), imageNode, textNode);
         pipeline->FlushSyncGeometryNodeTasks();
         DragAnimationHelper::ShowBadgeAnimation(textNode);
