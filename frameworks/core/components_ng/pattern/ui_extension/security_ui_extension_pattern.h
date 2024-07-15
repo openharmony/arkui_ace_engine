@@ -128,7 +128,6 @@ private:
     bool densityDpi_ = false;
     int32_t callbackId_ = 0;
     RectF displayArea_;
-    bool isKeyAsync_ = false;
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     int32_t uiExtensionId_ = 0;
 
