@@ -123,6 +123,15 @@ public:
         return true;
     }
 
+    void OnClearRegisterFlag() override
+    {
+        auto pattern = weakPattern_.Upgrade();
+        if (pattern == nullptr) {
+            return;
+        }
+        isReg_ = false;
+    }
+
 private:
     bool isReg_ = false;
     WeakPtr<UIExtensionPattern> weakPattern_;

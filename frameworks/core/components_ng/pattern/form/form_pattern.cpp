@@ -412,6 +412,8 @@ void FormPattern::UpdateStaticCard()
     RemoveFrsNode();
     // 3. Release renderer obj
     ReleaseRenderer();
+    // 4. clear form node ChildTree register flag.  can do register again
+    UnregisterAccessibility();
 }
 
 void FormPattern::DeleteImageNodeAfterRecover(bool needHandleCachedClick)
@@ -1881,5 +1883,14 @@ void FormPattern::UpdateChildNodeOpacity(FormChildNodeType formChildNodeType, do
         CHECK_NULL_VOID(renderContext);
         renderContext->OnOpacityUpdate(opacity);
     }
+}
+
+void FormPattern::UnregisterAccessibility()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto formNode = DynamicCast<FormNode>(host);
+    CHECK_NULL_VOID(formNode);
+    formNode->ClearAccessibilityChildTreeRegisterFlag();
 }
 } // namespace OHOS::Ace::NG
