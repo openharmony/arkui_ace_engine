@@ -483,6 +483,11 @@ public:
         return false;
     }
 
+    virtual bool GetCurPointerEventSourceType(int32_t& sourceType)
+    {
+        return false;
+    }
+
     virtual bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
         bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId)
     {
