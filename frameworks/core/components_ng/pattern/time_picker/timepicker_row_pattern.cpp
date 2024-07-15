@@ -502,18 +502,13 @@ void TimePickerRowPattern::UpdateNodePositionForUg()
 
 void TimePickerRowPattern::FlushAmPmFormatString()
 {
-    auto it = std::find(vecAmPm_.begin(), vecAmPm_.end(), "AM");
-    if (it != vecAmPm_.end()) {
+    auto amPmStrings = Localization::GetInstance()->GetAmPmStrings();
+    if (amPmStrings.size() > 1) {
         vecAmPm_.clear();
-        vecAmPm_ = Localization::GetInstance()->GetAmPmStrings();
-        std::string am = vecAmPm_[0];
+        std::string am = amPmStrings[0];
         vecAmPm_.emplace_back(am);
-        std::string pm = vecAmPm_[1];
+        std::string pm = amPmStrings[1];
         vecAmPm_.emplace_back(pm);
-    } else {
-        vecAmPm_.clear();
-        vecAmPm_.emplace_back("AM");
-        vecAmPm_.emplace_back("PM");
     }
 }
 
