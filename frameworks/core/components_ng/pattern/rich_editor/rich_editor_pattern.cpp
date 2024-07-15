@@ -682,6 +682,10 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
         spanIndex = static_cast<int32_t>(host->GetChildren().size());
     }
     imageNode->MountToParent(host, spanIndex);
+    auto renderContext = imageNode->GetRenderContext();
+    if (renderContext) {
+        renderContext->SetNeedAnimateFlag(false);
+    }
     SetImageLayoutProperty(imageNode, options);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
@@ -758,6 +762,10 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
         spanIndex = static_cast<int32_t>(host->GetChildren().size());
     }
     placeholderSpanNode->MountToParent(host, spanIndex);
+    auto renderContext = placeholderSpanNode->GetRenderContext();
+    if (renderContext) {
+        renderContext->SetNeedAnimateFlag(false);
+    }
     auto spanItem = placeholderSpanNode->GetSpanItem();
     spanItem->content = " ";
     AddSpanItem(spanItem, spanIndex);
