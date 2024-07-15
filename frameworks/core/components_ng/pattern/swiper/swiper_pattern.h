@@ -426,7 +426,6 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     bool IsAutoFill() const;
-    void OnTouchTestHit(SourceType hitTestType) override;
     void SwipeToWithoutAnimation(int32_t index);
     void StopAutoPlay();
     void StartAutoPlay();
@@ -814,7 +813,7 @@ private:
 
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
 
-    void OnScrollStartRecursive(float position, float velocity = 0.f) override;
+    void OnScrollStartRecursive(float position, float velocity) override;
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
 
     /**

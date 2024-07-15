@@ -186,6 +186,13 @@ void BaseTextSelectOverlay::UpdateSecondHandleOffset()
     manager->MarkInfoChange(DIRTY_SECOND_HANDLE);
 }
 
+void BaseTextSelectOverlay::UpdateViewPort()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->MarkInfoChange(DIRTY_VIEWPORT);
+}
+
 RefPtr<FrameNode> BaseTextSelectOverlay::GetOwner()
 {
     auto pattern = GetPattern<Pattern>();

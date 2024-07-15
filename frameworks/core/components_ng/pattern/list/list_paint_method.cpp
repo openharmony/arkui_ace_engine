@@ -153,9 +153,13 @@ ListDivider ListPaintMethod::HandleDividerList(
     float divOffset = (dividerInfo.space + dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
     float mainPos = itemPosition_.at(index).startPos - divOffset + dividerInfo.mainPadding;
     float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
-    if (isReverse_ && dividerInfo.isVertical) {
-        float divOffset = (dividerInfo.space - dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
-        mainPos = dividerInfo.mainSize - itemPosition_.at(index).startPos + divOffset - dividerInfo.mainPadding;
+    if (isReverse_) {
+        if (dividerInfo.isVertical) {
+            float divOffset = (dividerInfo.space - dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
+            mainPos = dividerInfo.mainSize - itemPosition_.at(index).startPos + divOffset - dividerInfo.mainPadding;
+        } else {
+            crossPos = dividerInfo.endMargin + dividerInfo.crossPadding;
+        }
     }
     if (dividerInfo.lanes > 1 && !lastIsGroup && !itemPosition_.at(index).isGroup) {
         crossPos +=
@@ -179,9 +183,13 @@ ListDivider ListPaintMethod::HandleLastLineIndex(int32_t index, int32_t laneIdx,
     float divOffset = (dividerInfo.space - dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
     float mainPos = itemPosition_.at(index).endPos + divOffset + dividerInfo.mainPadding;
     float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
-    if (isReverse_ && dividerInfo.isVertical) {
-        float divOffset = (dividerInfo.space + dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
-        mainPos = dividerInfo.mainSize - itemPosition_.at(index).endPos - divOffset - dividerInfo.mainPadding;
+    if (isReverse_) {
+        if (dividerInfo.isVertical) {
+            float divOffset = (dividerInfo.space + dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
+            mainPos = dividerInfo.mainSize - itemPosition_.at(index).endPos - divOffset - dividerInfo.mainPadding;
+        } else {
+            crossPos = dividerInfo.endMargin + dividerInfo.crossPadding;
+        }
     }
     if (dividerInfo.lanes > 1 && !itemPosition_.at(index).isGroup) {
         crossPos +=

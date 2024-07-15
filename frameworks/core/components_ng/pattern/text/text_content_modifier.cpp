@@ -620,7 +620,7 @@ void TextContentModifier::ModifyDecorationInTextStyle(TextStyle& textStyle)
 {
     if (textDecoration_.has_value() && textDecorationColor_.has_value() && textDecorationColorAlpha_) {
         if (textDecorationAnimatable_) {
-            uint8_t alpha = static_cast<int>(std::floor(textDecorationColorAlpha_->Get() + ROUND_VALUE));
+            uint8_t alpha = static_cast<uint8_t>(std::floor(textDecorationColorAlpha_->Get() + ROUND_VALUE));
             if (alpha == 0) {
                 textStyle.SetTextDecoration(TextDecoration::NONE);
                 textStyle.SetTextDecorationColor(textDecorationColor_.value());
@@ -715,7 +715,7 @@ void TextContentModifier::UpdateTextShadowMeasureFlag(PropertyChangeFlag& flag)
 void TextContentModifier::UpdateTextDecorationMeasureFlag(PropertyChangeFlag& flag)
 {
     if (textDecoration_.has_value() && textDecorationColor_.has_value() && textDecorationColorAlpha_) {
-        uint8_t alpha = static_cast<int>(std::floor(textDecorationColorAlpha_->Get() + ROUND_VALUE));
+        uint8_t alpha = static_cast<uint8_t>(std::floor(textDecorationColorAlpha_->Get() + ROUND_VALUE));
         if (textDecoration_.value() == TextDecoration::UNDERLINE && alpha != textDecorationColor_.value().GetAlpha()) {
             flag |= PROPERTY_UPDATE_MEASURE;
         } else if (textDecoration_.value() == TextDecoration::NONE && alpha != 0.0) {

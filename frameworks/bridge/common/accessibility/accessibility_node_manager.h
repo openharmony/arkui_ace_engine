@@ -105,6 +105,7 @@ public:
 
     // AccessibilityNodeManager overrides functions.
     void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) override;
+    void UpdateVirtualNodeFocus() override {}
     int64_t GenerateNextAccessibilityId() override;
     RefPtr<AccessibilityNode> CreateSpecializedNode(
         const std::string& tag, int32_t nodeId, int32_t parentNodeId) override;

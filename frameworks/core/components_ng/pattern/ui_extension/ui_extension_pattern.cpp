@@ -391,14 +391,12 @@ bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     CHECK_NULL_RETURN(dirty, false);
     auto host = dirty->GetHostNode();
     CHECK_NULL_RETURN(host, false);
-    auto context = host->GetContext();
-    CHECK_NULL_RETURN(context, false);
-    context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->DispatchDisplayArea(true);
-    });
-
+    auto [displayOffset, err] = host->GetPaintRectGlobalOffsetWithTranslate();
+    auto geometryNode = dirty->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto displaySize = geometryNode->GetFrameSize();
+    displayArea_ = RectF(displayOffset, displaySize);
+    sessionWrapper_->NotifyDisplayArea(displayArea_);
     return false;
 }
 

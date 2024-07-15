@@ -81,6 +81,8 @@ public:
     }
 #endif
 
+    virtual void SyncPageSafeArea(const RefPtr<FrameNode>& lastPage, PropertyChangeFlag changeFlag);
+
 protected:
     // ace performance check
     void PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout);

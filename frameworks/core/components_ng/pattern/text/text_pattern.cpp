@@ -1779,7 +1779,6 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
 {
     TextStyleResult textStyle;
     textStyle.fontColor = node->GetTextColorValue(Color::BLACK).ColorToString();
-    textStyle.fontSize = node->GetFontSizeValue(Dimension(16.0f, DimensionUnit::VP)).ConvertToFp();
     textStyle.fontStyle = static_cast<int32_t>(node->GetItalicFontStyleValue(OHOS::Ace::FontStyle::NORMAL));
     textStyle.fontWeight = static_cast<int32_t>(node->GetFontWeightValue(FontWeight::NORMAL));
     std::string fontFamilyValue;
@@ -1796,9 +1795,17 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
     textStyle.decorationStyle = static_cast<int32_t>(node->GetTextDecorationStyleValue(TextDecorationStyle::SOLID));
     textStyle.textAlign = static_cast<int32_t>(node->GetTextAlignValue(TextAlign::START));
     auto lm = node->GetLeadingMarginValue({});
-    textStyle.lineHeight = node->GetLineHeightValue(Dimension()).ConvertToFp();
-    textStyle.letterSpacing = node->GetLetterSpacingValue(Dimension()).ConvertToFp();
-    textStyle.lineSpacing = node->GetLineSpacingValue(Dimension()).ConvertToFp();
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        textStyle.fontSize = node->GetFontSizeValue(Dimension(16.0f, DimensionUnit::VP)).ConvertToFp();
+        textStyle.lineHeight = node->GetLineHeightValue(Dimension()).ConvertToFp();
+        textStyle.letterSpacing = node->GetLetterSpacingValue(Dimension()).ConvertToFp();
+        textStyle.lineSpacing = node->GetLineSpacingValue(Dimension()).ConvertToFp();
+    } else {
+        textStyle.fontSize = node->GetFontSizeValue(Dimension(16.0f, DimensionUnit::VP)).ConvertToVp();
+        textStyle.lineHeight = node->GetLineHeightValue(Dimension()).ConvertToVp();
+        textStyle.letterSpacing = node->GetLetterSpacingValue(Dimension()).ConvertToVp();
+        textStyle.lineSpacing = node->GetLineSpacingValue(Dimension()).ConvertToVp();
+    }
     textStyle.fontFeature = node->GetFontFeatureValue(ParseFontFeatureSettings("\"pnum\" 1"));
     textStyle.leadingMarginSize[RichEditorLeadingRange::LEADING_START] = lm.size.Width().ToString();
     textStyle.leadingMarginSize[RichEditorLeadingRange::LEADING_END] = lm.size.Height().ToString();
@@ -1930,9 +1937,13 @@ SymbolSpanStyle TextPattern::GetSymbolSpanStyleObject(const RefPtr<SpanNode>& no
     }
     symbolColorValue = symbolColorValue.substr(0, symbolColorValue.size() ? symbolColorValue.size() - 1 : 0);
     symbolSpanStyle.symbolColor = !symbolColorValue.empty() ? symbolColorValue : SYMBOL_COLOR;
-    symbolSpanStyle.fontSize = node->GetFontSizeValue(Dimension(DIMENSION_VALUE, DimensionUnit::VP)).ConvertToFp();
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        symbolSpanStyle.fontSize = node->GetFontSizeValue(Dimension(DIMENSION_VALUE, DimensionUnit::VP)).ConvertToFp();
+    } else {
+        symbolSpanStyle.fontSize = node->GetFontSizeValue(Dimension(DIMENSION_VALUE, DimensionUnit::VP)).ConvertToVp();
+    }
     symbolSpanStyle.fontWeight = static_cast<int32_t>(node->GetFontWeightValue(FontWeight::NORMAL));
-    symbolSpanStyle.renderingStrategy = node->GetSymbolRenderingStrategyValue(0);
+    symbolSpanStyle.renderingStrategy = static_cast<int32_t>(node->GetSymbolRenderingStrategyValue(0));
     symbolSpanStyle.effectStrategy = node->GetSymbolEffectStrategyValue(0);
     return symbolSpanStyle;
 }

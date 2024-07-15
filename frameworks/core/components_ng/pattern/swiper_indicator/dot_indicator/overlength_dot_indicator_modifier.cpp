@@ -68,6 +68,33 @@ void OverlengthDotIndicatorModifier::onDraw(DrawingContext& context)
     PaintContent(context, contentProperty);
 }
 
+std::pair<float, float> OverlengthDotIndicatorModifier::GetTouchBottomCenterX(ContentProperty& contentProperty)
+{
+    float leftCenterX = contentProperty.longPointLeftCenterX;
+    float rightCenterX = contentProperty.longPointRightCenterX;
+
+    if (isCustomSize_ || contentProperty.vectorBlackPointCenterX.empty() ||
+        contentProperty.vectorBlackPointCenterX.size() < maxDisplayCount_) {
+        return { leftCenterX, rightCenterX };
+    }
+
+    auto currentIndex = isHorizontalAndRTL_ ? realItemCount_ - 1 - currentIndex_ : currentIndex_;
+    bool isLeftTouchBottom = (currentIndex == realItemCount_ - 1);
+    bool isRightTouchBottom = (currentIndex == 0);
+    float radius = (rightCenterX - leftCenterX) * HALF_FLOAT;
+    if ((animationState_ == TouchBottomAnimationStage::STAGE_SHRINKT_TO_BLACK_POINT && isLeftTouchBottom) ||
+        (animationState_ == TouchBottomAnimationStage::STAGE_EXPAND_TO_LONG_POINT && isRightTouchBottom)) {
+        leftCenterX = contentProperty.vectorBlackPointCenterX[0] - radius;
+        rightCenterX = contentProperty.vectorBlackPointCenterX[0] + radius;
+    } else if ((animationState_ == TouchBottomAnimationStage::STAGE_EXPAND_TO_LONG_POINT && isLeftTouchBottom) ||
+               (animationState_ == TouchBottomAnimationStage::STAGE_SHRINKT_TO_BLACK_POINT && isRightTouchBottom)) {
+        leftCenterX = contentProperty.vectorBlackPointCenterX[maxDisplayCount_ - 1] - radius;
+        rightCenterX = contentProperty.vectorBlackPointCenterX[maxDisplayCount_ - 1] + radius;
+    }
+
+    return { leftCenterX, rightCenterX };
+}
+
 void OverlengthDotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty& contentProperty)
 {
     PaintBlackPoint(context, contentProperty);
@@ -185,6 +212,10 @@ void OverlengthDotIndicatorModifier::UpdateNormalPaintProperty(const OffsetF& ma
 std::pair<float, float> OverlengthDotIndicatorModifier::CalcLongPointEndCenterXWithBlack(
     int32_t index, const LinearVector<float>& itemHalfSizes)
 {
+    if (isHorizontalAndRTL_) {
+        index = maxDisplayCount_ - 1 - index;
+    }
+
     if (static_cast<size_t>(index) >= animationEndCenterX_.size()) {
         return std::make_pair(0.0f, 0.0f);
     }
@@ -247,9 +278,24 @@ void OverlengthDotIndicatorModifier::PlayBlackPointsAnimation(const LinearVector
     });
 }
 
-LinearVector<float> OverlengthDotIndicatorModifier::CalcIndicatorSize(
-    const LinearVector<float>& itemHalfSizes, OverlongType overlongType, int32_t pageIndex, bool isWidth)
+OverlongType OverlengthDotIndicatorModifier::RevertOverlongType(OverlongType overlongType) const
 {
+    if (overlongType == OverlongType::LEFT_NORMAL_RIGHT_FADEOUT) {
+        return OverlongType::LEFT_FADEOUT_RIGHT_NORMAL;
+    } else if (overlongType == OverlongType::LEFT_FADEOUT_RIGHT_NORMAL) {
+        return OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
+    }
+
+    return overlongType;
+}
+
+LinearVector<float> OverlengthDotIndicatorModifier::CalcIndicatorSize(
+    const LinearVector<float>& itemHalfSizes, OverlongType overlongType, bool isWidth)
+{
+    if (isHorizontalAndRTL_) {
+        overlongType = RevertOverlongType(overlongType);
+    }
+
     auto unselectedIndicatorRadius = isWidth ? itemHalfSizes[0] : itemHalfSizes[1];
     LinearVector<float> indicatorSize(maxDisplayCount_ + 1);
 
@@ -313,15 +359,21 @@ void OverlengthDotIndicatorModifier::UpdateSelectedCenterXOnDrag(const LinearVec
     auto rightMoveRate = longPointRightCenterMoveRate_;
     if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT &&
         touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
-        leftMoveRate = 1.0f - longPointLeftCenterMoveRate_;
-        rightMoveRate = 1.0f - longPointRightCenterMoveRate_;
+        if (isHorizontalAndRTL_) {
+            leftMoveRate = longPointLeftCenterMoveRate_ - 1.0f;
+            rightMoveRate = longPointRightCenterMoveRate_ - 1.0f;
+        } else {
+            leftMoveRate = 1.0f - longPointLeftCenterMoveRate_;
+            rightMoveRate = 1.0f - longPointRightCenterMoveRate_;
+        }
     }
 
-    auto longPointEndCenterX = CalcLongPointEndCenterXWithBlack(currentSelectedIndex_ + 1, itemHalfSizes);
+    auto targetIndex = currentSelectedIndex_ + 1;
     if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT) {
-        longPointEndCenterX = CalcLongPointEndCenterXWithBlack(currentSelectedIndex_ - 1, itemHalfSizes);
+        targetIndex = currentSelectedIndex_ - 1;
     }
 
+    auto longPointEndCenterX = CalcLongPointEndCenterXWithBlack(targetIndex, itemHalfSizes);
     if (touchBottomTypeLoop_ != TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
         auto dragTargetCenterX = (overlongSelectedEndCenterX_.second + overlongSelectedEndCenterX_.first) * HALF_FLOAT;
         overlongSelectedEndCenterX_.first = overlongSelectedStartCenterX_.first +
@@ -337,8 +389,15 @@ void OverlengthDotIndicatorModifier::UpdateSelectedCenterXOnDrag(const LinearVec
             rightDistance = longPointEndCenterX.second - overlongSelectedStartCenterX_.second;
         }
 
-        overlongSelectedEndCenterX_.first = overlongSelectedStartCenterX_.first + leftDistance * leftMoveRate;
-        overlongSelectedEndCenterX_.second = overlongSelectedStartCenterX_.second + rightDistance * rightMoveRate;
+        if (isHorizontalAndRTL_) {
+            overlongSelectedEndCenterX_.first =
+                overlongSelectedStartCenterX_.first - std::abs(leftDistance) * leftMoveRate;
+            overlongSelectedEndCenterX_.second =
+                overlongSelectedStartCenterX_.second - std::abs(rightDistance) * rightMoveRate;
+        } else {
+            overlongSelectedEndCenterX_.first = overlongSelectedStartCenterX_.first + leftDistance * leftMoveRate;
+            overlongSelectedEndCenterX_.second = overlongSelectedStartCenterX_.second + rightDistance * rightMoveRate;
+        }
     }
 }
 
@@ -412,16 +471,14 @@ int32_t OverlengthDotIndicatorModifier::CalcTargetIndexOnDrag() const
 
 void OverlengthDotIndicatorModifier::CalcTargetStatusOnLongPointMove(const LinearVector<float>& itemHalfSizes)
 {
-    auto endCenterX =
-        CalcIndicatorCenterX(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_);
+    auto endCenterX = CalcIndicatorCenterX(itemHalfSizes, targetSelectedIndex_, targetOverlongType_);
     animationEndCenterX_ = endCenterX.first;
     overlongSelectedEndCenterX_ = endCenterX.second;
-    animationStartIndicatorWidth_ = CalcIndicatorSize(itemHalfSizes, currentOverlongType_, animationStartIndex_, true);
-    animationStartIndicatorHeight_ =
-        CalcIndicatorSize(itemHalfSizes, currentOverlongType_, animationStartIndex_, false);
+    animationStartIndicatorWidth_ = CalcIndicatorSize(itemHalfSizes, currentOverlongType_, true);
+    animationStartIndicatorHeight_ = CalcIndicatorSize(itemHalfSizes, currentOverlongType_, false);
 
-    animationEndIndicatorWidth_ = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, animationEndIndex_, true);
-    animationEndIndicatorHeight_ = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, animationEndIndex_, false);
+    animationEndIndicatorWidth_ = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, true);
+    animationEndIndicatorHeight_ = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, false);
 
     if (touchBottomTypeLoop_ != TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
         animationStartCenterX_.resize(maxDisplayCount_);
@@ -443,11 +500,10 @@ void OverlengthDotIndicatorModifier::CalcTargetStatusOnLongPointMove(const Linea
 
 void OverlengthDotIndicatorModifier::CalcTargetStatusOnAllPointMoveForward(const LinearVector<float>& itemHalfSizes)
 {
-    auto targetCenterX =
-        CalcIndicatorCenterX(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_);
+    auto targetCenterX = CalcIndicatorCenterX(itemHalfSizes, targetSelectedIndex_, targetOverlongType_);
     overlongSelectedEndCenterX_ = targetCenterX.second;
-    auto targetIndicatorWidth = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, animationEndIndex_, true);
-    auto targetIndicatorHeight = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, animationEndIndex_, false);
+    auto targetIndicatorWidth = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, true);
+    auto targetIndicatorHeight = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, false);
 
     float itemSpacePx = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
     // calc new point current position
@@ -481,6 +537,10 @@ void OverlengthDotIndicatorModifier::CalcTargetStatusOnAllPointMoveForward(const
         targetOverlongType_ = currentOverlongType_;
 
         auto opacityMoveRate = GetMoveRateOnAllMove();
+        if (isHorizontalAndRTL_) {
+            opacityMoveRate = 1.0f - opacityMoveRate;
+        }
+
         auto firstPointOpacity = static_cast<uint8_t>(UINT8_MAX * opacityMoveRate);
         auto newPointOpacity = static_cast<uint8_t>(UINT8_MAX * (1.0f - opacityMoveRate));
         firstPointOpacity_->Set(firstPointOpacity);
@@ -490,11 +550,10 @@ void OverlengthDotIndicatorModifier::CalcTargetStatusOnAllPointMoveForward(const
 
 void OverlengthDotIndicatorModifier::CalcTargetStatusOnAllPointMoveBackward(const LinearVector<float>& itemHalfSizes)
 {
-    auto targetCenterX =
-        CalcIndicatorCenterX(itemHalfSizes, targetSelectedIndex_, targetOverlongType_, animationEndIndex_);
+    auto targetCenterX = CalcIndicatorCenterX(itemHalfSizes, targetSelectedIndex_, targetOverlongType_);
     overlongSelectedEndCenterX_ = targetCenterX.second;
-    auto targetIndicatorWidth = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, animationEndIndex_, true);
-    auto targetIndicatorHeight = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, animationEndIndex_, false);
+    auto targetIndicatorWidth = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, true);
+    auto targetIndicatorHeight = CalcIndicatorSize(itemHalfSizes, targetOverlongType_, false);
 
     float itemSpacePx = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
     // calc new point current position
@@ -524,6 +583,10 @@ void OverlengthDotIndicatorModifier::CalcTargetStatusOnAllPointMoveBackward(cons
         targetOverlongType_ = currentOverlongType_;
 
         auto opacityMoveRate = GetMoveRateOnAllMove();
+        if (isHorizontalAndRTL_) {
+            opacityMoveRate = 1.0f - opacityMoveRate;
+        }
+
         auto firstPointOpacity = static_cast<uint8_t>(UINT8_MAX * (1.0f - opacityMoveRate));
         auto newPointOpacity = static_cast<uint8_t>(UINT8_MAX * opacityMoveRate);
         firstPointOpacity_->Set(firstPointOpacity);
@@ -540,8 +603,7 @@ void OverlengthDotIndicatorModifier::CalcAnimationEndCenterX(const LinearVector<
 
     CalcTargetOverlongStatus(animationStartIndex_, animationEndIndex_);
 
-    auto startCenterX =
-        CalcIndicatorCenterX(itemHalfSizes, currentSelectedIndex_, currentOverlongType_, animationStartIndex_);
+    auto startCenterX = CalcIndicatorCenterX(itemHalfSizes, currentSelectedIndex_, currentOverlongType_);
     animationStartCenterX_ = startCenterX.first;
     overlongSelectedStartCenterX_ = startCenterX.second;
 
@@ -552,14 +614,15 @@ void OverlengthDotIndicatorModifier::CalcAnimationEndCenterX(const LinearVector<
         return;
     }
 
-    animationStartIndicatorWidth_ = CalcIndicatorSize(itemHalfSizes, currentOverlongType_, animationStartIndex_, true);
-    animationStartIndicatorHeight_ =
-        CalcIndicatorSize(itemHalfSizes, currentOverlongType_, animationStartIndex_, false);
+    animationStartIndicatorWidth_ = CalcIndicatorSize(itemHalfSizes, currentOverlongType_, true);
+    animationStartIndicatorHeight_ = CalcIndicatorSize(itemHalfSizes, currentOverlongType_, false);
     animationEndCenterX_.resize(maxDisplayCount_ + 1);
     animationEndIndicatorWidth_.resize(maxDisplayCount_ + 1);
     animationEndIndicatorHeight_.resize(maxDisplayCount_ + 1);
 
-    if (animationStartIndex_ < animationEndIndex_) {
+    auto isBackward =
+        isHorizontalAndRTL_ ? animationStartIndex_ > animationEndIndex_ : animationStartIndex_ < animationEndIndex_;
+    if (isBackward) {
         moveDirection_ = OverlongIndicatorMove::MOVE_BACKWARD;
         CalcTargetStatusOnAllPointMoveBackward(itemHalfSizes);
         return;
@@ -584,8 +647,10 @@ void OverlengthDotIndicatorModifier::PlayIndicatorAnimation(const OffsetF& margi
     std::vector<std::pair<float, float>> pointCenterX;
     if ((currentSelectedIndex_ == 0 && targetSelectedIndex_ == maxDisplayCount_ - 1) ||
         (currentSelectedIndex_ == maxDisplayCount_ - 1 && targetSelectedIndex_ == 0)) {
-        overlongSelectedStartCenterX_.first = animationEndCenterX_[currentSelectedIndex_];
-        overlongSelectedStartCenterX_.second = animationEndCenterX_[currentSelectedIndex_];
+        auto currentSelectedIndex =
+            isHorizontalAndRTL_ ? maxDisplayCount_ - 1 - currentSelectedIndex_ : currentSelectedIndex_;
+        overlongSelectedStartCenterX_.first = animationEndCenterX_[currentSelectedIndex];
+        overlongSelectedStartCenterX_.second = animationEndCenterX_[currentSelectedIndex];
         pointCenterX.emplace_back(overlongSelectedStartCenterX_);
         pointCenterX.emplace_back(overlongSelectedEndCenterX_);
     } else {
@@ -795,8 +860,13 @@ void OverlengthDotIndicatorModifier::CalcTargetOverlongStatus(int32_t currentPag
 }
 
 std::pair<LinearVector<float>, std::pair<float, float>> OverlengthDotIndicatorModifier::CalcIndicatorCenterX(
-    const LinearVector<float>& itemHalfSizes, int32_t selectedIndex, OverlongType overlongType, int32_t pageIndex)
+    const LinearVector<float>& itemHalfSizes, int32_t selectedIndex, OverlongType overlongType)
 {
+    if (isHorizontalAndRTL_) {
+        selectedIndex = maxDisplayCount_ - 1 - selectedIndex;
+        overlongType = RevertOverlongType(overlongType);
+    }
+
     auto unselectedIndicatorRadius = itemHalfSizes[ITEM_HALF_WIDTH];
     auto selectedIndicatorRadius = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
     if (!isCustomSizeValue_) {

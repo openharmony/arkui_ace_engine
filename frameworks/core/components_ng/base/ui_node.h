@@ -344,7 +344,7 @@ public:
 
     virtual void OnNotifyMemoryLevel(int32_t level) {}
 
-    virtual void SetActive(bool active);
+    virtual void SetActive(bool active, bool needRebuildRenderContext = false);
 
     virtual void SetJSViewActive(bool active, bool isLazyForEachNode = false);
 
@@ -612,6 +612,42 @@ public:
         return (flag & nodeFlag_) == flag;
     }
 
+    void SetAccessibilityNodeVirtual()
+    {
+        isAccessibilityVirtualNode_ = true;
+        for (auto& it : GetChildren()) {
+            it->SetAccessibilityNodeVirtual();
+        }
+    }
+
+    bool IsAccessibilityVirtualNode() const
+    {
+        return isAccessibilityVirtualNode_;
+    }
+
+    void SetAccessibilityVirtualNodeParent(const RefPtr<UINode>& parent)
+    {
+        parentForAccessibilityVirtualNode_ = parent;
+        for (auto& it : GetChildren()) {
+            it->SetAccessibilityVirtualNodeParent(parent);
+        }
+    }
+
+    WeakPtr<UINode> GetVirtualNodeParent() const
+    {
+        return parentForAccessibilityVirtualNode_;
+    }
+
+    bool IsFirstVirtualNode() const
+    {
+        return isFirstAccessibilityVirtualNode_;
+    }
+
+    void SetFirstAccessibilityVirtualNode()
+    {
+        isFirstAccessibilityVirtualNode_ = true;
+    }
+
     void SetRootNodeId(int32_t rootNodeId)
     {
         rootNodeId_ = rootNodeId;
@@ -816,6 +852,9 @@ private:
     // except for the modal uiextension
     // Used to mark modal uiextension count below the root node
     int32_t modalUiextensionCount_ = 0;
+    bool isAccessibilityVirtualNode_ = false;
+    WeakPtr<UINode> parentForAccessibilityVirtualNode_;
+    bool isFirstAccessibilityVirtualNode_ = false;
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };

@@ -1468,14 +1468,11 @@ void PipelineContext::SyncSafeArea(SafeAreaSyncType syncType)
     auto lastPage = stageManager_->GetLastPageWithTransition();
     auto prevPage = stageManager_->GetPrevPageWithTransition();
     if (lastPage) {
-        lastPage->MarkDirtyNode(
+        auto changeType =
             syncType == SafeAreaSyncType::SYNC_TYPE_KEYBOARD && !safeAreaManager_->KeyboardSafeAreaEnabled()
                 ? PROPERTY_UPDATE_LAYOUT
-                : PROPERTY_UPDATE_MEASURE);
-        auto overlay = lastPage->GetPattern<PagePattern>();
-        if (overlay) {
-            overlay->MarkDirtyOverlay();
-        }
+                : PROPERTY_UPDATE_MEASURE;
+        stageManager_->SyncPageSafeArea(lastPage, changeType);
     }
     if (prevPage) {
         auto overlay = prevPage->GetPattern<PagePattern>();
@@ -1783,7 +1780,7 @@ bool PipelineContext::OnBackPressed()
     }
 
     // if has sharedTransition, back press will stop the sharedTransition
-    if (sharedTransitionManager_->OnBackPressed()) {
+    if (sharedTransitionManager_ && sharedTransitionManager_->OnBackPressed()) {
         LOGI("sharedTransition consumed backpressed event");
         return true;
     }

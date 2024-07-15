@@ -85,6 +85,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
                 CHECK_NULL_VOID(stageManager);
                 stageManager->SetStageInTrasition(false);
                 page->GetRenderContext()->RemoveClipWithRRect();
+                page->GetRenderContext()->ResetPageTransitionEffect();
             });
         return;
     }
@@ -619,5 +620,14 @@ void StageManager::AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, cons
     auto destFullPath = destPageInfo->GetFullPath();
 
     ACE_SCOPED_TRACE_COMMERCIAL("Router Page from %s to %s", srcFullPath.c_str(), destFullPath.c_str());
+}
+
+void StageManager::SyncPageSafeArea(const RefPtr<FrameNode>& lastPage, PropertyChangeFlag changeFlag)
+{
+    CHECK_NULL_VOID(lastPage);
+    lastPage->MarkDirtyNode(changeFlag);
+    auto overlay = lastPage->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(overlay);
+    overlay->MarkDirtyOverlay();
 }
 } // namespace OHOS::Ace::NG

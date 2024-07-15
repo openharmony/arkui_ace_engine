@@ -1013,7 +1013,7 @@ HWTEST_F(OverlayManagerTestNg, DestroySheet003, TestSize.Level1)
     sheetNode->tag_ = V2::SHEET_PAGE_TAG;
     sheetNode->GetPattern<SheetPresentationPattern>()->targetId_ = targetId;
     overlayManager->DestroySheet(sheetNode, SheetKey(targetId));
-    EXPECT_TRUE(overlayManager->modalStack_.empty());
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
 
     auto targetNodeSecond = CreateTargetNode();
     targetNodeSecond->MountToParent(stageNode);

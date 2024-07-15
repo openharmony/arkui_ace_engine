@@ -246,6 +246,13 @@ public:
         }
     }
 
+    void SendUpdateVirtualNodeFocusEvent()
+    {
+        auto accessibilityManager = GetAccessibilityManager();
+        CHECK_NULL_VOID(accessibilityManager);
+        accessibilityManager->UpdateVirtualNodeFocus();
+    }
+
     int32_t RegisterDensityChangedCallback(std::function<void(double)>&& callback)
     {
         if (callback) {

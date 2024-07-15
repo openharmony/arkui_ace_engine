@@ -83,6 +83,7 @@ public:
     ~AccessibilityManager() override = default;
 
     virtual void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) = 0;
+    virtual void UpdateVirtualNodeFocus() = 0;
     virtual int64_t GenerateNextAccessibilityId() = 0;
     virtual RefPtr<AccessibilityNode> CreateSpecializedNode(
         const std::string& tag, int32_t nodeId, int32_t parentNodeId) = 0;
