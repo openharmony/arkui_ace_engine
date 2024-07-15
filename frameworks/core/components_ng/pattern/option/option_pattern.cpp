@@ -80,15 +80,6 @@ void OptionPattern::OnModifyDone()
         UpdatePasteFontColor(selectTheme_->GetMenuFontColor());
     }
     SetAccessibilityAction();
-    auto layoutProp = host->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProp);
-    if (!layoutProp->GetMarginProperty()) {
-        MarginProperty margin;
-        auto verticalMargin = CalcLength(selectTheme_->GetOptionNormalTopBottomMargin());
-        margin.SetEdges(CalcLength(0.0), CalcLength(0.0), verticalMargin, verticalMargin);
-        layoutProp->UpdateMargin(margin);
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    }
     InitFocusEvent();
 }
 

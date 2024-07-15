@@ -949,7 +949,8 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
     expandDisplay_ = expandDisplay;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled()) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled()
+        || theme->GetMenuBlendBgColor()) {
         auto bgColor = theme->GetBackgroundColor();
         renderContext->UpdateBackgroundColor(bgColor);
     }
@@ -1552,7 +1553,8 @@ void MenuPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(menuPattern);
 
     auto renderContext = host->GetRenderContext();
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled()) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled()
+        || menuTheme->GetMenuBlendBgColor()) {
         renderContext->UpdateBackgroundColor(menuTheme->GetBackgroundColor());
     } else {
         renderContext->UpdateBackBlurStyle(renderContext->GetBackBlurStyle());
