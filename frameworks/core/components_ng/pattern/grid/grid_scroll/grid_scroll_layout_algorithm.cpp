@@ -1498,7 +1498,7 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
             --currentIndex;
             break;
         }
-        i = lastCross_ - 1;
+        i = static_cast<uint32_t>(lastCross_) - 1;
         // Step3. Measure [GridItem]
         LargeItemLineHeight(itemWrapper, hasNormalItem);
 
