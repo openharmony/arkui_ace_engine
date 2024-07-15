@@ -261,6 +261,8 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     }
 
     CHECK_NULL_VOID(sessionWrapper_);
+    UIEXT_LOGI("The current state is '%{public}s' when UpdateWant.", ToString(state_));
+    bool isBackground = state_ == AbilityState::BACKGROUND;
     // Prohibit rebuilding the session unless the Want is updated.
     if (sessionWrapper_->IsSessionValid()) {
         if (sessionWrapper_->GetWant()->IsEquals(want)) {
@@ -283,6 +285,10 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     config.isAsyncModalBinding = isAsyncModalBinding_;
     config.uiExtensionUsage = uIExtensionUsage;
     sessionWrapper_->CreateSession(want, config);
+    if (isBackground) {
+        UIEXT_LOGW("Unable to StartUiextensionAbility while in the background.");
+        return;
+    }
     NotifyForeground();
 }
 
