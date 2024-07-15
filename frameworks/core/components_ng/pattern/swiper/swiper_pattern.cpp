@@ -1811,8 +1811,7 @@ void SwiperPattern::StopSpringAnimationImmediately()
     });
     PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
     AceAsyncTraceEnd(0, TRAILING_ANIMATION);
-    TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper finish spring animation offset %{public}f",
-        currentIndexOffset_);
+    TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper finish spring animation offset %{public}f", currentIndexOffset_);
     ACE_SCOPED_TRACE("Swiper finish spring animation offset %f", currentIndexOffset_);
     isTouchDownSpringAnimation_ = false;
     OnSpringAndFadeAnimationFinish();
@@ -1830,6 +1829,7 @@ void SwiperPattern::StopFadeAnimation()
 {
     AnimationUtils::StopAnimation(fadeAnimation_);
     if (fadeAnimationIsRunning_) {
+        LOGI("ZTE reset fade");
         fadeAnimationIsRunning_ = false;
     }
 }
@@ -2644,7 +2644,6 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
     mainDeltaSum_ = 0.0f;
     // in drag process, close lazy feature.
     SetLazyLoadFeature(false);
-    StopFadeAnimation();
 }
 
 void SwiperPattern::StopAnimationOnScrollStart(bool flushImmediately)
@@ -2655,6 +2654,7 @@ void SwiperPattern::StopAnimationOnScrollStart(bool flushImmediately)
 
     StopIndicatorAnimation();
     StopTranslateAnimation();
+    StopFadeAnimation();
     if (flushImmediately) {
         StopSpringAnimationAndFlushImmediately();
     } else {
@@ -4139,15 +4139,16 @@ void SwiperPattern::SetDigitStartAndEndProperty(const RefPtr<FrameNode>& indicat
     CHECK_NULL_VOID(swiperDigitalParameters);
     bool isRtl = GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (swiperDigitalParameters->dimStart.has_value()) {
-        auto dimValue = swiperDigitalParameters->dimStart.value().Value() >= 0.0 ?
-                        swiperDigitalParameters->dimStart.value() : Dimension(0.0, DimensionUnit::VP);
+        auto dimValue = swiperDigitalParameters->dimStart.value().Value() >= 0.0
+                            ? swiperDigitalParameters->dimStart.value()
+                            : Dimension(0.0, DimensionUnit::VP);
         isRtl ? layoutProperty->UpdateRight(dimValue) : layoutProperty->UpdateLeft(dimValue);
         isRtl ? swiperLayoutProperty->UpdateRight(dimValue)
               : swiperLayoutProperty->UpdateLeft(swiperDigitalParameters->dimLeft.value_or(0.0_vp));
         ;
     } else if (swiperDigitalParameters->dimEnd.has_value()) {
-        auto dimValue = swiperDigitalParameters->dimEnd.value().Value() >= 0.0 ?
-                        swiperDigitalParameters->dimEnd.value() : Dimension(0.0, DimensionUnit::VP);
+        auto dimValue = swiperDigitalParameters->dimEnd.value().Value() >= 0.0 ? swiperDigitalParameters->dimEnd.value()
+                                                                               : Dimension(0.0, DimensionUnit::VP);
         isRtl ? layoutProperty->UpdateLeft(dimValue) : layoutProperty->UpdateRight(dimValue);
         isRtl ? swiperLayoutProperty->UpdateLeft(dimValue)
               : swiperLayoutProperty->UpdateRight(swiperDigitalParameters->dimRight.value_or(0.0_vp));
@@ -4943,8 +4944,7 @@ void SwiperPattern::NotifyParentScrollEnd()
 
 inline bool SwiperPattern::AnimationRunning() const
 {
-    return (controller_ && controller_->IsRunning()) || (springAnimation_ && springAnimationIsRunning_) ||
-           (fadeAnimation_ && fadeAnimationIsRunning_) || targetIndex_ || usePropertyAnimation_;
+    return (springAnimation_ && springAnimationIsRunning_) || targetIndex_ || usePropertyAnimation_;
 }
 
 bool SwiperPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child)
@@ -5536,8 +5536,8 @@ bool SwiperPattern::ContentWillChange(int32_t currentIndex, int32_t comingIndex)
     CHECK_NULL_RETURN(tabBarNode, true);
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_RETURN(tabBarPattern, true);
-    if (!tabBarPattern->GetTabContentWillChangeFlag() &&
-        tabsPattern->GetInterceptStatus() && currentIndex != comingIndex) {
+    if (!tabBarPattern->GetTabContentWillChangeFlag() && tabsPattern->GetInterceptStatus() &&
+        currentIndex != comingIndex) {
         tabBarPattern->ResetTabContentWillChangeFlag();
         auto ret = tabsPattern->OnContentWillChange(currentIndex, comingIndex);
         return ret.has_value() ? ret.value() : true;
