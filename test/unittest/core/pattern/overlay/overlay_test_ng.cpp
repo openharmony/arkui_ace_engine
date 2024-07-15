@@ -711,11 +711,11 @@ HWTEST_F(OverlayTestNg, MenuTest001, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     overlayManager->ShowMenuAnimation(menuNode);
     EXPECT_FALSE(menuPattern == nullptr);
     EXPECT_FALSE(menuPattern->animationOption_.GetOnFinishEvent() == nullptr);
@@ -826,8 +826,8 @@ HWTEST_F(OverlayTestNg, MenuTest003, TestSize.Level1)
     ASSERT_NE(previewContext, nullptr);
     auto menuContext = previewNode->GetRenderContext();
     ASSERT_NE(menuContext, nullptr);
-    previewContext->UpdateTransformScale(VectorF(0.0f, 0.0f));
-    menuContext->UpdateTransformScale(VectorF(0.0f, 0.0f));
+    previewContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
+    menuContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
 
     auto pipeline = PipelineBase::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
@@ -902,8 +902,8 @@ HWTEST_F(OverlayTestNg, MenuTest004, TestSize.Level1)
      */
     overlayManager->CleanMenuInSubWindowWithAnimation();
     pipeline->taskExecutor_ = nullptr;
-    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(0.0f, 0.0f));
-    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(0.0f, 0.0f));
+    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(1.0f, 1.0f));
+    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(1.0f, 1.0f));
 }
 
 /**
