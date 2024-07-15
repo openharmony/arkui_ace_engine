@@ -1407,7 +1407,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnSelectAll");
     auto textSize = static_cast<int32_t>(contentController_->GetWideText().length());
     if (inlineStyle) {
-        if (contentController_->GetWideText().rfind(L".") < textSize - FIND_TEXT_ZERO_INDEX) {
+        if (static_cast<int32_t>(contentController_->GetWideText().rfind(L".")) < textSize - FIND_TEXT_ZERO_INDEX) {
             textSize = contentController_->GetWideText().rfind(L".");
         }
         UpdateSelection(0, textSize);
