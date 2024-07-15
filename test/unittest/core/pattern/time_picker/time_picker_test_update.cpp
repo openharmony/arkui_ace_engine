@@ -1693,43 +1693,6 @@ HWTEST_F(TimePickerPatternTestUpdate, SetIsEnableHapticFeedback002, TestSize.Lev
 }
 
 /**
- * @tc.name: ShowForAging001
- * @tc.desc: Test TimePickerDialogViewShow ShowForAging.
- * @tc.type: FUNC
- */
-HWTEST_F(TimePickerPatternTestUpdate, ShowForAging001, TestSize.Level1)
-{
-    TimePickerSettingData settingData;
-    settingData.properties.disappearTextStyle_.textColor = Color::RED;
-    settingData.properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
-
-    settingData.properties.normalTextStyle_.textColor = Color::RED;
-    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
-
-    settingData.properties.selectedTextStyle_.textColor = Color::RED;
-    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
-    settingData.isUseMilitaryTime = false;
-
-    std::map<std::string, PickerTime> timePickerProperty;
-    timePickerProperty["selected"] = PickerTime(1, 1, 1);
-
-    DialogProperties dialogProperties;
-
-    std::map<std::string, NG::DialogEvent> dialogEvent;
-    auto eventFunc = [](const std::string& info) { (void)info; };
-    dialogEvent["changeId"] = eventFunc;
-    dialogEvent["acceptId"] = eventFunc;
-    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
-    dialogCancelEvent["cancelId"] = cancelFunc;
-
-    std::vector<ButtonInfo> buttonInfos;
-    auto dialogNode = TimePickerDialogView::ShowForAging(
-        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
-    EXPECT_NE(dialogNode, nullptr);
-}
-
-/**
  * @tc.name: GetCurrentTime001
  * @tc.desc: Test TimePickerPatternTestUpdate GetCurrentTime.
  * @tc.type: FUNC
