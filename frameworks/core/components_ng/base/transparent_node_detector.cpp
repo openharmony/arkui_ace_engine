@@ -60,3 +60,4 @@ void TransparentNodeDetector::PostCheckNodeTransparentTask(const RefPtr<FrameNod
         "ArkUINodeCheckContextTransparent");
 }
 } // namespace OHOS::Ace::NG
+
