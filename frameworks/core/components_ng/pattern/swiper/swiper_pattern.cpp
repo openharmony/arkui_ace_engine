@@ -4934,7 +4934,8 @@ void SwiperPattern::NotifyParentScrollStart(float position)
     }
     auto parent = GetNestedScrollParent();
     CHECK_NULL_VOID(parent);
-    if (parent) {
+    const auto& nestedScroll = GetNestedScroll();
+    if (parent && nestedScroll.NeedParent()) {
         parent->OnScrollStartRecursive(position);
     }
 }
@@ -4956,7 +4957,7 @@ void SwiperPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 void SwiperPattern::NotifyParentScrollEnd()
 {
     auto parent = GetNestedScrollParent();
-    auto nestedScroll = GetNestedScroll();
+    const auto& nestedScroll = GetNestedScroll();
     if (parent && (nestedScroll.NeedParent() || GetIsNestedInterrupt())) {
         parent->OnScrollEndRecursive(std::nullopt);
     }
