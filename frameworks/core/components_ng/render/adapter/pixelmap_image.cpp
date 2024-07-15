@@ -359,6 +359,7 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
 
 void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect)
 {
+    auto pixelMapPtr = GetPixelMap();
 #ifndef USE_ROSEN_DRAWING
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
     CHECK_NULL_VOID(rsCanvas);
@@ -371,8 +372,8 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRe
     SkSamplingOptions option;
     SkRect dst { dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetRight(), dstRect.GetBottom() };
 
-    CHECK_NULL_VOID(pixelMap_);
-    auto pixelMap = pixelMap_->GetPixelMapSharedPtr();
+    CHECK_NULL_VOID(pixelMapPtr);
+    auto pixelMap = pixelMapPtr->GetPixelMapSharedPtr();
     recordingCanvas->DrawPixelMapRect(pixelMap, dst, option, &paint);
 #else
     auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
@@ -380,7 +381,8 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRe
     RSSamplingOptions options;
     RSRect dst = RSRect(dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetRight(), dstRect.GetBottom());
 
-    auto pixelMap = pixelMap_->GetPixelMapSharedPtr();
+    CHECK_NULL_VOID(pixelMapPtr);
+    auto pixelMap = pixelMapPtr->GetPixelMapSharedPtr();
     CHECK_NULL_VOID(pixelMap);
     RSRect src = RSRect(srcRect.GetLeft(), srcRect.GetTop(), srcRect.GetRight(), srcRect.GetBottom());
     recordingCanvas.AttachBrush(brush);
