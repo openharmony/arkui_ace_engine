@@ -1500,7 +1500,9 @@ double DragDropManager::CalcDragPreviewDistanceWithPoint(
     auto pipeline = PipelineContext::GetCurrentContext();
     auto windowScale = GetWindowScale();
     if (pipeline && NearEqual(windowScale, 1.0f)) {
-        auto windowOffset = pipeline->GetWindow()->GetCurrentWindowRect().GetOffset();
+        auto window = pipeline->GetWindow();
+        CHECK_NULL_RETURN(window, 0.0);
+        auto windowOffset = window->GetCurrentWindowRect().GetOffset();
         x += windowOffset.GetX();
         y += windowOffset.GetY();
     }
