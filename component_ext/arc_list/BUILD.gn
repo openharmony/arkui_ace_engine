@@ -63,8 +63,7 @@ ohos_shared_library("arclist") {
     "napi:ace_napi",
   ]
 
-  if (use_mingw_win || use_mac || use_linux) {
-  } else {
+  if (!(use_mingw_win || use_mac || use_linux)) {
     external_deps += [
       "ets_runtime:libark_jsruntime",
       "napi:ace_container_scope",
