@@ -14,11 +14,6 @@
  */
 
 #include "api_policy_adapter.h"
-#ifdef __WIN32
-#include <windows.h>
-#else
-#include <dlfcn.h>
-#endif
 
 ApiPolicyAdapter::ApiPolicyAdapter()
 {
