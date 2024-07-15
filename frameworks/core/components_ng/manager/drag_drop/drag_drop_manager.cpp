@@ -279,6 +279,7 @@ void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode
     }
     
     // drop allowed
+    CHECK_NULL_VOID(dragFrameNode);
     const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
     // special handling for no drag data present situation, always show as move
     if (dragFrameNodeAllowDrop.empty() || summaryMap_.empty()) {
@@ -289,9 +290,10 @@ void DragDropManager::UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode
     //other case, check drag behavior
     switch (dragBehavior) {
         case DragBehavior::UNKNOWN: {
-            // the application does not config the drag behavior, use move when moving within draggedFrameNode,
-            // otherwise use copy
-            if (draggedFrameNode_ == dragFrameNode) {
+            // the application does not config the drag behavior, use move when moving within
+            // draggedFrameNode or frameNode is disabled, otherwise use copy
+            auto eventHub = dragFrameNode->GetEventHub<EventHub>();
+            if (draggedFrameNode_ == dragFrameNode || !(eventHub && eventHub->IsEnabled())) {
                 UpdateDragStyle(DragCursorStyleCore::MOVE);
             } else {
                 UpdateDragStyle(DragCursorStyleCore::COPY);
@@ -1670,7 +1672,8 @@ void DragDropManager::FireOnEditableTextComponent(const RefPtr<FrameNode>& frame
 {
     CHECK_NULL_VOID(frameNode);
     auto frameTag = frameNode->GetTag();
-    if (!IsEditableTextComponent(frameTag)) {
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    if (!IsEditableTextComponent(frameTag) || !(eventHub && eventHub->IsEnabled())) {
         return;
     }
 
