@@ -125,14 +125,14 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto textSize = textGeometryNode->GetContentSize();
     if (!textData.empty() || messageCount > 0) {
         if ((textData.size() <= 1 && !textData.empty()) ||
-            ((messageCount < 10 && messageCount <= countLimit) && textData.empty())) {
+            ((messageCount < 10 && messageCount <= static_cast<size_t>(countLimit)) && textData.empty())) {
             if (hasFontSize_) {
                 badgeCircleDiameter = std::max(static_cast<double>(textSize.Height()), badgeCircleDiameter);
                 badgeHeight = std::max(badgeCircleDiameter, badgeHeight);
             }
             badgeCircleRadius = badgeCircleDiameter / 2;
             badgeWidth = badgeCircleDiameter;
-        } else if (textData.size() > 1 || messageCount > countLimit) {
+        } else if (textData.size() > 1 || messageCount > static_cast<size_t>(countLimit)) {
             if (hasFontSize_) {
                 badgeCircleDiameter = std::max(static_cast<double>(textSize.Height()), badgeCircleDiameter);
                 badgeHeight =
@@ -277,13 +277,13 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     if (!textData.empty() || messageCount > 0) {
         if ((textData.size() <= 1 && !textData.empty()) ||
-            ((messageCount < 10 && messageCount <= countLimit) && textData.empty())) {
+            ((messageCount < 10 && messageCount <= static_cast<size_t>(countLimit)) && textData.empty())) {
             if (hasFontSize_) {
                 badgeCircleDiameter = std::max(static_cast<double>(textSize.Height()), badgeCircleDiameter);
             }
             badgeCircleRadius = badgeCircleDiameter / 2;
             badgeWidth = badgeCircleDiameter;
-        } else if (textData.size() > 1 || messageCount > countLimit) {
+        } else if (textData.size() > 1 || messageCount > static_cast<size_t>(countLimit)) {
             if (hasFontSize_) {
                 badgeCircleDiameter = std::max(static_cast<double>(textSize.Height()), badgeCircleDiameter);
             }

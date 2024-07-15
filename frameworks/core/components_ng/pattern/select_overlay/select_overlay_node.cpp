@@ -1492,7 +1492,7 @@ void SelectOverlayNode::AddMenuItemByCreateMenuCallback(const std::shared_ptr<Se
         RemoveChild(extensionMenu_);
         extensionMenu_.Reset();
     }
-    if (extensionOptionStartIndex < createMenuItems.size()) {
+    if (static_cast<size_t>(extensionOptionStartIndex) < createMenuItems.size()) {
         auto moreButton = BuildMoreOrBackButton(GetId(), true);
         moreButton->MountToParent(selectMenuInner_);
         // add back button
