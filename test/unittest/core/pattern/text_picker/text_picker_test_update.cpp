@@ -1289,18 +1289,41 @@ HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateButtonStyles025, TestSi
 }
 
 /**
+ * @tc.name: getRadius
+ * @tc.desc: 提供TextPickerDialogViewUpdateButtonStyles026用例使用
+ * @tc.type: FUNC
+ */
+NG::BorderRadiusProperty getRadius()
+{
+    int calcvalue = 100;
+    NG::BorderRadiusProperty radius;
+    CalcDimension radiusCalc(calcvalue, static_cast<DimensionUnit>(1));
+    radius.radiusTopLeft = radiusCalc;
+    radius.radiusTopRight = radiusCalc;
+    radius.radiusBottomLeft = radiusCalc;
+    radius.radiusBottomRight = radiusCalc;
+    radius.multiValued = true;
+    return radius;
+}
+
+/**
  * @tc.name: TextPickerDialogViewUpdateButtonStyles026
  * @tc.desc: Test UpdateButtonStyle.
  * @tc.type: FUNC
  */
 HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateButtonStyles026, TestSize.Level1)
 {
+    uint32_t color = 0;
+    Color colorVal = Color(color);
     std::vector<ButtonInfo> buttonInfos;
     ButtonInfo info1;
     ButtonInfo info2;
     ButtonInfo info3;
     info1.fontSize = Dimension(1);
     info1.fontColor = Color::GRAY;
+    info1.fontFamily = { "unknown" };
+    info1.backgroundColor = colorVal;
+    info1.borderRadius = getRadius();
     info2.fontSize = Dimension(0);
     info2.fontColor = Color::FOREGROUND;
     info3.fontSize = Dimension(100);
@@ -1747,5 +1770,31 @@ HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateBackwardButtonMargin002
     TextPickerDialogView::UpdateBackwardButtonMargin(buttonBackwardNode, theme);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
     EXPECT_NE(buttonBackwardNode->GetLayoutProperty()->margin_, nullptr);
+}
+
+ /*
+ * @tc.name: UpdateForwardButtonMargin001
+ * @tc.desc: Test TextPickerDialogView UpdateForwardButtonMargin
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, UpdateForwardButtonMargin001, TestSize.Level1)
+{
+    auto buttonForwardNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    TextPickerDialogView::UpdateForwardButtonMargin(buttonForwardNode, dialogTheme);
+}
+
+/**
+ * @tc.name: SetDialogButtonActive001
+ * @tc.desc: Test TextPickerDialogView SetDialogButtonActive
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, SetDialogButtonActive001, TestSize.Level1)
+{
+    auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    TextPickerDialogView::SetDialogButtonActive(contentColumn, 0, 0);
 }
 } // namespace OHOS::Ace::NG
