@@ -1001,8 +1001,10 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
     CHECK_NULL_VOID(pipelineContext);
     auto containerId = pipelineContext->GetInstanceId();
     bool isShowInSubWindow = containerId >= MIN_SUBCONTAINER_ID;
+    auto targetId = menuWrapperPattern->GetTargetId();
+    overlayManager->EraseMenuInfo(targetId);
     if (isShowInSubWindow) {
-        SubwindowManager::GetInstance()->ClearMenuNG(instanceId, menuWrapperPattern->GetTargetId());
+        SubwindowManager::GetInstance()->ClearMenuNG(instanceId, targetId);
         overlayManager->ResetContextMenuDragHideFinished();
         overlayManager->SetIsMenuShow(false);
         return;
