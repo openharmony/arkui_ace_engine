@@ -64,6 +64,7 @@ public:
                 const double defaultMarkColorAplpa = 0.1;
                 theme->trackBgColor_ = pattern->GetAttr<Color>("track_bg_color", Color::RED);
                 theme->trackSelectedColor_ = pattern->GetAttr<Color>("track_color_selected", Color::RED);
+                theme->outsetAndNoneTrackColor_ = pattern->GetAttr<Color>("outset_and_none_track_color", Color::RED);
                 theme->markerColor_ = pattern->GetAttr<Color>("marker_color", Color::RED)
                     .BlendOpacity(pattern->GetAttr<double>("marker_color_alpha", defaultMarkColorAplpa));
                 theme->tipTextColor_ = pattern->GetAttr<Color>("tip_text_color", Color::RED);
@@ -230,6 +231,11 @@ public:
         return trackSelectedColor_;
     }
 
+    Color GetOutsetAndNoneTrackColor() const
+    {
+        return outsetAndNoneTrackColor_;
+    }
+
     Color GetBlockShadowColor() const
     {
         return blockShadowColor_;
@@ -311,6 +317,7 @@ private:
     Color markerColor_;
     Color trackBgColor_;
     Color trackSelectedColor_;
+    Color outsetAndNoneTrackColor_;
     Color blockShadowColor_;
 
     // others
