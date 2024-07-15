@@ -32,7 +32,7 @@ namespace {
 constexpr int32_t MAX_RECOVER_BUTTON_INDEX = 0;
 constexpr int32_t MINIMIZE_BUTTON_INDEX = 1;
 constexpr int32_t CLOSE_BUTTON_INDEX = 2;
-constexpr int32_t TITLE_POPUP_DURATION = 200;
+constexpr int32_t TITLE_POPUP_DURATION = 400;
 } // namespace
 
 void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool needUpdate)
@@ -255,9 +255,10 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
     CHECK_NULL_VOID(buttonsContext);
 
     auto titlePopupDistance = titleHeight_.ConvertToPx();
+    auto cubicBezierCurve = AceType::MakeRefPtr<CubicCurve>(0.00, 0.00, 0.20, 1.00);
     AnimationOption option;
     option.SetDuration(TITLE_POPUP_DURATION);
-    option.SetCurve(Curves::EASE_IN_OUT);
+    option.SetCurve(cubicBezierCurve);
 
     if (isShow && CanShowFloatingTitle()) {
         floatingContext->OnTransformTranslateUpdate({ 0.0f, height - static_cast<float>(titlePopupDistance), 0.0f });
