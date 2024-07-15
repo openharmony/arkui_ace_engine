@@ -842,20 +842,16 @@ void SwiperPattern::AdjustCurrentFocusIndex()
 
 bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (!isDragging_) {
+    if (!isDragging_ || isInit_) {
         SetLazyLoadFeature(true);
     }
-
-    auto isNotInit = true;
-    if (isInit_) {
-        isNotInit = false;
-        isInit_ = false;
-        // first load Swiper to preload page.
-        SetLazyLoadFeature(true);
-    } else {
+    if (!isInit_) {
         OnIndexChange();
         oldIndex_ = currentIndex_;
     }
+
+    auto isInit = isInit_;
+    isInit_ = false;
 
     if (!IsAutoPlay() && config.skipMeasure && config.skipLayout) {
         return false;
@@ -920,7 +916,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             FlushFocus(curChildFrame);
         }
         currentIndexOffset_ = 0.0f;
-        if (isNotInit) {
+        if (!isInit) {
             OnIndexChange();
         }
         ignoreBlankSpringOffset_ = IgnoreBlankOffset(true);
@@ -2083,13 +2079,25 @@ void SwiperPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 
 bool SwiperPattern::IsContentFocused()
 {
-    RefPtr<FocusHub> indicatorNode = GetFocusHubChild(V2::SWIPER_INDICATOR_ETS_TAG);
-    RefPtr<FocusHub> rightArrowNode = GetFocusHubChild(V2::SWIPER_RIGHT_ARROW_ETS_TAG);
-    RefPtr<FocusHub> leftArrowNode = GetFocusHubChild(V2::SWIPER_LEFT_ARROW_ETS_TAG);
-
-    return !((indicatorNode && indicatorNode->IsCurrentFocus()) ||
-             (rightArrowNode && rightArrowNode->IsCurrentFocus()) ||
-             (leftArrowNode && leftArrowNode->IsCurrentFocus()));
+    auto swiperHost = GetHost();
+    CHECK_NULL_RETURN(swiperHost, true);
+    auto swiperFocusHub = swiperHost->GetFocusHub();
+    CHECK_NULL_RETURN(swiperFocusHub, true);
+    auto focusChildren = swiperFocusHub->GetChildren();
+    CHECK_NULL_RETURN(!focusChildren.empty(), true);
+    for (const auto& child : focusChildren) {
+        if (!child || !child->IsCurrentFocus()) {
+            continue;
+        }
+        auto frameName = child->GetFrameName();
+        if (frameName == V2::SWIPER_INDICATOR_ETS_TAG
+            || frameName == V2::SWIPER_RIGHT_ARROW_ETS_TAG
+            || frameName == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
+            return false;
+        }
+        break;
+    }
+    return true;
 }
 
 bool SwiperPattern::OnKeyEvent(const KeyEvent& event)
