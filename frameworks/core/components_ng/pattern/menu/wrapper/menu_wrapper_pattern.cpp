@@ -128,31 +128,22 @@ void MenuWrapperPattern::HandleInteraction(const TouchEventInfo& info)
     RefPtr<UINode> innerMenuNode = nullptr;
     auto menuZone = GetMenuZone(innerMenuNode);
     CHECK_NULL_VOID(innerMenuNode);
-    // get menuNode's touch region
-    auto isInMenuRegion = menuZone.IsInRegion(PointF(position.GetX(), position.GetY()));
-    if (!isInMenuRegion) {
-        ClearLastMenuItem();
-        innerMenuNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        return;
-    }
-    currentTouchItem_ = FindTouchedMenuItem(innerMenuNode, position);
-    if (!currentTouchItem_) {
-        ClearLastMenuItem();
-        innerMenuNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        return;
-    }
-    if (currentTouchItem_ == lastTouchItem_) {
-        innerMenuNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        return;
-    }
-    ChangeCurMenuItemBgColor();
+
     ClearLastMenuItem();
-    lastTouchItem_ = currentTouchItem_;
+    // get menuNode's touch region
+    if (menuZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
+        currentTouchItem_ = FindTouchedMenuItem(innerMenuNode, position);
+        ChangeCurMenuItemBgColor();
+        lastTouchItem_ = currentTouchItem_;
+    }
     innerMenuNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void MenuWrapperPattern::ChangeCurMenuItemBgColor() 
 {
+    if (!currentTouchItem_) {
+        return;
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
