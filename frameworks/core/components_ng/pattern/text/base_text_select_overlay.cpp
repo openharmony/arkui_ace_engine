@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text/base_text_select_overlay.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
@@ -939,6 +940,7 @@ bool BaseTextSelectOverlay::IsTouchAtHandle(const TouchEventInfo& info)
 {
     auto overlayManager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_RETURN(overlayManager, false);
+    CHECK_NULL_RETURN(!info.GetTouches().empty(), false);
     auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::DOWN) {
         auto localOffset = info.GetTouches().front().GetLocalLocation();
