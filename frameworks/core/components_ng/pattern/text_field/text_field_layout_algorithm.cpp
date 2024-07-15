@@ -131,6 +131,19 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleTextOverflowAndWordBreak(TextStyle
     }
 }
 
+void TextFieldLayoutAlgorithm::InlineFocusMeasure(const LayoutConstraintF& contentConstraint,
+    LayoutWrapper* layoutWrapper, double& safeBoundary, float& contentWidth)
+{
+    ApplyIndent(contentConstraint.maxSize.Width());
+    paragraph_->Layout(
+        contentConstraint.maxSize.Width() - static_cast<float>(safeBoundary) - PARAGRAPH_SAVE_BOUNDARY);
+    auto tmpIndent = paragraph_->GetLineCount() == 1 ? indent_ : 0.0f;
+    auto longestLine = std::ceil(paragraph_->GetLongestLine() + tmpIndent);
+    paragraph_->Layout(std::min(static_cast<float>(longestLine), paragraph_->GetMaxWidth()));
+    contentWidth = ConstraintWithMinWidth(
+        contentConstraint, layoutWrapper, paragraph_, static_cast<float>(safeBoundary) + PARAGRAPH_SAVE_BOUNDARY);
+}
+
 std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(const LayoutConstraintF& contentConstraint,
     LayoutWrapper* layoutWrapper)
 {
@@ -146,19 +159,13 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(const Layout
     float contentWidth = 0.0f;
     auto safeBoundary = textFieldTheme->GetInlineBorderWidth().ConvertToPx() * 2;
     if (pattern->HasFocus()) {
-        ApplyIndent(contentConstraint.maxSize.Width()
-            - static_cast<float>(safeBoundary) - PARAGRAPH_SAVE_BOUNDARY);
-        paragraph_->Layout(
-            contentConstraint.maxSize.Width() - static_cast<float>(safeBoundary) - PARAGRAPH_SAVE_BOUNDARY);
-        auto longestLine = std::ceil(paragraph_->GetLongestLine());
-        paragraph_->Layout(std::min(static_cast<float>(longestLine), paragraph_->GetMaxWidth()));
-        contentWidth = ConstraintWithMinWidth(
-            contentConstraint, layoutWrapper, paragraph_, static_cast<float>(safeBoundary) + PARAGRAPH_SAVE_BOUNDARY);
+        InlineFocusMeasure(contentConstraint, layoutWrapper, safeBoundary, contentWidth);
     } else {
         ApplyIndent(contentConstraint.maxSize.Width());
         paragraph_->Layout(contentConstraint.maxSize.Width());
+        auto tmpIndent = paragraph_->GetLineCount() == 1 ? indent_ : 0.0f;
         if (autoWidth_) {
-            auto paragraphLongestLine = std::ceil(paragraph_->GetLongestLine());
+            auto paragraphLongestLine = std::ceil(paragraph_->GetLongestLine() + tmpIndent);
             paragraph_->Layout(std::min(static_cast<float>(paragraphLongestLine), paragraph_->GetMaxWidth()));
         }
         contentWidth = ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph_);
@@ -167,7 +174,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(const Layout
             pattern->GetPaddingLeft() + pattern->GetPaddingRight() - safeBoundary : 0.0f - safeBoundary;
         inlineParagraph_->Layout(contentConstraint.maxSize.Width() + widthOffSet
             - safeBoundary - PARAGRAPH_SAVE_BOUNDARY);
-        auto longestLine = std::ceil(inlineParagraph_->GetLongestLine());
+        auto inlineIndent = inlineParagraph_->GetLineCount() == 1 ? indent_ : 0.0f;
+        auto longestLine = std::ceil(inlineParagraph_->GetLongestLine() + inlineIndent);
         inlineParagraph_->Layout(std::min(static_cast<float>(longestLine), inlineParagraph_->GetMaxWidth()));
         auto inlineContentWidth = ConstraintWithMinWidth(contentConstraint, layoutWrapper, inlineParagraph_,
             static_cast<float>(safeBoundary) + PARAGRAPH_SAVE_BOUNDARY);
