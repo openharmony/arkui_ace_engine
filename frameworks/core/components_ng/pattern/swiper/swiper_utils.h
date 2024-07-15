@@ -181,7 +181,7 @@ private:
 
 /**
  * @brief Helper RAII object. set @c var to @c value when this object goes out of scope.
- * REQUIRES: the life span of @c var surpasses this object. 
+ * REQUIRES: the life span of @c var surpasses this object.
  */
 template<typename T>
 class DestructSetter {
