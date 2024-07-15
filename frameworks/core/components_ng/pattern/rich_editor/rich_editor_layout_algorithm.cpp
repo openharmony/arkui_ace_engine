@@ -183,7 +183,7 @@ bool RichEditorLayoutAlgorithm::CreateParagraph(
     CHECK_NULL_RETURN(pipeline, false);
     // default paragraph style
     auto paraStyle = GetParagraphStyle(textStyle, content, layoutWrapper);
-    return UpdateParagraphBySpan(layoutWrapper, paraStyle, maxWidth, textStyle);
+    return UpdateParagraphBySpan(layoutWrapper, paraStyle, maxWidth);
 }
 
 void RichEditorLayoutAlgorithm::UpdateRichTextRect(
