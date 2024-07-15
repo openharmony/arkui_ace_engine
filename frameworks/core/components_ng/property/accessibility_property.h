@@ -43,6 +43,7 @@ using ActionGetCursorIndexImpl = std::function<int32_t(void)>;
 using ActionClickImpl = ActionNoParam;
 using ActionLongClickImpl = ActionNoParam;
 using ActionsImpl = std::function<void((uint32_t actionType))>;
+using OnAccessibilityFocusCallbackImpl = std::function<void((bool isFocus))>;
 
 class FrameNode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
@@ -432,6 +433,18 @@ public:
         return false;
     }
 
+    void SetOnAccessibilityFocusCallback(const OnAccessibilityFocusCallbackImpl& onAccessibilityFocusCallbackImpl)
+    {
+        onAccessibilityFocusCallbackImpl_ = onAccessibilityFocusCallbackImpl;
+    }
+
+    void OnAccessibilityFocusCallback(bool isFocus)
+    {
+        if (onAccessibilityFocusCallbackImpl_) {
+            onAccessibilityFocusCallbackImpl_(isFocus);
+        }
+    }
+
     void SetAccessibilityGroup(bool accessibilityGroup)
     {
         accessibilityGroup_ = accessibilityGroup;
@@ -651,6 +664,7 @@ protected:
     ActionClickImpl actionClickImpl_;
     ActionLongClickImpl actionLongClickImpl_;
     ActionsImpl actionsImpl_;
+    OnAccessibilityFocusCallbackImpl onAccessibilityFocusCallbackImpl_;
     bool accessibilityGroup_ = false;
     int32_t childTreeId_ = -1;
     int32_t childWindowId_ = 0;

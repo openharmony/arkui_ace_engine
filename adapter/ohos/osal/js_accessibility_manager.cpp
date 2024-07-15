@@ -1855,6 +1855,9 @@ bool ActAccessibilityFocus(int64_t elementId, RefPtr<NG::FrameNode>& frameNode, 
         renderContext->UpdateAccessibilityFocus(true);
     }
     currentFocusNodeId = frameNode->GetAccessibilityId();
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    accessibilityProperty->OnAccessibilityFocusCallback(true);
     return true;
 }
 
