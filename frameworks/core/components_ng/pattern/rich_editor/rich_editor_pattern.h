@@ -378,6 +378,8 @@ public:
     int32_t CalcLineBeginPosition();
     float GetTextThemeFontSize();
     int32_t CalcLineEndPosition();
+    int32_t CalcSingleLineBeginPosition(int32_t fixedPos);
+    int32_t CalcSingleLineEndPosition(int32_t fixedPos);
     bool CursorMoveLineBegin();
     bool CursorMoveLineEnd();
     void HandleSelectFontStyle(KeyCode code) override;
@@ -385,7 +387,7 @@ public:
     void HandleOnShowMenu() override;
     int32_t HandleSelectPosition(bool isForward);
     int32_t HandleSelectParagraghPos(bool direction);
-    int32_t HandleSelectWrapper(CaretMoveIntent direction);
+    int32_t HandleSelectWrapper(CaretMoveIntent direction, int32_t fixedPos);
     void AIDeleteComb(int32_t start, int32_t end, int32_t& aiPosition, bool direction);
     bool HandleOnDeleteComb(bool backward) override;
     int32_t GetLeftWordPosition(int32_t caretPosition);
