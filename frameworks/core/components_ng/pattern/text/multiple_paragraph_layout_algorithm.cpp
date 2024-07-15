@@ -25,7 +25,6 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
-#include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/font_collection.h"
@@ -404,7 +403,7 @@ bool MultipleParagraphLayoutAlgorithm::ParagraphReLayout(const LayoutConstraintF
 }
 
 bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layoutWrapper,
-    ParagraphStyle paraStyle, double maxWidth, const TextStyle& textStyle)
+    ParagraphStyle paraStyle, double maxWidth)
 {
     CHECK_NULL_RETURN(layoutWrapper, false);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
@@ -433,9 +432,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
         if (group.front()) {
             GetSpanParagraphStyle(group.front()->textLineStyle, spanParagraphStyle);
             if (group.front()->fontStyle->HasFontSize()) {
-                auto fontSize = group.front()->fontStyle->GetFontSizeValue();
-                spanParagraphStyle.fontSize = TextLayoutadapter::TextConvertToPx(
-                    fontSize, { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+                spanParagraphStyle.fontSize = group.front()->fontStyle->GetFontSizeValue().ConvertToPx();
             }
         }
         if (paraStyle.maxLines != UINT32_MAX && !spanStringHasMaxLines_ && isSpanStringMode_) {
@@ -457,7 +454,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
                 if (iterItems == children.end() || !(*iterItems)) {
                     continue;
                 }
-                AddImageToParagraph(imageSpanItem, (*iterItems), layoutConstrain, paragraph, spanTextLength, textStyle);
+                AddImageToParagraph(imageSpanItem, (*iterItems), layoutConstrain, paragraph, spanTextLength);
                 auto imageNode = (*iterItems)->GetHostNode();
                 imageNodeList.emplace_back(WeakClaim(RawPtr(imageNode)));
                 iterItems++;
@@ -491,7 +488,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
         currentParagraphPlaceholderCount_ = 0;
         shadowOffset_ += GetShadowOffset(group);
         paragraph->Build();
-        ApplyIndent(spanParagraphStyle, paragraph, maxWidth, textStyle);
+        ApplyIndent(spanParagraphStyle, paragraph, maxWidth);
         UpdateSymbolSpanEffect(frameNode, paragraph, group);
         if (paraStyle.maxLines != UINT32_MAX && !spanStringHasMaxLines_ && isSpanStringMode_) {
             paragraph->Layout(static_cast<float>(maxWidth));
@@ -526,7 +523,7 @@ void MultipleParagraphLayoutAlgorithm::AddTextSpanToParagraph(const RefPtr<SpanI
 
 void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>& imageSpanItem,
     const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstrain,
-    const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength, const TextStyle& textStyle)
+    const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength)
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
@@ -551,8 +548,7 @@ void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>
         imageSpanItem->placeholderIndex =
             imageSpanItem->UpdateParagraph(parentNode, paragraph, isSpanStringMode_, placeholderStyle);
     } else {
-        placeholderStyle.baselineOffset = TextLayoutadapter::TextConvertToPx(
-            baselineOffset, { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+        placeholderStyle.baselineOffset = baselineOffset.ConvertToPx();
         imageSpanItem->placeholderIndex =
             imageSpanItem->UpdateParagraph(parentNode, paragraph, isSpanStringMode_, placeholderStyle);
     }
@@ -633,7 +629,7 @@ void MultipleParagraphLayoutAlgorithm::UpdateParagraphByCustomSpan(RefPtr<Custom
 }
 
 void MultipleParagraphLayoutAlgorithm::ApplyIndent(
-    ParagraphStyle& paragraphStyle, const RefPtr<Paragraph>& paragraph, double width, const TextStyle& textStyle)
+    ParagraphStyle& paragraphStyle, const RefPtr<Paragraph>& paragraph, double width)
 {
     auto indentValue = paragraphStyle.indent;
     CHECK_NULL_VOID(paragraph);
@@ -643,8 +639,10 @@ void MultipleParagraphLayoutAlgorithm::ApplyIndent(
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         if (indentValue.Unit() != DimensionUnit::PERCENT) {
-            value = TextLayoutadapter::TextConvertToPx(
-                indentValue, { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+            if (!indentValue.NormalizeToPx(
+                pipeline->GetDipScale(), pipeline->GetFontScale(), pipeline->GetLogicScale(), width, value)) {
+                return;
+            }
         } else {
             value = static_cast<float>(width * indentValue.Value());
             paragraphStyle.indent = Dimension(value);
@@ -654,8 +652,7 @@ void MultipleParagraphLayoutAlgorithm::ApplyIndent(
     auto leadingMarginValue = 0.0f;
     std::vector<float> indents;
     if (paragraphStyle.leadingMargin.has_value()) {
-        leadingMarginValue = TextLayoutadapter::TextConvertToPx(paragraphStyle.leadingMargin->size.Width(),
-            { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+        leadingMarginValue = paragraphStyle.leadingMargin->size.Width().ConvertToPx();
     }
     indents.emplace_back(indent + leadingMarginValue);
     indents.emplace_back(leadingMarginValue);

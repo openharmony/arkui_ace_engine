@@ -18,7 +18,6 @@
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -111,8 +110,15 @@ void TextContentModifier::SetDefaultAnimatablePropertyValue(const TextStyle& tex
 
 void TextContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
 {
-    float fontSizeValue = TextLayoutadapter::TextConvertToPx(textStyle.GetFontSize(),
-        { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+    float fontSizeValue = textStyle.GetFontSize().Value();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    if (pipelineContext) {
+        fontSizeValue = pipelineContext->NormalizeToPx(textStyle.GetFontSize());
+        if (textStyle.IsAllowScale() && textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
+            fontSizeValue = pipelineContext->NormalizeToPx(textStyle.GetFontSize() * pipelineContext->GetFontScale());
+        }
+    }
+
     fontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
     AttachProperty(fontSizeFloat_);
 }
@@ -122,8 +128,10 @@ void TextContentModifier::SetDefaultAdaptMinFontSize(const TextStyle& textStyle)
     float fontSizeValue = textStyle.GetFontSize().Value();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
-        fontSizeValue = TextLayoutadapter::TextConvertToPx(textStyle.GetAdaptMinFontSize(),
-            { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+        fontSizeValue = textStyle.GetAdaptMinFontSize().ConvertToPx();
+        if (textStyle.IsAllowScale() && textStyle.GetAdaptMinFontSize().Unit() == DimensionUnit::FP) {
+            fontSizeValue = (textStyle.GetAdaptMinFontSize() * pipelineContext->GetFontScale()).ConvertToPx();
+        }
     }
 
     adaptMinFontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
@@ -135,8 +143,10 @@ void TextContentModifier::SetDefaultAdaptMaxFontSize(const TextStyle& textStyle)
     float fontSizeValue = textStyle.GetFontSize().Value();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
-        fontSizeValue = TextLayoutadapter::TextConvertToPx(textStyle.GetAdaptMaxFontSize(),
-            { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+        fontSizeValue = textStyle.GetAdaptMaxFontSize().ConvertToPx();
+        if (textStyle.IsAllowScale() && textStyle.GetAdaptMaxFontSize().Unit() == DimensionUnit::FP) {
+            fontSizeValue = (textStyle.GetAdaptMaxFontSize() * pipelineContext->GetFontScale()).ConvertToPx();
+        }
     }
 
     adaptMaxFontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
@@ -205,8 +215,7 @@ void TextContentModifier::SetDefaultBaselineOffset(const TextStyle& textStyle)
     float baselineOffset = textStyle.GetBaselineOffset().Value();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
-        baselineOffset = TextLayoutadapter::TextConvertToPx(textStyle.GetBaselineOffset(),
-            { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+        baselineOffset = pipelineContext->NormalizeToPx(textStyle.GetBaselineOffset());
     }
 
     baselineOffsetFloat_ = MakeRefPtr<AnimatablePropertyFloat>(baselineOffset);
@@ -755,8 +764,19 @@ void TextContentModifier::SetFontFamilies(const std::vector<std::string>& value)
 
 void TextContentModifier::SetFontSize(const Dimension& value, TextStyle& textStyle)
 {
-    auto fontSizeValue = TextLayoutadapter::TextConvertToPx(
-        value, { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+    float fontSizeValue;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    if (pipelineContext) {
+        float fontScaleValue = std::clamp(pipelineContext->GetFontScale(), textStyle.GetMinFontScale(),
+            textStyle.GetMaxFontScale());
+        if (value.Unit() == DimensionUnit::FP) {
+            fontSizeValue = value.ConvertToPx() / pipelineContext->GetFontScale() * fontScaleValue;
+        } else {
+            fontSizeValue = value.ConvertToPx();
+        }
+    } else {
+        fontSizeValue = value.Value();
+    }
     fontSize_ = Dimension(fontSizeValue);
     CHECK_NULL_VOID(fontSizeFloat_);
     fontSizeFloat_->Set(fontSizeValue);
@@ -764,8 +784,19 @@ void TextContentModifier::SetFontSize(const Dimension& value, TextStyle& textSty
 
 void TextContentModifier::SetAdaptMinFontSize(const Dimension& value, TextStyle& textStyle)
 {
-    auto fontSizeValue = TextLayoutadapter::TextConvertToPx(
-        value, { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+    float fontSizeValue;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    if (pipelineContext) {
+        float fontScaleValue = std::clamp(pipelineContext->GetFontScale(), textStyle.GetMinFontScale(),
+            textStyle.GetMaxFontScale());
+        if (value.Unit() == DimensionUnit::FP) {
+            fontSizeValue = value.ConvertToPx() / pipelineContext->GetFontScale() * fontScaleValue;
+        } else {
+            fontSizeValue = value.ConvertToPx();
+        }
+    } else {
+        fontSizeValue = value.Value();
+    }
     adaptMinFontSize_ = Dimension(fontSizeValue);
     CHECK_NULL_VOID(adaptMinFontSizeFloat_);
     adaptMinFontSizeFloat_->Set(fontSizeValue);
@@ -773,8 +804,19 @@ void TextContentModifier::SetAdaptMinFontSize(const Dimension& value, TextStyle&
 
 void TextContentModifier::SetAdaptMaxFontSize(const Dimension& value, TextStyle& textStyle)
 {
-    auto fontSizeValue = TextLayoutadapter::TextConvertToPx(
-        value, { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+    float fontSizeValue;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    if (pipelineContext) {
+        float fontScaleValue = std::clamp(pipelineContext->GetFontScale(), textStyle.GetMinFontScale(),
+            textStyle.GetMaxFontScale());
+        if (value.Unit() == DimensionUnit::FP) {
+            fontSizeValue = value.ConvertToPx() / pipelineContext->GetFontScale() * fontScaleValue;
+        } else {
+            fontSizeValue = value.ConvertToPx();
+        }
+    } else {
+        fontSizeValue = value.Value();
+    }
     adaptMaxFontSize_ = Dimension(fontSizeValue);
     CHECK_NULL_VOID(adaptMaxFontSizeFloat_);
     adaptMaxFontSizeFloat_->Set(fontSizeValue);
@@ -925,11 +967,7 @@ bool TextContentModifier::SetTextRace(const MarqueeOption& option)
         auto theme = pipeline->GetTheme<TextTheme>();
         CHECK_NULL_RETURN(theme, true);
         auto fadeoutWidth = theme->GetFadeoutWidth();
-        auto textStyle = textPattern->GetTextStyle();
-        marqueeGradientPercent_ =
-            TextLayoutadapter::TextConvertToPx(
-                fadeoutWidth, { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() }) /
-            contentWidth;
+        marqueeGradientPercent_ = fadeoutWidth.ConvertToPx() / contentWidth;
     }
 
     return true;

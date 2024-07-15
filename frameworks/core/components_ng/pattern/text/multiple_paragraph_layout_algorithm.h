@@ -57,13 +57,11 @@ protected:
         const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const;
     virtual bool CreateParagraph(
         const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper, double maxWidth = 0.0) = 0;
-    void ApplyIndent(ParagraphStyle& paragraphStyle, const RefPtr<Paragraph>& paragraph, double width,
-        const TextStyle& textStyle);
+    void ApplyIndent(ParagraphStyle& paragraphStyle, const RefPtr<Paragraph>& paragraph, double width);
     void ConstructTextStyles(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, TextStyle& textStyle);
     bool ParagraphReLayout(const LayoutConstraintF& contentConstraint);
-    bool UpdateParagraphBySpan(LayoutWrapper* layoutWrapper, ParagraphStyle paraStyle, double maxWidth,
-        const TextStyle& textStyle);
+    bool UpdateParagraphBySpan(LayoutWrapper* layoutWrapper, ParagraphStyle paraStyle, double maxWidth);
     OffsetF SetContentOffset(LayoutWrapper* layoutWrapper);
     std::string SpansToString()
     {
@@ -113,8 +111,7 @@ private:
         TextStyle& textStyle);
 
     void AddImageToParagraph(RefPtr<ImageSpanItem>& imageSpanItem, const RefPtr<LayoutWrapper>& iterItem,
-        const LayoutConstraintF& layoutConstrain, const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength,
-        const TextStyle& textStyle);
+        const LayoutConstraintF& layoutConstrain, const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength);
     void AddPlaceHolderToParagraph(RefPtr<PlaceholderSpanItem>& placeholderSpanItem,
         const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstrain,
         const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength);

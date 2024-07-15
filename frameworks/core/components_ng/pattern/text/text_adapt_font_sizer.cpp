@@ -21,7 +21,6 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/font_manager.h"
-#include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -30,13 +29,17 @@ bool TextAdaptFontSizer::AdaptMaxFontSize(TextStyle& textStyle, const std::strin
 {
     double maxFontSize = 0.0;
     double minFontSize = 0.0;
-    GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint);
+    if (!GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint)) {
+        return false;
+    }
     if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
         // minFontSize or maxFontSize is invalid
         return CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper, false);
     }
     double stepSize = 0.0;
-    GetAdaptFontSizeStep(textStyle, stepSize, stepUnit, contentConstraint);
+    if (!GetAdaptFontSizeStep(textStyle, stepSize, stepUnit, contentConstraint)) {
+        return false;
+    }
     auto maxSize = GetMaxMeasureSize(contentConstraint);
     GetSuitableSize(maxSize, layoutWrapper);
     // Use the minFontSize to layout the paragraph. While using the minFontSize, if the paragraph could be layout in 1
@@ -78,12 +81,16 @@ bool TextAdaptFontSizer::AdaptMinFontSize(TextStyle& textStyle, const std::strin
 {
     double maxFontSize = 0.0;
     double minFontSize = 0.0;
-    GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint);
+    if (!GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint)) {
+        return false;
+    }
     if (LessNotEqual(maxFontSize, minFontSize) || LessOrEqual(minFontSize, 0.0)) {
         return CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper, false);
     }
     double stepSize = 0.0;
-    GetAdaptFontSizeStep(textStyle, stepSize, stepUnit, contentConstraint);
+    if (!GetAdaptFontSizeStep(textStyle, stepSize, stepUnit, contentConstraint)) {
+        return false;
+    }
     auto maxSize = GetMaxMeasureSize(contentConstraint);
     GetSuitableSize(maxSize, layoutWrapper);
     while (GreatOrEqual(maxFontSize, minFontSize)) {
@@ -99,24 +106,45 @@ bool TextAdaptFontSizer::AdaptMinFontSize(TextStyle& textStyle, const std::strin
     return true;
 }
 
-void TextAdaptFontSizer::GetAdaptMaxMinFontSize(
-    const TextStyle& textStyle, double& maxFontSize, double& minFontSize, const LayoutConstraintF& contentConstraint)
+bool TextAdaptFontSizer::GetAdaptMaxMinFontSize(const TextStyle& textStyle, double& maxFontSize, double& minFontSize,
+    const LayoutConstraintF& contentConstraint)
 {
-    maxFontSize = TextLayoutadapter::TextConvertToPx(textStyle.GetAdaptMaxFontSize(),
-        { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
-    minFontSize = TextLayoutadapter::TextConvertToPx(textStyle.GetAdaptMinFontSize(),
-        { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    float fontSacleValue = pipeline->GetFontScale();
+    if (textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
+        fontSacleValue = std::clamp(fontSacleValue, textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+    }
+    if (!textStyle.GetAdaptMaxFontSize().NormalizeToPx(pipeline->GetDipScale(), fontSacleValue,
+        pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), maxFontSize)) {
+        return false;
+    }
+    if (!textStyle.GetAdaptMinFontSize().NormalizeToPx(pipeline->GetDipScale(), fontSacleValue,
+        pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), minFontSize)) {
+        return false;
+    }
+    return true;
 }
 
-void TextAdaptFontSizer::GetAdaptFontSizeStep(
-    const TextStyle& textStyle, double& stepSize, const Dimension& stepUnit, const LayoutConstraintF& contentConstraint)
+bool TextAdaptFontSizer::GetAdaptFontSizeStep(const TextStyle& textStyle, double& stepSize, const Dimension& stepUnit,
+    const LayoutConstraintF& contentConstraint)
 {
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    float fontSacleValue = pipeline->GetFontScale();
+    if (textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
+        fontSacleValue = std::clamp(fontSacleValue, textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+    }
     Dimension step = stepUnit;
     if (GreatNotEqual(textStyle.GetAdaptFontSizeStep().Value(), 0.0)) {
         step = textStyle.GetAdaptFontSizeStep();
     }
-    stepSize = TextLayoutadapter::TextConvertToPx(
-        step, { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+    stepSize = 0.0;
+    if (!step.NormalizeToPx(pipeline->GetDipScale(), fontSacleValue,
+        pipeline->GetLogicScale(), contentConstraint.maxSize.Height(), stepSize)) {
+        return false;
+    }
+    return true;
 }
 
 SizeF TextAdaptFontSizer::GetMaxMeasureSize(const LayoutConstraintF& contentConstraint)
@@ -156,14 +184,15 @@ bool TextAdaptFontSizer::IsNeedAdaptFontSize(const TextStyle& textStyle, const L
 {
     double maxFontSize = 0.0;
     double minFontSize = 0.0;
-    GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint);
+    if (!GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint)) {
+        return false;
+    }
     return IsNeedAdaptFontSize(maxFontSize, minFontSize);
 }
 
-void TextAdaptFontSizer::SetAdaptFontSizeLineHeight(const Dimension& lineHeight, const TextStyle& textStyle)
+void TextAdaptFontSizer::SetAdaptFontSizeLineHeight(const Dimension& lineHeight)
 {
-    lineHeight_ = TextLayoutadapter::TextConvertToPx(
-        lineHeight, { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+    lineHeight_ = lineHeight.ConvertToPx();
 }
 
 bool TextAdaptFontSizer::IsAdaptFontSizeExceedLineHeight(const RefPtr<Paragraph>& paragraph)
