@@ -400,6 +400,27 @@ void SwiperPattern::OnAfterModifyDone()
     }
 }
 
+int32_t SwiperPattern::CheckUserSetIndex(int32_t index)
+{
+    if (!IsAutoLinear()) {
+        return index;
+    }
+
+    if (index < 0 || index >= RealTotalCount()) {
+        index = 0;
+    }
+
+    auto childNode = GetCurrentFrameNode(GetLoopIndex(index));
+    CHECK_NULL_RETURN(childNode, index);
+    auto childLayoutProperty = childNode->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_RETURN(childLayoutProperty, index);
+    if (childLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE) != VisibleType::GONE) {
+        return index;
+    }
+
+    return CheckTargetIndex(index + 1);
+}
+
 void SwiperPattern::BeforeCreateLayoutWrapper()
 {
     auto host = GetHost();
@@ -418,6 +439,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
     CHECK_NULL_VOID(layoutProperty);
     oldIndex_ = currentIndex_;
     auto userSetCurrentIndex = CurrentIndex();
+    userSetCurrentIndex = CheckUserSetIndex(userSetCurrentIndex);
     auto oldIndex = GetLoopIndex(oldIndex_);
     if (oldChildrenSize_.has_value() && oldChildrenSize_.value() != RealTotalCount()) {
         oldIndex = GetLoopIndex(oldIndex_, oldChildrenSize_.value());
@@ -1605,6 +1627,7 @@ void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
         return;
     }
 
+    targetIndex = CheckTargetIndex(targetIndex);
     if (useAnimation) {
         if (GetMaxDisplayCount() > 0) {
             SetIndicatorChangeIndexStatus(true);
