@@ -1240,8 +1240,9 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerDialogView025, TestSize.Level1)
  */
 NG::BorderRadiusProperty getRadius()
 {
+    int calcvalue = 100;
     NG::BorderRadiusProperty radius;
-    CalcDimension radiusCalc(100, static_cast<DimensionUnit>(1));
+    CalcDimension radiusCalc(calcvalue, static_cast<DimensionUnit>(1));
     radius.radiusTopLeft = radiusCalc;
     radius.radiusTopRight = radiusCalc;
     radius.radiusBottomLeft = radiusCalc;
