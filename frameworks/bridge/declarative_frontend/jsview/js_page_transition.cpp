@@ -14,7 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_page_transition.h"
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -167,7 +167,7 @@ void JSPageTransition::JsHandlerOnEnter(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("PageTransition.onEnter");
         func->Execute(type, progress);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
         UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "PageTransition.onEnter");
 #endif
     };
@@ -189,7 +189,7 @@ void JSPageTransition::JsHandlerOnExit(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("PageTransition.onExit");
         func->Execute(type, progress);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
         UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "PageTransition.onExit");
 #endif
     };

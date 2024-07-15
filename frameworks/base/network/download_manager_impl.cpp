@@ -97,7 +97,7 @@ public:
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_USERAGENT, "libcurl-agent/1.0");
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_URL, url.c_str());
 #if !defined(PREVIEW)
-        ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_CAINFO, "/etc/ssl/certs/cacert.pem");
+        ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_CAINFO, "/etc/security/certificates");
 #endif
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_VERBOSE, 1L);
         ACE_CURL_EASY_SET_OPTION(handle.get(), CURLOPT_ERRORBUFFER, errorStr.data());

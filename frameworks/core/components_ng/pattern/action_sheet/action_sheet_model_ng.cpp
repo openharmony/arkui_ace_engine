@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 #include "base/subwindow/subwindow_manager.h"
@@ -50,7 +50,7 @@ void ActionSheetModelNG::ShowActionSheet(const DialogProperties& arg)
         dialog = overlayManager->ShowDialog(arg, nullptr, false);
         CHECK_NULL_VOID(dialog);
     }
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
     UiSessionManager::GetInstance().ReportComponentChangeEvent("onVisibleChange", "show");
 #endif
 }

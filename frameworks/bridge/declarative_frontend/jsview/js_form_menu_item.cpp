@@ -14,7 +14,7 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_menu_item.h"
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -124,7 +124,7 @@ void JSFormMenuItem::JsOnRegClick(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onTap");
         RequestPublishFormWithSnapshot(wantValue, formBindingDataStr, jsCBFunc);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
         JSInteractableView::ReportClickEvent(node);
 #endif
     };
@@ -141,7 +141,7 @@ void JSFormMenuItem::JsOnRegClick(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onClick");
         PipelineContext::SetCallBackNode(node);
         RequestPublishFormWithSnapshot(wantValue, formBindingDataStr, jsCBFunc);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
         JSInteractableView::ReportClickEvent(node);
 #endif
     };

@@ -17,7 +17,7 @@
 
 #include <cstddef>
 #include <string>
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -241,7 +241,7 @@ void JSToggle::OnChange(const JSCallbackInfo& args)
         PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(isOn));
         func->ExecuteJS(1, &newJSVal);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
         UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Toggle.onChange");
 #endif
     };

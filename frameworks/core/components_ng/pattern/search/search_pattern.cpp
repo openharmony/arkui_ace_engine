@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/search/search_pattern.h"
 
 #include <cstdint>
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -667,7 +667,7 @@ void SearchPattern::OnClickButtonAndImage()
     searchEventHub->UpdateSubmitEvent(text);
     // close keyboard and select background color
     textFieldPattern->StopEditing();
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
     if (UiSessionManager::GetInstance().GetSearchEventRegistered()) {
         UiSessionManager::GetInstance().ReportSearchEvent(text);
     }

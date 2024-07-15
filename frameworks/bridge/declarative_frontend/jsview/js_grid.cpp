@@ -14,7 +14,7 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_grid.h"
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -609,7 +609,7 @@ void JSGrid::JsOnGridDrop(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Grid.onItemDrop");
         func->ItemDropExecute(dragInfo, itemIndex, insertIndex, isSuccess);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
         UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Grid.onItemDrop");
 #endif
     };
@@ -690,7 +690,7 @@ void JSGrid::JsOnScrollStop(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onScrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
             UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Grid.onScrollStop");
 #endif
             return;
@@ -753,7 +753,7 @@ void JSGrid::JsOnReachStart(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
             UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Grid.onReachStart");
 #endif
             return;
@@ -768,7 +768,7 @@ void JSGrid::JsOnReachEnd(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
             UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Grid.onReachEnd");
 #endif
             return;
