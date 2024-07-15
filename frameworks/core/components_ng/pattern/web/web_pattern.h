@@ -291,10 +291,7 @@ public:
         return onOpenAppLinkCallback_;
     }
 
-    void SetRenderMode(RenderMode renderMode)
-    {
-        renderMode_ = renderMode;
-    }
+    void SetRenderMode(RenderMode renderMode);
 
     RenderMode GetRenderMode()
     {
@@ -520,7 +517,7 @@ public:
         selectOverlayDragging_ = selectOverlayDragging;
     }
     void UpdateLocale();
-    void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height, bool isNeedReset);
+    void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height);
     void SetSelectPopupMenuShowing(bool showing)
     {
         selectPopupMenuShowing_ = showing;
@@ -549,10 +546,7 @@ public:
     Offset GetDragOffset() const;
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
     void OnScrollState(bool scrollState);
-    void SetLayoutMode(WebLayoutMode mode)
-    {
-        layoutMode_ = mode;
-    }
+    void SetLayoutMode(WebLayoutMode mode);
     WebLayoutMode GetLayoutMode() const
     {
         return layoutMode_;
@@ -717,7 +711,7 @@ private:
     void OnOverScrollModeUpdate(const int32_t value);
     void OnCopyOptionModeUpdate(const int32_t value);
     void OnMetaViewportUpdate(bool value);
-    void OnNativeEmbedModeEnabledUpdate(bool value);
+    void OnNativeEmbedModeEnabledUpdate(bool value) {};
     void OnNativeEmbedRuleTagUpdate(const std::string& tag);
     void OnNativeEmbedRuleTypeUpdate(const std::string& type);
     void OnTextAutosizingUpdate(bool isTextAutosizing);
@@ -759,8 +753,8 @@ private:
     void WebRequestFocus();
     void ResetDragAction();
     void InitSlideUpdateListener();
-    void CalculateHorizontalDrawRect(bool isNeedReset);
-    void CalculateVerticalDrawRect(bool isNeedReset);
+    void CalculateHorizontalDrawRect();
+    void CalculateVerticalDrawRect();
     void InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub);
     bool CheckZoomStatus(const double& curScale);
     bool ZoomOutAndIn(const double& curScale, double& scale);
@@ -876,7 +870,7 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> beginTouchHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle);
     double GetNewScale(double& scale) const;
-    void UpdateSlideOffset(bool isNeedReset = false);
+    void UpdateSlideOffset();
     void ClearKeyEventByKeyCode(int32_t keyCode);
     void SetRotation(uint32_t rotation);
     Color GetSystemColor() const;
@@ -988,6 +982,7 @@ private:
     bool isNeedUpdateScrollAxis_ = true;
     bool isScrollStarted_ = false;
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
+    bool isEmbedModeEnabled_ = false;
     bool scrollState_ = false;
     Axis axis_ = Axis::FREE;
     Axis syncAxis_ = Axis::NONE;
