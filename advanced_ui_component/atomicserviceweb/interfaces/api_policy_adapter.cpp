@@ -14,7 +14,7 @@
  */
 
 #include "api_policy_adapter.h"
-#include <dlfcn.h>
+#include "dlfcn.h"
 
 ApiPolicyAdapter::ApiPolicyAdapter()
 {
