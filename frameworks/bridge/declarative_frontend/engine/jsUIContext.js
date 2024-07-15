@@ -945,9 +945,16 @@ class PromptAction {
             return result_;
         }
         else {
-            let result_ = this.ohos_prompt.openCustomDialog(content.getFrameNode());
-            __JSScopeUtil__.restoreInstanceId();
-            return result_;
+            if (content.builderNode_ === undefined) {
+                let result_ = this.ohos_prompt.openCustomDialog(content);
+                __JSScopeUtil__.restoreInstanceId();
+                return result_;
+            }
+            else {
+                let result_ = this.ohos_prompt.openCustomDialog(content.getFrameNode());
+                __JSScopeUtil__.restoreInstanceId();
+                return result_;
+            }
         }
     }
 
@@ -960,9 +967,15 @@ class PromptAction {
 
     closeCustomDialog(content) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        let result_ = this.ohos_prompt.closeCustomDialog(content.getFrameNode());
-        __JSScopeUtil__.restoreInstanceId();
-        return result_;
+        if (typeof content === 'number') {
+            this.ohos_prompt.closeCustomDialog(content);
+            __JSScopeUtil__.restoreInstanceId();
+        }
+        else {
+            let result_ = this.ohos_prompt.closeCustomDialog(content.getFrameNode());
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        }
     }
 
     showActionMenu(options, callback) {
