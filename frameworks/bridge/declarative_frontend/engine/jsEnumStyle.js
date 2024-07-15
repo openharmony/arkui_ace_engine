@@ -60,11 +60,11 @@ var TextAlign;
 
 var TextDataDetectorType;
 (function (TextDataDetectorType) {
-  TextDataDetectorType[TextDataDetectorType["PHONE_NUMBER"] = 0] = "PHONE_NUMBER";
-  TextDataDetectorType[TextDataDetectorType["URL"] = 1] = "URL";
-  TextDataDetectorType[TextDataDetectorType["EMAIL"] = 2] = "EMAIL";
-  TextDataDetectorType[TextDataDetectorType["ADDRESS"] = 3] = "ADDRESS";
-  TextDataDetectorType[TextDataDetectorType["DATE_TIME"] = 4] = "DATE_TIME";
+  TextDataDetectorType[TextDataDetectorType.PHONE_NUMBER = 0] = 'PHONE_NUMBER';
+  TextDataDetectorType[TextDataDetectorType.URL = 1] = 'URL';
+  TextDataDetectorType[TextDataDetectorType.EMAIL = 2] = 'EMAIL';
+  TextDataDetectorType[TextDataDetectorType.ADDRESS = 3] = 'ADDRESS';
+  TextDataDetectorType[TextDataDetectorType.DATE_TIME = 4] = 'DATE_TIME';
 })(TextDataDetectorType || (TextDataDetectorType = {}));
 
 var DataPanelType;
