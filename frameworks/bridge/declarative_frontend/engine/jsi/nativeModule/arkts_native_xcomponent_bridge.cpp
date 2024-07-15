@@ -24,7 +24,14 @@
 
 namespace OHOS::Ace::NG {
 
-enum ArgIndices{ ARG_FIRST = 0, ARG_ID = 1, ARG_TYPE = 2, ARG_IMAGE_AI_OPTIONS = 3, ARG_LIBRARY_NAME = 4, ARG_CONTROLLER = 5 };
+enum ArgIndices {
+    ARG_FIRST = 0,
+    ARG_ID = 1,
+    ARG_TYPE = 2,
+    ARG_IMAGE_AI_OPTIONS = 3,
+    ARG_LIBRARY_NAME = 4,
+    ARG_CONTROLLER = 5
+};
 
 XComponentType XComponentBridge::ConvertToXComponentType(const std::string& type)
 {
