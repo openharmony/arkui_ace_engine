@@ -735,6 +735,7 @@ private:
     void TriggerEventOnFinish(int32_t nextIndex);
     bool IsVisibleChildrenSizeLessThanSwiper() const;
     void BeforeCreateLayoutWrapper() override;
+    int32_t CheckUserSetIndex(int32_t index);
 
     void SetLazyLoadFeature(bool useLazyLoad);
     void SetLazyForEachLongPredict(bool useLazyLoad) const;
