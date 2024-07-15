@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/toggle/switch_paint_method.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
+#include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -101,6 +102,15 @@ public:
         auto focusPaintcolor = switchTheme->GetActiveColor();
         focusPaintParams.SetPaintColor(focusPaintcolor);
         focusPaintParams.SetFocusPadding(Dimension(2.0_vp));
+        auto theme = pipelineContext->GetTheme<AppTheme>();
+        if (!theme) {
+            return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
+        }
+        if (theme->IsFocusBoxGlow()) {
+            focusPaintParams.SetPaintColor(theme->GetFocusBorderColor());
+            focusPaintParams.SetPaintWidth(theme->GetFocusBorderWidth());
+            focusPaintParams.SetFocusBoxGlow(theme->IsFocusBoxGlow());
+        }
 
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }

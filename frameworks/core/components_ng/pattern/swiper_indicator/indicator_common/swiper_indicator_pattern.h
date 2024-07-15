@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components/theme/app_theme.h"
 namespace OHOS::Ace::NG {
 class SwiperIndicatorPattern : public Pattern {
     DECLARE_ACE_TYPE(SwiperIndicatorPattern, Pattern);
@@ -203,6 +204,15 @@ public:
         FocusPaintParam paintParam;
         paintParam.SetPaintWidth(swiperTheme->GetFocusedBorderWidth());
         paintParam.SetPaintColor(swiperTheme->GetFocusedColor());
+        auto theme = pipelineContext->GetTheme<AppTheme>();
+        if (!theme) {
+            return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, paintParam };
+        }
+        if (theme->IsFocusBoxGlow()) {
+            paintParam.SetPaintColor(theme->GetFocusBorderColor());
+            paintParam.SetPaintWidth(theme->GetFocusBorderWidth());
+            paintParam.SetFocusBoxGlow(theme->IsFocusBoxGlow());
+        }
         return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, paintParam };
     }
 

@@ -26,6 +26,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -866,6 +867,15 @@ FocusPattern RadioPattern::GetFocusPattern() const
     } else {
         auto activeColor = radioTheme->GetActiveColor();
         focusPaintParam.SetPaintColor(activeColor);
+    }
+    auto theme = pipeline->GetTheme<AppTheme>();
+    if (!theme) {
+        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };
+    }
+    if (theme->IsFocusBoxGlow()) {
+        focusPaintParam.SetPaintColor(theme->GetFocusBorderColor());
+        focusPaintParam.SetPaintWidth(theme->GetFocusBorderWidth());
+        focusPaintParam.SetFocusBoxGlow(theme->IsFocusBoxGlow());
     }
     return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };
 }

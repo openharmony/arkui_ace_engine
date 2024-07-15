@@ -29,6 +29,7 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline/base/constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -767,6 +768,15 @@ FocusPattern CheckBoxPattern::GetFocusPattern() const
     auto activeColor = checkBoxTheme->GetActiveColor();
     FocusPaintParam focusPaintParam;
     focusPaintParam.SetPaintColor(activeColor);
+    auto theme = pipeline->GetTheme<AppTheme>();
+    if (!theme) {
+        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };
+    }
+    if (theme->IsFocusBoxGlow()) {
+        focusPaintParam.SetPaintColor(theme->GetFocusBorderColor());
+        focusPaintParam.SetPaintWidth(theme->GetFocusBorderWidth());
+        focusPaintParam.SetFocusBoxGlow(theme->IsFocusBoxGlow());
+    }
     return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };
 }
 
