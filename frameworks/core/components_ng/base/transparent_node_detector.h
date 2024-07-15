@@ -27,8 +27,8 @@ public:
     static TransparentNodeDetector& GetInstance();
     void PostCheckNodeTransparentTask(const RefPtr<FrameNode>& node, uint8_t detectCount);
 private:
-    TransparentNodeDetector();
-    ~TransparentNodeDetector();
+    TransparentNodeDetector() = default;
+    ~TransparentNodeDetector() = default;
     TransparentNodeDetector(const TransparentNodeDetector& instance) = delete;
     const TransparentNodeDetector& operator = (const TransparentNodeDetector& instance) = delete;
 };
