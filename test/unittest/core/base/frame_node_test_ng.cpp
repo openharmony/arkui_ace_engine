@@ -1624,3 +1624,25 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback053, TestSize
     EXPECT_TRUE(FRAME_NODE2->MarkSuggestOpIncGroup(true, true));
 }
 } // namespace OHOS::Ace::NG
+
+/**
+ * @tc.name: FrameNodeTestNg_IsOutOfTouchTestRegionOptionalJudge0054
+ * @tc.desc: Test frame node method IsOutOfTouchTestRegionOptionalJudge
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeIsOutOfTouchTestRegionOptionalJudge0025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. callback IsOutOfTouchTestRegion.
+     * @tc.expected: expect The function return value is true.
+     */
+    PointF pointF;
+    std::vector<RectF> rectF;
+    auto test = FRAME_NODE2->IsOutOfTouchTestRegionOptionalJudge(std::move(pointF), 0);
+    EXPECT_TRUE(test);
+
+    auto test1 = FRAME_NODE2->InResponseRegionList(pointF, rectF);
+    auto test2 = FRAME_NODE2->IsOutOfTouchTestRegionOptionalJudge(std::move(pointF), 0);
+    EXPECT_FALSE(test1);
+    EXPECT_TRUE(test2);
+}
