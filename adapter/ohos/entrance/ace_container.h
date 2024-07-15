@@ -565,7 +565,7 @@ public:
     bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish,
         const std::function<void()>& onUIExtNodeBindingCompleted, bool isNative = true) override;
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
-    void OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& node, std::vector<AbilityBase::PageNodeInfo>& nodeInfos);
+    void OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& frameNode, AbilityBase::ViewData& viewData);
     bool ChangeType(AbilityBase::ViewData& viewData);
     AceAutoFillType PlaceHolderToType(const std::string& onePlaceHolder) override;
 

@@ -171,25 +171,39 @@ std::string ParseTextJsonValue(const std::string& textJson)
 }
 
 const std::map<std::string, AceAutoFillType> NWEB_AUTOFILL_TYPE_TO_ACE = {
+    {OHOS::NWeb::NWEB_AUTOFILL_STREET_ADDRESS, AceAutoFillType::ACE_FULL_STREET_ADDRESS},
+    {OHOS::NWeb::NWEB_AUTOFILL_ADDRESS_LEVEL_3, AceAutoFillType::ACE_DISTRICT_ADDRESS},
+    {OHOS::NWeb::NWEB_AUTOFILL_ADDRESS_LEVEL_2, AceAutoFillType::ACE_CITY_ADDRESS},
+    {OHOS::NWeb::NWEB_AUTOFILL_ADDRESS_LEVEL_1, AceAutoFillType::ACE_PROVINCE_ADDRESS},
+    {OHOS::NWeb::NWEB_AUTOFILL_COUNTRY, AceAutoFillType::ACE_COUNTRY_ADDRESS},
     {OHOS::NWeb::NWEB_AUTOFILL_NAME, AceAutoFillType::ACE_PERSON_FULL_NAME},
     {OHOS::NWeb::NWEB_AUTOFILL_FAMILY_NAME, AceAutoFillType::ACE_PERSON_LAST_NAME},
     {OHOS::NWeb::NWEB_AUTOFILL_GIVEN_NAME, AceAutoFillType::ACE_PERSON_FIRST_NAME},
-    {OHOS::NWeb::NWEB_AUTOFILL_NICKNAME, AceAutoFillType::ACE_NICKNAME},
-    {OHOS::NWeb::NWEB_AUTOFILL_EMAIL, AceAutoFillType::ACE_EMAIL_ADDRESS},
-    {OHOS::NWeb::NWEB_AUTOFILL_STREET_ADDRESS, AceAutoFillType::ACE_FULL_STREET_ADDRESS},
-    {OHOS::NWeb::NWEB_AUTOFILL_ID_CARD_NUMBER, AceAutoFillType::ACE_ID_CARD_NUMBER},
     {OHOS::NWeb::NWEB_AUTOFILL_TEL_NATIONAL, AceAutoFillType::ACE_PHONE_NUMBER},
+    {OHOS::NWeb::NWEB_AUTOFILL_TEL, AceAutoFillType::ACE_FULL_PHONE_NUMBER},
+    {OHOS::NWeb::NWEB_AUTOFILL_TEL_COUNTRY_CODE, AceAutoFillType::ACE_PHONE_COUNTRY_CODE},
+    {OHOS::NWeb::NWEB_AUTOFILL_EMAIL, AceAutoFillType::ACE_EMAIL_ADDRESS},
+    {OHOS::NWeb::NWEB_AUTOFILL_CC_NUMBER, AceAutoFillType::ACE_BANK_CARD_NUMBER},
+    {OHOS::NWeb::NWEB_AUTOFILL_ID_CARD_NUMBER, AceAutoFillType::ACE_ID_CARD_NUMBER},
+    {OHOS::NWeb::NWEB_AUTOFILL_NICKNAME, AceAutoFillType::ACE_NICKNAME},
 };
 
 const std::map<AceAutoFillType, std::string> ACE_AUTOFILL_TYPE_TO_NWEB = {
+    {AceAutoFillType::ACE_FULL_STREET_ADDRESS, OHOS::NWeb::NWEB_AUTOFILL_STREET_ADDRESS},
+    {AceAutoFillType::ACE_DISTRICT_ADDRESS, OHOS::NWeb::NWEB_AUTOFILL_ADDRESS_LEVEL_3},
+    {AceAutoFillType::ACE_CITY_ADDRESS, OHOS::NWeb::NWEB_AUTOFILL_ADDRESS_LEVEL_2},
+    {AceAutoFillType::ACE_PROVINCE_ADDRESS, OHOS::NWeb::NWEB_AUTOFILL_ADDRESS_LEVEL_1},
+    {AceAutoFillType::ACE_COUNTRY_ADDRESS, OHOS::NWeb::NWEB_AUTOFILL_COUNTRY},
     {AceAutoFillType::ACE_PERSON_FULL_NAME, OHOS::NWeb::NWEB_AUTOFILL_NAME},
     {AceAutoFillType::ACE_PERSON_LAST_NAME, OHOS::NWeb::NWEB_AUTOFILL_FAMILY_NAME},
     {AceAutoFillType::ACE_PERSON_FIRST_NAME, OHOS::NWeb::NWEB_AUTOFILL_GIVEN_NAME},
-    {AceAutoFillType::ACE_NICKNAME, OHOS::NWeb::NWEB_AUTOFILL_NICKNAME},
-    {AceAutoFillType::ACE_EMAIL_ADDRESS, OHOS::NWeb::NWEB_AUTOFILL_EMAIL},
-    {AceAutoFillType::ACE_FULL_STREET_ADDRESS, OHOS::NWeb::NWEB_AUTOFILL_STREET_ADDRESS},
-    {AceAutoFillType::ACE_ID_CARD_NUMBER, OHOS::NWeb::NWEB_AUTOFILL_ID_CARD_NUMBER},
     {AceAutoFillType::ACE_PHONE_NUMBER, OHOS::NWeb::NWEB_AUTOFILL_TEL_NATIONAL},
+    {AceAutoFillType::ACE_FULL_PHONE_NUMBER, OHOS::NWeb::NWEB_AUTOFILL_TEL},
+    {AceAutoFillType::ACE_PHONE_COUNTRY_CODE, OHOS::NWeb::NWEB_AUTOFILL_TEL_COUNTRY_CODE},
+    {AceAutoFillType::ACE_EMAIL_ADDRESS, OHOS::NWeb::NWEB_AUTOFILL_EMAIL},
+    {AceAutoFillType::ACE_BANK_CARD_NUMBER, OHOS::NWeb::NWEB_AUTOFILL_CC_NUMBER},
+    {AceAutoFillType::ACE_ID_CARD_NUMBER, OHOS::NWeb::NWEB_AUTOFILL_ID_CARD_NUMBER},
+    {AceAutoFillType::ACE_NICKNAME, OHOS::NWeb::NWEB_AUTOFILL_NICKNAME},
 };
 
 const std::map<std::string, OHOS::NWeb::NWebAutofillEvent> NWEB_AUTOFILL_EVENTS = {
@@ -3303,6 +3317,7 @@ void WebPattern::ParseViewDataNumber(const std::string& key, int32_t value,
     RefPtr<PageNodeInfoWrap> node, RectT<float>& rect, float viewScale)
 {
     CHECK_NULL_VOID(viewScale > 0);
+    CHECK_NULL_VOID(node);
     std::optional<OffsetF> offset = GetCoordinatePoint();
     if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_FOCUS) {
         node->SetIsFocus(static_cast<bool>(value));
@@ -3316,6 +3331,17 @@ void WebPattern::ParseViewDataNumber(const std::string& key, int32_t value,
         rect.SetWidth(value / viewScale);
     } else if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_RECT_H) {
         rect.SetHeight(value / viewScale);
+    }
+}
+
+void ParseViewDataString(const std::string& key,
+    const std::string& value, RefPtr<PageNodeInfoWrap> node)
+{
+    CHECK_NULL_VOID(node);
+    if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_VALUE) {
+        node->SetValue(value);
+    } else if (key == OHOS::NWeb::NWEB_VIEW_DATA_KEY_PLACEHOLDER) {
+        node->SetPlaceholder(value);
     }
 }
 
@@ -3348,9 +3374,7 @@ void WebPattern::ParseNWebViewDataNode(std::unique_ptr<JsonValue> child,
         }
         for (auto child = object->GetChild(); child && !child->IsNull(); child = child->GetNext()) {
             if (child->IsString()) {
-                std::string key = child->GetKey();
-                std::string value = child->GetString();
-                node->SetValue(value);
+                ParseViewDataString(child->GetKey(), child->GetString(), node);
             } else if (child->IsNumber()) {
                 ParseViewDataNumber(child->GetKey(), child->GetInt(), node, rect, viewScale);
             }

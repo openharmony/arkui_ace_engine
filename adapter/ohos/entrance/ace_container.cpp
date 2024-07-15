@@ -101,6 +101,7 @@ constexpr uint32_t DENSITY_KEY = 0b0100;
 constexpr uint32_t POPUPSIZE_HEIGHT = 0;
 constexpr uint32_t POPUPSIZE_WIDTH = 0;
 constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
+constexpr int32_t POPUP_CALCULATE_RATIO = 2;
 
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
@@ -1275,11 +1276,44 @@ public:
             },
             TaskExecutor::TaskType::UI, "ArkUINotifyFillRequestFailed");
     }
+
+    void onPopupConfigWillUpdate(AbilityRuntime::AutoFill::AutoFillCustomConfig& config) override
+    {
+        // Non-native component like web/xcomponent, popup always displayed in the center of the hap
+        // The offset needs to be calculated based on the placement
+        if (isNative_ || !config.targetSize.has_value() || !config.placement.has_value()) {
+            return;
+        }
+        auto node = node_.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto rectf = node->GetRectWithRender();
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "frame rect:%{public}s", rectf.ToString().c_str());
+        AbilityRuntime::AutoFill::PopupOffset offset;
+        AbilityRuntime::AutoFill::PopupPlacement placement = config.placement.value();
+        AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
+        // only support BOTTOM_XXX AND TOP_XXX
+        if (placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM ||
+            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT ||
+            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
+            offset.deltaY = rect_.top + rect_.height +
+                ((size.height + rectf.GetY() - rectf.Height()) / POPUP_CALCULATE_RATIO);
+        } else {
+            offset.deltaY = rect_.top + ((rectf.GetY() - size.height - rectf.Height()) / POPUP_CALCULATE_RATIO);
+        }
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "popup offset.deltaY:%{public}f", offset.deltaY);
+        config.targetOffset = offset;
+    }
+
+    void SetFocusedRect(AbilityBase::Rect rect)
+    {
+        rect_ = rect;
+    }
 private:
     WeakPtr<NG::PipelineContext> pipelineContext_ = nullptr;
     WeakPtr<NG::FrameNode> node_ = nullptr;
     AceAutoFillType autoFillType_ = AceAutoFillType::ACE_UNSPECIFIED;
     bool isNative_ = true;
+    AbilityBase::Rect rect_;
 };
 
 bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
@@ -1297,9 +1331,7 @@ bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
     CHECK_NULL_RETURN(viewDataWrapOhos, false);
     auto viewData = viewDataWrapOhos->GetViewData();
     if (!isNative) {
-        std::vector<AbilityBase::PageNodeInfo> nodeInfos;
-        OverwritePageNodeInfo(node, nodeInfos);
-        viewData.nodes = nodeInfos;
+        OverwritePageNodeInfo(node, viewData);
     }
     AbilityRuntime::AutoFillManager::GetInstance().UpdateCustomPopupUIExtension(autoFillSessionId, viewData);
     return true;
@@ -1364,16 +1396,21 @@ void AceContainer::FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPt
     }
 }
 
-void AceContainer::OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& node,
-    std::vector<AbilityBase::PageNodeInfo>& nodeInfos)
+void AceContainer::OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& frameNode,
+    AbilityBase::ViewData& viewData)
 {
-    std::vector<RefPtr<PageNodeInfoWrap>> infos = node->GetVirtualPageNodeInfo();
+    // Non-native component like web/xcomponent, does not have PageNodeInfo
+    CHECK_NULL_VOID(frameNode);
+    std::vector<AbilityBase::PageNodeInfo> nodeInfos;
+    std::vector<RefPtr<PageNodeInfoWrap>> infos = frameNode->GetVirtualPageNodeInfo();
     for (const auto& info : infos) {
         AbilityBase::PageNodeInfo node;
         node.id = info->GetId();
         node.depth = -1;
         node.autoFillType = static_cast<AbilityBase::AutoFillType>(info->GetAutoFillType());
         node.isFocus = info->GetIsFocus();
+        node.value = info->GetValue();
+        node.placeholder = info->GetPlaceholder();
         NG::RectF rectF = info->GetPageNodeRect();
         node.rect.left = rectF.GetX();
         node.rect.top = rectF.GetY();
@@ -1381,6 +1418,7 @@ void AceContainer::OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& node,
         node.rect.height = rectF.Height();
         nodeInfos.emplace_back(node);
     }
+    viewData.nodes = nodeInfos;
 }
 
 void FillAutoFillCustomConfig(const RefPtr<NG::FrameNode>& node,
@@ -1394,6 +1432,15 @@ void FillAutoFillCustomConfig(const RefPtr<NG::FrameNode>& node,
     customConfig.isShowInSubWindow = false;
     customConfig.nodeId = node->GetId();
     customConfig.isEnableArrow = false;
+}
+
+void GetFocusedElementRect(const AbilityBase::ViewData& viewData, AbilityBase::Rect& rect)
+{
+    for (const auto& info : viewData.nodes) {
+        if (info.isFocus) {
+            rect = info.rect;
+        }
+    }
 }
 
 bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
@@ -1424,9 +1471,10 @@ bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFil
         return true;
     }
     if (!isNative) {
-        std::vector<AbilityBase::PageNodeInfo> nodeInfos;
-        OverwritePageNodeInfo(node, nodeInfos);
-        viewData.nodes = nodeInfos;
+        OverwritePageNodeInfo(node, viewData);
+        AbilityBase::Rect rect;
+        GetFocusedElementRect(viewData, rect);
+        callback->SetFocusedRect(rect);
     }
     AbilityRuntime::AutoFill::AutoFillCustomConfig customConfig;
     FillAutoFillCustomConfig(node, customConfig);
@@ -1509,9 +1557,7 @@ bool AceContainer::RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std:
     CHECK_NULL_RETURN(viewDataWrapOhos, false);
     auto viewData = viewDataWrapOhos->GetViewData();
     if (!isNative) {
-        std::vector<AbilityBase::PageNodeInfo> nodeInfos;
-        OverwritePageNodeInfo(node, nodeInfos);
-        viewData.nodes = nodeInfos;
+        OverwritePageNodeInfo(node, viewData);
     }
     AbilityRuntime::AutoFill::AutoFillRequest autoFillRequest;
     autoFillRequest.viewData = viewData;
