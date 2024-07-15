@@ -1829,7 +1829,6 @@ void SwiperPattern::StopFadeAnimation()
 {
     AnimationUtils::StopAnimation(fadeAnimation_);
     if (fadeAnimationIsRunning_) {
-        LOGI("ZTE reset fade");
         fadeAnimationIsRunning_ = false;
     }
 }

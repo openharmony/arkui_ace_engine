@@ -170,7 +170,7 @@ private:
 
     bool isFixedNestedScrollMode_ = false;
     bool isSearchRefresh_ = true;
-    bool isNestedInterrupt_ = false; // nested scroll interrupted by change of nested mode 
+    bool isNestedInterrupt_ = false; // nested scroll interrupted by change of nested mode
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLLABLE_NESTABLE_SCROLL_CONTAINER_H
