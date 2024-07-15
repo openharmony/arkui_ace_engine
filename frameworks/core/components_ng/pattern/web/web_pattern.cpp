@@ -211,6 +211,7 @@ constexpr double ZOOMIN_SMOOTH_SCALE = 0.99;
 constexpr char ACCESSIBILITY_GENERIC_CONTAINER[] = "genericContainer";
 constexpr char ACCESSIBILITY_IMAGE[] = "image";
 constexpr char ACCESSIBILITY_PARAGRAPH[] = "paragraph";
+constexpr char WEB_NODE_URL[] = "url";
 
 #define WEB_ACCESSIBILITY_DELAY_TIME 100
 
@@ -5094,6 +5095,7 @@ void WebPattern::WebNodeInfoToJsonValue(std::shared_ptr<OHOS::Ace::JsonValue>& j
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> webNodeInfo, std::string& nodeTag)
 {
     auto jsonNode = JsonUtil::Create(true);
+    jsonNode->Put(WEB_NODE_URL, delegate_ ? delegate_->GetUrl().c_str() : "");
     jsonNode->Put(EnumTypeToString(WebAccessibilityType::ID).c_str(), webNodeInfo->GetAccessibilityId());
     if (webNodeInfo->GetSelectionEnd() != 0) {
         jsonNode->Put(EnumTypeToString(WebAccessibilityType::SEL_START).c_str(), webNodeInfo->GetSelectionStart());
