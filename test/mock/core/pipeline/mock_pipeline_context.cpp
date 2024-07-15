@@ -509,8 +509,14 @@ void PipelineContext::AddNavigationNode(int32_t pageId, WeakPtr<UINode> navigati
 
 void PipelineContext::RemoveNavigationNode(int32_t pageId, int32_t nodeId) {}
 void PipelineContext::FirePageChanged(int32_t pageId, bool isOnShow) {}
-void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) {};
-void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) {};
+void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea)
+{
+    safeAreaManager_->UpdateSystemSafeArea(systemSafeArea);
+}
+void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
+{
+    safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea);
+}
 void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) {};
 void PipelineContext::SetEnableKeyBoardAvoidMode(bool value) {};
 bool PipelineContext::IsEnableKeyBoardAvoidMode()
