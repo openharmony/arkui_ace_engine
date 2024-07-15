@@ -48,7 +48,7 @@ const std::unordered_map<std::string, TextDataDetectType> TEXT_DETECT_MAP_REVERS
 };
 
 bool DataDetectorAdapter::ShowUIExtensionMenu(
-    const AISpan& aiSpan, NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode)
+    const AISpan& aiSpan, NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode, bool isShowSelectText)
 {
     ModalUIExtensionCallbacks callbacks;
     callbacks.onResult = [onClickMenu = onClickMenu_](int32_t code, const AAFwk::Want& want) {
@@ -69,6 +69,7 @@ bool DataDetectorAdapter::ShowUIExtensionMenu(
     };
     AAFwk::Want want;
     want.SetElementName(uiExtensionBundleName_, uiExtensionAbilityName_);
+    want.SetParam("isShowSelectText", isShowSelectText);
     SetWantParamaters(aiSpan, want);
 
     uiExtNode_ = NG::UIExtensionModelNG::Create(want, callbacks);

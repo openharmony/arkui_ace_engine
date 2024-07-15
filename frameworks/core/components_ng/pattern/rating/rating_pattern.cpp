@@ -128,19 +128,19 @@ void RatingPattern::OnImageLoadSuccess(int32_t imageFlag)
         foregroundImageCanvas_ = foregroundImageLoadingCtx_->MoveCanvasImage();
         foregroundConfig_.srcRect_ = foregroundImageLoadingCtx_->GetSrcRect();
         foregroundConfig_.dstRect_ = foregroundImageLoadingCtx_->GetDstRect();
-        imageSuccessStateCode_ = std::uint32_t(imageFlag) | std::uint32_t(imageSuccessStateCode_);
+        imageSuccessStateCode_ |= static_cast<uint32_t>(imageFlag);
     }
     if (imageFlag == 0b010) {
         secondaryImageCanvas_ = secondaryImageLoadingCtx_->MoveCanvasImage();
         secondaryConfig_.srcRect_ = secondaryImageLoadingCtx_->GetSrcRect();
         secondaryConfig_.dstRect_ = secondaryImageLoadingCtx_->GetDstRect();
-        imageSuccessStateCode_ = std::uint32_t(imageFlag) | std::uint32_t(imageSuccessStateCode_);
+        imageSuccessStateCode_ |= static_cast<uint32_t>(imageFlag);
     }
     if (imageFlag == 0b100) {
         backgroundImageCanvas_ = backgroundImageLoadingCtx_->MoveCanvasImage();
         backgroundConfig_.srcRect_ = backgroundImageLoadingCtx_->GetSrcRect();
         backgroundConfig_.dstRect_ = backgroundImageLoadingCtx_->GetDstRect();
-        imageSuccessStateCode_ = std::uint32_t(imageFlag) | std::uint32_t(imageSuccessStateCode_);
+        imageSuccessStateCode_ |= static_cast<uint32_t>(imageFlag);
     }
     // only when foreground, secondary and background image are all loaded successfully, mark dirty to update rendering.
     if (imageSuccessStateCode_ == RATING_IMAGE_SUCCESS_CODE) {
@@ -150,7 +150,7 @@ void RatingPattern::OnImageLoadSuccess(int32_t imageFlag)
 
 void RatingPattern::OnImageDataReady(int32_t imageFlag)
 {
-    imageReadyStateCode_ = std::uint32_t(imageReadyStateCode_) | std::uint32_t(imageFlag);
+    imageReadyStateCode_ |= static_cast<uint32_t>(imageFlag);;
 
     // 3 images are ready, invoke to update layout to calculate single star size.
     if (imageReadyStateCode_ == RATING_IMAGE_SUCCESS_CODE) {

@@ -439,6 +439,9 @@ class UIContext {
 
     getAtomicServiceBar() {
         const bundleMgr = globalThis.requireNapi('bundle.bundleManager');
+        if (!bundleMgr || !bundleMgr.BundleFlag) {
+            return undefined;
+        }
         let data = bundleMgr.getBundleInfoForSelfSync(bundleMgr.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
         if (data.appInfo.bundleType == 1) {
             this.atomServiceBar = new AtomicServiceBar(this.instanceId_);
@@ -491,7 +494,7 @@ class UIContext {
             __JSScopeUtil__.restoreInstanceId();
             return null;
         }
-        let xNode = globalThis.requireNapi('arkui.node');
+        let xNode = globalThis.__getArkUINode__();
         let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
         if (!node) {
             node = xNode.FrameNodeUtils.createFrameNode(this, nodePtr);
@@ -503,7 +506,7 @@ class UIContext {
     getFrameNodeByNodeId(id) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let nodePtr = getUINativeModule().getFrameNodeById(id);
-        let xNode = globalThis.requireNapi('arkui.node');
+        let xNode = globalThis.__getArkUINode__();
         let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
         if (!node) {
             node = xNode.FrameNodeUtils.createFrameNode(this, nodePtr);
@@ -519,7 +522,7 @@ class UIContext {
             __JSScopeUtil__.restoreInstanceId();
             return null;
         }
-        let xNode = globalThis.requireNapi('arkui.node');
+        let xNode = globalThis.__getArkUINode__();
         let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
         if (!node) {
             node = xNode.FrameNodeUtils.createFrameNode(this, nodePtr);
@@ -905,6 +908,19 @@ class PromptAction {
     showToast(options) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.ohos_prompt.showToast(options);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    openToast(options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let promise = this.ohos_prompt.openToast(options);
+        __JSScopeUtil__.restoreInstanceId();
+        return promise;
+    }
+
+    closeToast(toastId) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_prompt.closeToast(toastId);
         __JSScopeUtil__.restoreInstanceId();
     }
 

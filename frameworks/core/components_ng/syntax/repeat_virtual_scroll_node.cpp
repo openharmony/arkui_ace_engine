@@ -323,7 +323,7 @@ int32_t RepeatVirtualScrollNode::GetFrameNodeIndex(const RefPtr<FrameNode>& node
     return caches_.GetFrameNodeIndex(node);
 }
 
-const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildren() const
+const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildren(bool /*notDetach*/) const
 {
     if (!children_.empty()) {
         TAG_LOGD(AceLogTag::ACE_REPEAT, "GetChildren just returns non-empty children_");
@@ -358,7 +358,7 @@ void RepeatVirtualScrollNode::RecycleItems(int32_t from, int32_t to)
     offscreenItems_.from = from;
     offscreenItems_.to = to;
     for (auto i = from; i < to; i++) {
-        if (i >= startIndex_ && i < startIndex_ + totalCount_) {
+        if (i >= startIndex_ && i < startIndex_ + static_cast<int32_t>(totalCount_)) {
             caches_.RecycleItemsByIndex(i - startIndex_);
         }
     }

@@ -907,7 +907,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentGetLibraryNameTest020, TestSize.Lev
      * @tc.expected: result == ""
      */
     auto result = xComponent.GetLibraryName();
-    EXPECT_EQ(result, "");
+    EXPECT_EQ(result, std::nullopt);
 }
 
 /**

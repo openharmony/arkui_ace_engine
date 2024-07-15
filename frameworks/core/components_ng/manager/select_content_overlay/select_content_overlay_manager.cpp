@@ -255,6 +255,7 @@ void SelectContentOverlayManager::UpdateExistOverlay(const SelectOverlayInfo& in
             menuPattern->SetSelectInfo(info.selectText);
         }
         menuPattern->UpdateMenuInfo(info.menuInfo);
+        menuPattern->UpdateViewPort(info.ancestorViewPort);
     }
     // update handle node
     auto handlePattern = GetSelectHandlePattern(WeakClaim(this));
@@ -347,11 +348,16 @@ void SelectContentOverlayManager::MarkInfoChange(SelectOverlayDirtyFlag dirty)
             selectOverlayHolder_->OnUpdateMenuInfo(menuInfo, DIRTY_COPY_ALL_ITEM);
             auto oldMenuInfo = menuPattern->GetSelectMenuInfo();
             oldMenuInfo.showCopyAll = menuInfo.showCopyAll;
+            oldMenuInfo.showCopy = menuInfo.showCopy;
             menuPattern->UpdateSelectMenuInfo(oldMenuInfo);
         }
         if ((dirty & DIRTY_SELECT_TEXT) == DIRTY_SELECT_TEXT) {
             auto selectedInfo = selectOverlayHolder_->GetSelectedText();
             menuPattern->SetSelectInfo(selectedInfo);
+        }
+        if ((dirty & DIRTY_VIEWPORT) == DIRTY_VIEWPORT) {
+            auto viewPort = selectOverlayHolder_->GetAncestorNodeViewPort();
+            menuPattern->UpdateViewPort(viewPort);
         }
     }
     UpdateHandleInfosWithFlag(dirty);
@@ -962,15 +968,4 @@ bool SelectContentOverlayManager::IsTouchAtHandle(const PointF& localPoint, cons
     }
     return selectOverlayNode->IsInSelectedOrSelectOverlayArea(globalPoint);
 }
-
-void SelectContentOverlayManager::UpdateViewPort()
-{
-    auto menuNode = menuNode_.Upgrade();
-    CHECK_NULL_VOID(menuNode);
-    CHECK_NULL_VOID(selectOverlayHolder_);
-    CHECK_NULL_VOID(shareOverlayInfo_);
-    shareOverlayInfo_->ancestorViewPort = selectOverlayHolder_->GetAncestorNodeViewPort();
-    menuNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-}
-
 } // namespace OHOS::Ace::NG

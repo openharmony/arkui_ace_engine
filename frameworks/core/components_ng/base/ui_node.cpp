@@ -1021,10 +1021,10 @@ bool UINode::IsNeedExportTexture() const
     return exportTextureInfo_ && exportTextureInfo_->GetCurrentRenderType() == NodeRenderType::RENDER_TYPE_TEXTURE;
 }
 
-void UINode::SetActive(bool active)
+void UINode::SetActive(bool active, bool needRebuildRenderContext)
 {
     for (const auto& child : GetChildren()) {
-        child->SetActive(active);
+        child->SetActive(active, needRebuildRenderContext);
     }
 }
 

@@ -14,7 +14,7 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_scroll.h"
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -270,7 +270,7 @@ void JSScroll::OnScrollEdgeCallback(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto params = ConvertToJSValues(side);
             func->Call(JSRef<JSObject>(), 1, params.data());
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onScrollEdge");
 #endif
         };
@@ -285,7 +285,7 @@ void JSScroll::OnScrollEndCallback(const JSCallbackInfo& args)
         auto scrollEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             func->Call(JSRef<JSObject>(), 0, nullptr);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onScrollEnd");
 #endif
         };

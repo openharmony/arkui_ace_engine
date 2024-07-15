@@ -461,7 +461,7 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
         return HandleCaretWhenEmpty(result);
     }
     if (static_cast<size_t>(extent) > GetParagraphLength()) {
-        extent = GetParagraphLength();
+        extent = static_cast<int32_t>(GetParagraphLength());
     }
 
     extent = AdjustIndexForEmoji(extent);
@@ -499,7 +499,7 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
         boxes = paragrah->GetRectsForRange(
             prev, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
-        boxes = paragrah->GetTextRectsByBoundary(prev, extent,
+        boxes = paragrah->GetTextRectsByBoundary(prev, static_cast<size_t>(extent),
             needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM : Rosen::TextRectHeightStyle::TIGHT,
             Rosen::TextRectWidthStyle::TIGHT);
 #endif

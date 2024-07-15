@@ -152,6 +152,14 @@ class ModifierWithKey {
     }
     return false;
   }
+  applyStageImmediately(node, component) {
+    this.value = this.stageValue;
+    if (this.stageValue === undefined || this.stageValue === null) {
+      this.applyPeer(node, true, component);
+      return;
+    }
+    this.applyPeer(node, false, component);
+  }
   applyPeer(node, reset, component) { }
   checkObjectDiff() {
     return true;
@@ -2400,6 +2408,23 @@ class DragPreviewOptionsModifier extends ModifierWithKey {
   }
 }
 DragPreviewOptionsModifier.identity = Symbol('dragPreviewOptions');
+class DragPreviewModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetDragPreview(node);
+    } else {
+      getUINativeModule().common.setDragPreview(node, this.value.inspetorId);
+    }
+  }
+
+  checkObjectDiff() {
+    return this.value.inspetorId !== this.stageValue.inspetorId;
+  }
+}
+DragPreviewModifier.identity = Symbol('dragPreview');
 class MouseResponseRegionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -2880,7 +2905,7 @@ function parseWithDefaultNumber(val, defaultValue) {
   else { return defaultValue; }
 }
 function modifierWithKey(modifiers, identity, modifierClass, value) {
-  if (typeof modifiers.isFrameNode === "function" && modifiers.isFrameNode()) {
+  if (typeof modifiers.isFrameNode === 'function' && modifiers.isFrameNode()) {
     if (!modifierClass.instance) {
       modifierClass.instance = new modifierClass(value);
     }
@@ -2945,7 +2970,7 @@ class ObservedMap {
       return 'ObservedMapTag';
   }
   setFrameNode(isFrameNode) {
-    this.isFrameNode_ = isFrameNode
+    this.isFrameNode_ = isFrameNode;
   }
   isFrameNode() {
     return this.isFrameNode_;
@@ -2967,7 +2992,7 @@ class ArkComponent {
         if (this.nativePtr !== -1) {
           __JSScopeUtil__.syncInstanceId(this._instanceId);
         }
-        value.applyStage(this.nativePtr, this);
+        value.applyStageImmediately(this.nativePtr, this);
         getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
         if (this._instanceId !== -1) {
           __JSScopeUtil__.restoreInstanceId();
@@ -3910,6 +3935,12 @@ class ArkComponent {
     return this;
   }
   dragPreview(value) {
+    if (typeof value === 'string') {
+      let arkDragPreview = new ArkDragPreview();
+      arkDragPreview.inspetorId = value;
+      modifierWithKey(this._modifiersWithKeys, DragPreviewModifier.identity, DragPreviewModifier, arkDragPreview);
+      return this;
+    }
     throw new Error('Method not implemented.');
   }
   overlay(value, options) {
@@ -4444,6 +4475,9 @@ function attributeModifierFunc(modifier, componentBuilder, modifierBuilder) {
       component.applyModifierPatch();
     } else {
       modifier.attribute.applyStateUpdatePtr(component);
+      if (modifier.attribute._nativePtrChanged) {
+        modifier.onComponentChanged(modifier.attribute);
+      }
       modifier.attribute.applyNormalAttribute(component);
       applyUIAttributes(modifier, nativeNode, component);
       component.applyModifierPatch();
@@ -6334,7 +6368,7 @@ class ImageBorderModifier extends ModifierWithKey {
       let rightColor;
       let topColor;
       let bottomColor;
-      if (!isUndefined(this.value.color) && this.value.color != null) {
+      if (!isUndefined(this.value.color) && this.value.color !== null) {
         if (isNumber(this.value.color) || isString(this.value.color) || isResource(this.value.color)) {
           leftColor = this.value.color;
           rightColor = this.value.color;
@@ -6351,7 +6385,7 @@ class ImageBorderModifier extends ModifierWithKey {
       let topRight;
       let bottomLeft;
       let bottomRight;
-      if (!isUndefined(this.value.radius) && this.value.radius != null) {
+      if (!isUndefined(this.value.radius) && this.value.radius !== null) {
         if (isNumber(this.value.radius) || isString(this.value.radius) || isResource(this.value.radius)) {
           topLeft = this.value.radius;
           topRight = this.value.radius;
@@ -6368,7 +6402,7 @@ class ImageBorderModifier extends ModifierWithKey {
       let styleRight;
       let styleBottom;
       let styleLeft;
-      if (!isUndefined(this.value.style) && this.value.style != null) {
+      if (!isUndefined(this.value.style) && this.value.style !== null) {
         if (isNumber(this.value.style) || isString(this.value.style) || isResource(this.value.style)) {
           styleTop = this.value.style;
           styleRight = this.value.style;
@@ -10374,6 +10408,46 @@ class TextMaxFontSizeModifier extends ModifierWithKey {
   }
 }
 TextMaxFontSizeModifier.identity = Symbol('textMaxFontSize');
+class TextMinFontScaleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetMinFontScale(node);
+    }
+    else if (!isNumber(this.value) && !isResource(this.value)) {
+      getUINativeModule().text.resetMinFontScale(node);
+    }
+    else {
+      getUINativeModule().text.setMinFontScale(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextMinFontScaleModifier.identity = Symbol('textMinFontScale');
+class TextMaxFontScaleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetMaxFontScale(node);
+    }
+    else if (!isNumber(this.value) && !isResource(this.value)) {
+      getUINativeModule().text.resetMaxFontScale(node);
+    }
+    else {
+      getUINativeModule().text.setMaxFontScale(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextMaxFontScaleModifier.identity = Symbol('textMaxFontScale');
 class TextLineHeightModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -10833,6 +10907,14 @@ class ArkTextComponent extends ArkComponent {
   }
   maxFontSize(value) {
     modifierWithKey(this._modifiersWithKeys, TextMaxFontSizeModifier.identity, TextMaxFontSizeModifier, value);
+    return this;
+  }
+  minFontScale(value) {
+    modifierWithKey(this._modifiersWithKeys, TextMinFontScaleModifier.identity, TextMinFontScaleModifier, value);
+    return this;
+  }
+  maxFontScale(value) {
+    modifierWithKey(this._modifiersWithKeys, TextMaxFontScaleModifier.identity, TextMaxFontScaleModifier, value);
     return this;
   }
   fontStyle(value) {
@@ -15100,6 +15182,16 @@ class ArkDragPreviewOptions {
       this.isMultiSelectionEnabled === another.isMultiSelectionEnabled &&
       this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting
     );
+  }
+}
+
+class ArkDragPreview {
+  constructor() {
+    this.inspectorId = undefined;
+  }
+
+  isEqual(another) {
+    return this.inspectorId === another.inspectorId;
   }
 }
 
@@ -28347,3 +28439,12 @@ if (globalThis.ContainerSpan !== undefined) {
     });
   };
 }
+
+function __getArkUINode__() {
+  if(globalThis.__XNode__ === undefined) {
+      globalThis.__XNode__ = globalThis.requireNapi('arkui.node');
+  }
+  return globalThis.__XNode__;
+}
+
+globalThis.__getArkUINode__ = __getArkUINode__;

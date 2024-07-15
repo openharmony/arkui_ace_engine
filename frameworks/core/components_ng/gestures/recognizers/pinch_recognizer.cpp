@@ -64,6 +64,7 @@ void PinchRecognizer::OnAccepted()
         node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
     ResSchedReport::GetInstance().ResSchedDataReport("click");
     refereeState_ = RefereeState::SUCCEED;
+    isLastPinchFinished_ = false;
     SendCallbackMsg(onActionStart_);
 }
 
@@ -140,6 +141,9 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     if (fingersId_.find(event.id) != fingersId_.end()) {
         fingersId_.erase(event.id);
+    }
+    if (fingersId_.empty()) {
+        isLastPinchFinished_ = true;
     }
     if (!IsActiveFinger(event.id)) {
         return;
@@ -226,7 +230,11 @@ void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
                 Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
                 return;
             }
-            Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
+            if (!isLastPinchFinished_) {
+                OnAccepted();
+            } else {
+                Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
+            }
         }
     } else if (refereeState_ == RefereeState::SUCCEED) {
         scale_ = currentDev_ / initialDev_;
@@ -375,7 +383,13 @@ Offset PinchRecognizer::ComputePinchCenter()
 void PinchRecognizer::OnResetStatus()
 {
     MultiFingersRecognizer::OnResetStatus();
+    distance_ = 0.0;
+    initialDev_ = 0.0;
+    currentDev_ = 0.0;
+    scale_ = 1.0;
+    isFlushTouchEventsEnd_ = false;
     isPinchEnd_ = false;
+    isLastPinchFinished_ = true;
 }
 
 void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)

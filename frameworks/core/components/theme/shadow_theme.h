@@ -69,8 +69,9 @@ public:
         Shadow ParseShadowParam(
             const RefPtr<ThemeStyle>& themeStyle, ShadowStyle shadowStyle, const std::string& name, bool isDark)
         {
+            // shadow_style_floating_sm_shadow prefix + name +
             const std::string prefix = std::string("shadow_style_") + name;
-            const char* attrs[] = { "_shadow", "_offset_x", "_offset_y", "_color" };
+            const char* attrs[] = { "_shadow", "_offset_x", "_offset_y", "_color", "_radius" };
             const std::string suffix = isDark ? "_dark" : "";
 
             Shadow shadow;
@@ -86,8 +87,12 @@ public:
 
             auto colorName = prefix + std::string(attrs[3]) + suffix;
             auto color = themeStyle->GetAttr<Color>(colorName, Color());
-            
-            return Shadow(elevation, offset, color, shadowStyle);
+            auto radiusName =  prefix + std::string(attrs[4]) + suffix;
+            auto radius  =  themeStyle->GetAttr<double>(radiusName, 0.0);
+            if (radius != 0.0) {
+                return Shadow(radius, offset, color, shadowStyle);
+            }
+            return Shadow(static_cast<float>(elevation), offset, color, shadowStyle);
         }
     };
     ~ShadowTheme() override = default;

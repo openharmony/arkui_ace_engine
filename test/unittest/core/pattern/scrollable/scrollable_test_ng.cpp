@@ -1966,4 +1966,37 @@ HWTEST_F(ScrollableTestNg, InitMouseEvent001, TestSize.Level1)
     };
     EXPECT_FALSE(scrollPn->isMousePressed_);
 }
+
+/**
+ * @tc.name: SetEdgeEffect001
+ * @tc.desc: Test SetEdgeEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, SetEdgeEffect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize ScrollablePattern type pointer and set EdgeEffect to Spring.
+     * @tc.expected: spring animation is running.
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    scrollPn->SetEdgeEffect(EdgeEffect::SPRING);
+    auto scrollableEvent = scrollPn->GetScrollableEvent();
+    auto scrollable = scrollableEvent->GetScrollable();
+    scrollable->isSpringAnimationStop_ = false;
+    EXPECT_TRUE(scrollable->IsSpringMotionRunning());
+
+    /**
+     * @tc.steps: step2. set EdgeEffect to Spring.
+     * @tc.expected: spring animation is running.
+     */
+    scrollPn->SetEdgeEffect(EdgeEffect::SPRING);
+    EXPECT_TRUE(scrollable->IsSpringMotionRunning());
+
+    /**
+     * @tc.steps: step3. set EdgeEffect to None.
+     * @tc.expected: spring animation is stopped.
+     */
+    scrollPn->SetEdgeEffect(EdgeEffect::NONE);
+    EXPECT_FALSE(scrollable->IsSpringMotionRunning());
+}
 } // namespace OHOS::Ace::NG

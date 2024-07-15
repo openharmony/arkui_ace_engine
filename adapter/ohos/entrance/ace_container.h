@@ -44,7 +44,6 @@
 #include "core/common/router_recover_record.h"
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/pipeline_context.h"
-#include "interfaces/inner_api/ace/constants.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -178,16 +177,6 @@ public:
     RefPtr<PlatformResRegister> GetPlatformResRegister() const override
     {
         return resRegister_;
-    }
-
-    UIContentType GetUIContentType() const
-    {
-        return uIContentType_;
-    }
-
-    void SetUIContentType(UIContentType uIContentType)
-    {
-        uIContentType_ = uIContentType;
     }
 
     RefPtr<PipelineBase> GetPipelineContext() const override
@@ -449,8 +438,6 @@ public:
     static sptr<OHOS::Rosen::Window> GetUIWindow(int32_t instanceId);
     static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);
     static OHOS::AbilityRuntime::Context* GetRuntimeContext(int32_t instanceId);
-    static void SetFontScale(int32_t instanceId, float fontScale);
-    static void SetFontWeightScale(int32_t instanceId, float fontScale);
     static void SetWindowStyle(int32_t instanceId, WindowModal windowModal, ColorScheme colorScheme);
     static std::pair<RouterRecoverRecord, UIContentErrorCode> RestoreRouterStack(
         int32_t instanceId, const std::string& contentInfo, ContentInfoType type);
@@ -458,6 +445,7 @@ public:
 
     static RefPtr<AceContainer> GetContainer(int32_t instanceId);
     static bool UpdatePage(int32_t instanceId, int32_t pageId, const std::string& content);
+    static bool RemoveOverlayBySubwindowManager(int32_t instanceId);
 
     // ArkTsCard
     static std::shared_ptr<Rosen::RSSurfaceNode> GetFormSurfaceNode(int32_t instanceId);
@@ -571,8 +559,11 @@ public:
     bool GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
         int32_t& sourceTool, StopDragCallback&& stopDragCallback) override;
 
+    bool GetCurPointerEventSourceType(int32_t& sourceType) override;
+
     bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
         bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId) override;
+    bool IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType) override;
     bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish,
         const std::function<void()>& onUIExtNodeBindingCompleted) override;
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
@@ -743,7 +734,6 @@ private:
     mutable std::mutex cardTokensMutex_;
 
     std::string webHapPath_;
-    UIContentType uIContentType_ = UIContentType::UNDEFINED;
 
     bool installationFree_ = false;
     SharePanelCallback sharePanelCallback_ = nullptr;

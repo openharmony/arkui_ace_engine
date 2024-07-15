@@ -1,0 +1,3 @@
+export const useEnabled = <T>(enabled: boolean, value: T, defaultValue: T | undefined = undefined) => {
+  return enabled ? value : defaultValue;
+}

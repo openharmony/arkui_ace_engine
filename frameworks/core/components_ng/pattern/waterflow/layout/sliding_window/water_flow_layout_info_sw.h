@@ -149,10 +149,18 @@ public:
      * @return maximum end position of items in lanes_.
      */
     float EndPos() const;
+    inline float EndPosWithMargin() const
+    {
+        return EndPos() + BotMargin();
+    }
     /**
      * @return minimum start position of items in lanes_.
      */
     float StartPos() const;
+    inline float StartPosWithMargin() const
+    {
+        return StartPos() - TopMargin();
+    }
 
     void ClearDataFrom(int32_t idx, const std::vector<float>& mainGap);
 

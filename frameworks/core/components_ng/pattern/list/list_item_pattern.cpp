@@ -201,6 +201,8 @@ void ListItemPattern::OnDidPop()
     if (endNodeIndex_ >= 0 && endNodeIndex_ < childNodeIndex_) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
+        auto childNode = host->GetChildAtIndex(childNodeIndex_);
+        CHECK_NULL_VOID(childNode);
         auto endNode = host->GetChildAtIndex(endNodeIndex_);
         CHECK_NULL_VOID(endNode);
         endNode->MovePosition(-1);

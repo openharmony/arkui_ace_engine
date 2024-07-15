@@ -393,6 +393,9 @@ class JSBuilderNode extends BaseNode {
         this.updateNodePtr(nodePtr);
         this.updateInstanceId(instanceId);
     }
+    observeRecycleComponentCreation(name, recycleUpdateFunc) {
+        throw new Error('custom component in @Builder used by BuilderNode does not support @Reusable');
+    }
 }
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
@@ -425,6 +428,9 @@ class NodeAdapter {
         this.nativePtr_ = null;
     }
     set totalNodeCount(count) {
+        if (count < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.setTotalNodeCount(this.nativePtr_, count);
         this.count_ = count;
     }
@@ -435,15 +441,27 @@ class NodeAdapter {
         getUINativeModule().nodeAdapter.notifyItemReloaded(this.nativePtr_);
     }
     reloadItem(start, count) {
+        if (start < 0 || count < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.notifyItemChanged(this.nativePtr_, start, count);
     }
     removeItem(start, count) {
+        if (start < 0 || count < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.notifyItemRemoved(this.nativePtr_, start, count);
     }
     insertItem(start, count) {
+        if (start < 0 || count < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.notifyItemInserted(this.nativePtr_, start, count);
     }
     moveItem(from, to) {
+        if (from < 0 || to < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.notifyItemMoved(this.nativePtr_, from, to);
     }
     getAllAvailableItems() {
@@ -520,9 +538,26 @@ class NodeAdapter {
         }
     }
     static attachNodeAdapter(adapter, node) {
+        if (node === null || node === undefined) {
+            return false;
+        }
+        if (!node.isModifiable()) {
+            return false;
+        }
+        if (node.attribute_ !==  undefined) {
+            if (node.attribute_.allowChildCount !== undefined) {
+                const allowCount = node.attribute_.allowChildCount();
+                if (allowCount <= 1) {
+                    return false;
+                }
+            }
+        }
         return getUINativeModule().nodeAdapter.attachNodeAdapter(adapter.nativePtr_, node.getNodePtr());
     }
     static detachNodeAdapter(node) {
+        if (node === null || node === undefined) {
+            return;
+        }
         getUINativeModule().nodeAdapter.detachNodeAdapter(node.getNodePtr());
     }
 }

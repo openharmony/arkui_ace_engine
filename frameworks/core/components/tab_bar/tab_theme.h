@@ -83,6 +83,18 @@ public:
                 theme->horizontalBottomTabBarSpace_ =
                     pattern->GetAttr<Dimension>("horizontal_bottom_tab_bar_space", 0.0_vp);
                 theme->subTabBarHoverDuration_ = pattern->GetAttr<double>("sub_tab_bar_hover_duration", 0.0);
+                theme->subTabBarBigFontSizeScale_ =
+                    pattern->GetAttr<double>("sub_tab_bar_big_font_size_scale", 1.0);
+                theme->subTabBarLargeFontSizeScale_ =
+                    pattern->GetAttr<double>("sub_tab_bar_large_font_size_scale", 1.0);
+                theme->subTabBarMaxFontSizeScale_ =
+                    pattern->GetAttr<double>("sub_tab_bar_max_font_size_scale", 1.0);
+                theme->subTabBarOriginFontSizeScale_ =
+                    pattern->GetAttr<double>("sub_tab_bar_origin_font_size_scale", 1.0);
+                theme->subTabBarLeftRightMargin_ =
+                    pattern->GetAttr<Dimension>("sub_tab_bar_left_right_margin", 12.0_vp);
+                theme->subTabBarIndicatorstyleMarginTop_ =
+                    pattern->GetAttr<Dimension>("sub_tab_bar_indicatorstyle_margin_top", 4.0_vp);
 
                 ParseAttribute(theme, pattern);
             } else {
@@ -423,6 +435,30 @@ public:
     {
         return dialog_fontColor_;
     }
+    float GetSubTabBarBigFontSizeScale() const
+    {
+        return subTabBarBigFontSizeScale_;
+    }
+    float GetSubTabBarLargeFontSizeScale() const
+    {
+        return subTabBarLargeFontSizeScale_;
+    }
+    float GetSubTabBarMaxFontSizeScale() const
+    {
+        return subTabBarMaxFontSizeScale_;
+    }
+    float GetSubTabBarOriginFontSizeScale() const
+    {
+        return subTabBarOriginFontSizeScale_;
+    }
+    const Dimension& GetSubTabBarLeftRightMargin() const
+    {
+        return subTabBarLeftRightMargin_;
+    }
+    const Dimension& GetSubTabBarIndicatorstyleMarginTop() const
+    {
+        return subTabBarIndicatorstyleMarginTop_;
+    }
     
 protected:
     TabTheme() = default;
@@ -487,6 +523,12 @@ private:
     Color dialog_iconColor_;
     Color dialog_fontColor_;
     int bottomTabBackgroundBlurStyle_;
+    float subTabBarBigFontSizeScale_ = 1.0f;
+    float subTabBarLargeFontSizeScale_ = 1.0f;
+    float subTabBarMaxFontSizeScale_ = 1.0f;
+    float subTabBarOriginFontSizeScale_ = 1.0f;
+    Dimension subTabBarLeftRightMargin_;
+    Dimension subTabBarIndicatorstyleMarginTop_;
 };
 
 } // namespace OHOS::Ace

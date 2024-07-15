@@ -14,7 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -509,7 +509,7 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onClick");
         PipelineContext::SetCallBackNode(node);
         func->Execute(info);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
         JSInteractableView::ReportClickEvent(node);
 #endif
     };
@@ -519,7 +519,7 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onClick");
         PipelineContext::SetCallBackNode(node);
         func->Execute(*info);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
         JSInteractableView::ReportClickEvent(node);
 #endif
     };
@@ -659,6 +659,7 @@ CreateWithPara JSButton::ParseCreatePara(const JSCallbackInfo& info, bool hasLab
         para.optionSetFirst = true;
     }
     JSRef<JSObject> optionObj = JSRef<JSObject>::Cast(info[optionIndex]);
+    InitButtonOption(para);
     if (optionObj->GetProperty(JSButton::TYPE)->IsNumber()) {
         para.type = static_cast<ButtonType>(optionObj->GetProperty(JSButton::TYPE)->ToNumber<int32_t>());
     }
@@ -687,6 +688,18 @@ CreateWithPara JSButton::ParseCreatePara(const JSCallbackInfo& info, bool hasLab
     }
     ParseButtonRole(optionObj, para);
     return para;
+}
+
+void JSButton::InitButtonOption(CreateWithPara& param)
+{
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        return;
+    }
+    param.type = ButtonType::CAPSULE;
+    param.buttonStyleMode = ButtonStyleMode::EMPHASIZE;
+    param.stateEffect = true;
+    param.controlSize = ControlSize::NORMAL;
+    param.buttonRole = ButtonRole::NORMAL;
 }
 
 void JSButton::ParseButtonRole(const JSRef<JSObject>& optionObj, CreateWithPara& param)

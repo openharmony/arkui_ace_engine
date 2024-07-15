@@ -182,7 +182,7 @@ void FfiOHOSAceFrameworkSearchOnSubmit(void (*callback)(const char* value))
 void FfiOHOSAceFrameworkSearchOnChange(void (*callback)(const char* value))
 {
     auto onChange = [lambda = CJLambda::Create(callback)](const std::string& value,
-        TextRange& range) -> void { lambda(value.c_str()); };
+        PreviewText& previewText) -> void { lambda(value.c_str()); };
     SearchModel::GetInstance()->SetOnChange(std::move(onChange));
 }
 

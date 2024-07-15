@@ -54,6 +54,9 @@ class NodeAdapter {
     }
 
     set totalNodeCount(count: number) {
+        if (count < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.setTotalNodeCount(this.nativePtr_, count);
         this.count_ = count;
     }
@@ -67,18 +70,30 @@ class NodeAdapter {
     }
 
     reloadItem(start: number, count: number): void {
+        if (start < 0 || count < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.notifyItemChanged(this.nativePtr_, start, count);
     }
 
     removeItem(start: number, count: number): void {
+        if (start < 0 || count < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.notifyItemRemoved(this.nativePtr_, start, count);
     }
 
     insertItem(start: number, count: number): void {
+        if (start < 0 || count < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.notifyItemInserted(this.nativePtr_, start, count);
     }
 
     moveItem(from: number, to: number): void {
+        if (from < 0 || to < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.notifyItemMoved(this.nativePtr_, from, to);
     }
 
@@ -162,10 +177,27 @@ class NodeAdapter {
     }
 
     static attachNodeAdapter(adapter: NodeAdapter, node: FrameNode): boolean {
+        if (node === null || node === undefined) {
+            return false;
+        }
+        if (!node.isModifiable()) {
+            return false;
+        }
+        if (node.attribute_ !==  undefined) {
+            if (node.attribute_.allowChildCount !== undefined) {
+                const allowCount = node.attribute_.allowChildCount();
+                if (allowCount <= 1) {
+                    return false;
+                }
+            }
+        }
         return getUINativeModule().nodeAdapter.attachNodeAdapter(adapter.nativePtr_, node.getNodePtr());
     }
 
     static detachNodeAdapter(node: FrameNode) {
+        if (node === null || node === undefined) {
+            return;
+        }
         getUINativeModule().nodeAdapter.detachNodeAdapter(node.getNodePtr());
     }
 }

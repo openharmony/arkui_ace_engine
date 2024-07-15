@@ -168,6 +168,8 @@ public:
     // Called by ohos AceContainer when touch event received.
     virtual void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false) {}
 
+    virtual void OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
+
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
     virtual bool OnKeyEvent(const KeyEvent& event) = 0;
@@ -242,6 +244,13 @@ public:
                 callback(density);
             }
         }
+    }
+
+    void SendUpdateVirtualNodeFocusEvent()
+    {
+        auto accessibilityManager = GetAccessibilityManager();
+        CHECK_NULL_VOID(accessibilityManager);
+        accessibilityManager->UpdateVirtualNodeFocus();
     }
 
     int32_t RegisterDensityChangedCallback(std::function<void(double)>&& callback)
@@ -1394,7 +1403,7 @@ protected:
     std::function<void()> nextFrameLayoutCallback_ = nullptr;
     SharePanelCallback sharePanelCallback_ = nullptr;
     std::atomic<bool> isForegroundCalled_ = false;
-    std::atomic<bool> onFocus_ = true;
+    std::atomic<bool> onFocus_ = false;
     uint64_t lastTouchTime_ = 0;
     std::map<int32_t, std::string> formLinkInfoMap_;
     struct FunctionHash {
@@ -1432,7 +1441,7 @@ private:
     int64_t formAnimationStartTime_ = 0;
     bool isFormAnimation_ = false;
     bool halfLeading_ = false;
-    bool hasSupportedPreviewText_ = false;
+    bool hasSupportedPreviewText_ = true;
     bool hasPreviewTextOption_ = false;
     bool useCutout_ = false;
     uint64_t vsyncTime_ = 0;

@@ -574,7 +574,7 @@ void WaterFlowLayoutSW::AdjustOverScroll()
         ApplyDelta(delta);
 
         // handle special case when content < viewport && jump to end items
-        minStart = info_->StartPos() - info_->TopMargin();
+        minStart = info_->StartPosWithMargin();
         if (info_->StartIndex() == 0 && Positive(minStart)) {
             ApplyDelta(-minStart);
         }

@@ -1489,4 +1489,17 @@ HWTEST_F(ListAttrTestNg, FadingEdge002, TestSize.Level1)
     EXPECT_EQ(pattern_->endMainPos_, 490.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), 50.f);
 }
+
+/**
+ * @tc.name: GetOrCreateController001
+ * @tc.desc: Test GetOrCreateController
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, GetOrCreateController001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    auto controller = model.GetOrCreateController(AceType::RawPtr(frameNode_));
+    CreateDone(frameNode_);
+    EXPECT_NE(controller, nullptr);
+}
 } // namespace OHOS::Ace::NG

@@ -821,7 +821,7 @@ int32_t OH_ArkUI_NodeEvent_GetStringValue(
     if (!str) {
         return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
     }
-    size_t strLen = strlen(str);
+    int32_t strLen = (int32_t)strlen(str);
     int32_t size = stringSize[index];
     if (size <= 0) {
         return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_EVENT_PARAM_INVALID;
