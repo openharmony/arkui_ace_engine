@@ -116,7 +116,7 @@ private:
     std::string icon_;
     std::optional<TabBarSymbol> symbol_;
     TabBarBuilderFunc builder_;
-    TabBarStyle tabBarStyle_;
+    TabBarStyle tabBarStyle_ = TabBarStyle::NOSTYLE;
     FrameNode* node_ = nullptr;
 };
 
@@ -579,7 +579,7 @@ private:
     std::optional<int32_t> touchingIndex_;
     std::optional<int32_t> hoverIndex_;
     std::optional<int32_t> moveIndex_;
-    TabBarStyle tabBarStyle_;
+    TabBarStyle tabBarStyle_ = TabBarStyle::NOSTYLE;
     float currentIndicatorOffset_ = 0.0f;
     std::vector<SelectedMode> selectedModes_;
     std::vector<IndicatorStyle> indicatorStyles_;

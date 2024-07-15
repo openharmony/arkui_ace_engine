@@ -148,7 +148,7 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     if (defaultHeight_ || maxHeight_) {
-        if (NearEqual(fontscale_, originFontSizeScale_)) {
+        if (LessNotEqual(fontscale_, bigFontSizeScale_) || GreatNotEqual(fontscale_, maxFontSizeScale_)) {
             frameSize.SetHeight(std::max(defaultHeight_.value_or(0.0f), maxHeight_.value_or(0.0f)));
         }
     }
@@ -288,7 +288,7 @@ LayoutConstraintF TabBarLayoutAlgorithm::GetChildConstraint(LayoutWrapper* layou
             childLayoutConstraint.parentIdealSize = OptionalSizeF(frameSize);
             childLayoutConstraint.selfIdealSize.SetHeight(frameSize.Height());
         } else if (!isBarAdaptiveHeight_) {
-            if (NearEqual(fontscale_, originFontSizeScale_)) {
+            if (LessNotEqual(fontscale_, bigFontSizeScale_) || GreatNotEqual(fontscale_, maxFontSizeScale_)) {
                 frameSize.SetHeight(defaultHeight_.value());
             }
             childLayoutConstraint.parentIdealSize = OptionalSizeF(frameSize);
@@ -534,7 +534,7 @@ void TabBarLayoutAlgorithm::MeasureItemSecond(LayoutWrapper* layoutWrapper, Layo
 
     visibleChildrenMainSize_ = scrollMargin_ * DOUBLE_OF_WIDTH;
     if (isBarAdaptiveHeight_) {
-        if (NearEqual(fontscale_, originFontSizeScale_)) {
+        if (LessNotEqual(fontscale_, bigFontSizeScale_) || GreatNotEqual(fontscale_, maxFontSizeScale_)) {
             frameSize.SetHeight(std::max(defaultHeight_.value_or(0.0f), maxHeight_.value_or(0.0f)));
         }
         childLayoutConstraint.parentIdealSize = OptionalSizeF(frameSize);
