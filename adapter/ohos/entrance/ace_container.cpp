@@ -2761,6 +2761,15 @@ bool AceContainer::GetCurPointerEventInfo(
     return true;
 }
 
+bool AceContainer::GetCurPointerEventSourceType(int32_t& sourceType)
+{
+    std::lock_guard<std::mutex> lock(pointerEventMutex_);
+    CHECK_NULL_RETURN(currentPointerEvent_, false);
+    MMI::PointerEvent::PointerItem pointerItem;
+    sourceType = currentPointerEvent_->GetSourceType();
+    return true;
+}
+
 void AceContainer::RegisterStopDragCallback(int32_t pointerId, StopDragCallback&& stopDragCallback)
 {
     auto iter = stopDragCallbackMap_.find(pointerId);

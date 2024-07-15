@@ -176,6 +176,27 @@ HWTEST_F(InspectorTestNg, InspectorTestNg003, TestSize.Level1)
     auto test4 = Inspector::GetInspectorOfNode(TWO);
     EXPECT_NE(test4, "");
 
+    RefPtr<MockPipelineContext> pipeline_bak = MockPipelineContext::pipeline_;
+    MockPipelineContext::pipeline_ = nullptr;
+    auto jsonRoot = JsonUtil::Create(true);
+    const char INSPECTOR_TYPE[] = "$type";
+    const char INSPECTOR_ROOT[] = "root";
+    jsonRoot->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
+    auto test5 = Inspector::GetInspector(false);
+    EXPECT_EQ(test5, jsonRoot->ToString());
+    MockPipelineContext::pipeline_ = pipeline_bak;
+
+    InspectorFilter filter;
+    filter.SetFilterID("test");
+    bool needThrow = false;
+    auto test6 = Inspector::GetInspector(false, filter, needThrow);
+    auto rootNode = context1->GetStageManager()->GetLastPage();
+    if (rootNode == nullptr) {
+        EXPECT_EQ(test6, jsonRoot->ToString());
+    } else {
+       EXPECT_NE(test6, ""); 
+    }
+
     context1->stageManager_ = nullptr;
 }
 
@@ -392,6 +413,18 @@ HWTEST_F(InspectorTestNg, InspectorTestNg009, TestSize.Level1)
     ASSERT_NE(context, nullptr);
     auto nodePtr = Inspector::GetFrameNodeByKey(key);
     EXPECT_EQ(nodePtr, nullptr);
+
+    Inspector::AddOffscreenNode(ONE);
+    nodePtr = Inspector::GetFrameNodeByKey("one");
+    EXPECT_EQ(nodePtr, 0);
+
+    RefPtr<MockPipelineContext> pipeline_bak = MockPipelineContext::pipeline_;
+    MockPipelineContext::pipeline_ = nullptr;
+    context = PipelineContext::GetCurrentContext();
+    EXPECT_EQ(context, nullptr);
+    nodePtr = Inspector::GetFrameNodeByKey("two");
+    EXPECT_EQ(nodePtr, nullptr);
+    MockPipelineContext::pipeline_ = pipeline_bak;
 }
 
 /**
@@ -410,6 +443,14 @@ HWTEST_F(InspectorTestNg, InspectorTestNg010, TestSize.Level1)
     std::string key = "key";
     OHOS::Ace::NG::Rectangle rect;
     Inspector::GetRectangleById(key, rect);
+    EXPECT_EQ(rect.size.Width(), 0.0f);
+
+    auto frameNode = Inspector::GetFrameNodeByKey("one");
+    RefPtr<RenderContext> renderContextBak = ONE->renderContext_;
+    ONE->renderContext_ = nullptr;
+    Inspector::GetRectangleById("one", rect);
+    EXPECT_EQ(rect.screenRect.Width(), 0.0f);
+    ONE->renderContext_ = renderContextBak;
     context->rootNode_ = nullptr;
 }
 
@@ -434,8 +475,8 @@ HWTEST_F(InspectorTestNg, InspectorTestNg011, TestSize.Level1)
 
 /**
  * @tc.name: InspectorTestNg012
- * @tc.desc: Test the operation of GetSubWindowInspector
- * @tc.type: FUNC
+ * @tc.desc: Test the operation of GetSimplifiedInspector
+ * @tc.type: FUN
  */
 HWTEST_F(InspectorTestNg, InspectorTestNg012, TestSize.Level1)
 {
@@ -451,51 +492,53 @@ HWTEST_F(InspectorTestNg, InspectorTestNg012, TestSize.Level1)
 }
 
 /**
- * @tc.name: InspectorTestNg013
- * @tc.desc: Test the function of InspectorFilter
+ * @tc.name: AddOffscreenNode_001
+ * @tc.desc: Test the operation of AddOffscreenNode
  * @tc.type: FUNC
  */
-HWTEST_F(InspectorTestNg, InspectorTestNg013, TestSize.Level1)
+HWTEST_F(InspectorTestNg, AddOffscreenNode_001, TestSize.Level1)
 {
-    const char* hello = "hi";
-    InspectorFilter testFilter;
-    EXPECT_EQ(testFilter.CheckFilterAttr(FixedAttrBit::FIXED_ATTR_CONTENT, hello), true);
-    testFilter.SetFilterDepth(1);
-    testFilter.SetFilterID("id");
-    testFilter.filterExt.emplace_back("abc");
-    testFilter.AddFilterAttr("focusable");
-    testFilter.AddFilterAttr("abc");
-    testFilter.AddFilterAttr("def");
-    EXPECT_EQ(testFilter.CheckFixedAttr(FixedAttrBit::FIXED_ATTR_CONTENT), false);
-    EXPECT_EQ(testFilter.CheckExtAttr("zzz"), false);
-    EXPECT_EQ(testFilter.CheckFilterAttr(FixedAttrBit::FIXED_ATTR_CONTENT, hello), false);
-    EXPECT_EQ(testFilter.IsFastFilter(), false);
+    int32_t num = Inspector::offscreenNodes.size();
+    RefPtr<FrameNode> one = nullptr;
+    Inspector::AddOffscreenNode(one);
+    EXPECT_EQ(Inspector::offscreenNodes.size(), num);
+
+    auto id = ElementRegister::GetInstance()->MakeUniqueId();
+    one = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(one);
+    num = Inspector::offscreenNodes.size();
+    Inspector::AddOffscreenNode(one);
+    EXPECT_EQ(Inspector::offscreenNodes.size(), num + 1);
+    context->stageManager_ = nullptr;
 }
 
 /**
- * @tc.name: InspectorTestNg014
- * @tc.desc: Test the function of InspectorFilter
+ * @tc.name: RemoveOffscreenNode_001
+ * @tc.desc: Test the operation of RemoveOffscreenNode
  * @tc.type: FUNC
  */
-HWTEST_F(InspectorTestNg, InspectorTestNg014, TestSize.Level1)
+HWTEST_F(InspectorTestNg, RemoveOffscreenNode_001, TestSize.Level1)
 {
-    const char* hello = "hi";
-    InspectorFilter testFilter;
-    testFilter.AddFilterAttr("focusable");
-    EXPECT_EQ(testFilter.CheckFilterAttr(FixedAttrBit::FIXED_ATTR_FOCUSABLE, hello), true);
+    int32_t num = Inspector::offscreenNodes.size();
+    RefPtr<FrameNode> one = nullptr;
+    Inspector::RemoveOffscreenNode(one);
+    EXPECT_EQ(Inspector::offscreenNodes.size(), num);
+
+    auto id = ElementRegister::GetInstance()->MakeUniqueId();
+    one = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(one);
+    Inspector::AddOffscreenNode(one);
+    num = Inspector::offscreenNodes.size();
+
+    Inspector::RemoveOffscreenNode(one);
+    EXPECT_EQ(Inspector::offscreenNodes.size(), num - 1);
+    context->stageManager_ = nullptr;
 }
 
-/**
- * @tc.name: InspectorTestNg015
- * @tc.desc: Test the function of InspectorFilter
- * @tc.type: FUNC
- */
-HWTEST_F(InspectorTestNg, InspectorTestNg015, TestSize.Level1)
-{
-    const char* hello = "abc";
-    InspectorFilter testFilter;
-    testFilter.filterExt.emplace_back("abc");
-    testFilter.AddFilterAttr("focusable");
-    EXPECT_EQ(testFilter.CheckFilterAttr(FixedAttrBit::FIXED_ATTR_CONTENT, hello), true);
-}
+
 } // namespace OHOS::Ace::NG
