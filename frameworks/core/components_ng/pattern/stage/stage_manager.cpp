@@ -242,7 +242,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     }
 #if !defined(ACE_UNITTEST)
     TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(node,
-        TransparentNodeDetector::MAX_DETECT_COUNT);
+        );
 #endif
 
     // close keyboard
