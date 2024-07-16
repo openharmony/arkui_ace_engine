@@ -674,6 +674,7 @@ void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp)
 
     int32_t displaySyncRate = GetOrCreateUIDisplaySyncManager()->GetDisplaySyncRate();
     frameRateManager_->SetDisplaySyncRate(displaySyncRate);
+    ArkUIPerfMonitor::GetInstance().RecordDisplaySyncRate(displaySyncRate);
 }
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
