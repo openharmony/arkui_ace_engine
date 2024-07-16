@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -45,119 +46,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t LONG_PRESS_DURATION = 800;
-
-std::string GetTagFromRootNodeType(RootNodeType rootNodeType)
-{
-    switch (rootNodeType) {
-        case RootNodeType::PAGE_ETS_TAG:
-            return V2::PAGE_ETS_TAG;
-        case RootNodeType::NAVDESTINATION_VIEW_ETS_TAG:
-            return V2::NAVDESTINATION_VIEW_ETS_TAG;
-        case RootNodeType::WINDOW_SCENE_ETS_TAG:
-            return V2::WINDOW_SCENE_ETS_TAG;
-        default:
-            return V2::PAGE_ETS_TAG;
-    }
-}
-RefPtr<OverlayManager> GetOverlayFromPage(int32_t rootNodeId, RootNodeType rootNodeType)
-{
-    if (rootNodeId <= 0) {
-        return nullptr;
-    }
-    std::string tag  = GetTagFromRootNodeType(rootNodeType);
-    auto frameNode = FrameNode::GetFrameNode(tag, rootNodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    if (tag == V2::PAGE_ETS_TAG) {
-        auto node = AceType::DynamicCast<FrameNode>(frameNode);
-        CHECK_NULL_RETURN(node, nullptr);
-        auto pattern = node->GetPattern<PagePattern>();
-        return pattern->GetOverlayManager();
-    }
-    if (tag == V2::NAVDESTINATION_VIEW_ETS_TAG) {
-        auto node = AceType::DynamicCast<FrameNode>(frameNode);
-        CHECK_NULL_RETURN(node, nullptr);
-        auto pattern = node->GetPattern<NavDestinationPattern>();
-        CHECK_NULL_RETURN(pattern, nullptr);
-        return pattern->GetOverlayManager();
-    }
-#ifdef WINDOW_SCENE_SUPPORTED
-    if (tag == V2::WINDOW_SCENE_ETS_TAG) {
-        auto node = AceType::DynamicCast<FrameNode>(frameNode);
-        CHECK_NULL_RETURN(node, nullptr);
-        auto pattern = node->GetPattern<SystemWindowScene>();
-        CHECK_NULL_RETURN(pattern, nullptr);
-        return pattern->GetOverlayManager();
-    }
-#endif
-    return nullptr;
-}
-
-#ifdef WINDOW_SCENE_SUPPORTED
-RefPtr<OverlayManager> FindTargetNodeOverlay(RefPtr<UINode>& parent,
-    const RefPtr<FrameNode>& targetNode, bool isShow)
-{
-    auto node = AceType::DynamicCast<FrameNode>(parent);
-    CHECK_NULL_RETURN(node, nullptr);
-    auto pattern = node->GetPattern<SystemWindowScene>();
-    CHECK_NULL_RETURN(pattern, nullptr);
-    pattern->CreateOverlayManager(isShow, targetNode);
-    auto overlay = pattern->GetOverlayManager();
-    CHECK_NULL_RETURN(overlay, nullptr);
-    targetNode->SetRootNodeId(node->GetId());
-    targetNode->SetRootNodeType(RootNodeType::WINDOW_SCENE_ETS_TAG);
-    return overlay;
-}
-#endif
-
-RefPtr<OverlayManager> FindPageNodeOverlay(const RefPtr<FrameNode>& targetNode, bool isShow)
-{
-    CHECK_NULL_RETURN(targetNode, nullptr);
-    if (targetNode->GetRootNodeId() > 0) {
-        return GetOverlayFromPage(targetNode->GetRootNodeId(), targetNode->GetRootNodeType());
-    }
-    auto isNav = false;
-    RefPtr<OverlayManager> overlay;
-    RefPtr<UINode> parent = targetNode;
-    while (parent) {
-        if (parent->GetTag() == V2::PAGE_ETS_TAG) {
-            auto node = AceType::DynamicCast<FrameNode>(parent);
-            CHECK_NULL_RETURN(node, nullptr);
-            auto pattern = node->GetPattern<PagePattern>();
-            CHECK_NULL_RETURN(pattern, nullptr);
-            if (!isNav) {
-                pattern->CreateOverlayManager(isShow);
-                overlay = pattern->GetOverlayManager();
-                CHECK_NULL_RETURN(overlay, nullptr);
-                targetNode->SetRootNodeId(node->GetId());
-                targetNode->SetRootNodeType(RootNodeType::PAGE_ETS_TAG);
-            } else {
-                node->SetRootNodeType(RootNodeType::NAVDESTINATION_VIEW_ETS_TAG);
-                node->SetRootNodeId(targetNode->GetRootNodeId());
-            }
-            break;
-        }
-        if (parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
-            auto node = AceType::DynamicCast<FrameNode>(parent);
-            CHECK_NULL_RETURN(node, nullptr);
-            auto pattern = node->GetPattern<NavDestinationPattern>();
-            CHECK_NULL_RETURN(pattern, nullptr);
-            pattern->CreateOverlayManager(isShow);
-            overlay = pattern->GetOverlayManager();
-            CHECK_NULL_RETURN(overlay, nullptr);
-            targetNode->SetRootNodeId(node->GetId());
-            targetNode->SetRootNodeType(RootNodeType::NAVDESTINATION_VIEW_ETS_TAG);
-            isNav = true;
-        }
-#ifdef WINDOW_SCENE_SUPPORTED
-        if (parent->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
-            overlay = FindTargetNodeOverlay(parent, targetNode, isShow);
-            break;
-        }
-#endif
-        parent = parent->GetParent();
-    }
-    return overlay;
-}
+constexpr int32_t HOVER_IMAGE_LONG_PRESS_DURATION = 100;
 } // namespace
 
 void ViewAbstractModelNG::BindMenuGesture(
@@ -213,6 +102,7 @@ void ViewAbstractModelNG::BindMenu(
             renderContext->UpdateChainedTransition(menuParam.transition);
         }
         if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow) {
+            TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d.", targetId);
             overlayManager->HideMenu(menuNode, targetId, false);
         }
     } else if (menuParam.isShow) {
@@ -287,9 +177,6 @@ void BindContextMenuSingle(
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(targetNode);
-    auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetPreviewMode(menuParam.previewMode);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
     auto targetId = targetNode->GetId();
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
@@ -306,6 +193,7 @@ void BindContextMenuSingle(
             auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
             CHECK_NULL_VOID(wrapperPattern);
             if (wrapperPattern->IsShow() && !menuParam.isShow) {
+                TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d.", targetId);
                 SubwindowManager::GetInstance()->HideMenuNG(menuNode, targetId);
             } else if (!wrapperPattern->IsShow() && menuParam.isShow) {
                 CreateCustomMenuWithPreview(buildFunc, menuParam, previewBuildFunc);
@@ -327,38 +215,65 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
     auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(targetNode);
     auto targetId = targetNode->GetId();
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
-    if (subwindow) {
-        auto childContainerId = subwindow->GetChildContainerId();
-        auto childContainer = AceEngine::Get().GetContainer(childContainerId);
-        CHECK_NULL_VOID(childContainer);
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetOverlayManager();
+    auto pipelineContext = targetNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto expandDisplay = theme->GetExpandDisplay();
+    bool menuIsShowing = false;
+    auto containerId = pipelineContext->GetInstanceId();
+    RefPtr<Container> container = AceEngine::Get().GetContainer(containerId);
+    CHECK_NULL_VOID(container);
+    bool isUIExtensionWindow = container->IsUIExtensionWindow();
+
+    // contextMenu not use subWindow in such cases: not expandDisplay and not in UIExtendsion
+    if (!expandDisplay && !isUIExtensionWindow) {
+        auto overlayManager = pipelineContext->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         auto menuNode = overlayManager->GetMenuNode(targetId);
         if (menuNode) {
             auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
             CHECK_NULL_VOID(menuWrapperPattern);
             menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
+            menuIsShowing = true;
+        }
+    } else {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+        if (subwindow) {
+            auto childContainerId = subwindow->GetChildContainerId();
+            auto childContainer = AceEngine::Get().GetContainer(childContainerId);
+            CHECK_NULL_VOID(childContainer);
+            auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
+            CHECK_NULL_VOID(pipelineContext);
+            auto overlayManager = pipelineContext->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            auto menuNode = overlayManager->GetMenuNode(targetId);
+            if (menuNode) {
+                auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
+                CHECK_NULL_VOID(menuWrapperPattern);
+                menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
+                menuIsShowing = true;
+            }
         }
     }
+
     if (menuParam.contextMenuRegisterType == ContextMenuRegisterType::CUSTOM_TYPE) {
-        BindContextMenuSingle(buildFunc, menuParam, previewBuildFunc);
+        if (!menuIsShowing) {
+            BindContextMenuSingle(buildFunc, menuParam, previewBuildFunc);
+        }
     } else {
         auto hub = targetNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(hub);
         auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
         if (type == ResponseType::RIGHT_CLICK) {
             OnMouseEventFunc event = [builderF = buildFunc, weakTarget, menuParam](MouseInfo& info) mutable {
-                auto containerId = Container::CurrentId();
                 auto taskExecutor = Container::CurrentTaskExecutor();
                 CHECK_NULL_VOID(taskExecutor);
                 if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
                     info.SetStopPropagation(true);
                 }
                 taskExecutor->PostTask(
-                    [containerId, builder = builderF, weakTarget, menuParam, info]() mutable {
+                    [builder = builderF, weakTarget, menuParam, info]() mutable {
                         auto targetNode = weakTarget.Upgrade();
                         CHECK_NULL_VOID(targetNode);
                         NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
@@ -385,11 +300,10 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
             // create or show menu on long press
             auto event =
                 [builderF = buildFunc, weakTarget, menuParam, previewBuildFunc](const GestureEvent& info) mutable {
-                auto containerId = Container::CurrentId();
                 auto taskExecutor = Container::CurrentTaskExecutor();
                 CHECK_NULL_VOID(taskExecutor);
                 taskExecutor->PostTask(
-                    [containerId, builder = builderF, weakTarget, menuParam, previewBuildFunc, info]() mutable {
+                    [builder = builderF, weakTarget, menuParam, previewBuildFunc, info]() mutable {
                         auto targetNode = weakTarget.Upgrade();
                         CHECK_NULL_VOID(targetNode);
                         auto pipelineContext = NG::PipelineContext::GetCurrentContext();
@@ -418,7 +332,8 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
             };
             auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
             ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
-            hub->SetLongPressEvent(longPress, false, true, LONG_PRESS_DURATION);
+            auto longPressDuration = menuParam.isShowHoverImage ? HOVER_IMAGE_LONG_PRESS_DURATION : LONG_PRESS_DURATION;
+            hub->SetLongPressEvent(longPress, false, true, longPressDuration);
         } else {
             return;
         }
@@ -426,21 +341,43 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
     }
 
     // delete menu when target node destroy
-    auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId()]() {
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
-        CHECK_NULL_VOID(subwindow);
-        auto childContainerId = subwindow->GetChildContainerId();
-        auto childContainer = AceEngine::Get().GetContainer(childContainerId);
-        CHECK_NULL_VOID(childContainer);
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->DeleteMenu(id);
+    auto destructor = [targetNode, containerId, expandDisplay, isUIExtensionWindow]() {
+        // contextMenu not use subWindow in such cases: not expandDisplay and not in UIExtendsion
+        if (!expandDisplay && !isUIExtensionWindow) {
+            auto pipelineContext = targetNode->GetContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto overlayManager = pipelineContext->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->DeleteMenu(targetNode->GetId());
+        } else {
+            auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+            CHECK_NULL_VOID(subwindow);
+            auto childContainerId = subwindow->GetChildContainerId();
+            auto childContainer = AceEngine::Get().GetContainer(childContainerId);
+            CHECK_NULL_VOID(childContainer);
+            auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
+            CHECK_NULL_VOID(pipelineContext);
+            auto overlayManager = pipelineContext->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->DeleteMenu(targetNode->GetId());
+        }
     };
     targetNode->PushDestroyCallback(destructor);
 }
 
+void ViewAbstractModelNG::BindDragWithContextMenuParams(const NG::MenuParam& menuParam)
+{
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(targetNode);
+
+    auto gestureHub = targetNode->GetOrCreateGestureEventHub();
+    if (gestureHub) {
+        gestureHub->SetPreviewMode(menuParam.previewMode);
+        gestureHub->SetContextMenuShowStatus(menuParam.isShow);
+    } else {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Can not get gestureEventHub!");
+    }
+}
 void ViewAbstractModelNG::BindBackground(std::function<void()>&& buildFunc, const Alignment& align)
 {
     auto buildNodeFunc = [buildFunc = std::move(buildFunc)]() -> RefPtr<UINode> {
@@ -554,15 +491,16 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
 {
     auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(targetNode);
-    auto buildNodeFunc = [buildFunc]() -> RefPtr<UINode> {
-        NG::ScopedViewStackProcessor builderViewStackProcess;
+    auto instanceId = sheetStyle.instanceId.has_value() ? sheetStyle.instanceId.value() : Container::CurrentId();
+    auto buildNodeFunc = [buildFunc, instanceId]() -> RefPtr<UINode> {
+        NG::ScopedViewStackProcessor builderViewStackProcess(instanceId);
         buildFunc();
         auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         return customNode;
     };
-    auto buildTitleNodeFunc = [titleBuildFunc]() -> RefPtr<UINode> {
+    auto buildTitleNodeFunc = [titleBuildFunc, instanceId]() -> RefPtr<UINode> {
         CHECK_NULL_RETURN(titleBuildFunc, nullptr);
-        NG::ScopedViewStackProcessor builderViewStackProcess;
+        NG::ScopedViewStackProcessor builderViewStackProcess(instanceId);
         titleBuildFunc();
         auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         return customNode;
@@ -571,26 +509,25 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     if (sheetStyle.showInPage.value_or(false)) {
-        overlayManager = FindPageNodeOverlay(targetNode, isShow);
+        overlayManager = SheetManager::FindPageNodeOverlay(targetNode, isShow);
     }
     CHECK_NULL_VOID(overlayManager);
 
     // delete Sheet when target node destroy
-    auto destructor =
-        [id = targetNode->GetId(), rootNodeId = targetNode->GetRootNodeId(),
-            rootNodeType = targetNode->GetRootNodeType(), showInPage = sheetStyle.showInPage.value_or(false),
-            instanceId = sheetStyle.instanceId.has_value() ? sheetStyle.instanceId.value() : Container::CurrentId()]() {
-            ContainerScope scope(instanceId);
-            auto pipeline = NG::PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto overlayManager = pipeline->GetOverlayManager();
-            if (showInPage) {
-                TAG_LOGD(AceLogTag::ACE_SHEET, "To showInPage, get overlayManager from GetOverlayFromPage");
-                overlayManager = GetOverlayFromPage(rootNodeId, rootNodeType);
-            }
-            CHECK_NULL_VOID(overlayManager);
-            overlayManager->DeleteModal(id);
-        };
+    auto destructor = [id = targetNode->GetId(), rootNodeId = targetNode->GetRootNodeId(),
+                          rootNodeType = targetNode->GetRootNodeType(),
+                          showInPage = sheetStyle.showInPage.value_or(false), instanceId]() {
+        ContainerScope scope(instanceId);
+        auto pipeline = NG::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        if (showInPage) {
+            TAG_LOGD(AceLogTag::ACE_SHEET, "To showInPage, get overlayManager from GetOverlayFromPage");
+            overlayManager = SheetManager::GetOverlayFromPage(rootNodeId, rootNodeType);
+        }
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->DeleteModal(id);
+    };
     targetNode->PushDestroyCallback(destructor);
 
     overlayManager->BindSheet(isShow, std::move(callback), std::move(buildNodeFunc), std::move(buildTitleNodeFunc),
@@ -700,6 +637,9 @@ void ViewAbstractModelNG::SetAccessibilityVirtualNode(std::function<void()>&& bu
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(virtualNode);
     CHECK_NULL_VOID(virtualFrameNode);
+    virtualFrameNode->SetAccessibilityNodeVirtual();
+    virtualFrameNode->SetAccessibilityVirtualNodeParent(AceType::Claim(AceType::DynamicCast<NG::UINode>(frameNode)));
+    virtualFrameNode->SetFirstAccessibilityVirtualNode();
     FrameNode::ProcessOffscreenNode(virtualFrameNode);
     accessibilityProperty->SaveAccessibilityVirtualNode(virtualNode);
 }

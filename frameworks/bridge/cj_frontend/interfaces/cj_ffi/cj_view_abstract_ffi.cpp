@@ -254,6 +254,16 @@ void FfiOHOSAceFrameworkViewAbstractSetHeight(double height, int32_t unit)
     ViewAbstractModel::GetInstance()->SetHeight(value);
 }
 
+void FFISetWidthWithEmpty()
+{
+    ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+}
+
+void FFISetHeightWithEmpty()
+{
+    ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetSize(double width, int32_t widthUnit, double height, int32_t heightUnit)
 {
     Dimension widthDime(width, static_cast<DimensionUnit>(widthUnit));
@@ -852,9 +862,22 @@ void FfiOHOSAceFrameworkViewAbstractSetSharedTransition(char* shareId, CJSharedT
     ViewAbstractModel::GetInstance()->SetSharedTransition(std::string(shareId), sharedOption);
 }
 
-void FfiOHOSAceFrameworkViewAbstractSetGeometryTransition(char* id, bool followWithoutTransition)
+void FfiOHOSAceFrameworkViewAbstractSetGeometryTransition(char* id, CJGeometryTransitionOptions option)
 {
-    ViewAbstractModel::GetInstance()->SetGeometryTransition(std::string(id), followWithoutTransition);
+    bool followWithoutTransition = option.follow;
+    bool doRegisterSharedTransition = true;
+    switch (option.hierarchyStrategy) {
+        case 0:
+            doRegisterSharedTransition = false;
+            break;
+        case 1:
+            doRegisterSharedTransition = true;
+            break;
+        default:
+            break;
+    }
+    ViewAbstractModel::GetInstance()->SetGeometryTransition(
+        std::string(id), followWithoutTransition, doRegisterSharedTransition);
 }
 
 void FfiOHOSAceFrameworkViewAbstractSetBlur(double value)

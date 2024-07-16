@@ -54,6 +54,7 @@ protected:
     static void SetCustomContentTransition(const JSCallbackInfo& info);
     static void SetOnContentWillChange(const JSCallbackInfo& info);
     static void SetAnimateMode(const JSCallbackInfo& info);
+    static void SetEdgeEffect(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

@@ -39,6 +39,8 @@ public:
     bool OnDirtyLayoutWrapperSwap(
         const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    int32_t GetUiExtensionId() override;
+    int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
 
     void SetAdaptiveWidth(bool state);
     void SetAdaptiveHeight(bool state);
@@ -74,6 +76,7 @@ private:
     bool adaptiveHeight_ = true;
     IsolatedInfo curIsolatedInfo_;
     IsolatedDumpInfo isolatedDumpInfo_;
+    int32_t uiExtensionId_ = 0;
 
     static int32_t isolatedIdGenerator_; // only run on JS thread, and do not require mutex
     ACE_DISALLOW_COPY_AND_MOVE(IsolatedPattern);

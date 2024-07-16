@@ -24,7 +24,7 @@ class BaseNode extends __JSBaseNode__ {
             throw Error('Node constructor error, param uiContext error');
         }
         else {
-            if (!(typeof uiContext === "object") || !("instanceId_" in uiContext)) {
+            if (!(typeof uiContext === 'object') || !('instanceId_' in uiContext)) {
                 throw Error('Node constructor error, param uiContext is invalid');
             }
         }
@@ -251,7 +251,7 @@ class JSBuilderNode extends BaseNode {
     }
     observeComponentCreation2(compilerAssignedUpdateFunc, classObject) {
         const _componentName = classObject && 'name' in classObject ? Reflect.get(classObject, 'name') : 'unspecified UINode';
-        const _popFunc = classObject && "pop" in classObject ? classObject.pop : () => { };
+        const _popFunc = classObject && 'pop' in classObject ? classObject.pop : () => { };
         const updateFunc = (elmtId, isFirstRender) => {
             __JSScopeUtil__.syncInstanceId(this.instanceId_);
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
@@ -324,7 +324,7 @@ class JSBuilderNode extends BaseNode {
         else {
             // Create array of new ids.
             arr.forEach((item, index) => {
-                newIdArray.push(`${itemGenFuncUsesIndex ? index + "_" : ""}` + idGenFunc(item));
+                newIdArray.push(`${itemGenFuncUsesIndex ? index + '_' : ''}` + idGenFunc(item));
             });
         }
         // Set new array on C++ side.
@@ -393,6 +393,9 @@ class JSBuilderNode extends BaseNode {
         this.updateNodePtr(nodePtr);
         this.updateInstanceId(instanceId);
     }
+    observeRecycleComponentCreation(name, recycleUpdateFunc) {
+        throw new Error('custom component in @Builder used by BuilderNode does not support @Reusable');
+    }
 }
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
@@ -414,7 +417,7 @@ class NodeAdapter {
         this.count_ = 0;
         this.nativeRef_ = getUINativeModule().nodeAdapter.createAdapter();
         this.nativePtr_ = this.nativeRef_.getNativeHandle();
-        getUINativeModule().nodeAdapter.setCallbacks(this.nativePtr_, this, this.onAttachToNodePtr, this.onDetachFromNodePtr, this.onGetChildId !== undefined ? this.onGetChildId : undefined, this.onCreateNewChild !== undefined ? this.onCreateNewNodePtr : undefined, this.onDisposeChild !== undefined ? this.onDisposeNodePtr : undefined, this.onUpdateChild !== undefined ? this.onUpdateNodePtr : undefined);
+        getUINativeModule().nodeAdapter.setCallbacks(this.nativePtr_, this, this.onAttachToNodePtr, this.onDetachFromNodePtr, this.onGetChildId !== undefined ? this.onGetChildId : undefined, this.onCreateChild !== undefined ? this.onCreateNewNodePtr : undefined, this.onDisposeChild !== undefined ? this.onDisposeNodePtr : undefined, this.onUpdateChild !== undefined ? this.onUpdateNodePtr : undefined);
     }
     dispose() {
         let hostNode = this.attachedNodeRef_.deref();
@@ -425,6 +428,9 @@ class NodeAdapter {
         this.nativePtr_ = null;
     }
     set totalNodeCount(count) {
+        if (count < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.setTotalNodeCount(this.nativePtr_, count);
         this.count_ = count;
     }
@@ -435,15 +441,27 @@ class NodeAdapter {
         getUINativeModule().nodeAdapter.notifyItemReloaded(this.nativePtr_);
     }
     reloadItem(start, count) {
+        if (start < 0 || count < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.notifyItemChanged(this.nativePtr_, start, count);
     }
     removeItem(start, count) {
+        if (start < 0 || count < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.notifyItemRemoved(this.nativePtr_, start, count);
     }
     insertItem(start, count) {
+        if (start < 0 || count < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.notifyItemInserted(this.nativePtr_, start, count);
     }
     moveItem(from, to) {
+        if (from < 0 || to < 0) {
+            return;
+        }
         getUINativeModule().nodeAdapter.notifyItemMoved(this.nativePtr_, from, to);
     }
     getAllAvailableItems() {
@@ -475,6 +493,9 @@ class NodeAdapter {
         }
     }
     onDetachFromNodePtr() {
+        if (this === undefined) {
+            return;
+        }
         if (this.onDetachFromNode !== undefined) {
             this.onDetachFromNode();
         }
@@ -485,8 +506,8 @@ class NodeAdapter {
         this.nodeRefs_.splice(0, this.nodeRefs_.length);
     }
     onCreateNewNodePtr(index) {
-        if (this.onCreateNewChild !== undefined) {
-            let node = this.onCreateNewChild(index);
+        if (this.onCreateChild !== undefined) {
+            let node = this.onCreateChild(index);
             if (!this.nodeRefs_.includes(node)) {
                 this.nodeRefs_.push(node);
             }
@@ -517,9 +538,26 @@ class NodeAdapter {
         }
     }
     static attachNodeAdapter(adapter, node) {
-        getUINativeModule().nodeAdapter.attachNodeAdapter(adapter.nativePtr_, node.getNodePtr());
+        if (node === null || node === undefined) {
+            return false;
+        }
+        if (!node.isModifiable()) {
+            return false;
+        }
+        if (node.attribute_ !== undefined) {
+            if (node.attribute_.allowChildCount !== undefined) {
+                const allowCount = node.attribute_.allowChildCount();
+                if (allowCount <= 1) {
+                    return false;
+                }
+            }
+        }
+        return getUINativeModule().nodeAdapter.attachNodeAdapter(adapter.nativePtr_, node.getNodePtr());
     }
     static detachNodeAdapter(node) {
+        if (node === null || node === undefined) {
+            return;
+        }
         getUINativeModule().nodeAdapter.detachNodeAdapter(node.getNodePtr());
     }
 }
@@ -606,7 +644,7 @@ class NodeController {
         return this._nodeContainerId.__rootNodeOfNodeController__;
     }
     rebuild() {
-        if (this._nodeContainerId != undefined && this._nodeContainerId !== null && this._nodeContainerId._value >= 0) {
+        if (this._nodeContainerId !== undefined && this._nodeContainerId !== null && this._nodeContainerId._value >= 0) {
             getUINativeModule().nodeContainer.rebuild(this._nodeContainerId._value);
         }
     }
@@ -1549,16 +1587,13 @@ class ColorMetrics {
         return this.alpha_;
     }
 }
-class ShapeMask {
+class BaseShape {
     constructor() {
         this.rect = null;
         this.roundRect = null;
         this.circle = null;
         this.oval = null;
         this.path = null;
-        this.fillColor = 0XFF000000;
-        this.strokeColor = 0XFF000000;
-        this.strokeWidth = 0;
     }
     setRectShape(rect) {
         this.rect = rect;
@@ -1596,6 +1631,16 @@ class ShapeMask {
         this.roundRect = null;
     }
 }
+class ShapeClip extends BaseShape {
+}
+class ShapeMask extends BaseShape {
+    constructor() {
+        super(...arguments);
+        this.fillColor = 0XFF000000;
+        this.strokeColor = 0XFF000000;
+        this.strokeWidth = 0;
+    }
+}
 class RenderNode {
     constructor(type) {
         this.nodePtr = null;
@@ -1614,6 +1659,7 @@ class RenderNode {
         this.scaleValue = { x: 1.0, y: 1.0 };
         this.shadowColorValue = 0;
         this.shadowOffsetValue = { x: 0, y: 0 };
+        this.labelValue = '';
         this.shadowAlphaValue = 0;
         this.shadowElevationValue = 0;
         this.shadowRadiusValue = 0;
@@ -1712,6 +1758,10 @@ class RenderNode {
         }
         getUINativeModule().renderNode.setShadowOffset(this.nodePtr, this.shadowOffsetValue.x, this.shadowOffsetValue.y, this.lengthMetricsUnitValue);
     }
+    set label(label) {
+        this.labelValue = this.checkUndefinedOrNullWithDefaultValue(label, '');
+        getUINativeModule().renderNode.setLabel(this.nodePtr, this.labelValue);
+    }
     set shadowAlpha(alpha) {
         this.shadowAlphaValue = this.checkUndefinedOrNullWithDefaultValue(alpha, 0);
         getUINativeModule().renderNode.setShadowAlpha(this.nodePtr, this.shadowAlphaValue);
@@ -1768,15 +1818,17 @@ class RenderNode {
     }
     set lengthMetricsUnit(unit) {
         if (unit === undefined || unit == null) {
-            this.lengthMetricsUnitValue = LengthMetricsUnit.DEFAULT;
-        } else {
-            this.lengthMetricsUnitValue = unit;
+            this.lengthMetricsUnit = LengthMetricsUnit.DEFAULT;
+        }
+        else {
+            this.lengthMetricsUnit = unit;
         }
     }
     set markNodeGroup(isNodeGroup) {
         if (isNodeGroup === undefined || isNodeGroup === null) {
             this.markNodeGroupValue = false;
-        } else {
+        }
+        else {
             this.markNodeGroupValue = isNodeGroup;
         }
         getUINativeModule().renderNode.setMarkNodeGroup(this.nodePtr, this.markNodeGroupValue);
@@ -1810,6 +1862,9 @@ class RenderNode {
     }
     get shadowOffset() {
         return this.shadowOffsetValue;
+    }
+    get label() {
+        return this.labelValue;
     }
     get shadowAlpha() {
         return this.shadowAlphaValue;
@@ -2026,9 +2081,9 @@ class RenderNode {
             getUINativeModule().renderNode.setCircleMask(this.nodePtr, circle.centerX, circle.centerY, circle.radius, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
         }
         else if (this.shapeMaskValue.roundRect !== null) {
-            const reoundRect = this.shapeMask.roundRect;
-            const corners = reoundRect.corners;
-            const rect = reoundRect.rect;
+            const roundRect = this.shapeMask.roundRect;
+            const corners = roundRect.corners;
+            const rect = roundRect.rect;
             getUINativeModule().renderNode.setRoundRectMask(this.nodePtr, corners.topLeft.x, corners.topLeft.y, corners.topRight.x, corners.topRight.y, corners.bottomLeft.x, corners.bottomLeft.y, corners.bottomRight.x, corners.bottomRight.y, rect.left, rect.top, rect.right, rect.bottom, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
         }
         else if (this.shapeMaskValue.oval !== null) {
@@ -2042,6 +2097,40 @@ class RenderNode {
     }
     get shapeMask() {
         return this.shapeMaskValue;
+    }
+    set shapeClip(shapeClip) {
+        if (shapeClip === undefined || shapeClip === null) {
+            this.shapeClipValue = new ShapeClip();
+        }
+        else {
+            this.shapeClipValue = shapeClip;
+        }
+        if (this.shapeClipValue.rect !== null) {
+            const rectClip = this.shapeClipValue.rect;
+            getUINativeModule().renderNode.setRectClip(this.nodePtr, rectClip.left, rectClip.top, rectClip.right, rectClip.bottom);
+        }
+        else if (this.shapeClipValue.circle !== null) {
+            const circle = this.shapeClipValue.circle;
+            getUINativeModule().renderNode.setCircleClip(this.nodePtr, circle.centerX, circle.centerY, circle.radius);
+        }
+        else if (this.shapeClipValue.roundRect !== null) {
+            const roundRect = this.shapeClipValue.roundRect;
+            const corners = roundRect.corners;
+            const rect = roundRect.rect;
+            getUINativeModule().renderNode.setRoundRectClip(this.nodePtr, corners.topLeft.x, corners.topLeft.y, corners.topRight.x, corners.topRight.y, corners.bottomLeft.x, corners.bottomLeft.y, corners.bottomRight.x, corners.bottomRight.y, rect.left, rect.top, rect.right, rect.bottom);
+        }
+        else if (this.shapeClipValue.oval !== null) {
+            const oval = this.shapeClipValue.oval;
+            getUINativeModule().renderNode.setOvalClip(this.nodePtr, oval.left, oval.top, oval.right, oval.bottom);
+        }
+        else if (this.shapeClipValue.path !== null) {
+            const path = this.shapeClipValue.path;
+            getUINativeModule().renderNode.setPathClip(this.nodePtr, path.commands);
+        }
+    }
+    get shapeClip() {
+        this.shapeClipValue = this.shapeClipValue ? this.shapeClipValue : new ShapeClip();
+        return this.shapeClipValue;
     }
 }
 function edgeColors(all) {
@@ -2229,7 +2318,7 @@ class NodeContent extends Content {
 
 export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
-    NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask,
+    NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask, ShapeClip,
     edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent,
     typeNode, NodeAdapter
 };

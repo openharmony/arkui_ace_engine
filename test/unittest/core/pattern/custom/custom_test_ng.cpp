@@ -23,7 +23,9 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_param.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
@@ -921,7 +923,7 @@ HWTEST_F(CustomTestNg, CustomTest020, TestSize.Level1)
     customNode->AddChild(frameNode);
     auto frameNode2 = AceType::MakeRefPtr<FrameNode>("test2", 2, AceType::MakeRefPtr<Pattern>());
     frameNode2->layoutProperty_ = AceType::MakeRefPtr<LayoutProperty>();
-    auto geo = AceType::MakeRefPtr<GeometryTransition>(TEST_TAG, true);
+    auto geo = AceType::MakeRefPtr<GeometryTransition>(TEST_TAG, true, true);
     frameNode2->layoutProperty_->geometryTransition_ = AceType::WeakClaim(AceType::RawPtr(geo));
     customNode->AddChild(frameNode2);
 }
@@ -1215,5 +1217,330 @@ HWTEST_F(CustomTestNg, CustomTest029, TestSize.Level1)
      */
     customNode->CustomNode::GetFrameChildByIndex(0, false);
     EXPECT_FALSE(customNode->UINode::GetFrameChildByIndex(5, false));
+}
+
+/**
+ * @tc.name: CustomTest030
+ * @tc.desc: MeasureLayoutParam MeasureLayoutChild.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create framenode.
+     * @tc.expected: Make TabContent as CustomNode parent.
+     */
+    auto frameNode = CreateNode(V2::TAB_CONTENT_ITEM_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Invoke CustomNode Create function and create textNode mount to CustomNode.
+     * @tc.expected: Create CustomNode.
+     */
+    auto customNode = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(
+        ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    customNode->MountToParent(frameNode);
+    auto textFrameNode = CreateNode(V2::TEXT_ETS_TAG);
+    textFrameNode->MountToParent(customNode);
+
+    /**
+     * @tc.steps: step3. Create Parent LayoutWrapperNode.
+     */
+    auto pattern = frameNode->GetPattern<Pattern>();
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto parentLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    EXPECT_FALSE(parentLayoutWrapper == nullptr);
+    /**
+     * @tc.steps: step4. set renderFunction, add child to customNode and invoke Measure function.
+     * @tc.expected: parentLayoutWrapper's childCount is one.
+     */
+
+    RefPtr<GeometryNode> customGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto customPattern = customNode->GetPattern<CustomNodePattern>();
+    auto customLayoutAlgorithm = customPattern->CreateLayoutAlgorithm();
+    auto customLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(customNode, geometryNode, customNode->GetLayoutProperty());
+    EXPECT_FALSE(customLayoutWrapper == nullptr);
+    customLayoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(customLayoutAlgorithm));
+    parentLayoutWrapper->AppendChild(customLayoutWrapper);
+
+    MeasureLayoutParam layoutParam(AceType::RawPtr(parentLayoutWrapper));
+    layoutParam.CreateChildConstraint();
+    layoutParam.children_[0].CreateChildConstraint();
+    layoutParam.children_[0].UpdateSize(SizeF(1.0, 1.0));
+    ASSERT_NE(layoutParam.GetOrCreateChildByIndex(0), nullptr);
+    ASSERT_NE(layoutParam.children_[0].GetOrCreateChild(), nullptr);
+    EXPECT_EQ(layoutParam.GetChildByIndex(1), nullptr);
+    EXPECT_EQ(layoutParam.children_[0].GetChild(), nullptr);
+
+    layoutAlgorithm->Measure(AceType::RawPtr(parentLayoutWrapper));
+    layoutAlgorithm->Layout(AceType::RawPtr(parentLayoutWrapper));
+    DirtySwapConfig dirtySwapConfig;
+    customPattern->OnDirtyLayoutWrapperSwap(customLayoutWrapper, dirtySwapConfig);
+    EXPECT_EQ(parentLayoutWrapper->GetTotalChildCount(), CHILD_COUNT_1);
+}
+
+/**
+ * @tc.name: CustomTest031
+ * @tc.desc: MeasureLayoutParam Update.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MeasureLayoutParam.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<GeometryNode> childGeometryOne = AceType::MakeRefPtr<GeometryNode>();
+    auto childNodeOne = FrameNode::CreateFrameNode("childNodeOne", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto childWrapperOne =
+        AceType::MakeRefPtr<LayoutWrapperNode>(childNodeOne, childGeometryOne, childNodeOne->GetLayoutProperty());
+    RefPtr<GeometryNode> childGeometryTwo = AceType::MakeRefPtr<GeometryNode>();
+    auto childNodeTwo = FrameNode::CreateFrameNode("childNodeTwo", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto childWrapperTwo =
+        AceType::MakeRefPtr<LayoutWrapperNode>(childNodeTwo, childGeometryTwo, childNodeTwo->GetLayoutProperty());
+    layoutWrapper->AppendChild(childWrapperOne);
+    layoutWrapper->AppendChild(childWrapperTwo);
+    MeasureLayoutParam layoutParam(AceType::RawPtr(layoutWrapper));
+    ASSERT_NE(layoutParam.GetOrCreateChildByIndex(0), nullptr);
+
+    /**
+     * @tc.steps: step2. Create new layoutwrapper.
+     */
+    RefPtr<GeometryNode> testGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto testNode = FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto testWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(testNode, testGeometryNode, testNode->GetLayoutProperty());
+    RefPtr<GeometryNode> testGeometryOne = AceType::MakeRefPtr<GeometryNode>();
+    auto testNodeOne = FrameNode::CreateFrameNode("testNodeOne", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto testWrapperOne =
+        AceType::MakeRefPtr<LayoutWrapperNode>(testNodeOne, testGeometryOne, testNodeOne->GetLayoutProperty());
+    RefPtr<GeometryNode> testGeometryTwo = AceType::MakeRefPtr<GeometryNode>();
+    auto testNodeTwo = FrameNode::CreateFrameNode("testNodeTwo", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto testWrapperTwo =
+        AceType::MakeRefPtr<LayoutWrapperNode>(testNodeTwo, testGeometryTwo, testNodeTwo->GetLayoutProperty());
+    testWrapper->AppendChild(testWrapperOne);
+    testWrapper->AppendChild(testWrapperTwo);
+
+    /**
+     * @tc.steps: step3. call the function Update.
+     */
+    layoutParam.Update(AceType::RawPtr(testWrapper));
+    ASSERT_NE(layoutParam.GetOrCreateChildByIndex(0), nullptr);
+}
+
+/**
+ * @tc.name: CustomTest032
+ * @tc.desc: MeasureLayoutParam Update.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MeasureLayoutParam.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<GeometryNode> childGeometryOne = AceType::MakeRefPtr<GeometryNode>();
+    auto childNodeOne = FrameNode::CreateFrameNode("childNodeOne", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto childWrapperOne =
+        AceType::MakeRefPtr<LayoutWrapperNode>(childNodeOne, childGeometryOne, childNodeOne->GetLayoutProperty());
+    layoutWrapper->AppendChild(childWrapperOne);
+    MeasureLayoutParam layoutParam(AceType::RawPtr(layoutWrapper));
+    ASSERT_NE(layoutParam.GetOrCreateChildByIndex(0), nullptr);
+
+    /**
+     * @tc.steps: step2. Create new layoutwrapper.
+     */
+    RefPtr<GeometryNode> testGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto testNode = FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto testWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(testNode, testGeometryNode, testNode->GetLayoutProperty());
+    RefPtr<GeometryNode> testGeometryOne = AceType::MakeRefPtr<GeometryNode>();
+    auto testNodeOne = FrameNode::CreateFrameNode("testNodeOne", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto testWrapperOne =
+        AceType::MakeRefPtr<LayoutWrapperNode>(testNodeOne, testGeometryOne, testNodeOne->GetLayoutProperty());
+    RefPtr<GeometryNode> testGeometryTwo = AceType::MakeRefPtr<GeometryNode>();
+    auto testNodeTwo = FrameNode::CreateFrameNode("testNodeTwo", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto testWrapperTwo =
+        AceType::MakeRefPtr<LayoutWrapperNode>(testNodeTwo, testGeometryTwo, testNodeTwo->GetLayoutProperty());
+    testWrapper->AppendChild(testWrapperOne);
+    testWrapper->AppendChild(testWrapperTwo);
+
+    /**
+     * @tc.steps: step3. call the function Update.
+     */
+    layoutParam.Update(AceType::RawPtr(testWrapper));
+    ASSERT_NE(layoutParam.GetOrCreateChildByIndex(0), nullptr);
+}
+
+/**
+ * @tc.name: CustomTest033
+ * @tc.desc: MeasureLayoutParam Update.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MeasureLayoutParam.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    RefPtr<GeometryNode> childGeometryOne = AceType::MakeRefPtr<GeometryNode>();
+    auto childNodeOne = FrameNode::CreateFrameNode("childNodeOne", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto childWrapperOne =
+        AceType::MakeRefPtr<LayoutWrapperNode>(childNodeOne, childGeometryOne, childNodeOne->GetLayoutProperty());
+    RefPtr<GeometryNode> childGeometryTwo = AceType::MakeRefPtr<GeometryNode>();
+    auto childNodeTwo = FrameNode::CreateFrameNode("childNodeTwo", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto childWrapperTwo =
+        AceType::MakeRefPtr<LayoutWrapperNode>(childNodeTwo, childGeometryTwo, childNodeTwo->GetLayoutProperty());
+    layoutWrapper->AppendChild(childWrapperOne);
+    layoutWrapper->AppendChild(childWrapperTwo);
+    MeasureLayoutParam layoutParam(AceType::RawPtr(layoutWrapper));
+    ASSERT_NE(layoutParam.GetOrCreateChildByIndex(0), nullptr);
+
+    /**
+     * @tc.steps: step2. Create new layoutwrapper.
+     */
+    RefPtr<GeometryNode> testGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto testNode = FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto testWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(testNode, testGeometryNode, testNode->GetLayoutProperty());
+    RefPtr<GeometryNode> testGeometryOne = AceType::MakeRefPtr<GeometryNode>();
+    auto testNodeOne = FrameNode::CreateFrameNode("testNodeOne", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto testWrapperOne =
+        AceType::MakeRefPtr<LayoutWrapperNode>(testNodeOne, testGeometryOne, testNodeOne->GetLayoutProperty());
+    testWrapper->AppendChild(testWrapperOne);
+
+    /**
+     * @tc.steps: step3. call the function Update.
+     */
+    layoutParam.Update(AceType::RawPtr(testWrapper));
+    ASSERT_NE(layoutParam.GetOrCreateChildByIndex(0), nullptr);
+}
+
+/**
+ * @tc.name: CustomTest034
+ * @tc.desc: CustomNodeBase.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create customNode.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    EXPECT_TRUE(customNode != nullptr && customNode->GetTag() == V2::JS_VIEW_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. call the function FireRecycleRenderFunc.
+     */
+    bool appearFuncFlag = true;
+    auto appearFunc = [&appearFuncFlag]() { appearFuncFlag = !appearFuncFlag; };
+    customNode->SetAppearFunction(std::move(appearFunc));
+    bool didBuildFuncFlag = true;
+    auto didBuildFunc = [&didBuildFuncFlag]() { didBuildFuncFlag = !didBuildFuncFlag; };
+    customNode->SetDidBuildFunction(std::move(didBuildFunc));
+    bool recycleRenderFuncFlag = true;
+    auto recycleRenderFunc = [&recycleRenderFuncFlag]() { recycleRenderFuncFlag = !recycleRenderFuncFlag; };
+    customNode->SetRecycleRenderFunc(std::move(recycleRenderFunc));
+    customNode->FireRecycleRenderFunc();
+    customNode.Reset();
+    EXPECT_FALSE(appearFuncFlag);
+    EXPECT_FALSE(didBuildFuncFlag);
+    EXPECT_FALSE(recycleRenderFuncFlag);
+}
+
+/**
+ * @tc.name: CustomTest035
+ * @tc.desc: CustomNodeBase.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest035, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create customNode.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    EXPECT_TRUE(customNode != nullptr && customNode->GetTag() == V2::JS_VIEW_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. call the function FireRecycleRenderFunc.
+     */
+    bool appearFuncFlag = true;
+    auto appearFunc = [&appearFuncFlag]() { appearFuncFlag = !appearFuncFlag; };
+    customNode->SetAppearFunction(std::move(appearFunc));
+    bool recycleRenderFuncFlag = true;
+    auto recycleRenderFunc = [&recycleRenderFuncFlag]() { recycleRenderFuncFlag = !recycleRenderFuncFlag; };
+    customNode->SetRecycleRenderFunc(std::move(recycleRenderFunc));
+    customNode->FireRecycleRenderFunc();
+    customNode.Reset();
+    EXPECT_FALSE(appearFuncFlag);
+    EXPECT_FALSE(recycleRenderFuncFlag);
+}
+
+/**
+ * @tc.name: CustomTest036
+ * @tc.desc: CustomMeasureLayoutNode::FireOnUpdateParam.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest036, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create customNode.
+     */
+    auto customNode = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(
+        ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    CustomTitleNode titleNode(1, "title");
+    titleNode.FireAppTitleCallback("abc");
+    EXPECT_TRUE(customNode != nullptr && customNode->GetTag() == V2::JS_VIEW_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. call the function FireOnUpdateParam.
+     */
+    bool updateParamFuncFlag = true;
+    auto updateParamFunc = [&updateParamFuncFlag](
+                               LayoutWrapper* layoutWrapper) { updateParamFuncFlag = !updateParamFuncFlag; };
+    customNode->SetUpdateParamFunc(std::move(updateParamFunc));
+    RefPtr<GeometryNode> testGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto testNode = FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto testWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(testNode, testGeometryNode, testNode->GetLayoutProperty());
+    EXPECT_TRUE(customNode->FireOnUpdateParam(AceType::RawPtr(testWrapper)));
+}
+
+/**
+ * @tc.name: CustomTest037
+ * @tc.desc: CustomNodeLayoutAlgorithm::Measure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest037, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CustomNodeLayoutAlgorithm and frameNode.
+     */
+    CustomNodeLayoutAlgorithm test = CustomNodeLayoutAlgorithm(nullptr);
+    auto frameNode = CreateNode(V2::TEXT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. call the function Measure.
+     */
+    bool measureFuncFlag = true;
+    auto measureFunc = [&measureFuncFlag](LayoutWrapper* layoutWrapper) { measureFuncFlag = !measureFuncFlag; };
+    auto customNode = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(
+        ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    EXPECT_TRUE(customNode != nullptr && customNode->GetTag() == V2::JS_VIEW_ETS_TAG);
+    customNode->SetMeasureFunction(std::move(measureFunc));
+    auto layoutWrapper = customNode->CreateLayoutWrapper();
+    test.Measure(AceType::RawPtr(layoutWrapper));
+    EXPECT_FALSE(measureFuncFlag);
 }
 } // namespace OHOS::Ace::NG

@@ -49,6 +49,7 @@ const int32_t RET_OK = 0;
 constexpr float START = 50.0f;
 constexpr float MAIN_DELTA = 80.0f;
 constexpr float DEFAULT_SIZE_LENGTH = 20.0f;
+constexpr float DEFAULT_SIZE_LENGTH_NEGATIVE = -20.0f;
 const std::string NAV_BAR_NODE_TITLE = "title";
 const std::string NAV_BAR_NODE_MENU = "menu";
 const std::string NAV_BAR_NODE_BACK_BUTTON = "back_button";
@@ -512,13 +513,19 @@ HWTEST_F(NavBarTestNg, NarBarPattern002, TestSize.Level1)
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = AceType::MakeRefPtr<FrameNode>(frameTag, nodeId, AceType::MakeRefPtr<Pattern>());
 
+    auto navigationGroupNode = FrameNode::CreateFrameNode("NavigationGroupNode", 33,
+        AceType::MakeRefPtr<NavigationPattern>());
+    EXPECT_NE(navigationGroupNode, nullptr);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    EXPECT_NE(navigationPattern, nullptr);
+
     GestureEvent info;
     auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
-    navBarpattern_->InitPanEvent(gestureHub);
-    auto panEvent = navBarpattern_->panEvent_;
+    navigationPattern->InitPanEvent(gestureHub);
+    auto panEvent = navigationPattern->panEvent_;
     EXPECT_NE(panEvent, nullptr);
 }
 
@@ -593,31 +600,9 @@ HWTEST_F(NavBarTestNg, NavBarPattern005, TestSize.Level1)
     ASSERT_NE(barItemNode, nullptr);
     barItemNode->MountToParent(buttonNode);
     barItemNode->SetIsMoreItemNode(true);
-    navBarNode_->SetIsTitleMenuNodeShowing(true);
-
-    bool isItemActionFired = false;
-    auto barItemEventHub = barItemNode->GetEventHub<BarItemEventHub>();
-    ASSERT_NE(barItemEventHub, nullptr);
-    barItemEventHub->SetItemAction([&]() { isItemActionFired = true; });
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-
-    /**
-     * @tc.steps: step3. call OnWindowSizeChanged func when PrevMenuIsCustom is true
-     * @tc.expected: Set isItemActionFired is true
-     */
-    navBarNode_->UpdatePrevMenuIsCustom(true);
-    navBarpattern_->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::ROTATION);
-    EXPECT_TRUE(isItemActionFired);
-
-    /**
-     * @tc.steps: step4. call OnWindowSizeChanged func when PrevMenuIsCustom is false
-     * @tc.expected: isItemActionFired is true
-     */
-    navBarNode_->UpdatePrevMenuIsCustom(false);
-    navBarpattern_->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::ROTATION);
-    EXPECT_TRUE(isItemActionFired);
 }
 
 /**
@@ -1151,9 +1136,15 @@ HWTEST_F(NavBarTestNg, NavBarPattern021, TestSize.Level1)
     navBarPattern->isHideTitlebar_ = true;
     navBarPattern->titleMode_ = NavigationTitleMode::MINI;
 
+    auto navigationGroupNode = FrameNode::CreateFrameNode("NavigationGroupNode", 33,
+        AceType::MakeRefPtr<NavigationPattern>());
+    EXPECT_NE(navigationGroupNode, nullptr);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    EXPECT_NE(navigationPattern, nullptr);
+
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-    navBarPattern->InitPanEvent(gestureHub);
+    navigationPattern->InitPanEvent(gestureHub);
 }
 
 /**
@@ -1183,6 +1174,120 @@ HWTEST_F(NavBarTestNg, NavBarPattern022, TestSize.Level1)
         .edges = SAFE_AREA_TYPE_NONE});
     EXPECT_EQ(opts.type, SAFE_AREA_TYPE_SYSTEM);
     EXPECT_EQ(opts.edges, SAFE_AREA_EDGE_ALL);
+}
+
+/**
+ * @tc.name: NavBarPattern023
+ * @tc.desc: Test GetShowMenuOffset function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavBarPattern023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NavBar and Titlebar
+     */
+    CreateNavBar();
+    CreateTitlebar();
+    navBarNode_->SetTitleBarNode(titleBarNode_);
+
+    /**
+     * @tc.steps: step2. Create related objects for NavBar
+     */
+    auto size = SizeF(DEFAULT_SIZE_LENGTH, DEFAULT_SIZE_LENGTH);
+    auto navGeometryNode = navBarNode_->GetGeometryNode();
+    ASSERT_NE(navGeometryNode, nullptr);
+    navGeometryNode->SetFrameSize(size);
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto toolBarNode = AceType::MakeRefPtr<FrameNode>(
+        FRAME_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(toolBarNode, nullptr);
+    navBarNode_->SetToolBarNode(toolBarNode);
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<InnerMenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MULTI_MENU); });
+    ASSERT_NE(menuNode, nullptr);
+    titleBarNode_->SetMenu(menuNode);
+    navBarNode_->SetMenu(menuNode);
+    auto buttonNode = AceType::MakeRefPtr<FrameNode>(
+        FRAME_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(buttonNode, nullptr);
+    buttonNode->MountToParent(menuNode);
+    auto barItemNode = AceType::MakeRefPtr<BarItemNode>(FRAME_ITEM_ETS_TAG, nodeId);
+    ASSERT_NE(barItemNode, nullptr);
+    barItemNode->MountToParent(buttonNode);
+    barItemNode->SetIsMoreItemNode(true);
+    auto imageNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
+    imageNode->MarkModifyDone();
+    barItemNode->SetIconNode(imageNode);
+    barItemNode->AddChild(imageNode);
+    auto imgOffset = navBarpattern_->GetShowMenuOffset(barItemNode, menuNode);
+    EXPECT_FLOAT_EQ(imgOffset.GetY(), imgOffset.GetX());
+    auto layoutProperty = toolBarNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    auto imgOffset2 = navBarpattern_->GetShowMenuOffset(barItemNode, menuNode);
+    EXPECT_FLOAT_EQ(imgOffset2.GetY(), imgOffset2.GetX());
+}
+
+/**
+ * @tc.name: NavBarPattern024
+ * @tc.desc: Test CanCoordScrollUp function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavBarPattern024, TestSize.Level1)
+{
+    CreateNavBar();
+    CreateTitlebar();
+    navBarNode_->SetTitleBarNode(titleBarNode_);
+    auto size = SizeF(DEFAULT_SIZE_LENGTH, 0.0f);
+    auto navGeometryNode = navBarNode_->GetGeometryNode();
+    ASSERT_NE(navGeometryNode, nullptr);
+    navGeometryNode->SetFrameSize(size);
+    auto canCoordScrollUp = navBarpattern_->CanCoordScrollUp(DEFAULT_SIZE_LENGTH);
+    EXPECT_FALSE(canCoordScrollUp);
+    auto canCoordScrollUp2 = navBarpattern_->CanCoordScrollUp(DEFAULT_SIZE_LENGTH_NEGATIVE);
+    EXPECT_FALSE(canCoordScrollUp2);
+}
+
+/**
+ * @tc.name: NavBarPattern025
+ * @tc.desc: Test SetNavBarMask function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavBarPattern025, TestSize.Level1)
+{
+    TestParameters testParameters;
+    InitializationParameters(testParameters);
+    auto navigationPattern = testParameters.navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationMode(NavigationMode::SPLIT);
+    testParameters.theme->navBarUnfocusColor_ = Color::RED;
+    navBarpattern_->SetNavBarMask(false);
+    auto renderContext = navBarNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto maskProperty = renderContext->GetProgressMaskValue();
+    auto isTransparent = maskProperty->GetColor() == Color::TRANSPARENT ? true : false;
+    EXPECT_FALSE(isTransparent);
+}
+
+/**
+ * @tc.name: NavBarPattern026
+ * @tc.desc: Test SetNavBarMask function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavBarTestNg, NavBarPattern026, TestSize.Level1)
+{
+    TestParameters testParameters;
+    InitializationParameters(testParameters);
+    auto navigationPattern = testParameters.navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationMode(NavigationMode::SPLIT);
+    navBarpattern_->SetNavBarMask(true);
+    auto renderContext = navBarNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto maskProperty = renderContext->GetProgressMaskValue();
+    auto isTransparent = maskProperty->GetColor() == Color::TRANSPARENT ? true : false;
+    EXPECT_TRUE(isTransparent);
 }
 
 /**

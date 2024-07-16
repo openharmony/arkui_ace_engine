@@ -26,8 +26,6 @@
 #include "core/event/ace_events.h"
 namespace OHOS::Ace::NG {
 
-enum HandleIndex { FIRST, SECOND, CARET };
-
 class TextFieldSelectOverlay : public BaseTextSelectOverlay {
     DECLARE_ACE_TYPE(TextFieldSelectOverlay, BaseTextSelectOverlay);
 
@@ -39,13 +37,16 @@ public:
     bool PreProcessOverlay(const OverlayRequest& request) override;
     bool CheckHandleVisible(const RectF& paintRect) override;
 
-    bool OnlyAllowedPasteNonEmptyString() override
+    std::string GetPasteMimeType() override
     {
-        return true;
+        return pasteMimeType_;
     }
 
     void OnResetTextSelection() override;
     void AfterCloseOverlay() override;
+    RectF GetFirstHandleLocalPaintRect() override;
+    RectF GetSecondHandleLocalPaintRect() override;
+    void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag) override;
 
     // override SelectOverlayHolder
     std::optional<SelectHandleInfo> GetFirstHandleInfo() override;
@@ -78,13 +79,14 @@ public:
     }
 
 private:
-    std::optional<SelectHandleInfo> GetHandleInfo(HandleIndex handlIndex);
+    std::optional<SelectHandleInfo> GetHandleInfo(const RectF& handlePaintRect);
     void UpdatePattern(const OverlayRequest& request);
     int32_t GetCaretPositionOnHandleMove(const OffsetF& localOffset);
     int32_t GetTextAreaCaretPosition(const OffsetF& localOffset);
     int32_t GetTextInputCaretPosition(const OffsetF& localOffset);
     void CloseMagnifier();
     SourceType lastSourceType_ = SourceType::NONE;
+    std::string pasteMimeType_ = "text/plain";
 };
 
 } // namespace OHOS::Ace::NG

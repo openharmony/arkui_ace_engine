@@ -209,7 +209,7 @@ void RefreshPattern::InitProgressNode()
         progressPaintProperty->UpdateColor(layoutProperty->GetProgressColorValue());
     }
     layoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
-    host->AddChild(progressChild_, -1);
+    host->AddChild(progressChild_, 0);
     if (hasLoadingText_) {
         InitProgressColumn();
     }
@@ -260,7 +260,7 @@ void RefreshPattern::InitProgressColumn()
     UpdateLoadingTextOpacity(0.0f);
 
     columnNode_->AddChild(loadingTextNode_, -1);
-    host->AddChild(columnNode_);
+    host->AddChild(columnNode_, 0);
 }
 
 void RefreshPattern::OnColorConfigurationUpdate()
@@ -691,7 +691,7 @@ void RefreshPattern::UpdateScrollTransition(float scrollOffset)
         return;
     }
     // Need to search for frameNode and skip ComponentNode
-    auto childNode = host->GetFirstChild();
+    auto childNode = host->GetLastChild();
     while (!AceType::InstanceOf<FrameNode>(childNode) && !childNode->GetChildren().empty()) {
         childNode = childNode->GetFirstChild();
     }
@@ -1167,7 +1167,7 @@ void RefreshPattern::OnScrollStartRecursive(float position, float velocity)
     }
 }
 
-bool RefreshPattern::HandleScrollVelocity(float velocity)
+bool RefreshPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child)
 {
     auto parent = GetNestedScrollParent();
     auto nestedScroll = GetNestedScroll();

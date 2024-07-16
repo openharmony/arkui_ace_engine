@@ -45,7 +45,9 @@ bool SystemProperties::traceInputEventEnable_ = false;
 bool SystemProperties::stateManagerEnable_ = false;
 bool SystemProperties::buildTraceEnable_ = false;
 bool SystemProperties::syncDebugTraceEnable_ = false;
+bool SystemProperties::pixelRoundEnable_ = true;
 bool SystemProperties::textTraceEnable_ = false;
+bool SystemProperties::syntaxTraceEnable_ = false;
 bool SystemProperties::accessTraceEnable_ = false;
 bool SystemProperties::accessibilityEnabled_ = false;
 bool SystemProperties::isRound_ = false;
@@ -95,6 +97,7 @@ bool SystemProperties::navigationBlurEnabled_ = true;
 bool SystemProperties::gridCacheEnabled_ = false;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 bool SystemProperties::acePerformanceMonitorEnable_ = false;
+bool SystemProperties::aceCommercialLogEnable_ = false;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 bool SystemProperties::faultInjectEnabled_ = false;
 bool SystemProperties::imageFrameworkEnable_ = false;
@@ -246,11 +249,6 @@ bool SystemProperties::IsFormAnimationLimited()
 bool SystemProperties::GetDebugPixelMapSaveEnabled()
 {
     return false;
-}
-
-bool SystemProperties::GetPixelRoundEnable()
-{
-    return true;
 }
 
 bool SystemProperties::GetResourceDecoupling()

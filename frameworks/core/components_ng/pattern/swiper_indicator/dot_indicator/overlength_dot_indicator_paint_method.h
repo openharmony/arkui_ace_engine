@@ -61,24 +61,9 @@ public:
         animationEndIndex_ = animationEndIndex;
     }
 
-    void SetCurrentSelectedIndex(int32_t currentSelectedIndex)
+    void SetKeepStatus(bool keepStatus)
     {
-        currentSelectedIndex_ = currentSelectedIndex;
-    }
-
-    void SetTargetSelectedIndex(int32_t targetSelectedIndex)
-    {
-        targetSelectedIndex_ = targetSelectedIndex;
-    }
-
-    void SetCurrentOverlongType(OverlongType currentOverlongType)
-    {
-        currentOverlongType_ = currentOverlongType;
-    }
-
-    void SetTargetOverlongType(OverlongType targetOverlongType)
-    {
-        targetOverlongType_ = targetOverlongType;
+        keepStatus_ = keepStatus;
     }
 
 private:
@@ -105,11 +90,8 @@ private:
     int32_t realItemCount_ = 0;
     int32_t animationStartIndex_ = 0;
     int32_t animationEndIndex_ = 0;
+    bool keepStatus_ = false;
     std::pair<float, float> overlongSelectedCenterX_ = { 0.0f, 0.0f};
-    int32_t currentSelectedIndex_ = 0;
-    int32_t targetSelectedIndex_ = 0;
-    OverlongType currentOverlongType_ = OverlongType::NONE;
-    OverlongType targetOverlongType_ = OverlongType::NONE;
     ACE_DISALLOW_COPY_AND_MOVE(OverlengthDotIndicatorPaintMethod);
 };
 } // namespace OHOS::Ace::NG

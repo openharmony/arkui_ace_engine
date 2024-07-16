@@ -217,6 +217,33 @@ public:
         ViewAbstract::SetPadding(paddings);
     }
 
+    void SetPaddings(const NG::PaddingProperty& paddings) override
+    {
+        ViewAbstract::SetPadding(paddings);
+    }
+
+    void ResetSafeAreaPadding() override
+    {
+        ViewAbstract::ResetSafeAreaPadding();
+    }
+
+    void SetSafeAreaPadding(const CalcDimension& value) override
+    {
+        if (value.Unit() == DimensionUnit::CALC) {
+            ViewAbstract::SetSafeAreaPadding(NG::CalcLength(value.CalcValue()));
+        } else {
+            // padding must great or equal zero.
+            ViewAbstract::SetSafeAreaPadding(NG::CalcLength(value.IsNonNegative() ? value : CalcDimension()));
+        }
+    }
+
+    void SetSafeAreaPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
+        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override
+    {
+        NG::PaddingProperty paddings = NG::ConvertToCalcPaddingProperty(top, bottom, left, right);
+        ViewAbstract::SetSafeAreaPadding(paddings);
+    }
+
     void SetMargin(const CalcDimension& value) override
     {
         if (value.Unit() == DimensionUnit::CALC) {
@@ -261,6 +288,11 @@ public:
         ViewAbstract::SetMargin(margins);
     }
 
+    void SetMargins(const NG::MarginProperty& margins) override
+    {
+        ViewAbstract::SetMargin(margins);
+    }
+
     void SetBorderRadius(const Dimension& value) override
     {
         ViewAbstract::SetBorderRadius(value);
@@ -275,6 +307,11 @@ public:
         borderRadius.radiusBottomLeft = radiusBottomLeft;
         borderRadius.radiusBottomRight = radiusBottomRight;
         borderRadius.multiValued = true;
+        ViewAbstract::SetBorderRadius(borderRadius);
+    }
+
+    void SetBorderRadius(const NG::BorderRadiusProperty& borderRadius) override
+    {
         ViewAbstract::SetBorderRadius(borderRadius);
     }
 
@@ -294,6 +331,11 @@ public:
         ViewAbstract::SetBorderColor(borderColors);
     }
 
+    void SetBorderColor(const NG::BorderColorProperty& borderColors) override
+    {
+        ViewAbstract::SetBorderColor(borderColors);
+    }
+
     void SetBorderWidth(const Dimension& value) override
     {
         ViewAbstract::SetBorderWidth(value);
@@ -308,6 +350,18 @@ public:
         borderWidth.topDimen = top;
         borderWidth.bottomDimen = bottom;
         borderWidth.multiValued = true;
+        ViewAbstract::SetBorderWidth(borderWidth);
+    }
+
+    void SetBorderWidth(const std::optional<Dimension>& start, const std::optional<Dimension>& end,
+        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom, bool isLocalized) override
+    {
+        if (!isLocalized) {
+            return;
+        }
+        NG::BorderWidthProperty borderWidth {
+            .startDimen = start, .endDimen = end, .topDimen = top, .bottomDimen = bottom, .multiValued = true
+        };
         ViewAbstract::SetBorderWidth(borderWidth);
     }
 
@@ -380,6 +434,11 @@ public:
         ViewAbstract::SetOuterBorderRadius(borderRadius);
     }
 
+    void SetOuterBorderRadius(const NG::BorderRadiusProperty& borderRadius) override
+    {
+        ViewAbstract::SetOuterBorderRadius(borderRadius);
+    }
+
     void SetOuterBorderColor(const Color& value) override
     {
         ViewAbstract::SetOuterBorderColor(value);
@@ -393,6 +452,11 @@ public:
         borderColors.topColor = colorTop;
         borderColors.bottomColor = colorBottom;
         borderColors.multiValued = true;
+        ViewAbstract::SetOuterBorderColor(borderColors);
+    }
+
+    void SetOuterBorderColor(const NG::BorderColorProperty& borderColors) override
+    {
         ViewAbstract::SetOuterBorderColor(borderColors);
     }
 
@@ -433,19 +497,19 @@ public:
     void SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset) override
     {
         CHECK_NULL_VOID(borderImage);
-        if (bitset | BorderImage::SOURCE_BIT) {
+        if (bitset & BorderImage::SOURCE_BIT) {
             ViewAbstract::SetBorderImageSource(borderImage->GetSrc());
         }
-        if (bitset | BorderImage::OUTSET_BIT) {
+        if (bitset & BorderImage::OUTSET_BIT) {
             ViewAbstract::SetHasBorderImageOutset(true);
         }
-        if (bitset | BorderImage::SLICE_BIT) {
+        if (bitset & BorderImage::SLICE_BIT) {
             ViewAbstract::SetHasBorderImageSlice(true);
         }
-        if (bitset | BorderImage::REPEAT_BIT) {
+        if (bitset & BorderImage::REPEAT_BIT) {
             ViewAbstract::SetHasBorderImageRepeat(true);
         }
-        if (bitset | BorderImage::WIDTH_BIT) {
+        if (bitset & BorderImage::WIDTH_BIT) {
             ViewAbstract::SetHasBorderImageWidth(true);
         }
         ViewAbstract::SetBorderImage(borderImage);
@@ -625,9 +689,10 @@ public:
         ViewAbstract::SetSharedTransition(shareId, option);
     }
 
-    void SetGeometryTransition(const std::string& id, bool followWithoutTransition = false) override
+    void SetGeometryTransition(const std::string& id,
+        bool followWithoutTransition = false, bool doRegisterSharedTransition = true) override
     {
-        ViewAbstract::SetGeometryTransition(id, followWithoutTransition);
+        ViewAbstract::SetGeometryTransition(id, followWithoutTransition, doRegisterSharedTransition);
     }
 
     void SetMotionPath(const MotionPathOption& option) override
@@ -891,6 +956,11 @@ public:
     void SetOnHover(OnHoverFunc&& onHoverEventFunc) override
     {
         ViewAbstract::SetOnHover(std::move(onHoverEventFunc));
+    }
+
+    void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) override
+    {
+        ViewAbstract::SetOnAccessibilityHover(std::move(onAccessibilityHoverEventFunc));
     }
 
     void SetOnDelete(std::function<void()>&& onDeleteCallback) override {}
@@ -1164,6 +1234,8 @@ public:
     void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) override;
 
+    void BindDragWithContextMenuParams(const NG::MenuParam& menuParam) override;
+
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,
@@ -1237,6 +1309,11 @@ public:
     void DisableOnHover() override
     {
         ViewAbstract::DisableOnHover();
+    }
+
+    void DisableOnAccessibilityHover() override
+    {
+        ViewAbstract::DisableOnAccessibilityHover();
     }
 
     void DisableOnMouse() override

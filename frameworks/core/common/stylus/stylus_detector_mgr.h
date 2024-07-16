@@ -42,8 +42,9 @@ public:
     static StylusDetectorMgr* GetInstance();
 
     bool IsEnable() override;
-    bool RegisterStylusInteractionListener(const std::shared_ptr<IStylusDetectorCallback>& callback) override;
-    void UnRegisterStylusInteractionListener() override;
+    bool RegisterStylusInteractionListener(
+        const std::string& bundleName, const std::shared_ptr<IStylusDetectorCallback>& callback) override;
+    void UnRegisterStylusInteractionListener(const std::string& bundleName) override;
     bool Notify(const NotifyInfo& notifyInfo) override;
 
     bool IsNeedInterceptedTouchEvent(const TouchEvent& touchEvent);
@@ -74,6 +75,8 @@ private:
     };
 
     bool IsStylusTouchEvent(const TouchEvent& touchEvent) const;
+    bool IsHitCleanNodeResponseArea(
+        const NG::PointF& point, const RefPtr<NG::FrameNode>& frameNode, uint64_t nanoTimestamp);
 
     RefPtr<NG::FrameNode> FindTextInputFrameNodeByPosition(float globalX, float globalY);
 

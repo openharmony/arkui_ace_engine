@@ -88,6 +88,7 @@ public:
     void UpdateCounterBorderStyle(uint32_t& textLength, uint32_t& maxLength, LayoutWrapper* layoutWrapper);
     void UpdateCounterNode(uint32_t textLength, uint32_t maxLength, const LayoutConstraintF& contentConstraint,
         LayoutWrapper* layoutWrapper);
+    bool DidExceedMaxLines(const SizeF& maxSize) override;
     bool IsAdaptExceedLimit(const SizeF& maxSize) override;
 
 protected:
@@ -128,8 +129,6 @@ protected:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     bool IsNeedAdaptFontSize(const TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& layoutProperty,
         const LayoutConstraintF& contentConstraint);
-    bool AdaptFontSizeForLineHeight(TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& layoutProperty,
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     bool AdaptInlineFocusFontSize(TextStyle& textStyle, const std::string& content, const Dimension& stepUnit,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
     bool AdaptInlineFocusMinFontSize(TextStyle& textStyle, const std::string& content, const Dimension& stepUnit,
@@ -153,6 +152,8 @@ protected:
     Dimension textIndent_ = 0.0_px;
     float indent_ = 0.0f;
 private:
+    void InlineFocusMeasure(const LayoutConstraintF& contentConstraint,
+        LayoutWrapper* layoutWrapper, double& safeBoundary, float& contentWidth);
     static void UpdateTextStyleMore(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
         TextStyle& textStyle, bool isDisabled);
@@ -184,10 +185,9 @@ private:
         const RefPtr<GeometryNode>& textGeometryNode, float& countX, float errTextWidth);
     void HandleLTRTextArea(const std::unique_ptr<GeometryProperty>& content,
         const RefPtr<GeometryNode>& textGeometryNode, float &countX);
-    float CalculateLongestLine(LayoutWrapper* layoutWrapper);
     float CalculateContentWidth(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
-        float imageWidth, float longestLine);
-    float CalculateContentHeight(const LayoutConstraintF& contentConstraint, float longestLine);
+        float imageWidth);
+    float CalculateContentHeight(const LayoutConstraintF& contentConstraint);
     LayoutConstraintF BuildInfinityLayoutConstraint(const LayoutConstraintF& contentConstraint);
     LayoutConstraintF BuildInlineFocusLayoutConstraint(const LayoutConstraintF& contentConstraint,
         LayoutWrapper* layoutWrapper);

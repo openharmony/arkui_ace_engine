@@ -1450,4 +1450,113 @@ HWTEST_F(WaterFlowSegmentTest, ResetSections001, TestSize.Level1)
     EXPECT_EQ(info->startIndex_, 0);
     EXPECT_EQ(info->endIndex_, 3);
 }
+
+/**
+ * @tc.name: Jump001
+ * @tc.desc: Test jump function after updating section.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, Jump001, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(60);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_5);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+
+    UpdateCurrentOffset(-500.0f);
+    EXPECT_EQ(info->currentOffset_, -500.0f);
+    EXPECT_EQ(info->startIndex_, 5);
+    EXPECT_EQ(info->endIndex_, 13);
+    EXPECT_EQ(info->childrenCount_, 60);
+
+    std::vector<WaterFlowSections::Section> newSection = { WaterFlowSections::Section {
+        .itemsCount = 10, .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC, .crossCount = 5, .margin = MARGIN_1 } };
+    secObj->ChangeData(1, 1, newSection);
+    AddItems(5);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    pattern_->ScrollToIndex(0);
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(info->currentOffset_, 0);
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 10);
+    EXPECT_EQ(info->childrenCount_, 65);
+}
+
+/**
+ * @tc.name: Jump002
+ * @tc.desc: Test jump function after updateIndex change.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, Jump002, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(60);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_5);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+
+    UpdateCurrentOffset(-500.0f);
+    EXPECT_EQ(info->currentOffset_, -500.0f);
+    EXPECT_EQ(info->startIndex_, 5);
+    EXPECT_EQ(info->endIndex_, 13);
+    EXPECT_EQ(info->childrenCount_, 60);
+
+    frameNode_->ChildrenUpdatedFrom(10);
+    pattern_->ScrollToIndex(0);
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(info->currentOffset_, 0);
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 10);
+}
+
+/**
+ * @tc.name: EstimateContentHeight001
+ * @tc.desc: Test EstimateContentHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, EstimateContentHeight001, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(60);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_5);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+
+    UpdateCurrentOffset(-500.0f);
+    EXPECT_EQ(info->currentOffset_, -500.0f);
+    EXPECT_EQ(info->startIndex_, 5);
+    EXPECT_EQ(info->endIndex_, 13);
+
+    int32_t childCnt = static_cast<int32_t>(info->itemInfos_.size());
+    EXPECT_EQ(info->EstimateContentHeight(), info->maxHeight_ / childCnt * info->childrenCount_);
+
+    UpdateCurrentOffset(-9000.0f);
+    childCnt = static_cast<int32_t>(info->itemInfos_.size());
+    EXPECT_EQ(info->endIndex_, 59);
+    EXPECT_EQ(info->EstimateContentHeight(), info->maxHeight_ / childCnt * info->childrenCount_);
+}
 } // namespace OHOS::Ace::NG

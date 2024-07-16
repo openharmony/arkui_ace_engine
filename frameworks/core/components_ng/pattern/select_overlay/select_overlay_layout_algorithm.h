@@ -35,6 +35,9 @@ struct AvoidStrategyMember {
     double keyboardInsertStart = 0.0;
     bool hasKeyboard = false;
     bool downHandleIsReallyShow = true;
+    double selectAreaTop = 0.0;
+    double selectAndRootRectAreaTop = 0.0;
+    double selectAndRootRectAreaBottom = 0.0;
 };
 
 class ACE_EXPORT SelectOverlayLayoutAlgorithm : public BoxLayoutAlgorithm {
@@ -83,6 +86,9 @@ public:
         return hideMoreOrBack_;
     }
 
+    void MeasureChild(LayoutWrapper* layoutWrapper);
+    void LayoutChild(LayoutWrapper* layoutWrapper);
+
 private:
     OffsetF ComputeSelectMenuPosition(LayoutWrapper* layoutWrapper);
     OffsetF ComputeExtensionMenuPosition(LayoutWrapper* layoutWrapper, const OffsetF& offset);
@@ -91,7 +97,7 @@ private:
     void AdjustMenuTooFarAway(OffsetF& menuOffset, const RectF& menuRect);
     void AdjustMenuInRootRect(OffsetF& menuOffset, const SizeF& menuSize, const SizeF& rootSize);
     OffsetF CalculateCustomMenuByMouseOffset(LayoutWrapper* layoutWrapper);
-    OffsetF NewMenuAvoidStrategy(float menuWidth, float menuHeight);
+    OffsetF NewMenuAvoidStrategy(LayoutWrapper* layoutWrapper, float menuWidth, float menuHeight);
     void CalculateCustomMenuLayoutConstraint(LayoutWrapper* layoutWrapper, LayoutConstraintF& layoutConstraint);
     void CheckHideBackOrMoreButton(const RefPtr<LayoutWrapper>& extensionMenu, const RefPtr<LayoutWrapper>& button);
     void NewMenuAvoidStrategyGetY(const AvoidStrategyMember& avoidStrategyMember, float& offsetY);

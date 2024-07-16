@@ -27,6 +27,7 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
@@ -262,7 +263,7 @@ void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& n
     DoAddChild(iter, newNode, false, false);
 }
 
-void UINode::Clean(bool cleanDirectly, bool allowTransition)
+void UINode::Clean(bool cleanDirectly, bool allowTransition, int32_t branchId)
 {
     bool needSyncRenderTree = false;
     int32_t index = 0;
@@ -281,7 +282,7 @@ void UINode::Clean(bool cleanDirectly, bool allowTransition)
             needSyncRenderTree = true;
         } else {
             // else move child into disappearing children, skip syncing render tree
-            AddDisappearingChild(child, index);
+            AddDisappearingChild(child, index, branchId);
         }
         ++index;
     }
@@ -472,6 +473,9 @@ void UINode::GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const
 void UINode::GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
 {
     for (const auto& uiChild : GetChildren()) {
+        if (uiChild && !uiChild->IsOnMainTree()) {
+            continue;
+        }
         auto frameChild = AceType::DynamicCast<FrameNode>(uiChild.GetRawPtr());
         if (frameChild && frameChild->GetFocusType() != FocusType::DISABLE) {
             const auto focusHub = frameChild->GetFocusHub();
@@ -665,6 +669,10 @@ bool UINode::IsAutoFillContainerNode()
 
 void UINode::DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer)
 {
+    auto frameNode = AceType::DynamicCast<FrameNode>(this);
+    if (frameNode && !frameNode->IsVisible()) {
+        return;
+    }
     DumpViewDataPageNode(viewDataWrap);
     for (const auto& item : GetChildren()) {
         if (!item) {
@@ -679,6 +687,10 @@ void UINode::DumpViewDataPageNodes(RefPtr<ViewDataWrap> viewDataWrap, bool skipS
 
 bool UINode::NeedRequestAutoSave()
 {
+    auto frameNode = AceType::DynamicCast<FrameNode>(this);
+    if (frameNode && !frameNode->IsVisible()) {
+        return false;
+    }
     if (CheckAutoSave()) {
         return true;
     }
@@ -706,7 +718,7 @@ void UINode::DumpTree(int32_t depth)
     for (const auto& item : GetChildren()) {
         item->DumpTree(depth + 1);
     }
-    for (const auto& [item, index] : disappearingChildren_) {
+    for (const auto& [item, index, branch] : disappearingChildren_) {
         item->DumpTree(depth + 1);
     }
     auto frameNode = AceType::DynamicCast<FrameNode>(this);
@@ -731,7 +743,7 @@ bool UINode::DumpTreeById(int32_t depth, const std::string& id)
             return true;
         }
     }
-    for (const auto& [item, index] : disappearingChildren_) {
+    for (const auto& [item, index, branch] : disappearingChildren_) {
         if (item->DumpTreeById(depth + 1, id)) {
             return true;
         }
@@ -767,7 +779,7 @@ void UINode::GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNo
     // generate the merged list of children_ and disappearingChildren_
     auto allChildren = GetChildren();
     for (auto iter = disappearingChildren_.rbegin(); iter != disappearingChildren_.rend(); ++iter) {
-        auto& [disappearingChild, index] = *iter;
+        auto& [disappearingChild, index, _] = *iter;
         if (index >= allChildren.size()) {
             allChildren.emplace_back(disappearingChild);
         } else {
@@ -794,7 +806,7 @@ void UINode::GenerateOneDepthVisibleFrameWithOffset(
     // generate the merged list of children_ and disappearingChildren_
     auto allChildren = GetChildren();
     for (auto iter = disappearingChildren_.rbegin(); iter != disappearingChildren_.rend(); ++iter) {
-        auto& [disappearingChild, index] = *iter;
+        auto& [disappearingChild, index, _] = *iter;
         if (index >= allChildren.size()) {
             allChildren.emplace_back(disappearingChild);
         } else {
@@ -821,9 +833,13 @@ PipelineContext* UINode::GetContext()
     if (context_) {
         context = context_;
     } else {
-        context = PipelineContext::GetCurrentContextPtrSafely();
+        if (externalData_) {
+            context = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+        } else {
+            context = PipelineContext::GetCurrentContextPtrSafely();
+        }
     }
-    
+
     if (context && context->IsDestroyed()) {
         LOGW("Get context from node when the context is destroyed. The context_ of node is%{public}s nullptr",
             context_? " not" : "");
@@ -1005,10 +1021,10 @@ bool UINode::IsNeedExportTexture() const
     return exportTextureInfo_ && exportTextureInfo_->GetCurrentRenderType() == NodeRenderType::RENDER_TYPE_TEXTURE;
 }
 
-void UINode::SetActive(bool active)
+void UINode::SetActive(bool active, bool needRebuildRenderContext)
 {
     for (const auto& child : GetChildren()) {
-        child->SetActive(active);
+        child->SetActive(active, needRebuildRenderContext);
     }
 }
 
@@ -1113,12 +1129,12 @@ void UINode::SetChildrenInDestroying()
     }
 }
 
-void UINode::AddDisappearingChild(const RefPtr<UINode>& child, uint32_t index)
+void UINode::AddDisappearingChild(const RefPtr<UINode>& child, uint32_t index, int32_t branchId)
 {
     if (child->isDisappearing_) {
         // if child is already disappearing, remove it from disappearingChildren_ first
         auto it = std::find_if(disappearingChildren_.begin(), disappearingChildren_.end(),
-            [child](const auto& pair) { return pair.first == child; });
+            [child](const auto& tup) { return std::get<0>(tup) == child; });
         if (it != disappearingChildren_.end()) {
             disappearingChildren_.erase(it);
         }
@@ -1126,7 +1142,7 @@ void UINode::AddDisappearingChild(const RefPtr<UINode>& child, uint32_t index)
         // mark child as disappearing before adding to disappearingChildren_
         child->isDisappearing_ = true;
     }
-    disappearingChildren_.emplace_back(child, index);
+    disappearingChildren_.emplace_back(child, index, branchId);
 }
 
 bool UINode::RemoveDisappearingChild(const RefPtr<UINode>& child)
@@ -1136,7 +1152,7 @@ bool UINode::RemoveDisappearingChild(const RefPtr<UINode>& child)
         return false;
     }
     auto it = std::find_if(disappearingChildren_.begin(), disappearingChildren_.end(),
-        [child](const auto& pair) { return pair.first == child; });
+        [child](const auto& tup) { return std::get<0>(tup) == child; });
     if (it == disappearingChildren_.end()) {
         return false;
     }
@@ -1162,7 +1178,7 @@ bool UINode::RemoveImmediately() const
     return std::all_of(
                children.begin(), children.end(), [](const auto& child) { return child->RemoveImmediately(); }) &&
            std::all_of(disappearingChildren_.begin(), disappearingChildren_.end(),
-               [](const auto& pair) { return pair.first->RemoveImmediately(); });
+               [](const auto& tup) { return std::get<0>(tup)->RemoveImmediately(); });
 }
 
 void UINode::GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap)
@@ -1205,13 +1221,13 @@ void UINode::GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap)
     }
 }
 
-RefPtr<UINode> UINode::GetDisappearingChildById(const std::string& id) const
+RefPtr<UINode> UINode::GetDisappearingChildById(const std::string& id, int32_t branchId) const
 {
     if (id.empty()) {
         return nullptr;
     }
-    for (auto& [node, index] : disappearingChildren_) {
-        if (node->GetInspectorIdValue("") == id) {
+    for (auto& [node, index, branch] : disappearingChildren_) {
+        if (node->GetInspectorIdValue("") == id && branch == branchId) {
             return node;
         }
     }
@@ -1434,4 +1450,33 @@ bool UINode::IsContextTransparent()
     return true;
 }
 
+void UINode::GetInspectorValue()
+{
+    for (const auto& item : GetChildren()) {
+        item->GetInspectorValue();
+    }
+}
+
+void UINode::NotifyWebPattern(bool isRegister)
+{
+    for (const auto& item : GetChildren()) {
+        item->NotifyWebPattern(isRegister);
+    }
+}
+
+void UINode::GetContainerComponentText(std::string& text)
+{
+    for (const auto& child : GetChildren()) {
+        if (InstanceOf<FrameNode>(child) && child->GetTag() == V2::TEXT_ETS_TAG) {
+            auto frameChild = DynamicCast<FrameNode>(child);
+            auto pattern = frameChild->GetPattern();
+            CHECK_NULL_VOID(pattern);
+            auto layoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(layoutProperty);
+            text = layoutProperty->GetContent().value_or("");
+            break;
+        }
+        child->GetContainerComponentText(text);
+    }
+}
 } // namespace OHOS::Ace::NG

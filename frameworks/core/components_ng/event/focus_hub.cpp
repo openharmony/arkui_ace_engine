@@ -254,7 +254,7 @@ bool FocusHub::RequestFocusImmediately(bool isJudgeRootTree)
     if (onPreFocusCallback_) {
         onPreFocusCallback_();
     }
-    FocusManager::FocusGuard guard(focusManager->GetCurrentFocus());
+    FocusManager::FocusGuard guard(focusManager->GetCurrentFocus(), SwitchingStartReason::REQUEST_FOCUS);
     auto parent = GetParentFocusHub();
     if (parent) {
         if (focusManager) {
@@ -299,7 +299,7 @@ void FocusHub::LostFocusToViewRoot()
     curFocusView->SetIsViewRootScopeFocused(true);
     auto focusedChild = viewRootScope->lastWeakFocusNode_.Upgrade();
     CHECK_NULL_VOID(focusedChild);
-    FocusManager::FocusGuard guard(viewRootScope);
+    FocusManager::FocusGuard guard(viewRootScope, SwitchingStartReason::LOST_FOCUS_TO_VIEW_ROOT);
     focusedChild->LostFocus();
 }
 
@@ -338,7 +338,7 @@ void FocusHub::RemoveSelf(BlurReason reason)
     if (parent && parent != screenFocusHub && !focusView) {
         parent->RemoveChild(AceType::Claim(this), reason);
     } else if (IsCurrentFocus()) {
-        FocusManager::FocusGuard guard(parent);
+        FocusManager::FocusGuard guard(parent, SwitchingStartReason::REMOVE_SELF);
         LostFocus(reason);
     }
     if (!focusScopeId_.empty()) {
@@ -365,7 +365,7 @@ void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode, BlurReason reason)
                 RemoveSelf(reason);
             }
         }
-        FocusManager::FocusGuard guard(Claim(this));
+        FocusManager::FocusGuard guard(Claim(this), SwitchingStartReason::REMOVE_CHILD);
         focusNode->LostFocus(reason);
     }
     if (lastWeakFocusNode_ == focusNode) {
@@ -599,7 +599,7 @@ void FocusHub::RefreshFocus()
         parent = parent->GetParentFocusHub();
     }
 
-    FocusManager::FocusGuard guard(parent->GetParentFocusHub());
+    FocusManager::FocusGuard guard(parent->GetParentFocusHub(), SwitchingStartReason::DEFAULT);
     parent->LostFocus();
     parent->RequestFocusImmediately();
 }
@@ -840,7 +840,7 @@ bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
             RefPtr<FocusHub> nextFocusHub = nullptr;
             if (IsFocusStepTab(moveStep)) {
                 nextFocusHub = lastFocusNode->GetNearestNodeByProjectArea(
-                    GetChildren(), moveStep == FocusStep::TAB ? FocusStep::RIGHT : FocusStep::LEFT);
+                    GetChildren(), GetRealFocusStepByTab(moveStep, AceApplicationInfo::GetInstance().IsRightToLeft()));
             }
             if (!nextFocusHub) {
                 nextFocusHub = lastFocusNode->GetNearestNodeByProjectArea(GetChildren(), moveStep);
@@ -979,7 +979,7 @@ void FocusHub::SwitchFocus(const RefPtr<FocusHub>& focusNode)
     if (IsCurrentFocus()) {
         auto focusManger = GetFocusManager();
         CHECK_NULL_VOID(focusManger);
-        focusManger->UpdateCurrentFocus(Claim(this));
+        focusManger->UpdateCurrentFocus(Claim(this), SwitchingUpdateReason::SWITCH_FOCUS);
         if (focusNodeNeedBlur && focusNodeNeedBlur != focusNode) {
             focusNodeNeedBlur->LostFocus();
         }
@@ -1157,9 +1157,9 @@ void FocusHub::OnFocusNode()
     auto focusManager = pipeline->GetOrCreateFocusManager();
     CHECK_NULL_VOID(focusManager);
     focusManager->PaintFocusState();
-    focusManager->UpdateCurrentFocus(Claim(this));
+    focusManager->UpdateCurrentFocus(Claim(this), SwitchingUpdateReason::ON_FOCUS_NODE);
     if (focusType_ == FocusType::NODE) {
-        focusManager->FocusSwitchingEnd();
+        focusManager->FocusSwitchingEnd(SwitchingEndReason::NODE_FOCUS);
     }
 
     auto frameNode = GetFrameNode();
@@ -1183,25 +1183,35 @@ void FocusHub::OnBlurNode()
     CHECK_NULL_VOID(frameNode);
     auto* pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->AddAfterLayoutTask([weak = WeakClaim(this)]() {
-        auto focusHub = weak.Upgrade();
-        CHECK_NULL_VOID(focusHub);
-        auto onBlurCallback = focusHub->GetOnBlurCallback();
+    
+    if (blurReason_ == BlurReason::FRAME_DESTROY) {
+        auto onBlurCallback = GetOnBlurCallback();
         if (onBlurCallback) {
             onBlurCallback();
         }
-        auto onJSFrameNodeBlurCallback_ = focusHub->GetOnJSFrameNodeBlurCallback();
+        auto onJSFrameNodeBlurCallback_ = GetOnJSFrameNodeBlurCallback();
         if (onJSFrameNodeBlurCallback_) {
             onJSFrameNodeBlurCallback_();
         }
-    });
-    if (blurReason_ != BlurReason::FRAME_DESTROY) {
+    } else {
+        pipeline->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+            auto focusHub = weak.Upgrade();
+            CHECK_NULL_VOID(focusHub);
+            auto onBlurCallback = focusHub->GetOnBlurCallback();
+            if (onBlurCallback) {
+                onBlurCallback();
+            }
+            auto onJSFrameNodeBlurCallback_ = focusHub->GetOnJSFrameNodeBlurCallback();
+            if (onJSFrameNodeBlurCallback_) {
+                onJSFrameNodeBlurCallback_();
+            }
+        });
         ClearFocusState();
     }
+
     auto focusManager = pipeline->GetOrCreateFocusManager();
     CHECK_NULL_VOID(focusManager);
     focusManager->PaintFocusState();
-
     pipeline->RequestFrame();
 }
 
@@ -1228,7 +1238,7 @@ void FocusHub::OnFocusScope(bool currentHasFocused)
     if (focusDepend_ == FocusDependence::SELF) {
         lastWeakFocusNode_ = nullptr;
         OnFocusNode();
-        GetFocusManager()->FocusSwitchingEnd();
+        GetFocusManager()->FocusSwitchingEnd(SwitchingEndReason::DEPENDENCE_SELF);
         return;
     }
 
@@ -1242,7 +1252,7 @@ void FocusHub::OnFocusScope(bool currentHasFocused)
     if (focusDepend_ == FocusDependence::AUTO && !isAnyChildFocusable) {
         lastWeakFocusNode_ = nullptr;
         OnFocusNode();
-        GetFocusManager()->FocusSwitchingEnd();
+        GetFocusManager()->FocusSwitchingEnd(SwitchingEndReason::NO_FOCUSABLE_CHILD);
         return;
     }
 
@@ -1306,7 +1316,7 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
         return true;
     }
 
-    if (focusStyleType_ == FocusStyleType::NONE) {
+    if (focusStyleType_ == FocusStyleType::NONE && !box_.HasCustomStyle()) {
         return false;
     }
 
@@ -1468,7 +1478,7 @@ void FocusHub::ClearFocusState(bool isNeedStateStyles)
     if (onClearFocusStateCallback_) {
         onClearFocusStateCallback_();
     }
-    if (focusStyleType_ != FocusStyleType::NONE) {
+    if (focusStyleType_ != FocusStyleType::NONE || box_.HasCustomStyle()) {
         auto frameNode = GetFrameNode();
         CHECK_NULL_VOID(frameNode);
         auto renderContext = frameNode->GetRenderContext();
@@ -1498,7 +1508,7 @@ bool FocusHub::IsNeedPaintFocusState()
 {
     if (currentFocus_ && IsFocusableNode() &&
         (focusDepend_ == FocusDependence::SELF || focusType_ == FocusType::NODE)) {
-        return focusStyleType_ != FocusStyleType::NONE || HasFocusStateStyle();
+        return focusStyleType_ != FocusStyleType::NONE || HasFocusStateStyle() || box_.HasCustomStyle();
     }
     auto lastFocusNode = GetLastWeakFocusNode().Upgrade();
     while (lastFocusNode) {
@@ -1510,7 +1520,7 @@ bool FocusHub::IsNeedPaintFocusState()
         }
         lastFocusNode = lastFocusNode->GetLastWeakFocusNode().Upgrade();
     }
-    return focusStyleType_ != FocusStyleType::NONE || HasFocusStateStyle();
+    return focusStyleType_ != FocusStyleType::NONE || HasFocusStateStyle() || box_.HasCustomStyle();
 }
 
 bool FocusHub::AcceptFocusOfSpecifyChild(FocusStep step)
@@ -2127,7 +2137,7 @@ RefPtr<FocusHub> FocusHub::GetNearestNodeByProjectArea(const std::list<RefPtr<Fo
     CHECK_NULL_RETURN(!allNodes.empty(), nullptr);
     auto curFrameNode = GetFrameNode();
     CHECK_NULL_RETURN(curFrameNode, nullptr);
-    auto curFrameOffset = curFrameNode->GetOffsetRelativeToWindow();
+    auto curFrameOffset = curFrameNode->GetTransformRelativeOffset();
     auto curGeometryNode = curFrameNode->GetGeometryNode();
     CHECK_NULL_RETURN(curGeometryNode, nullptr);
     RectF curFrameRect = RectF(curFrameOffset, curGeometryNode->GetFrameRect().GetSize());
@@ -2138,6 +2148,7 @@ RefPtr<FocusHub> FocusHub::GetNearestNodeByProjectArea(const std::list<RefPtr<Fo
         curFrameRect.Bottom());
     bool isTabStep = IsFocusStepTab(step);
     double resDistance = !isTabStep ? std::numeric_limits<double>::max() : 0.0f;
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     RefPtr<FocusHub> nextNode;
     for (const auto& node : allNodes) {
         if (!node || AceType::RawPtr(node) == this) {
@@ -2147,7 +2158,7 @@ RefPtr<FocusHub> FocusHub::GetNearestNodeByProjectArea(const std::list<RefPtr<Fo
         if (!frameNode) {
             continue;
         }
-        auto frameOffset = frameNode->GetOffsetRelativeToWindow();
+        auto frameOffset = frameNode->GetTransformRelativeOffset();
         auto geometryNode = frameNode->GetGeometryNode();
         if (!geometryNode) {
             continue;
@@ -2156,17 +2167,22 @@ RefPtr<FocusHub> FocusHub::GetNearestNodeByProjectArea(const std::list<RefPtr<Fo
         auto realStep = step;
         if (step == FocusStep::TAB) {
             frameRect -= OffsetF(0, curFrameRect.Height());
-            realStep = FocusStep::LEFT;
+            // If TAB step, for RTL, the direction of focus is RIGHT.
+            // If TAB step, for LTR, the direction of focus is LEFT.
+            realStep = isRtl ? FocusStep::RIGHT : FocusStep::LEFT;
         } else if (step == FocusStep::SHIFT_TAB) {
             frameRect += OffsetF(0, curFrameRect.Height());
-            realStep = FocusStep::RIGHT;
+            // If SHIFT_TAB step, for RTL, the direction of focus is LEFT.
+            // If SHIFT_TAB step, for LTR, the direction of focus is RIGHT.
+            realStep = isRtl ? FocusStep::LEFT : FocusStep::RIGHT;
         }
         auto projectArea = GetProjectAreaOnRect(frameRect, curFrameRect, realStep);
         if (Positive(projectArea)) {
             OffsetF vec = frameRect.Center() - curFrameRect.Center();
             double val = (vec.GetX() * vec.GetX()) + (vec.GetY() * vec.GetY());
-            if ((step == FocusStep::TAB && Positive(vec.GetX())) ||
-                (step == FocusStep::SHIFT_TAB && Negative(vec.GetX()))) {
+            // The operation direction is opposite for RTL languages.
+            if ((step == FocusStep::TAB && (isRtl ? Negative(vec.GetX()) : Positive(vec.GetX()))) ||
+                (step == FocusStep::SHIFT_TAB && (isRtl ? Positive(vec.GetX()) : Negative(vec.GetX())))) {
                 val *= -1.0;
             }
             if ((!isTabStep && val < resDistance) || (isTabStep && val > resDistance)) {
@@ -2474,5 +2490,44 @@ bool FocusHub::IsNestingFocusGroup()
         parent = parent->GetParentFocusHub();
     }
     return false;
+}
+
+void FocusHub::ToJsonValue(
+    const RefPtr<FocusHub>& hub, std::unique_ptr<JsonValue>& json, const InspectorFilter& filter)
+{
+    bool focusable = false;
+    bool focused = false;
+    if (hub) {
+        focusable = hub->IsFocusable();
+        focused = hub->IsCurrentFocus();
+    }
+    if (filter.CheckFixedAttr(FIXED_ATTR_FOCUSABLE)) {
+        json->Put("focusable", focusable);
+        json->Put("focused", focused);
+    }
+    if (filter.IsFastFilter()) {
+        return;
+    }
+
+    bool enabled = true;
+    bool defaultFocus = false;
+    bool groupDefaultFocus = false;
+    bool focusOnTouch = false;
+    int32_t tabIndex = 0;
+    std::unique_ptr<JsonValue> focusBox = nullptr;
+    if (hub) {
+        enabled = hub->IsEnabled();
+        defaultFocus = hub->IsDefaultFocus();
+        groupDefaultFocus = hub->IsDefaultGroupFocus();
+        focusOnTouch = hub->IsFocusOnTouch().value_or(false);
+        tabIndex = hub->GetTabIndex();
+        focusBox = FocusBox::ToJsonValue(hub->box_);
+    }
+    json->PutExtAttr("enabled", enabled, filter);
+    json->PutExtAttr("defaultFocus", defaultFocus, filter);
+    json->PutExtAttr("groupDefaultFocus", groupDefaultFocus, filter);
+    json->PutExtAttr("focusOnTouch", focusOnTouch, filter);
+    json->PutExtAttr("tabIndex", tabIndex, filter);
+    json->PutExtAttr("focusBox", focusBox, filter);
 }
 } // namespace OHOS::Ace::NG

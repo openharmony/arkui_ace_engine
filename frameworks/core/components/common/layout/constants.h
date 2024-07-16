@@ -217,7 +217,7 @@ enum class TextDataDetectType {
     URL,
     EMAIL,
     ADDRESS,
-    DATETIME,
+    DATE_TIME,
 };
 
 enum class LineBreakStrategy {
@@ -336,6 +336,14 @@ enum class ImageFit {
     NONE,
     SCALE_DOWN,
     TOP_LEFT,
+    TOP,
+    TOP_END,
+    START,
+    CENTER,
+    END,
+    BOTTOM_START,
+    BOTTOM,
+    BOTTOM_END,
     COVER_TOP_LEFT,
 };
 
@@ -388,6 +396,8 @@ enum class BorderImageDirection {
     RIGHT,
     TOP,
     BOTTOM,
+    START,
+    END,
 };
 
 enum class TimePickerFormat {
@@ -864,6 +874,12 @@ enum class NodeRenderType : uint32_t {
 enum class MarqueeUpdateStrategy : uint32_t {
     DEFAULT = 0,
     PRESERVE_POSITION,
+};
+
+enum class EdgeType {
+    MARGIN,
+    PADDING,
+    SAFE_AREA_PADDING,
 };
 
 enum class SafeAreaSyncType : uint32_t {

@@ -21,18 +21,18 @@
 
 namespace OHOS::Ace::NG::CustomDialog {
 namespace {
-constexpr int32_t DEFAULT_DIALOG_ALIGNMENT = -1;
-constexpr uint32_t DEFAULT_MASK_COLOR = 0x33000000;
-constexpr uint32_t DEFAULT_DIALOG_BACKGROUND_COLOR = 0x00000000;
-constexpr int32_t ARKUI_ALIGNMENT_TOP_START_INDEX = 0;
-constexpr int32_t ARKUI_ALIGNMENT_TOP_INDEX = 1;
-constexpr int32_t ARKUI_ALIGNMENT_TOP_END_INDEX = 2;
-constexpr int32_t ARKUI_ALIGNMENT_START_INDEX = 3;
-constexpr int32_t ARKUI_ALIGNMENT_CENTER_INDEX = 4;
-constexpr int32_t ARKUI_ALIGNMENT_END_INDEX = 5;
-constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_START_INDEX = 6;
-constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_INDEX = 7;
-constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_END_INDEX = 8;
+    constexpr int32_t DEFAULT_DIALOG_ALIGNMENT = -1;
+    constexpr uint32_t DEFAULT_MASK_COLOR = 0x33000000;
+    constexpr uint32_t DEFAULT_DIALOG_BACKGROUND_COLOR = 0x00000000;
+    constexpr int32_t ARKUI_ALIGNMENT_TOP_START_INDEX = 0;
+    constexpr int32_t ARKUI_ALIGNMENT_TOP_INDEX = 1;
+    constexpr int32_t ARKUI_ALIGNMENT_TOP_END_INDEX = 2;
+    constexpr int32_t ARKUI_ALIGNMENT_START_INDEX = 3;
+    constexpr int32_t ARKUI_ALIGNMENT_CENTER_INDEX = 4;
+    constexpr int32_t ARKUI_ALIGNMENT_END_INDEX = 5;
+    constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_START_INDEX = 6;
+    constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_INDEX = 7;
+    constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_END_INDEX = 8;
 } // namespace
 
 ArkUIDialogHandle CreateDialog()
@@ -53,7 +53,7 @@ ArkUIDialogHandle CreateDialog()
         .showInSubWindow = false,
         .enableCustomAnimation = false,
         .onWillDismissCall = nullptr,
-        .onWillDismissCallWithUserData = nullptr,
+        .onWillDismissCallByNDK  = nullptr,
         .userData = nullptr });
 }
 
@@ -79,7 +79,7 @@ void DisposeDialog(ArkUIDialogHandle controllerHandler)
         delete cornerRadiusRect;
     }
     controllerHandler->onWillDismissCall = nullptr;
-    controllerHandler->onWillDismissCallWithUserData = nullptr;
+    controllerHandler->onWillDismissCallByNDK  = nullptr;
     controllerHandler->userData = nullptr;
     delete controllerHandler;
 }
@@ -111,6 +111,36 @@ DialogAlignment GetDialogAlignment(int32_t alignment)
     return DialogAlignment::DEFAULT;
 }
 
+void ParseDialogMask(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
+{
+    CHECK_NULL_VOID(controllerHandler);
+    dialogProperties.maskColor = Color(controllerHandler->maskColor);
+    if (!controllerHandler->maskRect) {
+        return;
+    }
+    DimensionRect maskRect;
+    maskRect.SetOffset(DimensionOffset(Dimension(controllerHandler->maskRect->x, DimensionUnit::VP),
+        Dimension(controllerHandler->maskRect->y, DimensionUnit::VP)));
+    maskRect.SetSize(DimensionSize(Dimension(controllerHandler->maskRect->width, DimensionUnit::VP),
+        Dimension(controllerHandler->maskRect->height, DimensionUnit::VP)));
+    dialogProperties.maskRect = maskRect;
+}
+
+void ParseDialogCornerRadiusRect(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
+{
+    CHECK_NULL_VOID(controllerHandler);
+    if (!controllerHandler->cornerRadiusRect) {
+        return;
+    }
+    NG::BorderRadiusProperty radius;
+    radius.radiusTopLeft = Dimension(controllerHandler->cornerRadiusRect->topLeft, DimensionUnit::VP);
+    radius.radiusTopRight = Dimension(controllerHandler->cornerRadiusRect->topRight, DimensionUnit::VP);
+    radius.radiusBottomLeft = Dimension(controllerHandler->cornerRadiusRect->bottomLeft, DimensionUnit::VP);
+    radius.radiusBottomRight = Dimension(controllerHandler->cornerRadiusRect->bottomRight, DimensionUnit::VP);
+    radius.multiValued = true;
+    dialogProperties.borderRadius = radius;
+}
+
 void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle controllerHandler)
 {
     CHECK_NULL_VOID(controllerHandler);
@@ -118,48 +148,28 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     dialogProperties.alignment = GetDialogAlignment(controllerHandler->alignment);
     dialogProperties.offset = DimensionOffset(Dimension(controllerHandler->offsetX, DimensionUnit::VP),
         Dimension(controllerHandler->offsetY, DimensionUnit::VP));
-    dialogProperties.maskColor = Color(controllerHandler->maskColor);
-    if (controllerHandler->maskRect) {
-        DimensionRect maskRect;
-        maskRect.SetOffset(DimensionOffset(Dimension(controllerHandler->maskRect->x, DimensionUnit::VP),
-            Dimension(controllerHandler->maskRect->y, DimensionUnit::VP)));
-        maskRect.SetSize(DimensionSize(Dimension(controllerHandler->maskRect->width, DimensionUnit::VP),
-            Dimension(controllerHandler->maskRect->height, DimensionUnit::VP)));
-        dialogProperties.maskRect = maskRect;
-    }
     dialogProperties.isShowInSubWindow = controllerHandler->showInSubWindow;
     dialogProperties.isModal = controllerHandler->isModal;
     dialogProperties.backgroundColor = Color(controllerHandler->backgroundColor);
     dialogProperties.customStyle = controllerHandler->enableCustomStyle;
     dialogProperties.gridCount = controllerHandler->gridCount;
-    if (controllerHandler->cornerRadiusRect) {
-        NG::BorderRadiusProperty radius;
-        radius.radiusTopLeft = Dimension(controllerHandler->cornerRadiusRect->topLeft, DimensionUnit::VP);
-        radius.radiusTopRight = Dimension(controllerHandler->cornerRadiusRect->topRight, DimensionUnit::VP);
-        radius.radiusBottomLeft = Dimension(controllerHandler->cornerRadiusRect->bottomLeft, DimensionUnit::VP);
-        radius.radiusBottomRight = Dimension(controllerHandler->cornerRadiusRect->bottomRight, DimensionUnit::VP);
-        radius.multiValued = true;
-        dialogProperties.borderRadius = radius;
-    }
+    ParseDialogMask(dialogProperties,controllerHandler);
+    ParseDialogCornerRadiusRect(dialogProperties, controllerHandler);
     if (controllerHandler->onWillDismissCall) {
-        dialogProperties.onWillDismiss = [controllerHandler](int32_t reason) {
-                CHECK_NULL_VOID(controllerHandler);
-                CHECK_NULL_VOID(controllerHandler->onWillDismissCall);
-                auto executeClose = (*(controllerHandler->onWillDismissCall))(reason);
-                if (!executeClose) {
-                    // todo
-                }
-            };
+        dialogProperties.onWillDismissCallByNDK = [controllerHandler](int32_t reason) {
+            ArkUI_DialogDismissEvent event = { controllerHandler->userData, reason, false };
+            return controllerHandler->onWillDismissCall(reason);
+        };
     }
 
-    if (controllerHandler->onWillDismissCallWithUserData) {
-        dialogProperties.onWillDismissCallWithUserData = [controllerHandler](int32_t reason) {
+    if (controllerHandler->onWillDismissCallByNDK ) {
+        dialogProperties.onWillDismissCallByNDK  = [controllerHandler](int32_t reason) {
             ArkUI_DialogDismissEvent event = { controllerHandler->userData, reason, false };
-            controllerHandler->onWillDismissCallWithUserData(&event);
+            controllerHandler->onWillDismissCallByNDK (&event);
             return event.BlockDismiss;
         };
     } else {
-        dialogProperties.onWillDismissCallWithUserData = nullptr;
+        dialogProperties.onWillDismissCallByNDK  = nullptr;
     }
 
     if (controllerHandler->enableCustomAnimation && !dialogProperties.openAnimation.has_value()) {
@@ -320,7 +330,7 @@ ArkUI_Int32 RegisterOnWillDialogDismissWithUserData(
     ArkUIDialogHandle controllerHandler, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event))
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
-    controllerHandler->onWillDismissCallWithUserData = callback;
+    controllerHandler->onWillDismissCallByNDK  = callback;
     controllerHandler->userData = userData;
     return ERROR_CODE_NO_ERROR;
 }

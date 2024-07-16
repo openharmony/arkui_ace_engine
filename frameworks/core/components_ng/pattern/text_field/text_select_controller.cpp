@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::string NEWLINE = "\n";
 const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
+constexpr float BOX_EPSILON = 1.0f;
 } // namespace
 void TextSelectController::UpdateHandleIndex(int32_t firstHandleIndex, int32_t secondHandleIndex)
 {
@@ -261,7 +262,7 @@ std::pair<int32_t, int32_t> TextSelectController::GetSelectRangeByOffset(const O
             pos + GetGraphemeClusterLength(contentController_->GetWideText(), pos, true));
     }
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_TEXT,
+        TAG_LOGD(AceLogTag::ACE_TEXT,
             "current word position = %{public}d, select position {start:%{public}d, end:%{public}d}", pos, start, end);
     }
     return { start, end };
@@ -292,7 +293,7 @@ std::pair<int32_t, int32_t> TextSelectController::GetSelectParagraphByOffset(con
     GetSubParagraphByOffset(pos, start, end);
 
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_TEXT,
+        TAG_LOGD(AceLogTag::ACE_TEXT,
             "current word position = %{public}d, select position {start:%{public}d, end:%{public}d}", pos, start, end);
     }
     return { start, end };
@@ -471,6 +472,14 @@ void TextSelectController::AdjustHandleOffset(RectF& handleRect) const
     if (LessNotEqual(handleRect.GetX(), textRect.GetX())) {
         handleRect.SetOffset(OffsetF(textRect.GetX(), handleRect.GetY()));
     }
+
+    // Adjust the y-axis of the handle into the text
+    if (GreatNotEqual(handleRect.GetY() + handleRect.Height(), textRect.GetY() + textRect.Height() + BOX_EPSILON)) {
+        auto contentRight = contentRect_.GetX() + contentRect_.Width();
+        auto textRectRight = textRect.GetX() + textRect.Width();
+        handleRect.SetOffset(
+            OffsetF(std::min(contentRight, textRectRight), textRect.GetY() + textRect.Height() - handleRect.Height()));
+    }
 }
 
 void TextSelectController::MoveFirstHandleToContentRect(int32_t index, bool moveHandle)
@@ -540,7 +549,7 @@ void TextSelectController::MoveCaretToContentRect(int32_t index, TextAffinity te
             caretInfo_.index < static_cast<int32_t>(contentController_->GetWideText().length())) {
             boundaryAdjustment = paragraph_->GetCharacterWidth(caretInfo_.index);
             if (SystemProperties::GetDebugEnabled()) {
-                TAG_LOGI(AceLogTag::ACE_TEXT, "caretInfo_.index = %{public}d, boundaryAdjustment =%{public}f",
+                TAG_LOGD(AceLogTag::ACE_TEXT, "caretInfo_.index = %{public}d, boundaryAdjustment =%{public}f",
                     caretInfo_.index, boundaryAdjustment);
             }
         }

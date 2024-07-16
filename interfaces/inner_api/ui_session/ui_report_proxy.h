@@ -30,22 +30,38 @@ public:
     /**
      * @description: notify stub side to execute click callback
      */
-    void ReportClickEvent(std::string data) override;
+    void ReportClickEvent(const std::string& data) override;
 
     /**
      * @description: notify stub side to execute switch callback
      */
-    void ReportRouterChangeEvent(std::string data) override;
+    void ReportRouterChangeEvent(const std::string& data) override;
 
     /**
      * @description: notify stub side to execute component callback
      */
-    void ReportComponentChangeEvent(std::string data) override;
+    void ReportComponentChangeEvent(const std::string& data) override;
 
     /**
      * @description: notify stub side to execute search callback
      */
-    void ReportSearchEvent(std::string data) override;
+    void ReportSearchEvent(const std::string& data) override;
+
+    /**
+     * @description: notify stub side to report inspector value
+     */
+    void ReportInspectorTreeValue(const std::string& data, int32_t partNum, bool isLastPart) override;
+
+    /**
+     * @description: notify stub side to report web unfocus value
+     */
+    void ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data) override;
+
+    /**
+     * @description: notify stub side to report web unfocus value
+     */
+    void SendBaseInfo(const std::string& data) override;
+    void OnComponentChange(const std::string& key, const std::string& value);
 
 private:
     static inline BrokerDelegator<UiReportProxy> delegator_;

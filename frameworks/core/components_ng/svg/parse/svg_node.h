@@ -165,7 +165,6 @@ public:
     {
         return imagePath_;
     }
-
     void SetIsRootNode(bool isRoot)
     {
         isRootNode_ = isRoot;
@@ -180,6 +179,7 @@ protected:
     virtual void OnDraw(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color) {}
 
     virtual void OnDrawTraversed(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color);
+    virtual void AdjustContentAreaByViewBox(RSCanvas& canvas, const Size& viewPort) {}
     bool OnCanvas(RSCanvas& canvas);
     void OnClipPath(RSCanvas& canvas, const Size& viewPort);
     void OnFilter(RSCanvas& canvas, const Size& viewPort);
@@ -191,7 +191,6 @@ protected:
 
     std::optional<Gradient> GetGradient(const std::string& href);
     const Rect& GetRootViewBox() const;
-
     virtual void PrepareAnimation(const RefPtr<SvgAnimation>& animate);
     // create animation that changes an attribute
     template<typename T>

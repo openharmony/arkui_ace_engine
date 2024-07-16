@@ -176,7 +176,6 @@ private:
     void WindowFocus(bool isFocus);
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnModifyDone() override;
-    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleOnDragStart(float offset);
     void HandleOnDragUpdate(float offset);
     void HandleOnDragEnd();
@@ -193,7 +192,6 @@ private:
     std::optional<int32_t> landscapeMenuNodeId_;
     RefPtr<FrictionMotion> motion_;
     RefPtr<Animator> controller_;
-    bool isTitleMenuNodeShowing_ = false;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
     int32_t maxMenuNums_ = -1;
     float avoidKeyboardOffset_ = 0.0f;

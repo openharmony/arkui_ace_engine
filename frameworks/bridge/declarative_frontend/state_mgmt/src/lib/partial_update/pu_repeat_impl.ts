@@ -31,7 +31,7 @@ class __RepeatImpl<T>  {
     }
 
     /**/
-    public render(config: __RepeatAPIConfig<T>, isInitialRender: boolean): void {
+    public render(config: __RepeatConfig<T>, isInitialRender: boolean): void {
         this.arr_ = config.arr;
         this.itemGenFuncs_ = config.itemGenFuncs;
         this.typeGenFunc_ = config.typeGenFunc;

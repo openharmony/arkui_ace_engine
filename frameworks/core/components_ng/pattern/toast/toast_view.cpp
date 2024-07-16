@@ -124,6 +124,23 @@ void ToastView::UpdateTextContext(const RefPtr<FrameNode>& textNode)
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(Dimension(radius.GetX().ConvertToPx()));
     textContext->UpdateBorderRadius(borderRadius);
+    if (toastTheme->GetToastDoubleBorderEnable()) {
+        textContext->UpdateOuterBorderRadius(borderRadius);
+
+        BorderWidthProperty innerWidthProp;
+        innerWidthProp.SetBorderWidth(Dimension(toastTheme->GetToastInnerBorderWidth()));
+        textContext->UpdateBorderWidth(innerWidthProp);
+        BorderColorProperty innerColorProp;
+        innerColorProp.SetColor(toastTheme->GetToastInnerBorderColor());
+        textContext->UpdateBorderColor(innerColorProp);
+
+        BorderWidthProperty outerWidthProp;
+        outerWidthProp.SetBorderWidth(Dimension(toastTheme->GetToastOuterBorderWidth()));
+        textContext->UpdateOuterBorderWidth(outerWidthProp);
+        BorderColorProperty outerColorProp;
+        outerColorProp.SetColor(toastTheme->GetToastOuterBorderColor());
+        textContext->UpdateOuterBorderColor(outerColorProp);
+    }
     textContext->UpdateBackShadow(ShadowConfig::DefaultShadowL);
     textContext->UpdateClipEdge(false);
 

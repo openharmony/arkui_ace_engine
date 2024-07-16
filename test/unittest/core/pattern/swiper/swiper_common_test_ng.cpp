@@ -24,6 +24,7 @@ public:
     AssertionResult IsEqualNextFocusNode(FocusStep step,
         const RefPtr<FrameNode>& currentNode, const RefPtr<FrameNode>& expectNextNode);
     void OnKeyEvent(KeyCode keyCode, KeyAction keyAction);
+    void SetOnMainTree();
 };
 
 AssertionResult SwiperCommonTestNg::IsEqualNextFocusNode(FocusStep step,
@@ -39,6 +40,19 @@ AssertionResult SwiperCommonTestNg::IsEqualNextFocusNode(FocusStep step,
         return AssertionFailure() << "Next focusNode is not as expected";
     }
     return AssertionSuccess();
+}
+
+void SwiperCommonTestNg::SetOnMainTree()
+{
+    if (indicatorNode_) {
+        indicatorNode_->onMainTree_ = true;
+    }
+    if (leftArrowNode_) {
+        leftArrowNode_->onMainTree_ = true;
+    }
+    if (rightArrowNode_) {
+        rightArrowNode_->onMainTree_ = true;
+    }
 }
 
 void SwiperCommonTestNg::OnKeyEvent(KeyCode keyCode, KeyAction keyAction)
@@ -403,6 +417,7 @@ HWTEST_F(SwiperCommonTestNg, FocusStep001, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
+    SetOnMainTree();
 
     /**
      * @tc.cases: GetNextFocusNode from indicatorNode_
@@ -448,6 +463,7 @@ HWTEST_F(SwiperCommonTestNg, FocusStep002, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
+    SetOnMainTree();
 
     /**
      * @tc.cases: GetNextFocusNode from indicatorNode_
@@ -493,6 +509,7 @@ HWTEST_F(SwiperCommonTestNg, FocusStep003, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
+    SetOnMainTree();
 
     /**
      * @tc.cases: LoopIndex is first item(index:0)
@@ -549,6 +566,7 @@ HWTEST_F(SwiperCommonTestNg, FocusStep004, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
+    SetOnMainTree();
 
     /**
      * @tc.cases: LoopIndex is last item(index:0)
@@ -609,6 +627,7 @@ HWTEST_F(SwiperCommonTestNg, FocusStep006, TestSize.Level1)
         model.SetHoverShow(false);
         model.SetArrowStyle(ARROW_PARAMETERS);
     });
+    SetOnMainTree();
     
     /**
      * @tc.cases: GetNextFocusNode from leftArrowNode_
@@ -624,94 +643,6 @@ HWTEST_F(SwiperCommonTestNg, FocusStep006, TestSize.Level1)
 }
 
 /**
- * @tc.name: DumpAdvanceInfo001
- * @tc.desc: DumpAdvanceInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperCommonTestNg, DumpAdvanceInfo001, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-
-    /**
-     * @tc.steps: step1. Test DumpAdvanceInfo function.
-     * @tc.expected: SwiperIndicatorType::DOT.
-     */
-    pattern_->lastSwiperIndicatorType_ = SwiperIndicatorType::DOT;
-    pattern_->DumpAdvanceInfo();
-    EXPECT_EQ(pattern_->lastSwiperIndicatorType_, SwiperIndicatorType::DOT);
-
-    /**
-     * @tc.steps: step2. Test DumpAdvanceInfo function.
-     * @tc.expected: SwiperIndicatorType::DIGIT.
-     */
-    pattern_->lastSwiperIndicatorType_ = SwiperIndicatorType::DIGIT;
-    pattern_->DumpAdvanceInfo();
-    EXPECT_EQ(pattern_->lastSwiperIndicatorType_, SwiperIndicatorType::DIGIT);
-
-    /**
-     * @tc.steps: step3. Test DumpAdvanceInfo function.
-     * @tc.expected: PanDirection::NONE.
-     */
-    pattern_->panDirection_.type = PanDirection::NONE;
-    pattern_->DumpAdvanceInfo();
-    EXPECT_EQ(pattern_->panDirection_.type, PanDirection::NONE);
-
-    pattern_->panDirection_.type = PanDirection::LEFT;
-    pattern_->DumpAdvanceInfo();
-    EXPECT_EQ(pattern_->panDirection_.type, PanDirection::LEFT);
-
-    pattern_->panDirection_.type = PanDirection::RIGHT;
-    pattern_->DumpAdvanceInfo();
-    EXPECT_EQ(pattern_->panDirection_.type, PanDirection::RIGHT);
-
-    pattern_->panDirection_.type = PanDirection::HORIZONTAL;
-    pattern_->DumpAdvanceInfo();
-    EXPECT_EQ(pattern_->panDirection_.type, PanDirection::HORIZONTAL);
-
-    pattern_->panDirection_.type = PanDirection::UP;
-    pattern_->DumpAdvanceInfo();
-    EXPECT_EQ(pattern_->panDirection_.type, PanDirection::UP);
-
-    pattern_->panDirection_.type = PanDirection::DOWN;
-    pattern_->DumpAdvanceInfo();
-    EXPECT_EQ(pattern_->panDirection_.type, PanDirection::DOWN);
-
-    pattern_->panDirection_.type = PanDirection::VERTICAL;
-    pattern_->DumpAdvanceInfo();
-    EXPECT_EQ(pattern_->panDirection_.type, PanDirection::VERTICAL);
-
-    pattern_->panDirection_.type = PanDirection::ALL;
-    pattern_->DumpAdvanceInfo();
-    EXPECT_EQ(pattern_->panDirection_.type, PanDirection::ALL);
-}
-
-/**
- * @tc.name: DumpAdvanceInfo002
- * @tc.desc: DumpAdvanceInfo
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperCommonTestNg, DumpAdvanceInfo002, TestSize.Level1)
-{
-    CreateWithItem([](SwiperModelNG model) {});
-
-    pattern_->direction_ = Axis::NONE;
-    pattern_->DumpAdvanceInfo();
-    EXPECT_EQ(pattern_->direction_, Axis::NONE);
-
-    pattern_->direction_ = Axis::HORIZONTAL;
-    pattern_->DumpAdvanceInfo();
-    EXPECT_EQ(pattern_->direction_, Axis::HORIZONTAL);
-
-    pattern_->direction_ = Axis::FREE;
-    pattern_->DumpAdvanceInfo();
-    EXPECT_EQ(pattern_->direction_, Axis::FREE);
-
-    pattern_->direction_ = Axis::VERTICAL;
-    pattern_->DumpAdvanceInfo();
-    ASSERT_EQ(pattern_->direction_, Axis::VERTICAL);
-}
-
-/**
  * @tc.name: Distributed001
  * @tc.desc: Test the distributed capability of Swiper
  * @tc.type: FUNC
@@ -719,30 +650,24 @@ HWTEST_F(SwiperCommonTestNg, DumpAdvanceInfo002, TestSize.Level1)
 HWTEST_F(SwiperCommonTestNg, Distributed001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create frameNode and get pattern_.
-     */
-    CreateWithItem([](SwiperModelNG model) {});
-
-    /**
-     * @tc.steps: step2. Set Index.
+     * @tc.steps: step1. Set Index.
      * @tc.expected: Function ProvideRestoreInfo is called.
      */
-    layoutProperty_->UpdateIndex(1);
-    std::string ret = pattern_->ProvideRestoreInfo();
-    EXPECT_EQ(ret, R"({"Index":1})");
+    const int32_t initIndex = 1;
+    CreateWithItem([=](SwiperModelNG model) {
+        model.SetIndex(initIndex);
+    });
+    EXPECT_EQ(pattern_->ProvideRestoreInfo(), R"({"Index":1})");
 
     /**
-     * @tc.steps: step3. Function OnRestoreInfo is called.
+     * @tc.steps: step2. Function OnRestoreInfo is called.
      * @tc.expected: Passing invalid & valid JSON format.
      */
-    std::string restoreInfo_ = R"({"Index":1})";
-    pattern_->OnRestoreInfo(restoreInfo_);
-    EXPECT_EQ(layoutProperty_->GetIndexValue(0), 1);
-    restoreInfo_ = R"({"Index":0})";
-    pattern_->OnRestoreInfo(restoreInfo_);
+    pattern_->OnRestoreInfo(R"({"Index":1})");
+    EXPECT_EQ(layoutProperty_->GetIndexValue(0), initIndex);
+    pattern_->OnRestoreInfo(R"({"Index":0})");
     EXPECT_EQ(layoutProperty_->GetIndexValue(0), 0);
-    restoreInfo_ = "invalid_json_string";
-    pattern_->OnRestoreInfo(restoreInfo_);
+    pattern_->OnRestoreInfo("invalid_json_string");
     EXPECT_EQ(layoutProperty_->GetIndexValue(0), 0);
 }
 
@@ -903,13 +828,14 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. CreateWithItem SetLoop false
      */
+    const int32_t displayCount = 3;
+    const float itemWidth = (SWIPER_WIDTH - PRE_MARGIN - NEXT_MARGIN) / displayCount;
     CreateWithItem(
-        [](SwiperModelNG model) {
-            model.SetDirection(Axis::HORIZONTAL);
-            model.SetDisplayCount(3);
+        [=](SwiperModelNG model) {
+            model.SetDisplayCount(displayCount);
             model.SetLoop(false);
-            model.SetPreviousMargin(Dimension(20), true);
-            model.SetNextMargin(Dimension(20), true);
+            model.SetPreviousMargin(Dimension(PRE_MARGIN), true);
+            model.SetNextMargin(Dimension(NEXT_MARGIN), true);
         },
         5);
 
@@ -918,78 +844,55 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest001, TestSize.Level1)
      * @tc.expected: Verify ignoreBlank on the homepage is effective
      */
     ChangeIndex(0);
-    EXPECT_EQ(pattern_->currentIndex_, 0);
-    const float itemWidth = (SWIPER_WIDTH - 2 * 20.0f) / 3.0f;
-    float offset = 0.0f;
-    for (int i = 0; i < pattern_->itemPosition_.size(); ++i) {
-        EXPECT_EQ(GetChildOffset(frameNode_, i).GetX(), offset);
-        offset += itemWidth;
-    }
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_EQ(GetChildX(frameNode_, 0), itemWidth * 0);
+    EXPECT_EQ(GetChildX(frameNode_, 1), itemWidth * 1);
+    EXPECT_EQ(GetChildX(frameNode_, 2), itemWidth * 2);
+    EXPECT_EQ(GetChildX(frameNode_, 3), itemWidth * 3);
+    EXPECT_EQ(GetChildX(frameNode_, 4), 0.f); // out of view
 
     /**
      * @tc.steps: step3. ChangeIndex to 1
      * @tc.expected: Verify ignoreBlank is not effective
      */
     ChangeIndex(1);
-    EXPECT_EQ(pattern_->currentIndex_, 1);
-    float offset2 = 20.0f;
-    for (int i = 1; i < pattern_->itemPosition_.size(); ++i) {
-        EXPECT_EQ(GetChildOffset(frameNode_, i).GetX(), offset2);
-        offset2 += itemWidth;
-    }
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
+    EXPECT_EQ(GetChildX(frameNode_, 0), PRE_MARGIN - itemWidth);
+    EXPECT_EQ(GetChildX(frameNode_, 1), PRE_MARGIN);
+    EXPECT_EQ(GetChildX(frameNode_, 2), PRE_MARGIN + itemWidth * 1);
+    EXPECT_EQ(GetChildX(frameNode_, 3), PRE_MARGIN + itemWidth * 2);
+    EXPECT_EQ(GetChildX(frameNode_, 4), PRE_MARGIN + itemWidth * 3);
+
+    /**
+     * @tc.steps: step4. ChangeIndex to 2
+     * @tc.expected: Verify ignoreBlank is not effective
+     */
+    ChangeIndex(2);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 2);
+    EXPECT_EQ(GetChildX(frameNode_, 0), PRE_MARGIN - itemWidth); // out of view
+    EXPECT_EQ(GetChildX(frameNode_, 1), PRE_MARGIN + NEXT_MARGIN - itemWidth);
+    EXPECT_EQ(GetChildX(frameNode_, 2), PRE_MARGIN + NEXT_MARGIN);
+    EXPECT_EQ(GetChildX(frameNode_, 3), PRE_MARGIN + NEXT_MARGIN + itemWidth * 1);
+    EXPECT_EQ(GetChildX(frameNode_, 4), PRE_MARGIN + NEXT_MARGIN + itemWidth * 2);
 }
 
 /**
  * @tc.name: MarginIgnoreBlankTest002
- * @tc.desc: Test Swiper NextMargin IgnoreBlank
+ * @tc.desc: Test Swiper IgnoreBlank Not effective in loop scenarios
  * @tc.type: FUNC
  */
 HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. CreateWithItem SetLoop false
-     */
-    CreateWithItem(
-        [](SwiperModelNG model) {
-            model.SetDirection(Axis::HORIZONTAL);
-            model.SetDisplayCount(3);
-            model.SetLoop(false);
-            model.SetPreviousMargin(Dimension(20), true);
-            model.SetNextMargin(Dimension(20), true);
-        },
-        5);
-
-    /**
-     * @tc.steps: step2. ChangeIndex to 0
-     * @tc.expected: Verify ignoreBlank on the endpage is effective
-     */
-    ChangeIndex(2);
-    EXPECT_EQ(pattern_->currentIndex_, 2);
-    const float itemWidth = (SWIPER_WIDTH - 2 * 20.0f) / 3.0f;
-    float offset =  40.0f;
-    for (int i = 2; i < pattern_->itemPosition_.size(); ++i) {
-        EXPECT_EQ(GetChildOffset(frameNode_, i).GetX(), offset);
-        offset += itemWidth;
-    }
-}
-
-/**
- * @tc.name: MarginIgnoreBlankTest003
- * @tc.desc: Test Swiper IgnoreBlank Not effective in loop scenarios
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest003, TestSize.Level1)
-{
-    /**
      * @tc.steps: step1. CreateWith SetLoop true
      */
+    const int32_t displayCount = 3;
+    const float itemWidth = (SWIPER_WIDTH - PRE_MARGIN - NEXT_MARGIN) / displayCount;
     CreateWithItem(
-        [](SwiperModelNG model) {
-            model.SetDirection(Axis::HORIZONTAL);
-            model.SetDisplayCount(3);
-            model.SetLoop(true);
-            model.SetPreviousMargin(Dimension(20), true);
-            model.SetNextMargin(Dimension(20), true);
+        [=](SwiperModelNG model) {
+            model.SetDisplayCount(displayCount);
+            model.SetPreviousMargin(Dimension(PRE_MARGIN), true);
+            model.SetNextMargin(Dimension(NEXT_MARGIN), true);
         },
         5);
 
@@ -998,14 +901,72 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest003, TestSize.Level1)
      * @tc.expected: loop is true, ignoreBlank on the endpage is not effective
      */
     ChangeIndex(0);
-    EXPECT_EQ(pattern_->currentIndex_, 0);
-    const float itemWidth = (SWIPER_WIDTH - 2 * 20.0f) / 3.0f;
-    float offset = 20.0f;
-    float lastOffset = GetChildOffset(frameNode_, pattern_->itemPosition_.size() - 1).GetX();
-    EXPECT_EQ(lastOffset, offset - itemWidth);
-    for (int i = 0; i < pattern_->itemPosition_.size() - 1; ++i) {
-        EXPECT_EQ(GetChildOffset(frameNode_, i).GetX(), offset);
-        offset += itemWidth;
-    }
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_EQ(GetChildX(frameNode_, 4), PRE_MARGIN - itemWidth);
+    EXPECT_EQ(GetChildX(frameNode_, 0), PRE_MARGIN);
+    EXPECT_EQ(GetChildX(frameNode_, 1), PRE_MARGIN + itemWidth * 1);
+    EXPECT_EQ(GetChildX(frameNode_, 2), PRE_MARGIN + itemWidth * 2);
+    EXPECT_EQ(GetChildX(frameNode_, 3), PRE_MARGIN + itemWidth * 3);
+}
+
+/**
+ * @tc.name: IsAtStartEnd001
+ * @tc.desc: Test IsAtStart IsAtEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, IsAtStartEnd001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Loop is true
+     * @tc.expected: There are no start or end
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetLoop(true);
+    });
+    EXPECT_FALSE(pattern_->IsAtStart());
+    EXPECT_FALSE(pattern_->IsAtEnd());
+
+    /**
+     * @tc.steps: step2. Empty items
+     * @tc.expected: There are no start or end
+     */
+    Create([](SwiperModelNG model) {
+        model.SetLoop(false);
+    });
+    EXPECT_FALSE(pattern_->IsAtStart());
+    EXPECT_FALSE(pattern_->IsAtEnd());
+}
+
+/**
+ * @tc.name: IsAtStartEnd002
+ * @tc.desc: Test IsAtStart IsAtEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, IsAtStartEnd002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. At start
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetLoop(false);
+    });
+    EXPECT_TRUE(pattern_->IsAtStart());
+    EXPECT_FALSE(pattern_->IsAtEnd());
+
+    /**
+     * @tc.steps: step2. Change currentIndex to middle item
+     * @tc.expected: Not at start or end
+     */
+    ChangeIndex(1);
+    EXPECT_FALSE(pattern_->IsAtStart());
+    EXPECT_FALSE(pattern_->IsAtEnd());
+
+    /**
+     * @tc.steps: step3. Change currentIndex to end item
+     * @tc.expected: At end
+     */
+    ChangeIndex(ITEM_NUMBER - 1);
+    EXPECT_FALSE(pattern_->IsAtStart());
+    EXPECT_TRUE(pattern_->IsAtEnd());
 }
 } // namespace OHOS::Ace::NG

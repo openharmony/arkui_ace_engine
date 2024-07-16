@@ -396,7 +396,7 @@ void SwiperArrowPattern::UpdateArrowContent()
         symbolLayoutProperty->UpdateSymbolColorList({ swiperArrowLayoutProperty->GetArrowColorValue().BlendOpacity(
             swiperIndicatorTheme->GetArrowDisabledAlpha()) });
     }
-    symbolNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    symbolNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     symbolNode->MarkModifyDone();
 }
 

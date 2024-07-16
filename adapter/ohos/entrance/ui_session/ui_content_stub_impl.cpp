@@ -20,32 +20,41 @@
 #include "adapter/ohos/entrance/ui_session/include/ui_service_hilog.h"
 namespace OHOS::Ace {
 
-int32_t UIContentServiceStubImpl::GetInspectorTree()
+int32_t UIContentServiceStubImpl::GetInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback)
 {
+    UiSessionManager::GetInstance().GetInspectorTree();
     return NO_ERROR;
 }
 
-int32_t UIContentServiceStubImpl::RegisterClickEventCallback(EventCallback eventCallback)
+int32_t UIContentServiceStubImpl::RegisterClickEventCallback(const EventCallback& eventCallback)
 {
     UiSessionManager::GetInstance().SetClickEventRegistered(true);
     return NO_ERROR;
 }
 
-int32_t UIContentServiceStubImpl::RegisterRouterChangeEventCallback(EventCallback eventCallback)
+int32_t UIContentServiceStubImpl::RegisterRouterChangeEventCallback(const EventCallback& eventCallback)
 {
     UiSessionManager::GetInstance().SetRouterChangeEventRegistered(true);
     return NO_ERROR;
 }
-int32_t UIContentServiceStubImpl::RegisterSearchEventCallback(EventCallback eventCallback)
+int32_t UIContentServiceStubImpl::RegisterSearchEventCallback(const EventCallback& eventCallback)
 {
     UiSessionManager::GetInstance().SetSearchEventRegistered(true);
     return NO_ERROR;
 }
-int32_t UIContentServiceStubImpl::RegisterComponentChangeEventCallback(EventCallback eventCallback)
+int32_t UIContentServiceStubImpl::RegisterComponentChangeEventCallback(const EventCallback& eventCallback)
 {
     UiSessionManager::GetInstance().SetComponentChangeEventRegistered(true);
     return NO_ERROR;
 }
+
+int32_t UIContentServiceStubImpl::RegisterWebUnfocusEventCallback(
+    const std::function<void(int64_t accessibilityId, const std::string& data)>& eventCallback)
+{
+    UiSessionManager::GetInstance().NotifyAllWebPattern(true);
+    return NO_ERROR;
+}
+
 int32_t UIContentServiceStubImpl::UnregisterClickEventCallback()
 {
     UiSessionManager::GetInstance().SetClickEventRegistered(false);
@@ -64,6 +73,12 @@ int32_t UIContentServiceStubImpl::UnregisterRouterChangeEventCallback()
 int32_t UIContentServiceStubImpl::UnregisterComponentChangeEventCallback()
 {
     UiSessionManager::GetInstance().SetComponentChangeEventRegistered(false);
+    return NO_ERROR;
+}
+
+int32_t UIContentServiceStubImpl::UnregisterWebUnfocusEventCallback()
+{
+    UiSessionManager::GetInstance().NotifyAllWebPattern(false);
     return NO_ERROR;
 }
 } // namespace OHOS::Ace

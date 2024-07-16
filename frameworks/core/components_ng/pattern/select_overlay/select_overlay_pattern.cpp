@@ -49,8 +49,22 @@ void SelectOverlayPattern::OnAttachToFrameNode()
 
     UpdateHandleHotZone();
     auto gesture = host->GetOrCreateGestureEventHub();
+    if (overlayMode_ == SelectOverlayMode::MENU_ONLY) {
+        gesture->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
+        return;
+    }
     gesture->SetHitTestMode(info_->hitTestMode);
+    SetGestureEvent();
+    if (info_->isSingleHandle && !info_->isHandleLineShow) {
+        StartHiddenHandleTask();
+    }
+}
 
+void SelectOverlayPattern::SetGestureEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
     clickEvent_ = MakeRefPtr<ClickEvent>([weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -91,10 +105,6 @@ void SelectOverlayPattern::OnAttachToFrameNode()
     };
     touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
     gesture->AddTouchEvent(touchEvent_);
-
-    if (info_->isSingleHandle && !info_->isHandleLineShow) {
-        StartHiddenHandleTask();
-    }
 }
 
 void SelectOverlayPattern::OnDetachFromFrameNode(FrameNode* /*frameNode*/)
@@ -137,12 +147,15 @@ void SelectOverlayPattern::AddMenuResponseRegion(std::vector<DimensionRect>& res
 
 void SelectOverlayPattern::UpdateHandleHotZone()
 {
+    if (!CheckIfNeedHandle()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto firstHandle = info_->firstHandle.paintRect;
-    auto secondHandle = info_->secondHandle.paintRect;
+    auto firstHandle = info_->GetFirstHandlePaintRect();
+    auto secondHandle = info_->GetSecondHandlePaintRect();
 
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(theme);
@@ -164,6 +177,7 @@ void SelectOverlayPattern::UpdateHandleHotZone()
                 Offset(secondHandleRegion_.GetOffset().GetX(), secondHandleRegion_.GetOffset().GetY())));
             responseRegion.emplace_back(secondHandleRegion);
             host->GetOrCreateGestureEventHub()->SetResponseRegion(responseRegion);
+            firstHandleRegion_.Reset();
         } else {
             // Use the first handle to make a single handle.
             auto firstHandleOffsetY = firstHandle.Bottom();
@@ -175,6 +189,7 @@ void SelectOverlayPattern::UpdateHandleHotZone()
                 DimensionOffset(Offset(firstHandleRegion_.GetOffset().GetX(), firstHandleRegion_.GetOffset().GetY())));
             responseRegion.emplace_back(firstHandleRegion);
             host->GetOrCreateGestureEventHub()->SetResponseRegion(responseRegion);
+            secondHandleRegion_.Reset();
         }
         return;
     }
@@ -204,13 +219,12 @@ void SelectOverlayPattern::UpdateHandleHotZone()
     if (IsCustomMenu()) {
         AddMenuResponseRegion(responseRegion);
     }
-
     host->GetOrCreateGestureEventHub()->SetResponseRegion(responseRegion);
 }
 
 void SelectOverlayPattern::HandleOnClick(GestureEvent& /*info*/)
 {
-    if (!info_->isSingleHandle) {
+    if (!info_->isSingleHandle || clickConsumeBySimulate_) {
         return;
     }
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
@@ -243,6 +257,12 @@ void SelectOverlayPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (IsCustomMenu()) {
         MenuWrapperPattern::OnTouchEvent(info);
     }
+    if (changedPoint.GetTouchType() == TouchType::UP && isSimulateOnClick_) {
+        isSimulateOnClick_ = false;
+        GestureEvent gestureEvent;
+        HandleOnClick(gestureEvent);
+        clickConsumeBySimulate_ = true;
+    }
 }
 
 void SelectOverlayPattern::HandleTouchDownEvent(const TouchEventInfo& info)
@@ -256,6 +276,15 @@ void SelectOverlayPattern::HandleTouchDownEvent(const TouchEventInfo& info)
         isFirstHandleTouchDown_ = true;
     } else if (secondHandleRegion_.IsInRegion(point)) {
         isSecondHandleTouchDown_ = true;
+    }
+    clickConsumeBySimulate_ = false;
+    if ((isFirstHandleTouchDown_ || isSecondHandleTouchDown_) && info_->enableHandleLevel &&
+        info_->handleLevelMode == HandleLevelMode::EMBED) {
+        auto host = DynamicCast<SelectOverlayNode>(GetHost());
+        if (host) {
+            isSimulateOnClick_ = true;
+            host->SwitchToOverlayMode();
+        }
     }
 }
 
@@ -298,6 +327,7 @@ void SelectOverlayPattern::HandlePanStart(GestureEvent& info)
 
 void SelectOverlayPattern::HandlePanMove(GestureEvent& info)
 {
+    isSimulateOnClick_ = false;
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
     const auto& offset = OffsetF(info.GetDelta().GetX(), info.GetDelta().GetY());
@@ -322,9 +352,11 @@ void SelectOverlayPattern::UpdateOffsetOnMove(
     CHECK_NULL_VOID(host);
     region += offset;
     handleInfo.paintRect += offset;
-    auto paintRect = handleInfo.paintRect;
+    handleInfo.localPaintRect += offset;
+    auto isOverlayMode = info_->handleLevelMode == HandleLevelMode::OVERLAY;
+    auto paintRect = isOverlayMode ? handleInfo.paintRect : handleInfo.localPaintRect;
     handleInfo.paintInfo = handleInfo.paintInfo + offset;
-    if (handleInfo.isPaintHandleWithPoints && handleInfo.paintInfoConverter) {
+    if (isOverlayMode && handleInfo.isPaintHandleWithPoints && handleInfo.paintInfoConverter) {
         paintRect = handleInfo.paintInfoConverter(handleInfo.paintInfo);
     }
     CheckHandleReverse();
@@ -363,7 +395,8 @@ void SelectOverlayPattern::HandlePanEnd(GestureEvent& /*info*/)
 RectF SelectOverlayPattern::GetHandlePaintRect(const SelectHandleInfo& handleInfo)
 {
     auto paintRect = handleInfo.paintRect;
-    if (handleInfo.isPaintHandleWithPoints && handleInfo.paintInfoConverter) {
+    if (info_->handleLevelMode == HandleLevelMode::OVERLAY && handleInfo.isPaintHandleWithPoints &&
+        handleInfo.paintInfoConverter) {
         paintRect = handleInfo.paintInfoConverter(handleInfo.paintInfo);
     }
     return paintRect;
@@ -660,5 +693,41 @@ void SelectOverlayPattern::SetSelectMenuHeight()
     auto geometryNode = selectMenu->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     selectMenuHeight_ = geometryNode->GetFrameSize().Height();
+}
+
+bool SelectOverlayPattern::CheckIfNeedMenu()
+{
+    return (overlayMode_ == SelectOverlayMode::ALL || overlayMode_ == SelectOverlayMode::MENU_ONLY);
+}
+
+bool SelectOverlayPattern::CheckIfNeedHandle()
+{
+    return (overlayMode_ == SelectOverlayMode::ALL || overlayMode_ == SelectOverlayMode::HANDLE_ONLY);
+}
+
+float SelectOverlayPattern::GetHandleDiameter()
+{
+    auto pipleline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipleline, 0.0f);
+    auto textOverlayTheme = pipleline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_RETURN(textOverlayTheme, 0.0f);
+    return textOverlayTheme->GetHandleDiameter().ConvertToPx();
+}
+
+void SelectOverlayPattern::SetContentModifierBounds(const RefPtr<SelectOverlayContentModifier>& modifier)
+{
+    CHECK_NULL_VOID(modifier);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameRect = geometryNode->GetFrameRect();
+    auto handleDiameter = GetHandleDiameter();
+    RectF boundsRect;
+    boundsRect.SetLeft(frameRect.Left() - handleDiameter * 1.5f);
+    boundsRect.SetTop(frameRect.Top() - handleDiameter * 1.5f);
+    boundsRect.SetWidth(frameRect.Width() + handleDiameter * 3.0f);
+    boundsRect.SetHeight(frameRect.Height() + handleDiameter * 3.0f);
+    modifier->SetBoundsRect(boundsRect);
 }
 } // namespace OHOS::Ace::NG

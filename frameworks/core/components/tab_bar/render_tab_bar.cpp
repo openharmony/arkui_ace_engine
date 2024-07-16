@@ -522,7 +522,6 @@ bool RenderTabBar::HandleScrollablePosition(double value)
             scrollableOffset_ += delta;
             scrollableOffset_.SetY(std::clamp(scrollableOffset_.GetY(), -MaxScrollableHeight(), 0.0));
         }
-
         if (!NearZero(value)) {
             MarkNeedLayout();
             return true;
@@ -690,7 +689,7 @@ void RenderTabBar::OnPaintFinish()
     if (deviceType == DeviceType::TV) {
         if (indicator_) {
             context->ShowFocusAnimation(RRect::MakeRRect(Rect(Offset(0, 0), indicator_->GetLayoutSize()),
-                                            Radius(NormalizeToPx(focusRadiusDimension_))),
+                Radius(NormalizeToPx(focusRadiusDimension_))),
                 focusAnimationColor_, indicator_->GetGlobalOffset());
         }
     } else {

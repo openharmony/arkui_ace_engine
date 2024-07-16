@@ -41,11 +41,11 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             break;
         }
         case REGISTER_SEARCH_EVENT: {
-            RegisterRouterChangeEventCallbackInner(data, reply, option);
+            RegisterSearchEventCallbackInner(data, reply, option);
             break;
         }
         case REGISTER_ROUTER_CHANGE_EVENT: {
-            RegisterSearchEventCallbackInner(data, reply, option);
+            RegisterRouterChangeEventCallbackInner(data, reply, option);
             break;
         }
         case REGISTER_COMPONENT_EVENT: {
@@ -68,6 +68,10 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             UnregisterComponentChangeEventCallbackInner(data, reply, option);
             break;
         }
+        case UNREGISTER_WEB_UNFOCUS_EVENT: {
+            UnregisterWebUnfocusEventCallbackInner(data, reply, option);
+            break;
+        }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -78,6 +82,7 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
 
 int32_t UiContentStub::GetInspectorTreeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
+    GetInspectorTree(nullptr);
     return NO_ERROR;
 }
 
@@ -90,6 +95,7 @@ int32_t UiContentStub::ConnectInner(MessageParcel& data, MessageParcel& reply, M
     }
     int32_t processId = data.ReadInt32();
     UiSessionManager::GetInstance().SaveReportStub(report, processId);
+    UiSessionManager::GetInstance().SendBaseInfo(processId);
     return NO_ERROR;
 }
 
@@ -116,7 +122,14 @@ int32_t UiContentStub::RegisterSearchEventCallbackInner(
 int32_t UiContentStub::RegisterComponentChangeEventCallbackInner(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
-    reply.WriteInt32(RegisterRouterChangeEventCallback(nullptr));
+    reply.WriteInt32(RegisterComponentChangeEventCallback(nullptr));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::RegisterWebUnfocusEventCallbackInner(
+    MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    reply.WriteInt32(RegisterWebUnfocusEventCallback(nullptr));
     return NO_ERROR;
 }
 
@@ -145,6 +158,13 @@ int32_t UiContentStub::UnregisterComponentChangeEventCallbackInner(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     reply.WriteInt32(UnregisterComponentChangeEventCallback());
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::UnregisterWebUnfocusEventCallbackInner(
+    MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    reply.WriteInt32(UnregisterWebUnfocusEventCallback());
     return NO_ERROR;
 }
 } // namespace OHOS::Ace

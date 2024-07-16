@@ -70,53 +70,197 @@ bool ContainerIsScenceBoard()
 #endif
 } // namespace
 
-bool HasProperty(napi_env env, napi_value value, const std::string& targetStr)
+bool GetToastMessage(napi_env env, napi_value messageNApi, std::string& messageString)
 {
-    bool hasProperty = false;
-    napi_has_named_property(env, value, targetStr.c_str(), &hasProperty);
-    return hasProperty;
+    size_t ret = 0;
+    ResourceInfo recv;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, messageNApi, &valueType);
+    if (valueType == napi_string) {
+        size_t messageLen = GetParamLen(env, messageNApi) + 1;
+        std::unique_ptr<char[]> message = std::make_unique<char[]>(messageLen);
+        napi_get_value_string_utf8(env, messageNApi, message.get(), messageLen, &ret);
+        messageString = message.get();
+    } else if (valueType == napi_object) {
+        if (!ParseResourceParam(env, messageNApi, recv)) {
+            NapiThrow(env, "Can not parse resource info from input params.", ERROR_CODE_INTERNAL_ERROR);
+            return false;
+        }
+        if (!ParseString(recv, messageString)) {
+            NapiThrow(env, "Can not get message from resource manager.", ERROR_CODE_INTERNAL_ERROR);
+            return false;
+        }
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "Toast message: %{public}s", messageString.c_str());
+    } else {
+        NapiThrow(env, "The type of message is incorrect.", ERROR_CODE_PARAM_INVALID);
+        return false;
+    }
+    return true;
 }
 
-bool ParseNapiDimension(napi_env env, CalcDimension& result, napi_value napiValue, DimensionUnit defaultUnit)
+bool GetToastDuration(napi_env env, napi_value durationNApi, int32_t& duration)
 {
     napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, napiValue, &valueType);
+    napi_typeof(env, durationNApi, &valueType);
+    ResourceInfo recv;
+    std::string durationStr;
     if (valueType == napi_number) {
-        double value = 0;
-        napi_get_value_double(env, napiValue, &value);
-        result.SetUnit(defaultUnit);
-        result.SetValue(value);
-        return true;
-    } else if (valueType == napi_string) {
-        std::string valueString;
-        if (!GetNapiString(env, napiValue, valueString, valueType)) {
-            return false;
-        }
-        result = StringUtils::StringToCalcDimension(valueString, false, defaultUnit);
-        return true;
+        napi_get_value_int32(env, durationNApi, &duration);
     } else if (valueType == napi_object) {
-        ResourceInfo recv;
-        std::string parameterStr;
-        if (!ParseResourceParam(env, napiValue, recv)) {
+        recv = {};
+        if (!ParseResourceParam(env, durationNApi, recv)) {
+            NapiThrow(env, "Can not parse resource info from input params.", ERROR_CODE_INTERNAL_ERROR);
             return false;
         }
-        if (!ParseString(recv, parameterStr)) {
+        if (!ParseString(recv, durationStr)) {
+            NapiThrow(env, "Can not get message from resource manager.", ERROR_CODE_INTERNAL_ERROR);
             return false;
         }
-        result = StringUtils::StringToDimensionWithUnit(parameterStr, defaultUnit);
-        return true;
+        duration = StringUtils::StringToInt(durationStr);
     }
-    return false;
+    return true;
 }
 
-napi_value GetReturnObject(napi_env env, std::string callbackString)
+bool GetToastBottom(napi_env env, napi_value bottomNApi, std::string& bottomString)
 {
-    napi_value result = nullptr;
-    napi_value returnObj = nullptr;
-    napi_create_object(env, &returnObj);
-    napi_create_string_utf8(env, callbackString.c_str(), NAPI_AUTO_LENGTH, &result);
-    napi_set_named_property(env, returnObj, "errMsg", result);
-    return returnObj;
+    size_t ret = 0;
+    ResourceInfo recv;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, bottomNApi, &valueType);
+    if (valueType == napi_string) {
+        size_t bottomLen = GetParamLen(env, bottomNApi) + 1;
+        std::unique_ptr<char[]> bottom = std::make_unique<char[]>(bottomLen);
+        napi_get_value_string_utf8(env, bottomNApi, bottom.get(), bottomLen, &ret);
+        bottomString = bottom.get();
+    } else if (valueType == napi_number) {
+        double bottom = 0.0;
+        napi_get_value_double(env, bottomNApi, &bottom);
+        bottomString = std::to_string(bottom);
+    } else if (valueType == napi_object) {
+        recv = {};
+        if (!ParseResourceParam(env, bottomNApi, recv)) {
+            NapiThrow(env, "Can not parse resource info from input params.", ERROR_CODE_INTERNAL_ERROR);
+            return false;
+        }
+        if (!ParseString(recv, bottomString)) {
+            NapiThrow(env, "Can not get message from resource manager.", ERROR_CODE_INTERNAL_ERROR);
+            return false;
+        }
+    }
+    return true;
+}
+
+bool GetToastShowMode(napi_env env, napi_value showModeNApi, NG::ToastShowMode& showMode)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, showModeNApi, &valueType);
+    if (valueType == napi_number) {
+        int32_t num = -1;
+        napi_get_value_int32(env, showModeNApi, &num);
+        if (num >= 0 && num <= static_cast<int32_t>(NG::ToastShowMode::SYSTEM_TOP_MOST)) {
+            showMode = static_cast<NG::ToastShowMode>(num);
+        }
+    }
+    return true;
+}
+
+bool GetToastAlignment(napi_env env, napi_value alignmentApi, int32_t& alignment)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, alignmentApi, &valueType);
+    if (valueType == napi_number) {
+        napi_get_value_int32(env, alignmentApi, &alignment);
+    }
+    return true;
+}
+
+bool GetToastOffset(napi_env env, napi_value offsetApi, std::optional<DimensionOffset>& offset)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, offsetApi, &valueType);
+    if (valueType == napi_object) {
+        napi_value dxApi = nullptr;
+        napi_value dyApi = nullptr;
+        napi_get_named_property(env, offsetApi, "dx", &dxApi);
+        napi_get_named_property(env, offsetApi, "dy", &dyApi);
+        CalcDimension dx;
+        CalcDimension dy;
+        ParseNapiDimension(env, dx, dxApi, DimensionUnit::VP);
+        ParseNapiDimension(env, dy, dyApi, DimensionUnit::VP);
+        offset = DimensionOffset { dx, dy };
+    }
+    return true;
+}
+
+bool GetToastParams(napi_env env, napi_value argv, NG::ToastInfo& toastInfo)
+{
+    napi_value messageNApi = nullptr;
+    napi_value durationNApi = nullptr;
+    napi_value bottomNApi = nullptr;
+    napi_value showModeNApi = nullptr;
+    napi_value alignmentApi = nullptr;
+    napi_value offsetApi = nullptr;
+
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv, &valueType);
+    if (valueType == napi_object) {
+        // message can not be null
+        if (!HasProperty(env, argv, "message")) {
+            NapiThrow(env, "Required input parameters are missing.", ERROR_CODE_PARAM_INVALID);
+            return false;
+        }
+        napi_get_named_property(env, argv, "message", &messageNApi);
+        napi_get_named_property(env, argv, "duration", &durationNApi);
+        napi_get_named_property(env, argv, "bottom", &bottomNApi);
+        napi_get_named_property(env, argv, "showMode", &showModeNApi);
+        napi_get_named_property(env, argv, "alignment", &alignmentApi);
+        napi_get_named_property(env, argv, "offset", &offsetApi);
+    } else {
+        NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+        return false;
+    }
+    if (!GetToastMessage(env, messageNApi, toastInfo.message) ||
+        !GetToastDuration(env, durationNApi, toastInfo.duration) ||
+        !GetToastBottom(env, bottomNApi, toastInfo.bottom) ||
+        !GetToastShowMode(env, showModeNApi, toastInfo.showMode) ||
+        !GetToastAlignment(env, alignmentApi, toastInfo.alignment) ||
+        !GetToastOffset(env, offsetApi, toastInfo.offset)) {
+        return false;
+    }
+    return true;
+}
+
+bool ShowToast(napi_env env, NG::ToastInfo& toastInfo, std::function<void(int32_t)>& toastCallback)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    if ((SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsScenceBoard() &&
+        toastInfo.showMode == NG::ToastShowMode::DEFAULT) {
+        auto delegate = EngineHelper::GetCurrentDelegateSafely();
+        if (!delegate) {
+            NapiThrow(env, "Can not get delegate.", ERROR_CODE_INTERNAL_ERROR);
+            return false;
+        }
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "before delegate show toast");
+        delegate->ShowToast(toastInfo, std::move(toastCallback));
+    } else if (SubwindowManager::GetInstance() != nullptr) {
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "before subwindow manager show toast");
+        SubwindowManager::GetInstance()->ShowToast(toastInfo, std::move(toastCallback));
+    }
+#else
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (!delegate) {
+        NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
+        return false;
+    }
+    if (toastInfo.showMode == NG::ToastShowMode::DEFAULT) {
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "before delegate show toast");
+        delegate->ShowToast(toastInfo, std::move(toastCallback));
+    } else if (SubwindowManager::GetInstance() != nullptr) {
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "before subwindow manager show toast");
+        SubwindowManager::GetInstance()->ShowToast(toastInfo, std::move(toastCallback));
+    }
+#endif
+    return true;
 }
 
 napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
@@ -132,153 +276,93 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         NapiThrow(env, "The number of parameters must be equal to 1.", ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
-    napi_value messageNApi = nullptr;
-    napi_value durationNApi = nullptr;
-    napi_value bottomNApi = nullptr;
-    napi_value showModeNApi = nullptr;
-    napi_value alignmentApi = nullptr;
-    napi_value offsetApi = nullptr;
-    std::string messageString;
-    std::string bottomString;
-    NG::ToastShowMode showMode = NG::ToastShowMode::DEFAULT;
-    int32_t alignment = -1;
-    std::optional<DimensionOffset> offset;
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, argv, &valueType);
-    if (valueType == napi_object) {
-        // message can not be null
-        if (!HasProperty(env, argv, "message")) {
-            NapiThrow(env, "Required input parameters are missing.", ERROR_CODE_PARAM_INVALID);
-            return nullptr;
-        }
-        napi_get_named_property(env, argv, "message", &messageNApi);
-        napi_get_named_property(env, argv, "duration", &durationNApi);
-        napi_get_named_property(env, argv, "bottom", &bottomNApi);
-        napi_get_named_property(env, argv, "showMode", &showModeNApi);
-        napi_get_named_property(env, argv, "alignment", &alignmentApi);
-        napi_get_named_property(env, argv, "offset", &offsetApi);
-    } else {
-        NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+    auto toastInfo = NG::ToastInfo { .duration = -1, .showMode = NG::ToastShowMode::DEFAULT, .alignment = -1 };
+    if (!GetToastParams(env, argv, toastInfo)) {
         return nullptr;
     }
+    std::function<void(int32_t)> toastCallback = nullptr;
+    ShowToast(env, toastInfo, toastCallback);
+    return nullptr;
+}
 
-    size_t ret = 0;
-    ResourceInfo recv;
-    napi_typeof(env, messageNApi, &valueType);
-    if (valueType == napi_string) {
-        size_t messageLen = GetParamLen(env, messageNApi) + 1;
-        std::unique_ptr<char[]> message = std::make_unique<char[]>(messageLen);
-        napi_get_value_string_utf8(env, messageNApi, message.get(), messageLen, &ret);
-        messageString = message.get();
-    } else if (valueType == napi_object) {
-        if (!ParseResourceParam(env, messageNApi, recv)) {
-            NapiThrow(env, "Can not parse resource info from input params.", ERROR_CODE_INTERNAL_ERROR);
-            return nullptr;
-        }
-        if (!ParseString(recv, messageString)) {
-            NapiThrow(env, "Can not get message from resource manager.", ERROR_CODE_INTERNAL_ERROR);
-            return nullptr;
-        }
-        TAG_LOGD(AceLogTag::ACE_DIALOG, "Toast message: %{public}s", messageString.c_str());
-    } else {
-        NapiThrow(env, "The type of message is incorrect.", ERROR_CODE_PARAM_INVALID);
+napi_value JSPromptOpenToast(napi_env env, napi_callback_info info)
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "open toast enter");
+    size_t requireArgc = 1;
+    size_t argc = 1;
+    napi_value argv = nullptr;
+    napi_value thisVar = nullptr;
+    void* data = nullptr;
+    napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data);
+    if (argc != requireArgc) {
+        NapiThrow(env, "The number of parameters must be equal to 1.", ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
-
-    int32_t duration = -1;
-    std::string durationStr;
-    napi_typeof(env, durationNApi, &valueType);
-    if (valueType == napi_number) {
-        napi_get_value_int32(env, durationNApi, &duration);
-    } else if (valueType == napi_object) {
-        recv = {};
-        if (!ParseResourceParam(env, durationNApi, recv)) {
-            NapiThrow(env, "Can not parse resource info from input params.", ERROR_CODE_INTERNAL_ERROR);
-            return nullptr;
-        }
-        if (!ParseString(recv, durationStr)) {
-            NapiThrow(env, "Can not get message from resource manager.", ERROR_CODE_INTERNAL_ERROR);
-            return nullptr;
-        }
-        duration = StringUtils::StringToInt(durationStr);
+    auto toastInfo = NG::ToastInfo { .duration = -1, .showMode = NG::ToastShowMode::DEFAULT, .alignment = -1 };
+    if (!GetToastParams(env, argv, toastInfo)) {
+        return nullptr;
     }
+    napi_deferred deferred;
+    napi_value result;
+    napi_create_promise(env, &deferred, &result);
+    std::function<void(int32_t)> toastCallback = nullptr;
+    toastCallback = [env, deferred](int32_t toastId) mutable {
+        napi_value napiToastId = nullptr;
+        napi_create_int32(env, toastId, &napiToastId);
+        napi_resolve_deferred(env, deferred, napiToastId);
+    };
+    if (ShowToast(env, toastInfo, toastCallback)) {
+        return result;
+    }
+    return nullptr;
+}
 
-    napi_typeof(env, bottomNApi, &valueType);
-    if (valueType == napi_string) {
-        size_t bottomLen = GetParamLen(env, bottomNApi) + 1;
-        std::unique_ptr<char[]> bottom = std::make_unique<char[]>(bottomLen);
-        napi_get_value_string_utf8(env, bottomNApi, bottom.get(), bottomLen, &ret);
-        bottomString = bottom.get();
-    } else if (valueType == napi_number) {
-        double bottom = 0.0;
-        napi_get_value_double(env, bottomNApi, &bottom);
-        bottomString = std::to_string(bottom);
-    } else if (valueType == napi_object) {
-        recv = {};
-        if (!ParseResourceParam(env, bottomNApi, recv)) {
-            NapiThrow(env, "Can not parse resource info from input params.", ERROR_CODE_INTERNAL_ERROR);
-            return nullptr;
+napi_value JSPromptCloseToast(napi_env env, napi_callback_info info)
+{
+    size_t argc = 1;
+    napi_value args[1];
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+    if (argc != 1) {
+        NapiThrow(env, "The number of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
+    int32_t id = -1;
+    napi_get_value_int32(env, args[0], &id);
+    int32_t showModeVal = id & 0b111;
+    int32_t toastId = id >> 3; // 3 : Move 3 bits to the right to get toastId, and the last 3 bits are the showMode
+    if (toastId < 0 || showModeVal < 0 || showModeVal > static_cast<int32_t>(NG::ToastShowMode::SYSTEM_TOP_MOST)) {
+        NapiThrow(env, "", ERROR_CODE_TOAST_NOT_FOUND);
+        return nullptr;
+    }
+    auto showMode = static_cast<NG::ToastShowMode>(showModeVal);
+    std::function<void(int32_t)> toastCloseCallback = nullptr;
+    toastCloseCallback = [env](int32_t errorCode) mutable {
+        if (errorCode != ERROR_CODE_NO_ERROR) {
+            NapiThrow(env, "", errorCode);
         }
-        if (!ParseString(recv, bottomString)) {
-            NapiThrow(env, "Can not get message from resource manager.", ERROR_CODE_INTERNAL_ERROR);
-            return nullptr;
-        }
-    }
-
-    napi_typeof(env, showModeNApi, &valueType);
-    if (valueType == napi_number) {
-        int32_t num = -1;
-        napi_get_value_int32(env, showModeNApi, &num);
-        if (num >= 0 && num <= static_cast<int32_t>(NG::ToastShowMode::SYSTEM_TOP_MOST)) {
-            showMode = static_cast<NG::ToastShowMode>(num);
-        }
-    }
-
-    // parse alignment
-    napi_typeof(env, alignmentApi, &valueType);
-    if (valueType == napi_number) {
-        napi_get_value_int32(env, alignmentApi, &alignment);
-    }
-
-    // parse offset
-    napi_typeof(env, offsetApi, &valueType);
-    if (valueType == napi_object) {
-        napi_value dxApi = nullptr;
-        napi_value dyApi = nullptr;
-        napi_get_named_property(env, offsetApi, "dx", &dxApi);
-        napi_get_named_property(env, offsetApi, "dy", &dyApi);
-        CalcDimension dx;
-        CalcDimension dy;
-        ParseNapiDimension(env, dx, dxApi, DimensionUnit::VP);
-        ParseNapiDimension(env, dy, dyApi, DimensionUnit::VP);
-        offset = DimensionOffset { dx, dy };
-    }
+    };
 #ifdef OHOS_STANDARD_SYSTEM
     if ((SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsScenceBoard() &&
         showMode == NG::ToastShowMode::DEFAULT) {
         auto delegate = EngineHelper::GetCurrentDelegateSafely();
-        if (!delegate) {
+        if (delegate) {
+            delegate->CloseToast(toastId, std::move(toastCloseCallback));
+        } else {
             NapiThrow(env, "Can not get delegate.", ERROR_CODE_INTERNAL_ERROR);
-            return nullptr;
         }
-        TAG_LOGD(AceLogTag::ACE_DIALOG, "before delegate show toast");
-        delegate->ShowToast(messageString, duration, bottomString, showMode, alignment, offset);
     } else if (SubwindowManager::GetInstance() != nullptr) {
-        TAG_LOGD(AceLogTag::ACE_DIALOG, "before subwindow manager show toast");
-        SubwindowManager::GetInstance()->ShowToast(messageString, duration, bottomString, showMode, alignment, offset);
+        SubwindowManager::GetInstance()->CloseToast(
+            toastId, static_cast<NG::ToastShowMode>(showMode), std::move(toastCloseCallback));
     }
 #else
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
-        return nullptr;
     }
     if (showMode == NG::ToastShowMode::DEFAULT) {
-        TAG_LOGD(AceLogTag::ACE_DIALOG, "before delegate show toast");
-        delegate->ShowToast(messageString, duration, bottomString, showMode, alignment, offset);
+        delegate->CloseToast(toastId, std::move(toastCloseCallback));
     } else if (SubwindowManager::GetInstance() != nullptr) {
-        TAG_LOGD(AceLogTag::ACE_DIALOG, "before subwindow manager show toast");
-        SubwindowManager::GetInstance()->ShowToast(messageString, duration, bottomString, showMode, alignment, offset);
+        SubwindowManager::GetInstance()->CloseToast(toastId, showMode, std::move(toastCloseCallback));
     }
 #endif
     return nullptr;
@@ -526,81 +610,11 @@ void GetNapiDialogbackgroundBlurStyleProps(napi_env env, const std::shared_ptr<P
     }
 }
 
-bool ParseNapiDimensionNG(
-    napi_env env, CalcDimension& result, napi_value napiValue, DimensionUnit defaultUnit, bool isSupportPercent)
-{
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, napiValue, &valueType);
-    if (valueType == napi_number) {
-        double value = 0;
-        napi_get_value_double(env, napiValue, &value);
-
-        result.SetUnit(defaultUnit);
-        result.SetValue(value);
-        return true;
-    } else if (valueType == napi_string) {
-        std::string valueString;
-        if (!GetNapiString(env, napiValue, valueString, valueType)) {
-            return false;
-        }
-        if (valueString.back() == '%' && !isSupportPercent) {
-            return false;
-        }
-        return StringUtils::StringToCalcDimensionNG(valueString, result, false, defaultUnit);
-    } else if (valueType == napi_object) {
-        ResourceInfo recv;
-        std::string parameterStr;
-        if (!ParseResourceParam(env, napiValue, recv)) {
-            return false;
-        }
-        if (!ParseString(recv, parameterStr)) {
-            return false;
-        }
-        if (!ParseIntegerToString(recv, parameterStr)) {
-            return false;
-        }
-        result = StringUtils::StringToDimensionWithUnit(parameterStr, defaultUnit);
-        return true;
-    }
-    return false;
-}
-
 void CheckNapiDimension(CalcDimension value)
 {
     if (value.IsNegative()) {
         value.Reset();
     }
-}
-
-bool ParseNapiColor(napi_env env, napi_value value, Color& result)
-{
-    napi_valuetype valueType = GetValueType(env, value);
-    if (valueType != napi_number && valueType != napi_string && valueType != napi_object) {
-        return false;
-    }
-    if (valueType == napi_number) {
-        int32_t colorId = 0;
-        napi_get_value_int32(env, value, &colorId);
-        constexpr uint32_t colorAlphaOffset = 24;
-        constexpr uint32_t colorAlphaDefaultValue = 0xFF000000;
-        auto origin = static_cast<uint32_t>(colorId);
-        uint32_t alphaResult = origin;
-        if ((origin >> colorAlphaOffset) == 0) {
-            alphaResult = origin | colorAlphaDefaultValue;
-        }
-        result = Color(alphaResult);
-        return true;
-    }
-    if (valueType == napi_string) {
-        std::optional<std::string> colorString = GetStringFromValueUtf8(env, value);
-        if (!colorString.has_value()) {
-            LOGE("Parse color from string failed");
-            return false;
-        }
-        return Color::ParseColorString(colorString.value(), result);
-    }
-
-    return ParseColorFromResourceObject(env, value, result);
 }
 
 std::optional<NG::BorderColorProperty> GetBorderColorProps(
@@ -753,21 +767,6 @@ std::optional<Color> GetColorProps(napi_env env, napi_value value)
     return std::nullopt;
 }
 
-bool ParseStyle(napi_env env, napi_value value, std::optional<BorderStyle>& style)
-{
-    napi_valuetype valueType = GetValueType(env, value);
-    if (valueType != napi_number) {
-        return false;
-    }
-    int32_t num;
-    napi_get_value_int32(env, value, &num);
-    style = static_cast<BorderStyle>(num);
-    if (style < BorderStyle::SOLID || style > BorderStyle::NONE) {
-        return false;
-    }
-    return true;
-}
-
 std::optional<NG::BorderStyleProperty> GetBorderStyleProps(
     napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
 {
@@ -810,24 +809,6 @@ std::optional<NG::BorderStyleProperty> GetBorderStyleProps(
         return styleProps;
     }
     return std::nullopt;
-}
-
-bool ParseShadowColorStrategy(napi_env env, napi_value value, ShadowColorStrategy& strategy)
-{
-    napi_valuetype valueType = GetValueType(env, value);
-    if (valueType == napi_string) {
-        std::optional<std::string> colorStr = GetStringFromValueUtf8(env, value);
-        if (colorStr.has_value()) {
-            if (colorStr->compare("average") == 0) {
-                strategy = ShadowColorStrategy::AVERAGE;
-                return true;
-            } else if (colorStr->compare("primary") == 0) {
-                strategy = ShadowColorStrategy::PRIMARY;
-                return true;
-            }
-        }
-    }
-    return false;
 }
 
 bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
@@ -1123,7 +1104,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     if (valueTypeOfThis == napi_undefined) {
         return nullptr;
     }
-
+    
     auto asyncContext = std::make_shared<PromptAsyncContext>();
     asyncContext->env = env;
     asyncContext->instanceId = Container::CurrentIdSafely();
@@ -1183,8 +1164,8 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             return nullptr;
         }
     }
-    auto onLanguageChange = [shadowProps, alignment, offset,
-        updateAlignment = UpdatePromptAlignment](DialogProperties& dialogProps) mutable {
+    auto onLanguageChange = [shadowProps, alignment, offset, maskRect,
+        updateAlignment = UpdatePromptAlignment](DialogProperties& dialogProps) {
         bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
         if (shadowProps.has_value()) {
             std::optional<Shadow> shadow = shadowProps.value();
@@ -1199,10 +1180,17 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         }
         if (offset.has_value()) {
             std::optional<DimensionOffset> pmOffset = offset.value();
-            double xValue = isRtl ? pmOffset->GetX().Value() * (-1) : pmOffset->GetX().Value();
-            Dimension offsetX = Dimension(xValue);
+            Dimension offsetX = isRtl ? pmOffset->GetX() * (-1) : pmOffset->GetX();
             pmOffset->SetX(offsetX);
             dialogProps.offset = pmOffset.value();
+        }
+        if (maskRect.has_value()) {
+            std::optional<DimensionRect> pmMaskRect = maskRect.value();
+            auto offset = pmMaskRect->GetOffset();
+            Dimension offsetX = isRtl ? offset.GetX() * (-1) : offset.GetX();
+            offset.SetX(offsetX);
+            pmMaskRect->SetOffset(offset);
+            dialogProps.maskRect = pmMaskRect.value();
         }
     };
     napi_value result = nullptr;

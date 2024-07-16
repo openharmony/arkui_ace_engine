@@ -245,7 +245,8 @@ public:
             state = Global::Resource::SUCCESS;
             return std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), len, resourceMgr);
         }
-        if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp") {
+        if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp" ||
+            type == "astc" || type == "sut") {
             HILOGD("Create DrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::BASE;
             state = Global::Resource::SUCCESS;
@@ -275,7 +276,8 @@ public:
             state = Global::Resource::SUCCESS;
             return std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), len, resourceMgr);
         }
-        if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp") {
+        if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp" ||
+            type == "astc" || type == "sut") {
             HILOGD("Create DrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::BASE;
             state = Global::Resource::SUCCESS;
@@ -311,7 +313,8 @@ public:
                     path, iconType, density);
             return layeredDrawableDescriptor;
         }
-        if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp") {
+        if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp" ||
+            type == "astc" || type == "sut") {
             HILOGD("Create DrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::BASE;
             return std::make_unique<DrawableDescriptor>(std::move(jsonBuf), len);
@@ -345,7 +348,8 @@ public:
                 std::move(jsonBuf), len, resourceMgr, path, iconType, density);
             return layeredDrawableDescriptor;
         }
-        if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp") {
+        if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp" ||
+            type == "astc" || type == "sut") {
             HILOGD("Create DrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::BASE;
             return std::make_unique<DrawableDescriptor>(std::move(jsonBuf), len);

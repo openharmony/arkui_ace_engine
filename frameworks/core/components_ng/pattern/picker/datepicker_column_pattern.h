@@ -347,8 +347,8 @@ private:
     float dividerSpacingWidth_ = 0.0f;
     double mainVelocity_ = 0.0;
     float dividerSpacing_ = 0.0f;
-    FontWeight SelectedWeight_;
-    FontWeight CandidateWeight_;
+    FontWeight SelectedWeight_ = FontWeight::MEDIUM;
+    FontWeight CandidateWeight_ = FontWeight::REGULAR;
     double offsetCurSet_ = 0.0;
     double distancePercent_ = 0.0;
     Color pressColor_;

@@ -100,11 +100,6 @@ public:
         }
     }
 
-    bool HasCallback() const
-    {
-        return static_cast<bool>(callback_);
-    }
-
     void UpdateShouldDismiss(std::function<void()>&& shouldDismiss)
     {
         shouldDismiss_ = std::move(shouldDismiss);
@@ -304,6 +299,12 @@ public:
 
     void HandleDragEnd(float dragVelocity);
 
+    void OnCoordScrollStart();
+
+    bool OnCoordScrollUpdate(float scrollOffset);
+
+    void OnCoordScrollEnd(float dragVelocity);
+
     void SheetTransition(bool isTransitionIn, float dragVelocity = 0.0f);
 
     void ModifyFireSheetTransition(float dragVelocity = 0.0f);
@@ -414,7 +415,7 @@ public:
     }
 
     SheetType GetSheetType();
-    bool IsPhoneOrFold();
+    bool IsPhoneInLandScape();
     ScrollSizeMode GetScrollSizeMode();
     void GetSheetTypeWithAuto(SheetType& sheetType);
     void GetSheetTypeWithPopup(SheetType& sheetType);
@@ -433,6 +434,16 @@ public:
 
     bool IsFold();
 
+    void SetSheetKey(const SheetKey& sheetKey)
+    {
+        sheetKey_ = sheetKey;
+    }
+
+    SheetKey GetSheetKey() const
+    {
+        return sheetKey_;
+    }
+    
     bool GetAnimationBreak() const
     {
         return isAnimationBreak_;
@@ -549,7 +560,7 @@ public:
         NestedState state = NestedState::GESTURE, float velocity = 0.f) override;
     void OnScrollStartRecursive(float position, float dragVelocity = 0.0f) override;
     void OnScrollEndRecursive (const std::optional<float>& velocity) override;
-    bool HandleScrollVelocity(float velocity) override;
+    bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
     ScrollResult HandleScrollWithSheet(float scrollOffset);
 
     bool IsSheetBottomStyle()
@@ -575,6 +586,7 @@ private:
     void OnColorConfigurationUpdate() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
+    void InitScrollProps();
     void InitPageHeight();
     void TranslateTo(float height);
     void SetColumnMinSize(bool reset = false);
@@ -593,6 +605,7 @@ private:
     void DismissSheetShadow(const RefPtr<RenderContext>& context);
     void ClipSheetNode();
     void CreatePropertyCallback();
+    void IsCustomDetentsChanged(SheetStyle sheetStyle);
     std::string GetPopupStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
     std::string GetCenterStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
     std::string GetBottomStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
@@ -602,6 +615,7 @@ private:
     void DismissTransition(bool isTransitionIn, float dragVelocity = 0.0f);
     uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;
+    SheetKey sheetKey_;
     std::optional<int32_t> titleId_;
     std::optional<int32_t> subtitleId_;
     std::string targetTag_;
@@ -658,6 +672,7 @@ private:
 
     WeakPtr<OverlayManager> overlayManager_ = nullptr;
 
+    std::vector<SheetHeight> preDetents_;
     std::vector<float> sheetDetentHeight_;
     std::vector<float> unSortedSheetDentents_;
 

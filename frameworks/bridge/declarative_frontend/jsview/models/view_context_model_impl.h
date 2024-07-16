@@ -23,6 +23,18 @@ class ViewContextModelImpl : public OHOS::Ace::ViewContextModel {
 public:
     void openAnimation(const AnimationOption& option) override;
     void closeAnimation(const AnimationOption& option, bool needFlush) override;
+    int32_t OpenBindSheet(const RefPtr<NG::FrameNode>& sheetContentNode,
+         std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
+        std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
+        std::function<void(const int32_t info)>&& onWillDismiss, std::function<void()>&& onWillAppear,
+        std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
+        int32_t currentInstanceId, int32_t targetId) override { return 0; };
+    int32_t UpdateBindSheet(const RefPtr<NG::FrameNode>& sheetContentNode,
+        NG::SheetStyle& sheetStyle, bool isPartialUpdate, int32_t currentInstanceId) override { return 0; }
+    int32_t CloseBindSheet(const RefPtr<NG::FrameNode>& sheetContentNode,
+        int32_t currentInstanceId) override { return 0; }
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_VIEW_CONTEXT_MODEL_IMPL_H

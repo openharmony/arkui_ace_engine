@@ -40,8 +40,38 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
+bool NavigationTitleUtil::BuildMoreButton(bool isButtonEnabled, RefPtr<NavigationBarTheme> theme,
+    RefPtr<TitleBarNode> titleBarNode, RefPtr<FrameNode> menuNode, std::vector<OptionParam>&& params)
+{
+    auto barItemNode = CreateBarItemNode(isButtonEnabled);
+    CHECK_NULL_RETURN(barItemNode, false);
+    auto menuItemNode = CreateMenuItemButton(theme);
+    CHECK_NULL_RETURN(menuItemNode, false);
+    MenuParam menuParam;
+    menuParam.isShowInSubWindow = false;
+    menuParam.placement = Placement::BOTTOM_RIGHT;
+    auto barMenuNode = MenuView::Create(
+        std::move(params), menuItemNode->GetId(), menuItemNode->GetTag(), MenuType::NAVIGATION_MENU, menuParam);
+    BuildMoreItemNodeAction(menuItemNode, barItemNode, barMenuNode, titleBarNode);
+    auto iconNode = AceType::DynamicCast<FrameNode>(barItemNode->GetChildren().front());
+    InitTitleBarButtonEvent(menuItemNode, iconNode, true);
+
+    // read navdestination "more" button
+    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.more");
+    SetAccessibility(menuItemNode, message);
+
+    barItemNode->MountToParent(menuItemNode);
+    barItemNode->MarkModifyDone();
+    menuItemNode->MarkModifyDone();
+    CHECK_NULL_RETURN(menuNode, false);
+    menuNode->AddChild(menuItemNode);
+    CHECK_NULL_RETURN(titleBarNode, false);
+    titleBarNode->SetMoreMenuNode(barMenuNode);
+    return true;
+}
+
 RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItems(const int32_t menuNodeId,
-    const std::vector<NG::BarItem>& menuItems, RefPtr<TitleBarNode> titleBarNode, const bool isButtonEnabled)
+    const std::vector<NG::BarItem>& menuItems, RefPtr<TitleBarNode> titleBarNode, bool isButtonEnabled)
 {
     auto menuNode = FrameNode::GetOrCreateFrameNode(
         V2::NAVIGATION_MENU_ETS_TAG, menuNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
@@ -68,30 +98,20 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItems(const int32_t menuNodeId,
         } else {
             auto menuItemNode = CreateMenuItemNode(theme, menuItem, isButtonEnabled);
             CHECK_NULL_RETURN(menuItemNode, nullptr);
+
+            // read navdestination menu button
+            SetAccessibility(menuItemNode, menuItem.text.value_or(""));
             menuNode->AddChild(menuItemNode);
         }
     }
 
     // build more button
     if (needMoreButton) {
-        auto barItemNode = CreateBarItemNode(isButtonEnabled);
-        CHECK_NULL_RETURN(barItemNode, nullptr);
-        auto menuItemNode = CreateMenuItemButton(theme);
-        CHECK_NULL_RETURN(menuItemNode, nullptr);
-        MenuParam menuParam;
-        menuParam.isShowInSubWindow = false;
-        menuParam.placement = Placement::BOTTOM_RIGHT;
-        auto barMenuNode = MenuView::Create(
-            std::move(params), menuItemNode->GetId(), menuItemNode->GetTag(), MenuType::NAVIGATION_MENU, menuParam);
-
-        BuildMoreItemNodeAction(menuItemNode, barItemNode, barMenuNode, titleBarNode);
-        auto iconNode = AceType::DynamicCast<FrameNode>(barItemNode->GetChildren().front());
-        InitTitleBarButtonEvent(menuItemNode, iconNode, true);
-        barItemNode->MountToParent(menuItemNode);
-        barItemNode->MarkModifyDone();
-        menuItemNode->MarkModifyDone();
-        menuNode->AddChild(menuItemNode);
-        titleBarNode->SetMoreMenuNode(barMenuNode);
+        bool buildMoreButtonResult = BuildMoreButton(isButtonEnabled, theme, titleBarNode, menuNode, std::move(params));
+        if (!buildMoreButtonResult) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "build more button node failed");
+            return nullptr;
+        }
     }
     InitDragAndLongPressEvent(menuNode, menuItems);
     return menuNode;
@@ -120,7 +140,6 @@ void NavigationTitleUtil::BuildMoreItemNodeAction(const RefPtr<FrameNode>& butto
     auto context = PipelineContext::GetCurrentContext();
     auto clickCallback = [weakContext = WeakPtr<PipelineContext>(context), id = barItemNode->GetId(),
                              weakMenu = WeakPtr<FrameNode>(barMenuNode),
-                             weakBarItemNode = WeakPtr<BarItemNode>(barItemNode),
                              weakTitleBarNode = WeakPtr<TitleBarNode>(titleBarNode)]() {
         auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
@@ -130,23 +149,7 @@ void NavigationTitleUtil::BuildMoreItemNodeAction(const RefPtr<FrameNode>& butto
 
         auto menu = weakMenu.Upgrade();
         CHECK_NULL_VOID(menu);
-
-        auto menuNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
-        CHECK_NULL_VOID(menuNode);
-
         overlayManager->ShowMenu(id, OffsetF(0.0f, 0.0f), menu);
-
-        auto titleBarNode = weakTitleBarNode.Upgrade();
-        CHECK_NULL_VOID(titleBarNode);
-        titleBarNode->SetIsTitleMenuNodeShowing(true);
-        auto hidMenuCallback = [weakTitleBarNode = WeakPtr<TitleBarNode>(titleBarNode)]() {
-            auto titleBarNode = weakTitleBarNode.Upgrade();
-            CHECK_NULL_VOID(titleBarNode);
-            titleBarNode->SetIsTitleMenuNodeShowing(false);
-        };
-        auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
-        CHECK_NULL_VOID(menuWrapperPattern);
-        menuWrapperPattern->RegisterMenuDisappearCallback(hidMenuCallback);
     };
     eventHub->SetItemAction(clickCallback);
 
@@ -605,7 +608,16 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateSymbolDialog(
     CHECK_NULL_RETURN(iconNode, nullptr);
     auto symbolProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(symbolProperty, nullptr);
-    return AgingAdapationDialogUtil::ShowLongPressDialog(
-        message, symbolProperty->GetSymbolSourceInfoValue(), symbolProperty->GetSymbolColorListValue({}));
+    return AgingAdapationDialogUtil::ShowLongPressDialog(message, symbolProperty->GetSymbolSourceInfoValue(),
+        symbolProperty->GetSymbolColorListValue({}), symbolProperty->GetFontWeightValue(FontWeight::NORMAL));
+}
+
+void NavigationTitleUtil::SetAccessibility(const RefPtr<FrameNode>& node, const std::string& message)
+{
+    CHECK_NULL_VOID(node);
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityText(message);
+    accessibilityProperty->SetAccessibilityGroup(true);
 }
 } // namespace OHOS::Ace::NG

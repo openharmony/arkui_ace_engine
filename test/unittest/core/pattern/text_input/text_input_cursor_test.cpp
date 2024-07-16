@@ -23,8 +23,6 @@ namespace {} // namespace
 
 class TextInputCursorTest : public TextInputBases {
 public:
-    RefPtr<TextFieldLayoutProperty> layoutProperty_;
-    RefPtr<TextFieldPattern> pattern_;
 };
 
 /**
@@ -1431,8 +1429,8 @@ HWTEST_F(TextInputCursorTest, FinishTextPreview003, TestSize.Level1)
      */
     SourceAndValueInfo info;
     info.insertValue = HELLO_TEXT;
-    pattern_->InsertValueOperation(info);
-    EXPECT_TRUE(pattern_->inputOperations_.front() == InputOperation::SET_PREVIEW_FINISH);
+    pattern_->InsertValue(info.insertValue, info.isIME);
+    EXPECT_TRUE(pattern_->inputOperations_.front() == InputOperation::SET_PREVIEW_TEXT);
     FlushLayoutTask(frameNode_);
 }
 

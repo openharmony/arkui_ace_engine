@@ -35,7 +35,7 @@ struct _ArkUIDialog {
     ArkUI_Int32 showInSubWindow;
     ArkUI_Bool enableCustomAnimation;
     bool (*onWillDismissCall)(ArkUI_Int32);
-    void (*onWillDismissCallWithUserData)(ArkUI_DialogDismissEvent*);
+    void (*onWillDismissCallByNDK)(ArkUI_DialogDismissEvent*);
     void* userData;
 };
 

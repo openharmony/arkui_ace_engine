@@ -29,8 +29,10 @@ class AgingAdapationDialogUtil {
 public:
     static RefPtr<FrameNode> ShowLongPressDialog(const std::string& message, ImageSourceInfo& imageSourceInfo);
     static RefPtr<FrameNode> ShowLongPressDialog(const std::string& message, const SymbolSourceInfo& symbolSourceInfo,
-        const std::vector<Color>& symbolColorList = {});
+        const std::vector<Color>& symbolColorList = {}, FontWeight fontWeight = FontWeight::NORMAL);
     static float GetDialogBigFontSizeScale();
+    static float GetDialogLargeFontSizeScale();
+    static float GetDialogMaxFontSizeScale();
 
 private:
     static void CreateDialogTextNode(const RefPtr<FrameNode>& columnNode, const std::string& message);

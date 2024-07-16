@@ -103,6 +103,8 @@ private:
         float windowsOffsetY = 0.0f;
         float top = 0.0f;
         float bottom = 0.0f;
+        float left = 0.0f;
+        float right = 0.0f;
         float topSecurity = 0.0f;
         float bottomSecurity = 0.0f;
         float previewMenuGap = 0.0f;
@@ -112,7 +114,7 @@ private:
     void Initialize(LayoutWrapper* layoutWrapper);
     void InitializePadding(LayoutWrapper* layoutWrapper);
     void InitializePaddingAPI12(LayoutWrapper* layoutWrapper);
-    void InitializeParam();
+    void InitializeParam(const RefPtr<MenuPattern>& menuPattern);
     void InitWrapperRect(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void InitSpace(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, OffsetF& position);
@@ -141,8 +143,7 @@ private:
     std::list<RefPtr<LayoutWrapper>> GetOptionsLayoutWrappper(LayoutWrapper* layoutWrapper);
 
     OffsetF GetPositionWithPlacement(const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition);
-    void InitTargetSizeAndPosition(const LayoutWrapper* layoutWrapper, bool isContextMenu,
-        const RefPtr<MenuPattern>& menuPattern);
+    void InitTargetSizeAndPosition(const LayoutWrapper* layoutWrapper, const RefPtr<MenuPattern>& menuPattern);
     OffsetF GetChildPosition(const SizeF& childSize, bool didNeedArrow = false);
     OffsetF FitToScreen(const OffsetF& position, const SizeF& childSize, bool didNeedArrow = false);
     bool CheckPosition(const OffsetF& position, const SizeF& childSize);

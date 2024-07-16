@@ -45,4 +45,14 @@ void SelectOverlayInfo::GetCallerNodeAncestorViewPort(RectF& viewPort)
         }
     }
 }
+
+const RectF& SelectOverlayInfo::GetFirstHandlePaintRect()
+{
+    return handleLevelMode == HandleLevelMode::OVERLAY ? firstHandle.paintRect : firstHandle.localPaintRect;
+}
+
+const RectF& SelectOverlayInfo::GetSecondHandlePaintRect()
+{
+    return handleLevelMode == HandleLevelMode::OVERLAY ? secondHandle.paintRect : secondHandle.localPaintRect;
+}
 } // namespace OHOS::Ace::NG

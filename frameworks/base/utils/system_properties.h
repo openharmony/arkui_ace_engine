@@ -231,7 +231,7 @@ public:
 
     static bool GetDebugPixelMapSaveEnabled();
 
-    static bool GetPixelRoundEnable();
+    static bool IsPixelRoundEnabled();
 
     static bool GetRosenBackendEnabled()
     {
@@ -283,9 +283,19 @@ public:
         return syncDebugTraceEnable_;
     }
 
+    static bool GetPixelRoundEnabled()
+    {
+        return pixelRoundEnable_;
+    }
+
     static bool GetTextTraceEnabled()
     {
         return textTraceEnable_;
+    }
+
+    static bool GetSyntaxTraceEnabled()
+    {
+        return syntaxTraceEnable_;
     }
 
     static bool GetAccessTraceEnabled()
@@ -520,6 +530,11 @@ public:
         return acePerformanceMonitorEnable_;
     }
 
+    static bool GetAceCommercialLogEnabled()
+    {
+        return aceCommercialLogEnable_;
+    }
+
     static std::string GetAtomicServiceBundleName();
 
     static std::pair<float, float> GetDarkModeBrightnessPercent()
@@ -541,7 +556,9 @@ private:
     static bool traceInputEventEnable_;
     static bool buildTraceEnable_;
     static bool syncDebugTraceEnable_;
+    static bool pixelRoundEnable_;
     static bool textTraceEnable_;
+    static bool syntaxTraceEnable_;
     static bool accessTraceEnable_;
     static bool accessibilityEnabled_;
     static uint32_t canvasDebugMode_;
@@ -592,6 +609,7 @@ private:
     static bool sideBarContainerBlurEnable_;
     static bool stateManagerEnable_;
     static bool acePerformanceMonitorEnable_;
+    static bool aceCommercialLogEnable_;
     static bool faultInjectEnabled_;
     static bool imageFrameworkEnable_;
     static std::pair<float, float> brightUpPercent_;

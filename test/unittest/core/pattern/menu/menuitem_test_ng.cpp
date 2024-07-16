@@ -87,6 +87,7 @@ const std::vector<SelectParam> CREATE_VALUE = { { "content1", "icon1" }, { "cont
     { "", "icon3" }, { "", "" } };
 const std::vector<SelectParam> CREATE_VALUE_NEW = { { "content1_new", "" }, { "", "icon4_new" },
     { "", "" }, { "", "icon4_new" } };
+const V2::ItemDivider ITEM_DIVIDER = { Dimension(5.f), Dimension(10), Dimension(20), Color(0x000000) };
 } // namespace
 class MenuItemTestNg : public testing::Test {
 public:
@@ -1462,5 +1463,32 @@ HWTEST_F(MenuItemTestNg, MenuItemTestNgTextMaxLines001, TestSize.Level1)
     auto textLayoutProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     EXPECT_EQ(textLayoutProperty->GetMaxLines().value(), menuTheme->GetTextMaxLines());
+}
+
+/**
+ * @tc.name: MenuItemTestNgText001
+ * @tc.desc: Verify UpdateNeedDivider.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, MenuItemTestNgText001, TestSize.Level1)
+{
+    MenuItemModelNG MneuItemModelInstance;
+    MenuItemProperties itemOption;
+    MneuItemModelInstance.Create(itemOption);
+    MneuItemModelInstance.SetFontStyle(Ace::FontStyle::ITALIC);
+
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto menu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    CHECK_NULL_VOID(menu);
+    auto menuProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuProperty);
+    menuProperty->UpdateItemDivider(ITEM_DIVIDER);
+    auto menuItemLayoutProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(menuItemLayoutProperty, nullptr);
+    itemPattern->UpdateNeedDivider(true);
 }
 } // namespace OHOS::Ace::NG

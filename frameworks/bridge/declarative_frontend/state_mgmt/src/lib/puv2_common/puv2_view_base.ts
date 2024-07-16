@@ -298,7 +298,9 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
       return;
     }
     const child = iChild as ViewPU | ViewV2;
-    child.updateStateVars(params);
+    if ('updateStateVars' in child) {
+      child.updateStateVars(params);
+    }
     stateMgmtConsole.debug(`${this.debugInfo__()}: updateChildViewById(${elmtId}) - end`);
     stateMgmtProfiler.end();
   }

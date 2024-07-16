@@ -53,6 +53,7 @@ public:
 
 private:
     void OnModifyDone() override;
+    void DumpInfo() override;
     void BadgeAnimation(RefPtr<FrameNode>& frameNode, bool isShowBadge) const;
     int32_t textNodeId_ = -2;
     bool lastBadgeVisible_ = false;

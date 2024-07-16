@@ -439,7 +439,8 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSMeasure(panda::JsiRuntimeCa
     ACE_SCOPED_TRACE("ViewMeasureLayout::JSMeasure");
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
-    auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+    auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
+        vm, 0));
     auto child = ptr->GetOrCreateChild();
     if (!child) {
         return panda::JSValueRef::Undefined(vm);
@@ -520,7 +521,8 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSLayout(panda::JsiRuntimeCal
     ACE_SCOPED_TRACE("ViewMeasureLayout::JSLayout");
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
-    auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+    auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
+        vm, 0));
     auto child = ptr->GetChild();
     if (!child) {
         return panda::JSValueRef::Undefined(vm);
@@ -557,7 +559,8 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSPlaceChildren(panda::JsiRun
     ACE_SCOPED_TRACE("ViewMeasureLayout::JSPlaceChildren");
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
-    auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+    auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
+        vm, 0));
     auto child = ptr->GetChild();
     if (!child) {
         return panda::JSValueRef::Undefined(vm);
@@ -589,8 +592,10 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSPlaceChildren(panda::JsiRun
 
 panda::Local<panda::JSValueRef> ViewMeasureLayout::JSGetMargin(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
-    auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+    auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
+        vm, 0));
     auto child = ptr->GetOrCreateChild();
     if (!(child && child->GetLayoutProperty())) {
         return GenEdgesGlobalized({}, TextDirection::LTR).Get().GetLocalHandle();
@@ -602,8 +607,10 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSGetMargin(panda::JsiRuntime
 
 panda::Local<panda::JSValueRef> ViewMeasureLayout::JSGetPadding(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
-    auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+    auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
+        vm, 0));
     auto child = ptr->GetOrCreateChild();
     if (!(child && child->GetLayoutProperty())) {
         return GenEdgesGlobalized({}, TextDirection::LTR).Get().GetLocalHandle();
@@ -617,8 +624,10 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSGetPadding(panda::JsiRuntim
 
 panda::Local<panda::JSValueRef> ViewMeasureLayout::JSGetBorderWidth(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
+    EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> thisObj = runtimeCallInfo->GetThisRef();
-    auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+    auto ptr = static_cast<NG::MeasureLayoutChild*>(panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(
+        vm, 0));
     auto child = ptr->GetOrCreateChild();
     if (!(child && child->GetLayoutProperty())) {
         return GenBorderWidthGlobalized({}, TextDirection::LTR).Get().GetLocalHandle();

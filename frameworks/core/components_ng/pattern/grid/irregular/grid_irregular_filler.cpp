@@ -298,6 +298,32 @@ void GridIrregularFiller::MeasureBackwardToTarget(
     }
 }
 
+void GridIrregularFiller::MeasureLineWithIrregulars(const FillParameters& params, const int32_t line)
+{
+    if (line == 0) {
+        return;
+    }
+    const auto it = info_->gridMatrix_.find(line);
+    if (it == info_->gridMatrix_.end()) {
+        return;
+    }
+    std::unordered_set<int32_t> visited;
+    int32_t topRow = line;
+    for (const auto& [c, itemIdx] : it->second) {
+        if (itemIdx == 0) {
+            topRow = 0;
+            break;
+        }
+        if (itemIdx < 0 && !visited.count(std::abs(itemIdx))) {
+            topRow = std::min(FindItemTopRow(it->first, c), topRow);
+        }
+        visited.insert(std::abs(itemIdx));
+    }
+    if (topRow < line) {
+        MeasureBackwardToTarget(params, topRow, line);
+    }
+}
+
 void GridIrregularFiller::BackwardImpl(std::unordered_set<int32_t>& measured, const FillParameters& params)
 {
     auto it = info_->gridMatrix_.find(posY_);

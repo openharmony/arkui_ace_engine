@@ -109,9 +109,12 @@ ArkUIAnimatorOption* ConvertAnimatorOption(ArkUI_AnimatorOption* option)
     animatorOption->begin = option->begin;
     animatorOption->end = option->end;
     animatorOption->fill = option->fill;
+    animatorOption->direction = option->direction;
     if (option->easing) {
         animatorOption->easing = option->easing->curve;
         animatorOption->curveType = option->easing->type;
+    } else {
+        animatorOption->easing = nullptr;
     }
 
     if (option->expectedFrameRateRange) {
@@ -194,6 +197,16 @@ int32_t AnimatorReset(ArkUI_AnimatorHandle animatorHandle, ArkUI_AnimatorOption*
 
     auto animatorOption = ConvertAnimatorOption(option);
     impl->getAnimation()->animatorReset(animatorHandle->animator, animatorOption);
+    if (animatorHandle->animatorOption) {
+        auto* animatorOption = reinterpret_cast<ArkUIAnimatorOption*>(animatorHandle->animatorOption);
+        if (animatorOption->keyframes) {
+            delete[] animatorOption->keyframes;
+            animatorOption->keyframes = nullptr;
+        }
+        delete animatorOption;
+        animatorHandle->animatorOption = nullptr;
+    }
+    animatorHandle->animatorOption = animatorOption;
     return ERROR_CODE_NO_ERROR;
 }
 

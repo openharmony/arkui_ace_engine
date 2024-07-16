@@ -474,6 +474,7 @@ bool FrontendDelegateDeclarative::OnPageBackPress()
         auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
         CHECK_NULL_RETURN(pagePattern, false);
         if (pagePattern->OnBackPressed()) {
+            TAG_LOGI(AceLogTag::ACE_ROUTER, "router user onBackPress return true");
             return true;
         }
         return pageRouterManager_->Pop();
@@ -1087,6 +1088,7 @@ void FrontendDelegateDeclarative::GetRouterStateByIndex(int32_t& index, std::str
         }
     }
     auto pos = url.rfind(".js");
+    // url length - (.js) length
     if (pos == url.length() - 3) {
         url = url.substr(0, pos);
     }
@@ -1134,6 +1136,7 @@ void FrontendDelegateDeclarative::GetRouterStateByUrl(std::string& url, std::vec
             if (iter.url == url) {
                 stateInfo.index = counter;
                 auto pos = url.rfind(".js");
+                // url length - (.js) length
                 if (pos == url.length() - 3) {
                     tempUrl = url.substr(0, pos);
                 }
@@ -1545,38 +1548,62 @@ int32_t FrontendDelegateDeclarative::GetVersionCode() const
     return manifestParser_->GetAppInfo()->GetVersionCode();
 }
 
-double FrontendDelegateDeclarative::MeasureText(const MeasureContext& context)
+double FrontendDelegateDeclarative::MeasureText(MeasureContext context)
 {
+    if (context.isFontSizeUseDefaultUnit && context.fontSize.has_value() &&
+        !AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        context.fontSize = Dimension(context.fontSize->Value(), DimensionUnit::VP);
+    }
     return MeasureUtil::MeasureText(context);
 }
 
-Size FrontendDelegateDeclarative::MeasureTextSize(const MeasureContext& context)
+Size FrontendDelegateDeclarative::MeasureTextSize(MeasureContext context)
 {
+    if (context.isFontSizeUseDefaultUnit && context.fontSize.has_value() &&
+        !AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        context.fontSize = Dimension(context.fontSize->Value(), DimensionUnit::VP);
+    }
     return MeasureUtil::MeasureTextSize(context);
 }
 
-void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
-    const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
+void FrontendDelegateDeclarative::ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast enter");
-    int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
-    bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    NG::ToastInfo updatedToastInfo = toastInfo;
+    updatedToastInfo.duration = std::clamp(toastInfo.duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
+    updatedToastInfo.isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::IsCurrentUseNewPipeline()) {
-        auto task = [durationTime, message, bottom, isRightToLeft, showMode, alignment, offset,
-                        containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+        auto task = [updatedToastInfo, callbackParam = std::move(callback), containerId = Container::CurrentId()](
+                        const RefPtr<NG::OverlayManager>& overlayManager) {
             CHECK_NULL_VOID(overlayManager);
             ContainerScope scope(containerId);
-            overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode, alignment, offset);
+            overlayManager->ShowToast(
+                updatedToastInfo, std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
         };
         MainWindowOverlay(std::move(task), "ArkUIOverlayShowToast");
         return;
     }
     auto pipeline = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     taskExecutor_->PostTask(
-        [durationTime, message, bottom, isRightToLeft, context = pipeline] {
-            ToastComponent::GetInstance().Show(context, message, durationTime, bottom, isRightToLeft);
+        [updatedToastInfo, context = pipeline] {
+            ToastComponent::GetInstance().Show(context, updatedToastInfo.message, updatedToastInfo.duration,
+                updatedToastInfo.bottom, updatedToastInfo.isRightToLeft);
         },
         TaskExecutor::TaskType::UI, "ArkUIShowToast");
+}
+
+void FrontendDelegateDeclarative::CloseToast(const int32_t toastId, std::function<void(int32_t)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "close toast enter");
+    auto currentId = Container::CurrentId();
+    ContainerScope scope(currentId);
+
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->CloseToast(toastId, std::move(callback));
 }
 
 void FrontendDelegateDeclarative::SetToastStopListenerCallback(std::function<void()>&& stopCallback)
@@ -3333,15 +3360,16 @@ std::string FrontendDelegateDeclarative::GetContentInfo(ContentInfoType type)
 }
 
 void FrontendDelegateDeclarative::GetSnapshot(
-    const std::string& componentId, NG::ComponentSnapshot::JsCallback&& callback)
+    const std::string& componentId, NG::ComponentSnapshot::JsCallback&& callback, const NG::SnapshotOptions& options)
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    NG::ComponentSnapshot::Get(componentId, std::move(callback));
+    NG::ComponentSnapshot::Get(componentId, std::move(callback), options);
 #endif
 }
 
 void FrontendDelegateDeclarative::CreateSnapshot(
-    std::function<void()>&& customBuilder, NG::ComponentSnapshot::JsCallback&& callback, bool enableInspector)
+    std::function<void()>&& customBuilder, NG::ComponentSnapshot::JsCallback&& callback, bool enableInspector,
+    const NG::SnapshotParam& param)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     ViewStackModel::GetInstance()->NewScope();
@@ -3349,7 +3377,7 @@ void FrontendDelegateDeclarative::CreateSnapshot(
     customBuilder();
     auto customNode = ViewStackModel::GetInstance()->Finish();
 
-    NG::ComponentSnapshot::Create(customNode, std::move(callback), enableInspector);
+    NG::ComponentSnapshot::Create(customNode, std::move(callback), enableInspector, param);
 #endif
 }
 

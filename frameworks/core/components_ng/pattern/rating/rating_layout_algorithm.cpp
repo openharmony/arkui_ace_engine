@@ -42,6 +42,7 @@ std::optional<SizeF> RatingLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(ratingTheme, std::nullopt);
     auto ratingLayoutProperty = DynamicCast<RatingLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto stars = ratingLayoutProperty->GetStarsValue(ratingTheme->GetStarNum());
+    CHECK_EQUAL_RETURN(stars, 0, std::nullopt);
     // case 2: rating component is only set with valid width or height
     // return height = width / stars, or width = height * stars.
     if (contentConstraint.selfIdealSize.Width() && !contentConstraint.selfIdealSize.Height()) {
@@ -84,9 +85,10 @@ void RatingLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto ratingTheme = pipeline->GetTheme<RatingTheme>();
     CHECK_NULL_VOID(ratingTheme);
+    auto stars = ratingLayoutProperty->GetStarsValue(ratingTheme->GetStarNum());
     // step1: calculate single star size.
-    float singleWidth =
-        ratingSize.Width() / static_cast<float>(ratingLayoutProperty->GetStarsValue(ratingTheme->GetStarNum()));
+    CHECK_EQUAL_VOID(stars, 0);
+    float singleWidth = ratingSize.Width() / static_cast<float>(stars);
     SizeF singleStarSize(singleWidth, ratingSize.Height());
 
     // step2: make 3 images canvas and set its dst size as single star size.

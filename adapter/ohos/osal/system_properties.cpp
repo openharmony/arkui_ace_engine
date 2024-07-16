@@ -118,6 +118,11 @@ bool IsTextTraceEnabled()
     return (system::GetParameter("persist.ace.trace.text.enabled", "false") == "true");
 }
 
+bool IsSyntaxTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.syntax.enabled", "false") == "true");
+}
+
 bool IsAccessTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.access.enabled", "false") == "true");
@@ -323,6 +328,11 @@ bool IsAcePerformanceMonitorEnabled()
     return system::GetParameter("const.logsystem.versiontype", "commercial") == "beta" ||
            system::GetBoolParameter("persist.ace.performance.monitor.enabled", false);
 }
+
+bool IsAceCommercialLogEnable()
+{
+    return system::GetParameter("const.logsystem.versiontype", "commercial") == "commercial";
+}
 } // namespace
 
 float ReadDragStartDampingRatio()
@@ -363,7 +373,9 @@ bool SystemProperties::traceInputEventEnable_ = IsTraceInputEventEnabled() && de
 bool SystemProperties::stateManagerEnable_ = IsStateManagerEnable();
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
 bool SystemProperties::syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
+bool SystemProperties::pixelRoundEnable_ = IsPixelRoundEnabled();
 bool SystemProperties::textTraceEnable_ = IsTextTraceEnabled();
+bool SystemProperties::syntaxTraceEnable_ = IsSyntaxTraceEnabled();
 bool SystemProperties::accessTraceEnable_ = IsAccessTraceEnabled();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
@@ -413,6 +425,7 @@ bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
 std::pair<float, float> SystemProperties::brightUpPercent_ = GetPercent();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
 bool SystemProperties::acePerformanceMonitorEnable_ = IsAcePerformanceMonitorEnabled();
+bool SystemProperties::aceCommercialLogEnable_ = IsAceCommercialLogEnable();
 bool SystemProperties::faultInjectEnabled_  = IsFaultInjectEnabled();
 bool SystemProperties::opincEnabled_ = IsOpIncEnabled();
 float SystemProperties::dragStartDampingRatio_ = ReadDragStartDampingRatio();
@@ -548,6 +561,7 @@ void SystemProperties::InitDeviceInfo(
     stateManagerEnable_ = IsStateManagerEnable();
     buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
     syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
+    pixelRoundEnable_ = IsPixelRoundEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     canvasDebugMode_ = ReadCanvasDebugMode();
     isHookModeEnabled_ = IsHookModeEnabled();
@@ -664,7 +678,7 @@ bool SystemProperties::GetDebugPixelMapSaveEnabled()
     return system::GetBoolParameter("persist.ace.save.pixelmap.enabled", false);
 }
 
-bool SystemProperties::GetPixelRoundEnable()
+bool SystemProperties::IsPixelRoundEnabled()
 {
     return system::GetBoolParameter("ace.debug.pixelround.enabled", true);
 }

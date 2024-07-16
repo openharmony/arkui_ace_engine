@@ -59,6 +59,9 @@ struct OptionParam {
     std::function<void(WeakPtr<NG::FrameNode>)> symbol = nullptr;
     std::optional<Dimension> symbolUserDefinedIdealFontSize = std::nullopt;
 
+    // Used for security controls.
+    bool isPasteOption = false;
+
     OptionParam() = default;
     OptionParam(const std::string &valueParam, const std::string &iconParam, const std::function<void()> &actionParam)
         : value(valueParam), icon(iconParam), enabled(true), action(actionParam)
@@ -141,6 +144,12 @@ public:
     static void SetLightUpEffect(double radio);
     static void SetPadding(const CalcLength &value);
     static void SetPadding(const PaddingProperty &value);
+    static void SetSafeAreaPadding(const CalcLength& value);
+    static void SetSafeAreaPadding(const PaddingProperty& value);
+    static void SetSafeAreaPadding(FrameNode* frameNode, const CalcLength& value);
+    static void SetSafeAreaPadding(FrameNode* frameNode, const PaddingProperty& value);
+    static void ResetSafeAreaPadding();
+    static void ResetSafeAreaPadding(FrameNode* frameNode);
     static void SetMargin(const CalcLength &value);
     static void SetMargin(const PaddingProperty &value);
     static void SetBorderRadius(const BorderRadiusProperty &value);
@@ -260,6 +269,7 @@ public:
     static void SetOnTouch(TouchEventFunc &&touchEventFunc);
     static void SetOnMouse(OnMouseEventFunc &&onMouseEventFunc);
     static void SetOnHover(OnHoverFunc &&onHoverEventFunc);
+    static void SetOnAccessibilityHover(OnAccessibilityHoverFunc &&onAccessibilityHoverEventFunc);
     static void SetHoverEffect(HoverEffectType hoverEffect);
     static void SetHoverEffectAuto(HoverEffectType hoverEffect);
     static void SetEnabled(bool enabled);
@@ -344,7 +354,8 @@ public:
     // sharedTransition
     static void SetSharedTransition(const std::string &shareId, const std::shared_ptr<SharedTransitionOption> &option);
     // geometryTransition
-    static void SetGeometryTransition(const std::string &id, bool followWithoutTransition = false);
+    static void SetGeometryTransition(const std::string &id,
+        bool followWithoutTransition = false, bool doRegisterSharedTransition = true);
     // clip and mask
     static void SetClipShape(const RefPtr<BasicShape> &basicShape);
     static void SetClipEdge(bool isClip);
@@ -369,6 +380,7 @@ public:
     static void DisableOnTouch();
     static void DisableOnKeyEvent();
     static void DisableOnHover();
+    static void DisableOnAccessibilityHover();
     static void DisableOnMouse();
     static void DisableOnAppear();
     static void DisableOnDisAppear();
@@ -499,8 +511,10 @@ public:
     static void SetTranslate(FrameNode* frameNode, const NG::TranslateOptions& value);
     static void SetScale(FrameNode* frameNode, const NG::VectorF& value);
     static void SetPivot(FrameNode* frameNode, const DimensionOffset& value);
-    static void SetGeometryTransition(FrameNode* frameNode, const std::string& id, bool followWithoutTransition);
-    static const std::string GetGeometryTransition(FrameNode* frameNode, bool* followWithoutTransition);
+    static void SetGeometryTransition(FrameNode* frameNode, const std::string& id,
+        bool followWithoutTransition, bool doRegisterSharedTransition);
+    static const std::string GetGeometryTransition(FrameNode* frameNode,
+        bool* followWithoutTransition, bool* doRegisterSharedTransition);
     static void SetRotate(FrameNode* frameNode, const NG::Vector5F& value);
     static void SetClipEdge(FrameNode* frameNode, bool isClip);
     static void SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
@@ -562,6 +576,7 @@ public:
     static void SetBgDynamicBrightness(FrameNode* frameNode, const BrightnessOption& brightnessOption);
     static void SetFgDynamicBrightness(FrameNode* frameNode, const BrightnessOption& brightnessOption);
     static void SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption);
+    static void SetDragPreview(FrameNode* frameNode, const DragDropInfo& dragDropInfo);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetMouseResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& mouseResponseRegion);
     static void SetSharedTransition(

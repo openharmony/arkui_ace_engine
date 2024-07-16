@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 
+#include <algorithm>
+
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
@@ -47,8 +49,11 @@ const RectF GetLastBoxRect(const std::vector<RectF>& boxes, const RectF& content
 {
     bool hasResult = false;
     RectF result;
+    auto maxBottom = contentRect.GetY() + SystemProperties::GetDevicePhysicalHeight();
     for (const auto& box : boxes) {
-        if (box.Bottom() + textStartY >= contentRect.Bottom() && !hasResult) {
+        auto caculateBottom = box.Bottom() + textStartY;
+        bool isReachingBottom = (caculateBottom >= maxBottom) || (caculateBottom >= contentRect.Bottom());
+        if (isReachingBottom && !hasResult) {
             result = box;
             hasResult = true;
             continue;
@@ -91,52 +96,65 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& patter
 {
     auto dragContext = dragNode->GetRenderContext();
     auto dragPattern = dragNode->GetPattern<TextDragPattern>();
-    float textStartX = pattern->GetTextRect().GetX();
-    float textStartY = pattern->IsTextArea() ? pattern->GetTextRect().GetY() : pattern->GetTextContentRect().GetY();
+    OffsetF textStartOffset = {pattern->GetTextRect().GetX(),
+        pattern->IsTextArea() ? pattern->GetTextRect().GetY() : pattern->GetTextContentRect().GetY()};
     auto contentRect = pattern->GetTextContentRect(true);
     float bothOffset = TEXT_DRAG_OFFSET.ConvertToPx() * CONSTANT_HALF;
     auto boxes = pattern->GetTextBoxes();
     CHECK_NULL_RETURN(!boxes.empty(), {});
-    auto boxFirst = GetFirstBoxRect(boxes, contentRect, textStartY);
-    auto boxLast = GetLastBoxRect(boxes, contentRect, textStartY);
-    float leftHandleX = boxFirst.Left() + textStartX;
-    float leftHandleY = boxFirst.Top() + textStartY;
-    float rightHandleX = boxLast.Right() + textStartX;
-    float rightHandleY = boxLast.Top() + textStartY;
-    bool oneLineSelected = (leftHandleY == rightHandleY);
-    float lineHeight = boxFirst.Height();
-    if (oneLineSelected) {
-        leftHandleX = std::max(leftHandleX, contentRect.Left());
-        rightHandleX = std::min(rightHandleX, contentRect.Right());
-    }
     auto globalOffset = pattern->GetParentGlobalOffset();
-    float width = rightHandleX - leftHandleX;
-    float height = rightHandleY - leftHandleY + boxLast.Height();
+    RectF leftHandler = GetHandler(true, boxes, contentRect, globalOffset, textStartOffset);
+    RectF rightHandler = GetHandler(false, boxes, contentRect, globalOffset, textStartOffset);
+    AdjustHandlers(contentRect, leftHandler, rightHandler);
+    float width = rightHandler.GetX() - leftHandler.GetX();
+    float height = rightHandler.GetY() - leftHandler.GetY() + rightHandler.Height();
     auto dragOffset = TEXT_DRAG_OFFSET.ConvertToPx();
-    float globalX = leftHandleX + globalOffset.GetX() - dragOffset;
-    float globalY = leftHandleY + globalOffset.GetY() - dragOffset;
+    float globalX = leftHandler.GetX() + globalOffset.GetX() - dragOffset;
+    float globalY = leftHandler.GetY() + globalOffset.GetY() - dragOffset;
     auto box = boxes.front();
-    if (oneLineSelected) {
-        float delta = 0.0f;
-        if (rightHandleX - leftHandleX + bothOffset < TEXT_DRAG_MIN_WIDTH.ConvertToPx()) {
-            delta = TEXT_DRAG_MIN_WIDTH.ConvertToPx() - (rightHandleX - leftHandleX + bothOffset);
+    float delta = 0.0f;
+    float handlersDistance = width;
+    if (leftHandler.GetY() == rightHandler.GetY()) {
+        if (handlersDistance + bothOffset < TEXT_DRAG_MIN_WIDTH.ConvertToPx()) {
+            delta = TEXT_DRAG_MIN_WIDTH.ConvertToPx() - (handlersDistance + bothOffset);
             width += delta;
             globalX -= delta / CONSTANT_HALF;
         }
-
-        dragPattern->SetContentOffset({box.Left() - dragOffset - delta / CONSTANT_HALF, box.Top() - dragOffset});
     } else {
         globalX = contentRect.Left() + globalOffset.GetX() - dragOffset;
         width = contentRect.Width();
-        dragPattern->SetContentOffset({0 - dragOffset, box.Top() - dragOffset});
     }
+    float contentX = (leftHandler.GetY() == rightHandler.GetY() ? box.Left() : 0) - dragOffset - delta / CONSTANT_HALF;
+    dragPattern->SetContentOffset({contentX, box.Top() - dragOffset});
     dragContext->UpdatePosition(OffsetT<Dimension>(Dimension(globalX), Dimension(globalY)));
-    RectF rect(textStartX + globalOffset.GetX() - globalX, textStartY + globalOffset.GetY() - globalY, width, height);
-    SelectPositionInfo info(leftHandleX + globalOffset.GetX() - globalX, leftHandleY + globalOffset.GetY() - globalY,
-        rightHandleX + globalOffset.GetX() - globalX, rightHandleY + globalOffset.GetY() - globalY);
+    auto offsetXValue = globalOffset.GetX() - globalX;
+    auto offsetYValue = globalOffset.GetY() - globalY;
+    RectF rect(textStartOffset.GetX() + offsetXValue, textStartOffset.GetY() + offsetYValue, width, height);
+    SelectPositionInfo info(leftHandler.GetX() + offsetXValue, leftHandler.GetY() + offsetYValue,
+        rightHandler.GetX() + offsetXValue, rightHandler.GetY() + offsetYValue);
     info.InitGlobalInfo(globalX, globalY);
-    TextDragData data(rect, width + bothOffset, height + bothOffset, lineHeight, info, oneLineSelected);
+    TextDragData data(rect, width + bothOffset, height + bothOffset, leftHandler.Height(), rightHandler.Height());
+    data.initSelecitonInfo(info, leftHandler.GetY() == rightHandler.GetY());
     return data;
+}
+
+RectF TextDragPattern::GetHandler(const bool isLeftHandler, const std::vector<RectF> boxes, const RectF contentRect,
+    const OffsetF globalOffset, const OffsetF textStartOffset)
+{
+    auto adjustedTextStartY = textStartOffset.GetY() + std::min(globalOffset.GetY(), 0.0f);
+    auto box = isLeftHandler ? GetFirstBoxRect(boxes, contentRect, adjustedTextStartY) :
+        GetLastBoxRect(boxes, contentRect, adjustedTextStartY);
+    auto handlerX = (isLeftHandler ? box.Left() : box.Right()) + textStartOffset.GetX();
+    return {handlerX, box.Top() + textStartOffset.GetY(), 0, box.Height()};
+}
+
+void TextDragPattern::AdjustHandlers(const RectF contentRect, RectF& leftHandler, RectF& rightHandler)
+{
+    if (leftHandler.GetY() != rightHandler.GetY()) {
+        return;
+    }
+    leftHandler.SetLeft(std::max(leftHandler.GetX(), contentRect.Left()));
+    rightHandler.SetLeft(std::min(rightHandler.GetX(), contentRect.Right()));
 }
 
 std::shared_ptr<RSPath> TextDragPattern::GenerateClipPath()
@@ -191,7 +209,7 @@ std::shared_ptr<RSPath> TextDragPattern::GenerateSelBackgroundPath(float offset)
 
 void TextDragPattern::GenerateBackgroundPoints(std::vector<TextPoint>& points, float offset, bool needAdjust)
 {
-    auto radius = TEXT_DRAG_RADIUS.ConvertToPx();
+    auto radius = GetDragCornerRadius().ConvertToPx();
     auto bothOffset = offset * 2; // 2 : double
     auto minWidth = TEXT_DRAG_MIN_WIDTH.ConvertToPx();
     auto selectPosition = GetSelectPosition();
@@ -240,7 +258,7 @@ void TextDragPattern::GenerateBackgroundPoints(std::vector<TextPoint>& points, f
 void TextDragPattern::CalculateLineAndArc(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path,
     float radiusRatio)
 {
-    auto originRadius = TEXT_DRAG_RADIUS.ConvertToPx();
+    auto originRadius = GetDragCornerRadius().ConvertToPx();
     auto radius = originRadius * radiusRatio;
     path->MoveTo(points[0].x + radius, points[0].y);
     auto frontPoint = points[0];
@@ -287,7 +305,7 @@ void TextDragPattern::CalculateLineAndArc(std::vector<TextPoint>& points, std::s
 
 void TextDragPattern::CalculateLine(std::vector<TextPoint>& points, std::shared_ptr<RSPath>& path)
 {
-    auto radius = TEXT_DRAG_RADIUS.ConvertToPx();
+    auto radius = GetDragCornerRadius().ConvertToPx();
     path->MoveTo(points[0].x + radius, points[0].y);
     size_t step = 2;
     for (size_t i = 0; i + step < points.size(); i++) {

@@ -1600,4 +1600,59 @@ HWTEST_F(MarqueeTestNg, MarqueeTest023, TestSize.Level1)
     offset = pattern->GetTextOffset();
     EXPECT_EQ(offset, 0.0f);
 }
+
+/**
+ * @tc.name: MarqueeTest024
+ * @tc.desc: Test all the properties of marquee1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, MarqueeTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize all properties of marquee.
+     */
+    TestProperty testProperty;
+    testProperty.src = std::make_optional(MARQUEE_SRC);
+    testProperty.loop = std::make_optional(MARQUEE_LOOP);
+    testProperty.playerStatus = std::make_optional(false);
+    testProperty.direction = std::make_optional(MarqueeDirection::LEFT);
+    testProperty.scrollAmount = std::make_optional(MARQUEE_SCROLL_AMOUNT);
+    testProperty.fontSize = std::make_optional(FONT_SIZE_VALUE);
+    testProperty.textColor = std::make_optional(TEXT_COLOR_VALUE);
+    testProperty.fontWeight = std::make_optional(FONT_WEIGHT_VALUE);
+    testProperty.fontFamily = std::make_optional(FONT_FAMILY_VALUE);
+
+    /**
+     * @tc.steps: step2. create frameNode to get layout properties.
+     * @tc.expected: step2. related function is called.
+     */
+    auto frameNode = CreateMarqueeParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto marqueeLayoutProperty = AceType::DynamicCast<MarqueeLayoutProperty>(layoutProperty);
+    ASSERT_NE(marqueeLayoutProperty, nullptr);
+    auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(textChild, nullptr);
+    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto marqueePaintProperty = frameNode->GetPaintProperty<MarqueePaintProperty>();
+    ASSERT_NE(marqueePaintProperty, nullptr);
+    marqueeLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    /**
+     * @tc.steps: step3. get the properties of all settings.
+     * @tc.expected: step3. check whether the properties is correct.
+     */
+    EXPECT_EQ(marqueePaintProperty->GetLoop(), MARQUEE_LOOP);
+    EXPECT_EQ(marqueePaintProperty->GetDirection(), MarqueeDirection::LEFT);
+    EXPECT_EQ(marqueePaintProperty->GetPlayerStatus(), false);
+    EXPECT_EQ(marqueePaintProperty->GetScrollAmount(), MARQUEE_SCROLL_AMOUNT);
+    EXPECT_EQ(marqueeLayoutProperty->GetSrc(), MARQUEE_SRC);
+    EXPECT_EQ(marqueeLayoutProperty->GetFontSize(), FONT_SIZE_VALUE);
+    EXPECT_EQ(marqueeLayoutProperty->GetFontColor(), TEXT_COLOR_VALUE);
+    EXPECT_EQ(marqueeLayoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
+    EXPECT_EQ(marqueeLayoutProperty->GetFontWeight(), FONT_WEIGHT_VALUE);
+    EXPECT_EQ(marqueeLayoutProperty->GetFontWeight(), FONT_WEIGHT_VALUE);
+    EXPECT_EQ(marqueeLayoutProperty->GetNonAutoLayoutDirection(), TextDirection::RTL);
+}
 } // namespace OHOS::Ace::NG

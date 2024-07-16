@@ -33,7 +33,7 @@ ArkUINativeModuleValue GridBridge::SetColumnsTemplate(ArkUIRuntimeCallInfo* runt
     if (arg_columnsTemplate->IsUndefined() || !arg_columnsTemplate->IsString(vm)) {
         GetArkUINodeModifiers()->getGridModifier()->resetGridColumnsTemplate(nativeNode);
     } else {
-        std::string columnsTemplate = arg_columnsTemplate->ToString(vm)->ToString();
+        std::string columnsTemplate = arg_columnsTemplate->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getGridModifier()->setGridColumnsTemplate(nativeNode, columnsTemplate.c_str());
     }
     return panda::JSValueRef::Undefined(vm);
@@ -59,7 +59,7 @@ ArkUINativeModuleValue GridBridge::SetRowsTemplate(ArkUIRuntimeCallInfo* runtime
     if (arg_rowsTemplate->IsUndefined() || !arg_rowsTemplate->IsString(vm)) {
         GetArkUINodeModifiers()->getGridModifier()->resetGridRowsTemplate(nativeNode);
     } else {
-        std::string rowsTemplate = arg_rowsTemplate->ToString(vm)->ToString();
+        std::string rowsTemplate = arg_rowsTemplate->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getGridModifier()->setGridRowsTemplate(nativeNode, rowsTemplate.c_str());
     }
     return panda::JSValueRef::Undefined(vm);

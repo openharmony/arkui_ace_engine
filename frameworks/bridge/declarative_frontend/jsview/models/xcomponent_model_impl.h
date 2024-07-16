@@ -22,7 +22,8 @@ namespace OHOS::Ace::Framework {
 
 class XComponentModelImpl : public OHOS::Ace::XComponentModel {
 public:
-    void Create(const std::string& id, XComponentType type, const std::string& libraryname,
+    void Create(const std::optional<std::string>& id, XComponentType type,
+        const std::optional<std::string>& libraryname,
         const std::shared_ptr<InnerXComponentController>& xcomponentController) override;
     void SetSoPath(const std::string& soPath) override;
     void SetOnLoad(LoadEvent&& onLoad) override;

@@ -139,6 +139,9 @@ public:
     void OnLanguageConfigurationUpdate() override;
 
     void GetTimeLimitResource(std::string &content);
+
+    void UnregisterAccessibility();
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -203,6 +206,8 @@ private:
     RefPtr<FrameNode> GetFormChildNode(FormChildNodeType formChildNodeType) const;
     double GetTimeLimitFontSize();
     bool IsMaskEnableForm(const RequestFormInfo &info);
+    void UpdateChildNodeOpacity(FormChildNodeType formChildNodeType, double opacity);
+    void SnapshotSurfaceNode();
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     RefPtr<RenderContext> externalRenderContext_;
 
@@ -232,6 +237,7 @@ private:
     bool isFormObscured_ = false;
     bool isJsCard_ = true;
     std::unordered_map<FormChildNodeType, RefPtr<FrameNode>> formChildrenNodeMap_;
+    bool isTibetanLanguage_ = false;
 };
 } // namespace NG
 } // namespace Ace

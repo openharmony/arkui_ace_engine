@@ -326,7 +326,7 @@ HWTEST_F(FrameNodeTestNg, TriggerVisibleAreaChangeCallback001, TestSize.Level1)
      * @tc.steps: step3. call TriggerVisibleAreaChangeCallback
      * @tc.expected: expect IsOnMainTree is true.
      */
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback(false);
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback(1, false);
     EXPECT_TRUE(FRAME_NODE2->IsOnMainTree());
 
     /**
@@ -345,7 +345,7 @@ HWTEST_F(FrameNodeTestNg, TriggerVisibleAreaChangeCallback001, TestSize.Level1)
      * @tc.steps: step5. call TriggerVisibleAreaChangeCallback
      * @tc.expected: expect parentNode isActive_ is true.
      */
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback(false);
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback(2, false);
     EXPECT_TRUE(parentNode->isActive_);
 
     /**
@@ -354,7 +354,7 @@ HWTEST_F(FrameNodeTestNg, TriggerVisibleAreaChangeCallback001, TestSize.Level1)
      */
     const RefPtr<FrameNode> parentNode2 = nullptr;
     FRAME_NODE2->SetParent(AceType::WeakClaim(AceType::RawPtr(parentNode2)));
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback(false);
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback(3, false);
     EXPECT_TRUE(FRAME_NODE2->isActive_);
 }
 
@@ -383,7 +383,7 @@ HWTEST_F(FrameNodeTestNg, DumpAdvanceInfo001, TestSize.Level1)
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     FRAME_NODE2->layoutProperty_ = layoutProperty;
     FRAME_NODE3->layoutProperty_->geometryTransition_ =
-        ElementRegister::GetInstance()->GetOrCreateGeometryTransition("test", false);
+        ElementRegister::GetInstance()->GetOrCreateGeometryTransition("test", false, true);
     FRAME_NODE3->DumpAdvanceInfo();
     EXPECT_NE(FRAME_NODE3->renderContext_, nullptr);
 }

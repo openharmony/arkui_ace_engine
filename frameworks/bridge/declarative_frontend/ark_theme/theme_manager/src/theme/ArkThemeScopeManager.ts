@@ -396,7 +396,7 @@ class ArkThemeScopeManager {
      * - and Default or System Theme (defined in this class)
      */
     makeTheme(customTheme: CustomThemeInternal): ThemeInternal {
-        if (customTheme === undefined) {
+        if (!customTheme) {
             return this.defaultTheme ?? ArkThemeScopeManager.SystemTheme;
         }
         // create Theme based on Custom Theme tokens and Baseline Theme

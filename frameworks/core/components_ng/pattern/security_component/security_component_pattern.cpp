@@ -526,27 +526,31 @@ void SecurityComponentPattern::RegisterSecurityComponent()
     CHECK_NULL_VOID(taskExecutor);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    taskExecutor->PostTask([weak = WeakClaim(this), weakContext = WeakPtr(pipeline)] {
-        if (!SecurityComponentHandler::LoadSecurityComponentService()) {
-            LOGW("load security component service failed.");
-            return;
-        }
-        auto context = weakContext.Upgrade();
-        CHECK_NULL_VOID(context);
-        auto taskExecutor = context->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask([weak, instanceID = context->GetInstanceId()] {
-            ContainerScope scope(instanceID);
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            if (pattern->regStatus_ != SecurityComponentRegisterStatus::REGISTERING) {
-                LOGI("Register security component ASync droped.");
+    taskExecutor->PostTask(
+        [weak = WeakClaim(this), weakContext = WeakPtr(pipeline)] {
+            if (!SecurityComponentHandler::LoadSecurityComponentService()) {
+                LOGW("load security component service failed.");
                 return;
             }
+            auto context = weakContext.Upgrade();
+            CHECK_NULL_VOID(context);
+            auto taskExecutor = context->GetTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(
+                [weak, instanceID = context->GetInstanceId()] {
+                    ContainerScope scope(instanceID);
+                    auto pattern = weak.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    if (pattern->regStatus_ != SecurityComponentRegisterStatus::REGISTERING) {
+                        LOGI("Register security component ASync droped.");
+                        return;
+                    }
 
-            pattern->RegisterSecurityComponentRetry();
-        }, TaskExecutor::TaskType::UI, "ArkUISecurityComponentRegisterRetry");
-    }, TaskExecutor::TaskType::BACKGROUND, "ArkUISecurityComponentRegister");
+                    pattern->RegisterSecurityComponentRetry();
+                },
+                TaskExecutor::TaskType::UI, "ArkUISecurityComponentRegisterRetry");
+        },
+        TaskExecutor::TaskType::BACKGROUND, "ArkUISecurityComponentRegister");
 }
 
 void SecurityComponentPattern::UnregisterSecurityComponent()
@@ -606,12 +610,14 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(GestureEvent
             CHECK_NULL_RETURN(context, -1);
             auto taskExecutor = context->GetTaskExecutor();
             CHECK_NULL_RETURN(taskExecutor, -1);
-            taskExecutor->PostTask([weak, instanceId = context->GetInstanceId(), result, nodeInner = node] {
-                ContainerScope scope(instanceId);
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                pattern->DoTriggerOnclick(result);
-            }, TaskExecutor::TaskType::UI, "ArkUISecurityComponentTriggerOnClick");
+            taskExecutor->PostTask(
+                [weak, instanceId = context->GetInstanceId(), result, nodeInner = node] {
+                    ContainerScope scope(instanceId);
+                    auto pattern = weak.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->DoTriggerOnclick(result);
+                },
+                TaskExecutor::TaskType::UI, "ArkUISecurityComponentTriggerOnClick");
             return 0;
         };
     }
@@ -651,12 +657,14 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const KeyEve
             CHECK_NULL_RETURN(context, -1);
             auto taskExecutor = context->GetTaskExecutor();
             CHECK_NULL_RETURN(taskExecutor, -1);
-            taskExecutor->PostTask([weak, instanceId = context->GetInstanceId(), result, nodeInner = node] {
-                ContainerScope scope(instanceId);
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                pattern->DoTriggerOnclick(result);
-            }, TaskExecutor::TaskType::UI, "ArkUISecurityComponentTriggerOnClick");
+            taskExecutor->PostTask(
+                [weak, instanceId = context->GetInstanceId(), result, nodeInner = node] {
+                    ContainerScope scope(instanceId);
+                    auto pattern = weak.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->DoTriggerOnclick(result);
+                },
+                TaskExecutor::TaskType::UI, "ArkUISecurityComponentTriggerOnClick");
             return 0;
         };
     }

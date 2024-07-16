@@ -255,6 +255,7 @@ public:
     }
 
     void GetParentNavigation();
+    void GetParentModalSheet();
 
     /**
      * @brief Return the portion of delta that's in overScroll range.
@@ -708,11 +709,13 @@ private:
     void ProcessNavBarReactOnStart();
     float ProcessNavBarReactOnUpdate(float offset);
     void ProcessNavBarReactOnEnd();
-    void InitSpringOffsetProperty(bool useTotalOffset = true);
+    void InitSpringOffsetProperty();
     void InitCurveOffsetProperty();
+    void OnAnimateFinish();
     void StopAnimation(std::shared_ptr<AnimationUtils::Animation> animation);
     void PauseAnimation(std::shared_ptr<AnimationUtils::Animation> animation);
     void InitOption(AnimationOption &option, float duration, const RefPtr<Curve>& curve);
+    float GetScrollDelta(float offset, bool& stopAnimation);
 
     void OnAttachToFrameNode() override;
     void AttachAnimatableProperty(RefPtr<Scrollable> scrollable);
@@ -730,7 +733,7 @@ private:
     void HandleInvisibleItemsSelectedStatus(const RectF& selectedZone);
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
-    void HandleDragEnd(const GestureEvent& info);
+    void HandleDragEnd();
     void SelectWithScroll();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     float GetOutOfScrollableOffset() const;
@@ -743,7 +746,13 @@ private:
      */
     ScrollResult HandleScroll(
         float offset, int32_t source, NestedState state = NestedState::GESTURE, float velocity = 0.f) override;
-    bool HandleScrollVelocity(float velocity) override;
+    bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
+
+    void RemainVelocityToChild(float remainVelocity) override;
+    bool NestedScrollOutOfBoundary() override
+    {
+        return OutBoundaryCallback();
+    }
 
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
     void OnScrollEndRecursiveInner(const std::optional<float>& velocity);
@@ -754,7 +763,8 @@ private:
     ScrollResult HandleScrollSelfFirst(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollSelfOnly(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollParallel(float& offset, int32_t source, NestedState state);
-    ScrollResult HandleOutBoundary(float& offset, int32_t source, NestedState state) override;
+    bool HandleOutBoundary(float& offset, int32_t source, NestedState state, ScrollResult& result);
+    void HandleSelfOutBoundary(float& offset, int32_t source);
 
     void ExecuteScrollFrameBegin(float& mainDelta, ScrollState state);
 
@@ -762,7 +772,7 @@ private:
     bool GetCanOverScroll() const;
 
     void OnScrollEnd();
-    void ProcessSpringEffect(float velocity);
+    void ProcessSpringEffect(float velocity, bool needRestart = false);
     void SetEdgeEffect(EdgeEffect edgeEffect);
 
     // Scrollable::UpdateScrollPosition
@@ -774,6 +784,7 @@ private:
      *******************************************************************************/
 
     bool HandleOverScroll(float velocity);
+    bool HandleScrollableOverScroll(float velocity);
 
     void CreateRefreshCoordination()
     {
@@ -788,6 +799,7 @@ private:
     RefreshCoordinationMode CoordinateWithRefresh(double& offset, int32_t source, bool isAtTop);
     bool CoordinateWithNavigation(double& offset, int32_t source, bool isAtTop);
     void NotifyFRCSceneInfo(const std::string& scene, double velocity, SceneStatus sceneStatus);
+    ModalSheetCoordinationMode CoordinateWithSheet(double& offset, int32_t source, bool isAtTop);
     bool NeedCoordinateScrollWithNavigation(double offset, int32_t source, const OverScrollOffset& overOffsets);
     void SetUiDvsyncSwitch(bool on);
 
@@ -806,6 +818,7 @@ private:
     float estimatedHeight_ = 0.0f;
     bool isReactInParentMovement_ = false;
     bool isRefreshInReactive_ = false; // true if Refresh component is ready to receive scroll offset.
+    bool isSheetInReactive_ = false;
     bool isCoordEventNeedSpring_ = true;
     double scrollBarOutBoundaryExtent_ = 0.0;
     double friction_ = 0.0;
@@ -833,6 +846,7 @@ private:
     RefPtr<PanEvent> boxSelectPanEvent_;
 
     RefPtr<NavBarPattern> navBarPattern_;
+    RefPtr<SheetPresentationPattern> sheetPattern_;
     std::vector<RefPtr<ScrollingListener>> scrollingListener_;
 
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;
@@ -848,6 +862,8 @@ private:
     float currentVelocity_ = 0.0f;
     float lastPosition_ = 0.0f;
     float finalPosition_ = 0.0f;
+    bool useTotalOffset_ = true;
+    bool animateToTraceFlag_ = false;
     std::optional<float> extraOffset_;
 
     RefPtr<Animator> hotzoneAnimator_;

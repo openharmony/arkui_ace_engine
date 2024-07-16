@@ -127,6 +127,7 @@ Matrix4 Matrix4::QuaternionToMatrix(double x, double y, double z, double w)
     y /= norm;
     z /= norm;
 
+    // Quaternion to matrix operation wiki:reference/apis-arkui/js-apis-matrix4.md.
     return Matrix4(1.0 - 2.0 * (y * y + z * z), 2.0 * (x * y - w * z), 2.0 * (x * z + w * y), 0.0,
         2.0 * (x * y + w * z), 1.0 - 2.0 * (x * x + z * z), 2.0 * (y * z - w * x), 0.0,
         2.0 * (x * z - w * y), 2.0 * (y * z + w * x), 1.0 - 2.0 * (x * x + y * y), 0.0,

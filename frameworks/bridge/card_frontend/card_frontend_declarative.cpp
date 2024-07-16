@@ -23,6 +23,7 @@
 #include "base/utils/utils.h"
 #include "core/common/thread_checker.h"
 #include "frameworks/bridge/common/utils/utils.h"
+#include "frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -48,7 +49,7 @@ bool CardFrontendDeclarative::Initialize(FrontendType type, const RefPtr<TaskExe
 
 void CardFrontendDeclarative::InitializeDelegate(const RefPtr<TaskExecutor>& taskExecutor)
 {
-    auto pageRouterManager = AceType::MakeRefPtr<NG::PageRouterManager>();
+    auto pageRouterManager = NG::PageRouterManagerFactory::CreateManager();
     delegate_ = AceType::MakeRefPtr<Framework::CardFrontendDelegateDeclarative>(taskExecutor);
     delegate_->SetPageRouterManager(pageRouterManager);
 }

@@ -67,13 +67,8 @@ public:
             theme->linearSplitChildMinSize_ = pattern->GetAttr<double>(LINEAR_SPLIT_CHILD_MIN_SIZE, childMinSize);
             theme->isTextFadeout_ = pattern->GetAttr<std::string>("text_fadeout_enable", "") == "true";
             theme->fadeoutWidth_ = pattern->GetAttr<Dimension>("text_fadeout_width", 16.0_vp);
-            RefPtr<ThemeStyle> textfieldPattern = themeConstants->GetPatternByName("textfield_pattern");
-            if (!textfieldPattern) {
-                LOGW("find pattern of textfield fail");
-                return;
-            }
-            auto textfieldShowHandle = textfieldPattern->GetAttr<std::string>("textfield_show_handle", "0");
-            theme->isShowHandle_ = StringUtils::StringToInt(textfieldShowHandle);
+            auto textShowHandle = pattern->GetAttr<std::string>("text_show_handle", "0");
+            theme->isShowHandle_ = StringUtils::StringToInt(textShowHandle);
         }
     };
 

@@ -99,6 +99,9 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
     }
     size_t idx = innerTargets.size();
     size_t newIdx = 0;
+    if (dragEventActuator_) {
+        dragEventActuator_->AddTouchListener(touchRestrict);
+    }
     if (touchEventActuator_) {
         touchEventActuator_->OnCollectTouchTarget(
             coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, responseLinkResult);
@@ -707,10 +710,6 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         HandleNotallowDrag(info);
         return;
     }
-    if (GetTextDraggable() && !GetIsTextDraggable()) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Text category component does not meet the drag condition, forbidden drag.");
-        return;
-    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto eventManager = pipeline->GetEventManager();
@@ -729,6 +728,8 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     }
     event->SetScreenX(info.GetScreenLocation().GetX());
     event->SetScreenY(info.GetScreenLocation().GetY());
+    event->SetDisplayX(info.GetScreenLocation().GetX());
+    event->SetDisplayY(info.GetScreenLocation().GetY());
     event->SetSourceTool(info.GetSourceTool());
 
     auto frameTag = frameNode->GetTag();
@@ -815,7 +816,9 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
                 },
                 TaskExecutor::TaskType::UI, "ArkUIGestureDragStart");
         };
-        NG::ComponentSnapshot::Create(dragDropInfo.customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
+        SnapshotParam param;
+        param.delay = CREATE_PIXELMAP_TIME;
+        NG::ComponentSnapshot::Create(dragDropInfo.customNode, std::move(callback), false, param);
         PrintBuilderNode(dragPreviewInfo.customNode);
         return;
     }
@@ -903,11 +906,11 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     RefPtr<FrameNode> textNode = nullptr;
     RefPtr<OverlayManager> subWindowOverlayManager = nullptr;
     bool isMenuShow = false;
-    auto window = SubwindowManager::GetInstance()->ShowPreviewNG();
+    auto window = SubwindowManager::GetInstance()->ShowDragPreviewWindowNG();
     if (window) {
         subWindowOverlayManager = window->GetOverlayManager();
         CHECK_NULL_VOID(subWindowOverlayManager);
-        isMenuShow = subWindowOverlayManager->IsMenuShow();
+        isMenuShow = subWindowOverlayManager->IsMenuShow() || overlayManager->IsMenuShow();
     }
     if (isMenuShow) {
         dragDropManager->SetIsDragWithContextMenu(true);
@@ -916,11 +919,18 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         dragDropManager->SetIsDragWithContextMenu(false);
     }
     auto focusHub = frameNode->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    bool hasContextMenu = focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
+    bool hasContextMenu = focusHub == nullptr
+                              ? false : focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
     if (IsNeedSwitchToSubWindow() || isMenuShow) {
         imageNode = overlayManager->GetPixelMapContentNode();
         DragEventActuator::CreatePreviewNode(frameNode, imageNode);
+        auto originPoint = imageNode->GetPositionToScreen();
+        if (hasContextMenu || isMenuShow) {
+            auto previewDragMovePosition = dragDropManager->GetUpdateDragMovePosition();
+            DragEventActuator::UpdatePreviewPositionAndScale(imageNode, previewDragMovePosition + originPoint);
+            dragDropManager ->ResetContextMenuDragPosition();
+        }
+        
         auto frameTag = frameNode->GetTag();
         if (IsPixelMapNeedScale() && GetTextDraggable() && IsTextCategoryComponent(frameTag)) {
             auto textDragPattern = frameNode->GetPattern<TextDragBase>();
@@ -1011,7 +1021,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     ret = InteractionInterface::GetInstance()->StartDrag(dragData, GetDragCallback(pipeline, eventHub));
     if (ret != 0) {
         if (dragDropManager->IsNeedDisplayInSubwindow() && subWindowOverlayManager) {
-            SubwindowManager::GetInstance()->HidePreviewNG();
+            SubwindowManager::GetInstance()->HideDragPreviewWindowNG();
             overlayManager->RemovePixelMap();
         }
         TAG_LOGW(AceLogTag::ACE_DRAG, "Start drag failed, return value is %{public}d", ret);
@@ -1087,6 +1097,9 @@ void GestureEventHub::UpdateExtraInfo(const RefPtr<FrameNode>& frameNode,
     double opacity = frameNode->GetDragPreviewOption().options.opacity;
     auto optionInfo = frameNode->GetDragPreviewOption().options;
     arkExtraInfoJson->Put("dip_opacity", opacity);
+    TAG_LOGD(AceLogTag::ACE_DRAG, "The info of opacity update to the framework is %{public}s",
+        arkExtraInfoJson->ToString().c_str());
+
     if (optionInfo.blurbgEffect.backGroundEffect.radius.IsValid()) {
         optionInfo.blurbgEffect.ToJsonValue(arkExtraInfoJson);
     }
@@ -1106,9 +1119,8 @@ int32_t GestureEventHub::RegisterCoordinationListener(const RefPtr<PipelineBase>
         CHECK_NULL_VOID(dragDropManager);
         auto taskScheduler = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
-        taskScheduler->PostTask([dragDropManager]() {
-            dragDropManager->HideDragPreviewOverlay();
-        }, TaskExecutor::TaskType::UI, "ArkUIGestureHideDragPreviewOverlay");
+        taskScheduler->PostTask([dragDropManager]() { dragDropManager->HideDragPreviewOverlay(); },
+            TaskExecutor::TaskType::UI, "ArkUIGestureHideDragPreviewOverlay");
     };
     return InteractionInterface::GetInstance()->RegisterCoordinationListener(callback);
 }
@@ -1444,8 +1456,8 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
             [eventHub, dragEvent, dragDropManager, eventManager, notifyMessage, id]() {
                 dragDropManager->SetDragResult(notifyMessage, dragEvent);
                 dragDropManager->SetDragBehavior(notifyMessage, dragEvent);
+                dragDropManager->DoDragReset();
                 dragDropManager->SetIsDragged(false);
-                dragDropManager->ResetDragging();
                 dragDropManager->SetDraggingPointer(-1);
                 dragDropManager->SetDraggingPressedState(false);
                 dragDropManager->ResetDragPreviewInfo();
@@ -1834,6 +1846,7 @@ void GestureEventHub::FireCustomerOnDragEnd(const RefPtr<PipelineBase>& context,
     CHECK_NULL_VOID(dragEvent);
     dragEvent->SetResult(DragRet::DRAG_FAIL);
     dragEvent->SetDragBehavior(DragBehavior::UNKNOWN);
+    dragDropManager->DoDragReset();
     dragDropManager->SetIsDragged(false);
     dragDropManager->ResetDragging();
     dragDropManager->SetDraggingPointer(-1);

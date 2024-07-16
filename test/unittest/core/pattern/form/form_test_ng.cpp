@@ -1100,6 +1100,14 @@ HWTEST_F(FormTestNg, FormSkeletonTest002, TestSize.Level1)
     want.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM, false);
     pattern->FireFormSurfaceNodeCallback(rsSurfaceNode, want);
     ASSERT_EQ(host->GetLastChild(), nullptr);
+    bool isTransparencyEnabled = true;
+    RequestFormInfo info;
+    pattern->isUnTrust_ = true;
+    auto ret = pattern->ShouldLoadFormSkeleton(isTransparencyEnabled, info);
+    ASSERT_EQ(ret, true);
+    pattern->isUnTrust_ = false;
+    ret = pattern->ShouldLoadFormSkeleton(isTransparencyEnabled, info);
+    ASSERT_EQ(ret, false);
 }
 
 /**
@@ -1423,5 +1431,99 @@ HWTEST_F(FormTestNg, GetTimeLimitFontSize, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     double fontSize = pattern->GetTimeLimitFontSize();
     EXPECT_EQ(fontSize, TIME_LIMIT_FONT_SIZE_BASE);
+}
+
+/**
+ * @tc.name: GetTimeLimitResource
+ * @tc.desc: Test function GetTimeLimitResource in FormPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, GetTimeLimitResource, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::string tmpStr = "action";
+    pattern->GetTimeLimitResource(tmpStr);
+    EXPECT_EQ(tmpStr.empty(), false);
+}
+
+/**
+ * @tc.name: OnLanguageConfigurationUpdate
+ * @tc.desc: Test function OnLanguageConfigurationUpdate in FormPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, OnLanguageConfigurationUpdate, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<FrameNode> textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    RefPtr<FrameNode> columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+    pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE, columnNode);
+    pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE, textNode);
+    RefPtr<FrameNode> disableStyleRootNode =
+        pattern->GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
+    RefPtr<FrameNode> disableStyleTextNode =
+        pattern->GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE);
+    pattern->EnableDrag();
+    LOGI("OnLanguageConfigurationUpdate");
+    pattern->OnLanguageConfigurationUpdate();
+    EXPECT_EQ(disableStyleTextNode, textNode);
+}
+
+/**
+ * @tc.name: CreateTimeLimitNode
+ * @tc.desc: Test CreateTimeLimitNode in Form Pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, CreateTimeLimitNode, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(100.0f, 100.0f));
+    geometryNode->SetFrameOffset(OffsetF(0, 0));
+    RefPtr<LayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<LayoutAlgorithm>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, nullptr);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto host = pattern->GetHost();
+    pattern->CreateTimeLimitNode();
+    ASSERT_NE(host, nullptr);
+}
+
+/**
+ * @tc.name: UpdateChildNodeOpacity
+ * @tc.desc: Test UpdateChildNodeOpacity in Form Pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, UpdateChildNodeOpacity, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    pattern->UpdateChildNodeOpacity(FormChildNodeType::FORM_SURFACE_NODE, 0);
+    ASSERT_NE(host, nullptr);
+}
+
+/**
+ * @tc.name: SnapshotSurfaceNode
+ * @tc.desc: Test SnapshotSurfaceNode in Form Pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, SnapshotSurfaceNode, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    pattern->SnapshotSurfaceNode();
+    ASSERT_NE(host, nullptr);
 }
 } // namespace OHOS::Ace::NG

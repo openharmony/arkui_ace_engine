@@ -132,7 +132,7 @@ ArkUINativeModuleValue TextTimerBridge::SetFontWeight(ArkUIRuntimeCallInfo* runt
         if (fontWeightArg->IsNumber()) {
             fontWeight = std::to_string(fontWeightArg->Int32Value(vm));
         } else if (fontWeightArg->IsString(vm)) {
-            fontWeight = fontWeightArg->ToString(vm)->ToString();
+            fontWeight = fontWeightArg->ToString(vm)->ToString(vm);
         }
     }
     GetArkUINodeModifiers()->getTextTimerModifier()->setFontWeight(nativeNode, fontWeight.c_str());
@@ -187,7 +187,7 @@ ArkUINativeModuleValue TextTimerBridge::SetFormat(ArkUIRuntimeCallInfo* runtimeC
     if (!secondArg->IsString(vm)) {
         GetArkUINodeModifiers()->getTextTimerModifier()->resetFormat(nativeNode);
     }
-    std::string format = secondArg->ToString(vm)->ToString();
+    std::string format = secondArg->ToString(vm)->ToString(vm);
     GetArkUINodeModifiers()->getTextTimerModifier()->setFormat(nativeNode, format.c_str());
     return panda::JSValueRef::Undefined(vm);
 }

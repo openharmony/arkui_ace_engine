@@ -198,7 +198,7 @@ private:
     Gradient SortGradientColorsOffset(const Gradient& srcGradient) const;
     RefPtr<AnimatablePropertyFloat> date_;
     RefPtr<PropertyBool> isEffect_;
-    size_t dataPanelType_;
+    size_t dataPanelType_ = 0;
     OffsetF offset_;
     bool isFirstCreate_ = true;
     bool isHasShadowValue_ = false;

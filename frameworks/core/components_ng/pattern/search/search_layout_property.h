@@ -67,6 +67,26 @@ public:
         json->PutExtAttr("searchButton", GetSearchButton().value_or("")->c_str(), filter);
     }
 
+    const std::function<void(WeakPtr<NG::FrameNode>)>& GetSearchIconSymbol() const
+    {
+        return searchIconSymbol_;
+    }
+
+    void SetSearchIconSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& searchIconSymbol)
+    {
+        searchIconSymbol_ = searchIconSymbol;
+    }
+
+    const std::function<void(WeakPtr<NG::FrameNode>)>& GetCancelIconSymbol() const
+    {
+        return cancelIconSymbol_;
+    }
+
+    void SetCancelIconSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& cancelIconSymbol)
+    {
+        cancelIconSymbol_ = cancelIconSymbol;
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SearchButton, std::optional<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CancelButtonStyle, CancelButtonStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CancelButtonUDSize, Dimension, PROPERTY_UPDATE_MEASURE);
@@ -74,6 +94,10 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CaretUDWidth, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SearchButtonFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontFeature, FONT_FEATURES_LIST, PROPERTY_UPDATE_MEASURE);
+
+private:
+    std::function<void(WeakPtr<NG::FrameNode>)> searchIconSymbol_;
+    std::function<void(WeakPtr<NG::FrameNode>)> cancelIconSymbol_;
 };
 
 } // namespace OHOS::Ace::NG

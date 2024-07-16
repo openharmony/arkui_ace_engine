@@ -151,6 +151,9 @@ public:
     void SetPixelMap(const RefPtr<DragEventActuator>& actuator);
     void SetEventColumn(const RefPtr<DragEventActuator>& actuator);
     void HideFilter();
+    void HideMenu(int32_t targetId);
+    void UpdateHideMenuOffsetNG(const NG::OffsetF& offset, float menuScale, bool isRedragStart);
+    void UpdatePreviewPosition();
     void HidePixelMap(bool startDrag = false, double x = 0, double y = 0, bool showAnimation = true);
     void HideEventColumn();
     void BindClickEvent(const RefPtr<FrameNode>& columnNode);
@@ -246,6 +249,7 @@ public:
     const std::vector<GatherNodeChildInfo>& GetGatherNodeChildrenInfo() const;
     void ClearGatherNodeChildrenInfo();
     void PushBackGatherNodeChild(GatherNodeChildInfo& gatherNodeChild);
+    void AddTouchListener(const TouchRestrict& touchRestrict) override;
     void HandleTouchUpEvent();
     void HandleTouchMoveEvent();
     void HandleTouchCancelEvent();
@@ -269,6 +273,7 @@ public:
     void GetThumbnailPixelMapAsync(const RefPtr<GestureEventHub>& gestureHub);
     void SetResponseRegionFull();
     void ResetResponseRegion();
+    static void ResetDragStatus();
 
 private:
     void UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>& frameNode);
@@ -295,6 +300,7 @@ private:
     RefPtr<LongPressRecognizer> previewLongPressRecognizer_;
     RefPtr<SequencedRecognizer> SequencedRecognizer_;
     RefPtr<FrameNode> gatherNode_;
+    RefPtr<TouchEventImpl> touchListener_;
 
     RefPtr<PixelMap> textPixelMap_;
     std::function<void(GestureEvent&)> actionStart_;

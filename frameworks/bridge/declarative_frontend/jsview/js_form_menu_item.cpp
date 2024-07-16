@@ -14,6 +14,9 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_menu_item.h"
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "want.h"
 
@@ -121,6 +124,9 @@ void JSFormMenuItem::JsOnRegClick(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onTap");
         RequestPublishFormWithSnapshot(wantValue, formBindingDataStr, jsCBFunc);
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+        JSInteractableView::ReportClickEvent(node);
+#endif
     };
 
     auto onClick = [execCtx = info.GetExecutionContext(), node = targetNode,
@@ -135,6 +141,9 @@ void JSFormMenuItem::JsOnRegClick(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onClick");
         PipelineContext::SetCallBackNode(node);
         RequestPublishFormWithSnapshot(wantValue, formBindingDataStr, jsCBFunc);
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+        JSInteractableView::ReportClickEvent(node);
+#endif
     };
     ViewAbstractModel::GetInstance()->SetOnClick(std::move(onTap), std::move(onClick));
 }

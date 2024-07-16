@@ -161,9 +161,9 @@ void XComponentTestNg::TearDownTestSuite()
 
 RefPtr<FrameNode> XComponentTestNg::CreateXComponentNode(TestProperty& testProperty)
 {
-    auto xcId = testProperty.xcId.value();
+    auto xcId = testProperty.xcId;
     auto xcType = testProperty.xcType.value();
-    auto libraryName = testProperty.libraryName.value();
+    auto libraryName = testProperty.libraryName;
     auto xcomponentController = std::make_shared<XComponentControllerNG>();
     XComponentModelNG().Create(xcId, xcType, libraryName, xcomponentController);
 
@@ -1303,10 +1303,12 @@ HWTEST_F(XComponentTestNg, XComponentImageAnalyzerTest, TestSize.Level1)
 HWTEST_F(XComponentTestNg, XComponentSurfaceLifeCycleCallback, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. set surface life cycle callback and create XComponent
+     * @tc.steps: step1. set surface life cycle callback, set id&libraryname to null and create XComponent
      * @tc.expected: xcomponent frameNode create successfully
      */
     testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    testProperty.xcId = std::nullopt;
+    testProperty.libraryName = std::nullopt;
     std::string onSurfaceCreatedSurfaceId = "";
     std::string onSurfaceChangedSurfaceId = "";
     std::string onSurfaceDestroyedSurfaceId = "";
@@ -1322,13 +1324,16 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceLifeCycleCallback, TestSize.Level1)
     testProperty.surfaceDestroyedEvent = std::move(onSurfaceDestroyed);
     auto frameNode = CreateXComponentNode(testProperty);
     ASSERT_TRUE(frameNode);
+    auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
+    ASSERT_TRUE(xComponentEventHub);
+    EXPECT_FALSE(xComponentEventHub->surfaceInitEvent_);
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(pattern);
     pattern->surfaceId_ = SURFACE_ID;
 
     /**
      * @tc.steps: step2. call BeforeSyncGeometryProperties
-     * @tc.expected: onSurfaceCreated & onSurfaceChanged has called
+     * @tc.expected: onSurfaceCreated & onSurfaceChanged has called and nativeXcomponent will not be created
      */
     DirtySwapConfig config;
     auto xComponentLayoutAlgorithm = AceType::MakeRefPtr<XComponentLayoutAlgorithm>();
@@ -1347,6 +1352,8 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceLifeCycleCallback, TestSize.Level1)
     pattern->BeforeSyncGeometryProperties(config);
     EXPECT_STREQ(SURFACE_ID.c_str(), onSurfaceCreatedSurfaceId.c_str());
     EXPECT_STREQ(SURFACE_ID.c_str(), onSurfaceChangedSurfaceId.c_str());
+    EXPECT_FALSE(pattern->nativeXComponent_);
+    EXPECT_FALSE(pattern->nativeXComponentImpl_);
 
     /**
      * @tc.steps: step3. call OnDetachFromFrameNode

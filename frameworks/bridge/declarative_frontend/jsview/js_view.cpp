@@ -955,6 +955,7 @@ void JSViewPartialUpdate::JSGetRouterPageInfo(const JSCallbackInfo& info)
 
 void JSViewPartialUpdate::JSGetNavigationInfo(const JSCallbackInfo& info)
 {
+    ContainerScope scope(GetInstanceId());
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto navigationMgr = pipeline->GetNavigationManager();
@@ -1119,8 +1120,6 @@ void JSViewPartialUpdate::JSGetProxiedItemRenderState(const JSCallbackInfo& info
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
         return;
     }
-
-    // TODO: Check this return value
     auto result = false;
 
     // set boolean return value to JS

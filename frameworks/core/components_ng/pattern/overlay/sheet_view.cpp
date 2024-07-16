@@ -217,11 +217,13 @@ RefPtr<FrameNode> SheetView::CreateScrollNode()
     pattern->SetEdgeEffect(EdgeEffect::SPRING, false);
     pattern->SetScrollToSafeAreaHelper(false);
     props->UpdateAlignment(Alignment::TOP_CENTER);
-    NestedScrollOptions nestedOpt = {
-        .forward = NestedScrollMode::PARENT_FIRST,
-        .backward = NestedScrollMode::SELF_FIRST,
-    };
-    pattern->SetNestedScroll(nestedOpt);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        NestedScrollOptions nestedOpt = {
+            .forward = NestedScrollMode::PARENT_FIRST,
+            .backward = NestedScrollMode::SELF_FIRST,
+        };
+        pattern->SetNestedScroll(nestedOpt);
+    }
     scroll->MarkModifyDone();
     return scroll;
 }
@@ -333,7 +335,8 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_RETURN(sheetTheme, nullptr);
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
-    if (pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale()) {
+    bool isTitleCustombuilder = sheetStyle.isTitleBuilder.has_value() && sheetStyle.isTitleBuilder.value();
+    if (pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale() || isTitleCustombuilder) {
         layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT)));
     }
     MarginProperty margin;

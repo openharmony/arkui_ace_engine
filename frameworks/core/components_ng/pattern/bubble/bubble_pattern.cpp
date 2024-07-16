@@ -180,7 +180,6 @@ void BubblePattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void BubblePattern::HandleTouchDown(const Offset& clickPosition)
 {
-    // TODO: need to check click position
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto bubbleRenderProp = host->GetPaintProperty<BubbleRenderProperty>();

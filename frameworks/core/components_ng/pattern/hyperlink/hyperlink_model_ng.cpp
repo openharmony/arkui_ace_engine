@@ -99,4 +99,11 @@ void HyperlinkModelNG::SetDraggable(FrameNode* frameNode, bool draggable)
     }
     frameNode->SetDraggable(draggable);
 }
+
+void HyperlinkModelNG::SetResponseRegion(bool isUserSetResponseRegion)
+{
+    auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetIsUserSetResponseRegion(isUserSetResponseRegion);
+}
 } // namespace OHOS::Ace::NG

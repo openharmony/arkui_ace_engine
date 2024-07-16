@@ -393,6 +393,7 @@ void DatePickerColumnPattern::FlushCurrentOptions(
     auto showOptionCount = datePickerPattern->GetShowCount();
     uint32_t totalOptionCount = datePickerPattern->GetOptionCount(host);
     uint32_t currentIndex = host->GetPattern<DatePickerColumnPattern>()->GetCurrentIndex();
+    CHECK_EQUAL_VOID(totalOptionCount, 0);
     currentIndex = currentIndex % totalOptionCount;
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
 
@@ -840,7 +841,7 @@ void DatePickerColumnPattern::HandleDragEnd()
     }
     DatePickerScrollDirection dir =
         scrollDelta_ > 0.0 ? DatePickerScrollDirection::DOWN : DatePickerScrollDirection::UP;
-    int32_t middleIndex = GetShowCount() / 2;
+    uint32_t middleIndex = GetShowCount() / 2;
     auto shiftDistance = (dir == DatePickerScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
                                                                 : optionProperties_[middleIndex].nextDistance;
     auto shiftThreshold = shiftDistance / 2;
@@ -1223,7 +1224,7 @@ void DatePickerColumnPattern::OnAroundButtonClick(RefPtr<DatePickerEventParam> p
     if (clickBreak_) {
         return;
     }
-    int32_t middleIndex = GetShowCount() / 2;
+    uint32_t middleIndex = GetShowCount() / 2;
     int32_t step = param->itemIndex_ - middleIndex;
     if (step != 0) {
         if (animation_) {
@@ -1254,7 +1255,7 @@ void DatePickerColumnPattern::PlayRestAnimation()
 {
     DatePickerScrollDirection dir =
         scrollDelta_ > 0.0 ? DatePickerScrollDirection::DOWN : DatePickerScrollDirection::UP;
-    int32_t middleIndex = GetShowCount() / 2;
+    uint32_t middleIndex = GetShowCount() / 2;
     double shiftDistance = (dir == DatePickerScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
                                                                   : optionProperties_[middleIndex].nextDistance;
     double shiftThreshold = shiftDistance / 2;

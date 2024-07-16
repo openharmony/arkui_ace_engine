@@ -50,6 +50,11 @@ public:
     void SetPadding(const CalcDimension& value) override;
     void SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override;
+    void SetSafeAreaPadding(const CalcDimension& value) override {}
+    void SetSafeAreaPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
+        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override
+    {}
+    void ResetSafeAreaPadding() override {}
     void SetMargin(const CalcDimension& value) override;
     void SetMargins(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override;
@@ -72,9 +77,11 @@ public:
     void SetOuterBorderRadius(const std::optional<Dimension>& radiusTopLeft,
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
         const std::optional<Dimension>& radiusBottomRight) override {}
+    void SetOuterBorderRadius(const NG::BorderRadiusProperty& borderRadius) override {}
     void SetOuterBorderColor(const Color& value) override {}
     void SetOuterBorderColor(const std::optional<Color>& colorLeft, const std::optional<Color>& colorRight,
         const std::optional<Color>& colorTop, const std::optional<Color>& colorBottom) override {}
+    void SetOuterBorderColor(const NG::BorderColorProperty& borderColors) override {}
     void SetOuterBorderWidth(const Dimension& value) override {}
     void SetOuterBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) override {}
@@ -101,7 +108,12 @@ public:
     void SetPosition(const Dimension& x, const Dimension& y) override;
     void SetOffset(const Dimension& x, const Dimension& y) override;
     void MarkAnchor(const Dimension& x, const Dimension& y) override;
-
+    void SetPaddings(const NG::PaddingProperty& paddings) override {};
+    void SetMargins(const NG::MarginProperty& margins) override {};
+    void SetBorderRadius(const NG::BorderRadiusProperty& borderRadius) override {};
+    void SetBorderColor(const NG::BorderColorProperty& borderColors) override {};
+    void SetBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
+        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom, bool isLocalized) override {};
     void SetScale(float x, float y, float z) override;
     void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) override;
     void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) override;
@@ -120,7 +132,8 @@ public:
     void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) override;
     void SetSharedTransition(
         const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) override;
-    void SetGeometryTransition(const std::string& id, bool followWithoutTransition = false) override;
+    void SetGeometryTransition(
+        const std::string& id, bool followWithoutTransition = false, bool doRegisterSharedTransition = true) override;
     void SetMotionPath(const MotionPathOption& option) override;
     void SetRenderGroup(bool isRenderGroup) override {}
     void SetRenderFit(RenderFit renderFit) override {}
@@ -176,6 +189,7 @@ public:
     void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) override;
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override;
     void SetOnHover(OnHoverFunc&& onHoverEventFunc) override;
+    void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) override {};
     void SetOnDelete(std::function<void()>&& onDeleteCallback) override;
     void SetOnAppear(std::function<void()>&& onAppearCallback) override;
     void SetOnAttach(std::function<void()>&& onAttachCallback) override {}
@@ -229,6 +243,7 @@ public:
     void DisableOnTouch() override {};
     void DisableOnKeyEvent() override {};
     void DisableOnHover() override {};
+    void DisableOnAccessibilityHover() override {};
     void DisableOnMouse() override {};
     void DisableOnAppear() override {};
     void DisableOnDisAppear() override {};
@@ -247,6 +262,7 @@ public:
 
     void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) override;
+    void BindDragWithContextMenuParams(const NG::MenuParam& menuParam) override {};
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,

@@ -549,7 +549,7 @@ HWTEST_F(OverlayTestNg, OnBindContentCover005, TestSize.Level1)
     auto topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
     ASSERT_NE(topModalPattern, nullptr);
     auto targetId = topModalPattern->GetTargetId();
-    overlayManager->SetDismissTargetId(targetId);
+    overlayManager->SetDismissTarget(DismissTarget(targetId));
     overlayManager->DismissContentCover();
     EXPECT_TRUE(overlayManager->modalStack_.empty());
 
@@ -711,11 +711,11 @@ HWTEST_F(OverlayTestNg, MenuTest001, TestSize.Level1)
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
     overlayManager->HideMenu(menuNode, targetId);
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
     overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
     overlayManager->HideMenuInSubWindow();
-    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
     overlayManager->ShowMenuAnimation(menuNode);
     EXPECT_FALSE(menuPattern == nullptr);
     EXPECT_FALSE(menuPattern->animationOption_.GetOnFinishEvent() == nullptr);
@@ -826,8 +826,8 @@ HWTEST_F(OverlayTestNg, MenuTest003, TestSize.Level1)
     ASSERT_NE(previewContext, nullptr);
     auto menuContext = previewNode->GetRenderContext();
     ASSERT_NE(menuContext, nullptr);
-    previewContext->UpdateTransformScale(VectorF(0.0f, 0.0f));
-    menuContext->UpdateTransformScale(VectorF(0.0f, 0.0f));
+    previewContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
+    menuContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
 
     auto pipeline = PipelineBase::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
@@ -902,8 +902,8 @@ HWTEST_F(OverlayTestNg, MenuTest004, TestSize.Level1)
      */
     overlayManager->CleanMenuInSubWindowWithAnimation();
     pipeline->taskExecutor_ = nullptr;
-    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(0.0f, 0.0f));
-    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(0.0f, 0.0f));
+    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(1.0f, 1.0f));
+    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(1.0f, 1.0f));
 }
 
 /**
@@ -1020,7 +1020,11 @@ HWTEST_F(OverlayTestNg, ToastTest003, TestSize.Level1)
      * @tc.steps: step2. call ShowToast.
      * @tc.expected: toastMap_ is empty
      */
-    overlay->ShowToast(MESSAGE, DURATION, BOTTOMSTRING, true);
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE,
+        .duration = DURATION,
+        .bottom = BOTTOMSTRING,
+        .isRightToLeft = true };
+    overlay->ShowToast(toastInfo, nullptr);
     EXPECT_FALSE(overlay->toastMap_.empty());
     overlay->ClearToast();
     EXPECT_TRUE(overlay->toastMap_.empty());
@@ -1281,7 +1285,12 @@ HWTEST_F(OverlayTestNg, ToastShowModeTest001, TestSize.Level1)
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     MockPipelineContext::GetCurrent()->rootNode_ = rootNode;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->ShowToast(MESSAGE, DURATION, BOTTOMSTRING, true, ToastShowMode::TOP_MOST);
+    auto toastInfo = NG::ToastInfo { .message = MESSAGE,
+        .duration = DURATION,
+        .bottom = BOTTOMSTRING,
+        .showMode = NG::ToastShowMode::TOP_MOST,
+        .isRightToLeft = true };
+    overlayManager->ShowToast(toastInfo, nullptr);
     EXPECT_FALSE(overlayManager->toastMap_.empty());
     /**
      * @tc.steps: step2. Test Toast showMode and offset.
@@ -1328,7 +1337,9 @@ HWTEST_F(OverlayTestNg, ToastTest001, TestSize.Level1)
      */
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->ShowToast(MESSAGE, DURATION, BOTTOMSTRING, true);
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    overlayManager->ShowToast(toastInfo, nullptr);
     EXPECT_TRUE(overlayManager->toastMap_.empty());
     /**
      * @tc.steps: step2. call PopToast.
@@ -1365,7 +1376,9 @@ HWTEST_F(OverlayTestNg, ToastTest002, TestSize.Level1)
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     MockPipelineContext::GetCurrent()->rootNode_ = rootNode;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->ShowToast(MESSAGE, DURATION, BOTTOMSTRING, true);
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    overlayManager->ShowToast(toastInfo, nullptr);
     EXPECT_TRUE(overlayManager->toastMap_.empty());
     /**
      * @tc.steps: step2. call PopToast.

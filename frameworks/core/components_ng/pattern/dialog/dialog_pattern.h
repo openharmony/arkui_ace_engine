@@ -74,13 +74,14 @@ public:
         return false;
     }
 
-    void SetOnWillDismissWithUserData(const std::function<bool(const int32_t& info)>& onWillDismissWithUserData)
+    void SetOnWillDismissByNDK(const std::function<bool(const int32_t& info)>& onWillDismissByNDK)
     {
-        onWillDismissWithUserData_ = onWillDismissWithUserData;
+        onWillDismissByNDK_ = onWillDismissByNDK;
     }
 
-    bool ShouldDismissWithUserData(int reason){
-        if (onWillDismissWithUserData_ && onWillDismissWithUserData_(reason)) {
+    bool CallDismissInNDK(int reason)
+    {
+        if (onWillDismissByNDK_ && onWillDismissByNDK_(reason)) {
             return true;
         }
         return false;
@@ -258,11 +259,6 @@ public:
         return foldDisplayModeChangedCallbackId_.has_value();
     }
 
-    bool GetNeeedUpdateOrientation()
-    {
-        return neeedUpdateOrientation_;
-    }
-
     bool GetIsSuitableForAging()
     {
         return isSuitableForElderly_;
@@ -275,6 +271,7 @@ public:
 
     void UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation);
     void InitHostWindowRect();
+    void UpdateFontScale();
 
 private:
     bool AvoidKeyboard() const override
@@ -340,8 +337,9 @@ private:
     void DumpObjectProperty();
     void UpdatePropertyForElderly(const std::vector<ButtonInfo>& buttons);
     bool NeedsButtonDirectionChange(const std::vector<ButtonInfo>& buttons);
-    void UpdateLandSpaceTextFontSizeForElderly(bool isLandSpace);
-    void UpdateTitleTextFontSizeForElderly(bool isLandSpace);
+    void OnFontConfigurationUpdate() override;
+    void UpdateTextFontScale();
+    void UpdateTitleTextFontScale();
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;
@@ -356,18 +354,16 @@ private:
     std::string title_;
     std::string subtitle_;
     std::function<void(const int32_t& info)> onWillDismiss_;
-    std::function<bool(const int32_t& info)> onWillDismissWithUserData_;
+    std::function<bool(const int32_t& info)> onWillDismissByNDK_;
 
     DialogProperties dialogProperties_;
     WeakPtr<FrameNode> menuNode_;
     bool isFirstDefaultFocus_ = true;
     RefPtr<FrameNode> buttonContainer_;
+    RefPtr<FrameNode> contentColumn_;
     RefPtr<RenderContext> contentRenderContext_;
     bool isSuitableForElderly_ = false;
-    bool isLandspace_ = false;
-    bool isThreeButtonsDialog_ = false;
-    bool neeedUpdateOrientation_ = false;
-    bool isNeedToVp_ = false;
+    bool notAdapationAging_ = false;
     float fontScaleForElderly_ = 1.0f;
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
     RefPtr<FrameNode> titleContainer_;

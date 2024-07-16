@@ -80,6 +80,7 @@ constexpr Dimension BADGE_RELATIVE_OFFSET = 8.0_vp;
 constexpr float DEFAULT_OPACITY = 0.95f;
 constexpr float MIN_OPACITY { 0.0f };
 constexpr float MAX_OPACITY { 1.0f };
+constexpr float MENU_DRAG_SCALE = 0.05f;
 #if defined(PIXEL_MAP_SUPPORTED)
 constexpr int32_t CREATE_PIXELMAP_TIME = 80;
 #endif
@@ -180,7 +181,7 @@ bool DragEventActuator::IsCurrentNodeStatusSuitableForDragging(
     auto gestureHub = gestureEventHub_.Upgrade();
     CHECK_NULL_RETURN(gestureHub, false);
     if (gestureHub->IsDragForbidden() || (!frameNode->IsDraggable() && frameNode->IsCustomerSet()) ||
-        IsBelongToMultiItemNode(frameNode) || touchRestrict.inputEventType == InputEventType::AXIS) {
+        touchRestrict.inputEventType == InputEventType::AXIS || IsBelongToMultiItemNode(frameNode)) {
         TAG_LOGI(AceLogTag::ACE_DRAG,
             "No need to collect drag gestures result, drag forbidden set is %{public}d,"
             "frameNode draggable is %{public}d, custom set is %{public}d",
@@ -218,12 +219,15 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         return;
     }
     auto focusHub = frameNode->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    bool hasContextMenu = focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
+    bool hasContextMenuUsingGesture = focusHub == nullptr
+                              ? false : focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
     dragDropManager->SetPreDragStatus(PreDragStatus::ACTION_DETECTING_STATUS);
     auto actionStart = [weak = WeakClaim(this), this](GestureEvent& info) {
         auto actuator = weak.Upgrade();
-        CHECK_NULL_VOID(actuator);
+        if (!actuator) {
+            DragEventActuator::ResetDragStatus();
+            return;
+        }
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto dragDropManager = pipeline->GetDragDropManager();
@@ -263,6 +267,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 } else {
                     HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                     HideFilter();
+                    HideMenu(frameNode->GetId());
                     SubwindowManager::GetInstance()->HideMenuNG(false, true);
                 }
             }
@@ -293,6 +298,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
                 HideFilter();
                 SubwindowManager::GetInstance()->HideMenuNG(false, true);
+                actuator->UpdatePreviewOptionFromModifier(frameNode);
             } else {
                 // For the drag initiacating from mouse, there is no chance to execute the modifier in the floating
                 // pharse, so need to update here to make sure the preview option is available to pass through to drag
@@ -300,7 +306,11 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 actuator->UpdatePreviewOptionFromModifier(frameNode);
             }
         }
-
+        if (gestureHub->GetTextDraggable() && !gestureHub->GetIsTextDraggable()) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "Text category component does not meet the drag condition, forbidden drag.");
+            dragDropManager->ResetDragging();
+            return;
+        }
        // Trigger drag start event set by user.
         CHECK_NULL_VOID(actuator->userCallback_);
         auto userActionStart = actuator->userCallback_->GetActionStartEventFunc();
@@ -364,7 +374,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         actuator->SetIsNotInPreviewState(false);
     };
     panRecognizer_->SetOnActionEnd(actionEnd);
-    auto actionCancel = [weak = WeakClaim(this)]() {
+    auto actionCancel = [weak = WeakClaim(this), hasContextMenuUsingGesture = hasContextMenuUsingGesture]() {
         TAG_LOGD(AceLogTag::ACE_DRAG, "Drag event has been canceled.");
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
@@ -373,18 +383,23 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         dragDropManager->SetHasGatherNode(false);
         dragDropManager->SetBadgeNumber(-1);
         auto actuator = weak.Upgrade();
-        CHECK_NULL_VOID(actuator);
+        if (!actuator) {
+            DragEventActuator::ResetDragStatus();
+            return;
+        }
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         auto frameNode = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(frameNode);
         actuator->ResetResponseRegion();
+        auto contextMenuShowStatus = gestureHub->GetContextMenuShowStatus();
         if (actuator->GetIsNotInPreviewState() && !gestureHub->GetTextDraggable()) {
             DragEventActuator::ExecutePreDragAction(PreDragStatus::ACTION_CANCELED_BEFORE_DRAG, frameNode);
         }
-        if (!actuator->GetIsBindOverlayValue(actuator)) {
+        if (!hasContextMenuUsingGesture && !contextMenuShowStatus) {
             if (gestureHub->GetTextDraggable()) {
                 if (gestureHub->GetIsTextDraggable()) {
+                    actuator->HideEventColumn();
                     actuator->textPixelMap_ = nullptr;
                     actuator->HideTextAnimation();
                 }
@@ -433,6 +448,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     actionCancel_ = actionCancel;
     panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     panRecognizer_->SetOnActionCancel(actionCancel);
+    panRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     if (touchRestrict.sourceType == SourceType::MOUSE) {
         std::vector<RefPtr<NGGestureRecognizer>> recognizers { panRecognizer_ };
         SequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
@@ -442,7 +458,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         result.emplace_back(SequencedRecognizer_);
         return;
     }
-    auto longPressUpdateValue = [weak = WeakClaim(this), hasContextMenu = hasContextMenu](GestureEvent& info) {
+    auto longPressUpdateValue = [weak = WeakClaim(this), hasContextMenuUsingGesture = hasContextMenuUsingGesture](
+                                    GestureEvent& info) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger long press for 500ms.");
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
@@ -468,12 +485,13 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             actuator->UpdatePreviewOptionFromModifier(frameNode);
             DragEventActuator::ExecutePreDragAction(PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION, frameNode);
         }
-        if (hasContextMenu) {
+        if (hasContextMenuUsingGesture) {
             actuator->SetDragDampStartPointInfo(info.GetGlobalPoint(), info.GetPointerId());
         }
     };
     longPressRecognizer_->SetOnActionUpdate(longPressUpdateValue);
-    auto longPressUpdate = [weak = WeakClaim(this), hasContextMenu = hasContextMenu](GestureEvent& info) {
+    auto longPressUpdate = [weak = WeakClaim(this), hasContextMenuUsingGesture = hasContextMenuUsingGesture](
+                                GestureEvent& info) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger long press for 800ms.");
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -521,14 +539,14 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
         dragDropManager->SetPrepareDragFrameNode(frameNode);
         bool isBindMenuPreview = gestureHub->GetPreviewMode() != MenuPreviewMode::NONE;
-        if (!isBindMenuPreview) {
+        if (!hasContextMenuUsingGesture && !isBindMenuPreview) {
             actuator->SetFilter(actuator);
         }
         auto manager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(manager);
         actuator->SetIsNotInPreviewState(false);
         actuator->SetGatherNodeAboveFilter(actuator);
-        if (!hasContextMenu) {
+        if (!hasContextMenuUsingGesture) {
             actuator->SetPixelMap(actuator);
         }
         auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_RESPONSE, SPRING_DAMPING_FRACTION, 0);
@@ -539,7 +557,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(imageNode);
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
-        if (!isBindMenuPreview) {
+        auto contextMenuShowStatus = gestureHub->GetContextMenuShowStatus();
+        if (!contextMenuShowStatus) {
             if (actuator->IsNeedGather()) {
                 DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
                 actuator->ShowPreviewBadgeAnimation(actuator, manager);
@@ -550,16 +569,17 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_STARTED);
             dragDropManager->SetDraggingPointer(info.GetPointerId());
             dragDropManager->SetDraggingPressedState(true);
-            option.SetOnFinishEvent([id = Container::CurrentId(), pointerId = info.GetPointerId(), hasContextMenu]() {
-                ContainerScope scope(id);
-                auto pipeline = PipelineContext::GetCurrentContext();
-                CHECK_NULL_VOID(pipeline);
-                auto dragDropManager = pipeline->GetDragDropManager();
-                CHECK_NULL_VOID(dragDropManager);
-                if (dragDropManager->IsDraggingPressed(pointerId) || hasContextMenu) {
-                    DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED);
-                }
-            });
+            option.SetOnFinishEvent(
+                [id = Container::CurrentId(), pointerId = info.GetPointerId(), hasContextMenuUsingGesture]() {
+                    ContainerScope scope(id);
+                    auto pipeline = PipelineContext::GetCurrentContext();
+                    CHECK_NULL_VOID(pipeline);
+                    auto dragDropManager = pipeline->GetDragDropManager();
+                    CHECK_NULL_VOID(dragDropManager);
+                    if (dragDropManager->IsDraggingPressed(pointerId) || hasContextMenuUsingGesture) {
+                        DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED);
+                    }
+                });
             AnimationUtils::Animate(
                 option,
                 [imageContext]() {
@@ -628,16 +648,19 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                         auto customPixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
                         auto taskScheduler = pipeline->GetTaskExecutor();
                         CHECK_NULL_VOID(taskScheduler);
-                        taskScheduler->PostTask([gestureHub, customPixelMap]() {
-                            CHECK_NULL_VOID(gestureHub);
-                            gestureHub->SetPixelMap(customPixelMap);
-                            gestureHub->SetDragPreviewPixelMap(customPixelMap);
-                        }, TaskExecutor::TaskType::UI, "ArkUIDragSetCustomPixelMap");
+                        taskScheduler->PostTask(
+                            [gestureHub, customPixelMap]() {
+                                CHECK_NULL_VOID(gestureHub);
+                                gestureHub->SetPixelMap(customPixelMap);
+                                gestureHub->SetDragPreviewPixelMap(customPixelMap);
+                            },
+                            TaskExecutor::TaskType::UI, "ArkUIDragSetCustomPixelMap");
                     }
                 };
-
+                SnapshotParam param;
+                param.delay = CREATE_PIXELMAP_TIME;
                 OHOS::Ace::NG::ComponentSnapshot::Create(
-                    dragPreviewInfo.customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
+                    dragPreviewInfo.customNode, std::move(callback), false, param);
                 gestureHub->PrintBuilderNode(dragPreviewInfo.customNode);
 #endif
             } else {
@@ -657,36 +680,30 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
 
         longPressRecognizer_->SetThumbnailCallback(std::move(callback));
     }
-    auto touchTask = [hasContextMenu, weak = WeakClaim(this)](const TouchEventInfo& info) {
-        auto actuator = weak.Upgrade();
-        CHECK_NULL_VOID(actuator);
-        if (info.GetTouches().empty()) {
-            return;
-        }
-        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
-            actuator->HandleTouchUpEvent();
-        } else if (info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
-            actuator->HandleTouchCancelEvent();
-        } else if (info.GetTouches().front().GetTouchType() == TouchType::MOVE) {
-            if (hasContextMenu) {
-                auto point = Point(info.GetTouches().front().GetGlobalLocation().GetX(),
-                                   info.GetTouches().front().GetGlobalLocation().GetY());
-                actuator->HandleDragDampingMove(point, info.GetTouches().front().GetFingerId());
-            }
-            actuator->HandleTouchMoveEvent();
-        }
-    };
-    auto touchListener = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchTask));
-    gestureHub->AddTouchEvent(touchListener);
     std::vector<RefPtr<NGGestureRecognizer>> recognizers { longPressRecognizer_, panRecognizer_ };
     SequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
     SequencedRecognizer_->RemainChildOnResetStatus();
     previewLongPressRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+    previewLongPressRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     longPressRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+    longPressRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     SequencedRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     SequencedRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     result.emplace_back(SequencedRecognizer_);
     result.emplace_back(previewLongPressRecognizer_);
+}
+
+void DragEventActuator::ResetDragStatus()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->RemovePreviewBadgeNode();
+    overlayManager->RemoveGatherNode();
+    overlayManager->RemovePixelMap();
+    overlayManager->RemoveEventColumn();
+    overlayManager->RemoveFilter();
 }
 
 void DragEventActuator::SetDragDampStartPointInfo(const Point& point, int32_t pointerId)
@@ -713,23 +730,33 @@ void DragEventActuator::HandleDragDampingMove(const Point& point, int32_t pointe
         return;
     }
     auto startPoint = dragDropManager->GetDragDampStartPoint();
-    auto delta = Point(point.GetX(), point.GetY()) - startPoint;
     //get the number with VP unit
     auto distance = SystemProperties::GetDragStartPanDistanceThreshold();
-    if (delta.GetDistance() > Dimension(distance, DimensionUnit::VP).ConvertToPx()) {
+    auto dragPanDistance = Dimension(distance, DimensionUnit::VP).ConvertToPx();
+    auto dragStartDampingRatio = SystemProperties::GetDragStartDampingRatio();
+    auto dragTotalDistance = dragDropManager->GetUpdateDragMovePosition();
+    auto delta = Offset(dragTotalDistance.GetX(), dragTotalDistance.GetY());
+    // delta.GetDistance(): pixelMap real move distance
+    if (delta.GetDistance() > dragPanDistance * dragStartDampingRatio) {
         return;
     }
-    auto dragStartDampingRatio = SystemProperties::GetDragStartDampingRatio();
+    // linear decrease for menu scale from 100% to 95% within drag damping range
+    auto previewMenuSacle = 1.0f - delta.GetDistance() / (dragPanDistance * dragStartDampingRatio) * MENU_DRAG_SCALE;
     auto updateOffset =
         OffsetF(dragStartDampingRatio * point.GetX() + (1 - dragStartDampingRatio) * startPoint.GetX(),
             dragStartDampingRatio * point.GetY() + (1 - dragStartDampingRatio) * startPoint.GetY());
     if (isRedragStart && !isRedragStart_) {
         isRedragStart_ = true;
-        SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, true);
+        SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, true);
+        UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, true);
+        dragDropManager->UpdateDragMovePosition(updateOffset, true);
     } else {
-        SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, false);
+        SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, false);
+        UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, false);
+        dragDropManager->UpdateDragMovePosition(updateOffset, false);
     }
     SubwindowManager::GetInstance()->UpdatePreviewPosition();
+    UpdatePreviewPosition();
 }
 
 void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
@@ -1087,8 +1114,8 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     imageNode->CreateLayoutTask();
     FlushSyncGeometryNodeTasks();
     auto focusHub = frameNode->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    bool hasContextMenu = focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
+    bool hasContextMenu = focusHub == nullptr
+                              ? false : focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
     ShowPixelMapAnimation(imageNode, frameNode, hasContextMenu);
     TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent set pixelMap success.");
     SetPreviewDefaultAnimateProperty(imageNode);
@@ -1272,6 +1299,43 @@ void DragEventActuator::HideFilter()
     manager->RemoveFilterAnimation();
 }
 
+void DragEventActuator::HideMenu(int32_t targetId)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto manager = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    auto menuNode = manager->GetMenuNode(targetId);
+    CHECK_NULL_VOID(menuNode);
+    TAG_LOGI(AceLogTag::ACE_DRAG, "will hide menu, tagetNode id %{public}d menuNode id %{public}d.",
+        targetId, menuNode->GetId());
+    manager->HideMenu(menuNode, targetId);
+}
+
+void DragEventActuator::UpdateHideMenuOffsetNG(const NG::OffsetF& offset, float menuScale, bool isRedragStart)
+{
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlay = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    if (overlay->IsContextMenuDragHideFinished()) {
+        return;
+    }
+    overlay->UpdateContextMenuDisappearPosition(offset, menuScale, isRedragStart);
+}
+
+void DragEventActuator::UpdatePreviewPosition()
+{
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlay = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    if (overlay->GetHasPixelMap()) {
+        return;
+    }
+    overlay->UpdatePixelMapPosition(true);
+}
+
 void DragEventActuator::HidePixelMap(bool startDrag, double x, double y, bool showAnimation)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -1312,6 +1376,10 @@ void DragEventActuator::BindClickEvent(const RefPtr<FrameNode>& columnNode)
         } else {
             actuator->HidePixelMap();
             actuator->HideFilter();
+            auto frameNode = gestureHub->GetFrameNode();
+            if (frameNode) {
+                actuator->HideMenu(frameNode->GetId());
+            }
         }
     };
     auto columnGestureHub = columnNode->GetOrCreateGestureEventHub();
@@ -1869,10 +1937,6 @@ bool DragEventActuator::IsBelongToMultiItemNode(const RefPtr<FrameNode>& frameNo
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_RETURN(dragDropManager, false);
     if (IsSelectedItemNode(frameNode)) {
-        if (dragDropManager->HasGatherNode()) {
-            return true;
-        }
-        dragDropManager->SetHasGatherNode(true);
         isSelectedItemNode_ = true;
         FindItemParentNode(frameNode);
         return false;
@@ -1949,6 +2013,44 @@ bool DragEventActuator::IsNeedGather() const
         return false;
     }
     return true;
+}
+
+void DragEventActuator::AddTouchListener(const TouchRestrict& touchRestrict)
+{
+    CHECK_NULL_VOID(userCallback_);
+    auto gestureHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_VOID(gestureHub);
+    auto frameNode = gestureHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (!IsGlobalStatusSuitableForDragging() || !IsCurrentNodeStatusSuitableForDragging(frameNode, touchRestrict)) {
+        gestureHub->RemoveTouchEvent(touchListener_);
+        return;
+    }
+    auto focusHub = frameNode->GetFocusHub();
+    bool hasContextMenuUsingGesture = focusHub ?
+        focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU) : false;
+    auto touchTask = [hasContextMenuUsingGesture, weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto actuator = weak.Upgrade();
+        CHECK_NULL_VOID(actuator);
+        if (info.GetTouches().empty()) {
+            return;
+        }
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+            actuator->HandleTouchUpEvent();
+        } else if (info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
+            actuator->HandleTouchCancelEvent();
+        } else if (info.GetTouches().front().GetTouchType() == TouchType::MOVE) {
+            if (hasContextMenuUsingGesture) {
+                auto point = Point(info.GetTouches().front().GetGlobalLocation().GetX(),
+                                   info.GetTouches().front().GetGlobalLocation().GetY());
+                actuator->HandleDragDampingMove(point, info.GetTouches().front().GetFingerId());
+            }
+            actuator->HandleTouchMoveEvent();
+        }
+    };
+    gestureHub->RemoveTouchEvent(touchListener_);
+    touchListener_ = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchTask));
+    gestureHub->AddTouchEvent(touchListener_);
 }
 
 void DragEventActuator::HandleTouchUpEvent()

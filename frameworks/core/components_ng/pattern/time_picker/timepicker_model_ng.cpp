@@ -32,8 +32,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float PICKER_MAXFONTSCALE = 1.75f;
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
-constexpr uint8_t PIXEL_ROUND = 18;
 } // namespace
 void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool hasSecond)
 {
@@ -92,7 +92,6 @@ void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool h
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateLayoutWeight(1);
         stackHourNode->MountToParent(timePickerNode);
-        hourColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
     if (!hasMinuteNode) {
         auto stackMinuteNode = CreateStackNode();
@@ -107,7 +106,6 @@ void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool h
         auto language = AceApplicationInfo::GetInstance().GetLanguage();
         language == "ug" ? stackMinuteNode->MountToParent(timePickerNode, 0)
                             : stackMinuteNode->MountToParent(timePickerNode);
-        minuteColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
     timePickerRowPattern->SetHasSecond(hasSecond);
     stack->Push(timePickerNode);
@@ -193,7 +191,6 @@ RefPtr<FrameNode> TimePickerModelNG::CreateFrameNode(int32_t nodeId)
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateLayoutWeight(1);
         stackHourNode->MountToParent(timePickerNode);
-        hourColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
     if (!hasMinuteNode) {
         auto stackMinuteNode = CreateStackNode();
@@ -206,7 +203,6 @@ RefPtr<FrameNode> TimePickerModelNG::CreateFrameNode(int32_t nodeId)
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateLayoutWeight(1);
         stackMinuteNode->MountToParent(timePickerNode);
-        minuteColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
     timePickerRowPattern->SetHasSecond(false);
     return timePickerNode;
@@ -218,6 +214,14 @@ void TimePickerModelNG::SetSelectedTime(const PickerTime& value)
     CHECK_NULL_VOID(frameNode);
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     timePickerRowPattern->SetSelectedTime(value);
+}
+
+void TimePickerModelNG::SetIsEnableHapticFeedback(bool isEnableHapticFeedback)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    timePickerRowPattern->SetIsEnableHaptic(isEnableHapticFeedback);
 }
 
 void TimePickerModelNG::SetHour24(bool isUseMilitaryTime)
@@ -284,9 +288,11 @@ void TimePickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, 
     CHECK_NULL_VOID(theme);
     auto disappearStyle = theme->GetDisappearOptionStyle();
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearFontSize, value.fontSize.value());
+        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearFontSize,
+            ConvertFontScaleValue(value.fontSize.value()));
     } else {
-        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearFontSize, disappearStyle.GetFontSize());
+        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearFontSize,
+            ConvertFontScaleValue(disappearStyle.GetFontSize()));
     }
     ACE_UPDATE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, DisappearColor, value.textColor.value_or(disappearStyle.GetTextColor()));
@@ -303,9 +309,10 @@ void TimePickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& theme, con
     CHECK_NULL_VOID(theme);
     auto normalStyle = theme->GetOptionStyle(false, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontSize, value.fontSize.value());
+        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontSize, ConvertFontScaleValue(value.fontSize.value()));
     } else {
-        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontSize, normalStyle.GetFontSize());
+        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontSize,
+            ConvertFontScaleValue(normalStyle.GetFontSize()));
     }
     ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Color, value.textColor.value_or(normalStyle.GetTextColor()));
     ACE_UPDATE_LAYOUT_PROPERTY(
@@ -321,9 +328,11 @@ void TimePickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, c
     CHECK_NULL_VOID(theme);
     auto selectedStyle = theme->GetOptionStyle(true, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedFontSize, value.fontSize.value());
+        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedFontSize,
+            ConvertFontScaleValue(value.fontSize.value()));
     } else {
-        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedFontSize, selectedStyle.GetFontSize());
+        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedFontSize,
+            ConvertFontScaleValue(selectedStyle.GetFontSize()));
     }
     ACE_UPDATE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, SelectedColor, value.textColor.value_or(selectedStyle.GetTextColor()));
@@ -475,10 +484,12 @@ void TimePickerModelNG::SetDisappearTextStyle(
     auto disappearStyle = theme->GetDisappearOptionStyle();
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            TimePickerLayoutProperty, DisappearFontSize, value.fontSize.value(), frameNode);
+            TimePickerLayoutProperty, DisappearFontSize,
+            ConvertFontScaleValue(value.fontSize.value()), frameNode);
     } else {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            TimePickerLayoutProperty, DisappearFontSize, disappearStyle.GetFontSize(), frameNode);
+            TimePickerLayoutProperty, DisappearFontSize,
+            ConvertFontScaleValue(disappearStyle.GetFontSize()), frameNode);
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, DisappearColor,
@@ -499,9 +510,11 @@ void TimePickerModelNG::SetNormalTextStyle(
     CHECK_NULL_VOID(theme);
     auto normalStyle = theme->GetOptionStyle(false, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontSize, value.fontSize.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontSize,
+            ConvertFontScaleValue(value.fontSize.value()), frameNode);
     } else {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontSize, normalStyle.GetFontSize(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontSize,
+            ConvertFontScaleValue(normalStyle.GetFontSize()), frameNode);
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, Color, value.textColor.value_or(normalStyle.GetTextColor()), frameNode);
@@ -519,10 +532,12 @@ void TimePickerModelNG::SetSelectedTextStyle(
     auto selectedStyle = theme->GetOptionStyle(true, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            TimePickerLayoutProperty, SelectedFontSize, value.fontSize.value(), frameNode);
+            TimePickerLayoutProperty, SelectedFontSize,
+            ConvertFontScaleValue(value.fontSize.value()), frameNode);
     } else {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            TimePickerLayoutProperty, SelectedFontSize, selectedStyle.GetFontSize(), frameNode);
+            TimePickerLayoutProperty, SelectedFontSize,
+            ConvertFontScaleValue(selectedStyle.GetFontSize()), frameNode);
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, SelectedColor,
@@ -540,7 +555,8 @@ void TimePickerModelNG::SetSelectedTextStyle(
 void TimePickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme)
 {
     auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedFontSize, selectedStyle.GetFontSize(), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedFontSize,
+        ConvertFontScaleValue(selectedStyle.GetFontSize()), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedColor, selectedStyle.GetTextColor(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedWeight, selectedStyle.GetFontWeight(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
@@ -550,7 +566,8 @@ void TimePickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const
 
     auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-        TimePickerLayoutProperty, DisappearFontSize, disappearStyle.GetFontSize(), frameNode);
+        TimePickerLayoutProperty, DisappearFontSize,
+        ConvertFontScaleValue(disappearStyle.GetFontSize()), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TimePickerLayoutProperty, DisappearColor, disappearStyle.GetTextColor(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
@@ -561,7 +578,8 @@ void TimePickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const
         TimePickerLayoutProperty, DisappearFontStyle, disappearStyle.GetFontStyle(), frameNode);
 
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontSize, normalStyle.GetFontSize(), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontSize,
+        ConvertFontScaleValue(normalStyle.GetFontSize()), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Color, normalStyle.GetTextColor(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Weight, normalStyle.GetFontWeight(), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontFamily, normalStyle.GetFontFamilies(), frameNode);
@@ -574,6 +592,12 @@ void TimePickerModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& co
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_VOID(timePickerRowPattern);
     timePickerRowPattern->SetBackgroundColor(color);
+}
+
+void TimePickerModelNG::SetIsEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TimePickerLayoutProperty, IsEnableHapticFeedback, isEnableHapticFeedback, frameNode);
 }
 
 void TimePickerModelNG::SetHour24(FrameNode* frameNode, bool isUseMilitaryTime)
@@ -613,7 +637,8 @@ PickerTextStyle TimePickerModelNG::getDisappearTextStyle(FrameNode* frameNode)
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetDisappearOptionStyle();
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        TimePickerLayoutProperty, DisappearFontSize, pickerTextStyle.fontSize, frameNode, style.GetFontSize());
+        TimePickerLayoutProperty, DisappearFontSize, pickerTextStyle.fontSize, frameNode,
+        ConvertFontScaleValue(style.GetFontSize()));
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         TimePickerLayoutProperty, DisappearColor, pickerTextStyle.textColor, frameNode, style.GetTextColor());
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -635,7 +660,8 @@ PickerTextStyle TimePickerModelNG::getNormalTextStyle(FrameNode* frameNode)
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetOptionStyle(false, false);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        TimePickerLayoutProperty, FontSize, pickerTextStyle.fontSize, frameNode, style.GetFontSize());
+        TimePickerLayoutProperty, FontSize, pickerTextStyle.fontSize, frameNode,
+        ConvertFontScaleValue(style.GetFontSize()));
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         TimePickerLayoutProperty, Color, pickerTextStyle.textColor, frameNode, style.GetTextColor());
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -657,7 +683,8 @@ PickerTextStyle TimePickerModelNG::getSelectedTextStyle(FrameNode* frameNode)
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetOptionStyle(true, false);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        TimePickerLayoutProperty, SelectedFontSize, pickerTextStyle.fontSize, frameNode, style.GetFontSize());
+        TimePickerLayoutProperty, SelectedFontSize, pickerTextStyle.fontSize, frameNode,
+        ConvertFontScaleValue(style.GetFontSize()));
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         TimePickerLayoutProperty, SelectedColor, pickerTextStyle.textColor, frameNode, style.GetTextColor());
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -685,10 +712,34 @@ uint32_t TimePickerModelNG::getTimepickerBackgroundColor(FrameNode* frameNode)
     return timePickerRowPattern->GetBackgroundColor().GetValue();
 }
 
+int32_t TimePickerModelNG::getEnableHapticFeedback(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    return frameNode->GetLayoutProperty<TimePickerLayoutProperty>()->GetIsEnableHapticFeedbackValue(false);
+}
+
 int32_t TimePickerModelNG::getTimepickerUseMilitaryTime(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
     return frameNode->GetLayoutProperty<TimePickerLayoutProperty>()->GetIsUseMilitaryTimeValue(false);
+}
+
+const Dimension TimePickerModelNG::ConvertFontScaleValue(const Dimension& fontSizeValue)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, fontSizeValue);
+
+    float fontScaleValue = pipeline->GetFontScale();
+    if (fontScaleValue == 0) {
+        return fontSizeValue;
+    }
+
+    if (GreatOrEqualCustomPrecision(fontScaleValue, PICKER_MAXFONTSCALE)) {
+        if (fontSizeValue.Unit() != DimensionUnit::VP) {
+            return Dimension(fontSizeValue / fontScaleValue);
+        }
+    }
+    return fontSizeValue;
 }
 
 } // namespace OHOS::Ace::NG

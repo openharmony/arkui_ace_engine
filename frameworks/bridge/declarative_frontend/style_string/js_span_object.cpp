@@ -694,9 +694,9 @@ RefPtr<ImageSpan> JSImageAttachment::ParseJsImageSpan(const JSRef<JSObject>& obj
 ImageSpanOptions JSImageAttachment::CreateImageOptions(const JSRef<JSObject>& obj)
 {
     ImageSpanOptions options;
-    auto container = Container::Current();
+    auto container = Container::CurrentSafely();
     CHECK_NULL_RETURN(container, options);
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, options);
     bool isCard = context->IsFormRender() && !container->IsDynamicRender();
 
@@ -968,7 +968,9 @@ bool JSCustomSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
     if (!customSpan) {
         return false;
     }
-    return &(customSpan->customSpanObj_) == &customSpanObj_;
+    return (customSpan->customSpanObj_)
+        ->GetLocalHandle()
+        ->IsStrictEquals(customSpanObj_->GetEcmaVM(), customSpanObj_->GetLocalHandle());
 }
 
 std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> JSCustomSpan::ParseOnMeasureFunc(
@@ -1438,5 +1440,39 @@ RefPtr<ParagraphStyleSpan>& JSParagraphStyleSpan::GetParagraphStyleSpan()
 void JSParagraphStyleSpan::SetParagraphStyleSpan(const RefPtr<ParagraphStyleSpan>& paragraphStyleSpan)
 {
     paragraphStyleSpan_ = paragraphStyleSpan;
+}
+
+// JSExtSpan
+JSExtSpan::JSExtSpan(JSRef<JSObject> extSpanObj) : extSpanObj_(extSpanObj) {}
+
+JSExtSpan::JSExtSpan(JSRef<JSObject> extSpanObj, int32_t start, int32_t end)
+    : ExtSpan(start, end), extSpanObj_(extSpanObj)
+{}
+
+RefPtr<SpanBase> JSExtSpan::GetSubSpan(int32_t start, int32_t end)
+{
+    RefPtr<SpanBase> spanBase = MakeRefPtr<JSExtSpan>(extSpanObj_, start, end);
+    return spanBase;
+}
+
+bool JSExtSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
+{
+    auto extSpan = DynamicCast<JSExtSpan>(other);
+    if (!extSpan) {
+        return false;
+    }
+    return (extSpan->extSpanObj_)
+        ->GetLocalHandle()
+        ->IsStrictEquals(extSpanObj_->GetEcmaVM(), extSpanObj_->GetLocalHandle());
+}
+
+void JSExtSpan::SetJsExtSpanObject(const JSRef<JSObject>& extSpanObj)
+{
+    extSpanObj_ = extSpanObj;
+}
+
+JSRef<JSObject>& JSExtSpan::GetJsExtSpanObject()
+{
+    return extSpanObj_;
 }
 } // namespace OHOS::Ace::Framework

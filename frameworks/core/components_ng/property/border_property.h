@@ -92,6 +92,10 @@ struct BorderRadiusPropertyT<Dimension> {
     std::optional<Dimension> radiusTopRight;
     std::optional<Dimension> radiusBottomRight;
     std::optional<Dimension> radiusBottomLeft;
+    std::optional<Dimension> radiusTopStart;
+    std::optional<Dimension> radiusTopEnd;
+    std::optional<Dimension> radiusBottomEnd;
+    std::optional<Dimension> radiusBottomStart;
     bool multiValued = true;
 
     BorderRadiusPropertyT<Dimension>() = default;
@@ -190,6 +194,8 @@ struct BorderColorProperty {
     std::optional<Color> rightColor;
     std::optional<Color> topColor;
     std::optional<Color> bottomColor;
+    std::optional<Color> startColor;
+    std::optional<Color> endColor;
     bool multiValued = false;
 
     void SetColor(const Color& borderColor)
@@ -262,6 +268,8 @@ struct BorderWidthPropertyT<Dimension> {
     std::optional<Dimension> topDimen;
     std::optional<Dimension> rightDimen;
     std::optional<Dimension> bottomDimen;
+    std::optional<Dimension> startDimen;
+    std::optional<Dimension> endDimen;
     bool multiValued = false;
 
     void SetBorderWidth(const Dimension& borderWidth);
@@ -272,6 +280,9 @@ struct BorderWidthPropertyT<Dimension> {
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson,
         const InspectorFilter& filter, bool isOutline = false) const;
+
+    void ToDashJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson,
+        const InspectorFilter& filter, const std::string& keyValue) const;
 
     std::string ToString() const;
 };

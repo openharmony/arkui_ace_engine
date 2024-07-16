@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -36,7 +37,6 @@ CanvasDrawFunction TimePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     auto theme = pipeline->GetTheme<PickerTheme>();
     auto dividerColor = theme->GetDividerColor();
 
-    auto dividerSpacing = pipeline->NormalizeToPx(theme->GetDividerSpacing());
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);
     auto frameRect = geometryNode->GetFrameRect();
@@ -48,6 +48,11 @@ CanvasDrawFunction TimePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     auto layoutProperty = pickerNode->GetLayoutProperty<TimePickerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
 
+    auto dividerSpacing = pipeline->NormalizeToPx(theme->GetDividerSpacing());
+    auto timePickerPattern = pickerNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_RETURN(timePickerPattern, nullptr);
+    auto fontScale = timePickerPattern->GetPaintDividerSpacing();
+    dividerSpacing = dividerSpacing * fontScale;
     return [weak = WeakClaim(this), dividerLineWidth = DIVIDER_LINE_WIDTH, layoutProperty, frameRect, dividerSpacing,
                dividerColor, enabled = enabled_](RSCanvas& canvas) {
         auto picker = weak.Upgrade();

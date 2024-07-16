@@ -39,14 +39,14 @@ typedef enum {
 } ArkUI_DismissReason;
 
 /**
-* @brief Invoked when the dialog box is closed.
-*
-* @since 12
-*/
+ * @brief Invoked when the dialog box is closed.
+ *
+ * @since 12
+ */
 typedef bool (*ArkUI_OnWillDismissEvent)(int32_t reason);
 
 /**
- * @brief 定义弹窗关闭事件对象。
+ * @brief Defines a struct for a dialog box dismiss event.
  *
  * @since 12
  */
@@ -221,51 +221,53 @@ typedef struct {
     int32_t (*close)(ArkUI_NativeDialogHandle handle);
 
     /**
-    * @brief 注册系统关闭自定义弹窗的监听事件。
+    * @brief Registers a listener for the dismiss event of the custom dialog box.
     *
-    * @param handle 指向自定义弹窗控制器的指针。
-    * @param userData 用户自定义数据指针。
-    * @param callback 监听自定义弹窗关闭的回调事件。
-    * @return 错误码。
-    *         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
-    *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} 函数参数异常。
+    * @param handle Indicates the pointer to the custom dialog box controller.
+    * @param userData Indicates the pointer to the custom data.
+    * @param callback Indicates the callback for the dismiss event of the custom dialog box.
+    * @return Returns the result code.
+    *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+    *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
     */
     int32_t (*registerOnWillDismissWithUserData)(
         ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event));
 } ArkUI_NativeDialogAPI_1;
 
 /**
- * @brief 设置是否需要屏蔽系统关闭弹窗行为，true表示屏蔽系统行为不关闭弹窗，false表示不屏蔽。
+ * @brief Sets whether to block the system behavior of dismissing a dialog box.
  *
- * @param event 弹窗关闭事件对象指针。
- * @param shouldBlockDismiss 实现需要屏蔽系统关闭弹窗行为。
+ * @param event Indicates the pointer to a dialog box dismiss event object.
+ * @param shouldBlockDismiss Indicates whether to block the system behavior of dismissing the dialog box. The value
+ *                           <b>true</b> means to block the system behavior, and <b>false</b> means the opposite.
  * @since 12
  */
-void OH_ArkUI_DialogDismissEvent_SetShouldBlockDismiss(ArkUI_DialogDismissEvent* event, bool shouldBlockDismiss);
+void ArkUI_DialogDismissEvent_SetShouldBlockDismiss(ArkUI_DialogDismissEvent* event, bool shouldBlockDismiss);
 
 /**
- * @brief 获取弹窗关闭事件对象中的用户自定义数据指针。
+ * @brief Obtains the pointer to user data in a dialog box dismiss event object.
  *
- * @param event 弹窗关闭事件对象指针。
+ * @param event Indicates the pointer to a dialog box dismiss event object.
  *
- * @return 用户自定义数据指针。
+ * @return Returns the pointer to user data.
  * @since 12
  */
-void* OH_ArkUI_DialogDismissEvent_GetUserData(ArkUI_DialogDismissEvent* event);
+void* ArkUI_DialogDismissEvent_GetUserData(ArkUI_DialogDismissEvent* event);
 
 /**
- * @brief 获取交互式关闭事件指针中的关闭原因。
+ * @brief Obtains the c from a dialog box dismiss event object.
  *
- * @param event 弹窗关闭事件对象指针。
+ * @param event Indicates the pointer to a dialog box dismiss event object.
  *
- * @return 关闭原因，如果event不存在返回-1。
- *         {@link DIALOG_DISMISS_BACK_PRESS} 对应点击三键back、左滑/右滑、键盘ESC关闭。
- *         {@link DIALOG_DISMISS_TOUCH_OUTSIDE} 点击遮障层时。
- *         {@link DIALOG_DISMISS_CLOSE_BUTTON} 点击关闭按钮。
- *         {@link DIALOG_DISMISS_SLIDE_DOWN} 下拉关闭。
+ * @return Returns the dismissal reason. Returns <b>-1</b> if an exception occurs.
+ *         {@link DIALOG_DISMISS_BACK_PRESS}: touching the Back button, swiping left or right on the screen, or
+ *                                            pressing the Esc key.
+ *         {@link DIALOG_DISMISS_TOUCH_OUTSIDE}: touching the mask.
+ *         {@link DIALOG_DISMISS_CLOSE_BUTTON}: touching the Close button.
+ *         {@link DIALOG_DISMISS_SLIDE_DOWN}: sliding down.
  * @since 12
  */
-int32_t OH_ArkUI_DialogDismissEvent_GetDismissReason(ArkUI_DialogDismissEvent* event);
+int32_t ArkUI_DialogDismissEvent_GetDismissReason(ArkUI_DialogDismissEvent* event);
 
 #ifdef __cplusplus
 };

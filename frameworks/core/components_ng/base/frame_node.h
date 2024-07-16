@@ -23,6 +23,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/rect_t.h"
+#include "base/geometry/ng/vector.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
@@ -65,6 +66,14 @@ class Pattern;
 class StateModifyTask;
 class UITask;
 struct DirtySwapConfig;
+
+struct CacheVisibleRectResult {
+    OffsetF windowOffset = OffsetF();
+    RectF visibleRect = RectF();
+    RectF innerVisibleRect = RectF();
+    VectorF cumulativeScale = {1.0f, 1.0f};
+    RectF frameRect = RectF();
+};
 
 // FrameNode will display rendering region in the screen.
 class ACE_FORCE_EXPORT FrameNode : public UINode, public LayoutWrapper {
@@ -165,7 +174,6 @@ public:
 
     void ProcessPropertyDiff()
     {
-        // TODO: modify done need to optimize.
         if (isPropertyDiffMarked_) {
             MarkModifyDone();
             MarkDirtyNode();
@@ -228,8 +236,10 @@ public:
         }
     }
 
-    void SetVisibleAreaInnerCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback)
+    void SetVisibleAreaInnerCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback,
+        bool isCalculateInnerClip = false)
     {
+        isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
         eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, false);
     }
 
@@ -238,7 +248,7 @@ public:
         eventHub_->CleanVisibleAreaCallback(false);
     }
 
-    void TriggerVisibleAreaChangeCallback(bool forceDisappear = false);
+    void TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceDisappear = false);
 
     void SetOnSizeChangeCallback(OnSizeChangedFunc&& callback);
 
@@ -347,12 +357,6 @@ public:
     HitTestResult AxisTest(
         const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult) override;
 
-    void CheckSecurityComponentStatus(std::vector<RectF>& rect);
-
-    bool HaveSecurityComponent();
-
-    bool IsSecurityComponent();
-
     void AnimateHoverEffect(bool isHovered) const;
 
     bool IsAtomicNode() const override;
@@ -456,6 +460,8 @@ public:
         AccessibilityEventType eventType, WindowsContentChangeTypes windowsContentChangeType =
                                               WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID) const;
 
+    void OnAccessibilityEventForVirtualNode(AccessibilityEventType eventType, int64_t accessibilityId);
+
     void OnAccessibilityEvent(
         AccessibilityEventType eventType, std::string beforeText, std::string latestContent);
 
@@ -488,7 +494,6 @@ public:
     void RemoveLastHotZoneRect() const;
 
     virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, int32_t sourceType);
-    bool CheckRectIntersect(const RectF& dest, std::vector<RectF>& origin);
 
     bool IsLayoutDirtyMarked() const
     {
@@ -742,17 +747,13 @@ public:
         return isActive_;
     }
 
-    void SetActive(bool active = true) override;
-
-    bool GetBypass() const
-    {
-        return bypass_;
-    }
+    void SetActive(bool active = true, bool needRebuildRenderContext = false) override;
 
     bool IsOutOfLayout() const override
     {
         return renderContext_->HasPosition() || renderContext_->HasPositionEdges();
     }
+    void ProcessSafeAreaPadding();
 
     bool SkipMeasureContent() const override;
     float GetBaselineDistance() const override;
@@ -883,6 +884,7 @@ public:
     }
 
     void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
+    void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect) const;
 
     void AttachContext(PipelineContext* context, bool recursive = false) override;
     void DetachContext(bool recursive = false) override;
@@ -920,15 +922,20 @@ public:
     }
 
     bool CheckAccessibilityLevelNo() const {
-        auto property = GetAccessibilityProperty<NG::AccessibilityProperty>();
-        if (property) {
-            auto level = property->GetAccessibilityLevel();
-            if (level == NG::AccessibilityProperty::Level::NO ||
-                level == NG::AccessibilityProperty::Level::NO_HIDE_DESCENDANTS) {
-                return true;
-            }
-        }
         return false;
+    }
+
+    RectF GetVirtualNodeTransformRectRelativeToWindow()
+    {
+        auto parentUinode = GetVirtualNodeParent().Upgrade();
+        CHECK_NULL_RETURN(parentUinode, RectF {});
+        auto parentFrame = AceType::DynamicCast<FrameNode>(parentUinode);
+        CHECK_NULL_RETURN(parentFrame, RectF {});
+        auto parentRect = parentFrame->GetTransformRectRelativeToWindow();
+        auto currentRect = GetTransformRectRelativeToWindow();
+        currentRect.SetTop(currentRect.Top() + parentRect.Top());
+        currentRect.SetLeft(currentRect.Left() + parentRect.Left());
+        return currentRect;
     }
 
     void SetIsUseTransitionAnimator(bool isUseTransitionAnimator)
@@ -940,7 +947,7 @@ public:
     {
         return isUseTransitionAnimator_;
     }
-
+    
     // this method will check the cache state and return the cached revert matrix preferentially,
     // but the caller can pass in true to forcible refresh the cache
     Matrix4& GetOrRefreshRevertMatrixFromCache(bool forceRefresh = false);
@@ -963,6 +970,26 @@ public:
     void MarkAndCheckNewOpIncNode();
     ChildrenListWithGuard GetAllChildren();
     OPINC_TYPE_E FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth);
+    void GetInspectorValue() override;
+    void NotifyWebPattern(bool isRegister) override;
+
+    FrameNodeChangeInfoFlag GetChangeInfoFlag()
+    {
+        return changeInfoFlag_;
+    }
+
+    void ClearChangeInfoFlag()
+    {
+        changeInfoFlag_ = FRAME_NODE_CHANGE_INFO_NONE;
+    }
+
+    void OnSyncGeometryFrameFinish(const RectF& paintRect);
+    void AddFrameNodeChangeInfoFlag(FrameNodeChangeInfoFlag changeFlag = FRAME_NODE_CHANGE_INFO_NONE);
+    void RegisterNodeChangeListener();
+    void UnregisterNodeChangeListener();
+    void ProcessFrameNodeChangeFlag();
+    void OnNodeTransformInfoUpdate(bool changed);
+    void OnNodeTransitionInfoUpdate();
 
 protected:
     void DumpInfo() override;
@@ -1014,7 +1041,6 @@ private:
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
     void DumpOnSizeChangeInfo();
     bool CheckAutoSave() override;
-    void FocusToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void MouseToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void TouchToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
@@ -1022,11 +1048,15 @@ private:
     bool GetTouchable() const;
     bool OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config);
 
+    void ProcessVisibleAreaChangeEvent(const RectF& visibleRect, const RectF& frameRect,
+        const std::vector<double>& visibleAreaRatios, VisibleCallbackInfo& visibleAreaCallback, bool isUser);
     void ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
         VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio,
-        double lastVisibleRatio, bool isThrottled = false);
+        double lastVisibleRatio, bool isThrottled = false, bool isInner = false);
     void ProcessThrottledVisibleCallback();
     bool IsFrameDisappear();
+    bool IsFrameDisappear(uint64_t timestamp);
+    bool IsFrameAncestorDisappear(uint64_t timestamp);
     void ThrottledVisibleTask();
 
     void OnPixelRoundFinish(const SizeF& pixelGridRoundSize);
@@ -1063,6 +1093,11 @@ private:
     void AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent);
 
     RectF ApplyFrameNodeTranformToRect(const RectF& rect, const RefPtr<FrameNode>& parent) const;
+
+    CacheVisibleRectResult GetCacheVisibleRect(uint64_t timestamp);
+
+    CacheVisibleRectResult CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
+        const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp);
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
@@ -1110,12 +1145,13 @@ private:
     bool exclusiveEventForChild_ = false;
     bool isActive_ = false;
     bool isResponseRegion_ = false;
-    bool bypass_ = false;
     bool isLayoutComplete_ = false;
     bool isFirstBuilding_ = true;
 
     double lastVisibleRatio_ = 0.0;
+    double lastInnerVisibleRatio_ = 0.0;
     double lastVisibleCallbackRatio_ = 0.0;
+    double lastInnerVisibleCallbackRatio_ = 0.0;
     double lastThrottledVisibleRatio_ = 0.0;
     double lastThrottledVisibleCbRatio_ = 0.0;
     int64_t lastThrottledTriggerTime_ = 0;
@@ -1148,6 +1184,7 @@ private:
     bool isDisallowDropForcedly_ = false;
     bool isGeometryTransitionIn_ = false;
     bool isLayoutNode_ = false;
+    bool isCalculateInnerVisibleRectClip_ = false;
 
     bool isUseTransitionAnimator_ = false;
 
@@ -1161,6 +1198,8 @@ private:
 
     std::pair<uint64_t, OffsetF> cachedGlobalOffset_ = { 0, OffsetF() };
     std::pair<uint64_t, OffsetF> cachedTransformRelativeOffset_ = { 0, OffsetF() };
+    std::pair<uint64_t, bool> cachedIsFrameDisappear_ = { 0, false };
+    std::pair<uint64_t, CacheVisibleRectResult> cachedVisibleRectResult_ = { 0, CacheVisibleRectResult() };
 
     struct onSizeChangeDumpInfo {
         int64_t onSizeChangeTimeStamp;
@@ -1169,6 +1208,8 @@ private:
     };
     std::vector<onSizeChangeDumpInfo> onSizeChangeDumpInfos;
     std::list<WeakPtr<FrameNode>> predictLayoutNode_;
+    FrameNodeChangeInfoFlag changeInfoFlag_ = FRAME_NODE_CHANGE_INFO_NONE;
+    std::optional<RectF> syncedFramePaintRect_;
 
     friend class RosenRenderContext;
     friend class RenderContext;

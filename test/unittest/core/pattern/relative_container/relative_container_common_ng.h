@@ -28,6 +28,7 @@ public:
         const HorizontalAlign& horizontalRule, std::map<AlignDirection, AlignRule>& alignRules);
     static void AddAlignRule(const std::string& id, const AlignDirection& direction, const VerticalAlign& verticalRule,
         std::map<AlignDirection, AlignRule>& alignRules);
+    static AlignDirection AlignDirectionRtl(const AlignDirection& direction);
 };
 } // namespace OHOS::Ace
 

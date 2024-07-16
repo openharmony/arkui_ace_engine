@@ -515,10 +515,7 @@ bool WebClientImpl::OnFileSelectorShow(
 
 void WebClientImpl::OnResource(const std::string& url)
 {
-    auto delegate = webDelegate_.Upgrade();
-    CHECK_NULL_VOID(delegate);
-    ContainerScope scope(delegate->GetInstanceId());
-    auto task = Container::CurrentTaskExecutor();
+    auto task = Container::CurrentTaskExecutorSafely();
     if (task == nullptr) {
         return;
     }
@@ -816,6 +813,7 @@ void WebClientImpl::OnWindowExitByJS()
 
 void WebClientImpl::OnPageVisible(const std::string& url)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebClientImpl::OnPageVisible override enter");
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());
@@ -1208,5 +1206,21 @@ void WebClientImpl::KeyboardReDispatch(
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());
     delegate->KeyboardReDispatch(event, isUsed);
+}
+
+void WebClientImpl::OnCursorUpdate(double x, double y, double width, double height)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnCursorUpdate(x, y, width, height);
+}
+
+void WebClientImpl::ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->ReportDynamicFrameLossEvent(sceneId, isStart);
 }
 } // namespace OHOS::Ace

@@ -101,6 +101,10 @@ public:
         navigationMode_ = navigationMode;
     }
 
+    bool IsFoldStateChange();
+
+    void UpdateFoldState();
+
     void SetNavigationStack(const RefPtr<NavigationStack>& navigationStack);
 
     const RefPtr<NavigationStack>& GetNavigationStack()
@@ -383,6 +387,16 @@ public:
     bool IsTopNavDestination(const RefPtr<UINode>& node) const;
     void TryRestoreSystemBarStyle(const RefPtr<WindowManager>& windowManager);
 
+    bool IsFinishInteractiveAnimation() const
+    {
+        return isFinishInteractiveAnimation_;
+    }
+
+    bool IsCurTopNewInstance() const
+    {
+        return isCurTopNewInstance_;
+    }
+
 private:
     void UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host);
     void UpdateSystemBarStyleOnFullPageStateChange(const RefPtr<WindowManager>& windowManager);
@@ -411,13 +425,14 @@ private:
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
     RefPtr<RenderContext> GetTitleBarRenderContext();
     void DoAnimation(NavigationMode usrNavigationMode);
-    void RecoveryToLastStack();
+    void RecoveryToLastStack(const RefPtr<NavDestinationGroupNode>& preTopDestination,
+        const RefPtr<NavDestinationGroupNode>& newTopDestination);
     RefPtr<UINode> GenerateUINodeByIndex(int32_t index);
     void DoNavbarHideAnimation(const RefPtr<NavigationGroupNode>& hostNode);
     RefPtr<FrameNode> GetDividerNode() const;
     void FireInterceptionEvent(bool isBefore,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath);
-    void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart();
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
@@ -466,7 +481,7 @@ private:
     std::function<void(std::string)> builder_;
     RefPtr<NavigationStack> navigationStack_;
     RefPtr<InputEvent> hoverEvent_;
-    RefPtr<DragEvent> dragEvent_;
+    RefPtr<PanEvent> panEvent_;
     RefPtr<NavigationTransitionProxy> currentProxy_;
     RectF dragRect_;
     WeakPtr<FrameNode> pageNode_;
@@ -494,7 +509,9 @@ private:
     bool isInDividerDrag_ = false;
     bool isDividerDraggable_ = true;
     bool isAnimated_ = false;
+    FoldStatus currentfoldStatus_ = FoldStatus::UNKNOWN;  // only used for mode-switch animation
     bool isReplace_ = false;
+    bool isFinishInteractiveAnimation_ = true;
     int32_t lastPreIndex_ = false;
     std::shared_ptr<NavigationController> navigationController_;
     std::map<int32_t, std::function<void(bool)>> onStateChangeMap_;
@@ -505,6 +522,7 @@ private:
     WeakPtr<UINode> parentNode_;
     int32_t preStackSize_ = 0;
     bool isRightToLeft_ = false;
+    bool isCurTopNewInstance_ = false;
 };
 
 } // namespace OHOS::Ace::NG

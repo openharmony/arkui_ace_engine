@@ -25,8 +25,10 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
@@ -66,6 +68,54 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t INVLID_VALUE = -1;
+
+int32_t WriteStringToBuffer(const std::string& src, char* buffer, int32_t bufferSize, int32_t* writeLen)
+{
+    CHECK_NULL_RETURN(buffer, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(writeLen, ERROR_CODE_PARAM_INVALID);
+    if (src.empty()) {
+        return ERROR_CODE_NO_ERROR;
+    }
+    int32_t srcLength = static_cast<int32_t>(src.length());
+    if (bufferSize - 1 < srcLength) {
+        *writeLen = srcLength == INT32_MAX ? INT32_MAX : srcLength + 1;
+        return ERROR_CODE_NATIVE_IMPL_BUFFER_SIZE_ERROR;
+    }
+    src.copy(buffer, srcLength);
+    buffer[srcLength] = '\0';
+    *writeLen = srcLength;
+    return ERROR_CODE_NO_ERROR;
+}
+
+std::shared_ptr<NavDestinationInfo> GetNavDestinationInfoByNode(ArkUINodeHandle node)
+{
+    FrameNode* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, nullptr);
+    return NG::UIObserverHandler::GetInstance().GetNavigationState(Ace::AceType::Claim<FrameNode>(currentNode));
+}
+
+std::shared_ptr<RouterPageInfoNG> GetRouterPageInfoByNode(ArkUINodeHandle node)
+{
+    FrameNode* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, nullptr);
+    return NG::UIObserverHandler::GetInstance().GetRouterPageState(Ace::AceType::Claim<FrameNode>(currentNode));
+}
+
+RefPtr<NavigationStack> GetNavigationStackByNode(ArkUINodeHandle node)
+{
+    FrameNode* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, nullptr);
+    auto pipeline = currentNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto navigationMgr = pipeline->GetNavigationManager();
+    CHECK_NULL_RETURN(navigationMgr, nullptr);
+    auto result = navigationMgr->GetNavigationInfo(Ace::AceType::Claim<FrameNode>(currentNode));
+    CHECK_NULL_RETURN(result, nullptr);
+    return result->pathStack.Upgrade();
+}
+} // namespace
 
 ArkUI_Int64 GetUIState(ArkUINodeHandle node)
 {
@@ -149,7 +199,13 @@ void SetCustomCallback(ArkUIVMContext context, ArkUINodeHandle node, ArkUI_Int32
 
 ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 flags)
 {
-    auto* node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
+    ArkUINodeHandle node = nullptr;
+    if (flags == ARKUI_NODE_FLAG_C) {
+        ContainerScope Scope(Container::CurrentIdSafelyWithCheck());
+        node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
+    } else {
+        node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
+    }
     return node;
 }
 
@@ -306,6 +362,10 @@ const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextInputContentSizeChange,
     NodeModifier::SetOnTextInputInputFilterError,
     NodeModifier::SetTextInputOnTextContentScroll,
+    NodeModifier::SetTextInputOnWillInsert,
+    NodeModifier::SetTextInputOnDidInsert,
+    NodeModifier::SetTextInputOnWillDelete,
+    NodeModifier::SetTextInputOnDidDelete,
 };
 
 const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
@@ -318,6 +378,10 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextAreaContentSizeChange,
     NodeModifier::SetOnTextAreaInputFilterError,
     NodeModifier::SetTextAreaOnTextContentScroll,
+    NodeModifier::SetTextAreaOnWillInsertValue,
+    NodeModifier::SetTextAreaOnDidInsertValue,
+    NodeModifier::SetTextAreaOnWillDeleteValue,
+    NodeModifier::SetTextAreaOnDidDeleteValue,
 };
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
@@ -1171,23 +1235,29 @@ ArkUIAPICallbackMethod* GetArkUIAPICallbackMethod()
     return ViewModel::GetCallbackMethod();
 }
 
-int SetVsyncCallback(ArkUIVMContext vmContext, ArkUI_Int32 device, ArkUI_Int32 callbackId)
+ArkUIPipelineContext GetPipelineContext(ArkUINodeHandle node)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    return reinterpret_cast<ArkUIPipelineContext>(frameNode->GetContext());
+}
+
+void SetVsyncCallback(ArkUIVMContext vmContext, ArkUIPipelineContext pipelineContext, ArkUI_Int32 callbackId)
 {
     static int vsyncCount = 1;
     auto vsync = [vmContext, callbackId]() {
-        ArkUIEventCallbackArg args[] = { { vsyncCount++ } };
+        ArkUIEventCallbackArg args[] = { {.i32 =vsyncCount++ } };
         ArkUIAPICallbackMethod* cbs = GetArkUIAPICallbackMethod();
         CHECK_NULL_VOID(vmContext);
         CHECK_NULL_VOID(cbs);
         cbs->CallInt(vmContext, callbackId, 1, &args[0]);
     };
-    PipelineContext::GetCurrentContext()->SetVsyncListener(vsync);
-    return 0;
+
+    reinterpret_cast<PipelineContext*>(pipelineContext)->SetVsyncListener(vsync);
 }
 
-void UnblockVsyncWait(ArkUIVMContext vmContext, ArkUI_Int32 device)
+void UnblockVsyncWait(ArkUIVMContext vmContext, ArkUIPipelineContext pipelineContext)
 {
-    PipelineContext::GetCurrentContext()->RequestFrame();
+    reinterpret_cast<PipelineContext*>(pipelineContext)->RequestFrame();
 }
 
 ArkUI_Int32 MeasureNode(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Float32* data)
@@ -1218,11 +1288,10 @@ void* GetAttachNodePtr(ArkUINodeHandle node)
 ArkUI_Int32 MeasureLayoutAndDraw(ArkUIVMContext vmContext, ArkUINodeHandle rootPtr)
 {
     auto* root = reinterpret_cast<FrameNode*>(rootPtr);
-    float scale = static_cast<float>(OHOS::Ace::SystemProperties::GetResolution());
-    float width = root->GetGeometryNode()->GetFrameSize().Width() / scale;
-    float height = root->GetGeometryNode()->GetFrameSize().Height() / scale;
+    float width = root->GetGeometryNode()->GetFrameSize().Width();
+    float height = root->GetGeometryNode()->GetFrameSize().Height();
     // measure
-    ArkUI_Float32 measureData[] = { width, height, width, height };
+    ArkUI_Float32 measureData[] = { width, height, width, height, width, height };
     MeasureNode(vmContext, rootPtr, &measureData[0]);
     // layout
     ArkUI_Float32 layoutData[] = { 0, 0 };
@@ -1393,6 +1462,128 @@ void GetLayoutConstraint(ArkUINodeHandle node, ArkUI_Int32* value)
     }
 }
 
+
+
+ArkUI_Int32 GetNavigationId(
+    ArkUINodeHandle node, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* writeLen)
+{
+    auto navDesInfo = GetNavDestinationInfoByNode(node);
+    CHECK_NULL_RETURN(navDesInfo, ERROR_CODE_NATIVE_IMPL_GET_INFO_FAILED);
+    std::string navigationId = navDesInfo->navigationId;
+    return WriteStringToBuffer(navigationId, buffer, bufferSize, writeLen);
+}
+
+ArkUI_Int32 GetNavDestinationName(
+    ArkUINodeHandle node, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* writeLen)
+{
+    auto navDesInfo = GetNavDestinationInfoByNode(node);
+    CHECK_NULL_RETURN(navDesInfo, ERROR_CODE_NATIVE_IMPL_GET_INFO_FAILED);
+    std::string name = navDesInfo->name;
+    return WriteStringToBuffer(name, buffer, bufferSize, writeLen);
+}
+
+ArkUI_Int32 GetStackLength(ArkUINodeHandle node)
+{
+    auto navigationStack = GetNavigationStackByNode(node);
+    CHECK_NULL_RETURN(navigationStack, INVLID_VALUE);
+    return navigationStack->Size();
+}
+
+ArkUI_Int32 GetNavDesNameByIndex(
+    ArkUINodeHandle node, ArkUI_Int32 index, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* writeLen)
+{
+    auto navigationStack = GetNavigationStackByNode(node);
+    CHECK_NULL_RETURN(navigationStack, ERROR_CODE_NATIVE_IMPL_GET_INFO_FAILED);
+    if (index < 0 || index >= navigationStack->Size()) {
+        return ERROR_CODE_NATIVE_IMPL_NODE_INDEX_INVALID;
+    }
+
+    std::string name = navigationStack->GetNavDesNameByIndex(index);
+    return WriteStringToBuffer(name, buffer, bufferSize, writeLen);
+}
+
+ArkUI_Int32 GetNavDestinationId(
+    ArkUINodeHandle node, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* writeLen)
+{
+    auto navDesInfo = GetNavDestinationInfoByNode(node);
+    CHECK_NULL_RETURN(navDesInfo, ERROR_CODE_NATIVE_IMPL_GET_INFO_FAILED);
+    std::string navDestinationId = navDesInfo->navDestinationId;
+    return WriteStringToBuffer(navDestinationId, buffer, bufferSize, writeLen);
+}
+
+ArkUI_Int32 GetNavDestinationState(ArkUINodeHandle node)
+{
+    auto navDesInfo = GetNavDestinationInfoByNode(node);
+    CHECK_NULL_RETURN(navDesInfo, INVLID_VALUE);
+    return static_cast<int32_t>(navDesInfo->state);
+}
+
+ArkUI_Int32 GetNavDestinationIndex(ArkUINodeHandle node)
+{
+    auto navDesInfo = GetNavDestinationInfoByNode(node);
+    CHECK_NULL_RETURN(navDesInfo, INVLID_VALUE);
+    return navDesInfo->index;
+}
+
+void* GetNavDestinationParam(ArkUINodeHandle node)
+{
+    auto navDesInfo = GetNavDestinationInfoByNode(node);
+    CHECK_NULL_RETURN(navDesInfo, nullptr);
+    return reinterpret_cast<void*>(navDesInfo->param);
+}
+
+ArkUI_Int32 GetRouterPageIndex(ArkUINodeHandle node)
+{
+    auto routerInfo = GetRouterPageInfoByNode(node);
+    CHECK_NULL_RETURN(routerInfo, INVLID_VALUE);
+    return routerInfo->index;
+}
+
+ArkUI_Int32 GetRouterPageName(
+    ArkUINodeHandle node, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* writeLen)
+{
+    auto routerInfo = GetRouterPageInfoByNode(node);
+    CHECK_NULL_RETURN(routerInfo, ERROR_CODE_NATIVE_IMPL_GET_INFO_FAILED);
+    std::string name = routerInfo->name;
+    return WriteStringToBuffer(name, buffer, bufferSize, writeLen);
+}
+
+ArkUI_Int32 GetRouterPagePath(
+    ArkUINodeHandle node, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* writeLen)
+{
+    auto routerInfo = GetRouterPageInfoByNode(node);
+    CHECK_NULL_RETURN(routerInfo, ERROR_CODE_NATIVE_IMPL_GET_INFO_FAILED);
+    std::string path = routerInfo->path;
+    return WriteStringToBuffer(path, buffer, bufferSize, writeLen);
+}
+
+ArkUI_Int32 GetRouterPageState(ArkUINodeHandle node)
+{
+    auto routerInfo = GetRouterPageInfoByNode(node);
+    CHECK_NULL_RETURN(routerInfo, INVLID_VALUE);
+    return static_cast<int32_t>(routerInfo->state);
+}
+
+ArkUI_Int32 GetRouterPageId(
+    ArkUINodeHandle node, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* writeLen)
+{
+    auto routerInfo = GetRouterPageInfoByNode(node);
+    CHECK_NULL_RETURN(routerInfo, ERROR_CODE_NATIVE_IMPL_GET_INFO_FAILED);
+    std::string pageId = routerInfo->pageId;
+    return WriteStringToBuffer(pageId, buffer, bufferSize, writeLen);
+}
+
+int32_t GetContextByNode(ArkUINodeHandle node)
+{
+    int32_t instanceId = -1;
+    FrameNode* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, instanceId);
+    auto pipeline = currentNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, instanceId);
+    instanceId = pipeline->GetInstanceId();
+    return instanceId;
+}
+
 const ArkUIBasicAPI* GetBasicAPI()
 {
     /* clang-format off */
@@ -1423,6 +1614,8 @@ const ArkUIBasicAPI* GetBasicAPI()
         MarkDirty,
         IsBuilderNode,
         ConvertLengthMetricsUnit,
+
+        GetContextByNode,
     };
     /* clang-format on */
 
@@ -1588,6 +1781,7 @@ ArkUIExtendedNodeAPI impl_extended = {
     nullptr, // indexerChecker
     nullptr, // setRangeUpdater
     nullptr, // setLazyItemIndexer
+    GetPipelineContext,
     SetVsyncCallback,
     UnblockVsyncWait,
     NodeEvent::CheckEvent,
@@ -1782,6 +1976,19 @@ const ArkUINavigation* GetNavigationAPI()
     static const ArkUINavigation modifier = {
         nullptr,
         nullptr,
+        GetNavigationId,
+        GetNavDestinationName,
+        GetStackLength,
+        GetNavDesNameByIndex,
+        GetNavDestinationId,
+        GetNavDestinationState,
+        GetNavDestinationIndex,
+        GetNavDestinationParam,
+        GetRouterPageIndex,
+        GetRouterPageName,
+        GetRouterPagePath,
+        GetRouterPageState,
+        GetRouterPageId,
     };
     return &modifier;
 }

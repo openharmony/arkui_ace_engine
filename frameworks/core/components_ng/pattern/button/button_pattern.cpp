@@ -71,6 +71,10 @@ bool ButtonPattern::NeedAgingUpdateText(RefPtr<ButtonLayoutProperty>& layoutProp
     CHECK_NULL_RETURN(buttonTheme, false);
     auto fontScale = pipeline->GetFontScale();
 
+    if (layoutProperty->HasType() && layoutProperty->GetType() == ButtonType::CIRCLE) {
+        return false;
+    }
+
     if (layoutProperty->HasLabel() && layoutProperty->GetLabel()->empty()) {
         return false;
     }
@@ -710,13 +714,15 @@ void ButtonPattern::OnColorConfigurationUpdate()
         node->SetNeedCallChildrenUpdate(false);
         return;
     }
-    node->SetNeedCallChildrenUpdate(false);
+    auto buttonLayoutProperty = node->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    if (buttonLayoutProperty->GetCreateWithLabelValue(true)) {
+        node->SetNeedCallChildrenUpdate(false);
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto buttonLayoutProperty = node->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
     ButtonStyleMode buttonStyle = buttonLayoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
     ButtonRole buttonRole = buttonLayoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
     if (renderContext->GetBackgroundColor().value_or(themeBgColor_) == themeBgColor_) {

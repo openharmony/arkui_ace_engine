@@ -168,6 +168,8 @@ public:
     // Called by ohos AceContainer when touch event received.
     virtual void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false) {}
 
+    virtual void OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
+
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
     virtual bool OnKeyEvent(const KeyEvent& event) = 0;
@@ -234,6 +236,9 @@ public:
 
     virtual void OnSurfaceDensityChanged(double density)
     {
+        // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker
+        // thread.
+        std::lock_guard lock(densityChangeMutex_);
         for (auto&& [id, callback] : densityChangedCallbacks_) {
             if (callback) {
                 callback(density);
@@ -241,9 +246,19 @@ public:
         }
     }
 
+    void SendUpdateVirtualNodeFocusEvent()
+    {
+        auto accessibilityManager = GetAccessibilityManager();
+        CHECK_NULL_VOID(accessibilityManager);
+        accessibilityManager->UpdateVirtualNodeFocus();
+    }
+
     int32_t RegisterDensityChangedCallback(std::function<void(double)>&& callback)
     {
         if (callback) {
+            // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker
+            // thread.
+            std::lock_guard lock(densityChangeMutex_);
             densityChangedCallbacks_.emplace(++densityChangeCallbackId_, std::move(callback));
             return densityChangeCallbackId_;
         }
@@ -252,6 +267,9 @@ public:
 
     void UnregisterDensityChangedCallback(int32_t callbackId)
     {
+        // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker
+        // thread.
+        std::lock_guard lock(densityChangeMutex_);
         densityChangedCallbacks_.erase(callbackId);
     }
 
@@ -1014,6 +1032,8 @@ public:
         parentPipeline_ = pipeline;
     }
 
+    virtual void SetupSubRootElement() = 0;
+
     void AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback);
 
     void HandleEtsCardTouchEvent(const TouchEvent& point, SerializedGesture &serializedGesture);
@@ -1260,6 +1280,16 @@ public:
 
     virtual void UpdateLastVsyncEndTimestamp(uint64_t lastVsyncEndTimestamp) {}
 
+#if defined(SUPPORT_TOUCH_TARGET_TEST)
+    // Called by hittest to find touch node is equal target.
+    virtual bool OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe = false,
+        const std::string& target = "") = 0;
+#endif
+    virtual bool IsWindowFocused() const
+    {
+        return false;
+    }
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1380,7 +1410,7 @@ protected:
     std::function<void()> nextFrameLayoutCallback_ = nullptr;
     SharePanelCallback sharePanelCallback_ = nullptr;
     std::atomic<bool> isForegroundCalled_ = false;
-    std::atomic<bool> onFocus_ = true;
+    std::atomic<bool> onFocus_ = false;
     uint64_t lastTouchTime_ = 0;
     std::map<int32_t, std::string> formLinkInfoMap_;
     struct FunctionHash {
@@ -1418,7 +1448,7 @@ private:
     int64_t formAnimationStartTime_ = 0;
     bool isFormAnimation_ = false;
     bool halfLeading_ = false;
-    bool hasSupportedPreviewText_ = false;
+    bool hasSupportedPreviewText_ = true;
     bool hasPreviewTextOption_ = false;
     bool useCutout_ = false;
     uint64_t vsyncTime_ = 0;
@@ -1431,6 +1461,8 @@ private:
     std::shared_ptr<Rosen::RSTransaction> rsTransaction_;
     uint32_t frameCount_ = 0;
 
+    // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker thread.
+    std::mutex densityChangeMutex_;
     int32_t densityChangeCallbackId_ = 0;
     std::unordered_map<int32_t, std::function<void(double)>> densityChangedCallbacks_;
 

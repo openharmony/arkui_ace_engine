@@ -59,15 +59,18 @@ typedef struct {
 */
 typedef struct ArkUI_AnimateOption ArkUI_AnimateOption;
 
-struct ArkUI_Curve;
+typedef struct ArkUI_Curve ArkUI_Curve;
 typedef struct ArkUI_Curve* ArkUI_CurveHandle;
 
 typedef struct ArkUI_KeyframeAnimateOption ArkUI_KeyframeAnimateOption;
 typedef struct ArkUI_AnimatorOption ArkUI_AnimatorOption;
 typedef struct ArkUI_Animator* ArkUI_AnimatorHandle;
 
-struct ArkUI_AnimatorEvent;
-struct ArkUI_AnimatorOnFrameEvent;
+typedef struct ArkUI_AnimatorEvent ArkUI_AnimatorEvent;
+typedef struct ArkUI_AnimatorOnFrameEvent ArkUI_AnimatorOnFrameEvent;
+
+
+typedef struct ArkUI_TransitionEffect ArkUI_TransitionEffect;
 
 /**
  * @brief Implements the native animation APIs provided by ArkUI.
@@ -298,15 +301,28 @@ int32_t OH_ArkUI_Animator_Finish(ArkUI_AnimatorHandle animator);
 int32_t OH_ArkUI_Animator_Pause(ArkUI_AnimatorHandle animator);
 int32_t OH_ArkUI_Animator_Cancel(ArkUI_AnimatorHandle animator);
 int32_t OH_ArkUI_Animator_Reverse(ArkUI_AnimatorHandle animator);
-ArkUI_CurveHandle OH_ArkUI_Curve_InitCurve(ArkUI_AnimationCurve curve);
-ArkUI_CurveHandle OH_ArkUI_Curve_StepsCurve(int32_t count, bool end);
-ArkUI_CurveHandle OH_ArkUI_Curve_CubicBezierCurve(float x1, float y1, float x2, float y2);
-ArkUI_CurveHandle OH_ArkUI_Curve_SpringCurve(float velocity, float mass, float stiffness, float damping);
-ArkUI_CurveHandle OH_ArkUI_Curve_SpringMotion(float response, float dampingFraction, float overlapDuration);
-ArkUI_CurveHandle OH_ArkUI_Curve_ResponsiveSpringMotion(float response, float dampingFraction, float overlapDuration);
-ArkUI_CurveHandle OH_ArkUI_Curve_InterpolatingSpring(float velocity, float mass, float stiffness, float damping);
-ArkUI_CurveHandle OH_ArkUI_Curve_CustomCurve(void* userData, float (*interpolate)(float fraction, void* userdata));
-void OH_ArkUI_Curve_disposeCurve(ArkUI_CurveHandle curveHandle);
+ArkUI_CurveHandle OH_ArkUI_Curve_CreateCurveByType(ArkUI_AnimationCurve curve);
+ArkUI_CurveHandle OH_ArkUI_Curve_CreateStepsCurve(int32_t count, bool end);
+ArkUI_CurveHandle OH_ArkUI_Curve_CreateCubicBezierCurve(float x1, float y1, float x2, float y2);
+ArkUI_CurveHandle OH_ArkUI_Curve_CreateSpringCurve(float velocity, float mass, float stiffness, float damping);
+ArkUI_CurveHandle OH_ArkUI_Curve_CreateSpringMotion(float response, float dampingFraction, float overlapDuration);
+ArkUI_CurveHandle OH_ArkUI_Curve_CreateResponsiveSpringMotion(
+    float response, float dampingFraction, float overlapDuration);
+ArkUI_CurveHandle OH_ArkUI_Curve_CreateInterpolatingSpring(float velocity, float mass, float stiffness, float damping);
+ArkUI_CurveHandle OH_ArkUI_Curve_CreateCustomCurve(
+    void* userData, float (*interpolate)(float fraction, void* userdata));
+void OH_ArkUI_Curve_DisposeCurve(ArkUI_CurveHandle curveHandle);
+
+ArkUI_TransitionEffect* OH_ArkUI_CreateOpacityTransitionEffect(float opacity);
+ArkUI_TransitionEffect* OH_ArkUI_CreateTranslationTransitionEffect(ArkUI_TranslationOptions* translate);
+ArkUI_TransitionEffect* OH_ArkUI_CreateScaleTransitionEffect(ArkUI_ScaleOptions* scale);
+ArkUI_TransitionEffect* OH_ArkUI_CreateRotationTransitionEffect(ArkUI_RotationOptions* rotate);
+ArkUI_TransitionEffect* OH_ArkUI_CreateMovementTransitionEffect(ArkUI_TransitionEdge move);
+ArkUI_TransitionEffect* OH_ArkUI_CreateAsymmetricTransitionEffect(
+    ArkUI_TransitionEffect* appear, ArkUI_TransitionEffect* disappear);
+void OH_ArkUI_TransitionEffect_Dispose(ArkUI_TransitionEffect* effect);
+int32_t OH_ArkUI_TransitionEffect_Combine(ArkUI_TransitionEffect* effect, ArkUI_TransitionEffect* combine);
+int32_t OH_ArkUI_TransitionEffect_SetAnimation(ArkUI_TransitionEffect* effect, ArkUI_AnimateOption* animation);
 #ifdef __cplusplus
 };
 #endif

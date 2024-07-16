@@ -44,12 +44,32 @@ int32_t IsolatedPattern::isolatedIdGenerator_ = 0;
 IsolatedPattern::IsolatedPattern()
     : PlatformPattern(AceLogTag::ACE_ISOLATED_COMPONENT, ++isolatedIdGenerator_)
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto uiExtensionManager = pipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
+    uiExtensionId_ = uiExtensionManager->ApplyExtensionId();
     PLATFORM_LOGI("The IsolatedPattern is created.");
 }
 
 IsolatedPattern::~IsolatedPattern()
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto uiExtensionManager = pipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtensionManager);
+    uiExtensionManager->RecycleExtensionId(uiExtensionId_);
     PLATFORM_LOGI("The IsolatedPattern is destroyed.");
+}
+
+int32_t IsolatedPattern::GetUiExtensionId()
+{
+    return uiExtensionId_;
+}
+
+int64_t IsolatedPattern::WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId)
+{
+    return uiExtensionId_ * extensionOffset + abilityId;
 }
 
 void IsolatedPattern::InitializeDynamicComponent(
@@ -140,7 +160,13 @@ bool IsolatedPattern::HandleKeyEvent(const KeyEvent& event)
 void IsolatedPattern::HandleFocusEvent()
 {
     CHECK_NULL_VOID(dynamicComponentRenderer_);
-    dynamicComponentRenderer_->TransferFocusActiveEvent(true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetIsFocusActive()) {
+        dynamicComponentRenderer_->TransferFocusActiveEvent(true);
+    }
     dynamicComponentRenderer_->TransferFocusState(true);
 }
 

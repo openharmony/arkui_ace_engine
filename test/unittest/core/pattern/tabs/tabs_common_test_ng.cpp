@@ -270,8 +270,7 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty006, TestSize.Level1)
     model.SetTabBarMode(TabBarMode::SCROLLABLE);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    tabBarPattern_->currentOffset_ = -1.f;
-    tabBarPattern_->tabItemOffsets_.emplace_back(OffsetF(TABS_WIDTH + 1.f, 0.f));
+    tabBarPattern_->visibleItemPosition_.clear();
     EXPECT_FALSE(tabBarPattern_->IsAtTop());
     EXPECT_FALSE(tabBarPattern_->IsAtBottom());
 
@@ -301,7 +300,7 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty007, TestSize.Level1)
     model.SetTabBarMode(TabBarMode::SCROLLABLE);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    tabBarPattern_->tabItemOffsets_.emplace_back(OffsetF(TABS_WIDTH + 1.f, 0.f));
+    tabBarPattern_->visibleItemPosition_[3] = { 1.f, TABS_WIDTH + 1.f };
     EXPECT_TRUE(tabBarPattern_->IsAtTop());
     EXPECT_FALSE(tabBarPattern_->IsAtBottom());
 
@@ -330,7 +329,7 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty008, TestSize.Level1)
     model.SetTabBarMode(TabBarMode::SCROLLABLE);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    tabBarPattern_->currentOffset_ = -1.f;
+    tabBarPattern_->visibleItemPosition_[0] = { -1.f, TABS_WIDTH - 1.f };
     EXPECT_FALSE(tabBarPattern_->IsAtTop());
     EXPECT_TRUE(tabBarPattern_->IsAtBottom());
 
@@ -441,5 +440,66 @@ HWTEST_F(TabsCommonTestNg, PerformActionTest001, TestSize.Level1)
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
     EXPECT_TRUE(tabBarAccessibilityProperty_->ActActionScrollForward());
     EXPECT_TRUE(tabBarAccessibilityProperty_->ActActionScrollBackward());
+}
+
+/**
+ * @tc.name: TabBarItemAccessibilityProperty001
+ * @tc.desc: Test TabBarItemAccessibilityProperty ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsCommonTestNg, TabBarItemAccessibilityProperty001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create tabs with items.
+     */
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step1. Call ToJsonValue function.
+     * @tc.expected: label is default tab bar name.
+     */
+    auto tabBarItem = AceType::DynamicCast<FrameNode>(GetChildFrameNode(tabBarNode_, 0));
+    auto accessibilityProperty = tabBarItem->GetAccessibilityProperty<TabBarItemAccessibilityProperty>();
+    auto json = JsonUtil::Create(true);
+    accessibilityProperty->ToJsonValue(json, filter);
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    auto defaultTabBarName = tabTheme->GetDefaultTabBarName();
+    EXPECT_EQ(json->GetString("label"), defaultTabBarName);
+}
+
+/**
+ * @tc.name: TabBarItemAccessibilityProperty002
+ * @tc.desc: Test TabBarItemAccessibilityProperty ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsCommonTestNg, TabBarItemAccessibilityProperty002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create tabs with builder.
+     */
+    TabsModelNG model = CreateTabs();
+    const std::string textTest = "text_test";
+    TabContentModelNG tabContentModel = CreateTabContent();
+    auto tabBarItemFunc = [textTest]() {
+        TextModelNG model;
+        model.Create(textTest);
+    };
+    tabContentModel.SetTabBar(textTest, "", std::nullopt, std::move(tabBarItemFunc), true);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step1. Call ToJsonValue function.
+     * @tc.expected: check label value.
+     */
+    auto tabBarItem = AceType::DynamicCast<FrameNode>(GetChildFrameNode(tabBarNode_, 0));
+    auto accessibilityProperty = tabBarItem->GetAccessibilityProperty<TabBarItemAccessibilityProperty>();
+    auto json = JsonUtil::Create(true);
+    accessibilityProperty->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("label"), textTest);
 }
 } // namespace OHOS::Ace::NG

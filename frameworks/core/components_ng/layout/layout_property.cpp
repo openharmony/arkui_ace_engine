@@ -34,6 +34,29 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+// safeaAreaPadding does not provide default param
+struct DefaultPaddingBorderParam {
+    float horizontalPadding = 0.0f;
+    float verticalPadding = 0.0f;
+    float horizontalBorder = 0.0f;
+    float verticalBorder = 0.0f;
+};
+
+PaddingPropertyF CombinePaddingsAndBorder(const PaddingPropertyF& safeAreaPadding, const PaddingPropertyF& padding,
+    const BorderWidthPropertyF& borderWidth, const DefaultPaddingBorderParam& defaultParam)
+{
+    PaddingPropertyF result;
+    result.left = safeAreaPadding.left.value_or(0.0f) + padding.left.value_or(defaultParam.horizontalPadding) +
+                  borderWidth.leftDimen.value_or(defaultParam.horizontalBorder);
+    result.right = safeAreaPadding.right.value_or(0.0f) + padding.right.value_or(defaultParam.horizontalPadding) +
+                   borderWidth.rightDimen.value_or(defaultParam.horizontalBorder);
+    result.top = safeAreaPadding.top.value_or(0.0f) + padding.top.value_or(defaultParam.verticalPadding) +
+                 borderWidth.topDimen.value_or(defaultParam.verticalBorder);
+    result.bottom = safeAreaPadding.bottom.value_or(0.0f) + padding.bottom.value_or(defaultParam.verticalPadding) +
+                    borderWidth.bottomDimen.value_or(defaultParam.verticalBorder);
+    return result;
+}
+
 std::string VisibleTypeToString(VisibleType type)
 {
     static const LinearEnumMapNode<VisibleType, std::string> visibilityMap[] = {
@@ -100,6 +123,7 @@ void LayoutProperty::Reset()
     layoutConstraint_.reset();
     calcLayoutConstraint_.reset();
     padding_.reset();
+    safeAreaPadding_.reset();
     margin_.reset();
     borderWidth_.reset();
     outerBorderWidth_.reset();
@@ -365,7 +389,7 @@ void LayoutProperty::CheckBorderAndPadding()
     }
     auto selfWidthFloat = selfWidth.value_or(Infinity<float>());
     auto selfHeightFloat = selfHeight.value_or(Infinity<float>());
-    auto paddingWithBorder = CreatePaddingAndBorder();
+    auto paddingWithBorder = CreatePaddingAndBorder(true, true);
     auto deflateWidthF = paddingWithBorder.Width();
     auto deflateHeightF = paddingWithBorder.Height();
     if (LessOrEqual(deflateWidthF, selfWidthFloat) && LessOrEqual(deflateHeightF, selfHeightFloat)) {
@@ -545,88 +569,128 @@ void LayoutProperty::UpdateContentConstraint()
     if (contentConstraint_->parentIdealSize.Height()) {
         contentConstraint_->percentReference.SetHeight(contentConstraint_->parentIdealSize.Height().value());
     }
-    if (padding_) {
-        auto paddingF = ConvertToPaddingPropertyF(
-            *padding_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            contentConstraint_->MinusPaddingToNonNegativeSize(
-                paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
-        } else {
-            contentConstraint_->MinusPadding(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
-        }
-    }
-    if (borderWidth_) {
-        auto borderWidthF = ConvertToBorderWidthPropertyF(
-            *borderWidth_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            contentConstraint_->MinusPaddingToNonNegativeSize(
-                borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
-        } else {
-            contentConstraint_->MinusPadding(
-                borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
-        }
+    ConstraintContentBySafeAreaPadding();
+    ConstraintContentByPadding();
+    ConstraintContentByBorder();
+}
+
+void LayoutProperty::ConstraintContentByPadding()
+{
+    CHECK_NULL_VOID(padding_);
+    auto paddingF = ConvertToPaddingPropertyF(
+        *padding_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width());
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        contentConstraint_->MinusPaddingToNonNegativeSize(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
+    } else {
+        contentConstraint_->MinusPadding(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
     }
 }
 
-PaddingPropertyF LayoutProperty::CreatePaddingAndBorder()
+void LayoutProperty::ConstraintContentByBorder()
 {
+    CHECK_NULL_VOID(borderWidth_);
+    auto borderWidthF = ConvertToBorderWidthPropertyF(
+        *borderWidth_, contentConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        contentConstraint_->MinusPaddingToNonNegativeSize(
+            borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
+    } else {
+        contentConstraint_->MinusPadding(
+            borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
+    }
+}
+
+void LayoutProperty::ConstraintContentBySafeAreaPadding()
+{
+    CHECK_NULL_VOID(safeAreaPadding_);
+    auto safeAreaPaddingF = ConvertToPaddingPropertyF(
+        *safeAreaPadding_, contentConstraint_->scaleProperty, contentConstraint_->percentReference.Width(), true, true);
+    contentConstraint_->MinusPaddingToNonNegativeSize(
+        safeAreaPaddingF.left, safeAreaPaddingF.right, safeAreaPaddingF.top, safeAreaPaddingF.bottom);
+}
+
+PaddingPropertyF LayoutProperty::GetOrCreateSafeAreaPadding(bool forceReCreate)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, CreateSafeAreaPadding());
+    const auto& geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, CreateSafeAreaPadding());
+    auto& resolvedSafeAreaPadding = geometryNode->GetResolvedSingleSafeAreaPadding();
+    if (forceReCreate || !resolvedSafeAreaPadding) {
+        host->ResetSafeAreaPadding();
+        auto safeAreaPadding = CreateSafeAreaPadding();
+        geometryNode->SetResolvedSingleSafeAreaPadding(safeAreaPadding);
+        return safeAreaPadding;
+    }
+    return *(resolvedSafeAreaPadding.get());
+}
+
+PaddingPropertyF LayoutProperty::CreateSafeAreaPadding()
+{
+    if (layoutConstraint_.has_value()) {
+        return ConvertToPaddingPropertyF(safeAreaPadding_, ScaleProperty::CreateScaleProperty(),
+            layoutConstraint_->percentReference.Width(), true, true);
+    }
+    return ConvertToPaddingPropertyF(
+        safeAreaPadding_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth(), true, true);
+}
+
+PaddingPropertyF LayoutProperty::CreatePaddingAndBorder(bool includeSafeAreaPadding, bool forceReCreate)
+{
+    PaddingPropertyF safeAreaPadding;
+    if (includeSafeAreaPadding) {
+        safeAreaPadding = GetOrCreateSafeAreaPadding(forceReCreate);
+    }
     if (layoutConstraint_.has_value()) {
         auto padding = ConvertToPaddingPropertyF(
             padding_, ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width());
         auto borderWidth = ConvertToBorderWidthPropertyF(
             borderWidth_, ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width());
-
-        return PaddingPropertyF { padding.left.value_or(0) + borderWidth.leftDimen.value_or(0),
-            padding.right.value_or(0) + borderWidth.rightDimen.value_or(0),
-            padding.top.value_or(0) + borderWidth.topDimen.value_or(0),
-            padding.bottom.value_or(0) + borderWidth.bottomDimen.value_or(0) };
+        return CombinePaddingsAndBorder(safeAreaPadding, padding, borderWidth, {});
     }
     auto padding = ConvertToPaddingPropertyF(
         padding_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
     auto borderWidth = ConvertToBorderWidthPropertyF(
         borderWidth_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
-
-    return PaddingPropertyF { padding.left.value_or(0) + borderWidth.leftDimen.value_or(0),
-        padding.right.value_or(0) + borderWidth.rightDimen.value_or(0),
-        padding.top.value_or(0) + borderWidth.topDimen.value_or(0),
-        padding.bottom.value_or(0) + borderWidth.bottomDimen.value_or(0) };
+    return CombinePaddingsAndBorder(safeAreaPadding, padding, borderWidth, {});
 }
 
 PaddingPropertyF LayoutProperty::CreatePaddingAndBorderWithDefault(float paddingHorizontalDefault,
     float paddingVerticalDefault, float borderHorizontalDefault, float borderVerticalDefault)
 {
+    auto safeAreaPadding = GetOrCreateSafeAreaPadding();
+    DefaultPaddingBorderParam defaultParem = { .horizontalPadding = paddingHorizontalDefault,
+        .verticalPadding = paddingVerticalDefault,
+        .horizontalBorder = borderHorizontalDefault,
+        .verticalBorder = borderVerticalDefault };
     if (layoutConstraint_.has_value()) {
         auto padding = ConvertToPaddingPropertyF(
             padding_, ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width());
         auto borderWidth = ConvertToBorderWidthPropertyF(
             borderWidth_, ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width());
-        return PaddingPropertyF { padding.left.value_or(paddingHorizontalDefault) +
-                                      borderWidth.leftDimen.value_or(borderHorizontalDefault),
-            padding.right.value_or(paddingHorizontalDefault) + borderWidth.rightDimen.value_or(borderHorizontalDefault),
-            padding.top.value_or(paddingVerticalDefault) + borderWidth.topDimen.value_or(borderVerticalDefault),
-            padding.bottom.value_or(paddingVerticalDefault) + borderWidth.bottomDimen.value_or(borderVerticalDefault) };
+        return CombinePaddingsAndBorder(safeAreaPadding, padding, borderWidth, defaultParem);
     }
     auto padding = ConvertToPaddingPropertyF(
         padding_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
     auto borderWidth = ConvertToBorderWidthPropertyF(
         borderWidth_, ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth());
-
-    return PaddingPropertyF { padding.left.value_or(paddingHorizontalDefault) +
-                                  borderWidth.leftDimen.value_or(borderHorizontalDefault),
-        padding.right.value_or(paddingHorizontalDefault) + borderWidth.rightDimen.value_or(borderHorizontalDefault),
-        padding.top.value_or(paddingVerticalDefault) + borderWidth.topDimen.value_or(borderVerticalDefault),
-        padding.bottom.value_or(paddingVerticalDefault) + borderWidth.bottomDimen.value_or(borderVerticalDefault) };
+    return CombinePaddingsAndBorder(safeAreaPadding, padding, borderWidth, defaultParem);
 }
 
 PaddingPropertyF LayoutProperty::CreatePaddingWithoutBorder(bool useRootConstraint, bool roundPixel)
 {
+    auto safeAreaPadding = GetOrCreateSafeAreaPadding();
     if (layoutConstraint_.has_value()) {
-        return ConvertToPaddingPropertyF(
+        auto padding = ConvertToPaddingPropertyF(
             padding_, layoutConstraint_->scaleProperty, layoutConstraint_->percentReference.Width(), roundPixel);
+        auto totalPadding = CombinePaddingsAndBorder(safeAreaPadding, padding, {}, {});
+        return totalPadding;
     }
 
-    return ConvertToPaddingPropertyF(padding_, ScaleProperty::CreateScaleProperty(),
+    auto padding = ConvertToPaddingPropertyF(padding_, ScaleProperty::CreateScaleProperty(),
         useRootConstraint ? PipelineContext::GetCurrentRootWidth() : 0.0f, roundPixel);
+    auto totalPadding = CombinePaddingsAndBorder(safeAreaPadding, padding, {}, {});
+    return totalPadding;
 }
 
 BorderWidthPropertyF LayoutProperty::CreateBorder()
@@ -721,6 +785,7 @@ void LayoutProperty::UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts)
     if (*safeAreaExpandOpts_ != opts) {
         *safeAreaExpandOpts_ = opts;
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+        safeAreaExpandOpts_->switchToNone = !opts.Expansive();
     }
 }
 
@@ -734,18 +799,18 @@ void LayoutProperty::UpdateSafeAreaInsets(const SafeAreaInsets& safeArea)
     }
 }
 
-bool LayoutProperty::HasFixedWidth() const
+bool LayoutProperty::HasFixedWidth(bool checkPercent) const
 {
     CHECK_NULL_RETURN(calcLayoutConstraint_, false);
     auto&& idealSize = calcLayoutConstraint_->selfIdealSize;
-    return (idealSize && idealSize->WidthFixed());
+    return (idealSize && idealSize->WidthFixed(checkPercent));
 }
 
-bool LayoutProperty::HasFixedHeight() const
+bool LayoutProperty::HasFixedHeight(bool checkPercent) const
 {
     CHECK_NULL_RETURN(calcLayoutConstraint_, false);
     auto&& idealSize = calcLayoutConstraint_->selfIdealSize;
-    return (idealSize && idealSize->HeightFixed());
+    return (idealSize && idealSize->HeightFixed(checkPercent));
 }
 
 bool LayoutProperty::HasAspectRatio() const
@@ -776,14 +841,16 @@ void LayoutProperty::ResetAspectRatio()
     }
 }
 
-void LayoutProperty::UpdateGeometryTransition(const std::string& id, bool followWithoutTransition)
+void LayoutProperty::UpdateGeometryTransition(const std::string& id,
+    bool followWithoutTransition, bool doRegisterSharedTransition)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
     auto geometryTransitionOld = GetGeometryTransition();
     auto geometryTransitionNew =
-        ElementRegister::GetInstance()->GetOrCreateGeometryTransition(id, followWithoutTransition);
+        ElementRegister::GetInstance()->GetOrCreateGeometryTransition(id,
+            followWithoutTransition, doRegisterSharedTransition);
     CHECK_NULL_VOID(geometryTransitionOld != geometryTransitionNew);
     if (geometryTransitionOld) {
         if (geometryTransitionOld->Update(host_, host_)) {
@@ -792,10 +859,13 @@ void LayoutProperty::UpdateGeometryTransition(const std::string& id, bool follow
         // unregister node from old geometry transition
         geometryTransitionOld->Update(host_, nullptr);
         // register node into new geometry transition
-        if (geometryTransitionNew) {
-            geometryTransitionNew->Update(nullptr, host_);
+        if (geometryTransitionNew && !geometryTransitionNew->Update(nullptr, host_)) {
+            TAG_LOGE(AceLogTag::ACE_GEOMETRY_TRANSITION, "redundant node%{public}d has same geoid", host->GetId());
         }
     } else if (geometryTransitionNew) {
+        if (geometryTransitionNew->IsInAndOutValid()) {
+            TAG_LOGE(AceLogTag::ACE_GEOMETRY_TRANSITION, "redundant node%{public}d has same geoid", host->GetId());
+        }
         geometryTransitionNew->Build(host_, true);
     }
     geometryTransition_ = geometryTransitionNew;
@@ -886,6 +956,26 @@ void LayoutProperty::UpdatePadding(const PaddingProperty& value)
     if (padding_->UpdateWithCheck(value)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
     }
+}
+
+void LayoutProperty::UpdateSafeAreaPadding(const PaddingProperty& value)
+{
+    auto host = GetHost();
+    if (!safeAreaPadding_) {
+        safeAreaPadding_ = std::make_unique<PaddingProperty>();
+    }
+    if (safeAreaPadding_->UpdateWithCheck(value)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void LayoutProperty::ResetSafeAreaPadding()
+{
+    if (!safeAreaPadding_) {
+        return;
+    }
+    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    safeAreaPadding_.reset();
 }
 
 void LayoutProperty::UpdateUserDefinedIdealSize(const CalcSize& value)
@@ -1281,8 +1371,12 @@ void LayoutProperty::CheckPositionLocalizedEdges(TextDirection layoutDirection)
     CHECK_NULL_VOID(target);
     EdgesParam edges;
     auto positionEdges = target->GetPositionEdgesValue(EdgesParam {});
-    edges.SetTop(positionEdges.top.value_or(Dimension(0.0)));
-    edges.SetBottom(positionEdges.bottom.value_or(Dimension(0.0)));
+    if (positionEdges.top.has_value()) {
+        edges.SetTop(positionEdges.top.value_or(Dimension(0.0)));
+    }
+    if (positionEdges.bottom.has_value()) {
+        edges.SetBottom(positionEdges.bottom.value_or(Dimension(0.0)));
+    }
     if (positionEdges.left.has_value()) {
         if (layoutDirection == TextDirection::RTL) {
             edges.SetRight(positionEdges.left.value_or(Dimension(0.0)));
@@ -1322,8 +1416,12 @@ void LayoutProperty::CheckOffsetLocalizedEdges(TextDirection layoutDirection)
     CHECK_NULL_VOID(target);
     EdgesParam edges;
     auto offsetEdges = target->GetOffsetEdgesValue(EdgesParam {});
-    edges.SetTop(offsetEdges.top.value_or(Dimension(0.0)));
-    edges.SetBottom(offsetEdges.bottom.value_or(Dimension(0.0)));
+    if (offsetEdges.top.has_value()) {
+        edges.SetTop(offsetEdges.top.value_or(Dimension(0.0)));
+    }
+    if (offsetEdges.bottom.has_value()) {
+        edges.SetBottom(offsetEdges.bottom.value_or(Dimension(0.0)));
+    }
     if (offsetEdges.left.has_value()) {
         if (layoutDirection == TextDirection::RTL) {
             edges.SetRight(offsetEdges.left.value_or(Dimension(0.0)));
@@ -1339,5 +1437,340 @@ void LayoutProperty::CheckOffsetLocalizedEdges(TextDirection layoutDirection)
         }
     }
     target->UpdateOffsetEdges(edges);
+}
+
+void LayoutProperty::CheckLocalizedBorderRadiuses(const TextDirection& direction)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& target = host->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    BorderRadiusProperty borderRadius;
+    BorderRadiusProperty borderRadiusProperty = target->GetBorderRadiusValue(BorderRadiusProperty {});
+    if (!borderRadiusProperty.radiusTopStart.has_value() && !borderRadiusProperty.radiusTopEnd.has_value() &&
+        !borderRadiusProperty.radiusBottomStart.has_value() && !borderRadiusProperty.radiusBottomEnd.has_value()) {
+        return;
+    }
+    if (borderRadiusProperty.radiusTopStart.has_value()) {
+        if (direction == TextDirection::RTL) {
+            borderRadius.radiusTopRight = borderRadiusProperty.radiusTopStart;
+        } else {
+            borderRadius.radiusTopLeft = borderRadiusProperty.radiusTopStart;
+        }
+    }
+    if (borderRadiusProperty.radiusTopEnd.has_value()) {
+        if (direction == TextDirection::RTL) {
+            borderRadius.radiusTopLeft = borderRadiusProperty.radiusTopEnd;
+        } else {
+            borderRadius.radiusTopRight = borderRadiusProperty.radiusTopEnd;
+        }
+    }
+    if (borderRadiusProperty.radiusBottomStart.has_value()) {
+        if (direction == TextDirection::RTL) {
+            borderRadius.radiusBottomRight = borderRadiusProperty.radiusBottomStart;
+        } else {
+            borderRadius.radiusBottomLeft = borderRadiusProperty.radiusBottomStart;
+        }
+    }
+    if (borderRadiusProperty.radiusBottomEnd.has_value()) {
+        if (direction == TextDirection::RTL) {
+            borderRadius.radiusBottomLeft = borderRadiusProperty.radiusBottomEnd;
+        } else {
+            borderRadius.radiusBottomRight = borderRadiusProperty.radiusBottomEnd;
+        }
+    }
+    target->UpdateBorderRadius(borderRadius);
+}
+
+void LayoutProperty::CheckLocalizedOuterBorderColor(const TextDirection& direction)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& target = host->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    NG::BorderColorProperty borderColors;
+    borderColors.multiValued = true;
+    auto outerBorderColorProperty = target->GetOuterBorderColorValue(BorderColorProperty {});
+    if (!outerBorderColorProperty.startColor.has_value() && !outerBorderColorProperty.endColor.has_value()) {
+        return;
+    }
+    if (outerBorderColorProperty.startColor.has_value()) {
+        if (direction == TextDirection::RTL) {
+            borderColors.rightColor = outerBorderColorProperty.startColor;
+        } else {
+            borderColors.leftColor = outerBorderColorProperty.startColor;
+        }
+    }
+    if (outerBorderColorProperty.endColor.has_value()) {
+        if (direction == TextDirection::RTL) {
+            borderColors.leftColor = outerBorderColorProperty.endColor;
+        } else {
+            borderColors.rightColor = outerBorderColorProperty.endColor;
+        }
+    }
+    if (outerBorderColorProperty.topColor.has_value()) {
+        borderColors.topColor = outerBorderColorProperty.topColor;
+    }
+    if (outerBorderColorProperty.bottomColor.has_value()) {
+        borderColors.topColor = outerBorderColorProperty.bottomColor;
+    }
+    target->UpdateOuterBorderColor(borderColors);
+}
+
+void LayoutProperty::CheckLocalizedPadding(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& paddingProperty = layoutProperty->GetPaddingProperty();
+    CHECK_NULL_VOID(paddingProperty);
+    if (!paddingProperty->start.has_value() && !paddingProperty->end.has_value()) {
+        return;
+    }
+    PaddingProperty padding;
+    if (paddingProperty->start.has_value()) {
+        if (direction == TextDirection::RTL) {
+            padding.right = paddingProperty->start;
+        } else {
+            padding.left = paddingProperty->start;
+        }
+    }
+    if (paddingProperty->end.has_value()) {
+        if (direction == TextDirection::RTL) {
+            padding.left = paddingProperty->end;
+        } else {
+            padding.right = paddingProperty->end;
+        }
+    }
+    if (paddingProperty->top.has_value()) {
+        padding.top = paddingProperty->top;
+    }
+    if (paddingProperty->bottom.has_value()) {
+        padding.bottom = paddingProperty->bottom;
+    }
+    if (padding.left.has_value() && !padding.right.has_value()) {
+        padding.right = std::optional<CalcLength>(CalcLength(0));
+    }
+    if (!padding.left.has_value() && padding.right.has_value()) {
+        padding.left = std::optional<CalcLength>(CalcLength(0));
+    }
+    layoutProperty->UpdatePadding(padding);
+}
+
+void LayoutProperty::CheckLocalizedMargin(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& marginProperty = layoutProperty->GetMarginProperty();
+    CHECK_NULL_VOID(marginProperty);
+    if (!marginProperty->start.has_value() && !marginProperty->end.has_value()) {
+        return;
+    }
+    MarginProperty margin;
+    if (marginProperty->start.has_value()) {
+        if (direction == TextDirection::RTL) {
+            margin.right = marginProperty->start;
+        } else {
+            margin.left = marginProperty->start;
+        }
+    }
+    if (marginProperty->end.has_value()) {
+        if (direction == TextDirection::RTL) {
+            margin.left = marginProperty->end;
+        } else {
+            margin.right = marginProperty->end;
+        }
+    }
+    if (marginProperty->top.has_value()) {
+        margin.top = marginProperty->top;
+    }
+    if (marginProperty->bottom.has_value()) {
+        margin.bottom = marginProperty->bottom;
+    }
+    if (margin.left.has_value() && !margin.right.has_value()) {
+        margin.right = std::optional<CalcLength>(CalcLength(0));
+    }
+    if (!margin.left.has_value() && margin.right.has_value()) {
+        margin.left = std::optional<CalcLength>(CalcLength(0));
+    }
+    layoutProperty->UpdateMargin(margin);
+}
+
+void LayoutProperty::CheckLocalizedEdgeWidths(
+    const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& target = host->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    auto borderWidthProperty = target->GetBorderWidth();
+    CHECK_NULL_VOID(borderWidthProperty);
+    if (!borderWidthProperty->startDimen.has_value() && !borderWidthProperty->endDimen.has_value()) {
+        return;
+    }
+    BorderWidthProperty borderWidth;
+    if (borderWidthProperty->startDimen.has_value()) {
+        if (direction == TextDirection::RTL) {
+            borderWidth.rightDimen = borderWidthProperty->startDimen;
+        } else {
+            borderWidth.leftDimen = borderWidthProperty->startDimen;
+        }
+    }
+    if (borderWidthProperty->endDimen.has_value()) {
+        if (direction == TextDirection::RTL) {
+            borderWidth.leftDimen = borderWidthProperty->endDimen;
+        } else {
+            borderWidth.rightDimen = borderWidthProperty->endDimen;
+        }
+    }
+    if (borderWidthProperty->topDimen.has_value()) {
+        borderWidth.topDimen = borderWidthProperty->topDimen;
+    }
+    if (borderWidthProperty->bottomDimen.has_value()) {
+        borderWidth.bottomDimen = borderWidthProperty->bottomDimen;
+    }
+    if (borderWidth.leftDimen.has_value() && !borderWidth.rightDimen.has_value()) {
+        borderWidth.rightDimen = std::optional<Dimension>(Dimension(0));
+    }
+    if (!borderWidth.leftDimen.has_value() && borderWidth.rightDimen.has_value()) {
+        borderWidth.leftDimen = std::optional<Dimension>(Dimension(0));
+    }
+    layoutProperty->UpdateBorderWidth(borderWidth);
+    target->UpdateBorderWidth(borderWidth);
+}
+
+void LayoutProperty::CheckLocalizedEdgeColors(const TextDirection& direction)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& target = host->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    BorderColorProperty borderColors;
+    BorderColorProperty colorProperty = target->GetBorderColorValue(BorderColorProperty {});
+    if (!colorProperty.startColor.has_value() && !colorProperty.endColor.has_value()) {
+        return;
+    }
+    if (colorProperty.startColor.has_value()) {
+        if (direction == TextDirection::RTL) {
+            borderColors.rightColor = colorProperty.startColor;
+        } else {
+            borderColors.leftColor = colorProperty.startColor;
+        }
+    }
+    if (colorProperty.endColor.has_value()) {
+        if (direction == TextDirection::RTL) {
+            borderColors.leftColor = colorProperty.endColor;
+        } else {
+            borderColors.rightColor = colorProperty.endColor;
+        }
+    }
+    if (colorProperty.topColor.has_value()) {
+        borderColors.topColor = colorProperty.topColor;
+    }
+    if (colorProperty.bottomColor.has_value()) {
+        borderColors.topColor = colorProperty.bottomColor;
+    }
+    borderColors.multiValued = true;
+    target->UpdateBorderColor(borderColors);
+}
+
+void LayoutProperty::CheckLocalizedBorderImageSlice(const TextDirection& direction)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& target = host->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    auto borderImage = target->GetBorderImage();
+    CHECK_NULL_VOID(borderImage);
+    auto borderImageProperty = borderImage.value();
+    CHECK_NULL_VOID(borderImageProperty);
+    if (!borderImageProperty->borderImageStart_.has_value() && !borderImageProperty->borderImageEnd_.has_value()) {
+        return;
+    }
+    Dimension leftSlice;
+    Dimension rightSlice;
+    if (borderImageProperty->borderImageStart_.has_value()) {
+        if (direction == TextDirection::RTL) {
+            rightSlice = borderImageProperty->borderImageStart_->GetBorderImageSlice();
+        } else {
+            leftSlice = borderImageProperty->borderImageStart_->GetBorderImageSlice();
+        }
+    }
+    if (borderImageProperty->borderImageEnd_.has_value()) {
+        if (direction == TextDirection::RTL) {
+            leftSlice = borderImageProperty->borderImageEnd_->GetBorderImageSlice();
+        } else {
+            rightSlice = borderImageProperty->borderImageEnd_->GetBorderImageSlice();
+        }
+    }
+    borderImageProperty->SetEdgeSlice(BorderImageDirection::LEFT, leftSlice);
+    borderImageProperty->SetEdgeSlice(BorderImageDirection::RIGHT, rightSlice);
+    target->UpdateBorderImage(borderImageProperty);
+}
+
+void LayoutProperty::CheckLocalizedBorderImageWidth(const TextDirection& direction)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& target = host->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    auto borderImage = target->GetBorderImage();
+    CHECK_NULL_VOID(borderImage);
+    auto borderImageProperty = borderImage.value();
+    CHECK_NULL_VOID(borderImageProperty);
+    if (!borderImageProperty->borderImageStart_.has_value() && !borderImageProperty->borderImageEnd_.has_value()) {
+        return;
+    }
+    Dimension leftWidth;
+    Dimension rightWidth;
+    if (borderImageProperty->borderImageStart_.has_value()) {
+        if (direction == TextDirection::RTL) {
+            rightWidth = borderImageProperty->borderImageStart_->GetBorderImageWidth();
+        } else {
+            leftWidth = borderImageProperty->borderImageStart_->GetBorderImageWidth();
+        }
+    }
+    if (borderImageProperty->borderImageEnd_.has_value()) {
+        if (direction == TextDirection::RTL) {
+            leftWidth = borderImageProperty->borderImageEnd_->GetBorderImageWidth();
+        } else {
+            rightWidth = borderImageProperty->borderImageEnd_->GetBorderImageWidth();
+        }
+    }
+    borderImageProperty->SetEdgeWidth(BorderImageDirection::LEFT, leftWidth);
+    borderImageProperty->SetEdgeWidth(BorderImageDirection::RIGHT, rightWidth);
+    target->UpdateBorderImage(borderImageProperty);
+}
+
+void LayoutProperty::CheckLocalizedBorderImageOutset(const TextDirection& direction)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& target = host->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    auto borderImage = target->GetBorderImage();
+    CHECK_NULL_VOID(borderImage);
+    auto borderImageProperty = borderImage.value();
+    CHECK_NULL_VOID(borderImageProperty);
+    if (!borderImageProperty->borderImageStart_.has_value() && !borderImageProperty->borderImageEnd_.has_value()) {
+        return;
+    }
+    Dimension leftOutset;
+    Dimension rightOutset;
+    if (borderImageProperty->borderImageStart_.has_value()) {
+        if (direction == TextDirection::RTL) {
+            rightOutset = borderImageProperty->borderImageStart_->GetBorderImageOutset();
+        } else {
+            leftOutset = borderImageProperty->borderImageStart_->GetBorderImageOutset();
+        }
+    }
+    if (borderImageProperty->borderImageEnd_.has_value()) {
+        if (direction == TextDirection::RTL) {
+            leftOutset = borderImageProperty->borderImageEnd_->GetBorderImageOutset();
+        } else {
+            rightOutset = borderImageProperty->borderImageEnd_->GetBorderImageOutset();
+        }
+    }
+    borderImageProperty->SetEdgeOutset(BorderImageDirection::LEFT, leftOutset);
+    borderImageProperty->SetEdgeOutset(BorderImageDirection::RIGHT, rightOutset);
+    target->UpdateBorderImage(borderImageProperty);
 }
 } // namespace OHOS::Ace::NG

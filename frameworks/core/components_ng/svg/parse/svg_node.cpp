@@ -388,12 +388,7 @@ void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<C
     if (!hrefClipPath_.empty()) {
         OnClipPath(canvas, viewPort);
     } else if (isRootNode_) {
-        auto defaultClip = AsPath(viewPort);
-#ifndef USE_ROSEN_DRAWING
-        skCanvas_->clipPath(defaultClip, SkClipOp::kIntersect, true);
-#else
-        rsCanvas_->ClipPath(defaultClip, RSClipOp::INTERSECT, true);
-#endif
+        AdjustContentAreaByViewBox(canvas, viewPort);
     }
     if (!transform_.empty() || !animateTransform_.empty()) {
         OnTransform(canvas, viewPort);

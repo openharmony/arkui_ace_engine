@@ -60,6 +60,7 @@ struct TestProperty {
 namespace {
 const std::string CHECK_KEY = "HI";
 const std::string XCOMPONENT_ID = "xcomponent";
+const std::string XCOMPONENT_ID_NEW = "xcomponent_new";
 const std::string XCOMPONENT_LIBRARY_NAME = "native_render";
 const std::string XCOMPONENT_SO_PATH = "com.example.xcomponentmultihap/entry";
 const std::string SURFACE_ID = "2430951489577";
@@ -106,9 +107,9 @@ void XComponentPropertyTestNg::TearDownTestSuite()
 
 RefPtr<FrameNode> XComponentPropertyTestNg::CreateXComponentNode(TestProperty& testProperty)
 {
-    auto xcId = testProperty.xcId.value();
+    auto xcId = testProperty.xcId;
     auto xcType = testProperty.xcType.value();
-    auto libraryName = testProperty.libraryName.value();
+    auto libraryName = testProperty.libraryName;
     auto xcomponentController = std::make_shared<XComponentControllerNG>();
     XComponentModelNG().Create(xcId, xcType, libraryName, xcomponentController);
 
@@ -849,5 +850,184 @@ HWTEST_F(XComponentPropertyTestNg, XComponentRenderTypeTest018, TestSize.Level1)
     XComponentModelNG::SetXComponentType(Referenced::RawPtr(frameNode), XCOMPONENT_SURFACE_TYPE_VALUE);
     flag = pattern->ChangeRenderType(NodeRenderType::RENDER_TYPE_TEXTURE);
     EXPECT_TRUE(flag);
+}
+
+/**
+ * @tc.name: XComponentGetLibraryNameTest019
+ * @tc.desc: Test XComponentModelNG GetLibraryName, type = XComponentType::SURFACE
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentPropertyTestNg, XComponentGetLibraryNameTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a XComponentModelNG
+     */
+    const std::shared_ptr<InnerXComponentController> xComponentController;
+    XComponentModelNG xComponent;
+
+    /**
+     * @tc.steps: step2. call Create and SetSoPath
+     *            case: type = XComponentType::SURFACE
+     * @tc.expected: the properties are expected
+     */
+    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
+    xComponent.SetSoPath(XCOMPONENT_SO_PATH);
+
+    /**
+     * @tc.steps: step3. call GetLibraryName
+     * @tc.expected: result == XCOMPONENT_LIBRARY_NAME
+     */
+    auto result = xComponent.GetLibraryName();
+    EXPECT_EQ(result, XCOMPONENT_LIBRARY_NAME);
+}
+
+/**
+ * @tc.name: XComponentGetLibraryNameTest020
+ * @tc.desc: Test XComponentModelNG GetLibraryName, type = XComponentType::COMPONENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentPropertyTestNg, XComponentGetLibraryNameTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a XComponentModelNG
+     */
+    const std::shared_ptr<InnerXComponentController> xComponentController;
+    XComponentModelNG xComponent;
+
+    /**
+     * @tc.steps: step2. call Create and SetSoPath
+     *            case: type = XComponentType::COMPONENT
+     * @tc.expected: the properties are expected
+     */
+    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_COMPONENT_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
+    xComponent.SetSoPath(XCOMPONENT_SO_PATH);
+
+    /**
+     * @tc.steps: step3. call GetLibraryName
+     * @tc.expected: result == ""
+     */
+    auto result = xComponent.GetLibraryName();
+    EXPECT_EQ(result, std::nullopt);
+}
+
+/**
+ * @tc.name: XComponentGetTypeTest021
+ * @tc.desc: Test XComponentModelNG GetType, type = XComponentType::TEXTURE
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentPropertyTestNg, XComponentGetTypeTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a XComponentModelNG
+     */
+    const std::shared_ptr<InnerXComponentController> xComponentController;
+    XComponentModelNG xComponent;
+
+    /**
+     * @tc.steps: step2. call Create and SetSoPath
+     *            case: type = XComponentType::TEXTURE
+     * @tc.expected: the properties are expected
+     */
+    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_TEXTURE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
+    xComponent.SetSoPath(XCOMPONENT_SO_PATH);
+
+    /**
+     * @tc.steps: step3. call GetType
+     * @tc.expected: result == XComponentType::TEXTURE
+     */
+    auto result = xComponent.GetType();
+    EXPECT_EQ(result, XCOMPONENT_TEXTURE_TYPE_VALUE);
+}
+
+/**
+ * @tc.name: XComponentCreateFrameNodeTest022
+ * @tc.desc: Test XComponentModelNG CreateFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentPropertyTestNg, XComponentCreateFrameNodeTest022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a XComponentModelNG.
+     */
+    auto xComponentController = std::make_shared<XComponentControllerNG>();
+    XComponentModelNG xComponent;
+
+    /**
+     * @tc.steps: step2. call CreateFrameNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        xComponent.CreateFrameNode(nodeId, XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME);
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
+}
+
+/**
+ * @tc.name: XComponentModelNGTest023
+ * @tc.desc: Test XComponentModelNG, and test XComponentModelNG id interface.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentPropertyTestNg, XComponentModelNGTest023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a XComponentModelNG
+     */
+    const std::shared_ptr<InnerXComponentController> xComponentController;
+    XComponentModelNG xComponent;
+
+    /**
+     * @tc.steps: step2. call Create and SetSoPath
+     *            case: id == XCOMPONENT_ID
+     * @tc.expected: the properties are expected
+     */
+    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
+    xComponent.SetSoPath(XCOMPONENT_SO_PATH);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
+
+    /**
+     * @tc.steps: step3. call SetXComponentId and GetXComponentId
+     *            case: id == XCOMPONENT_ID_NEW
+     * @tc.expected: resultId == XCOMPONENT_ID_NEW
+     */
+    XComponentModelNG::SetXComponentId(Referenced::RawPtr(frameNode), XCOMPONENT_ID_NEW);
+    auto resultId = xComponent.GetXComponentId(Referenced::RawPtr(frameNode));
+    EXPECT_EQ(resultId, XCOMPONENT_ID_NEW);
+}
+
+/**
+ * @tc.name: XComponentModelNGTest024
+ * @tc.desc: Test XComponentModelNG, and test XComponentModelNG type interface.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentPropertyTestNg, XComponentModelNGTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a XComponentModelNG
+     */
+    const std::shared_ptr<InnerXComponentController> xComponentController;
+    XComponentModelNG xComponent;
+
+    /**
+     * @tc.steps: step2. call Create and SetSoPath
+     *            case: type == XComponentType::SURFACE
+     * @tc.expected: the properties are expected
+     */
+    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
+    xComponent.SetSoPath(XCOMPONENT_SO_PATH);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
+
+    /**
+     * @tc.steps: step3. call SetXComponentType and GetXComponentType
+     *            case: type == XComponentType::TEXTURE
+     * @tc.expected: resultType == XComponentType::TEXTURE
+     */
+    XComponentModelNG::SetXComponentType(Referenced::RawPtr(frameNode), XCOMPONENT_TEXTURE_TYPE_VALUE);
+    auto resultType = xComponent.GetXComponentType(Referenced::RawPtr(frameNode));
+    EXPECT_EQ(resultType, XCOMPONENT_TEXTURE_TYPE_VALUE);
 }
 } // namespace OHOS::Ace::NG

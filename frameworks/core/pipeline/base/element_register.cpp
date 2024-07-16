@@ -87,6 +87,7 @@ bool ElementRegister::AddReferenced(ElementIdType elmtId, const WeakPtr<AceType>
     if (!result.second) {
         LOGE("Duplicate elmtId %{public}d error.", elmtId);
     }
+    lastestElementId_ = elmtId;
     return result.second;
 }
 
@@ -179,14 +180,15 @@ void ElementRegister::Clear()
 }
 
 RefPtr<NG::GeometryTransition> ElementRegister::GetOrCreateGeometryTransition(
-    const std::string& id, bool followWithoutTransition)
+    const std::string& id, bool followWithoutTransition, bool doRegisterSharedTransition)
 {
     if (id.empty()) {
         return nullptr;
     }
     auto it = geometryTransitionMap_.find(id);
     if (it == geometryTransitionMap_.end()) {
-        auto geometryTransition = AceType::MakeRefPtr<NG::GeometryTransition>(id, followWithoutTransition);
+        auto geometryTransition =
+            AceType::MakeRefPtr<NG::GeometryTransition>(id, followWithoutTransition, doRegisterSharedTransition);
         geometryTransitionMap_.emplace(id, geometryTransition);
         return geometryTransition;
     } else {

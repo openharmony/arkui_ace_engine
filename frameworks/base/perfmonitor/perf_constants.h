@@ -119,6 +119,15 @@ public:
 
     // launcher spring back scroll
     static constexpr char LAUNCHER_SPRINGBACK_SCROLL[] = "LAUNCHER_SPRINGBACK_SCROLL";
+
+    // window title bar minimized
+    static constexpr char WINDOW_TITLE_BAR_MINIMIZED[] = "WINDOW_TITLE_BAR_MINIMIZED";
+
+    // window title bar closed
+    static constexpr char APP_EXIT_FROM_WINDOW_TITLE_BAR_CLOSED[] = "APP_EXIT_FROM_WINDOW_TITLE_BAR_CLOSED";
+
+    // PC start app from other
+    static constexpr char LAUNCHER_APP_LAUNCH_FROM_OTHER[] = "LAUNCHER_APP_LAUNCH_FROM_OTHER";
 };
 } // namespace OHOS::Ace
 #endif // ARKUI_PERF_SCENE_ID_H

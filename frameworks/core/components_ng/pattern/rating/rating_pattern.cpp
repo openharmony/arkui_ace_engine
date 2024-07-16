@@ -31,10 +31,25 @@
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/image/image_source_info.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t RATING_IMAGE_SUCCESS_CODE = 0b111;
 constexpr int32_t DEFAULT_RATING_TOUCH_STAR_NUMBER = 0;
+
+void RatingPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto ratingTheme = pipeline->GetTheme<RatingTheme>();
+    CHECK_NULL_VOID(ratingTheme);
+    themeStarNum_ = ratingTheme->GetStarNum();
+    themeStepSize_ = ratingTheme->GetStepSize();
+    themeRatingScore_ = ratingTheme->GetRatingScore();
+    themeBorderWidth_ = ratingTheme->GetFocusBorderWidth();
+}
 
 void RatingPattern::CheckImageInfoHasChangedOrNot(
     int32_t imageFlag, const ImageSourceInfo& sourceInfo, const std::string& lifeCycleTag)
@@ -113,19 +128,19 @@ void RatingPattern::OnImageLoadSuccess(int32_t imageFlag)
         foregroundImageCanvas_ = foregroundImageLoadingCtx_->MoveCanvasImage();
         foregroundConfig_.srcRect_ = foregroundImageLoadingCtx_->GetSrcRect();
         foregroundConfig_.dstRect_ = foregroundImageLoadingCtx_->GetDstRect();
-        imageSuccessStateCode_ = imageFlag | imageSuccessStateCode_;
+        imageSuccessStateCode_ |= static_cast<uint32_t>(imageFlag);
     }
     if (imageFlag == 0b010) {
         secondaryImageCanvas_ = secondaryImageLoadingCtx_->MoveCanvasImage();
         secondaryConfig_.srcRect_ = secondaryImageLoadingCtx_->GetSrcRect();
         secondaryConfig_.dstRect_ = secondaryImageLoadingCtx_->GetDstRect();
-        imageSuccessStateCode_ = imageFlag | imageSuccessStateCode_;
+        imageSuccessStateCode_ |= static_cast<uint32_t>(imageFlag);
     }
     if (imageFlag == 0b100) {
         backgroundImageCanvas_ = backgroundImageLoadingCtx_->MoveCanvasImage();
         backgroundConfig_.srcRect_ = backgroundImageLoadingCtx_->GetSrcRect();
         backgroundConfig_.dstRect_ = backgroundImageLoadingCtx_->GetDstRect();
-        imageSuccessStateCode_ = imageFlag | imageSuccessStateCode_;
+        imageSuccessStateCode_ |= static_cast<uint32_t>(imageFlag);
     }
     // only when foreground, secondary and background image are all loaded successfully, mark dirty to update rendering.
     if (imageSuccessStateCode_ == RATING_IMAGE_SUCCESS_CODE) {
@@ -135,7 +150,7 @@ void RatingPattern::OnImageLoadSuccess(int32_t imageFlag)
 
 void RatingPattern::OnImageDataReady(int32_t imageFlag)
 {
-    imageReadyStateCode_ = imageReadyStateCode_ | imageFlag;
+    imageReadyStateCode_ |= static_cast<uint32_t>(imageFlag);
 
     // 3 images are ready, invoke to update layout to calculate single star size.
     if (imageReadyStateCode_ == RATING_IMAGE_SUCCESS_CODE) {
@@ -150,6 +165,7 @@ void RatingPattern::UpdatePaintConfig()
     auto layoutProperty = GetLayoutProperty<RatingLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto starsNum = layoutProperty->GetStarsValue(themeStarNum_);
+    CHECK_EQUAL_VOID(starsNum, 0);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
@@ -257,7 +273,6 @@ void RatingPattern::ConstrainsRatingScore(const RefPtr<RatingLayoutProperty>& la
     const double ratingScore = ratingRenderProperty->GetRatingScore().value_or(themeRatingScore_);
     const double stepSize = ratingRenderProperty->GetStepSize().value_or(themeStepSize_);
     const double drawScore = fmin(Round(ratingScore / stepSize) * stepSize, static_cast<double>(starNum));
-
     // do not fire onChange callback when rating is initialized for the first time.
     if (hasInit_ && lastRatingScore_ != drawScore) {
         FireChangeEvent();
@@ -908,19 +923,5 @@ RefPtr<FrameNode> RatingPattern::BuildContentModifierNode()
     auto enabled = eventHub->IsEnabled();
     RatingConfiguration ratingConfiguration(starNum, isIndicator, ratingScore, stepSize, enabled);
     return (makeFunc_.value())(ratingConfiguration);
-}
-
-void RatingPattern::InitDefaultParams()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto ratingTheme = pipeline->GetTheme<RatingTheme>();
-    CHECK_NULL_VOID(ratingTheme);
-    themeStarNum_ = ratingTheme->GetStarNum();
-    themeStepSize_ = ratingTheme->GetStepSize();
-    themeRatingScore_ = ratingTheme->GetRatingScore();
-    themeBorderWidth_ = ratingTheme->GetFocusBorderWidth();
 }
 } // namespace OHOS::Ace::NG

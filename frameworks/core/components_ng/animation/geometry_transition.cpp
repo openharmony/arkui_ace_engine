@@ -31,8 +31,9 @@ namespace OHOS::Ace::NG {
 // and position(outNode identity), animates to the final size and position of inNode(outNode active). Although
 // we have two transitions but these two transitions fit together perfectly, so the appearance looks like a
 // single view move from its old position to its new position, thus visual focus guidance is completed.
-GeometryTransition::GeometryTransition(const std::string& id, bool followWithoutTransition) : id_(id),
-    followWithoutTransition_(followWithoutTransition) {}
+GeometryTransition::GeometryTransition(
+    const std::string& id, bool followWithoutTransition, bool doRegisterSharedTransition) : id_(id),
+    followWithoutTransition_(followWithoutTransition), doRegisterSharedTransition_(doRegisterSharedTransition) {}
 
 bool GeometryTransition::IsInAndOutEmpty() const
 {
@@ -191,6 +192,10 @@ bool GeometryTransition::Update(const WeakPtr<FrameNode>& which, const WeakPtr<F
     } else {
         ret = false;
     }
+    auto whichNode = which.Upgrade();
+    if (ret && whichNode && whichNode != value.Upgrade()) {
+        whichNode->SetLayoutPriority(0);
+    }
     return ret;
 }
 
@@ -320,13 +325,18 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
         self->SetLayoutPriority(0);
         renderContext->SetFrameWithoutAnimation(activeFrameRect);
         if (target->IsRemoving()) {
-            renderContext->RegisterSharedTransition(targetRenderContext); // notify backend for hierarchy processing
+            if (doRegisterSharedTransition_) {
+                // notify backend for hierarchy processing
+                renderContext->RegisterSharedTransition(targetRenderContext);
+            }
         }
     } else {
         outNodeTargetAbsRect_ = targetRect;
         if (staticNodeAbsRect_ && targetRenderContext->HasSandBox()) {
             staticNodeAbsRect_.reset();
-            targetRenderContext->RegisterSharedTransition(renderContext);
+            if (doRegisterSharedTransition_) {
+                targetRenderContext->RegisterSharedTransition(renderContext);
+            }
         }
         if (taskExecutor) {
             taskExecutor->PostTask(

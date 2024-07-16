@@ -25,7 +25,9 @@ class ACE_EXPORT SelectContentOverlayPattern : public SelectOverlayPattern {
     DECLARE_ACE_TYPE(SelectContentOverlayPattern, SelectOverlayPattern);
 
 public:
-    explicit SelectContentOverlayPattern(std::shared_ptr<SelectOverlayInfo> info): SelectOverlayPattern(info) {}
+    explicit SelectContentOverlayPattern(std::shared_ptr<SelectOverlayInfo> info, SelectOverlayMode mode)
+        : SelectOverlayPattern(info, mode)
+    {}
     ~SelectContentOverlayPattern() override = default;
 
     void UpdateMenuIsShow(bool menuIsShow, bool noAnimation = false);
@@ -35,7 +37,7 @@ public:
     void RestartHiddenHandleTask(bool isDelay);
     void CancelHiddenHandleTask();
     SelectMenuInfo GetSelectMenuInfo();
-
+    void UpdateViewPort(const std::optional<RectF>& viewPort);
 protected:
     void CheckHandleReverse() override;
     void UpdateHandleHotZone() override;

@@ -48,7 +48,7 @@ void EventHub::OnDetachContext(PipelineContext *context)
     }
 
     if (HasVisibleAreaCallback(true) || HasVisibleAreaCallback(false)) {
-        host->TriggerVisibleAreaChangeCallback(true);
+        host->TriggerVisibleAreaChangeCallback(0, true);
         context->RemoveVisibleAreaChangeNode(host->GetId());
     }
 }
@@ -223,7 +223,7 @@ void EventHub::FireCustomerOnDragFunc(DragFuncType dragFuncType, const RefPtr<OH
 void EventHub::FireOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
 {
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager fire onDragEnter");
+        TAG_LOGD(AceLogTag::ACE_DRAG, "DragDropManager fire onDragEnter");
     }
     if (onDragEnter_) {
         // callback may be overwritten in its invoke so we copy it first
@@ -235,7 +235,7 @@ void EventHub::FireOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info, const s
 void EventHub::FireOnDragLeave(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
 {
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager fire onDragLeave");
+        TAG_LOGD(AceLogTag::ACE_DRAG, "DragDropManager fire onDragLeave");
     }
     if (onDragLeave_) {
         // callback may be overwritten in its invoke so we copy it first
@@ -247,7 +247,7 @@ void EventHub::FireOnDragLeave(const RefPtr<OHOS::Ace::DragEvent>& info, const s
 void EventHub::FireOnDragMove(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
 {
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager fire onDragMove");
+        TAG_LOGD(AceLogTag::ACE_DRAG, "DragDropManager fire onDragMove");
     }
     if (onDragMove_) {
         // callback may be overwritten in its invoke so we copy it first
@@ -259,7 +259,7 @@ void EventHub::FireOnDragMove(const RefPtr<OHOS::Ace::DragEvent>& info, const st
 void EventHub::FireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
 {
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager fire onDrop");
+        TAG_LOGD(AceLogTag::ACE_DRAG, "DragDropManager fire onDrop");
     }
     if (onDrop_) {
         // callback may be overwritten in its invoke so we copy it first
@@ -274,7 +274,6 @@ bool EventHub::IsFireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
         || info->GetResult() == DragRet::DRAG_DEFAULT
         || info->GetResult() == DragRet::ENABLE_DROP
         || info->GetResult() == DragRet::DISABLE_DROP;
-    return true;
 }
 
 void EventHub::HandleInternalOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)

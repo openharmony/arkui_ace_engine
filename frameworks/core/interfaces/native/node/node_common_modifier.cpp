@@ -82,7 +82,8 @@ constexpr double ROUND_UNIT = 360.0;
 constexpr TextDirection DEFAULT_COMMON_DIRECTION = TextDirection::AUTO;
 constexpr int32_t DEFAULT_COMMON_LAYOUTWEIGHT = 0;
 constexpr int32_t MAX_ALIGN_VALUE = 8;
-constexpr int32_t DEFAULT_GRIDSPAN = 0;
+// default gridSpan is 1 on doc
+constexpr int32_t DEFAULT_GRIDSPAN = 1;
 constexpr uint32_t DEFAULT_ALIGN_RULES_SIZE = 6;
 constexpr uint8_t DEFAULT_SAFE_AREA_TYPE = 0b111;
 constexpr uint8_t DEFAULT_SAFE_AREA_EDGE = 0b1111;
@@ -120,6 +121,23 @@ const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
     OHOS::Ace::Curves::SMOOTH,
     OHOS::Ace::Curves::FRICTION,
 };
+
+enum TransitionEffectType {
+    TRANSITION_EFFECT_OPACITY = 0,
+    TRANSITION_EFFECT_TRANSLATE,
+    TRANSITION_EFFECT_SCALE,
+    TRANSITION_EFFECT_ROTATE,
+    TRANSITION_EFFECT_MOVE,
+    TRANSITION_EFFECT_ASYMMETRIC,
+};
+
+const std::vector<AnimationDirection> DIRECTION_LIST = {
+    AnimationDirection::NORMAL,
+    AnimationDirection::REVERSE,
+    AnimationDirection::ALTERNATE,
+    AnimationDirection::ALTERNATE_REVERSE,
+};
+
 constexpr int32_t DEFAULT_DURATION = 1000;
 std::string g_strValue;
 
@@ -594,19 +612,19 @@ void SetBorderImage(FrameNode* frameNode, const RefPtr<BorderImage>& borderImage
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(borderImage);
-    if (bitset | BorderImage::SOURCE_BIT) {
+    if (bitset & BorderImage::SOURCE_BIT) {
         ViewAbstract::SetBorderImageSource(frameNode, borderImage->GetSrc());
     }
-    if (bitset | BorderImage::OUTSET_BIT) {
+    if (bitset & BorderImage::OUTSET_BIT) {
         ViewAbstract::SetHasBorderImageOutset(frameNode, true);
     }
-    if (bitset | BorderImage::SLICE_BIT) {
+    if (bitset & BorderImage::SLICE_BIT) {
         ViewAbstract::SetHasBorderImageSlice(frameNode, true);
     }
-    if (bitset | BorderImage::REPEAT_BIT) {
+    if (bitset & BorderImage::REPEAT_BIT) {
         ViewAbstract::SetHasBorderImageRepeat(frameNode, true);
     }
-    if (bitset | BorderImage::WIDTH_BIT) {
+    if (bitset & BorderImage::WIDTH_BIT) {
         ViewAbstract::SetHasBorderImageWidth(frameNode, true);
     }
     ViewAbstract::SetBorderImage(frameNode, borderImage);
@@ -643,8 +661,18 @@ void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, Ar
     ArkUI_Float32 valueY, BackgroundImagePosition& bgImgPosition)
 {
     OHOS::Ace::AnimationOption option;
-    bgImgPosition.SetSizeX(AnimatableDimension(valueX, typeX, option));
-    bgImgPosition.SetSizeY(AnimatableDimension(valueY, typeY, option));
+    auto animatableDimensionX = AnimatableDimension(valueX, typeX, option);
+    auto animatableDimensionY = AnimatableDimension(valueY, typeY, option);
+    if (typeX == DimensionUnit::VP || typeX == DimensionUnit::FP) {
+        animatableDimensionX.SetValue(animatableDimensionX.ConvertToPx());
+        animatableDimensionX.SetUnit(DimensionUnit::PX);
+    }
+    if (typeY == DimensionUnit::VP || typeY == DimensionUnit::FP) {
+        animatableDimensionY.SetValue(animatableDimensionY.ConvertToPx());
+        animatableDimensionY.SetUnit(DimensionUnit::PX);
+    }
+    bgImgPosition.SetSizeX(animatableDimensionX);
+    bgImgPosition.SetSizeY(animatableDimensionY);
 }
 
 void SetBackgroundColor(ArkUINodeHandle node, uint32_t color)
@@ -989,7 +1017,7 @@ bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
  * shadows[4] : ShadowType, shadows[5] : Color, shadows[6] : IsFilled
  * @param length shadows length
  */
-void SetBackShadow(ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length)
+void SetBackShadow(ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1006,8 +1034,11 @@ void SetBackShadow(ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, Ark
     }
     auto blurRadius = shadows[NUM_0].f32;                          // BlurRadius
     auto hasColorValue = static_cast<int32_t>(shadows[NUM_1].i32); // 1: has ColorStrategy; 2: has Color
-    auto offsetX = shadows[NUM_2].f32;                             // OffsetX
-    auto offsetY = shadows[NUM_3].f32;                             // OffsetY
+    
+    // OffsetX
+    auto offsetX = Dimension(shadows[NUM_2].f32, static_cast<OHOS::Ace::DimensionUnit>(unit)).ConvertToPx();
+    // OffsetY
+    auto offsetY = Dimension(shadows[NUM_3].f32, static_cast<OHOS::Ace::DimensionUnit>(unit)).ConvertToPx();
     auto shadowType = shadows[NUM_4].i32;                          // ShadowType
     auto color = static_cast<uint32_t>(shadows[NUM_5].u32);        // Color
     auto isFilled = static_cast<uint32_t>(shadows[NUM_6].i32);     // IsFilled
@@ -2213,21 +2244,24 @@ void ResetRotate(ArkUINodeHandle node)
     ViewAbstract::SetPivot(frameNode, center);
 }
 
-void SetGeometryTransition(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool options)
+void SetGeometryTransition(ArkUINodeHandle node, ArkUI_CharPtr id, const ArkUIGeometryTransitionOptions* options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::string idStr(id);
-    ViewAbstract::SetGeometryTransition(frameNode, idStr, static_cast<bool>(options));
+    ViewAbstract::SetGeometryTransition(frameNode, idStr,
+        static_cast<bool>(options->follow), static_cast<bool>(options->hierarchyStrategy));
 }
 
-ArkUI_CharPtr GetGeometryTransition(ArkUINodeHandle node, ArkUI_Bool* options)
+ArkUI_CharPtr GetGeometryTransition(ArkUINodeHandle node, ArkUIGeometryTransitionOptions* options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
     bool followWithoutTransition = false;
-    g_strValue = ViewAbstract::GetGeometryTransition(frameNode, &followWithoutTransition);
-    *options = followWithoutTransition;
+    bool doRegisterSharedTransition = true;
+    g_strValue = ViewAbstract::GetGeometryTransition(frameNode, &followWithoutTransition, &doRegisterSharedTransition);
+    options->follow = followWithoutTransition;
+    options->hierarchyStrategy = static_cast<int32_t>(doRegisterSharedTransition);
     return g_strValue.c_str();
 }
 
@@ -2235,7 +2269,7 @@ void ResetGeometryTransition(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetGeometryTransition(frameNode, "", false);
+    ViewAbstract::SetGeometryTransition(frameNode, "", false, true);
 }
 
 void SetOffset(ArkUINodeHandle node, const ArkUI_Float32* number, const ArkUI_Int32* unit)
@@ -5861,6 +5895,132 @@ void ResetPixelRound(ArkUINodeHandle node)
     ViewAbstract::SetPixelRound(frameNode, static_cast<uint8_t>(PixelRoundCalcPolicy::NO_FORCE_ROUND));
 }
 
+RefPtr<NG::ChainedTransitionEffect> ParseTransition(ArkUITransitionEffectOption* option)
+{
+    CHECK_NULL_RETURN(option, nullptr);
+    auto type = static_cast<TransitionEffectType>(option->type);
+    RefPtr<NG::ChainedTransitionEffect> transitionEffect;
+    switch (type) {
+        case TransitionEffectType::TRANSITION_EFFECT_OPACITY: {
+            transitionEffect = AceType::MakeRefPtr<NG::ChainedOpacityEffect>(option->opacity);
+            break;
+        }
+
+        case TransitionEffectType::TRANSITION_EFFECT_TRANSLATE: {
+            CalcDimension x(option->translate.x, DimensionUnit::VP);
+            CalcDimension y(option->translate.y, DimensionUnit::VP);
+            CalcDimension z(option->translate.z, DimensionUnit::VP);
+            NG::TranslateOptions translate(x, y, z);
+            transitionEffect = AceType::MakeRefPtr<NG::ChainedTranslateEffect>(translate);
+            break;
+        }
+
+        case TransitionEffectType::TRANSITION_EFFECT_SCALE: {
+            CalcDimension centerX(option->scale.centerX, DimensionUnit::PERCENT);
+            CalcDimension centerY(option->scale.centerY, DimensionUnit::PERCENT);
+            NG::ScaleOptions scale(option->scale.x, option->scale.y, option->scale.z, centerX, centerY);
+            transitionEffect = AceType::MakeRefPtr<NG::ChainedScaleEffect>(scale);
+            break;
+        }
+
+        case TransitionEffectType::TRANSITION_EFFECT_ROTATE: {
+            CalcDimension centerX(option->rotate.centerX, DimensionUnit::PERCENT);
+            CalcDimension centerY(option->rotate.centerY, DimensionUnit::PERCENT);
+            CalcDimension centerZ(option->rotate.centerZ, DimensionUnit::PERCENT);
+            NG::RotateOptions rotate(option->rotate.x, option->rotate.y, option->rotate.z, option->rotate.angle,
+                centerX, centerY, centerZ, option->rotate.perspective);
+            transitionEffect = AceType::MakeRefPtr<NG::ChainedRotateEffect>(rotate);
+            break;
+        }
+
+        case TransitionEffectType::TRANSITION_EFFECT_MOVE: {
+            transitionEffect =
+                AceType::MakeRefPtr<NG::ChainedMoveEffect>(static_cast<NG::TransitionEdge>(option->move));
+            break;
+        }
+
+        case TransitionEffectType::TRANSITION_EFFECT_ASYMMETRIC: {
+            RefPtr<NG::ChainedTransitionEffect> appearEffect;
+            RefPtr<NG::ChainedTransitionEffect> disappearEffect;
+            if (option->appear) {
+                appearEffect = ParseTransition(option->appear);
+            }
+            if (option->disappear) {
+                disappearEffect = ParseTransition(option->disappear);
+            }
+            transitionEffect = AceType::MakeRefPtr<NG::ChainedAsymmetricEffect>(appearEffect, disappearEffect);
+            break;
+        }
+    }
+
+    CHECK_NULL_RETURN(transitionEffect, nullptr);
+
+    if (option->hasAnimation) {
+        auto animation = option->animation;
+        AnimationOption animationOption;
+        animationOption.SetDuration(animation.duration);
+        animationOption.SetDelay(animation.delay);
+        animationOption.SetIteration(animation.iterations);
+        animationOption.SetTempo(animation.tempo);
+        animationOption.SetAnimationDirection(
+            DIRECTION_LIST[animation.playMode > DIRECTION_LIST.size() ? 0 : animation.playMode]);
+
+        // curve
+        if (animation.iCurve) {
+            auto curve = reinterpret_cast<Curve*>(animation.iCurve);
+            animationOption.SetCurve(AceType::Claim(curve));
+        } else {
+            if (animation.curve < 0 || animation.curve >= CURVES.size()) {
+                animationOption.SetCurve(OHOS::Ace::Curves::EASE_IN_OUT);
+            } else {
+                animationOption.SetCurve(CURVES[animation.curve]);
+            }
+        }
+
+        if (animation.expectedFrameRateRange) {
+            RefPtr<FrameRateRange> frameRateRange =
+                AceType::MakeRefPtr<FrameRateRange>(animation.expectedFrameRateRange->min,
+                    animation.expectedFrameRateRange->max, animation.expectedFrameRateRange->expected);
+            animationOption.SetFrameRateRange(frameRateRange);
+        }
+        auto animationOptionResult = std::make_shared<AnimationOption>(animationOption);
+        transitionEffect->SetAnimationOption(animationOptionResult);
+    }
+
+    if (option->combine) {
+        transitionEffect->SetNext(ParseTransition(option->combine));
+    }
+    return transitionEffect;
+}
+
+void SetTransition(ArkUINodeHandle node, ArkUITransitionEffectOption* option)
+{
+    CHECK_NULL_VOID(option);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    auto transitionEffectOption = ParseTransition(option);
+    CHECK_NULL_VOID(transitionEffectOption);
+    ViewAbstract::SetChainedTransition(frameNode, transitionEffectOption);
+}
+
+void SetDragPreview(ArkUINodeHandle node, ArkUIDragPreview dragPreview)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::DragDropInfo dragPreviewInfo;
+    dragPreviewInfo.inspectorId = dragPreview.inspectorId;
+    ViewAbstract::SetDragPreview(frameNode, dragPreviewInfo);
+}
+
+void ResetDragPreview(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::DragDropInfo dragPreviewInfo;
+    ViewAbstract::SetDragPreview(frameNode, dragPreviewInfo);
+}
+
 void GetExpandSafeArea(ArkUINodeHandle node, ArkUI_Uint32 (*values)[2])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -5974,7 +6134,8 @@ const ArkUICommonModifier* GetCommonModifier()
         SetAccessibilityValue, GetAccessibilityValue, ResetAccessibilityValue, SetAccessibilityActions,
         ResetAccessibilityActions, GetAccessibilityActions, SetAccessibilityRole, ResetAccessibilityRole,
         GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
-        SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea };
+        SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition, SetDragPreview,
+        ResetDragPreview };
 
     return &modifier;
 }
@@ -6511,9 +6672,14 @@ void ResetOnVisibleAreaChange(ArkUINodeHandle node)
 
 void ResetOnClick(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    ViewAbstract::DisableOnClick(frameNode);
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    if (uiNode->GetTag() == "Span") {
+        SpanModelNG::ClearOnClick(uiNode);
+    } else {
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
+        ViewAbstract::DisableOnClick(frameNode);
+    }
 }
 
 void ResetOnTouch(ArkUINodeHandle node)

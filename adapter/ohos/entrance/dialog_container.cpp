@@ -56,7 +56,7 @@ void DialogContainer::InitializeTouchEventCallback()
                                     const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
-            [context, event, markProcess, id]() {
+            [context, event, markProcess]() {
                 context->OnTouchEvent(event);
                 context->NotifyDispatchTouchEventDismiss(event);
                 CHECK_NULL_VOID(markProcess);
@@ -75,7 +75,7 @@ void DialogContainer::InitializeMouseEventCallback()
                                     const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
-            [context, event, markProcess, id]() {
+            [context, event, markProcess]() {
                 context->OnMouseEvent(event);
                 CHECK_NULL_VOID(markProcess);
                 markProcess();
@@ -93,7 +93,7 @@ void DialogContainer::InitializeAxisEventCallback()
                                    const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
         context->GetTaskExecutor()->PostTask(
-            [context, event, markProcess, id]() {
+            [context, event, markProcess]() {
                 context->OnAxisEvent(event);
                 CHECK_NULL_VOID(markProcess);
                 markProcess();
@@ -444,8 +444,8 @@ sptr<OHOS::Rosen::Window> DialogContainer::GetUIWindowInner() const
     return uiWindow_;
 }
 
-void DialogContainer::ShowToast(
-    int32_t instanceId, const std::string& message, int32_t duration, const std::string& bottom)
+void DialogContainer::ShowToast(int32_t instanceId, const std::string& message, int32_t duration,
+    const std::string& bottom, std::function<void(int32_t)>&& callback)
 {
     auto container = AceType::DynamicCast<DialogContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_VOID(container);
@@ -458,7 +458,32 @@ void DialogContainer::ShowToast(
             DialogContainer::HideWindow(instanceId);
         }
     });
-    delegate->ShowToast(message, duration, bottom, NG::ToastShowMode::DEFAULT, -1, std::nullopt);
+    auto toastInfo = NG::ToastInfo { .message = message,
+        .duration = duration,
+        .bottom = bottom,
+        .showMode = NG::ToastShowMode::DEFAULT,
+        .alignment = -1,
+        .offset = std::nullopt };
+    delegate->ShowToast(toastInfo, std::move(callback));
+}
+
+void DialogContainer::CloseToast(int32_t instanceId, int32_t toastId, std::function<void(int32_t)>&& callback)
+{
+    auto container = AceType::DynamicCast<DialogContainer>(AceEngine::Get().GetContainer(instanceId));
+    CHECK_NULL_VOID(container);
+
+    auto frontend = AceType::DynamicCast<DeclarativeFrontend>(container->GetFrontend());
+    CHECK_NULL_VOID(frontend);
+
+    auto delegate = frontend->GetDelegate();
+    CHECK_NULL_VOID(delegate);
+    delegate->SetToastStopListenerCallback([instanceId = instanceId]() {
+        if (ContainerScope::CurrentId() >= 0) {
+            DialogContainer::HideWindow(instanceId);
+        }
+    });
+
+    delegate->CloseToast(toastId, std::move(callback));
 }
 
 void DialogContainer::ShowDialog(int32_t instanceId, const std::string& title, const std::string& message,
@@ -588,5 +613,13 @@ bool DialogContainer::CloseWindow(int32_t instanceId)
 bool DialogContainer::OnBackPressed(int32_t instanceId)
 {
     return DialogContainer::CloseWindow(instanceId);
+}
+
+void DialogContainer::SetFontScaleAndWeightScale(int32_t instanceId)
+{
+    float fontScale = SystemProperties::GetFontScale();
+    float fontWeightScale = SystemProperties::GetFontWeightScale();
+    Container::SetFontScale(instanceId, fontScale);
+    Container::SetFontWeightScale(instanceId, fontWeightScale);
 }
 } // namespace OHOS::Ace::Platform

@@ -62,6 +62,8 @@ void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* pain
     dotIndicatorModifier_->SetOffset(geometryNode->GetContentOffset());
     dotIndicatorModifier_->SetAnimationStartIndex(animationStartIndex_);
     dotIndicatorModifier_->SetAnimationEndIndex(animationEndIndex_);
+    dotIndicatorModifier_->SetKeepStatus(keepStatus_);
+    dotIndicatorModifier_->SetIsHorizontalAndRTL(isHorizontalAndRightToLeft_);
 
     SizeF contentSize = geometryNode->GetFrameSize();
     centerY_ = (axis_ == Axis::HORIZONTAL ? contentSize.Height() : contentSize.Width()) * HALF_FLOAT;

@@ -23,6 +23,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_algorithm.h"
@@ -34,9 +35,6 @@ class TabsPattern : public Pattern {
     DECLARE_ACE_TYPE(TabsPattern, Pattern);
 
 public:
-    using ChangeEvent = std::function<void(int32_t)>;
-    using ChangeEventPtr = std::shared_ptr<ChangeEvent>;
-
     TabsPattern() = default;
     ~TabsPattern() override = default;
 
@@ -64,7 +62,7 @@ public:
 
     void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& event);
 
-    ChangeEventPtr GetChangeEvent()
+    ChangeEventWithPreIndexPtr GetChangeEvent()
     {
         return onChangeEvent_;
     }
@@ -157,13 +155,14 @@ private:
     void UpdateSwiperDisableSwipe(bool disableSwipe);
     void SetSwiperPaddingAndBorder();
     void RecordChangeEvent(int32_t index);
+    void FireTabContentStateCallback(int32_t oldIndex, int32_t nextIndex) const;
 
     bool isCustomAnimation_ = false;
     bool isDisableSwipe_ = false;
     bool isInit_ = true;
 
     TabAnimateMode animateMode_ = TabAnimateMode::CONTENT_FIRST;
-    ChangeEventPtr onChangeEvent_;
+    ChangeEventWithPreIndexPtr onChangeEvent_;
     ChangeEventPtr onTabBarClickEvent_;
     ChangeEventPtr onIndexChangeEvent_;
     AnimationStartEventPtr animationStartEvent_;

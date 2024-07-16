@@ -39,6 +39,11 @@ enum class AdaptiveColor {
     AVERAGE,
 };
 
+enum class TransitionHierarchyStrategy {
+    NONE = 0,
+    ADAPTIVE,
+};
+
 struct BlurOption {
     std::vector<float> grayscale;
 };

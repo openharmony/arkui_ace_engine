@@ -46,6 +46,7 @@
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
@@ -1110,6 +1111,10 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
         CreateImageBackIcon(backButtonNode, navigationGroupNode);
     }
 
+    //read navigation back button
+    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+    NavigationTitleUtil::SetAccessibility(backButtonNode, message);
+
     backButtonNode->MarkModifyDone();
     titleBarNode->SetBackButton(backButtonNode);
     titleBarNode->AddChild(backButtonNode, 0);
@@ -1871,6 +1876,10 @@ void NavigationModelNG::SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMo
     CHECK_NULL_VOID(imageRenderProperty);
     imageRenderProperty->UpdateMatchTextDirection(true);
 
+    //read navigation back button
+    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+    NavigationTitleUtil::SetAccessibility(backButtonNode, message);
+
     backButtonImageNode->MountToParent(backButtonNode);
     backButtonImageNode->MarkModifyDone();
     backButtonNode->MarkModifyDone();
@@ -1956,4 +1965,106 @@ void NavigationModelNG::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)
     CHECK_NULL_VOID(pattern);
     pattern->SetSystemBarStyle(style);
 }
+
+RefPtr<FrameNode> NavigationModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    // navBar node
+    if (!navigationGroupNode->GetNavBarNode()) {
+        int32_t navBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto navBarNode = NavBarNode::GetOrCreateNavBarNode(
+            V2::NAVBAR_ETS_TAG, navBarNodeId, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+        auto navBarRenderContext = navBarNode->GetRenderContext();
+        CHECK_NULL_RETURN(navBarRenderContext, nullptr);
+        navBarRenderContext->UpdateClipEdge(true);
+        navigationGroupNode->AddChild(navBarNode);
+        navigationGroupNode->SetNavBarNode(navBarNode);
+
+        // titleBar node
+        if (!navBarNode->GetTitleBarNode()) {
+            int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+            auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+                V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+            navBarNode->AddChild(titleBarNode);
+            navBarNode->SetTitleBarNode(titleBarNode);
+        }
+
+        // navBar content node
+        if (!navBarNode->GetNavBarContentNode()) {
+            int32_t navBarContentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+            auto navBarContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVBAR_CONTENT_ETS_TAG, navBarContentNodeId,
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+            auto navBarContentRenderContext = navBarContentNode->GetRenderContext();
+            CHECK_NULL_RETURN(navBarContentRenderContext, nullptr);
+            navBarContentRenderContext->UpdateClipEdge(true);
+            navBarNode->AddChild(navBarContentNode);
+            navBarNode->SetNavBarContentNode(navBarContentNode);
+        }
+
+        // toolBar node
+        if (!navBarNode->GetToolBarNode()) {
+            int32_t toolBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+            auto toolBarNode = NavToolbarNode::GetOrCreateToolbarNode(
+                V2::TOOL_BAR_ETS_TAG, toolBarNodeId, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+            navBarNode->AddChild(toolBarNode);
+            navBarNode->SetToolBarNode(toolBarNode);
+            navBarNode->SetPreToolBarNode(toolBarNode);
+            navBarNode->UpdatePrevToolBarIsCustom(false);
+        }
+        auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+        CHECK_NULL_RETURN(navBarLayoutProperty, nullptr);
+        navBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::FREE);
+    }
+
+    // content node
+    if (!navigationGroupNode->GetContentNode()) {
+        int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG, contentNodeId,
+            []() { return AceType::MakeRefPtr<NavigationContentPattern>(); });
+        contentNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+        contentNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
+            HitTestMode::HTMTRANSPARENT_SELF);
+        navigationGroupNode->AddChild(contentNode);
+        navigationGroupNode->SetContentNode(contentNode);
+    }
+
+    // divider node
+    if (!navigationGroupNode->GetDividerNode()) {
+        int32_t dividerNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto dividerNode = FrameNode::GetOrCreateFrameNode(
+            V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+        navigationGroupNode->AddChild(dividerNode);
+        navigationGroupNode->SetDividerNode(dividerNode);
+
+        auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
+        CHECK_NULL_RETURN(dividerLayoutProperty, nullptr);
+        dividerLayoutProperty->UpdateStrokeWidth(DIVIDER_WIDTH);
+        dividerLayoutProperty->UpdateVertical(true);
+        auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
+        CHECK_NULL_RETURN(dividerRenderProperty, nullptr);
+    }
+    auto navigationLayoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
+    if (!navigationLayoutProperty->HasNavigationMode()) {
+        navigationLayoutProperty->UpdateNavigationMode(NavigationMode::AUTO);
+    }
+    navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
+
+    SetNavigationStack(AceType::RawPtr(navigationGroupNode));
+
+    return navigationGroupNode;
+}
+
+void NavigationModelNG::SetNavigationStack(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto navigationStack = pattern->GetNavigationStack();
+    if (!navigationStack) {
+        auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+        pattern->SetNavigationStack(std::move(navigationStack));
+    }
+}
+
 } // namespace OHOS::Ace::NG

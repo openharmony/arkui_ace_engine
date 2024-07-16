@@ -16,6 +16,9 @@
 #include "gtest/gtest.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "base/memory/referenced.h"
+#include "frameworks/core/components_ng/manager/safe_area/safe_area_manager.h"
+
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
@@ -37,6 +40,10 @@ class SafeAreaManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
+    void SetUp() override;
+    void TearDown() override;
+
+    RefPtr<SafeAreaManager> safeAreaManager_;
 };
 
 void SafeAreaManagerTest::SetUpTestCase()
@@ -47,6 +54,16 @@ void SafeAreaManagerTest::SetUpTestCase()
 void SafeAreaManagerTest::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
+}
+
+void SafeAreaManagerTest::SetUp()
+{
+    safeAreaManager_ = Referenced::MakeRefPtr<SafeAreaManager>();
+}
+
+void SafeAreaManagerTest::TearDown()
+{
+    safeAreaManager_ = nullptr;
 }
 
 /**
@@ -65,10 +82,9 @@ HWTEST_F(SafeAreaManagerTest, UpdateCutoutTest, TestSize.Level1)
         NG::SafeAreaInsets({ CUTOUT_LEFT_START, CUTOUT_LEFT_END }, { CUTOUT_TOP_START, CUTOUT_TOP_END },
             { CUTOUT_RIGHT_START, CUTOUT_RIGHT_END }, { CUTOUT_BOTTOM_START, CUTOUT_BOTTOM_END });
 
-    auto pipeline = MockPipelineContext::GetCurrent();
-    pipeline->SetIsLayoutFullScreen(true);
-    pipeline->UpdateCutoutSafeArea(cutoutArea);
-    auto safeArea = pipeline->GetSafeArea();
+    safeAreaManager_->SetIsFullScreen(true);
+    safeAreaManager_->UpdateCutoutSafeArea(cutoutArea);
+    auto safeArea = safeAreaManager_->GetSafeArea();
 
     EXPECT_EQ(safeArea.left_.start, 0.0f);
     EXPECT_EQ(safeArea.right_.end, DISPLAY_WIDTH);

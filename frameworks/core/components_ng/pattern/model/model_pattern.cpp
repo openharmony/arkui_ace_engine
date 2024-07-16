@@ -71,6 +71,9 @@ void ModelPattern::OnModifyDone()
 
 bool ModelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    if (config.skipMeasure && config.skipLayout) {
+        return false;
+    }
     CHECK_NULL_RETURN(modelAdapter_, false);
     auto host = GetHost();
     CHECK_NULL_RETURN(dirty, false);
@@ -137,7 +140,7 @@ void ModelPattern::MarkDirtyNode(const PropertyChangeFlag flag)
 static std::string TextureImagesToStr(const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
     std::string ret;
-    if (!modelPaintProperty->GetModelImageTexturePaths().has_value()) {
+    if (modelPaintProperty->GetModelImageTexturePathsValue().empty()) {
         return ret;
     }
     auto& imageTextures = modelPaintProperty->GetModelImageTexturePaths().value();
@@ -150,9 +153,6 @@ static std::string TextureImagesToStr(const RefPtr<ModelPaintProperty>& modelPai
 static std::string ShaderInputBufferToStr(const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
     std::string ret;
-    if (!modelPaintProperty->GetModelShaderInputBuffer().has_value()) {
-        return ret;
-    }
     const auto& shaderInputBuffer = modelPaintProperty->GetModelShaderInputBuffer().value();
     if (!shaderInputBuffer || !shaderInputBuffer->IsValid()) {
         return ret;
@@ -204,7 +204,7 @@ static std::string SurfaceTypeToStr(const RefPtr<ModelAdapterWrapper>& modelAdap
 static std::string SceneResourceToStr(const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
     std::string ret;
-    if (!modelPaintProperty->GetModelSource().has_value()) {
+    if (modelPaintProperty->GetModelSourceValue().empty()) {
         return ret;
     }
     ret = modelPaintProperty->GetModelSource().value();
@@ -214,7 +214,7 @@ static std::string SceneResourceToStr(const RefPtr<ModelPaintProperty>& modelPai
 static std::string SceneEnvironmentToStr(const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
     std::string ret;
-    if (!modelPaintProperty->GetModelBackground().has_value()) {
+    if (modelPaintProperty->GetModelBackgroundValue().empty()) {
         return ret;
     }
     ret = modelPaintProperty->GetModelBackground().value();
@@ -224,9 +224,6 @@ static std::string SceneEnvironmentToStr(const RefPtr<ModelPaintProperty>& model
 static std::string SceneCustomRenderToStr(const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
     std::string ret;
-    if (!modelPaintProperty->GetModelCustomRender().has_value()) {
-        return ret;
-    }
     auto& customRender = modelPaintProperty->GetModelCustomRender().value();
     if (!customRender) {
         return ret;
@@ -238,7 +235,7 @@ static std::string SceneCustomRenderToStr(const RefPtr<ModelPaintProperty>& mode
 static std::string SceneShaderPathToStr(const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
     std::string ret;
-    if (!modelPaintProperty->GetShaderPath().has_value()) {
+    if (modelPaintProperty->GetShaderPathValue().empty()) {
         return ret;
     }
     ret = modelPaintProperty->GetShaderPath().value();

@@ -13,25 +13,25 @@
  * limitations under the License.
  */
 
-if (!("finalizeConstruction" in ViewPU.prototype)) {
-  Reflect.set(ViewPU.prototype, "finalizeConstruction", () => {});
+if (!('finalizeConstruction' in ViewPU.prototype)) {
+  Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {});
 }
-const display = globalThis.requireNapi("display");
-const window = globalThis.requireNapi("window");
-const hilog = globalThis.requireNapi("hilog");
-const LengthMetrics = globalThis.requireNapi("arkui.node").LengthMetrics;
-const curves = globalThis.requireNativeModule("ohos.curves");
-const mediaQuery = requireNapi("mediaquery");
+const display = globalThis.requireNapi('display');
+const window = globalThis.requireNapi('window');
+const hilog = globalThis.requireNapi('hilog');
+const LengthMetrics = globalThis.requireNapi('arkui.node').LengthMetrics;
+const curves = globalThis.requireNativeModule('ohos.curves');
+const mediaQuery = requireNapi('mediaquery');
 export var ExtraRegionPosition;
 (function (k3) {
-  k3[(k3["TOP"] = 1)] = "TOP";
-  k3[(k3["BOTTOM"] = 2)] = "BOTTOM";
+  k3[(k3['TOP'] = 1)] = 'TOP';
+  k3[(k3['BOTTOM'] = 2)] = 'BOTTOM';
 })(ExtraRegionPosition || (ExtraRegionPosition = {}));
 export var PresetSplitRatio;
 (function (s4) {
-  s4[(s4["LAYOUT_1V1"] = 1)] = "LAYOUT_1V1";
-  s4[(s4["LAYOUT_2V3"] = 0.6666666666666666)] = "LAYOUT_2V3";
-  s4[(s4["LAYOUT_3V2"] = 1.5)] = "LAYOUT_3V2";
+  s4[(s4['LAYOUT_1V1'] = 1)] = 'LAYOUT_1V1';
+  s4[(s4['LAYOUT_2V3'] = 0.6666666666666666)] = 'LAYOUT_2V3';
+  s4[(s4['LAYOUT_3V2'] = 1.5)] = 'LAYOUT_3V2';
 })(PresetSplitRatio || (PresetSplitRatio = {}));
 function withDefaultValue(h3, i3) {
   if (h3 === void 0 || h3 === null) {
@@ -50,13 +50,13 @@ function getSplitRatio(f3, g3) {
 }
 class Logger {
   static debug(d3, ...e3) {
-    return hilog.debug(0x3900, "FoldSplitContainer", d3, ...e3);
+    return hilog.debug(0x3900, 'FoldSplitContainer', d3, ...e3);
   }
   static info(b3, ...c3) {
-    return hilog.info(0x3900, "FoldSplitContainer", b3, ...c3);
+    return hilog.info(0x3900, 'FoldSplitContainer', b3, ...c3);
   }
   static error(z2, ...a3) {
-    return hilog.error(0x3900, "FoldSplitContainer", z2, ...a3);
+    return hilog.error(0x3900, 'FoldSplitContainer', z2, ...a3);
   }
 }
 function initLayout() {
@@ -68,7 +68,7 @@ function initLayout() {
 export class FoldSplitContainer extends ViewPU {
   constructor(t2, u2, v2, w2 = -1, x2 = undefined, y2) {
     super(t2, v2, w2, y2);
-    if (typeof x2 === "function") {
+    if (typeof x2 === 'function') {
       this.paramsGenerator_ = x2;
     }
     this.primary = undefined;
@@ -77,40 +77,40 @@ export class FoldSplitContainer extends ViewPU {
     this.__expandedLayoutOptions = new SynchedPropertyObjectOneWayPU(
       u2.expandedLayoutOptions,
       this,
-      "expandedLayoutOptions"
+      'expandedLayoutOptions'
     );
     this.__hoverModeLayoutOptions = new SynchedPropertyObjectOneWayPU(
       u2.hoverModeLayoutOptions,
       this,
-      "hoverModeLayoutOptions"
+      'hoverModeLayoutOptions'
     );
     this.__foldedLayoutOptions = new SynchedPropertyObjectOneWayPU(
       u2.foldedLayoutOptions,
       this,
-      "foldedLayoutOptions"
+      'foldedLayoutOptions'
     );
     this.__animationOptions = new SynchedPropertyObjectOneWayPU(
       u2.animationOptions,
       this,
-      "animationOptions"
+      'animationOptions'
     );
     this.onHoverStatusChange = () => {};
     this.__primaryLayout = new ObservedPropertyObjectPU(
       initLayout(),
       this,
-      "primaryLayout"
+      'primaryLayout'
     );
     this.__secondaryLayout = new ObservedPropertyObjectPU(
       initLayout(),
       this,
-      "secondaryLayout"
+      'secondaryLayout'
     );
     this.__extraLayout = new ObservedPropertyObjectPU(
       initLayout(),
       this,
-      "extraLayout"
+      'extraLayout'
     );
-    this.__extraOpacity = new ObservedPropertySimplePU(1, this, "extraOpacity");
+    this.__extraOpacity = new ObservedPropertySimplePU(1, this, 'extraOpacity');
     this.windowStatusType = window.WindowStatusType.UNDEFINED;
     this.foldStatus = display.FoldStatus.FOLD_STATUS_UNKNOWN;
     this.windowInstance = undefined;
@@ -118,10 +118,11 @@ export class FoldSplitContainer extends ViewPU {
     this.containerGlobalPosition = { x: 0, y: 0 };
     this.listener = undefined;
     this.isSmallScreen = false;
+    this.isHoverMode = undefined;
     this.setInitiallyProvidedValue(u2);
-    this.declareWatch("expandedLayoutOptions", this.updateLayout);
-    this.declareWatch("hoverModeLayoutOptions", this.updateLayout);
-    this.declareWatch("foldedLayoutOptions", this.updateLayout);
+    this.declareWatch('expandedLayoutOptions', this.updateLayout);
+    this.declareWatch('hoverModeLayoutOptions', this.updateLayout);
+    this.declareWatch('foldedLayoutOptions', this.updateLayout);
     this.finalizeConstruction();
   }
   setInitiallyProvidedValue(s2) {
@@ -192,6 +193,9 @@ export class FoldSplitContainer extends ViewPU {
     }
     if (s2.isSmallScreen !== undefined) {
       this.isSmallScreen = s2.isSmallScreen;
+    }
+    if (s2.isHoverMode !== undefined) {
+      this.isHoverMode = s2.isHoverMode;
     }
   }
   updateStateVars(r2) {
@@ -271,28 +275,23 @@ export class FoldSplitContainer extends ViewPU {
     this.__extraOpacity.set(l1);
   }
   aboutToAppear() {
-    this.listener = mediaQuery.matchMediaSync("(width<=600vp)");
+    this.listener = mediaQuery.matchMediaSync('(width<=600vp)');
     this.isSmallScreen = this.listener.matches;
-    this.listener.on("change", (m4) => {
+    this.listener.on('change', (m4) => {
       this.isSmallScreen = m4.matches;
     });
     this.foldStatus = display.getFoldStatus();
-    display.on("foldStatusChange", (j4) => {
+    display.on('foldStatusChange', (j4) => {
       if (this.foldStatus !== j4) {
-        const k4 = this.isHoverMode();
         this.foldStatus = j4;
         this.updateLayout();
-        const l4 = this.isHoverMode();
-        if (k4 !== l4) {
-          this.dispatchHoverStatusChange(l4);
-        }
         this.updatePreferredOrientation();
       }
     });
     window.getLastWindow(this.getUIContext().getHostContext(), (e4, f4) => {
       if (e4 && e4.code) {
         Logger.error(
-          "Failed to get window instance, error code: %{public}d",
+          'Failed to get window instance, error code: %{public}d',
           e4.code
         );
         return;
@@ -300,34 +299,34 @@ export class FoldSplitContainer extends ViewPU {
       const g4 = f4.getWindowProperties().id;
       if (g4 < 0) {
         Logger.error(
-          "Failed to get window instance because the window id is invalid. window id: %{public}d",
+          'Failed to get window instance because the window id is invalid. window id: %{public}d',
           g4
         );
         return;
       }
       this.windowInstance = f4;
       this.updatePreferredOrientation();
-      this.windowInstance.on("windowStatusChange", (i4) => {
+      this.windowInstance.on('windowStatusChange', (i4) => {
         this.windowStatusType = i4;
       });
     });
   }
   aboutToDisappear() {
     if (this.listener) {
-      this.listener.off("change");
+      this.listener.off('change');
       this.listener = undefined;
     }
-    display.off("foldStatusChange");
+    display.off('foldStatusChange');
     if (this.windowInstance) {
-      this.windowInstance.off("windowStatusChange");
+      this.windowInstance.off('windowStatusChange');
     }
   }
   initialRender() {
     this.observeComponentCreation2((y1, z1) => {
       Stack.create();
-      Stack.id("$$FoldSplitContainer$Stack$$");
-      Stack.width("100%");
-      Stack.height("100%");
+      Stack.id('$$FoldSplitContainer$Stack$$');
+      Stack.width('100%');
+      Stack.height('100%');
       Stack.onSizeChange((b2, d4) => {
         this.updateContainerSize(d4);
         this.updateContainerPosition();
@@ -428,7 +427,7 @@ export class FoldSplitContainer extends ViewPU {
           );
         }
       } catch (i1) {
-        Logger.error("Failed to update preferred orientation.");
+        Logger.error('Failed to update preferred orientation.');
       }
     }
   }
@@ -438,12 +437,13 @@ export class FoldSplitContainer extends ViewPU {
   }
   updateContainerPosition() {
     const y3 = this.getUIContext();
-    const z3 = y3.getFrameNodeById("$$FoldSplitContainer$Stack$$");
+    const z3 = y3.getFrameNodeById('$$FoldSplitContainer$Stack$$');
     if (z3) {
       this.containerGlobalPosition = z3.getPositionToWindow();
     }
   }
   updateLayout() {
+    let t1 = false;
     let g1;
     if (this.isSmallScreen) {
       g1 = this.getFoldedRegionLayouts();
@@ -453,7 +453,12 @@ export class FoldSplitContainer extends ViewPU {
       } else if (
         this.foldStatus === display.FoldStatus.FOLD_STATUS_HALF_FOLDED
       ) {
-        g1 = this.getHoverModeRegionLayouts();
+        if (this.isPortraitOrientation()) {
+          g1 = this.getExpandedRegionLayouts();
+        } else {
+          g1 = this.getHoverModeRegionLayouts();
+          t1 = true;
+        }
       } else if (this.foldStatus === display.FoldStatus.FOLD_STATUS_FOLDED) {
         g1 = this.getFoldedRegionLayouts();
       } else {
@@ -477,10 +482,11 @@ export class FoldSplitContainer extends ViewPU {
         this.extraLayout = g1.extra;
       });
     }
-    if (
-      this.foldStatus === display.FoldStatus.FOLD_STATUS_HALF_FOLDED &&
-      !this.hoverModeLayoutOptions.showExtraRegion
-    ) {
+    if (this.isHoverMode !== t1) {
+      this.dispatchHoverStatusChange(t1);
+      this.isHoverMode = t1;
+    }
+    if (t1 && !this.hoverModeLayoutOptions.showExtraRegion) {
       this.extraOpacity = 0;
     } else {
       this.extraOpacity = 1;
@@ -548,9 +554,6 @@ export class FoldSplitContainer extends ViewPU {
     const q = initLayout();
     const r = initLayout();
     const s = initLayout();
-    if (this.isPortraitOrientation()) {
-      return this.getExpandedRegionLayouts();
-    }
     const t = this.getCreaseRegionRect();
     q.position.x = 0;
     q.position.y = 0;
@@ -566,18 +569,18 @@ export class FoldSplitContainer extends ViewPU {
       q.size.width = o;
       r.size.width = o;
       s.position.x = o;
-      const h1 = withDefaultValue(
+      const r1 = withDefaultValue(
         this.expandedLayoutOptions.isExtraRegionPerpendicular,
         true
       );
-      if (h1) {
+      if (r1) {
         s.size.height = this.extraLayout.size.height;
       } else {
-        const k1 = withDefaultValue(
+        const s1 = withDefaultValue(
           this.expandedLayoutOptions.extraRegionPosition,
           ExtraRegionPosition.TOP
         );
-        if (k1 === ExtraRegionPosition.BOTTOM) {
+        if (s1 === ExtraRegionPosition.BOTTOM) {
           s.size.height = r.size.height;
           s.position.y = r.position.y;
         } else {
@@ -586,20 +589,20 @@ export class FoldSplitContainer extends ViewPU {
         }
       }
     } else {
-      const v = getSplitRatio(
+      const p1 = getSplitRatio(
         this.hoverModeLayoutOptions.horizontalSplitRatio,
         PresetSplitRatio.LAYOUT_3V2
       );
-      const w = withDefaultValue(
+      const q1 = withDefaultValue(
         this.hoverModeLayoutOptions.extraRegionPosition,
         ExtraRegionPosition.TOP
       );
       if (this.hasExtraRegion()) {
-        s.size.width = o / (v + 1);
+        s.size.width = o / (p1 + 1);
       } else {
         s.size.width = 0;
       }
-      if (w === ExtraRegionPosition.BOTTOM) {
+      if (q1 === ExtraRegionPosition.BOTTOM) {
         q.size.width = o;
         r.size.width = o - s.size.width;
         s.size.height = r.size.height;
@@ -654,12 +657,6 @@ export class FoldSplitContainer extends ViewPU {
       g = px2vp(h.height);
     }
     return { left: d, top: e, width: f, height: g };
-  }
-  isHoverMode() {
-    return (
-      this.foldStatus === display.FoldStatus.FOLD_STATUS_HALF_FOLDED &&
-      !this.isPortraitOrientation()
-    );
   }
   isPortraitOrientation() {
     const a = display.getDefaultDisplaySync();

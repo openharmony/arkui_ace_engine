@@ -93,11 +93,16 @@ public:
     ScrollResult HandleScroll(
         float offset, int32_t source, NestedState state = NestedState::GESTURE, float velocity = 0.f) override;
 
-    bool HandleScrollVelocity(float velocity) override;
+    bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
 
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
 
     void OnScrollStartRecursive(float position, float velocity = 0.f) override;
+    
+    bool NestedScrollOutOfBoundary() override
+    {
+        return !NearZero(scrollOffset_);
+    }
 
 private:
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);

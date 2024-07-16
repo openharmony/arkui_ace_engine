@@ -94,19 +94,30 @@ public:
     virtual void SetPadding(const CalcDimension& value) = 0;
     virtual void SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) = 0;
+    virtual void SetPaddings(const NG::PaddingProperty& paddings) = 0;
     virtual void SetMargin(const CalcDimension& value) = 0;
     virtual void SetMargins(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) = 0;
+    virtual void SetMargins(const NG::MarginProperty& margins) = 0;
+    virtual void ResetSafeAreaPadding() = 0;
+    virtual void SetSafeAreaPadding(const CalcDimension& value) = 0;
+    virtual void SetSafeAreaPaddings(const std::optional<CalcDimension>& top,
+        const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
+        const std::optional<CalcDimension>& right) = 0;
     virtual void SetBorderRadius(const Dimension& value) = 0;
     virtual void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
         const std::optional<Dimension>& radiusBottomRight) = 0;
+    virtual void SetBorderRadius(const NG::BorderRadiusProperty& borderRadius) = 0;
     virtual void SetBorderColor(const Color& value) = 0;
     virtual void SetBorderColor(const std::optional<Color>& colorLeft, const std::optional<Color>& colorRight,
         const std::optional<Color>& colorTop, const std::optional<Color>& colorBottom) = 0;
+    virtual void SetBorderColor(const NG::BorderColorProperty& borderColors) = 0;
     virtual void SetBorderWidth(const Dimension& value) = 0;
     virtual void SetBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) = 0;
+    virtual void SetBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
+        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom, bool isLocalized) = 0;
     virtual void SetBorderStyle(const BorderStyle& value) = 0;
     virtual void SetBorderStyle(const std::optional<BorderStyle>& styleLeft,
         const std::optional<BorderStyle>& styleRight, const std::optional<BorderStyle>& styleTop,
@@ -131,9 +142,11 @@ public:
     virtual void SetOuterBorderRadius(const std::optional<Dimension>& radiusTopLeft,
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
         const std::optional<Dimension>& radiusBottomRight) = 0;
+    virtual void SetOuterBorderRadius(const NG::BorderRadiusProperty& borderRadius) = 0;
     virtual void SetOuterBorderColor(const Color& value) = 0;
     virtual void SetOuterBorderColor(const std::optional<Color>& colorLeft, const std::optional<Color>& colorRight,
         const std::optional<Color>& colorTop, const std::optional<Color>& colorBottom) = 0;
+    virtual void SetOuterBorderColor(const NG::BorderColorProperty& borderColors) = 0;
     virtual void SetOuterBorderWidth(const Dimension& value) = 0;
     virtual void SetOuterBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) = 0;
@@ -186,7 +199,8 @@ public:
     virtual void SetVisibility(VisibleType visible, std::function<void(int32_t)>&& changeEventFunc) = 0;
     virtual void SetSharedTransition(
         const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option) = 0;
-    virtual void SetGeometryTransition(const std::string& id, bool followWithoutTransition = false) = 0;
+    virtual void SetGeometryTransition(const std::string& id,
+        bool followWithoutTransition = false, bool doRegisterSharedTransition = true) = 0;
     virtual void SetMotionPath(const MotionPathOption& option) = 0;
     virtual void SetRenderGroup(bool isRenderGroup) = 0;
     virtual void SetRenderFit(RenderFit renderFit) = 0;
@@ -250,6 +264,7 @@ public:
     virtual void SetOnKeyPreIme(OnKeyPreImeFunc&& onKeyCallback) {}
     virtual void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) = 0;
     virtual void SetOnHover(OnHoverFunc&& onHoverEventFunc) = 0;
+    virtual void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) = 0;
     virtual void SetOnDelete(std::function<void()>&& onDeleteCallback) = 0;
     virtual void SetOnAppear(std::function<void()>&& onAppearCallback) = 0;
     virtual void SetOnAttach(std::function<void()>&& onAttachCallback) = 0;
@@ -287,6 +302,7 @@ public:
     virtual void DisableOnKeyEvent() = 0;
     virtual void DisableOnKeyPreIme() {}
     virtual void DisableOnHover() = 0;
+    virtual void DisableOnAccessibilityHover() = 0;
     virtual void DisableOnMouse() = 0;
     virtual void DisableOnAppear() = 0;
     virtual void DisableOnDisAppear() = 0;
@@ -336,6 +352,7 @@ public:
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
     virtual void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const NG::MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) = 0;
+    virtual void BindDragWithContextMenuParams(const NG::MenuParam& menuParam) = 0;
     virtual void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,

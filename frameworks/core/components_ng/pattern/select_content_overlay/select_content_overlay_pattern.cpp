@@ -126,7 +126,11 @@ bool SelectContentOverlayPattern::IsHandleInSameLine(const RectF& first, const R
 
 void SelectContentOverlayPattern::UpdateHandleHotZone()
 {
-    if (info_->firstHandle.isPaintHandleWithPoints || info_->secondHandle.isPaintHandleWithPoints) {
+    if (!CheckIfNeedHandle()) {
+        return;
+    }
+    if (info_->handleLevelMode == HandleLevelMode::OVERLAY &&
+        (info_->firstHandle.isPaintHandleWithPoints || info_->secondHandle.isPaintHandleWithPoints)) {
         UpdateHandleHotZoneWithPoint();
     } else {
         SelectOverlayPattern::UpdateHandleHotZone();
@@ -152,12 +156,14 @@ bool SelectContentOverlayPattern::UpdateHandleHotZoneWithPoint()
             auto offsetX = centerOffset.GetX() - hotZone;
             auto offsetY = centerOffset.GetY() - hotZone;
             UpdateHandleHotRegion(secondHandleRegion_, { offsetX, offsetY });
+            firstHandleRegion_.Reset();
         } else {
             // Use the first handle to make a single handle.
             auto centerOffset = GetHandleHotZoneOffset(true, radius, false);
             auto offsetX = centerOffset.GetX() - hotZone;
             auto offsetY = centerOffset.GetY() - hotZone;
             UpdateHandleHotRegion(firstHandleRegion_, { offsetX, offsetY });
+            secondHandleRegion_.Reset();
         }
         return true;
     }
@@ -202,5 +208,13 @@ OffsetF SelectContentOverlayPattern::GetHandleHotZoneOffset(bool isFirst, float 
     auto startPoint = isFirst ? info_->firstHandle.paintInfo.startPoint : info_->secondHandle.paintInfo.startPoint;
     auto endPoint = isFirst ? info_->firstHandle.paintInfo.endPoint : info_->secondHandle.paintInfo.endPoint;
     return SelectOverlayContentModifier::CalculateCenterPoint(startPoint, endPoint, raidus, handleOnTop);
+}
+
+void SelectContentOverlayPattern::UpdateViewPort(const std::optional<RectF>& viewPort)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    info_->ancestorViewPort = viewPort;
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 } // namespace OHOS::Ace::NG

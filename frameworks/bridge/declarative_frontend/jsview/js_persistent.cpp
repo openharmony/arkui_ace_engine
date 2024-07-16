@@ -68,7 +68,7 @@ void JSPersistent::Set(const JSCallbackInfo& args)
     }
     std::string key = args[0]->ToString();
     auto serializedValue = JSON::Stringify(args.GetVm(), args[1].Get().GetLocalHandle());
-    std::string value = serializedValue->ToString(args.GetVm())->ToString();
+    std::string value = serializedValue->ToString(args.GetVm())->ToString(args.GetVm());
     if (!StorageProxy::GetInstance()->GetStorage()) {
         LOGW("no storage available");
         return;
