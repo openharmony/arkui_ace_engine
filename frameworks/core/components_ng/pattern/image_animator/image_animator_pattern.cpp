@@ -232,7 +232,7 @@ std::list<ImageAnimatorPattern::CacheImageStruct>::iterator ImageAnimatorPattern
 void ImageAnimatorPattern::GenerateCachedImages()
 {
     CHECK_NULL_VOID(images_.size());
-    auto averageShowTime = animator_->GetDuration() / images_.size();
+    auto averageShowTime = animator_->GetDuration() / static_cast<int32_t>(images_.size());
     size_t cacheImageNum = averageShowTime >= CRITICAL_TIME ? 1 : 2;
     cacheImageNum = std::min(images_.size() - 1, cacheImageNum);
     if (cacheImages_.size() > cacheImageNum) {

@@ -58,7 +58,7 @@ void LinearSplitLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     } while (false);
 
-    if (!childrenDragPos_.empty() && childrenDragPos_.size() != visibleChildCount_ + 1U) {
+    if (!childrenDragPos_.empty() && childrenDragPos_.size() != static_cast<size_t>(visibleChildCount_) + 1U) {
         childrenDragPos_.clear();
     }
 
