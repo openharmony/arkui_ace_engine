@@ -739,9 +739,31 @@ void CustomMenuItemPattern::OnTouch(const TouchEventInfo& info)
     } else if (touchType == TouchType::UP) {
         auto touchUpOffset = info.GetTouches().front().GetLocalLocation();
         if (lastTouchOffset_ && (touchUpOffset - *lastTouchOffset_).GetDistance() <= DEFAULT_CLICK_DISTANCE) {
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+                HandleOnChange();
+            }
             CloseMenu();
         }
         lastTouchOffset_.reset();
+    }
+}
+
+void CustomMenuItemPattern::HandleOnChange()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<MenuItemEventHub>();
+    CHECK_NULL_VOID(hub);
+    auto onChange = hub->GetOnChange();
+    auto selectedChangeEvent = hub->GetSelectedChangeEvent();
+    SetChange();
+    if (selectedChangeEvent) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "trigger selectedChangeEvent");
+        selectedChangeEvent(IsSelected());
+    }
+    if (onChange) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "trigger onChange");
+        onChange(IsSelected());
     }
 }
 
