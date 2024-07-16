@@ -231,12 +231,12 @@ std::shared_ptr<AnimationUtils::InteractiveAnimation> AnimationUtils::CreateInte
     return interactiveAnimation;
 }
 
-void AnimationUtils::StartInteractiveAnimation(
+int32_t AnimationUtils::StartInteractiveAnimation(
     const std::shared_ptr<AnimationUtils::InteractiveAnimation>& interactiveAnimation)
 {
-    CHECK_NULL_VOID(interactiveAnimation);
-    CHECK_NULL_VOID(interactiveAnimation->interactiveAnimation_);
-    interactiveAnimation->interactiveAnimation_->StartAnimation();
+    CHECK_NULL_RETURN(interactiveAnimation, -1);
+    CHECK_NULL_RETURN(interactiveAnimation->interactiveAnimation_, -1);
+    return interactiveAnimation->interactiveAnimation_->StartAnimation();
 }
 
 void AnimationUtils::ContinueInteractiveAnimation(

@@ -1700,7 +1700,7 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
             navigationTransition.transition(proxy);
         };
         proxy->SetInteractiveAnimation(AnimationUtils::CreateInteractiveAnimation(
-            addAnimationCallback, finishCallback));
+            addAnimationCallback, finishCallback), finishCallback);
         isFinishInteractiveAnimation_ = false;
         proxy->StartAnimation();
     } else {
