@@ -205,7 +205,7 @@ float SlidingPanelLayoutAlgorithm::GetMaxWidthByScreenSizeType(const SizeF& maxS
     columnInfo->GetParent()->BuildColumnWidth(maxSize.Width());
     auto gridSizeType = ScreenSystemManager::GetInstance().GetSize(maxSize.Width());
     auto width = 0.0f;
-    auto columns = 0;
+    uint32_t columns = 0;
     switch (gridSizeType) {
         case ScreenSizeType::UNDEFINED:
         case ScreenSizeType::XS:
