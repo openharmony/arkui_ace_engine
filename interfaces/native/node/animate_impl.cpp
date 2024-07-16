@@ -285,9 +285,11 @@ ArkUI_CurveHandle StepsCurve(int32_t count, bool end)
 ArkUI_CurveHandle CubicBezierCurve(float x1, float y1, float x2, float y2)
 {
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || x1 < 0 || x1 > 1 || x2 < 0 || x2 > 1) {
+    if (!impl) {
         return nullptr;
     }
+    x1 = std::clamp(x1, 0.0f, 1.0f);
+    x2 = std::clamp(x2, 0.0f, 1.0f);
     auto curve = impl->getAnimation()->cubicBezierCurve(x1, y1, x2, y2);
     ArkUI_Curve* iCurve = new ArkUI_Curve({ ARKUI_CURVE_TYPE_CUBIC_BEZIER, curve });
     return iCurve;
