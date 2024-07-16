@@ -1020,6 +1020,8 @@ private:
     bool OnRemoveFromParent(bool allowTransition) override;
     bool RemoveImmediately() const override;
 
+    bool IsPaintRectWithTransformValid();
+
     // dump self info.
     void DumpDragInfo();
     void DumpOverlayInfo();
