@@ -2593,9 +2593,9 @@ void PipelineContext::FlushMouseEvent()
         auto result = container->GetCurPointerEventSourceType(sourceType);
         if (result) {
             TAG_LOGI(AceLogTag::ACE_MOUSE,
-                "FlushMouseEvent: last pointer event sourceType:%{public}d last mouse event time:%{public}" PRIu64
+                "FlushMouseEvent: last pointer event sourceType:%{public}d last mouse event time:%{public}" PRId64
                 " current time %{public}" PRId64 "",
-                sourceType, lastMouseEvent_->time.time_since_epoch().count(), GetSysTimestamp());
+                sourceType, static_cast<int64_t>(lastMouseEvent_->time.time_since_epoch().count()), GetSysTimestamp());
         }
     }
     MouseEvent event;
