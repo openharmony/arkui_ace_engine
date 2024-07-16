@@ -214,6 +214,16 @@ public:
         return hasOptionWidth_;
     }
 
+    void SetIsBGColorSetByUser(bool isSet)
+    {
+        isBGColorSetByUser_ = isSet;
+    }
+
+    void SetIsTextColorSetByUser(bool isSet)
+    {
+        isTextColorSetByUser_ = isSet;
+    }
+
     const RefPtr<SelectTheme>& GetSelectTheme() const
     {
         return selectTheme_;
@@ -246,7 +256,10 @@ private:
     void InitFocusEvent();
     void HandleFocusEvent();
     void HandleBlurEvent();
+    void SetFocusStyle();
+    void ClearFocusStyle();
     std::optional<Color> bgColor_;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 
     // src of icon image, used in XTS inspector
     std::string iconSrc_;
@@ -266,9 +279,8 @@ private:
     bool hasOptionWidth_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(OptionPattern);
-    bool isFocused_ = false;
-    bool isFocusBGColorSet_ = false;
-    bool isFocusTextColorSet_ = false;
+    bool isBGColorSetByUser_ = false;
+    bool isTextColorSetByUser_ = false;
     bool focusEventInitialized_ = false;
     bool isFocusShadowSet_ = false;
     int32_t selected_ = -1;
