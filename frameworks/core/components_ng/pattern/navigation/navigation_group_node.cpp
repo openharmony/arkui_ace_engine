@@ -250,13 +250,19 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
             ++slot;
             continue;
         }
+        // The NavDestination in the EXIT animation needs to be cleaned in the animation onfinish callback.
         if (navDestination->IsOnAnimation()) {
-            if (maxAnimatingDestination == nullptr) {
-                maxAnimatingDestination = navDestination;
+            if (navDestination->GetTransitionType() == PageTransitionType::EXIT_POP) {
+                ++animatingSize;
+                continue;
             }
-            // The NavDestination in the animation needs to be cleaned in the animation onfinish callback.
-            ++animatingSize;
-            continue;
+            if (navDestination->NeedRemoveInPush()) {
+                if (maxAnimatingDestination == nullptr) {
+                    maxAnimatingDestination = navDestination;
+                }
+                ++animatingSize;
+                continue;
+            }
         }
         // remove content child
         auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
