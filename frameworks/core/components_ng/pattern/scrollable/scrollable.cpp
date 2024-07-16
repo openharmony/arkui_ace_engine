@@ -223,11 +223,15 @@ void Scrollable::HandleTouchDown()
 void Scrollable::HandleTouchUp()
 {
     // Two fingers are alternately drag, one finger is released without triggering spring animation.
-    ACE_SCOPED_TRACE("HandleTouchUp, isDragging_:%u, id:%d, tag:%s", isDragging_, nodeId_, nodeTag_.c_str());
+    ACE_SCOPED_TRACE("HandleTouchUp, isDragging_:%u, nestedScrolling_:%u id:%d, tag:%s",
+        isDragging_, nestedScrolling_, nodeId_, nodeTag_.c_str());
     if (isDragging_) {
         return;
     }
     isTouching_ = false;
+    if (nestedScrolling_) {
+        return;
+    }
     // outBoundaryCallback_ is only set in ScrollablePattern::SetEdgeEffect and when the edge effect is spring
     if (outBoundaryCallback_ && outBoundaryCallback_()) {
         if (isSpringAnimationStop_ && scrollOverCallback_) {
@@ -261,7 +265,7 @@ bool Scrollable::IsAnimationNotRunning() const
 bool Scrollable::Idle() const
 {
     return !isTouching_ && isFrictionAnimationStop_ && isSpringAnimationStop_
-        && isSnapAnimationStop_ && isSnapScrollAnimationStop_;
+        && isSnapAnimationStop_ && isSnapScrollAnimationStop_ && !nestedScrolling_;
 }
 
 bool Scrollable::IsStopped() const
@@ -1149,12 +1153,6 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSpringProperty()
         auto scroll = weak.Upgrade();
         CHECK_NULL_VOID(scroll);
         if (!scroll->isSpringAnimationStop_) {
-            // Avoid the situation where the scrollable has reverted to an unbounded state,
-            // but the spring animation is still running
-            if (scroll->outBoundaryCallback_ && !scroll->outBoundaryCallback_()) {
-                scroll->StopSpringAnimation();
-                return;
-            }
             if (NearEqual(scroll->finalPosition_, position, SPRING_ACCURACY)) {
                 scroll->ProcessSpringMotion(scroll->finalPosition_);
                 scroll->StopSpringAnimation();

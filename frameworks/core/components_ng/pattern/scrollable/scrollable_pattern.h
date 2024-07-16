@@ -354,7 +354,7 @@ public:
     bool CanOverScroll(int32_t source)
     {
         auto canOverScroll = (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR &&
-            IsScrollable() && (!ScrollableIdle() || animateOverScroll_ || animateCanOverScroll_ || nestedScrolling_));
+            IsScrollable() && (!ScrollableIdle() || animateOverScroll_ || animateCanOverScroll_));
         if (canOverScroll != lastCanOverScroll_) {
             lastCanOverScroll_ = canOverScroll;
             AddScrollableFrameInfo(source);
@@ -764,7 +764,7 @@ private:
     ScrollResult HandleScrollSelfOnly(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollParallel(float& offset, int32_t source, NestedState state);
     bool HandleOutBoundary(float& offset, int32_t source, NestedState state, ScrollResult& result);
-    void HandleSelfOutBoundary(float& offset, int32_t source);
+    bool HandleSelfOutBoundary(float& offset, int32_t source);
 
     void ExecuteScrollFrameBegin(float& mainDelta, ScrollState state);
 
@@ -802,6 +802,7 @@ private:
     ModalSheetCoordinationMode CoordinateWithSheet(double& offset, int32_t source, bool isAtTop);
     bool NeedCoordinateScrollWithNavigation(double offset, int32_t source, const OverScrollOffset& overOffsets);
     void SetUiDvsyncSwitch(bool on);
+    void SetNestedScrolling(bool nestedScrolling);
 
     Axis axis_ = Axis::VERTICAL;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -881,7 +882,6 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     bool isMousePressed_ = false;
     bool lastCanOverScroll_ = false;
-    bool nestedScrolling_ = false;
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;
