@@ -585,7 +585,7 @@ public:
     void ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
     void InitEditingValueText(std::string content);
-    void InitValueText(const std::string& content);
+    bool InitValueText(const std::string& content);
 
     void CloseSelectOverlay() override;
     void CloseSelectOverlay(bool animation);
@@ -1363,6 +1363,11 @@ public:
         start = selectController_->GetStartIndex();
         end = selectController_->GetEndIndex();
     }
+
+    void SetTextChangedAtCreation(bool changed)
+    {
+        isTextChangedAtCreation_ = changed;
+    }
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override
@@ -1778,6 +1783,7 @@ private:
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;
     bool isTouchPreviewText_ = false;
+    bool isTextChangedAtCreation_ = false;
 };
 } // namespace OHOS::Ace::NG
 
