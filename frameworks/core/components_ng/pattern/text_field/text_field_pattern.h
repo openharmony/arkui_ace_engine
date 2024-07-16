@@ -1101,6 +1101,11 @@ public:
     bool NeedPaintSelect();
     void SetCustomKeyboardOption(bool supportAvoidance);
 
+    void SetIsFocusedBeforeClick(bool isFocusedBeforeClick)
+    {
+        isFocusedBeforeClick_ = isFocusedBeforeClick;
+    }
+
     void SetIsCustomFont(bool isCustomFont)
     {
         isCustomFont_ = isCustomFont;
