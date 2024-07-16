@@ -482,6 +482,7 @@ HWTEST_F(WaterFlowSegmentCommonTest, Replace004, TestSize.Level1)
     UpdateCurrentOffset(-10000.0f);
     for (int i = 0; i < 100; ++i) {
         frameNode_->RemoveChildAtIndex(10);
+        pattern_->NotifyDataChange(10, -1);
     }
     frameNode_->ChildrenUpdatedFrom(10);
     newSection[0].itemsCount = 10;

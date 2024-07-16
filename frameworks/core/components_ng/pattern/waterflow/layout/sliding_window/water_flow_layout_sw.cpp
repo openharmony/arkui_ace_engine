@@ -156,6 +156,11 @@ void WaterFlowLayoutSW::SingleInit(const SizeF& frameSize)
 void WaterFlowLayoutSW::CheckReset()
 {
     int32_t updateIdx = wrapper_->GetHostNode()->GetChildrenUpdated();
+    if (info_->newStartIndex_ >= 0) {
+        info_->UpdateLanesIndex(updateIdx);
+        wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
+        return;
+    }
     if (updateIdx > -1) {
         if (updateIdx <= info_->startIndex_) {
             info_->ResetWithLaneOffset(std::nullopt);

@@ -61,6 +61,14 @@ public:
         onSectionDataChange_ = func;
     }
 
+    void NotifySectionChange(
+        int32_t start, int32_t deleteCount, const std::vector<WaterFlowSections::Section>& newSections);
+
+    void SetNotifyDataChange(std::function<void(int32_t start, int32_t count)>&& func)
+    {
+        notifyDataChange_ = func;
+    }
+
     /**
      * @brief Change section data.
      *
@@ -78,11 +86,17 @@ public:
         return sections_;
     }
 
+    const std::vector<Section>& GetPrevSectionInfo() const
+    {
+        return prevSections_;
+    }
+
 private:
     std::vector<Section> sections_;
     // for comparing and handling special case
     std::vector<Section> prevSections_;
     std::function<void(int32_t start)> onSectionDataChange_;
+    std::function<void(int32_t start, int32_t count)> notifyDataChange_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -428,6 +428,11 @@ RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
         return sections_;
     }
     sections_ = AceType::MakeRefPtr<WaterFlowSections>();
+    auto sectionChangeCallback = [weakPattern = WeakClaim(this)](int32_t start, int32_t count) {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->NotifyDataChange(start, count);
+    };
     auto callback = [weakPattern = WeakClaim(this)](int32_t start) {
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -441,12 +446,18 @@ RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
         context->RequestFrame();
     };
     sections_->SetOnDataChange(callback);
+    sections_->SetNotifyDataChange(sectionChangeCallback);
     return sections_;
 }
 
 void WaterFlowPattern::OnSectionChanged(int32_t start)
 {
-    layoutInfo_->InitSegments(sections_->GetSectionInfo(), start);
+    if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW && keepContentPosition_) {
+        layoutInfo_->InitSegmentsForKeepPositionMode(
+            sections_->GetSectionInfo(), sections_->GetPrevSectionInfo(), start);
+    } else {
+        layoutInfo_->InitSegments(sections_->GetSectionInfo(), start);
+    }
 
     MarkDirtyNodeSelf();
 }
@@ -621,6 +632,13 @@ int32_t WaterFlowPattern::GetChildrenCount() const
         return host->GetTotalChildCount();
     }
     return 0;
+}
+
+void WaterFlowPattern::NotifyDataChange(int32_t index, int32_t count)
+{
+    if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW && keepContentPosition_) {
+        layoutInfo_->NotifyDataChange(index, count);
+    }
 }
 
 void WaterFlowPattern::DumpAdvanceInfo()
