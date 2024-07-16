@@ -68,6 +68,8 @@ public:
             theme->borderColor_ = toastPattern->GetAttr<Color>("toast_border_color", Color());
             theme->borderWidth_ = toastPattern->GetAttr<Dimension>("toast_border_width", 0.0_vp);
             theme->shadowNormal_ = static_cast<uint32_t>(toastPattern->GetAttr<double>("toast_shadow_default", 0.0));
+            theme->toastAlign_ = static_cast<int32_t>(toastPattern->GetAttr<double>("toast_align", 0.0));
+            theme->multiLineTextAlign_ = static_cast<TextAlign>(toastPattern->GetAttr<double>("toast_text_align", 0.0));
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 theme->padding_ = Edge(toastPattern->GetAttr<Dimension>("toast_padding_level8", 0.0_vp).Value(),
                     toastPattern->GetAttr<Dimension>("toast_padding_level4", 0.0_vp).Value(),
@@ -202,6 +204,16 @@ public:
         return bgThemeColorMode_;
     }
 
+    int32_t GetAlign() const
+    {
+        return toastAlign_;
+    }
+
+    TextAlign GetMultiLineTextAlign() const
+    {
+        return multiLineTextAlign_;
+    }
+
 protected:
     ToastTheme() = default;
 
@@ -223,6 +235,8 @@ private:
     Edge marging_;
     Color blurStyleTextColor_;
     Color defaultBGColor_;
+    TextAlign multiLineTextAlign_;
+    int32_t toastAlign_ = 0;
 };
 
 } // namespace OHOS::Ace
