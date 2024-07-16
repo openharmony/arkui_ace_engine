@@ -564,7 +564,11 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, 
     CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    SyncGeometryProperties(paintRect_);
+    if (isNeedAnimate_) {
+        SyncGeometryProperties(paintRect_);
+    } else {
+        RSNode::ExecuteWithoutAnimation([&]() { SyncGeometryProperties(paintRect_); });
+    }
     host->OnPixelRoundFinish(paintRect_.GetSize());
 }
 

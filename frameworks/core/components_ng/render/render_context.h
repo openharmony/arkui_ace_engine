@@ -707,6 +707,11 @@ public:
     // The additional opacity will be multiplied with the base opacity.
     virtual void SetOpacityMultiplier(float opacity) {}
 
+    void SetNeedAnimateFlag(bool isNeedAnimate)
+    {
+        isNeedAnimate_ = isNeedAnimate;
+    }
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
@@ -715,6 +720,7 @@ protected:
     bool isSynced_ = false;
     bool isNeedRebuildRSTree_ = true;
     bool handleChildBounds_ = false;
+    bool isNeedAnimate_ = true;
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
