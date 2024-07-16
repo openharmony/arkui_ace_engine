@@ -506,7 +506,7 @@ void MenuLayoutAlgorithm::InitSpace(const RefPtr<MenuLayoutProperty>& props, con
             bottomSpace_ = wrapperRect_.Bottom() - position_.GetY() - paddingTop_;
         }
         leftSpace_ = position_.GetX() - paddingStart_;
-        rightSpace_ = wrapperRect_.Right() - leftSpace_ - paddingEnd_;
+        rightSpace_ = wrapperRect_.Right() - position_.GetX() - paddingEnd_;
     }
 }
 
