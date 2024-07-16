@@ -1587,6 +1587,7 @@ private:
     bool FinishTextPreviewByPreview(const std::string& insertValue);
 
     bool GetTouchInnerPreviewText(const Offset& offset) const;
+    bool IsShowMenu(const std::optional<SelectionOptions>& options);
 
     RectF frameRect_;
     RectF textRect_;

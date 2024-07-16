@@ -5188,7 +5188,7 @@ void TextFieldPattern::SetSelectionFlag(
     selectionStart = std::clamp(selectionStart, 0, length);
     selectionEnd = std::clamp(selectionEnd, 0, length);
     isTouchCaret_ = false;
-    bool isShowMenu = selectOverlay_->IsCurrentMenuVisibile();
+    isTouchPreviewText_ = false;
     if (selectionStart == selectionEnd) {
         selectController_->MoveCaretToContentRect(selectionEnd, TextAffinity::DOWNSTREAM);
         StartTwinkling();
@@ -5207,20 +5207,11 @@ void TextFieldPattern::SetSelectionFlag(
     if (RequestKeyboard(false, true, true)) {
         NotifyOnEditChanged(true);
     }
-
     SetIsSingleHandle(!IsSelected());
     if (!IsShowHandle()) {
         CloseSelectOverlay(true);
     } else {
-        if (options.has_value()) {
-            if (options.value().menuPolicy == MenuPolicy::HIDE) {
-                isShowMenu = false;
-            } else if (options.value().menuPolicy == MenuPolicy::SHOW) {
-                isShowMenu = true;
-            }
-        } else {
-            isShowMenu = false;
-        }
+        bool isShowMenu = IsShowMenu(options);
         if (!isShowMenu && IsUsingMouse()) {
             CloseSelectOverlay();
         } else {
@@ -5230,6 +5221,20 @@ void TextFieldPattern::SetSelectionFlag(
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+bool TextFieldPattern::IsShowMenu(const std::optional<SelectionOptions>& options)
+{
+    if (!options.has_value()) {
+        return false;
+    }
+    if (options.value().menuPolicy == MenuPolicy::HIDE) {
+        return false;
+    }
+    if (options.value().menuPolicy == MenuPolicy::SHOW) {
+        return true;
+    }
+    return selectOverlay_->IsCurrentMenuVisibile();
 }
 
 bool TextFieldPattern::OnBackPressed()
