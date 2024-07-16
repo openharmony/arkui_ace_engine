@@ -24,10 +24,14 @@
 #include "core/components_ng/base/view_abstract.h"
 
 namespace OHOS::Ace::NG {
+struct OptionValueInfo {
+    std::string value;
+    bool isPasteOption = false;
+};
 
 class ACE_EXPORT OptionView {
 public:
-    static RefPtr<FrameNode> CreateMenuOption(bool optionsHasIcon, const std::string& value,
+    static RefPtr<FrameNode> CreateMenuOption(bool optionsHasIcon, const OptionValueInfo& value,
         const std::function<void()>& onClickFunc, int32_t index, const std::string& icon = "");
     static RefPtr<FrameNode> CreateMenuOption(bool optionsHasIcon, std::vector<OptionParam>& params, int32_t index);
 
