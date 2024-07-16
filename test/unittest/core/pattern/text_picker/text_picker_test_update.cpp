@@ -1797,4 +1797,95 @@ HWTEST_F(TextPickerTestUpdate, SetDialogButtonActive001, TestSize.Level1)
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     TextPickerDialogView::SetDialogButtonActive(contentColumn, 0, 0);
 }
+
+/**
+ * @tc.name: SeparatedOptionsShow001
+ * @tc.desc: Test TextPickerDialogView SeparatedOptionsShow
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, SeparatedOptionsShow001, TestSize.Level1)
+{
+    InitTextPickerTestNg();
+    auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    frameNode_->MountToParent(contentColumn);
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W100;
+    buttonInfos.push_back(info1);
+    auto textNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textPickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_PICKER_ETS_TAG, textNodeId, []() { return AceType::MakeRefPtr<TextPickerPattern>(); });
+    TextPickerSettingData settingData;
+    settingData.columnKind = 0;
+    settingData.height = Dimension(10.0);
+    settingData.selected = 0;
+    std::map<std::string, NG::DialogTextEvent> dialogEvent;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    float scale = 1.00;
+    auto closeCallback = [](const GestureEvent& info) { (void)info; };
+
+    RefPtr<FrameNode> dialogNode = TextPickerDialogView::SeparatedOptionsShow(contentColumn, textPickerNode, buttonInfos, settingData, dialogEvent,
+        dialogCancelEvent, scale, closeCallback, frameNode_);
+    ASSERT_NE(dialogNode, nullptr);
+}
+
+/**
+ * @tc.name: SetRange001
+ * @tc.desc: Test TextPickerModelNG SetRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, SetRange001, TestSize.Level1)
+{
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" } };
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    TextPickerModelNG::SetRange(frameNode,range);
+}
+
+/**
+ * @tc.name: SetValue001
+ * @tc.desc: Test TextPickerModelNG SetValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, SetValue001, TestSize.Level1)
+{
+    std::string value = "";
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    TextPickerModelNG::SetValue(frameNode,value);
+}
+
+/**
+ * @tc.name: SetValues001
+ * @tc.desc: Test TextPickerModelNG SetValues
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, SetValues001, TestSize.Level1)
+{
+    std::vector<std::string> value;
+    value.push_back("1");
+    value.push_back("2");
+    value.push_back("3");
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    TextPickerModelNG::SetValues(frameNode,value);
+}
 } // namespace OHOS::Ace::NG

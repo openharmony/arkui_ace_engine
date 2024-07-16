@@ -1741,4 +1741,25 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternUpdateColumnChildPosition002,
     textPickerColumnPattern_->UpdateColumnChildPosition(1.0);
     EXPECT_EQ(textPickerColumnPattern_->scrollDelta_, 0.0f);
 }
+
+/**
+ * @tc.name: TextPropertiesLinearAnimation001
+ * @tc.desc: TextPickerColumnPattern TextPropertiesLinearAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, TextPropertiesLinearAnimation001, TestSize.Level1)
+{
+    InitTextPickerPatternTestNg();
+    auto host = textPickerColumnPattern_->GetHost();
+    CHECK_NULL_VOID(host);
+    auto child = host->GetChildren();
+    auto iter = child.begin();
+    auto textNode = AceType::DynamicCast<FrameNode>(*iter);
+    CHECK_NULL_VOID(textNode);
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    RefPtr<TextLayoutProperty> textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+
+    textPickerColumnPattern_->TextPropertiesLinearAnimation(textLayoutProperty, 0, 0, true, 0);
+}
 } // namespace OHOS::Ace::NG
