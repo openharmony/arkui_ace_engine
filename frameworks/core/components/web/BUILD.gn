@@ -41,6 +41,7 @@ build_component("web") {
       "ability_runtime:abilitykit_native",
       "ability_runtime:app_manager",
       "c_utils:utils",
+      "egl:libEGL",
       "graphic_2d:librender_service_client",
       "init:libbegetutil",
       "ipc:ipc_core",
@@ -48,7 +49,6 @@ build_component("web") {
       "opengles:libGLES",
       "webview:libnweb",
       "window_manager:libwm",
-      "egl:libEGL"
     ]
   }
 }
