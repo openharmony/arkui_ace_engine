@@ -2783,9 +2783,12 @@ void ScrollablePattern::HandleClickEvent(GestureEvent& info)
     }
 }
 
-void ScrollablePattern::ScrollPage(bool reverse, bool smooth)
+void ScrollablePattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType scrollType)
 {
     float distance = reverse ? GetMainContentSize() : -GetMainContentSize();
+    if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
+        distance = distance / 2.f;
+    }
     float position = -GetTotalOffset() + distance;
     AnimateTo(-position, -1, nullptr, true, false, false);
     return;
@@ -3128,5 +3131,36 @@ void ScrollablePattern::DumpAdvanceInfo()
         DumpLog::GetInstance().AddDesc("inner ScrollBar is null");
     }
     DumpLog::GetInstance().AddDesc("==========================inner ScrollBar===============================");
+}
+
+void ScrollablePattern::SetAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)](AccessibilityScrollType scrollType) {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        ACE_SCOPED_TRACE("accessibility action, scroll forward, isScrollable:%u, scrollType:%d, id:%d, tag:%s",
+            pattern->IsScrollable(), scrollType, static_cast<int32_t>(host->GetAccessibilityId()),
+            host->GetTag().c_str());
+        CHECK_NULL_VOID(pattern->IsScrollable());
+        pattern->ScrollPage(false, false, scrollType);
+    });
+
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)](AccessibilityScrollType scrollType) {
+        const auto& pattern = weakPtr.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        ACE_SCOPED_TRACE("accessibility action, scroll backward, isScrollable:%u, scrollType:%d, id:%d, tag:%s",
+            pattern->IsScrollable(), scrollType, static_cast<int32_t>(host->GetAccessibilityId()),
+            host->GetTag().c_str());
+        CHECK_NULL_VOID(pattern->IsScrollable());
+        pattern->ScrollPage(true, false, scrollType);
+    });
 }
 } // namespace OHOS::Ace::NG
