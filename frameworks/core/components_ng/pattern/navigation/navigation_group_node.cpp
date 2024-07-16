@@ -29,6 +29,11 @@
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/theme/app_theme.h"
+
+#if !defined(ACE_UNITTEST)
+#include "core/components_ng/base/transparent_node_detector.h"
+#endif
+
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -779,6 +784,9 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     }
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     UiSessionManager::GetInstance().OnRouterChange(navigationPathInfo_, "navigationPushPage");
+#endif
+#if !defined(ACE_UNITTEST)
+    TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(curNode);
 #endif
 }
 

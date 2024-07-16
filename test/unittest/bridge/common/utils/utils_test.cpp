@@ -17,6 +17,7 @@
 
 #define private public
 #define protected public
+#include "frameworks/bridge/common/utils/transform_convertor.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 #undef private
@@ -331,5 +332,60 @@ HWTEST_F(UtilsTest, UtilsTest008, TestSize.Level1)
     fun = [](float num) { return num; };
     EXPECT_NE(CreateCurveExceptSpring(value, fun), nullptr);
     EXPECT_NE(CreateCurve(fun), nullptr);
+}
+
+/**
+ * @tc.name: UtilsTest009
+ * @tc.desc: CreateCurveExceptSpring
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtilsTest, UtilsTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct params
+     */
+    std::string value = "aaa(int a,int b)";
+    std::function<float(float)> fun = nullptr;
+    EXPECT_EQ(CreateCurveExceptSpring(value, fun) == Curves::EASE_IN_OUT, true);
+}
+
+/**
+ * @tc.name: transformConvertorTest001
+ * @tc.desc: test func Convert
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtilsTest, transformConvertorTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct params for Convert
+     */
+    TransformConvertor transformConvertor;
+    std::string key = "aaa";
+    std::string value = "bbb";
+    double time = 0.0;
+    transformConvertor.Convert(key, value, time);
+    key = "translate";
+    transformConvertor.Convert(key, value, time);
+
+    /**
+     * @tc.steps: step2. construct params for AddAnimationToTweenOption
+     */
+    TweenOption tweenOption;
+    transformConvertor.AddAnimationToTweenOption(tweenOption);
+    EXPECT_EQ(tweenOption.GetTransformAnimations().size(), 1);
+    transformConvertor.InsertIdentityKeyframe(time);
+    EXPECT_EQ(transformConvertor.noneKeyframeTimes_.size() == 1, true);
+    transformConvertor.AddAnimationToTweenOption(tweenOption);
+    EXPECT_EQ(tweenOption.GetTransformAnimations().size(), 2);
+    AnimationType type = AnimationType::TRANSLATE;
+    RefPtr<Keyframe<TransformOperation>> keyframe;
+    transformConvertor.AddKeyframe(type, keyframe);
+
+    /**
+     * @tc.steps: step3. construct params for ApplyCurve
+     */
+    RefPtr<Curve> curve;
+    transformConvertor.ApplyCurve(curve);
+    EXPECT_EQ(transformConvertor.operationList_.size(), 1);
 }
 } // namespace OHOS::Ace::Framework

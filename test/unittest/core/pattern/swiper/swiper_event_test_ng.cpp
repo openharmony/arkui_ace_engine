@@ -559,6 +559,13 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll006, TestSize.Level1)
 
     auto res = pattern_->HandleScroll(5.0f, SCROLL_FROM_ANIMATION, NestedState::CHILD_SCROLL);
     EXPECT_EQ(res.remain, 5.0f);
+    pattern_->targetIndex_.reset();
+
+    pattern_->fadeAnimation_ = AnimationUtils::StartAnimation({}, [&]() {});
+    pattern_->fadeAnimationIsRunning_ = true;
+    res = pattern_->HandleScroll(5.0f, SCROLL_FROM_ANIMATION, NestedState::CHILD_SCROLL);
+    // fade animation doesn't affect scrolling
+    EXPECT_EQ(res.remain, 0.0f);
 }
 
 /**

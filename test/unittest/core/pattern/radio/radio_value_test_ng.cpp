@@ -49,6 +49,8 @@ constexpr int BIG_INT = 100000000;
 constexpr int NEGATIVE_BIG_INT = -100000000;
 constexpr int CHILD_NODE_ID = 100;
 const std::optional<int32_t> INDICATOR_TYPE_TICK = 0;
+const std::string RADIO_VALUE = "Radio";
+const std::string EMPTY_VALUE = "";
 } // namespace
 
 class RadioValueTestNg : public testing::Test {
@@ -954,5 +956,35 @@ HWTEST_F(RadioValueTestNg, RadioValueTest017, TestSize.Level1)
      * @tc.expected: Check the Radio isChecked
      */
     EXPECT_EQ(isChecked, true);
+}
+/**
+ * @tc.name: RadioValueTest018
+ * @tc.desc: Test RadioModelNG::SetRadioValue & SetRadioGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioValueTestNg, RadioValueTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Radio node and set Model.
+     */
+    auto radioNode = FrameNode::CreateFrameNode(V2::RADIO_ETS_TAG, 1, AceType::MakeRefPtr<RadioPattern>());
+    RadioModelNG radioModelNG;
+    radioModelNG.SetRadioValue(AceType::RawPtr(radioNode), RADIO_VALUE);
+    radioModelNG.SetRadioGroup(AceType::RawPtr(radioNode), RADIO_VALUE);
+    auto radioPattern = radioNode->GetPattern<RadioPattern>();
+    ASSERT_NE(radioPattern, nullptr);
+    /**
+     * @tc.steps: step1+. create Radio node and set Model not
+     */
+    auto radioNodeEx = FrameNode::CreateFrameNode(V2::RADIO_ETS_TAG, 1, AceType::MakeRefPtr<RadioPattern>());
+    RadioModelNG radioModelNGEx;
+    radioModelNGEx.SetRadioValue(AceType::RawPtr(radioNode), EMPTY_VALUE);
+    radioModelNGEx.SetRadioGroup(AceType::RawPtr(radioNode), EMPTY_VALUE);
+    auto radioPatternEx = radioNodeEx->GetPattern<RadioPattern>();
+    ASSERT_NE(radioPatternEx, nullptr);
+    auto eventHub = radioNodeEx->GetEventHub<NG::RadioEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_TRUE(eventHub->GetGroup().empty());
+    EXPECT_TRUE(eventHub->GetValue().empty());
 }
 }

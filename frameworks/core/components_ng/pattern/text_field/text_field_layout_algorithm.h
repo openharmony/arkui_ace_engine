@@ -152,6 +152,8 @@ protected:
     Dimension textIndent_ = 0.0_px;
     float indent_ = 0.0f;
 private:
+    void InlineFocusMeasure(const LayoutConstraintF& contentConstraint,
+        LayoutWrapper* layoutWrapper, double& safeBoundary, float& contentWidth);
     static void UpdateTextStyleMore(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
         TextStyle& textStyle, bool isDisabled);

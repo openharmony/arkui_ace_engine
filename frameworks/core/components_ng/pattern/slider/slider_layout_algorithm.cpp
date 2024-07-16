@@ -206,9 +206,11 @@ void SliderLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto axis = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     auto paintReverse = sliderLayoutProperty->GetReverseValue(false);
     auto direction = sliderLayoutProperty->GetLayoutDirection();
-    auto isRTL = direction == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft() :
-        direction == TextDirection::RTL;
-    auto reverse = isRTL ? !paintReverse : paintReverse;
+    if (axis == Axis::HORIZONTAL) {
+        auto isRTL = direction == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft()
+                                                      : direction == TextDirection::RTL;
+        paintReverse = isRTL ? !paintReverse : paintReverse;
+    }
     auto mode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
     Dimension hotBlockShadowWidth = mode == SliderModel::SliderMode::OUTSET ? theme->GetOutsetHotBlockShadowWidth()
                                                                             : theme->GetInsetHotBlockShadowWidth();
@@ -220,7 +222,7 @@ void SliderLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     borderBlank = (length - sliderLength) * HALF;
     auto selectOffset = borderBlank + pattern->GetValueRatio() * sliderLength;
 
-    CalculateBlockOffset(layoutWrapper, contentRect, selectOffset, axis, reverse);
+    CalculateBlockOffset(layoutWrapper, contentRect, selectOffset, axis, paintReverse);
 }
 
 void SliderLayoutAlgorithm::CalculateBlockOffset(

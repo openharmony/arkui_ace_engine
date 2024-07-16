@@ -1307,11 +1307,11 @@ var EffectFillStyle;
   EffectFillStyle[EffectFillStyle["ITERATIVE"] = 1] = "ITERATIVE";
 })(EffectFillStyle || (EffectFillStyle = {}));
 
-var WebKeyboardAvoidMode;
+let WebKeyboardAvoidMode;
 (function (WebKeyboardAvoidMode) {
-  WebKeyboardAvoidMode[WebKeyboardAvoidMode["RESIZE_VISUAL"] = 0] = "RESIZE_VISUAL";
-  WebKeyboardAvoidMode[WebKeyboardAvoidMode["RESIZE_CONTENT"] = 1] = "RESIZE_CONTENT";
-  WebKeyboardAvoidMode[WebKeyboardAvoidMode["OVERLAYS_CONTENT"] = 2] = "OVERLAYS_CONTENT";
+  WebKeyboardAvoidMode[WebKeyboardAvoidMode.RESIZE_VISUAL = 0] = 'RESIZE_VISUAL';
+  WebKeyboardAvoidMode[WebKeyboardAvoidMode.RESIZE_CONTENT = 1] = 'RESIZE_CONTENT';
+  WebKeyboardAvoidMode[WebKeyboardAvoidMode.OVERLAYS_CONTENT = 2] = 'OVERLAYS_CONTENT';
 })(WebKeyboardAvoidMode || (WebKeyboardAvoidMode = {}));
 
 class SymbolEffect {
@@ -2072,10 +2072,10 @@ var MarqueeUpdateStrategy;
 
 var LaunchMode;
 (function (LaunchMode) {
-  LaunchMode[LaunchMode.STANDARD = 0] = "STANDARD";
-  LaunchMode[LaunchMode.MOVE_TO_TOP_SINGLETON = 1] = "MOVE_TO_TOP_SINGLETON";
-  LaunchMode[LaunchMode.POP_TO_SINGLETON = 2] = "POP_TO_SINGLETON";
-  LaunchMode[LaunchMode.NEW_INSTANCE = 3] = "NEW_INSTANCE";
+  LaunchMode[LaunchMode.STANDARD = 0] = 'STANDARD';
+  LaunchMode[LaunchMode.MOVE_TO_TOP_SINGLETON = 1] = 'MOVE_TO_TOP_SINGLETON';
+  LaunchMode[LaunchMode.POP_TO_SINGLETON = 2] = 'POP_TO_SINGLETON';
+  LaunchMode[LaunchMode.NEW_INSTANCE = 3] = 'NEW_INSTANCE';
 })(LaunchMode || (LaunchMode = {}));
 
 class NavPathInfo {

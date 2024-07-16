@@ -383,6 +383,11 @@ Offset PinchRecognizer::ComputePinchCenter()
 void PinchRecognizer::OnResetStatus()
 {
     MultiFingersRecognizer::OnResetStatus();
+    distance_ = 0.0;
+    initialDev_ = 0.0;
+    currentDev_ = 0.0;
+    scale_ = 1.0;
+    isFlushTouchEventsEnd_ = false;
     isPinchEnd_ = false;
     isLastPinchFinished_ = true;
 }

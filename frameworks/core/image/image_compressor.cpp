@@ -141,7 +141,7 @@ bool ImageCompressor::CheckImageQuality(std::string key, uint32_t sumErr, uint32
     bool isOk = true;
     float mse = (float)sumErr / (width * height);
     float psnr = 10 * log10(255 * 255 / mse);
-    if (maxErr == 0 || psnr == 0 || maxErr > maxErr_ || (int32_t)psnr < psnr_) {
+    if (maxErr == 0 || psnr == 0 || maxErr > static_cast<uint32_t>(maxErr_)|| static_cast<int32_t>(psnr) < psnr_) {
         isOk = false;
         std::lock_guard<std::mutex> mLock(recordsMutex_);
         failedRecords_.insert(key);
@@ -185,12 +185,14 @@ std::shared_ptr<RSData> ImageCompressor::GpuCompress(std::string key, RSBitmap& 
     int32_t blockX = ceil((width + DIM - 1) / DIM);
     int32_t blockY = ceil((height + DIM - 1) / DIM);
     int32_t numBlocks = blockX * blockY;
+    uint32_t uWidth = static_cast<uint32_t>(width);
+    uint32_t uHeight = static_cast<uint32_t>(height);
     size_t local[] = { DIM, DIM };
     size_t global[2];
-    global[0] = (width % local[0] == 0 ? width : (width + local[0] - width % local[0]));
-    global[1] = (height % local[1] == 0 ? height : (height + local[1] - height % local[1]));
+    global[0] = (uWidth % local[0] == 0 ? uWidth : (uWidth + local[0] - uWidth % local[0]));
+    global[1] = (uHeight % local[1] == 0 ? uHeight : (uHeight + local[1] - uHeight % local[1]));
 
-    size_t astc_size = numBlocks * DIM * DIM;
+    size_t astc_size = static_cast<size_t>(numBlocks) * DIM * DIM;
 
     cl_image_format image_format = { CL_RGBA, CL_UNORM_INT8 };
     cl_image_desc desc = { CL_MEM_OBJECT_IMAGE2D, width, height };
@@ -290,8 +292,8 @@ void ImageCompressor::WriteToFile(std::string srcKey, std::shared_ptr<RSData> co
     BackgroundTaskExecutor::GetInstance().PostTask(
         [srcKey, compressedData, imgSize]() {
             AstcHeader header;
-            int32_t xsize = imgSize.Width();
-            int32_t ysize = imgSize.Height();
+            uint32_t xsize = static_cast<uint32_t>(imgSize.Width());
+            uint32_t ysize = static_cast<uint32_t>(imgSize.Height());
             header.magic[0] = MAGIC_FILE_CONSTANT & 0xFF;
             header.magic[1] = (MAGIC_FILE_CONSTANT >> 8) & 0xFF;
             header.magic[2] = (MAGIC_FILE_CONSTANT >> 16) & 0xFF;
@@ -405,9 +407,9 @@ static uint8_t SelectPartition(int32_t seed, int32_t x, int32_t y, int32_t z, in
 {
     // For small blocks bias the coordinates to get better distribution
     if (smallBlock) {
-        x <<= 1;
-        y <<= 1;
-        z <<= 1;
+        x *= 2;
+        y *= 2;
+        z *= 2;
     }
 
     seed += (partitionCount - 1) * 1024;
@@ -466,10 +468,10 @@ static uint8_t SelectPartition(int32_t seed, int32_t x, int32_t y, int32_t z, in
     seed11 >>= sh3;
     seed12 >>= sh3;
 
-    int32_t a = seed1 * x + seed2 * y + seed11 * z + (num >> 14);
-    int32_t b = seed3 * x + seed4 * y + seed12 * z + (num >> 10);
-    int32_t c = seed5 * x + seed6 * y + seed9 * z + (num >> 6);
-    int32_t d = seed7 * x + seed8 * y + seed10 * z + (num >> 2);
+    uint32_t a = seed1 * x + seed2 * y + seed11 * z + (num >> 14);
+    uint32_t b = seed3 * x + seed4 * y + seed12 * z + (num >> 10);
+    uint32_t c = seed5 * x + seed6 * y + seed9 * z + (num >> 6);
+    uint32_t d = seed7 * x + seed8 * y + seed10 * z + (num >> 2);
 
     // Apply the saw
     a &= 0x3F;

@@ -5404,7 +5404,7 @@ void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool i
         [weak = WeakClaim(this), targetUrl, isAlert, isUserTrigger, handler]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
-            int32_t parentNWebId = (delegate->nweb_ ? delegate->nweb_->GetWebId() : -1);
+            int32_t parentNWebId = (delegate->nweb_ ? static_cast<int32_t>(delegate->nweb_->GetWebId()) : -1);
             auto param = std::make_shared<WebWindowNewEvent>(
                 targetUrl, isAlert, isUserTrigger, AceType::MakeRefPtr<WebWindowNewHandlerOhos>(handler, parentNWebId));
 #ifdef NG_BUILD

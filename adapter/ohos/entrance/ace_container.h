@@ -557,8 +557,11 @@ public:
     bool IsSceneBoardEnabled() override;
 
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
-    bool GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
+    bool GetCurPointerEventInfo(int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
         int32_t& sourceTool, StopDragCallback&& stopDragCallback) override;
+
+    bool GetCurPointerEventSourceType(int32_t& sourceType) override;
+
     bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
         bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true) override;
     bool IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType) override;
@@ -743,6 +746,7 @@ private:
     std::mutex pointerEventMutex_;
     std::shared_ptr<MMI::PointerEvent> currentPointerEvent_;
     std::unordered_map<int32_t, std::list<StopDragCallback>> stopDragCallbackMap_;
+    std::map<int32_t, std::shared_ptr<MMI::PointerEvent>> currentEvents_;
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };
 

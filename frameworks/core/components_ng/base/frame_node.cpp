@@ -16,6 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 
 #include <cstdint>
+#include "base/geometry/ng/rect_t.h"
 
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -1503,21 +1504,16 @@ void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceD
     }
 
     if (hasInnerCallback) {
-        RectF frameRect;
-        RectF visibleRect;
-        RectF visibleInnerRect;
-        GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
-        ProcessVisibleAreaChangeEvent(visibleInnerRect, frameRect,
+        auto visibleResult = GetCacheVisibleRect(timestamp);
+        ProcessVisibleAreaChangeEvent(visibleResult.innerVisibleRect, visibleResult.frameRect,
             visibleAreaInnerRatios, visibleAreaInnerCallback, false);
         if (hasUserCallback) {
-            ProcessVisibleAreaChangeEvent(visibleRect, frameRect,
+            ProcessVisibleAreaChangeEvent(visibleResult.visibleRect, visibleResult.frameRect,
                 visibleAreaUserRatios, visibleAreaUserCallback, true);
         }
     } else {
-        RectF frameRect;
-        RectF visibleRect;
-        GetVisibleRect(visibleRect, frameRect);
-        ProcessVisibleAreaChangeEvent(visibleRect, frameRect,
+        auto visibleResult = GetCacheVisibleRect(timestamp);
+        ProcessVisibleAreaChangeEvent(visibleResult.visibleRect, visibleResult.frameRect,
             visibleAreaUserRatios, visibleAreaUserCallback, true);
     }
 }
@@ -4475,6 +4471,54 @@ void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRe
     if (!isCalculateInnerVisibleRectClip_) {
         visibleInnerRect = visibleRect;
     }
+}
+
+CacheVisibleRectResult FrameNode::GetCacheVisibleRect(uint64_t timestamp)
+{
+    RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(true);
+    auto rectToParent = GetPaintRectWithTransform();
+    auto scale = GetTransformScale();
+
+    if (!parentUi || IsWindowBoundary()) {
+        cachedVisibleRectResult_ = {timestamp,
+            {rectToParent.GetOffset(), rectToParent, rectToParent, scale, rectToParent}};
+        return cachedVisibleRectResult_.second;
+    }
+
+    if (parentUi->cachedVisibleRectResult_.first == timestamp) {
+        auto parentCacheVisibleRectResult = parentUi->cachedVisibleRectResult_.second;
+        return CalculateCacheVisibleRect(parentCacheVisibleRectResult, parentUi, rectToParent, scale, timestamp);
+    }
+
+    CacheVisibleRectResult parentCacheVisibleRectResult = parentUi->GetCacheVisibleRect(timestamp);
+    return CalculateCacheVisibleRect(parentCacheVisibleRectResult, parentUi, rectToParent, scale, timestamp);
+}
+
+CacheVisibleRectResult FrameNode::CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
+    const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp)
+{
+    auto parentRenderContext = parentUi->GetRenderContext();
+    OffsetF windowOffset;
+    auto offset = rectToParent.GetOffset();
+    if (parentRenderContext && parentRenderContext->GetTransformScale()) {
+        auto parentScale = parentRenderContext->GetTransformScale();
+        offset = OffsetF(offset.GetX() * parentScale.value().x, offset.GetY() * parentScale.value().y);
+    }
+    windowOffset = parentCacheVisibleRect.windowOffset + offset;
+
+    RectF rect;
+    rect.SetOffset(windowOffset);
+    rect.SetWidth(rectToParent.Width() * parentCacheVisibleRect.cumulativeScale.x);
+    rect.SetHeight(rectToParent.Height() * parentCacheVisibleRect.cumulativeScale.y);
+
+    auto visibleRect = rect.Constrain(parentCacheVisibleRect.visibleRect);
+    auto innerVisibleRect = rect;
+    if (parentRenderContext && parentRenderContext->GetClipEdge().value_or(false)) {
+        innerVisibleRect = rect.Constrain(parentCacheVisibleRect.visibleRect);
+    }
+    scale = {scale.x * parentCacheVisibleRect.cumulativeScale.x, scale.y * parentCacheVisibleRect.cumulativeScale.y};
+    cachedVisibleRectResult_ = {timestamp, {windowOffset, visibleRect, innerVisibleRect, scale, rect}};
+    return {windowOffset, visibleRect, innerVisibleRect, scale, rect};
 }
 
 bool FrameNode::IsContextTransparent()

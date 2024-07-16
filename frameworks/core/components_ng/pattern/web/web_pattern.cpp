@@ -256,6 +256,7 @@ constexpr double ZOOMIN_SMOOTH_SCALE = 0.99;
 constexpr char ACCESSIBILITY_GENERIC_CONTAINER[] = "genericContainer";
 constexpr char ACCESSIBILITY_IMAGE[] = "image";
 constexpr char ACCESSIBILITY_PARAGRAPH[] = "paragraph";
+constexpr char WEB_NODE_URL[] = "url";
 
 #define WEB_ACCESSIBILITY_DELAY_TIME 100
 
@@ -1834,7 +1835,7 @@ void WebPattern::OnAreaChangedInner()
     IsNeedResizeVisibleViewport();
     isKeyboardInSafeArea_ = false;
     if (renderMode_ == RenderMode::SYNC_RENDER) {
-        UpdateSlideOffset(true);
+        UpdateSlideOffset();
     }
 }
 
@@ -1903,6 +1904,11 @@ void WebPattern::OnMixedModeUpdate(MixedModeContent value)
 
 void WebPattern::OnZoomAccessEnabledUpdate(bool value)
 {
+    if ((layoutMode_ == WebLayoutMode::FIT_CONTENT) || isEmbedModeEnabled_) {
+        TAG_LOGI(
+            AceLogTag::ACE_WEB, "When layoutMode is fit-content or EmbedMode is on, Not allow to update zoom access.");
+        return;
+    }
     if (delegate_) {
         delegate_->UpdateSupportZoom(value);
     }
@@ -2030,6 +2036,10 @@ void WebPattern::OnBackgroundColorUpdate(int32_t value)
 
 void WebPattern::OnInitialScaleUpdate(float value)
 {
+    if ((layoutMode_ == WebLayoutMode::FIT_CONTENT) || isEmbedModeEnabled_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "When layoutMode is fit-content or EmbedMode is on, Not allow to update scale.");
+        return;
+    }
     if (delegate_) {
         delegate_->UpdateInitialScale(value);
     }
@@ -2144,13 +2154,6 @@ void WebPattern::OnOverlayScrollbarEnabledUpdate(bool enable)
 {
     if (delegate_) {
         delegate_->UpdateOverlayScrollbarEnabled(enable);
-    }
-}
-
-void WebPattern::OnNativeEmbedModeEnabledUpdate(bool value)
-{
-    if (delegate_) {
-        delegate_->UpdateNativeEmbedModeEnabled(value);
     }
 }
 
@@ -2401,7 +2404,12 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateBlockNetworkImage(!GetOnLineImageAccessEnabledValue(true));
         delegate_->UpdateLoadsImagesAutomatically(GetImageAccessEnabledValue(true));
         delegate_->UpdateMixedContentMode(GetMixedModeValue(MixedModeContent::MIXED_CONTENT_NEVER_ALLOW));
-        delegate_->UpdateSupportZoom(GetZoomAccessEnabledValue(true));
+        isEmbedModeEnabled_ = GetNativeEmbedModeEnabledValue(false);
+        if ((layoutMode_ == WebLayoutMode::FIT_CONTENT) || isEmbedModeEnabled_) {
+            delegate_->UpdateSupportZoom(false);
+        } else {
+            delegate_->UpdateSupportZoom(GetZoomAccessEnabledValue(true));
+        }
         delegate_->UpdateDomStorageEnabled(GetDomStorageAccessEnabledValue(false));
         delegate_->UpdateGeolocationEnabled(GetGeolocationAccessEnabledValue(true));
         delegate_->UpdateCacheMode(GetCacheModeValue(WebCacheMode::DEFAULT));
@@ -2965,7 +2973,7 @@ void WebPattern::RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
     CHECK_NULL_VOID(delegate_);
     auto copyOption = delegate_->GetCopyOptionMode();
     quickMenuCallback_ = callback;
-    int32_t flags = params->GetEditStateFlags();
+    uint32_t flags = static_cast<uint32_t>(params->GetEditStateFlags());
     if ((flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT)
         && (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::NONE)) {
         selectInfo.menuCallback.onCut = [weak = AceType::WeakClaim(this), callback]() {
@@ -4609,6 +4617,28 @@ void WebPattern::OnScrollState(bool scrollState)
     }
 }
 
+void WebPattern::SetLayoutMode(WebLayoutMode mode)
+{
+    static bool isInit = false;
+    if (isInit) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "layoutMode not allow to change.");
+        return;
+    }
+    layoutMode_ = mode;
+    isInit = true;
+}
+
+void WebPattern::SetRenderMode(RenderMode renderMode)
+{
+    static bool isInit = false;
+    if (isInit) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "renderMode not allow to change.");
+        return;
+    }
+    renderMode_ = renderMode;
+    isInit = true;
+}
+
 Axis WebPattern::GetParentAxis()
 {
     auto parent = GetNestedScrollParent();
@@ -4803,28 +4833,28 @@ void WebPattern::InitSlideUpdateListener()
     }
 }
 
-void WebPattern::UpdateSlideOffset(bool isNeedReset)
+void WebPattern::UpdateSlideOffset()
 {
     switch (syncAxis_) {
         case Axis::HORIZONTAL:
-            CalculateHorizontalDrawRect(isNeedReset);
+            CalculateHorizontalDrawRect();
             break;
         case Axis::VERTICAL:
-            CalculateVerticalDrawRect(isNeedReset);
+            CalculateVerticalDrawRect();
             break;
         default :
             break;
     }
 }
 
-void WebPattern::CalculateHorizontalDrawRect(bool isNeedReset)
+void WebPattern::CalculateHorizontalDrawRect()
 {
     fitContentOffset_ = OffsetF(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->SetWebOffset(fitContentOffset_.GetX());
     if (fitContentOffset_.GetX() >= 0) {
         if (isNeedReDrawRect_) {
-            SetDrawRect(0, 0, ADJUST_WEB_DRAW_LENGTH + ADJUST_WEB_DRAW_LENGTH, drawRectHeight_, isNeedReset);
+            SetDrawRect(0, 0, ADJUST_WEB_DRAW_LENGTH + ADJUST_WEB_DRAW_LENGTH, drawRectHeight_);
         }
         isNeedReDrawRect_ = false;
         return;
@@ -4838,18 +4868,18 @@ void WebPattern::CalculateHorizontalDrawRect(bool isNeedReset)
     renderSurface_->SetWebMessage({ x, 0 });
     TAG_LOGD(AceLogTag::ACE_WEB, "SetDrawRect x : %{public}d, y : %{public}d, width : %{public}d, height : %{public}d",
         x, y, width, height);
-    SetDrawRect(x, y, width, height, isNeedReset);
+    SetDrawRect(x, y, width, height);
     isNeedReDrawRect_ = true;
 }
 
-void WebPattern::CalculateVerticalDrawRect(bool isNeedReset)
+void WebPattern::CalculateVerticalDrawRect()
 {
     fitContentOffset_ = OffsetF(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->SetWebOffset(fitContentOffset_.GetY());
     if (fitContentOffset_.GetY() >= 0) {
         if (isNeedReDrawRect_) {
-            SetDrawRect(0, 0, drawRectWidth_, ADJUST_WEB_DRAW_LENGTH + ADJUST_WEB_DRAW_LENGTH, isNeedReset);
+            SetDrawRect(0, 0, drawRectWidth_, ADJUST_WEB_DRAW_LENGTH + ADJUST_WEB_DRAW_LENGTH);
         }
         isNeedReDrawRect_ = false;
         return;
@@ -4863,7 +4893,7 @@ void WebPattern::CalculateVerticalDrawRect(bool isNeedReset)
     renderSurface_->SetWebMessage({ 0, y });
     TAG_LOGD(AceLogTag::ACE_WEB, "SetDrawRect x : %{public}d, y : %{public}d, width : %{public}d, height : %{public}d",
         x, y, width, height);
-    SetDrawRect(x, y, width, height, isNeedReset);
+    SetDrawRect(x, y, width, height);
     isNeedReDrawRect_ = true;
 }
 
@@ -4879,9 +4909,9 @@ void WebPattern::PostTaskToUI(const std::function<void()>&& task, const std::str
     taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, name);
 }
 
-void WebPattern::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height, bool isNeedReset)
+void WebPattern::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height)
 {
-    if (!isNeedReset && (drawRectWidth_ == width) && (drawRectHeight_ == height)) {
+    if ((drawRectWidth_ == width) && (drawRectHeight_ == height)) {
         return;
     }
     drawRectWidth_ = width;
@@ -5326,7 +5356,7 @@ std::string WebPattern::VectorIntToString(std::vector<int64_t>&& vec)
         return vecStr;
     }
 
-    for (int i = 0; i < vecLen - 1; ++i) {
+    for (uint32_t i = 0; i < vecLen - 1; ++i) {
         vecStr += std::to_string(vec[i]) + " ";
     }
     return vecStr + std::to_string(vec[vecLen - 1]);
@@ -5336,6 +5366,7 @@ void WebPattern::WebNodeInfoToJsonValue(std::shared_ptr<OHOS::Ace::JsonValue>& j
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> webNodeInfo, std::string& nodeTag)
 {
     auto jsonNode = JsonUtil::Create(true);
+    jsonNode->Put(WEB_NODE_URL, delegate_ ? delegate_->GetUrl().c_str() : "");
     jsonNode->Put(EnumTypeToString(WebAccessibilityType::ID).c_str(), webNodeInfo->GetAccessibilityId());
     if (webNodeInfo->GetSelectionEnd() != 0) {
         jsonNode->Put(EnumTypeToString(WebAccessibilityType::SEL_START).c_str(), webNodeInfo->GetSelectionStart());
