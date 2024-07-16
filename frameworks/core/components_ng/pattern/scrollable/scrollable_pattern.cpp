@@ -1096,7 +1096,6 @@ void ScrollablePattern::AnimateTo(
     finalPosition_ = position;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    AceAsyncTraceBegin(host->GetId(), (SCROLLER_ANIMATION + std::to_string(host->GetAccessibilityId())).c_str());
     if (smooth) {
         if (!useTotalOffset) {
             lastPosition_ = GetTotalOffset();
@@ -1109,6 +1108,8 @@ void ScrollablePattern::AnimateTo(
     if (!GetIsDragging()) {
         FireOnScrollStart();
     }
+    PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::SCROLLER_ANIMATION, PerfActionType::FIRST_MOVE, "");
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
@@ -1121,7 +1122,7 @@ void ScrollablePattern::OnAnimateFinish()
     CHECK_NULL_VOID(host);
     if (isAnimationStop_) {
         SetUiDvsyncSwitch(false);
-        AceAsyncTraceEnd(host->GetId(), (SCROLLER_ANIMATION + std::to_string(host->GetAccessibilityId())).c_str());
+        PerfMonitor::GetPerfMonitor()->End(PerfConstants::SCROLLER_ANIMATION, false);
     }
     if (animateToTraceFlag_) {
         animateToTraceFlag_ = false;
