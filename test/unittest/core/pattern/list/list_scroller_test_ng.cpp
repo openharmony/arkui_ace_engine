@@ -931,7 +931,6 @@ HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup010, TestSize.Level1)
     EXPECT_EQ(pattern_->endIndex_, 2);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -100);
     EXPECT_EQ(pattern_->itemPosition_[1].endPos, 300);
-    pattern_->DumpAdvanceInfo();
 }
 
 /**

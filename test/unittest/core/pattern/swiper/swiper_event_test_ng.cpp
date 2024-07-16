@@ -859,19 +859,19 @@ HWTEST_F(SwiperEventTestNg, OnIndexChange001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwiperPatternOnScrollStart001
- * @tc.desc: test OnScrollStartRecursive
+ * @tc.name: OnScrollStartEnd001
+ * @tc.desc: test OnScrollStartRecursive/OnScrollEndRecursive
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperEventTestNg, SwiperPatternOnScrollStart001, TestSize.Level1)
+HWTEST_F(SwiperEventTestNg, OnScrollStartEnd001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
-    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
-    pattern_->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::NONE);
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetLoop(false);
+        model.SetEdgeEffect(EdgeEffect::NONE);
+    });
     auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
     auto mockScrollNode = FrameNode::CreateFrameNode("MockScroll", -1, mockScroll);
     frameNode_->MountToParent(mockScrollNode);
-
     EXPECT_CALL(*mockScroll, OnScrollStartRecursive).Times(1);
     EXPECT_CALL(*mockScroll, GetAxis).Times(1).WillOnce(Return(Axis::HORIZONTAL));
     NestedScrollOptions nestedOpt = {
@@ -883,34 +883,70 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternOnScrollStart001, TestSize.Level1)
     pattern_->currentIndex_ = 3;
     EXPECT_EQ(pattern_->gestureSwipeIndex_, 0);
 
+    /**
+     * @tc.steps: step1. Scroll start
+     */
     pattern_->OnScrollStartRecursive(5.0f, 0.0f);
     EXPECT_TRUE(pattern_->childScrolling_);
     EXPECT_EQ(pattern_->gestureSwipeIndex_, 3);
+
+    /**
+     * @tc.steps: step2. Scroll end
+     */
+    EXPECT_CALL(*mockScroll, HandleScrollVelocity).Times(1);
+    pattern_->parent_ = mockScroll;
+    pattern_->OnScrollEndRecursive(std::nullopt);
+    EXPECT_FALSE(pattern_->childScrolling_);
+
+    /**
+     * @tc.steps: step3. Scroll end when AnimationRunning
+     * @tc.expected: Can not HandleDragEnd
+     */
+    pattern_->targetIndex_ = 1;
+    pattern_->OnScrollEndRecursive(std::nullopt);
+    EXPECT_FALSE(pattern_->childScrolling_);
 }
 
 /**
- * @tc.name: SwiperPatternOnScrollEnd001
- * @tc.desc: test OnScrollEndRecursive
+ * @tc.name: OnScrollStartEnd002
+ * @tc.desc: test OnScrollStartRecursive/OnScrollEndRecursive when DisableSwipe
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperEventTestNg, SwiperPatternOnScrollEnd001, TestSize.Level1)
+HWTEST_F(SwiperEventTestNg, OnScrollStartEnd002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
-    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
-    pattern_->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::NONE);
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDisableSwipe(true);
+        model.SetLoop(false);
+        model.SetEdgeEffect(EdgeEffect::NONE);
+    });
     auto mockScroll = AceType::MakeRefPtr<MockNestableScrollContainer>();
-    EXPECT_CALL(*mockScroll, OnScrollEndRecursive).Times(1);
-    EXPECT_CALL(*mockScroll, HandleScrollVelocity).Times(1);
+    auto mockScrollNode = FrameNode::CreateFrameNode("MockScroll", -1, mockScroll);
+    frameNode_->MountToParent(mockScrollNode);
     NestedScrollOptions nestedOpt = {
         .forward = NestedScrollMode::SELF_FIRST,
         .backward = NestedScrollMode::SELF_FIRST,
     };
     pattern_->SetNestedScroll(nestedOpt);
+    pattern_->isDragging_ = false;
+    pattern_->currentIndex_ = 3;
+    EXPECT_EQ(pattern_->gestureSwipeIndex_, 0);
+
+    /**
+     * @tc.steps: step1. Scroll start
+     * @tc.expected: Can not start because of DisableSwipe
+     */
+    pattern_->OnScrollStartRecursive(5.0f, 0.0f);
+    EXPECT_FALSE(pattern_->childScrolling_);
+    EXPECT_EQ(pattern_->gestureSwipeIndex_, 0);
+
+    /**
+     * @tc.steps: step2. Scroll end
+     */
+    EXPECT_CALL(*mockScroll, OnScrollEndRecursive).Times(0);
+    EXPECT_CALL(*mockScroll, HandleScrollVelocity).Times(0);
     pattern_->parent_ = mockScroll;
     pattern_->OnScrollEndRecursive(std::nullopt);
     EXPECT_FALSE(pattern_->childScrolling_);
-
-    pattern_->NotifyParentScrollEnd();
 }
 
 /**
