@@ -63,6 +63,7 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
         CHECK_NULL_VOID(self);
         auto session = weakSession.promote();
         CHECK_NULL_VOID(session);
+        CHECK_NULL_VOID(self->session_);
         if (self->session_->IsAnco()) {
             if (self->blankWindow_) {
                 self->BufferAvailableCallbackForBlank();
@@ -411,10 +412,10 @@ void WindowScene::OnActivation()
 
 void WindowScene::DisposeSnapShotAndBlankWindow()
 {
+    CHECK_NULL_VOID(session_);
     if (session_->GetBlankFlag()) {
         return;
     }
-    CHECK_NULL_VOID(session_);
     auto surfaceNode = session_->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
     auto host = GetHost();
@@ -536,6 +537,7 @@ void WindowScene::OnDrawingCompleted()
 
 bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    CHECK_NULL_RETURN(session_, false);
     if (attachToFrameNodeFlag_ || session_->GetBlankFlag()) {
         attachToFrameNodeFlag_ = false;
         CHECK_EQUAL_RETURN(IsMainWindow(), false, false);
