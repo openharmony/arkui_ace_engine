@@ -558,7 +558,8 @@ public:
     void HandleClickEvent(GestureEvent& info);
     void InitScrollBarGestureEvent();
     void InitScrollBarMouseEvent();
-    virtual void ScrollPage(bool reverse, bool smooth = false);
+    virtual void ScrollPage(
+        bool reverse, bool smooth = false, AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL);
     void PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset);
 
     void SetScrollToSafeAreaHelper(bool isScrollToSafeAreaHelper)
@@ -617,6 +618,8 @@ public:
     {
         hotZoneScrollCallback_ = func;
     }
+
+    virtual void SetAccessibilityAction();
 
 protected:
     void SuggestOpIncGroup(bool flag);
