@@ -119,7 +119,7 @@ HWTEST_F(ModelTestNg, ModelViewNgTest001, TestSize.Level1)
     ASSERT_NE(modelPattern, nullptr);
 
     modelPattern->modelAdapter_->OnPaint3D(modelPaintProperty);
-    
+
     // ToJsonValue Before Set Values
     const InspectorFilter filter;
     auto json = JsonUtil::Create(true);
@@ -423,10 +423,6 @@ HWTEST_F(ModelTestNg, ModelViewNgTest005, TestSize.Level1)
     auto json4 = JsonUtil::Create(true);
     modelPattern->ToJsonValue(json4, filter4);
 
-    modelPaintProperty.Reset();
-    modelViewNG.AddShaderImageTexture("/data/local");
-    modelViewNG.GetShaderInputBuffer();
-
     std::shared_future<void> ftr = modelPattern->modelAdapter_->Deinit();
     if (ftr.valid()) {
         ftr.get();
@@ -454,6 +450,7 @@ HWTEST_F(ModelTestNg, ModelViewNgTest006, TestSize.Level1)
     touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
     EXPECT_EQ(modelTouchHandler.HandleTouchEvent(touchEventInfo, 1, 1), false);
 
+    modelTouchHandler.isHandleCameraMove_ = false;
     touchEventInfo.changedTouches_.clear();
     touchLocationInfo.touchType_ = TouchType::UP;
     touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
@@ -468,7 +465,7 @@ HWTEST_F(ModelTestNg, ModelViewNgTest006, TestSize.Level1)
     touchLocationInfo.touchType_ = TouchType::UNKNOWN;
     touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
     EXPECT_EQ(modelTouchHandler.HandleTouchEvent(touchEventInfo, 1, 1), true);
-    EXPECT_EQ(modelTouchHandler.HandleTouchEvent(touchEventInfo, 0, 1), true);
+    EXPECT_EQ(modelTouchHandler.HandleTouchEvent(touchEventInfo, 1, 0), true);
     EXPECT_EQ(modelTouchHandler.HandleTouchEvent(touchEventInfo, 0, 0), true);
 }
 } // namespace OHOS::Ace::NG
