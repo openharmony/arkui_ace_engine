@@ -105,6 +105,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
 
     pattern->BuildChild(param);
     pattern->SetOnWillDismiss(param.onWillDismiss);
+    pattern->SetOnWillDismissWithUserData(param.onWillDismissCallWithUserData);
 
     if (param.transitionEffect != nullptr) {
         dialogContext->UpdateChainedTransition(param.transitionEffect);

@@ -1517,6 +1517,13 @@ ArkUI_Int32 RegisterOnWillDialogDismiss(ArkUIDialogHandle handle, bool (*eventHa
     return CustomDialog::RegisterOnWillDialogDismiss(handle, eventHandler);
 }
 
+// Register closing event
+ArkUI_Int32 RegisterOnWillDismissWithUserData(
+    ArkUIDialogHandle handler, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event))
+{
+    return CustomDialog::RegisterOnWillDialogDismissWithUserData(handler, userData, callback);
+}
+
 const ArkUIDialogAPI* GetDialogAPI()
 {
     static const ArkUIDialogAPI dialogImpl = {
@@ -1537,6 +1544,7 @@ const ArkUIDialogAPI* GetDialogAPI()
         ShowDialog,
         CloseDialog,
         RegisterOnWillDialogDismiss,
+        RegisterOnWillDismissWithUserData
     };
     return &dialogImpl;
 }

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DIALOG_DIALOG_PATTERN_H
 
 #include <cstdint>
+#include <functional>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -68,6 +69,18 @@ public:
     bool ShouldDismiss() const
     {
         if (onWillDismiss_) {
+            return true;
+        }
+        return false;
+    }
+
+    void SetOnWillDismissWithUserData(const std::function<bool(const int32_t& info)>& onWillDismissWithUserData)
+    {
+        onWillDismissWithUserData_ = onWillDismissWithUserData;
+    }
+
+    bool ShouldDismissWithUserData(int reason){
+        if (onWillDismissWithUserData_ && onWillDismissWithUserData_(reason)) {
             return true;
         }
         return false;
@@ -343,6 +356,7 @@ private:
     std::string title_;
     std::string subtitle_;
     std::function<void(const int32_t& info)> onWillDismiss_;
+    std::function<bool(const int32_t& info)> onWillDismissWithUserData_;
 
     DialogProperties dialogProperties_;
     WeakPtr<FrameNode> menuNode_;

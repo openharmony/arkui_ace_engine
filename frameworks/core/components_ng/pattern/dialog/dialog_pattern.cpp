@@ -186,7 +186,9 @@ void DialogPattern::HandleClick(const GestureEvent& info)
             CHECK_NULL_VOID(pipeline);
             auto overlayManager = pipeline->GetOverlayManager();
             CHECK_NULL_VOID(overlayManager);
-            if (this->ShouldDismiss()) {
+            if (this->ShouldDismissWithUserData(static_cast<int32_t>(DialogDismissReason::DIALOG_TOUCH_OUTSIDE))) {
+                return;
+            } else if (this->ShouldDismiss()) {
                 overlayManager->SetDismissDialogId(host->GetId());
                 this->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_TOUCH_OUTSIDE));
                 TAG_LOGI(AceLogTag::ACE_DIALOG, "Dialog Should Dismiss");

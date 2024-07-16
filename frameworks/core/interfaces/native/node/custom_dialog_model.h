@@ -35,6 +35,8 @@ struct _ArkUIDialog {
     ArkUI_Int32 showInSubWindow;
     ArkUI_Bool enableCustomAnimation;
     bool (*onWillDismissCall)(ArkUI_Int32);
+    void (*onWillDismissCallWithUserData)(ArkUI_DialogDismissEvent*);
+    void* userData;
 };
 
 namespace OHOS::Ace::NG::CustomDialog {
@@ -57,6 +59,8 @@ ArkUI_Int32 EnableDialogCustomAnimation(ArkUIDialogHandle handle, bool enableCus
 ArkUI_Int32 ShowDialog(ArkUIDialogHandle handle, bool showInSubWindow);
 ArkUI_Int32 CloseDialog(ArkUIDialogHandle handle);
 ArkUI_Int32 RegisterOnWillDialogDismiss(ArkUIDialogHandle handler, bool (*eventHandler)(ArkUI_Int32));
+ArkUI_Int32 RegisterOnWillDialogDismissWithUserData(
+    ArkUIDialogHandle handler, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event));
 } // namespace OHOS::Ace::NG::CustomDialog
 
 #endif

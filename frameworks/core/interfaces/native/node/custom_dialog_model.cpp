@@ -13,33 +13,48 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/custom_dialog_model.h"
+
+#include "interfaces/native/node/dialog_model.h"
+
 #include "base/error/error_code.h"
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 
 namespace OHOS::Ace::NG::CustomDialog {
 namespace {
-    constexpr int32_t DEFAULT_DIALOG_ALIGNMENT = -1;
-    constexpr uint32_t DEFAULT_MASK_COLOR = 0x33000000;
-    constexpr uint32_t DEFAULT_DIALOG_BACKGROUND_COLOR = 0x00000000;
-    constexpr int32_t ARKUI_ALIGNMENT_TOP_START_INDEX = 0;
-    constexpr int32_t ARKUI_ALIGNMENT_TOP_INDEX = 1;
-    constexpr int32_t ARKUI_ALIGNMENT_TOP_END_INDEX = 2;
-    constexpr int32_t ARKUI_ALIGNMENT_START_INDEX = 3;
-    constexpr int32_t ARKUI_ALIGNMENT_CENTER_INDEX = 4;
-    constexpr int32_t ARKUI_ALIGNMENT_END_INDEX = 5;
-    constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_START_INDEX = 6;
-    constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_INDEX = 7;
-    constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_END_INDEX = 8;
-}
+constexpr int32_t DEFAULT_DIALOG_ALIGNMENT = -1;
+constexpr uint32_t DEFAULT_MASK_COLOR = 0x33000000;
+constexpr uint32_t DEFAULT_DIALOG_BACKGROUND_COLOR = 0x00000000;
+constexpr int32_t ARKUI_ALIGNMENT_TOP_START_INDEX = 0;
+constexpr int32_t ARKUI_ALIGNMENT_TOP_INDEX = 1;
+constexpr int32_t ARKUI_ALIGNMENT_TOP_END_INDEX = 2;
+constexpr int32_t ARKUI_ALIGNMENT_START_INDEX = 3;
+constexpr int32_t ARKUI_ALIGNMENT_CENTER_INDEX = 4;
+constexpr int32_t ARKUI_ALIGNMENT_END_INDEX = 5;
+constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_START_INDEX = 6;
+constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_INDEX = 7;
+constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_END_INDEX = 8;
+} // namespace
 
 ArkUIDialogHandle CreateDialog()
 {
-    return new _ArkUIDialog({ .dialogHandle = nullptr, .contentHandle = nullptr,
-        .alignment = DEFAULT_DIALOG_ALIGNMENT, .offsetX = 0.0f,
-        .offsetY = 0.0f, .isModal = true, .autoCancel = true, .maskColor = DEFAULT_MASK_COLOR, .maskRect = nullptr,
-        .backgroundColor = DEFAULT_DIALOG_BACKGROUND_COLOR, .cornerRadiusRect = nullptr,
-        .gridCount = -1, .enableCustomStyle = false,
-        .showInSubWindow = false, .enableCustomAnimation = false, .onWillDismissCall = nullptr });
+    return new _ArkUIDialog({ .dialogHandle = nullptr,
+        .contentHandle = nullptr,
+        .alignment = DEFAULT_DIALOG_ALIGNMENT,
+        .offsetX = 0.0f,
+        .offsetY = 0.0f,
+        .isModal = true,
+        .autoCancel = true,
+        .maskColor = DEFAULT_MASK_COLOR,
+        .maskRect = nullptr,
+        .backgroundColor = DEFAULT_DIALOG_BACKGROUND_COLOR,
+        .cornerRadiusRect = nullptr,
+        .gridCount = -1,
+        .enableCustomStyle = false,
+        .showInSubWindow = false,
+        .enableCustomAnimation = false,
+        .onWillDismissCall = nullptr,
+        .onWillDismissCallWithUserData = nullptr,
+        .userData = nullptr });
 }
 
 void DisposeDialog(ArkUIDialogHandle controllerHandler)
@@ -64,6 +79,8 @@ void DisposeDialog(ArkUIDialogHandle controllerHandler)
         delete cornerRadiusRect;
     }
     controllerHandler->onWillDismissCall = nullptr;
+    controllerHandler->onWillDismissCallWithUserData = nullptr;
+    controllerHandler->userData = nullptr;
     delete controllerHandler;
 }
 
@@ -134,6 +151,17 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
                 }
             };
     }
+
+    if (controllerHandler->onWillDismissCallWithUserData) {
+        dialogProperties.onWillDismissCallWithUserData = [controllerHandler](int32_t reason) {
+            ArkUI_DialogDismissEvent event = { controllerHandler->userData, reason, false };
+            controllerHandler->onWillDismissCallWithUserData(&event);
+            return event.BlockDismiss;
+        };
+    } else {
+        dialogProperties.onWillDismissCallWithUserData = nullptr;
+    }
+
     if (controllerHandler->enableCustomAnimation && !dialogProperties.openAnimation.has_value()) {
         AnimationOption animation;
         dialogProperties.openAnimation = animation;
@@ -287,4 +315,14 @@ ArkUI_Int32 RegisterOnWillDialogDismiss(ArkUIDialogHandle controllerHandler, boo
     controllerHandler->onWillDismissCall = eventHandler;
     return ERROR_CODE_NO_ERROR;
 }
+
+ArkUI_Int32 RegisterOnWillDialogDismissWithUserData(
+    ArkUIDialogHandle controllerHandler, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event))
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->onWillDismissCallWithUserData = callback;
+    controllerHandler->userData = userData;
+    return ERROR_CODE_NO_ERROR;
+}
+
 } // namespace OHOS::Ace::NG::ViewModel

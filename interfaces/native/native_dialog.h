@@ -23,15 +23,19 @@ extern "C" {
 #endif
 
 /**
-* @brief Enumerates the actions for triggering closure of the dialog box.
-*
-* @since 12
-*/
+ * @brief Enumerates the actions for triggering closure of the dialog box.
+ *
+ * @since 12
+ */
 typedef enum {
     /** Touching the system-defined Back button or pressing the Esc key. */
     DIALOG_DISMISS_BACK_PRESS = 0,
     /** Touching the mask. */
     DIALOG_DISMISS_TOUCH_OUTSIDE,
+    /** 点击关闭按钮。*/
+    DIALOG_DISMISS_CLOSE_BUTTON,
+    /** 下拉关闭。*/
+    DIALOG_DISMISS_SLIDE_DOWN,
 } ArkUI_DismissReason;
 
 /**
@@ -40,6 +44,13 @@ typedef enum {
 * @since 12
 */
 typedef bool (*ArkUI_OnWillDismissEvent)(int32_t reason);
+
+/**
+ * @brief 定义弹窗关闭事件对象。
+ *
+ * @since 12
+ */
+typedef struct ArkUI_DialogDismissEvent ArkUI_DialogDismissEvent;
 
 /**
  * @brief Provides the custom dialog box APIs for the native side.
@@ -208,7 +219,53 @@ typedef struct {
     * @return Returns <b>0</b> if the operation is successful; returns <b>401</b> if a parameter error occurs.
     */
     int32_t (*close)(ArkUI_NativeDialogHandle handle);
+
+    /**
+    * @brief 注册系统关闭自定义弹窗的监听事件。
+    *
+    * @param handle 指向自定义弹窗控制器的指针。
+    * @param userData 用户自定义数据指针。
+    * @param callback 监听自定义弹窗关闭的回调事件。
+    * @return 错误码。
+    *         {@link ARKUI_ERROR_CODE_NO_ERROR} 成功。
+    *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} 函数参数异常。
+    */
+    int32_t (*registerOnWillDismissWithUserData)(
+        ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event));
 } ArkUI_NativeDialogAPI_1;
+
+/**
+ * @brief 设置是否需要屏蔽系统关闭弹窗行为，true表示屏蔽系统行为不关闭弹窗，false表示不屏蔽。
+ *
+ * @param event 弹窗关闭事件对象指针。
+ * @param shouldBlockDismiss 实现需要屏蔽系统关闭弹窗行为。
+ * @since 12
+ */
+void OH_ArkUI_DialogDismissEvent_SetShouldBlockDismiss(ArkUI_DialogDismissEvent* event, bool shouldBlockDismiss);
+
+/**
+ * @brief 获取弹窗关闭事件对象中的用户自定义数据指针。
+ *
+ * @param event 弹窗关闭事件对象指针。
+ *
+ * @return 用户自定义数据指针。
+ * @since 12
+ */
+void* OH_ArkUI_DialogDismissEvent_GetUserData(ArkUI_DialogDismissEvent* event);
+
+/**
+ * @brief 获取交互式关闭事件指针中的关闭原因。
+ *
+ * @param event 弹窗关闭事件对象指针。
+ *
+ * @return 关闭原因，如果event不存在返回-1。
+ *         {@link DIALOG_DISMISS_BACK_PRESS} 对应点击三键back、左滑/右滑、键盘ESC关闭。
+ *         {@link DIALOG_DISMISS_TOUCH_OUTSIDE} 点击遮障层时。
+ *         {@link DIALOG_DISMISS_CLOSE_BUTTON} 点击关闭按钮。
+ *         {@link DIALOG_DISMISS_SLIDE_DOWN} 下拉关闭。
+ * @since 12
+ */
+int32_t OH_ArkUI_DialogDismissEvent_GetDismissReason(ArkUI_DialogDismissEvent* event);
 
 #ifdef __cplusplus
 };

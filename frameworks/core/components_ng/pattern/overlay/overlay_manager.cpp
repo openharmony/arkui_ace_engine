@@ -669,7 +669,7 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
     CHECK_NULL_VOID(root);
     node->OnAccessibilityEvent(
         AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-    root->RemoveChild(node);
+    root->RemoveChild(node, node->GetIsUseTransitionAnimator());
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     auto lastChild = AceType::DynamicCast<FrameNode>(root->GetLastChild());
     if (lastChild) {
@@ -2720,6 +2720,7 @@ int32_t OverlayManager::GetPopupIdByNode(const RefPtr<FrameNode>& overlay)
 
 bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
 {
+    LOGE("zrflog adddd");
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(rootNode, true);
     RemoveIndexerPopup();
@@ -2818,7 +2819,9 @@ int32_t OverlayManager::ExceptComponent(const RefPtr<NG::UINode>& rootNode, RefP
         }
         auto dialogPattern = DynamicCast<DialogPattern>(pattern);
         CHECK_NULL_RETURN(dialogPattern, OVERLAY_EXISTS);
-        if (dialogPattern->ShouldDismiss()) {
+        if (dialogPattern->ShouldDismissWithUserData(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK))) {
+            return OVERLAY_REMOVE;
+        } else if (dialogPattern->ShouldDismiss()) {
             SetDismissDialogId(overlay->GetId());
             dialogPattern->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK));
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss");
@@ -3145,7 +3148,9 @@ bool OverlayManager::RemoveOverlayInSubwindow()
     if (InstanceOf<DialogPattern>(pattern)) {
         auto dialogPattern = DynamicCast<DialogPattern>(pattern);
         CHECK_NULL_RETURN(dialogPattern, false);
-        if (dialogPattern->ShouldDismiss()) {
+        if (dialogPattern->ShouldDismissWithUserData(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK))) {
+            return true;
+        } else if (dialogPattern->ShouldDismiss()) {
             SetDismissDialogId(overlay->GetId());
             dialogPattern->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK));
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss");

@@ -931,6 +931,16 @@ public:
         return false;
     }
 
+    void SetIsUseTransitionAnimator(bool isUseTransitionAnimator)
+    {
+        isUseTransitionAnimator_ = isUseTransitionAnimator;
+    }
+
+    bool GetIsUseTransitionAnimator()
+    {
+        return isUseTransitionAnimator_;
+    }
+
     // this method will check the cache state and return the cached revert matrix preferentially,
     // but the caller can pass in true to forcible refresh the cache
     Matrix4& GetOrRefreshRevertMatrixFromCache(bool forceRefresh = false);
@@ -1138,6 +1148,8 @@ private:
     bool isDisallowDropForcedly_ = false;
     bool isGeometryTransitionIn_ = false;
     bool isLayoutNode_ = false;
+
+    bool isUseTransitionAnimator_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 
