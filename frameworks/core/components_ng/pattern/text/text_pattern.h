@@ -594,11 +594,6 @@ public:
         externalParagraphStyle_ = paragraphStyle;
     }
 
-    TextStyle GetTextStyle()
-    {
-        return textStyle_.value_or(TextStyle());
-    }
-
     std::optional<ParagraphStyle> GetExternalParagraphStyle()
     {
         return externalParagraphStyle_;

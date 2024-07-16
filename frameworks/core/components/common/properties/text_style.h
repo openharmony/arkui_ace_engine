@@ -784,8 +784,8 @@ private:
     bool adaptHeight_ = false; // whether adjust text size with height.
     bool allowScale_ = true;
     bool halfLeading_ = false;
-    float minFontScale_ = 0.0f;
-    float maxFontScale_ = static_cast<float>(INT32_MAX);
+    float minFontScale_ = 0.85f;
+    float maxFontScale_ = 3.20f;
 
     // for Symbol
     std::vector<Color> renderColors_;
