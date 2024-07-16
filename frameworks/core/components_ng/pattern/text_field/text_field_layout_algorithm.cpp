@@ -327,6 +327,7 @@ SizeF TextFieldLayoutAlgorithm::PlaceHolderMeasureContent(const LayoutConstraint
 SizeF TextFieldLayoutAlgorithm::TextAreaMeasureContent(const LayoutConstraintF& contentConstraint,
     LayoutWrapper* layoutWrapper)
 {
+    ACE_LAYOUT_SCOPED_TRACE("TextAreaMeasureContent");
     ApplyIndent(contentConstraint.maxSize.Width());
     paragraph_->Layout(contentConstraint.maxSize.Width());
 
@@ -354,6 +355,7 @@ SizeF TextFieldLayoutAlgorithm::TextAreaMeasureContent(const LayoutConstraintF& 
 SizeF TextFieldLayoutAlgorithm::TextInputMeasureContent(const LayoutConstraintF& contentConstraint,
     LayoutWrapper* layoutWrapper, float imageWidth)
 {
+    ACE_LAYOUT_SCOPED_TRACE("TextInputMeasureContent");
     ApplyIndent(contentConstraint.maxSize.Width());
     paragraph_->Layout(std::numeric_limits<double>::infinity());
     float contentWidth = CalculateContentWidth(contentConstraint, layoutWrapper, imageWidth);
@@ -1163,6 +1165,7 @@ bool TextFieldLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textSty
     if (!CreateParagraphEx(textStyle, content, contentConstraint, layoutWrapper)) {
         return false;
     }
+    ACE_LAYOUT_SCOPED_TRACE("CreateParagraphAndLayout[needLayout:%d]", needLayout);
     if (needLayout) {
         CHECK_NULL_RETURN(paragraph_, false);
         auto maxSize = GetMaxMeasureSize(contentConstraint);
