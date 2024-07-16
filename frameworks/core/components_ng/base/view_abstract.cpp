@@ -2368,6 +2368,7 @@ void ViewAbstract::SetBorderImageSource(const std::string& bdImageSrc)
     }
     ImageSourceInfo imageSourceInfo(bdImageSrc);
     ACE_UPDATE_RENDER_CONTEXT(BorderImageSource, imageSourceInfo);
+    ACE_UPDATE_RENDER_CONTEXT(BorderSourceFromImage, true);
 }
 
 void ViewAbstract::SetHasBorderImageSlice(bool tag)
@@ -2408,6 +2409,7 @@ void ViewAbstract::SetBorderImageGradient(const Gradient& gradient)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(BorderImageGradient, gradient);
+    ACE_UPDATE_RENDER_CONTEXT(BorderSourceFromImage, false);
 }
 
 void ViewAbstract::SetVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect)
@@ -2882,6 +2884,7 @@ void ViewAbstract::SetBorderImageSource(FrameNode* frameNode, const std::string&
 {
     ImageSourceInfo imageSourceInfo(bdImageSrc);
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderImageSource, imageSourceInfo, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BorderSourceFromImage, true, frameNode);
 }
 
 void ViewAbstract::SetHasBorderImageSlice(FrameNode* frameNode, bool tag)
@@ -2907,6 +2910,7 @@ void ViewAbstract::SetHasBorderImageRepeat(FrameNode* frameNode, bool tag)
 void ViewAbstract::SetBorderImageGradient(FrameNode* frameNode, const NG::Gradient& gradient)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderImageGradient, gradient, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BorderSourceFromImage, false, frameNode);
 }
 
 void ViewAbstract::SetForegroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& fgBlurStyle)
@@ -4491,7 +4495,7 @@ void ViewAbstract::SetJSFrameNodeOnVisibleAreaApproximateChange(FrameNode* frame
     frameNode->CleanVisibleAreaUserCallback(true);
 
     constexpr uint32_t minInterval = 100; // 100ms
-    if (interval < 0 || interval < minInterval) {
+    if (interval < 0 || static_cast<uint32_t>(interval) < minInterval) {
         interval = minInterval;
     }
     VisibleCallbackInfo callback;

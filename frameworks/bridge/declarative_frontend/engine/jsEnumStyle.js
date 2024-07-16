@@ -1307,11 +1307,11 @@ var EffectFillStyle;
   EffectFillStyle[EffectFillStyle["ITERATIVE"] = 1] = "ITERATIVE";
 })(EffectFillStyle || (EffectFillStyle = {}));
 
-var WebKeyboardAvoidMode;
+let WebKeyboardAvoidMode;
 (function (WebKeyboardAvoidMode) {
-  WebKeyboardAvoidMode[WebKeyboardAvoidMode["RESIZE_VISUAL"] = 0] = "RESIZE_VISUAL";
-  WebKeyboardAvoidMode[WebKeyboardAvoidMode["RESIZE_CONTENT"] = 1] = "RESIZE_CONTENT";
-  WebKeyboardAvoidMode[WebKeyboardAvoidMode["OVERLAYS_CONTENT"] = 2] = "OVERLAYS_CONTENT";
+  WebKeyboardAvoidMode[WebKeyboardAvoidMode.RESIZE_VISUAL = 0] = 'RESIZE_VISUAL';
+  WebKeyboardAvoidMode[WebKeyboardAvoidMode.RESIZE_CONTENT = 1] = 'RESIZE_CONTENT';
+  WebKeyboardAvoidMode[WebKeyboardAvoidMode.OVERLAYS_CONTENT = 2] = 'OVERLAYS_CONTENT';
 })(WebKeyboardAvoidMode || (WebKeyboardAvoidMode = {}));
 
 class SymbolEffect {

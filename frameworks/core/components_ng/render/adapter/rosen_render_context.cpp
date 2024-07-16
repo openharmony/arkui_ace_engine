@@ -643,11 +643,10 @@ void RosenRenderContext::SyncAdditionalGeometryProperties(const RectF& paintRect
         PaintBackground();
     }
 
-    if (bdImageLoadingCtx_ && bdImage_) {
+    auto sourceFromImage = GetBorderSourceFromImage().value_or(false);
+    if (sourceFromImage && bdImageLoadingCtx_ && bdImage_) {
         PaintBorderImage();
-    }
-
-    if (GetBorderImageGradient()) {
+    } else if (!sourceFromImage && GetBorderImageGradient()) {
         PaintBorderImageGradient();
     }
 

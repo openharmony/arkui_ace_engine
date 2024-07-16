@@ -1278,6 +1278,11 @@ public:
 
     virtual void UpdateLastVsyncEndTimestamp(uint64_t lastVsyncEndTimestamp) {}
 
+#if defined(SUPPORT_TOUCH_TARGET_TEST)
+    // Called by hittest to find touch node is equal target.
+    virtual bool OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe = false,
+        const std::string& target = "") = 0;
+#endif
     virtual bool IsWindowFocused() const
     {
         return false;

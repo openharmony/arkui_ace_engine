@@ -172,8 +172,8 @@ private:
     ImagePaintConfig foregroundConfig_;
     ImagePaintConfig secondaryConfig_;
     ImagePaintConfig backgroundConfig_;
-    int32_t imageReadyStateCode_ = 0;
-    int32_t imageSuccessStateCode_ = 0;
+    uint32_t imageReadyStateCode_ = 0;
+    uint32_t imageSuccessStateCode_ = 0;
     bool hasInit_ = false;
     bool isHover_ = false;
     bool isfocus_ = false;

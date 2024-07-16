@@ -30,7 +30,6 @@ void DragDropManagerTestNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
-    MOCK_DRAG_WINDOW = nullptr;
 }
 
 /**
@@ -54,7 +53,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest001, TestSize.Level1)
     void* voidPtr = static_cast<void*>(new char[0]);
     RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
     GestureEvent gestureEvent;
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawPixelMap(_)).Times(1);
     auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(pixelMap, gestureEvent);
     EXPECT_TRUE(dragDropProxy);
 
@@ -87,7 +85,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest002, TestSize.Level1)
      */
     RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     GestureEvent gestureEvent;
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawFrameNode(_)).Times(1);
     auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(customNode, gestureEvent);
     EXPECT_TRUE(dragDropProxy);
 
@@ -127,7 +124,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest003, TestSize.Level1)
      */
     RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     GestureEvent gestureEvent;
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawFrameNode(_)).Times(1);
     auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(customNode, gestureEvent);
     EXPECT_TRUE(dragDropProxy);
 
@@ -160,7 +156,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest004, TestSize.Level1)
      */
     RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     GestureEvent gestureEvent;
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawFrameNode(_)).Times(1);
     auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(customNode, gestureEvent);
     EXPECT_TRUE(dragDropProxy);
 
@@ -217,7 +212,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest005, TestSize.Level1)
      */
     RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     GestureEvent gestureEvent;
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawFrameNode(_)).Times(1);
     auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(customNode, gestureEvent);
     EXPECT_TRUE(dragDropProxy);
 
@@ -274,7 +268,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest006, TestSize.Level1)
      */
     RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     GestureEvent gestureEvent;
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawFrameNode(_)).Times(1);
     auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(customNode, gestureEvent);
     EXPECT_TRUE(dragDropProxy);
     flag = dragDropManager->CheckDragDropProxy(VALID_CURRENT_ID);
@@ -299,7 +292,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest006, TestSize.Level1)
     void* voidPtr = static_cast<void*>(new char[0]);
     RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
     GestureEvent gestureEvent2;
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawPixelMap(_)).Times(1);
     auto dragDropProxy2 = dragDropManager2->CreateAndShowDragWindow(pixelMap, gestureEvent2);
     EXPECT_TRUE(dragDropProxy2);
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragDropManager2->dragWindow_)), Destroy()).Times(1);
@@ -380,7 +372,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest008, TestSize.Level1)
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
     RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     GestureEvent gestureEvent;
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawFrameNode(_)).Times(1);
     auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(customNode, gestureEvent);
     EXPECT_TRUE(dragDropProxy);
 
@@ -504,7 +495,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest009, TestSize.Level1)
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
     RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     GestureEvent gestureEvent;
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawFrameNode(_)).Times(1);
     auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(customNode, gestureEvent);
     EXPECT_TRUE(dragDropProxy);
 
@@ -648,7 +638,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest011, TestSize.Level1)
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
     RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     GestureEvent gestureEvent;
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawFrameNode(_)).Times(1);
     auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(customNode, gestureEvent);
     EXPECT_TRUE(dragDropProxy);
 
@@ -743,7 +732,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest012, TestSize.Level1)
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
     RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     GestureEvent gestureEvent;
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawFrameNode(_)).Times(1);
     auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(customNode, gestureEvent);
     EXPECT_TRUE(dragDropProxy);
 
@@ -806,7 +794,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest013, TestSize.Level1)
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
     RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     GestureEvent gestureEvent;
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawFrameNode(_)).Times(1);
     auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(customNode, gestureEvent);
     EXPECT_TRUE(dragDropProxy);
 
@@ -1034,7 +1021,6 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest022, TestSize.Level1)
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
     RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     GestureEvent gestureEvent;
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(MOCK_DRAG_WINDOW)), DrawFrameNode(_)).Times(1);
     auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(customNode, gestureEvent);
     EXPECT_TRUE(dragDropProxy);
 

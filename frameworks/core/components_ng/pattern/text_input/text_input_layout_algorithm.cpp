@@ -219,7 +219,7 @@ void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         .isRTL = isRTL,
         .responseArea = responseArea,
         .cleanResponseArea = cleanNodeResponseArea,
-        .offsetBase = offsetBase
+        .contentOffset = content->GetRect().GetOffset()
     };
     UpdateTextRect(updateTextRectParams);
 
@@ -281,12 +281,12 @@ void TextInputLayoutAlgorithm::UpdateTextRect(const UpdateTextRectParams& params
                 RectF cleanResponseAreaRect = params.cleanResponseArea->GetAreaRect();
                 textRectOffsetX += cleanResponseAreaRect.Width();
             }
-            textRect_.SetOffset(OffsetF(textRectOffsetX, params.offsetBase.GetY()));
+            textRect_.SetOffset(OffsetF(textRectOffsetX, params.contentOffset.GetY()));
         } else {
-            textRect_.SetOffset(OffsetF(textRectOffsetX, params.offsetBase.GetY()));
+            textRect_.SetOffset(OffsetF(textRectOffsetX, params.contentOffset.GetY()));
         }
     } else {
-        textRect_.SetOffset({ params.pattern->GetTextRect().GetOffset().GetX(), params.offsetBase.GetY() });
+        textRect_.SetOffset({ params.pattern->GetTextRect().GetOffset().GetX(), params.contentOffset.GetY() });
     }
 }
 

@@ -1855,6 +1855,9 @@ bool ActAccessibilityFocus(int64_t elementId, RefPtr<NG::FrameNode>& frameNode, 
         renderContext->UpdateAccessibilityFocus(true);
     }
     currentFocusNodeId = frameNode->GetAccessibilityId();
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    accessibilityProperty->OnAccessibilityFocusCallback(true);
     return true;
 }
 
@@ -3012,7 +3015,7 @@ void JsAccessibilityManager::DumpTree(int32_t depth, int64_t nodeID)
             rootNode = ngPipeline->GetRootElement();
             CHECK_NULL_VOID(rootNode);
             nodeID = rootNode->GetAccessibilityId();
-            commonProperty.windowId = ngPipeline->GetWindowId();
+            commonProperty.windowId = static_cast<int32_t>(ngPipeline->GetWindowId());
             commonProperty.windowLeft = GetWindowLeft(ngPipeline->GetWindowId());
             commonProperty.windowTop = GetWindowTop(ngPipeline->GetWindowId());
             commonProperty.pageId = 0;
@@ -4888,7 +4891,7 @@ void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& 
     if (parentWindowId_ == 0) {
         output.windowId = static_cast<int32_t>(ngPipeline->GetFocusWindowId());
     } else {
-        output.windowId = GetWindowId();
+        output.windowId = static_cast<int32_t>(GetWindowId());
     }
     if (getParentRectHandler_) {
         getParentRectHandler_(output.windowTop, output.windowLeft);

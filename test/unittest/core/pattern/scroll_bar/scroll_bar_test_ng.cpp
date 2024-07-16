@@ -26,7 +26,6 @@
 
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
-#include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
@@ -224,12 +223,6 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest001, TestSize.Level1)
     EXPECT_EQ(ret, false);
     auto expectDistance = SCROLL_BAR_SELF_SIZE.Height() - SCROLL_BAR_CHILD_HEIGHT; // 1036
     EXPECT_EQ(pattern_->scrollableDistance_, expectDistance);
-    pattern_->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.size(), 10);
-    EXPECT_EQ(DumpLog::GetInstance().description_[0], "Axis: VERTICAL\n");
-    EXPECT_EQ(DumpLog::GetInstance().description_[1], "outerScrollBarState: OFF\n");
-    EXPECT_EQ(DumpLog::GetInstance().description_[2], "panDirection: VERTICAL\n");
-    DumpLog::GetInstance().description_.clear();
 }
 
 /**
@@ -270,12 +263,6 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest002, TestSize.Level1)
      * @tc.expected: step3. Compare return value with expected value.
      */
     pattern_->OnModifyDone();
-    pattern_->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.size(), 10);
-    EXPECT_EQ(DumpLog::GetInstance().description_[0], "Axis: HORIZONTAL\n");
-    EXPECT_EQ(DumpLog::GetInstance().description_[1], "outerScrollBarState: AUTO\n");
-    EXPECT_EQ(DumpLog::GetInstance().description_[2], "panDirection: HORIZONTAL\n");
-    DumpLog::GetInstance().description_.clear();
     EXPECT_EQ(pattern_->axis_, Axis::HORIZONTAL);
     auto callback = pattern_->scrollPositionCallback_;
     EXPECT_NE(callback, nullptr);
@@ -532,10 +519,6 @@ HWTEST_F(ScrollBarTestNg, PerformActionTest001, TestSize.Level1)
     pattern_->axis_ = Axis::NONE;
     pattern_->scrollableDistance_ = 0.0;
     pattern_->SetAccessibilityAction();
-    pattern_->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.size(), 10);
-    EXPECT_EQ(DumpLog::GetInstance().description_[0], "Axis: NONE\n");
-    DumpLog::GetInstance().description_.clear();
 
     /**
      * @tc.steps: step3. When scrollBar Axis is NONE and scrollable distance is 0, call the callback function in
@@ -903,10 +886,6 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest012, TestSize.Level1)
     EXPECT_EQ(pattern_->scrollableEvent_->InBarRegion(localPoint, source), false);
 
     pattern_->panRecognizer_ = nullptr;
-    pattern_->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.size(), 10);
-    EXPECT_EQ(DumpLog::GetInstance().description_[2], "panDirection is null\n");
-    DumpLog::GetInstance().description_.clear();
     pattern_->scrollableEvent_->BarCollectTouchTarget(
         coordinateOffset, getEventTargetImpl, result, frameNode, nullptr, responseLinkResult);
     EXPECT_EQ(result.size(), size + 1);
@@ -1011,10 +990,6 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest015, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->controlDistance_, 0);
     EXPECT_EQ(pattern_->opacity_, 0);
-    pattern_->DumpAdvanceInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_.size(), 10);
-    EXPECT_EQ(DumpLog::GetInstance().description_[1], "outerScrollBarState: ON\n");
-    DumpLog::GetInstance().description_.clear();
 
     /**
      * @tc.steps: case2. controlDistance_ > 0

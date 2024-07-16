@@ -3030,9 +3030,11 @@ void RichEditorPattern::HandleMenuCallbackOnSelectAll()
         StopTwinkling();
     }
     auto selectOverlayInfo = selectOverlay_->GetSelectOverlayInfo();
-    textResponseType_ = selectOverlayInfo
-                        ? static_cast<TextResponseType>(selectOverlayInfo->menuInfo.responseType.value_or(0))
-                        : TextResponseType::LONG_PRESS;
+    if (selectOverlayInfo && selectOverlay_->IsUsingMouse()) {
+        textResponseType_ = static_cast<TextResponseType>(selectOverlayInfo->menuInfo.responseType.value_or(0));
+    } else {
+        textResponseType_ = TextResponseType::LONG_PRESS;
+    }
     selectMenuInfo_.showCopyAll = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -4163,7 +4165,8 @@ void RichEditorPattern::NotifyExitTextPreview()
 
 std::vector<RectF> RichEditorPattern::GetPreviewTextRects()
 {
-    auto rects = paragraphs_.GetRects(previewTextRecord_.startOffset, previewTextRecord_.endOffset);
+    auto rects = paragraphs_.GetRects(previewTextRecord_.startOffset, previewTextRecord_.endOffset,
+        RectHeightPolicy::COVER_TEXT);
     auto offset = GetTextRect().GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
     for (RectF& rect : rects) {
         rect += offset;
@@ -4379,6 +4382,7 @@ void RichEditorPattern::InsertValueToSpanNode(
     text = StringUtils::ToString(textTemp);
     spanNode->UpdateContent(text);
     spanItem->position += static_cast<int32_t>(StringUtils::ToWstring(insertValue).length());
+    SpanNodeFission(spanNode);
 }
 
 void RichEditorPattern::SpanNodeFission(
@@ -4493,6 +4497,7 @@ void RichEditorPattern::CreateTextSpanNode(
         spanNode->AddPropertyInfo(PropertyInfo::FONTSIZE);
         SetDefaultColor(spanNode);
     }
+    SpanNodeFission(spanNode);
     AfterInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()), true, isIME);
 }
 

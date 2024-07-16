@@ -339,7 +339,6 @@ public:
 
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
 
-    void OnAreaChangedInner() override;
     void OnHandleAreaChanged() override;
     void OnVisibleChange(bool isVisible) override;
     void HandleCounterBorder();
@@ -1314,7 +1313,7 @@ public:
     }
 
     void OnSelectionMenuOptionsUpdate(
-        const NG::OnCreateMenuCallback && onCreateMenuCallback, const NG::OnMenuItemClickCallback && onMenuItemClick);
+        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick);
 
     void SetSupportPreviewText(bool isSupported)
     {
@@ -1580,6 +1579,8 @@ private:
     void UpdateParam(GestureEvent& info, bool shouldProcessOverlayAfterLayout);
     void ShowCaretAndStopTwinkling();
     void OnCaretMoveDone(const TouchEventInfo& info);
+    void HandleCrossPlatformInBlurEvent();
+    void ModifyInnerStateInBlurEvent();
 
     void TwinklingByFocus();
 

@@ -1282,21 +1282,14 @@ void TextFieldPattern::HandleBlurEvent()
     if (textFieldManager) {
         textFieldManager->ClearOnFocusTextField(host->GetId());
     }
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     auto textFieldTheme = GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
     if (!IsShowError() && IsUnderlineMode()) {
         underlineColor_ = userUnderlineColor_.normal.value_or(textFieldTheme->GetUnderlineColor());
         underlineWidth_ = UNDERLINE_WIDTH;
     }
-    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
     ProcNormalInlineStateInBlurEvent();
-    needToRequestKeyboardInner_ = false;
-    isLongPress_ = false;
-    isMoveCaretAnywhere_ = false;
-    isFocusedBeforeClick_ = false;
+    ModifyInnerStateInBlurEvent();
     magnifierController_->UpdateShowMagnifier();
     CloseSelectOverlay(!isKeyboardClosedByUser_ && blurReason_ == BlurReason::FOCUS_SWITCH);
     if (GetIsPreviewText()) {
@@ -1307,11 +1300,7 @@ void TextFieldPattern::HandleBlurEvent()
         CloseKeyboard(true);
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "textfield %{public}d on blur, close custom keyboard", host->GetId());
     }
-#ifndef OHOS_PLATFORM
-    if (HasConnection()) {
-        CloseKeyboard(true);
-    }
-#endif
+    HandleCrossPlatformInBlurEvent();
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
     NotifyOnEditChanged(false);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -1335,6 +1324,23 @@ void TextFieldPattern::HandleBlurEvent()
         data->Put("position", host->GetGeometryNode()->GetFrameRect().ToString().data());
         // report all use textfield component unfocus event,more than just the search box
         UiSessionManager::GetInstance().ReportSearchEvent(data->ToString());
+    }
+#endif
+}
+
+void TextFieldPattern::ModifyInnerStateInBlurEvent()
+{
+    needToRequestKeyboardInner_ = false;
+    isLongPress_ = false;
+    isMoveCaretAnywhere_ = false;
+    isFocusedBeforeClick_ = false;
+}
+
+void TextFieldPattern::HandleCrossPlatformInBlurEvent()
+{
+#ifndef OHOS_PLATFORM
+    if (HasConnection()) {
+        CloseKeyboard(true);
     }
 #endif
 }
@@ -1407,7 +1413,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnSelectAll");
     auto textSize = static_cast<int32_t>(contentController_->GetWideText().length());
     if (inlineStyle) {
-        if (contentController_->GetWideText().rfind(L".") < textSize - FIND_TEXT_ZERO_INDEX) {
+        if (static_cast<int32_t>(contentController_->GetWideText().rfind(L".")) < textSize - FIND_TEXT_ZERO_INDEX) {
             textSize = contentController_->GetWideText().rfind(L".");
         }
         UpdateSelection(0, textSize);
@@ -2147,6 +2153,7 @@ void TextFieldPattern::InitClickEvent()
 void TextFieldPattern::HandleClickEvent(GestureEvent& info)
 {
     CHECK_NULL_VOID(!IsDragging());
+    parentGlobalOffset_ = GetPaintRectGlobalOffset();
     if (selectOverlay_->IsClickAtHandle(info)) {
         return;
     }
@@ -4648,10 +4655,6 @@ void TextFieldPattern::UpdateInputFilterErrorText(const std::string& errorText)
 }
 
 void TextFieldPattern::OnValueChanged(bool needFireChangeEvent, bool needFireSelectChangeEvent) {}
-
-void TextFieldPattern::OnAreaChangedInner()
-{
-}
 
 void TextFieldPattern::OnHandleAreaChanged()
 {
