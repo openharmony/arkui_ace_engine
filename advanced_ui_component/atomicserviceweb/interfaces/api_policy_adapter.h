@@ -17,9 +17,7 @@
 #define API_POLICY_ADAPTER_H
 
 #include "string"
-#ifdef __WIN32
-#include <windows.h>
-#else
+#ifndef __WIN32
 #include <dlfcn.h>
 #endif
 
@@ -34,11 +32,7 @@ public:
     void SetCheckUrlFunc(CheckUrlFunc& func);
 
 private:
-#ifdef __WIN32
-    HMODULE handle = nullptr;
-#else
     void *handle = nullptr;
-#endif
     CheckUrlFunc func = nullptr;
 };
 

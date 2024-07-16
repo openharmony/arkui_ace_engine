@@ -17,13 +17,7 @@
 
 ApiPolicyAdapter::ApiPolicyAdapter()
 {
-#ifdef __WIN32
-    handle = LoadLibrary(TEXT("/system/lib64/platformsdk/libapipolicy_client.z.so"));
-    if (!handle) {
-        return;
-    }
-    func = (CheckUrlFunc)GetProcAddress(handle, "CheckUrl");
-#else
+#ifndef __WIN32
     handle = dlopen("/system/lib64/platformsdk/libapipolicy_client.z.so", RTLD_NOW);
     if (!handle) {
         return;
@@ -34,12 +28,7 @@ ApiPolicyAdapter::ApiPolicyAdapter()
 
 ApiPolicyAdapter::~ApiPolicyAdapter()
 {
-#ifdef __WIN32
-    if (handle) {
-        FreeLibrary(handle);
-        handle = nullptr;
-    }
-#else
+#ifndef __WIN32
     if (handle) {
         dlclose(handle);
         handle = nullptr;
