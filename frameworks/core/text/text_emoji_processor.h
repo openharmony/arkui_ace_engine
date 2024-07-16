@@ -63,6 +63,7 @@ public:
         const std::wstring& content, bool includeHalf = false);
     static TextEmojiSubStringRange CalSubWstringRange(int32_t index, int32_t length,
         const std::wstring& content, bool includeHalf);
+    static int32_t GetCharacterNum(const std::string& content);
 
 private:
     static void OnBeginState(uint32_t codePoint, int& state, int& deleteCount, bool isBackward);
