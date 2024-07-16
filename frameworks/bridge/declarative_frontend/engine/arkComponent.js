@@ -24889,6 +24889,21 @@ class ListInitialIndexModifier extends ModifierWithKey {
 }
 ListInitialIndexModifier.identity = Symbol('listInitialIndex');
 
+class ListInitialScrollerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.resetInitialScroller(node);
+    }
+    else {
+      getUINativeModule().list.setInitialScroller(node, this.value);
+    }
+  }
+}
+ListInitialScrollerModifier.identity = Symbol('listInitialScroller');
+
 class ArkListComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -24901,6 +24916,9 @@ class ArkListComponent extends ArkComponent {
       }
       if (value[0].space !== undefined) {
         modifierWithKey(this._modifiersWithKeys, ListSpaceModifier.identity, ListSpaceModifier, value[0].space);
+      }
+      if (value[0].scroller !== undefined) {
+        modifierWithKey(this._modifiersWithKeys, ListInitialScrollerModifier.identity, ListInitialScrollerModifier, value[0].scroller);
       }
     }
     return this;

@@ -183,7 +183,7 @@ class NodeAdapter {
         if (!node.isModifiable()) {
             return false;
         }
-        if (node.attribute_ !==  undefined) {
+        if (node.attribute_ !== undefined) {
             if (node.attribute_.allowChildCount !== undefined) {
                 const allowCount = node.attribute_.allowChildCount();
                 if (allowCount <= 1) {
