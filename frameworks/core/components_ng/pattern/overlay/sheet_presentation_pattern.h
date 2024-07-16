@@ -311,6 +311,8 @@ public:
 
     void SheetInteractiveDismiss(BindSheetDismissReason dismissReason, float dragVelocity = 0.0f);
 
+    void SetSheetBorderWidth(bool isPartialUpdate = false);
+
     void SetCurrentOffset(float currentOffset)
     {
         currentOffset_ = currentOffset;
