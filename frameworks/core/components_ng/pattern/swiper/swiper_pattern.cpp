@@ -2124,7 +2124,6 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
     currentDelta_ = currentDelta_ - offset;
     currentIndexOffset_ += offset;
     if (isDragging_ || childScrolling_) {
-        PlayScrollAnimation();
         AnimationCallbackInfo callbackInfo;
         callbackInfo.currentOffset =
             GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
@@ -2156,7 +2155,7 @@ bool SwiperPattern::CheckOverScroll(float offset)
                 auto realOffset = IsOutOfStart(offset) ? - itemPosition_.begin()->second.startPos :
                     CalculateVisibleSize() - itemPosition_.rbegin()->second.endPos;
                 currentDelta_ = currentDelta_ - realOffset;
-                PlayScrollAnimation();
+                PlayScrollAnimation(realOffset);
                 HandleSwiperCustomAnimation(realOffset);
                 MarkDirtyNodeSelf();
                 return true;
@@ -4854,6 +4853,7 @@ ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedSta
             CloseTheGap(offset);
             return { offset, true };
         }
+        PlayScrollAnimation(offset);
         UpdateCurrentOffset(offset);
         return { 0.0f, !IsLoop() && GetDistanceToEdge() <= 0.0f };
     }

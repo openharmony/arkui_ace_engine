@@ -746,7 +746,7 @@ private:
 
     // use property animation feature
     virtual void ResetAnimationParam() {};
-    virtual void PlayScrollAnimation() {};
+    virtual void PlayScrollAnimation(float offset) {};
     virtual void ClearAnimationFinishList() {};
     virtual void InitialFrameNodePropertyAnimation(const OffsetF& offset, RefPtr<FrameNode>& frameNode);
     virtual void CancelFrameNodePropertyAnimation(RefPtr<FrameNode>& frameNode);
