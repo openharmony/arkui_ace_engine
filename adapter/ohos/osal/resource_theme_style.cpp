@@ -204,7 +204,6 @@ void ResourceThemeStyle::OnParseResourceMedia(const std::string& attrName, const
 
 void ResourceThemeStyle::CheckThemeStyleLoaded()
 {
-    std::lock_guard lock(checkThemeStyleLoadedMutex_);
     if (future_.valid()) {
         future_.wait_until(std::chrono::system_clock::now() + std::chrono::milliseconds(WAIT_FOR_TIME));
     }
