@@ -53,6 +53,8 @@ void SwitchTheme::Builder::ParsePattern(const RefPtr<ThemeConstants>& themeConst
     theme->touchDuration_ = switchPattern->GetAttr<double>("touch_animation_duration", 0.0);
     theme->colorAnimationDuration_ = switchPattern->GetAttr<double>("color_animation_duration", 0.0);
     theme->pointAnimationDuration_ = switchPattern->GetAttr<double>("point_animation_duration", 0.0);
+    theme->interactiveHoverColor_ = switchPattern->GetAttr<Color>("interactive_hover", Color::RED);
+    theme->interactivePressedColor_ = switchPattern->GetAttr<Color>("interactive_pressed", Color::RED);
     if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
         return;
     }

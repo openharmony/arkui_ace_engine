@@ -81,8 +81,13 @@ void SwitchModifier::InitializeParam()
     CHECK_NULL_VOID(switchTheme);
     activeColor_ = switchTheme->GetActiveColor();
     inactiveColor_ = switchTheme->GetInactiveColor();
-    clickEffectColor_ = switchTheme->GetClickEffectColor();
-    hoverColor_ = switchTheme->GetHoverColor();
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        clickEffectColor_ = switchTheme->GetClickEffectColor();
+        hoverColor_ = switchTheme->GetHoverColor();
+    } else {
+        clickEffectColor_ = switchTheme->GetInteractivePressedColor();
+        hoverColor_ = switchTheme->GetInteractiveHoverColor();
+    }
     hoverRadius_ = switchTheme->GetHoverRadius();
     userActiveColor_ = activeColor_;
     hoverDuration_ = switchTheme->GetHoverDuration();
@@ -136,7 +141,9 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
     OffsetF hoverBoardOffset;
     hoverBoardOffset.SetX(xOffset - (actualWidth_ - width) / 2.0);
     hoverBoardOffset.SetY(yOffset - (actualHeight_ - height) / 2.0);
-    DrawTouchAndHoverBoard(canvas, hoverBoardOffset);
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        DrawTouchAndHoverBoard(canvas, hoverBoardOffset);
+    }
     DrawFocusBoard(canvas, contentOffset, contentSize, actualGap);
     DrawRectCircle(canvas, contentOffset, contentSize, actualGap);
 }
@@ -168,6 +175,12 @@ void SwitchModifier::DrawRectCircle(RSCanvas& canvas, const OffsetF& contentOffs
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(roundRect);
     canvas.DetachBrush();
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        brush.SetColor(ToRSColor(animateTouchHoverColor_->Get()));
+        canvas.AttachBrush(brush);
+        canvas.DrawRoundRect(roundRect);
+        canvas.DetachBrush();
+    }
     brush.SetColor(ToRSColor(animatePointColor_->Get()));
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
