@@ -16,7 +16,9 @@
 #include "core/components_ng/pattern/search/search_pattern.h"
 
 #include <cstdint>
-
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 #include "base/geometry/rect.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
@@ -664,6 +666,9 @@ void SearchPattern::OnClickButtonAndImage()
     searchEventHub->UpdateSubmitEvent(text);
     // close keyboard and select background color
     textFieldPattern->StopEditing();
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+    UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Search.onSubmit");
+#endif
 }
 
 void SearchPattern::OnClickCancelButton()

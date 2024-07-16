@@ -223,7 +223,7 @@ void JSRefresh::OnStateChange(const JSCallbackInfo& args)
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
         func->ExecuteJS(1, &newJSVal);
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Radio.onChange");
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Refresh.OnStateChange");
 #endif
     };
     RefreshModel::GetInstance()->SetOnStateChange(std::move(onStateChange));
