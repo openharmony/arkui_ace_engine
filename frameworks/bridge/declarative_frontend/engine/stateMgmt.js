@@ -5895,7 +5895,7 @@ class SynchedPropertyNestedObjectPU extends ObservedPropertyAbstractPU {
      */
     constructor(obsObject, owningChildView, propertyName) {
         super(owningChildView, propertyName);
-        this.obsObject_ = obsObject;
+        this.obsObject_ = undefined;
         this.createSourceDependency(obsObject);
         this.setValueInternal(obsObject);
         this.setDecoratorInfo("@ObjectLink");
