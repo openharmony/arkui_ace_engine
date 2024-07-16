@@ -2969,6 +2969,9 @@ class ObservedMap {
   get [Symbol.toStringTag]() {
       return 'ObservedMapTag';
   }
+  setOnChange(callback) {
+    this.changeCallback = callback;
+  }
   setFrameNode(isFrameNode) {
     this.isFrameNode_ = isFrameNode;
   }
