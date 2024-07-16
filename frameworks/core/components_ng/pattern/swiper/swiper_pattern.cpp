@@ -4943,7 +4943,8 @@ void SwiperPattern::NotifyParentScrollEnd()
 
 inline bool SwiperPattern::DuringTranslateAnimation() const
 {
-    return (springAnimation_ && springAnimationIsRunning_) || targetIndex_ || usePropertyAnimation_;
+    return (springAnimation_ && springAnimationIsRunning_) || targetIndex_ || usePropertyAnimation_ ||
+           translateAnimationIsRunning_;
 }
 
 bool SwiperPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child)
@@ -4983,6 +4984,12 @@ ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedSta
     }
     if (!CheckSwiperPanEvent(offset)) {
         return { offset, true };
+    }
+    // handle situations when multiple children are notifying scrollStart / scrollEnd
+    // reset flag and animations to correct states when scroll happens
+    childScrolling_ = true;
+    if (DuringTranslateAnimation()) {
+        StopAnimationOnScrollStart(false);
     }
     // mouse scroll triggers showNext / showPrev instead of updating offset
     if (source == SCROLL_FROM_AXIS) {
