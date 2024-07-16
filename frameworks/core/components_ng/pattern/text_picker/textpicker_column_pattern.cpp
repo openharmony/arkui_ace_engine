@@ -154,7 +154,11 @@ void TextPickerColumnPattern::OnMiddleButtonTouchMove()
 
 void TextPickerColumnPattern::OnMiddleButtonTouchUp()
 {
-    PlayPressAnimation(buttonBgColor_);
+    if (isHover_) {
+        PlayPressAnimation(hoverColor_);
+    } else {
+        PlayPressAnimation(buttonBgColor_);
+    }
 }
 
 int32_t TextPickerColumnPattern::GetMiddleButtonIndex()

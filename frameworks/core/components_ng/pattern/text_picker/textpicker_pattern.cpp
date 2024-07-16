@@ -112,9 +112,14 @@ void TextPickerPattern::SetButtonIdeaSize()
         if (resizeFlag_) {
             buttonHeight = resizePickerItemHeight_ - PRESS_INTERVAL.ConvertToPx() * RATE;
         }
-        auto buttonSpace = pickerTheme->GetSelectorItemSpace();
+
+        auto buttonSpace =
+            pickerTheme->NeedButtonFocusAreaType() ? pickerTheme->GetSelectorItemSpace() : PRESS_INTERVAL * RATE;
+        if (children.size() == 1 && pickerTheme->NeedButtonFocusAreaType()) {
+            buttonSpace = PRESS_INTERVAL * RATE;
+        }
         buttonLayoutProperty->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(width - buttonSpace.ConvertToPx() * RATE), CalcLength(buttonHeight)));
+            CalcSize(CalcLength(width - buttonSpace.ConvertToPx()), CalcLength(buttonHeight)));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
         CHECK_NULL_VOID(blendNode);
@@ -247,12 +252,15 @@ void TextPickerPattern::UpdateButtonStyles(const RefPtr<FrameNode>& buttonNode, 
         CHECK_NULL_VOID(buttonLayoutProperty);
         auto buttonRenderContext = buttonNode->GetRenderContext();
         CHECK_NULL_VOID(buttonRenderContext);
-
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
         BorderWidthProperty borderWidth;
         BorderColorProperty borderColor;
         Color buttonBgColor;
 
-        if (haveFocus) {
+        if (haveFocus && context->GetIsFocusActive()) {
             buttonBgColor = pickerTheme->GetSelectorItemFocusBgColor();
             borderWidth.SetBorderWidth(pickerTheme->GetSelectorItemFocusBorderWidth());
             borderColor.SetColor(pickerTheme->GetSelectorItemFocusBorderColor());

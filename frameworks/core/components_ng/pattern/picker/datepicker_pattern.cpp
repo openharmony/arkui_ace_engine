@@ -231,12 +231,16 @@ void DatePickerPattern::UpdateButtonStyles(const RefPtr<FrameNode>& buttonNode, 
         CHECK_NULL_VOID(buttonLayoutProperty);
         auto buttonRenderContext = buttonNode->GetRenderContext();
         CHECK_NULL_VOID(buttonRenderContext);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
 
         BorderWidthProperty borderWidth;
         BorderColorProperty borderColor;
         Color buttonBgColor;
 
-        if (haveFocus) {
+        if (haveFocus && context->GetIsFocusActive()) {
             buttonBgColor = pickerTheme->GetSelectorItemFocusBgColor();
             borderWidth.SetBorderWidth(pickerTheme->GetSelectorItemFocusBorderWidth());
             borderColor.SetColor(pickerTheme->GetSelectorItemFocusBorderColor());
