@@ -38,14 +38,22 @@ class LogWrapper:
 
 
 logWrapper = LogWrapper()
+log_debug_enabled = False
+
+
+def enable_debug(flag):
+    global log_debug_enabled
+    log_debug_enabled = flag
 
 
 def log_debug(msg):
-    logWrapper.logger.debug(msg)
+    if log_debug_enabled:
+        logWrapper.logger.debug(msg)
 
 
 def log_info(msg):
-    logWrapper.logger.info(msg)
+    if log_debug_enabled:
+        logWrapper.logger.info(msg)
 
 
 def log_warning(msg):
@@ -58,3 +66,7 @@ def log_error(msg):
 
 def log_critical(msg):
     logWrapper.logger.critical(msg)
+
+
+def log_message(msg):
+    logWrapper.logger.info(msg)
