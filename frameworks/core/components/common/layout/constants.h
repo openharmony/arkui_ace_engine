@@ -396,6 +396,8 @@ enum class BorderImageDirection {
     RIGHT,
     TOP,
     BOTTOM,
+    START,
+    END,
 };
 
 enum class TimePickerFormat {
