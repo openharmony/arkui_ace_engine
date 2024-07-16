@@ -39,7 +39,7 @@
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
-
+constexpr Dimension DEFAULT_FONT_SIZE = 14.0_px;
 CanvasPaintMethod::CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, const RefPtr<FrameNode>& frameNode)
     : frameNode_(frameNode)
 {
@@ -48,6 +48,8 @@ CanvasPaintMethod::CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, con
     imageShadow_ = std::make_unique<Shadow>();
     contentModifier_ = contentModifier;
     InitImageCallbacks();
+    // The initial value of the font size in canvas is 14px.
+    SetFontSize(DEFAULT_FONT_SIZE);
 }
 
 #ifndef USE_FAST_TASKPOOL
