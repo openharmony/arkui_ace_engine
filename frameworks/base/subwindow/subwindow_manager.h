@@ -51,11 +51,7 @@ public:
 
     // Get the subwindow of instance, return the window or nullptr.
     const RefPtr<Subwindow> GetSubwindow(int32_t instanceId);
-
-    void HideCurrentSubwindow();
-
-    void SetCurrentSubwindowName(const std::string& currentSubwindow);
-    std::string GetCurrentSubWindowName();
+    const RefPtr<Subwindow> GetOrCreateSubwindow(int32_t instanceId);
 
     void SetCurrentSubwindow(const RefPtr<Subwindow>& subwindow);
 
@@ -144,7 +140,6 @@ public:
     }
     void ClearToastInSystemSubwindow();
     void OnWindowSizeChanged(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
-    bool IsSubwindowExist(RefPtr<Subwindow> subwindow);
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
@@ -164,7 +159,6 @@ private:
     SubwindowMap subwindowMap_;
     int32_t dialogSubWindowId_;
     std::mutex currentSubwindowMutex_;
-    std::string currentSubwindowName_;
 
     RefPtr<Subwindow> currentSubwindow_;
 
