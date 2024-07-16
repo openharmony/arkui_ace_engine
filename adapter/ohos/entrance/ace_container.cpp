@@ -1401,9 +1401,16 @@ void AceContainer::OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& frameNode,
 {
     // Non-native component like web/xcomponent, does not have PageNodeInfo
     CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
     std::vector<AbilityBase::PageNodeInfo> nodeInfos;
-    std::vector<RefPtr<PageNodeInfoWrap>> infos = frameNode->GetVirtualPageNodeInfo();
+    auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
+    pattern->DumpViewDataPageNode(viewDataWrap);
+    auto infos = viewDataWrap->GetPageNodeInfoWraps();
     for (const auto& info : infos) {
+        if (!info) {
+            continue;
+        }
         AbilityBase::PageNodeInfo node;
         node.id = info->GetId();
         node.depth = -1;

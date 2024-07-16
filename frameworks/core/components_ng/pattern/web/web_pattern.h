@@ -190,7 +190,7 @@ public:
 
     void OnModifyDone() override;
 
-    std::vector<RefPtr<PageNodeInfoWrap>> GetVirtualPageNodeInfo() override;
+    void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
 
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;

@@ -3282,9 +3282,15 @@ void WebPattern::OnQuickMenuDismissed()
     CloseSelectOverlay();
 }
 
-std::vector<RefPtr<PageNodeInfoWrap>> WebPattern::GetVirtualPageNodeInfo()
+void WebPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap)
 {
-    return pageNodeInfo_;
+    TAG_LOGI(AceLogTag::ACE_WEB, "called");
+    CHECK_NULL_VOID(viewDataWrap);
+    for (const auto& nodeInfo : pageNodeInfo_) {
+        if (nodeInfo) {
+            viewDataWrap->AddPageNodeInfoWrap(nodeInfo);
+        }
+    }
 }
 
 void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
@@ -3391,6 +3397,7 @@ void WebPattern::ParseNWebViewDataNode(std::unique_ptr<JsonValue> child,
 void WebPattern::ParseNWebViewDataJson(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson,
     std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, OHOS::NWeb::NWebAutofillEvent& eventType)
 {
+    nodeInfos.clear();
     auto sourceJson = JsonUtil::ParseJsonString(viewDataJson->GetString());
     if (sourceJson == nullptr || sourceJson->IsNull()) {
         return;
@@ -3423,15 +3430,13 @@ void WebPattern::ParseNWebViewDataJson(const std::shared_ptr<OHOS::NWeb::NWebMes
 void WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "called");
-    std::vector<RefPtr<PageNodeInfoWrap>> nodeInfos;
     OHOS::NWeb::NWebAutofillEvent eventType = OHOS::NWeb::NWebAutofillEvent::UNKNOWN;
-    ParseNWebViewDataJson(viewDataJson, nodeInfos, eventType);
-    pageNodeInfo_ = nodeInfos;
+    ParseNWebViewDataJson(viewDataJson, pageNodeInfo_, eventType);
     if (eventType == OHOS::NWeb::NWebAutofillEvent::SAVE) {
         RequestAutoSave();
     } else if (eventType == OHOS::NWeb::NWebAutofillEvent::FILL) {
-        for (const auto& nodeInfo : nodeInfos) {
-            if (nodeInfo->GetIsFocus()) {
+        for (const auto& nodeInfo : pageNodeInfo_) {
+            if (nodeInfo && nodeInfo->GetIsFocus()) {
                 RequestAutoFill(static_cast<AceAutoFillType>(nodeInfo->GetAutoFillType()));
                 break;
             }

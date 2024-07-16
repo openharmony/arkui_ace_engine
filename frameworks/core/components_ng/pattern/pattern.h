@@ -379,10 +379,6 @@ public:
     virtual void DumpInfo() {}
     virtual void DumpAdvanceInfo() {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) {}
-    virtual std::vector<RefPtr<PageNodeInfoWrap>> GetVirtualPageNodeInfo()
-    {
-        return std::vector<RefPtr<PageNodeInfoWrap>> {};
-    }
     virtual void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) {}
     virtual void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) {}

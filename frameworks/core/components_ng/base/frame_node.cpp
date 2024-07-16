@@ -2056,14 +2056,6 @@ RefPtr<FrameNode> FrameNode::GetFirstAutoFillContainerNode()
     return AceType::DynamicCast<FrameNode>(parent);
 }
 
-std::vector<RefPtr<PageNodeInfoWrap>> FrameNode::GetVirtualPageNodeInfo()
-{
-    if (pattern_) {
-        return pattern_->GetVirtualPageNodeInfo();
-    }
-    return std::vector<RefPtr<PageNodeInfoWrap>> {};
-}
-
 void FrameNode::NotifyFillRequestSuccess(
     RefPtr<ViewDataWrap> viewDataWrap, RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType)
 {
