@@ -82,6 +82,7 @@ public:
     {
         sideBarStatus_ = sideBarStatus;
         showSideBar_ = sideBarStatus_ == SideBarStatus::SHOW;
+        SetAccessibilityEvent();
     }
 
     void SetHasControlButton(bool hasControlButton)
@@ -150,6 +151,11 @@ public:
         WindowFocus(false);
     }
 
+    bool GetShowSideBar() const
+    {
+        return showSideBar_;
+    }
+
 private:
     void WindowFocus(bool isFocus);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -195,6 +201,8 @@ private:
     void SetSideBarActive(bool isActive, bool onlyJsActive) const;
     void OnLanguageConfigurationUpdate() override;
     void SetSideBarMask(bool isWindowFocus) const;
+    void RegisterElementInfoCallBack(const RefPtr<FrameNode>& buttonNode);
+    void SetAccessibilityEvent();
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<InputEvent> dividerMouseEvent_;

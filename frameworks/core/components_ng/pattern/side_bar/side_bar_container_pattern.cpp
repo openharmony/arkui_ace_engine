@@ -17,6 +17,7 @@
 
 #include <optional>
 
+#include "accessibility_element_info.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/mousestyle/mouse_style.h"
@@ -569,6 +570,7 @@ void SideBarContainerPattern::CreateAndMountControlButton(const RefPtr<NG::Frame
 
     auto buttonNode = CreateControlButton(sideBarTheme);
     CHECK_NULL_VOID(buttonNode);
+    RegisterElementInfoCallBack(buttonNode);
     auto imgNode = CreateControlImage(sideBarTheme, parentNode);
     CHECK_NULL_VOID(imgNode);
 
@@ -1358,5 +1360,28 @@ void SideBarContainerPattern::ShowDialogWithNode()
     dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(text, imageInfo_);
 
     isDialogShow_ = true;
+}
+
+void SideBarContainerPattern::RegisterElementInfoCallBack(const RefPtr<FrameNode>& buttonNode)
+{
+    CHECK_NULL_VOID(buttonNode);
+    auto accessibilityProperty = buttonNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    auto callBack = [weak = WeakClaim(this)] (Accessibility::ExtraElementinfo& extraElementInfo) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto showSideBar = pattern->GetShowSideBar();
+        extraElementInfo.SetExtraElementinfo(
+            "SideBarContainerStates", static_cast<int32_t>(showSideBar));
+    };
+    accessibilityProperty->SetRelatedElementInfoCallback(callBack);
+}
+
+void SideBarContainerPattern::SetAccessibilityEvent()
+{
+    auto controlButton = GetControlButtonNode();
+    CHECK_NULL_VOID(controlButton);
+    // use TEXT_CHANGE event to report information update
+    controlButton->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, "", "");
 }
 } // namespace OHOS::Ace::NG
