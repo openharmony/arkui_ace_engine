@@ -148,6 +148,7 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
     }
     pipeline->RemoveOnAreaChangeNode(node->GetId());
     pipeline->RemoveWindowStateChangedCallback(node->GetId());
+    UnregisterMarqueeNodeChangeListener();
 }
 
 void TextPattern::CloseSelectOverlay()
@@ -2108,6 +2109,7 @@ void TextPattern::OnModifyDone()
         dataDetectorAdapter_->textForAI_ = textForDisplay_;
         dataDetectorAdapter_->StartAITask();
     }
+    RegisterMarqueeNodeChangeListener();
 }
 
 void TextPattern::RecoverCopyOption()
@@ -3541,5 +3543,67 @@ PositionWithAffinity TextPattern::GetGlyphPositionAtCoordinate(int32_t x, int32_
 {
     Offset offset(x, y);
     return pManager_->GetGlyphPositionAtCoordinate(ConvertLocalOffsetToParagraphOffset(offset));
+}
+
+void TextPattern::RegisterMarqueeNodeChangeListener()
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) != TextOverflow::MARQUEE) {
+        return;
+    }
+    host->RegisterNodeChangeListener();
+}
+
+void TextPattern::UnregisterMarqueeNodeChangeListener()
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) != TextOverflow::MARQUEE) {
+        return;
+    }
+    host->UnregisterNodeChangeListener();
+}
+
+void TextPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
+{
+    selectOverlay_->OnAncestorNodeChanged(flag);
+    HandleMarqueeWithIsVisible(flag);
+}
+
+void TextPattern::HandleMarqueeWithIsVisible(FrameNodeChangeInfoFlag flag)
+{
+    if ((flag & FRAME_NODE_CHANGE_GEOMETRY_CHANGE) != FRAME_NODE_CHANGE_GEOMETRY_CHANGE) {
+        return;
+    }
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) != TextOverflow::MARQUEE) {
+        return;
+    }
+    RectF frameRect;
+    RectF visibleRect;
+    host->GetVisibleRect(visibleRect, frameRect);
+    if (visibleRect.IsEmpty()) {
+        OnWindowHide();
+    } else {
+        OnWindowShow();
+    }
+}
+
+void TextPattern::UnregisterNodeChangeListenerWithoutSelect()
+{
+    if (selectOverlay_ && selectOverlay_->SelectOverlayIsOn()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->UnregisterNodeChangeListener();
 }
 } // namespace OHOS::Ace::NG
