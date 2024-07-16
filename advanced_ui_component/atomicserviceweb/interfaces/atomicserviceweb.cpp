@@ -20,8 +20,6 @@
 
 using namespace std;
 
-extern const char _binary_atomicserviceweb_js_start[];
-extern const char _binary_atomicserviceweb_js_end[];
 extern const char _binary_atomicserviceweb_abc_start[];
 extern const char _binary_atomicserviceweb_abc_end[];
 
@@ -79,18 +77,6 @@ namespace HMS::AtomicServiceWeb {
         };
         NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
         return exports;
-    }
-
-    // Napi get js code function
-    extern "C" __attribute__((visibility("default")))
-    void NAPI_atomicservice_AtomicServiceWeb_GetJSCode(const char **buf, int *buflen)
-    {
-        if (buf != nullptr) {
-            *buf = _binary_atomicserviceweb_js_start;
-        }
-        if (buflen != nullptr) {
-            *buflen = _binary_atomicserviceweb_js_end - _binary_atomicserviceweb_js_start;
-        }
     }
 
     // Napi get abc code function
