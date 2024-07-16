@@ -886,7 +886,7 @@ void TimePickerColumnPattern::HandleDragEnd()
 
     TimePickerScrollDirection dir =
         scrollDelta_ > 0.0 ? TimePickerScrollDirection::DOWN : TimePickerScrollDirection::UP;
-    int32_t middleIndex = GetShowCount() / MIDDLE_CHILD_INDEX;
+    int32_t middleIndex = static_cast<int32_t>(GetShowCount()) / MIDDLE_CHILD_INDEX;
     auto shiftDistance = (dir == TimePickerScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
                                                                 : optionProperties_[middleIndex].nextDistance;
     auto shiftThreshold = shiftDistance / MIDDLE_CHILD_INDEX;
@@ -1359,7 +1359,7 @@ void TimePickerColumnPattern::OnAroundButtonClick(RefPtr<TimePickerEventParam> p
     if (clickBreak_) {
         return;
     }
-    int32_t middleIndex = GetShowCount() / 2;
+    int32_t middleIndex = static_cast<int32_t>(GetShowCount()) / 2;
     int32_t step = param->itemIndex_ - middleIndex;
     if (step != 0) {
         if (animation_) {
@@ -1396,7 +1396,7 @@ void TimePickerColumnPattern::PlayRestAnimation()
 {
     TimePickerScrollDirection dir =
         scrollDelta_ > 0.0 ? TimePickerScrollDirection::DOWN : TimePickerScrollDirection::UP;
-    int32_t middleIndex = GetShowCount() / 2;
+    int32_t middleIndex = static_cast<int32_t>(GetShowCount()) / 2;
     double shiftDistance = (dir == TimePickerScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
                                                                   : optionProperties_[middleIndex].nextDistance;
     double shiftThreshold = shiftDistance / 2;
