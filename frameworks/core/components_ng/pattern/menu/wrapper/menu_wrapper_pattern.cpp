@@ -139,7 +139,7 @@ void MenuWrapperPattern::HandleInteraction(const TouchEventInfo& info)
     innerMenuNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void MenuWrapperPattern::ChangeCurMenuItemBgColor() 
+void MenuWrapperPattern::ChangeCurMenuItemBgColor()
 {
     if (!currentTouchItem_) {
         return;
@@ -158,7 +158,7 @@ void MenuWrapperPattern::ChangeCurMenuItemBgColor()
     curMenuItemPattern->PlayBgColorAnimation(false);
 }
 
-void MenuWrapperPattern::ClearLastMenuItem() 
+void MenuWrapperPattern::ClearLastMenuItem()
 {
     if (lastTouchItem_) {
         auto lastMenuItemPattern = lastTouchItem_->GetPattern<MenuItemPattern>();
