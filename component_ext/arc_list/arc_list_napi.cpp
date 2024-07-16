@@ -17,12 +17,18 @@
 
 #include "ext_napi_utils.h"
 
-#ifdef PREVIEW
 #include "core/common/container.h"
-#else
+
+#ifdef PREVIEW
+#include "native_engine/native_engine.h"
+#ifdef WINDOWS_PLATFORM
+#undef TRANSPARENT
+#undef ERROR
+#undef ALTERNATE
+#endif
+#endif
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
-#endif
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
@@ -40,7 +46,6 @@ using namespace ArcList;
 
 namespace ArcList {
 
-#ifndef PREVIEW
 void SetScroller(napi_env env, Framework::JSScroller* jsScroller)
 {
     if (jsScroller) {
@@ -59,7 +64,6 @@ void SetScroller(napi_env env, Framework::JSScroller* jsScroller)
         ListModel::GetInstance()->SetScroller(listController, proxy);
     }
 }
-#endif
 
 void SetHeader(napi_env env, napi_value jsBuilderNode)
 {
@@ -88,7 +92,6 @@ napi_value JsCreate(napi_env env, napi_callback_info info)
             }
         }
 
-#ifndef PREVIEW
         napi_value jsScroller = ExtNapiUtils::GetNamedProperty(env, argv[0], "scroller");
         if (ExtNapiUtils::CheckTypeForNapiValue(env, jsScroller, napi_object)) {
             panda::Local<panda::ObjectRef> scrollerObject((uintptr_t)jsScroller);
@@ -97,7 +100,6 @@ napi_value JsCreate(napi_env env, napi_callback_info info)
                 SetScroller(env, scroller);
             }
         }
-#endif
 
         napi_value jsHeader = ExtNapiUtils::GetNamedProperty(env, argv[0], "header");
         if (ExtNapiUtils::CheckTypeForNapiValue(env, jsHeader, napi_object)) {

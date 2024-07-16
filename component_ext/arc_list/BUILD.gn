@@ -59,16 +59,10 @@ ohos_shared_library("arclist") {
   ]
   external_deps = [
     "bounds_checking_function:libsec_static",
+    "ets_runtime:libark_jsruntime",
     "hilog:libhilog",
     "napi:ace_napi",
   ]
-
-  if (!(use_mingw_win || use_mac || use_linux)) {
-    external_deps += [
-      "ets_runtime:libark_jsruntime",
-      "napi:ace_container_scope",
-    ]
-  }
 
   ldflags = [ "-Wl,--gc-sections" ]
 
