@@ -163,13 +163,27 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto predictSnapOffset = listLayoutAlgorithm->GetPredictSnapOffset();
     auto predictSnapEndPos = listLayoutAlgorithm->GetPredictSnapEndPosition();
     bool isJump = listLayoutAlgorithm->NeedEstimateOffset();
+    auto lanesLayoutAlgorithm = DynamicCast<ListLanesLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    if (lanesLayoutAlgorithm) {
+        lanesLayoutAlgorithm->SwapLanesItemRange(lanesItemRange_);
+        if (lanesLayoutAlgorithm->GetLanes() != lanes_) {
+            needReEstimateOffset_ = true;
+            auto item = swiperItem_.Upgrade();
+            if (item) {
+                item->ResetSwipeStatus();
+            }
+        }
+        lanes_ = lanesLayoutAlgorithm->GetLanes();
+        laneGutter_ = lanesLayoutAlgorithm->GetLaneGutter();
+    } else {
+        lanes_ = listLayoutAlgorithm->GetLanes();
+    }
     if (childrenSize_) {
         listTotalHeight_ = posMap_->GetTotalHeight();
         currentOffset_ = itemPosition_.empty() ? 0.0f :
             posMap_->GetPos(itemPosition_.begin()->first, itemPosition_.begin()->second.startPos);
     } else {
         if (isJump || needReEstimateOffset_) {
-            lanes_ = listLayoutAlgorithm->GetLanes();
             auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, GetAxis());
             calculate.GetEstimateHeightAndOffset(GetHost());
             currentOffset_ = calculate.GetEstimateOffset();
@@ -232,18 +246,6 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     bool sizeDiminished =
         LessNotEqual(endMainPos_ - startMainPos_, contentMainSize_ - contentStartOffset_ - contentEndOffset_) &&
         GreatOrEqual(prevTotalSize, prevContentSize) && LessNotEqual(endMainPos_ - startMainPos_, prevTotalSize);
-    auto lanesLayoutAlgorithm = DynamicCast<ListLanesLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    if (lanesLayoutAlgorithm) {
-        lanesLayoutAlgorithm->SwapLanesItemRange(lanesItemRange_);
-        if (lanesLayoutAlgorithm->GetLanes() != lanes_) {
-            auto item = swiperItem_.Upgrade();
-            if (item) {
-                item->ResetSwipeStatus();
-            }
-        }
-        lanes_ = lanesLayoutAlgorithm->GetLanes();
-        laneGutter_ = lanesLayoutAlgorithm->GetLaneGutter();
-    }
     CheckScrollable();
 
     bool indexChanged = false;
@@ -1683,14 +1685,12 @@ bool ListPattern::AnimateToTarget(int32_t index, std::optional<int32_t> indexInG
         GetListItemAnimatePos(iter->second.startPos, iter->second.endPos, align, targetPos);
     }
     auto extraOffset = GetExtraOffset();
-    bool useTotalOffset = true;
     if (extraOffset.has_value()) {
-        useTotalOffset = false;
         targetPos += extraOffset.value();
         ResetExtraOffset();
     }
     if (!NearZero(targetPos)) {
-        AnimateTo(targetPos + currentOffset_, -1, nullptr, true, false, useTotalOffset);
+        AnimateTo(targetPos + currentOffset_, -1, nullptr, true, false);
         if (predictSnapOffset_.has_value() && AnimateRunning()) {
             scrollSnapVelocity_ = 0.0f;
             predictSnapOffset_.reset();
