@@ -31,6 +31,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t API_VERSION_9 = 9;
 constexpr Dimension ADAPT_TOAST_MIN_FONT_SIZE = 12.0_fp;
+constexpr float MIN_FONT_SCALE = 0.85f;
+constexpr float MAX_FONT_SCALE = 2.0f;
 
 // get main window's pipeline
 RefPtr<PipelineContext> GetMainPipelineContext()
@@ -150,6 +152,26 @@ double ToastPattern::GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper)
                                                         : toastTheme->GetBottom().ConvertToPx();
 }
 
+void ToastPattern::UpdateToastFontSize()
+{
+    auto context = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
+    CHECK_NULL_VOID(context);
+    auto toastTheme = context->GetTheme<ToastTheme>();
+    CHECK_NULL_VOID(toastTheme);
+    CHECK_NULL_VOID(textNode_);
+    auto textLayoutProperty = textNode_->GetLayoutProperty<TextLayoutProperty>();
+    auto minScale = textLayoutProperty->GetMinFontScaleValue(MIN_FONT_SCALE);
+    auto maxScale = textLayoutProperty->GetMaxFontScaleValue(MAX_FONT_SCALE);
+    auto fontScale = context->GetFontScale();
+    if (fontScale > minScale) {
+        fontScale = fontScale > maxScale ? maxScale : fontScale;
+    } else {
+        fontScale = minScale;
+    }
+    auto fontSize = toastTheme->GetTextStyle().GetFontSize() * fontScale;
+    textLayoutProperty->UpdateFontSize(fontSize);
+}
+
 void ToastPattern::BeforeCreateLayoutWrapper()
 {
     PopupBasePattern::BeforeCreateLayoutWrapper();
@@ -157,6 +179,7 @@ void ToastPattern::BeforeCreateLayoutWrapper()
     auto toastNode = GetHost();
     CHECK_NULL_VOID(toastNode);
     UpdateToastSize(toastNode);
+    UpdateToastFontSize();
 
     auto textNode = DynamicCast<FrameNode>(toastNode->GetFirstChild());
     CHECK_NULL_VOID(textNode);
