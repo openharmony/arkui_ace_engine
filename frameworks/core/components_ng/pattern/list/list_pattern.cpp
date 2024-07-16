@@ -1800,16 +1800,19 @@ void ListPattern::CalculateCurrentOffset(float delta, const ListLayoutAlgorithm:
     float startPos = itemPos.begin()->second.startPos;
     int32_t startIndex = itemPos.begin()->first;
     auto& groupInfo = itemPos.begin()->second.groupInfo;
-    if (startIndex == 0 && (!groupInfo || groupInfo.value().atStart)) {
+    bool groupAtStart = (!groupInfo || groupInfo.value().atStart);
+    if (startIndex == 0 && groupAtStart) {
         currentOffset_ = -startPos;
     } else {
-        posMap_->UpdatePosMapStart(delta, currentOffset_, spaceWidth_, startIndex, startPos);
+        posMap_->UpdatePosMapStart(delta, currentOffset_, spaceWidth_, startIndex, startPos, groupAtStart);
     }
     for (auto& [index, pos] : itemPos) {
         float height = pos.endPos - pos.startPos;
         posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height });
     }
-    posMap_->UpdatePosMapEnd(itemPos.rbegin()->first, spaceWidth_);
+    auto& endGroupInfo = itemPos.rbegin()->second.groupInfo;
+    bool groupAtEnd = (!endGroupInfo || endGroupInfo.value().atEnd);
+    posMap_->UpdatePosMapEnd(itemPos.rbegin()->first, spaceWidth_, groupAtEnd);
 }
 
 void ListPattern::UpdateScrollBarOffset()
