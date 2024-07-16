@@ -244,11 +244,10 @@ RefPtr<FrameNode> SheetView::BuildMainTitle(RefPtr<FrameNode> sheetNode, NG::She
     CHECK_NULL_RETURN(titleProp, nullptr);
     auto titleTextFontSize = sheetTheme->GetTitleTextFontSize();
     titleTextFontSize.SetUnit(DimensionUnit::FP);
-    titleProp->UpdateMaxLines(SHEET_MAIN_TITLE_MAX_LINES);
+    titleProp->UpdateMaxLines(SHEET_TITLE_MAX_LINES);
     titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     titleProp->UpdateAdaptMaxFontSize(titleTextFontSize);
-    titleProp->UpdateAdaptMinFontSize(MIN_MAIN_TITLE_FONT_SIZE);
-    titleProp->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    titleProp->UpdateAdaptMinFontSize(titleTextFontSize);
     if (sheetStyle.sheetTitle.has_value()) {
         titleProp->UpdateContent(sheetStyle.sheetTitle.value());
     }
@@ -285,11 +284,10 @@ RefPtr<FrameNode> SheetView::BuildSubTitle(RefPtr<FrameNode> sheetNode, NG::Shee
     CHECK_NULL_RETURN(titleProp, nullptr);
     auto titleTextFontSize = sheetTheme->GetSubtitleTextFontSize();
     titleTextFontSize.SetUnit(DimensionUnit::VP);
-    titleProp->UpdateMaxLines(SHEET_SUB_TITLE_MAX_LINES);
+    titleProp->UpdateMaxLines(SHEET_TITLE_MAX_LINES);
     titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     titleProp->UpdateAdaptMaxFontSize(titleTextFontSize);
-    titleProp->UpdateAdaptMinFontSize(MIN_SUB_TITLE_FONT_SIZE);
-    titleProp->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    titleProp->UpdateAdaptMinFontSize(titleTextFontSize);
     if (sheetStyle.sheetSubtitle.has_value()) {
         titleProp->UpdateContent(sheetStyle.sheetSubtitle.value());
     }
@@ -314,9 +312,9 @@ RefPtr<FrameNode> SheetView::BuildSubTitle(RefPtr<FrameNode> sheetNode, NG::Shee
 void SheetView::GetTitlePaddingPos(PaddingProperty& padding, const RefPtr<FrameNode>& sheetNode)
 {
     CHECK_NULL_VOID(sheetNode);
-    auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-    CHECK_NULL_VOID(sheetLayoutProperty);
-    auto showCloseIcon = sheetLayoutProperty->GetSheetStyleValue().showCloseIcon.value_or(true);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto showCloseIcon = sheetPattern->IsShowCloseIcon();
 
     // The title bar area is reserved for the close button area size by default.
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {

@@ -931,6 +931,15 @@ float SheetPresentationPattern::GetCloseIconPosX(const SizeF& sheetSize, const R
     return closeIconX;
 }
 
+bool SheetPresentationPattern::IsShowCloseIcon()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetSheetStyleValue().showCloseIcon.value_or(true);
+}
+
 void SheetPresentationPattern::UpdateTitlePadding()
 {
     if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -951,7 +960,7 @@ void SheetPresentationPattern::UpdateTitlePadding()
     CHECK_NULL_VOID(titleNode);
     auto titleLayoutProperty = DynamicCast<LinearLayoutProperty>(titleNode->GetLayoutProperty());
     CHECK_NULL_VOID(titleLayoutProperty);
-    auto showCloseIcon = layoutProperty->GetSheetStyleValue().showCloseIcon.value_or(true);
+    auto showCloseIcon = IsShowCloseIcon();
     PaddingProperty padding;
     if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
         padding.left = CalcLength(showCloseIcon ? SHEET_CLOSE_ICON_TITLE_SPACE_NEW + SHEET_CLOSE_ICON_WIDTH : 0.0_vp);
@@ -978,7 +987,7 @@ void SheetPresentationPattern::UpdateCloseIconStatus()
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
-    auto showCloseIcon = layoutProperty->GetSheetStyleValue().showCloseIcon.value_or(true);
+    auto showCloseIcon = IsShowCloseIcon();
     auto sheetCloseIcon = DynamicCast<FrameNode>(host->GetChildAtIndex(2));
     CHECK_NULL_VOID(sheetCloseIcon);
     auto geometryNode = host->GetGeometryNode();
