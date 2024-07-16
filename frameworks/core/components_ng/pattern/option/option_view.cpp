@@ -59,6 +59,14 @@ RefPtr<FrameNode> Create(int32_t index)
     CHECK_NULL_RETURN(props, nullptr);
     props->UpdateHover(false);
     props->UpdatePress(false);
+
+    auto layoutProp = node->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProp, nullptr);
+    MarginProperty margin;
+    auto verticalMargin = CalcLength(theme->GetOptionNormalTopBottomMargin());
+    auto leftRightMargin = CalcLength(theme->GetOptionFocusedLeftRightMargin());
+    margin.SetEdges(leftRightMargin, leftRightMargin, verticalMargin, verticalMargin);
+    layoutProp->UpdateMargin(margin);
     return node;
 }
 
