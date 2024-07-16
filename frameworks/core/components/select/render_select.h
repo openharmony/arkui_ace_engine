@@ -70,7 +70,7 @@ protected:
     RefPtr<RawRecognizer> rawRecognizer_;
     RefPtr<SelectComponent> data_;
     std::function<void()> onFocusCallback_;
-    int index_ = 0;
+    std::size_t index_ = 0;
 private:
     void ApplyRestoreInfo();
 };
