@@ -2263,11 +2263,19 @@ VectorF FrameNode::GetTransformScale() const
     return renderContext_->GetTransformScaleValue({ 1.0f, 1.0f });
 }
 
+bool FrameNode::IsPaintRectWithTransformValid()
+{
+    auto paintRectWithTransform = renderContext_->GetPaintRectWithTransform();
+    if (NearZero(paintRectWithTransform.Width()) || NearZero(paintRectWithTransform.Height())) {
+        return true;
+    }
+    return false;
+}
+
 bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentRevertPoint, int32_t sourceType)
 {
     bool isInChildRegion = false;
     auto paintRect = renderContext_->GetPaintRectWithoutTransform();
-    auto paintRectWithTransform = renderContext_->GetPaintRectWithTransform();
     auto responseRegionList = GetResponseRegionList(paintRect, sourceType);
 
     auto revertPoint = parentRevertPoint;
@@ -2275,51 +2283,13 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentRevertPoint, int32_t 
     auto subRevertPoint = revertPoint - paintRect.GetOffset();
     auto clip = renderContext_->GetClipEdge().value_or(false);
     if (!InResponseRegionList(revertPoint, responseRegionList) || !GetTouchable() ||
-        NearZero(paintRectWithTransform.Width() || NearZero(paintRectWithTransform.Height()))) {
+        IsPaintRectWithTransformValid()) {
         if (clip) {
             return true;
         }
         for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
             const auto& child = iter->Upgrade();
             if (child && !child->IsOutOfTouchTestRegion(subRevertPoint, sourceType)) {
-                isInChildRegion = true;
-                break;
-            }
-        }
-        if (!isInChildRegion) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool FrameNode::PaintRectWithTransformJudge()
-{
-    auto paintRectWithTransform = renderContext_->GetPaintRectWithTransform();
-    if (NearZero(paintRectWithTransform.Width() || NearZero(paintRectWithTransform.Height()))) {
-        return true;
-    }
-    return false;
-}
-
-bool FrameNode::IsOutOfTouchTestRegionJudge(const PointF& parentRevertPoint, int32_t sourceType)
-{
-    bool isInChildRegion = false;
-    auto paintRect = renderContext_->GetPaintRectWithoutTransform();
-    auto responseRegionList = GetResponseRegionList(paintRect, sourceType);
-
-    auto revertPoint = parentRevertPoint;
-    MapPointTo(revertPoint, GetOrRefreshRevertMatrixFromCache());
-    auto subRevertPoint = revertPoint - paintRect.GetOffset();
-    auto clip = renderContext_->GetClipEdge().value_or(false);
-    if (!InResponseRegionList(revertPoint, responseRegionList) || !GetTouchable() ||
-        PaintRectWithTransformJudge()) {
-        if (clip) {
-            return true;
-        }
-        for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
-            const auto& child = iter->Upgrade();
-            if (child && !child->IsOutOfTouchTestRegionJudge(subRevertPoint, sourceType)) {
                 isInChildRegion = true;
                 break;
             }
@@ -2394,8 +2364,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     }
     {
         ACE_DEBUG_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
-        bool isOutOfRegion = IsOutOfTouchTestRegionJudge(parentRevertPoint,
-            static_cast<int32_t>(touchRestrict.sourceType));
+        bool isOutOfRegion = IsOutOfTouchTestRegion(parentRevertPoint, static_cast<int32_t>(touchRestrict.sourceType));
         AddFrameNodeSnapshot(!isOutOfRegion, parentId, responseRegionList);
         if ((!isDispatch) && isOutOfRegion) {
             return HitTestResult::OUT_OF_REGION;

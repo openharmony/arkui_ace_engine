@@ -1625,24 +1625,34 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback053, TestSize
 }
 
 /**
- * @tc.name: FrameNodeTestNg_IsOutOfTouchTestRegionJudge054
- * @tc.desc: Test frame node method IsOutOfTouchTestRegionJudge
+ * @tc.name: FrameNodeTestNg_IsPaintRectWithTransformValid054
+ * @tc.desc: Test frame node method IsPaintRectWithTransformValid
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeTestNg, FrameNodeIsOutOfTouchTestRegionJudge054, TestSize.Level1)
+HWTEST_F(FrameNodeTestNg, FrameNodeIsPaintRectWithTransformValid054, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. callback IsOutOfTouchTestRegionJudge.
-     * @tc.expected: expect The function return value is true.
+     * @tc.steps: step1. callback IsPaintRectWithTransformValid.
+     * @tc.expected: expect The function return value is true when width or height is nearZero.
      */
-    PointF pointF;
-    std::vector<RectF> rectF;
-    auto test = FRAME_NODE2->IsOutOfTouchTestRegionJudge(std::move(pointF), 0);
-    EXPECT_TRUE(test);
+    auto node = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    node->renderContext_ = mockRenderContext;
 
-    auto test1 = FRAME_NODE2->InResponseRegionList(pointF, rectF);
-    auto test2 = FRAME_NODE2->IsOutOfTouchTestRegionJudge(std::move(pointF), 0);
-    EXPECT_FALSE(test1);
+    mockRenderContext->rect_ = RectF(0, 0, 0, 10);
+    auto test1 = node->IsPaintRectWithTransformValid();
+    EXPECT_TRUE(test1);
+
+    mockRenderContext->rect_ = RectF(0, 0, 10, 0);
+    auto test2 = node->IsPaintRectWithTransformValid();
     EXPECT_TRUE(test2);
+
+    mockRenderContext->rect_ = RectF(0, 0, 10, 10);
+    auto test3 = node->IsPaintRectWithTransformValid();
+    EXPECT_FALSE(test3);
+
+    mockRenderContext->rect_ = RectF(0, 0, 0, 0);
+    auto test4 = node->IsPaintRectWithTransformValid();
+    EXPECT_TRUE(test4);
 }
 } // namespace OHOS::Ace::NG
