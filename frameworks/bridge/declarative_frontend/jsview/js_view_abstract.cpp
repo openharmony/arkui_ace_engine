@@ -399,7 +399,12 @@ void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, co
 
 std::string GetReplaceContentStr(int pos, const std::string& type, JSRef<JSArray> params, int32_t containCount)
 {
-    JSRef<JSVal> item = params->GetValueAt(pos + containCount);
+    auto index = pos + containCount;
+    if (index < 0) {
+        return std::string();
+    }
+
+    JSRef<JSVal> item = params->GetValueAt(static_cast<size_t>(index));
     if (type == "d") {
         if (item->IsNumber()) {
             return std::to_string(item->ToNumber<int32_t>());
