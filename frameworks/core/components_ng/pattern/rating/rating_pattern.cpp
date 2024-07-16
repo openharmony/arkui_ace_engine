@@ -150,7 +150,7 @@ void RatingPattern::OnImageLoadSuccess(int32_t imageFlag)
 
 void RatingPattern::OnImageDataReady(int32_t imageFlag)
 {
-    imageReadyStateCode_ |= static_cast<uint32_t>(imageFlag);;
+    imageReadyStateCode_ |= static_cast<uint32_t>(imageFlag);
 
     // 3 images are ready, invoke to update layout to calculate single star size.
     if (imageReadyStateCode_ == RATING_IMAGE_SUCCESS_CODE) {
