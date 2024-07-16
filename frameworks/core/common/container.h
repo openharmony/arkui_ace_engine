@@ -182,6 +182,18 @@ public:
         return MakeRefPtr<DisplayInfo>();
     }
 
+    virtual void InitIsFoldable() {}
+
+    virtual bool IsFoldable() const
+    {
+        return false;
+    }
+
+    virtual FoldStatus GetCurrentFoldStatus()
+    {
+        return FoldStatus::UNKNOWN;
+    }
+
     virtual NG::SafeAreaInsets GetKeyboardSafeArea()
     {
         return {};

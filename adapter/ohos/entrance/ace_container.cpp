@@ -2619,6 +2619,24 @@ RefPtr<DisplayInfo> AceContainer::GetDisplayInfo()
     return displayInfo_;
 }
 
+void AceContainer::InitIsFoldable()
+{
+    auto isFoldable = Rosen::DisplayManager::GetInstance().IsFoldable();
+    displayInfo_->SetIsFoldable(isFoldable);
+}
+
+bool AceContainer::IsFoldable() const
+{
+    return displayInfo_->GetIsFoldable();
+}
+
+FoldStatus AceContainer::GetCurrentFoldStatus()
+{
+    auto dmFoldStatus = Rosen::DisplayManager::GetInstance().GetFoldStatus();
+    displayInfo_->SetFoldStatus(static_cast<FoldStatus>(static_cast<uint32_t>(dmFoldStatus)));
+    return displayInfo_->GetFoldStatus();
+}
+
 void AceContainer::UpdateSharedImage(
     std::vector<std::string>& picNameArray, std::vector<int32_t>& byteLenArray, std::vector<int>& fileDescriptorArray)
 {

@@ -294,6 +294,12 @@ public:
 
     RefPtr<DisplayInfo> GetDisplayInfo() override;
 
+    void InitIsFoldable() override;
+
+    bool IsFoldable() const override;
+
+    FoldStatus GetCurrentFoldStatus() override;
+
     void SetHapPath(const std::string& hapPath);
 
     void Dispatch(

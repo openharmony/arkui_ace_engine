@@ -23,6 +23,7 @@
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
@@ -362,16 +363,16 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
     bool modeChange = navigationPattern->GetNavigationMode() != usrNavigationMode;
     bool isFirstTimeLayout = (navigationPattern->GetNavigationMode() == INITIAL_MODE);
-    if (isFirstTimeLayout) {
-        navigationPattern->UpdateFoldState();  // Init fold state
-    }
     bool doModeSwitchAnimationInAnotherTask = modeChange && !isFirstTimeLayout && !hostNode->IsOnModeSwitchAnimation();
     if (doModeSwitchAnimationInAnotherTask) {
-        // If screen-fold-state changed, no need to do mode switch animation.
-        doModeSwitchAnimationInAnotherTask =
-            !navigationPattern->IsFoldStateChange() && doModeSwitchAnimationInAnotherTask;
-        // Only when navigation-mode changed, it is necessary to update the current screen-fold-state.
-        navigationPattern->UpdateFoldState();
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        if (container->IsFoldable()) {
+            // If screen-fold-state changed, no need to do mode switch animation.
+            // Only when navigation-mode changed, it is necessary to update the current screen-fold-state.
+            doModeSwitchAnimationInAnotherTask =
+                !navigationPattern->JudgeFoldStateChangeAndUpdateState() && doModeSwitchAnimationInAnotherTask;
+        }
     }
     if (!doModeSwitchAnimationInAnotherTask) {
         navigationPattern->SetNavigationMode(usrNavigationMode);

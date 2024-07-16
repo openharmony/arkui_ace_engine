@@ -288,6 +288,17 @@ void NavigationPattern::OnAttachToMainTree()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     InitPageNode(host);
+    InitFoldState();
+}
+
+void NavigationPattern::InitFoldState()
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    container->InitIsFoldable();
+    if (container->IsFoldable()) {
+        currentfoldStatus_ = container->GetCurrentFoldStatus();
+    }
 }
 
 void NavigationPattern::OnDetachFromMainTree()
@@ -319,23 +330,16 @@ bool NavigationPattern::IsTopNavDestination(const RefPtr<UINode>& node) const
     return navDestination == node;
 }
 
-bool NavigationPattern::IsFoldStateChange()
+bool NavigationPattern::JudgeFoldStateChangeAndUpdateState()
 {
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
-    auto displayInfo = container->GetDisplayInfo();
-    CHECK_NULL_RETURN(displayInfo, false);
-    auto foldStatus = displayInfo->GetFoldStatus();
-    return foldStatus != currentfoldStatus_;
-}
-
-void NavigationPattern::UpdateFoldState()
-{
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto displayInfo = container->GetDisplayInfo();
-    CHECK_NULL_VOID(displayInfo);
-    currentfoldStatus_ = displayInfo->GetFoldStatus();
+    auto foldStatus = container->GetCurrentFoldStatus();
+    if (foldStatus != currentfoldStatus_) {
+        currentfoldStatus_ = foldStatus;
+        return true;
+    }
+    return false;
 }
 
 void NavigationPattern::UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host)
