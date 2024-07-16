@@ -240,7 +240,7 @@ void UpdateCardRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectR
 panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    uint32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -272,7 +272,7 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtim
 panda::Local<panda::JSValueRef> JsLoadCustomTitleBar(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = static_cast<int32_t>(runtimeCallInfo->GetArgsNumber());
+    uint32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -290,7 +290,7 @@ panda::Local<panda::JSValueRef> JsLoadCustomTitleBar(panda::JsiRuntimeCallInfo* 
 panda::Local<panda::JSValueRef> JsRegisterNamedRoute(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    uint32_t argc = runtimeCallInfo->GetArgsNumber();
     // will need three arguments
     if (argc != 3) {
         return panda::JSValueRef::Undefined(vm);
@@ -359,7 +359,7 @@ panda::Local<panda::JSValueRef> JSPostCardAction(panda::JsiRuntimeCallInfo* runt
 "may behave differently than an real device.");
     return panda::JSValueRef::Undefined(vm);
 #endif
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    uint32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc > 2) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -411,7 +411,7 @@ panda::Local<panda::JSValueRef> JSPostCardAction(panda::JsiRuntimeCallInfo* runt
 panda::Local<panda::JSValueRef> JsLoadEtsCard(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    uint32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc > 2) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -502,7 +502,7 @@ panda::Local<panda::JSValueRef> JsDumpMemoryStats(panda::JsiRuntimeCallInfo* run
 panda::Local<panda::JSValueRef> JsGetI18nResource(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    uint32_t argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -564,7 +564,7 @@ panda::Local<panda::JSValueRef> JsGetI18nResource(panda::JsiRuntimeCallInfo* run
 panda::Local<panda::JSValueRef> JsGetMediaResource(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    uint32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -612,7 +612,7 @@ panda::Local<panda::JSValueRef> JsGetInspectorNodeById(panda::JsiRuntimeCallInfo
 {
     ContainerScope scope{Container::CurrentIdSafely()};
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    uint32_t argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1002,7 +1002,7 @@ panda::Local<panda::JSValueRef> JsSendMouseEvent(panda::JsiRuntimeCallInfo* runt
 panda::Local<panda::JSValueRef> Vp2Px(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    uint32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1021,7 +1021,7 @@ panda::Local<panda::JSValueRef> Px2Vp(panda::JsiRuntimeCallInfo* runtimeCallInfo
 {
     ContainerScope scope(Container::CurrentIdSafely());
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    uint32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1044,7 +1044,7 @@ panda::Local<panda::JSValueRef> Fp2Px(panda::JsiRuntimeCallInfo* runtimeCallInfo
 {
     ContainerScope scope(Container::CurrentIdSafely());
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    uint32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1073,7 +1073,7 @@ panda::Local<panda::JSValueRef> Px2Fp(panda::JsiRuntimeCallInfo* runtimeCallInfo
 {
     ContainerScope scope(Container::CurrentIdSafely());
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    uint32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1105,7 +1105,7 @@ panda::Local<panda::JSValueRef> Lpx2Px(panda::JsiRuntimeCallInfo* runtimeCallInf
 {
     ContainerScope scope(Container::CurrentIdSafely());
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    uint32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1139,7 +1139,7 @@ panda::Local<panda::JSValueRef> Px2Lpx(panda::JsiRuntimeCallInfo* runtimeCallInf
 {
     ContainerScope scope(Container::CurrentIdSafely());
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    uint32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1173,7 +1173,7 @@ panda::Local<panda::JSValueRef> SetAppBackgroundColor(panda::JsiRuntimeCallInfo*
 {
     ContainerScope scope(Container::CurrentIdSafely());
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    uint32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc != 1) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1197,7 +1197,7 @@ panda::Local<panda::JSValueRef> RequestFocus(panda::JsiRuntimeCallInfo* runtimeC
 {
     ContainerScope scope(Container::CurrentIdSafely());
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    uint32_t argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1223,7 +1223,7 @@ panda::Local<panda::JSValueRef> SetCursor(panda::JsiRuntimeCallInfo* runtimeCall
 {
     ContainerScope scope(Container::CurrentIdSafely());
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = static_cast<int32_t>(runtimeCallInfo->GetArgsNumber());
+    uint32_t argc = runtimeCallInfo->GetArgsNumber();
     if (vm == nullptr) {
         return panda::JSValueRef::Undefined(vm);
     }
