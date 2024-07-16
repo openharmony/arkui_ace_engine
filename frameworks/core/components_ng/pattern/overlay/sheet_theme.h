@@ -99,6 +99,8 @@ public:
             theme->sheetBackgroundBlurStyle_ = sheetPattern->GetAttr<int>("sheet_background_blur_style", 0);
             theme->sheetNormalScale_ = sheetPattern->GetAttr<double>("sheet_normal_aging_scale", 1.0f);
             theme->sheetMaxAgingScale_ = sheetPattern->GetAttr<double>("sheet_max_aging_scale", 1.75f);
+            theme->closeIconSource_ = themeConstants->GetSymbolByName("sys.symbol.xmark");
+            theme->closeIconSymbolColor_ = sheetPattern->GetAttr<Color>("close_icon_symbol_color", Color(0xff182431));
         }
     };
     ~SheetTheme() override = default;
@@ -188,6 +190,16 @@ public:
         return sheetMaxAgingScale_;
     }
 
+    const Color& GetCloseIconSymbolColor() const
+    {
+        return closeIconSymbolColor_;
+    }
+
+    const uint32_t& GetCloseIconSource() const
+    {
+        return closeIconSource_;
+    }
+
 protected:
     SheetTheme() = default;
 
@@ -204,11 +216,13 @@ private:
     Color maskColor_;
     Color closeIconColor_;
     Color closeIconImageColor_;
+    Color closeIconSymbolColor_;
     std::string sheetType_;
     std::string sheetBottom_;
     int sheetBackgroundBlurStyle_;
     double sheetNormalScale_;
     double sheetMaxAgingScale_;
+    uint32_t closeIconSource_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

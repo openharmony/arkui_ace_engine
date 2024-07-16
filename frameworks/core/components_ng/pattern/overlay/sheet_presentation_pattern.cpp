@@ -1080,12 +1080,20 @@ void SheetPresentationPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundColor(sheetTheme->GetCloseIconColor());
     sheetCloseIcon->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    auto imageNode = DynamicCast<FrameNode>(sheetCloseIcon->GetChildAtIndex(0));
-    CHECK_NULL_VOID(imageNode);
-    auto imagePaintProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(imagePaintProperty);
-    imagePaintProperty->UpdateSvgFillColor(sheetTheme->GetCloseIconImageColor());
-    imageNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto iconNode = DynamicCast<FrameNode>(sheetCloseIcon->GetChildAtIndex(0));
+    CHECK_NULL_VOID(iconNode);
+
+    // when api >= 12, use symbol format image, else use image format.
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto symbolLayoutProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolLayoutProperty);
+        symbolLayoutProperty->UpdateSymbolColorList({sheetTheme->GetCloseIconSymbolColor()});
+    } else {
+        auto imagePaintProperty = iconNode->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(imagePaintProperty);
+        imagePaintProperty->UpdateSvgFillColor(sheetTheme->GetCloseIconImageColor());
+    }
+    iconNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SheetPresentationPattern::CheckSheetHeightChange()
