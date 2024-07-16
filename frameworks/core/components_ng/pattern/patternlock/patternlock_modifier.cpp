@@ -352,7 +352,7 @@ void PatternLockModifier::AddCanceledLineToPath(RSPath& path, const OffsetF& off
         GetCircleCenterByXY(offset, choosePoint_[count - 1].GetColumn(), choosePoint_[count - 1].GetRow());
     OffsetF pointEnd = GetCanceledLineTailPoint();
     if (!NearEqual(pointBegin.GetX(), pointEnd.GetX(), EPSILON)
-        || !NearEqual(pointBegin.GetY(), pointEnd.GetY()), EPSILON) {
+        || !NearEqual(pointBegin.GetY(), pointEnd.GetY(), EPSILON)) {
         path.MoveTo(pointBegin.GetX(), pointBegin.GetY());
         path.LineTo(pointEnd.GetX(), pointEnd.GetY());
     }
