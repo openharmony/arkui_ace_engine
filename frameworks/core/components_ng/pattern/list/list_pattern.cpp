@@ -858,12 +858,6 @@ float ListPattern::GetStartOverScrollOffset(float offset) const
     if (startPos <= contentStartOffset_ && newStartPos > contentStartOffset_) {
         startOffset = newStartPos - contentStartOffset_;
     }
-    if (IsScrollSnapAlignCenter() && !itemPosition_.empty()) {
-        float startItemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
-        if (newStartPos > (contentMainSize_ / 2.0f - startItemHeight / 2.0f - spaceWidth_ / 2.0f)) {
-            startOffset = newStartPos - (contentMainSize_ / 2.0f - startItemHeight / 2.0f - spaceWidth_ / 2.0f);
-        }
-    }
     return startOffset;
 }
 
@@ -873,7 +867,7 @@ float ListPattern::GetEndOverScrollOffset(float offset) const
     float ChainDelta = chainAnimation_ ? chainAnimation_->GetValuePredict(endIndex_, -offset) : 0.f;
     auto endPos = endMainPos_ + ChainDelta;
     auto contentEndPos = contentMainSize_ - contentEndOffset_;
-    if (GreatNotEqual(contentEndPos, endMainPos_ - startMainPos_) && !IsScrollSnapAlignCenter()) {
+    if (GreatNotEqual(contentEndPos, endMainPos_ - startMainPos_)) {
         endPos = startMainPos_ + contentEndPos;
     }
     auto newEndPos = endPos + offset;
@@ -885,12 +879,6 @@ float ListPattern::GetEndOverScrollOffset(float offset) const
     }
     if (endPos >= contentEndPos && newEndPos < contentEndPos) {
         endOffset = newEndPos - contentEndPos;
-    }
-    if (IsScrollSnapAlignCenter() && !itemPosition_.empty()) {
-        float endItemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
-        if (newEndPos < (contentMainSize_ / 2.0f + endItemHeight / 2.0f + spaceWidth_ / 2.0f)) {
-            endOffset = newEndPos - (contentMainSize_ / 2.0f + endItemHeight / 2.0f + spaceWidth_ / 2.0f);
-        }
     }
     return endOffset;
 }
