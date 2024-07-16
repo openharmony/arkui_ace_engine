@@ -2928,7 +2928,7 @@ void WebPattern::RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
     CHECK_NULL_VOID(delegate_);
     auto copyOption = delegate_->GetCopyOptionMode();
     quickMenuCallback_ = callback;
-    int32_t flags = params->GetEditStateFlags();
+    uint32_t flags = static_cast<uint32_t>(params->GetEditStateFlags());
     if ((flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT)
         && (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::NONE)) {
         selectInfo.menuCallback.onCut = [weak = AceType::WeakClaim(this), callback]() {
@@ -5114,7 +5114,7 @@ std::string WebPattern::VectorIntToString(std::vector<int64_t>&& vec)
         return vecStr;
     }
 
-    for (int i = 0; i < vecLen - 1; ++i) {
+    for (uint32_t i = 0; i < vecLen - 1; ++i) {
         vecStr += std::to_string(vec[i]) + " ";
     }
     return vecStr + std::to_string(vec[vecLen - 1]);
