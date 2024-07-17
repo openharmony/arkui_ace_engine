@@ -80,7 +80,9 @@ public:
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
     bool IsFormRequestsEmpty();
     const std::vector<FormRequest>& GetAllRendererFormRequests() const;
+    std::pair<std::vector<std::string>, std::string> GetOrderedAndCurrentCompIds() const;
     void RecycleForm(std::string& statusData) const;
+    void RecoverRenderer(const std::vector<std::string> & formRequests, int currentCompIndex);
 private:
     enum class FormRendererInitState {
         UNINITIALIZED,
