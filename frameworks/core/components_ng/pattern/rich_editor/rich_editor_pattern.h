@@ -309,6 +309,7 @@ public:
     void OnModifyDone() override;
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void SupplementIdealSizeWidth(const RefPtr<FrameNode>& frameNode);
     void MoveCaretOnLayoutSwap(bool isReduceSize);
 
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;

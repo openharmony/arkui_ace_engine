@@ -561,6 +561,7 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     UpdateCaretInfoToController();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, ret);
+    SupplementIdealSizeWidth(host);
     auto context = host->GetRenderContext();
     CHECK_NULL_RETURN(context, ret);
     if (context->GetClipEdge().has_value()) {
@@ -576,6 +577,16 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     }
     caretUpdateType_ = CaretUpdateType::NONE;
     return ret;
+}
+
+void RichEditorPattern::SupplementIdealSizeWidth(const RefPtr<FrameNode>& frameNode)
+{
+    auto layoutProperty = frameNode->GetLayoutProperty<RichEditorLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto&& constraint = layoutProperty->GetCalcLayoutConstraint();
+    if (!constraint || !constraint->selfIdealSize.has_value() || !constraint->selfIdealSize->Width().has_value()) {
+        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(frameRect_.Width()), std::nullopt));
+    }
 }
 
 void RichEditorPattern::MoveCaretOnLayoutSwap(bool isReduceSize)
@@ -2833,7 +2844,7 @@ std::pair<OffsetF, float> RichEditorPattern::CalculateEmptyValueCaretRect()
     auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, std::make_pair(offset, 0.0f));
     auto textAlign = layoutProperty->GetTextAlignValue(TextAlign::START);
-    auto direction = layoutProperty->GetLayoutDirection();
+    auto direction = layoutProperty->GetNonAutoLayoutDirection();
     if (direction == TextDirection::RTL) {
         if (textAlign == TextAlign::START) {
             textAlign = TextAlign::END;
