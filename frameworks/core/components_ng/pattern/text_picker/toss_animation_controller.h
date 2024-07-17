@@ -66,7 +66,7 @@ public:
     double GetTossOffset() const;
 
     bool GetTossPlaying() const;
-    void SetTossPlaying();
+    void SetTossPlaying(bool playing);
 private:
     double GetCurrentTime() const;
     void CreatePropertyCallback();
