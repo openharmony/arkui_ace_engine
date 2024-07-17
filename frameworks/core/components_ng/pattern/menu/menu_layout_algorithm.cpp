@@ -596,6 +596,7 @@ bool IsNodeOnRootTree(const RefPtr<FrameNode>& frameNode)
         if (parent->GetTag() == V2::ROOT_ETS_TAG) {
             return true;
         }
+        parent = parent->GetParent();
     }
     TAG_LOGW(AceLogTag::ACE_MENU, "node %{public}d not no root tree", frameNode->GetId());
     return false;
