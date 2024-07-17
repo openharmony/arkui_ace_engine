@@ -81,6 +81,7 @@ public:
     virtual void SetAutoResize(bool autoResize) = 0;
     virtual void SetResizableSlice(const ImageResizableSlice& slice) = 0;
     virtual void SetResizableLattice(const RefPtr<DrawingLattice>& lattice) = 0;
+    virtual void ResetResizableLattice() = 0;
     virtual void SetSyncMode(bool syncMode) = 0;
     virtual void SetColorFilterMatrix(const std::vector<float>& matrix) = 0;
     virtual void SetDrawingColorFilter(RefPtr<DrawingColorFilter> &colorFilter) = 0;

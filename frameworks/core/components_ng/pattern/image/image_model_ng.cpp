@@ -569,6 +569,16 @@ void ImageModelNG::SetResizableLattice(FrameNode* frameNode, const RefPtr<Drawin
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableLattice, lattice, frameNode);
 }
 
+void ImageModelNG::ResetResizableLattice()
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableLattice, nullptr);
+}
+
+void ImageModelNG::ResetResizableLattice(FrameNode *frameNode)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableLattice, nullptr, frameNode);
+}
+
 void ImageModelNG::SetImageRepeat(FrameNode *frameNode, ImageRepeat imageRepeat)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageRepeat, imageRepeat, frameNode);

@@ -396,10 +396,15 @@ void JSImage::ParseResizableSlice(const JSRef<JSObject>& resizableObject)
 void JSImage::ParseResizableLattice(const JSRef<JSObject>& resizableObject)
 {
     auto latticeValue = resizableObject->GetProperty("lattice");
+    if (latticeValue->IsUndefined() || latticeValue->IsNull()) {
+        ImageModel::GetInstance()->ResetResizableLattice();
+    }
     CHECK_NULL_VOID(latticeValue->IsObject());
     auto drawingLattice = CreateDrawingLattice(latticeValue);
     if (drawingLattice) {
         ImageModel::GetInstance()->SetResizableLattice(drawingLattice);
+    } else {
+        ImageModel::GetInstance()->ResetResizableLattice();
     }
 }
 

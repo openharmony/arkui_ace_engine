@@ -68,6 +68,7 @@ public:
     void SetImageAIOptions(void* options) override;
     void SetResizableSlice(const ImageResizableSlice& slice) override;
     void SetResizableLattice(const RefPtr<DrawingLattice>& lattice) override;
+    void ResetResizableLattice() override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
         const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber = false);
     static void InitImage(FrameNode *frameNode, std::string& src);
@@ -111,6 +112,7 @@ public:
     static ImageRenderMode GetImageRenderMode(FrameNode* frameNode);
     static void SetResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice);
     static void SetResizableLattice(FrameNode* frameNode, const RefPtr<DrawingLattice>& lattice);
+    static void ResetResizableLattice(FrameNode *frameNode);
     static ImageResizableSlice GetResizableSlice(FrameNode* frameNode);
     static void SetDynamicRangeMode(FrameNode* frameNode, DynamicRangeMode dynamicRangeMode);
     static void SetEnhancedImageQuality(FrameNode* frameNode, AIImageQuality imageQuality);
