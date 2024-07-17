@@ -421,7 +421,7 @@ void MenuPattern::OnTouchEvent(const TouchEventInfo& info)
             auto touchGlobalLocation = info.GetTouches().front().GetGlobalLocation();
             auto position = OffsetF(static_cast<float>(touchGlobalLocation.GetX()),
                 static_cast<float>(touchGlobalLocation.GetY()));
-            TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu.");
+            TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, position is %{public}s.", position.ToString().c_str());
             HideMenu(true, position);
         }
         lastTouchOffset_.reset();
