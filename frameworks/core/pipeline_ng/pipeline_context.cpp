@@ -108,6 +108,16 @@ constexpr int32_t RESAMPLE_COORD_TIME_THRESHOLD = 20 * 1000 * 1000;
 constexpr int32_t VSYNC_PERIOD_COUNT = 2;
 constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
 constexpr int8_t RENDERING_SINGLE_COLOR = 1;
+
+#define CHECK_THREAD_SAFE(isFormRender, taskExecutor) CheckThreadSafe(isFormRender, taskExecutor, __func__, __LINE__)
+void CheckThreadSafe(
+    bool isFormRender, OHOS::Ace::RefPtr<OHOS::Ace::TaskExecutor>& taskExecutor, const char* func, int line)
+{
+    if (!isFormRender && !taskExecutor->WillRunOnCurrentThread(OHOS::Ace::TaskExecutor::TaskType::UI)) {
+        LOGW("[%{public}s:%{public}d] doesn't run on UI thread!", func, line);
+        OHOS::Ace::LogBacktrace();
+    }
+}
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -203,6 +213,7 @@ float PipelineContext::GetCurrentRootHeight()
 
 void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirtyNode)
 {
+    CHECK_THREAD_SAFE(isFormRender_, taskExecutor_);
     dirtyPropertyNodes_.emplace(dirtyNode);
     hasIdleTasks_ = true;
     RequestFrame();
@@ -315,6 +326,7 @@ void PipelineContext::FlushDirtyNodeUpdate()
     }
 
     // node api property diff before ets update.
+    CHECK_THREAD_SAFE(isFormRender_, taskExecutor_);
     decltype(dirtyPropertyNodes_) dirtyPropertyNodes(std::move(dirtyPropertyNodes_));
     dirtyPropertyNodes_.clear();
     for (const auto& node : dirtyPropertyNodes) {
@@ -704,6 +716,7 @@ void PipelineContext::FlushMessages()
 void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
 {
     window_->Lock();
+    CHECK_THREAD_SAFE(isFormRender_, taskExecutor_);
     decltype(dirtyPropertyNodes_) dirtyPropertyNodes(std::move(dirtyPropertyNodes_));
     dirtyPropertyNodes_.clear();
     for (const auto& dirtyNode : dirtyPropertyNodes) {
@@ -1529,6 +1542,7 @@ void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
         privacyManager->RemoveNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
     }
 
+    CHECK_THREAD_SAFE(isFormRender_, taskExecutor_);
     dirtyPropertyNodes_.erase(frameNode);
     needRenderNode_.erase(frameNode);
 
