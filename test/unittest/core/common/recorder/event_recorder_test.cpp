@@ -588,4 +588,169 @@ HWTEST_F(EventRecorderTest, EventRecorderTest012, TestSize.Level1)
     std::shared_ptr<std::unordered_map<std::string, std::string>> ret2 = eventBuilder.SetNavDst(dstName).build();
     EXPECT_EQ(ret2->size(), 2);
 }
+
+/**
+ * @tc.name: SetContainerInfo001
+ * @tc.desc: Test SetContainerInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, SetContainerInfo001, TestSize.Level1)
+{
+    std::string windowName = "$HA_FLOAT_WINDOW$";
+    Recorder::EventRecorder::Get().SetContainerInfo(windowName, 0, true);
+}
+
+/**
+ * @tc.name: SetContainerInfo002
+ * @tc.desc: Test SetContainerInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, SetContainerInfo002, TestSize.Level1)
+{
+    std::string windowName = "";
+    Recorder::EventRecorder::Get().SetContainerInfo(windowName, 0, true);
+}
+
+/**
+ * @tc.name: SetContainerInfo003
+ * @tc.desc: Test SetContainerInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, SetContainerInfo003, TestSize.Level1)
+{
+    std::string windowName = "";
+    Recorder::EventRecorder::Get().SetContainerInfo(windowName, 0, false);
+}
+
+/**
+ * @tc.name: SetFocusContainerInfo001
+ * @tc.desc: Test SetFocusContainerInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, SetFocusContainerInfo001, TestSize.Level1)
+{
+    std::string windowName = "$HA_FLOAT_WINDOW$";
+    Recorder::EventRecorder::Get().SetFocusContainerInfo(windowName, 0);
+}
+
+/**
+ * @tc.name: SetFocusContainerInfo002
+ * @tc.desc: Test SetFocusContainerInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, SetFocusContainerInfo002, TestSize.Level1)
+{
+    std::string windowName = "";
+    Recorder::EventRecorder::Get().SetFocusContainerInfo(windowName, 0);
+}
+
+/**
+ * @tc.name: Init001
+ * @tc.desc: Test Init.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, Init001, TestSize.Level1)
+{
+    std::string windowName = "";
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    config->Init("");
+}
+
+/**
+ * @tc.name: IsPageRecordEnable001
+ * @tc.desc: Test IsPageRecordEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, IsPageRecordEnable001, TestSize.Level1)
+{
+    EXPECT_TRUE(Recorder::EventRecorder::Get().IsPageRecordEnable());
+}
+
+/**
+ * @tc.name: IsComponentRecordEnable001
+ * @tc.desc: Test IsComponentRecordEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, IsComponentRecordEnable001, TestSize.Level1)
+{
+    EXPECT_FALSE(Recorder::EventRecorder::Get().IsComponentRecordEnable());
+}
+
+/**
+ * @tc.name: IsCacheAvaliable001
+ * @tc.desc: Test IsCacheAvaliable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, IsCacheAvaliable001, TestSize.Level1)
+{
+    EXPECT_FALSE(Recorder::IsCacheAvaliable());
+}
+
+/**
+ * @tc.name: PutString001
+ * @tc.desc: Test PutString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, PutString001, TestSize.Level1)
+{
+    auto pageNode = CreatePageNode("pages/Index");
+    bool result = Recorder::NodeDataCache::Get().PutString(pageNode, "", "1");
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PutString002
+ * @tc.desc: Test PutString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, PutString002, TestSize.Level1)
+{
+    auto pageNode = CreatePageNode("pages/Index");
+    std::string value;
+    bool result = Recorder::NodeDataCache::Get().PutString(pageNode, "", value);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: OnBeforePagePop001
+ * @tc.desc: Test OnBeforePagePop.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, OnBeforePagePop001, TestSize.Level1)
+{
+    Recorder::NodeDataCache::Get().OnBeforePagePop(true);
+}
+
+/**
+ * @tc.name: GetExposureCfg001
+ * @tc.desc: Test GetExposureCfg.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, GetExposureCfg001, TestSize.Level1)
+{
+    Recorder::ExposureCfg cfg;
+    Recorder::NodeDataCache::Get().GetExposureCfg("", "", cfg);
+}
+
+/**
+ * @tc.name: Clear001
+ * @tc.desc: Test Clear.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, Clear001, TestSize.Level1)
+{
+    Recorder::ExposureCfg cfg;
+    Recorder::NodeDataCache::Get().Clear("");
+}
+
+/**
+ * @tc.name: GetNodeData001
+ * @tc.desc: Test GetNodeData.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, GetNodeData001, TestSize.Level1)
+{
+    std::unordered_map<std::string, std::string> nodes;
+    Recorder::NodeDataCache::Get().GetNodeData("", nodes);
+}
 } // namespace OHOS::Ace

@@ -1743,23 +1743,36 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternUpdateColumnChildPosition002,
 }
 
 /**
- * @tc.name: TextPropertiesLinearAnimation001
- * @tc.desc: TextPickerColumnPattern TextPropertiesLinearAnimation
+ * @tc.name: LinearFontSize001
+ * @tc.desc: TextPickerColumnPattern LinearFontSize
  * @tc.type: FUNC
  */
-HWTEST_F(TextPickerPatternTestNg, TextPropertiesLinearAnimation001, TestSize.Level1)
+HWTEST_F(TextPickerPatternTestNg, LinearFontSize001, TestSize.Level1)
 {
     InitTextPickerPatternTestNg();
-    auto host = textPickerColumnPattern_->GetHost();
-    CHECK_NULL_VOID(host);
-    auto child = host->GetChildren();
-    auto iter = child.begin();
-    auto textNode = AceType::DynamicCast<FrameNode>(*iter);
-    CHECK_NULL_VOID(textNode);
-    auto textPattern = textNode->GetPattern<TextPattern>();
-    CHECK_NULL_VOID(textPattern);
-    RefPtr<TextLayoutProperty> textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    textPickerColumnPattern_->LinearFontSize(Dimension(FONT_SIZE_10), Dimension(FONT_SIZE_20), 1);
+}
 
-    textPickerColumnPattern_->TextPropertiesLinearAnimation(textLayoutProperty, 0, 0, true, 0);
+/**
+ * @tc.name: LinearFontSize002
+ * @tc.desc: TextPickerColumnPattern LinearFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, LinearFontSize002, TestSize.Level1)
+{
+    InitTextPickerPatternTestNg();
+    textPickerColumnPattern_->LinearFontSize(Dimension(FONT_SIZE_10), Dimension(FONT_SIZE_20), 2);
+}
+
+/**
+ * @tc.name: GetOverScrollDeltaIndex001
+ * @tc.desc: TextPickerColumnPattern GetOverScrollDeltaIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, GetOverScrollDeltaIndex001, TestSize.Level1)
+{
+    InitTextPickerPatternTestNg();
+    int32_t index = textPickerColumnPattern_->GetOverScrollDeltaIndex();
+    ASSERT_FALSE(index > 0);
 }
 } // namespace OHOS::Ace::NG
