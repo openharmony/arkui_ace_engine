@@ -239,8 +239,12 @@ std::string ContentController::RemoveErrorTextFromValue(const std::string& value
 
 std::string ContentController::FilterWithRegex(const std::string& filter, std::string& result)
 {
-    std::regex filterRegex(filter);
-    auto errorText = std::regex_replace(result, filterRegex, "");
+    // convert wstring for processing unicode characters
+    std::wstring wFilter = StringUtils::ToWstring(filter);
+    std::wstring wResult = StringUtils::ToWstring(result);
+    std::wregex wFilterRegex(wFilter);
+    std::wstring wErrorText = std::regex_replace(wResult, wFilterRegex, L"");
+    std::string errorText = StringUtils::ToString(wErrorText);
     result = RemoveErrorTextFromValue(result, errorText);
     return errorText;
 }
