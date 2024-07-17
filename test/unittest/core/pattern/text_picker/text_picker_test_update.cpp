@@ -1313,8 +1313,7 @@ NG::BorderRadiusProperty getRadius()
  */
 HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateButtonStyles026, TestSize.Level1)
 {
-    uint32_t color = 0;
-    Color colorVal = Color(color);
+    Color colorVal = Color(0);
     std::vector<ButtonInfo> buttonInfos;
     ButtonInfo info1;
     ButtonInfo info2;
@@ -1343,7 +1342,6 @@ HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateButtonStyles026, TestSi
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_VOID(buttonNode);
     auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    
     auto renderContext = buttonNode->GetRenderContext();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -1357,7 +1355,6 @@ HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateButtonStyles026, TestSi
     EXPECT_EQ(testval2, Color::GRAY);
     sizet++;
     TextPickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
-
     sizet--;
     TextPickerDialogView::UpdateButtonStyles(buttonInfos, sizet, layoutProperty, renderContext);
     auto testval5 = layoutProperty->GetFontSizeValue();
@@ -1395,7 +1392,7 @@ HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateButtonStyleAndRole002, 
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_VOID(buttonNode);
     auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    
+
     auto renderContext = buttonNode->GetRenderContext();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -1438,7 +1435,7 @@ HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateButtonStyleAndRole001, 
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_VOID(buttonNode);
     auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    
+
     auto renderContext = buttonNode->GetRenderContext();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -1452,7 +1449,7 @@ HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateButtonStyleAndRole001, 
     EXPECT_EQ(testval, ButtonRole::NORMAL);
 }
 
- /**
+/**
  * @tc.name: TextPickerDialogViewShow0013
  * @tc.desc: Test TextPickerDialogView Show(column kind is invalid).
  * @tc.type: FUNC
@@ -1482,7 +1479,7 @@ HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewShow0013, TestSize.Level1)
     EXPECT_EQ(frameNode, nullptr);
 }
 
- /**
+/**
  * @tc.name: TextPickerDialogViewShow0014
  * @tc.desc: Test TextPickerDialogView Show(column kind is invalid).
  * @tc.type: FUNC
@@ -1511,7 +1508,7 @@ HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewShow0014, TestSize.Level1)
 
     auto frameNode =
         TextPickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
-    
+
     ASSERT_NE(frameNode, nullptr);
 }
 
@@ -1550,9 +1547,9 @@ HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewCreateAgingButtonNode001, Tes
      * @tc.step: step2. call CreateAgingButtonNode.
      * @tc.expected: contentRow is successfully created.
      */
-    auto contentRow = TextPickerDialogView::CreateAgingButtonNode(frameNode, buttonInfos, dialogEvent,
-        dialogCancelEvent, dialogMoveForwardEvent, dialogMoveBackwardEvent,
-        closeCallback, nextCallBack, previousCallBack);
+    auto contentRow =
+        TextPickerDialogView::CreateAgingButtonNode(frameNode, buttonInfos, dialogEvent, dialogCancelEvent,
+            dialogMoveForwardEvent, dialogMoveBackwardEvent, closeCallback, nextCallBack, previousCallBack);
     ASSERT_NE(contentRow, nullptr);
 }
 
@@ -1772,7 +1769,7 @@ HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateBackwardButtonMargin002
     EXPECT_NE(buttonBackwardNode->GetLayoutProperty()->margin_, nullptr);
 }
 
- /*
+/*
  * @tc.name: UpdateForwardButtonMargin001
  * @tc.desc: Test TextPickerDialogView UpdateForwardButtonMargin
  * @tc.type: FUNC
@@ -1827,8 +1824,8 @@ HWTEST_F(TextPickerTestUpdate, SeparatedOptionsShow001, TestSize.Level1)
     float scale = 1.00;
     auto closeCallback = [](const GestureEvent& info) { (void)info; };
 
-    RefPtr<FrameNode> dialogNode = TextPickerDialogView::SeparatedOptionsShow(contentColumn, textPickerNode, buttonInfos, settingData, dialogEvent,
-        dialogCancelEvent, scale, closeCallback, frameNode_);
+    RefPtr<FrameNode> dialogNode = TextPickerDialogView::SeparatedOptionsShow(contentColumn, textPickerNode,
+        buttonInfos, settingData, dialogEvent, dialogCancelEvent, scale, closeCallback, frameNode_);
     ASSERT_NE(dialogNode, nullptr);
 }
 
@@ -1847,7 +1844,7 @@ HWTEST_F(TextPickerTestUpdate, SetRange001, TestSize.Level1)
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    TextPickerModelNG::SetRange(frameNode,range);
+    TextPickerModelNG::SetRange(frameNode, range);
 }
 
 /**
@@ -1865,7 +1862,7 @@ HWTEST_F(TextPickerTestUpdate, SetValue001, TestSize.Level1)
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    TextPickerModelNG::SetValue(frameNode,value);
+    TextPickerModelNG::SetValue(frameNode, value);
 }
 
 /**
@@ -1886,6 +1883,6 @@ HWTEST_F(TextPickerTestUpdate, SetValues001, TestSize.Level1)
     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    TextPickerModelNG::SetValues(frameNode,value);
+    TextPickerModelNG::SetValues(frameNode, value);
 }
 } // namespace OHOS::Ace::NG
