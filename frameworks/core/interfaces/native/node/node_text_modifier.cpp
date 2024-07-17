@@ -40,6 +40,8 @@ constexpr bool DEFAULT_TEXT_DRAGGABLE = false;
 constexpr bool DEFAULT_TEXT_SENSITIVE = false;
 constexpr Dimension DEFAULT_MAX_FONT_SIZE;
 constexpr Dimension DEFAULT_MIN_FONT_SIZE;
+constexpr float DEFAULT_MIN_FONT_SCALE = 0.85f;
+constexpr float DEFAULT_MAX_FONT_SCALE = 3.20f;
 constexpr CopyOptions DEFAULT_COPY_OPTION = CopyOptions::None;
 constexpr Dimension DEFAULT_BASELINE_OFFSET = 0.0_fp;
 constexpr Dimension DEFAULT_FONT_SIZE = 16.0_fp;
@@ -394,6 +396,34 @@ void ResetTextMaxFontSize(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetAdaptMaxFontSize(frameNode, DEFAULT_MAX_FONT_SIZE);
+}
+
+void SetTextMinFontScale(ArkUINodeHandle node, ArkUI_Float32 number)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetMinFontScale(frameNode, number);
+}
+
+void ResetTextMinFontScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetMinFontScale(frameNode, DEFAULT_MIN_FONT_SCALE);
+}
+
+void SetTextMaxFontScale(ArkUINodeHandle node, ArkUI_Float32 number)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetMaxFontScale(frameNode, number);
+}
+
+void ResetTextMaxFontScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetMaxFontScale(frameNode, DEFAULT_MAX_FONT_SCALE);
 }
 
 void SetTextFontFamily(ArkUINodeHandle node, const char** fontFamilies, ArkUI_Uint32 length)
@@ -1143,6 +1173,10 @@ const ArkUITextModifier* GetTextModifier()
         ResetTextOnCopy,
         SetTextOnTextSelectionChange,
         ResetTextOnTextSelectionChange,
+        SetTextMinFontScale,
+        ResetTextMinFontScale,
+        SetTextMaxFontScale,
+        ResetTextMaxFontScale,
         SetTextSelectionMenuOptions,
         ResetTextSelectionMenuOptions
     };

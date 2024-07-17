@@ -40,8 +40,6 @@ static std::vector<uintptr_t> g_callList = {
     reinterpret_cast<uintptr_t>(SecurityComponentHandler::ReportSecurityComponentClickEventInner)
 };
 
-const std::set<std::string> LAYOUT_TAGS = { "__Common__", "__Recycle__" };
-
 SecurityComponentProbe SecurityComponentHandler::probe;
 SecurityComponent::SecCompUiRegister uiRegister(g_callList, &SecurityComponentHandler::probe);
 
@@ -541,10 +539,6 @@ bool SecurityComponentHandler::IsContextTransparent(const RefPtr<FrameNode>& fra
     if (static_cast<int32_t>(layoutProperty->GetVisibility().value_or(VisibleType::VISIBLE)) != 0) {
         return true;
     }
-    if (LAYOUT_TAGS.find(frameNode->GetTag()) != LAYOUT_TAGS.end() &&
-        renderContext->GetBackgroundColor()->ColorToString().compare("#00000000") == 0) {
-        return true;
-    }
     return false;
 }
 
@@ -565,8 +559,21 @@ bool SecurityComponentHandler::CheckContainerTags(const RefPtr<FrameNode>& frame
     return false;
 }
 
-bool SecurityComponentHandler::CheckSecurityComponentStatus(const RefPtr<UINode>& root, std::vector<RectF>& rect,
-    int32_t secNodeId)
+bool SecurityComponentHandler::IsInModalPage(const RefPtr<UINode>& node)
+{
+    RefPtr<UINode> tmpNode = node;
+    while (tmpNode) {
+        if (tmpNode->GetTag() == V2::MODAL_PAGE_TAG) {
+            return true;
+        }
+        tmpNode = tmpNode->GetParent();
+    }
+    return false;
+}
+
+bool SecurityComponentHandler::CheckSecurityComponentStatus(const RefPtr<UINode>& root,
+    std::unordered_map<int32_t, NG::RectF>& nodeId2Rect, int32_t secNodeId,
+    std::unordered_map<int32_t, int32_t>& nodeId2Zindex)
 {
     bool res = false;
     RectF paintRect;
@@ -575,7 +582,10 @@ bool SecurityComponentHandler::CheckSecurityComponentStatus(const RefPtr<UINode>
     if (frameNode) {
         paintRect = frameNode->GetTransformRectRelativeToWindow();
         if (IsSecurityComponent(frameNode) && (frameNode->GetId() == secNodeId)) {
-            return CheckRectIntersect(paintRect, rect);
+            if (IsInModalPage(root)) {
+                return false;
+            }
+            return CheckRectIntersect(paintRect, secNodeId, nodeId2Rect, nodeId2Zindex);
         }
     }
     auto& children = root->GetChildren();
@@ -584,19 +594,22 @@ bool SecurityComponentHandler::CheckSecurityComponentStatus(const RefPtr<UINode>
         if (node && IsContextTransparent(node)) {
             continue;
         }
-        res |= CheckSecurityComponentStatus(*child, rect, secNodeId);
+        res |= CheckSecurityComponentStatus(*child, nodeId2Rect, secNodeId, nodeId2Zindex);
     }
 
     if (frameNode && frameNode->GetTag() != V2::SHEET_WRAPPER_TAG && !CheckContainerTags(frameNode)) {
-        rect.push_back(paintRect);
+        nodeId2Rect[frameNode->GetId()] = paintRect;
     }
     return res;
 }
 
-bool SecurityComponentHandler::CheckRectIntersect(const RectF& dest, const std::vector<RectF>& origin)
+bool SecurityComponentHandler::CheckRectIntersect(const RectF& dest, int32_t secNodeId,
+    const std::unordered_map<int32_t, NG::RectF>& nodeId2Rect,
+    std::unordered_map<int32_t, int32_t>& nodeId2Zindex)
 {
-    for (const auto& originRect : origin) {
-        if (originRect.IsInnerIntersectWith(dest)) {
+    for (const auto& originRect : nodeId2Rect) {
+        if (originRect.second.IsInnerIntersectWith(dest) &&
+            (nodeId2Zindex[secNodeId] <= nodeId2Zindex[originRect.first])) {
             return true;
         }
     }
@@ -609,14 +622,48 @@ bool SecurityComponentHandler::IsSecurityComponent(RefPtr<FrameNode>& node)
            node->GetTag() == V2::SAVE_BUTTON_ETS_TAG;
 }
 
+int32_t SecurityComponentHandler::GetNodeZIndex(const RefPtr<UINode>& root)
+{
+    int32_t zIndex;
+    auto node = AceType::DynamicCast<NG::FrameNode>(root);
+    if (node) {
+        const RefPtr<RenderContext> renderContext = node->GetRenderContext();
+        if (!renderContext) {
+            zIndex = 0;
+        } else {
+            zIndex = renderContext->GetZIndexValue(ZINDEX_DEFAULT_VALUE);
+        }
+    } else {
+        zIndex = 0;
+    }
+
+    return zIndex;
+}
+
+void SecurityComponentHandler::UpdateAllZindex(const RefPtr<UINode>& root,
+    std::unordered_map<int32_t, int32_t>& nodeId2Zindex)
+{
+    if (nodeId2Zindex.count(root->GetId()) == 0) {
+        nodeId2Zindex[root->GetId()] = GetNodeZIndex(root);
+    }
+    auto& children = root->GetChildren();
+    for (auto child = children.begin(); child != children.end(); ++child) {
+        int32_t nodeZIndex = GetNodeZIndex(*child);
+        nodeId2Zindex[(*child)->GetId()] = std::max(nodeZIndex, nodeId2Zindex[root->GetId()]);
+        UpdateAllZindex(*child, nodeId2Zindex);
+    }
+}
+
 bool SecurityComponentHandler::CheckComponentCoveredStatus(int32_t secNodeId)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     RefPtr<UINode> root = pipeline->GetRootElement();
     CHECK_NULL_RETURN(root, false);
-    std::vector<NG::RectF> rect;
-    if (CheckSecurityComponentStatus(root, rect, secNodeId)) {
+    std::unordered_map<int32_t, NG::RectF> nodeId2Rect;
+    std::unordered_map<int32_t, int32_t> nodeId2Zindex;
+    UpdateAllZindex(root, nodeId2Zindex);
+    if (CheckSecurityComponentStatus(root, nodeId2Rect, secNodeId, nodeId2Zindex)) {
         return true;
     }
     return false;
@@ -651,19 +698,24 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
     secEvent.point.touchX = event.GetDisplayX();
     secEvent.point.touchY = event.GetDisplayY();
     auto pointerEvent = event.GetPointerEvent();
+    uint8_t defaultData = 0;
+    std::vector<uint8_t> dataBuffer;
     if (pointerEvent == nullptr) {
-        LOGE("Receive a NULL pointerEvent");
-        return -1;
+        LOGW("Receive a NULL pointerEvent, set default data.");
+        secEvent.extraInfo.data = &defaultData;
+        secEvent.extraInfo.dataSize = 1;
+        secEvent.point.timestamp = 0;
+    } else {
+        dataBuffer = pointerEvent->GetEnhanceData();
+        if (dataBuffer.size() > 0) {
+            secEvent.extraInfo.data = dataBuffer.data();
+            secEvent.extraInfo.dataSize = dataBuffer.size();
+        }
+        std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
+        TimeStamp time(microseconds);
+        secEvent.point.timestamp =
+            static_cast<uint64_t>(time.time_since_epoch().count()) / SECOND_TO_MILLISECOND;
     }
-    auto data = pointerEvent->GetEnhanceData();
-    if (data.size() > 0) {
-        secEvent.extraInfo.data = data.data();
-        secEvent.extraInfo.dataSize = data.size();
-    }
-    std::chrono::microseconds microseconds(event.GetPointerEvent()->GetActionTime());
-    TimeStamp time(microseconds);
-    secEvent.point.timestamp =
-        static_cast<uint64_t>(time.time_since_epoch().count()) / SECOND_TO_MILLISECOND;
 #endif
     if (CheckComponentCoveredStatus(node->GetId())) {
         LOGW("Security component is covered by another component.");

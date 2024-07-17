@@ -224,6 +224,13 @@ if (defined(global_parts_info.multimedia_player_framework)) {
   enable_player_framework = false
 }
 
+if (defined(global_parts_info.multimedia_audio_framework)) {
+  enable_audio_framework = true
+  ace_common_defines += [ "AUDIO_FRAMEWORK_EXISTS" ]
+} else {
+  enable_audio_framework = false
+}
+
 if (!defined(global_parts_info) ||
     defined(global_parts_info.security_security_component_manager)) {
   security_component_enable = true
@@ -237,6 +244,13 @@ if (!defined(global_parts_info) ||
   form_fwk_enable = true
 } else {
   form_fwk_enable = false
+}
+
+if (defined(global_parts_info) &&
+    defined(global_parts_info.hiviewdfx_hicollie)) {
+  uiservice_xcollie_enable = true
+} else {
+  uiservice_xcollie_enable = false
 }
 
 ace_platforms = []

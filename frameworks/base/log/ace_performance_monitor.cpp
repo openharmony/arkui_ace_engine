@@ -96,6 +96,11 @@ void ArkUIPerfMonitor::RecordRenderNode(int64_t num)
     renderNodeNum_ += num;
 }
 
+void ArkUIPerfMonitor::RecordDisplaySyncRate(int32_t displaySyncRate)
+{
+    displaySyncRate_ = displaySyncRate;
+}
+
 void ArkUIPerfMonitor::SetRecordingStatus(MonitorTag tag, MonitorStatus status)
 {
     if (tag == MonitorTag::STATIC_API) {
@@ -124,10 +129,12 @@ void ArkUIPerfMonitor::ClearPerfMonitor()
     timeSlice_[MonitorTag::COMPONENT_UPDATE] = 0;
     timeSlice_[MonitorTag::JS_CALLBACK] = 0;
     timeSlice_[MonitorTag::STATIC_API] = 0;
+    timeSlice_[MonitorTag::OTHER] = 0;
     propertyNum_ = 0;
     stateMgmtNodeNum_ = 0;
     layoutNodeNum_ = 0;
     renderNodeNum_ = 0;
+    displaySyncRate_ = 0;
 }
 
 void ArkUIPerfMonitor::FlushPerfMonitor()
@@ -135,7 +142,7 @@ void ArkUIPerfMonitor::FlushPerfMonitor()
     auto total = static_cast<int64_t>(duration_cast<nanoseconds>(end_ - begin_).count());
     auto frameWork = total - timeSlice_[MonitorTag::COMPONENT_CREATION] - timeSlice_[MonitorTag::COMPONENT_LIFECYCLE] -
                      timeSlice_[MonitorTag::COMPONENT_UPDATE] - timeSlice_[MonitorTag::JS_CALLBACK] +
-                     timeSlice_[MonitorTag::STATIC_API];
+                     timeSlice_[MonitorTag::STATIC_API] - timeSlice_[MonitorTag::OTHER];
     auto json = JsonUtil::Create(true);
     json->Put("state_mgmt", stateMgmtNodeNum_);
     json->Put("layout", layoutNodeNum_);
@@ -143,6 +150,7 @@ void ArkUIPerfMonitor::FlushPerfMonitor()
     json->Put("property", propertyNum_);
     json->Put("total", total);
     json->Put("framework", frameWork);
+    json->Put("display_sync_rate", displaySyncRate_);
     ACE_SCOPED_TRACE("ArkUIPerfMonitor %s", json->ToString().c_str());
 }
 } // namespace OHOS::Ace

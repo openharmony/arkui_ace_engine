@@ -537,4 +537,62 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPattern001, TestSize.Level1)
     menuItemGroupPattern->AddHeader(headerNode);
     EXPECT_FALSE(menuItemGroupPattern->GetMenu() == nullptr);
 }
+
+/**
+ * @tc.name: MenuItemGroupPattern002
+ * @tc.desc: Test MenuItemGroup pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPattern002, TestSize.Level1)
+{
+    MenuModelNG MneuModelInstance;
+    MenuItemModelNG MneuItemModelInstance;
+    MneuModelInstance.Create();
+    MneuModelInstance.SetFontSize(Dimension(25.0));
+    MneuModelInstance.SetFontColor(Color::RED);
+    MneuModelInstance.SetFontWeight(FontWeight::BOLD);
+
+    auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    RefPtr<NG::UINode> footerNode;
+    footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    menuItemGroupPattern->footerIndex_ = 0;
+    menuItemGroupPattern->AddFooter(footerNode);
+    EXPECT_EQ(menuItemGroupPattern->footerIndex_, 0);
+}
+
+/**
+ * @tc.name: MenuItemGroupPattern003
+ * @tc.desc: Test MenuItemGroup pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPattern003, TestSize.Level1)
+{
+    MenuModelNG MneuModelInstance;
+    MenuItemModelNG MneuItemModelInstance;
+    MneuModelInstance.Create();
+    MneuModelInstance.SetFontSize(Dimension(25.0));
+    MneuModelInstance.SetFontColor(Color::RED);
+    MneuModelInstance.SetFontWeight(FontWeight::BOLD);
+
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+
+    auto menuItemGroupPattern1 = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    auto menuItemGroup1 = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, 1, menuItemGroupPattern1);
+    menuItemGroup1->MountToParent(menuNode);
+
+    auto menuItemGroupPattern2 = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    auto menuItemGroup2 = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, 2, menuItemGroupPattern2);
+    menuItemGroup2->MountToParent(menuNode);
+
+    auto menuItemGroupPattern3 = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    auto menuItemGroup3 = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, 3, menuItemGroupPattern3);
+    menuItemGroup3->MountToParent(menuNode);
+
+    bool press = true;
+    int32_t index = 0;
+    menuItemGroupPattern2->OnIntItemPressed(0, press);
+    index = -1;
+    menuItemGroupPattern2->OnIntItemPressed(-1, press);
+}
 } // namespace OHOS::Ace::NG

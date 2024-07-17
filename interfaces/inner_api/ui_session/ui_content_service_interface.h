@@ -51,7 +51,7 @@ public:
      * @description: define SA process and current process connect interface
      * @return: result number
      */
-    virtual int32_t Connect() = 0;
+    virtual int32_t Connect(const EventCallback& eventCallback) = 0;
 
     /**
      * @description: define register a callback on click event occur to execute interface
@@ -126,7 +126,8 @@ public:
         REPORT_COMPONENT_EVENT,
         REPORT_SEARCH_EVENT,
         REPORT_INSPECTOR_VALUE,
-        REPORT_WEB_UNFOCUS_EVENT
+        REPORT_WEB_UNFOCUS_EVENT,
+        SEND_BASE_INFO,
     };
 
     /**
@@ -153,7 +154,16 @@ public:
      * @description: define reports inspector value to the proxy interface
      */
     virtual void ReportInspectorTreeValue(const std::string& data, int32_t partNum, bool isLastPart) = 0;
+
+    /**
+     * @description: define reports web unfocus value to the proxy interface
+     */
     virtual void ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data) = 0;
+
+    /**
+     * @description: define send base info value to the proxy interface
+     */
+    virtual void SendBaseInfo(const std::string& data) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H

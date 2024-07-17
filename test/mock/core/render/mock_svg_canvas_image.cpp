@@ -25,6 +25,8 @@ void SvgCanvasImage::DrawToRSCanvas(
     RSCanvas& canvas, const RSRect& srcRect, const RSRect& /* dstRect */, const BorderRadiusArray& /* radiusXY */)
 {}
 
+void SvgCanvasImage::DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) {}
+
 void SvgCanvasImage::SetRedrawCallback(std::function<void()>&& callback) {}
 
 void SvgCanvasImage::SetOnFinishCallback(std::function<void ()> &&callback) {}

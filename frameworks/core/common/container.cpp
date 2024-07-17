@@ -126,7 +126,7 @@ RefPtr<Container> Container::GetFoucsed()
     RefPtr<Container> foucsContainer;
     AceEngine::Get().NotifyContainers([&foucsContainer](const RefPtr<Container>& container) {
         auto pipeline = container->GetPipelineContext();
-        if (pipeline && pipeline->GetOnFoucs()) {
+        if (pipeline && pipeline->IsWindowFocused()) {
             foucsContainer = container;
         }
     });
@@ -180,6 +180,26 @@ bool Container::Dump(const std::vector<std::string>& params, std::vector<std::st
 bool Container::IsIdAvailable(int32_t id)
 {
     return !AceEngine::Get().GetContainer(id);
+}
+
+void Container::SetFontScale(int32_t instanceId, float fontScale)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->SetFontScale(fontScale);
+}
+
+void Container::SetFontWeightScale(int32_t instanceId, float fontWeightScale)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->SetFontWeightScale(fontWeightScale);
 }
 
 template<>

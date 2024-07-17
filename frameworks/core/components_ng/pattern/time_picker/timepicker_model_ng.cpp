@@ -34,7 +34,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float PICKER_MAXFONTSCALE = 1.75f;
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
-constexpr uint8_t PIXEL_ROUND = 18;
 } // namespace
 void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool hasSecond)
 {
@@ -93,7 +92,6 @@ void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool h
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateLayoutWeight(1);
         stackHourNode->MountToParent(timePickerNode);
-        hourColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
     if (!hasMinuteNode) {
         auto stackMinuteNode = CreateStackNode();
@@ -108,7 +106,6 @@ void TimePickerModelNG::CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool h
         auto language = AceApplicationInfo::GetInstance().GetLanguage();
         language == "ug" ? stackMinuteNode->MountToParent(timePickerNode, 0)
                             : stackMinuteNode->MountToParent(timePickerNode);
-        minuteColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
     timePickerRowPattern->SetHasSecond(hasSecond);
     stack->Push(timePickerNode);
@@ -194,7 +191,6 @@ RefPtr<FrameNode> TimePickerModelNG::CreateFrameNode(int32_t nodeId)
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateLayoutWeight(1);
         stackHourNode->MountToParent(timePickerNode);
-        hourColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
     if (!hasMinuteNode) {
         auto stackMinuteNode = CreateStackNode();
@@ -207,7 +203,6 @@ RefPtr<FrameNode> TimePickerModelNG::CreateFrameNode(int32_t nodeId)
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateLayoutWeight(1);
         stackMinuteNode->MountToParent(timePickerNode);
-        minuteColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
     timePickerRowPattern->SetHasSecond(false);
     return timePickerNode;
@@ -223,7 +218,10 @@ void TimePickerModelNG::SetSelectedTime(const PickerTime& value)
 
 void TimePickerModelNG::SetIsEnableHapticFeedback(bool isEnableHapticFeedback)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, IsEnableHapticFeedback, isEnableHapticFeedback);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    timePickerRowPattern->SetIsEnableHaptic(isEnableHapticFeedback);
 }
 
 void TimePickerModelNG::SetHour24(bool isUseMilitaryTime)

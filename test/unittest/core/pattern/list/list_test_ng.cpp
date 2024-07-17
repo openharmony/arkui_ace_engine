@@ -35,15 +35,14 @@ void ListTestNg::SetUpTestSuite()
     auto listItemThemeConstants = CreateThemeConstants(THEME_PATTERN_LIST_ITEM);
     auto listItemTheme = ListItemTheme::Builder().Build(listItemThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(ListItemTheme::TypeId())).WillRepeatedly(Return(listItemTheme));
-    listItemTheme->itemDefaultColor_ = Color::WHITE;
-    listItemTheme->hoverColor_ = Color::RED;
-    listItemTheme->pressColor_ = Color::BLACK;
+    listItemTheme->itemDefaultColor_ = ITEMDEFAULT_COLOR;
+    listItemTheme->hoverColor_ = HOVER_COLOR;
+    listItemTheme->pressColor_ = PRESS_COLOR;
     int32_t hoverAnimationDuration = 250;
     int32_t hoverToPressAnimationDuration = 100;
-    double disabledAlpha = 0.4;
     listItemTheme->hoverAnimationDuration_ = hoverAnimationDuration;
     listItemTheme->hoverToPressAnimationDuration_ = hoverToPressAnimationDuration;
-    listItemTheme->disabledAlpha_ = disabledAlpha;
+    listItemTheme->disabledAlpha_ = DISABLED_ALPHA;
     listItemTheme->defaultColor_ = Color::WHITE;
     listItemTheme->defaultLeftMargin_ = GROUP_MARGIN;
     listItemTheme->defaultRightMargin_ = GROUP_MARGIN;
@@ -151,7 +150,7 @@ void ListTestNg::CreateItemWithSize(int32_t itemNumber, SizeT<Dimension> itemSiz
 }
 
 void ListTestNg::CreateGroupWithSetting(
-    int32_t groupNumber, Axis axis, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber)
+    int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber)
 {
     for (int32_t index = 0; index < groupNumber; index++) {
         auto header = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
@@ -280,9 +279,9 @@ void ListTestNg::ScrollToEdge(ScrollEdgeType scrollEdgeType)
     FlushLayoutTask(frameNode_);
 }
 
-void ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
+void ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
 {
-    pattern_->ScrollToIndex(index, smooth, align);
+    pattern_->ScrollToIndex(index, smooth, align, extraOffset);
     FlushLayoutTask(frameNode_);
     if (smooth) {
         auto iter = pattern_->itemPosition_.find(index);
@@ -294,6 +293,9 @@ void ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
             }
         } else {
             pattern_->GetListItemAnimatePos(iter->second.startPos, iter->second.endPos, align, targetPos);
+        }
+        if (extraOffset.has_value()) {
+            targetPos += extraOffset.value();
         }
         if (!NearZero(targetPos)) {
             float endValue = pattern_->GetFinalPosition();

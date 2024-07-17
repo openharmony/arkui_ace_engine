@@ -91,6 +91,16 @@ SizeF TextInputResponseArea::GetFrameSize(bool withSafeArea)
     CHECK_NULL_RETURN(geometryNode, SizeF(0, 0));
     return geometryNode->GetFrameSize(withSafeArea);
 }
+
+Alignment TextInputResponseArea::GetStackAlignment(const TextDirection& userDirection)
+{
+    bool isSysRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if ((isSysRtl && userDirection == TextDirection::LTR) ||
+        (!isSysRtl && userDirection == TextDirection::RTL)) {
+        return Alignment::CENTER_RIGHT;
+    }
+    return Alignment::CENTER_LEFT;
+}
 // TextInputResponseArea end
 
 // PasswordResponseArea begin
@@ -133,7 +143,9 @@ RefPtr<FrameNode> PasswordResponseArea::CreateNode()
     auto stackLayoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_RETURN(stackLayoutProperty, nullptr);
     stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(hotZoneSize), std::nullopt));
-    stackLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    stackLayoutProperty->UpdateAlignment(GetStackAlignment(layoutProperty->GetLayoutDirection()));
     AddEvent(stackNode);
     stackNode->MarkModifyDone();
 
@@ -209,6 +221,16 @@ void PasswordResponseArea::Refresh()
         InitResponseArea();
         return;
     }
+
+    auto textFieldPattern = hostPattern_.Upgrade();
+    if (textFieldPattern && stackNode_) {
+        auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+        auto stackLayoutProperty = stackNode_->GetLayoutProperty<LayoutProperty>();
+        if (stackLayoutProperty && layoutProperty) {
+            stackLayoutProperty->UpdateAlignment(GetStackAlignment(layoutProperty->GetLayoutDirection()));
+        }
+    }
+
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     auto currentSrc = imageLayoutProperty->GetImageSourceInfoValue().GetSrc();
@@ -474,7 +496,11 @@ RefPtr<FrameNode> CleanNodeResponseArea::CreateNode()
     auto stackLayoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_RETURN(stackLayoutProperty, nullptr);
     stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), std::nullopt));
-    stackLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
+    auto textFieldPattern = hostPattern_.Upgrade();
+    CHECK_NULL_RETURN(textFieldPattern, nullptr);
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    stackLayoutProperty->UpdateAlignment(GetStackAlignment(layoutProperty->GetLayoutDirection()));
     stackNode->MarkModifyDone();
     auto cleanNode = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
@@ -573,6 +599,14 @@ void CleanNodeResponseArea::ClearArea()
 
 void CleanNodeResponseArea::Refresh()
 {
+    auto textFieldPattern = hostPattern_.Upgrade();
+    if (textFieldPattern && cleanNode_) {
+        auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+        auto stackLayoutProperty = cleanNode_->GetLayoutProperty<LayoutProperty>();
+        if (layoutProperty && stackLayoutProperty) {
+            stackLayoutProperty->UpdateAlignment(GetStackAlignment(layoutProperty->GetLayoutDirection()));
+        }
+    }
     LoadingImageProperty();
     auto info = CreateImageSourceInfo();
     CHECK_NULL_VOID(cleanNode_);

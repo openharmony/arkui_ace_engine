@@ -18,6 +18,7 @@
 #include "base/geometry/offset.h"
 #include "base/log/log.h"
 #include "base/log/log_wrapper.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/gestures/base_gesture_event.h"
@@ -138,6 +139,8 @@ void PanRecognizer::OnAccepted()
     refereeState_ = RefereeState::SUCCEED;
     ReportSlideOn();
     SendCallbackMsg(onActionStart_);
+    // only report the pan gesture starting for touch event
+    DispatchPanStartedToPerf(lastTouchEvent_);
     if (IsEnabled()) {
         isStartTriggered_ = true;
     }
@@ -345,6 +348,13 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
     UpdateTouchPointWithAxisEvent(event);
     UpdateAxisPointInVelocityTracker(event, true);
     time_ = event.time;
+
+    auto velocityTrackerIter = panVelocity_.GetVelocityMap().find(event.id);
+    if (velocityTrackerIter != panVelocity_.GetVelocityMap().end()) {
+        velocityTrackerIter->second.DumpVelocityPoints();
+    }
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+        "PanVelocity main axis velocity is %{public}f", panVelocity_.GetMainAxisVelocity());
 
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -942,5 +952,18 @@ void PanRecognizer::UpdateTouchEventInfo(const TouchEvent& event, bool updateVel
     touchPoints_[event.id] = event;
     touchPointsDistance_[event.id] += delta_;
     time_ = event.time;
+}
+
+void PanRecognizer::DispatchPanStartedToPerf(const TouchEvent& event)
+{
+    int64_t inputTime = event.time.time_since_epoch().count();
+    if (inputTime <= 0 || event.sourceType != SourceType::TOUCH) {
+        return;
+    }
+    PerfMonitor* pMonitor = PerfMonitor::GetPerfMonitor();
+    if (pMonitor == nullptr) {
+        return;
+    }
+    pMonitor->RecordInputEvent(FIRST_MOVE, PERF_TOUCH_EVENT, inputTime);
 }
 } // namespace OHOS::Ace::NG

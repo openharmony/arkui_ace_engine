@@ -15,6 +15,7 @@
 
 #include "list_test_ng.h"
 #include "test/mock/base/mock_drag_window.h"
+#include "test/mock/core/common/mock_container.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
@@ -72,6 +73,7 @@ void ListCommonTestNg::CreateFocusableListItemGroups(int32_t groupNumber)
     for (int32_t index = 0; index < groupNumber; index++) {
         CreateListItemGroup();
         CreateFocusableListItems(GROUP_ITEM_NUMBER);
+        ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
@@ -573,6 +575,8 @@ HWTEST_F(ListCommonTestNg, MouseSelect001, TestSize.Level1)
      */
     MouseSelect(Offset(0.f, 0.f), Offset(LIST_WIDTH, 50.f));
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 0)->IsSelected());
+    std::vector<RefPtr<FrameNode>> expectSelectItems = { GetChildFrameNode(frameNode_, 0) };
+    EXPECT_EQ(pattern_->GetVisibleSelectedItems(), expectSelectItems);
 
     /**
      * @tc.steps: step2. Select from selected item(index:0) to item(index:1)
@@ -589,6 +593,8 @@ HWTEST_F(ListCommonTestNg, MouseSelect001, TestSize.Level1)
     MouseSelect(Offset(0.f, 150.f), Offset(LIST_WIDTH, 170.f));
     EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, 0)->IsSelected());
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 1)->IsSelected());
+    std::vector<RefPtr<FrameNode>> expectSelectItems2 = { GetChildFrameNode(frameNode_, 1) };
+    EXPECT_EQ(pattern_->GetVisibleSelectedItems(), expectSelectItems2);
 
     /**
      * @tc.steps: step4. Click selected item(index:1)
@@ -756,7 +762,7 @@ HWTEST_F(ListCommonTestNg, MouseSelect008, TestSize.Level1)
      */
     ListModelNG model = CreateList();
     model.SetLanes(2);
-    CreateGroupWithSetting(2, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    CreateGroupWithSetting(2, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
     MouseSelect(Offset(0.f, 0.f), Offset(240.f, 150.f)); // start on header
     std::vector<RefPtr<FrameNode>> listItems = GetALLItem(); // flat items
@@ -879,7 +885,7 @@ HWTEST_F(ListCommonTestNg, AccessibilityProperty003, TestSize.Level1)
 HWTEST_F(ListCommonTestNg, AccessibilityProperty004, TestSize.Level1)
 {
     CreateList();
-    CreateGroupWithSetting(GROUP_NUMBER, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    CreateGroupWithSetting(GROUP_NUMBER, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
     auto groupAccessibilityProperty =
         GetChildFrameNode(frameNode_, 0)->GetAccessibilityProperty<ListItemGroupAccessibilityProperty>();
@@ -984,10 +990,12 @@ HWTEST_F(ListCommonTestNg, EventHub001, TestSize.Level1)
     /**
      * @tc.steps: step1. EXPECT_CALL DrawFrameNode, HandleOnItemDragStart will trigger it
      */
-    auto mockDragWindow = MockDragWindow::CreateDragWindow("", 0, 0, 0, 0, 0);
+    auto mockDragWindow = MockDragWindow::CreateDragWindow({ "", 0, 0, 0, 0, 0 });
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(mockDragWindow)), DrawFrameNode(_)).Times(2);
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(mockDragWindow)), MoveTo).Times(AnyNumber());
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(mockDragWindow)), Destroy).Times(AnyNumber());
+    auto container = Container::GetContainer(CONTAINER_ID_DIVIDE_SIZE);
+    EXPECT_CALL(*(AceType::DynamicCast<MockContainer>(container)), GetWindowId()).Times(AnyNumber());
 
     /**
      * @tc.steps: step2. Run List GetDragExtraParams func.

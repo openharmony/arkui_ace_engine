@@ -43,16 +43,64 @@ void CheckThemeId(int32_t& themeId)
 
 const char* PATTERN_MAP[] = {
     THEME_PATTERN_BUTTON,
+    THEME_PATTERN_CHECKBOX,
+    THEME_PATTERN_DATA_PANEL,
+    THEME_PATTERN_RADIO,
+    THEME_PATTERN_SWIPER,
+    THEME_PATTERN_SWITCH,
+    THEME_PATTERN_TOOLBAR,
+    THEME_PATTERN_TOGGLE,
+    THEME_PATTERN_TOAST,
+    THEME_PATTERN_DIALOG,
+    THEME_PATTERN_DRAG_BAR,
+    THEME_PATTERN_CLOSE_ICON,
+    THEME_PATTERN_SEMI_MODAL,
+    THEME_PATTERN_BADGE,
+    THEME_PATTERN_CALENDAR,
     THEME_PATTERN_CAMERA,
+    THEME_PATTERN_CLOCK,
+    THEME_PATTERN_CARD,
+    THEME_PATTERN_COUNTER,
+    THEME_PATTERN_DIVIDER,
+    THEME_PATTERN_FOCUS_ANIMATION,
+    THEME_PATTERN_GRID,
+    THEME_PATTERN_HYPERLINK,
+    THEME_PATTERN_IMAGE,
+    THEME_PATTERN_LIST,
     THEME_PATTERN_LIST_ITEM,
+    THEME_PATTERN_MARQUEE,
+    THEME_PATTERN_NAVIGATION_BAR,
     THEME_PATTERN_PICKER,
+    THEME_PATTERN_PIECE,
+    THEME_PATTERN_POPUP,
     THEME_PATTERN_PROGRESS,
+    THEME_PATTERN_QRCODE,
+    THEME_PATTERN_RATING,
+    THEME_PATTERN_REFRESH,
+    THEME_PATTERN_SCROLL_BAR,
+    THEME_PATTERN_SEARCH,
     THEME_PATTERN_SELECT,
+    THEME_PATTERN_SLIDER,
     THEME_PATTERN_STEPPER,
+    THEME_PATTERN_TAB,
     THEME_PATTERN_TEXT,
     THEME_PATTERN_TEXTFIELD,
     THEME_PATTERN_TEXT_OVERLAY,
-    THEME_PATTERN_CONTAINER_MODAL
+    THEME_PATTERN_CONTAINER_MODAL,
+    THEME_PATTERN_VIDEO,
+    THEME_PATTERN_ICON,
+    THEME_PATTERN_INDEXER,
+    THEME_PATTERN_APP_BAR,
+    THEME_PATTERN_ADVANCED_PATTERN,
+    THEME_PATTERN_SECURITY_COMPONENT,
+    THEME_PATTERN_FORM,
+    THEME_PATTERN_SIDE_BAR,
+    THEME_PATTERN_RICH_EDITOR,
+    THEME_PATTERN_PATTERN_LOCK,
+    THEME_PATTERN_GAUGE,
+    THEME_PATTERN_SHEET,
+    THEME_BLUR_STYLE_COMMON,
+    THEME_PATTERN_SHADOW
 };
 const std::string RESOURCE_TOKEN_PATTERN = "\\[.+?\\]\\.(\\S+?\\.\\S+)";
 
@@ -198,31 +246,38 @@ void ResourceAdapterImplV2::UpdateConfig(const ResourceConfiguration& config, bo
 RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
 {
     CheckThemeId(themeId);
+    auto manager = GetResourceManager();
     auto theme = AceType::MakeRefPtr<ResourceThemeStyle>(AceType::Claim(this));
-    constexpr char OHFlag[] = "ohos_"; // fit with resource/base/theme.json and pattern.json
-    {
-        auto manager = GetResourceManager();
-        if (manager) {
-            auto ret = manager->GetThemeById(themeId, theme->rawAttrs_);
-            for (size_t i = 0; i < sizeof(PATTERN_MAP) / sizeof(PATTERN_MAP[0]); i++) {
-                ResourceThemeStyle::RawAttrMap attrMap;
-                std::string patternTag = PATTERN_MAP[i];
-                std::string patternName = std::string(OHFlag) + PATTERN_MAP[i];
-                ret = manager->GetPatternByName(patternName.c_str(), attrMap);
-                if (attrMap.empty()) {
-                    continue;
-                }
-                theme->patternAttrs_[patternTag] = attrMap;
-            }
+    CHECK_NULL_RETURN(manager, theme);
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(context, theme);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, theme);
+    auto task = [themeId, manager, themeStyle = WeakPtr<ResourceThemeStyle>(theme)]() -> void {
+        constexpr char OHFlag[] = "ohos_"; // fit with resource/base/theme.json and pattern.json
+        auto theme = themeStyle.Upgrade();
+        CHECK_NULL_VOID(theme);
+        auto ret = manager->GetThemeById(themeId, theme->rawAttrs_);
+        for (size_t i = 0; i < sizeof(PATTERN_MAP) / sizeof(PATTERN_MAP[0]); i++) {
+            ResourceThemeStyle::RawAttrMap attrMap;
+            std::string patternTag = PATTERN_MAP[i];
+            std::string patternName = std::string(OHFlag) + PATTERN_MAP[i];
+            ret = manager->GetPatternByName(patternName.c_str(), attrMap);
+            if (attrMap.empty()) {
+                continue;
+                            }
+            theme->patternAttrs_[patternTag] = attrMap;
         }
-    }
 
-    if (theme->patternAttrs_.empty() && theme->rawAttrs_.empty()) {
-        return nullptr;
-    }
-
-    theme->ParseContent();
-    theme->patternAttrs_.clear();
+        if (theme->patternAttrs_.empty() && theme->rawAttrs_.empty()) {
+            theme->SetPromiseValue();
+            return ;
+        }
+        theme->ParseContent();
+        theme->patternAttrs_.clear();
+        theme->SetPromiseValue();
+    };
+    taskExecutor->PostTask(task, TaskExecutor::TaskType::BACKGROUND, "ArkUILoadTheme");
     return theme;
 }
 

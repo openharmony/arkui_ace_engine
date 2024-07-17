@@ -21,16 +21,19 @@
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-    constexpr float MIN_SPACE = 8.0f;
-    constexpr float MIN_CHAR_VAL = 2.0f;
-    constexpr float SMALL_MIN_CHAR_VAL = 1.0f;
+constexpr float MIN_SPACE = 8.0f;
+constexpr float MIN_CHAR_VAL = 2.0f;
+constexpr float SMALL_MIN_CHAR_VAL = 1.0f;
 } // namespace
 void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    NeedAgingUpdateParams(layoutWrapper);
     auto layoutProps = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProps);
     auto childConstraint = layoutProps->CreateChildConstraint();
@@ -64,7 +67,7 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         textLayoutConstraint.maxSize.SetSizeT(textSize);
         textWrapper->Measure(textLayoutConstraint);
     }
-    
+
     auto rowGeometry = rowWrapper->GetGeometryNode();
     CHECK_NULL_VOID(rowGeometry);
     auto minSpace = Dimension(MIN_SPACE, DimensionUnit::VP);
@@ -122,5 +125,42 @@ SizeF SelectLayoutAlgorithm::MeasureAndGetSize(
     auto geometry = childLayoutWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometry, SizeF());
     return geometry->GetMarginFrameSize();
+}
+
+void SelectLayoutAlgorithm::NeedAgingUpdateParams(LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    if (fontScale_ == context->GetFontScale()) {
+        return;
+    }
+    fontScale_ = context->GetFontScale();
+    auto menuTheme = context->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto pattern = host->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto options = pattern->GetOptions();
+    if (NearEqual(fontScale_, menuTheme->GetBigFontSizeScale()) ||
+        NearEqual(fontScale_, menuTheme->GetLargeFontSizeScale()) ||
+        NearEqual(fontScale_, menuTheme->GetMaxFontSizeScale())) {
+        UpdateOptionsMaxLines(options, menuTheme->GetTextMaxLines());
+    } else {
+        UpdateOptionsMaxLines(options, 1);
+    }
+}
+
+void SelectLayoutAlgorithm::UpdateOptionsMaxLines(const std::vector<RefPtr<FrameNode>>& options, int32_t maxLines)
+{
+    for (auto child :options) {
+        auto optionPattern = child->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(optionPattern);
+        auto textNode = AceType::DynamicCast<FrameNode>(optionPattern->GetTextNode());
+        CHECK_NULL_VOID(textNode);
+        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateMaxLines(maxLines);
+    }
 }
 } // namespace OHOS::Ace::NG

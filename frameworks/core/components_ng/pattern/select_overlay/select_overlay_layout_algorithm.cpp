@@ -279,7 +279,12 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
         isBackButtonVisible =
             backButton->GetLayoutProperty()->GetVisibilityValue(VisibleType::INVISIBLE) == VisibleType::VISIBLE;
     }
-    if (!isBackButtonVisible) {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, OffsetF());
+    auto selectOverlayNode = DynamicCast<SelectOverlayNode>(host);
+    CHECK_NULL_RETURN(selectOverlayNode, OffsetF());
+    auto isExtensionMEnu = selectOverlayNode->GetIsExtensionMenu();
+    if (!isBackButtonVisible && !isExtensionMEnu) {
         menuWidth_ = width;
         menuHeight_ = height;
     } else {
@@ -530,11 +535,9 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(
     CHECK_NULL_RETURN(pipeline, OffsetF());
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(theme, OffsetF());
-
-    // Calculate the spacing with text and handle, menu is fixed up the handle and
-    // text.
     double menuSpacingBetweenText = theme->GetMenuSpacingWithText().ConvertToPx();
-    double menuSpacingBetweenHandle = theme->GetHandleDiameter().ConvertToPx();
+    double menuSpacingBetweenHandle = theme->GetHandleDiameter().ConvertToPx() +
+                                      theme->GetHandleDiameterStrokeWidth().ConvertToPx();
     double safeSpacing = theme->GetMenuSafeSpacing().ConvertToPx();
     auto selectArea = info_->selectArea;
     // 安全区域
@@ -551,7 +554,6 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(
     auto offset = layoutWrapper->GetGeometryNode()->GetFrameOffset();
     auto upPaint = upHandle.GetPaintRect() - offset;
     auto downPaint = downHandle.GetPaintRect() - offset;
-    auto selectAreaTop = upHandle.isShow ? upPaint.Top() : selectArea.Top();
     auto viewPort = pipeline->GetRootRect();
     auto selectAndRootRectArea = selectArea.IntersectRectT(viewPort);
     auto safeAreaBottom = safeAreaManager->GetSafeArea().bottom_.start;
@@ -568,11 +570,11 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(
     avoidStrategyMember.hasKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f);
     avoidStrategyMember.keyboardInsertStart = keyboardInsert.start;
     avoidStrategyMember.downHandleIsReallyShow = downHandle.isShow && downHandleIsReallyShow;
+    avoidStrategyMember.selectAreaTop = upHandle.isShow ? upPaint.Top() : selectArea.Top();
     avoidStrategyMember.selectAndRootRectAreaTop = upHandle.isShow ? upPaint.Top() : selectAndRootRectArea.Top();
     avoidStrategyMember.selectAndRootRectAreaBottom =
         avoidStrategyMember.downHandleIsReallyShow ? downPaint.Bottom() : selectAndRootRectArea.Bottom();
-
-    float offsetY = selectAreaTop - avoidStrategyMember.menuSpacing - avoidStrategyMember.menuHeight;
+    float offsetY = 0.0f;
     NewMenuAvoidStrategyGetY(avoidStrategyMember, offsetY);
     return OffsetF(positionX, offsetY);
 }
@@ -587,26 +589,31 @@ void SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategyGetY(const AvoidStrategyM
     auto topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
     auto upHandle = info_->handleReverse ? info_->secondHandle : info_->firstHandle;
     // 顶部避让
+    offsetY = upHandle.isShow ? (avoidStrategyMember.selectAreaTop - avoidStrategyMember.menuSpacing -
+                  avoidStrategyMember.menuHeight) : (avoidStrategyMember.selectAreaTop -
+                  avoidStrategyMember.menuSpacingBetweenText - avoidStrategyMember.menuHeight);
     if (!upHandle.isShow || LessOrEqual(offsetY, topArea)) {
         auto selectBottom = avoidStrategyMember.hasKeyboard ? std::min(avoidStrategyMember.selectAndRootRectAreaBottom,
             (double)avoidStrategyMember.keyboardInsertStart) : avoidStrategyMember.selectAndRootRectAreaBottom;
         auto offsetBetweenSelectArea =
             std::clamp((double)(avoidStrategyMember.selectAndRootRectAreaTop + selectBottom -
                 avoidStrategyMember.menuHeight) / 2.0f, (double)topArea, avoidStrategyMember.bottomLimitOffsetY);
+        auto offsetYTmp = avoidStrategyMember.downHandleIsReallyShow ?
+                                  (avoidStrategyMember.selectAndRootRectAreaBottom + avoidStrategyMember.menuSpacing) :
+                                  (avoidStrategyMember.selectAndRootRectAreaBottom +
+                                  avoidStrategyMember.menuSpacingBetweenText);
         if (avoidStrategyMember.downHandleIsReallyShow) {
             bool isOffsetYInBottom = false;
             // The upper handle is not visible and not in a single row, or offsetY <= topArea
             if ((!upHandle.isShow && !info_->isSingleLine) || (LessOrEqual(offsetY, topArea))) {
-                offsetY = avoidStrategyMember.selectAndRootRectAreaBottom + avoidStrategyMember.menuSpacing;
+                offsetY = offsetYTmp;
                 isOffsetYInBottom = true;
             }
             if (isOffsetYInBottom && GreatNotEqual(offsetY, avoidStrategyMember.bottomLimitOffsetY)) {
-                // 单手柄多行，底部避让失败 -> 选区中间
                 offsetY = offsetBetweenSelectArea;
             }
         } else {
             if (info_->isSingleLine) {
-                auto offsetYTmp = avoidStrategyMember.selectAndRootRectAreaBottom + avoidStrategyMember.menuSpacing;
                 offsetY = LessOrEqual(offsetY, topArea) ?
                     ((GreatNotEqual(offsetYTmp, avoidStrategyMember.bottomLimitOffsetY)) ?
                         offsetBetweenSelectArea : offsetYTmp) : offsetY;

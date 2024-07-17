@@ -95,6 +95,7 @@ const std::vector<SelectParam> CREATE_VALUE = { { "content1", "icon1" }, { "cont
     { "", "icon3" }, { "", "" } };
 const std::vector<SelectParam> CREATE_VALUE_NEW = { { "content1_new", "" }, { "", "icon4_new" },
     { "", "" }, { "", "icon4_new" } };
+const V2::ItemDivider ITEM_DIVIDER = { Dimension(5.f), Dimension(10), Dimension(20), Color(0x000000) };
 constexpr double MENU_OFFSET_X = 10.0;
 constexpr double MENU_OFFSET_Y = 10.0;
 constexpr float MENU_SIZE_WIDTH = 100.0f;
@@ -1921,5 +1922,106 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg043, TestSize.Level1)
     testInfo = menuPattern->GetInnerMenuOffset(menuitemgroupNode, true);
     EXPECT_EQ(testInfo.originOffset, OffsetF(0.0, 0.0));
     EXPECT_FALSE(testInfo.isFindTargetId);
+}
+
+/**
+ * @tc.name: MenuPatternTestNg044
+ * @tc.desc: Verify MneuModelInstance methods.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg044, TestSize.Level1)
+{
+    MenuModelNG MneuModelInstance;
+    MneuModelInstance.Create();
+    MneuModelInstance.SetFontSize(Dimension(25.0));
+    MneuModelInstance.SetFontColor(Color::RED);
+    MneuModelInstance.SetFontWeight(FontWeight::BOLD);
+    MneuModelInstance.SetFontStyle(Ace::FontStyle::ITALIC);
+    MneuModelInstance.SetBorderRadius(Dimension(2));
+    MneuModelInstance.SetWidth(Dimension(10));
+    std::vector<std::string> myFamilies = {"Smith"};
+    MneuModelInstance.SetFontFamily(myFamilies);
+    MneuModelInstance.SetBorderRadius(Dimension(1), Dimension(2), Dimension(3), Dimension(4));
+    MneuModelInstance.SetItemDivider(ITEM_DIVIDER);
+    MneuModelInstance.SetItemGroupDivider(ITEM_DIVIDER);
+    MneuModelInstance.SetExpandingMode(SubMenuExpandingMode::STACK);
+
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    // call UpdateMenuItemChildren
+    menuPattern->OnModifyDone();
+
+    MneuModelInstance.ResetFontFamily();
+    MneuModelInstance.ResetBorderRadius();
+    MneuModelInstance.CalculateBoundedWidth(Dimension(10));
+    MneuModelInstance.CalculateBoundedWidthForPC(Dimension(10));
+    MneuModelInstance.CalculateBoundedWidthForPC(Dimension(500));
+    MneuModelInstance.CalculateBoundedWidthForPC(Dimension(200));
+    MneuModelInstance.CalculateBoundedWidthForMobile(Dimension(10));
+    MneuModelInstance.CalculateBoundedWidthForMobile(Dimension(70));
+
+    ASSERT_TRUE(layoutProperty->GetFontSize().has_value());
+    EXPECT_EQ(layoutProperty->GetFontSize().value(), Dimension(25.0));
+    ASSERT_TRUE(layoutProperty->GetFontWeight().has_value());
+    EXPECT_EQ(layoutProperty->GetFontWeight().value(), FontWeight::BOLD);
+    ASSERT_TRUE(layoutProperty->GetFontColor().has_value());
+    EXPECT_EQ(layoutProperty->GetFontColor().value(), Color::RED);
+    ASSERT_TRUE(layoutProperty->GetItalicFontStyle().has_value());
+    EXPECT_EQ(layoutProperty->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
+}
+
+/**
+ * @tc.name: MenuPatternTestNg045
+ * @tc.desc: Verify MneuModelInstance methods with frameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg045, TestSize.Level1)
+{
+    MenuModelNG MneuModelInstance;
+    MneuModelInstance.Create();
+
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+    FrameNode *frameNode = menuNode.GetRawPtr();
+    CHECK_NULL_VOID(frameNode);
+    MneuModelInstance.SetFontSize(frameNode, Dimension(25.0));
+    MneuModelInstance.SetFontWeight(frameNode, FontWeight::BOLD);
+    MneuModelInstance.SetFontColor(frameNode, Color::RED);
+    MneuModelInstance.SetFontStyle(frameNode, Ace::FontStyle::ITALIC);
+    MneuModelInstance.SetBorderRadius(frameNode, Dimension(2));
+    MneuModelInstance.SetWidth(frameNode, Dimension(10));
+    std::vector<std::string> myFamilies = {"Smith"};
+    MneuModelInstance.SetFontFamily(frameNode, myFamilies);
+    MneuModelInstance.SetBorderRadius(frameNode, Dimension(1), Dimension(2), Dimension(3), Dimension(4));
+    MneuModelInstance.SetItemDivider(frameNode, ITEM_DIVIDER);
+    MneuModelInstance.SetItemGroupDivider(frameNode, ITEM_DIVIDER);
+    MneuModelInstance.ResetBorderRadius(frameNode);
+
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    // call UpdateMenuItemChildren
+    menuPattern->OnModifyDone();
+
+    ASSERT_TRUE(layoutProperty->GetFontSize().has_value());
+    EXPECT_EQ(layoutProperty->GetFontSize().value(), Dimension(25.0));
+    ASSERT_TRUE(layoutProperty->GetFontWeight().has_value());
+    EXPECT_EQ(layoutProperty->GetFontWeight().value(), FontWeight::BOLD);
+    ASSERT_TRUE(layoutProperty->GetFontColor().has_value());
+    EXPECT_EQ(layoutProperty->GetFontColor().value(), Color::RED);
+    ASSERT_TRUE(layoutProperty->GetItalicFontStyle().has_value());
+    EXPECT_EQ(layoutProperty->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
+
+    MneuModelInstance.SetFontColor(frameNode, std::nullopt);
+    ASSERT_FALSE(layoutProperty->GetFontColor().has_value());
+    MneuModelInstance.SetFontSize(frameNode, Dimension(0.0));
+    ASSERT_FALSE(layoutProperty->GetFontSize().has_value());
 }
 } // namespace OHOS::Ace::NG

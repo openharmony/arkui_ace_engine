@@ -21,7 +21,8 @@ from typing import List
 from src.beans.base_bean import BaseBean
 from src.beans.event_node import EventNode
 from src.beans.frame_node import FrameNode
-from src.keywords import event_procedure_keyword, keywords_dict, get_sample_key, get_sample_value, get_dict_value
+from src.keywords import event_procedure_keyword, keywords_dict, get_sample_key, get_dict_value, \
+    get_sample_separator_count
 from src.utils.log_wrapper import log_info
 from src.utils.value_parser import get_value_as_int, pack_string_until_next_keyword
 
@@ -39,7 +40,7 @@ class EventScope(BaseBean):
             return
         finger_str = texts[0]
         self.finger = get_value_as_int(finger_str, get_sample_key(event_procedure_keyword, 'finger'),
-                                       get_sample_value(event_procedure_keyword, 'finger'), True)
+                                       get_sample_separator_count(event_procedure_keyword, 'finger'), True)
         self.parse_event_nodes(texts, 1)
         self.check_parse_result()
 
@@ -63,7 +64,7 @@ class EventScope(BaseBean):
     #       procedure: HandleTouchDown, state: DETECTING, disposal: NONE, timestamp: 2017-08-25 15:00:22.247
     #       procedure: HandleTouchUp, state: FAIL, disposal: REJECT, timestamp: 2017-08-25 15:00:22.295
     def parse_event_nodes(self, spliced_lines, start_index):
-        start_keyword = get_sample_key(event_procedure_keyword, 'frameNodeId').key
+        start_keyword = get_sample_key(event_procedure_keyword, 'frameNodeId')
         end_keywords = [start_keyword, get_dict_value(keywords_dict, 'event tree')]
         current_index = 0
         while current_index < len(spliced_lines):

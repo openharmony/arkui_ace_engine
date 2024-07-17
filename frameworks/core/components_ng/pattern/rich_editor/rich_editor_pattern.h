@@ -131,29 +131,19 @@ public:
     struct PreviewTextRecord {
         int32_t startOffset = INVALID_VALUE;
         int32_t endOffset = INVALID_VALUE;
-        int32_t spanIndex = INVALID_VALUE;
-        int32_t currentClickedPosition = INVALID_VALUE;
         bool isPreviewTextInputting = false;
-        bool exitPreviewBySelf = false;
+        std::string previewContent;
+        std::string newPreviewContent;
         bool hasDiff = false;
         PreviewRange replacedRange;
-        std::string deltaStr;
-        RefPtr<SpanItem> previewTextSpan;
-        RefPtr<SpanNode> beforeSpanNode = nullptr;
-        RefPtr<SpanNode> afterSpanNode = nullptr;
-        bool isSplitSpan = false;
 
         std::string ToString() const
         {
             auto jsonValue = JsonUtil::Create(true);
-            if (previewTextSpan) {
-                JSON_STRING_PUT_STRING(jsonValue, previewTextSpan->content);
-            }
+            JSON_STRING_PUT_STRING(jsonValue, previewContent);
             JSON_STRING_PUT_BOOL(jsonValue, isPreviewTextInputting);
             JSON_STRING_PUT_INT(jsonValue, startOffset);
             JSON_STRING_PUT_INT(jsonValue, endOffset);
-            JSON_STRING_PUT_INT(jsonValue, spanIndex);
-            JSON_STRING_PUT_INT(jsonValue, currentClickedPosition);
 
             return jsonValue->ToString();
         }
@@ -162,22 +152,15 @@ public:
         {
             startOffset = INVALID_VALUE;
             endOffset = INVALID_VALUE;
-            spanIndex = INVALID_VALUE;
-            currentClickedPosition = INVALID_VALUE;
+            previewContent.clear();
             isPreviewTextInputting = false;
-            exitPreviewBySelf = false;
-            deltaStr.clear();
-            previewTextSpan = nullptr;
-            beforeSpanNode = nullptr;
-            afterSpanNode = nullptr;
-            isSplitSpan = false;
             hasDiff = false;
             replacedRange.Set(INVALID_VALUE, INVALID_VALUE);
         }
 
         bool IsValid() const
         {
-            return previewTextSpan && startOffset >= 0 && endOffset >= startOffset;
+            return !previewContent.empty() && isPreviewTextInputting && startOffset >= 0 && endOffset >= startOffset;
         }
     };
 
@@ -190,14 +173,6 @@ public:
     bool UpdatePreviewText(const std::string& previewTextValue, const PreviewRange range);
 
     const PreviewTextInfo GetPreviewTextInfo() const;
-
-    void HandlePreviewTextStyle(RefPtr<SpanNode>& spanNode,
-        RefPtr<SpanNode>& beforeSpanNode, RefPtr<SpanNode>& afterSpanNode);
-
-    bool CallbackBeforeSetPreviewText(
-        int32_t& delta, const std::string& previewTextValue, const PreviewRange& range, bool isReplaceAll);
-
-    bool CallbackAfterSetPreviewText(int32_t& delta);
 
     void FinishTextPreview() override;
 
@@ -218,10 +193,6 @@ public:
     float GetPreviewTextUnderlineWidth() const;
 
     PreviewTextStyle GetPreviewTextStyle() const;
-
-    void UpdatePreviewTextOnInsert(const std::string& insertValue);
-
-    bool BetweenPreviewTextPosition(const Offset& globalOffset);
 
     void SetSupportPreviewText(bool isTextPreviewSupported)
     {
@@ -338,6 +309,7 @@ public:
     void OnModifyDone() override;
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void SupplementIdealSizeWidth(const RefPtr<FrameNode>& frameNode);
     void MoveCaretOnLayoutSwap(bool isReduceSize);
 
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
@@ -509,8 +481,6 @@ public:
     void RemoveEmptySpanItems();
     void RemoveEmptySpanNodes();
     void RemoveEmptySpans();
-    void MergeSpanContent(RefPtr<SpanItem>& target, RefPtr<SpanItem>& source, bool isTargetFirst);
-    void MergeSameStyleSpan(RefPtr<SpanItem>& target, RefPtr<SpanItem>& source, bool isTargetFirst);
     RefPtr<GestureEventHub> GetGestureEventHub();
     float GetSelectedMaxWidth();
     void AfterAddImage(RichEditorChangeValue& changeValue);
@@ -815,7 +785,7 @@ public:
     void HideMenu();
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
     void OnSelectionMenuOptionsUpdate(
-        const NG::OnCreateMenuCallback && onCreateMenuCallback, const NG::OnMenuItemClickCallback && onMenuItemClick);
+        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick);
     RectF GetTextContentRect(bool isActualText = false) const override
     {
         return contentRect_;
@@ -914,6 +884,7 @@ private:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     std::string GetPlaceHolderInJson() const;
     std::string GetTextColorInJson(const std::optional<Color>& value) const;
+    void ResetSelectionAfterAddSpan(bool isPaste);
     void SetResultObjectText(ResultObject& resultObject, const RefPtr<SpanItem>& spanItem) override;
     SelectionInfo GetAdjustedSelectionInfo(const SelectionInfo& textSelectInfo);
 
@@ -1058,7 +1029,7 @@ private:
     void HandleOnEditChanged(bool isEditing);
     void OnTextInputActionUpdate(TextInputAction value);
     void CloseSystemMenu();
-    void SetAccessibilityAction();
+    void SetAccessibilityAction() override;
     void HandleTripleClickEvent(OHOS::Ace::GestureEvent& info);
     void UpdateSelectionByTouchMove(const Offset& offset);
     void MoveCaretAnywhere(const Offset& touchOffset);
@@ -1087,6 +1058,8 @@ private:
     void HandleOnCopyStyledString();
     void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event);
     void NotifyExitTextPreview();
+    void ProcessInsertValue(const std::string& insertValue, bool isIME = false, bool calledbyImf = false);
+    void FinishTextPreviewOperation(bool calledbyImf = true);
     void TripleClickSection(GestureEvent& info, int32_t start, int32_t end, int32_t pos);
     SelectType CheckResult(const Offset& pos, int32_t currentPosition);
     void RequestKeyboardToEdit();

@@ -32,7 +32,6 @@ constexpr int32_t CHILD_WITH_AMPM_SIZE = 3;
 constexpr int32_t CHILD_WITHOUT_AMPM_SIZE = 2;
 constexpr uint32_t AM_PM_HOUR_12 = 12;
 constexpr uint32_t AM_PM_HOUR_11 = 11;
-constexpr uint8_t PIXEL_ROUND = 18;
 const int32_t AM_PM_COUNT = 3;
 const Dimension PRESS_INTERVAL = 4.0_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
@@ -73,13 +72,14 @@ void TimePickerRowPattern::SetButtonIdeaSize()
     CHECK_NULL_VOID(pickerTheme);
     auto children = host->GetChildren();
     auto height = pickerTheme->GetDividerSpacing();
-    CHECK_EQUAL_VOID(children.size(), 0);
-    auto width = host->GetGeometryNode()->GetFrameSize().Width() / static_cast<float>(children.size());
-    auto defaultWidth = height.ConvertToPx() * 2;
-    if (width > defaultWidth) {
-        width = static_cast<float>(defaultWidth);
-    }
     for (const auto& child : children) {
+        auto childNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(childNode);
+        auto width = childNode->GetGeometryNode()->GetFrameSize().Width();
+        auto defaultWidth = height.ConvertToPx() * 2;
+        if (width > defaultWidth) {
+            width = static_cast<float>(defaultWidth);
+        }
         auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
         auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
@@ -181,7 +181,6 @@ void TimePickerRowPattern::CreateAmPmNode()
         buttonNode->MountToParent(stackAmPmNode);
         auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         amPmColumnNode->MountToParent(columnBlendNode);
-        amPmColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
         columnBlendNode->MountToParent(stackAmPmNode);
         auto layoutProperty = stackAmPmNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
@@ -233,7 +232,6 @@ void TimePickerRowPattern::CreateOrDeleteSecondNode()
             secondColumnNode->MountToParent(columnBlendNode);
             columnBlendNode->MarkModifyDone();
             columnBlendNode->MountToParent(stackSecondNode);
-            secondColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
             auto layoutProperty = stackSecondNode->GetLayoutProperty<LayoutProperty>();
             layoutProperty->UpdateAlignment(Alignment::CENTER);
             layoutProperty->UpdateLayoutWeight(1);
@@ -441,7 +439,6 @@ void TimePickerRowPattern::OnLanguageConfigurationUpdate()
         auto layoutProperty = AceType::DynamicCast<FrameNode>(amPmNode)->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateLayoutWeight(1);
-        AceType::DynamicCast<FrameNode>(amPmNode)->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     auto buttonConfirmNode = weakButtonConfirm_.Upgrade();
@@ -507,18 +504,13 @@ void TimePickerRowPattern::UpdateNodePositionForUg()
 
 void TimePickerRowPattern::FlushAmPmFormatString()
 {
-    auto it = std::find(vecAmPm_.begin(), vecAmPm_.end(), "AM");
-    if (it != vecAmPm_.end()) {
+    auto amPmStrings = Localization::GetInstance()->GetAmPmStrings();
+    if (amPmStrings.size() > 1) {
         vecAmPm_.clear();
-        vecAmPm_ = Localization::GetInstance()->GetAmPmStrings();
-        std::string am = vecAmPm_[0];
+        std::string am = amPmStrings[0];
         vecAmPm_.emplace_back(am);
-        std::string pm = vecAmPm_[1];
+        std::string pm = amPmStrings[1];
         vecAmPm_.emplace_back(pm);
-    } else {
-        vecAmPm_.clear();
-        vecAmPm_.emplace_back("AM");
-        vecAmPm_.emplace_back("PM");
     }
 }
 

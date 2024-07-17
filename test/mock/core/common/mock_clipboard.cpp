@@ -53,7 +53,8 @@ void MockClipBoard::HasData(const std::function<void(bool hasData)>& callback)
     }
 }
 
-void MockClipBoard::HasDataType(const std::function<void(bool hasData)>& callback, const std::string& mimeType)
+void MockClipBoard::HasDataType(
+    const std::function<void(bool hasData)>& callback, const std::vector<std::string>& mimeTypes)
 {
     if (callback) {
         callback(saveData.has_value());

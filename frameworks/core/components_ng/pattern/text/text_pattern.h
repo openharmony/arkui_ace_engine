@@ -594,6 +594,11 @@ public:
         externalParagraphStyle_ = paragraphStyle;
     }
 
+    TextStyle GetTextStyle()
+    {
+        return textStyle_.value_or(TextStyle());
+    }
+
     std::optional<ParagraphStyle> GetExternalParagraphStyle()
     {
         return externalParagraphStyle_;
@@ -604,11 +609,8 @@ public:
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
 
     void OnSelectionMenuOptionsUpdate(
-        const NG::OnCreateMenuCallback && onCreateMenuCallback, const NG::OnMenuItemClickCallback && onMenuItemClick);
-    void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override
-    {
-        selectOverlay_->OnAncestorNodeChanged(flag);
-    }
+        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
 
     void UpdateParentGlobalOffset()
     {
@@ -619,6 +621,8 @@ public:
     {
         isUserSetResponseRegion_ = isUserSetResponseRegion;
     }
+
+    void UnregisterNodeChangeListenerWithoutSelect();
 
 protected:
     void OnAttachToFrameNode() override;
@@ -672,7 +676,7 @@ protected:
 
     virtual bool CanStartAITask()
     {
-        return copyOption_ != CopyOptions::None && textDetectEnable_ && enabled_ && dataDetectorAdapter_;
+        return textDetectEnable_ && enabled_ && dataDetectorAdapter_;
     };
 
     void OnAttachToMainTree() override
@@ -786,6 +790,9 @@ private:
     void ProcessOverlayAfterLayout();
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     Offset ConvertLocalOffsetToParagraphOffset(const Offset& offset);
+    void RegisterMarqueeNodeChangeListener();
+    void UnregisterMarqueeNodeChangeListener();
+    void HandleMarqueeWithIsVisible(FrameNodeChangeInfoFlag flag);
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;

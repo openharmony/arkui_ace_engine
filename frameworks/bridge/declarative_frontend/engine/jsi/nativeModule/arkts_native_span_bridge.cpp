@@ -165,7 +165,7 @@ ArkUINativeModuleValue SpanBridge::SetFontWeight(ArkUIRuntimeCallInfo *runtimeCa
         if (secondArg->IsNumber()) {
             weight = std::to_string(secondArg->Int32Value(vm));
         } else if (secondArg->IsString(vm)) {
-            weight = secondArg->ToString(vm)->ToString();
+            weight = secondArg->ToString(vm)->ToString(vm);
         }
     }
 
@@ -379,7 +379,7 @@ ArkUINativeModuleValue SpanBridge::SetLetterSpacing(ArkUIRuntimeCallInfo *runtim
         letterSpacingValue.value = secondArg->ToNumber(vm)->Value();
         GetArkUINodeModifiers()->getSpanModifier()->setSpanLetterSpacing(nativeNode, &letterSpacingValue);
     } else if (secondArg->IsString(vm)) {
-        std::string tempValueStr = secondArg->ToString(vm)->ToString();
+        std::string tempValueStr = secondArg->ToString(vm)->ToString(vm);
         letterSpacingValue.valueStr = tempValueStr.c_str();
         GetArkUINodeModifiers()->getSpanModifier()->setSpanLetterSpacing(nativeNode, &letterSpacingValue);
     } else {
@@ -452,7 +452,7 @@ ArkUINativeModuleValue SpanBridge::SetFont(ArkUIRuntimeCallInfo *runtimeCallInfo
         if (weightArg->IsNumber()) {
             weight = std::to_string(weightArg->Int32Value(vm));
         } else if (weightArg->IsString(vm)) {
-            weight = weightArg->ToString(vm)->ToString();
+            weight = weightArg->ToString(vm)->ToString(vm);
         }
     }
     fontInfo.fontWeight = static_cast<uint8_t>(Framework::ConvertStrToFontWeight(weight));

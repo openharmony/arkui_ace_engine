@@ -71,6 +71,8 @@ public:
 
     static void EnableAnalyzer(bool isEnableAnalyzer);
     static void AnalyzerConfig(const JSCallbackInfo &info);
+    static void ParseResizableSlice(const JSRef<JSObject>& info);
+    static void ParseResizableLattice(const JSRef<JSObject>& info);
     static void JsImageResizable(const JSCallbackInfo& info);
     static bool IsDrawable(const JSRef<JSVal>& jsValue);
 

@@ -28,7 +28,7 @@ constexpr float PAN_MAX_VELOCITY = 2000.0f;
 
 // custom preview animation params when hover image
 const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
-    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 280.0f, 30.0f);
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 380.0f, 34.0f);
 
 RefPtr<MenuPattern> GetMenuPattern(const RefPtr<FrameNode>& menuWrapper)
 {
@@ -230,6 +230,7 @@ void MenuPreviewPattern::HandleDragEnd(float offsetX, float offsetY, float veloc
     CHECK_NULL_VOID(menuWrapper);
     auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
+    TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu");
     wrapperPattern->HideMenu();
 }
 } // namespace OHOS::Ace::NG

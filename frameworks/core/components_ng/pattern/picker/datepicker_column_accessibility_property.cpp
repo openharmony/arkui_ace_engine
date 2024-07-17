@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/picker/datepicker_column_accessibility_property.h"
+#include <cstdint>
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
@@ -61,8 +62,8 @@ int32_t DatePickerColumnAccessibilityProperty::GetEndIndex() const
     if (pattern->NotLoopOptions()) {
         return itemCounts - 1;
     }
-    auto currentIndex = pattern->GetCurrentIndex();
-    return (itemCounts + currentIndex + pattern->GetShowCount() / MIDDLE_OF_COUNTS) % itemCounts;
+    auto currentIndex = static_cast<int32_t>(pattern->GetCurrentIndex());
+    return (itemCounts + currentIndex + static_cast<int32_t>(pattern->GetShowCount()) / MIDDLE_OF_COUNTS) % itemCounts;
 }
 
 int32_t DatePickerColumnAccessibilityProperty::GetBeginIndex() const
@@ -78,8 +79,8 @@ int32_t DatePickerColumnAccessibilityProperty::GetBeginIndex() const
     if (pattern->NotLoopOptions()) {
         return 0;
     }
-    auto currentIndex = pattern->GetCurrentIndex();
-    return (itemCounts + currentIndex - pattern->GetShowCount() / MIDDLE_OF_COUNTS) % itemCounts;
+    auto currentIndex = static_cast<int32_t>(pattern->GetCurrentIndex());
+    return (itemCounts + currentIndex - static_cast<int32_t>(pattern->GetShowCount()) / MIDDLE_OF_COUNTS) % itemCounts;
 }
 
 std::string DatePickerColumnAccessibilityProperty::GetText() const

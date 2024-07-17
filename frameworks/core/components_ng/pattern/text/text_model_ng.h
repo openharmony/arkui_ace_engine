@@ -37,6 +37,8 @@ public:
     void SetTextShadow(const std::vector<Shadow>& value) override;
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
+    void SetMinFontScale(const float value) override;
+    void SetMaxFontScale(const float value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
     void SetTextAlign(TextAlign value) override;
     void SetTextOverflow(TextOverflow value) override;
@@ -87,6 +89,8 @@ public:
     static void InitSpanStringController(FrameNode* frameNode, const RefPtr<SpanStringBase>& spanBase);
     static RefPtr<TextControllerBase> InitTextController(FrameNode* frameNode);
     static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);
+    static void SetMinFontScale(FrameNode* frameNode, const float value);
+    static void SetMaxFontScale(FrameNode* frameNode, const float value);
     static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);
     static void SetTextAlign(FrameNode* frameNode, Ace::TextAlign value);
     static void SetTextColor(FrameNode* frameNode, const Color& value);

@@ -3892,6 +3892,7 @@ JSRef<JSVal> PageVisibleEventToJSValue(const PageVisibleEvent& eventInfo)
 
 void JSWeb::OnPageVisible(const JSCallbackInfo& args)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "JSWeb::OnPageVisible init by developer");
     if (!args[0]->IsFunction()) {
         return;
     }
@@ -3902,12 +3903,14 @@ void JSWeb::OnPageVisible(const JSCallbackInfo& args)
     auto instanceId = Container::CurrentId();
     auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const std::shared_ptr<BaseEventInfo>& info) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "JSWeb::OnPageVisible uiCallback enter");
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->UpdateCurrentActiveNode(node);
         context->PostAsyncEvent([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            TAG_LOGI(AceLogTag::ACE_WEB, "JSWeb::OnPageVisible async event execute");
             auto* eventInfo = TypeInfoHelper::DynamicCast<PageVisibleEvent>(info.get());
             postFunc->Execute(*eventInfo);
         }, "ArkUIWebPageVisible");

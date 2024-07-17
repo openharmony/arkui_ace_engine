@@ -268,6 +268,46 @@ class TextMaxFontSizeModifier extends ModifierWithKey<number | string | Resource
   }
 }
 
+class TextMinFontScaleModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textMinFontScale');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetMinFontScale(node);
+    } else if (!isNumber(this.value) && !isResource(this.value)) {
+      getUINativeModule().text.resetMinFontScale(node);
+    } else {
+      getUINativeModule().text.setMinFontScale(node, this.value!);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextMaxFontScaleModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textMaxFontScale');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetMaxFontScale(node);
+    } else if (!isNumber(this.value) && !isResource(this.value)) {
+      getUINativeModule().text.resetMaxFontScale(node);
+    } else {
+      getUINativeModule().text.setMaxFontScale(node, this.value!);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextLineHeightModifier extends ModifierWithKey<number | string | Resource> {
   constructor(value: number | string | Resource) {
     super(value);
@@ -760,6 +800,14 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
   maxFontSize(value: number | string | Resource): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextMaxFontSizeModifier.identity, TextMaxFontSizeModifier, value);
+    return this;
+  }
+  minFontScale(value: number | Resource): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextMinFontScaleModifier.identity, TextMinFontScaleModifier, value);
+    return this;
+  }
+  maxFontScale(value: number | Resource): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextMaxFontScaleModifier.identity, TextMaxFontScaleModifier, value);
     return this;
   }
   fontStyle(value: FontStyle): TextAttribute {

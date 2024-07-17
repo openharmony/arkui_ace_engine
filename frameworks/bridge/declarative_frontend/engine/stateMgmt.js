@@ -2143,7 +2143,7 @@ class stateMgmtConsole {
         // aceConsole.error(...args)
     }
     static applicationError(...args) {
-        aceConsole.error(LogTag.STATE_MGMT, `FIX THIS APPLICATION ERROR \n`, ...args);
+        aceConsole.error(LogTag.STATE_MGMT, `FIX THIS APPLICATION ERROR: `, ...args);
     }
     static applicationWarn(...args) {
         aceConsole.warn(LogTag.STATE_MGMT, ...args);
@@ -2287,7 +2287,7 @@ class SubscribableHandler {
             this.owningProperties_.add(subscriber.id__());
         }
         else {
-            stateMgmtConsole.warn(`SubscribableHandler: addOwningProperty: undefined subscriber. - Internal error?`);
+            stateMgmtConsole.warn(`SubscribableHandler: addOwningProperty: undefined subscriber.`);
         }
     }
     /*
@@ -2580,7 +2580,7 @@ class ObservedObject extends ExtendableProxy {
         if (ObservedObject.IsObservedObject(obj)) {
             stateMgmtConsole.error('ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already');
         }
-        if (objectOwningProperty !== undefined) {
+        if (objectOwningProperty) {
             this[SubscribableHandler.SUBSCRIBE] = objectOwningProperty;
         }
     } // end of constructor
@@ -2648,7 +2648,7 @@ class ObservedObject extends ExtendableProxy {
      * @returns false if given object is not an ObservedObject
      */
     static addOwningProperty(obj, subscriber) {
-        if (!ObservedObject.IsObservedObject(obj) || subscriber === undefined) {
+        if (!ObservedObject.IsObservedObject(obj) || !subscriber) {
             return false;
         }
         obj[SubscribableHandler.SUBSCRIBE] = subscriber;
@@ -4801,13 +4801,11 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
             }
         }
         this.subscriberRefs_.forEach((subscriber) => {
-            if (subscriber) {
-                if ('syncPeerHasChanged' in subscriber) {
-                    subscriber.syncPeerHasChanged(this);
-                }
-                else {
-                    stateMgmtConsole.warn(`${this.debugInfo()}: notifyPropertyHasChangedPU: unknown subscriber ID 'subscribedId' error!`);
-                }
+            if (subscriber && typeof subscriber === 'object' && 'syncPeerHasChanged' in subscriber) {
+                subscriber.syncPeerHasChanged(this);
+            }
+            else {
+                stateMgmtConsole.warn(`${this.debugInfo()}: notifyPropertyHasChangedPU: unknown subscriber ID 'subscribedId' error!`);
             }
         });
         
@@ -5647,7 +5645,6 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
         if (!obj || typeof obj !== 'object') {
             return obj;
         }
-        let stack = new Array();
         let copiedObjects = new Map();
         return getDeepCopyOfObjectRecursive(obj);
         function getDeepCopyOfObjectRecursive(obj) {
@@ -5656,7 +5653,6 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
             }
             const alreadyCopiedObject = copiedObjects.get(obj);
             if (alreadyCopiedObject) {
-                let msg = `@Prop deepCopyObject: Found reference to already copied object: Path ${variable ? variable : 'unknown variable'}`;
                 
                 return alreadyCopiedObject;
             }
@@ -5666,9 +5662,7 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
                 Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
                 copiedObjects.set(obj, copy);
                 obj.forEach((setKey) => {
-                    stack.push({ name: setKey });
                     copy.add(getDeepCopyOfObjectRecursive(setKey));
-                    stack.pop();
                 });
             }
             else if (obj instanceof Map) {
@@ -5676,9 +5670,7 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
                 Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
                 copiedObjects.set(obj, copy);
                 obj.forEach((mapValue, mapKey) => {
-                    stack.push({ name: mapKey });
                     copy.set(mapKey, getDeepCopyOfObjectRecursive(mapValue));
-                    stack.pop();
                 });
             }
             else if (obj instanceof Date) {
@@ -5709,17 +5701,9 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
                 return obj;
             }
             Object.keys(obj).forEach((objKey) => {
-                stack.push({ name: objKey });
-                try {
-                    Reflect.set(copy, objKey, getDeepCopyOfObjectRecursive(obj[objKey]));
-                }
-                catch (error) {
-                    stateMgmtConsole.error('DeepCopy failed, will use shallow copy instead. Error message is:', error);
-                    copy[objKey] = obj[objKey];
-                }
-                stack.pop();
+                copy[objKey] = getDeepCopyOfObjectRecursive(obj[objKey]);
             });
-            return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
+            return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, undefined) : copy;
         }
     }
 }
@@ -5909,7 +5893,7 @@ class SynchedPropertyNestedObjectPU extends ObservedPropertyAbstractPU {
      */
     constructor(obsObject, owningChildView, propertyName) {
         super(owningChildView, propertyName);
-        this.obsObject_ = obsObject;
+        this.obsObject_ = undefined;
         this.createSourceDependency(obsObject);
         this.setValueInternal(obsObject);
         this.setDecoratorInfo("@ObjectLink");
@@ -6897,11 +6881,9 @@ class ViewPU extends PUV2ViewBase {
             const parentPU = this.getParent();
             parentPU.getOrCreateRecycleManager().pushRecycleNode(name, this);
             this.hasBeenRecycled_ = true;
-            this.setActiveInternal(false);
         }
         else {
             this.resetRecycleCustomNode();
-            stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: recycleNode must have a parent`);
         }
     }
     UpdateLazyForEachElements(elmtIds) {
@@ -9151,9 +9133,19 @@ const Param = (proto, propertyKey) => {
             ObserveV2.getObserve().addRef(this, propertyKey);
             return ObserveV2.autoProxyObject(this, ObserveV2.OB_PREFIX + propertyKey);
         },
-        set(_) {
-            stateMgmtConsole.applicationError(`@param ${propertyKey.toString()}: can not assign a new value, application error.`);
-            return;
+        set(val) {
+            var _a;
+            const meta = (_a = proto[ObserveV2.V2_DECO_META]) === null || _a === void 0 ? void 0 : _a[propertyKey];
+            if (meta && meta.deco2 !== '@once') {
+                stateMgmtConsole.applicationError(`@param ${propertyKey.toString()}: can not assign a new value, application error.`);
+                return;
+            }
+            if (val !== this[storeProp]) {
+                this[storeProp] = val;
+                if (this[ObserveV2.SYMBOL_REFS]) { // This condition can improve performance.
+                    ObserveV2.getObserve().fireChange(this, propertyKey);
+                }
+            }
         },
         // @param can not be assigned, no setter
         enumerable: true
@@ -9740,12 +9732,12 @@ class __Repeat {
     constructor(owningView, arr) {
         this.config = {};
         this.isVirtualScroll = false;
-        //console.log('__Repeat ctor')
         this.config.owningView_ = owningView instanceof ViewV2 ? owningView : undefined;
         this.config.arr = arr !== null && arr !== void 0 ? arr : [];
         this.config.itemGenFuncs = {};
         this.config.keyGenFunc = __RepeatDefaultKeyGen.funcWithIndex;
         this.config.typeGenFunc = (() => '');
+        this.config.totalCountSpecified = false;
         this.config.totalCount = this.config.arr.length;
         this.config.templateOptions = {};
         // to be used with ViewV2
@@ -9756,43 +9748,42 @@ class __Repeat {
         this.config.mkRepeatItem = isViewV2 ? mkRepeatItemV2 : mkRepeatItemPU;
     }
     each(itemGenFunc) {
-        //console.log('__Repeat.each()')
         this.config.itemGenFuncs[''] = itemGenFunc;
         this.config.templateOptions[''] = this.normTemplateOptions({});
         return this;
     }
     key(keyGenFunc) {
-        //console.log('__Repeat.key()')
         this.config.keyGenFunc = keyGenFunc;
         return this;
     }
     virtualScroll(options) {
-        //console.log('__Repeat.virtualScroll()')
-        this.config.totalCount = this.normTotalCount(options === null || options === void 0 ? void 0 : options.totalCount);
+        if (options && options.totalCount && Number.isInteger(options.totalCount)) {
+            this.config.totalCount = options.totalCount;
+            this.config.totalCountSpecified = true;
+        }
+        else {
+            this.config.totalCountSpecified = false;
+        }
         this.isVirtualScroll = true;
         return this;
     }
     // function to decide which template to use, each template has an id
     templateId(typeFunc) {
-        //console.log('__Repeat.templateId()')
         this.config.typeGenFunc = typeFunc;
         return this;
     }
     // template: id + builder function to render specific type of data item 
     template(type, itemGenFunc, options) {
-        //console.log('__Repeat.template()')
         this.config.itemGenFuncs[type] = itemGenFunc;
         this.config.templateOptions[type] = this.normTemplateOptions(options);
         return this;
     }
     updateArr(arr) {
-        //console.log('__Repeat.updateArr()')
         this.config.arr = arr !== null && arr !== void 0 ? arr : [];
         return this;
     }
     render(isInitialRender) {
         var _a, _b, _c;
-        //console.log('__Repeat.render()')
         if (!((_a = this.config.itemGenFuncs) === null || _a === void 0 ? void 0 : _a[''])) {
             throw new Error(`__Repeat item builder function unspecified. Usage error`);
         }
@@ -9812,14 +9803,6 @@ class __Repeat {
         this.config.onMoveHandler = handler;
         return this;
     }
-    // normalize totalCount
-    normTotalCount(totalCount) {
-        const arrLen = this.config.arr.length;
-        if (Number.isInteger(totalCount) && totalCount > arrLen) {
-            return totalCount;
-        }
-        return arrLen;
-    }
     // normalize template options
     normTemplateOptions(options) {
         if (options) {
@@ -9832,8 +9815,6 @@ class __Repeat {
     }
 }
 ; // __Repeat<T>
-// __Repeat implements ForEach with child re-use for both existing state observation
-// and deep observation , for non-virtual and virtual code paths (TODO)
 /*
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -10008,16 +9989,27 @@ class __RepeatImpl {
 // deep observation. For virtual-scroll code paths
 class __RepeatVirtualScrollImpl {
     constructor() {
+        this.totalCountSpecified = false;
         // index <-> key maps
         this.key4Index_ = new Map();
         this.index4Key_ = new Map();
+        // Map key -> RepeatItem
+        // added to closure of following lambdas
+        this.repeatItem4Key_ = new Map();
+        // RepeatVirtualScrollNode elmtId
+        this.repeatElmtId_ = -1;
     }
     render(config, isInitialRender) {
         this.arr_ = config.arr;
         this.itemGenFuncs_ = config.itemGenFuncs;
         this.keyGenFunc_ = config.keyGenFunc;
         this.typeGenFunc_ = config.typeGenFunc;
-        this.totalCount_ = config.totalCount;
+        // if totalCountSpecified==false, then need to create dependency on array length 
+        // so when array length changes, will update totalCount
+        this.totalCountSpecified = config.totalCountSpecified;
+        this.totalCount_ = (!this.totalCountSpecified || config.totalCount < 0)
+            ? this.arr_.length
+            : config.totalCount;
         this.templateOptions_ = config.templateOptions;
         this.mkRepeatItem_ = config.mkRepeatItem;
         this.onMoveHandler_ = config.onMoveHandler;
@@ -10030,87 +10022,126 @@ class __RepeatVirtualScrollImpl {
     }
     /**/
     initialRender(owningView, repeatElmtId) {
-        // Map key -> RepeatItem
-        // added to closure of following lambdas
-        const _repeatItem4Key = new Map();
-        const repeatElmtId1 = repeatElmtId;
+        this.repeatElmtId_ = repeatElmtId;
         const onCreateNode = (forIndex) => {
             
-            if (forIndex < 0) {
+            if (forIndex < 0 || forIndex >= this.totalCount_ || forIndex >= this.arr_.length) {
                 // STATE_MGMT_NOTE check also index < totalCount
-                throw new Error(`__RepeatVirtualScrollImpl onCreateNode: for index=${forIndex} out of range error.`);
+                throw new Error(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onCreateNode: for index=${forIndex}  \
+                    with data array length ${this.arr_.length}, totalCount=${this.totalCount_}  out of range error.`);
             }
             // create dependency array item [forIndex] -> Repeat
             // so Repeat updates when the array item changes
             // STATE_MGMT_NOTE observe dependencies, adding the array is insurgent for Array of objects
-            ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, forIndex.toString());
+            ObserveV2.getObserve().addRef4Id(this.repeatElmtId_, this.arr_, forIndex.toString());
             const repeatItem = this.mkRepeatItem_(this.arr_[forIndex], forIndex);
             let forKey = this.getOrMakeKey4Index(forIndex);
-            _repeatItem4Key.set(forKey, repeatItem);
+            this.repeatItem4Key_.set(forKey, repeatItem);
             // execute the itemGen function
             this.initialRenderItem(repeatItem);
             
-        };
+        }; // onCreateNode
         const onUpdateNode = (fromKey, forIndex) => {
-            if (!fromKey || fromKey == "" || forIndex < 0) {
-                // STATE_MGMT_NOTE check also index < totalCount
-                throw new Error(`__RepeatVirtualScrollImpl onUpdateNode: fromKey "${fromKey}", forIndex=${forIndex} invalid function input error.`);
+            if (!fromKey || fromKey === '' || forIndex < 0 || forIndex >= this.totalCount_ || forIndex >= this.arr_.length) {
+                throw new Error(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onUpdateNode: fromKey "${fromKey}", \
+                    forIndex=${forIndex}, with data array length ${this.arr_.length}, totalCount=${this.totalCount_}, invalid function input error.`);
             }
             // create dependency array item [forIndex] -> Repeat
             // so Repeat updates when the array item changes
             // STATE_MGMT_NOTE observe dependencies, adding the array is insurgent for Array of objects
-            ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, forIndex.toString());
-            const repeatItem = _repeatItem4Key.get(fromKey);
+            ObserveV2.getObserve().addRef4Id(this.repeatElmtId_, this.arr_, forIndex.toString());
+            const repeatItem = this.repeatItem4Key_.get(fromKey);
             if (!repeatItem) {
-                stateMgmtConsole.error(`__RepeatVirtualScrollImpl onUpdateNode: fromKey "${fromKey}", forIndex=${forIndex}, can not find RepeatItem for key. Unrecoverable error`);
+                stateMgmtConsole.error(`__RepeatVirtualScrollImpl (${this.repeatElmtId_}) onUpdateNode: fromKey "${fromKey}", forIndex=${forIndex}, can not find RepeatItem for key. Unrecoverable error`);
                 return;
             }
             const forKey = this.getOrMakeKey4Index(forIndex);
             
-            repeatItem.updateItem(this.arr_[forIndex]);
-            repeatItem.updateIndex(forIndex);
             // update Map according to made update:
             // del fromKey entry and add forKey
-            _repeatItem4Key.delete(fromKey);
-            _repeatItem4Key.set(forKey, repeatItem);
-            
-            ObserveV2.getObserve().updateDirty2(true);
-        };
+            this.repeatItem4Key_.delete(fromKey);
+            this.repeatItem4Key_.set(forKey, repeatItem);
+            if (repeatItem.item !== this.arr_[forIndex] || repeatItem.index !== forIndex) {
+                // repeatItem needs update, will trigger partial update to using UINodes:
+                repeatItem.updateItem(this.arr_[forIndex]);
+                repeatItem.updateIndex(forIndex);
+                
+                ObserveV2.getObserve().updateDirty2(true);
+            }
+        }; // onUpdateNode
         const onGetKeys4Range = (from, to) => {
+            if (to > this.totalCount_ || to > this.arr_.length) {
+                stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId ${this.repeatElmtId_}:  onGetKeys4Range from ${from} to ${to} \
+                    with data array length ${this.arr_.length}, totalCount=${this.totalCount_} \
+                    Error!. Application fails to add more items to source data array. on time. Trying with corrected input parameters ...`);
+                to = this.totalCount_;
+                from = Math.min(to, from);
+            }
             
             const result = new Array();
             // deep observe dependencies,
             // create dependency array item [i] -> Repeat
             // so Repeat updates when the array item or nested objects changes
-            // not enough: ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, i.toString());
-            ViewStackProcessor.StartGetAccessRecordingFor(repeatElmtId1);
-            ObserveV2.getObserve().startRecordDependencies(owningView, repeatElmtId1, false);
+            // not enough: ObserveV2.getObserve().addRef4Id(this.repeatElmtId_, this.arr_, i.toString());
+            ViewStackProcessor.StartGetAccessRecordingFor(this.repeatElmtId_);
+            ObserveV2.getObserve().startRecordDependencies(owningView, this.repeatElmtId_, false);
             for (let i = from; i <= to && i < this.arr_.length; i++) {
                 result.push(this.getOrMakeKey4Index(i));
             }
             ObserveV2.getObserve().stopRecordDependencies();
             ViewStackProcessor.StopGetAccessRecording();
+            let needsRerender = false;
+            result.forEach((key, index) => {
+                const forIndex = index + from;
+                // if repeatItem exists, and needs update then do the update, and call sync update as well
+                // thereby ensure cached items are up-to-date on C++ side. C++ does not need to request update 
+                // from TS side 
+                const repeatItem4Key = this.repeatItem4Key_.get(key);
+                // make sure the index is up-to-date
+                if (repeatItem4Key && (repeatItem4Key.item !== this.arr_[forIndex] || repeatItem4Key.index !== forIndex)) {
+                    // repeatItem needs update, will trigger partial update to using UINodes:
+                    repeatItem4Key.updateItem(this.arr_[forIndex]);
+                    repeatItem4Key.updateIndex(forIndex);
+                    needsRerender = true;
+                }
+            }); // forEach
+            if (needsRerender) {
+                
+                ObserveV2.getObserve().updateDirty2(true);
+            }
             
             return result;
-        };
+        }; // const onGetKeys4Range 
         const onGetTypes4Range = (from, to) => {
             var _a;
+            if (to > this.totalCount_ || to > this.arr_.length) {
+                stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId: ${this.repeatElmtId_}:  onGetTypes4Range from ${from} to ${to} \
+                  with data array length ${this.arr_.length}, totalCount=${this.totalCount_} \
+                  Error! Application fails to add more items to source data array.on time.Trying with corrected input parameters ...`);
+                to = this.totalCount_;
+                from = Math.min(to, from);
+            }
             
             const result = new Array();
             // deep observe dependencies,
             // create dependency array item [i] -> Repeat
             // so Repeat updates when the array item or nested objects changes
-            // not enough: ObserveV2.getObserve().addRef4Id(repeatElmtId1, this.arr_, i.toString());
-            ViewStackProcessor.StartGetAccessRecordingFor(repeatElmtId1);
-            ObserveV2.getObserve().startRecordDependencies(owningView, repeatElmtId1, false);
+            // not enough: ObserveV2.getObserve().addRef4Id(this.repeatElmtId_, this.arr_, i.toString());
+            ViewStackProcessor.StartGetAccessRecordingFor(this.repeatElmtId_);
+            ObserveV2.getObserve().startRecordDependencies(owningView, this.repeatElmtId_, false);
             for (let i = from; i <= to && i < this.arr_.length; i++) {
-                result.push((_a = this.typeGenFunc_(this.arr_[i], i)) !== null && _a !== void 0 ? _a : '');
-            }
+                let ttype = (_a = this.typeGenFunc_(this.arr_[i], i)) !== null && _a !== void 0 ? _a : '';
+                if (!this.itemGenFuncs_[ttype]) {
+                    stateMgmtConsole.applicationError(`Repeat with virtual scroll elmtId: ${this.repeatElmtId_}. Factory function .templateId  returns template id '${ttype}'.` +
+                        (ttype == '') ? `Missing Repeat.each ` : `missing Repeat.template for id '${ttype}'` + `! Unrecoverable application error!"`);
+                }
+                result.push(ttype);
+            } // for
             ObserveV2.getObserve().stopRecordDependencies();
             ViewStackProcessor.StopGetAccessRecording();
             
             return result;
-        };
+        }; // const onGetTypes4Range
         
         RepeatVirtualScrollNative.create(this.totalCount_, Object.entries(this.templateOptions_), {
             onCreateNode,
@@ -10132,7 +10163,14 @@ class __RepeatVirtualScrollImpl {
         // execute the itemGen function
         const itemType = (_a = this.typeGenFunc_(repeatItem.item, repeatItem.index)) !== null && _a !== void 0 ? _a : '';
         const itemFunc = (_b = this.itemGenFuncs_[itemType]) !== null && _b !== void 0 ? _b : this.itemGenFuncs_[''];
-        itemFunc(repeatItem);
+        if (typeof itemFunc === "function") {
+            itemFunc(repeatItem);
+        }
+        else {
+            stateMgmtConsole.applicationError(`Repeat with virtualScroll elmtId ${this.repeatElmtId_}: `
+                + (itemType == '') ? "Missing Repeat.each " : `missing Repeat.template for id '${itemType}'`
+                + "! Unrecoverable application error!");
+        }
     }
     /**
      * maintain: index <-> key mapping
@@ -10148,7 +10186,7 @@ class __RepeatVirtualScrollImpl {
             const usedIndex = this.index4Key_.get(key);
             if (usedIndex) {
                 // duplicate key
-                stateMgmtConsole.applicationError(`Repeat key gen function: Detected duplicate key ${key} for indices ${forIndex} and ${usedIndex}. \
+                stateMgmtConsole.applicationError(`Repeat key gen function elmtId ${this.repeatElmtId_}: Detected duplicate key ${key} for indices ${forIndex} and ${usedIndex}. \
                             Generated random key will decrease Repeat performance. Correct the Key gen function in your application!`);
                 key = `___${forIndex}_+_${key}_+_${Math.random()}`;
             }

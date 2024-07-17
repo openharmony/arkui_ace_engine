@@ -91,6 +91,11 @@ struct SheetHeight {
     {
         return (height == sheetHeight.height && sheetMode == sheetHeight.sheetMode);
     }
+
+    bool operator!=(const SheetHeight& sheetHeight) const
+    {
+        return !(*this == sheetHeight);
+    }
 };
 
 struct SheetStyle {

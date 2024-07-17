@@ -31,6 +31,7 @@
 #include "base/notification/eventhandler/interfaces/inner_api/event_handler.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/web/render_web.h"
@@ -2783,6 +2784,23 @@ void WebDelegate::RegisterAvoidAreaChangeListener()
     }
 }
 
+class NWebAutoFillCallbackImpl : public OHOS::NWeb::NWebMessageValueCallback {
+public:
+    NWebAutoFillCallbackImpl(const WeakPtr<WebDelegate>& delegate) : delegate_(delegate) {}
+    ~NWebAutoFillCallbackImpl() = default;
+
+    void OnReceiveValue(std::shared_ptr<NWebMessage> result) override
+    {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+        auto delegate = delegate_.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        delegate->HandleAutoFillEvent(result);
+    }
+
+private:
+    WeakPtr<WebDelegate> delegate_;
+};
+
 void WebDelegate::UnregisterAvoidAreaChangeListener()
 {
     constexpr static int32_t PLATFORM_VERSION_TEN = 10;
@@ -2879,6 +2897,8 @@ void WebDelegate::InitWebViewWithSurface()
 #ifdef OHOS_STANDARD_SYSTEM
             auto screenLockCallback = std::make_shared<NWebScreenLockCallbackImpl>(context);
             delegate->nweb_->RegisterScreenLockFunction(Container::CurrentId(), screenLockCallback);
+            auto autoFillCallback = std::make_shared<NWebAutoFillCallbackImpl>(weak);
+            delegate->nweb_->SetAutofillCallback(autoFillCallback);
 #endif
             auto findListenerImpl = std::make_shared<FindListenerImpl>();
             findListenerImpl->SetWebDelegate(weak);
@@ -4922,6 +4942,20 @@ void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequ
         TaskExecutor::TaskType::JS, "ArkUIWebErrorReceive");
 }
 
+void WebDelegate::ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart)
+{
+    if (sceneId == "") {
+        TAG_LOGE(AceLogTag::ACE_WEB, "sceneId is null, do not report.");
+        return;
+    }
+    ACE_SCOPED_TRACE("ReportDynamicFrameLossEvent, sceneId: %s, isStart: %u", sceneId.c_str(), isStart);
+    if (isStart) {
+        PerfMonitor::GetPerfMonitor()->Start(sceneId, PerfActionType::FIRST_MOVE, "");
+    } else {
+        PerfMonitor::GetPerfMonitor()->End(sceneId, false);
+    }
+}
+
 void WebDelegate::OnHttpErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
     std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response)
 {
@@ -5370,7 +5404,7 @@ void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool i
         [weak = WeakClaim(this), targetUrl, isAlert, isUserTrigger, handler]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
-            int32_t parentNWebId = (delegate->nweb_ ? delegate->nweb_->GetWebId() : -1);
+            int32_t parentNWebId = (delegate->nweb_ ? static_cast<int32_t>(delegate->nweb_->GetWebId()) : -1);
             auto param = std::make_shared<WebWindowNewEvent>(
                 targetUrl, isAlert, isUserTrigger, AceType::MakeRefPtr<WebWindowNewHandlerOhos>(handler, parentNWebId));
 #ifdef NG_BUILD
@@ -5421,6 +5455,8 @@ void WebDelegate::OnPageVisible(const std::string& url)
 {
     if (onPageVisibleV2_) {
         onPageVisibleV2_(std::make_shared<PageVisibleEvent>(url));
+    } else {
+        TAG_LOGI(AceLogTag::ACE_WEB, "The developer has not registered this OnPageVisible event");
     }
 }
 
@@ -5816,6 +5852,30 @@ void WebDelegate::HandleAccessibilityHoverEvent(int32_t x, int32_t y)
     if (nweb_) {
         nweb_->SendAccessibilityHoverEvent(x, y);
     }
+}
+
+void WebDelegate::NotifyAutoFillViewData(const std::string& jsonStr)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), jsonStr]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            auto webMessage = std::make_shared<OHOS::NWeb::NWebMessage>(NWebValue::Type::NONE);
+            webMessage->SetType(NWebValue::Type::STRING);
+            webMessage->SetString(jsonStr);
+            delegate->nweb_->FillAutofillData(webMessage);
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebNotifyAutoFillViewData");
+}
+
+void WebDelegate::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
+{
+    auto pattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->HandleAutoFillEvent(viewDataJson);
 }
 
 #endif
@@ -6815,6 +6875,12 @@ void WebDelegate::OnAreaChange(const OHOS::Ace::Rect& area)
         return;
     }
     currentArea_ = area;
+    if (nweb_) {
+        double offsetX = 0;
+        double offsetY = 0;
+        UpdateScreenOffSet(offsetX, offsetY);
+        nweb_->SetScreenOffSet(offsetX, offsetY);
+    }
     OnSafeInsetsChange();
 }
 
@@ -6904,6 +6970,13 @@ void WebDelegate::KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEv
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     webPattern->KeyboardReDispatch(event, isUsed);
+}
+
+void WebDelegate::OnCursorUpdate(double x, double y, double width, double height)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnCursorUpdate(x, y, width, height);
 }
 
 void WebDelegate::OnSafeInsetsChange()

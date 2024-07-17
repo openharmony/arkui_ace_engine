@@ -68,7 +68,7 @@ const char INSPECTOR_VISIBILITY[] = "visibility";
 const uint32_t LONG_PRESS_DELAY = 1000;
 RectF deviceRect;
 
-RefPtr<UINode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::string& key)
+RefPtr<UINode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::string& key, bool notDetach = false)
 {
     std::queue<RefPtr<UINode>> elements;
     elements.push(root);
@@ -80,7 +80,7 @@ RefPtr<UINode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::strin
             return current;
         }
 
-        const auto& children = current->GetChildren();
+        const auto& children = current->GetChildren(notDetach);
         for (const auto& child : children) {
             elements.push(child);
         }
@@ -426,11 +426,11 @@ std::string GetInspectorInfo(std::vector<RefPtr<NG::UINode>> children, int32_t p
 
 std::set<RefPtr<FrameNode>> Inspector::offscreenNodes;
 
-RefPtr<FrameNode> Inspector::GetFrameNodeByKey(const std::string& key)
+RefPtr<FrameNode> Inspector::GetFrameNodeByKey(const std::string& key, bool notDetach)
 {
     if (!offscreenNodes.empty()) {
         for (auto node : offscreenNodes) {
-            auto frameNode = AceType::DynamicCast<FrameNode>(GetInspectorByKey(node, key));
+            auto frameNode = AceType::DynamicCast<FrameNode>(GetInspectorByKey(node, key, notDetach));
             if (frameNode) {
                 return frameNode;
             }
@@ -479,7 +479,7 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key, const Inspe
 
 void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
 {
-    auto frameNode = Inspector::GetFrameNodeByKey(key);
+    auto frameNode = Inspector::GetFrameNodeByKey(key, true);
     if (!frameNode) {
         LOGW("Can't find a component that id or key are %{public}s, Please check your parameters are correct",
             key.c_str());

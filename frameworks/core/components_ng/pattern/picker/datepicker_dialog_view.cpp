@@ -58,7 +58,6 @@ constexpr int32_t RATIO_SEVEN = 7;
 constexpr int32_t RATIO_FOUR = 4;
 constexpr int32_t RATIO_THREE = 3;
 constexpr int32_t RATIO_TWO = 2;
-constexpr uint8_t PIXEL_ROUND = 18;
 constexpr size_t ACCEPT_BUTTON_INDEX = 0;
 constexpr size_t CANCEL_BUTTON_INDEX = 1;
 } // namespace
@@ -1046,9 +1045,17 @@ void DatePickerDialogView::CreateSingleDateNode(const RefPtr<FrameNode>& dateNod
         blendYearNode->MountToParent(stackYearNode);
         auto layoutProperty = stackYearNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
-        layoutProperty->UpdateVisibility(VisibleType::GONE);
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            auto blendYearNodeLayoutProperty = blendYearNode->GetLayoutProperty<LayoutProperty>();
+            CHECK_NULL_VOID(blendYearNodeLayoutProperty);
+            blendYearNodeLayoutProperty->UpdateVisibility(VisibleType::GONE);
+            auto buttonYearNodeLayoutProperty = buttonYearNode->GetLayoutProperty<LayoutProperty>();
+            CHECK_NULL_VOID(buttonYearNodeLayoutProperty);
+            buttonYearNodeLayoutProperty->UpdateVisibility(VisibleType::GONE);
+        } else {
+            layoutProperty->UpdateVisibility(VisibleType::GONE);
+        }
         stackYearNode->MountToParent(dateNode);
-        yearColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
 }
 
@@ -1110,7 +1117,6 @@ void DatePickerDialogView::MountColumnNodeToPicker(
     layoutProperty->UpdateAlignment(Alignment::CENTER);
     layoutProperty->UpdateLayoutWeight(columnWeight);
     stackNode->MountToParent(pickerNode);
-    columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
 }
 
 RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(NG::DialogGestureEvent& cancelEvent,

@@ -70,10 +70,15 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/cj_utils/cj_utils.cpp",
 
       # AudioHaptic
-      "$ace_root/adapter/ohos/entrance/timepicker/timepicker_haptic_controller.cpp",
       "$ace_root/adapter/ohos/entrance/timepicker/timepicker_haptic_factory.cpp",
-      "$ace_root/adapter/ohos/entrance/timepicker/timepicker_haptic_impl.cpp",
     ]
+
+    if (enable_audio_framework && enable_player_framework) {
+      sources += [
+        "$ace_root/adapter/ohos/entrance/timepicker/timepicker_haptic_controller.cpp",
+        "$ace_root/adapter/ohos/entrance/timepicker/timepicker_haptic_impl.cpp",
+      ]
+    }
 
     if (target_cpu == "arm64") {
       defines += [ "_ARM64_" ]
@@ -106,7 +111,6 @@ template("ace_ohos_standard_source_set") {
       "ability_runtime:data_ability_helper",
       "ability_runtime:napi_common",
       "ability_runtime:ui_extension",
-      "audio_framework:audio_client",
       "bundle_framework:appexecfwk_core",
       "common_event_service:cesfwk_innerkits",
       "data_share:datashare_consumer",
@@ -120,7 +124,6 @@ template("ace_ohos_standard_source_set") {
       "ipc:ipc_napi",
       "miscdevice:vibrator_interface_native",
       "napi:ace_napi",
-      "player_framework:audio_haptic",
       "preferences:native_preferences",
       "relational_store:native_dataability",
       "relational_store:native_rdb",
@@ -147,6 +150,14 @@ template("ace_ohos_standard_source_set") {
 
     if (defined(config.media_library_exists) && config.media_library_exists) {
       external_deps += [ "media_library:media_library_manager" ]
+    }
+
+    if (enable_audio_framework) {
+      external_deps += [ "audio_framework:audio_client" ]
+    }
+
+    if (enable_player_framework) {
+      external_deps += [ "player_framework:audio_haptic" ]
     }
 
     if (enable_graphic_text_gine) {

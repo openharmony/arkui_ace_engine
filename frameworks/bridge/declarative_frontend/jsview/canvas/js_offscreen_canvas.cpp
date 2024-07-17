@@ -69,6 +69,7 @@ napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
     auto offscreenCanvasPattern = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(
         workCanvas->GetWidth(), workCanvas->GetHeight());
     workCanvas->SetOffscreenPattern(offscreenCanvasPattern);
+    auto bitmapSize = offscreenCanvasPattern->GetBitmapSize();
 
     napi_value offscreenCanvas = nullptr;
     napi_create_object(env, &offscreenCanvas);
@@ -81,7 +82,7 @@ napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
     napi_define_properties(env, offscreenCanvas, sizeof(desc) / sizeof(*desc), desc);
     napi_coerce_to_native_binding_object(
         env, offscreenCanvas, DetachOffscreenCanvas, AttachOffscreenCanvas, value, nullptr);
-    napi_wrap(
+    napi_wrap_with_size(
         env, offscreenCanvas, value,
         [](napi_env env, void* data, void* hint) {
             LOGD("Finalizer for offscreen canvas is called");
@@ -89,7 +90,7 @@ napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
             delete wrapper;
             wrapper = nullptr;
         },
-        nullptr, nullptr);
+        nullptr, nullptr, bitmapSize);
     return offscreenCanvas;
 }
 
@@ -159,9 +160,10 @@ napi_value JSOffscreenCanvas::Constructor(napi_env env, napi_callback_info info)
     }
     workCanvas->offscreenCanvasPattern_ = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(
         static_cast<int32_t>(fWidth), static_cast<int32_t>(fHeight));
+    auto bitmapSize = workCanvas->offscreenCanvasPattern_->GetBitmapSize();
     napi_coerce_to_native_binding_object(
         env, thisVar, DetachOffscreenCanvas, AttachOffscreenCanvas, workCanvas, nullptr);
-    napi_wrap(
+    napi_wrap_with_size(
         env, thisVar, workCanvas,
         [](napi_env env, void* data, void* hint) {
             LOGD("Finalizer for offscreen canvas is called");
@@ -169,7 +171,7 @@ napi_value JSOffscreenCanvas::Constructor(napi_env env, napi_callback_info info)
             delete workCanvas;
             workCanvas = nullptr;
         },
-        nullptr, nullptr);
+        nullptr, nullptr, bitmapSize);
     return thisVar;
 }
 

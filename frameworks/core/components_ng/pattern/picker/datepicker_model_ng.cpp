@@ -37,7 +37,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float PICKER_MAXFONTSCALE = 1.0f;
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
-constexpr uint8_t PIXEL_ROUND = 18;
 } // namespace
 void DatePickerModelNG::CreateDatePicker(RefPtr<PickerTheme> pickerTheme)
 {
@@ -151,7 +150,6 @@ void DatePickerModelNG::createMonthOrDayColumnNode(const RefPtr<FrameNode>& colu
     layoutProperty->UpdateAlignment(Alignment::CENTER);
     layoutProperty->UpdateLayoutWeight(1);
     stackNode->MountToParent(dateNode);
-    columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
 }
 
 void DatePickerModelNG::createYearColumnNode(const RefPtr<FrameNode>& columnNode,
@@ -167,7 +165,6 @@ void DatePickerModelNG::createYearColumnNode(const RefPtr<FrameNode>& columnNode
     layoutProperty->UpdateAlignment(Alignment::CENTER);
     layoutProperty->UpdateLayoutWeight(1);
     stackYearNode->MountToParent(dateNode);
-    columnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
 }
 
 RefPtr<FrameNode> DatePickerModelNG::CreateStackNode()
@@ -267,7 +264,6 @@ RefPtr<FrameNode> DatePickerModelNG::CreateFrameNode(int32_t nodeId)
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateLayoutWeight(1);
         stackYearNode->MountToParent(dateNode);
-        yearColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
     if (!hasMonthNode) {
         auto stackMonthNode = CreateStackNode();
@@ -281,7 +277,6 @@ RefPtr<FrameNode> DatePickerModelNG::CreateFrameNode(int32_t nodeId)
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateLayoutWeight(1);
         stackMonthNode->MountToParent(dateNode);
-        monthColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
     if (!hasDayNode) {
         auto stackDayNode = CreateStackNode();
@@ -295,7 +290,6 @@ RefPtr<FrameNode> DatePickerModelNG::CreateFrameNode(int32_t nodeId)
         layoutProperty->UpdateAlignment(Alignment::CENTER);
         layoutProperty->UpdateLayoutWeight(1);
         stackDayNode->MountToParent(dateNode);
-        dayColumnNode->GetLayoutProperty<LayoutProperty>()->UpdatePixelRound(PIXEL_ROUND);
     }
     return dateNode;
 }

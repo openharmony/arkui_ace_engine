@@ -880,7 +880,6 @@ HWTEST_F(ImageTestNg, ImageSvgTest001, TestSize.Level1)
     EXPECT_EQ(imagePattern->altLoadingCtx_->GetSourceInfo().GetSrc(), RESOURCE_URL);
 }
 
-
 /**
  * @tc.name: ImageColorFilterTest001
  * @tc.desc: Test image ColorFilter is set correctly.

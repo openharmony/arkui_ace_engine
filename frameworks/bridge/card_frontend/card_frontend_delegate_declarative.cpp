@@ -75,7 +75,7 @@ void CardFrontendDelegateDeclarative::FireCardAction(const std::string& action)
         TaskExecutor::TaskType::UI, "ArkUICardFrontendFireAction"); // eTSCard UI == Main JS/UI/PLATFORM
 }
 
-double CardFrontendDelegateDeclarative::MeasureText(const MeasureContext& context)
+double CardFrontendDelegateDeclarative::MeasureText(MeasureContext context)
     {
         return 0.0;
     }

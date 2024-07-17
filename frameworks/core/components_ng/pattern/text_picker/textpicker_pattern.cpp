@@ -617,7 +617,7 @@ void TextPickerPattern::ProcessCascadeOptionsValues(const std::vector<std::strin
     auto valueIterator = std::find(rangeResultValue.begin(), rangeResultValue.end(), values_[index]);
     if (valueIterator != rangeResultValue.end()) {
         if (index < selecteds_.size()) {
-            selecteds_[index] = std::distance(rangeResultValue.begin(), valueIterator);
+            selecteds_[index] = static_cast<uint32_t>(std::distance(rangeResultValue.begin(), valueIterator));
         } else {
             selecteds_.emplace_back(std::distance(rangeResultValue.begin(), valueIterator));
         }
@@ -680,7 +680,7 @@ void TextPickerPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool is
 {
     if (isCascade_) {
         auto frameNodes = GetColumnNodes();
-        auto columnIndex = 0;
+        uint32_t columnIndex = 0;
         for (auto iter = frameNodes.begin(); iter != frameNodes.end(); iter++) {
             if (iter->second->GetId() == tag->GetId()) {
                 break;

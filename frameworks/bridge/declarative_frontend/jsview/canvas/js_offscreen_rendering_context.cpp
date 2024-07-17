@@ -156,12 +156,14 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
     double height = 0.0;
     if (args.GetDoubleArg(0, width) && args.GetDoubleArg(1, height)) {
         double density = jsRenderContext->GetDensity();
+        width *= density;
+        height *= density;
         jsRenderContext->SetWidth(width);
         jsRenderContext->SetHeight(height);
         auto renderingContext =
             AceType::DynamicCast<OffscreenCanvasRenderingContext2DModel>(jsRenderContext->renderingContext2DModel_);
         auto offscreenPattern =
-            renderingContext->CreateOffscreenPattern(round(width * density), round(height * density));
+            renderingContext->CreateOffscreenPattern(round(width), round(height));
         CHECK_NULL_VOID(offscreenPattern);
         size_t bitmapSize = renderingContext->GetBitmapSize(offscreenPattern);
         args.SetSize(bitmapSize);

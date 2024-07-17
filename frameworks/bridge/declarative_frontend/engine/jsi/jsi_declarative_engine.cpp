@@ -185,6 +185,8 @@ inline bool PreloadJsEnums(const shared_ptr<JsRuntime>& runtime)
 
 inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
 {
+    // set __hasUIFramework__
+    runtime->GetGlobal()->SetProperty(runtime, "__hasUIFramework__", runtime->NewBoolean(true));
 #ifdef STATE_MGMT_USE_AOT
     return runtime->ExecuteJsBinForAOT("/etc/abc/framework/stateMgmt.abc");
 #else
@@ -320,14 +322,14 @@ bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRe
     if (!jsBundleName->IsString(vm) || !jsModuleName->IsString(vm) || !jsPagePath->IsString(vm)) {
         return false;
     }
-    bundleName = jsBundleName->ToString(vm)->ToString();
-    moduleName = jsModuleName->ToString(vm)->ToString();
-    pagePath = jsPagePath->ToString(vm)->ToString();
+    bundleName = jsBundleName->ToString(vm)->ToString(vm);
+    moduleName = jsModuleName->ToString(vm)->ToString(vm);
+    pagePath = jsPagePath->ToString(vm)->ToString(vm);
     bool ohmUrlValid = false;
     if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "ohmUrl"))) {
         auto jsOhmUrl = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "ohmUrl"));
         if (jsOhmUrl->IsString(vm)) {
-            ohmUrl = jsOhmUrl->ToString(vm)->ToString();
+            ohmUrl = jsOhmUrl->ToString(vm)->ToString(vm);
             if (ohmUrl.find(OHMURL_START_TAG) == std::string::npos) {
                 ohmUrl = OHMURL_START_TAG + ohmUrl;
                 ohmUrlValid = true;
@@ -345,7 +347,7 @@ bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRe
     if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"))) {
         auto integratedHsp = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "integratedHsp"));
         if (integratedHsp->IsString(vm)) {
-            integratedHspName = integratedHsp->ToString(vm)->ToString();
+            integratedHspName = integratedHsp->ToString(vm)->ToString(vm);
         }
     }
     if (integratedHspName == "true") {
@@ -356,7 +358,7 @@ bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRe
     if (params->Has(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"))) {
         auto pageFullPathInfo = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "pageFullPath"));
         if (pageFullPathInfo->IsString(vm)) {
-            pageFullPath = pageFullPathInfo->ToString(vm)->ToString();
+            pageFullPath = pageFullPathInfo->ToString(vm)->ToString(vm);
         }
     }
 
@@ -817,7 +819,7 @@ void JsiDeclarativeEngineInstance::DestroyRootViewHandle(int32_t pageId)
             return;
         }
         panda::Local<panda::ObjectRef> rootView = iter->second.ToLocal(arkRuntime->GetEcmaVm());
-        auto* jsView = static_cast<JSView*>(rootView->GetNativePointerField(0));
+        auto* jsView = static_cast<JSView*>(rootView->GetNativePointerField(arkRuntime->GetEcmaVm(), 0));
         if (jsView != nullptr) {
             jsView->Destroy(nullptr);
         }
@@ -837,7 +839,7 @@ void JsiDeclarativeEngineInstance::DestroyAllRootViewHandle()
     for (const auto& pair : rootViewMap_) {
         auto globalRootView = pair.second;
         panda::Local<panda::ObjectRef> rootView = globalRootView.ToLocal(arkRuntime->GetEcmaVm());
-        auto* jsView = static_cast<JSView*>(rootView->GetNativePointerField(0));
+        auto* jsView = static_cast<JSView*>(rootView->GetNativePointerField(arkRuntime->GetEcmaVm(), 0));
         if (jsView != nullptr) {
             jsView->Destroy(nullptr);
         }
@@ -860,7 +862,7 @@ void JsiDeclarativeEngineInstance::FlushReload()
     for (const auto& pair : rootViewMap_) {
         auto globalRootView = pair.second;
         panda::Local<panda::ObjectRef> rootView = globalRootView.ToLocal(arkRuntime->GetEcmaVm());
-        auto* jsView = static_cast<JSView*>(rootView->GetNativePointerField(0));
+        auto* jsView = static_cast<JSView*>(rootView->GetNativePointerField(arkRuntime->GetEcmaVm(), 0));
         if (jsView != nullptr) {
             jsView->MarkNeedUpdate();
         }
@@ -1473,7 +1475,7 @@ bool JsiDeclarativeEngine::UpdateRootComponent()
 {
     if (!JsiDeclarativeEngine::obj_.IsEmpty()) {
         LOGI("update rootComponent start");
-        Framework::UpdateRootComponent(JsiDeclarativeEngine::obj_.ToLocal());
+        Framework::UpdateRootComponent(obj_.GetEcmaVM(), JsiDeclarativeEngine::obj_.ToLocal());
         // Clear the global object to avoid load this obj next time
         JsiDeclarativeEngine::obj_.FreeGlobalHandleAddr();
         JsiDeclarativeEngine::obj_.Empty();
@@ -1814,7 +1816,7 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
     shared_ptr<ArkJSRuntime> arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     arkRuntime->AddRootView(rootView);
 #endif
-    Framework::UpdateRootComponent(ret->ToObject(vm));
+    Framework::UpdateRootComponent(vm, ret->ToObject(vm));
     JSViewStackProcessor::JsStopGetAccessRecording();
     return true;
 }

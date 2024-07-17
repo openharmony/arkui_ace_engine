@@ -57,15 +57,15 @@ ArkUINativeModuleValue SearchBridge::SetSearchInitialize(ArkUIRuntimeCallInfo* r
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     if (!secondArg->IsNull() && !secondArg->IsUndefined() && secondArg->IsString(vm)) {
-        std::string stringValue = secondArg->ToString(vm)->ToString();
+        std::string stringValue = secondArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getSearchModifier()->setSearchValue(nativeNode, stringValue.c_str());
     }
     if (!threeArg->IsNull() && !threeArg->IsUndefined() && threeArg->IsString(vm)) {
-        std::string stringPlaceholder = threeArg->ToString(vm)->ToString();
+        std::string stringPlaceholder = threeArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getSearchModifier()->setSearchPlaceholder(nativeNode, stringPlaceholder.c_str());
     }
     if (!fourArg->IsNull() && !fourArg->IsUndefined() && fourArg->IsString(vm)) {
-        std::string stringIcon = fourArg->ToString(vm)->ToString();
+        std::string stringIcon = fourArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getSearchModifier()->setSearchIcon(nativeNode, stringIcon.c_str());
     }
     Framework::JSTextEditableController* jsController = nullptr;
@@ -133,7 +133,7 @@ ArkUINativeModuleValue SearchBridge::SetTextFont(ArkUIRuntimeCallInfo* runtimeCa
 
     if (threeArg->IsString(vm) || threeArg->IsNumber()) {
         if (threeArg->IsString(vm)) {
-            auto weightStr = threeArg->ToString(vm)->ToString();
+            auto weightStr = threeArg->ToString(vm)->ToString(vm);
             value.fontWeight = static_cast<ArkUI_Int32>(OHOS::Ace::Framework::ConvertStrToFontWeight(weightStr));
         }
 
@@ -145,7 +145,7 @@ ArkUINativeModuleValue SearchBridge::SetTextFont(ArkUIRuntimeCallInfo* runtimeCa
     }
 
     if (fourArg->IsString(vm)) {
-        auto familyStr = fourArg->ToString(vm)->ToString();
+        auto familyStr = fourArg->ToString(vm)->ToString(vm);
         value.fontFamilies[0] = familyStr.c_str();
         value.familyLength = 1;
     }
@@ -317,7 +317,7 @@ ArkUINativeModuleValue SearchBridge::SetCancelButton(ArkUIRuntimeCallInfo* runti
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
     int32_t style = static_cast<int32_t>(theme->GetCancelButtonStyle());
     if (secondArg->IsString(vm)) {
-        CancelButtonStyle cancelButtonStyle = ConvertStrToCancelButtonStyle(secondArg->ToString(vm)->ToString());
+        CancelButtonStyle cancelButtonStyle = ConvertStrToCancelButtonStyle(secondArg->ToString(vm)->ToString(vm));
         style = static_cast<int32_t>(cancelButtonStyle);
     }
     struct ArkUISizeType size = {0.0, 0};
@@ -423,7 +423,7 @@ ArkUINativeModuleValue SearchBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo* ru
 
     if (threeArg->IsString(vm) || threeArg->IsNumber()) {
         if (threeArg->IsString(vm)) {
-            auto weightStr = threeArg->ToString(vm)->ToString();
+            auto weightStr = threeArg->ToString(vm)->ToString(vm);
             value.fontWeight = static_cast<ArkUI_Int32>(OHOS::Ace::Framework::ConvertStrToFontWeight(weightStr));
         }
 
@@ -435,7 +435,7 @@ ArkUINativeModuleValue SearchBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo* ru
     }
 
     if (fourArg->IsString(vm)) {
-        auto familyStr = fourArg->ToString(vm)->ToString();
+        auto familyStr = fourArg->ToString(vm)->ToString(vm);
         value.fontFamilies[0] = familyStr.c_str();
         value.familyLength = 1;
     }
@@ -530,7 +530,7 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
     
     std::string valueString = "";
     if (secondArg->IsString(vm)) {
-        valueString = secondArg->ToString(vm)->ToString();
+        valueString = secondArg->ToString(vm)->ToString(vm);
         value.value = valueString.c_str();
     }
 
@@ -709,7 +709,7 @@ ArkUINativeModuleValue SearchBridge::SetSearchInspectorId(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsString(vm)) {
-        std::string stringValue = secondArg->ToString(vm)->ToString();
+        std::string stringValue = secondArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getSearchModifier()->setSearchInspectorId(nativeNode, stringValue.c_str());
     } else {
         GetArkUINodeModifiers()->getSearchModifier()->resetSearchInspectorId(nativeNode);
@@ -892,7 +892,7 @@ ArkUINativeModuleValue SearchBridge::SetFontFeature(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsString(vm)) {
-        auto value = secondArg->ToString(vm)->ToString();
+        auto value = secondArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getSearchModifier()->setSearchFontFeature(nativeNode, value.c_str());
     } else {
         GetArkUINodeModifiers()->getSearchModifier()->resetSearchFontFeature(nativeNode);
@@ -1289,14 +1289,14 @@ ArkUINativeModuleValue SearchBridge::SetOnChange(ArkUIRuntimeCallInfo* runtimeCa
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const std::string&, TextRange&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func)](const std::string& changeValue, TextRange& range) {
+    std::function<void(const std::string&, PreviewText&)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](const std::string& changeValue, PreviewText& previewText) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        const char* keys[] = { "start", "end" };
-        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, range.start),
-            panda::NumberRef::New(vm, range.end) };
+        const char* keys[] = { "offset", "value" };
+        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, previewText.offset),
+            panda::StringRef::NewFromUtf8(vm, previewText.value.c_str()) };
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = {
             panda::StringRef::NewFromUtf8(vm, changeValue.c_str()), eventObject };
@@ -1405,11 +1405,11 @@ ArkUINativeModuleValue SearchBridge::SetShowCounter(ArkUIRuntimeCallInfo* runtim
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto showCounter = false;
     if (showCounterArg->IsBoolean()) {
-        showCounter = showCounterArg->BooleaValue();
+        showCounter = showCounterArg->BooleaValue(vm);
     }
     auto highlightBorder = true;
     if (highlightBorderArg->IsBoolean()) {
-        highlightBorder = highlightBorderArg->BooleaValue();
+        highlightBorder = highlightBorderArg->BooleaValue(vm);
     }
     auto thresholdValue = DEFAULT_MODE;
     if (thresholdArg->IsNumber()) {

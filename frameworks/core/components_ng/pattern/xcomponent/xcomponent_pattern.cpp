@@ -1374,12 +1374,12 @@ void XComponentPattern::SetHandlingRenderContextForSurface(const RefPtr<RenderCo
     renderContext->AddChild(handlingSurfaceRenderContext_, 0);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         auto paintRect = AdjustPaintRect(
-            localPosition_.GetX(), localPosition_.GetY(), drawSize_.Width(), drawSize_.Height(), true);
+            localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height(), true);
         handlingSurfaceRenderContext_->SetBounds(
             paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     } else {
         handlingSurfaceRenderContext_->SetBounds(
-            localPosition_.GetX(), localPosition_.GetY(), drawSize_.Width(), drawSize_.Height());
+            localPosition_.GetX(), localPosition_.GetY(), surfaceSize_.Width(), surfaceSize_.Height());
     }
 }
 

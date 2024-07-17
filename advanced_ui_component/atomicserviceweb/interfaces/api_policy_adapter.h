@@ -17,6 +17,9 @@
 #define API_POLICY_ADAPTER_H
 
 #include "string"
+#ifndef __WIN32
+#include <dlfcn.h>
+#endif
 
 class ApiPolicyAdapter {
 public:
