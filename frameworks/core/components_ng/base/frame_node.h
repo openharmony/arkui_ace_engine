@@ -981,6 +981,11 @@ public:
     void OnNodeTransformInfoUpdate(bool changed);
     void OnNodeTransitionInfoUpdate();
 
+    void ResetLayoutAlgorithm()
+    {
+        layoutAlgorithm_.Reset();
+    }
+
 protected:
     void DumpInfo() override;
 

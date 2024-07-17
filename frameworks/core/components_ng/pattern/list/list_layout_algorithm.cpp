@@ -1622,6 +1622,7 @@ void ListLayoutAlgorithm::SyncGeometry(RefPtr<LayoutWrapper>& wrapper)
     auto host = wrapper->GetHostNode();
     CHECK_NULL_VOID(host);
     host->ForceSyncGeometryNode();
+    host->ResetLayoutAlgorithm();
 }
 
 bool ListLayoutAlgorithm::LayoutCachedALine(LayoutWrapper* layoutWrapper, int32_t index,
