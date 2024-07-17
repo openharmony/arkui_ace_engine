@@ -175,15 +175,16 @@ bool ScrollablePattern::OnScrollPosition(double& offset, int32_t source)
 {
     auto isSearchRefresh = GetIsSearchRefresh();
     if (needLinked_) {
-        auto isAtTop = (IsAtTop() && Positive(offset));
+        bool isAtTop = IsAtTop();
+        auto isAtTopAndPositive = (isAtTop && Positive(offset));
         auto refreshCoordinateMode = RefreshCoordinationMode::UNKNOWN;
         auto modalSheetCoordinationMode = ModalSheetCoordinationMode::UNKNOWN;
         if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            modalSheetCoordinationMode = CoordinateWithSheet(offset, source, isAtTop);
+            modalSheetCoordinationMode = CoordinateWithSheet(offset, source, isAtTopAndPositive);
         }
         if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) ||
             !isSearchRefresh) {
-            refreshCoordinateMode = CoordinateWithRefresh(offset, source, isAtTop);
+            refreshCoordinateMode = CoordinateWithRefresh(offset, source, isAtTopAndPositive);
         }
         auto navigationInCoordination = CoordinateWithNavigation(offset, source, isAtTop);
         if ((refreshCoordinateMode == RefreshCoordinationMode::REFRESH_SCROLL) || navigationInCoordination ||
@@ -300,7 +301,7 @@ bool ScrollablePattern::CoordinateWithNavigation(double& offset, int32_t source,
     if (source == SCROLL_FROM_START) {
         GetParentNavigation();
         CHECK_NULL_RETURN(navBarPattern_, false);
-        if (isAtTop) {
+        if (isAtTop && Positive(offset)) {
             // Starting coordinating scroll at the beginning of scrolling.
             isReactInParentMovement_ = true;
             ProcessNavBarReactOnStart();
@@ -318,8 +319,10 @@ bool ScrollablePattern::CoordinateWithNavigation(double& offset, int32_t source,
         // Starting coordinating scroll during sliding or flipping.
         isReactInParentMovement_ = true;
         ProcessNavBarReactOnStart();
-        offsetRemain = offset - overOffsets.start;
-        offsetCoordinate = overOffsets.start;
+        if (Positive(offset)) {
+            offsetRemain = offset - overOffsets.start;
+            offsetCoordinate = overOffsets.start;
+        }
     }
 
     if (isReactInParentMovement_) {
@@ -329,15 +332,10 @@ bool ScrollablePattern::CoordinateWithNavigation(double& offset, int32_t source,
             SetCanOverScroll(false);
             offset = offsetRemain;
         } else {
-            // Not all offsets are handled by Navigation, list still needs to scroll.
-            if (Positive(offset)) {
-                // When scrolling down, allow list to scroll over.
-                SetCanOverScroll(true);
-            }
             offset = offsetRemain + (offsetCoordinate - handledByNav);
         }
 
-        if (Negative(offset) && source == SCROLL_FROM_ANIMATION_SPRING) {
+        if (Negative(offset) && (source == SCROLL_FROM_ANIMATION_SPRING || !isAtTop)) {
             // When rebounding form scrolling over, trigger the ProcessNavBarReactOnEnd callback.
             isReactInParentMovement_ = false;
             ProcessNavBarReactOnEnd();
