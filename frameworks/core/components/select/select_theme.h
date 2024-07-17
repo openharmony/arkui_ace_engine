@@ -333,6 +333,8 @@ public:
                 return;
             }
             theme->menuBlendBgColor_ = pattern->GetAttr<int>("menu_is_blend_bg_color", 0);
+            theme->optionFocusedBoxPadding_ =
+                pattern->GetAttr<Dimension>("option_focused_box_padding", 0.0_vp);
         }
     };
 
@@ -466,6 +468,7 @@ public:
         theme->selectedFontSizeText = selectedFontSizeText;
         theme->selectNormalLeftRightMargin_ = selectNormalLeftRightMargin_;
         theme->menuBlendBgColor_ = menuBlendBgColor_;
+        theme->optionFocusedBoxPadding_ = optionFocusedBoxPadding_;
         return theme;
     }
 
@@ -1275,6 +1278,11 @@ public:
     {
         return menuBlendBgColor_;
     }
+
+    const Dimension& GetOptionFocusedBoxPadding() const
+    {
+        return optionFocusedBoxPadding_;
+    }
 private:
     Color disabledColor_;
     Color clickedColor_;
@@ -1420,6 +1428,7 @@ private:
     Dimension selectedFontSizeText;
     Dimension selectNormalLeftRightMargin_  = 8.0_vp;
     bool menuBlendBgColor_ = false;
+    Dimension optionFocusedBoxPadding_ = 0.0_vp;
 };
 
 } // namespace OHOS::Ace
