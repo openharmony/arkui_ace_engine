@@ -470,6 +470,11 @@ public:
         return textRect_;
     }
 
+    float GetTextIndent() const
+    {
+        return textIndent_;
+    }
+
     void SetTextRect(const RectF& textRect)
     {
         textRect_ = textRect;
@@ -1519,6 +1524,7 @@ private:
 
     RectF frameRect_;
     RectF textRect_;
+    float textIndent_ = 0.0;
     RefPtr<Paragraph> paragraph_;
     RefPtr<Paragraph> errorParagraph_;
     RefPtr<Paragraph> dragParagraph_;

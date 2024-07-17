@@ -596,7 +596,7 @@ void CircleDotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWr
 {
     auto tempLongAngle = longPointAngle_;
     auto tempvector = vectorBlackPointAngle_;
-    float itemChangeValue = ITEM_PADDING / HALF_DIVISOR * touchBottomRate_;
+    float itemChangeValue = (ITEM_PADDING * touchBottomRate_) / HALF_DIVISOR;
     int displayAreaCount = itemCount_;
     if (itemCount_ >= MAX_INDICATOR_DOT_COUNT) {
         displayAreaCount = MAX_INDICATOR_DOT_COUNT;

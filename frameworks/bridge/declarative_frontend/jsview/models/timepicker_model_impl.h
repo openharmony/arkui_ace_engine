@@ -34,6 +34,7 @@ public:
     void SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) override {};
     void SetBackgroundColor(const Color& color) override;
     void SetChangeEvent(ChangeEvent&& onChange) override {};
+    void SetDigitalCrownSensitivity(int32_t value) override {};
 };
 
 class TimePickerDialogModelImpl : public TimePickerDialogModel {

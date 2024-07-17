@@ -24,10 +24,13 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_properties.h"
+#include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
+#include "core/components_ng/pattern/picker_utils/picker_paint_method_utils.h"
+
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT TextPickerPaintMethod : public NodePaintMethod {
+class ACE_EXPORT TextPickerPaintMethod : public PickerPaintMethodUtils, public NodePaintMethod {
     DECLARE_ACE_TYPE(TextPickerPaintMethod, NodePaintMethod)
 public:
     TextPickerPaintMethod() = default;
@@ -55,6 +58,7 @@ public:
         enabled_ = enabled;
     }
 
+    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
     void PaintDividerLines(RSCanvas& canvas, const RectF& contentRect, const DividerInfo &info,
         bool isDefaultLine = true);

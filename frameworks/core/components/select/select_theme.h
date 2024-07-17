@@ -63,6 +63,7 @@ public:
             }
             ParseNewPattern(themeConstants, theme);
             Parse(themeConstants, theme);
+            ParseExtPattern(themeConstants, theme);
             return theme;
         }
 
@@ -321,6 +322,18 @@ public:
             theme->selectNormalLeftRightMargin_ =
 		pattern->GetAttr<Dimension>("select_normal_left_right_margin", 8.0_vp);
         }
+        void ParseExtPattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SelectTheme>& theme) const
+        {
+            if (!theme) {
+                return;
+            }
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_SELECT);
+            if (!pattern) {
+                LOGE("Pattern of select is null, please check!");
+                return;
+            }
+            theme->menuBlendBgColor_ = pattern->GetAttr<int>("menu_is_blend_bg_color", 0);
+        }
     };
 
     ~SelectTheme() override = default;
@@ -452,6 +465,7 @@ public:
         theme->optionNormalWidth_ = optionNormalWidth_;
         theme->selectedFontSizeText = selectedFontSizeText;
         theme->selectNormalLeftRightMargin_ = selectNormalLeftRightMargin_;
+        theme->menuBlendBgColor_ = menuBlendBgColor_;
         return theme;
     }
 
@@ -1256,6 +1270,11 @@ public:
     {
         return selectNormalLeftRightMargin_;
     }
+
+    bool GetMenuBlendBgColor() const
+    {
+        return menuBlendBgColor_;
+    }
 private:
     Color disabledColor_;
     Color clickedColor_;
@@ -1400,6 +1419,7 @@ private:
     Dimension optionNormalWidth_;
     Dimension selectedFontSizeText;
     Dimension selectNormalLeftRightMargin_  = 8.0_vp;
+    bool menuBlendBgColor_ = false;
 };
 
 } // namespace OHOS::Ace

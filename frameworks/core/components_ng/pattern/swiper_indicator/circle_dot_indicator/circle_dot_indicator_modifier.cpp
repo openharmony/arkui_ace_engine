@@ -148,6 +148,8 @@ void CircleDotIndicatorModifier::PaintBackground(DrawingContext& context, const 
     float width = contentProperty.containerBorderWidth;
     if (touchBottomType_ != TouchBottomType::NONE) {
         width -= QUARTER * touchBottomRate_ * width;
+    } else {
+        backgroundOffset_ = 0;
     }
     float dotActiveAngle = contentProperty.dotActiveAngle;
     auto itemSize = contentProperty.vectorBlackPointAngle.size();

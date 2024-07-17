@@ -216,23 +216,11 @@ void TextFieldPaintMethod::DoTextRaceIfNeed(PaintWrapper* paintWrapper)
     auto paragraph = textFieldPattern->GetParagraph();
     CHECK_NULL_VOID(paragraph);
     auto paintContentWidth = paintWrapper->GetContentSize().Width();
-    if (GreatNotEqual(paintContentWidth, 0.0) && GreatNotEqual(paragraph->GetTextWidth(), paintContentWidth)) {
+    if (GreatNotEqual(paintContentWidth, 0.0) &&
+        GreatNotEqual(paragraph->GetTextWidth() + textFieldPattern->GetTextIndent(), paintContentWidth)) {
         textFieldContentModifier_->SetTextFadeoutEnabled(true);
-        if (!textFieldPattern->HasFocus()) {
-            auto contentRect = frameNode->GetGeometryNode()->GetContentRect();
-            auto textRect = textFieldPattern->GetTextRect();
-            if (LessNotEqual(textRect.GetX(), contentRect.GetX())) {
-                textRect.SetLeft(contentRect.GetX());
-                textFieldPattern->SetTextRect(textRect);
-            }
-
-            textFieldContentModifier_->StartTextRace();
-        } else {
-            textFieldContentModifier_->StopTextRace();
-        }
     } else {
         textFieldContentModifier_->SetTextFadeoutEnabled(false);
-        textFieldContentModifier_->StopTextRace();
     }
 }
 

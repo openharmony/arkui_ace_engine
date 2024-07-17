@@ -77,6 +77,7 @@ public:
                 theme->iconSubSize_ = pattern->GetAttr<double>("rating_icon_sub_size", 0.0);
                 theme->iconBoardDistance_ = pattern->GetAttr<double>("rating_icon_board_distance", 0.0);
                 theme->focusColor_ = pattern->GetAttr<Color>("rating_focus_bgcolor", Color());
+                theme->focusSpace_ = pattern->GetAttr<Dimension>("rating_focus_space", 0.0_vp);
             } else {
                 LOGW("find pattern of rating fail");
             }
@@ -186,6 +187,11 @@ public:
         return borderRadius_;
     }
 
+    const Dimension& GetFocusSpace() const
+    {
+        return focusSpace_;
+    }
+
     const Color& GetHoverColor() const
     {
         return hoverColor_;
@@ -231,6 +237,7 @@ private:
     Dimension ratingMiniWidth_;
     Dimension ratingMiniHeight_;
     Dimension paddingVertical_;
+    Dimension focusSpace_;
     double iconSubSize_ = 0.0;
     double iconBoardDistance_ = 0.0;
     double stepSize_ = 0.0;

@@ -28,6 +28,10 @@
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
+#include "core/components_ng/pattern/picker/picker_type_define.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -43,6 +47,20 @@ public:
     public:
         Builder() = default;
         ~Builder() = default;
+
+        void SetDigitalCrownSensitivity(const RefPtr<PickerTheme>& theme, const RefPtr<ThemeStyle>& themeStyle) const
+        {
+#ifdef SUPPORT_DIGITAL_CROWN
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("picker_pattern", nullptr);
+            if (pattern) {
+                auto sensitivity = pattern->GetAttr<int>("picker_crown_sensitivity",
+                    OHOS::Ace::NG::DEFAULT_CROWNSENSITIVITY);
+                if (sensitivity >= 0 && sensitivity <= static_cast<int32_t>(OHOS::Ace::CrownSensitivity::HIGH)) {
+                    theme->crownSensitivity_ = sensitivity;
+                }
+            }
+#endif
+        }
 
         RefPtr<PickerTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
@@ -126,6 +144,9 @@ public:
                     pattern->GetAttr<Dimension>("picker_normal_option_min_font_size", 0.0_fp));
                 theme->disappearOptionStyle_.SetMaxLines(1);
                 theme->disappearOptionStyle_.SetTextOverflow(TextOverflow::ELLIPSIS);
+                theme->backgroundColor_ = pattern->GetAttr<Color>("picker_background_color", Color(0xffffffff));
+                theme->showCircleDial_= static_cast<bool>(pattern->GetAttr<int>("picker_digital_circle", 0));
+                SetDigitalCrownSensitivity(theme, themeStyle);
             }
 
             theme->focusOptionStyle_.SetFontSize(pattern->GetAttr<Dimension>("picker_focus_option_font_size", 0.0_fp));
@@ -542,6 +563,21 @@ public:
         return selectorItemNormalBgColor_;
     }
 
+    const Color& GetBackgroundColor() const
+    {
+        return backgroundColor_;
+    }
+
+    int32_t GetDigitalCrownSensitivity() const
+    {
+        return crownSensitivity_;
+    }
+
+    bool IsCircleDial() const
+    {
+        return showCircleDial_;
+    }
+
 private:
     PickerTheme() = default;
 
@@ -549,6 +585,9 @@ private:
     Color hoverColor_;
     Color pressColor_;
     Color lunarswitchTextColor_;
+    Color backgroundColor_;
+    int32_t crownSensitivity_ = OHOS::Ace::NG::DEFAULT_CROWNSENSITIVITY;
+    bool showCircleDial_ = false;
 
     Radius focusRadius_;
     uint32_t showOptionCount_ = 0;
