@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text_field/text_field_select_overlay.h"
 
 #include <algorithm>
+#include <cstdint>
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
@@ -68,7 +69,7 @@ void TextFieldSelectOverlay::UpdatePattern(const OverlayRequest& request)
     CHECK_NULL_VOID(pattern);
     bool isRequestSelectAll = (static_cast<uint32_t>(request.requestCode) & REQUEST_SELECT_ALL) == REQUEST_SELECT_ALL;
     auto selectController = pattern->GetTextSelectController();
-    if ((request.requestCode & REQUEST_SELECT_ALL) != REQUEST_SELECT_ALL) {
+    if ((static_cast<uint32_t>(request.requestCode) & REQUEST_SELECT_ALL) != REQUEST_SELECT_ALL) {
         selectController->CalculateHandleOffset();
     }
     if (pattern->IsSelected() && selectController->IsHandleSamePosition()) {
@@ -109,7 +110,7 @@ void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason
     CloseMagnifier();
     if (CloseReason::CLOSE_REASON_BACK_PRESSED == reason) {
         OnResetTextSelection();
-        if (info && info->CanBackPressed()) {
+        if (info && info->isSingleHandle) {
             pattern->OnBackPressed();
         }
     }

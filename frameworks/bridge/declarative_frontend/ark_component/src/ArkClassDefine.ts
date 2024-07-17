@@ -1373,6 +1373,17 @@ class ArkDragPreviewOptions {
   }
 }
 
+class ArkDragPreview {
+  inspetorId : string;
+  constructor() {
+    this.inspetorId = undefined;
+  }
+
+  isEqual(another: ArkDragPreview) : boolean {
+    return this.inspetorId === another.inspetorId;
+  }
+}
+
 class ArkRelativeContainerGuideLine {
   ids: Array<string> | undefined;
   directions: Array<Axis> | undefined;

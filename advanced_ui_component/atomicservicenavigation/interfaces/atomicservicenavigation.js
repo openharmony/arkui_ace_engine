@@ -45,7 +45,7 @@ export class AtomicServiceNavigation extends ViewPU {
             this.navigationContent = v.navigationContent;
         }
         if (v.titleOptions === undefined) {
-            this.__titleOptions.set({ isEnableBlur: true });
+            this.__titleOptions.set({ isBlurEnabled: true });
         }
         if (v.navDestinationBuilder !== undefined) {
             this.navDestinationBuilder = v.navDestinationBuilder;
@@ -143,7 +143,7 @@ export class AtomicServiceNavigation extends ViewPU {
             Navigation.create(this.navPathStack);
             Navigation.title(ObservedObject.GetRawObject(this.title), {
                 backgroundColor: this.titleOptions?.backgroundColor,
-                backgroundBlurStyle: this.titleOptions?.isEnableBlur ? BlurStyle.COMPONENT_THICK : BlurStyle.NONE,
+                backgroundBlurStyle: this.titleOptions?.isBlurEnabled ? BlurStyle.COMPONENT_THICK : BlurStyle.NONE,
                 barStyle: this.titleOptions?.barStyle
             });
             Navigation.titleMode(NavigationTitleMode.Mini);

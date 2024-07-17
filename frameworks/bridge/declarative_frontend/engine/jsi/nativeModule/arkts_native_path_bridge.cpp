@@ -24,7 +24,7 @@ ArkUINativeModuleValue PathBridge::SetPathCommands(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
 
     if (secondArg->IsString(vm)) {
-        std::string commands = secondArg->ToString(vm)->ToString();
+        std::string commands = secondArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getPathModifier()->setPathCommands(nativeNode, commands.c_str());
     } else {
         GetArkUINodeModifiers()->getPathModifier()->resetPathCommands(nativeNode);

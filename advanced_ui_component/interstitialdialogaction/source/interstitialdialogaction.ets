@@ -27,6 +27,10 @@ const DIALOG_OFFSET_Y_FOR_NONE: number = -44;
 const STANDARD_MIN_COMPONENT_HEIGHT: number = 82;
 const STANDARD_MAX_COMPONENT_HEIGHT: number = 94;
 
+const DIALOG_SHADOW_RADIUS: number = 16;
+const DIALOG_SHADOW_OFFSET_Y: number = 10;
+const DIALOG_SHADOW_COLOR: ResourceStr = '#19000000';
+
 const TITLE_LINE_DISTANCE: number = 2;
 const TITLE_MAX_LINE: number = 2;
 const SUBTITLE_MAX_LINE: number = 1;
@@ -165,6 +169,12 @@ function dialogBuilder(params: DialogParams) {
       .margin({ left: TEXT_LEFT_MARGIN_SIZE })
     }
     .backgroundColor(params.options.backgroundImage === undefined ? '#EBEEF5' : 'rgba(0,0,0,0)')
+    .shadow({
+      radius: DIALOG_SHADOW_RADIUS,
+      offsetX: 0,
+      offsetY: DIALOG_SHADOW_OFFSET_Y,
+      color: DIALOG_SHADOW_COLOR
+    })
     .height(STANDARD_MIN_COMPONENT_HEIGHT)
     .width('100%')
     .alignSelf(ItemAlign.End)
@@ -232,11 +242,11 @@ export class InterstitialDialogAction {
   private dialogParam: DialogParams;
   private bottomOffsetType?: BottomOffset;
 
-  constructor(value: DialogOptions) {
-    this.uiContext = value.uiContext;
-    this.bottomOffsetType = value.bottomOffsetType;
+  constructor(dialogOptions: DialogOptions) {
+    this.uiContext = dialogOptions.uiContext;
+    this.bottomOffsetType = dialogOptions.bottomOffsetType;
     this.dialogParam = new DialogParams(
-      value,
+      dialogOptions,
       () => {
         this.closeDialog()
       }

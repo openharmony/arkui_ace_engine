@@ -181,11 +181,17 @@ public:
     void SetSearchIconSize(const Dimension& value);
     void SetSearchIconColor(const Color& color);
     void SetSearchSrcPath(const std::string& src, const std::string& bundleName, const std::string& moduleName);
+    void SetSearchSymbolIcon();
+    void SetSearchImageIcon(IconOptions& iconOptions);
+    void SetCancelSymbolIcon();
+    void SetCancelImageIcon(IconOptions& iconOptions);
     void SetRightIconSrcPath(const std::string& src);
     void SetCancelButtonStyle(const CancelButtonStyle& cancelButtonStyle);
     void SetCancelIconSize(const Dimension& value);
     void SetCancelIconColor(const Color& color);
     void InitIconColorSize();
+    void InitSearchIconColorSize();
+    void InitCancelIconColorSize();
     void CreateSearchIcon(const std::string& src);
     void CreateCancelIcon();
 
@@ -248,6 +254,13 @@ private:
     void HandleClickEvent(GestureEvent& info);
     void UpdateIconChangeEvent();
     bool IsEventEnabled(const std::string& textValue, int16_t style);
+	
+    void CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool isFromModifier);
+    void CreateOrUpdateImage(int32_t index, bool isCreateNode);
+    void UpdateImageIconProperties(RefPtr<FrameNode>& frameNode, int32_t index);
+    void UpdateImageIconNode(int32_t index);
+    void UpdateSymbolIconNode(int32_t index);
+    void UpdateSymbolIconProperties(RefPtr<FrameNode>& frameNode, int32_t index);
 
     void CreateOrUpdateSymbol(int32_t index, bool isCreateNode);
     void CreateOrUpdateImage(int32_t index, const std::string& src, bool isCreateNode, const std::string& bundleName,

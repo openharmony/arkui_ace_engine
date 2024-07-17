@@ -19,6 +19,7 @@
 #include <unistd.h>
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/i18n/localization.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/linear_map.h"
@@ -30,6 +31,8 @@
 #include "core/image/image_cache.h"
 #ifndef ACE_UNITTEST
 #include "core/components/common/painter/rosen_decoration_painter.h"
+#include "core/components/font/constants_converter.h"
+#include "core/components/font/rosen_font_collection.h"
 #include "core/image/image_provider.h"
 #include "core/image/sk_image_cache.h"
 #endif
@@ -442,35 +445,6 @@ void CustomPaintPaintMethod::InitImageCallbacks()
     onPostBackgroundTask_ = [weak = AceType::WeakClaim(this)](CancelableTask task) {};
 #endif
 }
-
-#ifndef ACE_UNITTEST
-void CustomPaintPaintMethod::GetSvgRect(
-    const sk_sp<SkSVGDOM>& skiaDom, const Ace::CanvasImage& canvasImage, RSRect* srcRect, RSRect* dstRect)
-{
-    switch (canvasImage.flag) {
-        case DrawImageType::THREE_PARAMS:
-            *srcRect = RSRect(0, 0, skiaDom->containerSize().width(), skiaDom->containerSize().height());
-            *dstRect = RSRect(canvasImage.dx, canvasImage.dy, skiaDom->containerSize().width() + canvasImage.dx,
-                skiaDom->containerSize().height() + canvasImage.dy);
-            break;
-        case DrawImageType::FIVE_PARAMS: {
-            *srcRect = RSRect(0, 0, skiaDom->containerSize().width(), skiaDom->containerSize().height());
-            *dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
-                canvasImage.dHeight + canvasImage.dy);
-            break;
-        }
-        case DrawImageType::NINE_PARAMS: {
-            *srcRect = RSRect(canvasImage.sx, canvasImage.sy, canvasImage.sWidth + canvasImage.sx,
-                canvasImage.sHeight + canvasImage.sy);
-            *dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
-                canvasImage.dHeight + canvasImage.dy);
-            break;
-        }
-        default:
-            break;
-    }
-}
-#endif
 
 void CustomPaintPaintMethod::DrawSvgImage(
     RefPtr<SvgDomBase> svgDom, const Ace::CanvasImage& canvasImage, const ImageFit& imageFit)
@@ -2012,5 +1986,143 @@ void CustomPaintPaintMethod::SetTransform(const TransformParam& param)
     rsMatrix.SetMatrix(
         param.scaleX, param.skewX, param.translateX, param.skewY, param.scaleY, param.translateY, 0, 0, 1);
     rsCanvas_->SetMatrix(rsMatrix);
+}
+
+TextMetrics CustomPaintPaintMethod::MeasureTextMetrics(const std::string& text, const PaintState& state)
+{
+#ifndef ACE_UNITTEST
+    TextMetrics textMetrics;
+    RSParagraphStyle style;
+    style.textAlign = Constants::ConvertTxtTextAlign(state.GetTextAlign());
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+    CHECK_NULL_RETURN(fontCollection, textMetrics);
+    std::unique_ptr<RSParagraphBuilder> builder = RSParagraphBuilder::Create(style, fontCollection);
+    RSTextStyle txtStyle;
+    ConvertTxtStyle(state.GetTextStyle(), txtStyle);
+    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
+    builder->PushStyle(txtStyle);
+    builder->AppendText(StringUtils::Str8ToStr16(text));
+
+    auto paragraph = builder->CreateTypography();
+    paragraph->Layout(Size::INFINITE_SIZE);
+    /**
+     * @brief reference: https://html.spec.whatwg.org/multipage/canvas.html#dom-textmetrics-alphabeticbaseline
+     *
+     */
+    auto fontMetrics = paragraph->MeasureText();
+    auto glyphsBoundsTop = paragraph->GetGlyphsBoundsTop();
+    auto glyphsBoundsBottom = paragraph->GetGlyphsBoundsBottom();
+    auto glyphsBoundsLeft = paragraph->GetGlyphsBoundsLeft();
+    auto glyphsBoundsRight = paragraph->GetGlyphsBoundsRight();
+    auto textAlign = state.GetTextAlign();
+    auto textBaseLine = state.GetTextStyle().GetTextBaseline();
+    const double baseLineY = GetFontBaseline(fontMetrics, textBaseLine);
+    const double baseLineX = GetFontAlign(textAlign, paragraph);
+
+    textMetrics.width = paragraph->GetMaxIntrinsicWidth();
+    textMetrics.height = paragraph->GetHeight();
+    textMetrics.actualBoundingBoxAscent = baseLineY - glyphsBoundsTop;
+    textMetrics.actualBoundingBoxDescent = glyphsBoundsBottom - baseLineY;
+    textMetrics.actualBoundingBoxLeft = baseLineX - glyphsBoundsLeft;
+    textMetrics.actualBoundingBoxRight = glyphsBoundsRight - baseLineX;
+    textMetrics.alphabeticBaseline = baseLineY;
+    textMetrics.ideographicBaseline = baseLineY - fontMetrics.fDescent;
+    textMetrics.fontBoundingBoxAscent = baseLineY - fontMetrics.fTop;
+    textMetrics.fontBoundingBoxDescent = fontMetrics.fBottom - baseLineY;
+    textMetrics.hangingBaseline = baseLineY - (HANGING_PERCENT * fontMetrics.fAscent);
+    textMetrics.emHeightAscent = baseLineY - fontMetrics.fAscent;
+    textMetrics.emHeightDescent = fontMetrics.fDescent - baseLineY;
+    return textMetrics;
+#else
+    return TextMetrics {};
+#endif
+}
+
+bool CustomPaintPaintMethod::UpdateParagraph(const std::string& text, bool isStroke, bool hasShadow)
+{
+#ifndef ACE_UNITTEST
+    RSParagraphStyle style;
+    if (isStroke) {
+        style.textAlign = Constants::ConvertTxtTextAlign(state_.strokeState.GetTextAlign());
+    } else {
+        style.textAlign = Constants::ConvertTxtTextAlign(state_.fillState.GetTextAlign());
+    }
+    style.textDirection = Constants::ConvertTxtTextDirection(state_.fillState.GetOffTextDirection());
+    style.textAlign = GetEffectiveAlign(style.textAlign, style.textDirection);
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+    CHECK_NULL_RETURN(fontCollection, false);
+    std::unique_ptr<RSParagraphBuilder> builder = RSParagraphBuilder::Create(style, fontCollection);
+    RSTextStyle txtStyle;
+    if (!isStroke && hasShadow) {
+        Rosen::TextShadow txtShadow;
+        txtShadow.color = state_.shadow.GetColor().GetValue();
+        txtShadow.offset.SetX(state_.shadow.GetOffset().GetX());
+        txtShadow.offset.SetY(state_.shadow.GetOffset().GetY());
+        txtShadow.blurRadius = state_.shadow.GetBlurRadius();
+        txtStyle.shadows.emplace_back(txtShadow);
+    }
+    txtStyle.locale = Localization::GetInstance()->GetFontLocale();
+    UpdateFontFamilies();
+    UpdateTextStyleForeground(isStroke, txtStyle, hasShadow);
+    builder->PushStyle(txtStyle);
+    builder->AppendText(StringUtils::Str8ToStr16(text));
+    paragraph_ = builder->CreateTypography();
+    return true;
+#else
+    return false;
+#endif
+}
+
+void CustomPaintPaintMethod::UpdateTextStyleForeground(bool isStroke, RSTextStyle& txtStyle, bool hasShadow)
+{
+#ifndef ACE_UNITTEST
+    if (!isStroke) {
+        txtStyle.foregroundPen = std::nullopt;
+        txtStyle.color = Constants::ConvertSkColor(state_.fillState.GetColor());
+        txtStyle.fontSize = state_.fillState.GetTextStyle().GetFontSize().Value();
+        ConvertTxtStyle(state_.fillState.GetTextStyle(), txtStyle);
+        if (state_.fillState.GetGradient().IsValid() && state_.fillState.GetPaintStyle() == PaintStyle::Gradient) {
+            RSBrush brush;
+            RSSamplingOptions options;
+            InitImagePaint(nullptr, &brush, options);
+            UpdatePaintShader(nullptr, &brush, state_.fillState.GetGradient());
+            txtStyle.foregroundBrush = brush;
+        }
+        if (state_.globalState.HasGlobalAlpha()) {
+            if (txtStyle.foregroundBrush.has_value()) {
+                txtStyle.foregroundBrush->SetColor(state_.fillState.GetColor().GetValue());
+                txtStyle.foregroundBrush->SetAlphaF(state_.globalState.GetAlpha()); // set alpha after color
+            } else {
+                RSBrush brush;
+                RSSamplingOptions options;
+                InitImagePaint(nullptr, &brush, options);
+                brush.SetColor(state_.fillState.GetColor().GetValue());
+                brush.SetAlphaF(state_.globalState.GetAlpha()); // set alpha after color
+                InitPaintBlend(brush);
+                txtStyle.foregroundBrush = brush;
+            }
+        }
+    } else {
+        // use foreground to draw stroke
+        txtStyle.foregroundPen = std::nullopt;
+        RSPen pen;
+        RSSamplingOptions options;
+        GetStrokePaint(pen, options);
+        InitPaintBlend(pen);
+        ConvertTxtStyle(state_.strokeState.GetTextStyle(), txtStyle);
+        txtStyle.fontSize = state_.strokeState.GetTextStyle().GetFontSize().Value();
+        if (state_.strokeState.GetGradient().IsValid() && state_.strokeState.GetPaintStyle() == PaintStyle::Gradient) {
+            UpdatePaintShader(&pen, nullptr, state_.strokeState.GetGradient());
+        }
+        if (hasShadow) {
+            pen.SetColor(state_.shadow.GetColor().GetValue());
+            RSFilter filter;
+            filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL,
+                RosenDecorationPainter::ConvertRadiusToSigma(state_.shadow.GetBlurRadius())));
+            pen.SetFilter(filter);
+        }
+        txtStyle.foregroundPen = pen;
+    }
+#endif
 }
 } // namespace OHOS::Ace::NG

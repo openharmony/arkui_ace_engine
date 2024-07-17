@@ -35,6 +35,10 @@ private:
     SizeF MeasureAndGetSize(const RefPtr<LayoutWrapper>& childLayoutWrapper, const LayoutConstraintF& constraint);
     void MeasureAndGetTextSize(double fontSize, SizeF& textSize, bool& isTextMin);
     float MeasureAndGetDefaultHeight(RefPtr<LayoutProperty> layoutProps, RefPtr<SelectTheme> theme);
+    void NeedAgingUpdateParams(LayoutWrapper* layoutWrapper);
+    void UpdateOptionsMaxLines(const std::vector<RefPtr<FrameNode>>& options, int32_t maxLines);
+
+    float fontScale_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectLayoutAlgorithm);
 };

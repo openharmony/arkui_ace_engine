@@ -75,6 +75,8 @@ private:
     };
 
     bool IsStylusTouchEvent(const TouchEvent& touchEvent) const;
+    bool IsHitCleanNodeResponseArea(
+        const NG::PointF& point, const RefPtr<NG::FrameNode>& frameNode, uint64_t nanoTimestamp);
 
     RefPtr<NG::FrameNode> FindTextInputFrameNodeByPosition(float globalX, float globalY);
 

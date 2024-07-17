@@ -959,6 +959,48 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AttrScrollSnapAlign007
+ * @tc.desc: Test LayoutProperty about ScrollSnapAlign in UnScrollable List
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign007, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    CreateListItems(VIEW_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    EXPECT_EQ(pattern_->GetScrollableDistance(), 0.f);
+
+    /**
+     * @tc.steps: stpe1. Scroll delta greater than half of ITEM_HEIGHT
+     * @tc.expected: The item(index:0) align to start
+     */
+    ScrollSnapForEqualHeightItem(-51.f, -1200.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+}
+
+/**
+ * @tc.name: AttrScrollSnapAlign008
+ * @tc.desc: Test LayoutProperty about ScrollSnapAlign::NONE
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign008, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::NONE);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    EXPECT_EQ(pattern_->GetScrollableDistance(), 200.f);
+
+    /**
+     * @tc.steps: stpe1. Scroll delta greater than half of ITEM_HEIGHT
+     * @tc.expected: Has no Snap effect
+     */
+    ScrollSnapForEqualHeightItem(-51.f, -1200.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 51.f);
+}
+
+/**
  * @tc.name: AttrSLECM001
  * @tc.desc: Test property about edgeEffect/chainAnimation/multiSelectable
  * @tc.type: FUNC
@@ -1446,5 +1488,18 @@ HWTEST_F(ListAttrTestNg, FadingEdge002, TestSize.Level1)
     EXPECT_EQ(pattern_->startMainPos_, -50.f);
     EXPECT_EQ(pattern_->endMainPos_, 490.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), 50.f);
+}
+
+/**
+ * @tc.name: GetOrCreateController001
+ * @tc.desc: Test GetOrCreateController
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, GetOrCreateController001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    auto controller = model.GetOrCreateController(AceType::RawPtr(frameNode_));
+    CreateDone(frameNode_);
+    EXPECT_NE(controller, nullptr);
 }
 } // namespace OHOS::Ace::NG

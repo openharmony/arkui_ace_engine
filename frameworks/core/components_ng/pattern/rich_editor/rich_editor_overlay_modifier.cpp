@@ -191,6 +191,9 @@ void RichEditorOverlayModifier::PaintCaret(DrawingContext& drawingContext) const
     if (GreatOrEqual(offset.GetX() + caretWidth_->Get(), contentRect_.value().Right())) {
         drawingContext.canvas.DrawRect(RSRect(
             offset.GetX() - caretWidth_->Get(), offset.GetY(), offset.GetX(), offset.GetY() + caretHeight_->Get()));
+    } else if (GreatOrEqual(offset.GetY() + caretHeight_->Get(), contentRect_.value().Bottom())) {
+        drawingContext.canvas.DrawRect(RSRect(
+            offset.GetX(), offset.GetY(), offset.GetX() + caretWidth_->Get(), contentRect_.value().Bottom()));
     } else {
         drawingContext.canvas.DrawRect(RSRect(
             offset.GetX(), offset.GetY(), offset.GetX() + caretWidth_->Get(), offset.GetY() + caretHeight_->Get()));
@@ -218,15 +221,18 @@ void RichEditorOverlayModifier::onDraw(DrawingContext& drawingContext)
 {
     ACE_SCOPED_TRACE("RichEditorOverlayOnDraw");
     drawingContext.canvas.Save();
-    if (contentRect_.has_value()) {
+    auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(richEditorPattern);
+    auto contentRect = richEditorPattern->GetTextContentRect();
+    if (!contentRect.IsEmpty()) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
         auto defaultCaretHeight = richEditorTheme->GetDefaultCaretHeight().ConvertToPx();
-        if (contentRect_->Height() < defaultCaretHeight) {
-            contentRect_->SetHeight(defaultCaretHeight);
+        if (contentRect.Height() < defaultCaretHeight) {
+            contentRect.SetHeight(defaultCaretHeight);
         }
-        drawingContext.canvas.ClipRect(ToRSRect(contentRect_.value()), RSClipOp::INTERSECT);
+        drawingContext.canvas.ClipRect(ToRSRect(contentRect), RSClipOp::INTERSECT);
     }
     PaintCaret(drawingContext);
     PaintPreviewTextDecoration(drawingContext);

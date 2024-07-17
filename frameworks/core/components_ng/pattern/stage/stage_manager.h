@@ -37,7 +37,9 @@ public:
     explicit StageManager(const RefPtr<FrameNode>& stage);
     ~StageManager() override = default;
 
-    virtual bool PushPage(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true);
+    // PushUrl and ReplaceUrl both use PushPage function
+    virtual bool PushPage(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true,
+        bool isPush = false);
     virtual bool InsertPage(const RefPtr<FrameNode>& node, bool bellowTopOrBottom);
     virtual bool PopPage(bool needShowNext = true, bool needTransition = true);
     virtual bool PopPageToIndex(int32_t index, bool needShowNext = true, bool needTransition = true);
@@ -67,6 +69,20 @@ public:
         stageInTrasition_ = stageInTrasition;
     }
 
+#if defined(ENABLE_SPLIT_MODE)
+    bool IsNewPageReplacing() const
+    {
+        return isNewPageReplacing_;
+    }
+
+    void SetIsNewPageReplacing(bool replacing)
+    {
+        isNewPageReplacing_ = replacing;
+    }
+#endif
+
+    virtual void SyncPageSafeArea(const RefPtr<FrameNode>& lastPage, PropertyChangeFlag changeFlag);
+
 protected:
     // ace performance check
     void PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout);
@@ -79,6 +95,9 @@ protected:
     WeakPtr<FrameNode> destPageNode_;
     WeakPtr<FrameNode> srcPageNode_;
     bool stageInTrasition_ = false;
+#if defined(ENABLE_SPLIT_MODE)
+    bool isNewPageReplacing_ = false;
+#endif
 
     ACE_DISALLOW_COPY_AND_MOVE(StageManager);
 };

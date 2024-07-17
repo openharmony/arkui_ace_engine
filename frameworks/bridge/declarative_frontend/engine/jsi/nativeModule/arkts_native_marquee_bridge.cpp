@@ -58,7 +58,7 @@ ArkUINativeModuleValue MarqueeBridge::SetFontWeight(ArkUIRuntimeCallInfo* runtim
         if (weightArg->IsNumber()) {
             weight = std::to_string(weightArg->Int32Value(vm));
         } else if (weightArg->IsString(vm)) {
-            weight = weightArg->ToString(vm)->ToString();
+            weight = weightArg->ToString(vm)->ToString(vm);
         }
     }
     GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeFontWeight(nativeNode, weight.c_str());
@@ -85,7 +85,7 @@ ArkUINativeModuleValue MarqueeBridge::SetFontFamily(ArkUIRuntimeCallInfo* runtim
     if (!secondArg->IsString(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
-    std::string families = secondArg->ToString(vm)->ToString();
+    std::string families = secondArg->ToString(vm)->ToString(vm);
     GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeFontFamily(nativeNode, families.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
@@ -161,7 +161,7 @@ ArkUINativeModuleValue MarqueeBridge::SetMarqueeUpdateStrategy(ArkUIRuntimeCallI
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    auto value = secondArg->ToString(vm)->ToString();
+    auto value = secondArg->ToString(vm)->ToString(vm);
     static const LinearMapNode<MarqueeUpdateStrategy> marqueeUpdateStrategyTable[] = {
         { "default", MarqueeUpdateStrategy::DEFAULT },
         { "preserve_position", MarqueeUpdateStrategy::PRESERVE_POSITION },

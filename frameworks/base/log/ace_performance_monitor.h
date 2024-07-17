@@ -64,6 +64,7 @@ public:
     void RecordStateMgmtNode(int64_t num);
     void RecordLayoutNode(int64_t num = 1);
     void RecordRenderNode(int64_t num = 1);
+    void RecordDisplaySyncRate(int32_t displaySyncRate);
     void SetRecordingStatus(MonitorTag tag, MonitorStatus status);
 
 private:
@@ -78,6 +79,7 @@ private:
     TimePoint begin_;
     TimePoint end_;
     int64_t monitorStatus_;
+    int32_t displaySyncRate_ = 0;
 };
 } // namespace OHOS::Ace
 

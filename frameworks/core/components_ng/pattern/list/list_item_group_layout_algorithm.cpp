@@ -1126,6 +1126,25 @@ void ListItemGroupLayoutAlgorithm::SetListItemIndex(const LayoutWrapper* groupLa
     listItem->SetIndexInList(listItemGroup->GetIndexInList());
 }
 
+ListItemGroupLayoutInfo ListItemGroupLayoutAlgorithm::GetLayoutInfo() const
+{
+    ListItemGroupLayoutInfo info;
+    if (totalItemCount_ == 0) {
+        info.atStart = true;
+        info.atEnd = true;
+        return info;
+    }
+    if (layoutedItemInfo_.has_value()) {
+        const auto& itemInfo = layoutedItemInfo_.value();
+        info.atStart = itemInfo.startIndex == 0;
+        info.atEnd = itemInfo.endIndex == totalItemCount_ - 1;
+        auto totalHeight = (layoutedItemInfo_.value().endPos - layoutedItemInfo_.value().startPos + spaceWidth_);
+        auto itemCount = layoutedItemInfo_.value().endIndex - layoutedItemInfo_.value().startIndex + 1;
+        info.averageHeight = totalHeight / itemCount;
+    }
+    return info;
+}
+
 bool ListItemGroupLayoutAlgorithm::IsCardStyleForListItemGroup(const LayoutWrapper* groupLayoutWrapper)
 {
     auto host = groupLayoutWrapper->GetHostNode();

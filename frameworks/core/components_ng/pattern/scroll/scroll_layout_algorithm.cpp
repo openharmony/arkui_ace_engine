@@ -148,6 +148,10 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         UpdateScrollAlignment(scrollAlignment);
     }
     auto alignmentPosition = Alignment::GetAlignPosition(size, viewPortExtent_, scrollAlignment);
+    if (GreatNotEqual(viewPortExtent_.Width(), size.Width()) && layoutDirection == TextDirection::RTL &&
+        axis == Axis::VERTICAL) {
+        alignmentPosition.SetX(size.Width() - viewPortExtent_.Width());
+    }
     childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentOffset + alignmentPosition);
     childWrapper->Layout();
 }

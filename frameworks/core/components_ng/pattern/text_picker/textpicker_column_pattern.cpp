@@ -1133,7 +1133,7 @@ void TextPickerColumnPattern::HandleDragEnd()
         ScrollOption(0.0);
         return;
     }
-    int32_t middleIndex = GetShowOptionCount() / HALF_NUMBER;
+    int32_t middleIndex = static_cast<int32_t>(GetShowOptionCount()) / HALF_NUMBER;
     auto shiftDistance = isDownScroll_ ? optionProperties_[middleIndex].nextDistance
                                        : optionProperties_[middleIndex].prevDistance;
     auto shiftThreshold = shiftDistance / HALF_NUMBER;
@@ -1258,7 +1258,7 @@ void TextPickerColumnPattern::CalcAlgorithmOffset(double distancePercent)
 
 double TextPickerColumnPattern::GetShiftDistance(int32_t index, ScrollDirection dir)
 {
-    int32_t optionCounts = GetShowOptionCount();
+    int32_t optionCounts = static_cast<int32_t>(GetShowOptionCount());
     if (optionCounts == 0) {
         return 0.0;
     }
@@ -1326,6 +1326,12 @@ double TextPickerColumnPattern::GetUpCandidateDistance(int32_t index, int32_t ne
 {
     double distance = 0.0;
     double val = 0.0;
+    // the index of last element in optionProperties_. return -1 while the arraySize equals 0.
+    auto maxIndex = static_cast<int32_t>(optionProperties_.size()) - 1;
+    auto minIndex = 0;
+    if (index > maxIndex || index < minIndex || nextIndex > maxIndex || nextIndex < minIndex) {
+        return distance;
+    }
     if (columnkind_ == TEXT) {
         if (dir == ScrollDirection::UP) {
             distance = -optionProperties_[nextIndex].height;
@@ -1394,7 +1400,7 @@ double TextPickerColumnPattern::GetShiftDistanceForLandscape(int32_t index, Scro
 
 void TextPickerColumnPattern::SetOptionShiftDistance()
 {
-    int32_t itemCounts = GetShowOptionCount();
+    auto itemCounts = GetShowOptionCount();
     bool isLanscape = itemCounts == OPTION_COUNT_PHONE_LANDSCAPE + BUFFER_NODE_NUMBER;
     for (int32_t i = 0; i < itemCounts; i++) {
         TextPickerOptionProperty& prop = optionProperties_[i];

@@ -461,7 +461,7 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
         return HandleCaretWhenEmpty(result);
     }
     if (static_cast<size_t>(extent) > GetParagraphLength()) {
-        extent = GetParagraphLength();
+        extent = static_cast<int32_t>(GetParagraphLength());
     }
 
     extent = AdjustIndexForEmoji(extent);
@@ -499,7 +499,7 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
         boxes = paragrah->GetRectsForRange(
             prev, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
-        boxes = paragrah->GetTextRectsByBoundary(prev, extent,
+        boxes = paragrah->GetTextRectsByBoundary(prev, static_cast<size_t>(extent),
             needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM : Rosen::TextRectHeightStyle::TIGHT,
             Rosen::TextRectWidthStyle::TIGHT);
 #endif
@@ -630,19 +630,31 @@ void TxtParagraph::GetRectsForRange(int32_t start, int32_t end, std::vector<Rect
 {
     auto adjustStart = AdjustIndexForEmoji(start);
     auto adjustEnd = AdjustIndexForEmoji(end);
-    GetRectsForRangeInner(adjustStart, adjustEnd, selectedRects);
+    GetRectsForRangeInner(adjustStart, adjustEnd, selectedRects, RectHeightPolicy::COVER_LINE);
 }
 
-void TxtParagraph::GetRectsForRangeInner(int32_t start, int32_t end, std::vector<RectF>& selectedRects)
+void TxtParagraph::GetTightRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects)
+{
+    auto adjustStart = AdjustIndexForEmoji(start);
+    auto adjustEnd = AdjustIndexForEmoji(end);
+    GetRectsForRangeInner(adjustStart, adjustEnd, selectedRects, RectHeightPolicy::COVER_TEXT);
+}
+
+void TxtParagraph::GetRectsForRangeInner(int32_t start, int32_t end, std::vector<RectF>& selectedRects,
+    RectHeightPolicy rectHeightPolicy)
 {
     auto paragrah = GetParagraph();
     CHECK_NULL_VOID(paragrah);
 #ifndef USE_GRAPHIC_TEXT_GINE
-    const auto& boxes = paragrah->GetRectsForRange(
-        start, end, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
+    auto heightStyle = rectHeightPolicy == RectHeightPolicy::COVER_TEXT
+        ? txt::Paragraph::RectHeightStyle::kTight
+        : txt::Paragraph::RectHeightStyle::kMax;
+    const auto& boxes = paragrah->GetRectsForRange(start, end, heightStyle, txt::Paragraph::RectWidthStyle::kTight);
 #else
-    const auto& boxes = paragrah->GetTextRectsByBoundary(
-        start, end, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+    auto heightStyle = rectHeightPolicy == RectHeightPolicy::COVER_TEXT
+        ? Rosen::TextRectHeightStyle::TIGHT
+        : Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM;
+    const auto& boxes = paragrah->GetTextRectsByBoundary(start, end, heightStyle, Rosen::TextRectWidthStyle::TIGHT);
 #endif
     if (boxes.empty()) {
         return;

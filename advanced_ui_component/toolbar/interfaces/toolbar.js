@@ -76,7 +76,7 @@ export class ToolBar extends ViewPU {
     this.__toolBarList = new SynchedPropertyNesedObjectPU(params.toolBarList, this, 'toolBarList');
     this.controller = new TabsController();
     this.__activateIndex = new SynchedPropertySimpleOneWayPU(params.activateIndex, this, 'activateIndex');
-    this.__moreText = new SynchedPropertySimpleOneWayPU(params.moreText, this, 'moreText');
+    this.__moreText = new SynchedPropertyObjectOneWayPU(params.moreText, this, 'moreText');
     this.__menuContent = new ObservedPropertyObjectPU([], this, 'menuContent');
     this.toolBarItemBackground = [];
     this.__itemBackground = new ObservedPropertyObjectPU({
@@ -127,7 +127,13 @@ export class ToolBar extends ViewPU {
       this.__activateIndex.set(-1);
     }
     if (params.moreText === undefined) {
-      this.__moreText.set('更多');
+      this.__moreText.set({
+        'id': -1,
+        'type': 10003,
+        params: ['sys.string.ohos_toolbar_more'],
+        'bundleName': '',
+        'moduleName': '',
+      });
     }
     if (params.menuContent !== undefined) {
       this.menuContent = params.menuContent;

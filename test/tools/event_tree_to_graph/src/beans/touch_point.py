@@ -17,7 +17,7 @@
 #
 
 from src.beans.base_bean import BaseBean
-from src.keywords import touch_point_keyword
+from src.keywords import touch_point_keyword, get_sample_key, get_sample_separator_count
 from src.utils.log_wrapper import log_info
 from src.utils.value_parser import get_value_as_int, get_value_as_str
 
@@ -36,18 +36,18 @@ class TouchPoint(BaseBean):
     def __init__(self, input_str):
         super().__init__()
         self.original_str = input_str
-        self.id = get_value_as_int(input_str, touch_point_keyword['id'].key,
-                                   touch_point_keyword['id'].value_separator_count)
-        self.point = get_value_as_str(input_str, touch_point_keyword['point'].key,
-                                      touch_point_keyword['point'].value_separator_count)
-        self.screenPoint = get_value_as_str(input_str, touch_point_keyword['screenPoint'].key,
-                                            touch_point_keyword['screenPoint'].value_separator_count)
-        self.type = get_value_as_str(input_str, touch_point_keyword['type'].key,
-                                     touch_point_keyword['type'].value_separator_count)
-        self.timestamp = get_value_as_str(input_str, touch_point_keyword['timestamp'].key,
-                                          touch_point_keyword['timestamp'].value_separator_count)
-        self.isInjected = get_value_as_int(input_str, touch_point_keyword['isInjected'].key,
-                                           touch_point_keyword['isInjected'].value_separator_count, True)
+        self.id = get_value_as_int(input_str, get_sample_key(touch_point_keyword, 'id'),
+                                   get_sample_separator_count(touch_point_keyword, 'id'))
+        self.point = get_value_as_str(input_str, get_sample_key(touch_point_keyword, 'point'),
+                                      get_sample_separator_count(touch_point_keyword, 'point'))
+        self.screenPoint = get_value_as_str(input_str, get_sample_key(touch_point_keyword, 'screenPoint'),
+                                            get_sample_separator_count(touch_point_keyword, 'screenPoint'))
+        self.type = get_value_as_str(input_str, get_sample_key(touch_point_keyword, 'type'),
+                                     get_sample_separator_count(touch_point_keyword, 'type'))
+        self.timestamp = get_value_as_str(input_str, get_sample_key(touch_point_keyword, 'timestamp'),
+                                          get_sample_separator_count(touch_point_keyword, 'timestamp'))
+        self.isInjected = get_value_as_int(input_str, get_sample_key(touch_point_keyword, 'isInjected'),
+                                           get_sample_separator_count(touch_point_keyword, 'isInjected'), True)
         self.check_parse_result()
 
     def check_parse_result(self):
@@ -58,14 +58,12 @@ class TouchPoint(BaseBean):
             self.parse_succeed()
 
     def to_string(self):
-        return '  id: ' + str(
-            self.id) + ', point: ' + self.point + ', screenPoint: ' + self.screenPoint + ', type: ' + self.type + (
-            ', timestamp: ') + self.timestamp + ', isInjected: ' + str(
-            self.isInjected)
+        return ('id: {}, point: {}, screenPoint: {}, type: {}, timestamp: {}, isInjected: {}'
+                .format(self.id, self.point, self.screenPoint, self.type, self.timestamp, self.isInjected))
 
     def to_summary_string(self):
-        return 'id: ' + str(self.id) + ', ' + self.point + ', ' + self.screenPoint + ', ' + self.type + (
-            ', ') + self.timestamp
+        return ('id: {}, {}, {}, {}, {}'
+                .format(str(self.id), self.point, self.screenPoint, self.type, self.timestamp))
 
     def dump(self):
         log_info(self.to_string())

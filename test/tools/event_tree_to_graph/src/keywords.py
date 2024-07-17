@@ -42,6 +42,9 @@
 #      procedure: HandleTouchUp, timestamp: 2017-08-25 15:00:22.295
 
 
+from typing import Dict, Any
+
+
 class KeyValueSample:
     key = ""
     value = ""
@@ -134,3 +137,30 @@ event_procedure_keyword = {
     "distance": KeyValueSample("distance: 7.5"),
     "fingers": KeyValueSample("fingers: 1")
 }
+
+
+def get_dict_value(input_dict: Dict[str, Any], key: str) -> Any:
+    if not isinstance(input_dict, dict):
+        raise ValueError("input_dict must be a dictionary")
+    return input_dict.get(key)
+
+
+def get_sample_key(input_dict: Dict[str, KeyValueSample], name: str) -> str:
+    sample: KeyValueSample = get_dict_value(input_dict, name)
+    if sample is None:
+        return ''
+    return sample.key
+
+
+def get_sample_value(input_dict: Dict[str, KeyValueSample], name: str) -> str:
+    sample: KeyValueSample = get_dict_value(input_dict, name)
+    if sample is None:
+        return ''
+    return sample.value
+
+
+def get_sample_separator_count(input_dict: Dict[str, KeyValueSample], name: str) -> int:
+    sample: KeyValueSample = get_dict_value(input_dict, name)
+    if sample is None:
+        return 0
+    return sample.value_separator_count

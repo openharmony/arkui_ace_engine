@@ -137,6 +137,7 @@ function disabledStyle() {
 
 class SubHeaderModifier implements AttributeModifier<RowAttribute> {
   public isAgeing: boolean = false
+
   applyNormalAttribute(instance: RowAttribute): void {
     if (this.isAgeing) {
       instance.width('100%')
@@ -226,7 +227,7 @@ export struct SubHeader {
           this.textArrowBgColor = $r('sys.color.interactive_pressed');
         }
         if (this.operationType === OperationType.BUTTON) {
-          this.buttonBgColor =  $r('sys.color.interactive_pressed');
+          this.buttonBgColor = $r('sys.color.interactive_pressed');
         }
       }
       if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
@@ -286,9 +287,9 @@ export struct SubHeader {
         })
         .padding({
           // 'sys.float.margin_left' id,value: 16vp
-          start: LengthMetrics.vp((Util.getNumberByResource(125830936) ?? 16) - this.paddingLeft),
+          start: LengthMetrics.vp(Util.getNumberByResource(125830936, LEFT_ICON_SIZE_NUMBER) - this.paddingLeft),
           // 'sys.float.margin_right' id,value: 16vp
-          end: LengthMetrics.vp(Util.getNumberByResource(125830937) ?? 16),
+          end: LengthMetrics.vp(Util.getNumberByResource(125830937, LEFT_ICON_SIZE_NUMBER)),
         })
         .justifyContent(FlexAlign.Start)
         .width('100%')
@@ -913,18 +914,6 @@ struct SingleIconStyle {
 }
 
 class Util {
-  private static readonly DEFAULT_VALUE: number = 0;
-  private static readonly DEFAULT_BREAKPOINT_S: number = 600;
-  private static readonly DEFAULT_BREAKPOINT_M: number = 840;
-  // 'sys.float.breakpoint_horizontal_s' id,value: 600vp
-  private static readonly CALCULATE_BREAKPOINT_S: number = this.getNumberByResource(125832765) ?? 600;
-  // 'sys.float.breakpoint_horizontal_m' id,value: 800vp
-  private static readonly CALCULATE_BREAKPOINT_M: number = this.getNumberByResource(125832766) ?? 840;
-  public static readonly BREAKPOINT_S: number =
-    this.CALCULATE_BREAKPOINT_S === this.DEFAULT_VALUE ? this.DEFAULT_BREAKPOINT_S : this.CALCULATE_BREAKPOINT_S;
-  public static readonly BREAKPOINT_M: number =
-    this.CALCULATE_BREAKPOINT_M === this.DEFAULT_VALUE ? this.DEFAULT_BREAKPOINT_M : this.CALCULATE_BREAKPOINT_M;
-
   /**
    * 是否symbol资源
    * @param resourceStr  资源
@@ -959,14 +948,19 @@ class Util {
    * @param resourceName resource id
    * @returns resource size
    */
-  public static getNumberByResource(resourceId: number): number | null {
+  public static getNumberByResource(resourceId: number, defaultNumber: number): number {
     try {
-      return resourceManager.getSystemResourceManager().getNumber(resourceId);
+      let resourceNumber: number = resourceManager.getSystemResourceManager().getNumber(resourceId);
+      if (resourceNumber === 0) {
+        return defaultNumber;
+      } else {
+        return resourceNumber;
+      }
     } catch (error) {
       let code: number = (error as BusinessError).code;
       let message: string = (error as BusinessError).message;
       hilog.error(0x3900, 'Ace', `SubHeader getNumberByResource error, code: ${code}, message: ${message}`);
-      return null;
+      return 0;
     }
   }
 

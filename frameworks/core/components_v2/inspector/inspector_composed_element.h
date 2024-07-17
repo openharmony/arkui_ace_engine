@@ -291,7 +291,7 @@ private:
     void OnVisibleAreaChangeCallback(
         VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio);
     double CalculateCurrentVisibleRatio(const Rect& visibleRect, const Rect& renderRect);
-    bool isRectValid_;
+    bool isRectValid_ = false;
     std::string key_;
     std::unique_ptr<std::pair<Rect, Offset>> lastRectOriginPtr_;
 };

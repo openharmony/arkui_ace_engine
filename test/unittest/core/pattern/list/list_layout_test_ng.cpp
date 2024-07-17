@@ -73,7 +73,7 @@ HWTEST_F(ListLayoutTestNg, GetOverScrollOffset001, TestSize.Level1)
     expectOffset = { 0, -ITEM_HEIGHT };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
 
-    ScrollDown();
+    ScrollTo(ITEM_HEIGHT);
     offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT);
     expectOffset = { ITEM_HEIGHT, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
@@ -95,7 +95,7 @@ HWTEST_F(ListLayoutTestNg, GetOverScrollOffset001, TestSize.Level1)
     expectOffset = { 0, -ITEM_HEIGHT };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
 
-    ScrollDown();
+    ScrollTo(ITEM_HEIGHT);
     offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT);
     expectOffset = { ITEM_HEIGHT, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
@@ -118,7 +118,7 @@ HWTEST_F(ListLayoutTestNg, GetOverScrollOffset001, TestSize.Level1)
     expectOffset = { 0, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
 
-    ScrollDown();
+    UpdateCurrentOffset(-ITEM_HEIGHT);
     offset = pattern_->GetOverScrollOffset(ITEM_HEIGHT);
     expectOffset = { 0, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
@@ -332,7 +332,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset004, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetContentStartOffset(contentStartOffset);
     model.SetContentEndOffset(contentEndOffset);
-    CreateGroupWithSetting(groupNumber, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    CreateGroupWithSetting(groupNumber, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
 
     /**
@@ -383,7 +383,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset005, TestSize.Level1)
     model.SetContentStartOffset(contentStartOffset);
     model.SetContentEndOffset(contentEndOffset);
     model.SetSticky(V2::StickyStyle::BOTH);
-    CreateGroupWithSetting(groupNumber, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    CreateGroupWithSetting(groupNumber, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
 
     /**
@@ -785,7 +785,7 @@ HWTEST_F(ListLayoutTestNg, PaintMethod004, TestSize.Level1)
      * @tc.expected: Not DrawLine
      */
     ListModelNG model = CreateList();
-    CreateGroupWithSetting(GROUP_NUMBER, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    CreateGroupWithSetting(GROUP_NUMBER, V2::ListItemGroupStyle::NONE);
     CreateListItems(TOTAL_ITEM_NUMBER);
     auto paintWrapper = CreateDone(frameNode_);
     auto paintMethod = AceType::DynamicCast<ListPaintMethod>(paintWrapper->nodePaintImpl_);
@@ -822,7 +822,7 @@ HWTEST_F(ListLayoutTestNg, PaintMethod004, TestSize.Level1)
     model.SetLanes(2);
     model.SetDivider(ITEM_DIVIDER);
     CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateGroupWithSetting(GROUP_NUMBER, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    CreateGroupWithSetting(GROUP_NUMBER, V2::ListItemGroupStyle::NONE);
     paintWrapper = CreateDone(frameNode_);
     paintMethod = AceType::DynamicCast<ListPaintMethod>(paintWrapper->nodePaintImpl_);
     paintMethod->UpdateContentModifier(AceType::RawPtr(paintWrapper));
@@ -844,7 +844,7 @@ HWTEST_F(ListLayoutTestNg, PaintMethod005, TestSize.Level1)
     EXPECT_CALL(canvas, DrawLine(_, _)).Times(2);
 
     CreateList();
-    CreateGroupWithSetting(GROUP_NUMBER, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    CreateGroupWithSetting(GROUP_NUMBER, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
     auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
     auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
@@ -985,11 +985,11 @@ HWTEST_F(ListLayoutTestNg, Pattern003, TestSize.Level1)
     EXPECT_NE(scrollable, nullptr);
     scrollable->isTouching_ = true;
     EXPECT_FALSE(pattern_->OutBoundaryCallback());
-    ScrollUp();
+    UpdateCurrentOffset(ITEM_HEIGHT);
     EXPECT_TRUE(pattern_->OutBoundaryCallback());
-    ScrollDown(2);
+    ScrollTo(ITEM_HEIGHT * 2);
     EXPECT_FALSE(pattern_->OutBoundaryCallback());
-    ScrollDown(2);
+    UpdateCurrentOffset(-ITEM_HEIGHT * 2);
     EXPECT_TRUE(pattern_->OutBoundaryCallback());
 
     ClearOldNodes();
@@ -1004,7 +1004,7 @@ HWTEST_F(ListLayoutTestNg, Pattern003, TestSize.Level1)
     scrollable->isTouching_ = true;
     EXPECT_NE(pattern_->springProperty_, nullptr);
     EXPECT_NE(pattern_->chainAnimation_, nullptr);
-    ScrollUp();
+    UpdateCurrentOffset(ITEM_HEIGHT);
     EXPECT_TRUE(pattern_->OutBoundaryCallback());
     EXPECT_TRUE(pattern_->dragFromSpring_);
 }
@@ -1248,73 +1248,89 @@ HWTEST_F(ListLayoutTestNg, ListItemHoverEventForCardModeTest001, TestSize.Level1
  */
 HWTEST_F(ListLayoutTestNg, ListItemPressEventForCardModeTest001, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step2. create ListItem in card mode.
-     * @tc.expected: step2. create a card style ListItem success.
-     */
-    ListItemModelNG itemModel;
-    itemModel.Create([](int32_t) {}, V2::ListItemStyle::CARD);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    CreateList();
+    CreateListItem(V2::ListItemStyle::CARD);
+    CreateDone(frameNode_);
+    auto itemPattern = GetChildPattern<ListItemPattern>(frameNode_, 0);
+    auto handleHoverEvent = itemPattern->hoverEvent_->GetOnHoverEventFunc();
+    auto itemNode = GetChildFrameNode(frameNode_, 0);
+    auto gesture = itemNode->GetOrCreateGestureEventHub();
+    auto handlePressEvent = gesture->touchEventActuator_->touchEvents_.back()->GetTouchEventCallback();
 
     /**
-     * @tc.steps: step3. call function HandlePressEvent, set TouchType to DOWN and set hover status is true.
-     * @tc.expected: step3. the color is different from the initial color when the listItem is pressed with the mouse.
+     * @tc.steps: step1. Hover and Touch Down/Move/Up
      */
-    pattern->isHover_ = true;
-    pattern->HandlePressEvent(true, frameNode);
-    EXPECT_TRUE(pattern->isPressed_);
+    handleHoverEvent(true);
+    EXPECT_TRUE(itemPattern->isHover_);
+    EXPECT_EQ(itemPattern->GetBlendGgColor(), HOVER_COLOR);
+
+    TouchEventInfo info = CreateTouchEventInfo(TouchType::DOWN, Offset());
+    handlePressEvent(info);
+    EXPECT_TRUE(itemPattern->isPressed_);
+    EXPECT_EQ(itemPattern->GetBlendGgColor(), PRESS_COLOR);
+
+    info = CreateTouchEventInfo(TouchType::MOVE, Offset());
+    handlePressEvent(info);
+    EXPECT_TRUE(itemPattern->isPressed_);
+    EXPECT_EQ(itemPattern->GetBlendGgColor(), PRESS_COLOR);
+
+    info = CreateTouchEventInfo(TouchType::UP, Offset());
+    handlePressEvent(info);
+    EXPECT_FALSE(itemPattern->isPressed_);
+    EXPECT_EQ(itemPattern->GetBlendGgColor(), HOVER_COLOR);
+
+    handleHoverEvent(false);
+    EXPECT_FALSE(itemPattern->isHover_);
+    EXPECT_EQ(itemPattern->GetBlendGgColor(), Color::TRANSPARENT);
 
     /**
-     * @tc.steps: step4. call function HandlePressEvent, set TouchType to DOWN and set hover status is false.
-     * @tc.expected: step4. the color is different from the initial color when the listItem is pressed with gesture.
+     * @tc.steps: step2. Touch Down/Cancel
      */
-    pattern->isHover_ = false;
-    pattern->HandlePressEvent(true, frameNode);
-    EXPECT_TRUE(pattern->isPressed_);
+    info = CreateTouchEventInfo(TouchType::DOWN, Offset());
+    handlePressEvent(info);
+    EXPECT_TRUE(itemPattern->isPressed_);
 
-    /**
-     * @tc.steps: step5. call function HandlePressEvent, set TouchType to UP and set hover status is true.
-     * @tc.expected: step5. the color differs from the initial color when mouse hovers over listItem after pressing.
-     */
-    pattern->isHover_ = true;
-    pattern->HandlePressEvent(false, frameNode);
-    EXPECT_FALSE(pattern->isPressed_);
-
-    /**
-     * @tc.steps: step6. call function HandlePressEvent, set TouchType to UP and set hover status is false.
-     * @tc.expected: step6. the color returns to its original color after pressing on listItem through gestures.
-     */
-    pattern->isHover_ = false;
-    pattern->HandlePressEvent(false, frameNode);
-    EXPECT_FALSE(pattern->isPressed_);
+    info = CreateTouchEventInfo(TouchType::CANCEL, Offset());
+    handlePressEvent(info);
+    EXPECT_FALSE(itemPattern->isPressed_);
 }
 
 /**
  * @tc.name: ListItemDisableEventForCardModeTest001
- * @tc.desc: Test disable event when the enable status of the listItem is false.
+ * @tc.desc: Test InitDisableEvent
  * @tc.type: FUNC
  */
 HWTEST_F(ListLayoutTestNg, ListItemDisableEventForCardModeTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step2. create ListItem in card mode.
-     * @tc.expected: step2. create a card style ListItem success and set enable status to false.
+     * @tc.steps: step1. create ListItem in card mode.
+     * @tc.expected: create a card style ListItem success and set enable status to false.
      */
-    ListItemModelNG itemModel;
-    itemModel.Create([](int32_t) {}, V2::ListItemStyle::CARD);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    auto pattern = frameNode->GetPattern<ListItemPattern>();
-    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
-    eventHub->SetEnabled(false);
-    pattern->selectable_ = true;
+    CreateList();
+    CreateListItem(V2::ListItemStyle::CARD);
+    CreateDone(frameNode_);
+    auto itemNode = GetChildFrameNode(frameNode_, 0);
+    auto itemPattern = GetChildPattern<ListItemPattern>(frameNode_, 0);
+    auto itemEventHub = GetChildEventHub<ListItemEventHub>(frameNode_, 0);
+    auto itemRenderContext = itemNode->GetRenderContext();
+    EXPECT_TRUE(itemEventHub->IsEnabled());
+    EXPECT_TRUE(itemEventHub->IsDeveloperEnabled());
+    EXPECT_EQ(itemRenderContext->GetOpacity(), 1.0);
 
-    /**
-     * @tc.steps: step3. call function InitDisableEvent.
-     * @tc.expected: step3. the background color has been updated and selectable has been set to false.
-     */
-    pattern->InitDisableEvent();
-    EXPECT_FALSE(pattern->selectable_);
+    itemEventHub->SetEnabled(false);
+    itemPattern->OnModifyDone(); // Test InitDisableEvent
+    EXPECT_FALSE(itemPattern->Selectable());
+    EXPECT_FALSE(itemEventHub->IsEnabled());
+    EXPECT_FALSE(itemEventHub->IsDeveloperEnabled());
+    EXPECT_EQ(itemRenderContext->GetOpacity(), 0.4);
+
+    itemPattern->OnModifyDone();
+    EXPECT_FALSE(itemPattern->Selectable());
+
+    itemEventHub->SetEnabled(true);
+    itemPattern->OnModifyDone();
+    EXPECT_FALSE(itemPattern->Selectable());
+    EXPECT_EQ(itemRenderContext->GetOpacity(), 0.4);
 }
 
 /**
@@ -1388,10 +1404,10 @@ HWTEST_F(ListLayoutTestNg, ListPattern_GetItemRectInGroup001, TestSize.Level1)
      * @tc.steps: step1. Init List then slide List by Scroller.
      */
     ListModelNG model = CreateList();
-    model.SetInitialIndex(1);
-    CreateListItemGroups(TOTAL_ITEM_NUMBER);
+    CreateListItemGroup(V2::ListItemGroupStyle::NONE);
+    CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-    pattern_->ScrollBy(ITEM_HEIGHT * 2);
+    pattern_->ScrollTo(ITEM_HEIGHT * 2);
     FlushLayoutTask(frameNode_);
 
     /**
@@ -1401,23 +1417,22 @@ HWTEST_F(ListLayoutTestNg, ListPattern_GetItemRectInGroup001, TestSize.Level1)
     EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(-1, 0), Rect()));
     EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(2, -1), Rect()));
     EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(0, 0), Rect()));
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(TOTAL_ITEM_NUMBER - 1, 0), Rect()));
     EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(1, 0), Rect()));
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(1, GROUP_ITEM_NUMBER), Rect()));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(0, TOTAL_ITEM_NUMBER), Rect()));
 
     /**
      * @tc.steps: step3. Get valid group item Rect.
      * @tc.expected: Return actual Rect when input valid group index.
      */
     EXPECT_TRUE(IsEqual(
-        pattern_->GetItemRectInGroup(2, 0), Rect(0, 0, FILL_LENGTH.Value() * LIST_WIDTH, ITEM_HEIGHT)));
+        pattern_->GetItemRectInGroup(0, 2), Rect(0, 0, FILL_LENGTH.Value() * LIST_WIDTH, ITEM_HEIGHT)));
 
     /**
      * @tc.steps: step4. Get valid ListItemGroup Rect.
      * @tc.expected: Return actual Rect when input valid index.
      */
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2),
-        Rect(0, 0, FILL_LENGTH.Value() * LIST_WIDTH, ITEM_HEIGHT * GROUP_ITEM_NUMBER)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0),
+        Rect(0, -ITEM_HEIGHT * 2, LIST_WIDTH, ITEM_HEIGHT * TOTAL_ITEM_NUMBER)));
 }
 
 /**

@@ -68,7 +68,7 @@ T* GetPointerField(ArkUIRuntimeCallInfo* runtimeCallInfo)
         return nullptr;
     }
     Local<panda::ObjectRef> thisObj = thisRef->ToObject(vm);
-    auto* pointer = reinterpret_cast<T*>(thisObj->GetNativePointerField(0));
+    auto* pointer = reinterpret_cast<T*>(thisObj->GetNativePointerField(vm, 0));
     return pointer;
 }
 

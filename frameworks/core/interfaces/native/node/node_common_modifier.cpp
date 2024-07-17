@@ -82,7 +82,8 @@ constexpr double ROUND_UNIT = 360.0;
 constexpr TextDirection DEFAULT_COMMON_DIRECTION = TextDirection::AUTO;
 constexpr int32_t DEFAULT_COMMON_LAYOUTWEIGHT = 0;
 constexpr int32_t MAX_ALIGN_VALUE = 8;
-constexpr int32_t DEFAULT_GRIDSPAN = 0;
+// default gridSpan is 1 on doc
+constexpr int32_t DEFAULT_GRIDSPAN = 1;
 constexpr uint32_t DEFAULT_ALIGN_RULES_SIZE = 6;
 constexpr uint8_t DEFAULT_SAFE_AREA_TYPE = 0b111;
 constexpr uint8_t DEFAULT_SAFE_AREA_EDGE = 0b1111;
@@ -611,19 +612,19 @@ void SetBorderImage(FrameNode* frameNode, const RefPtr<BorderImage>& borderImage
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(borderImage);
-    if (bitset | BorderImage::SOURCE_BIT) {
+    if (bitset & BorderImage::SOURCE_BIT) {
         ViewAbstract::SetBorderImageSource(frameNode, borderImage->GetSrc());
     }
-    if (bitset | BorderImage::OUTSET_BIT) {
+    if (bitset & BorderImage::OUTSET_BIT) {
         ViewAbstract::SetHasBorderImageOutset(frameNode, true);
     }
-    if (bitset | BorderImage::SLICE_BIT) {
+    if (bitset & BorderImage::SLICE_BIT) {
         ViewAbstract::SetHasBorderImageSlice(frameNode, true);
     }
-    if (bitset | BorderImage::REPEAT_BIT) {
+    if (bitset & BorderImage::REPEAT_BIT) {
         ViewAbstract::SetHasBorderImageRepeat(frameNode, true);
     }
-    if (bitset | BorderImage::WIDTH_BIT) {
+    if (bitset & BorderImage::WIDTH_BIT) {
         ViewAbstract::SetHasBorderImageWidth(frameNode, true);
     }
     ViewAbstract::SetBorderImage(frameNode, borderImage);
@@ -6003,6 +6004,23 @@ void SetTransition(ArkUINodeHandle node, ArkUITransitionEffectOption* option)
     ViewAbstract::SetChainedTransition(frameNode, transitionEffectOption);
 }
 
+void SetDragPreview(ArkUINodeHandle node, ArkUIDragPreview dragPreview)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::DragDropInfo dragPreviewInfo;
+    dragPreviewInfo.inspectorId = dragPreview.inspectorId;
+    ViewAbstract::SetDragPreview(frameNode, dragPreviewInfo);
+}
+
+void ResetDragPreview(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::DragDropInfo dragPreviewInfo;
+    ViewAbstract::SetDragPreview(frameNode, dragPreviewInfo);
+}
+
 void GetExpandSafeArea(ArkUINodeHandle node, ArkUI_Uint32 (*values)[2])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -6116,7 +6134,8 @@ const ArkUICommonModifier* GetCommonModifier()
         SetAccessibilityValue, GetAccessibilityValue, ResetAccessibilityValue, SetAccessibilityActions,
         ResetAccessibilityActions, GetAccessibilityActions, SetAccessibilityRole, ResetAccessibilityRole,
         GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
-        SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition };
+        SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition, SetDragPreview,
+        ResetDragPreview };
 
     return &modifier;
 }

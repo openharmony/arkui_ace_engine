@@ -479,7 +479,7 @@ bool JSProgress::ConvertGradientColor(const JsiRef<JsiValue>& param, NG::Gradien
             static_cast<panda::Local<panda::ProxyRef>>(proxy);
         jsLinearGradient = static_cast<JSLinearGradient *>(
             panda::Local<panda::ObjectRef>(thisProxiedObj->GetTarget(vm))
-                ->GetNativePointerField(0));
+                ->GetNativePointerField(vm, 0));
     }
 
     if (!jsLinearGradient || jsLinearGradient->GetGradient().empty()) {

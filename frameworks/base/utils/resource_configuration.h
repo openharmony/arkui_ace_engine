@@ -127,6 +127,16 @@ public:
         return mnc_;
     }
 
+    void SetAppHasDarkRes(bool hasDarkRes)
+    {
+        appHasDarkRes_ = hasDarkRes;
+    }
+
+    bool GetAppHasDarkRes() const
+    {
+        return appHasDarkRes_;
+    }
+
 private:
     bool ParseJsonColorMode(const std::unique_ptr<JsonValue>& jsonConfig, uint32_t& updateFlags);
     bool ParseJsonFontRatio(const std::unique_ptr<JsonValue>& jsonConfig, uint32_t& updateFlags);
@@ -139,6 +149,7 @@ private:
     bool isDeviceAccess_ = false;
     ColorMode colorMode_ = ColorMode::LIGHT;
     bool colorModeIsSetByApp_ = false;
+    bool appHasDarkRes_ = false;
     uint32_t mcc_ = 0;
     uint32_t mnc_ = 0;
 };

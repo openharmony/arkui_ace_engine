@@ -449,4 +449,53 @@ HWTEST_F(InspectorTestNg, InspectorTestNg012, TestSize.Level1)
     EXPECT_NE(result, "");
     context->stageManager_ = nullptr;
 }
+
+/**
+ * @tc.name: InspectorTestNg013
+ * @tc.desc: Test the function of InspectorFilter
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg013, TestSize.Level1)
+{
+    const char* hello = "hi";
+    InspectorFilter testFilter;
+    EXPECT_EQ(testFilter.CheckFilterAttr(FixedAttrBit::FIXED_ATTR_CONTENT, hello), true);
+    testFilter.SetFilterDepth(1);
+    testFilter.SetFilterID("id");
+    testFilter.filterExt.emplace_back("abc");
+    testFilter.AddFilterAttr("focusable");
+    testFilter.AddFilterAttr("abc");
+    testFilter.AddFilterAttr("def");
+    EXPECT_EQ(testFilter.CheckFixedAttr(FixedAttrBit::FIXED_ATTR_CONTENT), false);
+    EXPECT_EQ(testFilter.CheckExtAttr("zzz"), false);
+    EXPECT_EQ(testFilter.CheckFilterAttr(FixedAttrBit::FIXED_ATTR_CONTENT, hello), false);
+    EXPECT_EQ(testFilter.IsFastFilter(), false);
+}
+
+/**
+ * @tc.name: InspectorTestNg014
+ * @tc.desc: Test the function of InspectorFilter
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg014, TestSize.Level1)
+{
+    const char* hello = "hi";
+    InspectorFilter testFilter;
+    testFilter.AddFilterAttr("focusable");
+    EXPECT_EQ(testFilter.CheckFilterAttr(FixedAttrBit::FIXED_ATTR_FOCUSABLE, hello), true);
+}
+
+/**
+ * @tc.name: InspectorTestNg015
+ * @tc.desc: Test the function of InspectorFilter
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg015, TestSize.Level1)
+{
+    const char* hello = "abc";
+    InspectorFilter testFilter;
+    testFilter.filterExt.emplace_back("abc");
+    testFilter.AddFilterAttr("focusable");
+    EXPECT_EQ(testFilter.CheckFilterAttr(FixedAttrBit::FIXED_ATTR_CONTENT, hello), true);
+}
 } // namespace OHOS::Ace::NG

@@ -17,7 +17,7 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 #include "base/utils/utils.h"
@@ -74,7 +74,7 @@ ImageSourceInfo CreateSourceInfo(const std::shared_ptr<std::string>& srcRef, Ref
 std::unique_ptr<ImageModel> ImageModel::instance_ = nullptr;
 std::mutex ImageModel::mutex_;
 
-ImageModel* ImageModel::GetInstance()
+ImageModel* __attribute__((optnone)) ImageModel::GetInstance()
 {
     if (!instance_) {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -177,7 +177,7 @@ void JSImage::SetObjectFit(const JSCallbackInfo& args)
     }
     int32_t parseRes = 2;
     ParseJsInteger(args[0], parseRes);
-    if (parseRes < static_cast<int32_t>(ImageFit::FILL) || parseRes > static_cast<int32_t>(ImageFit::SCALE_DOWN)) {
+    if (parseRes < static_cast<int32_t>(ImageFit::FILL) || parseRes > static_cast<int32_t>(ImageFit::BOTTOM_END)) {
         parseRes = 2;
     }
     auto fit = static_cast<ImageFit>(parseRes);
@@ -216,7 +216,7 @@ void JSImage::OnComplete(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Image.onComplete");
             func->Execute(info);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Image.onComplete");
 #endif
         };
@@ -234,7 +234,7 @@ void JSImage::OnError(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Image.onError");
             func->Execute(info);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Image.onError");
 #endif
         };
@@ -278,8 +278,21 @@ bool JSImage::CheckIsCard()
     return container->IsFormRender() && !container->IsDynamicRender();
 }
 
+bool JSImage::CheckResetImage(const JSCallbackInfo& info)
+{
+    int32_t parseRes = -1;
+    if (info.Length() < 1 || !ParseJsInteger(info[0], parseRes)) {
+        return false;
+    }
+    ImageModel::GetInstance()->ResetImage();
+    return true;
+}
+
 void JSImage::CreateImage(const JSCallbackInfo& info, bool isImageSpan)
 {
+    if (CheckResetImage(info)) {
+        return;
+    }
     bool isCard = CheckIsCard();
 
     // Interim programme

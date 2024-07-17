@@ -19,8 +19,8 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/slider/render_slider.h"
-#include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_accessibility_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_algorithm.h"
@@ -213,10 +213,12 @@ public:
     {
         isStackSubmenuHeader_ = true;
     }
-    bool IsStackSubmenuHeader() {
+    bool IsStackSubmenuHeader()
+    {
         return isStackSubmenuHeader_;
     }
     RefPtr<FrameNode> FindTouchedEmbeddedMenuItem(const OffsetF& position);
+    void OnHover(bool isHover);
 
 protected:
     void RegisterOnKeyEvent();
@@ -229,7 +231,6 @@ private:
     void RegisterOnClick();
     void RegisterOnHover();
     virtual void OnTouch(const TouchEventInfo& info);
-    void OnHover(bool isHover);
     virtual bool OnKeyEvent(const KeyEvent& event);
     void OnClick();
 
@@ -324,6 +325,7 @@ public:
 
 private:
     void OnTouch(const TouchEventInfo& info) override;
+    void HandleOnChange();
     bool OnKeyEvent(const KeyEvent& event) override;
     std::unique_ptr<Offset> lastTouchOffset_;
 };

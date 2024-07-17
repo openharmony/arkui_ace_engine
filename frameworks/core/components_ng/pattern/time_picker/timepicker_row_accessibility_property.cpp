@@ -41,7 +41,7 @@ std::string TimePickerRowAccessibilityProperty::GetText() const
     CHECK_NULL_RETURN(hourPickerColumnPattern, "");
 
     std::string result;
-    int hour = hourPickerColumnPattern->GetCurrentIndex(); // + 1;
+    auto hour = static_cast<int32_t>(hourPickerColumnPattern->GetCurrentIndex()); // + 1;
     if (!timePickerRowPattern->GetHour24()) {
         hour += 1;
     }

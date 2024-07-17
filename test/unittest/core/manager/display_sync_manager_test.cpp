@@ -584,4 +584,57 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest010, TestSize.Level1)
     displaySync->DelFromPipelineOnContainer();
     EXPECT_FALSE(displaySync->IsOnPipeline());
 }
+
+/**
+ * @tc.name: DisplaySyncManagerTest011
+ * @tc.desc: Test DisplaySync's animator status.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get DisplaySyncManager from PipelineContext.
+     * @tc.expected: step1. Check the number of DisplaySync initially managed by the DisplaySyncManager is 0.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto displaySyncManager = pipeline->GetOrCreateUIDisplaySyncManager();
+    int32_t initSize = 0;
+    EXPECT_EQ(initSize, displaySyncManager->GetUIDisplaySyncMap().size());
+
+    /**
+     * @tc.steps: step2. Test SearchMatchedRate function of DisplaySync.
+     */
+    RefPtr<UIDisplaySync> displaySync = AceType::MakeRefPtr<UIDisplaySync>();
+    displaySync->AddToPipelineOnContainer();
+    EXPECT_TRUE(displaySync->IsOnPipeline());
+
+    /**
+     * @tc.steps: step3. Test DisplaySync's animator status.
+     */
+    int32_t mgrAnimatorRate = displaySyncManager->GetAnimatorRate();
+    EXPECT_EQ(-1, mgrAnimatorRate);
+    EXPECT_TRUE(displaySyncManager->IsAnimatorStopped());
+    int32_t animatorExpectedRate = displaySync->GetAnimatorExpectedRate();
+    EXPECT_EQ(-1, animatorExpectedRate);
+
+    displaySync->RegisterOnFrameWithTimestamp([](uint64_t timestamp) {});
+    mgrAnimatorRate = displaySyncManager->GetAnimatorRate();
+    EXPECT_EQ(0, mgrAnimatorRate);
+    EXPECT_FALSE(displaySyncManager->IsAnimatorStopped());
+    animatorExpectedRate = displaySync->GetAnimatorExpectedRate();
+    EXPECT_EQ(0, animatorExpectedRate);
+
+    displaySync->SetExpectedFrameRateRange({0, 120, 60});
+    mgrAnimatorRate = displaySyncManager->GetAnimatorRate();
+    EXPECT_EQ(60, mgrAnimatorRate);
+    EXPECT_FALSE(displaySyncManager->IsAnimatorStopped());
+    animatorExpectedRate = displaySync->GetAnimatorExpectedRate();
+    EXPECT_EQ(60, animatorExpectedRate);
+
+    /**
+     * @tc.steps: step4. Remove the DisplaySync from DisplaySyncManager.
+     */
+    displaySync->DelFromPipelineOnContainer();
+    EXPECT_FALSE(displaySync->IsOnPipeline());
+}
 } // namespace OHOS::Ace::NG

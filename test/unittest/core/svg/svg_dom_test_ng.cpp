@@ -18,11 +18,13 @@
 #include "gtest/gtest.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/rosen/testing_rect.h"
+#include "frameworks/core/components_ng/svg/svg_ulils.h"
 
 #define private public
 #define protected public
 
 #include "core/components_ng/svg/svg_dom.h"
+#include "core/components_ng/svg/svg_ulils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -32,7 +34,6 @@ namespace {
 const Size LAYOUT = { 400, 500 };
 const Size SVG_SIZE = { 50, 50 };
 const Rect VIEW_BOX = { -4.0, -10.0, 300.0, 300.0 };
-constexpr float EPSILON = 0.001;
 } // namespace
 class SvgDomTestNg : public testing::Test {};
 
@@ -48,17 +49,22 @@ HWTEST_F(SvgDomTestNg, SvgDom001, TestSize.Level1)
     svgDom->svgSize_ = SVG_SIZE;
     svgDom->viewBox_ = VIEW_BOX;
     Testing::MockCanvas canvas;
-    float layoutScale = LAYOUT.Width() / SVG_SIZE.Width();
-    float viewBoxScale = SVG_SIZE.Width() / VIEW_BOX.Width();
-    float tx = 4.0f * viewBoxScale * layoutScale;
-    float ty = 10.0f * viewBoxScale * layoutScale;
-
-    ty += (LAYOUT.Height() - SVG_SIZE.Height() * layoutScale) / 2;
     // check translate and scale parameters
-    EXPECT_CALL(canvas, Translate(FloatNear(tx, EPSILON), FloatNear(ty, EPSILON)));
-    EXPECT_CALL(canvas, Scale(layoutScale * viewBoxScale, layoutScale * viewBoxScale));
     auto clipRect = Testing::TestingRect(0, 0, LAYOUT.Width(), LAYOUT.Height());
     EXPECT_CALL(canvas, ClipRect(_, _, _));
     svgDom->FitImage(canvas, ImageFit::CONTAIN, LAYOUT);
+}
+
+/**
+ * @tc.name: SvgDom002
+ * @tc.desc: test svg content Size
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgDomTestNg, SvgDom002, TestSize.Level1)
+{
+    Size svgContentSize;
+    SvgUtils::CalculateSvgConentSize(svgContentSize, LAYOUT, SVG_SIZE, VIEW_BOX);
+    EXPECT_FLOAT_EQ(svgContentSize.Width(), SVG_SIZE.Width());
+    EXPECT_FLOAT_EQ(svgContentSize.Height(), SVG_SIZE.Height());
 }
 } // namespace OHOS::Ace::NG

@@ -118,6 +118,7 @@ void SwiperTestNg::CreateItem(int32_t itemNumber)
     for (int32_t index = 0; index < itemNumber; index++) {
         ButtonModelNG buttonModelNG;
         buttonModelNG.CreateWithLabel("label");
+        ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
         ViewStackProcessor::GetInstance()->Pop();
     }
 }

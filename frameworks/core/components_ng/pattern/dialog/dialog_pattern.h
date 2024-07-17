@@ -257,6 +257,7 @@ public:
 
     void UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation);
     void InitHostWindowRect();
+    void UpdateFontScale();
 
 private:
     bool AvoidKeyboard() const override

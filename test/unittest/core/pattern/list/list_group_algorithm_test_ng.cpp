@@ -38,7 +38,7 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_NeedMeasureItem001, Te
     model.SetSpace(Dimension(SPACE));
     // head + ListItem + SPACE + ListItem + SPACE + ListItem + Foot
     // FrameNode = 2 * 3
-    CreateGroupWithSetting(groupNumber, Axis::VERTICAL, V2::ListItemGroupStyle::NONE, itemNumber);
+    CreateGroupWithSetting(groupNumber, V2::ListItemGroupStyle::NONE, itemNumber);
     CreateDone(frameNode_);
 
     /* *
@@ -98,7 +98,7 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_NeedMeasureItem002, Te
     model.SetSpace(Dimension(SPACE));
     // head + ListItem + SPACE + ListItem + SPACE + ListItem + Foot
     // FrameNode = 2 * 3
-    CreateGroupWithSetting(groupNumber, Axis::VERTICAL, V2::ListItemGroupStyle::NONE, itemNumber);
+    CreateGroupWithSetting(groupNumber, V2::ListItemGroupStyle::NONE, itemNumber);
     CreateDone(frameNode_);
 
     /* *
@@ -166,7 +166,7 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_Layout, TestSize.Level
     model.SetSpace(Dimension(SPACE));
     // head + ListItem + SPACE + ListItem + SPACE + ListItem + Foot
     // FrameNode = 2 * 3
-    CreateGroupWithSetting(groupNumber, Axis::VERTICAL, V2::ListItemGroupStyle::NONE, itemNumber);
+    CreateGroupWithSetting(groupNumber, V2::ListItemGroupStyle::NONE, itemNumber);
     CreateDone(frameNode_);
 
     /* *
@@ -309,7 +309,7 @@ HWTEST_F(ListGroupAlgTestNg, ListItemLayoutAlgorithmTest002, TestSize.Level1)
 HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayout001, TestSize.Level1)
 {
     CreateList();
-    CreateGroupWithSetting(1, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    CreateGroupWithSetting(1, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
     RefPtr<FrameNode> groupNode = GetChildFrameNode(frameNode_, 0);
     float groupHeight = GROUP_ITEM_NUMBER * (ITEM_HEIGHT + SPACE) - SPACE + GROUP_HEADER_LEN * 2;
@@ -333,7 +333,7 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayout001, TestSize.Level1)
 HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayout002, TestSize.Level1)
 {
     CreateList();
-    CreateGroupWithSetting(1, Axis::VERTICAL, V2::ListItemGroupStyle::CARD);
+    CreateGroupWithSetting(1, V2::ListItemGroupStyle::CARD);
     CreateDone(frameNode_);
     RefPtr<FrameNode> groupNode = GetChildFrameNode(frameNode_, 0);
     float groupHeight = GROUP_ITEM_NUMBER * (ITEM_HEIGHT + SPACE) - SPACE + GROUP_HEADER_LEN * 2;
@@ -350,6 +350,55 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayout002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListItemGroupLayout003
+ * @tc.desc: Test CARD not support HORIZONTAL
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayout003, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetListDirection(Axis::HORIZONTAL);
+    CreateGroupWithSetting(2, V2::ListItemGroupStyle::CARD);
+    CreateDone(frameNode_);
+    EXPECT_EQ(layoutProperty_->GetListDirection(), Axis::VERTICAL);
+    EXPECT_LT(GetChildX(frameNode_, 0), GetChildX(frameNode_, 1));
+}
+
+/**
+ * @tc.name: ListItemGroupLayout004
+ * @tc.desc: Test model SetStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayout004, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetListDirection(Axis::HORIZONTAL);
+    ListItemGroupModelNG groupModel = CreateListItemGroup(V2::ListItemGroupStyle::NONE);
+    CreateListItem();
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. Change NONE to CARD
+     * @tc.expected: Change to CARD
+     */
+    auto groupNode = GetChildFrameNode(frameNode_, 0);
+    auto groupPattern = GetChildPattern<ListItemGroupPattern>(frameNode_, 0);
+    auto groupRenderContext = groupNode->GetRenderContext();
+    groupModel.SetStyle(AceType::RawPtr(groupNode), V2::ListItemGroupStyle::CARD);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(groupPattern->listItemGroupStyle_, V2::ListItemGroupStyle::CARD);
+    EXPECT_EQ(groupRenderContext->GetBackgroundColor(), ITEMDEFAULT_COLOR);
+
+    /**
+     * @tc.steps: step2. Change CARD to NONE
+     * @tc.expected: Still is CARD
+     */
+    groupPattern->SetListItemGroupStyle(V2::ListItemGroupStyle::NONE);
+    EXPECT_EQ(groupPattern->listItemGroupStyle_, V2::ListItemGroupStyle::CARD);
+}
+
+/**
  * @tc.name: Sticky001
  * @tc.desc: List set sticky header and footer
  * @tc.type: FUNC
@@ -362,7 +411,7 @@ HWTEST_F(ListGroupAlgTestNg, Sticky001, TestSize.Level1)
      */
     ListModelNG model = CreateList();
     model.SetSticky(V2::StickyStyle::HEADER);
-    CreateGroupWithSetting(GROUP_NUMBER, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    CreateGroupWithSetting(GROUP_NUMBER, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
     RefPtr<FrameNode> firstGroupNode = GetChildFrameNode(frameNode_, 0);
     RefPtr<FrameNode> secondGroupNode = GetChildFrameNode(frameNode_, 1);
@@ -413,7 +462,7 @@ HWTEST_F(ListGroupAlgTestNg, Sticky002, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetListDirection(Axis::HORIZONTAL);
     model.SetSticky(V2::StickyStyle::HEADER);
-    CreateGroupWithSetting(GROUP_NUMBER, Axis::HORIZONTAL, V2::ListItemGroupStyle::NONE);
+    CreateGroupWithSetting(GROUP_NUMBER, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
     RefPtr<FrameNode> firstGroupNode = GetChildFrameNode(frameNode_, 0);
     RefPtr<FrameNode> secondGroupNode = GetChildFrameNode(frameNode_, 1);
@@ -503,7 +552,7 @@ HWTEST_F(ListGroupAlgTestNg, LanesLayout001, TestSize.Level1)
     ClearOldNodes();
     model = CreateList();
     model.SetLanes(lanes);
-    CreateGroupWithSetting(1, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    CreateGroupWithSetting(1, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
     groupNode = GetChildFrameNode(frameNode_, 0);
     EXPECT_LT(GetChildX(groupNode, 2), GetChildX(groupNode, 3));
@@ -516,7 +565,7 @@ HWTEST_F(ListGroupAlgTestNg, LanesLayout001, TestSize.Level1)
     model = CreateList();
     model.SetLaneMinLength(Dimension(300.f));
     model.SetLaneMaxLength(Dimension(400.f));
-    CreateGroupWithSetting(1, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    CreateGroupWithSetting(1, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
     groupNode = GetChildFrameNode(frameNode_, 0);
     EXPECT_EQ(GetChildWidth(groupNode, HEADER_INDEX), LIST_WIDTH);
@@ -779,5 +828,137 @@ HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount003, TestSize.Level1)
     EXPECT_EQ(g2item0->IsActive(), false);
     auto g2item1 = groupNode2->GetChildByIndex(1 + 1)->GetHostNode();
     EXPECT_EQ(g2item1->IsActive(), false);
+}
+
+/**
+ * @tc.name: Space001
+ * @tc.desc: test space
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, Space001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set Normal space
+     * @tc.expected: There is space between listItems
+     */
+    CreateList();
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    groupModel.SetSpace(Dimension(SPACE));
+    CreateListItems(GROUP_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    RefPtr<FrameNode> groupNode = GetChildFrameNode(frameNode_, 0);
+    EXPECT_EQ(GetChildY(groupNode, 1), ITEM_HEIGHT + SPACE);
+
+    /**
+     * @tc.steps: step2. Set invalid space
+     * @tc.expected: Space reset to 0
+     */
+    auto groupProperty = groupNode->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    groupProperty->UpdateSpace(Dimension(-1.f));
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(groupNode, 1), ITEM_HEIGHT);
+
+    /**
+     * @tc.steps: step3. Set space > groupHeight
+     * @tc.expected: Space reset to 0
+     */
+    groupProperty->UpdateSpace(Dimension(LIST_HEIGHT));
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(groupNode, 1), ITEM_HEIGHT);
+}
+
+/**
+ * @tc.name: Divider001
+ * @tc.desc: test divider
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, Divider001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set Normal divider
+     * @tc.expected: There is divider between listItems
+     */
+    CreateList();
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    groupModel.SetDivider(ITEM_DIVIDER);
+    CreateListItems(GROUP_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    RefPtr<FrameNode> groupNode = GetChildFrameNode(frameNode_, 0);
+    EXPECT_EQ(GetChildY(groupNode, 1), ITEM_HEIGHT + STROKE_WIDTH);
+
+    /**
+     * @tc.steps: step2. Set invalid strokeWidth
+     * @tc.expected: StrokeWidth reset to 0
+     */
+    auto divider = ITEM_DIVIDER;
+    divider.strokeWidth = Dimension(-1.f);
+    auto groupProperty = groupNode->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    groupProperty->UpdateDivider(divider);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(groupNode, 1), ITEM_HEIGHT);
+
+    /**
+     * @tc.steps: step3. Set strokeWidth > groupHeight
+     * @tc.expected: StrokeWidth reset to 0
+     */
+    divider.strokeWidth = Dimension(LIST_HEIGHT);
+    groupProperty->UpdateDivider(divider);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(groupNode, 1), ITEM_HEIGHT);
+}
+
+/**
+ * @tc.name: SpaceDivider001
+ * @tc.desc: test space and divider
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, SpaceDivider001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set Normal space and divider, SPACE > strokeWidth
+     * @tc.expected: There is interval between listItems and equal to SPACE
+     */
+    CreateList();
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    groupModel.SetSpace(Dimension(SPACE));
+    groupModel.SetDivider(ITEM_DIVIDER);
+    CreateListItems(GROUP_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    RefPtr<FrameNode> groupNode = GetChildFrameNode(frameNode_, 0);
+    EXPECT_EQ(GetChildY(groupNode, 1), ITEM_HEIGHT + SPACE);
+
+    /**
+     * @tc.steps: step2. Set SPACE < strokeWidth
+     * @tc.expected: The interval is strokeWidth
+     */
+    auto groupProperty = groupNode->GetLayoutProperty<ListItemGroupLayoutProperty>();
+    groupProperty->UpdateSpace(Dimension(1.f));
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(groupNode, 1), ITEM_HEIGHT + STROKE_WIDTH);
+}
+
+/**
+ * @tc.name: InfinityCrossSize001
+ * @tc.desc: test Infinity crossSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, InfinityCrossSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set Group Infinity crossSize
+     * @tc.expected: crossSize equal to child size
+     */
+    CreateList();
+    CreateListItemGroup();
+    ViewAbstract::SetWidth(CalcLength(Infinity<float>()));
+    CreateListItem();
+    ViewAbstract::SetWidth(CalcLength(150.f));
+    CreateDone(frameNode_);
+    EXPECT_EQ(GetChildWidth(frameNode_, 0), 150.f);
 }
 } // namespace OHOS::Ace::NG
