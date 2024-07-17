@@ -612,19 +612,19 @@ void SetBorderImage(FrameNode* frameNode, const RefPtr<BorderImage>& borderImage
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(borderImage);
-    if (bitset | BorderImage::SOURCE_BIT) {
+    if (bitset & BorderImage::SOURCE_BIT) {
         ViewAbstract::SetBorderImageSource(frameNode, borderImage->GetSrc());
     }
-    if (bitset | BorderImage::OUTSET_BIT) {
+    if (bitset & BorderImage::OUTSET_BIT) {
         ViewAbstract::SetHasBorderImageOutset(frameNode, true);
     }
-    if (bitset | BorderImage::SLICE_BIT) {
+    if (bitset & BorderImage::SLICE_BIT) {
         ViewAbstract::SetHasBorderImageSlice(frameNode, true);
     }
-    if (bitset | BorderImage::REPEAT_BIT) {
+    if (bitset & BorderImage::REPEAT_BIT) {
         ViewAbstract::SetHasBorderImageRepeat(frameNode, true);
     }
-    if (bitset | BorderImage::WIDTH_BIT) {
+    if (bitset & BorderImage::WIDTH_BIT) {
         ViewAbstract::SetHasBorderImageWidth(frameNode, true);
     }
     ViewAbstract::SetBorderImage(frameNode, borderImage);

@@ -674,6 +674,7 @@ void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp)
 
     int32_t displaySyncRate = GetOrCreateUIDisplaySyncManager()->GetDisplaySyncRate();
     frameRateManager_->SetDisplaySyncRate(displaySyncRate);
+    ArkUIPerfMonitor::GetInstance().RecordDisplaySyncRate(displaySyncRate);
 }
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
@@ -991,7 +992,7 @@ void PipelineContext::SetupRootElement()
     OnAreaChangedFunc onAreaChangedFunc = [weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager_))](
                                               const RectF& /* oldRect */, const OffsetF& /* oldOrigin */,
                                               const RectF& /* rect */, const OffsetF& /* origin */) {
-        TAG_LOGD(AceLogTag::ACE_OVERLAY, "start OnAreaChangedFunc");
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "start OnAreaChangedFunc");
         auto overlay = weakOverlayManger.Upgrade();
         CHECK_NULL_VOID(overlay);
         overlay->HideAllMenus();
@@ -2593,9 +2594,9 @@ void PipelineContext::FlushMouseEvent()
         auto result = container->GetCurPointerEventSourceType(sourceType);
         if (result) {
             TAG_LOGI(AceLogTag::ACE_MOUSE,
-                "FlushMouseEvent: last pointer event sourceType:%{public}d last mouse event time:%{public}" PRIu64
+                "FlushMouseEvent: last pointer event sourceType:%{public}d last mouse event time:%{public}" PRId64
                 " current time %{public}" PRId64 "",
-                sourceType, lastMouseEvent_->time.time_since_epoch().count(), GetSysTimestamp());
+                sourceType, static_cast<int64_t>(lastMouseEvent_->time.time_since_epoch().count()), GetSysTimestamp());
         }
     }
     MouseEvent event;
@@ -3896,7 +3897,7 @@ void PipelineContext::ChangeDarkModeBrightness()
     dimension.SetValue(1);
     if (SystemProperties::GetColorMode() == ColorMode::DARK && appBgColor_.ColorToString().compare("#FF000000") == 0 &&
         mode != WindowMode::WINDOW_MODE_FULLSCREEN && !container->IsUIExtensionWindow() &&
-        !container->IsDynamicRender()) {
+        !container->IsDynamicRender() && !container->IsFormRender() && !IsJsCard()) {
         if (!onFocus_ && mode == WindowMode::WINDOW_MODE_FLOATING) {
             dimension.SetValue(1 + percent.second);
         } else {
@@ -4051,4 +4052,20 @@ void PipelineContext::NotifyAllWebPattern(bool isRegister)
 {
     rootNode_->NotifyWebPattern(isRegister);
 }
+#if defined(SUPPORT_TOUCH_TARGET_TEST)
+
+bool PipelineContext::OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe, const std::string& target)
+{
+    auto scalePoint = point.CreateScalePoint(GetViewScale());
+    if (scalePoint.type == TouchType::DOWN) {
+        TouchRestrict touchRestrict { TouchRestrict::NONE };
+        touchRestrict.sourceType = point.sourceType;
+        touchRestrict.touchEvent = point;
+        bool isTouchTarget = eventManager_->TouchTargetHitTest(
+            scalePoint, rootNode_, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe, target);
+        return isTouchTarget;
+    }
+    return false;
+}
+#endif
 } // namespace OHOS::Ace::NG

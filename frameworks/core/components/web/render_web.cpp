@@ -942,11 +942,11 @@ void RenderWeb::OnTouchSelectionChanged(
         showTextOveralyMenu_ = false;
         OverlayShowOption option {
             .showMenu = showTextOveralyMenu_,
+            .showStartHandle = showStartTouchHandle_,
+            .showEndHandle = showEndTouchHandle_,
             .isSingleHandle = true,
             .startHandleOffset = NormalizeTouchHandleOffset(insertHandle->GetX() + 1, insertHandle->GetY()),
             .endHandleOffset = NormalizeTouchHandleOffset(insertHandle->GetX() + 1, insertHandle->GetY()),
-            .showStartHandle = showStartTouchHandle_,
-            .showEndHandle = showEndTouchHandle_,
         };
         if (updateHandlePosition_) {
             updateHandlePosition_(option, lineHeight, lineHeight);
@@ -958,11 +958,11 @@ void RenderWeb::OnTouchSelectionChanged(
         textOverlay_->SetEndHandleHeight(endSelectionHandle->GetEdgeHeight());
         OverlayShowOption option {
             .showMenu = true,
+            .showStartHandle = showStartTouchHandle_,
+            .showEndHandle = showEndTouchHandle_,
             .isSingleHandle = false,
             .startHandleOffset = NormalizeTouchHandleOffset(startSelectionHandle->GetX(), startSelectionHandle->GetY()),
             .endHandleOffset = NormalizeTouchHandleOffset(endSelectionHandle->GetX(), endSelectionHandle->GetY()),
-            .showStartHandle = showStartTouchHandle_,
-            .showEndHandle = showEndTouchHandle_,
         };
         if (updateHandlePosition_) {
             updateHandlePosition_(option, startSelectionHandle->GetEdgeHeight(), endSelectionHandle->GetEdgeHeight());
@@ -1298,7 +1298,7 @@ void RenderWeb::OnSelectPopupMenu(
             continue;
         }
         popup_->AppendSelectOption(option);
-        if (index == params->GetSelectedItem()) {
+        if (index == static_cast<uint32_t>(params->GetSelectedItem())) {
             option->SetSelected(true);
         }
     }

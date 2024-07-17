@@ -54,6 +54,7 @@ public:
     SizeF GetFrameSize(bool withSafeArea = false);
 
 protected:
+    Alignment GetStackAlignment(const TextDirection& userDirection);
     void LayoutChild(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth);
     WeakPtr<Pattern> hostPattern_;
     RectF areaRect_;

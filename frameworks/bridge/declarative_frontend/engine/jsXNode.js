@@ -393,6 +393,9 @@ class JSBuilderNode extends BaseNode {
         this.updateNodePtr(nodePtr);
         this.updateInstanceId(instanceId);
     }
+    observeRecycleComponentCreation(name, recycleUpdateFunc) {
+        throw new Error('custom component in @Builder used by BuilderNode does not support @Reusable');
+    }
 }
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
@@ -541,7 +544,7 @@ class NodeAdapter {
         if (!node.isModifiable()) {
             return false;
         }
-        if (node.attribute_ !==  undefined) {
+        if (node.attribute_ !== undefined) {
             if (node.attribute_.allowChildCount !== undefined) {
                 const allowCount = node.attribute_.allowChildCount();
                 if (allowCount <= 1) {

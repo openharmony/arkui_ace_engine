@@ -739,6 +739,9 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
     int32_t length = finalHeight * finalWidth * 4;
     JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(length);
     auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
+    if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
+        return;
+    }
     renderingContext2DModel_->GetImageDataModel(imageSize, buffer);
     auto colorArray = JSRef<JSUint8ClampedArray>::New(arrayBuffer->GetLocalHandle(), 0, arrayBuffer->ByteLength());
 
@@ -763,10 +766,15 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     imageSize.top *= density;
     imageSize.width = imageSize.width * density + DIFF;
     imageSize.height = imageSize.height * density + DIFF;
+    auto height = static_cast<uint32_t>(std::abs(imageSize.height));
+    auto width = static_cast<uint32_t>(std::abs(imageSize.width));
+    if (height > 0 && width > (UINT32_MAX / height)) {
+        return;
+    }
     auto pixelmap = renderingContext2DModel_->GetPixelMap(imageSize);
     CHECK_NULL_VOID(pixelmap);
 
-    // 3 pixelmap to NapiValue
+    // pixelmap to NapiValue
     ContainerScope scope(instanceId_);
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     CHECK_NULL_VOID(runtime);

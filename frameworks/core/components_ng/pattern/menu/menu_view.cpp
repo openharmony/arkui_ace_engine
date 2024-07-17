@@ -636,6 +636,7 @@ void HandleDragEnd(float offsetX, float offsetY, float velocity, const RefPtr<Fr
     CHECK_NULL_VOID(menuWrapper);
     auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
+    TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu");
     wrapperPattern->HideMenu();
 }
 
@@ -925,7 +926,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
             optionNode = OptionView::CreateMenuOption(optionsHasSymbol, params, i);
         } else {
             optionNode = OptionView::CreateMenuOption(
-                optionsHasIcon, params[i].value, params[i].action, i, params[i].icon);
+                optionsHasIcon, { params[i].value, params[i].isPasteOption }, params[i].action, i, params[i].icon);
         }
         if (!optionNode) {
             continue;

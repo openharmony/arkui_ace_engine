@@ -30,7 +30,9 @@ namespace OHOS::Ace::NG {
 using ActionNoParam = std::function<void()>;
 using ActionSetTextImpl = std::function<void(const std::string&)>;
 using ActionScrollForwardImpl = ActionNoParam;
+using ActionScrollForwardWithParamImpl = std::function<void(AccessibilityScrollType scrollType)>;;
 using ActionScrollBackwardImpl = ActionNoParam;
+using ActionScrollBackwardWithParamImpl = std::function<void(AccessibilityScrollType scrollType)>;;
 using ActionSetSelectionImpl = std::function<void(int32_t start, int32_t end, bool isForward)>;
 using ActionCopyImpl = ActionNoParam;
 using ActionCutImpl = ActionNoParam;
@@ -43,6 +45,7 @@ using ActionGetCursorIndexImpl = std::function<int32_t(void)>;
 using ActionClickImpl = ActionNoParam;
 using ActionLongClickImpl = ActionNoParam;
 using ActionsImpl = std::function<void((uint32_t actionType))>;
+using OnAccessibilityFocusCallbackImpl = std::function<void((bool isFocus))>;
 
 class FrameNode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
@@ -291,10 +294,24 @@ public:
         actionScrollForwardImpl_ = actionScrollForwardImpl;
     }
 
-    bool ActActionScrollForward()
+    void SetActionScrollForward(const ActionScrollForwardWithParamImpl& actionScrollForwardImpl)
     {
-        if (actionScrollForwardImpl_) {
+        actionScrollForwardWithParamImpl_ = actionScrollForwardImpl;
+    }
+
+    bool ActActionScrollForward(AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_DEFAULT)
+    {
+        if (actionScrollForwardWithParamImpl_ == nullptr) {
+            scrollType = AccessibilityScrollType::SCROLL_DEFAULT;
+        }
+
+        if ((scrollType == AccessibilityScrollType::SCROLL_DEFAULT) && (actionScrollForwardImpl_)) {
             actionScrollForwardImpl_();
+            return true;
+        }
+
+        if (actionScrollForwardWithParamImpl_) {
+            actionScrollForwardWithParamImpl_(scrollType);
             return true;
         }
         return false;
@@ -305,10 +322,24 @@ public:
         actionScrollBackwardImpl_ = actionScrollBackwardImpl;
     }
 
-    bool ActActionScrollBackward()
+    void SetActionScrollBackward(const ActionScrollBackwardWithParamImpl& actionScrollBackwardImpl)
     {
-        if (actionScrollBackwardImpl_) {
+        actionScrollBackwardWithParamImpl_ = actionScrollBackwardImpl;
+    }
+
+    bool ActActionScrollBackward(AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_DEFAULT)
+    {
+        if (actionScrollBackwardWithParamImpl_ == nullptr) {
+            scrollType = AccessibilityScrollType::SCROLL_DEFAULT;
+        }
+
+        if ((scrollType == AccessibilityScrollType::SCROLL_DEFAULT) && (actionScrollBackwardImpl_)) {
             actionScrollBackwardImpl_();
+            return true;
+        }
+
+        if (actionScrollBackwardWithParamImpl_) {
+            actionScrollBackwardWithParamImpl_(scrollType);
             return true;
         }
         return false;
@@ -430,6 +461,18 @@ public:
             return true;
         }
         return false;
+    }
+
+    void SetOnAccessibilityFocusCallback(const OnAccessibilityFocusCallbackImpl& onAccessibilityFocusCallbackImpl)
+    {
+        onAccessibilityFocusCallbackImpl_ = onAccessibilityFocusCallbackImpl;
+    }
+
+    void OnAccessibilityFocusCallback(bool isFocus)
+    {
+        if (onAccessibilityFocusCallbackImpl_) {
+            onAccessibilityFocusCallbackImpl_(isFocus);
+        }
     }
 
     void SetAccessibilityGroup(bool accessibilityGroup)
@@ -640,7 +683,9 @@ protected:
     ActionSetSelectionImpl actionSetSelectionImpl_;
     ActionMoveTextImpl actionMoveTextImpl_;
     ActionScrollForwardImpl actionScrollForwardImpl_;
+    ActionScrollForwardWithParamImpl actionScrollForwardWithParamImpl_;
     ActionScrollBackwardImpl actionScrollBackwardImpl_;
+    ActionScrollBackwardWithParamImpl actionScrollBackwardWithParamImpl_;
     ActionCopyImpl actionCopyImpl_;
     ActionCutImpl actionCutImpl_;
     ActionPasteImpl actionPasteImpl_;
@@ -651,6 +696,7 @@ protected:
     ActionClickImpl actionClickImpl_;
     ActionLongClickImpl actionLongClickImpl_;
     ActionsImpl actionsImpl_;
+    OnAccessibilityFocusCallbackImpl onAccessibilityFocusCallbackImpl_;
     bool accessibilityGroup_ = false;
     int32_t childTreeId_ = -1;
     int32_t childWindowId_ = 0;

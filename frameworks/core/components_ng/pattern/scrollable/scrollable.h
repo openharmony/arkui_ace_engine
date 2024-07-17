@@ -455,6 +455,11 @@ public:
         return panRecognizerNG_->GetAxisDirection();
     }
 
+    void SetNestedScrolling(bool nestedScrolling)
+    {
+        nestedScrolling_ = nestedScrolling;
+    }
+
 private:
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
@@ -572,6 +577,7 @@ private:
     float snapVelocity_ = 0.0f;
     float endPos_ = 0.0;
     bool isSnapAnimation_ = false;
+    bool nestedScrolling_ = false;
 };
 
 } // namespace OHOS::Ace::NG

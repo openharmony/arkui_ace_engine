@@ -423,7 +423,7 @@ HWTEST_F(ModelTestNg, ModelViewNgTest005, TestSize.Level1)
     auto json4 = JsonUtil::Create(true);
     modelPattern->ToJsonValue(json4, filter4);
 
-    std::shared_future<void> ftr = modelPattern->modelAdapter_->Deinit();
+    auto ftr = modelPattern->modelAdapter_->Deinit();
     if (ftr.valid()) {
         ftr.get();
     }

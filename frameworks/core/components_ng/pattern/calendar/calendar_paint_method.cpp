@@ -705,7 +705,7 @@ bool CalendarPaintMethod::IsOffDay(const CalendarDay& dayInfo) const
 {
     std::vector<std::string> days;
     StringUtils::StringSplitter(offDays_, ',', days);
-    int daysOfWeek = 7;
+    int32_t daysOfWeek = 7;
     for (const auto& day : days) {
         auto num = (StringUtils::StringToInt(day) + (daysOfWeek - startOfWeek_)) % daysOfWeek;
         if ((dayInfo.index % daysOfWeek) == num) {

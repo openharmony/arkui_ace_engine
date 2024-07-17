@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text_picker/textpicker_layout_algorithm.h"
+#include <cstdint>
 
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/picker/picker_theme.h"
@@ -285,7 +286,7 @@ void TextPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             0, MAX_HALF_DISPLAY_COUNT);
     }
     int32_t i = 0;
-    int32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
+    int32_t showCount = static_cast<int32_t>(pickerTheme->GetShowOptionCount()) + BUFFER_NODE_NUMBER;
     for (const auto& child : children) {
         if (i >= showCount) {
             break;

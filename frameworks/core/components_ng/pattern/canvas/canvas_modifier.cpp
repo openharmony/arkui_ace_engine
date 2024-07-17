@@ -47,14 +47,7 @@ void CanvasModifier::onDraw(DrawingContext& drawingContext)
             rsDrawCmdList->GetHeight(), rsDrawCmdList->GetHeight(), drawCmdList->GetWidth(), drawCmdList->GetHeight(),
             drawCmdList->GetOpItemSize());
     }
-    if (needResetSurface_) {
-        auto renderContext = renderContext_.Upgrade();
-        CHECK_NULL_VOID(renderContext);
-        int surfaceWidth = static_cast<int>(drawCmdList->GetWidth());
-        int surfaceHeight = static_cast<int>(drawCmdList->GetHeight());
-        renderContext->ResetSurface(surfaceWidth, surfaceHeight);
-        needResetSurface_ = false;
-    }
+    ResetSurface();
     CHECK_EQUAL_VOID(drawCmdList->IsEmpty(), true);
     drawCmdList->Playback(recordingCanvas);
     rsRecordingCanvas_->Clear();
@@ -66,5 +59,14 @@ std::string CanvasModifier::GetDumpInfo()
         .append(recordingCanvasDrawSize_.ToString())
         .append(", rsRecordingCanvas size: ")
         .append(drawCmdSize_.ToString());
+}
+
+void CanvasModifier::ResetSurface()
+{
+    CHECK_EQUAL_VOID(needResetSurface_, false);
+    auto renderContext = renderContext_.Upgrade();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->ResetSurface(static_cast<int>(drawCmdSize_.Width()), static_cast<int>(drawCmdSize_.Height()));
+    needResetSurface_ = false;
 }
 } // namespace OHOS::Ace::NG

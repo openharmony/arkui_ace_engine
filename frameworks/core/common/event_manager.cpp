@@ -155,6 +155,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         }
         eventTree_.eventTreeList.clear();
         MockCancelEventAndDispatch(touchPoint);
+        refereeNG_->ForceCleanGestureReferee();
         refereeNG_->CleanAll();
 
         TouchTestResult reHitTestResult;
@@ -162,6 +163,11 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         frameNode->TouchTest(point, point, point, touchRestrict,
             reHitTestResult, touchPoint.id, reResponseLinkResult);
         SetResponseLinkRecognizers(reHitTestResult, reResponseLinkResult);
+        if (!refereeNG_->IsReady()) {
+            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
+                "GestureReferee is contaminate by new comming recognizer, force clean gestureReferee.");
+            refereeNG_->ForceCleanGestureReferee();
+        }
         if (needAppend) {
 #ifdef OHOS_STANDARD_SYSTEM
             for (const auto& entry : reHitTestResult) {
@@ -730,6 +736,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
 
 void EventManager::CleanRecognizersForDragBegin(TouchEvent& touchEvent)
 {
+    downFingerIds_.erase(touchEvent.id);
     // send cancel to all recognizer
     for (const auto& iter : touchTestResults_) {
         touchEvent.id = iter.first;
@@ -739,7 +746,6 @@ void EventManager::CleanRecognizersForDragBegin(TouchEvent& touchEvent)
     }
     touchTestResults_.clear();
     refereeNG_->CleanRedundanceScope();
-    return;
 }
 
 void EventManager::DispatchTouchEventToTouchTestResult(TouchEvent touchEvent,
@@ -2067,6 +2073,27 @@ void EventManager::MockCancelEventAndDispatch(const AxisEvent& axisEvent)
     mockedEvent.id = static_cast<int32_t>(axisTouchTestResults_.begin()->first);
     DispatchTouchEvent(mockedEvent);
 }
+#if defined(SUPPORT_TOUCH_TARGET_TEST)
+
+bool EventManager::TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
+    TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend, const std::string& target)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    TouchTestResult hitTestResult;
+    TouchTestResult responseLinkResult;
+    const NG::PointF point { touchPoint.x, touchPoint.y };
+    frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id, responseLinkResult);
+    for (const auto& entry : hitTestResult) {
+        if (entry) {
+            auto frameNodeInfo = entry->GetAttachedNode().Upgrade();
+            if (frameNodeInfo && frameNodeInfo->GetTag().compare(target) == 0) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+#endif
 
 void EventManager::MockHoverCancelEventAndDispatch(const TouchEvent& touchPoint)
 {

@@ -1003,8 +1003,10 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
     CHECK_NULL_VOID(pipelineContext);
     auto containerId = pipelineContext->GetInstanceId();
     bool isShowInSubWindow = containerId >= MIN_SUBCONTAINER_ID;
+    auto targetId = menuWrapperPattern->GetTargetId();
+    overlayManager->EraseMenuInfo(targetId);
     if (isShowInSubWindow) {
-        SubwindowManager::GetInstance()->ClearMenuNG(instanceId, menuWrapperPattern->GetTargetId());
+        SubwindowManager::GetInstance()->ClearMenuNG(instanceId, targetId);
         overlayManager->ResetContextMenuDragHideFinished();
         overlayManager->SetIsMenuShow(false);
         return;
@@ -1942,7 +1944,7 @@ void OverlayManager::HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, b
 
 void OverlayManager::HideAllMenus()
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide all menus enter");
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "hide all menus enter");
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
         for (const auto& windowScene : windowSceneSet_) {
@@ -1952,6 +1954,7 @@ void OverlayManager::HideAllMenus()
             for (const auto& child : windowScene.Upgrade()->GetChildren()) {
                 auto node = DynamicCast<FrameNode>(child);
                 if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+                    TAG_LOGI(AceLogTag::ACE_OVERLAY, "will hide menu, menuNode id %{public}d", node->GetId());
                     HideMenu(node, 0, false);
                 }
             }
@@ -1967,6 +1970,7 @@ void OverlayManager::HideAllMenus()
             auto wrapperPattern = node->GetPattern<MenuWrapperPattern>();
             CHECK_NULL_VOID(wrapperPattern);
             wrapperPattern->UpdateMenuAnimation(node);
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "will hide menu, menuNode id %{public}d", node->GetId());
             HideMenu(node, 0, false);
         }
     }
@@ -4116,7 +4120,9 @@ void OverlayManager::UpdateSheetRender(
     if (sheetStyle.backgroundBlurStyle.has_value()) {
         SetSheetBackgroundBlurStyle(sheetPageNode, sheetStyle.backgroundBlurStyle.value());
     }
-    SetSheetBorderWidth(sheetPageNode, sheetTheme, sheetStyle);
+    auto sheetNodePattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetNodePattern);
+    sheetNodePattern->SetSheetBorderWidth();
     if (sheetStyle.borderStyle.has_value()) {
         sheetRenderContext->UpdateBorderStyle(sheetStyle.borderStyle.value());
     }
@@ -4500,37 +4506,6 @@ void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool is
             });
         maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
         context->OpacityAnimation(option, 1.0, 0.0);
-    }
-}
-
-void OverlayManager::SetSheetBorderWidth(const RefPtr<FrameNode>& sheetNode, const RefPtr<SheetTheme>& sheetTheme,
-    const NG::SheetStyle& sheetStyle, bool isPartialUpdate)
-{
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    CHECK_NULL_VOID(sheetPattern);
-    auto sheetType = sheetPattern->GetSheetType();
-    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto renderContext = sheetNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (sheetStyle.borderWidth.has_value()) {
-        auto sheetRadius = sheetTheme->GetSheetRadius();
-        auto borderWidth = sheetStyle.borderWidth.value();
-        BorderRadiusProperty borderRadius;
-        if ((sheetType == SheetType::SHEET_CENTER) || (sheetType == SheetType::SHEET_POPUP)) {
-            borderRadius.SetRadius(sheetRadius);
-        } else {
-            borderRadius = BorderRadiusProperty(sheetRadius, sheetRadius, 0.0_vp, 0.0_vp);
-            borderWidth.bottomDimen = 0.0_vp;
-        }
-        renderContext->UpdateBorderRadius(borderRadius);
-        layoutProperty->UpdateBorderWidth(borderWidth);
-        renderContext->UpdateBorderWidth(borderWidth);
-    } else if (renderContext->GetBorderWidth().has_value() && !isPartialUpdate) {
-        BorderWidthProperty borderWidth;
-        borderWidth.SetBorderWidth(0.0_vp);
-        layoutProperty->UpdateBorderWidth(borderWidth);
-        renderContext->UpdateBorderWidth(borderWidth);
     }
 }
 
@@ -5431,7 +5406,6 @@ int32_t OverlayManager::CreateModalUIExtension(
     const ModalUIExtensionConfig& config)
 {
     isProhibitBack_ = config.isProhibitBack;
-    SetIsAllowedBeCovered(config.isAllowedBeCovered);
     auto uiExtNode = ModalUIExtension::Create(want, callbacks, config.isAsyncModalBinding);
     if (!HandleUIExtNodeTransform(want, uiExtNode)) {
         return 0;
@@ -5445,6 +5419,7 @@ int32_t OverlayManager::CreateModalUIExtension(
         ModalStyle modalStyle;
         modalStyle.modalTransition = NG::ModalTransition::NONE;
         modalStyle.isUIExtension = true;
+        SetIsAllowedBeCovered(config.isAllowedBeCovered);
         // Convert the sessionId into a negative number to distinguish it from the targetId of other modal pages
         BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, nullptr, nullptr,
             ContentCoverParam(), nullptr, -(sessionId));

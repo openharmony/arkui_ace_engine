@@ -4703,6 +4703,10 @@ void ArkUINativeModule::RegisterListAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetInitialIndex));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetInitialIndex"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetInitialIndex));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setInitialScroller"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetInitialScroller));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetInitialScroller"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetInitialScroller));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "list"), list);
 }
 

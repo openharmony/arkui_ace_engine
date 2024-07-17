@@ -339,7 +339,6 @@ public:
 
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
 
-    void OnAreaChangedInner() override;
     void OnHandleAreaChanged() override;
     void OnVisibleChange(bool isVisible) override;
     void HandleCounterBorder();
@@ -1102,6 +1101,11 @@ public:
     bool NeedPaintSelect();
     void SetCustomKeyboardOption(bool supportAvoidance);
 
+    void SetIsFocusedBeforeClick(bool isFocusedBeforeClick)
+    {
+        isFocusedBeforeClick_ = isFocusedBeforeClick;
+    }
+
     void SetIsCustomFont(bool isCustomFont)
     {
         isCustomFont_ = isCustomFont;
@@ -1207,7 +1211,8 @@ public:
 
     void CleanNodeResponseKeyEvent();
 
-    void ScrollPage(bool reverse, bool smooth = false) override;
+    void ScrollPage(bool reverse, bool smooth = false,
+        AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
     void InitScrollBarClickEvent() override {}
     bool IsUnderlineMode();
     bool IsInlineMode();
@@ -1314,7 +1319,7 @@ public:
     }
 
     void OnSelectionMenuOptionsUpdate(
-        const NG::OnCreateMenuCallback && onCreateMenuCallback, const NG::OnMenuItemClickCallback && onMenuItemClick);
+        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick);
 
     void SetSupportPreviewText(bool isSupported)
     {
@@ -1484,7 +1489,7 @@ private:
     void RequestKeyboardOnFocus();
     bool IsModalCovered();
     void SetNeedToRequestKeyboardOnFocus();
-    void SetAccessibilityAction();
+    void SetAccessibilityAction() override;
     void SetAccessibilityActionGetAndSetCaretPosition();
     void SetAccessibilityMoveTextAction();
     void SetAccessibilityScrollAction();
@@ -1580,6 +1585,8 @@ private:
     void UpdateParam(GestureEvent& info, bool shouldProcessOverlayAfterLayout);
     void ShowCaretAndStopTwinkling();
     void OnCaretMoveDone(const TouchEventInfo& info);
+    void HandleCrossPlatformInBlurEvent();
+    void ModifyInnerStateInBlurEvent();
 
     void TwinklingByFocus();
 

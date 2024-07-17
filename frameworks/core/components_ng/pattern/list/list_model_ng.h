@@ -132,6 +132,7 @@ public:
     static void ResetListChildrenMainSize(FrameNode* frameNode);
     static int32_t GetInitialIndex(FrameNode* frameNode);
     static V2::ItemDivider GetDivider(FrameNode* frameNode);
+    static void SetScroller(FrameNode* frameNode, RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy);
 private:
     void AddDragFrameNodeToManager() const;
 };

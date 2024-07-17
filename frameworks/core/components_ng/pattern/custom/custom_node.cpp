@@ -90,7 +90,7 @@ void CustomNode::FlushReload()
     CHECK_NULL_VOID(completeReloadFunc_);
     Clean();
     renderFunction_ = completeReloadFunc_;
-    Render();
+    Build(nullptr);
 }
 
 bool CustomNode::RenderCustomChild(int64_t deadline)

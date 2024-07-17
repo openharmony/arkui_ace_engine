@@ -181,7 +181,7 @@ bool DragEventActuator::IsCurrentNodeStatusSuitableForDragging(
     auto gestureHub = gestureEventHub_.Upgrade();
     CHECK_NULL_RETURN(gestureHub, false);
     if (gestureHub->IsDragForbidden() || (!frameNode->IsDraggable() && frameNode->IsCustomerSet()) ||
-        IsBelongToMultiItemNode(frameNode) || touchRestrict.inputEventType == InputEventType::AXIS) {
+        touchRestrict.inputEventType == InputEventType::AXIS || IsBelongToMultiItemNode(frameNode)) {
         TAG_LOGI(AceLogTag::ACE_DRAG,
             "No need to collect drag gestures result, drag forbidden set is %{public}d,"
             "frameNode draggable is %{public}d, custom set is %{public}d",
@@ -680,27 +680,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
 
         longPressRecognizer_->SetThumbnailCallback(std::move(callback));
     }
-    auto touchTask = [hasContextMenuUsingGesture, weak = WeakClaim(this)](const TouchEventInfo& info) {
-        auto actuator = weak.Upgrade();
-        CHECK_NULL_VOID(actuator);
-        if (info.GetTouches().empty()) {
-            return;
-        }
-        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
-            actuator->HandleTouchUpEvent();
-        } else if (info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
-            actuator->HandleTouchCancelEvent();
-        } else if (info.GetTouches().front().GetTouchType() == TouchType::MOVE) {
-            if (hasContextMenuUsingGesture) {
-                auto point = Point(info.GetTouches().front().GetGlobalLocation().GetX(),
-                                   info.GetTouches().front().GetGlobalLocation().GetY());
-                actuator->HandleDragDampingMove(point, info.GetTouches().front().GetFingerId());
-            }
-            actuator->HandleTouchMoveEvent();
-        }
-    };
-    auto touchListener = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchTask));
-    gestureHub->AddTouchEvent(touchListener);
     std::vector<RefPtr<NGGestureRecognizer>> recognizers { longPressRecognizer_, panRecognizer_ };
     SequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
     SequencedRecognizer_->RemainChildOnResetStatus();
@@ -769,12 +748,15 @@ void DragEventActuator::HandleDragDampingMove(const Point& point, int32_t pointe
     if (isRedragStart && !isRedragStart_) {
         isRedragStart_ = true;
         SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, true);
+        UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, true);
         dragDropManager->UpdateDragMovePosition(updateOffset, true);
     } else {
         SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, false);
+        UpdateHideMenuOffsetNG(updateOffset, previewMenuSacle, false);
         dragDropManager->UpdateDragMovePosition(updateOffset, false);
     }
     SubwindowManager::GetInstance()->UpdatePreviewPosition();
+    UpdatePreviewPosition();
 }
 
 void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
@@ -1325,7 +1307,33 @@ void DragEventActuator::HideMenu(int32_t targetId)
     CHECK_NULL_VOID(manager);
     auto menuNode = manager->GetMenuNode(targetId);
     CHECK_NULL_VOID(menuNode);
+    TAG_LOGI(AceLogTag::ACE_DRAG, "will hide menu, tagetNode id %{public}d menuNode id %{public}d.",
+        targetId, menuNode->GetId());
     manager->HideMenu(menuNode, targetId);
+}
+
+void DragEventActuator::UpdateHideMenuOffsetNG(const NG::OffsetF& offset, float menuScale, bool isRedragStart)
+{
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlay = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    if (overlay->IsContextMenuDragHideFinished()) {
+        return;
+    }
+    overlay->UpdateContextMenuDisappearPosition(offset, menuScale, isRedragStart);
+}
+
+void DragEventActuator::UpdatePreviewPosition()
+{
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlay = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    if (overlay->GetHasPixelMap()) {
+        return;
+    }
+    overlay->UpdatePixelMapPosition(true);
 }
 
 void DragEventActuator::HidePixelMap(bool startDrag, double x, double y, bool showAnimation)
@@ -1929,10 +1937,6 @@ bool DragEventActuator::IsBelongToMultiItemNode(const RefPtr<FrameNode>& frameNo
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_RETURN(dragDropManager, false);
     if (IsSelectedItemNode(frameNode)) {
-        if (dragDropManager->HasGatherNode()) {
-            return true;
-        }
-        dragDropManager->SetHasGatherNode(true);
         isSelectedItemNode_ = true;
         FindItemParentNode(frameNode);
         return false;
@@ -2009,6 +2013,44 @@ bool DragEventActuator::IsNeedGather() const
         return false;
     }
     return true;
+}
+
+void DragEventActuator::AddTouchListener(const TouchRestrict& touchRestrict)
+{
+    CHECK_NULL_VOID(userCallback_);
+    auto gestureHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_VOID(gestureHub);
+    auto frameNode = gestureHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (!IsGlobalStatusSuitableForDragging() || !IsCurrentNodeStatusSuitableForDragging(frameNode, touchRestrict)) {
+        gestureHub->RemoveTouchEvent(touchListener_);
+        return;
+    }
+    auto focusHub = frameNode->GetFocusHub();
+    bool hasContextMenuUsingGesture = focusHub ?
+        focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU) : false;
+    auto touchTask = [hasContextMenuUsingGesture, weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto actuator = weak.Upgrade();
+        CHECK_NULL_VOID(actuator);
+        if (info.GetTouches().empty()) {
+            return;
+        }
+        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+            actuator->HandleTouchUpEvent();
+        } else if (info.GetTouches().front().GetTouchType() == TouchType::CANCEL) {
+            actuator->HandleTouchCancelEvent();
+        } else if (info.GetTouches().front().GetTouchType() == TouchType::MOVE) {
+            if (hasContextMenuUsingGesture) {
+                auto point = Point(info.GetTouches().front().GetGlobalLocation().GetX(),
+                                   info.GetTouches().front().GetGlobalLocation().GetY());
+                actuator->HandleDragDampingMove(point, info.GetTouches().front().GetFingerId());
+            }
+            actuator->HandleTouchMoveEvent();
+        }
+    };
+    gestureHub->RemoveTouchEvent(touchListener_);
+    touchListener_ = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchTask));
+    gestureHub->AddTouchEvent(touchListener_);
 }
 
 void DragEventActuator::HandleTouchUpEvent()

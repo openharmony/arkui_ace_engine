@@ -375,8 +375,8 @@ private:
     float localDownDistance_ = 0.0f;
     Color pressColor_;
     Color hoverColor_;
-    FontWeight SelectedWeight_;
-    FontWeight DisappearWeight_;
+    FontWeight SelectedWeight_ = FontWeight::MEDIUM;
+    FontWeight DisappearWeight_ = FontWeight::REGULAR;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
     bool hour24_ = !Localization::GetInstance()->IsAmPmHour();
@@ -421,6 +421,7 @@ private:
     bool hasUserDefinedNormalFontFamily_ = false;
     bool hasUserDefinedSelectedFontFamily_ = false;
     bool isShow_ = true;
+    bool isEnableHaptic_ = true;
     std::shared_ptr<ITimepickerAudioHaptic> hapticController_ = nullptr;
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnPattern);
 };

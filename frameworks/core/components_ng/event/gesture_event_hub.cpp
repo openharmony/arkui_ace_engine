@@ -99,6 +99,9 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
     }
     size_t idx = innerTargets.size();
     size_t newIdx = 0;
+    if (dragEventActuator_) {
+        dragEventActuator_->AddTouchListener(touchRestrict);
+    }
     if (touchEventActuator_) {
         touchEventActuator_->OnCollectTouchTarget(
             coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, responseLinkResult);

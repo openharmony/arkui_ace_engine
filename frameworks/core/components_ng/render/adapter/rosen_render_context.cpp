@@ -564,7 +564,11 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, 
     CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    SyncGeometryProperties(paintRect_);
+    if (isNeedAnimate_) {
+        SyncGeometryProperties(paintRect_);
+    } else {
+        RSNode::ExecuteWithoutAnimation([&]() { SyncGeometryProperties(paintRect_); });
+    }
     host->OnPixelRoundFinish(paintRect_.GetSize());
 }
 
@@ -643,11 +647,10 @@ void RosenRenderContext::SyncAdditionalGeometryProperties(const RectF& paintRect
         PaintBackground();
     }
 
-    if (bdImageLoadingCtx_ && bdImage_) {
+    auto sourceFromImage = GetBorderSourceFromImage().value_or(false);
+    if (sourceFromImage && bdImageLoadingCtx_ && bdImage_) {
         PaintBorderImage();
-    }
-
-    if (GetBorderImageGradient()) {
+    } else if (!sourceFromImage && GetBorderImageGradient()) {
         PaintBorderImageGradient();
     }
 
@@ -848,6 +851,10 @@ void RosenRenderContext::OnBackgroundImageUpdate(const ImageSourceInfo& src)
     if (src.GetSrc().empty() && src.GetPixmap() == nullptr) {
         bgImage_ = nullptr;
         bgLoadingCtx_ = nullptr;
+        auto frameNode = GetHost();
+        if (frameNode) {
+            frameNode->SetColorModeUpdateCallback(nullptr);
+        }
         PaintBackground();
         return;
     }
