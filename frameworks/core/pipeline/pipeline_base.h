@@ -1287,7 +1287,7 @@ public:
 #endif
     virtual bool IsWindowFocused() const
     {
-        return false;
+        return GetOnFoucs();
     }
 
 protected:
