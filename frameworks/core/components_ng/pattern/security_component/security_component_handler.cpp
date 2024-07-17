@@ -698,19 +698,24 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
     secEvent.point.touchX = event.GetDisplayX();
     secEvent.point.touchY = event.GetDisplayY();
     auto pointerEvent = event.GetPointerEvent();
+    uint8_t defaultData = 0;
+    std::vector<uint8_t> dataBuffer;
     if (pointerEvent == nullptr) {
-        LOGE("Receive a NULL pointerEvent");
-        return -1;
+        LOGW("Receive a NULL pointerEvent, set default data.");
+        secEvent.extraInfo.data = &defaultData;
+        secEvent.extraInfo.dataSize = 1;
+        secEvent.point.timestamp = 0;
+    } else {
+        dataBuffer = pointerEvent->GetEnhanceData();
+        if (dataBuffer.size() > 0) {
+            secEvent.extraInfo.data = dataBuffer.data();
+            secEvent.extraInfo.dataSize = dataBuffer.size();
+        }
+        std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
+        TimeStamp time(microseconds);
+        secEvent.point.timestamp =
+            static_cast<uint64_t>(time.time_since_epoch().count()) / SECOND_TO_MILLISECOND;
     }
-    auto data = pointerEvent->GetEnhanceData();
-    if (data.size() > 0) {
-        secEvent.extraInfo.data = data.data();
-        secEvent.extraInfo.dataSize = data.size();
-    }
-    std::chrono::microseconds microseconds(event.GetPointerEvent()->GetActionTime());
-    TimeStamp time(microseconds);
-    secEvent.point.timestamp =
-        static_cast<uint64_t>(time.time_since_epoch().count()) / SECOND_TO_MILLISECOND;
 #endif
     if (CheckComponentCoveredStatus(node->GetId())) {
         LOGW("Security component is covered by another component.");
