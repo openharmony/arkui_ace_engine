@@ -1691,6 +1691,18 @@ bool FocusHub::CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) con
     auto frameNode = childNode->GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
     rect = frameNode->GetPaintRectWithTransform();
+
+    //  Calculate currentNode -> childNode offset
+    auto uiNode = frameNode->GetParent();
+    while (uiNode != GetFrameNode()) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+        if (!frameNode) {
+            uiNode = uiNode -> GetParent();
+            continue;
+        }
+        rect += frameNode->GetPaintRectWithTransform().GetOffset();
+        uiNode = frameNode->GetParent();
+    }
     return true;
 }
 
