@@ -350,7 +350,7 @@ bool WaterFlowLayoutInfo::ReachEnd(float prevOffset) const
 
 int32_t WaterFlowLayoutInfo::FastSolveStartIndex() const
 {
-    if (NearZero(currentOffset_) && endPosArray_.size() > 0 && NearZero(endPosArray_[0].first)) {
+    if (NearZero(currentOffset_) && !endPosArray_.empty() && NearZero(endPosArray_[0].first)) {
         return endPosArray_[0].second;
     }
     auto it = std::upper_bound(endPosArray_.begin(), endPosArray_.end(), -currentOffset_,
