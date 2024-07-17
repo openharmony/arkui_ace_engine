@@ -1007,6 +1007,30 @@ void ResetTextOnTextSelectionChange(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetOnTextSelectionChange(frameNode, nullptr);
 }
+
+void SetTextSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::OnCreateMenuCallback* onCreateMenu = nullptr;
+    NG::OnMenuItemClickCallback* onMenuItemClick = nullptr;
+    if (onCreateMenuCallback) {
+        onCreateMenu = reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback);
+    }
+    if (onMenuItemClickCallback) {
+        onMenuItemClick = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
+    }
+    TextModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
+}
+
+void ResetTextSelectionMenuOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::OnCreateMenuCallback onCreateMenuCallback;
+    NG::OnMenuItemClickCallback onMenuItemClick;
+    TextModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1118,7 +1142,9 @@ const ArkUITextModifier* GetTextModifier()
         SetTextOnCopy,
         ResetTextOnCopy,
         SetTextOnTextSelectionChange,
-        ResetTextOnTextSelectionChange
+        ResetTextOnTextSelectionChange,
+        SetTextSelectionMenuOptions,
+        ResetTextSelectionMenuOptions
     };
 
     return &modifier;

@@ -1065,6 +1065,20 @@ class TextAreaEnablePreviewTextModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextAreaEditMenuOptionsModifier extends ModifierWithKey<EditMenuOptions> {
+  constructor(value: EditMenuOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textEditMenuOptions');
+  applyPeer(node: KNode, reset: boolean) {
+    if (reset) {
+      getUINativeModule().textArea.resetSelectionMenuOptions(node);
+    } else {
+      getUINativeModule().textArea.setSelectionMenuOptions(node, this.value);
+    }
+  }
+}
+
 class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1414,6 +1428,11 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   }
   enablePreviewText(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaEnablePreviewTextModifier.identity, TextAreaEnablePreviewTextModifier, value);
+    return this;
+  }
+  editMenuOptions(value: EditMenuOptions) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaEditMenuOptionsModifier.identity,
+      TextAreaEditMenuOptionsModifier, value);
     return this;
   }
 }

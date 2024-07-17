@@ -8646,6 +8646,19 @@ class SearchEnablePreviewTextModifier extends ModifierWithKey {
   }
 }
 SearchEnablePreviewTextModifier.identity = Symbol('searchEnablePreviewText');
+class SearchEditMenuOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetSelectionMenuOptions(node);
+    } else {
+      getUINativeModule().search.setSelectionMenuOptions(node, this.value);
+    }
+  }
+}
+SearchEditMenuOptionsModifier.identity = Symbol('searchEditMenuOptions');
 class ArkSearchComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -8845,6 +8858,11 @@ class ArkSearchComponent extends ArkComponent {
   }
   enablePreviewText(value) {
     modifierWithKey(this._modifiersWithKeys, SearchEnablePreviewTextModifier.identity, SearchEnablePreviewTextModifier, value);
+    return this;
+  }
+  editMenuOptions(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchEditMenuOptionsModifier.identity,
+      SearchEditMenuOptionsModifier, value);
     return this;
   }
 }
@@ -10777,6 +10795,20 @@ class TextOnTextSelectionChangeModifier extends ModifierWithKey {
 }
 TextOnTextSelectionChangeModifier.identity = Symbol('textOnTextSelectionChange');
 
+class TextEditMenuOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetSelectionMenuOptions(node);
+    } else {
+      getUINativeModule().text.setSelectionMenuOptions(node, this.value);
+    }
+  }
+}
+TextEditMenuOptionsModifier.identity = Symbol('textEditMenuOptions');
+
 class ArkTextComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -10944,6 +10976,11 @@ class ArkTextComponent extends ArkComponent {
   onTextSelectionChange(callback) {
     modifierWithKey(this._modifiersWithKeys, TextOnTextSelectionChangeModifier.identity,
       TextOnTextSelectionChangeModifier, callback);
+    return this;
+  }
+  editMenuOptions(value) {
+    modifierWithKey(this._modifiersWithKeys, TextEditMenuOptionsModifier.identity,
+      TextEditMenuOptionsModifier, value);
     return this;
   }
 }
@@ -11967,6 +12004,19 @@ class TextAreaEnablePreviewTextModifier extends ModifierWithKey {
   }
 }
 TextAreaEnablePreviewTextModifier.identity = Symbol('textAreaEnablePreviewText');
+class TextAreaEditMenuOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetSelectionMenuOptions(node);
+    } else {
+      getUINativeModule().textArea.setSelectionMenuOptions(node, this.value);
+    }
+  }
+}
+TextAreaEditMenuOptionsModifier.identity = Symbol('textAreaEditMenuOptions');
 class ArkTextAreaComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -12247,6 +12297,11 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   enablePreviewText(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaEnablePreviewTextModifier.identity, TextAreaEnablePreviewTextModifier, value);
+    return this;
+  }
+  editMenuOptions(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaEditMenuOptionsModifier.identity,
+      TextAreaEditMenuOptionsModifier, value);
     return this;
   }
 }
@@ -13521,6 +13576,19 @@ class TextInputEnablePreviewTextModifier extends ModifierWithKey {
   }
 }
 TextInputEnablePreviewTextModifier.identity = Symbol('textInputEnablePreviewText');
+class TextInputEditMenuOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetSelectionMenuOptions(node);
+    } else {
+      getUINativeModule().textInput.setSelectionMenuOptions(node, this.value);
+    }
+  }
+}
+TextInputEditMenuOptionsModifier.identity = Symbol('textInputEditMenuOptions');
 class ArkTextInputComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -13866,6 +13934,11 @@ class ArkTextInputComponent extends ArkComponent {
   }
   enablePreviewText(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputEnablePreviewTextModifier.identity, TextInputEnablePreviewTextModifier, value);
+    return this;
+  }
+  editMenuOptions(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputEditMenuOptionsModifier.identity,
+      TextInputEditMenuOptionsModifier, value);
     return this;
   }
 }
