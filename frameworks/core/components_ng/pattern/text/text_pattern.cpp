@@ -2714,6 +2714,12 @@ void TextPattern::DumpAdvanceInfo()
 
     DumpLog::GetInstance().AddDesc(
         std::string("BindSelectionMenu: ").append(std::to_string(selectionMenuMap_.empty())));
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto fontScale = pipeline->GetFontScale();
+    auto fontWeightScale = pipeline->GetFontWeightScale();
+    DumpLog::GetInstance().AddDesc(std::string("fontScale: ").append(std::to_string(fontScale)));
+    DumpLog::GetInstance().AddDesc(std::string("fontWeightScale: ").append(std::to_string(fontWeightScale)));
 }
 
 void TextPattern::DumpInfo()
@@ -2730,21 +2736,23 @@ void TextPattern::DumpInfo()
         std::string("FontSize: ")
             .append((textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(DIMENSION_VALUE, DimensionUnit::FP))
                         .ToString()));
-    dumpLog.AddDesc(std::string("FontWeight: ").append(StringUtils::ToString(textStyle_->GetFontWeight())));
-    dumpLog.AddDesc(std::string("FontStyle: ").append(StringUtils::ToString(textStyle_->GetFontStyle())));
-    dumpLog.AddDesc(std::string("LineHeight: ").append(textStyle_->GetLineHeight().ToString()));
-    dumpLog.AddDesc(std::string("LineSpacing: ").append(textStyle_->GetLineSpacing().ToString()));
-    dumpLog.AddDesc(std::string("BaselineOffset: ").append(textStyle_->GetBaselineOffset().ToString()));
-    dumpLog.AddDesc(std::string("TextIndent: ").append(textStyle_->GetTextIndent().ToString()));
-    dumpLog.AddDesc(std::string("LetterSpacing: ").append(textStyle_->GetLetterSpacing().ToString()));
-    dumpLog.AddDesc(std::string("TextOverflow: ").append(StringUtils::ToString(textStyle_->GetTextOverflow())));
-    dumpLog.AddDesc(std::string("TextAlign: ").append(StringUtils::ToString(textStyle_->GetTextAlign())));
-    dumpLog.AddDesc(std::string("WordBreak: ").append(StringUtils::ToString(textStyle_->GetWordBreak())));
-    dumpLog.AddDesc(std::string("TextCase: ").append(StringUtils::ToString(textStyle_->GetTextCase())));
-    dumpLog.AddDesc(std::string("EllipsisMode: ").append(StringUtils::ToString(textStyle_->GetEllipsisMode())));
+    if (textStyle_.has_value()) {
+        dumpLog.AddDesc(std::string("FontWeight: ").append(StringUtils::ToString(textStyle_->GetFontWeight())));
+        dumpLog.AddDesc(std::string("FontStyle: ").append(StringUtils::ToString(textStyle_->GetFontStyle())));
+        dumpLog.AddDesc(std::string("LineHeight: ").append(textStyle_->GetLineHeight().ToString()));
+        dumpLog.AddDesc(std::string("LineSpacing: ").append(textStyle_->GetLineSpacing().ToString()));
+        dumpLog.AddDesc(std::string("BaselineOffset: ").append(textStyle_->GetBaselineOffset().ToString()));
+        dumpLog.AddDesc(std::string("TextIndent: ").append(textStyle_->GetTextIndent().ToString()));
+        dumpLog.AddDesc(std::string("LetterSpacing: ").append(textStyle_->GetLetterSpacing().ToString()));
+        dumpLog.AddDesc(std::string("TextOverflow: ").append(StringUtils::ToString(textStyle_->GetTextOverflow())));
+        dumpLog.AddDesc(std::string("TextAlign: ").append(StringUtils::ToString(textStyle_->GetTextAlign())));
+        dumpLog.AddDesc(std::string("WordBreak: ").append(StringUtils::ToString(textStyle_->GetWordBreak())));
+        dumpLog.AddDesc(std::string("TextCase: ").append(StringUtils::ToString(textStyle_->GetTextCase())));
+        dumpLog.AddDesc(std::string("EllipsisMode: ").append(StringUtils::ToString(textStyle_->GetEllipsisMode())));
+        dumpLog.AddDesc(
+            std::string("LineBreakStrategy: ").append(GetLineBreakStrategyInJson(textStyle_->GetLineBreakStrategy())));
+    }
     dumpLog.AddDesc(std::string("Selection: ").append("(").append(textSelector_.ToString()).append(")"));
-    dumpLog.AddDesc(
-        std::string("LineBreakStrategy: ").append(GetLineBreakStrategyInJson(textStyle_->GetLineBreakStrategy())));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();

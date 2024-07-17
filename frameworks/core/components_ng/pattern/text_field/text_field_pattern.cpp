@@ -3838,6 +3838,8 @@ bool TextFieldPattern::BeforeIMEInsertValue(const std::string& insertValue, int3
     InsertValueInfo insertValueInfo;
     insertValueInfo.insertOffset = offset;
     insertValueInfo.insertValue = insertValue;
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "BeforeIMEInsertValue len:%d,offset:%d",
+        static_cast<int32_t>(insertValue.length()), offset);
     return eventHub->FireOnWillInsertValueEvent(insertValueInfo);
 }
 
@@ -3848,8 +3850,11 @@ void TextFieldPattern::AfterIMEInsertValue(const std::string& insertValue)
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     InsertValueInfo insertValueInfo;
-    insertValueInfo.insertOffset = selectController_->GetCaretIndex();
+    auto offset = selectController_->GetCaretIndex();
+    insertValueInfo.insertOffset = offset;
     insertValueInfo.insertValue = insertValue;
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "AfterIMEInsertValue len:%d,offset:%d",
+        static_cast<int32_t>(insertValue.length()), offset);
     return eventHub->FireOnDidInsertValueEvent(insertValueInfo);
 }
 
@@ -6388,16 +6393,15 @@ void TextFieldPattern::DumpInfo()
         std::string("enableAutoFill:").append(std::to_string(layoutProperty->GetEnableAutoFillValue(true))));
     dumpLog.AddDesc(std::string("contentType:").append(TextContentTypeToString()));
     dumpLog.AddDesc(std::string("style:").append(GetInputStyleString()));
+    dumpLog.AddDesc(std::string("PreviewTextStart:").append(std::to_string(GetPreviewTextStart())));
+    dumpLog.AddDesc(std::string("PreviewTextEnd:").append(std::to_string(GetPreviewTextEnd())));
+    dumpLog.AddDesc(std::string("PreTextValue:").append(GetPreviewTextValue()));
 #if defined(ENABLE_STANDARD_INPUT)
     auto miscTextConfig = GetMiscTextConfig();
     CHECK_NULL_VOID(miscTextConfig.has_value());
     MiscServices::TextConfig textConfig = miscTextConfig.value();
     dumpLog.AddDesc(std::string("RequestKeyboard calling window :")
-                                       .append(std::to_string(textConfig.windowId))
-                                       .append(std::string("inputType:"))
-                                       .append(std::to_string(textConfig.inputAttribute.inputPattern))
-                                       .append(std::string("enterKeyType:"))
-                                       .append(std::to_string(textConfig.inputAttribute.enterKeyType)));
+                                       .append(std::to_string(textConfig.windowId)));
 #endif
     dumpLog.AddDesc(textSelector_.ToString());
     if (customKeyboard_ || customKeyboardBuilder_) {
@@ -6412,9 +6416,8 @@ void TextFieldPattern::DumpInfo()
 void TextFieldPattern::DumpAdvanceInfo()
 {
     if (customKeyboard_ || customKeyboardBuilder_) {
-        DumpLog::GetInstance().AddDesc(std::string("CustomKeyboard: true")
-                                           .append(", Attached: ")
-                                           .append(std::to_string(isCustomKeyboardAttached_)));
+        DumpLog::GetInstance().AddDesc(
+            std::string("CustomKeyboard: true, Attached:").append(std::to_string(isCustomKeyboardAttached_)));
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -6442,8 +6445,7 @@ void TextFieldPattern::DumpAdvanceInfo()
     auto miscTextConfig = GetMiscTextConfig();
     CHECK_NULL_VOID(miscTextConfig.has_value());
     MiscServices::CursorInfo cursorInfo = miscTextConfig.value().cursorInfo;
-    DumpLog::GetInstance().AddDesc(std::string("cursorInfo")
-                                       .append(", left:")
+    DumpLog::GetInstance().AddDesc(std::string("cursorInfo, left:")
                                        .append(std::to_string(cursorInfo.left))
                                        .append(", top:")
                                        .append(std::to_string(cursorInfo.top))
@@ -6455,6 +6457,12 @@ void TextFieldPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc(std::string("textRect: ").append(contentRect_.ToString()));
     DumpLog::GetInstance().AddDesc(std::string("contentRect: ").append(contentRect_.ToString()));
     DumpLog::GetInstance().AddDesc(textSelector_.ToString());
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto fontScale = pipeline->GetFontScale();
+    auto fontWeightScale = pipeline->GetFontWeightScale();
+    DumpLog::GetInstance().AddDesc(std::string("fontScale: ").append(std::to_string(fontScale)));
+    DumpLog::GetInstance().AddDesc(std::string("fontWeightScale: ").append(std::to_string(fontWeightScale)));
 }
 
 void TextFieldPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap)
