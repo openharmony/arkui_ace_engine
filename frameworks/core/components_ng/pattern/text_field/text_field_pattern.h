@@ -1202,7 +1202,7 @@ public:
 
     OffsetF GetTextPaintOffset() const override;
 
-    OffsetF GetPaintRectGlobalOffset() const;
+    OffsetF GetPaintRectGlobalOffset(bool duringLayout = false) const;
 
     void NeedRequestKeyboard()
     {
