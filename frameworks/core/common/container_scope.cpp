@@ -126,9 +126,6 @@ void ContainerScope::Remove(int32_t id)
 void ContainerScope::RemoveAndCheck(int32_t id)
 {
     Remove(id);
-    if (id == currentId_) {
-        UpdateCurrent(INSTANCE_ID_UNDEFINED);
-    }
     if (RecentActiveId() == id) {
         UpdateRecentActive(INSTANCE_ID_UNDEFINED);
     }
