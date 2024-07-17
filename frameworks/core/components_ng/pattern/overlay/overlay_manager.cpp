@@ -4136,6 +4136,16 @@ void OverlayManager::UpdateSheetRender(
         sheetRenderContext->UpdateBackShadow(ShadowConfig::NoneShadow);
     }
 }
+void OverlayManager::UpdateSheetProperty(const RefPtr<FrameNode>& sheetNode,
+    NG::SheetStyle& currentStyle, bool isPartialUpdate)
+{
+    auto pipeline = sheetNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    UpdateSheetRender(sheetNode, currentStyle, isPartialUpdate);
+    sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    pipeline->FlushUITasks();
+    ComputeSheetOffset(currentStyle, sheetNode);
+}
 
 void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& sheetStyle,
     int32_t targetId, bool isStartByUIContext, bool isPartialUpdate,
@@ -4151,9 +4161,6 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::She
         sheetNode->GetPattern<SheetPresentationPattern>()->GetTargetId() != targetId) {
         return;
     }
-    auto pipeline = sheetNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    UpdateSheetRender(sheetNode, sheetStyle, isPartialUpdate);
     auto maskNode = GetSheetMask(sheetNode);
     if (maskNode) {
         UpdateSheetMask(maskNode, sheetNode, sheetStyle, isPartialUpdate);
@@ -4162,9 +4169,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::She
     CHECK_NULL_VOID(sheetNodePattern);
     if (isStartByUIContext) {
         auto currentStyle = UpdateSheetStyle(sheetNode, sheetStyle, isPartialUpdate);
-        sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        pipeline->FlushUITasks();
-        ComputeSheetOffset(currentStyle, sheetNode);
+        UpdateSheetProperty(sheetNode, currentStyle, isPartialUpdate);
     } else {
         sheetNodePattern->UpdateOnAppear(std::move(onAppear));
         sheetNodePattern->UpdateOnDisappear(std::move(onDisappear));
@@ -4178,9 +4183,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::She
         sheetNodePattern->UpdateSheetSpringBack(std::move(sheetSpringBack));
         auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
         layoutProperty->UpdateSheetStyle(sheetStyle);
-        sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        pipeline->FlushUITasks();
-        ComputeSheetOffset(sheetStyle, sheetNode);
+        UpdateSheetProperty(sheetNode, sheetStyle, isPartialUpdate);
     }
     sheetNode->MarkModifyDone();
     auto sheetType = sheetNodePattern->GetSheetType();
@@ -6356,5 +6359,25 @@ void OverlayManager::SetNodeBeforeAppbar(const RefPtr<NG::UINode>& rootNode, con
             }
         }
     }
+}
+
+bool OverlayManager::IsRootExpansive() const
+{
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(rootNode, false);
+    auto pipelineContext = rootNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto manager = pipelineContext->GetSafeAreaManager();
+    CHECK_NULL_RETURN(manager, false);
+    if (manager->IsFullScreen()) {
+        // if window is full screen, sheetPage should layout under 8vp + status bar height under parent
+        return false;
+    }
+
+    // if page parent is full screen, sheetPage should layout 8vp under parent
+    auto layoutProp = DynamicCast<FrameNode>(rootNode)->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProp, false);
+    const auto& opts = layoutProp->GetSafeAreaExpandOpts();
+    return opts && opts->Expansive();
 }
 } // namespace OHOS::Ace::NG
