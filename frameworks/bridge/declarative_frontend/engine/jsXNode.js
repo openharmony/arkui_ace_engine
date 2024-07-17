@@ -17,6 +17,9 @@ var NodeRenderType;
     NodeRenderType[NodeRenderType["RENDER_TYPE_DISPLAY"] = 0] = "RENDER_TYPE_DISPLAY";
     NodeRenderType[NodeRenderType["RENDER_TYPE_TEXTURE"] = 1] = "RENDER_TYPE_TEXTURE";
 })(NodeRenderType || (NodeRenderType = {}));
+if (!globalThis.__hasUIFramework__) {
+    globalThis.requireNapi('arkui.mock');
+}
 class BaseNode extends __JSBaseNode__ {
     constructor(uiContext, options) {
         super(options);
