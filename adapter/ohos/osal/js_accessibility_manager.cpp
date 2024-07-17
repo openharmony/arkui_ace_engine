@@ -1171,10 +1171,13 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     if (node->GetRenderContext() != nullptr) {
         nodeInfo.SetZIndex(node->GetRenderContext()->GetZIndex().value_or(0));
         nodeInfo.SetOpacity(node->GetRenderContext()->GetOpacity().value_or(1));
-        nodeInfo.SetBackgroundColor(node->GetRenderContext()->GetBackgroundColor().value_or(Color::TRANSPARENT).ToString());
-        nodeInfo.SetBackgroundImage(node->GetRenderContext()->GetBackgroundImage().value_or(ImageSourceInfo("")).ToString());
+        nodeInfo.SetBackgroundColor(
+            node->GetRenderContext()->GetBackgroundColor().value_or(Color::TRANSPARENT).ToString());
+        nodeInfo.SetBackgroundImage(
+            node->GetRenderContext()->GetBackgroundImage().value_or(ImageSourceInfo("")).ToString());
         if (node->GetRenderContext()->GetForeground() != nullptr) {
-            nodeInfo.SetBlur(node->GetRenderContext()->GetForeground()->propBlurRadius.value_or(Dimension(0)).ToString());
+            nodeInfo.SetBlur(
+                node->GetRenderContext()->GetForeground()->propBlurRadius.value_or(Dimension(0)).ToString());
         }
     }
     auto eventHub = node->GetEventHub<NG::EventHub>();
