@@ -28,6 +28,7 @@
 
 #include "base/geometry/ng/vector.h"
 #include "base/image/drawing_color_filter.h"
+#include "base/image/drawing_lattice.h"
 #include "base/image/pixel_map.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
@@ -370,18 +371,9 @@ void JSImage::JsBorder(const JSCallbackInfo& info)
     ImageModel::GetInstance()->SetBackBorder();
 }
 
-void JSImage::JsImageResizable(const JSCallbackInfo& info)
+void JSImage::ParseResizableSlice(const JSRef<JSObject>& resizableObject)
 {
-    if (ImageModel::GetInstance()->GetIsAnimation()) {
-        return;
-    }
-    auto infoObj = info[0];
     ImageResizableSlice sliceResult;
-    if (!infoObj->IsObject()) {
-        ImageModel::GetInstance()->SetResizableSlice(sliceResult);
-        return;
-    }
-    JSRef<JSObject> resizableObject = JSRef<JSObject>::Cast(infoObj);
     if (resizableObject->IsEmpty()) {
         ImageModel::GetInstance()->SetResizableSlice(sliceResult);
         return;
@@ -399,6 +391,31 @@ void JSImage::JsImageResizable(const JSCallbackInfo& info)
     UpdateSliceResult(sliceObj, sliceResult);
 
     ImageModel::GetInstance()->SetResizableSlice(sliceResult);
+}
+
+void JSImage::ParseResizableLattice(const JSRef<JSObject>& resizableObject)
+{
+    auto latticeValue = resizableObject->GetProperty("lattice");
+    CHECK_NULL_VOID(latticeValue->IsObject());
+    auto drawingLattice = CreateDrawingLattice(latticeValue);
+    if (drawingLattice) {
+        ImageModel::GetInstance()->SetResizableLattice(drawingLattice);
+    }
+}
+
+void JSImage::JsImageResizable(const JSCallbackInfo& info)
+{
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
+    auto infoObj = info[0];
+    if (!infoObj->IsObject()) {
+        ImageModel::GetInstance()->SetResizableSlice(ImageResizableSlice());
+        return;
+    }
+    JSRef<JSObject> resizableObject = JSRef<JSObject>::Cast(infoObj);
+    ParseResizableSlice(resizableObject);
+    ParseResizableLattice(resizableObject);
 }
 
 void JSImage::UpdateSliceResult(const JSRef<JSObject>& sliceObj, ImageResizableSlice& sliceResult)

@@ -103,6 +103,8 @@ adapter/ohos/osal/data_detector_mgr.cpp @arkui_image
 adapter/ohos/osal/download_manager_ohos.cpp @arkui_image
 adapter/ohos/osal/drawing_color_filter_ohos.cpp @arkui_image
 adapter/ohos/osal/drawing_color_filter_ohos.h @arkui_image
+adapter/ohos/osal/drawing_lattice_ohos.cpp @arkui_image
+adapter/ohos/osal/drawing_lattice_ohos.h @arkui_image
 adapter/ohos/osal/event_report.cpp @arkuiframework
 adapter/ohos/osal/exception_handler.cpp @arkuiframework
 adapter/ohos/osal/fake_accessibility_manager.cpp @arkuiabilitygroup
