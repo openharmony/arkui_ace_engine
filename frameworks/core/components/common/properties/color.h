@@ -139,7 +139,7 @@ public:
 
     std::string ToString() const;
 
-private:
+protected:
     constexpr explicit Color(ColorParam colorValue) : colorValue_(colorValue) {}
 
     static double ConvertGammaToLinear(uint8_t value);
@@ -162,6 +162,24 @@ private:
 
     float CalculateBlend(float alphaLeft, float alphaRight, float valueLeft, float valueRight) const;
     ColorParam colorValue_ { .value = 0xff000000 };
+};
+
+class ACE_FORCE_EXPORT DynamicColor : public Color {
+public:
+    DynamicColor() {}
+    DynamicColor(const Color& color);
+    DynamicColor(const Color& color, std::optional<uint32_t> resId);
+    DynamicColor(const Color& color, uint32_t resId);
+
+    void UpdateColorByResourceId();
+    std::string ToString() const;
+    Color ToColor() const;
+
+    DynamicColor& operator=(const Color& rhs);
+    bool operator==(const DynamicColor& rhs) const;
+    bool operator!=(const DynamicColor& rhs) const;
+
+    std::optional<uint32_t> resourceId = std::nullopt;
 };
 
 namespace StringUtils {

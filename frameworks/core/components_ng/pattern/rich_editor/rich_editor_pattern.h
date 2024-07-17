@@ -691,19 +691,19 @@ public:
 
     void OnVirtualKeyboardAreaChanged() override;
 
-    void SetCaretColor(const Color& caretColor)
+    void SetCaretColor(const DynamicColor& caretColor)
     {
         caretColor_ = caretColor;
     }
 
-    Color GetCaretColor();
+    DynamicColor GetCaretColor();
 
-    void SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
+    void SetSelectedBackgroundColor(const DynamicColor& selectedBackgroundColor)
     {
         selectedBackgroundColor_ = selectedBackgroundColor;
     }
 
-    Color GetSelectedBackgroundColor();
+    DynamicColor GetSelectedBackgroundColor();
 
     void SetCustomKeyboardOption(bool supportAvoidance);
     void StopEditing();
@@ -1115,8 +1115,8 @@ private:
     std::optional<struct UpdateSpanStyle> typingStyle_;
     std::optional<TextStyle> typingTextStyle_;
     std::list<ResultObject> dragResultObjects_;
-    std::optional<Color> caretColor_;
-    std::optional<Color> selectedBackgroundColor_;
+    std::optional<DynamicColor> caretColor_;
+    std::optional<DynamicColor> selectedBackgroundColor_;
     std::function<void()> customKeyboardBuilder_;
     std::function<void(int32_t)> caretChangeListener_;
     RefPtr<OverlayManager> keyboardOverlay_;
