@@ -681,6 +681,54 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg012, TestSize.Level1)
     wrapperPattern->HideMenu(mainMenu);
     EXPECT_TRUE(mainMenu->GetTag() == V2::SELECT_OVERLAY_ETS_TAG);
 }
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg013
+ * @tc.desc: Verify HandleInteraction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg013, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::SELECT_OVERLAY_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+
+    MenuModelNG model;
+    model.Create();
+    auto menu = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menu, nullptr);
+    auto container = FrameNode::CreateFrameNode("", 1, AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MENU));
+    auto mockScroll = FrameNode::CreateFrameNode("", 2, AceType::MakeRefPtr<Pattern>());
+    container->GetGeometryNode()->SetFrameSize(SizeF(200, 200));
+    menu->GetGeometryNode()->SetFrameSize(SizeF(70, 70));
+    mockScroll->MountToParent(container);
+    menu->MountToParent(mockScroll);
+    container->MountToParent(wrapperNode);
+
+    auto menuItemNode1 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode1->MountToParent(menu);
+    menuItemNode1->GetGeometryNode()->SetFrameSize(SizeF(30, 30));
+
+    auto menuItemNode2 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 2, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode2->MountToParent(menu);
+    menuItemNode2->GetGeometryNode()->SetFrameSize(SizeF(30, 30));
+
+    TouchEventInfo info(MENU_TOUCH_EVENT_TYPE);
+    TouchLocationInfo locationInfo(TARGET_ID);
+    locationInfo.SetGlobalLocation(Offset(10, 10));
+    Offset location(10, 10);
+    locationInfo.SetTouchType(TouchType::MOVE);
+    locationInfo.SetLocalLocation(location);
+    info.touches_.emplace_back(locationInfo);
+
+    wrapperPattern->SetLastTouchItem(menuItemNode2);
+    wrapperPattern->currentTouchItem_ = menuItemNode1;
+    wrapperPattern->HandleInteraction(info);
+    wrapperPattern->currentTouchItem_ = menuItemNode2;
+    wrapperPattern->HandleInteraction(info);
+}
+
 /**
  * @tc.name: MenuViewTestNg001
  * @tc.desc: Test Verify Create.
