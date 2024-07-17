@@ -3051,6 +3051,7 @@ int32_t UIContentImpl::CreateCustomPopupUIExtension(
                 return;
             }
             auto popupParam = CreateCustomPopupParam(true, config);
+            popupParam->SetBlockEvent(false);
             auto uiExtNode = ModalUIExtension::Create(want, callbacks, false, false);
             auto focusHub = uiExtNode->GetFocusHub();
             if (focusHub) {
