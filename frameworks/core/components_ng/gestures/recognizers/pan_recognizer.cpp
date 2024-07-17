@@ -349,6 +349,13 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
     UpdateAxisPointInVelocityTracker(event, true);
     time_ = event.time;
 
+    auto velocityTrackerIter = panVelocity_.GetVelocityMap().find(event.id);
+    if (velocityTrackerIter != panVelocity_.GetVelocityMap().end()) {
+        velocityTrackerIter->second.DumpVelocityPoints();
+    }
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+        "PanVelocity main axis velocity is %{public}f", panVelocity_.GetMainAxisVelocity());
+
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
