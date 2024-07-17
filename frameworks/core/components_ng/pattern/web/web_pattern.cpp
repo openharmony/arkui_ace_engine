@@ -2644,7 +2644,6 @@ bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, doubl
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
-    context->SetRootRect(width, height, 0);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
     taskExecutor->PostDelayedTask(
@@ -2707,9 +2706,6 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeybo
         rect.SetSize(SizeF(drawSize_.Width(), drawSize_.Height()));
         frameNode->GetRenderContext()->SyncGeometryProperties(rect);
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        context->SetRootRect(width, height, 0);
     }
 }
 
