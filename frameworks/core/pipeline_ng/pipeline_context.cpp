@@ -4019,23 +4019,44 @@ void PipelineContext::GetInspectorTree()
     rootNode_->GetInspectorValue();
 }
 
-void PipelineContext::AddFrameNodeChangeListener(const RefPtr<FrameNode>& node)
+void PipelineContext::AddFrameNodeChangeListener(const WeakPtr<FrameNode>& node)
 {
+    CHECK_NULL_VOID(node.Upgrade());
     if (std::find(changeInfoListeners_.begin(), changeInfoListeners_.end(), node) == changeInfoListeners_.end()) {
         changeInfoListeners_.push_back(node);
     }
 }
 
-void PipelineContext::RemoveFrameNodeChangeListener(const RefPtr<FrameNode>& node)
+void PipelineContext::RemoveFrameNodeChangeListener(int32_t nodeId)
 {
-    changeInfoListeners_.remove(node);
+    if (changeInfoListeners_.empty()) {
+        return;
+    }
+    changeInfoListeners_.remove_if([nodeId](const WeakPtr<FrameNode>& node) {
+        return !node.Upgrade() || nodeId == node.Upgrade()->GetId();
+    });
 }
 
-void PipelineContext::AddChangedFrameNode(const RefPtr<FrameNode>& node)
+bool PipelineContext::AddChangedFrameNode(const WeakPtr<FrameNode>& node)
 {
+    CHECK_NULL_RETURN(node.Upgrade(), false);
+    if (changeInfoListeners_.empty() || !node.Upgrade()->IsOnMainTree()) {
+        return false;
+    }
     if (std::find(changedNodes_.begin(), changedNodes_.end(), node) == changedNodes_.end()) {
         changedNodes_.push_back(node);
     }
+    return true;
+}
+
+void PipelineContext::RemoveChangedFrameNode(int32_t nodeId)
+{
+    if (changedNodes_.empty()) {
+        return;
+    }
+    changedNodes_.remove_if([nodeId](const WeakPtr<FrameNode>& node) {
+        return !node.Upgrade() || nodeId == node.Upgrade()->GetId();
+    });
 }
 
 void PipelineContext::FlushNodeChangeFlag()
@@ -4043,8 +4064,9 @@ void PipelineContext::FlushNodeChangeFlag()
     ACE_FUNCTION_TRACE();
     if (!changeInfoListeners_.empty()) {
         for (const auto& it : changeInfoListeners_) {
-            if (it) {
-                it->ProcessFrameNodeChangeFlag();
+            auto listener = it.Upgrade();
+            if (listener) {
+                listener->ProcessFrameNodeChangeFlag();
             }
         }
     }
@@ -4056,9 +4078,9 @@ void PipelineContext::CleanNodeChangeFlag()
     auto cleanNodes = std::move(changedNodes_);
     changedNodes_.clear();
     for (const auto& it : cleanNodes) {
-        auto frameNode = AceType::DynamicCast<FrameNode>(it);
-        if (frameNode) {
-            frameNode->ClearChangeInfoFlag();
+        auto changeNode = it.Upgrade();
+        if (changeNode) {
+            changeNode->ClearChangeInfoFlag();
         }
     }
 }

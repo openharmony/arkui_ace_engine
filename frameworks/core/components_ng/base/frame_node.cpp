@@ -510,6 +510,8 @@ FrameNode::~FrameNode()
         if (frameRateManager) {
             frameRateManager->RemoveNodeRate(GetId());
         }
+        pipeline->RemoveChangedFrameNode(GetId());
+        pipeline->RemoveFrameNodeChangeListener(GetId());
     }
     FireOnNodeDestroyCallback();
 }
@@ -4866,7 +4868,9 @@ void FrameNode::AddFrameNodeChangeInfoFlag(FrameNodeChangeInfoFlag changeFlag)
     if (changeInfoFlag_ == FRAME_NODE_CHANGE_INFO_NONE) {
         auto context = GetContext();
         CHECK_NULL_VOID(context);
-        context->AddChangedFrameNode(Claim(this));
+        if (!context->AddChangedFrameNode(WeakClaim(this))) {
+            return;
+        }
     }
     changeInfoFlag_ = changeInfoFlag_ | changeFlag;
 }
@@ -4875,14 +4879,14 @@ void FrameNode::RegisterNodeChangeListener()
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
-    context->AddFrameNodeChangeListener(Claim(this));
+    context->AddFrameNodeChangeListener(WeakClaim(this));
 }
 
 void FrameNode::UnregisterNodeChangeListener()
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
-    context->RemoveFrameNodeChangeListener(Claim(this));
+    context->RemoveFrameNodeChangeListener(GetId());
 }
 
 void FrameNode::ProcessFrameNodeChangeFlag()
