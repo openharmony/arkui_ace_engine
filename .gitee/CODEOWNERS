@@ -650,6 +650,7 @@ frameworks/bridge/declarative_frontend/ark_modifier/src/toggle_modifier.ts @arku
 frameworks/bridge/declarative_frontend/ark_modifier/src/video_modifier.ts @arkuilayout
 frameworks/bridge/declarative_frontend/ark_modifier/src/water_flow_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/tsconfig.json @arkui_architecture
+frameworks/bridge/declarative_frontend/ark_mock/ @arkuiframework
 frameworks/bridge/declarative_frontend/ark_node/ @arkuiframework
 frameworks/bridge/declarative_frontend/ark_prefetcher/ @arkuistatemgmt
 frameworks/bridge/declarative_frontend/ark_shape/ @arkuiframework
