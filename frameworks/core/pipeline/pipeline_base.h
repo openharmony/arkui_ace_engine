@@ -1420,6 +1420,8 @@ protected:
     std::function<std::string()> onFormRecycle_;
     std::function<void(std::string)> onFormRecover_;
 
+    uint64_t compensationValue_ = 0;
+    int64_t recvTime_ = 0;
     std::once_flag displaySyncFlag_;
     RefPtr<UIDisplaySyncManager> uiDisplaySyncManager_;
 
