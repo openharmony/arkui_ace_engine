@@ -45,9 +45,9 @@ const segmentButtonTheme: SegmentButtonThemeInterface = {
   BACKGROUND_COLOR: $r('sys.color.ohos_id_color_button_normal'),
   TAB_SELECTED_BACKGROUND_COLOR: $r('sys.color.ohos_id_color_foreground_contrary'),
   CAPSULE_SELECTED_BACKGROUND_COLOR: $r('sys.color.ohos_id_color_emphasize'),
-  FOCUS_BORDER_COLOR: $r("sys.color.ohos_id_color_focused_outline"),
-  HOVER_COLOR: $r("sys.color.ohos_id_color_hover"),
-  PRESS_COLOR: $r("sys.color.ohos_id_color_click_effect"),
+  FOCUS_BORDER_COLOR: $r('sys.color.ohos_id_color_focused_outline'),
+  HOVER_COLOR: $r('sys.color.ohos_id_color_hover'),
+  PRESS_COLOR: $r('sys.color.ohos_id_color_click_effect'),
   BACKGROUND_BLUR_STYLE: BlurStyle.NONE
 }
 
@@ -111,11 +111,11 @@ export interface CapsuleSegmentButtonConstructionOptions extends CommonSegmentBu
 }
 
 export interface TabSegmentButtonOptions extends TabSegmentButtonConstructionOptions {
-  type: "tab",
+  type: 'tab',
 }
 
 export interface CapsuleSegmentButtonOptions extends CapsuleSegmentButtonConstructionOptions {
-  type: "capsule"
+  type: 'capsule'
 }
 
 interface SegmentButtonItemOptionsConstructorOptions {
@@ -149,9 +149,9 @@ export class SegmentButtonItemOptionsArray extends Array<SegmentButtonItemOption
 
   constructor(elementsOrLength: SegmentButtonItemTuple | number) {
 
-    super(typeof elementsOrLength === "number" ? elementsOrLength : 0);
+    super(typeof elementsOrLength === 'number' ? elementsOrLength : 0);
 
-    if (typeof elementsOrLength !== "number" && elementsOrLength !== void 0) {
+    if (typeof elementsOrLength !== 'number' && elementsOrLength !== void 0) {
       super.push(...elementsOrLength.map((element?: SegmentButtonTextItem | SegmentButtonIconItem |
       SegmentButtonIconTextItem) => new SegmentButtonItemOptions(element as
       SegmentButtonItemOptionsConstructorOptions)))
@@ -160,7 +160,7 @@ export class SegmentButtonItemOptionsArray extends Array<SegmentButtonItemOption
 
   push(...items: SegmentButtonItemArray): number {
     if (this.length + items.length > MAX_ITEM_COUNT) {
-      console.warn("Exceeded the maximum number of elements (5).")
+      console.warn('Exceeded the maximum number of elements (5).')
       return this.length
     }
     this.changeStartIndex = this.length
@@ -172,7 +172,7 @@ export class SegmentButtonItemOptionsArray extends Array<SegmentButtonItemOption
 
   pop() {
     if (this.length <= MIN_ITEM_COUNT) {
-      console.warn("Below the minimum number of elements (2).")
+      console.warn('Below the minimum number of elements (2).')
       return void 0
     }
     this.changeStartIndex = this.length - 1
@@ -183,7 +183,7 @@ export class SegmentButtonItemOptionsArray extends Array<SegmentButtonItemOption
 
   shift() {
     if (this.length <= MIN_ITEM_COUNT) {
-      console.warn("Below the minimum number of elements (2).")
+      console.warn('Below the minimum number of elements (2).')
       return void 0
     }
     this.changeStartIndex = 0
@@ -194,7 +194,7 @@ export class SegmentButtonItemOptionsArray extends Array<SegmentButtonItemOption
 
   unshift(...items: SegmentButtonItemArray): number {
     if (this.length + items.length > MAX_ITEM_COUNT) {
-      console.warn("Exceeded the maximum number of elements (5).")
+      console.warn('Exceeded the maximum number of elements (5).')
       return this.length
     }
     if (items.length > 0) {
@@ -210,11 +210,11 @@ export class SegmentButtonItemOptionsArray extends Array<SegmentButtonItemOption
     let length = (this.length - deleteCount) < 0 ? 0 : (this.length - deleteCount)
     length += items.length
     if (length < MIN_ITEM_COUNT) {
-      console.warn("Below the minimum number of elements (2).")
+      console.warn('Below the minimum number of elements (2).')
       return []
     }
     if (length > MAX_ITEM_COUNT) {
-      console.warn("Exceeded the maximum number of elements (5).")
+      console.warn('Exceeded the maximum number of elements (5).')
       return []
     }
     this.changeStartIndex = start
@@ -230,7 +230,7 @@ export class SegmentButtonItemOptionsArray extends Array<SegmentButtonItemOption
 
 @Observed
 export class SegmentButtonOptions {
-  public type: "tab" | "capsule"
+  public type: 'tab' | 'capsule'
   public multiply: boolean = false
   public fontColor: ResourceColor
   public selectedFontColor: ResourceColor
@@ -285,7 +285,7 @@ export class SegmentButtonOptions {
     this.localizedButtonPadding = options.localizedButtonPadding
     this.direction = options.direction ?? Direction.Auto
     this.buttons = new SegmentButtonItemOptionsArray(options.buttons)
-    if (this.type === "capsule") {
+    if (this.type === 'capsule') {
       this.multiply = (options as CapsuleSegmentButtonOptions).multiply ?? false
       this.buttons.forEach(button => {
         this.showText ||= button.text !== void 0
@@ -306,7 +306,7 @@ export class SegmentButtonOptions {
 
   static tab(options: TabSegmentButtonConstructionOptions): SegmentButtonOptions {
     return new SegmentButtonOptions({
-      type: "tab",
+      type: 'tab',
       buttons: options.buttons,
       fontColor: options.fontColor,
       selectedFontColor: options.selectedFontColor,
@@ -328,7 +328,7 @@ export class SegmentButtonOptions {
 
   static capsule(options: CapsuleSegmentButtonConstructionOptions): SegmentButtonOptions {
     return new SegmentButtonOptions({
-      type: "capsule",
+      type: 'capsule',
       buttons: options.buttons,
       multiply: options.multiply,
       fontColor: options.fontColor,
@@ -465,7 +465,7 @@ struct SegmentButtonItem {
   @ObjectLink options: SegmentButtonOptions;
   @ObjectLink property: ItemProperty
   @Prop index: number
-  private groupId: string = ""
+  private groupId: string = ''
 
   private getTextPadding(): Padding | Dimension | LocalizedPadding {
     if (this.options.localizedTextPadding) {
@@ -505,7 +505,6 @@ struct SegmentButtonItem {
       if (this.options.showIcon) {
         Image(this.property.isSelected ? this.itemOptions.selectedIcon : this.itemOptions.icon)
           .direction(this.options.direction)
-          .matchTextDirection(this.options.direction == Direction.Ltr ? false : true)
           .size(this.options.imageSize ?? { width: 24, height: 24 })
           .focusable(!this.options.showText)
           .draggable(false)
@@ -1017,7 +1016,7 @@ export struct SegmentButton {
   }
 
   private isMovedFromPanGestureStartPoint(x: number, y: number) {
-    return!nearEqual(x, this.panGestureStartPoint.x) || !nearEqual(y, this.panGestureStartPoint.y)
+    return !nearEqual(x, this.panGestureStartPoint.x) || !nearEqual(y, this.panGestureStartPoint.y)
   }
 
   private isShouldMirror(): boolean {
@@ -1171,7 +1170,7 @@ export struct SegmentButton {
           }),
         SwipeGesture()
           .onAction((event: GestureEvent) => {
-            if (this.options === void 0 || this.options.buttons === void 0) {
+            if (this.options === void 0 || this.options.buttons === void 0 || event.sourceTool === SourceTool.TOUCHPAD) {
               return
             }
             if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {

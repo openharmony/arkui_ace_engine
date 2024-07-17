@@ -90,6 +90,8 @@ private:
         const NG::RichEditorAbstractSpanResult& spanResult);
     static void SetSymbolChangeSpanResult(JSRef<JSObject>& resultObj,
         const NG::RichEditorAbstractSpanResult& spanResult);
+    static void SetJSSpanResultObject(JSRef<JSObject>& resultObj, const ResultObject& resultObject);
+    static void SetJSDeleteSpan(JSRef<JSObject>& spanResultObj, const NG::RichEditorAbstractSpanResult& it);
 };
 
 class JSRichEditorBaseController : public Referenced {
@@ -115,6 +117,7 @@ public:
     void SetSelection(const JSCallbackInfo& args);
     bool FontSizeRangeIsNegative(const CalcDimension& size);
     void GetLayoutManager(const JSCallbackInfo& args);
+    void GetPreviewTextInfo(const JSCallbackInfo& args);
 
     void SetInstanceId(int32_t id)
     {
@@ -143,6 +146,7 @@ protected:
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
     JSRef<JSObject> JSObjectCast(JSRef<JSVal> jsValue);
     void ParseJsSelectionOptions(const JSCallbackInfo& args, std::optional<SelectionOptions>& options);
+    JSRef<JSObject> CreateJSPreviewTextInfo(const PreviewTextInfo& info);
 };
 
 class JSRichEditorController final : public JSRichEditorBaseController {

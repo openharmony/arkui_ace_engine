@@ -79,6 +79,11 @@ public:
 
     virtual void OnHandleExistOverlay(SelectOverlayInfo info, int32_t requestCode) {}
 
+    virtual std::optional<RectF> GetAncestorNodeViewPort()
+    {
+        return std::nullopt;
+    }
+
     virtual bool CheckRestartHiddenHandleTask(int32_t requestCode)
     {
         return true;

@@ -554,6 +554,7 @@ public:
 
     void OnSensitiveStyleChange(bool isSensitive) override;
 
+    bool IsSetObscured();
     bool IsSensitiveEnalbe();
 
     void InitCustomSpanPlaceholderInfo(const std::vector<CustomSpanPlaceholderInfo>& customSpanPlaceholder)
@@ -593,27 +594,35 @@ public:
         externalParagraphStyle_ = paragraphStyle;
     }
 
+    TextStyle GetTextStyle()
+    {
+        return textStyle_.value_or(TextStyle());
+    }
+
     std::optional<ParagraphStyle> GetExternalParagraphStyle()
     {
         return externalParagraphStyle_;
     }
 
     size_t GetLineCount() const override;
-    bool DidExceedMaxLines() const override;
     TextLineMetrics GetLineMetrics(int32_t lineNumber) override;
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
 
     void OnSelectionMenuOptionsUpdate(
-        const NG::OnCreateMenuCallback && onCreateMenuCallback, const NG::OnMenuItemClickCallback && onMenuItemClick);
-    void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override
-    {
-        selectOverlay_->OnAncestorNodeChanged(flag);
-    }
+        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
 
     void UpdateParentGlobalOffset()
     {
         parentGlobalOffset_ = GetParentGlobalOffset();
     }
+
+    void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)
+    {
+        isUserSetResponseRegion_ = isUserSetResponseRegion;
+    }
+
+    void UnregisterNodeChangeListenerWithoutSelect();
 
 protected:
     void OnAttachToFrameNode() override;
@@ -663,10 +672,11 @@ protected:
     int32_t GetActualTextLength();
     bool IsSelectableAndCopy();
     void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
+    void SetResponseRegion(const SizeF& frameSize, const SizeF& boundsSize);
 
     virtual bool CanStartAITask()
     {
-        return copyOption_ != CopyOptions::None && textDetectEnable_ && enabled_ && dataDetectorAdapter_;
+        return textDetectEnable_ && enabled_ && dataDetectorAdapter_;
     };
 
     void OnAttachToMainTree() override
@@ -755,6 +765,7 @@ private:
     void CreateModifier();
 
     bool IsLineBreakOrEndOfParagraph(int32_t pos) const;
+    bool DidExceedMaxLines() const override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     // SpanString
     void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
@@ -779,6 +790,9 @@ private:
     void ProcessOverlayAfterLayout();
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     Offset ConvertLocalOffsetToParagraphOffset(const Offset& offset);
+    void RegisterMarqueeNodeChangeListener();
+    void UnregisterMarqueeNodeChangeListener();
+    void HandleMarqueeWithIsVisible(FrameNodeChangeInfoFlag flag);
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
@@ -818,6 +832,7 @@ private:
     bool isDetachFromMainTree_ = false;
     std::optional<void*> externalParagraph_;
     std::optional<ParagraphStyle> externalParagraphStyle_;
+    bool isUserSetResponseRegion_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -86,6 +86,9 @@ float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
         auto navBarOffset =
             OffsetT<float>(navigationGeometryNode->GetFrameSize().Width() - geometryNode->GetFrameSize().Width(),
                 geometryNode->GetFrameOffset().GetY());
+        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            navBarOffset = OffsetT<float>(0.0f, geometryNode->GetFrameOffset().GetY());
+        }
         const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
         navBarOffset.AddX(padding.left.value_or(0));
         navBarOffset.AddY(padding.top.value_or(0));
@@ -95,6 +98,10 @@ float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
         return isZeroNavbarWidth ? 0.0f : geometryNode->GetFrameSize().Width();
     }
     auto navBarOffset = OffsetT<float>(0.0f, 0.0f);
+    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        navBarOffset =
+            OffsetT<float>(navigationGeometryNode->GetFrameSize().Width() - geometryNode->GetFrameSize().Width(), 0.0f);
+    }
     const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
     navBarOffset.AddX(padding.left.value_or(0));
     navBarOffset.AddY(padding.top.value_or(0));
@@ -114,13 +121,16 @@ float LayoutDivider(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNo
     CHECK_NULL_RETURN(dividerWrapper, 0.0f);
     auto geometryNode = dividerWrapper->GetGeometryNode();
     auto navigationGeometryNode = layoutWrapper->GetGeometryNode();
-    OffsetT<float> dividerOffset;
+    auto dividerOffsetX = navBarWidth;
     if (position == NavBarPosition::END) {
-        dividerOffset = OffsetT<float>(
-            navigationGeometryNode->GetFrameSize().Width() - geometryNode->GetFrameSize().Width() - navBarWidth, 0.0f);
-    } else {
-        dividerOffset = OffsetT<float>(navBarWidth, 0.0f);
+        dividerOffsetX =
+            navigationGeometryNode->GetFrameSize().Width() - geometryNode->GetFrameSize().Width() - dividerOffsetX;
     }
+    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        dividerOffsetX =
+            navigationGeometryNode->GetFrameSize().Width() - geometryNode->GetFrameSize().Width() - dividerOffsetX;
+    }
+    OffsetT<float> dividerOffset = OffsetT<float>(dividerOffsetX, 0.0f);
     const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
     dividerOffset.AddX(padding.left.value_or(0));
     dividerOffset.AddY(padding.top.value_or(0));
@@ -153,6 +163,10 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
         position == NavBarPosition::END ||
         (navigationLayoutProperty->GetHideNavBar().value_or(false) &&
             navigationPattern->GetNavigationMode() == NavigationMode::SPLIT)) {
+        if (AceApplicationInfo::GetInstance().IsRightToLeft() &&
+            navigationPattern->GetNavigationMode() == NavigationMode::SPLIT) {
+            contentOffset = OffsetT<float>(navBarWidth + dividerWidth, 0.0f);
+        }
         const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
         contentOffset.AddX(padding.left.value_or(0));
         contentOffset.AddY(padding.top.value_or(0));
@@ -160,7 +174,9 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
         contentWrapper->Layout();
         return;
     }
-    contentOffset = OffsetT<float>(navBarWidth + dividerWidth, 0.0f);
+    if (!AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        contentOffset = OffsetT<float>(navBarWidth + dividerWidth, 0.0f);
+    }
     const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
     contentOffset.AddX(padding.left.value_or(0));
     contentOffset.AddY(padding.top.value_or(0));
@@ -345,9 +361,18 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
     }
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
     bool modeChange = navigationPattern->GetNavigationMode() != usrNavigationMode;
-    bool doModeSwitchAnimationInAnotherTask = modeChange && !hostNode->IsOnModeSwitchAnimation();
-    // First time layout, no need to do animation
-    doModeSwitchAnimationInAnotherTask &= (navigationPattern->GetNavigationMode() != INITIAL_MODE);
+    bool isFirstTimeLayout = (navigationPattern->GetNavigationMode() == INITIAL_MODE);
+    if (isFirstTimeLayout) {
+        navigationPattern->UpdateFoldState();  // Init fold state
+    }
+    bool doModeSwitchAnimationInAnotherTask = modeChange && !isFirstTimeLayout && !hostNode->IsOnModeSwitchAnimation();
+    if (doModeSwitchAnimationInAnotherTask) {
+        // If screen-fold-state changed, no need to do mode switch animation.
+        doModeSwitchAnimationInAnotherTask =
+            !navigationPattern->IsFoldStateChange() && doModeSwitchAnimationInAnotherTask;
+        // Only when navigation-mode changed, it is necessary to update the current screen-fold-state.
+        navigationPattern->UpdateFoldState();
+    }
     if (!doModeSwitchAnimationInAnotherTask) {
         navigationPattern->SetNavigationMode(usrNavigationMode);
         navigationPattern->SetNavigationModeChange(modeChange);

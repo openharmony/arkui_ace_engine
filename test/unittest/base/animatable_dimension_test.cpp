@@ -204,4 +204,24 @@ HWTEST_F(AnimatableDimensionTest, AnimatableDimensionTest005, TestSize.Level1)
     animatableDimensionObj1.ResetAnimatableDimension();
     EXPECT_TRUE(animatableDimensionObj1.isFirstAssign_);
 }
+
+/**
+ * @tc.name: AnimatableDimensionTest006
+ * @tc.desc: Test the function operator=(const AnimatableDimension& newDimension) of the class AnimatableDimension.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnimatableDimensionTest, AnimatableDimensionTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    AnimatableDimension animatableDimensionObj1;
+    bool flagCbk = false;
+    animatableDimensionObj1.SetContextAndCallback(nullptr, [&flagCbk]() { flagCbk = true; });
+    AnimatableDimension animatableDimensionObj2;
+    animatableDimensionObj1 = animatableDimensionObj2;
+
+    animatableDimensionObj1.SetContextAndCallback(nullptr, nullptr);
+    animatableDimensionObj1 = animatableDimensionObj2;
+}
 } // namespace OHOS::Ace

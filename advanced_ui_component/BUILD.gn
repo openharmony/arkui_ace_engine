@@ -16,6 +16,7 @@ group("advanced_ui_component") {
     "arcslider/interfaces:arcslider",
     "atomicservicenavigation/interfaces:atomicservicenavigation",
     "atomicservicetabs/interfaces:atomicservicetabs",
+    "atomicserviceweb/interfaces:atomicserviceweb",
     "chip/interfaces:chip",
     "chipgroup/interfaces:chipgroup",
     "composelistitem/interfaces:composelistitem",

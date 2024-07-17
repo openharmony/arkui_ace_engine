@@ -252,7 +252,6 @@ void WrapLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 void WrapLayoutAlgorithm::HandleDialogStretch()
 {
-    // TODO: Not completed.
 }
 
 void WrapLayoutAlgorithm::PerformLayoutInitialize(const RefPtr<LayoutProperty>& layoutProp)
@@ -519,7 +518,6 @@ float WrapLayoutAlgorithm::CalcItemCrossAxisOffset(
             return contentOffset.GetX() + (content.crossLength - itemFrameSize.Width()) / 2.0f;
         }
         case WrapAlignment::BASELINE: {
-            // TODO: Complete baseline
             break;
         }
         default: {

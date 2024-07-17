@@ -36,9 +36,9 @@ void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
         TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "the text is null");
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "InsertText length:%{public}d", text.length());
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "InsertText length:%{public}d", static_cast<int32_t>(text.length()));
     auto task = [textFieldPattern = pattern_, text] {
-        ACE_SCOPED_TRACE("InsertText [length:%d]", text.length());
+        ACE_SCOPED_TRACE("InsertText [length:%d]", static_cast<int32_t>(text.length()));
         auto client = textFieldPattern.Upgrade();
         CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
@@ -321,9 +321,9 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
         keyboardInfo.keyBoardType = KeyBoardType::STATUS_BAR;
     }
     keyboardInfo.visible = info.visible;
-    auto textclient = pattern_.Upgrade();
-    CHECK_NULL_VOID(textclient);
-    auto pattern = AceType::DynamicCast<Pattern>(textclient);
+    auto textClient = pattern_.Upgrade();
+    CHECK_NULL_VOID(textClient);
+    auto pattern = AceType::DynamicCast<Pattern>(textClient);
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
@@ -334,6 +334,7 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
         ContainerScope scope(id);
         auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
         CHECK_NULL_VOID(textFieldManager);
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyPanelStatusInfo SetImeShow:%d", keyboardInfo.visible);
         textFieldManager->SetImeShow(keyboardInfo.visible);
     };
     PostTaskToUI(task, "ArkUITextFieldSetImeShow");

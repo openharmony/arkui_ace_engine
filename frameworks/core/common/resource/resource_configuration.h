@@ -25,11 +25,13 @@ struct ConfigurationChange {
     bool fontUpdate = false;
     bool iconUpdate = false;
     bool skinUpdate = false;
+    bool fontScaleUpdate = false;
+    bool fontWeightScaleUpdate = false;
 
     bool IsNeedUpdate() const
     {
-        return colorModeUpdate || languageUpdate || directionUpdate ||
-            dpiUpdate || fontUpdate || iconUpdate || skinUpdate;
+        return colorModeUpdate || languageUpdate || directionUpdate || dpiUpdate || fontUpdate || iconUpdate ||
+               skinUpdate || fontScaleUpdate || fontWeightScaleUpdate;
     }
 };
 } // namespace OHOS::Ace

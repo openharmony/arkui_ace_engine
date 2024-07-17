@@ -60,11 +60,11 @@ var TextAlign;
 
 var TextDataDetectorType;
 (function (TextDataDetectorType) {
-  TextDataDetectorType[TextDataDetectorType["PHONE_NUMBER"] = 0] = "PHONE_NUMBER";
-  TextDataDetectorType[TextDataDetectorType["URL"] = 1] = "URL";
-  TextDataDetectorType[TextDataDetectorType["EMAIL"] = 2] = "EMAIL";
-  TextDataDetectorType[TextDataDetectorType["ADDRESS"] = 3] = "ADDRESS";
-  TextDataDetectorType[TextDataDetectorType["DATE_TIME"] = 4] = "DATE_TIME";
+  TextDataDetectorType[TextDataDetectorType.PHONE_NUMBER = 0] = 'PHONE_NUMBER';
+  TextDataDetectorType[TextDataDetectorType.URL = 1] = 'URL';
+  TextDataDetectorType[TextDataDetectorType.EMAIL = 2] = 'EMAIL';
+  TextDataDetectorType[TextDataDetectorType.ADDRESS = 3] = 'ADDRESS';
+  TextDataDetectorType[TextDataDetectorType.DATE_TIME = 4] = 'DATE_TIME';
 })(TextDataDetectorType || (TextDataDetectorType = {}));
 
 var DataPanelType;
@@ -201,6 +201,15 @@ var ImageFit;
   ImageFit[ImageFit["Auto"] = 3] = "Auto";
   ImageFit[ImageFit["None"] = 5] = "None";
   ImageFit[ImageFit["ScaleDown"] = 6] = "ScaleDown";
+  ImageFit[ImageFit["TOP_START"] = 7] = "TOP_START";
+  ImageFit[ImageFit["TOP"] = 8] = "TOP";
+  ImageFit[ImageFit["TOP_END"] = 9] = "TOP_END";
+  ImageFit[ImageFit["START"] = 10] = "START";
+  ImageFit[ImageFit["CENTER"] = 11] = "CENTER";
+  ImageFit[ImageFit["END"] = 12] = "END";
+  ImageFit[ImageFit["BOTTOM_START"] = 13] = "BOTTOM_START";
+  ImageFit[ImageFit["BOTTOM"] = 14] = "BOTTOM";
+  ImageFit[ImageFit["BOTTOM_END"] = 15] = "BOTTOM_END";
 })(ImageFit || (ImageFit = {}));
 
 var DynamicRangeMode ;
@@ -209,6 +218,11 @@ var DynamicRangeMode ;
   DynamicRangeMode [DynamicRangeMode ["CONSTRAINT"] = 1] = "CONSTRAINT";
   DynamicRangeMode [DynamicRangeMode ["STANDARD"] = 2] = "STANDARD";
 })(DynamicRangeMode  || (DynamicRangeMode  = {}));
+
+var ImageContent;
+(function (ImageContent) {
+  ImageContent[ImageContent["EMPTY"] = 0] = "EMPTY";
+})(ImageContent || (ImageContent = {}));
 
 var ImageRepeat;
 (function (ImageRepeat) {
@@ -1152,7 +1166,7 @@ var PlaybackSpeed;
 
 var MixedMode;
 (function (MixedMode) {
-  MixedMode[MixedMode["ALL"] = 0] = "All";
+  MixedMode[MixedMode["All"] = 0] = "All";
   MixedMode[MixedMode["Compatible"] = 1] = "Compatible";
   MixedMode[MixedMode["None"] = 2] = "None";
 })(MixedMode || (MixedMode = {}));
@@ -1226,6 +1240,7 @@ var ProtectedResourceType;
   ProtectedResourceType["MidiSysex"] = "TYPE_MIDI_SYSEX";
   ProtectedResourceType["VIDEO_CAPTURE"] = "TYPE_VIDEO_CAPTURE";
   ProtectedResourceType["AUDIO_CAPTURE"] = "TYPE_AUDIO_CAPTURE";
+  ProtectedResourceType["SENSOR"] = "TYPE_SENSOR";
 })(ProtectedResourceType || (ProtectedResourceType = {}));
 
 var ProgressType;
@@ -1291,6 +1306,13 @@ var EffectFillStyle;
   EffectFillStyle[EffectFillStyle["CUMULATIVE"] = 0] = "CUMULATIVE";
   EffectFillStyle[EffectFillStyle["ITERATIVE"] = 1] = "ITERATIVE";
 })(EffectFillStyle || (EffectFillStyle = {}));
+
+let WebKeyboardAvoidMode;
+(function (WebKeyboardAvoidMode) {
+  WebKeyboardAvoidMode[WebKeyboardAvoidMode.RESIZE_VISUAL = 0] = 'RESIZE_VISUAL';
+  WebKeyboardAvoidMode[WebKeyboardAvoidMode.RESIZE_CONTENT = 1] = 'RESIZE_CONTENT';
+  WebKeyboardAvoidMode[WebKeyboardAvoidMode.OVERLAYS_CONTENT = 2] = 'OVERLAYS_CONTENT';
+})(WebKeyboardAvoidMode || (WebKeyboardAvoidMode = {}));
 
 class SymbolEffect {
 }
@@ -1384,6 +1406,7 @@ var RichEditorSpanType;
   RichEditorSpanType[RichEditorSpanType["TEXT"] = 0] = "TEXT";
   RichEditorSpanType[RichEditorSpanType["IMAGE"] = 1] = "IMAGE";
   RichEditorSpanType[RichEditorSpanType["MIXED"] = 2] = "MIXED";
+  RichEditorSpanType[RichEditorSpanType["BUILDER"] = 3] = "BUILDER";
 })(RichEditorSpanType || (RichEditorSpanType = {}));
 
 var ListItemAlign;
@@ -2049,10 +2072,10 @@ var MarqueeUpdateStrategy;
 
 var LaunchMode;
 (function (LaunchMode) {
-  LaunchMode[LaunchMode.STANDARD = 0] = "STANDARD";
-  LaunchMode[LaunchMode.MOVE_TO_TOP_SINGLETON = 1] = "MOVE_TO_TOP_SINGLETON";
-  LaunchMode[LaunchMode.POP_TO_SINGLETON = 2] = "POP_TO_SINGLETON";
-  LaunchMode[LaunchMode.NEW_INSTANCE = 3] = "NEW_INSTANCE";
+  LaunchMode[LaunchMode.STANDARD = 0] = 'STANDARD';
+  LaunchMode[LaunchMode.MOVE_TO_TOP_SINGLETON = 1] = 'MOVE_TO_TOP_SINGLETON';
+  LaunchMode[LaunchMode.POP_TO_SINGLETON = 2] = 'POP_TO_SINGLETON';
+  LaunchMode[LaunchMode.NEW_INSTANCE = 3] = 'NEW_INSTANCE';
 })(LaunchMode || (LaunchMode = {}));
 
 class NavPathInfo {
@@ -3170,6 +3193,8 @@ let NativeEmbedStatus;
   NativeEmbedStatus['CREATE'] = 0;
   NativeEmbedStatus['UPDATE'] = 1;
   NativeEmbedStatus['DESTROY'] = 2;
+  NativeEmbedStatus['ENTER_BFCACHE'] = 3;
+  NativeEmbedStatus['LEAVE_BFCACHE'] = 4;
 })(NativeEmbedStatus || (NativeEmbedStatus = {}));
 
 let RenderMode;

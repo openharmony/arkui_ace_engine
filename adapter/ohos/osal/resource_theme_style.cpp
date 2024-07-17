@@ -39,6 +39,7 @@ constexpr char RES_HAP_PATH[] = "/data/storage/el1/bundle/ohos.global.systemres/
 #endif
 
 const std::string DIMENSION_PATTERN = R"(^([+-]?\d+(\.\d+)?)(px|fp|lpx|vp|%)?)";
+constexpr int32_t WAIT_FOR_TIME = 300;
 
 static const std::set<std::string> stringAttrs = {
     "attribute_text_font_family_regular",
@@ -88,7 +89,11 @@ static const std::set<std::string> stringAttrs = {
     "menu_has_filter",
     "calendar_picker_dialog_button_transparent",
     "calendar_picker_dialog_divider_transparent",
-    "textfield_accessibility_property_delete"
+    "textfield_accessibility_property_clear",
+    "textfield_accessibility_show_password",
+    "textfield_accessibility_hide_password",
+    "rich_editor_show_handle",
+    "text_show_handle"
 };
 
 void ParseNumberUnit(const std::string& value, std::string& number, std::string& unit)
@@ -195,5 +200,12 @@ void ResourceThemeStyle::OnParseResourceMedia(const std::string& attrName, const
         mediaPath = std::string(RES_TAG) + attrValue.substr(pos + 1);
     }
     attributes_[attrName] = { .type = ThemeConstantsType::STRING, .value = mediaPath };
+}
+
+void ResourceThemeStyle::CheckThemeStyleLoaded()
+{
+    if (future_.valid()) {
+        future_.wait_until(std::chrono::system_clock::now() + std::chrono::milliseconds(WAIT_FOR_TIME));
+    }
 }
 } // namespace OHOS::Ace

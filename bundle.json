@@ -16,7 +16,10 @@
             "SystemCapability.ArkUI.ArkUI.Full",
             "SystemCapability.ArkUI.ArkUI.Lite"
         ],
-        "features": [],
+        "features": [
+            "ace_engine_feature_enable_accessibility",
+            "ace_engine_feature_enable_web"
+        ],
         "adapted_system_type": [
             "standard"
         ],
@@ -91,7 +94,8 @@
                 "zlib",
                 "skia",
                 "libuv",
-                "background_task_mgr"
+                "background_task_mgr",
+                "atomicservice_basic_engine"
             ],
             "third_party": []
         },

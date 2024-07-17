@@ -697,23 +697,53 @@ HWTEST_F(ListAttrTestNg, AttrAlignListItem001, TestSize.Level1)
      * @tc.cases: case2. Set ListItemAlign::CENTER
      * @tc.expected: the item is align to center
      */
-    model = CreateList();
-    model.SetListItemAlign(V2::ListItemAlign::CENTER);
-    CreateListItem();
-    ViewAbstract::SetWidth(CalcLength(itemWidth));
-    CreateDone(frameNode_);
+    layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::CENTER);
+    FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildX(frameNode_, 0), (LIST_WIDTH - itemWidth) / 2);
 
     /**
      * @tc.cases: case3. Set ListItemAlign::END
      * @tc.expected: the item is align to end
      */
-    model = CreateList();
-    model.SetListItemAlign(V2::ListItemAlign::END);
+    layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::END);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), LIST_WIDTH - itemWidth);
+}
+
+/**
+ * @tc.name: AttrAlignListItem002
+ * @tc.desc: Test LayoutProperty about alignListItem in RTL Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrAlignListItem002, TestSize.Level1)
+{
+    /**
+     * @tc.cases: case1. Set item width smaller than LIST_WIDTH
+     * @tc.expected: the item default is align to start
+     */
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    const float itemWidth = LIST_WIDTH / 2;
+    CreateList();
     CreateListItem();
     ViewAbstract::SetWidth(CalcLength(itemWidth));
     CreateDone(frameNode_);
     EXPECT_EQ(GetChildX(frameNode_, 0), LIST_WIDTH - itemWidth);
+
+    /**
+     * @tc.cases: case2. Set ListItemAlign::CENTER
+     * @tc.expected: the item is align to center
+     */
+    layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::CENTER);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), (LIST_WIDTH - itemWidth) / 2);
+
+    /**
+     * @tc.cases: case3. Set ListItemAlign::END
+     * @tc.expected: the item is align to end
+     */
+    layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::END);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0);
 }
 
 /**
@@ -926,6 +956,48 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign006, TestSize.Level1)
      */
     ScrollSnap(-76.f, 1200.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), 100.f); // item(index:0,1) height and item(index:2) half-height
+}
+
+/**
+ * @tc.name: AttrScrollSnapAlign007
+ * @tc.desc: Test LayoutProperty about ScrollSnapAlign in UnScrollable List
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign007, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    CreateListItems(VIEW_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    EXPECT_EQ(pattern_->GetScrollableDistance(), 0.f);
+
+    /**
+     * @tc.steps: stpe1. Scroll delta greater than half of ITEM_HEIGHT
+     * @tc.expected: The item(index:0) align to start
+     */
+    ScrollSnapForEqualHeightItem(-51.f, -1200.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+}
+
+/**
+ * @tc.name: AttrScrollSnapAlign008
+ * @tc.desc: Test LayoutProperty about ScrollSnapAlign::NONE
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign008, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::NONE);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone(frameNode_);
+    EXPECT_EQ(pattern_->GetScrollableDistance(), 200.f);
+
+    /**
+     * @tc.steps: stpe1. Scroll delta greater than half of ITEM_HEIGHT
+     * @tc.expected: Has no Snap effect
+     */
+    ScrollSnapForEqualHeightItem(-51.f, -1200.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 51.f);
 }
 
 /**
@@ -1416,5 +1488,18 @@ HWTEST_F(ListAttrTestNg, FadingEdge002, TestSize.Level1)
     EXPECT_EQ(pattern_->startMainPos_, -50.f);
     EXPECT_EQ(pattern_->endMainPos_, 490.f);
     EXPECT_EQ(pattern_->GetTotalOffset(), 50.f);
+}
+
+/**
+ * @tc.name: GetOrCreateController001
+ * @tc.desc: Test GetOrCreateController
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, GetOrCreateController001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    auto controller = model.GetOrCreateController(AceType::RawPtr(frameNode_));
+    CreateDone(frameNode_);
+    EXPECT_NE(controller, nullptr);
 }
 } // namespace OHOS::Ace::NG

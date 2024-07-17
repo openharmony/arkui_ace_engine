@@ -29,7 +29,7 @@ namespace {
 const std::string DIGIT_WHITE_LIST = "[0-9]";
 const std::string DIGIT_DECIMAL_WHITE_LIST = "[0-9.]";
 const std::string PHONE_WHITE_LIST = R"([0-9 \+\-\*\#\(\)])";
-const std::string EMAIL_WHITE_LIST = "[\\w.\\@]";
+const std::string EMAIL_WHITE_LIST = R"([a-zA-Z0-9.!#$%&'*+/=?^_`{|}~@-])";
 // when do ai analaysis, we should list the left and right of the string
 constexpr static int32_t AI_TEXT_RANGE_LEFT = 50;
 constexpr static int32_t AI_TEXT_RANGE_RIGHT = 50;

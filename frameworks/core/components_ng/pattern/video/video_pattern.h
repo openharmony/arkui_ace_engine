@@ -337,11 +337,14 @@ private:
     void ChangePlayerStatus(bool isPlaying, const PlaybackStatus& status);
 
     bool IsSupportImageAnalyzer();
+    bool ShouldUpdateImageAnalyzer();
     void StartImageAnalyzer();
+    void StartUpdateImageAnalyzer();
     void CreateAnalyzerOverlay();
     void DestroyAnalyzerOverlay();
     void UpdateAnalyzerOverlay();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
+    void UpdateOverlayVisibility(VisibleType type);
 
     RefPtr<VideoControllerV2> videoControllerV2_;
     RefPtr<FrameNode> controlBar_;
@@ -368,6 +371,7 @@ private:
     bool isEnableAnalyzer_ = false;
     bool isAnalyzerCreated_ = false;
     bool isPaused_ = false;
+    bool isContentSizeChanged_ = false;
 
     uint32_t currentPos_ = 0;
     uint32_t duration_ = 0;

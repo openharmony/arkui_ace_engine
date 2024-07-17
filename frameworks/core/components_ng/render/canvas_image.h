@@ -68,6 +68,7 @@ public:
     ~CanvasImage() override = default;
     virtual void DrawToRSCanvas(
         RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) = 0;
+    virtual void DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) {}
 
     static RefPtr<CanvasImage> Create(void* rawImage);
     static RefPtr<CanvasImage> Create();

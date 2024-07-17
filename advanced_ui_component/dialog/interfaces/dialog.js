@@ -18,6 +18,7 @@ const hilog = requireNapi('hilog');
 const measure = requireNapi('measure');
 const resourceManager = requireNapi('resourceManager');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
+const LengthUnit = requireNapi('arkui.node').LengthUnit;
 if (!('finalizeConstruction' in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
     });
@@ -55,18 +56,18 @@ const FIRST_ITEM_INDEX = 0;
 const VERSION_TWELVE = 50000012;
 const BUTTON_MIN_FONT_SIZE = 9;
 const MAX_FONT_SCALE = 2;
-const MAX_DIALOG_WIDTH = getNumberByResourceId(125831042) ?? 400;
-const BUTTON_HORIZONTAL_MARGIN = getNumberByResourceId(125831054) ?? 16;
-const BUTTON_HORIZONTAL_PADDING = getNumberByResourceId(125830927) ?? 16;
-const BUTTON_HORIZONTAL_SPACE = getNumberByResourceId(125831051) ?? 8;
-const BODY_L = getNumberByResourceId(125830970) ?? 16;
-const BODY_S = getNumberByResourceId(125830972) ?? 12;
-const TITLE_S = getNumberByResourceId(125830966) ?? 20;
-const SUBTITLE_S = getNumberByResourceId(125830969) ?? 14;
-const PADDING_LEVEL_8 = getNumberByResourceId(125830927);
-const DIALOG_DIVIDER_SHOW = getNumberByResourceId(125831202);
-const ALERT_BUTTON_STYLE = getNumberByResourceId(125831085);
-const ALERT_TITLE_ALIGNMENT = getEnumNumberByResourceId(125831126);
+const MAX_DIALOG_WIDTH = getNumberByResourceId(125831042, 400);
+const BUTTON_HORIZONTAL_MARGIN = getNumberByResourceId(125831054, 16);
+const BUTTON_HORIZONTAL_PADDING = getNumberByResourceId(125830927, 16);
+const BUTTON_HORIZONTAL_SPACE = getNumberByResourceId(125831051, 8);
+const BODY_L = getNumberByResourceId(125830970, 16);
+const BODY_S = getNumberByResourceId(125830972, 12);
+const TITLE_S = getNumberByResourceId(125830966, 20);
+const SUBTITLE_S = getNumberByResourceId(125830969, 14);
+const PADDING_LEVEL_8 = getNumberByResourceId(125830927, 16);
+const DIALOG_DIVIDER_SHOW = getNumberByResourceId(125831202, 1);
+const ALERT_BUTTON_STYLE = getNumberByResourceId(125831085, 2);
+const ALERT_TITLE_ALIGNMENT = getEnumNumberByResourceId(125831126, 1);
 
 export class TipsDialog extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
@@ -347,7 +348,11 @@ export class TipsDialog extends ViewPU {
                                             });
                                         } else {
                                             this.ifElseBranchUpdateFunction(2, () => {
+                                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                    WithTheme.create({ theme: this.theme, colorMode: this.themeColorMode });
+                                                }, WithTheme);
                                                 this.checkBoxPart.bind(this)(parent ? parent : this);
+                                                WithTheme.pop();
                                             });
                                         }
                                     }, If);
@@ -795,7 +800,6 @@ export class SelectDialog extends ViewPU {
         this.controller = undefined;
         this.title = '';
         this.content = '';
-        this.selectedIndex = -1;
         this.confirm = null;
         this.radioContent = [];
         this.buttons = [];
@@ -804,6 +808,7 @@ export class SelectDialog extends ViewPU {
         this.currentFocusIndex = -1;
         this.radioHeight = 0;
         this.itemHeight = 0;
+        this.__selectedIndex = new ObservedPropertySimplePU(-1, this, 'selectedIndex');
         this.contentBuilder = this.buildContent;
         this.__fontColorWithTheme = new ObservedPropertyObjectPU({
             'id': -1,
@@ -838,9 +843,6 @@ export class SelectDialog extends ViewPU {
         if (params.content !== undefined) {
             this.content = params.content;
         }
-        if (params.selectedIndex !== undefined) {
-            this.selectedIndex = params.selectedIndex;
-        }
         if (params.confirm !== undefined) {
             this.confirm = params.confirm;
         }
@@ -864,6 +866,9 @@ export class SelectDialog extends ViewPU {
         }
         if (params.itemHeight !== undefined) {
             this.itemHeight = params.itemHeight;
+        }
+        if (params.selectedIndex !== undefined) {
+            this.selectedIndex = params.selectedIndex;
         }
         if (params.contentBuilder !== undefined) {
             this.contentBuilder = params.contentBuilder;
@@ -895,6 +900,7 @@ export class SelectDialog extends ViewPU {
     }
 
     purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.__selectedIndex.purgeDependencyOnElmtId(rmElmtId);
         this.__fontColorWithTheme.purgeDependencyOnElmtId(rmElmtId);
         this.__dividerColorWithTheme.purgeDependencyOnElmtId(rmElmtId);
         this.__fontSizeScale.purgeDependencyOnElmtId(rmElmtId);
@@ -902,6 +908,7 @@ export class SelectDialog extends ViewPU {
     }
 
     aboutToBeDeleted() {
+        this.__selectedIndex.aboutToBeDeleted();
         this.__fontColorWithTheme.aboutToBeDeleted();
         this.__dividerColorWithTheme.aboutToBeDeleted();
         this.__fontSizeScale.aboutToBeDeleted();
@@ -912,6 +919,14 @@ export class SelectDialog extends ViewPU {
 
     setController(ctr) {
         this.controller = ctr;
+    }
+
+    get selectedIndex() {
+        return this.__selectedIndex.get();
+    }
+
+    set selectedIndex(newValue) {
+        this.__selectedIndex.set(newValue);
     }
 
     get fontColorWithTheme() {
@@ -1109,9 +1124,13 @@ export class SelectDialog extends ViewPU {
                                     'moduleName': '__harDefaultModuleName__'
                                 }
                             });
+                            Button.focusBox({
+                                margin: { value: -2, unit: LengthUnit.VP }
+                            });
                             Button.onClick(() => {
+                                this.selectedIndex = index;
                                 item.action && item.action();
-                                this.controller.close();
+                                this.controller?.close();
                             });
                         }, Button);
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1155,6 +1174,7 @@ export class SelectDialog extends ViewPU {
                             Radio.checked(this.selectedIndex === index);
                             Radio.hitTestBehavior(HitTestMode.None);
                             Radio.id(String(index));
+                            Radio.focusable(false);
                             Radio.onFocus(() => {
                                 this.isFocus = true;
                                 this.currentFocusIndex = index;
@@ -1237,7 +1257,7 @@ export class SelectDialog extends ViewPU {
                         fontSizeScale: this.__fontSizeScale,
                         minContentHeight: this.__minContentHeight,
                     }, undefined, elmtId, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 495, col: 5 });
+                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 502 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -1760,7 +1780,7 @@ export class ConfirmDialog extends ViewPU {
                             ForEach.pop();
                         }
                     }, undefined, elmtId, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 696, col: 5 });
+                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 703 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -1830,7 +1850,7 @@ export class ConfirmDialog extends ViewPU {
                         themeColorMode: this.themeColorMode,
                         fontSizeScale: this.__fontSizeScale,
                     }, undefined, elmtId, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 710, col: 5 });
+                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 717 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -2041,7 +2061,7 @@ export class AlertDialog extends ViewPU {
                         fontSizeScale: this.__fontSizeScale,
                         minContentHeight: this.__minContentHeight,
                     }, undefined, elmtId, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 768, col: 5 });
+                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 775 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -2180,6 +2200,7 @@ export class CustomContentDialog extends ViewPU {
         this.secondaryTitle = undefined;
         this.contentBuilder = undefined;
         this.contentAreaPadding = undefined;
+        this.localizedContentAreaPadding = undefined;
         this.buttons = undefined;
         this.theme = new CustomThemeImpl({});
         this.themeColorMode = ThemeColorMode.SYSTEM;
@@ -2204,6 +2225,9 @@ export class CustomContentDialog extends ViewPU {
         }
         if (params.contentAreaPadding !== undefined) {
             this.contentAreaPadding = params.contentAreaPadding;
+        }
+        if (params.localizedContentAreaPadding !== undefined) {
+            this.localizedContentAreaPadding = params.localizedContentAreaPadding;
         }
         if (params.buttons !== undefined) {
             this.buttons = params.buttons;
@@ -2273,13 +2297,15 @@ export class CustomContentDialog extends ViewPU {
                             this.contentBuilder();
                         },
                         contentAreaPadding: this.contentAreaPadding,
+                        localizedContentAreaPadding: this.localizedContentAreaPadding,
                         buttons: this.buttons,
                         theme: this.theme,
                         themeColorMode: this.themeColorMode,
                         fontSizeScale: this.__fontSizeScale,
                         minContentHeight: this.__minContentHeight,
+                        customStyle: false
                     }, undefined, elmtId, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 860, col: 5 });
+                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 868 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -2290,11 +2316,13 @@ export class CustomContentDialog extends ViewPU {
                                 this.contentBuilder();
                             },
                             contentAreaPadding: this.contentAreaPadding,
+                            localizedContentAreaPadding: this.localizedContentAreaPadding,
                             buttons: this.buttons,
                             theme: this.theme,
                             themeColorMode: this.themeColorMode,
                             fontSizeScale: this.fontSizeScale,
-                            minContentHeight: this.minContentHeight
+                            minContentHeight: this.minContentHeight,
+                            customStyle: false
                         };
                     };
                     componentCall.paramsGenerator_ = paramsLambda;
@@ -2454,6 +2482,7 @@ class CustomDialogContentComponent extends ViewPU {
         this.controller = undefined;
         this.primaryTitle = undefined;
         this.secondaryTitle = undefined;
+        this.localizedContentAreaPadding = undefined;
         this.contentBuilder = this.defaultContentBuilder;
         this.buttons = undefined;
         this.contentAreaPadding = undefined;
@@ -2465,7 +2494,7 @@ class CustomDialogContentComponent extends ViewPU {
         this.__buttonHeight = new ObservedPropertySimplePU(0, this, 'buttonHeight');
         this.__contentMaxHeight = new ObservedPropertyObjectPU('100%', this, 'contentMaxHeight');
         this.__fontSizeScale = new SynchedPropertySimpleTwoWayPU(params.fontSizeScale, this, 'fontSizeScale');
-        this.__customStyle = new ObservedPropertySimplePU(false, this, 'customStyle');
+        this.__customStyle = new ObservedPropertySimplePU(undefined, this, 'customStyle');
         this.__buttonMaxFontSize = new ObservedPropertyObjectPU({
             'id': -1,
             'type': 10002,
@@ -2535,6 +2564,9 @@ class CustomDialogContentComponent extends ViewPU {
         }
         if (params.secondaryTitle !== undefined) {
             this.secondaryTitle = params.secondaryTitle;
+        }
+        if (params.localizedContentAreaPadding !== undefined) {
+            this.localizedContentAreaPadding = params.localizedContentAreaPadding;
         }
         if (params.contentBuilder !== undefined) {
             this.contentBuilder = params.contentBuilder;
@@ -2913,7 +2945,7 @@ class CustomDialogContentComponent extends ViewPU {
                             ForEach.pop();
                         }
                     }, undefined, elmtId, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 993, col: 11 });
+                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 1004 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
@@ -2993,8 +3025,7 @@ class CustomDialogContentComponent extends ViewPU {
         let maxHeight = Number(constraint.maxHeight);
         this.updateFontScale();
         this.updateFontSize();
-        this.isButtonVertical =
-            this.isVerticalAlignButton(Math.min(maxWidth - BUTTON_HORIZONTAL_MARGIN * 2, MAX_DIALOG_WIDTH));
+        this.isButtonVertical = this.isVerticalAlignButton(maxWidth - BUTTON_HORIZONTAL_MARGIN * 2);
         this.titleMinHeight = this.getTitleAreaMinHeight();
         let height = 0;
         children.forEach((child) => {
@@ -3013,12 +3044,15 @@ class CustomDialogContentComponent extends ViewPU {
 
     aboutToAppear() {
         this.updateFontScale();
-        if (this.controller) {
+        if (this.controller && this.customStyle === undefined) {
             let customController = this.controller;
             if (customController.arg_ && customController.arg_.customStyle &&
                 customController.arg_.customStyle === true) {
                 this.customStyle = true;
             }
+        }
+        if (this.customStyle === undefined) {
+            this.customStyle = false;
         }
         this.primaryTitleFontColorWithTheme = this.theme?.colors?.fontPrimary ?
         this.theme.colors.fontPrimary : {
@@ -3069,6 +3103,9 @@ class CustomDialogContentComponent extends ViewPU {
     }
 
     getContentPadding() {
+        if (this.localizedContentAreaPadding) {
+            return this.localizedContentAreaPadding;
+        }
         if (this.contentAreaPadding) {
             return this.contentAreaPadding;
         }
@@ -3715,27 +3752,36 @@ function __Button__setButtonProperties(buttonOptions, controller) {
     Button.layoutWeight(BUTTON_LAYOUT_WEIGHT);
 }
 
-function getNumberByResourceId(resourceId) {
+function getNumberByResourceId(resourceId, defaultValue) {
     try {
-        return resourceManager.getSystemResourceManager().getNumber(resourceId);
+        let sourceValue = resourceManager.getSystemResourceManager().getNumber(resourceId);
+        if (sourceValue > 0) {
+            return sourceValue;
+        } else {
+            return defaultValue;
+        }
     } catch (error) {
         let code = error.code;
         let message = error.message;
         hilog.error(0x3900, 'Ace', `CustomContentDialog getNumberByResourceId error, code: ${code},
          message: ${message}`);
-        return 0;
+        return defaultValue;
     }
 }
 
-function getEnumNumberByResourceId(resourceId) {
+function getEnumNumberByResourceId(resourceId, defaultValue) {
     try {
-        return getContext().resourceManager.getNumber(resourceId);
-    }
-    catch (error) {
+        let sourceValue = getContext().resourceManager.getNumber(resourceId);
+        if (sourceValue > 0) {
+            return sourceValue;
+        } else {
+            return defaultValue;
+        }
+    } catch (error) {
         let code = error.code;
         let message = error.message;
         hilog.error(0x3900, 'Ace', `getEnumNumberByResourceId error, code: ${code}, message: ${message}`);
-        return -1;
+        return defaultValue;
     }
 }
 
@@ -3912,7 +3958,7 @@ export class LoadingDialog extends ViewPU {
                         fontSizeScale: this.__fontSizeScale,
                         minContentHeight: this.__minContentHeight,
                     }, undefined, elmtId, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 1543, col: 7 });
+                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 1569 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {

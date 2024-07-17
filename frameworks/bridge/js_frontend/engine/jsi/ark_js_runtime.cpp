@@ -422,6 +422,7 @@ void ArkJSRuntime::DumpHeapSnapshot(bool isPrivate)
     dumpOption.dumpFormat = panda::ecmascript::DumpFormat::JSON;
     dumpOption.isVmMode = true;
     dumpOption.isPrivate = isPrivate;
+    dumpOption.isSync = false;
     LocalScope scope(vm_);
     panda::DFXJSNApi::DumpHeapSnapshot(vm_, dumpOption);
 }

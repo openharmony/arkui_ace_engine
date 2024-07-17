@@ -70,14 +70,23 @@ public:
      * function returns children_
      * function runs as part of idle task
      */
-    const std::list<RefPtr<UINode>>& GetChildren() const override;
+    const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override;
 
     /**
-     * update range of Active items inside Repeat:
-     * iterative L1 cache entries
+     * scenario: called by layout informs:
+     *   - start: the first visible index
+     *   - end: the last visible index
+     *   - cacheStart: number of items cached before start
+     *   - cacheEnd: number of items cached after end
+     *
+     * Total L1 cache includes items from start-cacheStart to end+cacheEnd,
+     * but the active items are only start...end.
+     *
      * those items with index in range [ start ... end ] are marked active
      * those out of range marked inactive.
-     * retests idle task
+     *
+     * those items out of cached range are removed from L1
+     * requests idle task
      */
     void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
 
@@ -150,7 +159,7 @@ private:
     // try to find entry for given index in L1 or L2 cache
     RefPtr<UINode> GetFromCaches(uint32_t forIndex)
     {
-        return caches_.GetNode4Index(forIndex);
+        return caches_.GetCachedNode4Index(forIndex);
     }
 
     // index is not in L1 or L2 cache, need to make it
@@ -160,6 +169,10 @@ private:
 
     // get farthest (from L1 indexes) index in L2 cache or -1
     int32_t GetFarthestL2CacheIndex();
+
+    // drop UINode with given key from L1 but keep in L2
+    // detach from tree and request tree sync
+    void DropFromL1(const std::string& key);
 
     // RepeatVirtualScrollNode is not instance of FrameNode
     // needs to propagate active state to all items inside
@@ -180,6 +193,7 @@ private:
     // true in the time from requesting idle / predict task until exec predict tsk.
     bool postUpdateTaskHasBeenScheduled_;
 
+    // STATE_MGMT_NOTE: What are these?
     OffscreenItems offscreenItems_;
     int32_t startIndex_ = 0;
 

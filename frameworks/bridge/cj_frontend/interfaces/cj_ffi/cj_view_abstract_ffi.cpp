@@ -254,6 +254,16 @@ void FfiOHOSAceFrameworkViewAbstractSetHeight(double height, int32_t unit)
     ViewAbstractModel::GetInstance()->SetHeight(value);
 }
 
+void FFISetWidthWithEmpty()
+{
+    ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+}
+
+void FFISetHeightWithEmpty()
+{
+    ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetSize(double width, int32_t widthUnit, double height, int32_t heightUnit)
 {
     Dimension widthDime(width, static_cast<DimensionUnit>(widthUnit));

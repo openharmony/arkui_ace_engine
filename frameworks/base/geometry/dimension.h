@@ -155,6 +155,8 @@ public:
             return value_;
         } else if (unit == DimensionUnit::PX) {
             return ConvertToPx();
+        } else if (unit == DimensionUnit::FP) {
+            return ConvertToFp();
         } else {
             return ConvertToVp();
         }

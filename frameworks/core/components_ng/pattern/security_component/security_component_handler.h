@@ -72,12 +72,19 @@ private:
     static bool GetWindowSceneWindowId(RefPtr<FrameNode>& node, uint32_t& windId);
     static bool InitBaseInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
     static bool InitChildInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
-    static bool CheckSecurityComponentStatus(const RefPtr<UINode>& root, std::vector<RectF>& rect, int32_t secNodeId);
-    static bool CheckRectIntersect(const RectF& dest, std::vector<RectF>& origin);
+    static bool CheckSecurityComponentStatus(const RefPtr<UINode>& root,
+        std::unordered_map<int32_t, NG::RectF>& nodeId2Rect, int32_t secNodeId,
+        std::unordered_map<int32_t, int32_t>& nodeId2Zindex);
+    static bool CheckRectIntersect(const RectF& dest, int32_t secNodeId,
+        const std::unordered_map<int32_t, NG::RectF>& nodeId2Rect,
+        std::unordered_map<int32_t, int32_t>& nodeId2Zindex);
     static bool IsSecurityComponent(RefPtr<FrameNode>& node);
     static bool CheckComponentCoveredStatus(int32_t secNodeId);
     static bool IsContextTransparent(const RefPtr<FrameNode>& frameNode);
     static bool CheckContainerTags(const RefPtr<FrameNode>& frameNode);
+    static bool IsInModalPage(const RefPtr<UINode>& node);
+    static int32_t GetNodeZIndex(const RefPtr<UINode>& root);
+    static void UpdateAllZindex(const RefPtr<UINode>& root, std::unordered_map<int32_t, int32_t>& nodeId2Zindex);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_COMPONENT_HANDLER_H

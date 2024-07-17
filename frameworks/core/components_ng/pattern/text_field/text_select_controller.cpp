@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::string NEWLINE = "\n";
 const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
+constexpr float BOX_EPSILON = 1.0f;
 } // namespace
 void TextSelectController::UpdateHandleIndex(int32_t firstHandleIndex, int32_t secondHandleIndex)
 {
@@ -404,6 +405,8 @@ std::vector<RectF> TextSelectController::GetSelectedRects() const
 
 void TextSelectController::MoveHandleToContentRect(RectF& handleRect, float boundaryAdjustment) const
 {
+    TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "before move, handleRect.GetX():%{public}f,handleRect.GetY():%{public}f",
+        handleRect.GetX(), handleRect.GetY());
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto textFiled = DynamicCast<TextFieldPattern>(pattern);
@@ -438,6 +441,8 @@ void TextSelectController::MoveHandleToContentRect(RectF& handleRect, float boun
     textFiled->SetTextRect(textRect);
     AdjustHandleAtEdge(handleRect);
     textFiled->UpdateScrollBarOffset();
+    TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "after move, handleRect.GetX():%{public}f,handleRect.GetY():%{public}f",
+        handleRect.GetX(), handleRect.GetY());
 }
 
 void TextSelectController::AdjustHandleAtEdge(RectF& handleRect) const
@@ -470,6 +475,14 @@ void TextSelectController::AdjustHandleOffset(RectF& handleRect) const
     auto textRect = textFiled->GetTextRect();
     if (LessNotEqual(handleRect.GetX(), textRect.GetX())) {
         handleRect.SetOffset(OffsetF(textRect.GetX(), handleRect.GetY()));
+    }
+
+    // Adjust the y-axis of the handle into the text
+    if (GreatNotEqual(handleRect.GetY() + handleRect.Height(), textRect.GetY() + textRect.Height() + BOX_EPSILON)) {
+        auto contentRight = contentRect_.GetX() + contentRect_.Width();
+        auto textRectRight = textRect.GetX() + textRect.Width();
+        handleRect.SetOffset(
+            OffsetF(std::min(contentRight, textRectRight), textRect.GetY() + textRect.Height() - handleRect.Height()));
     }
 }
 

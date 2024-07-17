@@ -515,8 +515,9 @@ void GetCallBackDataForJs(DragControllerAsyncCtx* asyncCtx, const DragNotifyMsg&
         napi_close_handle_scope(asyncCtx->env, scope);
         return;
     }
+    auto vm = reinterpret_cast<NativeEngine*>(asyncCtx->env)->GetEcmaVm();
     auto* jsDragEvent =
-        static_cast<Framework::JsDragEvent*>(Local<panda::ObjectRef>(localRef)->GetNativePointerField(0));
+        static_cast<Framework::JsDragEvent*>(Local<panda::ObjectRef>(localRef)->GetNativePointerField(vm, 0));
     CHECK_NULL_VOID(jsDragEvent);
     auto dragEvent = AceType::MakeRefPtr<DragEvent>();
     CHECK_NULL_VOID(dragEvent);
@@ -768,6 +769,7 @@ void OnMultipleComplete(DragControllerAsyncCtx* asyncCtx)
     taskExecutor->PostTask(
         [asyncCtx]() {
             CHECK_NULL_VOID(asyncCtx);
+            ContainerScope scope(asyncCtx->instanceId);
             DragState dragState = DragState::PENDING;
             {
                 std::lock_guard<std::mutex> lock(asyncCtx->dragStateMutex);
@@ -802,6 +804,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
     taskExecutor->PostTask(
         [asyncCtx]() {
             CHECK_NULL_VOID(asyncCtx);
+            ContainerScope scope(asyncCtx->instanceId);
             DragState dragState = DragState::PENDING;
             {
                 std::lock_guard<std::mutex> lock(asyncCtx->dragStateMutex);
@@ -1059,22 +1062,21 @@ bool ParsePixelMapAndBuilder(DragControllerAsyncCtx* asyncCtx, std::string& errM
     PixelMapNapiEntry pixelMapNapiEntry = Framework::JsEngine::GetPixelMapNapiEntry();
     if (pixelMapNapiEntry == nullptr) {
         TAG_LOGW(AceLogTag::ACE_DRAG, "failed to parse pixelMap from the first argument");
-        napi_value customBuilderValue;
-        napi_get_named_property(asyncCtx->env, element, "builder", &customBuilderValue);
-        napi_valuetype valueType = napi_undefined;
-        napi_typeof(asyncCtx->env, customBuilderValue, &valueType);
-        if (valueType != napi_function) {
-            errMsg = "The type of customBuilder of the first parameter is incorrect.";
-            return false;
-        }
-        napi_ref ref = nullptr;
-        napi_create_reference(asyncCtx->env, customBuilderValue, 1, &ref);
-        asyncCtx->customBuilderList.push_back(ref);
     } else {
         void* pixmapPtrAddr = pixelMapNapiEntry(asyncCtx->env, pixelMapValue);
         if (pixmapPtrAddr == nullptr) {
             TAG_LOGW(AceLogTag::ACE_DRAG, "the pixelMap parsed from the first argument is null");
-            return false;
+            napi_value customBuilderValue;
+            napi_get_named_property(asyncCtx->env, element, "builder", &customBuilderValue);
+            napi_valuetype valueType = napi_undefined;
+            napi_typeof(asyncCtx->env, customBuilderValue, &valueType);
+            if (valueType != napi_function) {
+                errMsg = "The type of customBuilder of the first parameter is incorrect.";
+                return false;
+            }
+            napi_ref ref = nullptr;
+            napi_create_reference(asyncCtx->env, customBuilderValue, 1, &ref);
+            asyncCtx->customBuilderList.push_back(ref);
         } else {
             asyncCtx->pixelMapList.push_back(*(reinterpret_cast<std::shared_ptr<Media::PixelMap>*>(pixmapPtrAddr)));
         }
@@ -1690,7 +1692,7 @@ static napi_value DragControllerExport(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("DragPreview", classDragPreview),
     };
     NAPI_CALL(env, napi_define_properties(
-                       env, exports, sizeof(dragControllerDesc) / sizeof(dragControllerDesc[0]), dragControllerDesc));
+        env, exports, sizeof(dragControllerDesc) / sizeof(dragControllerDesc[0]), dragControllerDesc));
     return exports;
 }
 

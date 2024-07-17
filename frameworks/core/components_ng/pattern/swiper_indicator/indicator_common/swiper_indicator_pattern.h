@@ -98,7 +98,8 @@ public:
         paintMethod->SetHorizontalAndRightToLeft(swiperLayoutProperty->GetNonAutoLayoutDirection());
         paintMethod->SetItemCount(swiperPattern->RealTotalCount());
         paintMethod->SetDisplayCount(swiperLayoutProperty->GetDisplayCount().value_or(1));
-        paintMethod->SetGestureState(swiperPattern->GetGestureState());
+        gestureState_ = swiperPattern->GetGestureState();
+        paintMethod->SetGestureState(gestureState_);
         paintMethod->SetTurnPageRate(swiperPattern->GetTurnPageRate());
         paintMethod->SetIsLoop(swiperPattern->IsLoop());
         paintMethod->SetTouchBottomTypeLoop(swiperPattern->GetTouchBottomTypeLoop());
@@ -191,6 +192,11 @@ public:
         jumpIndex_ = jumpIndex;
     }
 
+    void SetStartIndex(std::optional<int32_t> startIndex)
+    {
+        startIndex_ = startIndex;
+    }
+
     void DumpAdvanceInfo() override;
     void SetIndicatorInteractive(bool isInteractive);
 
@@ -243,6 +249,8 @@ private:
         RefPtr<SwiperPattern> swiperPattern);
     RefPtr<DotIndicatorPaintMethod> CreateDotIndicatorPaintMethod(RefPtr<SwiperPattern> swiperPattern);
     RectF CalcBoundsRect() const;
+    void UpdateOverlongPaintMethod(
+        const RefPtr<SwiperPattern>& swiperPattern, RefPtr<OverlengthDotIndicatorPaintMethod>& overlongPaintMethod);
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;
@@ -267,7 +275,9 @@ private:
     SwiperIndicatorType swiperIndicatorType_ = SwiperIndicatorType::DOT;
 
     std::optional<int32_t> jumpIndex_;
+    std::optional<int32_t> startIndex_;
     std::optional<bool> changeIndexWithAnimation_;
+    GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorPattern);
 };
 } // namespace OHOS::Ace::NG

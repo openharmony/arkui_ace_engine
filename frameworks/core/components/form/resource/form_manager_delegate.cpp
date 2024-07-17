@@ -227,6 +227,10 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
 
 void FormManagerDelegate::HandleCachedClickEvents()
 {
+    if (formRendererDispatcher_ == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "dispatcher is null, formId:%{public}" PRId64, runningCardId_);
+        return;
+    }
     if (!isDynamic_) {
         TAG_LOGE(AceLogTag::ACE_FORM, "failed to handle cached click, not dynamic card");
         return;

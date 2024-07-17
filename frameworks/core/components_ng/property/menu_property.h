@@ -47,11 +47,17 @@ enum class ContextMenuRegisterType : char {
     CUSTOM_TYPE = 1,
 };
 
+enum class MenuBindingType {
+    LONG_PRESS,
+    RIGHT_CLICK,
+};
+
 struct MenuParam {
     std::string title;
     OffsetF positionOffset;
     bool setShow = false;
     bool isShow = false;
+    MenuBindingType menuBindType = MenuBindingType::LONG_PRESS;
     ContextMenuRegisterType contextMenuRegisterType = ContextMenuRegisterType::NORMAL_TYPE;
     std::function<void(const std::string&)> onStateChange;
     std::optional<Placement> placement;

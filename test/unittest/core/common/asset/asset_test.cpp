@@ -18,9 +18,10 @@
 #include "core/common/asset_manager_impl.h"
 #undef private
 #undef protected
-#include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "mock_asset.h"
 #include "test/mock/core/common/mock_container.h"
+
+#include "adapter/ohos/entrance/file_asset_provider_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -205,5 +206,60 @@ HWTEST_F(AssetTest, AssetTest06, TestSize.Level1)
      */
     auto asset_Result = assetManager->GetAsset(ASSET_TEST);
     EXPECT_EQ(asset_Result, nullptr);
+}
+
+/**
+ * @tc.name: AssetTest07
+ * @tc.desc: Test PushFront/PushBack
+ * @tc.type: FUNC
+ */
+HWTEST_F(AssetTest, AssetTest07, TestSize.Level1)
+{
+    auto assetManager = AceType::MakeRefPtr<AssetManagerImpl>();
+    auto assetProvider = AceType::MakeRefPtr<MockAssetProvider>();
+    // assetProvider null
+    assetManager->PushFront(nullptr);
+    assetManager->PushBack(nullptr);
+    EXPECT_EQ(assetManager->assetProviders_.size() == 0, true);
+    // assetProvider is not null,IsValid is true
+    EXPECT_CALL(*assetProvider, IsValid()).Times(1).WillOnce(Return(true));
+    assetManager->PushFront(assetProvider);
+    EXPECT_EQ(assetManager->assetProviders_.size() == 1, true);
+    EXPECT_CALL(*assetProvider, IsValid()).Times(1).WillOnce(Return(true));
+    assetManager->PushBack(assetProvider);
+    EXPECT_EQ(assetManager->assetProviders_.size() == 2, true);
+    // assetProvider is not null,IsValid is false
+    EXPECT_CALL(*assetProvider, IsValid()).Times(1).WillOnce(Return(false));
+    assetManager->PushFront(assetProvider);
+    EXPECT_EQ(assetManager->assetProviders_.size() == 2, true);
+    EXPECT_CALL(*assetProvider, IsValid()).Times(1).WillOnce(Return(false));
+    assetManager->PushBack(assetProvider);
+    EXPECT_EQ(assetManager->assetProviders_.size() == 2, true);
+}
+
+/**
+ * @tc.name: AssetTest08
+ * @tc.desc: Test GetAssetFromI18n
+ * @tc.type: FUNC
+ */
+HWTEST_F(AssetTest, AssetTest08, TestSize.Level1)
+{
+    auto assetManager = AceType::MakeRefPtr<AssetManagerImpl>();
+    auto assetProvider = AceType::MakeRefPtr<MockAssetProvider>();
+    // assetProvider is not null,IsValid is true
+    EXPECT_CALL(*assetProvider, IsValid()).Times(1).WillOnce(Return(true));
+    assetManager->PushFront(assetProvider);
+    EXPECT_EQ(assetManager->assetProviders_.size() == 1, true);
+    EXPECT_CALL(*assetProvider, IsValid()).Times(1).WillOnce(Return(true));
+    assetManager->PushBack(assetProvider);
+    EXPECT_EQ(assetManager->assetProviders_.size() == 2, true);
+    // assetName is empty
+    std::string assetName = "";
+    std::vector<RefPtr<Asset>> ret = assetManager->GetAssetFromI18n(assetName);
+    EXPECT_EQ(ret.size() == 0, true);
+    // assetName is not empty
+    assetName = "test";
+    std::vector<RefPtr<Asset>> ret2 = assetManager->GetAssetFromI18n(assetName);
+    EXPECT_EQ(ret2.size() == 0, true);
 }
 } // namespace OHOS::Ace

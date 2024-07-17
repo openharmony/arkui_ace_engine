@@ -174,7 +174,6 @@ bool RenderGrid::UpdateOffset(const Offset& delta)
     if (NearZero(delta.GetX()) && NearZero(delta.GetY())) {
         return true;
     }
-
     Offset oldOffset = offset_;
     offset_ += delta;
     offset_ = LimitOffset(offset_);
@@ -843,7 +842,6 @@ void RenderGrid::RequestChildIfNeeded()
             break;
     }
     double viewportEnd = viewportStart + viewportSize;
-
     // Calculates the number of child nodes in the cache.
     auto beginCached = std::lower_bound(posOfChildren_.begin(), posOfChildren_.end(), viewportEnd);
     auto cachedNum = static_cast<int32_t>(std::distance(beginCached, posOfChildren_.end()));

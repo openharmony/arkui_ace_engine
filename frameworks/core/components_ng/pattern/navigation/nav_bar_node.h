@@ -150,16 +150,6 @@ public:
         return isNewToolbar_;
     }
 
-    void SetIsTitleMenuNodeShowing(const bool isTitleMenuNodeShowing)
-    {
-        isTitleMenuNodeShowing_ = isTitleMenuNodeShowing;
-    }
-
-    bool IsTitleMenuNodeShowing() const
-    {
-        return isTitleMenuNodeShowing_;
-    }
-
     std::string GetTitleString() const;
     std::string GetSubtitleString() const;
     std::string GetBarItemsString(bool isMenu) const;
@@ -201,7 +191,6 @@ private:
     RefPtr<UINode> toolBarNode_;
     RefPtr<UINode> preToolBarNode_;
     RefPtr<UINode> toolBarDividerNode_;
-    bool isTitleMenuNodeShowing_ = false;
     bool isNewToolbar_ = false;
     PageTransitionType transitionType_ = PageTransitionType::NONE;
 };

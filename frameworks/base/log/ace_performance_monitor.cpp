@@ -96,6 +96,11 @@ void ArkUIPerfMonitor::RecordRenderNode(int64_t num)
     renderNodeNum_ += num;
 }
 
+void ArkUIPerfMonitor::RecordDisplaySyncRate(int32_t displaySyncRate)
+{
+    displaySyncRate_ = displaySyncRate;
+}
+
 void ArkUIPerfMonitor::SetRecordingStatus(MonitorTag tag, MonitorStatus status)
 {
     if (tag == MonitorTag::STATIC_API) {
@@ -128,6 +133,7 @@ void ArkUIPerfMonitor::ClearPerfMonitor()
     stateMgmtNodeNum_ = 0;
     layoutNodeNum_ = 0;
     renderNodeNum_ = 0;
+    displaySyncRate_ = 0;
 }
 
 void ArkUIPerfMonitor::FlushPerfMonitor()
@@ -143,6 +149,7 @@ void ArkUIPerfMonitor::FlushPerfMonitor()
     json->Put("property", propertyNum_);
     json->Put("total", total);
     json->Put("framework", frameWork);
+    json->Put("display_sync_rate", displaySyncRate_);
     ACE_SCOPED_TRACE("ArkUIPerfMonitor %s", json->ToString().c_str());
 }
 } // namespace OHOS::Ace

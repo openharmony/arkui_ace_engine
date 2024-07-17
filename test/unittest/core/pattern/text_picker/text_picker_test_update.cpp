@@ -41,6 +41,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
@@ -1489,5 +1490,262 @@ HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewShow0014, TestSize.Level1)
         TextPickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
     
     ASSERT_NE(frameNode, nullptr);
+}
+
+/**
+ * @tc.name: TextPickerDialogViewCreateAgingButtonNode001
+ * @tc.desc: Test CreateAgingButtonNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewCreateAgingButtonNode001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_PICKER_ETS_TAG,
+        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<TextPickerPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontColor = Color::BLACK;
+    buttonInfos.push_back(info1);
+    std::map<std::string, NG::DialogTextEvent> dialogEvent;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    auto moveForwardFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogMoveForwardEvent;
+    dialogMoveForwardEvent["moveForwardId"] = moveForwardFunc;
+    auto moveBackwardFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogMoveBackwardEvent;
+    dialogMoveBackwardEvent["moveBackwardId"] = moveBackwardFunc;
+    auto closeCallback = [](const GestureEvent& info) { (void)info; };
+    auto nextCallBack = [](const GestureEvent& info) { (void)info; };
+    auto previousCallBack = [](const GestureEvent& info) { (void)info; };
+    /**
+     * @tc.step: step2. call CreateAgingButtonNode.
+     * @tc.expected: contentRow is successfully created.
+     */
+    auto contentRow = TextPickerDialogView::CreateAgingButtonNode(frameNode, buttonInfos, dialogEvent,
+        dialogCancelEvent, dialogMoveForwardEvent, dialogMoveBackwardEvent,
+        closeCallback, nextCallBack, previousCallBack);
+    ASSERT_NE(contentRow, nullptr);
+}
+
+/**
+ * @tc.name: TextPickerDialogViewSetDialogNodePageActive001
+ * @tc.desc: Test SetDialogNodePageActive
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewSetDialogNodePageActive001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create TextPicker.
+     */
+    InitTextPickerTestNg();
+    auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(contentColumn, nullptr);
+    frameNode_->MountToParent(contentColumn);
+    /**
+     * @tc.step: step2. call SetDialogNodePageActive.
+     * @tc.expected: isActive_ is false.
+     */
+    auto selectedStackNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    TextPickerDialogView::SetDialogNodePageActive(contentColumn, frameNode_, 1, 2);
+    EXPECT_FALSE(selectedStackNode->isActive_);
+}
+
+/**
+ * @tc.name: TextPickerDialogViewSetDialogButtonActive001
+ * @tc.desc: Test SetDialogButtonActive
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewSetDialogButtonActive001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create TextPickerNode.
+     */
+    InitTextPickerTestNg();
+    auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(contentColumn, nullptr);
+    frameNode_->MountToParent(contentColumn);
+    /**
+     * @tc.step: step2. call SetDialogButtonActive.
+     * @tc.expected: isActive_ is true.
+     */
+    auto contentRow = contentColumn->GetLastChild();
+    auto buttonCancelNode = AceType::DynamicCast<FrameNode>(contentRow->GetFirstChild());
+    ASSERT_NE(buttonCancelNode, nullptr);
+    TextPickerDialogView::SetDialogButtonActive(contentColumn, 0, 2);
+    EXPECT_TRUE(buttonCancelNode->isActive_);
+    /**
+     * @tc.step: step3. call SetDialogButtonActive.
+     * @tc.expected: isActive_ is false.
+     */
+    TextPickerDialogView::SetDialogButtonActive(contentColumn, 1, 3);
+    EXPECT_FALSE(buttonCancelNode->isActive_);
+}
+
+/**
+ * @tc.name: TextPickerDialogViewSetSingleDividerNodeActive001
+ * @tc.desc: Test SetSingleDividerNodeActive
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewSetSingleDividerNodeActive001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create dividerNode.
+     */
+    auto dividerNode = FrameNode::GetOrCreateFrameNode(V2::DIVIDER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<DividerPattern>(); });
+    ASSERT_NE(dividerNode, nullptr);
+    /**
+     * @tc.step: step2. call SetSingleDividerNodeActive and dividerActive is true.
+     * @tc.expected: Visibility is VISIBLE.
+     */
+    auto dividerLayoutProperty = dividerNode->GetLayoutProperty<LayoutProperty>();
+    TextPickerDialogView::SetSingleDividerNodeActive(dividerNode, true);
+    EXPECT_EQ(dividerLayoutProperty->GetVisibility(), VisibleType::VISIBLE);
+    /**
+     * @tc.step: step3. call SetSingleDividerNodeActive and dividerActive is false.
+     * @tc.expected: Visibility is GONE.
+     */
+    TextPickerDialogView::SetSingleDividerNodeActive(dividerNode, false);
+    EXPECT_EQ(dividerLayoutProperty->GetVisibility(), VisibleType::GONE);
+}
+
+/**
+ * @tc.name: TextPickerDialogViewUpdateForwardButtonMargin001
+ * @tc.desc: Test UpdateForwardButtonMargin
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateForwardButtonMargin001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create buttonForwardNode.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
+    ASSERT_NE(theme, nullptr);
+    InitTextPickerTestNg();
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontColor = Color::BLACK;
+    buttonInfos.push_back(info1);
+    auto moveForwardFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogMoveForwardEvent;
+    dialogMoveForwardEvent["moveForwardId"] = moveForwardFunc;
+    auto moveForwardEvent = dialogMoveForwardEvent["moveForwardId"];
+    auto buttonForwardNode = TextPickerDialogView::CreateForwardNode(moveForwardEvent, frameNode_, buttonInfos);
+    ASSERT_NE(buttonForwardNode, nullptr);
+    /**
+     * @tc.step: step2. call UpdateForwardButtonMargin.
+     * @tc.expected: margin_ is not null.
+     */
+    TextPickerDialogView::UpdateForwardButtonMargin(buttonForwardNode, theme);
+    EXPECT_NE(buttonForwardNode->GetLayoutProperty()->margin_, nullptr);
+}
+
+/**
+ * @tc.name: TextPickerDialogViewUpdateForwardButtonMargin002
+ * @tc.desc: Test UpdateForwardButtonMargin
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateForwardButtonMargin002, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create buttonForwardNode and set API version 12.
+     */
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
+    ASSERT_NE(theme, nullptr);
+    InitTextPickerTestNg();
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontColor = Color::BLACK;
+    buttonInfos.push_back(info1);
+    auto moveForwardFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogMoveForwardEvent;
+    dialogMoveForwardEvent["moveForwardId"] = moveForwardFunc;
+    auto moveForwardEvent = dialogMoveForwardEvent["moveForwardId"];
+    auto buttonForwardNode = TextPickerDialogView::CreateForwardNode(moveForwardEvent, frameNode_, buttonInfos);
+    ASSERT_NE(buttonForwardNode, nullptr);
+    /**
+     * @tc.step: step2. call UpdateForwardButtonMargin.
+     * @tc.expected: margin_ is not null.
+     */
+    TextPickerDialogView::UpdateForwardButtonMargin(buttonForwardNode, theme);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+    EXPECT_NE(buttonForwardNode->GetLayoutProperty()->margin_, nullptr);
+}
+
+/**
+ * @tc.name: TextPickerDialogViewUpdateBackwardButtonMargin001
+ * @tc.desc: Test UpdateBackwardButtonMargin
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateBackwardButtonMargin001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create buttonBackwardNode.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
+    ASSERT_NE(theme, nullptr);
+    InitTextPickerTestNg();
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontColor = Color::BLACK;
+    buttonInfos.push_back(info1);
+    auto moveBackwardFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogMoveBackwardEvent;
+    dialogMoveBackwardEvent["moveBackwardId"] = moveBackwardFunc;
+    auto moveBackwardEvent = dialogMoveBackwardEvent["moveBackwardId"];
+    auto buttonBackwardNode = TextPickerDialogView::CreateBackwardNode(moveBackwardEvent, frameNode_, buttonInfos);
+    ASSERT_NE(buttonBackwardNode, nullptr);
+    /**
+     * @tc.step: step2. call UpdateForwardButtonMargin.
+     * @tc.expected: margin_ is not null.
+     */
+    TextPickerDialogView::UpdateBackwardButtonMargin(buttonBackwardNode, theme);
+    EXPECT_NE(buttonBackwardNode->GetLayoutProperty()->margin_, nullptr);
+}
+
+/**
+ * @tc.name: TextPickerDialogViewUpdateBackwardButtonMargin002
+ * @tc.desc: Test UpdateBackwardButtonMargin
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestUpdate, TextPickerDialogViewUpdateBackwardButtonMargin002, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create buttonBackwardNode and set API version 12.
+     */
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
+    ASSERT_NE(theme, nullptr);
+    InitTextPickerTestNg();
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontColor = Color::BLACK;
+    buttonInfos.push_back(info1);
+    auto moveBackwardFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogMoveBackwardEvent;
+    dialogMoveBackwardEvent["moveBackwardId"] = moveBackwardFunc;
+    auto moveBackwardEvent = dialogMoveBackwardEvent["moveBackwardId"];
+    auto buttonBackwardNode = TextPickerDialogView::CreateBackwardNode(moveBackwardEvent, frameNode_, buttonInfos);
+    ASSERT_NE(buttonBackwardNode, nullptr);
+    /**
+     * @tc.step: step2. call UpdateForwardButtonMargin.
+     * @tc.expected: margin_ is not null.
+     */
+    TextPickerDialogView::UpdateBackwardButtonMargin(buttonBackwardNode, theme);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+    EXPECT_NE(buttonBackwardNode->GetLayoutProperty()->margin_, nullptr);
 }
 } // namespace OHOS::Ace::NG

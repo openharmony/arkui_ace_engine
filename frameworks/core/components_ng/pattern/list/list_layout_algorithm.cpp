@@ -172,6 +172,9 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         contentIdealSize.SetCrossSize(GetChildMaxCrossSize(layoutWrapper, axis_), axis_);
         crossMatchChild_ = true;
     }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && !mainSizeIsDefined_) {
+        contentMainSize_ = std::max(contentMainSize_, GetMainAxisSize(contentConstraint.minSize, axis_));
+    }
     contentIdealSize.SetMainSize(contentMainSize_, axis_);
     AddPaddingToSize(padding, contentIdealSize);
 
@@ -218,7 +221,7 @@ float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Ax
         return 0.0f;
     }
     float maxCrossSize = 0.0f;
-    float crossSize = 0.0f;
+    float crossSize = -laneGutter_;
     float prevPos = GetItemPosition().begin()->second.startPos;
     for (const auto& pos : GetItemPosition()) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first, false);
@@ -230,7 +233,7 @@ float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Ax
             continue;
         }
         if (NearEqual(prevPos, pos.second.startPos)) {
-            crossSize += getGeometryNode->GetMarginFrameSize().CrossSize(axis);
+            crossSize = crossSize + getGeometryNode->GetMarginFrameSize().CrossSize(axis) + laneGutter_;
         } else {
             crossSize = getGeometryNode->GetMarginFrameSize().CrossSize(axis);
         }
@@ -993,7 +996,6 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
             // adjust offset. If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
             if (!canOverScroll_ || jumpIndex_.has_value()) {
                 currentOffset_ = currentEndPos + contentEndOffset_ - contentMainSize_;
-                adjustOffset_ = currentOffset_;
             }
         }
     }
@@ -1059,7 +1061,6 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
         }
         if (!canOverScroll_ || jumpIndex_.has_value()) {
             currentOffset_ = currentStartPos - contentStartOffset_;
-            adjustOffset_ = currentOffset_;
         }
         endMainPos_ = currentStartPos - contentStartOffset_ + contentMainSize_;
         startMainPos_ = currentStartPos - contentStartOffset_;
@@ -1202,7 +1203,6 @@ void ListLayoutAlgorithm::FixPredictSnapOffsetAlignCenter()
     if (itemPosition_.empty()) {
         return;
     }
-
     auto predictEndPos = totalOffset_ - predictSnapOffset_.value();
     auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
     if (LessNotEqual(predictEndPos, itemHeight / 2.0f - contentMainSize_ / 2.0f - spaceWidth_ / 2.0f)) {
@@ -1299,8 +1299,7 @@ void ListLayoutAlgorithm::LayoutItem(RefPtr<LayoutWrapper>& wrapper, int32_t ind
         crossOffset = CalculateLaneCrossOffset(crossSize, childCrossSize);
     }
     auto chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(index) : 0.0f;
-    auto layoutDirection = wrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
-    if (layoutDirection == TextDirection::RTL) {
+    if (isReverse_) {
         if (axis_ == Axis::VERTICAL) {
             auto size = wrapper->GetGeometryNode()->GetMarginFrameSize();
             offset = offset + OffsetF(crossSize - crossOffset - size.Width(), pos.startPos + chainOffset);
@@ -1336,6 +1335,16 @@ void ListLayoutAlgorithm::ProcessCacheCount(LayoutWrapper* layoutWrapper, int32_
     }
 }
 
+std::optional<ListItemGroupLayoutInfo> ListLayoutAlgorithm::GetListItemGroupLayoutInfo(
+    const RefPtr<LayoutWrapper>& wrapper) const
+{
+    auto layoutAlgorithmWrapper = wrapper->GetLayoutAlgorithm(true);
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, std::nullopt);
+    auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(itemGroup, std::nullopt);
+    return itemGroup->GetLayoutInfo();
+}
+
 void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -1349,6 +1358,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     totalItemCount_ = layoutWrapper->GetTotalChildCount();
     listItemAlign_ = listLayoutProperty->GetListItemAlign().value_or(V2::ListItemAlign::START);
     int32_t startIndex = GetStartIndex();
+    isReverse_ = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::RTL;
 
     totalOffset_ += currentOffset_;
     FixPredictSnapOffset(listLayoutProperty);
@@ -1360,6 +1370,11 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         pos.second.startPos -= currentOffset_;
         pos.second.endPos -= currentOffset_;
+        if (pos.second.isGroup) {
+            pos.second.groupInfo = GetListItemGroupLayoutInfo(wrapper);
+        } else {
+            pos.second.groupInfo.reset();
+        }
         LayoutItem(wrapper, pos.first, pos.second, startIndex, crossSize);
         if (expandSafeArea_ || wrapper->CheckNeedForceMeasureAndLayout()) {
             wrapper->Layout();
@@ -2102,6 +2117,7 @@ std::pair<int32_t, float> ListLayoutAlgorithm::GetSnapStartIndexAndPos()
                 NearEqual(GetEndPosition(), prevContentMainSize_ - prevContentEndOffset_) && !canOverScroll_) {
                 startIndex = pos.first;
                 startPos = contentStartOffset_;
+                adjustOffset_ = pos.second.startPos - prevContentStartOffset_;
             }
             break;
         }
@@ -2122,6 +2138,7 @@ std::pair<int32_t, float> ListLayoutAlgorithm::GetSnapEndIndexAndPos()
             if ((GetStartIndex() == 0) && NearEqual(GetStartPosition(), prevContentStartOffset_) && !canOverScroll_) {
                 endIndex = pos->first;
                 endPos = prevContentMainSize_ - contentEndOffset_;
+                adjustOffset_ = pos->second.endPos + prevContentEndOffset_ - prevContentMainSize_;
             }
             break;
         }

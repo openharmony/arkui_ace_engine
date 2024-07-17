@@ -33,7 +33,9 @@ enum DialogEventType {
 enum class NativeEmbedStatus {
     CREATE = 0,
     UPDATE = 1,
-    DESTROY = 2
+    DESTROY = 2,
+    ENTER_BFCACHE = 3,
+    LEAVE_BFCACHE = 4
 };
 
 enum class NavigationType {
@@ -327,13 +329,13 @@ public:
 private:
     std::map<std::string, std::string> headers_;
     std::string data_;
-    int32_t fd_;
+    int32_t fd_ = -1;
     std::string resourceUrl_;
     WebResponseDataType dataType_ = WebResponseDataType::STRING_TYPE;
     std::string encoding_;
     std::string mimeType_;
     std::string reason_;
-    int32_t statusCode_;
+    int32_t statusCode_ = -1;
     bool isReady_ = true;
     std::shared_ptr<WebResponseAsyncHandle> handle_;
     char* buffer_ = nullptr;

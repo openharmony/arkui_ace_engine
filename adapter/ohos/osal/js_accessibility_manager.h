@@ -56,6 +56,7 @@ public:
     // JsAccessibilityManager overrides functions.
     void InitializeCallback() override;
     void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) override;
+    void UpdateVirtualNodeFocus() override;
     void SetCardViewParams(const std::string& key, bool focus) override;
     void HandleComponentPostBinding() override;
     void RegisterSubWindowInteractionOperation(int windowId) override;
@@ -97,8 +98,6 @@ public:
     void DeregisterInteractionOperation();
     bool SendAccessibilitySyncEvent(
         const AccessibilityEvent& accessibilityEvent, Accessibility::AccessibilityEventInfo eventInfo);
-    bool SendExtensionAccessibilitySyncEvent(
-        const AccessibilityEvent& accessibilityEvent, const Accessibility::AccessibilityEventInfo& eventInfo);
     bool TransferAccessibilityAsyncEvent(
         const Accessibility::AccessibilityEventInfo& eventInfo,
         int64_t uiExtensionOffset) override;
@@ -300,6 +299,8 @@ private:
     void DumpTreeNG(bool useWindowId, uint32_t windowId, int64_t rootId);
     void DumpTreeNG(const RefPtr<NG::FrameNode>& parent, int32_t depth,
         int64_t nodeID, const CommonProperty& commonProperty);
+    void DumpTreeAccessibilityNodeNG(const RefPtr<NG::UINode>& uiNodeParent,
+        int32_t depth, int64_t nodeID, const CommonProperty& commonProperty);
 
     void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
         const RefPtr<PipelineBase>& mainContext);
@@ -369,7 +370,6 @@ private:
     WeakPtr<NG::FrameNode> lastFrameNode_;
     mutable std::mutex childTreeCallbackMapMutex_;
     std::unordered_map<int64_t, std::shared_ptr<AccessibilityChildTreeCallback>> childTreeCallbackMap_;
-    int32_t treeId_ = 0;
     int64_t parentElementId_ = INVALID_PARENT_ID;
     uint32_t parentWindowId_ = 0;
     std::function<void(int32_t&, int32_t&)> getParentRectHandler_;

@@ -878,11 +878,9 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0025, TestSize.Level1)
     menu->children_.push_back(barItem);
     titleBarNode->menu_ = menu;
     barItem->isMoreItemNode_ = true;
-    navBarPattern->isTitleMenuNodeShowing_ = false;
     navBarPattern->OnWindowSizeChanged(20, 20, WindowSizeChangeReason::RECOVER);
     ASSERT_TRUE(barItem->isMoreItemNode_);
     barItem->isMoreItemNode_ = false;
-    navBarPattern->isTitleMenuNodeShowing_ = true;
     navBarPattern->OnWindowSizeChanged(20, 20, WindowSizeChangeReason::RECOVER);
     ASSERT_FALSE(barItem->isMoreItemNode_);
 }

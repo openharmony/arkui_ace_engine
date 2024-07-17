@@ -78,8 +78,8 @@ std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, co
 
 class FormAccessibilityChildTreeCallback : public AccessibilityChildTreeCallback {
 public:
-    explicit FormAccessibilityChildTreeCallback(const WeakPtr<FormNode> &weakFormNode)
-        : AccessibilityChildTreeCallback(), weakFormNode_(weakFormNode)
+    FormAccessibilityChildTreeCallback(const WeakPtr<FormNode> &weakFormNode, int64_t accessibilityId)
+        : AccessibilityChildTreeCallback(accessibilityId), weakFormNode_(weakFormNode)
     {}
 
     ~FormAccessibilityChildTreeCallback() override = default;
@@ -132,6 +132,14 @@ public:
         return true;
     }
 
+    void OnClearRegisterFlag() override
+    {
+        auto formNode = weakFormNode_.Upgrade();
+        if (formNode == nullptr) {
+            return;
+        }
+        isReg_ = false;
+    }
 private:
     bool isReg_ = false;
     WeakPtr<FormNode> weakFormNode_;
@@ -253,7 +261,8 @@ void FormNode::InitializeFormAccessibility()
     CHECK_NULL_VOID(pipeline);
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
-    accessibilityChildTreeCallback_ = std::make_shared<FormAccessibilityChildTreeCallback>(WeakClaim(this));
+    accessibilityChildTreeCallback_ = std::make_shared<FormAccessibilityChildTreeCallback>(
+        WeakClaim(this), GetAccessibilityId());
     accessibilityManager->RegisterAccessibilityChildTreeCallback(GetAccessibilityId(), accessibilityChildTreeCallback_);
 
 }
@@ -304,5 +313,11 @@ void FormNode::OnAccessibilityDumpChildInfo(const std::vector<std::string>& para
         return;
     }
     pattern->OnAccessibilityDumpChildInfo(params, info);
+}
+
+void FormNode::ClearAccessibilityChildTreeRegisterFlag()
+{
+    CHECK_NULL_VOID(accessibilityChildTreeCallback_);
+    accessibilityChildTreeCallback_->OnClearRegisterFlag();
 }
 } // namespace OHOS::Ace::NG

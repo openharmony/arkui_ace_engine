@@ -126,6 +126,9 @@ void MarqueePattern::OnModifyDone()
     CHECK_NULL_VOID(childRenderContext);
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
+    auto gestureHub = textChild->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetHitTestMode(HitTestMode::HTMNONE);
     auto src = layoutProperty->GetSrc().value_or(" ");
     textLayoutProperty->UpdateContent(src);
     auto pipelineContext = PipelineContext::GetCurrentContext();

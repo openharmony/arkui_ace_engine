@@ -52,7 +52,8 @@ public:
     std::optional<SelectOverlayInfo> GetSelectOverlayInfo();
     bool IsSingleHandleShow();
     void UpdateMenuOffset();
-    bool IsHandlesShow();
+    bool IsBothHandlesShow();
+    bool IsHandleShow();
 
 private:
     void RemoveAreaChangeInner();

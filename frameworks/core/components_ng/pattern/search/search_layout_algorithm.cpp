@@ -68,18 +68,13 @@ void SearchLayoutAlgorithm::CancelImageMeasure(LayoutWrapper* layoutWrapper)
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
     auto constraint = layoutProperty->GetLayoutConstraint();
-    auto imageConstraint = imageLayoutProperty->GetLayoutConstraint();
     auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
     auto defaultImageHeight = static_cast<float>(searchTheme->GetIconSize().ConvertToPx());
-    auto iconStretchSize = (NearZero(defaultImageHeight) || !imageConstraint->maxSize.IsPositive()) &&
-                           !layoutProperty->HasCancelButtonUDSize();
     auto imageHeight = static_cast<float>(std::min(layoutProperty->HasCancelButtonUDSize() ?
         layoutProperty->GetCancelButtonUDSizeValue().ConvertToPx() : defaultImageHeight,
         searchHeight));
     CalcSize imageCalcSize;
-    if (iconStretchSize) {
-        imageCalcSize.SetWidth(CalcLength(imageHeight));
-    }
+    imageCalcSize.SetWidth(CalcLength(imageHeight));
     imageCalcSize.SetHeight(CalcLength(imageHeight));
     imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
@@ -215,18 +210,13 @@ void SearchLayoutAlgorithm::ImageMeasure(LayoutWrapper* layoutWrapper)
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
     auto constraint = layoutProperty->GetLayoutConstraint();
-    auto imageConstraint = imageLayoutProperty->GetLayoutConstraint();
     auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
     auto defaultImageHeight = searchTheme->GetIconSize().ConvertToPx();
-    auto iconStretchSize = (NearZero(defaultImageHeight) || !imageConstraint->maxSize.IsPositive()) &&
-        !layoutProperty->HasSearchIconUDSize();
     auto imageHeight = static_cast<float>(std::min(layoutProperty->HasSearchIconUDSize() ?
         layoutProperty->GetSearchIconUDSizeValue().ConvertToPx() : defaultImageHeight,
         searchHeight));
     CalcSize imageCalcSize;
-    if (iconStretchSize) {
-        imageCalcSize.SetWidth(CalcLength(imageHeight));
-    }
+    imageCalcSize.SetWidth(CalcLength(imageHeight));
     imageCalcSize.SetHeight(CalcLength(imageHeight));
     imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
 
@@ -345,6 +335,7 @@ void SearchLayoutAlgorithm::SelfMeasure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
+    UpdateClipBounds(layoutWrapper, searchHeight);
     // update search height
     constraint->selfIdealSize.SetHeight(searchHeight);
     auto searchWidth = CalcSearchWidth(constraint.value(), layoutWrapper);
@@ -721,46 +712,21 @@ void SearchLayoutAlgorithm::LayoutTextField(const LayoutSearchParams& params)
     auto layoutProperty = DynamicCast<SearchLayoutProperty>(params.layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto padding = layoutProperty->CreatePaddingAndBorder();
-    auto dividerSideSpace = params.searchTheme->GetDividerSideSpace().ConvertToPx();
-    auto dividerWidth = params.searchTheme->GetSearchDividerWidth().ConvertToPx();
 
     auto textFieldWrapper = params.layoutWrapper->GetOrCreateChildByIndex(TEXTFIELD_INDEX);
     CHECK_NULL_VOID(textFieldWrapper);
     auto textFieldGeometryNode = textFieldWrapper->GetGeometryNode();
     CHECK_NULL_VOID(textFieldGeometryNode);
+
+    auto hostGeometryNode = params.layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(hostGeometryNode);
+
     auto textFieldHorizontalOffset = 0;
-
-    auto searchButtonWrapper = params.layoutWrapper->GetOrCreateChildByIndex(BUTTON_INDEX);
-    CHECK_NULL_VOID(searchButtonWrapper);
-    auto searchButtonGeometryNode = searchButtonWrapper->GetGeometryNode();
-    auto searchButtonFrameSize = searchButtonGeometryNode->GetFrameSize();
-    auto searchButtonHorizontalOffset = searchButtonGeometryNode->GetMarginFrameOffset().GetX();
-
-    auto cancelButtonWrapper = params.layoutWrapper->GetOrCreateChildByIndex(CANCEL_BUTTON_INDEX);
-    CHECK_NULL_VOID(cancelButtonWrapper);
-    auto cancelButtonGeometryNode = cancelButtonWrapper->GetGeometryNode();
-    auto cancelButtonFrameWidth = cancelButtonGeometryNode->GetFrameSize().Width();
-
-    auto searchButtonEvent = searchButtonWrapper->GetHostNode()->GetEventHub<ButtonEventHub>();
-
-    auto style = params.layoutProperty->GetCancelButtonStyle().value_or(CancelButtonStyle::INPUT);
     if (params.isRTL) {
-        if (searchButtonEvent->IsEnabled()) {
-            if (style != CancelButtonStyle::INVISIBLE) {
-                textFieldHorizontalOffset = searchButtonHorizontalOffset + searchButtonFrameSize.Width() +
-                    TWO * dividerSideSpace + dividerWidth + searchIconLeftSpace + cancelButtonFrameWidth;
-            } else {
-                textFieldHorizontalOffset =
-                    searchButtonHorizontalOffset + searchButtonFrameSize.Width() + searchIconLeftSpace;
-            }
-        } else {
-            if (style != CancelButtonStyle::INVISIBLE) {
-                textFieldHorizontalOffset =
-                    searchButtonHorizontalOffset + cancelButtonFrameWidth + searchIconRightSpace;
-            } else {
-                textFieldHorizontalOffset = searchButtonHorizontalOffset + searchIconRightSpace;
-            }
-        }
+        auto rightOffset = searchIconWidth + searchIconLeftSpace
+            + searchIconRightSpace + padding.right.value_or(0.0f);
+        textFieldHorizontalOffset = hostGeometryNode->GetFrameSize().Width()
+            - rightOffset - textFieldGeometryNode->GetFrameSize().Width();
     } else {
         textFieldHorizontalOffset = searchIconWidth + searchIconLeftSpace
             + searchIconRightSpace + padding.left.value_or(0.0f);
@@ -769,5 +735,36 @@ void SearchLayoutAlgorithm::LayoutTextField(const LayoutSearchParams& params)
     auto textFieldVerticalOffset = (params.searchFrameHeight - textFieldGeometryNode->GetFrameSize().Height()) / 2;
     textFieldGeometryNode->SetMarginFrameOffset(OffsetF(textFieldHorizontalOffset, textFieldVerticalOffset));
     textFieldWrapper->Layout();
+}
+
+void SearchLayoutAlgorithm::UpdateClipBounds(LayoutWrapper* layoutWrapper, float height)
+{
+    if (!IsFixedHeightMode(layoutWrapper)) {
+        return;
+    }
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto layoutProperty = AceType::DynamicCast<SearchLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->HasSearchIconUDSize() && !layoutProperty->HasCancelButtonUDSize()) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto searchTheme = pipeline->GetTheme<SearchTheme>();
+        CHECK_NULL_VOID(searchTheme);
+        auto defaultImageHeight = searchTheme->GetIconSize().ConvertToPx();
+        auto isClip = LessNotEqual(height, defaultImageHeight);
+        renderContext->SetClipToBounds(isClip);
+        return;
+    }
+    auto isClip = false;
+    if (layoutProperty->HasSearchIconUDSize()) {
+        isClip = isClip || LessNotEqual(height, layoutProperty->GetSearchIconUDSizeValue().ConvertToPx());
+    }
+    if (layoutProperty->HasCancelButtonUDSize()) {
+        isClip = isClip || LessNotEqual(height, layoutProperty->GetCancelButtonUDSizeValue().ConvertToPx());
+    }
+    renderContext->SetClipToBounds(isClip);
 }
 } // namespace OHOS::Ace::NG

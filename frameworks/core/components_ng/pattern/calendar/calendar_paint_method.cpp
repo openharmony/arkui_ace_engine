@@ -48,6 +48,7 @@ constexpr int32_t TEXT_END_INDEX = 2;
 constexpr int32_t WEEK_TEXT_END_INDEX = 3;
 constexpr double WEEKEND_TRANSPARENT = 0x7D;
 constexpr Dimension CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT = 4.0_vp;
+constexpr double DEVICE_HEIGHT_LIMIT = 640.0;
 
 std::unique_ptr<RSParagraph> GetTextParagraph(const std::string& text, const RSTextStyle& textStyle)
 {
@@ -670,7 +671,15 @@ void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& 
     backgroundSelectedNotTodayColor_ = ToRSColor(theme->GetBackgroundSelectedNotTodayColor());
     backgroundHoverColor_ = ToRSColor(theme->GetBackgroundHoverColor());
     backgroundPressColor_ = ToRSColor(theme->GetBackgroundPressColor());
-    calendarDayKeyFocusedWidth_ = theme->GetCalendarDayKeyFocusedWidth().ConvertToPx();
+
+    auto fontSizeScale = pipelineContext->GetFontScale();
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale() ||
+        Dimension(pipelineContext->GetRootHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
+        calendarDayKeyFocusedWidth_ = theme->GetCalendarDayKeyFocusedWidth().ConvertToPx();
+    } else {
+        calendarDayKeyFocusedWidth_ = theme->GetCalendarLargeDayKeyFocusedWidth().ConvertToPx();
+    }
+
     calendarDayKeyFocusedPenWidth_ = theme->GetCalendarDayKeyFocusedPenWidth().ConvertToPx();
     if (paintProperty->HasShowLunar()) {
         showLunar_ = paintProperty->GetShowLunarValue();
@@ -696,7 +705,7 @@ bool CalendarPaintMethod::IsOffDay(const CalendarDay& dayInfo) const
 {
     std::vector<std::string> days;
     StringUtils::StringSplitter(offDays_, ',', days);
-    int daysOfWeek = 7;
+    int32_t daysOfWeek = 7;
     for (const auto& day : days) {
         auto num = (StringUtils::StringToInt(day) + (daysOfWeek - startOfWeek_)) % daysOfWeek;
         if ((dayInfo.index % daysOfWeek) == num) {

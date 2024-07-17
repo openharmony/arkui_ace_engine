@@ -125,6 +125,12 @@ public:
 
     // window title bar closed
     static constexpr char APP_EXIT_FROM_WINDOW_TITLE_BAR_CLOSED[] = "APP_EXIT_FROM_WINDOW_TITLE_BAR_CLOSED";
+
+    // PC start app from other
+    static constexpr char LAUNCHER_APP_LAUNCH_FROM_OTHER[] = "LAUNCHER_APP_LAUNCH_FROM_OTHER";
+
+    // scroller animation
+    static constexpr char SCROLLER_ANIMATION[] = "SCROLLER_ANIMATION";
 };
 } // namespace OHOS::Ace
 #endif // ARKUI_PERF_SCENE_ID_H

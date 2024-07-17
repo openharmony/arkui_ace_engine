@@ -305,7 +305,7 @@ void ScrollPattern::AdjustOffset(float& delta, int32_t source)
     // the distance below the bottom, if higher than bottom, it is zero
     float overScrollPastEnd = 0.0f;
     float overScrollPast = 0.0f;
-    // TODO: not consider rowReverse or colReverse
+    // not consider rowReverse or colReverse
     overScrollPastStart = std::max(currentOffset_, 0.0f);
     if (Positive(scrollableDistance_)) {
         overScrollPastEnd = std::max(-scrollableDistance_ - currentOffset_, 0.0f);
@@ -581,11 +581,14 @@ void ScrollPattern::ScrollBy(float pixelX, float pixelY, bool smooth, const std:
     JumpToPosition(position);
 }
 
-void ScrollPattern::ScrollPage(bool reverse, bool smooth)
+void ScrollPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType scrollType)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     float distance = reverse ? viewPortLength_ : -viewPortLength_;
+    if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
+        distance = distance / 2.f;
+    }
     ACE_SCOPED_TRACE(
         "Scroll ScrollPage distance:%f, id:%d", distance, static_cast<int32_t>(host->GetAccessibilityId()));
     ScrollBy(distance, distance, smooth);
@@ -686,19 +689,31 @@ void ScrollPattern::SetAccessibilityAction()
     CHECK_NULL_VOID(host);
     auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)]() {
+    accessibilityProperty->SetActionScrollForward([weakPtr = WeakClaim(this)](AccessibilityScrollType scrollType) {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (pattern->IsScrollable() && pattern->GetScrollableDistance() > 0.0f) {
-            pattern->ScrollPage(false, true);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        ACE_SCOPED_TRACE("accessibility action, scroll forward, isScrollable:%u, IsPositiveScrollableDistance:%u, "
+                         "scrollType:%d, id:%d, tag:Scroll",
+            pattern->IsScrollable(), pattern->IsPositiveScrollableDistance(), scrollType,
+            static_cast<int32_t>(host->GetAccessibilityId()));
+        if (pattern->IsScrollable() && pattern->IsPositiveScrollableDistance()) {
+            pattern->ScrollPage(false, true, scrollType);
         }
     });
 
-    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
+    accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)](AccessibilityScrollType scrollType) {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (pattern->IsScrollable() && pattern->GetScrollableDistance() > 0.0f) {
-            pattern->ScrollPage(true, true);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        ACE_SCOPED_TRACE("accessibility action, scroll backward, isScrollable:%u, IsPositiveScrollableDistance:%u, "
+                         "scrollType:%d, id:%d, tag:Scroll",
+            pattern->IsScrollable(), pattern->IsPositiveScrollableDistance(), scrollType,
+            static_cast<int32_t>(host->GetAccessibilityId()));
+        if (pattern->IsScrollable() && pattern->IsPositiveScrollableDistance()) {
+            pattern->ScrollPage(true, true, scrollType);
         }
     });
 }
