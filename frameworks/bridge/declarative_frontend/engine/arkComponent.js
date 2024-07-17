@@ -28464,11 +28464,11 @@ if (globalThis.ContainerSpan !== undefined) {
   };
 }
 
-function __getArkUINode__() {
+function getArkUINodeFromNapi() {
   if(globalThis.__XNode__ === undefined) {
       globalThis.__XNode__ = globalThis.requireNapi('arkui.node');
   }
   return globalThis.__XNode__;
 }
 
-globalThis.__getArkUINode__ = __getArkUINode__;
+globalThis.__getArkUINode__ = getArkUINodeFromNapi;
