@@ -176,6 +176,26 @@ HWTEST_F(InspectorTestNg, InspectorTestNg003, TestSize.Level1)
     auto test4 = Inspector::GetInspectorOfNode(TWO);
     EXPECT_NE(test4, "");
 
+    RefPtr<MockPipelineContext> pipeline_bak = MockPipelineContext::pipeline_;
+    MockPipelineContext::pipeline_ = nullptr;
+    auto jsonRoot = JsonUtil::Create(true);
+    const char inspectorType[] = "$type";
+    const char inspectorRoot[] = "root";
+    jsonRoot->Put(inspectorType, inspectorRoot);
+    auto test5 = Inspector::GetInspector(false);
+    EXPECT_EQ(test5, jsonRoot->ToString());
+    MockPipelineContext::pipeline_ = pipeline_bak;
+
+    InspectorFilter filter;
+    filter.SetFilterID("test");
+    bool needThrow = false;
+    auto test6 = Inspector::GetInspector(false, filter, needThrow);
+    auto rootNode = context1->GetStageManager()->GetLastPage();
+    if (rootNode == nullptr) {
+        EXPECT_EQ(test6, jsonRoot->ToString());
+    } else {
+        EXPECT_NE(test6, "");
+    }
     context1->stageManager_ = nullptr;
 }
 
@@ -392,6 +412,18 @@ HWTEST_F(InspectorTestNg, InspectorTestNg009, TestSize.Level1)
     ASSERT_NE(context, nullptr);
     auto nodePtr = Inspector::GetFrameNodeByKey(key);
     EXPECT_EQ(nodePtr, nullptr);
+
+    Inspector::AddOffscreenNode(ONE);
+    nodePtr = Inspector::GetFrameNodeByKey("one");
+    EXPECT_EQ(nodePtr, 0);
+
+    RefPtr<MockPipelineContext> pipeline_bak = MockPipelineContext::pipeline_;
+    MockPipelineContext::pipeline_ = nullptr;
+    context = PipelineContext::GetCurrentContext();
+    EXPECT_EQ(context, nullptr);
+    nodePtr = Inspector::GetFrameNodeByKey("two");
+    EXPECT_EQ(nodePtr, nullptr);
+    MockPipelineContext::pipeline_ = pipeline_bak;
 }
 
 /**
@@ -410,7 +442,15 @@ HWTEST_F(InspectorTestNg, InspectorTestNg010, TestSize.Level1)
     std::string key = "key";
     OHOS::Ace::NG::Rectangle rect;
     Inspector::GetRectangleById(key, rect);
-    context->rootNode_ = nullptr;
+    EXPECT_EQ(rect.size.Width(), 0.0f);
+
+    auto frameNode = Inspector::GetFrameNodeByKey("one");
+    RefPtr<RenderContext> renderContextBak = ONE->renderContext_;
+    ONE->renderContext_ = nullptr;
+    Inspector::GetRectangleById("one", rect);
+    EXPECT_EQ(rect.screenRect.Width(), 0.0f);
+    ONE->renderContext_ = renderContextBak;
+    EXPECT_EQ(rect.size.Width(), 0.0f);
 }
 
 /**
@@ -434,7 +474,7 @@ HWTEST_F(InspectorTestNg, InspectorTestNg011, TestSize.Level1)
 
 /**
  * @tc.name: InspectorTestNg012
- * @tc.desc: Test the operation of GetSubWindowInspector
+ * @tc.desc: Test the operation of GetSimplifiedInspector
  * @tc.type: FUNC
  */
 HWTEST_F(InspectorTestNg, InspectorTestNg012, TestSize.Level1)
@@ -497,5 +537,54 @@ HWTEST_F(InspectorTestNg, InspectorTestNg015, TestSize.Level1)
     testFilter.filterExt.emplace_back("abc");
     testFilter.AddFilterAttr("focusable");
     EXPECT_EQ(testFilter.CheckFilterAttr(FixedAttrBit::FIXED_ATTR_CONTENT, hello), true);
+}
+
+/**
+ * @tc.name: AddOffscreenNode_001
+ * @tc.desc: Test the operation of AddOffscreenNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, AddOffscreenNode_001, TestSize.Level1)
+{
+    int32_t num = Inspector::offscreenNodes.size();
+    RefPtr<FrameNode> one = nullptr;
+    Inspector::AddOffscreenNode(one);
+    EXPECT_EQ(Inspector::offscreenNodes.size(), num);
+
+    auto id = ElementRegister::GetInstance()->MakeUniqueId();
+    one = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(one);
+    num = Inspector::offscreenNodes.size();
+    Inspector::AddOffscreenNode(one);
+    EXPECT_EQ(Inspector::offscreenNodes.size(), num + 1);
+    context->stageManager_ = nullptr;
+}
+
+/**
+ * @tc.name: RemoveOffscreenNode_001
+ * @tc.desc: Test the operation of RemoveOffscreenNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, RemoveOffscreenNode_001, TestSize.Level1)
+{
+    int32_t num = Inspector::offscreenNodes.size();
+    RefPtr<FrameNode> one = nullptr;
+    Inspector::RemoveOffscreenNode(one);
+    EXPECT_EQ(Inspector::offscreenNodes.size(), num);
+
+    auto id = ElementRegister::GetInstance()->MakeUniqueId();
+    one = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(one);
+    Inspector::AddOffscreenNode(one);
+    num = Inspector::offscreenNodes.size();
+
+    Inspector::RemoveOffscreenNode(one);
+    EXPECT_EQ(Inspector::offscreenNodes.size(), num - 1);
+    context->stageManager_ = nullptr;
 }
 } // namespace OHOS::Ace::NG
