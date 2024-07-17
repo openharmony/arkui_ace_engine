@@ -1637,8 +1637,8 @@ class BaseShape {
 class ShapeClip extends BaseShape {
 }
 class ShapeMask extends BaseShape {
-    constructor() {
-        super(...arguments);
+    constructor(...args) {
+        super(...args);
         this.fillColor = 0XFF000000;
         this.strokeColor = 0XFF000000;
         this.strokeWidth = 0;
