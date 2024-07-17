@@ -259,7 +259,7 @@ void FormRendererGroup::RecycleForm(std::string& statusData) const
 
 void FormRendererGroup::RecoverRenderer(const std::vector<FormRequest>& formRequests, size_t currentCompIndex)
 {
-    if (currentCompIndex >= formRequests.size() || currentCompIndex < 0) {
+    if (currentCompIndex >= formRequests.size()) {
         HILOG_ERROR("current comp index %{public}zu invalid", currentCompIndex);
         return;
     }
