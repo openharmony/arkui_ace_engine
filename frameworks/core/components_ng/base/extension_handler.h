@@ -89,6 +89,16 @@ public:
         invalidateRender_ = std::move(impl);
     }
 
+    void SetOverlayRenderImpl(std::function<void()>&& impl)
+    {
+        overlayRender_ = std::move(impl);
+    }
+
+    void SetForeGroundRenderImpl(std::function<void()>&& impl)
+    {
+        foreGroundRender_ = std::move(impl);
+    }
+
     void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier)
     {
         drawModifier_ = drawModifier;
@@ -138,6 +148,8 @@ private:
     std::function<void(DrawingContext&)> innerForegroundDrawImpl_;
     std::function<void(DrawingContext&)> innerOverlayDrawImpl_;
     std::function<void()> invalidateRender_;
+    std::function<void()> overlayRender_;
+    std::function<void()> foreGroundRender_;
     bool needRender_  = true;
 
     RefPtr<NG::DrawModifier> drawModifier_;
