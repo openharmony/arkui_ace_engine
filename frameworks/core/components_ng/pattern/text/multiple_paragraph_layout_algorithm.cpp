@@ -18,6 +18,7 @@
 #include "text_layout_adapter.h"
 
 #include "base/geometry/dimension.h"
+#include "base/log/ace_performance_monitor.h"
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
 #include "core/common/font_manager.h"
@@ -396,6 +397,7 @@ bool MultipleParagraphLayoutAlgorithm::ParagraphReLayout(const LayoutConstraintF
             auto paragraph = pIter->paragraph;
             CHECK_NULL_RETURN(paragraph, false);
             if (!NearEqual(paragraphNewWidth, paragraph->GetMaxWidth())) {
+                OTHER_DURATION();
                 paragraph->Layout(std::ceil(paragraphNewWidth));
             }
         }
