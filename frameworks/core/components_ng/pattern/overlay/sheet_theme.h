@@ -101,6 +101,7 @@ public:
             theme->largePercent_ = sheetPattern->GetAttr<double>("sheet_height_percent_large", 1.0f);
             theme->mediumPercent_ = sheetPattern->GetAttr<double>("sheet_height_percent_medium", 0.6f);
             theme->operationAreaHeight_ = sheetPattern->GetAttr<Dimension>("sheet_operation_height", 56.0_vp);
+            theme->showCloseIcon_ = static_cast<bool>(sheetPattern->GetAttr<int>("sheet_show_close_icon", 1));
         }
     };
     ~SheetTheme() override = default;
@@ -195,6 +196,11 @@ public:
         return mediumPercent_;
     }
 
+    bool GetShowCloseIcon() const
+    {
+        return showCloseIcon_;
+    }
+
 protected:
     SheetTheme() = default;
 
@@ -207,6 +213,7 @@ private:
     Dimension operationAreaHeight_;
     double largePercent_ = 0.0f;
     double mediumPercent_ = 0.0f;
+    bool showCloseIcon_ = true;
     Color titleTextFontColor_;
     Color subtitleTextFontColor_;
     Color sheetBackgoundColor_;

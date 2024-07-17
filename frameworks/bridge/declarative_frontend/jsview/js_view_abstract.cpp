@@ -7558,10 +7558,11 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
         func->Execute();
     };
     // parse SheetStyle and callbacks
+    auto sheetTheme = GetTheme<OHOS::Ace::NG::SheetTheme>();
     NG::SheetStyle sheetStyle;
     sheetStyle.sheetMode = NG::SheetMode::LARGE;
     sheetStyle.showDragBar = true;
-    sheetStyle.showCloseIcon = true;
+    sheetStyle.showCloseIcon = sheetTheme ? sheetTheme->GetShowCloseIcon() : true;
     sheetStyle.showInPage = false;
     std::function<void()> onAppearCallback;
     std::function<void()> onDisappearCallback;
@@ -7623,7 +7624,8 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     }
     bool showClose = true;
     if (showCloseIcon->IsNull() || showCloseIcon->IsUndefined()) {
-        sheetStyle.showCloseIcon = showClose;
+        auto sheetTheme = GetTheme<OHOS::Ace::NG::SheetTheme>();
+        sheetStyle.showCloseIcon = sheetTheme ? sheetTheme->GetShowCloseIcon() : showClose;
     } else {
         if (ParseJsBool(showCloseIcon, showClose)) {
             sheetStyle.showCloseIcon = showClose;
