@@ -44,7 +44,6 @@ private:
     float paddingEnd_ = 0.0f;
     float paddingTop_ = 0.0f;
     float paddingBottom_ = 0.0f;
-    float optionPadding_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(SubMenuLayoutAlgorithm);
 };
