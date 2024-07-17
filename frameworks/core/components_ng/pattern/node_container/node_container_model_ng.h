@@ -24,6 +24,8 @@ public:
     void Create() override;
     void SetMakeFunction(std::function<RefPtr<UINode>()>&& makeFunc) override;
     void SetOnResize(std::function<void(const SizeF& size)>&& resizeFunc) override;
+    void SetOnAppear(std::function<void()>&& onAppearCallback) override;
+    void SetOnDisAppear(std::function<void()>&& onDisAppearCallback) override;
     void BindController(std::function<void()>&& resetFunc) override;
     void SetOnTouchEvent(TouchEventFunc &&touchEventFunc) override;
     void ResetController() override;

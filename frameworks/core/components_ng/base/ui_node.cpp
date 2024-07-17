@@ -1357,12 +1357,12 @@ bool UINode::SetParentLayoutConstraint(const SizeF& size) const
 
 void UINode::UpdateNodeStatus(NodeStatus nodeStatus)
 {
+    if (nodeStatus_ == nodeStatus) {
+        return;
+    }
     nodeStatus_ = nodeStatus;
+    OnAttachToBuilderNode(nodeStatus_);
     for (const auto& child : children_) {
-        if (child->GetNodeStatus() == nodeStatus_) {
-            continue;
-        }
-        child->OnAttachToBuilderNode(nodeStatus_);
         child->UpdateNodeStatus(nodeStatus_);
     }
 }
