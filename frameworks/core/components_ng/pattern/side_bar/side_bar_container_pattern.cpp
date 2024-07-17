@@ -1080,15 +1080,15 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
 
 void SideBarContainerPattern::HandleDragEnd()
 {
-    if (!isDividerDraggable_ || sideBarStatus_ != SideBarStatus::SHOW) {
-        return;
-    }
     isInDividerDrag_ = false;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto windowId = pipeline->GetWindowId();
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), MouseFormat::DEFAULT);
+    if (!isDividerDraggable_ || sideBarStatus_ != SideBarStatus::SHOW) {
+        return;
+    }
     preSidebarWidth_ = realSideBarWidth_;
 }
 
