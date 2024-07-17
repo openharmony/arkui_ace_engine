@@ -112,7 +112,7 @@ NG::SafeAreaInsets ConvertAvoidArea(const OHOS::Rosen::AvoidArea& avoidArea)
         { avoidArea.rightRect_.posX_, avoidArea.rightRect_.posX_ + avoidArea.rightRect_.width_ },
         { avoidArea.bottomRect_.posY_, avoidArea.bottomRect_.posY_ + avoidArea.bottomRect_.height_ });
 }
-class IIgnoreViewSafeAreaListenerPreview  : public OHOS::Rosen::IIgnoreViewSafeAreaListener {
+class IIgnoreViewSafeAreaListenerPreview : public OHOS::Rosen::IIgnoreViewSafeAreaListener {
 public:
     explicit IIgnoreViewSafeAreaListenerPreview(int32_t instanceId) : instanceId_(instanceId) {}
     ~IIgnoreViewSafeAreaListenerPreview() = default;
@@ -305,7 +305,7 @@ void AceAbility::InitEnv()
         }
     }
     AceContainer::SetResourcesPathAndThemeStyle(ACE_INSTANCE_ID, runArgs_.systemResourcesPath,
-        runArgs_.appResourcesPath, runArgs_.themeId, runArgs_.deviceConfig.colorMode);
+        runArgs_.containerSdkPath, runArgs_.appResourcesPath, runArgs_.themeId, runArgs_.deviceConfig.colorMode);
 
     auto view = AceViewPreview::CreateView(ACE_INSTANCE_ID);
     auto window = GetWindow();
