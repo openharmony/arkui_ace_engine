@@ -165,7 +165,7 @@ void AceViewOhos::DispatchEventToPerf(const std::shared_ptr<MMI::PointerEvent>& 
     if (pMonitor == nullptr) {
         return;
     }
-    int64_t inputTime = pointerEvent->GetSensorInputTime() * US_TO_MS;
+    uint64_t inputTime = pointerEvent->GetSensorInputTime() * US_TO_MS;
     if (inputTime <= 0) {
         inputTime = pointerEvent->GetActionTime() * US_TO_MS;
     }
