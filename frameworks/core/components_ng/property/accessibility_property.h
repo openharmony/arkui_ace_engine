@@ -530,6 +530,11 @@ public:
         return accessibilityVirtualNode_;
     }
 
+    NG::UINode* GetAccessibilityVirtualNodePtr()
+    {
+        return Referenced::RawPtr(accessibilityVirtualNode_);
+    }
+
     bool HasAccessibilityVirtualNode() const
     {
         return accessibilityVirtualNode_ != nullptr;

@@ -35,9 +35,11 @@
 #include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/property/accessibility_property.h"
 #include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
+class AccessibilityProperty;
 
 struct ExtraInfo {
     std::string page;
@@ -601,6 +603,11 @@ public:
     virtual void PaintDebugBoundaryTreeAll(bool flag);
     static void DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>& res);
     static void GetBestBreakPoint(RefPtr<UINode>& breakPointChild, RefPtr<UINode>& breakPointParent);
+
+    virtual RefPtr<NG::AccessibilityProperty> GetVirtualAccessibilityProperty()
+    {
+        return nullptr;
+    }
 
     void AddFlag(uint32_t flag)
     {

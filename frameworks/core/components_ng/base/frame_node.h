@@ -332,6 +332,11 @@ public:
         return eventHub_->GetFocusHub();
     }
 
+    RefPtr<AccessibilityProperty> GetVirtualAccessibilityProperty() override
+    {
+        return accessibilityProperty_;
+    }
+
     FocusType GetFocusType() const
     {
         FocusType type = FocusType::DISABLE;
