@@ -61,462 +61,270 @@ public:
         PositionMode positionMode = PositionMode::RIGHT);
     ~ScrollBar() override = default;
 
-    bool InBarTouchRegion(const Point& point) const;
-    bool InBarHoverRegion(const Point& point) const;
-    bool InBarRectRegion(const Point& point) const;
-    bool NeedScrollBar() const;
-    bool NeedPaint() const;
-    void UpdateScrollBarRegion(
-        const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight);
-    double GetNormalWidthToPx() const;
-    float CalcPatternOffset(float scrollBarOffset) const;
-
     ShapeMode GetShapeMode() const
     {
         return shapeMode_;
     }
-
     DisplayMode GetDisplayMode() const
     {
         return displayMode_;
     }
-
     PositionMode GetPositionMode() const
     {
         return positionMode_;
     }
-
     void SetPadding(const Edge& padding)
     {
         padding_ = padding;
     }
-
     const Edge& GetPadding() const
     {
         return padding_;
     }
-
     void SetBackgroundColor(const Color& backgroundColor)
     {
         backgroundColor_ = backgroundColor;
     }
-
     const Color& GetBackgroundColor() const
     {
         return backgroundColor_;
     }
-
     void SetForegroundColor(const Color& foregroundColor)
     {
         foregroundColor_ = foregroundColor;
     }
-
-    Color GetForegroundColor() const
-    {
-        return IsPressed() ? foregroundColor_.BlendColor(PRESSED_BLEND_COLOR) : foregroundColor_;
-    }
-
     double GetTopAngle() const
     {
         return topAngle_;
     }
-
     double GetBottomAngle() const
     {
         return bottomAngle_;
     }
-
     double GetTrickStartAngle() const
     {
         return trickStartAngle_;
     }
-
     double GetTrickSweepAngle() const
     {
         return trickSweepAngle_;
     }
-
     void SetMinHeight(const Dimension& minHeight)
     {
         minHeight_ = minHeight;
     }
-
     const Dimension& GetMinHeight() const
     {
         return minHeight_;
     }
-
     void SetMinDynamicHeight(const Dimension& minDynamicHeight)
     {
         minDynamicHeight_ = minDynamicHeight;
     }
-
     const Dimension& GetMinDynamicHeight() const
     {
         return minDynamicHeight_;
     }
-
     void SetInactiveWidth(const Dimension& inactiveWidth)
     {
         inactiveWidth_ = inactiveWidth;
     }
-
     void SetActiveWidth(const Dimension& activeWidth)
     {
         activeWidth_ = activeWidth;
     }
-
-    void SetHoverWidth(const RefPtr<ScrollBarTheme>& theme)
-    {
-        hoverWidth_ = theme->GetActiveWidth() + theme->GetScrollBarMargin() * 2;
-    }
-
     const Dimension& GetActiveWidth() const
     {
         return activeWidth_;
     }
-
-    void SetNormalWidth(const Dimension& normalWidth)
-    {
-        if (normalWidth_ != normalWidth) {
-            normalWidthUpdate_ = true;
-            normalWidth_ = normalWidth;
-            CalcReservedHeight();
-            MarkNeedRender();
-        }
-    }
-
     const Rect& GetActiveRect() const
     {
         return activeRect_;
     }
-
     void SetTouchWidth(const Dimension& touchWidth)
     {
         touchWidth_ = touchWidth;
     }
-
     const Dimension& GetTouchWidth() const
     {
         return touchWidth_;
     }
-
     const Rect& GetBarRect() const
     {
         return barRect_;
     }
-
-    void SetScrollable(bool isScrollable)
-    {
-        CHECK_NULL_VOID(isScrollable_ != isScrollable);
-        isScrollable_ = isScrollable;
-    }
-
     bool IsScrollable() const
     {
         return isScrollable_;
     }
-
-    void SetPositionMode(PositionMode positionMode)
-    {
-        if (positionMode_ != positionMode) {
-            positionModeUpdate_ = true;
-            positionMode_ = positionMode;
-            if (panRecognizer_) {
-                PanDirection panDirection;
-                panDirection.type =
-                    positionMode_ == PositionMode::BOTTOM ? PanDirection::HORIZONTAL : PanDirection::VERTICAL;
-                panRecognizer_->SetDirection(panDirection);
-            }
-        }
-    }
-
     bool GetPositionModeUpdate() const
     {
         return positionModeUpdate_;
     }
-
     void SetShapeMode(ShapeMode shapeMode)
     {
         shapeMode_ = shapeMode;
     }
-
-    void SetDisplayMode(DisplayMode displayMode)
-    {
-        CHECK_NULL_VOID(displayMode_ != displayMode);
-        displayMode_ = displayMode;
-    }
-
     double GetOutBoundary() const
     {
         return outBoundary_;
     }
-
     void SetOutBoundary(double outBoundary)
     {
         outBoundary_ = outBoundary;
     }
-
     void SetIsOutOfBoundary(bool isOutOfBoundary)
     {
         isOutOfBoundary_ = isOutOfBoundary;
     }
-
     void SetPosition(const Dimension& position)
     {
         position_ = position;
     }
-
     const Dimension& GetPosition() const
     {
         return position_;
     }
-
     void SetPressed(bool press)
     {
         isPressed_ = press;
     }
-
     bool IsPressed() const
     {
         return isPressed_;
     }
-
     void SetHover(bool hover)
     {
         isHover_ = hover;
     }
-
     bool IsHover() const
     {
         return isHover_;
     }
-
-    void PlayScrollBarDisappearAnimation()
-    {
-        if (displayMode_ == DisplayMode::AUTO && isScrollable_ && !isHover_ && !isPressed_) {
-            opacityAnimationType_ = OpacityAnimationType::DISAPPEAR;
-            MarkNeedRender();
-        }
-    }
-
-    void PlayScrollBarAppearAnimation()
-    {
-        if (displayMode_ == DisplayMode::AUTO && isScrollable_) {
-            disappearDelayTask_.Cancel();
-            opacityAnimationType_ = OpacityAnimationType::APPEAR;
-            MarkNeedRender();
-        }
-    }
-
     OpacityAnimationType GetOpacityAnimationType() const
     {
         return opacityAnimationType_;
     }
-
     void SetOpacityAnimationType(OpacityAnimationType opacityAnimationType)
     {
         opacityAnimationType_ = opacityAnimationType;
     }
-
     HoverAnimationType GetHoverAnimationType() const
     {
         return hoverAnimationType_;
     }
-
     void SetHoverAnimationType(HoverAnimationType hoverAnimationType)
     {
         hoverAnimationType_ = hoverAnimationType;
     }
-
-    void PlayScrollBarGrowAnimation()
-    {
-        PlayScrollBarAppearAnimation();
-        normalWidth_ = activeWidth_;
-        FlushBarWidth();
-        hoverAnimationType_ = HoverAnimationType::GROW;
-        MarkNeedRender();
-    }
-
-    void PlayScrollBarShrinkAnimation()
-    {
-        normalWidth_ = inactiveWidth_;
-        FlushBarWidth();
-        hoverAnimationType_ = HoverAnimationType::SHRINK;
-        MarkNeedRender();
-    }
-
-    void PlayScrollBarAdaptAnimation()
-    {
-        needAdaptAnimation_ = true;
-        MarkNeedRender();
-    }
-
     bool GetNeedAdaptAnimation() const
     {
         return needAdaptAnimation_;
     }
-
-    void MarkNeedRender()
-    {
-        if (markNeedRenderFunc_) {
-            markNeedRenderFunc_();
-        }
-    }
-
     void SetMarkNeedRenderFunc(std::function<void()>&& func)
     {
         markNeedRenderFunc_ = func;
     }
-
     RefPtr<TouchEventImpl> GetTouchEvent()
     {
         return touchEvent_;
     }
-
     RefPtr<InputEvent> GetMouseEvent()
     {
         return mouseEvent_;
     }
-
     RefPtr<InputEvent> GetHoverEvent() const
     {
         return hoverEvent_;
     }
-
     void SetIsUserNormalWidth(bool isUserNormalWidth)
     {
         isUserNormalWidth_ = isUserNormalWidth;
     }
-
     bool GetIsUserNormalWidth() const
     {
         return isUserNormalWidth_;
     }
-
     void SetStartReservedHeight(const Dimension& startReservedHeight)
     {
         startReservedHeight_ = startReservedHeight;
     }
-
     const Dimension& GetStartReservedHeight() const
     {
         return startReservedHeight_;
     }
-
     void SetEndReservedHeight(const Dimension& endReservedHeight)
     {
         endReservedHeight_ = endReservedHeight;
     }
-
     const Dimension& GetEndReservedHeight() const
     {
         return endReservedHeight_;
     }
-
     void SetHostBorderRadius(const BorderRadiusProperty& hostBorderRadius)
     {
         hostBorderRadius_ = hostBorderRadius;
     }
-
     const BorderRadiusProperty& GetHostBorderRadius() const
     {
         return hostBorderRadius_;
     }
-
     void SetScrollPositionCallback(ScrollPositionCallback&& callback)
     {
         scrollPositionCallback_ = std::move(callback);
     }
-
     const ScrollPositionCallback& GetScrollPositionCallback() const
     {
         return scrollPositionCallback_;
     }
-
     void SetScrollEndCallback(ScrollEndCallback&& scrollEndCallback)
     {
         scrollEndCallback_ = std::move(scrollEndCallback);
     }
-
     const ScrollEndCallback& GetScrollEndCallback() const
     {
         return scrollEndCallback_;
     }
-
     void SetCalePredictSnapOffsetCallback(CalePredictSnapOffsetCallback&& calePredictSnapOffsetCallback)
     {
         calePredictSnapOffsetCallback_ = std::move(calePredictSnapOffsetCallback);
     }
-
     const CalePredictSnapOffsetCallback& GetCalePredictSnapOffsetCallback() const
     {
         return calePredictSnapOffsetCallback_;
     }
-
     void SetStartScrollSnapMotionCallback(StartScrollSnapMotionCallback&& startScrollSnapMotionCallback)
     {
         startScrollSnapMotionCallback_ = std::move(startScrollSnapMotionCallback);
     }
-
     const StartScrollSnapMotionCallback& GetStartScrollSnapMotionCallback() const
     {
         return startScrollSnapMotionCallback_;
     }
-
-    void SetGestureEvent();
-    void SetMouseEvent();
-    void SetHoverEvent();
-    void FlushBarWidth();
-    void CalcReservedHeight();
-    void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        TouchTestResult& responseLinkResult);
-    void ScheduleDisappearDelayTask();
-
     void SetDragFRCSceneCallback(DragFRCSceneCallback&& dragFRCSceneCallback)
     {
         dragFRCSceneCallback_ = std::move(dragFRCSceneCallback);
     }
-
-    float GetMainOffset(const Offset& offset) const
-    {
-        return positionMode_ == PositionMode::BOTTOM ? offset.GetX() : offset.GetY();
-    }
-
     void SetDragStartPosition(float position)
     {
         dragStartPosition_ = position;
     }
-
     void SetDragEndPosition(float position)
     {
         dragEndPosition_ = position;
     }
-
     float GetDragOffset()
     {
         return dragEndPosition_ - dragStartPosition_;
     }
-
-    void SetReverse(bool reverse)
-    {
-        if (isReverse_ != reverse) {
-            isReverse_ = reverse;
-            isReverseUpdate_ = true;
-        }
-    }
-
     bool IsReverse()
     {
         return isReverse_;
     }
-
     Rect GetTouchRegion() const
     {
         return touchRegion_;
     }
-    BarDirection CheckBarDirection(const Point& point);
     RefPtr<ClickEvent> GetClickEvent()
     {
         return clickevent_;
@@ -529,31 +337,54 @@ public:
     {
         scrollPageCallback_ = std::move(scrollPageCallback);
     }
+
+    void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        TouchTestResult& responseLinkResult);
     void OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
         TouchTestResult& responseLinkResult);
+    bool InBarTouchRegion(const Point& point) const;
+    bool InBarHoverRegion(const Point& point) const;
+    bool InBarRectRegion(const Point& point) const;
+    bool NeedScrollBar() const;
+    bool NeedPaint() const;
+    void UpdateScrollBarRegion(
+        const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight);
+    double GetNormalWidthToPx() const;
+    float CalcPatternOffset(float scrollBarOffset) const;
+    Color GetForegroundColor() const;
+    void SetHoverWidth(const RefPtr<ScrollBarTheme>& theme);
+    void SetNormalWidth(const Dimension& normalWidth);
+    void SetScrollable(bool isScrollable);
+    void SetPositionMode(PositionMode positionMode);
+    void SetDisplayMode(DisplayMode displayMode);
+    void PlayScrollBarDisappearAnimation();
+    void PlayScrollBarAppearAnimation();
+    void PlayScrollBarGrowAnimation();
+    void PlayScrollBarShrinkAnimation();
+    void PlayScrollBarAdaptAnimation();
+    void MarkNeedRender();
+    void SetGestureEvent();
+    void SetMouseEvent();
+    void SetHoverEvent();
+    void FlushBarWidth();
+    void CalcReservedHeight();
+    void ScheduleDisappearDelayTask();
+    float GetMainOffset(const Offset& offset) const;
+    void SetReverse(bool reverse);
+    BarDirection CheckBarDirection(const Point& point);
     void InitLongPressEvent();
     void HandleLongPress(bool smooth);
     bool AnalysisUpOrDown(Point point, bool& reverse);
     void ScheduleCaretLongPress();
-
-    Axis GetPanDirection() const
-    {
-        CHECK_NULL_RETURN(panRecognizer_, Axis::NONE);
-        return panRecognizer_->GetAxisDirection();
-    }
-
+    Axis GetPanDirection() const;
     // infos for dump
     void AddScrollBarLayoutInfo();
-
     void GetShapeModeDumpInfo();
-
     void GetPositionModeDumpInfo();
-
     void GetAxisDumpInfo();
-
     void GetPanDirectionDumpInfo();
-
     void DumpAdvanceInfo();
 
 protected:
@@ -590,11 +421,11 @@ private:
     Dimension endReservedHeight_;   // this is reservedHeight on the end
     Dimension inactiveWidth_;
     Dimension activeWidth_;
-    Dimension normalWidth_;         // user-set width of the scrollbar
+    Dimension normalWidth_; // user-set width of the scrollbar
     Dimension themeNormalWidth_;
     Dimension touchWidth_;
     Dimension hoverWidth_;
-    double barWidth_ = 0.0;         // actual width of the scrollbar
+    double barWidth_ = 0.0; // actual width of the scrollbar
 
     Dimension position_;
 
