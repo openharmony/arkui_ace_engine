@@ -20,6 +20,7 @@
 
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_forward.h"
 
 namespace OHOS::Ace::NG {
 class DrawingImage : public virtual CanvasImage {
@@ -91,6 +92,8 @@ public:
     void DrawToRSCanvas(
         RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) override;
     bool DrawImageNine(
+        RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY);
+    bool DrawImageLattice(
         RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY);
     void DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) override;
     static RefPtr<CanvasImage> QueryFromCache(const std::string& key);

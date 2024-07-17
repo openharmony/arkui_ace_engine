@@ -159,18 +159,21 @@ class ImageResizableModifier extends ModifierWithKey<ResizableOptions> {
     if (reset) {
       getUINativeModule().image.resetResizable(node);
     } else {
-      let sliceTop: Length | undefined;
-      let sliceRight: Length | undefined;
-      let sliceBottom: Length | undefined;
-      let sliceLeft: Length | undefined;
+      if (!isUndefined(this.value.lattice)) {
+        getUINativeModule().image.setResizableLattice(node, this.value.lattice);
+      }
       if (!isUndefined(this.value.slice)) {
+        let sliceTop: Length | undefined;
+        let sliceRight: Length | undefined;
+        let sliceBottom: Length | undefined;
+        let sliceLeft: Length | undefined;
         let tmpSlice = this.value.slice as EdgeWidths;
         sliceTop = tmpSlice.top;
         sliceRight = tmpSlice.right;
         sliceBottom = tmpSlice.bottom;
         sliceLeft = tmpSlice.left;
+        getUINativeModule().image.setResizable(node, sliceTop, sliceRight, sliceBottom, sliceLeft);
       }
-      getUINativeModule().image.setResizable(node, sliceTop, sliceRight, sliceBottom, sliceLeft);
     }
   }
 }

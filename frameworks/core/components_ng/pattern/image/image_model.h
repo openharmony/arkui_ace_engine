@@ -20,6 +20,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/image/drawing_color_filter.h"
+#include "base/image/drawing_lattice.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
 #include "core/components/box/drag_drop_event.h"
@@ -79,8 +80,9 @@ public:
     virtual bool IsSrcSvgImage() = 0;
     virtual void SetAutoResize(bool autoResize) = 0;
     virtual void SetResizableSlice(const ImageResizableSlice& slice) = 0;
+    virtual void SetResizableLattice(const RefPtr<DrawingLattice>& lattice) = 0;
     virtual void SetSyncMode(bool syncMode) = 0;
-    virtual void SetColorFilterMatrix(const std::vector<float> &matrix) = 0;
+    virtual void SetColorFilterMatrix(const std::vector<float>& matrix) = 0;
     virtual void SetDrawingColorFilter(RefPtr<DrawingColorFilter> &colorFilter) = 0;
     virtual void SetDraggable(bool draggable) = 0;
     virtual void SetOnDragStart(NG::OnDragStartFunc &&onDragStart) = 0;
