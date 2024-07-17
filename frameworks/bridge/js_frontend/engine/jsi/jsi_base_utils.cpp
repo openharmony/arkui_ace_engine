@@ -49,7 +49,7 @@ int32_t GetLineOffset(const AceType* data)
 
 std::string GetMsgStr(const std::string& msg)
 {
-    int pos = msg.find('\n');
+    auto pos = msg.find('\n');
     if (pos == std::string::npos) {
         return msg;
     }
