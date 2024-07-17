@@ -590,11 +590,12 @@ RefPtr<FrameNode> StageManager::GetLastPageWithTransition() const
     if (children.empty()) {
         return nullptr;
     }
-    if (stageInTrasition_) {
+    auto lastChildFrame = DynamicCast<FrameNode>(children.back());
+    auto pagePattern = lastChildFrame->GetPattern<PagePattern>();
+    if (pagePattern && pagePattern->GetPageInTransition()) {
         return DynamicCast<FrameNode>(destPageNode_.Upgrade());
-    } else {
-        return DynamicCast<FrameNode>(children.back());
     }
+    return lastChildFrame;
 }
 
 RefPtr<FrameNode> StageManager::GetPrevPageWithTransition() const
