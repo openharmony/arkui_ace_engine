@@ -50,11 +50,11 @@ class Prefetcher implements IPrefetcher {
     this.cancelDifference(oldRangeToPrefetch);
   }
 
-  private prefetchDifference(oldRange: IndexRange) {
+  private prefetchDifference(oldRange: IndexRange): void {
     this.prefetchRangeEvaluator.rangeToPrefetch.subtract(oldRange).forEachIndex((index) => {
       const prefetchStart = this.timeProvider.getCurrent();
 
-      const prefetchedCallback = () => {
+      const prefetchedCallback = (): void => {
         if (!this.prefetchRangeEvaluator.rangeToPrefetch.contains(index)) {
           return;
         }

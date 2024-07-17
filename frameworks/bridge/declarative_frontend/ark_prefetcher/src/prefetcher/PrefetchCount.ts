@@ -80,13 +80,13 @@ class PrefetchCount {
     return new IndexRange(start, end);
   }
 
-  private updateLimits() {
+  private updateLimits(): void {
     this.min = Math.ceil(this.itemsOnScreen.meanValue * this.MIN_SCREENS);
     this.max = Math.max(this.min, Math.ceil(this.MAX_SCREENS * this.itemsOnScreen.meanValue));
     this.updateCurrentLimit();
   }
 
-  private updateCurrentLimit() {
+  private updateCurrentLimit(): void {
     this._currentLimit = Math.max(this.min, Math.ceil(this.max * this._maxRatio));
   }
 }
