@@ -4074,11 +4074,15 @@ bool RichEditorPattern::ReplacePreviewText(const std::string& previewTextValue, 
     return true;
 }
 
+// Used for text replacement, without notifying developer caret change
 void RichEditorPattern::DeleteByRange(OperationRecord* const record, int32_t start, int32_t end, bool needNotifyImf)
 {
     auto length = end - start;
     CHECK_NULL_VOID(length > 0);
-    SetCaretPosition(start, needNotifyImf);
+    caretPosition_ = std::clamp(start, 0, GetTextContentLength());
+    if (needNotifyImf) {
+        UpdateCaretInfoToController();
+    }
     std::wstring deleteText = DeleteForwardOperation(length);
     if (record && deleteText.length() != 0) {
         record->deleteText = StringUtils::ToString(deleteText);
