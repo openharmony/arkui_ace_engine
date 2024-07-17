@@ -116,7 +116,7 @@ class VariableUtilV3 {
         // check all entries of this format varName: { deco: '@Provider' | '@Consumer', aliasName: ..... }
         // do not check alias entries
         // 'varName' is only in alias entries, see addProvideConsumeVariableDecoMeta
-        if (typeof value === 'object' && value['deco'] === '@Consumer' && !('varName' in value)) {
+        if (typeof value === 'object' && value.deco === '@Consumer' && !('varName' in value)) {
           let result = ProviderConsumerUtilV2.findProvider(view, value['aliasName']);
           if (result && result[0] && result[1]) {
             ProviderConsumerUtilV2.connectConsumer2Provider(view, key, result[0], result[1]);
