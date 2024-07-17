@@ -113,7 +113,7 @@ public:
         it--;
         float prevPos = it->second.mainPos + it->second.mainSize + space;
         int32_t prevIndex = it->first;
-        if (prevIndex + 1 >= startIndex) {
+        if (prevIndex + 1 >= startIndex && groupAtStart) {
             if (NearEqual(prevPos, startPos)) {
                 return;
             }
