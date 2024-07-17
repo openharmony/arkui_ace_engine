@@ -118,6 +118,7 @@ struct BorderImageProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(HasBorderImageOutset, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(HasBorderImageRepeat, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderImageGradient, Gradient);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BorderSourceFromImage, bool);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {

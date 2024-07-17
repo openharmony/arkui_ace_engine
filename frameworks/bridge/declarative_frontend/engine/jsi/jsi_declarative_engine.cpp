@@ -185,6 +185,8 @@ inline bool PreloadJsEnums(const shared_ptr<JsRuntime>& runtime)
 
 inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
 {
+    // set __hasUIFramework__
+    runtime->GetGlobal()->SetProperty(runtime, "__hasUIFramework__", runtime->NewBoolean(true));
 #ifdef STATE_MGMT_USE_AOT
     return runtime->ExecuteJsBinForAOT("/etc/abc/framework/stateMgmt.abc");
 #else

@@ -610,10 +610,7 @@ public:
 
     void OnSelectionMenuOptionsUpdate(
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick);
-    void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override
-    {
-        selectOverlay_->OnAncestorNodeChanged(flag);
-    }
+    void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
 
     void UpdateParentGlobalOffset()
     {
@@ -624,6 +621,8 @@ public:
     {
         isUserSetResponseRegion_ = isUserSetResponseRegion;
     }
+
+    void UnregisterNodeChangeListenerWithoutSelect();
 
 protected:
     void OnAttachToFrameNode() override;
@@ -791,6 +790,9 @@ private:
     void ProcessOverlayAfterLayout();
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     Offset ConvertLocalOffsetToParagraphOffset(const Offset& offset);
+    void RegisterMarqueeNodeChangeListener();
+    void UnregisterMarqueeNodeChangeListener();
+    void HandleMarqueeWithIsVisible(FrameNodeChangeInfoFlag flag);
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;

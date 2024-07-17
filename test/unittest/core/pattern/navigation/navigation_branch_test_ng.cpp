@@ -1726,7 +1726,8 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest049, TestSize.Level1)
     ASSERT_NE(pattern->navigationStack_, nullptr);
 
     // Create four old BarItemNodes with different attributes
-    auto oldBar1 = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, 101);
+    auto oldBar1 = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, 101, []() { return AceType::MakeRefPtr<Pattern>(); });
     ASSERT_NE(oldBar1, nullptr);
     frameNode->children_.emplace_front(oldBar1);
     oldBar1->SetIsMoreItemNode(false);
@@ -1772,7 +1773,8 @@ HWTEST_F(NavigationBranchTestNg, NavigationPatternTest050, TestSize.Level1)
     ASSERT_NE(pattern->navigationStack_, nullptr);
 
     // Create four old BarItemNodes with different attributes
-    auto oldBar1 = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, 101);
+    auto oldBar1 = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, 101, []() { return AceType::MakeRefPtr<Pattern>(); });
     ASSERT_NE(oldBar1, nullptr);
     frameNode->children_.emplace_front(oldBar1);
     oldBar1->SetIsMoreItemNode(false);

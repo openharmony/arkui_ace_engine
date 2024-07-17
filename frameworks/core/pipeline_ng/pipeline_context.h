@@ -102,7 +102,7 @@ public:
 
     void SetupRootElement() override;
 
-    void SetupSubRootElement();
+    void SetupSubRootElement() override;
 
     bool NeedSoftKeyboard() override;
 

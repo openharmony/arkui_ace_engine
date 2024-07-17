@@ -208,7 +208,6 @@ void SwiperPattern::StopAndResetSpringAnimation()
         itemPosition_.clear();
         isVoluntarilyClear_ = true;
         jumpIndex_ = currentIndex_;
-        springAnimationIsRunning_ = false;
     }
 }
 
@@ -291,7 +290,9 @@ void SwiperPattern::ResetOnForceMeasure()
 {
     StopPropertyTranslateAnimation(isFinishAnimation_, false, true);
     StopTranslateAnimation();
-    StopSpringAnimation();
+    if (springAnimationIsRunning_) {
+        StopSpringAnimationImmediately();
+    }
     StopFadeAnimation();
     StopIndicatorAnimation(true);
     currentOffset_ = 0.0f;
@@ -386,8 +387,6 @@ void SwiperPattern::OnModifyDone()
     if (IsSwipeByGroup()) {
         needAdjustIndex_ = true;
     }
-
-    SetIndicatorJumpIndex(currentIndex_);
 }
 
 void SwiperPattern::OnAfterModifyDone()
@@ -487,7 +486,9 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         StopAutoPlay();
         StopTranslateAnimation();
         StopFadeAnimation();
-        StopSpringAnimation();
+        if (springAnimationIsRunning_) {
+            StopSpringAnimationImmediately();
+        }
         if (usePropertyAnimation_) {
             StopPropertyTranslateAnimation(false, true);
             StopIndicatorAnimation();
@@ -602,9 +603,8 @@ void SwiperPattern::InitSurfaceChangedCallback()
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfaceChangedCallback()) {
-        auto callbackId = pipeline->RegisterSurfaceChangedCallback(
-            [weak = WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight,
-                WindowSizeChangeReason type) {
+        auto callbackId = pipeline->RegisterSurfaceChangedCallback([weak = WeakClaim(this)]
+        (int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight, WindowSizeChangeReason type) {
                 if (type == WindowSizeChangeReason::UNDEFINED && newWidth == prevWidth && newHeight == prevHeight) {
                     return;
                 }
@@ -623,7 +623,9 @@ void SwiperPattern::InitSurfaceChangedCallback()
                 swiper->needFireCustomAnimationEvent_ = swiper->translateAnimationIsRunning_;
                 swiper->StopPropertyTranslateAnimation(swiper->isFinishAnimation_);
                 swiper->StopTranslateAnimation();
-                swiper->StopSpringAnimation();
+                if (swiper->springAnimationIsRunning_) {
+                    swiper->StopSpringAnimationImmediately();
+                }
                 swiper->StopFadeAnimation();
                 swiper->StopIndicatorAnimation();
 
@@ -924,6 +926,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     if (!targetIndex_) {
+        SetIndicatorJumpIndex(jumpIndex_);
         CheckMarkDirtyNodeForRenderIndicator();
     }
 
@@ -1366,7 +1369,9 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
 
     StopTranslateAnimation();
     StopFadeAnimation();
-    StopSpringAnimation();
+    if (springAnimationIsRunning_) {
+        StopSpringAnimationImmediately();
+    }
     StopIndicatorAnimation(true);
     jumpIndex_ = index;
     uiCastJumpIndex_ = index;
@@ -1382,7 +1387,6 @@ void SwiperPattern::StopSpringAnimationAndFlushImmediately()
         itemPosition_.clear();
         isVoluntarilyClear_ = true;
         jumpIndex_ = currentIndex_;
-        springAnimationIsRunning_ = false;
         MarkDirtyNodeSelf();
         auto pipeline = PipelineContext::GetCurrentContext();
         if (pipeline) {
@@ -1424,7 +1428,6 @@ void SwiperPattern::SwipeTo(int32_t index)
     if (springAnimationIsRunning_) {
         StopSpringAnimationImmediately();
         jumpIndex_ = currentIndex_;
-        springAnimationIsRunning_ = false;
         MarkDirtyNodeSelf();
         auto pipeline = PipelineContext::GetCurrentContext();
         if (pipeline) {
@@ -1833,6 +1836,7 @@ void SwiperPattern::StopSpringAnimationImmediately()
     TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper finish spring animation offset %{public}f", currentIndexOffset_);
     ACE_SCOPED_TRACE("Swiper finish spring animation offset %f", currentIndexOffset_);
     isTouchDownSpringAnimation_ = false;
+    springAnimationIsRunning_ = false;
     OnSpringAndFadeAnimationFinish();
 }
 
@@ -2270,7 +2274,16 @@ bool SwiperPattern::CheckOverScroll(float offset)
             }
             break;
         case EdgeEffect::NONE:
-            if (IsOutOfBoundary(offset)) {
+            if (IsHorizontalAndRightToLeft()) {
+                if (IsOutOfBoundary(-offset)) {
+                    auto realOffset = IsOutOfStart(offset) ? - itemPosition_.begin()->second.startPos :
+                        CalculateVisibleSize() - itemPosition_.rbegin()->second.endPos;
+                    currentDelta_ = currentDelta_ + realOffset;
+                    HandleSwiperCustomAnimation(realOffset);
+                    MarkDirtyNodeSelf();
+                    return true;
+                }
+            } else if (IsOutOfBoundary(offset)) {
                 auto realOffset = IsOutOfStart(offset) ? -itemPosition_.begin()->second.startPos
                                                        : CalculateVisibleSize() - itemPosition_.rbegin()->second.endPos;
                 currentDelta_ = currentDelta_ - realOffset;
@@ -2285,7 +2298,8 @@ bool SwiperPattern::CheckOverScroll(float offset)
 
 bool SwiperPattern::SpringOverScroll(float offset)
 {
-    bool outOfBounds = isTouchPad_ ? IsOutOfBoundary(offset) : IsOutOfBoundary();
+    auto roffset = IsHorizontalAndRightToLeft() ? -offset : offset;
+    bool outOfBounds = isTouchPad_ ? IsOutOfBoundary(roffset) : IsOutOfBoundary();
     if (!outOfBounds) {
         return false;
     }
@@ -2318,9 +2332,9 @@ bool SwiperPattern::SpringOverScroll(float offset)
 bool SwiperPattern::FadeOverScroll(float offset)
 {
     if (IsHorizontalAndRightToLeft()) {
-        if (IsOutOfBoundary(-fadeOffset_ + offset)) {
-            auto beginIndex = TotalCount() - GetDisplayCount();
-            auto rbeginIndex = GetDisplayCount() - 1;
+        if (IsOutOfBoundary(fadeOffset_ - offset)) {
+            auto beginIndex = 0;
+            auto rbeginIndex = TotalCount() - 1;
             auto onlyUpdateFadeOffset = (itemPosition_.begin()->first == beginIndex && offset < 0.0f) ||
                                         (itemPosition_.rbegin()->first == rbeginIndex && offset > 0.0f);
             if (!IsVisibleChildrenSizeLessThanSwiper() && !onlyUpdateFadeOffset) {
@@ -2334,7 +2348,7 @@ bool SwiperPattern::FadeOverScroll(float offset)
             CHECK_NULL_RETURN(host, false);
             if (itemPosition_.begin()->first == beginIndex || itemPosition_.rbegin()->first == rbeginIndex) {
                 auto remainOffset = GetDistanceToEdge();
-                fadeOffset_ += (-offset - remainOffset);
+                fadeOffset_ += (remainOffset - offset);
             }
             host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
             MarkDirtyNodeSelf();
@@ -3607,8 +3621,8 @@ bool SwiperPattern::IsOutOfBoundary(float mainOffset) const
         return false;
     }
     if (IsHorizontalAndRightToLeft()) {
-        auto beginIndex = TotalCount() - GetDisplayCount();
-        auto rbeginIndex = GetDisplayCount() - 1;
+        auto beginIndex = 0;
+        auto rbeginIndex = TotalCount() - 1;
         auto startPos = itemPosition_.begin()->second.startPos;
         startPos = NearZero(startPos, PX_EPSILON) ? 0.0 : startPos;
         auto isOutOfStart = itemPosition_.begin()->first == beginIndex && GreatNotEqual(startPos - mainOffset, 0.0);
@@ -3639,12 +3653,7 @@ bool SwiperPattern::IsOutOfStart(float mainOffset) const
 
     auto startPos = itemPosition_.begin()->second.startPos;
     startPos = NearZero(startPos, PX_EPSILON) ? 0.f : startPos;
-    if (IsHorizontalAndRightToLeft()) {
-        auto beginIndex = TotalCount() - GetDisplayCount();
-        return itemPosition_.begin()->first == beginIndex && GreatNotEqual(startPos - mainOffset, 0.f);
-    } else {
-        return itemPosition_.begin()->first == 0 && GreatNotEqual(startPos + mainOffset, 0.f);
-    }
+    return itemPosition_.begin()->first == 0 && GreatNotEqual(startPos + mainOffset, 0.f);
 }
 
 bool SwiperPattern::IsOutOfEnd(float mainOffset) const
@@ -4996,7 +5005,8 @@ void SwiperPattern::NotifyParentScrollEnd()
 
 inline bool SwiperPattern::DuringTranslateAnimation() const
 {
-    return (springAnimation_ && springAnimationIsRunning_) || targetIndex_ || usePropertyAnimation_;
+    return (springAnimation_ && springAnimationIsRunning_) || targetIndex_ || usePropertyAnimation_ ||
+           translateAnimationIsRunning_;
 }
 
 bool SwiperPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child)
@@ -5036,6 +5046,12 @@ ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedSta
     }
     if (!CheckSwiperPanEvent(offset)) {
         return { offset, true };
+    }
+    // handle situations when multiple children are notifying scrollStart / scrollEnd
+    // reset flag and animations to correct states when scroll happens
+    childScrolling_ = true;
+    if (DuringTranslateAnimation()) {
+        StopAnimationOnScrollStart(false);
     }
     // mouse scroll triggers showNext / showPrev instead of updating offset
     if (source == SCROLL_FROM_AXIS) {

@@ -608,6 +608,36 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SwiperPatternHandleScrollMultiChildren001
+ * @tc.desc: test HandleScroll with multiple scrollable children
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollMultiChildren001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    pattern_->usePropertyAnimation_ = true;
+    pattern_->OnScrollStartRecursive(0.0f, 0.0f);
+    EXPECT_TRUE(pattern_->childScrolling_);
+    EXPECT_FALSE(pattern_->usePropertyAnimation_);
+    pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+    EXPECT_TRUE(pattern_->childScrolling_);
+    EXPECT_FALSE(pattern_->usePropertyAnimation_);
+
+    // second child calling
+    pattern_->OnScrollStartRecursive(0.0f, 0.0f);
+
+    // first child ending
+    pattern_->OnScrollEndRecursive(std::nullopt);
+    EXPECT_FALSE(pattern_->childScrolling_);
+    EXPECT_EQ(pattern_->targetIndex_, 0);
+
+    // second child scrolling
+    pattern_->HandleScroll(-5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+    EXPECT_TRUE(pattern_->childScrolling_);
+    EXPECT_FALSE(pattern_->usePropertyAnimation_);
+}
+
+/**
  * @tc.name: SwiperPatternHandleScrollVelocity001
  * @tc.desc: test HandleScrollVelocity self handle
  * @tc.type: FUNC

@@ -74,7 +74,7 @@ ImageSourceInfo CreateSourceInfo(const std::shared_ptr<std::string>& srcRef, Ref
 std::unique_ptr<ImageModel> ImageModel::instance_ = nullptr;
 std::mutex ImageModel::mutex_;
 
-ImageModel* ImageModel::GetInstance()
+ImageModel* __attribute__((optnone)) ImageModel::GetInstance()
 {
     if (!instance_) {
         std::lock_guard<std::mutex> lock(mutex_);

@@ -103,7 +103,9 @@ public:
         if (type_ == XComponentType::NODE) {
             return { FocusType::SCOPE, true };
         }
-        return { FocusType::NODE, false };
+        FocusPattern focusPattern = { FocusType::NODE, false };
+        focusPattern.SetIsFocusActiveWhenFocused(true);
+        return focusPattern;
     }
 
     bool NeedSoftKeyboard() const override

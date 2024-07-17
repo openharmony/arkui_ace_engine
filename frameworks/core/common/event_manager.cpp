@@ -155,6 +155,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         }
         eventTree_.eventTreeList.clear();
         MockCancelEventAndDispatch(touchPoint);
+        refereeNG_->ForceCleanGestureReferee();
         refereeNG_->CleanAll();
 
         TouchTestResult reHitTestResult;
@@ -162,6 +163,11 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         frameNode->TouchTest(point, point, point, touchRestrict,
             reHitTestResult, touchPoint.id, reResponseLinkResult);
         SetResponseLinkRecognizers(reHitTestResult, reResponseLinkResult);
+        if (!refereeNG_->IsReady()) {
+            TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
+                "GestureReferee is contaminate by new comming recognizer, force clean gestureReferee.");
+            refereeNG_->ForceCleanGestureReferee();
+        }
         if (needAppend) {
 #ifdef OHOS_STANDARD_SYSTEM
             for (const auto& entry : reHitTestResult) {

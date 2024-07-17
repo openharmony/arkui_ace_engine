@@ -981,6 +981,11 @@ public:
     void OnNodeTransformInfoUpdate(bool changed);
     void OnNodeTransitionInfoUpdate();
 
+    void ResetLayoutAlgorithm()
+    {
+        layoutAlgorithm_.Reset();
+    }
+
 protected:
     void DumpInfo() override;
 
@@ -1019,6 +1024,8 @@ private:
 
     bool OnRemoveFromParent(bool allowTransition) override;
     bool RemoveImmediately() const override;
+
+    bool IsPaintRectWithTransformValid();
 
     // dump self info.
     void DumpDragInfo();

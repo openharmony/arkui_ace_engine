@@ -94,6 +94,7 @@ void ViewAbstractModelNG::BindMenu(
     CHECK_NULL_VOID(overlayManager);
     auto menuNode = overlayManager->GetMenuNode(targetId);
     if (menuNode) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
         auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
         wrapperPattern->SetHasTransitionEffect(menuParam.hasTransitionEffect);
         if (menuParam.hasTransitionEffect) {
@@ -102,6 +103,7 @@ void ViewAbstractModelNG::BindMenu(
             renderContext->UpdateChainedTransition(menuParam.transition);
         }
         if (wrapperPattern->IsShow() && menuParam.setShow && !menuParam.isShow) {
+            TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d.", targetId);
             overlayManager->HideMenu(menuNode, targetId, false);
         }
     } else if (menuParam.isShow) {
@@ -189,9 +191,11 @@ void BindContextMenuSingle(
         CHECK_NULL_VOID(overlayManager);
         auto menuNode = overlayManager->GetMenuNode(targetId);
         if (menuNode) {
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
             auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
             CHECK_NULL_VOID(wrapperPattern);
             if (wrapperPattern->IsShow() && !menuParam.isShow) {
+                TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d.", targetId);
                 SubwindowManager::GetInstance()->HideMenuNG(menuNode, targetId);
             } else if (!wrapperPattern->IsShow() && menuParam.isShow) {
                 CreateCustomMenuWithPreview(buildFunc, menuParam, previewBuildFunc);
@@ -230,6 +234,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
         CHECK_NULL_VOID(overlayManager);
         auto menuNode = overlayManager->GetMenuNode(targetId);
         if (menuNode) {
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
             auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
             CHECK_NULL_VOID(menuWrapperPattern);
             menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
@@ -247,6 +252,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
             CHECK_NULL_VOID(overlayManager);
             auto menuNode = overlayManager->GetMenuNode(targetId);
             if (menuNode) {
+                TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
                 auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
                 CHECK_NULL_VOID(menuWrapperPattern);
                 menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);

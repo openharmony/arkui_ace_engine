@@ -393,7 +393,10 @@ HWTEST_F(ModelTestNg, ModelViewNgTest005, TestSize.Level1)
     EXPECT_EQ(json1->GetString("shader"), testPath);
     EXPECT_EQ(json1->GetString("scene"), testPath);
 
-    modelPattern->modelAdapter_->Deinit();
+    auto ftr = modelPattern->modelAdapter_->Deinit();
+    if (ftr.valid()) {
+        ftr.get();
+    }
     Render3D::GraphicsTask::GetInstance().Stop();
 }
 } // namespace OHOS::Ace::NG

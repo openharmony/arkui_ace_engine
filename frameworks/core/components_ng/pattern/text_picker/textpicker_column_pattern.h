@@ -450,7 +450,7 @@ private:
     std::vector<std::string> range_ { "" };
     uint32_t currentIndex_ = 0;
     std::vector<NG::RangeContent> options_;
-    int32_t columnkind_;
+    int32_t columnkind_ = 0;
     int32_t currentChildIndex_ = 0;
     float deltaSize_ = 0.0f;
     double yLast_ = 0.0;

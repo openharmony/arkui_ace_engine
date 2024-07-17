@@ -2784,6 +2784,23 @@ void WebDelegate::RegisterAvoidAreaChangeListener()
     }
 }
 
+class NWebAutoFillCallbackImpl : public OHOS::NWeb::NWebMessageValueCallback {
+public:
+    NWebAutoFillCallbackImpl(const WeakPtr<WebDelegate>& delegate) : delegate_(delegate) {}
+    ~NWebAutoFillCallbackImpl() = default;
+
+    void OnReceiveValue(std::shared_ptr<NWebMessage> result) override
+    {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+        auto delegate = delegate_.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        delegate->HandleAutoFillEvent(result);
+    }
+
+private:
+    WeakPtr<WebDelegate> delegate_;
+};
+
 void WebDelegate::UnregisterAvoidAreaChangeListener()
 {
     constexpr static int32_t PLATFORM_VERSION_TEN = 10;
@@ -2880,6 +2897,8 @@ void WebDelegate::InitWebViewWithSurface()
 #ifdef OHOS_STANDARD_SYSTEM
             auto screenLockCallback = std::make_shared<NWebScreenLockCallbackImpl>(context);
             delegate->nweb_->RegisterScreenLockFunction(Container::CurrentId(), screenLockCallback);
+            auto autoFillCallback = std::make_shared<NWebAutoFillCallbackImpl>(weak);
+            delegate->nweb_->SetAutofillCallback(autoFillCallback);
 #endif
             auto findListenerImpl = std::make_shared<FindListenerImpl>();
             findListenerImpl->SetWebDelegate(weak);
@@ -5833,6 +5852,30 @@ void WebDelegate::HandleAccessibilityHoverEvent(int32_t x, int32_t y)
     if (nweb_) {
         nweb_->SendAccessibilityHoverEvent(x, y);
     }
+}
+
+void WebDelegate::NotifyAutoFillViewData(const std::string& jsonStr)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), jsonStr]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            CHECK_NULL_VOID(delegate->nweb_);
+            auto webMessage = std::make_shared<OHOS::NWeb::NWebMessage>(NWebValue::Type::NONE);
+            webMessage->SetType(NWebValue::Type::STRING);
+            webMessage->SetString(jsonStr);
+            delegate->nweb_->FillAutofillData(webMessage);
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebNotifyAutoFillViewData");
+}
+
+void WebDelegate::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
+{
+    auto pattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->HandleAutoFillEvent(viewDataJson);
 }
 
 #endif

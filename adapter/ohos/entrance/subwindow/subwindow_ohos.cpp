@@ -68,7 +68,14 @@ int32_t SubwindowOhos::id_ = 0;
 static std::atomic<int32_t> gToastDialogId = 0;
 RefPtr<Subwindow> Subwindow::CreateSubwindow(int32_t instanceId)
 {
-    return AceType::MakeRefPtr<SubwindowOhos>(instanceId);
+    auto subWindow = AceType::MakeRefPtr<SubwindowOhos>(instanceId);
+    CHECK_NULL_RETURN(subWindow, nullptr);
+    auto ret = subWindow->InitContainer();
+    if (!ret) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "InitContainer failed, container id %{public}d", instanceId);
+        return nullptr;
+    }
+    return subWindow;
 }
 
 SubwindowOhos::SubwindowOhos(int32_t instanceId) : windowId_(id_), parentContainerId_(instanceId)
@@ -79,19 +86,19 @@ SubwindowOhos::SubwindowOhos(int32_t instanceId) : windowId_(id_), parentContain
         instanceId);
 }
 
-void SubwindowOhos::InitContainer()
+bool SubwindowOhos::InitContainer()
 {
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-    CHECK_NULL_VOID(parentContainer);
+    CHECK_NULL_RETURN(parentContainer, false);
     auto parentPipeline = parentContainer->GetPipelineContext();
-    CHECK_NULL_VOID(parentPipeline);
+    CHECK_NULL_RETURN(parentPipeline, false);
     if (!window_) {
         OHOS::sptr<OHOS::Rosen::WindowOption> windowOption = new OHOS::Rosen::WindowOption();
         auto parentWindowName = parentContainer->GetWindowName();
         auto parentWindowId = parentContainer->GetWindowId();
         auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
         sptr<OHOS::Rosen::Window> parentWindow = parentContainer->GetUIWindow(parentContainerId_);
-        CHECK_NULL_VOID(parentWindow);
+        CHECK_NULL_RETURN(parentWindow, false);
         parentWindow_ = parentWindow;
         auto windowType = parentWindow->GetType();
         if (IsSystemTopMost()) {
@@ -102,6 +109,13 @@ void SubwindowOhos::InitContainer()
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_TOAST);
         } else if (windowType == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
             auto hostWindowId = parentPipeline->GetFocusWindowId();
+            auto hostWindowRect = parentWindow->GetHostWindowRect(hostWindowId);
+            auto isValid = GreatNotEqual(hostWindowRect.width_, 0) && GreatNotEqual(hostWindowRect.height_, 0);
+            if (!isValid) {
+                TAG_LOGW(AceLogTag::ACE_SUB_WINDOW,
+                    "UIExtension Window failed to obtain host window information. Please check if permissions are enabled");
+                return false;
+            }
             windowOption->SetExtensionTag(true);
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
             windowOption->SetParentId(hostWindowId);
@@ -118,14 +132,17 @@ void SubwindowOhos::InitContainer()
         window_ = OHOS::Rosen::Window::Create("ARK_APP_SUBWINDOW_" + parentWindowName + std::to_string(windowId_),
             windowOption, parentWindow->GetContext());
         if (!window_) {
-            SetIsRosenWindowCreate(false);
             TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Window create failed");
+            return false;
         }
-        CHECK_NULL_VOID(window_);
     }
     std::string url = "";
     auto subSurface = window_->GetSurfaceNode();
-    CHECK_NULL_VOID(subSurface);
+    if (!subSurface) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Window get surface node failed");
+        window_->Destroy();
+        return false;
+    }
     subSurface->SetShadowElevation(0.0f);
     window_->NapiSetUIContent(url, nullptr, nullptr, Rosen::BackupAndRestoreType::NONE);
     childContainerId_ = SubwindowManager::GetInstance()->GetContainerId(window_->GetWindowId());
@@ -134,9 +151,10 @@ void SubwindowOhos::InitContainer()
 
     auto container = Platform::AceContainer::GetContainer(childContainerId_);
     if (!container) {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Window get ace container failed");
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Window get ace container failed");
+        window_->Destroy();
+        return false;
     }
-    CHECK_NULL_VOID(container);
 
     auto parentToken = parentContainer->GetToken();
     container->SetToken(parentToken);
@@ -151,8 +169,7 @@ void SubwindowOhos::InitContainer()
     container->SetHapPath(parentContainer->GetHapPath());
     container->SetIsSubContainer(true);
     container->InitializeSubContainer(parentContainerId_);
-    SetIsRosenWindowCreate(true);
-    ViewportConfig config;
+
     // create ace_view
     auto aceView =
         Platform::AceViewOhos::CreateView(childContainerId_, false, container->GetSettings().usePlatformAsUIThread);
@@ -167,10 +184,15 @@ void SubwindowOhos::InitContainer()
     Ace::Platform::UIEnvCallback callback = nullptr;
     // set view
     Platform::AceContainer::SetView(aceView, density, width, height, window_, callback);
+    ViewportConfig config;
     Platform::AceViewOhos::SurfaceChanged(aceView, width, height, config.Orientation());
 
     auto uiContentImpl = reinterpret_cast<UIContentImpl*>(window_->GetUIContent());
-    CHECK_NULL_VOID(uiContentImpl);
+    if (!uiContentImpl) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Window get ui content failed");
+        window_->Destroy();
+        return false;
+    }
     uiContentImpl->SetFontScaleAndWeightScale(container, childContainerId_);
 
 #ifndef NG_BUILD
@@ -189,32 +211,18 @@ void SubwindowOhos::InitContainer()
     }
 #endif
 #endif
-#ifdef NG_BUILD
-    auto subPipelineContextNG = AceType::DynamicCast<NG::PipelineContext>(
-        Platform::AceContainer::GetContainer(childContainerId_)->GetPipelineContext());
-    CHECK_NULL_VOID(subPipelineContextNG);
-    subPipelineContextNG->SetParentPipeline(parentContainer->GetPipelineContext());
-    subPipelineContextNG->SetupSubRootElement();
-    subPipelineContextNG->SetMinPlatformVersion(parentPipeline->GetMinPlatformVersion());
-#else
-    if (container->IsCurrentUseNewPipeline()) {
-        auto subPipelineContextNG = AceType::DynamicCast<NG::PipelineContext>(
-            Platform::AceContainer::GetContainer(childContainerId_)->GetPipelineContext());
-        CHECK_NULL_VOID(subPipelineContextNG);
-        subPipelineContextNG->SetParentPipeline(parentContainer->GetPipelineContext());
-        subPipelineContextNG->SetupSubRootElement();
-        subPipelineContextNG->SetMinPlatformVersion(parentPipeline->GetMinPlatformVersion());
-        subPipelineContextNG->SetKeyboardAnimationConfig(parentPipeline->GetKeyboardAnimationConfig());
-        return;
+
+    auto subPipelineContext = Platform::AceContainer::GetContainer(childContainerId_)->GetPipelineContext();
+    if (!subPipelineContext) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get sub pipeline failed");
+        window_->Destroy();
+        return false;
     }
-    auto subPipelineContext =
-        DynamicCast<PipelineContext>(Platform::AceContainer::GetContainer(childContainerId_)->GetPipelineContext());
-    CHECK_NULL_VOID(subPipelineContext);
     subPipelineContext->SetParentPipeline(parentContainer->GetPipelineContext());
-    subPipelineContext->SetupSubRootElement();
     subPipelineContext->SetMinPlatformVersion(parentPipeline->GetMinPlatformVersion());
+    subPipelineContext->SetupSubRootElement();
     subPipelineContext->SetKeyboardAnimationConfig(parentPipeline->GetKeyboardAnimationConfig());
-#endif
+    return true;
 }
 
 RefPtr<PipelineBase> SubwindowOhos::GetChildPipelineContext() const
@@ -417,6 +425,7 @@ void SubwindowOhos::HideWindow()
     auto focusHub = rootNode->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetIsDefaultHasFocused(false);
+    context->SetIsFocusActive(false);
 #else
     if (Container::IsCurrentUseNewPipeline()) {
         auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -430,6 +439,7 @@ void SubwindowOhos::HideWindow()
         auto focusHub = rootNode->GetFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->SetIsDefaultHasFocused(false);
+        context->SetIsFocusActive(false);
     } else {
         auto context = DynamicCast<PipelineContext>(aceContainer->GetPipelineContext());
         CHECK_NULL_VOID(context);
@@ -540,7 +550,7 @@ void SubwindowOhos::HideDragPreviewWindowNG()
 void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> customNode, const NG::MenuParam& menuParam,
     const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show menu ng enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show menu ng enter");
     CHECK_NULL_VOID(customNode);
     CHECK_NULL_VOID(targetNode);
     ContainerScope scope(childContainerId_);
@@ -568,7 +578,7 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> customNode, const NG:
 void SubwindowOhos::ShowMenuNG(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
     const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show menu ng enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show menu ng enter");
     ContainerScope scope(childContainerId_);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
@@ -599,7 +609,7 @@ void SubwindowOhos::ShowMenuNG(std::function<void()>&& buildFunc, std::function<
 
 void SubwindowOhos::HideMenuNG(bool showPreviewAnimation, bool startDrag)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide menu ng enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "hide menu ng enter");
     if (!isShowed_) {
         return;
     }
@@ -619,7 +629,7 @@ void SubwindowOhos::HideMenuNG(bool showPreviewAnimation, bool startDrag)
 
 void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide menu ng enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "hide menu ng enter");
     if (!isShowed_) {
         return;
     }
@@ -678,7 +688,7 @@ void SubwindowOhos::ContextMenuSwitchDragPreviewAnimationtNG(const RefPtr<NG::Fr
 
 void SubwindowOhos::ClearMenuNG(int32_t targetId, bool inWindow, bool showAnimation)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear menu ng enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "clear menu ng enter");
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -718,14 +728,14 @@ void SubwindowOhos::ClearPopupNG()
 
 void SubwindowOhos::ShowMenu(const RefPtr<Component>& newComponent)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show menu enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show menu enter");
     ShowWindow();
     AddMenu(newComponent);
 }
 
 void SubwindowOhos::CloseMenu()
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close menu enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "close menu enter");
 #ifndef NG_BUILD
     if (!isShowed_) {
         return;
@@ -1679,27 +1689,6 @@ void SubwindowOhos::MarkDirtyDialogSafeArea()
     auto lastChild = rootNode->GetLastChild();
     CHECK_NULL_VOID(lastChild);
     lastChild->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
-}
-
-bool SubwindowOhos::CheckHostWindowStatus() const
-{
-    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-    CHECK_NULL_RETURN(parentContainer, false);
-    sptr<OHOS::Rosen::Window> parentWindow = parentContainer->GetUIWindow(parentContainerId_);
-    CHECK_NULL_RETURN(parentWindow, false);
-    if (parentWindow->GetType() == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
-        auto parentPipeline = parentContainer->GetPipelineContext();
-        CHECK_NULL_RETURN(parentPipeline, false);
-        auto hostWindowId = parentPipeline->GetFocusWindowId();
-        auto hostWindowRect = parentWindow->GetHostWindowRect(hostWindowId);
-        auto isValid = GreatNotEqual(hostWindowRect.width_, 0) && GreatNotEqual(hostWindowRect.height_, 0);
-        if (!isValid) {
-            TAG_LOGW(AceLogTag::ACE_SUB_WINDOW,
-                "UIExtension Window failed to obtain host window information. Please check if permissions are enabled");
-            return false;
-        }
-    }
-    return true;
 }
 
 bool SubwindowOhos::Close()

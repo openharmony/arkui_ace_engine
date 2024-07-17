@@ -405,6 +405,8 @@ std::vector<RectF> TextSelectController::GetSelectedRects() const
 
 void TextSelectController::MoveHandleToContentRect(RectF& handleRect, float boundaryAdjustment) const
 {
+    TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "before move, handleRect.GetX():%{public}f,handleRect.GetY():%{public}f",
+        handleRect.GetX(), handleRect.GetY());
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto textFiled = DynamicCast<TextFieldPattern>(pattern);
@@ -439,6 +441,8 @@ void TextSelectController::MoveHandleToContentRect(RectF& handleRect, float boun
     textFiled->SetTextRect(textRect);
     AdjustHandleAtEdge(handleRect);
     textFiled->UpdateScrollBarOffset();
+    TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "after move, handleRect.GetX():%{public}f,handleRect.GetY():%{public}f",
+        handleRect.GetX(), handleRect.GetY());
 }
 
 void TextSelectController::AdjustHandleAtEdge(RectF& handleRect) const

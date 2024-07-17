@@ -14,8 +14,9 @@
  */
 
 #include "core/components_ng/pattern/time_picker/timepicker_haptic_factory.h"
+#if defined(AUDIO_FRAMEWORK_EXISTS) && defined(PLAYER_FRAMEWORK_EXISTS)
 #include "adapter/ohos/entrance/timepicker/timepicker_haptic_impl.h"
-
+#endif
 
 namespace OHOS::Ace::NG {
 std::shared_ptr<ITimepickerAudioHaptic> TimepickerAudioHapticFactory::instance_ { nullptr };
@@ -26,7 +27,9 @@ std::shared_ptr<ITimepickerAudioHaptic> TimepickerAudioHapticFactory::GetInstanc
     if (instance_ == nullptr) {
         std::lock_guard<std::mutex> lock(mutex_);
         if (instance_ == nullptr) {
+#if defined(AUDIO_FRAMEWORK_EXISTS) && defined(PLAYER_FRAMEWORK_EXISTS)
             instance_ = std::make_shared<TimepickerAudioHapticImpl>();
+#endif
         }
     }
     return instance_;

@@ -721,7 +721,8 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
     auto textValue = pattern->GetTextValue();
     if (textFieldLayoutProperty) {
         if (value.has_value() && value.value() != textValue) {
-            pattern->InitValueText(value.value());
+            auto changed = pattern->InitValueText(value.value());
+            pattern->SetTextChangedAtCreation(changed);
         }
         textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
         textFieldLayoutProperty->UpdateMaxLines(1);
