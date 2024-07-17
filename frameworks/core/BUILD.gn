@@ -530,7 +530,10 @@ template("ace_core_source_set") {
           "$ace_root/frameworks/core/components/form:ace_core_components_form_$platform",
           "$ace_root/frameworks/core/components_ng/pattern/form:ace_core_components_form_pattern_ng_$platform",
         ]
-        external_deps += [ "form_fwk:form_manager" ]
+        external_deps += [
+          "ability_base:base",
+          "form_fwk:form_manager",
+        ]
       }
     }
 
