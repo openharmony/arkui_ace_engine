@@ -3466,6 +3466,10 @@ void TextFieldPattern::HandleLeftMouseReleaseEvent(MouseInfo& info)
         StartTwinkling();
         tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+    auto frameId = tmpHost->GetId();
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->FreeMouseStyleHoldNode(frameId);
     mouseStatus_ = MouseStatus::NONE;
     blockPress_ = false;
     leftMouseCanMove_ = false;
