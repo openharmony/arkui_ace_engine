@@ -1091,6 +1091,8 @@ private:
     void TriggerShouldParallelInnerWith(
         const TouchTestResult& currentRecognizers, const TouchTestResult& responseLinkRecognizers);
 
+    void TriggerRsProfilerNodeMountCallbackIfExist();
+
     void AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent);
 
     RectF ApplyFrameNodeTranformToRect(const RectF& rect, const RefPtr<FrameNode>& parent) const;
