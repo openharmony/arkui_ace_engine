@@ -208,7 +208,6 @@ void SwiperPattern::StopAndResetSpringAnimation()
         itemPosition_.clear();
         isVoluntarilyClear_ = true;
         jumpIndex_ = currentIndex_;
-        springAnimationIsRunning_ = false;
     }
 }
 
@@ -291,7 +290,9 @@ void SwiperPattern::ResetOnForceMeasure()
 {
     StopPropertyTranslateAnimation(isFinishAnimation_, false, true);
     StopTranslateAnimation();
-    StopSpringAnimation();
+    if (springAnimationIsRunning_) {
+        StopSpringAnimationImmediately();
+    }
     StopFadeAnimation();
     StopIndicatorAnimation(true);
     currentOffset_ = 0.0f;
@@ -487,7 +488,9 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         StopAutoPlay();
         StopTranslateAnimation();
         StopFadeAnimation();
-        StopSpringAnimation();
+        if (springAnimationIsRunning_) {
+            StopSpringAnimationImmediately();
+        }
         if (usePropertyAnimation_) {
             StopPropertyTranslateAnimation(false, true);
             StopIndicatorAnimation();
@@ -602,9 +605,8 @@ void SwiperPattern::InitSurfaceChangedCallback()
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     if (!HasSurfaceChangedCallback()) {
-        auto callbackId = pipeline->RegisterSurfaceChangedCallback(
-            [weak = WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight,
-                WindowSizeChangeReason type) {
+        auto callbackId = pipeline->RegisterSurfaceChangedCallback([weak = WeakClaim(this)]
+        (int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight, WindowSizeChangeReason type) {
                 if (type == WindowSizeChangeReason::UNDEFINED && newWidth == prevWidth && newHeight == prevHeight) {
                     return;
                 }
@@ -623,7 +625,9 @@ void SwiperPattern::InitSurfaceChangedCallback()
                 swiper->needFireCustomAnimationEvent_ = swiper->translateAnimationIsRunning_;
                 swiper->StopPropertyTranslateAnimation(swiper->isFinishAnimation_);
                 swiper->StopTranslateAnimation();
-                swiper->StopSpringAnimation();
+                if (swiper->springAnimationIsRunning_) {
+                    swiper->StopSpringAnimationImmediately();
+                }
                 swiper->StopFadeAnimation();
                 swiper->StopIndicatorAnimation();
 
@@ -1366,7 +1370,9 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
 
     StopTranslateAnimation();
     StopFadeAnimation();
-    StopSpringAnimation();
+    if (springAnimationIsRunning_) {
+        StopSpringAnimationImmediately();
+    }
     StopIndicatorAnimation(true);
     jumpIndex_ = index;
     uiCastJumpIndex_ = index;
@@ -1382,7 +1388,6 @@ void SwiperPattern::StopSpringAnimationAndFlushImmediately()
         itemPosition_.clear();
         isVoluntarilyClear_ = true;
         jumpIndex_ = currentIndex_;
-        springAnimationIsRunning_ = false;
         MarkDirtyNodeSelf();
         auto pipeline = PipelineContext::GetCurrentContext();
         if (pipeline) {
@@ -1424,7 +1429,6 @@ void SwiperPattern::SwipeTo(int32_t index)
     if (springAnimationIsRunning_) {
         StopSpringAnimationImmediately();
         jumpIndex_ = currentIndex_;
-        springAnimationIsRunning_ = false;
         MarkDirtyNodeSelf();
         auto pipeline = PipelineContext::GetCurrentContext();
         if (pipeline) {
@@ -1833,6 +1837,7 @@ void SwiperPattern::StopSpringAnimationImmediately()
     TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper finish spring animation offset %{public}f", currentIndexOffset_);
     ACE_SCOPED_TRACE("Swiper finish spring animation offset %f", currentIndexOffset_);
     isTouchDownSpringAnimation_ = false;
+    springAnimationIsRunning_ = false;
     OnSpringAndFadeAnimationFinish();
 }
 
