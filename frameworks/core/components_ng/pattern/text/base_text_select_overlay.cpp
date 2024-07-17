@@ -41,9 +41,9 @@ void BaseTextSelectOverlay::ProcessOverlay(const OverlayRequest& request)
     CHECK_NULL_VOID(textBase);
     auto clipboard = textBase->GetClipboard();
     if (clipboard) {
-        auto mimeType = GetPasteMimeType();
-        if (!mimeType.empty()) {
-            clipboard->HasDataType(checkClipboard, mimeType);
+        auto mimeTypes = GetPasteMimeTypes();
+        if (!mimeTypes.empty()) {
+            clipboard->HasDataType(checkClipboard, mimeTypes);
             return;
         }
         clipboard->HasData(checkClipboard);
