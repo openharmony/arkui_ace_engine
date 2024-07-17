@@ -94,6 +94,7 @@ void ViewAbstractModelNG::BindMenu(
     CHECK_NULL_VOID(overlayManager);
     auto menuNode = overlayManager->GetMenuNode(targetId);
     if (menuNode) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
         auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
         wrapperPattern->SetHasTransitionEffect(menuParam.hasTransitionEffect);
         if (menuParam.hasTransitionEffect) {
@@ -190,6 +191,7 @@ void BindContextMenuSingle(
         CHECK_NULL_VOID(overlayManager);
         auto menuNode = overlayManager->GetMenuNode(targetId);
         if (menuNode) {
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
             auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
             CHECK_NULL_VOID(wrapperPattern);
             if (wrapperPattern->IsShow() && !menuParam.isShow) {
@@ -232,6 +234,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
         CHECK_NULL_VOID(overlayManager);
         auto menuNode = overlayManager->GetMenuNode(targetId);
         if (menuNode) {
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
             auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
             CHECK_NULL_VOID(menuWrapperPattern);
             menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
@@ -249,6 +252,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
             CHECK_NULL_VOID(overlayManager);
             auto menuNode = overlayManager->GetMenuNode(targetId);
             if (menuNode) {
+                TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
                 auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
                 CHECK_NULL_VOID(menuWrapperPattern);
                 menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
