@@ -58,7 +58,8 @@ void TextFieldModelNG::CreateNode(
     pattern->ResetContextAttr();
     auto textValue = pattern->GetTextValue();
     if (value.has_value() && value.value() != textValue) {
-        pattern->InitValueText(value.value());
+        auto changed = pattern->InitValueText(value.value());
+        pattern->SetTextChangedAtCreation(changed);
     }
     textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
     if (!isTextArea) {
