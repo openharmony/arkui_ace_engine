@@ -2041,6 +2041,7 @@ void ScrollablePattern::Fling(double flingVelocity)
         scrollable->HandleOverScroll(flingVelocity);
     } else {
         scrollable->StartScrollAnimation(0.0f, flingVelocity);
+        FireOnScrollStart();
     }
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
