@@ -3085,6 +3085,45 @@ HWTEST_F(OverlayManagerTestNg, GetSheetType002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsShowCloseIcon
+ * @tc.desc: Test SheetPresentationPattern::IsShowCloseIcon.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, IsShowCloseIcon001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page, get sheet pattern.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Change the showCloseIcon.
+     * @tc.expected: the showCloseIcon is updated successfully
+     */
+    SheetStyle sheetStyle;
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    auto showCloseIcon = sheetPattern->IsShowCloseIcon();
+    EXPECT_EQ(showCloseIcon, true);
+
+    sheetStyle.showCloseIcon = true;
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    showCloseIcon = sheetPattern->IsShowCloseIcon();
+    EXPECT_EQ(showCloseIcon, true);
+
+    sheetStyle.showCloseIcon = false;
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    showCloseIcon = sheetPattern->IsShowCloseIcon();
+    EXPECT_EQ(showCloseIcon, false);
+}
+
+/**
  * @tc.name: TestSuitAgingScale
  * @tc.desc: Test SheetPresentationPattern::UpdateFontScaleStatus.
  * @tc.type: FUNC

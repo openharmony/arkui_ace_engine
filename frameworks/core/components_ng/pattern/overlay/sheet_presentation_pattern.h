@@ -421,6 +421,7 @@ public:
 
     SheetType GetSheetType();
     bool IsPhoneOrFold();
+    bool IsShowCloseIcon();
     ScrollSizeMode GetScrollSizeMode();
     void GetSheetTypeWithAuto(SheetType& sheetType);
     void GetSheetTypeWithPopup(SheetType& sheetType);
