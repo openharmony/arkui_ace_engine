@@ -652,25 +652,25 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     }
     txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
     // Font size must be px when transferring to Rosen::TextStyle
-    txtStyle.fontSize = NG::TextLayoutadapter::TextConvertToPx(textStyle.GetFontSize(),
-        { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+    txtStyle.fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     txtStyle.fontStyle = ConvertTxtFontStyle(textStyle.GetFontStyle());
 
     if (textStyle.GetWordSpacing().Unit() == DimensionUnit::PERCENT) {
         txtStyle.wordSpacing = textStyle.GetWordSpacing().Value() * txtStyle.fontSize;
     } else {
         if (pipelineContext) {
-            txtStyle.wordSpacing = NG::TextLayoutadapter::TextConvertToPx(textStyle.GetWordSpacing(),
-            { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+            txtStyle.wordSpacing = textStyle.GetWordSpacing().ConvertToPxDistribute(
+                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
         } else {
             txtStyle.wordSpacing = textStyle.GetWordSpacing().Value();
         }
     }
     if (pipelineContext) {
-        txtStyle.letterSpacing = NG::TextLayoutadapter::TextConvertToPx(textStyle.GetLetterSpacing(),
-            { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
-        txtStyle.baseLineShift = -NG::TextLayoutadapter::TextConvertToPx(textStyle.GetBaselineOffset(),
-            { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+        txtStyle.letterSpacing = textStyle.GetLetterSpacing().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+        txtStyle.baseLineShift = -textStyle.GetBaselineOffset().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     }
 
     txtStyle.fontFamilies = textStyle.GetFontFamilies();
@@ -702,8 +702,8 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         double fontSize = txtStyle.fontSize;
         double lineHeight = textStyle.GetLineHeight().Value();
         if (pipelineContext) {
-            lineHeight = NG::TextLayoutadapter::TextConvertToPx(textStyle.GetLineHeight(),
-                { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+            lineHeight = textStyle.GetLineHeight().ConvertToPxDistribute(
+                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
         }
         lineHeightOnly = textStyle.HasHeightOverride();
         if (!NearEqual(lineHeight, fontSize) && (lineHeight > 0.0) && (!NearZero(fontSize))) {
@@ -724,8 +724,8 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         double fontSize = txtStyle.fontSize;
         double lineSpacing = textStyle.GetLineSpacing().Value();
         if (pipelineContext) {
-            lineSpacing = NG::TextLayoutadapter::TextConvertToPx(textStyle.GetLineSpacing(),
-                { textStyle.IsAllowScale(), textStyle.GetMinFontScale(), textStyle.GetMaxFontScale() });
+            lineSpacing = textStyle.GetLineSpacing().ConvertToPxDistribute(
+                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
         }
         lineSpacingOnly = true;
         if (!NearEqual(lineSpacing, fontSize) && (lineSpacing > 0.0) && (!NearZero(fontSize))) {
@@ -766,12 +766,11 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     }
     auto radius = textBackgroundStyle->backgroundRadius;
     CHECK_NULL_VOID(radius.has_value());
-    auto radiusConverter = [context = pipelineContext, style = textStyle](
+    auto radiusConverter = [context = pipelineContext, textStyle](
                                const std::optional<Dimension>& radius) -> double {
         CHECK_NULL_RETURN(radius.has_value(), 0);
         CHECK_NULL_RETURN(context, radius->Value());
-        return NG::TextLayoutadapter::TextConvertToPx(
-            radius.value(), { style.IsAllowScale(), style.GetMinFontScale(), style.GetMaxFontScale() });
+        return radius.value().ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     };
     txtStyle.backgroundRect.leftTopRadius = radiusConverter(radius->radiusTopLeft);
     txtStyle.backgroundRect.rightTopRadius = radiusConverter(radius->radiusTopRight);
