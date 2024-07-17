@@ -82,7 +82,7 @@ public:
     const std::vector<FormRequest>& GetAllRendererFormRequests() const;
     std::pair<std::vector<std::string>, std::string> GetOrderedAndCurrentCompIds() const;
     void RecycleForm(std::string& statusData) const;
-    void RecoverRenderer(const std::vector<std::string> & formRequests, int currentCompIndex);
+    void RecoverRenderer(const std::vector<FormRequest>& formRequests, size_t currentCompIndex);
 private:
     enum class FormRendererInitState {
         UNINITIALIZED,
