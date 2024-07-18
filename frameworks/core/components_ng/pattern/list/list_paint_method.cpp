@@ -18,8 +18,10 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/render/divider_painter.h"
 
+#ifdef ARKUI_CIRCLE_FEATURE
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
+#endif // ARKUI_CIRCLE_FEATURE
 
 namespace OHOS::Ace::NG {
 constexpr double PERCENT_100 = 100.0;
