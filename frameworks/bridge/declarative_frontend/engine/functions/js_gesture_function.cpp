@@ -64,6 +64,7 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
         "getModifierKeyState",
         JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
     gestureInfoObj->SetPropertyObject("fingerList", CreateFingerListArray(info));
+    gestureInfoObj->SetProperty<double>("deviceId", info.GetDeviceId());
 
     auto target = CreateEventTargetObject(info);
     gestureInfoObj->SetPropertyObject("target", target);

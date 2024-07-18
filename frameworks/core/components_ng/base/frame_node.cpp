@@ -4315,6 +4315,7 @@ HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
     CHECK_NULL_RETURN(onTouchIntercept, HitTestMode::HTMDEFAULT);
     TouchEventInfo event("touchEvent");
     event.SetTimeStamp(touchEvent.time);
+    event.SetDeviceId(touchEvent.deviceId);
     event.SetPointerEvent(touchEvent.pointerEvent);
     TouchLocationInfo changedInfo("onTouch", touchEvent.originalId);
     PointF lastLocalPoint(touchEvent.x, touchEvent.y);

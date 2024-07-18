@@ -311,6 +311,7 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     GetEventDevice(orgDevice, events);
     events.targetDisplayId = pointerEvent->GetTargetDisplayId();
     events.originalId = item.GetOriginPointerId();
+    events.deviceId = pointerEvent->GetDeviceId();
 
     std::set<int32_t> pressedSet = pointerEvent->GetPressedButtons();
     uint32_t pressedButtons = 0;
@@ -326,8 +327,7 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     events.pressedButtons = static_cast<int32_t>(pressedButtons);
 
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
-    TimeStamp time(microseconds);
-    events.time = time;
+    events.time = TimeStamp(microseconds);
     events.pointerEvent = pointerEvent;
     events.sourceTool = GetSourceTool(item.GetToolType());
     if (events.sourceType == SourceType::TOUCH && events.sourceTool == SourceTool::PEN) {
@@ -395,6 +395,7 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
     event.sourceTool = GetSourceTool(item.GetToolType());
     event.pointerEvent = pointerEvent;
     event.originalId = item.GetOriginPointerId();
+    event.deviceId = pointerEvent->GetDeviceId();
 
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
     TimeStamp time(microseconds);

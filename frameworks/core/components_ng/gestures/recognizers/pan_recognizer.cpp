@@ -685,6 +685,7 @@ GestureJudgeResult PanRecognizer::TriggerGestureJudgeCallback()
     UpdateFingerListInfo();
     info->SetFingerList(fingerList_);
     info->SetTimeStamp(time_);
+    info->SetDeviceId(deviceId_);
     info->SetOffsetX(averageDistance_.GetX());
     info->SetOffsetY(averageDistance_.GetY());
     info->SetSourceDevice(deviceType_);
