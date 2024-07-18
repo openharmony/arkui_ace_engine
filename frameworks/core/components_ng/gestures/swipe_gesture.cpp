@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 
 RefPtr<NGGestureRecognizer> SwipeGesture::CreateRecognizer()
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, nullptr);
 
     double speed = context->NormalizeToPx(Dimension(speed_, DimensionUnit::VP));

@@ -34,6 +34,7 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/render_node/render_node_properties.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/property/attraction_effect.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/particle_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
@@ -78,6 +79,7 @@ struct PaintFocusExtraInfo final {
 };
 
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
+using TransitionFinishCallback = std::function<void(bool)>;
 
 inline constexpr int32_t ZINDEX_DEFAULT_VALUE = 0;
 
@@ -121,13 +123,9 @@ public:
 
     virtual void MoveFrame(FrameNode* self, const RefPtr<FrameNode>& child, int32_t index) {}
 
-    virtual void SyncGeometryPropertiesWithoutAnimation(
-        GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0)
-    {}
-
     virtual void SyncGeometryProperties(GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0) {}
 
-    virtual void SyncGeometryProperties(const RectF& rectF, bool isSkipFrameTransition = false) {}
+    virtual void SyncGeometryProperties(const RectF& rectF) {}
 
     virtual void SetBorderRadius(const BorderRadiusProperty& value) {}
 
@@ -136,6 +134,10 @@ public:
     virtual void SetBorderColor(const BorderColorProperty& value) {};
 
     virtual void SetBorderWidth(const BorderWidthProperty& value) {};
+
+    virtual void SetDashGap(const BorderWidthProperty& value) {};
+
+    virtual void SetDashWidth(const BorderWidthProperty& value) {};
 
     virtual void SetOuterBorderRadius(const BorderRadiusProperty& value) {};
 
@@ -299,6 +301,9 @@ public:
     virtual void UpdateFrontBlurRadius(const Dimension& radius) {}
     virtual void ResetBackBlurStyle() {}
     virtual void ClipWithRect(const RectF& rectF) {}
+    virtual void ClipWithRoundRect(const RoundRect& roundRect) {}
+    virtual void ClipWithOval(const RectF& rectF) {}
+    virtual void ClipWithCircle(const Circle& circle) {}
     virtual void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) {}
     virtual void RemoveClipWithRRect() {}
 
@@ -336,6 +341,7 @@ public:
     virtual void SetRoundRectMask(const RoundRect& roundRect, const ShapeMaskProperty& property) {}
     virtual void SetOvalMask(const RectF& rect, const ShapeMaskProperty& property) {}
     virtual void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) {}
+    virtual void SetMarkNodeGroup(bool isNodeGroup) {}
 
     virtual RectF GetPaintRectWithTransform()
     {
@@ -395,6 +401,8 @@ public:
 
     virtual void SetTransitionInCallback(std::function<void()>&& callback) {}
 
+    virtual void SetTransitionUserCallback(TransitionFinishCallback&& callback) {}
+
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json);
@@ -453,7 +461,8 @@ public:
 
     virtual void ClearAccessibilityFocus() {};
 
-    virtual void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) {};
+    virtual void OnAccessibilityFocusUpdate(
+        bool isAccessibilityFocus, const int64_t accessibilityIdForVirtualNode = -2100000) {};
     virtual void OnAccessibilityFocusRectUpdate(RectT<int32_t> accessibilityFocusRect) {};
 
     virtual void OnMouseSelectUpdate(bool isSelected, const Color& fillColor, const Color& strokeColor) {}
@@ -499,7 +508,7 @@ public:
 
     virtual void SetActualForegroundColor(const Color& value) {}
 
-    virtual void ResetSurface() {}
+    virtual void ResetSurface(int width, int height) {}
     virtual void PaintDebugBoundary(bool flag) {}
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
@@ -532,6 +541,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, HasBorderImageOutset, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, HasBorderImageRepeat, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, BorderImageGradient, Gradient);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(BdImage, BorderSourceFromImage, bool);
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackgroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
@@ -574,6 +584,8 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderWidth, BorderWidthProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderColor, BorderColorProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, BorderStyle, BorderStyleProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, DashGap, BorderWidthProperty);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Border, DashWidth, BorderWidthProperty);
 
     // Outer Border
     ACE_DEFINE_PROPERTY_GROUP(OuterBorder, OuterBorderProperty);
@@ -630,7 +642,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Motion, MotionPath, MotionPathOption)
 
     // accessibility
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocus, bool);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP_FOR_VIRTUAL_NODE(AccessibilityFocus, bool);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocusRect, RectT<int32_t>);
 
     // useEffect
@@ -647,6 +659,9 @@ public:
 
     // renderFit
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderFit, RenderFit);
+
+    // AttractionEffect
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AttractionEffect, AttractionEffect);
 
     virtual void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) {}
     virtual std::vector<double> GetTrans()
@@ -678,12 +693,24 @@ public:
 
     virtual void SetSurfaceRotation(bool isLock) {}
 
+    void SetHandleChildBounds(bool value) {
+        handleChildBounds_ = value;
+    }
+
     virtual Matrix4 GetRevertMatrix()
     {
         return Matrix4();
     }
 
     virtual void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) {}
+
+    // The additional opacity will be multiplied with the base opacity.
+    virtual void SetOpacityMultiplier(float opacity) {}
+
+    void SetNeedAnimateFlag(bool isNeedAnimate)
+    {
+        isNeedAnimate_ = isNeedAnimate;
+    }
 
 protected:
     RenderContext() = default;
@@ -692,6 +719,8 @@ protected:
     bool isModalRootNode_ = false;
     bool isSynced_ = false;
     bool isNeedRebuildRSTree_ = true;
+    bool handleChildBounds_ = false;
+    bool isNeedAnimate_ = true;
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
@@ -713,11 +742,14 @@ protected:
     virtual void OnHasBorderImageOutsetUpdate(bool tag) {}
     virtual void OnHasBorderImageRepeatUpdate(bool tag) {}
     virtual void OnBorderImageGradientUpdate(const Gradient& gradient) {}
+    virtual void OnBorderSourceFromImageUpdate(bool sourceFromImage) {}
 
     virtual void OnBorderWidthUpdate(const BorderWidthProperty& value) {}
     virtual void OnBorderRadiusUpdate(const BorderRadiusProperty& value) {}
     virtual void OnBorderColorUpdate(const BorderColorProperty& value) {}
     virtual void OnBorderStyleUpdate(const BorderStyleProperty& value) {}
+    virtual void OnDashGapUpdate(const BorderWidthProperty& value) {}
+    virtual void OnDashWidthUpdate(const BorderWidthProperty& value) {}
 
     virtual void OnOuterBorderWidthUpdate(const BorderWidthProperty& value) {}
     virtual void OnOuterBorderRadiusUpdate(const BorderRadiusProperty& value) {}
@@ -770,6 +802,7 @@ protected:
     virtual void OnUseShadowBatchingUpdate(bool useShadowBatching) {}
     virtual void OnFreezeUpdate(bool isFreezed) {}
     virtual void OnObscuredUpdate(const std::vector<ObscuredReasons>& reasons) {}
+    virtual void OnAttractionEffectUpdate(const AttractionEffect& effect) {}
 
 private:
     friend class ViewAbstract;

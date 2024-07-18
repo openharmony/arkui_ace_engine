@@ -37,8 +37,11 @@ constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SO
 constexpr TextCase DEFAULT_TEXT_CASE = TextCase::NORMAL;
 constexpr uint32_t DEFAULT_MAX_LINE = Infinity<uint32_t>();
 constexpr bool DEFAULT_TEXT_DRAGGABLE = false;
+constexpr bool DEFAULT_TEXT_SENSITIVE = false;
 constexpr Dimension DEFAULT_MAX_FONT_SIZE;
 constexpr Dimension DEFAULT_MIN_FONT_SIZE;
+constexpr float DEFAULT_MIN_FONT_SCALE = 0.85f;
+constexpr float DEFAULT_MAX_FONT_SCALE = 3.20f;
 constexpr CopyOptions DEFAULT_COPY_OPTION = CopyOptions::None;
 constexpr Dimension DEFAULT_BASELINE_OFFSET = 0.0_fp;
 constexpr Dimension DEFAULT_FONT_SIZE = 16.0_fp;
@@ -52,6 +55,8 @@ const std::vector<OHOS::Ace::TextAlign> TEXT_ALIGNS = { OHOS::Ace::TextAlign::ST
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
+const std::vector<TextSelectableMode> TEXT_SELECTABLE_MODE = { TextSelectableMode::SELECTABLE_UNFOCUSABLE,
+    TextSelectableMode::SELECTABLE_FOCUSABLE, TextSelectableMode::UNSELECTABLE };
 constexpr bool DEFAULT_ENABLE_TEXT_DETECTOR = false;
 const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location" };
 
@@ -363,6 +368,22 @@ void ResetTextDraggable(ArkUINodeHandle node)
     TextModelNG::SetDraggable(frameNode, DEFAULT_TEXT_DRAGGABLE);
 }
 
+void SetTextPrivacySensitve(ArkUINodeHandle node, ArkUI_Uint32 sensitive)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetPrivacySensitive(static_cast<bool>(sensitive));
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void ResetTextPrivacySensitve(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetPrivacySensitive(DEFAULT_TEXT_SENSITIVE);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 void SetTextMaxFontSize(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -375,6 +396,34 @@ void ResetTextMaxFontSize(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetAdaptMaxFontSize(frameNode, DEFAULT_MAX_FONT_SIZE);
+}
+
+void SetTextMinFontScale(ArkUINodeHandle node, ArkUI_Float32 number)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetMinFontScale(frameNode, number);
+}
+
+void ResetTextMinFontScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetMinFontScale(frameNode, DEFAULT_MIN_FONT_SCALE);
+}
+
+void SetTextMaxFontScale(ArkUINodeHandle node, ArkUI_Float32 number)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetMaxFontScale(frameNode, number);
+}
+
+void ResetTextMaxFontScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetMaxFontScale(frameNode, DEFAULT_MAX_FONT_SCALE);
 }
 
 void SetTextFontFamily(ArkUINodeHandle node, const char** fontFamilies, ArkUI_Uint32 length)
@@ -712,6 +761,8 @@ void GetFont(ArkUINodeHandle node, ArkUITextFont* font)
         }
         g_strValue = families;
         font->fontFamilies = g_strValue.c_str();
+    } else {
+        font->fontFamilies = "HarmonyOS Sans";
     }
     if (value.fontStyle.has_value()) {
         font->fontStyle = static_cast<ArkUI_Int32>(value.fontStyle.value());
@@ -913,6 +964,23 @@ void ResetTextSelection(ArkUINodeHandle node)
     TextModelNG::SetTextSelection(frameNode, DEFAULT_SELECTION, DEFAULT_SELECTION);
 }
 
+void SetTextSelectableMode(ArkUINodeHandle node, ArkUI_Uint32 textSelectableMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (textSelectableMode < 0 || textSelectableMode >= TEXT_SELECTABLE_MODE.size()) {
+        textSelectableMode = 0;
+    }
+    TextModelNG::SetTextSelectableMode(frameNode, TEXT_SELECTABLE_MODE[textSelectableMode]);
+}
+
+void ResetTextSelectableMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextSelectableMode(frameNode, TEXT_SELECTABLE_MODE[0]);
+}
+
 void SetTextDataDetectorConfigWithEvent(ArkUINodeHandle node, ArkUI_CharPtr types, void* callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1002,6 +1070,8 @@ const ArkUITextModifier* GetTextModifier()
         ResetTextMinFontSize,
         SetTextDraggable,
         ResetTextDraggable,
+        SetTextPrivacySensitve,
+        ResetTextPrivacySensitve,
         SetTextMaxFontSize,
         ResetTextMaxFontSize,
         SetTextFontFamily,
@@ -1071,12 +1141,18 @@ const ArkUITextModifier* GetTextModifier()
         ResetTextContentWithStyledString,
         SetTextSelection,
         ResetTextSelection,
+        SetTextSelectableMode,
+        ResetTextSelectableMode,
         SetTextDataDetectorConfigWithEvent,
         ResetTextDataDetectorConfigWithEvent,
         SetTextOnCopy,
         ResetTextOnCopy,
         SetTextOnTextSelectionChange,
-        ResetTextOnTextSelectionChange
+        ResetTextOnTextSelectionChange,
+        SetTextMinFontScale,
+        ResetTextMinFontScale,
+        SetTextMaxFontScale,
+        ResetTextMaxFontScale
     };
 
     return &modifier;
@@ -1095,6 +1171,13 @@ void SetOnDetectResultUpdate(ArkUINodeHandle node, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     TextModelNG::SetOnDetectResultUpdate(frameNode, std::move(onDetectResultUpdate));
+}
+
+void ResetOnDetectResultUpdate(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetOnDetectResultUpdate(frameNode, nullptr);
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

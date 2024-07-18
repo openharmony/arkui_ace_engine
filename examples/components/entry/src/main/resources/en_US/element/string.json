@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "Review application"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "ArkUI is the control base of OpenHarmony, which is an ArkUI control inspection application, you can check out the control capabilities and default styles of the current version."
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "components"
+    }
+  ]
+}

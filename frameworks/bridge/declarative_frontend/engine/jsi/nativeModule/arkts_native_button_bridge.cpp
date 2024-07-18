@@ -33,11 +33,17 @@ const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeigh
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 const std::string DEFAULT_FONT_WEIGHT = "400";
 const std::string NONE_FONT_FAMILY = "NoneFontFamily";
+constexpr int32_t DEFAULT_BUTTON_TYPE = 1;
+constexpr bool DEFAULT_STATE_EFFECT = true;
+constexpr uint32_t DEFAULT_CONTROL_SIZE = 1;
+constexpr uint32_t DEFAULT_STYLE = 1;
+constexpr uint32_t DEFAULT_ROLE = 0;
 constexpr int32_t CALL_ARG_0 = 0;
 constexpr int32_t CALL_ARG_1 = 1;
 constexpr int32_t CALL_ARG_2 = 2;
 constexpr int32_t CALL_ARG_3 = 3;
 constexpr int32_t CALL_ARG_4 = 4;
+constexpr int32_t CALL_ARG_5 = 5;
 constexpr int32_t MAX_LINES_ARG_2 = 2;
 constexpr int32_t MIN_FONT_SIZE_ARG_3 = 3;
 constexpr int32_t MAX_FONT_SIZE_ARG_4 = 4;
@@ -63,12 +69,99 @@ panda::Local<panda::JSValueRef> JsButtonClickCallback(panda::JsiRuntimeCallInfo*
     double yPos = secondArg->ToNumber(vm)->Value();
     auto ref = runtimeCallInfo->GetThisRef();
     auto obj = ref->ToObject(vm);
-    if (obj->GetNativePointerFieldCount() < CALL_ARG_1) {
+    if (obj->GetNativePointerFieldCount(vm) < CALL_ARG_1) {
         return panda::JSValueRef::Undefined(vm);
     }
-    auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(0));
+    auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(vm, 0));
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     ButtonModelNG::TriggerClick(frameNode, xPos, yPos);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ButtonBridge::SetCreateWithLabel(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    bool createWithLabel = false;
+    if (secondArg->IsBoolean()) {
+        createWithLabel = secondArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getButtonModifier()->setCreateWithLabel(nativeNode, createWithLabel);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ButtonBridge::SetLabel(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    std::string value;
+    ArkTSUtils::ParseJsString(vm, secondArg, value);
+    GetArkUINodeModifiers()->getButtonModifier()->setButtonLabelWithCheck(nativeNode, value.c_str());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ButtonBridge::ResetLabel(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getButtonModifier()->resetButtonLabelWithCheck(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ButtonBridge::SetOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> typeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    Local<JSValueRef> stateEffectArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_2);
+    Local<JSValueRef> buttonStyleArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_3);
+    Local<JSValueRef> controlSizeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_4);
+    Local<JSValueRef> roleArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_5);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    int32_t type = DEFAULT_BUTTON_TYPE;
+    if (typeArg->IsNumber()) {
+        type = typeArg->Int32Value(vm);
+    }
+    bool stateEffect = DEFAULT_STATE_EFFECT;
+    if (stateEffectArg->IsBoolean()) {
+        stateEffect = stateEffectArg->ToBoolean(vm)->Value();
+    }
+    uint32_t controlSize = DEFAULT_CONTROL_SIZE;
+    if (controlSizeArg->IsNumber()) {
+        controlSize = controlSizeArg->Uint32Value(vm);
+    }
+    uint32_t buttonStyle = DEFAULT_STYLE;
+    if (buttonStyleArg->IsNumber()) {
+        buttonStyle = buttonStyleArg->Uint32Value(vm);
+    }
+    uint32_t buttonRole = DEFAULT_ROLE;
+    if (roleArg->IsNumber()) {
+        buttonRole = roleArg->Uint32Value(vm);
+    }
+    GetArkUINodeModifiers()->getButtonModifier()->setButtonType(nativeNode, type);
+    GetArkUINodeModifiers()->getButtonModifier()->setButtonStateEffect(nativeNode, stateEffect);
+    GetArkUINodeModifiers()->getButtonModifier()->setButtonControlSize(nativeNode, controlSize);
+    GetArkUINodeModifiers()->getButtonModifier()->setButtonStyle(nativeNode, buttonStyle);
+    GetArkUINodeModifiers()->getButtonModifier()->setButtonRole(nativeNode, buttonRole);
+    GetArkUINodeModifiers()->getButtonModifier()->setButtonOptions(nativeNode, buttonStyle, buttonRole);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ButtonBridge::ResetOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getButtonModifier()->resetButtonOptions(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -190,9 +283,9 @@ ArkUINativeModuleValue ButtonBridge::SetFontWeight(ArkUIRuntimeCallInfo* runtime
     if (!fontWeightArg->IsNull()) {
         if (fontWeightArg->IsNumber()) {
             fontWeight = std::to_string(fontWeightArg->Int32Value(vm));
-        } else if (fontWeightArg->IsString()) {
+        } else if (fontWeightArg->IsString(vm)) {
             // enum FontWeight is string.
-            fontWeight = fontWeightArg->ToString(vm)->ToString();
+            fontWeight = fontWeightArg->ToString(vm)->ToString(vm);
         }
     }
     GetArkUINodeModifiers()->getButtonModifier()->setButtonFontWeight(nativeNode, fontWeight.c_str());
@@ -378,9 +471,9 @@ void ButtonBridge::PutButtonStringParameters(
     if (!fontWeightArg->IsNull()) {
         if (fontWeightArg->IsNumber()) {
             fontWeight = std::to_string(fontWeightArg->Int32Value(vm));
-        } else if (fontWeightArg->IsString()) {
+        } else if (fontWeightArg->IsString(vm)) {
             // enum FontWeight is sent as string.
-            fontWeight = fontWeightArg->ToString(vm)->ToString();
+            fontWeight = fontWeightArg->ToString(vm)->ToString(vm);
         }
     }
     stringsVector.push_back(fontWeight);
@@ -657,7 +750,7 @@ ArkUINativeModuleValue ButtonBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     auto* frameNode = reinterpret_cast<FrameNode*>(firstArg->ToNativePointer(vm)->Value());
-    if (!secondArg->IsObject()) {
+    if (!secondArg->IsObject(vm)) {
         ButtonModelNG::SetBuilderFunc(frameNode, nullptr);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -680,11 +773,11 @@ ArkUINativeModuleValue ButtonBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
             panda::TryCatch trycatch(vm);
             auto jsObject = obj.ToLocal();
             auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
-            CHECK_EQUAL_RETURN(makeFunc->IsFunction(), false, nullptr);
+            CHECK_EQUAL_RETURN(makeFunc->IsFunction(vm), false, nullptr);
             panda::Local<panda::FunctionRef> func = makeFunc;
             auto result = func->Call(vm, jsObject, params, CALL_ARG_2);
             JSNApi::ExecutePendingJob(vm);
-            CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(), true, nullptr);
+            CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(vm), true, nullptr);
             auto resultObj = result->ToObject(vm);
             panda::Local<panda::JSValueRef> nodeptr =
                 resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, BUTTON_NODEPTR_OF_UINODE));

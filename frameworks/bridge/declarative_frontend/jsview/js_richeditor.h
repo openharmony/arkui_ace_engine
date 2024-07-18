@@ -48,6 +48,7 @@ public:
     static void SetOnPaste(const JSCallbackInfo& info);
     static void SetPlaceholder(const JSCallbackInfo& info);
     static void JsEnableDataDetector(const JSCallbackInfo& info);
+    static void JsEnablePreviewText(const JSCallbackInfo& info);
     static void JsDataDetectorConfig(const JSCallbackInfo& info);
     static void SetOnWillChange(const JSCallbackInfo& info);
     static void SetOnDidChange(const JSCallbackInfo& info);
@@ -74,6 +75,7 @@ public:
     static std::optional<NG::BorderRadiusProperty> ParseBorderRadiusAttr(JsiRef<JSVal> args);
     static std::optional<NG::MarginProperty> ParseMarginAttr(JsiRef<JSVal> marginAttr);
     static CalcDimension ParseLengthMetrics(const JSRef<JSObject>& obj);
+    static void EditMenuOptions(const JSCallbackInfo& info);
 private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
     static void CreateImageStyleObj(JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj,
@@ -88,6 +90,8 @@ private:
         const NG::RichEditorAbstractSpanResult& spanResult);
     static void SetSymbolChangeSpanResult(JSRef<JSObject>& resultObj,
         const NG::RichEditorAbstractSpanResult& spanResult);
+    static void SetJSSpanResultObject(JSRef<JSObject>& resultObj, const ResultObject& resultObject);
+    static void SetJSDeleteSpan(JSRef<JSObject>& spanResultObj, const NG::RichEditorAbstractSpanResult& it);
 };
 
 class JSRichEditorBaseController : public Referenced {
@@ -113,6 +117,7 @@ public:
     void SetSelection(const JSCallbackInfo& args);
     bool FontSizeRangeIsNegative(const CalcDimension& size);
     void GetLayoutManager(const JSCallbackInfo& args);
+    void GetPreviewTextInfo(const JSCallbackInfo& args);
 
     void SetInstanceId(int32_t id)
     {
@@ -141,6 +146,7 @@ protected:
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
     JSRef<JSObject> JSObjectCast(JSRef<JSVal> jsValue);
     void ParseJsSelectionOptions(const JSCallbackInfo& args, std::optional<SelectionOptions>& options);
+    JSRef<JSObject> CreateJSPreviewTextInfo(const PreviewTextInfo& info);
 };
 
 class JSRichEditorController final : public JSRichEditorBaseController {
@@ -180,6 +186,8 @@ public:
     void GetSpansInfo(const JSCallbackInfo& args);
     void GetParagraphsInfo(const JSCallbackInfo& args);
     void GetSelection(const JSCallbackInfo& args);
+    void ToStyledString(const JSCallbackInfo& args);
+    void FromStyledString(const JSCallbackInfo& args);
 
 private:
     bool ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);

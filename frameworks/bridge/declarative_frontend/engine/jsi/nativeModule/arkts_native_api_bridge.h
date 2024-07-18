@@ -19,11 +19,11 @@
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/js_object_template.h"
-#include "core/interfaces/native/node/node_api.h"
 #include "bridge/declarative_frontend/frontend_delegate_declarative.h"
-#include "bridge/declarative_frontend/jsview/js_canvas_image_data.h"
+#include "bridge/declarative_frontend/jsview/canvas/js_canvas_image_data.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG {
 using ArkUINativeModuleValue = panda::Local<panda::JSValueRef>;
@@ -33,10 +33,14 @@ public:
     static ArkUINativeModuleValue PreviewMockComponent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetFrameNodeById(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetFrameNodeByUniqueId(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetPageInfoByUniqueId(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetNavigationInfoByUniqueId(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetArkUINativeModule(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetUIState(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSupportedUIState(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetFrameNodeByKey(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue RequireDynamicSyncScene(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetFrameRateRange(ArkUIRuntimeCallInfo* runtimeCallInfo);
 private:
     static void RegisterButtonAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterToggleAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -83,7 +87,7 @@ private:
     static void RegisterShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSwiperAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterListAttributes(Local<panda::ObjectRef> object, EcmaVM* vm); 
+    static void RegisterListAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterGridAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListItemGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterQRCodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

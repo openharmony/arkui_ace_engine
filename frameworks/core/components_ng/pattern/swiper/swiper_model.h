@@ -45,6 +45,7 @@ struct SwiperParameters {
     std::optional<bool> maskValue;
     std::optional<Color> colorVal;
     std::optional<Color> selectedColorVal;
+    std::optional<int32_t> maxDisplayCountVal;
 };
 
 struct SwiperDigitalParameters {
@@ -52,6 +53,8 @@ struct SwiperDigitalParameters {
     std::optional<Dimension> dimTop;
     std::optional<Dimension> dimRight;
     std::optional<Dimension> dimBottom;
+    std::optional<Dimension> dimStart;
+    std::optional<Dimension> dimEnd;
     std::optional<Color> fontColor;
     std::optional<Color> selectedFontColor;
     std::optional<Dimension> fontSize;
@@ -101,7 +104,7 @@ public:
     static SwiperModel* GetInstance();
     virtual ~SwiperModel() = default;
 
-    virtual RefPtr<SwiperController> Create();
+    virtual RefPtr<SwiperController> Create(bool isCreateArc = false);
     virtual void SetDirection(Axis axis);
     virtual void SetIndex(uint32_t index);
     virtual void SetIndicatorInteractive(bool interactive) {}

@@ -280,6 +280,57 @@ class ListScrollBarModifier extends ModifierWithKey<number> {
   }
 }
 
+class ListScrollBarWidthModifier extends ModifierWithKey<string | number> {
+  constructor(value: string | number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listScrollBarWidth');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetScrollBarWidth(node);
+    } else {
+      getUINativeModule().list.setScrollBarWidth(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class ListScrollBarColorModifier extends ModifierWithKey<string | number | Color> {
+  constructor(value: string | number | Color) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listScrollBarColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetScrollBarColor(node);
+    } else {
+      getUINativeModule().list.setScrollBarColor(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class ListFlingSpeedLimitModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listFlingSpeedLimit');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetFlingSpeedLimit(node);
+    } else {
+      getUINativeModule().list.setFlingSpeedLimit(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ListLanesModifier extends ModifierWithKey<ArkLanesOpt> {
   constructor(value: ArkLanesOpt) {
     super(value);
@@ -329,6 +380,23 @@ class ListFadingEdgeModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class ListChildrenMainSizeModifier extends ModifierWithKey<ChildrenMainSize> {
+  constructor(value: ChildrenMainSize) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listChildrenMainSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetListChildrenMainSize(node);
+    } else {
+      getUINativeModule().list.setListChildrenMainSize(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return true;
+  }
+}
+
 class ListSpaceModifier extends ModifierWithKey<number | string> {
   constructor(value: number | string) {
     super(value);
@@ -359,9 +427,25 @@ class ListInitialIndexModifier extends ModifierWithKey<number> {
   }
 }
 
+class ListInitialScrollerModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listInitialScroller');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetInitialScroller(node);
+    }
+    else {
+      getUINativeModule().list.setInitialScroller(node, this.value);
+    }
+  }
+}
+
 interface ListParam {
   initialIndex?: number;
-  space?: number | string
+  space?: number | string;
+  scroller?: Scroller;
 }
 
 class ArkListComponent extends ArkComponent implements ListAttribute {
@@ -375,6 +459,9 @@ class ArkListComponent extends ArkComponent implements ListAttribute {
       }
       if ((value[0] as ListParam).space !== undefined) {
         modifierWithKey(this._modifiersWithKeys, ListSpaceModifier.identity, ListSpaceModifier, (value[0] as ListParam).space);
+      }
+      if ((value[0] as ListParam).scroller !== undefined) {
+        modifierWithKey(this._modifiersWithKeys, ListInitialScrollerModifier.identity, ListInitialScrollerModifier, (value[0] as ListParam).scroller);
       }
     }
     return this;
@@ -407,6 +494,18 @@ class ArkListComponent extends ArkComponent implements ListAttribute {
   }
   scrollBar(value: BarState): this {
     modifierWithKey(this._modifiersWithKeys, ListScrollBarModifier.identity, ListScrollBarModifier, value);
+    return this;
+  }
+  scrollBarWidth(value: string | number): this {
+    modifierWithKey(this._modifiersWithKeys, ListScrollBarWidthModifier.identity, ListScrollBarWidthModifier, value);
+    return this;
+  }
+  scrollBarColor(value: string | number | Color): this {
+    modifierWithKey(this._modifiersWithKeys, ListScrollBarColorModifier.identity, ListScrollBarColorModifier, value);
+    return this;
+  }
+  flingSpeedLimit(value: number): this {
+    modifierWithKey(this._modifiersWithKeys, ListFlingSpeedLimitModifier.identity, ListFlingSpeedLimitModifier, value);
     return this;
   }
   edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions | undefined): this {
@@ -516,6 +615,10 @@ class ArkListComponent extends ArkComponent implements ListAttribute {
   }
   fadingEdge(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ListFadingEdgeModifier.identity, ListFadingEdgeModifier, value);
+    return this;
+  }
+  childrenMainSize(value: ChildrenMainSize): this {
+    modifierWithKey(this._modifiersWithKeys, ListChildrenMainSizeModifier.identity, ListChildrenMainSizeModifier, value);
     return this;
   }
 }

@@ -25,6 +25,7 @@
 #include "base/thread/cancelable_callback.h"
 #include "base/utils/utils.h"
 #include "base/geometry/axis.h"
+#include "base/web/webview/ohos_nweb/include/nweb_autofill.h"
 #include "base/web/webview/ohos_nweb/include/nweb_handler.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/components/dialog/dialog_properties.h"
@@ -37,6 +38,7 @@
 #include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
+#include "core/components_ng/pattern/web/touch_event_listener.h"
 #include "core/components_ng/pattern/web/web_accessibility_node.h"
 #include "core/components_ng/pattern/web/web_accessibility_property.h"
 #include "core/components_ng/pattern/web/web_context_select_overlay.h"
@@ -46,12 +48,14 @@
 #include "core/components_ng/pattern/web/web_pattern_property.h"
 #include "core/components_ng/pattern/web/web_paint_method.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/render_surface.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/gestures/pinch_gesture.h"
 
 namespace OHOS::Ace {
 class WebDelegateObserver;
+class ImageAnalyzerManager;
 }
 
 namespace OHOS::Ace::NG {
@@ -104,11 +108,16 @@ public:
     using PermissionClipboardCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using OnOpenAppLinkCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
     using DefaultFileSelectorShowCallback = std::function<void(const std::shared_ptr<BaseEventInfo>&)>;
+    using WebNodeInfoCallback = const std::function<void(std::shared_ptr<JsonValue>& jsonNodeArray, int32_t webId)>;
+    using TextBlurCallback = std::function<void(int64_t, const std::string)>;
+    using WebComponentClickCallback = std::function<void(int64_t, const std::string)>;
     WebPattern();
     WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController,
-               RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
+               RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
+			   const std::string& sharedRenderProcessToken = "");
     WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback,
-               RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false);
+               RenderMode type = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
+			   const std::string& sharedRenderProcessToken = "");
 
     ~WebPattern() override;
 
@@ -116,6 +125,47 @@ public:
         VK_NONE,
         VK_SHOW,
         VK_HIDE
+    };
+
+    enum class WebAccessibilityType : int32_t {
+        ID = 0,
+        SEL_START,
+        SEL_END,
+        INPUT_TYPE,
+        LIVE_REGION,
+        HINT,
+        CONTENT,
+        ERROR,
+        CHILD_IDS,
+        PARENT_ID,
+        GRID_ROWS,
+        GRID_COLS,
+        GRID_SEL_MODE,
+        GRID_ITEM_ROW,
+        GRID_ITEM_ROW_SPAN,
+        GRID_ITEM_COL,
+        GRID_ITEM_COL_SPAN,
+        PAGE_ID,
+        RECTX,
+        RECTY,
+        RECT_WIDTH,
+        RECT_HEIGHT,
+        HEADING,
+        CHECKED,
+        EDITABLE,
+        ENABLED,
+        FOCUSED,
+        SELECTED,
+        CHECKABLE,
+        CLICKABLE,
+        FOCUSABLE,
+        SCROLLABLE,
+        PASSWORD,
+        VISIBLE,
+        PLURAL_LINE,
+        POPUP,
+        DELETABLE,
+        FOCUS,
     };
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
@@ -139,6 +189,13 @@ public:
 
 
     void OnModifyDone() override;
+
+    void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
+
+    void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
+        RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
+
+    void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) override;
 
     void SetWebSrc(const std::string& webSrc)
     {
@@ -242,10 +299,7 @@ public:
         return onOpenAppLinkCallback_;
     }
 
-    void SetRenderMode(RenderMode renderMode)
-    {
-        renderMode_ = renderMode;
-    }
+    void SetRenderMode(RenderMode renderMode);
 
     RenderMode GetRenderMode()
     {
@@ -260,6 +314,16 @@ public:
     bool GetIncognitoMode() const
     {
         return incognitoMode_;
+    }
+
+    void SetSharedRenderProcessToken(const std::string& sharedRenderProcessToken)
+    {
+        sharedRenderProcessToken_ = sharedRenderProcessToken;
+    }
+
+    const std::optional<std::string>& GetSharedRenderProcessToken() const
+    {
+        return sharedRenderProcessToken_;
     }
 
     void SetOnControllerAttachedCallback(OnControllerAttachedCallback&& callback)
@@ -340,7 +404,7 @@ public:
     }
     ScrollResult HandleScroll(float offset, int32_t source, NestedState state, float velocity = 0.f) override;
     ScrollResult HandleScroll(RefPtr<NestableScrollContainer> parent, float offset, int32_t source, NestedState state);
-    bool HandleScrollVelocity(float velocity) override;
+    bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
     bool HandleScrollVelocity(RefPtr<NestableScrollContainer> parent, float velocity);
     void OnScrollStartRecursive(float position, float velocity = 0.f) override;
     void OnScrollStartRecursive(std::vector<float> positions);
@@ -405,6 +469,8 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeVideoPlayerConfig, NativeVideoPlayerConfigType);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SmoothDragResizeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverlayScrollbarEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAvoidMode, WebKeyboardAvoidMode);
 
     bool IsFocus() const
     {
@@ -430,7 +496,8 @@ public:
     RectF ComputeClippedSelectionBounds(
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startHandle,
-        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endHandle);
+        std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endHandle,
+        bool& isNewAvoid);
     void OnQuickMenuDismissed();
     void OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
@@ -458,7 +525,7 @@ public:
         selectOverlayDragging_ = selectOverlayDragging;
     }
     void UpdateLocale();
-    void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height, bool isNeedReset);
+    void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height);
     void SetSelectPopupMenuShowing(bool showing)
     {
         selectPopupMenuShowing_ = showing;
@@ -467,6 +534,16 @@ public:
     {
         isCurrentStartHandleDragging_ = isStartHandle;
     }
+    void ParseViewDataNumber(const std::string& key, int32_t value,
+        RefPtr<PageNodeInfoWrap> node, RectT<float>& rect, float viewScale);
+    void ParseNWebViewDataNode(std::unique_ptr<JsonValue> child,
+        std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, int32_t nodeId);
+    void ParseNWebViewDataJson(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson,
+        std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, OHOS::NWeb::NWebAutofillEvent& eventType);
+    void HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
+    bool RequestAutoFill(AceAutoFillType autoFillType);
+    bool RequestAutoSave();
+    bool UpdateAutoFillPopup();
     void UpdateSelectHandleInfo();
     bool IsSelectHandleReverse();
     void OnCompleteSwapWithNewSize();
@@ -487,10 +564,7 @@ public:
     Offset GetDragOffset() const;
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
     void OnScrollState(bool scrollState);
-    void SetLayoutMode(WebLayoutMode mode)
-    {
-        layoutMode_ = mode;
-    }
+    void SetLayoutMode(WebLayoutMode mode);
     WebLayoutMode GetLayoutMode() const
     {
         return layoutMode_;
@@ -519,7 +593,8 @@ public:
     RefPtr<WebAccessibilityNode> GetFocusedAccessibilityNode(int64_t accessibilityId, bool isAccessibilityFocus);
     RefPtr<WebAccessibilityNode> GetAccessibilityNodeById(int64_t accessibilityId);
     RefPtr<WebAccessibilityNode> GetAccessibilityNodeByFocusMove(int64_t accessibilityId, int32_t direction);
-    void ExecuteAction(int64_t accessibilityId, AceAction action) const;
+    void ExecuteAction(int64_t accessibilityId, AceAction action,
+        const std::map<std::string, std::string>& actionArguments) const;
     void SetAccessibilityState(bool state);
     void UpdateFocusedAccessibilityId(int64_t accessibilityId = -1);
     void OnTooltip(const std::string& tooltip);
@@ -528,7 +603,13 @@ public:
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
     bool Backward();
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
+    void NotifyForNextTouchEvent() override;
     void CloseKeyboard();
+    void CreateOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int offsetX, int offsetY, int rectWidth,
+        int rectHeight, int pointX, int pointY);
+    void OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, int rectHeight);
+    void OnTextSelected();
+    void DestroyAnalyzerOverlay();
     WebInfoType GetWebInfoType();
     void RequestFocus();
     void SetCustomKeyboardBuilder(std::function<void()> customKeyboardBuilder)
@@ -538,9 +619,40 @@ public:
     void AttachCustomKeyboard();
     void CloseCustomKeyboard();
     void KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed);
+    void OnCursorUpdate(double x, double y, double width, double height)
+    {
+        cursorInfo_ = RectF(x, y, width, height);
+    }
+    RectF GetCaretRect() const override
+    {
+        return cursorInfo_;
+    }
     void OnAttachContext(PipelineContext *context) override;
     void OnDetachContext(PipelineContext *context) override;
     void SetUpdateInstanceIdCallback(std::function<void(int32_t)> &&callabck);
+    Rosen::NodeId GetWebSurfaceNodeId() const
+    {
+        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContextForSurface_);
+        CHECK_NULL_RETURN(rosenRenderContext, 0);
+        auto rsNode = rosenRenderContext->GetRSNode();
+        CHECK_NULL_RETURN(rsNode, 0);
+        auto surfaceNodeId = rsNode->GetId();
+        TAG_LOGD(AceLogTag::ACE_WEB, "Web surfaceNodeId is %{public}" PRIu64 "", surfaceNodeId);
+        return surfaceNodeId;
+    }
+    std::shared_ptr<Rosen::RSNode> GetSurfaceRSNode() const;
+
+    void GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId);
+    bool OnAccessibilityHoverEvent(const PointF& point) override;
+    void RegisterTextBlurCallback(TextBlurCallback&& callback);
+    void UnRegisterTextBlurCallback();
+    TextBlurCallback GetTextBlurCallback() const
+    {
+        return textBlurCallback_;
+    }
+    void RegisterWebComponentClickCallback(WebComponentClickCallback&& callback);
+    void UnregisterWebComponentClickCallback();
+    WebComponentClickCallback GetWebComponentClickCallback() const { return webComponentClickCallback_; }
 
 private:
     friend class WebContextSelectOverlay;
@@ -549,11 +661,14 @@ private:
     void CloseContextSelectionMenu();
     RectF ComputeMouseClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
     void RegistVirtualKeyBoardListener(const RefPtr<PipelineContext> &context);
+    bool IsNeedResizeVisibleViewport();
+    bool ProcessVirtualKeyBoardHide(int32_t width, int32_t height, bool safeAreaEnabled);
+    bool ProcessVirtualKeyBoardShow(int32_t width, int32_t height, double keyboard, bool safeAreaEnabled);
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
-    void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard);
+    void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard, bool isUpdate = true);
     void UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
+    void OnRebuildFrame() override;
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -614,13 +729,15 @@ private:
     void OnOverScrollModeUpdate(const int32_t value);
     void OnCopyOptionModeUpdate(const int32_t value);
     void OnMetaViewportUpdate(bool value);
-    void OnNativeEmbedModeEnabledUpdate(bool value);
+    void OnNativeEmbedModeEnabledUpdate(bool value) {};
     void OnNativeEmbedRuleTagUpdate(const std::string& tag);
     void OnNativeEmbedRuleTypeUpdate(const std::string& type);
     void OnTextAutosizingUpdate(bool isTextAutosizing);
     void OnNativeVideoPlayerConfigUpdate(const std::tuple<bool, bool>& config);
     void WindowDrag(int32_t width, int32_t height);
     void OnSmoothDragResizeEnabledUpdate(bool value);
+    void OnOverlayScrollbarEnabledUpdate(bool enable);
+    void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
     int GetWebId();
 
     void InitEvent();
@@ -654,8 +771,8 @@ private:
     void WebRequestFocus();
     void ResetDragAction();
     void InitSlideUpdateListener();
-    void CalculateHorizontalDrawRect(bool isNeedReset);
-    void CalculateVerticalDrawRect(bool isNeedReset);
+    void CalculateHorizontalDrawRect();
+    void CalculateVerticalDrawRect();
     void InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub);
     bool CheckZoomStatus(const double& curScale);
     bool ZoomOutAndIn(const double& curScale, double& scale);
@@ -669,8 +786,11 @@ private:
     void HandleOnDragDropLink(RefPtr<UnifiedData> aceData);
     void HandleOnDragLeave(int32_t x, int32_t y);
     void HandleOnDragEnd(int32_t x, int32_t y);
+    void InitTouchEventListener();
+    void UninitTouchEventListener();
     void DragDropSelectionMenu();
     void OnDragFileNameStart(const RefPtr<UnifiedData>& aceUnifiedData, const std::string& fileName);
+    bool needRestoreMenuForDrag_ = false;
     int32_t dropX_ = 0;
     int32_t dropY_ = 0;
     int onDragMoveCnt = 0;
@@ -753,8 +873,13 @@ private:
     void HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void RegisterVisibleAreaChangeCallback(const RefPtr<PipelineContext> &context);
+    void SetMouseHoverExit(bool isHoverExit)
+    {
+        isHoverExit_ = isHoverExit;
+    }
     bool CheckSafeAreaIsExpand();
     bool CheckSafeAreaKeyBoard();
+    bool IsDialogNested();
     void SelectCancel() const;
     std::string GetSelectInfo() const;
     void UpdateRunQuickMenuSelectInfo(SelectOverlayInfo& selectInfo,
@@ -763,14 +888,39 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> beginTouchHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle);
     double GetNewScale(double& scale) const;
-    void UpdateSlideOffset(bool isNeedReset = false);
-    void ClearKeyEventBeforeUp(
-        const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event);
+    void UpdateSlideOffset();
+    void ClearKeyEventByKeyCode(int32_t keyCode);
+    void SetRotation(uint32_t rotation);
+    Color GetSystemColor() const;
+    void UpdateTransformHintChangedCallbackId(std::optional<int32_t> id)
+    {
+        transformHintChangedCallbackId_ = id;
+    }
+
+    bool HasTransformHintChangedCallbackId()
+    {
+        return transformHintChangedCallbackId_.has_value();
+    }
+
+    void JsonNodePutDefaultValue(std::unique_ptr<OHOS::Ace::JsonValue>& jsonNode,
+        WebAccessibilityType key, int32_t value, int32_t defaultValue);
+    void JsonNodePutDefaultValue(std::unique_ptr<OHOS::Ace::JsonValue>& jsonNode,
+        WebAccessibilityType key, bool value);
+    void JsonNodePutDefaultValue(std::unique_ptr<OHOS::Ace::JsonValue>& jsonNode,
+        WebAccessibilityType key, std::string value);
+    void WebNodeInfoToJsonValue(std::shared_ptr<OHOS::Ace::JsonValue>& jsonNodeArray,
+                                std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> webNodeInfo,
+                                std::string& nodeTag);
+    void GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId);
+    std::string EnumTypeToString(WebAccessibilityType type);
+    std::string VectorIntToString(std::vector<int64_t>&& vec);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
     std::optional<std::string> customScheme_;
     RefPtr<WebController> webController_;
+    std::optional<int32_t> transformHintChangedCallbackId_;
+    uint32_t rotation_ = 0;
     SetWebIdCallback setWebIdCallback_ = nullptr;
     PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
     OnOpenAppLinkCallback onOpenAppLinkCallback_ = nullptr;
@@ -800,6 +950,9 @@ private:
     std::shared_ptr<FullScreenEnterEvent> fullScreenExitHandler_ = nullptr;
     bool needOnFocus_ = false;
     Size drawSize_;
+    Size visibleViewportSize_{-1.0, -1.0};
+    bool isKeyboardInSafeArea_ = false;
+    WebKeyboardAvoidMode keyBoardAvoidMode_ = WebKeyboardAvoidMode::DEFAULT;
     Size rootLayerChangeSize_;
     Size drawSizeCache_;
     Size areaChangeSize_;
@@ -814,11 +967,13 @@ private:
     bool isActive_ = true;
     bool isEnhanceSurface_ = false;
     bool isAllowWindowOpenMethod_ = false;
+    bool isShowAutofillPopup_ = false;
     OffsetF webOffset_;
     RefPtr<WebContextSelectOverlay> contextSelectOverlay_ = nullptr;
     RefPtr<WebContextMenuParam> contextMenuParam_ = nullptr;
     RefPtr<ContextMenuResult> contextMenuResult_ = nullptr;
     RectF selectArea_;
+    RectF cursorInfo_;
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> quickMenuCallback_ = nullptr;
     SelectMenuInfo selectMenuInfo_;
     bool selectOverlayDragging_ = false;
@@ -836,6 +991,7 @@ private:
     bool isWaiting_ = false;
     bool isDisableDrag_ = false;
     bool isMouseEvent_ = false;
+    bool isHoverExit_ = false;
     bool isVisible_ = true;
     bool isVisibleActiveEnable_ = true;
     bool isMemoryLevelEnable_ = true;
@@ -844,6 +1000,7 @@ private:
     bool isNeedUpdateScrollAxis_ = true;
     bool isScrollStarted_ = false;
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
+    bool isEmbedModeEnabled_ = false;
     bool scrollState_ = false;
     Axis axis_ = Axis::FREE;
     Axis syncAxis_ = Axis::NONE;
@@ -878,9 +1035,20 @@ private:
     bool isTouchUpEvent_ = false;
     int32_t zoomStatus_ = 0;
     int32_t zoomErrorCount_ = 0;
+    std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_ = nullptr;
+    bool overlayCreating_ = false;
     RefPtr<OverlayManager> keyboardOverlay_;
     std::function<void()> customKeyboardBuilder_ = nullptr;
     std::function<void(int32_t)> updateInstanceIdCallback_;
+    std::shared_ptr<TouchEventListener> touchEventListener_ = nullptr;
+    double lastKeyboardHeight_ = 0.0;
+    bool inspectorAccessibilityEnable_ = false;
+    std::optional<std::string> sharedRenderProcessToken_;
+    bool textBlurAccessibilityEnable_ = false;
+    TextBlurCallback textBlurCallback_ = nullptr;
+    WebComponentClickCallback webComponentClickCallback_ = nullptr;
+    uint32_t autoFillSessionId_ = 0;
+    std::vector<RefPtr<PageNodeInfoWrap>> pageNodeInfo_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -42,10 +42,8 @@ JsiXComponentBridge::~JsiXComponentBridge()
     if (currentContainer) {
         auto taskExecutor = currentContainer->GetTaskExecutor();
         if (taskExecutor) {
-            taskExecutor->PostTask([ renderContext = std::move(renderContext_) ] () mutable {
-                renderContext.reset();
-            },
-            TaskExecutor::TaskType::JS, "ArkUIXComponentRenderContextRelease");
+            taskExecutor->PostTask([renderContext = std::move(renderContext_)]() mutable { renderContext.reset(); },
+                TaskExecutor::TaskType::JS, "ArkUIXComponentRenderContextRelease");
         }
     }
 }
@@ -83,7 +81,7 @@ void JsiXComponentBridge::HandleContext(const shared_ptr<JsRuntime>& runtime, No
         LOGE("JsiXComponentBridge Current container null");
         return;
     }
-    auto nativeView = static_cast<AceView*>(container->GetView());
+    auto nativeView = container->GetAceView();
     if (!nativeView) {
         LOGE("JsiXComponentBridge nativeView null");
         return;

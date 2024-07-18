@@ -14,6 +14,7 @@
  */
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_span_ffi.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/text/span_model.h"
@@ -71,19 +72,16 @@ void FfiOHOSAceFrameworkSpanSetFontSize(double fontSize, int32_t unit)
     SpanModel::GetInstance()->SetFontSize(value);
 }
 
-void FfiOHOSAceFrameworkSpanSetOnClick(void (*callback)(ClickInfoForSpan newInfo))
+void FfiOHOSAceFrameworkSpanSetOnClick(void (*callback)(CJClickInfo clickInfo))
 {
-    auto lambda = [ffiOnClick = CJLambda::Create(callback)](const GestureEvent& newInfo) -> void {
-        ClickInfoForSpan ffiClickInfo {};
-        auto& globalLoc = newInfo.GetGlobalLocation();
-        ffiClickInfo.globalX = globalLoc.GetX();
-        ffiClickInfo.globalY = globalLoc.GetY();
-        auto& localLoc = newInfo.GetLocalLocation();
-        ffiClickInfo.localX = localLoc.GetX();
-        ffiClickInfo.localY = localLoc.GetY();
-        ffiClickInfo.timestamp = newInfo.GetTimeStamp().time_since_epoch().count();
-        ffiClickInfo.sourceType = static_cast<int32_t>(newInfo.GetSourceDevice());
-        ffiOnClick(ffiClickInfo);
+    auto lambda = [ffiOnClick = CJLambda::Create(callback)](const GestureEvent& event) -> void {
+        CJClickInfo cjClickInfo {};
+        CJEventTarget cjEventTarget {};
+        CJArea cjArea {};
+        CJPosition cjPosition {};
+        CJPosition cjGlobalPosition {};
+        AssambleCJClickInfo(event, cjClickInfo, cjEventTarget, cjArea, cjPosition, cjGlobalPosition);
+        ffiOnClick(cjClickInfo);
     };
 
     auto onClick = [lambda](const BaseEventInfo* info) {

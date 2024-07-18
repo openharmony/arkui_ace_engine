@@ -41,6 +41,8 @@ constexpr bool UNCHECKED = false;
 constexpr int32_t BIG_INT = 100000000;
 constexpr int32_t NEGATIVE_BIG_INT = -100000000;
 constexpr int32_t CHILD_NODE_ID = 100;
+constexpr int32_t NORMAL_INT = 2;
+constexpr int32_t NEGATIVE_INT = -2;
 } // namespace
 
 class LoadingProgressSetBuilderTestNg : public testing::Test {
@@ -536,6 +538,206 @@ HWTEST_F(LoadingProgressSetBuilderTestNg, LoadingProgressSetBuilderTest012, Test
      */
     modelNg.SetEnableLoading(NEGATIVE_BIG_INT);
     eventHub->SetEnabled(CHECKED);
+    /**
+     * @tc.steps: step3. make builderFunc
+     */
+    auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(CHECKED, config.enableloading_);
+                EXPECT_EQ(CHECKED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to pattern builderFunc
+     */
+    loadingProgressPattern->SetBuilderFunc(node);
+    loadingProgressPattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: LoadingProgressSetBuilderTest013
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressSetBuilderTestNg, LoadingProgressSetBuilderTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init LoadingProgress node
+     */
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    /**
+     * @tc.steps: step2. Set LoadingProgressConfiguration
+     */
+    modelNg.SetEnableLoading(NORMAL_INT);
+    eventHub->SetEnabled(CHECKED);
+    /**
+     * @tc.steps: step3. make builderFunc
+     */
+    auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(CHECKED, config.enableloading_);
+                EXPECT_EQ(CHECKED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to pattern builderFunc
+     */
+    loadingProgressPattern->SetBuilderFunc(node);
+    loadingProgressPattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: LoadingProgressSetBuilderTest014
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressSetBuilderTestNg, LoadingProgressSetBuilderTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init LoadingProgress node
+     */
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    /**
+     * @tc.steps: step2. Set LoadingProgressConfiguration
+     */
+    modelNg.SetEnableLoading(CHECKED);
+    eventHub->SetEnabled(NORMAL_INT);
+    /**
+     * @tc.steps: step3. make builderFunc
+     */
+    auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(CHECKED, config.enableloading_);
+                EXPECT_EQ(CHECKED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to pattern builderFunc
+     */
+    loadingProgressPattern->SetBuilderFunc(node);
+    loadingProgressPattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: LoadingProgressSetBuilderTest015
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressSetBuilderTestNg, LoadingProgressSetBuilderTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init LoadingProgress node
+     */
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    /**
+     * @tc.steps: step2. Set LoadingProgressConfiguration
+     */
+    modelNg.SetEnableLoading(NEGATIVE_BIG_INT);
+    eventHub->SetEnabled(NEGATIVE_BIG_INT);
+    /**
+     * @tc.steps: step3. make builderFunc
+     */
+    auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(CHECKED, config.enableloading_);
+                EXPECT_EQ(CHECKED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to pattern builderFunc
+     */
+    loadingProgressPattern->SetBuilderFunc(node);
+    loadingProgressPattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: LoadingProgressSetBuilderTest016
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressSetBuilderTestNg, LoadingProgressSetBuilderTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init LoadingProgress node
+     */
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    /**
+     * @tc.steps: step2. Set LoadingProgressConfiguration
+     */
+    modelNg.SetEnableLoading(NEGATIVE_INT);
+    eventHub->SetEnabled(CHECKED);
+    /**
+     * @tc.steps: step3. make builderFunc
+     */
+    auto node = [](LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
+                EXPECT_EQ(CHECKED, config.enableloading_);
+                EXPECT_EQ(CHECKED, config.enabled_);
+                RefPtr<FrameNode> child =
+                    AceType::MakeRefPtr<FrameNode>("child", CHILD_NODE_ID, AceType::MakeRefPtr<Pattern>());
+                return child;
+            };
+    /**
+     * @tc.steps: step4. Set parameters to pattern builderFunc
+     */
+    loadingProgressPattern->SetBuilderFunc(node);
+    loadingProgressPattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: LoadingProgressSetBuilderTest017
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressSetBuilderTestNg, LoadingProgressSetBuilderTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init LoadingProgress node
+     */
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    /**
+     * @tc.steps: step2. Set LoadingProgressConfiguration
+     */
+    modelNg.SetEnableLoading(CHECKED);
+    eventHub->SetEnabled(NEGATIVE_INT);
     /**
      * @tc.steps: step3. make builderFunc
      */

@@ -24,6 +24,8 @@
 #include "base/log/log.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/utils.h"
+#include "core/common/font_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/picker/picker_base_component.h"
@@ -329,6 +331,42 @@ bool DatePickerColumnPattern::OnDirtyLayoutWrapperSwap(
     return true;
 }
 
+void DatePickerColumnPattern::InitTextFontFamily()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_VOID(stackNode);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto datePickerPattern = parentNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    auto dataPickerRowLayoutProperty = parentNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(dataPickerRowLayoutProperty);
+    hasUserDefinedDisappearFontFamily_ = datePickerPattern->GetHasUserDefinedDisappearFontFamily();
+    hasUserDefinedNormalFontFamily_ = datePickerPattern->GetHasUserDefinedNormalFontFamily();
+    hasUserDefinedSelectedFontFamily_ = datePickerPattern->GetHasUserDefinedSelectedFontFamily();
+    auto fontManager = pipeline->GetFontManager();
+    CHECK_NULL_VOID(fontManager);
+    if (!(fontManager->GetAppCustomFont().empty())) {
+        hasAppCustomFont_ = true;
+    }
+    auto appCustomFontFamily = Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont());
+    if (hasAppCustomFont_ && !hasUserDefinedDisappearFontFamily_) {
+        dataPickerRowLayoutProperty->UpdateDisappearFontFamily(appCustomFontFamily);
+    }
+    if (hasAppCustomFont_ && !hasUserDefinedNormalFontFamily_) {
+        dataPickerRowLayoutProperty->UpdateFontFamily(appCustomFontFamily);
+    }
+    if (hasAppCustomFont_ && !hasUserDefinedSelectedFontFamily_) {
+        dataPickerRowLayoutProperty->UpdateSelectedFontFamily(appCustomFontFamily);
+    }
+}
+
 void DatePickerColumnPattern::FlushCurrentOptions(
     bool isDown, bool isUpateTextContentOnly, bool isUpdateAnimationProperties)
 {
@@ -346,6 +384,8 @@ void DatePickerColumnPattern::FlushCurrentOptions(
     dataPickerLayoutProperty->UpdatePadding(PaddingProperty { CalcLength(PADDING_WEIGHT, DimensionUnit::PX) });
     dataPickerLayoutProperty->UpdateAlignSelf(FlexAlign::CENTER);
 
+    InitTextFontFamily();
+
     auto datePickerPattern = parentNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_VOID(datePickerPattern);
     auto dataPickerRowLayoutProperty = parentNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
@@ -353,6 +393,7 @@ void DatePickerColumnPattern::FlushCurrentOptions(
     auto showOptionCount = datePickerPattern->GetShowCount();
     uint32_t totalOptionCount = datePickerPattern->GetOptionCount(host);
     uint32_t currentIndex = host->GetPattern<DatePickerColumnPattern>()->GetCurrentIndex();
+    CHECK_EQUAL_VOID(totalOptionCount, 0);
     currentIndex = currentIndex % totalOptionCount;
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
 
@@ -800,7 +841,7 @@ void DatePickerColumnPattern::HandleDragEnd()
     }
     DatePickerScrollDirection dir =
         scrollDelta_ > 0.0 ? DatePickerScrollDirection::DOWN : DatePickerScrollDirection::UP;
-    int32_t middleIndex = GetShowCount() / 2;
+    uint32_t middleIndex = GetShowCount() / 2;
     auto shiftDistance = (dir == DatePickerScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
                                                                 : optionProperties_[middleIndex].nextDistance;
     auto shiftThreshold = shiftDistance / 2;
@@ -1183,7 +1224,7 @@ void DatePickerColumnPattern::OnAroundButtonClick(RefPtr<DatePickerEventParam> p
     if (clickBreak_) {
         return;
     }
-    int32_t middleIndex = GetShowCount() / 2;
+    uint32_t middleIndex = GetShowCount() / 2;
     int32_t step = param->itemIndex_ - middleIndex;
     if (step != 0) {
         if (animation_) {
@@ -1214,7 +1255,7 @@ void DatePickerColumnPattern::PlayRestAnimation()
 {
     DatePickerScrollDirection dir =
         scrollDelta_ > 0.0 ? DatePickerScrollDirection::DOWN : DatePickerScrollDirection::UP;
-    int32_t middleIndex = GetShowCount() / 2;
+    uint32_t middleIndex = GetShowCount() / 2;
     double shiftDistance = (dir == DatePickerScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
                                                                   : optionProperties_[middleIndex].nextDistance;
     double shiftThreshold = shiftDistance / 2;

@@ -25,6 +25,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_font_manager.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "base/geometry/dimension.h"
@@ -36,6 +37,7 @@
 #include "core/components/picker/picker_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_property.h"
@@ -82,6 +84,8 @@ constexpr double DISTANCE = 20.0;
 const OffsetF CHILD_OFFSET(0.0f, 10.0f);
 const SizeF TEST_TEXT_FRAME_SIZE { 100.0f, 10.0f };
 const SizeF COLUMN_SIZE { 100.0f, 200.0f };
+const std::vector<std::string> DEFAULT_VALUE = { "1", "2", "3" };
+const std::vector<std::string> CUSTOM_VALUE = { "appCustomFont" };
 } // namespace
 
 class TextPickerColumnTestNg : public testing::Test {
@@ -187,6 +191,7 @@ void TextPickerColumnTestNg::TearDownTestSuite()
 void TextPickerColumnTestNg::SetUp()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto fontManager = AceType::MakeRefPtr<MockFontManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
         if (type == IconTheme::TypeId()) {
             return AceType::MakeRefPtr<IconTheme>();
@@ -1019,7 +1024,7 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternFlushCurrentOptions015, 
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    ASSERT_FALSE(textLayoutProperty->HasFontWeight());
+    ASSERT_TRUE(textLayoutProperty->HasFontWeight());
 }
 
 void InnerHandleScrollUp003Init()
@@ -1135,7 +1140,7 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternInnerHandleScrollUp004, 
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    ASSERT_FALSE(textLayoutProperty->HasFontSize());
+    ASSERT_TRUE(textLayoutProperty->HasFontSize());
 }
 
 /**
@@ -1195,7 +1200,7 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternInnerHandleScrollDown003
     ASSERT_NE(textLayoutProperty, nullptr);
     std::string content = textLayoutProperty->GetContent().value_or("");
     EXPECT_EQ("test1", content);
-    ASSERT_FALSE(textLayoutProperty->HasFontSize());
+    ASSERT_TRUE(textLayoutProperty->HasFontSize());
 }
 
 /**
@@ -1815,6 +1820,9 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest010, TestSize.Level1
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->GetShiftDistanceForLandscape(COLUMN_INDEX_0, dir);
     double distance = 0.0f - textPickerColumnPattern->optionProperties_[COLUMN_INDEX_0].height;
     EXPECT_EQ(textPickerColumnPattern_->GetShiftDistanceForLandscape(COLUMN_INDEX_0, dir), distance);
@@ -1863,5 +1871,111 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest012, TestSize.Level1
     for (uint32_t i = 0; i < counts; i++) {
         EXPECT_EQ(textPickerColumnPattern->algorithmOffset_.emplace_back(i), i);
     }
+}
+
+/**
+ * @tc.name: TextPickerColumnPatternInitTextFontFamily001
+ * @tc.desc: Test InitTextFontFamily.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternInitTextFontFamily001, TestSize.Level1)
+{
+    InitTextPickerColumnTestNg();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->fontManager_ = AceType::MakeRefPtr<MockFontManager>();
+    auto textPickerPattern = frameNode_->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto textPickerLayoutProperty = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(textPickerLayoutProperty, nullptr);
+    /**
+     * @tc.cases: case. cover hasAppCustomFont_ == false && ALL FontFamily_ == false.
+     */
+    textPickerColumnPattern_->InitTextFontFamily();
+    EXPECT_EQ(textPickerLayoutProperty->GetDisappearFontFamilyValue(DEFAULT_VALUE), DEFAULT_VALUE);
+    EXPECT_EQ(textPickerLayoutProperty->GetFontFamilyValue(DEFAULT_VALUE), DEFAULT_VALUE);
+    EXPECT_EQ(textPickerLayoutProperty->GetSelectedFontFamilyValue(DEFAULT_VALUE), DEFAULT_VALUE);
+    /**
+     * @tc.cases: case. cover hasAppCustomFont_ == false && ALL FontFamily_ == true.
+     */
+    textPickerPattern->HasUserDefinedDisappearFontFamily(true);
+    textPickerPattern->HasUserDefinedNormalFontFamily(true);
+    textPickerPattern->HasUserDefinedSelectedFontFamily(true);
+    textPickerColumnPattern_->InitTextFontFamily();
+    EXPECT_EQ(textPickerLayoutProperty->GetDisappearFontFamilyValue(DEFAULT_VALUE), DEFAULT_VALUE);
+    EXPECT_EQ(textPickerLayoutProperty->GetFontFamilyValue(DEFAULT_VALUE), DEFAULT_VALUE);
+    EXPECT_EQ(textPickerLayoutProperty->GetSelectedFontFamilyValue(DEFAULT_VALUE), DEFAULT_VALUE);
+}
+
+/**
+ * @tc.name: TextPickerColumnPatternInitTextFontFamily002
+ * @tc.desc: Test InitTextFontFamily.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternInitTextFontFamily002, TestSize.Level1)
+{
+    InitTextPickerColumnTestNg();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->fontManager_ = AceType::MakeRefPtr<MockFontManager>();
+    pipeline->fontManager_->appCustomFont_ = "appCustomFont";
+    auto textPickerPattern = frameNode_->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto textPickerLayoutProperty = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(textPickerLayoutProperty, nullptr);
+    /**
+     * @tc.cases: case. cover hasAppCustomFont_ == true && ALL FontFamily_ == true.
+     */
+    textPickerPattern->HasUserDefinedDisappearFontFamily(true);
+    textPickerPattern->HasUserDefinedNormalFontFamily(true);
+    textPickerPattern->HasUserDefinedSelectedFontFamily(true);
+    textPickerColumnPattern_->InitTextFontFamily();
+    EXPECT_EQ(textPickerLayoutProperty->GetDisappearFontFamilyValue(DEFAULT_VALUE), DEFAULT_VALUE);
+    EXPECT_EQ(textPickerLayoutProperty->GetFontFamilyValue(DEFAULT_VALUE), DEFAULT_VALUE);
+    EXPECT_EQ(textPickerLayoutProperty->GetSelectedFontFamilyValue(DEFAULT_VALUE), DEFAULT_VALUE);
+    /**
+     * @tc.cases: case. cover hasAppCustomFont_ == true && ALL FontFamily_ == false.
+     */
+    textPickerPattern->HasUserDefinedDisappearFontFamily(false);
+    textPickerPattern->HasUserDefinedNormalFontFamily(false);
+    textPickerPattern->HasUserDefinedSelectedFontFamily(false);
+    textPickerColumnPattern_->InitTextFontFamily();
+    EXPECT_EQ(textPickerLayoutProperty->GetDisappearFontFamilyValue(DEFAULT_VALUE), CUSTOM_VALUE);
+    EXPECT_EQ(textPickerLayoutProperty->GetFontFamilyValue(DEFAULT_VALUE), CUSTOM_VALUE);
+    EXPECT_EQ(textPickerLayoutProperty->GetSelectedFontFamilyValue(DEFAULT_VALUE), CUSTOM_VALUE);
+}
+
+/**
+ * @tc.name: TextPickerColumnPatternSetCanLoop001
+ * @tc.desc: Test SetCanLoop.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternSetCanLoop001, TestSize.Level1)
+{
+    InitTextPickerColumnTestNg();
+    /**
+     * @tc.cases: case. cover isLoop_ == isLoop.
+     */
+    textPickerColumnPattern_->SetCanLoop(true);
+    EXPECT_TRUE(textPickerColumnPattern_->isLoop_);
+
+    textPickerColumnPattern_->SetCanLoop(false);
+    EXPECT_EQ(textPickerColumnPattern_->overscroller_.loopTossOffset_, 0.0);
+    /**
+     * @tc.cases: case. cover isLoop_ != isLoop.
+     */
+    textPickerColumnPattern_->isLoop_ = false;
+    textPickerColumnPattern_->SetCanLoop(true);
+    EXPECT_EQ(textPickerColumnPattern_->overscroller_.loopTossOffset_, 0.0);
+
+    textPickerColumnPattern_->isLoop_ = false;
+    textPickerColumnPattern_->SetTossStatus(true);
+    textPickerColumnPattern_->SetCanLoop(true);
+    EXPECT_EQ(textPickerColumnPattern_->overscroller_.loopTossOffset_, 0.0);
+
+    textPickerColumnPattern_->isLoop_ = true;
+    textPickerColumnPattern_->SetTossStatus(true);
+    textPickerColumnPattern_->SetCanLoop(false);
+    EXPECT_EQ(textPickerColumnPattern_->overscroller_.loopTossOffset_, 0.0);
 }
 } // namespace OHOS::Ace::NG

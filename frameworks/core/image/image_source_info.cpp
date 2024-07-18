@@ -105,7 +105,8 @@ SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
         return SrcType::INTERNAL;
     } else if (head == "data") {
         static constexpr char BASE64_PATTERN[] =
-            "^data:image/(jpeg|JPEG|jpg|JPG|png|PNG|ico|ICO|gif|GIF|bmp|BMP|webp|WEBP|heic|heif|HEIF);base64$";
+            "^data:image/(jpeg|JPEG|jpg|JPG|png|PNG|ico|ICO|gif|GIF|bmp|BMP|webp|WEBP|heic|heif|HEIF"
+            "|sut|astc);base64$";
         if (IsValidBase64Head(uri, BASE64_PATTERN)) {
             return SrcType::BASE64;
         }
@@ -235,7 +236,8 @@ bool ImageSourceInfo::operator==(const ImageSourceInfo& info) const
     if (isSvg_ && fillColor_ != info.fillColor_) {
         return false;
     }
-    return ((!pixmap_ && !info.pixmap_) || (pixmap_ && info.pixmap_ && pixmap_ == info.pixmap_)) &&
+    return ((!pixmap_ && !info.pixmap_) ||
+               (pixmap_ && info.pixmap_ && pixmap_->GetRawPixelMapPtr() == info.pixmap_->GetRawPixelMapPtr())) &&
            GetSrc() == info.GetSrc() && resourceId_ == info.resourceId_;
 }
 

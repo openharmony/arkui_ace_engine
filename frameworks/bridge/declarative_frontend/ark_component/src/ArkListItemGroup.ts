@@ -14,6 +14,19 @@
  */
 
 /// <reference path='./import.ts' />
+class ListItemGroupInitializeModifier extends ModifierWithKey<ListItemGroupParam> {
+  constructor(value: ListItemGroupParam) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listItemGroupinitialize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().listItemGroup.resetListItemGroupInitialize(node);
+    } else {
+      getUINativeModule().listItemGroup.setListItemGroupInitialize(node, this.value?.space, this.value?.style);
+    }
+  }
+}
 class ListItemGroupDividerModifier extends ModifierWithKey<DividerStyle> {
   constructor(value: DividerStyle) {
     super(value);
@@ -35,6 +48,28 @@ class ListItemGroupDividerModifier extends ModifierWithKey<DividerStyle> {
   }
 }
 
+class ListItemGroupChildrenMainSizeModifier extends ModifierWithKey<ChildrenMainSize> {
+  constructor(value: ChildrenMainSize) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listItemGroupChildrenMainSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().listItemGroup.resetListItemGroupChildrenMainSize(node);
+    } else {
+      getUINativeModule().listItemGroup.setListItemGroupChildrenMainSize(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return true;
+  }
+}
+
+interface ListItemGroupParam {
+  space: string | number;
+  style: ListItemGroupStyle;
+}
+
 class ArkListItemGroupComponent extends ArkComponent implements ListItemGroupAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -42,6 +77,23 @@ class ArkListItemGroupComponent extends ArkComponent implements ListItemGroupAtt
   divider(value: { strokeWidth: any; color?: any; startMargin?: any; endMargin?: any; } | null): this {
     modifierWithKey(this._modifiersWithKeys, ListItemGroupDividerModifier.identity, ListItemGroupDividerModifier, value);
     return this;
+  }
+  childrenMainSize(value: ChildrenMainSize): this {
+    modifierWithKey(this._modifiersWithKeys, ListItemGroupChildrenMainSizeModifier.identity, ListItemGroupChildrenMainSizeModifier, value);
+    return this;
+  }
+  initialize(value: Object[]): this {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, ListItemGroupInitializeModifier.identity,
+        ListItemGroupInitializeModifier, value[0] as ListItemGroupParam);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, ListItemGroupInitializeModifier.identity,
+        ListItemGroupInitializeModifier, undefined);
+    }
+    return this;
+  }
+  allowChildTypes(): string[] {
+    return ['ListItem'];
   }
 }
 

@@ -23,6 +23,7 @@ namespace OHOS::Ace::Framework {
 class JSRefresh : public JSContainerBase {
 public:
     static bool ParseCustomBuilder(const JSCallbackInfo& info);
+    static bool ParseRefreshingContent(const JSRef<JSObject>& paramObject);
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
     static void OnStateChange(const JSCallbackInfo& args);

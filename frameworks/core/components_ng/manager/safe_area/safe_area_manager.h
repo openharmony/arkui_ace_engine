@@ -129,6 +129,8 @@ public:
         needExpandNodes_.insert(node);
     }
 
+    bool AddNodeToExpandListIfNeeded(const WeakPtr<FrameNode>& node);
+
     void ClearNeedExpandNode()
     {
         needExpandNodes_.clear();
@@ -187,6 +189,7 @@ public:
     bool IsSafeAreaValid() const;
     // check if the page node needs to be avoid keyboard
     bool CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameNode);
+    PaddingPropertyF SafeAreaToPadding(bool withoutProcess = false);
 private:
     bool isAtomicService_ = false;
 

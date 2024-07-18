@@ -86,7 +86,7 @@ void FlexCreateFlexComponent(CJFlexParams params)
         FlexModel::GetInstance()->SetMainAxisAlign(static_cast<FlexAlign>(justifyVal));
     }
     if (params.alignItems >= 0 && params.alignItems <= CROSS_ALIGN_MAX_VALUE) {
-        FlexModel::GetInstance()->SetCrossAxisAlign(static_cast<FlexAlign>(params.alignItems + 1));
+        FlexModel::GetInstance()->SetCrossAxisAlign(static_cast<FlexAlign>(params.alignItems));
     }
 }
 void FlexCreateWrapComponent(CJFlexParams params)

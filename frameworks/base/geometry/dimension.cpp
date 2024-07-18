@@ -166,6 +166,39 @@ double Dimension::ConvertToPxWithSize(double size) const
     return ConvertToPx();
 }
 
+double Dimension::ConvertToPxDistribute(std::optional<float> minOptional, std::optional<float> maxOptional) const
+{
+    auto minFontScale = minOptional.value_or(0.85f);
+    auto maxFontScale = maxOptional.value_or(3.2f);
+    if (!maxOptional.has_value()) {
+        return ConvertToPxByAppFontScale(minFontScale);
+    }
+    return ConvertToPxByCustomFontScale(minFontScale, maxFontScale);
+}
+
+double Dimension::ConvertToPxByCustomFontScale(float minFontScale, float maxFontScale) const
+{
+    if (unit_ != DimensionUnit::FP) {
+        return ConvertToPx();
+    }
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, value_);
+    float fontScale = std::clamp(pipeline->GetFontScale(), minFontScale, maxFontScale);
+    return value_ * pipeline->GetDipScale() * fontScale;
+}
+
+double Dimension::ConvertToPxByAppFontScale(float minFontScale) const
+{
+    if (unit_ != DimensionUnit::FP) {
+        return ConvertToPx();
+    }
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, value_);
+    float maxFontScale = 3.2f;
+    float fontScale = std::clamp(pipeline->GetFontScale(), minFontScale, maxFontScale);
+    return value_ * pipeline->GetDipScale() * fontScale;
+}
+
 std::string Dimension::ToString() const
 {
     static const int32_t unitsNum = 6;
@@ -177,6 +210,9 @@ std::string Dimension::ToString() const
     }
     if (unit_ == DimensionUnit::NONE) {
         return StringUtils::DoubleToString(value_).append("none");
+    }
+    if (unit_ == DimensionUnit::INVALID) {
+        return StringUtils::DoubleToString(value_).append("invalid");
     }
     if (units[static_cast<int>(unit_)] == units[percentIndex]) {
         return StringUtils::DoubleToString(value_ * percentUnit).append(units[static_cast<int>(unit_)]);

@@ -116,13 +116,13 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     return this.dependentElmtIdsByProperty_.dumpInfoDependencies(this.owningView_, dumpDependantElements);
   }
 
-  public dumpDependentElmtIdsObj(isTrackedMode: boolean): PropertyDependenciesInfo {
-    return this.dependentElmtIdsByProperty_.dumpInfoDependenciesObj(this.owningView_, isTrackedMode);
+  public dumpDependentElmtIdsObj(isTrackedMode: boolean, isProfiler: boolean): PropertyDependenciesInfo {
+    return this.dependentElmtIdsByProperty_.dumpInfoDependenciesObj(this.owningView_, isTrackedMode, isProfiler);
   }
 
   public debugInfoElmtId(elmtId: number): string {
     if (this.owningView_) {
-      return this.owningView_.debugInfoElmtId(elmtId);
+      return this.owningView_.debugInfoElmtId(elmtId) as string;
     }
     return '<unknown element id ' + elmtId + ', missing owning view>';
   }
@@ -177,35 +177,16 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       : false;
   }
 
-  public getRawObjectValue(): T {
-    let wrappedValue: T = this.getUnmonitored();
-    if (typeof wrappedValue !== 'object') {
-      return this.getUnmonitored();
-    }
-    let rawObject: T = ObservedObject.GetRawObject(wrappedValue);
-    if (rawObject instanceof Map) {
-      return MapInfo.toObject(rawObject).keyToValue as unknown as T;
-    } else if (rawObject instanceof Set) {
-      return SetInfo.toObject(rawObject).values as unknown as T;
-    } else if (rawObject instanceof Date) {
-      return DateInfo.toObject(rawObject).date as unknown as T;
-    }
-    return rawObject;
+  public getOwningView() :ViewPUInfo {
+    return { componentName: this.owningView_?.constructor.name, id: this.owningView_?.id__() }
   }
 
-  public dumpSyncPeers(changedTrackPropertyName?: string): ObservedPropertyInfo<T>[] {
+  public dumpSyncPeers(isProfiler: boolean, changedTrackPropertyName?: string): ObservedPropertyInfo<T>[] {
     let res: ObservedPropertyInfo<T>[] = [];
     this.subscriberRefs_.forEach((subscriber: IPropertySubscriber) => {
       if ('debugInfo' in subscriber) {
         const observedProp = subscriber as ObservedPropertyAbstractPU<any>;
-        let syncPeer: ObservedPropertyInfo<T> = {
-          decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
-          changedTrackPropertyName: changedTrackPropertyName,
-          value: this.getRawObjectValue(),
-          dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() == 'object'? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()): false),
-          owningView: { componentName: observedProp.owningView_?.constructor.name, id: observedProp.owningView_?.id__() }
-        };
-        res.push(syncPeer);
+        res.push(stateMgmtDFX.getObservedPropertyInfo(observedProp, isProfiler, changedTrackPropertyName));
       }
     });
     return res;
@@ -213,15 +194,8 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
 
   protected onDumpProfiler(changedTrackPropertyName?: string): void {
     let res: DumpInfo = new DumpInfo();
-    let observedPropertyInfo: ObservedPropertyInfo<T> = {
-      decorator: this.debugInfoDecorator(), propertyName: this.info(), id: this.id__(), changedTrackPropertyName: changedTrackPropertyName,
-      value: this.getRawObjectValue(),
-      dependentElementIds: this.dumpDependentElmtIdsObj(typeof this.getUnmonitored() == 'object'? !TrackedObject.isCompatibilityMode(this.getUnmonitored()): false),
-      owningView: { componentName: this.owningView_?.constructor.name, id: this.owningView_?.id__() },
-      changeId: stateMgmtDFX.changeId_, syncPeers: this.dumpSyncPeers()
-    };
     res.viewInfo = { componentName: this.owningView_?.constructor.name, id: this.owningView_?.id__() };
-    res.observedPropertiesInfo.push(observedPropertyInfo);
+    res.observedPropertiesInfo.push(stateMgmtDFX.getObservedPropertyInfo(this, true, changedTrackPropertyName));
     if (this.owningView_) {
       try {
         this.owningView_.sendStateInfo(JSON.stringify(res));
@@ -301,7 +275,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   // notify owning ViewPU and peers of a variable assignment
   // also property/item changes to  ObservedObjects of class object type, which use compat mode
   // Date and Array are notified as if there had been an assignment.
-  protected notifyPropertyHasChangedPU(isFromSource: boolean = false) {
+  protected notifyPropertyHasChangedPU() {
     stateMgmtProfiler.begin('ObservedPropertyAbstractPU.notifyPropertyHasChangedPU');
     stateMgmtConsole.debug(`${this.debugInfo()}: notifyPropertyHasChangedPU.`);
     if (this.owningView_) {
@@ -311,11 +285,8 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
 
         // send changed observed property to profiler
         // only will be true when enable profiler
-        if (stateMgmtDFX.enableProfiler_) {
-          stateMgmtConsole.warn(`notifyPropertyHasChangedPU in profiler mode`);
-          if (isFromSource && !this.changeNotificationIsOngoing_) {
-            stateMgmtDFX.changeId_++;
-          }
+        if (stateMgmtDFX.enableProfiler) {
+          stateMgmtConsole.debug(`notifyPropertyHasChangedPU in profiler mode`);
           this.onDumpProfiler();
         }
       } else {
@@ -324,20 +295,18 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       }
     }
     this.subscriberRefs_.forEach((subscriber) => {
-      if (subscriber) {
-        if ('syncPeerHasChanged' in subscriber) {
-          (subscriber as unknown as PeerChangeEventReceiverPU<T>).syncPeerHasChanged(this);
-        } else {
-          stateMgmtConsole.warn(`${this.debugInfo()}: notifyPropertyHasChangedPU: unknown subscriber ID 'subscribedId' error!`);
-        }
+      if (subscriber && typeof subscriber === 'object' && 'syncPeerHasChanged' in subscriber) {
+        (subscriber as unknown as PeerChangeEventReceiverPU<T>).syncPeerHasChanged(this);
+      } else {
+        stateMgmtConsole.warn(`${this.debugInfo()}: notifyPropertyHasChangedPU: unknown subscriber ID 'subscribedId' error!`);
       }
     });
     stateMgmtProfiler.end();
-  }  
+  }
 
 
   // notify owning ViewPU and peers of a ObservedObject @Track property's assignment
-  protected notifyTrackedObjectPropertyHasChanged(changedPropertyName : string, isFromSource: boolean = false) : void {
+  protected notifyTrackedObjectPropertyHasChanged(changedPropertyName : string) : void {
     stateMgmtProfiler.begin('ObservedPropertyAbstract.notifyTrackedObjectPropertyHasChanged');
     stateMgmtConsole.debug(`${this.debugInfo()}: notifyTrackedObjectPropertyHasChanged.`);
     if (this.owningView_) {
@@ -346,11 +315,8 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
         this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElmtIdsByProperty_.getTrackedObjectPropertyDependencies(changedPropertyName, 'notifyTrackedObjectPropertyHasChanged'));
         // send changed observed property to profiler
         // only will be true when enable profiler
-        if (stateMgmtDFX.enableProfiler_) {
+        if (stateMgmtDFX.enableProfiler) {
           stateMgmtConsole.debug(`notifyPropertyHasChangedPU in profiler mode`);
-          if (isFromSource) {
-            stateMgmtDFX.changeId_++;
-          }
           this.onDumpProfiler(changedPropertyName);
         }
       } else {
@@ -563,7 +529,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     stateMgmtConsole.debug(`${this.debugInfo()}: onTrackedObjectPropertyHasChangedPU: property '${changedPropertyName}' of \
       object value has changed.`);
 
-    this.notifyTrackedObjectPropertyHasChanged(changedPropertyName, true);
+    this.notifyTrackedObjectPropertyHasChanged(changedPropertyName);
   }
 
   /**
@@ -577,7 +543,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     stateMgmtConsole.debug(`${this.debugInfo()}: onTrackedObjectPropertyCompatModeHasChangedPU: property '${changedPropertyName}' of \
       object value has changed.`);
 
-    this.notifyPropertyHasChangedPU(true);
+    this.notifyPropertyHasChangedPU();
   }
 
 
@@ -662,17 +628,18 @@ class PropertyDependencies {
   }
 
 
-  public dumpInfoDependenciesObj(owningView: ViewPU | undefined = undefined, isTrackedMode): PropertyDependenciesInfo {
-    const formatElmtId = owningView ? (elmtId => owningView.debugInfoElmtId(elmtId)) : (elmtId => elmtId);
+  public dumpInfoDependenciesObj(owningView: ViewPU | undefined = undefined, isTrackedMode: boolean, isProfiler: boolean): PropertyDependenciesInfo {
 
-    let trackedObjectPropertyDependenciesDumpInfo: Map<string, Array<string | number>> = new Map<string, Array<string | number>>();
+    const formatElmtId = owningView ? (elmtId => owningView.debugInfoElmtId(elmtId, isProfiler)) : (elmtId => elmtId);
+
+    let trackedObjectPropertyDependenciesDumpInfo: Map<string, Array<ElementType | number | string>> = new Map<string, Array<ElementType | number | string>>();
 
     this.trackedObjectPropertyDependencies_.forEach((propertyElmtId, propertyName) => {
       trackedObjectPropertyDependenciesDumpInfo.set(propertyName, Array.from(propertyElmtId).map(formatElmtId));
     });
 
     let PropertyDependenciesInfo: PropertyDependenciesInfo = {
-      mode: isTrackedMode ? 'Track Mode' : 'Compatible mode',
+      mode: isTrackedMode ? 'Track Mode' : 'Compatible Mode',
       trackPropertiesDependencies: MapInfo.toObject(trackedObjectPropertyDependenciesDumpInfo).keyToValue,
       propertyDependencies: Array.from(this.propertyDependencies_).map(formatElmtId),
     }

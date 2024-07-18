@@ -100,6 +100,16 @@ public:
         parentNWebId_ = parentNWebId;
     }
 
+    void SetSharedRenderProcessToken(const std::string& sharedRenderProcessToken)
+    {
+        shared_render_process_token_ = sharedRenderProcessToken;
+    }
+
+    const std::string& GetSharedRenderProcessToken() const
+    {
+        return shared_render_process_token_;
+    }
+
     void SetData(const std::string& data)
     {
         CHECK_NULL_VOID(declaration_);
@@ -1158,9 +1168,9 @@ private:
     bool isAllowWindowOpenMethod_ = false;
     OnMouseCallback onMouseEvent_;
     OnKeyEventCallback onKeyEvent_;
-    float initialScale_;
+    float initialScale_ = 0;
     bool isInitialScaleSet_ = false;
-    int32_t backgroundColor_;
+    int32_t backgroundColor_ = 0;
     bool isBackgroundColor_ = false;
     bool isNeedGestureAccess_ = true;
     bool isNativeEmbedMode_ = false;
@@ -1179,6 +1189,7 @@ private:
     OverScrollMode OverScrollMode_ = OverScrollMode::NEVER;
     CopyOptions CopyOptionMode_ = CopyOptions::Distributed;
     std::tuple<bool, bool> native_video_player_config_{false, false};
+    std::string shared_render_process_token_;
 };
 
 } // namespace OHOS::Ace

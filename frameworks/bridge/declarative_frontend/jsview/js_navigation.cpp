@@ -19,8 +19,10 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/referenced.h"
+#include "base/system_bar/system_bar_style.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_navigation_function.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
@@ -264,12 +266,14 @@ void JSNavigation::Create(const JSCallbackInfo& info)
     std::string moduleName;
     std::string pagePath;
     if (info.Length() == 1) {
+        // input format: navPathStack/pathInfo
         if (!info[0]->IsObject()) {
             return;
         }
         // instance of NavPathStack
         JSValueWrapper valueWrapper = info[0].Get().GetLocalHandle();
         if (!JSNavPathStack::CheckIsValid(valueWrapper)) {
+            // first parameter = pathInfo{'moduleName': stringA, 'pagePath': stringB, 'isUserCreateStack': bool}
             TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current stack is not navPathStack");
             auto infoObj = JSRef<JSObject>::Cast(info[0]);
             if (!infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->IsString() ||
@@ -280,9 +284,11 @@ void JSNavigation::Create(const JSCallbackInfo& info)
             moduleName = infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->ToString();
             pagePath = infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->ToString();
         } else {
+            // first parameter = navPathStack
             newObj = JSRef<JSObject>::Cast(info[0]);
         }
-    } else if (info.Length() > 1) {
+    } else if (info.Length() == 2) {
+        // parameter = navPathStack(maybe empty) + pathInfo
         if (!info[0]->IsObject() || !info[1]->IsObject()) {
             TAG_LOGE(AceLogTag::ACE_NAVIGATION, "stack or pageInfo is invalid");
             return;
@@ -293,8 +299,16 @@ void JSNavigation::Create(const JSCallbackInfo& info)
             TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current stack is not navPathStack");
             return;
         }
-        newObj = JSRef<JSObject>::Cast(info[0]);
+        // pathInfo{'moduleName': stringA, 'pagePath': stringB, 'isUserCreateStack': bool}
         auto infoObj = JSRef<JSObject>::Cast(info[1]);
+        auto isUserCreateStack = infoObj->GetProperty(NG::IS_USER_CREATE_STACK);
+        bool isUserDefined = true;
+        if (isUserCreateStack->IsBoolean()) {
+            isUserDefined = isUserCreateStack->ToBoolean();
+        }
+        if (isUserDefined) {
+            newObj = JSRef<JSObject>::Cast(info[0]);
+        }
         if (!infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->IsString() ||
             !infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->IsString()) {
             TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current pageInfo is invalid");
@@ -369,6 +383,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSNavigation>::StaticMethod("customNavContentTransition", &JSNavigation::SetCustomNavContentTransition);
     JSClass<JSNavigation>::StaticMethod("ignoreLayoutSafeArea", &JSNavigation::SetIgnoreLayoutSafeArea);
+    JSClass<JSNavigation>::StaticMethod("systemBarStyle", &JSNavigation::SetSystemBarStyle);
     JSClass<JSNavigation>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -442,6 +457,7 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
     }
     if (info.Length() > 1) {
         ParseBackgroundOptions(info[1], options.bgOptions);
+        ParseBarOptions(info[1], options.brOptions);
     }
     NavigationModel::GetInstance()->SetTitlebarOptions(std::move(options));
 }
@@ -930,5 +946,18 @@ void JSNavigation::SetIgnoreLayoutSafeArea(const JSCallbackInfo& info)
         opts.edges = safeAreaEdge;
     }
     NavigationModel::GetInstance()->SetIgnoreLayoutSafeArea(opts);
+}
+
+void JSNavigation::SetSystemBarStyle(const JSCallbackInfo& info)
+{
+    RefPtr<SystemBarStyle> style = nullptr;
+    if (info.Length() == 1 && info[0]->IsObject()) {
+        auto styleObj = JsConverter::ConvertJsValToNapiValue(info[0]);
+        auto env = GetCurrentEnv();
+        if (env) {
+            style = SystemBarStyle::CreateStyleFromJsObj(env, styleObj);
+        }
+    }
+    NavigationModel::GetInstance()->SetSystemBarStyle(style);
 }
 } // namespace OHOS::Ace::Framework

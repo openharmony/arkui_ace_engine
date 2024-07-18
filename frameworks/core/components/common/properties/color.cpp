@@ -216,6 +216,11 @@ Color Color::ColorFromString(const std::string& str)
     return Color(value);
 }
 
+std::string Color::ToString() const
+{
+    return ColorToString();
+}
+
 Color Color::FromARGB(uint8_t alpha, uint8_t red, uint8_t green, uint8_t blue)
 {
     ColorParam colorValue {
@@ -397,7 +402,7 @@ Color Color::ConvertLinearToGamma(double alpha, double linearRed, double linearG
 
 bool Color::IsHexNumber(std::string& colorStr)
 {
-    for (size_t i = 0; i < colorStr.size(); i++) {
+    for (size_t i = 1; i < colorStr.size(); i++) {
         if (colorStr[i] >= '0' && colorStr[i] <= '9') {
             continue;
         }
@@ -435,10 +440,10 @@ bool Color::MatchColorWithMagic(std::string& colorStr, uint32_t maskAlpha, Color
     if (!FastCheckColorType(colorStr, "#", EXPECT_MAGIC_COLOR_LENGTHS)) {
         return false;
     }
-    colorStr.erase(0, 1);
     if (!IsHexNumber(colorStr)) {
         return false;
     }
+    colorStr.erase(0, 1);
     auto value = stoul(colorStr, nullptr, COLOR_STRING_BASE);
     if (colorStr.length() < COLOR_STRING_SIZE_STANDARD) {
         // no alpha specified, set alpha to 0xff
@@ -453,10 +458,10 @@ bool Color::MatchColorWithMagicMini(std::string& colorStr, uint32_t maskAlpha, C
     if (!FastCheckColorType(colorStr, "#", EXPECT_MAGIC_MINI_COLOR_LENGTHS)) {
         return false;
     }
-    colorStr.erase(0, 1);
     if (!IsHexNumber(colorStr)) {
         return false;
     }
+    colorStr.erase(0, 1);
     std::string newColorStr;
     // translate #rgb or #rgba to #rrggbb or #rrggbbaa
     for (auto& c : colorStr) {

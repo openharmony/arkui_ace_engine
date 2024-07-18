@@ -59,7 +59,7 @@ public:
     void SetOnEditChanged(std::function<void(bool)>&& func) override;
     void SetOnSubmit(std::function<void(int32_t)>&& func) override;
     void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override {};
-    void SetOnChange(std::function<void(const std::string&)>&& func) override;
+    void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& func) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override {};
     void SetOnSecurityStateChange(std::function<void(bool)>&& func) override {};
     void SetOnContentScroll(std::function<void(float, float)>&& func) override {};
@@ -68,7 +68,6 @@ public:
     void SetOnPaste(std::function<void(const std::string&)>&& func) override;
     void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func) override {};
     void SetCopyOption(CopyOptions copyOption) override;
-    void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) override;
     void ResetMaxLength() override {};
     static void InitTextInputDefaultStyle();
     void SetForegroundColor(const Color& value) override {};
@@ -76,7 +75,7 @@ public:
     void SetOnChangeEvent(std::function<void(const std::string&)>&& func) override {};
     void SetBackgroundColor(const Color& color, bool tmp) override;
     void SetHeight(const Dimension& value) override;
-    void SetPadding(NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) override;
+    void SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) override;
     void SetBackBorder() override;
     void SetHoverEffect(HoverEffectType value) override;
     void SetOnClick(std::function<void(const ClickInfo&)>&& func) override;
@@ -98,6 +97,7 @@ public:
     void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func) override {};
     void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) override {};
     void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) override {};
+    void SetEnablePreviewText(bool enablePreviewText) override {};
 
 private:
     static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

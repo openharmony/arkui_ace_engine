@@ -58,6 +58,7 @@
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/event/ace_events.h"
+#include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace::NG {
 
@@ -117,9 +118,6 @@ void TextPattern::OnAttachToFrameNode()
             host->GetRenderContext()->SetClipToFrame(true);
         }
     }
-    if (host->GetTag() != V2::RICH_EDITOR_ETS_TAG) {
-        host->GetRenderContext()->SetUsingContentRectForRenderFrame(true, true);
-    }
     InitSurfaceChangedCallback();
     InitSurfacePositionChangedCallback();
     pipeline->AddWindowStateChangedCallback(host->GetId());
@@ -150,6 +148,7 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
     }
     pipeline->RemoveOnAreaChangeNode(node->GetId());
     pipeline->RemoveWindowStateChangedCallback(node->GetId());
+    UnregisterMarqueeNodeChangeListener();
 }
 
 void TextPattern::CloseSelectOverlay()
@@ -215,7 +214,7 @@ void TextPattern::CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& care
 
 void TextPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
 {
-    auto textContentGlobalOffset = parentGlobalOffset_ + contentRect_.GetOffset();
+    auto textContentGlobalOffset = selectOverlay_->GetHandleGlobalOffset() + contentRect_.GetOffset();
     auto paragraphPaintOffset = textContentGlobalOffset - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
 
     // calculate firstHandleOffset, secondHandleOffset and handlePaintSize
@@ -331,7 +330,7 @@ int32_t TextPattern::GetTextContentLength()
 void TextPattern::HandleLongPress(GestureEvent& info)
 {
     HandleSpanLongPressEvent(info);
-    if (copyOption_ == CopyOptions::None || isMousePressed_) {
+    if (!IsSelectableAndCopy() || isMousePressed_) {
         return;
     }
     auto host = GetHost();
@@ -522,18 +521,15 @@ void TextPattern::HandleOnCopy()
         return;
     }
     auto value = GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
-    if (value.empty()) {
-        HiddenMenu();
-        return;
-    }
-    if (copyOption_ != CopyOptions::None) {
-        if (isSpanStringMode_) {
+    if (IsSelectableAndCopy()) {
+        if (isSpanStringMode_ && !externalParagraph_) {
             HandleOnCopySpanString();
-        } else {
+        } else if (!value.empty()) {
             clipboard_->SetData(value, copyOption_);
         }
     }
     HiddenMenu();
+    CHECK_NULL_VOID(!value.empty());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextEventHub>();
@@ -544,7 +540,7 @@ void TextPattern::HandleOnCopy()
 void TextPattern::HandleOnCopySpanString()
 {
     RefPtr<PasteDataMix> pasteData = clipboard_->CreatePasteDataMix();
-    auto subSpanString = spanString->GetSubSpanString(textSelector_.GetTextStart(),
+    auto subSpanString = styledString_->GetSubSpanString(textSelector_.GetTextStart(),
         textSelector_.GetTextEnd() - textSelector_.GetTextStart());
     std::vector<uint8_t> tlvData;
     subSpanString->EncodeTlv(tlvData);
@@ -576,8 +572,8 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
             CHECK_NULL_VOID(renderContext);
             auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
             bool ifHaveObscured = textPattern->GetSpanItemChildren().empty() &&
-                std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
-                [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
+                                  std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
+                                      [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
             auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
             if (textLayoutProperty->GetCalcLayoutConstraint() &&
@@ -586,14 +582,17 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
                 auto selfIdealSizeHeight = textLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height();
                 auto constraint = textLayoutProperty->GetLayoutConstraint();
                 if ((selfIdealSizeWidth.has_value() && NearZero(selfIdealSizeWidth->GetDimension().ConvertToPxWithSize(
-                                                           constraint->percentReference.Width()))) ||
+                            constraint->percentReference.Width()))) ||
                     (selfIdealSizeHeight.has_value() &&
                         NearZero(selfIdealSizeHeight->GetDimension().ConvertToPxWithSize(
                             constraint->percentReference.Height())))) {
                     return;
                 }
             }
-            if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) == CopyOptions::None ||
+
+            auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+            if (mode == TextSelectableMode::UNSELECTABLE ||
+                textLayoutProperty->GetCopyOptionValue(CopyOptions::None) == CopyOptions::None ||
                 textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
                 return;
             }
@@ -680,6 +679,9 @@ void TextPattern::OnHandleTouchUp()
 
 void TextPattern::HandleClickEvent(GestureEvent& info)
 {
+    if (selectOverlay_->IsClickAtHandle(info)) {
+        return;
+    }
     if (dataDetectorAdapter_->hasClickedAISpan_) {
         dataDetectorAdapter_->hasClickedAISpan_ = false;
     } else if (hasClicked_) {
@@ -776,7 +778,7 @@ bool TextPattern::CheckClickedOnSpanOrText(RectF textContentRect, const Offset& 
         textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
     }
     if (textContentRect.IsInRegion(
-            PointF(static_cast<float>(localLocation.GetX()), static_cast<float>(localLocation.GetY()))) &&
+        PointF(static_cast<float>(localLocation.GetX()), static_cast<float>(localLocation.GetY()))) &&
         !spans_.empty() && pManager_) {
         if (CalculateClickedSpanPosition(textOffset)) {
             return true;
@@ -812,7 +814,7 @@ bool TextPattern::CalculateClickedSpanPosition(const PointF& textOffset)
 
 void TextPattern::HandleSpanSingleClickEvent(GestureEvent& info, RectF textContentRect, bool& isClickOnSpan)
 {
-    if (copyOption_ != CopyOptions::None) {
+    if (IsSelectableAndCopy()) {
         CheckClickedOnSpanOrText(textContentRect, info.GetLocalLocation());
     }
     TAG_LOGD(AceLogTag::ACE_TEXT, "HandleSpanSingleClickEvent clickedSpanPosition_: %{public}d", clickedSpanPosition_);
@@ -865,7 +867,7 @@ void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc
                                              const std::string& action) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (pattern->copyOption_ == CopyOptions::None) {
+        if (!(pattern->IsSelectableAndCopy())) {
             return;
         }
         pattern->CloseSelectOverlay();
@@ -873,10 +875,11 @@ void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc
             pattern->HandleSelectionChange(aiSpan.start, aiSpan.end);
             pattern->HandleOnCopy();
         } else if (action == std::string(SELECT_ACTION)) {
-            pattern->HandleSelectionChange(aiSpan.start, aiSpan.end);
             if (calculateHandleFunc == nullptr) {
+                pattern->SetTextSelection(aiSpan.start, aiSpan.end);
                 pattern->CalculateHandleOffsetAndShowOverlay();
             } else {
+                pattern->HandleSelectionChange(aiSpan.start, aiSpan.end);
                 calculateHandleFunc();
             }
             if (showSelectOverlayFunc == nullptr) {
@@ -919,13 +922,13 @@ bool TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandl
         aiRect = textSelector_.firstHandle.CombineRectT(textSelector_.secondHandle);
     }
 
-    return dataDetectorAdapter_->ShowUIExtensionMenu(aiSpan, aiRect, host);
+    return dataDetectorAdapter_->ShowUIExtensionMenu(aiSpan, aiRect, host, IsSelectableAndCopy());
 }
 
 void TextPattern::HandleDoubleClickEvent(GestureEvent& info)
 {
     CheckOnClickEvent(info);
-    if (copyOption_ == CopyOptions::None || textForDisplay_.empty()) {
+    if (!IsSelectableAndCopy() || textForDisplay_.empty()) {
         return;
     }
     auto host = GetHost();
@@ -989,7 +992,7 @@ void TextPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
         RectF textContentRect = contentRect;
         textContentRect.SetTop(contentRect.GetY() - std::min(baselineOffset, 0.0f));
         textContentRect.SetHeight(contentRect.Height() - std::max(baselineOffset, 0.0f));
-        if (textPattern->GetCopyOptions() == CopyOptions::None &&
+        if (textPattern->GetCopyOptions() == CopyOptions::None && !textPattern->NeedShowAIDetect() &&
             !textPattern->CheckClickedOnSpanOrText(textContentRect, localLocation)) {
             return GestureJudgeResult::REJECT;
         }
@@ -1065,7 +1068,7 @@ void TextPattern::InitHoverEvent()
 
 void TextPattern::HandleMouseEvent(const MouseInfo& info)
 {
-    if (copyOption_ == CopyOptions::None) {
+    if (!IsSelectableAndCopy()) {
         return;
     }
 
@@ -1255,7 +1258,7 @@ bool TextPattern::HandleKeyEvent(const KeyEvent& keyEvent)
         return false;
     }
 
-    if (keyEvent.IsCtrlWith(KeyCode::KEY_C) && copyOption_ != CopyOptions::None) {
+    if (keyEvent.IsCtrlWith(KeyCode::KEY_C)) {
         HandleOnCopy();
         return true;
     }
@@ -1269,23 +1272,22 @@ bool TextPattern::HandleKeyEvent(const KeyEvent& keyEvent)
 
 void TextPattern::HandleOnSelect(KeyCode code)
 {
-    auto start = textSelector_.GetStart();
     auto end = textSelector_.GetEnd();
     switch (code) {
         case KeyCode::KEY_DPAD_LEFT: {
-            HandleSelection(start, end - 1);
+            HandleSelection(true, end - 1);
             break;
         }
         case KeyCode::KEY_DPAD_RIGHT: {
-            HandleSelection(start, end + 1);
+            HandleSelection(false, end + 1);
             break;
         }
         case KeyCode::KEY_DPAD_UP: {
-            HandleSelectionUp(start, end);
+            HandleSelectionUp();
             break;
         }
         case KeyCode::KEY_DPAD_DOWN: {
-            HandleSelectionDown(start, end);
+            HandleSelectionDown();
             break;
         }
         default:
@@ -1293,56 +1295,60 @@ void TextPattern::HandleOnSelect(KeyCode code)
     }
 }
 
-void TextPattern::HandleSelectionUp(int32_t start, int32_t end)
+void TextPattern::HandleSelectionUp()
 {
+    auto end = textSelector_.GetEnd();
     auto line = pManager_->GetLineCount();
     if (line == 1) {
-        HandleSelection(start, 0);
+        HandleSelection(true, 0);
         return;
     }
     CaretMetricsF secondHandleMetrics;
-    CalcCaretMetricsByPosition(0, secondHandleMetrics, TextAffinity::UPSTREAM);
-    auto firstIndexOffsetY = secondHandleMetrics.offset.GetY();
     CalcCaretMetricsByPosition(textSelector_.destinationOffset, secondHandleMetrics, TextAffinity::UPSTREAM);
     auto secondOffsetX = secondHandleMetrics.offset.GetX();
     auto secondOffsetY = secondHandleMetrics.offset.GetY();
-    float height = GetTextHeight();
-    if (secondOffsetY - height < firstIndexOffsetY) {
-        end = 0;
-    } else {
-        Offset offset = { secondOffsetX, secondOffsetY - height * 0.5 };
-        end = GetHandleIndex(offset);
+    double height = GetTextHeight(end, false);
+    Offset offset = { secondOffsetX, secondOffsetY - height * 0.5 };
+    auto caculateIndex = GetHandleIndex(offset);
+    if (end == caculateIndex) {
+        caculateIndex = 0;
     }
-    HandleSelection(start, end);
+    HandleSelection(true, caculateIndex);
 }
 
-void TextPattern::HandleSelectionDown(int32_t start, int32_t end)
+void TextPattern::HandleSelectionDown()
 {
+    auto end = textSelector_.GetEnd();
     auto line = pManager_->GetLineCount();
+    auto lastIndex = GetActualTextLength();
     if (line == 1) {
-        HandleSelection(start, GetTextLength());
+        HandleSelection(true, lastIndex);
         return;
     }
     CaretMetricsF secondHandleMetrics;
-    CalcCaretMetricsByPosition(GetTextLength(), secondHandleMetrics, TextAffinity::UPSTREAM);
-    auto lastIndexOffsetY = secondHandleMetrics.offset.GetY();
     CalcCaretMetricsByPosition(textSelector_.destinationOffset, secondHandleMetrics, TextAffinity::UPSTREAM);
     auto secondOffsetX = secondHandleMetrics.offset.GetX();
-    auto secondOffsetY = secondHandleMetrics.offset.GetY();
-    float height = GetTextHeight();
-    if (secondOffsetY + height > lastIndexOffsetY) {
-        end = GetTextLength();
-    } else {
-        Offset offset = { secondOffsetX, secondOffsetY + height + height * 0.5 };
-        end = GetHandleIndex(offset);
+    double height = GetTextHeight(end, true);
+    auto caculateIndex = GetHandleIndex({ secondOffsetX, height });
+    if (NearZero(height) || caculateIndex == end || caculateIndex > lastIndex) {
+        caculateIndex = lastIndex;
     }
-    HandleSelection(start, end);
+    HandleSelection(true, caculateIndex);
 }
 
-void TextPattern::HandleSelection(int32_t start, int32_t end)
+void TextPattern::HandleSelection(bool isEmojiStart, int32_t end)
 {
-    if (start < 0 || start > GetTextLength() || end < 0 || end > GetTextLength()) {
+    auto start = textSelector_.GetStart();
+    auto lastIndex = GetActualTextLength();
+    if (start < 0 || start > lastIndex || end < 0 || end > lastIndex) {
         return;
+    }
+    int32_t emojiStartIndex;
+    int32_t emojiEndIndex;
+    bool isIndexInEmoji = TextEmojiProcessor::IsIndexInEmoji(end, GetSelectedText(0, lastIndex),
+        emojiStartIndex, emojiEndIndex);
+    if (isIndexInEmoji) {
+        end = isEmojiStart ? emojiStartIndex : emojiEndIndex;
     }
     HandleSelectionChange(start, end);
     CalculateHandleOffsetAndShowOverlay();
@@ -1352,20 +1358,59 @@ void TextPattern::HandleSelection(int32_t start, int32_t end)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-float TextPattern::GetTextHeight()
+double TextPattern::GetTextHeight(int32_t index, bool isNextLine)
 {
-    if (pManager_ && !NearZero(pManager_->GetHeight()) && pManager_->GetLineCount() > 0) {
-        return pManager_->GetHeight() / pManager_->GetLineCount();
+    double lineHeight = 0.0;
+    auto lineCount = static_cast<int32_t>(pManager_->GetLineCount());
+    for (auto lineNumber = 0; lineNumber < lineCount; lineNumber++) {
+        auto lineMetrics = GetLineMetrics(lineNumber);
+        auto startIndex = static_cast<int32_t>(lineMetrics.startIndex);
+        auto endIndex = static_cast<int32_t>(lineMetrics.endIndex);
+        lineHeight += lineMetrics.height;
+        if (isNextLine) {
+            if (index <= endIndex && endIndex != GetActualTextLength()) {
+                return lineHeight;
+            }
+        } else {
+            auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_RETURN(textLayoutProperty, 0);
+            auto maxLines = textLayoutProperty->GetMaxLinesValue(Infinity<uint32_t>());
+            if ((index <= endIndex && startIndex != 0) ||
+                ((lineNumber + 1) == static_cast<int32_t>(maxLines) && lineNumber != 0)) {
+                return GetLineMetrics(lineNumber - 1).height;
+            }
+        }
     }
     return 0.0;
 }
 
-int32_t TextPattern::GetTextLength()
+int32_t TextPattern::GetActualTextLength()
 {
-    if (!spans_.empty()) {
-        return static_cast<int32_t>(GetWideText().length()) + placeholderCount_;
+    auto lineCount = static_cast<int32_t>(pManager_->GetLineCount());
+    return GetLineMetrics(lineCount - 1).endIndex;
+}
+
+void TextPattern::SetTextSelectableMode(TextSelectableMode value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (value == TextSelectableMode::SELECTABLE_FOCUSABLE) {
+        focusHub->SetFocusable(true);
+        focusHub->SetIsFocusOnTouch(true);
+    } else {
+        focusHub->SetFocusable(false);
+        focusHub->SetIsFocusOnTouch(false);
     }
-    return static_cast<int32_t>(GetWideText().length());
+}
+
+bool TextPattern::IsSelectableAndCopy()
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, false);
+    auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+    return mode != TextSelectableMode::UNSELECTABLE && copyOption_ != CopyOptions::None;
 }
 
 bool TextPattern::IsDraggable(const Offset& offset)
@@ -1374,7 +1419,7 @@ bool TextPattern::IsDraggable(const Offset& offset)
     CHECK_NULL_RETURN(host, false);
     auto eventHub = host->GetEventHub<EventHub>();
     bool draggable = eventHub->HasOnDragStart();
-    if (copyOption_ != CopyOptions::None && draggable &&
+    if (IsSelectableAndCopy() && draggable &&
         GreatNotEqual(textSelector_.GetTextEnd(), textSelector_.GetTextStart())) {
         // Determine if the pan location is in the selected area
         auto selectedRects = pManager_->GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
@@ -1466,7 +1511,7 @@ void TextPattern::AddUdmfData(const RefPtr<Ace::DragEvent>& event)
     };
     if (isSpanStringMode_) {
         std::vector<uint8_t> arr;
-        auto dragSpanString = spanString->GetSubSpanString(recoverStart_, recoverEnd_ - recoverStart_);
+        auto dragSpanString = styledString_->GetSubSpanString(recoverStart_, recoverEnd_ - recoverStart_);
         dragSpanString->EncodeTlv(arr);
         UdmfClient::GetInstance()->AddSpanStringRecord(unifiedData, arr);
     } else {
@@ -1735,7 +1780,6 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
 {
     TextStyleResult textStyle;
     textStyle.fontColor = node->GetTextColorValue(Color::BLACK).ColorToString();
-    textStyle.fontSize = node->GetFontSizeValue(Dimension(16.0f, DimensionUnit::VP)).ConvertToVp();
     textStyle.fontStyle = static_cast<int32_t>(node->GetItalicFontStyleValue(OHOS::Ace::FontStyle::NORMAL));
     textStyle.fontWeight = static_cast<int32_t>(node->GetFontWeightValue(FontWeight::NORMAL));
     std::string fontFamilyValue;
@@ -1749,11 +1793,20 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
     textStyle.fontFamily = !fontFamilyValue.empty() ? fontFamilyValue : defaultFontFamily.front();
     textStyle.decorationType = static_cast<int32_t>(node->GetTextDecorationValue(TextDecoration::NONE));
     textStyle.decorationColor = node->GetTextDecorationColorValue(Color::BLACK).ColorToString();
+    textStyle.decorationStyle = static_cast<int32_t>(node->GetTextDecorationStyleValue(TextDecorationStyle::SOLID));
     textStyle.textAlign = static_cast<int32_t>(node->GetTextAlignValue(TextAlign::START));
     auto lm = node->GetLeadingMarginValue({});
-    textStyle.lineHeight = node->GetLineHeightValue(Dimension()).ConvertToVp();
-    textStyle.letterSpacing = node->GetLetterSpacingValue(Dimension()).ConvertToVp();
-    textStyle.lineSpacing = node->GetLineSpacingValue(Dimension()).ConvertToVp();
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        textStyle.fontSize = node->GetFontSizeValue(Dimension(16.0f, DimensionUnit::VP)).ConvertToFp();
+        textStyle.lineHeight = node->GetLineHeightValue(Dimension()).ConvertToFp();
+        textStyle.letterSpacing = node->GetLetterSpacingValue(Dimension()).ConvertToFp();
+        textStyle.lineSpacing = node->GetLineSpacingValue(Dimension()).ConvertToFp();
+    } else {
+        textStyle.fontSize = node->GetFontSizeValue(Dimension(16.0f, DimensionUnit::VP)).ConvertToVp();
+        textStyle.lineHeight = node->GetLineHeightValue(Dimension()).ConvertToVp();
+        textStyle.letterSpacing = node->GetLetterSpacingValue(Dimension()).ConvertToVp();
+        textStyle.lineSpacing = node->GetLineSpacingValue(Dimension()).ConvertToVp();
+    }
     textStyle.fontFeature = node->GetFontFeatureValue(ParseFontFeatureSettings("\"pnum\" 1"));
     textStyle.leadingMarginSize[RichEditorLeadingRange::LEADING_START] = lm.size.Width().ToString();
     textStyle.leadingMarginSize[RichEditorLeadingRange::LEADING_END] = lm.size.Height().ToString();
@@ -1819,11 +1872,17 @@ ResultObject TextPattern::GetTextResultObject(RefPtr<UINode> uinode, int32_t ind
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
         resultObject.type = SelectSpanType::TYPESPAN;
-        resultObject.valueString = spanItem->content;
+        SetResultObjectText(resultObject, spanItem);
         auto spanNode = DynamicCast<SpanNode>(uinode);
         resultObject.textStyle = GetTextStyleObject(spanNode);
     }
     return resultObject;
+}
+
+void TextPattern::SetResultObjectText(ResultObject& resultObject, const RefPtr<SpanItem>& spanItem)
+{
+    CHECK_NULL_VOID(spanItem);
+    resultObject.valueString = spanItem->content;
 }
 
 ResultObject TextPattern::GetSymbolSpanResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end)
@@ -1879,9 +1938,13 @@ SymbolSpanStyle TextPattern::GetSymbolSpanStyleObject(const RefPtr<SpanNode>& no
     }
     symbolColorValue = symbolColorValue.substr(0, symbolColorValue.size() ? symbolColorValue.size() - 1 : 0);
     symbolSpanStyle.symbolColor = !symbolColorValue.empty() ? symbolColorValue : SYMBOL_COLOR;
-    symbolSpanStyle.fontSize = node->GetFontSizeValue(Dimension(DIMENSION_VALUE, DimensionUnit::VP)).ConvertToVp();
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        symbolSpanStyle.fontSize = node->GetFontSizeValue(Dimension(DIMENSION_VALUE, DimensionUnit::VP)).ConvertToFp();
+    } else {
+        symbolSpanStyle.fontSize = node->GetFontSizeValue(Dimension(DIMENSION_VALUE, DimensionUnit::VP)).ConvertToVp();
+    }
     symbolSpanStyle.fontWeight = static_cast<int32_t>(node->GetFontWeightValue(FontWeight::NORMAL));
-    symbolSpanStyle.renderingStrategy = node->GetSymbolRenderingStrategyValue(0);
+    symbolSpanStyle.renderingStrategy = static_cast<int32_t>(node->GetSymbolRenderingStrategyValue(0));
     symbolSpanStyle.effectStrategy = node->GetSymbolEffectStrategyValue(0);
     return symbolSpanStyle;
 }
@@ -1952,14 +2015,12 @@ std::vector<RectF> TextPattern::GetTextBoxes()
 
 OffsetF TextPattern::GetParentGlobalOffset() const
 {
+    selectOverlay_->UpdateHandleGlobalOffset();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, {});
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, {});
     auto rootOffset = pipeline->GetRootRect().GetOffset();
-    if (selectOverlay_->HasRenderTransform()) {
-        return selectOverlay_->GetPaintOffsetWithoutTransform() - rootOffset;
-    }
     return host->GetPaintRectOffset() - rootOffset;
 }
 
@@ -1989,6 +2050,7 @@ bool TextPattern::BetweenSelectedPosition(const Offset& globalOffset)
 
 void TextPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     auto host = GetHost();
@@ -2023,12 +2085,22 @@ void TextPattern::OnModifyDone()
     const auto& children = host->GetChildren();
     if (children.empty()) {
         std::string textCache = textForDisplay_;
-        textForDisplay_ = textLayoutProperty->GetContent().value_or("");
+        if (!isSpanStringMode_) {
+            textForDisplay_ = textLayoutProperty->GetContent().value_or("");
+        }
         if (textCache != textForDisplay_) {
             host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
             dataDetectorAdapter_->aiDetectInitialized_ = false;
             CloseSelectOverlay();
             ResetSelection();
+        }
+
+        if (textDetectEnable_) {
+            auto entityJson = JsonUtil::ParseJsonString(textForDisplay_);
+            if (!entityJson->IsNull() && !entityJson->GetValue("bundleName")->IsNull() &&
+                dataDetectorAdapter_->ParseOriText(entityJson, textForDisplay_)) {
+                textLayoutProperty->UpdateContent(textForDisplay_);
+            }
         }
     }
 
@@ -2038,6 +2110,7 @@ void TextPattern::OnModifyDone()
         dataDetectorAdapter_->textForAI_ = textForDisplay_;
         dataDetectorAdapter_->StartAITask();
     }
+    RegisterMarqueeNodeChangeListener();
 }
 
 void TextPattern::RecoverCopyOption()
@@ -2073,7 +2146,7 @@ void TextPattern::InitCopyOption()
 
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
-    if (copyOption_ != CopyOptions::None) {
+    if (IsSelectableAndCopy()) {
         auto context = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(context);
         if (!clipboard_ && context) {
@@ -2092,7 +2165,7 @@ void TextPattern::InitCopyOption()
             gestureEventHub->SetTextDraggable(false);
         }
     }
-    if (onClick_ || copyOption_ != CopyOptions::None) {
+    if (onClick_ || IsSelectableAndCopy() || CanStartAITask()) {
         InitClickEvent(gestureEventHub);
     }
     auto eventHub = host->GetEventHub<EventHub>();
@@ -2198,7 +2271,7 @@ void TextPattern::ActSetSelection(int32_t start, int32_t end)
 
 bool TextPattern::IsShowHandle()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(theme, false);
@@ -2381,14 +2454,13 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
     while (!nodes.empty()) {
         auto current = nodes.top();
         nodes.pop();
-        // TODO: Add the judgment of display.
         if (!current.node) {
             continue;
         }
         UpdateContainerChildren(current.containerSpanNode, current.node);
         auto spanNode = DynamicCast<SpanNode>(current.node);
         auto tag = current.node->GetTag();
-        if (spanNode && tag == V2::SYMBOL_SPAN_ETS_TAG) {
+        if (spanNode && tag == V2::SYMBOL_SPAN_ETS_TAG && spanNode->GetSpanItem()->GetSymbolUnicode() != 0) {
             spanNode->CleanSpanItemChildren();
             UpdateChildProperty(spanNode);
             spanNode->MountToParagraph();
@@ -2589,6 +2661,7 @@ void TextPattern::AddImageToSpanItem(const RefPtr<UINode>& child)
             CHECK_NULL_VOID(gesture);
             gesture->SetHitTestMode(HitTestMode::HTMNONE);
         }
+        imageSpanItem->UpdatePlaceholderBackgroundStyle(imageSpanNode);
         spans_.emplace_back(imageSpanItem);
         spans_.back()->imageNodeId = imageSpanNode->GetId();
         return;
@@ -2614,21 +2687,12 @@ void TextPattern::AddImageToSpanItem(const RefPtr<UINode>& child)
 
 void TextPattern::DumpAdvanceInfo()
 {
-    auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProp);
-    DumpLog::GetInstance().AddDesc(std::string("Content: ").append(textLayoutProp->GetContent().value_or(" ")));
-    DumpLog::GetInstance().AddDesc(
-        std::string("FontColor: ")
-            .append((textStyle_.has_value() ? textStyle_->GetTextColor() : Color::BLACK).ColorToString()));
+    DumpLog::GetInstance().AddDesc(std::string("contentRect :").append(contentRect_.ToString()));
     DumpLog::GetInstance().AddDesc(
         std::string("FontSize: ")
-            .append((textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(DIMENSION_VALUE, DimensionUnit::FP))
-                        .ToString()));
-    DumpLog::GetInstance().AddDesc(std::string("contentRect-->x:")
-                                       .append(std::to_string(contentRect_.GetX()))
-                                       .append(" y:")
-                                       .append(std::to_string(contentRect_.GetY())));
-    DumpLog::GetInstance().AddDesc(std::string("Selection: ").append("(").append(textSelector_.ToString()).append(")"));
+            .append(
+            (textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(
+                DIMENSION_VALUE, DimensionUnit::FP)).ToString()));
     if (SystemProperties::GetDebugEnabled() && pManager_) {
         DumpLog::GetInstance().AddDesc(std::string("from TextEngine paragraphs_ info :"));
         DumpLog::GetInstance().AddDesc(
@@ -2650,30 +2714,56 @@ void TextPattern::DumpAdvanceInfo()
 
     DumpLog::GetInstance().AddDesc(
         std::string("BindSelectionMenu: ").append(std::to_string(selectionMenuMap_.empty())));
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto fontScale = pipeline->GetFontScale();
+    auto fontWeightScale = pipeline->GetFontWeightScale();
+    DumpLog::GetInstance().AddDesc(std::string("fontScale: ").append(std::to_string(fontScale)));
+    DumpLog::GetInstance().AddDesc(std::string("fontWeightScale: ").append(std::to_string(fontWeightScale)));
 }
 
 void TextPattern::DumpInfo()
 {
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
-    DumpLog::GetInstance().AddDesc(std::string("Content: ").append(textLayoutProp->GetContent().value_or(" ")));
-    DumpLog::GetInstance().AddDesc(
-        std::string("FontColor: ")
-            .append((textStyle_.has_value() ? textStyle_->GetTextColor() : Color::BLACK).ColorToString()));
-    DumpLog::GetInstance().AddDesc(
+    auto& dumpLog = DumpLog::GetInstance();
+    if (!IsSetObscured()) {
+        dumpLog.AddDesc(std::string("Content: ").append(textLayoutProp->GetContent().value_or(" ")));
+    }
+    dumpLog.AddDesc(std::string("FontColor: ")
+                        .append((textStyle_.has_value() ? textStyle_->GetTextColor() : Color::BLACK).ColorToString()));
+    dumpLog.AddDesc(
         std::string("FontSize: ")
             .append((textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(DIMENSION_VALUE, DimensionUnit::FP))
                         .ToString()));
-    DumpLog::GetInstance().AddDesc(std::string("Selection: ").append("(").append(textSelector_.ToString()).append(")"));
-    DumpLog::GetInstance().AddDesc(
-        std::string("LineBreakStrategy: ").append(GetLineBreakStrategyInJson(textStyle_->GetLineBreakStrategy())));
+    if (textStyle_.has_value()) {
+        dumpLog.AddDesc(std::string("FontWeight: ").append(StringUtils::ToString(textStyle_->GetFontWeight())));
+        dumpLog.AddDesc(std::string("FontStyle: ").append(StringUtils::ToString(textStyle_->GetFontStyle())));
+        dumpLog.AddDesc(std::string("LineHeight: ").append(textStyle_->GetLineHeight().ToString()));
+        dumpLog.AddDesc(std::string("LineSpacing: ").append(textStyle_->GetLineSpacing().ToString()));
+        dumpLog.AddDesc(std::string("BaselineOffset: ").append(textStyle_->GetBaselineOffset().ToString()));
+        dumpLog.AddDesc(std::string("TextIndent: ").append(textStyle_->GetTextIndent().ToString()));
+        dumpLog.AddDesc(std::string("LetterSpacing: ").append(textStyle_->GetLetterSpacing().ToString()));
+        dumpLog.AddDesc(std::string("TextOverflow: ").append(StringUtils::ToString(textStyle_->GetTextOverflow())));
+        dumpLog.AddDesc(std::string("TextAlign: ").append(StringUtils::ToString(textStyle_->GetTextAlign())));
+        dumpLog.AddDesc(std::string("WordBreak: ").append(StringUtils::ToString(textStyle_->GetWordBreak())));
+        dumpLog.AddDesc(std::string("TextCase: ").append(StringUtils::ToString(textStyle_->GetTextCase())));
+        dumpLog.AddDesc(std::string("EllipsisMode: ").append(StringUtils::ToString(textStyle_->GetEllipsisMode())));
+        dumpLog.AddDesc(
+            std::string("LineBreakStrategy: ").append(GetLineBreakStrategyInJson(textStyle_->GetLineBreakStrategy())));
+    }
+    dumpLog.AddDesc(std::string("Selection: ").append("(").append(textSelector_.ToString()).append(")"));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (renderContext->HasForegroundColor() || renderContext->HasForegroundColorStrategy()) {
-        DumpLog::GetInstance().AddDesc(
+    if (renderContext->HasForegroundColor()) {
+        dumpLog.AddDesc(
             std::string("ForegroundColor: ").append(renderContext->GetForegroundColorValue().ColorToString()));
+    }
+    if (SystemProperties::GetDebugEnabled()) {
+        dumpLog.AddDesc(std::string("-----DumpAdvanceInfo-----"));
+        DumpAdvanceInfo();
     }
 }
 
@@ -2711,6 +2801,11 @@ void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
             case PropertyInfo::FONTFAMILY:
                 if (textLayoutProp->HasFontFamily()) {
                     child->UpdateFontFamilyWithoutFlushDirty(textLayoutProp->GetFontFamily().value());
+                }
+                break;
+            case PropertyInfo::FONTFEATURE:
+                if (textLayoutProp->HasFontFeature()) {
+                    child->UpdateFontFeatureWithoutFlushDirty(textLayoutProp->GetFontFeature().value());
                 }
                 break;
             case PropertyInfo::TEXTDECORATION:
@@ -2769,7 +2864,9 @@ void TextPattern::SetAccessibilityAction()
             CHECK_NULL_VOID(pattern);
             auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
-            if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None) {
+            auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+            if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None &&
+                mode != TextSelectableMode::UNSELECTABLE) {
                 pattern->ActSetSelection(start, end);
             }
         });
@@ -2779,7 +2876,9 @@ void TextPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(pattern);
         auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None) {
+        auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+        if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None &&
+            mode != TextSelectableMode::UNSELECTABLE) {
             pattern->CloseSelectOverlay(true);
             pattern->ResetSelection();
         }
@@ -2790,7 +2889,9 @@ void TextPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(pattern);
         auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None) {
+        auto mode = textLayoutProperty->GetTextSelectableModeValue(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+        if (textLayoutProperty->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None &&
+            mode != TextSelectableMode::UNSELECTABLE) {
             pattern->HandleOnCopy();
             pattern->CloseSelectOverlay(true);
             pattern->ResetSelection();
@@ -2896,10 +2997,6 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
     CHECK_NULL_RETURN(geometryNode, paintMethod);
     auto frameSize = geometryNode->GetFrameSize();
 
-    auto gestureHub = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_RETURN(gestureHub, paintMethod);
-    std::vector<DimensionRect> hotZoneRegions;
-    DimensionRect hotZoneRegion;
     auto clip = false;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         clip = true;
@@ -2912,10 +3009,8 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
             contentRect_.GetY() + static_cast<float>(pManager_->GetHeight() + std::fabs(baselineOffset_));
         boundsRect.SetWidth(boundsWidth);
         boundsRect.SetHeight(boundsHeight);
-
-        hotZoneRegion.SetSize(DimensionSize(Dimension(std::max(boundsWidth, frameSize.Width())),
-            Dimension(std::max(frameSize.Height(), boundsRect.Height()))));
-
+        
+        SetResponseRegion(frameSize, boundsRect.GetSize());
         ProcessBoundRectByTextShadow(boundsRect);
         ProcessBoundRectByTextMarquee(boundsRect);
         if ((LessNotEqual(frameSize.Width(), boundsRect.Width()) ||
@@ -2930,11 +3025,26 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
         }
         overlayMod_->SetBoundsRect(boundsRect);
     } else {
-        hotZoneRegion.SetSize(DimensionSize(Dimension(frameSize.Width()), Dimension(frameSize.Height())));
+        SetResponseRegion(frameSize, frameSize);
     }
+    return paintMethod;
+}
+
+void TextPattern::SetResponseRegion(const SizeF& frameSize, const SizeF& boundsSize)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (isUserSetResponseRegion_) {
+        return;
+    }
+    std::vector<DimensionRect> hotZoneRegions;
+    DimensionRect hotZoneRegion;
+    hotZoneRegion.SetSize(DimensionSize(Dimension(std::max(boundsSize.Width(), frameSize.Width())),
+        Dimension(std::max(frameSize.Height(), boundsSize.Height()))));
     hotZoneRegions.emplace_back(hotZoneRegion);
     gestureHub->SetResponseRegion(hotZoneRegions);
-    return paintMethod;
 }
 
 void TextPattern::CreateModifier()
@@ -2983,8 +3093,7 @@ void TextPattern::RemoveAreaChangeInner()
 
 bool TextPattern::NeedShowAIDetect()
 {
-    return textDetectEnable_ && copyOption_ != CopyOptions::None && enabled_ &&
-           !dataDetectorAdapter_->aiSpanMap_.empty();
+    return textDetectEnable_ && enabled_ && !dataDetectorAdapter_->aiSpanMap_.empty();
 }
 
 void TextPattern::BindSelectionMenu(TextSpanType spanType, TextResponseType responseType,
@@ -3038,8 +3147,6 @@ void TextPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextRes
     if (menuParams == nullptr) {
         return;
     }
-
-    selectInfo.menuInfo.menuIsShow = true;
     CopyBindSelectionMenuParams(selectInfo, menuParams);
 }
 
@@ -3092,6 +3199,12 @@ void TextPattern::FireOnMarqueeStateChange(const TextMarqueeState& state)
     RecoverCopyOption();
 }
 
+void TextPattern::OnSelectionMenuOptionsUpdate(
+    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
+{
+    selectOverlay_->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
+
 void TextPattern::HandleSelectionChange(int32_t start, int32_t end)
 {
     if (textSelector_.GetStart() == start && textSelector_.GetEnd() == end) {
@@ -3124,13 +3237,17 @@ void TextPattern::UpdateSelectionType(const SelectionInfo& selection)
     auto list = selection.GetSelection().resultObjects;
     bool imageSelected = false;
     bool textSelected = false;
+    bool builderSelected = false;
     for (const auto& obj : list) {
         if (obj.type == SelectSpanType::TYPEIMAGE) {
             imageSelected = true;
         } else if (obj.type == SelectSpanType::TYPESPAN) {
             textSelected = true;
+        } else if (obj.type == SelectSpanType::TYPEBUILDERSPAN) {
+            builderSelected = true;
         }
-        if (imageSelected && textSelected) {
+        if ((imageSelected && textSelected) || (builderSelected && textSelected) ||
+            (imageSelected && builderSelected)) {
             selectedType_ = TextSpanType::MIXED;
             return;
         }
@@ -3139,6 +3256,8 @@ void TextPattern::UpdateSelectionType(const SelectionInfo& selection)
         selectedType_ = TextSpanType::IMAGE;
     } else if (textSelected) {
         selectedType_ = TextSpanType::TEXT;
+    } else if (builderSelected) {
+        selectedType_ = TextSpanType::BUILDER;
     }
 
     TAG_LOGD(AceLogTag::ACE_TEXT, "UpdateSelectionSpanType, selectedType_: %{public}d", selectedType_.value());
@@ -3214,8 +3333,8 @@ void TextPattern::SetStyledString(const RefPtr<SpanString>& value)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ProcessSpanString();
-    auto length = spanString->GetLength();
-    spanString->ReplaceSpanString(0, length, value);
+    auto length = styledString_->GetLength();
+    styledString_->ReplaceSpanString(0, length, value);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -3392,14 +3511,33 @@ bool TextPattern::DidExceedMaxLines() const
     return pManager_->DidExceedMaxLines();
 }
 
+bool TextPattern::IsSetObscured()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
+    bool ifHaveObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
+        [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
+    return ifHaveObscured;
+}
+
 TextLineMetrics TextPattern::GetLineMetrics(int32_t lineNumber)
 {
-    if (lineNumber < 0 || lineNumber > GetLineCount()) {
+    CHECK_NULL_RETURN(pManager_, TextLineMetrics());
+    if (lineNumber < 0 || static_cast<size_t>(lineNumber) > GetLineCount() - 1) {
         TAG_LOGI(AceLogTag::ACE_TEXT, "GetLineMetrics failed, lineNumber not between 0 and max lines:%{public}d",
             lineNumber);
         return TextLineMetrics();
     }
-    return pManager_->GetLineMetrics(lineNumber);
+    auto lineMetrics = pManager_->GetLineMetrics(lineNumber);
+    RectF textContentRect = contentRect_;
+    textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
+    lineMetrics.x += textContentRect.GetX();
+    lineMetrics.y += textContentRect.GetY();
+    lineMetrics.baseline += textContentRect.GetY();
+    return lineMetrics;
 }
 
 Offset TextPattern::ConvertLocalOffsetToParagraphOffset(const Offset& offset)
@@ -3414,5 +3552,67 @@ PositionWithAffinity TextPattern::GetGlyphPositionAtCoordinate(int32_t x, int32_
 {
     Offset offset(x, y);
     return pManager_->GetGlyphPositionAtCoordinate(ConvertLocalOffsetToParagraphOffset(offset));
+}
+
+void TextPattern::RegisterMarqueeNodeChangeListener()
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) != TextOverflow::MARQUEE) {
+        return;
+    }
+    host->RegisterNodeChangeListener();
+}
+
+void TextPattern::UnregisterMarqueeNodeChangeListener()
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) != TextOverflow::MARQUEE) {
+        return;
+    }
+    host->UnregisterNodeChangeListener();
+}
+
+void TextPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
+{
+    selectOverlay_->OnAncestorNodeChanged(flag);
+    HandleMarqueeWithIsVisible(flag);
+}
+
+void TextPattern::HandleMarqueeWithIsVisible(FrameNodeChangeInfoFlag flag)
+{
+    if ((flag & FRAME_NODE_CHANGE_GEOMETRY_CHANGE) != FRAME_NODE_CHANGE_GEOMETRY_CHANGE) {
+        return;
+    }
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) != TextOverflow::MARQUEE) {
+        return;
+    }
+    RectF frameRect;
+    RectF visibleRect;
+    host->GetVisibleRect(visibleRect, frameRect);
+    if (visibleRect.IsEmpty()) {
+        OnWindowHide();
+    } else {
+        OnWindowShow();
+    }
+}
+
+void TextPattern::UnregisterNodeChangeListenerWithoutSelect()
+{
+    if (selectOverlay_ && selectOverlay_->SelectOverlayIsOn()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->UnregisterNodeChangeListener();
 }
 } // namespace OHOS::Ace::NG

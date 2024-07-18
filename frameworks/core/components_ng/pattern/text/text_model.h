@@ -60,6 +60,8 @@ public:
     virtual void SetTextShadow(const std::vector<Shadow>& value) = 0;
     virtual void SetItalicFontStyle(Ace::FontStyle value) = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
+    virtual void SetMinFontScale(const float value) = 0;
+    virtual void SetMaxFontScale(const float value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
     virtual void SetWordBreak(WordBreak wordBreak) = 0;
     virtual void SetLineBreakStrategy(LineBreakStrategy lineBreakStrategy) = 0;
@@ -96,9 +98,9 @@ public:
     virtual void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) = 0;
     virtual void SetOnDrop(NG::OnDragDropFunc&& onDrop) = 0;
     virtual void SetDraggable(bool draggable) = 0;
-    virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;
 
     virtual void SetTextSelection(int32_t startIndex, int32_t endIndex) = 0;
+    virtual void SetTextSelectableMode(TextSelectableMode textSelectable) = 0;
     virtual void BindSelectionMenu(NG::TextSpanType& spanType, NG::TextResponseType& responseType,
         std::function<void()>& buildFunc, NG::SelectMenuParam& menuParam) {};
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) {};
@@ -110,6 +112,9 @@ public:
     virtual void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) = 0;
     virtual void SetMarqueeOptions(const NG::TextMarqueeOptions& options) = 0;
     virtual void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) = 0;
+    virtual void SetSelectionMenuOptions(
+        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
+    virtual void SetResponseRegion(bool isUserSetResponseRegion) {};
 
 private:
     static std::unique_ptr<TextModel> instance_;

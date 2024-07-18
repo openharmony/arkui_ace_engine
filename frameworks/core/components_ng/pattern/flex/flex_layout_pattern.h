@@ -131,7 +131,7 @@ public:
             jsonConstructor->Put("justifyContent",
                 V2::ConvertWrapAlignmentToStirng(property->GetMainAlignment().value_or(WrapAlignment::START)).c_str());
             jsonConstructor->Put("alignItems",
-                V2::ConvertWrapAlignmentToStirng(property->GetCrossAlignment().value_or(WrapAlignment::START)).c_str());
+                V2::ConvertItemAlignToStirng(property->GetCrossAlignment().value_or(WrapAlignment::START)).c_str());
             jsonConstructor->Put("alignContent",
                 V2::ConvertWrapAlignmentToStirng(property->GetAlignment().value_or(WrapAlignment::START)).c_str());
         }

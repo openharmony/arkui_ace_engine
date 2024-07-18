@@ -55,6 +55,7 @@ public:
     void SetButtonStyle(const std::optional<ButtonStyleMode>& buttonStyle) override;
     void SetControlSize(const std::optional<ControlSize>& controlSize) override;
     void SetRole(const std::optional<ButtonRole>& buttonRole) override;
+    void SetCreateWithLabel(bool createWithLabel) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
     static void SetFontWeight(FrameNode* frameNode, const Ace::FontWeight& fontWeight);
@@ -82,6 +83,9 @@ public:
     static void TriggerClick(FrameNode* frameNode, double xPos, double yPos);
     static void SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize);
     static ButtonType GetType(FrameNode* frameNode);
+    static void ApplyTheme(FrameNode* frameNode, ButtonStyleMode buttonStyle, ButtonRole buttonRole);
+    static void SetLabelWithCheck(FrameNode* frameNode, const char* label);
+    static void SetCreateWithLabel(FrameNode* frameNode, bool createWithLabel);
 
 private:
     static void CreateWithLabel(const std::string& label);

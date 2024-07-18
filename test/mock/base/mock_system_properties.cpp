@@ -41,12 +41,15 @@ bool SystemProperties::layoutTraceEnable_ = false;
 bool SystemProperties::traceInputEventEnable_ = false;
 bool SystemProperties::buildTraceEnable_ = false;
 bool SystemProperties::syncDebugTraceEnable_ = false;
+bool SystemProperties::pixelRoundEnable_ = true;
 bool SystemProperties::textTraceEnable_ = false;
+bool SystemProperties::syntaxTraceEnable_ = false;
 double SystemProperties::resolution_ = 0.0;
 constexpr float defaultAnimationScale = 1.0f;
 bool SystemProperties::extSurfaceEnabled_ = false;
 uint32_t SystemProperties::dumpFrameCount_ = 0;
 bool SystemProperties::debugEnabled_ = false;
+bool SystemProperties::layoutDetectEnabled_ = false;
 ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
 int32_t SystemProperties::deviceWidth_ = 720;
 int32_t SystemProperties::deviceHeight_ = 1280;
@@ -60,11 +63,15 @@ bool SystemProperties::gridCacheEnabled_ = true;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 bool SystemProperties::stateManagerEnable_ = false;
 bool SystemProperties::acePerformanceMonitorEnable_ = false;
+bool SystemProperties::aceCommercialLogEnable_ = false;
 bool SystemProperties::debugBoundaryEnabled_ = false;
 bool SystemProperties::developerModeOn_ = false;
 bool SystemProperties::faultInjectEnabled_ = false;
 bool SystemProperties::imageFileCacheConvertAstc_ = true;
 bool SystemProperties::imageFrameworkEnable_ = true;
+bool SystemProperties::debugAutoUIEnabled_ = false;
+float SystemProperties::dragStartDampingRatio_ = 0.2f;
+float SystemProperties::dragStartPanDisThreshold_ = 10.0f;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 3;
 
@@ -85,6 +92,11 @@ DeviceType SystemProperties::GetDeviceType()
 bool SystemProperties::GetDebugEnabled()
 {
     return debugEnabled_;
+}
+
+bool SystemProperties::GetLayoutDetectEnabled()
+{
+    return layoutDetectEnabled_;
 }
 
 float SystemProperties::GetAnimationScale()
@@ -166,5 +178,15 @@ float SystemProperties::GetDefaultResolution()
 std::string SystemProperties::GetAtomicServiceBundleName()
 {
     return {};
+}
+
+float SystemProperties::GetDragStartDampingRatio()
+{
+    return dragStartDampingRatio_;
+}
+
+float SystemProperties::GetDragStartPanDistanceThreshold()
+{
+    return dragStartPanDisThreshold_;
 }
 } // namespace OHOS::Ace

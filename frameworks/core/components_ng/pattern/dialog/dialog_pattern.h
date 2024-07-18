@@ -245,11 +245,6 @@ public:
         return foldDisplayModeChangedCallbackId_.has_value();
     }
 
-    bool GetNeeedUpdateOrientation()
-    {
-        return neeedUpdateOrientation_;
-    }
-
     bool GetIsSuitableForAging()
     {
         return isSuitableForElderly_;
@@ -261,6 +256,8 @@ public:
     }
 
     void UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation);
+    void InitHostWindowRect();
+    void UpdateFontScale();
 
 private:
     bool AvoidKeyboard() const override
@@ -272,7 +269,6 @@ private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
-    void InitHostWindowRect();
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleClick(const GestureEvent& info);
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -307,7 +303,7 @@ private:
         const Dimension& dividerLength, const Dimension& dividerWidth, const Color& color, const Dimension& space);
     RefPtr<FrameNode> CreateButton(
         const ButtonInfo& params, int32_t index, bool isCancel = false, bool isVertical = false, int32_t length = 0);
-    RefPtr<FrameNode> CreateButtonText(const std::string& text, const std::string& colorStr, bool isVertical);
+    RefPtr<FrameNode> CreateButtonText(const std::string& text, const std::string& colorStr);
     // to close dialog when button is clicked
     void BindCloseCallBack(const RefPtr<GestureEventHub>& hub, int32_t buttonIdx);
     // build ActionSheet items
@@ -322,12 +318,14 @@ private:
     void UpdateSheetIconAndText();
     void UpdateButtonsProperty();
     void UpdateNodeContent(const RefPtr<FrameNode>& node, std::string& text);
+    void UpdateAlignmentAndOffset();
     void DumpBoolProperty();
     void DumpObjectProperty();
     void UpdatePropertyForElderly(const std::vector<ButtonInfo>& buttons);
     bool NeedsButtonDirectionChange(const std::vector<ButtonInfo>& buttons);
-    void UpdateLandSpaceTextFontSizeForElderly(bool isLandSpace);
-    void UpdateTitleTextFontSizeForElderly(bool isLandSpace);
+    void OnFontConfigurationUpdate() override;
+    void UpdateTextFontScale();
+    void UpdateTitleTextFontScale();
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;
@@ -347,11 +345,10 @@ private:
     WeakPtr<FrameNode> menuNode_;
     bool isFirstDefaultFocus_ = true;
     RefPtr<FrameNode> buttonContainer_;
+    RefPtr<FrameNode> contentColumn_;
     RefPtr<RenderContext> contentRenderContext_;
     bool isSuitableForElderly_ = false;
-    bool isLandspace_ = false;
-    bool isThreeButtonsDialog_ = false;
-    bool neeedUpdateOrientation_ = false;
+    bool notAdapationAging_ = false;
     float fontScaleForElderly_ = 1.0f;
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
     RefPtr<FrameNode> titleContainer_;

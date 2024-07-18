@@ -694,10 +694,10 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0020, TestSize.Level1)
     property->propHideNavBar_ = true;
     property->layoutConstraint_ = LayoutConstraintF();
 
-    algorithm->SizeCalculationSplit(property, SizeF());
+    algorithm->SizeCalculationSplit(navigation, property, SizeF());
     property->propHideNavBar_ = false;
     algorithm->realNavBarWidth_ = -1.0f;
-    algorithm->SizeCalculationSplit(property, SizeF(0.0f, 0.0f));
+    algorithm->SizeCalculationSplit(navigation, property, SizeF(0.0f, 0.0f));
 }
 
 /**
@@ -874,15 +874,14 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0025, TestSize.Level1)
     navBar->titleBarNode_ = titleBarNode;
     navBarPattern->OnWindowSizeChanged(20, 20, WindowSizeChangeReason::RESIZE);
     auto menu = FrameNode::CreateFrameNode("menu", 302, AceType::MakeRefPtr<ButtonPattern>());
-    auto barItem = AceType::MakeRefPtr<BarItemNode>("barItem", 303);
+    auto barItem = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, 303, []() { return AceType::MakeRefPtr<Pattern>(); });
     menu->children_.push_back(barItem);
     titleBarNode->menu_ = menu;
     barItem->isMoreItemNode_ = true;
-    navBarPattern->isTitleMenuNodeShowing_ = false;
     navBarPattern->OnWindowSizeChanged(20, 20, WindowSizeChangeReason::RECOVER);
     ASSERT_TRUE(barItem->isMoreItemNode_);
     barItem->isMoreItemNode_ = false;
-    navBarPattern->isTitleMenuNodeShowing_ = true;
     navBarPattern->OnWindowSizeChanged(20, 20, WindowSizeChangeReason::RECOVER);
     ASSERT_FALSE(barItem->isMoreItemNode_);
 }

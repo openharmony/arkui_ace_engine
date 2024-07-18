@@ -35,6 +35,8 @@ enum class Direction {
 using ChangeIndicatorEvent = std::function<void()>;
 using ChangeEvent = std::function<void(int32_t index)>;
 using ChangeEventPtr = std::shared_ptr<ChangeEvent>;
+using ChangeEventWithPreIndex = std::function<void(int32_t preIndex, int32_t currentIndex)>;
+using ChangeEventWithPreIndexPtr = std::shared_ptr<ChangeEventWithPreIndex>;
 using ChangeDoneEvent = std::function<void()>;
 
 class SwiperEventHub : public EventHub {
@@ -48,6 +50,11 @@ public:
     void AddOnChangeEvent(const ChangeEventPtr& changeEvent)
     {
         changeEvents_.emplace_back(changeEvent);
+    }
+
+    void AddOnChangeEventWithPreIndex(const ChangeEventWithPreIndexPtr& changeEventWithPreIndex)
+    {
+        changeEventsWithPreIndex_.emplace_back(changeEventWithPreIndex);
     }
 
     void SetIndicatorOnChange(ChangeIndicatorEvent&& changeEvent)
@@ -87,14 +94,22 @@ public:
         }
     }
 
-    void FireChangeEvent(int32_t index) const
+    void FireChangeEvent(int32_t preIndex, int32_t currentIndex) const
     {
-        ACE_SCOPED_TRACE("Swiper FireChangeEvent, index: %d eventSize: %zu", index, changeEvents_.size());
+        ACE_SCOPED_TRACE("Swiper FireChangeEvent, preIndex: %d currentIndex: %d eventSize: %zu",
+            preIndex, currentIndex, changeEvents_.size() + changeEventsWithPreIndex_.size());
         if (!changeEvents_.empty()) {
             std::for_each(
-                changeEvents_.begin(), changeEvents_.end(), [index](const ChangeEventPtr& changeEvent) {
+                changeEvents_.begin(), changeEvents_.end(), [currentIndex](const ChangeEventPtr& changeEvent) {
                     auto event = *changeEvent;
-                    event(index);
+                    event(currentIndex);
+                });
+        }
+        if (!changeEventsWithPreIndex_.empty()) {
+            std::for_each(changeEventsWithPreIndex_.begin(), changeEventsWithPreIndex_.end(),
+                [preIndex, currentIndex](const ChangeEventWithPreIndexPtr& changeEventWithPreIndex) {
+                    auto event = *changeEventWithPreIndex;
+                    event(preIndex, currentIndex);
                 });
         }
 
@@ -105,10 +120,10 @@ public:
                 auto id = host->GetInspectorIdValue("");
                 builder.SetId(id).SetType(host->GetHostTag()).SetDescription(host->GetAutoEventParamValue(""));
                 if (!id.empty()) {
-                    Recorder::NodeDataCache::Get().PutInt(host, id, index);
+                    Recorder::NodeDataCache::Get().PutInt(host, id, currentIndex);
                 }
             }
-            builder.SetIndex(index);
+            builder.SetIndex(currentIndex);
             Recorder::EventRecorder::Get().OnChange(std::move(builder));
         }
     }
@@ -174,6 +189,7 @@ public:
 private:
     Direction direction_;
     std::list<ChangeEventPtr> changeEvents_;
+    std::list<ChangeEventWithPreIndexPtr> changeEventsWithPreIndex_;
     ChangeDoneEvent changeDoneEvent_;
     ChangeIndicatorEvent changeIndicatorEvent_;
     std::list<AnimationStartEventPtr> animationStartEvents_;

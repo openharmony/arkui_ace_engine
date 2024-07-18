@@ -33,6 +33,7 @@ public:
     static void OnComplete(const JSCallbackInfo& args);
     static void OnError(const JSCallbackInfo& args);
     static void JSBind(BindingTarget globalObj);
+    static void SetColorFilter(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_IMAGE_SPAN_H

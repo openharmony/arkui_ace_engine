@@ -18,7 +18,8 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
-void ScrollableController::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
+void ScrollableController::ScrollToIndex(
+    int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
@@ -30,7 +31,7 @@ void ScrollableController::ScrollToIndex(int32_t index, bool smooth, ScrollAlign
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("ScrollToIndex, index:%d, smooth:%u, align:%d, id:%d, tag:%s", index, smooth, align,
         static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
-    pattern->ScrollToIndex(index, smooth, align);
+    pattern->ScrollToIndex(index, smooth, align, extraOffset);
 }
 
 bool ScrollableController::AnimateTo(
@@ -138,7 +139,7 @@ void ScrollableController::ScrollPage(bool reverse, bool smooth)
         auto position = pattern->GetTotalOffset() - offset;
         ACE_SCOPED_TRACE("ScrollPage with animation, position:%f, id:%d, tag:%s", position,
             static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
-        pattern->AnimateTo(position, -1, nullptr, true);
+        pattern->AnimateTo(position, -1, nullptr, true, false, false);
     } else {
         pattern->StopAnimate();
         ACE_SCOPED_TRACE("ScrollPage without animation, offset:%f, id:%d, tag:%s", offset,

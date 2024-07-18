@@ -38,6 +38,8 @@
 #include "include/core/SkPaint.h"
 #else
 #include "draw/canvas.h"
+#include "image/bitmap.h"
+#include "image/image_info.h"
 #endif
 #include "resource_manager.h"
 
@@ -152,6 +154,11 @@ public:
     void InitialMask(const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr);
     bool GetDefaultMask();
 
+    bool GetCompositePixelMapWithBadge(
+        const std::shared_ptr<Media::PixelMap> layeredPixelMap,
+        const std::shared_ptr<Media::PixelMap> badgedPixelMap,
+        std::shared_ptr<Media::PixelMap> &compositePixelMap);
+
 private:
     friend class ImageConverter;
     void InitialResource(const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr);
@@ -168,8 +175,17 @@ private:
     void DrawOntoCanvas(
         const std::shared_ptr<SkBitmap>& bitMap, float width, float height, SkCanvas& canvas, const SkPaint& paint);
 #else
-    void DrawOntoCanvas(const std::shared_ptr<Rosen::Drawing::Bitmap>& bitMap,
-        float width, float height, Rosen::Drawing::Canvas& canvas);
+    bool GetLayeredIconParm(std::shared_ptr<Rosen::Drawing::Bitmap>& foreground,
+        std::shared_ptr<Rosen::Drawing::Bitmap>& background, std::shared_ptr<Rosen::Drawing::Bitmap>& mask);
+    Rosen::Drawing::ImageInfo ImageInfo();
+    void CompositeIconNotAdaptive(std::shared_ptr<Rosen::Drawing::Bitmap>& foreground,
+        std::shared_ptr<Rosen::Drawing::Bitmap>& background, std::shared_ptr<Rosen::Drawing::Bitmap>& mask);
+    void CompositeIconAdaptive(std::shared_ptr<Rosen::Drawing::Bitmap>& foreground,
+        std::shared_ptr<Rosen::Drawing::Bitmap>& background, std::shared_ptr<Rosen::Drawing::Bitmap>& mask);
+    Rosen::Drawing::ImageInfo CreateRSImageInfo(OptionalPixelMap pixelmap, int32_t width, int32_t height);
+    void TransformToPixelMap(const Rosen::Drawing::Bitmap& bitmap, const Rosen::Drawing::ImageInfo& imageInfo);
+    void DrawOntoCanvas(const std::shared_ptr<Rosen::Drawing::Bitmap>& bitMap, float width, float height,
+        Rosen::Drawing::Canvas& canvas);
 #endif
 
     std::unique_ptr<uint8_t[]> defaultMaskData_;
@@ -229,7 +245,8 @@ public:
             state = Global::Resource::SUCCESS;
             return std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), len, resourceMgr);
         }
-        if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp") {
+        if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp" ||
+            type == "astc" || type == "sut") {
             HILOGD("Create DrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::BASE;
             state = Global::Resource::SUCCESS;
@@ -259,7 +276,8 @@ public:
             state = Global::Resource::SUCCESS;
             return std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), len, resourceMgr);
         }
-        if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp") {
+        if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp" ||
+            type == "astc" || type == "sut") {
             HILOGD("Create DrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::BASE;
             state = Global::Resource::SUCCESS;
@@ -295,7 +313,8 @@ public:
                     path, iconType, density);
             return layeredDrawableDescriptor;
         }
-        if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp") {
+        if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp" ||
+            type == "astc" || type == "sut") {
             HILOGD("Create DrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::BASE;
             return std::make_unique<DrawableDescriptor>(std::move(jsonBuf), len);
@@ -329,7 +348,8 @@ public:
                 std::move(jsonBuf), len, resourceMgr, path, iconType, density);
             return layeredDrawableDescriptor;
         }
-        if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp") {
+        if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp" ||
+            type == "astc" || type == "sut") {
             HILOGD("Create DrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::BASE;
             return std::make_unique<DrawableDescriptor>(std::move(jsonBuf), len);

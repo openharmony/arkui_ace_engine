@@ -222,7 +222,7 @@ void SwitchPattern::UpdateSwitchPaintProperty()
 
 void SwitchPattern::UpdateSwitchLayoutProperty()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto switchTheme = pipeline->GetTheme<SwitchTheme>();
     CHECK_NULL_VOID(switchTheme);
@@ -512,11 +512,17 @@ void SwitchPattern::InitClickEvent()
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto switchPattern = weak.Upgrade();
         CHECK_NULL_VOID(switchPattern);
+        if (info.GetSourceDevice() == SourceType::TOUCH &&
+            (info.IsPreventDefault() || switchPattern->isTouchPreventDefault_)) {
+            TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "swich preventDefault successfully");
+            switchPattern->isTouchPreventDefault_ = false;
+            return;
+        }
         switchPattern->OnClick();
     };
 
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    gesture->AddClickEvent(clickListener_);
+    gesture->AddClickAfterEvent(clickListener_);
 }
 
 void SwitchPattern::InitTouchEvent()
@@ -531,6 +537,9 @@ void SwitchPattern::InitTouchEvent()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto switchPattern = weak.Upgrade();
         CHECK_NULL_VOID(switchPattern);
+        if (info.GetSourceDevice() == SourceType::TOUCH && info.IsPreventDefault()) {
+            switchPattern->isTouchPreventDefault_ = info.IsPreventDefault();
+        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             switchPattern->OnTouchDown();
         }
@@ -540,7 +549,7 @@ void SwitchPattern::InitTouchEvent()
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    gesture->AddTouchEvent(touchListener_);
+    gesture->AddTouchAfterEvent(touchListener_);
 }
 
 void SwitchPattern::InitMouseEvent()

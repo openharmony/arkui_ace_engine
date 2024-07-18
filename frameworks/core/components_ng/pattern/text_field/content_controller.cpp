@@ -29,8 +29,7 @@ namespace {
 const std::string DIGIT_WHITE_LIST = "[0-9]";
 const std::string DIGIT_DECIMAL_WHITE_LIST = "[0-9.]";
 const std::string PHONE_WHITE_LIST = R"([0-9 \+\-\*\#\(\)])";
-const std::string EMAIL_WHITE_LIST = "[\\w.\\@]";
-const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
+const std::string EMAIL_WHITE_LIST = R"([a-zA-Z0-9.!#$%&'*+/=?^_`{|}~@-])";
 // when do ai analaysis, we should list the left and right of the string
 constexpr static int32_t AI_TEXT_RANGE_LEFT = 50;
 constexpr static int32_t AI_TEXT_RANGE_RIGHT = 50;
@@ -133,10 +132,6 @@ void ContentController::FilterTextInputStyle(bool& textChanged, std::string& res
         case TextInputType::EMAIL_ADDRESS: {
             textChanged |= FilterWithEvent(EMAIL_WHITE_LIST, result);
             textChanged |= FilterWithEmail(result);
-            break;
-        }
-        case TextInputType::URL: {
-            textChanged |= FilterWithEvent(URL_WHITE_LIST, result);
             break;
         }
         case TextInputType::VISIBLE_PASSWORD:
@@ -244,8 +239,12 @@ std::string ContentController::RemoveErrorTextFromValue(const std::string& value
 
 std::string ContentController::FilterWithRegex(const std::string& filter, std::string& result)
 {
-    std::regex filterRegex(filter);
-    auto errorText = std::regex_replace(result, filterRegex, "");
+    // convert wstring for processing unicode characters
+    std::wstring wFilter = StringUtils::ToWstring(filter);
+    std::wstring wResult = StringUtils::ToWstring(result);
+    std::wregex wFilterRegex(wFilter);
+    std::wstring wErrorText = std::regex_replace(wResult, wFilterRegex, L"");
+    std::string errorText = StringUtils::ToString(wErrorText);
     result = RemoveErrorTextFromValue(result, errorText);
     return errorText;
 }

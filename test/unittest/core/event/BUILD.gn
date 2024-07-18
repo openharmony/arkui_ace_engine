@@ -23,6 +23,7 @@ ace_unittest("event_manager_test_ng") {
     "$ace_root/frameworks/core/gestures/gesture_referee.cpp",
     "$ace_root/test/mock/core/common/mock_watch_dog.cpp",
     "$ace_root/test/mock/core/common/mock_window.cpp",
+    "event_dump_test_ng.cpp",
     "event_manager_test_ng.cpp",
     "event_manager_test_ng_new.cpp",
   ]
@@ -37,7 +38,10 @@ ace_unittest("click_event_test_ng") {
 ace_unittest("drag_event_test_ng") {
   type = "new"
   module_output = "events"
-  sources = [ "drag_event_test_ng.cpp" ]
+  sources = [
+    "drag_event_test_ng.cpp",
+    "drag_event_test_ng_property_config.cpp",
+  ]
 }
 
 ace_unittest("event_hub_test_ng") {
@@ -51,6 +55,7 @@ ace_unittest("focus_hub_test_ng") {
   module_output = "events"
   sources = [
     "focus_hub_test_ng.cpp",
+    "focus_hub_test_ng_for_property_config.cpp",
     "focus_hub_test_ng_new.cpp",
   ]
 }
@@ -60,14 +65,17 @@ ace_unittest("gesture_event_hub_test_ng") {
   module_output = "events"
   sources = [
     "gesture_event_hub_test_ng.cpp",
-    "gesture_event_hub_test_ng_new.cpp",
+    "gesture_event_hub_test_ng_property_config.cpp",
   ]
 }
 
 ace_unittest("input_event_hub_test_ng") {
   type = "new"
   module_output = "events"
-  sources = [ "input_event_hub_test_ng.cpp" ]
+  sources = [
+    "$ace_root/frameworks/core/event/mouse_event.cpp",
+    "input_event_hub_test_ng.cpp",
+  ]
 }
 
 ace_unittest("long_press_event_test_ng") {

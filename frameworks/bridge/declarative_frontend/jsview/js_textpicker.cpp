@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_textpicker.h"
 
+#include <cstdint>
 #include <securec.h>
 
 #include "base/log/ace_scoring_log.h"
@@ -509,7 +510,7 @@ void JSTextPickerParser::ParseMultiTextArraySelectInternal(const std::vector<NG:
 
         auto valueIterator = std::find(options[i].rangeResult.begin(), options[i].rangeResult.end(), values[i]);
         if (valueIterator != options[i].rangeResult.end()) {
-            selectedValue = std::distance(options[i].rangeResult.begin(), valueIterator);
+            selectedValue = static_cast<uint32_t>(std::distance(options[i].rangeResult.begin(), valueIterator));
             selectedValues.emplace_back(selectedValue);
         } else {
             selectedValues.emplace_back(0);
@@ -797,7 +798,7 @@ bool JSTextPickerParser::ParseTextArray(const JSRef<JSObject>& paramObject, Pars
         if (!ParseJsInteger(getSelected, param.selected) && !param.value.empty()) {
             auto valueIterator = std::find(getRangeVector.begin(), getRangeVector.end(), param.value);
             if (valueIterator != getRangeVector.end()) {
-                param.selected = std::distance(getRangeVector.begin(), valueIterator);
+                param.selected = static_cast<uint32_t>(std::distance(getRangeVector.begin(), valueIterator));
             }
         }
         if (param.selected >= getRangeVector.size()) {
@@ -851,7 +852,19 @@ bool JSTextPickerParser::ParseIconTextArray(
     return true;
 }
 
-void JSTextPickerParser::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle)
+void JSTextPickerParser::IsUserDefinedFontFamily(const std::string& pos)
+{
+    if (pos == "disappearTextStyle") {
+        TextPickerModel::GetInstance()->HasUserDefinedDisappearFontFamily(true);
+    } else if (pos == "textStyle") {
+        TextPickerModel::GetInstance()->HasUserDefinedNormalFontFamily(true);
+    } else if (pos == "selectedTextStyle") {
+        TextPickerModel::GetInstance()->HasUserDefinedSelectedFontFamily(true);
+    }
+}
+
+void JSTextPickerParser::ParseTextStyle(
+    const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle, const std::string& pos)
 {
     auto fontColor = paramObj->GetProperty("color");
     auto fontOptions = paramObj->GetProperty("font");
@@ -894,6 +907,7 @@ void JSTextPickerParser::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::Pic
         std::vector<std::string> families;
         if (ParseJsFontFamilies(fontFamily, families)) {
             textStyle.fontFamily = families;
+            IsUserDefinedFontFamily(pos);
         }
     }
 
@@ -965,7 +979,7 @@ void JSTextPicker::SetDisappearTextStyle(const JSCallbackInfo& info)
     NG::PickerTextStyle textStyle;
     JSTextPickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
-        JSTextPickerParser::ParseTextStyle(info[0], textStyle);
+        JSTextPickerParser::ParseTextStyle(info[0], textStyle, "disappearTextStyle");
     }
     TextPickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 }
@@ -977,7 +991,7 @@ void JSTextPicker::SetTextStyle(const JSCallbackInfo& info)
     NG::PickerTextStyle textStyle;
     JSTextPickerTheme::ObtainTextStyle(textStyle);
     if (info[0]->IsObject()) {
-        JSTextPickerParser::ParseTextStyle(info[0], textStyle);
+        JSTextPickerParser::ParseTextStyle(info[0], textStyle, "textStyle");
     }
     TextPickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
@@ -989,7 +1003,7 @@ void JSTextPicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     NG::PickerTextStyle textStyle;
     JSTextPickerTheme::ObtainSelectedTextStyle(textStyle);
     if (info[0]->IsObject()) {
-        JSTextPickerParser::ParseTextStyle(info[0], textStyle);
+        JSTextPickerParser::ParseTextStyle(info[0], textStyle, "selectedTextStyle");
     }
     TextPickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 }
@@ -1380,7 +1394,7 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
             JSViewAbstract::ParseJsString(getValue, value)) {
             auto valueIterator = std::find(getRangeVector.begin(), getRangeVector.end(), value);
             if (valueIterator != getRangeVector.end()) {
-                selectedValue = std::distance(getRangeVector.begin(), valueIterator);
+                selectedValue = static_cast<uint32_t>(std::distance(getRangeVector.begin(), valueIterator));
             }
         }
         if (selectedValue >= getRangeVector.size()) {
@@ -1637,17 +1651,17 @@ void JSTextPickerDialog::ParseTextProperties(const JSRef<JSObject>& paramObj, NG
 
     if (!disappearProperty->IsNull() && disappearProperty->IsObject()) {
         JSRef<JSObject> disappearObj = JSRef<JSObject>::Cast(disappearProperty);
-        JSTextPickerParser::ParseTextStyle(disappearObj, result.disappearTextStyle_);
+        JSTextPickerParser::ParseTextStyle(disappearObj, result.disappearTextStyle_, "disappearTextStyle");
     }
 
     if (!normalProperty->IsNull() && normalProperty->IsObject()) {
         JSRef<JSObject> noramlObj = JSRef<JSObject>::Cast(normalProperty);
-        JSTextPickerParser::ParseTextStyle(noramlObj, result.normalTextStyle_);
+        JSTextPickerParser::ParseTextStyle(noramlObj, result.normalTextStyle_, "textStyle");
     }
 
     if (!selectedProperty->IsNull() && selectedProperty->IsObject()) {
         JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(selectedProperty);
-        JSTextPickerParser::ParseTextStyle(selectedObj, result.selectedTextStyle_);
+        JSTextPickerParser::ParseTextStyle(selectedObj, result.selectedTextStyle_, "selectedTextStyle");
     }
 }
 
@@ -1775,7 +1789,7 @@ void JSTextPickerDialog::ParseText(RefPtr<PickerTextComponent>& component, const
     if (!JSViewAbstract::ParseJsInteger(getSelected, selectedValue) && JSViewAbstract::ParseJsString(getValue, value)) {
         auto valueIterator = std::find(getRangeVector.begin(), getRangeVector.end(), value);
         if (valueIterator != getRangeVector.end()) {
-            selectedValue = std::distance(getRangeVector.begin(), valueIterator);
+            selectedValue = static_cast<uint32_t>(std::distance(getRangeVector.begin(), valueIterator));
         }
     }
 

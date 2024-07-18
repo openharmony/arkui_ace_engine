@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/window_scene/screen/screen_pattren.h"
+#include "core/components_ng/pattern/window_scene/screen/screen_pattern.h"
 
 #include <mutex>
 

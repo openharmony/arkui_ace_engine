@@ -20,6 +20,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/image/drawing_color_filter.h"
+#include "base/image/drawing_lattice.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
 #include "core/components/box/drag_drop_event.h"
@@ -68,6 +69,7 @@ public:
     virtual void SetOnError(std::function<void(const LoadImageFailEvent &info)> &&callback) = 0;
     virtual void SetSvgAnimatorFinishEvent(std::function<void()> &&callback) = 0;
     virtual void Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixMap) = 0;
+    virtual void ResetImage() = 0;
     virtual void CreateAnimation(const std::vector<ImageProperties>& imageList,
         int32_t duration, int32_t iteration) = 0;
     virtual void SetImageSourceSize(const std::pair<Dimension, Dimension> &size) = 0;
@@ -78,8 +80,9 @@ public:
     virtual bool IsSrcSvgImage() = 0;
     virtual void SetAutoResize(bool autoResize) = 0;
     virtual void SetResizableSlice(const ImageResizableSlice& slice) = 0;
+    virtual void SetResizableLattice(const RefPtr<DrawingLattice>& lattice) = 0;
     virtual void SetSyncMode(bool syncMode) = 0;
-    virtual void SetColorFilterMatrix(const std::vector<float> &matrix) = 0;
+    virtual void SetColorFilterMatrix(const std::vector<float>& matrix) = 0;
     virtual void SetDrawingColorFilter(RefPtr<DrawingColorFilter> &colorFilter) = 0;
     virtual void SetDraggable(bool draggable) = 0;
     virtual void SetOnDragStart(NG::OnDragStartFunc &&onDragStart) = 0;
@@ -92,6 +95,7 @@ public:
     virtual void EnableAnalyzer(bool isEnableAnalyzer) = 0;
     virtual void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) = 0;
     virtual void SetImageAnalyzerConfig(void* config) = 0;
+    virtual void SetImageAIOptions(void* options) = 0;
     virtual void SetSmoothEdge(float value) = 0;
     virtual void SetDynamicRangeMode(DynamicRangeMode dynamicRangeMode) = 0;
     virtual void SetEnhancedImageQuality(AIImageQuality imageQuality) = 0;

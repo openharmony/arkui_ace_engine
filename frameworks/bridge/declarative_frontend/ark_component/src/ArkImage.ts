@@ -159,18 +159,21 @@ class ImageResizableModifier extends ModifierWithKey<ResizableOptions> {
     if (reset) {
       getUINativeModule().image.resetResizable(node);
     } else {
-      let sliceTop: Length | undefined;
-      let sliceRight: Length | undefined;
-      let sliceBottom: Length | undefined;
-      let sliceLeft: Length | undefined;
+      if (!isUndefined(this.value.lattice)) {
+        getUINativeModule().image.setResizableLattice(node, this.value.lattice);
+      }
       if (!isUndefined(this.value.slice)) {
+        let sliceTop: Length | undefined;
+        let sliceRight: Length | undefined;
+        let sliceBottom: Length | undefined;
+        let sliceLeft: Length | undefined;
         let tmpSlice = this.value.slice as EdgeWidths;
         sliceTop = tmpSlice.top;
         sliceRight = tmpSlice.right;
         sliceBottom = tmpSlice.bottom;
         sliceLeft = tmpSlice.left;
+        getUINativeModule().image.setResizable(node, sliceTop, sliceRight, sliceBottom, sliceLeft);
       }
-      getUINativeModule().image.setResizable(node, sliceTop, sliceRight, sliceBottom, sliceLeft);
     }
   }
 }
@@ -375,7 +378,7 @@ class ImageBorderModifier extends ModifierWithKey<BorderOptions> {
       let widthRight;
       let widthTop;
       let widthBottom;
-      if (!isUndefined(this.value.width) && this.value.width != null) {
+      if (!isUndefined(this.value.width) && this.value.width !== null) {
         if (isNumber(this.value.width) || isString(this.value.width) || isResource(this.value.width)) {
           widthLeft = this.value.width;
           widthRight = this.value.width;
@@ -392,7 +395,7 @@ class ImageBorderModifier extends ModifierWithKey<BorderOptions> {
       let rightColor;
       let topColor;
       let bottomColor;
-      if (!isUndefined(this.value.color) && this.value.color != null) {
+      if (!isUndefined(this.value.color) && this.value.color !== null) {
         if (isNumber(this.value.color) || isString(this.value.color) || isResource(this.value.color)) {
           leftColor = this.value.color;
           rightColor = this.value.color;
@@ -409,7 +412,7 @@ class ImageBorderModifier extends ModifierWithKey<BorderOptions> {
       let topRight;
       let bottomLeft;
       let bottomRight;
-      if (!isUndefined(this.value.radius) && this.value.radius != null) {
+      if (!isUndefined(this.value.radius) && this.value.radius !== null) {
         if (isNumber(this.value.radius) || isString(this.value.radius) || isResource(this.value.radius)) {
           topLeft = this.value.radius;
           topRight = this.value.radius;
@@ -503,8 +506,8 @@ class ImageTransitionModifier extends ModifierWithKey<object> {
   }
 }
 
-class ImageSrcModifier extends ModifierWithKey<ResourceStr | PixelMap | DrawableDescriptor> {
-  constructor(value: ResourceStr | PixelMap | DrawableDescriptor) {
+class ImageSrcModifier extends ModifierWithKey<ResourceStr | PixelMap | DrawableDescriptor | ImageContent> {
+  constructor(value: ResourceStr | PixelMap | DrawableDescriptor | ImageContent) {
     super(value);
   }
   static identity: Symbol = Symbol('imageShowSrc');
@@ -532,6 +535,23 @@ class ImageEnableAnalyzerModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class ImagePrivacySensitiveModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('imagePrivacySensitive');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetPrivacySensitive(node);
+    } else {
+      getUINativeModule().image.setPrivacySensitive(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ImageAnalyzerConfigModifier extends ModifierWithKey<object> {
   constructor(value: object) {
     super(value);
@@ -542,6 +562,34 @@ class ImageAnalyzerConfigModifier extends ModifierWithKey<object> {
       getUINativeModule().image.analyzerConfig(node, '');
     } else {
       getUINativeModule().image.analyzerConfig(node, this.value!);
+    }
+  }
+}
+
+class ImageOnErrorModifier extends ModifierWithKey<(result: {componentWidth: number; componentHeight: number; message: string}) => void> {
+    constructor(value: (event: {componentWidth: number; componentHeight: number; message: string}) => void) {
+    super(value);
+  }
+  static identity = Symbol('imageOnError');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetOnError(node);
+    } else {
+      getUINativeModule().image.setOnError(node, this.value);
+    }
+  }
+}
+
+class ImageOnFinishModifier extends ModifierWithKey<VoidCallback> {
+    constructor(value: VoidCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('imageOnFinish');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetOnFinish(node);
+    } else {
+      getUINativeModule().image.setOnFinish(node, this.value);
     }
   }
 }
@@ -585,7 +633,39 @@ class ImagePointLightModifier extends ModifierWithKey<PointLightStyle> {
     !isBaseOrResourceEqual(this.stageValue.bloom, this.value.bloom);
   }
 }
-
+class ImageOnCompleteModifier extends ModifierWithKey<(event?: {
+  width: number;
+  height: number;
+  componentWidth: number;
+  componentHeight: number;
+  loadingStatus: number;
+  contentWidth: number;
+  contentHeight: number;
+  contentOffsetX: number;
+  contentOffsetY: number;
+}) => void> {
+  constructor(value: (event?: {
+    width: number;
+    height: number;
+    componentWidth: number;
+    componentHeight: number;
+    loadingStatus: number;
+    contentWidth: number;
+    contentHeight: number;
+    contentOffsetX: number;
+    contentOffsetY: number;
+  }) => void) {
+    super(value);
+  }
+  static identity = Symbol('imageOnComplete');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetOnComplete(node);
+    } else {
+      getUINativeModule().image.setOnComplete(node, this.value);
+    }
+  }
+}
 class ArkImageComponent extends ArkComponent implements ImageAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -689,18 +769,20 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
       contentOffsetY: number;
     }) => void,
   ): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ImageOnCompleteModifier.identity, ImageOnCompleteModifier, value);
+    return this;
   }
-
   onError(callback: (event: {
     componentWidth: number;
     componentHeight: number;
     message: string
   }) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ImageOnErrorModifier.identity, ImageOnErrorModifier, callback);
+    return this;
   }
   onFinish(event: () => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ImageOnFinishModifier.identity, ImageOnFinishModifier, event);
+    return this;
   }
   border(value: BorderOptions): this {
     modifierWithKey(this._modifiersWithKeys, ImageBorderModifier.identity, ImageBorderModifier, value);
@@ -725,6 +807,10 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
     return this;
   }
   enableAnalyzer(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, ImageEnableAnalyzerModifier.identity, ImageEnableAnalyzerModifier, value);
+    return this;
+  }
+  privacySensitive(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ImageEnableAnalyzerModifier.identity, ImageEnableAnalyzerModifier, value);
     return this;
   }

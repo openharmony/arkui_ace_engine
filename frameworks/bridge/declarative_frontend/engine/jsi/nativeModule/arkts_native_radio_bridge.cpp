@@ -38,10 +38,10 @@ panda::Local<panda::JSValueRef> JsRadioChangeCallback(panda::JsiRuntimeCallInfo*
     bool value = firstArg->ToBoolean(vm)->Value();
     auto ref = runtimeCallInfo->GetThisRef();
     auto obj = ref->ToObject(vm);
-    if (obj->GetNativePointerFieldCount() < NUM_1) {
+    if (obj->GetNativePointerFieldCount(vm) < NUM_1) {
         return panda::JSValueRef::Undefined(vm);
     }
-    auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(0));
+    auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(vm, 0));
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     RadioModelNG::SetChangeValue(frameNode, value);
     return panda::JSValueRef::Undefined(vm);
@@ -324,7 +324,7 @@ ArkUINativeModuleValue RadioBridge::SetContentModifierBuilder(ArkUIRuntimeCallIn
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto* frameNode = reinterpret_cast<FrameNode*>(firstArg->ToNativePointer(vm)->Value());
-    if (!secondArg->IsObject()) {
+    if (!secondArg->IsObject(vm)) {
         RadioModelNG::SetBuilderFunc(frameNode, nullptr);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -348,11 +348,11 @@ ArkUINativeModuleValue RadioBridge::SetContentModifierBuilder(ArkUIRuntimeCallIn
             panda::TryCatch trycatch(vm);
             auto jsObject = obj.ToLocal();
             auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));
-            CHECK_EQUAL_RETURN(makeFunc->IsFunction(), false, nullptr);
+            CHECK_EQUAL_RETURN(makeFunc->IsFunction(vm), false, nullptr);
             panda::Local<panda::FunctionRef> func = makeFunc;
             auto result = func->Call(vm, jsObject, params, NUM_2);
             JSNApi::ExecutePendingJob(vm);
-            CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(), true, nullptr);
+            CHECK_EQUAL_RETURN(result.IsEmpty() || trycatch.HasCaught() || !result->IsObject(vm), true, nullptr);
             auto resultObj = result->ToObject(vm);
             panda::Local<panda::JSValueRef> nodeptr =
                 resultObj->Get(vm, panda::StringRef::NewFromUtf8(vm, RADIO_BUILDER_NODEPTR_OF_UINODE));

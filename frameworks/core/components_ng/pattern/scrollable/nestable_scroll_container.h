@@ -46,9 +46,10 @@ public:
      * @brief Handle drag end velocity, triggering a scroll animation or a bounce animation on overScroll.
      *
      * @param velocity drag end velocity.
+     * @param child components that call HandleScrollVelocity.
      * @return true if velocity is consumed
      */
-    virtual bool HandleScrollVelocity(float velocity) = 0;
+    virtual bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) = 0;
 
     /**
      * @brief Called when the scroll starts, recursively pass upwards.
@@ -69,6 +70,14 @@ public:
     const std::unique_ptr<NestedScrollOptions>& GetNestedModeForChildren() const
     {
         return childNestedScroll_;
+    }
+
+    /**
+     * @brief Determine if a component is in an out-of-bounds state.
+     */
+    virtual bool NestedScrollOutOfBoundary()
+    {
+        return false;
     }
 
     void UpdateNestedModeForChildren(const NestedScrollOptions& childNestedScroll);
@@ -102,6 +111,23 @@ public:
         parent_ = parent;
     }
 
+    void SetScrollOriginChild(const WeakPtr<NestableScrollContainer>& scrollOriginChild)
+    {
+        scrollOriginChild_ = scrollOriginChild;
+    }
+
+    RefPtr<NestableScrollContainer> GetScrollOriginChild()
+    {
+        return scrollOriginChild_.Upgrade();
+    }
+
+    /**
+     * @brief Passes the velocity of the current component to the child component for processing.
+     *
+     * @param remainVelocity the velocity of the current component.
+     */
+    virtual void RemainVelocityToChild(float remainVelocity) {}
+
     void SetIsSearchRefresh(bool isSearchRefresh)
     {
         isSearchRefresh_ = isSearchRefresh;
@@ -116,7 +142,7 @@ public:
     {
         isNestedInterrupt_ = isNestedInterrupt;
     }
-    
+
     bool GetIsNestedInterrupt() const
     {
         return isNestedInterrupt_;
@@ -135,6 +161,7 @@ protected:
 private:
     std::unique_ptr<NestedScrollOptions> childNestedScroll_;
     WeakPtr<NestableScrollContainer> parent_;
+    WeakPtr<NestableScrollContainer> scrollOriginChild_;
 
     NestedScrollOptions nestedScroll_ = {
         .forward = NestedScrollMode::SELF_ONLY,
@@ -143,7 +170,7 @@ private:
 
     bool isFixedNestedScrollMode_ = false;
     bool isSearchRefresh_ = true;
-    bool isNestedInterrupt_ = false;
+    bool isNestedInterrupt_ = false; // nested scroll interrupted by change of nested mode
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLLABLE_NESTABLE_SCROLL_CONTAINER_H

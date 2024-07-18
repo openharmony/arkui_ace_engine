@@ -99,6 +99,8 @@ public:
  
 private:
     void OnModifyDone() override;
+    void InitArrayValue(bool& autoCollapseModeChanged, bool& itemCountChanged);
+    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void DumpInfo() override;
 
@@ -107,6 +109,7 @@ private:
     void CollapseArrayValue();
     void ApplySevenPlusOneMode(int32_t fullArraySize);
     void ApplyFivePlusOneMode(int32_t fullArraySize);
+    int32_t GetAutoCollapseIndex(int32_t propSelect);
 
     void OnTouchDown(const TouchEventInfo& info);
     void OnTouchUp(const TouchEventInfo& info);
@@ -116,7 +119,7 @@ private:
     bool MoveIndexBySearch(const std::string& searchStr);
     void ApplyIndexChanged(
         bool isTextNodeInTree, bool refreshBubble = true, bool fromTouchUp = false, bool indexerSizeChanged = false);
-    void OnSelect(bool changed = false);
+    void OnSelect();
     int32_t GetSkipChildIndex(int32_t step);
     int32_t GetFocusChildIndex(const std::string& searchStr);
 
@@ -213,15 +216,17 @@ private:
     uint32_t lastPopupSize_ = 0;
     int32_t currentPopupIndex_ = -1;
     float itemSizeRender_ = 0.0f;
-    uint32_t popupClickedIndex_ = -1;
+    int32_t popupClickedIndex_ = -1;
     int32_t lastFireSelectIndex_ = -1;
     float lastItemSize_ = -1.0f;
     bool lastIndexFromPress_ = false;
     bool selectChanged_ = false;
-    bool autoCollapse_ = false;
+    bool autoCollapse_ = true;
+    bool lastAutoCollapse_ = true;
     bool enableHapticFeedback_ = true;
     float actualIndexerHeight_ = 0.0f;
     bool isNewHeightCalculated_ = false;
+    bool selectedChangedForHaptic_ = false;
     IndexerCollapsingMode lastCollapsingMode_ = IndexerCollapsingMode::INVALID;
     CancelableCallback<void()> delayTask_;
     CancelableCallback<void()> delayCollapseTask_;

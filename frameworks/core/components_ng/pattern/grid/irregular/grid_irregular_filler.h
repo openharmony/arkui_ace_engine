@@ -113,6 +113,18 @@ public:
      */
     void MeasureBackwardToTarget(const FillParameters& params, int32_t targetLine, int32_t startingLine);
 
+    /**
+     * @brief Check if the line contains non-top-left tiles of irregular items (represented by idx < 0 in the matrix).
+     * These items would be skipped in a a regular forward Fill, so we need to use a backward traversal to measure them.
+     * If the line doesn't contain any irregulars, no measure is performed in this function.
+     *
+     * REQUIRES: GridMatrix prior to [line] is already filled.
+     *
+     * @param params FillParameters
+     * @param line index to prepare and measure.
+     */
+    void MeasureLineWithIrregulars(const FillParameters& params, int32_t line);
+
 private:
     /**
      * @brief Fills one GridItem into the Grid.
@@ -188,7 +200,7 @@ private:
     /**
      * @brief Implementation of MeasureBackward algorithm on each row.
      *
-     * @param measured unordered_set to record irregular items that are already measured.
+     * @param measured unordered_set to record items that are already measured.
      * @param params Fill Parameters needed for measure.
      */
     void BackwardImpl(std::unordered_set<int32_t>& measured, const FillParameters& params);

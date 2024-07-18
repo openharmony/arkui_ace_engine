@@ -17,9 +17,6 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "frameworks/core/common/container.h"
 
-#include "graphics_task.h"
-#include "ohos/graphics_manager.h"
-
 #include "render_service_client/core/ui/rs_ui_director.h"
 #include "render_service_client/core/ui/rs_ui_share_context.h"
 
@@ -64,26 +61,24 @@ ModelAdapterWrapper::ModelAdapterWrapper(uint32_t key, const ModelViewContext& c
 #endif
 }
 
-void ModelAdapterWrapper::Deinit()
+std::shared_future<void> ModelAdapterWrapper::Deinit()
 {
     ACE_SCOPED_TRACE("ModelAdapterWrapper::Deinit");
 #if defined(KIT_3D_ENABLE)
     if (sceneAdapter_) {
         sceneAdapter_->Deinit();
-        return;
+        return std::shared_future<void>();
     }
 #endif
-    Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this)] {
+    std::shared_ptr<Render3D::WidgetAdapter> widgetAdapter(widgetAdapter_);
+    std::shared_ptr<Render3D::TextureLayer> textureLayer(textureLayer_);
+    auto key = key_;
+    return Render3D::GraphicsTask::GetInstance().PushAsyncMessage([widgetAdapter, textureLayer, key] {
         ACE_SCOPED_TRACE("ModelAdapterWrapper::Deinit render");
-        auto adapter = weak.Upgrade();
-        CHECK_NULL_VOID(adapter);
-
-        CHECK_NULL_VOID(adapter->widgetAdapter_);
-        adapter->widgetAdapter_->DeInitEngine();
-
-        Render3D::GraphicsManager::GetInstance().UnRegister(adapter->GetKey());
-
-        auto& textureLayer = adapter->textureLayer_;
+        
+        CHECK_NULL_VOID(widgetAdapter);
+        widgetAdapter->DeInitEngine();
+        Render3D::GraphicsManager::GetInstance().UnRegister(key);
         CHECK_NULL_VOID(textureLayer);
         textureLayer->DestroyRenderTarget();
     });
@@ -193,23 +188,7 @@ void ModelAdapterWrapper::OnPaint3D(const RefPtr<ModelPaintProperty>& modelPaint
     if (modelPaintProperty->NeedsModelBackgroundSetup()) {
         UpdateEnviroment(modelPaintProperty);
     }
-
-    if (modelPaintProperty->NeedsCameraSetup()) {
-        UpdateCamera(modelPaintProperty);
-    }
-
-    if (modelPaintProperty->NeedsLightsSetup()) {
-        UpdateLights(modelPaintProperty);
-    }
-
-    if (modelPaintProperty->NeedsAnimationsSetup()) {
-        UpdateGLTFAnimations(modelPaintProperty);
-    }
-
-    if (modelPaintProperty->NeedsGeometriesSetup()) {
-        UpdateGeometries(modelPaintProperty);
-    }
-
+    
     if (modelPaintProperty->NeedsCustomRenderSetup()) {
         UpdateCustomRender(modelPaintProperty);
     }
@@ -234,7 +213,9 @@ void ModelAdapterWrapper::DrawFrame()
     ACE_FUNCTION_TRACE();
 #if defined(KIT_3D_ENABLE)
     if (sceneAdapter_) {
-        sceneAdapter_->RenderFrame();
+        sceneAdapter_->RenderFrame(needsSyncPaint_);
+        needsRepaint_ = sceneAdapter_->NeedsRepaint();
+        needsSyncPaint_ = false;
         return;
     }
 #endif
@@ -328,7 +309,7 @@ void ModelAdapterWrapper::UpdateScene(const RefPtr<ModelPaintProperty>& modelPai
         return;
     }
 #endif
-    if (!modelPaintProperty->GetModelSource().has_value()) {
+    if (modelPaintProperty->GetModelSourceValue().empty()) {
         LOGW("UpdateScene invalid model source");
         return;
     }
@@ -350,7 +331,7 @@ void ModelAdapterWrapper::UpdateEnviroment(const RefPtr<ModelPaintProperty>& mod
         return;
     }
 #endif
-    if (!modelPaintProperty->GetModelBackground().has_value()) {
+    if (modelPaintProperty->GetModelBackgroundValue().empty()) {
         LOGW("UpdateEnviroment invalid model background");
         return;
     }
@@ -385,193 +366,6 @@ void ModelAdapterWrapper::HandleCameraMove(const Render3D::PointerEvent& event)
     });
 }
 
-void ExtractCameraProperty(const RefPtr<ModelPaintProperty>& modelPaintProperty,
-    CameraProperty& camera)
-{
-    if (modelPaintProperty->GetCameraPosition().has_value()) {
-        auto& v = modelPaintProperty->GetCameraPosition().value();
-        camera.position_.SetPosition(Render3D::Vec3 { v.GetX(), v.GetY(), v.GetZ() });
-    }
-
-    if (modelPaintProperty->GetCameraDistance().has_value()) {
-        const auto& v = modelPaintProperty->GetCameraDistance().value().GetValue();
-        camera.position_.SetDistance(v);
-    }
-
-    if (modelPaintProperty->GetCameraIsAngular().has_value()) {
-        auto& v = modelPaintProperty->GetCameraIsAngular().value();
-        camera.position_.SetIsAngular(v);
-    }
-
-    if (modelPaintProperty->GetCameraLookAt().has_value()) {
-        const auto& v = modelPaintProperty->GetCameraLookAt().value();
-        camera.lookAt_.SetX(v.GetX());
-        camera.lookAt_.SetY(v.GetY());
-        camera.lookAt_.SetZ(v.GetZ());
-    }
-
-    if (modelPaintProperty->GetCameraUp().has_value()) {
-        const auto& v = modelPaintProperty->GetCameraUp().value();
-        camera.up_.SetX(v.GetX());
-        camera.up_.SetY(v.GetY());
-        camera.up_.SetZ(v.GetZ());
-    }
-
-    if (modelPaintProperty->GetCameraUp().has_value()) {
-        const auto& v = modelPaintProperty->GetCameraUp().value();
-        camera.up_.SetX(v.GetX());
-        camera.up_.SetY(v.GetY());
-        camera.up_.SetZ(v.GetZ());
-    }
-
-    if (modelPaintProperty->GetCameraRotation().has_value()) {
-        const auto& v = modelPaintProperty->GetCameraRotation().value();
-        camera.rotation_.SetX(v.GetX());
-        camera.rotation_.SetY(v.GetY());
-        camera.rotation_.SetZ(v.GetZ());
-        camera.rotation_.SetW(v.GetW());
-    }
-
-    if (modelPaintProperty->GetCameraZNear().has_value()) {
-        camera.near_ = modelPaintProperty->GetCameraZNear().value();
-    }
-
-    if (modelPaintProperty->GetCameraZFar().has_value()) {
-        camera.far_ = modelPaintProperty->GetCameraZFar().value();
-    }
-
-    if (modelPaintProperty->GetCameraFOV().has_value()) {
-        camera.fov_ = modelPaintProperty->GetCameraFOV().value();
-    }
-}
-
-void ModelAdapterWrapper::UpdateCamera(const RefPtr<ModelPaintProperty>& modelPaintProperty)
-{
-#if defined(KIT_3D_ENABLE)
-    if (sceneAdapter_) {
-        return;
-    }
-#endif
-    CameraProperty camera;
-    ExtractCameraProperty(modelPaintProperty, camera);
-    Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), &camera] {
-        auto adapter = weak.Upgrade();
-        CHECK_NULL_VOID(adapter);
-        CHECK_NULL_VOID(adapter->widgetAdapter_);
-        
-        adapter->widgetAdapter_->SetupCameraTransform(camera.position_, camera.lookAt_, camera.up_,
-            camera.rotation_);
-        adapter->widgetAdapter_->SetupCameraViewProjection(camera.near_, camera.far_, camera.fov_);
-    });
-}
-
-void ExtractLightsProperty(const RefPtr<ModelPaintProperty>& modelPaintProperty,
-    std::vector<std::shared_ptr<Render3D::Light>>& lights)
-{
-    auto& propLights = modelPaintProperty->GetModelLights().value();
-    for (auto& light : propLights) {
-        const auto& color = light->GetLightColor();
-        const auto& rotation = light->GetRotation();
-        const auto& position = light->GetPosition();
-
-        Render3D::Position lightPosition;
-        lightPosition.SetPosition(Render3D::Vec3(position.GetX(), position.GetY(), position.GetZ()));
-        lightPosition.SetDistance(position.GetDistance().GetValue());
-        lightPosition.SetIsAngular(position.GetIsAngular());
-        Render3D::LightType lightType;
-        switch (light->GetLightType()) {
-            case ModelLightType::INVALID_LIGHT:
-                lightType = Render3D::LightType::INVALID;
-                break;
-            case ModelLightType::DIRECTIONAL_LIGHT:
-                lightType = Render3D::LightType::DIRECTIONAL;
-                break;
-            case ModelLightType::POINT_LIGHT:
-                lightType = Render3D::LightType::POINT;
-                break;
-            case ModelLightType::SPOT_LIGHT:
-                lightType = Render3D::LightType::SPOT;
-                break;
-            default:
-                LOGW("invalid light type");
-        }
-
-        lights.push_back(std::make_shared<Render3D::Light>(lightType, Render3D::Vec3(
-            color.GetX(), color.GetY(), color.GetZ()), light->GetLightIntensity().GetValue(),
-            light->GetLightShadow(), lightPosition, Render3D::Quaternion(rotation.GetX(),
-            rotation.GetY(), rotation.GetZ(), rotation.GetW())));
-    }
-}
-
-void ModelAdapterWrapper::UpdateLights(const RefPtr<ModelPaintProperty>& modelPaintProperty)
-{
-#if defined(KIT_3D_ENABLE)
-    if (sceneAdapter_) {
-        return;
-    }
-#endif
-    if (!modelPaintProperty->GetModelLights().has_value()) {
-        LOGW("MODEL_NG: UpdateLights invalid lights");
-        return;
-    }
-
-    std::vector<std::shared_ptr<Render3D::Light>> lights;
-    ExtractLightsProperty(modelPaintProperty, lights);
-
-    Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), &lights] {
-        auto adapter = weak.Upgrade();
-        CHECK_NULL_VOID(adapter);
-        CHECK_NULL_VOID(adapter->widgetAdapter_);
-
-        adapter->widgetAdapter_->UpdateLights(lights);
-    });
-}
-
-void ModelAdapterWrapper::UpdateGLTFAnimations(const RefPtr<ModelPaintProperty>& modelPaintProperty)
-{
-#if defined(KIT_3D_ENABLE)
-    if (sceneAdapter_) {
-        return;
-    }
-#endif
-    if (!modelPaintProperty->GetModelAnimations().has_value()) {
-        LOGW("UpdateGLTFAnimations invalid animation");
-        return;
-    }
-
-    auto& animations = modelPaintProperty->GetModelAnimations().value();
-    Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), &animations] {
-        auto adapter = weak.Upgrade();
-        CHECK_NULL_VOID(adapter);
-        CHECK_NULL_VOID(adapter->widgetAdapter_);
-
-        adapter->widgetAdapter_->UpdateGLTFAnimations(animations);
-    });
-}
-
-void ModelAdapterWrapper::UpdateGeometries(const RefPtr<ModelPaintProperty>& modelPaintProperty)
-{
-#if defined(KIT_3D_ENABLE)
-    if (sceneAdapter_) {
-        return;
-    }
-#endif
-    if (!modelPaintProperty->GetModelGeometries().has_value()) {
-        LOGW("UpdateGeometries invalid geometries");
-        return;
-    }
-
-    auto& geometries = modelPaintProperty->GetModelGeometries().value();
-
-    Render3D::GraphicsTask::GetInstance().PushSyncMessage([weak = WeakClaim(this), &geometries] {
-        auto adapter = weak.Upgrade();
-        CHECK_NULL_VOID(adapter);
-        CHECK_NULL_VOID(adapter->widgetAdapter_);
-
-        adapter->widgetAdapter_->UpdateGeometries(geometries);
-    });
-}
-
 void ModelAdapterWrapper::UpdateCustomRender(const RefPtr<ModelPaintProperty>& modelPaintProperty)
 {
 #if defined(KIT_3D_ENABLE)
@@ -579,13 +373,9 @@ void ModelAdapterWrapper::UpdateCustomRender(const RefPtr<ModelPaintProperty>& m
         return;
     }
 #endif
-    if (!modelPaintProperty->GetModelCustomRender().has_value()) {
-        LOGW("UpdateCustomRender invalid custom render");
-        return;
-    }
-
     auto& customRender = modelPaintProperty->GetModelCustomRender().value();
     if (!customRender) {
+        LOGW("UpdateCustomRender invalid custom render");
         return;
     }
 
@@ -605,7 +395,7 @@ void ModelAdapterWrapper::UpdateShaderPath(const RefPtr<ModelPaintProperty>& mod
         return;
     }
 #endif
-    if (!modelPaintProperty->GetShaderPath().has_value()) {
+    if (modelPaintProperty->GetShaderPathValue().empty()) {
         LOGW("UpdateShaderPath invalid shader path");
         return;
     }
@@ -628,7 +418,7 @@ void ModelAdapterWrapper::UpdateImageTexturePaths(const RefPtr<ModelPaintPropert
         return;
     }
 #endif
-    if (!modelPaintProperty->GetModelImageTexturePaths().has_value()) {
+    if (modelPaintProperty->GetModelImageTexturePathsValue().empty()) {
         LOGW("UpdateImageTexturePaths invalid image texture");
         return;
     }
@@ -651,7 +441,7 @@ void ModelAdapterWrapper::UpdateShaderInputBuffers(const RefPtr<ModelPaintProper
         return;
     }
 #endif
-    if (!modelPaintProperty->GetModelShaderInputBuffer().has_value()) {
+    if (modelPaintProperty->GetModelShaderInputBufferValue() == nullptr) {
         LOGW("UpdateShaderInputBuffers invalid shader input buffer");
         return;
     }

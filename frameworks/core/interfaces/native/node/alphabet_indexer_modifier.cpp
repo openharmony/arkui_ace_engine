@@ -531,7 +531,7 @@ void ResetAutoCollapse(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    IndexerModelNG::SetAutoCollapse(frameNode, false);
+    IndexerModelNG::SetAutoCollapse(frameNode, true);
 }
 
 void SetEnableHapticFeedback(ArkUINodeHandle node, ArkUI_Bool value)
@@ -597,7 +597,7 @@ void SetOnIndexerRequestPopupData(ArkUINodeHandle node, void* extraParam)
         ArkUI_Int32 length = event.textArrayEvent.length;
         std::vector<std::string> valueVector;
         if (length != 0 && valueArray != nullptr) {
-            for (uint32_t i = 0; i < length; i++) {
+            for (ArkUI_Int32 i = 0; i < length; i++) {
                 valueVector.emplace_back(valueArray[i]);
                 free(valueArray[i]);
             }

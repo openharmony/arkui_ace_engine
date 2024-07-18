@@ -33,6 +33,7 @@ CustomNodeBase::~CustomNodeBase()
         }
     }
     if (destroyFunc_) {
+        ACE_SCOPED_TRACE("CustomNodeBase:Destroy [%s]", GetJSViewName().c_str());
         destroyFunc_();
     }
 }

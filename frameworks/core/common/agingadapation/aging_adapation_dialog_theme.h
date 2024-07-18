@@ -72,9 +72,10 @@ public:
             theme->textPropertyLeft_ = dialogPattern->GetAttr<Dimension>("text_property_left", 0.0_vp);
             theme->textPropertyBottom_ = dialogPattern->GetAttr<Dimension>("text_property_bottom", 0.0_vp);
             theme->textPropertyRight_ = dialogPattern->GetAttr<Dimension>("text_property_right", 0.0_vp);
+            theme->dialogFontSize_ = dialogPattern->GetAttr<Dimension>("dialog_font_size", 0.0_fp);
             theme->gridCount_ = GRID_COUNT;
             theme->maxLines_ = MAX_LINES;
-
+            theme->dialogCornerRadius_ = dialogPattern->GetAttr<Dimension>("dialog_corner_radius_level10", 0.0_vp);
             return theme;
         }
     };
@@ -135,6 +136,11 @@ public:
     {
         return textPropertyRight_;
     }
+
+    const Dimension& GetDialogFontSize() const
+    {
+        return dialogFontSize_;
+    }
     
     const Color& GetDialogIconColor() const
     {
@@ -156,6 +162,11 @@ public:
         return maxLines_;
     }
 
+    const Dimension& GetDialogCornerRadius() const
+    {
+        return dialogCornerRadius_;
+    }
+
 protected:
     AgingAdapationDialogTheme() = default;
 
@@ -171,6 +182,8 @@ private:
     Dimension textPropertyLeft_;
     Dimension textPropertyBottom_;
     Dimension textPropertyRight_;
+    Dimension dialogFontSize_;
+    Dimension dialogCornerRadius_;
     Color dialogIconColor_;
     Color dialogFontColor_;
     int32_t gridCount_;

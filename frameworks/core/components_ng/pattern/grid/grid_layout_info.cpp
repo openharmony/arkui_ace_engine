@@ -148,11 +148,14 @@ bool GridLayoutInfo::IsOutOfStart() const
     return reachStart_ && Positive(currentOffset_);
 }
 
-bool GridLayoutInfo::IsOutOfEnd() const
+bool GridLayoutInfo::IsOutOfEnd(float mainGap, bool irregular) const
 {
-    auto atOrOutofStart = reachStart_ && NonNegative(currentOffset_);
-    auto endPos = currentOffset_ + totalHeightOfItemsInView_;
-    return !atOrOutofStart && (endIndex_ == childrenCount_ - 1) &&
+    const bool atOrOutOfStart = reachStart_ && NonNegative(currentOffset_);
+    if (irregular) {
+        return !atOrOutOfStart && Negative(GetDistanceToBottom(lastMainSize_, totalHeightOfItemsInView_, mainGap));
+    }
+    const float endPos = currentOffset_ + totalHeightOfItemsInView_;
+    return !atOrOutOfStart && (endIndex_ == childrenCount_ - 1) &&
            LessNotEqual(endPos, lastMainSize_ - contentEndPadding_);
 }
 
@@ -535,6 +538,9 @@ ScrollAlign GridLayoutInfo::TransformAutoScrollAlign(
 
 float GridLayoutInfo::GetAnimatePosIrregular(int32_t targetIdx, int32_t height, ScrollAlign align, float mainGap) const
 {
+    if (targetIdx == LAST_ITEM) {
+        targetIdx = childrenCount_ - 1;
+    }
     auto it = FindInMatrix(targetIdx);
     if (it == gridMatrix_.end()) {
         return -1.0f;
@@ -800,6 +806,9 @@ float GridLayoutInfo::GetTotalHeightOfItemsInView(float mainGap, bool regular) c
     if (it == lineHeightMap_.end()) {
         return -mainGap;
     }
+    if (startMainLineIndex_ > endMainLineIndex_ || it->first > endMainLineIndex_) {
+        return -mainGap;
+    }
     auto endIt = lineHeightMap_.find(endMainLineIndex_ + 1);
     for (; it != endIt; ++it) {
         len += it->second + mainGap;
@@ -818,6 +827,58 @@ std::pair<GridLayoutInfo::HeightMapIt, float> GridLayoutInfo::SkipLinesAboveView
     return { it, offset };
 }
 
+void GridLayoutInfo::UpdateStartIndexForExtralOffset(float mainGap, float mainSize)
+{
+    if (Negative(currentOffset_)) {
+        auto startLineHeight = lineHeightMap_.find(startMainLineIndex_);
+        CHECK_NULL_VOID(startLineHeight != lineHeightMap_.end());
+        auto currentEndOffset = currentOffset_ + startLineHeight->second + mainGap;
+        while (!Positive(currentEndOffset)) {
+            startMainLineIndex_++;
+            startLineHeight = lineHeightMap_.find(startMainLineIndex_);
+            if (startLineHeight == lineHeightMap_.end()) {
+                startMainLineIndex_--;
+                break;
+            }
+            currentOffset_ = currentEndOffset;
+            currentEndOffset += (startLineHeight->second + mainGap);
+        }
+    } else if (Positive(currentOffset_)) {
+        auto preLineHeight = lineHeightMap_.find(startMainLineIndex_ - 1);
+        CHECK_NULL_VOID(preLineHeight != lineHeightMap_.end());
+        auto preItemCurrentOffset = currentOffset_ - preLineHeight->second - mainGap;
+        while (Positive(preItemCurrentOffset)) {
+            startMainLineIndex_--;
+            preLineHeight = lineHeightMap_.find(startMainLineIndex_);
+            if (preLineHeight == lineHeightMap_.end()) {
+                startMainLineIndex_++;
+                break;
+            }
+            preItemCurrentOffset -= (preLineHeight->second + mainGap);
+            currentOffset_ = preItemCurrentOffset;
+        }
+    }
+    auto startLine = gridMatrix_.find(startMainLineIndex_);
+    CHECK_NULL_VOID(startLine != gridMatrix_.end() && (!startLine->second.empty()));
+    startIndex_ = startLine->second.begin()->second;
+    auto endLineHeight = lineHeightMap_.find(startMainLineIndex_);
+    CHECK_NULL_VOID(endLineHeight != lineHeightMap_.end());
+    endMainLineIndex_ = startMainLineIndex_;
+    auto currentEndOffset = currentOffset_ + endLineHeight->second + mainGap;
+    while (LessNotEqual(currentEndOffset, mainSize)) {
+        endMainLineIndex_++;
+        endLineHeight = lineHeightMap_.find(endMainLineIndex_);
+        if (endLineHeight == lineHeightMap_.end()) {
+            endMainLineIndex_--;
+            break;
+        }
+        currentEndOffset += (endLineHeight->second + mainGap);
+    }
+    auto endLine = gridMatrix_.find(endMainLineIndex_);
+    CHECK_NULL_VOID(endLine != gridMatrix_.end() && (!endLine->second.empty()));
+    endIndex_ = endLine->second.rbegin()->second;
+}
+
 float GridLayoutInfo::GetDistanceToBottom(float mainSize, float heightInView, float mainGap) const
 {
     if (lineHeightMap_.empty() || endIndex_ < childrenCount_ - 1 ||
@@ -832,7 +893,7 @@ float GridLayoutInfo::GetDistanceToBottom(float mainSize, float heightInView, fl
         offset += it->second + mainGap;
         ++it;
     }
-    float bottomPos = offset + heightInView;
+    const float bottomPos = offset + heightInView;
     return bottomPos - mainSize;
 }
 

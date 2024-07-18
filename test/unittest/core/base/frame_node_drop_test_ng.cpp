@@ -694,11 +694,11 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg016, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_SPOT);
+    const std::string allowTag(NODE_TAG_SPOT);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    std::set<std::string> allowDrop = { allow_TAG };
+    std::set<std::string> allowDrop = { allowTag };
     frameNode->SetAllowDrop(allowDrop);
     ASSERT_NE(frameNode, nullptr);
 
@@ -746,11 +746,11 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg017, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_SPOT);
+    const std::string allowTag(NODE_TAG_SPOT);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    std::set<std::string> allowDrop = { allow_TAG };
+    std::set<std::string> allowDrop = { allowTag };
     frameNode->SetAllowDrop(allowDrop);
     ASSERT_NE(frameNode, nullptr);
 
@@ -798,11 +798,11 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg018, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_SPOT);
+    const std::string allowTag(NODE_TAG_SPOT);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    std::set<std::string> allowDrop = { allow_TAG };
+    std::set<std::string> allowDrop = { allowTag };
     frameNode->SetAllowDrop(allowDrop);
     ASSERT_NE(frameNode, nullptr);
 
@@ -850,11 +850,11 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg019, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_ONE);
+    const std::string allowTag(NODE_TAG_ONE);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    std::set<std::string> allowDrop = { allow_TAG };
+    std::set<std::string> allowDrop = { allowTag };
     frameNode->SetAllowDrop(allowDrop);
     ASSERT_NE(frameNode, nullptr);
 
@@ -902,11 +902,11 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg020, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_ONE);
+    const std::string allowTag(NODE_TAG_ONE);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    std::set<std::string> allowDrop = { allow_TAG };
+    std::set<std::string> allowDrop = { allowTag };
     frameNode->SetAllowDrop(allowDrop);
     ASSERT_NE(frameNode, nullptr);
 
@@ -954,11 +954,11 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg021, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_ONE);
+    const std::string allowTag(NODE_TAG_ONE);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    std::set<std::string> allowDrop = { allow_TAG };
+    std::set<std::string> allowDrop = { allowTag };
     frameNode->SetAllowDrop(allowDrop);
     ASSERT_NE(frameNode, nullptr);
 
@@ -1006,11 +1006,11 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg022, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_A);
+    const std::string allowTag(NODE_TAG_A);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    std::set<std::string> allowDrop = { allow_TAG };
+    std::set<std::string> allowDrop = { allowTag };
     frameNode->SetAllowDrop(allowDrop);
     ASSERT_NE(frameNode, nullptr);
 
@@ -1058,11 +1058,11 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg023, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_A);
+    const std::string allowTag(NODE_TAG_A);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    std::set<std::string> allowDrop = { allow_TAG };
+    std::set<std::string> allowDrop = { allowTag };
     frameNode->SetAllowDrop(allowDrop);
     ASSERT_NE(frameNode, nullptr);
 
@@ -1110,11 +1110,11 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg024, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_A);
+    const std::string allowTag(NODE_TAG_A);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    std::set<std::string> allowDrop = { allow_TAG };
+    std::set<std::string> allowDrop = { allowTag };
     frameNode->SetAllowDrop(allowDrop);
     ASSERT_NE(frameNode, nullptr);
 
@@ -1162,9 +1162,9 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg025, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_EMPTY);
+    const std::string allowTag(NODE_TAG_EMPTY);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
     std::set<std::string> allowDrop;
     frameNode->SetAllowDrop(allowDrop);
@@ -1214,9 +1214,9 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg026, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_EMPTY);
+    const std::string allowTag(NODE_TAG_EMPTY);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
     std::set<std::string> allowDrop;
     frameNode->SetAllowDrop(allowDrop);
@@ -1266,9 +1266,9 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg027, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_EMPTY);
+    const std::string allowTag(NODE_TAG_EMPTY);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
     std::set<std::string> allowDrop;
     frameNode->SetAllowDrop(allowDrop);
@@ -1318,11 +1318,11 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg028, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_A);
+    const std::string allowTag(NODE_TAG_SPOT);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    std::set<std::string> allowDrop = { allow_TAG };
+    std::set<std::string> allowDrop = { allowTag };
     frameNode->SetAllowDrop(allowDrop);
     ASSERT_NE(frameNode, nullptr);
 
@@ -1330,7 +1330,6 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg028, TestSize.Level1)
      * @tc.steps: step3. construct summaryMap for dragDropManager.
      * @tc.expected: dragDropManager is not null.
      */
-    const std::string summary_TAG(NODE_TAG_SPOT);
     dragDropManager->summaryMap_.clear();
     ASSERT_NE(dragDropManager, nullptr);
 
@@ -1369,11 +1368,11 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg029, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_A);
+    const std::string allowTag(NODE_TAG_ONE);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    std::set<std::string> allowDrop = { allow_TAG };
+    std::set<std::string> allowDrop = { allowTag };
     frameNode->SetAllowDrop(allowDrop);
     ASSERT_NE(frameNode, nullptr);
 
@@ -1381,7 +1380,6 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg029, TestSize.Level1)
      * @tc.steps: step3. construct summaryMap for dragDropManager.
      * @tc.expected: dragDropManager is not null.
      */
-    const std::string summary_TAG(NODE_TAG_ONE);
     dragDropManager->summaryMap_.clear();
     ASSERT_NE(dragDropManager, nullptr);
 
@@ -1420,11 +1418,11 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg030, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_A);
+    const std::string allowTag(NODE_TAG_A);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    std::set<std::string> allowDrop = { allow_TAG };
+    std::set<std::string> allowDrop = { allowTag };
     frameNode->SetAllowDrop(allowDrop);
     ASSERT_NE(frameNode, nullptr);
 
@@ -1432,7 +1430,6 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg030, TestSize.Level1)
      * @tc.steps: step3. construct summaryMap for dragDropManager.
      * @tc.expected: dragDropManager is not null.
      */
-    const std::string summary_TAG(NODE_TAG_A);
     dragDropManager->summaryMap_.clear();
     ASSERT_NE(dragDropManager, nullptr);
 
@@ -1471,11 +1468,11 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg031, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_SPOT);
+    const std::string allowTag(NODE_TAG_SPOT);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    std::set<std::string> allowDrop = { allow_TAG };
+    std::set<std::string> allowDrop = { allowTag };
     frameNode->SetAllowDrop(allowDrop);
     ASSERT_NE(frameNode, nullptr);
 
@@ -1523,11 +1520,11 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg032, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_SPOT);
+    const std::string allowTag(NODE_TAG_SPOT);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    std::set<std::string> allowDrop = { allow_TAG };
+    std::set<std::string> allowDrop = { allowTag };
     frameNode->SetAllowDrop(allowDrop);
     ASSERT_NE(frameNode, nullptr);
 
@@ -1575,11 +1572,11 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg033, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_SPOT);
+    const std::string allowTag(NODE_TAG_SPOT);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    std::set<std::string> allowDrop = { allow_TAG };
+    std::set<std::string> allowDrop = { allowTag };
     frameNode->SetAllowDrop(allowDrop);
     ASSERT_NE(frameNode, nullptr);
 
@@ -1627,11 +1624,11 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg034, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_ONE);
+    const std::string allowTag(NODE_TAG_ONE);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    std::set<std::string> allowDrop = { allow_TAG };
+    std::set<std::string> allowDrop = { allowTag };
     frameNode->SetAllowDrop(allowDrop);
     ASSERT_NE(frameNode, nullptr);
 
@@ -1679,11 +1676,11 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg035, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_ONE);
+    const std::string allowTag(NODE_TAG_ONE);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    std::set<std::string> allowDrop = { allow_TAG };
+    std::set<std::string> allowDrop = { allowTag };
     frameNode->SetAllowDrop(allowDrop);
     ASSERT_NE(frameNode, nullptr);
 
@@ -1731,11 +1728,11 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg036, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_ONE);
+    const std::string allowTag(NODE_TAG_ONE);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    std::set<std::string> allowDrop = { allow_TAG };
+    std::set<std::string> allowDrop = { allowTag };
     frameNode->SetAllowDrop(allowDrop);
     ASSERT_NE(frameNode, nullptr);
 
@@ -1783,11 +1780,11 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg037, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_A);
+    const std::string allowTag(NODE_TAG_A);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    std::set<std::string> allowDrop = { allow_TAG };
+    std::set<std::string> allowDrop = { allowTag };
     frameNode->SetAllowDrop(allowDrop);
     ASSERT_NE(frameNode, nullptr);
 
@@ -1835,11 +1832,11 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg038, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_A);
+    const std::string allowTag(NODE_TAG_A);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    std::set<std::string> allowDrop = { allow_TAG };
+    std::set<std::string> allowDrop = { allowTag };
     frameNode->SetAllowDrop(allowDrop);
     ASSERT_NE(frameNode, nullptr);
 
@@ -1887,11 +1884,11 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg039, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_A);
+    const std::string allowTag(NODE_TAG_A);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    std::set<std::string> allowDrop = { allow_TAG };
+    std::set<std::string> allowDrop = { allowTag };
     frameNode->SetAllowDrop(allowDrop);
     ASSERT_NE(frameNode, nullptr);
 
@@ -1939,9 +1936,9 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg040, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_EMPTY);
+    const std::string allowTag(NODE_TAG_EMPTY);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
     std::set<std::string> allowDrop;
     frameNode->SetAllowDrop(allowDrop);
@@ -1991,9 +1988,9 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg041, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_EMPTY);
+    const std::string allowTag(NODE_TAG_EMPTY);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
     std::set<std::string> allowDrop;
     frameNode->SetAllowDrop(allowDrop);
@@ -2043,9 +2040,9 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg042, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_EMPTY);
+    const std::string allowTag(NODE_TAG_EMPTY);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
     std::set<std::string> allowDrop;
     frameNode->SetAllowDrop(allowDrop);
@@ -2095,11 +2092,11 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg043, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_A);
+    const std::string allowTag(NODE_TAG_SPOT);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    std::set<std::string> allowDrop = { allow_TAG };
+    std::set<std::string> allowDrop = { allowTag };
     frameNode->SetAllowDrop(allowDrop);
     ASSERT_NE(frameNode, nullptr);
 
@@ -2107,7 +2104,7 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg043, TestSize.Level1)
      * @tc.steps: step3. construct summaryMap for dragDropManager.
      * @tc.expected: dragDropManager is not null.
      */
-    const std::string summary_TAG(NODE_TAG_SPOT);
+    const std::string summary_TAG(NODE_TAG_EMPTY);
     dragDropManager->summaryMap_.clear();
     ASSERT_NE(dragDropManager, nullptr);
 
@@ -2146,11 +2143,11 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg044, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_A);
+    const std::string allowTag(NODE_TAG_ONE);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    std::set<std::string> allowDrop = { allow_TAG };
+    std::set<std::string> allowDrop = { allowTag };
     frameNode->SetAllowDrop(allowDrop);
     ASSERT_NE(frameNode, nullptr);
 
@@ -2158,7 +2155,7 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg044, TestSize.Level1)
      * @tc.steps: step3. construct summaryMap for dragDropManager.
      * @tc.expected: dragDropManager is not null.
      */
-    const std::string summary_TAG(NODE_TAG_ONE);
+    const std::string summary_TAG(NODE_TAG_EMPTY);
     dragDropManager->summaryMap_.clear();
     ASSERT_NE(dragDropManager, nullptr);
 
@@ -2197,11 +2194,11 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg045, TestSize.Level1)
      * @tc.steps: step2. construct frameNode and update the properties.
      * @tc.expected: frameNode is not null.
      */
-    const std::string allow_TAG(NODE_TAG_A);
+    const std::string allowTag(NODE_TAG_A);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(allow_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    std::set<std::string> allowDrop = { allow_TAG };
+    std::set<std::string> allowDrop = { allowTag };
     frameNode->SetAllowDrop(allowDrop);
     ASSERT_NE(frameNode, nullptr);
 
@@ -2209,7 +2206,518 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg045, TestSize.Level1)
      * @tc.steps: step3. construct summaryMap for dragDropManager.
      * @tc.expected: dragDropManager is not null.
      */
-    const std::string summary_TAG(NODE_TAG_A);
+    const std::string summary_TAG(NODE_TAG_EMPTY);
+    dragDropManager->summaryMap_.clear();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step4. Set an isDisallowDropForcedly in the frameNode and then get an isDisallowDropForcedly.
+     * @tc.expected: The set isDisallowDropForcedly is the same as the get isDisallowDropForcedly.
+     */
+    bool isDisallowDrop = true;
+    ASSERT_TRUE(isDisallowDrop);
+    frameNode->SetDisallowDropForcedly(isDisallowDrop);
+    bool isDisallowDropForcedly = frameNode->GetDisallowDropForcedly();
+    ASSERT_TRUE(isDisallowDropForcedly);
+    
+    /**
+     * @tc.steps: step5. ReportingSupported is set to false.
+     * @tc.expected: reportingEnabledFalse is false.
+     */
+    ASSERT_FALSE(dragDropManager->IsDropAllowed(frameNode));
+}
+
+/**
+ * @tc.name: FrameNodeDropTestNg046
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg046, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. construct frameNode and update the properties.
+     * @tc.expected: frameNode is not null.
+     */
+    const std::string allowTag(NODE_TAG_EMPTY);
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    std::set<std::string> allowDrop = { allowTag };
+    frameNode->SetAllowDrop(allowDrop);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step3. construct summaryMap for dragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    const std::string summary_TAG(NODE_TAG_EMPTY);
+    dragDropManager->summaryMap_.clear();
+    dragDropManager->summaryMap_.insert(make_pair(summary_TAG, frameNodeNullId));
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step4. Set an isDisallowDropForcedly in the frameNode and then get an isDisallowDropForcedly.
+     * @tc.expected: The set isDisallowDropForcedly is the same as the get isDisallowDropForcedly.
+     */
+    bool isDisallowDrop = false;
+    ASSERT_FALSE(isDisallowDrop);
+    frameNode->SetDisallowDropForcedly(isDisallowDrop);
+    bool isDisallowDropForcedly = frameNode->GetDisallowDropForcedly();
+    ASSERT_FALSE(isDisallowDropForcedly);
+    
+    /**
+     * @tc.steps: step5. ReportingSupported is set to false.
+     * @tc.expected: reportingEnabledFalse is false.
+     */
+    ASSERT_TRUE(dragDropManager->IsDropAllowed(frameNode));
+}
+
+/**
+ * @tc.name: FrameNodeDropTestNg047
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg047, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. construct frameNode and update the properties.
+     * @tc.expected: frameNode is not null.
+     */
+    const std::string allowTag(NODE_TAG_EMPTY);
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    std::set<std::string> allowDrop = { allowTag };
+    frameNode->SetAllowDrop(allowDrop);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step3. construct summaryMap for dragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    const std::string summary_TAG(NODE_TAG_EMPTY);
+    dragDropManager->summaryMap_.clear();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step4. Set an isDisallowDropForcedly in the frameNode and then get an isDisallowDropForcedly.
+     * @tc.expected: The set isDisallowDropForcedly is the same as the get isDisallowDropForcedly.
+     */
+    bool isDisallowDrop = true;
+    ASSERT_TRUE(isDisallowDrop);
+    frameNode->SetDisallowDropForcedly(isDisallowDrop);
+    bool isDisallowDropForcedly = frameNode->GetDisallowDropForcedly();
+    ASSERT_TRUE(isDisallowDropForcedly);
+    
+    /**
+     * @tc.steps: step5. ReportingSupported is set to false.
+     * @tc.expected: reportingEnabledFalse is false.
+     */
+    ASSERT_FALSE(dragDropManager->IsDropAllowed(frameNode));
+}
+
+/**
+ * @tc.name: FrameNodeDropTestNg048
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg048, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. construct frameNode and update the properties.
+     * @tc.expected: frameNode is not null.
+     */
+    const std::string allowTag(NODE_TAG_SPOT);
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    std::set<std::string> allowDrop = { allowTag };
+    frameNode->SetAllowDrop(allowDrop);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step3. construct summaryMap for dragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    const std::string summary_TAG(NODE_TAG_EMPTY);
+    dragDropManager->summaryMap_.clear();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step4. Set an isDisallowDropForcedly in the frameNode and then get an isDisallowDropForcedly.
+     * @tc.expected: The set isDisallowDropForcedly is the same as the get isDisallowDropForcedly.
+     */
+    bool isDisallowDrop = false;
+    ASSERT_FALSE(isDisallowDrop);
+    frameNode->SetDisallowDropForcedly(isDisallowDrop);
+    bool isDisallowDropForcedly = frameNode->GetDisallowDropForcedly();
+    ASSERT_FALSE(isDisallowDropForcedly);
+    
+    /**
+     * @tc.steps: step5. ReportingSupported is set to false.
+     * @tc.expected: reportingEnabledFalse is false.
+     */
+    ASSERT_TRUE(dragDropManager->IsDropAllowed(frameNode));
+}
+
+/**
+ * @tc.name: FrameNodeDropTestNg049
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg049, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. construct frameNode and update the properties.
+     * @tc.expected: frameNode is not null.
+     */
+    const std::string allowTag(NODE_TAG_ONE);
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    std::set<std::string> allowDrop = { allowTag };
+    frameNode->SetAllowDrop(allowDrop);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step3. construct summaryMap for dragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    const std::string summary_TAG(NODE_TAG_EMPTY);
+    dragDropManager->summaryMap_.clear();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step4. Set an isDisallowDropForcedly in the frameNode and then get an isDisallowDropForcedly.
+     * @tc.expected: The set isDisallowDropForcedly is the same as the get isDisallowDropForcedly.
+     */
+    bool isDisallowDrop = false;
+    ASSERT_FALSE(isDisallowDrop);
+    frameNode->SetDisallowDropForcedly(isDisallowDrop);
+    bool isDisallowDropForcedly = frameNode->GetDisallowDropForcedly();
+    ASSERT_FALSE(isDisallowDropForcedly);
+    
+    /**
+     * @tc.steps: step5. ReportingSupported is set to false.
+     * @tc.expected: reportingEnabledFalse is false.
+     */
+    ASSERT_TRUE(dragDropManager->IsDropAllowed(frameNode));
+}
+
+/**
+ * @tc.name: FrameNodeDropTestNg050
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg050, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. construct frameNode and update the properties.
+     * @tc.expected: frameNode is not null.
+     */
+    const std::string allowTag(NODE_TAG_A);
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    std::set<std::string> allowDrop = { allowTag };
+    frameNode->SetAllowDrop(allowDrop);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step3. construct summaryMap for dragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    const std::string summary_TAG(NODE_TAG_EMPTY);
+    dragDropManager->summaryMap_.clear();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step4. Set an isDisallowDropForcedly in the frameNode and then get an isDisallowDropForcedly.
+     * @tc.expected: The set isDisallowDropForcedly is the same as the get isDisallowDropForcedly.
+     */
+    bool isDisallowDrop = false;
+    ASSERT_FALSE(isDisallowDrop);
+    frameNode->SetDisallowDropForcedly(isDisallowDrop);
+    bool isDisallowDropForcedly = frameNode->GetDisallowDropForcedly();
+    ASSERT_FALSE(isDisallowDropForcedly);
+    
+    /**
+     * @tc.steps: step5. ReportingSupported is set to false.
+     * @tc.expected: reportingEnabledFalse is false.
+     */
+    ASSERT_TRUE(dragDropManager->IsDropAllowed(frameNode));
+}
+
+/**
+ * @tc.name: FrameNodeDropTestNg051
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg051, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. construct frameNode and update the properties.
+     * @tc.expected: frameNode is not null.
+     */
+    const std::string allowTag(NODE_TAG_EMPTY);
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    std::set<std::string> allowDrop = { allowTag };
+    frameNode->SetAllowDrop(allowDrop);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step3. construct summaryMap for dragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    const std::string summary_TAG(NODE_TAG_EMPTY);
+    dragDropManager->summaryMap_.clear();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step4. Set an isDisallowDropForcedly in the frameNode and then get an isDisallowDropForcedly.
+     * @tc.expected: The set isDisallowDropForcedly is the same as the get isDisallowDropForcedly.
+     */
+    bool isDisallowDrop = false;
+    ASSERT_FALSE(isDisallowDrop);
+    frameNode->SetDisallowDropForcedly(isDisallowDrop);
+    bool isDisallowDropForcedly = frameNode->GetDisallowDropForcedly();
+    ASSERT_FALSE(isDisallowDropForcedly);
+    
+    /**
+     * @tc.steps: step5. ReportingSupported is set to false.
+     * @tc.expected: reportingEnabledFalse is false.
+     */
+    ASSERT_TRUE(dragDropManager->IsDropAllowed(frameNode));
+}
+
+/**
+ * @tc.name: FrameNodeDropTestNg048
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg052, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. construct frameNode and update the properties.
+     * @tc.expected: frameNode is not null.
+     */
+    const std::string allowTag(NODE_TAG_SPOT);
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    std::set<std::string> allowDrop = { allowTag };
+    frameNode->SetAllowDrop(allowDrop);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step3. construct summaryMap for dragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    const std::string summary_TAG(NODE_TAG_EMPTY);
+    dragDropManager->summaryMap_.clear();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step4. Set an isDisallowDropForcedly in the frameNode and then get an isDisallowDropForcedly.
+     * @tc.expected: The set isDisallowDropForcedly is the same as the get isDisallowDropForcedly.
+     */
+    bool isDisallowDrop = true;
+    ASSERT_TRUE(isDisallowDrop);
+    frameNode->SetDisallowDropForcedly(isDisallowDrop);
+    bool isDisallowDropForcedly = frameNode->GetDisallowDropForcedly();
+    ASSERT_TRUE(isDisallowDropForcedly);
+    
+    /**
+     * @tc.steps: step5. ReportingSupported is set to false.
+     * @tc.expected: reportingEnabledFalse is false.
+     */
+    ASSERT_FALSE(dragDropManager->IsDropAllowed(frameNode));
+}
+
+/**
+ * @tc.name: FrameNodeDropTestNg049
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg053, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. construct frameNode and update the properties.
+     * @tc.expected: frameNode is not null.
+     */
+    const std::string allowTag(NODE_TAG_ONE);
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    std::set<std::string> allowDrop = { allowTag };
+    frameNode->SetAllowDrop(allowDrop);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step3. construct summaryMap for dragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    const std::string summary_TAG(NODE_TAG_EMPTY);
+    dragDropManager->summaryMap_.clear();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step4. Set an isDisallowDropForcedly in the frameNode and then get an isDisallowDropForcedly.
+     * @tc.expected: The set isDisallowDropForcedly is the same as the get isDisallowDropForcedly.
+     */
+    bool isDisallowDrop = true;
+    ASSERT_TRUE(isDisallowDrop);
+    frameNode->SetDisallowDropForcedly(isDisallowDrop);
+    bool isDisallowDropForcedly = frameNode->GetDisallowDropForcedly();
+    ASSERT_TRUE(isDisallowDropForcedly);
+    
+    /**
+     * @tc.steps: step5. ReportingSupported is set to false.
+     * @tc.expected: reportingEnabledFalse is false.
+     */
+    ASSERT_FALSE(dragDropManager->IsDropAllowed(frameNode));
+}
+
+/**
+ * @tc.name: FrameNodeDropTestNg050
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg054, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. construct frameNode and update the properties.
+     * @tc.expected: frameNode is not null.
+     */
+    const std::string allowTag(NODE_TAG_A);
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    std::set<std::string> allowDrop = { allowTag };
+    frameNode->SetAllowDrop(allowDrop);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step3. construct summaryMap for dragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    const std::string summary_TAG(NODE_TAG_EMPTY);
+    dragDropManager->summaryMap_.clear();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step4. Set an isDisallowDropForcedly in the frameNode and then get an isDisallowDropForcedly.
+     * @tc.expected: The set isDisallowDropForcedly is the same as the get isDisallowDropForcedly.
+     */
+    bool isDisallowDrop = true;
+    ASSERT_TRUE(isDisallowDrop);
+    frameNode->SetDisallowDropForcedly(isDisallowDrop);
+    bool isDisallowDropForcedly = frameNode->GetDisallowDropForcedly();
+    ASSERT_TRUE(isDisallowDropForcedly);
+    
+    /**
+     * @tc.steps: step5. ReportingSupported is set to false.
+     * @tc.expected: reportingEnabledFalse is false.
+     */
+    ASSERT_FALSE(dragDropManager->IsDropAllowed(frameNode));
+}
+
+/**
+ * @tc.name: FrameNodeDropTestNg051
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg055, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. construct frameNode and update the properties.
+     * @tc.expected: frameNode is not null.
+     */
+    const std::string allowTag(NODE_TAG_EMPTY);
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(allowTag, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    std::set<std::string> allowDrop = { allowTag };
+    frameNode->SetAllowDrop(allowDrop);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step3. construct summaryMap for dragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    const std::string summary_TAG(NODE_TAG_EMPTY);
     dragDropManager->summaryMap_.clear();
     ASSERT_NE(dragDropManager, nullptr);
 

@@ -32,20 +32,28 @@ gen_js_obj("formmenu_abc") {
   dep = ":gen_formmenu_abc"
 }
 
+es2abc_gen_abc("gen_formmenu_abc_preview") {
+  src_js = rebase_path("formmenu_preview.js")
+  dst_file = rebase_path(target_out_dir + "/formmenu_preview.abc")
+  in_puts = [ "formmenu_preview.js" ]
+  out_puts = [ target_out_dir + "/formmenu_preview.abc" ]
+  extra_args = [ "--module" ]
+}
+
 gen_obj("formmenu_abc_preview") {
-  input =
-      get_label_info(":gen_formmenu_abc", "target_out_dir") + "/formmenu.abc"
-  output = target_out_dir + "/formmenu_abc.c"
-  snapshot_dep = [ ":gen_formmenu_abc" ]
+  input = get_label_info(":gen_formmenu_abc_preview", "target_out_dir") +
+          "/formmenu_preview.abc"
+  output = target_out_dir + "/formmenu_abc_preview.c"
+  snapshot_dep = [ ":gen_formmenu_abc_preview" ]
 }
 
 ohos_shared_library("formmenu") {
-  sources = [ "formmenu.cpp" ]
-
   if (use_mingw_win || use_mac || use_linux) {
     deps = [ ":gen_obj_src_formmenu_abc_preview" ]
+    sources = [ "formmenu_preview.cpp" ]
   } else {
     deps = [ ":formmenu_abc" ]
+    sources = [ "formmenu.cpp" ]
   }
 
   external_deps = [

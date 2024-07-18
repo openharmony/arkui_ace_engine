@@ -114,8 +114,8 @@ ArkUINativeModuleValue SymbolSpanBridge::SetFontWeight(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (secondArg->IsString()) {
-        std::string weight = secondArg->ToString(vm)->ToString();
+    if (secondArg->IsString(vm)) {
+        std::string weight = secondArg->ToString(vm)->ToString(vm);
         GetArkUINodeModifiers()->getSymbolSpanModifier()->setSymbolSpanFontWeightStr(
             nativeNode, weight.c_str());
     } else {

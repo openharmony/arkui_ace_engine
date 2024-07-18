@@ -132,6 +132,10 @@ private:
     void OnEnterKeyEvent(const KeyEvent& event);
     void UpdateTitleArrowsImage();
     void UpdateImage(const RefPtr<FrameNode>& buttonNode, const InternalResource::ResourceId& resourceId);
+    void UpdateOptionsButton();
+    void UpdateCalendarLayout();
+    void UpdateNonCurrentMonthFocusedDay(int32_t focusedDayIndex);
+    void PaintMonthFocusState(int32_t focusedDayIndex);
 
     RefPtr<FrameNode> GetCalendarFrameNode();
     RefPtr<CalendarPattern> GetCalendarPattern();
@@ -151,6 +155,7 @@ private:
     std::vector<bool> updateColorFlags = {true, true, true, true};
     OffsetF dialogOffset_;
     WeakPtr<FrameNode> entryNode_ = nullptr;
+    std::map<int32_t, RefPtr<ClickEvent>> clickEvents_;
     RefPtr<TouchEventImpl> touchListener_ = nullptr;
     RefPtr<InputEvent> hoverListener_ = nullptr;
     ACE_DISALLOW_COPY_AND_MOVE(CalendarDialogPattern);

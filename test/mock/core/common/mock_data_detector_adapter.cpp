@@ -17,13 +17,17 @@
 namespace OHOS::Ace {
 void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectText) {}
 void DataDetectorAdapter::SetTextDetectTypes(const std::string& types) {}
+bool DataDetectorAdapter::ParseOriText(const std::unique_ptr<JsonValue>& entityJson, std::string& text)
+{
+    return false;
+}
 void DataDetectorAdapter::ParseAIResult(const TextDataDetectResult& result, int32_t startPos) {}
 void DataDetectorAdapter::ParseAIJson(
     const std::unique_ptr<JsonValue>& jsonValue, TextDataDetectType type, int32_t startPos) {}
 void DataDetectorAdapter::StartAITask() {}
 
 bool DataDetectorAdapter::ShowUIExtensionMenu(
-    const AISpan& aiSpan, NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode)
+    const AISpan& aiSpan, NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode, bool isShowSelectText)
 {
     return true;
 }

@@ -34,6 +34,9 @@
 namespace OHOS::Ace::NG {
 const static uint8_t DEFAULT_TRANSPARENCY_THRESHOLD = 0x1A;
 const static uint8_t FULL_TRANSPARENCY_VALUE = 0xFF;
+const static std::set<uint32_t> RELEASE_ATTRIBUTE_LIST = {
+    0x0C000000,
+};
 RefPtr<SecurityComponentTheme> SecurityComponentModelNG::GetTheme()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -245,6 +248,11 @@ bool SecurityComponentModelNG::IsArkuiComponent()
     return false;
 }
 
+bool SecurityComponentModelNG::IsInReleaseList(uint32_t value)
+{
+    return (RELEASE_ATTRIBUTE_LIST.find(value) != RELEASE_ATTRIBUTE_LIST.end());
+}
+
 bool SecurityComponentModelNG::IsBelowThreshold(const Color& value)
 {
     return value.GetAlpha() < DEFAULT_TRANSPARENCY_THRESHOLD;
@@ -293,7 +301,7 @@ void SecurityComponentModelNG::SetBackgroundColor(const Color& value)
     }
 
     Color resColor = value;
-    if (!IsArkuiComponent() && IsBelowThreshold(value)) {
+    if (!IsInReleaseList(resColor.GetValue()) && !IsArkuiComponent() && IsBelowThreshold(value)) {
         resColor = value.ChangeAlpha(FULL_TRANSPARENCY_VALUE);
     }
     ACE_UPDATE_PAINT_PROPERTY(SecurityComponentPaintProperty, BackgroundColor, resColor);

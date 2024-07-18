@@ -277,7 +277,7 @@ bool NavDestinationPattern::NeedIgnoreKeyboard()
     auto layoutProperty = GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     auto& opts = layoutProperty->GetSafeAreaExpandOpts();
-    if (opts && (opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
+    if (opts && (opts->type & SAFE_AREA_TYPE_KEYBOARD) && (opts->edges & SAFE_AREA_EDGE_BOTTOM)) {
         return true;
     }
     return false;
@@ -350,8 +350,9 @@ void NavDestinationPattern::HandleLongPress()
         if (backButtonIconNode->GetTag() == V2::SYMBOL_ETS_TAG) {
             auto symbolProperty = backButtonIconNode->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(symbolProperty);
-            dialogNode_ =
-                AgingAdapationDialogUtil::ShowLongPressDialog(message, symbolProperty->GetSymbolSourceInfoValue());
+            dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message,
+                symbolProperty->GetSymbolSourceInfoValue(), symbolProperty->GetSymbolColorListValue({}),
+                symbolProperty->GetFontWeightValue(FontWeight::NORMAL));
             return ;
         }
         auto imageProperty = backButtonIconNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -375,5 +376,29 @@ void NavDestinationPattern::HandleLongPressActionEnd()
     CHECK_NULL_VOID(overlayManager);
     overlayManager->CloseDialog(dialogNode_);
     dialogNode_ = nullptr;
+}
+
+void NavDestinationPattern::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    if (!backupStyle_.has_value()) {
+        backupStyle_ = windowManager->GetSystemBarStyle();
+    }
+    currStyle_ = style;
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(navigationNode_.Upgrade());
+    CHECK_NULL_VOID(navigationNode);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    if (navigationPattern->IsFullPageNavigation() && navigationPattern->IsTopNavDestination(host)) {
+        if (currStyle_.value() != nullptr) {
+            windowManager->SetSystemBarStyle(currStyle_.value());
+        } else {
+            navigationPattern->TryRestoreSystemBarStyle(windowManager);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

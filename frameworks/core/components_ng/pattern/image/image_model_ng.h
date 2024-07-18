@@ -28,6 +28,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ImageModelNG : public OHOS::Ace::ImageModel {
 public:
     void Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixMap) override;
+    void ResetImage() override;
     void CreateAnimation(const std::vector<ImageProperties>& imageList, int32_t duration, int32_t iteration) override;
     bool GetIsAnimation() override;
     void SetAlt(const ImageSourceInfo &src) override;
@@ -64,10 +65,13 @@ public:
     void EnableAnalyzer(bool isEnableAnalyzer) override;
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) override;
     void SetImageAnalyzerConfig(void* config) override;
+    void SetImageAIOptions(void* options) override;
     void SetResizableSlice(const ImageResizableSlice& slice) override;
+    void SetResizableLattice(const RefPtr<DrawingLattice>& lattice) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
         const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber = false);
     static void InitImage(FrameNode *frameNode, std::string& src);
+    static void ResetImage(FrameNode* frameNode);
     static void SetInitialSrc(FrameNode* frameNode, const std::string& src, const std::string& bundleName,
         const std::string& moduleName, bool isUriPureNumber = false);
     static void SetInitialPixelMap(FrameNode* frameNode, RefPtr<PixelMap>& pixMap);
@@ -105,12 +109,13 @@ public:
     static ImageSourceInfo GetAlt(FrameNode* frameNode);
     static bool GetDraggable(FrameNode* frameNode);
     static ImageRenderMode GetImageRenderMode(FrameNode* frameNode);
-    static void SetResizableSlice(FrameNode *frameNode, const ImageResizableSlice& slice);
-    static ImageResizableSlice GetResizableSlice(FrameNode *frameNode);
-    static void SetDynamicRangeMode(FrameNode *frameNode, DynamicRangeMode dynamicRangeMode);
-    static void SetEnhancedImageQuality(FrameNode *frameNode, AIImageQuality imageQuality);
-    static bool GetFitOriginalSize(FrameNode *frameNode);
-    static uint32_t GetFillColor(FrameNode *frameNode);
+    static void SetResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice);
+    static void SetResizableLattice(FrameNode* frameNode, const RefPtr<DrawingLattice>& lattice);
+    static ImageResizableSlice GetResizableSlice(FrameNode* frameNode);
+    static void SetDynamicRangeMode(FrameNode* frameNode, DynamicRangeMode dynamicRangeMode);
+    static void SetEnhancedImageQuality(FrameNode* frameNode, AIImageQuality imageQuality);
+    static bool GetFitOriginalSize(FrameNode* frameNode);
+    static uint32_t GetFillColor(FrameNode* frameNode);
     static void SetPixelMap(FrameNode* frameNode, void* drawableDescriptor);
     static void SetPixelMapArray(FrameNode* frameNode, void* animatedDrawableDescriptor);
     static void SetResource(FrameNode* frameNode, void* resource);
@@ -119,8 +124,10 @@ public:
     static RefPtr<DrawingColorFilter> GetDrawingColorFilter(FrameNode* frameNode);
     static void ResetImageSrc(FrameNode* frameNode);
     static void ResetImageAlt(FrameNode* frameNode);
+    static void SetAltPixelMap(FrameNode* frameNode, void* pixelMap);
+    static void SetAltResource(FrameNode* frameNode, void* resource);
 private:
-    RefPtr<ImagePattern> GetImagePattern();
+    ImagePattern* GetImagePattern();
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H

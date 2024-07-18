@@ -31,8 +31,9 @@ namespace OHOS::Ace::NG {
 // and position(outNode identity), animates to the final size and position of inNode(outNode active). Although
 // we have two transitions but these two transitions fit together perfectly, so the appearance looks like a
 // single view move from its old position to its new position, thus visual focus guidance is completed.
-GeometryTransition::GeometryTransition(const std::string& id, bool followWithoutTransition) : id_(id),
-    followWithoutTransition_(followWithoutTransition) {}
+GeometryTransition::GeometryTransition(
+    const std::string& id, bool followWithoutTransition, bool doRegisterSharedTransition) : id_(id),
+    followWithoutTransition_(followWithoutTransition), doRegisterSharedTransition_(doRegisterSharedTransition) {}
 
 bool GeometryTransition::IsInAndOutEmpty() const
 {
@@ -191,6 +192,10 @@ bool GeometryTransition::Update(const WeakPtr<FrameNode>& which, const WeakPtr<F
     } else {
         ret = false;
     }
+    auto whichNode = which.Upgrade();
+    if (ret && whichNode && whichNode != value.Upgrade()) {
+        whichNode->SetLayoutPriority(0);
+    }
     return ret;
 }
 
@@ -217,13 +222,13 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
     CHECK_NULL_VOID(node);
     bool isRoot = layoutWrapper->IsRootMeasureNode();
     std::optional<bool> direction;
-
     if (isRoot && IsNodeInAndActive(node)) {
         TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node: %{public}d in and active", node->GetId());
         state_ = State::IDENTITY;
         auto geometryNode = node->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         inNodeActiveFrameSize_ = geometryNode->GetFrameSize();
+        CHECK_NULL_VOID(layoutPropertyIn_);
         layoutPropertyIn_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
         node->SetLayoutProperty(layoutPropertyIn_);
         layoutPropertyIn_.Reset();
@@ -242,7 +247,6 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
         hasOutAnim_ = false;
         direction = false;
     }
-
     if (direction.has_value()) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -321,13 +325,18 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
         self->SetLayoutPriority(0);
         renderContext->SetFrameWithoutAnimation(activeFrameRect);
         if (target->IsRemoving()) {
-            renderContext->RegisterSharedTransition(targetRenderContext); // notify backend for hierarchy processing
+            if (doRegisterSharedTransition_) {
+                // notify backend for hierarchy processing
+                renderContext->RegisterSharedTransition(targetRenderContext);
+            }
         }
     } else {
         outNodeTargetAbsRect_ = targetRect;
         if (staticNodeAbsRect_ && targetRenderContext->HasSandBox()) {
             staticNodeAbsRect_.reset();
-            targetRenderContext->RegisterSharedTransition(renderContext);
+            if (doRegisterSharedTransition_) {
+                targetRenderContext->RegisterSharedTransition(renderContext);
+            }
         }
         if (taskExecutor) {
             taskExecutor->PostTask(

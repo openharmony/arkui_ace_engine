@@ -384,6 +384,7 @@ void ListItemDragManager::HandleOnItemDragUpdate(const GestureEvent& info)
     auto frameRect = geometry->GetMarginFrameRect();
     OffsetF gestureOffset(info.GetOffsetX(), info.GetOffsetY());
     realOffset_ = gestureOffset + dragOffset_;
+    lanes_ = GetLanes();
     if (lanes_ == 1) {
         if (axis_ == Axis::VERTICAL) {
             realOffset_.SetX(dragOffset_.GetX());
@@ -514,5 +515,14 @@ int32_t ListItemDragManager::GetIndex() const
     auto forEach = forEachNode_.Upgrade();
     CHECK_NULL_RETURN(forEach, -1);
     return forEach->GetFrameNodeIndex(GetHost());
+}
+
+int32_t ListItemDragManager::GetLanes() const
+{
+    auto parent = listNode_.Upgrade();
+    CHECK_NULL_RETURN(parent, 1);
+    auto pattern = parent->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, 1);
+    return pattern->GetLanes();
 }
 } // namespace OHOS::Ace::NG

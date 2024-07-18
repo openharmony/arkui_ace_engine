@@ -68,19 +68,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg002, TestSize.Level1)
 }
 
 /**
- * @tc.name: FrameNodeTestNg003
- * @tc.desc: Test frame node method
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeTestNg003, TestSize.Level1)
-{
-    auto jsonValue = std::make_unique<JsonValue>();
-    FRAME_NODE->GetOrCreateFocusHub();
-    FRAME_NODE->FocusToJsonValue(jsonValue, filter);
-    EXPECT_FALSE(jsonValue->GetBool("enabled", false));
-}
-
-/**
  * @tc.name: FrameNodeTestNg004
  * @tc.desc: Test frame node method
  * @tc.type: FUNC
@@ -167,7 +154,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg007, TestSize.Level1)
     EXPECT_EQ(node->GetBaselineDistance(), 0);
     auto nodeLayoutProperty = node->GetLayoutProperty();
     nodeLayoutProperty->geometryTransition_ =
-        ElementRegister::GetInstance()->GetOrCreateGeometryTransition("test", false);
+        ElementRegister::GetInstance()->GetOrCreateGeometryTransition("test", false, true);
     node->Layout();
     EXPECT_FALSE(node->IsRootMeasureNode());
     node->SetRootMeasureNode();
@@ -181,51 +168,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg007, TestSize.Level1)
  * @tc.type: FUNC
  */
 HWTEST_F(FrameNodeTestNg, FrameNodeTestNg008, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step 1. create framenode and initialize the params used in Test.
-     */
-    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto node = FrameNode::CreateFrameNode("node", nodeId, AceType::MakeRefPtr<Pattern>(), true);
-
-    auto parentNode = FrameNode::CreateFrameNode("LocationButton", nodeId + 1, AceType::MakeRefPtr<Pattern>(), true);
-    /**
-     * @tc.steps: step 2. call AddFRCSceneInfo .
-     * @tc.expect: rosenContext set scene and speed, no expect
-     */
-    node->AddFRCSceneInfo("test", 0, SceneStatus::START);
-    node->AddFRCSceneInfo("test", 0, SceneStatus::RUNNING);
-
-    /**
-     * @tc.steps: step 3. call CheckSecurityComponentStatus .
-     * @tc.expect: rect.size ++
-     */
-    EXPECT_FALSE(node->HaveSecurityComponent());
-    std::list<RefPtr<FrameNode>> nodeList;
-    nodeList.push_back(parentNode);
-    node->frameChildren_ = { nodeList.begin(), nodeList.end() };
-    std::vector<RectF> rect;
-    node->CheckSecurityComponentStatus(rect);
-    EXPECT_EQ(rect.size(), 2);
-    rect.clear();
-    rect.emplace_back(RectF(0, 0, 0, 0));
-    parentNode->CheckSecurityComponentStatus(rect);
-    EXPECT_EQ(rect.size(), 2);
-
-    /**
-     * @tc.steps: step 3. call HaveSecurityComponent.
-     * @tc.expect: Different GetTag() return false or true.
-     */
-    EXPECT_TRUE(parentNode->HaveSecurityComponent());
-    EXPECT_TRUE(node->HaveSecurityComponent());
-}
-
-/**
- * @tc.name: FrameNodeTestNg009
- * @tc.desc: Test frame node method
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeTestNg009, TestSize.Level1)
 {
     /**
      * @tc.steps: step 1. create framenode and initialize the params used in Test.
@@ -745,7 +687,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback0014, TestSiz
      */
     VisibleCallbackInfo callbackInfo;
     FRAME_NODE2->SetVisibleAreaUserCallback({ 0.0f }, callbackInfo);
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback();
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback(1);
 
     /**
      * @tc.steps: step2. callback SetParent
@@ -753,18 +695,18 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback0014, TestSiz
      */
     auto parentNode = AceType::MakeRefPtr<FrameNode>("test", -1, AceType::MakeRefPtr<Pattern>(), false);
     FRAME_NODE2->SetParent(FRAME_NODE3);
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback();
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback(2);
     auto parent = FRAME_NODE2->GetParent();
     EXPECT_EQ(parent, 1);
 
     auto parentNode1 = FrameNode::CreateFrameNode("parent", 2, AceType::MakeRefPtr<Pattern>());
     RefPtr<FrameNode> frameNodes[3] = { parentNode1, nullptr, nullptr };
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback();
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback(3);
     auto parent1 = FRAME_NODE2->GetParent();
     EXPECT_EQ(parent1, 1);
 
     FRAME_NODE2->lastVisibleRatio_ = 1.0;
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback();
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback(4);
 
     /**
      * @tc.steps: step3. set onShow_ and call TriggerVisibleAreaChangeCallback
@@ -772,17 +714,17 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback0014, TestSiz
      */
     auto context = PipelineContext::GetCurrentContext();
     context->onShow_ = true;
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback();
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback(5);
     auto testNode_ = TestNode::CreateTestNode(101);
     FRAME_NODE3->SetParent(testNode_);
     FRAME_NODE3->isActive_ = true;
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback();
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback(6);
     FRAME_NODE3->layoutProperty_->UpdateVisibility(VisibleType::INVISIBLE);
     FRAME_NODE2->layoutProperty_->UpdateVisibility(VisibleType::VISIBLE);
     FRAME_NODE2->isActive_ = true;
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback();
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback(7);
     FRAME_NODE3->layoutProperty_->UpdateVisibility(VisibleType::VISIBLE);
-    FRAME_NODE2->TriggerVisibleAreaChangeCallback();
+    FRAME_NODE2->TriggerVisibleAreaChangeCallback(8);
     EXPECT_TRUE(context->GetOnShow());
     EXPECT_EQ(FRAME_NODE2->lastVisibleRatio_, 0);
 }
@@ -986,12 +928,12 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsOutOfTouchTestRegion0025, TestSize.Level1)
     PointF pointF;
     std::vector<RectF> rectF;
     auto test = FRAME_NODE2->IsOutOfTouchTestRegion(std::move(pointF), 0);
-    EXPECT_FALSE(test);
+    EXPECT_TRUE(test);
 
     auto test1 = FRAME_NODE2->InResponseRegionList(pointF, rectF);
     auto test2 = FRAME_NODE2->IsOutOfTouchTestRegion(std::move(pointF), 0);
     EXPECT_FALSE(test1);
-    EXPECT_FALSE(test2);
+    EXPECT_TRUE(test2);
 }
 
 /**
@@ -1509,11 +1451,11 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest047, TestSize.Level1)
 }
 
 /**
- * @tc.name: FrameNodeTestNg_TriggerVisibleAreaChangeCallback0048
+ * @tc.name: FrameNodeTestNg_TriggerVisibleAreaChangeCallback048
  * @tc.desc: Test frame node method
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback0048, TestSize.Level1)
+HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback048, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. build a object to TriggerVisibleAreaChangeCallback
@@ -1527,5 +1469,190 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback0048, TestSiz
     FRAME_NODE2->SetVisibleAreaUserCallback({ 0.2, 0.8, 0.21, 0.79, 0.5 }, callbackInfo);
     FRAME_NODE2->ProcessThrottledVisibleCallback();
     EXPECT_EQ(FRAME_NODE2->throttledCallbackOnTheWay_, false);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_TriggerVisibleAreaChangeCallback049
+ * @tc.desc: Test the function GetValidLeafChildNumber
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback049, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build a object to TriggerVisibleAreaChangeCallback
+     * @tc.expected: expect The function is run ok.
+     */
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> node =
+        FrameNode::CreateFrameNode("TriggerVisibleAreaChangeCallback001", nodeId, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps2: Call the function GetValidLeafChildNumber.
+     * @tc.expected: Value returned as expected.
+     */
+    EXPECT_EQ(FRAME_NODE2->GetValidLeafChildNumber(node, 1), 1);
+    const RefPtr<FrameNode> GET_CHILD1 = FrameNode::CreateFrameNode("child1", 5, AceType::MakeRefPtr<Pattern>(), true);
+    GET_CHILD1->UpdateInspectorId("child1");
+    node->AddChild(GET_CHILD1);
+    EXPECT_EQ(FRAME_NODE2->GetValidLeafChildNumber(node, 1), 1);
+
+    const RefPtr<FrameNode> GET_CHILD2 = FrameNode::CreateFrameNode("child2", 6, AceType::MakeRefPtr<Pattern>(), true);
+    GET_CHILD2->UpdateInspectorId("child2");
+    node->AddChild(GET_CHILD2);
+    EXPECT_EQ(FRAME_NODE2->GetValidLeafChildNumber(node, 3), 2);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_TriggerVisibleAreaChangeCallback050
+ * @tc.desc: Test the function MarkAndCheckNewOpIncNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback050, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. creat node and generate a node tree.
+     */
+    RefPtr<FrameNode> GET_PARENT = FrameNode::CreateFrameNode("parent", 4, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> GET_CHILD1 = FrameNode::CreateFrameNode("child1", 5, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> GET_CHILD2 = FrameNode::CreateFrameNode("child2", 6, AceType::MakeRefPtr<Pattern>());
+    GET_CHILD1->UpdateInspectorId("child1");
+    GET_CHILD2->UpdateInspectorId("child2");
+    GET_PARENT->frameChildren_.insert(GET_CHILD1);
+    GET_PARENT->frameChildren_.insert(GET_CHILD2);
+    GET_CHILD1->MarkAndCheckNewOpIncNode();
+
+    /**
+     * @tc.steps2: set suggestOpIncByte_ and call the function MarkAndCheckNewOpIncNode.
+     * @tc.expected: Value returned as expected.
+     */
+    GET_PARENT->suggestOpIncByte_ = 7;
+    GET_CHILD1->SetSuggestOpIncActivatedOnce();
+    GET_PARENT->SetSuggestOpIncActivatedOnce();
+    GET_CHILD1->MarkAndCheckNewOpIncNode();
+    EXPECT_EQ(GET_CHILD1->GetParent(), nullptr);
+}
+
+/**
+ * @tc.name: FrameNodeTouchTest051
+ * @tc.desc: Test frameNode FindSuggestOpIncNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest051, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    FRAME_NODE->isActive_ = true;
+    FRAME_NODE->eventHub_->SetEnabled(true);
+    SystemProperties::debugEnabled_ = true;
+    auto geometryNode = FRAME_NODE->GetGeometryNode();
+
+    /**
+     * @tc.steps: step2. set frame size and call FindSuggestOpIncNode
+     * @tc.expected: expect result value.
+     */
+
+    geometryNode->SetFrameSize(CONTAINER_SIZE_HUGE);
+    auto host = FRAME_NODE2->GetPattern()->GetHost();
+    CHECK_NULL_VOID(host);
+    std::string path(host->GetHostTag());
+    auto result = FRAME_NODE2->FindSuggestOpIncNode(path, host->GetGeometryNode()->GetFrameSize(), 1);
+    EXPECT_EQ(result, 2);
+
+    SystemProperties::debugEnabled_ = false;
+    result = FRAME_NODE2->FindSuggestOpIncNode(path, host->GetGeometryNode()->GetFrameSize(), 1);
+    EXPECT_EQ(result, 2);
+
+    FRAME_NODE2->suggestOpIncByte_ = 7;
+    FRAME_NODE2->SetSuggestOpIncActivatedOnce();
+    result = FRAME_NODE2->FindSuggestOpIncNode(path, host->GetGeometryNode()->GetFrameSize(), 1);
+    EXPECT_EQ(result, 2);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_TriggerVisibleAreaChangeCallback052
+ * @tc.desc: Test the function IsOpIncValidNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback052, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+
+    SizeF boundary(1, 1);
+    int32_t childNumber = 2;
+
+    /**
+     * @tc.steps2: call the function IsOpIncValidNode.
+     * @tc.expected: Value returned as expected.
+     */
+    auto result = FRAME_NODE2->IsOpIncValidNode(boundary, childNumber);
+    EXPECT_EQ(result, 2);
+
+    FRAME_NODE2->geometryNode_->SetFrameSize(SizeF(20, 20));
+    result = FRAME_NODE2->IsOpIncValidNode(boundary, childNumber);
+    EXPECT_EQ(result, 3);
+
+    SizeF boundary1(40, 40);
+    FRAME_NODE2->geometryNode_->SetFrameSize(SizeF(20, 20));
+    result = FRAME_NODE2->IsOpIncValidNode(boundary1, childNumber);
+    EXPECT_EQ(result, 2);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_TriggerVisibleAreaChangeCallback053
+ * @tc.desc: Test the function MarkSuggestOpIncGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback053, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: call the function MarkSuggestOpIncGroup.
+     * @tc.expected: Value returned as expected.
+     */
+    EXPECT_TRUE(FRAME_NODE2->MarkSuggestOpIncGroup(true, true));
+
+    FRAME_NODE2->SetCanSuggestOpInc(true);
+    FRAME_NODE2->SetSuggestOpIncMarked(true);
+    FRAME_NODE2->SetOpIncGroupCheckedThrough(true);
+    EXPECT_TRUE(FRAME_NODE2->MarkSuggestOpIncGroup(true, true));
+
+    FRAME_NODE2->SetSuggestOpIncMarked(false);
+    FRAME_NODE2->SetCanSuggestOpInc(false);
+    FRAME_NODE2->SetOpIncGroupCheckedThrough(false);
+    EXPECT_TRUE(FRAME_NODE2->MarkSuggestOpIncGroup(true, true));
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_IsPaintRectWithTransformValid054
+ * @tc.desc: Test frame node method IsPaintRectWithTransformValid
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeIsPaintRectWithTransformValid054, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. callback IsPaintRectWithTransformValid.
+     * @tc.expected: expect The function return value is true when width or height is nearZero.
+     */
+    auto node = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    node->renderContext_ = mockRenderContext;
+
+    mockRenderContext->rect_ = RectF(0, 0, 0, 10);
+    auto test1 = node->IsPaintRectWithTransformValid();
+    EXPECT_TRUE(test1);
+
+    mockRenderContext->rect_ = RectF(0, 0, 10, 0);
+    auto test2 = node->IsPaintRectWithTransformValid();
+    EXPECT_TRUE(test2);
+
+    mockRenderContext->rect_ = RectF(0, 0, 10, 10);
+    auto test3 = node->IsPaintRectWithTransformValid();
+    EXPECT_FALSE(test3);
+
+    mockRenderContext->rect_ = RectF(0, 0, 0, 0);
+    auto test4 = node->IsPaintRectWithTransformValid();
+    EXPECT_TRUE(test4);
 }
 } // namespace OHOS::Ace::NG

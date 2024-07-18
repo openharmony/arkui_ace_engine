@@ -56,6 +56,7 @@ enum class PointerAction : int32_t {
 };
 
 struct PointerEvent final {
+    int32_t pointerEventId = 0;
     int32_t pointerId = 0;
     bool pressed = false;
     int32_t windowX = 0;
@@ -73,6 +74,7 @@ struct PointerEvent final {
     int32_t y = 0;
     std::shared_ptr<MMI::PointerEvent> rawPointerEvent;
     std::vector<KeyCode> pressedKeyCodes_;
+    PointerAction action = PointerAction::UNKNOWN;
 
     PointerEvent() = default;
     PointerEvent(int32_t x, int32_t y) : x(x), y(y) {}
@@ -87,6 +89,16 @@ struct PointerEvent final {
         } else {
             return Point(x, y, x, y);
         }
+    }
+
+    int32_t GetDisplayX() const
+    {
+        return displayX;
+    }
+
+    int32_t GetDisplayY() const
+    {
+        return displayY;
     }
 };
 } // namespace OHOS::Ace

@@ -24,8 +24,11 @@
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/utils.h"
+#include "core/common/font_manager.h"
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/calendar/calendar_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
@@ -37,7 +40,6 @@ namespace OHOS::Ace::NG {
 namespace {
 
 const char ELLIPSIS[] = "...";
-constexpr int32_t WEEK_START_DAY_OFFSET = 6;
 constexpr int32_t ROW_COUNT_FOUR = 4;
 constexpr int32_t ROW_COUNT_FIVE = 5;
 constexpr int32_t ROW_COUNT_SIX = 6;
@@ -46,6 +48,7 @@ constexpr int32_t TEXT_END_INDEX = 2;
 constexpr int32_t WEEK_TEXT_END_INDEX = 3;
 constexpr double WEEKEND_TRANSPARENT = 0x7D;
 constexpr Dimension CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT = 4.0_vp;
+constexpr double DEVICE_HEIGHT_LIMIT = 640.0;
 
 std::unique_ptr<RSParagraph> GetTextParagraph(const std::string& text, const RSTextStyle& textStyle)
 {
@@ -106,6 +109,12 @@ void DrawCalendarText(RSCanvas* canvas, const std::string& text, const RSTextSty
 
 CanvasDrawFunction CalendarPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    auto calendarNode = renderContext->GetHost();
+    CHECK_NULL_RETURN(calendarNode, nullptr);
+    textDirection_ = calendarNode->GetLayoutProperty()->GetNonAutoLayoutDirection();
+
     auto paintProperty = DynamicCast<CalendarPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_RETURN(paintProperty, nullptr);
     frameSize_ = paintWrapper->GetGeometryNode()->GetFrameSize();
@@ -148,7 +157,7 @@ void CalendarPaintMethod::DrawDates(RSCanvas& canvas, const Offset& offset)
 
     // Set the rowCount.
     if (totalWeek != 0) {
-        rowCount_ = (static_cast<int32_t>(calendarDays_.size()) / totalWeek);
+        rowCount_ = static_cast<int32_t>(calendarDays_.size() / totalWeek);
     }
 
     // Set dailyFourRowSpace_ for four line calendar.
@@ -169,17 +178,11 @@ void CalendarPaintMethod::DrawDates(RSCanvas& canvas, const Offset& offset)
             break;
     }
 
-    bool isRtl = OHOS::Ace::AceApplicationInfo::GetInstance().IsRightToLeft();
-    auto textDirection = textDirection_;
-    if (isRtl) {
-        textDirection = textDirection_ == TextDirection::RTL ? TextDirection::LTR : TextDirection::RTL;
-    }
-
     for (int32_t row = 0; row < rowCount_; row++) {
         double y = row * (dayHeight_ + dailyRowSpace) + dayNumberStartY;
         for (uint32_t column = 0; column < totalWeek; column++) {
             const auto& day = calendarDays_[dateNumber++];
-            double x = textDirection == TextDirection::LTR ? column * (dayWidth_ + colSpace_)
+            double x = textDirection_ == TextDirection::LTR ? column * (dayWidth_ + colSpace_)
                                                             : (totalWeek - column - 1) * (dayWidth_ + colSpace_);
             auto dayOffset = Offset(x, y);
             DrawCalendar(canvas, offset, dayOffset, day);
@@ -323,12 +326,22 @@ void CalendarPaintMethod::InitTextStyle(RSTextStyle& dateTextStyle, RSTextStyle&
 
     lunarTextStyle.fontSize_ = lunarDayFontSize_;
     lunarTextStyle.fontWeight_ = static_cast<RSFontWeight>(lunarDayFontWeight_);
+
+    if (!appFontFamilies_.empty()) {
+        dateTextStyle.fontFamilies_ = appFontFamilies_;
+        lunarTextStyle.fontFamilies_ = appFontFamilies_;
+    }
 #else
     dateTextStyle.fontSize = dayFontSize_;
     dateTextStyle.fontWeight = static_cast<RSFontWeight>(dayFontWeight_);
 
     lunarTextStyle.fontSize = lunarDayFontSize_;
     lunarTextStyle.fontWeight = static_cast<RSFontWeight>(lunarDayFontWeight_);
+
+    if (!appFontFamilies_.empty()) {
+        dateTextStyle.fontFamilies = appFontFamilies_;
+        lunarTextStyle.fontFamilies = appFontFamilies_;
+    }
 #endif
 }
 
@@ -400,9 +413,17 @@ void CalendarPaintMethod::SetOffWorkTextStyle(RSTextStyle& offWorkTextStyle, con
 #ifndef USE_GRAPHIC_TEXT_GINE
     offWorkTextStyle.fontWeight_ = static_cast<RSFontWeight>(workStateFontWeight_);
     offWorkTextStyle.locale_ = Localization::GetInstance()->GetFontLocale();
+
+    if (!appFontFamilies_.empty()) {
+        offWorkTextStyle.fontFamilies_ = appFontFamilies_;
+    }
 #else
     offWorkTextStyle.fontWeight = static_cast<RSFontWeight>(workStateFontWeight_);
     offWorkTextStyle.locale = Localization::GetInstance()->GetFontLocale();
+
+    if (!appFontFamilies_.empty()) {
+        offWorkTextStyle.fontFamilies = appFontFamilies_;
+    }
 #endif
     if (day.month.month == currentMonth_.month) {
         if (day.dayMark == "work") {
@@ -497,22 +518,24 @@ void CalendarPaintMethod::DrawWeek(RSCanvas& canvas, const Offset& offset) const
     weekTextStyle.color_ = weekColor_;
     weekTextStyle.fontSize_ = weekFontSize_;
     weekTextStyle.locale_ = Localization::GetInstance()->GetFontLocale();
+
+    if (!appFontFamilies_.empty()) {
+        weekTextStyle.fontFamilies_ = appFontFamilies_;
+    }
 #else
     weekTextStyle.color = weekColor_;
     weekTextStyle.fontSize = weekFontSize_;
     weekTextStyle.locale = Localization::GetInstance()->GetFontLocale();
+
+    if (!appFontFamilies_.empty()) {
+        weekTextStyle.fontFamilies = appFontFamilies_;
+    }
 #endif
     static const int32_t daysOfWeek = 7;
 
     auto startDayOfWeek = startOfWeek_;
-    auto textDirection = textDirection_;
-    bool isRtl = OHOS::Ace::AceApplicationInfo::GetInstance().IsRightToLeft();
-    if (isRtl) {
-        startDayOfWeek = startOfWeek_ + WEEK_START_DAY_OFFSET;
-        textDirection = textDirection_ == TextDirection::RTL ? TextDirection::LTR : TextDirection::RTL;
-    }
     for (uint32_t column = 0; column < totalWeek; column++) {
-        double x = textDirection == TextDirection::LTR ? column * (weekWidth_ + colSpace_)
+        double x = textDirection_ == TextDirection::LTR ? column * (weekWidth_ + colSpace_)
                                                         : (totalWeek - column - 1) * (weekWidth_ + colSpace_);
         Offset weekNumberOffset = offset + Offset(x, topPadding_);
         Rect boxRect { weekNumberOffset.GetX(), weekNumberOffset.GetY(), weekWidth_, weekHeight_ };
@@ -523,11 +546,7 @@ void CalendarPaintMethod::DrawWeek(RSCanvas& canvas, const Offset& offset) const
             newText = StringUtils::ToString(wText);
         }
         DrawCalendarText(&canvas, newText, weekTextStyle, boxRect);
-        if (isRtl) {
-            --startDayOfWeek;
-        } else {
-            ++startDayOfWeek;
-        }
+        ++startDayOfWeek;
     }
 }
 
@@ -537,6 +556,11 @@ void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& 
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
+
+    auto fontManager = pipelineContext->GetFontManager();
+    if (fontManager && !(fontManager->GetAppCustomFont().empty())) {
+        appFontFamilies_ = Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont());
+    }
 
     weekColor_ = ToRSColor(paintProperty->GetWeekColor().value_or(theme->GetCalendarTheme().weekColor));
     dayColor_ = ToRSColor(paintProperty->GetDayColor().value_or(theme->GetCalendarTheme().dayColor));
@@ -647,7 +671,15 @@ void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& 
     backgroundSelectedNotTodayColor_ = ToRSColor(theme->GetBackgroundSelectedNotTodayColor());
     backgroundHoverColor_ = ToRSColor(theme->GetBackgroundHoverColor());
     backgroundPressColor_ = ToRSColor(theme->GetBackgroundPressColor());
-    calendarDayKeyFocusedWidth_ = theme->GetCalendarDayKeyFocusedWidth().ConvertToPx();
+
+    auto fontSizeScale = pipelineContext->GetFontScale();
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale() ||
+        Dimension(pipelineContext->GetRootHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT) {
+        calendarDayKeyFocusedWidth_ = theme->GetCalendarDayKeyFocusedWidth().ConvertToPx();
+    } else {
+        calendarDayKeyFocusedWidth_ = theme->GetCalendarLargeDayKeyFocusedWidth().ConvertToPx();
+    }
+
     calendarDayKeyFocusedPenWidth_ = theme->GetCalendarDayKeyFocusedPenWidth().ConvertToPx();
     if (paintProperty->HasShowLunar()) {
         showLunar_ = paintProperty->GetShowLunarValue();
@@ -673,7 +705,7 @@ bool CalendarPaintMethod::IsOffDay(const CalendarDay& dayInfo) const
 {
     std::vector<std::string> days;
     StringUtils::StringSplitter(offDays_, ',', days);
-    int daysOfWeek = 7;
+    int32_t daysOfWeek = 7;
     for (const auto& day : days) {
         auto num = (StringUtils::StringToInt(day) + (daysOfWeek - startOfWeek_)) % daysOfWeek;
         if ((dayInfo.index % daysOfWeek) == num) {

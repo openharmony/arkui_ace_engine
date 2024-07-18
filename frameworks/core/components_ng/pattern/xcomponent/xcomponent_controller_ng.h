@@ -56,7 +56,7 @@ public:
 
     RefPtr<XComponentPattern> GetPattern();
 
-    void StartImageAnalyzer(void* config, onAnalyzedCallback& onAnalyzed) override;
+    void StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed) override;
 
     void StopImageAnalyzer() override;
 

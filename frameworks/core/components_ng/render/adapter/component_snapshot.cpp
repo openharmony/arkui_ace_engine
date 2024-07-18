@@ -15,15 +15,18 @@
 
 #include "core/components_ng/render/adapter/component_snapshot.h"
 
+#include <iterator>
 #include <memory>
 
 #include "transaction/rs_interfaces.h"
 
 #include "base/log/log_wrapper.h"
+#include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -81,6 +84,52 @@ private:
 };
 } // namespace
 
+void ProcessImageNode(const RefPtr<UINode>& node)
+{
+    if (node->GetTag() == V2::IMAGE_ETS_TAG) {
+        auto imageNode = AceType::DynamicCast<FrameNode>(node);
+        if (imageNode && AceType::DynamicCast<ImagePattern>(imageNode->GetPattern())) {
+            auto imagePattern  = AceType::DynamicCast<ImagePattern>(imageNode->GetPattern());
+            imagePattern->OnVisibleAreaChange(true);
+        }
+    }
+    auto children = node->GetChildren();
+    for (const auto& child : children) {
+        ProcessImageNode(child);
+    }
+}
+
+bool CheckImageSuccessfullyLoad(const RefPtr<UINode>& node, int32_t& imageCount)
+{
+    CHECK_NULL_RETURN(node, false);
+    if (node->GetTag() == V2::IMAGE_ETS_TAG) {
+        imageCount++;
+        auto imageNode = AceType::DynamicCast<FrameNode>(node);
+        CHECK_NULL_RETURN(imageNode, false);
+        auto imagePattern  = AceType::DynamicCast<ImagePattern>(imageNode->GetPattern());
+        CHECK_NULL_RETURN(imagePattern, false);
+        auto imageLoadContext = imagePattern->GetImageLoadingContext().Upgrade();
+        CHECK_NULL_RETURN(imageLoadContext, false);
+        auto imageStateManger = imageLoadContext->GetStateManger();
+        CHECK_NULL_RETURN(imageStateManger, false);
+
+        auto result = imageStateManger->GetCurrentState() == ImageLoadingState::LOAD_SUCCESS;
+        if (!result) {
+            TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Image loading failed! ImageId=%{public}d ImageKey=%{public}s",
+                imageNode->GetId(), imageNode->GetInspectorId().value_or("").c_str());
+        }
+        return result;
+    }
+
+    auto children = node->GetChildren();
+    for (const auto& child : children) {
+        if (!CheckImageSuccessfullyLoad(child, imageCount)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 std::shared_ptr<Rosen::RSNode> ComponentSnapshot::GetRsNode(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, nullptr);
@@ -90,7 +139,7 @@ std::shared_ptr<Rosen::RSNode> ComponentSnapshot::GetRsNode(const RefPtr<FrameNo
     return rsNode;
 }
 
-void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callback)
+void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callback, const SnapshotOptions& options)
 {
     auto node = Inspector::GetFrameNodeByKey(componentId);
     if (!node) {
@@ -118,7 +167,8 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
         }
         auto& rsInterface = Rosen::RSInterfaces::GetInstance();
         rsInterface.TakeSurfaceCaptureForUI(
-            rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr));
+            rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr),
+            options.scale, options.scale, options.waitUntilRenderFinished);
         return;
     }
 
@@ -131,11 +181,13 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
         return;
     }
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
-    rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr));
+    rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<CustomizedCallback>(std::move(callback), nullptr),
+        options.scale, options.scale, options.waitUntilRenderFinished);
 }
 
 void ComponentSnapshot::Create(
-    const RefPtr<AceType>& customNode, JsCallback&& callback, bool enableInspector, const int32_t delayTime, bool flag)
+    const RefPtr<AceType>& customNode, JsCallback&& callback, bool enableInspector, const SnapshotParam& param,
+    bool flag)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -150,10 +202,11 @@ void ComponentSnapshot::Create(
         stackNode->AddChild(uiNode);
         node = stackNode;
     }
-
     FrameNode::ProcessOffscreenNode(node);
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Process off screen Node finished, root size = %{public}s",
         node->GetGeometryNode()->GetFrameSize().ToString().c_str());
+
+    ProcessImageNode(node);
 
     if (enableInspector) {
         Inspector::AddOffscreenNode(node);
@@ -164,19 +217,16 @@ void ComponentSnapshot::Create(
     auto executor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
     if (flag) {
-        pipeline->FlushUITasks();
-        pipeline->FlushMessages();
+        executor->PostTask(
+            [node]() {
+                auto pipeline = node->GetContext();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->FlushUITasks();
+                pipeline->FlushMessages();
+            },
+            TaskExecutor::TaskType::UI, "ArkUIComponentSnapshotFlushUITasks", PriorityType::VIP);
     }
-    executor->PostDelayedTask(
-        [callback, node, enableInspector]() mutable {
-            auto rsNode = GetRsNode(node);
-            TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-                "Begin to take surfaceCapture for ui, rootNode = %{public}s", node->GetTag().c_str());
-            auto& rsInterface = Rosen::RSInterfaces::GetInstance();
-            rsInterface.TakeSurfaceCaptureForUI(
-                rsNode, std::make_shared<CustomizedCallback>(std::move(callback), enableInspector ? node : nullptr));
-        },
-        TaskExecutor::TaskType::UI, delayTime, "ArkUIComponentSnapshotCreateCapture");
+    PostDelayedTaskOfBuiler(executor, std::move(callback), node, enableInspector, pipeline, param);
 }
 
 void ComponentSnapshot::GetNormalCapture(const RefPtr<FrameNode>& frameNode, NormalCallback&& callback)
@@ -184,5 +234,41 @@ void ComponentSnapshot::GetNormalCapture(const RefPtr<FrameNode>& frameNode, Nor
     auto rsNode = GetRsNode(frameNode);
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
     rsInterface.TakeSurfaceCaptureForUI(rsNode, std::make_shared<NormalCaptureCallback>(std::move(callback)));
+}
+
+void ComponentSnapshot::PostDelayedTaskOfBuiler(const RefPtr<TaskExecutor>& executor, JsCallback&& callback,
+    const RefPtr<FrameNode>& node, bool enableInspector, const RefPtr<PipelineContext>& pipeline,
+    const SnapshotParam& param)
+{
+    executor->PostDelayedTask(
+        [callback, node, enableInspector, pipeline, param]() mutable {
+            BuilerTask(std::move(callback), node, enableInspector, pipeline, param);
+        },
+        TaskExecutor::TaskType::UI, param.delay, "ArkUIComponentSnapshotCreateCapture", PriorityType::VIP);
+}
+
+void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode>& node, bool enableInspector,
+    const RefPtr<PipelineContext>& pipeline, const SnapshotParam& param)
+{
+    int32_t imageCount = 0;
+    if (param.checkImageStatus && !CheckImageSuccessfullyLoad(node, imageCount)) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Image loading failed! rootId=%{public}d rootNode=%{public}s",
+            node->GetId(), node->GetTag().c_str());
+        callback(nullptr, ERROR_CODE_COMPONENT_SNAPSHOT_IMAGE_LOAD_ERROR, nullptr);
+        return;
+    }
+    if (param.options.waitUntilRenderFinished) {
+        pipeline->FlushUITasks();
+        pipeline->FlushMessages();
+    }
+    auto rsNode = GetRsNode(node);
+    auto& rsInterface = Rosen::RSInterfaces::GetInstance();
+    TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+        "Begin to take surfaceCapture for ui, rootId=%{public}d rootNode=%{public}s imageCount=%{public}d",
+        node->GetId(), node->GetTag().c_str(), imageCount);
+    rsInterface.TakeSurfaceCaptureForUI(
+        rsNode,
+        std::make_shared<CustomizedCallback>(std::move(callback), enableInspector ? node : nullptr),
+        param.options.scale, param.options.scale, param.options.waitUntilRenderFinished);
 }
 } // namespace OHOS::Ace::NG

@@ -126,6 +126,7 @@ inline constexpr uint32_t SAFE_AREA_EDGE_ALL = 0b1111;
 struct SafeAreaExpandOpts {
     uint32_t type = SAFE_AREA_TYPE_NONE;
     uint32_t edges = SAFE_AREA_EDGE_NONE;
+    bool switchToNone = false;
 
     bool operator==(const SafeAreaExpandOpts& other) const
     {
@@ -145,6 +146,11 @@ struct SafeAreaExpandOpts {
     bool Expansive() const
     {
         return type != SAFE_AREA_TYPE_NONE && edges != SAFE_AREA_EDGE_NONE;
+    }
+
+    bool ExpansiveToKeyboard() const
+    {
+        return (edges & SAFE_AREA_EDGE_BOTTOM) && (type & SAFE_AREA_TYPE_KEYBOARD);
     }
 
     std::string ToString()

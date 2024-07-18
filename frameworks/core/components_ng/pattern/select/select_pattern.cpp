@@ -42,6 +42,7 @@
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
+#include "core/components_ng/pattern/select/select_properties.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/border_property.h"
@@ -216,11 +217,6 @@ void SelectPattern::ShowSelectMenu()
         offset.AddY(selectSize_.Height());
     }
 
-    auto direction = select->GetLayoutProperty<LayoutProperty>()->GetNonAutoLayoutDirection();
-    if (direction == TextDirection::RTL) {
-        offset.AddX(-selectSize_.Width());
-    }
-
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "select click to show menu.");
     overlayManager->ShowMenu(GetHost()->GetId(), offset, menuWrapper_);
 }
@@ -324,9 +320,12 @@ void SelectPattern::RegisterOnPress()
     auto host = GetHost();
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
-        auto host = pattern->GetHost();
-        auto theme = host->GetContextRefPtr()->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContextRefPtr();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<SelectTheme>();
         auto touchType = info.GetTouches().front().GetTouchType();
         const auto& renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
@@ -628,7 +627,7 @@ void SelectPattern::SetOptionBgColor(const Color& color)
 {
     optionBgColor_ = color;
     for (size_t i = 0; i < options_.size(); ++i) {
-        if (i == selected_ && selectedBgColor_.has_value()) {
+        if (static_cast<int32_t>(i) == selected_ && selectedBgColor_.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<OptionPattern>();
@@ -641,7 +640,7 @@ void SelectPattern::SetOptionFontSize(const Dimension& value)
 {
     optionFont_.FontSize = value;
     for (size_t i = 0; i < options_.size(); ++i) {
-        if (i == selected_ && selectedFont_.FontSize.has_value()) {
+        if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontSize.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<OptionPattern>();
@@ -654,7 +653,7 @@ void SelectPattern::SetOptionItalicFontStyle(const Ace::FontStyle& value)
 {
     optionFont_.FontStyle = value;
     for (size_t i = 0; i < options_.size(); ++i) {
-        if (i == selected_ && selectedFont_.FontStyle.has_value()) {
+        if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontStyle.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<OptionPattern>();
@@ -667,7 +666,7 @@ void SelectPattern::SetOptionFontWeight(const FontWeight& value)
 {
     optionFont_.FontWeight = value;
     for (size_t i = 0; i < options_.size(); ++i) {
-        if (i == selected_ && selectedFont_.FontWeight.has_value()) {
+        if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontWeight.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<OptionPattern>();
@@ -680,7 +679,7 @@ void SelectPattern::SetOptionFontFamily(const std::vector<std::string>& value)
 {
     optionFont_.FontFamily = value;
     for (size_t i = 0; i < options_.size(); ++i) {
-        if (i == selected_ && selectedFont_.FontFamily.has_value()) {
+        if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontFamily.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<OptionPattern>();
@@ -693,7 +692,7 @@ void SelectPattern::SetOptionFontColor(const Color& color)
 {
     optionFont_.FontColor = color;
     for (size_t i = 0; i < options_.size(); ++i) {
-        if (i == selected_ && selectedFont_.FontColor.has_value()) {
+        if (static_cast<int32_t>(i) == selected_ && selectedFont_.FontColor.has_value()) {
             continue;
         }
         auto pattern = options_[i]->GetPattern<OptionPattern>();
@@ -978,6 +977,7 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     std::string optionHeight =  std::to_string(menuLayoutProps->GetSelectModifiedHeightValue(0.0f));
     json->PutExtAttr("optionHeight", optionHeight.c_str(), filter);
     ToJsonMenuBackgroundStyle(json, filter);
+    ToJsonDivider(json, filter);
 }
 
 void SelectPattern::ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -1032,6 +1032,30 @@ void SelectPattern::ToJsonMenuBackgroundStyle(
             jsonValue->GetValue("backgroundBlurStyle")->GetValue("value"), filter);
     } else {
         json->PutExtAttr("menuBackgroundBlurStyle", "", filter);
+    }
+}
+
+void SelectPattern::ToJsonDivider(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    if (options_.empty()) {
+        json->PutExtAttr("divider", "", filter);
+    } else {
+        auto props = options_[0]->GetPaintProperty<OptionPaintProperty>();
+        CHECK_NULL_VOID(props);
+        auto divider = JsonUtil::Create(true);
+        if (props->HasDivider()) {
+            divider->Put("strokeWidth", props->GetDividerValue().strokeWidth.ToString().c_str());
+            divider->Put("startMargin", props->GetDividerValue().startMargin.ToString().c_str());
+            divider->Put("endMargin", props->GetDividerValue().endMargin.ToString().c_str());
+            divider->Put("color", props->GetDividerValue().color.ColorToString().c_str());
+            json->PutExtAttr("divider", divider->ToString().c_str(), filter);
+        } else {
+            json->PutExtAttr("divider", "", filter);
+        }
     }
 }
 
@@ -1433,5 +1457,14 @@ void SelectPattern::SetLayoutDirection(TextDirection value)
 ControlSize SelectPattern::GetControlSize()
 {
     return controlSize_;
+}
+
+void SelectPattern::SetDivider(const SelectDivider& divider)
+{
+    for (auto&& option : options_) {
+        auto props = option->GetPaintProperty<OptionPaintProperty>();
+        CHECK_NULL_VOID(props);
+        props->UpdateDivider(divider);
+    }
 }
 } // namespace OHOS::Ace::NG

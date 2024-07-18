@@ -164,8 +164,8 @@ ArkUINativeModuleValue SpanBridge::SetFontWeight(ArkUIRuntimeCallInfo *runtimeCa
     if (!secondArg->IsNull()) {
         if (secondArg->IsNumber()) {
             weight = std::to_string(secondArg->Int32Value(vm));
-        } else if (secondArg->IsString()) {
-            weight = secondArg->ToString(vm)->ToString();
+        } else if (secondArg->IsString(vm)) {
+            weight = secondArg->ToString(vm)->ToString(vm);
         }
     }
 
@@ -378,8 +378,8 @@ ArkUINativeModuleValue SpanBridge::SetLetterSpacing(ArkUIRuntimeCallInfo *runtim
     if (secondArg->IsNumber()) {
         letterSpacingValue.value = secondArg->ToNumber(vm)->Value();
         GetArkUINodeModifiers()->getSpanModifier()->setSpanLetterSpacing(nativeNode, &letterSpacingValue);
-    } else if (secondArg->IsString()) {
-        std::string tempValueStr = secondArg->ToString(vm)->ToString();
+    } else if (secondArg->IsString(vm)) {
+        std::string tempValueStr = secondArg->ToString(vm)->ToString(vm);
         letterSpacingValue.valueStr = tempValueStr.c_str();
         GetArkUINodeModifiers()->getSpanModifier()->setSpanLetterSpacing(nativeNode, &letterSpacingValue);
     } else {
@@ -406,7 +406,7 @@ ArkUINativeModuleValue SpanBridge::SetBaselineOffset(ArkUIRuntimeCallInfo *runti
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension result;
-    if (secondArg->IsObject() && ArkTSUtils::ParseJsLengthMetrics(vm, secondArg, result) &&
+    if (secondArg->IsObject(vm) && ArkTSUtils::ParseJsLengthMetrics(vm, secondArg, result) &&
         result.Unit() != DimensionUnit::PERCENT && !std::isnan(result.Value())) {
         GetArkUINodeModifiers()->getSpanModifier()->setSpanBaselineOffset(
             nativeNode, result.Value(), static_cast<int8_t>(result.Unit()));
@@ -451,8 +451,8 @@ ArkUINativeModuleValue SpanBridge::SetFont(ArkUIRuntimeCallInfo *runtimeCallInfo
     if (!weightArg->IsNull()) {
         if (weightArg->IsNumber()) {
             weight = std::to_string(weightArg->Int32Value(vm));
-        } else if (weightArg->IsString()) {
-            weight = weightArg->ToString(vm)->ToString();
+        } else if (weightArg->IsString(vm)) {
+            weight = weightArg->ToString(vm)->ToString(vm);
         }
     }
     fontInfo.fontWeight = static_cast<uint8_t>(Framework::ConvertStrToFontWeight(weight));

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/dialog/dialog_accessibility_property.h"
 
 #include "base/utils/utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 
@@ -24,10 +25,16 @@ std::string DialogAccessibilityProperty::GetText() const
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, "");
-    auto dialogPattern = frameNode->GetPattern<DialogPattern>();
-    CHECK_NULL_RETURN(dialogPattern, "");
-    std::string title = dialogPattern->GetTitle();
-    std::string message = dialogPattern->GetMessage();
-    return title.append(message);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, "");
+    ContainerScope scope(pipelineContext->GetInstanceId());
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto dialogPattern = frameNode->GetPattern<DialogPattern>();
+        CHECK_NULL_RETURN(dialogPattern, "");
+        std::string title = dialogPattern->GetTitle();
+        std::string message = dialogPattern->GetMessage();
+        return title.append(message);
+    }
+    return "";
 }
 } // namespace OHOS::Ace::NG

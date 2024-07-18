@@ -57,17 +57,8 @@ public:
 
     void SetNavPathList(const NavPathList& navPathList)
     {
-        navPathList_ = navPathList;
-    }
-
-    void SetPreNavPathList(const NavPathList& navPathList)
-    {
         preNavPathList_ = navPathList;
-    }
-
-    NavPathList GetPreNavPathList() const
-    {
-        return preNavPathList_;
+        navPathList_ = navPathList;
     }
 
     bool Empty() const
@@ -127,6 +118,7 @@ public:
     void Add(const std::string& name, const RefPtr<UINode>& navDestinationNode, NavRouteMode mode,
         const RefPtr<RouteInfo>& routeInfo = nullptr);
     RefPtr<UINode> Get();
+    std::string GetNavDesNameByIndex(int32_t index);
     bool Get(const std::string& name, RefPtr<UINode>& navDestinationNode, int32_t& index);
     bool GetFromPreBackup(const std::string& name, RefPtr<UINode>& navDestinationNode, int32_t& index);
     RefPtr<UINode> Get(int32_t index);
@@ -189,6 +181,23 @@ public:
 
     virtual void UpdatePathInfoIfNeeded(RefPtr<UINode>& uiNode, int32_t index) {}
     virtual void RecoveryNavigationStack() {}
+    virtual bool NeedBuildNewInstance(int32_t index) { return false; }
+    virtual void SetNeedBuildNewInstance(int32_t index, bool need) {}
+
+    void UpdateRecoveryList()
+    {
+        recoveryList_ = navPathList_;
+    }
+
+    void ClearRecoveryList()
+    {
+        recoveryList_.clear();
+    }
+
+    NavPathList GetRecoveryList()
+    {
+        return recoveryList_;
+    }
 
 protected:
     void MoveToTop(const std::string& name, const RefPtr<UINode>& navDestinationNode);
@@ -200,6 +209,8 @@ protected:
     NavPathList navPathList_;
     // prev backup NavPathList
     NavPathList preNavPathList_;
+    // recovery NavPathList
+    NavPathList recoveryList_;
     NavPathList cacheNodes_;
     bool animated_ = true;
     WeakPtr<UINode> navigationNode_;

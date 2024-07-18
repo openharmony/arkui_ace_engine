@@ -55,7 +55,8 @@ public:
     using OnGetRectRelativeToWindowCallback = std::function<void(int32_t&, int32_t&)>;
     using OnFormErrorCallback = std::function<void(const std::string&, const std::string&)>;
     using OnFormUninstallCallback = std::function<void(int64_t)>;
-    using OnFormSurfaceNodeCallback = std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&, bool, bool)>;
+    using OnFormSurfaceNodeCallback = std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&,
+        const AAFwk::Want&)>;
     using OnFormSurfaceChangeCallback = std::function<void(float width, float height, float borderWidth)>;
     using OnFormSurfaceDetachCallback = std::function<void()>;
     using ActionEventHandle = std::function<void(const std::string&)>;
@@ -116,10 +117,12 @@ public:
     void OnGetRectRelativeToWindow(int32_t &top, int32_t &left);
     void ReleaseRenderer();
     void SetObscured(bool isObscured);
+    void OnAccessibilityTransferHoverEvent(float pointX, float pointY, int32_t sourceType,
+        int32_t eventType, int64_t timeMs);
     void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
     void OnAccessibilityChildTreeDeregister();
     void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
-    void OnEnableForm(const AppExecFwk::FormJsInfo& formInfo, const bool enable);
+    bool CheckFormBundleForbidden(const std::string& bundleName);
 #ifdef OHOS_STANDARD_SYSTEM
     void ProcessFormUpdate(const AppExecFwk::FormJsInfo& formJsInfo);
     void ProcessFormUninstall(const int64_t formId);
@@ -135,7 +138,9 @@ public:
     static bool GetFormInfo(const std::string& bundleName, const std::string& moduleName,
         const std::string& cardName, AppExecFwk::FormInfo& formInfo);
     void ProcessRecycleForm();
+    void ProcessEnableForm(bool enable);
 #endif
+    void HandleCachedClickEvents();
 
 private:
     void CreatePlatformResource(const WeakPtr<PipelineBase>& context, const RequestFormInfo& info);
@@ -151,8 +156,8 @@ private:
     void HandleUnTrustFormCallback();
     void HandleSnapshotCallback(const uint32_t& delayTime);
     bool ParseAction(const std::string& action, const std::string& type, AAFwk::Want& want);
-    void HandleCachedClickEvents();
     void HandleEnableFormCallback(const bool enable);
+    void SetGestureInnerFlag();
 
     onFormAcquiredCallbackForJava onFormAcquiredCallbackForJava_;
     OnFormUpdateCallbackForJava onFormUpdateCallbackForJava_;

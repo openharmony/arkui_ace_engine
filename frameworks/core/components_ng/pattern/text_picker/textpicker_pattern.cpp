@@ -58,6 +58,24 @@ void TextPickerPattern::OnAttachToFrameNode()
     host->GetRenderContext()->UpdateClipEdge(true);
 }
 
+void TextPickerPattern::SetLayoutDirection(TextDirection textDirection)
+{
+    auto textPickerNode = GetHost();
+    std::function<void (decltype(textPickerNode))> updateDirectionFunc = [&](decltype(textPickerNode) node) {
+        CHECK_NULL_VOID(node);
+        auto updateProperty = node->GetLayoutProperty();
+        updateProperty->UpdateLayoutDirection(textDirection);
+        for (auto child : node->GetAllChildrenWithBuild()) {
+            auto frameNode = AceType::DynamicCast<FrameNode>(child);
+            if (!frameNode) {
+                continue;
+            }
+            updateDirectionFunc(frameNode);
+        }
+    };
+    updateDirectionFunc(textPickerNode);
+}
+
 bool TextPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     CHECK_NULL_RETURN(dirty, false);
@@ -84,6 +102,12 @@ void TextPickerPattern::OnLanguageConfigurationUpdate()
     CHECK_NULL_VOID(cancelNodeLayout);
     cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
     cancelNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void TextPickerPattern::OnFontConfigurationUpdate()
+{
+    CHECK_NULL_VOID(closeDialogEvent_);
+    closeDialogEvent_();
 }
 
 void TextPickerPattern::SetButtonIdeaSize()
@@ -131,7 +155,15 @@ void TextPickerPattern::OnModifyDone()
         isFiredSelectsChange_ = false;
         return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
 
+    auto layoutDirection = layoutProperty->GetLayoutDirection();
+    if (layoutDirection != TextDirection::AUTO) {
+        SetLayoutDirection(layoutDirection);
+    }
     OnColumnsBuilding();
     FlushOptions();
     CalculateHeight();
@@ -148,8 +180,6 @@ void TextPickerPattern::OnModifyDone()
         CHECK_NULL_VOID(refPtr);
         refPtr->FireChangeEvent(refresh);
     });
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
@@ -390,6 +420,7 @@ double TextPickerPattern::CalculateHeight()
         auto textPickerColumnPattern = it.second->GetPattern<TextPickerColumnPattern>();
         CHECK_NULL_RETURN(textPickerColumnPattern, height);
         textPickerColumnPattern->SetDefaultPickerItemHeight(height);
+        textPickerColumnPattern->ResetOptionPropertyHeight();
         textPickerColumnPattern->NeedResetOptionPropertyHeight(true);
     }
     return height;
@@ -586,7 +617,7 @@ void TextPickerPattern::ProcessCascadeOptionsValues(const std::vector<std::strin
     auto valueIterator = std::find(rangeResultValue.begin(), rangeResultValue.end(), values_[index]);
     if (valueIterator != rangeResultValue.end()) {
         if (index < selecteds_.size()) {
-            selecteds_[index] = std::distance(rangeResultValue.begin(), valueIterator);
+            selecteds_[index] = static_cast<uint32_t>(std::distance(rangeResultValue.begin(), valueIterator));
         } else {
             selecteds_.emplace_back(std::distance(rangeResultValue.begin(), valueIterator));
         }
@@ -649,7 +680,7 @@ void TextPickerPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool is
 {
     if (isCascade_) {
         auto frameNodes = GetColumnNodes();
-        auto columnIndex = 0;
+        uint32_t columnIndex = 0;
         for (auto iter = frameNodes.begin(); iter != frameNodes.end(); iter++) {
             if (iter->second->GetId() == tag->GetId()) {
                 break;
@@ -965,8 +996,9 @@ void TextPickerPattern::CheckAndUpdateColumnSize(SizeF& size)
     PaddingPropertyF padding = pickerLayoutProperty->CreatePaddingAndBorder();
     auto minSize = SizeF(pickerLayoutConstraint->minSize.Width(), pickerLayoutConstraint->minSize.Height());
     MinusPaddingToSize(padding, minSize);
-    auto version10OrLarger =
-        PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9;
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto version10OrLarger = context->GetMinPlatformVersion() > 9;
     pickerContentSize.Constrain(minSize, stackLayoutConstraint->maxSize, version10OrLarger);
 
     size.SetWidth(pickerContentSize.Width() / std::max(childCount, 1.0f));
@@ -978,6 +1010,7 @@ void TextPickerPattern::SetCanLoop(bool isLoop)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto children = host->GetChildren();
+    canloop_ = isLoop;
     for (const auto& child : children) {
         auto stackNode = DynamicCast<FrameNode>(child);
         CHECK_NULL_VOID(stackNode);

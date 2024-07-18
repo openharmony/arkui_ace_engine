@@ -24,6 +24,8 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
+#include "core/components_ng/pattern/tabs/tabs_layout_property.h"
+#include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace {
@@ -388,6 +390,7 @@ void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
 {
     CalcDimension length;
     NG::PaddingProperty padding;
+    bool useLocalizedPadding = false;
     if (ParseJsDimensionVp(info, length) && NonNegative(length.Value()) && length.Unit() != DimensionUnit::PERCENT) {
         padding.left = NG::CalcLength(length);
         padding.right = NG::CalcLength(length);
@@ -442,36 +445,35 @@ void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
         CalcDimension bottom;
         if (paddingObj->GetProperty("start")->IsObject()) {
             JSRef<JSObject> startObj = JSRef<JSObject>::Cast(paddingObj->GetProperty("start"));
-            if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-                ParseJsLengthMetrics(startObj, start);
-                padding.right = NG::CalcLength(start);
-            } else {
-                ParseJsLengthMetrics(startObj, start);
+            if (ParseJsLengthMetrics(startObj, start)) {
                 padding.left = NG::CalcLength(start);
+                useLocalizedPadding = true;
             }
         }
         if (paddingObj->GetProperty("end")->IsObject()) {
             JSRef<JSObject> endObj = JSRef<JSObject>::Cast(paddingObj->GetProperty("end"));
-            if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-                ParseJsLengthMetrics(endObj, end);
-                padding.left = NG::CalcLength(end);
-            } else {
-                ParseJsLengthMetrics(endObj, end);
+            if (ParseJsLengthMetrics(endObj, end)) {
                 padding.right = NG::CalcLength(end);
+                useLocalizedPadding = true;
             }
         }
         if (paddingObj->GetProperty("top")->IsObject()) {
             JSRef<JSObject> topObj = JSRef<JSObject>::Cast(paddingObj->GetProperty("top"));
-            ParseJsLengthMetrics(topObj, top);
-            padding.top = NG::CalcLength(top);
+            if (ParseJsLengthMetrics(topObj, top)) {
+                padding.top = NG::CalcLength(top);
+                useLocalizedPadding = true;
+            }
         }
         if (paddingObj->GetProperty("bottom")->IsObject()) {
             JSRef<JSObject> bottomObj = JSRef<JSObject>::Cast(paddingObj->GetProperty("bottom"));
-            ParseJsLengthMetrics(bottomObj, bottom);
-            padding.bottom = NG::CalcLength(bottom);
+            if (ParseJsLengthMetrics(bottomObj, bottom)) {
+                padding.bottom = NG::CalcLength(bottom);
+                useLocalizedPadding = true;
+            }
         }
     }
     TabContentModel::GetInstance()->SetPadding(padding);
+    TabContentModel::GetInstance()->SetUseLocalizedPadding(useLocalizedPadding);
 }
 
 void JSTabContent::SetId(const JSRef<JSVal>& info)

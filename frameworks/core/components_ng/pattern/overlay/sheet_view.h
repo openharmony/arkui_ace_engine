@@ -34,11 +34,13 @@ private:
     static void CreateDragBarNode(const RefPtr<FrameNode>& titleBuilder, const RefPtr<FrameNode>& operationColumn,
         NG::SheetStyle& sheetStyle, const RefPtr<FrameNode>& sheetNode);
     static void CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::SheetStyle& sheetStyle);
+    static void CreateCloseIconNode(RefPtr<FrameNode> buttonNode);
     static void SetSheetOffset(RefPtr<FrameNode> sheetNode);
     static RefPtr<FrameNode> BuildMainTitle(RefPtr<FrameNode> sheetNode, NG::SheetStyle& sheetStyle);
     static RefPtr<FrameNode> BuildSubTitle(RefPtr<FrameNode> sheetNode, NG::SheetStyle& sheetStyle);
     static RefPtr<FrameNode> BuildTitle(RefPtr<FrameNode> sheetNode, NG::SheetStyle& sheetStyle);
     static RefPtr<FrameNode> BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::SheetStyle& sheetStyle);
+    static void GetTitlePaddingPos(PaddingProperty& padding);
 };
 } // namespace OHOS::Ace::NG
 

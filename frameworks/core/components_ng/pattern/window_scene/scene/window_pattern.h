@@ -53,35 +53,45 @@ protected:
     void RegisterLifecycleListener();
     void UnregisterLifecycleListener();
 
-    void CreateStartingNode();
-    void CreateContentNode();
-    void CreateSnapshotNode(std::optional<std::shared_ptr<Media::PixelMap>> snapshot = std::nullopt);
+#ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
+    RefPtr<FrameNode> BuildTextNode(const std::string& appNameInfo);
+    RefPtr<FrameNode> BuildAnimateNode(const std::string& base64Resource);
+    RefPtr<FrameNode> BuildStaticImageNode(const std::string& base64Resource);
+    void CreateASStartingWindow();
+#endif
+
+    void CreateAppWindow();
+    void CreateBlankWindow();
+    void CreateStartingWindow();
+    void CreateSnapshotWindow(std::optional<std::shared_ptr<Media::PixelMap>> snapshot = std::nullopt);
     void ClearImageCache(const ImageSourceInfo& sourceInfo);
-    void CreateBlankNode();
+
     void AddChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
         const std::string& nodeType, int32_t index = DEFAULT_NODE_SLOT);
     void RemoveChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
-        const std::string& nodeType);
+        const std::string& nodeType, bool allowTransition = false);
 
     virtual void OnActivation() {}
     virtual void OnConnect() {}
     virtual void OnForeground() {}
     virtual void OnBackground() {}
     virtual void OnDisconnect() {}
+    virtual void OnDrawingCompleted() {}
 
-    RefPtr<FrameNode> startingNode_;
-    RefPtr<FrameNode> contentNode_;
-    RefPtr<FrameNode> snapshotNode_;
-    RefPtr<FrameNode> blankNode_;
-    std::string startingNodeName_ = "startingNode";
-    std::string contentNodeName_ = "contentNode";
-    std::string snapshotNodeName_ = "snapshotNode";
-    std::string blankNodeName_ = "blankNode";
+    RefPtr<FrameNode> startingWindow_;
+    RefPtr<FrameNode> appWindow_;
+    RefPtr<FrameNode> snapshotWindow_;
+    RefPtr<FrameNode> blankWindow_;
+    std::string startingWindowName_ = "StartingWindow";
+    std::string appWindowName_ = "AppWindow";
+    std::string snapshotWindowName_ = "SnapshotWindow";
+    std::string blankWindowName_ = "BlankWindow";
     bool attachToFrameNodeFlag_ = false;
 
     sptr<Rosen::Session> session_;
     int32_t instanceId_ = Container::CurrentId();
-    std::function<void()> callback_;
+    std::function<void()> coldStartCallback_;
+    std::function<void()> hotStartCallback_;
     std::function<void(const Rosen::Vector4f&)> boundsChangedCallback_;
 
 private:
@@ -93,6 +103,7 @@ private:
     bool IsFilterMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void SetWindowSceneConsumed(int32_t action);
     void FilterInvalidPointerItem(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void UpdateSnapshotWindowProperty();
 
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
     RefPtr<TouchEventImpl> touchEvent_;

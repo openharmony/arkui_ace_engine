@@ -18,11 +18,13 @@
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components_ng/render/image_painter.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/render/adapter/pixelmap_image.h"
@@ -109,15 +111,8 @@ void TextContentModifier::SetDefaultAnimatablePropertyValue(const TextStyle& tex
 
 void TextContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
 {
-    float fontSizeValue = textStyle.GetFontSize().Value();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    if (pipelineContext) {
-        fontSizeValue = pipelineContext->NormalizeToPx(textStyle.GetFontSize());
-        if (textStyle.IsAllowScale() && textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
-            fontSizeValue = pipelineContext->NormalizeToPx(textStyle.GetFontSize() * pipelineContext->GetFontScale());
-        }
-    }
-
+    float fontSizeValue = textStyle.GetFontSize().ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     fontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
     AttachProperty(fontSizeFloat_);
 }
@@ -127,10 +122,8 @@ void TextContentModifier::SetDefaultAdaptMinFontSize(const TextStyle& textStyle)
     float fontSizeValue = textStyle.GetFontSize().Value();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
-        fontSizeValue = textStyle.GetAdaptMinFontSize().ConvertToPx();
-        if (textStyle.IsAllowScale() && textStyle.GetAdaptMinFontSize().Unit() == DimensionUnit::FP) {
-            fontSizeValue = (textStyle.GetAdaptMinFontSize() * pipelineContext->GetFontScale()).ConvertToPx();
-        }
+        fontSizeValue = textStyle.GetAdaptMinFontSize().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     }
 
     adaptMinFontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
@@ -142,10 +135,8 @@ void TextContentModifier::SetDefaultAdaptMaxFontSize(const TextStyle& textStyle)
     float fontSizeValue = textStyle.GetFontSize().Value();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
-        fontSizeValue = textStyle.GetAdaptMaxFontSize().ConvertToPx();
-        if (textStyle.IsAllowScale() && textStyle.GetAdaptMaxFontSize().Unit() == DimensionUnit::FP) {
-            fontSizeValue = (textStyle.GetAdaptMaxFontSize() * pipelineContext->GetFontScale()).ConvertToPx();
-        }
+        fontSizeValue = textStyle.GetAdaptMaxFontSize().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     }
 
     adaptMaxFontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
@@ -214,7 +205,8 @@ void TextContentModifier::SetDefaultBaselineOffset(const TextStyle& textStyle)
     float baselineOffset = textStyle.GetBaselineOffset().Value();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
-        baselineOffset = pipelineContext->NormalizeToPx(textStyle.GetBaselineOffset());
+        baselineOffset = textStyle.GetBaselineOffset().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     }
 
     baselineOffsetFloat_ = MakeRefPtr<AnimatablePropertyFloat>(baselineOffset);
@@ -252,52 +244,73 @@ void TextContentModifier::UpdateImageNodeVisible(const VisibleType visible)
 
 void TextContentModifier::PaintImage(RSCanvas& canvas, float x, float y)
 {
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
-        CHECK_NULL_VOID(pattern);
-        size_t index = 0;
-        auto rectsForPlaceholders = pattern->GetRectsForPlaceholders();
-        auto placeHolderIndexVector = pattern->GetPlaceHolderIndex();
-        for (const auto& imageWeak : imageNodeList_) {
-            auto imageChild = imageWeak.Upgrade();
-            if (!imageChild) {
-                continue;
-            }
-            auto rect = rectsForPlaceholders.at(placeHolderIndexVector.at(index));
-            auto imagePattern = DynamicCast<ImagePattern>(imageChild->GetPattern());
-            if (!imagePattern) {
-                continue;
-            }
-            auto layoutProperty = imageChild->GetLayoutProperty<ImageLayoutProperty>();
-            if (!layoutProperty) {
-                continue;
-            }
-            const auto& marginProperty = layoutProperty->GetMarginProperty();
-            float marginTop = 0.0f;
-            float marginLeft = 0.0f;
-            if (marginProperty) {
-                marginLeft =
-                    marginProperty->left.has_value() ? marginProperty->left->GetDimension().ConvertToPx() : 0.0f;
-                marginTop = marginProperty->top.has_value() ? marginProperty->top->GetDimension().ConvertToPx() : 0.0f;
-            }
-            auto canvasImage = imagePattern->GetCanvasImage();
-            if (!canvasImage) {
-                canvasImage = imagePattern->GetAltCanvasImage();
-            }
-            auto geometryNode = imageChild->GetGeometryNode();
-            if (!canvasImage || !geometryNode) {
-                continue;
-            }
-            RectF imageRect(rect.Left() + x + marginLeft, rect.Top() + y + marginTop,
-                geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
-            auto pixelMapImage = DynamicCast<PixelMapImage>(canvasImage);
-            if (!pixelMapImage) {
-                continue;
-            }
-            pixelMapImage->DrawRect(canvas, ToRSRect(imageRect));
-            ++index;
-        }
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        return;
     }
+    auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    size_t index = 0;
+    auto rectsForPlaceholders = pattern->GetRectsForPlaceholders();
+    auto placeHolderIndexVector = pattern->GetPlaceHolderIndex();
+    auto placeholdersSize = rectsForPlaceholders.size();
+    auto placeHolderIndexSize = static_cast<int32_t>(placeHolderIndexVector.size());
+    for (const auto& imageWeak : imageNodeList_) {
+        auto imageChild = imageWeak.Upgrade();
+        if (!imageChild) {
+            continue;
+        }
+        if (index >= placeholdersSize) {
+            return;
+        }
+        auto tmp = static_cast<int32_t>(placeHolderIndexVector.at(index));
+        if (tmp >= placeHolderIndexSize || tmp < 0) {
+            return;
+        }
+        auto rect = rectsForPlaceholders.at(tmp);
+        if (!DrawImage(imageChild, canvas, x, y, rect)) {
+            continue;
+        }
+        ++index;
+    }
+}
+
+bool TextContentModifier::DrawImage(const RefPtr<FrameNode>& imageNode, RSCanvas& canvas, float x, float y,
+    const RectF& rect)
+{
+    CHECK_NULL_RETURN(imageNode, false);
+    auto imagePattern = DynamicCast<ImagePattern>(imageNode->GetPattern());
+    if (!imagePattern) {
+        return false;
+    }
+    auto layoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    if (!layoutProperty) {
+        return false;
+    }
+    const auto& marginProperty = layoutProperty->GetMarginProperty();
+    float marginTop = 0.0f;
+    float marginLeft = 0.0f;
+    if (marginProperty) {
+        marginLeft = marginProperty->left.has_value() ? marginProperty->left->GetDimension().ConvertToPx() : 0.0f;
+        marginTop = marginProperty->top.has_value() ? marginProperty->top->GetDimension().ConvertToPx() : 0.0f;
+    }
+    auto canvasImage = imagePattern->GetCanvasImage();
+    if (!canvasImage) {
+        canvasImage = imagePattern->GetAltCanvasImage();
+    }
+    auto geometryNode = imageNode->GetGeometryNode();
+    if (!canvasImage || !geometryNode) {
+        return false;
+    }
+    RectF imageRect(rect.Left() + x + marginLeft, rect.Top() + y + marginTop,
+        geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
+    const auto config = canvasImage->GetPaintConfig();
+    SizeF imageSize(canvasImage->GetWidth(), canvasImage->GetHeight());
+    SizeF contentSize(geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
+    RectF srcRect;
+    RectF dstRect;
+    ImagePainter::ApplyImageFit(config.imageFit_, imageSize, contentSize, srcRect, dstRect);
+    canvasImage->DrawRect(canvas, ToRSRect(srcRect), ToRSRect(imageRect));
+    return true;
 }
 
 void TextContentModifier::PaintCustomSpan(DrawingContext& drawingContext)
@@ -308,18 +321,24 @@ void TextContentModifier::PaintCustomSpan(DrawingContext& drawingContext)
     CHECK_NULL_VOID(pManager);
     auto rectsForPlaceholders = pattern->GetRectsForPlaceholders();
     auto customSpanPlaceholderInfo = pattern->GetCustomSpanPlaceholderInfo();
-    for (auto customSpanPlaceholder : customSpanPlaceholderInfo) {
+    auto x = paintOffset_.GetX();
+    auto y = paintOffset_.GetY();
+    auto rectsForPlaceholderSize = rectsForPlaceholders.size();
+    for (const auto& customSpanPlaceholder : customSpanPlaceholderInfo) {
         if (!customSpanPlaceholder.onDraw) {
             continue;
         }
         auto index = customSpanPlaceholder.customSpanIndex;
+        if (index >= static_cast<int32_t>(rectsForPlaceholderSize) || index < 0) {
+            return;
+        }
         auto rect = rectsForPlaceholders.at(index);
         auto lineMetrics = pManager->GetLineMetricsByRectF(rect, customSpanPlaceholder.paragraphIndex);
         CustomSpanOptions customSpanOptions;
-        customSpanOptions.x = static_cast<double>(rect.Left());
-        customSpanOptions.lineTop = lineMetrics.y;
-        customSpanOptions.lineBottom = lineMetrics.y + lineMetrics.height;
-        customSpanOptions.baseline = lineMetrics.y + lineMetrics.ascender;
+        customSpanOptions.x = static_cast<float>(rect.Left()) + x;
+        customSpanOptions.lineTop = lineMetrics.y + y;
+        customSpanOptions.lineBottom = lineMetrics.y + lineMetrics.height + y;
+        customSpanOptions.baseline = lineMetrics.y + lineMetrics.ascender + y;
         customSpanPlaceholder.onDraw(drawingContext, customSpanOptions);
     }
 }
@@ -328,12 +347,13 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
 {
     auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textPattern);
-    ACE_SCOPED_TRACE("Text paint offset=[%f,%f]", paintOffset_.GetX(), paintOffset_.GetY());
     bool ifPaintObscuration = std::any_of(obscuredReasons_.begin(), obscuredReasons_.end(),
         [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
     auto pManager = textPattern->GetParagraphManager();
     CHECK_NULL_VOID(pManager);
     CHECK_NULL_VOID(!pManager->GetParagraphs().empty());
+    ACE_SCOPED_TRACE(
+        "Text[id:%d] paint[offset:%f,%f]", textPattern->GetHost()->GetId(), paintOffset_.GetX(), paintOffset_.GetY());
 
     auto info = GetFadeoutInfo(drawingContext);
     bool isDrawNormal = !ifPaintObscuration || ifHaveSpanItemChildren_;
@@ -414,6 +434,16 @@ void TextContentModifier::DrawNormal(DrawingContext& drawingContext)
     CHECK_NULL_VOID(!pManager->GetParagraphs().empty());
 
     auto& canvas = drawingContext.canvas;
+    auto contentSize = contentSize_->Get();
+    auto contentOffset = contentOffset_->Get();
+    canvas.Save();
+    if (clip_ && clip_->Get() &&
+        (!fontSize_.has_value() || !fontSizeFloat_ ||
+            NearEqual(fontSize_.value().Value(), fontSizeFloat_->Get()))) {
+        RSRect clipInnerRect = RSRect(contentOffset.GetX(), contentOffset.GetY(),
+            contentSize.Width() + contentOffset.GetX(), contentSize.Height() + contentOffset.GetY());
+        canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
+    }
     if (!textRacing_) {
         auto paintOffsetY = paintOffset_.GetY();
         auto paragraphs = pManager->GetParagraphs();
@@ -422,6 +452,9 @@ void TextContentModifier::DrawNormal(DrawingContext& drawingContext)
             CHECK_NULL_VOID(paragraph);
             paragraph->Paint(canvas, paintOffset_.GetX(), paintOffsetY);
             paintOffsetY += paragraph->GetHeight();
+        }
+        if (marqueeSet_) {
+            PaintImage(drawingContext.canvas, paintOffset_.GetX(), paintOffset_.GetY());
         }
     } else {
         // Racing
@@ -441,6 +474,7 @@ void TextContentModifier::DrawNormal(DrawingContext& drawingContext)
             PaintImage(drawingContext.canvas, paintOffset_.GetX() + paragraph2Offset, paintOffset_.GetY());
         }
     }
+    canvas.Restore();
 }
 
 void TextContentModifier::DrawFadeout(DrawingContext& drawingContext, const FadeoutInfo& info, const bool& isDrawNormal)
@@ -586,7 +620,7 @@ void TextContentModifier::ModifyDecorationInTextStyle(TextStyle& textStyle)
 {
     if (textDecoration_.has_value() && textDecorationColor_.has_value() && textDecorationColorAlpha_) {
         if (textDecorationAnimatable_) {
-            uint8_t alpha = static_cast<int>(std::floor(textDecorationColorAlpha_->Get() + ROUND_VALUE));
+            uint8_t alpha = static_cast<uint8_t>(std::floor(textDecorationColorAlpha_->Get() + ROUND_VALUE));
             if (alpha == 0) {
                 textStyle.SetTextDecoration(TextDecoration::NONE);
                 textStyle.SetTextDecorationColor(textDecorationColor_.value());
@@ -681,7 +715,7 @@ void TextContentModifier::UpdateTextShadowMeasureFlag(PropertyChangeFlag& flag)
 void TextContentModifier::UpdateTextDecorationMeasureFlag(PropertyChangeFlag& flag)
 {
     if (textDecoration_.has_value() && textDecorationColor_.has_value() && textDecorationColorAlpha_) {
-        uint8_t alpha = static_cast<int>(std::floor(textDecorationColorAlpha_->Get() + ROUND_VALUE));
+        uint8_t alpha = static_cast<uint8_t>(std::floor(textDecorationColorAlpha_->Get() + ROUND_VALUE));
         if (textDecoration_.value() == TextDecoration::UNDERLINE && alpha != textDecorationColor_.value().GetAlpha()) {
             flag |= PROPERTY_UPDATE_MEASURE;
         } else if (textDecoration_.value() == TextDecoration::NONE && alpha != 0.0) {
@@ -719,43 +753,25 @@ void TextContentModifier::SetFontFamilies(const std::vector<std::string>& value)
     fontFamilyString_->Set(V2::ConvertFontFamily(value));
 }
 
-void TextContentModifier::SetFontSize(const Dimension& value)
+void TextContentModifier::SetFontSize(const Dimension& value, TextStyle& textStyle)
 {
-    float fontSizeValue;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    if (pipelineContext) {
-        fontSizeValue = value.ConvertToPx();
-    } else {
-        fontSizeValue = value.Value();
-    }
+    auto fontSizeValue = value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     fontSize_ = Dimension(fontSizeValue);
     CHECK_NULL_VOID(fontSizeFloat_);
     fontSizeFloat_->Set(fontSizeValue);
 }
 
-void TextContentModifier::SetAdaptMinFontSize(const Dimension& value)
+void TextContentModifier::SetAdaptMinFontSize(const Dimension& value, TextStyle& textStyle)
 {
-    float fontSizeValue;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    if (pipelineContext) {
-        fontSizeValue = value.ConvertToPx();
-    } else {
-        fontSizeValue = value.Value();
-    }
+    auto fontSizeValue = value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     adaptMinFontSize_ = Dimension(fontSizeValue);
     CHECK_NULL_VOID(adaptMinFontSizeFloat_);
     adaptMinFontSizeFloat_->Set(fontSizeValue);
 }
 
-void TextContentModifier::SetAdaptMaxFontSize(const Dimension& value)
+void TextContentModifier::SetAdaptMaxFontSize(const Dimension& value, TextStyle& textStyle)
 {
-    float fontSizeValue;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    if (pipelineContext) {
-        fontSizeValue = value.ConvertToPx();
-    } else {
-        fontSizeValue = value.Value();
-    }
+    auto fontSizeValue = value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     adaptMaxFontSize_ = Dimension(fontSizeValue);
     CHECK_NULL_VOID(adaptMaxFontSizeFloat_);
     adaptMaxFontSizeFloat_->Set(fontSizeValue);
@@ -906,7 +922,9 @@ bool TextContentModifier::SetTextRace(const MarqueeOption& option)
         auto theme = pipeline->GetTheme<TextTheme>();
         CHECK_NULL_RETURN(theme, true);
         auto fadeoutWidth = theme->GetFadeoutWidth();
-        marqueeGradientPercent_ = fadeoutWidth.ConvertToPx() / contentWidth;
+        auto textStyle = textPattern->GetTextStyle();
+        marqueeGradientPercent_ =
+            fadeoutWidth.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale()) / contentWidth;
     }
 
     return true;

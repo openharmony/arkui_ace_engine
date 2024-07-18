@@ -146,7 +146,15 @@ public:
 
     void OnDataReadyOnCompleteCallBack();
     void SetOnProgressCallback(std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)>&& onProgress);
-    bool RemoveDownloadTask(const std::string& src);
+    const std::string& GetErrorMsg()
+    {
+        return errorMsg_;
+    }
+
+    void SetNodeId(int32_t nodeId)
+    {
+        nodeId_ = nodeId;
+    }
 
 private:
 #define DEFINE_SET_NOTIFY_TASK(loadResult)                                            \
@@ -208,6 +216,7 @@ private:
     std::atomic<bool> needDataReadyCallBack_ = false;
     // to determine whether the image needs to be reloaded
     int32_t sizeLevel_ = -1;
+    int32_t nodeId_ = -1;
 
     ImageFit imageFit_ = ImageFit::COVER;
     std::unique_ptr<SizeF> sourceSizePtr_ = nullptr;

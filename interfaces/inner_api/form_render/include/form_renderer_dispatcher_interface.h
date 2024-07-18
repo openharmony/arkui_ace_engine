@@ -56,6 +56,8 @@ public:
     virtual void OnAccessibilityChildTreeDeregister() = 0;
     virtual void OnAccessibilityDumpChildInfo(
         const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
+    virtual void OnAccessibilityTransferHoverEvent(float pointX, float pointY, int32_t sourceType,
+        int32_t eventType, int64_t timeMs) = 0;
 
     enum Message : uint32_t {
         DISPATCH_POINTER_EVENT = 1,
@@ -65,6 +67,7 @@ public:
         ACCESSIBILITY_CHILD_TREE_REGISTER,
         ACCESSIBILITY_CHILD_TREE_DEREGISTER,
         ACCESSIBILITY_DUMP_CHILD_INFO,
+        ACCESSIBILITY_TRANSFER_HOVER_EVENT,
     };
 };
 }  // namespace Ace

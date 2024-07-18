@@ -76,6 +76,7 @@ constexpr Dimension SHEET_LIST_PADDING = 24.0_vp;
 constexpr Dimension DIALOG_BUTTON_TEXT_SIZE = 16.0_fp;
 constexpr Color DEFAULT_BUTTON_COLOR = Color(0xff007dff);
 const CalcLength SHEET_IMAGE_SIZE(40.0_vp);
+constexpr int32_t THREE_BUTTON_MODE = 3;
 constexpr int32_t TWO_BUTTON_MODE = 2;
 constexpr int32_t ONE_BUTTON_MODE = 1;
 constexpr int32_t START_CHILD_INDEX = 0;
@@ -91,15 +92,6 @@ constexpr Dimension ADAPT_TITLE_MIN_FONT_SIZE = 16.0_fp;
 constexpr Dimension ADAPT_SUBTITLE_MIN_FONT_SIZE = 12.0_fp;
 constexpr uint32_t ADAPT_TITLE_MAX_LINES = 2;
 constexpr int32_t TEXT_ALIGN_TITLE_CENTER = 1;
-constexpr uint32_t DIALOG_TEXT_MAXLINES_WITH_ELDERLY = 2;
-constexpr uint32_t THREE_BUTON_DIALOG_BUTTON_NUMBER = 3;
-constexpr float DIALOG_FONT_SCALE_THREE_BUTTONS = 1.0f;
-constexpr float DIALOG_MIN_FONT_SCALE_FOR_AGING = 1.75f;
-constexpr float LANDSCAPE_MAX_FONT_SCALE_FOR_AGING = 2.0f;
-constexpr Dimension LANDSCAPE_MAINTitle_FONT_SIZE = 40.0_vp;
-constexpr Dimension LANDSCAPE_SUBTITLE_FONT_SIZE = 28.0_vp;
-constexpr Dimension LANDSCAPE_CONTENT_TEXT_FONT_SIZE = 32.0_vp;
-constexpr Dimension LANDSCAPE_BUTTON_TEXT_FONT_SIZE = 32.0_vp;
 constexpr int32_t BUTTON_TYPE_NORMAL = 1;
 
 std::string GetBoolStr(bool isTure)
@@ -152,6 +144,24 @@ void DialogPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     }
 }
 
+void DialogPattern::OnFontConfigurationUpdate()
+{
+    CHECK_NULL_VOID(buttonContainer_);
+    UpdatePropertyForElderly(dialogProperties_.buttons);
+    contentColumn_->RemoveChild(buttonContainer_);
+    auto buttonContainer = BuildButtons(dialogProperties_.buttons, dialogProperties_.buttonDirection);
+    CHECK_NULL_VOID(buttonContainer);
+    buttonContainer->MountToParent(contentColumn_);
+    UpdateTextFontScale();
+    if (isSuitableForElderly_ && NeedsButtonDirectionChange(dialogProperties_.buttons)) {
+        contentColumn_->RemoveChild(buttonContainer_);
+        auto buttonContainerNew = BuildButtons(dialogProperties_.buttons, DialogButtonDirection::VERTICAL);
+        CHECK_NULL_VOID(buttonContainerNew);
+        buttonContainerNew->MountToParent(contentColumn_);
+        UpdateTextFontScale();
+    }
+}
+
 void DialogPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     GestureEventFunc task = [weak = WeakClaim(this)](const GestureEvent& info) {
@@ -181,7 +191,7 @@ void DialogPattern::HandleClick(const GestureEvent& info)
         // close dialog if clicked outside content rect
         auto&& clickPosition = info.GetGlobalLocation();
         if (!contentRect.IsInRegion(
-                PointF(clickPosition.GetX() - globalOffset.GetX(), clickPosition.GetY() - globalOffset.GetY()))) {
+            PointF(clickPosition.GetX() - globalOffset.GetX(), clickPosition.GetY() - globalOffset.GetY()))) {
             auto pipeline = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
             auto overlayManager = pipeline->GetOverlayManager();
@@ -259,31 +269,46 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
     CHECK_NULL_VOID(contentRenderContext);
     contentRenderContext_ = contentRenderContext;
     UpdateBgBlurStyle(contentRenderContext, props);
+    bool isCustomBorder = props.borderRadius.has_value() || props.borderWidth.has_value() ||
+        props.borderStyle.has_value() || props.borderColor.has_value();
+    BorderRadiusProperty radius;
     if (props.borderRadius.has_value()) {
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            auto radiusValue = props.borderRadius.value();
-            ParseBorderRadius(radiusValue);
-            contentRenderContext->UpdateBorderRadius(radiusValue);
+            radius = props.borderRadius.value();
+            ParseBorderRadius(radius);
+            contentRenderContext->UpdateBorderRadius(radius);
         } else {
             contentRenderContext->UpdateBorderRadius(props.borderRadius.value());
         }
     } else {
-        BorderRadiusProperty radius;
         radius.SetRadius(dialogTheme_->GetRadius().GetX());
         contentRenderContext->UpdateBorderRadius(radius);
+        if (!isCustomBorder && dialogTheme_->GetDialogDoubleBorderEnable()) {
+            contentRenderContext->UpdateOuterBorderRadius(radius);
+        }
     }
     if (props.borderWidth.has_value()) {
         auto layoutProps = contentNode->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_VOID(layoutProps);
         layoutProps->UpdateBorderWidth(props.borderWidth.value());
         contentRenderContext->UpdateBorderWidth(props.borderWidth.value());
-        contentNodeMap_[DialogContentNode::BORDERWIDTH] = contentNode;
     } else {
         BorderWidthProperty borderWidth;
-        Dimension width = dialogTheme_->GetBackgroudBorderWidth();
-        borderWidth.SetBorderWidth(width);
+        if (!isCustomBorder && dialogTheme_->GetDialogDoubleBorderEnable()) {
+            auto layoutProps = contentNode->GetLayoutProperty<LinearLayoutProperty>();
+            CHECK_NULL_VOID(layoutProps);
+            borderWidth.SetBorderWidth(Dimension(dialogTheme_->GetDialogInnerBorderWidth()));
+            layoutProps->UpdateBorderWidth(borderWidth);
+            BorderWidthProperty outerWidthProp;
+            outerWidthProp.SetBorderWidth(Dimension(dialogTheme_->GetDialogOuterBorderWidth()));
+            contentRenderContext->UpdateOuterBorderWidth(outerWidthProp);
+        } else {
+            Dimension width = dialogTheme_->GetBackgroudBorderWidth();
+            borderWidth.SetBorderWidth(width);
+        }
         contentRenderContext->UpdateBorderWidth(borderWidth);
-        contentNodeMap_[DialogContentNode::BORDERWIDTH] = contentNode;
     }
+    contentNodeMap_[DialogContentNode::BORDERWIDTH] = contentNode;
     if (props.borderStyle.has_value()) {
         contentRenderContext->UpdateBorderStyle(props.borderStyle.value());
     }
@@ -291,8 +316,15 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
         contentRenderContext->UpdateBorderColor(props.borderColor.value());
     } else {
         BorderColorProperty borderColor;
-        Color color = dialogTheme_->GetBackgroudBorderColor();
-        borderColor.SetColor(color);
+        if (!isCustomBorder && dialogTheme_->GetDialogDoubleBorderEnable()) {
+            borderColor.SetColor(dialogTheme_->GetDialogInnerBorderColor());
+            BorderColorProperty outerColorProp;
+            outerColorProp.SetColor(dialogTheme_->GetDialogOuterBorderColor());
+            contentRenderContext->UpdateOuterBorderColor(outerColorProp);
+        } else {
+            Color color = dialogTheme_->GetBackgroudBorderColor();
+            borderColor.SetColor(color);
+        }
         contentRenderContext->UpdateBorderColor(borderColor);
     }
     if (props.shadow.has_value()) {
@@ -358,9 +390,6 @@ void DialogPattern::BuildChild(const DialogProperties& props)
         BuildCustomChild(props, customNode);
         return;
     }
-    if (isSuitableForElderly_) {
-        neeedUpdateOrientation_ = true;
-    }
     // Make dialog Content Column
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -387,6 +416,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
         UpdateContentRenderContext(contentColumn, props);
         if (props.height.has_value()) {
             auto layoutProps = contentColumn->GetLayoutProperty<LinearLayoutProperty>();
+            CHECK_NULL_VOID(layoutProps);
             layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
             layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
         }
@@ -425,6 +455,7 @@ void DialogPattern::BuildChild(const DialogProperties& props)
 
     auto dialog = GetHost();
     contentColumn->MountToParent(dialog);
+    UpdateTextFontScale();
     if (isSuitableForElderly_ && NeedsButtonDirectionChange(props.buttons)) {
         //remove buttonContainer when Button text is too long
         contentColumn->RemoveChild(buttonContainer_);
@@ -432,12 +463,14 @@ void DialogPattern::BuildChild(const DialogProperties& props)
         buttonContainerNew->MountToParent(contentColumn);
         buttonContainer_ = buttonContainerNew;
     }
+    contentColumn_ = contentColumn;
+    UpdateTextFontScale();
 }
 
 void DialogPattern::BuildCustomChild(const DialogProperties& props, const RefPtr<UINode>& customNode)
 {
-    auto contentWrapper = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto contentWrapper = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_VOID(contentWrapper);
     if (!props.customStyle) {
         UpdateContentRenderContext(contentWrapper, props);
@@ -467,19 +500,6 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
         titleProp->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
         titleProp->UpdateMaxLines(ADAPT_TITLE_MAX_LINES);
     }
-    if (isSuitableForElderly_) {
-        if (isLandspace_ && !isThreeButtonsDialog_) {
-            titleProp->UpdateMaxLines(DIALOG_TEXT_MAXLINES_WITH_ELDERLY);
-            titleProp->UpdateFontSize(LANDSCAPE_MAINTitle_FONT_SIZE);
-            titleProp->UpdateAdaptMaxFontSize(LANDSCAPE_MAINTitle_FONT_SIZE);
-            titleProp->UpdateAdaptMinFontSize(LANDSCAPE_MAINTitle_FONT_SIZE);
-        } else {
-            titleProp->UpdateMaxLines(DIALOG_TEXT_MAXLINES_WITH_ELDERLY);
-            titleProp->UpdateFontSize(titleStyle.GetFontSize());
-            titleProp->UpdateAdaptMaxFontSize(titleStyle.GetFontSize());
-            titleProp->UpdateAdaptMinFontSize(titleStyle.GetFontSize());
-        }
-    }
     PaddingProperty titlePadding;
     CreateTitleRowNode(dialogProperties, titlePadding);
     titleProp->UpdatePadding(titlePadding);
@@ -496,9 +516,7 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
     } else {
         titleRowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
     }
-    if (!isSuitableForElderly_) {
-        titleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    }
+    titleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     title->MountToParent(titleRow);
     title->MarkModifyDone();
     contentNodeMap_[dialogProperties.title.empty() ? DialogContentNode::SUBTITLE : DialogContentNode::TITLE] = title;
@@ -549,19 +567,6 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
     titlePadding.bottom = CalcLength(dialogTheme_->GetPaddingTopTitle());
     titleProp->UpdatePadding(titlePadding);
 
-    if (isSuitableForElderly_) {
-        if (isLandspace_ && !isThreeButtonsDialog_) {
-            titleProp->UpdateMaxLines(DIALOG_TEXT_MAXLINES_WITH_ELDERLY);
-            titleProp->UpdateFontSize(LANDSCAPE_SUBTITLE_FONT_SIZE);
-            titleProp->UpdateAdaptMaxFontSize(LANDSCAPE_SUBTITLE_FONT_SIZE);
-            titleProp->UpdateAdaptMinFontSize(LANDSCAPE_SUBTITLE_FONT_SIZE);
-        } else {
-            titleProp->UpdateMaxLines(DIALOG_TEXT_MAXLINES_WITH_ELDERLY);
-            titleProp->UpdateFontSize(titleStyle.GetFontSize());
-            titleProp->UpdateAdaptMaxFontSize(titleStyle.GetFontSize());
-            titleProp->UpdateAdaptMinFontSize(titleStyle.GetFontSize());
-        }
-    }
     // XTS inspector value
     subtitle_ = dialogProperties.subtitle;
 
@@ -575,9 +580,7 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
     } else {
         subtitleRowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
     }
-    if (!isSuitableForElderly_) {
-        subtitleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    }
+    subtitleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     subtitle->MountToParent(subtitleRow);
     subtitle->MarkModifyDone();
     contentNodeMap_[DialogContentNode::SUBTITLE] = subtitle;
@@ -616,9 +619,6 @@ RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& props)
     auto contentStyle = dialogTheme_->GetContentTextStyle();
     contentProp->UpdateFontSize(contentStyle.GetFontSize());
     contentProp->UpdateTextColor(contentStyle.GetTextColor());
-    if (isSuitableForElderly_ && isLandspace_ && !isThreeButtonsDialog_) {
-        contentProp->UpdateFontSize(LANDSCAPE_CONTENT_TEXT_FONT_SIZE);
-    }
     // update padding
     Edge contentPaddingInTheme;
     PaddingProperty contentPadding;
@@ -708,24 +708,13 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
         V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<ButtonPattern>());
     CHECK_NULL_RETURN(buttonNode, nullptr);
     UpdateDialogButtonProperty(buttonNode, index, isVertical, length);
-    auto buttonProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(buttonProp, nullptr);
-    buttonProp->UpdateLabel(params.text);
-    if (isSuitableForElderly_) {
-        Dimension buttonTextSize =
-            dialogTheme_->GetButtonTextSize().IsValid() ? dialogTheme_->GetButtonTextSize() : DIALOG_BUTTON_TEXT_SIZE;
-        buttonProp->UpdateFontSize(buttonTextSize);
-        if (isLandspace_ && !isThreeButtonsDialog_) {
-            buttonProp->UpdateFontSize(LANDSCAPE_BUTTON_TEXT_FONT_SIZE);
-        }
-    }
     // parse button text color and background color
     std::string textColor;
     std::optional<Color> bgColor;
     ParseButtonFontColorAndBgColor(params, textColor, bgColor);
 
     // append text inside button
-    auto textNode = CreateButtonText(params.text, textColor, isVertical);
+    auto textNode = CreateButtonText(params.text, textColor);
     CHECK_NULL_RETURN(textNode, nullptr);
     textNode->MountToParent(buttonNode);
     textNode->MarkModifyDone();
@@ -790,6 +779,12 @@ void DialogPattern::UpdateDialogButtonProperty(
         buttonProp->UpdateLayoutWeight(1);
         buttonProp->UpdateFlexGrow(1.0);
         buttonProp->UpdateFlexShrink(1.0);
+        if (isSuitableForElderly_ && index != 0) {
+            MarginProperty margin = {
+                .left = CalcLength(dialogTheme_->GetMarginLeft()),
+            };
+            buttonProp->UpdateMargin(margin);
+        }
     } else if (isVertical && index != (length - 1)) {
         // update button space in vertical
         auto buttonSpace = dialogTheme_->GetMutiButtonPaddingVertical();
@@ -838,18 +833,14 @@ RefPtr<FrameNode> DialogPattern::BuildButtons(
         CHECK_NULL_RETURN(container, nullptr);
         auto layoutProps = container->GetLayoutProperty<LinearLayoutProperty>();
         layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
-        if (!isSuitableForElderly_) {
-            layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-        }
+        layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     } else {
         // use vertical layout
         isVertical = true;
         container = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, Id, AceType::MakeRefPtr<LinearLayoutPattern>(true));
         auto layoutProps = container->GetLayoutProperty<LinearLayoutProperty>();
         layoutProps->UpdateCrossAxisAlign(FlexAlign::STRETCH);
-        if (!isSuitableForElderly_) {
-            layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
-        }
+        layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
     }
     CHECK_NULL_RETURN(container, nullptr);
     // set action's padding
@@ -880,7 +871,7 @@ void DialogPattern::AddButtonAndDivider(
     auto buttonSpace = dialogTheme_->GetMutiButtonPaddingHorizontal();
     auto length = buttons.size();
     for (size_t i = 0; i < length; ++i) {
-        if (i != 0 && !isVertical) {
+        if (i != 0 && !isVertical && !isSuitableForElderly_) {
             auto dividerNode = CreateDivider(dividerLength, dividerWidth, dividerColor, buttonSpace);
             CHECK_NULL_VOID(dividerNode);
             container->AddChild(dividerNode);
@@ -895,7 +886,7 @@ void DialogPattern::AddButtonAndDivider(
     }
 }
 
-RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const std::string& colorStr, bool isVertical)
+RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const std::string& colorStr)
 {
     auto textNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
@@ -905,15 +896,12 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     CHECK_NULL_RETURN(textProps, nullptr);
     textProps->UpdateContent(text);
     textProps->UpdateFontWeight(FontWeight::MEDIUM);
-    if (isSuitableForElderly_ && isVertical) {
-        textProps->UpdateMaxLines(DIALOG_TEXT_MAXLINES_WITH_ELDERLY);
-    } else {
-        textProps->UpdateMaxLines(1);
-    }
+    textProps->UpdateMaxLines(1);
     textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     Dimension buttonTextSize =
         dialogTheme_->GetButtonTextSize().IsValid() ? dialogTheme_->GetButtonTextSize() : DIALOG_BUTTON_TEXT_SIZE;
     textProps->UpdateFontSize(buttonTextSize);
+
     // update text color
     Color color;
     if (Color::ParseColorString(colorStr, color)) {
@@ -1174,10 +1162,22 @@ void DialogPattern::OnColorConfigurationUpdate()
     host->MarkDirtyNode();
 }
 
+void DialogPattern::UpdateAlignmentAndOffset()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto props = host->GetLayoutProperty<DialogLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    auto dialogProp = GetDialogProperties();
+    props->UpdateDialogAlignment(dialogProp.alignment);
+    props->UpdateDialogOffset(dialogProp.offset);
+}
+
 void DialogPattern::OnLanguageConfigurationUpdate()
 {
     CHECK_NULL_VOID(dialogProperties_.onLanguageChange);
     dialogProperties_.onLanguageChange(dialogProperties_);
+    UpdateAlignmentAndOffset();
     if (!dialogProperties_.title.empty() && contentNodeMap_.find(DialogContentNode::TITLE) != contentNodeMap_.end()) {
         UpdateNodeContent(contentNodeMap_[DialogContentNode::TITLE], dialogProperties_.title);
         title_ = dialogProperties_.title;
@@ -1304,29 +1304,26 @@ void DialogPattern::UpdateButtonsProperty()
 
 void DialogPattern::UpdatePropertyForElderly(const std::vector<ButtonInfo>& buttons)
 {
+    isSuitableForElderly_ = false;
+    notAdapationAging_ = false;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
-    if (GreatOrEqual(pipeline->GetFontScale(), DIALOG_MIN_FONT_SCALE_FOR_AGING)) {
-        if (windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
-            SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+    if (GreatOrEqual(pipeline->GetFontScale(), dialogTheme_->GetMinFontScaleForElderly())) {
+        if (pipeline->GetRootHeight() < dialogTheme_->GetDialogLandscapeHeightBoundary().ConvertToPx() &&
+            windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_SPLIT_PRIMARY) {
+            notAdapationAging_ = true;
+            return;
+        }
+        deviceOrientation_ = SystemProperties::GetDeviceOrientation();
+        if (buttons.size() >= THREE_BUTTON_MODE && deviceOrientation_ == DeviceOrientation::LANDSCAPE) {
+            notAdapationAging_ = true;
             return;
         }
         fontScaleForElderly_ = pipeline->GetFontScale();
         isSuitableForElderly_ = true;
-        deviceOrientation_ = SystemProperties::GetDeviceOrientation();
-        if (deviceOrientation_ == DeviceOrientation::LANDSCAPE &&
-            GreatOrEqual(pipeline->GetFontScale(), LANDSCAPE_MAX_FONT_SCALE_FOR_AGING)) {
-            isLandspace_ = true;
-        }
-        if (buttons.size() >= THREE_BUTON_DIALOG_BUTTON_NUMBER) {
-            isThreeButtonsDialog_ = true;
-        }
+        notAdapationAging_ = false;
     }
-    if (isThreeButtonsDialog_ && deviceOrientation_ == DeviceOrientation::LANDSCAPE) {
-        pipeline->SetFontScale(DIALOG_FONT_SCALE_THREE_BUTTONS);
-    }
-    std::cout << pipeline->GetFontScale() << std::endl;
 }
 
 bool DialogPattern::NeedsButtonDirectionChange(const std::vector<ButtonInfo>& buttons)
@@ -1360,10 +1357,17 @@ bool DialogPattern::NeedsButtonDirectionChange(const std::vector<ButtonInfo>& bu
             MeasureContext measureContext;
             measureContext.textContent = textDisplay;
             measureContext.fontSize = buttonTextSize;
+            auto pipeline = GetContext();
+            CHECK_NULL_RETURN(pipeline, false);
+            if (isSuitableForElderly_ && pipeline->GetFontScale() >= dialogTheme_->GetTitleMaxFontScale() &&
+                SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+                measureContext.fontSize =
+                    Dimension(buttonTextSize.Value() * dialogTheme_->GetTitleMaxFontScale(), DimensionUnit::VP);
+            }
             auto fontweight = StringUtils::FontWeightToString(FontWeight::MEDIUM);
             measureContext.fontWeight = fontweight;
             Size measureSize = MeasureUtil::MeasureTextSize(measureContext);
-            if (GreatNotEqual(measureSize.Width(), textFarmeSize.Width())) {
+            if (measureSize.Width() != textFarmeSize.Width()) {
                 return true;
             }
         }
@@ -1376,110 +1380,108 @@ void DialogPattern::UpdateDeviceOrientation(const DeviceOrientation& deviceOrien
     if (deviceOrientation_ != deviceOrientation) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        if (deviceOrientation == DeviceOrientation::LANDSCAPE) {
-            if (isThreeButtonsDialog_) {
-                pipeline->SetFontScale(DIALOG_FONT_SCALE_THREE_BUTTONS);
-            } else if (fontScaleForElderly_ <= LANDSCAPE_MAX_FONT_SCALE_FOR_AGING) {
-                pipeline->SetFontScale(fontScaleForElderly_);
-            } else {
-                UpdateLandSpaceTextFontSizeForElderly(true);
-            }
-        }
-        if (deviceOrientation == DeviceOrientation::PORTRAIT) {
-            UpdateLandSpaceTextFontSizeForElderly(false);
-            pipeline->SetFontScale(fontScaleForElderly_);
-        }
+        UpdateTextFontScale();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        CHECK_NULL_VOID(buttonContainer_);
         buttonContainer_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         deviceOrientation_ = deviceOrientation;
     }
 }
 
-void DialogPattern::UpdateTitleTextFontSizeForElderly(bool isLandSpace)
+void DialogPattern::UpdateTitleTextFontScale()
 {
     CHECK_NULL_VOID(titleContainer_);
+    auto scale = dialogTheme_->GetMinFontScaleForElderly();
+    if (isSuitableForElderly_) {
+        scale = dialogTheme_->GetTitleMaxFontScale();
+    }
     if (titleContainer_->GetTag() == V2::COLUMN_ETS_TAG) {
         auto children = titleContainer_->GetChildren();
         for (const auto& child : children) {
-            int index = 0;
             auto textNode = AceType::DynamicCast<FrameNode>(child->GetChildAtIndex(START_CHILD_INDEX));
             CHECK_NULL_VOID(textNode);
             auto titleProp = AceType::DynamicCast<TextLayoutProperty>(textNode->GetLayoutProperty());
             CHECK_NULL_VOID(titleProp);
-            auto fontSize = (index == 0) ? LANDSCAPE_MAINTitle_FONT_SIZE : LANDSCAPE_SUBTITLE_FONT_SIZE;
-            if (isLandSpace) {
-                titleProp->UpdateFontSize(fontSize);
-                titleProp->UpdateAdaptMaxFontSize(fontSize);
-                titleProp->UpdateAdaptMinFontSize(fontSize);
-                return;
-            }
-            Dimension titlefontSize;
-            if (index == 0) {
-                titlefontSize = dialogTheme_->GetTitleTextStyle().GetFontSize();
+            if (notAdapationAging_) {
+                titleProp->UpdateMaxFontScale(dialogTheme_->GetDialogDefaultScale());
             } else {
-                titlefontSize = dialogTheme_->GetSubTitleTextStyle().GetFontSize();
+                titleProp->UpdateMaxFontScale(scale);
+                titleProp->UpdateMaxLines(ADAPT_TITLE_MAX_LINES);
             }
-            titleProp->UpdateFontSize(titlefontSize);
-            titleProp->UpdateAdaptMaxFontSize(titlefontSize);
-            titleProp->UpdateAdaptMinFontSize(titlefontSize);
         }
     } else {
         auto textNode = AceType::DynamicCast<FrameNode>(titleContainer_->GetChildAtIndex(START_CHILD_INDEX));
         CHECK_NULL_VOID(textNode);
         auto titleProp = AceType::DynamicCast<TextLayoutProperty>(textNode->GetLayoutProperty());
         CHECK_NULL_VOID(titleProp);
-        if (isLandSpace) {
-            titleProp->UpdateFontSize(LANDSCAPE_MAINTitle_FONT_SIZE);
-            titleProp->UpdateAdaptMaxFontSize(LANDSCAPE_MAINTitle_FONT_SIZE);
-            titleProp->UpdateAdaptMinFontSize(LANDSCAPE_MAINTitle_FONT_SIZE);
+        if (notAdapationAging_) {
+            titleProp->UpdateMaxFontScale(dialogTheme_->GetDialogDefaultScale());
         } else {
-            auto titleStyle = dialogTheme_->GetTitleTextStyle();
-            titleProp->UpdateFontSize(titleStyle.GetFontSize());
-            titleProp->UpdateAdaptMaxFontSize(titleStyle.GetFontSize());
-            titleProp->UpdateAdaptMinFontSize(titleStyle.GetFontSize());
+            titleProp->UpdateMaxFontScale(scale);
+            titleProp->UpdateMaxLines(ADAPT_TITLE_MAX_LINES);
         }
     }
 }
 
-void DialogPattern::UpdateLandSpaceTextFontSizeForElderly(bool isLandSpace)
+void DialogPattern::UpdateTextFontScale()
 {
-    UpdateTitleTextFontSizeForElderly(isLandSpace);
+    UpdateTitleTextFontScale();
     CHECK_NULL_VOID(contentNodeMap_[DialogContentNode::MESSAGE]);
+    auto scale = dialogTheme_->GetMinFontScaleForElderly();
     auto contentProp =
         AceType::DynamicCast<TextLayoutProperty>(contentNodeMap_[DialogContentNode::MESSAGE]->GetLayoutProperty());
     CHECK_NULL_VOID(contentProp);
-    if (isLandSpace) {
-        contentProp->UpdateFontSize(LANDSCAPE_CONTENT_TEXT_FONT_SIZE);
-    } else {
-        auto contentStyle = dialogTheme_->GetContentTextStyle();
-        contentProp->UpdateFontSize(contentStyle.GetFontSize());
+    if (isSuitableForElderly_) {
+        scale = SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE
+                    ? dialogTheme_->GetContentLandscapeMaxFontScale()
+                    : dialogTheme_->GetContentMaxFontScale();
     }
-
+    if (notAdapationAging_) {
+        contentProp->UpdateMaxFontScale(dialogTheme_->GetDialogDefaultScale());
+    } else {
+        contentProp->UpdateMaxFontScale(scale);
+    }
     CHECK_NULL_VOID(buttonContainer_);
+    MarginProperty margin;
+    if (isSuitableForElderly_) {
+        scale = SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE
+                    ? dialogTheme_->GetButtonLandscapeMaxFontScale()
+                    : dialogTheme_->GetButtonMaxFontScale();
+        margin.top = CalcLength(8.0_vp);
+        margin.bottom = CalcLength(8.0_vp);
+    }
     const auto& children = buttonContainer_->GetChildren();
     for (const auto& child : children) {
         if (child->GetTag() == V2::BUTTON_ETS_TAG) {
             auto buttonNode = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(buttonNode);
-            auto buttonProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-            CHECK_NULL_VOID(buttonProp);
             auto buttonTextNode = DynamicCast<FrameNode>(buttonNode->GetFirstChild());
             CHECK_NULL_VOID(buttonTextNode);
-            auto titleProp = AceType::DynamicCast<TextLayoutProperty>(buttonTextNode->GetLayoutProperty());
-            CHECK_NULL_VOID(titleProp);
-            if (isLandSpace) {
-                buttonProp->UpdateFontSize(LANDSCAPE_BUTTON_TEXT_FONT_SIZE);
-                titleProp->UpdateFontSize(LANDSCAPE_BUTTON_TEXT_FONT_SIZE);
+            auto textProp = AceType::DynamicCast<TextLayoutProperty>(buttonTextNode->GetLayoutProperty());
+            CHECK_NULL_VOID(textProp);
+            if (notAdapationAging_) {
+                textProp->UpdateMaxFontScale(dialogTheme_->GetDialogDefaultScale());
             } else {
-                Dimension buttonTextSize = dialogTheme_->GetButtonTextSize().IsValid()
-                                               ? dialogTheme_->GetButtonTextSize()
-                                               : DIALOG_BUTTON_TEXT_SIZE;
-                buttonProp->UpdateFontSize(buttonTextSize);
-                titleProp->UpdateFontSize(buttonTextSize);
+                textProp->UpdateMaxFontScale(scale);
+                textProp->UpdateMargin(margin);
             }
         }
+    }
+}
+
+void DialogPattern::UpdateFontScale()
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetFontScale() != fontScaleForElderly_) {
+        OnFontConfigurationUpdate();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkModifyDone();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        fontScaleForElderly_ = pipeline->GetFontScale();
     }
 }
 

@@ -47,7 +47,7 @@ export interface SuffixIconOptions extends IconCommonOptions {
 
 export interface PrefixIconOptions extends IconCommonOptions {}
 
-export interface SymbolOptions {
+export interface ChipSymbolGlyphOptions {
   normal?: SymbolGlyphModifier;
   activated?: SymbolGlyphModifier;
 }
@@ -89,6 +89,7 @@ interface DefaultSymbolTheme {
   normalFontColor: Array<ResourceColor>;
   activatedFontColor: Array<ResourceColor>;
   fontSize: Length;
+  defaultEffect: number;
 }
 
 interface LabelTheme {
@@ -163,16 +164,16 @@ export const defaultTheme: ChipTheme = {
     smallMargin: { left: 4, right: 4, top: 0, bottom: 0 },
     defaultFontSize: 14,
     localizedNormalMargin: {
-      start: LengthMetrics.vp(16),
-      end: LengthMetrics.vp(16),
-      top: LengthMetrics.vp(4),
-      bottom: LengthMetrics.vp(4)
+      start: LengthMetrics.vp(6),
+      end: LengthMetrics.vp(6),
+      top: LengthMetrics.vp(0),
+      bottom: LengthMetrics.vp(0)
     },
     localizedSmallMargin: {
       start: LengthMetrics.vp(4),
       end: LengthMetrics.vp(4),
-      top: LengthMetrics.vp(4),
-      bottom: LengthMetrics.vp(4),
+      top: LengthMetrics.vp(0),
+      bottom: LengthMetrics.vp(0),
     }
   },
   suffixIcon: {
@@ -186,6 +187,7 @@ export const defaultTheme: ChipTheme = {
     normalFontColor: [$r('sys.color.ohos_id_color_secondary')],
     activatedFontColor: [$r('sys.color.ohos_id_color_text_primary_contrary')],
     fontSize: 16,
+    defaultEffect: -1,
   },
   chipNode: {
     suitAgeScale: 1.75,
@@ -229,10 +231,10 @@ const noop = () => {
 
 interface ChipOptions {
   prefixIcon?: PrefixIconOptions;
-  prefixSymbol?: SymbolOptions;
+  prefixSymbol?: ChipSymbolGlyphOptions;
   label: LabelOptions;
   suffixIcon?: SuffixIconOptions;
-  suffixSymbol?: SymbolOptions;
+  suffixSymbol?: ChipSymbolGlyphOptions;
   allowClose?: boolean;
   enabled?: boolean;
   activated?: boolean;
@@ -273,10 +275,10 @@ export struct ChipComponent {
   @Prop allowClose: boolean = true
   @Prop chipDirection: Direction = Direction.Auto
   @Prop prefixIcon: PrefixIconOptions = { src: "" }
-  @Prop prefixSymbol: SymbolOptions
+  @Prop prefixSymbol: ChipSymbolGlyphOptions
   @Prop label: LabelOptions = { text: "" }
   @Prop suffixIcon: SuffixIconOptions = { src: "" }
-  @Prop suffixSymbol: SymbolOptions
+  @Prop suffixSymbol: ChipSymbolGlyphOptions
   @Prop chipNodeBackgroundColor: ResourceColor = this.theme.chipNode.backgroundColor
   @Prop chipNodeActivatedBackgroundColor: ResourceColor = this.theme.chipNode.activatedBackgroundColor
   @Prop chipNodeRadius: Dimension | undefined = void (0)
@@ -310,6 +312,7 @@ export struct ChipComponent {
   private callbackId: number | undefined = undefined
   @State prefixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById("PrefixSymbolGlyph")?.size?.width);
   @State suffixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById("SuffixSymbolGlyph")?.size?.width);
+  @State symbolEffect: SymbolEffect = new SymbolEffect();
 
   private isChipSizeEnum(): boolean {
     return typeof (this.chipSize) === 'string'
@@ -387,45 +390,58 @@ export struct ChipComponent {
       case 'object':
         try {
           if ((value as Resource).id !== -1) {
-            return px2vp(getContext(this).resourceManager.getNumber((value as Resource).id))
+            return getContext(this).resourceManager.getNumber((value as Resource).id)
           } else {
-            return px2vp(getContext(this)
+            return getContext(this)
               .resourceManager
-              .getNumberByName(((value.params as string[])[0]).split('.')[2]))
+              .getNumberByName(((value.params as string[])[0]).split('.')[2])
           }
         } catch (error) {
-          return Number.NEGATIVE_INFINITY
+          try {
+            if ((value as Resource).id !== -1) {
+              return this.parseStringToVp(getContext(this).resourceManager.getStringSync((value as Resource).id))
+            } else {
+              return this.parseStringToVp(getContext(this).resourceManager
+                .getStringByNameSync(((value.params as string[])[0]).split('.')[2]))
+            }
+          } catch (error) {
+            return Number.NEGATIVE_INFINITY
+          }
         }
       case 'string':
-        let regex: RegExp = new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$", "i");
-        let matches: RegExpMatchArray | null = value.match(regex);
-        if (!matches) {
-          return Number.NEGATIVE_INFINITY
-        }
-        let length: number = Number(matches?.[1] ?? 0);
-        let unit: string = matches?.[2] ?? 'vp'
-        switch (unit.toLowerCase()) {
-          case 'px':
-            length = px2vp(length)
-            break
-          case 'fp':
-            length = px2vp(fp2px(length))
-            break
-          case 'lpx':
-            length = px2vp(lpx2px(length))
-            break
-          case '%':
-            length = Number.NEGATIVE_INFINITY
-            break
-          case 'vp':
-            break
-          default:
-            break
-        }
-        return length
+        return this.parseStringToVp(value)
       default:
         return Number.NEGATIVE_INFINITY
     }
+  }
+
+  private parseStringToVp(value: string): number {
+    let regex: RegExp = new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i');
+    let matches: RegExpMatchArray | null = value.match(regex);
+    if (!matches) {
+      return Number.NEGATIVE_INFINITY
+    }
+    let length: number = Number(matches?.[1] ?? 0);
+    let unit: string = matches?.[2] ?? 'vp'
+    switch (unit.toLowerCase()) {
+      case 'px':
+        length = px2vp(length)
+        break
+      case 'fp':
+        length = px2vp(fp2px(length))
+        break
+      case 'lpx':
+        length = px2vp(lpx2px(length))
+        break
+      case '%':
+        length = Number.NEGATIVE_INFINITY
+        break
+      case 'vp':
+        break
+      default:
+        break
+    }
+    return length;
   }
 
   private getLabelMargin(): Margin {
@@ -454,7 +470,7 @@ export struct ChipComponent {
 
   private getLocalizedLabelMargin(): LocalizedMargin {
     let localizedLabelMargin: LocalizedMargin = { start: LengthMetrics.vp(0), end: LengthMetrics.vp(0) }
-    if (this.label?.localizedLabelMargin?.start.value !== void (0) &&
+    if (this.label?.localizedLabelMargin?.start?.value !== void (0) &&
       this.lengthMetricsToVp(this.label.localizedLabelMargin.start) >= 0) {
       localizedLabelMargin.start = this.label?.localizedLabelMargin?.start
     } else if ((this.prefixSymbol?.normal || this.prefixSymbol?.activated) || this.prefixIcon?.src) {
@@ -464,7 +480,7 @@ export struct ChipComponent {
         localizedLabelMargin.start = this.theme.label.localizedNormalMargin.start
       }
     }
-    if (this.label?.localizedLabelMargin?.end.value !== void (0) &&
+    if (this.label?.localizedLabelMargin?.end?.value !== void (0) &&
       this.lengthMetricsToVp(this.label.localizedLabelMargin.end) >= 0) {
       localizedLabelMargin.end = this.label?.localizedLabelMargin?.end
     } else if ((this.suffixSymbol?.normal || this.suffixSymbol?.activated) ||
@@ -479,28 +495,27 @@ export struct ChipComponent {
   }
 
   private getLabelStartEndVp(): LocalizedMargin {
-    let labelMargin: LocalizedMargin = { start: LengthMetrics.vp(0), end: LengthMetrics.vp(0) }
-    if (this.label && this.label.labelMargin) {
+    let labelMargin: LocalizedMargin = this.getLocalizedLabelMargin()
+    if (this.label && (this.label.labelMargin !== void (0)) && (this.label.localizedLabelMargin === void (0))) {
       let margin: Margin = this.getLabelMargin()
-      return { start: LengthMetrics.vp(this.toVp(margin.left)), end: LengthMetrics.vp(this.toVp(margin.right)) }
-    }
-    if (this.label && this.label.localizedLabelMargin) {
-      let localizedMargin: LocalizedMargin = this.getLocalizedLabelMargin()
       return {
-        start: LengthMetrics.vp(this.lengthMetricsToVp(localizedMargin.start)),
-        end: LengthMetrics.vp(this.lengthMetricsToVp(localizedMargin.end))
+        start: LengthMetrics.vp(this.toVp(margin.left)),
+        end: LengthMetrics.vp(this.toVp(margin.right))
       }
     }
-    return labelMargin
+    return {
+      start: LengthMetrics.vp(this.lengthMetricsToVp(labelMargin.start)),
+      end: LengthMetrics.vp(this.lengthMetricsToVp(labelMargin.end))
+    }
   }
 
   private getActualLabelMargin(): Margin | LocalizedMargin {
-    let localizedLabelMargin: LocalizedMargin = { start: LengthMetrics.vp(0), end: LengthMetrics.vp(0) }
-    if (this.label && this.label.labelMargin) {
-      return this.getLabelMargin()
+    let localizedLabelMargin: LocalizedMargin = this.getLocalizedLabelMargin()
+    if (this.label && this.label.localizedLabelMargin !== void (0)) {
+      return localizedLabelMargin
     }
-    if (this.label && this.label.localizedLabelMargin) {
-      return this.getLocalizedLabelMargin()
+    if (this.label && this.label.labelMargin !== void (0)) {
+      return this.getLabelMargin()
     }
     return localizedLabelMargin
   }
@@ -587,7 +602,7 @@ export struct ChipComponent {
   }
 
   private getSuffixIconFocusable(): boolean {
-    return (this.useDefaultSuffixIcon && this.allowClose) || this.suffixIcon?.action !== void (0)
+    return (this.useDefaultSuffixIcon && (this.allowClose ?? true)) || this.suffixIcon?.action !== void (0)
   }
 
   private getChipNodePadding(): LocalizedPadding {
@@ -612,20 +627,16 @@ export struct ChipComponent {
       currentColor = this.chipNodeBackgroundColor ?? this.theme.chipNode.backgroundColor
     }
 
-    if (!this.isShowPressedBackGroundColor) {
-      return currentColor
-    }
     let sourceColor: ColorMetrics;
 
     try {
       sourceColor = ColorMetrics.resourceColor(currentColor);
     } catch (err) {
       hilog.error(0x3900, 'Ace', `Chip resourceColor, error: ${err.toString()}`);
-      if (this.getChipActive()) {
-        sourceColor = ColorMetrics.resourceColor(this.theme.chipNode.activatedBackgroundColor);
-      } else {
-        sourceColor = ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor);
-      }
+      sourceColor = ColorMetrics.resourceColor(Color.Transparent);
+    }
+    if (!this.isShowPressedBackGroundColor) {
+      return sourceColor.color
     }
 
     return sourceColor
@@ -658,13 +669,13 @@ export struct ChipComponent {
   private getCalculateChipNodeWidth(): number {
     let calWidth: number = 0
     let startEndVp: LocalizedMargin = this.getLabelStartEndVp()
-    calWidth += this.getChipNodePadding().start.value
+    calWidth += this.getChipNodePadding().start?.value ?? 0
     calWidth += this.toVp(this.getPrefixChipWidth())
-    calWidth += this.toVp(startEndVp.start.value)
+    calWidth += this.toVp(startEndVp.start?.value ?? 0)
     calWidth += this.getLabelWidth()
-    calWidth += this.toVp(startEndVp.end.value)
+    calWidth += this.toVp(startEndVp.end?.value ?? 0)
     calWidth += this.toVp(this.getSuffixChipWidth())
-    calWidth += this.getChipNodePadding().end.value
+    calWidth += this.getChipNodePadding().end?.value ?? 0
     return calWidth
   }
 
@@ -683,7 +694,7 @@ export struct ChipComponent {
       return this.suffixSymbolWidth
     } else if (this.suffixIcon?.src) {
       return this.getSuffixIconSize().width
-    } else if (!this.suffixIcon?.src && this.allowClose) {
+    } else if (!this.suffixIcon?.src && (this.allowClose ?? true)) {
       return this.theme.defaultSymbol.fontSize
     } else {
       return 0
@@ -711,20 +722,20 @@ export struct ChipComponent {
       return
     }
     if (this.isHover) {
-      if (event.type === TouchType.Down) {
+      if (event.type === TouchType.Down || event.type === TouchType.Move) {
         this.isShowPressedBackGroundColor = true
-
       } else if (event.type === TouchType.Up) {
         this.isShowPressedBackGroundColor = false
-
+      } else {
+        this.isShowPressedBackGroundColor = false
       }
     } else {
-      if (event.type === TouchType.Down) {
+      if (event.type === TouchType.Down || event.type === TouchType.Move) {
         this.isShowPressedBackGroundColor = true
-
       } else if (event.type === TouchType.Up) {
         this.isShowPressedBackGroundColor = false
-
+      } else {
+        this.isShowPressedBackGroundColor = false
       }
     }
   }
@@ -746,16 +757,18 @@ export struct ChipComponent {
       this.chipOpacity = 0
       this.chipBlendColor = Color.Transparent
     })
-    animateTo({ duration: 150, curve: Curve.FastOutLinearIn, onFinish: () => {
-      this.deleteChip = true
-    } },
+    animateTo({
+      duration: 150, curve: Curve.FastOutLinearIn, onFinish: () => {
+        this.deleteChip = true
+      }
+    },
       () => {
         this.chipScale = { x: 0.85, y: 0.85 }
       })
   }
 
   private getSuffixIconSrc(): ResourceStr | undefined {
-    this.useDefaultSuffixIcon = !this.suffixIcon?.src && this.allowClose
+    this.useDefaultSuffixIcon = !this.suffixIcon?.src && (this.allowClose ?? true)
     return this.useDefaultSuffixIcon ? this.theme.suffixIcon.defaultDeleteIcon : (this.suffixIcon?.src ?? void (0))
   }
 
@@ -904,6 +917,9 @@ export struct ChipComponent {
             .fontSize(this.theme.defaultSymbol.fontSize)
             .fontColor(this.getDefaultSymbolColor())
             .attributeModifier(this.getPrefixSymbolModifier())
+            .effectStrategy(SymbolEffectStrategy.NONE)
+            .symbolEffect(this.symbolEffect, false)
+            .symbolEffect(this.symbolEffect, this.theme.defaultSymbol.defaultEffect)
             .onSizeChange((oldValue, newValue) => {
               this.prefixSymbolWidth = newValue?.width
             })
@@ -911,7 +927,6 @@ export struct ChipComponent {
         } else if (this.prefixIcon?.src !== "") {
           Image(this.prefixIcon?.src)
             .direction(this.chipDirection)
-            .matchTextDirection(this.chipDirection == Direction.Ltr ? false : true)
             .opacity(this.getChipNodeOpacity())
             .size(this.getPrefixIconSize())
             .fillColor(this.getPrefixIconFilledColor())
@@ -945,6 +960,9 @@ export struct ChipComponent {
             .fontSize(this.theme.defaultSymbol.fontSize)
             .fontColor(this.getDefaultSymbolColor())
             .attributeModifier(this.getSuffixSymbolModifier())
+            .effectStrategy(SymbolEffectStrategy.NONE)
+            .symbolEffect(this.symbolEffect, false)
+            .symbolEffect(this.symbolEffect, this.theme.defaultSymbol.defaultEffect)
             .onSizeChange((oldValue, newValue) => {
               this.suffixSymbolWidth = newValue?.width
             })
@@ -952,7 +970,6 @@ export struct ChipComponent {
         } else if (this.suffixIcon?.src !== "") {
           Image(this.getSuffixIconSrc())
             .direction(this.chipDirection)
-            .matchTextDirection(this.chipDirection == Direction.Ltr ? false : true)
             .opacity(this.getChipNodeOpacity())
             .size(this.getSuffixIconSize())
             .fillColor(this.getSuffixIconFilledColor())
@@ -976,14 +993,14 @@ export struct ChipComponent {
                 this.suffixIcon.action()
                 return
               }
-              if (this.allowClose && this.useDefaultSuffixIcon) {
+              if ((this.allowClose ?? true) && this.useDefaultSuffixIcon) {
                 this.onClose()
                 this.deleteChipNodeAnimate()
                 return
               }
               this.onClicked()
             })
-        } else if (this.allowClose) {
+        } else if (this.allowClose ?? true) {
           SymbolGlyph($r('sys.symbol.xmark'))
             .fontSize(this.theme.defaultSymbol.fontSize)
             .fontColor(this.getDefaultSymbolColor())
@@ -1003,6 +1020,7 @@ export struct ChipComponent {
       .padding(this.getChipNodePadding())
       .constraintSize(this.getChipConstraintWidth())
     }
+    .constraintSize(this.getChipConstraintWidth())
     .direction(this.chipDirection)
     .type(ButtonType.Normal)
     .clip(false)
@@ -1022,12 +1040,15 @@ export struct ChipComponent {
       this.handleTouch(event)
     })
     .onHover((isHover: boolean) => {
-      if (this.isShowPressedBackGroundColor == false) {
+      if (isHover) {
         this.isShowPressedBackGroundColor = true
       } else {
-        this.isShowPressedBackGroundColor = false
+        if (!this.isShowPressedBackGroundColor && isHover) {
+          this.isShowPressedBackGroundColor = true
+        } else {
+          this.isShowPressedBackGroundColor = false
+        }
       }
-
     })
     .onKeyEvent((event) => {
       if (event.type === KeyType.Down && event.keyCode === KeyCode.KEYCODE_FORWARD_DEL && !this.suffixIconOnFocus) {

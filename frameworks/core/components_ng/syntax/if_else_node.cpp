@@ -37,11 +37,8 @@ RefPtr<IfElseNode> IfElseNode::GetOrCreateIfElseNode(int32_t nodeId)
     return node;
 }
 
-/*
- * how if else works:
- *
- * the transpiler generated JS code is like this(simplified, but main points shown):
- *
+/* how if else works
+ * the transpiler generated JS code is like this(simplified, but main points shown)
  * this.observeComponentCreation(..., () => {
  * If.create();
  * if (condition1) {
@@ -57,32 +54,28 @@ RefPtr<IfElseNode> IfElseNode::GetOrCreateIfElseNode(int32_t nodeId)
  *    If.setBranchId(compilerGeneratedUniqueConstBranchId)
  * }
  * If.pop()
- *
  * - if re-renders whenever one of the variables used in 'condition' during last render has changed.
  *      - the dependent variables can change from one render of if to the next, depending if 'condition1' and
  *        'condition2' bind to different variables.
  *      - If can re-render, but the branch does not change, e.g. if 'condition1' is (this.i > 20)
  *        then If will re-render whenever i changes.
- *
  * - eDSL to JS traspiler generates a unique id for each branch of the code inside.
  *   Thereby the framework can detect that the branch has actually changed.
  *   In this case ViewPU.ifElseBranchUpdateFunction will call IfElseNode::SetBranchId to upate
  *   and it will execute the 2nd parameter lambda function to re-generate the children.
- *
  * - In case of if without else, or if ... else if ... , eDSL to JS traspiler generates
  *   an extra else clause in which to set the branchId (calls IfElseNode::SetBranchId)
- *
- * - IfElseNode::FlushUpdateAndMarkDirty is called upon If.Pop()  FIXME
+ * - IfElseNode::FlushUpdateAndMarkDirty is called upon If.Pop()
  */
-
 void IfElseNode::SetBranchId(int32_t value, std::list<int32_t>& removedElmtId)
 {
     branchIdChanged_ = (branchId_ != value);
+    TAG_LOGD(AceLogTag::ACE_IF, "id: %{public}d, branchIdChanged_: %{public}d", GetId(), branchIdChanged_);
     if (branchIdChanged_) {
         // collect elmtIds of all children and their children up to CustomNode object
         // these will be removed, but possibly with a delay if their is an animation
         // list of elmtIds is sent back to calling TS ViewPU.ifElseBranchUpdateFunction()
-        Clean(false, true);
+        Clean(false, true, branchId_);
         CollectRemovedChildren(GetChildren(), removedElmtId, true);
         branchId_ = value;
     }
@@ -108,8 +101,9 @@ void IfElseNode::FlushUpdateAndMarkDirty()
 
 bool IfElseNode::TryRetake(const std::string& id)
 {
-    auto node = GetDisappearingChildById(id);
+    auto node = GetDisappearingChildById(id, branchId_);
     if (node) {
+        ACE_SCOPED_TRACE("IfElse TryRetake validate.");
         AddChild(node);
         // for geometryTransition, let all reused children call UpdateGeometryTransition.
         LayoutProperty::UpdateAllGeometryTransition(node);

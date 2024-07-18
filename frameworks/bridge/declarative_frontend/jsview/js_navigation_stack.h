@@ -111,6 +111,8 @@ public:
     void MoveIndexToTop(int32_t index) override;
     void UpdatePathInfoIfNeeded(RefPtr<NG::UINode>& uiNode, int32_t index) override;
     void RecoveryNavigationStack() override;
+    bool NeedBuildNewInstance(int32_t index) override;
+    void SetNeedBuildNewInstance(int32_t index, bool need) override;
 
 protected:
     JSRef<JSObject> dataSourceObj_;
@@ -119,6 +121,8 @@ protected:
     std::function<void()> onStateChangedCallback_;
 
 private:
+    JSRef<JSArray> GetJsPathArray();
+    JSRef<JSObject> GetJsPathInfo(int32_t index);
     std::string GetNameByIndex(int32_t index);
     JSRef<JSVal> GetOnPopByIndex(int32_t index) const;
     bool GetNavDestinationNodeInUINode(RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode);

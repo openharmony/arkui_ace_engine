@@ -19,17 +19,30 @@
 #include "iremote_proxy.h"
 #include "ui_content_errors.h"
 #include "ui_content_service_interface.h"
+#include "ui_report_stub.h"
 
 namespace OHOS::Ace {
-class UIContentServiceProxy : public IRemoteProxy<IUiContentService> {
+class ACE_FORCE_EXPORT UIContentServiceProxy : public IRemoteProxy<IUiContentService> {
 public:
     explicit UIContentServiceProxy(const sptr<IRemoteObject>& impl) : IRemoteProxy<IUiContentService>(impl) {};
-    virtual int32_t OnGetInspectorTree() override;
-    virtual int32_t OnReportUnfocusEvent() override;
-    virtual int32_t RegisterRemoteObject(sptr<IRemoteObject> remoteObject) override;
+    virtual int32_t GetInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback) override;
+    virtual int32_t Connect(const EventCallback& eventCallback) override;
+    virtual int32_t RegisterClickEventCallback(const EventCallback& eventCallback) override;
+    virtual int32_t RegisterRouterChangeEventCallback(const EventCallback& eventCallback) override;
+    virtual int32_t RegisterSearchEventCallback(const EventCallback& eventCallback) override;
+    virtual int32_t RegisterComponentChangeEventCallback(const EventCallback& eventCallback) override;
+    virtual int32_t RegisterWebUnfocusEventCallback(
+        const std::function<void(int64_t accessibilityId, const std::string& data)>& eventCallback) override;
+    virtual int32_t UnregisterClickEventCallback() override;
+    virtual int32_t UnregisterSearchEventCallback() override;
+    virtual int32_t UnregisterRouterChangeEventCallback() override;
+    virtual int32_t UnregisterComponentChangeEventCallback() override;
+    virtual int32_t UnregisterWebUnfocusEventCallback() override;
 
 private:
     static inline BrokerDelegator<UIContentServiceProxy> delegator_;
+    sptr<UiReportStub> report_ = nullptr;
+    int32_t processId_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_PROXY_H

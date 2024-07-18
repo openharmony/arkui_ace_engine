@@ -112,6 +112,7 @@ constexpr Dimension IMAGE_WIDTH = 170.0_vp;
 constexpr Dimension IMAGE_HEIGHT = 120.0_vp;
 constexpr Dimension IMAGE_TOP = 0.0_vp;
 constexpr Dimension IMAGE_LEFT = 0.0_vp;
+const std::vector<float> COLOR_FILTER_NULL;
 
 class ImageBases : public testing::Test {
 public:
@@ -126,6 +127,22 @@ public:
     static RefPtr<PixelMap> CreatePixelMap(const std::string& src);
     static RefPtr<FrameNode> CreatePixelMapAnimator(int32_t number = 1);
 };
+
+template <class LayoutPropertyCls = ImageLayoutProperty,
+          class PatternCls = ImagePattern,
+          class RenderPropertyCls = ImageRenderProperty>
+auto GetCompoment()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<LayoutPropertyCls>();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto pattern = frameNode->GetPattern<PatternCls>();
+    EXPECT_NE(pattern, nullptr);
+    auto renderProperty = frameNode->GetPaintProperty<RenderPropertyCls>();
+    EXPECT_NE(renderProperty, nullptr);
+    return std::make_tuple(frameNode, layoutProperty, pattern, renderProperty);
+}
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_TEXTFIELD_TEXTINPUT_TEST_NG_H

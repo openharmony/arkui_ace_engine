@@ -33,9 +33,9 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
-#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/pattern/text_field/text_content_type.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
+#include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace {
 
@@ -50,7 +50,7 @@ struct Font {
     bool IsEqual(const Font& other) const
     {
         bool flag = fontWeight == other.fontWeight && fontSize == other.fontSize && fontStyle == other.fontStyle &&
-            fontColor == other.fontColor;
+                    fontColor == other.fontColor;
         if (!flag) {
             return false;
         }
@@ -291,7 +291,7 @@ public:
     virtual void SetOnEditChanged(std::function<void(bool)>&& func) = 0;
     virtual void SetOnSubmit(std::function<void(int32_t)>&& func) = 0;
     virtual void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) = 0;
-    virtual void SetOnChange(std::function<void(const std::string&)>&& func) = 0;
+    virtual void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& func) = 0;
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) = 0;
     virtual void SetOnSecurityStateChange(std::function<void(bool)>&& func) = 0;
     virtual void SetOnContentScroll(std::function<void(float, float)>&& func) = 0;
@@ -304,14 +304,12 @@ public:
     virtual void SetForegroundColor(const Color& value) = 0;
     virtual void SetBackgroundColor(const Color& color, bool tmp) = 0;
     virtual void SetHeight(const Dimension& value) = 0;
-    virtual void SetPadding(NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) = 0;
+    virtual void SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) = 0;
     virtual void SetMargin() {};
     virtual void SetBackBorder() {};
     virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;
     virtual void SetShowPasswordText(bool value) = 0;
     virtual void SetOnClick(std::function<void(const ClickInfo&)>&& func) {};
-
-    virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;
     virtual void SetPasswordIcon(const PasswordIcon& passwordIcon) {};
     virtual void SetShowUnit(std::function<void()>&& unitAction) {};
     virtual void SetShowError(const std::string& errorText, bool visible) {};
@@ -357,6 +355,9 @@ public:
     virtual void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func) = 0;
     virtual void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) = 0;
     virtual void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) = 0;
+    virtual void SetSelectionMenuOptions(
+        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
+    virtual void SetEnablePreviewText(bool enablePreviewText) = 0;
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_overlay_modifier.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_client.h"
@@ -194,8 +195,14 @@ public:
         return syncLoad_;
     }
 
+    void SetNeedBorderRadius(bool needBorderRadius)
+    {
+        needBorderRadius_ = needBorderRadius;
+    }
+
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config);
     void SetImageAnalyzerConfig(void* config);
+    void SetImageAIOptions(void* options);
     void BeforeCreatePaintWrapper() override;
     void DumpInfo() override;
     void DumpLayoutInfo();
@@ -298,6 +305,16 @@ public:
     void OnActive() override
     {
         if (status_ == Animator::Status::RUNNING && animator_->GetStatus() != Animator::Status::RUNNING) {
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            if (!animator_->HasScheduler()) {
+                auto context = host->GetContextRefPtr();
+                if (context) {
+                    animator_->AttachScheduler(context);
+                } else {
+                    TAG_LOGW(AceLogTag::ACE_IMAGE, "pipelineContext is null.");
+                }
+            }
             animator_->Forward();
         }
     }
@@ -320,6 +337,16 @@ public:
         return loadInVipChannel_;
     }
 
+    bool GetNeedLoadAlt()
+    {
+        return needLoadAlt_;
+    }
+
+    void SetNeedLoadAlt(bool needLoadAlt)
+    {
+        needLoadAlt_ = needLoadAlt;
+    }
+
     void SetLoadInVipChannel(bool loadInVipChannel)
     {
         loadInVipChannel_ = loadInVipChannel;
@@ -335,17 +362,31 @@ public:
         return loadingCtx_->GetImageSize();
     }
 
+    void OnVisibleAreaChange(bool visible);
+
+    bool GetDefaultAutoResize()
+    {
+        InitDefaultValue();
+        return autoResizeDefault_;
+    }
+    ImageInterpolation GetDefaultInterpolation()
+    {
+        InitDefaultValue();
+        return interpolationDefault_;
+    }
 protected:
     void RegisterWindowStateChangedCallback();
     void UnregisterWindowStateChangedCallback();
-    void OnVisibleAreaChange(bool visible);
     bool isShow_ = true;
     bool gifAnimation_ = false;
+    RefPtr<ImageOverlayModifier> overlayMod_;
 
 private:
     class ObscuredImage : public CanvasImage {
         void DrawToRSCanvas(
             RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) override
+        {}
+        void DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) override
         {}
         int32_t GetWidth() const override
         {
@@ -395,6 +436,8 @@ private:
     void OpenSelectOverlay();
     void CloseSelectOverlay();
 
+    void TriggerFirstVisibleAreaChange();
+
     void UpdateFillColorIfForegroundColor();
     void UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event);
 
@@ -415,8 +458,7 @@ private:
     void OnDirectionConfigurationUpdate() override;
     void OnIconConfigurationUpdate() override;
     void OnConfigurationUpdate();
-    void ClearImageCache();
-    void LoadImage(const ImageSourceInfo& src);
+    void LoadImage(const ImageSourceInfo& src, const PropertyChangeFlag& propertyChangeFlag, VisibleType visibleType);
     void LoadAltImage(const ImageSourceInfo& altImageSourceInfo);
 
     void CreateAnalyzerOverlay();
@@ -452,6 +494,7 @@ private:
 
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::LOW;
+    bool needLoadAlt_ = true;
 
     RefPtr<ImageLoadingContext> loadingCtx_;
     RefPtr<CanvasImage> image_;
@@ -474,6 +517,7 @@ private:
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
 
     bool syncLoad_ = false;
+    bool needBorderRadius_ = false;
     bool loadInVipChannel_ = false;
     AIImageQuality imageQuality_ = AIImageQuality::NONE;
     bool isImageQualityChange_ = false;
@@ -482,6 +526,7 @@ private:
     bool isSensitive_ = false;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
     OffsetF parentGlobalOffset_;
+    bool isSelected_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 

@@ -495,7 +495,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentInitButtonInfo001, TestS
  */
 HWTEST_F(SecurityComponentModelTestNg, PasteButtonModelNGCreateNode001, TestSize.Level1)
 {
-    auto frameNode = PasteButtonModelNG::GetInstance()->CreateNode(0, 0, 0);
+    auto frameNode = PasteButtonModelNG::GetInstance()->CreateNode(0, 0, 0, false);
     ASSERT_NE(frameNode, nullptr);
 }
 

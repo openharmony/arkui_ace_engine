@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H
 
+#include <atomic>
 #include <cstdint>
 #include <list>
 
@@ -176,11 +177,26 @@ public:
     {
         isOnAnimation_ = isOnAnimation;
     }
-
+    RefPtr<FrameNode> GetTopDestination();
     void OnDetachFromMainTree(bool recursive) override;
     void OnAttachToMainTree(bool recursive) override;
 
     void FireHideNodeChange(NavDestinationLifecycle lifecycle);
+
+    void ReduceModeSwitchAnimationCnt()
+    {
+        --modeSwitchAnimationCnt_;
+    }
+
+    void IncreaseModeSwitchAnimationCnt()
+    {
+        ++modeSwitchAnimationCnt_;
+    }
+
+    int32_t GetModeSwitchAnimationCnt()
+    {
+        return modeSwitchAnimationCnt_;
+    }
 
     float CheckLanguageDirection();
 
@@ -188,11 +204,8 @@ public:
 
     void SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath)
     {
-        navigationPathInfo_.clear();
-        navigationPathInfo_.append(NAVIGATION_MODULE_NAME);
-        navigationPathInfo_ += ": " + moduleName + ", ";
-        navigationPathInfo_.append(NAVIGATION_PAGE_PATH);
-        navigationPathInfo_ += ": " + pagePath;
+        navigationPathInfo_ = pagePath;
+        navigationModuleName_ = moduleName;
     }
 
     const std::string& GetNavigationPathInfo() const
@@ -200,14 +213,22 @@ public:
         return navigationPathInfo_;
     }
 
+    void CleanHideNodes()
+    {
+        hideNodes_.clear();
+    }
+
 private:
     bool UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
-        const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize);
+        const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize,
+        const RefPtr<UINode>& preLastStandardNode);
     bool ReorderNavDestination(
         const std::vector<std::pair<std::string, RefPtr<UINode>>>& navDestinationNodes,
         RefPtr<FrameNode>& navigationContentNode, int32_t& slot, bool& hasChanged);
     void RemoveRedundantNavDestination(RefPtr<FrameNode>& navigationContentNode,
-        const RefPtr<UINode>& remainChild, size_t slot, bool& hasChanged);
+        const RefPtr<UINode>& remainChild, int32_t slot, bool& hasChanged, int32_t beforeLastStandardIndex);
+    void ReorderAnimatingDestination(RefPtr<FrameNode>& navigationContentNode, RefPtr<UINode>& maxAnimatingDestination,
+        RefPtr<UINode>& remainDestination, RefPtr<UINode>& curTopDestination);
     bool FindNavigationParent(const std::string& parentName);
     bool GetCurTitleBarNode(RefPtr<TitleBarNode>& curTitleBarNode, const RefPtr<FrameNode>& curNode,
         bool isNavBar);
@@ -221,6 +242,7 @@ private:
     std::vector<std::pair<RefPtr<NavDestinationGroupNode>, bool>> hideNodes_;
     std::vector<RefPtr<NavDestinationGroupNode>> showNodes_;
     int32_t lastStandardIndex_ = -1;
+    std::atomic_int32_t modeSwitchAnimationCnt_ = 0;
     bool isOnAnimation_ { false };
     bool isModeChange_ { false };
     bool needSetInvisible_ { false };
@@ -229,6 +251,7 @@ private:
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
     std::string navigationPathInfo_;
+    std::string navigationModuleName_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H

@@ -54,12 +54,12 @@ CanvasDrawFunction MenuItemPaintMethod::GetOverlayDrawFunction(PaintWrapper* pai
                 strokeWidth = selectTheme->GetDefaultDividerWidth();
                 dividerColor =  selectTheme->GetLineColor();
             }
-            info.strokeWidth = props->GetStrokeWidth().value_or(strokeWidth).ConvertToPx();
-            info.startMargin = props->GetStartMargin().value_or(horInterval).ConvertToPx();
-            info.endMargin = props->GetEndMargin().value_or(horInterval).ConvertToPx();
+            auto itemSize = paintWrapper->GetGeometryNode()->GetFrameSize();
+            info.width = itemSize.Width();
+            info.strokeWidth = props->GetStrokeWidth().value_or(strokeWidth).ConvertToPxWithSize(itemSize.Height());
+            info.startMargin = props->GetStartMargin().value_or(horInterval).ConvertToPxWithSize(itemSize.Width());
+            info.endMargin = props->GetEndMargin().value_or(horInterval).ConvertToPxWithSize(itemSize.Width());
             info.color = props->GetDividerColor().value_or(dividerColor);
-            auto groupSize = paintWrapper->GetGeometryNode()->GetFrameSize();
-            info.width = groupSize.Width();
             menuItem->PaintDivider(canvas, paintWrapper, info);
         }
     };

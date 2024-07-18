@@ -136,6 +136,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     // Pause GC during long frame
     std::unique_ptr<ILongFrame> longFrame = std::make_unique<ILongFrame>();
     if (is64BitSystem_) {
+        ACE_LAYOUT_SCOPED_TRACE("ReportStartEvent");
         longFrame->ReportStartEvent();
     }
 #endif
@@ -161,6 +162,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     FlushSyncGeometryNodeTasks();
 #ifdef FFRT_EXISTS
     if (is64BitSystem_) {
+        ACE_LAYOUT_SCOPED_TRACE("ReportEndEvent");
         longFrame->ReportEndEvent();
     }
 #endif
@@ -218,7 +220,7 @@ bool UITaskScheduler::NeedAdditionalLayout()
             }
             const auto& geometryTransition = node->GetLayoutProperty()->GetGeometryTransition();
             if (geometryTransition != nullptr) {
-                ret = ret || geometryTransition->OnAdditionalLayout(node);
+                ret |= geometryTransition->OnAdditionalLayout(node);
             }
         }
     }
@@ -236,11 +238,53 @@ void UITaskScheduler::FlushTask(bool triggeredByImplicitAnimation)
     if (!afterLayoutTasks_.empty()) {
         FlushAfterLayoutTask();
     }
+    FlushSafeAreaPaddingProcess();
     if (!triggeredByImplicitAnimation && !afterLayoutCallbacksInImplicitAnimationTask_.empty()) {
         FlushAfterLayoutCallbackInImplicitAnimationTask();
     }
     ElementRegister::GetInstance()->ClearPendingRemoveNodes();
     FlushRenderTask();
+}
+
+void UITaskScheduler::AddSafeAreaPaddingProcessTask(FrameNode* node)
+{
+    safeAreaPaddingProcessTasks_.insert(node);
+}
+
+void UITaskScheduler::RemoveSafeAreaPaddingProcessTask(FrameNode* node)
+{
+    safeAreaPaddingProcessTasks_.erase(node);
+}
+
+void UITaskScheduler::FlushSafeAreaPaddingProcess()
+{
+    if (safeAreaPaddingProcessTasks_.empty()) {
+        return;
+    }
+    auto iter = safeAreaPaddingProcessTasks_.begin();
+    while (iter != safeAreaPaddingProcessTasks_.end()) {
+        auto node = *iter;
+        if (!node) {
+            iter = safeAreaPaddingProcessTasks_.erase(iter);
+        } else {
+            node->ProcessSafeAreaPadding();
+            ++iter;
+        }
+    }
+    // clear caches after all process tasks
+    iter = safeAreaPaddingProcessTasks_.begin();
+    while (iter != safeAreaPaddingProcessTasks_.end()) {
+        auto node = *iter;
+        if (!node) {
+            iter = safeAreaPaddingProcessTasks_.erase(iter);
+        } else {
+            const auto& geometryNode = node->GetGeometryNode();
+            if (geometryNode) {
+                geometryNode->ResetAccumulatedSafeAreaPadding();
+            }
+            ++iter;
+        }
+    }
 }
 
 void UITaskScheduler::AddPredictTask(PredictTask&& task)

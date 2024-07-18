@@ -959,6 +959,11 @@ HWTEST_F(SelectTestNg, SelectModel002, TestSize.Level1)
      * @tc.steps: step4. Get the select frame node and select pattern.
      * @tc.expected: Objects are gotten successfully and should not be null.
      */
+    selectModelInstance.SetPaddingLeft(CalcDimension(20.00, DimensionUnit::CALC));
+    selectModelInstance.SetPaddingTop(CalcDimension(20.00, DimensionUnit::CALC));
+    selectModelInstance.SetPaddingRight(CalcDimension(20.00, DimensionUnit::CALC));
+    selectModelInstance.SetPaddingBottom(CalcDimension(20.00, DimensionUnit::CALC));
+    selectModelInstance.SetPaddings(std::nullopt, std::nullopt, std::nullopt, std::nullopt);
     ASSERT_NE(select, nullptr);
     auto pattern = select->GetPattern<SelectPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -1890,40 +1895,6 @@ HWTEST_F(SelectTestNg, selectMenuPatterntTest001, TestSize.Level1)
     for (int i = 0; i < params.size(); i++) {
         menuPattern->BuildContentModifierNode(i);
     }
-}
-
-/**
- * @tc.name: SelectControlSizeTest001
- * @tc.desc: Test SelectPattern ControlSize.
- * @tc.type: FUNC
- */
-HWTEST_F(SelectTestNg, SelectControlSizeTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create select model, select frame node and select pattern.
-     * @tc.expected: Objects are created successfully.
-     */
-    SelectModelNG selectModelInstance;
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        return;
-    }
-    auto selectFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(selectFrameNode, nullptr);
-    auto selectPattern = selectFrameNode->GetPattern<SelectPattern>();
-    ASSERT_NE(selectPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Get ControlSize, compare the set value with the ControlSize.
-     * @tc.expected: SelectPattern's default ControlSize and ControlSize::NORMAL are equal.
-     */
-    EXPECT_EQ(selectPattern->GetControlSize(), ControlSize::NORMAL);
-
-    /**
-     * @tc.steps: step3. Call SetControlSize and get ControlSize, compare the set value with the ControlSize.
-     * @tc.expected: SelectPattern's ControlSize and the set value are equal.
-     */
-    selectModelInstance.SetControlSize(ControlSize::SMALL);
-    EXPECT_EQ(selectPattern->GetControlSize(), ControlSize::SMALL);
 }
 
 /**

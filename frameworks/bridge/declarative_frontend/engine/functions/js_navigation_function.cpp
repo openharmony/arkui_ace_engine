@@ -71,7 +71,10 @@ void JsNavigationTransitionProxy::GetToContentInfo(const JSCallbackInfo& args)
 void JsNavigationTransitionProxy::FinishTransition(const JSCallbackInfo& info)
 {
     if (proxy_) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "fire custom animation finish");
         proxy_->FireFinishCallback();
+    } else {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "finish interactive animation failed");
     }
 }
 
@@ -102,6 +105,7 @@ JSRef<JSVal> JsNavigationTransitionProxy::ConvertContentInfo(RefPtr<NG::NavDesti
     value->SetProperty<std::string>("name", info->GetName());
     value->SetProperty<int32_t>("index", context->GetIndex());
     value->SetProperty<int32_t>("mode", static_cast<int32_t>(context->GetMode()));
+    value->SetProperty<std::string>("navDestinationId", std::to_string(context->GetNavDestinationId()));
     auto jsPathInfo = AceType::DynamicCast<JSNavPathInfo>(info);
     if (jsPathInfo) {
         value->SetPropertyObject("param", jsPathInfo->GetParam());
@@ -148,8 +152,10 @@ void JsNavigationTransitionProxy::GetInteractive(const JSCallbackInfo& info)
 void JsNavigationTransitionProxy::CancelAnimation(const JSCallbackInfo& info)
 {
     if (proxy_ == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "cancel interactive animation failed");
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "fire cancel interactive animation");
     proxy_->CancelInteractiveAnimation();
 }
 
@@ -162,6 +168,8 @@ void JsNavigationTransitionProxy::UpdateTransition(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         progress = info[0]->ToNumber<float>();
     }
-    proxy_->UpdateTransition(progress);
+    if (progress >= 0 && progress <= 1) {
+        proxy_->UpdateTransition(progress);
+    }
 }
 }; // namespace OHOS::Ace::Framework

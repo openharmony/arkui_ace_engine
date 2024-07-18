@@ -1943,4 +1943,62 @@ HWTEST_F(OverlayManagerTestUpdateNg, OnBindSheet031, TestSize.Level1)
     renderContext = sheetNode->GetRenderContext();
     EXPECT_EQ(renderContext->GetBorderStyle().value(), NEW_BORDER_STYLE_TEST);
 }
+
+/**
+ * @tc.name: OnBindSheet032
+ * @tc.desc: Test OverlayManager::OnBindSheet closeIcon test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, OnBindSheet032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    /**
+     * @tc.steps: step2. create sheetNode.
+     * @tc.expected: closeIcon is Image.
+     */
+    SheetStyle sheetStyle;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto sheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(sheetNode, nullptr);
+    auto buttonNode = sheetNode->GetChildAtIndex(2);
+    ASSERT_NE(buttonNode, nullptr);
+    auto iconNode = buttonNode->GetChildAtIndex(0);
+    ASSERT_NE(iconNode, nullptr);
+    ASSERT_EQ(iconNode->GetTag(), V2::IMAGE_ETS_TAG);
+    /**
+     * @tc.steps: step3. Change SDK Version.
+     * @tc.expected: closeIcon is Symbol.
+     */
+    auto newTargetNode = CreateTargetNode();
+    newTargetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        newTargetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    sheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(sheetNode, nullptr);
+    buttonNode = sheetNode->GetChildAtIndex(2);
+    ASSERT_NE(buttonNode, nullptr);
+    iconNode = buttonNode->GetChildAtIndex(0);
+    ASSERT_NE(iconNode, nullptr);
+    ASSERT_EQ(iconNode->GetTag(), V2::SYMBOL_ETS_TAG);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
+}
 } // namespace OHOS::Ace::NG

@@ -80,22 +80,22 @@ constexpr uint32_t APP_DOMAIN = 0xC0D0;
 #define APP_LOGE(fmt, ...) PRINT_APP_LOG(ERROR, fmt, ##__VA_ARGS__)
 #define APP_LOGF(fmt, ...) PRINT_APP_LOG(FATAL, fmt, ##__VA_ARGS__)
 
-#define JSON_STRING_PUT_INT(jsonValue, var) jsonValue->Put(#var, static_cast<int64_t>(var))
-#define JSON_STRING_PUT_BOOL(jsonValue, var) jsonValue->Put(#var, var)
-#define JSON_STRING_PUT_STRING(jsonValue, var) jsonValue->Put(#var, var.c_str())
-#define JSON_STRING_PUT_STRINGABLE(jsonValue, var) jsonValue->Put(#var, var.ToString().c_str())
+#define JSON_STRING_PUT_INT(jsonValue, var) (jsonValue)->Put(#var, static_cast<int64_t>(var))
+#define JSON_STRING_PUT_BOOL(jsonValue, var) (jsonValue)->Put(#var, (var))
+#define JSON_STRING_PUT_STRING(jsonValue, var) (jsonValue)->Put(#var, (var).c_str())
+#define JSON_STRING_PUT_STRINGABLE(jsonValue, var) (jsonValue)->Put(#var, (var).ToString().c_str())
 
 #define JSON_STRING_PUT_OPTIONAL_INT(jsonValue, var)          \
     do {                                                      \
         if (var) {                                            \
-            jsonValue->Put(#var, static_cast<int64_t>(*var)); \
+            (jsonValue)->Put(#var, static_cast<int64_t>(*(var))); \
         }                                                     \
     } while (0)                                               \
 
 #define JSON_STRING_PUT_OPTIONAL_STRING(jsonValue, var) \
     do {                                                \
         if (var) {                                      \
-            jsonValue->Put(#var, var->c_str());         \
+            (jsonValue)->Put(#var, (var)->c_str());         \
         }                                               \
     } while (0)                                         \
 
@@ -103,14 +103,14 @@ constexpr uint32_t APP_DOMAIN = 0xC0D0;
 #define JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, var) \
     do {                                                    \
         if (var) {                                          \
-            jsonValue->Put(#var, var->ToString().c_str());  \
+            (jsonValue)->Put(#var, (var)->ToString().c_str());  \
         }                                                   \
     } while (0)                                             \
 
 
 namespace OHOS::Ace {
 enum AceLogTag : uint8_t {
-    ACE_DEFAULT_DOMAIN = 0,          // C03900
+    ACE_DEFAULT_DOMAIN = 0,   // C03900
     ACE_ALPHABET_INDEXER,     // C03901
     ACE_COUNTER,              // C03902
     ACE_SUB_WINDOW,           // C03903
@@ -189,6 +189,9 @@ enum AceLogTag : uint8_t {
     ACE_MOVING_PHOTO,         // C0394C
     ACE_ARK_COMPONENT,        // C0394D
     ACE_WINDOW,               // C0394E
+    ACE_LIBUV,                // C0394F
+    ACE_SECURITYUIEXTENSION,  // C03950
+    ACE_INPUTKEYFLOW,         // C03951
 
     FORM_RENDER = 255, // C039FF FormRenderer
     END = 256,         // Last one, do not use

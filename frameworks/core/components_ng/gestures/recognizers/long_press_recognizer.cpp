@@ -63,7 +63,7 @@ void LongPressRecognizer::OnAccepted()
     }
     
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Long press gesture has been accepted, node tag = %{public}s, id = %{public}s",
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "LongPress accepted, tag = %{public}s, id = %{public}s",
         node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
     if (onAccessibilityEventFunc_) {
         onAccessibilityEventFunc_(AccessibilityEventType::LONG_PRESS);
@@ -122,8 +122,8 @@ void LongPressRecognizer::ThumbnailTimer(int32_t time)
 
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, long press recognizer receives %{public}d", event.touchEventId, event.id);
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d down, state: %{public}d",
+        event.touchEventId, event.id, refereeState_);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -144,13 +144,9 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         int64_t currentTimeStamp = GetSysTimestamp();
         int64_t eventTimeStamp = static_cast<int64_t>(event.time.time_since_epoch().count());
         if (currentTimeStamp > eventTimeStamp) {
-            TAG_LOGI(AceLogTag::ACE_GESTURE,
-                "CurrentTimeStamp is larger than eventTimeStamp, need to minus time spent waiting");
             // nanoseconds to millisceond.
             curDuration = curDuration - static_cast<int32_t>((currentTimeStamp - eventTimeStamp) / (1000 * 1000));
-            if (curDuration < 0) {
-                curDuration = 0;
-            }
+            curDuration = curDuration < 0 ? 0 : curDuration;
         }
     }
 #endif
@@ -162,13 +158,14 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
+    if (fingersId_.find(event.id) == fingersId_.end()) {
+        fingersId_.insert(event.id);
+    }
     globalPoint_ = Point(event.x, event.y);
     touchPoints_[event.id] = event;
     lastTouchEvent_ = event;
     UpdateFingerListInfo();
-    auto pointsCount = GetValidFingersCount();
-
-    if (pointsCount == fingers_) {
+    if (GetValidFingersCount() == fingers_) {
         refereeState_ = RefereeState::DETECTING;
         if (useCatchMode_) {
             DeadlineTimer(curDuration, true);
@@ -182,12 +179,14 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, long press recognizer receives %{public}d touch up event", event.touchEventId,
-        event.id);
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d up, state: %{public}d",
+        event.touchEventId, event.id, refereeState_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
+    if (fingersId_.find(event.id) != fingersId_.end()) {
+        fingersId_.erase(event.id);
+    }
     if (touchPoints_.find(event.id) != touchPoints_.end()) {
         touchPoints_.erase(event.id);
     }
@@ -232,9 +231,7 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, long press recognizer receives %{public}d touch cancel event, touchPoint "
-        "size:%{public}d",
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d cancel, TPS:%{public}d",
         event.touchEventId, event.id, static_cast<int32_t>(touchPoints_.size()));
     if (refereeState_ == RefereeState::FAIL) {
         return;
@@ -344,30 +341,30 @@ double LongPressRecognizer::ConvertPxToVp(double offset) const
 void LongPressRecognizer::SendCallbackMsg(
     const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, bool isOnAction)
 {
+    if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
+        return;
+    }
     if (callback && *callback) {
         GestureEvent info;
         info.SetTimeStamp(time_);
         info.SetRepeat(isRepeat);
         info.SetFingerList(fingerList_);
-        TouchEvent trackPoint = {};
-        if (!touchPoints_.empty()) {
-            trackPoint = touchPoints_.begin()->second;
-        }
         info.SetSourceDevice(deviceType_);
         info.SetDeviceId(deviceId_);
-        info.SetTargetDisplayId(trackPoint.targetDisplayId);
+        info.SetTargetDisplayId(lastTouchEvent_.targetDisplayId);
         info.SetGlobalPoint(globalPoint_);
-        info.SetScreenLocation(trackPoint.GetScreenOffset());
-        info.SetGlobalLocation(trackPoint.GetOffset()).SetLocalLocation(trackPoint.GetOffset() - coordinateOffset_);
+        info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
+        info.SetGlobalLocation(lastTouchEvent_.GetOffset())
+            .SetLocalLocation(lastTouchEvent_.GetOffset() - coordinateOffset_);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
-        info.SetForce(trackPoint.force);
-        if (trackPoint.tiltX.has_value()) {
-            info.SetTiltX(trackPoint.tiltX.value());
+        info.SetForce(lastTouchEvent_.force);
+        if (lastTouchEvent_.tiltX.has_value()) {
+            info.SetTiltX(lastTouchEvent_.tiltX.value());
         }
-        if (trackPoint.tiltY.has_value()) {
-            info.SetTiltY(trackPoint.tiltY.value());
+        if (lastTouchEvent_.tiltY.has_value()) {
+            info.SetTiltY(lastTouchEvent_.tiltY.value());
         }
-        info.SetSourceTool(trackPoint.sourceTool);
+        info.SetSourceTool(lastTouchEvent_.sourceTool);
         info.SetPointerEvent(lastPointEvent_);
         info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         // callback may be overwritten in its invoke so we copy it first

@@ -28,11 +28,16 @@
 namespace OHOS::Ace::NG {
 
 struct GridPredictLayoutParam {
-    std::list<int32_t> items;
     LayoutConstraintF layoutConstraint;
     std::map<int32_t, float> itemsCrossSizes;
     float crossGap;
 };
+
+/**
+ * @brief callback to build a grid item at [itemIdx] in an IdleTask
+ * @returns true if the built item needs Grid to perform a layout.
+ */
+using BuildGridItemCallback = std::function<bool(const RefPtr<FrameNode>& host, int32_t itemIdx)>;
 
 constexpr int32_t EMPTY_JUMP_INDEX = -2;
 constexpr int32_t JUMP_TO_BOTTOM_EDGE = -3;
@@ -68,11 +73,19 @@ struct GridLayoutInfo {
         startIndex_ = startLine->second.begin()->second;
     }
 
+    void UpdateStartIndexForExtralOffset(float mainGap, float mainSize);
+
     void UpdateEndLine(float mainSize, float mainGap);
     // for overScroll at top
     void UpdateEndIndex(float overScrollOffset, float mainSize, float mainGap);
     bool IsOutOfStart() const;
-    bool IsOutOfEnd() const;
+    /**
+     * @brief Determine out of boundary condition for overScroll
+     *
+     * @param irregular whether running irregular layout.
+     * @return true if the end of content is above viewport.
+     */
+    bool IsOutOfEnd(float mainGap, bool irregular) const;
 
     void SwapItems(int32_t itemIndex, int32_t insertIndex);
     int32_t GetOriginalIndex() const;
@@ -354,6 +367,7 @@ struct GridLayoutInfo {
     int32_t endMainLineIndex_ = 0;
 
     int32_t jumpIndex_ = EMPTY_JUMP_INDEX;
+    std::optional<float> extraOffset_;
     int32_t crossCount_ = 0;
     int32_t childrenCount_ = 0;
     ScrollAlign scrollAlign_ = ScrollAlign::AUTO;

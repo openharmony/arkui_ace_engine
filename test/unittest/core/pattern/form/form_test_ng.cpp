@@ -29,6 +29,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 
+#include "base/utils/system_properties.h"
 #include "core/common/ace_engine.h"
 #include "core/common/form_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -40,6 +41,8 @@
 #include "core/components_ng/pattern/form/form_model_ng.h"
 #include "core/components_ng/pattern/form/form_node.h"
 #include "core/components_ng/pattern/form/form_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 #include "form_constants.h"
 
@@ -52,6 +55,7 @@ constexpr int64_t FORM_ID_OF_TDD = 123456;
 const std::string FORM_ID_STRING_OF_TDD = "123456";
 constexpr int32_t NODE_ID_OF_PARENT_NODE = 654321;
 const std::vector<ObscuredReasons> reasonsVector = { ObscuredReasons::PLACEHOLDER };
+constexpr double TIME_LIMIT_FONT_SIZE_BASE = 18.0;
 RequestFormInfo formInfo;
 DirtySwapConfig config;
 FormModelNG formModelNG;
@@ -1020,7 +1024,7 @@ HWTEST_F(FormTestNg, FormSkeletonTest001, TestSize.Level1)
      */
     auto host = pattern->GetHost();
     ASSERT_NE(host, nullptr);
-    auto columnNode = pattern->CreateColumnNode();
+    auto columnNode = pattern->CreateColumnNode(FormChildNodeType::FORM_SKELETON_NODE);
     ASSERT_EQ(host->GetLastChild(), columnNode);
 
     /**
@@ -1038,7 +1042,7 @@ HWTEST_F(FormTestNg, FormSkeletonTest001, TestSize.Level1)
      * @tc.steps: step5. Remove form skeleton node form form.
      * @tc.expected: Remove node success.
      */
-    pattern->RemoveFormSkeleton();
+    pattern->RemoveFormChildNode(FormChildNodeType::FORM_SKELETON_NODE);
     ASSERT_EQ(host->GetLastChild(), nullptr);
 }
 
@@ -1072,8 +1076,10 @@ HWTEST_F(FormTestNg, FormSkeletonTest002, TestSize.Level1)
      * @tc.steps: step3. Create a form skeleton view by LoadFormSkeleton.
      * @tc.expected: Create view success and mount to form node.
      */
+    pattern->isUnTrust_ = true;
     pattern->LoadFormSkeleton();
     ASSERT_NE(host->GetLastChild(), nullptr);
+    pattern->isUnTrust_ = false;
 
     /**
      * @tc.steps: step4. Test when form RSSurfaceNode created.
@@ -1088,7 +1094,436 @@ HWTEST_F(FormTestNg, FormSkeletonTest002, TestSize.Level1)
     ASSERT_NE(externalRenderContext, nullptr);
     auto renderContext = host->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    pattern->FireFormSurfaceNodeCallback(rsSurfaceNode, true, false);
+
+    AAFwk::Want want;
+    want.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_DYNAMIC, true);
+    want.SetParam(OHOS::AppExecFwk::Constants::FORM_IS_RECOVER_FORM, false);
+    pattern->FireFormSurfaceNodeCallback(rsSurfaceNode, want);
     ASSERT_EQ(host->GetLastChild(), nullptr);
+    bool isTransparencyEnabled = true;
+    RequestFormInfo info;
+    pattern->isUnTrust_ = true;
+    auto ret = pattern->ShouldLoadFormSkeleton(isTransparencyEnabled, info);
+    ASSERT_EQ(ret, true);
+    pattern->isUnTrust_ = false;
+    ret = pattern->ShouldLoadFormSkeleton(isTransparencyEnabled, info);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: FormPatternTest001
+ * @tc.desc: Verify the form pattern function work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormPatternTest001, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    pattern->OnAttachToFrameNode();
+    pattern->InitClickEvent();
+
+    TouchEventInfo event("onTouchUp");
+    TouchLocationInfo touchLocationInfo(1);
+    touchLocationInfo.SetTouchType(TouchType::UP);
+    event.AddTouchLocationInfo(std::move(touchLocationInfo));
+    pattern->HandleTouchUpEvent(event);
+    ASSERT_EQ(event.GetTouches().empty(), false);
+}
+
+/**
+ * @tc.name: FormPatternTest002
+ * @tc.desc: Verify the form pattern function work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormPatternTest002, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    pattern->OnAttachToFrameNode();
+    pattern->InitClickEvent();
+
+    TouchEventInfo event("onTouchDown");
+    TouchLocationInfo touchLocationInfo(1);
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    event.AddTouchLocationInfo(std::move(touchLocationInfo));
+    pattern->HandleUnTrustForm();
+    pattern->UpdateBackgroundColorWhenUnTrustForm();
+    pattern->HandleTouchDownEvent(event);
+    ASSERT_EQ(event.GetTouches().empty(), false);
+}
+/**
+ * @tc.name: FormPatternTest003
+ * @tc.desc: Verify the form pattern function work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormPatternTest003, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+
+    int32_t delayTime = 0;
+    pattern->HandleSnapshot(delayTime);
+    ASSERT_EQ(delayTime, 0);
+}
+
+/**
+ * @tc.name: FormPatternTest004
+ * @tc.desc: Verify the form pattern function work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormPatternTest004, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+
+    std::vector<std::string> infos;
+    std::string tmpStr = "action";
+    infos.emplace_back(tmpStr);
+    pattern->SetFormLinkInfos(infos);
+    pattern->HandleEnableForm(true);
+
+    pattern->isFrsNodeDetached_ = true;
+    pattern->isDynamic_ = true;
+    pattern->TakeSurfaceCaptureForUI();
+    ASSERT_EQ(pattern->formLinkInfos_.empty(), false);
+
+    pattern->isFrsNodeDetached_ = false;
+    pattern->isDynamic_ = true;
+    pattern->TakeSurfaceCaptureForUI();
+    ASSERT_EQ(pattern->formLinkInfos_.empty(), true);
+}
+
+/**
+ * @tc.name: FormPatternTest005
+ * @tc.desc: Verify the form pattern function work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormPatternTest005, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+
+    PointF touchPoint;
+    touchPoint.SetX(-5.0f);
+    touchPoint.SetY(5.0f);
+    std::vector<std::string> infos;
+    pattern->SetFormLinkInfos(infos);
+    pattern->HandleStaticFormEvent(touchPoint);
+    ASSERT_EQ(pattern->formLinkInfos_.empty(), true);
+
+    std::string tmpStr = "action";
+    infos.emplace_back(tmpStr);
+    pattern->SetFormLinkInfos(infos);
+    pattern->isDynamic_ = true;
+    pattern->HandleStaticFormEvent(touchPoint);
+
+    pattern->isDynamic_ = false;
+    pattern->shouldResponseClick_ = false;
+    pattern->HandleStaticFormEvent(touchPoint);
+    ASSERT_EQ(pattern->formLinkInfos_.empty(), false);
+
+    pattern->shouldResponseClick_ = true;
+    pattern->HandleStaticFormEvent(touchPoint);
+    ASSERT_EQ(pattern->formLinkInfos_.empty(), false);
+}
+
+/**
+ * @tc.name: FormPatternTest006
+ * @tc.desc: Verify the form pattern function work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormPatternTest006, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+
+    std::vector<std::string> infos;
+    std::string tmpStr = "action";
+    infos.emplace_back(tmpStr);
+    pattern->SetFormLinkInfos(infos);
+
+    pattern->FireFormSurfaceDetachCallback();
+    ASSERT_EQ(pattern->isFrsNodeDetached_, true);
+    pattern->TakeSurfaceCaptureForUI();
+    ASSERT_EQ(pattern->formLinkInfos_.empty(), false);
+
+    pattern->isFrsNodeDetached_ = false;
+    pattern->isDynamic_ = false;
+    pattern->TakeSurfaceCaptureForUI();
+    ASSERT_EQ(pattern->formLinkInfos_.empty(), false);
+
+    pattern->isDynamic_ = true;
+    pattern->TakeSurfaceCaptureForUI();
+    ASSERT_EQ(pattern->formLinkInfos_.empty(), true);
+}
+
+/**
+ * @tc.name: FormPatternTest007
+ * @tc.desc: Verify the form pattern function work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormPatternTest007, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::vector<std::string> infos;
+    std::string tmpStr = "action";
+    infos.emplace_back(tmpStr);
+    pattern->SetFormLinkInfos(infos);
+    std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    pattern->OnSnapshot(pixelMap);
+    pattern->HandleOnSnapshot(pixelMap);
+    ASSERT_EQ(pattern->isSnapshot_, false);
+
+    pixelMap = std::make_shared<Media::PixelMap>();
+    pattern->OnSnapshot(pixelMap);
+    pattern->HandleOnSnapshot(pixelMap);
+    ASSERT_EQ(pattern->isSnapshot_, true);
+}
+
+/**
+ * @tc.name: FormPatternTest008
+ * @tc.desc: Verify the form pattern function work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormPatternTest008, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::vector<std::string> infos;
+    std::string tmpStr = "action";
+    infos.emplace_back(tmpStr);
+    pattern->SetFormLinkInfos(infos);
+    uint32_t windowId = 0;
+    int32_t treeId = 0;
+    int64_t accessibilityId = 0;
+    pattern->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+    ASSERT_NE(pattern->formManagerBridge_, nullptr);
+
+    pattern->OnAccessibilityChildTreeDeregister();
+    ASSERT_NE(pattern->formManagerBridge_, nullptr);
+}
+
+/**
+ * @tc.name: FormPatternTest009
+ * @tc.desc: Verify the form pattern function work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormPatternTest009, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::vector<std::string> params;
+    std::vector<std::string> info;
+    pattern->OnAccessibilityDumpChildInfo(params, info);
+    ASSERT_NE(pattern->formManagerBridge_, nullptr);
+    pattern->UpdateStaticCard();
+    auto retRef = pattern->GetAccessibilitySessionAdapter();
+    ASSERT_NE(retRef, nullptr);
+}
+
+/**
+ * @tc.name: FormPatternTest010
+ * @tc.desc: Verify the form pattern function work correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, FormPatternTest010, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+
+    auto retNodeRef = pattern->CreateImageNode();
+    pattern->UpdateImageNode();
+    pattern->RemoveFrsNode();
+    ASSERT_NE(retNodeRef, nullptr);
+}
+
+/**
+ * @tc.name: AddFormChildNode and GetFormChildNode
+ * @tc.desc: Test function AddFormChildNode and GetFormChildNode in FormPattern with different params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, AddFormChildNode, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<FrameNode> textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    RefPtr<FrameNode> columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+    pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE, columnNode);
+    pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE, textNode);
+    RefPtr<FrameNode> disableStyleRootNode =
+        pattern->GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
+    RefPtr<FrameNode> disableStyleTextNode =
+        pattern->GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE);
+    EXPECT_EQ(disableStyleRootNode, columnNode);
+    EXPECT_EQ(disableStyleTextNode, textNode);
+}
+
+/**
+ * @tc.name: RemoveFormChildNode and GetFormChildNode
+ * @tc.desc: Test function RemoveFormChildNode and GetFormChildNode in FormPattern with different params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, RemoveFormChildNode, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<FrameNode> textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    RefPtr<FrameNode> columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+    pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE, columnNode);
+    pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE, textNode);
+    pattern->RemoveFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
+    pattern->RemoveFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE);
+    RefPtr<FrameNode> disableStyleRootNode =
+        pattern->GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
+    RefPtr<FrameNode> disableStyleTextNode =
+        pattern->GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE);
+    EXPECT_EQ(disableStyleRootNode, nullptr);
+    EXPECT_EQ(disableStyleTextNode, nullptr);
+}
+
+/**
+ * @tc.name: GetTimeLimitFontSize
+ * @tc.desc: Test function GetTimeLimitFontSize in FormPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, GetTimeLimitFontSize, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    double fontSize = pattern->GetTimeLimitFontSize();
+    EXPECT_EQ(fontSize, TIME_LIMIT_FONT_SIZE_BASE);
+}
+
+/**
+ * @tc.name: GetTimeLimitResource
+ * @tc.desc: Test function GetTimeLimitResource in FormPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, GetTimeLimitResource, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::string tmpStr = "action";
+    pattern->GetTimeLimitResource(tmpStr);
+    EXPECT_EQ(tmpStr.empty(), false);
+}
+
+/**
+ * @tc.name: OnLanguageConfigurationUpdate
+ * @tc.desc: Test function OnLanguageConfigurationUpdate in FormPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, OnLanguageConfigurationUpdate, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<FrameNode> textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    RefPtr<FrameNode> columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+    pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE, columnNode);
+    pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE, textNode);
+    RefPtr<FrameNode> disableStyleRootNode =
+        pattern->GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
+    RefPtr<FrameNode> disableStyleTextNode =
+        pattern->GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE);
+    pattern->EnableDrag();
+    LOGI("OnLanguageConfigurationUpdate");
+    pattern->OnLanguageConfigurationUpdate();
+    EXPECT_EQ(disableStyleTextNode, textNode);
+}
+
+/**
+ * @tc.name: CreateTimeLimitNode
+ * @tc.desc: Test CreateTimeLimitNode in Form Pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, CreateTimeLimitNode, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(100.0f, 100.0f));
+    geometryNode->SetFrameOffset(OffsetF(0, 0));
+    RefPtr<LayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<LayoutAlgorithm>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, nullptr);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto host = pattern->GetHost();
+    pattern->CreateTimeLimitNode();
+    ASSERT_NE(host, nullptr);
+}
+
+/**
+ * @tc.name: UpdateChildNodeOpacity
+ * @tc.desc: Test UpdateChildNodeOpacity in Form Pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, UpdateChildNodeOpacity, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    pattern->UpdateChildNodeOpacity(FormChildNodeType::FORM_SURFACE_NODE, 0);
+    ASSERT_NE(host, nullptr);
+}
+
+/**
+ * @tc.name: SnapshotSurfaceNode
+ * @tc.desc: Test SnapshotSurfaceNode in Form Pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormTestNg, SnapshotSurfaceNode, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    pattern->SnapshotSurfaceNode();
+    ASSERT_NE(host, nullptr);
 }
 } // namespace OHOS::Ace::NG

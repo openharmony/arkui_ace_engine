@@ -143,9 +143,13 @@ constexpr uint32_t DRAW_REGION_FOCUS_MODIFIER_INDEX = 2;
 constexpr uint32_t DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX = 3;
 constexpr uint32_t DRAW_REGION_OVERLAY_TEXT_MODIFIER_INDEX = 4;
 constexpr uint32_t DRAW_REGION_DEBUG_BOUNDARY_MODIFIER_INDEX = 5;
+constexpr int32_t RIGHT_ANGLE = 90;
+constexpr int32_t STRAIGHT_ANGLE = 180;
+constexpr int32_t REFLEX_ANGLE = 270;
+constexpr int32_t FULL_ROTATION = 360;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
-constexpr int32_t DELAY_TIME = 300;
+constexpr Dimension DASH_GEP_WIDTH = -1.0_px;
 
 Rosen::Gravity GetRosenGravity(RenderFit renderFit)
 {
@@ -171,8 +175,19 @@ Rosen::Gravity GetRosenGravity(RenderFit renderFit)
     return idx != -1 ? gravityMap[idx].value : Rosen::Gravity::DEFAULT;
 }
 
+ColorMode GetResourceColorMode(PipelineContext* pipeline)
+{
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, ColorMode::LIGHT);
+    auto themeConstants = themeManager->GetThemeConstants();
+    CHECK_NULL_RETURN(themeConstants, ColorMode::LIGHT);
+    auto resourceAdapter = themeConstants->GetResourceAdapter();
+    CHECK_NULL_RETURN(resourceAdapter, ColorMode::LIGHT);
+    return resourceAdapter->GetResourceColorMode();
+}
+
 std::shared_ptr<Rosen::RSFilter> CreateRSMaterialFilter(
-    const BlurStyleOption& blurStyleOption, const RefPtr<PipelineBase>& pipeline)
+    const BlurStyleOption& blurStyleOption, PipelineContext* pipeline)
 {
     auto blurStyleTheme = pipeline->GetTheme<BlurStyleTheme>();
     if (!blurStyleTheme) {
@@ -181,7 +196,7 @@ std::shared_ptr<Rosen::RSFilter> CreateRSMaterialFilter(
     }
     ThemeColorMode colorMode = blurStyleOption.colorMode;
     if (blurStyleOption.colorMode == ThemeColorMode::SYSTEM) {
-        colorMode = SystemProperties::GetColorMode() == ColorMode::DARK ? ThemeColorMode::DARK : ThemeColorMode::LIGHT;
+        colorMode = GetResourceColorMode(pipeline) == ColorMode::DARK ? ThemeColorMode::DARK : ThemeColorMode::LIGHT;
     }
     auto blurParam = blurStyleTheme->GetBlurParameter(blurStyleOption.blurStyle, colorMode);
     CHECK_NULL_RETURN(blurParam, nullptr);
@@ -357,7 +372,9 @@ void RosenRenderContext::SetPivot(float xPivot, float yPivot, float zPivot)
 {
     // change pivot without animation
     CHECK_NULL_VOID(rsNode_);
+    auto changed = true;
     if (pivotProperty_) {
+        changed = pivotProperty_->Get().x_ != xPivot || pivotProperty_->Get().y_ != yPivot;
         pivotProperty_->Set({ xPivot, yPivot });
     } else {
         pivotProperty_ = std::make_shared<Rosen::RSProperty<Rosen::Vector2f>>(Rosen::Vector2f(xPivot, yPivot));
@@ -365,7 +382,7 @@ void RosenRenderContext::SetPivot(float xPivot, float yPivot, float zPivot)
         rsNode_->AddModifier(modifier);
     }
     rsNode_->SetPivotZ(zPivot);
-    NotifyHostTransformUpdated();
+    NotifyHostTransformUpdated(changed);
 }
 
 void RosenRenderContext::SetTransitionPivot(const SizeF& frameSize, bool transitionIn)
@@ -539,18 +556,7 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
 void RosenRenderContext::SetFrameWithoutAnimation(const RectF& paintRect)
 {
     CHECK_NULL_VOID(rsNode_ && paintRect.IsValid());
-    RSNode::ExecuteWithoutAnimation(
-        [&]() { rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height()); });
-}
-
-void RosenRenderContext::SyncGeometryPropertiesWithoutAnimation(
-    GeometryNode* /*geometryNode*/, bool /* isRound */, uint8_t /* flag */)
-{
-    CHECK_NULL_VOID(rsNode_);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    SyncGeometryProperties(paintRect_, true);
-    host->OnPixelRoundFinish(paintRect_.GetSize());
+    RSNode::ExecuteWithoutAnimation([&]() { SyncGeometryFrame(paintRect); });
 }
 
 void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, bool /* isRound */, uint8_t /* flag */)
@@ -558,7 +564,11 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, 
     CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    SyncGeometryProperties(paintRect_);
+    if (isNeedAnimate_) {
+        SyncGeometryProperties(paintRect_);
+    } else {
+        RSNode::ExecuteWithoutAnimation([&]() { SyncGeometryProperties(paintRect_); });
+    }
     host->OnPixelRoundFinish(paintRect_.GetSize());
 }
 
@@ -566,6 +576,12 @@ void RosenRenderContext::SyncGeometryFrame(const RectF& paintRect)
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+    if (rsTextureExport_) {
+        rsTextureExport_->UpdateBufferInfo(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+    }
+    if (handleChildBounds_) {
+        SetChildBounds(paintRect);
+    }
     if (useContentRectForRSFrame_) {
         SetContentRectToFrame(paintRect);
     } else {
@@ -575,9 +591,21 @@ void RosenRenderContext::SyncGeometryFrame(const RectF& paintRect)
         rsNode_->SetFrame(paintRect.GetX() + frameOffset_->GetX(), paintRect.GetY() + frameOffset_->GetY(),
             paintRect.Width(), paintRect.Height());
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnSyncGeometryFrameFinish(paintRect);
 }
 
-void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect, bool isSkipFrameTransition)
+void RosenRenderContext::SetChildBounds(const RectF& paintRect) const
+{
+    auto childRsNodeId = rsNode_->GetChildIdByIndex(0);
+    if (childRsNodeId.has_value()) {
+        auto childRsNode = Rosen::RSNodeMap::Instance().GetNode(childRsNodeId.value());
+        childRsNode->SetBounds(0.0f, 0.0f, paintRect.Width(), paintRect.Height());
+    }
+}
+
+void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
 {
     CHECK_NULL_VOID(rsNode_);
     if (isDisappearing_ && !paintRect.IsValid()) {
@@ -588,11 +616,8 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect, bool isS
         ACE_LAYOUT_SCOPED_TRACE("SyncGeometryProperties [%s][self:%d] set bounds %s",
             host->GetTag().c_str(), host->GetId(), paintRect.ToString().c_str());
     }
-    if (isSkipFrameTransition) {
-        RSNode::ExecuteWithoutAnimation([&]() { SyncGeometryFrame(paintRect); });
-    } else {
-        SyncGeometryFrame(paintRect);
-    }
+    SyncGeometryFrame(paintRect);
+
     if (!isSynced_) {
         isSynced_ = true;
         auto borderRadius = GetBorderRadius();
@@ -600,6 +625,7 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect, bool isS
             OnBorderRadiusUpdate(borderRadius.value());
         }
     }
+
     if (firstTransitionIn_) {
         // need to perform transitionIn early so not influence the following SetPivot
         NotifyTransitionInner(paintRect.GetSize(), true);
@@ -621,11 +647,10 @@ void RosenRenderContext::SyncAdditionalGeometryProperties(const RectF& paintRect
         PaintBackground();
     }
 
-    if (bdImageLoadingCtx_ && bdImage_) {
+    auto sourceFromImage = GetBorderSourceFromImage().value_or(false);
+    if (sourceFromImage && bdImageLoadingCtx_ && bdImage_) {
         PaintBorderImage();
-    }
-
-    if (GetBorderImageGradient()) {
+    } else if (!sourceFromImage && GetBorderImageGradient()) {
         PaintBorderImageGradient();
     }
 
@@ -826,6 +851,10 @@ void RosenRenderContext::OnBackgroundImageUpdate(const ImageSourceInfo& src)
     if (src.GetSrc().empty() && src.GetPixmap() == nullptr) {
         bgImage_ = nullptr;
         bgLoadingCtx_ = nullptr;
+        auto frameNode = GetHost();
+        if (frameNode) {
+            frameNode->SetColorModeUpdateCallback(nullptr);
+        }
         PaintBackground();
         return;
     }
@@ -883,7 +912,7 @@ bool RosenRenderContext::HasValidBgImageResizable()
 void RosenRenderContext::SetBackBlurFilter()
 {
     CHECK_NULL_VOID(rsNode_);
-    auto context = PipelineBase::GetCurrentContext();
+    auto context = GetPipelineContext();
     CHECK_NULL_VOID(context);
     const auto& background = GetBackground();
     CHECK_NULL_VOID(background);
@@ -909,7 +938,7 @@ void RosenRenderContext::SetBackBlurFilter()
 void RosenRenderContext::SetFrontBlurFilter()
 {
     CHECK_NULL_VOID(rsNode_);
-    auto context = PipelineBase::GetCurrentContextSafely();
+    auto context = GetPipelineContext();
     CHECK_NULL_VOID(context);
     const auto& foreground = GetForeground();
     CHECK_NULL_VOID(foreground);
@@ -1729,9 +1758,14 @@ void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& tran
 {
     CHECK_NULL_VOID(rsNode_);
     auto translateVec = MarshallTranslate(translate);
-    if (AnimationUtils::IsImplicitAnimationOpen() && translateXYUserModifier_ && GetHost()) {
-        auto preTranslate =
+    auto changed = true;
+    Rosen::Vector2f preTranslate;
+    if (translateXYUserModifier_) {
+        preTranslate =
             GetAnimatablePropertyStagingValue<Rosen::RSTranslateModifier, Rosen::Vector2f>(translateXYUserModifier_);
+        changed = !NearEqual(preTranslate[0], translateVec.x) || !NearEqual(preTranslate[1], translateVec.y);
+    }
+    if (AnimationUtils::IsImplicitAnimationOpen() && translateXYUserModifier_ && GetHost()) {
         if (!(NearEqual(preTranslate[0], translateVec.x) && NearEqual(preTranslate[1], translateVec.y))) {
             auto host = GetHost();
             ACE_SCOPED_TRACE("translate from (%f, %f) to (%f, %f), id:%d, tag:%s", preTranslate[0], preTranslate[1],
@@ -1742,7 +1776,7 @@ void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& tran
         translateXYUserModifier_, { translateVec.x, translateVec.y });
     SetAnimatableProperty<Rosen::RSTranslateZModifier, float>(translateZUserModifier_, translateVec.z);
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
-    NotifyHostTransformUpdated();
+    NotifyHostTransformUpdated(changed);
     RequestNextFrame();
 }
 
@@ -1822,22 +1856,22 @@ RectF gRect;
 double Degree2Radian(int32_t degree)
 {
     const float pi = 3.14159265;
-    degree = degree % 360;
+    degree = degree % FULL_ROTATION;
     if (degree < 0) {
-        degree += 360;
+        degree += FULL_ROTATION;
     }
-    return degree * pi / 180;
+    return degree * pi / STRAIGHT_ANGLE;
 }
 
 void SetCorner(double& x, double& y, double width, double height, int32_t degree)
 {
-    if (degree == 90) {
+    if (degree == RIGHT_ANGLE) {
         x = 0;
         y = height;
-    } else if (degree == 180) {
+    } else if (degree == STRAIGHT_ANGLE) {
         x = width;
         y = height;
-    } else if (degree == 270) {
+    } else if (degree == REFLEX_ANGLE) {
         x = width;
         y = 0;
     }
@@ -1854,6 +1888,40 @@ void SkewRect(float sx, float sy, RectF& rect)
     auto rightAfterSkew = sx > 0? right + sx * bottom: right + sx * top;
     auto topAfterSkew = sy > 0? top + sy * left: top + sy * right;
     auto bottomAfterSkew = sy > 0? bottom + sy * right: bottom + sy * left;
+
+    rect.SetLeft(leftAfterSkew);
+    rect.SetWidth(rightAfterSkew - leftAfterSkew);
+    rect.SetTop(topAfterSkew);
+    rect.SetHeight(bottomAfterSkew - topAfterSkew);
+}
+
+void PerspectiveRect(float px, float py, RectF& rect)
+{
+    auto left = rect.Left();
+    auto right = rect.Right();
+    auto top = rect.Top();
+    auto bottom = rect.Bottom();
+
+    auto leftAfterSkew = Infinity<double>();
+    auto rightAfterSkew = -Infinity<double>();
+    auto topAfterSkew = Infinity<double>();
+    auto bottomAfterSkew = -Infinity<double>();
+
+    double xValues[] = { left, right };
+    double yValues[] = { top, bottom };
+
+    for (uint32_t i = 0; i < 2; i++) {
+        for (uint32_t j = 0; j < 2; j++) {
+            double perspectiveValue = px * xValues[i] + py * yValues[j] + 1;
+            if (NearZero(perspectiveValue)) {
+                return;
+            }
+            leftAfterSkew = std::min(leftAfterSkew, xValues[i] / perspectiveValue);
+            rightAfterSkew = std::max(rightAfterSkew, xValues[i] / perspectiveValue);
+            topAfterSkew = std::min(topAfterSkew, yValues[i] / perspectiveValue);
+            bottomAfterSkew = std::max(bottomAfterSkew, yValues[i] / perspectiveValue);
+        }
+    }
 
     rect.SetLeft(leftAfterSkew);
     rect.SetWidth(rightAfterSkew - leftAfterSkew);
@@ -1878,6 +1946,7 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
     rect = GetPaintRectWithoutTransform();
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     auto skew = rsNode_->GetStagingProperties().GetSkew();
+    auto perspective = rsNode_->GetStagingProperties().GetPersp();
     auto scale = rsNode_->GetStagingProperties().GetScale();
     auto center = rsNode_->GetStagingProperties().GetPivot();
     auto degree = rsNode_->GetStagingProperties().GetRotation();
@@ -1896,13 +1965,13 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
     // calculate skew
     SkewRect(skew[0], skew[1], rect);
     // calculate rotate
-    degree = static_cast<int32_t>(degree) % 360;
+    degree = static_cast<int32_t>(degree) % FULL_ROTATION;
     auto radian = Degree2Radian(degree);
     if (degree != 0) {
         auto newRect = GetPaintRectWithoutTransform();
         double leftX = 0.0;
         double leftY = 0.0;
-        degree = degree < 0 ? degree + 360 : degree;
+        degree = degree < 0 ? degree + FULL_ROTATION : degree;
         SetCorner(leftX, leftY, oldSize.Width(), oldSize.Height(), degree);
         double centerX = oldSize.Width() * center[0];
         double centerY = oldSize.Height() * center[1];
@@ -1913,12 +1982,15 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
         leftY += newRect.GetOffset().GetY() + centerY;
         auto offset = OffsetF(leftX + translate[0], leftY + translate[1]);
         rect.SetOffset(offset);
-        if (degree == 180) {
+        if (degree == STRAIGHT_ANGLE) {
             newSize = SizeF(oldSize.Width() * scale[0], oldSize.Height() * scale[1]);
         } else {
             newSize = SizeF(oldSize.Height() * scale[1], oldSize.Width() * scale[0]);
         }
         rect.SetSize(newSize);
+
+        // calculate perspective
+        PerspectiveRect(perspective[0], perspective[1], rect);
     }
     gRect = rect;
     return rect;
@@ -1947,23 +2019,36 @@ Matrix4 RosenRenderContext::GetRevertMatrix()
 {
     CHECK_NULL_RETURN(rsNode_, {});
     auto center = rsNode_->GetStagingProperties().GetPivot();
-    int32_t degree = rsNode_->GetStagingProperties().GetRotation();
-    if (rsNode_->GetType() == RSUINodeType::DISPLAY_NODE && degree != 0) {
-        degree = 0;
-        return Matrix4();
+    Matrix4 rotateMat;
+    if (transformMatrixModifier_ &&
+        !transformMatrixModifier_->quaternionValue->GetStagingValue().IsIdentity()) {
+        auto quaternionValue = transformMatrixModifier_->quaternionValue->GetStagingValue();
+        rotateMat = Matrix4::QuaternionToMatrix(quaternionValue[0], quaternionValue[1],
+            quaternionValue[2], quaternionValue[3]);
+    } else {
+        int32_t degree = rsNode_->GetStagingProperties().GetRotation();
+        if (rsNode_->GetType() == RSUINodeType::DISPLAY_NODE && degree != 0) {
+            degree = 0;
+            return Matrix4();
+        }
+        rotateMat = Matrix4::CreateRotate(degree, 0, 0, 1);
     }
 
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     auto skew = rsNode_->GetStagingProperties().GetSkew();
     auto scale = rsNode_->GetStagingProperties().GetScale();
+    auto perspective = rsNode_->GetStagingProperties().GetPersp();
 
     RectF rect = GetPaintRectWithoutTransform();
     auto centOffset = OffsetF(center[0] * rect.Width(), center[1] * rect.Height());
     auto centerPos = rect.GetOffset() + centOffset;
 
+    auto perspectiveMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
+                       Matrix4::CreateFactorPerspective(perspective[0], perspective[1]) *
+                       Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
     auto translateMat = Matrix4::CreateTranslate(translate[0], translate[1], 0);
     auto rotationMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
-                       Matrix4::CreateRotate(degree, 0, 0, 1) *
+                       rotateMat *
                        Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
     auto skewMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
                     Matrix4::CreateFactorSkew(skew[0], skew[1]) *
@@ -1972,7 +2057,7 @@ Matrix4 RosenRenderContext::GetRevertMatrix()
                     Matrix4::CreateScale(scale[0], scale[1], 1) *
                     Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
 
-    return Matrix4::Invert(translateMat * rotationMat * skewMat * scaleMat);
+    return Matrix4::Invert(perspectiveMat * translateMat * rotationMat * skewMat * scaleMat);
 }
 
 Matrix4 RosenRenderContext::GetMatrix()
@@ -2096,6 +2181,7 @@ void RosenRenderContext::GetPointWithTransform(PointF& point)
     CHECK_NULL_VOID(rsNode_);
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     auto skew = rsNode_->GetStagingProperties().GetSkew();
+    auto perspective = rsNode_->GetStagingProperties().GetPersp();
     auto scale = rsNode_->GetStagingProperties().GetScale();
     point = PointF(point.GetX() / scale[0], point.GetY() / scale[1]);
     SkewPoint(skew[0], skew[1], point);
@@ -2105,7 +2191,7 @@ void RosenRenderContext::GetPointWithTransform(PointF& point)
     if (rsNode_->GetType() == RSUINodeType::DISPLAY_NODE && degree != 0) {
         degree = 0;
     }
-    degree = degree % 360;
+    degree = degree % FULL_ROTATION;
     auto radian = Degree2Radian(degree);
     if (degree != 0) {
         point = point + gRect.GetOffset();
@@ -2117,10 +2203,18 @@ void RosenRenderContext::GetPointWithTransform(PointF& point)
 
         double currentPointX = (point.GetX() - centerX) * cos(radian) + (point.GetY() - centerY) * sin(radian);
         double currentPointY = -1 * (point.GetX() - centerX) * sin(radian) + (point.GetY() - centerY) * cos(radian);
-        currentPointX = currentPointX + centerX;
-        currentPointY = currentPointY + centerY;
-        point.SetX(currentPointX - rect.Left());
-        point.SetY(currentPointY - rect.Top());
+        currentPointX += centerX - rect.Left();
+        currentPointY += centerY - rect.Top();
+
+        double perspectiveValue = perspective[0] * currentPointX + perspective[1] * currentPointY + 1;
+        if (NearZero(perspectiveValue)) {
+            point.SetX(currentPointX);
+            point.SetY(currentPointY);
+            return;
+        }
+
+        point.SetX(currentPointX / perspectiveValue);
+        point.SetY(currentPointY / perspectiveValue);
     }
 }
 
@@ -2239,15 +2333,12 @@ void RosenRenderContext::SetBorderRadius(const BorderRadiusProperty& value)
     if (isDisappearing_ && !paintRect.IsValid()) {
         return;
     }
-    double radiusX = paintRect.Width();
+    double width = paintRect.Width();
     Rosen::Vector4f cornerRadius;
-    // When the unit of radius is percent, the length and width of rect should be calculated at the same time,
-    // but currently SetCornerRadius only supports Vector4f parameter passing.
-    // Graphic should provide support .
-    cornerRadius.SetValues(static_cast<float>(value.radiusTopLeft.value_or(Dimension()).ConvertToPxWithSize(radiusX)),
-        static_cast<float>(value.radiusTopRight.value_or(Dimension()).ConvertToPxWithSize(radiusX)),
-        static_cast<float>(value.radiusBottomRight.value_or(Dimension()).ConvertToPxWithSize(radiusX)),
-        static_cast<float>(value.radiusBottomLeft.value_or(Dimension()).ConvertToPxWithSize(radiusX)));
+    cornerRadius.SetValues(static_cast<float>(value.radiusTopLeft.value_or(Dimension()).ConvertToPxWithSize(width)),
+        static_cast<float>(value.radiusTopRight.value_or(Dimension()).ConvertToPxWithSize(width)),
+        static_cast<float>(value.radiusBottomRight.value_or(Dimension()).ConvertToPxWithSize(width)),
+        static_cast<float>(value.radiusBottomLeft.value_or(Dimension()).ConvertToPxWithSize(width)));
     rsNode_->SetCornerRadius(cornerRadius);
     RequestNextFrame();
 }
@@ -2308,6 +2399,40 @@ void RosenRenderContext::SetBorderStyle(const BorderStyleProperty& value)
         static_cast<uint32_t>(value.styleTop.value_or(BorderStyle::SOLID)),
         static_cast<uint32_t>(value.styleRight.value_or(BorderStyle::SOLID)),
         static_cast<uint32_t>(value.styleBottom.value_or(BorderStyle::SOLID)));
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnDashGapUpdate(const BorderWidthProperty& value)
+{
+    SetDashGap(value);
+}
+
+void RosenRenderContext::SetDashGap(const BorderWidthProperty& value)
+{
+    CHECK_NULL_VOID(rsNode_);
+    Rosen::Vector4f cornerDashGap;
+    cornerDashGap.SetValues(static_cast<float>((value.leftDimen.value_or(DASH_GEP_WIDTH)).ConvertToPx()),
+        static_cast<float>((value.topDimen.value_or(DASH_GEP_WIDTH)).ConvertToPx()),
+        static_cast<float>((value.rightDimen.value_or(DASH_GEP_WIDTH)).ConvertToPx()),
+        static_cast<float>((value.bottomDimen.value_or(DASH_GEP_WIDTH)).ConvertToPx()));
+    rsNode_->SetBorderDashGap(cornerDashGap);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnDashWidthUpdate(const BorderWidthProperty& value)
+{
+    SetDashWidth(value);
+}
+
+void RosenRenderContext::SetDashWidth(const BorderWidthProperty& value)
+{
+    CHECK_NULL_VOID(rsNode_);
+    Rosen::Vector4f cornerDashWidth;
+    cornerDashWidth.SetValues(static_cast<float>((value.leftDimen.value_or(DASH_GEP_WIDTH)).ConvertToPx()),
+        static_cast<float>((value.topDimen.value_or(DASH_GEP_WIDTH)).ConvertToPx()),
+        static_cast<float>((value.rightDimen.value_or(DASH_GEP_WIDTH)).ConvertToPx()),
+        static_cast<float>((value.bottomDimen.value_or(DASH_GEP_WIDTH)).ConvertToPx()));
+    rsNode_->SetBorderDashWidth(cornerDashWidth);
     RequestNextFrame();
 }
 
@@ -2384,7 +2509,8 @@ void RosenRenderContext::SetOuterBorderStyle(const BorderStyleProperty& value)
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnAccessibilityFocusUpdate(bool isAccessibilityFocus)
+void RosenRenderContext::OnAccessibilityFocusUpdate(
+    bool isAccessibilityFocus, const int64_t accessibilityIdForVirtualNode)
 {
     auto uiNode = GetHost();
     CHECK_NULL_VOID(uiNode);
@@ -2394,8 +2520,15 @@ void RosenRenderContext::OnAccessibilityFocusUpdate(bool isAccessibilityFocus)
     } else {
         ClearAccessibilityFocus();
     }
-    uiNode->OnAccessibilityEvent(isAccessibilityFocus ? AccessibilityEventType::ACCESSIBILITY_FOCUSED
-                                                      : AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED);
+    if (accessibilityIdForVirtualNode == INVALID_PARENT_ID) {
+        uiNode->OnAccessibilityEvent(isAccessibilityFocus ? AccessibilityEventType::ACCESSIBILITY_FOCUSED
+                                                          : AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED);
+    } else {
+        uiNode->OnAccessibilityEventForVirtualNode(isAccessibilityFocus
+                                                       ? AccessibilityEventType::ACCESSIBILITY_FOCUSED
+                                                       : AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED,
+            accessibilityIdForVirtualNode);
+    }
 }
 
 void RosenRenderContext::OnAccessibilityFocusRectUpdate(RectT<int32_t> accessibilityFocusRect)
@@ -2471,6 +2604,7 @@ void RosenRenderContext::BdImagePaintTask(RSCanvas& canvas)
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto dipScale = pipeline->GetDipScale();
+    auto lpxScale = pipeline->GetLogicScale();
 
     CHECK_NULL_VOID(bdImage_);
 #ifndef USE_ROSEN_DRAWING
@@ -2486,7 +2620,8 @@ void RosenRenderContext::BdImagePaintTask(RSCanvas& canvas)
     }
     CHECK_NULL_VOID(image);
     RSImage rsImage(&image);
-    BorderImagePainter borderImagePainter(*GetBdImage(), widthProp, paintRect.GetSize(), rsImage, dipScale);
+    BorderImagePainter borderImagePainter(
+        *GetBdImage(), widthProp, paintRect.GetSize(), rsImage, { dipScale, lpxScale });
 #else
     std::shared_ptr<RSImage> image;
     if (InstanceOf<DrawingImage>(bdImage_)) {
@@ -2499,7 +2634,8 @@ void RosenRenderContext::BdImagePaintTask(RSCanvas& canvas)
         return;
     }
     CHECK_NULL_VOID(image);
-    BorderImagePainter borderImagePainter(*GetBdImage(), widthProp, paintRect.GetSize(), *image, dipScale);
+    BorderImagePainter borderImagePainter(
+        *GetBdImage(), widthProp, paintRect.GetSize(), *image, { dipScale, lpxScale });
 #endif
     borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), canvas);
 }
@@ -2604,7 +2740,8 @@ void RosenRenderContext::CreateBackgroundPixelMap(const RefPtr<FrameNode>& custo
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUICreateBackgroundPixelMap");
     };
-    NG::ComponentSnapshot::Create(customNode, std::move(callback), false, DELAY_TIME, false);
+    SnapshotParam param;
+    NG::ComponentSnapshot::Create(customNode, std::move(callback), false, param, false);
 }
 
 void RosenRenderContext::OnBorderImageUpdate(const RefPtr<BorderImage>& /*borderImage*/)
@@ -2659,14 +2796,21 @@ void RosenRenderContext::PaintBorderImageGradient()
 
     auto borderImageProperty = *GetBdImage();
     auto&& borderWidthProperty = layoutProperty->GetBorderWidthProperty();
-    auto paintTask = [paintSize, borderImageProperty, &borderWidthProperty, gradient](RSCanvas& rsCanvas) mutable {
+    auto paintTask = [weak = WeakClaim(this), paintSize, borderImageProperty, &borderWidthProperty, gradient](
+                         RSCanvas& rsCanvas) mutable {
 #ifndef USE_ROSEN_DRAWING
         auto rsImage = SkiaDecorationPainter::CreateBorderImageGradient(gradient, paintSize);
 #else
         auto rsImage = DrawingDecorationPainter::CreateBorderImageGradient(gradient, paintSize);
 #endif
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
         BorderImagePainter borderImagePainter(borderImageProperty, borderWidthProperty, paintSize, rsImage,
-            PipelineBase::GetCurrentContext()->GetDipScale());
+            { pipeline->GetDipScale(), pipeline->GetLogicScale() });
         borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), rsCanvas);
     };
 
@@ -4416,6 +4560,44 @@ void RosenRenderContext::ClipWithRect(const RectF& rectF)
 #endif
 }
 
+void RosenRenderContext::ClipWithRoundRect(const RoundRect& roundRect)
+{
+    CHECK_NULL_VOID(rsNode_);
+    RSRoundRect rsRoundRect;
+
+    RSRect rsRect(roundRect.GetRect().Left(), roundRect.GetRect().Top(), roundRect.GetRect().Right(),
+        roundRect.GetRect().Bottom());
+    rsRoundRect.SetRect(rsRect);
+
+    EdgeF edge = roundRect.GetCornerRadius(RoundRect::TOP_LEFT_POS);
+    rsRoundRect.SetCornerRadius(RSRoundRect::TOP_LEFT_POS, edge.x, edge.y);
+    edge = roundRect.GetCornerRadius(RoundRect::TOP_RIGHT_POS);
+    rsRoundRect.SetCornerRadius(RSRoundRect::TOP_RIGHT_POS, edge.x, edge.y);
+    edge = roundRect.GetCornerRadius(RoundRect::BOTTOM_LEFT_POS);
+    rsRoundRect.SetCornerRadius(RSRoundRect::BOTTOM_LEFT_POS, edge.x, edge.y);
+    edge = roundRect.GetCornerRadius(RoundRect::BOTTOM_RIGHT_POS);
+    rsRoundRect.SetCornerRadius(RSRoundRect::BOTTOM_RIGHT_POS, edge.x, edge.y);
+    RSRecordingPath rsPath;
+    rsPath.AddRoundRect(rsRoundRect);
+    rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(rsPath));
+}
+
+void RosenRenderContext::ClipWithOval(const RectF& rectF)
+{
+    CHECK_NULL_VOID(rsNode_);
+    RSRecordingPath rsPath;
+    rsPath.AddOval({ rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height() });
+    rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(rsPath));
+}
+
+void RosenRenderContext::ClipWithCircle(const Circle& circle)
+{
+    CHECK_NULL_VOID(rsNode_);
+    RSRecordingPath rsPath;
+    rsPath.AddCircle(circle.GetAxisX().Value(), circle.GetAxisY().Value(), circle.GetRadius().Value());
+    rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(rsPath));
+}
+
 void RosenRenderContext::ClipWithRRect(const RectF& rectF, const RadiusF& radiusF)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -5352,6 +5534,9 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
                 // for window surfaceNode, remove surfaceNode explicitly
                 frameParent->GetRenderContext()->RemoveChild(Claim(this));
             }
+            if (transitionUserCallback_ && !disappearingTransitionCount_) {
+                PostTransitionUserOutCallback();
+            }
             return;
         }
         // Re-use current implicit animation timing params, only replace the finish callback function.
@@ -5377,6 +5562,9 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
             },
             false);
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnNodeTransitionInfoUpdate();
 }
 
 void RosenRenderContext::RemoveDefaultTransition()
@@ -5403,6 +5591,7 @@ void RosenRenderContext::OnTransitionInFinish()
     RemoveDefaultTransition();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    FireTransitionUserCallback(true);
     auto parent = host->GetParent();
     CHECK_NULL_VOID(parent);
     if (host->IsVisible()) {
@@ -5437,13 +5626,15 @@ void RosenRenderContext::OnTransitionOutFinish()
         }
         parent->MarkNeedSyncRenderTree();
         parent->RebuildRenderContextTree();
+        FireTransitionUserCallback(false);
         return;
     }
     RefPtr<UINode> breakPointChild = host;
     RefPtr<UINode> breakPointParent = breakPointChild->GetParent();
     UINode::GetBestBreakPoint(breakPointChild, breakPointParent);
-    // if can not find the breakPoint, means the node is not disappearing (reappear?), return.
+    // if can not find the breakPoint, means the node is not disappearing (reappear? or the node of subtree), return.
     if (!breakPointParent) {
+        FireTransitionUserCallback(false);
         return;
     }
     if (breakPointChild->RemoveImmediately()) {
@@ -5459,6 +5650,27 @@ void RosenRenderContext::OnTransitionOutFinish()
         grandParent->RemoveChild(breakPointParent);
         grandParent->RebuildRenderContextTree();
     }
+    FireTransitionUserCallback(false);
+}
+
+void RosenRenderContext::FireTransitionUserCallback(bool isTransitionIn)
+{
+    if (transitionUserCallback_) {
+        auto callback = transitionUserCallback_;
+        callback(isTransitionIn);
+    }
+}
+
+void RosenRenderContext::PostTransitionUserOutCallback()
+{
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    // post the callback to let it run on isolate environment
+    taskExecutor->PostTask([callback = transitionUserCallback_]() {
+        if (callback) {
+            callback(false);
+        }
+    }, TaskExecutor::TaskType::UI, "ArkUITransitionOutFinishCallback", PriorityType::HIGH);
 }
 
 void RosenRenderContext::SetActualForegroundColor(const Color& value)
@@ -5836,6 +6048,12 @@ void RosenRenderContext::SetOpacity(float opacity)
     rsNode_->SetAlpha(opacity);
 }
 
+void RosenRenderContext::SetOpacityMultiplier(float opacity)
+{
+    CHECK_NULL_VOID(rsNode_);
+    SetAnimatableProperty<Rosen::RSAlphaModifier, float>(alphaModifier_, opacity);
+}
+
 void RosenRenderContext::SetTranslate(float translateX, float translateY, float translateZ)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -5853,6 +6071,11 @@ void RosenRenderContext::SetTransitionInCallback(std::function<void()>&& callbac
 void RosenRenderContext::SetTransitionOutCallback(std::function<void()>&& callback)
 {
     transitionOutCallback_ = std::move(callback);
+}
+
+void RosenRenderContext::SetTransitionUserCallback(TransitionFinishCallback&& callback)
+{
+    transitionUserCallback_ = std::move(callback);
 }
 
 void RosenRenderContext::SetRectMask(const RectF& rect, const ShapeMaskProperty& property)
@@ -5937,11 +6160,17 @@ void RosenRenderContext::SetCommandPathMask(
     rsNode_->SetMask(mask);
 }
 
-void RosenRenderContext::ResetSurface()
+void RosenRenderContext::SetMarkNodeGroup(bool isNodeGroup)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkNodeGroup(isNodeGroup);
+}
+
+void RosenRenderContext::ResetSurface(int width, int height)
 {
     auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode_);
     CHECK_NULL_VOID(rsCanvasDrawingNode);
-    rsCanvasDrawingNode->ResetSurface();
+    rsCanvasDrawingNode->ResetSurface(width, height);
 }
 
 void RosenRenderContext::SavePaintRect(bool isRound, uint8_t flag)
@@ -5951,7 +6180,7 @@ void RosenRenderContext::SavePaintRect(bool isRound, uint8_t flag)
     const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     AdjustPaintRect();
-    if (!SystemProperties::GetPixelRoundEnable()) {
+    if (!SystemProperties::GetPixelRoundEnabled()) {
         isRound = false;
     }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -6024,16 +6253,34 @@ void RosenRenderContext::UpdateDrawRegion(uint32_t index, const std::shared_ptr<
     rsNode_->SetDrawRegion(result);
 }
 
-void RosenRenderContext::NotifyHostTransformUpdated()
+void RosenRenderContext::NotifyHostTransformUpdated(bool changed)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->NotifyTransformInfoChanged();
+    host->OnNodeTransformInfoUpdate(changed);
 }
 
 void RosenRenderContext::SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate)
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->MarkSuggestOpincNode(isOpincNode, isNeedCalculate);
+}
+
+void RosenRenderContext::OnAttractionEffectUpdate(const AttractionEffect& effect)
+{
+    CHECK_NULL_VOID(rsNode_);
+    Rosen::Vector2f destinationPoint(effect.destinationX.ConvertToPx(), effect.destinationY.ConvertToPx());
+    rsNode_->SetAttractionEffect(effect.fraction, destinationPoint);
+    RequestNextFrame();
+}
+
+PipelineContext* RosenRenderContext::GetPipelineContext() const
+{
+    auto host = GetHost();
+    if (host) {
+        return host->GetContextWithCheck();
+    }
+    return PipelineContext::GetCurrentContextPtrSafelyWithCheck();
 }
 } // namespace OHOS::Ace::NG

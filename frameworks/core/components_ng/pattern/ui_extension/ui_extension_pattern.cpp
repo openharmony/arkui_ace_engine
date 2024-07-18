@@ -28,6 +28,7 @@
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "base/geometry/offset.h"
+#include "base/error/error_code.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/event/event_hub.h"
@@ -53,6 +54,9 @@ namespace {
 constexpr char ABILITY_KEY_ASYNC[] = "ability.want.params.KeyAsync";
 constexpr char ABILITY_KEY_IS_MODAL[] = "ability.want.params.IsModal";
 constexpr char ATOMIC_SERVICE_PREFIX[] = "com.atomicservice.";
+constexpr char PROHIBIT_NESTING_FAIL_NAME[] = "Prohibit_Nesting_SecurityUIExtensionComponent";
+constexpr char PROHIBIT_NESTING_FAIL_MESSAGE[] =
+    "Prohibit nesting securityUIExtensionComponent in UIExtensionAbility";
 
 bool StartWith(const std::string &source, const std::string &prefix)
 {
@@ -62,6 +66,76 @@ bool StartWith(const std::string &source, const std::string &prefix)
 
     return source.find(prefix) == 0;
 }
+
+class UIExtensionAccessibilityChildTreeCallback : public AccessibilityChildTreeCallback {
+public:
+    UIExtensionAccessibilityChildTreeCallback(const WeakPtr<UIExtensionPattern> &weakPattern, int64_t accessibilityId)
+        : AccessibilityChildTreeCallback(accessibilityId), weakPattern_(weakPattern)
+    {}
+
+    ~UIExtensionAccessibilityChildTreeCallback() override = default;
+
+    bool OnRegister(uint32_t windowId, int32_t treeId) override
+    {
+        auto pattern = weakPattern_.Upgrade();
+        if (pattern == nullptr) {
+            return false;
+        }
+        if (isReg_) {
+            return true;
+        }
+        pattern->OnAccessibilityChildTreeRegister(windowId, treeId, GetAccessibilityId());
+        isReg_ = true;
+        return true;
+    }
+
+    bool OnDeregister() override
+    {
+        auto pattern = weakPattern_.Upgrade();
+        if (pattern == nullptr) {
+            return false;
+        }
+        if (!isReg_) {
+            return true;
+        }
+        pattern->OnAccessibilityChildTreeDeregister();
+        isReg_ = false;
+        return true;
+    }
+
+    bool OnSetChildTree(int32_t childWindowId, int32_t childTreeId) override
+    {
+        auto pattern = weakPattern_.Upgrade();
+        if (pattern == nullptr) {
+            return false;
+        }
+        pattern->OnSetAccessibilityChildTree(childWindowId, childTreeId);
+        return true;
+    }
+
+    bool OnDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override
+    {
+        auto pattern = weakPattern_.Upgrade();
+        if (pattern == nullptr) {
+            return false;
+        }
+        pattern->OnAccessibilityDumpChildInfo(params, info);
+        return true;
+    }
+
+    void OnClearRegisterFlag() override
+    {
+        auto pattern = weakPattern_.Upgrade();
+        if (pattern == nullptr) {
+            return;
+        }
+        isReg_ = false;
+    }
+
+private:
+    bool isReg_ = false;
+    WeakPtr<UIExtensionPattern> weakPattern_;
+};
 }
 
 UIExtensionPattern::UIExtensionPattern(
@@ -84,6 +158,9 @@ UIExtensionPattern::UIExtensionPattern(
 UIExtensionPattern::~UIExtensionPattern()
 {
     UIEXT_LOGI("The %{public}smodal UIExtension is destroyed.", isModal_ ? "" : "non");
+    if (isModal_) {
+        LogoutModalUIExtension();
+    }
     NotifyDestroy();
     FireModalOnDestroy();
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -92,6 +169,31 @@ UIExtensionPattern::~UIExtensionPattern()
     CHECK_NULL_VOID(uiExtensionManager);
     uiExtensionManager->RecycleExtensionId(uiExtensionId_);
     uiExtensionManager->RemoveDestroyedUIExtension(GetNodeId());
+
+    if (accessibilityChildTreeCallback_ == nullptr) {
+        return;
+    }
+    ContainerScope scope(instanceId_);
+    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(ngPipeline);
+    auto frontend = ngPipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->DeregisterAccessibilityChildTreeCallback(
+        accessibilityChildTreeCallback_->GetAccessibilityId());
+    accessibilityChildTreeCallback_ = nullptr;
+}
+
+void UIExtensionPattern::LogoutModalUIExtension()
+{
+    auto sessionId = GetSessionId();
+    UIEXT_LOGI("LogoutModalUIExtension sessionId %{public}d.", sessionId);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlay = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    overlay->ResetRootNode(-(sessionId));
 }
 
 RefPtr<LayoutAlgorithm> UIExtensionPattern::CreateLayoutAlgorithm()
@@ -111,7 +213,16 @@ RefPtr<AccessibilitySessionAdapter> UIExtensionPattern::GetAccessibilitySessionA
 
 void UIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
 {
-    auto want = AceType::DynamicCast<WantWrapOhos>(wantWrap)->GetWant();
+    if (!wantWrap) {
+        UIEXT_LOGW("wantWrap is nullptr");
+        return;
+    }
+    auto wantWrapOhos = AceType::DynamicCast<WantWrapOhos>(wantWrap);
+    if (!wantWrapOhos) {
+        UIEXT_LOGW("DynamicCast failed, wantWrapOhos is nullptr");
+        return;
+    }
+    auto want = wantWrapOhos->GetWant();
     UpdateWant(want);
 }
 
@@ -137,9 +248,30 @@ void UIExtensionPattern::RemovePlaceholderNode()
     }
 }
 
+bool UIExtensionPattern::CheckConstraint()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    if (container->GetUIContentType() == UIContentType::SECURITY_UI_EXTENSION) {
+        UIEXT_LOGE("Not allowed nesting in SECURITY_UI_EXTENSION.");
+        FireOnErrorCallback(ERROR_CODE_UIEXTENSION_FORBID_CASCADE,
+            PROHIBIT_NESTING_FAIL_NAME, PROHIBIT_NESTING_FAIL_MESSAGE);
+        return false;
+    }
+
+    return true;
+}
+
 void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
 {
+    if (!CheckConstraint()) {
+        UIEXT_LOGE("Check constraint failed.");
+        return;
+    }
+
     CHECK_NULL_VOID(sessionWrapper_);
+    UIEXT_LOGI("The current state is '%{public}s' when UpdateWant.", ToString(state_));
+    bool isBackground = state_ == AbilityState::BACKGROUND;
     // Prohibit rebuilding the session unless the Want is updated.
     if (sessionWrapper_->IsSessionValid()) {
         if (sessionWrapper_->GetWant()->IsEquals(want)) {
@@ -154,32 +286,39 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     }
 
     isKeyAsync_ = want.GetBoolParam(ABILITY_KEY_ASYNC, false);
-    bool shouldCallSystem = ShouldCallSystem(want);
-    UIEXT_LOGI("The ability KeyAsync %{public}d, shouldCallSystem: %{public}d.",
-        isKeyAsync_, shouldCallSystem);
+    UIExtensionUsage uIExtensionUsage = GetUIExtensionUsage(want);
+    UIEXT_LOGI("The ability KeyAsync %{public}d, uIExtensionUsage: %{public}u.",
+        isKeyAsync_, uIExtensionUsage);
     MountPlaceholderNode();
-    sessionWrapper_->CreateSession(want, isAsyncModalBinding_, shouldCallSystem);
+    SessionConfig config;
+    config.isAsyncModalBinding = isAsyncModalBinding_;
+    config.uiExtensionUsage = uIExtensionUsage;
+    sessionWrapper_->CreateSession(want, config);
+    if (isBackground) {
+        UIEXT_LOGW("Unable to StartUiextensionAbility while in the background.");
+        return;
+    }
     NotifyForeground();
 }
 
-bool UIExtensionPattern::ShouldCallSystem(const AAFwk::Want& want)
+UIExtensionUsage UIExtensionPattern::GetUIExtensionUsage(const AAFwk::Want& want)
 {
-    if (sessionType_ != SessionType::UI_EXTENSION_ABILITY) {
-        return false;
+    if (sessionType_ == SessionType::EMBEDDED_UI_EXTENSION) {
+        return UIExtensionUsage::EMBEDDED;
     }
 
     if (isModal_) {
-        return false;
+        return UIExtensionUsage::MODAL;
     }
 
     bool wantParamModal = want.GetBoolParam(ABILITY_KEY_IS_MODAL, false);
     auto bundleName = want.GetElement().GetBundleName();
     bool startWithAtomicService = StartWith(bundleName, ATOMIC_SERVICE_PREFIX);
     if (wantParamModal && startWithAtomicService) {
-        return false;
+        return UIExtensionUsage::MODAL;
     }
 
-    return true;
+    return UIExtensionUsage::EMBEDDED;
 }
 
 void UIExtensionPattern::OnConnect()
@@ -228,6 +367,7 @@ void UIExtensionPattern::OnConnect()
     if (isFocused || isModal_) {
         uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this), sessionWrapper_);
     }
+    InitializeAccessibility();
 }
 
 void UIExtensionPattern::OnAccessibilityEvent(
@@ -253,6 +393,11 @@ void UIExtensionPattern::OnDisconnect(bool isAbnormal)
     CHECK_NULL_VOID(host);
     host->RemoveChild(contentNode_);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void UIExtensionPattern::OnAreaChangedInner()
+{
+    DispatchDisplayArea();
 }
 
 bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -330,19 +475,6 @@ void UIExtensionPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    auto eventHub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    OnAreaChangedFunc onAreaChangedFunc = [weak = WeakClaim(this)](
-        const RectF& oldRect,
-        const OffsetF& oldOrigin,
-        const RectF& rect,
-        const OffsetF& origin) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->DispatchDisplayArea();
-    };
-    eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
-
     pipeline->AddOnAreaChangeNode(host->GetId());
     callbackId_ = pipeline->RegisterSurfacePositionChangedCallback([weak = WeakClaim(this)](int32_t, int32_t) {
         auto pattern = weak.Upgrade();
@@ -358,6 +490,7 @@ void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     ContainerScope scope(instanceId_);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveOnAreaChangeNode(id);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->UnregisterSurfacePositionChangedCallback(callbackId_);
 }
@@ -627,7 +760,7 @@ void UIExtensionPattern::DispatchDisplayArea(bool isForce)
 
 void UIExtensionPattern::HandleDragEvent(const PointerEvent& info)
 {
-    const auto pointerEvent = info.rawPointerEvent;
+    auto pointerEvent = info.rawPointerEvent;
     CHECK_NULL_VOID(pointerEvent);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -644,6 +777,7 @@ void UIExtensionPattern::HandleDragEvent(const PointerEvent& info)
     } else {
         Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale, udegree);
     }
+    Platform::UpdatePointerAction(pointerEvent, info.action);
     DispatchPointerEvent(pointerEvent);
 }
 
@@ -660,7 +794,7 @@ void UIExtensionPattern::SetModalOnRemoteReadyCallback(
 
 void UIExtensionPattern::FireOnRemoteReadyCallback()
 {
-    UIEXT_LOGD("The current state is '%{public}s'.", ToString(state_));
+    UIEXT_LOGI("OnRemoteReady the current state is '%{public}s'.", ToString(state_));
     ContainerScope scope(instanceId_);
     // These two callbacks will be unified in the future.
     if (onRemoteReadyCallback_) {
@@ -678,7 +812,7 @@ void UIExtensionPattern::SetModalOnDestroy(const std::function<void()>&& callbac
 
 void UIExtensionPattern::FireModalOnDestroy()
 {
-    UIEXT_LOGD("The current state is '%{public}s'.", ToString(state_));
+    UIEXT_LOGI("ModalOnDestroy the current state is '%{public}s'.", ToString(state_));
     // Native modal page destroy callback
     if (onModalDestroy_) {
         ContainerScope scope(instanceId_);
@@ -693,7 +827,7 @@ void UIExtensionPattern::SetOnReleaseCallback(const std::function<void(int32_t)>
 
 void UIExtensionPattern::FireOnReleaseCallback(int32_t releaseCode)
 {
-    UIEXT_LOGD("The state is changing from '%{public}s' to 'DESTRUCTION' and releaseCode = %{public}d.",
+    UIEXT_LOGI("OnRelease the state is changing from '%{public}s' to 'DESTRUCTION' and releaseCode = %{public}d.",
         ToString(state_), releaseCode);
     state_ = AbilityState::DESTRUCTION;
     if (onReleaseCallback_) {
@@ -719,8 +853,12 @@ void UIExtensionPattern::SetOnErrorCallback(
 void UIExtensionPattern::FireOnErrorCallback(int32_t code, const std::string& name, const std::string& message)
 {
     // 1. As long as the error occurs, the host believes that UIExtensionAbility has been killed.
-    UIEXT_LOGD("The state is changing from '%{public}s' to 'NONE'.", ToString(state_));
+    UIEXT_LOGI("OnError the state is changing from '%{public}s' to 'NONE'.", ToString(state_));
     state_ = AbilityState::NONE;
+    // Release the session.
+    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
+        sessionWrapper_->DestroySession();
+    }
     if (onErrorCallback_) {
         ContainerScope scope(instanceId_);
         onErrorCallback_(code, name, message);
@@ -736,7 +874,7 @@ void UIExtensionPattern::SetOnResultCallback(const std::function<void(int32_t, c
 
 void UIExtensionPattern::FireOnResultCallback(int32_t code, const AAFwk::Want& want)
 {
-    UIEXT_LOGD("The state is changing from '%{public}s' to 'DESTRUCTION'.", ToString(state_));
+    UIEXT_LOGI("OnResult tThe state is changing from '%{public}s' to 'DESTRUCTION'.", ToString(state_));
     if (onResultCallback_ && (state_ != AbilityState::DESTRUCTION)) {
         ContainerScope scope(instanceId_);
         onResultCallback_(code, want);
@@ -758,7 +896,7 @@ void UIExtensionPattern::SetOnTerminatedCallback(
 
 void UIExtensionPattern::FireOnTerminatedCallback(int32_t code, const RefPtr<WantWrap>& wantWrap)
 {
-    UIEXT_LOGD("The state is changing from '%{public}s' to 'DESTRUCTION'.", ToString(state_));
+    UIEXT_LOGI("OnTerminated the state is changing from '%{public}s' to 'DESTRUCTION'.", ToString(state_));
     if (onTerminatedCallback_ && (state_ != AbilityState::DESTRUCTION)) {
         ContainerScope scope(instanceId_);
         onTerminatedCallback_(code, wantWrap);
@@ -773,7 +911,7 @@ void UIExtensionPattern::SetOnReceiveCallback(const std::function<void(const AAF
 
 void UIExtensionPattern::FireOnReceiveCallback(const AAFwk::WantParams& params)
 {
-    UIEXT_LOGD("The current state is '%{public}s'.", ToString(state_));
+    UIEXT_LOGI("OnReceive the current state is '%{public}s'.", ToString(state_));
     if (onReceiveCallback_) {
         ContainerScope scope(instanceId_);
         onReceiveCallback_(params);
@@ -860,6 +998,73 @@ void UIExtensionPattern::OnVisibleChange(bool visible)
     } else {
         NotifyBackground();
     }
+}
+
+void UIExtensionPattern::InitializeAccessibility()
+{
+    if (accessibilityChildTreeCallback_ != nullptr) {
+        return;
+    }
+    ContainerScope scope(instanceId_);
+    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(ngPipeline);
+    auto frontend = ngPipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    int64_t accessibilityId = frameNode->GetAccessibilityId();
+    accessibilityChildTreeCallback_ = std::make_shared<UIExtensionAccessibilityChildTreeCallback>(
+        WeakClaim(this), accessibilityId);
+    CHECK_NULL_VOID(accessibilityChildTreeCallback_);
+    if (accessibilityManager->IsRegister()) {
+        accessibilityChildTreeCallback_->OnRegister(ngPipeline->GetWindowId(), accessibilityManager->GetTreeId());
+    }
+    UIEXT_LOGD("UIExtension: %{public}" PRId64 " register child tree", accessibilityId);
+    accessibilityManager->RegisterAccessibilityChildTreeCallback(accessibilityId, accessibilityChildTreeCallback_);
+}
+
+void UIExtensionPattern::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId)
+{
+    UIEXT_LOGI("treeId: %{public}d, id: %{public}" PRId64, treeId, accessibilityId);
+    if (sessionWrapper_ == nullptr) {
+        UIEXT_LOGI("sessionWrapper_ is null");
+        return;
+    }
+    sessionWrapper_->TransferAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+}
+
+void UIExtensionPattern::OnAccessibilityChildTreeDeregister()
+{
+    UIEXT_LOGI("deregister accessibility child tree");
+    if (sessionWrapper_ == nullptr) {
+        UIEXT_LOGI("sessionWrapper_ is null");
+        return;
+    }
+    sessionWrapper_->TransferAccessibilityChildTreeDeregister();
+}
+
+void UIExtensionPattern::OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId)
+{
+    auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    if (accessibilityProperty != nullptr) {
+        accessibilityProperty->SetChildWindowId(childWindowId);
+        accessibilityProperty->SetChildTreeId(childTreeId);
+    }
+}
+
+void UIExtensionPattern::OnAccessibilityDumpChildInfo(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    UIEXT_LOGI("dump accessibility child info");
+    if (sessionWrapper_ == nullptr) {
+        UIEXT_LOGI("sessionWrapper_ is null");
+        return;
+    }
+    sessionWrapper_->TransferAccessibilityDumpChildInfo(params, info);
 }
 
 void UIExtensionPattern::OnMountToParentDone()
@@ -958,39 +1163,5 @@ const char* UIExtensionPattern::ToString(AbilityState state)
         default:
             return "NONE";
     }
-}
-
-void UIExtensionPattern::SearchExtensionElementInfoByAccessibilityId(
-    int64_t elementId, int32_t mode, int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
-{
-    CHECK_NULL_VOID(sessionWrapper_);
-    sessionWrapper_->SearchExtensionElementInfoByAccessibilityId(elementId, mode, baseParent, output);
-}
-
-void UIExtensionPattern::SearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
-    std::list<Accessibility::AccessibilityElementInfo>& output)
-{
-    CHECK_NULL_VOID(sessionWrapper_);
-    sessionWrapper_->SearchElementInfosByText(elementId, text, baseParent, output);
-}
-
-void UIExtensionPattern::FindFocusedElementInfo(
-    int64_t elementId, int32_t focusType, int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
-{
-    CHECK_NULL_VOID(sessionWrapper_);
-    sessionWrapper_->FindFocusedElementInfo(elementId, focusType, baseParent, output);
-}
-
-void UIExtensionPattern::FocusMoveSearch(
-    int64_t elementId, int32_t direction, int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
-{
-    CHECK_NULL_VOID(sessionWrapper_);
-    sessionWrapper_->FocusMoveSearch(elementId, direction, baseParent, output);
-}
-
-bool UIExtensionPattern::TransferExecuteAction(
-    int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset)
-{
-    return sessionWrapper_ && sessionWrapper_->TransferExecuteAction(elementId, actionArguments, action, offset);
 }
 } // namespace OHOS::Ace::NG

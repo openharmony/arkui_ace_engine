@@ -652,4 +652,22 @@ void WaterFlowModelNG::SetFlingSpeedLimit(FrameNode* frameNode, double maxSpeed)
 {
     ScrollableModelNG::SetMaxFlingSpeed(frameNode, maxSpeed);
 }
+
+void WaterFlowModelNG::SetScroller(
+    FrameNode* frameNode, RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetPositionController(AceType::DynamicCast<ScrollableController>(scroller));
+    pattern->SetScrollBarProxy(AceType::DynamicCast<ScrollBarProxy>(proxy));
+}
+
+void WaterFlowModelNG::SetLayoutMode(FrameNode* frameNode, WaterFlowLayoutMode mode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetLayoutMode(mode);
+}
 } // namespace OHOS::Ace::NG

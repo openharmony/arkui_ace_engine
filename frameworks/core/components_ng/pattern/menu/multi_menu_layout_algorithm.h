@@ -34,6 +34,8 @@ public:
         const RefPtr<LayoutWrapper>& child, const LayoutConstraintF& layoutConstraint);
 
 private:
+    void UpdateSelfSize(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint,
+        std::optional<LayoutConstraintF>& layoutConstraint);
     void UpdateConstraintBaseOnMenuItems(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     float GetChildrenMaxWidth(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
 

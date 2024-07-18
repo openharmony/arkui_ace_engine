@@ -17,15 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_BASE_H
 
 #include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
 #include "base/memory/referenced.h"
 #include "core/common/clipboard/clipboard.h"
-#include "core/common/container.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_client.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
-#include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/paragraph.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -64,6 +60,7 @@ void GetTextCaretMetrics(RefPtr<FrameNode>& targetNode, CaretMetricsF& caretMetr
         textPattern->GetCaretMetrics(caretMetrics);
     }
 }
+
 class TextBase : public SelectOverlayClient {
     DECLARE_ACE_TYPE(TextBase, SelectOverlayClient);
 
@@ -91,64 +88,6 @@ public:
         return mouseStatus_;
     }
 
-    static void SetSelectionNode(const SelectedByMouseInfo& info)
-    {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto selectOverlayManager = pipeline->GetSelectOverlayManager();
-        selectOverlayManager->SetSelectedNodeByMouse(info);
-    }
-
-    static int32_t GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev = false)
-    {
-        char16_t aroundChar = 0;
-        if (checkPrev) {
-            if (static_cast<size_t>(extend) <= text.length()) {
-                aroundChar = text[std::max(0, extend - 1)];
-            }
-        } else {
-            if (static_cast<size_t>(extend) <= (text.length())) {
-                aroundChar =
-                    text[std::min(static_cast<int32_t>(text.length() ? text.length() - 1 : 0), extend)];
-            }
-        }
-        return StringUtils::NotInUtf16Bmp(aroundChar) ? 2 : 1;
-    }
-
-    static void CalculateSelectedRect(std::vector<RectF>& selectedRect, float longestLine)
-    {
-        if (selectedRect.size() <= 1) {
-            return;
-        }
-        std::map<float, RectF> lineGroup;
-        for (auto const& localRect : selectedRect) {
-            if (NearZero(localRect.Width()) && NearZero(localRect.Height())) {
-                continue;
-            }
-            auto it = lineGroup.find(localRect.GetY());
-            if (it == lineGroup.end()) {
-                lineGroup.emplace(localRect.GetY(), localRect);
-            } else {
-                auto lineRect = it->second;
-                it->second = lineRect.CombineRectT(localRect);
-            }
-        }
-        selectedRect.clear();
-        auto firstRect = lineGroup.begin()->second;
-        float lastLineBottom = firstRect.Top();
-        auto end = *(lineGroup.rbegin());
-        for (auto const& line : lineGroup) {
-            if (line == end) {
-                break;
-            }
-            auto rect = RectF(line.second.Left(), lastLineBottom, longestLine - line.second.Left(),
-                line.second.Bottom() - lastLineBottom);
-            selectedRect.emplace_back(rect);
-            lastLineBottom = line.second.Bottom();
-        }
-        selectedRect.emplace_back(RectF(end.second.Left(), lastLineBottom, end.second.Width(), end.second.Height()));
-    }
-
     // The methods that need to be implemented for input class components
     virtual RectF GetCaretRect() const
     {
@@ -156,38 +95,6 @@ public:
     }
 
     virtual void ScrollToSafeArea() const {}
-
-    static bool UpdateKeyboardOffset(double positionY, double height, bool foreChange = false)
-    {
-        auto container = Container::Current();
-        CHECK_NULL_RETURN(container, false);
-        if (container->IsUIExtensionWindow()) {
-            return false;
-        }
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(context, false);
-        auto keyboardArea = container->GetKeyboardSafeArea();
-        auto keyboardLength = keyboardArea.bottom_.Length();
-        Rect keyboardRect;
-        keyboardRect.SetRect(0, keyboardArea.bottom_.start, 0, keyboardLength);
-        context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, nullptr, foreChange);
-        return true;
-    }
-
-    static bool AvoidKeyboard(float offsetY, float height)
-    {
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(context, false);
-        auto safeAreaManager = context->GetSafeAreaManager();
-        CHECK_NULL_RETURN(safeAreaManager, false);
-        auto keyboardInset = safeAreaManager->GetKeyboardInset();
-        CHECK_NULL_RETURN(keyboardInset.Length() != 0, false);
-        if (LessOrEqual(offsetY + height, keyboardInset.start)) {
-            return false;
-        }
-        auto keyboardOffset = safeAreaManager->GetKeyboardOffset();
-        return UpdateKeyboardOffset(offsetY - keyboardOffset, height, true);
-    }
 
     virtual void GetCaretMetrics(CaretMetricsF& caretCaretMetric) {}
 
@@ -243,11 +150,10 @@ public:
         return textSelector_;
     }
 
-    virtual bool CaretAvoidSoftKeyboard()
+    virtual void GetSelectIndex(int32_t& start, int32_t& end) const
     {
-        auto caretRect = GetCaretRect();
-        return AvoidKeyboard(caretRect.Top() + GetTextPaintOffset().GetY(),
-            caretRect.Height() + GetAvoidSoftKeyboardOffset().ConvertToPx());
+        start = textSelector_.GetTextStart();
+        end = textSelector_.GetTextEnd();
     }
 
     virtual const Dimension& GetAvoidSoftKeyboardOffset() const
@@ -256,6 +162,10 @@ public:
     }
 
     virtual void OnHandleAreaChanged() {}
+
+    static void SetSelectionNode(const SelectedByMouseInfo& info);
+    static int32_t GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev = false);
+    static void CalculateSelectedRect(std::vector<RectF>& selectedRect, float longestLine);
 
 protected:
     TextSelector textSelector_;

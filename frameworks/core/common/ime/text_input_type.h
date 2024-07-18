@@ -38,7 +38,8 @@ enum class TextInputType {
     USER_NAME = 10,
     NEW_PASSWORD = 11,
     NUMBER_DECIMAL = 12,
-    END = NUMBER_DECIMAL,
+    JS_ENUM_URL = 13,
+    END = JS_ENUM_URL,
 };
 
 TextInputType CastToTextInputType(int32_t value);

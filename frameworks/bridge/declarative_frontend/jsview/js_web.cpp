@@ -1935,6 +1935,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onViewportFitChanged", &JSWeb::OnViewportFitChanged);
     JSClass<JSWeb>::StaticMethod("onInterceptKeyboardAttach", &JSWeb::OnInterceptKeyboardAttach);
     JSClass<JSWeb>::StaticMethod("onAdsBlocked", &JSWeb::OnAdsBlocked);
+    JSClass<JSWeb>::StaticMethod("forceDisplayScrollBar", &JSWeb::ForceDisplayScrollBar);
+    JSClass<JSWeb>::StaticMethod("keyboardAvoidMode", &JSWeb::KeyboardAvoidMode);
 
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -2267,6 +2269,9 @@ void JSWeb::Create(const JSCallbackInfo& info)
     bool incognitoMode = false;
     ParseJsBool(paramObject->GetProperty("incognitoMode"), incognitoMode);
 
+    std::string sharedRenderProcessToken = "";
+    ParseJsString(paramObject->GetProperty("sharedRenderProcessToken"), sharedRenderProcessToken);
+
     auto controller = JSRef<JSObject>::Cast(controllerObj);
     auto setWebIdFunction = controller->GetProperty("setWebId");
     if (setWebIdFunction->IsFunction()) {
@@ -2347,10 +2352,8 @@ void JSWeb::Create(const JSCallbackInfo& info)
 
         int32_t parentNWebId = -1;
         bool isPopup = JSWebWindowNewHandler::ExistController(controller, parentNWebId);
-        WebModel::GetInstance()->Create(
-            isPopup ? "" : dstSrc.value(), std::move(setIdCallback),
-            std::move(setHapPathCallback), parentNWebId, isPopup, renderMode,
-            incognitoMode);
+        WebModel::GetInstance()->Create(isPopup ? "" : dstSrc.value(), std::move(setIdCallback),
+            std::move(setHapPathCallback), parentNWebId, isPopup, renderMode, incognitoMode, sharedRenderProcessToken);
 
         WebModel::GetInstance()->SetPermissionClipboard(std::move(requestPermissionsFromUserCallback));
         WebModel::GetInstance()->SetOpenAppLinkFunction(std::move(openAppLinkCallback));
@@ -2389,8 +2392,8 @@ void JSWeb::Create(const JSCallbackInfo& info)
     } else {
         auto* jsWebController = controller->Unwrap<JSWebController>();
         CHECK_NULL_VOID(jsWebController);
-        WebModel::GetInstance()->Create(dstSrc.value(),
-            jsWebController->GetController(), renderMode, incognitoMode);
+        WebModel::GetInstance()->Create(
+            dstSrc.value(), jsWebController->GetController(), renderMode, incognitoMode, sharedRenderProcessToken);
     }
 
     WebModel::GetInstance()->SetFocusable(true);
@@ -3199,6 +3202,7 @@ void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
     auto name = JSRef<JSVal>::Cast(paramObject->GetProperty("name"));
     auto methodList = JSRef<JSVal>::Cast(paramObject->GetProperty("methodList"));
     auto asyncMethodList = JSRef<JSVal>::Cast(paramObject->GetProperty("asyncMethodList"));
+    auto permission = JSRef<JSVal>::Cast(paramObject->GetProperty("permission"));
     if (!controllerObj->IsObject()) {
         return;
     }
@@ -3206,9 +3210,9 @@ void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
     auto jsProxyFunction = controller->GetProperty("jsProxy");
     if (jsProxyFunction->IsFunction()) {
         auto jsProxyCallback = [webviewController = controller, func = JSRef<JSFunc>::Cast(jsProxyFunction), object,
-                                   name, methodList, asyncMethodList]() {
-            JSRef<JSVal> argv[] = { object, name, methodList, asyncMethodList };
-            func->Call(webviewController, 4, argv);
+                                   name, methodList, asyncMethodList, permission]() {
+            JSRef<JSVal> argv[] = { object, name, methodList, asyncMethodList, permission };
+            func->Call(webviewController, 5, argv);
         };
 
         WebModel::GetInstance()->SetJsProxyCallback(jsProxyCallback);
@@ -3888,6 +3892,7 @@ JSRef<JSVal> PageVisibleEventToJSValue(const PageVisibleEvent& eventInfo)
 
 void JSWeb::OnPageVisible(const JSCallbackInfo& args)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "JSWeb::OnPageVisible init by developer");
     if (!args[0]->IsFunction()) {
         return;
     }
@@ -3898,12 +3903,14 @@ void JSWeb::OnPageVisible(const JSCallbackInfo& args)
     auto instanceId = Container::CurrentId();
     auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                           const std::shared_ptr<BaseEventInfo>& info) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "JSWeb::OnPageVisible uiCallback enter");
         ContainerScope scope(instanceId);
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->UpdateCurrentActiveNode(node);
         context->PostAsyncEvent([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            TAG_LOGI(AceLogTag::ACE_WEB, "JSWeb::OnPageVisible async event execute");
             auto* eventInfo = TypeInfoHelper::DynamicCast<PageVisibleEvent>(info.get());
             postFunc->Execute(*eventInfo);
         }, "ArkUIWebPageVisible");
@@ -4725,7 +4732,7 @@ void JSWeb::OnOverrideUrlLoading(const JSCallbackInfo& args)
 
 void JSWeb::CopyOption(int32_t copyOption)
 {
-    auto mode = CopyOptions::Distributed;
+    auto mode = CopyOptions::Local;
     switch (copyOption) {
         case static_cast<int32_t>(CopyOptions::None):
             mode = CopyOptions::None;
@@ -4740,7 +4747,7 @@ void JSWeb::CopyOption(int32_t copyOption)
             mode = CopyOptions::Distributed;
             break;
         default:
-            mode = CopyOptions::Distributed;
+            mode = CopyOptions::Local;
             break;
     }
     WebModel::GetInstance()->SetCopyOptionMode(mode);
@@ -5041,4 +5048,23 @@ void JSWeb::OnAdsBlocked(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetAdsBlockedEventId(jsCallback);
 }
 
+void JSWeb::ForceDisplayScrollBar(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        return;
+    }
+    bool isEnabled = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetOverlayScrollbarEnabled(isEnabled);
+}
+
+void JSWeb::KeyboardAvoidMode(int32_t mode)
+{
+    if (mode < static_cast<int32_t>(WebKeyboardAvoidMode::RESIZE_VISUAL) ||
+        mode > static_cast<int32_t>(WebKeyboardAvoidMode::DEFAULT)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "KeyboardAvoidMode param err");
+        return;
+    }
+    WebKeyboardAvoidMode avoidMode = static_cast<WebKeyboardAvoidMode>(mode);
+    WebModel::GetInstance()->SetKeyboardAvoidMode(avoidMode);
+}
 } // namespace OHOS::Ace::Framework

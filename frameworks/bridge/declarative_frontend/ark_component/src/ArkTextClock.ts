@@ -59,7 +59,7 @@ class ArkTextClockComponent extends ArkComponent implements TextClockAttribute {
     return this;
   }
   contentModifier(value: ContentModifier<TextClockConfiguration>): this {
-    this.setContentModifier(value);
+    modifierWithKey(this._modifiersWithKeys, TextClockContentModifier.identity, TextClockContentModifier, value);
     return this;
   }
   setContentModifier(modifier: ContentModifier<TextClockConfiguration>): this {
@@ -86,6 +86,11 @@ class ArkTextClockComponent extends ArkComponent implements TextClockAttribute {
       this.textClockNode.update(textClockConfiguration);
     }
     return this.textClockNode.getFrameNode();
+  }
+  dateTimeOptions(value: DateTimeOptions): this {
+    modifierWithKey(this._modifiersWithKeys, TextClockDateTimeOptionsModifier.identity,
+      TextClockDateTimeOptionsModifier, value);
+    return this;
   }
 }
 
@@ -220,6 +225,17 @@ class TextClockFontFeatureModifier extends ModifierWithKey<FontFeature> {
   }
 }
 
+class TextClockContentModifier extends ModifierWithKey<ContentModifier<TextClockConfiguration>> {
+  constructor(value: ContentModifier<TextClockConfiguration>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textClockContentModifier');
+  applyPeer(node: KNode, reset: boolean, component: ArkComponent) {
+    let textClockComponent = component as ArkTextClockComponent;
+    textClockComponent.setContentModifier(this.value);
+  }
+}
+
 class TextClockFontFamilyModifier extends ModifierWithKey<ResourceStr> {
   constructor(value: ResourceStr) {
     super(value);
@@ -230,6 +246,24 @@ class TextClockFontFamilyModifier extends ModifierWithKey<ResourceStr> {
       getUINativeModule().textClock.resetFontFamily(node);
     } else {
       getUINativeModule().textClock.setFontFamily(node, this.value!);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextClockDateTimeOptionsModifier extends ModifierWithKey<DateTimeOptions> {
+  constructor(value: DateTimeOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textClockDateTimeOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textClock.resetDateTimeOptions(node);
+    } else {
+      getUINativeModule().textClock.setDateTimeOptions(node, this.value.hour);
     }
   }
 

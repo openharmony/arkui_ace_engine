@@ -15,5 +15,8 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("option_test_ng") {
   type = "new"
-  sources = [ "option_test_ng.cpp" ]
+  sources = [
+    "option_paint_method_test_ng.cpp",
+    "option_test_ng.cpp",
+  ]
 }

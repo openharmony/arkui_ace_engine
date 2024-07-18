@@ -1247,6 +1247,23 @@ HWTEST_F(CalendarTestNg, CalendarMonthPatternTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalendarMonthPatternTest004
+ * @tc.desc: Test CalendarMonthPattern GetDaySize
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarTestNg, CalendarMonthPatternTest004, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+    auto calendarMonthPattern = frameNode->GetPattern<CalendarMonthPattern>();
+    ASSERT_NE(calendarMonthPattern, nullptr);
+
+    RefPtr<CalendarTheme> theme = MockPipelineContext::GetCurrent()->GetTheme<CalendarTheme>();
+    EXPECT_EQ(calendarMonthPattern->GetDaySize(theme).ConvertToVp(), 0.0);
+}
+
+/**
  * @tc.name: CalendarLayoutAlgorithmTest001
  * @tc.desc: Test CalendarLayoutAlgorithm MeasureContent
  * @tc.type: FUNC
@@ -1599,5 +1616,35 @@ HWTEST_F(CalendarTestNg, CalendarPaintMethodTest005, TestSize.Level1)
 #else
     EXPECT_EQ(workOffTextStyle.color, RSColor(0xffff0000));
 #endif
+}
+
+/**
+ * @tc.name: CalendarPaintMethodTest006
+ * @tc.desc: Test CalendarPaintMethod DrawWeekAndDates
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarTestNg, CalendarPaintMethodTest006, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
+    auto calendarPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    ASSERT_NE(calendarPaintProperty, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, calendarPaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+
+    ObtainedMonth obtainedMonth;
+    CalendarDay calendarDay;
+    auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay);
+    Testing::MockCanvas rsCanvas;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    paintMethod->DrawWeekAndDates(rsCanvas, Offset(0, 0));
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    paintMethod->DrawWeekAndDates(rsCanvas, Offset(0, 0));
 }
 } // namespace OHOS::Ace::NG

@@ -26,6 +26,11 @@ const Offset LEFT_TOP = Offset(ITEM_WIDTH * 0.5, ITEM_HEIGHT * 0.5);     // (60,
 const Offset LEFT_BOTTOM = Offset(ITEM_WIDTH * 0.5, ITEM_HEIGHT * 1.5);  // (60, 300)
 const Offset RIGHT_TOP = Offset(ITEM_WIDTH * 1.5, ITEM_HEIGHT * 0.5);    // (180, 100)
 const Offset RIGHT_BOTTOM = Offset(ITEM_WIDTH * 1.5, ITEM_HEIGHT * 1.5); // (180, 300)
+void OnItemDragStartEvent(const ItemDragInfo&, int32_t)
+{
+    ButtonModelNG buttonModelNG;
+    buttonModelNG.CreateWithLabel("label");
+};
 } // namespace
 
 class GridCommonTestNg : public GridTestNg {
@@ -49,7 +54,7 @@ void GridCommonTestNg::MouseSelect(Offset start, Offset end)
         info.SetRawGlobalLocation(end);
         pattern_->HandleDragUpdate(info);
     }
-    pattern_->HandleDragEnd(info);
+    pattern_->HandleDragEnd();
 }
 
 int32_t GridCommonTestNg::FindFocusNodeIndex(RefPtr<FocusHub>& focusNode)
@@ -266,9 +271,9 @@ HWTEST_F(GridCommonTestNg, MouseSelect004, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetRowsTemplate("1fr 1fr 1fr 1fr");
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateBigItem(1, 2, 1, 2);
-        CreateBigItem(NULL_VALUE, NULL_VALUE, 1, 3);
-        CreateBigItem(1, 3, NULL_VALUE, NULL_VALUE);
+    CreateBigItem(1, 2, 1, 2);
+    CreateBigItem(NULL_VALUE, NULL_VALUE, 1, 3);
+    CreateBigItem(1, 3, NULL_VALUE, NULL_VALUE);
     CreateGridItems(7);
     CreateDone(frameNode_);
     MouseSelect(LEFT_BOTTOM, RIGHT_TOP);
@@ -372,43 +377,44 @@ HWTEST_F(GridCommonTestNg, MouseSelect007, TestSize.Level1)
  */
 HWTEST_F(GridCommonTestNg, HandleDrag001, TestSize.Level1)
 {
-    auto onItemDragStart = [](const ItemDragInfo&, int32_t) {
-        auto dragItem = AceType::MakeRefPtr<FrameNode>("test", 0, AceType::MakeRefPtr<Pattern>());
-        return AceType::DynamicCast<UINode>(dragItem);
-    };
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     model.SetEditable(true);
-    model.SetOnItemDragStart(onItemDragStart);
+    model.SetOnItemDragStart(std::move(OnItemDragStartEvent));
     CreateFixedItems(8);
     CreateDone(frameNode_);
-    eventHub_->onItemDragStart_ = onItemDragStart;
-
+    auto gestureEventHub = eventHub_->GetOrCreateGestureEventHub();
+    auto userCallback = gestureEventHub->dragEventActuator_->userCallback_;
+    auto HandleOnItemDragStart = userCallback->GetActionStartEventFunc();
+    auto HandleOnItemDragUpdate = userCallback->GetActionUpdateEventFunc();
+    auto HandleOnItemDragEnd = userCallback->GetActionEndEventFunc();
+    auto HandleOnItemDragCancel = userCallback->GetActionCancelEventFunc();
     GestureEvent info;
-    Point globalPoint = Point(ITEM_WIDTH * 1.5, ITEM_HEIGHT / 2); // Point at the second item.
-    info.SetGlobalPoint(globalPoint);
+    auto secondItem = GetChildFrameNode(frameNode_, 1);
+    Point secondItemPoint = Point(ITEM_WIDTH * 1.5, ITEM_HEIGHT / 2);
+    info.SetGlobalPoint(secondItemPoint);
 
     /**
-     * @tc.steps: step1. Trigger HandleOnItemDragStart, HandleOnItemDragUpdate, HandleOnItemDragEnd.
+     * @tc.steps: step1. HandleDrag item(index:1)
      * @tc.expected: Verify some values of the drag.
      */
-    eventHub_->HandleOnItemDragStart(info);
+    HandleOnItemDragStart(info);
     EXPECT_EQ(eventHub_->draggedIndex_, 1);
     ASSERT_NE(eventHub_->dragDropProxy_, nullptr);
-    EXPECT_EQ(eventHub_->draggingItem_, GetChildFrameNode(frameNode_, 1));
-    eventHub_->HandleOnItemDragUpdate(info);
-    eventHub_->HandleOnItemDragEnd(info);
+    EXPECT_EQ(eventHub_->draggingItem_, secondItem);
+    HandleOnItemDragUpdate(info);
+    HandleOnItemDragEnd(info);
     EXPECT_EQ(eventHub_->draggedIndex_, 0);
     EXPECT_EQ(eventHub_->dragDropProxy_, nullptr);
     EXPECT_EQ(eventHub_->draggingItem_, nullptr);
 
     /**
-     * @tc.steps: step2. Trigger HandleOnItemDragStart, HandleOnItemDragUpdate, HandleOnItemDragCancel.
+     * @tc.steps: step1. HandleDrag to cancel
      * @tc.expected: Verify some values of the drag.
      */
-    eventHub_->HandleOnItemDragStart(info);
-    eventHub_->HandleOnItemDragUpdate(info);
-    eventHub_->HandleOnItemDragCancel();
+    HandleOnItemDragStart(info);
+    HandleOnItemDragUpdate(info);
+    HandleOnItemDragCancel();
     EXPECT_EQ(eventHub_->draggedIndex_, 0);
     EXPECT_EQ(eventHub_->dragDropProxy_, nullptr);
     EXPECT_EQ(eventHub_->draggingItem_, nullptr);
@@ -421,21 +427,15 @@ HWTEST_F(GridCommonTestNg, HandleDrag001, TestSize.Level1)
  */
 HWTEST_F(GridCommonTestNg, HandleDrag002, TestSize.Level1)
 {
-    auto onItemDragStart = [](const ItemDragInfo&, int32_t) {
-        auto dragItem = AceType::MakeRefPtr<FrameNode>("test", 0, AceType::MakeRefPtr<Pattern>());
-        return AceType::DynamicCast<UINode>(dragItem);
-    };
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     model.SetEditable(false); // set false
-    model.SetOnItemDragStart(onItemDragStart);
+    model.SetOnItemDragStart(OnItemDragStartEvent);
     CreateFixedItems(8);
     CreateDone(frameNode_);
-    eventHub_->onItemDragStart_ = onItemDragStart;
-
     GestureEvent info;
-    Point globalPoint = Point(ITEM_WIDTH * 1.5, ITEM_HEIGHT / 2); // Point at the second item.
-    info.SetGlobalPoint(globalPoint);
+    Point secondItemPoint = Point(ITEM_WIDTH * 1.5, ITEM_HEIGHT / 2);
+    info.SetGlobalPoint(secondItemPoint);
 
     /**
      * @tc.steps: step1. Trigger HandleOnItemDragStart, HandleOnItemDragUpdate, HandleOnItemDragEnd.
@@ -474,16 +474,11 @@ HWTEST_F(GridCommonTestNg, FireDrag001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
     model.SetEditable(true);
     model.SetSupportAnimation(true);
-        CreateBigColItem(2, 3);
-        CreateBigColItem(0, 2);
-        CreateBigColItem(2, 1);
+    CreateBigColItem(2, 3);
+    CreateBigColItem(0, 2);
+    CreateBigColItem(2, 1);
     CreateFixedItems(8);
     CreateDone(frameNode_);
-    auto onItemDragStart = [](const ItemDragInfo&, int32_t) {
-        auto dragItem = AceType::MakeRefPtr<FrameNode>("test", 0, AceType::MakeRefPtr<Pattern>());
-        return AceType::DynamicCast<UINode>(dragItem);
-    };
-    eventHub_->onItemDragStart_ = onItemDragStart;
 
     GestureEvent info;
     Point globalPoint = Point(270.f, 50.f);
@@ -563,11 +558,6 @@ HWTEST_F(GridCommonTestNg, FireDrag002, TestSize.Level1)
     model.SetSupportAnimation(true);
     CreateFixedItems(itemCount);
     CreateDone(frameNode_);
-    auto onItemDragStart = [](const ItemDragInfo&, int32_t) {
-        auto dragItem = AceType::MakeRefPtr<FrameNode>("test", 0, AceType::MakeRefPtr<Pattern>());
-        return AceType::DynamicCast<UINode>(dragItem);
-    };
-    eventHub_->onItemDragStart_ = onItemDragStart;
 
     GestureEvent info;
     Point globalPoint = Point(270.f, 50.f);
@@ -653,16 +643,11 @@ HWTEST_F(GridCommonTestNg, FireDrag003, TestSize.Level1)
     model.SetOnItemDragMove(onItemDragMove);
     model.SetOnItemDragLeave(onItemDragLeave);
     model.SetOnItemDrop(onItemDragDrop);
-        CreateBigColItem(2, 3);
-        CreateBigColItem(0, 2);
-        CreateBigColItem(2, 1);
+    CreateBigColItem(2, 3);
+    CreateBigColItem(0, 2);
+    CreateBigColItem(2, 1);
     CreateFixedItems(8);
     CreateDone(frameNode_);
-    auto onItemDragStart = [](const ItemDragInfo&, int32_t) {
-        auto dragItem = AceType::MakeRefPtr<FrameNode>("test", 0, AceType::MakeRefPtr<Pattern>());
-        return AceType::DynamicCast<UINode>(dragItem);
-    };
-    eventHub_->onItemDragStart_ = onItemDragStart;
 
     GestureEvent info;
     Point globalPoint = Point(270.f, 50.f);
@@ -984,7 +969,7 @@ HWTEST_F(GridCommonTestNg, Focus001, TestSize.Level1)
      * @tc.expected: Would change startMainLineIndex_, focus last child.
      */
     gridFocusNode->RequestFocusImmediately();
-    UpdateCurrentOffset(-ITEM_HEIGHT - 1.f);
+    ScrollTo(ITEM_HEIGHT + 1.f);
     EXPECT_TRUE(GetChildFocusHub(frameNode_, 1)->IsCurrentFocus());
 }
 
@@ -1065,93 +1050,60 @@ HWTEST_F(GridCommonTestNg, GetCollectionInfo002, TestSize.Level1)
  */
 HWTEST_F(GridCommonTestNg, SetSpecificSupportAction001, TestSize.Level1)
 {
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    CreateFixedItems(6);
+    CreateDone(frameNode_);
+
     /**
-     * @tc.cases: Grid is at top.
+     * @tc.steps: step1. Grid is at top.
      * @tc.expected: Check actions value
      */
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    CreateFixedItems(24);
-    CreateDone(frameNode_);
     EXPECT_TRUE(pattern_->IsAtTop());
     EXPECT_FALSE(pattern_->IsAtBottom());
-
     accessibilityProperty_->ResetSupportAction();
-    uint64_t exptectActions_1 = 0;
-    exptectActions_1 |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), exptectActions_1);
-}
+    uint64_t exptectActions = 0;
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
+    EXPECT_EQ(GetActions(accessibilityProperty_), exptectActions);
 
-/**
- * @tc.name: SetSpecificSupportAction002
- * @tc.desc: Test SetSpecificSupportAction
- * @tc.type: FUNC
- */
-HWTEST_F(GridCommonTestNg, SetSpecificSupportAction002, TestSize.Level1)
-{
     /**
-     * @tc.cases: Grid is at middle.
+     * @tc.steps: step2. Grid is at middle.
      * @tc.expected: Check actions value
      */
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    CreateFixedItems(24);
-    CreateDone(frameNode_);
-    UpdateCurrentOffset(-ITEM_HEIGHT);
+    ScrollTo(ITEM_HEIGHT);
     EXPECT_FALSE(pattern_->IsAtTop());
     EXPECT_FALSE(pattern_->IsAtBottom());
-
     accessibilityProperty_->ResetSupportAction();
-    uint64_t exptectActions_2 = 0;
-    exptectActions_2 |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    exptectActions_2 |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), exptectActions_2);
-}
+    exptectActions = 0;
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
+    EXPECT_EQ(GetActions(accessibilityProperty_), exptectActions);
 
-/**
- * @tc.name: SetSpecificSupportAction003
- * @tc.desc: Test SetSpecificSupportAction
- * @tc.type: FUNC
- */
-HWTEST_F(GridCommonTestNg, SetSpecificSupportAction003, TestSize.Level1)
-{
     /**
-     * @tc.cases: Grid is at bottom.
+     * @tc.steps: step3. Grid is at bottom.
      * @tc.expected: Check actions value
      */
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    CreateFixedItems(24);
-    CreateDone(frameNode_);
-    UpdateCurrentOffset(-ITEM_HEIGHT * 2);
+    ScrollTo(ITEM_HEIGHT * 2);
     EXPECT_FALSE(pattern_->IsAtTop());
     EXPECT_TRUE(pattern_->IsAtBottom());
-
     accessibilityProperty_->ResetSupportAction();
-    uint64_t exptectActions_3 = 0;
-    exptectActions_3 |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), exptectActions_3);
-}
+    exptectActions = 0;
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
+    EXPECT_EQ(GetActions(accessibilityProperty_), exptectActions);
 
-/**
- * @tc.name: SetSpecificSupportAction004
- * @tc.desc: Test SetSpecificSupportAction
- * @tc.type: FUNC
- */
-HWTEST_F(GridCommonTestNg, SetSpecificSupportAction004, TestSize.Level1)
-{
     /**
-     * @tc.cases: Grid is unscrollable.
+     * @tc.steps: step4. Grid is unscrollable.
      * @tc.expected: Check actions value
      */
-    GridModelNG model = CreateGrid();
-    CreateFixedItems(14);
+    ClearOldNodes();
+    CreateGrid();
+    model.SetRowsTemplate("1fr");
+    model.SetColumnsTemplate("1fr");
     CreateDone(frameNode_);
     EXPECT_FALSE(accessibilityProperty_->IsScrollable());
-
     accessibilityProperty_->ResetSupportAction();
-    uint64_t exptectActions_4 = 0;
-    EXPECT_EQ(GetActions(accessibilityProperty_), exptectActions_4);
+    exptectActions = 0;
+    EXPECT_EQ(GetActions(accessibilityProperty_), exptectActions);
 }
 
 /**

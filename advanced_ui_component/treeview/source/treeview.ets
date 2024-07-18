@@ -35,9 +35,8 @@ const X_OFF_SET: string = '0vp'
 const Y_OFF_SET: string = '2.75vp'
 const Y_BOTTOM_OFF_SET: string = '-1.25vp'
 const Y_BASE_PLATE_OFF_SET: string = '1.5vp'
-const COLOR_SELECT: string = '#1A0A59F7'
-const COLOR_IMAGE_ROW: string = '#00000000'
 const COLOR_IMAGE_EDIT: string = '#FFFFFF'
+const COLOR_IMAGE_ROW: string = '#00000000'
 const SHADOW_COLOR: string = '#00001E'
 const GRAG_POP_UP_HEIGHT: string = '48'
 const FLOOR_MIN_WIDTH: string = '128vp'
@@ -48,17 +47,7 @@ const MIN_WIDTH: string = '112vp'
 const MAX_WIDTH: string = '192vp'
 const TRANS_COLOR: string = '#00FFFFFF'
 
-const ARROW_DOWN = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAAIGNIUk0AAHomAACAhAAA+' +
-  'gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzA' +
-  'AAOxAAADsQBlSsOGwAAAq9JREFUeNrt2j9rFEEYx/FJziIECwsLCwsJIVhYiISgaIhiioiIlpaCjZ1/qhNUIkHE0negpZggEnwHFgoWFiJic' +
-  'VyRQsQXIHKIvyGzIJKbmTW7M7P6/cCvyR3c7fPsPLO7F2MAAAAAAAAAAAAAAAAAAAAAAAAAAF01keAz9ihrymVln/JEua18L7w2V5TrykHlt' +
-  'XJTGTb9Ib0EB/JYueWKP6Ucd3mh/Ci0+Hfc9z6gTCuHlUvK06ZPnMkEB3Nth78tK89dQ0os/toOfz+kHG36w1I0YNwZs6JsFtaEccVvTYoGr' +
-  'HteW3ajaKoDxbfz/10X94BXyoIyO+b1Wbcn2JE0ylT8VeW+5/UtZUn52sUG/FQ23PycG/OeGWXevW+U4cwPFf+MMmjjw3uJDnLkRo2vCTlWQ' +
-  'l954Hn9i3Je+djWF+glPNNimlCthJcJLlH7buZPemb+ovKpzS/RS7zcqybMB/aEhZZXwmqg+NXMH7ZdkNQNqJrwLLAxz7Q4jkIzf5iq+LkaU' +
-  'GdjbroJoUvNb674g1SFyNWAOntCU48tYq7zzyqfUxYhZwPqNOHYLi9RQ8XfylH8EhpQZ2P+23EUU/zFlGOntAbU2Zjr3qyF7nCrsTPIdeClN' +
-  'CB2Y66zEvoRG26WsVNqA+rerPlWwg3lYeAmayl38UtsQBOPLezMfxRxkzUo4WBLbEDsxmxXwinlrRsn+5W7yr1SbrJiTJiy2d+T7Y82K4H32' +
-  'QbsNf7fFeyDtRMlFb/kFVBnY7amXbN8l5oXTYtPNf/VBsTuCSZQfPs8/0OJB9eFBuymCXbsnCxlw+1yA2I35j+Lf860/Dz/f2rA73fMdhUc8' +
-  'bzvjXKhxJnftasgH3sJelU5bbb/Z8ee8e/N9j9PrZt8P/ADAAAAAAAAAAAAAAAAAAAAAAAgpV9KuZwVm6MIDQAAAABJRU5ErkJggg=='
+const ARROW_DOWN: Resource | string = $r('sys.media.ohos_ic_public_arrow_down');
 
 const ARROW_DOWN_WITHE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAIGNIUk0AAHomAAC' +
   'AhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAl' +
@@ -66,16 +55,7 @@ const ARROW_DOWN_WITHE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAY
   '4BYgvYFODz4JYIF4DxBOwWYJkeAAQRwBdvxGbIcy4TG9sbPzX0NCwHsjUAuIiIPsDUOwkDsPXkhwHWFwaAsQlQAwyrJsYw4myAIslIPCHGMP' +
   'xBhGO4PoGxF+AOA9o+NbRTDgKRgFxAAAzj0Grm3RjyAAAAABJRU5ErkJggg=='
 
-const ARROW_RIGHT = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAAIGNIUk0AAHomAACAhAAA' +
-  '+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlz' +
-  'AAAOxAAADsQBlSsOGwAAAjVJREFUeNrtnCtvG1EQRq+9BlVUEBAYYFBgYGBYaBBoFUVVfkCtyqDAIL8jtI8EBruVIgU4UvMD0iKDPmirtlJg' +
-  'lJZUyqzsSFXlxwZsPPPtOdJHbDKac+/cXXvtlAAAAAAAAAAAAAAAAAAAAAAUyZzW1bMMLbuWv5YvqgJqTps/sjT+eW1geckOuB+OLdtzpHy3' +
-  'fFQTUHdY06MFr7+xPGMHlE93iYQnajvBo4APlj3LRhUkeBRwaRnProDkJXi9DP1ZFQmZ49oqISFzXl9RCb8sFwhYn4Sw9wlZkDplx1EWqFZJ' +
-  'CVmwHSsnIZoAuYM5ogCpgzmqAJlxFFmAxDiKLiD8OFIQEHocqQgIK0FJwF0kfLZMELA+CTuWI8s1AtYj4YHlt+UcAeVK+JqmX2/OY9Pyat1F' +
-  '1pM2J2n6Fec8mh4KVBdwO27m8RAB5dNb0uhPCCiXTpo+zLWItwgoj/bsKmhrwft/PBzAOQ3RlT9a0vycF5ZvHoqtCTZ/vKL5fcuhl4KVRlA7' +
-  'WvOVBOQP875f0fyBt+arnAH52DmNtvJVzoBwM19pBBVp/r7n5kceQa0CYyfE78pqoiu/733lRxUg1fxoZ0BbrfmRzoAiHy+Ea36UEdRRXPlR' +
-  'RlCR5g+iNt/7CGoqr3zvAuRXvucR1CrQ/GES+fMOjzvgQH3seN8B3ao036uASVWan+Pxybgflqf/LY78wH2dBPF6I/bY8txyZXlnOUsAAAAA' +
-  'AAAAAAAAAAAAAAAAEIgb8WKMjSFbuAQAAAAASUVORK5CYII='
+const ARROW_RIGHT: Resource | string = $r('sys.media.ohos_ic_public_arrow_right');
 
 const ARROW_RIGHT_WITHE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAIGNIUk0AAHomAA' +
   'CAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAA' +
@@ -699,7 +679,7 @@ export class TreeListener {
   public on(type: TreeListenType, callback: (callbackParam: CallbackParam) => void): void {
     if (Array.isArray(type)) {
       for (let i = 0, l = type.length; i < l; i++) {
-        this.on((type as Array<TreeListenType>)[i], callback);
+        this.on((type as TreeListenType[])[i], callback);
       }
     } else {
       (this._events[type] || (this._events[type] = [])).push(callback);
@@ -748,7 +728,7 @@ export class TreeListener {
     }
     if (Array.isArray(type)) {
       for (let i: number = 0, l: number = type.length; i < l; i++) {
-        this.off((type as Array<TreeListenType>)[i], callback);
+        this.off((type as TreeListenType[])[i], callback);
       }
     }
     let cbs: [(callbackParam: CallbackParam) => void] = this._events[type];
@@ -777,7 +757,7 @@ export class TreeListener {
    */
   public emit(event: TreeListenType, argument: CallbackParam) {
     if (this._once_events[event]) {
-      let cbs_once: Array<(callbackParam: CallbackParam) => void> = Array.from<(callbackParam: CallbackParam) => void>(this._once_events[event]);
+      let cbs_once: ((callbackParam: CallbackParam) => void)[] = Array.from<(callbackParam: CallbackParam) => void>(this._once_events[event]);
       if (cbs_once) {
         for (let i: number = 0, l: number = cbs_once.length; i < l; i++) {
           try {
@@ -789,7 +769,7 @@ export class TreeListener {
         this._once_events[event] = null;
       }
     } else if (this._events[event]) {
-      let cbs_on: Array<(callbackParam: CallbackParam) => void> = Array.from<(callbackParam: CallbackParam) => void>(this._events[event]);
+      let cbs_on: ((callbackParam: CallbackParam) => void)[] = Array.from<(callbackParam: CallbackParam) => void>(this._events[event]);
       if (cbs_on) {
         for (let i: number = 0, l: number = cbs_on.length; i < l; i++) {
           try {
@@ -924,7 +904,7 @@ export struct TreeView {
     this.treeViewTheme.borderFocusedColor = theme.colors.interactiveFocus;
     this.treeViewTheme.leftIconColor = theme.colors.iconSecondary;
     this.treeViewTheme.leftIconActiveColor = theme.colors.interactiveActive;
-    this.treeViewTheme.arrowIconColor = theme.colors.iconTertiary;
+    this.treeViewTheme.arrowIconColor = theme.colors.iconPrimary;
     this.treeController.treeViewTheme = this.treeViewTheme;
   }
 
@@ -966,6 +946,8 @@ export struct TreeView {
             .height(item.getNodeItem().imageNode?.itemHeight)
             .width(item.getNodeItem().imageNode?.itemWidth)
             .opacity(this.listNodeDataSource.getDragPopupPara().imageOpacity)
+            .matchTextDirection((item.getNodeItem().imageCollapse?.collapseSource === ARROW_RIGHT || item.getNodeItem()
+              .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false)
         }
         .backgroundColor(COLOR_IMAGE_ROW)
         .margin({ end: getLengthMetricsByResourceOrNumber(item.getNodeItem().imageNode?.itemRightMargin) })
@@ -1148,7 +1130,7 @@ export struct TreeView {
       /* flag the position of the focus on the node. */
       let flag: Flag = Math.floor(
         event.getY() /
-        (nodeHeight / FLAG_NUMBER)) %
+          (nodeHeight / FLAG_NUMBER)) %
         FLAG_NUMBER ? Flag.DOWN_FLAG : Flag.UP_FLAG;
 
       /* Record the node position to which the dragged node moves. */
@@ -1344,14 +1326,14 @@ export struct TreeView {
           this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem()
             .imageNode?.setImageSource(InteractionStatus.Normal);
           this.listNodeDataSource.listNode[this.viewLastIndex].imageSource =
-          this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem()
-            .imageNode?.source;
+            this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem()
+              .imageNode?.source;
         }
       }
 
       if (this.listNodeDataSource.listNode[this.viewLastIndex]) {
         this.listNodeDataSource.listNode[this.viewLastIndex]
-        .setNodeColor($r('sys.color.ohos_id_color_background_transparent'));
+          .setNodeColor($r('sys.color.ohos_id_color_background_transparent'));
       }
 
       this.listNodeDataSource.lastIndex = currentFocusIndex;
@@ -1603,12 +1585,12 @@ export class TreeController {
     return this.listNodeDataSource;
   }
 
-  public getClickNodeChildrenInfo(): Array<nodeInfo> {
+  public getClickNodeChildrenInfo(): nodeInfo[] {
     let clickNodeId: number = this.listNodeDataSource.getClickNodeId();
     return this.listNodeUtils.getClickNodeChildrenInfo(clickNodeId);
   }
 
-  public getChildrenId(): Array<number> {
+  public getChildrenId(): number[] {
     let clickNodeId: number = this.listNodeDataSource.getClickNodeId();
     return this.listNodeUtils.getClickChildId(clickNodeId);
   }
@@ -1884,7 +1866,7 @@ class ListNodeDataSource extends BasicDataSource {
   public modifyNodeId: number = -1;
   private currentOperation?: MenuOperation;
   private expandAndCollapseInfo: Map<number, NodeStatus> = new Map<number, NodeStatus>();
-  public loadedNodeIdAndIndexMap: Map<number, number> = new Map<number, number>(); // [currentNodeId, index]
+  public loadedNodeIdAndIndexMap: Map<number, number> = new Map<number, number>();
   private isTouchDown: boolean = false;
   private appEventBus: TreeListener = TreeListenerManager.getInstance().getTreeListener();
   /* parameter of the drag event. */
@@ -1910,7 +1892,7 @@ class ListNodeDataSource extends BasicDataSource {
   private lastDelayHighLightIndex: number = this.INITIAL_INVALID_VALUE;
   //record last passing node Id in HighLight event.
   private lastDelayHighLightId: number = this.INITIAL_INVALID_VALUE;
-  private nodeIdAndSubtitleMap: Map<number, ResourceStr> = new Map<number, ResourceStr>(); // [currentNodeId, subtitle]
+  private nodeIdAndSubtitleMap: Map<number, ResourceStr> = new Map<number, ResourceStr>();
   private flag: Flag = Flag.NONE;
   private selectedParentNodeId: number = this.INITIAL_INVALID_VALUE;
   private selectedParentNodeSubtitle: ResourceStr = '';
@@ -2151,10 +2133,10 @@ class ListNodeDataSource extends BasicDataSource {
           this.changeNodeStatus(index);
         }
         this.listNode.splice(i + 1, 0, addNodeInfo);
-        this.listNode[i + 1].setTitleAndInputTextStatus(true); // false->true: realize inner Interaction.
+        this.listNode[i + 1].setTitleAndInputTextStatus(true);
         this.listNode[i + 1].setNodeIsShow(true);
         this.listNode[i + 1].setListItemHeight(LIST_ITEM_HEIGHT);
-        this.setImageSource(i + 1, InteractionStatus.Edit); // Normal->Edit : realize inner Interaction.
+        this.setImageSource(i + 1, InteractionStatus.Edit);
         this.currentOperation = MenuOperation.ADD_NODE;
         this.notifyDataAdd(i + 1);
         this.notificationNodeInfo(i + 1, this.currentOperation);
@@ -2314,6 +2296,9 @@ class ListNodeDataSource extends BasicDataSource {
       this.appEventBus.emit(TreeListenType.NODE_MODIFY, backParamModify);
     } else if (operation === MenuOperation.ADD_NODE) {
       let addNodeInfo: NodeInfo = this.listNode[addNodeId];
+      if (addNodeInfo === undefined) {
+        return;
+      }
       let icon: Resource | string | undefined = (addNodeInfo.getNodeItem().imageNode !== undefined) ?
         addNodeInfo.getNodeItem().imageNode?.source : undefined;
       let selectedIcon: Resource | string | undefined = (addNodeInfo.getNodeItem().imageNode !== undefined) ?
@@ -2352,6 +2337,9 @@ class ListNodeDataSource extends BasicDataSource {
         }
       }
       let nodeInfo: NodeInfo = this.listNode[index];
+      if (nodeInfo === undefined) {
+        return;
+      }
       nodeInfo.setIsModify(true);
       if (nodeInfo.getNodeItem().mainTitleNode === null) {
         return; // no title
@@ -2376,6 +2364,9 @@ class ListNodeDataSource extends BasicDataSource {
     index = nodeId;
     if (operation === MenuOperation.COMMIT_NODE) {
       let nodeInfo: NodeInfo = this.listNode[index];
+      if (nodeInfo === undefined) {
+        return;
+      }
       nodeInfo.setTitleAndInputTextStatus(false);
       nodeInfo.setIsModify(false);
       this.setImageSource(index, InteractionStatus.FinishEdit);
@@ -2387,6 +2378,9 @@ class ListNodeDataSource extends BasicDataSource {
 
   public setPopUpInfo(popUpType: PopUpType, inputError: InputError, isShow: boolean, index: number) {
     let nodeInfo: NodeInfo = this.listNode[index];
+    if (nodeInfo === undefined) {
+      return;
+    }
     nodeInfo.setPopUpIsShow(isShow);
     // this.listNode index to lazyForEach index.
     let lazyForEachIndex: number = this.loadedNodeIdAndIndexMap.get(nodeInfo.getCurrentNodeId()) as number;
@@ -2893,8 +2887,8 @@ class ListNodeDataSource extends BasicDataSource {
         if (this.flag === Flag.DOWN_FLAG && this.expandAndCollapseInfo.get(rearCurrentNodeId) === NodeStatus.Expand) {
           parentNodeId = rearCurrentNodeId;
           insertChildIndex = 0;
-        } else if (this.flag === Flag.UP_FLAG && this.expandAndCollapseInfo.get(rearCurrentNodeId) === 
-          NodeStatus.Expand &&
+        } else if (this.flag === Flag.UP_FLAG && this.expandAndCollapseInfo.get(rearCurrentNodeId) ===
+        NodeStatus.Expand &&
           this.listNode[i].getCanShowFlagLine() === false) {
           parentNodeId = rearCurrentNodeId;
           insertChildIndex = 0;
@@ -3193,6 +3187,9 @@ export struct TreeViewInner {
                     .focusable(this.item.getNodeItem().mainTitleNode !== null ? false : true)
                     .fillColor(!this.item.getIsSelected() && !this.item.getIsHighLight() ?
                     this.treeViewTheme.leftIconColor : this.treeViewTheme.leftIconActiveColor)
+                    .matchTextDirection((this.item.getNodeItem()
+                      .imageCollapse?.collapseSource === ARROW_RIGHT || this.item.getNodeItem()
+                      .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false)
                 }
                 .focusable(true)
                 .backgroundColor(COLOR_IMAGE_ROW)
@@ -3273,7 +3270,7 @@ export struct TreeViewInner {
                           InputError.NONE,
                           false,
                           thisIndex
-                          );
+                        );
                         this.listNodeDataSource.setItemVisibilityOnEdit(thisIndex, MenuOperation.COMMIT_NODE);
                       })
                   }.backgroundColor(this.item.getNodeItem().inputText?.backgroundColor)
@@ -3307,7 +3304,7 @@ export struct TreeViewInner {
               if (this.item.getNodeItem().imageCollapse) {
                 Row() {
                   Image(this.item.getNodeItem().imageCollapse?.collapseSource)
-                    .fillColor(this.item.getNodeItem().imageCollapse?.isCollapse ? COLOR_IMAGE_ROW : COLOR_IMAGE_EDIT)
+                    .fillColor(this.item.getNodeItem().imageCollapse?.isCollapse ? this.treeViewTheme.arrowIconColor : COLOR_IMAGE_EDIT)
                     .align(Alignment.End)
                     .objectFit(ImageFit.Contain)
                     .height(this.item.getNodeItem().imageCollapse?.itemHeight)
@@ -3322,6 +3319,9 @@ export struct TreeViewInner {
                       event.stopPropagation();
                     })
                     .focusable(true)
+                    .matchTextDirection((this.item.getNodeItem()
+                      .imageCollapse?.collapseSource === ARROW_RIGHT || this.item.getNodeItem()
+                      .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false)
                 }
                 .focusable(true)
                 .height(this.item.getNodeItem().imageCollapse?.itemHeight)
@@ -3331,7 +3331,7 @@ export struct TreeViewInner {
             .focusable(true)
             .width('100%')
             .gesture(
-              TapGesture({ count: 2 })// doubleClick
+              TapGesture({ count: 2 })
                 .onAction((event: GestureEvent) => {
                   this.listNodeDataSource.expandAndCollapseNode(
                     findCurrentNodeIndex(this.listNodeDataSource, this.item.getNodeCurrentNodeId()));
@@ -3367,7 +3367,11 @@ export struct TreeViewInner {
           }
 
           else if (event.type === TouchType.Up) {
-            this.item.setNodeColor(COLOR_SELECT);
+            if (!(typeof this.treeViewTheme.itemSelectedBgColor === 'string')) {
+              this.item.setNodeColor(COLOR_SELECT)
+            } else {
+              this.item.setNodeColor(this.treeViewTheme.itemSelectedBgColor)
+            }
             if (this.item.getNodeItem().imageNode !== null) {
               this.item.getNodeItem().imageNode?.setImageSource(InteractionStatus.Selected);
               this.item.imageSource = this.item.getNodeItem().imageNode?.source;
@@ -3455,7 +3459,7 @@ export class NodeItem {
   public nodeLevel: number;
   public parentNodeId: number;
   public currentNodeId: number;
-  public children: Array<NodeItem>;
+  public children: NodeItem[];
   public data: NodeParam;
 
   constructor(data: NodeParam) {
@@ -3842,7 +3846,7 @@ export class ListNodeUtils {
   }
 
   traverseNodeDF(callback: (currentNode: NodeItem) => boolean, root: NodeItem = this._root) {
-    let stack: Array<NodeItem> = [];
+    let stack: NodeItem[] = [];
     let found: boolean = false;
     stack.unshift(root);
     let currentNode: NodeItem = stack.shift() as NodeItem;
@@ -3856,7 +3860,7 @@ export class ListNodeUtils {
   }
 
   traverseNodeBF(callback: (currentNode: NodeItem) => boolean) {
-    let queue: Array<NodeItem> = [];
+    let queue: NodeItem[] = [];
     let found: boolean = false;
     queue.push(this._root);
     let currentNode: NodeItem = queue.shift() as NodeItem;
@@ -3929,13 +3933,13 @@ export class ListNodeUtils {
       if (parent.nodeLevel > this.maxNodeLevel) {
         throw new Error('ListNodeUtils[addNode]: The level of the tree view cannot exceed 50.');
       }
-      currentNode.nodeLevel = parent.nodeLevel + 1; // nodeLevel
+      currentNode.nodeLevel = parent.nodeLevel + 1;
       currentNode.parentNodeId = parentNodeId;
       currentNode.currentNodeId = currentNodeId;
       parent.children.push(currentNode);
       parent.getChildNodeInfo().isHasChildNode = true;
       parent.getChildNodeInfo().childNum = parent.children.length;
-      parent.getChildNodeInfo().allChildNum += 1; // childNum
+      parent.getChildNodeInfo().allChildNum += 1;
       parent.addImageCollapse(parent.getChildNodeInfo().isHasChildNode);
       this.updateParentChildNum(parent, true, 1);
       return this;
@@ -3944,7 +3948,7 @@ export class ListNodeUtils {
     }
   }
 
-  findNodeIndex(children: Array<NodeItem>, currentNodeId: number) {
+  findNodeIndex(children: NodeItem[], currentNodeId: number) {
     let index: number = this.INITIAL_INVALID_VALUE;
     for (let i: number = 0, len: number = children.length; i < len; i++) {
       if (children[i].currentNodeId === currentNodeId) {
@@ -4126,7 +4130,7 @@ export class ListNodeUtils {
    */
   dragTraverseNodeDF(callback: (node: NodeItem, listNode: NodeInfo[]) => boolean,
                      root: NodeItem = this._root, listNode: NodeInfo[]) {
-    let stack: Array<NodeItem> = [];
+      let stack: NodeItem[] = [];
     let found: boolean = false;
     stack.unshift(root);
     let currentNode: NodeItem = stack.shift() as NodeItem;

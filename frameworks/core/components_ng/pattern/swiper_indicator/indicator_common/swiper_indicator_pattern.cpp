@@ -46,6 +46,7 @@ constexpr Dimension CIRCLE_DIAMETER_OFFSET = 16.0_vp;
 constexpr float INDICATOR_DRAG_MIN_ANGLE = 6.0;
 constexpr float INDICATOR_DRAG_MAX_ANGLE = 23.0;
 constexpr float INDICATOR_TOUCH_BOTTOM_MAX_ANGLE = 120.0;
+constexpr float HALF_FLOAT = 0.5f;
 } // namespace
 
 void SwiperIndicatorPattern::OnAttachToFrameNode()
@@ -80,9 +81,6 @@ void SwiperIndicatorPattern::OnModifyDone()
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
             lastTextNode = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-            auto lastTextLayoutProperty = lastTextNode->GetLayoutProperty<TextLayoutProperty>();
-            CHECK_NULL_VOID(lastTextLayoutProperty);
-            lastTextLayoutProperty->UpdateLayoutDirection(swiperPattern->GetNonAutoLayoutDirection());
         }
         UpdateTextContent(layoutProperty, firstTextNode, lastTextNode);
         host->AddChild(firstTextNode);
@@ -410,6 +408,10 @@ void SwiperIndicatorPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestu
             if (pattern->dotIndicatorModifier_) {
                 pattern->dotIndicatorModifier_->StopAnimation(ifImmediately);
             }
+
+            if (pattern->overlongDotIndicatorModifier_) {
+                pattern->overlongDotIndicatorModifier_->StopAnimation(ifImmediately);
+            }
         }
     };
     swiperPattern->SetStopIndicatorAnimationCb(stopAnimationCb);
@@ -572,13 +574,16 @@ void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLa
             currentIndex = 1;
         }
     }
+    auto lastTextLayoutProperty = lastTextNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(lastTextLayoutProperty);
+    lastTextLayoutProperty->UpdateLayoutDirection(swiperPattern->GetNonAutoLayoutDirection());
     bool isRtl = swiperPattern->GetNonAutoLayoutDirection() == TextDirection::RTL;
     std::string firstContent = isRtl ? std::to_string(swiperPattern->RealTotalCount()) : std::to_string(currentIndex);
     std::string lastContent = isRtl ? std::to_string(currentIndex) + "\\" :
         "/" + std::to_string(swiperPattern->RealTotalCount());
 
     firstTextLayoutProperty->UpdateContent(firstContent);
-    auto lastTextLayoutProperty = lastTextNode->GetLayoutProperty<TextLayoutProperty>();
+    lastTextLayoutProperty = lastTextNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(lastTextLayoutProperty);
     auto fontColor = layoutProperty->GetFontColorValue(theme->GetDigitalIndicatorTextStyle().GetTextColor());
     auto fontSize = layoutProperty->GetFontSizeValue(theme->GetDigitalIndicatorTextStyle().GetFontSize());
@@ -1093,5 +1098,143 @@ OffsetF SwiperIndicatorPattern::CalculateRectLayout(
         height = oneAngleLength;
     }
     return hotRegionOffset;
+}
+
+RefPtr<OverlengthDotIndicatorPaintMethod> SwiperIndicatorPattern::CreateOverlongDotIndicatorPaintMethod(
+    RefPtr<SwiperPattern> swiperPattern)
+{
+    if (dotIndicatorModifier_) {
+        dotIndicatorModifier_->StopAnimation(true);
+        dotIndicatorModifier_->SetIsOverlong(true);
+    }
+
+    if (!overlongDotIndicatorModifier_) {
+        overlongDotIndicatorModifier_ = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
+    }
+
+    overlongDotIndicatorModifier_->SetAnimationDuration(swiperPattern->GetDuration());
+    overlongDotIndicatorModifier_->SetLongPointHeadCurve(
+        swiperPattern->GetCurveIncludeMotion(), swiperPattern->GetMotionVelocity());
+
+    auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
+    auto overlongPaintMethod = MakeRefPtr<OverlengthDotIndicatorPaintMethod>(overlongDotIndicatorModifier_);
+    auto paintMethodTemp = DynamicCast<DotIndicatorPaintMethod>(overlongPaintMethod);
+    SetDotIndicatorPaintMethodInfo(swiperPattern, paintMethodTemp, swiperLayoutProperty);
+    UpdateOverlongPaintMethod(swiperPattern, overlongPaintMethod);
+
+    return overlongPaintMethod;
+}
+
+RefPtr<DotIndicatorPaintMethod> SwiperIndicatorPattern::CreateDotIndicatorPaintMethod(
+    RefPtr<SwiperPattern> swiperPattern)
+{
+    if (overlongDotIndicatorModifier_) {
+        overlongDotIndicatorModifier_->StopAnimation(true);
+        overlongDotIndicatorModifier_->SetMaxDisplayCount(0);
+    }
+
+    if (!dotIndicatorModifier_) {
+        dotIndicatorModifier_ = AceType::MakeRefPtr<DotIndicatorModifier>();
+    }
+
+    dotIndicatorModifier_->SetIsOverlong(false);
+    dotIndicatorModifier_->SetAnimationDuration(swiperPattern->GetDuration());
+    dotIndicatorModifier_->SetLongPointHeadCurve(
+        swiperPattern->GetCurveIncludeMotion(), swiperPattern->GetMotionVelocity());
+    auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
+    auto paintMethod = MakeRefPtr<DotIndicatorPaintMethod>(dotIndicatorModifier_);
+    SetDotIndicatorPaintMethodInfo(swiperPattern, paintMethod, swiperLayoutProperty);
+
+    dotIndicatorModifier_->SetBoundsRect(CalcBoundsRect());
+
+    return paintMethod;
+}
+
+RectF SwiperIndicatorPattern::CalcBoundsRect() const
+{
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_RETURN(swiperNode, RectF());
+    auto geometryNode = swiperNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, RectF());
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RectF());
+    auto indicatorGeometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(indicatorGeometryNode, RectF());
+    auto boundsValue = (geometryNode->GetFrameSize().Width() - indicatorGeometryNode->GetFrameSize().Width()) * 0.5f;
+    auto boundsRectOriginX = -boundsValue;
+    auto boundsRectOriginY = 0.0f;
+    auto boundsRectWidth = geometryNode->GetFrameSize().Width();
+    auto boundsRectHeight = indicatorGeometryNode->GetFrameSize().Height();
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(swiperPattern, RectF());
+    if (swiperPattern->GetDirection() == Axis::VERTICAL) {
+        boundsValue = (geometryNode->GetFrameSize().Height() - indicatorGeometryNode->GetFrameSize().Height()) * 0.5f;
+        boundsRectOriginX = 0.0f;
+        boundsRectOriginY = -boundsValue;
+        boundsRectWidth = indicatorGeometryNode->GetFrameSize().Width();
+        boundsRectHeight = geometryNode->GetFrameSize().Height();
+    }
+    RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
+
+    return boundsRect;
+}
+
+void SwiperIndicatorPattern::UpdateOverlongPaintMethod(
+    const RefPtr<SwiperPattern>& swiperPattern, RefPtr<OverlengthDotIndicatorPaintMethod>& overlongPaintMethod)
+{
+    auto animationStartIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex());
+    auto animationEndIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex());
+
+    auto paintMethodTemp = DynamicCast<DotIndicatorPaintMethod>(overlongPaintMethod);
+    if (changeIndexWithAnimation_ && !changeIndexWithAnimation_.value()) {
+        animationStartIndex = startIndex_ ? startIndex_.value() : overlongDotIndicatorModifier_->GetAnimationEndIndex();
+        paintMethodTemp->SetGestureState(GestureState::GESTURE_STATE_NONE);
+    }
+
+    if (jumpIndex_) {
+        paintMethodTemp->SetGestureState(GestureState::GESTURE_STATE_NONE);
+
+        if (!changeIndexWithAnimation_) {
+            overlongDotIndicatorModifier_->StopAnimation(true);
+            overlongDotIndicatorModifier_->SetCurrentOverlongType(OverlongType::NONE);
+        }
+    }
+
+    auto isSwiperTouchDown = swiperPattern->IsTouchDownOnOverlong();
+    auto isSwiperAnimationRunning = swiperPattern->IsPropertyAnimationRunning();
+    auto keepStatus = !isSwiperTouchDown && !isSwiperAnimationRunning && animationStartIndex != animationEndIndex &&
+                      !changeIndexWithAnimation_;
+
+    if (!changeIndexWithAnimation_ && gestureState_ == GestureState::GESTURE_STATE_NONE) {
+        keepStatus = true;
+    }
+
+    auto bottomTouchLoop = swiperPattern->GetTouchBottomTypeLoop();
+    auto turnPageRateAbs = std::abs(swiperPattern->GetTurnPageRate());
+    auto totalCount = swiperPattern->RealTotalCount();
+    auto loopDrag = (animationStartIndex == 0 && animationEndIndex == totalCount - 1 && turnPageRateAbs < HALF_FLOAT &&
+                        turnPageRateAbs > 0.0f) ||
+                    (animationStartIndex == animationEndIndex && animationEndIndex == totalCount - 1 &&
+                        turnPageRateAbs > HALF_FLOAT);
+    auto nonLoopDrag = bottomTouchLoop == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE &&
+                       ((gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT && turnPageRateAbs > HALF_FLOAT) ||
+                           (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT && turnPageRateAbs < HALF_FLOAT &&
+                               turnPageRateAbs > 0.0f));
+
+    if (isSwiperTouchDown && (loopDrag || nonLoopDrag)) {
+        overlongDotIndicatorModifier_->UpdateCurrentStatus();
+    }
+
+    overlongPaintMethod->SetMaxDisplayCount(swiperPattern->GetMaxDisplayCount());
+    overlongPaintMethod->SetKeepStatus(keepStatus);
+    overlongPaintMethod->SetAnimationStartIndex(animationStartIndex);
+    overlongPaintMethod->SetAnimationEndIndex(animationEndIndex);
+    overlongDotIndicatorModifier_->SetIsSwiperTouchDown(isSwiperTouchDown);
+    overlongDotIndicatorModifier_->SetBoundsRect(CalcBoundsRect());
+    changeIndexWithAnimation_.reset();
+    jumpIndex_.reset();
+    startIndex_.reset();
 }
 } // namespace OHOS::Ace::NG

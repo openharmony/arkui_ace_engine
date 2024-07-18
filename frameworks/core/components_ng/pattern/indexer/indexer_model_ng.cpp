@@ -34,6 +34,9 @@ void IndexerModelNG::Create(std::vector<std::string>& arrayValue, int32_t select
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::INDEXER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndexerPattern>(); });
     stack->Push(frameNode);
+    if (selected < 0 || selected >= static_cast<int32_t>(arrayValue.size())) {
+        selected = 0;
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, ArrayValue, arrayValue);
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, Selected, selected);
 }

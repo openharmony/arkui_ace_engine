@@ -71,6 +71,26 @@ enum class RequestFocusResult : int32_t {
     NON_EXIST = 3,
     NON_FOCUSABLE_BY_TAB = 4,
 };
+enum class SwitchingStartReason : int32_t {
+    DEFAULT = 0,
+    WINDOW_FOCUS = 1,
+    REQUEST_FOCUS = 2,
+    LOST_FOCUS_TO_VIEW_ROOT = 3,
+    REMOVE_SELF = 4,
+    REMOVE_CHILD = 5,
+};
+enum class SwitchingEndReason : int32_t {
+    DEFAULT = 0,
+    FOCUS_GUARD_DESTROY = 1,
+    DEPENDENCE_SELF = 2,
+    NO_FOCUSABLE_CHILD = 3,
+    NODE_FOCUS = 4,
+};
+enum class SwitchingUpdateReason : int32_t {
+    DEFAULT = 0,
+    SWITCH_FOCUS = 1,
+    ON_FOCUS_NODE = 2,
+};
 
 using GetNextFocusNodeFunc = std::function<void(FocusStep, const WeakPtr<FocusHub>&, WeakPtr<FocusHub>&)>;
 
@@ -515,11 +535,11 @@ public:
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     bool RequestFocusImmediately(bool isJudgeRootTree = false);
     void RequestFocus() const;
-    void UpdateAccessibilityFocusInfo();
     void SwitchFocus(const RefPtr<FocusHub>& focusNode);
 
     static void LostFocusToViewRoot();
 
+    bool IsViewRootScope();
     void LostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH);
     void LostSelfFocus();
     void RemoveSelf(BlurReason reason = BlurReason::FRAME_DESTROY);
@@ -780,9 +800,6 @@ public:
 
     std::list<RefPtr<FocusHub>>::iterator FlushChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
 
-    // Only for the currently loaded children, do not expand.
-    std::list<RefPtr<FocusHub>>::iterator FlushCurrentChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
-
     std::list<RefPtr<FocusHub>> GetChildren()
     {
         std::list<RefPtr<FocusHub>> focusNodes;
@@ -977,9 +994,13 @@ public:
         return (static_cast<uint32_t>(step) & 0x1) == 0;
     }
 
-    static inline bool IsFocusStepForward(FocusStep step)
+    static inline bool IsFocusStepForward(FocusStep step, bool isRtl = false)
     {
-        return (static_cast<uint32_t>(step) & MASK_FOCUS_STEP_FORWARD) != 0;
+        bool isForward = (static_cast<uint32_t>(step) & MASK_FOCUS_STEP_FORWARD) != 0;
+        if (isRtl && (step == FocusStep::RIGHT || step == FocusStep::LEFT)) {
+            isForward = !isForward;
+        }
+        return isForward;
     }
 
     static inline bool IsFocusStepTab(FocusStep step)
@@ -987,6 +1008,15 @@ public:
         return (static_cast<uint32_t>(step) & MASK_FOCUS_STEP_TAB) == MASK_FOCUS_STEP_TAB;
     }
 
+    static inline FocusStep GetRealFocusStepByTab(FocusStep moveStep, bool isRtl = false)
+    {
+        if (isRtl) {
+            return moveStep == FocusStep::TAB ? FocusStep::LEFT : FocusStep::RIGHT;
+        } else {
+            return moveStep == FocusStep::TAB ? FocusStep::RIGHT : FocusStep::LEFT;
+        }
+    }
+    
     static double GetProjectAreaOnRect(const RectF& rect, const RectF& projectRect, FocusStep step);
 
     void SetFocusScopeId(const std::string& focusScopeId, bool isGroup);
@@ -1019,6 +1049,9 @@ public:
     {
         return focusPriority_;
     }
+
+    static void ToJsonValue(
+        const RefPtr<FocusHub>& hub, std::unique_ptr<JsonValue>& json, const InspectorFilter& filter);
 
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);

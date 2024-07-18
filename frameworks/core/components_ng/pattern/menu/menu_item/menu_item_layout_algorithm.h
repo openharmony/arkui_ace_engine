@@ -21,8 +21,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-    constexpr static int32_t EXPANDABLE_AREA_VIEW_INDEX = 2;
-    constexpr static int32_t CLICKABLE_AREA_VIEW_INDEX = 3;
+    constexpr static int32_t CLICKABLE_AREA_VIEW_INDEX = 2;
+    constexpr static int32_t EXPANDABLE_AREA_VIEW_INDEX = 3;
 }
 class ACE_EXPORT MenuItemLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(MenuItemLayoutAlgorithm, BoxLayoutAlgorithm);
@@ -35,21 +35,26 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
-    void MeasureItemViews(float maxRowWidth, float middleSpace,
-        float minRowWidth, float minItemHeight, double iconSize,
-        LayoutConstraintF& childConstraint, std::optional<LayoutConstraintF>& layoutConstraint,
+    void CheckNeedMatchParent(LayoutWrapper* layoutWrapper,
+        std::optional<LayoutConstraintF>& layoutConstraint);
+    void MeasureItemViews(LayoutConstraintF& childConstraint,
+        std::optional<LayoutConstraintF>& layoutConstraint,
         PaddingPropertyF padding, LayoutWrapper* layoutWrapper);
     void MeasureRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint);
-    void MeasureExpandableArea(const RefPtr<LayoutWrapper>& area, const LayoutConstraintF& constraint);
     void CheckNeedExpandContent(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint);
-    void UpdateSelfSize(LayoutWrapper* layoutWrapper, float width, float itemHeight,
-        float minItemHeight, float expandableHeight);
-    void UpdateOverlay(RefPtr<FrameNode> frameNode);
+    void UpdateSelfSize(LayoutWrapper* layoutWrapper, float width, float itemHeight, float expandableHeight);
     float GetDividerStroke(LayoutWrapper* layoutWrapper);
+    float GetBordersHeight(LayoutWrapper* layoutWrapper);
 
     float horInterval_ = 0.0f;
+    float verInterval_ = 0.0f;
     float idealWidth_ = 0.0f;
     float emptyWidth_ = 0.0f;
+    float maxRowWidth_ = 0.0f;
+    float middleSpace_ = 0.0f;
+    float minRowWidth_ = 0.0f;
+    float minItemHeight_ = 0.0f;
+    double iconSize_ = 0.0f;
     bool needExpandContent_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemLayoutAlgorithm);

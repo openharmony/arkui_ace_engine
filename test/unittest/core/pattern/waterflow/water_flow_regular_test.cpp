@@ -30,8 +30,10 @@ HWTEST_F(WaterFlowTestNg, OffsetEnd001, TestSize.Level1)
         model.SetRowsGap(Dimension(5.0f));
         CreateItem(30);
     });
-    pattern_->ScrollToIndex(29, false, ScrollAlign::END);
     auto info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 10);
+    pattern_->ScrollToIndex(29, false, ScrollAlign::END);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info->endIndex_, 29);
     EXPECT_EQ(GetChildY(frameNode_, 30), 600.0f);
@@ -110,5 +112,101 @@ HWTEST_F(WaterFlowTestNg, Constraint001, TestSize.Level1)
     EXPECT_EQ(GetChildWidth(frameNode_, 4), 300.0f);
     EXPECT_EQ(info->storedOffset_, -20.0f);
     EXPECT_EQ(info->startIndex_, 3);
+}
+
+/**
+ * @tc.name: IllegalItemCnt
+ * @tc.desc: Layout WaterFlow without items.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, IllegalItemCnt, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            model.SetColumnsTemplate("1fr 1fr");
+            CreateItem(6);
+        },
+        true);
+    const auto& info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->endIndex_, 5);
+
+    for (int i = 0; i < 6; ++i) {
+        frameNode_->RemoveChildAtIndex(0);
+    }
+    frameNode_->childrenUpdatedFrom_ = 0;
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    FlushLayoutTask(frameNode_);
+
+    pattern_->ScrollToIndex(LAST_ITEM);
+    EXPECT_EQ(info->jumpIndex_, LAST_ITEM);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(info->startIndex_ >= info->endIndex_);
+}
+
+/**
+ * @tc.name: Property014
+ * @tc.desc: Test the property of itemConstraintSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Property014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create waterFlow.
+     */
+    WaterFlowModelNG model;
+    model.Create();
+    ViewAbstract::SetWidth(CalcLength(WATERFLOW_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(WATERFLOW_HEIGHT));
+    model.SetScroller(model.CreateScrollController(), model.CreateScrollBarProxy());
+    CreateItem(TOTAL_LINE_NUMBER);
+    GetInstance();
+    FlushLayoutTask(frameNode_);
+    EXPECT_FALSE(layoutProperty_->HasItemLayoutConstraint());
+    EXPECT_EQ(model.GetItemMinWidth(AceType::RawPtr(frameNode_)), Dimension(0.f));
+    EXPECT_EQ(model.GetItemMaxWidth(AceType::RawPtr(frameNode_)), Dimension(0.f));
+    EXPECT_EQ(model.GetItemMinHeight(AceType::RawPtr(frameNode_)), Dimension(0.f));
+    EXPECT_EQ(model.GetItemMaxHeight(AceType::RawPtr(frameNode_)), Dimension(0.f));
+    for (int32_t i = 0; i < 2; ++i) {
+        Rect rect = pattern_->GetItemRect(i);
+        EXPECT_EQ(rect.Width(), WATERFLOW_WIDTH);
+        EXPECT_EQ(rect.Height(), i == 0 ? ITEM_HEIGHT : BIG_ITEM_HEIGHT);
+    }
+
+    /**
+     * @tc.steps: step2. set minWidth and maxWidth.
+     * @tc.expected: the value between minWidth and maxWidth.
+     */
+    model.SetItemMinWidth(AceType::RawPtr(frameNode_), Dimension(300.f));
+    model.SetItemMaxWidth(AceType::RawPtr(frameNode_), Dimension(400.f));
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(layoutProperty_->HasItemLayoutConstraint());
+    EXPECT_EQ(model.GetItemMinWidth(AceType::RawPtr(frameNode_)), Dimension(300.f));
+    EXPECT_EQ(model.GetItemMaxWidth(AceType::RawPtr(frameNode_)), Dimension(400.f));
+    EXPECT_EQ(model.GetItemMinHeight(AceType::RawPtr(frameNode_)), Dimension(0.f));
+    EXPECT_EQ(model.GetItemMaxHeight(AceType::RawPtr(frameNode_)), Dimension(0.f));
+    Rect rect = pattern_->GetItemRect(0);
+    EXPECT_GE(rect.Width(), 300.f);
+    EXPECT_LE(rect.Width(), 400.f);
+
+    /**
+     * @tc.steps: step3. set minHeight and maxHeight.
+     * @tc.expected: the value between minHeight and maxHeight.
+     */
+    layoutProperty_->Reset();
+    model.SetItemMinHeight(AceType::RawPtr(frameNode_), Dimension(150.f));
+    model.SetItemMaxHeight(AceType::RawPtr(frameNode_), Dimension(250.f));
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(layoutProperty_->HasItemLayoutConstraint());
+    EXPECT_EQ(model.GetItemMinWidth(AceType::RawPtr(frameNode_)), Dimension(0.f));
+    EXPECT_EQ(model.GetItemMaxWidth(AceType::RawPtr(frameNode_)), Dimension(0.f));
+    EXPECT_EQ(model.GetItemMinHeight(AceType::RawPtr(frameNode_)), Dimension(150.f));
+    EXPECT_EQ(model.GetItemMaxHeight(AceType::RawPtr(frameNode_)), Dimension(250.f));
+    for (int32_t i = 0; i < 2; ++i) {
+        rect = pattern_->GetItemRect(i);
+        EXPECT_GE(rect.Height(), 150.f);
+        EXPECT_LE(rect.Height(), 250.f);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -233,7 +233,7 @@ struct ScrollableFrameInfo {
     uint64_t scrollStateTime_ = 0;
     int32_t scrollState_ = 0;
     bool canOverScroll_ = false;
-    int32_t canOverScrollInfo_ = 0;
+    uint32_t canOverScrollInfo_ = 0;
 
     std::string ToString() const
     {
@@ -356,7 +356,7 @@ enum class ScrollSource {
 constexpr char TRAILING_ANIMATION[] = "TRAILING_ANIMATION ";
 
 // scroller animation, such as scrollTo, scrollPage
-constexpr char SCROLLER_ANIMATION[] = "SCROLLER_ANIMATION ";
+constexpr char SCROLLER_ANIMATION[] = "CUSTOM_ANIMATOR_SCROLLER_ANIMATION ";
 
 // scrollToEdge at a fixed speed
 constexpr char SCROLLER_FIX_VELOCITY_ANIMATION[] = "SCROLLER_FIX_VELOCITY_ANIMATION ";

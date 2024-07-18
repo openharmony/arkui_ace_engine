@@ -29,11 +29,12 @@ public:
     virtual ~WebModel() = default;
 
     virtual void Create(const std::string& src, const RefPtr<WebController>& webController,
-        RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false) = 0;
+        RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
+        const std::string& sharedRenderProcessToken = "") = 0;
     virtual void Create(const std::string& src, std::function<void(int32_t)>&& setWebIdCallback,
-        std::function<void(const std::string&)>&& setHapPathCallback,
-        int32_t parentWebId, bool popup, RenderMode renderMode = RenderMode::ASYNC_RENDER,
-        bool incognitoMode = false) = 0;
+        std::function<void(const std::string&)>&& setHapPathCallback, int32_t parentWebId, bool popup,
+        RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
+        const std::string& sharedRenderProcessToken = "") = 0;
     virtual void SetCustomScheme(const std::string& cmdLine) = 0;
     virtual void SetFocusable(bool focusable) {};
     virtual void SetFocusNode(bool isFocusNode) {};
@@ -185,6 +186,8 @@ public:
     virtual void SetUpdateInstanceIdCallback(std::function<void(int32_t)> &&callback) = 0;
 
     virtual void SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)> && jsCallback) = 0;
+    virtual void SetOverlayScrollbarEnabled(bool isEnabled) {};
+    virtual void SetKeyboardAvoidMode(const WebKeyboardAvoidMode& mode) {}
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

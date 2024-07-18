@@ -141,6 +141,11 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest001, TestSize.Level1)
     onHoverEvent(false);
     EXPECT_EQ(pipeline->mouseStyleNodeId_, -1);
 
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    RectF paintRect = { 0.0f, 0.0f, 1.0f, 1.0f };
+    renderContext->UpdatePaintRect(paintRect);
+
     MouseInfo mouseInfo;
     onMouseEvent(mouseInfo);
     EXPECT_EQ(pipeline->mouseStyleNodeId_, frameNode->GetId());
@@ -163,6 +168,23 @@ HWTEST_F(HyperlinkTestNg, HyperlinkModelNGTest001, TestSize.Level1)
 
     hyperlinkModelNG.SetDraggable(false);
     EXPECT_EQ(gestureHub->dragEventActuator_, nullptr);
+}
+
+/**
+ * @tc.name: HyperlinkModelNGTest002
+ * @tc.desc: Test HyperlinkModelNG SetDraggable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HyperlinkTestNg, HyperlinkModelNGTest003, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    HyperlinkModelNG hyperlinkModelNG;
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    hyperlinkModelNG.SetDraggable(true);
+    hyperlinkModelNG.SetDraggable(false);
+    hyperlinkModelNG.SetDraggable(frameNode, false);
+    frameNode->draggable_ = false;
+    hyperlinkModelNG.SetDraggable(frameNode, true);
 }
 
 /**

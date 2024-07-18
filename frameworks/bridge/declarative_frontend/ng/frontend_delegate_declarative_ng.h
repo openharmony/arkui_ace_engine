@@ -19,6 +19,7 @@
 #include "base/memory/ace_type.h"
 #include "base/thread/cancelable_callback.h"
 #include "base/utils/measure_util.h"
+#include "core/components_ng/render/snapshot_param.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 #include "frameworks/bridge/common/manifest/manifest_parser.h"
 #include "frameworks/bridge/common/utils/pipeline_context_holder.h"
@@ -40,12 +41,13 @@ public:
 
     void AttachPipelineContext(const RefPtr<PipelineBase>& context) override;
     void AttachSubPipelineContext(const RefPtr<PipelineBase>& context);
-    // distribute
-    std::pair<std::string, UIContentErrorCode> RestoreRouterStack(const std::string& contentInfo) override
+    // restore
+    std::pair<RouterRecoverRecord, UIContentErrorCode> RestoreRouterStack(
+        const std::string& contentInfo, ContentInfoType type) override
     {
-        return std::make_pair("", UIContentErrorCode::NO_ERRORS);
+        return std::make_pair(RouterRecoverRecord(), UIContentErrorCode::NO_ERRORS);
     }
-    std::string GetContentInfo() override;
+    std::string GetContentInfo(ContentInfoType type) override;
     // JSFrontend delegate NG functions.
     void RunPage(const std::string& url, const std::string& params,
         const std::string& profile, bool isNamedRouter = false);
@@ -97,15 +99,15 @@ public:
     // FrontendDelegate overrides.
     void Push(const std::string& uri, const std::string& params) override;
     void PushWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) override;
-    void PushWithCallback(const std::string& uri, const std::string& params,
+    void PushWithCallback(const std::string& uri, const std::string& params, bool recoverable,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
-    void PushNamedRoute(const std::string& uri, const std::string& params,
+    void PushNamedRoute(const std::string& uri, const std::string& params, bool recoverable,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
     void Replace(const std::string& uri, const std::string& params) override;
     void ReplaceWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) override;
-    void ReplaceWithCallback(const std::string& uri, const std::string& params,
+    void ReplaceWithCallback(const std::string& uri, const std::string& params, bool recoverable,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
-    void ReplaceNamedRoute(const std::string& uri, const std::string& params,
+    void ReplaceNamedRoute(const std::string& uri, const std::string& params, bool recoverable,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
     void Back(const std::string& uri, const std::string& params) override;
     void BackToIndex(int32_t index, const std::string& params) override;
@@ -132,11 +134,10 @@ public:
     const std::string& GetVersionName() const override;
     int32_t GetVersionCode() const override;
 
-    double MeasureText(const MeasureContext& context) override;
-    Size MeasureTextSize(const MeasureContext& context) override;
-    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
-        const NG::ToastShowMode& showMode = NG::ToastShowMode::DEFAULT, int32_t alignment = -1,
-        std::optional<DimensionOffset> offset = std::nullopt) override;
+    double MeasureText(MeasureContext context) override;
+    Size MeasureTextSize(MeasureContext context) override;
+    void ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback = nullptr) override;
+    void CloseToast(const int32_t toastId, std::function<void(int32_t)>&& callback = nullptr) override;
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks) override;
@@ -215,11 +216,12 @@ public:
     void HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback) override {}
 
     void GetSnapshot(const std::string& componentId,
-        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback) override;
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+        const NG::SnapshotOptions& options) override;
 
     void CreateSnapshot(std::function<void()>&& customBuilder,
         std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
-        bool enableInspector) override;
+        bool enableInspector, const NG::SnapshotParam& param) override;
 
     void AddFrameNodeToOverlay(
         const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt) override;

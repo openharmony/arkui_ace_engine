@@ -588,6 +588,55 @@ ArkUI_Int32 GetButtonType(ArkUINodeHandle node)
     return static_cast<ArkUI_Int32>(ButtonModelNG::GetType(frameNode));
 }
 
+void SetButtonLabelWithCheck(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonModelNG::SetLabelWithCheck(frameNode, value);
+}
+
+void ResetButtonLabelWithCheck(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonModelNG::SetLabelWithCheck(frameNode, "");
+}
+
+void SetButtonOptions(ArkUINodeHandle node, ArkUI_Uint32 buttonStyle, ArkUI_Uint32 buttonRole)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonStyleMode style = ButtonStyleMode::EMPHASIZE;
+    if (buttonStyle >= static_cast<uint32_t>(ButtonStyleMode::NORMAL) && buttonStyle <=
+    static_cast<uint32_t>(ButtonStyleMode::TEXT)) {
+        style = static_cast<ButtonStyleMode>(buttonStyle);
+    }
+    ButtonRole role = ButtonRole::NORMAL;
+    if (buttonRole >= static_cast<uint32_t>(ButtonRole::NORMAL) && buttonRole <=
+    static_cast<uint32_t>(ButtonRole::ERROR)) {
+        role = static_cast<ButtonRole>(buttonRole);
+    }
+    ButtonModelNG::ApplyTheme(frameNode, style, role);
+}
+
+void ResetButtonOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonModelNG::SetType(frameNode, DEFAULT_BUTTON_TYPE);
+    ButtonModelNG::SetStateEffect(frameNode, DEFAULT_STATE_EFFECT);
+    ButtonModelNG::SetButtonStyle(frameNode, ButtonStyleMode::EMPHASIZE);
+    ButtonModelNG::SetControlSize(frameNode, ControlSize::NORMAL);
+    ButtonModelNG::SetRole(frameNode, ButtonRole::NORMAL);
+}
+
+void SetCreateWithLabel(ArkUINodeHandle node, bool createWithLabel)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonModelNG::SetCreateWithLabel(frameNode, createWithLabel);
+}
+
 namespace NodeModifier {
 const ArkUIButtonModifier* GetButtonModifier()
 {
@@ -598,7 +647,8 @@ const ArkUIButtonModifier* GetButtonModifier()
         SetButtonBackgroundColor, ResetButtonBackgroundColor, SetButtonBorderRadius, ResetButtonBorderRadius,
         SetButtonFontWeightEnum, SetButtonSize, ResetButtonSize, GetButtonLabel, GetButtonFontSize, GetButtonFontWeight,
         GetButtonFontColor, SetButtonRole, ResetButtonRole, SetButtonStyle, ResetButtonStyle, SetButtonControlSize,
-        ResetButtonControlSize, GetButtonType };
+        ResetButtonControlSize, GetButtonType, SetButtonLabelWithCheck, ResetButtonLabelWithCheck,
+        SetButtonOptions, ResetButtonOptions, SetCreateWithLabel };
     return &modifier;
 }
 } // namespace NodeModifier

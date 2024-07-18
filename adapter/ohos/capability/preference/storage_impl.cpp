@@ -19,7 +19,13 @@
 namespace OHOS::Ace {
 std::shared_ptr<NativePreferences::Preferences> StorageImpl::GetPreference(const std::string& fileName)
 {
-    return NativePreferences::PreferencesHelper::GetPreferences(fileName, errCode_);
+    auto it = preferences_.find(fileName);
+    if (it != preferences_.end()) {
+        return it->second;
+    }
+    auto pref = NativePreferences::PreferencesHelper::GetPreferences(fileName, errCode_);
+    preferences_.insert(std::make_pair(fileName, pref));
+    return pref;
 }
 
 void StorageImpl::SetString(const std::string& key, const std::string& value)
@@ -36,7 +42,7 @@ std::string StorageImpl::GetString(const std::string& key)
 {
     std::shared_ptr<NativePreferences::Preferences> pref = GetPreference(fileName_);
     CHECK_NULL_RETURN(pref, "");
-    LOGI("Get preference with key %{public}s", key.c_str());
+    LOGD("Get preference with key %{public}s", key.c_str());
     return pref->GetString(key, "");
 }
 
@@ -45,15 +51,16 @@ void StorageImpl::Clear()
     std::shared_ptr<NativePreferences::Preferences> pref = GetPreference(fileName_);
     CHECK_NULL_VOID(pref);
     pref->Clear();
-    LOGI("StorageImpl: Clear preferences");
+    LOGD("StorageImpl: Clear preferences");
     NativePreferences::PreferencesHelper::DeletePreferences(fileName_);
+    preferences_.erase(fileName_);
 }
 
 void StorageImpl::Delete(const std::string& key)
 {
     std::shared_ptr<NativePreferences::Preferences> pref = GetPreference(fileName_);
     CHECK_NULL_VOID(pref);
-    LOGI("StorageImpl: Delete preference with key %{public}s", key.c_str());
+    LOGD("StorageImpl: Delete preference with key %{public}s", key.c_str());
     pref->Delete(key);
     pref->FlushSync();
 }

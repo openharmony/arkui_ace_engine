@@ -15,6 +15,7 @@
 
 #include "frameworks/core/interfaces/native/node/touch_event_convertor.h"
 
+#include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 
 namespace OHOS::Ace::NG {
@@ -24,4 +25,8 @@ TouchEvent ConvertToTouchEvent(const std::shared_ptr<MMI::PointerEvent>& srcPoin
     return Platform::ConvertTouchEvent(srcPointerEvent);
 }
 
+void ConvertToMouseEvent(MouseEvent& mouseEvent, const std::shared_ptr<MMI::PointerEvent>& srcPointerEvent)
+{
+    Platform::ConvertMouseEvent(srcPointerEvent, mouseEvent, Container::Current()->IsScenceBoardWindow());
+}
 }

@@ -44,9 +44,43 @@ enum SheetType {
     SHEET_BOTTOM_FREE_WINDOW,
 };
 
+struct SheetKey {
+    SheetKey() {}
+    explicit SheetKey(int32_t inputTargetId) : targetId(inputTargetId) {}
+    SheetKey(bool hasValidTarget, int32_t inputContentId, int32_t inputTargetId)
+        : hasValidTargetNode(hasValidTarget), contentId(inputContentId), targetId(inputTargetId)
+    {
+        isStartUpByUIContext = true;
+    }
+
+    bool operator==(const SheetKey& other) const
+    {
+        return isStartUpByUIContext == other.isStartUpByUIContext &&
+            hasValidTargetNode == other.hasValidTargetNode &&
+            contentId == other.contentId && targetId == other.targetId;
+    }
+
+    bool isStartUpByUIContext = false;  // Indicates whether the sheet is started by UIContext
+    bool hasValidTargetNode = true;     // If sheet was start-up by UIContext and without targetId, this flag is FALSE
+    int32_t contentId = -1;             // Indicates the uniqueID of componentContent when isStartUpByUIContext is TRUE
+    int32_t targetId = -1;
+};
+
+struct SheetKeyHash {
+    size_t operator()(const SheetKey& sheetKey) const
+    {
+        return sheetKey.isStartUpByUIContext ? sheetKey.contentId : sheetKey.targetId;
+    }
+};
+
 enum SheetLevel {
     OVERLAY,
     EMBEDDED,
+};
+
+enum ScrollSizeMode {
+    FOLLOW_DETENT,
+    CONTINUOUS,
 };
 
 struct SheetHeight {
@@ -56,6 +90,11 @@ struct SheetHeight {
     bool operator==(const SheetHeight& sheetHeight) const
     {
         return (height == sheetHeight.height && sheetMode == sheetHeight.sheetMode);
+    }
+
+    bool operator!=(const SheetHeight& sheetHeight) const
+    {
+        return !(*this == sheetHeight);
     }
 };
 
@@ -74,6 +113,7 @@ struct SheetStyle {
     std::vector<SheetHeight> detents;
     std::optional<bool> interactive;
     std::optional<bool> showInPage;
+    std::optional<ScrollSizeMode> scrollSizeMode;
     std::optional<NG::BorderWidthProperty> borderWidth; // border width
     std::optional<NG::BorderColorProperty> borderColor; // border color
     std::optional<NG::BorderStyleProperty> borderStyle;  // border style
@@ -92,7 +132,38 @@ struct SheetStyle {
                 interactive == sheetStyle.interactive && showInPage == sheetStyle.showInPage &&
                 borderWidth == sheetStyle.borderWidth && borderColor == sheetStyle.borderColor &&
                 borderStyle == sheetStyle.borderStyle && shadow == sheetStyle.shadow && width == sheetStyle.width &&
-                instanceId == sheetStyle.instanceId);
+                instanceId == sheetStyle.instanceId && scrollSizeMode == sheetStyle.scrollSizeMode);
+    }
+
+    void PartialUpdate(const SheetStyle& sheetStyle)
+    {
+        if (sheetStyle.height.has_value() && !sheetStyle.sheetMode.has_value()) {
+            height = sheetStyle.height;
+            sheetMode.reset();
+        } else if (!sheetStyle.height.has_value() && sheetStyle.sheetMode.has_value()) {
+            sheetMode = sheetStyle.sheetMode;
+            height.reset();
+        } else {
+            sheetMode = sheetStyle.sheetMode.has_value() ? sheetStyle.sheetMode : sheetMode;
+        }
+        showDragBar = sheetStyle.showDragBar.has_value() ? sheetStyle.showDragBar : showDragBar;
+        showCloseIcon = sheetStyle.showCloseIcon.has_value() ? sheetStyle.showCloseIcon : showCloseIcon;
+        isTitleBuilder = sheetStyle.isTitleBuilder.has_value() ? sheetStyle.isTitleBuilder : isTitleBuilder;
+        sheetType = sheetStyle.sheetType.has_value() ? sheetStyle.sheetType : sheetType;
+        backgroundColor = sheetStyle.backgroundColor.has_value() ? sheetStyle.backgroundColor : backgroundColor;
+        maskColor = sheetStyle.maskColor.has_value() ? sheetStyle.maskColor : maskColor;
+        backgroundBlurStyle = sheetStyle.backgroundBlurStyle.has_value() ?
+            sheetStyle.backgroundBlurStyle : backgroundBlurStyle;
+        sheetTitle = sheetStyle.sheetTitle.has_value() ? sheetStyle.sheetTitle : sheetTitle;
+        sheetSubtitle = sheetStyle.sheetSubtitle.has_value() ? sheetStyle.sheetSubtitle : sheetSubtitle;
+        detents = !sheetStyle.detents.empty() ? sheetStyle.detents : detents;
+        interactive = sheetStyle.interactive.has_value() ? sheetStyle.interactive : interactive;
+        scrollSizeMode = sheetStyle.scrollSizeMode.has_value() ? sheetStyle.scrollSizeMode : scrollSizeMode;
+        borderWidth = sheetStyle.borderWidth.has_value() ? sheetStyle.borderWidth : borderWidth;
+        borderColor = sheetStyle.borderColor.has_value() ? sheetStyle.borderColor : borderColor;
+        borderStyle = sheetStyle.borderStyle.has_value() ? sheetStyle.borderStyle : borderStyle;
+        shadow = sheetStyle.shadow.has_value() ? sheetStyle.shadow : shadow;
+        width = sheetStyle.width.has_value() ? sheetStyle.width : width;
     }
 };
 } // namespace OHOS::Ace::NG

@@ -173,8 +173,12 @@ void ScrollBarProxy::NotifyScrollBar(const WeakPtr<ScrollablePattern>& weakScrol
             !scrollable->IsReverse() ? scrollableNodeOffset : controlDistance - scrollableNodeOffset);
         scrollBar->HandleScrollBarOutBoundary(scrollBarOutBoundaryDistance);
         auto host = scrollBar->GetHost();
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        if (!host) {
+            continue;
+        }
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && !scrollBar->HasChild()) {
+            scrollBar->UpdateScrollBarOffset();
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         } else {
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         }

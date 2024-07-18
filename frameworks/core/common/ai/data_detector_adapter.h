@@ -59,15 +59,13 @@ public:
     {
         textDetectResult_ = result;
     }
-    void FireOnResult(const TextDataDetectResult& result)
+    void FireOnResult(const std::string& result)
     {
         if (onResult_) {
-            auto resultJson = JsonUtil::Create(true);
-            resultJson->Put("code", result.code);
-            resultJson->Put("entity", result.entity.c_str());
-            onResult_(resultJson->ToString());
+            onResult_(result);
         }
     }
+    bool ParseOriText(const std::unique_ptr<JsonValue>& entityJson, std::string& text);
     void InitTextDetect(int32_t startPos, std::string detectText);
     void SetTextDetectTypes(const std::string& types);
     void ParseAIResult(const TextDataDetectResult& result, int32_t startPos);
@@ -80,7 +78,8 @@ public:
         }
         aiDetectInitialized_ = false;
     }
-    bool ShowUIExtensionMenu(const AISpan& aiSpan, NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode);
+    bool ShowUIExtensionMenu(
+        const AISpan& aiSpan, NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode, bool isShowSelectText = true);
     void ResponseBestMatchItem(const AISpan& aiSpan);
     void StartAbilityByType(const std::string& type, AAFwk::WantParams& wantParams);
 
@@ -113,7 +112,7 @@ private:
     std::string uiExtensionAbilityName_;
     std::unordered_map<int32_t, std::string> entityJson_;
     TimeStamp startDetectorTimeStamp_;
-    std::vector<std::string> detectTexts;
+    std::vector<std::string> detectTexts_;
 };
 } // namespace OHOS::Ace
 

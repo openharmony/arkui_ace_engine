@@ -36,8 +36,8 @@ class ACE_EXPORT SelectOverlayPattern : public MenuWrapperPattern {
     DECLARE_ACE_TYPE(SelectOverlayPattern, MenuWrapperPattern);
 
 public:
-    explicit SelectOverlayPattern(std::shared_ptr<SelectOverlayInfo> info)
-        : MenuWrapperPattern(-1), info_(std::move(info))
+    explicit SelectOverlayPattern(std::shared_ptr<SelectOverlayInfo> info, SelectOverlayMode mode)
+        : MenuWrapperPattern(-1), info_(std::move(info)), overlayMode_(mode)
     {
         CheckHandleReverse();
     }
@@ -60,20 +60,26 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        if (!selectOverlayModifier_) {
+        if (!selectOverlayModifier_ && CheckIfNeedMenu()) {
             selectOverlayModifier_ = AceType::MakeRefPtr<SelectOverlayModifier>(defaultMenuEndOffset_);
         }
-        if (!selectOverlayContentModifier_) {
+        if (!selectOverlayContentModifier_ && CheckIfNeedHandle()) {
             selectOverlayContentModifier_ = AceType::MakeRefPtr<SelectOverlayContentModifier>();
         }
+        SetContentModifierBounds(selectOverlayContentModifier_);
         SetSelectMenuHeight();
+        auto layoutProps = GetLayoutProperty<LayoutProperty>();
+        CHECK_NULL_RETURN(layoutProps, nullptr);
+        bool isReverse = layoutProps->GetNonAutoLayoutDirection() == TextDirection::RTL;
         if (paintMethodCreated_) {
             return MakeRefPtr<SelectOverlayPaintMethod>(selectOverlayModifier_, selectOverlayContentModifier_, *info_,
-                defaultMenuEndOffset_, selectMenuHeight_, hasExtensionMenu_, hasShowAnimation_, true, isHiddenHandle_);
+                defaultMenuEndOffset_, selectMenuHeight_, hasExtensionMenu_, hasShowAnimation_, true, isHiddenHandle_,
+                defaultMenuStartOffset_, isReverse);
         } else {
             paintMethodCreated_ = true;
             return MakeRefPtr<SelectOverlayPaintMethod>(selectOverlayModifier_, selectOverlayContentModifier_, *info_,
-                defaultMenuEndOffset_, selectMenuHeight_, hasExtensionMenu_, hasShowAnimation_, false, isHiddenHandle_);
+                defaultMenuEndOffset_, selectMenuHeight_, hasExtensionMenu_, hasShowAnimation_, false, isHiddenHandle_,
+                defaultMenuStartOffset_, isReverse);
         }
     }
 
@@ -123,9 +129,14 @@ public:
         return defaultMenuEndOffset_;
     }
 
-    float GetMenuWidth() const
+    std::optional<float> GetMenuWidth() const
     {
-        return menuWidth_.value_or(0);
+        return menuWidth_;
+    }
+
+    std::optional<float> GetMenuHeight() const
+    {
+        return menuHeight_;
     }
 
     const RectF& GetHandleRegion(bool isFirst) const
@@ -170,6 +181,18 @@ public:
 
     void SetIsNewAvoid(bool isNewAvoid);
 
+    bool CheckIfNeedMenu();
+    bool CheckIfNeedHandle();
+
+    SelectOverlayMode GetMode()
+    {
+        return overlayMode_;
+    }
+
+    void SetGestureEvent();
+
+    static float GetHandleDiameter();
+
 protected:
     virtual void CheckHandleReverse();
     virtual void UpdateHandleHotZone();
@@ -203,6 +226,7 @@ private:
     void HiddenHandle();
     void UpdateOffsetOnMove(RectF& region, SelectHandleInfo& handleInfo, const OffsetF& offset, bool isFirst);
     void SetSelectMenuHeight();
+    void SetContentModifierBounds(const RefPtr<SelectOverlayContentModifier>& modifier);
 
     RefPtr<TouchEventImpl> touchEvent_;
 
@@ -219,6 +243,7 @@ private:
     std::optional<float> menuWidth_;
     std::optional<float> menuHeight_;
 
+    OffsetF defaultMenuStartOffset_;
     OffsetF defaultMenuEndOffset_;
 
     float selectMenuHeight_ = 0.0f;
@@ -230,6 +255,9 @@ private:
     bool paintMethodCreated_ = false;
 
     bool closedByGlobalTouchEvent_ = false;
+    SelectOverlayMode overlayMode_ = SelectOverlayMode::ALL;
+    bool isSimulateOnClick_ = false;
+    bool clickConsumeBySimulate_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayPattern);
 };

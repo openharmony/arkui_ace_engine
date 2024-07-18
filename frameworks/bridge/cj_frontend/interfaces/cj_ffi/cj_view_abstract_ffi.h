@@ -238,8 +238,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetScaleSingle(float scale);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetScaleX(float scaleVal);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetScaleY(float scaleVal);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOpacity(double opacity);
-CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractbindSheetParam3(bool isShow, void (*builder)(), CJSheetOptions option);
-CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractbindSheetParam2(bool isShow, void (*builder)());
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractbindSheetParam(bool isShow, void (*builder)(), CJSheetOptions option);
 
 struct CJSetRotate {
     float dx;
@@ -286,9 +285,13 @@ struct CJSharedTransitionOptions {
     CJMotionPathOptions motionPathOption;
     int32_t type;
 };
+struct CJGeometryTransitionOptions {
+    bool follow = false;
+    int32_t hierarchyStrategy;
+};
 
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetSharedTransition(char* shareId, CJSharedTransitionOptions option);
-CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetGeometryTransition(char* id, bool followWithoutTransition);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetGeometryTransition(char* id, CJGeometryTransitionOptions option);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBlur(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetColorBlend(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBackdropBlur(double value);
@@ -395,6 +398,9 @@ CJ_EXPORT void FFIOHOSAceFrameworkDefaultFocus(bool isDefaultFocus);
 CJ_EXPORT void FFIOHOSAceFrameworkGroupDefaultFocus(bool isGroupDefaultFocus);
 CJ_EXPORT void FFIOHOSAceFrameworkFocusOnTouch(bool isFocusOnTouch);
 CJ_EXPORT bool FFIOHOSAceFrameworkRequestFocus(const char* inspectorKey);
+
+CJ_EXPORT void FFISetWidthWithEmpty();
+CJ_EXPORT void FFISetHeightWithEmpty();
 
 struct CJContentCoverOptions {
     uint32_t modalTransition;

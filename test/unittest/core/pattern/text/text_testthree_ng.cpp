@@ -274,35 +274,6 @@ HWTEST_F(TextTestThreeNg, SetDraggable001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetMenuOptionItems001
- * @tc.desc: test text_model_ng.cpp SetMenuOptionItems function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestThreeNg, SetMenuOptionItems001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
-     */
-    auto [host, pattern] = Init();
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-
-    /**
-     * @tc.steps: step2. construct menuOptionItems.
-     * @tc.expected: Running SetMenuOptionItems function and check the result.
-     */
-    std::vector<MenuOptionsParam> menuOptionItems;
-    MenuOptionsParam menuOptionItem1;
-    menuOptionItem1.content = "test1";
-    menuOptionItem1.action = [](const std::string&) {};
-    menuOptionItems.emplace_back(menuOptionItem1);
-    pattern->menuOptionItems_ = menuOptionItems;
-    textModelNG.SetMenuOptionItems(std::move(menuOptionItems));
-    EXPECT_EQ(pattern->menuOptionItems_.size(), 1);
-    EXPECT_EQ(pattern->menuOptionItems_[0].ToString(), menuOptionItem1.ToString());
-}
-
-/**
  * @tc.name: ClearOnClick001
  * @tc.desc: test text_model_ng.cpp ClearOnClick function
  * @tc.type: FUNC

@@ -19,6 +19,7 @@
 
 #include "base/log/ace_performance_monitor.h"
 #include "base/log/event_report.h"
+#include "base/log/ace_trace.h"
 #include "base/log/frame_report.h"
 #include "base/log/jank_frame_report.h"
 #include "base/thread/task_executor.h"
@@ -52,6 +53,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
     vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_](int64_t timeStampNanos, int64_t frameCount) {
         auto taskExecutor = weakTask.Upgrade();
         auto onVsync = [id, timeStampNanos, frameCount] {
+            int64_t ts = GetSysTimestamp();
             ArkUIPerfMonitor::GetInstance().StartPerf();
             if (FrameReport::GetInstance().GetEnable()) {
                 FrameReport::GetInstance().FlushBegin();
@@ -64,14 +66,15 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             CHECK_NULL_VOID(window);
             int64_t refreshPeriod = window->GetVSyncPeriod();
             window->OnVsync(static_cast<uint64_t>(timeStampNanos), static_cast<uint64_t>(frameCount));
+            ArkUIPerfMonitor::GetInstance().FinishPerf();
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
-            pipeline->OnIdle(timeStampNanos + refreshPeriod);
+            pipeline->OnIdle(std::min(ts, timeStampNanos) + refreshPeriod);
             JankFrameReport::GetInstance().JankFrameRecord(timeStampNanos, window->GetWindowName());
             if (FrameReport::GetInstance().GetEnable()) {
                 FrameReport::GetInstance().FlushEnd();
             }
-            ArkUIPerfMonitor::GetInstance().FinishPerf();
+            pipeline->UpdateLastVsyncEndTimestamp(GetSysTimestamp());
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {
@@ -88,11 +91,12 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
     rsUIDirector_->Init();
     rsUIDirector_->SetUITaskRunner(
         [taskExecutor, id](const std::function<void()>& task, uint32_t delay) {
-        ContainerScope scope(id);
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostDelayedTask(
-            task, TaskExecutor::TaskType::UI, delay, "ArkUIRosenWindowRenderServiceTask", PriorityType::HIGH);
-    }, id);
+            ContainerScope scope(id);
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostDelayedTask(
+                task, TaskExecutor::TaskType::UI, delay, "ArkUIRosenWindowRenderServiceTask", PriorityType::HIGH);
+        },
+        id);
     rsUIDirector_->SetRequestVsyncCallback([weak = weak_from_this()]() {
         auto self = weak.lock();
         CHECK_NULL_VOID(self);
@@ -109,12 +113,25 @@ void RosenWindow::Init()
     }
 }
 
-void RosenWindow::FlushFrameRate(int32_t rate, bool isAnimatorStopped)
+void RosenWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType)
 {
     if (!rsWindow_ || rate < 0) {
         return;
     }
-    rsWindow_->FlushFrameRate(rate, isAnimatorStopped);
+    rsWindow_->FlushFrameRate(rate, animatorExpectedFrameRate, rateType);
+}
+
+void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
+{
+    if (!rsWindow_) {
+        return;
+    }
+    if (dvsyncSwitch) {
+        ACE_SCOPED_TRACE("enale dvsync");
+    } else {
+        ACE_SCOPED_TRACE("disable dvsync");
+    }
+    rsWindow_->SetUiDvsyncSwitch(dvsyncSwitch);
 }
 
 void RosenWindow::RequestFrame()
@@ -132,11 +149,10 @@ void RosenWindow::RequestFrame()
             auto windowId = rsWindow_->GetWindowId();
             auto instanceId = Container::CurrentIdSafely();
             auto task = [windowId, instanceId, timeStamp = lastRequestVsyncTime_]() {
-                LOGE("ArkUI request vsync，but no vsync was received within 3 seconds");
+                LOGE("ArkUI request vsync,but no vsync was received within 3 seconds");
                 EventReport::SendVsyncException(VsyncExcepType::UI_VSYNC_TIMEOUT, windowId, instanceId, timeStamp);
             };
-            onVsyncEventCheckTimer_.Reset(task);
-            taskExecutor->PostDelayedTask(onVsyncEventCheckTimer_, TaskExecutor::TaskType::JS,
+            taskExecutor->PostDelayedTaskWithoutTraceId(task, TaskExecutor::TaskType::JS,
                 VSYNC_TASK_DELAY_MILLISECOND, "ArkUIVsyncTimeoutCheck");
         }
 #endif
@@ -246,4 +262,14 @@ std::string RosenWindow::GetWindowName() const
     return rsWindow_->GetWindowName();
 }
 
+void RosenWindow::OnVsync(uint64_t nanoTimestamp, uint32_t frameCount)
+{
+    Window::OnVsync(nanoTimestamp, frameCount);
+    auto taskExecutor = taskExecutor_.Upgrade();
+#ifdef VSYNC_TIMEOUT_CHECK
+        if (taskExecutor) {
+            taskExecutor->RemoveTask(TaskExecutor::TaskType::JS, "ArkUIVsyncTimeoutCheck");
+        }
+#endif
+}
 } // namespace OHOS::Ace::NG

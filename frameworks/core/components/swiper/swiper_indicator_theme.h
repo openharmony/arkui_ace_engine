@@ -40,6 +40,19 @@ constexpr Dimension SWIPER_INDICATOR_DOT_ITEM_SPACE = 8.0_vp;
 constexpr double INDICATOR_ZOOM_IN_SCALE = 1.33;
 } // namespace
 
+enum class OverlongType {
+    NONE = 0,
+    LEFT_NORMAL_RIGHT_FADEOUT,
+    LEFT_FADEOUT_RIGHT_NORMAL,
+    LEFT_FADEOUT_RIGHT_FADEOUT
+};
+
+enum class OverlongIndicatorMove {
+    NONE = 0,
+    MOVE_FORWARD,
+    MOVE_BACKWARD
+};
+
 enum class GestureState {
     GESTURE_STATE_INIT,
     GESTURE_STATE_NONE,
@@ -119,6 +132,12 @@ public:
             theme->hoverColor_ = swiperPattern->GetAttr<Color>("indicator_color_hover", Color::TRANSPARENT);
             theme->pressedColor_ = swiperPattern->GetAttr<Color>("indicator_color_pressed", Color::TRANSPARENT);
             theme->focusedColor_ = swiperPattern->GetAttr<Color>("indicator_color_focused", Color::TRANSPARENT);
+            ParsePattern2(themeConstants, theme, swiperPattern);
+        }
+
+        void ParsePattern2(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SwiperIndicatorTheme>& theme,
+            const RefPtr<ThemeStyle> swiperPattern) const
+        {
             theme->focusedBorderWidth_ = SWIPER_FOCUSED_BORDER_WIDTH;
             theme->hoverArrowBackgroundColor_ =
                 swiperPattern->GetAttr<Color>(ARROW_COLOR_BOARDCOLOR_HOVER, Color::TRANSPARENT);

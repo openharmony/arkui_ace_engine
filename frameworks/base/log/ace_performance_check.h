@@ -70,6 +70,8 @@ public:
 
     static CodeInfo GetCodeInfo(int32_t row, int32_t col);
     static void RecordPerformanceCheckData(const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout);
+    static void RecordPerformanceCheckDataForNavigation(
+        const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout, const std::string& navPath);
 
 private:
     static std::string GetCurrentTime();

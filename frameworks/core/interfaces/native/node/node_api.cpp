@@ -16,22 +16,28 @@
 #include "core/interfaces/native/node/node_api.h"
 
 #include <deque>
+#include <securec.h>
 
 #include "base/error/error_code.h"
+#include "base/log/ace_trace.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/canvas_rendering_context_2d_modifier.h"
 #include "core/interfaces/native/node/custom_dialog_model.h"
+#include "core/interfaces/native/node/grid_modifier.h"
+#include "core/interfaces/native/node/node_adapter_impl.h"
 #include "core/interfaces/native/node/node_animate.h"
 #include "core/interfaces/native/node/node_canvas_modifier.h"
-#include "core/interfaces/native/node/node_adapter_impl.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_common_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
@@ -41,9 +47,9 @@
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/node_swiper_modifier.h"
-#include "core/interfaces/native/node/node_text_modifier.h"
 #include "core/interfaces/native/node/node_text_area_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
+#include "core/interfaces/native/node/node_text_modifier.h"
 #include "core/interfaces/native/node/node_textpicker_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
 #include "core/interfaces/native/node/node_toggle_modifier.h"
@@ -53,12 +59,63 @@
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 #include "core/interfaces/native/node/search_modifier.h"
 #include "core/interfaces/native/node/radio_modifier.h"
+#include "core/interfaces/native/node/search_modifier.h"
 #include "core/interfaces/native/node/select_modifier.h"
+#include "core/interfaces/native/node/util_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
+#include "core/interfaces/native/node/node_list_item_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t INVLID_VALUE = -1;
+
+int32_t WriteStringToBuffer(const std::string& src, char* buffer, int32_t bufferSize, int32_t* writeLen)
+{
+    CHECK_NULL_RETURN(buffer, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(writeLen, ERROR_CODE_PARAM_INVALID);
+    if (src.empty()) {
+        return ERROR_CODE_NO_ERROR;
+    }
+    int32_t srcLength = static_cast<int32_t>(src.length());
+    if (bufferSize - 1 < srcLength) {
+        *writeLen = srcLength == INT32_MAX ? INT32_MAX : srcLength + 1;
+        return ERROR_CODE_NATIVE_IMPL_BUFFER_SIZE_ERROR;
+    }
+    src.copy(buffer, srcLength);
+    buffer[srcLength] = '\0';
+    *writeLen = srcLength;
+    return ERROR_CODE_NO_ERROR;
+}
+
+std::shared_ptr<NavDestinationInfo> GetNavDestinationInfoByNode(ArkUINodeHandle node)
+{
+    FrameNode* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, nullptr);
+    return NG::UIObserverHandler::GetInstance().GetNavigationState(Ace::AceType::Claim<FrameNode>(currentNode));
+}
+
+std::shared_ptr<RouterPageInfoNG> GetRouterPageInfoByNode(ArkUINodeHandle node)
+{
+    FrameNode* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, nullptr);
+    return NG::UIObserverHandler::GetInstance().GetRouterPageState(Ace::AceType::Claim<FrameNode>(currentNode));
+}
+
+RefPtr<NavigationStack> GetNavigationStackByNode(ArkUINodeHandle node)
+{
+    FrameNode* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, nullptr);
+    auto pipeline = currentNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto navigationMgr = pipeline->GetNavigationManager();
+    CHECK_NULL_RETURN(navigationMgr, nullptr);
+    auto result = navigationMgr->GetNavigationInfo(Ace::AceType::Claim<FrameNode>(currentNode));
+    CHECK_NULL_RETURN(result, nullptr);
+    return result->pathStack.Upgrade();
+}
+} // namespace
 
 ArkUI_Int64 GetUIState(ArkUINodeHandle node)
 {
@@ -142,7 +199,13 @@ void SetCustomCallback(ArkUIVMContext context, ArkUINodeHandle node, ArkUI_Int32
 
 ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 flags)
 {
-    auto* node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
+    ArkUINodeHandle node = nullptr;
+    if (flags == ARKUI_NODE_FLAG_C) {
+        ContainerScope Scope(Container::CurrentIdSafelyWithCheck());
+        node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
+    } else {
+        node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
+    }
     return node;
 }
 
@@ -247,6 +310,8 @@ void ResetAttribute(ArkUINodeHandle nodePtr, ArkUI_CharPtr attribute)
 
 typedef void (*ComponentAsyncEventHandler)(ArkUINodeHandle node, void* extraParam);
 
+typedef void (*ResetComponentAsyncEventHandler)(ArkUINodeHandle node);
+
 /**
  * IMPORTANT!!!
  * the order of declaring the handler must be same as the in the ArkUIEventSubKind enum
@@ -297,6 +362,10 @@ const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextInputContentSizeChange,
     NodeModifier::SetOnTextInputInputFilterError,
     NodeModifier::SetTextInputOnTextContentScroll,
+    NodeModifier::SetTextInputOnWillInsert,
+    NodeModifier::SetTextInputOnDidInsert,
+    NodeModifier::SetTextInputOnWillDelete,
+    NodeModifier::SetTextInputOnDidDelete,
 };
 
 const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
@@ -309,12 +378,17 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnTextAreaContentSizeChange,
     NodeModifier::SetOnTextAreaInputFilterError,
     NodeModifier::SetTextAreaOnTextContentScroll,
+    NodeModifier::SetTextAreaOnWillInsertValue,
+    NodeModifier::SetTextAreaOnDidInsertValue,
+    NodeModifier::SetTextAreaOnWillDeleteValue,
+    NodeModifier::SetTextAreaOnDidDeleteValue,
 };
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
     NodeModifier::SetRefreshOnStateChange,
     NodeModifier::SetOnRefreshing,
     NodeModifier::SetRefreshOnOffsetChange,
+    NodeModifier::SetRefreshChangeEvent,
 };
 
 const ComponentAsyncEventHandler TOGGLE_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -376,6 +450,10 @@ const ComponentAsyncEventHandler listNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnListReachEnd,
 };
 
+const ComponentAsyncEventHandler LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetListItemOnSelect,
+};
+
 const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnWillScroll,
     NodeModifier::SetOnWaterFlowReachEnd,
@@ -424,6 +502,185 @@ const ComponentAsyncEventHandler IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetImageAnimatorOnRepeat,
     NodeModifier::SetImageAnimatorOnCancel,
     NodeModifier::SetImageAnimatorOnFinish,
+};
+
+const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetOnAppear,
+    NodeModifier::ResetOnDisappear,
+    NodeModifier::ResetOnTouch,
+    NodeModifier::ResetOnClick,
+    NodeModifier::ResetOnHover,
+    NodeModifier::ResetOnBlur,
+    nullptr,
+    NodeModifier::ResetOnMouse,
+    NodeModifier::ResetOnAreaChange,
+    NodeModifier::ResetOnVisibleAreaChange,
+    nullptr,
+    NodeModifier::ResetOnFocus,
+    NodeModifier::ResetOnTouchIntercept,
+    NodeModifier::ResetOnAttach,
+    NodeModifier::ResetOnDetach,
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetOnScroll,
+    NodeModifier::ResetOnScrollFrameBegin,
+    NodeModifier::ResetScrollOnWillScroll,
+    NodeModifier::ResetScrollOnDidScroll,
+    NodeModifier::ResetOnScrollStart,
+    NodeModifier::ResetOnScrollStop,
+    NodeModifier::ResetOnScrollEdge,
+    NodeModifier::ResetOnScrollReachStart,
+    NodeModifier::ResetOnScrollReachEnd,
+};
+
+const ResetComponentAsyncEventHandler TEXT_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetOnDetectResultUpdate,
+};
+
+const ResetComponentAsyncEventHandler TEXT_INPUT_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetOnTextInputEditChange,
+    NodeModifier::ResetTextInputOnSubmit,
+    NodeModifier::ResetOnTextInputChange,
+    NodeModifier::ResetOnTextInputCut,
+    NodeModifier::ResetOnTextInputPaste,
+    NodeModifier::ResetOnTextInputSelectionChange,
+    NodeModifier::ResetOnTextInputContentSizeChange,
+    NodeModifier::ResetOnTextInputInputFilterError,
+    NodeModifier::ResetTextInputOnTextContentScroll,
+};
+
+const ResetComponentAsyncEventHandler TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetOnTextAreaEditChange,
+    nullptr,
+    NodeModifier::ResetOnTextAreaChange,
+    NodeModifier::ResetOnTextAreaPaste,
+    NodeModifier::ResetOnTextAreaSelectionChange,
+    NodeModifier::ResetTextAreaOnSubmit,
+    NodeModifier::ResetOnTextAreaContentSizeChange,
+    NodeModifier::ResetOnTextAreaInputFilterError,
+    NodeModifier::ResetTextAreaOnTextContentScroll,
+};
+
+const ResetComponentAsyncEventHandler REFRESH_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetRefreshOnStateChange,
+    NodeModifier::ResetOnRefreshing,
+    NodeModifier::ResetRefreshOnOffsetChange,
+    NodeModifier::ResetRefreshChangeEvent,
+};
+
+const ResetComponentAsyncEventHandler TOGGLE_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetOnToggleChange,
+};
+
+const ResetComponentAsyncEventHandler IMAGE_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetImageOnComplete,
+    NodeModifier::ResetImageOnError,
+    NodeModifier::ResetImageOnSvgPlayFinish,
+    NodeModifier::ResetImageOnDownloadProgress,
+};
+
+const ResetComponentAsyncEventHandler DATE_PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler TIME_PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler TEXT_PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler CALENDAR_PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler CHECKBOX_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler SLIDER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler CANVAS_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler LIST_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetOnListScroll,
+    NodeModifier::ResetOnListScrollIndex,
+    NodeModifier::ResetOnListScrollStart,
+    NodeModifier::ResetOnListScrollStop,
+    NodeModifier::ResetOnListScrollFrameBegin,
+    NodeModifier::ResetOnListWillScroll,
+    NodeModifier::ResetOnListDidScroll,
+    NodeModifier::ResetOnListReachStart,
+    NodeModifier::ResetOnListReachEnd,
+};
+
+const ResetComponentAsyncEventHandler LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetListItemOnSelect,
+};
+
+const ResetComponentAsyncEventHandler WATERFLOW_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetOnWillScroll,
+    NodeModifier::ResetOnWaterFlowReachEnd,
+    NodeModifier::ResetOnDidScroll,
+    NodeModifier::ResetOnWaterFlowScrollStart,
+    NodeModifier::ResetOnWaterFlowScrollStop,
+    NodeModifier::ResetOnWaterFlowScrollFrameBegin,
+    NodeModifier::ResetOnWaterFlowScrollIndex,
+    NodeModifier::ResetOnWaterFlowReachStart,
+};
+
+const ResetComponentAsyncEventHandler GRID_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+    nullptr,
+    nullptr,
+    NodeModifier::ResetOnGridScrollIndex,
+};
+
+const ResetComponentAsyncEventHandler ALPHABET_INDEXER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler SEARCH_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler RADIO_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler SELECT_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+};
+
+const ResetComponentAsyncEventHandler IMAGE_ANIMATOR_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetImageAnimatorOnStart,
+    NodeModifier::ResetImageAnimatorOnPause,
+    NodeModifier::ResetImageAnimatorOnRepeat,
+    NodeModifier::ResetImageAnimatorOnCancel,
+    NodeModifier::ResetImageAnimatorOnFinish,
 };
 
 /* clang-format on */
@@ -528,7 +785,7 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = TEXT_PICKER_NODE_ASYNC_EVENT_HANDLERS[subKind];
-            break;            
+            break;
         }
         case ARKUI_CALENDAR_PICKER: {
             // calendar picker event type.
@@ -581,6 +838,15 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = listNodeAsyncEventHandlers[subKind];
+            break;
+        }
+        case ARKUI_LIST_ITEM: {
+            // list item event type.
+            if (subKind >= sizeof(LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_WATER_FLOW: {
@@ -658,9 +924,278 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
     }
 }
 
-void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind subKind)
+void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind)
 {
-    // TODO
+    unsigned int subClassType = kind / ARKUI_MAX_EVENT_NUM;
+    unsigned int subKind = kind % ARKUI_MAX_EVENT_NUM;
+    ResetComponentAsyncEventHandler eventHandle = nullptr;
+    switch (subClassType) {
+        case 0: {
+            // common event type.
+            if (subKind >= sizeof(COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_IMAGE: {
+            if (subKind >= sizeof(IMAGE_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = IMAGE_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_SCROLL: {
+            // scroll event type.
+            if (subKind >= sizeof(SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_TEXT: {
+            // text event type.
+            if (subKind >= sizeof(TEXT_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = TEXT_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_TEXT_INPUT: {
+            // text input event type.
+            if (subKind >=
+                sizeof(TEXT_INPUT_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = TEXT_INPUT_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_TEXTAREA: {
+            // textarea event type.
+            if (subKind >=
+                sizeof(TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_REFRESH: {
+            // refresh event type.
+            if (subKind >= sizeof(REFRESH_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = REFRESH_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_TOGGLE: {
+            // toggle event type.
+            if (subKind >= sizeof(TOGGLE_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = TOGGLE_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_DATE_PICKER: {
+            // datepicker event type.
+            if (subKind >=
+                sizeof(DATE_PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = DATE_PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_TIME_PICKER: {
+            // timepicker event type.
+            if (subKind >=
+                sizeof(TIME_PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = TIME_PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_TEXT_PICKER: {
+            if (subKind >=
+                sizeof(TEXT_PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = TEXT_PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_CALENDAR_PICKER: {
+            // calendar picker event type.
+            if (subKind >= sizeof(CALENDAR_PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(
+                ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = CALENDAR_PICKER_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_CHECKBOX: {
+            // timepicker event type.
+            if (subKind >= sizeof(CHECKBOX_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = CHECKBOX_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_SLIDER: {
+            // timepicker event type.
+            if (subKind >= sizeof(SLIDER_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = SLIDER_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_SWIPER: {
+            // swiper event type.
+            if (subKind >= sizeof(SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_CANVAS: {
+            if (subKind >= sizeof(CANVAS_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = CANVAS_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_LIST: {
+            // list event type.
+            if (subKind >= sizeof(LIST_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = LIST_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_LIST_ITEM: {
+            // list item event type.
+            if (subKind >=
+                sizeof(LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_WATER_FLOW: {
+            // swiper event type.
+            if (subKind >=
+                sizeof(WATERFLOW_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = WATERFLOW_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_GRID: {
+            // grid event type.
+            if (subKind >= sizeof(GRID_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = GRID_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_ALPHABET_INDEXER: {
+            // alphabet indexer event type.
+            if (subKind >= sizeof(ALPHABET_INDEXER_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(
+                ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = ALPHABET_INDEXER_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_SEARCH: {
+            // search event type.
+            if (subKind >= sizeof(SEARCH_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = SEARCH_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_RADIO: {
+            // search event type.
+            if (subKind >= sizeof(RADIO_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = RADIO_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_SELECT: {
+            // select event type.
+            if (subKind >= sizeof(SELECT_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = SELECT_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_IMAGE_ANIMATOR: {
+            // imageAnimator event type.
+            if (subKind >=
+                sizeof(IMAGE_ANIMATOR_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = IMAGE_ANIMATOR_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        default: {
+            TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+        }
+    }
+    if (eventHandle) {
+        eventHandle(node);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d EMPTY IMPLEMENT", kind);
+    }
 }
 
 void RegisterNodeAsyncEventReceiver(EventReceiver eventReceiver)
@@ -700,23 +1235,29 @@ ArkUIAPICallbackMethod* GetArkUIAPICallbackMethod()
     return ViewModel::GetCallbackMethod();
 }
 
-int SetVsyncCallback(ArkUIVMContext vmContext, ArkUI_Int32 device, ArkUI_Int32 callbackId)
+ArkUIPipelineContext GetPipelineContext(ArkUINodeHandle node)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    return reinterpret_cast<ArkUIPipelineContext>(frameNode->GetContext());
+}
+
+void SetVsyncCallback(ArkUIVMContext vmContext, ArkUIPipelineContext pipelineContext, ArkUI_Int32 callbackId)
 {
     static int vsyncCount = 1;
     auto vsync = [vmContext, callbackId]() {
-        ArkUIEventCallbackArg args[] = { { vsyncCount++ } };
+        ArkUIEventCallbackArg args[] = { {.i32 =vsyncCount++ } };
         ArkUIAPICallbackMethod* cbs = GetArkUIAPICallbackMethod();
         CHECK_NULL_VOID(vmContext);
         CHECK_NULL_VOID(cbs);
         cbs->CallInt(vmContext, callbackId, 1, &args[0]);
     };
-    PipelineContext::GetCurrentContext()->SetVsyncListener(vsync);
-    return 0;
+
+    reinterpret_cast<PipelineContext*>(pipelineContext)->SetVsyncListener(vsync);
 }
 
-void UnblockVsyncWait(ArkUIVMContext vmContext, ArkUI_Int32 device)
+void UnblockVsyncWait(ArkUIVMContext vmContext, ArkUIPipelineContext pipelineContext)
 {
-    PipelineContext::GetCurrentContext()->RequestFrame();
+    reinterpret_cast<PipelineContext*>(pipelineContext)->RequestFrame();
 }
 
 ArkUI_Int32 MeasureNode(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Float32* data)
@@ -724,7 +1265,7 @@ ArkUI_Int32 MeasureNode(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Fl
     return ViewModel::MeasureNode(vmContext, node, data);
 }
 
-ArkUI_Int32 LayoutNode(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Float32* data)
+ArkUI_Int32 LayoutNode(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Float32 (*data)[2])
 {
     return ViewModel::LayoutNode(vmContext, node, data);
 }
@@ -747,15 +1288,14 @@ void* GetAttachNodePtr(ArkUINodeHandle node)
 ArkUI_Int32 MeasureLayoutAndDraw(ArkUIVMContext vmContext, ArkUINodeHandle rootPtr)
 {
     auto* root = reinterpret_cast<FrameNode*>(rootPtr);
-    float scale = static_cast<float>(OHOS::Ace::SystemProperties::GetResolution());
-    float width = root->GetGeometryNode()->GetFrameSize().Width() / scale;
-    float height = root->GetGeometryNode()->GetFrameSize().Height() / scale;
+    float width = root->GetGeometryNode()->GetFrameSize().Width();
+    float height = root->GetGeometryNode()->GetFrameSize().Height();
     // measure
-    ArkUI_Float32 measureData[] = { width, height, width, height };
+    ArkUI_Float32 measureData[] = { width, height, width, height, width, height };
     MeasureNode(vmContext, rootPtr, &measureData[0]);
     // layout
-    ArkUI_Float32 layoutData[] = { 0, 0, width, height };
-    LayoutNode(vmContext, rootPtr, &layoutData[0]);
+    ArkUI_Float32 layoutData[] = { 0, 0 };
+    LayoutNode(vmContext, rootPtr, &layoutData);
     // draw
     ArkUI_Float32 drawData[] = { 0, 0, 0, 0 };
     DrawNode(vmContext, rootPtr, &drawData[0]);
@@ -922,6 +1462,128 @@ void GetLayoutConstraint(ArkUINodeHandle node, ArkUI_Int32* value)
     }
 }
 
+
+
+ArkUI_Int32 GetNavigationId(
+    ArkUINodeHandle node, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* writeLen)
+{
+    auto navDesInfo = GetNavDestinationInfoByNode(node);
+    CHECK_NULL_RETURN(navDesInfo, ERROR_CODE_NATIVE_IMPL_GET_INFO_FAILED);
+    std::string navigationId = navDesInfo->navigationId;
+    return WriteStringToBuffer(navigationId, buffer, bufferSize, writeLen);
+}
+
+ArkUI_Int32 GetNavDestinationName(
+    ArkUINodeHandle node, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* writeLen)
+{
+    auto navDesInfo = GetNavDestinationInfoByNode(node);
+    CHECK_NULL_RETURN(navDesInfo, ERROR_CODE_NATIVE_IMPL_GET_INFO_FAILED);
+    std::string name = navDesInfo->name;
+    return WriteStringToBuffer(name, buffer, bufferSize, writeLen);
+}
+
+ArkUI_Int32 GetStackLength(ArkUINodeHandle node)
+{
+    auto navigationStack = GetNavigationStackByNode(node);
+    CHECK_NULL_RETURN(navigationStack, INVLID_VALUE);
+    return navigationStack->Size();
+}
+
+ArkUI_Int32 GetNavDesNameByIndex(
+    ArkUINodeHandle node, ArkUI_Int32 index, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* writeLen)
+{
+    auto navigationStack = GetNavigationStackByNode(node);
+    CHECK_NULL_RETURN(navigationStack, ERROR_CODE_NATIVE_IMPL_GET_INFO_FAILED);
+    if (index < 0 || index >= navigationStack->Size()) {
+        return ERROR_CODE_NATIVE_IMPL_NODE_INDEX_INVALID;
+    }
+
+    std::string name = navigationStack->GetNavDesNameByIndex(index);
+    return WriteStringToBuffer(name, buffer, bufferSize, writeLen);
+}
+
+ArkUI_Int32 GetNavDestinationId(
+    ArkUINodeHandle node, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* writeLen)
+{
+    auto navDesInfo = GetNavDestinationInfoByNode(node);
+    CHECK_NULL_RETURN(navDesInfo, ERROR_CODE_NATIVE_IMPL_GET_INFO_FAILED);
+    std::string navDestinationId = navDesInfo->navDestinationId;
+    return WriteStringToBuffer(navDestinationId, buffer, bufferSize, writeLen);
+}
+
+ArkUI_Int32 GetNavDestinationState(ArkUINodeHandle node)
+{
+    auto navDesInfo = GetNavDestinationInfoByNode(node);
+    CHECK_NULL_RETURN(navDesInfo, INVLID_VALUE);
+    return static_cast<int32_t>(navDesInfo->state);
+}
+
+ArkUI_Int32 GetNavDestinationIndex(ArkUINodeHandle node)
+{
+    auto navDesInfo = GetNavDestinationInfoByNode(node);
+    CHECK_NULL_RETURN(navDesInfo, INVLID_VALUE);
+    return navDesInfo->index;
+}
+
+void* GetNavDestinationParam(ArkUINodeHandle node)
+{
+    auto navDesInfo = GetNavDestinationInfoByNode(node);
+    CHECK_NULL_RETURN(navDesInfo, nullptr);
+    return reinterpret_cast<void*>(navDesInfo->param);
+}
+
+ArkUI_Int32 GetRouterPageIndex(ArkUINodeHandle node)
+{
+    auto routerInfo = GetRouterPageInfoByNode(node);
+    CHECK_NULL_RETURN(routerInfo, INVLID_VALUE);
+    return routerInfo->index;
+}
+
+ArkUI_Int32 GetRouterPageName(
+    ArkUINodeHandle node, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* writeLen)
+{
+    auto routerInfo = GetRouterPageInfoByNode(node);
+    CHECK_NULL_RETURN(routerInfo, ERROR_CODE_NATIVE_IMPL_GET_INFO_FAILED);
+    std::string name = routerInfo->name;
+    return WriteStringToBuffer(name, buffer, bufferSize, writeLen);
+}
+
+ArkUI_Int32 GetRouterPagePath(
+    ArkUINodeHandle node, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* writeLen)
+{
+    auto routerInfo = GetRouterPageInfoByNode(node);
+    CHECK_NULL_RETURN(routerInfo, ERROR_CODE_NATIVE_IMPL_GET_INFO_FAILED);
+    std::string path = routerInfo->path;
+    return WriteStringToBuffer(path, buffer, bufferSize, writeLen);
+}
+
+ArkUI_Int32 GetRouterPageState(ArkUINodeHandle node)
+{
+    auto routerInfo = GetRouterPageInfoByNode(node);
+    CHECK_NULL_RETURN(routerInfo, INVLID_VALUE);
+    return static_cast<int32_t>(routerInfo->state);
+}
+
+ArkUI_Int32 GetRouterPageId(
+    ArkUINodeHandle node, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* writeLen)
+{
+    auto routerInfo = GetRouterPageInfoByNode(node);
+    CHECK_NULL_RETURN(routerInfo, ERROR_CODE_NATIVE_IMPL_GET_INFO_FAILED);
+    std::string pageId = routerInfo->pageId;
+    return WriteStringToBuffer(pageId, buffer, bufferSize, writeLen);
+}
+
+int32_t GetContextByNode(ArkUINodeHandle node)
+{
+    int32_t instanceId = -1;
+    FrameNode* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, instanceId);
+    auto pipeline = currentNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, instanceId);
+    instanceId = pipeline->GetInstanceId();
+    return instanceId;
+}
+
 const ArkUIBasicAPI* GetBasicAPI()
 {
     /* clang-format off */
@@ -952,6 +1614,8 @@ const ArkUIBasicAPI* GetBasicAPI()
         MarkDirty,
         IsBuilderNode,
         ConvertLengthMetricsUnit,
+
+        GetContextByNode,
     };
     /* clang-format on */
 
@@ -1109,6 +1773,7 @@ ArkUIExtendedNodeAPI impl_extended = {
     nullptr, // indexerChecker
     nullptr, // setRangeUpdater
     nullptr, // setLazyItemIndexer
+    GetPipelineContext,
     SetVsyncCallback,
     UnblockVsyncWait,
     NodeEvent::CheckEvent,
@@ -1175,6 +1840,100 @@ void AnimateTo(ArkUIContext* context, ArkUIAnimateOption option, void* event, vo
     ViewAnimate::AnimateTo(context, option, reinterpret_cast<void (*)(void*)>(event), user);
 }
 
+void KeyframeAnimateTo(ArkUIContext* context, ArkUIKeyframeAnimateOption* animateOption)
+{
+    ViewAnimate::KeyframeAnimateTo(context, animateOption);
+}
+
+ArkUIAnimatorHandle CreateAnimator(ArkUIContext* context, ArkUIAnimatorOption* animateOption)
+{
+    return ViewAnimate::CreateAnimator(context, animateOption);
+}
+
+void DisposeAnimator(ArkUIAnimatorHandle animator)
+{
+    ViewAnimate::DisposeAnimator(animator);
+}
+
+ArkUI_Int32 AnimatorReset(ArkUIAnimatorHandle animator, ArkUIAnimatorOption* option)
+{
+    return ViewAnimate::AnimatorReset(animator, option);
+}
+
+ArkUI_Int32 AnimatorPlay(ArkUIAnimatorHandle animator)
+{
+    return ViewAnimate::AnimatorPlay(animator);
+}
+
+ArkUI_Int32 AnimatorFinish(ArkUIAnimatorHandle animator)
+{
+    return ViewAnimate::AnimatorFinish(animator);
+}
+
+ArkUI_Int32 AnimatorPause(ArkUIAnimatorHandle animator)
+{
+    return ViewAnimate::AnimatorPause(animator);
+}
+
+ArkUI_Int32 AnimatorCancel(ArkUIAnimatorHandle animator)
+{
+    return ViewAnimate::AnimatorCancel(animator);
+}
+
+ArkUI_Int32 AnimatorReverse(ArkUIAnimatorHandle animator)
+{
+    return ViewAnimate::AnimatorReverse(animator);
+}
+
+ArkUICurveHandle CreateCurve(ArkUI_Int32 curve)
+{
+    return ViewAnimate::CreateCurve(curve);
+}
+
+ArkUICurveHandle CreateStepsCurve(ArkUI_Int32 count, ArkUI_Bool end)
+{
+    return ViewAnimate::CreateStepsCurve(count, end);
+}
+
+ArkUICurveHandle CreateCubicBezierCurve(ArkUI_Float32 x1, ArkUI_Float32 y1, ArkUI_Float32 x2, ArkUI_Float32 y2)
+{
+    return ViewAnimate::CreateCubicBezierCurve(x1, y1, x2, y2);
+}
+
+ArkUICurveHandle CreateSpringCurve(
+    ArkUI_Float32 velocity, ArkUI_Float32 mass, ArkUI_Float32 stiffness, ArkUI_Float32 damping)
+{
+    return ViewAnimate::CreateSpringCurve(velocity, mass, stiffness, damping);
+}
+
+ArkUICurveHandle CreateSpringMotion(
+    ArkUI_Float32 response, ArkUI_Float32 dampingFraction, ArkUI_Float32 overlapDuration)
+{
+    return ViewAnimate::CreateSpringMotion(response, dampingFraction, overlapDuration);
+}
+
+ArkUICurveHandle CreateResponsiveSpringMotion(
+    ArkUI_Float32 response, ArkUI_Float32 dampingFraction, ArkUI_Float32 overlapDuration)
+{
+    return ViewAnimate::CreateResponsiveSpringMotion(response, dampingFraction, overlapDuration);
+}
+
+ArkUICurveHandle CreateInterpolatingSpring(
+    ArkUI_Float32 velocity, ArkUI_Float32 mass, ArkUI_Float32 stiffness, ArkUI_Float32 damping)
+{
+    return ViewAnimate::CreateInterpolatingSpring(velocity, mass, stiffness, damping);
+}
+
+ArkUICurveHandle CreateCustomCurve(ArkUI_Float32 (*interpolate)(ArkUI_Float32 fraction, void* userData), void* userData)
+{
+    return ViewAnimate::CreateCustomCurve(interpolate, userData);
+}
+
+void DisposeCurve(ArkUICurveHandle curve)
+{
+    return ViewAnimate::DisposeCurve(curve);
+}
+
 const ArkUIAnimation* GetAnimationAPI()
 {
     static const ArkUIAnimation modifier = {
@@ -1182,6 +1941,24 @@ const ArkUIAnimation* GetAnimationAPI()
         nullptr,
         nullptr,
         AnimateTo,
+        KeyframeAnimateTo,
+        CreateAnimator,
+        DisposeAnimator,
+        AnimatorReset,
+        AnimatorPlay,
+        AnimatorFinish,
+        AnimatorPause,
+        AnimatorCancel,
+        AnimatorReverse,
+        CreateCurve,
+        CreateStepsCurve,
+        CreateCubicBezierCurve,
+        CreateSpringCurve,
+        CreateSpringMotion,
+        CreateResponsiveSpringMotion,
+        CreateInterpolatingSpring,
+        CreateCustomCurve,
+        DisposeCurve,
     };
     return &modifier;
 }
@@ -1191,6 +1968,19 @@ const ArkUINavigation* GetNavigationAPI()
     static const ArkUINavigation modifier = {
         nullptr,
         nullptr,
+        GetNavigationId,
+        GetNavDestinationName,
+        GetStackLength,
+        GetNavDesNameByIndex,
+        GetNavDestinationId,
+        GetNavDestinationState,
+        GetNavDestinationIndex,
+        GetNavDestinationParam,
+        GetRouterPageIndex,
+        GetRouterPageName,
+        GetRouterPagePath,
+        GetRouterPageState,
+        GetRouterPageId,
     };
     return &modifier;
 }
@@ -1318,13 +2108,17 @@ __attribute__((constructor)) static void provideEntryPoint(void)
 #ifdef WINDOWS_PLATFORM
     // mingw has no setenv :(.
     static char entryPointString[64];
-    (void)snprintf(entryPointString, sizeof entryPointString, "__LIBACE_ENTRY_POINT=%llx",
-        static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(&GetArkUIAPI)));
+    if (snprintf_s(entryPointString, sizeof entryPointString, sizeof entryPointString - 1,
+        "__LIBACE_ENTRY_POINT=%llx", static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(&GetArkUIAPI))) < 0) {
+        return;
+    }
     putenv(entryPointString);
 #else
     char entryPointString[64];
-    (void)snprintf(entryPointString, sizeof entryPointString, "%llx",
-        static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(&GetArkUIAPI)));
+    if (snprintf_s(entryPointString, sizeof entryPointString, sizeof entryPointString - 1,
+        "%llx", static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(&GetArkUIAPI))) < 0) {
+        return;
+    }
     setenv("__LIBACE_ENTRY_POINT", entryPointString, 1);
 #endif
 }

@@ -54,6 +54,11 @@ constexpr int32_t BLACK_POINT_DURATION = 400;
 
 void DotIndicatorModifier::onDraw(DrawingContext& context)
 {
+    if (isOverlong_) {
+        isOverlong_ = false;
+        return;
+    }
+
     ContentProperty contentProperty;
     contentProperty.backgroundColor = backgroundColor_->Get().ToColor();
     contentProperty.vectorBlackPointCenterX = vectorBlackPointCenterX_->Get();
@@ -177,7 +182,7 @@ std::pair<float, float> DotIndicatorModifier::GetTouchBottomCenterX(ContentPrope
     auto totalCount = contentProperty.vectorBlackPointCenterX.size();
     // 2.0 means get the long point radius
     float radius = (rightCenterX - leftCenterX) / 2.0f;
-    bool isLeftTouchBottom = (currentIndex_ == totalCount - 1);
+    bool isLeftTouchBottom = (currentIndex_ == static_cast<int32_t>(totalCount) - 1);
     bool isRightTouchBottom = (currentIndex_ == 0);
 
     if ((animationState_ == TouchBottomAnimationStage::STAGE_SHRINKT_TO_BLACK_POINT && isLeftTouchBottom) ||
@@ -202,7 +207,7 @@ void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty
     for (size_t i = 0; i < totalCount; ++i) {
         LinearVector<float> itemHalfSizes = GetItemHalfSizes(i, contentProperty);
         OffsetF center = { contentProperty.vectorBlackPointCenterX[i], centerY_ };
-        if (i != currentIndex_) {
+        if (static_cast<int32_t>(i) != currentIndex_) {
             PaintUnselectedIndicator(canvas, center, itemHalfSizes, false, LinearColor(originalUnselectColor_));
         } else {
             selectedCenter = center;

@@ -123,11 +123,15 @@ public:
 
     void LogPrintMouseTest();
     void MouseTest(const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict);
+    void AccessibilityHoverTest(
+        const TouchEvent& event, const RefPtr<NG::FrameNode>& frameNode, TouchRestrict& touchRestrict);
+    void UpdateAccessibilityHoverNode(const TouchEvent& event, const TouchTestResult& testResult);
     void UpdateHoverNode(const MouseEvent& event, const TouchTestResult& testResult);
     bool DispatchMouseEventNG(const MouseEvent& event);
     void DispatchMouseHoverAnimationNG(const MouseEvent& event);
     bool DispatchMouseHoverEventNG(const MouseEvent& event);
     void DispatchHoverEffectEvent(const MouseEvent& event);
+    void DispatchAccessibilityHoverEventNG(const TouchEvent& event);
 
     void AxisTest(const AxisEvent& event, const RefPtr<RenderNode>& renderNode);
     bool DispatchAxisEvent(const AxisEvent& event);
@@ -231,7 +235,8 @@ public:
         return responseCtrl_;
     }
 
-    void CheckTouchEvent(TouchEvent touchEvent);
+    void CheckDownEvent(const TouchEvent& touchEvent);
+    void CheckUpEvent(const TouchEvent& touchEvent);
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, TouchTestResult> postEventTouchTestResults_;
 
@@ -272,6 +277,11 @@ public:
 
     void CheckAndLogLastConsumedEventInfo(int32_t eventId, bool logImmediately = false);
 
+#if defined(SUPPORT_TOUCH_TARGET_TEST)
+    bool TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
+        TouchRestrict& touchRestrict, const Offset& offset = Offset(), float viewScale = 1.0f,
+        bool needAppend = false, const std::string& target = "");
+#endif
 private:
     void SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
     void CleanGestureEventHub();
@@ -283,12 +293,17 @@ private:
         bool sendOnTouch);
     void CleanRecognizersForDragBegin(TouchEvent& touchEvent);
     void SetResponseLinkRecognizers(const TouchTestResult& result, const TouchTestResult& responseLinkRecognizers);
+    void MockCancelEventAndDispatch(const TouchEvent& touchPoint);
+    void MockCancelEventAndDispatch(const AxisEvent& axisEvent);
+    void MockHoverCancelEventAndDispatch(const TouchEvent& touchPoint);
     bool innerEventWin_ = false;
-    std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
+    std::unordered_map<size_t, TouchTestResult> mouseTestResults_;
     MouseTestResult currMouseTestResults_;
     MouseTestResult pressMouseTestResults_;
     HoverTestResult currHoverTestResults_;
     HoverTestResult lastHoverTestResults_;
+    HoverTestResult curAccessibilityHoverResults_;
+    HoverTestResult lastAccessibilityHoverResults_;
     AxisTestResult axisTestResults_;
     WeakPtr<NG::FrameNode> lastHoverNode_;
     WeakPtr<NG::FrameNode> currHoverNode_;
@@ -300,6 +315,7 @@ private:
     WeakPtr<RenderNode> axisNode_;
     int32_t instanceId_ = 0;
     uint32_t lastHoverDispatchLength_ = 0;
+    uint32_t lastAccessibilityHoverDispatchLength_ = 0;
     bool inSelectedRect_ = false;
     bool isDragging_ = false;
     bool isLastMoveBeforeUp_ = false;
@@ -316,6 +332,7 @@ private:
     std::set<WeakPtr<NG::FrameNode>> hittedFrameNode_;
     MarkProcessedEventInfo lastReceivedEvent_;
     MarkProcessedEventInfo lastConsumedEvent_;
+    int32_t lastDownFingerNumber_ = 0;
 };
 
 } // namespace OHOS::Ace

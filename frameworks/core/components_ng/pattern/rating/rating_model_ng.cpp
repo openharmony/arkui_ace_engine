@@ -30,8 +30,6 @@ void RatingModelNG::Create(double rating, bool indicator)
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::RATING_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RatingPattern>(); });
     stack->Push(frameNode);
-    auto pattern = frameNode->GetPattern<RatingPattern>();
-    pattern->InitDefaultParams();
     RatingModelNG::SetRatingScore(rating);
     RatingModelNG::SetIndicator(indicator);
 }

@@ -16,10 +16,12 @@
 #include "core/components_ng/pattern/security_component/security_component_layout_algorithm.h"
 
 #include "base/log/ace_scoring_log.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
+#include "core/components_ng/pattern/security_component/security_component_layout_element.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -403,6 +405,11 @@ void SecurityComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     maxWidth_ = constraint_->maxSize.Width();
     maxHeight_ = constraint_->maxSize.Height();
     InitPadding(securityComponentLayoutProperty);
+    if (GetTextDirection(layoutWrapper) == TextDirection::RTL) {
+        PaddingLayoutElement temp = left_;
+        left_ = right_;
+        right_ = temp;
+    }
 
     MeasureIntegralSize();
 

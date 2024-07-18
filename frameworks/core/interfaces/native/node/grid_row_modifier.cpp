@@ -57,16 +57,8 @@ void ResetAlignItems(ArkUINodeHandle node)
 }
 
 void InheritGridRowGutterOption(const RefPtr<V2::Gutter>& gutter,
-    int32_t *gutterSizeArray, int32_t size, int32_t defaultVal)
+    int32_t *gutterSizeArray)
 {
-    if (gutterSizeArray[0] == -1) {
-        gutterSizeArray[0] = defaultVal;
-    }
-    for (int32_t i = 1; i < size; i++) {
-        if (gutterSizeArray[i] == -1) {
-            gutterSizeArray[i] = gutterSizeArray[i - 1];
-        }
-    }
     gutter->xXs = Dimension(gutterSizeArray[X_XS], DimensionUnit::VP);
     gutter->xSm = Dimension(gutterSizeArray[X_SM], DimensionUnit::VP);
     gutter->xMd = Dimension(gutterSizeArray[X_MD], DimensionUnit::VP);
@@ -171,7 +163,7 @@ void SetGutter(ArkUINodeHandle node, int32_t *containerSizeArray, int32_t size)
     CHECK_NULL_VOID(frameNode);
 
     auto parsedGutter = Referenced::MakeRefPtr<V2::Gutter>();
-    InheritGridRowGutterOption(parsedGutter, containerSizeArray, size, 0);
+    InheritGridRowGutterOption(parsedGutter, containerSizeArray);
     GridRowModelNG::SetGutter(frameNode, parsedGutter);
 }
 
@@ -183,11 +175,31 @@ void ResetGutter(ArkUINodeHandle node)
     GridRowModelNG::SetGutter(frameNode, parsedGutter);
 }
 
+void SetOnBreakpointChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onBreakpointChange = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        GridRowModelNG::SetOnBreakPointChange(frameNode, std::move(*onBreakpointChange));
+    } else {
+        GridRowModelNG::SetOnBreakPointChange(frameNode, nullptr);
+    }
+}
+
+void ResetOnBreakpointChange(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridRowModelNG::SetOnBreakPointChange(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUIGridRowModifier* GetGridRowModifier()
 {
     static const ArkUIGridRowModifier modifier = { SetAlignItems, ResetAlignItems, SetDirection, ResetDirection,
-        SetBreakpoints, ResetBreakpoints, SetColumns, ResetColumns, SetGutter, ResetGutter };
+        SetBreakpoints, ResetBreakpoints, SetColumns, ResetColumns, SetGutter, ResetGutter,
+        SetOnBreakpointChange, ResetOnBreakpointChange };
     return &modifier;
 }
 }

@@ -27,8 +27,6 @@ const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NO
 constexpr Ace::FontWeight DEFAULT_FONT_WEIGHT = Ace::FontWeight::NORMAL;
 constexpr Dimension DEFAULT_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
 const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
-const char* DEFAULT_TEXT_CLOCK_FORMAT_IN_CARD = "hh:mm";
-const char* DEFAULT_TEXT_CLOCK_FORMAT_IN_NOCARD = "aa hh:mm:ss";
 
 namespace TextClockModifier {
 void SetFormat(ArkUINodeHandle node, ArkUI_CharPtr format)
@@ -42,14 +40,7 @@ void ResetFormat(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::string defaultFormat;
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-        PipelineBase::GetCurrentContext()->IsJsCard()) {
-        defaultFormat = DEFAULT_TEXT_CLOCK_FORMAT_IN_CARD;
-    } else {
-        defaultFormat = DEFAULT_TEXT_CLOCK_FORMAT_IN_NOCARD;
-    }
-    TextClockModelNG::SetFormat(frameNode, defaultFormat);
+    TextClockModelNG::SetFormat(frameNode, "");
 }
 
 void SetFontColor(ArkUINodeHandle node, ArkUI_Uint32 color)
@@ -176,6 +167,22 @@ void ResetFontFeature(ArkUINodeHandle node)
     std::string strValue = "";
     TextClockModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(strValue));
 }
+
+void SetDateTimeOptions(ArkUINodeHandle node, ArkUI_Int32 hourType)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ZeroPrefixType hour = static_cast<ZeroPrefixType>(hourType);
+    TextClockModelNG::SetDateTimeOptions(frameNode, hour);
+}
+
+void ResetDateTimeOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ZeroPrefixType hourType = ZeroPrefixType::AUTO;
+    TextClockModelNG::SetDateTimeOptions(frameNode, hourType);
+}
 } // namespace TextClockModifier
 
 namespace NodeModifier {
@@ -197,7 +204,9 @@ const ArkUITextClockModifier* GetTextClockModifier()
         TextClockModifier::SetTextShadow,
         TextClockModifier::ResetTextShadow,
         TextClockModifier::SetFontFeature,
-        TextClockModifier::ResetFontFeature
+        TextClockModifier::ResetFontFeature,
+        TextClockModifier::SetDateTimeOptions,
+        TextClockModifier::ResetDateTimeOptions
     };
 
     return &modifier;

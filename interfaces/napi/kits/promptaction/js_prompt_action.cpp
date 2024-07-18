@@ -21,6 +21,7 @@
 namespace OHOS::Ace::Napi {
 static constexpr uint32_t DEFAULT = 0;
 static constexpr uint32_t TOP_MOST = 1;
+static constexpr uint32_t SYSTEM_TOP_MOST = 2;
 static napi_value PromptActionExport(napi_env env, napi_value exports)
 {
     napi_value showMode = nullptr;
@@ -30,9 +31,13 @@ static napi_value PromptActionExport(napi_env env, napi_value exports)
     napi_set_named_property(env, showMode, "DEFAULT", prop);
     napi_create_uint32(env, TOP_MOST, &prop);
     napi_set_named_property(env, showMode, "TOP_MOST", prop);
+    napi_create_uint32(env, SYSTEM_TOP_MOST, &prop);
+    napi_set_named_property(env, showMode, "SYSTEM_TOP_MOST", prop);
 
     napi_property_descriptor promptDesc[] = {
         DECLARE_NAPI_FUNCTION("showToast", JSPromptShowToast),
+        DECLARE_NAPI_FUNCTION("openToast", JSPromptOpenToast),
+        DECLARE_NAPI_FUNCTION("closeToast", JSPromptCloseToast),
         DECLARE_NAPI_FUNCTION("showDialog", JSPromptShowDialog),
         DECLARE_NAPI_FUNCTION("showActionMenu", JSPromptShowActionMenu),
         DECLARE_NAPI_FUNCTION("openCustomDialog", JSPromptOpenCustomDialog),

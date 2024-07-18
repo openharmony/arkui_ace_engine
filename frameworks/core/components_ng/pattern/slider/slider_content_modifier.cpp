@@ -426,6 +426,10 @@ void SliderContentModifier::SetSelectSize(const PointF& start, const PointF& end
         selectStart_->Set(start - PointF());
     }
     CHECK_NULL_VOID(selectEnd_);
+    auto currentEnd = end - PointF();
+    if (targetSelectEnd_ == currentEnd) {
+        return;
+    }
     if (animatorStatus_ != SliderStatus::DEFAULT && isVisible_) {
         StopSelectAnimation();
         AnimationOption option = AnimationOption();

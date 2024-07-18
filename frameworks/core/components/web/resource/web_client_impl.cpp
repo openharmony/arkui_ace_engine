@@ -106,15 +106,16 @@ bool OnJsCommonDialog(
     if (task == nullptr) {
         return false;
     }
-    task->PostSyncTask([&webClientImpl, dialogEventType, &param, &jsResult] {
-        if (webClientImpl == nullptr) {
-            return;
-        }
-        auto delegate = webClientImpl->GetWebDelegate();
-        if (delegate) {
-            jsResult = delegate->OnCommonDialog(param, dialogEventType);
-        }
-    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientCommonDialogEvent");
+    task->PostSyncTask(
+        [&webClientImpl, dialogEventType, &param, &jsResult] {
+            if (webClientImpl == nullptr) {
+                return;
+            }
+            auto delegate = webClientImpl->GetWebDelegate();
+            if (delegate) {
+                jsResult = delegate->OnCommonDialog(param, dialogEventType);
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientCommonDialogEvent");
     return jsResult;
 }
 
@@ -146,6 +147,16 @@ void FindListenerImpl::OnFindResultReceived(
     }
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnSearchResultReceive(activeMatchOrdinal, numberOfMatches, isDoneCounting);
+}
+
+std::string SpanstringConvertHtmlImpl::SpanstringConvertHtml(const std::vector<uint8_t> &content)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return "";
+    }
+    return delegate->SpanstringConvertHtml(content);
 }
 
 void WebClientImpl::OnPageLoadEnd(int httpStatusCode, const std::string& url)
@@ -192,15 +203,16 @@ bool WebClientImpl::OnConsoleLog(const std::shared_ptr<OHOS::NWeb::NWebConsoleLo
     if (!task) {
         return false;
     }
-    task->PostSyncTask([webClient = this, message, &jsMessage] {
-        if (!webClient) {
-            return;
-        }
-        auto delegate = webClient->webDelegate_.Upgrade();
-        if (delegate) {
-            jsMessage = delegate->OnConsoleLog(message);
-        }
-    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientConsoleLog");
+    task->PostSyncTask(
+        [webClient = this, message, &jsMessage] {
+            if (!webClient) {
+                return;
+            }
+            auto delegate = webClient->webDelegate_.Upgrade();
+            if (delegate) {
+                jsMessage = delegate->OnConsoleLog(message);
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientConsoleLog");
 
     return jsMessage;
 }
@@ -318,16 +330,17 @@ void WebClientImpl::OnHttpError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceReque
         return;
     }
     std::weak_ptr<WebClientImpl> webClientWeak = shared_from_this();
-    task->PostTask([webClient = webClientWeak, request, response] {
-        auto webClientUpgrade = webClient.lock();
-        if (webClientUpgrade == nullptr) {
-            return;
-        }
-        auto delegate = webClientUpgrade->GetWebDelegate();
-        if (delegate) {
-            delegate->OnHttpErrorReceive(request, response);
-        }
-    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientHttpError");
+    task->PostTask(
+        [webClient = webClientWeak, request, response] {
+            auto webClientUpgrade = webClient.lock();
+            if (webClientUpgrade == nullptr) {
+                return;
+            }
+            auto delegate = webClientUpgrade->GetWebDelegate();
+            if (delegate) {
+                delegate->OnHttpErrorReceive(request, response);
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientHttpError");
 }
 
 void WebClientImpl::OnMessage(const std::string& param)
@@ -487,38 +500,37 @@ bool WebClientImpl::OnFileSelectorShow(
     if (task == nullptr) {
         return false;
     }
-    task->PostSyncTask([webClient = this, &param, &jsResult] {
-        if (webClient == nullptr) {
-            return;
-        }
-        auto delegate = webClient->GetWebDelegate();
-        if (delegate) {
-            jsResult = delegate->OnFileSelectorShow(param);
-        }
-    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientFileSelectorShow");
+    task->PostSyncTask(
+        [webClient = this, &param, &jsResult] {
+            if (webClient == nullptr) {
+                return;
+            }
+            auto delegate = webClient->GetWebDelegate();
+            if (delegate) {
+                jsResult = delegate->OnFileSelectorShow(param);
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientFileSelectorShow");
     return jsResult;
 }
 
 void WebClientImpl::OnResource(const std::string& url)
 {
-    auto delegate = webDelegate_.Upgrade();
-    CHECK_NULL_VOID(delegate);
-    ContainerScope scope(delegate->GetInstanceId());
-    auto task = Container::CurrentTaskExecutor();
+    auto task = Container::CurrentTaskExecutorSafely();
     if (task == nullptr) {
         return;
     }
     std::weak_ptr<WebClientImpl> webClientWeak = shared_from_this();
-    task->PostTask([webClient = webClientWeak, url] {
-        auto webClientUpgrade = webClient.lock();
-        if (webClientUpgrade == nullptr) {
-            return;
-        }
-        auto delegate = webClientUpgrade->GetWebDelegate();
-        if (delegate) {
-            delegate->OnResourceLoad(url);
-        }
-    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientResourceLoad");
+    task->PostTask(
+        [webClient = webClientWeak, url] {
+            auto webClientUpgrade = webClient.lock();
+            if (webClientUpgrade == nullptr) {
+                return;
+            }
+            auto delegate = webClientUpgrade->GetWebDelegate();
+            if (delegate) {
+                delegate->OnResourceLoad(url);
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientResourceLoad");
 }
 
 void WebClientImpl::OnScaleChanged(float oldScaleFactor, float newScaleFactor)
@@ -575,7 +587,8 @@ bool WebClientImpl::OnSslErrorRequestByJS(std::shared_ptr<NWeb::NWebJSSslErrorRe
     ContainerScope scope(delegate->GetInstanceId());
 
     bool jsResult = false;
-    auto param = std::make_shared<WebSslErrorEvent>(AceType::MakeRefPtr<SslErrorResultOhos>(result), static_cast<int32_t>(error));
+    auto param = std::make_shared<WebSslErrorEvent>(AceType::MakeRefPtr<SslErrorResultOhos>(result),
+        static_cast<int32_t>(error));
     auto task = Container::CurrentTaskExecutor();
     if (task == nullptr) {
         return false;
@@ -688,15 +701,16 @@ bool WebClientImpl::RunContextMenu(
     if (task == nullptr) {
         return false;
     }
-    task->PostSyncTask([webClient = this, &param, &jsResult] {
-        if (webClient == nullptr) {
-            return;
-        }
-        auto delegate = webClient->GetWebDelegate();
-        if (delegate) {
-            jsResult = delegate->OnContextMenuShow(param);
-        }
-    }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebRunContextMenu");
+    task->PostSyncTask(
+        [webClient = this, &param, &jsResult] {
+            if (webClient == nullptr) {
+                return;
+            }
+            auto delegate = webClient->GetWebDelegate();
+            if (delegate) {
+                jsResult = delegate->OnContextMenuShow(param);
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebRunContextMenu");
     return jsResult;
 }
 
@@ -799,6 +813,7 @@ void WebClientImpl::OnWindowExitByJS()
 
 void WebClientImpl::OnPageVisible(const std::string& url)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebClientImpl::OnPageVisible override enter");
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());
@@ -1157,6 +1172,23 @@ void WebClientImpl::OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit)
     delegate->OnViewportFitChange(viewportFit);
 }
 
+void WebClientImpl::CreateOverlay(void* data, size_t len, int width, int height, int offsetX, int offsetY,
+    int rectWidth, int rectHeight, int pointX, int pointY)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->CreateOverlay(data, len, width, height, offsetX, offsetY, rectWidth, rectHeight, pointX, pointY);
+}
+
+void WebClientImpl::OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, int rectHeight)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnOverlayStateChanged(offsetX, offsetY, rectWidth, rectHeight);
+}
+
 void WebClientImpl::OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked)
 {
     auto delegate = webDelegate_.Upgrade();
@@ -1174,5 +1206,21 @@ void WebClientImpl::KeyboardReDispatch(
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());
     delegate->KeyboardReDispatch(event, isUsed);
+}
+
+void WebClientImpl::OnCursorUpdate(double x, double y, double width, double height)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnCursorUpdate(x, y, width, height);
+}
+
+void WebClientImpl::ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->ReportDynamicFrameLossEvent(sceneId, isStart);
 }
 } // namespace OHOS::Ace

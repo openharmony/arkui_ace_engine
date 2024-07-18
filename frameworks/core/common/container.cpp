@@ -29,12 +29,8 @@ int32_t Container::CurrentId()
     return ContainerScope::CurrentId();
 }
 
-int32_t Container::CurrentIdSafely()
+int32_t Container::SafelyId()
 {
-    int32_t currentId = ContainerScope::CurrentId();
-    if (currentId >= 0) {
-        return currentId;
-    }
     uint32_t containerCount = ContainerScope::ContainerCount();
     if (containerCount == 0) {
         return INSTANCE_ID_UNDEFINED;
@@ -42,7 +38,7 @@ int32_t Container::CurrentIdSafely()
     if (containerCount == 1) {
         return ContainerScope::SingletonId();
     }
-    currentId = ContainerScope::RecentActiveId();
+    int32_t currentId = ContainerScope::RecentActiveId();
     if (currentId >= 0) {
         return currentId;
     }
@@ -53,6 +49,15 @@ int32_t Container::CurrentIdSafely()
     return ContainerScope::DefaultId();
 }
 
+int32_t Container::CurrentIdSafely()
+{
+    int32_t currentId = ContainerScope::CurrentId();
+    if (currentId >= 0) {
+        return currentId;
+    }
+    return SafelyId();
+}
+
 RefPtr<Container> Container::Current()
 {
     return AceEngine::Get().GetContainer(ContainerScope::CurrentId());
@@ -61,6 +66,30 @@ RefPtr<Container> Container::Current()
 RefPtr<Container> Container::CurrentSafely()
 {
     return AceEngine::Get().GetContainer(Container::CurrentIdSafely());
+}
+
+RefPtr<Container> Container::CurrentSafelyWithCheck()
+{
+    int32_t currentId = CurrentId();
+    if (currentId >= 0) {
+        auto container = GetContainer(currentId);
+        if (container) {
+            return container;
+        }
+    }
+    currentId = SafelyId();
+    return GetContainer(currentId);
+}
+
+int32_t Container::CurrentIdSafelyWithCheck()
+{
+    int32_t currentId = CurrentId();
+    if (currentId >= 0) {
+        if (AceEngine::Get().HasContainer(currentId)) {
+            return currentId;
+        }
+    }
+    return SafelyId();
 }
 
 RefPtr<Container> Container::GetContainer(int32_t containerId)
@@ -97,7 +126,7 @@ RefPtr<Container> Container::GetFoucsed()
     RefPtr<Container> foucsContainer;
     AceEngine::Get().NotifyContainers([&foucsContainer](const RefPtr<Container>& container) {
         auto pipeline = container->GetPipelineContext();
-        if (pipeline && pipeline->GetOnFoucs()) {
+        if (pipeline && pipeline->IsWindowFocused()) {
             foucsContainer = container;
         }
     });
@@ -107,6 +136,20 @@ RefPtr<Container> Container::GetFoucsed()
 RefPtr<TaskExecutor> Container::CurrentTaskExecutor()
 {
     auto curContainer = Current();
+    CHECK_NULL_RETURN(curContainer, nullptr);
+    return curContainer->GetTaskExecutor();
+}
+
+RefPtr<TaskExecutor> Container::CurrentTaskExecutorSafely()
+{
+    auto curContainer = CurrentSafely();
+    CHECK_NULL_RETURN(curContainer, nullptr);
+    return curContainer->GetTaskExecutor();
+}
+
+RefPtr<TaskExecutor> Container::CurrentTaskExecutorSafelyWithCheck()
+{
+    auto curContainer = CurrentSafelyWithCheck();
     CHECK_NULL_RETURN(curContainer, nullptr);
     return curContainer->GetTaskExecutor();
 }
@@ -137,6 +180,26 @@ bool Container::Dump(const std::vector<std::string>& params, std::vector<std::st
 bool Container::IsIdAvailable(int32_t id)
 {
     return !AceEngine::Get().GetContainer(id);
+}
+
+void Container::SetFontScale(int32_t instanceId, float fontScale)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->SetFontScale(fontScale);
+}
+
+void Container::SetFontWeightScale(int32_t instanceId, float fontWeightScale)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->SetFontWeightScale(fontWeightScale);
 }
 
 template<>

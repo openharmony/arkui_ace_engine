@@ -23,7 +23,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float MAGNIFIER_GAIN = 1.25f;
-constexpr float AGING_MIN_SCALE = 1.75f;
+constexpr float AGING_MAX_SCALE = 3.2f;
 constexpr Dimension MAGNIFIER_WIDTH = 140.0_vp;
 constexpr Dimension MAGNIFIER_HEIGHT = 48.0_vp;
 constexpr Dimension MAGNIFIER_OFFSET_Y = 4.0_vp;
@@ -36,14 +36,15 @@ MagnifierPainter::MagnifierPainter(const WeakPtr<Pattern>& pattern) : pattern_(p
 
 void MagnifierPainter::PaintMagnifier(RSCanvas& canvas)
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    float scale = pipeline->GetFontScale();
+    if (GreatOrEqual(scale, AGING_MAX_SCALE)) {
+        return;
+    }
     auto pattern = DynamicCast<Magnifier>(pattern_.Upgrade());
     CHECK_NULL_VOID(pattern);
     auto controller = pattern->GetMagnifierController();
     CHECK_NULL_VOID(controller);
-
-    auto textBasePattern = DynamicCast<TextBase>(pattern_.Upgrade());
-    CHECK_NULL_VOID(textBasePattern);
-
     magnifierRect_ = controller->GetMagnifierRect();
     auto parentPattern = DynamicCast<Magnifier>(magnifierRect_.parent.Upgrade());
     CHECK_NULL_VOID(parentPattern);
@@ -60,40 +61,7 @@ void MagnifierPainter::PaintMagnifier(RSCanvas& canvas)
         return;
     }
 
-    canvas.Save();
-    RSBrush brush;
-    brush.SetColor(RSColor::COLOR_WHITE);
-    brush.SetAntiAlias(true);
-    canvas.AttachBrush(brush);
-
-    std::vector<TextPoint> pathPoints = GetTextPoints(magnifierRect_, false);
-    auto drawPath = GetPathByPoints(pathPoints);
-    auto clipPath = GetPathByPoints(pathPoints);
-    PaintShadow(*drawPath, ShadowConfig::DefaultShadowM, canvas);
-    canvas.DrawPath(*drawPath);
-    canvas.ClipPath(*clipPath, RSClipOp::INTERSECT, true);
-
-    auto magnifierGain = MAGNIFIER_GAIN;
-    auto pixelMapImageOffset = PIXEL_MAP_IMAGE_OFFSET.ConvertToPx();
-
-    PixelMapImage pixelMapImage(pixelMap);
-    auto magnifierPaintConfig = pixelMapImage.GetPaintConfig();
-    magnifierPaintConfig.scaleX_ = magnifierGain;
-    magnifierPaintConfig.scaleY_ = magnifierGain;
-    pixelMapImage.SetPaintConfig(magnifierPaintConfig);
-
-    auto localOffsetY = magnifierRect_.localOffset.GetY();
-    auto localOffsetX = magnifierRect_.localOffset.GetX();
-    auto textPaintOffset = textBasePattern->GetTextPaintOffset();
-    RectF dstRect;
-    dstRect.SetRect(localOffsetX - localOffsetX * magnifierGain - textPaintOffset.GetX() * magnifierGain,
-        magnifierRect_.startY - textPaintOffset.GetY() * magnifierGain - localOffsetY * magnifierGain +
-            pixelMapImageOffset,
-        pixelMap->GetWidth() * magnifierGain, pixelMap->GetHeight() * magnifierGain);
-    pixelMapImage.DrawRect(canvas, ToRSRect(dstRect));
-
-    canvas.DetachBrush();
-    canvas.Restore();
+    PaintMagnifierToPixelMap(canvas, pixelMap);
 }
 
 bool MagnifierPainter::GetMagnifierRect(MagnifierRect& rect)
@@ -114,14 +82,6 @@ bool MagnifierPainter::GetMagnifierRect(
     auto cursorOffsetX = magnifierRect_.cursorOffset.GetX();
     auto magnifierWidth = MAGNIFIER_WIDTH.ConvertToPx();
     auto magnifierHeight = MAGNIFIER_HEIGHT.ConvertToPx();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_RETURN(textFieldTheme, false);
-    if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
-        magnifierHeight *= pipeline->GetFontScale() / MAGNIFIER_GAIN;
-    }
-
     auto magnifierOffsetY = MAGNIFIER_OFFSET_Y.ConvertToPx();
     localOffsetX = std::max(localOffsetX, magnifierRect_.contentOffset.GetX());
     localOffsetX = std::min(localOffsetX, magnifierRect_.contentSize.Width() + magnifierRect_.contentOffset.GetX());
@@ -157,14 +117,6 @@ std::vector<TextPoint> MagnifierPainter::GetTextPoints(
 {
     std::vector<TextPoint> textPoints;
     auto lineHeight = MAGNIFIER_HEIGHT.ConvertToPx();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, textPoints);
-    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_RETURN(textFieldTheme, textPoints);
-    if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
-        lineHeight *= pipeline->GetFontScale() / MAGNIFIER_GAIN;
-    }
-
     auto offset = MAGNIFIER_BOUNDRY_WIDTH.ConvertToPx();
     if (haveOffset) {
         textPoints.emplace_back(TextPoint(startX - offset, startY - offset));
@@ -188,14 +140,6 @@ std::shared_ptr<RSPath> MagnifierPainter::GetPathByPoints(const std::vector<Text
 {
     std::shared_ptr<RSPath> path = std::make_shared<RSPath>();
     auto radius = MAGNIFIER_HEIGHT.ConvertToPx() / 2.0f;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, path);
-    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_RETURN(textFieldTheme, path);
-    if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
-        radius *= pipeline->GetFontScale() / MAGNIFIER_GAIN / 2.0f;
-    }
-
     path->MoveTo(points[0].x + radius, points[0].y);
     size_t step = 2;
     for (size_t i = 0; i + step < points.size(); i++) {
@@ -245,6 +189,46 @@ void MagnifierPainter::PaintShadow(const RSPath& path, const Shadow& shadow, RSC
     RSColor ambientColor = RSColor(0, 0, 0, 0);
     canvas.DrawShadow(rsPath, planeParams, lightPos, shadow.GetLightRadius(), ambientColor, spotColor,
         RSShadowFlags::TRANSPARENT_OCCLUDER);
+    canvas.Restore();
+}
+
+void MagnifierPainter::PaintMagnifierToPixelMap(RSCanvas& canvas, RefPtr<PixelMap> pixelMap)
+{
+    canvas.Save();
+    RSBrush brush;
+    brush.SetColor(RSColor::COLOR_WHITE);
+    brush.SetAntiAlias(true);
+    canvas.AttachBrush(brush);
+
+    std::vector<TextPoint> pathPoints = GetTextPoints(magnifierRect_, false);
+    auto drawPath = GetPathByPoints(pathPoints);
+    auto clipPath = GetPathByPoints(pathPoints);
+    PaintShadow(*drawPath, ShadowConfig::DefaultShadowM, canvas);
+    canvas.DrawPath(*drawPath);
+    canvas.ClipPath(*clipPath, RSClipOp::INTERSECT, true);
+
+    auto magnifierGain = MAGNIFIER_GAIN;
+    auto pixelMapImageOffset = PIXEL_MAP_IMAGE_OFFSET.ConvertToPx();
+
+    PixelMapImage pixelMapImage(pixelMap);
+    auto magnifierPaintConfig = pixelMapImage.GetPaintConfig();
+    magnifierPaintConfig.scaleX_ = magnifierGain;
+    magnifierPaintConfig.scaleY_ = magnifierGain;
+    pixelMapImage.SetPaintConfig(magnifierPaintConfig);
+
+    auto localOffsetY = magnifierRect_.localOffset.GetY();
+    auto localOffsetX = magnifierRect_.localOffset.GetX();
+    auto textBasePattern = DynamicCast<TextBase>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textBasePattern);
+    auto textPaintOffset = textBasePattern->GetTextPaintOffset();
+    RectF dstRect;
+    dstRect.SetRect(localOffsetX - localOffsetX * magnifierGain - textPaintOffset.GetX() * magnifierGain,
+        magnifierRect_.startY - textPaintOffset.GetY() * magnifierGain - localOffsetY * magnifierGain +
+            pixelMapImageOffset,
+        pixelMap->GetWidth() * magnifierGain, pixelMap->GetHeight() * magnifierGain);
+    pixelMapImage.DrawRect(canvas, ToRSRect(dstRect));
+
+    canvas.DetachBrush();
     canvas.Restore();
 }
 } // namespace OHOS::Ace::NG

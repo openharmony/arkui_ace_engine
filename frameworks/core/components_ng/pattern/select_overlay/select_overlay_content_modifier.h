@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/vector.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
@@ -166,6 +167,16 @@ public:
 
     static OffsetF CalculateCenterPoint(const OffsetF& start, const OffsetF& end, float radius, bool handleOnTop);
 
+    void SetIsOverlayMode(bool isOverlayMode)
+    {
+        isOverlayMode_ = isOverlayMode;
+    }
+
+    void SetScale(const VectorF& scale)
+    {
+        scale_ = scale;
+    }
+
 private:
     void PaintHandle(RSCanvas& canvas, const RectF& handleRect, bool handleOnTop, bool isHandleLineShow = true);
     void PaintHandle(RSCanvas& canvas, const HandleDrawInfo& handleInfo);
@@ -179,6 +190,9 @@ private:
     void PaintDoubleHandle(RSCanvas& canvas);
 
     void ClipViewPort(RSCanvas& canvas);
+    RectF ConvertPointsToRect(const SelectHandlePaintInfo& paintInfo) const;
+    RectF GetFirstPaintRect() const;
+    RectF GetSecondPaintRect() const;
 
     RefPtr<PropertyBool> inShowArea_;
     RefPtr<PropertyBool> handleReverse_;
@@ -200,6 +214,8 @@ private:
     bool isPaintHandleUsePoints_ = false;
     SelectHandlePaintInfo firstHandlePaintInfo_;
     SelectHandlePaintInfo secondHandlePaintInfo_;
+    bool isOverlayMode_ = true;
+    VectorF scale_ = VectorF(1.0f, 1.0f);
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayContentModifier);
 };

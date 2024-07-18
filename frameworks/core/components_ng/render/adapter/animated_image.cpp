@@ -145,11 +145,13 @@ void AnimatedImage::RenderFrame(uint32_t idx)
     if (GetCachedFrame(idx)) {
         return;
     }
-    ImageUtils::PostToBg([weak = WeakClaim(this), idx] {
-        auto self = weak.Upgrade();
-        CHECK_NULL_VOID(self);
-        self->DecodeFrame(idx);
-    }, "ArkUIImageRenderAnimatedFrame");
+    ImageUtils::PostToBg(
+        [weak = WeakClaim(this), idx] {
+            auto self = weak.Upgrade();
+            CHECK_NULL_VOID(self);
+            self->DecodeFrame(idx);
+        },
+        "ArkUIImageRenderAnimatedFrame");
 }
 
 // runs on Background threads
@@ -166,11 +168,13 @@ void AnimatedImage::DecodeFrame(uint32_t idx)
     std::scoped_lock<std::mutex> lock(decodeMtx_);
     DecodeImpl(idx);
 
-    ImageUtils::PostToUI([weak = WeakClaim(this)] {
-        auto self = weak.Upgrade();
-        CHECK_NULL_VOID(self && self->redraw_);
-        self->redraw_();
-    }, "ArkUIImageDecodeAnimatedFrame");
+    ImageUtils::PostToUI(
+        [weak = WeakClaim(this)] {
+            auto self = weak.Upgrade();
+            CHECK_NULL_VOID(self && self->redraw_);
+            self->redraw_();
+        },
+        "ArkUIImageDecodeAnimatedFrame");
 
     CacheFrame(cacheKey_ + std::to_string(idx));
     --queueSize_;
@@ -338,7 +342,7 @@ void AnimatedPixmap::DecodeImpl(uint32_t idx)
     }
     RefPtr<PixelMap> frame;
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE,
+        TAG_LOGD(AceLogTag::ACE_IMAGE,
             "gif decode to pixmap, src=%{public}s, idx = %{public}d, resolutionQuality = %{public}s",
             GetCacheKey().c_str(), idx, GetResolutionQuality(size_.imageQuality).c_str());
     }

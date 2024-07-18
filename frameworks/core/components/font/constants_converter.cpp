@@ -31,6 +31,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 #include "core/components_ng/pattern/symbol/constants.h"
+#include "core/components_ng/pattern/text/text_layout_adapter.h"
 
 namespace OHOS::Ace::Constants {
 namespace {
@@ -38,7 +39,7 @@ const std::string FONTWEIGHT = "wght";
 constexpr float DEFAULT_MULTIPLE = 100.0f;
 constexpr uint32_t SCALE_EFFECT = 2;
 constexpr uint32_t NONE_EFFECT = 0;
-constexpr float ORIGINAL_LINE_HEIGHT_SCALE = 1.2f;
+constexpr float ORIGINAL_LINE_HEIGHT_SCALE = 1.0f;
 } // namespace
 
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -651,29 +652,25 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     }
     txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
     // Font size must be px when transferring to Rosen::TextStyle
-    if (pipelineContext) {
-        txtStyle.fontSize = pipelineContext->NormalizeToPx(textStyle.GetFontSize());
-        if (textStyle.IsAllowScale() && textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
-            txtStyle.fontSize =
-                pipelineContext->NormalizeToPx(textStyle.GetFontSize() * pipelineContext->GetFontScale());
-        }
-    } else {
-        txtStyle.fontSize = textStyle.GetFontSize().Value();
-    }
+    txtStyle.fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     txtStyle.fontStyle = ConvertTxtFontStyle(textStyle.GetFontStyle());
 
     if (textStyle.GetWordSpacing().Unit() == DimensionUnit::PERCENT) {
         txtStyle.wordSpacing = textStyle.GetWordSpacing().Value() * txtStyle.fontSize;
     } else {
         if (pipelineContext) {
-            txtStyle.wordSpacing = pipelineContext->NormalizeToPx(textStyle.GetWordSpacing());
+            txtStyle.wordSpacing = textStyle.GetWordSpacing().ConvertToPxDistribute(
+                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
         } else {
             txtStyle.wordSpacing = textStyle.GetWordSpacing().Value();
         }
     }
     if (pipelineContext) {
-        txtStyle.letterSpacing = pipelineContext->NormalizeToPx(textStyle.GetLetterSpacing());
-        txtStyle.baseLineShift = -pipelineContext->NormalizeToPx(textStyle.GetBaselineOffset());
+        txtStyle.letterSpacing = textStyle.GetLetterSpacing().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+        txtStyle.baseLineShift = -textStyle.GetBaselineOffset().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     }
 
     txtStyle.fontFamilies = textStyle.GetFontFamilies();
@@ -705,12 +702,8 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         double fontSize = txtStyle.fontSize;
         double lineHeight = textStyle.GetLineHeight().Value();
         if (pipelineContext) {
-            if (textStyle.GetLineHeight().Unit() == DimensionUnit::FP) {
-                lineHeight = pipelineContext->NormalizeToPx(
-                    textStyle.GetLineHeight() * pipelineContext->GetFontScale());
-            } else {
-                lineHeight = pipelineContext->NormalizeToPx(textStyle.GetLineHeight());
-            }
+            lineHeight = textStyle.GetLineHeight().ConvertToPxDistribute(
+                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
         }
         lineHeightOnly = textStyle.HasHeightOverride();
         if (!NearEqual(lineHeight, fontSize) && (lineHeight > 0.0) && (!NearZero(fontSize))) {
@@ -731,7 +724,8 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         double fontSize = txtStyle.fontSize;
         double lineSpacing = textStyle.GetLineSpacing().Value();
         if (pipelineContext) {
-            lineSpacing = pipelineContext->NormalizeToPx(textStyle.GetLineSpacing());
+            lineSpacing = textStyle.GetLineSpacing().ConvertToPxDistribute(
+                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
         }
         lineSpacingOnly = true;
         if (!NearEqual(lineSpacing, fontSize) && (lineSpacing > 0.0) && (!NearZero(fontSize))) {
@@ -772,10 +766,11 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
     }
     auto radius = textBackgroundStyle->backgroundRadius;
     CHECK_NULL_VOID(radius.has_value());
-    auto radiusConverter = [context = pipelineContext](const std::optional<Dimension>& radius) -> double {
+    auto radiusConverter = [context = pipelineContext, textStyle](
+                               const std::optional<Dimension>& radius) -> double {
         CHECK_NULL_RETURN(radius.has_value(), 0);
         CHECK_NULL_RETURN(context, radius->Value());
-        return context->NormalizeToPx(radius.value());
+        return radius.value().ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     };
     txtStyle.backgroundRect.leftTopRadius = radiusConverter(radius->radiusTopLeft);
     txtStyle.backgroundRect.rightTopRadius = radiusConverter(radius->radiusTopRight);

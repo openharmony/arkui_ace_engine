@@ -76,7 +76,6 @@ template("ace_unittest") {
   }
 
   if (flutter_skia) {
-    ace_unittest_deps += [ "$skia_root_new:skia_ohos" ]
     flutter_external_deps = [ "eventhandler:libeventhandler" ]
   }
 

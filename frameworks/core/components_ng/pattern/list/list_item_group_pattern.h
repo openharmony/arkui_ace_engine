@@ -31,6 +31,8 @@
 namespace OHOS::Ace::NG {
 
 struct ListItemGroupPaintInfo {
+    TextDirection layoutDirection = TextDirection::LTR;
+    float mainSize = 0.0f;
     bool vertical = false;
     int32_t lanes = 1;
     float spaceWidth = 0.0f;
@@ -194,6 +196,7 @@ public:
         }
     }
 
+    void SetListItemGroupStyle(V2::ListItemGroupStyle style);
     RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize();
     void SetListChildrenMainSize(float defaultSize, const std::vector<float>& mainSize);
     void OnChildrenSizeChanged(std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag);
@@ -203,6 +206,11 @@ public:
     VisibleContentInfo GetEndListItemIndex();
     void ResetChildrenSize();
 
+    void CalculateItemStartIndex();
+    void UpdateActiveChildRange(bool forward, int32_t cacheCount);
+    int32_t UpdateForwardCachedIndex(int32_t cacheCount, bool outOfView);
+    int32_t UpdateBackwardCachedIndex(int32_t cacheCount, bool outOfView);
+    void LayoutCache(const LayoutConstraintF& constraint, bool forward, int64_t deadline, int32_t cached);
 private:
     bool IsNeedInitClickEventRecorder() const override
     {
@@ -212,6 +220,7 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
     void SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode);
+    void OnColorConfigurationUpdate() override;
     void CheckListDirectionInCardStyle();
     RefPtr<ShallowBuilder> shallowBuilder_;
     RefPtr<ListPositionMap> posMap_;
@@ -223,6 +232,8 @@ private:
     WeakPtr<UINode> header_;
     WeakPtr<UINode> footer_;
     int32_t itemStartIndex_ = 0;
+    int32_t headerIndex_ = -1;
+    int32_t footerIndex_ = -1;
     int32_t itemTotalCount_ = -1;
     int32_t itemDisplayEndIndex_ = -1;
     int32_t itemDisplayStartIndex_ = -1;
@@ -233,6 +244,9 @@ private:
     std::set<int32_t> pressedItem_;
     bool layouted_ = false;
 
+    int32_t backwardCachedIndex_ = INT_MAX;
+    int32_t forwardCachedIndex_ = -1;
+
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
     float spaceWidth_ = 0.0f;
     Axis axis_ = Axis::VERTICAL;
@@ -240,6 +254,8 @@ private:
     float laneGutter_ = 0.0f;
     float startHeaderPos_ = 0.0f;
     float endFooterPos_ = 0.0f;
+    TextDirection layoutDirection_ = TextDirection::LTR;
+    float mainSize_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(ListItemGroupPattern);
 };
 } // namespace OHOS::Ace::NG

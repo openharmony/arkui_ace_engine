@@ -84,7 +84,7 @@ RefPtr<FrameNode> TextModelNG::CreateFrameNode(int32_t nodeId, const std::string
     }
     // set draggable for framenode
     if (frameNode->IsFirstBuilding()) {
-        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, nullptr);
         auto draggable = pipeline->GetDraggable<TextTheme>();
         frameNode->SetDraggable(draggable);
@@ -172,6 +172,16 @@ void TextModelNG::SetFontWeight(FrameNode* frameNode, Ace::FontWeight value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value, frameNode);
 }
 
+void TextModelNG::SetMinFontScale(const float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, value);
+}
+
+void TextModelNG::SetMaxFontScale(const float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, value);
+}
+
 void TextModelNG::SetFontWeight(Ace::FontWeight value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, value);
@@ -192,6 +202,16 @@ void TextModelNG::SetLineBreakStrategy(Ace::LineBreakStrategy value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LineBreakStrategy, value);
 }
 
+void TextModelNG::SetTextSelectableMode(Ace::TextSelectableMode value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextSelectableMode, value);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetTextSelectableMode(value);
+}
+
 void TextModelNG::SetEllipsisMode(EllipsisMode value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, EllipsisMode, value);
@@ -210,11 +230,20 @@ void TextModelNG::SetTextAlign(FrameNode* frameNode, Ace::TextAlign value)
 void TextModelNG::SetTextOverflow(Ace::TextOverflow value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextOverflow, value);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->UnregisterNodeChangeListenerWithoutSelect();
 }
 
 void TextModelNG::SetTextOverflow(FrameNode* frameNode, Ace::TextOverflow value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextOverflow, value, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->UnregisterNodeChangeListenerWithoutSelect();
 }
 
 void TextModelNG::SetMaxLines(uint32_t value)
@@ -359,14 +388,6 @@ void TextModelNG::SetDraggable(bool draggable)
     frameNode->SetDraggable(draggable);
 }
 
-void TextModelNG::SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto textPattern = frameNode->GetPattern<TextPattern>();
-    textPattern->SetMenuOptionItems(std::move(menuOptionsItems));
-}
-
 void TextModelNG::SetOnCopy(std::function<void(const std::string&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextEventHub>();
@@ -467,6 +488,16 @@ void TextModelNG::SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& val
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMaxFontSize, value, frameNode);
 }
 
+void TextModelNG::SetMinFontScale(FrameNode* frameNode, const float value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, value, frameNode);
+}
+
+void TextModelNG::SetMaxFontScale(FrameNode* frameNode, const float value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, value, frameNode);
+}
+
 void TextModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontFamily, value, frameNode);
@@ -526,6 +557,14 @@ void TextModelNG::SetWordBreak(FrameNode* frameNode, Ace::WordBreak value)
 void TextModelNG::SetLineBreakStrategy(FrameNode* frameNode, Ace::LineBreakStrategy value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineBreakStrategy, value, frameNode);
+}
+
+void TextModelNG::SetTextSelectableMode(FrameNode* frameNode, Ace::TextSelectableMode value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextSelectableMode, value, frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetTextSelectableMode(value);
 }
 
 void TextModelNG::SetEllipsisMode(FrameNode* frameNode, Ace::EllipsisMode value)
@@ -944,6 +983,13 @@ LineBreakStrategy TextModelNG::GetLineBreakStrategy(FrameNode* frameNode)
     return value;
 }
 
+TextSelectableMode TextModelNG::GetTextSelectableMode(FrameNode* frameNode)
+{
+    TextSelectableMode value = TextSelectableMode::SELECTABLE_UNFOCUSABLE;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, TextSelectableMode, value, frameNode, value);
+    return value;
+}
+
 void TextModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedBackgroundColor, value, frameNode);
@@ -989,7 +1035,7 @@ void TextModelNG::SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_Sty
             if (spanItem) {
                 auto wSpanContent = StringUtils::ToWstring(spanItem->content);
                 auto intervalStart = position;
-                position += wSpanContent.length();
+                position += static_cast<int32_t>(wSpanContent.length());
                 auto intervalEnd = position;
                 spanItem->interval = { intervalStart, intervalEnd };
                 spanItems.emplace_back(spanItem);
@@ -1034,5 +1080,20 @@ void TextModelNG::SetOnTextSelectionChange(FrameNode* frameNode, std::function<v
     auto eventHub = frameNode->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnSelectionChange(std::move(func));
+}
+
+void TextModelNG::SetSelectionMenuOptions(
+    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
+{
+    auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
+
+void TextModelNG::SetResponseRegion(bool isUserSetResponseRegion)
+{
+    auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetIsUserSetResponseRegion(isUserSetResponseRegion);
 }
 } // namespace OHOS::Ace::NG

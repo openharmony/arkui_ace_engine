@@ -101,6 +101,7 @@ public:
     PaintWrapper* GetPaintWrapper(RefPtr<MenuPaintProperty> paintProperty);
     RefPtr<FrameNode> GetPreviewMenuWrapper(
         SizeF itemSize = SizeF(0.0f, 0.0f), std::optional<MenuPreviewAnimationOptions> scaleOptions = std::nullopt);
+    RefPtr<FrameNode> GetPreviewMenuWrapper2();
     RefPtr<FrameNode> menuFrameNode_;
     RefPtr<MenuAccessibilityProperty> menuAccessibilityProperty_;
     RefPtr<FrameNode> menuItemFrameNode_;
@@ -199,6 +200,32 @@ RefPtr<FrameNode> MenuWrapperTestNg::GetPreviewMenuWrapper(
     return menuWrapperNode;
 }
 
+RefPtr<FrameNode> MenuWrapperTestNg::GetPreviewMenuWrapper2()
+{
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    CHECK_NULL_RETURN(rootNode, nullptr);
+    auto targetNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(targetNode, nullptr);
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(textNode, nullptr);
+    targetNode->MountToParent(rootNode);
+    targetNode->GetOrCreateGestureEventHub();
+    MenuParam menuParam;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.previewMode = MenuPreviewMode::IMAGE;
+    auto customNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(customNode, nullptr);
+    auto customGeometryNode = customNode->GetGeometryNode();
+    CHECK_NULL_RETURN(customGeometryNode, nullptr);
+    customGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
+    auto menuWrapperNode =
+        MenuView::Create(textNode, targetNode->GetId(), V2::TEXT_ETS_TAG, menuParam, true, customNode);
+    return menuWrapperNode;
+}
 /**
  * @tc.name: MenuWrapperPatternTestNg001
  * @tc.desc: Verify HideMenu(Menu).
@@ -628,5 +655,91 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg011, TestSize.Level1)
     gestureEvent.offsetY_ = 1.0;
     (*menuItemPattern->longPressEvent_)(gestureEvent);
     ASSERT_FALSE(menuItemPattern->isSubMenuShowed_);
+}
+/**
+ * @tc.name: MenuWrapperPatternTestNg012
+ * @tc.desc: Verify HideMenu(Menu).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create wrapper and child menu
+     * @tc.expected: wrapper pattern not null
+     */
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::SELECT_OVERLAY_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu = FrameNode::CreateFrameNode(
+        V2::SELECT_OVERLAY_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    mainMenu->MountToParent(wrapperNode);
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    /**
+     * @tc.steps: step2. excute HideMenu
+     * @tc.expected: wrapper pattern return
+     */
+    wrapperPattern->HideMenu(mainMenu);
+    EXPECT_TRUE(mainMenu->GetTag() == V2::SELECT_OVERLAY_ETS_TAG);
+}
+
+/**
+ * @tc.name: MenuWrapperPatternTestNg013
+ * @tc.desc: Verify HandleInteraction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg013, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::SELECT_OVERLAY_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+
+    MenuModelNG model;
+    model.Create();
+    auto menu = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menu, nullptr);
+    auto container = FrameNode::CreateFrameNode("", 1, AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MENU));
+    auto mockScroll = FrameNode::CreateFrameNode("", 2, AceType::MakeRefPtr<Pattern>());
+    container->GetGeometryNode()->SetFrameSize(SizeF(200, 200));
+    menu->GetGeometryNode()->SetFrameSize(SizeF(70, 70));
+    mockScroll->MountToParent(container);
+    menu->MountToParent(mockScroll);
+    container->MountToParent(wrapperNode);
+
+    auto menuItemNode1 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode1->MountToParent(menu);
+    menuItemNode1->GetGeometryNode()->SetFrameSize(SizeF(30, 30));
+
+    auto menuItemNode2 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 2, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode2->MountToParent(menu);
+    menuItemNode2->GetGeometryNode()->SetFrameSize(SizeF(30, 30));
+
+    TouchEventInfo info(MENU_TOUCH_EVENT_TYPE);
+    TouchLocationInfo locationInfo(TARGET_ID);
+    locationInfo.SetGlobalLocation(Offset(10, 10));
+    Offset location(10, 10);
+    locationInfo.SetTouchType(TouchType::MOVE);
+    locationInfo.SetLocalLocation(location);
+    info.touches_.emplace_back(locationInfo);
+
+    wrapperPattern->SetLastTouchItem(menuItemNode2);
+    wrapperPattern->currentTouchItem_ = menuItemNode1;
+    wrapperPattern->HandleInteraction(info);
+    wrapperPattern->currentTouchItem_ = menuItemNode2;
+    wrapperPattern->HandleInteraction(info);
+}
+
+/**
+ * @tc.name: MenuViewTestNg001
+ * @tc.desc: Test Verify Create.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuViewTestNg001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set API12.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto menuWrapperNode = GetPreviewMenuWrapper2();
 }
 } // namespace OHOS::Ace::NG

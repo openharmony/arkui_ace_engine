@@ -14,6 +14,9 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_save_button.h"
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
@@ -130,10 +133,14 @@ void JSSaveButton::JsOnClick(const JSCallbackInfo& info)
         return;
     }
     auto jsOnClickFunc = AceType::MakeRefPtr<JsSaveButtonClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto onTap = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc](GestureEvent& info) {
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onTap = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = frameNode](GestureEvent& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onClick");
         func->Execute(info);
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+        JSInteractableView::ReportClickEvent(node);
+#endif
     };
 
     NG::ViewAbstract::SetOnClick(std::move(onTap));

@@ -140,6 +140,7 @@ public:
     JsiRef<JsiValue> GetValueAt(size_t index) const;
     void SetValueAt(size_t index, JsiRef<JsiValue> value) const;
     JsiRef<JsiValue> GetProperty(const char* prop) const;
+    JsiRef<JsiValue> GetProperty(int32_t propertyIndex) const;
     size_t Length() const;
     void SetLength(size_t length) const;
     bool IsArray() const;
@@ -199,11 +200,19 @@ public:
 
     JsiRef<JsiArray> GetPropertyNames() const;
     JsiRef<JsiValue> GetProperty(const char* prop) const;
+    JsiRef<JsiValue> GetProperty(int32_t propertyIndex) const;
+    bool HasProperty(int32_t propertyIndex) const;
     bool HasProperty(const char* prop) const;
     JsiRef<JsiValue> ToJsonObject(const char* value) const;
 
     template<typename T>
+    T GetPropertyValue(int32_t propertyIndex, T defaultValue) const;
+
+    template<typename T>
     T GetPropertyValue(const char* prop, T defaultValue) const;
+
+    template<typename T>
+    void SetProperty(int32_t propertyIndex, const T value) const;
 
     template<typename T>
     void SetProperty(const char* prop, const T value) const;

@@ -30,4 +30,29 @@ Dimension SelectHandleInfo::GetDefaultLineWidth()
     CHECK_NULL_RETURN(theme, defaultLineWidth);
     return theme->GetHandleLineWidth();
 }
+
+void SelectOverlayInfo::GetCallerNodeAncestorViewPort(RectF& viewPort)
+{
+    if (ancestorViewPort) {
+        viewPort = ancestorViewPort.value();
+    } else {
+        auto frameNode = callerFrameNode.Upgrade();
+        if (frameNode) {
+            auto viewPortOption = frameNode->GetViewPort();
+            if (viewPortOption.has_value()) {
+                viewPort = viewPortOption.value();
+            }
+        }
+    }
+}
+
+const RectF& SelectOverlayInfo::GetFirstHandlePaintRect()
+{
+    return handleLevelMode == HandleLevelMode::OVERLAY ? firstHandle.paintRect : firstHandle.localPaintRect;
+}
+
+const RectF& SelectOverlayInfo::GetSecondHandlePaintRect()
+{
+    return handleLevelMode == HandleLevelMode::OVERLAY ? secondHandle.paintRect : secondHandle.localPaintRect;
+}
 } // namespace OHOS::Ace::NG

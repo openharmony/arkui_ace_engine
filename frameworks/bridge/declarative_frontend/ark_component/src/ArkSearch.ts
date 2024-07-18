@@ -690,6 +690,23 @@ class SearchOnDidDeleteModifier extends ModifierWithKey<Callback<DeleteValue>> {
   }
 }
 
+class SearchEnablePreviewTextModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchEnablePreviewText');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetEnablePreviewText(node);
+    } else {
+      getUINativeModule().search.setEnablePreviewText(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 interface SearchParam {
   value?: string;
   placeholder?: ResourceStr;
@@ -903,6 +920,10 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
   }
   onDidDelete(callback: Callback<DeleteValue>): this {
     modifierWithKey(this._modifiersWithKeys, SearchOnDidDeleteModifier.identity, SearchOnDidDeleteModifier, callback);
+    return this;
+  }
+  enablePreviewText(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, SearchEnablePreviewTextModifier.identity, SearchEnablePreviewTextModifier, value);
     return this;
   }
 }

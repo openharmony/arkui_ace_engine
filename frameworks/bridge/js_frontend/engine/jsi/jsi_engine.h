@@ -161,6 +161,8 @@ public:
 
     void ForceFullGC() override;
 
+    void NotifyUIIdle() override;
+
     std::string GetStacktraceMessage() override;
 
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;

@@ -217,6 +217,33 @@ public:
         ViewAbstract::SetPadding(paddings);
     }
 
+    void SetPaddings(const NG::PaddingProperty& paddings) override
+    {
+        ViewAbstract::SetPadding(paddings);
+    }
+
+    void ResetSafeAreaPadding() override
+    {
+        ViewAbstract::ResetSafeAreaPadding();
+    }
+
+    void SetSafeAreaPadding(const CalcDimension& value) override
+    {
+        if (value.Unit() == DimensionUnit::CALC) {
+            ViewAbstract::SetSafeAreaPadding(NG::CalcLength(value.CalcValue()));
+        } else {
+            // padding must great or equal zero.
+            ViewAbstract::SetSafeAreaPadding(NG::CalcLength(value.IsNonNegative() ? value : CalcDimension()));
+        }
+    }
+
+    void SetSafeAreaPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
+        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override
+    {
+        NG::PaddingProperty paddings = NG::ConvertToCalcPaddingProperty(top, bottom, left, right);
+        ViewAbstract::SetSafeAreaPadding(paddings);
+    }
+
     void SetMargin(const CalcDimension& value) override
     {
         if (value.Unit() == DimensionUnit::CALC) {
@@ -261,6 +288,11 @@ public:
         ViewAbstract::SetMargin(margins);
     }
 
+    void SetMargins(const NG::MarginProperty& margins) override
+    {
+        ViewAbstract::SetMargin(margins);
+    }
+
     void SetBorderRadius(const Dimension& value) override
     {
         ViewAbstract::SetBorderRadius(value);
@@ -278,6 +310,11 @@ public:
         ViewAbstract::SetBorderRadius(borderRadius);
     }
 
+    void SetBorderRadius(const NG::BorderRadiusProperty& borderRadius) override
+    {
+        ViewAbstract::SetBorderRadius(borderRadius);
+    }
+
     void SetBorderColor(const Color& value) override
     {
         ViewAbstract::SetBorderColor(value);
@@ -291,6 +328,11 @@ public:
         borderColors.topColor = colorTop;
         borderColors.bottomColor = colorBottom;
         borderColors.multiValued = true;
+        ViewAbstract::SetBorderColor(borderColors);
+    }
+
+    void SetBorderColor(const NG::BorderColorProperty& borderColors) override
+    {
         ViewAbstract::SetBorderColor(borderColors);
     }
 
@@ -311,6 +353,18 @@ public:
         ViewAbstract::SetBorderWidth(borderWidth);
     }
 
+    void SetBorderWidth(const std::optional<Dimension>& start, const std::optional<Dimension>& end,
+        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom, bool isLocalized) override
+    {
+        if (!isLocalized) {
+            return;
+        }
+        NG::BorderWidthProperty borderWidth {
+            .startDimen = start, .endDimen = end, .topDimen = top, .bottomDimen = bottom, .multiValued = true
+        };
+        ViewAbstract::SetBorderWidth(borderWidth);
+    }
+
     void SetBorderStyle(const BorderStyle& value) override
     {
         ViewAbstract::SetBorderStyle(value);
@@ -326,6 +380,40 @@ public:
         borderStyles.styleBottom = styleBottom.value_or(BorderStyle::SOLID);
         borderStyles.multiValued = true;
         ViewAbstract::SetBorderStyle(borderStyles);
+    }
+
+    void SetDashGap(const Dimension& value) override
+    {
+        ViewAbstract::SetDashGap(value);
+    }
+
+    void SetDashGap(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
+        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) override
+    {
+        NG::BorderWidthProperty dashGap;
+        dashGap.leftDimen = left;
+        dashGap.rightDimen = right;
+        dashGap.topDimen = top;
+        dashGap.bottomDimen = bottom;
+        dashGap.multiValued = true;
+        ViewAbstract::SetDashGap(dashGap);
+    }
+
+    void SetDashWidth(const Dimension& value) override
+    {
+        ViewAbstract::SetDashWidth(value);
+    }
+
+    void SetDashWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
+        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) override
+    {
+        NG::BorderWidthProperty dashWidth;
+        dashWidth.leftDimen = left;
+        dashWidth.rightDimen = right;
+        dashWidth.topDimen = top;
+        dashWidth.bottomDimen = bottom;
+        dashWidth.multiValued = true;
+        ViewAbstract::SetDashWidth(dashWidth);
     }
 
     void SetOuterBorderRadius(const Dimension& value) override
@@ -346,6 +434,11 @@ public:
         ViewAbstract::SetOuterBorderRadius(borderRadius);
     }
 
+    void SetOuterBorderRadius(const NG::BorderRadiusProperty& borderRadius) override
+    {
+        ViewAbstract::SetOuterBorderRadius(borderRadius);
+    }
+
     void SetOuterBorderColor(const Color& value) override
     {
         ViewAbstract::SetOuterBorderColor(value);
@@ -359,6 +452,11 @@ public:
         borderColors.topColor = colorTop;
         borderColors.bottomColor = colorBottom;
         borderColors.multiValued = true;
+        ViewAbstract::SetOuterBorderColor(borderColors);
+    }
+
+    void SetOuterBorderColor(const NG::BorderColorProperty& borderColors) override
+    {
         ViewAbstract::SetOuterBorderColor(borderColors);
     }
 
@@ -399,19 +497,19 @@ public:
     void SetBorderImage(const RefPtr<BorderImage>& borderImage, uint8_t bitset) override
     {
         CHECK_NULL_VOID(borderImage);
-        if (bitset | BorderImage::SOURCE_BIT) {
+        if (bitset & BorderImage::SOURCE_BIT) {
             ViewAbstract::SetBorderImageSource(borderImage->GetSrc());
         }
-        if (bitset | BorderImage::OUTSET_BIT) {
+        if (bitset & BorderImage::OUTSET_BIT) {
             ViewAbstract::SetHasBorderImageOutset(true);
         }
-        if (bitset | BorderImage::SLICE_BIT) {
+        if (bitset & BorderImage::SLICE_BIT) {
             ViewAbstract::SetHasBorderImageSlice(true);
         }
-        if (bitset | BorderImage::REPEAT_BIT) {
+        if (bitset & BorderImage::REPEAT_BIT) {
             ViewAbstract::SetHasBorderImageRepeat(true);
         }
-        if (bitset | BorderImage::WIDTH_BIT) {
+        if (bitset & BorderImage::WIDTH_BIT) {
             ViewAbstract::SetHasBorderImageWidth(true);
         }
         ViewAbstract::SetBorderImage(borderImage);
@@ -550,17 +648,20 @@ public:
         ViewAbstract::CleanTransition();
     }
 
-    void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect, bool passThrough = false) override
+    void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect,
+        NG::TransitionFinishCallback&& finishCallback = nullptr) override
     {
-        ViewAbstract::SetChainedTransition(effect);
+        ViewAbstract::SetChainedTransition(effect, std::move(finishCallback));
     }
 
     void SetOverlay(const std::string& text, std::function<void()>&& buildFunc,
-        const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
-        const std::optional<Dimension>& offsetY, NG::OverlayType type) override
+        const RefPtr<NG::FrameNode>& contentNode, const std::optional<Alignment>& align,
+        const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY, NG::OverlayType type) override
     {
         if (type == NG::OverlayType::BUILDER) {
             ViewAbstract::SetOverlayBuilder(std::move(buildFunc), align, offsetX, offsetY);
+        } else if (type == NG::OverlayType::COMPONENT_CONTENT) {
+            ViewAbstract::SetOverlayComponentContent(contentNode, align, offsetX, offsetY);
         } else {
             NG::OverlayOptions overlay;
             overlay.content = text;
@@ -588,9 +689,10 @@ public:
         ViewAbstract::SetSharedTransition(shareId, option);
     }
 
-    void SetGeometryTransition(const std::string& id, bool followWithoutTransition = false) override
+    void SetGeometryTransition(const std::string& id,
+        bool followWithoutTransition = false, bool doRegisterSharedTransition = true) override
     {
-        ViewAbstract::SetGeometryTransition(id, followWithoutTransition);
+        ViewAbstract::SetGeometryTransition(id, followWithoutTransition, doRegisterSharedTransition);
     }
 
     void SetMotionPath(const MotionPathOption& option) override
@@ -839,6 +941,13 @@ public:
         focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
     }
 
+    static void SetOnKeyPreIme(FrameNode* frameNode, OnKeyPreImeFunc&& onKeyCallback)
+    {
+        auto focusHub = frameNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
+    }
+
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override
     {
         ViewAbstract::SetOnMouse(std::move(onMouseEventFunc));
@@ -847,6 +956,11 @@ public:
     void SetOnHover(OnHoverFunc&& onHoverEventFunc) override
     {
         ViewAbstract::SetOnHover(std::move(onHoverEventFunc));
+    }
+
+    void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) override
+    {
+        ViewAbstract::SetOnAccessibilityHover(std::move(onAccessibilityHoverEventFunc));
     }
 
     void SetOnDelete(std::function<void()>&& onDeleteCallback) override {}
@@ -1120,6 +1234,8 @@ public:
     void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) override;
 
+    void BindDragWithContextMenuParams(const NG::MenuParam& menuParam) override;
+
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
         std::function<void()>&& onDisappear, std::function<void()>&& onWillAppear,
@@ -1183,9 +1299,21 @@ public:
         focusHub->ClearOnKeyPreIme();
     }
 
+    static void DisableOnKeyPreIme(FrameNode* frameNode)
+    {
+        auto focusHub = frameNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->ClearOnKeyPreIme();
+    }
+
     void DisableOnHover() override
     {
         ViewAbstract::DisableOnHover();
+    }
+
+    void DisableOnAccessibilityHover() override
+    {
+        ViewAbstract::DisableOnAccessibilityHover();
     }
 
     void DisableOnMouse() override
@@ -1342,6 +1470,21 @@ private:
     void UpdateSafeAreaExpandOpts(const SafeAreaExpandOpts& opts) override
     {
         ViewAbstract::UpdateSafeAreaExpandOpts(opts);
+    }
+
+    void SetPositionLocalizedEdges(bool needLocalized) override
+    {
+        ViewAbstract::SetPositionLocalizedEdges(needLocalized);
+    }
+
+    void SetLocalizedMarkAnchor(bool needLocalized) override
+    {
+        ViewAbstract::SetLocalizedMarkAnchor(needLocalized);
+    }
+
+    void SetOffsetLocalizedEdges(bool needLocalized) override
+    {
+        ViewAbstract::SetOffsetLocalizedEdges(needLocalized);
     }
 };
 } // namespace OHOS::Ace::NG

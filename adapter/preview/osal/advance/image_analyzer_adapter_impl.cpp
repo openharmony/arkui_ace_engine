@@ -16,7 +16,7 @@
 #include "core/common/ai/image_analyzer_adapter_impl.h"
 
 namespace OHOS::Ace {
-void ImageAnalyzerAdapterImpl::SetImageAnalyzerConfig(void* config) {};
+void ImageAnalyzerAdapterImpl::SetImageAnalyzerConfig(void* config, bool isOptions) {};
 void* ImageAnalyzerAdapterImpl::GetImageAnalyzerConfig()
 {
     return nullptr;
@@ -25,6 +25,12 @@ void* ImageAnalyzerAdapterImpl::ConvertPixmapNapi(const RefPtr<PixelMap>& pixelM
 {
     return nullptr;
 }
+
+bool ImageAnalyzerAdapterImpl::HasImageAnalyzerConfig()
+{
+    return false;
+}
+
 ImageAnalyzerAdapter* CreateImageAnalyzerAdapter()
 {
     return nullptr;

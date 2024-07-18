@@ -151,6 +151,8 @@ private:
     bool GetFadingEdge() const;
     BarGridColumnOptions GetBarGridAlign() const;
     ScrollableBarModeOptions GetScrollableBarModeOptions() const;
+    std::string GetAnimationMode() const;
+    std::string GetEdgeEffect() const;
 
     std::optional<int32_t> swiperId_;
     std::optional<int32_t> tabBarId_;

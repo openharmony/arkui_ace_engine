@@ -36,12 +36,14 @@ public:
 
     bool PopWithExitCheck() override;
 
+    void FlushReload() override;
+
     // router operation
     int32_t GetStackSize() const override;
     void GetState(int32_t& index, std::string& name, std::string& path) override;
     std::string GetParams() const override;
 
-    RefPtr<NG::FrameNode> GetCurrentPageNode() const
+    RefPtr<NG::FrameNode> GetCurrentPageNode() override
     {
         if (pageRouterStack_.empty()) {
             LOGE("fail to get current page node due to page is null");

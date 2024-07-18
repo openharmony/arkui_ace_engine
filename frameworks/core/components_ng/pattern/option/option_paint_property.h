@@ -19,6 +19,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/inspector_filter.h"
+#include "core/components_ng/pattern/select/select_properties.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
@@ -38,6 +39,7 @@ public:
         paintProperty->propPress_ = ClonePress();
         paintProperty->propNeedDivider_ = CloneNeedDivider();
         paintProperty->propHasIcon_ = CloneHasIcon();
+        paintProperty->propDivider_ = CloneDivider();
 
         return paintProperty;
     }
@@ -49,6 +51,7 @@ public:
         ResetPress();
         ResetNeedDivider();
         ResetHasIcon();
+        ResetDivider();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Hover, bool, PROPERTY_UPDATE_RENDER);
@@ -56,6 +59,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NeedDivider, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HasIcon, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectModifiedWidth, float, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Divider, SelectDivider, PROPERTY_UPDATE_RENDER);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {

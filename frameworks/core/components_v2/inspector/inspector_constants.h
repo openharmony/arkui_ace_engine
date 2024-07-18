@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,7 +75,9 @@ ACE_EXPORT extern const char JS_LAZY_FOR_EACH_ETS_TAG[];
 ACE_EXPORT extern const char JS_FOR_EACH_ETS_TAG[];
 // js lazy foreach node
 ACE_EXPORT extern const char JS_SYNTAX_ITEM_ETS_TAG[];
-// js if lese node
+// js repeat node
+ACE_EXPORT extern const char JS_REPEAT_ETS_TAG[];
+// js if else node
 ACE_EXPORT extern const char JS_IF_ELSE_ETS_TAG[];
 // js node slot node
 ACE_EXPORT extern const char JS_NODE_SLOT_ETS_TAG[];
@@ -600,11 +602,18 @@ ACE_EXPORT extern const char CONTAINER_SPAN_ETS_TAG[];
 //RenderNode
 ACE_EXPORT extern const char RENDER_NODE_ETS_TAG[];
 
+//NodeContainer
+ACE_EXPORT extern const char NODE_CONTAINER_ETS_TAG[];
+
 //CustomFrameNode
 ACE_EXPORT extern const char CUSTOM_FRAME_NODE_ETS_TAG[];
 
 // MovingPhoto
 ACE_EXPORT extern const char MOVING_PHOTO_COMPONENT_TAG[];
 ACE_FORCE_EXPORT extern const char MOVING_PHOTO_ETS_TAG[];
+
+// LinearIndicator
+ACE_EXPORT extern const char LINEARINDICATOR_COMPONENT_TAG[];
+ACE_EXPORT extern const char LINEARINDICATOR_ETS_TAG[];
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

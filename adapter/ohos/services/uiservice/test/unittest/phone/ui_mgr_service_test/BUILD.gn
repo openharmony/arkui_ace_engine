@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/ability/ability_runtime/ability_runtime.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
 if (is_ohos_standard_system) {
@@ -46,7 +45,6 @@ ohos_unittest("UIMgrServiceTest") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:runtime",
-    "appspawn:appspawn_socket_client",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "eventhandler:libeventhandler",

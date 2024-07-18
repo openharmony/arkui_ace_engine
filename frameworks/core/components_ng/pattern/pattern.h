@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "base/utils/utils.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/components_ng/base/frame_node.h"
@@ -89,7 +90,14 @@ public:
         return false;
     }
 
+    virtual void ProcessSafeAreaPadding() {}
+
     virtual bool IsNeedPercent() const
+    {
+        return false;
+    }
+
+    virtual bool CheckCustomAvoidKeyboard() const
     {
         return false;
     }
@@ -103,6 +111,11 @@ public:
     virtual bool NeedSoftKeyboard() const
     {
         return false;
+    }
+
+    virtual bool NeedToRequestKeyboardOnFocus() const
+    {
+        return true;
     }
 
     virtual bool DefaultSupportDrag()
@@ -184,6 +197,7 @@ public:
             InitClickEventRecorder();
         }
 #endif
+        CheckLocalized();
         auto* frameNode = GetUnsafeHostPtr();
         const auto& children = frameNode->GetChildren();
         if (children.empty()) {
@@ -277,7 +291,8 @@ public:
         return true;
     }
 
-    // TODO: for temp use, need to delete this.
+    virtual void NotifyForNextTouchEvent() {}
+
     virtual bool OnDirtyLayoutWrapperSwap(
         const RefPtr<LayoutWrapper>& /*dirty*/, bool /*skipMeasure*/, bool /*skipLayout*/)
     {
@@ -355,12 +370,18 @@ public:
         return UnsafeRawPtr(frameNode_);
     }
 
+    PipelineContext* GetContext() {
+        auto frameNode = GetUnsafeHostPtr();
+        CHECK_NULL_RETURN(frameNode, nullptr);
+        return frameNode->GetContext();
+    }
+
     virtual void DumpInfo() {}
     virtual void DumpAdvanceInfo() {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) {}
     virtual void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) {}
-    virtual void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "") {}
+    virtual void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) {}
     virtual bool CheckAutoSave()
     {
         return false;
@@ -551,6 +572,41 @@ public:
 
     virtual void OnAttachContext(PipelineContext *context) {}
     virtual void OnDetachContext(PipelineContext *context) {}
+    virtual void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) {}
+
+    void CheckLocalized()
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto layoutProperty = host->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+        if (layoutProperty->IsPositionLocalizedEdges()) {
+            layoutProperty->CheckPositionLocalizedEdges(layoutDirection);
+        }
+        if (layoutProperty->IsMarkAnchorPosition()) {
+            layoutProperty->CheckMarkAnchorPosition(layoutDirection);
+        }
+        if (layoutProperty->IsOffsetLocalizedEdges()) {
+            layoutProperty->CheckOffsetLocalizedEdges(layoutDirection);
+        }
+        layoutProperty->CheckLocalizedPadding(layoutProperty, layoutDirection);
+        layoutProperty->CheckLocalizedMargin(layoutProperty, layoutDirection);
+        layoutProperty->CheckLocalizedEdgeWidths(layoutProperty, layoutDirection);
+        layoutProperty->CheckLocalizedEdgeColors(layoutDirection);
+        layoutProperty->CheckLocalizedBorderRadiuses(layoutDirection);
+        layoutProperty->CheckLocalizedOuterBorderColor(layoutDirection);
+        layoutProperty->CheckLocalizedBorderImageSlice(layoutDirection);
+        layoutProperty->CheckLocalizedBorderImageWidth(layoutDirection);
+        layoutProperty->CheckLocalizedBorderImageOutset(layoutDirection);
+    }
+
+    virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
+
+    virtual bool OnAccessibilityHoverEvent(const PointF& point)
+    {
+        return false;
+    }
 
 protected:
     virtual void OnAttachToFrameNode() {}
@@ -563,15 +619,19 @@ protected:
 
     void InitClickEventRecorder()
     {
-        if (clickCallback_) {
-            return;
-        }
-
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto gesture = host->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gesture);
-        if (!gesture->IsClickable()) {
+        if (!gesture->IsUserClickable()) {
+            if (clickCallback_) {
+                gesture->RemoveClickEvent(clickCallback_);
+                clickCallback_ = nullptr;
+            }
+            return;
+        }
+
+        if (clickCallback_) {
             return;
         }
 

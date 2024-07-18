@@ -63,6 +63,9 @@ constexpr int32_t PARAMETER_NUM = 2;
 constexpr int32_t argCount3 = 3;
 constexpr int32_t SOURCE_TYPE_MOUSE = 1;
 constexpr int32_t MOUSE_POINTER_ID = 1001;
+constexpr int32_t SOURCE_TOOL_PEN = 1;
+constexpr int32_t SOURCE_TYPE_TOUCH = 2;
+constexpr int32_t PEN_POINTER_ID = 102;
 
 using DragNotifyMsg = Msdp::DeviceStatus::DragNotifyMsg;
 using DragRet = OHOS::Ace::DragRet;
@@ -512,8 +515,9 @@ void GetCallBackDataForJs(DragControllerAsyncCtx* asyncCtx, const DragNotifyMsg&
         napi_close_handle_scope(asyncCtx->env, scope);
         return;
     }
+    auto vm = reinterpret_cast<NativeEngine*>(asyncCtx->env)->GetEcmaVm();
     auto* jsDragEvent =
-        static_cast<Framework::JsDragEvent*>(Local<panda::ObjectRef>(localRef)->GetNativePointerField(0));
+        static_cast<Framework::JsDragEvent*>(Local<panda::ObjectRef>(localRef)->GetNativePointerField(vm, 0));
     CHECK_NULL_VOID(jsDragEvent);
     auto dragEvent = AceType::MakeRefPtr<DragEvent>();
     CHECK_NULL_VOID(dragEvent);
@@ -765,6 +769,7 @@ void OnMultipleComplete(DragControllerAsyncCtx* asyncCtx)
     taskExecutor->PostTask(
         [asyncCtx]() {
             CHECK_NULL_VOID(asyncCtx);
+            ContainerScope scope(asyncCtx->instanceId);
             DragState dragState = DragState::PENDING;
             {
                 std::lock_guard<std::mutex> lock(asyncCtx->dragStateMutex);
@@ -799,6 +804,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
     taskExecutor->PostTask(
         [asyncCtx]() {
             CHECK_NULL_VOID(asyncCtx);
+            ContainerScope scope(asyncCtx->instanceId);
             DragState dragState = DragState::PENDING;
             {
                 std::lock_guard<std::mutex> lock(asyncCtx->dragStateMutex);
@@ -992,7 +998,8 @@ bool GetPixelMapByCustom(DragControllerAsyncCtx* asyncCtx)
     auto builder = [build = asyncCtx->customBuilder, env = asyncCtx->env] {
         napi_call_function(env, nullptr, build, 0, nullptr, nullptr);
     };
-    delegate->CreateSnapshot(builder, callback, true);
+    NG::SnapshotParam param;
+    delegate->CreateSnapshot(builder, callback, true, param);
     napi_close_escapable_handle_scope(asyncCtx->env, scope);
     return true;
 }
@@ -1026,7 +1033,8 @@ bool GetPixelMapArrayByCustom(DragControllerAsyncCtx* asyncCtx, napi_value custo
     auto builder = [build = customBuilder, env = asyncCtx->env] {
         napi_call_function(env, nullptr, build, 0, nullptr, nullptr);
     };
-    delegate->CreateSnapshot(builder, callback, true);
+    NG::SnapshotParam param;
+    delegate->CreateSnapshot(builder, callback, true, param);
     napi_close_escapable_handle_scope(asyncCtx->env, scope);
     return true;
 }
@@ -1054,22 +1062,21 @@ bool ParsePixelMapAndBuilder(DragControllerAsyncCtx* asyncCtx, std::string& errM
     PixelMapNapiEntry pixelMapNapiEntry = Framework::JsEngine::GetPixelMapNapiEntry();
     if (pixelMapNapiEntry == nullptr) {
         TAG_LOGW(AceLogTag::ACE_DRAG, "failed to parse pixelMap from the first argument");
-        napi_value customBuilderValue;
-        napi_get_named_property(asyncCtx->env, element, "builder", &customBuilderValue);
-        napi_valuetype valueType = napi_undefined;
-        napi_typeof(asyncCtx->env, customBuilderValue, &valueType);
-        if (valueType != napi_function) {
-            errMsg = "The type of customBuilder of the first parameter is incorrect.";
-            return false;
-        }
-        napi_ref ref = nullptr;
-        napi_create_reference(asyncCtx->env, customBuilderValue, 1, &ref);
-        asyncCtx->customBuilderList.push_back(ref);
     } else {
         void* pixmapPtrAddr = pixelMapNapiEntry(asyncCtx->env, pixelMapValue);
         if (pixmapPtrAddr == nullptr) {
             TAG_LOGW(AceLogTag::ACE_DRAG, "the pixelMap parsed from the first argument is null");
-            return false;
+            napi_value customBuilderValue;
+            napi_get_named_property(asyncCtx->env, element, "builder", &customBuilderValue);
+            napi_valuetype valueType = napi_undefined;
+            napi_typeof(asyncCtx->env, customBuilderValue, &valueType);
+            if (valueType != napi_function) {
+                errMsg = "The type of customBuilder of the first parameter is incorrect.";
+                return false;
+            }
+            napi_ref ref = nullptr;
+            napi_create_reference(asyncCtx->env, customBuilderValue, 1, &ref);
+            asyncCtx->customBuilderList.push_back(ref);
         } else {
             asyncCtx->pixelMapList.push_back(*(reinterpret_cast<std::shared_ptr<Media::PixelMap>*>(pixmapPtrAddr)));
         }
@@ -1378,9 +1385,6 @@ bool CheckAndParseParams(DragControllerAsyncCtx* asyncCtx, std::string& errMsg)
 {
     // Check the number of the argument
     CHECK_NULL_RETURN(asyncCtx, false);
-    if (errMsg.empty()) {
-        return false;
-    }
     if ((asyncCtx->argc != 2) && (asyncCtx->argc != argCount3)) {
         errMsg = "The number of parameters must be 2 or 3.";
         return false;
@@ -1474,10 +1478,14 @@ bool ConfirmCurPointerEventInfo(DragControllerAsyncCtx *asyncCtx, const RefPtr<C
                 TaskExecutor::TaskType::JS, "ArkUIDragStop");
         }
     };
+    int32_t sourceTool = -1;
     bool getPointSuccess = container->GetCurPointerEventInfo(
-        asyncCtx->pointerId, asyncCtx->globalX, asyncCtx->globalY, asyncCtx->sourceType, std::move(stopDragCallback));
+        asyncCtx->pointerId, asyncCtx->globalX, asyncCtx->globalY, asyncCtx->sourceType,
+        sourceTool, std::move(stopDragCallback));
     if (asyncCtx->sourceType == SOURCE_TYPE_MOUSE) {
         asyncCtx->pointerId = MOUSE_POINTER_ID;
+    } else if (asyncCtx->sourceType == SOURCE_TYPE_TOUCH && sourceTool == SOURCE_TOOL_PEN) {
+        asyncCtx->pointerId = PEN_POINTER_ID;
     }
     return getPointSuccess;
 }
@@ -1684,7 +1692,7 @@ static napi_value DragControllerExport(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("DragPreview", classDragPreview),
     };
     NAPI_CALL(env, napi_define_properties(
-                       env, exports, sizeof(dragControllerDesc) / sizeof(dragControllerDesc[0]), dragControllerDesc));
+        env, exports, sizeof(dragControllerDesc) / sizeof(dragControllerDesc[0]), dragControllerDesc));
     return exports;
 }
 

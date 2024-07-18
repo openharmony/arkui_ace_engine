@@ -474,6 +474,7 @@ bool FrontendDelegateDeclarative::OnPageBackPress()
         auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
         CHECK_NULL_RETURN(pagePattern, false);
         if (pagePattern->OnBackPressed()) {
+            TAG_LOGI(AceLogTag::ACE_ROUTER, "router user onBackPress return true");
             return true;
         }
         return pageRouterManager_->Pop();
@@ -805,17 +806,6 @@ void FrontendDelegateDeclarative::GetStageSourceMap(
     }
 }
 
-void FrontendDelegateDeclarative::InitializeRouterManager(NG::LoadPageCallback&& loadPageCallback,
-    NG::LoadPageByBufferCallback&& loadPageByBufferCallback, NG::LoadNamedRouterCallback&& loadNamedRouterCallback,
-    NG::UpdateRootComponentCallback&& updateRootComponentCallback)
-{
-    pageRouterManager_ = AceType::MakeRefPtr<NG::PageRouterManager>();
-    pageRouterManager_->SetLoadJsCallback(std::move(loadPageCallback));
-    pageRouterManager_->SetLoadJsByBufferCallback(std::move(loadPageByBufferCallback));
-    pageRouterManager_->SetLoadNamedRouterCallback(std::move(loadNamedRouterCallback));
-    pageRouterManager_->SetUpdateRootComponentCallback(std::move(updateRootComponentCallback));
-}
-
 #if defined(PREVIEW)
 void FrontendDelegateDeclarative::SetIsComponentPreview(NG::IsComponentPreviewCallback&& callback)
 {
@@ -831,7 +821,7 @@ void FrontendDelegateDeclarative::Push(const std::string& uri, const std::string
         auto currentId = GetEffectiveContainerId();
         CHECK_EQUAL_VOID(currentId.has_value(), false);
         ContainerScope scope(currentId.value());
-        pageRouterManager_->Push(NG::RouterPageInfo({ uri, params }));
+        pageRouterManager_->Push(NG::RouterPageInfo({ uri, params, true }));
         OnMediaQueryUpdate();
         return;
     }
@@ -846,7 +836,8 @@ void FrontendDelegateDeclarative::PushWithMode(const std::string& uri, const std
         auto currentId = GetEffectiveContainerId();
         CHECK_EQUAL_VOID(currentId.has_value(), false);
         ContainerScope scope(currentId.value());
-        pageRouterManager_->Push(NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode) }));
+        pageRouterManager_->Push(
+            NG::RouterPageInfo({ uri, params, true, static_cast<NG::RouterMode>(routerMode) }));
         OnMediaQueryUpdate();
         return;
     }
@@ -854,7 +845,7 @@ void FrontendDelegateDeclarative::PushWithMode(const std::string& uri, const std
 }
 
 void FrontendDelegateDeclarative::PushWithCallback(const std::string& uri, const std::string& params,
-    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+    bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
@@ -862,7 +853,7 @@ void FrontendDelegateDeclarative::PushWithCallback(const std::string& uri, const
         CHECK_EQUAL_VOID(currentId.has_value(), false);
         ContainerScope scope(currentId.value());
         pageRouterManager_->Push(
-            NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+            NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
         OnMediaQueryUpdate();
         return;
     }
@@ -870,14 +861,14 @@ void FrontendDelegateDeclarative::PushWithCallback(const std::string& uri, const
 }
 
 void FrontendDelegateDeclarative::PushNamedRoute(const std::string& uri, const std::string& params,
-    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+    bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
     auto currentId = GetEffectiveContainerId();
     CHECK_EQUAL_VOID(currentId.has_value(), false);
     ContainerScope scope(currentId.value());
     pageRouterManager_->PushNamedRoute(
-        NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
     OnMediaQueryUpdate();
 }
 
@@ -888,7 +879,7 @@ void FrontendDelegateDeclarative::Replace(const std::string& uri, const std::str
         auto currentId = GetEffectiveContainerId();
         CHECK_EQUAL_VOID(currentId.has_value(), false);
         ContainerScope scope(currentId.value());
-        pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params }));
+        pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params, true }));
         OnMediaQueryUpdate();
         return;
     }
@@ -903,7 +894,8 @@ void FrontendDelegateDeclarative::ReplaceWithMode(
         auto currentId = GetEffectiveContainerId();
         CHECK_EQUAL_VOID(currentId.has_value(), false);
         ContainerScope scope(currentId.value());
-        pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode) }));
+        pageRouterManager_->Replace(
+            NG::RouterPageInfo({ uri, params, true, static_cast<NG::RouterMode>(routerMode) }));
         OnMediaQueryUpdate();
         return;
     }
@@ -911,7 +903,7 @@ void FrontendDelegateDeclarative::ReplaceWithMode(
 }
 
 void FrontendDelegateDeclarative::ReplaceWithCallback(const std::string& uri, const std::string& params,
-    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+    bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
@@ -919,7 +911,7 @@ void FrontendDelegateDeclarative::ReplaceWithCallback(const std::string& uri, co
         CHECK_EQUAL_VOID(currentId.has_value(), false);
         ContainerScope scope(currentId.value());
         pageRouterManager_->Replace(
-            NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+            NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
         OnMediaQueryUpdate();
         return;
     }
@@ -927,14 +919,14 @@ void FrontendDelegateDeclarative::ReplaceWithCallback(const std::string& uri, co
 }
 
 void FrontendDelegateDeclarative::ReplaceNamedRoute(const std::string& uri, const std::string& params,
-    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+    bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
     auto currentId = GetEffectiveContainerId();
     CHECK_EQUAL_VOID(currentId.has_value(), false);
     ContainerScope scope(currentId.value());
     pageRouterManager_->ReplaceNamedRoute(
-        NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
     OnMediaQueryUpdate();
 }
 
@@ -1021,6 +1013,19 @@ int32_t FrontendDelegateDeclarative::GetStackSize() const
     return static_cast<int32_t>(pageRouteStack_.size());
 }
 
+int32_t FrontendDelegateDeclarative::GetCurrentPageIndex() const
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_RETURN(pageRouterManager_, 0);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_RETURN(currentId.has_value(), false, 0);
+        ContainerScope scope(currentId.value());
+        return pageRouterManager_->GetCurrentPageIndex();
+    }
+    std::lock_guard<std::mutex> lock(mutex_);
+    return static_cast<int32_t>(pageRouteStack_.size());
+}
+
 void FrontendDelegateDeclarative::GetState(int32_t& index, std::string& name, std::string& path)
 {
     if (Container::IsCurrentUseNewPipeline()) {
@@ -1083,6 +1088,7 @@ void FrontendDelegateDeclarative::GetRouterStateByIndex(int32_t& index, std::str
         }
     }
     auto pos = url.rfind(".js");
+    // url length - (.js) length
     if (pos == url.length() - 3) {
         url = url.substr(0, pos);
     }
@@ -1092,6 +1098,18 @@ void FrontendDelegateDeclarative::GetRouterStateByIndex(int32_t& index, std::str
         path = url.substr(0, pos + 1);
     }
     params = GetParams();
+}
+
+bool FrontendDelegateDeclarative::IsUnrestoreByIndex(int32_t index)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return false;
+    }
+    CHECK_NULL_RETURN(pageRouterManager_, false);
+    auto currentId = GetEffectiveContainerId();
+    CHECK_EQUAL_RETURN(currentId.has_value(), false, false);
+    ContainerScope scope(currentId.value());
+    return pageRouterManager_->IsUnrestoreByIndex(index);
 }
 
 void FrontendDelegateDeclarative::GetRouterStateByUrl(std::string& url, std::vector<StateInfo>& stateArray)
@@ -1118,6 +1136,7 @@ void FrontendDelegateDeclarative::GetRouterStateByUrl(std::string& url, std::vec
             if (iter.url == url) {
                 stateInfo.index = counter;
                 auto pos = url.rfind(".js");
+                // url length - (.js) length
                 if (pos == url.length() - 3) {
                     tempUrl = url.substr(0, pos);
                 }
@@ -1529,38 +1548,62 @@ int32_t FrontendDelegateDeclarative::GetVersionCode() const
     return manifestParser_->GetAppInfo()->GetVersionCode();
 }
 
-double FrontendDelegateDeclarative::MeasureText(const MeasureContext& context)
+double FrontendDelegateDeclarative::MeasureText(MeasureContext context)
 {
+    if (context.isFontSizeUseDefaultUnit && context.fontSize.has_value() &&
+        !AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        context.fontSize = Dimension(context.fontSize->Value(), DimensionUnit::VP);
+    }
     return MeasureUtil::MeasureText(context);
 }
 
-Size FrontendDelegateDeclarative::MeasureTextSize(const MeasureContext& context)
+Size FrontendDelegateDeclarative::MeasureTextSize(MeasureContext context)
 {
+    if (context.isFontSizeUseDefaultUnit && context.fontSize.has_value() &&
+        !AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        context.fontSize = Dimension(context.fontSize->Value(), DimensionUnit::VP);
+    }
     return MeasureUtil::MeasureTextSize(context);
 }
 
-void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
-    const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
+void FrontendDelegateDeclarative::ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast enter");
-    int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
-    bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    NG::ToastInfo updatedToastInfo = toastInfo;
+    updatedToastInfo.duration = std::clamp(toastInfo.duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
+    updatedToastInfo.isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::IsCurrentUseNewPipeline()) {
-        auto task = [durationTime, message, bottom, isRightToLeft, showMode, alignment, offset,
-                        containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+        auto task = [updatedToastInfo, callbackParam = std::move(callback), containerId = Container::CurrentId()](
+                        const RefPtr<NG::OverlayManager>& overlayManager) {
             CHECK_NULL_VOID(overlayManager);
             ContainerScope scope(containerId);
-            overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode, alignment, offset);
+            overlayManager->ShowToast(
+                updatedToastInfo, std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
         };
         MainWindowOverlay(std::move(task), "ArkUIOverlayShowToast");
         return;
     }
     auto pipeline = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
     taskExecutor_->PostTask(
-        [durationTime, message, bottom, isRightToLeft, context = pipeline] {
-            ToastComponent::GetInstance().Show(context, message, durationTime, bottom, isRightToLeft);
+        [updatedToastInfo, context = pipeline] {
+            ToastComponent::GetInstance().Show(context, updatedToastInfo.message, updatedToastInfo.duration,
+                updatedToastInfo.bottom, updatedToastInfo.isRightToLeft);
         },
         TaskExecutor::TaskType::UI, "ArkUIShowToast");
+}
+
+void FrontendDelegateDeclarative::CloseToast(const int32_t toastId, std::function<void(int32_t)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "close toast enter");
+    auto currentId = Container::CurrentId();
+    ContainerScope scope(currentId);
+
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->CloseToast(toastId, std::move(callback));
 }
 
 void FrontendDelegateDeclarative::SetToastStopListenerCallback(std::function<void()>&& stopCallback)
@@ -1686,10 +1729,10 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .content = dialogAttr.message,
         .autoCancel = dialogAttr.autoCancel,
         .buttons = buttons,
+        .onLanguageChange = dialogAttr.onLanguageChange,
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
         .maskRect = dialogAttr.maskRect,
-        .onLanguageChange = dialogAttr.onLanguageChange,
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
@@ -1754,12 +1797,15 @@ void FrontendDelegateDeclarative::RemoveCustomDialog()
 
 DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const PromptDialogAttr &dialogAttr)
 {
-    DialogProperties dialogProperties = { .isShowInSubWindow = dialogAttr.showInSubWindow,
-        .isModal = dialogAttr.isModal,
-        .customBuilder = dialogAttr.customBuilder,
+    DialogProperties dialogProperties = { .autoCancel = dialogAttr.autoCancel,
+        .customStyle = dialogAttr.customStyle,
         .onWillDismiss = dialogAttr.customOnWillDismiss,
+        .maskColor = dialogAttr.maskColor,
         .backgroundColor = dialogAttr.backgroundColor,
         .borderRadius = dialogAttr.borderRadius,
+        .isShowInSubWindow = dialogAttr.showInSubWindow,
+        .isModal = dialogAttr.isModal,
+        .customBuilder = dialogAttr.customBuilder,
         .borderWidth = dialogAttr.borderWidth,
         .borderColor = dialogAttr.borderColor,
         .borderStyle = dialogAttr.borderStyle,
@@ -1767,11 +1813,8 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
         .width = dialogAttr.width,
         .height = dialogAttr.height,
         .maskRect = dialogAttr.maskRect,
-        .autoCancel = dialogAttr.autoCancel,
-        .contentNode = dialogAttr.contentNode,
-        .maskColor = dialogAttr.maskColor,
-        .customStyle = dialogAttr.customStyle,
         .transitionEffect = dialogAttr.transitionEffect,
+        .contentNode = dialogAttr.contentNode,
         .onDidAppear = dialogAttr.onDidAppear,
         .onDidDisappear = dialogAttr.onDidDisappear,
         .onWillAppear = dialogAttr.onWillAppear,
@@ -1854,9 +1897,9 @@ void FrontendDelegateDeclarative::UpdateCustomDialog(
     const WeakPtr<NG::UINode>& node, const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback)
 {
     DialogProperties dialogProperties = {
-        .isSysBlurStyle = false,
         .autoCancel = dialogAttr.autoCancel,
-        .maskColor = dialogAttr.maskColor
+        .maskColor = dialogAttr.maskColor,
+        .isSysBlurStyle = false
     };
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();
@@ -3216,35 +3259,36 @@ RefPtr<PipelineBase> FrontendDelegateDeclarative::GetPipelineContext()
     return pipelineContextHolder_.Get();
 }
 
-std::pair<std::string, UIContentErrorCode> FrontendDelegateDeclarative::RestoreRouterStack(
-    const std::string& contentInfo)
+std::pair<RouterRecoverRecord, UIContentErrorCode> FrontendDelegateDeclarative::RestoreRouterStack(
+    const std::string& contentInfo, ContentInfoType type)
 {
     LOGI("FrontendDelegateDeclarative::RestoreRouterStack: contentInfo = %{public}s", contentInfo.c_str());
     auto jsonContentInfo = JsonUtil::ParseJsonString(contentInfo);
     if (!jsonContentInfo->IsValid() || !jsonContentInfo->IsObject()) {
         LOGW("restore contentInfo is invalid");
-        return std::make_pair("", UIContentErrorCode::WRONG_PAGE_ROUTER);
+        return std::make_pair(RouterRecoverRecord(), UIContentErrorCode::WRONG_PAGE_ROUTER);
     }
-    // restore node info
-    auto jsonNodeInfo = jsonContentInfo->GetValue("nodeInfo");
-    auto pipelineContext = pipelineContextHolder_.Get();
-    CHECK_NULL_RETURN(pipelineContext, std::make_pair("", UIContentErrorCode::WRONG_PAGE_ROUTER));
-    pipelineContext->RestoreNodeInfo(std::move(jsonNodeInfo));
+    if (type == ContentInfoType::CONTINUATION || type == ContentInfoType::APP_RECOVERY) {
+        // restore node info
+        auto jsonNodeInfo = jsonContentInfo->GetValue("nodeInfo");
+        auto pipelineContext = pipelineContextHolder_.Get();
+        CHECK_NULL_RETURN(pipelineContext,
+            std::make_pair(RouterRecoverRecord(), UIContentErrorCode::WRONG_PAGE_ROUTER));
+        pipelineContext->RestoreNodeInfo(std::move(jsonNodeInfo));
+    }
+
     // restore stack info
     auto routerStack = jsonContentInfo->GetValue("stackInfo");
-    if (Container::IsCurrentUseNewPipeline()) {
-        CHECK_NULL_RETURN(pageRouterManager_, std::make_pair("", UIContentErrorCode::NULL_PAGE_ROUTER));
-        return pageRouterManager_->RestoreRouterStack(std::move(routerStack));
-    } else {
+    if (!Container::IsCurrentUseNewPipeline()) {
         std::lock_guard<std::mutex> lock(mutex_);
         if (!routerStack->IsValid() || !routerStack->IsArray()) {
             LOGW("restore router stack is invalid");
-            return std::make_pair("", UIContentErrorCode::WRONG_PAGE_ROUTER);
+            return std::make_pair(RouterRecoverRecord(), UIContentErrorCode::WRONG_PAGE_ROUTER);
         }
         int32_t stackSize = routerStack->GetArraySize();
         if (stackSize < 1) {
-            LOGW("restore stack size is invalid");
-            return std::make_pair("", UIContentErrorCode::WRONG_PAGE_ROUTER);
+            LOGW("restore stack size: %{public}d is invalid", stackSize);
+            return std::make_pair(RouterRecoverRecord(), UIContentErrorCode::WRONG_PAGE_ROUTER);
         }
         for (int32_t index = 0; index < stackSize - 1; ++index) {
             std::string url = routerStack->GetArrayItem(index)->ToString();
@@ -3253,11 +3297,34 @@ std::pair<std::string, UIContentErrorCode> FrontendDelegateDeclarative::RestoreR
         }
         std::string startUrl = routerStack->GetArrayItem(stackSize - 1)->ToString();
         // remove 5 useless character, as "XXX.js" to XXX
-        return std::make_pair(startUrl.substr(1, startUrl.size() - 5), UIContentErrorCode::NO_ERRORS);
+        return std::make_pair(RouterRecoverRecord(startUrl.substr(1, startUrl.size() - 5), "", false),
+            UIContentErrorCode::NO_ERRORS);
     }
+
+    CHECK_NULL_RETURN(pageRouterManager_,
+        std::make_pair(RouterRecoverRecord(), UIContentErrorCode::NULL_PAGE_ROUTER));
+    if (type == ContentInfoType::RESOURCESCHEDULE_RECOVERY) {
+        auto namedRouterInfo = jsonContentInfo->GetValue("namedRouterInfo");
+        if (namedRouterInfo && namedRouterInfo->IsValid()) {
+            if (!namedRouterInfo->IsArray()) {
+                LOGD("restore named router info is invalid");
+                return std::make_pair(RouterRecoverRecord(), UIContentErrorCode::WRONG_PAGE_ROUTER);
+            }
+            pageRouterManager_->RestoreNamedRouterInfo(std::move(namedRouterInfo));
+        }
+        auto fullPathInfo = jsonContentInfo->GetValue("fullPathInfo");
+        if (fullPathInfo && fullPathInfo->IsValid()) {
+            if (!fullPathInfo->IsArray()) {
+                LOGD("restore full path info is invalid");
+                return std::make_pair(RouterRecoverRecord(), UIContentErrorCode::WRONG_PAGE_ROUTER);
+            }
+            pageRouterManager_->RestoreFullPathInfo(std::move(fullPathInfo));
+        }
+    }
+    return pageRouterManager_->RestoreRouterStack(std::move(routerStack), type);
 }
 
-std::string FrontendDelegateDeclarative::GetContentInfo()
+std::string FrontendDelegateDeclarative::GetContentInfo(ContentInfoType type)
 {
     auto jsonContentInfo = JsonUtil::Create(true);
 
@@ -3270,26 +3337,39 @@ std::string FrontendDelegateDeclarative::GetContentInfo()
         jsonContentInfo->Put("stackInfo", jsonRouterStack);
     } else {
         CHECK_NULL_RETURN(pageRouterManager_, "");
-        jsonContentInfo->Put("stackInfo", pageRouterManager_->GetStackInfo());
+        jsonContentInfo->Put("stackInfo", pageRouterManager_->GetStackInfo(type));
+        if (type == ContentInfoType::RESOURCESCHEDULE_RECOVERY) {
+            auto namedRouterInfo = pageRouterManager_->GetNamedRouterInfo();
+            if (namedRouterInfo) {
+                jsonContentInfo->Put("namedRouterInfo", std::move(namedRouterInfo));
+            }
+            auto fullPathInfo = pageRouterManager_->GetFullPathInfo();
+            if (fullPathInfo) {
+                jsonContentInfo->Put("fullPathInfo", std::move(fullPathInfo));
+            }
+        }
     }
 
-    auto pipelineContext = pipelineContextHolder_.Get();
-    CHECK_NULL_RETURN(pipelineContext, jsonContentInfo->ToString());
-    jsonContentInfo->Put("nodeInfo", pipelineContext->GetStoredNodeInfo());
+    if (type == ContentInfoType::CONTINUATION || type == ContentInfoType::APP_RECOVERY) {
+        auto pipelineContext = pipelineContextHolder_.Get();
+        CHECK_NULL_RETURN(pipelineContext, jsonContentInfo->ToString());
+        jsonContentInfo->Put("nodeInfo", pipelineContext->GetStoredNodeInfo());
+    }
 
     return jsonContentInfo->ToString();
 }
 
 void FrontendDelegateDeclarative::GetSnapshot(
-    const std::string& componentId, NG::ComponentSnapshot::JsCallback&& callback)
+    const std::string& componentId, NG::ComponentSnapshot::JsCallback&& callback, const NG::SnapshotOptions& options)
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    NG::ComponentSnapshot::Get(componentId, std::move(callback));
+    NG::ComponentSnapshot::Get(componentId, std::move(callback), options);
 #endif
 }
 
 void FrontendDelegateDeclarative::CreateSnapshot(
-    std::function<void()>&& customBuilder, NG::ComponentSnapshot::JsCallback&& callback, bool enableInspector)
+    std::function<void()>&& customBuilder, NG::ComponentSnapshot::JsCallback&& callback, bool enableInspector,
+    const NG::SnapshotParam& param)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     ViewStackModel::GetInstance()->NewScope();
@@ -3297,7 +3377,7 @@ void FrontendDelegateDeclarative::CreateSnapshot(
     customBuilder();
     auto customNode = ViewStackModel::GetInstance()->Finish();
 
-    NG::ComponentSnapshot::Create(customNode, std::move(callback), enableInspector);
+    NG::ComponentSnapshot::Create(customNode, std::move(callback), enableInspector, param);
 #endif
 }
 

@@ -167,7 +167,7 @@ void HandleInnerCustomEvent(ArkUICustomNodeEvent* origin)
         return;
     }
     auto* nodePtr = reinterpret_cast<ArkUI_NodeHandle>(origin->extraParam);
-    if (!nodePtr->extraCustomData) {
+    if (!IsValidArkUINode(nodePtr) || !nodePtr->extraCustomData) {
         return;
     }
 
@@ -191,9 +191,9 @@ void HandleCustomEvent(ArkUI_NodeCustomEvent* event)
     if (!event) {
         return;
     }
-    if (event->node && event->node->eventListeners) {
+    if (event->node && event->node->customEventListeners) {
         auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeCustomEvent*)>*>(
-            event->node->eventListeners);
+            event->node->customEventListeners);
         if (eventListenersSet) {
             for (const auto& eventlistener : *eventListenersSet) {
                 (*eventlistener)(event);
@@ -210,11 +210,11 @@ int32_t AddNodeCustomEventReceiver(ArkUI_NodeHandle nodePtr, void (*eventReceive
     if (!nodePtr || !eventReceiver) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (!nodePtr->eventListeners) {
-        nodePtr->eventListeners = new std::set<void (*)(ArkUI_NodeCustomEvent*)>();
+    if (!nodePtr->customEventListeners) {
+        nodePtr->customEventListeners = new std::set<void (*)(ArkUI_NodeCustomEvent*)>();
     }
     auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeCustomEvent*)>*>(
-        nodePtr->eventListeners);
+        nodePtr->customEventListeners);
     if (!eventListenersSet) {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -225,18 +225,18 @@ int32_t AddNodeCustomEventReceiver(ArkUI_NodeHandle nodePtr, void (*eventReceive
 int32_t RemoveNodeCustomEventReceiver(ArkUI_NodeHandle nodePtr,
     void (*eventReceiver)(ArkUI_NodeCustomEvent* event))
 {
-    if (!nodePtr || !eventReceiver || !nodePtr->eventListeners) {
+    if (!nodePtr || !eventReceiver || !nodePtr->customEventListeners) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto eventListenersSet = reinterpret_cast<std::set<void (*)(ArkUI_NodeCustomEvent*)>*>(
-        nodePtr->eventListeners);
+        nodePtr->customEventListeners);
     if (!eventListenersSet) {
         return ERROR_CODE_PARAM_INVALID;
     }
     eventListenersSet->erase(eventReceiver);
     if (eventListenersSet->empty()) {
         delete eventListenersSet;
-        nodePtr->eventListeners = nullptr;
+        nodePtr->customEventListeners = nullptr;
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -347,7 +347,7 @@ int32_t LayoutNode(ArkUI_NodeHandle node, int32_t positionX, int32_t positionY)
     data[0] = positionX;
     //positionY
     data[1] = positionY;
-    impl->getExtendedAPI()->layoutNode(nullptr, node->uiNodeHandle, data);
+    impl->getExtendedAPI()->layoutNode(nullptr, node->uiNodeHandle, &data);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -442,5 +442,13 @@ ArkUI_NodeHandle GetParent(ArkUI_NodeHandle node)
         return reinterpret_cast<ArkUI_NodeHandle>(attachNode);
     }
     return nullptr;
+}
+
+int32_t RemoveAllChildren(ArkUI_NodeHandle parentNode)
+{
+    CHECK_NULL_RETURN(parentNode, ERROR_CODE_PARAM_INVALID);
+    auto* impl = GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->clearChildren(parentNode->uiNodeHandle);
+    return ERROR_CODE_NO_ERROR;
 }
 } // namespace OHOS::Ace::NodeModel

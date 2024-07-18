@@ -90,7 +90,7 @@ void CustomNode::FlushReload()
     CHECK_NULL_VOID(completeReloadFunc_);
     Clean();
     renderFunction_ = completeReloadFunc_;
-    Render();
+    Build(nullptr);
 }
 
 bool CustomNode::RenderCustomChild(int64_t deadline)
@@ -102,7 +102,7 @@ bool CustomNode::RenderCustomChild(int64_t deadline)
     return UINode::RenderCustomChild(deadline);
 }
 
-void CustomNode::SetJSViewActive(bool active)
+void CustomNode::SetJSViewActive(bool active, bool isLazyForEachNode)
 {
     if (GetJsActive() != active) {
         SetJsActive(active);
@@ -172,7 +172,7 @@ RefPtr<UINode> CustomNode::GetFrameChildByIndex(uint32_t index, bool needBuild, 
     return UINode::GetFrameChildByIndex(index, needBuild, isCache, addToRenderTree);
 }
 
-void CustomNode::DoSetActiveChildRange(int32_t start, int32_t end)
+void CustomNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
 {
     if (start <= end) {
         if (start > 0 || end < 0) {

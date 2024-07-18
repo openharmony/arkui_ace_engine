@@ -21,6 +21,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
+#include "core/common/ime/text_range.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
@@ -36,6 +37,21 @@ struct DeleteValueInfo {
     int32_t deleteOffset = 0;
     TextDeleteDirection direction = TextDeleteDirection::BACKWARD;
     std::string deleteValue;
+};
+
+struct PreviewText {
+    int32_t offset;
+    std::string value;
+
+    bool operator==(const PreviewText& other) const
+    {
+        return this->offset == other.offset && this->value == other.value;
+    }
+
+    bool operator!=(const PreviewText& other) const
+    {
+        return this->offset != other.offset || this->value != other.value;
+    }
 };
 } // namespace OHOS::Ace
 
@@ -82,7 +98,7 @@ public:
     void FireOnInputFilterError(const std::string& value) const
     {
         if (onInputFilterError_) {
-            LOGI("On filter error %{private}s", value.c_str());
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On filter error %{private}s", value.c_str());
             onInputFilterError_(value);
         }
     }
@@ -100,7 +116,7 @@ public:
     void FireOnSecurityStateChanged(bool value)
     {
         if (onSecurityStateChanged_) {
-            LOGI("FireOnSecurityStateChanged %{public}d", value);
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "FireOnSecurityStateChanged %{public}d", value);
             onSecurityStateChanged_(value);
         }
     }
@@ -108,7 +124,7 @@ public:
     void FireOnEditChanged(bool value)
     {
         if (onEditChanged_) {
-            LOGI("On edit change %{private}d", value);
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On edit change %{private}d", value);
             onEditChanged_(value);
         }
     }
@@ -121,35 +137,39 @@ public:
     void FireOnSubmit(int32_t value, NG::TextFieldCommonEvent& event)
     {
         if (onSubmit_) {
-            LOGI("On submit %{private}d", value);
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On submit %{private}d", value);
             onSubmit_(value, event);
         }
     }
 
-    void SetOnChange(std::function<void(const std::string&)>&& func)
+    void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& func)
     {
         onChange_ = std::move(func);
     }
 
-    const std::function<void(const std::string&)>& GetOnChange() const
+    const std::function<void(const std::string&, PreviewText&)>& GetOnChange() const
     {
         return onChange_;
     }
 
-    void FireOnChange(const std::string& value)
+    void FireOnChange(const std::string& value, PreviewText& previewText)
     {
-        if (lastValue_.has_value() && lastValue_.value() == value) {
+        if (lastValue_.has_value() && lastValue_.value() == value && lastPreviewText_ == previewText) {
             return;
         }
         if (onValueChangeEvent_) {
-            LOGI("On change event %{private}s", value.c_str());
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On change event %{private}s", value.c_str());
             onValueChangeEvent_(value);
         }
         if (onChange_) {
-            LOGI("On change %{private}s", value.c_str());
-            onChange_(value);
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On change %{private}s", value.c_str());
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On change previewText %{private}s", previewText.value.c_str());
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On change previewText index %{private}d", previewText.offset);
+            auto onChange = onChange_;
+            onChange(value, previewText);
         }
         lastValue_ = value;
+        lastPreviewText_ = previewText;
     }
 
     void SetOnContentSizeChange(std::function<void(float, float)>&& func)
@@ -177,7 +197,8 @@ public:
     void FireOnSelectionChange(int32_t selectionStart, int32_t selectionEnd)
     {
         if (onSelectionChange_) {
-            LOGI("On selection change start %{private}d, end %{private}d", selectionStart, selectionEnd);
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On selection change start %{private}d, end %{private}d",
+                selectionStart, selectionEnd);
             onSelectionChange_(selectionStart, selectionEnd);
         }
     }
@@ -190,7 +211,7 @@ public:
     void FireOnCopy(const std::string& value)
     {
         if (onCopy_) {
-            LOGI("On copy %{private}s", value.c_str());
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On copy %{private}s", value.c_str());
             onCopy_(value);
         }
     }
@@ -203,7 +224,7 @@ public:
     void FireOnCut(const std::string& value)
     {
         if (onCut_) {
-            LOGI("On cut %{private}s", value.c_str());
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On cut %{private}s", value.c_str());
             onCut_(value);
         }
     }
@@ -216,7 +237,7 @@ public:
     void FireOnPaste(const std::string& value)
     {
         if (onPaste_) {
-            LOGI("On paste %{private}s", value.c_str());
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On paste %{private}s", value.c_str());
             onPaste_(value);
         }
     }
@@ -362,6 +383,7 @@ public:
 
 private:
     std::optional<std::string> lastValue_;
+    PreviewText lastPreviewText_ {};
 
     OnScrollEvent onScrollEvent_;
     OnScrollBeginEvent onScrollBeginEvent_;
@@ -375,7 +397,7 @@ private:
     std::function<void(bool)> onEditChanged_;
     std::function<void(bool)> onSecurityStateChanged_;
     std::function<void(int32_t, NG::TextFieldCommonEvent&)> onSubmit_;
-    std::function<void(const std::string&)> onChange_;
+    std::function<void(const std::string&, PreviewText&)> onChange_;
     std::function<void(float, float)> onContentSizeChange_;
     std::function<void(int32_t, int32_t)> onSelectionChange_;
 

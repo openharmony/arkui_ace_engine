@@ -60,7 +60,7 @@ std::string ArkJSValue::ToString(shared_ptr<JsRuntime> runtime)
     }
     Local<StringRef> string = value_->ToString(vm);
     if (!CheckException(pandaRuntime, string)) {
-        return string->ToString();
+        return string->ToString(vm);
     }
     LOGE("ArkJSValue::ToString occurs exception, return empty string directly");
     return "";
@@ -71,7 +71,7 @@ bool ArkJSValue::ToBoolean(shared_ptr<JsRuntime> runtime)
     shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     LocalScope scope(pandaRuntime->GetEcmaVm());
     if (!CheckException(pandaRuntime)) {
-        return value_->BooleaValue();
+        return value_->BooleaValue(pandaRuntime->GetEcmaVm());
     }
     LOGE("ArkJSValue::ToBoolean occurs exception, return false directly");
     return false;
@@ -104,17 +104,20 @@ bool ArkJSValue::WithinInt32([[maybe_unused]] shared_ptr<JsRuntime> runtime)
 
 bool ArkJSValue::IsString([[maybe_unused]] shared_ptr<JsRuntime> runtime)
 {
-    return !value_.IsEmpty() && value_->IsString();
+    shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    return !value_.IsEmpty() && value_->IsString(pandaRuntime->GetEcmaVm());
 }
 
 bool ArkJSValue::IsNumber([[maybe_unused]] shared_ptr<JsRuntime> runtime)
 {
+    shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     return !value_.IsEmpty() && value_->IsNumber();
 }
 
 bool ArkJSValue::IsObject([[maybe_unused]] shared_ptr<JsRuntime> runtime)
 {
-    return !value_.IsEmpty() && value_->IsObject();
+    shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    return !value_.IsEmpty() && value_->IsObject(pandaRuntime->GetEcmaVm());
 }
 
 bool ArkJSValue::IsArray([[maybe_unused]] shared_ptr<JsRuntime> runtime)
@@ -125,7 +128,8 @@ bool ArkJSValue::IsArray([[maybe_unused]] shared_ptr<JsRuntime> runtime)
 
 bool ArkJSValue::IsFunction([[maybe_unused]] shared_ptr<JsRuntime> runtime)
 {
-    return !value_.IsEmpty() && value_->IsFunction();
+    shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    return !value_.IsEmpty() && value_->IsFunction(pandaRuntime->GetEcmaVm());
 }
 
 // NOLINTNEXTLINE(performance-unnecessary-value-param)
@@ -402,7 +406,7 @@ std::string ArkJSValue::GetJsonString(const shared_ptr<JsRuntime>& runtime)
         LOGE("ArkJSValue::GetJsonString occurs exception, return empty string directly");
         return "";
     }
-    return valueStr->ToString();
+    return valueStr->ToString(pandaRuntime->GetEcmaVm());
 }
 
 bool ArkJSValue::CheckException(const shared_ptr<ArkJSRuntime> &runtime) const

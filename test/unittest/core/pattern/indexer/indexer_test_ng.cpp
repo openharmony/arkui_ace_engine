@@ -29,13 +29,13 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/container.h"
+#include "core/components/indexer/indexer_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/indexer/indexer_layout_property.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/indexer/indexer_paint_property.h"
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
-#include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -93,8 +93,10 @@ void IndexerTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<IndexerTheme>()));
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_INDEXER);
+    auto indexerTheme = IndexerTheme::Builder().Build(themeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(indexerTheme));
 }
 
 void IndexerTestNg::TearDownTestSuite()
@@ -130,6 +132,7 @@ void IndexerTestNg::Create(
 {
     IndexerModelNG model;
     model.Create(arrayValue, selected);
+    model.SetAutoCollapse(false);
     if (callback) {
         callback(model);
     }
@@ -1411,7 +1414,7 @@ HWTEST_F(IndexerTestNg, OnModifyDone006, TestSize.Level1)
         model.SetItemSize(Dimension(10, DimensionUnit::VP));
     }, CREATE_ARRAY_1, 0);
 
-    EXPECT_EQ(pattern_->autoCollapse_, true);
+    EXPECT_EQ(pattern_->autoCollapse_, false);
     EXPECT_EQ(pattern_->fullArrayValue_.size(), CREATE_ARRAY_1.size());
     EXPECT_EQ(pattern_->arrayValue_.size(), CREATE_ARRAY_1.size());
     for (auto value : pattern_->arrayValue_) {
@@ -1448,7 +1451,7 @@ HWTEST_F(IndexerTestNg, OnModifyDone007, TestSize.Level1)
     dirtySwapConfig.skipLayout = false;
     pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
 
-    EXPECT_EQ(pattern_->autoCollapse_, true);
+    EXPECT_EQ(pattern_->autoCollapse_, false);
     EXPECT_EQ(pattern_->fullArrayValue_.size(), CREATE_ARRAY_1.size());
     EXPECT_EQ(pattern_->arrayValue_.size(), CREATE_ARRAY_1.size());
     for (auto value : pattern_->arrayValue_) {
@@ -1718,14 +1721,14 @@ HWTEST_F(IndexerTestNg, IndexerPatternCoverage001, TestSize.Level1)
      * has no condition that selected_ more than itemCount_-1 when OnTouchUp.
      */
     pattern_->selected_ = CREATE_ARRAY.size();
-    pattern_->OnSelect(true);
+    pattern_->OnSelect();
 
     /**
      * @tc.steps: step5. Supplement OnSelect branch.
      * has no condition that selected_ less than 0 when OnTouchUp.
      */
     pattern_->selected_ = -1;
-    pattern_->OnSelect(true);
+    pattern_->OnSelect();
 
     /**
      * @tc.steps: step6. Supplement UpdateBubbleSize branch,

@@ -60,6 +60,11 @@ void SetIgnoreLayoutSafeArea(ArkUINodeHandle node, const char* typeStr, const ch
     uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
     std::string safeAreaTypeStr = std::string(typeStr);
     std::string safeAreaEdgeStr = std::string(edgesStr);
+    if (safeAreaTypeStr == "" || safeAreaEdgeStr == "") {
+        NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_NONE, .edges = NG::SAFE_AREA_EDGE_NONE};
+        NavDestinationModelNG::SetIgnoreLayoutSafeArea(frameNode, opts);
+        return;
+    }
     std::string delimiter = "|";
     size_t pos = 0;
     std::string type;

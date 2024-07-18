@@ -30,6 +30,8 @@ ace_unittest("frame_node_test_ng") {
   module_output = "basic"
   sources = [
     "frame_node_test_ng.cpp",
+    "frame_node_test_ng_coverage.cpp",
+    "frame_node_test_ng_coverage_new.cpp",
     "frame_node_test_ng_new.cpp",
   ]
 }
@@ -63,6 +65,7 @@ ace_unittest("view_abstract_test_ng") {
   module_output = "basic"
   sources = [
     "view_abstract_test_ng.cpp",
+    "view_abstract_test_ng_for_property_config.cpp",
     "view_abstract_test_ng_new.cpp",
   ]
 }

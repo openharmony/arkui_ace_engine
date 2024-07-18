@@ -988,6 +988,7 @@ export class ArcSlider extends ViewPU {
             Canvas.onTouch((i) => {
                 if (i) {
                     if (i.type === TouchType.Down && this.isEnlarged === false) {
+                        this.touchY = i.touches[0].y;
                         clearTimeout(this.meter);
                         if (this.isHotRegion(i.touches[0].x, i.touches[0].y)) {
                             this.options.onTouch?.(i);

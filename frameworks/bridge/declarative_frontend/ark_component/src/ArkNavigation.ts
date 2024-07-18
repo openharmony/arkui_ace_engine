@@ -105,7 +105,7 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
   }
   ignoreLayoutSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): NavigationAttribute {
     let opts = new ArkSafeAreaExpandOpts();
-    if (types && types.length > 0) {
+    if (types && types.length >= 0) {
       let safeAreaType: string | number = '';
       for (let param of types) {
         if (!isNumber(param) || param >= NAV_SAFE_AREA_TYPE_LIMIT || param < NAV_SAFE_AREA_LOWER_LIMIT) {
@@ -121,7 +121,7 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
       }
       opts.type = safeAreaType;
     }
-    if (edges && edges.length > 0) {
+    if (edges && edges.length >= 0) {
       let safeAreaEdge: string | number = '';
       for (let param of edges) {
         if (!isNumber(param) || param >= NAV_SAFE_AREA_EDGE_LIMIT || param < NAV_SAFE_AREA_LOWER_LIMIT) {

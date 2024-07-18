@@ -23,6 +23,8 @@ class JSWaterFlow : public JSScrollableBase {
 public:
     static void Create(const JSCallbackInfo& args);
     static void JSBind(BindingTarget globalObj);
+    static void UpdateWaterFlowSectionsByFrameNode(
+        NG::FrameNode* frameNode, const JSCallbackInfo& args, const JSRef<JSVal>& sections);
 
 protected:
     static void SetColumnsGap(const JSCallbackInfo& info);
@@ -46,7 +48,7 @@ protected:
     static void JsOnScrollIndex(const JSCallbackInfo& args);
 
     static void SetScrollBar(const JSCallbackInfo& info);
-    static void SetScrollBarColor(const std::string& color);
+    static void SetScrollBarColor(const JSCallbackInfo& info);
     static void SetScrollBarWidth(const JSCallbackInfo& scrollWidth);
 };
 } // namespace OHOS::Ace::Framework

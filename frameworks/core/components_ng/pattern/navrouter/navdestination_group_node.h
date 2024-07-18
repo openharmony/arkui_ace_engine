@@ -42,6 +42,7 @@ public:
     void DeleteChildFromGroup(int32_t slot = DEFAULT_NODE_SLOT) override;
     static RefPtr<NavDestinationGroupNode> GetOrCreateGroupNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void SetTitleBarNode(const RefPtr<UINode>& title)
     {
@@ -154,16 +155,23 @@ public:
 
     void SetNavDestinationPathInfo(const std::string& moduleName, const std::string& pagePath)
     {
-        navDestinationPathInfo_.clear();
-        navDestinationPathInfo_.append(NAVIGATION_MODULE_NAME);
-        navDestinationPathInfo_ += ": " + moduleName + ", ";
-        navDestinationPathInfo_.append(NAVIGATION_PAGE_PATH);
-        navDestinationPathInfo_ += ": " + pagePath;
+        navDestinationPathInfo_ = pagePath;
+        navDestinationModuleName_ = moduleName;
     }
 
     const std::string& GetNavDestinationPathInfo() const
     {
         return navDestinationPathInfo_;
+    }
+
+    void SetNeedRemoveInPush(bool need)
+    {
+        needRemoveInPush_ = need;
+    }
+
+    bool NeedRemoveInPush() const
+    {
+        return needRemoveInPush_;
     }
 
 private:
@@ -175,9 +183,11 @@ private:
     PageTransitionType transitionType_ = PageTransitionType::NONE;
     NavDestinationMode mode_ = NavDestinationMode::STANDARD;
     bool isCacheNode_ = false;
-    bool isAnimated_ = false;
+    bool isAnimated_ = true;
     bool canReused_ = true;
     std::string navDestinationPathInfo_;
+    std::string navDestinationModuleName_;
+    bool needRemoveInPush_ = false;
 };
 
 } // namespace OHOS::Ace::NG

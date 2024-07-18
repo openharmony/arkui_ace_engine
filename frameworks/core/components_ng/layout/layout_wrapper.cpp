@@ -34,10 +34,15 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+bool InRange(float number, float boundaryStart, float boundaryEnd)
+{
+    return GreatOrEqual(number, boundaryStart) && LessOrEqual(number, boundaryEnd);
+}
+
 bool IsSyntaxNode(const std::string& tag)
 {
     return tag == V2::JS_VIEW_ETS_TAG || tag == V2::JS_IF_ELSE_ETS_TAG || tag == V2::JS_FOR_EACH_ETS_TAG ||
-           tag == V2::JS_LAZY_FOR_EACH_ETS_TAG || tag == V2::JS_SYNTAX_ITEM_ETS_TAG;
+           tag == V2::JS_LAZY_FOR_EACH_ETS_TAG || tag == V2::JS_SYNTAX_ITEM_ETS_TAG || tag == V2::JS_NODE_SLOT_ETS_TAG;
 }
 } // namespace
 
@@ -88,24 +93,29 @@ bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
     // apply keyboard avoidance on Page or Overlay
     if ((GetHostTag() == V2::PAGE_ETS_TAG && isNeedAvoidKeyboard && !isFocusOnOverlay) ||
         GetHostTag() == V2::OVERLAY_ETS_TAG) {
-        if (!(isFocusOnPage || isFocusOnOverlay) && LessNotEqual(manager->GetKeyboardOffset(), 0.0)) {
-            return false;
-        }
         auto renderContext = GetHostNode()->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         auto safeArea = manager->GetSafeArea();
+        auto pageCurrentOffset = GetPageCurrentOffset();
+        auto pageHasOffset = LessNotEqual(pageCurrentOffset, 0.0f);
+        if (!(isFocusOnPage || isFocusOnOverlay || pageHasOffset) && LessNotEqual(manager->GetKeyboardOffset(), 0.0)) {
+            renderContext->SavePaintRect(true, GetLayoutProperty()->GetPixelRound());
+            return false;
+        }
         auto geometryNode = GetGeometryNode();
         auto x = geometryNode->GetFrameOffset().GetX();
         if (manager->IsAtomicService()) {
             auto usingRect = RectF(OffsetF(x, manager->GetKeyboardOffset()), geometryNode->GetFrameSize());
             renderContext->UpdatePaintRect(usingRect);
             geometryNode->SetSelfAdjust(usingRect - geometryNode->GetFrameRect());
+            renderContext->SyncPartialRsProperties();
             return true;
         }
         auto usingRect =
             RectF(OffsetF(x, safeArea.top_.Length() + manager->GetKeyboardOffset()), geometryNode->GetFrameSize());
         renderContext->UpdatePaintRect(usingRect);
         geometryNode->SetSelfAdjust(usingRect - geometryNode->GetFrameRect());
+        renderContext->SyncPartialRsProperties();
         return true;
     }
     return false;
@@ -181,17 +191,17 @@ RectF LayoutWrapper::GetFrameRectWithSafeArea(bool checkPosition) const
         CHECK_NULL_RETURN(layoutProp, rect);
         auto layoutConstraint = layoutProp->GetLayoutConstraint();
         CHECK_NULL_RETURN(layoutConstraint.has_value(), rect);
-        auto renderPosition = FrameNode::ContextPositionConvertToPX(
-            renderContext, layoutConstraint.value().percentReference);
+        auto renderPosition =
+            FrameNode::ContextPositionConvertToPX(renderContext, layoutConstraint.value().percentReference);
         auto size = (geometryNode->GetSelfAdjust() + geometryNode->GetFrameRect()).GetSize();
-        rect = RectF(OffsetF(static_cast<float>(renderPosition.first),
-            static_cast<float>(renderPosition.second)), size);
+        rect =
+            RectF(OffsetF(static_cast<float>(renderPosition.first), static_cast<float>(renderPosition.second)), size);
         return rect;
     }
     return geometryNode->GetSelfAdjust() + geometryNode->GetFrameRect();
 }
 
-void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
+void LayoutWrapper::ExpandSafeArea()
 {
     auto host = GetHostNode();
     CHECK_NULL_VOID(host);
@@ -217,9 +227,10 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
         return;
     }
     CHECK_NULL_VOID(selfExpansive);
+    opts->switchToNone = false;
     auto geometryNode = GetGeometryNode();
     OffsetF keyboardAdjust;
-    if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && (opts->type & SAFE_AREA_TYPE_KEYBOARD) && isFocusOnPage) {
+    if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && (opts->type & SAFE_AREA_TYPE_KEYBOARD)) {
         keyboardAdjust = ExpandIntoKeyboard();
     }
 
@@ -229,7 +240,7 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
     if (!safeAreaManager->IsSafeAreaValid()) {
         parentAdjust = RectF();
     }
-    auto frame = geometryNode->GetPixelGridRoundRect() + parentGlobalOffset + keyboardAdjust + parentAdjust.GetOffset();
+    auto frame = geometryNode->GetFrameRect() + parentGlobalOffset + keyboardAdjust + parentAdjust.GetOffset();
     auto originGlobal = frame;
 
     auto safeArea = pipeline->GetSafeAreaManager()->GetCombinedSafeArea(*opts);
@@ -260,31 +271,170 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
     if (layoutProperty->HasAspectRatio()) {
         frame.SetHeight(frame.Width() / layoutProperty->GetAspectRatio());
     }
+    auto parent = host->GetAncestorNodeOfFrame();
+    auto parentScrollable = (parent && parent->GetPattern<ScrollablePattern>());
     // restore to local offset
     auto diff = originGlobal.GetOffset() - frame.GetOffset();
     frame -= parentGlobalOffset;
     // since adjustment is not accumulated and we did not track previous diff, diff need to be updated
-    AdjustChildren(diff);
+    AdjustChildren(diff, parentScrollable);
 
-    auto selfAdjust = frame - geometryNode->GetFrameRect();
-    geometryNode->SetSelfAdjust(selfAdjust);
-    auto parent = host->GetAncestorNodeOfFrame();
-    if (parent && parent->GetPattern<ScrollablePattern>()) {
+    if (parentScrollable) {
         return;
     }
+    auto selfAdjust = frame - geometryNode->GetFrameRect();
+    geometryNode->SetSelfAdjust(selfAdjust);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdatePaintRect(frame + geometryNode->GetPixelGridRoundRect() - geometryNode->GetFrameRect());
 }
 
-void LayoutWrapper::AdjustChildren(const OffsetF& offset)
+void LayoutWrapper::ResetSafeAreaPadding()
+{
+    // meant to reset everything each frame
+    const auto& geometryNode = GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->ResetResolvedSelfSafeAreaPadding();
+    geometryNode->ResetAccumulatedSafeAreaPadding();
+}
+
+bool LayoutWrapper::AccumulateExpandCacheHit(ExpandEdges& totalExpand)
+{
+    auto host = GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    const auto& geometryNode = GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto& selfAccumulateExpand = geometryNode->GetAccumulatedSafeAreaExpand();
+    CHECK_NULL_RETURN(selfAccumulateExpand, false);
+    // if parent has expand cache that covers child's, for expample child expands toward left, top
+    // and parent already has cache toward left, top, bottom, then this is a cache hit
+    // and we can concatenate left and top cache to result
+    // otherwise meaning child is expanding toward a direction that parent does not have cache
+    CHECK_NULL_RETURN(selfAccumulateExpand->OptionalValueCover(totalExpand), false);
+    // if reaches page and totalExpand is still empty, then querying node is already as large as page
+    // then add page cache directly to total expand
+    totalExpand =
+        totalExpand.Plus(*(selfAccumulateExpand.get()), totalExpand.Empty() && host->GetTag() == V2::PAGE_ETS_TAG);
+    return true;
+}
+
+ExpandEdges LayoutWrapper::GetAccumulatedSafeAreaExpand(bool includingSelf)
+{
+    ExpandEdges totalExpand;
+    auto host = GetHostNode();
+    CHECK_NULL_RETURN(host, totalExpand);
+    const auto& geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, totalExpand);
+    auto adjustingRect = geometryNode->GetFrameRect();
+    const auto& layoutProperty = GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, totalExpand);
+    if (includingSelf && geometryNode->GetResolvedSingleSafeAreaPadding()) {
+        totalExpand.Plus(*(geometryNode->GetResolvedSingleSafeAreaPadding()));
+    }
+    // CreateMargin does get or create
+    auto hostMargin = layoutProperty->CreateMargin();
+    if (hostMargin.AllSidesFilled(true)) {
+        return totalExpand;
+    }
+    // total expanding distance of four sides used to calculate cache
+    GetAccumulatedSafeAreaExpandHelper(adjustingRect, totalExpand);
+    geometryNode->SetAccumulatedSafeAreaEdges(totalExpand);
+    return totalExpand;
+}
+
+void LayoutWrapper::GetAccumulatedSafeAreaExpandHelper(RectF& adjustingRect, ExpandEdges& totalExpand)
+{
+    auto host = GetHostNode();
+    CHECK_NULL_VOID(host);
+    // calculate page expand based on querying node
+    auto parent = host->GetAncestorNodeOfFrame();
+    CHECK_NULL_VOID(parent);
+    const auto& parentGeometryNode = parent->GetGeometryNode();
+    CHECK_NULL_VOID(parentGeometryNode);
+    ExpandEdges rollingExpand;
+    const auto& parentLayoutProperty = parent->GetLayoutProperty();
+    CHECK_NULL_VOID(parentLayoutProperty);
+    PaddingPropertyF parentSafeAreaPadding;
+    if (parent->GetTag() == V2::STAGE_ETS_TAG) {
+        const auto& pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        const auto& safeAreaManager = pipeline->GetSafeAreaManager();
+        CHECK_NULL_VOID(safeAreaManager);
+        parentSafeAreaPadding = safeAreaManager->SafeAreaToPadding();
+    } else {
+        parentSafeAreaPadding = parentLayoutProperty->GetOrCreateSafeAreaPadding();
+    }
+    // used to locate offset regions of safeAreaPaddings
+    auto parentInnerSpace = parentLayoutProperty->CreatePaddingAndBorder(false, false);
+    // check if current rect can overlap with four parent safeAreaPaddings
+    if (!NearZero(parentSafeAreaPadding.left.value_or(0.0f))) {
+        auto innerSpaceLeftLength = parentInnerSpace.left.value_or(0.0f);
+        // left side safeArea range is [border + padding, border + padding + safeAreaPadding]
+        if (InRange(adjustingRect.Left(), innerSpaceLeftLength,
+                innerSpaceLeftLength + parentSafeAreaPadding.left.value_or(0.0f))) {
+            rollingExpand.left = adjustingRect.Left() - innerSpaceLeftLength;
+        }
+    }
+    if (!NearZero(parentSafeAreaPadding.top.value_or(0.0f))) {
+        auto innerSpaceTopLength = parentInnerSpace.top.value_or(0.0f);
+        // top side safeArea padding range is [top border + padding, top border + padding + safeAreaPadding]
+        if (InRange(adjustingRect.Top(), innerSpaceTopLength,
+                innerSpaceTopLength + parentSafeAreaPadding.top.value_or(0.0f))) {
+            rollingExpand.top = adjustingRect.Top() - innerSpaceTopLength;
+        }
+    }
+    if (!NearZero(parentSafeAreaPadding.right.value_or(0.0f))) {
+        auto parentWidth = parentGeometryNode->GetFrameRect().Width();
+        auto innerSpaceRightLength = parentInnerSpace.right.value_or(0.0f);
+        // right side safeArea padding range is
+        // [parentWidth - (right border + padding) - right safeAreaPadding, parentWidth - (right border + padding)]
+        if (InRange(adjustingRect.Right(),
+                parentWidth - innerSpaceRightLength - parentSafeAreaPadding.right.value_or(0.0f),
+                parentWidth - innerSpaceRightLength)) {
+            rollingExpand.right = parentWidth - innerSpaceRightLength - adjustingRect.Right();
+        }
+    }
+    if (!NearZero(parentSafeAreaPadding.bottom.value_or(0.0f))) {
+        auto parentHeight = parentGeometryNode->GetFrameRect().Height();
+        // bottom side safeArea padding range is
+        // [parentHeight - (bottom border + padding) - bottom safeAreaPadding,
+        // parentHeight - (bottom border + padding)]
+        auto innerSpaceBottomLength = parentInnerSpace.bottom.value_or(0.0f);
+        if (InRange(adjustingRect.Bottom(),
+                parentHeight - innerSpaceBottomLength - parentSafeAreaPadding.bottom.value_or(0.0f),
+                parentHeight - innerSpaceBottomLength)) {
+            rollingExpand.bottom = parentHeight - innerSpaceBottomLength - adjustingRect.Bottom();
+        }
+    }
+    adjustingRect.SetLeft(adjustingRect.Left() - rollingExpand.left.value_or(0.0f));
+    adjustingRect.SetTop(adjustingRect.Top() - rollingExpand.top.value_or(0.0f));
+    adjustingRect.SetWidth(
+        adjustingRect.Width() + rollingExpand.left.value_or(0.0f) + rollingExpand.right.value_or(0.0f));
+    adjustingRect.SetHeight(
+        adjustingRect.Height() + rollingExpand.top.value_or(0.0f) + rollingExpand.bottom.value_or(0.0f));
+    // after expanding based on parent safeAreaPadding, adjust rect to parent's coordinate
+    adjustingRect.SetOffset(adjustingRect.GetOffset() + parentGeometryNode->GetFrameOffset());
+    totalExpand = totalExpand.Plus(rollingExpand);
+    // CreateMargin does get or create
+    auto margin = parentLayoutProperty->CreateMargin();
+    // if parent has all four sides of innerSpace included(padding and border) or margin, stop expanding.
+    if (parentInnerSpace.AllSidesFilled(true) || margin.AllSidesFilled(true) || parent->GetTag() == V2::STAGE_ETS_TAG) {
+        return;
+    }
+    if (parent->AccumulateExpandCacheHit(totalExpand)) {
+        return;
+    }
+    parent->GetAccumulatedSafeAreaExpandHelper(adjustingRect, totalExpand);
+}
+
+void LayoutWrapper::AdjustChildren(const OffsetF& offset, bool parentScrollable)
 {
     for (const auto& childUI : GetHostNode()->GetChildren()) {
-        AdjustChild(childUI, offset);
+        AdjustChild(childUI, offset, parentScrollable);
     }
 }
 
-void LayoutWrapper::AdjustChild(RefPtr<UINode> childUI, const OffsetF& offset)
+void LayoutWrapper::AdjustChild(RefPtr<UINode> childUI, const OffsetF& offset, bool parentScrollable)
 {
     auto child = DynamicCast<FrameNode>(childUI);
     if (!child) {
@@ -292,29 +442,78 @@ void LayoutWrapper::AdjustChild(RefPtr<UINode> childUI, const OffsetF& offset)
             return;
         }
         for (const auto& syntaxChild : childUI->GetChildren()) {
-            AdjustChild(syntaxChild, offset);
+            AdjustChild(syntaxChild, offset, parentScrollable);
         }
         return;
     }
     auto childGeo = child->GetGeometryNode();
-    childGeo->SetParentAdjust(RectF(offset, SizeF()));
+    auto parentAdjust = childGeo->GetParentAdjust();
+    if (parentAdjust.GetOffset() != offset) {
+        AddChildToExpandListIfNeeded(AceType::WeakClaim(AceType::RawPtr(child)));
+    }
+    if (!parentScrollable) {
+        childGeo->SetParentAdjust(RectF(offset, SizeF()));
+    }
+}
+
+void LayoutWrapper::AddChildToExpandListIfNeeded(const WeakPtr<FrameNode>& node)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    bool canAdd = safeAreaManager->AddNodeToExpandListIfNeeded(node);
+    CHECK_NULL_VOID(canAdd);
+    auto task = [weak = node]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        DirtySwapConfig emptyConfig;
+        frameNode->SyncGeometryNode(true, emptyConfig);
+    };
+    pipeline->AddSyncGeometryNodeTask(task);
 }
 
 OffsetF LayoutWrapper::ExpandIntoKeyboard()
 {
+    auto pageOffset = GetPageCurrentOffset();
+    if (GreatOrEqual(pageOffset, 0.0f)) {
+        return OffsetF();
+    }
     // if parent already expanded into keyboard, offset shouldn't be applied again
     auto parent = GetHostNode()->GetAncestorNodeOfFrame();
     while (parent) {
+        auto pattern = parent->GetPattern();
+        if (pattern && pattern->CheckCustomAvoidKeyboard()) {
+            // if parent need avoid keyboard and child need expand into keyboard,
+            // keep child expand into keyboard
+            break;
+        }
         auto&& opts = parent->GetLayoutProperty()->GetSafeAreaExpandOpts();
         if (opts && (opts->edges & SAFE_AREA_EDGE_BOTTOM) && opts->type & SAFE_AREA_TYPE_KEYBOARD) {
             return OffsetF();
         }
         parent = parent->GetAncestorNodeOfFrame();
     }
-
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, OffsetF());
     return OffsetF(0.0f, -pipeline->GetSafeAreaManager()->GetKeyboardOffset());
+}
+
+float LayoutWrapper::GetPageCurrentOffset()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, 0.0f);
+    auto stageManager = pipeline->GetStageManager();
+    CHECK_NULL_RETURN(stageManager, 0.0f);
+    auto pageNode = stageManager->GetLastPageWithTransition();
+    CHECK_NULL_RETURN(pageNode, 0.0f);
+    auto pageRenderContext = pageNode->GetRenderContext();
+    CHECK_NULL_RETURN(pageRenderContext, 0.0f);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaManager, 0.0f);
+    auto safeArea = safeAreaManager->GetSafeArea();
+    auto safeAreaTop = safeAreaManager->IsAtomicService() ? 0 : safeArea.top_.Length();
+    return pageRenderContext->GetPaintRectWithoutTransform().GetY() - safeAreaTop;
 }
 
 void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint)

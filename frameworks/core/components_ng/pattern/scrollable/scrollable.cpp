@@ -40,7 +40,8 @@ constexpr uint32_t DRAG_INTERVAL_TIME = 900;
 
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
-constexpr double NEW_FRICTION = 0.7;
+constexpr double API11_FRICTION = 0.7;
+constexpr double API12_FRICTION = 0.75;
 constexpr double VELOCITY_SCALE = 1.0;
 constexpr double NEW_VELOCITY_SCALE = 1.5;
 constexpr double ADJUSTABLE_VELOCITY = 3000.0;
@@ -88,23 +89,24 @@ void Scrollable::SetFriction(double sFriction)
 
 Scrollable::Scrollable()
 {
-    friction_ = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_FRICTION : FRICTION;
+    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
+    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ? API12_FRICTION : friction_;
     velocityScale_ =
-        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_VELOCITY_SCALE : VELOCITY_SCALE;
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_VELOCITY_SCALE : VELOCITY_SCALE;
 }
-
 Scrollable::Scrollable(ScrollPositionCallback&& callback, Axis axis) : callback_(std::move(callback)), axis_(axis)
 {
-    friction_ = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_FRICTION : FRICTION;
+    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
+    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ? API12_FRICTION : friction_;
     velocityScale_ =
-        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_VELOCITY_SCALE : VELOCITY_SCALE;
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_VELOCITY_SCALE : VELOCITY_SCALE;
 }
-
 Scrollable::Scrollable(const ScrollPositionCallback& callback, Axis axis) : callback_(callback), axis_(axis)
 {
-    friction_ = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_FRICTION : FRICTION;
+    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
+    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ? API12_FRICTION : friction_;
     velocityScale_ =
-        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_VELOCITY_SCALE : VELOCITY_SCALE;
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_VELOCITY_SCALE : VELOCITY_SCALE;
 }
 
 Scrollable::~Scrollable()
@@ -221,11 +223,15 @@ void Scrollable::HandleTouchDown()
 void Scrollable::HandleTouchUp()
 {
     // Two fingers are alternately drag, one finger is released without triggering spring animation.
-    ACE_SCOPED_TRACE("HandleTouchUp, isDragging_:%u, id:%d, tag:%s", isDragging_, nodeId_, nodeTag_.c_str());
+    ACE_SCOPED_TRACE("HandleTouchUp, isDragging_:%u, nestedScrolling_:%u id:%d, tag:%s",
+        isDragging_, nestedScrolling_, nodeId_, nodeTag_.c_str());
     if (isDragging_) {
         return;
     }
     isTouching_ = false;
+    if (nestedScrolling_) {
+        return;
+    }
     // outBoundaryCallback_ is only set in ScrollablePattern::SetEdgeEffect and when the edge effect is spring
     if (outBoundaryCallback_ && outBoundaryCallback_()) {
         if (isSpringAnimationStop_ && scrollOverCallback_) {
@@ -259,7 +265,7 @@ bool Scrollable::IsAnimationNotRunning() const
 bool Scrollable::Idle() const
 {
     return !isTouching_ && isFrictionAnimationStop_ && isSpringAnimationStop_
-        && isSnapAnimationStop_ && isSnapScrollAnimationStop_;
+        && isSnapAnimationStop_ && isSnapScrollAnimationStop_ && !nestedScrolling_;
 }
 
 bool Scrollable::IsStopped() const
@@ -817,6 +823,9 @@ void Scrollable::StartSpringMotion(
     springOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
     ACE_SCOPED_TRACE("Scrollable spring animation start, start:%f, end:%f, vel:%f, id:%d, tag:%s", mainPosition,
         finalPosition_, mainVelocity, nodeId_, nodeTag_.c_str());
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    lastVsyncTime_ = context->GetVsyncTime();
     springOffsetProperty_->AnimateWithVelocity(
         option, finalPosition_, mainVelocity, [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
@@ -955,7 +964,7 @@ void Scrollable::ProcessSpringMotion(double position)
         auto distance = currentPos_ - finalPosition_;
         auto nextDistance = position - finalPosition_;
         isFadingAway_ = GreatNotEqual(std::abs(nextDistance), std::abs(distance));
-        moved_ = UpdateScrollPosition(position - currentPos_, SCROLL_FROM_ANIMATION_SPRING);
+        auto delta = position - currentPos_;
         if (distance * nextDistance < 0) {
             double currentVelocity = currentVelocity_;
             scrollPause_ = true;
@@ -964,8 +973,14 @@ void Scrollable::ProcessSpringMotion(double position)
             ACE_SCOPED_TRACE("change direction in spring animation and start fling animation, distance:%f, "
                              "nextDistance:%f, nodeId:%d, tag:%s",
                 distance, nextDistance, nodeId_, nodeTag_.c_str());
-            StartScrollAnimation(position, currentVelocity);
+            if (remainVelocityCallback_ && remainVelocityCallback_(currentVelocity)) {
+                // pass the velocity to the child component to avoid dealing with additional offsets
+                delta = finalPosition_ - currentPos_;
+            } else {
+                StartScrollAnimation(position, currentVelocity);
+            }
         }
+        moved_ = UpdateScrollPosition(delta, SCROLL_FROM_ANIMATION_SPRING);
         if (!moved_) {
             StopSpringAnimation();
         } else if (!touchUp_) {

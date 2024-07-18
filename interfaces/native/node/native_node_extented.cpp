@@ -30,6 +30,8 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 constexpr int NUM_5 = 5;
+constexpr int32_t MAX_DISPLAY_COUNT_MIN = 6;
+constexpr int32_t MAX_DISPLAY_COUNT_MAX = 9;
 
 ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Create()
 {
@@ -39,8 +41,8 @@ ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Create()
 
 ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Copy(const ArkUI_LayoutConstraint* constraint)
 {
-    CHECK_NULL_RETURN(constraint, nullptr);
     ArkUI_LayoutConstraint* layoutConstraint = new ArkUI_LayoutConstraint { 0, 0, 0, 0, 0, 0 };
+    CHECK_NULL_RETURN(constraint, nullptr);
     layoutConstraint->minWidth = constraint->minWidth;
     layoutConstraint->maxWidth = constraint->maxWidth;
     layoutConstraint->minHeight = constraint->minHeight;
@@ -209,6 +211,7 @@ ArkUI_SwiperIndicator* OH_ArkUI_SwiperIndicator_Create(ArkUI_SwiperIndicatorType
         indicator->maskValue = ArkUI_OptionalInt { 0, 0 };
         indicator->colorValue = ArkUI_OptionalUint { 0, 0xFF000000 };
         indicator->selectedColorValue = ArkUI_OptionalUint { 0, 0xFF000000 };
+        indicator->maxDisplayCount = ArkUI_OptionalInt { 0, 0 };
     } else {
         return nullptr;
     }
@@ -363,12 +366,31 @@ uint32_t OH_ArkUI_SwiperIndicator_GetSelectedColor(ArkUI_SwiperIndicator* indica
     return indicator->selectedColorValue.value;
 }
 
+
+int32_t OH_ArkUI_SwiperIndicator_SetMaxDisplayCount(ArkUI_SwiperIndicator* indicator, int32_t maxDisplayCount)
+{
+    CHECK_NULL_RETURN(indicator, ARKUI_ERROR_CODE_PARAM_INVALID);
+    if (maxDisplayCount < MAX_DISPLAY_COUNT_MIN || maxDisplayCount > MAX_DISPLAY_COUNT_MAX) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    indicator->maxDisplayCount.isSet = 1;
+    indicator->maxDisplayCount.value = maxDisplayCount;
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_SwiperIndicator_GetMaxDisplayCount(ArkUI_SwiperIndicator* indicator)
+{
+    CHECK_NULL_RETURN(indicator, 0);
+    return indicator->maxDisplayCount.value;
+}
+
 ArkUI_StyledString* OH_ArkUI_StyledString_Create(
     OH_Drawing_TypographyStyle* typoStyle, OH_Drawing_FontCollection* collection)
 {
     ArkUI_StyledString* storage = new ArkUI_StyledString;
     storage->builder = OH_Drawing_CreateTypographyHandler(typoStyle, collection);
-    storage->paragraphStyle = typoStyle;
+    OH_Drawing_TypographyStyle* typographyStyle = OH_Drawing_CreateTypographyStyle();
+    storage->paragraphStyle = typographyStyle;
     return storage;
 }
 
@@ -378,15 +400,24 @@ void OH_ArkUI_StyledString_Destroy(ArkUI_StyledString* storage)
     for (auto item : storage->items) {
         delete item;
     }
+    while (!storage->styles.empty()) {
+        auto style = reinterpret_cast<OH_Drawing_TextStyle*>(storage->styles.top());
+        OH_Drawing_DestroyTextStyle(style);
+        storage->styles.pop();
+    }
     storage->styles = std::stack<void*>();
     storage->items.clear();
+    OH_Drawing_TypographyStyle* paragraphStyle =
+        reinterpret_cast<OH_Drawing_TypographyStyle*>(storage->paragraphStyle);
+    OH_Drawing_DestroyTypographyStyle(paragraphStyle);
     delete storage;
 }
 
 void OH_ArkUI_StyledString_PushTextStyle(ArkUI_StyledString* storage, OH_Drawing_TextStyle* style)
 {
     OH_Drawing_TypographyHandlerPushTextStyle(reinterpret_cast<OH_Drawing_TypographyCreate*>(storage->builder), style);
-    storage->styles.push(style);
+    OH_Drawing_TextStyle* textStyle = OH_Drawing_CreateTextStyle();
+    storage->styles.push(textStyle);
 }
 
 void OH_ArkUI_StyledString_AddText(ArkUI_StyledString* storage, const char* content)

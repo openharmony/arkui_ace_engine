@@ -60,10 +60,11 @@ void PinchRecognizer::OnAccepted()
     }
     
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "Pinch gesture has been accepted, node tag = %{public}s, id = %{public}s",
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Pinch accepted, tag = %{public}s, id = %{public}s",
         node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
     ResSchedReport::GetInstance().ResSchedDataReport("click");
     refereeState_ = RefereeState::SUCCEED;
+    isLastPinchFinished_ = false;
     SendCallbackMsg(onActionStart_);
 }
 
@@ -85,10 +86,9 @@ bool PinchRecognizer::IsCtrlBeingPressed()
 
 void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, Pinch recognizer receives %{public}d touch down event, begin to detect pinch "
-        "event",
-        event.touchEventId, event.id);
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pinch %{public}d down, begin to detect pinch,"
+        "state: %{public}d", event.touchEventId, event.id, refereeState_);
+    touchPoints_[event.id] = event;
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -101,8 +101,10 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         return;
     }
 
+    if (fingersId_.find(event.id) == fingersId_.end()) {
+        fingersId_.insert(event.id);
+    }
     activeFingers_.emplace_back(event.id);
-    touchPoints_[event.id] = event;
     lastTouchEvent_ = event;
 
     if (static_cast<int32_t>(activeFingers_.size()) >= fingers_ && refereeState_ != RefereeState::FAIL) {
@@ -126,9 +128,8 @@ void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     if (IsRefereeFinished()) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, Pinch recognizer receives axis start event, begin to detect pinch event",
-        event.touchEventId);
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pinch axis start, state: %{public}d", event.touchEventId,
+        refereeState_);
     if (refereeState_ == RefereeState::READY && (NearEqual(event.pinchAxisScale, 1.0) || IsCtrlBeingPressed())) {
         scale_ = 1.0f;
         pinchCenter_ = Offset(event.x, event.y);
@@ -138,12 +139,18 @@ void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
+    if (fingersId_.find(event.id) != fingersId_.end()) {
+        fingersId_.erase(event.id);
+    }
+    if (fingersId_.empty()) {
+        isLastPinchFinished_ = true;
+    }
     if (!IsActiveFinger(event.id)) {
         return;
     }
 
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, Pinch recognizer receives %{public}d touch up event",
-        event.touchEventId, event.id);
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pinch %{public}d up, state: %{public}d", event.touchEventId,
+        event.id, refereeState_);
     if (static_cast<int32_t>(activeFingers_.size()) < fingers_ && refereeState_ != RefereeState::SUCCEED) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -173,8 +180,8 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, Pinch recognizer receives axis end event",
-        event.touchEventId);
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pinch axis end, state: %{public}d",
+        event.touchEventId, refereeState_);
     // if axisEvent received rotateEvent, no need to active Pinch recognizer.
     if (isPinchEnd_ || event.isRotationEvent) {
         return;
@@ -202,11 +209,11 @@ void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 
 void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
+    touchPoints_[event.id] = event;
     if (!IsActiveFinger(event.id)) {
         return;
     }
 
-    touchPoints_[event.id] = event;
     lastTouchEvent_ = event;
     currentDev_ = ComputeAverageDeviation();
     time_ = event.time;
@@ -223,7 +230,11 @@ void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
                 Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
                 return;
             }
-            Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
+            if (!isLastPinchFinished_) {
+                OnAccepted();
+            } else {
+                Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
+            }
         }
     } else if (refereeState_ == RefereeState::SUCCEED) {
         scale_ = currentDev_ / initialDev_;
@@ -294,9 +305,7 @@ void PinchRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     if (!IsActiveFinger(event.id)) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "InputTracking id:%{public}d, pinch recognizer receives %{public}d touch cancel event", event.touchEventId,
-        event.id);
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pinch %{public}d cancel", event.touchEventId, event.id);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -310,8 +319,7 @@ void PinchRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void PinchRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_GESTURE, "InputTracking id:%{public}d, pinch recognizer receives axis cancel event",
-        event.touchEventId);
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pinch axis cancel", event.touchEventId);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -366,7 +374,7 @@ Offset PinchRecognizer::ComputePinchCenter()
 
     PointF localPoint(focalX, focalY);
     NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false,
-        isPostEventResult_, touchPoints_[touchPoints_.begin()->first].postEventNodeId);
+        isPostEventResult_, touchPoints_.begin()->second.postEventNodeId);
     Offset pinchCenter = Offset(localPoint.GetX(), localPoint.GetY());
 
     return pinchCenter;
@@ -375,7 +383,12 @@ Offset PinchRecognizer::ComputePinchCenter()
 void PinchRecognizer::OnResetStatus()
 {
     MultiFingersRecognizer::OnResetStatus();
+    initialDev_ = 0.0;
+    currentDev_ = 0.0;
+    scale_ = 1.0;
+    isFlushTouchEventsEnd_ = false;
     isPinchEnd_ = false;
+    isLastPinchFinished_ = true;
 }
 
 void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)

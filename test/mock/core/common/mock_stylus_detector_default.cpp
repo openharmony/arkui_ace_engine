@@ -27,12 +27,13 @@ bool StylusDetectorDefault::IsEnable()
     return isEnable_;
 }
 
-bool StylusDetectorDefault::RegisterStylusInteractionListener(const std::shared_ptr<IStylusDetectorCallback>& callback)
+bool StylusDetectorDefault::RegisterStylusInteractionListener(
+    const std::string& bundleName, const std::shared_ptr<IStylusDetectorCallback>& callback)
 {
     return false;
 }
 
-void StylusDetectorDefault::UnRegisterStylusInteractionListener() {}
+void StylusDetectorDefault::UnRegisterStylusInteractionListener(const std::string& bundleName) {}
 
 bool StylusDetectorDefault::Notify(const NotifyInfo& notifyInfo)
 {

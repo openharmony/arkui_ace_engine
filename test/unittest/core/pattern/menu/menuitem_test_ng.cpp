@@ -87,6 +87,7 @@ const std::vector<SelectParam> CREATE_VALUE = { { "content1", "icon1" }, { "cont
     { "", "icon3" }, { "", "" } };
 const std::vector<SelectParam> CREATE_VALUE_NEW = { { "content1_new", "" }, { "", "icon4_new" },
     { "", "" }, { "", "icon4_new" } };
+const V2::ItemDivider ITEM_DIVIDER = { Dimension(5.f), Dimension(10), Dimension(20), Color(0x000000) };
 } // namespace
 class MenuItemTestNg : public testing::Test {
 public:
@@ -673,7 +674,7 @@ HWTEST_F(MenuItemTestNg, MenuItemViewTestNgCreate001, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 4);
+    ASSERT_EQ(itemNode->GetChildren().size(), 2);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     EXPECT_EQ(leftRow->GetChildren().size(), 0);
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
@@ -739,7 +740,7 @@ HWTEST_F(MenuItemTestNg, MenuItemViewTestNgCreate003, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     EXPECT_EQ(leftRow->GetChildren().size(), 0u);
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
@@ -786,7 +787,7 @@ HWTEST_F(MenuItemTestNg, MenuItemViewTestNgCreate004, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     EXPECT_EQ(leftRow->GetChildren().size(), 0u);
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
@@ -885,6 +886,125 @@ HWTEST_F(MenuItemTestNg, MenuItemViewTestNgSetSelectIconSrc002, TestSize.Level1)
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
     EXPECT_FALSE(itemProperty->GetSelectIconSrc().has_value());
+}
+
+/**
+ * @tc.name: MenuItemViewTestNg001
+ * @tc.desc: Verify MenuItemModelNG methods.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, MenuItemViewTestNg001, TestSize.Level1)
+{
+    MenuItemModelNG MneuItemModelInstance;
+    MenuItemProperties itemOption;
+    MneuItemModelInstance.Create(itemOption);
+    MneuItemModelInstance.SetFontSize(Dimension());
+    MneuItemModelInstance.SetSelectIconSymbol([](WeakPtr<NG::FrameNode> weakPtr) {});
+    MneuItemModelInstance.SetOnChange([](bool onChange) {});
+    std::vector<std::string> families = {"cursive"};
+    MneuItemModelInstance.SetFontFamily(families);
+    MneuItemModelInstance.SetLabelFontFamily(families);
+
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(itemProperty, nullptr);
+
+    EXPECT_FALSE(itemProperty->GetFontSize().has_value());
+}
+
+/**
+ * @tc.name: MenuItemViewTestNg002
+ * @tc.desc: Verify MenuItemModelNG methods with frameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, MenuItemViewTestNg002, TestSize.Level1)
+{
+    MenuItemModelNG MneuItemModelInstance;
+    MenuItemProperties itemOption;
+    MneuItemModelInstance.Create(itemOption);
+
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    FrameNode *frameNode = itemNode.GetRawPtr();
+    CHECK_NULL_VOID(frameNode);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(itemProperty, nullptr);
+
+    MneuItemModelInstance.SetSelected(frameNode, true);
+    MneuItemModelInstance.SetSelectIconSymbol(frameNode, [](WeakPtr<NG::FrameNode> weakPtr) {});
+    std::vector<std::string> families = {"cursive"};
+    MneuItemModelInstance.SetFontFamily(frameNode, families);
+
+    MneuItemModelInstance.SetFontColor(frameNode, Color::RED);
+    EXPECT_EQ(itemProperty->GetFontColor().value(), Color::RED);
+
+    MneuItemModelInstance.SetFontColor(frameNode, std::nullopt);
+    ASSERT_FALSE(itemProperty->GetFontColor().has_value());
+
+    MneuItemModelInstance.SetFontSize(frameNode, Dimension(10));
+    EXPECT_EQ(itemProperty->GetFontSize().value(), Dimension(10));
+
+    MneuItemModelInstance.SetFontSize(frameNode, Dimension(0));
+    EXPECT_FALSE(itemProperty->GetFontSize().has_value());
+
+    MneuItemModelInstance.SetFontWeight(frameNode, FontWeight::BOLD);
+    EXPECT_EQ(itemProperty->GetFontWeight().value(), FontWeight::BOLD);
+
+    MneuItemModelInstance.SetFontStyle(frameNode, Ace::FontStyle::ITALIC);
+    EXPECT_EQ(itemProperty->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
+
+    MneuItemModelInstance.SetSelectIcon(frameNode, true);
+    EXPECT_EQ(itemProperty->GetSelectIcon().value_or(false), true);
+
+    MneuItemModelInstance.SetSelectIconSrc(frameNode, "selectIcon.png");
+    EXPECT_EQ(itemProperty->GetSelectIconSrc().value_or(""), "selectIcon.png");
+}
+
+/**
+ * @tc.name: MenuItemViewTestNg003
+ * @tc.desc: Verify MenuItemModelNG methods with frameNode about label.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, MenuItemViewTestNg003, TestSize.Level1)
+{
+    MenuItemModelNG MneuItemModelInstance;
+    MenuItemProperties itemOption;
+    MneuItemModelInstance.Create(itemOption);
+
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    FrameNode *frameNode = itemNode.GetRawPtr();
+    CHECK_NULL_VOID(frameNode);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(itemProperty, nullptr);
+
+    std::vector<std::string> families = {"cursive"};
+    MneuItemModelInstance.SetLabelFontFamily(frameNode, families);
+
+    MneuItemModelInstance.SetLabelFontColor(frameNode, Color::RED);
+    EXPECT_EQ(itemProperty->GetLabelFontColor().value(), Color::RED);
+
+    MneuItemModelInstance.SetLabelFontColor(frameNode, std::nullopt);
+    ASSERT_FALSE(itemProperty->GetLabelFontColor().has_value());
+
+    MneuItemModelInstance.SetLabelFontSize(frameNode, Dimension(10));
+    EXPECT_EQ(itemProperty->GetLabelFontSize().value(), Dimension(10));
+
+    MneuItemModelInstance.SetLabelFontSize(frameNode, Dimension(0));
+    EXPECT_FALSE(itemProperty->GetLabelFontSize().has_value());
+
+    MneuItemModelInstance.SetLabelFontWeight(frameNode, FontWeight::BOLD);
+    EXPECT_EQ(itemProperty->GetLabelFontWeight().value(), FontWeight::BOLD);
+
+    MneuItemModelInstance.SetLabelFontStyle(frameNode, Ace::FontStyle::ITALIC);
+    EXPECT_EQ(itemProperty->GetLabelItalicFontStyle().value(), Ace::FontStyle::ITALIC);
 }
 
 /**
@@ -1462,5 +1582,32 @@ HWTEST_F(MenuItemTestNg, MenuItemTestNgTextMaxLines001, TestSize.Level1)
     auto textLayoutProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     EXPECT_EQ(textLayoutProperty->GetMaxLines().value(), menuTheme->GetTextMaxLines());
+}
+
+/**
+ * @tc.name: MenuItemTestNgText001
+ * @tc.desc: Verify UpdateNeedDivider.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, MenuItemTestNgText001, TestSize.Level1)
+{
+    MenuItemModelNG MneuItemModelInstance;
+    MenuItemProperties itemOption;
+    MneuItemModelInstance.Create(itemOption);
+    MneuItemModelInstance.SetFontStyle(Ace::FontStyle::ITALIC);
+
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto menu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    CHECK_NULL_VOID(menu);
+    auto menuProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuProperty);
+    menuProperty->UpdateItemDivider(ITEM_DIVIDER);
+    auto menuItemLayoutProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(menuItemLayoutProperty, nullptr);
+    itemPattern->UpdateNeedDivider(true);
 }
 } // namespace OHOS::Ace::NG

@@ -66,6 +66,8 @@ constexpr int32_t CREATE_PIXELMAP_TIME = 80;
 constexpr int32_t MAX_BUILDER_DEPTH = 5;
 #endif
 constexpr uint32_t EXTRA_INFO_MAX_LENGTH = 200;
+constexpr int32_t PIXELMAP_ANIMATION_DURATION = 250;
+constexpr float PIXELMAP_OPACITY_RATE = 0.95f;
 } // namespace
 const std::string DEFAULT_MOUSE_DRAG_IMAGE { "/system/etc/device_status/drag_icon/Copy_Drag.svg" };
 constexpr const char* HIT_TEST_MODE[] = {
@@ -97,6 +99,9 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
     }
     size_t idx = innerTargets.size();
     size_t newIdx = 0;
+    if (dragEventActuator_) {
+        dragEventActuator_->AddTouchListener(touchRestrict);
+    }
     if (touchEventActuator_) {
         touchEventActuator_->OnCollectTouchTarget(
             coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, responseLinkResult);
@@ -458,7 +463,8 @@ void GestureEventHub::InitDragDropEvent()
 
     auto dragEvent = MakeRefPtr<DragEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    SetDragEvent(dragEvent, { PanDirection::ALL }, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    auto distance = SystemProperties::GetDragStartPanDistanceThreshold();
+    SetDragEvent(dragEvent, { PanDirection::ALL }, DEFAULT_PAN_FINGER, Dimension(distance, DimensionUnit::VP));
 }
 
 bool GestureEventHub::IsAllowedDrag(RefPtr<EventHub> eventHub)
@@ -485,6 +491,7 @@ bool GestureEventHub::IsAllowedDrag(RefPtr<EventHub> eventHub)
 
 void GestureEventHub::StartLongPressActionForWeb()
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop start long press action for web");
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto taskScheduler = pipeline->GetTaskExecutor();
@@ -503,6 +510,7 @@ void GestureEventHub::StartLongPressActionForWeb()
 
 void GestureEventHub::CancelDragForWeb()
 {
+    TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop cancel drag for web");
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto taskScheduler = pipeline->GetTaskExecutor();
@@ -521,15 +529,24 @@ void GestureEventHub::CancelDragForWeb()
 
 void GestureEventHub::ResetDragActionForWeb()
 {
+    TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop reset drag action for web");
     isReceivedDragGestureInfo_ = false;
     CHECK_NULL_VOID(dragEventActuator_);
     dragEventActuator_->ResetDragActionForWeb();
+
+    // fix drag failed when long press drag after 500ms and before 800ms
+    // need to reset the state of the drag manager
+    auto pipeLine = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeLine);
+    auto dragDropManager = pipeLine->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->ResetDragging();
 }
 
 void GestureEventHub::StartDragTaskForWeb()
 {
     if (!isReceivedDragGestureInfo_) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "DragDrop StartDragTaskForWeb failed,"
+        TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop StartDragTaskForWeb failed,"
             "because not recv gesture info");
         return;
     }
@@ -547,8 +564,9 @@ void GestureEventHub::StartDragTaskForWeb()
             CHECK_NULL_VOID(gestureHub);
             auto dragEventActuator = gestureHub->dragEventActuator_;
             CHECK_NULL_VOID(dragEventActuator);
+            CHECK_NULL_VOID(gestureHub->gestureInfoForWeb_);
             TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop start drag task for web in async task");
-            dragEventActuator->StartDragTaskForWeb(gestureHub->gestureInfoForWeb_);
+            dragEventActuator->StartDragTaskForWeb(*gestureHub->gestureInfoForWeb_);
         },
         TaskExecutor::TaskType::UI, "ArkUIGestureWebStartDrag");
 }
@@ -568,21 +586,16 @@ OffsetF GestureEventHub::GetPixelMapOffset(
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, result);
     auto frameTag = frameNode->GetTag();
-    if (needScale) {
-        result.SetX(size.Width() * PIXELMAP_WIDTH_RATE);
-        result.SetY(PIXELMAP_DRAG_DEFAULT_HEIGHT);
+    auto coordinateX = frameNodeOffset_.GetX();
+    auto coordinateY = frameNodeOffset_.GetY();
+    if (NearZero(frameNodeSize_.Width()) || NearZero(size.Width())) {
+        result.SetX(scale * (coordinateX - info.GetGlobalLocation().GetX()));
+        result.SetY(scale * (coordinateY - info.GetGlobalLocation().GetY()));
     } else {
-        auto coordinateX = frameNodeOffset_.GetX();
-        auto coordinateY = frameNodeOffset_.GetY();
-        if (NearZero(frameNodeSize_.Width()) || NearZero(size.Width())) {
-            result.SetX(scale * (coordinateX - info.GetGlobalLocation().GetX()));
-            result.SetY(scale * (coordinateY - info.GetGlobalLocation().GetY()));
-        } else {
-            auto rateX = (info.GetGlobalLocation().GetX() - coordinateX) / frameNodeSize_.Width();
-            auto rateY = (info.GetGlobalLocation().GetY() - coordinateY) / frameNodeSize_.Height();
-            result.SetX(-rateX * size.Width());
-            result.SetY(-rateY * size.Height());
-        }
+        auto rateX = (info.GetGlobalLocation().GetX() - coordinateX) / frameNodeSize_.Width();
+        auto rateY = (info.GetGlobalLocation().GetY() - coordinateY) / frameNodeSize_.Height();
+        result.SetX(-rateX * size.Width());
+        result.SetY(-rateY * size.Height());
     }
     if (result.GetX() >= 0.0f) {
         result.SetX(-1.0f);
@@ -667,8 +680,9 @@ void GestureEventHub::HandleNotallowDrag(const GestureEvent& info)
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
-        gestureInfoForWeb_ = info;
+        gestureInfoForWeb_ = std::make_shared<GestureEvent>(info);
         isReceivedDragGestureInfo_ = true;
+        TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop drag gesture info received");
     }
 }
 
@@ -696,10 +710,6 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         HandleNotallowDrag(info);
         return;
     }
-    if (GetTextDraggable() && !GetIsTextDraggable()) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Text category component does not meet the drag condition, forbidden drag.");
-        return;
-    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto eventManager = pipeline->GetEventManager();
@@ -718,6 +728,8 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     }
     event->SetScreenX(info.GetScreenLocation().GetX());
     event->SetScreenY(info.GetScreenLocation().GetY());
+    event->SetDisplayX(info.GetScreenLocation().GetX());
+    event->SetDisplayY(info.GetScreenLocation().GetY());
     event->SetSourceTool(info.GetSourceTool());
 
     auto frameTag = frameNode->GetTag();
@@ -804,7 +816,9 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
                 },
                 TaskExecutor::TaskType::UI, "ArkUIGestureDragStart");
         };
-        NG::ComponentSnapshot::Create(dragDropInfo.customNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
+        SnapshotParam param;
+        param.delay = CREATE_PIXELMAP_TIME;
+        NG::ComponentSnapshot::Create(dragDropInfo.customNode, std::move(callback), false, param);
         PrintBuilderNode(dragPreviewInfo.customNode);
         return;
     }
@@ -861,7 +875,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
         pixelMap = CreatePixelMapFromString(DEFAULT_MOUSE_DRAG_IMAGE);
         CHECK_NULL_VOID(pixelMap);
-        GenerateMousePixelMap(info);
+        if (!GetTextDraggable()) {
+            GenerateMousePixelMap(info);
+        }
         if (pixelMap_) {
             pixelMap = pixelMap_;
         }
@@ -890,20 +906,31 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     RefPtr<FrameNode> textNode = nullptr;
     RefPtr<OverlayManager> subWindowOverlayManager = nullptr;
     bool isMenuShow = false;
-    auto window = SubwindowManager::GetInstance()->ShowPreviewNG();
+    auto window = SubwindowManager::GetInstance()->ShowDragPreviewWindowNG();
     if (window) {
         subWindowOverlayManager = window->GetOverlayManager();
         CHECK_NULL_VOID(subWindowOverlayManager);
-        isMenuShow = subWindowOverlayManager->IsMenuShow();
+        isMenuShow = subWindowOverlayManager->IsMenuShow() || overlayManager->IsMenuShow();
     }
     if (isMenuShow) {
         dragDropManager->SetIsDragWithContextMenu(true);
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Drag with contextMenu.");
     } else {
         dragDropManager->SetIsDragWithContextMenu(false);
     }
+    auto focusHub = frameNode->GetFocusHub();
+    bool hasContextMenu = focusHub == nullptr
+                              ? false : focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
     if (IsNeedSwitchToSubWindow() || isMenuShow) {
         imageNode = overlayManager->GetPixelMapContentNode();
         DragEventActuator::CreatePreviewNode(frameNode, imageNode);
+        auto originPoint = imageNode->GetPositionToScreen();
+        if (hasContextMenu || isMenuShow) {
+            auto previewDragMovePosition = dragDropManager->GetUpdateDragMovePosition();
+            DragEventActuator::UpdatePreviewPositionAndScale(imageNode, previewDragMovePosition + originPoint);
+            dragDropManager ->ResetContextMenuDragPosition();
+        }
+        
         auto frameTag = frameNode->GetTag();
         if (IsPixelMapNeedScale() && GetTextDraggable() && IsTextCategoryComponent(frameTag)) {
             auto textDragPattern = frameNode->GetPattern<TextDragBase>();
@@ -994,7 +1021,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     ret = InteractionInterface::GetInstance()->StartDrag(dragData, GetDragCallback(pipeline, eventHub));
     if (ret != 0) {
         if (dragDropManager->IsNeedDisplayInSubwindow() && subWindowOverlayManager) {
-            SubwindowManager::GetInstance()->HidePreviewNG();
+            SubwindowManager::GetInstance()->HideDragPreviewWindowNG();
             overlayManager->RemovePixelMap();
         }
         TAG_LOGW(AceLogTag::ACE_DRAG, "Start drag failed, return value is %{public}d", ret);
@@ -1008,7 +1035,23 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         DragEventActuator::MountPixelMap(subWindowOverlayManager, eventHub->GetGestureEventHub(), imageNode, textNode);
         pipeline->FlushSyncGeometryNodeTasks();
         DragAnimationHelper::ShowBadgeAnimation(textNode);
-        dragDropManager->DoDragStartAnimation(subWindowOverlayManager, info);
+        dragDropManager->DoDragStartAnimation(subWindowOverlayManager, info, hasContextMenu);
+        if (hasContextMenu) {
+            //response: 0.347, dampingRatio: 0.99, blendDuration: 0.0
+            const RefPtr<Curve> curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.347f, 0.99f, 0.0f);
+            AnimationOption option;
+            option.SetCurve(curve);
+            option.SetDuration(PIXELMAP_ANIMATION_DURATION);
+            auto renderContext = imageNode->GetRenderContext();
+            AnimationUtils::Animate(
+                option,
+                [renderContext]() {
+                    if (renderContext) {
+                        renderContext->UpdateOpacity(PIXELMAP_OPACITY_RATE);
+                    }
+                },
+                option.GetOnFinishEvent());
+        }
     }
     if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && IsNeedSwitchToSubWindow()) {
         ret = RegisterCoordinationListener(pipeline);
@@ -1054,6 +1097,9 @@ void GestureEventHub::UpdateExtraInfo(const RefPtr<FrameNode>& frameNode,
     double opacity = frameNode->GetDragPreviewOption().options.opacity;
     auto optionInfo = frameNode->GetDragPreviewOption().options;
     arkExtraInfoJson->Put("dip_opacity", opacity);
+    TAG_LOGD(AceLogTag::ACE_DRAG, "The info of opacity update to the framework is %{public}s",
+        arkExtraInfoJson->ToString().c_str());
+
     if (optionInfo.blurbgEffect.backGroundEffect.radius.IsValid()) {
         optionInfo.blurbgEffect.ToJsonValue(arkExtraInfoJson);
     }
@@ -1073,16 +1119,15 @@ int32_t GestureEventHub::RegisterCoordinationListener(const RefPtr<PipelineBase>
         CHECK_NULL_VOID(dragDropManager);
         auto taskScheduler = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
-        taskScheduler->PostTask([dragDropManager]() {
-            dragDropManager->HideDragPreviewOverlay();
-        }, TaskExecutor::TaskType::UI, "ArkUIGestureHideDragPreviewOverlay");
+        taskScheduler->PostTask([dragDropManager]() { dragDropManager->HideDragPreviewOverlay(); },
+            TaskExecutor::TaskType::UI, "ArkUIGestureHideDragPreviewOverlay");
     };
     return InteractionInterface::GetInstance()->RegisterCoordinationListener(callback);
 }
 
 void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)
 {
-    gestureInfoForWeb_ = info;
+    gestureInfoForWeb_ = std::make_shared<GestureEvent>(info);
     CHECK_NULL_VOID(dragDropProxy_);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -1408,14 +1453,15 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
                         const DragNotifyMsgCore& notifyMessage) {
         ContainerScope scope(id);
         taskScheduler->PostTask(
-            [eventHub, dragEvent, dragDropManager, eventManager, notifyMessage]() {
+            [eventHub, dragEvent, dragDropManager, eventManager, notifyMessage, id]() {
                 dragDropManager->SetDragResult(notifyMessage, dragEvent);
                 dragDropManager->SetDragBehavior(notifyMessage, dragEvent);
+                dragDropManager->DoDragReset();
                 dragDropManager->SetIsDragged(false);
-                dragDropManager->ResetDragging();
                 dragDropManager->SetDraggingPointer(-1);
                 dragDropManager->SetDraggingPressedState(false);
                 dragDropManager->ResetDragPreviewInfo();
+                dragDropManager->HideDragPreviewWindow(id);
                 dragEvent->SetPressedKeyCodes(dragDropManager->GetDragDropPointerEvent().pressedKeyCodes_);
                 auto ret = InteractionInterface::GetInstance()->UnRegisterCoordinationListener();
                 if (ret != 0) {
@@ -1566,6 +1612,9 @@ DragDropInfo GestureEventHub::GetDragDropInfo(const GestureEvent& info, const Re
         dragEventActuator_->SetIsDefaultOnDragStartExecuted(true);
     }
     dragEvent->SetPressedKeyCodes(info.GetPressedKeyCodes());
+    if (GetTextDraggable() && info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
+        GenerateMousePixelMap(info);
+    }
     dragDropInfo = onDragStart(dragEvent, extraParams);
 
     auto frameTag = frameNode->GetTag();
@@ -1659,6 +1708,9 @@ bool GestureEventHub::IsDragForbidden()
 
 bool GestureEventHub::IsNeedSwitchToSubWindow() const
 {
+    auto frameNode = GetFrameNode();
+    auto focusHub = frameNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
     if (IsPixelMapNeedScale()) {
         return true;
     }
@@ -1794,6 +1846,7 @@ void GestureEventHub::FireCustomerOnDragEnd(const RefPtr<PipelineBase>& context,
     CHECK_NULL_VOID(dragEvent);
     dragEvent->SetResult(DragRet::DRAG_FAIL);
     dragEvent->SetDragBehavior(DragBehavior::UNKNOWN);
+    dragDropManager->DoDragReset();
     dragDropManager->SetIsDragged(false);
     dragDropManager->ResetDragging();
     dragDropManager->SetDraggingPointer(-1);

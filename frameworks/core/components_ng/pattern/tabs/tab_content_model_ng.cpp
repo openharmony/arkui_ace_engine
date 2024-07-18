@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_bar_item_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_event_hub.h"
 #include "core/components_ng/pattern/tabs/tab_content_node.h"
@@ -38,7 +39,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const uint8_t PIXEL_ROUND = 18;
+constexpr uint8_t PIXEL_ROUND = static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
+                                static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
+                                static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END) |
+                                static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
 constexpr uint32_t DEFAULT_RENDERING_STRATEGY = 2;
 }
 
@@ -150,7 +154,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
 
     // Create column node to contain image and text or builder.
     auto columnNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabContentNode->GetTabBarItemId(),
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        []() { return AceType::MakeRefPtr<TabBarItemPattern>(); });
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
@@ -175,9 +179,17 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     auto boardStyle = tabContentPattern->GetBoardStyle();
     auto bottomTabBarStyle = tabContentPattern->GetBottomTabBarStyle();
     auto padding = tabContentPattern->GetPadding();
-
-    auto linearLayoutPattern = columnNode->GetPattern<LinearLayoutPattern>();
-    CHECK_NULL_VOID(linearLayoutPattern);
+    auto tabLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
+    CHECK_NULL_VOID(tabLayoutProperty);
+    auto isRTL = tabLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    if (isRTL && tabContentPattern->GetUseLocalizedPadding()) {
+        PaddingProperty paddingRtl;
+        paddingRtl.left = padding.right;
+        paddingRtl.right = padding.left;
+        paddingRtl.top = padding.top;
+        paddingRtl.bottom = padding.bottom;
+        padding = paddingRtl;
+    }
 
     if (tabBarParam.GetTabBarStyle() == TabBarStyle::BOTTOMTABBATSTYLE) {
         if (bottomTabBarStyle.layoutMode == LayoutMode::HORIZONTAL) {
@@ -260,7 +272,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     }
 
     bool isFrameNode = false;
-    bool isFirstCreate = false;
     if (static_cast<int32_t>(columnNode->GetChildren().size()) == 0) {
         if (tabBarParam.GetSymbol().has_value()) {
             iconNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
@@ -281,7 +292,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         columnNode->MountToParent(tabBarNode, position);
         iconNode->MountToParent(columnNode);
         textNode->MountToParent(columnNode);
-        isFirstCreate = true;
     } else {
         if (tabBarStyle == TabBarStyle::SUBTABBATSTYLE && tabContentPattern->HasSubTabBarStyleNode()) {
             isFrameNode = true;
@@ -294,7 +304,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
             auto icon = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
                 ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
             columnNode->ReplaceChild(oldIcon, icon);
-                isFirstCreate = true;
         } else if (!tabBarParam.GetIcon().empty() && oldIcon->GetTag() != V2::IMAGE_ETS_TAG) {
             auto icon = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
                 ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -380,7 +389,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         if (myIndex == indicator) {
             tabBarPattern->SetImageColorOnIndex(indicator);
             symbolProperty->UpdateSymbolColorList({tabTheme->GetBottomTabSymbolOn()});
-            if (modifierOnApply != nullptr && isFirstCreate) {
+            if (modifierOnApply != nullptr) {
                 modifierOnApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)), "normal");
                 UpdateDefaultSymbol(tabTheme, symbolProperty);
                 symbolProperty->UpdateSymbolColorList({tabTheme->GetBottomTabSymbolOn()});
@@ -484,6 +493,16 @@ void TabContentModelNG::SetIndicator(const IndicatorStyle& indicator)
     frameNodePattern->SetIndicatorStyle(indicator);
 }
 
+void TabContentModelNG::SetCustomTabBar(FrameNode* node, FrameNode* tabBar)
+{
+    CHECK_NULL_VOID(node);
+    CHECK_NULL_VOID(tabBar);
+    auto frameNodePattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetTabBarStyle(TabBarStyle::NOSTYLE);
+    frameNodePattern->SetCustomTabBar(tabBar);
+}
+
 void TabContentModelNG::SetBoard(const BoardStyle& board)
 {
     auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
@@ -517,6 +536,13 @@ void TabContentModelNG::SetPadding(const PaddingProperty& padding)
     auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
     CHECK_NULL_VOID(frameNodePattern);
     frameNodePattern->SetPadding(padding);
+}
+
+void TabContentModelNG::SetUseLocalizedPadding(bool useLocalizedPadding)
+{
+    auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetUseLocalizedPadding(useLocalizedPadding);
 }
 
 void TabContentModelNG::SetLayoutMode(LayoutMode layoutMode)

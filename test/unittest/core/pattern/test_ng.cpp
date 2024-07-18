@@ -52,17 +52,28 @@ RefPtr<PaintWrapper> TestNG::FlushLayoutTask(const RefPtr<FrameNode>& frameNode)
     return wrapper;
 }
 
-void TestNG::CreateDone(const RefPtr<FrameNode>& frameNode)
+void TestNG::FlushExpandSafeAreaTask()
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    CHECK_NULL_VOID(pipeline);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    safeAreaManager->ExpandSafeArea();
+}
+
+RefPtr<PaintWrapper> TestNG::CreateDone(const RefPtr<FrameNode>& frameNode)
 {
     auto& elementsStack = ViewStackProcessor::GetInstance()->elementsStack_;
     while (elementsStack.size() > 1) {
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
-    ViewStackProcessor::GetInstance()->Finish();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto rootNode = AceType::DynamicCast<FrameNode>(element);
     ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    frameNode->MarkModifyDone();
-    FlushLayoutTask(frameNode);
+    auto layoutNode = frameNode ? frameNode : rootNode;
+    layoutNode->MarkModifyDone();
+    return FlushLayoutTask(layoutNode);
 }
 
 uint64_t TestNG::GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty)
@@ -83,5 +94,19 @@ TouchEventInfo TestNG::CreateTouchEventInfo(TouchType touchType, Offset location
     TouchEventInfo touchEventInfo("touch");
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
     return touchEventInfo;
+}
+
+RefPtr<ThemeConstants> TestNG::CreateThemeConstants(const std::string& patternName)
+{
+    auto resAdapter = RefPtr<ResourceAdapter>();
+    auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(resAdapter);
+    std::unordered_map<std::string, ResValueWrapper> attributes;
+    ResValueWrapper resValueWrapper;
+    resValueWrapper.type = ThemeConstantsType::THEME;
+    resValueWrapper.value = AceType::MakeRefPtr<ThemeStyle>();
+    attributes.insert(std::pair<std::string, ResValueWrapper>(patternName, resValueWrapper));
+    themeConstants->currentThemeStyle_ = AceType::MakeRefPtr<ThemeStyle>();
+    themeConstants->currentThemeStyle_->SetAttributes(attributes);
+    return themeConstants;
 }
 } // namespace OHOS::Ace::NG

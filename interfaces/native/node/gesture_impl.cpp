@@ -21,6 +21,7 @@
 #include "node_model.h"
 #include "gesture_impl.h"
 
+#include "base/utils/utils.h"
 #include "core/gestures/gesture_event.h"
 #include "frameworks/core/interfaces/arkoala/arkoala_api.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
@@ -33,6 +34,7 @@ struct ArkUI_GestureRecognizer {
     int32_t type = -1;
     ArkUIGesture* gesture = nullptr;
     void* extraData = nullptr;
+    void* attachNode = nullptr;
 };
 #ifdef __cplusplus
 };
@@ -40,6 +42,7 @@ struct ArkUI_GestureRecognizer {
 // the ArkUI_GestureEvent struct actually same as ArkUIAPIEventGestureAsyncEvent;
 struct ArkUI_GestureEvent {
     ArkUIAPIEventGestureAsyncEvent eventData;
+    void* attachNode;
 };
 
 struct ArkUI_GestureInterruptInfo {
@@ -141,6 +144,11 @@ float OH_ArkUI_PinchGesture_GetCenterY(const ArkUI_GestureEvent* event)
     return event->eventData.pinchCenterY;
 }
 
+ArkUI_NodeHandle OH_ArkUI_GestureEvent_GetNode(const ArkUI_GestureEvent* event)
+{
+    return reinterpret_cast<ArkUI_NodeHandle>(event->attachNode);
+}
+
 bool OH_ArkUI_GestureInterruptInfo_GetSystemFlag(const ArkUI_GestureInterruptInfo* event)
 {
     return event->interruptData.isSystemGesture;
@@ -153,10 +161,16 @@ ArkUI_GestureRecognizer* OH_ArkUI_GestureInterruptInfo_GetRecognizer(const ArkUI
 
 ArkUI_GestureEvent* OH_ArkUI_GestureInterruptInfo_GetGestureEvent(const ArkUI_GestureInterruptInfo* event)
 {
-    ArkUI_GestureEvent* gestureEvent = reinterpret_cast<ArkUI_GestureEvent *>(event->interruptData.event);
-    ArkUI_UIInputEvent* uiEvent = new ArkUI_UIInputEvent{
-        ARKUI_UIINPUTEVENT_TYPE_TOUCH, C_TOUCH_EVENT_ID, gestureEvent->eventData.rawPointerEvent };
+    CHECK_NULL_RETURN(event, nullptr);
+    ArkUI_GestureEvent* gestureEvent = reinterpret_cast<ArkUI_GestureEvent*>(event->interruptData.gestureEvent);
+    CHECK_NULL_RETURN(gestureEvent, nullptr);
+
+    ArkUI_UIInputEvent* uiEvent = reinterpret_cast<ArkUI_UIInputEvent*>(event->interruptData.inputEvent);
     gestureEvent->eventData.rawPointerEvent = uiEvent;
+
+    auto* gestureRecognizer = reinterpret_cast<ArkUI_GestureRecognizer*>(event->interruptData.userData);
+    CHECK_NULL_RETURN(gestureRecognizer, nullptr);
+    gestureEvent->attachNode = gestureRecognizer->attachNode;
     return gestureEvent;
 }
 
@@ -178,11 +192,12 @@ constexpr double DEFAULT_SWIPE_SPEED = 100.0f;
 struct GestureInnerData {
     void (*targetReceiver)(ArkUI_GestureEvent* event, void* extraParam);
     void* extraParam;
+    void* gesture;
 };
 
 ArkUI_GestureRecognizer* CreateTapGesture(int32_t count, int32_t fingers)
 {
-    auto* ndkGesture = new ArkUI_GestureRecognizer{ TAP_GESTURE, nullptr, nullptr };
+    auto* ndkGesture = new ArkUI_GestureRecognizer{ TAP_GESTURE, nullptr, nullptr, nullptr };
     auto* gesture = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createTapGesture(
         count, fingers, ndkGesture);
     ndkGesture->gesture = gesture;
@@ -191,7 +206,7 @@ ArkUI_GestureRecognizer* CreateTapGesture(int32_t count, int32_t fingers)
 
 ArkUI_GestureRecognizer* CreateLongPressGesture(int32_t fingers, bool repeatResult, int32_t duration)
 {
-    auto* ndkGesture = new ArkUI_GestureRecognizer{ LONG_PRESS_GESTURE, nullptr, nullptr };
+    auto* ndkGesture = new ArkUI_GestureRecognizer{ LONG_PRESS_GESTURE, nullptr, nullptr, nullptr };
     auto* gesture =
         OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createLongPressGesture(fingers,
         repeatResult, duration, ndkGesture);
@@ -206,7 +221,7 @@ ArkUI_GestureRecognizer* CreatePinchGesture(int32_t fingers, double distance)
     }
     double distanceNum = OHOS::Ace::NodeModel::GetFullImpl()->getBasicAPI()->convertLengthMetricsUnit(
         distance, static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_PX), static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_VP));
-    auto* ndkGesture = new ArkUI_GestureRecognizer{ PINCH_GESTURE, nullptr, nullptr };
+    auto* ndkGesture = new ArkUI_GestureRecognizer{ PINCH_GESTURE, nullptr, nullptr, nullptr };
     auto* gesture =
         OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createPinchGesture(fingers,
         distanceNum, ndkGesture);
@@ -216,7 +231,7 @@ ArkUI_GestureRecognizer* CreatePinchGesture(int32_t fingers, double distance)
 
 ArkUI_GestureRecognizer* CreateRotationGesture(int32_t fingers, double angle)
 {
-    auto* ndkGesture = new ArkUI_GestureRecognizer{ ROTATION_GESTURE, nullptr, nullptr };
+    auto* ndkGesture = new ArkUI_GestureRecognizer{ ROTATION_GESTURE, nullptr, nullptr, nullptr };
     auto* gesture =
         OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createRotationGesture(fingers,
         angle, ndkGesture);
@@ -231,7 +246,7 @@ ArkUI_GestureRecognizer* CreateSwipeGesture(int32_t fingers, ArkUI_GestureDirect
     }
     double speedNum = OHOS::Ace::NodeModel::GetFullImpl()->getBasicAPI()->convertLengthMetricsUnit(
         speed, static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_PX), static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_VP));
-    auto* ndkGesture = new ArkUI_GestureRecognizer{ SWIPE_GESTURE, nullptr, nullptr };
+    auto* ndkGesture = new ArkUI_GestureRecognizer{ SWIPE_GESTURE, nullptr, nullptr, nullptr };
     auto* gesture =
         OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createSwipeGesture(fingers,
         directions, speedNum, ndkGesture);
@@ -247,7 +262,7 @@ ArkUI_GestureRecognizer* CreatePanGesture(int32_t fingersNum, ArkUI_GestureDirec
     } else {
         fingers = fingersNum;
     }
-    auto* ndkGesture = new ArkUI_GestureRecognizer{ PAN_GESTURE, nullptr, nullptr };
+    auto* ndkGesture = new ArkUI_GestureRecognizer{ PAN_GESTURE, nullptr, nullptr, nullptr };
     auto* gesture = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createPanGesture(
         fingers, mask, distanceNum, ndkGesture);
     ndkGesture->gesture = gesture;
@@ -258,7 +273,9 @@ void DisposeGesture(ArkUI_GestureRecognizer* recognizer)
 {
     OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->dispose(recognizer->gesture);
     delete reinterpret_cast<GestureInnerData*>(recognizer->extraData);
+    recognizer->extraData = nullptr;
     delete recognizer;
+    recognizer = nullptr;
 }
 
 int32_t SetGestureEventTarget(ArkUI_GestureRecognizer* recognizer, ArkUI_GestureEventActionTypeMask mask,
@@ -268,8 +285,9 @@ int32_t SetGestureEventTarget(ArkUI_GestureRecognizer* recognizer, ArkUI_Gesture
     // 把回调函数和上下文都封装到内部结构体中。
     if (recognizer->extraData) {
         delete reinterpret_cast<GestureInnerData*>(recognizer->extraData);
+        recognizer->extraData = nullptr;
     }
-    recognizer->extraData = new GestureInnerData { targetReceiver, extraParam };
+    recognizer->extraData = new GestureInnerData { targetReceiver, extraParam, recognizer };
     OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->registerGestureEvent(
         recognizer->gesture, mask, recognizer->extraData);
     return 0;
@@ -278,6 +296,7 @@ int32_t SetGestureEventTarget(ArkUI_GestureRecognizer* recognizer, ArkUI_Gesture
 int32_t AddGestureToNode(ArkUI_NodeHandle node, ArkUI_GestureRecognizer* recognizer, ArkUI_GesturePriority priorityNum,
     ArkUI_GestureMask mask)
 {
+    recognizer->attachNode = node;
     OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->addGestureToNode(
         node->uiNodeHandle, recognizer->gesture, priorityNum, mask);
     return 0;
@@ -318,15 +337,32 @@ int32_t RemoveChildGesture(ArkUI_GestureRecognizer* group, ArkUI_GestureRecogniz
 
 void HandleGestureEvent(ArkUINodeEvent* event)
 {
+    if (event == nullptr) {
+        return;
+    }
     auto* extraData = reinterpret_cast<GestureInnerData*>(event->extraParam);
+    if (extraData == nullptr) {
+        return;
+    }
     ArkUI_GestureEvent* gestureEvent = reinterpret_cast<ArkUI_GestureEvent *>(&event->gestureAsyncEvent);
+    if (gestureEvent == nullptr || extraData->targetReceiver == nullptr) {
+        return;
+    }
     ArkUI_UIInputEvent uiEvent;
-    uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_TOUCH;
-    uiEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    if (gestureEvent->eventData.source == static_cast<int32_t>(UI_INPUT_EVENTT_SOURCE_TYPE_MOUSE)) {
+        uiEvent.eventTypeId = C_MOUSE_EVENT_ID;
+        uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_MOUSE;
+    } else {
+        uiEvent.eventTypeId = C_TOUCH_EVENT_ID;
+        uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_TOUCH;
+    }
     uiEvent.inputEvent = gestureEvent->eventData.rawPointerEvent;
     gestureEvent->eventData.rawPointerEvent = &uiEvent;
+    if (extraData->gesture) {
+        ArkUI_GestureRecognizer* recognizer = reinterpret_cast<ArkUI_GestureRecognizer*>(extraData->gesture);
+        gestureEvent->attachNode = recognizer->attachNode;
+    }
     extraData->targetReceiver(gestureEvent, extraData->extraParam);
-    delete event;
 }
 
 int32_t SetGestureInterrupterToNode(

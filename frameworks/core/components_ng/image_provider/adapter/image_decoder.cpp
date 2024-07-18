@@ -124,7 +124,7 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(AIImageQuality imageQuality, b
     auto image = PixelMapImage::Create(pixmap);
 
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE,
+        TAG_LOGD(AceLogTag::ACE_IMAGE,
             "decode to pixmap, src=%{public}s, resolutionQuality = %{public}s, desiredSize = %{public}s, pixmap size = "
             "%{public}d x %{public}d",
             obj_->GetSourceInfo().ToString().c_str(), GetResolutionQuality(imageQuality).c_str(),
@@ -218,7 +218,7 @@ std::shared_ptr<RSImage> ImageDecoder::ResizeDrawingImage()
         auto scale = std::max(static_cast<float>(width) / info.width(), static_cast<float>(height) / info.height());
         auto idealSize = codec->getScaledDimensions(scale);
         if (SystemProperties::GetDebugEnabled()) {
-            TAG_LOGI(AceLogTag::ACE_IMAGE, "desiredSize = %{public}s, codec idealSize: %{public}dx%{public}d",
+            TAG_LOGD(AceLogTag::ACE_IMAGE, "desiredSize = %{public}s, codec idealSize: %{public}dx%{public}d",
                 desiredSize_.ToString().c_str(), idealSize.width(), idealSize.height());
         }
 

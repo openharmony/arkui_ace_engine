@@ -15,8 +15,11 @@
 
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
 
+#include <memory>
+#include <string>
 #include <utility>
 
+#include "draw/core_canvas.h"
 #include "include/core/SkGraphics.h"
 
 #include "base/image/pixel_map.h"
@@ -46,10 +49,29 @@ const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0, 0, // red
     0.30f, 0.59f, 0.11f, 0, 0,                                   // blue
     0, 0, 0, 1.0f, 0 };                                          // alpha transparency
 
+void PrintDrawingLatticeConfig(const Rosen::Drawing::Lattice& lattice)
+{
+    std::string drawingConfigStr;
+    drawingConfigStr.append("fXCount = " + std::to_string(lattice.fXCount));
+    drawingConfigStr.append("fXDivs = [");
+    for (int32_t idx = 0; idx < lattice.fXCount; ++idx) {
+        drawingConfigStr.append(std::to_string(lattice.fXDivs[idx]) + " ");
+    }
+    drawingConfigStr.append("] ");
+    drawingConfigStr.append("fYCount = " + std::to_string(lattice.fYCount));
+    drawingConfigStr.append("fYDivs = [");
+    for (int32_t idx = 0; idx < lattice.fYCount; ++idx) {
+        drawingConfigStr.append(std::to_string(lattice.fYDivs[idx]) + " ");
+    }
+    drawingConfigStr.append("] ");
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "Begin to draw iamge with lattice : %{public}s", drawingConfigStr.c_str());
+}
+
 bool ConvertSlice(const ImagePaintConfig& config, RectF& result, float rawImageWidth, float rawImageHeight)
 {
     const auto& slice = config.resizableSlice_;
     CHECK_NULL_RETURN(slice.Valid(), false);
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "Draw image with slice = %{public}s.", slice.ToString().c_str());
     result.SetLeft(ConvertToPx(slice.left, ScaleProperty::CreateScaleProperty(), rawImageWidth).value_or(0.0f));
     result.SetTop(ConvertToPx(slice.top, ScaleProperty::CreateScaleProperty(), rawImageHeight).value_or(0.0f));
     auto rightSliceValue = ConvertToPx(slice.right, ScaleProperty::CreateScaleProperty(), rawImageWidth).value_or(0.0f);
@@ -247,11 +269,64 @@ void DrawingImage::DrawToRSCanvas(
         canvas.DrawImageRect(*image, srcRect, dstRect, options);
     } else {
         const auto& config = GetPaintConfig();
+        if (config.resizableLattice_ && DrawImageLattice(canvas, srcRect, dstRect, radiusXY)) {
+            return;
+        }
         if (config.resizableSlice_.Valid() && DrawImageNine(canvas, srcRect, dstRect, radiusXY)) {
             return;
         }
         DrawWithRecordingCanvas(canvas, radiusXY);
     }
+}
+
+bool DrawingImage::DrawImageLattice(
+    RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
+{
+    const auto& config = GetPaintConfig();
+    const auto& drawingLattice = config.resizableLattice_;
+    CHECK_NULL_RETURN(drawingLattice, false);
+#ifdef ENABLE_ROSEN_BACKEND
+    auto latticeSptrAddr =
+        static_cast<std::shared_ptr<Rosen::Drawing::Lattice>*>(drawingLattice->GetDrawingLatticeSptrAddr());
+    RSBrush brush;
+    auto filterMode = RSFilterMode::NEAREST;
+    switch (config.imageInterpolation_) {
+        case ImageInterpolation::LOW:
+        case ImageInterpolation::MEDIUM:
+            filterMode = RSFilterMode::LINEAR;
+            break;
+        case ImageInterpolation::HIGH:
+        default:
+            break;
+    }
+
+    auto filter = brush.GetFilter();
+    UpdateRSFilter(config, filter);
+    brush.SetFilter(filter);
+    auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
+    auto radii = ImagePainterUtils::ToRSRadius(radiusXY);
+    std::vector<RSPoint> radius;
+    for (size_t ii = 0; ii < 4; ii++) {
+        RSPoint point(radii[ii].GetX(), radii[ii].GetY());
+        radius.emplace_back(point);
+    }
+    recordingCanvas.ClipAdaptiveRoundRect(radius);
+    recordingCanvas.Scale(config.scaleX_, config.scaleY_);
+
+    RSPoint pointRadius[4] = {};
+    for (size_t i = 0; i < 4; i++) {
+        pointRadius[i] = radius[i];
+    }
+    auto lattice = *(*latticeSptrAddr);
+    if (SystemProperties::GetDebugEnabled()) {
+        PrintDrawingLatticeConfig(lattice);
+    }
+    recordingCanvas.AttachBrush(brush);
+    recordingCanvas.DrawImageLattice(image_.get(), *(*latticeSptrAddr), dstRect, filterMode);
+    recordingCanvas.DetachBrush();
+    return true;
+#endif
+    return false;
 }
 
 bool DrawingImage::DrawImageNine(
@@ -326,10 +401,11 @@ bool DrawingImage::DrawWithRecordingCanvas(RSCanvas& canvas, const BorderRadiusA
     for (int i = 0; i < 4; i++) {
         pointRadius[i] = radius[i];
     }
-    Rosen::Drawing::AdaptiveImageInfo rsImageInfo =
-        {static_cast<int32_t>(config.imageFit_), static_cast<int32_t>(config.imageRepeat_),
-         {pointRadius[0], pointRadius[1], pointRadius[2], pointRadius[3]}, 1.0, GetUniqueID(),
-        GetCompressWidth(), GetCompressHeight()};
+    Rosen::Drawing::AdaptiveImageInfo rsImageInfo = {
+        static_cast<int32_t>(config.imageFit_), static_cast<int32_t>(config.imageRepeat_),
+        {pointRadius[0], pointRadius[1], pointRadius[2], pointRadius[3]}, 1.0, GetUniqueID(),
+        GetCompressWidth(), GetCompressHeight()
+    };
     auto data = GetCompressData();
     recordingCanvas.AttachBrush(brush);
     recordingCanvas.DrawImageWithParm(GetImage(), std::move(data), rsImageInfo, options);
@@ -337,6 +413,22 @@ bool DrawingImage::DrawWithRecordingCanvas(RSCanvas& canvas, const BorderRadiusA
     return true;
 #else // !ENABLE_ROSEN_BACKEND
     return false;
+#endif
+}
+
+void DrawingImage::DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    auto& recordingCanvas = static_cast<Rosen::Drawing::RecordingCanvas&>(canvas);
+    RSBrush brush;
+    RSSamplingOptions options;
+    RSRect dst = RSRect(dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetRight(), dstRect.GetBottom());
+    RSRect src = RSRect(srcRect.GetLeft(), srcRect.GetTop(), srcRect.GetRight(), srcRect.GetBottom());
+    recordingCanvas.AttachBrush(brush);
+    auto imagePtr = GetImage();
+    recordingCanvas.DrawImageRect(*imagePtr, src, dst, options);
+    recordingCanvas.DetachBrush();
+#else // !ENABLE_ROSEN_BACKEND
 #endif
 }
 } // namespace OHOS::Ace::NG

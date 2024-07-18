@@ -57,6 +57,10 @@ struct OptionParam {
     bool enabled = true;
     std::function<void()> action;
     std::function<void(WeakPtr<NG::FrameNode>)> symbol = nullptr;
+    std::optional<Dimension> symbolUserDefinedIdealFontSize = std::nullopt;
+
+    // Used for security controls.
+    bool isPasteOption = false;
 
     OptionParam() = default;
     OptionParam(const std::string &valueParam, const std::string &iconParam, const std::function<void()> &actionParam)
@@ -78,13 +82,32 @@ struct OptionParam {
         : value(valueParam), icon(iconParam), enabled(enabledParam), action(actionParam), symbol(symbol)
     {}
 
+    void SetSymbolUserDefinedIdealFontSize(const Dimension& dimension)
+    {
+        symbolUserDefinedIdealFontSize = dimension;
+    }
+
+    Dimension GetSymbolUserDefinedIdealFontSize(const Dimension& defaultValue) const
+    {
+        if (!symbolUserDefinedIdealFontSize.has_value()) {
+            return defaultValue;
+        }
+        return symbolUserDefinedIdealFontSize.value();
+    }
+
+    bool HasSymbolUserDefinedIdealFontSize() const
+    {
+        return symbolUserDefinedIdealFontSize.has_value();
+    }
+
     ~OptionParam() = default;
 };
 
 enum class OverlayType {
     BUILDER = 0,
     TEXT = 1,
-    RESET = 2,
+    COMPONENT_CONTENT = 2,
+    RESET = 3,
 };
 
 class ACE_FORCE_EXPORT ViewAbstract {
@@ -121,6 +144,12 @@ public:
     static void SetLightUpEffect(double radio);
     static void SetPadding(const CalcLength &value);
     static void SetPadding(const PaddingProperty &value);
+    static void SetSafeAreaPadding(const CalcLength& value);
+    static void SetSafeAreaPadding(const PaddingProperty& value);
+    static void SetSafeAreaPadding(FrameNode* frameNode, const CalcLength& value);
+    static void SetSafeAreaPadding(FrameNode* frameNode, const PaddingProperty& value);
+    static void ResetSafeAreaPadding();
+    static void ResetSafeAreaPadding(FrameNode* frameNode);
     static void SetMargin(const CalcLength &value);
     static void SetMargin(const PaddingProperty &value);
     static void SetBorderRadius(const BorderRadiusProperty &value);
@@ -131,6 +160,10 @@ public:
     static void SetBorderWidth(const BorderWidthProperty &value);
     static void SetBorderStyle(const BorderStyle &value);
     static void SetBorderStyle(const BorderStyleProperty &value);
+    static void SetDashGap(const Dimension &value);
+    static void SetDashGap(const BorderWidthProperty &value);
+    static void SetDashWidth(const Dimension &value);
+    static void SetDashWidth(const BorderWidthProperty &value);
     static void SetOpacity(double opacity);
     static void SetAllowDrop(const std::set<std::string> &allowDrop);
     static void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier);
@@ -236,6 +269,7 @@ public:
     static void SetOnTouch(TouchEventFunc &&touchEventFunc);
     static void SetOnMouse(OnMouseEventFunc &&onMouseEventFunc);
     static void SetOnHover(OnHoverFunc &&onHoverEventFunc);
+    static void SetOnAccessibilityHover(OnAccessibilityHoverFunc &&onAccessibilityHoverEventFunc);
     static void SetHoverEffect(HoverEffectType hoverEffect);
     static void SetHoverEffectAuto(HoverEffectType hoverEffect);
     static void SetEnabled(bool enabled);
@@ -315,11 +349,13 @@ public:
     // transition
     static void SetTransition(const TransitionOptions &options);
     static void CleanTransition();
-    static void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect> &effect);
+    static void SetChainedTransition(
+        const RefPtr<NG::ChainedTransitionEffect>& effect, NG::TransitionFinishCallback&& finishCallback = nullptr);
     // sharedTransition
     static void SetSharedTransition(const std::string &shareId, const std::shared_ptr<SharedTransitionOption> &option);
     // geometryTransition
-    static void SetGeometryTransition(const std::string &id, bool followWithoutTransition = false);
+    static void SetGeometryTransition(const std::string &id,
+        bool followWithoutTransition = false, bool doRegisterSharedTransition = true);
     // clip and mask
     static void SetClipShape(const RefPtr<BasicShape> &basicShape);
     static void SetClipEdge(bool isClip);
@@ -327,6 +363,9 @@ public:
     // overlay
     static void SetOverlay(const NG::OverlayOptions &overlay);
     static void SetOverlayBuilder(std::function<void()>&& buildFunc,
+        const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+        const std::optional<Dimension>& offsetY);
+    static void SetOverlayComponentContent(const RefPtr<NG::FrameNode>& contentNode,
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY);
     // motionPath
@@ -341,6 +380,7 @@ public:
     static void DisableOnTouch();
     static void DisableOnKeyEvent();
     static void DisableOnHover();
+    static void DisableOnAccessibilityHover();
     static void DisableOnMouse();
     static void DisableOnAppear();
     static void DisableOnDisAppear();
@@ -366,6 +406,7 @@ public:
     static void SetUseEffect(bool useEffect);
 
     static void SetFreeze(bool freeze);
+    static void SetAttractionEffect(const AttractionEffect& effect);
 
     static void SetDisallowDropForcedly(bool isDisallowDropForcedly);
 
@@ -426,6 +467,10 @@ public:
     static void SetOuterBorderStyle(FrameNode* frameNode, const BorderStyle& value);
     static void SetBorderStyle(FrameNode* frameNode, const BorderStyle& value);
     static void SetBorderStyle(FrameNode* frameNode, const BorderStyleProperty& value);
+    static void SetDashGap(FrameNode* frameNode, const BorderWidthProperty& value);
+    static void SetDashGap(FrameNode* frameNode, const Dimension& value);
+    static void SetDashWidth(FrameNode* frameNode, const BorderWidthProperty& value);
+    static void SetDashWidth(FrameNode* frameNode, const Dimension& value);
     static void SetBackShadow(FrameNode* frameNode, const Shadow& shadow);
     static void SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& value);
     static void SetPositionEdges(FrameNode* frameNode, const EdgesParam& value);
@@ -466,8 +511,10 @@ public:
     static void SetTranslate(FrameNode* frameNode, const NG::TranslateOptions& value);
     static void SetScale(FrameNode* frameNode, const NG::VectorF& value);
     static void SetPivot(FrameNode* frameNode, const DimensionOffset& value);
-    static void SetGeometryTransition(FrameNode* frameNode, const std::string& id, bool followWithoutTransition);
-    static const std::string GetGeometryTransition(FrameNode* frameNode, bool* followWithoutTransition);
+    static void SetGeometryTransition(FrameNode* frameNode, const std::string& id,
+        bool followWithoutTransition, bool doRegisterSharedTransition);
+    static const std::string GetGeometryTransition(FrameNode* frameNode,
+        bool* followWithoutTransition, bool* doRegisterSharedTransition);
     static void SetRotate(FrameNode* frameNode, const NG::Vector5F& value);
     static void SetClipEdge(FrameNode* frameNode, bool isClip);
     static void SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
@@ -529,13 +576,15 @@ public:
     static void SetBgDynamicBrightness(FrameNode* frameNode, const BrightnessOption& brightnessOption);
     static void SetFgDynamicBrightness(FrameNode* frameNode, const BrightnessOption& brightnessOption);
     static void SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption);
+    static void SetDragPreview(FrameNode* frameNode, const DragDropInfo& dragDropInfo);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetMouseResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& mouseResponseRegion);
     static void SetSharedTransition(
         FrameNode* frameNode, const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option);
     static void SetTransition(FrameNode* frameNode, const TransitionOptions& options);
     static void CleanTransition(FrameNode* frameNode);
-    static void SetChainedTransition(FrameNode* frameNode, const RefPtr<NG::ChainedTransitionEffect>& effect);
+    static void SetChainedTransition(FrameNode* frameNode, const RefPtr<NG::ChainedTransitionEffect>& effect,
+        NG::TransitionFinishCallback&& finishCallback = nullptr);
     static void SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMaskProperty>& progress);
     static void SetEnabled(FrameNode* frameNode, bool enabled);
@@ -679,9 +728,18 @@ public:
     static void ResetLayoutRect(FrameNode* frameNode);
     static NG::RectF GetLayoutRect(FrameNode* frameNode);
     static bool GetFocusOnTouch(FrameNode* frameNode);
+    static void SetPixelRound(FrameNode* frameNode, uint8_t value);
+    static uint32_t GetSafeAreaExpandType(FrameNode* frameNode);
+    static uint32_t GetSafeAreaExpandEdges(FrameNode* frameNode);
+    static void SetPositionLocalizedEdges(bool needLocalized);
+    static void SetLocalizedMarkAnchor(bool needLocalized);
+    static void SetOffsetLocalizedEdges(bool needLocalized);
 
 private:
     static void AddDragFrameNodeToManager();
+    static void AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,
+        const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+        const std::optional<Dimension>& offsetY);
 };
 } // namespace OHOS::Ace::NG
 

@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_SCROLL_MODIFIER_H
+#define FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_SCROLL_MODIFIER_H
 
 #include "core/interfaces/native/node/node_api.h"
 
@@ -29,4 +30,26 @@ void SetOnScrollStop(ArkUINodeHandle node, void* extraParam);
 void SetOnScrollEdge(ArkUINodeHandle node, void* extraParam);
 void SetOnScrollReachStart(ArkUINodeHandle node, void* extraParam);
 void SetOnScrollReachEnd(ArkUINodeHandle node, void* extraParam);
+
+void ResetOnScroll(ArkUINodeHandle node);
+void ResetOnScrollFrameBegin(ArkUINodeHandle node);
+void ResetScrollOnWillScroll(ArkUINodeHandle node);
+void ResetScrollOnDidScroll(ArkUINodeHandle node);
+void ResetOnScrollStart(ArkUINodeHandle node);
+void ResetOnScrollStop(ArkUINodeHandle node);
+void ResetOnScrollEdge(ArkUINodeHandle node);
+void ResetOnScrollReachStart(ArkUINodeHandle node);
+void ResetOnScrollReachEnd(ArkUINodeHandle node);
+void SetScrollOnScrollStart(ArkUINodeHandle node, void* callback);
+void ResetScrollOnScrollStart(ArkUINodeHandle node);
+void SetScrollOnScrollEnd(ArkUINodeHandle node, void* callback);
+void ResetScrollOnScrollEnd(ArkUINodeHandle node);
+void SetScrollOnScrollStop(ArkUINodeHandle node, void* callback);
+void ResetScrollOnScrollStop(ArkUINodeHandle node);
+void SetScrollOnScroll(ArkUINodeHandle node, void* callback);
+void ResetScrollOnScroll(ArkUINodeHandle node);
+void SetScrollOnScrollEdge(ArkUINodeHandle node, void* callback);
+void ResetScrollOnScrollEdge(ArkUINodeHandle node);
+void SetScrollOnDidScrollCallBack(ArkUINodeHandle node, void* callback);
 } // namespace OHOS::Ace::NG::NodeModifier
+#endif // FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_SCROLL_MODIFIER_H

@@ -31,11 +31,23 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_with_theme.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
 #include "frameworks/bridge/declarative_frontend/jsview/action_sheet/js_action_sheet.h"
+#include "frameworks/bridge/declarative_frontend/jsview/canvas/js_canvas.h"
+#include "frameworks/bridge/declarative_frontend/jsview/canvas/js_canvas_gradient.h"
+#include "frameworks/bridge/declarative_frontend/jsview/canvas/js_canvas_image_data.h"
+#include "frameworks/bridge/declarative_frontend/jsview/canvas/js_canvas_pattern.h"
+#include "frameworks/bridge/declarative_frontend/jsview/canvas/js_matrix2d.h"
+#include "frameworks/bridge/declarative_frontend/jsview/canvas/js_offscreen_canvas.h"
+#include "frameworks/bridge/declarative_frontend/jsview/canvas/js_offscreen_rendering_context.h"
+#include "frameworks/bridge/declarative_frontend/jsview/canvas/js_path2d.h"
+#include "frameworks/bridge/declarative_frontend/jsview/canvas/js_render_image.h"
+#include "frameworks/bridge/declarative_frontend/jsview/canvas/js_rendering_context.h"
+#include "frameworks/bridge/declarative_frontend/jsview/canvas/js_rendering_context_settings.h"
 #include "frameworks/bridge/declarative_frontend/jsview/dialog/js_alert_dialog.h"
 #include "frameworks/bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_animator.h"
@@ -46,10 +58,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_picker.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_canvas.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_canvas_gradient.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_canvas_image_data.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_canvas_pattern.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_checkbox.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_checkboxgroup.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle.h"
@@ -94,7 +102,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_loading_progress.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_marquee.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_matrix2d.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_menu.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_menu_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_menu_item_group.h"
@@ -103,11 +110,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigation.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navrouter.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_canvas.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_page_transition.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_path2d.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_persistent.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polygon.h"
@@ -119,10 +123,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_rect_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_recycle_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_refresh.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_render_image.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context_settings.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_repeat.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row_split.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scope_util.h"
@@ -164,7 +166,6 @@
 #include "frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.h"
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_object.h"
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_string.h"
-#include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_with_theme.h"
 
 #ifdef USE_COMPONENTS_LIB
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
@@ -180,6 +181,7 @@
 #endif
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_embedded_component.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_security_ui_extension.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ui_extension.h"
 #endif
 #ifdef ABILITY_COMPONENT_SUPPORTED
@@ -228,7 +230,9 @@ namespace OHOS::Ace::Framework {
 
 void AddCustomTitleBarComponent(const panda::Local<panda::ObjectRef>& obj)
 {
-    auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
+    const auto object = JSRef<JSObject>::Make(obj);
+    const EcmaVM* vm = object->GetEcmaVM();
+    auto* view = static_cast<JSView*>(obj->GetNativePointerField(vm, 0));
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return;
     }
@@ -237,14 +241,12 @@ void AddCustomTitleBarComponent(const panda::Local<panda::ObjectRef>& obj)
     auto customNode = AceType::DynamicCast<NG::CustomTitleNode>(uiNode);
     CHECK_NULL_VOID(customNode);
 
-    const auto object = JSRef<JSObject>::Make(obj);
     auto id = ContainerScope::CurrentId();
     const JSRef<JSVal> setAppTitle = object->GetProperty("setAppTitle");
     if (setAppTitle->IsFunction()) {
         JSRef<JSFunc> jsSetAppTitleFunc = JSRef<JSFunc>::Cast(setAppTitle);
-        auto callback = [obj = object, jsFunc = jsSetAppTitleFunc, id](const std::string& title) {
+        auto callback = [obj = object, jsFunc = jsSetAppTitleFunc, id, vm](const std::string& title) {
             ContainerScope scope(id);
-            const EcmaVM* vm = obj->GetEcmaVM();
             CHECK_NULL_VOID(vm);
             JSRef<JSVal> param = JSRef<JSVal>::Make(JsiValueConvertor::toJsiValueWithVM(vm, title));
             jsFunc->Call(obj, 1, &param);
@@ -303,9 +305,9 @@ void CleanPageNode(const RefPtr<NG::FrameNode>& pageNode)
     pageNode->Clean();
 }
 
-void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
+void UpdateRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectRef>& obj)
 {
-    auto* view = static_cast<JSView*>(obj->GetNativePointerField(0));
+    auto* view = static_cast<JSView*>(obj->GetNativePointerField(vm, 0));
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return;
     }
@@ -451,6 +453,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSTabsController::JSBind(globalObj);
     JSForEach::JSBind(globalObj);
     JSRepeat::JSBind(globalObj);
+    JSRepeatVirtualScroll::JSBind(globalObj);
     JSIfElse::JSBind(globalObj);
     JSDivider::JSBind(globalObj);
     JSScroll::JSBind(globalObj);
@@ -498,6 +501,8 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSWindowScene::JSBind(globalObj);
     JSRootScene::JSBind(globalObj);
     JSScreen::JSBind(globalObj);
+    JSSecurityUIExtensionProxy::JSBind(globalObj);
+    JSSecurityUIExtension::JSBind(globalObj);
     JSUIExtension::JSBind(globalObj);
     JSUIExtensionProxy::JSBind(globalObj);
 #if defined(DYNAMIC_COMPONENT_SUPPORT)

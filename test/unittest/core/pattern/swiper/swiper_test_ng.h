@@ -41,6 +41,7 @@
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/swiper/arc_swiper_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/circle_dot_indicator/circle_dot_indicator_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper_indicator/circle_dot_indicator/circle_dot_indicator_paint_method.h"
 #include "core/components_ng/pattern/swiper_indicator/circle_dot_indicator/circle_dot_indicator_paint_property.h"
@@ -81,6 +82,8 @@ constexpr double ARROW_DISABLED_ALPHA = 0.5;
 const Color INDICATOR_TEXT_FONT_COLOR = Color::FromString("#ff182431");
 const Dimension INDICATOR_TEXT_FONT_SIZE = Dimension(14.f);
 const FontWeight INDICATOR_TEXT_FONT_WEIGHT = FontWeight::W800;
+constexpr float PRE_MARGIN = 10.f;
+constexpr float NEXT_MARGIN = 20.f;
 
 class SwiperTestNg : public TestNG {
 public:
@@ -99,7 +102,6 @@ public:
     void ChangeIndex(int32_t index);
 
     void InitCaptureTest();
-    void CreateWithCustomAnimation();
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<SwiperPattern> pattern_;

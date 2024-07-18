@@ -99,9 +99,18 @@ const Param = (proto: Object, propertyKey: string): void => {
       ObserveV2.getObserve().addRef(this, propertyKey);
       return ObserveV2.autoProxyObject(this, ObserveV2.OB_PREFIX + propertyKey);
     },
-    set(_) {
-      stateMgmtConsole.applicationError(`@param ${propertyKey.toString()}: can not assign a new value, application error.`);
-      return;
+    set(val) {
+      const meta = proto[ObserveV2.V2_DECO_META]?.[propertyKey];
+      if (meta && meta.deco2 !== '@once') {
+        stateMgmtConsole.applicationError(`@param ${propertyKey.toString()}: can not assign a new value, application error.`);
+        return;
+      }
+      if (val !== this[storeProp]) {
+        this[storeProp] = val;
+        if (this[ObserveV2.SYMBOL_REFS]) { // This condition can improve performance.
+          ObserveV2.getObserve().fireChange(this, propertyKey);
+        }
+      }
     },
     // @param can not be assigned, no setter
     enumerable: true

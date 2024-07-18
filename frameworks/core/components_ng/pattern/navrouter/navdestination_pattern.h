@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVROUTER_NAVDESTINATION_PATTERN_H
 
 #include "base/memory/referenced.h"
+#include "base/system_bar/system_bar_style.h"
 #include "base/utils/utils.h"
 #include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components_ng/base/ui_node.h"
@@ -56,6 +57,11 @@ public:
         auto layout = MakeRefPtr<NavDestinationLayoutAlgorithm>();
         layout->SetIsShown(isOnShow_);
         return layout;
+    }
+    
+    bool CheckCustomAvoidKeyboard() const override
+    {
+        return !NearZero(avoidKeyboardOffset_);
     }
 
     RefPtr<EventHub> CreateEventHub() override
@@ -171,6 +177,14 @@ public:
         return navigationNode_.Upgrade();
     }
 
+    NavDestinationState GetNavDestinationState() const
+    {
+        auto eventHub = GetEventHub<NavDestinationEventHub>();
+        CHECK_NULL_RETURN(eventHub, NavDestinationState::NONE);
+        auto state = eventHub->GetState();
+        return state;
+    }
+
     void DumpInfo() override;
 
     uint64_t GetNavDestinationId() const
@@ -185,8 +199,8 @@ public:
 
     void OnDetachFromMainTree() override
     {
-        auto weak = AceType::WeakClaim(this);
-        UIObserverHandler::GetInstance().NotifyNavigationStateChange(weak, NavDestinationState::ON_DISAPPEAR);
+        backupStyle_.reset();
+        currStyle_.reset();
     }
 
     bool OverlayOnBackPressed();
@@ -229,17 +243,27 @@ public:
     }
 
     void OnLanguageConfigurationUpdate() override;
-    void SetKeyboardOffset(float keyboardOffset)
+    void SetAvoidKeyboardOffset(float avoidKeyboardOffset)
     {
-        keyboardOffset_ = keyboardOffset;
+        avoidKeyboardOffset_ = avoidKeyboardOffset;
     }
 
-    float GetKeyboardOffset()
+    float GetAvoidKeyboardOffset()
     {
-        return keyboardOffset_;
+        return avoidKeyboardOffset_;
     }
 
     bool NeedIgnoreKeyboard();
+
+    void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style);
+    const std::optional<RefPtr<SystemBarStyle>>& GetBackupStyle() const
+    {
+        return backupStyle_;
+    }
+    const std::optional<RefPtr<SystemBarStyle>>& GetCurrentStyle() const
+    {
+        return currStyle_;
+    }
 
 private:
     void UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
@@ -261,10 +285,13 @@ private:
     bool isRightToLeft_ = false;
     uint64_t navDestinationId_ = 0;
     void OnAttachToFrameNode() override;
-    float keyboardOffset_ = 0.0f;
+    float avoidKeyboardOffset_ = 0.0f;
 
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<FrameNode> dialogNode_;
+
+    std::optional<RefPtr<SystemBarStyle>> backupStyle_;
+    std::optional<RefPtr<SystemBarStyle>> currStyle_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -912,25 +912,34 @@ int32_t PluginFrontendDelegate::GetVersionCode() const
     return manifestParser_->GetAppInfo()->GetVersionCode();
 }
 
-double PluginFrontendDelegate::MeasureText(const MeasureContext& context)
+double PluginFrontendDelegate::MeasureText(MeasureContext context)
 {
+    if (context.isFontSizeUseDefaultUnit && context.fontSize.has_value() &&
+        !AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        context.fontSize = Dimension(context.fontSize->Value(), DimensionUnit::VP);
+    }
     return MeasureUtil::MeasureText(context);
 }
 
-Size PluginFrontendDelegate::MeasureTextSize(const MeasureContext& context)
+Size PluginFrontendDelegate::MeasureTextSize(MeasureContext context)
 {
+    if (context.isFontSizeUseDefaultUnit && context.fontSize.has_value() &&
+        !AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        context.fontSize = Dimension(context.fontSize->Value(), DimensionUnit::VP);
+    }
     return MeasureUtil::MeasureTextSize(context);
 }
 
-void PluginFrontendDelegate::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
-    const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
+void PluginFrontendDelegate::ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback)
 {
-    int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
+    NG::ToastInfo updatedToastInfo = toastInfo;
+    updatedToastInfo.duration = std::clamp(toastInfo.duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
+    updatedToastInfo.isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
-    bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     taskExecutor_->PostTask(
-        [durationTime, message, bottom, isRightToLeft, context = pipelineContext] {
-            ToastComponent::GetInstance().Show(context, message, durationTime, bottom, isRightToLeft);
+        [updatedToastInfo, context = pipelineContext] {
+            ToastComponent::GetInstance().Show(context, updatedToastInfo.message, updatedToastInfo.duration,
+                updatedToastInfo.bottom, updatedToastInfo.isRightToLeft);
         },
         TaskExecutor::TaskType::UI, "ArkUIPluginShowToast");
 }

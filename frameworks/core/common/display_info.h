@@ -50,6 +50,18 @@ enum class Rotation : uint32_t {
     ROTATION_270,
 };
 
+/**
+ * souce is Rosen::WindowStatus
+ */
+enum class WindowStatus : uint32_t {
+    WINDOW_STATUS_UNDEFINED = 0,
+    WINDOW_STATUS_FULLSCREEN = 1,
+    WINDOW_STATUS_MAXMIZE,
+    WINDOW_STATUS_MINIMIZE,
+    WINDOW_STATUS_FLOATING,
+    WINDOW_STATUS_SPLITSCREEN
+};
+
 class ACE_EXPORT DisplayInfo : public AceType {
     DECLARE_ACE_TYPE(DisplayInfo, AceType);
 

@@ -61,8 +61,8 @@ public:
         OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) override;
     UIContentErrorCode InitializeByName(
         OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override;
-    void InitializeDynamic(
-        const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint) override;
+    void InitializeDynamic(const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint,
+        const std::vector<std::string>& registerComponents) override;
     void Initialize(
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override;
     void Foreground() override;
@@ -77,6 +77,7 @@ public:
         napi_value storage, ContentInfoType type) override;
     std::string GetContentInfo(ContentInfoType type) const override;
     void DestroyUIDirector() override;
+    void SetUIContentType(UIContentType uIContentType) override;
 
     // UI content event process
     bool ProcessBackPressed() override;
@@ -314,11 +315,18 @@ public:
 
     void SetContentNodeGrayScale(float grayscale) override;
 
+    void PreLayout() override;
+    
     sptr<IRemoteObject> GetRemoteObj() override
     {
         return instance_;
     }
+    
     void SetStatusBarItemColor(uint32_t color) override;
+
+    void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
+
+    void SetForceSplitEnable(bool isForceSplit) override;
 
 private:
     UIContentErrorCode InitializeInner(
@@ -338,7 +346,6 @@ private:
     void OnPopupStateChange(const std::string& event, const CustomPopupUIExtensionConfig& config, int32_t nodeId);
     void SetCustomPopupConfig(int32_t nodeId, const CustomPopupUIExtensionConfig& config, int32_t popupId);
 
-    static void RemoveOldPopInfoIfExsited(bool isShowInSubWindow, int32_t nodeId);
     void RenderLayoutBoundary(bool isDebugBoundary);
     static void EnableSystemParameterTraceLayoutCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterTraceInputEventCallback(const char* key, const char* value, void* context);
@@ -346,8 +353,6 @@ private:
     static void EnableSystemParameterDebugStatemgrCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context);
     void AddWatchSystemParameter();
-
-    void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
 
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
@@ -381,7 +386,9 @@ private:
     std::unique_ptr<DistributedUIManager> uiManager_;
 
     bool isDynamicRender_ = false;
+    UIContentType uIContentType_ = UIContentType::UNDEFINED;
     std::shared_ptr<TaskWrapper> taskWrapper_;
+    std::vector<std::string> registerComponents_;
 
     sptr<IRemoteObject> parentToken_ = nullptr;
     sptr<IRemoteObject> instance_ = new (std::nothrow) UIContentServiceStubImpl();

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_SYSTEM_PROPERTIES_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_SYSTEM_PROPERTIES_H
 
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <string>
@@ -230,7 +231,7 @@ public:
 
     static bool GetDebugPixelMapSaveEnabled();
 
-    static bool GetPixelRoundEnable();
+    static bool IsPixelRoundEnabled();
 
     static bool GetRosenBackendEnabled()
     {
@@ -282,9 +283,19 @@ public:
         return syncDebugTraceEnable_;
     }
 
+    static bool GetPixelRoundEnabled()
+    {
+        return pixelRoundEnable_;
+    }
+
     static bool GetTextTraceEnabled()
     {
         return textTraceEnable_;
+    }
+
+    static bool GetSyntaxTraceEnabled()
+    {
+        return syntaxTraceEnable_;
     }
 
     static bool GetAccessTraceEnabled()
@@ -327,7 +338,14 @@ public:
         return accessibilityEnabled_;
     }
 
+    static uint32_t GetCanvasDebugMode()
+    {
+        return canvasDebugMode_;
+    }
+
     static bool GetDebugEnabled();
+
+    static bool GetLayoutDetectEnabled();
 
     static bool GetGpuUploadEnabled()
     {
@@ -512,6 +530,11 @@ public:
         return acePerformanceMonitorEnable_;
     }
 
+    static bool GetAceCommercialLogEnabled()
+    {
+        return aceCommercialLogEnable_;
+    }
+
     static std::string GetAtomicServiceBundleName();
 
     static std::pair<float, float> GetDarkModeBrightnessPercent()
@@ -521,6 +544,10 @@ public:
 
     static bool IsOpIncEnable();
 
+    static float GetDragStartDampingRatio();
+
+    static float GetDragStartPanDistanceThreshold();
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -529,9 +556,12 @@ private:
     static bool traceInputEventEnable_;
     static bool buildTraceEnable_;
     static bool syncDebugTraceEnable_;
+    static bool pixelRoundEnable_;
     static bool textTraceEnable_;
+    static bool syntaxTraceEnable_;
     static bool accessTraceEnable_;
     static bool accessibilityEnabled_;
+    static uint32_t canvasDebugMode_;
     static bool isRound_;
     static bool isDeviceAccess_;
     static int32_t deviceWidth_;
@@ -558,6 +588,7 @@ private:
     static bool rosenBackendEnabled_;
     static bool windowAnimationEnabled_;
     static bool debugEnabled_;
+    static bool layoutDetectEnabled_;
     static bool debugBoundaryEnabled_;
     static bool debugAutoUIEnabled_; // for AutoUI Test
     static bool debugOffsetLogEnabled_;
@@ -578,9 +609,12 @@ private:
     static bool sideBarContainerBlurEnable_;
     static bool stateManagerEnable_;
     static bool acePerformanceMonitorEnable_;
+    static bool aceCommercialLogEnable_;
     static bool faultInjectEnabled_;
     static bool imageFrameworkEnable_;
     static std::pair<float, float> brightUpPercent_;
+    static float dragStartDampingRatio_;
+    static float dragStartPanDisThreshold_;
 };
 
 } // namespace OHOS::Ace

@@ -149,7 +149,8 @@ public:
 
             auto frameNode = AceType::DynamicCast<FrameNode>(node.second->GetFrameChildByIndex(0, true));
             if (frameNode && !frameNode->IsActive()) {
-                frameNode->SetJSViewActive(false);
+                ACE_SYNTAX_SCOPED_TRACE("LazyForEach not active index[%d]", index);
+                frameNode->SetJSViewActive(false, true);
                 expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
                 continue;
             }
@@ -192,6 +193,7 @@ public:
 
     void RemoveAllChild()
     {
+        ACE_SYNTAX_SCOPED_TRACE("LazyForEach RemoveAllChild");
         for (auto& [index, node] : cachedItems_) {
             if (!node.second) {
                 continue;
@@ -209,6 +211,7 @@ public:
 
     bool SetActiveChildRange(int32_t start, int32_t end)
     {
+        ACE_SYNTAX_SCOPED_TRACE("LazyForEach active range start[%d], end[%d]", start, end);
         int32_t count = GetTotalCount();
         bool needBuild = false;
         for (auto& [index, node] : cachedItems_) {
@@ -307,7 +310,7 @@ public:
             frameNode->GetPattern<ListItemPattern>()->BeforeCreateLayoutWrapper();
         }
         context->ResetPredictNode();
-        itemInfo.second->SetJSViewActive(false);
+        itemInfo.second->SetJSViewActive(false, true);
         cachedItems_[index] = LazyForEachChild(itemInfo.first, nullptr);
 
         return itemInfo.second;
@@ -508,10 +511,10 @@ public:
             if (node.second.second == nullptr) {
                 continue;
             }
-            node.second.second->SetJSViewActive(active);
+            node.second.second->SetJSViewActive(active, true);
         }
         for (const auto& node : expiringItem_) {
-            node.second.second->SetJSViewActive(active);
+            node.second.second->SetJSViewActive(active, true);
         }
     }
 

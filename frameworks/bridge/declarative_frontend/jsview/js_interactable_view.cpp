@@ -14,6 +14,9 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "base/log/ace_scoring_log.h"
 #include "base/log/log_wrapper.h"
@@ -137,7 +140,6 @@ void JSInteractableView::JsOnHover(const JSCallbackInfo& info)
 void JSInteractableView::JsOnPan(const JSCallbackInfo& args)
 {
     if (args[0]->IsObject()) {
-        // TODO: JSPanHandler should support ng build
 #ifndef NG_BUILD
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
         JSPanHandler* handler = obj->Unwrap<JSPanHandler>();
@@ -198,6 +200,9 @@ void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onClick");
         PipelineContext::SetCallBackNode(node);
         func->Execute(info);
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+        ReportClickEvent(node);
+#endif
     };
     auto onClick = [execCtx = info.GetExecutionContext(), func = jsOnClickFunc, node = weak](
                        const ClickInfo* info) {
@@ -205,9 +210,13 @@ void JSInteractableView::JsOnClick(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onClick");
         PipelineContext::SetCallBackNode(node);
         func->Execute(*info);
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+        ReportClickEvent(node);
+#endif
     };
 
     ViewAbstractModel::GetInstance()->SetOnClick(std::move(onTap), std::move(onClick));
+    CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusable(true, false);
@@ -391,6 +400,27 @@ std::function<void()> JSInteractableView::GetRemoteMessageEventCallback(const JS
 
     return eventCallback;
 }
+
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+void JSInteractableView::ReportClickEvent(const WeakPtr<NG::FrameNode>& node, const std::string text)
+{
+    if (UiSessionManager::GetInstance().GetClickEventRegistered()) {
+        auto data = JsonUtil::Create();
+        data->Put("event", "onClick");
+        std::string content = text;
+        if (!node.Invalid()) {
+            data->Put("id", node.GetRawPtr()->GetId());
+            auto children = node.GetRawPtr()->GetChildren();
+            if (!children.empty()) {
+                node.GetRawPtr()->GetContainerComponentText(content);
+            }
+            data->Put("text", content.data());
+            data->Put("position", node.GetRawPtr()->GetGeometryNode()->GetFrameRect().ToString().data());
+        }
+        UiSessionManager::GetInstance().ReportClickEvent(data->ToString());
+    }
+}
+#endif
 
 void JSInteractableView::SplitString(const std::string& str, char tag, std::vector<std::string>& strList)
 {

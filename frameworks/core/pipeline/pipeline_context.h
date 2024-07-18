@@ -123,7 +123,7 @@ public:
     void SetupRootElement() override;
 
     // This is used for subwindow, when the subwindow is created,a new subRootElement will be built
-    RefPtr<Element> SetupSubRootElement();
+    void SetupSubRootElement() override;
     RefPtr<DialogComponent> ShowDialog(
         const DialogProperties& dialogProperties, bool isRightToLeft, const std::string& inspectorTag = "");
     void CloseContextMenu();
@@ -214,6 +214,10 @@ public:
     // Called by view when touch event received.
     void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) override;
 
+#if defined(SUPPORT_TOUCH_TARGET_TEST)
+    // Used to determine whether the touched frameNode is the target
+    bool OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe = false, const std::string& target = "") override;
+#endif
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
     bool OnKeyEvent(const KeyEvent& event) override;
@@ -659,7 +663,8 @@ public:
     }
     void StartSystemDrag(const std::string& str, const RefPtr<PixelMap>& pixmap);
     void InitDragListener();
-    void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action) override;
+    void OnDragEvent(const PointerEvent& pointerEvent, DragEventAction action,
+        const RefPtr<NG::FrameNode>& node = nullptr) override;
     void SetPreTargetRenderNode(const RefPtr<DragDropEvent>& preDragDropNode);
     const RefPtr<DragDropEvent>& GetPreTargetRenderNode() const;
     void SetInitRenderNode(const RefPtr<RenderNode>& initRenderNode);
@@ -786,7 +791,7 @@ public:
 
     void AddVisibleAreaChangeNode(const ComposeId& nodeId, double ratio, const VisibleRatioCallback& callback);
 
-    bool GetOnShow() const
+    bool GetOnShow() const override
     {
         return onShow_;
     }
@@ -808,13 +813,18 @@ public:
     void SetAppIcon(const RefPtr<PixelMap>& icon) override;
     void FlushMessages() override;
 
+    bool IsDensityChanged() const override
+    {
+        return isDensityUpdate_;
+    }
+
 protected:
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void DispatchDisplaySync(uint64_t nanoTimestamp) override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
-    void FlushReload(const ConfigurationChange& configurationChange) override;
+    void FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate = true) override;
     void FlushReloadTransition() override;
     void FlushUITasks(bool triggeredByImplicitAnimation = false) override
     {

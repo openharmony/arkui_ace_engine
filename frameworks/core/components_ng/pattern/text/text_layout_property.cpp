@@ -22,6 +22,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension DEFAULT_MARQUEE_STEP_VP = 4.0_vp;
+constexpr float MINFONTSCALE = 0.85f;
+constexpr float MAXFONTSCALE = 3.20f;
 static const std::array<std::string, 6> TEXT_BASE_LINE_TO_STRING = {
     "textBaseline.ALPHABETIC",
     "textBaseline.IDEOGRAPHIC",
@@ -171,9 +173,13 @@ void TextLayoutProperty::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, 
     json->PutExtAttr("ellipsisMode",
         V2::ConvertEllipsisModeToString(GetEllipsisMode().value_or(EllipsisMode::TAIL)).c_str(), filter);
     json->PutExtAttr("marqueeOptions", GetTextMarqueeOptionsString().c_str(), filter);
+    json->PutExtAttr("textSelectable", V2::ConvertWrapTextSelectableToString(
+        GetTextSelectableMode().value_or(TextSelectableMode::SELECTABLE_UNFOCUSABLE)).c_str(), filter);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     json->PutExtAttr("privacySensitive", host->IsPrivacySensitive(), filter);
+    json->PutExtAttr("minFontSacle", std::to_string(GetMinFontScale().value_or(MINFONTSCALE)).c_str(), filter);
+    json->PutExtAttr("maxFontSacle", std::to_string(GetMaxFontScale().value_or(MAXFONTSCALE)).c_str(), filter);
 }
 
 void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)

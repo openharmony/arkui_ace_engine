@@ -100,8 +100,8 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetSelectedFont(ArkUIRuntimeCallIn
         fontSize = fontSizeData.ToString();
     }
     std::string weight = "normal";
-    if (!weightArg->IsNull() && !weightArg->IsUndefined() && (weightArg->IsString() || weightArg->IsNumber())) {
-        weight = weightArg->ToString(vm)->ToString();
+    if (!weightArg->IsNull() && !weightArg->IsUndefined() && (weightArg->IsString(vm) || weightArg->IsNumber())) {
+        weight = weightArg->ToString(vm)->ToString(vm);
     }
     std::string fontFamily;
     if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamily) || fontFamily.empty()) {
@@ -150,8 +150,8 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupFont(ArkUIRuntimeCallInfo*
         fontSize = fontSizeData.ToString();
     }
     std::string weight = "normal";
-    if (!weightArg->IsNull() && !weightArg->IsUndefined() && (weightArg->IsString() || weightArg->IsNumber())) {
-        weight = weightArg->ToString(vm)->ToString();
+    if (!weightArg->IsNull() && !weightArg->IsUndefined() && (weightArg->IsString(vm) || weightArg->IsNumber())) {
+        weight = weightArg->ToString(vm)->ToString(vm);
     }
     std::string fontFamily;
     if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamily) || fontFamily.empty()) {
@@ -200,8 +200,8 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetFont(ArkUIRuntimeCallInfo* runt
         fontSize = fontSizeData.ToString();
     }
     std::string weight = "normal";
-    if (!weightArg->IsNull() && !weightArg->IsUndefined() && (weightArg->IsString() || weightArg->IsNumber())) {
-        weight = weightArg->ToString(vm)->ToString();
+    if (!weightArg->IsNull() && !weightArg->IsUndefined() && (weightArg->IsString(vm) || weightArg->IsNumber())) {
+        weight = weightArg->ToString(vm)->ToString(vm);
     }
     std::string fontFamily;
     if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamily) || fontFamily.empty()) {
@@ -423,10 +423,10 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetAlignStyle(ArkUIRuntimeCallInfo
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (!secondArg->IsNumber()) {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetAlignStyle(nativeNode);
-        return panda::JSValueRef::Undefined(vm);
+    } else {
+        int32_t alignValue = secondArg->Int32Value(vm);
+        GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setAlignStyle(nativeNode, alignValue);
     }
-    int32_t alignValue = secondArg->Int32Value(vm);
-    GetArkUINodeModifiers()->getAlphabetIndexerModifier()->setAlignStyle(nativeNode, alignValue);
     CalcDimension popupHorizontalSpace;
     if (!thirdArg->IsNull() && !thirdArg->IsUndefined() &&
         ArkTSUtils::ParseJsDimensionVp(vm, thirdArg, popupHorizontalSpace)) {
@@ -745,7 +745,7 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetAutoCollapse(ArkUIRuntimeCallIn
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> autoCollapseArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    bool autoCollapse = false;
+    bool autoCollapse = true;
     if (autoCollapseArg->IsBoolean()) {
         autoCollapse = autoCollapseArg->ToBoolean(vm)->Value();
     }

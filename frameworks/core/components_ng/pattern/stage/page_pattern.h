@@ -34,7 +34,12 @@ namespace OHOS::Ace::NG {
 using SharedTransitionMap = std::unordered_map<ShareId, WeakPtr<FrameNode>>;
 using JSAnimatorMap = std::unordered_map<std::string, RefPtr<Framework::AnimatorInfo>>;
 
-using DynamicPageSizeCallback = std::function<void(SizeF size)>;
+using DynamicPageSizeCallback = std::function<void(const SizeF& size)>;
+/**
+ * When the page triggers 'onHide' or 'onShow', the callback is called,
+ * and the input parameter is 'true' for onHide and false for onShow.
+ */
+using PageVisibilityChangeCallback = std::function<void(bool)>;
 
 enum class RouterPageState {
     ABOUT_TO_APPEAR = 0,
@@ -72,9 +77,9 @@ public:
         return pageInfo_ ? pageInfo_->GetPageUrl() : "";
     }
 
-    void OnShow();
+    virtual void OnShow();
 
-    void OnHide();
+    virtual void OnHide();
 
     bool OnBackPressed();
 
@@ -148,12 +153,18 @@ public:
         isPageInTransition_ = pageTransition;
     }
 
+    bool GetPageInTransition() const
+    {
+        return isPageInTransition_;
+    }
+
     // Mark current page node invisible in render tree.
     void ProcessHideState();
     // Mark current page node visible in render tree.
     void ProcessShowState();
 
-    void ProcessAutoSave();
+    bool ProcessAutoSave(const std::function<void()>& onFinish = nullptr,
+        const std::function<void()>& onUIExtNodeBindingCompleted = nullptr);
 
     void StopPageTransition();
 
@@ -197,7 +208,22 @@ public:
         return isOnShow_;
     }
 
-private:
+    bool GetIsModalCovered() const
+    {
+        return isModalCovered_;
+    }
+
+    void SetIsModalCovered(bool isModalCovered)
+    {
+        isModalCovered_ = isModalCovered;
+    }
+
+    void SetPageVisibilityChangeCallback(PageVisibilityChangeCallback&& callback)
+    {
+        visibilityChangeCallback_ = std::move(callback);
+    }
+
+protected:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
@@ -229,6 +255,7 @@ private:
     std::function<void()> firstBuildCallback_;
     std::function<void(bool)> onHiddenChange_;
     DynamicPageSizeCallback dynamicPageSizeCallback_;
+    PageVisibilityChangeCallback visibilityChangeCallback_;
     std::shared_ptr<std::function<void()>> pageTransitionFinish_;
     std::list<RefPtr<PageTransitionEffect>> pageTransitionEffects_;
 
@@ -236,6 +263,7 @@ private:
     bool isFirstLoad_ = true;
     bool isPageInTransition_ = false;
     bool isRenderDone_ = false;
+    bool isModalCovered_ = false;
 
     SharedTransitionMap sharedTransitionMap_;
     JSAnimatorMap jsAnimatorMap_;

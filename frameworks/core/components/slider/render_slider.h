@@ -225,7 +225,7 @@ protected:
     bool HandleMouseEvent(const MouseEvent& event) override;
     void AnimateMouseHoverExit() override;
 
-    void SetOnChange(const std::function<void(double,int)>& value)
+    void SetOnChange(const std::function<void(double, int32_t)>& value)
     {
         onChange_ = value;
     }
@@ -294,7 +294,7 @@ protected:
     RefPtr<TextComponent> tipText_;
     WeakPtr<SliderComponent> sliderComponent_;
 
-    std::function<void(double,int)> onChange_;
+    std::function<void(double, int32_t)> onChange_;
     RefPtr<RenderNode> block_ = AceType::MakeRefPtr<RenderBlock>();
     RefPtr<RenderNode> track_ = AceType::MakeRefPtr<RenderTrack>();
 

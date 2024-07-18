@@ -73,7 +73,6 @@ const std::string MENU_TAG = "menu";
 const std::string MENU_ITEM_TEXT = "menuItem";
 const std::string MENU_ITEM_GROUP_TEXT = "menuItemGroup";
 const std::string MENU_TOUCH_EVENT_TYPE = "1";
-constexpr Color ITEM_DISABLED_COLOR = Color(0x0c182431);
 const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
@@ -99,6 +98,7 @@ public:
     void TearDown() override;
     void InitMenuItemPatternTestNg();
     void InitMenuItemTestNg();
+    void MockPipelineContextGetTheme();
     PaintWrapper* GetPaintWrapper(RefPtr<MenuPaintProperty> paintProperty);
     RefPtr<FrameNode> GetPreviewMenuWrapper(
         SizeF itemSize = SizeF(0.0f, 0.0f), std::optional<MenuPreviewAnimationOptions> scaleOptions = std::nullopt);
@@ -119,6 +119,23 @@ void MenuItemPatternTestNg::SetUp()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+}
+
+void MenuItemPatternTestNg::MockPipelineContextGetTheme()
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else {
+            return AceType::MakeRefPtr<MenuTheme>();
+        }
+    });
 }
 
 void MenuItemPatternTestNg::TearDown()
@@ -220,7 +237,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon001, TestSize.
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     EXPECT_EQ(leftRow->GetChildren().size(), 0u);
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
@@ -256,7 +273,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon002, TestSize.
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     EXPECT_EQ(leftRow->GetChildren().size(), 1u);
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
@@ -265,9 +282,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon002, TestSize.
     EXPECT_CALL(*themeManager, GetTheme(_))
         .WillOnce(Return(AceType::MakeRefPtr<TextTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<ShadowTheme>()));
+        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()));
     // call AddSelectIcon
     itemPattern->OnModifyDone();
 
@@ -300,7 +315,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon003, TestSize.
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     EXPECT_EQ(leftRow->GetChildren().size(), 1u);
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
@@ -309,9 +324,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon003, TestSize.
     EXPECT_CALL(*themeManager, GetTheme(_))
         .WillOnce(Return(AceType::MakeRefPtr<TextTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<ShadowTheme>()));
+        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()));
     // call AddSelectIcon
     itemPattern->OnModifyDone();
 
@@ -324,8 +337,6 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon003, TestSize.
     ASSERT_NE(imagePattern, nullptr);
     auto imageLayoutProperty = selectIconNode->GetLayoutProperty<ImageLayoutProperty>();
     ASSERT_NE(imageLayoutProperty, nullptr);
-    auto sourceInfo = imageLayoutProperty->GetImageSourceInfo();
-    ASSERT_TRUE(sourceInfo.has_value());
 }
 
 /**
@@ -351,7 +362,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon004, TestSize.
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     EXPECT_EQ(leftRow->GetChildren().size(), 1u);
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
@@ -359,9 +370,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgAddSelectIcon004, TestSize.
     EXPECT_CALL(*themeManager, GetTheme(_))
         .WillOnce(Return(AceType::MakeRefPtr<TextTheme>()))
         .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<ShadowTheme>()));
+        .WillOnce(Return(AceType::MakeRefPtr<MenuTheme>()));
     // call AddSelectIcon
     itemPattern->OnModifyDone();
 
@@ -396,7 +405,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateIcon001, TestSize.Lev
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
 
@@ -435,7 +444,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateIcon002, TestSize.Lev
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
 
@@ -468,12 +477,40 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateIcon002, TestSize.Lev
 }
 
 /**
+ * @tc.name: MenuItemPatternTestNgUpdateIcon003
+ * @tc.desc: Verify UpdateIcon.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateIcon003, TestSize.Level1)
+{
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.endIcon = ImageSourceInfo(IMAGE_SRC_URL);
+    MenuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(itemProperty, nullptr);
+
+    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
+    auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
+
+    // call UpdateIcon
+    itemPattern->UpdateIcon(leftRow, false);
+    itemPattern->UpdateDisabledStyle();
+}
+
+/**
  * @tc.name: MenuItemPatternTestNgUpdateText001
  * @tc.desc: Verify UpdateText.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText001, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     MenuItemModelNG MenuItemModelInstance;
     MenuItemProperties itemOption;
     itemOption.content = "content";
@@ -485,7 +522,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText001, TestSize.Lev
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
 
@@ -511,6 +548,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText001, TestSize.Lev
  */
 HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText002, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
     MenuItemModelNG MenuItemModelInstance;
     MenuItemProperties itemOption;
     itemOption.labelInfo = "label";
@@ -522,7 +560,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText002, TestSize.Lev
     auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     ASSERT_NE(itemProperty, nullptr);
 
-    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
 
@@ -549,8 +587,8 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText002, TestSize.Lev
 HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText003, TestSize.Level1)
 {
     // mock theme
+    MockPipelineContextGetTheme();
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
-    selectTheme->SetDisabledMenuFontColor(ITEM_DISABLED_COLOR);
 
     // create menu item
     MenuItemModelNG MenuItemModelInstance;
@@ -569,7 +607,7 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText003, TestSize.Lev
     itemPattern->OnModifyDone();
 
     EXPECT_FALSE(itemEventHub->IsEnabled());
-    ASSERT_EQ(itemNode->GetChildren().size(), 4u);
+    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
     auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
     EXPECT_EQ(leftRow->GetChildren().size(), 2u);
     auto startIconNode = AceType::DynamicCast<FrameNode>(leftRow->GetChildAtIndex(0));
@@ -590,7 +628,71 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText003, TestSize.Lev
     ASSERT_TRUE(content.has_value());
     EXPECT_EQ(content.value(), "item content");
     auto textRenderContext = contentNode->GetRenderContext();
-    EXPECT_EQ(textRenderContext->GetForegroundColor(), ITEM_DISABLED_COLOR);
+    EXPECT_EQ(textRenderContext->GetForegroundColor(), selectTheme->GetMenuFontColor());
+}
+
+/**
+ * @tc.name: MenuItemPatternTestNgUpdateText004
+ * @tc.desc: Verify UpdateText.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText004, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.labelInfo = "label";
+    MenuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(itemProperty, nullptr);
+
+    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
+    auto rightRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(1));
+
+    auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    // call UpdateText
+    itemPattern->UpdateText(leftRow, layoutProp, true);
+    itemPattern->UpdateDisabledStyle();
+}
+
+HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNgUpdateText005, TestSize.Level1)
+{
+    // mock theme
+    MockPipelineContextGetTheme();
+    auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
+
+    // create menu item
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.startIcon = ImageSourceInfo(IMAGE_SRC_URL);
+    itemOption.content = "item content";
+    MenuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    auto itemEventHub = itemNode->GetEventHub<MenuItemEventHub>();
+    ASSERT_NE(itemEventHub, nullptr);
+    itemEventHub->SetEnabled(false);
+    // update item
+    itemPattern->OnModifyDone();
+
+    EXPECT_FALSE(itemEventHub->IsEnabled());
+    ASSERT_EQ(itemNode->GetChildren().size(), 2u);
+    auto leftRow = AceType::DynamicCast<FrameNode>(itemNode->GetChildAtIndex(0));
+    EXPECT_EQ(leftRow->GetChildren().size(), 2u);
+
+    auto itemRenderContext = itemNode->GetRenderContext();
+    itemRenderContext->UpdateForegroundColor(selectTheme->GetDisabledMenuFontColor());
+
+    auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    // call UpdateText
+    itemPattern->UpdateText(leftRow, layoutProp, false);
 }
 
 /**
@@ -1107,5 +1209,198 @@ HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg011, TestSize.Level1)
     algorithm->Layout(wrapper);
     EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetX(), 0);
     EXPECT_EQ(wrapper->GetGeometryNode()->GetMarginFrameOffset().GetY(), 0);
+}
+/**
+ * @tc.name: MenuItemPatternTestNg012
+ * @tc.desc: Verify HandleFocusEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg012, TestSize.Level1)
+{
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    mainMenu->GetGeometryNode()->SetFrameSize(SizeF(100, 100));
+}
+/**
+ * @tc.name: MenuItemPatternTestNg013
+ * @tc.desc: Verify HandleBlurEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg013, TestSize.Level1)
+{
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    mainMenu->GetGeometryNode()->SetFrameSize(SizeF(100, 100));
+    auto RenderContext = menuItemNode->GetRenderContext();
+}
+/**
+ * @tc.name: MenuItemPatternTestNg014
+ * @tc.desc: Verify InitFocusEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg014, TestSize.Level1)
+{
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    mainMenu->GetGeometryNode()->SetFrameSize(SizeF(100, 100));
+}
+/**
+ * @tc.name: MenuItemPatternTestNg015
+ * @tc.desc: Verify GetShadowFromTheme.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg015, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(wrapperNode);
+    wrapperNode->RemoveChildAtIndex(0);
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    mainMenu->GetGeometryNode()->SetFrameSize(SizeF(100, 100));
+    menuItemPattern->OnClick();
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::STACK;
+    menuItemPattern->OnClick();
+}
+/**
+ * @tc.name: MenuItemPatternTestNg016
+ * @tc.desc: Verify ShowSubMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg016, TestSize.Level1)
+{
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    mainMenu->GetGeometryNode()->SetFrameSize(SizeF(100, 100));
+    menuItemPattern->ShowSubMenu();
+    menuItemPattern->isSubMenuShowed_ = false;
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::EMBEDDED;
+    menuItemPattern->ShowSubMenu();
+}
+/**
+ * @tc.name: MenuItemPatternTestNg017
+ * @tc.desc: Verify AddClickableArea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create cascade menu condition
+     * @tc.expected: wrapper and child pattern is not null
+     */
+    std::function<void()> buildFun = []() {
+        MenuModelNG MenuModelInstance;
+        MenuModelInstance.Create();
+    };
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto subMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    auto subMenuParent = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 5, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    subMenu->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->ShowSubMenu();
+    menuItemPattern->SetSubBuilder(buildFun);
+    menuItemPattern->SetIsSubMenuShowed(false);
+    auto mainMenuPattern = mainMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(mainMenuPattern, nullptr);
+    mainMenuPattern->SetShowedSubMenu(subMenu);
+    auto subMenuPattern = subMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(subMenuPattern, nullptr);
+    subMenuPattern->SetParentMenuItem(subMenuParent);
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::EMBEDDED;
+    menuItemPattern->AddClickableArea();
+}
+/**
+ * @tc.name: MenuItemPatternTestNg018
+ * @tc.desc: Verify FindTouchedEmbeddedMenuItem.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create cascade menu condition
+     * @tc.expected: wrapper and child pattern is not null
+     */
+    std::function<void()> buildFun = []() {
+        MenuModelNG MenuModelInstance;
+        MenuModelInstance.Create();
+    };
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto subMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    auto subMenuParent = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 5, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    subMenu->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->ShowSubMenu();
+    menuItemPattern->SetSubBuilder(buildFun);
+    menuItemPattern->SetIsSubMenuShowed(false);
+    auto mainMenuPattern = mainMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(mainMenuPattern, nullptr);
+    mainMenuPattern->SetShowedSubMenu(subMenu);
+    auto subMenuPattern = subMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(subMenuPattern, nullptr);
+    subMenuPattern->SetParentMenuItem(subMenuParent);
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::EMBEDDED;
+    menuItemPattern->FindTouchedEmbeddedMenuItem(OffsetF(MENU_OFFSET_X, MENU_OFFSET_Y));
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::STACK;
+    menuItemPattern->isExpanded_ = true;
+    menuItemPattern->embeddedMenu_ = mainMenu;
+    menuItemPattern->FindTouchedEmbeddedMenuItem(OffsetF(MENU_OFFSET_X, MENU_OFFSET_Y));
+}
+
+/**
+ * @tc.name: MenuItemPatternTestNg019
+ * @tc.desc: Verify OnClick().
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestNg, MenuItemPatternTestNg019, TestSize.Level1)
+{
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    MenuItemModelNG MneuItemModelInstance;
+    MneuItemModelInstance.Create(itemOption);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto menuItemPattern = frameNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto menuItemEventHub = frameNode->GetEventHub<MenuItemEventHub>();
+    ASSERT_NE(menuItemEventHub, nullptr);
+
+    bool isSelected = true;
+    auto changeEvent = [&isSelected](bool select) { isSelected = select; };
+    menuItemEventHub->SetSelectedChangeEvent(changeEvent);
+    menuItemEventHub->SetOnChange(changeEvent);
+    menuItemPattern->OnClick();
 }
 } // namespace OHOS::Ace::NG

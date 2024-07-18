@@ -34,6 +34,7 @@ public:
     static ArkUINativeModuleValue SetRotation(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetShadowColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetShadowOffset(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetLabel(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetShadowAlpha(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetShadowElevation(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetShadowRadius(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -54,9 +55,14 @@ public:
     static ArkUINativeModuleValue SetRoundRectMask(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOvalMask(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetCommandPathMask(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetRectClip(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetCircleClip(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetRoundRectClip(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOvalClip(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetCommandPathClip(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue Invalidate(ArkUIRuntimeCallInfo* runtimeCallInfo);
-
-private:
+    static ArkUINativeModuleValue SetMarkNodeGroup(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    
     template<typename T>
     static T GetNumber(EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, int index, T defaultValue)
     {
@@ -64,7 +70,7 @@ private:
         T value = defaultValue;
         if (jsValueRef->IsNumber()) {
             if (std::is_same<T, uint32_t>::value) {
-                value = jsValueRef->Uint32Value(vm);
+                value = static_cast<uint32_t>(jsValueRef->Uint32Value(vm));
             } else if (std::is_same<T, int32_t>::value) {
                 value = jsValueRef->Int32Value(vm);
             } else if (std::is_same<T, int64_t>::value) {

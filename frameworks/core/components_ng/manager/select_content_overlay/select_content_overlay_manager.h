@@ -79,16 +79,29 @@ public:
         legacyManagerCallbacks_ = callbacks;
     }
 
+    RefPtr<Pattern> GetMenuPattern();
+    RefPtr<Pattern> GetHandlePattern();
+    RefPtr<FrameNode> GetHandleOverlayNode();
+    void NotifyUpdateToolBar(bool itemChanged);
+    void SwitchToHandleMode(HandleLevelMode mode, bool forceChange = true);
+    float GetHandleDiameter();
+    void ConvertPointRelativeToNode(const RefPtr<FrameNode>& node, PointF& point);
+    bool IsTouchAtHandle(const PointF& localPoint, const PointF& globalPoint);
+
 private:
     void SetHolder(const RefPtr<SelectOverlayHolder>& holder);
     bool HasHolder(int32_t holderId);
     void SetHolderInternal(const RefPtr<SelectOverlayHolder>& holder);
     void CreateSelectOverlay(SelectOverlayInfo& info, bool animation = false);
-    void UpdateExistOverlay(SelectOverlayInfo info, bool animation, int32_t requestCode);
+    void CreateNormalSelectOverlay(SelectOverlayInfo& info, bool animation);
+    void CreateHandleLevelSelectOverlay(SelectOverlayInfo& info, bool animation, HandleLevelMode mode);
+    void UpdateExistOverlay(const SelectOverlayInfo& info, bool animation, int32_t requestCode);
     bool IsSameMouseSelectOverlay(const SelectOverlayInfo& info);
     void CloseInternal(int32_t holderId, bool animation, CloseReason reason);
     void DestroySelectOverlayNode(const RefPtr<FrameNode>& node);
-    void CreateAndMountNode(const RefPtr<FrameNode>& overlayNode, bool animation);
+    void DestroySelectOverlayNodeWithAnimation(const RefPtr<FrameNode>& node);
+    void MountNodeToRoot(const RefPtr<FrameNode>& overlayNode, bool animation);
+    void MountNodeToCaller(const RefPtr<FrameNode>& overlayNode, bool animation);
     std::function<void()> MakeMenuCallback(OptionMenuActionId actionId, const SelectOverlayInfo& info);
     SelectOverlayInfo BuildSelectOverlayInfo(int32_t requestCode);
     void UpdateStatusInfos(SelectOverlayInfo& info);
@@ -97,11 +110,17 @@ private:
     void HandleSelectionEvent(const PointF& point, const TouchEvent& rawTouchEvent);
     void UpdateHandleInfosWithFlag(int32_t updateFlag);
     bool IsTouchInSelectOverlayArea(const PointF& point);
+    bool IsTouchInNormalSelectOverlayArea(const PointF& point);
+    bool IsTouchInHandleLevelOverlayArea(const PointF& point);
     RefPtr<UINode> FindWindowScene(RefPtr<FrameNode> targetNode);
     void ClearAllStatus();
+    bool IsEnableHandleLevel();
+    void NotifySelectOverlayShow(bool isCreated);
 
     RefPtr<SelectOverlayHolder> selectOverlayHolder_;
     WeakPtr<FrameNode> selectOverlayNode_;
+    WeakPtr<FrameNode> menuNode_;
+    WeakPtr<FrameNode> handleNode_;
     std::shared_ptr<SelectOverlayInfo> shareOverlayInfo_;
     WeakPtr<FrameNode> rootNodeWeak_;
     int32_t selectionHoldId_ = -1;

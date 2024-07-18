@@ -29,6 +29,7 @@
 #include "base/utils/string_expression.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/time_util.h"
+#include "base/utils/utf.h"
 #include "base/utils/utils.h"
 
 #ifndef WINDOWS_PLATFORM
@@ -815,5 +816,502 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest042, TestSize.Level1)
     ASSERT_EQ(StringUtils::StartWith(startWithValue, prefixChar, prefixLen), true);
     ASSERT_EQ(StringUtils::EndWith(startWithValue, prefixString), true);
     ASSERT_EQ(StringUtils::EndWith(startWithValue, prefixString), true);
+}
+
+/**
+ * @tc.name: BaseUtilsTest043
+ * @tc.desc: utf8 string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest043, TestSize.Level1)
+{
+    std::string utf8String = "THIS IS A UTF-8 STRING é (e-acute).";
+    ASSERT_EQ(IsUTF8(utf8String), true);
+}
+
+/**
+ * @tc.name: BaseUtilsTest044
+ * @tc.desc: empty string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest044, TestSize.Level1)
+{
+    std::string emptyUtf8 = "";
+    ASSERT_EQ(IsUTF8(emptyUtf8), false);
+}
+
+/**
+ * @tc.name: BaseUtilsTest045
+ * @tc.desc: singleByte string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest045, TestSize.Level1)
+{
+    std::string singleByte = "\x80";
+    ASSERT_EQ(IsUTF8(singleByte), false);
+}
+
+/**
+ * @tc.name: BaseUtilsTest046
+ * @tc.desc: singleByte string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest046, TestSize.Level1)
+{
+    uint8_t data = 0x41;
+    auto result = ConvertMUtf8ToUtf16Pair(&data, 1);
+    EXPECT_EQ(result.first, 0x0041);
+    EXPECT_EQ(result.second, 1);
+}
+
+/**
+ * @tc.name: BaseUtilsTest047
+ * @tc.desc: twoByte string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest047, TestSize.Level1)
+{
+    uint8_t data[2] = { 0xC3, 0x81 };
+    auto result = ConvertMUtf8ToUtf16Pair(data, 2);
+    EXPECT_EQ(result.first, 0xc1);
+    EXPECT_EQ(result.second, 2);
+}
+
+/**
+ * @tc.name: BaseUtilsTest048
+ * @tc.desc: threeByte string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest048, TestSize.Level1)
+{
+    uint8_t data[3] = { 0xE1, 0x82, 0x81 };
+    auto result = ConvertMUtf8ToUtf16Pair(data, 3);
+    EXPECT_EQ(result.first, 0x1081);
+    EXPECT_EQ(result.second, 3);
+}
+
+/**
+ * @tc.name: BaseUtilsTest049
+ * @tc.desc:fourByte string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest049, TestSize.Level1)
+{
+    uint8_t data[4] = { 0xF1, 0x80, 0x80, 0x81 };
+    auto result = ConvertMUtf8ToUtf16Pair(data, 4);
+    EXPECT_EQ(result.first, 0xD8C0DC01);
+    EXPECT_EQ(result.second, 4);
+}
+
+/**
+ * @tc.name: BaseUtilsTest050
+ * @tc.desc: empty string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest050, TestSize.Level1)
+{
+    const uint8_t* emptyStr = reinterpret_cast<const uint8_t*>("");
+    size_t size = MUtf8ToUtf16Size(emptyStr, 0);
+    EXPECT_EQ(size, 0);
+}
+
+/**
+ * @tc.name: BaseUtilsTest051
+ * @tc.desc: singleByte string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest051, TestSize.Level1)
+{
+    const uint8_t* singleByteStr = reinterpret_cast<const uint8_t*>("a");
+    size_t size = MUtf8ToUtf16Size(singleByteStr, 1);
+    EXPECT_EQ(size, 1);
+}
+
+/**
+ * @tc.name: BaseUtilsTest052
+ * @tc.desc: mixed string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest052, TestSize.Level1)
+{
+    const uint8_t* mixedStr = reinterpret_cast<const uint8_t*>(u8"Hello, 世界!");
+    size_t size = MUtf8ToUtf16Size(mixedStr, strlen(reinterpret_cast<const char*>(mixedStr)));
+    EXPECT_EQ(size, 10);
+}
+
+/**
+ * @tc.name: BaseUtilsTest053
+ * @tc.desc: empty string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest053, TestSize.Level1)
+{
+    const uint8_t* emptyInput = nullptr;
+    uint16_t output[10] = { 0 };
+    size_t result = ConvertRegionUtf8ToUtf16(emptyInput, output, 0, 10, 0);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: BaseUtilsTest054
+ * @tc.desc: singleByte string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest054, TestSize.Level1)
+{
+    const uint8_t* input = reinterpret_cast<const uint8_t*>(u8"a");
+    uint16_t output[10] = { 0 };
+    size_t result = ConvertRegionUtf8ToUtf16(input, output, 1, 10, 0);
+    EXPECT_EQ(result, 1);
+    EXPECT_EQ(output[0], 'a');
+}
+
+/**
+ * @tc.name: BaseUtilsTest055
+ * @tc.desc: mixed string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest055, TestSize.Level1)
+{
+    const uint8_t* input = reinterpret_cast<const uint8_t*>(u8"Hello, 世界!");
+    uint16_t output[50] = { 0 };
+    size_t result = ConvertRegionUtf8ToUtf16(input, output, strlen(reinterpret_cast<const char*>(input)), 50, 0);
+    EXPECT_EQ(result, 10);
+}
+
+/**
+ * @tc.name: BaseUtilsTest056
+ * @tc.desc: invalid string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest056, TestSize.Level1)
+{
+    const uint8_t* input = reinterpret_cast<const uint8_t*>(u8"XXXX");
+    uint16_t output[10] = { 0 };
+    size_t result = ConvertRegionUtf8ToUtf16(input, output, 4, 10, 0);
+    EXPECT_EQ(result, 4);
+}
+
+/**
+ * @tc.name: BaseUtilsTest057
+ * @tc.desc: null string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest057, TestSize.Level1)
+{
+    const uint16_t* emptyInput = nullptr;
+    uint8_t output[10] = { 0 };
+    size_t result = DebuggerConvertRegionUtf16ToUtf8(emptyInput, output, 0, 10, 0);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: BaseUtilsTest058
+ * @tc.desc: singlebyte string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest058, TestSize.Level1)
+{
+    const uint16_t input[] = { 0x0061 };
+    uint8_t output[10] = { 0 };
+    size_t result = DebuggerConvertRegionUtf16ToUtf8(input, output, 1, 10, 0);
+    EXPECT_EQ(result, 1);
+    EXPECT_EQ(output[0], 0x61);
+}
+
+/**
+ * @tc.name: BaseUtilsTest059
+ * @tc.desc: twobyte string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest059, TestSize.Level1)
+{
+    const uint16_t input[] = { 0xD800, 0xDC00 };
+    uint8_t output[10] = { 0 };
+    size_t result = DebuggerConvertRegionUtf16ToUtf8(input, output, 2, 10, 0);
+    EXPECT_EQ(result, 4);
+}
+
+/**
+ * @tc.name: BaseUtilsTest060
+ * @tc.desc: twobyte string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest060, TestSize.Level1)
+{
+    const uint16_t input[] = { 0xD800, 0xD800 };
+    uint8_t output[10] = { 0 };
+    size_t result = DebuggerConvertRegionUtf16ToUtf8(input, output, 2, 10, 0);
+    EXPECT_EQ(result, 6);
+}
+
+/**
+ * @tc.name: BaseUtilsTest061
+ * @tc.desc: standard string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest061, TestSize.Level1)
+{
+    std::string legalStr = "THIS IS A UTF-8 STRING é (e-acute).";
+    ConvertIllegalStr(legalStr);
+    EXPECT_TRUE(IsUTF8(legalStr));
+    EXPECT_EQ(legalStr, "THIS IS A UTF-8 STRING é (e-acute).");
+}
+
+/**
+ * @tc.name: BaseUtilsTest062
+ * @tc.desc: valid string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest062, TestSize.Level1)
+{
+    std::string illegalStr = "Hello, \xFF\xFE World!";
+    ConvertIllegalStr(illegalStr);
+    EXPECT_FALSE(IsUTF8(illegalStr));
+    EXPECT_EQ(illegalStr, "Hello, \xFF\xFE World!");
+}
+
+/**
+ * @tc.name: BaseUtilsTest063
+ * @tc.desc: emptyStr string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest063, TestSize.Level1)
+{
+    std::string emptyStr = "";
+    ConvertIllegalStr(emptyStr);
+    EXPECT_FALSE(IsUTF8(emptyStr));
+    EXPECT_EQ(emptyStr, "");
+}
+
+/**
+ * @tc.name: BaseUtilsTest064
+ * @tc.desc: allByte string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest064, TestSize.Level1)
+{
+    std::string allByteValues(256, 0);
+    for (int i = 0; i < 256; ++i) {
+        allByteValues[i] = static_cast<char>(i);
+    }
+    ConvertIllegalStr(allByteValues);
+    EXPECT_TRUE(IsUTF8(allByteValues));
+}
+
+/**
+ * @tc.name: StringExpressionTest001
+ * @tc.desc: InitMapping()
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest001, TestSize.Level1)
+{
+    std::map<std::string, int> mapping;
+    StringExpression::InitMapping(mapping);
+
+    EXPECT_EQ(mapping.find("+")->second, 0);
+    EXPECT_EQ(mapping.find("-")->second, 0);
+    EXPECT_EQ(mapping.find("*")->second, 1);
+    EXPECT_EQ(mapping.find("/")->second, 1);
+    EXPECT_EQ(mapping.find("(")->second, 2);
+    EXPECT_EQ(mapping.find(")")->second, 2);
+}
+
+/**
+ * @tc.name: StringExpressionTest002
+ * @tc.desc: CheckCalcIsValid()
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest002, TestSize.Level1)
+{
+    std::string formula;
+    EXPECT_TRUE(StringExpression::CheckCalcIsValid(formula));
+    formula = "+calc(1,1)-calc(1,1)";
+    EXPECT_FALSE(StringExpression::CheckCalcIsValid(formula));
+    formula = "(calc{1,1}+calc{1,1}-calc{1,1})";
+    EXPECT_TRUE(StringExpression::CheckCalcIsValid(formula));
+}
+
+/**
+ * @tc.name: StringExpressionTest003
+ * @tc.desc: CheckCalcIsValid()
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest003, TestSize.Level1)
+{
+    std::string formula;
+    StringExpression::ReplaceSignNumber(formula);
+    EXPECT_EQ(formula, "");
+    formula = "+10-10+1.0+2.0+5-1.0";
+    StringExpression::ReplaceSignNumber(formula);
+    EXPECT_EQ(formula, " (0 + 10) (0 - 10) (0 + 1.0) (0 + 2.0) (0 + 5) (0 - 1.0)");
+}
+
+/**
+ * @tc.name: StringExpressionTest004
+ * @tc.desc: PushOpStack()
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest004, TestSize.Level1)
+{
+    std::vector<std::string> result;
+    std::vector<std::string> opStack;
+    std::string curNum;
+    std::string formula = "2 * 3 - (2 + 3) / 5 + 6 / 2";
+    EXPECT_TRUE(StringExpression::PushOpStack(formula, curNum, result, opStack));
+    EXPECT_TRUE(!result.empty());
+    EXPECT_TRUE(!opStack.empty());
+    EXPECT_TRUE(!curNum.empty());
+}
+
+/**
+ * @tc.name: StringExpressionTest005
+ * @tc.desc: CalculateFourOperationsExp()
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest005, TestSize.Level1)
+{
+    double opRes = 0.0;
+    Dimension num1 = 10.0_px;
+    Dimension num2 = 5.0_px;
+    std::string formula = "+";
+    EXPECT_TRUE(StringExpression::CalculateFourOperationsExp(
+        formula, num1, num2, [](const Dimension& dim) -> double { return dim.Value(); }, opRes));
+    EXPECT_EQ(opRes, 15.0);
+    num1.SetUnit(DimensionUnit::NONE);
+    EXPECT_FALSE(StringExpression::CalculateFourOperationsExp(
+        formula, num1, num2, [](const Dimension& dim) -> double { return dim.Value(); }, opRes));
+    num1.SetUnit(DimensionUnit::PX);
+    num2.SetUnit(DimensionUnit::NONE);
+    EXPECT_FALSE(StringExpression::CalculateFourOperationsExp(
+        formula, num1, num2, [](const Dimension& dim) -> double { return dim.Value(); }, opRes));
+
+    formula = "-";
+    EXPECT_FALSE(StringExpression::CalculateFourOperationsExp(
+        formula, num1, num2, [](const Dimension& dim) -> double { return dim.Value(); }, opRes));
+    num2.SetUnit(DimensionUnit::PX);
+    num1.SetUnit(DimensionUnit::NONE);
+    EXPECT_FALSE(StringExpression::CalculateFourOperationsExp(
+        formula, num1, num2, [](const Dimension& dim) -> double { return dim.Value(); }, opRes));
+    num1.SetUnit(DimensionUnit::PX);
+    EXPECT_TRUE(StringExpression::CalculateFourOperationsExp(
+        formula, num1, num2, [](const Dimension& dim) -> double { return dim.Value(); }, opRes));
+    EXPECT_EQ(opRes, -5.0);
+
+    formula = "*";
+    EXPECT_FALSE(StringExpression::CalculateFourOperationsExp(
+        formula, num1, num2, [](const Dimension& dim) -> double { return dim.Value(); }, opRes));
+    num1.SetUnit(DimensionUnit::NONE);
+    num2.SetUnit(DimensionUnit::PX);
+    EXPECT_TRUE(StringExpression::CalculateFourOperationsExp(
+        formula, num1, num2, [](const Dimension& dim) -> double { return dim.Value(); }, opRes));
+    num1.SetUnit(DimensionUnit::PX);
+    num2.SetUnit(DimensionUnit::NONE);
+    EXPECT_TRUE(StringExpression::CalculateFourOperationsExp(
+        formula, num1, num2, [](const Dimension& dim) -> double { return dim.Value(); }, opRes));
+    EXPECT_EQ(opRes, 50.0);
+
+    formula = "/";
+    EXPECT_FALSE(StringExpression::CalculateFourOperationsExp(
+        formula, num1, num2, [](const Dimension& dim) -> double { return dim.Value(); }, opRes));
+    num1.SetUnit(DimensionUnit::NONE);
+    EXPECT_TRUE(StringExpression::CalculateFourOperationsExp(
+        formula, num1, num2, [](const Dimension& dim) -> double { return dim.Value(); }, opRes));
+    num1.SetValue(0.0);
+    EXPECT_FALSE(StringExpression::CalculateFourOperationsExp(
+        formula, num1, num2, [](const Dimension& dim) -> double { return dim.Value(); }, opRes));
+    EXPECT_EQ(opRes, 0.5);
+}
+
+/**
+ * @tc.name: StringExpressionTest006
+ * @tc.desc: CalculateExpImpl()
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest006, TestSize.Level1)
+{
+    std::vector<std::string> rpnexp = { "2", "3", "*", "2", "3", "+", "5", "6", "/" };
+    std::vector<Dimension> result;
+    double opRes = 0.0;
+    EXPECT_TRUE(StringExpression::CalculateExpImpl(
+        rpnexp, [](const Dimension& dim) -> double { return dim.Value(); }, result, opRes));
+    rpnexp = { "2_invalid", "*", "3" };
+    EXPECT_FALSE(StringExpression::CalculateExpImpl(
+        rpnexp, [](const Dimension& dim) -> double { return dim.Value(); }, result, opRes));
+    result.clear();
+    rpnexp = { "2", "*", "3", "-", "(", "2", "3", "+", "5", "6", "/" };
+    EXPECT_FALSE(StringExpression::CalculateExpImpl(
+        rpnexp, [](const Dimension& dim) -> double { return dim.Value(); }, result, opRes));
+}
+
+/**
+ * @tc.name: StringExpressionTest007
+ * @tc.desc: ConvertDal2Rpn: ReplaceSignNumberWithUnit()/FilterCalcSpecialString
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringExpressionTest007, TestSize.Level1)
+{
+    // replace sign number with unit with formula == ""
+    std::string formula = "";
+    std::vector<std::string> ret = StringExpression::ConvertDal2Rpn(formula);
+    EXPECT_EQ(formula, "");
+    EXPECT_EQ(ret.size(), 0);
+
+    // replace sign number with unit normal case
+    formula = "+1.1px";
+    std::vector<std::string> ret2 = StringExpression::ConvertDal2Rpn(formula);
+    EXPECT_EQ(ret2.size(), 0);
+
+    formula = "calc(2 * 3 - (2 + 3) / 5 + 6 / 2 + (1 + 2))";
+    std::vector<std::string> ret3 = StringExpression::ConvertDal2Rpn(formula);
+    EXPECT_EQ(ret3.size(), 17);
+}
+
+/**
+ * @tc.name: DateUtilsTest001
+ * @tc.desc: GetMilliSecondsByDateTime
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, DateUtilsTest001, TestSize.Level1)
+{
+    std::tm dateTime;
+    Date::GetMilliSecondsByDateTime(dateTime);
+    EXPECT_EQ(dateTime.tm_year != 0, true);
+    EXPECT_EQ(dateTime.tm_mday != 0, true);
+    dateTime.tm_mday = 5;
+    Date::GetMilliSecondsByDateTime(dateTime);
+    EXPECT_EQ(dateTime.tm_year != 0, true);
+    EXPECT_EQ(dateTime.tm_mday == 5, true);
+    dateTime.tm_year = 8;
+    Date::GetMilliSecondsByDateTime(dateTime);
+    EXPECT_EQ(dateTime.tm_year == 8, true);
+    EXPECT_EQ(dateTime.tm_mday == 5, true);
+}
+
+/**
+ * @tc.name: StringUtilsTest001
+ * @tc.desc: IsAscii
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, StringUtilsTest001, TestSize.Level1)
+{
+    std::string str = "abcde";
+    bool ret = StringUtils::IsAscii(str);
+    EXPECT_EQ(ret, true);
+    str = "中文";
+    bool ret2 = StringUtils::IsAscii(str);
+    EXPECT_EQ(ret2, false);
+}
+
+/**
+ * @tc.name: TimeUtilsTest001
+ * @tc.desc: ConvertTimestampToStr
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, TimeUtilsTest001, TestSize.Level1)
+{
+    int64_t timestamp = 1626211200;
+    std::string ret = ConvertTimestampToStr(timestamp);
+    EXPECT_EQ(ret, "1970-01-20 03:43:31.200");
 }
 } // namespace OHOS::Ace

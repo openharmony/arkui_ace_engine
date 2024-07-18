@@ -230,11 +230,9 @@ void JSCalendarPicker::SetEdgeAlign(const JSCallbackInfo& info)
 {
     NG::CalendarEdgeAlign alignType = NG::CalendarEdgeAlign::EDGE_ALIGN_END;
     DimensionOffset offset;
-    if (!info[0]->IsNumber()) {
-        CalendarPickerModel::GetInstance()->SetEdgeAlign(alignType, offset);
-        return;
+    if (info[0]->IsNumber()) {
+        alignType = static_cast<NG::CalendarEdgeAlign>(info[0]->ToNumber<int32_t>());
     }
-    alignType = static_cast<NG::CalendarEdgeAlign>(info[0]->ToNumber<int32_t>());
 
     if (!info[1]->IsObject()) {
         CalendarPickerModel::GetInstance()->SetEdgeAlign(alignType, offset);

@@ -30,6 +30,8 @@ public:
     ~MockClipBoard() override = default;
 
     void HasData(const std::function<void(bool hasData)>& callback) override;
+    void HasDataType(
+        const std::function<void(bool hasData)>& callback, const std::vector<std::string>& mimeTypes) override;
     void SetData(const std::string& data, CopyOptions copyOption, bool isDragData) override;
     void GetData(const std::function<void(const std::string&)>& callback, bool syncMode) override;
 
@@ -41,6 +43,8 @@ public:
     void GetData(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,
         const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
         const std::function<void(const std::string&, bool isLastRecord)>& urlCallback, bool syncMode = false) override;
+    void GetSpanStringData(
+        const std::function<void(std::vector<uint8_t>&, const std::string&)>& callback, bool syncMode = false) override;
     RefPtr<PasteDataMix> CreatePasteDataMix() override;
 
     MOCK_METHOD2(SetPixelMapData, void(const RefPtr<PixelMap>& pixmap, CopyOptions copyOption));

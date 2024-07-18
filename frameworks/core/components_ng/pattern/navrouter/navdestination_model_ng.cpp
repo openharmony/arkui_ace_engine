@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 
+#include "base/i18n/localization.h"
 #include "base/log/ace_scoring_log.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -22,7 +23,9 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
@@ -72,6 +75,7 @@ bool NavDestinationModelNG::ParseCommonTitle(
                     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
             }
             textLayoutProperty->UpdateContent(title);
+            textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
         } else {
             // create and init main title
             mainTitle = FrameNode::CreateFrameNode(
@@ -86,6 +90,7 @@ bool NavDestinationModelNG::ParseCommonTitle(
             textLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
             textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
             textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+            textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
                 textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetMainTitleFontSizeS());
                 textLayoutProperty->UpdateTextColor(theme->GetMainTitleFontColor());
@@ -114,6 +119,7 @@ bool NavDestinationModelNG::ParseCommonTitle(
         // update subtitle
         auto textLayoutProperty = subTitle->GetLayoutProperty<TextLayoutProperty>();
         textLayoutProperty->UpdateContent(subtitle);
+        textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
     } else {
         // create and init subtitle
         subTitle = FrameNode::CreateFrameNode(
@@ -128,6 +134,7 @@ bool NavDestinationModelNG::ParseCommonTitle(
         textLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
         textLayoutProperty->UpdateMaxLines(1);
         textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+        textLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             textLayoutProperty->UpdateAdaptMaxFontSize(theme->GetSubTitleFontSizeS());
             textLayoutProperty->UpdateTextColor(theme->GetSubTitleFontColor());
@@ -152,6 +159,12 @@ void NavDestinationModelNG::Create()
             CreateImageButton(navDestinationNode);
         } else {
             CreateBackButton(navDestinationNode);
+        }
+        auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+        if (titleBarNode) {
+            auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+            CHECK_NULL_VOID(titleBarLayoutProperty);
+            titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
         }
     }
     // content node
@@ -192,11 +205,10 @@ void NavDestinationModelNG::CreateImageButton(const RefPtr<NavDestinationGroupNo
     auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(backButtonLayoutProperty);
     backButtonLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    auto imageRenderProperty = backButtonNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imageRenderProperty);
+    imageRenderProperty->UpdateMatchTextDirection(true);
     backButtonNode->MarkModifyDone();
-
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
-    titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
 }
 
 void CreateImageBackButton(RefPtr<FrameNode>& backButtonNode, RefPtr<TitleBarNode>& titleBarNode)
@@ -213,11 +225,11 @@ void CreateImageBackButton(RefPtr<FrameNode>& backButtonNode, RefPtr<TitleBarNod
     CHECK_NULL_VOID(backButtonImageLayoutProperty);
     backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     backButtonImageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto imageRenderProperty = backButtonImageNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imageRenderProperty);
+    imageRenderProperty->UpdateMatchTextDirection(true);
     backButtonNode->AddChild(backButtonImageNode);
     backButtonImageNode->MarkModifyDone();
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
-    titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
     backButtonNode->MarkModifyDone();
 }
 
@@ -231,14 +243,10 @@ void CreateSymbolBackButton(RefPtr<FrameNode>& backButtonNode, RefPtr<TitleBarNo
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(theme->GetBackSymbolId()));
-    symbolProperty->UpdateFontSize(theme->GetIconWidth());
     symbolNode->MountToParent(backButtonNode);
     auto iconColor = theme->GetIconColor();
     symbolProperty->UpdateSymbolColorList({ iconColor });
     symbolNode->MarkDirtyNode();
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
-    titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
     backButtonNode->MarkModifyDone();
 }
 
@@ -268,6 +276,11 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
         buttonPattern->SetFocusBorderColor(theme->GetBackgroundFocusOutlineColor());
         buttonPattern->SetFocusBorderWidth(theme->GetBackgroundFocusOutlineWeight());
     }
+
+    // read navdestination back button
+    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+    NavigationTitleUtil::SetAccessibility(backButtonNode, message);
+    
     titleBarNode->AddChild(backButtonNode);
     titleBarNode->SetBackButton(backButtonNode);
     auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
@@ -333,6 +346,12 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc, RefPt
             CreateImageButton(navDestinationNode);
         } else {
             CreateBackButton(navDestinationNode);
+        }
+        auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+        if (titleBarNode) {
+            auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+            CHECK_NULL_VOID(titleBarLayoutProperty);
+            titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
         }
     }
     // content node
@@ -668,5 +687,15 @@ void NavDestinationModelNG::SetNavDestinationPathInfo(const std::string& moduleN
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestination);
     navDestination->SetNavDestinationPathInfo(moduleName, pagePath);
+}
+
+void NavDestinationModelNG::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestination);
+    auto pattern = navDestination->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSystemBarStyle(style);
 }
 } // namespace OHOS::Ace::NG

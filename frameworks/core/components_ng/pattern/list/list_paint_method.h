@@ -36,6 +36,7 @@ struct DividerInfo {
     int32_t totalItemCount = 0;
     Color color = Color::TRANSPARENT;
     float laneGutter = 0.0f;
+    float mainSize = 0.0f;
 };
 
 class ACE_EXPORT ListPaintMethod : public NodePaintMethod {
@@ -77,6 +78,11 @@ public:
     void SetTotalItemCount(int32_t totalItemCount)
     {
         totalItemCount_ = totalItemCount;
+    }
+
+    void SetDirection(bool isReverse)
+    {
+        isReverse_ = isReverse;
     }
 
     void SetContentModifier(const RefPtr<ListContentModifier>& modify)
@@ -136,7 +142,7 @@ private:
     V2::ItemDivider divider_;
     bool vertical_ = false;
     int32_t lanes_ = 1;
-    int32_t totalItemCount_;
+    int32_t totalItemCount_ = 0;
     float space_;
     float laneGutter_ = 0.0f;
     PositionMap itemPosition_;
@@ -150,6 +156,7 @@ private:
     bool isFadingTop_ = false;
     bool isFadingBottom_ = false;
     float percentFading_ = 0.0f;
+    bool isReverse_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LIST_LIST_PAINT_METHOD_H

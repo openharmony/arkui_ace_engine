@@ -101,6 +101,24 @@ private:
     WeakPtr<WebDelegate> webDelegate_;
 };
 
+class SpanstringConvertHtmlImpl : public OHOS::NWeb::NWebSpanstringConvertHtmlCallback {
+public:
+    SpanstringConvertHtmlImpl() = default;
+    explicit SpanstringConvertHtmlImpl(int32_t instanceId) : instanceId_(instanceId) {}
+    ~SpanstringConvertHtmlImpl() = default;
+
+    virtual std::string SpanstringConvertHtml(const std::vector<uint8_t> &content) override;
+
+    void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
+    {
+        webDelegate_ = delegate;
+    }
+
+private:
+    WeakPtr<WebDelegate> webDelegate_;
+    int32_t instanceId_ = -1;
+};
+
 class WebClientImpl :
     public std::enable_shared_from_this<WebClientImpl>,
     public OHOS::NWeb::NWebHandler {
@@ -145,6 +163,7 @@ public:
     bool OnFocus(OHOS::NWeb::NWebFocusSource source) override;
     void OnResourceLoadError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error) override;
+    void ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart) override;
     void OnHttpError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response) override;
     void OnRenderExited(OHOS::NWeb::RenderExitReason reason) override;
@@ -255,7 +274,12 @@ public:
     void OnRenderProcessResponding() override;
 
     void OnViewportFitChange(NWeb::ViewportFit viewportFit) override;
-    
+
+    void CreateOverlay(void* data, size_t len, int width, int height, int offsetX, int offsetY, int rectWidth,
+        int rectHeight, int pointX, int pointY) override;
+
+    void OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, int rectHeight) override;
+
     void OnInterceptKeyboardAttach(
         const std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler,
         const std::map<std::string, std::string> &attributes, bool &useSystemKeyboard, int32_t &enterKeyType) override;
@@ -265,6 +289,9 @@ public:
     void OnCustomKeyboardClose() override;
 
     void KeyboardReDispatch(std::shared_ptr<OHOS::NWeb::NWebKeyEvent> event, bool isUsed) override;
+
+    void OnCursorUpdate(double x, double y, double width, double height) override;
+
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

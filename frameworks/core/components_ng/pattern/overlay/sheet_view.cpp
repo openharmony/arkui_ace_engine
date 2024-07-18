@@ -18,6 +18,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
@@ -92,7 +93,7 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
     layoutProps->UpdateMargin(margin);
 
     layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
-    if (sheetStyle.isTitleBuilder.has_value() && pipeline->GetFontScale() == SHEET_NORMAL_SCALE) {
+    if (sheetStyle.isTitleBuilder.has_value() && pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale()) {
         layoutProps->UpdateUserDefinedIdealSize(
             CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT - SHEET_TITLE_AERA_MARGIN)));
         if (sheetStyle.sheetTitle.has_value() && sheetStyle.sheetSubtitle.has_value()) {
@@ -172,6 +173,7 @@ void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::Sheet
         CHECK_NULL_VOID(sheet);
         auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_VOID(sheetPattern);
+        sheetPattern->SetIsDirectionUp(false);
         sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::CLOSE_BUTTON);
     };
     eventConfirmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(clickCallback));
@@ -181,21 +183,45 @@ void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::Sheet
     focusHub->SetFocusDependence(FocusDependence::SELF);
     buttonNode->MarkModifyDone();
 
-    auto imageNode = FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    imageLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(SHEET_CLOSE_ICON_IMAGE_HEIGHT), CalcLength(SHEET_CLOSE_ICON_IMAGE_HEIGHT)));
-    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
-    ImageSourceInfo imageSourceInfo;
-    imageSourceInfo.SetResourceId(InternalResource::ResourceId::IC_CANCEL_SVG);
-    imageSourceInfo.SetFillColor(sheetTheme->GetCloseIconImageColor());
-    imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    imageNode->MarkModifyDone();
-
-    buttonNode->AddChild(imageNode);
+    CreateCloseIconNode(buttonNode);
     buttonNode->MountToParent(sheetNode);
+}
+
+void SheetView::CreateCloseIconNode(RefPtr<FrameNode> buttonNode)
+{
+    auto pipeline = buttonNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    RefPtr<FrameNode> iconNode;
+
+    // when api >= 12, use symbol format image, else use image format.
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        iconNode = FrameNode::CreateFrameNode(
+            V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        CHECK_NULL_VOID(iconNode);
+        auto symbolLayoutProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolLayoutProperty);
+        uint32_t symbolId = sheetTheme->GetCloseIconSource();
+        symbolLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo{symbolId});
+        symbolLayoutProperty->UpdateFontSize(SHEET_CLOSE_ICON_IMAGE_HEIGHT);
+        symbolLayoutProperty->UpdateSymbolColorList({sheetTheme->GetCloseIconSymbolColor()});
+    } else {
+        iconNode = FrameNode::CreateFrameNode(
+            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+        CHECK_NULL_VOID(iconNode);
+        auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        imageLayoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(SHEET_CLOSE_ICON_IMAGE_HEIGHT), CalcLength(SHEET_CLOSE_ICON_IMAGE_HEIGHT)));
+        imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
+        ImageSourceInfo imageSourceInfo;
+        imageSourceInfo.SetResourceId(InternalResource::ResourceId::IC_CANCEL_SVG);
+        imageSourceInfo.SetFillColor(sheetTheme->GetCloseIconImageColor());
+        imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    }
+    iconNode->MarkModifyDone();
+    buttonNode->AddChild(iconNode);
 }
 
 RefPtr<FrameNode> SheetView::CreateScrollNode()
@@ -215,11 +241,13 @@ RefPtr<FrameNode> SheetView::CreateScrollNode()
     pattern->SetEdgeEffect(EdgeEffect::SPRING, false);
     pattern->SetScrollToSafeAreaHelper(false);
     props->UpdateAlignment(Alignment::TOP_CENTER);
-    NestedScrollOptions nestedOpt = {
-        .forward = NestedScrollMode::PARENT_FIRST,
-        .backward = NestedScrollMode::SELF_FIRST,
-    };
-    pattern->SetNestedScroll(nestedOpt);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        NestedScrollOptions nestedOpt = {
+            .forward = NestedScrollMode::PARENT_FIRST,
+            .backward = NestedScrollMode::SELF_FIRST,
+        };
+        pattern->SetNestedScroll(nestedOpt);
+    }
     scroll->MarkModifyDone();
     return scroll;
 }
@@ -247,6 +275,7 @@ RefPtr<FrameNode> SheetView::BuildMainTitle(RefPtr<FrameNode> sheetNode, NG::She
     if (sheetStyle.sheetTitle.has_value()) {
         titleProp->UpdateContent(sheetStyle.sheetTitle.value());
     }
+    titleProp->UpdateMaxFontScale(sheetTheme->GetSheetMaxAgingScale());
     titleProp->UpdateFontSize(titleTextFontSize);
     titleProp->UpdateFontWeight(FontWeight::BOLD);
     titleProp->UpdateTextColor(sheetTheme->GetTitleTextFontColor());
@@ -304,6 +333,20 @@ RefPtr<FrameNode> SheetView::BuildSubTitle(RefPtr<FrameNode> sheetNode, NG::Shee
     return subtitleRow;
 }
 
+void SheetView::GetTitlePaddingPos(PaddingProperty& padding)
+{
+    // The title bar area is reserved for the close button area size by default.
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            padding.left = CalcLength(SHEET_CLOSE_ICON_TITLE_SPACE_NEW + SHEET_CLOSE_ICON_WIDTH);
+        } else {
+            padding.right = CalcLength(SHEET_CLOSE_ICON_TITLE_SPACE_NEW + SHEET_CLOSE_ICON_WIDTH);
+        }
+    } else {
+        padding.right = CalcLength(SHEET_CLOSE_ICON_TITLE_SPACE + SHEET_CLOSE_ICON_WIDTH);
+    }
+}
+
 RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::SheetStyle& sheetStyle)
 {
     auto titleColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -313,8 +356,11 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_RETURN(sheetTheme, nullptr);
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
-    if (pipeline->GetFontScale() == SHEET_NORMAL_SCALE) {
+    bool isTitleCustombuilder = sheetStyle.isTitleBuilder.has_value() && sheetStyle.isTitleBuilder.value();
+    if (pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale() || isTitleCustombuilder) {
         layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT)));
     }
     MarginProperty margin;
@@ -322,11 +368,7 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
     margin.bottom = CalcLength(SHEET_DOUBLE_TITLE_BOTTON_PADDING);
     layoutProperty->UpdateMargin(margin);
     PaddingProperty padding;
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        padding.right = CalcLength(SHEET_CLOSE_ICON_TITLE_SPACE_NEW + SHEET_CLOSE_ICON_WIDTH);
-    } else {
-        padding.right = CalcLength(SHEET_CLOSE_ICON_TITLE_SPACE + SHEET_CLOSE_ICON_WIDTH);
-    }
+    GetTitlePaddingPos(padding);
     layoutProperty->UpdatePadding(padding);
     auto columnProps = titleColumn->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(columnProps, nullptr);
@@ -344,10 +386,17 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
             auto subtitleRow = BuildSubTitle(sheetNode, sheetStyle);
             CHECK_NULL_RETURN(subtitleRow, nullptr);
             subtitleRow->MountToParent(titleColumn);
-            if (pipeline->GetFontScale() == SHEET_NORMAL_SCALE) {
+            if (pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale()) {
                 layoutProperty->UpdateUserDefinedIdealSize(
                     CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_DRAG_BAR_HEIGHT)));
             }
+        }
+    } else if (sheetStyle.isTitleBuilder.has_value()) {
+        auto isCustomBuilder = sheetStyle.isTitleBuilder.value();
+		
+        // When title is custombuilder, set FlexAlign to CENTER.
+        if (isCustomBuilder) {
+            columnProps->UpdateMainAxisAlign(FlexAlign::CENTER);
         }
     }
     return titleColumn;

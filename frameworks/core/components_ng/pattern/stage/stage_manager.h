@@ -37,20 +37,23 @@ public:
     explicit StageManager(const RefPtr<FrameNode>& stage);
     ~StageManager() override = default;
 
-    bool PushPage(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true);
-    bool PopPage(bool needShowNext = true, bool needTransition = true);
-    bool PopPageToIndex(int32_t index, bool needShowNext = true, bool needTransition = true);
-    bool CleanPageStack();
-    bool MovePageToFront(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true);
+    // PushUrl and ReplaceUrl both use PushPage function
+    virtual bool PushPage(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true,
+        bool isPush = false);
+    virtual bool InsertPage(const RefPtr<FrameNode>& node, bool bellowTopOrBottom);
+    virtual bool PopPage(bool needShowNext = true, bool needTransition = true);
+    virtual bool PopPageToIndex(int32_t index, bool needShowNext = true, bool needTransition = true);
+    virtual bool CleanPageStack();
+    virtual bool MovePageToFront(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true);
 
-    void StartTransition(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage, RouteType type);
+    virtual void StartTransition(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage, RouteType type);
 
     void PageChangeCloseKeyboard();
 
     static void FirePageHide(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE);
     static void FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE);
 
-    RefPtr<FrameNode> GetLastPage();
+    virtual RefPtr<FrameNode> GetLastPage() const;
     RefPtr<FrameNode> GetPageById(int32_t pageId);
     const RefPtr<FrameNode> GetStageNode() const
     {
@@ -59,18 +62,32 @@ public:
 
     void ReloadStage();
 
-    RefPtr<FrameNode> GetLastPageWithTransition() const;
-    RefPtr<FrameNode> GetPrevPageWithTransition() const;
+    virtual RefPtr<FrameNode> GetLastPageWithTransition() const;
+    virtual RefPtr<FrameNode> GetPrevPageWithTransition() const;
 
     void SetStageInTrasition (bool stageInTrasition) {
         stageInTrasition_ = stageInTrasition;
     }
 
-private:
+#if defined(ENABLE_SPLIT_MODE)
+    bool IsNewPageReplacing() const
+    {
+        return isNewPageReplacing_;
+    }
+
+    void SetIsNewPageReplacing(bool replacing)
+    {
+        isNewPageReplacing_ = replacing;
+    }
+#endif
+
+    virtual void SyncPageSafeArea(const RefPtr<FrameNode>& lastPage, PropertyChangeFlag changeFlag);
+
+protected:
     // ace performance check
     void PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout);
     void StopPageTransition();
-    void FireAutoSave(const RefPtr<FrameNode>& pageNode);
+    void FireAutoSave(const RefPtr<FrameNode>& outPageNode, const RefPtr<FrameNode>& inPageNode);
     void AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage);
 
     RefPtr<FrameNode> stageNode_;
@@ -78,6 +95,9 @@ private:
     WeakPtr<FrameNode> destPageNode_;
     WeakPtr<FrameNode> srcPageNode_;
     bool stageInTrasition_ = false;
+#if defined(ENABLE_SPLIT_MODE)
+    bool isNewPageReplacing_ = false;
+#endif
 
     ACE_DISALLOW_COPY_AND_MOVE(StageManager);
 };

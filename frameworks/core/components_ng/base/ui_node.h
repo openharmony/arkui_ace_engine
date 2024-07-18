@@ -51,6 +51,12 @@ enum class NodeStatus : char {
     BUILDER_NODE_ON_MAINTREE = 2   // Indicates it is a BuilderNode and is attach to the mainTree;
 };
 
+enum class RootNodeType : int32_t {
+    PAGE_ETS_TAG = 0,
+    NAVDESTINATION_VIEW_ETS_TAG = 1,
+    WINDOW_SCENE_ETS_TAG = 2
+};
+
 class InspectorFilter;
 class PipelineContext;
 constexpr int32_t DEFAULT_NODE_SLOT = -1;
@@ -76,7 +82,7 @@ public:
 
     // Tree operation start.
     void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
-        bool addDefaultTransition = false);
+        bool addDefaultTransition = false, bool addModalUiextension = false);
     void AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
     void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
 
@@ -85,7 +91,7 @@ public:
     void ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode);
     void MovePosition(int32_t slot);
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
-        bool addDefaultTransition = false);
+        bool addDefaultTransition = false, bool addModalUiextension = false);
     RefPtr<FrameNode> GetParentFrameNode() const;
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
@@ -95,7 +101,7 @@ public:
     void GetCurrentChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
 
     void GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const;
-    void Clean(bool cleanDirectly = false, bool allowTransition = false);
+    void Clean(bool cleanDirectly = false, bool allowTransition = false, int32_t branchId = -1);
     void RemoveChildAtIndex(int32_t index);
     RefPtr<UINode> GetChildAtIndex(int32_t index) const;
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
@@ -108,7 +114,17 @@ public:
     // process offscreen process.
     void ProcessOffscreenTask(bool recursive = false);
 
+    void UpdateModalUiextensionCount(bool addNode)
+    {
+        if (addNode) {
+            modalUiextensionCount_++;
+        } else {
+            modalUiextensionCount_--;
+        }
+    }
+
     int32_t TotalChildCount() const;
+    virtual void UpdateGeometryTransition();
 
     // Returns index in the flatten tree structure
     // of the node with given id and type
@@ -117,7 +133,7 @@ public:
     // int32_t second - index of the node
     std::pair<bool, int32_t> GetChildFlatIndex(int32_t id);
 
-    virtual const std::list<RefPtr<UINode>>& GetChildren() const
+    virtual const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const
     {
         return children_;
     }
@@ -164,6 +180,7 @@ public:
 
     // performance.
     PipelineContext* GetContext();
+    PipelineContext* GetContextWithCheck();
 
     RefPtr<PipelineContext> GetContextRefPtr();
 
@@ -327,9 +344,9 @@ public:
 
     virtual void OnNotifyMemoryLevel(int32_t level) {}
 
-    virtual void SetActive(bool active);
+    virtual void SetActive(bool active, bool needRebuildRenderContext = false);
 
-    virtual void SetJSViewActive(bool active);
+    virtual void SetJSViewActive(bool active, bool isLazyForEachNode = false);
 
     virtual void TryVisibleChangeOnDescendant(bool isVisible);
 
@@ -386,7 +403,7 @@ public:
     }
 
     // utility function for adding child to disappearingChildren_
-    void AddDisappearingChild(const RefPtr<UINode>& child, uint32_t index = UINT32_MAX);
+    void AddDisappearingChild(const RefPtr<UINode>& child, uint32_t index = UINT32_MAX, int32_t branchId = -1);
     // utility function for removing child from disappearingChildren_, return true if child is removed
     bool RemoveDisappearingChild(const RefPtr<UINode>& child);
     // return if we are in parent's disappearing children
@@ -394,7 +411,7 @@ public:
     {
         return isDisappearing_;
     }
-    RefPtr<UINode> GetDisappearingChildById(const std::string& id) const;
+    RefPtr<UINode> GetDisappearingChildById(const std::string& id, int32_t branchId) const;
 
     // These two interfaces are only used for fast preview.
     // FastPreviewUpdateChild: Replace the old child at the specified slot with the new created node.
@@ -409,7 +426,7 @@ public:
         bool addToRenderTree = false);
     virtual RefPtr<UINode> GetFrameChildByIndexWithoutExpanded(uint32_t index);
     // Get current frameNode index with or without expanded all LazyForEachNode;
-    virtual int32_t GetFrameNodeIndex(RefPtr<FrameNode> node, bool isExpanded = true);
+    virtual int32_t GetFrameNodeIndex(const RefPtr<FrameNode>& node, bool isExpanded = true);
     void SetDebugLine(const std::string& line)
     {
         debugLine_ = line;
@@ -527,7 +544,10 @@ public:
     // --------------------------------------------------------------------------------
 
     virtual void DoRemoveChildInRenderTree(uint32_t index, bool isAll = false);
-    virtual void DoSetActiveChildRange(int32_t start, int32_t end);
+    virtual void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd);
+    virtual void DoSetActiveChildRange(
+        const std::set<int32_t>& activeItems, const std::set<int32_t>& cachedItems, int32_t baseIndex)
+    {}
     virtual void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint);
 
     // return value: true if the node can be removed immediately.
@@ -592,24 +612,65 @@ public:
         return (flag & nodeFlag_) == flag;
     }
 
-    void SetPageLevelNodeId(int32_t pageLevelId)
+    void SetAccessibilityNodeVirtual()
     {
-        pageLevelId_ = pageLevelId;
+        isAccessibilityVirtualNode_ = true;
+        for (auto& it : GetChildren()) {
+            it->SetAccessibilityNodeVirtual();
+        }
     }
 
-    int32_t GetPageLevelNodeId() const
+    bool IsAccessibilityVirtualNode() const
     {
-        return pageLevelId_;
+        return isAccessibilityVirtualNode_;
     }
 
-    void SetPageLevelToNav(bool isLevelNavDest)
+    void SetAccessibilityVirtualNodeParent(const RefPtr<UINode>& parent)
     {
-        isLevelNavDest_ = isLevelNavDest;
+        parentForAccessibilityVirtualNode_ = parent;
+        for (auto& it : GetChildren()) {
+            it->SetAccessibilityVirtualNodeParent(parent);
+        }
     }
 
-    bool PageLevelIsNavDestination() const
+    WeakPtr<UINode> GetVirtualNodeParent() const
     {
-        return isLevelNavDest_;
+        return parentForAccessibilityVirtualNode_;
+    }
+
+    bool IsFirstVirtualNode() const
+    {
+        return isFirstAccessibilityVirtualNode_;
+    }
+
+    void SetFirstAccessibilityVirtualNode()
+    {
+        isFirstAccessibilityVirtualNode_ = true;
+    }
+
+    void SetRootNodeId(int32_t rootNodeId)
+    {
+        rootNodeId_ = rootNodeId;
+    }
+
+    int32_t GetRootNodeId() const
+    {
+        return rootNodeId_;
+    }
+
+    bool RootNodeIsPage() const
+    {
+        return rootNodeType_ == RootNodeType::PAGE_ETS_TAG;
+    }
+
+    void SetRootNodeType(RootNodeType rootNodeType)
+    {
+        rootNodeType_ = rootNodeType;
+    }
+
+    RootNodeType GetRootNodeType() const
+    {
+        return rootNodeType_;
     }
 
     void GetPageNodeCountAndDepth(int32_t* count, int32_t* depth);
@@ -624,19 +685,8 @@ public:
         return instanceId_;
     }
 
-    bool GetIsGeometryTransitionIn() const
-    {
-        return isGeometryTransitionIn_;
-    }
-
-    void SetIsGeometryTransitionIn(bool isGeometryTransitionIn)
-    {
-        isGeometryTransitionIn_ = isGeometryTransitionIn;
-    }
-
     virtual void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn)
     {
-        SetIsGeometryTransitionIn(isGeometryTransitionIn);
         for (const auto& child : GetChildren()) {
             child->SetGeometryTransitionInRecursive(isGeometryTransitionIn);
         }
@@ -687,6 +737,11 @@ public:
     {
         return updateNodeConfig_;
     }
+
+    virtual void GetInspectorValue();
+    virtual void NotifyWebPattern(bool isRegister);
+    void GetContainerComponentText(std::string& text);
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -748,13 +803,13 @@ protected:
     virtual void PaintDebugBoundary(bool flag) {}
 
     PipelineContext* context_ = nullptr;
-
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
 
     std::list<RefPtr<UINode>> children_;
-    std::list<std::pair<RefPtr<UINode>, uint32_t>> disappearingChildren_;
+    // disappearingChild、index、branchId
+    std::list<std::tuple<RefPtr<UINode>, uint32_t, int32_t>> disappearingChildren_;
     std::unique_ptr<PerformanceCheckNode> nodeInfo_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";
@@ -764,8 +819,7 @@ private:
     int32_t nodeId_ = 0;
     int64_t accessibilityId_ = -1;
     int32_t layoutPriority_ = 0;
-    int32_t pageLevelId_ = 0; // host is Page or NavDestination
-    bool isLevelNavDest_ = false;
+    int32_t rootNodeId_ = 0; // host is Page or NavDestination
     bool isRoot_ = false;
     bool onMainTree_ = false;
     bool removeSilently_ = true;
@@ -774,8 +828,8 @@ private:
     bool isBuildByJS_ = false;
     bool isRootBuilderNode_ = false;
     bool isArkTsFrameNode_ = false;
-    bool isGeometryTransitionIn_ = false;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
+    RootNodeType rootNodeType_ = RootNodeType::PAGE_ETS_TAG;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
     int32_t instanceId_ = -1;
     uint32_t nodeFlag_ { 0 };
@@ -794,6 +848,13 @@ private:
     std::string viewId_;
     void* externalData_ = nullptr;
     std::function<void(int32_t)> destroyCallback_;
+    // Other components cannot be masked above the modal uiextension,
+    // except for the modal uiextension
+    // Used to mark modal uiextension count below the root node
+    int32_t modalUiextensionCount_ = 0;
+    bool isAccessibilityVirtualNode_ = false;
+    WeakPtr<UINode> parentForAccessibilityVirtualNode_;
+    bool isFirstAccessibilityVirtualNode_ = false;
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };

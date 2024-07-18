@@ -54,6 +54,7 @@ class FocusStateModifier;
 class PageTransitionEffect;
 class OverlayTextModifier;
 class GradientStyleModifier;
+class PipelineContext;
 class RosenRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext)
 public:
@@ -72,14 +73,11 @@ public:
 
     void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode) override;
 
-    void SyncGeometryPropertiesWithoutAnimation(
-        GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0) override;
-
     void SyncGeometryFrame(const RectF& paintRect);
 
     void SyncGeometryProperties(GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0) override;
 
-    void SyncGeometryProperties(const RectF& paintRect, bool isSkipFrameTransition = false) override;
+    void SyncGeometryProperties(const RectF& paintRect) override;
 
     void SetBorderRadius(const BorderRadiusProperty& value) override;
 
@@ -88,6 +86,10 @@ public:
     void SetBorderColor(const BorderColorProperty& value) override;
 
     void SetBorderWidth(const BorderWidthProperty& value) override;
+
+    void SetDashGap(const BorderWidthProperty& value) override;
+
+    void SetDashWidth(const BorderWidthProperty& value) override;
 
     void SetOuterBorderRadius(const BorderRadiusProperty& value) override;
 
@@ -223,8 +225,12 @@ public:
     void OnNodeDisappear(bool recursive) override;
     void SetTransitionOutCallback(std::function<void()>&& callback) override;
     void SetTransitionInCallback(std::function<void()>&& callback) override;
+    void SetTransitionUserCallback(TransitionFinishCallback&& callback) override;
     void ClipWithRect(const RectF& rectF) override;
     void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) override;
+    void ClipWithRoundRect(const RoundRect& roundRect) override;
+    void ClipWithOval(const RectF& rectF) override;
+    void ClipWithCircle(const Circle& circle) override;
     void RemoveClipWithRRect() override;
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
@@ -259,6 +265,7 @@ public:
     bool DoTextureExport(uint64_t surfaceId) override;
     bool StopTextureExport() override;
     void SetSurfaceRotation(bool isLock) override;
+    PipelineContext* GetPipelineContext() const;
 
     RectF GetPaintRectWithTransform() override;
 
@@ -296,7 +303,8 @@ public:
 
     void ClearAccessibilityFocus() override;
 
-    void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) override;
+    void OnAccessibilityFocusUpdate(
+        bool isAccessibilityFocus, const int64_t accessibilityIdForVirtualNode = INVALID_PARENT_ID) override;
     void OnAccessibilityFocusRectUpdate(RectT<int32_t> accessibilityFocusRect) override;
 
     void OnMouseSelectUpdate(bool isSelected, const Color& fillColor, const Color& strokeColor) override;
@@ -381,7 +389,8 @@ public:
     void SetRoundRectMask(const RoundRect& roundRect, const ShapeMaskProperty& property) override;
     void SetOvalMask(const RectF& rect, const ShapeMaskProperty& property) override;
     void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) override;
-    void ResetSurface() override;
+    void ResetSurface(int width, int height) override;
+    void SetMarkNodeGroup(bool isNodeGroup) override;
     void PaintDebugBoundary(bool flag) override;
     void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) override;
     void SavePaintRect(bool isRound = true, uint8_t flag = 0) override;
@@ -389,8 +398,9 @@ public:
     void UpdatePaintRect(const RectF& paintRect) override;
     Matrix4 GetRevertMatrix() override;
     void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) override;
+    void SetOpacityMultiplier(float opacity) override;
 
-private:
+protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
     void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) override;
@@ -411,6 +421,8 @@ private:
     void OnBorderRadiusUpdate(const BorderRadiusProperty& value) override;
     void OnBorderColorUpdate(const BorderColorProperty& value) override;
     void OnBorderStyleUpdate(const BorderStyleProperty& value) override;
+    void OnDashGapUpdate(const BorderWidthProperty& value) override;
+    void OnDashWidthUpdate(const BorderWidthProperty& value) override;
 
     void OnOuterBorderRadiusUpdate(const BorderRadiusProperty& value) override;
     void OnOuterBorderColorUpdate(const BorderColorProperty& value) override;
@@ -468,9 +480,11 @@ private:
     void OnSuggestedRenderGroupUpdate(bool isRenderGroup) override;
     void OnRenderFitUpdate(RenderFit renderFit) override;
     void OnNodeNameUpdate(const std::string& id) override;
+    void OnAttractionEffectUpdate(const AttractionEffect& effect) override;
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
     void SyncAdditionalGeometryProperties(const RectF& paintRect);
+    void SetChildBounds(const RectF& paintRect) const;
     void NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn);
     void NotifyTransition(bool isTransitionIn);
     bool HasTransitionOutAnimation() const override
@@ -485,11 +499,13 @@ private:
     void OnTransitionInFinish();
     void OnTransitionOutFinish();
     void RemoveDefaultTransition();
+    void FireTransitionUserCallback(bool isTransitionIn);
+    void PostTransitionUserOutCallback();
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot, float zPivot = 0.0f);
     void SetPositionToRSNode();
 
-    RefPtr<PageTransitionEffect> GetDefaultPageTransition(PageTransitionType type);
+    virtual RefPtr<PageTransitionEffect> GetDefaultPageTransition(PageTransitionType type);
     RefPtr<PageTransitionEffect> GetPageTransitionEffect(const RefPtr<PageTransitionEffect>& transition);
 
     // Convert BorderRadiusProperty to Rosen::Vector4f
@@ -587,7 +603,7 @@ private:
     void AddFrameNodeInfoToRsNode();
     // Use rect to update the drawRegion rect at index.
     void UpdateDrawRegion(uint32_t index, const std::shared_ptr<Rosen::RectF>& rect);
-    void NotifyHostTransformUpdated();
+    void NotifyHostTransformUpdated(bool changed = true);
 
     void InitAccessibilityFocusModidifer(const RoundRect&, const Color&, float);
 
@@ -626,6 +642,7 @@ private:
     int disappearingTransitionCount_ = 0;
     int sandBoxCount_ = 0;
     bool isFocusBoxGlow_ = true;
+    static constexpr int32_t INVALID_PARENT_ID = -2100000;
     static constexpr uint32_t DRAW_REGION_RECT_COUNT = 6;
     std::map<std::string, RefPtr<ImageLoadingContext>> particleImageContextMap_;
     std::map<std::string, RefPtr<CanvasImage>> particleImageMap_;
@@ -635,6 +652,7 @@ private:
     RefPtr<RosenTransitionEffect> transitionEffect_;
     std::function<void()> transitionOutCallback_;
     std::function<void()> transitionInCallback_;
+    TransitionFinishCallback transitionUserCallback_;
     std::shared_ptr<DebugBoundaryModifier> debugBoundaryModifier_;
     std::shared_ptr<BackgroundModifier> backgroundModifier_;
     std::shared_ptr<BorderImageModifier> borderImageModifier_;
@@ -655,6 +673,7 @@ private:
     std::shared_ptr<Rosen::RSScaleModifier> scaleXYUserModifier_;
     std::shared_ptr<Rosen::RectF> drawRegionRects_[DRAW_REGION_RECT_COUNT] = { nullptr };
     RefPtr<FocusAnimationModifier> focusAnimationModifier_;
+    std::shared_ptr<Rosen::RSAlphaModifier> alphaModifier_;
 
     // translate modifiers for interruption
     std::shared_ptr<Rosen::RSTranslateModifier> translateXY_;

@@ -26,12 +26,23 @@
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UIContentServiceStubImpl : public UiContentStub {
-private:
-    int32_t OnGetInspectorTreeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
-    int32_t OnReportUnfocusEventInner(MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
-    int32_t RegisterRemoteObjectInner(MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
-
-    sptr<IRemoteObject> SAObject_ = nullptr;
+public:
+    int32_t Connect(const EventCallback& eventCallback) override
+    {
+        return 0;
+    }
+    int32_t GetInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback) override;
+    int32_t RegisterClickEventCallback(const EventCallback& eventCallback) override;
+    int32_t RegisterRouterChangeEventCallback(const EventCallback& eventCallback) override;
+    int32_t RegisterSearchEventCallback(const EventCallback& eventCallback) override;
+    int32_t RegisterComponentChangeEventCallback(const EventCallback& eventCallback) override;
+    int32_t RegisterWebUnfocusEventCallback(
+        const std::function<void(int64_t accessibilityId, const std::string& data)>& eventCallback) override;
+    int32_t UnregisterClickEventCallback() override;
+    int32_t UnregisterSearchEventCallback() override;
+    int32_t UnregisterRouterChangeEventCallback() override;
+    int32_t UnregisterComponentChangeEventCallback() override;
+    int32_t UnregisterWebUnfocusEventCallback() override;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_STUB_IMPL_H

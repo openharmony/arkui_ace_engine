@@ -1930,4 +1930,532 @@ HWTEST_F(DragDropReportTestNg, DragDropReportTest028, TestSize.Level1)
     ASSERT_TRUE(preTargetNode);
     ASSERT_FALSE(reportingEnabledFalse);
 }
+
+/**
+ * @tc.name: DragDropReportTest029
+ * @tc.desc: Test DragEventStrictReportingEnabled
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropReportTestNg, DragDropReportTest029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. ReportingEnable is not set.
+     * @tc.expected: reportingEnabledDefault is false.
+     */
+    bool reportingEnabledDefault = dragDropManager->IsEventStrictReportingEnabled();
+    ASSERT_FALSE(reportingEnabledDefault);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_1, GLOBAL_1 }, frameNode);
+    auto preTargetNode = dragDropManager->preTargetFrameNode_;
+    ASSERT_TRUE(preTargetNode);
+    dragDropManager->FireOnDragLeave(preTargetNode, { GLOBAL_2, GLOBAL_3 }, EXTRA_INFO);
+    ASSERT_TRUE(preTargetNode);
+    ASSERT_FALSE(reportingEnabledDefault);
+    preTargetNode.Reset();
+    frameNode.Reset();
+
+    /**
+     * @tc.steps: step3. ReportingSupported is set to true.
+     * @tc.expected: reportingEnabledTrue is true.
+     */
+    bool variableTrue = true;
+    dragDropManager->SetEventStrictReportingEnabled(variableTrue);
+    bool reportingEnabledTrue = dragDropManager->IsEventStrictReportingEnabled();
+    ASSERT_TRUE(reportingEnabledTrue);
+    frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_1, GLOBAL_1 }, frameNode);
+    preTargetNode = dragDropManager->preTargetFrameNode_;
+    ASSERT_TRUE(preTargetNode);
+    dragDropManager->FireOnDragLeave(preTargetNode, { GLOBAL_2, GLOBAL_3 }, EXTRA_INFO);
+    ASSERT_TRUE(preTargetNode);
+    ASSERT_TRUE(reportingEnabledTrue);
+    preTargetNode.Reset();
+    frameNode.Reset();
+    
+    /**
+     * @tc.steps: step4. ReportingSupported is set to false.
+     * @tc.expected: reportingEnabledFalse is false.
+     */
+    bool variableFalse = false;
+    dragDropManager->SetEventStrictReportingEnabled(variableFalse);
+    bool reportingEnabledFalse = dragDropManager->IsEventStrictReportingEnabled();
+    ASSERT_FALSE(reportingEnabledFalse);
+    frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_1, GLOBAL_1 }, frameNode);
+    preTargetNode = dragDropManager->preTargetFrameNode_;
+    ASSERT_TRUE(preTargetNode);
+    dragDropManager->FireOnDragLeave(preTargetNode, { GLOBAL_2, GLOBAL_3 }, EXTRA_INFO);
+    ASSERT_TRUE(preTargetNode);
+    ASSERT_FALSE(reportingEnabledFalse);
+}
+
+/**
+ * @tc.name: DragDropReportTest030
+ * @tc.desc: Test DragEventStrictReportingEnabled
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropReportTestNg, DragDropReportTest030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. ReportingEnable is not set.
+     * @tc.expected: reportingEnabledDefault is false.
+     */
+    bool reportingEnabledDefault = dragDropManager->IsEventStrictReportingEnabled();
+    ASSERT_FALSE(reportingEnabledDefault);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_2, GLOBAL_1 }, frameNode);
+    auto preTargetNode = dragDropManager->preTargetFrameNode_;
+    ASSERT_TRUE(preTargetNode);
+    dragDropManager->FireOnDragLeave(preTargetNode, { GLOBAL_1, GLOBAL_2 }, EXTRA_INFO);
+    ASSERT_TRUE(preTargetNode);
+    ASSERT_FALSE(reportingEnabledDefault);
+    preTargetNode.Reset();
+    frameNode.Reset();
+
+    /**
+     * @tc.steps: step3. ReportingSupported is set to true.
+     * @tc.expected: reportingEnabledTrue is true.
+     */
+    bool variableTrue = true;
+    dragDropManager->SetEventStrictReportingEnabled(variableTrue);
+    bool reportingEnabledTrue = dragDropManager->IsEventStrictReportingEnabled();
+    ASSERT_TRUE(reportingEnabledTrue);
+    frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_2, GLOBAL_1 }, frameNode);
+    preTargetNode = dragDropManager->preTargetFrameNode_;
+    ASSERT_TRUE(preTargetNode);
+    dragDropManager->FireOnDragLeave(preTargetNode, { GLOBAL_1, GLOBAL_2 }, EXTRA_INFO);
+    ASSERT_TRUE(preTargetNode);
+    ASSERT_TRUE(reportingEnabledTrue);
+    preTargetNode.Reset();
+    frameNode.Reset();
+    
+    /**
+     * @tc.steps: step4. ReportingSupported is set to false.
+     * @tc.expected: reportingEnabledFalse is false.
+     */
+    bool variableFalse = false;
+    dragDropManager->SetEventStrictReportingEnabled(variableFalse);
+    bool reportingEnabledFalse = dragDropManager->IsEventStrictReportingEnabled();
+    ASSERT_FALSE(reportingEnabledFalse);
+    frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_2, GLOBAL_1 }, frameNode);
+    preTargetNode = dragDropManager->preTargetFrameNode_;
+    ASSERT_TRUE(preTargetNode);
+    dragDropManager->FireOnDragLeave(preTargetNode, { GLOBAL_1, GLOBAL_2 }, EXTRA_INFO);
+    ASSERT_TRUE(preTargetNode);
+    ASSERT_FALSE(reportingEnabledFalse);
+}
+
+/**
+ * @tc.name: DragDropReportTest031
+ * @tc.desc: Test DragEventStrictReportingEnabled
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropReportTestNg, DragDropReportTest031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. ReportingEnable is not set.
+     * @tc.expected: reportingEnabledDefault is false.
+     */
+    bool reportingEnabledDefault = dragDropManager->IsEventStrictReportingEnabled();
+    ASSERT_FALSE(reportingEnabledDefault);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_3, GLOBAL_2 }, frameNode);
+    auto preTargetNode = dragDropManager->preTargetFrameNode_;
+    ASSERT_TRUE(preTargetNode);
+    dragDropManager->FireOnDragLeave(preTargetNode, { GLOBAL_2, GLOBAL_3 }, EXTRA_INFO);
+    ASSERT_TRUE(preTargetNode);
+    ASSERT_FALSE(reportingEnabledDefault);
+    preTargetNode.Reset();
+    frameNode.Reset();
+
+    /**
+     * @tc.steps: step3. ReportingSupported is set to true.
+     * @tc.expected: reportingEnabledTrue is true.
+     */
+    bool variableTrue = true;
+    dragDropManager->SetEventStrictReportingEnabled(variableTrue);
+    bool reportingEnabledTrue = dragDropManager->IsEventStrictReportingEnabled();
+    ASSERT_TRUE(reportingEnabledTrue);
+    frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_3, GLOBAL_2 }, frameNode);
+    preTargetNode = dragDropManager->preTargetFrameNode_;
+    ASSERT_TRUE(preTargetNode);
+    dragDropManager->FireOnDragLeave(preTargetNode, { GLOBAL_2, GLOBAL_3 }, EXTRA_INFO);
+    ASSERT_TRUE(preTargetNode);
+    ASSERT_TRUE(reportingEnabledTrue);
+    preTargetNode.Reset();
+    frameNode.Reset();
+    
+    /**
+     * @tc.steps: step4. ReportingSupported is set to false.
+     * @tc.expected: reportingEnabledFalse is false.
+     */
+    bool variableFalse = false;
+    dragDropManager->SetEventStrictReportingEnabled(variableFalse);
+    bool reportingEnabledFalse = dragDropManager->IsEventStrictReportingEnabled();
+    ASSERT_FALSE(reportingEnabledFalse);
+    frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_3, GLOBAL_2 }, frameNode);
+    preTargetNode = dragDropManager->preTargetFrameNode_;
+    ASSERT_TRUE(preTargetNode);
+    dragDropManager->FireOnDragLeave(preTargetNode, { GLOBAL_2, GLOBAL_3 }, EXTRA_INFO);
+    ASSERT_TRUE(preTargetNode);
+    ASSERT_FALSE(reportingEnabledFalse);
+}
+
+/**
+ * @tc.name: DragDropReportTest032
+ * @tc.desc: Test DragEventStrictReportingEnabled
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropReportTestNg, DragDropReportTest032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. ReportingEnable is not set.
+     * @tc.expected: reportingEnabledDefault is false.
+     */
+    bool reportingEnabledDefault = dragDropManager->IsEventStrictReportingEnabled();
+    ASSERT_FALSE(reportingEnabledDefault);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_3, GLOBAL_3 }, frameNode);
+    auto preTargetNode = dragDropManager->preTargetFrameNode_;
+    ASSERT_TRUE(preTargetNode);
+    dragDropManager->FireOnDragLeave(preTargetNode, { GLOBAL_1, GLOBAL_2 }, EXTRA_INFO);
+    ASSERT_TRUE(preTargetNode);
+    ASSERT_FALSE(reportingEnabledDefault);
+    preTargetNode.Reset();
+    frameNode.Reset();
+
+    /**
+     * @tc.steps: step3. ReportingSupported is set to true.
+     * @tc.expected: reportingEnabledTrue is true.
+     */
+    bool variableTrue = true;
+    dragDropManager->SetEventStrictReportingEnabled(variableTrue);
+    bool reportingEnabledTrue = dragDropManager->IsEventStrictReportingEnabled();
+    ASSERT_TRUE(reportingEnabledTrue);
+    frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_3, GLOBAL_3 }, frameNode);
+    preTargetNode = dragDropManager->preTargetFrameNode_;
+    ASSERT_TRUE(preTargetNode);
+    dragDropManager->FireOnDragLeave(preTargetNode, { GLOBAL_1, GLOBAL_2 }, EXTRA_INFO);
+    ASSERT_TRUE(preTargetNode);
+    ASSERT_TRUE(reportingEnabledTrue);
+    preTargetNode.Reset();
+    frameNode.Reset();
+    
+    /**
+     * @tc.steps: step4. ReportingSupported is set to false.
+     * @tc.expected: reportingEnabledFalse is false.
+     */
+    bool variableFalse = false;
+    dragDropManager->SetEventStrictReportingEnabled(variableFalse);
+    bool reportingEnabledFalse = dragDropManager->IsEventStrictReportingEnabled();
+    ASSERT_FALSE(reportingEnabledFalse);
+    frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_3, GLOBAL_3 }, frameNode);
+    preTargetNode = dragDropManager->preTargetFrameNode_;
+    ASSERT_TRUE(preTargetNode);
+    dragDropManager->FireOnDragLeave(preTargetNode, { GLOBAL_1, GLOBAL_2 }, EXTRA_INFO);
+    ASSERT_TRUE(preTargetNode);
+    ASSERT_FALSE(reportingEnabledFalse);
+}
+
+/**
+ * @tc.name: DragDropReportTest033
+ * @tc.desc: Test DragEventStrictReportingEnabled
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropReportTestNg, DragDropReportTest033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. ReportingEnable is not set.
+     * @tc.expected: reportingEnabledDefault is false.
+     */
+    bool reportingEnabledDefault = dragDropManager->IsEventStrictReportingEnabled();
+    ASSERT_FALSE(reportingEnabledDefault);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_3, GLOBAL_3 }, frameNode);
+    auto preTargetNode = dragDropManager->preTargetFrameNode_;
+    ASSERT_TRUE(preTargetNode);
+    dragDropManager->FireOnDragLeave(preTargetNode, { GLOBAL_2, GLOBAL_2 }, EXTRA_INFO);
+    ASSERT_TRUE(preTargetNode);
+    ASSERT_FALSE(reportingEnabledDefault);
+    preTargetNode.Reset();
+    frameNode.Reset();
+
+    /**
+     * @tc.steps: step3. ReportingSupported is set to true.
+     * @tc.expected: reportingEnabledTrue is true.
+     */
+    bool variableTrue = true;
+    dragDropManager->SetEventStrictReportingEnabled(variableTrue);
+    bool reportingEnabledTrue = dragDropManager->IsEventStrictReportingEnabled();
+    ASSERT_TRUE(reportingEnabledTrue);
+    frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_3, GLOBAL_3 }, frameNode);
+    preTargetNode = dragDropManager->preTargetFrameNode_;
+    ASSERT_TRUE(preTargetNode);
+    dragDropManager->FireOnDragLeave(preTargetNode, { GLOBAL_2, GLOBAL_2 }, EXTRA_INFO);
+    ASSERT_TRUE(preTargetNode);
+    ASSERT_TRUE(reportingEnabledTrue);
+    preTargetNode.Reset();
+    frameNode.Reset();
+    
+    /**
+     * @tc.steps: step4. ReportingSupported is set to false.
+     * @tc.expected: reportingEnabledFalse is false.
+     */
+    bool variableFalse = false;
+    dragDropManager->SetEventStrictReportingEnabled(variableFalse);
+    bool reportingEnabledFalse = dragDropManager->IsEventStrictReportingEnabled();
+    ASSERT_FALSE(reportingEnabledFalse);
+    frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_3, GLOBAL_3 }, frameNode);
+    preTargetNode = dragDropManager->preTargetFrameNode_;
+    ASSERT_TRUE(preTargetNode);
+    dragDropManager->FireOnDragLeave(preTargetNode, { GLOBAL_2, GLOBAL_2 }, EXTRA_INFO);
+    ASSERT_TRUE(preTargetNode);
+    ASSERT_FALSE(reportingEnabledFalse);
+}
+
+/**
+ * @tc.name: DragDropReportTest034
+ * @tc.desc: Test DragEventStrictReportingEnabled
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropReportTestNg, DragDropReportTest034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. ReportingEnable is not set.
+     * @tc.expected: reportingEnabledDefault is false.
+     */
+    bool reportingEnabledDefault = dragDropManager->IsEventStrictReportingEnabled();
+    ASSERT_FALSE(reportingEnabledDefault);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_3, GLOBAL_3 }, frameNode);
+    auto preTargetNode = dragDropManager->preTargetFrameNode_;
+    ASSERT_TRUE(preTargetNode);
+    dragDropManager->FireOnDragLeave(preTargetNode, { GLOBAL_2, GLOBAL_1 }, EXTRA_INFO);
+    ASSERT_TRUE(preTargetNode);
+    ASSERT_FALSE(reportingEnabledDefault);
+    preTargetNode.Reset();
+    frameNode.Reset();
+
+    /**
+     * @tc.steps: step3. ReportingSupported is set to true.
+     * @tc.expected: reportingEnabledTrue is true.
+     */
+    bool variableTrue = true;
+    dragDropManager->SetEventStrictReportingEnabled(variableTrue);
+    bool reportingEnabledTrue = dragDropManager->IsEventStrictReportingEnabled();
+    ASSERT_TRUE(reportingEnabledTrue);
+    frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_3, GLOBAL_3 }, frameNode);
+    preTargetNode = dragDropManager->preTargetFrameNode_;
+    ASSERT_TRUE(preTargetNode);
+    dragDropManager->FireOnDragLeave(preTargetNode, { GLOBAL_2, GLOBAL_1 }, EXTRA_INFO);
+    ASSERT_TRUE(preTargetNode);
+    ASSERT_TRUE(reportingEnabledTrue);
+    preTargetNode.Reset();
+    frameNode.Reset();
+    
+    /**
+     * @tc.steps: step4. ReportingSupported is set to false.
+     * @tc.expected: reportingEnabledFalse is false.
+     */
+    bool variableFalse = false;
+    dragDropManager->SetEventStrictReportingEnabled(variableFalse);
+    bool reportingEnabledFalse = dragDropManager->IsEventStrictReportingEnabled();
+    ASSERT_FALSE(reportingEnabledFalse);
+    frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_3, GLOBAL_3 }, frameNode);
+    preTargetNode = dragDropManager->preTargetFrameNode_;
+    ASSERT_TRUE(preTargetNode);
+    dragDropManager->FireOnDragLeave(preTargetNode, { GLOBAL_2, GLOBAL_1 }, EXTRA_INFO);
+    ASSERT_TRUE(preTargetNode);
+    ASSERT_FALSE(reportingEnabledFalse);
+}
+
+/**
+ * @tc.name: DragDropReportTest035
+ * @tc.desc: Test DragEventStrictReportingEnabled
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropReportTestNg, DragDropReportTest035, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. ReportingEnable is not set.
+     * @tc.expected: reportingEnabledDefault is false.
+     */
+    bool reportingEnabledDefault = dragDropManager->IsEventStrictReportingEnabled();
+    ASSERT_FALSE(reportingEnabledDefault);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_3, GLOBAL_3 }, frameNode);
+    auto preTargetNode = dragDropManager->preTargetFrameNode_;
+    ASSERT_TRUE(preTargetNode);
+    dragDropManager->FireOnDragLeave(preTargetNode, { GLOBAL_3, GLOBAL_1 }, EXTRA_INFO);
+    ASSERT_TRUE(preTargetNode);
+    ASSERT_FALSE(reportingEnabledDefault);
+    preTargetNode.Reset();
+    frameNode.Reset();
+
+    /**
+     * @tc.steps: step3. ReportingSupported is set to true.
+     * @tc.expected: reportingEnabledTrue is true.
+     */
+    bool variableTrue = true;
+    dragDropManager->SetEventStrictReportingEnabled(variableTrue);
+    bool reportingEnabledTrue = dragDropManager->IsEventStrictReportingEnabled();
+    ASSERT_TRUE(reportingEnabledTrue);
+    frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_3, GLOBAL_3 }, frameNode);
+    preTargetNode = dragDropManager->preTargetFrameNode_;
+    ASSERT_TRUE(preTargetNode);
+    dragDropManager->FireOnDragLeave(preTargetNode, { GLOBAL_3, GLOBAL_1 }, EXTRA_INFO);
+    ASSERT_TRUE(preTargetNode);
+    ASSERT_TRUE(reportingEnabledTrue);
+    preTargetNode.Reset();
+    frameNode.Reset();
+    
+    /**
+     * @tc.steps: step4. ReportingSupported is set to false.
+     * @tc.expected: reportingEnabledFalse is false.
+     */
+    bool variableFalse = false;
+    dragDropManager->SetEventStrictReportingEnabled(variableFalse);
+    bool reportingEnabledFalse = dragDropManager->IsEventStrictReportingEnabled();
+    ASSERT_FALSE(reportingEnabledFalse);
+    frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_3, GLOBAL_3 }, frameNode);
+    preTargetNode = dragDropManager->preTargetFrameNode_;
+    ASSERT_TRUE(preTargetNode);
+    dragDropManager->FireOnDragLeave(preTargetNode, { GLOBAL_3, GLOBAL_1 }, EXTRA_INFO);
+    ASSERT_TRUE(preTargetNode);
+    ASSERT_FALSE(reportingEnabledFalse);
+}
+
+/**
+ * @tc.name: DragDropReportTest036
+ * @tc.desc: Test DragEventStrictReportingEnabled
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropReportTestNg, DragDropReportTest036, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. ReportingEnable is not set.
+     * @tc.expected: reportingEnabledDefault is false.
+     */
+    bool reportingEnabledDefault = dragDropManager->IsEventStrictReportingEnabled();
+    ASSERT_FALSE(reportingEnabledDefault);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_3, GLOBAL_3 }, frameNode);
+    auto preTargetNode = dragDropManager->preTargetFrameNode_;
+    ASSERT_TRUE(preTargetNode);
+    dragDropManager->FireOnDragLeave(preTargetNode, { GLOBAL_1, GLOBAL_3 }, EXTRA_INFO);
+    ASSERT_TRUE(preTargetNode);
+    ASSERT_FALSE(reportingEnabledDefault);
+    preTargetNode.Reset();
+    frameNode.Reset();
+
+    /**
+     * @tc.steps: step3. ReportingSupported is set to true.
+     * @tc.expected: reportingEnabledTrue is true.
+     */
+    bool variableTrue = true;
+    dragDropManager->SetEventStrictReportingEnabled(variableTrue);
+    bool reportingEnabledTrue = dragDropManager->IsEventStrictReportingEnabled();
+    ASSERT_TRUE(reportingEnabledTrue);
+    frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_3, GLOBAL_3 }, frameNode);
+    preTargetNode = dragDropManager->preTargetFrameNode_;
+    ASSERT_TRUE(preTargetNode);
+    dragDropManager->FireOnDragLeave(preTargetNode, { GLOBAL_1, GLOBAL_3 }, EXTRA_INFO);
+    ASSERT_TRUE(preTargetNode);
+    ASSERT_TRUE(reportingEnabledTrue);
+    preTargetNode.Reset();
+    frameNode.Reset();
+    
+    /**
+     * @tc.steps: step4. ReportingSupported is set to false.
+     * @tc.expected: reportingEnabledFalse is false.
+     */
+    bool variableFalse = false;
+    dragDropManager->SetEventStrictReportingEnabled(variableFalse);
+    bool reportingEnabledFalse = dragDropManager->IsEventStrictReportingEnabled();
+    ASSERT_FALSE(reportingEnabledFalse);
+    frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    dragDropManager->OnDragStart({ GLOBAL_3, GLOBAL_3 }, frameNode);
+    preTargetNode = dragDropManager->preTargetFrameNode_;
+    ASSERT_TRUE(preTargetNode);
+    dragDropManager->FireOnDragLeave(preTargetNode, { GLOBAL_1, GLOBAL_3 }, EXTRA_INFO);
+    ASSERT_TRUE(preTargetNode);
+    ASSERT_FALSE(reportingEnabledFalse);
+}
 } // namespace OHOS::Ace::NG

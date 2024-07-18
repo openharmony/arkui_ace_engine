@@ -33,6 +33,23 @@ void ListItemGroupPattern::OnAttachToFrameNode()
     }
 }
 
+void ListItemGroupPattern::OnColorConfigurationUpdate()
+{
+    if (listItemGroupStyle_ != V2::ListItemGroupStyle::CARD) {
+        return;
+    }
+    auto itemGroupNode = GetHost();
+    CHECK_NULL_VOID(itemGroupNode);
+    auto renderContext = itemGroupNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = itemGroupNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto listItemGroupTheme = pipeline->GetTheme<ListItemTheme>();
+    CHECK_NULL_VOID(listItemGroupTheme);
+
+    renderContext->UpdateBackgroundColor(listItemGroupTheme->GetItemGroupDefaultColor());
+}
+
 void ListItemGroupPattern::SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode)
 {
     auto renderContext = itemGroupNode->GetRenderContext();
@@ -40,7 +57,7 @@ void ListItemGroupPattern::SetListItemGroupDefaultAttributes(const RefPtr<FrameN
     auto layoutProperty = itemGroupNode->GetLayoutProperty<ListItemGroupLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto listItemGroupTheme = pipeline->GetTheme<ListItemTheme>();
     CHECK_NULL_VOID(listItemGroupTheme);
@@ -79,27 +96,8 @@ void ListItemGroupPattern::DumpAdvanceInfo()
 
 RefPtr<LayoutAlgorithm> ListItemGroupPattern::CreateLayoutAlgorithm()
 {
-    int32_t headerIndex = -1;
-    int32_t footerIndex = -1;
-    int32_t itemStartIndex = 0;
-    auto header = header_.Upgrade();
-    if (header) {
-        auto count = header->FrameCount();
-        if (count > 0) {
-            headerIndex = itemStartIndex;
-            itemStartIndex += count;
-        }
-    }
-    auto footer = footer_.Upgrade();
-    if (footer) {
-        int32_t count = footer->FrameCount();
-        if (count > 0) {
-            footerIndex = itemStartIndex;
-            itemStartIndex += count;
-        }
-    }
-    itemStartIndex_ = itemStartIndex;
-    auto layoutAlgorithm = MakeRefPtr<ListItemGroupLayoutAlgorithm>(headerIndex, footerIndex, itemStartIndex_);
+    CalculateItemStartIndex();
+    auto layoutAlgorithm = MakeRefPtr<ListItemGroupLayoutAlgorithm>(headerIndex_, footerIndex_, itemStartIndex_);
     layoutAlgorithm->SetItemsPosition(itemPosition_);
     layoutAlgorithm->SetLayoutedItemInfo(layoutedItemInfo_);
     if (childrenSize_ && ListChildrenSizeExist()) {
@@ -118,7 +116,8 @@ RefPtr<NodePaintMethod> ListItemGroupPattern::CreateNodePaintMethod()
     V2::ItemDivider itemDivider;
     auto divider = layoutProperty->GetDivider().value_or(itemDivider);
     auto drawVertical = (axis_ == Axis::HORIZONTAL);
-    ListItemGroupPaintInfo listItemGroupPaintInfo { drawVertical, lanes_, spaceWidth_, laneGutter_, itemTotalCount_ };
+    ListItemGroupPaintInfo listItemGroupPaintInfo { layoutDirection_, mainSize_, drawVertical, lanes_,
+        spaceWidth_, laneGutter_, itemTotalCount_ };
     return MakeRefPtr<ListItemGroupPaintMethod>(divider, listItemGroupPaintInfo, itemPosition_, pressedItem_);
 }
 
@@ -135,6 +134,8 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     spaceWidth_ = layoutAlgorithm->GetSpaceWidth();
     lanes_ = layoutAlgorithm->GetLanes();
     axis_ = layoutAlgorithm->GetAxis();
+    layoutDirection_ = layoutAlgorithm->GetLayoutDirection();
+    mainSize_ = layoutAlgorithm->GetMainSize();
     laneGutter_ = layoutAlgorithm->GetLaneGutter();
     itemDisplayEndIndex_ = layoutAlgorithm->GetEndIndex();
     itemDisplayStartIndex_ = layoutAlgorithm->GetStartIndex();
@@ -152,6 +153,12 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     if (accessibilityProperty != nullptr) {
         accessibilityProperty->SetCollectionItemCounts(layoutAlgorithm->GetTotalItemCount());
     }
+    auto cacheParam = layoutAlgorithm->GetCacheParam();
+    if (cacheParam) {
+        forwardCachedIndex_ = cacheParam.value().forwardCachedIndex;
+        backwardCachedIndex_ = cacheParam.value().backwardCachedIndex;
+        layoutAlgorithm->SetCacheParam(std::nullopt);
+    }
     auto listLayoutProperty = host->GetLayoutProperty<ListItemGroupLayoutProperty>();
     return listLayoutProperty && listLayoutProperty->GetDivider().has_value() && !itemPosition_.empty();
 }
@@ -168,6 +175,12 @@ float ListItemGroupPattern::GetEstimateOffset(float height, const std::pair<floa
 
 float ListItemGroupPattern::GetEstimateHeight(float& averageHeight) const
 {
+    auto layoutProperty = GetLayoutProperty<ListItemGroupLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    auto visible = layoutProperty->GetVisibility().value_or(VisibleType::VISIBLE);
+    if (visible == VisibleType::GONE) {
+        return 0.0f;
+    }
     if (layoutedItemInfo_.has_value()) {
         auto totalHeight = (layoutedItemInfo_.value().endPos - layoutedItemInfo_.value().startPos + spaceWidth_);
         auto itemCount = layoutedItemInfo_.value().endIndex - layoutedItemInfo_.value().startIndex + 1;
@@ -318,6 +331,110 @@ void ListItemGroupPattern::ResetChildrenSize()
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         OnChildrenSizeChanged({ -1, -1, -1 }, LIST_UPDATE_CHILD_SIZE);
+    }
+}
+
+void ListItemGroupPattern::CalculateItemStartIndex()
+{
+    int32_t headerIndex = -1;
+    int32_t footerIndex = -1;
+    int32_t itemStartIndex = 0;
+    auto header = header_.Upgrade();
+    if (header) {
+        auto count = header->FrameCount();
+        if (count > 0) {
+            headerIndex = itemStartIndex;
+            itemStartIndex += count;
+        }
+    }
+    auto footer = footer_.Upgrade();
+    if (footer) {
+        int32_t count = footer->FrameCount();
+        if (count > 0) {
+            footerIndex = itemStartIndex;
+            itemStartIndex += count;
+        }
+    }
+    headerIndex_ = headerIndex;
+    footerIndex_ = footerIndex;
+    itemStartIndex_ = itemStartIndex;
+}
+
+void ListItemGroupPattern::UpdateActiveChildRange(bool forward, int32_t cacheCount)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (forward) {
+        host->SetActiveChildRange(-1, itemStartIndex_ - 1, 0, cacheCount);
+    } else {
+        int32_t index = itemTotalCount_ + itemStartIndex_;
+        host->SetActiveChildRange(index, index, cacheCount, 0);
+    }
+}
+
+int32_t ListItemGroupPattern::UpdateForwardCachedIndex(int32_t cacheCount, bool outOfView)
+{
+    int32_t endIndex = (outOfView || itemPosition_.empty()) ? -1 : itemPosition_.rbegin()->first;
+    int32_t limit = std::min(endIndex + cacheCount * lanes_, itemTotalCount_ - 1);
+    int32_t forwardCachedIndex = std::clamp(forwardCachedIndex_, endIndex, limit);
+    if (outOfView && forwardCachedIndex < forwardCachedIndex_) {
+        UpdateActiveChildRange(true, forwardCachedIndex + 1);
+    }
+    forwardCachedIndex_ = forwardCachedIndex;
+    return forwardCachedIndex_;
+}
+
+int32_t ListItemGroupPattern::UpdateBackwardCachedIndex(int32_t cacheCount, bool outOfView)
+{
+    int32_t startIndex = (outOfView || itemPosition_.empty()) ? itemTotalCount_ : itemPosition_.begin()->first;
+    int32_t limit = std::max(startIndex - cacheCount * lanes_, 0);
+    int32_t backwardCachedIndex = std::clamp(backwardCachedIndex_, limit, startIndex);
+    if (outOfView && backwardCachedIndex > backwardCachedIndex_) {
+        UpdateActiveChildRange(false, itemTotalCount_ - backwardCachedIndex);
+    }
+    backwardCachedIndex_ = backwardCachedIndex;
+    return backwardCachedIndex_;
+}
+
+void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint,
+    bool forward, int64_t deadline, int32_t cached)
+{
+    ACE_SCOPED_TRACE("Group LayoutCache:%d,%d", forward, cached);
+    auto listNode = GetListFrameNode();
+    CHECK_NULL_VOID(listNode);
+    auto listLayoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_VOID(listLayoutProperty);
+    auto cacheCount = listLayoutProperty->GetCachedCountValue(1) - cached;
+    if (cacheCount < 1) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutAlgorithmWrapper = host->GetLayoutAlgorithm(true);
+    CHECK_NULL_VOID(layoutAlgorithmWrapper);
+    auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(itemGroup);
+    ListItemGroupCacheParam param = {
+        .forward = forward,
+        .cacheCount = cacheCount,
+        .forwardCachedIndex = forwardCachedIndex_,
+        .backwardCachedIndex = backwardCachedIndex_,
+        .deadline = deadline,
+    };
+    itemGroup->SetCacheParam(param);
+    itemGroup->SetListLayoutProperty(listLayoutProperty);
+    host->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    host->GetGeometryNode()->SetParentLayoutConstraint(constraint);
+    FrameNode::ProcessOffscreenNode(host);
+}
+
+void ListItemGroupPattern::SetListItemGroupStyle(V2::ListItemGroupStyle style)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (listItemGroupStyle_ == V2::ListItemGroupStyle::NONE && style == V2::ListItemGroupStyle::CARD) {
+        listItemGroupStyle_ = style;
+        SetListItemGroupDefaultAttributes(host);
     }
 }
 } // namespace OHOS::Ace::NG

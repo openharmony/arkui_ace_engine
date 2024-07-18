@@ -54,7 +54,7 @@ public:
     explicit SubwindowOhos(int32_t instanceId);
     ~SubwindowOhos() = default;
 
-    void InitContainer() override;
+    bool InitContainer() override;
     void ResizeWindow() override;
     NG::RectF GetRect() override;
     void ShowMenu(const RefPtr<Component>& newComponent) override;
@@ -62,13 +62,14 @@ public:
         const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) override;
     void ShowMenuNG(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
         const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) override;
-    bool ShowPreviewNG() override;
-    void HidePreviewNG() override;
+    bool ShowDragPreviewWindowNG() override;
+    void HideDragPreviewWindowNG() override;
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) override;
     void HideMenuNG(bool showPreviewAnimation, bool startDrag) override;
-    void UpdateHideMenuOffsetNG(const NG::OffsetF& offset) override;
+    void UpdateHideMenuOffsetNG(const NG::OffsetF& offset, float menuScale, bool isRedragStart) override;
     void ContextMenuSwitchDragPreviewAnimationtNG(const RefPtr<NG::FrameNode>& dragPreviewNode,
         const NG::OffsetF& offset) override;
+    void UpdatePreviewPosition() override;
     void ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent = true) override;
     void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true) override;
@@ -97,8 +98,8 @@ public:
     void SetHotAreas(const std::vector<Rect>& rects, int32_t nodeId) override;
     void DeleteHotAreas(int32_t nodeId) override;
     void ClearToast() override;
-    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
-        const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset) override;
+    void ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback) override;
+    void CloseToast(const int32_t toastId, std::function<void(int32_t)>&& callback) override;
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks) override;
@@ -134,7 +135,6 @@ public:
     // Gets parent window's size and offset
     Rect GetParentWindowRect() const override;
     Rect GetUIExtensionHostWindowRect() const override;
-    bool CheckHostWindowStatus() const override;
 
     bool IsFocused() override;
     void RequestFocus() override;
@@ -146,6 +146,7 @@ public:
     void ResizeWindowForFoldStatus(int32_t parentContainerId) override;
     void MarkDirtyDialogSafeArea() override;
 
+    bool Close() override;
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);
@@ -160,10 +161,8 @@ private:
         int32_t& width, int32_t& height, int32_t& posX, int32_t& posY, float& density) const;
     bool InitToastDialogWindow(int32_t width, int32_t height, int32_t posX, int32_t posY, bool isToast = false);
     bool InitToastDialogView(int32_t width, int32_t height, float density);
-    void ShowToastForAbility(const std::string& message, int32_t duration, const std::string& bottom,
-        const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset);
-    void ShowToastForService(const std::string& message, int32_t duration, const std::string& bottom,
-        const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset);
+    void ShowToastForAbility(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
+    void ShowToastForService(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
     void ShowDialogForAbility(const std::string& title, const std::string& message,
         const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
         const std::set<std::string>& callbacks);
@@ -180,7 +179,7 @@ private:
         std::function<void(int32_t, int32_t)>&& callback);
     void ShowActionMenuForService(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
-
+    
     RefPtr<PipelineBase> GetChildPipelineContext() const;
     void ContainerModalUnFocus();
 

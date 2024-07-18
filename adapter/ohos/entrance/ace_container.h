@@ -41,9 +41,9 @@
 #include "core/common/font_manager.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/common/resource/resource_configuration.h"
+#include "core/common/router_recover_record.h"
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/pipeline_context.h"
-#include "interfaces/inner_api/ace/constants.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -98,7 +98,8 @@ public:
 
     ~AceContainer() override;
 
-    bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node) override;
+    bool UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
+        uint32_t autoFillSessionId, bool isNative = true) override;
 
     void Initialize() override;
 
@@ -205,14 +206,16 @@ public:
         return aceView_ ? aceView_->GetPosY() : 0;
     }
 
-    AceView* GetAceView() const
+    RefPtr<AceView> GetAceView() const override
     {
+        std::lock_guard<std::mutex> lock(viewMutex_);
         return aceView_;
     }
 
     void* GetView() const override
     {
-        return static_cast<void*>(aceView_);
+        std::lock_guard<std::mutex> lock(viewMutex_);
+        return static_cast<void*>(AceType::RawPtr(aceView_));
     }
 
     void SetWindowModal(WindowModal windowModal)
@@ -351,7 +354,7 @@ public:
         return isSubContainer_;
     }
 
-    bool IsFormRender() const
+    bool IsFormRender() const override
     {
         return isFormRender_;
     }
@@ -388,6 +391,16 @@ public:
         }
     }
 
+    bool IsUseCustomBg() const
+    {
+        return isUseCustomBg_;
+    }
+
+    void SetIsUseCustomBg(bool isUseCustomBg)
+    {
+        isUseCustomBg_ = isUseCustomBg;
+    }
+
     bool IsTransparentBg() const;
 
     static void CreateContainer(int32_t instanceId, FrontendType type, const std::string& instanceName,
@@ -418,23 +431,22 @@ public:
     static void AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::string& hapPath,
         const std::vector<std::string>& paths);
     static void AddLibPath(int32_t instanceId, const std::vector<std::string>& libPath);
-    static void SetView(AceView* view, double density, int32_t width, int32_t height,
+    static void SetView(const RefPtr<AceView>& view, double density, int32_t width, int32_t height,
         sptr<OHOS::Rosen::Window> rsWindow, UIEnvCallback callback = nullptr);
     static UIContentErrorCode SetViewNew(
-        AceView* view, double density, float width, float height, sptr<OHOS::Rosen::Window> rsWindow);
+        const RefPtr<AceView>& view, double density, float width, float height, sptr<OHOS::Rosen::Window> rsWindow);
     static void SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow);
     static sptr<OHOS::Rosen::Window> GetUIWindow(int32_t instanceId);
     static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);
     static OHOS::AbilityRuntime::Context* GetRuntimeContext(int32_t instanceId);
-    static void SetFontScale(int32_t instanceId, float fontScale);
-    static void SetFontWeightScale(int32_t instanceId, float fontScale);
     static void SetWindowStyle(int32_t instanceId, WindowModal windowModal, ColorScheme colorScheme);
-    static std::pair<std::string, UIContentErrorCode> RestoreRouterStack(
-        int32_t instanceId, const std::string& contentInfo);
-    static std::string GetContentInfo(int32_t instanceId);
+    static std::pair<RouterRecoverRecord, UIContentErrorCode> RestoreRouterStack(
+        int32_t instanceId, const std::string& contentInfo, ContentInfoType type);
+    static std::string GetContentInfo(int32_t instanceId, ContentInfoType type);
 
     static RefPtr<AceContainer> GetContainer(int32_t instanceId);
     static bool UpdatePage(int32_t instanceId, int32_t pageId, const std::string& content);
+    static bool RemoveOverlayBySubwindowManager(int32_t instanceId);
 
     // ArkTsCard
     static std::shared_ptr<Rosen::RSSurfaceNode> GetFormSurfaceNode(int32_t instanceId);
@@ -474,7 +486,7 @@ public:
         isSubContainer_ = isSubContainer;
     }
 
-    void SetIsFormRender(bool isFormRender)
+    void SetIsFormRender(bool isFormRender) override
     {
         isFormRender_ = isFormRender;
     }
@@ -545,13 +557,18 @@ public:
     bool IsSceneBoardEnabled() override;
 
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
-    bool GetCurPointerEventInfo(int32_t pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
-        StopDragCallback&& stopDragCallback) override;
+    bool GetCurPointerEventInfo(int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
+        int32_t& sourceTool, StopDragCallback&& stopDragCallback) override;
 
-    bool RequestAutoFill(const RefPtr<NG::FrameNode>& node,
-        AceAutoFillType autoFillType, bool& isPopup, bool isNewPassWord = false) override;
-    bool RequestAutoSave(const RefPtr<NG::FrameNode>& node) override;
+    bool GetCurPointerEventSourceType(int32_t& sourceType) override;
+
+    bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
+        bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true) override;
+    bool IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType) override;
+    bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish,
+        const std::function<void()>& onUIExtNodeBindingCompleted, bool isNative = true) override;
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
+    void OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& frameNode, AbilityBase::ViewData& viewData);
     bool ChangeType(AbilityBase::ViewData& viewData);
     AceAutoFillType PlaceHolderToType(const std::string& onePlaceHolder) override;
 
@@ -610,6 +627,11 @@ public:
         return isUIExtensionAbilityHost_;
     }
 
+    void RecordResAdapter(const std::string& key)
+    {
+        resAdapterRecord_.emplace(key);
+    }
+
     std::vector<Ace::RectF> GetOverlayNodePositions();
 
     void RegisterOverlayNodePositionsUpdateCallback(
@@ -617,6 +639,20 @@ public:
 
     OHOS::Rosen::WMError RegisterAvoidAreaChangeListener(sptr<OHOS::Rosen::IAvoidAreaChangedListener>& listener);
     OHOS::Rosen::WMError UnregisterAvoidAreaChangeListener(sptr<OHOS::Rosen::IAvoidAreaChangedListener>& listener);
+
+    bool NeedFullUpdate(uint32_t limitKey);
+    void NotifyDensityUpdate();
+    void NotifyDirectionUpdate();
+
+    void SetRegisterComponents(const std::vector<std::string>& registerComponents)
+    {
+        registerComponents_ = registerComponents;
+    }
+
+    std::vector<std::string> GetRegisterComponents() override
+    {
+        return registerComponents_;
+    }
 
 private:
     virtual bool MaybeRelease() override;
@@ -628,22 +664,22 @@ private:
     std::string GetFontFamilyName(std::string path);
     bool endsWith(std::string str, std::string suffix);
 
-    void AttachView(std::shared_ptr<Window> window, AceView* view, double density, float width, float height,
-        uint32_t windowId, UIEnvCallback callback = nullptr);
+    void AttachView(std::shared_ptr<Window> window, const RefPtr<AceView>& view, double density, float width,
+        float height, uint32_t windowId, UIEnvCallback callback = nullptr);
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);
     sptr<OHOS::Rosen::Window> GetUIWindowInner() const;
     std::weak_ptr<OHOS::AppExecFwk::Ability> GetAbilityInner() const;
     std::weak_ptr<OHOS::AbilityRuntime::Context> GetRuntimeContextInner() const;
 
     void RegisterStopDragCallback(int32_t pointerId, StopDragCallback&& stopDragCallback);
-    void SetFontScaleAndWeightScale(const ParsedConfig& parsedConfig);
+    void SetFontScaleAndWeightScale(const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange);
     void ReleaseResourceAdapter();
     void FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPtr<ViewDataWrap> &viewDataWrap);
 
     void NotifyConfigToSubContainers(const ParsedConfig& parsedConfig, const std::string& configuration);
 
     int32_t instanceId_ = 0;
-    AceView* aceView_ = nullptr;
+    RefPtr<AceView> aceView_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;
     RefPtr<PlatformResRegister> resRegister_;
@@ -679,18 +715,21 @@ private:
     bool isUIExtensionSubWindow_ = false;
     bool isUIExtensionAbilityProcess_ = false;
     bool isUIExtensionAbilityHost_ = false;
+    bool isUseCustomBg_ = false;
 
     DeviceOrientation orientation_ = DeviceOrientation::ORIENTATION_UNDEFINED;
 
     // for other AceContainer subscribe configuration from host AceContaier
     // key is instanceId, value is callback function
     std::unordered_map<int32_t, ConfigurationChangedCallback> configurationChangedCallbacks_;
+    std::vector<std::string> registerComponents_;
 
     std::unordered_set<std::string> resAdapterRecord_;
 
     mutable std::mutex frontendMutex_;
     mutable std::mutex pipelineMutex_;
     mutable std::mutex destructMutex_;
+    mutable std::mutex viewMutex_;
 
     mutable std::mutex cardFrontMutex_;
     mutable std::mutex cardPipelineMutex_;
@@ -707,6 +746,7 @@ private:
     std::mutex pointerEventMutex_;
     std::shared_ptr<MMI::PointerEvent> currentPointerEvent_;
     std::unordered_map<int32_t, std::list<StopDragCallback>> stopDragCallbackMap_;
+    std::map<int32_t, std::shared_ptr<MMI::PointerEvent>> currentEvents_;
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };
 

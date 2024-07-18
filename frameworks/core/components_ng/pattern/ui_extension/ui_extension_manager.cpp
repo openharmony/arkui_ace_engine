@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "core/components_ng/pattern/ui_extension/security_ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -44,7 +45,17 @@ void UIExtensionManager::UIExtensionIdUtility::RecycleExtensionId(int32_t id)
 void UIExtensionManager::RegisterUIExtensionInFocus(
     const WeakPtr<UIExtensionPattern>& uiExtensionFocused, const WeakPtr<SessionWrapper>& sessionWrapper)
 {
+    securityUiExtensionFocused_ = nullptr;
     uiExtensionFocused_ = uiExtensionFocused;
+    sessionWrapper_ = sessionWrapper;
+}
+
+void UIExtensionManager::RegisterSecurityUIExtensionInFocus(
+    const WeakPtr<SecurityUIExtensionPattern>& uiExtensionFocused,
+    const WeakPtr<SessionWrapper>& sessionWrapper)
+{
+    uiExtensionFocused_ = nullptr;
+    securityUiExtensionFocused_ = uiExtensionFocused;
     sessionWrapper_ = sessionWrapper;
 }
 
@@ -104,9 +115,22 @@ void UIExtensionManager::AddAliveUIExtension(int32_t nodeId, const WeakPtr<UIExt
     aliveUIExtensions_.try_emplace(nodeId, uiExtension);
 }
 
+void UIExtensionManager::AddAliveUIExtension(
+    int32_t nodeId, const WeakPtr<SecurityUIExtensionPattern>& uiExtension)
+{
+    aliveSecurityUIExtensions_.try_emplace(nodeId, uiExtension);
+}
+
 void UIExtensionManager::TransferOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type)
 {
     for (const auto& it : aliveUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        if (uiExtension) {
+            uiExtension->DispatchOriginAvoidArea(avoidArea, type);
+        }
+    }
+
+    for (const auto& it : aliveSecurityUIExtensions_) {
         auto uiExtension = it.second.Upgrade();
         if (uiExtension) {
             uiExtension->DispatchOriginAvoidArea(avoidArea, type);
@@ -120,18 +144,45 @@ void UIExtensionManager::RemoveDestroyedUIExtension(int32_t nodeId)
     if (it != aliveUIExtensions_.end()) {
         aliveUIExtensions_.erase(nodeId);
     }
+
+    auto iter = aliveSecurityUIExtensions_.find(nodeId);
+    if (iter != aliveSecurityUIExtensions_.end()) {
+        aliveSecurityUIExtensions_.erase(nodeId);
+    }
 }
 
 bool UIExtensionManager::NotifyOccupiedAreaChangeInfo(const sptr<Rosen::OccupiedAreaChangeInfo>& info)
 {
-    auto sessionWrapper = sessionWrapper_.Upgrade();
-    return sessionWrapper && sessionWrapper->NotifyOccupiedAreaChangeInfo(info);
+    int32_t keyboardHeight = static_cast<int32_t>(info->rect_.height_);
+    if (keyboardHeight != 0) {
+        auto sessionWrapper = sessionWrapper_.Upgrade();
+        return sessionWrapper && sessionWrapper->NotifyOccupiedAreaChangeInfo(info);
+    }
+    // keyboardHeight is 0, broadcast it.
+    bool ret = false;
+    for (const auto& it : aliveUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        if (uiExtension) {
+            auto session = uiExtension->GetSessionWrapper();
+            if (session && session->IsSessionValid()) {
+                ret |= session->NotifyOccupiedAreaChangeInfo(info);
+            }
+        }
+    }
+    return ret;
 }
 
 void UIExtensionManager::NotifySizeChangeReason(WindowSizeChangeReason type,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     for (const auto& it : aliveUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        if (uiExtension) {
+            uiExtension->NotifySizeChangeReason(type, rsTransaction);
+        }
+    }
+
+    for (const auto& it : aliveSecurityUIExtensions_) {
         auto uiExtension = it.second.Upgrade();
         if (uiExtension) {
             uiExtension->NotifySizeChangeReason(type, rsTransaction);

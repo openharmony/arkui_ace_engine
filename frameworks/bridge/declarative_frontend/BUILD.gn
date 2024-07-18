@@ -45,6 +45,18 @@ template("declarative_frontend") {
       ]
     }
 
+    if (ace_engine_feature_enable_split_mode &&
+        defined(vendor_configs.ace_engine_advanced_split_mode_dirs)) {
+      include_dirs += vendor_configs.ace_engine_advanced_split_mode_dirs
+    }
+
+    if (ace_engine_feature_enable_split_mode &&
+        defined(vendor_configs.ace_engine_advanced_split_mode_bridge)) {
+      sources += vendor_configs.ace_engine_advanced_split_mode_bridge
+    } else {
+      sources += [ "ng/page_router_manager_factory.cpp" ]
+    }
+
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
     external_deps = [
       "ets_runtime:libark_jsruntime",
@@ -79,6 +91,7 @@ jsproxyclass_obj_path = base_output_path + "/js_proxy_class.o"
 jsenumstyle_obj_path = base_output_path + "/js_enum_style.o"
 jsmocksystemplugin_obj_path = base_output_path + "/js_mock_system_plugin.o"
 ark_theme_obj_path = base_output_path + "/arkTheme.o"
+jsuicontext_obj_path = base_output_path + "/jsUIContext.o"
 arkcomponent_obj_path = base_output_path + "/arkComponent.o"
 
 gen_obj("js_proxyclass") {
@@ -117,7 +130,7 @@ gen_obj("ark_component") {
   snapshot_dep = []
 }
 
-if (!is_arkui_x) {
+if (!is_arkui_x && (use_mac || use_mingw_win || use_linux)) {
   gen_obj("js_mock_system_plugin") {
     input = "$root_out_dir/obj/ide/tools/previewer/automock/dist/jsMockSystemPlugin.js"
     if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
@@ -127,6 +140,15 @@ if (!is_arkui_x) {
     output = jsmocksystemplugin_obj_path
     snapshot_dep = [ "//ide/tools/previewer/automock:gen_snapshot_jsmock" ]
   }
+}
+
+gen_obj("js_uicontext") {
+  input = "engine/jsUIContext.js"
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
+    jsuicontext_obj_path = base_output_path + "/jsUIContext.c"
+  }
+  output = jsuicontext_obj_path
+  snapshot_dep = []
 }
 
 # build declarative javascript engine source
@@ -153,8 +175,11 @@ template("declarative_js_engine") {
       ":gen_obj_src_ark_theme",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
+      ":gen_obj_src_js_uicontext",
+      ":mock",
+      ":prefetcher",
       ":shape",
-      ":uicontext",
+      ":statemanagement",
       ":x_node",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
     ]
@@ -194,6 +219,20 @@ template("declarative_js_engine") {
       "engine/js_types.cpp",
       "interfaces/profiler/js_profiler.cpp",
       "jsview/action_sheet/js_action_sheet.cpp",
+      "jsview/canvas/js_canvas.cpp",
+      "jsview/canvas/js_canvas_gradient.cpp",
+      "jsview/canvas/js_canvas_image_data.cpp",
+      "jsview/canvas/js_canvas_path.cpp",
+      "jsview/canvas/js_canvas_pattern.cpp",
+      "jsview/canvas/js_canvas_renderer.cpp",
+      "jsview/canvas/js_drawing_rendering_context.cpp",
+      "jsview/canvas/js_matrix2d.cpp",
+      "jsview/canvas/js_offscreen_canvas.cpp",
+      "jsview/canvas/js_offscreen_rendering_context.cpp",
+      "jsview/canvas/js_path2d.cpp",
+      "jsview/canvas/js_render_image.cpp",
+      "jsview/canvas/js_rendering_context.cpp",
+      "jsview/canvas/js_rendering_context_settings.cpp",
       "jsview/dialog/js_alert_dialog.cpp",
       "jsview/dialog/js_custom_dialog_controller.cpp",
       "jsview/js_animator.cpp",
@@ -204,12 +243,6 @@ template("declarative_js_engine") {
       "jsview/js_calendar.cpp",
       "jsview/js_calendar_controller.cpp",
       "jsview/js_calendar_picker.cpp",
-      "jsview/js_canvas.cpp",
-      "jsview/js_canvas_gradient.cpp",
-      "jsview/js_canvas_image_data.cpp",
-      "jsview/js_canvas_path.cpp",
-      "jsview/js_canvas_pattern.cpp",
-      "jsview/js_canvas_renderer.cpp",
       "jsview/js_checkbox.cpp",
       "jsview/js_checkboxgroup.cpp",
       "jsview/js_circle.cpp",
@@ -225,7 +258,6 @@ template("declarative_js_engine") {
       "jsview/js_data_panel.cpp",
       "jsview/js_datepicker.cpp",
       "jsview/js_divider.cpp",
-      "jsview/js_drawing_rendering_context.cpp",
       "jsview/js_dump_log.cpp",
       "jsview/js_ellipse.cpp",
       "jsview/js_ellipse_shape.cpp",
@@ -254,6 +286,8 @@ template("declarative_js_engine") {
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_line.cpp",
       "jsview/js_linear_gradient.cpp",
+      "jsview/js_linear_indicator.cpp",
+      "jsview/js_linear_indicator_controller.cpp",
       "jsview/js_list.cpp",
       "jsview/js_list_item.cpp",
       "jsview/js_list_item_group.cpp",
@@ -261,7 +295,6 @@ template("declarative_js_engine") {
       "jsview/js_local_storage.cpp",
       "jsview/js_location_button.cpp",
       "jsview/js_marquee.cpp",
-      "jsview/js_matrix2d.cpp",
       "jsview/js_menu.cpp",
       "jsview/js_menu_item.cpp",
       "jsview/js_menu_item_group.cpp",
@@ -273,14 +306,11 @@ template("declarative_js_engine") {
       "jsview/js_navigator.cpp",
       "jsview/js_navrouter.cpp",
       "jsview/js_node_container.cpp",
-      "jsview/js_offscreen_canvas.cpp",
-      "jsview/js_offscreen_rendering_context.cpp",
       "jsview/js_page_transition.cpp",
       "jsview/js_pan_handler.cpp",
       "jsview/js_particle.cpp",
       "jsview/js_paste_button.cpp",
       "jsview/js_path.cpp",
-      "jsview/js_path2d.cpp",
       "jsview/js_path_shape.cpp",
       "jsview/js_pattern_lock.cpp",
       "jsview/js_persistent.cpp",
@@ -294,10 +324,8 @@ template("declarative_js_engine") {
       "jsview/js_recycle_view.cpp",
       "jsview/js_refresh.cpp",
       "jsview/js_relative_container.cpp",
-      "jsview/js_render_image.cpp",
-      "jsview/js_rendering_context.cpp",
-      "jsview/js_rendering_context_settings.cpp",
       "jsview/js_repeat.cpp",
+      "jsview/js_repeat_virtual_scroll.cpp",
       "jsview/js_richeditor.cpp",
       "jsview/js_row.cpp",
       "jsview/js_row_split.cpp",
@@ -587,15 +615,12 @@ template("declarative_js_engine") {
       if (defined(config.build_container_scope_lib) &&
           config.build_container_scope_lib) {
         if (is_arkui_x) {
-          deps += [ "$ace_napi:ace_container_scope_static" ]
+          deps += [ "$ace_root/frameworks/core:ace_container_scope_static" ]
         } else {
-          deps += [ "$ace_napi:ace_container_scope" ]
+          deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
         }
       }
     }
-
-    include_dirs +=
-        [ "//foundation/window/window_manager/interfaces/innerkits" ]
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
     if (is_arkui_x) {
@@ -632,6 +657,7 @@ template("declarative_js_engine") {
       if (defined(config.window_scene_support) && config.window_scene_support) {
         sources += [
           "jsview/js_embedded_component.cpp",
+          "jsview/js_security_ui_extension.cpp",
           "jsview/js_ui_extension.cpp",
           "jsview/window_scene/js_root_scene.cpp",
           "jsview/window_scene/js_screen.cpp",
@@ -675,8 +701,11 @@ template("declarative_js_engine_ng") {
       ":gen_obj_src_ark_theme",
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
+      ":gen_obj_src_js_uicontext",
+      ":mock",
+      ":prefetcher",
       ":shape",
-      ":uicontext",
+      ":statemanagement",
       ":x_node",
       "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform",
     ]
@@ -724,6 +753,20 @@ template("declarative_js_engine_ng") {
       # jsviews
       "interfaces/profiler/js_profiler.cpp",
       "jsview/action_sheet/js_action_sheet.cpp",
+      "jsview/canvas/js_canvas.cpp",
+      "jsview/canvas/js_canvas_gradient.cpp",
+      "jsview/canvas/js_canvas_image_data.cpp",
+      "jsview/canvas/js_canvas_path.cpp",
+      "jsview/canvas/js_canvas_pattern.cpp",
+      "jsview/canvas/js_canvas_renderer.cpp",
+      "jsview/canvas/js_drawing_rendering_context.cpp",
+      "jsview/canvas/js_matrix2d.cpp",
+      "jsview/canvas/js_offscreen_canvas.cpp",
+      "jsview/canvas/js_offscreen_rendering_context.cpp",
+      "jsview/canvas/js_path2d.cpp",
+      "jsview/canvas/js_render_image.cpp",
+      "jsview/canvas/js_rendering_context.cpp",
+      "jsview/canvas/js_rendering_context_settings.cpp",
       "jsview/dialog/js_alert_dialog.cpp",
       "jsview/dialog/js_custom_dialog_controller.cpp",
       "jsview/js_animator.cpp",
@@ -734,12 +777,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_calendar.cpp",
       "jsview/js_calendar_controller.cpp",
       "jsview/js_calendar_picker.cpp",
-      "jsview/js_canvas.cpp",
-      "jsview/js_canvas_gradient.cpp",
-      "jsview/js_canvas_image_data.cpp",
-      "jsview/js_canvas_path.cpp",
-      "jsview/js_canvas_pattern.cpp",
-      "jsview/js_canvas_renderer.cpp",
       "jsview/js_checkbox.cpp",
       "jsview/js_checkboxgroup.cpp",
       "jsview/js_circle.cpp",
@@ -755,7 +792,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_data_panel.cpp",
       "jsview/js_datepicker.cpp",
       "jsview/js_divider.cpp",
-      "jsview/js_drawing_rendering_context.cpp",
       "jsview/js_ellipse.cpp",
       "jsview/js_ellipse_shape.cpp",
       "jsview/js_flex.cpp",
@@ -788,7 +824,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_loading_progress.cpp",
       "jsview/js_location_button.cpp",
       "jsview/js_marquee.cpp",
-      "jsview/js_matrix2d.cpp",
       "jsview/js_menu.cpp",
       "jsview/js_menu_item.cpp",
       "jsview/js_menu_item_group.cpp",
@@ -800,12 +835,9 @@ template("declarative_js_engine_ng") {
       "jsview/js_navigator.cpp",
       "jsview/js_navrouter.cpp",
       "jsview/js_node_container.cpp",
-      "jsview/js_offscreen_canvas.cpp",
-      "jsview/js_offscreen_rendering_context.cpp",
       "jsview/js_page_transition.cpp",
       "jsview/js_paste_button.cpp",
       "jsview/js_path.cpp",
-      "jsview/js_path2d.cpp",
       "jsview/js_path_shape.cpp",
       "jsview/js_polygon.cpp",
       "jsview/js_polyline.cpp",
@@ -816,10 +848,8 @@ template("declarative_js_engine_ng") {
       "jsview/js_rect_shape.cpp",
       "jsview/js_recycle_view.cpp",
       "jsview/js_refresh.cpp",
-      "jsview/js_render_image.cpp",
-      "jsview/js_rendering_context.cpp",
-      "jsview/js_rendering_context_settings.cpp",
       "jsview/js_repeat.cpp",
+      "jsview/js_repeat_virtual_scroll.cpp",
       "jsview/js_richeditor.cpp",
       "jsview/js_row.cpp",
       "jsview/js_row_split.cpp",
@@ -904,6 +934,7 @@ template("declarative_js_engine_ng") {
     if (defined(config.window_scene_support) && config.window_scene_support) {
       sources += [
         "jsview/js_embedded_component.cpp",
+        "jsview/js_security_ui_extension.cpp",
         "jsview/js_ui_extension.cpp",
         "jsview/window_scene/js_root_scene.cpp",
         "jsview/window_scene/js_screen.cpp",
@@ -995,7 +1026,7 @@ template("declarative_js_engine_ng") {
       }
       if (defined(config.build_container_scope_lib) &&
           config.build_container_scope_lib) {
-        deps += [ "$ace_napi:ace_container_scope" ]
+        deps += [ "$ace_root/frameworks/core:ace_container_scope" ]
       }
     }
 
@@ -1083,6 +1114,24 @@ foreach(item, ace_platforms) {
   }
 }
 
+ohos_abc("statemanagement") {
+  sources = [ "engine/jsStateManagement.js" ]
+  output_name = "statemanagement"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("mock") {
+  sources = [ "engine/jsMock.js" ]
+  output_name = "mock"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
 ohos_abc("x_node") {
   sources = [ "engine/jsXNode.js" ]
   output_name = "node"
@@ -1092,9 +1141,9 @@ ohos_abc("x_node") {
   part_name = ace_engine_part
 }
 
-ohos_abc("uicontext") {
-  sources = [ "engine/jsUIContext.js" ]
-  output_name = "uicontext"
+ohos_abc("prefetcher") {
+  sources = [ "engine/jsPrefetcher.js" ]
+  output_name = "prefetcher"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui"
   subsystem_name = ace_engine_subsystem

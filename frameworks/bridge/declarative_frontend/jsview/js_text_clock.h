@@ -34,6 +34,7 @@ public:
     static void SetFontFamily(const JSCallbackInfo& info);
     static void SetTextShadow(const JSCallbackInfo& info);
     static void SetFontFeature(const JSCallbackInfo& info);
+    static void SetDateTimeOptions(const JSCallbackInfo& info);
 
 protected:
     static void SetFontDefault();

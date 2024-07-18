@@ -42,9 +42,11 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest001, TestSize.Leve
      * @tc.steps: step2. set the frameNode to tab content.
      * @tc.expected: set the frameNode to tab content successfully.
      */
-    Create([=](TabsModelNG model) {
-        CreateSingleItem([=](TabContentModelNG tabContentModel) { tabContentModel.SetCustomStyleNode(frameNode); }, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.SetCustomStyleNode(frameNode);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step3. check the frameNode.
@@ -69,7 +71,9 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest002, TestSize.Leve
      * @tc.steps: step1. create a tab.
      * @tc.expected: create a tab successfully.
      */
-    Create([=](TabsModelNG model) { CreateSingleItem([=](TabContentModelNG tabContentModel) {}, 0); });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. check the frameNode.
@@ -91,17 +95,9 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest003, TestSize.Leve
     /**
      * @tc.cases: create tabs
      */
-    TabsModelNG model;
-    model.Create(BarPosition::START, 0, nullptr, nullptr);
-    ViewAbstract::SetWidth(CalcLength(TABS_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(TABS_HEIGHT));
-    CreateItem(TABCONTENT_NUMBER);
-    auto tabNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    auto tabBarNode_ = AceType::DynamicCast<FrameNode>(tabNode->GetTabBar());
-    tabBarNode_->GetOrCreateFocusHub();
-    model.Pop();
-    GetInstance();
-    FlushLayoutTask(frameNode_);
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.cases: set invalid properties
@@ -177,9 +173,11 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest004, TestSize.Leve
      * @tc.steps: step2. set the frameNode to tab content.
      * @tc.expected: set the frameNode to tab content successfully.
      */
-    Create([=](TabsModelNG model) {
-        CreateSingleItem([=](TabContentModelNG tabContentModel) { tabContentModel.SetCustomStyleNode(frameNode); }, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.SetCustomStyleNode(frameNode);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step3. set indicator to tab content.
@@ -219,7 +217,9 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest005, TestSize.Leve
      * @tc.steps: step1. create a tab.
      * @tc.expected: create a tab successfully.
      */
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. set indicator to tab content.
@@ -267,9 +267,11 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest006, TestSize.Leve
      * @tc.steps: step2. set the frameNode to tab content.
      * @tc.expected: set the frameNode to tab content successfully.
      */
-    Create([=](TabsModelNG model) {
-        CreateSingleItem([=](TabContentModelNG tabContentModel) { tabContentModel.SetCustomStyleNode(frameNode); }, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.SetCustomStyleNode(frameNode);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step3. set IndicatorStyle to tab content.
@@ -299,7 +301,9 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest007, TestSize.Leve
      * @tc.steps: step1. create a tab.
      * @tc.expected: create a tab successfully.
      */
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. set IndicatorStyle to tab content.
@@ -396,9 +400,11 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest010, TestSize.Leve
      * @tc.steps: step2. set the frameNode to tab content.
      * @tc.expected: set the frameNode to tab content successfully.
      */
-    Create([=](TabsModelNG model) {
-        CreateSingleItem([=](TabContentModelNG tabContentModel) { tabContentModel.SetCustomStyleNode(frameNode); }, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.SetCustomStyleNode(frameNode);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step3. set BoardStyle to tab content.
@@ -430,7 +436,9 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest011, TestSize.Leve
      * @tc.steps: step1. create a tab.
      * @tc.expected: create a tab successfully.
      */
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. set BoardStyle to tab content.
@@ -470,9 +478,11 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest012, TestSize.Leve
      * @tc.steps: step2. set the frameNode to tab content.
      * @tc.expected: set the frameNode to tab content successfully.
      */
-    Create([=](TabsModelNG model) {
-        CreateSingleItem([=](TabContentModelNG tabContentModel) { tabContentModel.SetCustomStyleNode(frameNode); }, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.SetCustomStyleNode(frameNode);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step3. set BoardStyle to tab content.
@@ -504,7 +514,9 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest013, TestSize.Leve
      * @tc.steps: step1. create a tab.
      * @tc.expected: create a tab successfully.
      */
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. set BoardStyle to tab content.
@@ -544,9 +556,11 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest014, TestSize.Leve
      * @tc.steps: step2. set the frameNode to tab content.
      * @tc.expected: set the frameNode to tab content successfully.
      */
-    Create([=](TabsModelNG model) {
-        CreateSingleItem([=](TabContentModelNG tabContentModel) { tabContentModel.SetCustomStyleNode(frameNode); }, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.SetCustomStyleNode(frameNode);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step3. set default SelectedMode to tab content.
@@ -574,7 +588,9 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest015, TestSize.Leve
      * @tc.steps: step1. create a tab.
      * @tc.expected: create a tab successfully.
      */
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. set default SelectedMode to tab content.
@@ -610,9 +626,11 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest016, TestSize.Leve
      * @tc.steps: step2. set the frameNode to tab content.
      * @tc.expected: set the frameNode to tab content successfully.
      */
-    Create([=](TabsModelNG model) {
-        CreateSingleItem([=](TabContentModelNG tabContentModel) { tabContentModel.SetCustomStyleNode(frameNode); }, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.SetCustomStyleNode(frameNode);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step3. set LabelStyle to tab content.
@@ -652,7 +670,9 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest017, TestSize.Leve
      * @tc.steps: step1. create a tab.
      * @tc.expected: create a tab successfully.
      */
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. set LabelStyle to tab content.
@@ -700,9 +720,11 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest018, TestSize.Leve
      * @tc.steps: step2. set the frameNode to tab content.
      * @tc.expected: set the frameNode to tab content successfully.
      */
-    Create([=](TabsModelNG model) {
-        CreateSingleItem([=](TabContentModelNG tabContentModel) { tabContentModel.SetCustomStyleNode(frameNode); }, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.SetCustomStyleNode(frameNode);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step3. set LabelStyle to tab content.
@@ -754,7 +776,9 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest019, TestSize.Leve
      * @tc.steps: step1. create a tab.
      * @tc.expected: create a tab successfully.
      */
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. set IndicatorStyle to tab content.
@@ -814,9 +838,11 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest020, TestSize.Leve
      * @tc.steps: step2. set the frameNode to tab content.
      * @tc.expected: set the frameNode to tab content successfully.
      */
-    Create([=](TabsModelNG model) {
-        CreateSingleItem([=](TabContentModelNG tabContentModel) { tabContentModel.SetCustomStyleNode(frameNode); }, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.SetCustomStyleNode(frameNode);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step3. set IconStyle to tab content.
@@ -847,7 +873,9 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest021, TestSize.Leve
      * @tc.steps: step1. create a tab.
      * @tc.expected: create a tab successfully.
      */
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. set IndicatorStyle to tab content.
@@ -886,9 +914,11 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest022, TestSize.Leve
      * @tc.steps: step2. set the frameNode to tab content.
      * @tc.expected: set the frameNode to tab content successfully.
      */
-    Create([=](TabsModelNG model) {
-        CreateSingleItem([=](TabContentModelNG tabContentModel) { tabContentModel.SetCustomStyleNode(frameNode); }, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.SetCustomStyleNode(frameNode);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step3. set IconStyle to tab content.
@@ -921,7 +951,9 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest023, TestSize.Leve
      * @tc.steps: step1. create a tab.
      * @tc.expected: create a tab successfully.
      */
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. set IconStyle to tab content.
@@ -979,14 +1011,12 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest024, TestSize.Leve
      * @tc.steps: step3. set the frameNode and labelStyle to tab content.
      * @tc.expected: set the frameNode and labelStyle to tab content successfully.
      */
-    Create([=](TabsModelNG model) {
-        CreateSingleItem(
-            [=](TabContentModelNG tabContentModel) {
-                tabContentModel.UpdateLabelStyle(labelStyle, layoutProperty);
-                tabContentModel.SetCustomStyleNode(frameNode);
-            },
-            0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.UpdateLabelStyle(labelStyle, layoutProperty);
+    tabContentModel.SetCustomStyleNode(frameNode);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
 
     EXPECT_EQ(layoutProperty->GetTextOverflow(), labelStyle.textOverflow);
     EXPECT_EQ(layoutProperty->GetMaxLines(), labelStyle.maxLines);
@@ -1036,11 +1066,11 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest025, TestSize.Leve
      * @tc.steps: step2. create a tab.
      * @tc.expected: create a tab successfully.
      */
-    Create([=](TabsModelNG model) {
-        CreateSingleItem(
-            [=](TabContentModelNG tabContentModel) { tabContentModel.UpdateLabelStyle(labelStyle, layoutProperty); },
-            0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.UpdateLabelStyle(labelStyle, layoutProperty);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
     EXPECT_EQ(layoutProperty->GetTextOverflow(), labelStyle.textOverflow);
     EXPECT_EQ(layoutProperty->GetMaxLines(), labelStyle.maxLines);
     EXPECT_EQ(layoutProperty->GetAdaptMinFontSize(), labelStyle.minFontSize);
@@ -1087,14 +1117,12 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest026, TestSize.Leve
      * @tc.steps: step3. set the frameNode and labelStyle to tab content.
      * @tc.expected: set the frameNode and labelStyle to tab content successfully.
      */
-    Create([=](TabsModelNG model) {
-        CreateSingleItem(
-            [=](TabContentModelNG tabContentModel) {
-                tabContentModel.UpdateLabelStyle(labelStyle, layoutProperty);
-                tabContentModel.SetCustomStyleNode(frameNode);
-            },
-            0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.UpdateLabelStyle(labelStyle, layoutProperty);
+    tabContentModel.SetCustomStyleNode(frameNode);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
 
     EXPECT_FALSE(layoutProperty->GetTextOverflow().has_value());
     EXPECT_FALSE(layoutProperty->GetMaxLines().has_value());
@@ -1134,11 +1162,11 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest027, TestSize.Leve
      * @tc.steps: step2. create a tab.
      * @tc.expected: create a tab successfully.
      */
-    Create([=](TabsModelNG model) {
-        CreateSingleItem(
-            [=](TabContentModelNG tabContentModel) { tabContentModel.UpdateLabelStyle(labelStyle, layoutProperty); },
-            0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.UpdateLabelStyle(labelStyle, layoutProperty);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
 
     EXPECT_FALSE(layoutProperty->GetTextOverflow().has_value());
     EXPECT_FALSE(layoutProperty->GetMaxLines().has_value());
@@ -1179,9 +1207,11 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest028, TestSize.Leve
      * @tc.steps: step2. set the frameNode to tab content.
      * @tc.expected: set the frameNode to tab content successfully.
      */
-    Create([=](TabsModelNG model) {
-        CreateSingleItem([=](TabContentModelNG tabContentModel) { tabContentModel.SetCustomStyleNode(frameNode); }, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.SetCustomStyleNode(frameNode);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step3. set LabelStyle to tab content.
@@ -1222,7 +1252,9 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest029, TestSize.Leve
      * @tc.steps: step1. create a tab.
      * @tc.expected: create a tab successfully.
      */
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. set LabelStyle to tab content.
@@ -1271,22 +1303,22 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest030, TestSize.Leve
      * @tc.steps: step2. SetTabBar without builder
      * @tc.expected: tabbarnode has default textNode and imageNode
      */
-    Create([=](TabsModelNG model) {
-        auto tabFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-        auto weakTab = AceType::WeakClaim(AceType::RawPtr(tabFrameNode));
-        TabContentModelNG tabContentModel;
-        tabContentModel.Create();
-        tabContentModel.SetTabBar("", "", std::nullopt, nullptr, true);
-        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
-        ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
-        tabContentModel.SetCustomStyleNode(frameNode);
-        auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-        auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
-        tabContentNode->UpdateRecycleElmtId(0);
-        tabContentNode->GetTabBarItemId();
-        tabContentNode->SetParent(weakTab);
-        tabContentModel.Pop();
-    });
+    TabsModelNG model = CreateTabs();
+    auto tabFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto weakTab = AceType::WeakClaim(AceType::RawPtr(tabFrameNode));
+    TabContentModelNG tabContentModel;
+    tabContentModel.Create();
+    tabContentModel.SetTabBar("", "", std::nullopt, nullptr, true);
+    ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+    ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
+    tabContentModel.SetCustomStyleNode(frameNode);
+    auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
+    tabContentNode->UpdateRecycleElmtId(0);
+    tabContentNode->GetTabBarItemId();
+    tabContentNode->SetParent(weakTab);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step3. check the tag of frame node.
@@ -1303,7 +1335,6 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest030, TestSize.Leve
      * @tc.steps: step4. check the frameNode.
      * @tc.expected: true.
      */
-    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
     ASSERT_NE(tabContentPattern, nullptr);
     EXPECT_TRUE(tabContentPattern->HasSubTabBarStyleNode());
@@ -1320,21 +1351,21 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest031, TestSize.Leve
      * @tc.steps: step1. SetTabBar without builder
      * @tc.expected: tabbarnode has default textNode and imageNode
      */
-    Create([](TabsModelNG model) {
-        auto tabFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-        auto weakTab = AceType::WeakClaim(AceType::RawPtr(tabFrameNode));
-        TabContentModelNG tabContentModel;
-        tabContentModel.Create();
-        tabContentModel.SetTabBar("", "", std::nullopt, nullptr, true);
-        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
-        ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
-        auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-        auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
-        tabContentNode->UpdateRecycleElmtId(0);
-        tabContentNode->GetTabBarItemId();
-        tabContentNode->SetParent(weakTab);
-        tabContentModel.Pop();
-    });
+    TabsModelNG model = CreateTabs();
+    auto tabFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto weakTab = AceType::WeakClaim(AceType::RawPtr(tabFrameNode));
+    TabContentModelNG tabContentModel;
+    tabContentModel.Create();
+    tabContentModel.SetTabBar("", "", std::nullopt, nullptr, true);
+    ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+    ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
+    auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
+    tabContentNode->UpdateRecycleElmtId(0);
+    tabContentNode->GetTabBarItemId();
+    tabContentNode->SetParent(weakTab);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step3. check the tag of frame node.
@@ -1351,7 +1382,6 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest031, TestSize.Leve
      * @tc.steps: step3. check the frameNode.
      * @tc.expected: false.
      */
-    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
     ASSERT_NE(tabContentPattern, nullptr);
     EXPECT_FALSE(tabContentPattern->HasSubTabBarStyleNode());
@@ -1376,25 +1406,25 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest032, TestSize.Leve
      * @tc.steps: step2. set the frameNode to tab content.
      * @tc.expected: set the frameNode to tab content successfully.
      */
-    Create([=](TabsModelNG model) {
-        auto tabFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-        auto weakTab = AceType::WeakClaim(AceType::RawPtr(tabFrameNode));
-        TabContentModelNG tabContentModel;
-        tabContentModel.Create();
-        TabBarSymbol tabBarSymbol;
-        tabContentModel.SetTabBar("", "", tabBarSymbol, nullptr, true);
-        tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
-        ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
-        tabContentModel.SetCustomStyleNode(frameNode);
-        auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-        auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
-        tabContentNode->UpdateRecycleElmtId(0);
-        tabContentNode->GetTabBarItemId();
-        tabContentNode->SetParent(weakTab);
-        tabContentModel.AddTabBarItem(tabContentFrameNode, 0, true);
-        ViewStackProcessor::GetInstance()->PopContainer();
-    });
+    TabsModelNG model = CreateTabs();
+    auto tabFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto weakTab = AceType::WeakClaim(AceType::RawPtr(tabFrameNode));
+    TabContentModelNG tabContentModel;
+    tabContentModel.Create();
+    TabBarSymbol tabBarSymbol;
+    tabContentModel.SetTabBar("", "", tabBarSymbol, nullptr, true);
+    tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+    ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
+    tabContentModel.SetCustomStyleNode(frameNode);
+    auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
+    tabContentNode->UpdateRecycleElmtId(0);
+    tabContentNode->GetTabBarItemId();
+    tabContentNode->SetParent(weakTab);
+    tabContentModel.AddTabBarItem(tabContentFrameNode, 0, true);
+    ViewStackProcessor::GetInstance()->PopContainer();
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step3. check the tag of frame node.
@@ -1421,7 +1451,6 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest032, TestSize.Leve
      * @tc.steps: step5. check the frameNode.
      * @tc.expected: true.
      */
-    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
     ASSERT_NE(tabContentPattern, nullptr);
     EXPECT_TRUE(tabContentPattern->HasSubTabBarStyleNode());
@@ -1438,24 +1467,24 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest033, TestSize.Leve
      * @tc.steps: step1. create a tab.
      * @tc.expected: create a tab successfully.
      */
-    Create([](TabsModelNG model) {
-        auto tabFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-        auto weakTab = AceType::WeakClaim(AceType::RawPtr(tabFrameNode));
-        TabContentModelNG tabContentModel;
-        tabContentModel.Create();
-        TabBarSymbol tabBarSymbol;
-        tabContentModel.SetTabBar("", "", tabBarSymbol, nullptr, true);
-        tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
-        ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
-        auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-        auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
-        tabContentNode->UpdateRecycleElmtId(0);
-        tabContentNode->GetTabBarItemId();
-        tabContentNode->SetParent(weakTab);
-        tabContentModel.AddTabBarItem(tabContentFrameNode, 0, true);
-        ViewStackProcessor::GetInstance()->PopContainer();
-    });
+    TabsModelNG model = CreateTabs();
+    auto tabFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto weakTab = AceType::WeakClaim(AceType::RawPtr(tabFrameNode));
+    TabContentModelNG tabContentModel;
+    tabContentModel.Create();
+    TabBarSymbol tabBarSymbol;
+    tabContentModel.SetTabBar("", "", tabBarSymbol, nullptr, true);
+    tabContentModel.SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+    ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
+    auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
+    tabContentNode->UpdateRecycleElmtId(0);
+    tabContentNode->GetTabBarItemId();
+    tabContentNode->SetParent(weakTab);
+    tabContentModel.AddTabBarItem(tabContentFrameNode, 0, true);
+    ViewStackProcessor::GetInstance()->PopContainer();
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. check the tag of frame node.
@@ -1482,7 +1511,6 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest033, TestSize.Leve
      * @tc.steps: step4. check the frameNode.
      * @tc.expected: false.
      */
-    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
     ASSERT_NE(tabContentPattern, nullptr);
     EXPECT_FALSE(tabContentPattern->HasSubTabBarStyleNode());
@@ -1515,14 +1543,12 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest034, TestSize.Leve
      * @tc.steps: step3. set the frameNode and padding to tab content.
      * @tc.expected: set the frameNode and padding to tab content successfully.
      */
-    Create([=](TabsModelNG model) {
-        CreateSingleItem(
-            [=](TabContentModelNG tabContentModel) {
-                tabContentModel.SetPadding(padding);
-                tabContentModel.SetCustomStyleNode(frameNode);
-            },
-            0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.SetPadding(padding);
+    tabContentModel.SetCustomStyleNode(frameNode);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
 
@@ -1562,9 +1588,11 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest035, TestSize.Leve
      * @tc.steps: step2. create a tab and set padding to the tab content.
      * @tc.expected: create a tab and set padding to the tab content successfully.
      */
-    Create([=](TabsModelNG model) {
-        CreateSingleItem([=](TabContentModelNG tabContentModel) { tabContentModel.SetPadding(padding); }, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.SetPadding(padding);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
 
@@ -1605,14 +1633,12 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest036, TestSize.Leve
      * @tc.expected: set the frameNode and the LayoutMode to tab content successfully.
      */
     LayoutMode layoutMode = LayoutMode::AUTO;
-    Create([=](TabsModelNG model) {
-        CreateSingleItem(
-            [=](TabContentModelNG tabContentModel) {
-                tabContentModel.SetLayoutMode(layoutMode);
-                tabContentModel.SetCustomStyleNode(frameNode);
-            },
-            0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.SetLayoutMode(layoutMode);
+    tabContentModel.SetCustomStyleNode(frameNode);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
 
@@ -1642,9 +1668,11 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest037, TestSize.Leve
      * @tc.expected: create a tab and set LayoutMode successfully.
      */
     LayoutMode layoutMode = LayoutMode::AUTO;
-    Create([=](TabsModelNG model) {
-        CreateSingleItem([=](TabContentModelNG tabContentModel) { tabContentModel.SetLayoutMode(layoutMode); }, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.SetLayoutMode(layoutMode);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
 
@@ -1682,14 +1710,12 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest038, TestSize.Leve
      * @tc.expected: set the frameNode and the FlexAlign to tab content successfully.
      */
     FlexAlign verticalAlign = FlexAlign::CENTER;
-    Create([=](TabsModelNG model) {
-        CreateSingleItem(
-            [=](TabContentModelNG tabContentModel) {
-                tabContentModel.SetVerticalAlign(verticalAlign);
-                tabContentModel.SetCustomStyleNode(frameNode);
-            },
-            0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.SetVerticalAlign(verticalAlign);
+    tabContentModel.SetCustomStyleNode(frameNode);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
 
@@ -1719,10 +1745,11 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest039, TestSize.Leve
      * @tc.expected: set the FlexAlign to tab content successfully.
      */
     FlexAlign verticalAlign = FlexAlign::CENTER;
-    Create([=](TabsModelNG model) {
-        CreateSingleItem(
-            [=](TabContentModelNG tabContentModel) { tabContentModel.SetVerticalAlign(verticalAlign); }, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.SetVerticalAlign(verticalAlign);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
 
@@ -1760,14 +1787,12 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest040, TestSize.Leve
      * @tc.expected: set the frameNode and SymmetricExtensible to tab content successfully.
      */
     bool isExtensible = true;
-    Create([=](TabsModelNG model) {
-        CreateSingleItem(
-            [=](TabContentModelNG tabContentModel) {
-                tabContentModel.SetSymmetricExtensible(isExtensible);
-                tabContentModel.SetCustomStyleNode(frameNode);
-            },
-            0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.SetSymmetricExtensible(isExtensible);
+    tabContentModel.SetCustomStyleNode(frameNode);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
 
@@ -1797,10 +1822,11 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest041, TestSize.Leve
      * @tc.expected: set SymmetricExtensible to tab content successfully.
      */
     bool isExtensible = true;
-    Create([=](TabsModelNG model) {
-        CreateSingleItem(
-            [=](TabContentModelNG tabContentModel) { tabContentModel.SetSymmetricExtensible(isExtensible); }, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.SetSymmetricExtensible(isExtensible);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = GetChildPattern<TabContentPattern>(swiperNode_, 0);
 
@@ -1837,10 +1863,11 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest042, TestSize.Leve
      * @tc.steps: step2. set the frameNode to tab content.
      * @tc.expected: set the frameNode to tab content successfully.
      */
-    Create([=](TabsModelNG model) {
-        CreateSingleItemWithoutBuilder(
-            [=](TabContentModelNG tabContentModel) { tabContentModel.SetCustomStyleNode(frameNode); }, 0);
-    });
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    tabContentModel.SetCustomStyleNode(frameNode);
+    tabContentModel.Pop();
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step3. check the frameNode.
@@ -1865,7 +1892,9 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest043, TestSize.Leve
      * @tc.steps: step1. create a tab.
      * @tc.expected: create a tab successfully.
      */
-    Create([=](TabsModelNG model) { CreateSingleItemWithoutBuilder([=](TabContentModelNG tabContentModel) {}, 0); });
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step2. check the frameNode.

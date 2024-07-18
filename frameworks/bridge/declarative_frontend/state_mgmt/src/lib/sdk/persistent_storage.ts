@@ -14,6 +14,18 @@
  */
 
 /**
+ * file version
+ *
+ * To indicate the file formate
+ *
+ */
+enum ObjectVersion {
+  NewVersion,
+  CompatibleVersion,
+  Default,
+}
+
+/**
  * MapInfo
  *
  * Helper class to persist Map in Persistent storage
@@ -22,6 +34,9 @@
 type MapItem<K, V> = { key: K, value: V };
 class MapInfo<K, V> {
   static readonly replacer: string = '_____map_replacer__';
+  static readonly replacerCompatible: string = 'ace_engine_state_mgmt_map_replacer';
+  public keys: K[];
+  public values: V[];
 
   constructor(
     public mapReplacer: string,
@@ -29,12 +44,15 @@ class MapInfo<K, V> {
   ) { }
 
   // Check if the given object is of type MapInfo
-  static isObject<K, V>(obj: unknown): obj is MapInfo<K, V> {
+  static isObject<K, V>(obj: unknown): ObjectVersion {
     const typedObject = obj as MapInfo<K, V>;
     if ('mapReplacer' in typedObject && typedObject.mapReplacer === MapInfo.replacer) {
-      return true;
+      return ObjectVersion.NewVersion;
     }
-    return false;
+    if ('mapReplacer' in typedObject && typedObject.mapReplacer === MapInfo.replacerCompatible) {
+      return ObjectVersion.CompatibleVersion;
+    }
+    return ObjectVersion.Default;
   }
 
   // Convert Map to Object
@@ -50,6 +68,10 @@ class MapInfo<K, V> {
   static toMap<K, V>(obj: MapInfo<K, V>): Map<K, V> {
     return new Map<K, V>(obj.keyToValue.map((item: MapItem<K, V>) => [item.key, item.value]));
   }
+
+  static toMapCompatible<K, V>(obj: MapInfo<K, V>): Map<K, V> {
+    return new Map<K, V>(obj.keys.map((key, i) => [key, obj.values[i]]));
+  }
 }
 
 /**
@@ -60,6 +82,7 @@ class MapInfo<K, V> {
  */
 class SetInfo<V> {
   static readonly replacer: string = '_____set_replacer__';
+  static readonly replacerCompatible: string = "ace_engine_state_mgmt_set_replacer";
 
   constructor(
     public setReplacer: string,
@@ -69,7 +92,8 @@ class SetInfo<V> {
   // Check if the given object is of type SetInfo
   static isObject<V>(obj: unknown): obj is SetInfo<V> {
     const typedObject = obj as SetInfo<V>;
-    if ('setReplacer' in typedObject && typedObject.setReplacer === SetInfo.replacer) {
+    if ('setReplacer' in typedObject &&
+      (typedObject.setReplacer === SetInfo.replacer || typedObject.setReplacer === SetInfo.replacerCompatible)) {
       return true;
     }
     return false;
@@ -95,6 +119,7 @@ class SetInfo<V> {
  */
 class DateInfo {
   static readonly replacer: string = '_____date_replacer__';
+  static readonly replacerCompatible: string = "ace_engine_state_mgmt_date_replacer";
 
   constructor(
     public dateReplacer: string,
@@ -104,7 +129,8 @@ class DateInfo {
   // Check if the given object is of type DateInfo
   static isObject(obj: unknown): obj is DateInfo {
     const typedObject = obj as DateInfo;
-    if ('dateReplacer' in typedObject && typedObject.dateReplacer === DateInfo.replacer) {
+    if ('dateReplacer' in typedObject &&
+      (typedObject.dateReplacer === DateInfo.replacer || typedObject.dateReplacer === DateInfo.replacerCompatible)) {
       return true;
     }
     return false;
@@ -411,8 +437,10 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
   private readFromPersistentStorage<T>(propName: string): T {
     let newValue: T = PersistentStorage.storage_.get(propName);
     if (newValue instanceof Object) {
-      if (MapInfo.isObject(newValue)) {
-        newValue = MapInfo.toMap(newValue) as unknown as T;
+      if (MapInfo.isObject(newValue) === ObjectVersion.NewVersion) {
+        newValue = MapInfo.toMap(newValue as unknown as MapInfo<any, any>) as unknown as T;
+      } else if (MapInfo.isObject(newValue) === ObjectVersion.CompatibleVersion) {
+        newValue = MapInfo.toMapCompatible(newValue as unknown as MapInfo<any, any>) as unknown as T;
       } else if (SetInfo.isObject(newValue)) {
         newValue = SetInfo.toSet(newValue) as unknown as T;
       } else if (DateInfo.isObject(newValue)) {

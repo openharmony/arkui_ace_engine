@@ -30,7 +30,11 @@ AssertionResult TabsCommonTestNg::IsEqualNextFocusNode(FocusStep step,
 {
     RefPtr<FocusHub> currentFocusNode = currentNode->GetOrCreateFocusHub();
     currentFocusNode->RequestFocusImmediately();
-    RefPtr<FocusHub> nextFocusNode = pattern_->GetNextFocusNode(step, currentFocusNode).Upgrade();
+    ScopeFocusAlgorithm scopeFocusAlgorithm = pattern_->GetScopeFocusAlgorithm();
+    GetNextFocusNodeFunc getNextFocusNode = scopeFocusAlgorithm.getNextFocusNode;
+    WeakPtr<FocusHub> weakNextFocusNode;
+    getNextFocusNode(step, currentFocusNode, weakNextFocusNode);
+    RefPtr<FocusHub> nextFocusNode = weakNextFocusNode.Upgrade();
     if (expectNextNode == nullptr && nextFocusNode != nullptr) {
         return AssertionFailure() << "Next focusNode is not null";
     }
@@ -50,9 +54,10 @@ HWTEST_F(TabsCommonTestNg, FocusStep001, TestSize.Level1)
     /**
      * @tc.cases: BarPosition::START, Vertical:false
      */
-    CreateWithItem([](TabsModelNG model) {
-        model.SetIsVertical(false);
-    }, BarPosition::START);
+    TabsModelNG model = CreateTabs(BarPosition::START);
+    model.SetIsVertical(false);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, tabBarNode_, swiperNode_));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, tabBarNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, tabBarNode_, nullptr));
@@ -87,9 +92,10 @@ HWTEST_F(TabsCommonTestNg, FocusStep002, TestSize.Level1)
     /**
      * @tc.cases: BarPosition::START, Vertical:true
      */
-    CreateWithItem([](TabsModelNG model) {
-        model.SetIsVertical(true);
-    }, BarPosition::START);
+    TabsModelNG model = CreateTabs(BarPosition::START);
+    model.SetIsVertical(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, tabBarNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, tabBarNode_, swiperNode_));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, tabBarNode_, nullptr));
@@ -111,9 +117,10 @@ HWTEST_F(TabsCommonTestNg, FocusStep003, TestSize.Level1)
     /**
      * @tc.cases: BarPosition::END, Vertical:false
      */
-    CreateWithItem([](TabsModelNG model) {
-        model.SetIsVertical(false);
-    }, BarPosition::END);
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    model.SetIsVertical(false);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, tabBarNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, tabBarNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, tabBarNode_, swiperNode_));
@@ -135,9 +142,10 @@ HWTEST_F(TabsCommonTestNg, FocusStep004, TestSize.Level1)
     /**
      * @tc.cases: BarPosition::END, Vertical:true
      */
-    CreateWithItem([](TabsModelNG model) {
-        model.SetIsVertical(true);
-    }, BarPosition::END);
+    TabsModelNG model = CreateTabs(BarPosition::END);
+    model.SetIsVertical(true);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, tabBarNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, tabBarNode_, nullptr));
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, tabBarNode_, nullptr));
@@ -160,7 +168,9 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty001, TestSize.Level1)
      * @tc.cases: Not set TabBarMode
      * @tc.expected: IsScrollable default is false
      */
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_FALSE(tabBarAccessibilityProperty_->IsScrollable());
 }
 
@@ -175,7 +185,10 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty002, TestSize.Level1)
      * @tc.cases: Set TabBarMode::SCROLLABLE
      * @tc.expected: IsScrollable is true
      */
-    CreateWithItem([](TabsModelNG model) { model.SetTabBarMode(TabBarMode::SCROLLABLE); });
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_TRUE(tabBarAccessibilityProperty_->IsScrollable());
 }
 
@@ -190,7 +203,9 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty003, TestSize.Level1)
      * @tc.cases: Set TabBarMode::SCROLLABLE, but has no items
      * @tc.expected: IsScrollable is false
      */
-    Create([](TabsModelNG model) { model.SetTabBarMode(TabBarMode::SCROLLABLE); });
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    CreateTabsDone(model);
     EXPECT_FALSE(tabBarAccessibilityProperty_->IsScrollable());
 }
 
@@ -205,7 +220,8 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty004, TestSize.Level1)
      * @tc.cases: Create tabs with empty items
      * @tc.expected: Items number is zero, BeginIndex CurrentIndex EndIndex is -1
      */
-    Create([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabsDone(model);
     EXPECT_EQ(tabBarAccessibilityProperty_->GetCollectionItemCounts(), 0);
     EXPECT_EQ(tabBarAccessibilityProperty_->GetBeginIndex(), -1); // default
     EXPECT_EQ(tabBarAccessibilityProperty_->GetCurrentIndex(), -1);
@@ -223,7 +239,9 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty005, TestSize.Level1)
      * @tc.steps: step1. Create tabs with items
      * @tc.expected: Items number is TABCONTENT_NUMBER
      */
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_EQ(tabBarAccessibilityProperty_->GetCollectionItemCounts(), TABCONTENT_NUMBER); // 4
     EXPECT_EQ(tabBarAccessibilityProperty_->GetBeginIndex(), 0);
     EXPECT_EQ(tabBarAccessibilityProperty_->GetCurrentIndex(), 0);
@@ -248,9 +266,11 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty006, TestSize.Level1)
      * @tc.steps: step1. Set TabBarMode::SCROLLABLE and middle
      * @tc.expected: tabBar is at middle
      */
-    CreateWithItem([](TabsModelNG model) { model.SetTabBarMode(TabBarMode::SCROLLABLE); });
-    tabBarPattern_->currentOffset_ = -1.f;
-    tabBarPattern_->tabItemOffsets_.emplace_back(OffsetF(TABS_WIDTH + 1.f, 0.f));
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    tabBarPattern_->visibleItemPosition_.clear();
     EXPECT_FALSE(tabBarPattern_->IsAtTop());
     EXPECT_FALSE(tabBarPattern_->IsAtBottom());
 
@@ -276,8 +296,11 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty007, TestSize.Level1)
      * @tc.steps: step1. Set TabBarMode::SCROLLABLE and top
      * @tc.expected: tabBar is at top
      */
-    CreateWithItem([](TabsModelNG model) { model.SetTabBarMode(TabBarMode::SCROLLABLE); });
-    tabBarPattern_->tabItemOffsets_.emplace_back(OffsetF(TABS_WIDTH + 1.f, 0.f));
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    tabBarPattern_->visibleItemPosition_[3] = { 1.f, TABS_WIDTH + 1.f };
     EXPECT_TRUE(tabBarPattern_->IsAtTop());
     EXPECT_FALSE(tabBarPattern_->IsAtBottom());
 
@@ -302,8 +325,11 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty008, TestSize.Level1)
      * @tc.steps: step1. Set TabBarMode::SCROLLABLE and bottom
      * @tc.expected: tabBar is at bottom
      */
-    CreateWithItem([](TabsModelNG model) { model.SetTabBarMode(TabBarMode::SCROLLABLE); });
-    tabBarPattern_->currentOffset_ = -1.f;
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    tabBarPattern_->visibleItemPosition_[0] = { -1.f, TABS_WIDTH - 1.f };
     EXPECT_FALSE(tabBarPattern_->IsAtTop());
     EXPECT_TRUE(tabBarPattern_->IsAtBottom());
 
@@ -328,7 +354,10 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty009, TestSize.Level1)
      * @tc.steps: step1. Set TabBarMode::SCROLLABLE and top and bottom
      * @tc.expected: tabBar is at top and bottom
      */
-    CreateWithItem([](TabsModelNG model) { model.SetTabBarMode(TabBarMode::SCROLLABLE); });
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_TRUE(tabBarPattern_->IsAtTop());
     EXPECT_TRUE(tabBarPattern_->IsAtBottom());
 
@@ -352,7 +381,9 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty010, TestSize.Level1)
      * @tc.steps: step1. Default is TabBarMode::FIXED
      * @tc.expected: tabBar is FIXED
      */
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
     EXPECT_FALSE(tabBarAccessibilityProperty_->IsScrollable());
 
     /**
@@ -371,7 +402,9 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty010, TestSize.Level1)
  */
 HWTEST_F(TabsCommonTestNg, PerformActionTest001, TestSize.Level1)
 {
-    CreateWithItem([](TabsModelNG model) {});
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
 
     /**
      * @tc.steps: step1. When tabBar TabBarMode is FIXED and child is null, call the callback function in
@@ -407,5 +440,66 @@ HWTEST_F(TabsCommonTestNg, PerformActionTest001, TestSize.Level1)
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
     EXPECT_TRUE(tabBarAccessibilityProperty_->ActActionScrollForward());
     EXPECT_TRUE(tabBarAccessibilityProperty_->ActActionScrollBackward());
+}
+
+/**
+ * @tc.name: TabBarItemAccessibilityProperty001
+ * @tc.desc: Test TabBarItemAccessibilityProperty ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsCommonTestNg, TabBarItemAccessibilityProperty001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create tabs with items.
+     */
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step1. Call ToJsonValue function.
+     * @tc.expected: label is default tab bar name.
+     */
+    auto tabBarItem = AceType::DynamicCast<FrameNode>(GetChildFrameNode(tabBarNode_, 0));
+    auto accessibilityProperty = tabBarItem->GetAccessibilityProperty<TabBarItemAccessibilityProperty>();
+    auto json = JsonUtil::Create(true);
+    accessibilityProperty->ToJsonValue(json, filter);
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    auto defaultTabBarName = tabTheme->GetDefaultTabBarName();
+    EXPECT_EQ(json->GetString("label"), defaultTabBarName);
+}
+
+/**
+ * @tc.name: TabBarItemAccessibilityProperty002
+ * @tc.desc: Test TabBarItemAccessibilityProperty ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsCommonTestNg, TabBarItemAccessibilityProperty002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create tabs with builder.
+     */
+    TabsModelNG model = CreateTabs();
+    const std::string textTest = "text_test";
+    TabContentModelNG tabContentModel = CreateTabContent();
+    auto tabBarItemFunc = [textTest]() {
+        TextModelNG model;
+        model.Create(textTest);
+    };
+    tabContentModel.SetTabBar(textTest, "", std::nullopt, std::move(tabBarItemFunc), true);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step1. Call ToJsonValue function.
+     * @tc.expected: check label value.
+     */
+    auto tabBarItem = AceType::DynamicCast<FrameNode>(GetChildFrameNode(tabBarNode_, 0));
+    auto accessibilityProperty = tabBarItem->GetAccessibilityProperty<TabBarItemAccessibilityProperty>();
+    auto json = JsonUtil::Create(true);
+    accessibilityProperty->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("label"), textTest);
 }
 } // namespace OHOS::Ace::NG

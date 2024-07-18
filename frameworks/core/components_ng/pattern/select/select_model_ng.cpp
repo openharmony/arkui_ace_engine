@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
+#include "core/components_ng/pattern/select/select_properties.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -425,6 +426,20 @@ void SelectModelNG::SetControlSize(const std::optional<ControlSize>& controlSize
         CHECK_NULL_VOID(pattern);
         pattern->SetControlSize(controlSize.value());
     }
+}
+
+void SelectModelNG::SetDivider(const NG::SelectDivider& divider)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDivider(divider);
+}
+
+void SelectModelNG::SetDivider(FrameNode* frameNode, const NG::SelectDivider& divider)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDivider(divider);
 }
 
 void SelectModelNG::SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize)

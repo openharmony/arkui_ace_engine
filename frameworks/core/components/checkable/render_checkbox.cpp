@@ -102,10 +102,8 @@ void RenderCheckbox::Update(const RefPtr<Component>& component)
     SetAccessibilityClickImpl();
 }
 
-
 bool RenderCheckbox::UpdateItemValue(const bool itemValue)
 {
-
     if (!(component_->GetCheckboxName().empty())) {
         UpdateUIStatus();
         UpdateAnimation();

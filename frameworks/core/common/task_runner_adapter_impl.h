@@ -34,6 +34,7 @@ public:
         std::function<void()> task, uint32_t delay, const std::string& name, PriorityType priorityType = PriorityType::LOW) override;
     bool RunsTasksOnCurrentThread() override;
     void Initialize(bool useCurrentEventRunner = false, const std::string& name = "") override;
+    void RemoveTask(const std::string &name) override;
 
 private:
     static AppExecFwk::EventQueue::Priority ConvertPriority(PriorityType priorityType);

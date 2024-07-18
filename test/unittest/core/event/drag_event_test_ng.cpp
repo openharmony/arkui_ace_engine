@@ -13,67 +13,12 @@
  * limitations under the License.
  */
 
-#include "gtest/gtest.h"
-#include <string>
-
-#define private public
-#define protected public
-
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "core/components/theme/blur_style_theme.h"
-#include "core/components/theme/shadow_theme.h"
-#include "core/components_ng/event/drag_event.h"
-#include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/stack/stack_pattern.h"
-#include "core/components_ng/pattern/grid/grid_item_pattern.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
-#include "core/components_ng/pattern/grid/grid_pattern.h"
-#include "core/components_ng/pattern/list/list_pattern.h"
+#include "test/unittest/core/event/drag_event_test_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr double GESTURE_EVENT_PROPERTY_DEFAULT_VALUE = 0.0;
-constexpr double GESTURE_EVENT_PROPERTY_VALUE = 10.0;
-const PanDirection DRAG_DIRECTION = { PanDirection::LEFT };
-const TouchRestrict DRAG_TOUCH_RESTRICT = { TouchRestrict::CLICK };
-const TouchRestrict DRAG_TOUCH_RESTRICT_MOUSE = {
-    .forbiddenType = TouchRestrict::CLICK,
-    .sourceType = SourceType::MOUSE
-};
-constexpr int32_t FINGERS_NUMBER = 2;
-constexpr int32_t TOUCH_TEST_RESULT_SIZE = 1;
-constexpr int32_t TOUCH_TEST_RESULT_SIZE_2 = 2;
-constexpr int32_t NUMBER_BADGE_SIZE_3 = 3;
-constexpr int32_t NUMBER_BADGE_SIZE_100 = 100;
-constexpr float DISTANCE = 10.5f;
-constexpr float WIDTH = 400.0f;
-constexpr float HEIGHT = 400.0f;
-const OffsetF COORDINATE_OFFSET(WIDTH, HEIGHT);
-constexpr int32_t FINGERS_NUMBER_GREATER_THAN_DEFAULT = 2;
-constexpr float DISTANCE_GREATER_THAN_DEFAULT = 6.0f;
-constexpr float DISTANCE_EQUAL_DEFAULT = 5.0f;
-constexpr float IMAGE_INVALID_RECT_WIDTH = 100.0f;
-const std::string COMPONENT_ID = "id of component which you want to get screenshot from";
-const std::string NO_COMPONENT_ID = "";
-} // namespace
-
-class DragEventTestNg : public testing::Test {
-public:
-    static void SetUpTestSuite();
-    static void TearDownTestSuite();
-    void SetUp() override;
-    void TearDown() override;
-};
-
 void DragEventTestNg::SetUpTestSuite()
 {
     GTEST_LOG_(INFO) << "DragEventTestNg SetUpTestCase";
@@ -235,6 +180,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorOnCollectTouchTargetTest003, TestSize
     EXPECT_NE(getEventTargetImpl, nullptr);
     TouchTestResult finalResult;
     TouchTestResult responseLinkResult;
+    framenode->GetOrCreateFocusHub();
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_EQ(dragEventActuator->panRecognizer_->onActionStart_, nullptr);
@@ -367,8 +313,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg002, TestSize.Level1)
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     frameNode->SetDraggable(true);
     NG::DragDropInfo dragPreviewInfo;
-    void* voidPtr = static_cast<void*>(new char[0]);
-    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(static_cast<void*>(new char[0]));
     dragPreviewInfo.pixelMap = pixelMap;
     frameNode->SetDragPreview(dragPreviewInfo);
 
@@ -424,6 +369,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg002, TestSize.Level1)
      * @tc.expected: longPressRecognizer is not nullptr and longPressRecognizer's callback is not nullptr.
      */
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    frameNode->GetOrCreateFocusHub();
     EXPECT_NE(getEventTargetImpl, nullptr);
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
@@ -481,6 +427,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg003, TestSize.Level1)
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
     EXPECT_NE(getEventTargetImpl, nullptr);
     EXPECT_EQ(dragEventActuator->longPressRecognizer_->HasThumbnailCallback(), false);
+    frameNode->GetOrCreateFocusHub();
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_EQ(dragEventActuator->longPressRecognizer_->HasThumbnailCallback(), true);
@@ -547,6 +494,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg004, TestSize.Level1)
     EXPECT_NE(getEventTargetImpl, nullptr);
     TouchTestResult finalResult;
     TouchTestResult responseLinkResult;
+    frameNode->GetOrCreateFocusHub();
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT_MOUSE, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_FALSE(finalResult.empty());
@@ -592,6 +540,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg005, TestSize.Level1)
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
     TouchTestResult finalResult;
     TouchTestResult responseLinkResult;
+    frameNode->GetOrCreateFocusHub();
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_NE(dragEventActuator->previewLongPressRecognizer_->onAction_, nullptr);
@@ -667,9 +616,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg006, TestSize.Level1)
      * @tc.expected: dragEventActuator's userCallback_ is not null.
      */
     double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
-    GestureEventFunc actionStart = [&unknownPropertyValue](GestureEvent& info) {
-        unknownPropertyValue = info.GetScale();
-    };
+    auto actionStart = [&unknownPropertyValue](GestureEvent& info) { unknownPropertyValue = info.GetScale(); };
     GestureEventFunc actionUpdate = [](GestureEvent& info) {};
     GestureEventFunc actionEnd = [](GestureEvent& info) {};
     GestureEventNoParameter actionCancel = []() {};
@@ -686,6 +633,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg006, TestSize.Level1)
     EXPECT_NE(getEventTargetImpl, nullptr);
     TouchTestResult finalResult;
     TouchTestResult responseLinkResult;
+    frameNode->GetOrCreateFocusHub();
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_NE(dragEventActuator->panRecognizer_->onActionStart_, nullptr);
@@ -764,6 +712,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg007, TestSize.Level1)
     auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
     TouchTestResult finalResult;
     TouchTestResult responseLinkResult;
+    frameNode->GetOrCreateFocusHub();
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     EXPECT_NE(dragEventActuator->panRecognizer_->onActionCancel_, nullptr);
@@ -1966,5 +1915,24 @@ HWTEST_F(DragEventTestNg, GetDefaultBorderRadiusTest001, TestSize.Level1)
     EXPECT_EQ(radiusTopRight, 12.0);
     EXPECT_EQ(radiusBottomRight, 12.0);
     EXPECT_EQ(radiusBottomLeft, 12.0);
+}
+
+/**
+ * @tc.name: GetSetPressedKeyCodesTest001
+ * @tc.desc: Test GetPressedKeyCodes and SetPressedKeyCodes function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, GetSetPressedKeyCodesTest001, TestSize.Level1)
+{
+    GestureEventFunc actionStart = [](GestureEvent& info) {};
+    GestureEventFunc actionUpdate = [](GestureEvent& info) {};
+    GestureEventFunc actionEnd = [](GestureEvent& info) {};
+    GestureEventNoParameter actionCancel = []() {};
+    auto dragEvent = AceType::MakeRefPtr<DragEvent>(std::move(actionStart), std::move(actionUpdate),
+        std::move(actionEnd), std::move(actionCancel));
+    dragEvent->SetPressedKeyCodes({KeyCode::KEY_DPAD_LEFT, KeyCode::KEY_DPAD_RIGHT});
+    auto pressedKeyCodes = dragEvent->GetPressedKeyCodes();
+    EXPECT_EQ(pressedKeyCodes.size(), 2);
+    EXPECT_EQ(pressedKeyCodes[1], KeyCode::KEY_DPAD_RIGHT);
 }
 } // namespace OHOS::Ace::NG

@@ -19,6 +19,9 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
@@ -216,7 +219,7 @@ void JSTextField::SetType(const JSCallbackInfo& info)
     if (!jsValue->IsNumber()) {
         return;
     }
-    TextInputType textInputType = static_cast<TextInputType>(jsValue->ToNumber<int32_t>());
+    TextInputType textInputType = CastToTextInputType(jsValue->ToNumber<int32_t>());
     TextFieldModel::GetInstance()->SetType(textInputType);
 }
 
@@ -348,7 +351,7 @@ void JSTextField::SetLineBreakStrategy(const JSCallbackInfo& info)
 
 void JSTextField::SetInputStyle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsString()) {
+    if (info.Length() < 1) {
         return;
     }
     auto styleString = info[0]->ToString();
@@ -708,6 +711,7 @@ void JSTextField::JsPadding(const JSCallbackInfo& info)
     CalcDimension length;
     ParseJsDimensionVp(jsValue, length);
     if (length.IsNegative()) {
+        TextFieldModel::GetInstance()->SetPadding(NG::PaddingProperty(), Edge(), true);
         return;
     }
     bool tmp = !jsValue->IsString() && !jsValue->IsNumber() && !jsValue->IsObject();
@@ -896,7 +900,7 @@ Local<JSValueRef> JSTextField::JsKeepEditableState(panda::JsiRuntimeCallInfo *in
 {
     Local<JSValueRef> thisObj = info->GetThisRef();
     auto eventInfo = static_cast<NG::TextFieldCommonEvent*>(
-        panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(0));
+        panda::Local<panda::ObjectRef>(thisObj)->GetNativePointerField(info->GetVM(), 0));
     if (eventInfo) {
         eventInfo->SetKeepEditable(true);
     }
@@ -905,7 +909,7 @@ Local<JSValueRef> JSTextField::JsKeepEditableState(panda::JsiRuntimeCallInfo *in
 
 void JSTextField::CreateJsTextFieldCommonEvent(const JSCallbackInfo &info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject() || !info[0]->IsFunction()) {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
         return;
     }
     auto jsValue = info[0];
@@ -927,6 +931,9 @@ void JSTextField::CreateJsTextFieldCommonEvent(const JSCallbackInfo &info)
         JSRef<JSVal> dataObject = JSRef<JSVal>::Cast(object);
         JSRef<JSVal> param[2] = {keyEvent, dataObject};
         func->Execute(param);
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onSubmit");
+#endif
     };
     TextFieldModel::GetInstance()->SetOnSubmit(std::move(callback));
 }
@@ -947,12 +954,27 @@ void JSTextField::SetOnSubmit(const JSCallbackInfo& info)
 #endif
 }
 
+JSRef<JSVal> JSTextField::CreateJsOnChangeObj(const PreviewText& previewText)
+{
+    JSRef<JSObject> previewTextObj = JSRef<JSObject>::New();
+    previewTextObj->SetProperty<int32_t>("offset", previewText.offset);
+    previewTextObj->SetProperty<std::string>("value", previewText.value);
+    return JSRef<JSVal>::Cast(previewTextObj);
+}
+
 void JSTextField::SetOnChange(const JSCallbackInfo& info)
 {
     auto jsValue = info[0];
     CHECK_NULL_VOID(jsValue->IsFunction());
-    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
-    TextFieldModel::GetInstance()->SetOnChange(std::move(callback));
+    auto jsChangeFunc = AceType::MakeRefPtr<JsCitedEventFunction<PreviewText, 2>>(
+        JSRef<JSFunc>::Cast(jsValue), CreateJsOnChangeObj);
+    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsChangeFunc)](
+        const std::string& val, PreviewText& previewText) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onChange");
+        func->Execute(val, previewText);
+    };
+    TextFieldModel::GetInstance()->SetOnChange(std::move(onChange));
 }
 
 void JSTextField::SetOnTextSelectionChange(const JSCallbackInfo& info)
@@ -1017,6 +1039,9 @@ void JSTextField::SetOnPaste(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onPaste");
         func->Execute(val, info);
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onPaste");
+#endif
     };
     TextFieldModel::GetInstance()->SetOnPasteWithEvent(std::move(onPaste));
 }
@@ -1048,16 +1073,6 @@ void JSTextField::SetCopyOption(const JSCallbackInfo& info)
         copyOptions = static_cast<CopyOptions>(emunNumber);
     }
     TextFieldModel::GetInstance()->SetCopyOption(copyOptions);
-}
-
-void JSTextField::JsMenuOptionsExtension(const JSCallbackInfo& info)
-{
-    auto jsValue = info[0];
-    if (jsValue->IsArray()) {
-        std::vector<NG::MenuOptionsParam> menuOptionsItems;
-        JSViewAbstract::ParseMenuOptions(info, JSRef<JSArray>::Cast(jsValue), menuOptionsItems);
-        TextFieldModel::GetInstance()->SetMenuOptionItems(std::move(menuOptionsItems));
-    }
 }
 
 void JSTextField::SetShowUnderline(const JSCallbackInfo& info)
@@ -1704,5 +1719,23 @@ void JSTextField::OnDidDelete(const JSCallbackInfo& info)
         func->ExecuteWithValue(deleteValue);
     };
     TextFieldModel::GetInstance()->SetOnDidDeleteEvent(std::move(callback));
+}
+
+void JSTextField::EditMenuOptions(const JSCallbackInfo& info)
+{
+    NG::OnCreateMenuCallback onCreateMenuCallback;
+    NG::OnMenuItemClickCallback onMenuItemClick;
+    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick);
+    TextFieldModel::GetInstance()->SetSelectionMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
+
+void JSTextField::SetEnablePreviewText(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    if (!jsValue->IsBoolean()) {
+        TextFieldModel::GetInstance()->SetEnablePreviewText(true);
+        return;
+    }
+    TextFieldModel::GetInstance()->SetEnablePreviewText(jsValue->ToBoolean());
 }
 } // namespace OHOS::Ace::Framework

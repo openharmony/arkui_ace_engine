@@ -187,6 +187,7 @@ void FfiOHOSAceFrameworkRichEditorOnSelect(void(*callback)(NativeRichEditorSelec
         result.spanSize = static_cast<int64_t>(spanObjectList.size());
 
         cjCallback(result);
+        delete[] spans;
     };
     RichEditorModel::GetInstance()->SetOnSelect(std::move(onSelectFunc));
 }
@@ -241,5 +242,18 @@ void FfiOHOSAceFrameworkRichEditorPreventDefault(int64_t id)
 {
     auto nativePasteEvent = FFIData::GetData<NativePasteEvent>(id);
     nativePasteEvent->PreventDefault();
+}
+
+void FfiOHOSAceFrameworkRichEditorOnDidChange(void(*callback)(CJTextRange rangeBefore, CJTextRange rangeAfter))
+{
+    auto onDidChange = [cjCallback = CJLambda::Create(callback)](const NG::RichEditorChangeValue& changeValue) {
+        const auto& rangeBefore = changeValue.GetRangeBefore();
+        const auto& rangeAfter = changeValue.GetRangeAfter();
+        CJTextRange cjRangeBefore = { rangeBefore.start, rangeBefore.end };
+        CJTextRange cjRangeAfter = { rangeAfter.start, rangeAfter.end };
+
+        cjCallback(cjRangeBefore, cjRangeAfter);
+    };
+    RichEditorModel::GetInstance()->SetOnDidChange(std::move(onDidChange));
 }
 }

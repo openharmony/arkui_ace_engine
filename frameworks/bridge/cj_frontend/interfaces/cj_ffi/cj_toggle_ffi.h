@@ -32,6 +32,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkTogglePadding(double left, int32_t leftUnit, d
 CJ_EXPORT void FfiOHOSAceFrameworkToggleSelectedColor(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkToggleSwitchPointColor(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkToggleOnChange(void (*callback)(bool isOn));
+CJ_EXPORT void FfiOHOSAceFrameworkTogglePop();
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_TOGGLE_FFI_H

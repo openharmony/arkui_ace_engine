@@ -136,6 +136,7 @@ public:
     virtual void SetLabelStyle(const LabelStyle& labelStyle) = 0;
     virtual void SetIconStyle(const IconStyle& iconStyle)  {}
     virtual void SetPadding(const NG::PaddingProperty& padding) = 0;
+    virtual void SetUseLocalizedPadding(bool useLocalizedPadding) = 0;
     virtual void SetLayoutMode(LayoutMode layoutMode) = 0;
     virtual void SetVerticalAlign(FlexAlign verticalAlign) = 0;
     virtual void SetSymmetricExtensible(bool isExtensible) = 0;

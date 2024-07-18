@@ -38,6 +38,22 @@ RefPtr<SelectContentOverlayPattern> GetSelectOverlayPattern(const WeakPtr<FrameN
     CHECK_NULL_RETURN(selectOverlayNode, nullptr);
     return selectOverlayNode->GetPattern<SelectContentOverlayPattern>();
 }
+
+RefPtr<SelectContentOverlayPattern> GetSelectMenuPattern(const WeakPtr<SelectContentOverlayManager>& manager)
+{
+    auto overlayManager = manager.Upgrade();
+    CHECK_NULL_RETURN(overlayManager, nullptr);
+    auto pattern = overlayManager->GetMenuPattern();
+    return AceType::DynamicCast<SelectContentOverlayPattern>(pattern);
+}
+
+RefPtr<SelectContentOverlayPattern> GetSelectHandlePattern(const WeakPtr<SelectContentOverlayManager>& manager)
+{
+    auto overlayManager = manager.Upgrade();
+    CHECK_NULL_RETURN(overlayManager, nullptr);
+    auto pattern = overlayManager->GetHandlePattern();
+    return AceType::DynamicCast<SelectContentOverlayPattern>(pattern);
+}
 } // namespace
 
 const RefPtr<SelectContentOverlayManager> SelectContentOverlayManager::GetOverlayManager(
@@ -107,6 +123,7 @@ void SelectContentOverlayManager::Show(bool animation, int32_t requestCode)
     if (legacyManagerCallbacks_.closeCallback) {
         legacyManagerCallbacks_.closeCallback(false, true);
     }
+    info.enableHandleLevel = info.enableHandleLevel && !info.isUsingMouse;
     if (IsOpen()) {
         if (info.recreateOverlay || info.menuInfo.menuType != shareOverlayInfo_->menuInfo.menuType) {
             auto holder = selectOverlayHolder_;
@@ -228,56 +245,121 @@ std::function<void()> SelectContentOverlayManager::MakeMenuCallback(
     };
 }
 
-void SelectContentOverlayManager::UpdateExistOverlay(SelectOverlayInfo info, bool animation, int32_t requestCode)
+void SelectContentOverlayManager::UpdateExistOverlay(const SelectOverlayInfo& info, bool animation, int32_t requestCode)
 {
-    auto pattern = GetSelectOverlayPattern(selectOverlayNode_);
-    CHECK_NULL_VOID(pattern);
-    pattern->UpdateIsSingleHandle(info.isSingleHandle);
-    if (!info.isSingleHandle) {
-        pattern->UpdateSelectArea(info.selectArea);
-        pattern->SetSelectInfo(info.selectText);
-    }
-    pattern->UpdateIsShowHandleLine(info.isHandleLineShow);
-    pattern->UpdateFirstAndSecondHandleInfo(info.firstHandle, info.secondHandle);
-    pattern->UpdateMenuInfo(info.menuInfo);
-    if (info.isSingleHandle) {
-        if (selectOverlayHolder_->CheckRestartHiddenHandleTask(requestCode)) {
-            pattern->RestartHiddenHandleTask(true);
+    // update menu node
+    auto menuPattern = GetSelectMenuPattern(WeakClaim(this));
+    if (menuPattern) {
+        if (!info.isSingleHandle) {
+            menuPattern->UpdateSelectArea(info.selectArea);
+            menuPattern->SetSelectInfo(info.selectText);
         }
-    } else {
-        pattern->CancelHiddenHandleTask();
+        menuPattern->UpdateMenuInfo(info.menuInfo);
+        menuPattern->UpdateViewPort(info.ancestorViewPort);
+    }
+    // update handle node
+    auto handlePattern = GetSelectHandlePattern(WeakClaim(this));
+    if (handlePattern) {
+        handlePattern->UpdateIsSingleHandle(info.isSingleHandle);
+        handlePattern->UpdateIsShowHandleLine(info.isHandleLineShow);
+        handlePattern->UpdateFirstAndSecondHandleInfo(info.firstHandle, info.secondHandle);
+        LOGI("SelectOverlay: Update first %{public}s isShow %{public}d, second %{public}s isShow %{public}d",
+            info.firstHandle.paintRect.ToString().c_str(), info.firstHandle.isShow,
+            info.secondHandle.paintRect.ToString().c_str(), info.secondHandle.isShow);
+        if (info.isSingleHandle) {
+            if (selectOverlayHolder_->CheckRestartHiddenHandleTask(requestCode)) {
+                handlePattern->RestartHiddenHandleTask(true);
+            }
+        } else {
+            handlePattern->CancelHiddenHandleTask();
+        }
     }
     selectOverlayHolder_->OnHandleExistOverlay(info, requestCode);
-    auto callback = selectOverlayHolder_->GetCallback();
-    CHECK_NULL_VOID(callback);
-    callback->OnAfterSelectOverlayShow(false);
+    NotifySelectOverlayShow(false);
+}
+
+void SelectContentOverlayManager::SwitchToHandleMode(HandleLevelMode mode, bool forceChange)
+{
+    CHECK_NULL_VOID(shareOverlayInfo_);
+    if (shareOverlayInfo_->handleLevelMode == mode) {
+        return;
+    }
+    if (selectOverlayHolder_ && selectOverlayHolder_->GetCallback()) {
+        if (!forceChange && !selectOverlayHolder_->GetCallback()->CheckSwitchToMode(mode)) {
+            return;
+        }
+        selectOverlayHolder_->GetCallback()->OnHandleLevelModeChanged(mode);
+    }
+    LOGI("SelectOverlay: Set handle node to mode: %{public}d", mode);
+    shareOverlayInfo_->handleLevelMode = mode;
+    auto handleNode = handleNode_.Upgrade();
+    CHECK_NULL_VOID(handleNode);
+    if (mode == HandleLevelMode::OVERLAY) {
+        auto taskExecutor = Container::CurrentTaskExecutor();
+        taskExecutor->PostTask(
+            [weak = WeakClaim(this), node = handleNode] {
+                auto manager = weak.Upgrade();
+                CHECK_NULL_VOID(manager);
+                CHECK_NULL_VOID(node);
+                if (!manager->IsOpen()) {
+                    return;
+                }
+                manager->DestroySelectOverlayNode(node);
+                manager->MountNodeToRoot(node, false);
+                node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            },
+            TaskExecutor::TaskType::UI, "SwitchToOverlayModeTask");
+        return;
+    }
+    if (mode == HandleLevelMode::EMBED) {
+        auto taskExecutor = Container::CurrentTaskExecutor();
+        taskExecutor->PostTask(
+            [weak = WeakClaim(this), node = handleNode] {
+                auto manager = weak.Upgrade();
+                CHECK_NULL_VOID(manager);
+                CHECK_NULL_VOID(node);
+                if (!manager->IsOpen()) {
+                    return;
+                }
+                manager->DestroySelectOverlayNode(node);
+                manager->MountNodeToCaller(node, false);
+                node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            },
+            TaskExecutor::TaskType::UI, "SwitchToEmbedModeTask");
+    }
 }
 
 void SelectContentOverlayManager::MarkInfoChange(SelectOverlayDirtyFlag dirty)
 {
     CHECK_NULL_VOID(selectOverlayHolder_);
     CHECK_NULL_VOID(IsOpen());
-    auto pattern = GetSelectOverlayPattern(selectOverlayNode_);
-    CHECK_NULL_VOID(pattern);
-    if ((dirty & DIRTY_SELECT_AREA) == DIRTY_SELECT_AREA) {
-        auto selectArea = selectOverlayHolder_->GetSelectArea();
-        pattern->UpdateSelectArea(selectArea);
-    }
-    if ((dirty & DIRTY_ALL_MENU_ITEM) == DIRTY_ALL_MENU_ITEM) {
-        SelectMenuInfo menuInfo;
-        selectOverlayHolder_->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
-        pattern->UpdateSelectMenuInfo(menuInfo);
-    }
-    if ((dirty & DIRTY_COPY_ALL_ITEM) == DIRTY_COPY_ALL_ITEM) {
-        SelectMenuInfo menuInfo;
-        selectOverlayHolder_->OnUpdateMenuInfo(menuInfo, DIRTY_COPY_ALL_ITEM);
-        auto oldMenuInfo = pattern->GetSelectMenuInfo();
-        oldMenuInfo.showCopyAll = menuInfo.showCopyAll;
-        pattern->UpdateSelectMenuInfo(oldMenuInfo);
-    }
-    if ((dirty & DIRTY_SELECT_TEXT) == DIRTY_SELECT_TEXT) {
-        auto selectedInfo = selectOverlayHolder_->GetSelectedText();
-        pattern->SetSelectInfo(selectedInfo);
+    auto menuPattern = GetSelectMenuPattern(WeakClaim(this));
+    if (menuPattern) {
+        if ((dirty & DIRTY_SELECT_AREA) == DIRTY_SELECT_AREA) {
+            auto selectArea = selectOverlayHolder_->GetSelectArea();
+            menuPattern->UpdateSelectArea(selectArea);
+        }
+        if ((dirty & DIRTY_ALL_MENU_ITEM) == DIRTY_ALL_MENU_ITEM) {
+            SelectMenuInfo menuInfo;
+            selectOverlayHolder_->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
+            menuPattern->UpdateSelectMenuInfo(menuInfo);
+        }
+        if ((dirty & DIRTY_COPY_ALL_ITEM) == DIRTY_COPY_ALL_ITEM) {
+            SelectMenuInfo menuInfo;
+            selectOverlayHolder_->OnUpdateMenuInfo(menuInfo, DIRTY_COPY_ALL_ITEM);
+            auto oldMenuInfo = menuPattern->GetSelectMenuInfo();
+            oldMenuInfo.showCopyAll = menuInfo.showCopyAll;
+            oldMenuInfo.showCopy = menuInfo.showCopy;
+            menuPattern->UpdateSelectMenuInfo(oldMenuInfo);
+        }
+        if ((dirty & DIRTY_SELECT_TEXT) == DIRTY_SELECT_TEXT) {
+            auto selectedInfo = selectOverlayHolder_->GetSelectedText();
+            menuPattern->SetSelectInfo(selectedInfo);
+        }
+        if ((dirty & DIRTY_VIEWPORT) == DIRTY_VIEWPORT) {
+            auto viewPort = selectOverlayHolder_->GetAncestorNodeViewPort();
+            menuPattern->UpdateViewPort(viewPort);
+        }
     }
     UpdateHandleInfosWithFlag(dirty);
     selectOverlayHolder_->OnHandleMarkInfoChange(shareOverlayInfo_, dirty);
@@ -291,7 +373,7 @@ void SelectContentOverlayManager::MarkSelectOverlayDirty(PropertyChangeFlag chan
 
 void SelectContentOverlayManager::UpdateHandleInfosWithFlag(int32_t updateFlag)
 {
-    auto pattern = GetSelectOverlayPattern(selectOverlayNode_);
+    auto pattern = GetSelectHandlePattern(WeakClaim(this));
     CHECK_NULL_VOID(pattern);
     std::optional<SelectHandleInfo> firstHandleInfo;
     if ((static_cast<uint32_t>(updateFlag) & DIRTY_FIRST_HANDLE) == DIRTY_FIRST_HANDLE) {
@@ -315,6 +397,15 @@ void SelectContentOverlayManager::UpdateHandleInfosWithFlag(int32_t updateFlag)
 
 void SelectContentOverlayManager::CreateSelectOverlay(SelectOverlayInfo& info, bool animation)
 {
+    if (!info.enableHandleLevel) {
+        CreateNormalSelectOverlay(info, animation);
+        return;
+    }
+    CreateHandleLevelSelectOverlay(info, animation, info.handleLevelMode);
+}
+
+void SelectContentOverlayManager::CreateNormalSelectOverlay(SelectOverlayInfo& info, bool animation)
+{
     shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(info);
     auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo_);
     selectOverlayNode_ = overlayNode;
@@ -323,15 +414,49 @@ void SelectContentOverlayManager::CreateSelectOverlay(SelectOverlayInfo& info, b
         [animation, weak = WeakClaim(this), node = overlayNode] {
             auto manager = weak.Upgrade();
             CHECK_NULL_VOID(manager);
-            manager->CreateAndMountNode(node, animation);
+            if (node && node == manager->selectOverlayNode_) {
+                manager->MountNodeToRoot(node, animation);
+                manager->NotifySelectOverlayShow(true);
+            }
         },
         TaskExecutor::TaskType::UI, "ArkUISelectOverlayCreate");
 }
 
-void SelectContentOverlayManager::CreateAndMountNode(const RefPtr<FrameNode>& overlayNode, bool animation)
+void SelectContentOverlayManager::CreateHandleLevelSelectOverlay(
+    SelectOverlayInfo& info, bool animation, HandleLevelMode mode)
 {
-    CHECK_NULL_VOID(overlayNode);
-    CHECK_NULL_VOID(overlayNode == selectOverlayNode_);
+    LOGI("Show SelectOverlay, first %{public}s isShow %{public}d, second %{public}s isShow %{public}d",
+        info.firstHandle.paintRect.ToString().c_str(), info.firstHandle.isShow,
+        info.secondHandle.paintRect.ToString().c_str(), info.secondHandle.isShow);
+    shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(info);
+    auto menuNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo_, SelectOverlayMode::MENU_ONLY);
+    menuNode_ = menuNode;
+    auto handleNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo_, SelectOverlayMode::HANDLE_ONLY);
+    handleNode_ = handleNode;
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [animation, weak = WeakClaim(this), menuNode, handleNode, mode] {
+            auto manager = weak.Upgrade();
+            CHECK_NULL_VOID(manager);
+            auto isMenuNodeValid = (menuNode && menuNode == manager->menuNode_);
+            auto isHandleNodeValid = (handleNode && handleNode == manager->handleNode_);
+            if (!isMenuNodeValid || !isHandleNodeValid) {
+                return;
+            }
+            manager->MountNodeToRoot(menuNode, animation);
+            if (mode == HandleLevelMode::EMBED) {
+                manager->MountNodeToCaller(handleNode, animation);
+            } else if (mode == HandleLevelMode::OVERLAY) {
+                manager->MountNodeToRoot(handleNode, animation);
+            }
+            manager->NotifySelectOverlayShow(true);
+        },
+        TaskExecutor::TaskType::UI, "CreateHandleLevelSelectOverlay");
+}
+
+void SelectContentOverlayManager::MountNodeToRoot(const RefPtr<FrameNode>& overlayNode, bool animation)
+{
     auto rootNode = GetSelectOverlayRoot();
     CHECK_NULL_VOID(rootNode);
     // get keyboard index to put selet_overlay before keyboard node
@@ -339,6 +464,14 @@ void SelectContentOverlayManager::CreateAndMountNode(const RefPtr<FrameNode>& ov
     int32_t index = 0;
     for (const auto& it : rootNode->GetChildren()) {
         if (it->GetTag() == V2::KEYBOARD_ETS_TAG) {
+            slot = index;
+            break;
+        }
+        if (it->GetTag() == V2::SELECT_OVERLAY_ETS_TAG) {
+            slot = index;
+            break;
+        }
+        if (it->GetTag() == V2::TEXTINPUT_ETS_TAG) {
             slot = index;
             break;
         }
@@ -360,10 +493,40 @@ void SelectContentOverlayManager::CreateAndMountNode(const RefPtr<FrameNode>& ov
         CHECK_NULL_VOID(hostNode);
         hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
     });
+}
+
+void SelectContentOverlayManager::MountNodeToCaller(const RefPtr<FrameNode>& overlayNode, bool animation)
+{
+    CHECK_NULL_VOID(selectOverlayHolder_);
+    auto ownerFrameNode = selectOverlayHolder_->GetOwner();
+    CHECK_NULL_VOID(ownerFrameNode);
+    LOGI("SelectOverlay: Mount SelectOverlay node to tag: %{public}s, id: %{public}d",
+        ownerFrameNode->GetTag().c_str(), ownerFrameNode->GetId());
+    ownerFrameNode->SetOverlayNode(overlayNode);
+    overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(ownerFrameNode)));
+    overlayNode->SetActive(true);
+    auto overlayProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
+    CHECK_NULL_VOID(overlayProperty);
+    overlayProperty->SetIsOverlayNode(true);
+    overlayProperty->UpdateAlignment(Alignment::CENTER);
+    overlayProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    ownerFrameNode->MarkNeedSyncRenderTree();
+    ownerFrameNode->RebuildRenderContextTree();
+    overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (!shareOverlayInfo_->isUsingMouse) {
+        auto node = DynamicCast<SelectOverlayNode>(overlayNode);
+        if (node) {
+            node->ShowSelectOverlay(animation);
+        }
+    }
+}
+
+void SelectContentOverlayManager::NotifySelectOverlayShow(bool isCreated)
+{
     CHECK_NULL_VOID(selectOverlayHolder_);
     auto callback = selectOverlayHolder_->GetCallback();
     CHECK_NULL_VOID(callback);
-    callback->OnAfterSelectOverlayShow(true);
+    callback->OnAfterSelectOverlayShow(isCreated);
 }
 
 const RefPtr<FrameNode> SelectContentOverlayManager::GetSelectOverlayRoot()
@@ -404,12 +567,11 @@ void SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, Clos
 {
     CHECK_NULL_VOID(selectOverlayHolder_);
     CHECK_NULL_VOID(selectOverlayHolder_->GetOwnerId() == id);
-    auto overlay = selectOverlayNode_.Upgrade();
-    CHECK_NULL_VOID(overlay);
-    auto node = DynamicCast<SelectOverlayNode>(overlay);
+    LOGI("SelectOverlay: Close selectoverlay by id %{public}d, reason %{public}d", id, reason);
     auto callback = selectOverlayHolder_->GetCallback();
+    CHECK_NULL_VOID(shareOverlayInfo_);
     auto menuType = shareOverlayInfo_->menuInfo.menuType;
-    auto pattern = GetSelectOverlayPattern(selectOverlayNode_);
+    auto pattern = GetSelectHandlePattern(WeakClaim(this));
     RefPtr<OverlayInfo> info = nullptr;
     if (pattern) {
         info = AceType::MakeRefPtr<OverlayInfo>();
@@ -417,15 +579,18 @@ void SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, Clos
         info->isShowMenu = shareOverlayInfo_->menuInfo.menuIsShow;
         info->isHiddenHandle = pattern->IsHiddenHandle();
     }
-    if (node && animation) {
+    auto selectOverlayNode = selectOverlayNode_.Upgrade();
+    auto menuNode = menuNode_.Upgrade();
+    auto handleNode = handleNode_.Upgrade();
+    if (animation && !shareOverlayInfo_->isUsingMouse) {
         ClearAllStatus();
-        node->HideSelectOverlay([weakOverlay = WeakClaim(AceType::RawPtr(overlay)), managerWeak = WeakClaim(this)]() {
-            auto manager = managerWeak.Upgrade();
-            CHECK_NULL_VOID(manager);
-            manager->DestroySelectOverlayNode(weakOverlay.Upgrade());
-        });
+        DestroySelectOverlayNodeWithAnimation(selectOverlayNode);
+        DestroySelectOverlayNodeWithAnimation(menuNode);
+        DestroySelectOverlayNodeWithAnimation(handleNode);
     } else {
-        DestroySelectOverlayNode(overlay);
+        DestroySelectOverlayNode(selectOverlayNode);
+        DestroySelectOverlayNode(menuNode);
+        DestroySelectOverlayNode(handleNode);
         ClearAllStatus();
     }
     if (callback) {
@@ -433,17 +598,43 @@ void SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, Clos
     }
 }
 
+void SelectContentOverlayManager::DestroySelectOverlayNodeWithAnimation(const RefPtr<FrameNode>& node)
+{
+    auto overlayNode = DynamicCast<SelectOverlayNode>(node);
+    CHECK_NULL_VOID(overlayNode);
+    overlayNode->HideSelectOverlay([weakOverlay = WeakClaim(AceType::RawPtr(node)), managerWeak = WeakClaim(this)]() {
+        auto manager = managerWeak.Upgrade();
+        CHECK_NULL_VOID(manager);
+        manager->DestroySelectOverlayNode(weakOverlay.Upgrade());
+    });
+}
+
 void SelectContentOverlayManager::DestroySelectOverlayNode(const RefPtr<FrameNode>& overlay)
 {
     CHECK_NULL_VOID(overlay);
-    auto rootNode = overlay->GetParent();
-    CHECK_NULL_VOID(rootNode);
-    rootNode->RemoveChild(overlay);
-    rootNode->MarkNeedSyncRenderTree();
-    rootNode->RebuildRenderContextTree();
+    auto parentNode = overlay->GetParent();
+    CHECK_NULL_VOID(parentNode);
+
+    auto parentFrameNode = DynamicCast<FrameNode>(parentNode);
+    if (parentFrameNode) {
+        auto pattern = overlay->GetPattern<SelectOverlayPattern>();
+        if (pattern && pattern->GetMode() == SelectOverlayMode::HANDLE_ONLY) {
+            parentFrameNode->SetOverlayNode(nullptr);
+            overlay->SetParent(nullptr);
+        }
+    }
+    LOGI("SelectOverlay: Remove node [%{public}s, %{public}d] from [%{public}s, %{public}d]", overlay->GetTag().c_str(),
+        overlay->GetId(), parentNode->GetTag().c_str(), parentNode->GetId());
+    parentNode->RemoveChild(overlay);
+    parentNode->MarkNeedSyncRenderTree();
+    parentNode->RebuildRenderContextTree();
+    auto rootNode = GetSelectOverlayRoot();
+    if (rootNode != DynamicCast<FrameNode>(parentNode)) {
+        return;
+    }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    context->AddAfterRenderTask([weakNode = WeakPtr<UINode>(rootNode)]() {
+    context->AddAfterRenderTask([weakNode = WeakPtr<UINode>(parentNode)]() {
         auto hostNode = weakNode.Upgrade();
         CHECK_NULL_VOID(hostNode);
         if (AceType::InstanceOf<FrameNode>(hostNode)) {
@@ -457,6 +648,8 @@ void SelectContentOverlayManager::DestroySelectOverlayNode(const RefPtr<FrameNod
 void SelectContentOverlayManager::ClearAllStatus()
 {
     selectOverlayNode_.Reset();
+    handleNode_.Reset();
+    menuNode_.Reset();
     shareOverlayInfo_.reset();
     if (selectOverlayHolder_) {
         selectOverlayHolder_->OnBind(nullptr);
@@ -467,7 +660,7 @@ void SelectContentOverlayManager::ClearAllStatus()
 bool SelectContentOverlayManager::CloseCurrent(bool animation, CloseReason reason)
 {
     CHECK_NULL_RETURN(selectOverlayHolder_, false);
-    CHECK_NULL_RETURN(selectOverlayNode_.Upgrade(), false);
+    CHECK_NULL_RETURN(selectOverlayNode_.Upgrade() || menuNode_.Upgrade() || handleNode_.Upgrade(), false);
     CloseInternal(selectOverlayHolder_->GetOwnerId(), animation, reason);
     return true;
 }
@@ -475,8 +668,12 @@ bool SelectContentOverlayManager::CloseCurrent(bool animation, CloseReason reaso
 void SelectContentOverlayManager::CloseWithOverlayId(int32_t overlayId, CloseReason reason, bool animation)
 {
     CHECK_NULL_VOID(IsOpen());
-    CHECK_NULL_VOID(overlayId == selectOverlayNode_.Upgrade()->GetId());
-    CloseInternal(selectOverlayHolder_->GetOwnerId(), animation, reason);
+    // call from menu button.
+    auto hasOverlayId = (selectOverlayNode_.Upgrade() && overlayId == selectOverlayNode_.Upgrade()->GetId());
+    hasOverlayId = hasOverlayId || (menuNode_.Upgrade() && menuNode_.Upgrade()->GetId());
+    if (hasOverlayId) {
+        CloseInternal(selectOverlayHolder_->GetOwnerId(), animation, reason);
+    }
 }
 
 void SelectContentOverlayManager::Close(int32_t id, bool animation, CloseReason reason)
@@ -486,14 +683,14 @@ void SelectContentOverlayManager::Close(int32_t id, bool animation, CloseReason 
 
 void SelectContentOverlayManager::ShowOptionMenu()
 {
-    auto pattern = GetSelectOverlayPattern(selectOverlayNode_);
+    auto pattern = GetSelectMenuPattern(WeakClaim(this));
     CHECK_NULL_VOID(pattern);
     pattern->UpdateMenuIsShow(true);
 }
 
 void SelectContentOverlayManager::HideOptionMenu(bool noAnimation)
 {
-    auto pattern = GetSelectOverlayPattern(selectOverlayNode_);
+    auto pattern = GetSelectMenuPattern(WeakClaim(this));
     CHECK_NULL_VOID(pattern);
     pattern->UpdateMenuIsShow(false, noAnimation);
 }
@@ -501,42 +698,52 @@ void SelectContentOverlayManager::HideOptionMenu(bool noAnimation)
 void SelectContentOverlayManager::ToggleOptionMenu()
 {
     CHECK_NULL_VOID(shareOverlayInfo_);
-    auto pattern = GetSelectOverlayPattern(selectOverlayNode_);
+    auto pattern = GetSelectMenuPattern(WeakClaim(this));
     CHECK_NULL_VOID(pattern);
     pattern->UpdateMenuIsShow(!shareOverlayInfo_->menuInfo.menuIsShow);
 }
 
 void SelectContentOverlayManager::DisableMenu()
 {
-    auto pattern = GetSelectOverlayPattern(selectOverlayNode_);
+    auto pattern = GetSelectMenuPattern(WeakClaim(this));
     CHECK_NULL_VOID(pattern);
     pattern->DisableMenu(true);
 }
 
 void SelectContentOverlayManager::EnableMenu()
 {
-    auto pattern = GetSelectOverlayPattern(selectOverlayNode_);
+    auto pattern = GetSelectMenuPattern(WeakClaim(this));
     CHECK_NULL_VOID(pattern);
     pattern->DisableMenu(false);
 }
 
 void SelectContentOverlayManager::HideHandle()
 {
-    auto pattern = GetSelectOverlayPattern(selectOverlayNode_);
+    auto pattern = GetSelectHandlePattern(WeakClaim(this));
     CHECK_NULL_VOID(pattern);
     pattern->StartHiddenHandleTask(false);
 }
 
 bool SelectContentOverlayManager::IsOpen()
 {
-    auto overlayNode = selectOverlayNode_.Upgrade();
-    return overlayNode && overlayNode->GetParent();
+    if (!IsEnableHandleLevel()) {
+        auto overlayNode = selectOverlayNode_.Upgrade();
+        return overlayNode && overlayNode->GetParent();
+    }
+    auto hasHandleNode = handleNode_.Upgrade() && handleNode_.Upgrade()->GetParent();
+    auto hasMenuNode = menuNode_.Upgrade() && menuNode_.Upgrade()->GetParent();
+    return hasHandleNode || hasMenuNode;
 }
 
 bool SelectContentOverlayManager::IsCreating()
 {
-    auto overlayNode = selectOverlayNode_.Upgrade();
-    return overlayNode && !overlayNode->GetParent();
+    if (!IsEnableHandleLevel()) {
+        auto overlayNode = selectOverlayNode_.Upgrade();
+        return overlayNode && !overlayNode->GetParent();
+    }
+    auto menuNode = menuNode_.Upgrade();
+    auto handleNode = handleNode_.Upgrade();
+    return (menuNode && !menuNode->GetParent()) || (handleNode && !handleNode->GetParent());
 }
 
 bool SelectContentOverlayManager::IsMenuShow()
@@ -561,21 +768,22 @@ bool SelectContentOverlayManager::IsHandleReverse()
 
 void SelectContentOverlayManager::RestartHiddenHandleTask(bool isDelay)
 {
-    auto pattern = GetSelectOverlayPattern(selectOverlayNode_);
+    auto pattern = GetSelectHandlePattern(WeakClaim(this));
     CHECK_NULL_VOID(pattern);
     pattern->RestartHiddenHandleTask(isDelay);
 }
 
 void SelectContentOverlayManager::CancelHiddenHandleTask()
 {
-    auto pattern = GetSelectOverlayPattern(selectOverlayNode_);
+    auto pattern = GetSelectHandlePattern(WeakClaim(this));
     CHECK_NULL_VOID(pattern);
     pattern->CancelHiddenHandleTask();
 }
 
 RefPtr<SelectOverlayNode> SelectContentOverlayManager::GetSelectOverlayNode()
 {
-    return AceType::DynamicCast<SelectOverlayNode>(selectOverlayNode_.Upgrade());
+    auto overlayNode = IsEnableHandleLevel() ? menuNode_.Upgrade() : selectOverlayNode_.Upgrade();
+    return AceType::DynamicCast<SelectOverlayNode>(overlayNode);
 }
 
 OptionMenuType SelectContentOverlayManager::GetShowMenuType()
@@ -583,24 +791,34 @@ OptionMenuType SelectContentOverlayManager::GetShowMenuType()
     return IsOpen() && shareOverlayInfo_ ? shareOverlayInfo_->menuInfo.menuType : OptionMenuType::NO_MENU;
 }
 
-void SelectContentOverlayManager::HandleGlobalEvent(const TouchEvent& touchPoint, const NG::OffsetF& rootOffset)
+void SelectContentOverlayManager::HandleGlobalEvent(const TouchEvent& touchEvent, const NG::OffsetF& rootOffset)
 {
-    NG::PointF point { touchPoint.x - rootOffset.GetX(), touchPoint.y - rootOffset.GetY() };
-    if (touchPoint.type == TouchType::DOWN) {
+    NG::PointF point { touchEvent.x - rootOffset.GetX(), touchEvent.y - rootOffset.GetY() };
+    if (touchEvent.type == TouchType::DOWN) {
         isIntercept_ = IsTouchInSelectOverlayArea(point);
     }
     if (!isIntercept_) {
-        HandleSelectionEvent(point, touchPoint);
-        if (selectOverlayHolder_ && selectOverlayHolder_->GetCallback()) {
-            selectOverlayHolder_->GetCallback()->OnHandleGlobalEvent(point, touchPoint);
+        HandleSelectionEvent(point, touchEvent);
+        if (selectOverlayHolder_ && selectOverlayHolder_->GetCallback() && selectOverlayHolder_->GetOwner()) {
+            auto localPoint = point;
+            ConvertPointRelativeToNode(selectOverlayHolder_->GetOwner(), localPoint);
+            selectOverlayHolder_->GetCallback()->OnHandleGlobalEvent(point, localPoint, touchEvent);
         }
     }
-    if (touchPoint.type == TouchType::UP) {
+    if (touchEvent.type == TouchType::UP) {
         isIntercept_ = false;
     }
 }
 
 bool SelectContentOverlayManager::IsTouchInSelectOverlayArea(const PointF& point)
+{
+    if (!IsEnableHandleLevel()) {
+        return IsTouchInNormalSelectOverlayArea(point);
+    }
+    return IsTouchInHandleLevelOverlayArea(point);
+}
+
+bool SelectContentOverlayManager::IsTouchInNormalSelectOverlayArea(const PointF& point)
 {
     auto current = selectOverlayNode_.Upgrade();
     CHECK_NULL_RETURN(current, false);
@@ -621,6 +839,19 @@ bool SelectContentOverlayManager::IsTouchInSelectOverlayArea(const PointF& point
         }
     }
     return false;
+}
+
+bool SelectContentOverlayManager::IsTouchInHandleLevelOverlayArea(const PointF& point)
+{
+    auto selectOverlayNode = DynamicCast<SelectOverlayNode>(menuNode_.Upgrade());
+    if (selectOverlayNode && selectOverlayNode->IsInSelectedOrSelectOverlayArea(point)) {
+        return true;
+    }
+    selectOverlayNode = DynamicCast<SelectOverlayNode>(handleNode_.Upgrade());
+    CHECK_NULL_RETURN(selectOverlayNode, false);
+    auto localPoint = point;
+    ConvertPointRelativeToNode(selectOverlayNode->GetAncestorNodeOfFrame(), localPoint);
+    return selectOverlayNode->IsInSelectedOrSelectOverlayArea(localPoint);
 }
 
 void SelectContentOverlayManager::HandleSelectionEvent(const PointF& point, const TouchEvent& rawTouchEvent)
@@ -663,5 +894,79 @@ void SelectContentOverlayManager::RemoveHoldSelectionCallback(int32_t id)
         selectionHoldId_ = -1;
         holdSelectionInfo_.reset();
     }
+}
+
+bool SelectContentOverlayManager::IsEnableHandleLevel()
+{
+    return shareOverlayInfo_ && shareOverlayInfo_->enableHandleLevel;
+}
+
+RefPtr<Pattern> SelectContentOverlayManager::GetMenuPattern()
+{
+    return IsEnableHandleLevel() ? GetSelectOverlayPattern(menuNode_)
+                                      : GetSelectOverlayPattern(selectOverlayNode_);
+}
+
+RefPtr<Pattern> SelectContentOverlayManager::GetHandlePattern()
+{
+    return IsEnableHandleLevel() ? GetSelectOverlayPattern(handleNode_)
+                                      : GetSelectOverlayPattern(selectOverlayNode_);
+}
+
+RefPtr<FrameNode> SelectContentOverlayManager::GetHandleOverlayNode()
+{
+    return handleNode_.Upgrade();
+}
+
+void SelectContentOverlayManager::NotifyUpdateToolBar(bool itemChanged)
+{
+    auto menuNode = DynamicCast<SelectOverlayNode>(menuNode_.Upgrade());
+    CHECK_NULL_VOID(menuNode);
+    menuNode->UpdateToolBar(itemChanged);
+}
+
+float SelectContentOverlayManager::GetHandleDiameter()
+{
+    return SelectOverlayPattern::GetHandleDiameter();
+}
+
+void SelectContentOverlayManager::ConvertPointRelativeToNode(const RefPtr<FrameNode>& node, PointF& point)
+{
+    CHECK_NULL_VOID(node);
+    auto rootNode = GetSelectOverlayRoot();
+    CHECK_NULL_VOID(rootNode);
+    std::stack<RefPtr<FrameNode>> nodeStack;
+    auto parent = node;
+    while (parent && parent != rootNode) {
+        nodeStack.push(parent);
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    CHECK_NULL_VOID(!nodeStack.empty());
+    PointF temp(point.GetX(), point.GetY());
+    while (!nodeStack.empty()) {
+        parent = nodeStack.top();
+        CHECK_NULL_VOID(parent);
+        nodeStack.pop();
+        auto renderContext = parent->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->GetPointWithRevert(temp);
+        auto rectOffset = renderContext->GetPaintRectWithoutTransform().GetOffset();
+        temp = temp - rectOffset;
+    }
+    point.SetX(temp.GetX());
+    point.SetY(temp.GetY());
+}
+
+bool SelectContentOverlayManager::IsTouchAtHandle(const PointF& localPoint, const PointF& globalPoint)
+{
+    auto handleNode = handleNode_.Upgrade();
+    CHECK_NULL_RETURN(handleNode, false);
+    auto selectOverlayNode = DynamicCast<SelectOverlayNode>(handleNode);
+    CHECK_NULL_RETURN(selectOverlayNode, false);
+    CHECK_NULL_RETURN(selectOverlayHolder_, false);
+    if (selectOverlayNode->GetParent() == selectOverlayHolder_->GetOwner()) {
+        return selectOverlayNode->IsInSelectedOrSelectOverlayArea(localPoint);
+    }
+    return selectOverlayNode->IsInSelectedOrSelectOverlayArea(globalPoint);
 }
 } // namespace OHOS::Ace::NG

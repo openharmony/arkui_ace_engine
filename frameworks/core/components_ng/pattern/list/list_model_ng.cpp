@@ -769,6 +769,11 @@ void ListModelNG::SetScrollBy(FrameNode* frameNode, double x, double y)
     pattern->UpdateCurrentOffset(-offset, SCROLL_FROM_JUMP);
 }
 
+void ListModelNG::SetFlingSpeedLimit(FrameNode* frameNode, double maxSpeed)
+{
+    ScrollableModelNG::SetMaxFlingSpeed(frameNode, maxSpeed);
+}
+
 RefPtr<ListChildrenMainSize> ListModelNG::GetOrCreateListChildrenMainSize()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -793,5 +798,28 @@ void ListModelNG::ResetListChildrenMainSize(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetChildrenSize();
+}
+
+int32_t ListModelNG::GetInitialIndex(FrameNode* frameNode)
+{
+    int32_t value = 0;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, InitialIndex, value, frameNode, value);
+    return value;
+}
+
+V2::ItemDivider ListModelNG::GetDivider(FrameNode* frameNode)
+{
+    V2::ItemDivider value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, Divider, value, frameNode, value);
+    return value;
+}
+
+void ListModelNG::SetScroller(FrameNode* frameNode, RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetPositionController(AceType::DynamicCast<ListPositionController>(scroller));
+    pattern->SetScrollBarProxy(AceType::DynamicCast<ScrollBarProxy>(proxy));
 }
 } // namespace OHOS::Ace::NG

@@ -196,6 +196,7 @@ public:
     void SetOptionWidthFitTrigger(bool isFitTrigger);
     void SetHasOptionWidth(bool hasOptionWidth);
     void SetControlSize(const ControlSize& controlSize);
+    void SetDivider(const SelectDivider& divider);
     ControlSize GetControlSize();
     void SetLayoutDirection(TextDirection value);
 
@@ -295,6 +296,7 @@ private:
     void ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonOptionAlign(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonMenuBackgroundStyle(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToJsonDivider(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     // XTS inspector helper functions
     std::string InspectorGetOptions() const;
     std::string InspectorGetSelectedFont() const;

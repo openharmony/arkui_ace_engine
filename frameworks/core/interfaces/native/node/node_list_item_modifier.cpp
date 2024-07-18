@@ -127,5 +127,27 @@ const ArkUIListItemModifier* GetListItemModifier()
         ResetSelectable, SetListItemSwiperAction, ResetListItemSwiperAction };
     return &modifier;
 }
+
+void SetListItemOnSelect(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](bool isSelected) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_LIST_ITEM_SELECTED;
+        event.componentAsyncEvent.data[0].i32 = static_cast<int32_t>(isSelected);
+        SendArkUIAsyncEvent(&event);
+    };
+    ListItemModelNG::SetSelectCallback(frameNode, std::move(onEvent));
+}
+
+void ResetListItemOnSelect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemModelNG::SetSelectCallback(frameNode, nullptr);
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

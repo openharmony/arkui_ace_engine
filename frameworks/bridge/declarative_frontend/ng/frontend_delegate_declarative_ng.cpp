@@ -163,6 +163,7 @@ void FrontendDelegateDeclarativeNG::AttachSubPipelineContext(const RefPtr<Pipeli
         return;
     }
     jsAccessibilityManager_->AddSubPipelineContext(context);
+    jsAccessibilityManager_->RegisterSubWindowInteractionOperation(context->GetWindowId());
 }
 
 void FrontendDelegateDeclarativeNG::RunPage(
@@ -386,64 +387,65 @@ void FrontendDelegateDeclarativeNG::ClearTimer(const std::string& callbackId)
 void FrontendDelegateDeclarativeNG::Push(const std::string& uri, const std::string& params)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Push(NG::RouterPageInfo({ uri, params }));
+    pageRouterManager_->Push(NG::RouterPageInfo({ uri, params, true }));
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::PushWithMode(const std::string& uri, const std::string& params, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Push(NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode) }));
+    pageRouterManager_->Push(NG::RouterPageInfo({ uri, params, true, static_cast<NG::RouterMode>(routerMode) }));
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::PushWithCallback(const std::string& uri, const std::string& params,
-    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+    bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
     pageRouterManager_->Push(
-        NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::PushNamedRoute(const std::string& uri, const std::string& params,
-    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+    bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
     pageRouterManager_->PushNamedRoute(
-        NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::Replace(const std::string& uri, const std::string& params)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params }));
+    pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params, true }));
 }
 
 void FrontendDelegateDeclarativeNG::ReplaceWithMode(
     const std::string& uri, const std::string& params, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode) }));
+    pageRouterManager_->Replace(
+        NG::RouterPageInfo({ uri, params, true, static_cast<NG::RouterMode>(routerMode) }));
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::ReplaceWithCallback(const std::string& uri, const std::string& params,
-    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+    bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
     pageRouterManager_->Replace(
-        NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::ReplaceNamedRoute(const std::string& uri, const std::string& params,
-    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+    bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
     pageRouterManager_->ReplaceNamedRoute(
-        NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
     OnMediaQueryUpdate();
 }
 
@@ -587,13 +589,21 @@ void FrontendDelegateDeclarativeNG::GetUIFontConfig(FontConfigJsonInfo& fontConf
     pipelineContextHolder_.Get()->GetUIFontConfig(fontConfigJsonInfo);
 }
 
-double FrontendDelegateDeclarativeNG::MeasureText(const MeasureContext& context)
+double FrontendDelegateDeclarativeNG::MeasureText(MeasureContext context)
 {
+    if (context.isFontSizeUseDefaultUnit && context.fontSize.has_value() &&
+        !AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        context.fontSize = Dimension(context.fontSize->Value(), DimensionUnit::VP);
+    }
     return MeasureUtil::MeasureText(context);
 }
 
-Size FrontendDelegateDeclarativeNG::MeasureTextSize(const MeasureContext& context)
+Size FrontendDelegateDeclarativeNG::MeasureTextSize(MeasureContext context)
 {
+    if (context.isFontSizeUseDefaultUnit && context.fontSize.has_value() &&
+        !AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        context.fontSize = Dimension(context.fontSize->Value(), DimensionUnit::VP);
+    }
     return MeasureUtil::MeasureTextSize(context);
 }
 
@@ -721,12 +731,15 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
 
 DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const PromptDialogAttr &dialogAttr)
 {
-    DialogProperties dialogProperties = { .isShowInSubWindow = dialogAttr.showInSubWindow,
-        .isModal = dialogAttr.isModal,
-        .customBuilder = dialogAttr.customBuilder,
+    DialogProperties dialogProperties = { .autoCancel = dialogAttr.autoCancel,
+        .customStyle = dialogAttr.customStyle,
         .onWillDismiss = dialogAttr.customOnWillDismiss,
+        .maskColor = dialogAttr.maskColor,
         .backgroundColor = dialogAttr.backgroundColor,
         .borderRadius = dialogAttr.borderRadius,
+        .isShowInSubWindow = dialogAttr.showInSubWindow,
+        .isModal = dialogAttr.isModal,
+        .customBuilder = dialogAttr.customBuilder,
         .borderWidth = dialogAttr.borderWidth,
         .borderColor = dialogAttr.borderColor,
         .borderStyle = dialogAttr.borderStyle,
@@ -734,11 +747,8 @@ DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const Pr
         .width = dialogAttr.width,
         .height = dialogAttr.height,
         .maskRect = dialogAttr.maskRect,
-        .autoCancel = dialogAttr.autoCancel,
-        .contentNode = dialogAttr.contentNode,
-        .maskColor = dialogAttr.maskColor,
-        .customStyle = dialogAttr.customStyle,
         .transitionEffect = dialogAttr.transitionEffect,
+        .contentNode = dialogAttr.contentNode,
         .onDidAppear = dialogAttr.onDidAppear,
         .onDidDisappear = dialogAttr.onDidDisappear,
         .onWillAppear = dialogAttr.onWillAppear,
@@ -819,9 +829,9 @@ void FrontendDelegateDeclarativeNG::UpdateCustomDialog(
     const WeakPtr<NG::UINode>& node, const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback)
 {
     DialogProperties dialogProperties = {
-        .isSysBlurStyle = false,
         .autoCancel = dialogAttr.autoCancel,
-        .maskColor = dialogAttr.maskColor
+        .maskColor = dialogAttr.maskColor,
+        .isSysBlurStyle = false
     };
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();
@@ -1017,19 +1027,32 @@ size_t FrontendDelegateDeclarativeNG::GetComponentsCount()
     return pageNode->GetAllDepthChildrenCount();
 }
 
-void FrontendDelegateDeclarativeNG::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
-    const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
+void FrontendDelegateDeclarativeNG::ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast enter");
-    int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
-    bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
-    auto task = [durationTime, message, bottom, isRightToLeft, showMode, alignment, offset,
-                    containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+    NG::ToastInfo updatedToastInfo = toastInfo;
+    updatedToastInfo.duration = std::clamp(toastInfo.duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
+    updatedToastInfo.isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto task = [updatedToastInfo, callbackParam = std::move(callback), containerId = Container::CurrentId()](
+                    const RefPtr<NG::OverlayManager>& overlayManager) {
         CHECK_NULL_VOID(overlayManager);
         ContainerScope scope(containerId);
-        overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode, alignment,  offset);
+        overlayManager->ShowToast(
+            updatedToastInfo, std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
     };
     MainWindowOverlay(std::move(task), "ArkUIOverlayShowToast");
+}
+
+void FrontendDelegateDeclarativeNG::CloseToast(const int32_t toastId, std::function<void(int32_t)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "close toast enter");
+    auto currentId = Container::CurrentId();
+    ContainerScope scope(currentId);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->CloseToast(toastId, std::move(callback));
 }
 
 void FrontendDelegateDeclarativeNG::ShowDialogInner(DialogProperties& dialogProperties,
@@ -1141,29 +1164,38 @@ void FrontendDelegateDeclarativeNG::OnPageHide()
 }
 
 void FrontendDelegateDeclarativeNG::GetSnapshot(
-    const std::string& componentId, NG::ComponentSnapshot::JsCallback&& callback)
+    const std::string& componentId, NG::ComponentSnapshot::JsCallback&& callback, const NG::SnapshotOptions& options)
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    NG::ComponentSnapshot::Get(componentId, std::move(callback));
+    NG::ComponentSnapshot::Get(componentId, std::move(callback), options);
 #endif
 }
 
-std::string FrontendDelegateDeclarativeNG::GetContentInfo()
+std::string FrontendDelegateDeclarativeNG::GetContentInfo(ContentInfoType type)
 {
     auto jsonContentInfo = JsonUtil::Create(true);
 
     CHECK_NULL_RETURN(pageRouterManager_, "");
-    jsonContentInfo->Put("stackInfo", pageRouterManager_->GetStackInfo());
+    jsonContentInfo->Put("stackInfo", pageRouterManager_->GetStackInfo(type));
+    if (type == ContentInfoType::RESOURCESCHEDULE_RECOVERY) {
+        auto namedRouterInfo = pageRouterManager_->GetNamedRouterInfo();
+        if (namedRouterInfo) {
+            jsonContentInfo->Put("namedRouterInfo", std::move(namedRouterInfo));
+        }
+    }
 
-    auto pipelineContext = pipelineContextHolder_.Get();
-    CHECK_NULL_RETURN(pipelineContext, jsonContentInfo->ToString());
-    jsonContentInfo->Put("nodeInfo", pipelineContext->GetStoredNodeInfo());
+    if (type == ContentInfoType::CONTINUATION || type == ContentInfoType::APP_RECOVERY) {
+        auto pipelineContext = pipelineContextHolder_.Get();
+        CHECK_NULL_RETURN(pipelineContext, jsonContentInfo->ToString());
+        jsonContentInfo->Put("nodeInfo", pipelineContext->GetStoredNodeInfo());
+    }
 
     return jsonContentInfo->ToString();
 }
 
 void FrontendDelegateDeclarativeNG::CreateSnapshot(
-    std::function<void()>&& customBuilder, NG::ComponentSnapshot::JsCallback&& callback, bool enableInspector)
+    std::function<void()>&& customBuilder, NG::ComponentSnapshot::JsCallback&& callback, bool enableInspector,
+    const NG::SnapshotParam& param)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     ViewStackModel::GetInstance()->NewScope();
@@ -1171,7 +1203,7 @@ void FrontendDelegateDeclarativeNG::CreateSnapshot(
     customBuilder();
     auto customNode = ViewStackModel::GetInstance()->Finish();
 
-    NG::ComponentSnapshot::Create(customNode, std::move(callback), enableInspector);
+    NG::ComponentSnapshot::Create(customNode, std::move(callback), enableInspector, param);
 #endif
 }
 

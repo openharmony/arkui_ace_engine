@@ -20,6 +20,7 @@
 
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/image_provider/adapter/image_decoder.h"
 #ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
@@ -70,7 +71,16 @@ bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
     auto imageLoader = ImageLoader::CreateImageLoader(imageObj->GetSourceInfo());
     CHECK_NULL_RETURN(imageLoader, false);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto container = Container::Current();
+    if (container && container->IsSubContainer()) {
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "subContainer's pipeline's dataProviderManager is null, cannot load image "
+                                       "source, need to switch pipeline in parentContainer.");
+        auto currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+        container = Container::GetContainer(currentId);
+    }
+    CHECK_NULL_RETURN(container, false);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, false);
     auto newLoadedData = imageLoader->GetImageData(imageObj->GetSourceInfo(), WeakClaim(RawPtr(pipeline)));
     CHECK_NULL_RETURN(newLoadedData, false);
     // load data success
@@ -295,8 +305,10 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
 #endif
     if (!size.IsPositive()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "Image of src: %{public}s, imageData's size is invalid %{public}s, frameCount is %{public}d",
-            src.ToString().c_str(), size.ToString().c_str(), frameCount);
+            "Image of src: %{private}s, imageData's size = %{public}d is invalid, and the parsed size is invalid "
+            "%{public}s, "
+            "frameCount is %{public}d",
+            src.ToString().c_str(), static_cast<int32_t>(data->GetSize()), size.ToString().c_str(), frameCount);
         return nullptr;
     }
     if (frameCount > 1) {

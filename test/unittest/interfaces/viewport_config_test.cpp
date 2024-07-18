@@ -71,6 +71,9 @@ HWTEST_F(ViewportConfigTest, ViewportConfigTest001, TestSize.Level1)
 
     viewConfig.SetOrientation(1);
     ASSERT_EQ(viewConfig.Orientation(), 1);
+
+    viewConfig.SetTransformHint(90);
+    ASSERT_EQ(viewConfig.TransformHint(), 90);
 }
 
 /**
@@ -82,6 +85,7 @@ HWTEST_F(ViewportConfigTest, ViewportConfigTest002, TestSize.Level1)
 {
     ViewportConfig viewConfig = ViewportConfig(0, 1, 1.0f);
     auto toString = viewConfig.ToString();
-    ASSERT_EQ(toString, "Viewport config: size: (0, 1) orientation: 0 density: 1.000000 position: (0, 0)");
+    ASSERT_EQ(
+        toString, "Viewport config: size: (0, 1) orientation: 0 density: 1.000000 position: (0, 0) transformHint: 0");
 }
 } // namespace OHOS::Ace

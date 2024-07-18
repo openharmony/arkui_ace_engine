@@ -25,7 +25,6 @@
 #include "base/log/log_wrapper.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
 #include "core/image/image_loader.h"
 #include "core/image/image_source_info.h"
 
@@ -95,10 +94,6 @@ bool ImageFileCache::WriteFile(const std::string& url, const void* const data, s
     const std::string& fileCacheKey, const std::string& suffix)
 {
     std::string writeFilePath = ConstructCacheFilePath(fileCacheKey + suffix);
-    char realPath[PATH_MAX] = { 0x00 };
-    if (!RealPath(writeFilePath.c_str(), realPath)) {
-        return false;
-    }
 #ifdef WINDOWS_PLATFORM
     std::ofstream outFile(writeFilePath, std::ios::binary);
 #else
@@ -110,10 +105,10 @@ bool ImageFileCache::WriteFile(const std::string& url, const void* const data, s
     }
     outFile.write(reinterpret_cast<const char*>(data), size);
     TAG_LOGI(
-        AceLogTag::ACE_IMAGE, "write image cache: %{public}s %{private}s", url.c_str(), writeFilePath.c_str());
+        AceLogTag::ACE_IMAGE, "write image cache: %{private}s %{private}s", url.c_str(), writeFilePath.c_str());
 #ifndef WINDOWS_PLATFORM
     if (chmod(writeFilePath.c_str(), CHOWN_RW_UG) != 0) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "write image cache chmod failed: %{public}s %{private}s",
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "write image cache chmod failed: %{private}s %{private}s",
             url.c_str(), writeFilePath.c_str());
     }
 #endif
@@ -235,7 +230,7 @@ void ImageFileCache::WriteCacheFile(
         if (iter != fileNameToFileInfoPos_.end()) {
             auto infoIter = iter->second;
             // either suffix not specified, or fileName ends with the suffix
-            if (suffix == "" || EndsWith(infoIter->fileName, suffix)) {
+            if (suffix.empty() || EndsWith(infoIter->fileName, suffix)) {
                 TAG_LOGI(AceLogTag::ACE_IMAGE, "file has been wrote %{private}s", infoIter->fileName.c_str());
                 return;
             }
@@ -306,7 +301,7 @@ void ImageFileCache::ConvertToAstcAndWriteToFile(const std::string& fileCacheKey
         removeVector.push_back(filePath);
 
         auto infoIter = fileNameToFileInfoPos_[fileCacheKey];
-        cacheFileSize_ = cacheFileSize_ + packedSize - infoIter->fileSize;
+        cacheFileSize_ = cacheFileSize_ + static_cast<size_t>(packedSize) - infoIter->fileSize;
         infoIter->fileName = astcFileName;
         infoIter->fileSize = static_cast<uint64_t>(packedSize);
     }

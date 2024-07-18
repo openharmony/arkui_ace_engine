@@ -53,6 +53,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_bar_item_accessibility_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
@@ -110,6 +111,12 @@ constexpr int32_t TABBAR_DEFAULT_WIDTH = 56.f;
 constexpr int32_t TABBAR_DEFAULT_HEIGHT = 56.f;
 constexpr Dimension BAR_SATURATE = 1.3_vp;
 const InspectorFilter filter;
+constexpr float BARITEM_SIZE = 10.f;
+constexpr float BIG_FONT_SIZE_SCALE = 1.75f;
+constexpr float LARGE_FONT_SIZE_SCALE = 2.0f;
+constexpr float MAX_FONT_SIZE_SCALE = 3.2f;
+constexpr double BIG_DIALOG_WIDTH = 216.0;
+constexpr double MAX_DIALOG_WIDTH = 256.0;
 
 class TabsTestNg : public TestNG {
 public:
@@ -117,20 +124,15 @@ public:
     static void TearDownTestSuite();
     void SetUp() override;
     void TearDown() override;
-    void GetInstance();
-    void Create(const std::function<void(TabsModelNG)>& callback,
-        BarPosition barPosition = BarPosition::START, int32_t index = 0);
-    void CreateWithItem(const std::function<void(TabsModelNG)>& callback,
-        BarPosition barPosition = BarPosition::START, int32_t index = 0);
-    void CreateWithItemWithoutBuilder(const std::function<void(TabsModelNG)>& callback,
-        BarPosition barPosition = BarPosition::START, int32_t index = 0);
-
-    static void CreateItem(
-        int32_t itemNumber, const std::function<void(TabContentModelNG, int32_t)>& callback = nullptr);
-    static void CreateSingleItem(const std::function<void(TabContentModelNG)>& callback, int32_t nodeId);
-    static void CreateSingleItemWithoutBuilder(
-        const std::function<void(TabContentModelNG)>& callback, int32_t nodeId);
-    static TabBarBuilderFunc TabBarItemBuilder();
+    void GetTabs();
+    TabsModelNG CreateTabs(BarPosition barPosition = BarPosition::START, int32_t index = 0);
+    TabContentModelNG CreateTabContent();
+    void CreateTabContents(int32_t itemNumber = TABCONTENT_NUMBER);
+    void CreateTabContentsWithBuilder(int32_t itemNumber = TABCONTENT_NUMBER);
+    RefPtr<PaintWrapper> CreateTabsDone(TabsModelNG model);
+    TabBarBuilderFunc TabBarItemBuilder();
+    void CreateTabContentTabBarStyle(TabBarStyle tabBarStyle);
+    void CreateTabContentTabBarStyleWithBuilder(TabBarStyle tabBarStyle);
     void SwipeToWithoutAnimation(int32_t index);
     void ClickTo(Offset offset, int32_t index);
     void MouseTo(MouseAction action, Offset location, bool isHover);

@@ -23,6 +23,7 @@
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
+#include "core/components_ng/pattern/search/search_node.h"
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -44,6 +45,7 @@ constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SO
 constexpr int16_t DEFAULT_ALPHA = 255;
 constexpr double DEFAULT_OPACITY = 0.2;
 constexpr int32_t DEFAULT_CARET_POSITION = 0;
+constexpr bool DEFAULT_ENABLE_PREVIEW_TEXT_VALUE = true;
 
 void SetSearchTextFont(ArkUINodeHandle node, const struct ArkUIFontStruct* value)
 {
@@ -138,11 +140,9 @@ void SetSearchCancelButton(ArkUINodeHandle node,
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetCancelButtonStyle(frameNode, static_cast<CancelButtonStyle>(style));
-    SearchModelNG::SetCancelIconSize(frameNode,
-        Dimension(size->value, static_cast<DimensionUnit>(size->unit)));
-    SearchModelNG::SetCancelIconColor(frameNode, Color(color));
-    std::string srcStr = std::string(src);
-    SearchModelNG::SetRightIconSrcPath(frameNode, srcStr);
+    NG::IconOptions cancelIconOptions = NG::IconOptions(
+        Color(color), Dimension(size->value, static_cast<DimensionUnit>(size->unit)), std::string(src), "", "");
+    SearchModelNG::SetCancelImageIcon(frameNode, cancelIconOptions);
 }
 
 void ResetSearchCancelButton(ArkUINodeHandle node)
@@ -194,11 +194,14 @@ void SetSearchSearchIcon(ArkUINodeHandle node, const struct ArkUIIconOptionsStru
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SearchModelNG::SetSearchSrcPath(frameNode, value->src);
-    SearchModelNG::SetSearchIconSize(frameNode, Dimension(value->value, static_cast<DimensionUnit>(value->unit)));
+    Color iconColor;
     if (value->color != INVALID_COLOR_VALUE) {
-        SearchModelNG::SetSearchIconColor(frameNode, Color(value->color));
+        iconColor = Color(value->color);
     }
+
+    NG::IconOptions cancelInconOptions = NG::IconOptions(
+        iconColor, Dimension(value->value, static_cast<DimensionUnit>(value->unit)), std::string(value->src), "", "");
+    SearchModelNG::SetSearchImageIcon(frameNode, cancelInconOptions);
 }
 
 void ResetSearchSearchIcon(ArkUINodeHandle node)
@@ -635,7 +638,7 @@ void SetSearchOnChange(ArkUINodeHandle node, void* callback)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (callback) {
-        auto onSubmit = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        auto onSubmit = reinterpret_cast<std::function<void(const std::string&, PreviewText&)>*>(callback);
         SearchModelNG::SetOnChange(frameNode, std::move(*onSubmit));
     } else {
         SearchModelNG::SetOnChange(frameNode, nullptr);
@@ -792,6 +795,20 @@ void ResetSearchOnDidDelete(ArkUINodeHandle node)
     SearchModelNG::SetOnDidDeleteEvent(frameNode, nullptr);
 }
 
+void SetSearchEnablePreviewText(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetEnablePreviewText(frameNode, static_cast<bool>(value));
+}
+
+void ResetSearchEnablePreviewText(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetEnablePreviewText(frameNode, DEFAULT_ENABLE_PREVIEW_TEXT_VALUE);
+}
+
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
 {
@@ -819,7 +836,8 @@ const ArkUISearchModifier* GetSearchModifier()
         SetSearchOnWillInsert, ResetSearchOnWillInsert,
         SetSearchOnDidInsert, ResetSearchOnDidInsert,
         SetSearchOnWillDelete, ResetSearchOnWillDelete,
-        SetSearchOnDidDelete, ResetSearchOnDidDelete };
+        SetSearchOnDidDelete, ResetSearchOnDidDelete,
+        SetSearchEnablePreviewText, ResetSearchEnablePreviewText };
     return &modifier;
 }
 
@@ -842,7 +860,7 @@ void SetOnSearchChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, extraParam](const std::string& text) {
+    auto onEvent = [node, extraParam](const std::string& text, PreviewText&) {
         ArkUINodeEvent event;
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);

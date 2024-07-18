@@ -42,7 +42,7 @@ void ResetLoadingProgressColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = frameNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<ProgressTheme>();
         CHECK_NULL_VOID(theme);

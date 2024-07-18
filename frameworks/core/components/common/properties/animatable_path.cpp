@@ -31,8 +31,7 @@ AnimatablePath& AnimatablePath::operator=(const AnimatablePath& newValue)
         SetValue(newValue.GetValue());
         return *this;
     }
-    AnimationOption explicitAnim;
-    explicitAnim = context->GetExplicitAnimationOption();
+    AnimationOption explicitAnim = context->GetExplicitAnimationOption();
     if (explicitAnim.IsValid()) {
         SetAnimationOption(explicitAnim);
         AnimateTo(newValue.GetValue());

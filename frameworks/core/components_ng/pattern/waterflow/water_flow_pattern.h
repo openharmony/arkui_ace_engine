@@ -17,11 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_PATTERN_H
 
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"
+#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_accessibility_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_content_modifier.h"
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
-#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"
-#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 
@@ -72,7 +72,7 @@ public:
     }
 
     void TriggerModifyDone();
-    
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     bool UpdateStartIndex(int32_t index);
@@ -102,8 +102,6 @@ public:
 
     int32_t GetColumns() const;
 
-    void SetAccessibilityAction();
-
     void OnAnimateStop() override;
     /**
      * @brief LayoutMode::SLIDING_WINDOW doesn't support scrollTo and animateTo
@@ -112,12 +110,14 @@ public:
     /**
      * @brief LayoutMode::SLIDING_WINDOW doesn't support animateTo
      */
-    void AnimateTo(
-        float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll) override;
+    void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll,
+        bool useTotalOffset = true) override;
 
-    void ScrollPage(bool reverse, bool smooth = false) override;
+    void ScrollPage(bool reverse, bool smooth = false,
+        AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
 
-    void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START) override;
+    void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START,
+        std::optional<float> extraOffset = std::nullopt) override;
 
     double GetStoredOffset() const
     {
@@ -149,10 +149,25 @@ public:
      */
     void OnSectionChanged(int32_t start);
 
-    void OnSectionChangedNow(int32_t start);
-
     void DumpAdvanceInfo() override;
 
+    void SetPredictLayoutParam(std::optional<WaterFlowLayoutBase::PredictLayoutParam> param)
+    {
+        predictLayoutParam_ = param;
+    }
+    std::optional<WaterFlowLayoutBase::PredictLayoutParam> GetPredictLayoutParam() const
+    {
+        return predictLayoutParam_;
+    }
+
+    // ------------------------ Focus adapter --------------------------------
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override;
+    std::function<bool(int32_t)> GetScrollIndexAbility() override;
+    // ------------------------ Focus ^^^ --------------------------------
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override
     {
@@ -171,6 +186,14 @@ private:
     void OnScrollEndCallback() override;
     bool ScrollToTargetIndex(int32_t index);
     bool NeedRender();
+
+    /**
+     * @param step FocusStep
+     * @param currentFocusNode the currently focused FlowItem.
+     * @return WeakPtr<FocusHub> of the next FlowItem to focus on.
+     */
+    WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
+
     std::optional<int32_t> targetIndex_;
     RefPtr<WaterFlowLayoutInfoBase> layoutInfo_ = WaterFlowLayoutInfoBase::Create(LayoutMode::TOP_DOWN);
     RefPtr<WaterFlowSections> sections_;
@@ -182,6 +205,8 @@ private:
 
     // clip padding of WaterFlow
     RefPtr<WaterFlowContentModifier> contentModifier_;
+
+    std::optional<WaterFlowLayoutBase::PredictLayoutParam> predictLayoutParam_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_PATTERN_H

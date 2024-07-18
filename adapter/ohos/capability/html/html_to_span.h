@@ -117,6 +117,7 @@ private:
     void InitTextShadow(
         const std::string& key, const std::string& value, const std::string& index, StyleValues& values);
     bool IsTextShadowAttr(const std::string& key);
+    Dimension FromString(const std::string& str);
     TextAlign StringToTextAlign(const std::string& value);
     WordBreak StringToWordBreak(const std::string& value);
     TextOverflow StringToTextOverflow(const std::string& value);
@@ -142,7 +143,9 @@ private:
 
     void ToDefalutSpan(xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos);
     std::map<std::string, HtmlToSpan::StyleValue> ToTextSpanStyle(xmlAttrPtr curNode);
-    void ToTextSpan(xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos);
+    void AddStyleSpan(const std::string& element, SpanInfo& info);
+    void ToTextSpan(const std::string& element, xmlNodePtr node, size_t len,
+        size_t& pos, std::vector<SpanInfo>& spanInfos);
 
     void ToImageOptions(const std::map<std::string, std::string>& styles, ImageSpanOptions& option);
     void ToImage(xmlNodePtr node, size_t len, size_t& pos, std::vector<SpanInfo>& spanInfos);

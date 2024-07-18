@@ -124,15 +124,13 @@ void RelativeContainerLayoutAlgorithm::UpdateSizeWhenChildrenEmpty(LayoutWrapper
     CHECK_NULL_VOID(layoutWrapper);
     auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(relativeContainerLayoutProperty);
-    const auto& calcLayoutConstraint = relativeContainerLayoutProperty->GetCalcLayoutConstraint();
-    if (!calcLayoutConstraint) {
-        const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
-        CHECK_NULL_VOID(layoutConstraint.has_value());
-        auto idealSize = CreateIdealSizeByPercentRef(layoutConstraint.value(), Axis::FREE, MeasureType::MATCH_PARENT)
+    const auto& layoutConstraint = relativeContainerLayoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint.has_value());
+    auto idealSize = CreateIdealSizeByPercentRef(layoutConstraint.value(), Axis::FREE, MeasureType::MATCH_PARENT)
                              .ConvertToSizeT();
-        layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize.IsPositive() ? idealSize : SizeF(0.0f, 0.0f));
-        return;
-    }
+    layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize.IsPositive() ? idealSize : SizeF(0.0f, 0.0f));
+    const auto& calcLayoutConstraint = relativeContainerLayoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_VOID(calcLayoutConstraint);
     auto selfIdealSize = calcLayoutConstraint->selfIdealSize;
     padding_ = relativeContainerLayoutProperty->CreatePaddingAndBorder();
     if (selfIdealSize->Width()->GetDimension().Unit() == DimensionUnit::AUTO) {
@@ -922,17 +920,14 @@ void RelativeContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto top = padding_.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
     auto textDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
-    for (const auto& mapItem : idNodeMap_) {
-        auto childWrapper = mapItem.second.layoutWrapper;
-        if (!childWrapper) {
-            continue;
-        }
+    for (auto && childWrapper : layoutWrapper->GetAllChildrenWithBuild()) {
+        auto nodeName = GetOrCreateNodeInspectorId(childWrapper->GetHostNode());
         if (!childWrapper->GetLayoutProperty()->GetFlexItemProperty() && (textDirection != TextDirection::RTL)) {
             childWrapper->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0.0f, 0.0f) + paddingOffset);
             childWrapper->Layout();
             continue;
         }
-        auto it = recordOffsetMap_.find(mapItem.second.id);
+        auto it = recordOffsetMap_.find(nodeName);
         if (it == recordOffsetMap_.end()) {
             continue;
         }

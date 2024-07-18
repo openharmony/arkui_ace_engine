@@ -189,16 +189,6 @@ public:
         return currentIndex_;
     }
 
-    void SetIsNeedResetPrevMarginAndNextMargin()
-    {
-        isNeedResetPrevMarginAndNextMargin_ = false;
-    }
-
-    bool GetIsNeedResetPrevMarginAndNextMargin() const
-    {
-        return isNeedResetPrevMarginAndNextMargin_;
-    }
-
     bool IsCrossMatchChild() const
     {
         return crossMatchChild_;
@@ -294,7 +284,25 @@ public:
         return targetStartPos_;
     }
 
+    void SetCachedCount(int32_t cachedCount)
+    {
+        cachedCount_ = cachedCount > realTotalCount_ ? realTotalCount_ : cachedCount;
+    }
+
+    const std::set<int32_t>& GetCachedItems() const
+    {
+        return cachedItems_;
+    }
+
+    const LayoutConstraintF& GetLayoutConstraint() const
+    {
+        return childLayoutConstraint_;
+    }
+
 private:
+    void LayoutSwiperIndicator(
+        LayoutWrapper* layoutWrapper, const RefPtr<SwiperLayoutProperty>& swiperLayoutProperty,
+        const PaddingPropertyF& padding);
     void MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
     void MeasureTabsCustomAnimation(LayoutWrapper* layoutWrapper);
     void MeasureSwiperCustomAnimation(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
@@ -325,6 +333,8 @@ private:
     void IndicatorAndArrowMeasure(LayoutWrapper* layoutWrapper, const OptionalSizeF& parentIdealSize);
     float GetChildMainAxisSize(
         const RefPtr<LayoutWrapper>& childWrapper, const RefPtr<SwiperLayoutProperty>& swiperProperty, Axis axis);
+
+    void CheckCachedItem(int32_t startIndex, int32_t endIndex, LayoutWrapper* layoutWrapper);
 
     bool isLoop_ = true;
     float prevMargin_ = 0.0f;
@@ -360,7 +370,6 @@ private:
     std::optional<int32_t> removeFromRSTreeIndex_;
     int32_t currentIndex_ = 0;
     bool targetIsSameWithStartFlag_ = false;
-    bool isNeedResetPrevMarginAndNextMargin_ = false;
     bool useCustomAnimation_ = false;
     std::set<int32_t> indexsInAnimation_;
     std::set<int32_t> needUnmountIndexs_;
@@ -374,8 +383,12 @@ private:
     bool isMeasureOneMoreItem_ = false;
     bool isFrameAnimation_ = false;
     std::set<int32_t> measuredItems_;
+    std::set<int32_t> activeItems_;
+    std::set<int32_t> cachedItems_;
     // only be used in AutoLinear mode
     float targetStartPos_ = 0.0f;
+    int32_t cachedCount_ = 0;
+    LayoutConstraintF childLayoutConstraint_;
 };
 
 } // namespace OHOS::Ace::NG

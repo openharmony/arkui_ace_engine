@@ -483,6 +483,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
             ++iter;
         }
     } else {
+        auto magicNodeSize = magicNodes_.size();
         auto iter = magicNodes_.rbegin();
         while (iter != magicNodes_.rend()) {
             auto childList = iter->second;
@@ -506,6 +507,11 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
                     UpdateFlexProperties(flexItemProperties, childLayoutWrapper);
                 }
                 secondaryMeasureList_.emplace_back(child);
+            }
+            if (magicNodeSize != magicNodes_.size()) {
+                LOGE("magicNodes changed during use. oldsize: %{public}zu ,newsize: %{public}zu ",
+                    magicNodeSize, magicNodes_.size());
+                break;
             }
             ++iter;
         }

@@ -55,6 +55,8 @@ enum class ResourceType : uint32_t {
     RAWFILE = 30000
 };
 
+enum class ResourceStruct { CONSTANT, DYNAMIC_V1, DYNAMIC_V2 };
+
 size_t GetParamLen(napi_env env, napi_value param);
 bool GetNapiString(napi_env env, napi_value value, std::string& retStr, napi_valuetype& valueType);
 
@@ -64,13 +66,20 @@ napi_value ParseCurve(napi_env env, napi_value value, std::string& curveTypeStri
 
 napi_value CreateNapiString(napi_env env, const std::string& rawStr);
 
+ResourceStruct CheckResourceStruct(napi_env env, napi_value value);
+
 void CompleteResourceParam(napi_env env, napi_value value);
+
+void CompleteResourceParamV1(napi_env env, napi_value value);
+
+void CompleteResourceParamV2(napi_env env, napi_value value);
 
 void ModifyResourceParam(napi_env env, napi_value value, const ResourceType& resType, const std::string& resName);
 
 bool ConvertResourceType(const std::string& typeName, ResourceType& resType);
 
-bool ParseDollarResource(napi_env env, napi_value value, ResourceType& resType, std::string& resName);
+bool ParseDollarResource(
+    napi_env env, napi_value value, ResourceType& resType, std::string& resName, std::string& moduleName);
 
 void ParseCurveInfo(const std::string& curveString, std::string& curveTypeString, std::vector<float>& curveValue);
 
@@ -91,6 +100,15 @@ RefPtr<ResourceWrapper> CreateResourceWrapper(const ResourceInfo& info);
 std::optional<std::string> GetStringFromValueUtf8(napi_env env, napi_value value);
 bool ParseIntegerToString(const ResourceInfo& info, std::string& result);
 bool ParseColorFromResourceObject(napi_env env, napi_value value, Color& colorResult);
+
+napi_value GetReturnObject(napi_env env, std::string callbackString);
+bool HasProperty(napi_env env, napi_value value, const std::string& targetStr);
+bool ParseNapiDimension(napi_env env, CalcDimension& result, napi_value napiValue, DimensionUnit defaultUnit);
+bool ParseNapiDimensionNG(
+    napi_env env, CalcDimension& result, napi_value napiValue, DimensionUnit defaultUnit, bool isSupportPercent);
+bool ParseNapiColor(napi_env env, napi_value value, Color& result);
+bool ParseStyle(napi_env env, napi_value value, std::optional<BorderStyle>& style);
+bool ParseShadowColorStrategy(napi_env env, napi_value value, ShadowColorStrategy& strategy);
 } // namespace OHOS::Ace::Napi
 
 #endif // FOUNDATION_ACE_INTERFACES_NAPI_KITS_UTILS_H

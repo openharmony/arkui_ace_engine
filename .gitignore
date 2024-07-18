@@ -15,3 +15,5 @@ lite/maplejs/
 lite/tools/
 lite/ui/
 .clangd
+__pycache__/
+output/

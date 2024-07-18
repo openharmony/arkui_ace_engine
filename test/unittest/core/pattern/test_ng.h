@@ -47,9 +47,11 @@ public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     RefPtr<PaintWrapper> FlushLayoutTask(const RefPtr<FrameNode>& frameNode);
-    void CreateDone(const RefPtr<FrameNode>& frameNode);
+    RefPtr<PaintWrapper> CreateDone(const RefPtr<FrameNode>& frameNode = nullptr);
     uint64_t GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty);
     TouchEventInfo CreateTouchEventInfo(TouchType touchType, Offset location);
+    static RefPtr<ThemeConstants> CreateThemeConstants(const std::string& patternName);
+    void FlushExpandSafeAreaTask();
 
     AssertionResult IsEqual(const SizeF& actual, const SizeF& expected)
     {
@@ -127,7 +129,7 @@ public:
 
     RefPtr<FrameNode> GetChildFrameNode(const RefPtr<FrameNode>& frameNode, int32_t index)
     {
-        return AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(index));
+        return AceType::DynamicCast<FrameNode>(frameNode->GetChildByIndex(index));
     }
 
     RefPtr<FocusHub> GetChildFocusHub(const RefPtr<FrameNode>& frameNode, int32_t index)

@@ -117,15 +117,19 @@ HWTEST_F(NavigationModelTestNg, UpdateOldBarItems001, TestSize.Level1)
     ASSERT_NE(navBarNode, nullptr);
     EXPECT_FALSE(navBarNode->GetPrevToolBarIsCustom().value_or(false));
     // Create four old BarItemNodes with different attributes
-    auto oldBar1 = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, 101);
-    auto oldBar2 = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, 102);
+    auto oldBar1 = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, 101, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto oldBar2 = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, 102, []() { return AceType::MakeRefPtr<Pattern>(); });
     oldBar2->text_ = FrameNode::CreateFrameNode("text", 201, AceType::MakeRefPtr<TextPattern>());
     oldBar2->icon_ = FrameNode::CreateFrameNode("image", 301, AceType::MakeRefPtr<ImagePattern>());
-    auto oldBar3 = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, 103);
+    auto oldBar3 = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, 103, []() { return AceType::MakeRefPtr<Pattern>(); });
     // Make frameNode_ not NULL or crash will happen in Pattern::OnModifyDone
     ASSERT_NE(oldBar3->pattern_, nullptr);
     oldBar3->pattern_->frameNode_ = oldBar3;
-    auto oldBar4 = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, 104);
+    auto oldBar4 = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, 104, []() { return AceType::MakeRefPtr<Pattern>(); });
     oldBar4->text_ = FrameNode::CreateFrameNode("text", 202, AceType::MakeRefPtr<TextPattern>());
     oldBar4->icon_ = FrameNode::CreateFrameNode("image", 302, AceType::MakeRefPtr<ImagePattern>());
     auto preToolBarNode = navBarNode->GetPreToolBarNode();
@@ -163,7 +167,8 @@ HWTEST_F(NavigationModelTestNg, UpdateOldBarItems002, TestSize.Level1)
     ASSERT_NE(navBarNode, nullptr);
     EXPECT_FALSE(navBarNode->GetPrevToolBarIsCustom().value_or(false));
     // Create an old BarItemNode with different attributes
-    auto oldBar1 = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, 101);
+    auto oldBar1 = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, 101, []() { return AceType::MakeRefPtr<Pattern>(); });
     auto preToolBarNode = navBarNode->GetPreToolBarNode();
     ASSERT_NE(preToolBarNode, nullptr);
     preToolBarNode->children_.emplace_back(oldBar1);
@@ -175,8 +180,10 @@ HWTEST_F(NavigationModelTestNg, UpdateOldBarItems002, TestSize.Level1)
     navigationModel.SetToolBarItems(std::move(toolBarItems));
 
     // Make newChildrenSize 2 and prevChildrenSize 3
-    auto oldBar2 = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, 102);
-    auto oldBar3 = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, 103);
+    auto oldBar2 = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, 102, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto oldBar3 = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, 103, []() { return AceType::MakeRefPtr<Pattern>(); });
     preToolBarNode->children_.emplace_back(oldBar2);
     preToolBarNode->children_.emplace_back(oldBar3);
     navigationModel.SetToolBarItems(std::move(toolBarItems));
@@ -1296,7 +1303,8 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility001, TestSize.Leve
     EXPECT_FALSE(index == static_cast<int32_t>(destinationSize) - 1);
     EXPECT_FALSE(index < navigationNode->lastStandardIndex_);
     EXPECT_TRUE(navDestinationPattern->GetCustomNode() == remainChild);
-    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, remainChild, index, destinationSize);
+    bool ret = navigationNode->UpdateNavDestinationVisibility(
+        navDestinationNode, remainChild, index, destinationSize, nullptr);
     EXPECT_FALSE(ret);
 }
 
@@ -1323,7 +1331,8 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility002, TestSize.Leve
     EXPECT_NE(navDestinationNode->GetEventHub<NavDestinationEventHub>(), nullptr);
     EXPECT_EQ(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_TRUE(CheckNeedMeasure(navDestinationNode->GetLayoutProperty()->GetPropertyChangeFlag()));
-    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, nullptr, index, destinationSize);
+    bool ret = navigationNode->UpdateNavDestinationVisibility(
+        navDestinationNode, nullptr, index, destinationSize, nullptr);
     EXPECT_TRUE(ret);
 }
 
@@ -1356,7 +1365,8 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility003, TestSize.Leve
     EXPECT_FALSE(CheckNeedMeasure(navDestinationNode->GetLayoutProperty()->GetPropertyChangeFlag()));
     auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
     EXPECT_FALSE(NavigationLayoutAlgorithm::IsAutoHeight(navigationLayoutProperty));
-    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, nullptr, index, destinationSize);
+    bool ret = navigationNode->UpdateNavDestinationVisibility(
+        navDestinationNode, nullptr, index, destinationSize, nullptr);
     EXPECT_FALSE(ret);
 }
 
@@ -1396,7 +1406,8 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility004, TestSize.Leve
     EXPECT_EQ(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_FALSE(CheckNeedMeasure(navDestinationNode->GetLayoutProperty()->GetPropertyChangeFlag()));
     EXPECT_TRUE(NavigationLayoutAlgorithm::IsAutoHeight(navigationLayoutProperty));
-    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, nullptr, index, destinationSize);
+    bool ret = navigationNode->UpdateNavDestinationVisibility(
+        navDestinationNode, nullptr, index, destinationSize, nullptr);
     EXPECT_TRUE(ret);
 }
 
@@ -1430,7 +1441,8 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility005, TestSize.Leve
     EXPECT_NE(index, static_cast<int32_t>(destinationSize) - 1);
     EXPECT_TRUE(index < navigationNode->lastStandardIndex_);
     EXPECT_TRUE(navDestinationNode->IsOnAnimation());
-    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, nullptr, index, destinationSize);
+    bool ret = navigationNode->UpdateNavDestinationVisibility(
+        navDestinationNode, nullptr, index, destinationSize, nullptr);
     EXPECT_FALSE(ret);
 }
 
@@ -1475,7 +1487,8 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility006, TestSize.Leve
     EXPECT_FALSE(navDestinationNode->IsOnAnimation());
     EXPECT_FALSE(navDestinationPattern->GetIsOnShow());
     EXPECT_TRUE(navDestinationPattern->GetCustomNode() == remainChild);
-    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, remainChild, index, destinationSize);
+    bool ret = navigationNode->UpdateNavDestinationVisibility(
+        navDestinationNode, remainChild, index, destinationSize, nullptr);
     EXPECT_FALSE(ret);
 }
 
@@ -1520,7 +1533,8 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility007, TestSize.Leve
     EXPECT_FALSE(navDestinationNode->IsOnAnimation());
     EXPECT_TRUE(navDestinationPattern->GetIsOnShow());
     EXPECT_TRUE(navDestinationPattern->GetCustomNode() != remainChild);
-    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, remainChild, index, destinationSize);
+    bool ret = navigationNode->UpdateNavDestinationVisibility(
+        navDestinationNode, remainChild, index, destinationSize, nullptr);
     EXPECT_FALSE(ret);
 }
 
@@ -1561,7 +1575,8 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility008, TestSize.Leve
     EXPECT_FALSE(index < navigationNode->lastStandardIndex_);
     EXPECT_TRUE(navDestinationPattern->GetCustomNode() != remainChild);
     EXPECT_TRUE(navDestinationNode->IsOnAnimation());
-    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, remainChild, index, destinationSize);
+    bool ret = navigationNode->UpdateNavDestinationVisibility(
+        navDestinationNode, remainChild, index, destinationSize, nullptr);
     EXPECT_FALSE(ret);
 }
 
@@ -1602,7 +1617,8 @@ HWTEST_F(NavigationModelTestNg, UpdateNavDestinationVisibility009, TestSize.Leve
     EXPECT_FALSE(index < navigationNode->lastStandardIndex_);
     EXPECT_TRUE(navDestinationPattern->GetCustomNode() != remainChild);
     EXPECT_FALSE(navDestinationNode->IsOnAnimation());
-    bool ret = navigationNode->UpdateNavDestinationVisibility(navDestinationNode, remainChild, index, destinationSize);
+    bool ret = navigationNode->UpdateNavDestinationVisibility(
+        navDestinationNode, remainChild, index, destinationSize, nullptr);
     EXPECT_FALSE(ret);
 }
 
@@ -1654,6 +1670,41 @@ HWTEST_F(NavigationModelTestNg, OnAttachToMainTree001, TestSize.Level1)
     // Reset pattern_ or crash will happen in ~NavigationGroupNode()
     navigationNode->pattern_ = prePattern;
     ASSERT_EQ(AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern()), prePattern);
+}
+
+/**
+ * @tc.name: AccessibilityTest001
+ * @tc.desc: Test navigation "backbutton" and "more" button.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, AccessibilityTest001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+
+    titleBarNode->backButton_ = FrameNode::CreateFrameNode("button", 101, AceType::MakeRefPtr<ButtonPattern>());
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    ASSERT_NE(backButtonNode, nullptr);
+    navBarNode->menu_ = FrameNode::CreateFrameNode("menu", 102, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto menuNode = AceType::DynamicCast<FrameNode>(navBarNode->GetMenu());
+    ASSERT_NE(menuNode, nullptr);
+
+    auto AccessibilityProperty1 = backButtonNode->GetAccessibilityProperty<AccessibilityProperty>();
+    AccessibilityProperty1->SetAccessibilityGroup(true);
+    AccessibilityProperty1->SetAccessibilityText("NavigationBackButton");
+    auto text1 = AccessibilityProperty1->GetAccessibilityText();
+    EXPECT_EQ(text1, "NavigationBackButton");
+
+    auto AccessibilityProperty2 = menuNode->GetAccessibilityProperty<AccessibilityProperty>();
+    AccessibilityProperty2->SetAccessibilityGroup(true);
+    AccessibilityProperty2->SetAccessibilityText("NavigationMenu");
+    auto text2 = AccessibilityProperty2->GetAccessibilityText();
+    EXPECT_EQ(text2, "NavigationMenu");
 }
 } // namespace OHOS::Ace::NG
 

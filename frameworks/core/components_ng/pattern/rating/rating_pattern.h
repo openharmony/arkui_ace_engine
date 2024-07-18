@@ -97,9 +97,8 @@ public:
 
     void SetRatingScore(double value);
 
-    void InitDefaultParams();
-
 private:
+    void OnAttachToFrameNode() override;
     void UpdateRatingScore(double ratingScore);
     void MarkDirtyNode(const PropertyChangeFlag& flag);
     void OnModifyDone() override;
@@ -173,8 +172,8 @@ private:
     ImagePaintConfig foregroundConfig_;
     ImagePaintConfig secondaryConfig_;
     ImagePaintConfig backgroundConfig_;
-    int32_t imageReadyStateCode_ = 0;
-    int32_t imageSuccessStateCode_ = 0;
+    uint32_t imageReadyStateCode_ = 0;
+    uint32_t imageSuccessStateCode_ = 0;
     bool hasInit_ = false;
     bool isHover_ = false;
     bool isfocus_ = false;
@@ -192,6 +191,7 @@ private:
     bool isBackgroundImageInfoFromTheme_ = false;
     // get XTS inspector value
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    bool isTouchPreventDefault_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(RatingPattern);
 };
 

@@ -87,6 +87,7 @@ public:
     void SyncInstanceId();
     void RestoreInstanceId();
     void MarkNeedUpdate();
+    void FlushReload();
     bool NeedsUpdate() const
     {
         return needsUpdate_;

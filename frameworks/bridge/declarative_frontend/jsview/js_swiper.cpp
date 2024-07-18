@@ -40,6 +40,7 @@
 #include "core/components_ng/pattern/swiper/swiper_content_transition_proxy.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -439,19 +440,17 @@ std::optional<Dimension> JSSwiper::ParseIndicatorDimension(const JSRef<JSVal>& v
 
 SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
 {
-    JSRef<JSVal> leftValue = obj->GetProperty("leftValue");
-    JSRef<JSVal> topValue = obj->GetProperty("topValue");
-    JSRef<JSVal> rightValue = obj->GetProperty("rightValue");
-    JSRef<JSVal> bottomValue = obj->GetProperty("bottomValue");
-    JSRef<JSVal> startValue = obj->GetProperty("startValue");
-    JSRef<JSVal> endValue = obj->GetProperty("endValue");
-    JSRef<JSVal> itemWidthValue = obj->GetProperty("itemWidthValue");
-    JSRef<JSVal> itemHeightValue = obj->GetProperty("itemHeightValue");
-    JSRef<JSVal> selectedItemWidthValue = obj->GetProperty("selectedItemWidthValue");
-    JSRef<JSVal> selectedItemHeightValue = obj->GetProperty("selectedItemHeightValue");
-    JSRef<JSVal> maskValue = obj->GetProperty("maskValue");
-    JSRef<JSVal> colorValue = obj->GetProperty("colorValue");
-    JSRef<JSVal> selectedColorValue = obj->GetProperty("selectedColorValue");
+    JSRef<JSVal> leftValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::LEFT_VALUE));
+    JSRef<JSVal> topValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP_VALUE));
+    JSRef<JSVal> rightValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::RIGHT_VALUE));
+    JSRef<JSVal> bottomValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM_VALUE));
+    JSRef<JSVal> startValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::START_VALUE));
+    JSRef<JSVal> endValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::END_VALUE));
+    JSRef<JSVal> itemWidthValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::ITEM_WIDTH_VALUE));
+    JSRef<JSVal> itemHeightValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::ITEM_HEIGHT_VALUE));
+    JSRef<JSVal> selectedItemWidthValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::SELECTED_ITEM_WIDTH_VALUE));
+    JSRef<JSVal> selectedItemHeightValue =
+        obj->GetProperty(static_cast<int32_t>(ArkUIIndex::SELECTED_ITEM_HEIGHT_VALUE));
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, SwiperParameters());
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
@@ -463,10 +462,9 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     swiperParameters.dimBottom = ParseIndicatorDimension(bottomValue);
     CalcDimension dimStart;
     CalcDimension dimEnd;
-    swiperParameters.dimStart = ParseLengthMetricsToDimension(startValue, dimStart) ?
-        dimStart : ParseIndicatorDimension(startValue);
-    swiperParameters.dimEnd = ParseLengthMetricsToDimension(endValue, dimEnd) ?
-        dimEnd : ParseIndicatorDimension(endValue);
+    std::optional<Dimension> indicatorDimension;
+    swiperParameters.dimStart =  ParseLengthMetricsToDimension(startValue, dimStart) ? dimStart : indicatorDimension;
+    swiperParameters.dimEnd =  ParseLengthMetricsToDimension(endValue, dimEnd) ? dimEnd : indicatorDimension;
 
     CalcDimension dimPosition;
     bool parseItemWOk =
@@ -484,6 +482,16 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     swiperParameters.selectedItemHeight = parseSelectedItemHOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
     SwiperModel::GetInstance()->SetIsIndicatorCustomSize(
         parseSelectedItemWOk || parseSelectedItemHOk || parseItemWOk || parseItemHOk);
+    SetDotIndicatorInfo(obj, swiperParameters, swiperIndicatorTheme);
+    return swiperParameters;
+}
+void JSSwiper::SetDotIndicatorInfo(const JSRef<JSObject>& obj, SwiperParameters& swiperParameters,
+    const RefPtr<SwiperIndicatorTheme>& swiperIndicatorTheme)
+{
+    JSRef<JSVal> maskValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::MASK_VALUE));
+    JSRef<JSVal> colorValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLOR_VALUE));
+    JSRef<JSVal> selectedColorValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::SELECTED_COLOR_VALUE));
+    JSRef<JSVal> maxDisplayCountVal = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::MAX_DISPLAY_COUNT_VALUE));
     if (maskValue->IsBoolean()) {
         auto mask = maskValue->ToBoolean();
         swiperParameters.maskValue = mask;
@@ -493,9 +501,13 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     swiperParameters.colorVal = parseOk ? colorVal : swiperIndicatorTheme->GetColor();
     parseOk = ParseJsColor(selectedColorValue, colorVal);
     swiperParameters.selectedColorVal = parseOk ? colorVal : swiperIndicatorTheme->GetSelectedColor();
-    return swiperParameters;
+    if (maxDisplayCountVal->IsUndefined()) {
+        return;
+    }
+    uint32_t result = 0;
+    auto setMaxDisplayCountVal = ParseJsInteger(maxDisplayCountVal, result);
+    swiperParameters.maxDisplayCountVal = setMaxDisplayCountVal && result > 0 ? result : 0;
 }
-
 bool JSSwiper::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
 {
     if (jsValue->IsNumber()) {
@@ -514,6 +526,11 @@ bool JSSwiper::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDi
         result = CalcDimension(value, unit);
         return true;
     }
+    if (jsValue->IsNull()) {
+        result = CalcDimension(0.0f, DimensionUnit::VP);
+        return true;
+    }
+
     return false;
 }
 
@@ -523,6 +540,8 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
     JSRef<JSVal> dotTopValue = obj->GetProperty("topValue");
     JSRef<JSVal> dotRightValue = obj->GetProperty("rightValue");
     JSRef<JSVal> dotBottomValue = obj->GetProperty("bottomValue");
+    JSRef<JSVal> startValue = obj->GetProperty("startValue");
+    JSRef<JSVal> endValue = obj->GetProperty("endValue");
     JSRef<JSVal> fontColorValue = obj->GetProperty("fontColorValue");
     JSRef<JSVal> selectedFontColorValue = obj->GetProperty("selectedFontColorValue");
     JSRef<JSVal> digitFontValue = obj->GetProperty("digitFontValue");
@@ -536,6 +555,12 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
     digitalParameters.dimTop = ParseIndicatorDimension(dotTopValue);
     digitalParameters.dimRight = ParseIndicatorDimension(dotRightValue);
     digitalParameters.dimBottom = ParseIndicatorDimension(dotBottomValue);
+    std::optional<Dimension> indicatorDimension;
+    CalcDimension dimStart;
+    CalcDimension dimEnd;
+    digitalParameters.dimStart =  ParseLengthMetricsToDimension(startValue, dimStart) ? dimStart : indicatorDimension;
+    digitalParameters.dimEnd =  ParseLengthMetricsToDimension(endValue, dimEnd) ? dimEnd : indicatorDimension;
+
     Color fontColor;
     auto parseOk = JSViewAbstract::ParseJsColor(fontColorValue, fontColor);
     digitalParameters.fontColor =
@@ -1164,12 +1189,13 @@ void JSSwiperController::PreloadItems(const JSCallbackInfo& args)
     }
 
     RefPtr<JsSwiperFunction> jsFunc = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(args[1]));
-    auto onPreloadFinish = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](int32_t errorCode) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("Swiper.preloadItems");
-        TAG_LOGD(AceLogTag::ACE_SWIPER, "SwiperController preloadItems callback execute.");
-        func->Execute(errorCode);
-    };
+    auto onPreloadFinish =
+        [execCtx = args.GetExecutionContext(), func = std::move(jsFunc)](int32_t errorCode, std::string message) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("Swiper.preloadItems");
+            TAG_LOGD(AceLogTag::ACE_SWIPER, "SwiperController preloadItems callback execute.");
+            func->Execute(errorCode);
+        };
 
     controller_->SetPreloadFinishCallback(onPreloadFinish);
     controller_->PreloadItems(indexSet);

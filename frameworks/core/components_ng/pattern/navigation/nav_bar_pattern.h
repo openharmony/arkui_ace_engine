@@ -49,6 +49,11 @@ public:
     {
         return MakeRefPtr<NavBarLayoutAlgorithm>();
     }
+    
+    bool CheckCustomAvoidKeyboard() const override
+    {
+        return !NearZero(avoidKeyboardOffset_);
+    }
 
     void SetTitleBarMenuItems(const std::vector<NG::BarItem>& menuItems)
     {
@@ -155,13 +160,13 @@ public:
     }
     OffsetF GetShowMenuOffset(const RefPtr<BarItemNode> barItemNode, RefPtr<FrameNode> menuNode);
 
-    void SetKeyboardOffset(float keyboardOffset)
+    void SetAvoidKeyboardOffset(float avoidKeyboardOffset)
     {
-        keyboardOffset_ = keyboardOffset;
+        avoidKeyboardOffset_ = avoidKeyboardOffset;
     }
-    float GetKeyboardOffset()
+    float GetAvoidKeyboardOffset()
     {
-        return keyboardOffset_;
+        return avoidKeyboardOffset_;
     }
 
 protected:
@@ -171,7 +176,6 @@ private:
     void WindowFocus(bool isFocus);
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnModifyDone() override;
-    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleOnDragStart(float offset);
     void HandleOnDragUpdate(float offset);
     void HandleOnDragEnd();
@@ -188,10 +192,9 @@ private:
     std::optional<int32_t> landscapeMenuNodeId_;
     RefPtr<FrictionMotion> motion_;
     RefPtr<Animator> controller_;
-    bool isTitleMenuNodeShowing_ = false;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
     int32_t maxMenuNums_ = -1;
-    float keyboardOffset_ = 0.0f;
+    float avoidKeyboardOffset_ = 0.0f;
     bool isWindowFocus_ = true;
 };
 

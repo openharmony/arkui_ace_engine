@@ -70,7 +70,6 @@ const std::list<RefPtr<NGGestureRecognizer>>& RecognizerGroup::GetGroupRecognize
 
 void RecognizerGroup::AddChildren(const std::list<RefPtr<NGGestureRecognizer>>& recognizers)
 {
-    // TODO: add state adjustment.
     for (const auto& child : recognizers) {
         if (child && !Existed(child) && child->SetGestureGroup(AceType::WeakClaim(this))) {
             recognizers_.emplace_back(child);
@@ -245,5 +244,18 @@ void RecognizerGroup::CleanRecognizerState()
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
     }
+}
+
+bool RecognizerGroup::IsReady()
+{
+    if (refereeState_ != RefereeState::READY) {
+        return false;
+    }
+    for (const auto& child : recognizers_) {
+        if (child && !child->IsReady()) {
+            return false;
+        }
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

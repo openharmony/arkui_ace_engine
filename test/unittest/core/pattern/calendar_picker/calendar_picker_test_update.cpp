@@ -209,7 +209,6 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles003, TestSize
     info1.fontSize = Dimension(100);
     buttonInfos.push_back(info1);
 
-
     size_t sizet = 0;
 
     auto* stack = ViewStackProcessor::GetInstance();
@@ -777,5 +776,825 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles014, TestSize
 
     auto testval3 = buttonLayoutProperty->GetButtonRoleValue();
     EXPECT_EQ(testval3, ButtonRole::NORMAL);
+}
+// /**
+//  * @tc.name: CalendarPickerUpdateButtonStyles015
+//  * @tc.desc: Test UpdateButtonStyle.
+//  * @tc.type: FUNC
+//  */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles015, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontSize = Dimension(0);
+    buttonInfos.push_back(info1);
+
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    CreateCalendarPicker();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto renderContext = buttonNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+    CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto testval = buttonLayoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(0));
+}
+// /**
+//  * @tc.name: CalendarPickerUpdateButtonStyles016
+//  * @tc.desc: Test UpdateButtonStyle.
+//  * @tc.type: FUNC
+//  */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles016, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontSize = Dimension(100000);
+    buttonInfos.push_back(info1);
+
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    CreateCalendarPicker();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto renderContext = buttonNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+    CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto testval = buttonLayoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(100000));
+}
+
+// /**
+//  * @tc.name: CalendarPickerUpdateButtonStyles017
+//  * @tc.desc: Test UpdateButtonStyle.
+//  * @tc.type: FUNC
+//  */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles017, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontSize = Dimension(1);
+    buttonInfos.push_back(info1);
+
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    CreateCalendarPicker();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto renderContext = buttonNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+    CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto testval = buttonLayoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(1));
+}
+
+// /**
+//  * @tc.name: CalendarPickerUpdateButtonStyles018
+//  * @tc.desc: Test UpdateButtonStyle.
+//  * @tc.type: FUNC
+//  */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles018, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    ButtonInfo info2;
+    info1.fontSize = Dimension(1);
+    buttonInfos.push_back(info1);
+    info2.fontSize = Dimension(0);
+    buttonInfos.push_back(info2);
+
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    CreateCalendarPicker();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto renderContext = buttonNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+    CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto testval = buttonLayoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(1));
+
+    sizet++;
+    CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto testval2 = buttonLayoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval2, Dimension(0));
+}
+
+// /**
+//  * @tc.name: CalendarPickerUpdateButtonStyles019
+//  * @tc.desc: Test UpdateButtonStyle.
+//  * @tc.type: FUNC
+//  */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles019, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    ButtonInfo info2;
+    ButtonInfo info3;
+    info1.fontSize = Dimension(0);
+    buttonInfos.push_back(info1);
+    info2.fontSize = Dimension(100);
+    buttonInfos.push_back(info2);
+    info2.fontSize = Dimension(1);
+    buttonInfos.push_back(info2);
+
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    CreateCalendarPicker();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto renderContext = buttonNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+    CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto testval = buttonLayoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(0));
+
+    sizet++;
+    CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto testval2 = buttonLayoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval2, Dimension(100));
+
+    sizet++;
+    CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto testval3 = buttonLayoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval3, Dimension(1));
+}
+
+// /**
+//  * @tc.name: CalendarPickerUpdateButtonStyles020
+//  * @tc.desc: Test UpdateButtonStyle.
+//  * @tc.type: FUNC
+//  */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles020, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontSize = Dimension(0);
+    info1.fontColor = Color::BLACK;
+    buttonInfos.push_back(info1);
+
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    CreateCalendarPicker();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto renderContext = buttonNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+    CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+
+    auto testval = buttonLayoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(0));
+
+    auto testval2 = buttonLayoutProperty->GetFontColorValue();
+    EXPECT_EQ(testval2, Color::BLACK);
+}
+
+// /**
+//  * @tc.name: CalendarPickerUpdateButtonStyles021
+//  * @tc.desc: Test UpdateButtonStyle.
+//  * @tc.type: FUNC
+//  */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles021, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontSize = Dimension(1);
+    info1.fontColor = Color::FOREGROUND;
+    buttonInfos.push_back(info1);
+
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    CreateCalendarPicker();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto renderContext = buttonNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+    CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+
+    auto testval = buttonLayoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(1));
+
+    auto testval2 = buttonLayoutProperty->GetFontColorValue();
+    EXPECT_EQ(testval2, Color::FOREGROUND);
+}
+
+// /**
+//  * @tc.name: CalendarPickerUpdateButtonStyles022
+//  * @tc.desc: Test UpdateButtonStyle.
+//  * @tc.type: FUNC
+//  */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles022, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontSize = Dimension(100);
+    info1.fontColor = Color::GREEN;
+    buttonInfos.push_back(info1);
+
+    size_t sizet = 0;
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+
+    CreateCalendarPicker();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto renderContext = buttonNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+
+    CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+
+    auto testval = buttonLayoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(100));
+
+    auto testval2 = buttonLayoutProperty->GetFontColorValue();
+    EXPECT_EQ(testval2, Color::GREEN);
+}
+
+// /**
+//  * @tc.name: CalendarPickerUpdateButtonStyles023
+//  * @tc.desc: Test UpdateButtonStyle.
+//  * @tc.type: FUNC
+//  */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerUpdateButtonStyles023, TestSize.Level1)
+{
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    ButtonInfo info2;
+    ButtonInfo info3;
+    info1.fontSize = Dimension(100);
+    info2.fontSize = Dimension(0);
+    info3.fontSize = Dimension(1);
+    buttonInfos.push_back(info1);
+    buttonInfos.push_back(info2);
+    buttonInfos.push_back(info3);
+    size_t sizet = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    CreateCalendarPicker();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto renderContext = buttonNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto testval = buttonLayoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval, Dimension(100));
+    sizet++;
+    CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto testval2 = buttonLayoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval2, Dimension(0));
+    sizet++;
+    CalendarDialogView::UpdateButtonStyles(buttonInfos, sizet, buttonLayoutProperty, renderContext);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto testval3 = buttonLayoutProperty->GetFontSizeValue();
+    EXPECT_EQ(testval3, Dimension(1));
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest050
+ * @tc.desc: InitDateIndex Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerPatternTest050, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+
+    pickerPattern->SetCalendarEdgeAlign(CalendarEdgeAlign::EDGE_ALIGN_START);
+    pickerPattern->UpdateEdgeAlign();
+    EXPECT_EQ(layoutProperty->GetDialogAlignType(), CalendarEdgeAlign::EDGE_ALIGN_END);
+
+    pickerPattern->SetCalendarEdgeAlign(CalendarEdgeAlign::EDGE_ALIGN_END);
+    pickerPattern->UpdateEdgeAlign();
+    EXPECT_EQ(layoutProperty->GetDialogAlignType(), CalendarEdgeAlign::EDGE_ALIGN_START);
+
+    pickerPattern->SetCalendarEdgeAlign(CalendarEdgeAlign::EDGE_ALIGN_CENTER);
+    pickerPattern->UpdateEdgeAlign();
+    EXPECT_EQ(layoutProperty->GetDialogAlignType(), CalendarEdgeAlign::EDGE_ALIGN_CENTER);
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest051
+ * @tc.desc: HandleYearKeyEvent Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerPatternTest051, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    auto json = JsonUtil::Create(true);
+    pickerPattern->isKeyWaiting_ = true;
+    json->Put("year", 999);
+    json->Put("month", 1);
+    json->Put("day", 1);
+    pickerPattern->SetDate(json->ToString());
+    pickerPattern->yearPrefixZeroCount_ = 1;
+    pickerPattern->yearEnterCount_ = 2;
+    EXPECT_TRUE(pickerPattern->HandleYearKeyEvent(0));
+
+    pickerPattern->isKeyWaiting_ = true;
+    json->Put("year", 999);
+    json->Put("month", 1);
+    json->Put("day", 1);
+    pickerPattern->SetDate(json->ToString());
+    pickerPattern->yearPrefixZeroCount_ = 0;
+    pickerPattern->yearEnterCount_ = 2;
+    EXPECT_TRUE(pickerPattern->HandleYearKeyEvent(1));
+
+    pickerPattern->isKeyWaiting_ = true;
+    json->Put("year", 999);
+    json->Put("month", 1);
+    json->Put("day", 1);
+    pickerPattern->SetDate(json->ToString());
+    pickerPattern->yearPrefixZeroCount_ = 3;
+    pickerPattern->yearEnterCount_ = 2;
+    EXPECT_FALSE(pickerPattern->HandleYearKeyEvent(0));
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest052
+ * @tc.desc: HandleYearKeyEvent Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerPatternTest052, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    auto json = JsonUtil::Create(true);
+    pickerPattern->isKeyWaiting_ = true;
+    json->Put("year", 0);
+    json->Put("month", 1);
+    json->Put("day", 1);
+    pickerPattern->SetDate(json->ToString());
+    pickerPattern->yearPrefixZeroCount_ = 1;
+    pickerPattern->yearEnterCount_ = 2;
+    EXPECT_TRUE(pickerPattern->HandleYearKeyEvent(1));
+
+    pickerPattern->isKeyWaiting_ = true;
+    json->Put("year", 0);
+    json->Put("month", 1);
+    json->Put("day", 1);
+    pickerPattern->SetDate(json->ToString());
+    pickerPattern->yearPrefixZeroCount_ = 0;
+    pickerPattern->yearEnterCount_ = 2;
+    EXPECT_TRUE(pickerPattern->HandleYearKeyEvent(1));
+
+    pickerPattern->isKeyWaiting_ = true;
+    json->Put("year", 0);
+    json->Put("month", 1);
+    json->Put("day", 1);
+    pickerPattern->SetDate(json->ToString());
+    pickerPattern->yearPrefixZeroCount_ = 1;
+    pickerPattern->yearEnterCount_ = 3;
+    EXPECT_TRUE(pickerPattern->HandleYearKeyEvent(1));
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest053
+ * @tc.desc: HandleYearKeyEvent Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerPatternTest053, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    auto json = JsonUtil::Create(true);
+    pickerPattern->isKeyWaiting_ = true;
+    json->Put("year", 0);
+    json->Put("month", 1);
+    json->Put("day", 1);
+    pickerPattern->SetDate(json->ToString());
+    pickerPattern->yearPrefixZeroCount_ = 1;
+    pickerPattern->yearEnterCount_ = 3;
+    EXPECT_TRUE(pickerPattern->HandleYearKeyEvent(0));
+
+    pickerPattern->isKeyWaiting_ = true;
+    json->Put("year", 0);
+    json->Put("month", 1);
+    json->Put("day", 1);
+    pickerPattern->SetDate(json->ToString());
+    pickerPattern->yearPrefixZeroCount_ = 0;
+    pickerPattern->yearEnterCount_ = 1;
+    EXPECT_TRUE(pickerPattern->HandleYearKeyEvent(0));
+
+    pickerPattern->isKeyWaiting_ = true;
+    json->Put("year", 0);
+    json->Put("month", 1);
+    json->Put("day", 1);
+    pickerPattern->SetDate(json->ToString());
+    pickerPattern->yearPrefixZeroCount_ = 0;
+    pickerPattern->yearEnterCount_ = 2;
+    EXPECT_TRUE(pickerPattern->HandleYearKeyEvent(0));
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest054
+ * @tc.desc: HandleZeroStartTaskCallback Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerPatternTest054, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    pickerPattern->taskCount_ = 2;
+    pickerPattern->HandleZeroStartTaskCallback();
+    EXPECT_EQ(pickerPattern->taskCount_, 1);
+
+    pickerPattern->taskCount_ = 0;
+    pickerPattern->isKeyWaiting_ = true;
+    pickerPattern->HandleZeroStartTaskCallback();
+    EXPECT_EQ(pickerPattern->taskCount_, 0);
+    EXPECT_FALSE(pickerPattern->isKeyWaiting_);
+
+    pickerPattern->taskCount_ = 0;
+    pickerPattern->isKeyWaiting_ = false;
+    pickerPattern->HandleZeroStartTaskCallback();
+    EXPECT_EQ(pickerPattern->taskCount_, 0);
+    EXPECT_FALSE(pickerPattern->isKeyWaiting_);
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest055
+ * @tc.desc: SetSelectDateWithNode Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerPatternTest055, TestSize.Level1)
+{
+    CalendarSettingData settingData;
+    CalendarPickerModelNG calendarPickerModel;
+    calendarPickerModel.Create(settingData);
+    DimensionOffset offset;
+    calendarPickerModel.SetEdgeAlign(CalendarEdgeAlign::EDGE_ALIGN_START, offset);
+    PickerTextStyle textStyle;
+    calendarPickerModel.SetTextStyle(textStyle);
+    auto onChange = [](const std::string& /* info */) {};
+    calendarPickerModel.SetOnChange(onChange);
+    calendarPickerModel.SetChangeEvent(onChange);
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto contentFrameNode = FrameNode::GetOrCreateFrameNode(
+        V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<StackPattern>(); });
+    ASSERT_NE(contentFrameNode, nullptr);
+
+    auto yearNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(yearNode, nullptr);
+    yearNode->MountToParent(contentFrameNode);
+
+    auto textNode1 = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode1, nullptr);
+    textNode1->MountToParent(contentFrameNode);
+
+    auto monthNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(monthNode, nullptr);
+    monthNode->MountToParent(contentFrameNode);
+
+    auto textNode2 = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode2, nullptr);
+    textNode2->MountToParent(contentFrameNode);
+
+    auto dayNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(dayNode, nullptr);
+    dayNode->MountToParent(contentFrameNode);
+
+    contentFrameNode->MountToParent(frameNode);
+    calendarPickerModel.SetSelectDateWithNode(frameNode.GetRawPtr(), 2000, 1, 1);
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest056
+ * @tc.desc: SetSelectDateWithNode Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerPatternTest056, TestSize.Level1)
+{
+    CalendarSettingData settingData;
+    CalendarPickerModelNG calendarPickerModel;
+    calendarPickerModel.Create(settingData);
+    DimensionOffset offset;
+    calendarPickerModel.SetEdgeAlign(CalendarEdgeAlign::EDGE_ALIGN_START, offset);
+    PickerTextStyle textStyle;
+    calendarPickerModel.SetTextStyle(textStyle);
+    auto onChange = [](const std::string& /* info */) {};
+    calendarPickerModel.SetOnChange(onChange);
+    calendarPickerModel.SetChangeEvent(onChange);
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto contentFrameNode = FrameNode::GetOrCreateFrameNode(
+        V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<StackPattern>(); });
+    ASSERT_NE(contentFrameNode, nullptr);
+
+    auto yearNode = FrameNode::GetOrCreateFrameNode(
+        V2::BLANK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<StackPattern>(); });
+    ASSERT_NE(yearNode, nullptr);
+    yearNode->MountToParent(contentFrameNode);
+
+    auto textNode1 = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode1, nullptr);
+    textNode1->MountToParent(contentFrameNode);
+
+    auto monthNode = FrameNode::GetOrCreateFrameNode(
+        V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<StackPattern>(); });
+    ASSERT_NE(monthNode, nullptr);
+    monthNode->MountToParent(contentFrameNode);
+
+    auto textNode2 = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode2, nullptr);
+    textNode2->MountToParent(contentFrameNode);
+
+    auto dayNode = FrameNode::GetOrCreateFrameNode(
+        V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<StackPattern>(); });
+    ASSERT_NE(dayNode, nullptr);
+    dayNode->MountToParent(contentFrameNode);
+
+    contentFrameNode->MountToParent(frameNode);
+    calendarPickerModel.SetSelectDateWithNode(frameNode.GetRawPtr(), 2000, 1, 1);
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest057
+ * @tc.desc: SetSelectDateWithNode Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestUpdate, CalendarPickerPatternTest057, TestSize.Level1)
+{
+    CalendarSettingData settingData;
+    CalendarPickerModelNG calendarPickerModel;
+    calendarPickerModel.Create(settingData);
+    DimensionOffset offset;
+    calendarPickerModel.SetEdgeAlign(CalendarEdgeAlign::EDGE_ALIGN_START, offset);
+    PickerTextStyle textStyle;
+    calendarPickerModel.SetTextStyle(textStyle);
+    auto onChange = [](const std::string& /* info */) {};
+    calendarPickerModel.SetOnChange(onChange);
+    calendarPickerModel.SetChangeEvent(onChange);
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+
+    calendarPickerModel.SetSelectDateWithNode(frameNode.GetRawPtr(), 2000, 1, 1);
+    calendarPickerModel.SetSelectDateWithNode(frameNode.GetRawPtr(), 0, 0, 0);
 }
 } // namespace OHOS::Ace::NG

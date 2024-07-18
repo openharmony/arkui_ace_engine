@@ -19,12 +19,14 @@ template("ace_base_base64") {
   source_set(target_name) {
     defines += invoker.defines
     cflags_cc += invoker.cflags_cc
-    deps = [ "$skia_root_new:skia_$platform" ]
-    include_dirs = []
-    sources = []
+    if (is_arkui_x) {
+      deps = [ "//third_party/skia:skia_canvaskit_static" ]
+    } else {
+      external_deps = [ "skia:skia_canvaskit" ]
+    }
 
     # add base source file here
-    sources += [ "base64_util.cpp" ]
+    sources = [ "base64_util.cpp" ]
 
     configs += [ "$ace_root:ace_config" ]
   }
@@ -32,7 +34,6 @@ template("ace_base_base64") {
 
 foreach(item, ace_platforms) {
   ace_base_base64("ace_base_base64_" + item.name) {
-    platform = item.name
     defines = []
     cflags_cc = []
     config = {

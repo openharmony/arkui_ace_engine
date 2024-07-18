@@ -35,7 +35,6 @@ class ACE_EXPORT TextClockModelNG : public OHOS::Ace::TextClockModel {
 public:
     RefPtr<TextClockController> Create() override;
     void SetFormat(const std::string& format) override;
-    void IsDefaultFormat(bool isDefaultFormat) override;
     void SetHoursWest(float hoursWest) override;
     void SetOnDateChange(std::function<void(const std::string)>&& onChange) override;
     void SetFontSize(const Dimension& value) override;
@@ -46,6 +45,7 @@ public:
     void SetTextShadow(const std::vector<Shadow>& value) override;
     void SetFontFeature(const FONT_FEATURES_LIST& value) override;
     void InitFontDefault(const TextStyle& textStyle) override;
+    void SetDateTimeOptions(const ZeroPrefixType& hourType) override;
 
     static void SetFormat(FrameNode* frameNode, const std::string& format);
     static void SetFontColor(FrameNode* frameNode, const Color& value);
@@ -56,6 +56,7 @@ public:
     static void SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetBuilderFunc(FrameNode* frameNode, TextClockMakeCallback&& jsMake);
+    static void SetDateTimeOptions(FrameNode* frameNode, const ZeroPrefixType& hourType);
 };
 } // namespace OHOS::Ace::NG
 

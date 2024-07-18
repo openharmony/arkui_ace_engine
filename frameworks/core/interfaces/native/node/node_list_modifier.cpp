@@ -573,7 +573,7 @@ void SetListChildrenMainSize(ArkUINodeHandle node, ArkUIListChildrenMainSize opt
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    for (int i = 0; i < option->mainSize.size(); i++) {
+    for (uint32_t i = 0; i < option->mainSize.size(); i++) {
         if (option->mainSize[i] > 0) {
             option->mainSize[i] =
                 Dimension(option->mainSize[i], static_cast<OHOS::Ace::DimensionUnit>(unit)).ConvertToPx();
@@ -607,6 +607,56 @@ void SetListCloseAllSwipeActions(ArkUINodeHandle node, void* userData, void (onF
         scrollControllerBase->CloseAllSwipeActions(nullptr);
     }
 }
+
+ArkUI_Int32 GetInitialIndex(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return ListModelNG::GetInitialIndex(frameNode);
+}
+
+void SetListFlingSpeedLimit(ArkUINodeHandle node, ArkUI_Float32 maxSpeed)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetFlingSpeedLimit(frameNode, maxSpeed);
+}
+
+void ResetListFlingSpeedLimit(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetFlingSpeedLimit(frameNode, -1.0);
+}
+
+void GetlistDivider(ArkUINodeHandle node, ArkUIdividerOptions* option, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto divider = ListModelNG::GetDivider(frameNode);
+    option->color = divider.color.GetValue();
+    option->strokeWidth = divider.strokeWidth.GetNativeValue(static_cast<DimensionUnit>(unit));
+    option->startMargin = divider.startMargin.GetNativeValue(static_cast<DimensionUnit>(unit));
+    option->endMargin = divider.endMargin.GetNativeValue(static_cast<DimensionUnit>(unit));
+}
+
+void SetInitialScroller(ArkUINodeHandle node, ArkUINodeHandle controller, ArkUINodeHandle proxy)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto listProxy = AceType::Claim(reinterpret_cast<ScrollProxy*>(proxy));
+    auto listController = AceType::Claim(reinterpret_cast<ScrollControllerBase*>(controller));
+    ListModelNG::SetScroller(frameNode, listController, listProxy);
+}
+
+void ResetInitialScroller(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<ScrollControllerBase> listController;
+    RefPtr<ScrollProxy> listProxy;
+    ListModelNG::SetScroller(frameNode, listController, listProxy);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -624,7 +674,8 @@ const ArkUIListModifier* GetListModifier()
         ResetContentEndOffset, ListSetDivider, ListResetDivider, SetChainAnimationOptions, ResetChainAnimationOptions,
         GetListSpace, SetListSpace, ResetListSpace, SetFadingEdge, ResetFadingEdge, SetNodeAdapter, ResetNodeAdapter,
         GetNodeAdapter, GetCachedCount, SetScrollToIndex, SetScrollBy, SetInitialIndex, ResetInitialIndex,
-        SetListChildrenMainSize, ResetListChildrenMainSize, SetListCloseAllSwipeActions };
+        SetListChildrenMainSize, ResetListChildrenMainSize, SetListCloseAllSwipeActions, GetInitialIndex,
+        SetListFlingSpeedLimit, ResetListFlingSpeedLimit, GetlistDivider, SetInitialScroller, ResetInitialScroller };
     return &modifier;
 }
 
@@ -783,6 +834,61 @@ void SetOnListReachEnd(ArkUINodeHandle node, void* extraParam)
         SendArkUIAsyncEvent(&event);
     };
     ListModelNG::SetOnReachEnd(frameNode, std::move(onReachEnd));
+}
+
+void ResetOnListScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetOnScroll(frameNode, nullptr);
+}
+void ResetOnListScrollIndex(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetOnScrollIndex(frameNode, nullptr);
+}
+void ResetOnListScrollStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetOnScrollStart(frameNode, nullptr);
+}
+void ResetOnListScrollStop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetOnScrollStop(frameNode, nullptr);
+}
+void ResetOnListScrollFrameBegin(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetOnScrollFrameBegin(frameNode, nullptr);
+}
+void ResetOnListWillScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetOnWillScroll(frameNode, nullptr);
+}
+void ResetOnListDidScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetOnDidScroll(frameNode, nullptr);
+}
+void ResetOnListReachStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetOnReachStart(frameNode, nullptr);
+}
+void ResetOnListReachEnd(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetOnReachEnd(frameNode, nullptr);
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

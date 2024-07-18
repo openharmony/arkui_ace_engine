@@ -67,7 +67,9 @@ public:
     ScrollControllerBase() = default;
     ~ScrollControllerBase() override = default;
 
-    virtual void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::NONE) {}
+    virtual void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::NONE,
+        std::optional<float> extraOffset = std::nullopt)
+    {}
 
     virtual void JumpToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth = false,
         ScrollAlign align = ScrollAlign::NONE, int32_t source = 3) {} // 3 is SCROLL_FROM_JUMP

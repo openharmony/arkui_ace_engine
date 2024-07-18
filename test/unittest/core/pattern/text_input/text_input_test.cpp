@@ -1137,43 +1137,6 @@ HWTEST_F(TextFieldUXTest, testTextAlign002, TestSize.Level1)
 }
 
 /**
- * @tc.name: testWordBreak001
- * @tc.desc: test testInput text WordBreak
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldUXTest, testWordBreak001, TestSize.Level1)
-{
-    /**
-     * @tc.step1: Create Text filed node
-     * @tc.expected: style is Inline
-     */
-    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
-        model.SetInputStyle(DEFAULT_INPUT_STYLE);
-    });
-
-    /**
-     * @tc.step: step2. Set wordBreak NORMAL
-     */
-    layoutProperty_->UpdateWordBreak(WordBreak::NORMAL);
-    frameNode_->MarkModifyDone();
-    EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::NORMAL);
-
-    /**
-     * @tc.step: step3. Set wordBreak BREAK_ALL
-     */
-    layoutProperty_->UpdateWordBreak(WordBreak::BREAK_ALL);
-    frameNode_->MarkModifyDone();
-    EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::BREAK_ALL);
-
-    /**
-     * @tc.step: step4. Set wordBreak BREAK_WORD
-     */
-    layoutProperty_->UpdateWordBreak(WordBreak::BREAK_WORD);
-    frameNode_->MarkModifyDone();
-    EXPECT_EQ(layoutProperty_->GetWordBreak(), WordBreak::BREAK_WORD);
-}
-
-/**
  * @tc.name: testTextOverFlow001
  * @tc.desc: test testInput text TextOverFlow
  * @tc.type: FUNC
@@ -1959,6 +1922,7 @@ HWTEST_F(TextFieldUXTest, HandleClickEventTest001, TestSize.Level1)
     info.localLocation_ = Offset(1.0f, 110.0f);
     pattern_->scrollBar_->barRect_ = Rect(0.0f, 0.0f, 30.0f, 500.0f);
     pattern_->scrollBar_->touchRegion_ = Rect(10.0f, 100.0f, 30.0f, 100.0f);
+    pattern_->scrollBar_->isScrollable_ = true;
     // /**
     //  * @tc.steps: step2. Test HandleClickEvent.
     //  * @tc.expect: CheckBarDirection equal BarDirection's Value.

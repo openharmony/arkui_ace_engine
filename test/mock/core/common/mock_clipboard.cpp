@@ -53,6 +53,14 @@ void MockClipBoard::HasData(const std::function<void(bool hasData)>& callback)
     }
 }
 
+void MockClipBoard::HasDataType(
+    const std::function<void(bool hasData)>& callback, const std::vector<std::string>& mimeTypes)
+{
+    if (callback) {
+        callback(saveData.has_value());
+    }
+}
+
 void MockClipBoard::SetData(const std::string& data, CopyOptions /* copyOption */, bool /* isDragData */)
 {
     saveData = data;
@@ -73,6 +81,9 @@ void MockClipBoard::SetData(const RefPtr<PasteDataMix>& pasteData, CopyOptions c
 void MockClipBoard::GetData(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,
     const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
     const std::function<void(const std::string&, bool isLastRecord)>& urlCallback, bool syncMode)
+{}
+void MockClipBoard::GetSpanStringData(
+    const std::function<void(std::vector<uint8_t>&, const std::string&)>& callback, bool syncMode)
 {}
 
 RefPtr<PasteDataMix> MockClipBoard::CreatePasteDataMix()

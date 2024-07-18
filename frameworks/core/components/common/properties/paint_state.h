@@ -82,6 +82,17 @@ struct LineDashParam {
     double dashOffset = 0.0;
 };
 
+struct ImageData {
+    RefPtr<Ace::PixelMap> pixelMap;
+    int32_t x = 0;
+    int32_t y = 0;
+    int32_t dirtyX = 0;
+    int32_t dirtyY = 0;
+    int32_t dirtyWidth = 0;
+    int32_t dirtyHeight = 0;
+    std::vector<Color> data;
+};
+
 struct CanvasImage {
     int32_t flag = 0;
     double sx = 0.0;
@@ -94,17 +105,7 @@ struct CanvasImage {
     double dHeight = 0.0;
     std::string src;
     int32_t instanceId = 0;
-};
-
-struct ImageData {
-    RefPtr<Ace::PixelMap> pixelMap;
-    int32_t x = 0;
-    int32_t y = 0;
-    int32_t dirtyX = 0;
-    int32_t dirtyY = 0;
-    int32_t dirtyWidth = 0;
-    int32_t dirtyHeight = 0;
-    std::vector<Color> data;
+    std::shared_ptr<ImageData> imageData;
 };
 
 struct TextMetrics {

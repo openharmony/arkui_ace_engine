@@ -19,6 +19,7 @@
 #include <functional>
 
 #include "base/memory/ace_type.h"
+#include "base/system_bar/system_bar_style.h"
 #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace {
@@ -28,6 +29,8 @@ using WindowModeCallback = std::function<WindowMode(void)>;
 using WindowTypeCallback = std::function<WindowType(void)>;
 using WindowSetMaximizeModeCallback = std::function<void(MaximizeMode)>;
 using WindowGetMaximizeModeCallback = std::function<MaximizeMode(void)>;
+using GetSystemBarStyleCallback = std::function<RefPtr<SystemBarStyle>(void)>;
+using SetSystemBarStyleCallback = std::function<void(const RefPtr<SystemBarStyle>&)>;
 
 class WindowManager : public virtual AceType {
     DECLARE_ACE_TYPE(WindowManager, AceType);
@@ -114,6 +117,16 @@ public:
     void SetWindowGetMaximizeModeCallBack(WindowGetMaximizeModeCallback&& callback)
     {
         windowGetMaximizeModeCallback_ = std::move(callback);
+    }
+
+    void SetGetSystemBarStyleCallBack(GetSystemBarStyleCallback&& callback)
+    {
+        getSystemBarStyleCallback_ = std::move(callback);
+    }
+
+    void SetSetSystemBarStyleCallBack(SetSystemBarStyleCallback&& callback)
+    {
+        setSystemBarStyleCallback_ = std::move(callback);
     }
 
     void WindowMinimize() const
@@ -207,6 +220,21 @@ public:
         maximizeMode_ = mode;
     }
 
+    RefPtr<SystemBarStyle> GetSystemBarStyle()
+    {
+        if (getSystemBarStyleCallback_) {
+            return getSystemBarStyleCallback_();
+        }
+        return nullptr;
+    }
+
+    void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)
+    {
+        if (setSystemBarStyleCallback_) {
+            setSystemBarStyleCallback_(style);
+        }
+    }
+
 private:
     int32_t appLabelId_ = 0;
     int32_t appIconId_ = 0;
@@ -223,6 +251,8 @@ private:
     WindowGetMaximizeModeCallback windowGetMaximizeModeCallback_;
     WindowModeCallback windowGetModeCallback_;
     WindowTypeCallback windowGetTypeCallback_;
+    GetSystemBarStyleCallback getSystemBarStyleCallback_;
+    SetSystemBarStyleCallback setSystemBarStyleCallback_;
 };
 
 } // namespace OHOS::Ace

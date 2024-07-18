@@ -126,9 +126,6 @@ std::optional<SelectOverlayInfo> SelectOverlayClient::GetSelectOverlayInfo(const
     if (!clientInfo.isUpdateMenu) {
         return overlayInfo;
     }
-    if (!GetMenuOptionItems().empty()) {
-        overlayInfo.menuOptionItems = GetMenuOptionItems();
-    }
     if (OnPreShowSelectOverlay(overlayInfo, clientInfo, SelectOverlayIsOn())) {
         overlayInfo.menuInfo.singleHandleMenuIsShow = overlayInfo.menuInfo.menuIsShow;
         return overlayInfo;

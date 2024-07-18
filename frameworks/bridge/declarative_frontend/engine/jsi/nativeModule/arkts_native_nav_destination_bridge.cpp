@@ -125,18 +125,18 @@ ArkUINativeModuleValue NavDestinationBridge::SetIgnoreLayoutSafeArea(ArkUIRuntim
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::string typeCppStr;
     std::string edgesCppStr;
-    if (secondArg->IsString()) {
-        typeCppStr = secondArg->ToString(vm)->ToString();
+    if (secondArg->IsString(vm)) {
+        typeCppStr = secondArg->ToString(vm)->ToString(vm);
     } else {
         //type system
-        typeCppStr = "1";
+        typeCppStr = "0";
     }
 
-    if (thirdArg->IsString()) {
-        edgesCppStr = thirdArg->ToString(vm)->ToString();
+    if (thirdArg->IsString(vm)) {
+        edgesCppStr = thirdArg->ToString(vm)->ToString(vm);
     } else {
-        //type top and bottom
-        edgesCppStr = "1|2";
+        //edge top and bottom
+        edgesCppStr = "0|1";
     }
     const char* typeStr = typeCppStr.c_str();
     const char* edgesStr = edgesCppStr.c_str();

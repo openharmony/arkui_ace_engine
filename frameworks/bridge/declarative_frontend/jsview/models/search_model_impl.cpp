@@ -176,11 +176,6 @@ void SearchModelImpl::SetCopyOption(const CopyOptions& copyOptions)
     JSViewSetProperty(&TextFieldComponent::SetCopyOption, copyOptions);
 }
 
-void SearchModelImpl::SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems)
-{
-    LOGI("only newPipeline supply");
-}
-
 void SearchModelImpl::SetFocusable(bool focusable)
 {
     auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent();
@@ -236,12 +231,18 @@ void SearchModelImpl::SetOnSubmit(std::function<void(const std::string&)>&& onSu
     component->SetOnSubmit(std::move(onSubmit));
 }
 
-void SearchModelImpl::SetOnChange(std::function<void(const std::string&)>&& onChange)
+void SearchModelImpl::SetOnChange(std::function<void(const std::string&, PreviewText&)>&& onChange)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<SearchComponent>(stack->GetMainComponent());
     CHECK_NULL_VOID(component);
-    component->SetOnChange(std::move(onChange));
+    auto onChangeImpl = [onChange] (const std::string& value) {
+        if (!onChange) {
+            PreviewText previewText {};
+            onChange(value, previewText);
+        }
+    };
+    component->SetOnChange(std::move(onChangeImpl));
 }
 
 void SearchModelImpl::SetOnCopy(std::function<void(const std::string&)>&& func)

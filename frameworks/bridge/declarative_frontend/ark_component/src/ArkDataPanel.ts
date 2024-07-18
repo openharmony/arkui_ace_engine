@@ -44,7 +44,7 @@ class ArkDataPanelComponent extends ArkComponent implements DataPanelAttribute {
     return this;
   }
   contentModifier(value: ContentModifier<DataPanelConfiguration>): this {
-    this.setContentModifier(value);
+    modifierWithKey(this._modifiersWithKeys, DataPanelContentModifier.identity, DataPanelContentModifier, value);
     return this;
   }
   setContentModifier(modifier: ContentModifier<DataPanelConfiguration>): this {
@@ -132,6 +132,17 @@ class DataPanelTrackShadowModifier extends ModifierWithKey<DataPanelShadowOption
   }
   checkObjectDiff(): boolean {
     return true;
+  }
+}
+
+class DataPanelContentModifier extends ModifierWithKey<ContentModifier<DataPanelConfiguration>> {
+  constructor(value: ContentModifier<DataPanelConfiguration>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('dataPanelContentModifier');
+  applyPeer(node: KNode, reset: boolean, component: ArkComponent) {
+    let dataPanelComponent = component as ArkDataPanelComponent;
+    dataPanelComponent.setContentModifier(this.value);
   }
 }
 class DataPanelValueColorsModifier extends ModifierWithKey<Array<ResourceColor | LinearGradient>> {

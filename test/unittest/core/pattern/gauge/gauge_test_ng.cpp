@@ -115,11 +115,14 @@ public:
 void GaugeTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
-
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto progressTheme = AceType::MakeRefPtr<ProgressTheme>();
+    auto themeConstants = CreateThemeConstants(THEME_PATTERN_PROGRESS);
+    auto progressTheme = ProgressTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
+
+    auto gaugeTheme = GaugeTheme::Builder().Build(themeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(GaugeTheme::TypeId())).WillRepeatedly(Return(gaugeTheme));
 }
 
 void GaugeTestNg::TearDownTestSuite()
@@ -178,6 +181,11 @@ HWTEST_F(GaugeTestNg, GaugePaintPropertyTest001, TestSize.Level1)
     EXPECT_EQ(paintProperty_->GetMaxValue(), MAX);
     EXPECT_EQ(paintProperty_->GetMinValue(), MIN);
     EXPECT_EQ(paintProperty_->GetValueValue(), VALUE);
+    EXPECT_TRUE(accessibilityProperty_->HasRange());
+    EXPECT_EQ(accessibilityProperty_->GetAccessibilityValue().current, VALUE);
+    EXPECT_EQ(accessibilityProperty_->GetAccessibilityValue().max, MAX);
+    EXPECT_EQ(accessibilityProperty_->GetAccessibilityValue().min, MIN);
+    EXPECT_EQ(accessibilityProperty_->GetText(), std::to_string(VALUE));
 }
 
 /**
@@ -312,11 +320,11 @@ HWTEST_F(GaugeTestNg, GaugeMeasureTest001, TestSize.Level1)
      *         Gauge({ { value: 50, min: 0, max: 100 }}).height(-10)
      *     }
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineContext::GetCurrent()->GetThemeManager());
+    ASSERT_NE(themeManager, nullptr);
     auto progressTheme = AceType::MakeRefPtr<ProgressTheme>();
     progressTheme->trackWidth_ = WIDTH;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
+    EXPECT_CALL(*themeManager, GetTheme(ProgressTheme::TypeId())).WillRepeatedly(Return(progressTheme));
 
     LayoutConstraintF layoutConstraintHeightInvalid;
     layoutConstraintHeightInvalid.maxSize = MAX_SIZE;
@@ -343,7 +351,7 @@ HWTEST_F(GaugeTestNg, GaugeMeasureTest001, TestSize.Level1)
      *     }
      */
     progressTheme = AceType::MakeRefPtr<ProgressTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
+    EXPECT_CALL(*themeManager, GetTheme(ProgressTheme::TypeId())).WillRepeatedly(Return(progressTheme));
 
     LayoutConstraintF layoutConstraintWidth;
     layoutConstraintWidth.selfIdealSize.SetWidth(WIDTH.ConvertToPx());
@@ -398,11 +406,11 @@ HWTEST_F(GaugeTestNg, GaugeMeasureTest002, TestSize.Level1)
      *         Gauge({ { value: 50, min: 0, max: 100 }})
      *     }
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineContext::GetCurrent()->GetThemeManager());
+    ASSERT_NE(themeManager, nullptr);
     auto progressTheme = AceType::MakeRefPtr<ProgressTheme>();
     progressTheme->trackWidth_ = 500.0_vp;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
+    EXPECT_CALL(*themeManager, GetTheme(ProgressTheme::TypeId())).WillRepeatedly(Return(progressTheme));
 
     LayoutConstraintF layoutConstraintSmallWidth;
     layoutConstraintSmallWidth.maxSize = SizeF(SMALL_WIDTH, MAX_HEIGHT);
@@ -443,9 +451,10 @@ HWTEST_F(GaugeTestNg, GaugeLayoutPropertyTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. create gauge.
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ProgressTheme>()));
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineContext::GetCurrent()->GetThemeManager());
+    ASSERT_NE(themeManager, nullptr);
+    auto progressTheme = AceType::MakeRefPtr<ProgressTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(ProgressTheme::TypeId())).WillRepeatedly(Return(progressTheme));
     Create(VALUE, MIN, MAX);
 
     /**
@@ -947,19 +956,191 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest015, TestSize.Level1)
 }
 
 /**
- * @tc.name: GaugeAccessibilityPropertyTestNg001
- * @tc.desc: Test the HasRange and RangeInfo properties of Gauge
+ * @tc.name: GaugePaintMethodTest016
+ * @tc.desc: Test Gauge PaintMethod Paint
  * @tc.type: FUNC
  */
-HWTEST_F(GaugeTestNg, GaugeAccessibilityPropertyTestNg001, TestSize.Level1)
+HWTEST_F(GaugeTestNg, GaugePaintMethodTest016, TestSize.Level1)
 {
-    Create(VALUE, MIN, MAX);
+    /**
+     * case: colors.size != VALUES.size.
+     */
+    Create(VALUE, MIN, MAX, [](GaugeModelNG model) {
+        std::vector<ColorStopArray> colors;
+        ColorStopArray colorStopArray;
+        for (const auto& color : COLORS) {
+            colorStopArray.emplace_back(std::make_pair(color, Dimension(0.0)));
+        }
+        colors.emplace_back(colorStopArray);
+        model.SetGradientColors(colors, VALUES, GaugeType::TYPE_CIRCULAR_MONOCHROME);
+    });
 
-    EXPECT_TRUE(accessibilityProperty_->HasRange());
-    EXPECT_EQ(accessibilityProperty_->GetAccessibilityValue().current, VALUE);
-    EXPECT_EQ(accessibilityProperty_->GetAccessibilityValue().max, MAX);
-    EXPECT_EQ(accessibilityProperty_->GetAccessibilityValue().min, MIN);
-    EXPECT_EQ(accessibilityProperty_->GetText(), std::to_string(VALUE));
+    GaugeModifier modifier = GaugeModifier(pattern_);
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    DrawingContext context = { rsCanvas, 1.f, 1.f };
+    modifier.onDraw(context);
+
+    paintProperty_->ResetValues();
+    modifier.onDraw(context);
+
+    modifier.SetUseContentModifier(true);
+    modifier.onDraw(context);
+}
+
+/**
+ * @tc.name: GaugePaintMethodTest017
+ * @tc.desc: Test Gauge PaintMethod Paint
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugeTestNg, GaugePaintMethodTest017, TestSize.Level1)
+{
+    /**
+     * case: endAngle - startAngle > DEFAULT_END_DEGREE.
+     */
+    int32_t minPlatformVersion = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    Create(VALUE, MIN, MAX, [](GaugeModelNG model) {
+        std::vector<ColorStopArray> colors;
+        ColorStopArray colorStopArray;
+        for (const auto& color : COLORS) {
+            colorStopArray.emplace_back(std::make_pair(color, Dimension(0.0)));
+        }
+        colors.emplace_back(colorStopArray);
+        model.SetGradientColors(colors, VALUES, GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT);
+        model.SetIsShowIndicator(false);
+        model.SetStartAngle(START_ANGLE);
+        model.SetEndAngle(END_ANGLE + DEFAULT_END_DEGREE);
+        model.SetStrokeWidth(STOKE_WIDTH);
+    });
+
+    pattern_->OnSensitiveStyleChange(true);
+    GaugeModifier modifier = GaugeModifier(pattern_);
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    DrawingContext context = { rsCanvas, 1.f, 1.f };
+    modifier.onDraw(context);
+
+    GaugeShadowOptions shadowOptions;
+    shadowOptions.isShadowVisible = false;
+    paintProperty_->UpdateShadowOptions(shadowOptions);
+    paintProperty_->UpdateEndAngle(-DEFAULT_END_DEGREE);
+    paintProperty_->UpdateGaugeType(GaugeType::TYPE_CIRCULAR_MONOCHROME);
+    paintProperty_->ResetGradientColors();
+    layoutProperty_->UpdateEndAngle(-DEFAULT_END_DEGREE);
+    PaddingPropertyF padding;
+    padding.left = 16.f;
+    padding.top = 16.f;
+    frameNode_->GetGeometryNode()->UpdatePaddingWithBorder(padding);
+    modifier.UpdateValue();
+    modifier.onDraw(context);
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(minPlatformVersion);
+}
+
+/**
+ * @tc.name: GaugePaintMethodTest018
+ * @tc.desc: Test Gauge PaintMethod Paint
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugeTestNg, GaugePaintMethodTest018, TestSize.Level1)
+{
+    /**
+     * case: colors.size == VALUES.size.
+     */
+    int32_t minPlatformVersion = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    Create(VALUE, MIN, MAX, [](GaugeModelNG model) {
+        std::vector<ColorStopArray> colors;
+        ColorStopArray colorStopArray;
+        for (const auto& color : COLORS) {
+            colorStopArray.emplace_back(std::make_pair(color, Dimension(0.0)));
+        }
+        for (size_t i = 0; i < COLORS.size(); ++i) {
+            colors.emplace_back(colorStopArray);
+        }
+        model.SetGradientColors(colors, VALUES, GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT);
+    });
+
+    GaugeModifier modifier = GaugeModifier(pattern_);
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, ClipPath(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    DrawingContext context = { rsCanvas, 1.f, 1.f };
+    modifier.onDraw(context);
+
+    paintProperty_->ResetGradientColors();
+    paintProperty_->ResetValues();
+    GaugeShadowOptions shadowOptions;
+    shadowOptions.isShadowVisible = false;
+    paintProperty_->UpdateShadowOptions(shadowOptions);
+    modifier.onDraw(context);
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(minPlatformVersion);
+}
+
+/**
+ * @tc.name: GaugePaintMethodTest019
+ * @tc.desc: Test Gauge PaintMethod Paint
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugeTestNg, GaugePaintMethodTest019, TestSize.Level1)
+{
+    /**
+     * case: GaugeType == GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT.
+     */
+    int32_t minPlatformVersion = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    Create(VALUE, MIN, MAX, [](GaugeModelNG model) {
+        std::vector<ColorStopArray> colors;
+        ColorStopArray colorStopArray;
+        for (const auto& color : COLORS) {
+            colorStopArray.emplace_back(std::make_pair(color, Dimension(0.0)));
+        }
+        colors.emplace_back(colorStopArray);
+        model.SetGradientColors(colors, VALUES, GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT);
+    });
+
+    GaugeModifier modifier = GaugeModifier(pattern_);
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Restore()).Times(AtLeast(1));
+    DrawingContext context = { rsCanvas, 1.f, 1.f };
+    modifier.onDraw(context);
+
+    paintProperty_->ResetGradientColors();
+    GaugeShadowOptions shadowOptions;
+    shadowOptions.isShadowVisible = false;
+    paintProperty_->UpdateShadowOptions(shadowOptions);
+    modifier.onDraw(context);
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(minPlatformVersion);
 }
 
 /**
@@ -970,13 +1151,8 @@ HWTEST_F(GaugeTestNg, GaugeAccessibilityPropertyTestNg001, TestSize.Level1)
 HWTEST_F(GaugeTestNg, NewPaint001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Mock theme manager and create GaugePaintMethod.
+     * @tc.steps: step1. create GaugePaintMethod.
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto gaugeTheme = AceType::MakeRefPtr<GaugeTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(gaugeTheme));
-
     Create(VALUE, MIN, MAX);
     auto nodePaintMethod = pattern_->CreateNodePaintMethod();
     auto gaugePaint = AceType::DynamicCast<GaugePaintMethod>(nodePaintMethod);
@@ -1370,7 +1546,7 @@ HWTEST_F(GaugeTestNg, Layout002, TestSize.Level1)
 HWTEST_F(GaugeTestNg, OnModifyDone, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Mock theme manager and create GaugePattern.
+     * @tc.steps: step1. create GaugePattern.
      */
     MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     Create(VALUE, MIN, MAX);

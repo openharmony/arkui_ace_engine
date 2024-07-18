@@ -17,9 +17,7 @@
 
 #include <algorithm>
 
-#include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
 
 constexpr float HALF = 0.5f;
 
@@ -272,7 +270,7 @@ void WaterFlowLayoutInfo::Reset(int32_t resetFrom)
     }
     maxHeight_ = 0.0f;
     jumpIndex_ = EMPTY_JUMP_INDEX;
-    startIndex_ = resetFrom;
+    startIndex_ = 0;
     ClearCacheAfterIndex(resetFrom - 1);
 }
 
@@ -352,6 +350,9 @@ bool WaterFlowLayoutInfo::ReachEnd(float prevOffset) const
 
 int32_t WaterFlowLayoutInfo::FastSolveStartIndex() const
 {
+    if (NearZero(currentOffset_) && !endPosArray_.empty() && NearZero(endPosArray_[0].first)) {
+        return endPosArray_[0].second;
+    }
     auto it = std::upper_bound(endPosArray_.begin(), endPosArray_.end(), -currentOffset_,
         [](float value, const std::pair<float, int32_t>& info) { return LessNotEqual(value, info.first); });
     if (it == endPosArray_.end()) {
@@ -468,21 +469,12 @@ void WaterFlowLayoutInfo::InitSegments(const std::vector<WaterFlowSections::Sect
             items_[i][j] = {};
         }
     }
+
+    margins_.clear(); // to be initialized during layout
 }
 
-void WaterFlowLayoutInfo::InitMargins(
-    const std::vector<WaterFlowSections::Section>& sections, const ScaleProperty& scale, float percentWidth)
+void WaterFlowLayoutInfo::PrepareSegmentStartPos()
 {
-    size_t n = sections.size();
-    if (n == 0) {
-        return;
-    }
-    margins_.resize(n);
-    for (size_t i = 0; i < n; ++i) {
-        if (sections[i].margin) {
-            margins_[i] = ConvertToMarginPropertyF(*sections[i].margin, scale, percentWidth);
-        }
-    }
     if (segmentStartPos_.size() <= 1) {
         ResetSegmentStartPos();
     }
@@ -553,6 +545,10 @@ float WaterFlowLayoutInfo::JumpToTargetAlign(const std::pair<float, float>& item
 void WaterFlowLayoutInfo::JumpTo(const std::pair<float, float>& item)
 {
     currentOffset_ = JumpToTargetAlign(item);
+    if (extraOffset_.has_value()) {
+        currentOffset_ += extraOffset_.value();
+        extraOffset_.reset();
+    }
     align_ = ScrollAlign::START;
     jumpIndex_ = EMPTY_JUMP_INDEX;
 }
@@ -585,5 +581,27 @@ float WaterFlowLayoutInfo::CalcOverScroll(float mainSize, float delta) const
         res = mainSize - (GetMaxMainHeight() + currentOffset_ - delta);
     }
     return res;
+}
+
+float WaterFlowLayoutInfo::EstimateContentHeight() const
+{
+    auto childCount = 0;
+    if (!itemInfos_.empty()) {
+        //in segmented layout
+        childCount = static_cast<int32_t>(itemInfos_.size());
+    } else if (maxHeight_) {
+        //in original layout, already reach end.
+        return maxHeight_;
+    } else {
+        //in original layout
+        for (const auto& item : items_[0]) {
+            childCount += static_cast<int32_t>(item.second.size());
+        }
+    }
+    if (childCount == 0) {
+        return 0;
+    }
+    auto estimateHeight = GetMaxMainHeight() / childCount * childrenCount_;
+    return estimateHeight;
 }
 } // namespace OHOS::Ace::NG

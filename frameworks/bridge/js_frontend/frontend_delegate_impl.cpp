@@ -298,12 +298,14 @@ void FrontendDelegateImpl::TransferComponentResponseData(int32_t callbackId, int
 void FrontendDelegateImpl::TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const
 {
     auto weak = AceType::WeakClaim(AceType::RawPtr(groupJsBridge_));
-    taskExecutor_->PostTask([callbackId, code, data = std::move(data), weak]() mutable {
-        auto groupJsBridge = weak.Upgrade();
-        if (groupJsBridge) {
-            groupJsBridge->TriggerModuleJsCallback(callbackId, code, std::move(data));
-        }
-    }, TaskExecutor::TaskType::JS, "ArkUITransferJsResponseData");
+    taskExecutor_->PostTask(
+        [callbackId, code, data = std::move(data), weak]() mutable {
+            auto groupJsBridge = weak.Upgrade();
+            if (groupJsBridge) {
+                groupJsBridge->TriggerModuleJsCallback(callbackId, code, std::move(data));
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUITransferJsResponseData");
 }
 
 #if defined(PREVIEW)
@@ -312,12 +314,14 @@ void FrontendDelegateImpl::TransferJsResponseDataPreview(
 {
     LOGI("JsFrontend TransferJsResponseDataPreview");
     auto weak = AceType::WeakClaim(AceType::RawPtr(groupJsBridge_));
-    taskExecutor_->PostTask([callbackId, code, responseData, weak]() mutable {
-        auto groupJsBridge = weak.Upgrade();
-        if (groupJsBridge) {
-            groupJsBridge->TriggerModuleJsCallbackPreview(callbackId, code, responseData);
-        }
-    }, TaskExecutor::TaskType::JS, "ArkUITransferJsResponseData");
+    taskExecutor_->PostTask(
+        [callbackId, code, responseData, weak]() mutable {
+            auto groupJsBridge = weak.Upgrade();
+            if (groupJsBridge) {
+                groupJsBridge->TriggerModuleJsCallbackPreview(callbackId, code, responseData);
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUITransferJsResponseData");
 }
 #endif
 
@@ -325,45 +329,53 @@ void FrontendDelegateImpl::TransferJsPluginGetError(
     int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const
 {
     auto weak = AceType::WeakClaim(AceType::RawPtr(groupJsBridge_));
-    taskExecutor_->PostTask([callbackId, errorCode, errorMessage = std::move(errorMessage), weak]() mutable {
-        auto groupJsBridge = weak.Upgrade();
-        if (groupJsBridge) {
-            groupJsBridge->TriggerModulePluginGetErrorCallback(callbackId, errorCode, std::move(errorMessage));
-        }
-    }, TaskExecutor::TaskType::JS, "ArkUITransferJsPluginGetError");
+    taskExecutor_->PostTask(
+        [callbackId, errorCode, errorMessage = std::move(errorMessage), weak]() mutable {
+            auto groupJsBridge = weak.Upgrade();
+            if (groupJsBridge) {
+                groupJsBridge->TriggerModulePluginGetErrorCallback(callbackId, errorCode, std::move(errorMessage));
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUITransferJsPluginGetError");
 }
 
 void FrontendDelegateImpl::TransferJsEventData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const
 {
     auto weak = AceType::WeakClaim(AceType::RawPtr(groupJsBridge_));
-    taskExecutor_->PostTask([callbackId, code, data = std::move(data), weak]() mutable {
-        auto groupJsBridge = weak.Upgrade();
-        if (groupJsBridge) {
-            groupJsBridge->TriggerEventJsCallback(callbackId, code, std::move(data));
-        }
-    }, TaskExecutor::TaskType::JS, "ArkUITransferJsEventData");
+    taskExecutor_->PostTask(
+        [callbackId, code, data = std::move(data), weak]() mutable {
+            auto groupJsBridge = weak.Upgrade();
+            if (groupJsBridge) {
+                groupJsBridge->TriggerEventJsCallback(callbackId, code, std::move(data));
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUITransferJsEventData");
 }
 
 void FrontendDelegateImpl::LoadPluginJsCode(std::string&& jsCode) const
 {
     auto weak = AceType::WeakClaim(AceType::RawPtr(groupJsBridge_));
-    taskExecutor_->PostTask([jsCode = std::move(jsCode), weak]() mutable {
-        auto groupJsBridge = weak.Upgrade();
-        if (groupJsBridge) {
-            groupJsBridge->LoadPluginJsCode(std::move(jsCode));
-        }
-    }, TaskExecutor::TaskType::JS, "ArkUILoadPluginJsCode");
+    taskExecutor_->PostTask(
+        [jsCode = std::move(jsCode), weak]() mutable {
+            auto groupJsBridge = weak.Upgrade();
+            if (groupJsBridge) {
+                groupJsBridge->LoadPluginJsCode(std::move(jsCode));
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUILoadPluginJsCode");
 }
 
 void FrontendDelegateImpl::LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const
 {
     auto weak = AceType::WeakClaim(AceType::RawPtr(groupJsBridge_));
-    taskExecutor_->PostTask([jsCode = std::move(jsCode), jsCodeLen = std::move(jsCodeLen), weak]() mutable {
-        auto groupJsBridge = weak.Upgrade();
-        if (groupJsBridge) {
-            groupJsBridge->LoadPluginJsByteCode(std::move(jsCode), std::move(jsCodeLen));
-        }
-    }, TaskExecutor::TaskType::JS, "ArkUILoadPluginJsByteCode");
+    taskExecutor_->PostTask(
+        [jsCode = std::move(jsCode), jsCodeLen = std::move(jsCodeLen), weak]() mutable {
+            auto groupJsBridge = weak.Upgrade();
+            if (groupJsBridge) {
+                groupJsBridge->LoadPluginJsByteCode(std::move(jsCode), std::move(jsCodeLen));
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUILoadPluginJsByteCode");
 }
 
 bool FrontendDelegateImpl::OnPageBackPress()
@@ -400,12 +412,14 @@ void FrontendDelegateImpl::OnForeground()
 bool FrontendDelegateImpl::OnStartContinuation()
 {
     bool ret = false;
-    taskExecutor_->PostSyncTask([weak = AceType::WeakClaim(this), &ret] {
-        auto delegate = weak.Upgrade();
-        if (delegate && delegate->onStartContinuationCallBack_) {
-            ret = delegate->onStartContinuationCallBack_();
-        }
-    }, TaskExecutor::TaskType::JS, "ArkUIStartContinuationCallback");
+    taskExecutor_->PostSyncTask(
+        [weak = AceType::WeakClaim(this), &ret] {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->onStartContinuationCallBack_) {
+                ret = delegate->onStartContinuationCallBack_();
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIStartContinuationCallback");
     if (!ret) {
         ret = FireSyncEvent("_root", std::string("\"onStartContinuation\","), std::string(""));
     }
@@ -414,34 +428,40 @@ bool FrontendDelegateImpl::OnStartContinuation()
 
 void FrontendDelegateImpl::OnCompleteContinuation(int32_t code)
 {
-    taskExecutor_->PostSyncTask([weak = AceType::WeakClaim(this), code] {
-        auto delegate = weak.Upgrade();
-        if (delegate && delegate->onCompleteContinuationCallBack_) {
-            delegate->onCompleteContinuationCallBack_(code);
-        }
-    }, TaskExecutor::TaskType::JS, "ArkUICompleteContinuationCallback");
+    taskExecutor_->PostSyncTask(
+        [weak = AceType::WeakClaim(this), code] {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->onCompleteContinuationCallBack_) {
+                delegate->onCompleteContinuationCallBack_(code);
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUICompleteContinuationCallback");
     FireSyncEvent("_root", std::string("\"onCompleteContinuation\","), std::to_string(code));
 }
 
 void FrontendDelegateImpl::OnRemoteTerminated()
 {
-    taskExecutor_->PostSyncTask([weak = AceType::WeakClaim(this)] {
-        auto delegate = weak.Upgrade();
-        if (delegate && delegate->onRemoteTerminatedCallBack_) {
-            delegate->onRemoteTerminatedCallBack_();
-        }
-    }, TaskExecutor::TaskType::JS, "ArkUIRemoteTerminatedCallback");
+    taskExecutor_->PostSyncTask(
+        [weak = AceType::WeakClaim(this)] {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->onRemoteTerminatedCallBack_) {
+                delegate->onRemoteTerminatedCallBack_();
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIRemoteTerminatedCallback");
 }
 
 void FrontendDelegateImpl::OnSaveData(std::string& data)
 {
     std::string savedData;
-    taskExecutor_->PostSyncTask([weak = AceType::WeakClaim(this), &savedData] {
-        auto delegate = weak.Upgrade();
-        if (delegate && delegate->onSaveDataCallBack_) {
-            delegate->onSaveDataCallBack_(savedData);
-        }
-    }, TaskExecutor::TaskType::JS, "ArkUISaveDataCallback");
+    taskExecutor_->PostSyncTask(
+        [weak = AceType::WeakClaim(this), &savedData] {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->onSaveDataCallBack_) {
+                delegate->onSaveDataCallBack_(savedData);
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUISaveDataCallback");
     if (savedData.empty()) {
         FireSyncEvent("_root", std::string("\"onSaveData\","), std::string(""), savedData);
     }
@@ -452,12 +472,14 @@ void FrontendDelegateImpl::OnSaveData(std::string& data)
 bool FrontendDelegateImpl::OnRestoreData(const std::string& data)
 {
     bool ret = false;
-    taskExecutor_->PostSyncTask([weak = AceType::WeakClaim(this), &data, &ret] {
-        auto delegate = weak.Upgrade();
-        if (delegate && delegate->onRestoreDataCallBack_) {
-            ret = delegate->onRestoreDataCallBack_(data);
-        }
-    }, TaskExecutor::TaskType::JS, "ArkUIRestoreDataCallback");
+    taskExecutor_->PostSyncTask(
+        [weak = AceType::WeakClaim(this), &data, &ret] {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->onRestoreDataCallBack_) {
+                ret = delegate->onRestoreDataCallBack_(data);
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIRestoreDataCallback");
     FireSyncEvent("_root", std::string("\"onSaveData\","), data);
     return ret;
 }
@@ -584,7 +606,7 @@ void FrontendDelegateImpl::Push(const std::string& uri, const std::string& param
     Push(uri, params, nullptr);
 }
 
-void FrontendDelegateImpl::PushWithCallback(const std::string& uri, const std::string& params,
+void FrontendDelegateImpl::PushWithCallback(const std::string& uri, const std::string& params, bool recoverable,
     const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     Push(uri, params, errorCallback);
@@ -636,7 +658,7 @@ void FrontendDelegateImpl::Replace(const std::string& uri, const std::string& pa
     Replace(uri, params, nullptr);
 }
 
-void FrontendDelegateImpl::ReplaceWithCallback(const std::string& uri, const std::string& params,
+void FrontendDelegateImpl::ReplaceWithCallback(const std::string& uri, const std::string& params, bool recoverable,
     const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     Push(uri, params, errorCallback);
@@ -762,6 +784,7 @@ void FrontendDelegateImpl::GetState(int32_t& index, std::string& name, std::stri
         url = pageRouteStack_.back().url;
     }
     auto pos = url.rfind(".js");
+    // url length - (.js) length
     if (pos == url.length() - 3) {
         url = url.substr(0, pos);
     }
@@ -853,12 +876,14 @@ void FrontendDelegateImpl::TriggerPageUpdate(int32_t pageId, bool directExecute)
         }
     };
     auto weakContext = AceType::WeakClaim(AceType::RawPtr(pipelineContext));
-    taskExecutor_->PostTask([updateTask, weakContext, directExecute]() {
-        auto pipelineContext = weakContext.Upgrade();
-        if (pipelineContext) {
-            pipelineContext->AddPageUpdateTask(std::move(updateTask), directExecute);
-        }
-    }, TaskExecutor::TaskType::UI, "ArkUIAddPageUpdateTask");
+    taskExecutor_->PostTask(
+        [updateTask, weakContext, directExecute]() {
+            auto pipelineContext = weakContext.Upgrade();
+            if (pipelineContext) {
+                pipelineContext->AddPageUpdateTask(std::move(updateTask), directExecute);
+            }
+        },
+        TaskExecutor::TaskType::UI, "ArkUIAddPageUpdateTask");
 }
 
 void FrontendDelegateImpl::PostJsTask(std::function<void()>&& task, const std::string& name)
@@ -915,26 +940,37 @@ bool FrontendDelegateImpl::IsWebFeature()
     return manifestParser_->IsWebFeature();
 }
 
-double FrontendDelegateImpl::MeasureText(const MeasureContext& context)
+double FrontendDelegateImpl::MeasureText(MeasureContext context)
 {
+    if (context.isFontSizeUseDefaultUnit && context.fontSize.has_value() &&
+        !AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        context.fontSize = Dimension(context.fontSize->Value(), DimensionUnit::VP);
+    }
     return MeasureUtil::MeasureText(context);
 }
 
-Size FrontendDelegateImpl::MeasureTextSize(const MeasureContext& context)
+Size FrontendDelegateImpl::MeasureTextSize(MeasureContext context)
 {
+    if (context.isFontSizeUseDefaultUnit && context.fontSize.has_value() &&
+        !AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        context.fontSize = Dimension(context.fontSize->Value(), DimensionUnit::VP);
+    }
     return MeasureUtil::MeasureTextSize(context);
 }
 
-void FrontendDelegateImpl::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
-    const NG::ToastShowMode& /* showMode */, int32_t alignment, std::optional<DimensionOffset> offset)
+void FrontendDelegateImpl::ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback)
 {
-    int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
+    NG::ToastInfo updatedToastInfo = toastInfo;
+    updatedToastInfo.duration = std::clamp(toastInfo.duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
+    updatedToastInfo.isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
-    bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     auto weak = AceType::WeakClaim(AceType::RawPtr(pipelineContext));
-    taskExecutor_->PostTask([durationTime, message, bottom, isRightToLeft, weak] {
-        ToastComponent::GetInstance().Show(weak.Upgrade(), message, durationTime, bottom, isRightToLeft);
-    }, TaskExecutor::TaskType::UI, "ArkUIShowToast");
+    taskExecutor_->PostTask(
+        [updatedToastInfo, weak] {
+            ToastComponent::GetInstance().Show(weak.Upgrade(), updatedToastInfo.message, updatedToastInfo.duration,
+                updatedToastInfo.bottom, updatedToastInfo.isRightToLeft);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIShowToast");
 }
 
 Rect FrontendDelegateImpl::GetBoundingRectData(NodeId nodeId)
@@ -1807,6 +1843,7 @@ std::string FrontendDelegateImpl::GetRunningPageUrl() const
     }
     const auto& pageUrl = pageRouteStack_.back().url;
     auto pos = pageUrl.rfind(".js");
+    // url length - (.js) length
     if (pos == pageUrl.length() - 3) {
         return pageUrl.substr(0, pos);
     }
@@ -2025,12 +2062,14 @@ void FrontendDelegateImpl::LoadResourceConfiguration(std::map<std::string, std::
 void FrontendDelegateImpl::PushJsCallbackToRenderNode(NodeId id, double ratio,
     std::function<void(bool, double)>&& callback)
 {
-    auto visibleCallback = [jsCallback = std::move(callback), executor = taskExecutor_] (bool visible, double ratio) {
-        executor->PostTask([task = std::move(jsCallback), visible, ratio] {
-            if (task) {
-                task(visible, ratio);
-            }
-        }, TaskExecutor::TaskType::JS, "ArkUIJsVisibleCallback");
+    auto visibleCallback = [jsCallback = std::move(callback), executor = taskExecutor_](bool visible, double ratio) {
+        executor->PostTask(
+            [task = std::move(jsCallback), visible, ratio] {
+                if (task) {
+                    task(visible, ratio);
+                }
+            },
+            TaskExecutor::TaskType::JS, "ArkUIJsVisibleCallback");
     };
     auto uiPushTask = [id, ratio, visibleCallback,
                           pipeline = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get())]() {

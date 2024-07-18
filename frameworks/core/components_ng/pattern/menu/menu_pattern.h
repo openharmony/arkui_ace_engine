@@ -141,6 +141,9 @@ public:
 
     float GetPreviewAfterAnimationScale() const
     {
+        if (isShowHoverImage_) {
+            return 1.0f;
+        }
         return previewAnimationOptions_.scaleTo;
     }
 
@@ -289,6 +292,11 @@ public:
 
     void UpdateSelectParam(const std::vector<SelectParam>& params);
 
+    void SetNeedHideAfterTouch(bool needHideAfterTouch)
+    {
+        needHideAfterTouch_ = needHideAfterTouch;
+    }
+
     void HideMenu(bool isMenuOnTouch = false, OffsetF position = OffsetF()) const;
 
     bool HideStackExpandMenu(const OffsetF& position) const;
@@ -358,12 +366,14 @@ public:
         isExtensionMenuShow_ = true;
     }
 
-    void SetHasDisappearAnimation(bool hasAnimation)
+    void SetDisappearAnimation(bool hasAnimation)
     {
+        // false：exit from BOTTOM to TOP
+        // true：exit from LEFT_BOTTOM to RIGHT_TOP
         hasAnimation_ = hasAnimation;
     }
 
-    bool HasDisappearAnimation() const
+    bool GetDisappearAnimation() const
     {
         return hasAnimation_;
     }
@@ -467,23 +477,47 @@ public:
 
     BorderRadiusProperty CalcIdealBorderRadius(const BorderRadiusProperty& borderRadius, const SizeF& menuSize);
 
-    void OnItemPressed(const RefPtr<FrameNode>& parent, int32_t index, bool press);
+    void OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover = false);
     
     void BlockFurtherExpand()
     {
         canExpand_ = false;
     }
+    
     bool CanExpand()
     {
         return canExpand_;
     }
+
+    RefPtr<FrameNode> GetLastSelectedItem()
+    {
+        return lastSelectedItem_;
+    }
+
+    void SetLastSelectedItem(const RefPtr<FrameNode>& lastSelectedItem)
+    {
+        lastSelectedItem_ = lastSelectedItem;
+    }
+
+    void SetIsEmbedded()
+    {
+        isEmbedded_ = true;
+    }
+    bool IsEmbedded()
+    {
+        return isEmbedded_;
+    }
 protected:
-    void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
+    void UpdateMenuItemChildren(RefPtr<UINode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
     void SetAccessibilityAction();
     void SetType(MenuType value)
     {
         type_ = value;
+    }
+    void ResetNeedDivider()
+    {
+        isNeedDivider_ = false;
     }
     virtual void InitTheme(const RefPtr<FrameNode>& host);
     virtual void UpdateBorderRadius(const RefPtr<FrameNode>& menuNode, const BorderRadiusProperty& borderRadius);
@@ -506,6 +540,7 @@ private:
     void DisableTabInMenu();
 
     Offset GetTransformCenter() const;
+    void CallMenuAboutToAppearCallback();
     void ShowPreviewMenuAnimation();
     void ShowPreviewMenuScaleAnimation();
     void ShowMenuAppearAnimation();
@@ -520,8 +555,12 @@ private:
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragEnd(float offsetX, float offsetY, float velocity);
     void HandleScrollDragEnd(float offsetX, float offsetY, float velocity);
+    RefPtr<UINode> GetForEachMenuItem(const RefPtr<UINode>& parent, bool next);
+    RefPtr<UINode> GetOutsideForEachMenuItem(const RefPtr<UINode>& forEachNode, bool next);
 
     RefPtr<FrameNode> BuildContentModifierNode(int index);
+    bool IsMenuScrollable() const;
+
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
     std::optional<Offset> lastTouchOffset_;
@@ -546,6 +585,7 @@ private:
     bool isSubMenuShow_ = false;
     bool isMenuShow_ = false;
     bool hasAnimation_ = true;
+    bool needHideAfterTouch_ = true;
 
     OffsetF originOffset_;
     OffsetF endOffset_;
@@ -559,6 +599,9 @@ private:
     SizeF targetSize_;
     bool expandDisplay_ = false;
     bool canExpand_ = true;
+    RefPtr<FrameNode> lastSelectedItem_ = nullptr;
+    bool isEmbedded_ = false;
+    bool isNeedDivider_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };

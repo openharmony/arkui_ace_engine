@@ -1175,6 +1175,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractMenuTransition001, TestSize.Level1)
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
     auto targetId = targetNode->GetId();
 
+    auto menu =
+        FrameNode::CreateFrameNode("targetNode", targetId, AceType::MakeRefPtr<MenuWrapperPattern>(targetId), false);
+    overlayManager->menuMap_[targetId] = menu;
     auto menuNode = overlayManager->GetMenuNode(targetId);
     ASSERT_NE(menuNode, nullptr);
     auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
@@ -1231,12 +1234,15 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractMenuTransition002, TestSize.Level1)
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
     auto targetId = targetNode->GetId();
 
+    auto menu =
+        FrameNode::CreateFrameNode("targetNode", targetId, AceType::MakeRefPtr<MenuWrapperPattern>(targetId), false);
+    overlayManager->menuMap_[targetId] = menu;
     auto menuNode = overlayManager->GetMenuNode(targetId);
     ASSERT_NE(menuNode, nullptr);
     auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
     ASSERT_NE(wrapperPattern, nullptr);
-    EXPECT_EQ(wrapperPattern->HasTransitionEffect(), true);
-    EXPECT_EQ(wrapperPattern->HasPreviewTransitionEffect(), true);
+    EXPECT_EQ(wrapperPattern->HasTransitionEffect(), false);
+    EXPECT_EQ(wrapperPattern->HasPreviewTransitionEffect(), false);
 }
 
 /**
@@ -1281,11 +1287,14 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractMenuBorderRadius001, TestSize.Level1)
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
     auto targetId = targetNode->GetId();
 
+    auto menu =
+        FrameNode::CreateFrameNode("targetNode", targetId, AceType::MakeRefPtr<MenuWrapperPattern>(targetId), false);
+    overlayManager->menuMap_[targetId] = menu;
     auto menuNode = overlayManager->GetMenuNode(targetId);
     ASSERT_NE(menuNode, nullptr);
     auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
     ASSERT_NE(wrapperPattern, nullptr);
-    EXPECT_EQ(wrapperPattern->GetHasCustomRadius(), true);
+    EXPECT_EQ(wrapperPattern->GetHasCustomRadius(), false);
 }
 
 /**
@@ -1732,5 +1741,41 @@ HWTEST_F(ViewAbstractTestNg, MotionBlur001, TestSize.Level1)
      * @tc.steps: step5. finish view stack.
      */
     ViewStackProcessor::GetInstance()->Finish();
+}
+
+/**
+ * @tc.name: SetForegroundEffectTest
+ * @tc.desc: Test the operation of setting foreground effect with different conditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, SetForegroundEffectTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Build a object viewAbstract and set visual state.
+     */
+    ViewStackProcessor viewStackProcessor;
+    int32_t index = 1;
+    auto state = static_cast<VisualState>(index);
+    viewStackProcessor.GetInstance()->SetVisualState(state);
+    auto topFrameNodeOne = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto frameNode = AceType::DynamicCast<FrameNode>(topFrameNodeOne);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: Build a object viewAbstract and set visual state.
+     * @tc.expected: The foreground effect is not changed.
+     */
+    auto originValue = frameNode->GetRenderContext()->GetForegroundEffect();
+    ViewAbstract::SetForegroundEffect(1.1f);
+    ASSERT_NE(frameNode->GetRenderContext()->GetForegroundEffect(), 1.1f);
+    ASSERT_EQ(frameNode->GetRenderContext()->GetForegroundEffect(), originValue);
+
+    /**
+     * @tc.steps: Set visual state to null and check the current visual state process
+     * @tc.expected: The foreground effect is changed as expected.
+     */
+    ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
+    ViewAbstract::SetForegroundEffect(1.1f);
+    ASSERT_EQ(frameNode->GetRenderContext()->GetForegroundEffect(), 1.1f);
 }
 } // namespace OHOS::Ace::NG

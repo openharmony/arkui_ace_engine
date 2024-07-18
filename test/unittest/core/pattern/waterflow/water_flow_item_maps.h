@@ -101,6 +101,21 @@ const std::vector<float> SEGMENT_START_POS_2 = { 0.0f, 502.0f };
 
 const std::vector<int32_t> SEGMENT_TAILS_3 = { 99, 100 };
 
+const decltype(WaterFlowLayoutInfo::items_) ITEM_MAP_3 = { {
+    // segment 0
+    { 0, { { 0, { 0.0f, 0.0f } } } },                           // Column 0
+    { 1, { { 1, { 0.0f, 30.0f } }, { 4, { 35.0f, 20.0f } } } }, // Column 1
+    { 2, { { 2, { 0.0f, 40.0f } } } },                          // Column 2
+    { 3, { { 3, { 0.0f, 60.0f } } } },                          // Column 3
+} };
+
+const std::vector<std::pair<float, int32_t>> END_POS_ARRAY_3 = {
+    { 0.0f, 0 },
+    { 30.0f, 1 },
+    { 40.0f, 2 },
+    { 60.0f, 3 },
+};
+
 const std::function<float(int32_t)> GET_MAIN_SIZE_FUNC = [](int32_t idx) {
     if (idx & 1) {
         return 200.0f;
@@ -120,6 +135,7 @@ const PaddingProperty MARGIN_1 = {
     .bottom = CalcLength(5.0_vp),
     .top = CalcLength(1.0_vp),
     .right = CalcLength(3.0_vp),
+    .left = CalcLength(5.0_vp),
 };
 
 const std::vector<WaterFlowSections::Section> SECTION_5 = {
@@ -147,7 +163,7 @@ const std::vector<float> CROSS_GAP_5 = { 0.0f, 0.0f, 0.0f, 2.0f, 0.0f };
 const std::vector<float> MAIN_GAP_5 = { 5.0f, 0.0f, 0.0f, 1.0f, 2.0f };
 // assuming WaterFlow width = 400.0f
 const std::vector<std::vector<float>> ITEM_CROSS_SIZE_5 = { { 400.0f / 3, 400.0f / 3, 400.0f / 3 },
-    { 79.4f, 79.4f, 79.4f, 79.4f, 79.4f }, { 400.0f }, { 400.0f }, { 200.0f, 200.0f } };
+    { 78.4f, 78.4f, 78.4f, 78.4f, 78.4f }, { 400.0f }, { 400.0f }, { 200.0f, 200.0f } };
 
 const std::vector<WaterFlowSections::Section> ADD_SECTION_6 = {
     WaterFlowSections::Section { .itemsCount = 10,
@@ -198,6 +214,16 @@ const std::vector<WaterFlowSections::Section> SECTION_8 = {
 };
 const std::vector<WaterFlowSections::Section> SECTION_9 = {
     { .itemsCount = 6, .onGetItemMainSizeByIndex = GET_MAIN_SIZE_2, .crossCount = 3 },
+};
+
+const std::vector<WaterFlowSections::Section> SECTION_10 = {
+    { .itemsCount = 3, .crossCount = 3, .margin = MARGIN_2, .rowsGap = Dimension(5.0f) },
+    { .itemsCount = 2, .crossCount = 2, .margin = MARGIN_2, .rowsGap = Dimension(5.0f) },
+    { .itemsCount = 3, .crossCount = 3 },
+    { .itemsCount = 2, .crossCount = 2 },
+    { .itemsCount = 3, .crossCount = 3 },
+    { .itemsCount = 2, .crossCount = 2 },
+    { .itemsCount = 30, .crossCount = 3 },
 };
 } // namespace OHOS::Ace::NG
 

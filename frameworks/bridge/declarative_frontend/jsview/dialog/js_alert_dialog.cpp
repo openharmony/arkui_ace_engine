@@ -268,6 +268,101 @@ void ParseAlertRadius(DialogProperties& properties, JSRef<JSObject> obj)
     }
 }
 
+void UpdateAlertAlignment(DialogAlignment& alignment)
+{
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (alignment == DialogAlignment::TOP_START) {
+        if (isRtl) {
+            alignment = DialogAlignment::TOP_END;
+        }
+    } else if (alignment == DialogAlignment::TOP_END) {
+        if (isRtl) {
+            alignment = DialogAlignment::TOP_START;
+        }
+    } else if (alignment == DialogAlignment::CENTER_START) {
+        if (isRtl) {
+            alignment = DialogAlignment::CENTER_END;
+        }
+    } else if (alignment == DialogAlignment::CENTER_END) {
+        if (isRtl) {
+            alignment = DialogAlignment::CENTER_START;
+        }
+    } else if (alignment == DialogAlignment::BOTTOM_START) {
+        if (isRtl) {
+            alignment = DialogAlignment::BOTTOM_END;
+        }
+    } else if (alignment == DialogAlignment::BOTTOM_END) {
+        if (isRtl) {
+            alignment = DialogAlignment::BOTTOM_START;
+        }
+    }
+}
+
+void ParseAlertAlignment(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    // Parse alignment
+    auto alignmentValue = obj->GetProperty("alignment");
+    if (alignmentValue->IsNumber()) {
+        auto alignment = alignmentValue->ToNumber<int32_t>();
+        if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+            properties.alignment = DIALOG_ALIGNMENT[alignment];
+            UpdateAlertAlignment(properties.alignment);
+        }
+    }
+}
+
+void ParseAlertOffset(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    // Parse offset
+    auto offsetValue = obj->GetProperty("offset");
+    if (offsetValue->IsObject()) {
+        auto offsetObj = JSRef<JSObject>::Cast(offsetValue);
+        CalcDimension dx;
+        auto dxValue = offsetObj->GetProperty("dx");
+        JSAlertDialog::ParseJsDimensionVp(dxValue, dx);
+        CalcDimension dy;
+        auto dyValue = offsetObj->GetProperty("dy");
+        JSAlertDialog::ParseJsDimensionVp(dyValue, dy);
+        properties.offset = DimensionOffset(dx, dy);
+        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+        Dimension offsetX = isRtl ? properties.offset.GetX() * (-1) : properties.offset.GetX();
+        properties.offset.SetX(offsetX);
+    }
+}
+
+void ParseTextStyle(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    auto textStyleObj = obj->GetProperty("textStyle");
+    if (textStyleObj->IsNull() || !textStyleObj->IsObject()) {
+        return;
+    }
+    auto textStyle = JSRef<JSObject>::Cast(textStyleObj);
+    auto args = textStyle->GetProperty("wordBreak");
+    int32_t index = 1;
+    if (args->IsNumber()) {
+        index = args->ToNumber<int32_t>();
+    }
+    if (index < 0 || index >= static_cast<int32_t>(WORD_BREAK_TYPES.size())) {
+        index = 1;
+    }
+    properties.wordBreak = WORD_BREAK_TYPES[index];
+}
+
+void ParseAlertMaskRect(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    // Parse maskRect.
+    auto maskRectValue = obj->GetProperty("maskRect");
+    DimensionRect maskRect;
+    if (JSViewAbstract::ParseJsDimensionRect(maskRectValue, maskRect)) {
+        properties.maskRect = maskRect;
+        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+        auto offset = maskRect.GetOffset();
+        Dimension offsetX = isRtl ? offset.GetX() * (-1) : offset.GetX();
+        offset.SetX(offsetX);
+        properties.maskRect->SetOffset(offset);
+    }
+}
+
 void JSAlertDialog::Show(const JSCallbackInfo& args)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
@@ -288,11 +383,16 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         ParseAlertShadow(properties, obj);
         ParseAlertBorderWidthAndColor(properties, obj);
         ParseAlertRadius(properties, obj);
+        ParseAlertAlignment(properties, obj);
+        ParseAlertOffset(properties, obj);
+        ParseTextStyle(properties, obj);
+        ParseAlertMaskRect(properties, obj);
 
         auto onLanguageChange = [execContext, obj, parseContent = ParseDialogTitleAndMessage,
                                     parseButton = ParseButtons, parseShadow = ParseAlertShadow,
                                     parseBorderProps = ParseAlertBorderWidthAndColor,
-                                    parseRadius = ParseAlertRadius,
+                                    parseRadius = ParseAlertRadius, parseAlignment = ParseAlertAlignment,
+                                    parseOffset = ParseAlertOffset, parseMaskRect = ParseAlertMaskRect,
                                     node = dialogNode](DialogProperties& dialogProps) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execContext);
             ACE_SCORING_EVENT("AlertDialog.property.onLanguageChange");
@@ -304,6 +404,9 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
             parseShadow(dialogProps, obj);
             parseBorderProps(dialogProps, obj);
             parseRadius(dialogProps, obj);
+            parseAlignment(dialogProps, obj);
+            parseOffset(dialogProps, obj);
+            parseMaskRect(dialogProps, obj);
         };
         properties.onLanguageChange = std::move(onLanguageChange);
 
@@ -337,35 +440,6 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         std::function<void(const int32_t& info)> onWillDismissFunc = nullptr;
         ParseDialogCallback(obj, onWillDismissFunc);
         AlertDialogModel::GetInstance()->SetOnWillDismiss(std::move(onWillDismissFunc), properties);
-
-        // Parse alignment
-        auto alignmentValue = obj->GetProperty("alignment");
-        if (alignmentValue->IsNumber()) {
-            auto alignment = alignmentValue->ToNumber<int32_t>();
-            if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
-                properties.alignment = DIALOG_ALIGNMENT[alignment];
-            }
-        }
-
-        // Parse offset
-        auto offsetValue = obj->GetProperty("offset");
-        if (offsetValue->IsObject()) {
-            auto offsetObj = JSRef<JSObject>::Cast(offsetValue);
-            CalcDimension dx;
-            auto dxValue = offsetObj->GetProperty("dx");
-            ParseJsDimensionVp(dxValue, dx);
-            CalcDimension dy;
-            auto dyValue = offsetObj->GetProperty("dy");
-            ParseJsDimensionVp(dyValue, dy);
-            properties.offset = DimensionOffset(dx, dy);
-        }
-
-        // Parse maskRect.
-        auto maskRectValue = obj->GetProperty("maskRect");
-        DimensionRect maskRect;
-        if (JSViewAbstract::ParseJsDimensionRect(maskRectValue, maskRect)) {
-            properties.maskRect = maskRect;
-        }
 
         // Parse showInSubWindowValue.
         auto showInSubWindowValue = obj->GetProperty("showInSubWindow");

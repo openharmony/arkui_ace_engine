@@ -82,7 +82,7 @@ void CheckBoxPattern::OnModifyDone()
     UpdateState();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
     CHECK_NULL_VOID(checkBoxTheme);
@@ -195,10 +195,16 @@ void CheckBoxPattern::InitClickEvent()
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto checkboxPattern = weak.Upgrade();
         CHECK_NULL_VOID(checkboxPattern);
+        if (info.GetSourceDevice() == SourceType::TOUCH &&
+            (info.IsPreventDefault() || checkboxPattern->isTouchPreventDefault_)) {
+            TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "checkbox preventDefault successfully");
+            checkboxPattern->isTouchPreventDefault_ = false;
+            return;
+        }
         checkboxPattern->OnClick();
     };
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    gesture->AddClickEvent(clickListener_);
+    gesture->AddClickAfterEvent(clickListener_);
 }
 
 void CheckBoxPattern::InitTouchEvent()
@@ -213,6 +219,9 @@ void CheckBoxPattern::InitTouchEvent()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto checkboxPattern = weak.Upgrade();
         CHECK_NULL_VOID(checkboxPattern);
+        if (info.GetSourceDevice() == SourceType::TOUCH && info.IsPreventDefault()) {
+            checkboxPattern->isTouchPreventDefault_ = info.IsPreventDefault();
+        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             checkboxPattern->OnTouchDown();
         }
@@ -222,7 +231,7 @@ void CheckBoxPattern::InitTouchEvent()
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    gesture->AddTouchEvent(touchListener_);
+    gesture->AddTouchAfterEvent(touchListener_);
 }
 
 void CheckBoxPattern::InitMouseEvent()
@@ -249,7 +258,7 @@ void CheckBoxPattern::InitMouseEvent()
 
 void CheckBoxPattern::HandleMouseEvent(bool isHover)
 {
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox on hover %{public}d", isHover);
+    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "checkbox on hover %{public}d", isHover);
     isHover_ = isHover;
     if (isHover) {
         touchHoverType_ = TouchHoverAnimationType::HOVER;
@@ -333,7 +342,7 @@ void CheckBoxPattern::OnClick()
     if (UseContentModifier()) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox onclick");
+    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "checkbox onclick");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
@@ -353,7 +362,7 @@ void CheckBoxPattern::OnTouchDown()
     if (UseContentModifier()) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox touch down %{public}d", isHover_);
+    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "checkbox touch down %{public}d", isHover_);
     if (isHover_) {
         touchHoverType_ = TouchHoverAnimationType::HOVER_TO_PRESS;
     } else {
@@ -370,7 +379,7 @@ void CheckBoxPattern::OnTouchUp()
     if (UseContentModifier()) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox touch up %{public}d", isHover_);
+    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "checkbox touch up %{public}d", isHover_);
     if (isHover_) {
         touchHoverType_ = TouchHoverAnimationType::PRESS_TO_HOVER;
     } else {
@@ -430,7 +439,7 @@ void CheckBoxPattern::CheckPageNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto prePageId = GetPrePageId();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto stageManager = pipelineContext->GetStageManager();
     CHECK_NULL_VOID(stageManager);
@@ -452,7 +461,7 @@ void CheckBoxPattern::UpdateState()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);
@@ -530,7 +539,12 @@ void CheckBoxPattern::StartEnterAnimation()
         eventHub->SetEnabled(true);
     }
     AnimationUtils::Animate(
-        option, [&]() { renderContext->UpdateOpacity(1); }, nullptr);
+        option,
+        [&]() {
+            TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "check enter animation");
+            renderContext->UpdateOpacity(1);
+        },
+        nullptr);
 }
 
 void CheckBoxPattern::StartExitAnimation()
@@ -542,7 +556,12 @@ void CheckBoxPattern::StartExitAnimation()
     const auto& renderContext = builderNode_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     AnimationUtils::Animate(
-        option, [&]() { renderContext->UpdateOpacity(0); }, nullptr);
+        option,
+        [&]() {
+            TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "check exit animation");
+            renderContext->UpdateOpacity(0);
+        },
+        nullptr);
     const auto& eventHub = builderNode_->GetEventHub<EventHub>();
     if (eventHub) {
         eventHub->SetEnabled(false);

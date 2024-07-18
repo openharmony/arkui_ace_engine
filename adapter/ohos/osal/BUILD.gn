@@ -91,7 +91,7 @@ template("ace_osal_ohos_source_set") {
         "resource_convertor.cpp",
         "resource_theme_style.cpp",
       ]
-      deps = [ "$skia_root_new:skia_ohos" ]
+      deps = []
 
       if (defined(global_parts_info) &&
           defined(global_parts_info.resourceschedule_soc_perf)) {
@@ -109,6 +109,7 @@ template("ace_osal_ohos_source_set") {
         "ability_base:view_data",
         "ability_base:want",
         "ability_runtime:abilitykit_native",
+        "graphic_2d:libframe_analyzer",
         "image_framework:image",
         "input:libmmi-client",
         "napi:ace_napi",
@@ -136,7 +137,9 @@ template("ace_osal_ohos_source_set") {
       external_deps += [ "multimedia_image:image" ]
     }
     sources += [
+      "background_task_helper_ohos.cpp",
       "drawing_color_filter_ohos.cpp",
+      "drawing_lattice_ohos.cpp",
       "file_uri_helper_ohos.cpp",
       "image_packer_ohos.cpp",
       "image_source_ohos.cpp",
@@ -145,11 +148,14 @@ template("ace_osal_ohos_source_set") {
       "navigation_route_ohos.cpp",
       "page_url_checker_ohos.cpp",
       "pixel_map_ohos.cpp",
+      "system_bar_style_ohos.cpp",
     ]
     external_deps += [
       "ability_runtime:abilitykit_native",
       "ability_runtime:app_manager",
+      "ability_runtime:wantagent_innerkits",
       "app_file_service:fileuri_native",
+      "background_task_mgr:bgtaskmgr_innerkits",
       "bundle_framework:appexecfwk_core",
       "graphic_2d:2d_graphics",
       "graphic_2d:drawing_napi_impl",
@@ -160,7 +166,9 @@ template("ace_osal_ohos_source_set") {
       "safwk:system_ability_fwk",
       "samgr:samgr_proxy",
       "window_manager:libdm",
+      "window_manager:libwm",
       "window_manager:scene_session",
+      "window_manager:window_native_kit",
     ]
 
     if (defined(config.hichecker_exists) && config.hichecker_exists) {

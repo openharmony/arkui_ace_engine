@@ -124,6 +124,13 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContextSafely()
     return currentContainer->GetPipelineContext();
 }
 
+RefPtr<PipelineBase> PipelineBase::GetCurrentContextSafelyWithCheck()
+{
+    auto currentContainer = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_RETURN(currentContainer, nullptr);
+    return currentContainer->GetPipelineContext();
+}
+
 double PipelineBase::GetCurrentDensity()
 {
     auto pipelineContext = PipelineContext::GetCurrentContextSafely();
@@ -226,14 +233,15 @@ void PipelineBase::SetRootSize(double density, float width, float height)
         }
         context->SetRootRect(width, height);
     };
-
-    auto container = Container::GetContainer(instanceId_);
-    auto settings = container->GetSettings();
-    if (settings.usePlatformAsUIThread && settings.useUIAsJSThread) {
+#ifdef NG_BUILD
+    if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         task();
     } else {
         taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUISetRootSize");
     }
+#else
+    taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUISetRootSize");
+#endif
 }
 
 void PipelineBase::SetFontScale(float fontScale)
@@ -523,6 +531,16 @@ bool PipelineBase::Dump(const std::vector<std::string>& params) const
         return true;
     }
     return OnDumpInfo(params);
+}
+
+bool PipelineBase::IsDestroyed()
+{
+    return destroyed_;
+}
+
+void PipelineBase::SetDestroyed()
+{
+    destroyed_ = true;
 }
 
 void PipelineBase::ForceLayoutForImplicitAnimation()
@@ -887,6 +905,7 @@ bool PipelineBase::MaybeRelease()
 void PipelineBase::Destroy()
 {
     CHECK_RUN_ON(UI);
+    destroyed_ = true;
     ClearImageCache();
     platformResRegister_.Reset();
     drawDelegate_.reset();
@@ -906,6 +925,12 @@ void PipelineBase::Destroy()
     etsCardTouchEventCallback_.clear();
     formLinkInfoMap_.clear();
     finishFunctions_.clear();
+    {
+        // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker
+        // thread.
+        std::lock_guard lock(densityChangeMutex_);
+        densityChangedCallbacks_.clear();
+    }
 }
 
 std::string PipelineBase::OnFormRecycle()
@@ -923,5 +948,12 @@ void PipelineBase::OnFormRecover(const std::string& statusData)
         return onFormRecover_(statusData);
     }
     LOGE("onFormRecover_ is null.");
+}
+
+void PipelineBase::SetUiDvsyncSwitch(bool on)
+{
+    if (window_) {
+        window_->SetUiDvsyncSwitch(on);
+    }
 }
 } // namespace OHOS::Ace

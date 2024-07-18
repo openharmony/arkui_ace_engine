@@ -143,13 +143,13 @@ RefPtr<FrameNode> SecurityComponentModelTestNg::CreateSecurityComponent(int32_t 
 {
     if (type == V2::LOCATION_BUTTON_ETS_TAG) {
         LocationButtonModelNG locationSc;
-        locationSc.Create(text, icon, backgroundType);
+        locationSc.Create(text, icon, backgroundType, false);
     } else if (type == V2::PASTE_BUTTON_ETS_TAG) {
         PasteButtonModelNG pasteSc;
-        pasteSc.Create(text, icon, backgroundType);
+        pasteSc.Create(text, icon, backgroundType, false);
     } else if (type == V2::SAVE_BUTTON_ETS_TAG) {
         SaveButtonModelNG saveSc;
-        saveSc.Create(text, icon, backgroundType);
+        saveSc.Create(text, icon, backgroundType, false);
     }
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     return AceType::DynamicCast<FrameNode>(element);
@@ -160,13 +160,13 @@ void SecurityComponentModelTestNg::CreateSecurityComponentNotFinish(int32_t text
 {
     if (type == V2::LOCATION_BUTTON_ETS_TAG) {
         LocationButtonModelNG locationSc;
-        locationSc.Create(text, icon, backgroundType);
+        locationSc.Create(text, icon, backgroundType, false);
     } else if (type == V2::PASTE_BUTTON_ETS_TAG) {
         PasteButtonModelNG pasteSc;
-        pasteSc.Create(text, icon, backgroundType);
+        pasteSc.Create(text, icon, backgroundType, false);
     } else if (type == V2::SAVE_BUTTON_ETS_TAG) {
         SaveButtonModelNG saveSc;
-        saveSc.Create(text, icon, backgroundType);
+        saveSc.Create(text, icon, backgroundType, false);
     }
 }
 
@@ -1703,6 +1703,20 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest004, TestSize
     ASSERT_EQ(SecurityComponentHandler::UnregisterSecurityComponent(noExistId), 0);
     ASSERT_EQ(SecurityComponentHandler::ReportSecurityComponentClickEvent(
         noExistId, frameNode, info, [] (int32_t) {}), -1);
+}
+
+/**
+ * @tc.name: SecurityComponentHandlerTest005
+ * @tc.desc: Test security component handler
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentHandlerTest005, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+
+    ASSERT_EQ(SecurityComponentHandler::CheckComponentCoveredStatus(frameNode->GetId()), false);
 }
 
 /**

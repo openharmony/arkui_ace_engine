@@ -403,9 +403,13 @@ HWTEST_F(SwiperIndicatorLayoutTestNg, CircleDotIndicatorLayoutAlgorithmMeasure00
      * @tc.steps: step1. create swiper and set parameters.
      */
     CreateWithItem([](SwiperModelNG model) {
+        model.Create(true);
         model.SetDirection(Axis::VERTICAL);
         model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
     });
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(SWIPER_WIDTH));
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(SWIPER_HEIGHT));
+    FlushLayoutTask(frameNode_);
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     indicatorPattern->OnModifyDone();
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
@@ -432,6 +436,7 @@ HWTEST_F(SwiperIndicatorLayoutTestNg, CircleDotIndicatorLayoutAlgorithmLayout001
      * @tc.steps: step1. create swiper and set parameters.
      */
     CreateWithItem([](SwiperModelNG model) {
+        model.Create(true);
         model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
     });
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
@@ -458,8 +463,12 @@ HWTEST_F(SwiperIndicatorLayoutTestNg, CircleDotIndicatorFlushLayoutTask001, Test
      * @tc.steps: step1. create swiper and set parameters.
      */
     CreateWithItem([](SwiperModelNG model) {
+        model.Create(true);
         model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
     });
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(SWIPER_WIDTH));
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(SWIPER_HEIGHT));
+    FlushLayoutTask(frameNode_);
 
     /**
      * @tc.steps: step2. call FlushLayoutTask.

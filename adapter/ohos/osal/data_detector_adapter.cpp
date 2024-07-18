@@ -33,16 +33,22 @@ namespace OHOS::Ace {
 constexpr int32_t AI_TEXT_MAX_LENGTH = 500;
 constexpr int32_t AI_TEXT_GAP = 100;
 constexpr int32_t AI_DELAY_TIME = 100;
-const std::pair<std::string, std::string> UI_EXTENSION_TYPE = { "ability.want.params.uiExtensionType", "sys/commonUI" };
+const std::pair<std::string, std::string> UI_EXTENSION_TYPE = { "ability.want.params.uiExtensionType",
+    "sys/visualExtension" };
 constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
 const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
     { TextDataDetectType::PHONE_NUMBER, "phoneNum" }, { TextDataDetectType::URL, "url" },
     { TextDataDetectType::EMAIL, "email" }, { TextDataDetectType::ADDRESS, "location" },
-    { TextDataDetectType::DATETIME, "datetime" }
+    { TextDataDetectType::DATE_TIME, "datetime" }
+};
+const std::unordered_map<std::string, TextDataDetectType> TEXT_DETECT_MAP_REVERSE = {
+    { "phoneNum", TextDataDetectType::PHONE_NUMBER }, { "url", TextDataDetectType::URL },
+    { "email", TextDataDetectType::EMAIL }, { "location", TextDataDetectType::ADDRESS },
+    { "datetime", TextDataDetectType::DATE_TIME }
 };
 
 bool DataDetectorAdapter::ShowUIExtensionMenu(
-    const AISpan& aiSpan, NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode)
+    const AISpan& aiSpan, NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode, bool isShowSelectText)
 {
     ModalUIExtensionCallbacks callbacks;
     callbacks.onResult = [onClickMenu = onClickMenu_](int32_t code, const AAFwk::Want& want) {
@@ -63,6 +69,7 @@ bool DataDetectorAdapter::ShowUIExtensionMenu(
     };
     AAFwk::Want want;
     want.SetElementName(uiExtensionBundleName_, uiExtensionAbilityName_);
+    want.SetParam("isShowSelectText", isShowSelectText);
     SetWantParamaters(aiSpan, want);
 
     uiExtNode_ = NG::UIExtensionModelNG::Create(want, callbacks);
@@ -70,6 +77,7 @@ bool DataDetectorAdapter::ShowUIExtensionMenu(
     auto onReceive = GetOnReceive(aiRect, targetNode);
     auto pattern = uiExtNode_->GetPattern<NG::UIExtensionPattern>();
     CHECK_NULL_RETURN(pattern, false);
+    pattern->SetModalFlag(false);
     pattern->SetOnReceiveCallback(std::move(onReceive));
     uiExtNode_->MarkModifyDone();
     return true;
@@ -90,6 +98,10 @@ std::function<void(const AAFwk::WantParams&)> DataDetectorAdapter::GetOnReceive(
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
+        const std::string& closeMenu = wantParams.GetStringParam("closeMenu");
+        if (closeMenu == "true") {
+            overlayManager->CloseUIExtensionMenu(targetNode->GetId());
+        }
         const std::string& action = wantParams.GetStringParam("action");
         if (!action.empty() && dataDetectorAdapter->onClickMenu_) {
             dataDetectorAdapter->onClickMenu_(action);
@@ -99,9 +111,7 @@ std::function<void(const AAFwk::WantParams&)> DataDetectorAdapter::GetOnReceive(
             auto abilityParams = wantParams.GetWantParams("abilityParams");
             dataDetectorAdapter->StartAbilityByType(abilityType, abilityParams);
         }
-        const std::string& closeMenu = wantParams.GetStringParam("closeMenu");
         if (closeMenu == "true") {
-            overlayManager->CloseUIExtensionMenu(targetNode->GetId());
             return;
         }
         const std::string& longestContent = wantParams.GetStringParam("longestContent");
@@ -159,7 +169,7 @@ void DataDetectorAdapter::SetWantParamaters(const AISpan& aiSpan, AAFwk::Want& w
     if (entityJson_.find(aiSpan.start) != entityJson_.end()) {
         want.SetParam("entityJson", entityJson_[aiSpan.start]);
     }
-    if (aiSpan.type == TextDataDetectType::DATETIME) {
+    if (aiSpan.type == TextDataDetectType::DATE_TIME) {
         want.SetParam("fullText", textForAI_);
         want.SetParam("offset", aiSpan.start);
     }
@@ -185,6 +195,43 @@ void DataDetectorAdapter::SetTextDetectTypes(const std::string& types)
     }
 }
 
+bool DataDetectorAdapter::ParseOriText(const std::unique_ptr<JsonValue>& entityJson, std::string& text)
+{
+    auto runtimeContext = Platform::AceContainer::GetRuntimeContext(Container::CurrentId());
+    CHECK_NULL_RETURN(runtimeContext, false);
+    if (runtimeContext->GetBundleName() != entityJson->GetString("bundleName")) {
+        return false;
+    }
+    auto aiSpanArray = entityJson->GetValue("entity");
+    if (aiSpanArray->IsNull() || !aiSpanArray->IsArray()) {
+        TAG_LOGW(AceLogTag::ACE_TEXT, "Error AI Entity.");
+        return false;
+    }
+
+    AISpan aiSpan;
+    for (int32_t i = 0; i < aiSpanArray->GetArraySize(); ++i) {
+        auto item = aiSpanArray->GetArrayItem(i);
+        aiSpan.content = item->GetString("entityContent");
+        aiSpan.type = TEXT_DETECT_MAP_REVERSE.at(item->GetString("entityType"));
+        aiSpan.start = item->GetInt("start");
+        aiSpan.end = item->GetInt("end");
+        aiSpanMap_[aiSpan.start] = aiSpan;
+    }
+    auto entityMenuServiceInfoJson = entityJson->GetValue("entityMenuServiceInfoJson");
+    if (!entityMenuServiceInfoJson->IsNull()) {
+        if (uiExtensionBundleName_.empty()) {
+            uiExtensionBundleName_ = entityMenuServiceInfoJson->GetString("bundlename");
+        }
+        if (uiExtensionAbilityName_.empty()) {
+            uiExtensionAbilityName_ = entityMenuServiceInfoJson->GetString("abilityname");
+        }
+    }
+    aiDetectInitialized_ = true;
+    text = entityJson->GetString("content");
+    textForAI_ = text;
+    return true;
+}
+
 void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectText)
 {
     TextDataDetectInfo info;
@@ -203,31 +250,29 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([result, weak, instanceID, startPos, info] {
-            ContainerScope scope(instanceID);
-            auto dataDetectorAdapter = weak.Upgrade();
-            CHECK_NULL_VOID(dataDetectorAdapter);
-            if (info.module != dataDetectorAdapter->textDetectTypes_) {
-                return;
-            }
-            dataDetectorAdapter->SetTextDetectResult(result);
-            dataDetectorAdapter->FireOnResult(result);
-            if (result.code != 0) {
-                TAG_LOGE(AceLogTag::ACE_TEXT, "Data detect error, error code: %{public}d", result.code);
-                return;
-            }
-            dataDetectorAdapter->ParseAIResult(result, startPos);
-            auto host = dataDetectorAdapter->GetHost();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
-        }, "ArkUITextParseAIResult");
+        uiTaskExecutor.PostTask(
+            [result, weak, instanceID, startPos, info] {
+                ContainerScope scope(instanceID);
+                auto dataDetectorAdapter = weak.Upgrade();
+                CHECK_NULL_VOID(dataDetectorAdapter);
+                if (info.module != dataDetectorAdapter->textDetectTypes_) {
+                    return;
+                }
+                dataDetectorAdapter->ParseAIResult(result, startPos);
+                auto host = dataDetectorAdapter->GetHost();
+                CHECK_NULL_VOID(host);
+                host->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+            },
+            "ArkUITextParseAIResult");
     };
 
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-    uiTaskExecutor.PostTask([info, textFunc] {
-        TAG_LOGI(AceLogTag::ACE_TEXT, "Start entity detect using AI");
-        DataDetectorMgr::GetInstance().DataDetect(info, textFunc);
-    }, "ArkUITextInitDataDetect");
+    uiTaskExecutor.PostTask(
+        [info, textFunc] {
+            TAG_LOGI(AceLogTag::ACE_TEXT, "Start entity detect using AI");
+            DataDetectorMgr::GetInstance().DataDetect(info, textFunc);
+        },
+        "ArkUITextInitDataDetect");
 }
 
 void DataDetectorAdapter::ParseAIResult(const TextDataDetectResult& result, int32_t startPos)
@@ -249,6 +294,7 @@ void DataDetectorAdapter::ParseAIResult(const TextDataDetectResult& result, int3
 
     if (startPos + AI_TEXT_MAX_LENGTH >= static_cast<int32_t>(StringUtils::ToWstring(textForAI_).length())) {
         aiDetectInitialized_ = true;
+        auto entityJsonArray = JsonUtil::CreateArray(true);
         // process with overlapping entities, leaving only the earlier ones
         int32_t preEnd = 0;
         auto aiSpanIterator = aiSpanMap_.begin();
@@ -259,8 +305,20 @@ void DataDetectorAdapter::ParseAIResult(const TextDataDetectResult& result, int3
             } else {
                 preEnd = aiSpan.end;
                 ++aiSpanIterator;
+                auto aiSpanJson = JsonUtil::Create(true);
+                aiSpanJson->Put("start", aiSpan.start);
+                aiSpanJson->Put("end", aiSpan.end);
+                aiSpanJson->Put("entityContent", aiSpan.content.c_str());
+                aiSpanJson->Put("entityType", TEXT_DETECT_MAP.at(aiSpan.type).c_str());
+                entityJsonArray->Put(aiSpanJson);
             }
         }
+        auto resultJson = JsonUtil::Create(true);
+        resultJson->Put("entity", entityJsonArray);
+        resultJson->Put("code", result.code);
+        resultJson->Put("entityMenuServiceInfoJson", entityMenuServiceInfoJson);
+        SetTextDetectResult(result);
+        FireOnResult(resultJson->ToString());
     }
 }
 
@@ -331,8 +389,8 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
         do {
             std::string detectText = StringUtils::ToString(
                 wTextForAI.substr(startPos, std::min(AI_TEXT_MAX_LENGTH, wTextForAILength - startPos)));
-            bool isSameDetectText = detectTextIdx < dataDetectorAdapter->detectTexts.size() &&
-                                    detectText == dataDetectorAdapter->detectTexts[detectTextIdx];
+            bool isSameDetectText = detectTextIdx < dataDetectorAdapter->detectTexts_.size() &&
+                                    detectText == dataDetectorAdapter->detectTexts_[detectTextIdx];
             while (!aiSpanMap.empty() && aiSpanMapIt != aiSpanMap.end() && aiSpanMapIt->first >= 0 &&
                    aiSpanMapIt->first < std::min(wTextForAILength, startPos + AI_TEXT_MAX_LENGTH - AI_TEXT_GAP)) {
                 auto aiContent = aiSpanMapIt->second.content;
@@ -346,10 +404,10 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
             }
             if (!isSameDetectText) {
                 dataDetectorAdapter->InitTextDetect(startPos, detectText);
-                if (detectTextIdx < dataDetectorAdapter->detectTexts.size()) {
-                    dataDetectorAdapter->detectTexts[detectTextIdx] = detectText;
+                if (detectTextIdx < dataDetectorAdapter->detectTexts_.size()) {
+                    dataDetectorAdapter->detectTexts_[detectTextIdx] = detectText;
                 } else {
-                    dataDetectorAdapter->detectTexts.emplace_back(detectText);
+                    dataDetectorAdapter->detectTexts_.emplace_back(detectText);
                 }
             }
             ++detectTextIdx;
@@ -374,6 +432,8 @@ void DataDetectorAdapter::StartAITask()
     std::map<int32_t, AISpan> aiSpanMapCopy;
     if (!typeChanged_) {
         aiSpanMapCopy = aiSpanMap_;
+    } else {
+        detectTexts_.clear();
     }
     aiSpanMap_.clear();
     typeChanged_ = false;

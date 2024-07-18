@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_NODE_CONTENT_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_NODE_CONTENT_H
 
 #include <functional>
 #include <list>
@@ -49,13 +50,25 @@ public:
         onDetachCallback_ = std::move(callback);
     }
 
+    void* GetUserData() const
+    {
+        return userData_;
+    }
+
+    void SetUserData(void* userData)
+    {
+        userData_ = userData;
+    }
+
 private:
     WeakPtr<UINode> nodeSlot_;
     std::list<RefPtr<UINode>> children_;
     std::function<void()> onAttachCallback_;
     std::function<void()> onDetachCallback_;
+    void* userData_ = nullptr;
 
     bool onMainTree_ = false;
 };
 
 } // namespace OHOS::Ace::NG
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_NODE_CONTENT_H

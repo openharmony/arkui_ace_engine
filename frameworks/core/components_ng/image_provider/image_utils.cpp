@@ -20,7 +20,7 @@ namespace OHOS::Ace::NG {
 void ImageUtils::PostTask(
     std::function<void()>&& task, TaskExecutor::TaskType taskType, const char* taskTypeName, PriorityType priorityType)
 {
-    auto taskExecutor = Container::CurrentTaskExecutor();
+    auto taskExecutor = Container::CurrentTaskExecutorSafelyWithCheck();
     if (!taskExecutor) {
         LOGE("taskExecutor is null when try post task to %{public}s", taskTypeName);
         return;

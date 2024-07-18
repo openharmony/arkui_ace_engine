@@ -33,18 +33,24 @@ void ListItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc, V2::
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto deepRender = [nodeId, deepRenderFunc = std::move(deepRenderFunc)]() -> RefPtr<UINode> {
-        CHECK_NULL_RETURN(deepRenderFunc, nullptr);
-        ScopedViewStackProcessor scopedViewStackProcessor;
-        deepRenderFunc(nodeId);
-        return ViewStackProcessor::GetInstance()->Finish();
-    };
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::LIST_ITEM_ETS_TAG, nodeId);
-    auto frameNode = ScrollableItemPool::GetInstance().Allocate(V2::LIST_ITEM_ETS_TAG, nodeId,
-        [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender)), itemStyle = listItemStyle]() {
-            return AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, itemStyle);
-        });
-    stack->Push(frameNode);
+    if (deepRenderFunc) {
+        auto deepRender = [nodeId, deepRenderFunc = std::move(deepRenderFunc)]() -> RefPtr<UINode> {
+            CHECK_NULL_RETURN(deepRenderFunc, nullptr);
+            ScopedViewStackProcessor scopedViewStackProcessor;
+            deepRenderFunc(nodeId);
+            return ViewStackProcessor::GetInstance()->Finish();
+        };
+        auto frameNode = ScrollableItemPool::GetInstance().Allocate(V2::LIST_ITEM_ETS_TAG, nodeId,
+            [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender)), itemStyle = listItemStyle]() {
+                return AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, itemStyle);
+            });
+        stack->Push(frameNode);
+    } else {
+        auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
+            [listItemStyle]() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, listItemStyle); });
+        stack->Push(frameNode);
+    }
 }
 
 void ListItemModelNG::Create()
@@ -54,6 +60,15 @@ void ListItemModelNG::Create()
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
         []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
     stack->Push(frameNode);
+}
+
+void ListItemModelNG::OnDidPop()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->OnDidPop();
 }
 
 RefPtr<FrameNode> ListItemModelNG::CreateFrameNode(int32_t nodeId)
@@ -234,6 +249,14 @@ void ListItemModelNG::SetSwiperAction(FrameNode* frameNode, std::function<void()
     CHECK_NULL_VOID(pattern);
     pattern->SetOffsetChangeCallBack(std::move(onOffsetChangeFunc));
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EdgeEffect, edgeEffect, frameNode);
+}
+
+void ListItemModelNG::SetSelectCallback(FrameNode* frameNode, OnSelectFunc&& selectCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelect(std::move(selectCallback));
 }
 
 } // namespace OHOS::Ace::NG

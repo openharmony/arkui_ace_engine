@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/inspector.h"
 
+#include <unistd.h>
 #include <unordered_set>
 
 #include "base/memory/ace_type.h"
@@ -67,7 +68,7 @@ const char INSPECTOR_VISIBILITY[] = "visibility";
 const uint32_t LONG_PRESS_DELAY = 1000;
 RectF deviceRect;
 
-RefPtr<UINode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::string& key)
+RefPtr<UINode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::string& key, bool notDetach = false)
 {
     std::queue<RefPtr<UINode>> elements;
     elements.push(root);
@@ -79,7 +80,7 @@ RefPtr<UINode> GetInspectorByKey(const RefPtr<FrameNode>& root, const std::strin
             return current;
         }
 
-        const auto& children = current->GetChildren();
+        const auto& children = current->GetChildren(notDetach);
         for (const auto& child : children) {
             elements.push(child);
         }
@@ -343,6 +344,9 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
     auto jsonObject = JsonUtil::Create(true);
     parent->ToJsonValue(jsonObject, filter);
     jsonNode->PutRef(INSPECTOR_ATTRS, std::move(jsonObject));
+    std::string jsonNodeStr = jsonNode->ToString();
+    ConvertIllegalStr(jsonNodeStr);
+    auto jsonNodeNew = JsonUtil::ParseJsonString(jsonNodeStr);
     std::vector<RefPtr<NG::UINode>> children;
     for (const auto& item : parent->GetChildren()) {
         GetFrameNodeChildren(item, children, pageId, isLayoutInspector);
@@ -359,13 +363,10 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
             GetInspectorChildren(uiNode, jsonChildrenArray, pageId, isActive, filter, depth - 1, isLayoutInspector);
         }
         if (jsonChildrenArray->GetArraySize()) {
-            jsonNode->PutRef(INSPECTOR_CHILDREN, std::move(jsonChildrenArray));
+            jsonNodeNew->PutRef(INSPECTOR_CHILDREN, std::move(jsonChildrenArray));
         }
     }
-    std::string jsonChildStr = jsonNode->ToString();
-    ConvertIllegalStr(jsonChildStr);
-    auto jsonChild = JsonUtil::ParseJsonString(jsonChildStr);
-    jsonNodeArray->PutRef(std::move(jsonChild));
+    jsonNodeArray->PutRef(std::move(jsonNodeNew));
 }
 #endif
 
@@ -410,6 +411,12 @@ std::string GetInspectorInfo(std::vector<RefPtr<NG::UINode>> children, int32_t p
         auto jsonTree = JsonUtil::Create(true);
         jsonTree->Put("type", "root");
         jsonTree->PutRef("content", std::move(jsonRoot));
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        if (pipeline) {
+            jsonTree->Put("VsyncID", (int32_t)pipeline->GetFrameCount());
+            jsonTree->Put("ProcessID", getpid());
+            jsonTree->Put("WindowID", (int32_t)pipeline->GetWindowId());
+        }
         return jsonTree->ToString();
     }
 
@@ -419,11 +426,11 @@ std::string GetInspectorInfo(std::vector<RefPtr<NG::UINode>> children, int32_t p
 
 std::set<RefPtr<FrameNode>> Inspector::offscreenNodes;
 
-RefPtr<FrameNode> Inspector::GetFrameNodeByKey(const std::string& key)
+RefPtr<FrameNode> Inspector::GetFrameNodeByKey(const std::string& key, bool notDetach)
 {
     if (!offscreenNodes.empty()) {
         for (auto node : offscreenNodes) {
-            auto frameNode = AceType::DynamicCast<FrameNode>(GetInspectorByKey(node, key));
+            auto frameNode = AceType::DynamicCast<FrameNode>(GetInspectorByKey(node, key, notDetach));
             if (frameNode) {
                 return frameNode;
             }
@@ -472,7 +479,7 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key, const Inspe
 
 void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
 {
-    auto frameNode = Inspector::GetFrameNodeByKey(key);
+    auto frameNode = Inspector::GetFrameNodeByKey(key, true);
     if (!frameNode) {
         LOGW("Can't find a component that id or key are %{public}s, Please check your parameters are correct",
             key.c_str());
@@ -490,6 +497,9 @@ void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     rectangle.screenRect = pipeline->GetCurrentWindowRect();
+    LOGD("GetRectangleById Id = %{public}s localOffset = %{public}s windowOffset = %{public}s screenRect = %{public}s",
+        key.c_str(), rectangle.localOffset.ToString().c_str(), rectangle.windowOffset.ToString().c_str(),
+        rectangle.screenRect.ToString().c_str());
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     Matrix4 defMatrix4 = Matrix4::CreateIdentity();
@@ -603,10 +613,9 @@ std::string Inspector::GetInspectorOfNode(RefPtr<NG::UINode> node)
     CHECK_NULL_RETURN(node, jsonRoot->ToString());
     auto pageId = context->GetStageManager()->GetLastPage()->GetPageId();
     auto jsonNodeArray = JsonUtil::CreateArray(true);
-    GetInspectorChildren(node, jsonNodeArray, pageId, true);
+    GetInspectorChildren(node, jsonNodeArray, pageId, true, InspectorFilter(), 0);
     if (jsonNodeArray->GetArraySize()) {
         jsonRoot = jsonNodeArray->GetArrayItem(0);
-        jsonRoot->Delete(INSPECTOR_CHILDREN);
         GetContextInfo(context, jsonRoot);
     }
 

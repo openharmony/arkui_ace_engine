@@ -36,6 +36,10 @@ declare class __JSBaseNode__ {
   updateEnd(): void;
 }
 
+if (!globalThis.__hasUIFramework__) {
+  globalThis.requireNapi('arkui.mock');
+}
+
 class BaseNode extends __JSBaseNode__ {
   protected instanceId_?: number;
   protected nodePtr_: NodePtr;
@@ -45,7 +49,7 @@ class BaseNode extends __JSBaseNode__ {
     if (uiContext === undefined) {
       throw Error('Node constructor error, param uiContext error');
     } else {
-      if (!(typeof uiContext === "object") || !("instanceId_" in uiContext)) {
+      if (!(typeof uiContext === 'object') || !('instanceId_' in uiContext)) {
         throw Error(
           'Node constructor error, param uiContext is invalid'
         );
@@ -56,7 +60,7 @@ class BaseNode extends __JSBaseNode__ {
   public getInstanceId() {
     return this.instanceId_;
   }
-  updateInstance(uiContext: UIContext) {
+  updateInstance(uiContext: UIContext): void {
       this.instanceId_ = uiContext.instanceId_;
   }
 }

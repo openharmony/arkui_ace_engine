@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 20212022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,7 +81,6 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextArea>::StaticMethod("onEditChange", &JSTextField::SetOnEditChanged);
     JSClass<JSTextArea>::StaticMethod("copyOption", &JSTextField::SetCopyOption);
-    JSClass<JSTextArea>::StaticMethod("textMenuOptions", &JSTextField::JsMenuOptionsExtension);
     JSClass<JSTextArea>::StaticMethod("foregroundColor", &JSTextField::SetForegroundColor);
     JSClass<JSTextArea>::StaticMethod("enableKeyboardOnFocus", &JSTextField::SetEnableKeyboardOnFocus);
     JSClass<JSTextArea>::StaticMethod("selectionMenuHidden", &JSTextField::SetSelectionMenuHidden);
@@ -109,6 +108,8 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("onDidInsert", &JSTextField::OnDidInsertValue);
     JSClass<JSTextArea>::StaticMethod("onWillDelete", &JSTextField::OnWillDelete);
     JSClass<JSTextArea>::StaticMethod("onDidDelete", &JSTextField::OnDidDelete);
+    JSClass<JSTextArea>::StaticMethod("editMenuOptions", &JSTextField::EditMenuOptions);
+    JSClass<JSTextArea>::StaticMethod("enablePreviewText", &JSTextField::SetEnablePreviewText);
     JSClass<JSTextArea>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

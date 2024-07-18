@@ -81,7 +81,27 @@ SizeF TextInputResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index
     auto geometryNode = childWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, size);
     return geometryNode->GetFrameSize();
-} // TextInputResponseArea end
+}
+
+SizeF TextInputResponseArea::GetFrameSize(bool withSafeArea)
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, SizeF(0, 0));
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, SizeF(0, 0));
+    return geometryNode->GetFrameSize(withSafeArea);
+}
+
+Alignment TextInputResponseArea::GetStackAlignment(const TextDirection& userDirection)
+{
+    bool isSysRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if ((isSysRtl && userDirection == TextDirection::LTR) ||
+        (!isSysRtl && userDirection == TextDirection::RTL)) {
+        return Alignment::CENTER_RIGHT;
+    }
+    return Alignment::CENTER_LEFT;
+}
+// TextInputResponseArea end
 
 // PasswordResponseArea begin
 void PasswordResponseArea::InitResponseArea()
@@ -123,7 +143,9 @@ RefPtr<FrameNode> PasswordResponseArea::CreateNode()
     auto stackLayoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_RETURN(stackLayoutProperty, nullptr);
     stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(hotZoneSize), std::nullopt));
-    stackLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    stackLayoutProperty->UpdateAlignment(GetStackAlignment(layoutProperty->GetLayoutDirection()));
     AddEvent(stackNode);
     stackNode->MarkModifyDone();
 
@@ -180,11 +202,16 @@ void PasswordResponseArea::AddEvent(const RefPtr<FrameNode>& node)
         CHECK_NULL_VOID(textfield);
         textfield->RestoreDefaultMouseState();
     };
+    auto touchTask = [weak = WeakClaim(this)](TouchEventInfo& info) {
+        info.SetStopPropagation(true);
+    };
+
     auto inputHub = node->GetOrCreateInputEventHub();
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnMouseEvent(mouseEvent);
     gesture->SetLongPressEvent(MakeRefPtr<LongPressEvent>(std::move(longPressCallback)));
     gesture->AddClickEvent(MakeRefPtr<ClickEvent>(std::move(clickCallback)));
+    gesture->AddTouchEvent(MakeRefPtr<TouchEventImpl>(std::move(touchTask)));
 }
 
 void PasswordResponseArea::Refresh()
@@ -194,6 +221,16 @@ void PasswordResponseArea::Refresh()
         InitResponseArea();
         return;
     }
+
+    auto textFieldPattern = hostPattern_.Upgrade();
+    if (textFieldPattern && stackNode_) {
+        auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+        auto stackLayoutProperty = stackNode_->GetLayoutProperty<LayoutProperty>();
+        if (stackLayoutProperty && layoutProperty) {
+            stackLayoutProperty->UpdateAlignment(GetStackAlignment(layoutProperty->GetLayoutDirection()));
+        }
+    }
+
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     auto currentSrc = imageLayoutProperty->GetImageSourceInfoValue().GetSrc();
@@ -418,14 +455,33 @@ SizeF CleanNodeResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index
     return TextInputResponseArea::Measure(layoutWrapper, index);
 }
 
-void CleanNodeResponseArea::Layout(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth)
+bool CleanNodeResponseArea::IsShowClean()
 {
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_RETURN(textFieldPattern, false);
+    return textFieldPattern->IsShowCancelButtonMode();
+}
+
+void CleanNodeResponseArea::Layout(LayoutWrapper *layoutWrapper, int32_t index, float &nodeWidth)
+{
+    if (!IsShowClean()) {
+        return;
+    }
     LayoutChild(layoutWrapper, index, nodeWidth);
 }
 
 OffsetF CleanNodeResponseArea::GetChildOffset(SizeF parentSize, RectF contentRect, SizeF childSize, float nodeWidth)
 {
-    return OffsetF(parentSize.Width() - childSize.Width() - nodeWidth, 0);
+    auto textFieldPattern = hostPattern_.Upgrade();
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    if (isRTL) {
+        return OffsetF(nodeWidth, 0);
+    } else {
+        return OffsetF(parentSize.Width() - childSize.Width() - nodeWidth, 0);
+    }
 }
 
 const RefPtr<FrameNode> CleanNodeResponseArea::GetFrameNode()
@@ -440,7 +496,11 @@ RefPtr<FrameNode> CleanNodeResponseArea::CreateNode()
     auto stackLayoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_RETURN(stackLayoutProperty, nullptr);
     stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), std::nullopt));
-    stackLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
+    auto textFieldPattern = hostPattern_.Upgrade();
+    CHECK_NULL_RETURN(textFieldPattern, nullptr);
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    stackLayoutProperty->UpdateAlignment(GetStackAlignment(layoutProperty->GetLayoutDirection()));
     stackNode->MarkModifyDone();
     auto cleanNode = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
@@ -534,10 +594,19 @@ void CleanNodeResponseArea::ClearArea()
     CHECK_NULL_VOID(cleanNode_);
     host->RemoveChildAndReturnIndex(cleanNode_);
     cleanNode_.Reset();
+    areaRect_.Reset();
 }
 
 void CleanNodeResponseArea::Refresh()
 {
+    auto textFieldPattern = hostPattern_.Upgrade();
+    if (textFieldPattern && cleanNode_) {
+        auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+        auto stackLayoutProperty = cleanNode_->GetLayoutProperty<LayoutProperty>();
+        if (layoutProperty && stackLayoutProperty) {
+            stackLayoutProperty->UpdateAlignment(GetStackAlignment(layoutProperty->GetLayoutDirection()));
+        }
+    }
     LoadingImageProperty();
     auto info = CreateImageSourceInfo();
     CHECK_NULL_VOID(cleanNode_);

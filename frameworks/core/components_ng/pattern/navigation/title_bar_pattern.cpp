@@ -123,6 +123,24 @@ void ApplyImageSourceInfo(const RefPtr<FrameNode>& backButtonNode,
     }
 }
 
+void ApplyThemeIconSize(RefPtr<TextLayoutProperty>& symbolProperty)
+{
+    CHECK_NULL_VOID(symbolProperty);
+    auto theme = NavigationGetTheme();
+    if (theme) {
+        symbolProperty->UpdateFontSize(theme->GetIconWidth());
+    }
+}
+
+void UpdateSymbolEffect(RefPtr<TextLayoutProperty> symbolProperty, bool isActive)
+{
+    CHECK_NULL_VOID(symbolProperty);
+    auto symbolEffectOptions = SymbolEffectOptions(SymbolEffectType::BOUNCE);
+    symbolEffectOptions.SetIsTxtActive(isActive);
+    symbolEffectOptions.SetIsTxtActiveSource(0);
+    symbolProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+}
+
 void UpdateSymbolBackButton(const RefPtr<FrameNode>& backButtonNode, const RefPtr<FrameNode>& backButtonIconNode,
     const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty)
 {
@@ -134,11 +152,12 @@ void UpdateSymbolBackButton(const RefPtr<FrameNode>& backButtonNode, const RefPt
         CHECK_NULL_VOID(symbolProperty);
         symbolProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
         if (theme) {
-            symbolProperty->UpdateFontSize(theme->GetIconWidth());
             symbolProperty->UpdateSymbolColorList({ theme->GetIconColor() });
         }
         // User-defined color overrides the default color of the theme
         backIconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(backButtonIconNode)));
+        ApplyThemeIconSize(symbolProperty);
+        UpdateSymbolEffect(symbolProperty, false);
         backButtonIconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     } else if (IsImageBackIcon(titleBarLayoutProperty)) {
         // symbol -> image
@@ -215,10 +234,11 @@ void UpdateImageBackButton(const RefPtr<FrameNode>& backButtonNode, const RefPtr
         CHECK_NULL_VOID(symbolProperty);
         symbolProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
         if (theme) {
-            symbolProperty->UpdateFontSize(theme->GetIconWidth());
             symbolProperty->UpdateSymbolColorList({ theme->GetIconColor() });
         }
         backIconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(symbolNode)));
+        ApplyThemeIconSize(symbolProperty);
+        UpdateSymbolEffect(symbolProperty, false);
         symbolNode->MountToParent(backButtonNode);
         symbolNode->MarkDirtyNode();
         symbolNode->MarkModifyDone();
@@ -298,10 +318,11 @@ void MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
         textHeightAdaptivePolicy = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
     }
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
-        titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_SUBTITLE_FONT_SIZE);
-        titleLayoutProperty->UpdateAdaptMaxFontSize(subTitleSize);
         titleLayoutProperty->UpdateHeightAdaptivePolicy(textHeightAdaptivePolicy);
     }
+    titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_SUBTITLE_FONT_SIZE);
+    titleLayoutProperty->UpdateAdaptMaxFontSize(subTitleSize);
+    titleLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
 
     subtitleNode->MarkModifyDone();
 }
@@ -402,6 +423,7 @@ void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
 
     titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_TITLE_FONT_SIZE);
     titleLayoutProperty->UpdateHeightAdaptivePolicy(textHeightAdaptivePolicy);
+    titleLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
     auto maxLines = hostNode->GetSubtitle() ? 1 : TITLEBAR_MAX_LINES;
     titleLayoutProperty->UpdateMaxLines(maxLines);
     if (currentFontSize != titleLayoutProperty->GetFontSizeValue(Dimension(0)) ||
@@ -986,7 +1008,7 @@ float TitleBarPattern::OnCoordScrollUpdate(float offset)
     }
     UpdateTitleBarByCoordScroll(titleBarOffset);
     coordScrollFinalOffset_ = titleBarOffset;
-    auto barStyle = options_.bgOptions.barStyle.value_or(BarStyle::STANDARD);
+    auto barStyle = options_.brOptions.barStyle.value_or(BarStyle::STANDARD);
     if (barStyle == BarStyle::STACK) {
         offsetHandled = 0.0f;
     }
@@ -1074,10 +1096,6 @@ void TitleBarPattern::OnColorConfigurationUpdate()
         backButton = AceType::DynamicCast<FrameNode>(backButton->GetChildren().front());
         CHECK_NULL_VOID(backButton);
     }
-    auto backButtonImgNode = AceType::DynamicCast<FrameNode>(backButton->GetChildren().front());
-    CHECK_NULL_VOID(backButtonImgNode);
-    auto backButtonImgRender = backButtonImgNode->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(backButtonImgRender);
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     auto iconColor = theme->GetBackButtonIconColor();
@@ -1093,7 +1111,13 @@ void TitleBarPattern::OnColorConfigurationUpdate()
         renderContext->UpdateBackgroundColor(backButtonColor);
         backButton->MarkModifyDone();
     }
-    backButtonImgRender->UpdateSvgFillColor(iconColor);
+    auto backButtonImgNode = AceType::DynamicCast<FrameNode>(backButton->GetChildren().front());
+    CHECK_NULL_VOID(backButtonImgNode);
+    if (backButtonImgNode->GetTag() == V2::IMAGE_ETS_TAG) {
+        auto backButtonImgRender = backButtonImgNode->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(backButtonImgRender);
+        backButtonImgRender->UpdateSvgFillColor(iconColor);
+    }
     backButtonImgNode->MarkModifyDone();
 }
 
@@ -1201,26 +1225,6 @@ void TitleBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowS
         MountMenu(titleBarNode, true);
         titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     } while (0);
-    bool isTitleMenuNodeShow = false;
-    if (isTitleMenuNodeShow == titleBarNode->IsTitleMenuNodeShowing()) {
-        return;
-    }
-    if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::RESIZE) {
-        isTitleMenuNodeShow = titleBarNode->IsTitleMenuNodeShowing();
-    }
-    if (titleBarNode->GetMenu()) {
-        auto buttonNode = titleBarNode->GetMenu()->GetLastChild();
-        CHECK_NULL_VOID(buttonNode);
-        auto barItemNode = buttonNode->GetFirstChild();
-        CHECK_NULL_VOID(barItemNode);
-        auto barItemFrameNode = AceType::DynamicCast<BarItemNode>(barItemNode);
-        CHECK_NULL_VOID(barItemFrameNode);
-        if (barItemFrameNode->IsMoreItemNode() && isTitleMenuNodeShow) {
-            auto eventHub = barItemFrameNode->GetEventHub<BarItemEventHub>();
-            CHECK_NULL_VOID(eventHub);
-            eventHub->FireItemAction();
-        }
-    }
 }
 
 void TitleBarPattern::UpdateBackgroundStyle(RefPtr<FrameNode>& host)

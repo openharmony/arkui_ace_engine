@@ -35,6 +35,12 @@ public:
     void SetSearchIconColor(const Color& color) override;
     void SetSearchSrcPath(
         const std::string& src, const std::string& bundleName, const std::string& moduleName) override;
+    void SetSearchSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol) override;
+    void SetSearchDefaultIcon() override;
+    void SetSearchImageIcon(NG::IconOptions& iconOptions) override;
+    void SetCancelSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol) override;
+    void SetCancelDefaultIcon() override;
+    void SetCancelImageIcon(NG::IconOptions& iconOptions) override;
     void SetRightIconSrcPath(const std::string& src) override;
     void SetCancelButtonStyle(CancelButtonStyle cancelButtonStyle) override;
     void SetCancelIconSize(const Dimension& value) override;
@@ -47,10 +53,9 @@ public:
     void SetTextColor(const Color& color) override;
     void SetTextAlign(const TextAlign& textAlign) override;
     void SetCopyOption(const CopyOptions& copyOptions) override;
-    void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems) override;
     void SetHeight(const Dimension& height) override;
     void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override;
-    void SetOnChange(std::function<void(const std::string&)>&& onChange) override;
+    void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& onChange) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     void SetOnScroll(std::function<void(float, float)>&& func) override;
     void SetOnCopy(std::function<void(const std::string&)>&& func) override;
@@ -82,6 +87,9 @@ public:
     void UpdateInspectorId(const std::string& key) override;
     void SetDragPreviewOptions(const NG::DragPreviewOption option) override;
     void SetSelectedBackgroundColor(const Color& value) override;
+    void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
+    void SetEnablePreviewText(bool enablePreviewText) override;
     static RefPtr<SearchNode> CreateFrameNode(int32_t nodeId);
     static void SetTextValue(FrameNode* frameNode, const std::optional<std::string>& value);
     static void SetPlaceholder(FrameNode* frameNode, const std::optional<std::string>& placeholder);
@@ -97,6 +105,7 @@ public:
     static void SetSearchIconSize(FrameNode* frameNode, const Dimension& value);
     static void SetSearchSrcPath(FrameNode* frameNode, const std::string& src);
     static void SetSearchIconColor(FrameNode* frameNode, const Color& color);
+    static void SetSearchImageIcon(FrameNode* frameNode, IconOptions& iconOptions);
     static void SetSearchButton(FrameNode* frameNode, const std::string& text);
     static void SetSearchButtonFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetSearchButtonFontColor(FrameNode* frameNode, const Color& color);
@@ -112,6 +121,7 @@ public:
     static void SetCancelIconColor(FrameNode* frameNode, const Color& color);
     static void SetCancelIconSize(FrameNode* frameNode, const Dimension& value);
     static void SetCancelButtonStyle(FrameNode* frameNode, CancelButtonStyle style);
+    static void SetCancelImageIcon(FrameNode* frameNode, IconOptions& iconOptions);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
     static void SetSearchEnterKeyType(FrameNode* frameNode, TextInputAction value);
     static void SetId(FrameNode* frameNode, const std::string& key);
@@ -123,7 +133,7 @@ public:
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
     static void SetOnSubmit(FrameNode* frameNode, std::function<void(const std::string&)>&& onSubmit);
-    static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&)>&& onChange);
+    static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&, PreviewText&)>&& onChange);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnCut(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnPasteWithEvent(FrameNode* frameNode,
@@ -142,6 +152,7 @@ public:
     static void SetOnDidInsertValueEvent(FrameNode* frameNode, std::function<void(const InsertValueInfo&)>&& func);
     static void SetOnWillDeleteEvent(FrameNode* frameNode, std::function<bool(const DeleteValueInfo&)>&& func);
     static void SetOnDidDeleteEvent(FrameNode* frameNode, std::function<void(const DeleteValueInfo&)>&& func);
+    static void SetEnablePreviewText(FrameNode* frameNode, bool enablePreviewText);
 
 private:
     static RefPtr<SearchNode> CreateSearchNode(int32_t nodeId, const std::optional<std::string>& value,
@@ -153,6 +164,9 @@ private:
     static RefPtr<SearchNode> GetOrCreateSearchNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     RefPtr<FrameNode> GetSearchTextFieldFrameNode() const;
+    static const Dimension ConvertTextFontScaleValue(const Dimension& fontSizeValue);
+    static void UpdateTextFieldFontValue(const RefPtr<FrameNode>& frameNode);
+    static void TextFieldUpdateContext(const RefPtr<FrameNode>& frameNode);
 };
 
 } // namespace OHOS::Ace::NG

@@ -174,8 +174,8 @@ void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset) con
             }
             arcData.progressValue = arcData.totalValue * date_->Get();
             arcData.drawAngle = arcData.progressValue / arcData.maxValue * WHOLE_CIRCLE;
+            arcData.drawAngle = arcData.lastAngle + std::max(arcData.drawAngle - arcData.lastAngle, MIN_CIRCLE);
             arcData.drawAngle = std::min(arcData.drawAngle, WHOLE_CIRCLE);
-            arcData.drawAngle = std::max(arcData.drawAngle, MIN_CIRCLE);
 
             arcData.gradientPointBase = totalValuePre / arcData.totalValue;
 
@@ -208,8 +208,8 @@ void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset) con
         }
         arcData.progressValue = arcData.totalValue * date_->Get();
         arcData.drawAngle = arcData.progressValue / arcData.maxValue * WHOLE_CIRCLE;
+        arcData.drawAngle = arcData.lastAngle + std::max(arcData.drawAngle - arcData.lastAngle, MIN_CIRCLE);
         arcData.drawAngle = std::min(arcData.drawAngle, WHOLE_CIRCLE);
-        arcData.drawAngle = std::max(arcData.drawAngle, MIN_CIRCLE);
 
         arcData.gradientPointBase = totalValuePre / arcData.totalValue;
 
@@ -346,6 +346,9 @@ void DataPanelModifier::PaintLinearProgress(DrawingContext& context, OffsetF off
             continue;
         }
         segmentWidthSum += values_[i]->Get();
+        if (GreatOrEqual(segmentWidthSum, max_->Get())) {
+            break;
+        }
         ++segmentSize;
     }
 

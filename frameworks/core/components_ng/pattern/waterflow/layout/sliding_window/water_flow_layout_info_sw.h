@@ -26,7 +26,7 @@
 namespace OHOS::Ace::NG {
 
 /**
- * @brief Layout Data structure for Sliding Window version of WaterFlowLayout
+ * @brief Layout data structure for Sliding Window version of WaterFlowLayout
  */
 class WaterFlowLayoutInfoSW : public WaterFlowLayoutInfoBase {
     DECLARE_ACE_TYPE(WaterFlowLayoutInfoSW, WaterFlowLayoutInfoBase);
@@ -76,7 +76,10 @@ public:
     int32_t GetMainCount() const override;
     int32_t GetCrossCount() const override
     {
-        return lanes_.size();
+        if (lanes_.empty()) {
+            return 0;
+        }
+        return lanes_[0].size();
     }
 
     float CurrentPos() const override
@@ -90,12 +93,15 @@ public:
 
     bool IsMisaligned() const override;
 
+    void InitSegments(const std::vector<WaterFlowSections::Section>& sections, int32_t start) override;
+
     /**
-     * @brief reset layout data before performing a jump.
+     * @brief reset layout data and setting up a base position for each lane.
      *
      * @param laneBasePos base value for lane's start&end position.
+     * When not provided, lane positions are not modified.
      */
-    void ResetBeforeJump(float laneBasePos);
+    void ResetWithLaneOffset(std::optional<float> laneBasePos);
 
     void BeginUpdate()
     {
@@ -108,7 +114,7 @@ public:
      * @param mainSize main-axis length of the viewport.
      * @param mainGap main-axis gap between items.
      */
-    void Sync(int32_t itemCnt, float mainSize, float mainGap);
+    void Sync(int32_t itemCnt, float mainSize, const std::vector<float>& mainGap);
 
     /**
      * @brief Calculates distance from the item's top edge to the top of the viewport.
@@ -143,27 +149,60 @@ public:
      * @return maximum end position of items in lanes_.
      */
     float EndPos() const;
+    inline float EndPosWithMargin() const
+    {
+        return EndPos() + BotMargin();
+    }
     /**
      * @return minimum start position of items in lanes_.
      */
     float StartPos() const;
+    inline float StartPosWithMargin() const
+    {
+        return StartPos() - TopMargin();
+    }
 
-    void ClearDataFrom(int32_t idx, float mainGap);
+    void ClearDataFrom(int32_t idx, const std::vector<float>& mainGap);
+
+    inline float TopMargin() const
+    {
+        if (margins_.empty()) {
+            return 0.0f;
+        }
+        return (axis_ == Axis::VERTICAL ? margins_.front().top : margins_.front().left).value_or(0.0f);
+    }
+    inline float BotMargin() const
+    {
+        if (margins_.empty()) {
+            return 0.0f;
+        }
+        return (axis_ == Axis::VERTICAL ? margins_.back().bottom : margins_.back().right).value_or(0.0f);
+    }
+
+    /**
+     * @brief prepare lanes in the current section.
+     *
+     * @param idx current item index
+     * @param fillBack true if preparing in the forward direction (prevIdx < curIdx).
+     */
+    void PrepareSectionPos(int32_t idx, bool fillBack);
 
     struct Lane;
-    std::vector<Lane> lanes_;
+    std::vector<std::vector<Lane>> lanes_; // lanes in multiple sections
     // mapping of all items previously or currently in lanes_.
     std::unordered_map<int32_t, size_t> idxToLane_;
 
     float delta_ = 0.0f;
-    float totalOffset_ = 0.0f; // record total offset when continuously scrolling. Reset when jumped
-    float mainGap_ = 0.0f;     // update this at the end of a layout
+    float totalOffset_ = 0.0f;   // record total offset when continuously scrolling. Reset when jumped
+    std::vector<float> mainGap_; // update this at the end of a layout
 
     // maximum content height encountered so far, mainly for comparing content and viewport height
     float maxHeight_ = 0.0f;
     float footerHeight_ = 0.0f;
 
 private:
+    inline void PrepareJump();
+
     /* cache */
     float startPos_ = 0.0f;
     float endPos_ = 0.0f;

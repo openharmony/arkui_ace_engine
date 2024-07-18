@@ -27,6 +27,7 @@
 #include "bridge/declarative_frontend/ng/page_router_manager.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/render/snapshot_param.h"
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 #include "frameworks/bridge/common/manifest/manifest_parser.h"
@@ -119,9 +120,10 @@ public:
     void NotifyAppStorage(
         const WeakPtr<Framework::JsEngine>& jsEngineWeak, const std::string& key, const std::string& value);
 
-    // distribute
-    std::pair<std::string, UIContentErrorCode> RestoreRouterStack(const std::string& contentInfo) override;
-    std::string GetContentInfo() override;
+    // restore
+    std::pair<RouterRecoverRecord, UIContentErrorCode> RestoreRouterStack(
+        const std::string& contentInfo, ContentInfoType type) override;
+    std::string GetContentInfo(ContentInfoType type) override;
 
     // Accessibility delegate functions.
     RefPtr<Framework::AccessibilityNodeManager> GetJSAccessibilityManager() const
@@ -151,22 +153,24 @@ public:
 
     void Push(const std::string& uri, const std::string& params) override;
     void PushWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) override;
-    void PushWithCallback(const std::string& uri, const std::string& params,
+    void PushWithCallback(const std::string& uri, const std::string& params, bool recoverable,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
-    void PushNamedRoute(const std::string& uri, const std::string& params,
+    void PushNamedRoute(const std::string& uri, const std::string& params, bool recoverable,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
     void Replace(const std::string& uri, const std::string& params) override;
     void ReplaceWithMode(const std::string& uri, const std::string& params, uint32_t routerMode) override;
-    void ReplaceWithCallback(const std::string& uri, const std::string& params,
+    void ReplaceWithCallback(const std::string& uri, const std::string& params, bool recoverable,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
-    void ReplaceNamedRoute(const std::string& uri, const std::string& params,
+    void ReplaceNamedRoute(const std::string& uri, const std::string& params, bool recoverable,
         const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode = 0) override;
     void Back(const std::string& uri, const std::string& params) override;
     void BackToIndex(int32_t index, const std::string& params) override;
     void Clear() override;
     int32_t GetStackSize() const override;
+    int32_t GetCurrentPageIndex() const override;
     void GetState(int32_t& index, std::string& name, std::string& path) override;
     void GetRouterStateByIndex(int32_t& index, std::string& name, std::string& path, std::string& params) override;
+    bool IsUnrestoreByIndex(int32_t index);
     void GetRouterStateByUrl(std::string& url, std::vector<StateInfo>& stateArray) override;
     std::string GetParams() override;
     int32_t GetIndexByUrl(const std::string& url) override;
@@ -187,12 +191,11 @@ public:
         return manifestParser_->GetWindowConfig();
     }
 
-    double MeasureText(const MeasureContext& context) override;
-    Size MeasureTextSize(const MeasureContext& context) override;
+    double MeasureText(MeasureContext context) override;
+    Size MeasureTextSize(MeasureContext context) override;
 
-    void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
-        const NG::ToastShowMode& showMode = NG::ToastShowMode::DEFAULT, int32_t alignment = -1,
-        std::optional<DimensionOffset> offset = std::nullopt) override;
+    void ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback = nullptr) override;
+    void CloseToast(const int32_t toastId, std::function<void(int32_t)>&& callback = nullptr) override;
     void SetToastStopListenerCallback(std::function<void()>&& stopCallback) override;
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
@@ -276,10 +279,11 @@ public:
     void HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback) override;
 
     void GetSnapshot(const std::string& componentId,
-        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback) override;
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+        const NG::SnapshotOptions& options) override;
     void CreateSnapshot(std::function<void()>&& customBuilder,
         std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
-        bool enableInspector) override;
+        bool enableInspector, const NG::SnapshotParam& param) override;
 
     void AddFrameNodeToOverlay(
         const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt) override;
@@ -338,15 +342,14 @@ public:
     void GetStageSourceMap(
         std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMap);
 
-    void InitializeRouterManager(
-        NG::LoadPageCallback&& loadPageCallback, NG::LoadPageByBufferCallback&& loadPageByBufferCallback,
-        NG::LoadNamedRouterCallback&& loadNamedRouterCallback,
-        NG::UpdateRootComponentCallback&& updateRootComponentCallback);
-
 #if defined(PREVIEW)
     void SetIsComponentPreview(NG::IsComponentPreviewCallback&& callback);
 #endif
 
+    void SetPageRouterManager(const RefPtr<NG::PageRouterManager>& routerMgr)
+    {
+        pageRouterManager_ = routerMgr;
+    }
     const RefPtr<NG::PageRouterManager>& GetPageRouterManager() const
     {
         return pageRouterManager_;

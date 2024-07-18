@@ -29,7 +29,6 @@ void ForEachModelNG::Pop()
     stack->PopContainer();
 }
 
-// FIXME, change to emply implementation
 void ForEachModelNG::Create(const std::string& compilerGenId, const OHOS::Ace::ForEachFunc& ForEachFunc)
 {
     TAG_LOGW(AceLogTag::ACE_FOREACH, "Create (with 2 params) unsupported by ForEachModelNG");
@@ -49,7 +48,6 @@ void ForEachModelNG::Create()
 
 std::list<std::string> ForEachModelNG::GetCurrentIdList(int32_t nodeId)
 {
-    // FIXME: is the nodeId needed, or can we do lile SetNewIds ?
     auto forEachNode = ForEachNode::GetOrCreateForEachNode(nodeId);
     return forEachNode->GetTempIds();
 }

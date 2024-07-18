@@ -35,6 +35,12 @@ constexpr int32_t MENU_SHOW_ANIMATION_DURATION = 250;
 constexpr int32_t MENU_HIDE_ANIMATION_DURATION = 200;
 constexpr int32_t HANDLE_ANIMATION_DURATION = 150;
 
+struct OnMenuItemCallback {
+    OnCreateMenuCallback onCreateMenuCallback;
+    OnMenuItemClickCallback onMenuItemClick;
+    std::function<void(int32_t&, int32_t&)> textRangeCallback;
+};
+
 struct SelectHandlePaintInfo {
     OffsetF startPoint;
     OffsetF endPoint;
@@ -57,6 +63,16 @@ struct SelectHandlePaintInfo {
             .width = width
         };
     }
+
+    bool operator==(const SelectHandlePaintInfo& info) const
+    {
+        return (startPoint == info.startPoint) && (endPoint == info.endPoint) && (width == info.width);
+    }
+
+    bool operator!=(const SelectHandlePaintInfo& info) const
+    {
+        return !(*this == info);
+    }
 };
 
 struct SelectHandleInfo {
@@ -65,12 +81,13 @@ struct SelectHandleInfo {
     bool isPaintHandleWithPoints = false;
     // in Global coordinates.
     RectF paintRect;
+    RectF localPaintRect;
     SelectHandlePaintInfo paintInfo;
     std::function<RectF(const SelectHandlePaintInfo&)> paintInfoConverter;
 
     bool operator==(const SelectHandleInfo& info) const
     {
-        return (isShow == info.isShow) && (paintRect == info.paintRect);
+        return (isShow == info.isShow) && (paintRect == info.paintRect) && (paintInfo == info.paintInfo);
     }
 
     bool operator!=(const SelectHandleInfo& info) const
@@ -108,9 +125,10 @@ inline constexpr SelectOverlayDirtyFlag DIRTY_SELECT_AREA = 1 << 2;
 inline constexpr SelectOverlayDirtyFlag DIRTY_ALL_MENU_ITEM = 1 << 3;
 inline constexpr SelectOverlayDirtyFlag DIRTY_COPY_ALL_ITEM = 1 << 4;
 inline constexpr SelectOverlayDirtyFlag DIRTY_SELECT_TEXT = 1 << 5;
+inline constexpr SelectOverlayDirtyFlag DIRTY_VIEWPORT = 1 << 6;
 inline constexpr SelectOverlayDirtyFlag DIRTY_DOUBLE_HANDLE = DIRTY_FIRST_HANDLE | DIRTY_SECOND_HANDLE;
 inline constexpr SelectOverlayDirtyFlag DIRTY_ALL =
-    DIRTY_DOUBLE_HANDLE | DIRTY_ALL_MENU_ITEM | DIRTY_SELECT_AREA | DIRTY_SELECT_TEXT;
+    DIRTY_DOUBLE_HANDLE | DIRTY_ALL_MENU_ITEM | DIRTY_SELECT_AREA | DIRTY_SELECT_TEXT | DIRTY_VIEWPORT;
 
 inline constexpr int32_t REQUEST_RECREATE = 1;
 
@@ -216,6 +234,14 @@ struct CallerFrameNodeInfo {
     OffsetF paintOffset;
 };
 
+enum class SelectOverlayMode {
+    ALL, MENU_ONLY, HANDLE_ONLY
+};
+
+enum class HandleLevelMode {
+    OVERLAY, EMBED
+};
+
 struct SelectOverlayInfo {
     WeakPtr<Pattern> pattern;
     bool isUsingMouse = false;
@@ -257,6 +283,7 @@ struct SelectOverlayInfo {
     SelectMenuCallback menuCallback;
 
     std::vector<MenuOptionsParam> menuOptionItems;
+    OnMenuItemCallback onCreateCallback;
 
     // force hide callback, which may be called when other textOverlay shows.
     std::function<void(bool)> onClose;
@@ -265,10 +292,15 @@ struct SelectOverlayInfo {
 
     OHOS::Ace::WeakPtr<FrameNode> callerFrameNode;
     std::optional<CallerFrameNodeInfo> callerNodeInfo;
+    std::optional<RectF> ancestorViewPort;
 
     bool isHandleLineShow = true;
     std::string selectText;
     bool isSingleLine = false;
+
+    HandleLevelMode handleLevelMode = HandleLevelMode::OVERLAY;
+    bool enableHandleLevel = false;
+    VectorF scale = VectorF(1.0f, 1.0f);
 
     std::string ToString() const
     {
@@ -288,6 +320,10 @@ struct SelectOverlayInfo {
         JSON_STRING_PUT_STRING(jsonValue, selectText);
         return jsonValue->ToString();
     }
+
+    void GetCallerNodeAncestorViewPort(RectF& viewPort);
+    const RectF& GetFirstHandlePaintRect();
+    const RectF& GetSecondHandlePaintRect();
 };
 
 } // namespace OHOS::Ace::NG

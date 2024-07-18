@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 
 #include "scope_manager/native_scope_manager.h"
+#include "base/image/drawing_lattice.h"
 
 #if !defined(PREVIEW)
 #include <dlfcn.h>
@@ -46,9 +47,12 @@ namespace {
 #if defined(WINDOWS_PLATFORM)
 constexpr char CHECK_REGEX_VALID[] = "__checkRegexValid__";
 #endif
+// navigation title bar options
 constexpr char BACKGROUND_COLOR_PROPERTY[] = "backgroundColor";
 constexpr char BACKGROUND_BLUR_STYLE_PROPERTY[] = "backgroundBlurStyle";
 constexpr char BAR_STYLE_PROPERTY[] = "barStyle";
+constexpr char PADDING_START_PROPERTY[] = "paddingStart";
+constexpr char PADDING_END_PROPERTY[] = "paddingEnd";
 } // namespace
 
 namespace {
@@ -87,16 +91,21 @@ void* UnwrapNapiValue(const JSRef<JSVal>& obj)
 } // namespace
 
 #if !defined(PREVIEW)
-RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
+RefPtr<PixelMap> CreatePixelMapFromNapiValue(const JSRef<JSVal>& obj, NativeEngine* localNativeEngine)
 {
     if (!obj->IsObject()) {
         return nullptr;
     }
-    auto engine = EngineHelper::GetCurrentEngine();
-    if (!engine) {
-        return nullptr;
+    NativeEngine* nativeEngine = nullptr;
+    if (localNativeEngine != nullptr) {
+        nativeEngine = localNativeEngine;
+    } else {
+        auto engine = EngineHelper::GetCurrentEngineSafely();
+        if (!engine) {
+            return nullptr;
+        }
+        nativeEngine = engine->GetNativeEngine();
     }
-    auto* nativeEngine = engine->GetNativeEngine();
     if (nativeEngine == nullptr) {
         return nullptr;
     }
@@ -177,6 +186,11 @@ const Rosen::Filter* CreateRSFilterFromNapiValue(JSRef<JSVal> obj)
 RefPtr<DrawingColorFilter> CreateDrawingColorFilter(JSRef<JSVal> obj)
 {
     return DrawingColorFilter::CreateDrawingColorFilter(UnwrapNapiValue(obj));
+}
+
+RefPtr<DrawingLattice> CreateDrawingLattice(JSRef<JSVal> obj)
+{
+    return DrawingLattice::CreateDrawingLattice(UnwrapNapiValue(obj));
 }
 
 std::optional<NG::BorderRadiusProperty> HandleDifferentRadius(JsiRef<JSVal> args)
@@ -379,16 +393,47 @@ void ParseBackgroundOptions(const JSRef<JSVal>& obj, NG::NavigationBackgroundOpt
             options.blurStyle = static_cast<BlurStyle>(blurStyle);
         }
     }
+}
+
+void ParseBarOptions(const JSRef<JSVal>& obj, NG::NavigationBarOptions& options)
+{
+    options.paddingStart.reset();
+    options.paddingEnd.reset();
+    options.barStyle.reset();
+    if (!obj->IsObject()) {
+        return;
+    }
+    auto optObj = JSRef<JSObject>::Cast(obj);
     auto barStyleProperty = optObj->GetProperty(BAR_STYLE_PROPERTY);
     if (barStyleProperty->IsNumber()) {
         auto barStyle = barStyleProperty->ToNumber<int32_t>();
         if (barStyle >= static_cast<int32_t>(NG::BarStyle::STANDARD) &&
             barStyle <= static_cast<int32_t>(NG::BarStyle::STACK)) {
             options.barStyle = static_cast<NG::BarStyle>(barStyle);
-            return;
+        } else {
+            options.barStyle = NG::BarStyle::STANDARD;
         }
-        barStyle = static_cast<int32_t>(NG::BarStyle::STANDARD);
-        return;
     }
+    CalcDimension paddingStart;
+    if (JSViewAbstract::ParseLengthMetricsToDimension(optObj->GetProperty(PADDING_START_PROPERTY), paddingStart)) {
+        options.paddingStart = paddingStart;
+    }
+    CalcDimension paddingEnd;
+    if (JSViewAbstract::ParseLengthMetricsToDimension(optObj->GetProperty(PADDING_END_PROPERTY), paddingEnd)) {
+        options.paddingEnd = paddingEnd;
+    }
+}
+
+napi_env GetCurrentEnv()
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (!engine) {
+        return nullptr;
+    }
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    if (!nativeEngine) {
+        return nullptr;
+    }
+    return reinterpret_cast<napi_env>(nativeEngine);
 }
 } // namespace OHOS::Ace::Framework

@@ -79,21 +79,25 @@ void MovingPhotoPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(context);
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     controller_->SetStartPlaybackImpl([weak = WeakClaim(this), uiTaskExecutor]() {
-        uiTaskExecutor.PostTask([weak]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            ContainerScope scope(pattern->instanceId_);
-            pattern->StartPlayback();
-        }, "ArkUIMovingPhotoStart");
+        uiTaskExecutor.PostTask(
+            [weak]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                ContainerScope scope(pattern->instanceId_);
+                pattern->StartPlayback();
+            },
+            "ArkUIMovingPhotoStart");
     });
 
     controller_->SetStopPlaybackImpl([weak = WeakClaim(this), uiTaskExecutor]() {
-        uiTaskExecutor.PostTask([weak]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            ContainerScope scope(pattern->instanceId_);
-            pattern->StopPlayback();
-        }, "ArkUIMovingPhotoStop");
+        uiTaskExecutor.PostTask(
+            [weak]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                ContainerScope scope(pattern->instanceId_);
+                pattern->StopPlayback();
+            },
+            "ArkUIMovingPhotoStop");
     });
 
     RegisterVisibleAreaChange();
@@ -239,14 +243,16 @@ void MovingPhotoPattern::UpdateVideoNode()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto uiTaskExecutor = SingleTaskExecutor::Make(pipelineContext->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    uiTaskExecutor.PostTask([weak = WeakClaim(this)]() {
-        auto movingPhotoPattern = weak.Upgrade();
-        CHECK_NULL_VOID(movingPhotoPattern);
-        ContainerScope scope(movingPhotoPattern->instanceId_);
-        movingPhotoPattern->PrepareMediaPlayer();
-        movingPhotoPattern->UpdateMediaPlayerSpeed();
-        movingPhotoPattern->UpdateMediaPlayerMuted();
-    }, "ArkUIMovingPhotoUpdateVideo");
+    uiTaskExecutor.PostTask(
+        [weak = WeakClaim(this)]() {
+            auto movingPhotoPattern = weak.Upgrade();
+            CHECK_NULL_VOID(movingPhotoPattern);
+            ContainerScope scope(movingPhotoPattern->instanceId_);
+            movingPhotoPattern->PrepareMediaPlayer();
+            movingPhotoPattern->UpdateMediaPlayerSpeed();
+            movingPhotoPattern->UpdateMediaPlayerMuted();
+        },
+        "ArkUIMovingPhotoUpdateVideo");
 }
 
 void MovingPhotoPattern::PrepareMediaPlayer()
@@ -275,11 +281,13 @@ void MovingPhotoPattern::PrepareMediaPlayer()
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-    platformTask.PostTask([weak = WeakClaim(this)] {
-        auto movingPhotoPattern = weak.Upgrade();
-        CHECK_NULL_VOID(movingPhotoPattern);
-        movingPhotoPattern->ResetMediaPlayer();
-    }, "ArkUIMovingPhotoPrepare");
+    platformTask.PostTask(
+        [weak = WeakClaim(this)] {
+            auto movingPhotoPattern = weak.Upgrade();
+            CHECK_NULL_VOID(movingPhotoPattern);
+            movingPhotoPattern->ResetMediaPlayer();
+        },
+        "ArkUIMovingPhotoPrepare");
 }
 
 void MovingPhotoPattern::ResetMediaPlayer()
@@ -294,12 +302,14 @@ void MovingPhotoPattern::ResetMediaPlayer()
         CHECK_NULL_VOID(context);
 
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            ContainerScope scope(pattern->instanceId_);
-            pattern->FireMediaPlayerError();
-        }, "ArkUIMovingPhotoReset");
+        uiTaskExecutor.PostTask(
+            [weak = WeakClaim(this)] {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                ContainerScope scope(pattern->instanceId_);
+                pattern->FireMediaPlayerError();
+            },
+            "ArkUIMovingPhotoReset");
         return;
     }
     RegisterMediaPlayerEvent();
@@ -321,7 +331,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
     auto movingPhotoPattern = WeakClaim(this);
 
     auto&& positionUpdatedEvent = [movingPhotoPattern, uiTaskExecutor](uint32_t currentPos) {
-        uiTaskExecutor.PostSyncTask([movingPhotoPattern, currentPos] {
+        uiTaskExecutor.PostTask([movingPhotoPattern, currentPos] {
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -330,7 +340,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
     };
 
     auto&& stateChangedEvent = [movingPhotoPattern, uiTaskExecutor](PlaybackStatus status) {
-        uiTaskExecutor.PostSyncTask([movingPhotoPattern, status] {
+        uiTaskExecutor.PostTask([movingPhotoPattern, status] {
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -348,7 +358,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
     };
 
     auto&& resolutionChangeEvent = [movingPhotoPattern, uiTaskExecutor]() {
-        uiTaskExecutor.PostSyncTask([movingPhotoPattern] {
+        uiTaskExecutor.PostTask([movingPhotoPattern] {
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -357,7 +367,7 @@ void MovingPhotoPattern::RegisterMediaPlayerEvent()
     };
 
     auto&& startRenderFrameEvent = [movingPhotoPattern, uiTaskExecutor]() {
-        uiTaskExecutor.PostSyncTask([movingPhotoPattern] {
+        uiTaskExecutor.PostTask([movingPhotoPattern] {
             auto movingPhoto = movingPhotoPattern.Upgrade();
             CHECK_NULL_VOID(movingPhoto);
             ContainerScope scope(movingPhoto->instanceId_);
@@ -442,6 +452,11 @@ void MovingPhotoPattern::OnResolutionChange()
 void MovingPhotoPattern::OnStartRenderFrame()
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer OnStartRenderFrame.");
+}
+
+void MovingPhotoPattern::OnStartedStatusCallback()
+{
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer OnStartedStatusCallback.");
     ACE_FUNCTION_TRACE();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -560,7 +575,8 @@ SizeF MovingPhotoPattern::GetRawImageSize()
     return imagePattern->GetRawImageSize();
 }
 
-SizeF MovingPhotoPattern::MeasureContentLayout(const SizeF& layoutSize, const RefPtr<MovingPhotoLayoutProperty>& layoutProperty)
+SizeF MovingPhotoPattern::MeasureContentLayout(const SizeF& layoutSize,
+    const RefPtr<MovingPhotoLayoutProperty>& layoutProperty)
 {
     if (!layoutProperty || !layoutProperty->HasVideoSize()) {
         return layoutSize;
@@ -609,6 +625,7 @@ void MovingPhotoPattern::OnMediaPlayerStatusChanged(PlaybackStatus status)
             break;
         case PlaybackStatus::STARTED:
             TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "Player current status is STARTED.");
+            OnStartedStatusCallback();
             FireMediaPlayerStart();
             break;
         case PlaybackStatus::PAUSED:
@@ -712,15 +729,21 @@ void MovingPhotoPattern::StartAnimation()
     CHECK_NULL_VOID(videoRsContext);
     videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
 
+    auto movingPhotoPattern = WeakClaim(this);
     AnimationOption animationOption;
     animationOption.SetDuration(ANIMATION_DURATION_400);
     animationOption.SetCurve(Curves::FRICTION);
-    animationOption.SetOnFinishEvent([this]() {
-        if (currentPlayStatus_ == PlaybackStatus::PAUSED || currentPlayStatus_ == PlaybackStatus::STOPPED
-                                                         || !startAnimationFlag_) {
+    animationOption.SetOnFinishEvent([movingPhotoPattern]() {
+        auto movingPhoto = movingPhotoPattern.Upgrade();
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto StartAnimation OnFinishEvent1.");
+        CHECK_NULL_VOID(movingPhoto);
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto StartAnimation OnFinishEvent2.");
+        if (movingPhoto->currentPlayStatus_ == PlaybackStatus::PAUSED
+            || movingPhoto->currentPlayStatus_ == PlaybackStatus::STOPPED
+            || !movingPhoto->startAnimationFlag_) {
             return;
         }
-        HideImageNode();
+        movingPhoto->HideImageNode();
     });
     startAnimationFlag_ = true;
     AnimationUtils::Animate(animationOption, [imageCtx = imageRsContext, videoCtx = videoRsContext]() {
@@ -765,11 +788,16 @@ void MovingPhotoPattern::StopAnimation()
     videoRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
     video->MarkModifyDone();
 
+    auto movingPhotoPattern = WeakClaim(this);
     AnimationOption option;
     option.SetDuration(ANIMATION_DURATION_300);
     option.SetCurve(Curves::FRICTION);
-    option.SetOnFinishEvent([this]() {
-        Seek(1);
+    option.SetOnFinishEvent([movingPhotoPattern]() {
+        auto movingPhoto = movingPhotoPattern.Upgrade();
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto StopAnimation OnFinishEvent1.");
+        CHECK_NULL_VOID(movingPhoto);
+        TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "movingphoto StopAnimation OnFinishEvent2.");
+        movingPhoto->Seek(0);
     });
     AnimationUtils::Animate(option, [imageCtx = imageRsContext, videoCtx = videoRsContext]() {
             imageCtx->UpdateOpacity(1.0);
@@ -794,11 +822,13 @@ void MovingPhotoPattern::Start()
     CHECK_NULL_VOID(context);
 
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-    platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_))] {
-        auto mediaPlayer = weak.Upgrade();
-        CHECK_NULL_VOID(mediaPlayer);
-        mediaPlayer->Play();
-    }, "ArkUIMovingPhotoStartPlay");
+    platformTask.PostTask(
+        [weak = WeakClaim(RawPtr(mediaPlayer_))] {
+            auto mediaPlayer = weak.Upgrade();
+            CHECK_NULL_VOID(mediaPlayer);
+            mediaPlayer->Play();
+        },
+        "ArkUIMovingPhotoStartPlay");
 }
 
 void MovingPhotoPattern::Pause()
@@ -812,11 +842,13 @@ void MovingPhotoPattern::Pause()
     CHECK_NULL_VOID(context);
     
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-    platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_))] {
-        auto mediaPlayer = weak.Upgrade();
-        CHECK_NULL_VOID(mediaPlayer);
-        mediaPlayer->Pause();
-        }, "ArkUIMovingPhotoPausePlay");
+    platformTask.PostTask(
+        [weak = WeakClaim(RawPtr(mediaPlayer_))] {
+            auto mediaPlayer = weak.Upgrade();
+            CHECK_NULL_VOID(mediaPlayer);
+            mediaPlayer->Pause();
+        },
+        "ArkUIMovingPhotoPausePlay");
 }
 
 void MovingPhotoPattern::Stop()
@@ -830,11 +862,13 @@ void MovingPhotoPattern::Stop()
     CHECK_NULL_VOID(context);
     
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-    platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_))] {
-        auto mediaPlayer = weak.Upgrade();
-        CHECK_NULL_VOID(mediaPlayer);
-        mediaPlayer->Stop();
-    }, "ArkUIMovingPhotoStopPlay");
+    platformTask.PostTask(
+        [weak = WeakClaim(RawPtr(mediaPlayer_))] {
+            auto mediaPlayer = weak.Upgrade();
+            CHECK_NULL_VOID(mediaPlayer);
+            mediaPlayer->Stop();
+        },
+        "ArkUIMovingPhotoStopPlay");
 }
 
 void MovingPhotoPattern::Seek(int32_t position)
@@ -848,11 +882,13 @@ void MovingPhotoPattern::Seek(int32_t position)
     CHECK_NULL_VOID(context);
     
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-    platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_)), pos = position] {
-        auto mediaPlayer = weak.Upgrade();
-        CHECK_NULL_VOID(mediaPlayer);
-        mediaPlayer->Seek(pos, SeekMode::SEEK_PREVIOUS_SYNC);
-        }, "ArkUIMovingPhotoSeek");
+    platformTask.PostTask(
+        [weak = WeakClaim(RawPtr(mediaPlayer_)), pos = position] {
+            auto mediaPlayer = weak.Upgrade();
+            CHECK_NULL_VOID(mediaPlayer);
+            mediaPlayer->Seek(pos, SeekMode::SEEK_PREVIOUS_SYNC);
+        },
+        "ArkUIMovingPhotoSeek");
 }
 
 void MovingPhotoPattern::UpdateMediaPlayerSpeed()
@@ -865,11 +901,13 @@ void MovingPhotoPattern::UpdateMediaPlayerSpeed()
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-    platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_))] {
-        auto mediaPlayer = weak.Upgrade();
-        CHECK_NULL_VOID(mediaPlayer);
-        mediaPlayer->SetPlaybackSpeed(static_cast<float>(NORMAL_PLAY_SPEED));
-    }, "ArkUIMovingPhotoUpdateSpeed");
+    platformTask.PostTask(
+        [weak = WeakClaim(RawPtr(mediaPlayer_))] {
+            auto mediaPlayer = weak.Upgrade();
+            CHECK_NULL_VOID(mediaPlayer);
+            mediaPlayer->SetPlaybackSpeed(static_cast<float>(NORMAL_PLAY_SPEED));
+        },
+        "ArkUIMovingPhotoUpdateSpeed");
 }
 
 void MovingPhotoPattern::UpdateMediaPlayerMuted()
@@ -883,11 +921,13 @@ void MovingPhotoPattern::UpdateMediaPlayerMuted()
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-    platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_)), videoVolume = volume] {
-        auto mediaPlayer = weak.Upgrade();
-        CHECK_NULL_VOID(mediaPlayer);
-        mediaPlayer->SetVolume(videoVolume, videoVolume);
-    }, "ArkUIMovingPhotoUpdateMuted");
+    platformTask.PostTask(
+        [weak = WeakClaim(RawPtr(mediaPlayer_)), videoVolume = volume] {
+            auto mediaPlayer = weak.Upgrade();
+            CHECK_NULL_VOID(mediaPlayer);
+            mediaPlayer->SetVolume(videoVolume, videoVolume);
+        },
+        "ArkUIMovingPhotoUpdateMuted");
 }
 
 void MovingPhotoPattern::OnAreaChangedInner()

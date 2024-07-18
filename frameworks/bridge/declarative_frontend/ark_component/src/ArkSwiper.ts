@@ -78,8 +78,16 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     modifierWithKey(this._modifiersWithKeys, SwiperCachedCountModifier.identity, SwiperCachedCountModifier, value);
     return this;
   }
-  displayCount(value: string | number | SwiperAutoFill): this {
-    modifierWithKey(this._modifiersWithKeys, SwiperDisplayCountModifier.identity, SwiperDisplayCountModifier, value);
+  displayCount(value: string | number | SwiperAutoFill, swipeByGroup?: boolean | undefined): this {
+    let arkDisplayCount = new ArkDisplayCount();
+    arkDisplayCount.value = value;
+    arkDisplayCount.swipeByGroup = swipeByGroup;
+    modifierWithKey(
+      this._modifiersWithKeys,
+      SwiperDisplayCountModifier.identity,
+      SwiperDisplayCountModifier,
+      arkDisplayCount
+    );
     return this;
   }
   effectMode(value: EdgeEffect): this {
@@ -96,7 +104,8 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     return this;
   }
   onChange(event: (index: number) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SwiperOnChangeModifier.identity, SwiperOnChangeModifier, event);
+    return this;
   }
   indicatorStyle(value?: IndicatorStyle | undefined): this {
     throw new Error('Method not implemented.');
@@ -114,19 +123,31 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     return this;
   }
   onAnimationStart(event: (index: number, targetIndex: number, extraInfo: SwiperAnimationEvent) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SwiperOnAnimationStartModifier.identity, SwiperOnAnimationStartModifier, event);
+    return this;
   }
   onAnimationEnd(event: (index: number, extraInfo: SwiperAnimationEvent) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SwiperOnAnimationEndModifier.identity, SwiperOnAnimationEndModifier, event);
+    return this;
   }
   onGestureSwipe(event: (index: number, extraInfo: SwiperAnimationEvent) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SwiperOnGestureSwipeModifier.identity, SwiperOnGestureSwipeModifier, event);
+    return this;
   }
   nestedScroll(value: SwiperNestedScrollMode): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SwiperNestedScrollModifier.identity, SwiperNestedScrollModifier, value);
+    return this;
   }
   indicatorInteractive(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, SwiperIndicatorInteractiveModifier.identity, SwiperIndicatorInteractiveModifier, value);
+    return this;
+  }
+  customContentTransition(transition: SwiperContentAnimatedTransition): this {
+    modifierWithKey(this._modifiersWithKeys, SwiperCustomContentTransitionModifier.identity, SwiperCustomContentTransitionModifier, transition);
+    return this;
+  }
+  onContentDidScroll(handler: ContentDidScrollCallback): this {
+    modifierWithKey(this._modifiersWithKeys, SwiperOnContentDidScrollModifier.identity, SwiperOnContentDidScrollModifier, handler);
     return this;
   }
 }
@@ -167,29 +188,46 @@ class SwiperPrevMarginModifier extends ModifierWithKey<Length> {
   }
 }
 
-class SwiperDisplayCountModifier extends ModifierWithKey<string | number | SwiperAutoFill> {
+class SwiperDisplayCountModifier extends ModifierWithKey<ArkDisplayCount> {
   static identity: Symbol = Symbol('swiperDisplayCount');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      getUINativeModule().swiper.resetSwiperSwipeByGroup(node);
       getUINativeModule().swiper.resetSwiperDisplayCount(node);
     } else {
-      if (isNull(this.value) || isUndefined(this.value)) {
-        getUINativeModule().swiper.resetSwiperDisplayCount(node);
-      } else if (typeof this.value === 'object') {
-        let minSize = (this.value as SwiperAutoFill).minSize.toString();
-        getUINativeModule().swiper.setSwiperDisplayCount(node, minSize, typeof this.value);
+      if (!isNull(this.value) && !isUndefined(this.value)) {
+        let swipeByGroup;
+        if (typeof this.value.swipeByGroup === 'boolean') {
+          swipeByGroup = this.value.swipeByGroup;
+        }
+
+        getUINativeModule().swiper.setSwiperSwipeByGroup(node, swipeByGroup);
+
+        if (typeof this.value.value === 'object') {
+          let minSize = (this.value.value as SwiperAutoFill).minSize.toString();
+          getUINativeModule().swiper.setSwiperDisplayCount(node, minSize, typeof this.value.value);
+        } else {
+          getUINativeModule().swiper.setSwiperDisplayCount(node, this.value.value, typeof this.value.value);
+        }
       } else {
-        getUINativeModule().swiper.setSwiperDisplayCount(node, this.value, typeof this.value);
+        getUINativeModule().swiper.resetSwiperSwipeByGroup(node);
+        getUINativeModule().swiper.resetSwiperDisplayCount(node);
       }
     }
   }
   checkObjectDiff(): boolean {
-    if (typeof this.stageValue !== typeof this.value) {
+    if (
+      this.stageValue.swipeByGroup !== this.value.swipeByGroup ||
+      typeof this.stageValue.value !== typeof this.value.value
+    ) {
       return true;
-    } else if (typeof this.stageValue === 'object' && typeof this.stageValue === 'object') {
-      return (this.stageValue as SwiperAutoFill).minSize !== (this.value as SwiperAutoFill).minSize;
+    } else if (
+      typeof this.stageValue.value === 'object' &&
+      typeof this.value.value === 'object'
+    ) {
+      return (this.stageValue.value as SwiperAutoFill).minSize !== (this.value.value as SwiperAutoFill).minSize;
     } else {
-      return !isBaseOrResourceEqual(this.stageValue, this.value);
+      return !isBaseOrResourceEqual(this.stageValue.value, this.value.value);
     }
   }
 }
@@ -306,6 +344,7 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
       let mask;
       let color;
       let selectedColor;
+      let maxDisplayCount;
       let fontColor;
       let selectedFontColor;
       let digitFontSize;
@@ -326,6 +365,7 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
         mask = (this.value as ArkDotIndicator).maskValue;
         color = (this.value as ArkDotIndicator).colorValue;
         selectedColor = (this.value as ArkDotIndicator).selectedColorValue;
+        maxDisplayCount = (this.value as ArkDotIndicator).maxDisplayCountValue;
         getUINativeModule().swiper.setSwiperIndicator(
           node,
           'ArkDotIndicator',
@@ -336,6 +376,7 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
           mask,
           color,
           selectedColor,
+          maxDisplayCount,
           left,
           top,
           right,
@@ -416,6 +457,10 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
         !isBaseOrResourceEqual(
           (this.stageValue as ArkDotIndicator).selectedColorValue,
           (this.value as ArkDotIndicator).selectedColorValue
+        ) ||
+        !isBaseOrResourceEqual(
+          (this.stageValue as ArkDotIndicator).maxDisplayCountValue,
+          (this.value as ArkDotIndicator).maxDisplayCountValue
         )
       );
     } else if (this.stageValue instanceof ArkDigitIndicator && this.value instanceof ArkDigitIndicator) {
@@ -484,6 +529,19 @@ class SwiperCurveModifier extends ModifierWithKey<string | Curve | ICurve> {
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class SwiperOnChangeModifier extends ModifierWithKey<Callback<number>> {
+  constructor(value: Callback<number>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperOnChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnChange(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnChange(node, this.value);
+    }
   }
 }
 class SwiperDisableSwipeModifier extends ModifierWithKey<boolean> {
@@ -644,6 +702,63 @@ class SwiperEnabledModifier extends ModifierWithKey<boolean> {
     }
   }
 }
+
+class SwiperNestedScrollModifier extends ModifierWithKey<SwiperNestedScrollMode> {
+  constructor(value: SwiperNestedScrollMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('nestedScroll');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetNestedScroll(node);
+    } else {
+      getUINativeModule().swiper.setNestedScroll(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class SwiperOnAnimationStartModifier extends ModifierWithKey<(index: number, targetIndex: number,
+    extraInfo: SwiperAnimationEvent) => void> {
+  constructor(value: (index: number, targetIndex: number, extraInfo: SwiperAnimationEvent) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperOnAnimationStart');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnAnimationStart(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnAnimationStart(node, this.value);
+    }
+  }
+}
+class SwiperOnAnimationEndModifier extends ModifierWithKey<Callback<number, SwiperAnimationEvent>> {
+  constructor(value: Callback<number, SwiperAnimationEvent>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperOnAnimationEnd');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnAnimationEnd(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnAnimationEnd(node, this.value);
+    }
+  }
+}
+class SwiperOnGestureSwipeModifier extends ModifierWithKey<Callback<number, SwiperAnimationEvent>> {
+  constructor(value: Callback<number, SwiperAnimationEvent>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperOnGestureSwipe');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnGestureSwipe(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnGestureSwipe(node, this.value);
+    }
+  }
+}
 class SwiperIndicatorInteractiveModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -657,7 +772,39 @@ class SwiperIndicatorInteractiveModifier extends ModifierWithKey<boolean> {
     }
   }
 }
-
+class SwiperCustomContentTransitionModifier extends ModifierWithKey<SwiperContentAnimatedTransition> {
+  constructor(value: SwiperContentAnimatedTransition) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperCustomContentTransition');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperCustomContentTransition(node);
+    } else {
+      getUINativeModule().swiper.setSwiperCustomContentTransition(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class SwiperOnContentDidScrollModifier extends ModifierWithKey<(selectedIndex: number, index: number,
+  position: number, mainAxisLength: number) => void> {
+  constructor(value: (selectedIndex: number, index: number, position: number, mainAxisLength: number) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperOnContentDidScroll');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnContentDidScroll(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnContentDidScroll(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
 // @ts-ignore
 globalThis.Swiper.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {

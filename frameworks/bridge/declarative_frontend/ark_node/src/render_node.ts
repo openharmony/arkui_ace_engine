@@ -202,7 +202,7 @@ class ColorMetrics {
     this.blue_ = ColorMetrics.clamp(blue);
     this.alpha_ = ColorMetrics.clamp(alpha);
   }
-  private toNumeric() {
+  private toNumeric(): number {
     return (this.alpha_ << 24) + (this.red_ << 16) + (this.green_ << 8) + this.blue_;
   }
   static numeric(value: number): ColorMetrics {
@@ -233,7 +233,7 @@ class ColorMetrics {
       const [, red, green, blue, alpha] = rgbaMatch;
       return new ColorMetrics(Number.parseInt(red, 10), Number.parseInt(green, 10), Number.parseInt(blue, 10), Number.parseFloat(alpha) * MAX_CHANNEL_VALUE);
     } else {
-      const error = new Error("Parameter error. The format of the input color string is not rgb or rgba.") as BusinessError;
+      const error = new Error('Parameter error. The format of the input color string is not RGB or RGBA.') as BusinessError;
       error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
       throw error;
     }
@@ -241,7 +241,7 @@ class ColorMetrics {
 
   static resourceColor(color: ResourceColor): ColorMetrics {
     if (color === undefined || color === null) {
-      const error = new Error("Parameter error. The type of input color parameter is not ResourceColor.") as BusinessError;
+      const error = new Error('Parameter error. The type of the input color parameter is not ResourceColor.') as BusinessError;
       error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
       throw error;
     }
@@ -249,7 +249,7 @@ class ColorMetrics {
     if (typeof color === 'object') {
       chanels = getUINativeModule().nativeUtils.parseResourceColor(color);
       if (chanels === undefined) {
-        const error = new Error("Get color resource failed.") as BusinessError;
+        const error = new Error('Failed to obtain the color resource.') as BusinessError;
         error.code = ERROR_CODE_RESOURCE_GET_FAILED;
         throw error;
       }
@@ -267,7 +267,7 @@ class ColorMetrics {
         return ColorMetrics.rgbOrRGBA(color);
       }
     } else {
-      const error = new Error("Parameter error. The type of input color parameter is not ResourceColor.") as BusinessError;
+      const error = new Error('Parameter error. The type of the input color parameter is not ResourceColor.') as BusinessError;
       error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
       throw error;
     }
@@ -304,13 +304,13 @@ class ColorMetrics {
   }
   blendColor(overlayColor: ColorMetrics): ColorMetrics {
     if (overlayColor === undefined || overlayColor === null) {
-      const error = new Error("Parameter error. The type of input parameter is not ColorMetrics.") as BusinessError;
+      const error = new Error('Parameter error. The type of the input parameter is not ColorMetrics.') as BusinessError;
       error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
       throw error;
     }
     const chanels = getUINativeModule().nativeUtils.blendColor(this.toNumeric(), overlayColor.toNumeric());
     if (chanels === undefined) {
-      const error = new Error("Parameter error. The type of input parameter is not ColorMetrics.") as BusinessError;
+      const error = new Error('Parameter error. The type of the input parameter is not ColorMetrics.') as BusinessError;
       error.code = ERROR_CODE_COLOR_PARAMETER_INCORRECT;
       throw error;
     }
@@ -337,15 +337,12 @@ class ColorMetrics {
   }
 }
 
-class ShapeMask {
+class BaseShape {
   public rect: Rect | null = null;
   public roundRect: RoundRect | null = null;
   public circle: Circle | null = null;
   public oval: Rect | null = null;
   public path: CommandPath | null = null;
-  public fillColor: number = 0XFF000000;
-  public strokeColor: number = 0XFF000000;
-  public strokeWidth: number = 0;
   setRectShape(rect: Rect) {
     this.rect = rect;
     this.roundRect = null;
@@ -383,6 +380,14 @@ class ShapeMask {
   }
 }
 
+class ShapeClip extends BaseShape { }
+
+class ShapeMask extends BaseShape {
+  public fillColor: number = 0XFF000000;
+  public strokeColor: number = 0XFF000000;
+  public strokeWidth: number = 0;
+}
+
 class RenderNode {
   private childrenList: Array<RenderNode>;
   private nodePtr: NodePtr;
@@ -396,6 +401,7 @@ class RenderNode {
   private scaleValue: Vector2;
   private shadowColorValue: number;
   private shadowOffsetValue: Vector2;
+  private labelValue: string;
   private shadowAlphaValue: number;
   private shadowElevationValue: number;
   private shadowRadiusValue: number;
@@ -407,16 +413,23 @@ class RenderNode {
   private borderColorValue: EdgeColors;
   private borderRadiusValue: BorderRadiuses;
   private shapeMaskValue: ShapeMask;
+  private shapeClipValue: ShapeClip;
   private _nativeRef: NativeStrongRef;
   private _frameNode: WeakRef<FrameNode>;
   private lengthMetricsUnitValue: LengthMetricsUnit;
+  private markNodeGroupValue: boolean;
+  private apiTargetVersion: number;
 
   constructor(type: string) {
     this.nodePtr = null;
     this.childrenList = [];
     this.parentRenderNode = null;
     this.backgroundColorValue = 0;
+    this.apiTargetVersion = getUINativeModule().common.getApiTargetVersion();
     this.clipToFrameValue = true;
+    if (this.apiTargetVersion && this.apiTargetVersion < 12) {
+        this.clipToFrameValue = false;
+    }
     this.frameValue = { x: 0, y: 0, width: 0, height: 0 };
     this.opacityValue = 1.0;
     this.pivotValue = { x: 0.5, y: 0.5 };
@@ -424,6 +437,7 @@ class RenderNode {
     this.scaleValue = { x: 1.0, y: 1.0 };
     this.shadowColorValue = 0;
     this.shadowOffsetValue = { x: 0, y: 0 };
+    this.labelValue = '';
     this.shadowAlphaValue = 0;
     this.shadowElevationValue = 0;
     this.shadowRadiusValue = 0;
@@ -433,12 +447,17 @@ class RenderNode {
       0, 0, 0, 1];
     this.translationValue = { x: 0, y: 0 };
     this.lengthMetricsUnitValue = LengthMetricsUnit.DEFAULT;
+    this.markNodeGroupValue = false;
     if (type === 'BuilderRootFrameNode' || type === 'CustomFrameNode') {
       return;
     }
     this._nativeRef = getUINativeModule().renderNode.createRenderNode(this);
     this.nodePtr = this._nativeRef?.getNativeHandle();
-    this.clipToFrame = true;
+    if (this.apiTargetVersion && this.apiTargetVersion < 12) {
+      this.clipToFrame = false;
+  } else {
+      this.clipToFrame = true;
+  }
   }
 
   set backgroundColor(color: number) {
@@ -512,6 +531,10 @@ class RenderNode {
     }
     getUINativeModule().renderNode.setShadowOffset(this.nodePtr, this.shadowOffsetValue.x, this.shadowOffsetValue.y, this.lengthMetricsUnitValue);
   }
+  set label(label: string) {
+    this.labelValue = this.checkUndefinedOrNullWithDefaultValue<string>(label, '');
+    getUINativeModule().renderNode.setLabel(this.nodePtr, this.labelValue);
+  }
   set shadowAlpha(alpha: number) {
     this.shadowAlphaValue = this.checkUndefinedOrNullWithDefaultValue<number>(alpha, 0);
     getUINativeModule().renderNode.setShadowAlpha(this.nodePtr, this.shadowAlphaValue);
@@ -569,6 +592,14 @@ class RenderNode {
       this.lengthMetricsUnit = unit;
     }
   }
+  set markNodeGroup(isNodeGroup) {
+    if (isNodeGroup === undefined || isNodeGroup === null) {
+        this.markNodeGroupValue = false;
+    } else {
+        this.markNodeGroupValue = isNodeGroup;
+    }
+    getUINativeModule().renderNode.setMarkNodeGroup(this.nodePtr, this.markNodeGroupValue);
+  }
   get backgroundColor(): number {
     return this.backgroundColorValue;
   }
@@ -599,6 +630,9 @@ class RenderNode {
   get shadowOffset(): Vector2 {
     return this.shadowOffsetValue;
   }
+  get label(): string {
+    return this.labelValue;
+  }
   get shadowAlpha(): number {
     return this.shadowAlphaValue;
   }
@@ -619,7 +653,10 @@ class RenderNode {
   }
   get lengthMetricsUnit() {
     return this.lengthMetricsUnitValue;
-}
+  }
+  get markNodeGroup() {
+    return this.markNodeGroupValue;
+  }
   checkUndefinedOrNullWithDefaultValue<T>(arg: T, defaultValue: T): T {
     if (arg === undefined || arg === null) {
       return defaultValue;
@@ -754,7 +791,8 @@ class RenderNode {
     } else {
       this.borderStyleValue = style;
     }
-    getUINativeModule().renderNode.setBorderStyle(this.nodePtr, this.borderStyleValue.left, this.borderStyleValue.top, this.borderStyleValue.right, this.borderStyleValue.bottom);
+    getUINativeModule().renderNode.setBorderStyle(
+      this.nodePtr, this.borderStyleValue.left, this.borderStyleValue.top, this.borderStyleValue.right, this.borderStyleValue.bottom);
   }
   get borderStyle(): EdgeStyles {
     return this.borderStyleValue;
@@ -765,7 +803,9 @@ class RenderNode {
     } else {
       this.borderWidthValue = width;
     }
-    getUINativeModule().renderNode.setBorderWidth(this.nodePtr, this.borderWidthValue.left, this.borderWidthValue.top, this.borderWidthValue.right, this.borderWidthValue.bottom, this.lengthMetricsUnitValue);
+    getUINativeModule().renderNode.setBorderWidth(
+      this.nodePtr, this.borderWidthValue.left, this.borderWidthValue.top,
+      this.borderWidthValue.right, this.borderWidthValue.bottom, this.lengthMetricsUnitValue);
   }
   get borderWidth(): EdgeWidths {
     return this.borderWidthValue;
@@ -776,7 +816,8 @@ class RenderNode {
     } else {
       this.borderColorValue = color;
     }
-    getUINativeModule().renderNode.setBorderColor(this.nodePtr, this.borderColorValue.left, this.borderColorValue.top, this.borderColorValue.right, this.borderColorValue.bottom);
+    getUINativeModule().renderNode.setBorderColor(
+      this.nodePtr, this.borderColorValue.left, this.borderColorValue.top, this.borderColorValue.right, this.borderColorValue.bottom);
   }
   get borderColor(): EdgeColors {
     return this.borderColorValue;
@@ -787,7 +828,9 @@ class RenderNode {
     } else {
       this.borderRadiusValue = radius;
     }
-    getUINativeModule().renderNode.setBorderRadius(this.nodePtr, this.borderRadiusValue.topLeft, this.borderRadiusValue.topRight, this.borderRadiusValue.bottomLeft, this.borderRadiusValue.bottomRight, this.lengthMetricsUnitValue);
+    getUINativeModule().renderNode.setBorderRadius(
+      this.nodePtr, this.borderRadiusValue.topLeft, this.borderRadiusValue.topRight,
+      this.borderRadiusValue.bottomLeft, this.borderRadiusValue.bottomRight, this.lengthMetricsUnitValue);
   }
   get borderRadius(): BorderRadiuses {
     return this.borderRadiusValue;
@@ -800,14 +843,18 @@ class RenderNode {
     }
     if (this.shapeMaskValue.rect !== null) {
       const rectMask = this.shapeMaskValue.rect;
-      getUINativeModule().renderNode.setRectMask(this.nodePtr, rectMask.left, rectMask.top, rectMask.right, rectMask.bottom, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
+      getUINativeModule().renderNode.setRectMask(
+        this.nodePtr, rectMask.left, rectMask.top, rectMask.right, rectMask.bottom,
+        this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
     } else if (this.shapeMaskValue.circle !== null) {
       const circle = this.shapeMaskValue.circle;
-      getUINativeModule().renderNode.setCircleMask(this.nodePtr, circle.centerX, circle.centerY, circle.radius, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
+      getUINativeModule().renderNode.setCircleMask(
+        this.nodePtr, circle.centerX, circle.centerY, circle.radius,
+        this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
     } else if (this.shapeMaskValue.roundRect !== null) {
-      const reoundRect = this.shapeMask.roundRect;
-      const corners = reoundRect.corners;
-      const rect = reoundRect.rect;
+      const roundRect = this.shapeMask.roundRect;
+      const corners = roundRect.corners;
+      const rect = roundRect.rect;
       getUINativeModule().renderNode.setRoundRectMask(
         this.nodePtr,
         corners.topLeft.x,
@@ -827,14 +874,64 @@ class RenderNode {
         this.shapeMaskValue.strokeWidth);
     } else if (this.shapeMaskValue.oval !== null) {
       const oval = this.shapeMaskValue.oval;
-      getUINativeModule().renderNode.setOvalMask(this.nodePtr, oval.left, oval.top, oval.right, oval.bottom, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
+      getUINativeModule().renderNode.setOvalMask(
+        this.nodePtr, oval.left, oval.top, oval.right, oval.bottom,
+        this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
     } else if (this.shapeMaskValue.path !== null) {
       const path = this.shapeMaskValue.path;
-      getUINativeModule().renderNode.setPath(this.nodePtr, path.commands, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
+      getUINativeModule().renderNode.setPath(
+        this.nodePtr, path.commands, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
     }
   }
   get shapeMask(): ShapeMask {
     return this.shapeMaskValue;
+  }
+  set shapeClip(shapeClip: ShapeClip) {
+    if (shapeClip === undefined || shapeClip === null) {
+      this.shapeClipValue = new ShapeClip();
+    } else {
+      this.shapeClipValue = shapeClip;
+    }
+    if (this.shapeClipValue.rect !== null) {
+      const rectClip = this.shapeClipValue.rect;
+      getUINativeModule().renderNode.setRectClip(
+        this.nodePtr, rectClip.left, rectClip.top, rectClip.right, rectClip.bottom);
+    } else if (this.shapeClipValue.circle !== null) {
+      const circle = this.shapeClipValue.circle;
+      getUINativeModule().renderNode.setCircleClip(
+        this.nodePtr, circle.centerX, circle.centerY, circle.radius);
+    } else if (this.shapeClipValue.roundRect !== null) {
+      const roundRect = this.shapeClipValue.roundRect;
+      const corners = roundRect.corners;
+      const rect = roundRect.rect;
+      getUINativeModule().renderNode.setRoundRectClip(
+        this.nodePtr,
+        corners.topLeft.x,
+        corners.topLeft.y,
+        corners.topRight.x,
+        corners.topRight.y,
+        corners.bottomLeft.x,
+        corners.bottomLeft.y,
+        corners.bottomRight.x,
+        corners.bottomRight.y,
+        rect.left,
+        rect.top,
+        rect.right,
+        rect.bottom);
+    } else if (this.shapeClipValue.oval !== null) {
+      const oval = this.shapeClipValue.oval;
+      getUINativeModule().renderNode.setOvalClip(
+        this.nodePtr, oval.left, oval.top, oval.right, oval.bottom,
+      );
+    } else if (this.shapeClipValue.path !== null) {
+      const path = this.shapeClipValue.path;
+      getUINativeModule().renderNode.setPathClip(
+        this.nodePtr, path.commands);
+    }
+  }
+  get shapeClip(): ShapeClip {
+    this.shapeClipValue = this.shapeClipValue ? this.shapeClipValue : new ShapeClip();
+    return this.shapeMask;
   }
 }
 

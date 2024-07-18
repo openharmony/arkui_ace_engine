@@ -19,7 +19,8 @@
 
 namespace OHOS::Ace::V2 {
 
-void ListPositionController::ScrollToIndex(int32_t index, bool /* smooth */, ScrollAlign /* align */)
+void ListPositionController::ScrollToIndex(
+    int32_t index, bool /* smooth */, ScrollAlign /* align */, std::optional<float> /* extraOffset */)
 {
     auto list = AceType::DynamicCast<V2::RenderList>(scroll_.Upgrade());
     if (!list) {

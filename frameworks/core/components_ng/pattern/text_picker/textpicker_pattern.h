@@ -238,7 +238,18 @@ public:
         weakButtonCancel_ = buttonCancelNode;
     }
 
+    void SetForwardNode(WeakPtr<FrameNode> buttonForwardNode)
+    {
+        weakButtonForward_ = buttonForwardNode;
+    }
+
+    void SetBackwardNode(WeakPtr<FrameNode> buttonBackwardNode)
+    {
+        weakButtonBackward_ = buttonBackwardNode;
+    }
+
     void OnLanguageConfigurationUpdate() override;
+    void OnFontConfigurationUpdate() override;
 
     void SetValues(const std::vector<std::string>& values)
     {
@@ -354,8 +365,107 @@ public:
 
     void SetCanLoop(bool isLoop);
 
+    bool GetCanLoop()
+    {
+        return canloop_;
+    }
+
+    void HasUserDefinedDisappearFontFamily(bool isUserDefined)
+    {
+        hasUserDefinedDisappearFontFamily_ = isUserDefined;
+    }
+
+    bool GetHasUserDefinedDisappearFontFamily()
+    {
+        return hasUserDefinedDisappearFontFamily_;
+    }
+
+    void HasUserDefinedNormalFontFamily(bool isUserDefined)
+    {
+        hasUserDefinedNormalFontFamily_ = isUserDefined;
+    }
+
+    bool GetHasUserDefinedNormalFontFamily()
+    {
+        return hasUserDefinedNormalFontFamily_;
+    }
+
+    void HasUserDefinedSelectedFontFamily(bool isUserDefined)
+    {
+        hasUserDefinedSelectedFontFamily_ = isUserDefined;
+    }
+
+    bool GetHasUserDefinedSelectedFontFamily()
+    {
+        return hasUserDefinedSelectedFontFamily_;
+    }
+
+    void SetRangeType(int32_t rangeType)
+    {
+        rangeType_ = rangeType;
+    }
+
+    int32_t GetRangeType()
+    {
+        return rangeType_;
+    }
+
+    void updateFontConfigurationEvent(const std::function<void()>& closeDialogEvent)
+    {
+        closeDialogEvent_ = closeDialogEvent;
+    }
+
+        void SetTextProperties(const PickerTextProperties& properties)
+    {
+        if (properties.disappearTextStyle_.fontSize.has_value() && properties.disappearTextStyle_.fontSize->IsValid()) {
+            isUserSetGradientFont_ = true;
+            gradientHeight_ = properties.disappearTextStyle_.fontSize.value();
+        }
+
+        if (properties.normalTextStyle_.fontSize.has_value() && properties.normalTextStyle_.fontSize->IsValid()) {
+            isUserSetGradientFont_ = true;
+            gradientHeight_ = std::max(properties.normalTextStyle_.fontSize.value(), gradientHeight_);
+        }
+
+        if (properties.selectedTextStyle_.fontSize.has_value() && properties.selectedTextStyle_.fontSize->IsValid()) {
+            isUserSetDividerSpacingFont_ = true;
+            dividerSpacing_ = properties.selectedTextStyle_.fontSize.value();
+        }
+    }
+
+    bool GetIsUserSetDividerSpacingFont()
+    {
+        return isUserSetDividerSpacingFont_;
+    }
+
+    bool GetIsUserSetGradientFont()
+    {
+        return isUserSetGradientFont_;
+    }
+
+    Dimension GetDividerSpacing()
+    {
+        return dividerSpacing_;
+    }
+
+    Dimension GetTextGradientHeight()
+    {
+        return gradientHeight_;
+    }
+
+    void SetPaintDividerSpacing(float& value)
+    {
+        paintDividerSpacing_ = value;
+    }
+
+    float GetPaintDividerSpacing()
+    {
+        return paintDividerSpacing_;
+    }
+
 private:
     void OnModifyDone() override;
+    void SetLayoutDirection(TextDirection textDirection);
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -391,7 +501,7 @@ private:
     uint32_t selectedIndex_ = 0;
     std::vector<NG::RangeContent> range_;
     std::vector<NG::RangeContent> options_;
-    uint32_t columnsKind_;
+    uint32_t columnsKind_ = 0;
     std::vector<NG::TextCascadePickerOptions> cascadeOptions_;
     std::map<WeakPtr<FrameNode>, std::vector<NG::RangeContent>> optionsWithNode_;
     std::vector<NG::TextCascadePickerOptions> cascadeOriginptions_;
@@ -399,14 +509,21 @@ private:
     bool isHasSelectAttr_ = false;
     WeakPtr<FrameNode> weakButtonConfirm_;
     WeakPtr<FrameNode> weakButtonCancel_;
+    WeakPtr<FrameNode> weakButtonForward_;
+    WeakPtr<FrameNode> weakButtonBackward_;
     std::vector<std::string> values_;
     std::vector<uint32_t> selecteds_;
     Color backgroundColor_ = Color::WHITE;
     bool resizeFlag_ = false;
     bool isShowInDialog_ = false;
+    bool canloop_ = true;
 
     // inner focus switch
     bool operationOn_ = false;
+
+    bool hasUserDefinedDisappearFontFamily_ = false;
+    bool hasUserDefinedNormalFontFamily_ = false;
+    bool hasUserDefinedSelectedFontFamily_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerPattern);
 
@@ -417,6 +534,13 @@ private:
     ItemDivider divider_;
     bool customDividerFlag_ = false;
     Dimension value_;
+    int32_t rangeType_ = 0;
+    std::function<void()> closeDialogEvent_;
+    bool isUserSetDividerSpacingFont_ = false;
+    bool isUserSetGradientFont_ = false;
+    Dimension gradientHeight_;
+    Dimension dividerSpacing_;
+    float paintDividerSpacing_ = 1.0f;
 };
 } // namespace OHOS::Ace::NG
 

@@ -384,9 +384,9 @@ Size RenderGridLayout::GetTargetLayoutSize(int32_t row, int32_t col)
     innerLayout.SetMaxSize(Size(colSize_, rowSize_));
     std::vector<std::string> rows, cols;
     StringUtils::StringSplitter(rowsArgs_, ' ', rows);
-    rowCount_ = rows.size() == 0 ? 1 : rows.size();
+    rowCount_ = rows.size() == 0 ? 1 : static_cast<int32_t>(rows.size());
     StringUtils::StringSplitter(colsArgs_, ' ', cols);
-    colCount_ = cols.size() == 0 ? 1 : cols.size();
+    colCount_ = cols.size() == 0 ? 1 : static_cast<int32_t>(cols.size());
     int32_t rowIndex = 0;
     int32_t colIndex = 0;
     int32_t itemIndex = 0;
@@ -427,8 +427,8 @@ std::string RenderGridLayout::PreParseRows()
     std::vector<std::string> strs;
     StringUtils::StringSplitter(rowsArgs_, ' ', strs);
     std::string current;
-    int32_t rowArgSize = strs.size();
-    for (int32_t i = 0; i < rowArgSize; ++i) {
+    auto rowArgSize = strs.size();
+    for (size_t i = 0; i < rowArgSize; ++i) {
         current = strs[i];
         if (strs[i] == std::string(UNIT_AUTO)) {
             Size layoutSize = GetTargetLayoutSize(i, 0);
@@ -449,8 +449,8 @@ std::string RenderGridLayout::PreParseCols()
     std::vector<std::string> strs;
     StringUtils::StringSplitter(colsArgs_, ' ', strs);
     std::string current;
-    int32_t colArgSize = strs.size();
-    for (int32_t i = 0; i < colArgSize; ++i) {
+    auto colArgSize = strs.size();
+    for (size_t i = 0; i < colArgSize; ++i) {
         current = strs[i];
         if (strs[i] == std::string(UNIT_AUTO)) {
             Size layoutSize = GetTargetLayoutSize(0, i);
@@ -471,8 +471,8 @@ std::string RenderGridLayout::PreParseArgs(const std::string& args)
     std::vector<std::string> strs;
     StringUtils::StringSplitter(args, ' ', strs);
     std::string current;
-    int32_t argSize = strs.size();
-    for (int32_t i = 0; i < argSize; ++i) {
+    auto argSize = strs.size();
+    for (size_t i = 0; i < argSize; ++i) {
         current = strs[i];
         if (strs[i] == std::string(UNIT_AUTO)) {
             Size layoutSize = GetTargetLayoutSize(i, 0);
@@ -525,8 +525,8 @@ void RenderGridLayout::InitialGridProp()
         gridWidth_ = colSize_;
     }
     // Initialize the columnCount and rowCount, default is 1
-    colCount_ = cols.size();
-    rowCount_ = rows.size();
+    colCount_ = static_cast<int32_t>(cols.size());
+    rowCount_ = static_cast<int32_t>(rows.size());
     itemCountMax_ = colCount_ * rowCount_;
     gridCells_.clear();
     int32_t row = 0;
@@ -556,7 +556,7 @@ void RenderGridLayout::UpdateAccessibilityAttr()
     refPtr->AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
 }
 
-// Support five ways below:
+// This function support five ways as below:
 // (1) 50px 100px 60px
 // (2) 1fr 1fr 2fr
 // (3) 30% 20% 50%
@@ -1160,11 +1160,9 @@ void RenderGridLayout::PanOnActionUpdate(const GestureEvent& info)
     auto targetRenderGrid = FindTargetRenderNode<RenderGridLayout>(GetContext().Upgrade(), info);
     auto preTargetRenderGrid = GetPreTargetRenderGrid();
     auto mainTargetRenderGrid = GetMainTargetRenderGrid();
-
     if (!mainTargetRenderGrid) {
         return;
     }
-
     if (targetRenderGrid) {
         if (preTargetRenderGrid == targetRenderGrid) {
             mainTargetRenderGrid->OnDragMove(event);
@@ -1616,7 +1614,7 @@ void RenderGridLayout::CalculateVerticalSize(
         cols.push_back(colSize_);
     }
     // Get the number of items in each row
-    colCount_ = cols.size();
+    colCount_ = static_cast<int32_t>(cols.size());
     // Get the number of items
     auto totalNum = (int32_t)GetChildren().size() + dragLeaveOrEnter;
     // Count the number of rows
@@ -1642,7 +1640,7 @@ void RenderGridLayout::CalculateHorizontalSize(
         rows.push_back(rowSize_);
     }
     // Get the number of items in each col
-    rowCount_ = rows.size();
+    rowCount_ = static_cast<int32_t>(rows.size());
     // Get the number of items
     auto totalNum = (int32_t)GetChildren().size() + dragLeaveOrEnter;
     // Count the number of cols
@@ -3372,7 +3370,7 @@ std::vector<double> RenderGridLayout::ParseArgsWithAutoFill(const std::string& a
     if (!CheckAutoFillParameter(args, size, lens, retTemplates)) {
         return lens;
     }
-    int countNonRepeat = 0;
+    uint32_t countNonRepeat = 0;
     double sizeRepeat = 0.0;
     double sizeNonRepeat = 0.0;
     bool bRepeat = false;

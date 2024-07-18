@@ -38,19 +38,20 @@ void MagnifierController::OpenMagnifier()
     CHECK_NULL_VOID(pattern);
     auto textBasePattern = DynamicCast<TextBase>(pattern);
     CHECK_NULL_VOID(textBasePattern);
-    if (!magnifierFrameNode_) {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto rootUINode = pipeline->GetRootElement();
+    CHECK_NULL_VOID(rootUINode);
+    if ((!magnifierFrameNode_) || (rootUINode->GetChildIndexById(magnifierFrameNode_->GetId()) == -1)) {
         CreateMagnifierChildNode();
     }
     CHECK_NULL_VOID(magnifierFrameNode_);
     auto layoutProperty = magnifierFrameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto overlayManager = pipeline->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    auto rootUINode = overlayManager->GetRootNode().Upgrade();
-    CHECK_NULL_VOID(rootUINode);
+
     if (rootUINode->GetChildIndexById(magnifierFrameNode_->GetId()) == -1) {
         magnifierFrameNode_->MountToParent(rootUINode);
     }
@@ -71,23 +72,11 @@ void MagnifierController::OpenMagnifier()
 void MagnifierController::CloseMagnifier()
 {
     CHECK_NULL_VOID(magnifierFrameNode_);
-    auto pattern = pattern_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    auto textBasePattern = DynamicCast<TextBase>(pattern);
-    CHECK_NULL_VOID(textBasePattern);
-
-    auto layoutProperty = magnifierFrameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateVisibility(VisibleType::GONE);
-
-    auto childContext = magnifierFrameNode_->GetRenderContext();
-    CHECK_NULL_VOID(childContext);
-
-    auto paintOffset = textBasePattern->GetTextPaintOffset();
-    childContext->UpdatePosition(OffsetT<Dimension>(Dimension(paintOffset.GetX()), Dimension(paintOffset.GetY())));
-    childContext->SetContentRectToFrame(RectF(paintOffset.GetX(), paintOffset.GetY(), 0.0f, 0.0f));
-    magnifierFrameNode_->ForceSyncGeometryNode();
-    magnifierFrameNode_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto parentNode = magnifierFrameNode_->GetParent();
+    CHECK_NULL_VOID(parentNode);
+    parentNode->RemoveChild(magnifierFrameNode_);
+    parentNode->MarkNeedSyncRenderTree();
+    parentNode->RebuildRenderContextTree();
 }
 
 void MagnifierController::CreateMagnifierChildNode()
@@ -139,14 +128,10 @@ RefPtr<PixelMap> MagnifierController::GetPixelMap()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, NULL);
-    auto overlayManager = pipeline->GetOverlayManager();
-    CHECK_NULL_RETURN(overlayManager, NULL);
-    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    auto rootUINode = pipeline->GetRootElement();
     CHECK_NULL_RETURN(rootUINode, NULL);
-    auto rootFrameNode = DynamicCast<FrameNode>(rootUINode);
-    CHECK_NULL_RETURN(rootFrameNode, NULL);
 
-    auto context = rootFrameNode->GetRenderContext();
+    auto context = rootUINode->GetRenderContext();
     if (!context) {
         UpdateShowMagnifier();
     }

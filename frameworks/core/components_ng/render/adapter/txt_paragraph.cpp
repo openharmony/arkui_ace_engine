@@ -15,6 +15,7 @@
 
 #include "core/components_ng/render/adapter/txt_paragraph.h"
 
+#include "base/log/ace_performance_monitor.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "base/geometry/dimension.h"
@@ -68,7 +69,7 @@ void TxtParagraph::CreateBuilder()
     Rosen::TypographyStyle style;
     style.textDirection = Constants::ConvertTxtTextDirection(paraStyle_.direction);
     style.textAlign = Constants::ConvertTxtTextAlign(paraStyle_.align);
-    style.maxLines = paraStyle_.maxLines;
+    style.maxLines = paraStyle_.maxLines == UINT32_MAX ? UINT32_MAX - 1 : paraStyle_.maxLines;
     style.fontSize = paraStyle_.fontSize; // Rosen style.fontSize
     style.ellipsisModal = static_cast<Rosen::EllipsisModal>(paraStyle_.ellipsisMode);
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle_.wordBreak);
@@ -175,6 +176,7 @@ int32_t TxtParagraph::AddPlaceholder(const PlaceholderRun& span)
 
 void TxtParagraph::Build()
 {
+    OTHER_DURATION();
     ACE_TEXT_SCOPED_TRACE("TxtParagraph::Build");
     CHECK_NULL_VOID(!hasExternalParagraph_ && builder_);
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -205,6 +207,7 @@ void TxtParagraph::Reset()
 
 void TxtParagraph::Layout(float width)
 {
+    OTHER_DURATION();
     ACE_TEXT_SCOPED_TRACE("TxtParagraph::Layout");
     CHECK_NULL_VOID(!hasExternalParagraph_ && paragraph_);
     paragraph_->Layout(width);
@@ -461,7 +464,7 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
         return HandleCaretWhenEmpty(result);
     }
     if (static_cast<size_t>(extent) > GetParagraphLength()) {
-        extent = GetParagraphLength();
+        extent = static_cast<int32_t>(GetParagraphLength());
     }
 
     extent = AdjustIndexForEmoji(extent);
@@ -499,7 +502,7 @@ bool TxtParagraph::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& 
         boxes = paragrah->GetRectsForRange(
             prev, extent, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
 #else
-        boxes = paragrah->GetTextRectsByBoundary(prev, extent,
+        boxes = paragrah->GetTextRectsByBoundary(prev, static_cast<size_t>(extent),
             needLineHighest ? Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM : Rosen::TextRectHeightStyle::TIGHT,
             Rosen::TextRectWidthStyle::TIGHT);
 #endif
@@ -630,19 +633,31 @@ void TxtParagraph::GetRectsForRange(int32_t start, int32_t end, std::vector<Rect
 {
     auto adjustStart = AdjustIndexForEmoji(start);
     auto adjustEnd = AdjustIndexForEmoji(end);
-    GetRectsForRangeInner(adjustStart, adjustEnd, selectedRects);
+    GetRectsForRangeInner(adjustStart, adjustEnd, selectedRects, RectHeightPolicy::COVER_LINE);
 }
 
-void TxtParagraph::GetRectsForRangeInner(int32_t start, int32_t end, std::vector<RectF>& selectedRects)
+void TxtParagraph::GetTightRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects)
+{
+    auto adjustStart = AdjustIndexForEmoji(start);
+    auto adjustEnd = AdjustIndexForEmoji(end);
+    GetRectsForRangeInner(adjustStart, adjustEnd, selectedRects, RectHeightPolicy::COVER_TEXT);
+}
+
+void TxtParagraph::GetRectsForRangeInner(int32_t start, int32_t end, std::vector<RectF>& selectedRects,
+    RectHeightPolicy rectHeightPolicy)
 {
     auto paragrah = GetParagraph();
     CHECK_NULL_VOID(paragrah);
 #ifndef USE_GRAPHIC_TEXT_GINE
-    const auto& boxes = paragrah->GetRectsForRange(
-        start, end, txt::Paragraph::RectHeightStyle::kMax, txt::Paragraph::RectWidthStyle::kTight);
+    auto heightStyle = rectHeightPolicy == RectHeightPolicy::COVER_TEXT
+        ? txt::Paragraph::RectHeightStyle::kTight
+        : txt::Paragraph::RectHeightStyle::kMax;
+    const auto& boxes = paragrah->GetRectsForRange(start, end, heightStyle, txt::Paragraph::RectWidthStyle::kTight);
 #else
-    const auto& boxes = paragrah->GetTextRectsByBoundary(
-        start, end, Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM, Rosen::TextRectWidthStyle::TIGHT);
+    auto heightStyle = rectHeightPolicy == RectHeightPolicy::COVER_TEXT
+        ? Rosen::TextRectHeightStyle::TIGHT
+        : Rosen::TextRectHeightStyle::COVER_TOP_AND_BOTTOM;
+    const auto& boxes = paragrah->GetTextRectsByBoundary(start, end, heightStyle, Rosen::TextRectWidthStyle::TIGHT);
 #endif
     if (boxes.empty()) {
         return;
@@ -707,16 +722,16 @@ void TxtParagraph::GetRectsForPlaceholders(std::vector<RectF>& selectedRects)
 }
 
 bool TxtParagraph::CalcCaretMetricsByPosition(
-    int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity)
+    int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity, bool needLineHighest)
 {
     CaretMetricsF metrics;
     bool computeSuccess = false;
     if (textAffinity == TextAffinity::DOWNSTREAM) {
-        computeSuccess =
-            ComputeOffsetForCaretDownstream(extent, metrics) || ComputeOffsetForCaretUpstream(extent, metrics);
+        computeSuccess = ComputeOffsetForCaretDownstream(extent, metrics, needLineHighest) ||
+                         ComputeOffsetForCaretUpstream(extent, metrics, needLineHighest);
     } else {
-        computeSuccess =
-            ComputeOffsetForCaretUpstream(extent, metrics) || ComputeOffsetForCaretDownstream(extent, metrics);
+        computeSuccess = ComputeOffsetForCaretUpstream(extent, metrics, needLineHighest) ||
+                         ComputeOffsetForCaretDownstream(extent, metrics, needLineHighest);
     }
     if (computeSuccess) {
         if (metrics.height <= 0 || std::isnan(metrics.height)) {
@@ -824,8 +839,11 @@ bool TxtParagraph::HandleCaretWhenEmpty(CaretMetricsF& result)
     }
     if (paraStyle_.align != TextAlign::START) {
         HandleTextAlign(result, paraStyle_.align);
-    } else if (paraStyle_.leadingMargin) {
-        HandleLeadingMargin(result, *(paraStyle_.leadingMargin));
+    } else {
+        if (paraStyle_.leadingMargin) {
+            HandleLeadingMargin(result, *(paraStyle_.leadingMargin));
+        }
+        result.offset.SetX(result.offset.GetX() + paraStyle_.indent.ConvertToPx());
     }
     return true;
 }
@@ -870,11 +888,8 @@ TextLineMetrics TxtParagraph::GetLineMetrics(size_t lineNumber)
     TextLineMetrics lineMetrics;
     OHOS::Rosen::LineMetrics resMetric;
     CHECK_NULL_RETURN(paragraphTxt, lineMetrics);
-    bool success = paragraphTxt->GetLineMetricsAt(lineNumber, &resMetric);
-    if (!success) {
-        TAG_LOGE(AceLogTag::ACE_TEXT, "TxtParagraph::GetLineMetrics failed");
-    }
- 
+    paragraphTxt->GetLineMetricsAt(lineNumber, &resMetric);
+
     lineMetrics.ascender = resMetric.ascender;
     lineMetrics.descender = resMetric.descender;
     lineMetrics.capHeight = resMetric.capHeight;
@@ -887,12 +902,12 @@ TextLineMetrics TxtParagraph::GetLineMetrics(size_t lineNumber)
     lineMetrics.endIndex = resMetric.endIndex;
     lineMetrics.baseline = resMetric.baseline;
     lineMetrics.lineNumber = resMetric.lineNumber;
- 
+
     if (resMetric.runMetrics.empty()) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "GetLineMetrics runMetrics is empty.");
         return lineMetrics;
     }
- 
+
     auto runMetricsResMap = resMetric.runMetrics;
     for (const auto& it : runMetricsResMap) {
         RunMetrics runMetrics;
@@ -902,11 +917,14 @@ TextLineMetrics TxtParagraph::GetLineMetrics(size_t lineNumber)
     }
     return lineMetrics;
 }
- 
+
 void TxtParagraph::SetRunMetrics(RunMetrics& runMetrics, const OHOS::Rosen::RunMetrics& runMetricsRes)
 {
     auto textStyleRes = runMetricsRes.textStyle;
     runMetrics.textStyle.SetTextDecoration(static_cast<TextDecoration>(textStyleRes->decoration));
+    Color color;
+    color.SetValue(textStyleRes->color.CastToColorQuad());
+    runMetrics.textStyle.SetTextColor(color);
     runMetrics.textStyle.SetFontWeight(static_cast<FontWeight>(textStyleRes->fontWeight));
     runMetrics.textStyle.SetFontStyle(static_cast<FontStyle>(textStyleRes->fontStyle));
     runMetrics.textStyle.SetTextBaseline(static_cast<TextBaseline>(textStyleRes->baseline));
@@ -917,10 +935,15 @@ void TxtParagraph::SetRunMetrics(RunMetrics& runMetrics, const OHOS::Rosen::RunM
     runMetrics.textStyle.SetHeightScale(textStyleRes->heightScale);
     runMetrics.textStyle.SetHalfLeading(textStyleRes->halfLeading);
     runMetrics.textStyle.SetHeightOnly(textStyleRes->heightOnly);
-    runMetrics.textStyle.SetEllipsis(textStyleRes->ellipsis);
+    auto& ellipsis = textStyleRes->ellipsis;
+    if (ellipsis == StringUtils::DEFAULT_USTRING || ellipsis.empty()) {
+        runMetrics.textStyle.SetEllipsis(u"");
+    } else {
+        runMetrics.textStyle.SetEllipsis(ellipsis);
+    }
     runMetrics.textStyle.SetEllipsisMode(static_cast<EllipsisMode>(textStyleRes->ellipsisModal));
     runMetrics.textStyle.SetLocale(textStyleRes->locale);
- 
+
     auto fontMetricsRes = runMetricsRes.fontMetrics;
     runMetrics.fontMetrics.fFlags = fontMetricsRes.fFlags;
     runMetrics.fontMetrics.fTop = fontMetricsRes.fTop;

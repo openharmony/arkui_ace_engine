@@ -24,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_type.h"
+#include "core/common/udmf/udmf_client.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
@@ -34,6 +35,9 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const std::string DROP_TYPE_STYLED_STRING = "ApplicationDefinedType";
+}
 void TextFieldModelNG::CreateNode(
     const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool isTextArea)
 {
@@ -47,12 +51,15 @@ void TextFieldModelNG::CreateNode(
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textfieldPaintProperty);
+    std::set<std::string> allowDropSet({ DROP_TYPE_PLAIN_TEXT, DROP_TYPE_HYPERLINK, DROP_TYPE_STYLED_STRING });
+    frameNode->SetAllowDrop(allowDropSet);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->SetModifyDoneStatus(false);
     pattern->ResetContextAttr();
     auto textValue = pattern->GetTextValue();
     if (value.has_value() && value.value() != textValue) {
-        pattern->InitValueText(value.value());
+        auto changed = pattern->InitValueText(value.value());
+        pattern->SetTextChangedAtCreation(changed);
     }
     textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
     if (!isTextArea) {
@@ -70,7 +77,9 @@ void TextFieldModelNG::CreateNode(
     pattern->InitSurfacePositionChangedCallback();
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
+    if (pipeline->GetHasPreviewTextOption()) {
+        pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
+    }
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
@@ -118,6 +127,11 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     pattern->InitSurfaceChangedCallback();
     pattern->InitSurfacePositionChangedCallback();
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    if (pipeline->GetHasPreviewTextOption()) {
+        pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
+    }
     ProcessDefaultStyleAndBehaviors(frameNode);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "text field create node in c-api");
     return frameNode;
@@ -343,7 +357,13 @@ void TextFieldModelNG::SetLineBreakStrategy(LineBreakStrategy value)
 void TextFieldModelNG::SetMaxLength(uint32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxLength, value);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateShowCountBorderStyle();
 }
+
 void TextFieldModelNG::ResetMaxLength()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -439,7 +459,7 @@ void TextFieldModelNG::SetOnSubmit(std::function<void(int32_t, NG::TextFieldComm
     eventHub->SetOnSubmit(std::move(func));
 }
 
-void TextFieldModelNG::SetOnChange(std::function<void(const std::string&)>&& func)
+void TextFieldModelNG::SetOnChange(std::function<void(const std::string&, PreviewText&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -506,14 +526,6 @@ void TextFieldModelNG::SetOnPasteWithEvent(std::function<void(const std::string&
 void TextFieldModelNG::SetCopyOption(CopyOptions copyOption)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CopyOptions, copyOption);
-}
-
-void TextFieldModelNG::SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
-    textFieldPattern->SetMenuOptionItems(std::move(menuOptionsItems));
 }
 
 void TextFieldModelNG::AddDragFrameNodeToManager() const
@@ -636,17 +648,18 @@ void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
 {
     Color backgroundColor = color;
     if (tmp) {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        auto pipeline = frameNode->GetContextRefPtr();
         CHECK_NULL_VOID(pipeline);
         auto themeManager = pipeline->GetThemeManager();
         CHECK_NULL_VOID(themeManager);
         auto theme = themeManager->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
         backgroundColor = theme->GetBgColor();
-    } else {
-        ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, color);
     }
     NG::ViewAbstract::SetBackgroundColor(backgroundColor);
+    ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, backgroundColor);
 }
 
 void TextFieldModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
@@ -674,55 +687,30 @@ void TextFieldModelNG::SetMargin()
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, MarginByUser, userMargin);
 }
 
-void TextFieldModelNG::SetPadding(NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp)
+void TextFieldModelNG::SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp)
 {
     if (tmp) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID(theme);
-        auto textFieldPadding = theme->GetPadding();
-        auto top = textFieldPadding.Top();
-        auto bottom = textFieldPadding.Bottom();
-        auto left = textFieldPadding.Left();
-        auto right = textFieldPadding.Right();
-
-        NG::PaddingProperty paddings;
-        if (top.Value()) {
-            if (top.Unit() == DimensionUnit::CALC) {
-                paddings.top = NG::CalcLength(top.IsNonNegative() ? top.CalcValue() : CalcDimension().CalcValue());
-            } else {
-                paddings.top = NG::CalcLength(top.IsNonNegative() ? top : CalcDimension());
-            }
-        }
-        if (bottom.Value()) {
-            if (bottom.Unit() == DimensionUnit::CALC) {
-                paddings.bottom =
-                    NG::CalcLength(bottom.IsNonNegative() ? bottom.CalcValue() : CalcDimension().CalcValue());
-            } else {
-                paddings.bottom = NG::CalcLength(bottom.IsNonNegative() ? bottom : CalcDimension());
-            }
-        }
-        if (left.Value()) {
-            if (left.Unit() == DimensionUnit::CALC) {
-                paddings.left = NG::CalcLength(left.IsNonNegative() ? left.CalcValue() : CalcDimension().CalcValue());
-            } else {
-                paddings.left = NG::CalcLength(left.IsNonNegative() ? left : CalcDimension());
-            }
-        }
-        if (right.Value()) {
-            if (right.Unit() == DimensionUnit::CALC) {
-                paddings.right =
-                    NG::CalcLength(right.IsNonNegative() ? right.CalcValue() : CalcDimension().CalcValue());
-            } else {
-                paddings.right = NG::CalcLength(right.IsNonNegative() ? right : CalcDimension());
-            }
-        }
-        ViewAbstract::SetPadding(paddings);
+        SetDefaultPadding();
         return;
     }
     NG::ViewAbstract::SetPadding(newPadding);
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, newPadding);
+}
+
+void TextFieldModelNG::SetDefaultPadding()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    auto themePadding = theme->GetPadding();
+    PaddingProperty paddings;
+    paddings.top = NG::CalcLength(themePadding.Top().ConvertToPx());
+    paddings.bottom = NG::CalcLength(themePadding.Bottom().ConvertToPx());
+    paddings.left = NG::CalcLength(themePadding.Left().ConvertToPx());
+    paddings.right = NG::CalcLength(themePadding.Right().ConvertToPx());
+    ViewAbstract::SetPadding(paddings);
+    ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, paddings);
 }
 
 void TextFieldModelNG::SetHoverEffect(HoverEffectType hoverEffect)
@@ -1053,6 +1041,10 @@ void TextFieldModelNG::SetFontStyle(FrameNode* frameNode, Ace::FontStyle value)
 void TextFieldModelNG::SetMaxLength(FrameNode* frameNode, uint32_t value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxLength, value, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateShowCountBorderStyle();
 }
 
 void TextFieldModelNG::ResetMaxLength(FrameNode* frameNode)
@@ -1179,6 +1171,10 @@ void TextFieldModelNG::SetEnableAutoFill(FrameNode* frameNode, bool enableAutoFi
 
 void TextFieldModelNG::SetShowCounter(FrameNode* frameNode, bool value)
 {
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCounterState(false);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value, frameNode);
 }
 
@@ -1196,7 +1192,7 @@ void TextFieldModelNG::SetCounterType(FrameNode* frameNode, int32_t value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SetCounter, value, frameNode);
 }
 
-void TextFieldModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const std::string&)>&& func)
+void TextFieldModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const std::string&, PreviewText&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
@@ -1371,7 +1367,7 @@ bool TextFieldModelNG::GetRequestKeyboardOnFocus(FrameNode* frameNode)
     bool value = false;
     CHECK_NULL_RETURN(frameNode, value);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    return pattern->GetNeedToRequestKeyboardOnFocus();
+    return pattern->NeedToRequestKeyboardOnFocus();
 }
 
 TextInputType TextFieldModelNG::GetType(FrameNode* frameNode)
@@ -1641,7 +1637,6 @@ void TextFieldModelNG::SetOnEditChanged(FrameNode* frameNode, std::function<void
     eventHub->SetOnEditChanged(std::move(func));
 }
 
-
 void TextFieldModelNG::SetCustomKeyboard(FrameNode* frameNode, FrameNode* customKeyboard, bool supportAvoidance)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1774,6 +1769,13 @@ void TextFieldModelNG::SetOnDidDeleteEvent(std::function<void(const DeleteValueI
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDidDeleteEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetEnablePreviewText(bool enablePreviewText)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSupportPreviewText(enablePreviewText);
 }
 
 Dimension TextFieldModelNG::GetAdaptMaxFontSize(FrameNode* frameNode)
@@ -1952,4 +1954,33 @@ void TextFieldModelNG::SetOnDidDeleteEvent(FrameNode* frameNode,
     eventHub->SetOnDidDeleteEvent(std::move(func));
 }
 
+void TextFieldModelNG::SetSelectionMenuOptions(
+    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
+{
+    auto textFieldPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
+void TextFieldModelNG::SetEnablePreviewText(FrameNode* frameNode, bool enablePreviewText)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSupportPreviewText(enablePreviewText);
+}
+
+PaddingProperty TextFieldModelNG::GetPadding(FrameNode* frameNode)
+{
+    NG::PaddingProperty paddings = NG::ViewAbstract::GetPadding(frameNode);
+    auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(textfieldPaintProperty, paddings);
+    if (textfieldPaintProperty->HasPaddingByUser()) {
+        const auto& property = textfieldPaintProperty->GetPaddingByUserValue();
+        paddings.top = std::optional<CalcLength>(property.top);
+        paddings.right = std::optional<CalcLength>(property.right);
+        paddings.bottom = std::optional<CalcLength>(property.bottom);
+        paddings.left = std::optional<CalcLength>(property.left);
+    }
+    return paddings;
+}
 } // namespace OHOS::Ace::NG

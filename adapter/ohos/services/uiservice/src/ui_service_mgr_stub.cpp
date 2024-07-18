@@ -20,10 +20,13 @@
 #include "string_ex.h"
 #include "tokenid_kit.h"
 #include "ui_service_mgr_errors.h"
+#include "ui_service_mgr_xcollie.h"
 #include "ui_service_proxy.h"
 #include "ui_service_stub.h"
 
 namespace OHOS::Ace {
+constexpr uint32_t UI_MGR_SERVICE_TIMEOUT = 5;
+
 UIServiceMgrStub::UIServiceMgrStub()
 {
     requestFuncMap_[REGISTER_CALLBACK] = &UIServiceMgrStub::RegisterCallBackInner;
@@ -64,6 +67,7 @@ bool UIServiceMgrStub::IsSystemApp()
 
 int32_t UIServiceMgrStub::RegisterCallBackInner(MessageParcel& data, MessageParcel& reply)
 {
+    UIServiceMgrXCollie uiServiceMgrXCollie("UISERVICE_REGISTER_CALLBACK", UI_MGR_SERVICE_TIMEOUT);
     if (!IsSystemApp()) {
         return ERR_PERMISSION_DENIED;
     }
@@ -85,6 +89,7 @@ int32_t UIServiceMgrStub::RegisterCallBackInner(MessageParcel& data, MessageParc
 
 int32_t UIServiceMgrStub::UnregisterCallBackInner(MessageParcel& data, MessageParcel& reply)
 {
+    UIServiceMgrXCollie uiServiceMgrXCollie("UISERVICE_UNREGISTER_CALLBACK", UI_MGR_SERVICE_TIMEOUT);
     if (!IsSystemApp()) {
         return ERR_PERMISSION_DENIED;
     }
@@ -99,6 +104,7 @@ int32_t UIServiceMgrStub::UnregisterCallBackInner(MessageParcel& data, MessagePa
 
 int32_t UIServiceMgrStub::PushInner(MessageParcel& data, MessageParcel& reply)
 {
+    UIServiceMgrXCollie uiServiceMgrXCollie("UISERVICE_PUSH", UI_MGR_SERVICE_TIMEOUT);
     if (!IsSystemApp()) {
         return ERR_PERMISSION_DENIED;
     }
@@ -118,6 +124,7 @@ int32_t UIServiceMgrStub::PushInner(MessageParcel& data, MessageParcel& reply)
 
 int32_t UIServiceMgrStub::RequestInner(MessageParcel& data, MessageParcel& reply)
 {
+    UIServiceMgrXCollie uiServiceMgrXCollie("UISERVICE_REQUEST", UI_MGR_SERVICE_TIMEOUT);
     if (!IsSystemApp()) {
         return ERR_PERMISSION_DENIED;
     }
@@ -134,6 +141,7 @@ int32_t UIServiceMgrStub::RequestInner(MessageParcel& data, MessageParcel& reply
 
 int32_t UIServiceMgrStub::ReturnRequestInner(MessageParcel& data, MessageParcel& reply)
 {
+    UIServiceMgrXCollie uiServiceMgrXCollie("UISERVICE_RETURN_REQUEST", UI_MGR_SERVICE_TIMEOUT);
     if (!IsSystemApp()) {
         return ERR_PERMISSION_DENIED;
     }

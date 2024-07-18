@@ -70,6 +70,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkScrollScrollable(int32_t scrollDirection);
 CJ_EXPORT void FfiOHOSAceFrameworkScrollScrollBar(int32_t barState);
 CJ_EXPORT void FfiOHOSAceFrameworkScrollScrollBarColor(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkScrollScrollBarWidth(double width, int32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkScrollNestedScroll(int32_t scrollForward, int32_t scrollBackward);
 CJ_EXPORT void FfiOHOSAceFrameworkScrollOnScroll(void (*callback)(CJOffset offset));
 CJ_EXPORT void FfiOHOSAceFrameworkScrollOnScrollEdge(void (*callback)(int32_t edge));
 CJ_EXPORT void FfiOHOSAceFrameworkScrollOnScrollEnd(void (*callback)());

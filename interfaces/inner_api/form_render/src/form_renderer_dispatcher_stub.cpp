@@ -37,6 +37,8 @@ FormRendererDispatcherStub::FormRendererDispatcherStub()
         &FormRendererDispatcherStub::HandleOnAccessibilityChildTreeDeregister;
     memberFuncMap_[static_cast<uint32_t>(IFormRendererDispatcher::Message::ACCESSIBILITY_DUMP_CHILD_INFO)] =
         &FormRendererDispatcherStub::HandleOnAccessibilityDumpChildInfo;
+    memberFuncMap_[static_cast<uint32_t>(IFormRendererDispatcher::Message::ACCESSIBILITY_TRANSFER_HOVER_EVENT)] =
+        &FormRendererDispatcherStub::HandleOnAccessibilityTransferHoverEvent;
 }
 
 FormRendererDispatcherStub::~FormRendererDispatcherStub()
@@ -140,6 +142,26 @@ int32_t FormRendererDispatcherStub::HandleOnAccessibilityDumpChildInfo(MessagePa
     std::vector<std::string> info;
     OnAccessibilityDumpChildInfo(params, info);
     reply.WriteStringVector(info);
+    return ERR_OK;
+}
+
+int32_t FormRendererDispatcherStub::HandleOnAccessibilityTransferHoverEvent(MessageParcel &data, MessageParcel &reply)
+{
+    float pointX = 0;
+    float pointY = 0;
+    int32_t sourceType = 0;
+    int32_t eventType = 0;
+    int64_t timeMs = 0;
+    if (!data.ReadFloat(pointX) ||
+        !data.ReadFloat(pointY) ||
+        !data.ReadInt32(sourceType) ||
+        !data.ReadInt32(eventType) ||
+        !data.ReadInt64(timeMs)) {
+        HILOG_ERROR("Read HandleTransferAccessibilityHoverEvent data failed!");
+        return ERR_INVALID_VALUE;
+    };
+    OnAccessibilityTransferHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+    reply.WriteInt32(ERR_OK);
     return ERR_OK;
 }
 }  // namespace Ace

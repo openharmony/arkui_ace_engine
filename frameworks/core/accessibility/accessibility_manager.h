@@ -49,12 +49,14 @@ enum class AccessibilityVersion {
 
 class AccessibilityChildTreeCallback {
 public:
-    AccessibilityChildTreeCallback() = default;
+    explicit AccessibilityChildTreeCallback(int64_t accessibilityId) : accessibilityId_(accessibilityId)
+    {}
     virtual ~AccessibilityChildTreeCallback() = default;
     virtual bool OnRegister(uint32_t windowId, int32_t treeId) = 0;
     virtual bool OnDeregister() = 0;
     virtual bool OnSetChildTree(int32_t childWindowId, int32_t childTreeId) = 0;
     virtual bool OnDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
+    virtual void OnClearRegisterFlag() = 0;
     int32_t GetChildTreeId() const
     {
         return childTreeId_;
@@ -63,9 +65,14 @@ public:
     {
         childTreeId_ = childTreeId;
     }
+    int64_t GetAccessibilityId() const
+    {
+        return accessibilityId_;
+    }
 
 private:
     int32_t childTreeId_ = 0;
+    int64_t accessibilityId_ = -1;
 };
 
 using VisibleRatioCallback = std::function<void(bool, double)>;
@@ -77,6 +84,7 @@ public:
     ~AccessibilityManager() override = default;
 
     virtual void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) = 0;
+    virtual void UpdateVirtualNodeFocus() = 0;
     virtual int64_t GenerateNextAccessibilityId() = 0;
     virtual RefPtr<AccessibilityNode> CreateSpecializedNode(
         const std::string& tag, int32_t nodeId, int32_t parentNodeId) = 0;
@@ -154,6 +162,8 @@ public:
         uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId) {};
     virtual void SetAccessibilityGetParentRectHandler(std::function<void(int32_t &, int32_t &)> &&callback) {};
     virtual void DeregisterInteractionOperationAsChildTree() {};
+    virtual void SendEventToAccessibilityWithNode(const AccessibilityEvent& accessibilityEvent,
+        const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context) {};
     bool IsRegister()
     {
         return isReg_;
@@ -163,6 +173,14 @@ public:
     {
         isReg_ = state;
     }
+
+    int32_t GetTreeId() const
+    {
+        return treeId_;
+    }
+
+protected:
+    int32_t treeId_ = 0;
 
 private:
     AccessibilityVersion version_ = AccessibilityVersion::JS_VERSION;

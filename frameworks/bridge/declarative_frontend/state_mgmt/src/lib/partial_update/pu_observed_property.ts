@@ -152,7 +152,7 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     if (this.setValueInternal(newValue)) {
       TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.wrappedValue_,
         this.notifyPropertyHasChangedPU,
-        this.notifyTrackedObjectPropertyHasChanged, this, true);
+        this.notifyTrackedObjectPropertyHasChanged, this);
     }
   }
 

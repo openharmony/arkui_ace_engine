@@ -56,10 +56,12 @@ public:
         safeHeight_ = safeHeight;
     }
 
+    float GetKeyboardHeight();
+
 private:
     int32_t targetId_ = -1;
     float keyboardHeight_ = 0.0f;
-    bool supportAvoidance_;
+    bool supportAvoidance_ = false;
     float safeHeight_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG

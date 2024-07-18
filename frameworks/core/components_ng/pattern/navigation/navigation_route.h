@@ -30,7 +30,7 @@ struct RouteItem {
     std::optional<std::string> moduleName;
     std::optional<std::string> buildFunction;
     std::optional<std::string> pageSourceFile;
-    std::string data;
+    std::map<std::string, std::string> data;
 };
 
 class ACE_EXPORT NavigationRoute : public AceType {

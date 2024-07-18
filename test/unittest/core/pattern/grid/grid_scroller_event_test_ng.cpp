@@ -103,19 +103,23 @@ HWTEST_F(GridScrollerEventTestNg, GridEventTestNg001, TestSize.Level1)
     CreateFixedItems(10);
     CreateDone(frameNode_);
 
-    UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
+    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
     EXPECT_EQ(offsetY.ConvertToPx(), ITEM_HEIGHT);
     EXPECT_EQ(scrollState, ScrollState::SCROLL);
 
-    UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
+    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_ANIMATION);
+    FlushLayoutTask(frameNode_);
     EXPECT_EQ(offsetY.ConvertToPx(), -ITEM_HEIGHT);
     EXPECT_EQ(scrollState, ScrollState::FLING);
 
-    UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
+    pattern_->UpdateCurrentOffset(-ITEM_HEIGHT, SCROLL_FROM_ANIMATION_SPRING);
+    FlushLayoutTask(frameNode_);
     EXPECT_EQ(offsetY.ConvertToPx(), ITEM_HEIGHT);
     EXPECT_EQ(scrollState, ScrollState::FLING);
 
-    UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_NONE);
+    pattern_->UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_NONE);
+    FlushLayoutTask(frameNode_);
     EXPECT_EQ(offsetY.ConvertToPx(), -ITEM_HEIGHT);
     EXPECT_EQ(scrollState, ScrollState::IDLE);
 
@@ -182,11 +186,11 @@ HWTEST_F(GridScrollerEventTestNg, GridEventTestNg002, TestSize.Level1)
     CreateFixedItems(12);
     CreateDone(frameNode_);
 
-    UpdateCurrentOffset(-ITEM_HEIGHT);
+    ScrollTo(ITEM_HEIGHT);
     EXPECT_EQ(startIndex, 0);
     EXPECT_EQ(endIndex, 9);
 
-    UpdateCurrentOffset(-ITEM_HEIGHT);
+    ScrollTo(ITEM_HEIGHT * 2);
     EXPECT_EQ(startIndex, 2);
     EXPECT_EQ(endIndex, 11);
 }
@@ -208,10 +212,10 @@ HWTEST_F(GridScrollerEventTestNg, GridEventTestNg003, TestSize.Level1)
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
-    UpdateCurrentOffset(-ITEM_HEIGHT);
+    ScrollTo(ITEM_HEIGHT);
     EXPECT_FALSE(isTrigger);
     isTrigger = false;
-    UpdateCurrentOffset(ITEM_HEIGHT);
+    ScrollTo(0.f);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
@@ -1009,7 +1013,7 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithScrollBarWithoutAnimation001, 
      * @tc.expected: Only onScroll call back function should be triggered
      */
     auto controller = pattern_->positionController_;
-    controller->ScrollToIndex(5, false, ScrollAlign::CENTER);
+    controller->ScrollToIndex(5, false, ScrollAlign::CENTER, std::nullopt);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
@@ -1066,7 +1070,7 @@ HWTEST_F(GridScrollerEventTestNg, VerticalGridWithScrollBarWithoutAnimation002, 
      * @tc.expected: Only onScroll and onReachEnd should be triggered
      */
     auto controller = pattern_->positionController_;
-    controller->ScrollToIndex(19, false, ScrollAlign::END);
+    controller->ScrollToIndex(19, false, ScrollAlign::END, std::nullopt);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
@@ -1247,7 +1251,7 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithScrollBarWithoutAnimation001
      * @tc.expected: Only onScroll call back function should be triggered
      */
     auto controller = pattern_->positionController_;
-    controller->ScrollToIndex(5, false, ScrollAlign::CENTER);
+    controller->ScrollToIndex(5, false, ScrollAlign::CENTER, std::nullopt);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);
@@ -1303,7 +1307,7 @@ HWTEST_F(GridScrollerEventTestNg, HorizontalGridWithScrollBarWithoutAnimation002
      * @tc.expected: Only onScroll and onReachEnd should be triggered
      */
     auto controller = pattern_->positionController_;
-    controller->ScrollToIndex(19, false, ScrollAlign::END);
+    controller->ScrollToIndex(19, false, ScrollAlign::END, std::nullopt);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_FALSE(isOnScrollStartCallBack);

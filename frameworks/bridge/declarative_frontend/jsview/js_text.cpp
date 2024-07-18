@@ -19,6 +19,10 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
@@ -29,6 +33,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_layout_manager.h"
 #include "bridge/declarative_frontend/jsview/js_text.h"
@@ -89,6 +94,8 @@ const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeigh
 const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES = { LineBreakStrategy::GREEDY,
     LineBreakStrategy::HIGH_QUALITY, LineBreakStrategy::BALANCED };
 const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
+const std::vector<TextSelectableMode> TEXT_SELECTABLE_MODE = { TextSelectableMode::SELECTABLE_UNFOCUSABLE,
+    TextSelectableMode::SELECTABLE_FOCUSABLE, TextSelectableMode::UNSELECTABLE };
 constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 }; // namespace
 
@@ -127,13 +134,13 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(tmpInfo);
-    auto fontSize = paramObject->GetProperty("size");
+    auto fontSize = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::SIZE));
     CalcDimension size;
     if (ParseJsDimensionFpNG(fontSize, size, false) && size.IsNonNegative()) {
         font.fontSize = size;
     }
     std::string weight;
-    auto fontWeight = paramObject->GetProperty("weight");
+    auto fontWeight = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::WEIGHT));
     if (!fontWeight->IsNull()) {
         if (fontWeight->IsNumber()) {
             weight = std::to_string(fontWeight->ToNumber<int32_t>());
@@ -142,14 +149,14 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
         }
         font.fontWeight = ConvertStrToFontWeight(weight);
     }
-    auto fontFamily = paramObject->GetProperty("family");
+    auto fontFamily = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::FAMILY));
     if (!fontFamily->IsNull()) {
         std::vector<std::string> fontFamilies;
         if (JSContainerBase::ParseJsFontFamilies(fontFamily, fontFamilies)) {
             font.fontFamilies = fontFamilies;
         }
     }
-    auto style = paramObject->GetProperty("style");
+    auto style = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::STYLE));
     if (!style->IsNull() || style->IsNumber()) {
         font.fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
     }
@@ -177,6 +184,34 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
 void JSText::SetFontWeight(const std::string& value)
 {
     TextModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
+}
+
+void JSText::SetMinFontScale(const JSCallbackInfo& info)
+{
+    double minFontScale;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], minFontScale)) {
+        TextModel::GetInstance()->SetMinFontScale(1.0f);
+        return;
+    }
+    if (LessOrEqual(minFontScale, 0.0f) || GreatOrEqual(minFontScale, 1.0f)) {
+        TextModel::GetInstance()->SetMinFontScale(1.0f);
+        return;
+    }
+    TextModel::GetInstance()->SetMinFontScale(static_cast<float>(minFontScale));
+}
+
+void JSText::SetMaxFontScale(const JSCallbackInfo& info)
+{
+    double maxFontScale;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], maxFontScale)) {
+        TextModel::GetInstance()->SetMaxFontScale(1.0f);
+        return;
+    }
+    if (LessOrEqual(maxFontScale, 1.0f)) {
+        TextModel::GetInstance()->SetMaxFontScale(1.0f);
+        return;
+    }
+    TextModel::GetInstance()->SetMaxFontScale(static_cast<float>(maxFontScale));
 }
 
 void JSText::SetForegroundColor(const JSCallbackInfo& info)
@@ -309,10 +344,28 @@ void JSText::SetTextSelection(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetTextSelection(startIndex, endIndex);
 }
 
+void JSText::SetTextSelectableMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        TextModel::GetInstance()->SetTextSelectableMode(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        TextModel::GetInstance()->SetTextSelectableMode(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+        return;
+    }
+    auto index = info[0]->ToNumber<int32_t>();
+    if (index < 0 || index >= static_cast<int32_t>(TEXT_SELECTABLE_MODE.size())) {
+        TextModel::GetInstance()->SetTextSelectableMode(TextSelectableMode::SELECTABLE_UNFOCUSABLE);
+        return;
+    }
+    TextModel::GetInstance()->SetTextSelectableMode(TEXT_SELECTABLE_MODE[index]);
+}
+
 void JSText::SetMaxLines(const JSCallbackInfo& info)
 {
     JSRef<JSVal> args = info[0];
-    int32_t value = Infinity<uint32_t>();
+    auto value = Infinity<int32_t>();
     if (args->ToString() != "Infinity") {
         ParseJsInt32(args, value);
     }
@@ -554,6 +607,17 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
             ACE_SCORING_EVENT("Text.onClick");
             PipelineContext::SetCallBackNode(node);
             func->Execute(*clickInfo);
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+            std::string label = "";
+            if (!node.Invalid()) {
+                auto pattern = node.GetRawPtr()->GetPattern();
+                CHECK_NULL_VOID(pattern);
+                auto layoutProperty = pattern->GetLayoutProperty<NG::TextLayoutProperty>();
+                CHECK_NULL_VOID(layoutProperty);
+                label = layoutProperty->GetContent().value_or("");
+            }
+            JSInteractableView::ReportClickEvent(node, label);
+#endif
         };
         TextModel::GetInstance()->SetOnClick(std::move(onClick));
 
@@ -561,28 +625,34 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
         CHECK_NULL_VOID(focusHub);
         focusHub->SetFocusable(true, false);
     } else {
-#ifndef NG_BUILD
-        if (args->IsFunction()) {
-            auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
-            auto impl = inspector ? inspector->GetInspectorFunctionImpl() : nullptr;
-            auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-            RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(args));
-            auto onClickId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl,
-                                 node = frameNode](const BaseEventInfo* info) {
-                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                const auto* clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
-                auto newInfo = *clickInfo;
-                if (impl) {
-                    impl->UpdateEventInfo(newInfo);
-                }
-                ACE_SCORING_EVENT("Text.onClick");
-                PipelineContext::SetCallBackNode(node);
-                func->Execute(newInfo);
-            };
-            TextModel::GetInstance()->SetOnClick(std::move(onClickId));
-        }
-#endif
+        JsOnClickWithoutNGBUILD(info);
     }
+}
+
+void JSText::JsOnClickWithoutNGBUILD(const JSCallbackInfo& info)
+{
+#ifndef NG_BUILD
+    JSRef<JSVal> args = info[0];
+    if (args->IsFunction()) {
+        auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+        auto impl = inspector ? inspector->GetInspectorFunctionImpl() : nullptr;
+        auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        RefPtr<JsClickFunction> jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(args));
+        auto onClickId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc), impl,
+                             node = frameNode](const BaseEventInfo* info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            const auto* clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
+            auto newInfo = *clickInfo;
+            if (impl) {
+                impl->UpdateEventInfo(newInfo);
+            }
+            ACE_SCORING_EVENT("Text.onClick");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute(newInfo);
+        };
+        TextModel::GetInstance()->SetOnClick(std::move(onClickId));
+    }
+#endif
 }
 
 void JSText::JsRemoteMessage(const JSCallbackInfo& info)
@@ -774,18 +844,6 @@ void JSText::JsDraggable(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetDraggable(tmpInfo->ToBoolean());
 }
 
-void JSText::JsMenuOptionsExtension(const JSCallbackInfo& info)
-{
-    if (Container::IsCurrentUseNewPipeline()) {
-        auto tmpInfo = info[0];
-        if (tmpInfo->IsArray()) {
-            std::vector<NG::MenuOptionsParam> menuOptionsItems;
-            JSViewAbstract::ParseMenuOptions(info, JSRef<JSArray>::Cast(tmpInfo), menuOptionsItems);
-            TextModel::GetInstance()->SetMenuOptionItems(std::move(menuOptionsItems));
-        }
-    }
-}
-
 void JSText::JsEnableDataDetector(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -894,8 +952,17 @@ void JSText::SetFontFeature(const JSCallbackInfo& info)
         return;
     }
 
+    if (!info[0]->IsString() && !info[0]->IsObject()) {
+        return;
+    }
     std::string fontFeatureSettings = info[0]->ToString();
     TextModel::GetInstance()->SetFontFeature(ParseFontFeatureSettings(fontFeatureSettings));
+}
+
+void JSText::JsResponseRegion(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsResponseRegion(info);
+    TextModel::GetInstance()->SetResponseRegion(true);
 }
 
 void JSText::JSBind(BindingTarget globalObj)
@@ -910,10 +977,13 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("textShadow", &JSText::SetTextShadow, opt);
     JSClass<JSText>::StaticMethod("fontSize", &JSText::SetFontSize, opt);
     JSClass<JSText>::StaticMethod("fontWeight", &JSText::SetFontWeight, opt);
+    JSClass<JSText>::StaticMethod("minFontScale", &JSText::SetMinFontScale, opt);
+    JSClass<JSText>::StaticMethod("maxFontScale", &JSText::SetMaxFontScale, opt);
     JSClass<JSText>::StaticMethod("wordBreak", &JSText::SetWordBreak, opt);
     JSClass<JSText>::StaticMethod("lineBreakStrategy", &JSText::SetLineBreakStrategy, opt);
     JSClass<JSText>::StaticMethod("ellipsisMode", &JSText::SetEllipsisMode, opt);
     JSClass<JSText>::StaticMethod("selection", &JSText::SetTextSelection, opt);
+    JSClass<JSText>::StaticMethod("textSelectable", &JSText::SetTextSelectableMode, opt);
     JSClass<JSText>::StaticMethod("maxLines", &JSText::SetMaxLines, opt);
     JSClass<JSText>::StaticMethod("textIndent", &JSText::SetTextIndent);
     JSClass<JSText>::StaticMethod("textOverflow", &JSText::SetTextOverflow, opt);
@@ -949,7 +1019,6 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("onDrop", &JSText::JsOnDrop);
     JSClass<JSText>::StaticMethod("focusable", &JSText::JsFocusable);
     JSClass<JSText>::StaticMethod("draggable", &JSText::JsDraggable);
-    JSClass<JSText>::StaticMethod("textMenuOptions", &JSText::JsMenuOptionsExtension);
     JSClass<JSText>::StaticMethod("enableDataDetector", &JSText::JsEnableDataDetector);
     JSClass<JSText>::StaticMethod("dataDetectorConfig", &JSText::JsDataDetectorConfig);
     JSClass<JSText>::StaticMethod("bindSelectionMenu", &JSText::BindSelectionMenu);
@@ -959,6 +1028,8 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("foregroundColor", &JSText::SetForegroundColor);
     JSClass<JSText>::StaticMethod("marqueeOptions", &JSText::SetMarqueeOptions);
     JSClass<JSText>::StaticMethod("onMarqueeStateChange", &JSText::SetOnMarqueeStateChange);
+    JSClass<JSText>::StaticMethod("editMenuOptions", &JSText::EditMenuOptions);
+    JSClass<JSText>::StaticMethod("responseRegion", &JSText::JsResponseRegion);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -1137,4 +1208,11 @@ void JSText::SetOnMarqueeStateChange(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetOnMarqueeStateChange(std::move(onMarqueeStateChange));
 }
 
+void JSText::EditMenuOptions(const JSCallbackInfo& info)
+{
+    NG::OnCreateMenuCallback onCreateMenuCallback;
+    NG::OnMenuItemClickCallback onMenuItemClick;
+    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick);
+    TextModel::GetInstance()->SetSelectionMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
 } // namespace OHOS::Ace::Framework

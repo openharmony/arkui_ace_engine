@@ -19,6 +19,8 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIListItemModifier* GetListItemModifier();
+void SetListItemOnSelect(ArkUINodeHandle node, void* extraParam);
+void ResetListItemOnSelect(ArkUINodeHandle node);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_ARKTS_NATIVE_NODE_LIST_ITEM_BRIDGE_MODIFIER_H
