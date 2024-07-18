@@ -15,6 +15,10 @@
 
 #include "core/components_ng/pattern/list/list_item_accessibility_property.h"
 
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+#include "accessibility_element_info.h"
+#endif
+
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
@@ -33,5 +37,16 @@ void ListItemAccessibilityProperty::SetSpecificSupportAction()
 {
     AddSupportAction(AceAction::ACTION_SELECT);
     AddSupportAction(AceAction::ACTION_CLEAR_SELECTION);
+}
+
+void ListItemAccessibilityProperty::GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo)
+{
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto listItemPattern = frameNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(listItemPattern);
+    extraElementInfo.SetExtraElementInfo("ListItemIndex", listItemPattern->GetIndexInList());
+#endif
 }
 } // namespace OHOS::Ace::NG

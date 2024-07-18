@@ -30,6 +30,8 @@ public:
 
     bool IsSelected() const override;
 
+    void GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo) override;
+
 protected:
     void SetSpecificSupportAction() override;
 
