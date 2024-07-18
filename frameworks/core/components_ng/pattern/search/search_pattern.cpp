@@ -1883,8 +1883,22 @@ void SearchPattern::UpdateSymbolIconProperties(RefPtr<FrameNode>& iconFrameNode,
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(iconFrameNode);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(searchTheme);
     auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    symbolLayoutProperty->UpdateSymbolSourceInfo(index == IMAGE_INDEX
+                                                     ? SymbolSourceInfo(searchTheme->GetSearchSymbolId())
+                                                     : SymbolSourceInfo(searchTheme->GetCancelSymbolId()));
+    symbolLayoutProperty->UpdateFontSize(
+        index == IMAGE_INDEX ? GetSearchNode()->GetSearchSymbolIconSize() : GetSearchNode()->GetCancelSymbolIconSize());
+    symbolLayoutProperty->UpdateSymbolColorList({ index == IMAGE_INDEX ? GetSearchNode()->GetSearchSymbolIconColor()
+                                                                       : GetSearchNode()->GetCancelSymbolIconColor() });
+    auto parentInspector = GetSearchNode()->GetInspectorIdValue("");
+    iconFrameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + parentInspector);
     if (index == IMAGE_INDEX) {
         auto iconSymbol = layoutProperty->GetSearchIconSymbol();
         if (iconSymbol != nullptr) {
@@ -1897,7 +1911,6 @@ void SearchPattern::UpdateSymbolIconProperties(RefPtr<FrameNode>& iconFrameNode,
         }
     }
     // reset symbol effect
-    auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
     auto symbolEffectOptions = symbolLayoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
     symbolEffectOptions.SetIsTxtActive(false);
     symbolLayoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
