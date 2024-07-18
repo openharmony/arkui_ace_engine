@@ -67,7 +67,6 @@
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
-#include "core/components_ng/base/navigation_register.h"
 
 namespace OHOS::Ace::NG {
 namespace {
