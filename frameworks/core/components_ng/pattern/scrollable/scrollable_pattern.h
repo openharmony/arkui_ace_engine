@@ -621,6 +621,15 @@ public:
 
     virtual void SetAccessibilityAction();
 
+    /**
+     * @brief Notify component the position and count when data has changed.
+     *        This function should not be implemented here.
+     *
+     * @param index the position of change.
+     * @param count the count of change. nagative/0/positive implies delete/change/add respectively.
+     */
+    virtual void NotifyDataChange(int32_t index, int32_t count) {};
+
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

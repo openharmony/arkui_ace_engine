@@ -29,6 +29,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -139,6 +140,7 @@ void LazyForEachNode::OnDataAdded(size_t index)
     tempChildren_.clear();
     tempChildren_.swap(children_);
     NotifyDataCountChanged(insertIndex);
+    NotifyCountChange(insertIndex, 1);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -154,6 +156,7 @@ void LazyForEachNode::OnDataBulkAdded(size_t index, size_t count)
     tempChildren_.clear();
     tempChildren_.swap(children_);
     NotifyDataCountChanged(insertIndex);
+    NotifyCountChange(insertIndex, static_cast<int32_t>(count));
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -178,6 +181,7 @@ void LazyForEachNode::OnDataDeleted(size_t index)
     tempChildren_.clear();
     tempChildren_.swap(children_);
     NotifyDataCountChanged(deletedIndex);
+    NotifyCountChange(deletedIndex, -1);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -206,19 +210,22 @@ void LazyForEachNode::OnDataBulkDeleted(size_t index, size_t count)
     tempChildren_.clear();
     tempChildren_.swap(children_);
     NotifyDataCountChanged(deletedIndex);
+    NotifyCountChange(deletedIndex, -static_cast<int32_t>(count));
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void LazyForEachNode::OnDataChanged(size_t index)
 {
+    auto changedIndex = static_cast<int32_t>(index);
     if (builder_) {
         builder_->SetUseNewInterface(false);
         builder_->OnDataChanged(index);
     }
     tempChildren_.clear();
     tempChildren_.swap(children_);
-    NotifyDataCountChanged(static_cast<int32_t>(index));
+    NotifyDataCountChanged(changedIndex);
+    NotifyCountChange(changedIndex, 0);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -226,7 +233,7 @@ void LazyForEachNode::OnDataChanged(size_t index)
 void LazyForEachNode::OnDataBulkChanged(size_t index, size_t count)
 {
     ACE_SCOPED_TRACE("LazyForEach OnDataBulkChanged");
-    auto deletedIndex = static_cast<int32_t>(index);
+    auto changedIndex = static_cast<int32_t>(index);
     if (builder_) {
         builder_->SetUseNewInterface(false);
         const auto& nodeList = builder_->OnDataBulkChanged(index, count);
@@ -246,7 +253,8 @@ void LazyForEachNode::OnDataBulkChanged(size_t index, size_t count)
     }
     tempChildren_.clear();
     tempChildren_.swap(children_);
-    NotifyDataCountChanged(deletedIndex);
+    NotifyDataCountChanged(changedIndex);
+    NotifyCountChange(changedIndex + static_cast<int32_t>(count) - 1, 0);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -260,6 +268,7 @@ void LazyForEachNode::OnDataMoveToNewPlace(size_t from, size_t to)
     tempChildren_.clear();
     tempChildren_.swap(children_);
     NotifyDataCountChanged(static_cast<int32_t>(std::min(from, to)));
+    NotifyCountChange(static_cast<int32_t>(std::max(from, to)), 0);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -273,6 +282,7 @@ void LazyForEachNode::OnDataMoved(size_t from, size_t to)
     tempChildren_.clear();
     tempChildren_.swap(children_);
     NotifyDataCountChanged(static_cast<int32_t>(std::min(from, to)));
+    NotifyCountChange(static_cast<int32_t>(std::max(from, to)), 0);
     MarkNeedSyncRenderTree(true);
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
@@ -545,5 +555,14 @@ void LazyForEachNode::InitAllChilrenDragManager(bool init)
             pattern->DeInitDragManager();
         }
     }
+}
+
+void LazyForEachNode::NotifyCountChange(int32_t index, int32_t count)
+{
+    auto parentNode = GetParentFrameNode();
+    CHECK_NULL_VOID(parentNode);
+    auto pattern = parentNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->NotifyDataChange(index, count);
 }
 } // namespace OHOS::Ace::NG
