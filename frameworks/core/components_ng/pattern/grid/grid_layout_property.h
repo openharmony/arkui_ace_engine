@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_LAYOUT_PROPERTY_H
 
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/grid/grid_constants.h"
 #include "core/components_ng/pattern/grid/grid_layout_options.h"
 
 namespace OHOS::Ace::NG {
@@ -140,6 +141,12 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Editable, bool, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollEnabled, bool, PROPERTY_UPDATE_MEASURE);
+
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AlignItems, GridItemAlignment);
+    void OnAlignItemsUpdate(GridItemAlignment /* alignItems */) const
+    {
+        ResetGridLayoutInfoAndMeasure();
+    }
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(GridLayoutProperty);

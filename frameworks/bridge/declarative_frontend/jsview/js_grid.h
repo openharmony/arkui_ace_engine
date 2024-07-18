@@ -57,6 +57,7 @@ public:
     static void SetNestedScroll(const JSCallbackInfo& args);
     static void SetScrollEnabled(const JSCallbackInfo& args);
     static void SetFriction(const JSCallbackInfo& info);
+    static void SetAlignItems(const JSCallbackInfo& info);
 
     static void JsOnScroll(const JSCallbackInfo& args);
     static void JsOnReachStart(const JSCallbackInfo& args);
