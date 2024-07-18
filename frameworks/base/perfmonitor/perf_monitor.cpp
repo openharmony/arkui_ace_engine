@@ -540,11 +540,14 @@ bool PerfMonitor::IsExceptResponseTime(int64_t time, const std::string& sceneId)
 // for jank frame app
 bool PerfMonitor::IsExclusionFrame()
 {
+    ACE_SCOPED_TRACE("IsExclusionFrame: isResponse(%d) isStartApp(%d) isBg(%d) isExcluWindow(%d) isExcAni(%d)",
+        isResponseExclusion, isStartAppFrame, isBackgroundApp, isExclusionWindow, isExceptAnimator);
     return isResponseExclusion || isStartAppFrame || isBackgroundApp || isExclusionWindow || isExceptAnimator;
 }
 
 void PerfMonitor::SetAppStartStatus()
 {
+    ACE_FUNCTION_TRACE();
     isStartAppFrame = true;
     startAppTime = GetCurrentRealTimeNs();
 }
