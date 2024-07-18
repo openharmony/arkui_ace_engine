@@ -46,6 +46,7 @@ public:
     void SetAutoResize(bool autoResize) override;
     void SetResizableSlice(const ImageResizableSlice& slice) override {};
     void SetResizableLattice(const RefPtr<DrawingLattice>& lattice) override {};
+    void ResetResizableLattice() override {};
     void SetSyncMode(bool syncMode) override;
     void SetColorFilterMatrix(const std::vector<float>& matrix) override;
     void SetDrawingColorFilter(RefPtr<DrawingColorFilter>& colorFilter) override {};
