@@ -635,7 +635,8 @@ void PipelineContext::InspectDrew()
     CHECK_RUN_ON(UI);
     if (!needRenderNode_.empty()) {
         auto needRenderNode = std::move(needRenderNode_);
-        for (auto&& node : needRenderNode) {
+        for (auto&& nodeWeak : needRenderNode) {
+            auto node = nodeWeak.Upgrade();
             if (node) {
                 OnDrawCompleted(node->GetInspectorId()->c_str());
             }
@@ -733,7 +734,7 @@ void PipelineContext::FlushAfterLayoutCallbackInImplicitAnimationTask()
     window_->Unlock();
 }
 
-void PipelineContext::SetNeedRenderNode(const RefPtr<FrameNode>& node)
+void PipelineContext::SetNeedRenderNode(const WeakPtr<FrameNode>& node)
 {
     CHECK_RUN_ON(UI);
     needRenderNode_.insert(node);
@@ -1544,7 +1545,7 @@ void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
 
     CHECK_THREAD_SAFE(isFormRender_, taskExecutor_);
     dirtyPropertyNodes_.erase(frameNode);
-    needRenderNode_.erase(frameNode);
+    needRenderNode_.erase(WeakPtr<FrameNode>(frameNode));
 
     if (dirtyFocusNode_ == frameNode) {
         dirtyFocusNode_.Reset();

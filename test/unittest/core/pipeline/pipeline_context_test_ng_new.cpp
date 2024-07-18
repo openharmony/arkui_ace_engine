@@ -521,8 +521,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg045, TestSize.Level1)
      */
     auto pattern = AceType::MakeRefPtr<Pattern>();
     auto frameNode = FrameNode::CreateFrameNode(TEST_TAG, 3, pattern);
-    context_->SetNeedRenderNode(frameNode);
-    EXPECT_EQ(context_->needRenderNode_.count(frameNode), 1);
+    context_->SetNeedRenderNode(WeakPtr<FrameNode>(frameNode));
+    EXPECT_EQ(context_->needRenderNode_.count(WeakPtr<FrameNode>(frameNode)), 1);
 
     /**
      * @tc.steps3: Call the function FlushPipelineImmediately.
@@ -840,10 +840,10 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg057, TestSize.Level1)
 
     auto needRenderNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto needRenderNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, needRenderNodeId, nullptr);
-    context_->SetNeedRenderNode(needRenderNode);
-    EXPECT_EQ(context_->needRenderNode_.count(needRenderNode), 1);
+    context_->SetNeedRenderNode(WeakPtr<FrameNode>(needRenderNode));
+    EXPECT_EQ(context_->needRenderNode_.count(WeakPtr<FrameNode>(needRenderNode)), 1);
     context_->InspectDrew();
-    EXPECT_EQ(context_->needRenderNode_.count(needRenderNode), 0);
+    EXPECT_EQ(context_->needRenderNode_.count(WeakPtr<FrameNode>(needRenderNode)), 0);
 }
 
 /**
@@ -1625,7 +1625,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg087, TestSize.Level1)
      */
     ASSERT_NE(context_, nullptr);
     context_->dirtyPropertyNodes_.emplace(frameNode_);
-    context_->needRenderNode_.emplace(frameNode_);
+    context_->needRenderNode_.emplace(WeakPtr<FrameNode>(frameNode_));
     context_->dirtyFocusNode_ = frameNode_;
     context_->dirtyFocusScope_ = frameNode_;
     context_->dirtyRequestFocusNode_ = frameNode_;
@@ -1638,7 +1638,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg087, TestSize.Level1)
     context_->DetachNode(frameNode_);
 
     EXPECT_NE(context_->dirtyPropertyNodes_.count(frameNode_), 1);
-    EXPECT_NE(context_->needRenderNode_.count(frameNode_), 1);
+    EXPECT_NE(context_->needRenderNode_.count(WeakPtr<FrameNode>(frameNode_)), 1);
     EXPECT_NE(context_->dirtyFocusNode_, frameNode_);
     EXPECT_NE(context_->dirtyFocusScope_, frameNode_);
     EXPECT_NE(context_->dirtyRequestFocusNode_, frameNode_);

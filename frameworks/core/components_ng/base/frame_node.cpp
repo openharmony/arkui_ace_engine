@@ -1729,7 +1729,7 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
         if (self->GetInspectorId()) {
             auto pipeline = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
-            pipeline->SetNeedRenderNode(self);
+            pipeline->SetNeedRenderNode(weak);
         }
     };
     if (forceUseMainThread || wrapper->CheckShouldRunOnMain()) {

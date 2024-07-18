@@ -360,7 +360,7 @@ bool PipelineContext::CheckOverlayFocus()
 
 void PipelineContext::OnDrawCompleted(const std::string& componentId) {}
 
-void PipelineContext::SetNeedRenderNode(const RefPtr<FrameNode>& node) {}
+void PipelineContext::SetNeedRenderNode(const WeakPtr<FrameNode>& node) {}
 
 void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
 
