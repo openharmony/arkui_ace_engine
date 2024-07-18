@@ -33,6 +33,12 @@ constexpr int32_t MAX_RECOVER_BUTTON_INDEX = 0;
 constexpr int32_t MINIMIZE_BUTTON_INDEX = 1;
 constexpr int32_t CLOSE_BUTTON_INDEX = 2;
 constexpr int32_t TITLE_POPUP_DURATION = 400;
+
+constexpr float LIGHT_ON_INTENSITY = 1.8f;
+constexpr float LIGHT_OFF_INTENSITY = 0.0f;
+constexpr float LIGHT_POSITION_Z = 40.0f;
+constexpr int32_t LIGHT_ILLUMINATED_TYPE = 7;
+constexpr int32_t POINT_LIGHT_ANIMATION_DURATION = 500;
 } // namespace
 
 void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool needUpdate)
@@ -104,6 +110,7 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     CHECK_NULL_VOID(controlButtonsLayoutProperty);
     ChangeFloatingTitle(isFocus_);
     ChangeControlButtons(isFocus_);
+    AddPointLight();
     auto controlButtonsContext = controlButtonsNode->GetRenderContext();
     CHECK_NULL_VOID(controlButtonsContext);
     controlButtonsContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
@@ -130,6 +137,7 @@ void ContainerModalPatternEnhance::OnWindowFocused()
 {
     ContainerModalPattern::OnWindowFocused();
     ContainerModalPattern::SetIsHoveredMenu(false);
+    UpdateLightIntensity();
 }
 
 void ContainerModalPatternEnhance::OnWindowUnfocused()
@@ -142,6 +150,7 @@ void ContainerModalPatternEnhance::OnWindowUnfocused()
     }
     ContainerModalPattern::OnWindowUnfocused();
     ContainerModalPattern::SetIsHoveredMenu(false);
+    UpdateLightIntensity();
 }
 
 void ContainerModalPatternEnhance::OnWindowForceUnfocused()
@@ -291,5 +300,80 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
                 controlButtonsLayoutProperty->UpdateVisibility(beforeVisible);
             });
     }
+}
+
+void ContainerModalPatternEnhance::AddPointLight()
+{
+    auto controlButtonsNode = GetControlButtonRow();
+    CHECK_NULL_VOID(controlButtonsNode);
+
+    auto maximizeButton =
+        AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MAX_RECOVER_BUTTON_INDEX));
+    auto minimizeButton =
+        AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MINIMIZE_BUTTON_INDEX));
+    auto closeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, CLOSE_BUTTON_INDEX));
+
+    SetPointLight(controlButtonsNode, maximizeButton, minimizeButton, closeButton);
+}
+
+void ContainerModalPatternEnhance::SetPointLight(RefPtr<FrameNode>& containerTitleRow, RefPtr<FrameNode>& maximizeBtn,
+    RefPtr<FrameNode>& minimizeBtn, RefPtr<FrameNode>& closeBtn)
+{
+    auto inputHub = containerTitleRow->GetOrCreateInputEventHub();
+    RefPtr<RenderContext> maximizeBtnRenderContext_ = maximizeBtn->GetRenderContext();
+    RefPtr<RenderContext> minimizeBtnRenderContext_ = minimizeBtn->GetRenderContext();
+    closeBtnRenderContext_ = closeBtn->GetRenderContext();
+
+    maximizeBtnRenderContext_->UpdateLightIlluminated(LIGHT_ILLUMINATED_TYPE);
+    minimizeBtnRenderContext_->UpdateLightIlluminated(LIGHT_ILLUMINATED_TYPE);
+    closeBtnRenderContext_->UpdateLightIlluminated(LIGHT_ILLUMINATED_TYPE);
+    closeBtnRenderContext_->UpdateLightIntensity(LIGHT_ON_INTENSITY);
+
+    auto mouseTask = [this, weakCloseBtn = AceType::WeakClaim(AceType::RawPtr(closeBtn))](MouseInfo& info) {
+        auto closeBtn = weakCloseBtn.Upgrade();
+        CHECK_NULL_VOID(closeBtn);
+        auto closeBntFrameRect = closeBtn->GetGeometryNode()->GetFrameRect();
+        TranslateOptions closeTranslate = TranslateOptions(info.GetLocalLocation().GetX() - closeBntFrameRect.Left(),
+            info.GetLocalLocation().GetY() - closeBntFrameRect.Top(), LIGHT_POSITION_Z);
+        auto closeBtnContext = closeBtn->GetRenderContext();
+        closeBtnContext->UpdateLightPosition(closeTranslate);
+    };
+    auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    inputHub->AddOnMouseEvent(mouseEvent);
+
+    auto hoverEventFucRow = [this](bool hover) {
+        isTitleRowHovered_ = hover;
+        UpdateLightColor();
+        UpdateLightIntensity();
+    };
+    inputHub->AddOnHoverEvent(AceType::MakeRefPtr<InputEvent>(std::move(hoverEventFucRow)));
+}
+
+void ContainerModalPatternEnhance::UpdateLightColor()
+{
+    auto colorMode = SystemProperties::GetColorMode();
+    bool isDarkMode = colorMode == ColorMode::LIGHT;
+    if (isDarkMode) {
+        closeBtnRenderContext_->UpdateLightColor(Color(0xa0000000));
+    } else {
+        closeBtnRenderContext_->UpdateLightColor(Color::WHITE);
+    }
+}
+
+void ContainerModalPatternEnhance::UpdateLightIntensity()
+{
+    if (!closeBtnRenderContext_) {
+        return;
+    }
+    AnimationOption option;
+    option.SetDuration(POINT_LIGHT_ANIMATION_DURATION);
+    option.SetCurve(Curves::SMOOTH);
+    AnimationUtils::Animate(option, [this]() {
+        if (GetIsFocus() && isTitleRowHovered_) {
+            closeBtnRenderContext_->UpdateLightIntensity(LIGHT_ON_INTENSITY);
+        } else {
+            closeBtnRenderContext_->UpdateLightIntensity(LIGHT_OFF_INTENSITY);
+        }
+    });
 }
 } // namespace OHOS::Ace::NG
