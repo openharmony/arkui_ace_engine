@@ -5962,15 +5962,15 @@ RefPtr<NG::ChainedTransitionEffect> ParseTransition(ArkUITransitionEffectOption*
         animationOption.SetDelay(animation.delay);
         animationOption.SetIteration(animation.iterations);
         animationOption.SetTempo(animation.tempo);
-        animationOption.SetAnimationDirection(
-            DIRECTION_LIST[animation.playMode > DIRECTION_LIST.size() ? 0 : animation.playMode]);
+        animationOption.SetAnimationDirection(DIRECTION_LIST[
+            static_cast<ArkUI_Uint32>(animation.playMode) > DIRECTION_LIST.size() ? 0 : animation.playMode]);
 
         // curve
         if (animation.iCurve) {
             auto curve = reinterpret_cast<Curve*>(animation.iCurve);
             animationOption.SetCurve(AceType::Claim(curve));
         } else {
-            if (animation.curve < 0 || animation.curve >= CURVES.size()) {
+            if (animation.curve < 0 || static_cast<ArkUI_Uint32>(animation.curve) >= CURVES.size()) {
                 animationOption.SetCurve(OHOS::Ace::Curves::EASE_IN_OUT);
             } else {
                 animationOption.SetCurve(CURVES[animation.curve]);
