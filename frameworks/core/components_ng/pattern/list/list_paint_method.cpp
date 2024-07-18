@@ -18,6 +18,11 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/render/divider_painter.h"
 
+#ifdef ARKUI_CIRCLE_FEATURE
+#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
+#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
+#endif // ARKUI_CIRCLE_FEATURE
+
 namespace OHOS::Ace::NG {
 constexpr double PERCENT_100 = 100.0;
 constexpr float LINEAR_GRADIENT_ANGLE = 90.0f;
@@ -187,6 +192,26 @@ ListDivider ListPaintMethod::HandleLastLineIndex(int32_t index, int32_t laneIdx,
 
 void ListPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 {
+#ifdef ARKUI_CIRCLE_FEATURE
+    CHECK_NULL_VOID(paintWrapper);
+    auto scrollBarOverlayModifier =
+        AceType::DynamicCast<ArcScrollBarOverlayModifier>(scrollBarOverlayModifier_.Upgrade());
+    CHECK_NULL_VOID(scrollBarOverlayModifier);
+    auto scrollBar = AceType::DynamicCast<ArcScrollBar>(scrollBar_.Upgrade());
+    CHECK_NULL_VOID(scrollBar);
+    if (scrollBar->GetPositionModeUpdate()) {
+        scrollBarOverlayModifier->SetPositionMode(scrollBar->GetPositionMode());
+    }
+    scrollBarOverlayModifier->SetBackgroundBarColor(scrollBar->GetBackgroundColor());
+    scrollBarOverlayModifier->StartArcBarAnimation(scrollBar->GetHoverAnimationType(),
+        scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetArcActiveRect(),
+        scrollBar->GetArcBarRect());
+
+    scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
+
+    scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
+    scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
+#else
     CHECK_NULL_VOID(paintWrapper);
     auto scrollBarOverlayModifier = scrollBarOverlayModifier_.Upgrade();
     CHECK_NULL_VOID(scrollBarOverlayModifier);
@@ -201,6 +226,7 @@ void ListPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
+#endif
 }
 
 void ListPaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& listRenderContext)
