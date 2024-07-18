@@ -250,13 +250,13 @@ void SliderContentModifier::DrawStep(DrawingContext& context)
 
     if (reverse_) {
         while (GreatOrEqual(endX, startX) && GreatOrEqual(endY, startY)) {
-            canvas.DrawCircle(RSPoint(endX, endY), stepSize * HALF);
+            canvas.DrawCircle(RSPoint(endX, endY), isEnlarge_ ? stepSize * HALF * scaleValue_ : stepSize * HALF);
             endX -= stepsLengthX;
             endY -= stepsLengthY;
         }
     } else {
         while (LessOrEqual(startX, endX) && LessOrEqual(startY, endY)) {
-            canvas.DrawCircle(RSPoint(startX, startY), stepSize * HALF);
+            canvas.DrawCircle(RSPoint(startX, startY), isEnlarge_ ? stepSize * HALF * scaleValue_ : stepSize * HALF);
             startX += stepsLengthX;
             startY += stepsLengthY;
         }
@@ -398,6 +398,7 @@ void SliderContentModifier::SetBoardColor()
     CHECK_NULL_VOID(theme);
     Color shadowColor = Color::TRANSPARENT;
     shadowColor = mouseHoverFlag_ ? theme->GetBlockHoverColor() : shadowColor;
+    mouseHoverFlag_ ? SetIsHover(true) : SetIsHover(false);
     shadowColor = mousePressedFlag_ ? theme->GetBlockPressedColor() : shadowColor;
     auto duration = mousePressedFlag_ ? static_cast<int32_t>(theme->GetPressAnimationDuration())
                                       : static_cast<int32_t>(theme->GetHoverAnimationDuration());

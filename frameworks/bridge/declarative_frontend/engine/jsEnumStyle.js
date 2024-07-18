@@ -3192,3 +3192,10 @@ var CrownSensitivity;
   CrownSensitivity[CrownSensitivity["MEDIUM"] = 1] = "MEDIUM";
   CrownSensitivity[CrownSensitivity["HIGH"] = 2] = "HIGH";
 })(CrownSensitivity || (CrownSensitivity = {}));
+
+var CrownAction;
+(function (CrownAction) {
+  CrownAction[CrownAction["BEGIN"] = 0] = "BEGIN";
+  CrownAction[CrownAction["UPDATE"] = 1] = "UPDATE";
+  CrownAction[CrownAction["END"] = 2] = "END";
+})(CrownAction || (CrownAction = {}));

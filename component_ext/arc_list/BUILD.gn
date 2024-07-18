@@ -28,16 +28,13 @@ es2abc_gen_abc("gen_arkui_arclist_abc") {
   extra_args = [ "--module" ]
 }
 
-gen_obj("arkui_arclist_js") {
-  input = "arkui_arclist.js"
-  output = target_out_dir + "/arkui_arclist.o"
-  snapshot_dep = []
-}
-
 gen_obj("arkui_arclist_abc") {
   input = get_label_info(":gen_arkui_arclist_abc", "target_out_dir") +
           "/arkui_arclist.abc"
-  output = target_out_dir + "arkui_arclist_abc.o"
+  output = target_out_dir + "/arkui_arclist_abc.o"
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
+    output = target_out_dir + "arkui_arclist_abc.c"
+  }
   snapshot_dep = [ ":gen_arkui_arclist_abc" ]
 }
 
@@ -58,16 +55,12 @@ ohos_shared_library("arclist") {
 
   deps = [
     ":gen_obj_src_arkui_arclist_abc",
-    ":gen_obj_src_arkui_arclist_js",
     "$ace_root/build:libace_compatible",
-    "$ace_root/interfaces/inner_api/ace:ace_uicontent",
   ]
-
   external_deps = [
     "bounds_checking_function:libsec_static",
     "ets_runtime:libark_jsruntime",
     "hilog:libhilog",
-    "napi:ace_container_scope",
     "napi:ace_napi",
   ]
 
@@ -88,6 +81,11 @@ ohos_shared_library("arclist") {
     "-fvisibility-inlines-hidden",
     "-Os",
   ]
+
+  if (use_mingw_win || use_linux) {
+    cflags_cc += [ "-std=c++17" ]
+    defines += [ "_USE_MATH_DEFINES" ]
+  }
 
   relative_install_dir = "module/arkui"
   subsystem_name = ace_engine_subsystem

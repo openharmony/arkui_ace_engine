@@ -17,7 +17,16 @@
 
 #include "ext_napi_utils.h"
 
-#include "bridge/declarative_frontend/engine/js_converter.h"
+#include "core/common/container.h"
+
+#ifdef PREVIEW
+#include "native_engine/native_engine.h"
+#ifdef WINDOWS_PLATFORM
+#undef TRANSPARENT
+#undef ERROR
+#undef ALTERNATE
+#endif
+#endif
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
@@ -25,15 +34,8 @@
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
-extern const char _binary_arkui_arclist_js_start[];
 extern const char _binary_arkui_arclist_abc_start[];
-#if !defined(IOS_PLATFORM)
-extern const char _binary_arkui_arclist_js_end[];
 extern const char _binary_arkui_arclist_abc_end[];
-#else
-extern const char* _binary_arkui_arclist_js_end;
-extern const char* _binary_arkui_arclist_abc_end;
-#endif
 
 namespace OHOS::Ace {
 namespace {
@@ -43,6 +45,7 @@ static constexpr size_t MAX_ARG_NUM = 10;
 using namespace ArcList;
 
 namespace ArcList {
+
 void SetScroller(napi_env env, Framework::JSScroller* jsScroller)
 {
     if (jsScroller) {
@@ -91,9 +94,11 @@ napi_value JsCreate(napi_env env, napi_callback_info info)
 
         napi_value jsScroller = ExtNapiUtils::GetNamedProperty(env, argv[0], "scroller");
         if (ExtNapiUtils::CheckTypeForNapiValue(env, jsScroller, napi_object)) {
-            Framework::JSScroller* scroller = nullptr;
-            napi_unwrap(env, jsScroller, (void**)&scroller);
-            SetScroller(env, scroller);
+            panda::Local<panda::ObjectRef> scrollerObject((uintptr_t)jsScroller);
+            if (scrollerObject->GetNativePointerFieldCount() > 0) {
+                Framework::JSScroller* scroller = (Framework::JSScroller*)scrollerObject->GetNativePointerField(0);
+                SetScroller(env, scroller);
+            }
         }
 
         napi_value jsHeader = ExtNapiUtils::GetNamedProperty(env, argv[0], "header");
@@ -423,19 +428,7 @@ napi_value ExportArcList(napi_env env, napi_value exports)
 
 } // namespace OHOS::Ace
 
-extern "C" __attribute__((visibility("default"))) void NAPI_arkui_ArcList_GetJSCode(const char** buf, int* bufLen)
-{
-    if (buf != nullptr) {
-        *buf = _binary_arkui_arclist_js_start;
-    }
-
-    if (bufLen != nullptr) {
-        *bufLen = _binary_arkui_arclist_js_end - _binary_arkui_arclist_js_start;
-    }
-}
-
-// arkui_arclist JS register
-extern "C" __attribute__((visibility("default"))) void NAPI_arkui_ArcList_GetABCCode(const char** buf, int* buflen)
+extern "C" ACE_FORCE_EXPORT void NAPI_arkui_ArcList_GetABCCode(const char** buf, int* buflen)
 {
     if (buf != nullptr) {
         *buf = _binary_arkui_arclist_abc_start;

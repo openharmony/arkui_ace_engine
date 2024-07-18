@@ -110,15 +110,41 @@ void OptionPattern::InitFocusEvent()
 
 void OptionPattern::HandleFocusEvent()
 {
-    isFocused_ = true;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+
+    if (pipeline->GetIsFocusActive()) {
+        SetFocusStyle();
+    }
+
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusActive) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            isFocusActive ? pattern->SetFocusStyle() : pattern->ClearFocusStyle();
+        };
+    }
+
+    pipeline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void OptionPattern::HandleBlurEvent()
+{
+    ClearFocusStyle();
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveIsFocusActiveUpdateEvent(GetHost());
+}
+
+void OptionPattern::SetFocusStyle()
+{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto && graphics = renderContext->GetOrCreateGraphics();
-    auto && transform = renderContext->GetOrCreateTransform();
+    auto&& graphics = renderContext->GetOrCreateGraphics();
     CHECK_NULL_VOID(graphics);
-    CHECK_NULL_VOID(transform);
 
     Shadow shadow = Shadow::CreateShadow(static_cast<ShadowStyle>(NONE_SHADOW_VALUE));
     if (!graphics->HasBackShadow() || graphics->GetBackShadowValue() == shadow) {
@@ -127,51 +153,34 @@ void OptionPattern::HandleFocusEvent()
         isFocusShadowSet_ = true;
     }
 
-    isFocusBGColorSet_ = true;
-    renderContext->UpdateBackgroundColor(selectTheme_->GetOptionFocusedBackgroundColor());
-    CHECK_NULL_VOID(text_);
-    auto context = text_->GetRenderContext();
-    CHECK_NULL_VOID(context);
-    context->UpdateForegroundColor(selectTheme_->GetOptionFocusedFontColor());
-    context->UpdateForegroundColorFlag(false);
-    context->ResetForegroundColorStrategy();
-    text_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    isFocusTextColorSet_ = true;
+    if (!isBGColorSetByUser_) {
+        renderContext->UpdateBackgroundColor(selectTheme_->GetOptionFocusedBackgroundColor());
+    }
+
+    if (!isTextColorSetByUser_) {
+        SetFontColor(selectTheme_->GetOptionFocusedFontColor());
+        text_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
-void OptionPattern::HandleBlurEvent()
+void OptionPattern::ClearFocusStyle()
 {
-    isFocused_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (isFocusBGColorSet_) {
-        if (selected_ == index_) {
-            renderContext->UpdateBackgroundColor(selectTheme_->GetSelectedColor());
-        } else {
-            renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        }
-        isFocusBGColorSet_ = false;
+    if (!isBGColorSetByUser_) {
+        renderContext->UpdateBackgroundColor(
+            selected_ == index_ ? selectTheme_->GetSelectedColor() : Color::TRANSPARENT);
     }
     if (isFocusShadowSet_) {
         renderContext->ResetBackShadow();
         renderContext->SetShadowRadius(0.0f);
         isFocusShadowSet_ = false;
     }
-    if (isFocusTextColorSet_) {
-        CHECK_NULL_VOID(text_);
-        auto context = text_->GetRenderContext();
-        CHECK_NULL_VOID(context);
-        if (selected_ == index_) {
-            context->UpdateForegroundColor(selectTheme_->GetSelectedColorText());
-        } else {
-            context->UpdateForegroundColor(GetFontColor());
-        }
-        context->UpdateForegroundColorFlag(false);
-        context->ResetForegroundColorStrategy();
-        text_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        isFocusTextColorSet_ = false;
+    if (!isTextColorSetByUser_) {
+        SetFontColor(selected_ == index_ ? selectTheme_->GetSelectedColorText() : selectTheme_->GetMenuFontColor());
+        text_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
 

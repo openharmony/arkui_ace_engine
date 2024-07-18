@@ -758,6 +758,7 @@ void SelectPattern::SetOptionBgColor(const Color& color)
         auto pattern = options_[i]->GetPattern<OptionPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetBgColor(color);
+        pattern->SetIsBGColorSetByUser(true);
     }
 }
 
@@ -823,6 +824,7 @@ void SelectPattern::SetOptionFontColor(const Color& color)
         auto pattern = options_[i]->GetPattern<OptionPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetFontColor(color);
+        pattern->SetIsTextColorSetByUser(true);
     }
 }
 

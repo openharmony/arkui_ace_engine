@@ -1061,6 +1061,11 @@ void OverlayManager::ShowToast(const std::string& message, int32_t duration, con
         rootNode->RemoveChild(toastNodeWeak.Upgrade());
     }
     toastMap_.clear();
+    if (alignment == -1) {
+        auto toastTheme = context->GetTheme<ToastTheme>();
+        CHECK_NULL_VOID(toastTheme);
+        alignment = toastTheme->GetAlign();
+    }
     ToastInfo toastInfo = {message, duration, bottom, isRightToLeft, showMode, alignment, offset};
     auto toastNode = ToastView::CreateToastNode(toastInfo);
     CHECK_NULL_VOID(toastNode);
