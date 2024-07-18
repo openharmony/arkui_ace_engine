@@ -61,6 +61,10 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             ConvertToPx(calcConstraint->selfIdealSize.value().Width()->GetDimension(), scaleProperty,
                 layoutConstraint->percentReference.Width()));
     }
+    if (calcConstraint && calcConstraint->selfIdealSize.has_value() &&
+        calcConstraint->selfIdealSize.value().Height().has_value()) {
+        idealHeight_ = calcConstraint->selfIdealSize.value().Height()->GetDimension().ConvertToPx();
+    }
     if (layoutConstraint->selfIdealSize.Width().has_value()) {
         maxRowWidth_ =
             std::max(layoutConstraint->minSize.Width(),
@@ -102,12 +106,10 @@ void MenuItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto rightRow = layoutWrapper->GetOrCreateChildByIndex(1);
     auto rightRowSize = rightRow ? rightRow->GetGeometryNode()->GetFrameSize() : SizeT(0.0f, 0.0f);
 
-    auto itemHeight = std::max(leftRowSize.Height(), rightRowSize.Height()) + padding.Height();
+    auto itemHeight = idealHeight_ > 0.0f ? idealHeight_ :
+        std::max(leftRowSize.Height(), rightRowSize.Height()) + padding.Height();
     CHECK_NULL_VOID(leftRow);
     float topSpace = (itemHeight - leftRowSize.Height() + GetBordersHeight(layoutWrapper)) / 2.0f;
-    if (padding.top.has_value() && Positive(padding.top.value()) && padding.top.value() > topSpace) {
-        topSpace = padding.top.value();
-    }
     leftRow->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     leftRow->GetGeometryNode()->SetMarginFrameOffset(OffsetF(padding.left.value_or(horInterval_), topSpace));
     if (layoutDirection == TextDirection::RTL) {
@@ -120,9 +122,6 @@ void MenuItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     CHECK_NULL_VOID(rightRow);
     topSpace = (itemHeight - rightRowSize.Height() + GetBordersHeight(layoutWrapper)) / 2.0f;
-    if (padding.top.has_value() && Positive(padding.top.value()) && padding.top.value() > topSpace) {
-        topSpace = padding.top.value();
-    }
     rightRow->GetGeometryNode()->SetMarginFrameOffset(
         OffsetF(layoutWrapper->GetGeometryNode()->GetFrameSize().Width() - padding.right.value_or(horInterval_) -
             rightRow->GetGeometryNode()->GetFrameSize().Width(), topSpace));
