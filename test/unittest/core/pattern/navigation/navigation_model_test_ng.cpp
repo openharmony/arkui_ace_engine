@@ -1706,5 +1706,104 @@ HWTEST_F(NavigationModelTestNg, AccessibilityTest001, TestSize.Level1)
     auto text2 = AccessibilityProperty2->GetAccessibilityText();
     EXPECT_EQ(text2, "NavigationMenu");
 }
-} // namespace OHOS::Ace::NG
 
+/**
+ * @tc.name: SetMinNavBarWidth001
+ * @tc.desc: Test SetMinNavBarWidth and cover all conditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, SetMinNavBarWidth001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    Dimension value = 250.0_vp;
+    navigationPattern->SetMinNavBarWidthValue(value);
+    // Make GetMinNavBarWidthValue return value
+    EXPECT_EQ(navigationPattern->GetMinNavBarWidthValue(), value);
+    navigationModel.SetMinNavBarWidth(value);
+    EXPECT_EQ(navigationPattern->GetMinNavBarWidthValue(), navigationPattern->minNavBarWidthValue_);
+}
+
+/**
+ * @tc.name: SetMaxNavBarWidth001
+ * @tc.desc: Test SetMaxNavBarWidth and cover all conditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, SetMaxNavBarWidth001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    Dimension value = 250.0_vp;
+    navigationPattern->SetMaxNavBarWidthValue(value);
+    // Make GetMaxNavBarWidthValue return value
+    EXPECT_EQ(navigationPattern->GetMaxNavBarWidthValue(), value);
+    navigationModel.SetMaxNavBarWidth(value);
+    EXPECT_EQ(navigationPattern->GetMaxNavBarWidthValue(), navigationPattern->maxNavBarWidthValue_);
+}
+
+/**
+ * @tc.name: SetMinContentWidth001
+ * @tc.desc: Test SetMinContentWidth and cover all conditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, SetMinContentWidth001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    Dimension value = 250.0_vp;
+    navigationPattern->SetMinContentWidthValue(value);
+    EXPECT_EQ(navigationPattern->GetMinContentWidthValue(), value);
+    navigationModel.SetMinContentWidth(value);
+    EXPECT_EQ(navigationPattern->GetMinContentWidthValue(), navigationPattern->minContentWidthValue_);
+}
+
+/**
+ * @tc.name: SetNavigationPathInfo001
+ * @tc.desc: Test SetNavigationPathInfo and cover all conditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, SetNavigationPathInfo001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    navigationModel.SetNavigationPathInfo("TestName", "TestPath");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    EXPECT_EQ(navigationGroupNode->navigationModuleName_, "TestName");
+    EXPECT_EQ(navigationGroupNode->navigationPathInfo_, "TestPath");
+}
+} // namespace OHOS::Ace::NG
