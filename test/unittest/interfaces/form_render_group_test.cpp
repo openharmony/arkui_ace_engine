@@ -28,6 +28,7 @@ using namespace testing::ext;
 namespace OHOS::Ace {
 namespace {
 constexpr char FORM_RENDER_STATE[] = "ohos.extra.param.key.form_render_state";
+constexpr char FORM_RENDERER_COMP_ID[] = "ohos.extra.param.key.form_comp_id";
 } // namespace
 class FormRenderGroupTest : public testing::Test {
 public:
