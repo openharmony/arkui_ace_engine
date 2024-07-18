@@ -280,6 +280,7 @@ void SelectContentOverlayManager::UpdateExistOverlay(const SelectOverlayInfo& in
 
 void SelectContentOverlayManager::SwitchToHandleMode(HandleLevelMode mode, bool forceChange)
 {
+    CHECK_NULL_VOID(shareOverlayInfo_);
     if (shareOverlayInfo_->handleLevelMode == mode) {
         return;
     }

@@ -1101,11 +1101,6 @@ public:
     bool NeedPaintSelect();
     void SetCustomKeyboardOption(bool supportAvoidance);
 
-    void SetIsFocusedBeforeClick(bool isFocusedBeforeClick)
-    {
-        isFocusedBeforeClick_ = isFocusedBeforeClick;
-    }
-
     void SetIsCustomFont(bool isCustomFont)
     {
         isCustomFont_ = isCustomFont;
@@ -1202,7 +1197,7 @@ public:
 
     OffsetF GetTextPaintOffset() const override;
 
-    OffsetF GetPaintRectGlobalOffset() const;
+    OffsetF GetPaintRectGlobalOffset(bool duringLayout = false) const;
 
     void NeedRequestKeyboard()
     {
@@ -1598,6 +1593,7 @@ private:
     bool FinishTextPreviewByPreview(const std::string& insertValue);
 
     bool GetTouchInnerPreviewText(const Offset& offset) const;
+    bool IsShowMenu(const std::optional<SelectionOptions>& options);
 
     RectF frameRect_;
     RectF textRect_;

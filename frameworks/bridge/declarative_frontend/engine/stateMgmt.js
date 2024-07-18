@@ -6881,7 +6881,6 @@ class ViewPU extends PUV2ViewBase {
             const parentPU = this.getParent();
             parentPU.getOrCreateRecycleManager().pushRecycleNode(name, this);
             this.hasBeenRecycled_ = true;
-            this.setActiveInternal(false);
         }
         else {
             this.resetRecycleCustomNode();

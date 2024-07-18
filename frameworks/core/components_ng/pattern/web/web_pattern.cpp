@@ -2644,7 +2644,6 @@ bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, doubl
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
-    context->SetRootRect(width, height, 0);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
     taskExecutor->PostDelayedTask(
@@ -2707,9 +2706,6 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeybo
         rect.SetSize(SizeF(drawSize_.Width(), drawSize_.Height()));
         frameNode->GetRenderContext()->SyncGeometryProperties(rect);
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        context->SetRootRect(width, height, 0);
     }
 }
 
@@ -3081,8 +3077,8 @@ void WebPattern::SelectCancel() const
     if (isReceivedArkDrag_) {
         return;
     }
-    CHECK_NULL_VOID(menuCallback_);
-    menuCallback_->Cancel();
+    CHECK_NULL_VOID(quickMenuCallback_);
+    quickMenuCallback_->Cancel();
 }
 
 std::string WebPattern::GetSelectInfo() const
@@ -3170,7 +3166,6 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
         selectOverlayProxy_->SetHandleReverse(false);
     }
     dropParams_ = params;
-    menuCallback_ = callback;
     selectMenuInfo_ = selectInfo.menuInfo;
     insertHandle_ = insertTouchHandle;
     startSelectionHandle_ = beginTouchHandle;
@@ -3189,8 +3184,12 @@ void WebPattern::DragDropSelectionMenu()
     if (!isDragEndMenuShow_ || IsImageDrag()) {
         return;
     }
+    if (!isVisible_) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop selection menu web is invisible");
+        return;
+    }
     CHECK_NULL_VOID(dropParams_);
-    CHECK_NULL_VOID(menuCallback_);
+    CHECK_NULL_VOID(quickMenuCallback_);
     SelectOverlayInfo selectInfo;
     selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
     selectInfo.firstHandle.isShow = IsTouchHandleShow(startSelectionHandle_);
@@ -3199,7 +3198,7 @@ void WebPattern::DragDropSelectionMenu()
     selectInfo.secondHandle.paintRect = ComputeTouchHandleRect(endSelectionHandle_);
     QuickMenuIsNeedNewAvoid(selectInfo, dropParams_, startSelectionHandle_, endSelectionHandle_);
     selectInfo.menuInfo.menuIsShow = true;
-    RegisterSelectOverlayCallback(selectInfo, dropParams_, menuCallback_);
+    RegisterSelectOverlayCallback(selectInfo, dropParams_, quickMenuCallback_);
     RegisterSelectOverlayEvent(selectInfo);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -4408,6 +4407,7 @@ void WebPattern::OnVisibleAreaChange(bool isVisible)
     isVisible_ = isVisible;
     if (!isVisible_) {
         CloseSelectOverlay();
+        SelectCancel();
         if (isVisibleActiveEnable_) {
             OnInActive();
         }

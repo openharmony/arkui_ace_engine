@@ -188,42 +188,30 @@ void JSText::SetFontWeight(const std::string& value)
 
 void JSText::SetMinFontScale(const JSCallbackInfo& info)
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    float minFontSizeDefault = theme->GetTextStyle().GetMinFontScale();
-    if (info.Length() < 1) {
-        TextModel::GetInstance()->SetMinFontScale(minFontSizeDefault);
-        return;
-    }
-    JSRef<JSVal> jValue = info[0];
     double minFontScale;
-    if (ParseJsDouble(jValue, minFontScale) && GreatOrEqual(minFontScale, 0.0f)) {
-        TextModel::GetInstance()->SetMinFontScale(static_cast<float>(minFontScale));
+    if (info.Length() < 1 || !ParseJsDouble(info[0], minFontScale)) {
+        TextModel::GetInstance()->SetMinFontScale(1.0f);
         return;
     }
-    TextModel::GetInstance()->SetMinFontScale(minFontSizeDefault);
+    if (LessOrEqual(minFontScale, 0.0f) || GreatOrEqual(minFontScale, 1.0f)) {
+        TextModel::GetInstance()->SetMinFontScale(1.0f);
+        return;
+    }
+    TextModel::GetInstance()->SetMinFontScale(static_cast<float>(minFontScale));
 }
 
 void JSText::SetMaxFontScale(const JSCallbackInfo& info)
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    float maxFontSizeDefault = theme->GetTextStyle().GetMaxFontScale();
-    if (info.Length() < 1) {
-        TextModel::GetInstance()->SetMaxFontScale(maxFontSizeDefault);
-        return;
-    }
-    JSRef<JSVal> jValue = info[0];
     double maxFontScale;
-    if (ParseJsDouble(jValue, maxFontScale) && GreatOrEqual(maxFontScale, 0.0f)) {
-        TextModel::GetInstance()->SetMaxFontScale(static_cast<float>(maxFontScale));
+    if (info.Length() < 1 || !ParseJsDouble(info[0], maxFontScale)) {
+        TextModel::GetInstance()->SetMaxFontScale(1.0f);
         return;
     }
-    TextModel::GetInstance()->SetMaxFontScale(maxFontSizeDefault);
+    if (LessOrEqual(maxFontScale, 1.0f)) {
+        TextModel::GetInstance()->SetMaxFontScale(1.0f);
+        return;
+    }
+    TextModel::GetInstance()->SetMaxFontScale(static_cast<float>(maxFontScale));
 }
 
 void JSText::SetForegroundColor(const JSCallbackInfo& info)

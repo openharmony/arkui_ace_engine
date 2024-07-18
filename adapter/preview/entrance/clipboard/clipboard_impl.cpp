@@ -81,7 +81,8 @@ void ClipboardImpl::HasData(const std::function<void(bool hasData)>& callback)
         TaskExecutor::TaskType::UI, "ArkUIClipboardHasData");
 }
 
-void ClipboardImpl::HasDataType(const std::function<void(bool hasData)>& callback, const std::string& mimeType)
+void ClipboardImpl::HasDataType(
+    const std::function<void(bool hasData)>& callback, const std::vector<std::string>& mimeTypes)
 {
     HasData(callback);
 }

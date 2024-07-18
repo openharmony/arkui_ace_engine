@@ -328,12 +328,12 @@ public:
         minFontScale_ = minFontScale;
     }
 
-    float GetMaxFontScale() const
+    std::optional<float> GetMaxFontScale() const
     {
         return maxFontScale_;
     }
 
-    float GetMinFontScale() const
+    std::optional<float> GetMinFontScale() const
     {
         return minFontScale_;
     }
@@ -784,8 +784,8 @@ private:
     bool adaptHeight_ = false; // whether adjust text size with height.
     bool allowScale_ = true;
     bool halfLeading_ = false;
-    float minFontScale_ = 0.0f;
-    float maxFontScale_ = static_cast<float>(INT32_MAX);
+    std::optional<float> minFontScale_;
+    std::optional<float> maxFontScale_;
 
     // for Symbol
     std::vector<Color> renderColors_;

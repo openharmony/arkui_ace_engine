@@ -673,19 +673,18 @@ HWTEST_F(RefreshTestNg, AddCustomBuilderNode002, TestSize.Level1)
      */
     Create([](RefreshModelNG model) { model.SetProgressColor(Color::BLUE); });
     EXPECT_EQ(layoutProperty_->GetProgressColor(), Color::BLUE);
-    auto builder = CreateCustomNode();
-    pattern_->AddCustomBuilderNode(builder);
-    EXPECT_EQ(GetChildFrameNode(frameNode_, 0), builder);
     EXPECT_NE(pattern_->progressChild_, nullptr);
 
     /**
-     * @tc.steps: step2. init child node
+     * @tc.steps: step2. init custom node
      * @tc.expected: remove progress child.
      */
     int32_t childrenSize = frameNode_->GetChildren().size();
-    pattern_->InitChildNode();
+    auto builder = CreateCustomNode();
+    pattern_->AddCustomBuilderNode(builder);
+    EXPECT_EQ(GetChildFrameNode(frameNode_, 0), builder);
     EXPECT_EQ(pattern_->progressChild_, nullptr);
-    EXPECT_EQ(frameNode_->GetChildren().size(), childrenSize - 1);
+    EXPECT_EQ(frameNode_->GetChildren().size(), childrenSize);
 
     /**
      * @tc.steps: step3. set null custom node
@@ -725,8 +724,9 @@ HWTEST_F(RefreshTestNg, AddCustomBuilderNode003, TestSize.Level1)
      */
     pattern_->AddCustomBuilderNode(nullptr);
     EXPECT_FALSE(pattern_->isCustomBuilderExist_);
+    EXPECT_EQ(frameNode_->TotalChildCount(), 1);
     pattern_->InitChildNode();
-    EXPECT_EQ(frameNode_->TotalChildCount(), 3);
+    EXPECT_EQ(frameNode_->TotalChildCount(), 2);
 }
 
 /**

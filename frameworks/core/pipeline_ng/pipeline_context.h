@@ -815,9 +815,10 @@ public:
     }
     void GetInspectorTree();
     void NotifyAllWebPattern(bool isRegister);
-    void AddFrameNodeChangeListener(const RefPtr<FrameNode>& node);
-    void RemoveFrameNodeChangeListener(const RefPtr<FrameNode>& node);
-    void AddChangedFrameNode(const RefPtr<FrameNode>& node);
+    void AddFrameNodeChangeListener(const WeakPtr<FrameNode>& node);
+    void RemoveFrameNodeChangeListener(int32_t nodeId);
+    bool AddChangedFrameNode(const WeakPtr<FrameNode>& node);
+    void RemoveChangedFrameNode(int32_t nodeId);
     void SetForceSplitEnable(bool isForceSplit)
     {
         isForceSplit_ = isForceSplit;
@@ -1077,8 +1078,8 @@ private:
 
     std::list<FrameCallbackFunc> frameCallbackFuncs_;
     uint32_t transform_ = 0;
-    std::list<RefPtr<FrameNode>> changeInfoListeners_;
-    std::list<RefPtr<FrameNode>> changedNodes_;
+    std::list<WeakPtr<FrameNode>> changeInfoListeners_;
+    std::list<WeakPtr<FrameNode>> changedNodes_;
 };
 } // namespace OHOS::Ace::NG
 

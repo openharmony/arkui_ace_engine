@@ -21,6 +21,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/image/image_source_info.h"
 #ifndef ACE_UNITTEST
 #include "core/components_ng/base/view_abstract.h"
@@ -556,6 +557,26 @@ void ImageModelNG::SetResizableSlice(const ImageResizableSlice& slice)
 void ImageModelNG::SetResizableSlice(FrameNode *frameNode, const ImageResizableSlice& slice)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableSlice, slice, frameNode);
+}
+
+void ImageModelNG::SetResizableLattice(const RefPtr<DrawingLattice>& lattice)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableLattice, lattice);
+}
+
+void ImageModelNG::SetResizableLattice(FrameNode* frameNode, const RefPtr<DrawingLattice>& lattice)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableLattice, lattice, frameNode);
+}
+
+void ImageModelNG::ResetResizableLattice()
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableLattice, nullptr);
+}
+
+void ImageModelNG::ResetResizableLattice(FrameNode *frameNode)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableLattice, nullptr, frameNode);
 }
 
 void ImageModelNG::SetImageRepeat(FrameNode *frameNode, ImageRepeat imageRepeat)

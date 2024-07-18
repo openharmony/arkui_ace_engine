@@ -6538,6 +6538,9 @@ class ImageeResizableModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().image.resetResizable(node);
     } else {
+      if (!isUndefined(this.value.lattice)) {
+        getUINativeModule().image.setResizableLattice(node, this.value.lattice);
+      }
       let sliceTop;
       let sliceRight;
       let sliceBottom;
@@ -28461,11 +28464,11 @@ if (globalThis.ContainerSpan !== undefined) {
   };
 }
 
-function __getArkUINode__() {
+function getArkUINodeFromNapi() {
   if(globalThis.__XNode__ === undefined) {
       globalThis.__XNode__ = globalThis.requireNapi('arkui.node');
   }
   return globalThis.__XNode__;
 }
 
-globalThis.__getArkUINode__ = __getArkUINode__;
+globalThis.__getArkUINode__ = getArkUINodeFromNapi;
