@@ -6659,6 +6659,16 @@ void RichEditorPattern::DumpInfo()
                                        : GetCaretRect().Height())));
     dumpLog.AddDesc(std::string("text rect: ").append(richTextRect_.ToString()));
     dumpLog.AddDesc(std::string("content rect: ").append(contentRect_.ToString()));
+    auto richEditorPaintOffset = host->GetPaintRectOffset();
+    bool hasRenderTransform = selectOverlay_->HasRenderTransform();
+    if (hasRenderTransform) {
+        richEditorPaintOffset = selectOverlay_->GetPaintOffsetWithoutTransform();
+    }
+    dumpLog.AddDesc(std::string("hasRenderTransform: ").append(std::to_string(hasRenderTransform)));
+    dumpLog.AddDesc(std::string("richEditorPaintOffset: ").append(richEditorPaintOffset.ToString()));
+    auto selectOverlayInfo = selectOverlay_->GetSelectOverlayInfo();
+    CHECK_NULL_VOID(selectOverlayInfo);
+    dumpLog.AddDesc(std::string("selectOverlay info: ").append(selectOverlayInfo->ToString()));
 }
 
 bool RichEditorPattern::HasFocus() const
