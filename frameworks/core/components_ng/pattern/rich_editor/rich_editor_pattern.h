@@ -1164,6 +1164,7 @@ private:
     std::vector<TimeStamp> clickInfo_;
     bool previewLongPress_ = false;
     bool editingLongPress_ = false;
+    bool needMoveCaretToContentRect_ = false;
 };
 } // namespace OHOS::Ace::NG
 
