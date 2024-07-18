@@ -1544,7 +1544,7 @@ void FrameNode::ProcessVisibleAreaChangeEvent(const RectF& visibleRect, const Re
 
 double FrameNode::CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect)
 {
-    if (!visibleRect.IsValid() || !renderRect.IsValid()) {
+    if (visibleRect.IsEmpty() || renderRect.IsEmpty()) {
         return 0.0;
     }
     return visibleRect.Width() * visibleRect.Height() / (renderRect.Width() * renderRect.Height());
