@@ -126,8 +126,10 @@ public:
     void SetExtraInfo(const std::string& extraInfo);
     void ClearExtraInfo();
     float GetWindowScale() const;
-    void UpdateDragStyle(const DragCursorStyleCore& dragCursorStyleCore = DragCursorStyleCore::DEFAULT);
-    void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const DragBehavior dragBehavior);
+    void UpdateDragStyle(
+        const DragCursorStyleCore& dragCursorStyleCore = DragCursorStyleCore::DEFAULT, const int32_t eventId = -1);
+    void UpdateDragAllowDrop(
+        const RefPtr<FrameNode>& dragFrameNode, const DragBehavior dragBehavior, const int32_t eventId = -1);
     void RequireSummary();
     void ClearSummary();
     void SetSummaryMap(const std::map<std::string, int64_t>& summaryMap)
