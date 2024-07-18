@@ -702,17 +702,15 @@ void ScrollablePattern::InitScrollBarGestureEvent()
         });
 }
 
+RefPtr<ScrollBar> ScrollablePattern::CreateScrollBar()
+{
 #ifdef ARKUI_CIRCLE_FEATURE
-RefPtr<ScrollBar> ScrollablePattern::CreateScrollBar()
-{
-    return AceType::MakeRefPtr<ArcScrollBar>();
-}
-#else
-RefPtr<ScrollBar> ScrollablePattern::CreateScrollBar()
-{
+    if (isRoundScroll_) {
+        return AceType::MakeRefPtr<ArcScrollBar>();
+    }
+#endif
     return AceType::MakeRefPtr<ScrollBar>();
 }
-#endif // ARKUI_CIRCLE_FEATURE
 
 void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
 {
@@ -891,17 +889,15 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
     scrollBarProxy_ = scrollBarProxy;
 }
 
+RefPtr<ScrollBarOverlayModifier> ScrollablePattern::CreateOverlayModifier()
+{
 #ifdef ARKUI_CIRCLE_FEATURE
-RefPtr<ScrollBarOverlayModifier> ScrollablePattern::CreateOverlayModifier()
-{
-    return AceType::MakeRefPtr<ArcScrollBarOverlayModifier>();
-}
-#else
-RefPtr<ScrollBarOverlayModifier> ScrollablePattern::CreateOverlayModifier()
-{
+    if (isRoundScroll_) {
+        return AceType::MakeRefPtr<ArcScrollBarOverlayModifier>();
+    }
+#endif
     return AceType::MakeRefPtr<ScrollBarOverlayModifier>();
 }
-#endif // ARKUI_CIRCLE_FEATURE
 
 void ScrollablePattern::CreateScrollBarOverlayModifier()
 {

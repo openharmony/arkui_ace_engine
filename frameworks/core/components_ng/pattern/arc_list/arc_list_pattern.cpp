@@ -51,6 +51,7 @@ constexpr float FLOAT_TWO = 2.0f;
 
 ArcListPattern::ArcListPattern()
 {
+    SetRoundScroll();
     SetFriction(ARC_LIST_FRICTION);
     SetVelocityScale(ARC_LIST_VELOCITY_SCALE);
     scrollAlign_ = ScrollAlign::CENTER;

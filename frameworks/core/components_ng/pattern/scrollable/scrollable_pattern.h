@@ -703,6 +703,10 @@ protected:
     {
         return true;
     }
+    void SetRoundScroll()
+    {
+        isRoundScroll_ = true;
+    }
 
 private:
     virtual void OnScrollEndCallback() {};
@@ -864,6 +868,7 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     bool isMousePressed_ = false;
     bool lastCanOverScroll_ = false;
+    bool isRoundScroll_ = false;
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;
