@@ -743,6 +743,7 @@ private:
     int32_t ComputeNextIndexByVelocity(float velocity, bool onlyDistance = false) const;
     void UpdateCurrentIndex(int32_t index);
     void OnSpringAnimationStart(float velocity);
+    void OnSpringAnimationFinish();
     void OnSpringAndFadeAnimationFinish();
     void OnFadeAnimationStart();
     int32_t TotalDisPlayCount() const;
