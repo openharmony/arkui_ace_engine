@@ -408,7 +408,7 @@ void DatePickerColumnPattern::FlushCurrentOptions(
         animationProperties_.clear();
     }
     for (uint32_t index = 0; index < showOptionCount; index++) {
-        currentChildIndex_ = index;
+        currentChildIndex_ = static_cast<int32_t>(index);
         uint32_t optionIndex = (totalOptionCount + currentIndex + index - selectedIndex) % totalOptionCount;
 
         auto textNode = DynamicCast<FrameNode>(*iter);
@@ -1224,7 +1224,7 @@ void DatePickerColumnPattern::OnAroundButtonClick(RefPtr<DatePickerEventParam> p
     if (clickBreak_) {
         return;
     }
-    uint32_t middleIndex = GetShowCount() / 2;
+    int32_t middleIndex = static_cast<int32_t>(GetShowCount()) / 2;
     int32_t step = param->itemIndex_ - middleIndex;
     if (step != 0) {
         if (animation_) {
