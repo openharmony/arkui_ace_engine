@@ -4630,7 +4630,7 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
         GenerateOneDepthVisibleFrame(childrens);
         for (auto child : childrens) {
             if (child) {
-                frameNode->FindSuggestOpIncNode(path, boundary, depth + 1);
+                child->FindSuggestOpIncNode(path, boundary, depth + 1);
             }
         }
         return OPINC_PARENT_POSSIBLE;
