@@ -10301,11 +10301,11 @@ void JSViewAbstract::JsFocusScopeId(const JSCallbackInfo& info)
     if (info.Length() == 0) {
         return;
     }
-    if (!info[0]->IsString() || info[0]->IsNull() || info[0]->IsUndefined()) {
-        return;
-    }
 
-    std::string focusScopeId = info[0]->ToString();
+    std::string focusScopeId;
+    if (info[0]->IsString()) {
+        focusScopeId = info[0]->ToString();
+    }
 
     bool isGroup = false;
     if (info.Length() == PARAMETER_LENGTH_SECOND && !info[0]->IsNull() && !info[0]->IsUndefined() &&
