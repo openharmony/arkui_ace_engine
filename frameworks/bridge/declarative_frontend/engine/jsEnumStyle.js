@@ -1982,7 +1982,7 @@ class TextMenuItemId {
   }
 
   equals(id) {
-    return id.id_ == this.id_;
+    return id.id_ === this.id_;
   }
 
   static get CUT() {
