@@ -156,7 +156,7 @@ public:
 
     bool NeedCoordWithScroll()
     {
-        return titleMode_ == NavigationTitleMode::FREE;
+        return !isHideTitlebar_ && titleMode_ == NavigationTitleMode::FREE;
     }
     OffsetF GetShowMenuOffset(const RefPtr<BarItemNode> barItemNode, RefPtr<FrameNode> menuNode);
 
