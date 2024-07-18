@@ -3123,7 +3123,9 @@ void AceContainer::NotifyDensityUpdate()
 void AceContainer::NotifyDirectionUpdate()
 {
     bool fullUpdate = NeedFullUpdate(DIRECTION_KEY);
-    ConfigurationChange configurationChange { .directionUpdate = true };
-    pipelineContext_->FlushReload(configurationChange, fullUpdate);
+    if (fullUpdate) {
+        ConfigurationChange configurationChange { .directionUpdate = true };
+        pipelineContext_->FlushReload(configurationChange, fullUpdate);
+    }
 }
 } // namespace OHOS::Ace::Platform
