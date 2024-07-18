@@ -573,5 +573,3 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_023, TestSize.Level1)
     GTEST_LOG_(INFO) << "FormRenderGroupTest_023 end";
 }
 }
-
-
