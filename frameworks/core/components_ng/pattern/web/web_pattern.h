@@ -816,6 +816,7 @@ private:
     bool IsTouchHandleShow(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle);
 
     void SuggestionSelected(int32_t index);
+    void RegisterSelectOverLayOnClose(SelectOverlayInfo& selectInfo);
 #ifdef OHOS_STANDARD_SYSTEM
     WebOverlayType GetTouchHandleOverlayType(
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle,

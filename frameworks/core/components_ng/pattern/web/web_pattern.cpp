@@ -3151,6 +3151,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     CHECK_NULL_RETURN(theme, false);
     selectHotZone_ = theme->GetHandleHotZoneRadius().ConvertToPx();
     SelectOverlayInfo selectInfo;
+    RegisterSelectOverLayOnClose(selectInfo);
     selectInfo.isSingleHandle = (overlayType == INSERT_OVERLAY);
     UpdateRunQuickMenuSelectInfo(selectInfo, params, insertTouchHandle, beginTouchHandle, endTouchHandle);
     if (isQuickMenuMouseTrigger_) {
@@ -3171,6 +3172,20 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     startSelectionHandle_ = beginTouchHandle;
     endSelectionHandle_ = endTouchHandle;
     return selectOverlayProxy_ ? true : false;
+}
+
+void WebPattern::RegisterSelectOverLayOnClose(SelectOverlayInfo& selectInfo)
+{
+    selectInfo.onClose = [weak = AceType::WeakClaim(this)] (bool isGlobalTouchEvent) {
+        if (!isGlobalTouchEvent) {
+            return;
+        }
+        TAG_LOGI(AceLogTag::ACE_WEB, "globalTouchEvent, close web select overLayer.");
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->CloseSelectOverlay();
+        webPattern->SelectCancel();
+    };
 }
 
 void WebPattern::DragDropSelectionMenu()
