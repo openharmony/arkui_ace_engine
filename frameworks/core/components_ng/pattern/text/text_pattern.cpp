@@ -1945,7 +1945,7 @@ SymbolSpanStyle TextPattern::GetSymbolSpanStyleObject(const RefPtr<SpanNode>& no
     }
     symbolSpanStyle.fontWeight = static_cast<int32_t>(node->GetFontWeightValue(FontWeight::NORMAL));
     symbolSpanStyle.renderingStrategy = static_cast<int32_t>(node->GetSymbolRenderingStrategyValue(0));
-    symbolSpanStyle.effectStrategy = node->GetSymbolEffectStrategyValue(0);
+    symbolSpanStyle.effectStrategy = static_cast<int32_t>(node->GetSymbolEffectStrategyValue(0));
     return symbolSpanStyle;
 }
 

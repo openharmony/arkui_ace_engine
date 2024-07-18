@@ -188,7 +188,7 @@ public:
         const OffsetF& rightTop, const OffsetF& leftTop);
 
     void OnSelectionMenuOptionsUpdate(
-        const NG::OnCreateMenuCallback && onCreateMenuCallback, const NG::OnMenuItemClickCallback && onMenuItemClick);
+        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick);
 
     float GetHandleDiameter();
     VectorF GetHostScale();
