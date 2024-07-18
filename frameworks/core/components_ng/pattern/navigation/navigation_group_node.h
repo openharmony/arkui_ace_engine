@@ -153,10 +153,14 @@ public:
     static RefPtr<UINode> GetNavDestinationNode(RefPtr<UINode> uiNode);
     void SetBackButtonEvent(const RefPtr<NavDestinationGroupNode>& navDestination);
 
-    virtual void TransitionWithPop(
-        const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
-    virtual void TransitionWithPush(
-        const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
+    void TransitionWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
+    void TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
+    virtual void CreateAnimationWithPop(
+        const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, const RefPtr<TitleBarNode>& preTitleNode,
+        const RefPtr<TitleBarNode>& curTitleBarNode, const AnimationFinishCallback callback);
+    virtual void CreateAnimationWithPush(
+        const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, const RefPtr<TitleBarNode>& preTitleNode,
+        const RefPtr<TitleBarNode>& curTitleNode, const AnimationFinishCallback callback);
 
     std::shared_ptr<AnimationUtils::Animation> BackButtonAnimation(
         const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);
@@ -221,10 +225,6 @@ public:
     }
 
 protected:
-    bool GetCurTitleBarNode(RefPtr<TitleBarNode>& curTitleBarNode, const RefPtr<FrameNode>& curNode,
-        bool isNavBar);
-
-    bool isOnAnimation_ { false };
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
 
@@ -240,6 +240,8 @@ private:
     void ReorderAnimatingDestination(RefPtr<FrameNode>& navigationContentNode, RefPtr<UINode>& maxAnimatingDestination,
         RefPtr<UINode>& remainDestination, RefPtr<UINode>& curTopDestination);
     bool FindNavigationParent(const std::string& parentName);
+    bool GetCurTitleBarNode(RefPtr<TitleBarNode>& curTitleBarNode, const RefPtr<FrameNode>& curNode,
+        bool isNavBar);
 
     void DealRemoveDestination(const RefPtr<NavDestinationGroupNode>& destination);
 
@@ -251,6 +253,7 @@ private:
     std::vector<RefPtr<NavDestinationGroupNode>> showNodes_;
     int32_t lastStandardIndex_ = -1;
     std::atomic_int32_t modeSwitchAnimationCnt_ = 0;
+    bool isOnAnimation_ { false };
     bool isModeChange_ { false };
     bool needSetInvisible_ { false };
     bool isOnModeSwitchAnimation_ { false };
