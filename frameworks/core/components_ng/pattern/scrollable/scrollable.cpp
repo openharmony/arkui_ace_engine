@@ -1217,7 +1217,7 @@ void Scrollable::StopFrictionAnimation()
             [weak = AceType::WeakClaim(this)]() {
                 auto scroll = weak.Upgrade();
                 CHECK_NULL_VOID(scroll);
-                scroll->frictionOffsetProperty_->Set(0.0f);
+                scroll->frictionOffsetProperty_->Set(scroll->currentPos_);
             },
             nullptr);
     }
@@ -1261,7 +1261,7 @@ void Scrollable::StopSnapAnimation()
             [weak = AceType::WeakClaim(this)]() {
                 auto scroll = weak.Upgrade();
                 CHECK_NULL_VOID(scroll);
-                scroll->snapOffsetProperty_->Set(0.0f);
+                scroll->snapOffsetProperty_->Set(scroll->currentPos_);
             },
             nullptr);
     }
