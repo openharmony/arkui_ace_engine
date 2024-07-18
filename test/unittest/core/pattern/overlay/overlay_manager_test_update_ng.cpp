@@ -161,6 +161,7 @@ void OverlayManagerTestUpdateNg::TearDownTestCase()
 {
     MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 RefPtr<FrameNode> OverlayManagerTestUpdateNg::CreateTargetNode()
@@ -1949,7 +1950,7 @@ HWTEST_F(OverlayManagerTestUpdateNg, OnBindSheet031, TestSize.Level1)
  * @tc.desc: Test OverlayManager::OnBindSheet closeIcon test.
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayManagerTestNg, OnBindSheet032, TestSize.Level1)
+HWTEST_F(OverlayManagerTestUpdateNg, OnBindSheet032, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create target node.
