@@ -173,9 +173,7 @@ void GridScrollLayoutAlgorithm::AdaptToChildMainSize(LayoutWrapper* layoutWrappe
 void GridScrollLayoutAlgorithm::UpdateOffsetOnHeightChangeDuringAnimation(LayoutWrapper* layoutWrapper, float mainSize)
 {
     // If only the height of the Grid is changed, keep the prevOffset_ and currentOffset_ equal.
-    if (scrollSource_ == SCROLL_FROM_NONE) {
-        gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
-    }
+    ResetOffsetWhenHeightChanged();
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<GridPattern>();
@@ -1188,6 +1186,8 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
         // run out of reord, startMainLineIndex is larger by 1 than real start main line index, so reduce 1
         info.ClearMapsFromStart(info.startMainLineIndex_ > info.endMainLineIndex_ ? info.startMainLineIndex_ - 1
                                                                                   : info.startMainLineIndex_);
+        // If only the height of the GridItem is changed, keep the prevOffset_ and currentOffset_ equal.
+        ResetOffsetWhenHeightChanged();
     }
     return runOutOfRecord;
 }
@@ -2313,5 +2313,12 @@ bool GridScrollLayoutAlgorithm::IsIrregularLine(int32_t lineIndex) const
         return true;
     }
     return false;
+}
+
+void GridScrollLayoutAlgorithm::ResetOffsetWhenHeightChanged()
+{
+    if (scrollSource_ == SCROLL_FROM_NONE) {
+        gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+    }
 }
 } // namespace OHOS::Ace::NG

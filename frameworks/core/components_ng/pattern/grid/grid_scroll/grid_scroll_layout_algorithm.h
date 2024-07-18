@@ -180,6 +180,8 @@ private:
     bool CheckLastLineItemFullyShowed(LayoutWrapper* layoutWrapper);
 
     bool IsIrregularLine(int32_t lineIndex) const override;
+    
+    void ResetOffsetWhenHeightChanged();
 
 protected:
     uint32_t crossCount_ = 0;
