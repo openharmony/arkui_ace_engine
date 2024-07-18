@@ -1168,6 +1168,23 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     nodeInfo.SetTextType(accessibilityProperty->GetTextType());
     nodeInfo.SetTextLengthLimit(accessibilityProperty->GetTextLengthLimit());
     nodeInfo.SetOffset(accessibilityProperty->GetScrollOffSet());
+    auto context = node->GetRenderContext();
+    if (context != nullptr) {
+        nodeInfo.SetZIndex(context->GetZIndex().value_or(0));
+        nodeInfo.SetOpacity(context->GetOpacity().value_or(1));
+        nodeInfo.SetBackgroundColor(context->GetBackgroundColor().value_or(Color::TRANSPARENT).ToString());
+        nodeInfo.SetBackgroundImage(context->GetBackgroundImage().value_or(ImageSourceInfo("")).ToString());
+        if (context->GetForeground() != nullptr) {
+            nodeInfo.SetBlur(context->GetForeground()->propBlurRadius.value_or(Dimension(0)).ToString());
+        }
+    }
+    auto eventHub = node->GetEventHub<NG::EventHub>();
+    if (eventHub != nullptr) {
+        auto gestureEventHub = eventHub->GetGestureEventHub();
+        if (gestureEventHub != nullptr) {
+            nodeInfo.SetHitTestBehavior(gestureEventHub->GetHitTestModeStr());
+        }
+    }
     if (accessibilityProperty->HasUserDisabled()) {
         nodeInfo.SetEnabled(!accessibilityProperty->IsUserDisabled());
     }
