@@ -1990,7 +1990,7 @@ ArkUINativeModuleValue CommonBridge::SetShadow(ArkUIRuntimeCallInfo *runtimeCall
     if (ArkTSUtils::ParseJsInteger(vm, styleArg, shadowStyle)) {
         ArkUIInt32orFloat32 shadows[] = { {.i32 = shadowStyle} };
         GetArkUINodeModifiers()->getCommonModifier()->setBackShadow(nativeNode, shadows,
-            (sizeof(shadows) / sizeof(shadows[NUM_0])), NUM_0);
+            (sizeof(shadows) / sizeof(shadows[NUM_0])));
         return panda::JSValueRef::Undefined(vm);
     }
     ArkUIInt32orFloat32 shadows[] = { { 0.0 }, { .i32 = 0  }, { 0.0 }, { 0.0 },
@@ -2021,7 +2021,7 @@ ArkUINativeModuleValue CommonBridge::SetShadow(ArkUIRuntimeCallInfo *runtimeCall
     }
     shadows[NUM_6].i32 = fillArg->IsBoolean() ? fillArg->BooleaValue(vm) : false;
     GetArkUINodeModifiers()->getCommonModifier()->setBackShadow(nativeNode, shadows,
-        (sizeof(shadows) / sizeof(shadows[NUM_0])), NUM_0);
+        (sizeof(shadows) / sizeof(shadows[NUM_0])));
     return panda::JSValueRef::Undefined(vm);
 }
 
