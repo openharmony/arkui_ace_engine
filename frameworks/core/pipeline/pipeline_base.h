@@ -1278,8 +1278,6 @@ public:
 
     void SetDestroyed();
 
-    virtual void UpdateLastVsyncEndTimestamp(uint64_t lastVsyncEndTimestamp) {}
-
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     // Called by hittest to find touch node is equal target.
     virtual bool OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe = false,

@@ -258,6 +258,11 @@ public:
         }
     }
 
+    int64_t GetLastTouchEventEndTimestamp()
+    {
+        return lastTouchEventEndTimestamp_;
+    }
+
     void RecordHitEmptyMessage(
         const TouchEvent& touchPoint, const std::string& resultInfo, const RefPtr<NG::FrameNode>& frameNode);
 
@@ -328,6 +333,7 @@ private:
     NG::EventTreeRecord eventTree_;
     RefPtr<NG::ResponseCtrl> responseCtrl_;
     TimeStamp lastEventTime_;
+    int64_t lastTouchEventEndTimestamp_ = 0;
     std::set<int32_t> downFingerIds_;
     std::set<WeakPtr<NG::FrameNode>> hittedFrameNode_;
     MarkProcessedEventInfo lastReceivedEvent_;
