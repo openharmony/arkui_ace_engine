@@ -1051,7 +1051,7 @@ export class TreeView extends ViewPU {
     }
 
     clearLastIndexColor() {
-        if (this.viewLastIndex === -1 || this.viewLastIndex >= this.nodeList.length) {
+        if (this.viewLastIndex === -1) {
             return;
         }
         this.setImageSources(this.viewLastIndex, InteractionStatus.Normal);
@@ -1426,6 +1426,7 @@ export class TreeController {
         let u19 = this.listNodeUtils.removeNode(s19, t19);
         this.listNodeDataSource.refreshData(this.listNodeUtils, MenuOperation.REMOVE_NODE, t19, u19);
         this.nodeIdList.splice(this.nodeIdList.indexOf(s19), 1);
+        this.listNodeDataSource.lastIndex = -1;
     }
 
     modifyNode() {
@@ -1760,7 +1761,7 @@ class ListNodeDataSource extends BasicDataSource {
     }
 
     clearLastIndexStatus() {
-        if (this.lastIndex === -1 || this.lastIndex >= this.listNode.length) {
+        if (this.lastIndex === -1) {
             return;
         }
         this.setImageSource(this.lastIndex, InteractionStatus.Normal);
