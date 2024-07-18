@@ -539,16 +539,15 @@ HWTEST_F(ImageTestNg, ImagePatternCreateObscuredImageIfNeed001, TestSize.Level1)
  */
 HWTEST_F(ImageTestNg, ImagePaintMethod002, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. create Image frameNode.
-     */
     auto frameNode = ImageTestNg::CreateImageNodeWithDefaultProp(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
     ASSERT_NE(frameNode, nullptr);
     EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    // update border radius
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(Dimension(RADIUS_DEFAULT));
     frameNode->GetRenderContext()->UpdateBorderRadius(borderRadius);
+    BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(IMAGE_SOURCEINFO_WIDTH);
+    frameNode->GetRenderContext()->SetBorderWidth(borderWidth);
     /**
      * @tc.steps: step2. create ImagePaintMethod.
      */
@@ -786,6 +785,29 @@ HWTEST_F(ImageTestNg, ImageCreator003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ImageCreator004
+ * @tc.desc: Verify that CreateFrameNode reset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageCreator004, TestSize.Level1)
+{
+    auto nodeId = int32_t(1);
+    RefPtr<PixelMap> pixMap = nullptr;
+    auto frameNode = ImageModelNG::CreateFrameNode(nodeId, IMAGE_SRC_URL,
+                                        pixMap, BUNDLE_NAME,
+                                        MODULE_NAME, false);
+    
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(frameNode, nullptr);
+
+    imagePattern->SetNeedLoadAlt(true);
+    EXPECT_EQ(imagePattern->needLoadAlt_, true);
+
+    ImageModelNG::ResetImage(&(*frameNode));
+    EXPECT_EQ(imagePattern->needLoadAlt_, false);
+}
+
+/**
  * @tc.name: ImageEventTest001
  * @tc.desc: Test Image onComplete event.
  * @tc.type: FUNC
@@ -906,6 +928,7 @@ HWTEST_F(ImageTestNg, ImageColorFilterTest001, TestSize.Level1)
     auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
     ASSERT_NE(imageRenderProperty, nullptr);
     EXPECT_EQ(imageRenderProperty->GetColorFilter().value(), COLOR_FILTER_DEFAULT);
+    EXPECT_EQ(ImageModelNG::GetColorFilter(frameNode), COLOR_FILTER_DEFAULT);
     frameNode->MarkModifyDone();
    /**
     * 图形
@@ -1815,5 +1838,80 @@ HWTEST_F(ImageTestNg, TestDraggable001, TestSize.Level1)
     frameNode->SetDraggable(false);
     frameNode->MarkModifyDone();
     EXPECT_EQ(frameNode->IsDraggable(), false);
+}
+
+/**
+ * @tc.name: TestMeasureAndLayoutTest001
+ * @tc.desc: test image measure and layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestMeasureAndLayoutTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create image.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    auto [frameNode, layoutProperty, pattern, v3] = GetCompoment();
+    auto frameNode_ = RefPtr<FrameNode>(frameNode);
+    /**
+     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
+     * @tc.expected: step2. related function is called.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode_, geometryNode, layoutProperty);
+
+    auto imageLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(imageLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(imageLayoutAlgorithm));
+    pattern->SetImageType(ImagePattern::ImageType::ANIMATION);
+    /**
+     * @tc.steps: step3. call measure and layout with no child.
+     */
+    imageLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    imageLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+}
+
+/**
+ * @tc.name: ImageModifier
+ * @tc.desc: Test the dynamic effect of the Image
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageModifierTest001, TestSize.Level1)
+{
+    ImageModifier imageModifier;
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+
+    imageModifier.Modify();
+    imageModifier.SetIsAltImage(true);
+    EXPECT_EQ(imageModifier.isAltImage_, true);
+
+    auto value = imageModifier.GetValue(10);
+    EXPECT_EQ(value, static_cast<float>(10));
+
+    RefPtr<CanvasImage> imageCanvas = AceType::MakeRefPtr<MockCanvasImage>();
+    imageModifier.UpdateImageData(imageCanvas,
+        OffsetF(WIDTH, HEIGHT), SizeF(WIDTH, HEIGHT));
+
+    DrawingContext context = { rsCanvas, 10.0f, 10.0f };
+    imageModifier.onDraw(context);
+    imageModifier.DrawImageWithAnimation(context);
+    imageModifier.DrawImageWithoutAnimation(context);
+
+    imageModifier.SetImageFit(ImageFit::COVER);
+    EXPECT_EQ(imageModifier.imageFit_->Get(), static_cast<float>(ImageFit::COVER));
+
+    imageModifier.UpdatePaintConfig(1);
+    imageModifier.UpdatePaintConfig(2);
 }
 } // namespace OHOS::Ace::NG
