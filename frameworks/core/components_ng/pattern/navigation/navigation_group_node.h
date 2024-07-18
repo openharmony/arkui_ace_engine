@@ -153,8 +153,10 @@ public:
     static RefPtr<UINode> GetNavDestinationNode(RefPtr<UINode> uiNode);
     void SetBackButtonEvent(const RefPtr<NavDestinationGroupNode>& navDestination);
 
-    void TransitionWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
-    void TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
+    virtual void TransitionWithPop(
+        const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
+    virtual void TransitionWithPush(
+        const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
 
     std::shared_ptr<AnimationUtils::Animation> BackButtonAnimation(
         const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);
@@ -218,6 +220,14 @@ public:
         hideNodes_.clear();
     }
 
+protected:
+    bool GetCurTitleBarNode(RefPtr<TitleBarNode>& curTitleBarNode, const RefPtr<FrameNode>& curNode,
+        bool isNavBar);
+
+    bool isOnAnimation_ { false };
+    std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
+    std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
+
 private:
     bool UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
         const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize,
@@ -230,8 +240,6 @@ private:
     void ReorderAnimatingDestination(RefPtr<FrameNode>& navigationContentNode, RefPtr<UINode>& maxAnimatingDestination,
         RefPtr<UINode>& remainDestination, RefPtr<UINode>& curTopDestination);
     bool FindNavigationParent(const std::string& parentName);
-    bool GetCurTitleBarNode(RefPtr<TitleBarNode>& curTitleBarNode, const RefPtr<FrameNode>& curNode,
-        bool isNavBar);
 
     void DealRemoveDestination(const RefPtr<NavDestinationGroupNode>& destination);
 
@@ -243,13 +251,10 @@ private:
     std::vector<RefPtr<NavDestinationGroupNode>> showNodes_;
     int32_t lastStandardIndex_ = -1;
     std::atomic_int32_t modeSwitchAnimationCnt_ = 0;
-    bool isOnAnimation_ { false };
     bool isModeChange_ { false };
     bool needSetInvisible_ { false };
     bool isOnModeSwitchAnimation_ { false };
     std::string curId_;
-    std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
-    std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
     std::string navigationPathInfo_;
     std::string navigationModuleName_;
 };
