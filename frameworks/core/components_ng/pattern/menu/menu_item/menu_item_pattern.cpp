@@ -1425,17 +1425,11 @@ void MenuItemPattern::UpdateDisabledStyle()
     auto theme = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     if (content_) {
-        content_->GetRenderContext()->UpdateForegroundColor(theme->GetDisabledMenuFontColor());
-        auto textLayoutProperty = content_->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateTextColor(theme->GetDisabledMenuFontColor());
+        content_->GetRenderContext()->UpdateOpacity(theme->GetDisabledFontColorAlpha());
         content_->MarkModifyDone();
     }
     if (label_) {
-        label_->GetRenderContext()->UpdateForegroundColor(theme->GetDisabledMenuFontColor());
-        auto labelTextLayoutProperty = label_->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(labelTextLayoutProperty);
-        labelTextLayoutProperty->UpdateTextColor(theme->GetDisabledMenuFontColor());
+        label_->GetRenderContext()->UpdateOpacity(theme->GetDisabledFontColorAlpha());
         label_->MarkModifyDone();
     }
     if (startIcon_) {
