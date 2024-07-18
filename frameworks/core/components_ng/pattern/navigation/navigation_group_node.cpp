@@ -462,15 +462,12 @@ void NavigationGroupNode::CreateAnimationWithPop(
     auto preFrameSize = preNode->GetGeometryNode()->GetFrameSize();
     auto preBackIcon = AceType::DynamicCast<FrameNode>(preTitleNode->GetBackButton());
     CHECK_NULL_VOID(preBackIcon);
-    auto preNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
-    CHECK_NULL_VOID(preNavDestination);
     /* set initial status of animation */
     preNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
     preNode->GetRenderContext()->ClipWithRRect(RectF(0.0f, 0.0f, preFrameSize.Width(), REMOVE_CLIP_SIZE),
         RadiusF(EdgeF(0.0f, 0.0f)));
     preNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     preTitleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-    preNavDestination->SetIsOnAnimation(true);
 
     if (curNode) {
         auto curFrameSize = curNode->GetGeometryNode()->GetFrameSize();
@@ -610,6 +607,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             context->MarkNeedFlushMouseEvent();
         };
 
+    preNavDestination->SetIsOnAnimation(true);
     CreateAnimationWithPop(preNode, curNode, preTitleNode, curTitleBarNode, callback);
 
     // clear this flag for navBar layout only
@@ -633,13 +631,6 @@ void NavigationGroupNode::CreateAnimationWithPush(
     /* preNode */
     preNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     preTitleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-    if (!isNavBar) {
-        auto preDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
-        preDestination->SetIsOnAnimation(true);
-        if (preDestination->NeedRemoveInPush()) {
-            preNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
-        }
-    }
     /* curNode */
     float flag = CheckLanguageDirection();
     if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
@@ -652,7 +643,6 @@ void NavigationGroupNode::CreateAnimationWithPush(
     }
     curNode->GetRenderContext()->UpdateTranslateInXY({ curFrameSize.Width() * HALF * flag, 0.0f });
     curTitleNode->GetRenderContext()->UpdateTranslateInXY({ curFrameSize.Width() * HALF * flag, 0.0f });
-    curNavDestination->SetIsOnAnimation(true);
 
     /* start transition animation */
     AnimationOption option = CreateAnimationOption(springCurve, FillMode::FORWARDS, DEFAULT_ANIMATION_DURATION,
@@ -786,6 +776,14 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             navigation->CleanPushAnimations();
         };
 
+    if (!isNavBar) {
+        auto preDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
+        preDestination->SetIsOnAnimation(true);
+        if (preDestination->NeedRemoveInPush()) {
+            preNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
+        }
+    }
+    curNavDestination->SetIsOnAnimation(true);
     CreateAnimationWithPush(preNode, curNode, preTitleNode, curTitleNode, callback);
 
     isOnAnimation_ = true;
