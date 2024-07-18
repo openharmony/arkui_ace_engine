@@ -93,6 +93,7 @@ void SheetPresentationPattern::OnModifyDone()
     }
     InitPanEvent();
     InitPageHeight();
+    InitScrollProps();
 }
 
 // check device is phone, fold status, and device in landscape
@@ -146,6 +147,20 @@ void SheetPresentationPattern::InitPageHeight()
     CHECK_NULL_VOID(sheetTheme);
     sheetThemeType_ = sheetTheme->GetSheetType();
     scrollSizeMode_ = GetScrollSizeMode();
+}
+
+void SheetPresentationPattern::InitScrollProps()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto scrollNode = DynamicCast<FrameNode>(host->GetChildAtIndex(1));
+    CHECK_NULL_VOID(scrollNode);
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(scrollPattern);
+
+    // real-time refresh should set scroll always enabled,
+    // because sheet will be not draggable when sheet init height is less than content height
+    scrollPattern->SetAlwaysEnabled(scrollSizeMode_ == ScrollSizeMode::CONTINUOUS);
 }
 
 bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
@@ -301,6 +316,41 @@ void SheetPresentationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
     CHECK_NULL_VOID(targetNode);
     pipeline->RemoveOnAreaChangeNode(targetNode->GetId());
+}
+
+void SheetPresentationPattern::SetSheetBorderWidth(bool isPartialUpdate)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    auto sheetType = GetSheetType();
+    auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (sheetStyle.borderWidth.has_value()) {
+        auto sheetRadius = sheetTheme->GetSheetRadius();
+        auto borderWidth = sheetStyle.borderWidth.value();
+        BorderRadiusProperty borderRadius;
+        if ((sheetType == SheetType::SHEET_CENTER) || (sheetType == SheetType::SHEET_POPUP)) {
+            borderRadius.SetRadius(sheetRadius);
+        } else {
+            borderRadius = BorderRadiusProperty(sheetRadius, sheetRadius, 0.0_vp, 0.0_vp);
+            borderWidth.bottomDimen = 0.0_vp;
+        }
+        renderContext->UpdateBorderRadius(borderRadius);
+        layoutProperty->UpdateBorderWidth(borderWidth);
+        renderContext->UpdateBorderWidth(borderWidth);
+    } else if (renderContext->GetBorderWidth().has_value() && !isPartialUpdate) {
+        BorderWidthProperty borderWidth;
+        borderWidth.SetBorderWidth(0.0_vp);
+        layoutProperty->UpdateBorderWidth(borderWidth);
+        renderContext->UpdateBorderWidth(borderWidth);
+    }
 }
 
 // initial drag gesture event
@@ -1065,12 +1115,20 @@ void SheetPresentationPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundColor(sheetTheme->GetCloseIconColor());
     sheetCloseIcon->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    auto imageNode = DynamicCast<FrameNode>(sheetCloseIcon->GetChildAtIndex(0));
-    CHECK_NULL_VOID(imageNode);
-    auto imagePaintProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(imagePaintProperty);
-    imagePaintProperty->UpdateSvgFillColor(sheetTheme->GetCloseIconImageColor());
-    imageNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto iconNode = DynamicCast<FrameNode>(sheetCloseIcon->GetChildAtIndex(0));
+    CHECK_NULL_VOID(iconNode);
+
+    // when api >= 12, use symbol format image, else use image format.
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto symbolLayoutProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolLayoutProperty);
+        symbolLayoutProperty->UpdateSymbolColorList({sheetTheme->GetCloseIconSymbolColor()});
+    } else {
+        auto imagePaintProperty = iconNode->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(imagePaintProperty);
+        imagePaintProperty->UpdateSvgFillColor(sheetTheme->GetCloseIconImageColor());
+    }
+    iconNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SheetPresentationPattern::CheckSheetHeightChange()
@@ -1109,8 +1167,35 @@ void SheetPresentationPattern::CheckSheetHeightChange()
     }
 }
 
+void SheetPresentationPattern::IsCustomDetentsChanged(SheetStyle sheetStyle)
+{
+    unsigned int preDetentsSize = preDetents_.size();
+    unsigned int userSetDetentsSize = sheetStyle.detents.size();
+    // if preview detents size is not equal to the new one, set detents index to zero
+    if (preDetentsSize != userSetDetentsSize) {
+        detentsFinalIndex_ = 0;
+        return;
+    }
+
+    // check whether the new coming one's content is equal to the last time input
+    unsigned int length = std::min(preDetentsSize, userSetDetentsSize);
+    for (unsigned int index = 0; index < length; index++) {
+        if (sheetStyle.detents[index] != preDetents_[index]) {
+            // if detents has been changed, set detents index to zero
+            detentsFinalIndex_ = 0;
+            break;
+        }
+    }
+}
+
 void SheetPresentationPattern::InitSheetDetents()
 {
+    // record input detents
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    IsCustomDetentsChanged(sheetStyle);
+    preDetents_.clear();
     sheetDetentHeight_.clear();
     unSortedSheetDentents_.clear();
     float height = 0.0f;
@@ -1119,9 +1204,6 @@ void SheetPresentationPattern::InitSheetDetents()
     auto geometryNode = sheetNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto largeHeight = sheetMaxHeight_ - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
-    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
     auto sheetType = GetSheetType();
     auto sheetFrameHeight = geometryNode->GetFrameSize().Height();
     auto mediumSize = MEDIUM_SIZE;
@@ -1143,6 +1225,7 @@ void SheetPresentationPattern::InitSheetDetents()
                 break;
             }
             for (auto iter : sheetStyle.detents) {
+                preDetents_.emplace_back(iter);
                 if (iter.sheetMode.has_value()) {
                     if (iter.sheetMode == SheetMode::MEDIUM) {
                         height = pageHeight_ * mediumSize;
@@ -1307,6 +1390,7 @@ void SheetPresentationPattern::BubbleStyleSheetTransition(bool isTransitionIn)
                 overlayManager->DestroySheet(node, pattern->GetSheetKey());
                 pattern->FireCallback("false");
             });
+        overlayManager->CleanSheet(host, GetSheetKey());
     }
 }
 
@@ -1448,10 +1532,8 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
     } else {
         host->OnAccessibilityEvent(
             AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-        if (sheetPattern->HasCallback()) {
-            sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
-                HitTestMode::HTMTRANSPARENT);
-        }
+        sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
+            HitTestMode::HTMTRANSPARENT);
         animation_ = AnimationUtils::StartAnimation(
             option,
             [context, this]() {
@@ -1461,6 +1543,9 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
                 }
             },
             option.GetOnFinishEvent());
+        const auto& overlayManager = GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->CleanSheet(host, GetSheetKey());
     }
 }
 
@@ -1531,8 +1616,12 @@ void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
+    if (sheetType_ != sheetType) {
+        sheetType_ = sheetType;
+        SetSheetBorderWidth();
+    }
     auto windowManager = pipelineContext->GetWindowManager();
     if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
         host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);

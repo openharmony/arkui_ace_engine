@@ -301,4 +301,302 @@ HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest004, TestSize.Level
     ASSERT_EQ(destPage_->GetChildren().size(), 1);
     EXPECT_EQ(destPage_->GetFirstChild(), destNodeShareId1);
 }
+
+/**
+ * @tc.name: SharedOverlayManagerTest005
+ * @tc.desc: Test the function CreateAnimation of SharedTransitionStatic
+ * @tc.type: FUNC
+ */
+HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a SharedTransitionStatic and call function CreateAnimation
+     */
+    auto option = std::make_shared<SharedTransitionOption>();
+    SharedTransitionStatic test("test", option);
+    test.SetSharedNode(nullptr, nullptr);
+    EXPECT_FALSE(test.CreateAnimation());
+}
+
+/**
+ * @tc.name: SharedOverlayManagerTest006
+ * @tc.desc: Test the function DestRequestDefaultFocus of SharedTransitionExchange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a SharedTransitionExchange and call function DestRequestDefaultFocus
+     */
+    auto frameNode = FrameNode::CreateFrameNode("page", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    auto option = std::make_shared<SharedTransitionOption>();
+    SharedTransitionExchange test("test", option);
+    test.SetSharedNode(WeakPtr<FrameNode>(frameNode), WeakPtr<FrameNode>(frameNode));
+    test.SetInitialDestVisible(VisibleType::INVISIBLE);
+    test.DestRequestDefaultFocus();
+    test.SetInitialDestVisible(VisibleType::VISIBLE);
+    test.DestRequestDefaultFocus();
+    auto dst = test.GetDestSharedNode().Upgrade();
+    auto page = dst->GetPageNode();
+    auto pagePattern = page->GetPattern<PagePattern>();
+    EXPECT_FALSE(pagePattern->GetIsViewHasFocused());
+}
+
+/**
+ * @tc.name: SharedOverlayManagerTest007
+ * @tc.desc: Test the function CreateSizeAnimation of SharedTransitionExchange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a SharedTransitionExchange and call function CreateSizeAnimation
+     */
+    auto destNode = FrameNode::CreateFrameNode("destNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    auto srcNode = FrameNode::CreateFrameNode("srcNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    destNode->GetGeometryNode()->SetFrameSize(SizeF(-1.0, -1.0));
+    auto option = std::make_shared<SharedTransitionOption>();
+    SharedTransitionExchange test("test", option);
+    EXPECT_FALSE(test.CreateSizeAnimation(srcNode, destNode));
+}
+
+/**
+ * @tc.name: SharedOverlayManagerTest008
+ * @tc.desc: Test the function CreateSizeAnimation of SharedTransitionExchange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a SharedTransitionExchange and call function CreateSizeAnimation
+     */
+    auto destNode = FrameNode::CreateFrameNode("destNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    auto srcNode = FrameNode::CreateFrameNode("srcNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    destNode->GetGeometryNode()->SetFrameSize(SizeF(1.0, 1.0));
+    srcNode->GetGeometryNode()->SetFrameSize(SizeF(1.0, 1.0));
+    auto option = std::make_shared<SharedTransitionOption>();
+    SharedTransitionExchange test("test", option);
+    EXPECT_TRUE(test.CreateSizeAnimation(srcNode, destNode));
+}
+
+/**
+ * @tc.name: SharedOverlayManagerTest009
+ * @tc.desc: Test the function CreateSizeAnimation of SharedTransitionExchange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a SharedTransitionExchange and call function CreateSizeAnimation
+     */
+    auto destNode = FrameNode::CreateFrameNode("destNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    auto srcNode = FrameNode::CreateFrameNode("srcNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    destNode->GetGeometryNode()->SetFrameSize(SizeF(1.0, 1.0));
+    srcNode->GetGeometryNode()->SetFrameSize(SizeF(1.0, 0.0));
+    auto width = CalcLength::FromString("1px");
+    auto height = CalcLength::FromString("1px");
+    CalcSize calcSize(width, height);
+    MeasureProperty calcLayoutConstraint;
+    calcLayoutConstraint.UpdateMinSizeWithCheck(calcSize);
+    calcLayoutConstraint.UpdateMinSizeWithCheck(calcSize);
+    srcNode->GetLayoutProperty()->UpdateCalcLayoutProperty(calcLayoutConstraint);
+    srcNode->GetLayoutProperty()->GetMagicItemProperty().UpdateAspectRatio(1.0);
+    auto option = std::make_shared<SharedTransitionOption>();
+    SharedTransitionExchange test("test", option);
+    auto flag = test.CreateSizeAnimation(srcNode, destNode);
+    auto interpolator = test.GetController()->interpolators_;
+    for (const auto& inter : interpolator) {
+        inter->OnInitNotify(1.0, true);
+    }
+    test.PerformFinishCallback();
+    EXPECT_TRUE(flag);
+}
+
+/**
+ * @tc.name: SharedOverlayManagerTest010
+ * @tc.desc: Test the function CreateSizeAnimation of SharedTransitionExchange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a SharedTransitionExchange and call function CreateSizeAnimation
+     */
+    auto destNode = FrameNode::CreateFrameNode("destNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    auto srcNode = FrameNode::CreateFrameNode("srcNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    destNode->GetGeometryNode()->SetFrameSize(SizeF(1.0, 1.0));
+    srcNode->GetGeometryNode()->SetFrameSize(SizeF(1.0, 0.0));
+    auto width = CalcLength::FromString("1px");
+    auto height = CalcLength::FromString("1px");
+    CalcSize calcSize(width, height);
+    MeasureProperty calcLayoutConstraint;
+    calcLayoutConstraint.UpdateMinSizeWithCheck(calcSize);
+    calcLayoutConstraint.UpdateMinSizeWithCheck(calcSize);
+    srcNode->GetLayoutProperty()->UpdateCalcLayoutProperty(calcLayoutConstraint);
+    auto option = std::make_shared<SharedTransitionOption>();
+    SharedTransitionExchange test("test", option);
+    auto flag = test.CreateSizeAnimation(srcNode, destNode);
+    auto interpolator = test.GetController()->interpolators_;
+    for (const auto& inter : interpolator) {
+        inter->OnInitNotify(1.0, true);
+    }
+    test.PerformFinishCallback();
+    EXPECT_TRUE(flag);
+}
+
+/**
+ * @tc.name: SharedOverlayManagerTest011
+ * @tc.desc: Test the function CreateTranslateAnimation of SharedTransitionExchange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a SharedTransitionExchange and call function CreateSizeAnimation
+     */
+    auto frameNode = FrameNode::CreateFrameNode("page", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    auto destNode = FrameNode::CreateFrameNode("destNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    auto srcNode = FrameNode::CreateFrameNode("srcNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    frameNode->AddChild(srcNode);
+    frameNode->AddChild(destNode);
+    auto mockDestContext = AceType::MakeRefPtr<MockRenderContext>();
+    mockDestContext->rect_ = RectF(0.0, 0.0, 1.0, 1.0);
+    auto mockSrcContext = AceType::MakeRefPtr<MockRenderContext>();
+    mockSrcContext->rect_ = RectF(1.0, 1.0, 0.0, 0.0);
+    destNode->renderContext_ = mockDestContext;
+    srcNode->renderContext_ = mockSrcContext;
+    auto option = std::make_shared<SharedTransitionOption>();
+    SharedTransitionExchange test("test", option);
+    test.GetOption()->motionPathOption.SetPath("abc");
+    test.GetOption()->motionPathOption.SetRotate(true);
+    auto flag = test.CreateTranslateAnimation(srcNode, destNode);
+    test.PerformFinishCallback();
+    EXPECT_TRUE(flag);
+}
+
+/**
+ * @tc.name: SharedOverlayManagerTest012
+ * @tc.desc: Test the function CreateTranslateAnimation of SharedTransitionExchange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a SharedTransitionExchange and call function CreateSizeAnimation
+     */
+    auto frameNode = FrameNode::CreateFrameNode("page", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    auto destNode = FrameNode::CreateFrameNode("destNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    auto srcNode = FrameNode::CreateFrameNode("srcNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    frameNode->AddChild(srcNode);
+    frameNode->AddChild(destNode);
+    auto mockDestContext = AceType::MakeRefPtr<MockRenderContext>();
+    mockDestContext->rect_ = RectF(0.0, 0.0, 1.0, 1.0);
+    auto mockSrcContext = AceType::MakeRefPtr<MockRenderContext>();
+    mockSrcContext->rect_ = RectF(1.0, 1.0, 0.0, 0.0);
+    destNode->renderContext_ = mockDestContext;
+    srcNode->renderContext_ = mockSrcContext;
+    auto option = std::make_shared<SharedTransitionOption>();
+    SharedTransitionExchange test("test", option);
+    test.GetOption()->motionPathOption.SetPath("abc");
+    test.GetOption()->motionPathOption.SetRotate(false);
+    auto flag = test.CreateTranslateAnimation(srcNode, destNode);
+    test.PerformFinishCallback();
+    EXPECT_TRUE(flag);
+}
+
+/**
+ * @tc.name: SharedOverlayManagerTest013
+ * @tc.desc: Test the function CreateTranslateAnimation of SharedTransitionExchange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a SharedTransitionExchange and call function CreateSizeAnimation
+     */
+    auto frameNode = FrameNode::CreateFrameNode("page", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    auto destNode = FrameNode::CreateFrameNode("destNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    auto srcNode = FrameNode::CreateFrameNode("srcNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    frameNode->AddChild(srcNode);
+    frameNode->AddChild(destNode);
+    auto mockDestContext = AceType::MakeRefPtr<MockRenderContext>();
+    mockDestContext->rect_ = RectF(0.0, 0.0, 1.0, 1.0);
+    auto mockSrcContext = AceType::MakeRefPtr<MockRenderContext>();
+    mockSrcContext->rect_ = RectF(1.0, 1.0, 0.0, 0.0);
+    destNode->renderContext_ = mockDestContext;
+    srcNode->renderContext_ = mockSrcContext;
+    auto option = std::make_shared<SharedTransitionOption>();
+    SharedTransitionExchange test("test", option);
+    auto flag = test.CreateTranslateAnimation(srcNode, destNode);
+    test.PerformFinishCallback();
+    EXPECT_TRUE(flag);
+}
+
+/**
+ * @tc.name: SharedOverlayManagerTest014
+ * @tc.desc: Test the function CreateAnimation of SharedTransitionExchange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a SharedTransitionExchange and call function CreateAnimation
+     */
+    auto destNode = FrameNode::CreateFrameNode("destNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    auto srcNode = FrameNode::CreateFrameNode("srcNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    auto option = std::make_shared<SharedTransitionOption>();
+    SharedTransitionExchange test("test", option);
+    test.SetSharedNode(nullptr, WeakPtr<FrameNode>(destNode));
+    EXPECT_FALSE(test.CreateAnimation());
+    EXPECT_FALSE(test.Allow());
+    SharedTransitionExchange testTwo("test", option);
+    testTwo.SetSharedNode(WeakPtr<FrameNode>(srcNode), nullptr);
+    EXPECT_FALSE(testTwo.CreateAnimation());
+    EXPECT_FALSE(testTwo.Allow());
+}
+
+/**
+ * @tc.name: SharedOverlayManagerTest015
+ * @tc.desc: Test the function CreateAnimation of SharedTransitionExchange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a SharedTransitionExchange and call function CreateAnimation
+     */
+    auto destNode = FrameNode::CreateFrameNode("destNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    auto srcNode = FrameNode::CreateFrameNode("srcNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    destNode->GetGeometryNode()->SetFrameSize(SizeF(-1.0, -1.0));
+    auto option = std::make_shared<SharedTransitionOption>();
+    SharedTransitionExchange test("test", option);
+    test.SetSharedNode(WeakPtr<FrameNode>(srcNode), WeakPtr<FrameNode>(destNode));
+    test.GetOption()->curve = Curves::EASE_IN_OUT;
+    EXPECT_FALSE(test.CreateAnimation());
+}
+
+/**
+ * @tc.name: SharedOverlayManagerTest016
+ * @tc.desc: Test the function CreateOpacityAnimation of SharedTransitionEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a SharedTransitionExchange and call function CreateOpacityAnimation
+     */
+    auto destNode = FrameNode::CreateFrameNode("destNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    auto srcNode = FrameNode::CreateFrameNode("srcNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    auto option = std::make_shared<SharedTransitionOption>();
+    SharedTransitionStatic test("test", option);
+    test.SetSharedNode(WeakPtr<FrameNode>(srcNode), WeakPtr<FrameNode>(destNode));
+    test.finishCallbacks_.emplace_back(nullptr);
+    auto flag = test.CreateAnimation();
+    auto interpolator = test.GetController()->interpolators_;
+    for (const auto& inter : interpolator) {
+        inter->OnInitNotify(1.0, true);
+    }
+    test.PerformFinishCallback();
+    EXPECT_TRUE(flag);
+}
 } // namespace OHOS::Ace::NG

@@ -91,6 +91,7 @@ public:
     void UpdateAllHandlesOffset();
     void UpdateFirstHandleOffset();
     void UpdateSecondHandleOffset();
+    void UpdateViewPort();
     bool IsShowMouseMenu();
     bool IsCurrentMenuVisibile();
     bool IsHandleReverse();
@@ -151,9 +152,9 @@ public:
     virtual RectF GetVisibleContentRect();
     virtual bool CheckHandleVisible(const RectF& paintRect) = 0;
 
-    virtual std::string GetPasteMimeType()
+    virtual std::vector<std::string> GetPasteMimeTypes()
     {
-        return "";
+        return std::vector<std::string>();
     }
 
     virtual void OnResetTextSelection() {}
@@ -186,18 +187,8 @@ public:
     bool IsPointInRect(const OffsetF& point, const OffsetF& leftBottom, const OffsetF& rightBottom,
         const OffsetF& rightTop, const OffsetF& leftTop);
 
-    void SetScrollableParentCallback();
-    void ResetScrollableParentCallback();
-    virtual void OnParentScrollStart();
-    virtual void OnParentScrollEnd() {};
-    virtual void OnParentScrolling();
-
     void OnSelectionMenuOptionsUpdate(
-        const NG::OnCreateMenuCallback && onCreateMenuCallback, const NG::OnMenuItemClickCallback && onMenuItemClick);
-
-    void SetkeyBoardChangeCallback();
-    void RemoveKeyboardChangeCallback();
-    virtual void OnKeyboardChanged(bool isKeyboardShow);
+        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick);
 
     float GetHandleDiameter();
     VectorF GetHostScale();
@@ -213,12 +204,13 @@ public:
     {
         SetHandleLevelMode(mode);
         UpdateAllHandlesOffset();
+        UpdateViewPort();
     }
     virtual void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag);
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info) override;
     bool IsTouchAtHandle(const TouchEventInfo& info);
     bool IsClickAtHandle(const GestureEvent& info);
-    bool HasThreeDimensionTransform();
+    bool HasUnsupportedTransform();
     bool CheckSwitchToMode(HandleLevelMode mode) override;
 
     void OnUpdateOnCreateMenuCallback(SelectOverlayInfo& selectInfo)
@@ -285,8 +277,6 @@ private:
     bool isUsingMouse_ = false;
     OffsetF mouseMenuOffset_;
     WeakPtr<TextBase> hostTextBase_;
-    bool hasScrollableParent_ = true;
-    std::vector<int32_t> scrollableParentIds_;
     bool enableHandleLevel_ = false;
     bool touchAtHandle_ = false;
     bool isChangeToOverlayModeAtEdge_ = true;

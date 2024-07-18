@@ -24,8 +24,7 @@ RefPtr<DragWindow> DragWindow::CreateDragWindow(
     return dragWindow;
 }
 
-RefPtr<DragWindow> DragWindow::CreateDragWindow(const std::string& /* windowName */, int32_t /* parentWindowId */,
-    int32_t /* x */, int32_t /* y */, uint32_t /* width */, uint32_t /* height */)
+RefPtr<DragWindow> DragWindow::CreateDragWindow(const DragWindowParams& /* params */)
 {
     static RefPtr<DragWindow> dragWindow = AceType::MakeRefPtr<MockDragWindow>();
     return dragWindow;

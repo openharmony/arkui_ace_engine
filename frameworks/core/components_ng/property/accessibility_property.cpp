@@ -178,14 +178,43 @@ std::unique_ptr<JsonValue> AccessibilityProperty::CreateNodeSearchInfo(const Ref
     return nodeInfo;
 }
 
+bool AccessibilityProperty::ProcessHoverTestRecursive(const PointF& noOffsetPoint, const RefPtr<FrameNode>& node,
+    AccessibilityHoverTestPath& path, std::unique_ptr<HoverTestDebugTraceInfo>& debugInfo, bool hitTarget)
+{
+    auto property = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    auto virtualNode = property->GetAccessibilityVirtualNode();
+    if (virtualNode != nullptr) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(virtualNode);
+        CHECK_NULL_RETURN(frameNode, false);
+
+        if (AccessibilityProperty::HoverTestRecursive(noOffsetPoint, frameNode, path, debugInfo)) {
+            return true;
+        }
+    } else {
+        auto children = node->GetFrameChildren();
+        for (auto childWeak = children.rbegin(); childWeak != children.rend(); ++childWeak) {
+            auto child = childWeak->Upgrade();
+            if (child == nullptr) {
+                continue;
+            }
+            if (AccessibilityProperty::HoverTestRecursive(noOffsetPoint, child, path, debugInfo)) {
+                return true;
+            }
+        }
+    }
+    return hitTarget;
+}
+
 bool AccessibilityProperty::HoverTestRecursive(
     const PointF& parentPoint,
     const RefPtr<FrameNode>& node,
     AccessibilityHoverTestPath& path,
     std::unique_ptr<HoverTestDebugTraceInfo>& debugInfo)
 {
-    if (!node->IsActive() || node->IsInternal()) {
-        return false;
+    if (!node->IsAccessibilityVirtualNode()) {
+        if (!node->IsActive() || node->IsInternal()) {
+            return false;
+        }
     }
     if (debugInfo != nullptr) {
         auto nodeInfo = CreateNodeSearchInfo(node, parentPoint);
@@ -214,16 +243,7 @@ bool AccessibilityProperty::HoverTestRecursive(
 
     if (shouldSearchChildren) {
         PointF noOffsetPoint = selfPoint - rect.GetOffset();
-        auto children = node->GetFrameChildren();
-        for (auto childWeak = children.rbegin(); childWeak != children.rend();  ++childWeak) {
-            auto child = childWeak->Upgrade();
-            if (child == nullptr) {
-                continue;
-            }
-            if (AccessibilityProperty::HoverTestRecursive(noOffsetPoint, child, path, debugInfo)) {
-                return true;
-            }
-        }
+        return ProcessHoverTestRecursive(noOffsetPoint, node, path, debugInfo, hitTarget);
     }
     return hitTarget;
 }
@@ -252,8 +272,7 @@ std::pair<bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<Fram
         auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
         if (accessibilityProperty != nullptr) {
             auto level = accessibilityProperty->GetAccessibilityLevel();
-            bool hasGroupOrVirtualNode = accessibilityProperty->IsAccessibilityGroup() ||
-                accessibilityProperty->HasAccessibilityVirtualNode();
+            bool hasGroupOrVirtualNode = accessibilityProperty->IsAccessibilityGroup();
             bool hasAccessibilityText = accessibilityProperty->HasAccessibilityTextOrDescription();
             if (level == AccessibilityProperty::Level::YES) {
                 if (hasGroupOrVirtualNode) {
@@ -286,6 +305,10 @@ std::pair<bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<Fram
         }
         HitTestMode hitTestMode = node->GetHitTestMode();
         UpdateSearchStrategyByHitTestMode(hitTestMode, shouldSearchSelf, shouldSearchChildren);
+        if (accessibilityProperty != nullptr && accessibilityProperty->HasAccessibilityVirtualNode() &&
+            accessibilityProperty->GetAccessibilityLevel() != AccessibilityProperty::Level::NO_HIDE_DESCENDANTS) {
+            shouldSearchChildren = true;
+        }
     } while (0);
     return std::make_pair(shouldSearchSelf, shouldSearchChildren);
 }

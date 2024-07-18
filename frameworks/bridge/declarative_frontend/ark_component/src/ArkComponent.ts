@@ -87,8 +87,8 @@ class ObservedMap {
       this.changeCallback = callback;
     }
   }
-  public setFrameNode(isFrameNode: boolean) {
-    this.isFrameNode_ = isFrameNode
+  public setFrameNode(isFrameNode: boolean): void {
+    this.isFrameNode_ = isFrameNode;
   }
   public isFrameNode(): boolean {
     return this.isFrameNode_;
@@ -211,6 +211,15 @@ class ModifierWithKey<T extends number | string | boolean | object | Function> {
       this.applyPeer(node, false, component);
     }
     return false;
+  }
+
+  applyStageImmediately(node: KNode, component?: ArkComponent): void {
+    this.value = this.stageValue;
+    if (this.stageValue === undefined || this.stageValue === null) {
+      this.applyPeer(node, true, component);
+      return;
+    }
+    this.applyPeer(node, false, component);
   }
 
   applyPeer(node: KNode, reset: boolean, component?: ArkComponent): void { }
@@ -3038,7 +3047,7 @@ function modifierWithKey<T extends number | string | boolean | object, M extends
   modifierClass: new (value: T) => M,
   value: T
 ) {
-  if (typeof (modifiers as ObservedMap).isFrameNode === "function" && (modifiers as ObservedMap).isFrameNode()) {
+  if (typeof (modifiers as ObservedMap).isFrameNode === 'function' && (modifiers as ObservedMap).isFrameNode()) {
     if (!(modifierClass as any).instance) {
       (modifierClass as any).instance = new modifierClass(value);
     } else {
@@ -3085,7 +3094,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         if (this._instanceId !== -1) {
           __JSScopeUtil__.syncInstanceId(this._instanceId);
         }
-        value.applyStage(this.nativePtr, this);
+        value.applyStageImmediately(this.nativePtr, this);
         getUINativeModule().frameNode.propertyUpdate(this.nativePtr);
         if (this._instanceId !== -1) {
           __JSScopeUtil__.restoreInstanceId();
@@ -4496,6 +4505,9 @@ function attributeModifierFunc<T>(modifier: AttributeModifier<T>,
       component.applyModifierPatch();
     } else {
       modifier.attribute.applyStateUpdatePtr(component);
+      if (modifier.attribute._nativePtrChanged) {
+        modifier.onComponentChanged(modifier.attribute);
+      }
       modifier.attribute.applyNormalAttribute(component);
       applyUIAttributes(modifier, nativeNode, component);
       component.applyModifierPatch();

@@ -224,6 +224,10 @@ void JSToggle::JsResponseRegion(const JSCallbackInfo& info)
 
 void JSToggle::JsSize(const JSCallbackInfo& info)
 {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        JSViewAbstract::JsSize(info);
+        return;
+    }
     if (!info[0]->IsObject()) {
         return;
     }

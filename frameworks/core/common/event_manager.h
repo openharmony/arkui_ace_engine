@@ -277,6 +277,11 @@ public:
 
     void CheckAndLogLastConsumedEventInfo(int32_t eventId, bool logImmediately = false);
 
+#if defined(SUPPORT_TOUCH_TARGET_TEST)
+    bool TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
+        TouchRestrict& touchRestrict, const Offset& offset = Offset(), float viewScale = 1.0f,
+        bool needAppend = false, const std::string& target = "");
+#endif
 private:
     void SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
     void CleanGestureEventHub();

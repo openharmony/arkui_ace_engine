@@ -144,7 +144,7 @@ private:
     int32_t instanceId_ = -1;
 };
 
-class IIgnoreViewSafeAreaListener  : public OHOS::Rosen::IIgnoreViewSafeAreaListener {
+class IIgnoreViewSafeAreaListener : public OHOS::Rosen::IIgnoreViewSafeAreaListener {
 public:
     explicit IIgnoreViewSafeAreaListener(int32_t instanceId) : instanceId_(instanceId) {}
     ~IIgnoreViewSafeAreaListener() = default;
@@ -176,8 +176,8 @@ public:
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
     {
         LOGD("Avoid area changed, type:%{public}d, topRect: avoidArea:x:%{public}d, y:%{public}d, "
-             "width:%{public}d, height%{public}d; bottomRect: avoidArea:x:%{public}d, y:%{public}d, "
-             "width:%{public}d, height%{public}d",
+             "width:%{public}d, height:%{public}d; bottomRect: avoidArea:x:%{public}d, y:%{public}d, "
+             "width:%{public}d, height:%{public}d",
             type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
             (int32_t)avoidArea.topRect_.height_, avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_,
             (int32_t)avoidArea.bottomRect_.width_, (int32_t)avoidArea.bottomRect_.height_);
@@ -386,7 +386,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window,
     }
     AceContainer::AddAssetPath(instanceId_, "", paths);
     AceContainer::SetResourcesPathAndThemeStyle(
-        instanceId_, systemResourcesPath_, appResourcesPath_, themeId_, deviceConfig_.colorMode);
+        instanceId_, systemResourcesPath_, containerSdkPath_, appResourcesPath_, themeId_, deviceConfig_.colorMode);
 
     auto view = AceViewPreview::CreateView(instanceId_, false, container->GetSettings().usePlatformAsUIThread);
     UIEnvCallback callback = [window = rsWindow_, id = instanceId_](

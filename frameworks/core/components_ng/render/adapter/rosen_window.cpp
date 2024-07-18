@@ -143,7 +143,7 @@ void RosenWindow::RequestFrame()
     if (rsWindow_) {
         isRequestVsync_ = true;
         rsWindow_->RequestVsync(vsyncCallback_);
-        lastRequestVsyncTime_ = GetSysTimestamp();
+        lastRequestVsyncTime_ = static_cast<uint64_t>(GetSysTimestamp());
 #ifdef VSYNC_TIMEOUT_CHECK
         if (taskExecutor) {
             auto windowId = rsWindow_->GetWindowId();

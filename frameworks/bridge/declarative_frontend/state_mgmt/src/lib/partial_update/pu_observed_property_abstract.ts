@@ -177,8 +177,8 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       : false;
   }
 
-  public getOwningView() :ViewPUInfo {
-    return { componentName: this.owningView_?.constructor.name, id: this.owningView_?.id__() }
+  public getOwningView(): ViewPUInfo {
+    return { componentName: this.owningView_?.constructor.name, id: this.owningView_?.id__() };
   }
 
   public dumpSyncPeers(isProfiler: boolean, changedTrackPropertyName?: string): ObservedPropertyInfo<T>[] {
@@ -295,16 +295,14 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       }
     }
     this.subscriberRefs_.forEach((subscriber) => {
-      if (subscriber) {
-        if ('syncPeerHasChanged' in subscriber) {
-          (subscriber as unknown as PeerChangeEventReceiverPU<T>).syncPeerHasChanged(this);
-        } else {
-          stateMgmtConsole.warn(`${this.debugInfo()}: notifyPropertyHasChangedPU: unknown subscriber ID 'subscribedId' error!`);
-        }
+      if (subscriber && typeof subscriber === 'object' && 'syncPeerHasChanged' in subscriber) {
+        (subscriber as unknown as PeerChangeEventReceiverPU<T>).syncPeerHasChanged(this);
+      } else {
+        stateMgmtConsole.warn(`${this.debugInfo()}: notifyPropertyHasChangedPU: unknown subscriber ID 'subscribedId' error!`);
       }
     });
     stateMgmtProfiler.end();
-  }  
+  }
 
 
   // notify owning ViewPU and peers of a ObservedObject @Track property's assignment

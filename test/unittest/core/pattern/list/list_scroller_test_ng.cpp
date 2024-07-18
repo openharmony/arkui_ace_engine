@@ -617,10 +617,12 @@ HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup001, TestSize.Level1)
     EXPECT_TRUE(pattern_->IsAtTop());
     int32_t index = 0;
     int32_t indexInGroup = 0;
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::NONE, 0.f));
     EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 0.f));
     EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 0.f));
     EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 0.f));
     EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO, 0.f));
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::NONE, 0.f));
     EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::START, 0.f));
     EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::CENTER, 0.f));
     EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::END, 0.f));
@@ -790,22 +792,27 @@ HWTEST_F(ListScrollerTestNg, DISABLED_ScrollToItemInGroup006, TestSize.Level1)
 HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup007, TestSize.Level1)
 {
     /**
-     * @tc.cases: ScrollTo invalid index:4 indexInGroup:-2, text each ScrollAlign
+     * @tc.cases: ScrollTo invalid index:1 indexInGroup:-2, text each ScrollAlign
      * @tc.expected: Each test scroll the correct distance
      */
     CreateList();
     CreateListItemGroups(8);
     CreateDone(frameNode_);
-    int32_t index = 4;
-    int32_t indexInGroup = -2;
+    int32_t index = 1;
+    int32_t indexInGroup = -2; // invalid
     EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 0.f));
-    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 0.f));
-    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 0.f));
-    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::AUTO, 0.f));
-    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::START, 0.f));
-    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::CENTER, 0.f));
-    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::END, 0.f));
-    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, true, ScrollAlign::AUTO, 0.f));
+
+    index = 1;
+    indexInGroup = 100; // invalid
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 0.f));
+
+    index = -2; // invalid
+    indexInGroup = 2;
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 0.f));
+
+    index = 4; // invalid
+    indexInGroup = 2;
+    EXPECT_TRUE(JumpToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 0.f));
 }
 
 /**
@@ -931,7 +938,6 @@ HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup010, TestSize.Level1)
     EXPECT_EQ(pattern_->endIndex_, 2);
     EXPECT_EQ(pattern_->itemPosition_[0].startPos, -100);
     EXPECT_EQ(pattern_->itemPosition_[1].endPos, 300);
-    pattern_->DumpAdvanceInfo();
 }
 
 /**

@@ -829,9 +829,9 @@ void FrontendDelegateDeclarativeNG::UpdateCustomDialog(
     const WeakPtr<NG::UINode>& node, const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback)
 {
     DialogProperties dialogProperties = {
-        .isSysBlurStyle = false,
         .autoCancel = dialogAttr.autoCancel,
-        .maskColor = dialogAttr.maskColor
+        .maskColor = dialogAttr.maskColor,
+        .isSysBlurStyle = false
     };
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();
@@ -1027,19 +1027,32 @@ size_t FrontendDelegateDeclarativeNG::GetComponentsCount()
     return pageNode->GetAllDepthChildrenCount();
 }
 
-void FrontendDelegateDeclarativeNG::ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
-    const NG::ToastShowMode& showMode, int32_t alignment, std::optional<DimensionOffset> offset)
+void FrontendDelegateDeclarativeNG::ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast enter");
-    int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
-    bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
-    auto task = [durationTime, message, bottom, isRightToLeft, showMode, alignment, offset,
-                    containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
+    NG::ToastInfo updatedToastInfo = toastInfo;
+    updatedToastInfo.duration = std::clamp(toastInfo.duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
+    updatedToastInfo.isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto task = [updatedToastInfo, callbackParam = std::move(callback), containerId = Container::CurrentId()](
+                    const RefPtr<NG::OverlayManager>& overlayManager) {
         CHECK_NULL_VOID(overlayManager);
         ContainerScope scope(containerId);
-        overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft, showMode, alignment,  offset);
+        overlayManager->ShowToast(
+            updatedToastInfo, std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
     };
     MainWindowOverlay(std::move(task), "ArkUIOverlayShowToast");
+}
+
+void FrontendDelegateDeclarativeNG::CloseToast(const int32_t toastId, std::function<void(int32_t)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "close toast enter");
+    auto currentId = Container::CurrentId();
+    ContainerScope scope(currentId);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->CloseToast(toastId, std::move(callback));
 }
 
 void FrontendDelegateDeclarativeNG::ShowDialogInner(DialogProperties& dialogProperties,

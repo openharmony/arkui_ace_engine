@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 #
 # Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,18 +16,19 @@
 #
 
 import os.path
-
 from typing import List
-
 from graphviz import Digraph
-
 from src.beans.event_node import EventNode
 from src.beans.event_procedures import EventProcedures
 from src.beans.event_scope import EventScope
 from src.beans.event_tree import EventTree
+from src.beans.frame_node import FrameNode
 from src.keywords import get_dict_value
+from src.utils.log_wrapper import log_message
 
 output_folder = 'output'
+# finger scope edge colors
+edge_colors = ['black', 'blue', 'brown', 'purple', 'yellow', 'pink', 'gray']
 
 
 def reset_output_dir():
@@ -53,9 +53,9 @@ def draw_title_and_touch_points(tree: EventTree, tree_name, dot):
         dot.subgraph(sub_graph)
 
 
-class ParentChildrenPair:
+class EventParentChildrenPair:
     item_self: EventNode = None  # parent
-    children: List['ParentChildrenPair'] = []
+    children: List['EventParentChildrenPair'] = []
 
     def __init__(self, item):
         self.item_self = item
@@ -74,8 +74,8 @@ def build_event_node_tree(scope: EventScope):
     flatten_frame_nodes: List[EventNode] = scope.event_nodes
     # make a mapping table
     for item in flatten_frame_nodes:
-        node_map[item.address] = ParentChildrenPair(item)
-    # # append child nodes to their parent's `children` attribute based on `parentId`
+        node_map[item.address] = EventParentChildrenPair(item)
+    # append child nodes to their parent's `children` attribute based on `parentId`
     for item in flatten_frame_nodes:
         if item.parentId is not None and item.parentId != 0 and len(item.parentId) > 6:
             parent = get_dict_value(node_map, item.parentId)
@@ -89,18 +89,21 @@ def build_event_node_tree(scope: EventScope):
 
 
 # draw node relationships recursively
-def draw_event_scope_tree_recursively(node_tree: List[ParentChildrenPair], parent_node_name: str, graph: Digraph,
-                                      is_show_detail):
+def draw_event_scop_tree_recursively(node_tree: List[EventParentChildrenPair],
+                                     parent_node_name: str,
+                                     finger,
+                                     graph: Digraph,
+                                     is_show_detail):
     for item in node_tree:
         node_name = item.get_address()
         node_label = item.item_self.get_summary_string()
         if is_show_detail:
             node_label = item.item_self.get_detailed_summary_string()
-        graph.node(node_name, node_label)
+        graph.node(node_name, node_label, tooltip=item.item_self.to_string())
         if parent_node_name is not None:
-            graph.edge(parent_node_name, node_name)
+            graph.edge(parent_node_name, node_name, color=edge_colors[finger])
         if len(item.children) > 0:
-            draw_event_scope_tree_recursively(item.children, node_name, graph, is_show_detail)
+            draw_event_scop_tree_recursively(item.children, node_name, finger, graph, is_show_detail)
 
 
 def draw_event_procedures(tree: EventTree, tree_name, dot, is_show_detail):
@@ -109,6 +112,7 @@ def draw_event_procedures(tree: EventTree, tree_name, dot, is_show_detail):
         return
     tag = f'{str(tree.tree_id)} event procedures'
     sub_graph = Digraph(comment=tag)
+    current_index = 0
     for scope in event_procedures.event_scopes:
         comment = f'event scope {str(scope.finger)}'
         sub_scope_graph = Digraph(comment=comment)
@@ -116,15 +120,15 @@ def draw_event_procedures(tree: EventTree, tree_name, dot, is_show_detail):
         # treat finger as root node of subgraph
         scope_root_node_name = f'finger {str(scope.finger)}'
         sub_scope_graph.node(scope_root_node_name, scope_root_node_name)
-        dot.edge(tree_name, scope_root_node_name)
-        draw_event_scope_tree_recursively(node_tree, scope_root_node_name, sub_scope_graph, is_show_detail)
+        dot.edge(tree_name, scope_root_node_name, color=edge_colors[current_index])
+        draw_event_scop_tree_recursively(node_tree, scope_root_node_name, current_index, sub_scope_graph,
+                                         is_show_detail)
         sub_graph.subgraph(sub_scope_graph)
+        current_index += 1
     dot.subgraph(sub_graph)
 
 
 def generate_event_trees_graph(dump_result, is_show_detail):
-    # delete all history files before generate new ones
-    reset_output_dir()
     current_index = 0
     # draw every event tree into file
     for tree in dump_result.event_trees:
@@ -136,10 +140,95 @@ def generate_event_trees_graph(dump_result, is_show_detail):
         draw_title_and_touch_points(tree, tree_name, dot)
         # draw event procedures
         draw_event_procedures(tree, tree_name, dot, is_show_detail)
-        # save or show directly
-        # dot.view()
-        # or save to file
-        out_graph_file_name = f'/view_tree_{str(tree.tree_id)}'
-        out_graph_file_name = os.path.join(output_folder, out_graph_file_name)
+        # save to file
+        file_name = f'event_tree_{str(tree.tree_id)}'
+        out_graph_file_name = os.path.join(output_folder, file_name)
         dot.render(out_graph_file_name, format='svg', cleanup=True, view=False)
         current_index += 1
+    log_message('event trees graph generated done, count: ' + str(current_index))
+
+
+class FrameNodeParentChildrenPair:
+    item_self: FrameNode = None  # parent
+    children: List['FrameNodeParentChildrenPair'] = []
+
+    def __init__(self, item):
+        self.item_self = item
+        self.children = []
+
+    def append_child(self, child):
+        self.children.append(child)
+
+    def get_node_id(self):
+        return self.item_self.nodeId
+
+
+def build_hittest_result_tree(tree: EventTree):
+    result = []
+    node_map = {}
+    flatten_frame_nodes: List[FrameNode] = tree.frame_nodes
+    # make a mapping table
+    for item in flatten_frame_nodes:
+        node_map[item.nodeId] = FrameNodeParentChildrenPair(item)
+    # # append child nodes to their parent's `children` attribute based on `parentId`
+    for item in flatten_frame_nodes:
+        if item.parentId is not None and item.parentId != -1:
+            parent = get_dict_value(node_map, item.parentId)
+            if parent is not None:
+                child = get_dict_value(node_map, item.nodeId)
+                parent.append_child(child)
+        else:
+            child = get_dict_value(node_map, item.nodeId)
+            result.append(child)
+    return result
+
+
+def generate_hittest_label_with_highlight(item: FrameNode):
+    if item.isHit == 0:
+        return item.get_showup_string()
+
+    label = '<{}({})<br/><font color="red">isHit: {}</font><br/>hitTestMode: {} >'.format(item.tag, item.nodeId,
+                                                                                          item.isHit,
+                                                                                          item.hitTestMode)
+    return label
+
+
+def draw_hittest_result_recursively(node_tree: List[FrameNodeParentChildrenPair], parent_node_name: str,
+                                    graph: Digraph):
+    for item in node_tree:
+        node_name = 'frame node ' + str(item.get_node_id())
+        node_label = generate_hittest_label_with_highlight(item.item_self)
+        graph.node(node_name, node_label, tooltip=item.item_self.to_string())
+        if parent_node_name is not None:
+            graph.edge(parent_node_name, node_name)
+        if len(item.children) > 0:
+            draw_hittest_result_recursively(item.children, node_name, graph)
+
+
+def draw_hittest_result(tree: EventTree, tree_name, dot):
+    hittest_result = build_hittest_result_tree(tree)
+    draw_hittest_result_recursively(hittest_result, tree_name, dot)
+
+
+def generate_hittest_graph(dump_result):
+    current_index = 0
+    # draw every event tree into file
+    for tree in dump_result.event_trees:
+        # create a graph
+        dot = Digraph(comment='hit test result ' + str(current_index))
+        tree_name = 'hit test result ' + str(tree.tree_id)
+        # draw event procedures
+        draw_hittest_result(tree, tree_name, dot)
+        # save to file
+        file_name = f'hit_test_{str(tree.tree_id)}'
+        out_graph_file_name = os.path.join(output_folder, file_name)
+        dot.render(out_graph_file_name, format='svg', cleanup=True, view=False)
+        current_index += 1
+    log_message('hit test graph generated done, count: ' + str(current_index))
+
+
+def generate_all_graphs(dump_result, is_show_detail):
+    # delete all history files before generate new ones
+    reset_output_dir()
+    generate_event_trees_graph(dump_result, is_show_detail)
+    generate_hittest_graph(dump_result)

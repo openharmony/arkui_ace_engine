@@ -48,11 +48,13 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(const std::string& bundleName, cons
 }
 
 RefPtr<FrameNode> UIExtensionModelNG::Create(
-    const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, bool isAsyncModalBinding)
+    const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, bool isAsyncModalBinding, bool isModal)
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
-        [isAsyncModalBinding]() { return AceType::MakeRefPtr<UIExtensionPattern>(false, true, isAsyncModalBinding); });
+        [isAsyncModalBinding, isModal]() {
+            return AceType::MakeRefPtr<UIExtensionPattern>(false, isModal, isAsyncModalBinding);
+        });
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_RETURN(pattern, frameNode);
     pattern->UpdateWant(want);
@@ -142,6 +144,7 @@ void UIExtensionModelNG::Create(const UIExtensionConfig& config)
 
 void UIExtensionModelNG::CreateSecurityUIExtension(const UIExtensionConfig& config)
 {
+    LOGI("CreateSecurityUIExtension");
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,

@@ -466,6 +466,7 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
     }
     auto info = std::make_shared<TapGestureEvent>();
     info->SetTimeStamp(time_);
+    info->SetDeviceId(deviceId_);
     info->SetFingerList(fingerList_);
     TouchEvent touchPoint = {};
     if (!touchPoints_.empty()) {

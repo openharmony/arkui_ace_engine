@@ -24,7 +24,7 @@ class SynchedPropertyNestedObjectPU<C extends Object>
   extends ObservedPropertyAbstractPU<C>
   implements ObservedObjectEventsPUReceiver<C> {
 
-  private obsObject_: C;
+  private obsObject_: C = undefined;
 
   /**
    * Construct a Property of a su component that links to a variable of parent view that holds an ObservedObject
@@ -38,7 +38,6 @@ class SynchedPropertyNestedObjectPU<C extends Object>
   constructor(obsObject: C,
     owningChildView: IPropertySubscriber, propertyName: PropertyInfo) {
     super(owningChildView, propertyName);
-    this.obsObject_ = obsObject;
     this.createSourceDependency(obsObject);
     this.setValueInternal(obsObject);
     this.setDecoratorInfo("@ObjectLink");

@@ -1794,6 +1794,59 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg059, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SideBarPatternTestNg060
+ * @tc.desc: Test SideBar GetFirstFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg060, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto backButton1 = FrameNode::CreateFrameNode("BackButton", 34, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto backButton2 = FrameNode::CreateFrameNode("BackButton", 35, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto backButton3 = FrameNode::CreateFrameNode("BackButton", 36, AceType::MakeRefPtr<SideBarContainerPattern>());
+    frameNode->children_.push_back(backButton);
+    frameNode->children_.push_back(backButton1);
+    frameNode->children_.push_back(backButton2);
+    frameNode->children_.push_back(backButton3);
+    pattern->CreateAndMountNodes();
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto uINode = AceType::DynamicCast<UINode>(host);
+    ASSERT_NE(uINode, nullptr);
+    auto firstChildNode = pattern->GetFirstFrameNode(uINode);
+    EXPECT_NE(firstChildNode, nullptr);
+}
+
+/**
+ * @tc.name: SideBarPatternTestNg061
+ * @tc.desc: Test SideBar GetControlButtonNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg061, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    auto backButton = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, 33, AceType::MakeRefPtr<SideBarContainerPattern>());
+    auto backButton1 = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, 34, AceType::MakeRefPtr<SideBarContainerPattern>());
+    frameNode->children_.push_back(backButton);
+    frameNode->children_.push_back(backButton1);
+    auto sideBarNode = pattern->GetControlButtonNode();
+    EXPECT_NE(sideBarNode, nullptr);
+}
+
+/**
  * @tc.name: SideBarContainerPaintMethodNg001
  * @tc.desc: Test SideBarContainerPaintMethod ClipPadding
  * @tc.type: FUNC
@@ -1913,6 +1966,28 @@ HWTEST_F(SideBarPatternTestNg, SideBarContainerPattern002, TestSize.Level1)
     pattern->hasInit_ = true;
     pattern->showSideBar_ = false;
     pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
+    pattern->OnUpdateShowSideBar(sideBarLayoutProperty);
+}
+
+/**
+ * @tc.name: SideBarContainerPattern003
+ * @tc.desc: Test SideBarContainerPattern OnUpdateShowSideBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestNg, SideBarContainerPattern003, TestSize.Level1)
+{
+    SideBarContainerModelNG sideBarContainerModelInstance;
+    auto pattern = AceType::MakeRefPtr<SideBarContainerPattern>();
+    EXPECT_FALSE(pattern == nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::CreateFrameNode("Test", nodeId, pattern);
+    EXPECT_FALSE(frameNode == nullptr);
+    auto sideBarLayoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(sideBarLayoutProperty, nullptr);
+    pattern->hasInit_ = true;
+    pattern->showSideBar_ = false;
+    pattern->sideBarStatus_ = SideBarStatus::SHOW;
     pattern->OnUpdateShowSideBar(sideBarLayoutProperty);
 }
 } // namespace OHOS::Ace::NG

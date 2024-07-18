@@ -265,7 +265,7 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
             ret = manager->GetPatternByName(patternName.c_str(), attrMap);
             if (attrMap.empty()) {
                 continue;
-            }
+                            }
             theme->patternAttrs_[patternTag] = attrMap;
         }
 
@@ -273,13 +273,11 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
             theme->SetPromiseValue();
             return ;
         }
-
         theme->ParseContent();
         theme->patternAttrs_.clear();
         theme->SetPromiseValue();
     };
     taskExecutor->PostTask(task, TaskExecutor::TaskType::BACKGROUND, "ArkUILoadTheme");
-
     return theme;
 }
 

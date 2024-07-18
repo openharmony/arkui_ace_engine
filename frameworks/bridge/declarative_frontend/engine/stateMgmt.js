@@ -4801,13 +4801,11 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
             }
         }
         this.subscriberRefs_.forEach((subscriber) => {
-            if (subscriber) {
-                if ('syncPeerHasChanged' in subscriber) {
-                    subscriber.syncPeerHasChanged(this);
-                }
-                else {
-                    stateMgmtConsole.warn(`${this.debugInfo()}: notifyPropertyHasChangedPU: unknown subscriber ID 'subscribedId' error!`);
-                }
+            if (subscriber && typeof subscriber === 'object' && 'syncPeerHasChanged' in subscriber) {
+                subscriber.syncPeerHasChanged(this);
+            }
+            else {
+                stateMgmtConsole.warn(`${this.debugInfo()}: notifyPropertyHasChangedPU: unknown subscriber ID 'subscribedId' error!`);
             }
         });
         
@@ -5895,7 +5893,7 @@ class SynchedPropertyNestedObjectPU extends ObservedPropertyAbstractPU {
      */
     constructor(obsObject, owningChildView, propertyName) {
         super(owningChildView, propertyName);
-        this.obsObject_ = obsObject;
+        this.obsObject_ = undefined;
         this.createSourceDependency(obsObject);
         this.setValueInternal(obsObject);
         this.setDecoratorInfo("@ObjectLink");
@@ -6883,11 +6881,9 @@ class ViewPU extends PUV2ViewBase {
             const parentPU = this.getParent();
             parentPU.getOrCreateRecycleManager().pushRecycleNode(name, this);
             this.hasBeenRecycled_ = true;
-            this.setActiveInternal(false);
         }
         else {
             this.resetRecycleCustomNode();
-            stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: recycleNode must have a parent`);
         }
     }
     UpdateLazyForEachElements(elmtIds) {

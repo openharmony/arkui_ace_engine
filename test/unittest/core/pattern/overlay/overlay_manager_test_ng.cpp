@@ -231,7 +231,9 @@ HWTEST_F(OverlayManagerTestNg, DeleteModal001, TestSize.Level1)
      */
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->ShowToast(MESSAGE, DURATION, BOTTOMSTRING, true);
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    overlayManager->ShowToast(toastInfo, nullptr);
     EXPECT_FALSE(overlayManager->toastMap_.empty());
 
     auto builderFunc = []() -> RefPtr<UINode> {
@@ -1011,7 +1013,7 @@ HWTEST_F(OverlayManagerTestNg, DestroySheet003, TestSize.Level1)
     sheetNode->tag_ = V2::SHEET_PAGE_TAG;
     sheetNode->GetPattern<SheetPresentationPattern>()->targetId_ = targetId;
     overlayManager->DestroySheet(sheetNode, SheetKey(targetId));
-    EXPECT_TRUE(overlayManager->modalStack_.empty());
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
 
     auto targetNodeSecond = CreateTargetNode();
     targetNodeSecond->MountToParent(stageNode);

@@ -357,6 +357,8 @@ struct PaddingPropertyT {
     std::optional<T> right;
     std::optional<T> top;
     std::optional<T> bottom;
+    std::optional<T> start;
+    std::optional<T> end;
 
     void SetEdges(const T& padding)
     {
@@ -391,6 +393,8 @@ struct PaddingPropertyT {
             right = value.right;
             top = value.top;
             bottom = value.bottom;
+            start = value.start;
+            end = value.end;
             return true;
         }
         return false;
@@ -528,6 +532,12 @@ struct PaddingPropertyT<float> {
     bool Empty()
     {
         return !left.has_value() && !right.has_value() && !top.has_value() && !bottom.has_value();
+    }
+
+    bool HasValue() const
+    {
+        return (left && !NearZero(left.value())) || (right && !NearZero(right.value())) ||
+            (top && !NearZero(top.value())) || (bottom && !NearZero(bottom.value()));
     }
 
     PaddingPropertyT<float> Plus(const PaddingPropertyT<float>& another, bool skipNullOpt = true)

@@ -605,6 +605,27 @@ HWTEST_F(SwiperArrowTestNg, MouseEvent005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MouseEvent006
+ * @tc.desc: When has no left/right button, test mouse event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, MouseEvent006, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetLoop(false);
+    });
+    Offset inRegionPoint = Offset(SWIPER_WIDTH / 2, SWIPER_HEIGHT - 10.f);
+
+    /**
+     * @tc.steps: step1. Mouse in navigation(no button)
+     * @tc.expected: Nothing happened
+     */
+    HandleMouseEvent(inRegionPoint);
+    EXPECT_EQ(leftArrowNode_, nullptr);
+    EXPECT_EQ(rightArrowNode_, nullptr);
+}
+
+/**
  * @tc.name: Arrow001
  * @tc.desc: Test arrow
  * @tc.type: FUNC

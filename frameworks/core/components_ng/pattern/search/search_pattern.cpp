@@ -704,6 +704,15 @@ void SearchPattern::OnClickTextField()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->PaintInnerFocusState(focusRect);
+
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    auto textFiledFocusHub = textFieldPattern->GetFocusHub();
+    if (!textFiledFocusHub->IsCurrentFocus()) {
+        textFiledFocusHub->RequestFocusImmediately();
+    }
     host->MarkModifyDone();
 }
 
@@ -888,7 +897,8 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
         if (!recoverFlag) {
             if (!textFieldPattern->GetTextValue().empty()) {
                 textFieldPattern->NeedRequestKeyboard();
-                textFieldPattern->HandleOnSelectAll(true); // Select all text
+                textFieldPattern->SearchRequestKeyboard();
+                textFieldPattern->HandleOnSelectAll(false); // Select all text
                 textFieldPattern->StopTwinkling();         // Hide caret
             } else {
                 textFieldPattern->HandleFocusEvent(); // Show caret

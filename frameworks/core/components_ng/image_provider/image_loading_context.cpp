@@ -15,11 +15,13 @@
 
 #include "core/components_ng/image_provider/image_loading_context.h"
 
+#include "base/log/log_wrapper.h"
 #include "base/network/download_manager.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/components_ng/image_provider/image_provider.h"
 #include "core/components_ng/image_provider/image_state_manager.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
@@ -167,6 +169,12 @@ void ImageLoadingContext::SetOnProgressCallback(
 
 void ImageLoadingContext::OnDataLoading()
 {
+    auto obj = ImageProvider::QueryImageObjectFromCache(src_);
+    if (obj) {
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "%{private}s hit cache, not need create object", src_.GetSrc().c_str());
+        DataReadyCallback(obj);
+        return;
+    }
     if (Downloadable()) {
         if (syncLoad_) {
             DownloadImage();

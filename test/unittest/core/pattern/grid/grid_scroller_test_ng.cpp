@@ -1652,34 +1652,6 @@ HWTEST_F(GridScrollerTestNg, ScrollBy001, TestSize.Level1)
 }
 
 /**
- * @tc.name: DumpAdvanceInfo001
- * @tc.desc: Test ScrollBy
- * @tc.type: FUNC
- */
-HWTEST_F(GridScrollerTestNg, DumpAdvanceInfo001, TestSize.Level1)
-{
-    GridModelNG model = CreateGrid();
-    model.SetColumnsTemplate("1fr");
-    CreateDone(frameNode_);
-    pattern_->DumpAdvanceInfo();
-    pattern_->gridLayoutInfo_.scrollAlign_ = ScrollAlign::NONE;
-    pattern_->DumpAdvanceInfo();
-    pattern_->gridLayoutInfo_.scrollAlign_ = ScrollAlign::CENTER;
-    pattern_->DumpAdvanceInfo();
-    pattern_->gridLayoutInfo_.scrollAlign_ = ScrollAlign::END;
-    pattern_->DumpAdvanceInfo();
-    pattern_->gridLayoutInfo_.scrollAlign_ = ScrollAlign::START;
-    pattern_->DumpAdvanceInfo();
-
-    ClearOldNodes();
-    model = CreateGrid();
-    model.SetColumnsTemplate("1fr");
-    CreateFixedItems(1);
-    CreateDone(frameNode_);
-    pattern_->DumpAdvanceInfo();
-}
-
-/**
  * @tc.name: GetGridItemAnimatePos001
  * @tc.desc: Test GetGridItemAnimatePos
  * @tc.type: FUNC

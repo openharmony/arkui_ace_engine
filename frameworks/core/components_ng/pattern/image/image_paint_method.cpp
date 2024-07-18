@@ -100,6 +100,7 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
     config.dynamicMode = renderProps->GetDynamicModeValue(DynamicRangeMode::STANDARD);
     if (renderProps) {
         config.resizableSlice_ = renderProps->GetImageResizableSliceValue({});
+        config.resizableLattice_ = renderProps->GetImageResizableLatticeValue(nullptr);
     }
     auto pipelineCtx = PipelineBase::GetCurrentContext();
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();

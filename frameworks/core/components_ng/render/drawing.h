@@ -133,6 +133,7 @@ using RSSrcRectConstraint = Rosen::Drawing::SrcRectConstraint;
 using RSPixmap = Rosen::Drawing::Pixmap;
 using RSImageInfo = Rosen::Drawing::ImageInfo;
 using RSRectI = Rosen::Drawing::RectI;
+using RSImageBlurType = Rosen::Drawing::ImageBlurType;
 #endif
 #ifndef USE_GRAPHIC_TEXT_GINE
 using RSPathEffect = rosen::PathEffect;

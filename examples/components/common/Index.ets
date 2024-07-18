@@ -13,6 +13,6 @@
  * limitations under the License.
  */
 
-export * from './src/main/ets/components/ColorBlock';
-export * from './src/main/ets/components/RadioBlock';
-export * from './src/main/ets/components/SliderBlock';
+export * from './src/main/ets/components';
+
+export * from './src/main/ets/utils';

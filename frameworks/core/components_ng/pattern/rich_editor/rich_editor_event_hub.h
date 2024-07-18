@@ -69,7 +69,7 @@ public:
     const std::string& GetPreviewText() const;
 
 private:
-    int32_t insertOffset_;
+    int32_t insertOffset_ = 0;
     std::string insertValue_;
     std::string previewText_;
 };
@@ -215,7 +215,7 @@ public:
 
 private:
     int32_t offset_ = 0;
-    RichEditorDeleteDirection direction_;
+    RichEditorDeleteDirection direction_ = RichEditorDeleteDirection::BACKWARD;
     int32_t length_ = 0;
     std::list<RichEditorAbstractSpanResult> richEditorDeleteSpans_;
 };

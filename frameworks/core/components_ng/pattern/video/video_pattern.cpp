@@ -279,6 +279,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
             CHECK_NULL_VOID(video);
             ContainerScope scope(video->instanceId_);
             video->OnCurrentTimeChange(currentPos);
+            video->StartUpdateImageAnalyzer();
         }, "ArkUIVideoCurrentTimeChange");
     };
 
@@ -1937,6 +1938,7 @@ void VideoPattern::OnWindowHide()
 {
 #if defined(OHOS_PLATFORM)
     if (!BackgroundTaskHelper::GetInstance().HasBackgroundTask()) {
+        autoPlay_ = false;
         Pause();
     }
 #else

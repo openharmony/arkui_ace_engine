@@ -120,6 +120,8 @@ public:
 
     void UpdateBarItemActiveStatusResource();
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+
 private:
     RefPtr<ClickEvent> clickListener_;
     ImageSourceInfo info_;

@@ -312,18 +312,31 @@ void SwiperLayoutAlgorithm::MeasureTabsCustomAnimation(LayoutWrapper* layoutWrap
     auto contentConstraint = layoutProperty->GetContentLayoutConstraint().value();
     auto contentIdealSize = CreateIdealSizeByPercentRef(contentConstraint, axis, MeasureType::MATCH_PARENT_MAIN_AXIS);
     auto childLayoutConstraint = SwiperUtils::CreateChildConstraint(layoutProperty, contentIdealSize, false);
+    auto childCrossSize = 0.0f;
 
     auto currentIndex = layoutProperty->GetIndex().value_or(0);
     auto currentIndexWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
     CHECK_NULL_VOID(currentIndexWrapper);
     currentIndexWrapper->Measure(childLayoutConstraint);
+    auto currentIndexGeometryNode = currentIndexWrapper->GetGeometryNode();
+    if (currentIndexGeometryNode) {
+        childCrossSize = std::max(childCrossSize, currentIndexGeometryNode->GetMarginFrameSize().CrossSize(axis));
+    }
 
     if (customAnimationToIndex_) {
         auto toIndexWrapper = layoutWrapper->GetOrCreateChildByIndex(customAnimationToIndex_.value());
         CHECK_NULL_VOID(toIndexWrapper);
         toIndexWrapper->Measure(childLayoutConstraint);
+        auto toIndexGeometryNode = toIndexWrapper->GetGeometryNode();
+        if (toIndexGeometryNode) {
+            childCrossSize = std::max(childCrossSize, toIndexGeometryNode->GetMarginFrameSize().CrossSize(axis));
+        }
     }
 
+    auto crossSize = contentIdealSize.CrossSize(axis);
+    if ((crossSize.has_value() && GreaterOrEqualToInfinity(crossSize.value())) || !crossSize.has_value()) {
+        contentIdealSize.SetCrossSize(childCrossSize, axis);
+    }
     layoutWrapper->GetGeometryNode()->SetFrameSize(contentIdealSize.ConvertToSizeT());
 
     std::set<int32_t> removeIndexs;

@@ -339,15 +339,13 @@ void JSSearch::SetCancelDefaultIcon()
 
 void JSSearch::SetCancelSymbolIcon(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsObject()) {
-        return;
+    if (info[0]->IsObject()) {
+        std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
+        auto param = JSRef<JSObject>::Cast(info[0]);
+        auto iconProp = param->GetProperty("icon");
+        SetSymbolOptionApply(info, iconSymbol, iconProp);
+        SearchModel::GetInstance()->SetCancelSymbolIcon(iconSymbol);
     }
-
-    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
-    auto param = JSRef<JSObject>::Cast(info[0]);
-    auto iconProp = param->GetProperty("icon");
-    SetSymbolOptionApply(info, iconSymbol, iconProp);
-    SearchModel::GetInstance()->SetCancelSymbolIcon(iconSymbol);
 }
 
 void JSSearch::SetCancelImageIcon(const JSCallbackInfo& info)
@@ -355,7 +353,6 @@ void JSSearch::SetCancelImageIcon(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return;
     }
-
     auto param = JSRef<JSObject>::Cast(info[0]);
     auto theme = GetTheme<SearchTheme>();
     CHECK_NULL_VOID(theme);
@@ -416,7 +413,6 @@ void JSSearch::SetSearchImageIcon(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return;
     }
-
     auto param = JSRef<JSObject>::Cast(info[0]);
     auto theme = GetTheme<SearchTheme>();
     CHECK_NULL_VOID(theme);

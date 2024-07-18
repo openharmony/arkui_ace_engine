@@ -18,6 +18,7 @@
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -110,15 +111,8 @@ void TextContentModifier::SetDefaultAnimatablePropertyValue(const TextStyle& tex
 
 void TextContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
 {
-    float fontSizeValue = textStyle.GetFontSize().Value();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    if (pipelineContext) {
-        fontSizeValue = pipelineContext->NormalizeToPx(textStyle.GetFontSize());
-        if (textStyle.IsAllowScale() && textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
-            fontSizeValue = pipelineContext->NormalizeToPx(textStyle.GetFontSize() * pipelineContext->GetFontScale());
-        }
-    }
-
+    float fontSizeValue = textStyle.GetFontSize().ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     fontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
     AttachProperty(fontSizeFloat_);
 }
@@ -128,10 +122,8 @@ void TextContentModifier::SetDefaultAdaptMinFontSize(const TextStyle& textStyle)
     float fontSizeValue = textStyle.GetFontSize().Value();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
-        fontSizeValue = textStyle.GetAdaptMinFontSize().ConvertToPx();
-        if (textStyle.IsAllowScale() && textStyle.GetAdaptMinFontSize().Unit() == DimensionUnit::FP) {
-            fontSizeValue = (textStyle.GetAdaptMinFontSize() * pipelineContext->GetFontScale()).ConvertToPx();
-        }
+        fontSizeValue = textStyle.GetAdaptMinFontSize().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     }
 
     adaptMinFontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
@@ -143,10 +135,8 @@ void TextContentModifier::SetDefaultAdaptMaxFontSize(const TextStyle& textStyle)
     float fontSizeValue = textStyle.GetFontSize().Value();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
-        fontSizeValue = textStyle.GetAdaptMaxFontSize().ConvertToPx();
-        if (textStyle.IsAllowScale() && textStyle.GetAdaptMaxFontSize().Unit() == DimensionUnit::FP) {
-            fontSizeValue = (textStyle.GetAdaptMaxFontSize() * pipelineContext->GetFontScale()).ConvertToPx();
-        }
+        fontSizeValue = textStyle.GetAdaptMaxFontSize().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     }
 
     adaptMaxFontSizeFloat_ = MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
@@ -215,7 +205,8 @@ void TextContentModifier::SetDefaultBaselineOffset(const TextStyle& textStyle)
     float baselineOffset = textStyle.GetBaselineOffset().Value();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
-        baselineOffset = pipelineContext->NormalizeToPx(textStyle.GetBaselineOffset());
+        baselineOffset = textStyle.GetBaselineOffset().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     }
 
     baselineOffsetFloat_ = MakeRefPtr<AnimatablePropertyFloat>(baselineOffset);
@@ -313,23 +304,12 @@ bool TextContentModifier::DrawImage(const RefPtr<FrameNode>& imageNode, RSCanvas
     RectF imageRect(rect.Left() + x + marginLeft, rect.Top() + y + marginTop,
         geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
     const auto config = canvasImage->GetPaintConfig();
-    if (config.isSvg_) {
-        ImagePainter imagePainter(canvasImage);
-        OffsetF offset(0, 0);
-        SizeF contentSize(geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
-        auto clipRect = RSRect(0, 0, geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
-        canvas.Save();
-        canvas.Translate(rect.Left() + x + marginLeft, rect.Top() + y + marginTop);
-        canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
-        imagePainter.DrawSVGImage(canvas, offset, contentSize);
-        canvas.Restore();
-    } else {
-        auto pixelMapImage = DynamicCast<PixelMapImage>(canvasImage);
-        if (!pixelMapImage) {
-            return false;
-        }
-        pixelMapImage->DrawRect(canvas, ToRSRect(imageRect));
-    }
+    SizeF imageSize(canvasImage->GetWidth(), canvasImage->GetHeight());
+    SizeF contentSize(geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
+    RectF srcRect;
+    RectF dstRect;
+    ImagePainter::ApplyImageFit(config.imageFit_, imageSize, contentSize, srcRect, dstRect);
+    canvasImage->DrawRect(canvas, ToRSRect(srcRect), ToRSRect(imageRect));
     return true;
 }
 
@@ -640,7 +620,7 @@ void TextContentModifier::ModifyDecorationInTextStyle(TextStyle& textStyle)
 {
     if (textDecoration_.has_value() && textDecorationColor_.has_value() && textDecorationColorAlpha_) {
         if (textDecorationAnimatable_) {
-            uint8_t alpha = static_cast<int>(std::floor(textDecorationColorAlpha_->Get() + ROUND_VALUE));
+            uint8_t alpha = static_cast<uint8_t>(std::floor(textDecorationColorAlpha_->Get() + ROUND_VALUE));
             if (alpha == 0) {
                 textStyle.SetTextDecoration(TextDecoration::NONE);
                 textStyle.SetTextDecorationColor(textDecorationColor_.value());
@@ -735,7 +715,7 @@ void TextContentModifier::UpdateTextShadowMeasureFlag(PropertyChangeFlag& flag)
 void TextContentModifier::UpdateTextDecorationMeasureFlag(PropertyChangeFlag& flag)
 {
     if (textDecoration_.has_value() && textDecorationColor_.has_value() && textDecorationColorAlpha_) {
-        uint8_t alpha = static_cast<int>(std::floor(textDecorationColorAlpha_->Get() + ROUND_VALUE));
+        uint8_t alpha = static_cast<uint8_t>(std::floor(textDecorationColorAlpha_->Get() + ROUND_VALUE));
         if (textDecoration_.value() == TextDecoration::UNDERLINE && alpha != textDecorationColor_.value().GetAlpha()) {
             flag |= PROPERTY_UPDATE_MEASURE;
         } else if (textDecoration_.value() == TextDecoration::NONE && alpha != 0.0) {
@@ -775,19 +755,7 @@ void TextContentModifier::SetFontFamilies(const std::vector<std::string>& value)
 
 void TextContentModifier::SetFontSize(const Dimension& value, TextStyle& textStyle)
 {
-    float fontSizeValue;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    if (pipelineContext) {
-        float fontScaleValue = std::clamp(pipelineContext->GetFontScale(), textStyle.GetMinFontScale(),
-            textStyle.GetMaxFontScale());
-        if (value.Unit() == DimensionUnit::FP) {
-            fontSizeValue = value.ConvertToPx() / pipelineContext->GetFontScale() * fontScaleValue;
-        } else {
-            fontSizeValue = value.ConvertToPx();
-        }
-    } else {
-        fontSizeValue = value.Value();
-    }
+    auto fontSizeValue = value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     fontSize_ = Dimension(fontSizeValue);
     CHECK_NULL_VOID(fontSizeFloat_);
     fontSizeFloat_->Set(fontSizeValue);
@@ -795,19 +763,7 @@ void TextContentModifier::SetFontSize(const Dimension& value, TextStyle& textSty
 
 void TextContentModifier::SetAdaptMinFontSize(const Dimension& value, TextStyle& textStyle)
 {
-    float fontSizeValue;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    if (pipelineContext) {
-        float fontScaleValue = std::clamp(pipelineContext->GetFontScale(), textStyle.GetMinFontScale(),
-            textStyle.GetMaxFontScale());
-        if (value.Unit() == DimensionUnit::FP) {
-            fontSizeValue = value.ConvertToPx() / pipelineContext->GetFontScale() * fontScaleValue;
-        } else {
-            fontSizeValue = value.ConvertToPx();
-        }
-    } else {
-        fontSizeValue = value.Value();
-    }
+    auto fontSizeValue = value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     adaptMinFontSize_ = Dimension(fontSizeValue);
     CHECK_NULL_VOID(adaptMinFontSizeFloat_);
     adaptMinFontSizeFloat_->Set(fontSizeValue);
@@ -815,19 +771,7 @@ void TextContentModifier::SetAdaptMinFontSize(const Dimension& value, TextStyle&
 
 void TextContentModifier::SetAdaptMaxFontSize(const Dimension& value, TextStyle& textStyle)
 {
-    float fontSizeValue;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    if (pipelineContext) {
-        float fontScaleValue = std::clamp(pipelineContext->GetFontScale(), textStyle.GetMinFontScale(),
-            textStyle.GetMaxFontScale());
-        if (value.Unit() == DimensionUnit::FP) {
-            fontSizeValue = value.ConvertToPx() / pipelineContext->GetFontScale() * fontScaleValue;
-        } else {
-            fontSizeValue = value.ConvertToPx();
-        }
-    } else {
-        fontSizeValue = value.Value();
-    }
+    auto fontSizeValue = value.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     adaptMaxFontSize_ = Dimension(fontSizeValue);
     CHECK_NULL_VOID(adaptMaxFontSizeFloat_);
     adaptMaxFontSizeFloat_->Set(fontSizeValue);
@@ -978,7 +922,9 @@ bool TextContentModifier::SetTextRace(const MarqueeOption& option)
         auto theme = pipeline->GetTheme<TextTheme>();
         CHECK_NULL_RETURN(theme, true);
         auto fadeoutWidth = theme->GetFadeoutWidth();
-        marqueeGradientPercent_ = fadeoutWidth.ConvertToPx() / contentWidth;
+        auto textStyle = textPattern->GetTextStyle();
+        marqueeGradientPercent_ =
+            fadeoutWidth.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale()) / contentWidth;
     }
 
     return true;

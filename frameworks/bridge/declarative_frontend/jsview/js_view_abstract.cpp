@@ -399,7 +399,12 @@ void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, co
 
 std::string GetReplaceContentStr(int pos, const std::string& type, JSRef<JSArray> params, int32_t containCount)
 {
-    JSRef<JSVal> item = params->GetValueAt(pos + containCount);
+    auto index = pos + containCount;
+    if (index < 0) {
+        return std::string();
+    }
+
+    JSRef<JSVal> item = params->GetValueAt(static_cast<size_t>(index));
     if (type == "d") {
         if (item->IsNumber()) {
             return std::to_string(item->ToNumber<int32_t>());
@@ -1369,20 +1374,20 @@ void ParseLocalizedEdgeColors(const JSRef<JSObject>& object, LocalizedColor& loc
     }
 }
 
-void ParseCommonEdgeColors(const JSRef<JSObject>& object, CommonColor& commonColor)
+bool ParseCommonEdgeColors(const JSRef<JSObject>& object, CommonColor& commonColor)
 {
     if (object->HasProperty(static_cast<int32_t>(ArkUIIndex::START)) ||
         object->HasProperty(static_cast<int32_t>(ArkUIIndex::END))) {
         LocalizedColor localizedColor;
         ParseLocalizedEdgeColors(object, localizedColor);
-        auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
         commonColor.top = localizedColor.top;
         commonColor.bottom = localizedColor.bottom;
-        commonColor.left = isRightToLeft ? localizedColor.end : localizedColor.start;
-        commonColor.right = isRightToLeft ? localizedColor.start : localizedColor.end;
-        return;
+        commonColor.left = localizedColor.start;
+        commonColor.right = localizedColor.end;
+        return true;
     }
     ParseEdgeColors(object, commonColor);
+    return false;
 }
 
 void ParseEdgeWidths(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension, bool notNegative)
@@ -1519,19 +1524,19 @@ void ParseLocalizedEdgeWidthsProps(const JSRef<JSObject>& object, LocalizedCalcD
     }
 }
 
-void ParseCommonEdgeWidths(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension, bool notNegative)
+bool ParseCommonEdgeWidths(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension, bool notNegative)
 {
     if (CheckLengthMetrics(object)) {
         LocalizedCalcDimension localizedCalcDimension;
         ParseLocalizedEdgeWidths(object, localizedCalcDimension, notNegative);
-        auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
         commonCalcDimension.top = localizedCalcDimension.top;
         commonCalcDimension.bottom = localizedCalcDimension.bottom;
-        commonCalcDimension.left = isRightToLeft ? localizedCalcDimension.end : localizedCalcDimension.start;
-        commonCalcDimension.right = isRightToLeft ? localizedCalcDimension.start : localizedCalcDimension.end;
-        return;
+        commonCalcDimension.left = localizedCalcDimension.start;
+        commonCalcDimension.right = localizedCalcDimension.end;
+        return true;
     }
     ParseEdgeWidths(object, commonCalcDimension, notNegative);
+    return false;
 }
 
 void ParseCommonEdgeWidthsForDashParams(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
@@ -2828,6 +2833,56 @@ void JSViewAbstract::ParseBlurOption(const JSRef<JSObject>& jsBlurOption, BlurOp
     }
 }
 
+void JSViewAbstract::ParseBlurStyleOption(const JSRef<JSObject>& jsOption, BlurStyleOption& styleOption)
+{
+    auto colorMode = static_cast<int32_t>(ThemeColorMode::SYSTEM);
+    ParseJsInt32(jsOption->GetProperty("colorMode"), colorMode);
+    if (colorMode >= static_cast<int32_t>(ThemeColorMode::SYSTEM) &&
+        colorMode <= static_cast<int32_t>(ThemeColorMode::DARK)) {
+        styleOption.colorMode = static_cast<ThemeColorMode>(colorMode);
+    }
+    auto adaptiveColor = static_cast<int32_t>(AdaptiveColor::DEFAULT);
+    ParseJsInt32(jsOption->GetProperty("adaptiveColor"), adaptiveColor);
+    if (adaptiveColor >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
+        adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
+        styleOption.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
+    }
+
+    // policy
+    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE);
+    ParseJsInt32(jsOption->GetProperty("policy"), policy);
+    if (policy >= static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) &&
+        policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALAWYS_INACTIVE)) {
+        styleOption.policy = static_cast<BlurStyleActivePolicy>(policy);
+    }
+
+    // blurType
+    auto blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
+    ParseJsInt32(jsOption->GetProperty("type"), blurType);
+    if (blurType >= static_cast<int32_t>(BlurType::WITHIN_WINDOW) &&
+        blurType <= static_cast<int32_t>(BlurType::BEHIND_WINDOW)) {
+        styleOption.blurType = static_cast<BlurType>(blurType);
+    }
+
+    // inactiveColor
+    if (ParseJsColor(jsOption->GetProperty("inactiveColor"), styleOption.inactiveColor)) {
+        styleOption.isValidColor = true;
+    }
+
+    // scale
+    if (jsOption->GetProperty("scale")->IsNumber()) {
+        double scale = jsOption->GetProperty("scale")->ToNumber<double>();
+        styleOption.scale = std::clamp(scale, 0.0, 1.0);
+    }
+
+    if (jsOption->GetProperty("blurOptions")->IsObject()) {
+        JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOptions"));
+        BlurOption blurOption;
+        ParseBlurOption(jsBlurOption, blurOption);
+        styleOption.blurOption = blurOption;
+    }
+}
+
 void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
 {
     if (info.Length() == 0) {
@@ -2843,29 +2898,7 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
     }
     if (info.Length() > 1 && info[1]->IsObject()) {
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
-        auto colorMode = static_cast<int32_t>(ThemeColorMode::SYSTEM);
-        ParseJsInt32(jsOption->GetProperty("colorMode"), colorMode);
-        if (colorMode >= static_cast<int32_t>(ThemeColorMode::SYSTEM) &&
-            colorMode <= static_cast<int32_t>(ThemeColorMode::DARK)) {
-            styleOption.colorMode = static_cast<ThemeColorMode>(colorMode);
-        }
-        auto adaptiveColor = static_cast<int32_t>(AdaptiveColor::DEFAULT);
-        ParseJsInt32(jsOption->GetProperty("adaptiveColor"), adaptiveColor);
-        if (adaptiveColor >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
-            adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
-            styleOption.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
-        }
-        if (jsOption->GetProperty("scale")->IsNumber()) {
-            double scale = jsOption->GetProperty("scale")->ToNumber<double>();
-            styleOption.scale = std::clamp(scale, 0.0, 1.0);
-        }
-
-        if (jsOption->GetProperty("blurOptions")->IsObject()) {
-            JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOptions"));
-            BlurOption blurOption;
-            ParseBlurOption(jsBlurOption, blurOption);
-            styleOption.blurOption = blurOption;
-        }
+        ParseBlurStyleOption(jsOption, styleOption);
     }
     ViewAbstractModel::GetInstance()->SetBackgroundBlurStyle(styleOption);
 }
@@ -2926,20 +2959,24 @@ void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOp
     if (!ParseJsDimensionVp(jsOption->GetProperty("radius"), radius) || LessNotEqual(radius.Value(), 0.0f)) {
         radius.SetValue(0.0f);
     }
+    effectOption.radius = radius;
+
     double saturation = 1.0f;
     if (jsOption->GetProperty("saturation")->IsNumber()) {
         saturation = jsOption->GetProperty("saturation")->ToNumber<double>();
         saturation = (saturation > 0.0f || NearZero(saturation)) ? saturation : 1.0f;
     }
+    effectOption.saturation = saturation;
+
     double brightness = 1.0f;
     if (jsOption->GetProperty("brightness")->IsNumber()) {
         brightness = jsOption->GetProperty("brightness")->ToNumber<double>();
         brightness = (brightness > 0.0f || NearZero(brightness)) ? brightness : 1.0f;
     }
-    Color color = Color::TRANSPARENT;
-    if (!ParseJsColor(jsOption->GetProperty("color"), color)) {
-        color.SetValue(Color::TRANSPARENT.GetValue());
-    }
+    effectOption.brightness = brightness;
+
+    ParseJsColor(jsOption->GetProperty("color"), effectOption.color);
+
     auto adaptiveColorValue = static_cast<int32_t>(AdaptiveColor::DEFAULT);
     auto adaptiveColor = AdaptiveColor::DEFAULT;
     ParseJsInt32(jsOption->GetProperty("adaptiveColor"), adaptiveColorValue);
@@ -2947,13 +2984,35 @@ void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOp
         adaptiveColorValue <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
         adaptiveColor = static_cast<AdaptiveColor>(adaptiveColorValue);
     }
+    effectOption.adaptiveColor = adaptiveColor;
+
+    // policy
+    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE);
+    ParseJsInt32(jsOption->GetProperty("policy"), policy);
+    if (policy >= static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) &&
+        policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALAWYS_INACTIVE)) {
+        effectOption.policy = static_cast<BlurStyleActivePolicy>(policy);
+    }
+
+    // blurType
+    auto blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
+    ParseJsInt32(jsOption->GetProperty("type"), blurType);
+    if (blurType >= static_cast<int32_t>(BlurType::WITHIN_WINDOW) &&
+        blurType <= static_cast<int32_t>(BlurType::BEHIND_WINDOW)) {
+        effectOption.blurType = static_cast<BlurType>(blurType);
+    }
+
+    // inactiveColor
+    if (ParseJsColor(jsOption->GetProperty("inactiveColor"), effectOption.inactiveColor)) {
+        effectOption.isValidColor = true;
+    }
 
     BlurOption blurOption;
     if (jsOption->GetProperty("blurOptions")->IsObject()) {
         JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOptions"));
         ParseBlurOption(jsBlurOption, blurOption);
+        effectOption.blurOption = blurOption;
     }
-    effectOption = { radius, saturation, brightness, color, adaptiveColor, blurOption };
 }
 
 void JSViewAbstract::JsForegroundEffect(const JSCallbackInfo& info)
@@ -3366,7 +3425,6 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
     }
 
     auto backgroundBlurStyle = menuOptions->GetProperty(static_cast<int32_t>(ArkUIIndex::BACKGROUND_BLUR_STYLE));
-    BlurStyleOption styleOption;
     if (backgroundBlurStyle->IsNumber()) {
         auto blurStyle = backgroundBlurStyle->ToNumber<int32_t>();
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
@@ -3663,15 +3721,25 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType t
     if (jsVal->IsObject()) {
         CommonCalcDimension commonCalcDimension;
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(jsVal);
-        ParseCommonMarginOrPaddingCorner(paddingObj, commonCalcDimension);
+        auto useLengthMetrics = ParseCommonMarginOrPaddingCorner(paddingObj, commonCalcDimension);
         if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
             commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
-            if (type == EdgeType::MARGIN)  {
-                ViewAbstractModel::GetInstance()->SetMargins(commonCalcDimension.top, commonCalcDimension.bottom,
-                    commonCalcDimension.left, commonCalcDimension.right);
+            if (type == EdgeType::MARGIN) {
+                if (useLengthMetrics) {
+                    ViewAbstractModel::GetInstance()->SetMargins(GetLocalizedPadding(commonCalcDimension.top,
+                        commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right));
+                } else {
+                    ViewAbstractModel::GetInstance()->SetMargins(commonCalcDimension.top, commonCalcDimension.bottom,
+                        commonCalcDimension.left, commonCalcDimension.right);
+                }
             } else if (type == EdgeType::PADDING) {
-                ViewAbstractModel::GetInstance()->SetPaddings(commonCalcDimension.top, commonCalcDimension.bottom,
-                    commonCalcDimension.left, commonCalcDimension.right);
+                if (useLengthMetrics) {
+                    ViewAbstractModel::GetInstance()->SetPaddings(GetLocalizedPadding(commonCalcDimension.top,
+                        commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right));
+                } else {
+                    ViewAbstractModel::GetInstance()->SetPaddings(commonCalcDimension.top, commonCalcDimension.bottom,
+                        commonCalcDimension.left, commonCalcDimension.right);
+                }
             } else if (type == EdgeType::SAFE_AREA_PADDING) {
                 ViewAbstractModel::GetInstance()->SetSafeAreaPaddings(commonCalcDimension.top,
                     commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right);
@@ -3692,6 +3760,42 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType t
     } else if (type == EdgeType::SAFE_AREA_PADDING) {
         ViewAbstractModel::GetInstance()->SetSafeAreaPadding(length);
     }
+}
+
+NG::PaddingProperty JSViewAbstract::GetLocalizedPadding(const std::optional<CalcDimension>& top,
+    const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& start,
+    const std::optional<CalcDimension>& end)
+{
+    NG::PaddingProperty paddings;
+    if (start.has_value()) {
+        if (start.value().Unit() == DimensionUnit::CALC) {
+            paddings.start = NG::CalcLength(start.value().CalcValue());
+        } else {
+            paddings.start = NG::CalcLength(start.value());
+        }
+    }
+    if (bottom.has_value()) {
+        if (bottom.value().Unit() == DimensionUnit::CALC) {
+            paddings.bottom = NG::CalcLength(bottom.value().CalcValue());
+        } else {
+            paddings.bottom = NG::CalcLength(bottom.value());
+        }
+    }
+    if (end.has_value()) {
+        if (end.value().Unit() == DimensionUnit::CALC) {
+            paddings.end = NG::CalcLength(end.value().CalcValue());
+        } else {
+            paddings.end = NG::CalcLength(end.value());
+        }
+    }
+    if (top.has_value()) {
+        if (top.value().Unit() == DimensionUnit::CALC) {
+            paddings.top = NG::CalcLength(top.value().CalcValue());
+        } else {
+            paddings.top = NG::CalcLength(top.value());
+        }
+    }
+    return paddings;
 }
 
 void JSViewAbstract::ParseMarginOrPaddingCorner(JSRef<JSObject> obj, std::optional<CalcDimension>& top,
@@ -3752,21 +3856,21 @@ void JSViewAbstract::ParseLocalizedMarginOrLocalizedPaddingCorner(
     }
 }
 
-void JSViewAbstract::ParseCommonMarginOrPaddingCorner(
+bool JSViewAbstract::ParseCommonMarginOrPaddingCorner(
     const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension)
 {
     if (CheckLengthMetrics(object)) {
         LocalizedCalcDimension localizedCalcDimension;
         ParseLocalizedMarginOrLocalizedPaddingCorner(object, localizedCalcDimension);
-        auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
         commonCalcDimension.top = localizedCalcDimension.top;
         commonCalcDimension.bottom = localizedCalcDimension.bottom;
-        commonCalcDimension.left = isRightToLeft ? localizedCalcDimension.end : localizedCalcDimension.start;
-        commonCalcDimension.right = isRightToLeft ? localizedCalcDimension.start : localizedCalcDimension.end;
-        return;
+        commonCalcDimension.left = localizedCalcDimension.start;
+        commonCalcDimension.right = localizedCalcDimension.end;
+        return true;
     }
     ParseMarginOrPaddingCorner(object, commonCalcDimension.top, commonCalcDimension.bottom, commonCalcDimension.left,
         commonCalcDimension.right);
+        return false;
 }
 
 void JSViewAbstract::JsOutline(const JSCallbackInfo& info)
@@ -3796,7 +3900,7 @@ void JSViewAbstract::JsOutline(const JSCallbackInfo& info)
     if (!valueOuterRadius->IsUndefined()) {
         ParseOuterBorderRadius(valueOuterRadius);
     } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        ViewAbstractModel::GetInstance()->SetOuterBorderRadius({});
+        ViewAbstractModel::GetInstance()->SetOuterBorderRadius(Dimension {});
     }
     // use default value when undefined.
     ParseOuterBorderStyle(object->GetProperty("style"));
@@ -3826,7 +3930,7 @@ void JSViewAbstract::JsOutlineRadius(const JSCallbackInfo& info)
         JSCallbackInfoType::OBJECT };
     auto jsVal = info[0];
     if (!CheckJSCallbackInfo("JsOutlineRadius", jsVal, checkList)) {
-        ViewAbstractModel::GetInstance()->SetOuterBorderRadius({});
+        ViewAbstractModel::GetInstance()->SetOuterBorderRadius(Dimension {});
         return;
     }
     ParseOuterBorderRadius(jsVal);
@@ -3934,7 +4038,11 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args)
         }
         CommonCalcDimension commonCalcDimension;
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args);
-        ParseCommonEdgeWidths(obj, commonCalcDimension, true);
+        if (ParseCommonEdgeWidths(obj, commonCalcDimension, true)) {
+            ViewAbstractModel::GetInstance()->SetBorderWidth(commonCalcDimension.left, commonCalcDimension.right,
+                commonCalcDimension.top, commonCalcDimension.bottom, true);
+            return;
+        }
         ViewAbstractModel::GetInstance()->SetBorderWidth(
             commonCalcDimension.left, commonCalcDimension.right, commonCalcDimension.top, commonCalcDimension.bottom);
     } else {
@@ -4095,22 +4203,21 @@ void JSViewAbstract::JsBorderImage(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
-void JSViewAbstract::ParseBorderImageDimension(
+bool JSViewAbstract::ParseBorderImageDimension(
     const JSRef<JSVal>& args, BorderImage::BorderImageOption& borderImageDimension)
 {
     if (!args->IsObject()) {
-        return;
+        return false;
     }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
     if (CheckLengthMetrics(object)) {
         LocalizedCalcDimension localizedCalcDimension;
         ParseBorderImageLengthMetrics(object, localizedCalcDimension);
-        auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
         borderImageDimension.topDimension = localizedCalcDimension.top;
         borderImageDimension.bottomDimension = localizedCalcDimension.bottom;
-        borderImageDimension.leftDimension = isRightToLeft ? localizedCalcDimension.end : localizedCalcDimension.start;
-        borderImageDimension.rightDimension = isRightToLeft ? localizedCalcDimension.start : localizedCalcDimension.end;
-        return;
+        borderImageDimension.startDimension = localizedCalcDimension.start;
+        borderImageDimension.endDimension = localizedCalcDimension.end;
+        return true;
     }
     static std::array<int32_t, DIRECTION_COUNT> keys = { static_cast<int32_t>(ArkUIIndex::LEFT),
         static_cast<int32_t>(ArkUIIndex::RIGHT), static_cast<int32_t>(ArkUIIndex::TOP),
@@ -4138,6 +4245,7 @@ void JSViewAbstract::ParseBorderImageDimension(
             }
         }
     }
+    return false;
 }
 
 void JSViewAbstract::ParseBorderImageLengthMetrics(
@@ -4263,6 +4371,12 @@ void JSViewAbstract::ParseBorderImageOutset(const JSRef<JSVal>& args, RefPtr<Bor
     }
     BorderImage::BorderImageOption option;
     ParseBorderImageDimension(args, option);
+    if (option.startDimension.has_value()) {
+        borderImage->SetEdgeOutset(BorderImageDirection::START, option.startDimension.value());
+    }
+    if (option.endDimension.has_value()) {
+        borderImage->SetEdgeOutset(BorderImageDirection::END, option.endDimension.value());
+    }
     if (option.leftDimension.has_value()) {
         borderImage->SetEdgeOutset(BorderImageDirection::LEFT, option.leftDimension.value());
     }
@@ -4300,14 +4414,11 @@ void JSViewAbstract::ParseBorderImageSlice(const JSRef<JSVal>& args, RefPtr<Bord
         if (localizedCalcDimension.bottom.has_value()) {
             borderImage->SetEdgeSlice(BorderImageDirection::BOTTOM, localizedCalcDimension.bottom.value());
         }
-        auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
         if (localizedCalcDimension.start.has_value()) {
-            isRightToLeft ? borderImage->SetEdgeSlice(BorderImageDirection::RIGHT, localizedCalcDimension.start.value())
-                          : borderImage->SetEdgeSlice(BorderImageDirection::LEFT, localizedCalcDimension.start.value());
+            borderImage->SetEdgeSlice(BorderImageDirection::START, localizedCalcDimension.start.value());
         }
         if (localizedCalcDimension.end.has_value()) {
-            isRightToLeft ? borderImage->SetEdgeSlice(BorderImageDirection::LEFT, localizedCalcDimension.end.value())
-                          : borderImage->SetEdgeSlice(BorderImageDirection::RIGHT, localizedCalcDimension.end.value());
+            borderImage->SetEdgeSlice(BorderImageDirection::END, localizedCalcDimension.end.value());
         }
         return;
     }
@@ -4335,6 +4446,12 @@ void JSViewAbstract::ParseBorderImageWidth(const JSRef<JSVal>& args, RefPtr<Bord
 
     BorderImage::BorderImageOption option;
     ParseBorderImageDimension(args, option);
+    if (option.startDimension.has_value()) {
+        borderImage->SetEdgeWidth(BorderImageDirection::START, option.startDimension.value());
+    }
+    if (option.endDimension.has_value()) {
+        borderImage->SetEdgeWidth(BorderImageDirection::END, option.endDimension.value());
+    }
     if (option.leftDimension.has_value()) {
         borderImage->SetEdgeWidth(BorderImageDirection::LEFT, option.leftDimension.value());
     }
@@ -4354,6 +4471,19 @@ void JSViewAbstract::JsBorderColor(const JSCallbackInfo& info)
     ParseBorderColor(info[0]);
 }
 
+NG::BorderColorProperty JSViewAbstract::GetLocalizedBorderColor(const std::optional<Color>& colorStart,
+    const std::optional<Color>& colorEnd, const std::optional<Color>& colorTop,
+    const std::optional<Color>& colorBottom)
+{
+    NG::BorderColorProperty borderColors;
+    borderColors.startColor = colorStart;
+    borderColors.endColor = colorEnd;
+    borderColors.topColor = colorTop;
+    borderColors.bottomColor = colorBottom;
+    borderColors.multiValued = true;
+    return borderColors;
+}
+
 void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args)
 {
     Color borderColor;
@@ -4362,7 +4492,11 @@ void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args)
     } else if (args->IsObject()) {
         CommonColor commonColor;
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        ParseCommonEdgeColors(object, commonColor);
+        if (ParseCommonEdgeColors(object, commonColor)) {
+            ViewAbstractModel::GetInstance()->SetBorderColor(
+                GetLocalizedBorderColor(commonColor.left, commonColor.right, commonColor.top, commonColor.bottom));
+            return;
+        }
         ViewAbstractModel::GetInstance()->SetBorderColor(
             commonColor.left, commonColor.right, commonColor.top, commonColor.bottom);
     } else {
@@ -4378,7 +4512,11 @@ void JSViewAbstract::ParseOuterBorderColor(const JSRef<JSVal>& args)
     } else if (args->IsObject()) {
         CommonColor commonColor;
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        ParseCommonEdgeColors(object, commonColor);
+        if (ParseCommonEdgeColors(object, commonColor)) {
+            ViewAbstractModel::GetInstance()->SetOuterBorderColor(
+                GetLocalizedBorderColor(commonColor.left, commonColor.right, commonColor.top, commonColor.bottom));
+            return;
+        }
         ViewAbstractModel::GetInstance()->SetOuterBorderColor(
             commonColor.left, commonColor.right, commonColor.top, commonColor.bottom);
     } else {
@@ -4392,10 +4530,23 @@ void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
         JSCallbackInfoType::OBJECT };
     auto jsVal = info[0];
     if (!CheckJSCallbackInfo("JsBorderRadius", jsVal, checkList)) {
-        ViewAbstractModel::GetInstance()->SetBorderRadius({});
+        ViewAbstractModel::GetInstance()->SetBorderRadius(Dimension {});
         return;
     }
     ParseBorderRadius(jsVal);
+}
+
+NG::BorderRadiusProperty JSViewAbstract::GetLocalizedBorderRadius(const std::optional<Dimension>& radiusTopStart,
+    const std::optional<Dimension>& radiusTopEnd, const std::optional<Dimension>& radiusBottomStart,
+    const std::optional<Dimension>& radiusBottomEnd)
+{
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopStart = radiusTopStart;
+    borderRadius.radiusTopEnd = radiusTopEnd;
+    borderRadius.radiusBottomStart = radiusBottomStart;
+    borderRadius.radiusBottomEnd = radiusBottomEnd;
+    borderRadius.multiValued = true;
+    return borderRadius;
 }
 
 void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args)
@@ -4409,7 +4560,11 @@ void JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args)
         CalcDimension topRight;
         CalcDimension bottomLeft;
         CalcDimension bottomRight;
-        ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
+        if (ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight)) {
+            ViewAbstractModel::GetInstance()->SetBorderRadius(
+                GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
+                return;
+        }
         ViewAbstractModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
     }
 }
@@ -4431,7 +4586,10 @@ void JSViewAbstract::ParseOuterBorderRadius(const JSRef<JSVal>& args)
         CalcDimension topRight;
         CalcDimension bottomLeft;
         CalcDimension bottomRight;
-        ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
+        if (ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight)) {
+            ViewAbstractModel::GetInstance()->SetOuterBorderRadius(
+                GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
+        }
         ViewAbstractModel::GetInstance()->SetOuterBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
     }
 }
@@ -4449,7 +4607,7 @@ void JSViewAbstract::GetBorderRadiusByLengthMetrics(const char* key, JSRef<JSObj
     }
 }
 
-void JSViewAbstract::ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft, CalcDimension& topRight,
+bool JSViewAbstract::ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft, CalcDimension& topRight,
     CalcDimension& bottomLeft, CalcDimension& bottomRight)
 {
     if (object->HasProperty(TOP_START_PROPERTY) || object->HasProperty(TOP_END_PROPERTY) ||
@@ -4462,17 +4620,17 @@ void JSViewAbstract::ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimensi
         GetBorderRadiusByLengthMetrics(TOP_END_PROPERTY, object, topEnd);
         GetBorderRadiusByLengthMetrics(BOTTOM_START_PROPERTY, object, bottomStart);
         GetBorderRadiusByLengthMetrics(BOTTOM_END_PROPERTY, object, bottomEnd);
-        auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
-        topLeft = isRightToLeft ? topEnd : topStart;
-        topRight = isRightToLeft ? topStart : topEnd;
-        bottomLeft = isRightToLeft ? bottomEnd : bottomStart;
-        bottomRight = isRightToLeft ? bottomStart : bottomEnd;
-        return;
+        topLeft = topStart;
+        topRight = topEnd;
+        bottomLeft = bottomStart;
+        bottomRight = bottomEnd;
+        return true;
     }
     GetBorderRadius("topLeft", object, topLeft);
     GetBorderRadius("topRight", object, topRight);
     GetBorderRadius("bottomLeft", object, bottomLeft);
     GetBorderRadius("bottomRight", object, bottomRight);
+    return false;
 }
 
 void JSViewAbstract::JsBorderStyle(const JSCallbackInfo& info)

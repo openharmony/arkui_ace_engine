@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -64,34 +65,6 @@ void NavBarNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
         }
     }
     contentNode->AddChild(child);
-}
-
-std::string NavBarNode::GetTitleString() const
-{
-    auto titleBarNode = DynamicCast<TitleBarNode>(titleBarNode_);
-    CHECK_NULL_RETURN(titleBarNode, "");
-    auto title = DynamicCast<FrameNode>(titleBarNode->GetTitle());
-    CHECK_NULL_RETURN(title, "");
-    if (title->GetTag() != V2::TEXT_ETS_TAG) {
-        return "";
-    }
-    auto textLayoutProperty = title->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textLayoutProperty, "");
-    return textLayoutProperty->GetContentValue("");
-}
-
-std::string NavBarNode::GetSubtitleString() const
-{
-    auto titleBarNode = DynamicCast<TitleBarNode>(titleBarNode_);
-    CHECK_NULL_RETURN(titleBarNode, "");
-    auto subtitle = DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
-    CHECK_NULL_RETURN(subtitle, "");
-    if (subtitle->GetTag() != V2::TEXT_ETS_TAG) {
-        return "";
-    }
-    auto textLayoutProperty = subtitle->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textLayoutProperty, "");
-    return textLayoutProperty->GetContentValue("");
 }
 
 std::string NavBarNode::GetBarItemsString(bool isMenu) const
@@ -147,12 +120,18 @@ void NavBarNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFi
     auto layoutProperty = GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->ToJsonValue(json, filter);
+    
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
         return;
     }
-    json->PutExtAttr("title", GetTitleString().c_str(), filter);
-    json->PutExtAttr("subtitle", GetSubtitleString().c_str(), filter);
+    auto titleBarNode = DynamicCast<TitleBarNode>(titleBarNode_);
+    if (titleBarNode) {
+        std::string title = NavigationTitleUtil::GetTitleString(titleBarNode, GetPrevTitleIsCustomValue(false));
+        std::string subtitle = NavigationTitleUtil::GetSubtitleString(titleBarNode);
+        json->PutExtAttr("title", title.c_str(), filter);
+        json->PutExtAttr("subtitle", subtitle.c_str(), filter);
+    }
     json->PutExtAttr("menus", GetBarItemsString(true).c_str(), filter);
     json->PutExtAttr("toolBar", GetBarItemsString(false).c_str(), filter);
 }

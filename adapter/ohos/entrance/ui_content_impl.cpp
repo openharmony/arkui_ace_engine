@@ -34,6 +34,11 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+
+#if !defined(ACE_UNITTEST)
+#include "core/components_ng/base/transparent_node_detector.h"
+#endif
+
 #include "core/components_ng/property/safe_area_insets.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -282,8 +287,9 @@ public:
         double positionY = info->textFieldPositionY_;
         double height = info->textFieldHeight_;
         Rect keyboardRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
-        LOGI("UIContent OccupiedAreaChange rect:%{public}s type: %{public}d, positionY:%{public}f, height:%{public}f",
-            keyboardRect.ToString().c_str(), type, positionY, height);
+        LOGI("UIContent OccupiedAreaChange rect:%{public}s type: %{public}d, positionY:%{public}f, height:%{public}f, "
+             "instanceId_ %{public}d",
+            keyboardRect.ToString().c_str(), type, positionY, height, instanceId_);
         if (type == OHOS::Rosen::OccupiedAreaType::TYPE_INPUT) {
             auto container = Platform::AceContainer::GetContainer(instanceId_);
             CHECK_NULL_VOID(container);
@@ -533,7 +539,7 @@ public:
 
     void OnTouchOutside() const
     {
-        LOGI("window is touching outside. instance id is %{public}d", instanceId_);
+        TAG_LOGI(AceLogTag::ACE_MENU, "window is touching outside. instance id is %{public}d", instanceId_);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
         auto taskExecutor = container->GetTaskExecutor();
@@ -644,6 +650,12 @@ UIContentErrorCode UIContentImpl::InitializeInner(
     Platform::AceContainer::GetContainer(instanceId_)->SetUIExtensionSubWindow(isUIExtensionSubWindow_);
     Platform::AceContainer::GetContainer(instanceId_)->SetUIExtensionAbilityProcess(isUIExtensionAbilityProcess_);
     Platform::AceContainer::GetContainer(instanceId_)->SetUIExtensionAbilityHost(isUIExtensionAbilityHost_);
+#if !defined(ACE_UNITTEST)
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, errorCode);
+    auto rootNode = pipelineContext->GetRootElement();
+    NG::TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(rootNode);
+#endif
     return errorCode;
 }
 
@@ -751,6 +763,12 @@ void UIContentImpl::Initialize(
     auto distributedUI = std::make_shared<NG::DistributedUI>();
     uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
     Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
+#if !defined(ACE_UNITTEST)
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto rootNode = pipelineContext->GetRootElement();
+    NG::TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(rootNode);
+#endif
 }
 
 napi_value UIContentImpl::GetUINapiContext()
@@ -1812,7 +1830,9 @@ void UIContentImpl::Foreground()
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: window foreground", bundleName_.c_str(), moduleName_.c_str(),
         instanceId_);
-    PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
+    if (window_ != nullptr && window_->GetType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+        PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
+    }
     ContainerScope::UpdateRecentForeground(instanceId_);
     Platform::AceContainer::OnShow(instanceId_);
     // set the flag isForegroundCalled to be true
@@ -3050,7 +3070,8 @@ int32_t UIContentImpl::CreateCustomPopupUIExtension(
                 return;
             }
             auto popupParam = CreateCustomPopupParam(true, config);
-            auto uiExtNode = ModalUIExtension::Create(want, callbacks);
+            popupParam->SetBlockEvent(false);
+            auto uiExtNode = ModalUIExtension::Create(want, callbacks, false, false);
             auto focusHub = uiExtNode->GetFocusHub();
             if (focusHub) {
                 focusHub->SetFocusable(config.isFocusable);

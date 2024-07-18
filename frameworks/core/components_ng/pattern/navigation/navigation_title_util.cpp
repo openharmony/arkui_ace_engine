@@ -171,8 +171,8 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItemNode(
     CHECK_NULL_RETURN(menuItemNode, nullptr);
 
     int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barItemNode = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, barItemNodeId);
-    barItemNode->InitializePatternAndContext();
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, barItemNodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
     UpdateBarItemNodeWithItem(barItemNode, menuItem, isButtonEnabled);
     auto iconNode = AceType::DynamicCast<FrameNode>(barItemNode->GetChildren().front());
     InitTitleBarButtonEvent(menuItemNode, iconNode, false, menuItem, menuItem.isEnabled.value_or(true));
@@ -445,8 +445,8 @@ void NavigationTitleUtil::BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNod
 RefPtr<BarItemNode> NavigationTitleUtil::CreateBarItemNode(const bool isButtonEnabled)
 {
     int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barItemNode = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, barItemNodeId);
-    barItemNode->InitializePatternAndContext();
+    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
+        V2::BAR_ITEM_ETS_TAG, barItemNodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
     auto barItemLayoutProperty = barItemNode->GetLayoutProperty();
     CHECK_NULL_RETURN(barItemLayoutProperty, nullptr);
     barItemLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
@@ -619,5 +619,34 @@ void NavigationTitleUtil::SetAccessibility(const RefPtr<FrameNode>& node, const 
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityText(message);
     accessibilityProperty->SetAccessibilityGroup(true);
+}
+
+std::string NavigationTitleUtil::GetTitleString(const RefPtr<TitleBarNode>& titleBarNode, bool isCustom)
+{
+    if (isCustom) {
+        return "";
+    }
+    CHECK_NULL_RETURN(titleBarNode, "");
+    auto title = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
+    CHECK_NULL_RETURN(title, "");
+    if (title->GetTag() != V2::TEXT_ETS_TAG) {
+        return "";
+    }
+    auto textLayoutProperty = title->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, "");
+    return textLayoutProperty->GetContentValue("");
+}
+
+std::string NavigationTitleUtil::GetSubtitleString(const RefPtr<TitleBarNode>& titleBarNode)
+{
+    CHECK_NULL_RETURN(titleBarNode, "");
+    auto subtitle = AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
+    CHECK_NULL_RETURN(subtitle, "");
+    if (subtitle->GetTag() != V2::TEXT_ETS_TAG) {
+        return "";
+    }
+    auto textLayoutProperty = subtitle->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, "");
+    return textLayoutProperty->GetContentValue("");
 }
 } // namespace OHOS::Ace::NG

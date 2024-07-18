@@ -102,6 +102,7 @@ const Dimension DEFAULT_INDENT_SIZE3 = Dimension(7, DimensionUnit::VP);
 const Dimension DEFAULT_INDENT_SIZE4 = Dimension(8, DimensionUnit::VP);
 const Dimension DEFAULT_INDENT_SIZE5 = Dimension(9, DimensionUnit::VP);
 const Dimension DEFAULT_INDENT_SIZE6 = Dimension(10, DimensionUnit::VP);
+const float PADDING_FIVE = 5.0f;
 struct ExpectParagraphParams {
     float height = 50.f;
     float longestLine = 460.f;
@@ -741,5 +742,161 @@ HWTEST_F(TextInputAreaTest, testTextIndent024, TestSize.Level1)
     layoutProperty_->UpdateTextIndent(DEFAULT_INDENT_SIZE6);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(layoutProperty_->GetTextIndent(), DEFAULT_INDENT_SIZE6);
+}
+
+/**
+ * @tc.name: testFieldModelNg001
+ * @tc.desc: test testInput ModelNg TextInputType
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, testFieldModelNg001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+
+    /**
+     * @tc.step: step2. Set TextInputType
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateTextInputType(TextInputType::UNSPECIFIED);
+    textFieldModelNG.SetType(TextInputType::UNSPECIFIED);
+    layoutProperty->UpdateTextInputType(TextInputType::EMAIL_ADDRESS);
+    textFieldModelNG.SetType(TextInputType::UNSPECIFIED);
+    layoutProperty->ResetTextInputType();
+    textFieldModelNG.SetType(TextInputType::UNSPECIFIED);
+}
+
+/**
+ * @tc.name: testFieldModelNg002
+ * @tc.desc: test testInput ModelNg SetContentType
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, testFieldModelNg002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+
+    /**
+     * @tc.step: step2. Set SetContentType
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateTextContentType(TextContentType::USER_NAME);
+    textFieldModelNG.SetContentType(TextContentType::USER_NAME);
+    layoutProperty->UpdateTextContentType(TextContentType::PERSON_FIRST_NAME);
+    textFieldModelNG.SetContentType(TextContentType::USER_NAME);
+    layoutProperty->ResetTextContentType();
+    textFieldModelNG.SetContentType(TextContentType::PERSON_FIRST_NAME);
+}
+
+/**
+ * @tc.name: testFieldModelNg003
+ * @tc.desc: test testInput ModelNg SetPasswordIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, testFieldModelNg003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+
+    /**
+     * @tc.step: step2. Set SetPasswordIcon
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    PasswordIcon passwordIcon;
+    textFieldModelNG.SetPasswordIcon(passwordIcon);
+    passwordIcon.showResult = HELLO_TEXT;
+    passwordIcon.hideResult = HELLO_TEXT;
+    textFieldModelNG.SetPasswordIcon(passwordIcon);
+    std::function<void()> buildFunc;
+    textFieldModelNG.SetCustomKeyboard(std::move(buildFunc), true);
+}
+
+/**
+ * @tc.name: testFieldModelNg004
+ * @tc.desc: test testInput ModelNg SetPlaceholderFont
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, testFieldModelNg004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+
+    /**
+     * @tc.step: step2. Set SetPlaceholderFont
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    Font font;
+    textFieldModelNG.SetPlaceholderFont(frameNode, font);
+    font.fontSize = Dimension(2);
+    font.fontStyle = Ace::FontStyle::NORMAL;
+    font.fontWeight = FontWeight::W200;
+    std::vector<std::string> families = { "cursive" };
+    font.fontFamilies = families;
+    textFieldModelNG.SetPlaceholderFont(frameNode, font);
+    textFieldModelNG.GetOrCreateController(frameNode);
+}
+
+/**
+ * @tc.name: testFieldModelNg005
+ * @tc.desc: test testInput ModelNg SetTextFieldText
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, testFieldModelNg005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text area.
+     */
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+
+    /**
+     * @tc.step: step2. Set SetTextFieldText
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    textFieldModelNG.SetTextFieldText(frameNode, DEFAULT_TEXT);
+    RefPtr<TextFieldPattern> pattern = frameNode->GetPattern<TextFieldPattern>();
+    EXPECT_NE(pattern, nullptr);
+    pattern->contentController_->SetTextValue(TEXTCASE_TEXT);
+    textFieldModelNG.SetTextFieldText(frameNode, TEXTCASE_TEXT);
+    textFieldModelNG.StopTextFieldEditing(frameNode);
+    textFieldModelNG.ResetNumberOfLines(frameNode);
+    textFieldModelNG.GetMargin(frameNode);
+    textFieldModelNG.GetPadding(frameNode);
+    textFieldModelNG.SetDefaultPadding();
+    textFieldModelNG.GetPadding(frameNode);
+    PaddingProperty margins;
+    margins.left = CalcLength(PADDING_FIVE);
+    margins.right = CalcLength(PADDING_FIVE);
+    margins.top = CalcLength(PADDING_FIVE);
+    margins.bottom = CalcLength(PADDING_FIVE);
+    textFieldModelNG.SetMargin(frameNode, margins);
+    textFieldModelNG.GetMargin(frameNode);
 }
 } // namespace OHOS::Ace::NG

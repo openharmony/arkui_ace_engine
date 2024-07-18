@@ -20,9 +20,17 @@
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
 
 namespace OHOS::Ace::NG {
-
-BarItemNode::BarItemNode(const std::string& tag, int32_t nodeId)
-    : FrameNode(tag, nodeId, MakeRefPtr<BarItemPattern>()), isMoreItemNode_(false)
-{}
+RefPtr<BarItemNode> BarItemNode::GetOrCreateBarItemNode(
+    const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
+{
+    auto frameNode = GetFrameNode(tag, nodeId);
+    if (frameNode) {
+        return AceType::DynamicCast<BarItemNode>(frameNode);
+    }
+    auto barItemNode = AceType::MakeRefPtr<BarItemNode>(tag, nodeId, MakeRefPtr<BarItemPattern>());
+    barItemNode->InitializePatternAndContext();
+    ElementRegister::GetInstance()->AddUINode(barItemNode);
+    return barItemNode;
+}
 
 } // namespace OHOS::Ace::NG
