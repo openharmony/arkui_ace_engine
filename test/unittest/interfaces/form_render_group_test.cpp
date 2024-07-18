@@ -513,11 +513,11 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_022, TestSize.Level1)
     OHOS::AppExecFwk::FormJsInfo formJsInfo;
     formJsInfo.formId = 1;
     std::string compId1 = "comp1";
-    want.SetStringParam(FORM_RENDERER_COMP_ID, compId1);
+    want.SetParam(FORM_RENDERER_COMP_ID, compId1);
     group->AddForm(want, formJsInfo);
     formJsInfo.formId = 2;
     std::string compId2 = "comp2";
-    want.SetStringParam(FORM_RENDERER_COMP_ID, compId2);
+    want.SetParam(FORM_RENDERER_COMP_ID, compId2);
     group->AddForm(want, formJsInfo);
     compIdPair = group->GetOrderedAndCurrentCompIds();
     EXPECT_EQ(2, compIdPair.first.size());
@@ -548,11 +548,11 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_023, TestSize.Level1)
     OHOS::AppExecFwk::FormJsInfo formJsInfo;
     formJsInfo.formId = 1;
     std::string compId1 = "comp1";
-    want.SetStringParam(FORM_RENDERER_COMP_ID, compId1);
+    want.SetParam(FORM_RENDERER_COMP_ID, compId1);
     group->AddForm(want, formJsInfo);
     formJsInfo.formId = 2;
     std::string compId2 = "comp2";
-    want.SetStringParam(FORM_RENDERER_COMP_ID, compId2);
+    want.SetParam(FORM_RENDERER_COMP_ID, compId2);
     group->AddForm(want, formJsInfo);
     std::pair<std::vector<std::string>, std::string> compIdPair = group->GetOrderedAndCurrentCompIds();
     group->DeleteForm();
