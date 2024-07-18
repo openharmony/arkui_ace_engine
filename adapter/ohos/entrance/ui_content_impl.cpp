@@ -1828,9 +1828,9 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
 
 void UIContentImpl::Foreground()
 {
-    LOGI("[%{public}s][%{public}s][%{public}d][%{public}u]: window foreground",
-        bundleName_.c_str(), moduleName_.c_str(), instanceId_, window_->GetType());
-    if (window_->GetType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
+    LOGI("[%{public}s][%{public}s][%{public}d]: window foreground", bundleName_.c_str(), moduleName_.c_str(),
+        instanceId_);
+    if (window_ != nullptr && window_->GetType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
     }
     ContainerScope::UpdateRecentForeground(instanceId_);
