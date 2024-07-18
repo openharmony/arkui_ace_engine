@@ -64,6 +64,7 @@ PlaybackStatus ConvertToPlaybackStatus(int32_t status)
 struct MediaPlayerCallback : public Media::PlayerCallback {
 public:
     using PositionUpdatedEvent = std::function<void(uint32_t)>;
+    using SeekDoneEvent = std::function<void(uint32_t)>;
     using StateChangedEvent = std::function<void(PlaybackStatus)>;
     using CommonEvent = std::function<void()>;
 
@@ -90,7 +91,9 @@ public:
         ContainerScope scope(instanceId_);
         switch (type) {
             case OHOS::Media::INFO_TYPE_SEEKDONE:
-                if (positionUpdatedEvent_) {
+                if (seekDoneEvent_) {
+                    seekDoneEvent_(extra / MILLISECONDS_TO_SECONDS);
+                } else if (positionUpdatedEvent_) {
                     positionUpdatedEvent_(extra / MILLISECONDS_TO_SECONDS);
                 }
                 break;
@@ -178,8 +181,14 @@ public:
         startRenderFrameEvent_ = std::move(startRenderFrameEvent);
     }
 
+    void SetSeekDoneEvent(SeekDoneEvent&& seekDoneEvent)
+    {
+        seekDoneEvent_ = std::move(seekDoneEvent);
+    }
+
 private:
     PositionUpdatedEvent positionUpdatedEvent_;
+    SeekDoneEvent seekDoneEvent_;
     CommonEvent endOfStreamEvent_;
     StateChangedEvent stateChangedEvent_;
     CommonEvent errorEvent_;
