@@ -50,6 +50,7 @@
 #endif
 #include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/recycle_view/recycle_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/web/itouch_event_callback.h"
 #include "core/components_ng/property/safe_area_insets.h"
@@ -709,6 +710,11 @@ public:
         return navigationMgr_;
     }
 
+    const std::unique_ptr<RecycleManager>& GetRecycleManager() const
+    {
+        return recycleManager_;
+    }
+
     RefPtr<PrivacySensitiveManager> GetPrivacySensitiveManager() const
     {
         return privacySensitiveManager_;
@@ -1068,6 +1074,7 @@ private:
     int32_t preNodeId_ = -1;
 
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
+    std::unique_ptr<RecycleManager> recycleManager_ = std::make_unique<RecycleManager>();
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
     std::vector<std::shared_ptr<ITouchEventCallback>> listenerVector_;
     bool customTitleSettedShow_ = true;
