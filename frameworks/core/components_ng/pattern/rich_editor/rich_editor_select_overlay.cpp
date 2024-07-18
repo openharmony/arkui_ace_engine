@@ -399,6 +399,17 @@ void RichEditorSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, To
     BaseTextSelectOverlay::OnHandleGlobalTouchEvent(sourceType, touchType);
 }
 
+void RichEditorSelectOverlay::OnHandleLevelModeChanged(HandleLevelMode mode)
+{
+    if (handleLevelMode_ != mode && mode == HandleLevelMode::OVERLAY) {
+        auto pattern = GetPattern<RichEditorPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->CalculateHandleOffsetAndShowOverlay();
+        UpdateAllHandlesOffset();
+    }
+    BaseTextSelectOverlay::OnHandleLevelModeChanged(mode);
+}
+
 std::optional<SelectOverlayInfo> RichEditorSelectOverlay::GetSelectOverlayInfo()
 {
     auto manager = GetManager<SelectContentOverlayManager>();
