@@ -222,8 +222,15 @@ public:
     }
     bool CanReplaceSwiperItem()
     {
-        if (!swiperItem_.Upgrade()) {
+        auto listItemPattern = swiperItem_.Upgrade();
+        if (!listItemPattern) {
             canReplaceSwiperItem_ = true;
+            return canReplaceSwiperItem_;
+        }
+        auto host = listItemPattern->GetHost();
+        if (!host || !host->IsOnMainTree()) {
+            canReplaceSwiperItem_ = true;
+            return canReplaceSwiperItem_;
         }
         return canReplaceSwiperItem_;
     }
