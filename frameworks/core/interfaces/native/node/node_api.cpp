@@ -1769,17 +1769,6 @@ void SetLazyItemIndexer(ArkUIVMContext vmContext, ArkUINodeHandle nodePtr, int i
     }
 }
 
-ArkUI_Int32 GetContextByNode(ArkUINodeHandle node)
-{
-    ArkUI_Int32 instanceId = -1;
-    FrameNode* currentNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(currentNode, instanceId);
-    auto pipeline = currentNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, instanceId);
-    instanceId = pipeline->GetInstanceId();
-    return instanceId;
-}
-
 const ArkUIBasicAPI* GetBasicAPI()
 {
     /* clang-format off */
