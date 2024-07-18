@@ -3622,7 +3622,8 @@ class CustomDialogContentComponent extends ViewPU {
                             const item = _item;
                             this.buildButtonWithDivider.bind(this)(index, parent ? parent : this);
                         };
-                        this.forEachUpdateFunction(elmtId, this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT),
+                        this.forEachUpdateFunction(elmtId, this.buttons.length === HORIZON_BUTTON_MAX_COUNT ?
+                        this.buttons.reverse() : this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT),
                             forEachItemGenFunction, (item) => item.value.toString(), true, false);
                     }, ForEach);
                     ForEach.pop();
@@ -3958,7 +3959,7 @@ export class LoadingDialog extends ViewPU {
                         fontSizeScale: this.__fontSizeScale,
                         minContentHeight: this.__minContentHeight,
                     }, undefined, elmtId, () => {
-                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 1569 });
+                    }, { page: 'library/src/main/ets/components/mainpage/dialog.ets', line: 1570 });
                     ViewPU.create(componentCall);
                     let paramsLambda = () => {
                         return {
