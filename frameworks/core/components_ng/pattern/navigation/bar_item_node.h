@@ -28,8 +28,13 @@ class ACE_EXPORT BarItemNode : public FrameNode {
     DECLARE_ACE_TYPE(BarItemNode, FrameNode)
 public:
     BarItemNode(const std::string& tag, int32_t nodeId);
+    BarItemNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
+        : FrameNode(tag, nodeId, pattern), isMoreItemNode_(false)
+    {}
     ~BarItemNode() override = default;
 
+    static RefPtr<BarItemNode> GetOrCreateBarItemNode(
+        const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     bool IsAtomicNode() const override
     {
         return false;

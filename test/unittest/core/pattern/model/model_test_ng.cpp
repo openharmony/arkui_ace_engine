@@ -118,6 +118,8 @@ HWTEST_F(ModelTestNg, ModelViewNgTest001, TestSize.Level1)
     auto modelPattern = modelViewNG.frameNode_.Upgrade()->GetPattern<ModelPattern>();
     ASSERT_NE(modelPattern, nullptr);
 
+    modelPattern->modelAdapter_->OnPaint3D(modelPaintProperty);
+
     // ToJsonValue Before Set Values
     const InspectorFilter filter;
     auto json = JsonUtil::Create(true);
@@ -147,9 +149,6 @@ HWTEST_F(ModelTestNg, ModelViewNgTest001, TestSize.Level1)
     EXPECT_EQ(modelPaintProperty->GetModelShaderInputBufferValue(), buffer);
     modelPattern->modelAdapter_->UpdateShaderInputBuffers(modelPaintProperty);
     EXPECT_EQ(modelViewNG.GetShaderInputBuffer(), modelPaintProperty->propModelShaderInputBuffer_);
-
-    FrameNode* frameNode = nullptr;
-    modelViewNG.AddShaderInputBuffer(frameNode, buffer);
     // Buffer test end
 
     // CustomRender
@@ -165,11 +164,12 @@ HWTEST_F(ModelTestNg, ModelViewNgTest001, TestSize.Level1)
     // Add Same Path
     modelViewNG.AddShaderImageTexture("/data/local");
     EXPECT_EQ(modelPaintProperty->GetModelImageTexturePathsValue().back(), "/data/local");
+    modelViewNG.AddShaderImageTexture("/data/local1");
 
     // case 2 frameNode == nullptr
     modelViewNG.frameNode_.Reset();
-    modelViewNG.AddShaderImageTexture("/data/local1");
-    EXPECT_EQ(modelPaintProperty->GetModelImageTexturePathsValue().size(), 1);
+    modelViewNG.AddShaderImageTexture("/data/local2");
+    EXPECT_EQ(modelPaintProperty->GetModelImageTexturePathsValue().size(), 2);
     modelViewNG.GetShaderInputBuffer();
 
     modelViewNG.AddCustomRender(desc);
@@ -195,6 +195,17 @@ HWTEST_F(ModelTestNg, ModelViewNgTest002, TestSize.Level1)
     // Get ModelPattern
     auto modelPattern = frameNode->GetPattern<ModelPattern>();
     ASSERT_NE(modelPattern, nullptr);
+
+    std::shared_ptr<OHOS::Render3D::ShaderInputBuffer> buffer = nullptr;
+    buffer = std::make_shared<OHOS::Render3D::ShaderInputBuffer>();
+    int length = 3; // 3: buffer length
+
+    ASSERT_TRUE(buffer->Alloc(length));
+    for (uint32_t i = 0; i < static_cast<uint32_t>(length); i++) {
+        buffer->Update(1, i);
+    }
+    FrameNode* frameNode1 = nullptr;
+    modelViewNG.AddShaderInputBuffer(frameNode1, buffer);
 
     // Create SceneAdapter
     modelPattern->modelAdapter_->sceneAdapter_ = std::make_shared<TestSceneAdapter>();
@@ -341,6 +352,10 @@ HWTEST_F(ModelTestNg, ModelViewNgTest004, TestSize.Level1)
     layoutWrapper->skipMeasureContent_ = std::make_optional(true);
     DirtySwapConfig config;
     EXPECT_FALSE(modelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+    config.skipMeasure = true;
+    EXPECT_FALSE(modelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
+    config.skipLayout = true;
+    EXPECT_FALSE(modelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
 
     // MarkDirtyNode
     modelPattern->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -386,15 +401,72 @@ HWTEST_F(ModelTestNg, ModelViewNgTest005, TestSize.Level1)
     EXPECT_EQ(json1->GetString("renderWidth"), "1.000000");
     EXPECT_EQ(json1->GetString("renderHeight"), "1.000000");
     EXPECT_EQ(json1->GetString("shaderInputBuffer"), "1.000000 1.000000 1.000000 ");
-    EXPECT_EQ(json1->GetString("shaderImageTexture"), "/data/local ");
+    EXPECT_EQ(json1->GetString("shaderImageTexture"), "/data/local /data/local1 ");
     EXPECT_EQ(json1->GetString("modelType"), "ModelType.SURFACE");
     EXPECT_EQ(json1->GetString("environment"), testPath);
     EXPECT_EQ(json1->GetString("customRender"), testPath);
     EXPECT_EQ(json1->GetString("shader"), testPath);
     EXPECT_EQ(json1->GetString("scene"), testPath);
 
-    modelPattern->modelAdapter_->Deinit();
+    modelPattern->modelAdapter_->surfaceType_ = Render3D::SurfaceType::SURFACE_TEXTURE;
+    const InspectorFilter filter2;
+    auto json2 = JsonUtil::Create(true);
+    modelPattern->ToJsonValue(json2, filter2);
+
+    modelPattern->modelAdapter_->surfaceType_ = Render3D::SurfaceType::UNDEFINE;
+    const InspectorFilter filter3;
+    auto json3 = JsonUtil::Create(true);
+    modelPattern->ToJsonValue(json3, filter3);
+
+    modelPattern->modelAdapter_->surfaceType_ = Render3D::SurfaceType::SURFACE_BUFFER;
+    const InspectorFilter filter4;
+    auto json4 = JsonUtil::Create(true);
+    modelPattern->ToJsonValue(json4, filter4);
+
+    auto ftr = modelPattern->modelAdapter_->Deinit();
+    if (ftr.valid()) {
+        ftr.get();
+    }
     Render3D::GraphicsTask::GetInstance().Stop();
+}
+
+/**
+ * @tc.name: ModelViewNgTest006
+ * @tc.desc: Test ModelTouchHandler Functions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ModelTestNg, ModelViewNgTest006, TestSize.Level1)
+{
+    ModelTouchHandler modelTouchHandler;
+    TouchEventInfo touchEventInfo("onTouch");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.touchType_ = TouchType::DOWN;
+    touchLocationInfo.localLocation_ = Offset(1.0f, 1.0f);
+    touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
+    EXPECT_EQ(modelTouchHandler.HandleTouchEvent(touchEventInfo, 1, 1), false);
+
+    touchEventInfo.changedTouches_.clear();
+    touchLocationInfo.touchType_ = TouchType::MOVE;
+    touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
+    EXPECT_EQ(modelTouchHandler.HandleTouchEvent(touchEventInfo, 1, 1), false);
+
+    modelTouchHandler.isHandleCameraMove_ = false;
+    touchEventInfo.changedTouches_.clear();
+    touchLocationInfo.touchType_ = TouchType::UP;
+    touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
+    EXPECT_EQ(modelTouchHandler.HandleTouchEvent(touchEventInfo, 1, 1), false);
+
+    touchEventInfo.changedTouches_.clear();
+    touchLocationInfo.touchType_ = TouchType::CANCEL;
+    touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
+    EXPECT_EQ(modelTouchHandler.HandleTouchEvent(touchEventInfo, 1, 1), true);
+
+    touchEventInfo.changedTouches_.clear();
+    touchLocationInfo.touchType_ = TouchType::UNKNOWN;
+    touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
+    EXPECT_EQ(modelTouchHandler.HandleTouchEvent(touchEventInfo, 1, 1), true);
+    EXPECT_EQ(modelTouchHandler.HandleTouchEvent(touchEventInfo, 1, 0), true);
+    EXPECT_EQ(modelTouchHandler.HandleTouchEvent(touchEventInfo, 0, 0), true);
 }
 } // namespace OHOS::Ace::NG
 

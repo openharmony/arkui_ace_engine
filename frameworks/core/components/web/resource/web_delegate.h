@@ -792,6 +792,8 @@ public:
         richtextData_ = richtextData;
     }
     void HandleAccessibilityHoverEvent(int32_t x, int32_t y);
+    void NotifyAutoFillViewData(const std::string& jsonStr);
+    void HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);

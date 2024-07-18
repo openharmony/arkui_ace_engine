@@ -279,6 +279,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
             CHECK_NULL_VOID(video);
             ContainerScope scope(video->instanceId_);
             video->OnCurrentTimeChange(currentPos);
+            video->StartUpdateImageAnalyzer();
         }, "ArkUIVideoCurrentTimeChange");
     };
 

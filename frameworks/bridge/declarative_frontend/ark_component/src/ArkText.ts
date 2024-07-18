@@ -745,6 +745,20 @@ class TextControllerModifier extends ModifierWithKey<TextOptions> {
   }
 }
 
+class TextEditMenuOptionsModifier extends ModifierWithKey<EditMenuOptions> {
+  constructor(value: EditMenuOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textEditMenuOptions');
+  applyPeer(node: KNode, reset: boolean) {
+    if (reset) {
+      getUINativeModule().text.resetSelectionMenuOptions(node);
+    } else {
+      getUINativeModule().text.setSelectionMenuOptions(node, this.value);
+    }
+  }
+}
+
 class ArkTextComponent extends ArkComponent implements TextAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -919,6 +933,11 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   onTextSelectionChange(callback: (selectionStart: number, selectionEnd: number) => void) {
     modifierWithKey(this._modifiersWithKeys, TextOnTextSelectionChangeModifier.identity,
       TextOnTextSelectionChangeModifier, callback);
+    return this;
+  }
+  editMenuOptions(value: EditMenuOptions) {
+    modifierWithKey(this._modifiersWithKeys, TextEditMenuOptionsModifier.identity,
+      TextEditMenuOptionsModifier, value);
     return this;
   }
 }

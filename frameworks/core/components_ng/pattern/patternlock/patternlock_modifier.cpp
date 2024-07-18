@@ -62,6 +62,7 @@ constexpr int32_t ANIMATABLE_POINT_COUNT = 2;
 constexpr float DIAMETER_TO_RADIUS = 0.5f;
 constexpr float GRADUAL_CHANGE_POINT = 0.5;
 constexpr int32_t MAX_ALPHA = 255;
+constexpr double EPSILON = 0.01f;
 } // namespace
 
 PatternLockCell::PatternLockCell(int32_t column, int32_t row)
@@ -350,7 +351,8 @@ void PatternLockModifier::AddCanceledLineToPath(RSPath& path, const OffsetF& off
     OffsetF pointBegin =
         GetCircleCenterByXY(offset, choosePoint_[count - 1].GetColumn(), choosePoint_[count - 1].GetRow());
     OffsetF pointEnd = GetCanceledLineTailPoint();
-    if (pointEnd != pointBegin) {
+    if (!NearEqual(pointBegin.GetX(), pointEnd.GetX(), EPSILON)
+        || !NearEqual(pointBegin.GetY(), pointEnd.GetY(), EPSILON)) {
         path.MoveTo(pointBegin.GetX(), pointBegin.GetY());
         path.LineTo(pointEnd.GetX(), pointEnd.GetY());
     }

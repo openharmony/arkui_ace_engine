@@ -51,6 +51,7 @@ public:
     uint64_t GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty);
     TouchEventInfo CreateTouchEventInfo(TouchType touchType, Offset location);
     static RefPtr<ThemeConstants> CreateThemeConstants(const std::string& patternName);
+    void FlushExpandSafeAreaTask();
 
     AssertionResult IsEqual(const SizeF& actual, const SizeF& expected)
     {

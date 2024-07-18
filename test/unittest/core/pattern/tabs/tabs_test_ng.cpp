@@ -558,25 +558,6 @@ HWTEST_F(TabsTestNg, InitScrollable001, TestSize.Level1)
 }
 
 /**
-* @tc.name: DumpAdvanceInfo005
-* @tc.desc: test AddTabBarItem
-* @tc.type: FUNC
-*/
-HWTEST_F(TabsTestNg, DumpAdvanceInfo005, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-    tabBarPattern_->DumpAdvanceInfo();
-    tabBarPattern_->axis_ = Axis::VERTICAL;
-    tabBarPattern_->DumpAdvanceInfo();
-    tabBarPattern_->axis_ = Axis::FREE;
-    tabBarPattern_->DumpAdvanceInfo();
-    tabBarPattern_->axis_ = Axis::NONE;
-    tabBarPattern_->DumpAdvanceInfo();
-}
-
-/**
 * @tc.name: ProvideRestoreInfo001
 * @tc.desc: test AddTabBarItem
 * @tc.type: FUNC

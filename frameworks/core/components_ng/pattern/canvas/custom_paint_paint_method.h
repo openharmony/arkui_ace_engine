@@ -298,9 +298,9 @@ public:
     void SetTransformMatrix(const TransformParam& param);
     void TransformMatrix(const TransformParam& param);
     void TranslateMatrix(double tx, double ty);
-    void DrawSvgImage(RefPtr<SvgDomBase> svgDom, const Ace::CanvasImage& canvasImage,
-        const ImageFit& imageFit);
+    void DrawSvgImage(RefPtr<SvgDomBase> svgDom, const Ace::CanvasImage& canvasImage, const ImageFit& imageFit);
     void DrawImage(const Ace::CanvasImage& canvasImage, double width, double height);
+    TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
 
 protected:
     std::optional<double> CalcTextScale(double maxIntrinsicWidth, std::optional<double> maxWidth);
@@ -309,6 +309,8 @@ protected:
     void UpdateLineDash(RSPen& pen);
     void UpdatePaintShader(RSPen* pen, RSBrush* brush, const Ace::Gradient& gradient);
     void UpdatePaintShader(const Ace::Pattern& pattern, RSPen* pen, RSBrush* brush);
+    bool UpdateParagraph(const std::string& text, bool isStroke, bool hasShadow = false);
+    void UpdateTextStyleForeground(bool isStroke, RSTextStyle& txtStyle, bool hasShadow);
     void InitPaintBlend(RSBrush& brush);
     void InitPaintBlend(RSPen& pen);
     std::shared_ptr<RSShaderEffect> MakeConicGradient(RSBrush* brush, const Ace::Gradient& gradient);
@@ -362,10 +364,6 @@ protected:
     virtual void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) = 0;
     virtual void ImageObjFailed() = 0;
     std::shared_ptr<RSImage> GetImage(const std::string& src);
-#ifndef ACE_UNITTEST
-    void GetSvgRect(const sk_sp<SkSVGDOM>& skiaDom, const Ace::CanvasImage& canvasImage,
-        RSRect* srcRect, RSRect* dstRect);
-#endif
     void PaintShadow(const RSPath& path, const Shadow& shadow, const RSBrush* brush = nullptr,
         const RSPen* pen = nullptr, RSSaveLayerOps* slo = nullptr);
     void PaintImageShadow(const RSPath& path, const Shadow& shadow, const RSBrush* brush = nullptr,
@@ -378,6 +376,7 @@ protected:
 #ifndef ACE_UNITTEST
     double GetFontBaseline(const Rosen::Drawing::FontMetrics& fontMetrics, TextBaseline baseline) const;
     double GetFontAlign(TextAlign align, std::unique_ptr<RSParagraph>& paragraph) const;
+    virtual void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle) = 0;
 #endif
     void ResetStates();
     void DrawImageInternal(const Ace::CanvasImage& canvasImage, const std::shared_ptr<RSImage>& image);
@@ -392,7 +391,6 @@ protected:
     bool smoothingEnabled_ = true;
     std::string smoothingQuality_ = "low";
     bool antiAlias_ = false;
-    std::function<void(RSCanvas*, double, double)> canvasCallback_ = nullptr;
     std::unique_ptr<RSParagraph> paragraph_;
 
     WeakPtr<PipelineBase> context_;

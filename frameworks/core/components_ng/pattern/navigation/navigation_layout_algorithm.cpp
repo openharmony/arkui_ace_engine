@@ -361,9 +361,18 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
     }
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
     bool modeChange = navigationPattern->GetNavigationMode() != usrNavigationMode;
-    bool doModeSwitchAnimationInAnotherTask = modeChange && !hostNode->IsOnModeSwitchAnimation();
-    // First time layout, no need to do animation
-    doModeSwitchAnimationInAnotherTask &= (navigationPattern->GetNavigationMode() != INITIAL_MODE);
+    bool isFirstTimeLayout = (navigationPattern->GetNavigationMode() == INITIAL_MODE);
+    if (isFirstTimeLayout) {
+        navigationPattern->UpdateFoldState();  // Init fold state
+    }
+    bool doModeSwitchAnimationInAnotherTask = modeChange && !isFirstTimeLayout && !hostNode->IsOnModeSwitchAnimation();
+    if (doModeSwitchAnimationInAnotherTask) {
+        // If screen-fold-state changed, no need to do mode switch animation.
+        doModeSwitchAnimationInAnotherTask =
+            !navigationPattern->IsFoldStateChange() && doModeSwitchAnimationInAnotherTask;
+        // Only when navigation-mode changed, it is necessary to update the current screen-fold-state.
+        navigationPattern->UpdateFoldState();
+    }
     if (!doModeSwitchAnimationInAnotherTask) {
         navigationPattern->SetNavigationMode(usrNavigationMode);
         navigationPattern->SetNavigationModeChange(modeChange);

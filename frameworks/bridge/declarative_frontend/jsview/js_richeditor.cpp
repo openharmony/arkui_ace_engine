@@ -328,8 +328,15 @@ JSRef<JSObject> JSRichEditor::CreateJSSpanResultObject(const ResultObject& resul
     spanPositionObj->SetPropertyObject("spanRange", spanRangeArray);
     resultObj->SetPropertyObject("offsetInSpan", offsetArray);
     resultObj->SetPropertyObject("spanPosition", spanPositionObj);
+    SetJSSpanResultObject(resultObj, resultObject);
+    return resultObj;
+}
+
+void JSRichEditor::SetJSSpanResultObject(JSRef<JSObject>& resultObj, const ResultObject& resultObject)
+{
     if (resultObject.type == SelectSpanType::TYPESPAN) {
         resultObj->SetProperty<std::string>("value", resultObject.valueString);
+        resultObj->SetProperty<std::string>("previewText", resultObject.previewText);
         resultObj->SetPropertyObject("textStyle", CreateJSTextStyleResult(resultObject.textStyle));
         resultObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(resultObject.textStyle));
     } else if (resultObject.type == SelectSpanType::TYPESYMBOLSPAN) {
@@ -349,8 +356,6 @@ JSRef<JSObject> JSRichEditor::CreateJSSpanResultObject(const ResultObject& resul
         }
         resultObj->SetPropertyObject("imageStyle", CreateJSImageStyleResult(resultObject.imageStyle));
     }
-
-    return resultObj;
 }
 
 JSRef<JSVal> JSRichEditor::CreateJSSelection(const SelectionInfo& selectInfo)
@@ -674,38 +679,44 @@ JSRef<JSArray> JSRichEditor::CreateJSDeleteSpans(const NG::RichEditorDeleteValue
         spanPositionObj->SetProperty<int32_t>("spanIndex", it.GetSpanIndex());
         spanResultObj->SetPropertyObject("spanPosition", spanPositionObj);
         spanResultObj->SetPropertyObject("offsetInSpan", offsetInSpan);
-        switch (it.GetType()) {
-            case NG::SpanResultType::TEXT: {
-                JSRef<JSObject> textStyleObj = JSRef<JSObject>::New();
-                CreateTextStyleObj(textStyleObj, it);
-                spanResultObj->SetProperty<std::string>("value", it.GetValue());
-                spanResultObj->SetPropertyObject("textStyle", textStyleObj);
-                spanResultObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(it.GetTextStyle()));
-                break;
-            }
-            case NG::SpanResultType::IMAGE: {
-                JSRef<JSObject> imageStyleObj = JSRef<JSObject>::New();
-                CreateImageStyleObj(imageStyleObj, spanResultObj, it);
-                JSRef<JSObject> layoutStyleObj = JSRef<JSObject>::New();
-                layoutStyleObj->SetProperty<std::string>("borderRadius", it.GetBorderRadius());
-                layoutStyleObj->SetProperty<std::string>("margin", it.GetMargin());
-                imageStyleObj->SetPropertyObject("layoutStyle", layoutStyleObj);
-                spanResultObj->SetPropertyObject("imageStyle", imageStyleObj);
-                break;
-            }
-            case NG::SpanResultType::SYMBOL: {
-                spanResultObj->SetProperty<std::string>("value", it.GetValueString());
-                spanResultObj->SetPropertyObject(
-                    "symbolSpanStyle", CreateJSSymbolSpanStyleResult(it.GetSymbolSpanStyle()));
-                spanResultObj->SetPropertyObject("valueResource", CreateJSValueResource(it.GetValueResource()));
-                break;
-            }
-            default:
-                break;
-        }
+        SetJSDeleteSpan(spanResultObj, it);
         richEditorDeleteSpans->SetValueAt(index++, spanResultObj);
     }
     return richEditorDeleteSpans;
+}
+
+void JSRichEditor::SetJSDeleteSpan(JSRef<JSObject>& spanResultObj, const NG::RichEditorAbstractSpanResult& it)
+{
+    switch (it.GetType()) {
+        case NG::SpanResultType::TEXT: {
+            JSRef<JSObject> textStyleObj = JSRef<JSObject>::New();
+            CreateTextStyleObj(textStyleObj, it);
+            spanResultObj->SetProperty<std::string>("value", it.GetValue());
+            spanResultObj->SetProperty<std::string>("previewText", it.GetPreviewText());
+            spanResultObj->SetPropertyObject("textStyle", textStyleObj);
+            spanResultObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(it.GetTextStyle()));
+            break;
+        }
+        case NG::SpanResultType::IMAGE: {
+            JSRef<JSObject> imageStyleObj = JSRef<JSObject>::New();
+            CreateImageStyleObj(imageStyleObj, spanResultObj, it);
+            JSRef<JSObject> layoutStyleObj = JSRef<JSObject>::New();
+            layoutStyleObj->SetProperty<std::string>("borderRadius", it.GetBorderRadius());
+            layoutStyleObj->SetProperty<std::string>("margin", it.GetMargin());
+            imageStyleObj->SetPropertyObject("layoutStyle", layoutStyleObj);
+            spanResultObj->SetPropertyObject("imageStyle", imageStyleObj);
+            break;
+        }
+        case NG::SpanResultType::SYMBOL: {
+            spanResultObj->SetProperty<std::string>("value", it.GetValueString());
+            spanResultObj->SetPropertyObject(
+                "symbolSpanStyle", CreateJSSymbolSpanStyleResult(it.GetSymbolSpanStyle()));
+            spanResultObj->SetPropertyObject("valueResource", CreateJSValueResource(it.GetValueResource()));
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 void JSRichEditor::SetChangeTextSpans(
@@ -748,6 +759,7 @@ void JSRichEditor::SetTextChangeSpanResult(JSRef<JSObject>& resultObj,
     JSRef<JSObject> textStyleObj = JSRef<JSObject>::New();
     CreateTextStyleObj(textStyleObj, spanResult);
     resultObj->SetProperty<std::string>("value", spanResult.GetValue());
+    resultObj->SetProperty<std::string>("previewText", spanResult.GetPreviewText());
     resultObj->SetPropertyObject("textStyle", textStyleObj);
     resultObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(spanResult.GetTextStyle()));
 }

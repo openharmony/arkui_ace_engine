@@ -412,6 +412,8 @@ void FormPattern::UpdateStaticCard()
     RemoveFrsNode();
     // 3. Release renderer obj
     ReleaseRenderer();
+    // 4. clear form node ChildTree register flag.  can do register again
+    UnregisterAccessibility();
 }
 
 void FormPattern::DeleteImageNodeAfterRecover(bool needHandleCachedClick)
@@ -1294,12 +1296,20 @@ void FormPattern::InitFormManagerDelegate()
                 }, "ArkUIFormGetRectRelativeToWindow");
         });
 
-    formManagerBridge_->AddEnableFormCallback(
-        [weak = WeakClaim(this), instanceID](const bool enable) {
+    formManagerBridge_->AddEnableFormCallback([weak = WeakClaim(this), instanceID](const bool enable) {
+        ContainerScope scope(instanceID);
+        auto formPattern = weak.Upgrade();
+        CHECK_NULL_VOID(formPattern);
+        auto host = formPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto uiTaskExecutor =
+            SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask([weak, instanceID, enable] {
             ContainerScope scope(instanceID);
             auto formPattern = weak.Upgrade();
             CHECK_NULL_VOID(formPattern);
             formPattern->HandleEnableForm(enable);
+            }, "ArkUIFormHandleEnableForm");
         });
 }
 
@@ -1347,6 +1357,9 @@ void FormPattern::AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node
         != formChildrenNodeMap_.end()) {
         TAG_LOGI(AceLogTag::ACE_FORM, "surfaceNode: %{public}s setOpacity:0", std::to_string(node->GetId()).c_str());
         externalRenderContext->SetOpacity(TRANSPARENT_VAL);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_FORM, "surfaceNode: %{public}s setOpacity:1", std::to_string(node->GetId()).c_str());
+        externalRenderContext->SetOpacity(NON_TRANSPARENT_VAL);
     }
 
     auto renderContext = host->GetRenderContext();
@@ -1870,5 +1883,14 @@ void FormPattern::UpdateChildNodeOpacity(FormChildNodeType formChildNodeType, do
         CHECK_NULL_VOID(renderContext);
         renderContext->OnOpacityUpdate(opacity);
     }
+}
+
+void FormPattern::UnregisterAccessibility()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto formNode = DynamicCast<FormNode>(host);
+    CHECK_NULL_VOID(formNode);
+    formNode->ClearAccessibilityChildTreeRegisterFlag();
 }
 } // namespace OHOS::Ace::NG

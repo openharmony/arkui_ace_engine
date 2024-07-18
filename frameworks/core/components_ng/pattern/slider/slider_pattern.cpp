@@ -44,7 +44,8 @@ bool GetReverseValue(RefPtr<SliderLayoutProperty> layoutProperty)
 {
     auto reverse = layoutProperty->GetReverseValue(false);
     auto direction = layoutProperty->GetLayoutDirection();
-    if (direction == TextDirection::AUTO) {
+    auto axis = layoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
+    if (direction == TextDirection::AUTO && axis == Axis::HORIZONTAL) {
         return AceApplicationInfo::GetInstance().IsRightToLeft() ? !reverse : reverse;
     }
     return direction == TextDirection::RTL ? !reverse : reverse;

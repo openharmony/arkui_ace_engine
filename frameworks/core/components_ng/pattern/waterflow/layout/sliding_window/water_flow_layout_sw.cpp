@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/templates_parser.h"
 
@@ -599,15 +600,27 @@ float WaterFlowLayoutSW::MeasureChild(const RefPtr<WaterFlowLayoutProperty>& pro
     return child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
 }
 
+namespace {
+float MarginStart(Axis axis, const PaddingPropertyF& margin)
+{
+    return (axis == Axis::VERTICAL ? margin.left : margin.top).value_or(0.0f);
+}
+float MarginEnd(Axis axis, const PaddingPropertyF& margin)
+{
+    return (axis == Axis::VERTICAL ? margin.right : margin.bottom).value_or(0.0f);
+}
+} // namespace
+
 void WaterFlowLayoutSW::LayoutSection(
     size_t idx, const OffsetF& paddingOffset, float selfCrossLen, bool reverse, bool rtl)
 {
-    float crossPos = rtl ? selfCrossLen + mainGaps_[idx] : 0.0f;
+    const auto& margin = info_->margins_[idx];
+    float crossPos = rtl ? selfCrossLen + mainGaps_[idx] - MarginEnd(axis_, margin) : MarginStart(axis_, margin);
     for (size_t i = 0; i < info_->lanes_[idx].size(); ++i) {
         if (rtl) {
             crossPos -= itemsCrossSize_[idx][i] + crossGaps_[idx];
         }
-        auto& lane = info_->lanes_[idx][i];
+        const auto& lane = info_->lanes_[idx][i];
         float mainPos = lane.startPos;
         for (const auto& item : lane.items_) {
             auto child = wrapper_->GetOrCreateChildByIndex(nodeIdx(item.idx));

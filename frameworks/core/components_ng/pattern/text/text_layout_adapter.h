@@ -18,7 +18,11 @@
 
 #include <string>
 
+#include "base/geometry/dimension.h"
+#include "core/components_ng/pattern/text/text_styles.h"
+
 namespace OHOS::Ace::NG {
+
 class TextLayoutadapter {
 public:
     static bool IsLeftToRight(int32_t charOfShowingText);

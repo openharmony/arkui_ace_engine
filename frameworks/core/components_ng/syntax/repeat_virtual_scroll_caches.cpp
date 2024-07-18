@@ -81,7 +81,6 @@ bool RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to)
     // optimism by merging the two calls into one
     const std::list<std::string> keysFrom = onGetKeys4Range_(from, to);
     const std::list<std::string> ttypesFrom = onGetTypes4Range_(from, to);
-
     if ((keysFrom.size() == 0) || (ttypesFrom.size() == 0) || (keysFrom.size() != ttypesFrom.size())) {
         TAG_LOGE(AceLogTag::ACE_REPEAT,
             "fail to fetch keys and/or ttyypes: requested range %{public}d - %{public}d. "
@@ -242,7 +241,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::UpdateFromL2(uint32_t forIndex)
 
     // call TS to do the RepeatItem update
     onUpdateNode_(oldKey.value(), forIndex);
-    
+
     TAG_LOGD(AceLogTag::ACE_REPEAT,
         "for index %{public}d, from old key %{public}s requesting TS to update child UINodes -done ",
         static_cast<int32_t>(forIndex), oldKey.value().c_str());
@@ -363,7 +362,7 @@ bool RepeatVirtualScrollCaches::RebuildL1(const std::function<bool(int32_t index
             continue;
         }
         const auto& cacheItem = node4key_[key];
-        int32_t index = indexIter->second;
+        int32_t index = static_cast<int32_t>(indexIter->second);
         if (cbFunc(index, cacheItem.item)) {
             activeNodeKeysInL1_.emplace(key);
         } else {
@@ -580,7 +579,7 @@ bool RepeatVirtualScrollCaches::Purge()
  * given key return the index position (reverse lookup)
  * invalidated keys (after Repeat rerender/ data change)
  * are keys for which no index exists anymore,
- * method returns int max value for these.
+ * method returns uint max value for these.
  * int max value causes that distance from active range is max
  * these keys will be selected for update first.
  */
@@ -592,7 +591,7 @@ uint32_t RepeatVirtualScrollCaches::GetIndex4Key(const std::string& key) const
     }
     // key is no longer used
     // return max uint32_t value
-    return std::numeric_limits<uint32_t>::max();
+    return UINT32_MAX;
 }
 
 std::optional<std::string> RepeatVirtualScrollCaches::GetTType4Index(uint32_t index)
@@ -638,7 +637,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::GetCachedNode4Key4Ttype(
 /**
  *  for given index return distance from active range,
  *  or 0 if within active range
- *  distance is int max for invalidated keys
+ *  distance is uint max for invalidated keys
  *
  * instead of just using previous active range
  * use the ranges informed by previous two SetActiveRaneg calls.
@@ -646,10 +645,14 @@ RefPtr<UINode> RepeatVirtualScrollCaches::GetCachedNode4Key4Ttype(
  * Items left 'behind' when scrolling get larger distance and are more
  * likely updated or purged from L2 cache.
  */
-int32_t RepeatVirtualScrollCaches::GetDistanceFromRange(uint32_t index) const
+uint32_t RepeatVirtualScrollCaches::GetDistanceFromRange(uint32_t index) const
 {
-    int32_t last[2] = { lastActiveRanges_[0].first, lastActiveRanges_[0].second };
-    int32_t prev[2] = { lastActiveRanges_[1].first, lastActiveRanges_[1].second };
+    // distance is uint max for invalidated keys
+    if (index == UINT32_MAX) {
+        return UINT32_MAX;
+    }
+    uint32_t last[2] = { lastActiveRanges_[0].first, lastActiveRanges_[0].second };
+    uint32_t prev[2] = { lastActiveRanges_[1].first, lastActiveRanges_[1].second };
 
     // this is experimental optimization, based on scrolling detection
     // here we assume this is a scrolling, if previous range and last range has

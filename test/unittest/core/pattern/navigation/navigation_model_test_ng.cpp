@@ -117,15 +117,19 @@ HWTEST_F(NavigationModelTestNg, UpdateOldBarItems001, TestSize.Level1)
     ASSERT_NE(navBarNode, nullptr);
     EXPECT_FALSE(navBarNode->GetPrevToolBarIsCustom().value_or(false));
     // Create four old BarItemNodes with different attributes
-    auto oldBar1 = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, 101);
-    auto oldBar2 = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, 102);
+    auto oldBar1 = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, 101, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto oldBar2 = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, 102, []() { return AceType::MakeRefPtr<Pattern>(); });
     oldBar2->text_ = FrameNode::CreateFrameNode("text", 201, AceType::MakeRefPtr<TextPattern>());
     oldBar2->icon_ = FrameNode::CreateFrameNode("image", 301, AceType::MakeRefPtr<ImagePattern>());
-    auto oldBar3 = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, 103);
+    auto oldBar3 = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, 103, []() { return AceType::MakeRefPtr<Pattern>(); });
     // Make frameNode_ not NULL or crash will happen in Pattern::OnModifyDone
     ASSERT_NE(oldBar3->pattern_, nullptr);
     oldBar3->pattern_->frameNode_ = oldBar3;
-    auto oldBar4 = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, 104);
+    auto oldBar4 = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, 104, []() { return AceType::MakeRefPtr<Pattern>(); });
     oldBar4->text_ = FrameNode::CreateFrameNode("text", 202, AceType::MakeRefPtr<TextPattern>());
     oldBar4->icon_ = FrameNode::CreateFrameNode("image", 302, AceType::MakeRefPtr<ImagePattern>());
     auto preToolBarNode = navBarNode->GetPreToolBarNode();
@@ -163,7 +167,8 @@ HWTEST_F(NavigationModelTestNg, UpdateOldBarItems002, TestSize.Level1)
     ASSERT_NE(navBarNode, nullptr);
     EXPECT_FALSE(navBarNode->GetPrevToolBarIsCustom().value_or(false));
     // Create an old BarItemNode with different attributes
-    auto oldBar1 = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, 101);
+    auto oldBar1 = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, 101, []() { return AceType::MakeRefPtr<Pattern>(); });
     auto preToolBarNode = navBarNode->GetPreToolBarNode();
     ASSERT_NE(preToolBarNode, nullptr);
     preToolBarNode->children_.emplace_back(oldBar1);
@@ -175,8 +180,10 @@ HWTEST_F(NavigationModelTestNg, UpdateOldBarItems002, TestSize.Level1)
     navigationModel.SetToolBarItems(std::move(toolBarItems));
 
     // Make newChildrenSize 2 and prevChildrenSize 3
-    auto oldBar2 = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, 102);
-    auto oldBar3 = AceType::MakeRefPtr<BarItemNode>(V2::BAR_ITEM_ETS_TAG, 103);
+    auto oldBar2 = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, 102, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto oldBar3 = BarItemNode::GetOrCreateBarItemNode(
+            V2::BAR_ITEM_ETS_TAG, 103, []() { return AceType::MakeRefPtr<Pattern>(); });
     preToolBarNode->children_.emplace_back(oldBar2);
     preToolBarNode->children_.emplace_back(oldBar3);
     navigationModel.SetToolBarItems(std::move(toolBarItems));

@@ -56,6 +56,7 @@ public:
     // JsAccessibilityManager overrides functions.
     void InitializeCallback() override;
     void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) override;
+    void UpdateVirtualNodeFocus() override;
     void SetCardViewParams(const std::string& key, bool focus) override;
     void HandleComponentPostBinding() override;
     void RegisterSubWindowInteractionOperation(int windowId) override;
@@ -298,6 +299,8 @@ private:
     void DumpTreeNG(bool useWindowId, uint32_t windowId, int64_t rootId);
     void DumpTreeNG(const RefPtr<NG::FrameNode>& parent, int32_t depth,
         int64_t nodeID, const CommonProperty& commonProperty);
+    void DumpTreeAccessibilityNodeNG(const RefPtr<NG::UINode>& uiNodeParent,
+        int32_t depth, int64_t nodeID, const CommonProperty& commonProperty);
 
     void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
         const RefPtr<PipelineBase>& mainContext);

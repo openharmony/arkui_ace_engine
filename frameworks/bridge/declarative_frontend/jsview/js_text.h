@@ -64,6 +64,7 @@ public:
     static void SetOnCopy(const JSCallbackInfo& info);
     static void SetHeightAdaptivePolicy(int32_t value);
     static void JsOnClick(const JSCallbackInfo& info);
+    static void JsOnClickWithoutNGBUILD(const JSCallbackInfo& info);
     static void JsRemoteMessage(const JSCallbackInfo& info);
     static void JsOnDragStart(const JSCallbackInfo& info);
     static void JsOnDragEnter(const JSCallbackInfo& info);
@@ -86,6 +87,7 @@ public:
     static void ParseMarqueeParam(const JSRef<JSObject>& paramObject, NG::TextMarqueeOptions& options);
     static void SetOnMarqueeStateChange(const JSCallbackInfo& info);
     static void EditMenuOptions(const JSCallbackInfo& info);
+    static void JsResponseRegion(const JSCallbackInfo& info);
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

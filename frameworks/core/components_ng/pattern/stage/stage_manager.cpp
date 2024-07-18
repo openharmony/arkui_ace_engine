@@ -33,6 +33,11 @@
 #include "core/common/ime/input_method_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+
+#if !defined(ACE_UNITTEST)
+#include "core/components_ng/base/transparent_node_detector.h"
+#endif
+
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
@@ -85,6 +90,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
                 CHECK_NULL_VOID(stageManager);
                 stageManager->SetStageInTrasition(false);
                 page->GetRenderContext()->RemoveClipWithRRect();
+                page->GetRenderContext()->ResetPageTransitionEffect();
             });
         return;
     }
@@ -235,6 +241,9 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
             stage->PerformanceCheck(pageNode, endTime - startTime);
         });
     }
+#if !defined(ACE_UNITTEST)
+    TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(node);
+#endif
 
     // close keyboard
     PageChangeCloseKeyboard();
@@ -581,11 +590,12 @@ RefPtr<FrameNode> StageManager::GetLastPageWithTransition() const
     if (children.empty()) {
         return nullptr;
     }
-    if (stageInTrasition_) {
+    auto lastChildFrame = DynamicCast<FrameNode>(children.back());
+    auto pagePattern = lastChildFrame->GetPattern<PagePattern>();
+    if (pagePattern && pagePattern->GetPageInTransition()) {
         return DynamicCast<FrameNode>(destPageNode_.Upgrade());
-    } else {
-        return DynamicCast<FrameNode>(children.back());
     }
+    return lastChildFrame;
 }
 
 RefPtr<FrameNode> StageManager::GetPrevPageWithTransition() const
@@ -619,5 +629,14 @@ void StageManager::AddPageTransitionTrace(const RefPtr<FrameNode>& srcPage, cons
     auto destFullPath = destPageInfo->GetFullPath();
 
     ACE_SCOPED_TRACE_COMMERCIAL("Router Page from %s to %s", srcFullPath.c_str(), destFullPath.c_str());
+}
+
+void StageManager::SyncPageSafeArea(const RefPtr<FrameNode>& lastPage, PropertyChangeFlag changeFlag)
+{
+    CHECK_NULL_VOID(lastPage);
+    lastPage->MarkDirtyNode(changeFlag);
+    auto overlay = lastPage->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(overlay);
+    overlay->MarkDirtyOverlay();
 }
 } // namespace OHOS::Ace::NG

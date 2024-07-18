@@ -32,7 +32,7 @@ const std::map<std::string, RefPtr<Curve>> curveMap {
     { "easeOut",            Curves::EASE_OUT    },
     { "easeInOut",          Curves::EASE_IN_OUT },
 };
-const uint32_t CLEAN_WINDOW_DELAY_TIME = 500;
+const uint32_t CLEAN_WINDOW_DELAY_TIME = 1000;
 const int32_t ANIMATION_DURATION = 200;
 } // namespace
 
@@ -63,10 +63,16 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
         CHECK_NULL_VOID(self);
         auto session = weakSession.promote();
         CHECK_NULL_VOID(session);
+        CHECK_NULL_VOID(self->session_);
         if (self->session_->IsAnco()) {
             if (self->blankWindow_) {
                 self->BufferAvailableCallbackForBlank();
             }
+            return;
+        }
+        if (self->session_->GetBufferAvailableCallbackEnable()) {
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+                "buffer available callback enable is true, no need remove blank.");
             return;
         }
         if (self->snapshotWindow_) {
@@ -407,6 +413,9 @@ void WindowScene::OnActivation()
 void WindowScene::DisposeSnapShotAndBlankWindow()
 {
     CHECK_NULL_VOID(session_);
+    if (session_->GetBlankFlag()) {
+        return;
+    }
     auto surfaceNode = session_->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
     auto host = GetHost();
@@ -528,7 +537,8 @@ void WindowScene::OnDrawingCompleted()
 
 bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (attachToFrameNodeFlag_) {
+    CHECK_NULL_RETURN(session_, false);
+    if (attachToFrameNodeFlag_ || session_->GetBlankFlag()) {
         attachToFrameNodeFlag_ = false;
         CHECK_EQUAL_RETURN(IsMainWindow(), false, false);
         CHECK_EQUAL_RETURN(session_->GetShowRecent(), true, false);
@@ -536,9 +546,11 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         CHECK_NULL_RETURN(host, false);
         CHECK_NULL_RETURN(dirty, false);
         auto size = dirty->GetGeometryNode()->GetFrameSize();
-        if (!(NearEqual(size.Width(), session_->GetSessionLastRect().width_, 1.0f) &&
-            NearEqual(size.Height(), session_->GetSessionLastRect().height_, 1.0f)) && snapshotWindow_) {
+        if ((!(NearEqual(size.Width(), session_->GetSessionLastRect().width_, 1.0f) &&
+            NearEqual(size.Height(), session_->GetSessionLastRect().height_, 1.0f)) && snapshotWindow_) ||
+            session_->GetBlankFlag()) {
             ACE_SCOPED_TRACE("WindowScene::OnDirtyLayoutWrapperSwap");
+            session_->SetBlankFlag(false);
             auto context = AceType::DynamicCast<RosenRenderContext>(appWindow_->GetRenderContext());
             CHECK_NULL_RETURN(context, false);
             context->SetOpacity(0);

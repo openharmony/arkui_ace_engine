@@ -148,7 +148,7 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     if (defaultHeight_ || maxHeight_) {
-        if (NearEqual(fontscale_, originFontSizeScale_)) {
+        if (LessNotEqual(fontscale_, bigFontSizeScale_) || GreatNotEqual(fontscale_, maxFontSizeScale_)) {
             frameSize.SetHeight(std::max(defaultHeight_.value_or(0.0f), maxHeight_.value_or(0.0f)));
         }
     }
@@ -288,7 +288,7 @@ LayoutConstraintF TabBarLayoutAlgorithm::GetChildConstraint(LayoutWrapper* layou
             childLayoutConstraint.parentIdealSize = OptionalSizeF(frameSize);
             childLayoutConstraint.selfIdealSize.SetHeight(frameSize.Height());
         } else if (!isBarAdaptiveHeight_) {
-            if (NearEqual(fontscale_, originFontSizeScale_)) {
+            if (LessNotEqual(fontscale_, bigFontSizeScale_) || GreatNotEqual(fontscale_, maxFontSizeScale_)) {
                 frameSize.SetHeight(defaultHeight_.value());
             }
             childLayoutConstraint.parentIdealSize = OptionalSizeF(frameSize);
@@ -481,7 +481,7 @@ void TabBarLayoutAlgorithm::MeasureItem(LayoutWrapper* layoutWrapper, LayoutCons
     CHECK_NULL_VOID (childWrapper);
     auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    if (tabBarPattern->GetTabBarStyle(index) == TabBarStyle::BOTTOMTABBATSTYLE) {
+    if (tabBarPattern->GetTabBarStyle(index) == TabBarStyle::BOTTOMTABBATSTYLE && axis_ == Axis::HORIZONTAL) {
         auto iconWrapper = childWrapper->GetOrCreateChildByIndex(0);
         CHECK_NULL_VOID(iconWrapper);
         if (iconWrapper->GetHostNode()->GetTag() == V2::SYMBOL_ETS_TAG) {
@@ -534,7 +534,7 @@ void TabBarLayoutAlgorithm::MeasureItemSecond(LayoutWrapper* layoutWrapper, Layo
 
     visibleChildrenMainSize_ = scrollMargin_ * DOUBLE_OF_WIDTH;
     if (isBarAdaptiveHeight_) {
-        if (NearEqual(fontscale_, originFontSizeScale_)) {
+        if (LessNotEqual(fontscale_, bigFontSizeScale_) || GreatNotEqual(fontscale_, maxFontSizeScale_)) {
             frameSize.SetHeight(std::max(defaultHeight_.value_or(0.0f), maxHeight_.value_or(0.0f)));
         }
         childLayoutConstraint.parentIdealSize = OptionalSizeF(frameSize);
@@ -1040,8 +1040,8 @@ int32_t TabBarLayoutAlgorithm::CalcTabBarContentLetterNums(LayoutWrapper* layout
         CHECK_NULL_RETURN(textWrapper, 0);
         auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
         CHECK_NULL_RETURN(textLayoutProperty, 0);
-        if (tabBarLetterNums < textLayoutProperty->GetContent().value().length()) {
-            tabBarLetterNums = textLayoutProperty->GetContent().value().length();
+        if (tabBarLetterNums < static_cast<int32_t>(textLayoutProperty->GetContent().value().length())) {
+            tabBarLetterNums = static_cast<int32_t>(textLayoutProperty->GetContent().value().length());
         }
     }
     return tabBarLetterNums;

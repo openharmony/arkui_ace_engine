@@ -47,15 +47,15 @@ public:
 
     static bool IsNeedAdaptFontSize(const double& maxFontSize, const double& minFontSize);
     static bool IsNeedAdaptFontSize(const TextStyle& textStyle, const LayoutConstraintF& contentConstraint);
-    static bool GetAdaptMaxMinFontSize(const TextStyle& textStyle, double& maxFontSize, double& minFontSize,
+    static void GetAdaptMaxMinFontSize(const TextStyle& textStyle, double& maxFontSize, double& minFontSize,
         const LayoutConstraintF& contentConstraint);
-    static bool GetAdaptFontSizeStep(const TextStyle& textStyle, double& stepSize, const Dimension& stepUnit,
+    static void GetAdaptFontSizeStep(const TextStyle& textStyle, double& stepSize, const Dimension& stepUnit,
         const LayoutConstraintF& contentConstraint);
     static SizeF GetMaxMeasureSize(const LayoutConstraintF& contentConstraint);
 
 protected:
     virtual bool DidExceedMaxLines(const SizeF& maxSize);
-    void SetAdaptFontSizeLineHeight(const Dimension& lineHeight);
+    void SetAdaptFontSizeLineHeight(const Dimension& lineHeight, const TextStyle& textStyle);
     bool IsAdaptFontSizeExceedLineHeight(const RefPtr<Paragraph>& paragraph);
 
 private:

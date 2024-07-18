@@ -18,7 +18,7 @@
  */
 declare interface ArkToolsMock {
     print(str: string, obj: Object): void;
-    timeInUs(arg? :any): number;
+    timeInUs(arg?: any): number;
 }
 
 declare const ArkTools : ArkToolsMock;

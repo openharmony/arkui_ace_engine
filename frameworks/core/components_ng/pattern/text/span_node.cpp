@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text/span_node.h"
 
+#include <cstdint>
 #include <optional>
 #include <string>
 
@@ -521,7 +522,7 @@ uint32_t SpanItem::GetSymbolUnicode()
 void SpanItem::StartDrag(int32_t start, int32_t end)
 {
     selectedStart = std::max(0, start);
-    int32_t contentLen = content.size();
+    auto contentLen = static_cast<int32_t>(content.size());
     selectedEnd = std::min(contentLen, end);
 }
 

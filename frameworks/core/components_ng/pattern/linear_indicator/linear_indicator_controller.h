@@ -283,6 +283,8 @@ private:
 
     float RecalcProgressValue(int32_t newAnimationTime);
 
+    void SetValueAndCallback(float value, bool isDraw);
+
 public:
     static const float END_VALUE;
     static const std::string LINEAR_INDICATOR_ANIMATION_NAME;

@@ -1021,10 +1021,10 @@ bool UINode::IsNeedExportTexture() const
     return exportTextureInfo_ && exportTextureInfo_->GetCurrentRenderType() == NodeRenderType::RENDER_TYPE_TEXTURE;
 }
 
-void UINode::SetActive(bool active)
+void UINode::SetActive(bool active, bool needRebuildRenderContext)
 {
     for (const auto& child : GetChildren()) {
-        child->SetActive(active);
+        child->SetActive(active, needRebuildRenderContext);
     }
 }
 
@@ -1357,12 +1357,12 @@ bool UINode::SetParentLayoutConstraint(const SizeF& size) const
 
 void UINode::UpdateNodeStatus(NodeStatus nodeStatus)
 {
+    if (nodeStatus_ == nodeStatus) {
+        return;
+    }
     nodeStatus_ = nodeStatus;
+    OnAttachToBuilderNode(nodeStatus_);
     for (const auto& child : children_) {
-        if (child->GetNodeStatus() == nodeStatus_) {
-            continue;
-        }
-        child->OnAttachToBuilderNode(nodeStatus_);
         child->UpdateNodeStatus(nodeStatus_);
     }
 }

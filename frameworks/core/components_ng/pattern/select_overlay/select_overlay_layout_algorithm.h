@@ -35,6 +35,7 @@ struct AvoidStrategyMember {
     double keyboardInsertStart = 0.0;
     bool hasKeyboard = false;
     bool downHandleIsReallyShow = true;
+    double selectAreaTop = 0.0;
     double selectAndRootRectAreaTop = 0.0;
     double selectAndRootRectAreaBottom = 0.0;
 };

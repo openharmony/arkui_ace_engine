@@ -236,7 +236,7 @@ private:
      *  or 0 if within active range
      *  distance is int max for invalidated keys
      */
-    int32_t GetDistanceFromRange(uint32_t index) const;
+    uint32_t GetDistanceFromRange(uint32_t index) const;
     /**
      * scenario: find L1 key that should be updated
      * choose the key whose index is the furthest away from active range

@@ -223,6 +223,10 @@ public:
         const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
         TouchTestResult& responseLinkResult);
 
+    void InitClickRecognizer(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        const RefPtr<ScrollableEvent>& event, bool clickJudge);
+
 private:
     void InitializeScrollable(RefPtr<ScrollableEvent> event);
 

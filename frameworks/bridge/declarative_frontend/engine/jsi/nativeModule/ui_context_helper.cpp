@@ -43,6 +43,7 @@ panda::Local<panda::JSValueRef> UIContextHelper::GetUIContext(EcmaVM* vm, int32_
     std::shared_lock<std::shared_mutex> lock(uiContextMapMutex_);
     auto iter = uiContextMap_.find(instanceId);
     if (iter == uiContextMap_.end()) {
+        ContainerScope scope(instanceId);
         lock.unlock();
         auto uiContext = ArkTSUtils::GetContext(vm);
         AddUIContext(vm, instanceId, uiContext);

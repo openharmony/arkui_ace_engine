@@ -112,6 +112,21 @@ NG::SafeAreaInsets ConvertAvoidArea(const OHOS::Rosen::AvoidArea& avoidArea)
         { avoidArea.rightRect_.posX_, avoidArea.rightRect_.posX_ + avoidArea.rightRect_.width_ },
         { avoidArea.bottomRect_.posY_, avoidArea.bottomRect_.posY_ + avoidArea.bottomRect_.height_ });
 }
+
+NG::SafeAreaInsets GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type, sptr<OHOS::Rosen::Window> rsWindow)
+{
+    CHECK_NULL_RETURN(rsWindow, {});
+    Rosen::AvoidArea avoidArea;
+    Rosen::WMError ret = rsWindow->GetAvoidAreaByType(type, avoidArea);
+    if (ret == Rosen::WMError::WM_OK) {
+        auto safeAreaInsets = ConvertAvoidArea(avoidArea);
+        LOGI("SafeArea get success, area type is:%{public}d insets area is:%{public}s", static_cast<int32_t>(type),
+            safeAreaInsets.ToString().c_str());
+        return safeAreaInsets;
+    }
+    return {};
+}
+
 class IIgnoreViewSafeAreaListenerPreview  : public OHOS::Rosen::IIgnoreViewSafeAreaListener {
 public:
     explicit IIgnoreViewSafeAreaListenerPreview(int32_t instanceId) : instanceId_(instanceId) {}
@@ -144,8 +159,8 @@ public:
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
     {
         LOGD("Avoid area changed, type:%{public}d, topRect: avoidArea:x:%{public}d, y:%{public}d, "
-             "width:%{public}d, height%{public}d; bottomRect: avoidArea:x:%{public}d, y:%{public}d, "
-             "width:%{public}d, height%{public}d",
+             "width:%{public}d, height:%{public}d; bottomRect: avoidArea:x:%{public}d, y:%{public}d, "
+             "width:%{public}d, height:%{public}d",
             type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
             (int32_t)avoidArea.topRect_.height_, avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_,
             (int32_t)avoidArea.bottomRect_.width_, (int32_t)avoidArea.bottomRect_.height_);
@@ -352,6 +367,11 @@ void AceAbility::InitEnv()
             Rect(Offset(0.0f, 0.0f), Size(runArgs_.deviceWidth, runArgs_.deviceHeight)));
     }
     container->InitializeAppConfig(runArgs_.assetPath, bundleName_, moduleName_, compileMode_);
+    pipelineContext->UpdateSystemSafeArea(GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM, window));
+    if (pipelineContext->GetUseCutout()) {
+        pipelineContext->UpdateCutoutSafeArea(GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT, window));
+    }
+    pipelineContext->UpdateNavSafeArea(GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR, window));
     AceContainer::AddRouterChangeCallback(ACE_INSTANCE_ID, runArgs_.onRouterChange);
     OHOS::Ace::Framework::InspectorClient::GetInstance().RegisterFastPreviewErrorCallback(runArgs_.onError);
     // Should make it possible to update surface changes by using viewWidth and viewHeight.
