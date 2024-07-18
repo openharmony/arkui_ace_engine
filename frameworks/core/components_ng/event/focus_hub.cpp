@@ -1183,25 +1183,35 @@ void FocusHub::OnBlurNode()
     CHECK_NULL_VOID(frameNode);
     auto* pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->AddAfterLayoutTask([weak = WeakClaim(this)]() {
-        auto focusHub = weak.Upgrade();
-        CHECK_NULL_VOID(focusHub);
-        auto onBlurCallback = focusHub->GetOnBlurCallback();
+    
+    if (blurReason_ == BlurReason::FRAME_DESTROY) {
+        auto onBlurCallback = GetOnBlurCallback();
         if (onBlurCallback) {
             onBlurCallback();
         }
-        auto onJSFrameNodeBlurCallback_ = focusHub->GetOnJSFrameNodeBlurCallback();
+        auto onJSFrameNodeBlurCallback_ = GetOnJSFrameNodeBlurCallback();
         if (onJSFrameNodeBlurCallback_) {
             onJSFrameNodeBlurCallback_();
         }
-    });
-    if (blurReason_ != BlurReason::FRAME_DESTROY) {
+    } else {
+        pipeline->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+            auto focusHub = weak.Upgrade();
+            CHECK_NULL_VOID(focusHub);
+            auto onBlurCallback = focusHub->GetOnBlurCallback();
+            if (onBlurCallback) {
+                onBlurCallback();
+            }
+            auto onJSFrameNodeBlurCallback_ = focusHub->GetOnJSFrameNodeBlurCallback();
+            if (onJSFrameNodeBlurCallback_) {
+                onJSFrameNodeBlurCallback_();
+            }
+        });
         ClearFocusState();
     }
+
     auto focusManager = pipeline->GetOrCreateFocusManager();
     CHECK_NULL_VOID(focusManager);
     focusManager->PaintFocusState();
-
     pipeline->RequestFrame();
 }
 
@@ -1681,6 +1691,18 @@ bool FocusHub::CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) con
     auto frameNode = childNode->GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
     rect = frameNode->GetPaintRectWithTransform();
+
+    //  Calculate currentNode -> childNode offset
+    auto uiNode = frameNode->GetParent();
+    while (uiNode != GetFrameNode()) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+        if (!frameNode) {
+            uiNode = uiNode -> GetParent();
+            continue;
+        }
+        rect += frameNode->GetPaintRectWithTransform().GetOffset();
+        uiNode = frameNode->GetParent();
+    }
     return true;
 }
 

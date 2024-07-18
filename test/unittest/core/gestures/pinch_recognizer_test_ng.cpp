@@ -126,7 +126,7 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerHandleTouchDownEventTest001, Test
     pinchRecognizer.refereeState_ = RefereeState::SUCCEED;
     pinchRecognizer.fingers_ = 0;
     pinchRecognizer.HandleTouchDownEvent(touchEvent);
-    EXPECT_EQ(static_cast<int32_t>(pinchRecognizer.touchPoints_.size()), 0);
+    EXPECT_EQ(static_cast<int32_t>(pinchRecognizer.touchPoints_.size()), 1);
 
     /**
      * @tc.steps: step2. call HandleTouchDownEvent function and compare result.

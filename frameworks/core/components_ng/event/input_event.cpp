@@ -28,6 +28,7 @@ InputEventActuator::InputEventActuator(const WeakPtr<InputEventHub>& inputEventH
     mouseEventTarget_ = MakeRefPtr<MouseEventTarget>(frameNode->GetTag(), frameNode->GetId());
     hoverEventTarget_ = MakeRefPtr<HoverEventTarget>(frameNode->GetTag(), frameNode->GetId());
     hoverEffectTarget_ = MakeRefPtr<HoverEffectTarget>(frameNode->GetTag(), frameNode->GetId());
+    accessibilityHoverEventTarget_ = MakeRefPtr<HoverEventTarget>(frameNode->GetTag(), frameNode->GetId());
     axisEventTarget_ = MakeRefPtr<AxisEventTarget>(frameNode->GetTag());
 }
 
@@ -106,6 +107,29 @@ void InputEventActuator::OnCollectHoverEffect(
     hoverEffectTarget_->SetGetEventTargetImpl(getEventTargetImpl);
     hoverEffectTarget_->SetHoverNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
     result.emplace_back(hoverEffectTarget_);
+}
+
+void InputEventActuator::OnCollectAccessibilityHoverEvent(const OffsetF& coordinateOffset,
+    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& host)
+{
+    if (inputEvents_.empty() && !userCallback_ && !userJSFrameNodeCallback_) {
+        return;
+    }
+
+    auto onAccessibilityHoverCallback = [weak = WeakClaim(this)](
+                                            bool info, AccessibilityHoverInfo& accessibilityHoverInfo) {
+        auto actuator = weak.Upgrade();
+        CHECK_NULL_VOID(actuator);
+        auto userEvent = actuator->userCallback_;
+        if (userEvent) {
+            (*userEvent)(info, accessibilityHoverInfo);
+        }
+    };
+    accessibilityHoverEventTarget_->AttachFrameNode(host);
+    accessibilityHoverEventTarget_->SetAccessibilityHoverCallback(onAccessibilityHoverCallback);
+    accessibilityHoverEventTarget_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+    accessibilityHoverEventTarget_->SetGetEventTargetImpl(getEventTargetImpl);
+    result.emplace_back(accessibilityHoverEventTarget_);
 }
 
 void InputEventActuator::OnCollectAxisEvent(

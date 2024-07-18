@@ -809,6 +809,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarWidth001, TestSize.Level1)
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
     EXPECT_EQ(pattern_->scrollBar_->activeRect_.Width(), NORMAL_WIDTH);
+    EXPECT_EQ(pattern_->scrollBar_->barRect_.Width(), NORMAL_WIDTH);
 
     /**
      * @tc.steps: step2. Set bar width less than bar height
@@ -819,6 +820,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarWidth001, TestSize.Level1)
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
     EXPECT_EQ(pattern_->scrollBar_->activeRect_.Width(), 10);
+    EXPECT_EQ(pattern_->scrollBar_->barRect_.Width(), 10);
 
     /**
      * @tc.steps: step3. Set bar width greater than SCROLL_HEIGHT
@@ -829,17 +831,21 @@ HWTEST_F(ScrollBarTestNg, ScrollBarWidth001, TestSize.Level1)
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
     EXPECT_EQ(pattern_->scrollBar_->activeRect_.Width(), NORMAL_WIDTH);
+    EXPECT_EQ(pattern_->scrollBar_->barRect_.Width(), NORMAL_WIDTH);
 
     /**
-     * @tc.steps: step4. Set bar width greater than SCROLL_HEIGHT
+     * @tc.steps: step4. Set bar width less than SCROLL_HEIGHT
      * @tc.expected: The bar width will be the value that was set, and bar height will be equal to bar width
      */
+    float barWidth = SCROLL_HEIGHT - 1;
     model = CreateScroll();
-    model.SetScrollBarWidth(Dimension(SCROLL_HEIGHT - 1));
+    model.SetScrollBarWidth(Dimension(barWidth));
     CreateContent(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-    EXPECT_EQ(pattern_->scrollBar_->activeRect_.Width(), SCROLL_HEIGHT - 1);
-    EXPECT_EQ(pattern_->scrollBar_->activeRect_.Height(), SCROLL_HEIGHT - 1);
+    EXPECT_EQ(pattern_->scrollBar_->activeRect_.Width(), barWidth);
+    EXPECT_EQ(pattern_->scrollBar_->activeRect_.Height(), barWidth);
+    EXPECT_EQ(pattern_->scrollBar_->barRect_.Width(), barWidth);
+    EXPECT_EQ(pattern_->scrollBar_->barRect_.Height(), SCROLL_HEIGHT);
 }
 
 /**
@@ -1014,39 +1020,62 @@ HWTEST_F(ScrollBarTestNg, AttrScrollBarColorWidth001, TestSize.Level1)
 }
 
 /**
- * @tc.name: DumpAdvanceInfo001
- * @tc.desc: Test DumpAdvanceInfo001
+ * @tc.name: RegisterEventByClick001
+ * @tc.desc: Test Register Event By Click(CollectTouchTarget)
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollBarTestNg, DumpAdvanceInfo001, TestSize.Level1)
+HWTEST_F(ScrollBarTestNg, RegisterEventByClick001, TestSize.Level1)
 {
-    CreateScroll();
+    MockContainer::Current()->useNewPipeline_ = true; // for init panRecognizerNG_
+    ScrollModelNG model = CreateScroll();
+    model.SetDisplayMode(static_cast<int>(DisplayMode::ON));
+    model.SetScrollBarWidth(Dimension(SCROLL_HEIGHT + 1.f)); // will be default
     CreateContent(TOTAL_ITEM_NUMBER);
-    auto paintWrapper = CreateDone(frameNode_);
-    auto scrollBar = pattern_->GetScrollBar();
-    scrollBar->DumpAdvanceInfo();
+    CreateDone(frameNode_);
+    scrollBar_ = pattern_->GetScrollBar();
+    OffsetF coordinateOffset;
+    TouchRestrict touchRestrict;
+    GetEventTargetImpl getEventTargetImpl;
+    TouchTestResult result;
+    PointF localPoint;
+    RefPtr<FrameNode> frameNode = frameNode_;
+    RefPtr<TargetComponent> targetComponent;
+    TouchTestResult responseLinkResult;
+    auto scrollableActuator = frameNode_->GetOrCreateGestureEventHub()->scrollableActuator_;
+    int32_t nodeId = 123456;
+    frameNode_->UpdateRecycleElmtId(nodeId);
+    EXPECT_EQ(frameNode_->GetId(), nodeId);
 
-    scrollBar->SetShapeMode(ShapeMode::ROUND);
-    scrollBar->SetPositionMode(PositionMode::LEFT);
-    scrollBar->SetAxis(Axis::NONE);
-    PanDirection panDirection;
-    panDirection.type = 0;
-    scrollBar->panRecognizer_->direction_ = panDirection;
-    scrollBar->DumpAdvanceInfo();
+    /**
+     * @tc.steps: step1. Click activeBar
+     * @tc.expected: Trigger BarCollectTouchTarget
+     */
+    localPoint = PointF(SCROLL_WIDTH - 1.f, 1.f);
+    scrollableActuator->CollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl,
+        result, localPoint, frameNode, targetComponent, responseLinkResult);
+    EXPECT_EQ(scrollBar_->panRecognizer_->nodeId_, nodeId);
 
-    scrollBar->SetShapeMode(ShapeMode::DEFAULT);
-    scrollBar->SetPositionMode(PositionMode::BOTTOM);
-    scrollBar->SetAxis(Axis::HORIZONTAL);
-    panDirection.type = 3;
-    scrollBar->panRecognizer_->direction_ = panDirection;
-    scrollBar->DumpAdvanceInfo();
+    /**
+     * @tc.steps: step2. Click bar
+     * @tc.expected: Trigger BarCollectLongPressTarget,CollectScrollableTouchTarget
+     */
+    localPoint = PointF(SCROLL_WIDTH - 1.f, SCROLL_HEIGHT - 1.f);
+    scrollableActuator->CollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl,
+        result, localPoint, frameNode, targetComponent, responseLinkResult);
+    EXPECT_EQ(scrollBar_->longPressRecognizer_->nodeId_, nodeId);
+    EXPECT_EQ(pattern_->scrollableEvent_->GetScrollable()->panRecognizerNG_->nodeId_, nodeId);
 
-    scrollBar->SetAxis(Axis::FREE);
-    panDirection.type = 15;
-    scrollBar->panRecognizer_->direction_ = panDirection;
-    scrollBar->DumpAdvanceInfo();
+    /**
+     * @tc.steps: step3. Click out of bar
+     * @tc.expected: Trigger CollectScrollableTouchTarget
+     */
+    pattern_->scrollableEvent_->GetScrollable()->panRecognizerNG_->SetNodeId(0);
+    localPoint = PointF(1.f, 1.f);
+    scrollableActuator->CollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl,
+        result, localPoint, frameNode, targetComponent, responseLinkResult);
+    EXPECT_EQ(pattern_->scrollableEvent_->GetScrollable()->panRecognizerNG_->nodeId_, nodeId);
 
-    scrollBar->panRecognizer_ = nullptr;
-    scrollBar->DumpAdvanceInfo();
+    // reset useNewPipeline_
+    MockContainer::Current()->useNewPipeline_ = false;
 }
 } // namespace OHOS::Ace::NG

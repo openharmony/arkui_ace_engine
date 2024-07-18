@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_textpicker.h"
 
+#include <cstdint>
 #include <securec.h>
 
 #include "base/log/ace_scoring_log.h"
@@ -509,7 +510,7 @@ void JSTextPickerParser::ParseMultiTextArraySelectInternal(const std::vector<NG:
 
         auto valueIterator = std::find(options[i].rangeResult.begin(), options[i].rangeResult.end(), values[i]);
         if (valueIterator != options[i].rangeResult.end()) {
-            selectedValue = std::distance(options[i].rangeResult.begin(), valueIterator);
+            selectedValue = static_cast<uint32_t>(std::distance(options[i].rangeResult.begin(), valueIterator));
             selectedValues.emplace_back(selectedValue);
         } else {
             selectedValues.emplace_back(0);
@@ -797,7 +798,7 @@ bool JSTextPickerParser::ParseTextArray(const JSRef<JSObject>& paramObject, Pars
         if (!ParseJsInteger(getSelected, param.selected) && !param.value.empty()) {
             auto valueIterator = std::find(getRangeVector.begin(), getRangeVector.end(), param.value);
             if (valueIterator != getRangeVector.end()) {
-                param.selected = std::distance(getRangeVector.begin(), valueIterator);
+                param.selected = static_cast<uint32_t>(std::distance(getRangeVector.begin(), valueIterator));
             }
         }
         if (param.selected >= getRangeVector.size()) {
@@ -1393,7 +1394,7 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
             JSViewAbstract::ParseJsString(getValue, value)) {
             auto valueIterator = std::find(getRangeVector.begin(), getRangeVector.end(), value);
             if (valueIterator != getRangeVector.end()) {
-                selectedValue = std::distance(getRangeVector.begin(), valueIterator);
+                selectedValue = static_cast<uint32_t>(std::distance(getRangeVector.begin(), valueIterator));
             }
         }
         if (selectedValue >= getRangeVector.size()) {
@@ -1788,7 +1789,7 @@ void JSTextPickerDialog::ParseText(RefPtr<PickerTextComponent>& component, const
     if (!JSViewAbstract::ParseJsInteger(getSelected, selectedValue) && JSViewAbstract::ParseJsString(getValue, value)) {
         auto valueIterator = std::find(getRangeVector.begin(), getRangeVector.end(), value);
         if (valueIterator != getRangeVector.end()) {
-            selectedValue = std::distance(getRangeVector.begin(), valueIterator);
+            selectedValue = static_cast<uint32_t>(std::distance(getRangeVector.begin(), valueIterator));
         }
     }
 

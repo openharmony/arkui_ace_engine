@@ -18,7 +18,7 @@
 
 from src.beans.base_bean import BaseBean
 from src.beans.event_tree import EventTree
-from src.keywords import keywords_dict
+from src.keywords import keywords_dict, get_dict_value
 from src.utils.log_wrapper import log_info
 from src.utils.value_parser import pack_string_until_next_keyword
 
@@ -33,18 +33,18 @@ class DumpResult(BaseBean):
         self.check_parse_result()
         if self.is_succeed():
             self.update_tree_info()
-        print('parse result: ' + self.to_string())
+        log_info('parse result: ' + self.to_string())
 
     def parse_event_trees(self, input_str):
         if input_str is None or len(input_str) == 0:
             return
         spliced_lines = input_str.split('\n')
         current_index = 0
-        start_keyword = keywords_dict['event tree']
-        end_keywords = [keywords_dict['event tree']]
+        start_keyword = get_dict_value(keywords_dict, 'event tree')
+        end_keywords = [start_keyword]
         while current_index < len(spliced_lines):
             line = spliced_lines[current_index]
-            if line.find(keywords_dict['event tree']) == -1:
+            if line.find(start_keyword) == -1:
                 # not found, try next line
                 current_index += 1
                 continue

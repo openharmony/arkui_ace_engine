@@ -42,7 +42,7 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange001, 
     };
     ListModelNG model = CreateList();
     model.SetOnScrollVisibleContentChange(onVisibleChange);
-    CreateGroupWithSetting(5, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    CreateGroupWithSetting(5, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
     ListItemIndex startExpect = { 0, 2 };
     ListItemIndex endExpect = { 1, 1, 0 };
@@ -112,7 +112,7 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange002, 
     };
     ListModelNG model = CreateList();
     model.SetOnScrollVisibleContentChange(onVisibleChange);
-    CreateGroupWithSetting(5, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    CreateGroupWithSetting(5, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
     ListItemIndex startExpect = { 0, 2 };
     ListItemIndex endExpect = { 1, 1, 0 };
@@ -184,7 +184,7 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange003, 
     };
     ListModelNG model = CreateList();
     model.SetOnScrollVisibleContentChange(onVisibleChange);
-    CreateGroupWithSetting(5, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    CreateGroupWithSetting(5, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
     ListItemIndex startExpect = { 0, 2 };
     ListItemIndex endExpect = { 1, 1, 0 };
@@ -256,7 +256,7 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange004, 
     };
     ListModelNG model = CreateList();
     model.SetOnScrollVisibleContentChange(onVisibleChange);
-    CreateGroupWithSetting(5, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    CreateGroupWithSetting(5, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
     ListItemIndex startExpect = { 0, 2 };
     ListItemIndex endExpect = { 1, 1, 0 };
@@ -328,7 +328,7 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange005, 
     };
     ListModelNG model = CreateList();
     model.SetOnScrollVisibleContentChange(onVisibleChange);
-    CreateGroupWithSetting(5, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    CreateGroupWithSetting(5, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
     ListItemIndex startExpect = { 0, 2 };
     ListItemIndex endExpect = { 1, 1, 0 };
@@ -401,7 +401,7 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange006, 
     };
     ListModelNG model = CreateList();
     model.SetOnScrollVisibleContentChange(onVisibleChange);
-    CreateGroupWithSetting(5, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    CreateGroupWithSetting(5, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
     ListItemIndex startExpect = { 0, 2 };
     ListItemIndex endExpect = { 1, 1, 0 };
@@ -475,7 +475,7 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange007, 
     };
     ListModelNG model = CreateList();
     model.SetOnScrollVisibleContentChange(onVisibleChange);
-    CreateGroupWithSetting(5, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    CreateGroupWithSetting(5, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
     ListItemIndex startExpect = { 0, 2 };
     ListItemIndex endExpect = { 1, 1, 0 };
@@ -552,7 +552,7 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange008, 
     };
     ListModelNG model = CreateList();
     model.SetOnScrollVisibleContentChange(onVisibleChange);
-    CreateGroupWithSetting(5, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    CreateGroupWithSetting(5, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
     ListItemIndex startExpect = { 0, 2 };
     ListItemIndex endExpect = { 1, 1, 0 };
@@ -631,7 +631,7 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange009, 
     };
     ListModelNG model = CreateList();
     model.SetOnScrollVisibleContentChange(onVisibleChange);
-    CreateGroupWithSetting(5, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    CreateGroupWithSetting(5, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
     ListItemIndex startExpect = { 0, 2 };
     ListItemIndex endExpect = { 1, 1, 0 };
@@ -711,7 +711,7 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange010, 
     };
     ListModelNG model = CreateList();
     model.SetOnScrollVisibleContentChange(onVisibleChange);
-    CreateGroupWithSetting(5, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    CreateGroupWithSetting(5, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
     ListItemIndex startExpect = { 0, 2 };
     ListItemIndex endExpect = { 1, 1, 0 };
@@ -791,7 +791,7 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange011, 
     };
     ListModelNG model = CreateList();
     model.SetOnScrollVisibleContentChange(onVisibleChange);
-    CreateGroupWithSetting(5, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    CreateGroupWithSetting(5, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
     ListItemIndex startExpect = { 0, 2 };
     ListItemIndex endExpect = { 1, 1, 0 };
@@ -870,7 +870,7 @@ HWTEST_F(ListScrollVisibleContentChangeTestNg, OnScrollVisibleContentChange012, 
     };
     ListModelNG model = CreateList();
     model.SetOnScrollVisibleContentChange(onVisibleChange);
-    CreateGroupWithSetting(5, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    CreateGroupWithSetting(5, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
     ListItemIndex startExpect = { 0, 2 };
     ListItemIndex endExpect = { 1, 1, 0 };

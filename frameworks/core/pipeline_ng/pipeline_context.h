@@ -102,7 +102,7 @@ public:
 
     void SetupRootElement() override;
 
-    void SetupSubRootElement();
+    void SetupSubRootElement() override;
 
     bool NeedSoftKeyboard() override;
 
@@ -134,6 +134,8 @@ public:
 
     void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false) override;
 
+    void OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) override;
+
     void OnMouseEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) override;
 
     void OnAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node) override;
@@ -141,6 +143,10 @@ public:
     // Called by view when touch event received.
     void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) override;
 
+#if defined(SUPPORT_TOUCH_TARGET_TEST)
+    // Used to determine whether the touched frameNode is the target
+    bool OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe = false, const std::string& target = "") override;
+#endif
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
     bool OnKeyEvent(const KeyEvent& event) override;
@@ -809,9 +815,10 @@ public:
     }
     void GetInspectorTree();
     void NotifyAllWebPattern(bool isRegister);
-    void AddFrameNodeChangeListener(const RefPtr<FrameNode>& node);
-    void RemoveFrameNodeChangeListener(const RefPtr<FrameNode>& node);
-    void AddChangedFrameNode(const RefPtr<FrameNode>& node);
+    void AddFrameNodeChangeListener(const WeakPtr<FrameNode>& node);
+    void RemoveFrameNodeChangeListener(int32_t nodeId);
+    bool AddChangedFrameNode(const WeakPtr<FrameNode>& node);
+    void RemoveChangedFrameNode(int32_t nodeId);
     void SetForceSplitEnable(bool isForceSplit)
     {
         isForceSplit_ = isForceSplit;
@@ -822,6 +829,10 @@ public:
         return isForceSplit_;
     }
 
+    bool IsWindowFocused() const override
+    {
+        return isWindowHasFocused_ && GetOnFoucs();
+    }
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1061,14 +1072,14 @@ private:
     std::vector<std::shared_ptr<ITouchEventCallback>> listenerVector_;
     bool customTitleSettedShow_ = true;
     bool isShowTitle_ = false;
-    bool lastAnimationStatus_ = true;
+    int32_t lastAnimatorExpectedFrameRate_ = -1;
     bool isDoKeyboardAvoidAnimate_ = true;
     bool isForceSplit_ = false;
 
     std::list<FrameCallbackFunc> frameCallbackFuncs_;
     uint32_t transform_ = 0;
-    std::list<RefPtr<FrameNode>> changeInfoListeners_;
-    std::list<RefPtr<FrameNode>> changedNodes_;
+    std::list<WeakPtr<FrameNode>> changeInfoListeners_;
+    std::list<WeakPtr<FrameNode>> changedNodes_;
 };
 } // namespace OHOS::Ace::NG
 

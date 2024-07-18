@@ -378,4 +378,61 @@ HWTEST_F(Matrix3Test, Matrix3Test007, TestSize.Level1)
     EXPECT_EQ(dstVec[2], DEFAULT_DOUBLE3);
     EXPECT_EQ(dstVec[3], DEFAULT_DOUBLE0);
 }
+
+/**
+ * @tc.name: Matrix3Test008
+ * @tc.desc: Test the function SetEntry for Matrix3/Matrix3N
+ * @tc.type: FUNC
+ */
+HWTEST_F(Matrix3Test, Matrix3Test008, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.Matrix3::SetEntry: index out of range
+     */
+    Matrix3 matrixObj1;
+    // true false false false
+    matrixObj1.SetEntry(-1, 2, 5.0f);
+    // false true false false
+    matrixObj1.SetEntry(10, 2, 5.0f);
+    // false false true false
+    matrixObj1.SetEntry(0, -1, 5.0f);
+    // false false false true
+    matrixObj1.SetEntry(0, 10, 5.0f);
+    // false false false false
+    matrixObj1.SetEntry(0, 2, 5.0f);
+    EXPECT_EQ(matrixObj1(0, 2) == 5.0f, true);
+
+    /**
+     * @tc.steps2: Matrix3N::SetEntry: index out of range
+     */
+    Matrix3N matrix3NObj1(3);
+    // true false
+    bool ret = matrix3NObj1.SetEntry(10, 2, 5.0f);
+    EXPECT_FALSE(ret);
+    // false true
+    bool ret2 = matrix3NObj1.SetEntry(0, 3, 5.0f);
+    EXPECT_FALSE(ret2);
+    // false false
+    bool ret3 = matrix3NObj1.SetEntry(0, 2, 5.0f);
+    EXPECT_TRUE(ret3);
+
+    /**
+     * @tc.steps3: MatrixN3::SetEntry: index out of range
+     */
+    MatrixN3 matrixN3Obj1(3);
+    // true false
+    bool ret4 = matrixN3Obj1.SetEntry(3, 2, 5.0f);
+    EXPECT_FALSE(ret4);
+    // false true
+    bool ret5 = matrixN3Obj1.SetEntry(0, 10, 5.0f);
+    EXPECT_FALSE(ret5);
+    // false false
+    bool ret6 = matrixN3Obj1.SetEntry(0, 2, 5.0f);
+    EXPECT_TRUE(ret6);
+
+    // Matrix3N::operator*: matrix size not match
+    MatrixN3 matrixN3Obj2(2);
+    Matrix3 ret7 = matrix3NObj1 * matrixN3Obj2;
+    EXPECT_EQ(ret7(0, 0) == 0.0f, true);
+}
 } // namespace OHOS::Ace

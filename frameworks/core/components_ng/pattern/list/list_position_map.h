@@ -101,13 +101,10 @@ public:
         return flag;
     }
 
-    void UpdatePosMapStart(float delta, float& listCurrentPos, float space, int32_t startIndex, float startPos)
+    void UpdatePosMapStart(float delta, float& listCurrentPos, float space,
+        int32_t startIndex, float startPos, bool groupAtStart)
     {
         listCurrentPos += delta;
-        if (startIndex == 0) {
-            listCurrentPos = -startPos;
-            return;
-        }
         auto it = posMap_.find(startIndex);
         if (it == posMap_.begin() || it == posMap_.end()) {
             return;
@@ -116,7 +113,7 @@ public:
         it--;
         float prevPos = it->second.mainPos + it->second.mainSize + space;
         int32_t prevIndex = it->first;
-        if (prevIndex + 1 >= startIndex) {
+        if (prevIndex + 1 >= startIndex && groupAtStart) {
             if (NearEqual(prevPos, startPos)) {
                 return;
             }
@@ -128,7 +125,7 @@ public:
         listCurrentPos += prevPos - startPos;
     }
 
-    void UpdatePosMapEnd(int32_t prevEndIndex, float space)
+    void UpdatePosMapEnd(int32_t prevEndIndex, float space, bool groupAtEnd)
     {
         auto it = posMap_.find(prevEndIndex);
         if (it == posMap_.end()) {
@@ -139,7 +136,7 @@ public:
         if (it == posMap_.end()) {
             return;
         }
-        if (prevEndIndex + 1 >= it->first) {
+        if (prevEndIndex + 1 >= it->first && groupAtEnd) {
             if (NearEqual(prevPos, it->second.mainPos)) {
                 return;
             }

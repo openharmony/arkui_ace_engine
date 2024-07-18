@@ -78,7 +78,7 @@ public:
         }
     }
 	
-    double MeasureText(const MeasureContext& context) override;
+    double MeasureText(MeasureContext context) override;
 
     ACE_DISALLOW_COPY_AND_MOVE(CardFrontendDelegateDeclarative);
 

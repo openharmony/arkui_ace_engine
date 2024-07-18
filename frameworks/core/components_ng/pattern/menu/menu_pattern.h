@@ -559,6 +559,8 @@ private:
     RefPtr<UINode> GetOutsideForEachMenuItem(const RefPtr<UINode>& forEachNode, bool next);
 
     RefPtr<FrameNode> BuildContentModifierNode(int index);
+    bool IsMenuScrollable() const;
+
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
     std::optional<Offset> lastTouchOffset_;

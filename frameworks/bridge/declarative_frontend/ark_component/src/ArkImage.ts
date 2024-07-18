@@ -159,18 +159,21 @@ class ImageResizableModifier extends ModifierWithKey<ResizableOptions> {
     if (reset) {
       getUINativeModule().image.resetResizable(node);
     } else {
-      let sliceTop: Length | undefined;
-      let sliceRight: Length | undefined;
-      let sliceBottom: Length | undefined;
-      let sliceLeft: Length | undefined;
+      if (!isUndefined(this.value.lattice)) {
+        getUINativeModule().image.setResizableLattice(node, this.value.lattice);
+      }
       if (!isUndefined(this.value.slice)) {
+        let sliceTop: Length | undefined;
+        let sliceRight: Length | undefined;
+        let sliceBottom: Length | undefined;
+        let sliceLeft: Length | undefined;
         let tmpSlice = this.value.slice as EdgeWidths;
         sliceTop = tmpSlice.top;
         sliceRight = tmpSlice.right;
         sliceBottom = tmpSlice.bottom;
         sliceLeft = tmpSlice.left;
+        getUINativeModule().image.setResizable(node, sliceTop, sliceRight, sliceBottom, sliceLeft);
       }
-      getUINativeModule().image.setResizable(node, sliceTop, sliceRight, sliceBottom, sliceLeft);
     }
   }
 }
@@ -375,7 +378,7 @@ class ImageBorderModifier extends ModifierWithKey<BorderOptions> {
       let widthRight;
       let widthTop;
       let widthBottom;
-      if (!isUndefined(this.value.width) && this.value.width != null) {
+      if (!isUndefined(this.value.width) && this.value.width !== null) {
         if (isNumber(this.value.width) || isString(this.value.width) || isResource(this.value.width)) {
           widthLeft = this.value.width;
           widthRight = this.value.width;
@@ -392,7 +395,7 @@ class ImageBorderModifier extends ModifierWithKey<BorderOptions> {
       let rightColor;
       let topColor;
       let bottomColor;
-      if (!isUndefined(this.value.color) && this.value.color != null) {
+      if (!isUndefined(this.value.color) && this.value.color !== null) {
         if (isNumber(this.value.color) || isString(this.value.color) || isResource(this.value.color)) {
           leftColor = this.value.color;
           rightColor = this.value.color;
@@ -409,7 +412,7 @@ class ImageBorderModifier extends ModifierWithKey<BorderOptions> {
       let topRight;
       let bottomLeft;
       let bottomRight;
-      if (!isUndefined(this.value.radius) && this.value.radius != null) {
+      if (!isUndefined(this.value.radius) && this.value.radius !== null) {
         if (isNumber(this.value.radius) || isString(this.value.radius) || isResource(this.value.radius)) {
           topLeft = this.value.radius;
           topRight = this.value.radius;

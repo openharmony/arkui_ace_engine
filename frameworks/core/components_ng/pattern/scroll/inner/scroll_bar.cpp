@@ -66,7 +66,7 @@ void ScrollBar::InitTheme()
 
 bool ScrollBar::InBarTouchRegion(const Point& point) const
 {
-    if (NeedScrollBar() && shapeMode_ == ShapeMode::RECT) {
+    if (NeedPaint() && shapeMode_ == ShapeMode::RECT) {
         return touchRegion_.IsInRegion(point);
     }
     return false;
@@ -74,7 +74,7 @@ bool ScrollBar::InBarTouchRegion(const Point& point) const
 
 bool ScrollBar::InBarHoverRegion(const Point& point) const
 {
-    if (NeedScrollBar() && shapeMode_ == ShapeMode::RECT) {
+    if (NeedPaint() && shapeMode_ == ShapeMode::RECT) {
         return hoverRegion_.IsInRegion(point);
     }
     return false;
@@ -82,7 +82,7 @@ bool ScrollBar::InBarHoverRegion(const Point& point) const
 
 bool ScrollBar::InBarRectRegion(const Point& point) const
 {
-    if (NeedScrollBar() && shapeMode_ == ShapeMode::RECT) {
+    if (NeedPaint() && shapeMode_ == ShapeMode::RECT) {
         return barRect_.IsInRegion(point);
     }
     return false;

@@ -152,6 +152,7 @@ bool InputMethodManager::NeedSoftKeyboard() const
 
 void InputMethodManager::CloseKeyboard()
 {
+    ACE_LAYOUT_SCOPED_TRACE("CloseKeyboard");
     auto currentFocusNode = curFocusNode_.Upgrade();
     CHECK_NULL_VOID(currentFocusNode);
     auto pipeline = currentFocusNode->GetContext();
@@ -180,6 +181,7 @@ void InputMethodManager::CloseKeyboard(const RefPtr<NG::FrameNode>& focusNode)
     // If focus pattern does not need softkeyboard, close it, not in windowScene.
     auto curPattern = focusNode->GetPattern<NG::Pattern>();
     CHECK_NULL_VOID(curPattern);
+    ACE_LAYOUT_SCOPED_TRACE("CloseKeyboard[id:%d]", focusNode->GetId());
     bool isNeedKeyBoard = curPattern->NeedSoftKeyboard();
     if (!isNeedKeyBoard) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FrameNode(%{public}s/%{public}d) notNeedSoftKeyboard.",

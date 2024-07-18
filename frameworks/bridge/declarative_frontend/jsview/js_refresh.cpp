@@ -16,7 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_refresh.h"
 
 #include <cstdint>
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 
@@ -177,12 +177,39 @@ void JSRefresh::Create(const JSCallbackInfo& info)
         }
     }
     ParsFrictionData(friction);
-    ParseCustomBuilder(info);
+    if (!ParseRefreshingContent(paramObject)) {
+        ParseCustomBuilder(info);
+    }
 
     std::string loadingStr = "";
     if (ParseJsString(promptText, loadingStr)) {
         RefreshModel::GetInstance()->SetLoadingText(loadingStr);
     }
+}
+
+bool JSRefresh::ParseRefreshingContent(const JSRef<JSObject>& paramObject)
+{
+    JSRef<JSVal> contentParam = paramObject->GetProperty("refreshingContent");
+    if (!contentParam->IsObject()) {
+        return false;
+    }
+    JSRef<JSObject> contentObject = JSRef<JSObject>::Cast(contentParam);
+    JSRef<JSVal> builderNodeParam = contentObject->GetProperty("builderNode_");
+    if (!builderNodeParam->IsObject()) {
+        return false;
+    }
+    JSRef<JSObject> builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
+    JSRef<JSVal> nodeptr = builderNodeObject->GetProperty("nodePtr_");
+    if (nodeptr.IsEmpty()) {
+        return false;
+    }
+    const auto* vm = nodeptr->GetEcmaVM();
+    auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    RefPtr<NG::FrameNode> refPtrFrameNode = AceType::Claim(frameNode);
+    RefreshModel::GetInstance()->SetCustomBuilder(refPtrFrameNode);
+    return true;
 }
 
 bool JSRefresh::ParseCustomBuilder(const JSCallbackInfo& info)
@@ -222,7 +249,7 @@ void JSRefresh::OnStateChange(const JSCallbackInfo& args)
         PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
         func->ExecuteJS(1, &newJSVal);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
         UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Radio.onChange");
 #endif
     };

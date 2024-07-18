@@ -17,7 +17,7 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
 #include "base/utils/utils.h"
@@ -28,6 +28,7 @@
 
 #include "base/geometry/ng/vector.h"
 #include "base/image/drawing_color_filter.h"
+#include "base/image/drawing_lattice.h"
 #include "base/image/pixel_map.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/log/ace_trace.h"
@@ -74,7 +75,7 @@ ImageSourceInfo CreateSourceInfo(const std::shared_ptr<std::string>& srcRef, Ref
 std::unique_ptr<ImageModel> ImageModel::instance_ = nullptr;
 std::mutex ImageModel::mutex_;
 
-ImageModel* ImageModel::GetInstance()
+ImageModel* __attribute__((optnone)) ImageModel::GetInstance()
 {
     if (!instance_) {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -216,7 +217,7 @@ void JSImage::OnComplete(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Image.onComplete");
             func->Execute(info);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Image.onComplete");
 #endif
         };
@@ -234,7 +235,7 @@ void JSImage::OnError(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Image.onError");
             func->Execute(info);
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
             UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Image.onError");
 #endif
         };
@@ -370,18 +371,9 @@ void JSImage::JsBorder(const JSCallbackInfo& info)
     ImageModel::GetInstance()->SetBackBorder();
 }
 
-void JSImage::JsImageResizable(const JSCallbackInfo& info)
+void JSImage::ParseResizableSlice(const JSRef<JSObject>& resizableObject)
 {
-    if (ImageModel::GetInstance()->GetIsAnimation()) {
-        return;
-    }
-    auto infoObj = info[0];
     ImageResizableSlice sliceResult;
-    if (!infoObj->IsObject()) {
-        ImageModel::GetInstance()->SetResizableSlice(sliceResult);
-        return;
-    }
-    JSRef<JSObject> resizableObject = JSRef<JSObject>::Cast(infoObj);
     if (resizableObject->IsEmpty()) {
         ImageModel::GetInstance()->SetResizableSlice(sliceResult);
         return;
@@ -399,6 +391,36 @@ void JSImage::JsImageResizable(const JSCallbackInfo& info)
     UpdateSliceResult(sliceObj, sliceResult);
 
     ImageModel::GetInstance()->SetResizableSlice(sliceResult);
+}
+
+void JSImage::ParseResizableLattice(const JSRef<JSObject>& resizableObject)
+{
+    auto latticeValue = resizableObject->GetProperty("lattice");
+    if (latticeValue->IsUndefined() || latticeValue->IsNull()) {
+        ImageModel::GetInstance()->ResetResizableLattice();
+    }
+    CHECK_NULL_VOID(latticeValue->IsObject());
+    auto drawingLattice = CreateDrawingLattice(latticeValue);
+    if (drawingLattice) {
+        ImageModel::GetInstance()->SetResizableLattice(drawingLattice);
+    } else {
+        ImageModel::GetInstance()->ResetResizableLattice();
+    }
+}
+
+void JSImage::JsImageResizable(const JSCallbackInfo& info)
+{
+    if (ImageModel::GetInstance()->GetIsAnimation()) {
+        return;
+    }
+    auto infoObj = info[0];
+    if (!infoObj->IsObject()) {
+        ImageModel::GetInstance()->SetResizableSlice(ImageResizableSlice());
+        return;
+    }
+    JSRef<JSObject> resizableObject = JSRef<JSObject>::Cast(infoObj);
+    ParseResizableSlice(resizableObject);
+    ParseResizableLattice(resizableObject);
 }
 
 void JSImage::UpdateSliceResult(const JSRef<JSObject>& sliceObj, ImageResizableSlice& sliceResult)

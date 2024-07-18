@@ -49,9 +49,14 @@ public:
 
 private:
     float pickerItemHeight_ = 0.0f;
+    float dividerSpacingFontScale_ = 1.0f;
+    float gradientFontScale_ = 1.0f;
     std::vector<int32_t> currentOffset_;
     void InitGradient(const float& gradientPercent, const RefPtr<FrameNode> blendNode,
         const RefPtr<FrameNode> columnNode);
+    const Dimension AdjustFontSizeScale(const Dimension& fontSizeValue, double fontScale);
+    bool NeedAdaptForAging();
+    float ReCalcItemHeightScale(const Dimension& userSetHeight, bool isDividerSpacing = true);
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerColumnLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

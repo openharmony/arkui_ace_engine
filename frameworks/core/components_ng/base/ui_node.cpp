@@ -27,6 +27,7 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
@@ -1020,10 +1021,10 @@ bool UINode::IsNeedExportTexture() const
     return exportTextureInfo_ && exportTextureInfo_->GetCurrentRenderType() == NodeRenderType::RENDER_TYPE_TEXTURE;
 }
 
-void UINode::SetActive(bool active)
+void UINode::SetActive(bool active, bool needRebuildRenderContext)
 {
     for (const auto& child : GetChildren()) {
-        child->SetActive(active);
+        child->SetActive(active, needRebuildRenderContext);
     }
 }
 
@@ -1356,12 +1357,12 @@ bool UINode::SetParentLayoutConstraint(const SizeF& size) const
 
 void UINode::UpdateNodeStatus(NodeStatus nodeStatus)
 {
+    if (nodeStatus_ == nodeStatus) {
+        return;
+    }
     nodeStatus_ = nodeStatus;
+    OnAttachToBuilderNode(nodeStatus_);
     for (const auto& child : children_) {
-        if (child->GetNodeStatus() == nodeStatus_) {
-            continue;
-        }
-        child->OnAttachToBuilderNode(nodeStatus_);
         child->UpdateNodeStatus(nodeStatus_);
     }
 }
@@ -1460,6 +1461,22 @@ void UINode::NotifyWebPattern(bool isRegister)
 {
     for (const auto& item : GetChildren()) {
         item->NotifyWebPattern(isRegister);
+    }
+}
+
+void UINode::GetContainerComponentText(std::string& text)
+{
+    for (const auto& child : GetChildren()) {
+        if (InstanceOf<FrameNode>(child) && child->GetTag() == V2::TEXT_ETS_TAG) {
+            auto frameChild = DynamicCast<FrameNode>(child);
+            auto pattern = frameChild->GetPattern();
+            CHECK_NULL_VOID(pattern);
+            auto layoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(layoutProperty);
+            text = layoutProperty->GetContent().value_or("");
+            break;
+        }
+        child->GetContainerComponentText(text);
     }
 }
 } // namespace OHOS::Ace::NG

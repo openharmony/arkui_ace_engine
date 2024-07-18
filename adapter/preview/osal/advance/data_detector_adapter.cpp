@@ -27,7 +27,7 @@ void DataDetectorAdapter::ParseAIJson(
 void DataDetectorAdapter::StartAITask() {}
 
 bool DataDetectorAdapter::ShowUIExtensionMenu(
-    const AISpan& aiSpan, NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode)
+    const AISpan& aiSpan, NG::RectF aiRect, const RefPtr<NG::FrameNode>& targetNode, bool isShowSelectText)
 {
     return true;
 }

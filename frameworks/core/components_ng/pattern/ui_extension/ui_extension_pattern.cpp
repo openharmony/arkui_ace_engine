@@ -123,6 +123,15 @@ public:
         return true;
     }
 
+    void OnClearRegisterFlag() override
+    {
+        auto pattern = weakPattern_.Upgrade();
+        if (pattern == nullptr) {
+            return;
+        }
+        isReg_ = false;
+    }
+
 private:
     bool isReg_ = false;
     WeakPtr<UIExtensionPattern> weakPattern_;
@@ -261,6 +270,8 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     }
 
     CHECK_NULL_VOID(sessionWrapper_);
+    UIEXT_LOGI("The current state is '%{public}s' when UpdateWant.", ToString(state_));
+    bool isBackground = state_ == AbilityState::BACKGROUND;
     // Prohibit rebuilding the session unless the Want is updated.
     if (sessionWrapper_->IsSessionValid()) {
         if (sessionWrapper_->GetWant()->IsEquals(want)) {
@@ -283,6 +294,10 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     config.isAsyncModalBinding = isAsyncModalBinding_;
     config.uiExtensionUsage = uIExtensionUsage;
     sessionWrapper_->CreateSession(want, config);
+    if (isBackground) {
+        UIEXT_LOGW("Unable to StartUiextensionAbility while in the background.");
+        return;
+    }
     NotifyForeground();
 }
 
@@ -380,6 +395,11 @@ void UIExtensionPattern::OnDisconnect(bool isAbnormal)
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void UIExtensionPattern::OnAreaChangedInner()
+{
+    DispatchDisplayArea();
+}
+
 bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     CHECK_NULL_RETURN(sessionWrapper_, false);
@@ -389,9 +409,7 @@ bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto [displayOffset, err] = host->GetPaintRectGlobalOffsetWithTranslate();
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
-    auto selfExpansive = host->SelfExpansive();
-    UIEXT_LOGI("OnDirtyLayoutWrapperSwap GetSafeAreaExpandOpts isExpansive '%{public}d'.", selfExpansive);
-    auto displaySize = geometryNode->GetFrameSize(selfExpansive);
+    auto displaySize = geometryNode->GetFrameSize();
     displayArea_ = RectF(displayOffset, displaySize);
     sessionWrapper_->NotifyDisplayArea(displayArea_);
     return false;
@@ -457,19 +475,6 @@ void UIExtensionPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    auto eventHub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    OnAreaChangedFunc onAreaChangedFunc = [weak = WeakClaim(this)](
-        const RectF& oldRect,
-        const OffsetF& oldOrigin,
-        const RectF& rect,
-        const OffsetF& origin) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->DispatchDisplayArea();
-    };
-    eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
-
     pipeline->AddOnAreaChangeNode(host->GetId());
     callbackId_ = pipeline->RegisterSurfacePositionChangedCallback([weak = WeakClaim(this)](int32_t, int32_t) {
         auto pattern = weak.Upgrade();
@@ -485,6 +490,7 @@ void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     ContainerScope scope(instanceId_);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveOnAreaChangeNode(id);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->UnregisterSurfacePositionChangedCallback(callbackId_);
 }
@@ -754,7 +760,7 @@ void UIExtensionPattern::DispatchDisplayArea(bool isForce)
 
 void UIExtensionPattern::HandleDragEvent(const PointerEvent& info)
 {
-    const auto pointerEvent = info.rawPointerEvent;
+    auto pointerEvent = info.rawPointerEvent;
     CHECK_NULL_VOID(pointerEvent);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -771,6 +777,7 @@ void UIExtensionPattern::HandleDragEvent(const PointerEvent& info)
     } else {
         Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale, udegree);
     }
+    Platform::UpdatePointerAction(pointerEvent, info.action);
     DispatchPointerEvent(pointerEvent);
 }
 

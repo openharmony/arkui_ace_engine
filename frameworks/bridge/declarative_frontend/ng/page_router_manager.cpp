@@ -308,7 +308,7 @@ void PageRouterManager::PushNamedRouteInner(const RouterPageInfo& target)
     }
     RouterPageInfo info = target;
     info.isNamedRouterMode = true;
-    LoadPage(GenerateNextPageId(), info);
+    LoadPage(GenerateNextPageId(), info, true, true, true);
 }
 
 void PageRouterManager::Replace(const RouterPageInfo& target)
@@ -1128,7 +1128,7 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target)
         }
     }
 
-    LoadPage(GenerateNextPageId(), info);
+    LoadPage(GenerateNextPageId(), info, true, true, true);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto pageUrlChecker = container->GetPageUrlChecker();
@@ -1196,7 +1196,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
         }
     }
 
-    LoadPage(GenerateNextPageId(), info);
+    LoadPage(GenerateNextPageId(), info, true, true, true);
 }
 
 void PageRouterManager::ReplaceOhmUrl(const RouterPageInfo& target)
@@ -1387,7 +1387,8 @@ void PageRouterManager::BackToIndexCheckAlert(int32_t index, const std::string& 
     StartBackToIndex(index, params);
 }
 
-void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, bool needHideLast, bool needTransition)
+void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, bool needHideLast, bool needTransition,
+    bool isPush)
 {
     ACE_SCOPED_TRACE_COMMERCIAL("load page: %s(id:%d)", target.url.c_str(), pageId);
     CHECK_RUN_ON(JS);
@@ -1398,7 +1399,7 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     }
 
     pageRouterStack_.emplace_back(pageNode);
-    if (!OnPageReady(pageNode, needHideLast, needTransition)) {
+    if (!OnPageReady(pageNode, needHideLast, needTransition, false, 0, isPush)) {
         pageRouterStack_.pop_back();
         LOGW("LoadPage OnPageReady Failed");
         return;
@@ -1883,8 +1884,8 @@ void PageRouterManager::PopPageToIndex(int32_t index, const std::string& params,
     pageInfo->ReplacePageParams(tempParam);
 }
 
-bool PageRouterManager::OnPageReady(
-    const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition, bool isCardRouter, int64_t cardId)
+bool PageRouterManager::OnPageReady(const RefPtr<FrameNode>& pageNode, bool needHideLast, bool needTransition,
+    bool isCardRouter, int64_t cardId, bool isPush)
 {
     Recorder::NodeDataCache::Get().OnPageReady();
     auto container = Container::Current();
@@ -1902,7 +1903,7 @@ bool PageRouterManager::OnPageReady(
     auto context = DynamicCast<NG::PipelineContext>(pipeline);
     auto stageManager = context ? context->GetStageManager() : nullptr;
     if (stageManager) {
-        return stageManager->PushPage(pageNode, needHideLast, needTransition);
+        return stageManager->PushPage(pageNode, needHideLast, needTransition, isPush);
     }
     return false;
 }

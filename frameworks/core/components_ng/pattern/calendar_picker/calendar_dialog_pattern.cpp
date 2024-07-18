@@ -1044,8 +1044,9 @@ void CalendarDialogPattern::GetCalendarMonthData(int32_t year, int32_t month, Ob
 
     CalendarMonth currentMonth { .year = year, .month = month };
 
-    int32_t currentMonthMaxDay = PickerDate::GetMaxDay(year, month);
-    int32_t preMonthMaxDay = PickerDate::GetMaxDay(GetLastMonth(currentMonth).year, GetLastMonth(currentMonth).month);
+    int32_t currentMonthMaxDay = static_cast<int32_t>(PickerDate::GetMaxDay(year, month));
+    int32_t preMonthMaxDay =
+        static_cast<int32_t>(PickerDate::GetMaxDay(GetLastMonth(currentMonth).year, GetLastMonth(currentMonth).month));
     int32_t preMonthDaysCount = (Date::CalculateWeekDay(year, month, 1) + 1) % WEEK_DAYS;
     int32_t nextMonthDaysCount = 6 - ((Date::CalculateWeekDay(year, month, currentMonthMaxDay) + 1) % WEEK_DAYS);
 

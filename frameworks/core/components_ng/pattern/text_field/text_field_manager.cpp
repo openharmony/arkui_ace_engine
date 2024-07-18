@@ -148,7 +148,6 @@ bool TextFieldManagerNG::ScrollTextFieldToSafeArea()
     CHECK_NULL_RETURN(pipeline, false);
     auto keyboardInset = pipeline->GetSafeAreaManager()->GetKeyboardInset();
     bool isShowKeyboard = keyboardInset.IsValid();
-    NotifyKeyboardChangedCallback(isShowKeyboard);
     if (isShowKeyboard) {
         auto bottomInset = pipeline->GetSafeArea().bottom_.Combine(keyboardInset);
         CHECK_NULL_RETURN(bottomInset.IsValid(), false);
@@ -267,21 +266,5 @@ void TextFieldManagerNG::SetNavContentAvoidKeyboardOffset(RefPtr<FrameNode> navN
         }
     }
     navNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-}
-
-void TextFieldManagerNG::NotifyKeyboardChangedCallback(bool isShowKeyboard)
-{
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto safeAreaManager = context->GetSafeAreaManager();
-    CHECK_NULL_VOID(safeAreaManager);
-    auto keyboardOffset = safeAreaManager->GetKeyboardOffset();
-    auto isChanged = !NearEqual(lastKeyboardOffset_, keyboardOffset);
-    for (const auto& pair : keyboardChangeCallbackMap_) {
-        if (pair.second) {
-            pair.second(isChanged, isShowKeyboard);
-        }
-    }
-    lastKeyboardOffset_ = keyboardOffset;
 }
 } // namespace OHOS::Ace::NG

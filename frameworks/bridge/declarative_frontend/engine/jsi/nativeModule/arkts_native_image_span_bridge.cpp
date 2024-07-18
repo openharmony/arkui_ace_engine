@@ -291,7 +291,7 @@ void SetSpanColorFilterObject(const EcmaVM* vm, const Local<JSValueRef>& jsObjAr
 {
     Framework::JSColorFilter* colorFilter;
     if (!jsObjArg->IsUndefined() && !jsObjArg->IsNull()) {
-        colorFilter = static_cast<Framework::JSColorFilter*>(jsObjArg->ToObject(vm)->GetNativePointerField(0));
+        colorFilter = static_cast<Framework::JSColorFilter*>(jsObjArg->ToObject(vm)->GetNativePointerField(vm, 0));
     } else {
         GetArkUINodeModifiers()->getImageSpanModifier()->setImageSpanColorFilter(
             nativeNode, &(*DEFAULT_COLOR_FILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);

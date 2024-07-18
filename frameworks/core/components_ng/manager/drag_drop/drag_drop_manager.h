@@ -141,7 +141,7 @@ public:
     void HideDragPreviewOverlay();
     void HideDragPreviewWindow(int32_t containerId);
     bool IsMSDPDragging() const;
-    void UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const Point& point);
+    void UpdateDragEvent(RefPtr<OHOS::Ace::DragEvent>& event, const OHOS::Ace::PointerEvent& pointerEvent);
     void UpdateNotifyDragEvent(
         RefPtr<NotifyDragEvent>& notifyEvent, const Point& point, const DragEventType dragEventType);
     bool CheckDragDropProxy(int64_t id) const;
@@ -441,6 +441,8 @@ public:
         return dragTotalMovePosition_;
     }
 
+    bool IsDropAllowed(const RefPtr<FrameNode>& dragFrameNode);
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
@@ -477,8 +479,9 @@ private:
     bool isDistanceLimited(const Point& point);
     bool isTimeLimited(const PointerEvent& pointerEvent, const Point& point);
     bool ReachMoveLimit(const PointerEvent& pointerEvent, const Point& point);
-    bool IsDropAllowed(const RefPtr<FrameNode>& dragFrameNode);
     bool IsUIExtensionShowPlaceholder(const RefPtr<NG::UINode>& node);
+    bool IsUIExtensionComponent(const RefPtr<NG::UINode>& node);
+    int32_t GetWindowId();
 
     std::map<int32_t, WeakPtr<FrameNode>> dragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
@@ -517,6 +520,7 @@ private:
     bool isDragWindowShow_ = false;
     bool hasNotifiedTransformation_ = false;
     bool isPullMoveReceivedForCurrentDrag_ = false;
+    bool isDragWindowSubWindow_ = false;
     VelocityTracker velocityTracker_;
     DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;
     PreDragStatus preDragStatus_ = PreDragStatus::ACTION_DETECTING_STATUS;

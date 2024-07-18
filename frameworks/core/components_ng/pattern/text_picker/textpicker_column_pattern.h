@@ -352,6 +352,7 @@ public:
         return isDownScroll_;
     }
     void ResetOptionPropertyHeight();
+    void ResetTotalDelta();
 
 private:
     void OnModifyDone() override;
@@ -430,6 +431,8 @@ private:
     void UpdateTexOverflow(bool isSel, const RefPtr<TextLayoutProperty>& textLayoutProperty);
 
     void InitTextFontFamily();
+    bool SpringCurveTailMoveProcess(bool useRebound, double& dragDelta);
+    void SpringCurveTailEndProcess(bool useRebound, bool stopMove);
 
     bool isTossing_ = false;
     bool isTextFadeOut_ = false;
@@ -450,9 +453,10 @@ private:
     std::vector<std::string> range_ { "" };
     uint32_t currentIndex_ = 0;
     std::vector<NG::RangeContent> options_;
-    int32_t columnkind_;
+    int32_t columnkind_ = 0;
     int32_t currentChildIndex_ = 0;
     float deltaSize_ = 0.0f;
+    double totalDragDelta_ = 0.0;
     double yLast_ = 0.0;
     double yOffset_ = 0.0;
     double jumpInterval_;

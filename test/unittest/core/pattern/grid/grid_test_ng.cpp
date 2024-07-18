@@ -16,6 +16,7 @@
 #include "grid_test_ng.h"
 
 #include "test/mock/base/mock_drag_window.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -41,10 +42,12 @@ void GridTestNg::SetUpTestSuite()
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_GRID);
     auto gridItemTheme = GridItemTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(GridItemTheme::TypeId())).WillRepeatedly(Return(gridItemTheme));
-    RefPtr<DragWindow> dragWindow = DragWindow::CreateDragWindow("", 0, 0, 0, 0, 0);
+    RefPtr<DragWindow> dragWindow = DragWindow::CreateDragWindow({ "", 0, 0, 0, 0, 0 });
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragWindow)), DrawFrameNode(_)).Times(AnyNumber());
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragWindow)), MoveTo(_, _)).Times(AnyNumber());
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragWindow)), Destroy()).Times(AnyNumber());
+    auto container = Container::GetContainer(CONTAINER_ID_DIVIDE_SIZE);
+    EXPECT_CALL(*(AceType::DynamicCast<MockContainer>(container)), GetWindowId()).Times(AnyNumber());
     EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(AnyNumber());
 
 #ifndef TEST_IRREGULAR_GRID
@@ -127,8 +130,10 @@ void GridTestNg::CreateFocusableGridItems(int32_t itemNumber, float width, float
         {
             ButtonModelNG buttonModelNG;
             buttonModelNG.CreateWithLabel("label");
+            ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
             ViewStackProcessor::GetInstance()->Pop();
         }
+        ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }

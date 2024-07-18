@@ -21,7 +21,7 @@ from src.beans.event_procedures import EventProcedures
 from src.beans.frame_node import FrameNode
 from src.beans.touch_point import TouchPoint
 from src.utils.log_wrapper import log_info, log_error
-from src.utils.value_parser import pack_string_until_next_keyword, get_value_as_int
+from src.utils.value_parser import pack_string_until_next_keyword
 
 
 # includes touch points and frame nodes(hittest) and event procedures
@@ -100,10 +100,15 @@ class EventTree(BaseBean):
         self.event_procedures = EventProcedures(packed_str)
         return packed_result[1]
 
+    def is_parse_failed(self):
+        if self.tree_id == -1 or self.touch_points is None or len(self.touch_points) == 0:
+            return True
+        if self.frame_nodes is None or len(self.frame_nodes) == 0 or self.event_procedures is None:
+            return True
+        return False
+
     def check_parse_result(self):
-        if self.tree_id == -1 or self.touch_points is None or len(self.touch_points) == 0 or self.frame_nodes is None \
-                or len(
-            self.frame_nodes) == 0 or self.event_procedures is None:
+        if self.is_parse_failed():
             self.parse_failed()
         else:
             self.parse_succeed()

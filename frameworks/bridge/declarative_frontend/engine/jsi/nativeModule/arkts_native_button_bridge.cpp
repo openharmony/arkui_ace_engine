@@ -69,10 +69,10 @@ panda::Local<panda::JSValueRef> JsButtonClickCallback(panda::JsiRuntimeCallInfo*
     double yPos = secondArg->ToNumber(vm)->Value();
     auto ref = runtimeCallInfo->GetThisRef();
     auto obj = ref->ToObject(vm);
-    if (obj->GetNativePointerFieldCount() < CALL_ARG_1) {
+    if (obj->GetNativePointerFieldCount(vm) < CALL_ARG_1) {
         return panda::JSValueRef::Undefined(vm);
     }
-    auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(0));
+    auto frameNode = static_cast<FrameNode*>(obj->GetNativePointerField(vm, 0));
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     ButtonModelNG::TriggerClick(frameNode, xPos, yPos);
     return panda::JSValueRef::Undefined(vm);
@@ -285,7 +285,7 @@ ArkUINativeModuleValue ButtonBridge::SetFontWeight(ArkUIRuntimeCallInfo* runtime
             fontWeight = std::to_string(fontWeightArg->Int32Value(vm));
         } else if (fontWeightArg->IsString(vm)) {
             // enum FontWeight is string.
-            fontWeight = fontWeightArg->ToString(vm)->ToString();
+            fontWeight = fontWeightArg->ToString(vm)->ToString(vm);
         }
     }
     GetArkUINodeModifiers()->getButtonModifier()->setButtonFontWeight(nativeNode, fontWeight.c_str());
@@ -473,7 +473,7 @@ void ButtonBridge::PutButtonStringParameters(
             fontWeight = std::to_string(fontWeightArg->Int32Value(vm));
         } else if (fontWeightArg->IsString(vm)) {
             // enum FontWeight is sent as string.
-            fontWeight = fontWeightArg->ToString(vm)->ToString();
+            fontWeight = fontWeightArg->ToString(vm)->ToString(vm);
         }
     }
     stringsVector.push_back(fontWeight);

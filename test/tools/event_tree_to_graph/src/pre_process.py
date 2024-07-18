@@ -16,36 +16,34 @@
 # limitations under the License.
 #
 
-# 预处理输入文件，去除多余信息，生成一个中间文件
+# Preprocess the input file, removing extraneous information, and generate an intermediate file
 import os
-from src.keywords import keywords_dict
+import stat
+
+from src.keywords import keywords_dict, get_dict_value
 from src.utils.log_wrapper import log_info
 
 
 def handle_file_preprocess(input_file, output_file):
-    # 检查输出文件路径的文件是否存在，存在则先删除
+    # Check if the file at the output file path exists, and if it does, delete it first.
     if os.path.exists(output_file):
         try:
             os.remove(output_file)
         except Exception as e:
-            # 删除文件时发生错误
-            print(f"删除文件 {output_file} 时发生错误：{e}")
+            print(f"delete {output_file} failed：{e}")
 
-    # 打开原始文件和目标文件
-    with open(input_file, 'r', encoding='utf-8') as infile, open(output_file, 'w', encoding='utf-8') as outfile:
-        # 遍历输入文件的每一行
-        for line in infile:
-            # 查找'EventTreeDumpInfo'的位置
-            index = line.find(keywords_dict['EventTreeDumpInfo'])
-            # 如果找到了'EventTreeDumpInfo: '
-            if index != -1:
-                new_index = index + len(keywords_dict['EventTreeDumpInfo'])
-                # 从'EventTreeDumpInfo'开始截取直到行末
-                newline = line[new_index:]
-                # 将处理后的行写入临时文件
-                outfile.write(newline)
-            else:
-                # 否则直接写入临时文件
-                outfile.write(line)
-    log_info("输入文件预处理完成：" + input_file + "->" + output_file)
-
+    with open(input_file, 'r', encoding='utf-8') as infile:
+        flags = os.O_WRONLY | os.O_CREAT
+        mode = stat.S_IWUSR | stat.S_IRUSR
+        with os.fdopen(os.open(output_file, flags, mode), 'w') as outfile:
+            event_tree_dump_info_key = get_dict_value(keywords_dict, 'EventTreeDumpInfo')
+            for line in infile:
+                # find the EventTreeDumpInfo section position
+                index = line.find(event_tree_dump_info_key)
+                if index != -1:
+                    new_index = index + len(event_tree_dump_info_key)
+                    newline = line[new_index:]
+                    outfile.write(newline)
+                else:
+                    outfile.write(line)
+    log_info("preprocess done: " + input_file + "->" + output_file)

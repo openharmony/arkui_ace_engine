@@ -76,10 +76,11 @@ public:
                 theme->backButtonIconColor_ = pattern->GetAttr<Color>("back_button_icon_color", Color::WHITE);
                 theme->alphaDisabled_ = pattern->GetAttr<double>("button_alpha_disabled", 0.0);
                 auto dividerShadowEnable = pattern->GetAttr<std::string>("divider_shadow_enable", "0");
-                theme->dividerShadowEnable_ = StringUtils::StringToInt(dividerShadowEnable);
+                theme->dividerShadowEnable_ = static_cast<uint32_t>(StringUtils::StringToInt(dividerShadowEnable));
                 theme->navigationGroupColor_ = pattern->GetAttr<Color>("navigation_group_color", Color::TRANSPARENT);
                 auto navBarUnfocusEffectEnable = pattern->GetAttr<std::string>("section_unfocus_effect_enable", "0");
-                theme->navBarUnfocusEffectEnable_ = StringUtils::StringToInt(navBarUnfocusEffectEnable);
+                theme->navBarUnfocusEffectEnable_ = static_cast<uint32_t>(
+                    StringUtils::StringToInt(navBarUnfocusEffectEnable));
                 theme->navBarUnfocusColor_ = pattern->GetAttr<Color>("color_panel_bg", Color::TRANSPARENT);
                 theme->titlebarBackgroundBlurStyle_ = pattern->GetAttr<int>("titlebar_background_blur_style", 0);
                 theme->toolbarBackgroundBlurStyle_ = pattern->GetAttr<int>("toolbar_background_blur_style", 0);
@@ -117,11 +118,12 @@ public:
             theme->toolbarActiveTextColor_ =
                 pattern->GetAttr<Color>("toolbar_item_active_text_color", Color(0xff007dff));
             auto dividerShadowEnable = pattern->GetAttr<std::string>("divider_shadow_enable", "0");
-            theme->dividerShadowEnable_ = StringUtils::StringToInt(dividerShadowEnable);
+            theme->dividerShadowEnable_ = static_cast<uint32_t>(StringUtils::StringToInt(dividerShadowEnable));
             theme->navigationDividerColor_ = pattern->GetAttr<Color>("navigation_divider_color", Color(0x33000000));
             theme->navigationGroupColor_ = pattern->GetAttr<Color>("navigation_group_color", Color::TRANSPARENT);
             auto navBarUnfocusEffectEnable = pattern->GetAttr<std::string>("section_unfocus_effect_enable", "0");
-            theme->navBarUnfocusEffectEnable_ = StringUtils::StringToInt(navBarUnfocusEffectEnable);
+            theme->navBarUnfocusEffectEnable_ = static_cast<uint32_t>(
+                StringUtils::StringToInt(navBarUnfocusEffectEnable));
             theme->navBarUnfocusColor_ = pattern->GetAttr<Color>("color_panel_bg", Color::TRANSPARENT);
             theme->backgroundBlurColor_ = pattern->GetAttr<Color>("background_blur_color", Color(0x19E6E6E6));
             theme->mainTitleFontColor_ = pattern->GetAttr<Color>("title_primary_color", Color(0xe5000000));

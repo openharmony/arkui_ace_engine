@@ -79,8 +79,7 @@ void KeyboardPattern::OnAreaChangedInner()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto parentGlobal = host->GetTransformRectRelativeToWindow();
-    auto customHeight = parentGlobal.Height();
+    auto customHeight = GetKeyboardHeight();
     if (NearEqual(customHeight, keyboardHeight_)) {
         return;
     }
@@ -90,6 +89,7 @@ void KeyboardPattern::OnAreaChangedInner()
         auto pipeline = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         Rect keyboardRect = Rect(0.0f, 0.0f, 0.0f, customHeight);
+        TAG_LOGI(ACE_KEYBOARD, "customKeyboardHeight Change to %{public}f", customHeight);
         pipeline->OnVirtualKeyboardAreaChange(keyboardRect, nullptr, safeHeight_, supportAvoidance_);
     }
     keyboardHeight_ = customHeight;
@@ -100,13 +100,36 @@ void KeyboardPattern::SetKeyboardAreaChange(bool keyboardAvoidance)
     if (keyboardAvoidance) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto parentGlobal = host->GetTransformRectRelativeToWindow();
-        auto keyboardHeight = parentGlobal.Height();
+        auto keyboardHeight = GetKeyboardHeight();
         auto pipeline = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         Rect keyboardRect = Rect(0.0f, 0.0f, 0.0f, keyboardHeight);
+        TAG_LOGI(ACE_KEYBOARD, "customKeyboardHeight Change to %{public}f", keyboardHeight);
         pipeline->OnVirtualKeyboardAreaChange(keyboardRect, nullptr, safeHeight_, supportAvoidance_);
     }
+}
+
+float KeyboardPattern::GetKeyboardHeight()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto child = host->GetChildAtIndex(0);
+    while (child) {
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+        if (!childFrameNode) {
+            child = child->GetChildAtIndex(0);
+            continue;
+        }
+        auto hostRect = host->GetTransformRectRelativeToWindow();
+        if (!CheckChildPosition(childFrameNode)) {
+            return hostRect.Height();
+        }
+        auto childRender = childFrameNode->GetRenderContext();
+        CHECK_NULL_RETURN(childRender, false);
+        auto positionY = childRender->GetPositionValue({}).GetY().ConvertToPx();
+        return hostRect.Height() - positionY > 0.0f ? hostRect.Height() - positionY : 0.0f;
+    }
+    return 0.0f;
 }
 
 void KeyboardPattern::OnDetachFromFrameNode(FrameNode* node)

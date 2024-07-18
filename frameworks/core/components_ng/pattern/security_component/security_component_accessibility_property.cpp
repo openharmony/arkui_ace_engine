@@ -18,6 +18,10 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "location_button/location_button_common.h"
+#include "paste_button/paste_button_common.h"
+#include "save_button/save_button_common.h"
+#include "security_component_theme.h"
 
 namespace OHOS::Ace::NG {
 std::string SecurityComponentAccessibilityProperty::GetText() const
@@ -30,9 +34,34 @@ std::string SecurityComponentAccessibilityProperty::GetText() const
         CHECK_NULL_RETURN(node, value);
         if (node->GetTag() == V2::TEXT_ETS_TAG) {
             auto textLayoutProperty = node->GetLayoutProperty<TextLayoutProperty>();
-            CHECK_NULL_RETURN(textLayoutProperty, value);
+            if (textLayoutProperty == nullptr) {
+                break;
+            }
             value = textLayoutProperty->GetContentValue(value);
             break;
+        }
+    }
+    if (value.empty()) {
+        std::string nodeType = frameNode->GetTag();
+        auto pipeline = frameNode->GetContextRefPtr();
+        if (pipeline == nullptr) {
+            LOGE("Pipeline is null.");
+            return std::string();
+        }
+        auto theme = pipeline->GetTheme<SecurityComponentTheme>();
+        if (theme == nullptr) {
+            LOGE("Theme is null.");
+            return std::string();
+        }
+        if (nodeType == V2::LOCATION_BUTTON_ETS_TAG) {
+            value = theme->GetLocationDescriptions(
+                static_cast<int32_t>(LocationButtonLocationDescription::LOCATING));
+        } else if (nodeType == V2::PASTE_BUTTON_ETS_TAG) {
+            value = theme->GetPasteDescriptions(
+                static_cast<int32_t>(PasteButtonPasteDescription::PASTE));
+        } else if (nodeType == V2::SAVE_BUTTON_ETS_TAG) {
+            value = theme->GetSaveDescriptions(
+                static_cast<int32_t>(SaveButtonSaveDescription::SAVE));
         }
     }
     return value;

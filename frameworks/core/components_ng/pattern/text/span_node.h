@@ -213,7 +213,7 @@ public:
     int32_t selectedEnd = -1;
     void UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder);
     virtual int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
-        bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle());
+        bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle(), bool isMarquee = false);
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
     virtual void UpdateTextStyleForAISpan(
         const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle);
@@ -273,7 +273,7 @@ public:
     {
         return isParentText;
     }
-    std::string GetSpanContent(const std::string& rawContent);
+    std::string GetSpanContent(const std::string& rawContent, bool isMarquee = false);
     std::string GetSpanContent();
     uint32_t GetSymbolUnicode();
     std::string SymbolColorToString();
@@ -493,7 +493,8 @@ public:
     ~PlaceholderSpanItem() override = default;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
     int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
-        bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle()) override;
+        bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle(),
+        bool isMarquee = false) override;
 
     void DumpInfo() const
     {
@@ -600,7 +601,8 @@ public:
     }
     ~ImageSpanItem() override = default;
     int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
-        bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle()) override;
+        bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle(),
+        bool isMarquee = false) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
     void UpdatePlaceholderBackgroundStyle(const RefPtr<FrameNode>& imageNode);
     void SetImageSpanOptions(const ImageSpanOptions& options);

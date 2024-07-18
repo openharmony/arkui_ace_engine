@@ -733,7 +733,7 @@ HWTEST_F(ListScrollerEventTestNg, OnScrollVisibleContentChange002, TestSize.Leve
     };
     ListModelNG model = CreateList();
     model.SetOnScrollVisibleContentChange(onVisibleChange);
-    CreateGroupWithSetting(5, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
+    CreateGroupWithSetting(5, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
     ListItemIndex startExpect = { 0, 2 };
     ListItemIndex endExpect = { 1, 1, 0 };

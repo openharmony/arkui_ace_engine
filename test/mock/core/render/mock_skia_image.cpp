@@ -63,6 +63,10 @@ void DrawingImage::DrawToRSCanvas(
 #endif
 {}
 
+#ifdef USE_ROSEN_DRAWING
+void DrawingImage::DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect) {}
+#endif
+
 #ifndef USE_ROSEN_DRAWING
 int32_t SkiaImage::GetWidth() const
 #else

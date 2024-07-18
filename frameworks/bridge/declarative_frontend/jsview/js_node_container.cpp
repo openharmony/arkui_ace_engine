@@ -196,8 +196,8 @@ void JSNodeContainer::ResetNodeController()
     NodeContainerModel::GetInstance()->SetMakeFunction(nullptr);
     NodeContainerModel::GetInstance()->SetOnTouchEvent(nullptr);
     NodeContainerModel::GetInstance()->SetOnResize(nullptr);
-    ViewAbstractModel::GetInstance()->SetOnAppear(nullptr);
-    ViewAbstractModel::GetInstance()->SetOnDisAppear(nullptr);
+    NodeContainerModel::GetInstance()->SetOnAppear(nullptr);
+    NodeContainerModel::GetInstance()->SetOnDisAppear(nullptr);
     ViewAbstractModel::GetInstance()->SetOnAttach(nullptr);
     ViewAbstractModel::GetInstance()->SetOnDetach(nullptr);
 }
@@ -212,7 +212,7 @@ void JSNodeContainer::SetOnAppearFunc(const JSRef<JSObject>& object, JsiExecutio
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         func->Execute();
     };
-    ViewAbstractModel::GetInstance()->SetOnAppear(onAppear);
+    NodeContainerModel::GetInstance()->SetOnAppear(onAppear);
 }
 
 void JSNodeContainer::SetOnDisappearFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx)
@@ -225,7 +225,7 @@ void JSNodeContainer::SetOnDisappearFunc(const JSRef<JSObject>& object, JsiExecu
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         func->Execute();
     };
-    ViewAbstractModel::GetInstance()->SetOnDisAppear(onDisappear);
+    NodeContainerModel::GetInstance()->SetOnDisAppear(onDisappear);
 }
 
 void JSNodeContainer::SetOnAttachFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx)

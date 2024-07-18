@@ -130,7 +130,7 @@ ArkUINativeModuleValue GridRowBridge::SetBreakpoints(ArkUIRuntimeCallInfo* runti
         CalcDimension calvalue;
         std::string calcStr;
         auto item = panda::ArrayRef::GetValueAt(vm, arrayVal, index);
-        calcStr = item->ToString(vm)->ToString();
+        calcStr = item->ToString(vm)->ToString(vm);
         if (!ArkTSUtils::ParseJsDimensionVp(vm, item, calvalue, false)) {
             calvalue = CalcDimension(0, DimensionUnit::VP);
         }

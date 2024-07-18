@@ -54,12 +54,11 @@ CanvasPaintMethod::CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, con
 void CanvasPaintMethod::PushTask(const TaskFunc& task)
 {
     tasks_.emplace_back(task);
-    if (needMarkDirty_) {
-        needMarkDirty_ = false;
-        auto host = frameNode_.Upgrade();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    }
+    CHECK_EQUAL_VOID(needMarkDirty_, false);
+    needMarkDirty_ = false;
+    auto host = frameNode_.Upgrade();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 #endif
 
@@ -110,9 +109,7 @@ void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         return;
     }
 
-    if (onModifierUpdate_) {
-        onModifierUpdate_();
-    }
+    FireOnModifierUpdateFunc();
     recordingCanvas->Scale(1.0, 1.0);
     FlushTask();
     CHECK_NULL_VOID(contentModifier_);
@@ -125,24 +122,15 @@ void CanvasPaintMethod::UpdateRecordingCanvas(float width, float height)
     contentModifier_->UpdateCanvas(std::static_pointer_cast<RSRecordingCanvas>(rsCanvas_));
     CHECK_NULL_VOID(rsCanvas_);
     rsCanvas_->Save();
-    if (canvasCallback_) {
-        canvasCallback_(rsCanvas_.get(), width, height);
-    }
+    FireRSCanvasCallback(width, height);
     needMarkDirty_ = true;
-}
-
-void CanvasPaintMethod::SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback)
-{
-    canvasCallback_ = callback;
 }
 
 void CanvasPaintMethod::ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj)
 {
 #ifndef ACE_UNITTEST
     imageObj_ = imageObj;
-    if (!imageObj_->IsSvg()) {
-        return;
-    }
+    CHECK_EQUAL_VOID(imageObj_->IsSvg(), false);
     skiaDom_ = AceType::DynamicCast<SvgSkiaImageObject>(imageObj_)->GetSkiaDom();
     currentSource_ = loadingSource_;
     Ace::CanvasImage canvasImage = canvasImage_;
@@ -231,59 +219,14 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
 #endif
 }
 
-void CanvasPaintMethod::DrawPixelMapWithoutGlobalState(
-    const RefPtr<PixelMap>& pixelMap, const Ace::CanvasImage& canvasImage)
-{
-#ifndef ACE_UNITTEST
-    InitImagePaint(nullptr, &imageBrush_, sampleOptions_);
-    auto recordingCanvas = std::static_pointer_cast<RSRecordingCanvas>(rsCanvas_);
-    CHECK_NULL_VOID(recordingCanvas);
-    const std::shared_ptr<Media::PixelMap> tempPixelMap = pixelMap->GetPixelMapSharedPtr();
-    CHECK_NULL_VOID(tempPixelMap);
-    switch (canvasImage.flag) {
-        case 0: {
-            RSRect srcRect = RSRect(0, 0, tempPixelMap->GetWidth(), tempPixelMap->GetHeight());
-            RSRect dstRect = RSRect(canvasImage.dx, canvasImage.dy,
-                canvasImage.dx + tempPixelMap->GetWidth(), canvasImage.dy + tempPixelMap->GetHeight());
-            recordingCanvas->AttachBrush(imageBrush_);
-            recordingCanvas->DrawPixelMapRect(tempPixelMap, srcRect, dstRect, sampleOptions_);
-            recordingCanvas->DetachBrush();
-            break;
-        }
-        case 1: {
-            RSRect srcRect = RSRect(0, 0, tempPixelMap->GetWidth(), tempPixelMap->GetHeight());
-            RSRect dstRect = RSRect(canvasImage.dx, canvasImage.dy,
-                canvasImage.dx + canvasImage.dWidth, canvasImage.dy + canvasImage.dHeight);
-            recordingCanvas->AttachBrush(imageBrush_);
-            recordingCanvas->DrawPixelMapRect(tempPixelMap, srcRect, dstRect, sampleOptions_);
-            recordingCanvas->DetachBrush();
-            break;
-        }
-        case 2: {
-            RSRect srcRect = RSRect(canvasImage.sx, canvasImage.sy,
-                canvasImage.sx + canvasImage.sWidth, canvasImage.sy + canvasImage.sHeight);
-            RSRect dstRect = RSRect(canvasImage.dx, canvasImage.dy,
-                canvasImage.dx + canvasImage.dWidth, canvasImage.dy + canvasImage.dHeight);
-            recordingCanvas->AttachBrush(imageBrush_);
-            recordingCanvas->DrawPixelMapRect(tempPixelMap, srcRect, dstRect,
-                sampleOptions_, RSSrcRectConstraint::STRICT_SRC_RECT_CONSTRAINT);
-            recordingCanvas->DetachBrush();
-            break;
-        }
-        default:
-            break;
-    }
-#endif
-}
-
 void CanvasPaintMethod::CloseImageBitmap(const std::string& src)
 {
 #ifndef ACE_UNITTEST
     CHECK_NULL_VOID(imageCache_);
     auto cacheImage = imageCache_->GetCacheImage(src);
-    if (cacheImage && cacheImage->imagePtr) {
-        imageCache_->ClearCacheImage(src);
-    }
+    CHECK_NULL_VOID(cacheImage);
+    CHECK_NULL_VOID(cacheImage->imagePtr);
+    imageCache_->ClearCacheImage(src);
 #endif
 }
 
@@ -293,14 +236,9 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
     CHECK_NULL_RETURN(renderContext, nullptr);
     double dirtyWidth = std::abs(width);
     double dirtyHeight = std::abs(height);
-    double scaledLeft = left;
-    double scaledTop = top;
-    if (Negative(width)) {
-        scaledLeft += width;
-    }
-    if (Negative(height)) {
-        scaledTop += height;
-    }
+    double scaledLeft = left + std::min(width, 0.0);
+    double scaledTop = top + std::min(height, 0.0);
+
     // copy the bitmap to tempCanvas
     RSBitmap currentBitmap;
     if (!DrawBitmap(renderContext, currentBitmap)) {
@@ -344,22 +282,8 @@ void CanvasPaintMethod::GetImageData(
     CHECK_NULL_VOID(imageData);
     auto dirtyWidth = std::abs(imageData->dirtyWidth);
     auto dirtyHeight = std::abs(imageData->dirtyHeight);
-    auto scaledLeft = imageData->dirtyX;
-    auto scaledTop = imageData->dirtyY;
-    auto dx = 0.0f;
-    auto dy = 0.0f;
-    if (Negative(imageData->dirtyWidth)) {
-        scaledLeft += imageData->dirtyWidth;
-    }
-    if (Negative(imageData->dirtyHeight)) {
-        scaledTop += imageData->dirtyHeight;
-    }
-    if (Negative(scaledLeft)) {
-        dx = scaledLeft;
-    }
-    if (Negative(scaledTop)) {
-        dy = scaledTop;
-    }
+    auto scaledLeft = imageData->dirtyX + std::min(imageData->dirtyWidth, 0);
+    auto scaledTop = imageData->dirtyY + std::min(imageData->dirtyHeight, 0);
 
     auto recordingCanvas = std::static_pointer_cast<RSRecordingCanvas>(rsCanvas_);
     CHECK_NULL_VOID(recordingCanvas);
@@ -389,9 +313,16 @@ void CanvasPaintMethod::GetImageData(
 void CanvasPaintMethod::TransferFromImageBitmap(const RefPtr<PixelMap>& pixelMap)
 {
     CHECK_NULL_VOID(pixelMap);
-    Ace::CanvasImage canvasImage;
-    canvasImage.flag = 0;
-    DrawPixelMapWithoutGlobalState(pixelMap, canvasImage);
+    InitImagePaint(nullptr, &imageBrush_, sampleOptions_);
+    auto recordingCanvas = std::static_pointer_cast<RSRecordingCanvas>(rsCanvas_);
+    CHECK_NULL_VOID(recordingCanvas);
+    const std::shared_ptr<Media::PixelMap> tempPixelMap = pixelMap->GetPixelMapSharedPtr();
+    CHECK_NULL_VOID(tempPixelMap);
+    RSRect srcRect = RSRect(0, 0, tempPixelMap->GetWidth(), tempPixelMap->GetHeight());
+    RSRect dstRect = RSRect(0, 0, tempPixelMap->GetWidth(), tempPixelMap->GetHeight());
+    recordingCanvas->AttachBrush(imageBrush_);
+    recordingCanvas->DrawPixelMapRect(tempPixelMap, srcRect, dstRect, sampleOptions_);
+    recordingCanvas->DetachBrush();
 }
 #endif
 
@@ -413,145 +344,6 @@ void CanvasPaintMethod::StrokeText(const std::string& text, double x, double y, 
     auto success = UpdateParagraph(text, true);
     CHECK_NULL_VOID(success);
     PaintText(lastLayoutSize_.Width(), x, y, maxWidth, true);
-}
-
-TextMetrics CanvasPaintMethod::MeasureTextMetrics(const std::string& text, const PaintState& state)
-{
-#ifndef ACE_UNITTEST
-    TextMetrics textMetrics;
-    RSParagraphStyle style;
-    style.textAlign = Constants::ConvertTxtTextAlign(state.GetTextAlign());
-    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
-    CHECK_NULL_RETURN(fontCollection, textMetrics);
-    std::unique_ptr<RSParagraphBuilder> builder = RSParagraphBuilder::Create(style, fontCollection);
-    RSTextStyle txtStyle;
-    Constants::ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
-    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
-    builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-
-    auto paragraph = builder->CreateTypography();
-    paragraph->Layout(Size::INFINITE_SIZE);
-    /**
-     * @brief reference: https://html.spec.whatwg.org/multipage/canvas.html#dom-textmetrics-alphabeticbaseline
-     *
-     */
-    auto fontMetrics = paragraph->MeasureText();
-    auto glyphsBoundsTop = paragraph->GetGlyphsBoundsTop();
-    auto glyphsBoundsBottom = paragraph->GetGlyphsBoundsBottom();
-    auto glyphsBoundsLeft = paragraph->GetGlyphsBoundsLeft();
-    auto glyphsBoundsRight = paragraph->GetGlyphsBoundsRight();
-    auto textAlign = state.GetTextAlign();
-    auto textBaseLine = state.GetTextStyle().GetTextBaseline();
-    const double baseLineY = GetFontBaseline(fontMetrics, textBaseLine);
-    const double baseLineX = GetFontAlign(textAlign, paragraph);
-
-    textMetrics.width = paragraph->GetMaxIntrinsicWidth();
-    textMetrics.height = paragraph->GetHeight();
-    textMetrics.actualBoundingBoxAscent = baseLineY - glyphsBoundsTop;
-    textMetrics.actualBoundingBoxDescent = glyphsBoundsBottom - baseLineY;
-    textMetrics.actualBoundingBoxLeft = baseLineX - glyphsBoundsLeft;
-    textMetrics.actualBoundingBoxRight = glyphsBoundsRight - baseLineX;
-    textMetrics.alphabeticBaseline = baseLineY;
-    textMetrics.ideographicBaseline = baseLineY - fontMetrics.fDescent;
-    textMetrics.fontBoundingBoxAscent = baseLineY - fontMetrics.fTop;
-    textMetrics.fontBoundingBoxDescent = fontMetrics.fBottom - baseLineY;
-    textMetrics.hangingBaseline = baseLineY - (HANGING_PERCENT * fontMetrics.fAscent);
-    textMetrics.emHeightAscent = baseLineY - fontMetrics.fAscent;
-    textMetrics.emHeightDescent = fontMetrics.fDescent - baseLineY;
-    return textMetrics;
-#else
-    return TextMetrics {};
-#endif
-}
-
-bool CanvasPaintMethod::UpdateParagraph(const std::string& text, bool isStroke, bool hasShadow)
-{
-#ifndef ACE_UNITTEST
-    RSParagraphStyle style;
-    if (isStroke) {
-        style.textAlign = Constants::ConvertTxtTextAlign(state_.strokeState.GetTextAlign());
-    } else {
-        style.textAlign = Constants::ConvertTxtTextAlign(state_.fillState.GetTextAlign());
-    }
-    style.textDirection = Constants::ConvertTxtTextDirection(state_.fillState.GetOffTextDirection());
-    style.textAlign = GetEffectiveAlign(style.textAlign, style.textDirection);
-
-    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
-    CHECK_NULL_RETURN(fontCollection, false);
-    std::unique_ptr<RSParagraphBuilder> builder = RSParagraphBuilder::Create(style, fontCollection);
-    RSTextStyle txtStyle;
-    if (!isStroke && hasShadow) {
-        Rosen::TextShadow txtShadow;
-        txtShadow.color = state_.shadow.GetColor().GetValue();
-        txtShadow.offset.SetX(state_.shadow.GetOffset().GetX());
-        txtShadow.offset.SetY(state_.shadow.GetOffset().GetY());
-        txtShadow.blurRadius = state_.shadow.GetBlurRadius();
-        txtStyle.shadows.emplace_back(txtShadow);
-    }
-    txtStyle.locale = Localization::GetInstance()->GetFontLocale();
-    UpdateFontFamilies();
-    UpdateTextStyleForeground(isStroke, txtStyle, hasShadow);
-    builder->PushStyle(txtStyle);
-    builder->AppendText(StringUtils::Str8ToStr16(text));
-    paragraph_ = builder->CreateTypography();
-    return true;
-#else
-    return false;
-#endif
-}
-
-void CanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, RSTextStyle& txtStyle, bool hasShadow)
-{
-#ifndef ACE_UNITTEST
-    if (!isStroke) {
-        txtStyle.foregroundPen = std::nullopt;
-        txtStyle.color = Constants::ConvertSkColor(state_.fillState.GetColor());
-        txtStyle.fontSize = state_.fillState.GetTextStyle().GetFontSize().Value();
-        Constants::ConvertTxtStyle(state_.fillState.GetTextStyle(), context_, txtStyle);
-        if (state_.fillState.GetGradient().IsValid() && state_.fillState.GetPaintStyle() == PaintStyle::Gradient) {
-            RSBrush brush;
-            RSSamplingOptions options;
-            InitImagePaint(nullptr, &brush, options);
-            UpdatePaintShader(nullptr, &brush, state_.fillState.GetGradient());
-            txtStyle.foregroundBrush = brush;
-        }
-        if (state_.globalState.HasGlobalAlpha()) {
-            if (txtStyle.foregroundBrush.has_value()) {
-                txtStyle.foregroundBrush->SetColor(state_.fillState.GetColor().GetValue());
-                txtStyle.foregroundBrush->SetAlphaF(state_.globalState.GetAlpha()); // set alpha after color
-            } else {
-                RSBrush brush;
-                RSSamplingOptions options;
-                InitImagePaint(nullptr, &brush, options);
-                brush.SetColor(state_.fillState.GetColor().GetValue());
-                brush.SetAlphaF(state_.globalState.GetAlpha()); // set alpha after color
-                InitPaintBlend(brush);
-                txtStyle.foregroundBrush = brush;
-            }
-        }
-    } else {
-        // use foreground to draw stroke
-        txtStyle.foregroundPen = std::nullopt;
-        RSPen pen;
-        RSSamplingOptions options;
-        GetStrokePaint(pen, options);
-        InitPaintBlend(pen);
-        Constants::ConvertTxtStyle(state_.strokeState.GetTextStyle(), context_, txtStyle);
-        txtStyle.fontSize = state_.strokeState.GetTextStyle().GetFontSize().Value();
-        if (state_.strokeState.GetGradient().IsValid() && state_.strokeState.GetPaintStyle() == PaintStyle::Gradient) {
-            UpdatePaintShader(&pen, nullptr, state_.strokeState.GetGradient());
-        }
-        if (hasShadow) {
-            pen.SetColor(state_.shadow.GetColor().GetValue());
-            RSFilter filter;
-            filter.SetMaskFilter(RSRecordingMaskFilter::CreateBlurMaskFilter(RSBlurType::NORMAL,
-                RosenDecorationPainter::ConvertRadiusToSigma(state_.shadow.GetBlurRadius())));
-            pen.SetFilter(filter);
-        }
-        txtStyle.foregroundPen = pen;
-    }
-#endif
 }
 
 std::string CanvasPaintMethod::ToDataURL(RefPtr<RenderContext> renderContext, const std::string& args)
@@ -656,4 +448,10 @@ void CanvasPaintMethod::Reset()
     rsCanvas_->Clear(RSColor::COLOR_TRANSPARENT);
     rsCanvas_->Save();
 }
+#ifndef ACE_UNITTEST
+void CanvasPaintMethod::ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
+{
+    Constants::ConvertTxtStyle(textStyle, context_, txtStyle);
+}
+#endif
 } // namespace OHOS::Ace::NG

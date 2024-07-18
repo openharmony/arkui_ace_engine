@@ -99,6 +99,9 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
     }
     size_t idx = innerTargets.size();
     size_t newIdx = 0;
+    if (dragEventActuator_) {
+        dragEventActuator_->AddTouchListener(touchRestrict);
+    }
     if (touchEventActuator_) {
         touchEventActuator_->OnCollectTouchTarget(
             coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, responseLinkResult);
@@ -725,6 +728,8 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     }
     event->SetScreenX(info.GetScreenLocation().GetX());
     event->SetScreenY(info.GetScreenLocation().GetY());
+    event->SetDisplayX(info.GetScreenLocation().GetX());
+    event->SetDisplayY(info.GetScreenLocation().GetY());
     event->SetSourceTool(info.GetSourceTool());
 
     auto frameTag = frameNode->GetTag();

@@ -375,6 +375,15 @@ public:
     void CheckPositionLocalizedEdges(TextDirection layoutDirection);
     void CheckMarkAnchorPosition(TextDirection layoutDirection);
     void CheckOffsetLocalizedEdges(TextDirection layoutDirection);
+    void CheckLocalizedBorderRadiuses(const TextDirection& direction);
+    void CheckLocalizedOuterBorderColor(const TextDirection& direction);
+    void CheckLocalizedPadding(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
+    void CheckLocalizedMargin(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
+    void CheckLocalizedEdgeWidths(const RefPtr<LayoutProperty>& layoutProperty, const TextDirection& direction);
+    void CheckLocalizedEdgeColors(const TextDirection& direction);
+    void CheckLocalizedBorderImageSlice(const TextDirection& direction);
+    void CheckLocalizedBorderImageWidth(const TextDirection& direction);
+    void CheckLocalizedBorderImageOutset(const TextDirection& direction);
 
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);
@@ -437,7 +446,6 @@ private:
 
     bool heightPercentSensitive_ = false;
     bool widthPercentSensitive_ = false;
-
     bool needPositionLocalizedEdges_ = false;
     bool needMarkAnchorPosition_ = false;
     bool needOffsetLocalizedEdges_ = false;
