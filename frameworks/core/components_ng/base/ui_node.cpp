@@ -203,6 +203,10 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
         AddDisappearingChild(child, std::distance(children_.begin(), iter));
     }
     MarkNeedSyncRenderTree(true);
+    if (isTraversing_) {
+        LOGF("Try to remove the child([%{public}s][%{public}d]) of node [%{public}s][%{public}d] when its children "
+            "is traversing", (*iter)->GetTag().c_str(), (*iter)->GetId(), GetTag().c_str(), GetId());
+    }
     auto result = children_.erase(iter);
     return result;
 }
@@ -554,9 +558,11 @@ void UINode::DetachFromMainTree(bool recursive)
     OnDetachFromMainTree(recursive);
     // if recursive = false, recursively call DetachFromMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
+    isTraversing_ = true;
     for (const auto& child : GetChildren()) {
         child->DetachFromMainTree(isRecursive);
     }
+    isTraversing_ = false;
 }
 
 void UINode::ProcessOffscreenTask(bool recursive)
