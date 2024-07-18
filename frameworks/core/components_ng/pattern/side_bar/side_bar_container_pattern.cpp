@@ -80,6 +80,7 @@ constexpr static int32_t DEFAULT_CONTENT_ZINDEX_EMBED = 2;
 constexpr static int32_t DEFAULT_SIDE_BAR_ZINDEX_OVERLAY = 2;
 constexpr static int32_t DEFAULT_DIVIDER_ZINDEX_OVERLAY = 1;
 constexpr static int32_t DEFAULT_CONTENT_ZINDEX_OVERLAY = 0;
+constexpr static int32_t DEFAULT_DOUBLE_DRAG_REGION = 2;
 } // namespace
 
 void SideBarContainerPattern::OnAttachToFrameNode()
@@ -962,6 +963,11 @@ void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContaine
         return;
     }
 
+    auto dividerFrameNode = GetDividerNode();
+    CHECK_NULL_VOID(dividerFrameNode);
+    auto geometryNode = dividerFrameNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto dividerHeight = geometryNode->GetFrameSize().Height();
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto dividerStartMagin = layoutProperty->GetDividerStartMargin().value_or(DEFAULT_DIVIDER_START_MARGIN_VP);
@@ -974,7 +980,7 @@ void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContaine
         DEFAULT_DIVIDER_STROKE_WIDTH.ConvertToPx() : realDividerWidth_;
     hotZoneSize.SetWidth(baseWidth + DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_VALUE *
                                                  DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_VP.ConvertToPx());
-    hotZoneSize.SetHeight(realSideBarHeight_);
+    hotZoneSize.SetHeight(dividerHeight);
 
     DimensionRect hotZoneRegion;
     hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize.Width()), Dimension(hotZoneSize.Height())));
@@ -983,8 +989,6 @@ void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContaine
     std::vector<DimensionRect> mouseRegion;
     mouseRegion.emplace_back(hotZoneRegion);
 
-    auto dividerFrameNode = GetDividerNode();
-    CHECK_NULL_VOID(dividerFrameNode);
     dividerFrameNode->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
     auto dividerGestureHub = dividerFrameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(dividerGestureHub);
@@ -993,7 +997,10 @@ void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContaine
     auto dragRectOffset = layoutAlgorithm->GetSideBarOffset();
     dragRectOffset.SetX(-DEFAULT_DRAG_REGION.ConvertToPx());
     dragRect_.SetOffset(dragRectOffset);
-    dragRect_.SetSize(SizeF(DEFAULT_DRAG_REGION.ConvertToPx() * 2 + realDividerWidth_, realSideBarHeight_));
+
+    // divider drag rect height = dividerHeight - divider start margin - divider end margin
+    dragRect_.SetSize(SizeF(DEFAULT_DRAG_REGION.ConvertToPx() * DEFAULT_DOUBLE_DRAG_REGION + realDividerWidth_,
+        dividerHeight));
 
     std::vector<DimensionRect> responseRegion;
     DimensionOffset responseOffset(dragRectOffset);

@@ -82,29 +82,15 @@ float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     CHECK_NULL_RETURN(navBarWrapper, 0.0f);
     auto geometryNode = navBarWrapper->GetGeometryNode();
     auto navigationGeometryNode = layoutWrapper->GetGeometryNode();
-    if (position == NavBarPosition::END) {
-        auto navBarOffset =
-            OffsetT<float>(navigationGeometryNode->GetFrameSize().Width() - geometryNode->GetFrameSize().Width(),
-                geometryNode->GetFrameOffset().GetY());
-        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-            navBarOffset = OffsetT<float>(0.0f, geometryNode->GetFrameOffset().GetY());
-        }
-        const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
-        navBarOffset.AddX(padding.left.value_or(0));
-        navBarOffset.AddY(padding.top.value_or(0));
-        geometryNode->SetMarginFrameOffset(navBarOffset);
-        navBarWrapper->Layout();
-        returnNavBarOffset = navBarOffset;
-        return isZeroNavbarWidth ? 0.0f : geometryNode->GetFrameSize().Width();
-    }
     auto navBarOffset = OffsetT<float>(0.0f, 0.0f);
-    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-        navBarOffset =
-            OffsetT<float>(navigationGeometryNode->GetFrameSize().Width() - geometryNode->GetFrameSize().Width(), 0.0f);
+    bool isNavBarInRight = (position == NavBarPosition::END && !AceApplicationInfo::GetInstance().IsRightToLeft()) ||
+        (position == NavBarPosition::START && AceApplicationInfo::GetInstance().IsRightToLeft());
+    if (isNavBarInRight) {
+        navBarOffset.SetX(navigationGeometryNode->GetFrameSize().Width() - geometryNode->GetFrameSize().Width());
     }
     const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
-    navBarOffset.AddX(padding.left.value_or(0));
-    navBarOffset.AddY(padding.top.value_or(0));
+    navBarOffset.AddX(padding.left.value_or(0.0f));
+    navBarOffset.AddY(padding.top.value_or(0.0f));
     geometryNode->SetMarginFrameOffset(navBarOffset);
     navBarWrapper->Layout();
     returnNavBarOffset = navBarOffset;
