@@ -149,6 +149,12 @@ public:
     // Percentage unit conversion is not supported.
     double ConvertToFp() const;
 
+    double ConvertToPxDistribute(std::optional<float> minOptional, std::optional<float> maxOptional) const;
+
+    double ConvertToPxByCustomFontScale(float minFontScale, float maxFontScale) const;
+
+    double ConvertToPxByAppFontScale(float minFontScale) const;
+
     double GetNativeValue(DimensionUnit unit) const
     {
         if (unit_ == unit || unit == DimensionUnit::PERCENT) {

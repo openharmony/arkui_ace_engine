@@ -156,4 +156,19 @@ HWTEST_F(UObjectTest, UObjectTest002, TestSize.Level1)
     delete[] buffer;
     buffer = nullptr;
 }
+
+/**
+ * @tc.name: UObjectTest003
+ * @tc.desc: Serialize()
+ * @tc.type: FUNC
+ */
+HWTEST_F(UObjectTest, UObjectTest003, TestSize.Level1)
+{
+    UObject uObject;
+    std::string value = "";
+    uObject.WriteString(value);
+    const char* buffer = nullptr;
+    int32_t bufferLen = 100;
+    uObject.Deserialize(buffer, bufferLen);
+}
 } // namespace OHOS::Ace

@@ -139,6 +139,10 @@ public:
     int32_t GetSessionId();
     int32_t GetNodeId();
     int32_t GetUiExtensionId() override;
+    RefPtr<SessionWrapper> GetSessionWrapper()
+    {
+        return sessionWrapper_;
+    }
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
     void DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type);
     void SetWantWrap(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);

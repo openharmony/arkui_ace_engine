@@ -103,6 +103,8 @@ private:
         float windowsOffsetY = 0.0f;
         float top = 0.0f;
         float bottom = 0.0f;
+        float left = 0.0f;
+        float right = 0.0f;
         float topSecurity = 0.0f;
         float bottomSecurity = 0.0f;
         float previewMenuGap = 0.0f;

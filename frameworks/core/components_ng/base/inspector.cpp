@@ -479,7 +479,7 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key, const Inspe
 
 void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
 {
-    auto frameNode = Inspector::GetFrameNodeByKey(key);
+    auto frameNode = Inspector::GetFrameNodeByKey(key, true);
     if (!frameNode) {
         LOGW("Can't find a component that id or key are %{public}s, Please check your parameters are correct",
             key.c_str());

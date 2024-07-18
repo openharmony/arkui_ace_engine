@@ -14,28 +14,31 @@
  */
 
 #include "api_policy_adapter.h"
-#include <dlfcn.h>
 
 ApiPolicyAdapter::ApiPolicyAdapter()
 {
+#ifndef __WIN32
     handle = dlopen("/system/lib64/platformsdk/libapipolicy_client.z.so", RTLD_NOW);
     if (!handle) {
         return;
     }
     func = reinterpret_cast<CheckUrlFunc>(dlsym(handle, "CheckUrl"));
+#endif
 }
 
 ApiPolicyAdapter::~ApiPolicyAdapter()
 {
+#ifndef __WIN32
     if (handle) {
         dlclose(handle);
         handle = nullptr;
     }
+#endif
 }
 
 int32_t ApiPolicyAdapter::CheckUrl(const std::string& bundleName, const std::string& domainType, const std::string& url)
 {
-    int32_t res = -1;
+    int32_t res = 0;
     if (func == nullptr) {
         return res;
     }

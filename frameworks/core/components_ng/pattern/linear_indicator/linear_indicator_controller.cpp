@@ -89,10 +89,7 @@ void LinearIndicatorController::SetProgressValue(float value)
         return;
     }
     if (SetProgressComponentValue(animationData_.Index(), value)) {
-        animationData_.SetValue(value);
-        if (changeCallback_) {
-            changeCallback_(animationData_.Index(), value);
-        }
+        SetValueAndCallback(value, false);
         return;
     }
     LOGE("LinearIndicator: Failed to set progress.");
@@ -230,7 +227,7 @@ void LinearIndicatorController::PlayingUpdateTime(int32_t animationTime, int32_t
             animationData_.SetTotalIntervalTime(intervalTime);
         } else {
             StopAnimation(LinearIndicatorControllerDataState::ANIMATION_PAUSE);
-            animationData_.SetValue(RecalcProgressValue(animationTime));
+            SetValueAndCallback(RecalcProgressValue(animationTime), true);
             animationData_.SetTime(animationTime, intervalTime);
             StartProgressAnimation();
         }
@@ -260,7 +257,7 @@ void LinearIndicatorController::Start(int32_t animationTime, int32_t intervalTim
                 StartProgressInterval(intervalTime - consumeTime);
             }
         } else {
-            animationData_.SetValue(RecalcProgressValue(animationTime));
+            SetValueAndCallback(RecalcProgressValue(animationTime), true);
             animationData_.SetTime(animationTime, intervalTime);
             StartProgressAnimation();
         }
@@ -376,4 +373,14 @@ float LinearIndicatorController::RecalcProgressValue(int32_t newAnimationTime)
     return std::clamp(oldAnimationTime * oldValue / newAnimationTime, .0f, END_VALUE);
 }
 
+void LinearIndicatorController::SetValueAndCallback(float value, bool isDraw)
+{
+    animationData_.SetValue(value);
+    if (isDraw) {
+        InitProgressValue();
+    }
+    if (changeCallback_) {
+        changeCallback_(animationData_.Index(), value);
+    }
+}
 } // namespace OHOS::Ace::NG

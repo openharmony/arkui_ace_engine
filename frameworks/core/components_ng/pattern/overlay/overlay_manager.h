@@ -153,6 +153,7 @@ public:
     void HideMenuInSubWindow(bool showPreviewAnimation = true, bool startDrag = false);
     void CleanMenuInSubWindow(int32_t targetId);
     void CleanPreviewInSubWindow();
+    void CleanHoverImagePreviewInSubWindow(const RefPtr<FrameNode>& flexNode);
     void CleanPopupInSubWindow();
     void CleanMenuInSubWindowWithAnimation();
     void HideAllMenus();
@@ -685,8 +686,6 @@ private:
     void FireModalPageHide();
 
     void SetSheetBackgroundBlurStyle(const RefPtr<FrameNode>& sheetNode, const BlurStyleOption& bgBlurStyle);
-    void SetSheetBorderWidth(const RefPtr<FrameNode>& sheetNode, const RefPtr<SheetTheme>& sheetTheme,
-        const NG::SheetStyle& sheetStyle, bool isPartialUpdate = false);
     void SetSheetBackgroundColor(const RefPtr<FrameNode>& sheetNode, const RefPtr<SheetTheme>& sheetTheme,
         const NG::SheetStyle& sheetStyle, bool isPartialUpdate = false);
 

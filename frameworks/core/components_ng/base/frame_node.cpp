@@ -16,6 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 
 #include <cstdint>
+#include "base/geometry/ng/rect_t.h"
 
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -448,7 +449,7 @@ private:
     std::list<RefPtr<LayoutWrapper>> allFrameNodeChildren_;
     std::map<uint32_t, RefPtr<LayoutWrapper>> partFrameNodeChildren_;
     std::unique_ptr<FrameProxy> prevFrameProxy_;
-    uint32_t totalCount_ = 0;
+    int32_t totalCount_ = 0;
     FrameNode* hostNode_ { nullptr };
     uint32_t inUse_ = 0;
     bool delayReset_ = false;
@@ -509,6 +510,8 @@ FrameNode::~FrameNode()
         if (frameRateManager) {
             frameRateManager->RemoveNodeRate(GetId());
         }
+        pipeline->RemoveChangedFrameNode(GetId());
+        pipeline->RemoveFrameNodeChangeListener(GetId());
     }
     FireOnNodeDestroyCallback();
 }
@@ -1503,21 +1506,16 @@ void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceD
     }
 
     if (hasInnerCallback) {
-        RectF frameRect;
-        RectF visibleRect;
-        RectF visibleInnerRect;
-        GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
-        ProcessVisibleAreaChangeEvent(visibleInnerRect, frameRect,
+        auto visibleResult = GetCacheVisibleRect(timestamp);
+        ProcessVisibleAreaChangeEvent(visibleResult.innerVisibleRect, visibleResult.frameRect,
             visibleAreaInnerRatios, visibleAreaInnerCallback, false);
         if (hasUserCallback) {
-            ProcessVisibleAreaChangeEvent(visibleRect, frameRect,
+            ProcessVisibleAreaChangeEvent(visibleResult.visibleRect, visibleResult.frameRect,
                 visibleAreaUserRatios, visibleAreaUserCallback, true);
         }
     } else {
-        RectF frameRect;
-        RectF visibleRect;
-        GetVisibleRect(visibleRect, frameRect);
-        ProcessVisibleAreaChangeEvent(visibleRect, frameRect,
+        auto visibleResult = GetCacheVisibleRect(timestamp);
+        ProcessVisibleAreaChangeEvent(visibleResult.visibleRect, visibleResult.frameRect,
             visibleAreaUserRatios, visibleAreaUserCallback, true);
     }
 }
@@ -1604,8 +1602,7 @@ void FrameNode::ThrottledVisibleTask()
     GetVisibleRect(visibleRect, frameRect);
     double ratio = IsFrameDisappear() ? VISIBLE_RATIO_MIN
                                       : std::clamp(CalculateCurrentVisibleRatio(visibleRect, frameRect),
-                                      VISIBLE_RATIO_MIN, 
-                                      VISIBLE_RATIO_MAX);
+                                          VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
     if (NearEqual(ratio, lastThrottledVisibleRatio_)) {
         throttledCallbackOnTheWay_ = false;
         return;
@@ -2263,11 +2260,19 @@ VectorF FrameNode::GetTransformScale() const
     return renderContext_->GetTransformScaleValue({ 1.0f, 1.0f });
 }
 
+bool FrameNode::IsPaintRectWithTransformValid()
+{
+    auto paintRectWithTransform = renderContext_->GetPaintRectWithTransform();
+    if (NearZero(paintRectWithTransform.Width()) || NearZero(paintRectWithTransform.Height())) {
+        return true;
+    }
+    return false;
+}
+
 bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentRevertPoint, int32_t sourceType)
 {
     bool isInChildRegion = false;
     auto paintRect = renderContext_->GetPaintRectWithoutTransform();
-    auto paintRectWithTransform = renderContext_->GetPaintRectWithTransform();
     auto responseRegionList = GetResponseRegionList(paintRect, sourceType);
 
     auto revertPoint = parentRevertPoint;
@@ -2275,7 +2280,7 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentRevertPoint, int32_t 
     auto subRevertPoint = revertPoint - paintRect.GetOffset();
     auto clip = renderContext_->GetClipEdge().value_or(false);
     if (!InResponseRegionList(revertPoint, responseRegionList) || !GetTouchable() ||
-        NearZero(paintRectWithTransform.Width() || NearZero(paintRectWithTransform.Height()))) {
+        IsPaintRectWithTransformValid()) {
         if (clip) {
             return true;
         }
@@ -4477,6 +4482,54 @@ void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRe
     }
 }
 
+CacheVisibleRectResult FrameNode::GetCacheVisibleRect(uint64_t timestamp)
+{
+    RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(true);
+    auto rectToParent = GetPaintRectWithTransform();
+    auto scale = GetTransformScale();
+
+    if (!parentUi || IsWindowBoundary()) {
+        cachedVisibleRectResult_ = {timestamp,
+            {rectToParent.GetOffset(), rectToParent, rectToParent, scale, rectToParent}};
+        return cachedVisibleRectResult_.second;
+    }
+
+    if (parentUi->cachedVisibleRectResult_.first == timestamp) {
+        auto parentCacheVisibleRectResult = parentUi->cachedVisibleRectResult_.second;
+        return CalculateCacheVisibleRect(parentCacheVisibleRectResult, parentUi, rectToParent, scale, timestamp);
+    }
+
+    CacheVisibleRectResult parentCacheVisibleRectResult = parentUi->GetCacheVisibleRect(timestamp);
+    return CalculateCacheVisibleRect(parentCacheVisibleRectResult, parentUi, rectToParent, scale, timestamp);
+}
+
+CacheVisibleRectResult FrameNode::CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
+    const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp)
+{
+    auto parentRenderContext = parentUi->GetRenderContext();
+    OffsetF windowOffset;
+    auto offset = rectToParent.GetOffset();
+    if (parentRenderContext && parentRenderContext->GetTransformScale()) {
+        auto parentScale = parentRenderContext->GetTransformScale();
+        offset = OffsetF(offset.GetX() * parentScale.value().x, offset.GetY() * parentScale.value().y);
+    }
+    windowOffset = parentCacheVisibleRect.windowOffset + offset;
+
+    RectF rect;
+    rect.SetOffset(windowOffset);
+    rect.SetWidth(rectToParent.Width() * parentCacheVisibleRect.cumulativeScale.x);
+    rect.SetHeight(rectToParent.Height() * parentCacheVisibleRect.cumulativeScale.y);
+
+    auto visibleRect = rect.Constrain(parentCacheVisibleRect.visibleRect);
+    auto innerVisibleRect = rect;
+    if (parentRenderContext && parentRenderContext->GetClipEdge().value_or(false)) {
+        innerVisibleRect = rect.Constrain(parentCacheVisibleRect.visibleRect);
+    }
+    scale = {scale.x * parentCacheVisibleRect.cumulativeScale.x, scale.y * parentCacheVisibleRect.cumulativeScale.y};
+    cachedVisibleRectResult_ = {timestamp, {windowOffset, visibleRect, innerVisibleRect, scale, rect}};
+    return {windowOffset, visibleRect, innerVisibleRect, scale, rect};
+}
+
 bool FrameNode::IsContextTransparent()
 {
     ACE_SCOPED_TRACE("Transparent detection");
@@ -4814,7 +4867,9 @@ void FrameNode::AddFrameNodeChangeInfoFlag(FrameNodeChangeInfoFlag changeFlag)
     if (changeInfoFlag_ == FRAME_NODE_CHANGE_INFO_NONE) {
         auto context = GetContext();
         CHECK_NULL_VOID(context);
-        context->AddChangedFrameNode(Claim(this));
+        if (!context->AddChangedFrameNode(WeakClaim(this))) {
+            return;
+        }
     }
     changeInfoFlag_ = changeInfoFlag_ | changeFlag;
 }
@@ -4823,14 +4878,14 @@ void FrameNode::RegisterNodeChangeListener()
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
-    context->AddFrameNodeChangeListener(Claim(this));
+    context->AddFrameNodeChangeListener(WeakClaim(this));
 }
 
 void FrameNode::UnregisterNodeChangeListener()
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
-    context->RemoveFrameNodeChangeListener(Claim(this));
+    context->RemoveFrameNodeChangeListener(GetId());
 }
 
 void FrameNode::ProcessFrameNodeChangeFlag()

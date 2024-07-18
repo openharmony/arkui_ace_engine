@@ -448,4 +448,59 @@ HWTEST_F(Matrix4Test, Matrix4Test008, TestSize.Level1)
     Matrix4 matrix4Obj6 = matrix4Obj4 * matrix4Obj5;
     EXPECT_EQ(matrix4Obj6, matrix4Obj2);
 }
+
+/**
+ * @tc.name: Matrix4Test009
+ * @tc.desc: Test  function QuaternionToMatrix/SetEntry/operator=
+ * @tc.type: FUNC
+ */
+HWTEST_F(Matrix4Test, Matrix4Test009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: LessOrEqual 0.0f or not
+     */
+    Matrix4 ret = Matrix4::QuaternionToMatrix(0.0f, 0.0f, 0.0f, 0.0f);
+    EXPECT_EQ(ret.Get(0, 0) == 1.0f, true);
+    Matrix4 ret2 = Matrix4::QuaternionToMatrix(1.0f, 1.0f, 1.0f, 1.0f);
+    EXPECT_EQ(ret2.Get(0, 1) == 0.0f, true);
+
+    /**
+     * @tc.steps: Matrix4 SetEntry row or col is out of range
+     */
+    // true
+    Matrix4 matrix4Obj = Matrix4::CreateIdentity();
+    matrix4Obj.SetEntry(-1, 0, 1.0f);
+    // false true
+    matrix4Obj.SetEntry(10.0, 0, 1.0f);
+    // false false true
+    matrix4Obj.SetEntry(1.0, -1, 1.0f);
+    // false false false true
+    matrix4Obj.SetEntry(1.0, 10.0, 1.0f);
+
+    /**
+     * @tc.steps: Matrix4N SetEntry row or col is out of range
+     */
+    Matrix4N mtrix4NObj = Matrix4N(COLUMN_NUM);
+    bool ret3 = mtrix4NObj.SetEntry(-1, 0, 1.0f);
+    EXPECT_EQ(ret3, false);
+    bool ret4 = mtrix4NObj.SetEntry(10.0, 0, 1.0f);
+    EXPECT_EQ(ret4, false);
+    bool ret5 = mtrix4NObj.SetEntry(1.0, -1, 1.0f);
+    EXPECT_EQ(ret5, false);
+    bool ret6 = mtrix4NObj.SetEntry(1.0, COLUMN_NUM, 1.0f);
+    EXPECT_EQ(ret6, false);
+
+    /**
+     * @tc.steps: MatrixN4 SetEntry row or col is out of range
+     */
+    MatrixN4 mtrixN4Obj = MatrixN4(ROW_NUM);
+    bool ret7 = mtrixN4Obj.SetEntry(-1, 0, 1.0f);
+    EXPECT_EQ(ret7, false);
+    bool ret8 = mtrixN4Obj.SetEntry(ROW_NUM, 0, 1.0f);
+    EXPECT_EQ(ret8, false);
+    bool ret9 = mtrixN4Obj.SetEntry(1.0, -1, 1.0f);
+    EXPECT_EQ(ret9, false);
+    bool ret10 = mtrixN4Obj.SetEntry(1.0, 10.0, 1.0f);
+    EXPECT_EQ(ret10, false);
+}
 } // namespace OHOS::Ace

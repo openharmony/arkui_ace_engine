@@ -1922,6 +1922,7 @@ HWTEST_F(TextFieldUXTest, HandleClickEventTest001, TestSize.Level1)
     info.localLocation_ = Offset(1.0f, 110.0f);
     pattern_->scrollBar_->barRect_ = Rect(0.0f, 0.0f, 30.0f, 500.0f);
     pattern_->scrollBar_->touchRegion_ = Rect(10.0f, 100.0f, 30.0f, 100.0f);
+    pattern_->scrollBar_->isScrollable_ = true;
     // /**
     //  * @tc.steps: step2. Test HandleClickEvent.
     //  * @tc.expect: CheckBarDirection equal BarDirection's Value.

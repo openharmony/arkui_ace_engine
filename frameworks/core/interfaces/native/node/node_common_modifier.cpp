@@ -612,19 +612,19 @@ void SetBorderImage(FrameNode* frameNode, const RefPtr<BorderImage>& borderImage
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(borderImage);
-    if (bitset | BorderImage::SOURCE_BIT) {
+    if (bitset & BorderImage::SOURCE_BIT) {
         ViewAbstract::SetBorderImageSource(frameNode, borderImage->GetSrc());
     }
-    if (bitset | BorderImage::OUTSET_BIT) {
+    if (bitset & BorderImage::OUTSET_BIT) {
         ViewAbstract::SetHasBorderImageOutset(frameNode, true);
     }
-    if (bitset | BorderImage::SLICE_BIT) {
+    if (bitset & BorderImage::SLICE_BIT) {
         ViewAbstract::SetHasBorderImageSlice(frameNode, true);
     }
-    if (bitset | BorderImage::REPEAT_BIT) {
+    if (bitset & BorderImage::REPEAT_BIT) {
         ViewAbstract::SetHasBorderImageRepeat(frameNode, true);
     }
-    if (bitset | BorderImage::WIDTH_BIT) {
+    if (bitset & BorderImage::WIDTH_BIT) {
         ViewAbstract::SetHasBorderImageWidth(frameNode, true);
     }
     ViewAbstract::SetBorderImage(frameNode, borderImage);
@@ -5962,15 +5962,15 @@ RefPtr<NG::ChainedTransitionEffect> ParseTransition(ArkUITransitionEffectOption*
         animationOption.SetDelay(animation.delay);
         animationOption.SetIteration(animation.iterations);
         animationOption.SetTempo(animation.tempo);
-        animationOption.SetAnimationDirection(
-            DIRECTION_LIST[animation.playMode > DIRECTION_LIST.size() ? 0 : animation.playMode]);
+        animationOption.SetAnimationDirection(DIRECTION_LIST[
+            static_cast<ArkUI_Uint32>(animation.playMode) > DIRECTION_LIST.size() ? 0 : animation.playMode]);
 
         // curve
         if (animation.iCurve) {
             auto curve = reinterpret_cast<Curve*>(animation.iCurve);
             animationOption.SetCurve(AceType::Claim(curve));
         } else {
-            if (animation.curve < 0 || animation.curve >= CURVES.size()) {
+            if (animation.curve < 0 || static_cast<ArkUI_Uint32>(animation.curve) >= CURVES.size()) {
                 animationOption.SetCurve(OHOS::Ace::Curves::EASE_IN_OUT);
             } else {
                 animationOption.SetCurve(CURVES[animation.curve]);

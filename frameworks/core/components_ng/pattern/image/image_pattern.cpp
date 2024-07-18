@@ -451,7 +451,7 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
     ImageFit imageFit = props->GetImageFit().value_or(ImageFit::COVER);
     const std::optional<SizeF>& sourceSize = props->GetSourceSize();
     auto renderProp = host->GetPaintProperty<ImageRenderProperty>();
-    bool hasValidSlice = renderProp && renderProp->HasImageResizableSlice();
+    bool hasValidSlice = renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice());
     DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
     bool isHdrDecoderNeed = false;
     if (renderProp && renderProp->HasDynamicMode()) {
@@ -544,7 +544,7 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     StartDecoding(dstSize);
     if (loadingCtx_) {
         auto renderProp = GetPaintProperty<ImageRenderProperty>();
-        if (renderProp && renderProp->HasImageResizableSlice() && image_) {
+        if (renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice()) && image_) {
             loadingCtx_->ResizableCalcDstSize();
             SetImagePaintConfig(image_, loadingCtx_->GetSrcRect(), loadingCtx_->GetDstRect(), loadingCtx_->GetSrc(),
                 loadingCtx_->GetFrameCount());
@@ -553,7 +553,8 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
 
     if (altLoadingCtx_) {
         auto renderProp = GetPaintProperty<ImageRenderProperty>();
-        if (renderProp && renderProp->HasImageResizableSlice() && altImage_) {
+        if (renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice()) &&
+            altImage_) {
             altLoadingCtx_->ResizableCalcDstSize();
             SetImagePaintConfig(altImage_, altLoadingCtx_->GetSrcRect(), altLoadingCtx_->GetDstRect(),
                 altLoadingCtx_->GetSrc(), altLoadingCtx_->GetFrameCount());

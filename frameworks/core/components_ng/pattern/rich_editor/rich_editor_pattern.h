@@ -309,6 +309,7 @@ public:
     void OnModifyDone() override;
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void SupplementIdealSizeWidth(const RefPtr<FrameNode>& frameNode);
     void MoveCaretOnLayoutSwap(bool isReduceSize);
 
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
@@ -317,7 +318,7 @@ public:
     void InsertValueOperation(
         const std::string& insertValue, OperationRecord* const record = nullptr, bool isIME = true);
     void DeleteSelectOperation(OperationRecord* const record);
-    void DeleteByRange(OperationRecord* const record, int32_t start, int32_t end, bool needNotifyImf = true);
+    void DeleteByRange(OperationRecord* const record, int32_t start, int32_t end);
     void InsertValueAfterBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, RefPtr<SpanNode>& spanNode,
         const TextInsertValueInfo& info, const std::string& insertValue, bool isIME = true);
     void InsertDiffStyleValueInSpan(
@@ -394,7 +395,7 @@ public:
     int32_t GetParagraphEndPosition(int32_t caretPosition);
     int32_t CaretPositionSelectEmoji(CaretMoveIntent direction);
     void HandleSelect(CaretMoveIntent direction) override;
-    bool SetCaretPosition(int32_t pos, bool needNotifyImf = true);
+    bool SetCaretPosition(int32_t pos);
     int32_t GetCaretPosition();
     int32_t GetTextContentLength() override;
     bool GetCaretVisible() const;
@@ -784,7 +785,7 @@ public:
     void HideMenu();
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
     void OnSelectionMenuOptionsUpdate(
-        const NG::OnCreateMenuCallback && onCreateMenuCallback, const NG::OnMenuItemClickCallback && onMenuItemClick);
+        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick);
     RectF GetTextContentRect(bool isActualText = false) const override
     {
         return contentRect_;
@@ -1028,7 +1029,7 @@ private:
     void HandleOnEditChanged(bool isEditing);
     void OnTextInputActionUpdate(TextInputAction value);
     void CloseSystemMenu();
-    void SetAccessibilityAction();
+    void SetAccessibilityAction() override;
     void HandleTripleClickEvent(OHOS::Ace::GestureEvent& info);
     void UpdateSelectionByTouchMove(const Offset& offset);
     void MoveCaretAnywhere(const Offset& touchOffset);

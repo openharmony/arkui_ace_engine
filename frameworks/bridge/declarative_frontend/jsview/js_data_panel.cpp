@@ -386,7 +386,7 @@ void JSDataPanel::BorderRadius(const JSCallbackInfo& info)
                 CHECK_NULL_VOID(theme);
                 ViewAbstractModel::GetInstance()->SetBorderRadius(theme->GetDefaultBorderRadius());
             } else {
-                ViewAbstractModel::GetInstance()->SetBorderRadius({});
+                ViewAbstractModel::GetInstance()->SetBorderRadius(Dimension {});
             }
             return;
         }

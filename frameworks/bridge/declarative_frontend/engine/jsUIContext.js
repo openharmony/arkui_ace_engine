@@ -439,6 +439,9 @@ class UIContext {
 
     getAtomicServiceBar() {
         const bundleMgr = globalThis.requireNapi('bundle.bundleManager');
+        if (!bundleMgr || !bundleMgr.BundleFlag) {
+            return undefined;
+        }
         let data = bundleMgr.getBundleInfoForSelfSync(bundleMgr.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
         if (data.appInfo.bundleType == 1) {
             this.atomServiceBar = new AtomicServiceBar(this.instanceId_);
@@ -728,7 +731,10 @@ class ComponentUtils {
     }
     getRectangleById(id) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        let componentInformation = this.ohos_componentUtils.getRectangleById(id);
+        if (typeof this.ohos_componentUtils.getRectangleById !== 'function'){
+            throw Error('getRectangleById is not callable');
+        }
+        let componentInformation = this.ohos_componentUtils?.getRectangleById?.(id);
         __JSScopeUtil__.restoreInstanceId();
         return componentInformation;
     }
@@ -942,9 +948,16 @@ class PromptAction {
             return result_;
         }
         else {
-            let result_ = this.ohos_prompt.openCustomDialog(content.getFrameNode());
-            __JSScopeUtil__.restoreInstanceId();
-            return result_;
+            if (content.builderNode_ === undefined) {
+                let result_ = this.ohos_prompt.openCustomDialog(content);
+                __JSScopeUtil__.restoreInstanceId();
+                return result_;
+            }
+            else {
+                let result_ = this.ohos_prompt.openCustomDialog(content.getFrameNode());
+                __JSScopeUtil__.restoreInstanceId();
+                return result_;
+            }
         }
     }
 
@@ -957,9 +970,15 @@ class PromptAction {
 
     closeCustomDialog(content) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        let result_ = this.ohos_prompt.closeCustomDialog(content.getFrameNode());
-        __JSScopeUtil__.restoreInstanceId();
-        return result_;
+        if (typeof content === 'number') {
+            this.ohos_prompt.closeCustomDialog(content);
+            __JSScopeUtil__.restoreInstanceId();
+        }
+        else {
+            let result_ = this.ohos_prompt.closeCustomDialog(content.getFrameNode());
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        }
     }
 
     showActionMenu(options, callback) {

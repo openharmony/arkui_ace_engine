@@ -144,6 +144,7 @@ void UIExtensionModelNG::Create(const UIExtensionConfig& config)
 
 void UIExtensionModelNG::CreateSecurityUIExtension(const UIExtensionConfig& config)
 {
+    LOGI("CreateSecurityUIExtension");
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,

@@ -311,6 +311,8 @@ public:
 
     void SheetInteractiveDismiss(BindSheetDismissReason dismissReason, float dragVelocity = 0.0f);
 
+    void SetSheetBorderWidth(bool isPartialUpdate = false);
+
     void SetCurrentOffset(float currentOffset)
     {
         currentOffset_ = currentOffset;
@@ -586,6 +588,7 @@ private:
     void OnColorConfigurationUpdate() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
+    void InitScrollProps();
     void InitPageHeight();
     void TranslateTo(float height);
     void SetColumnMinSize(bool reset = false);

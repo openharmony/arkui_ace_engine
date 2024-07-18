@@ -269,6 +269,7 @@ build_component_ng("pattern_ng") {
     "navrouter/navrouter_group_node.cpp",
     "navrouter/navrouter_model_ng.cpp",
     "navrouter/navrouter_pattern.cpp",
+    "node_container/node_container_event_hub.cpp",
     "node_container/node_container_layout_algorithm.cpp",
     "node_container/node_container_model_ng.cpp",
     "node_container/node_container_node.cpp",
@@ -569,6 +570,7 @@ build_component_ng("pattern_ng") {
   if (defined(vendor_configs.ace_engine_advanced)) {
     sources += vendor_configs.ace_engine_advanced_pattern
     external_deps += vendor_configs.ace_engine_ext_extra_deps
+    external_deps += vendor_configs.ace_engine_ext_jsview_deps
   }
 
   if (is_ohos_standard_system) {

@@ -148,6 +148,7 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
     }
     pipeline->RemoveOnAreaChangeNode(node->GetId());
     pipeline->RemoveWindowStateChangedCallback(node->GetId());
+    UnregisterMarqueeNodeChangeListener();
 }
 
 void TextPattern::CloseSelectOverlay()
@@ -2049,6 +2050,7 @@ bool TextPattern::BetweenSelectedPosition(const Offset& globalOffset)
 
 void TextPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     auto host = GetHost();
@@ -2108,6 +2110,7 @@ void TextPattern::OnModifyDone()
         dataDetectorAdapter_->textForAI_ = textForDisplay_;
         dataDetectorAdapter_->StartAITask();
     }
+    RegisterMarqueeNodeChangeListener();
 }
 
 void TextPattern::RecoverCopyOption()
@@ -2711,6 +2714,12 @@ void TextPattern::DumpAdvanceInfo()
 
     DumpLog::GetInstance().AddDesc(
         std::string("BindSelectionMenu: ").append(std::to_string(selectionMenuMap_.empty())));
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto fontScale = pipeline->GetFontScale();
+    auto fontWeightScale = pipeline->GetFontWeightScale();
+    DumpLog::GetInstance().AddDesc(std::string("fontScale: ").append(std::to_string(fontScale)));
+    DumpLog::GetInstance().AddDesc(std::string("fontWeightScale: ").append(std::to_string(fontWeightScale)));
 }
 
 void TextPattern::DumpInfo()
@@ -2727,21 +2736,23 @@ void TextPattern::DumpInfo()
         std::string("FontSize: ")
             .append((textStyle_.has_value() ? textStyle_->GetFontSize() : Dimension(DIMENSION_VALUE, DimensionUnit::FP))
                         .ToString()));
-    dumpLog.AddDesc(std::string("FontWeight: ").append(StringUtils::ToString(textStyle_->GetFontWeight())));
-    dumpLog.AddDesc(std::string("FontStyle: ").append(StringUtils::ToString(textStyle_->GetFontStyle())));
-    dumpLog.AddDesc(std::string("LineHeight: ").append(textStyle_->GetLineHeight().ToString()));
-    dumpLog.AddDesc(std::string("LineSpacing: ").append(textStyle_->GetLineSpacing().ToString()));
-    dumpLog.AddDesc(std::string("BaselineOffset: ").append(textStyle_->GetBaselineOffset().ToString()));
-    dumpLog.AddDesc(std::string("TextIndent: ").append(textStyle_->GetTextIndent().ToString()));
-    dumpLog.AddDesc(std::string("LetterSpacing: ").append(textStyle_->GetLetterSpacing().ToString()));
-    dumpLog.AddDesc(std::string("TextOverflow: ").append(StringUtils::ToString(textStyle_->GetTextOverflow())));
-    dumpLog.AddDesc(std::string("TextAlign: ").append(StringUtils::ToString(textStyle_->GetTextAlign())));
-    dumpLog.AddDesc(std::string("WordBreak: ").append(StringUtils::ToString(textStyle_->GetWordBreak())));
-    dumpLog.AddDesc(std::string("TextCase: ").append(StringUtils::ToString(textStyle_->GetTextCase())));
-    dumpLog.AddDesc(std::string("EllipsisMode: ").append(StringUtils::ToString(textStyle_->GetEllipsisMode())));
+    if (textStyle_.has_value()) {
+        dumpLog.AddDesc(std::string("FontWeight: ").append(StringUtils::ToString(textStyle_->GetFontWeight())));
+        dumpLog.AddDesc(std::string("FontStyle: ").append(StringUtils::ToString(textStyle_->GetFontStyle())));
+        dumpLog.AddDesc(std::string("LineHeight: ").append(textStyle_->GetLineHeight().ToString()));
+        dumpLog.AddDesc(std::string("LineSpacing: ").append(textStyle_->GetLineSpacing().ToString()));
+        dumpLog.AddDesc(std::string("BaselineOffset: ").append(textStyle_->GetBaselineOffset().ToString()));
+        dumpLog.AddDesc(std::string("TextIndent: ").append(textStyle_->GetTextIndent().ToString()));
+        dumpLog.AddDesc(std::string("LetterSpacing: ").append(textStyle_->GetLetterSpacing().ToString()));
+        dumpLog.AddDesc(std::string("TextOverflow: ").append(StringUtils::ToString(textStyle_->GetTextOverflow())));
+        dumpLog.AddDesc(std::string("TextAlign: ").append(StringUtils::ToString(textStyle_->GetTextAlign())));
+        dumpLog.AddDesc(std::string("WordBreak: ").append(StringUtils::ToString(textStyle_->GetWordBreak())));
+        dumpLog.AddDesc(std::string("TextCase: ").append(StringUtils::ToString(textStyle_->GetTextCase())));
+        dumpLog.AddDesc(std::string("EllipsisMode: ").append(StringUtils::ToString(textStyle_->GetEllipsisMode())));
+        dumpLog.AddDesc(
+            std::string("LineBreakStrategy: ").append(GetLineBreakStrategyInJson(textStyle_->GetLineBreakStrategy())));
+    }
     dumpLog.AddDesc(std::string("Selection: ").append("(").append(textSelector_.ToString()).append(")"));
-    dumpLog.AddDesc(
-        std::string("LineBreakStrategy: ").append(GetLineBreakStrategyInJson(textStyle_->GetLineBreakStrategy())));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -3541,5 +3552,67 @@ PositionWithAffinity TextPattern::GetGlyphPositionAtCoordinate(int32_t x, int32_
 {
     Offset offset(x, y);
     return pManager_->GetGlyphPositionAtCoordinate(ConvertLocalOffsetToParagraphOffset(offset));
+}
+
+void TextPattern::RegisterMarqueeNodeChangeListener()
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) != TextOverflow::MARQUEE) {
+        return;
+    }
+    host->RegisterNodeChangeListener();
+}
+
+void TextPattern::UnregisterMarqueeNodeChangeListener()
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) != TextOverflow::MARQUEE) {
+        return;
+    }
+    host->UnregisterNodeChangeListener();
+}
+
+void TextPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
+{
+    selectOverlay_->OnAncestorNodeChanged(flag);
+    HandleMarqueeWithIsVisible(flag);
+}
+
+void TextPattern::HandleMarqueeWithIsVisible(FrameNodeChangeInfoFlag flag)
+{
+    if ((flag & FRAME_NODE_CHANGE_GEOMETRY_CHANGE) != FRAME_NODE_CHANGE_GEOMETRY_CHANGE) {
+        return;
+    }
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) != TextOverflow::MARQUEE) {
+        return;
+    }
+    RectF frameRect;
+    RectF visibleRect;
+    host->GetVisibleRect(visibleRect, frameRect);
+    if (visibleRect.IsEmpty()) {
+        OnWindowHide();
+    } else {
+        OnWindowShow();
+    }
+}
+
+void TextPattern::UnregisterNodeChangeListenerWithoutSelect()
+{
+    if (selectOverlay_ && selectOverlay_->SelectOverlayIsOn()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->UnregisterNodeChangeListener();
 }
 } // namespace OHOS::Ace::NG

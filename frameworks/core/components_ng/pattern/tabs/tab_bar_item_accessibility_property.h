@@ -35,9 +35,9 @@ public:
         CHECK_NULL_RETURN(tabBarItem, false);
         auto tabBar = AceType::DynamicCast<FrameNode>(tabBarItem->GetParent());
         CHECK_NULL_RETURN(tabBar, false);
-        auto tabBarPattern = tabBar->GetPattern<TabBarPattern>();
-        CHECK_NULL_RETURN(tabBarPattern, false);
-        auto selectedIndex = tabBarPattern->GetIndicator();
+        auto layoutProperty = tabBar->GetLayoutProperty<TabBarLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProperty, false);
+        auto selectedIndex = layoutProperty->GetIndicatorValue(0);
         auto index = tabBar->GetChildFlatIndex(tabBarItem->GetId()).second;
         return index == selectedIndex;
     }

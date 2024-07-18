@@ -1222,6 +1222,7 @@ void TabBarPattern::GetBottomTabBarImageSizeAndOffset(const std::vector<int32_t>
     }
     auto selectedMaskNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(maskPosition + maskIndex));
     CHECK_NULL_VOID(selectedMaskNode);
+    selectedMaskNode->GetLayoutProperty()->UpdateLayoutDirection(TextDirection::LTR);
     if (maskIndex == 0) {
         originalSelectedMaskOffset = imageOffset;
     } else {

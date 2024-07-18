@@ -51,7 +51,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr char ABILITY_KEY_ASYNC[] = "ability.want.params.KeyAsync";
 constexpr char PROHIBIT_NESTING_FAIL_NAME[] = "Prohibit_Nesting_SecurityUIExtensionComponent";
 constexpr char PROHIBIT_NESTING_FAIL_MESSAGE[] =
     "Prohibit nesting securityUIExtensionComponent in securityUIExtensionAbility";
@@ -171,6 +170,8 @@ void SecurityUIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     }
 
     CHECK_NULL_VOID(sessionWrapper_);
+    PLATFORM_LOGI("The current state is '%{public}s' when UpdateWant.", ToString(state_));
+    bool isBackground = state_ == AbilityState::BACKGROUND;
     // Prohibit rebuilding the session unless the Want is updated.
     if (sessionWrapper_->IsSessionValid()) {
         if (sessionWrapper_->GetWant()->IsEquals(want)) {
@@ -184,12 +185,14 @@ void SecurityUIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         NotifyDestroy();
     }
 
-    isKeyAsync_ = want.GetBoolParam(ABILITY_KEY_ASYNC, false);
-    PLATFORM_LOGI("The ability KeyAsync %{public}d.", isKeyAsync_);
     MountPlaceholderNode();
     SessionConfig config;
     config.uiExtensionUsage = UIExtensionUsage::CONSTRAINED_EMBEDDED;
     sessionWrapper_->CreateSession(want, config);
+    if (isBackground) {
+        PLATFORM_LOGW("Unable to StartUiextensionAbility while in the background.");
+        return;
+    }
     NotifyForeground();
 }
 
@@ -402,10 +405,6 @@ bool SecurityUIExtensionPattern::HandleKeyEvent(const KeyEvent& event)
         event.IsKey({ KeyCode::KEY_MOVE_HOME }) || event.IsKey({ KeyCode::KEY_MOVE_END }) || event.IsEscapeKey())) {
         return false;
     }
-    if (isKeyAsync_) {
-        sessionWrapper_->NotifyKeyEventAsync(event.rawKeyEvent, false);
-        return true;
-    }
     return sessionWrapper_->NotifyKeyEventSync(event.rawKeyEvent, event.isPreIme);
 }
 
@@ -595,6 +594,8 @@ void SecurityUIExtensionPattern::OnMountToParentDone()
         PLATFORM_LOGI("Frame node status is normal.");
         return;
     }
+
+    PLATFORM_LOGI("OnMountToParentDone");
     auto wantWrap = GetWantWrap();
     CHECK_NULL_VOID(wantWrap);
     UpdateWant(wantWrap);

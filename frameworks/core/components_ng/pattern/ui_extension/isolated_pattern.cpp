@@ -160,7 +160,13 @@ bool IsolatedPattern::HandleKeyEvent(const KeyEvent& event)
 void IsolatedPattern::HandleFocusEvent()
 {
     CHECK_NULL_VOID(dynamicComponentRenderer_);
-    dynamicComponentRenderer_->TransferFocusActiveEvent(true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetIsFocusActive()) {
+        dynamicComponentRenderer_->TransferFocusActiveEvent(true);
+    }
     dynamicComponentRenderer_->TransferFocusState(true);
 }
 

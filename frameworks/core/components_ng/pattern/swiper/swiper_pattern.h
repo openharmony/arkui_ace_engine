@@ -735,6 +735,7 @@ private:
     void TriggerEventOnFinish(int32_t nextIndex);
     bool IsVisibleChildrenSizeLessThanSwiper() const;
     void BeforeCreateLayoutWrapper() override;
+    int32_t CheckUserSetIndex(int32_t index);
 
     void SetLazyLoadFeature(bool useLazyLoad);
     void SetLazyForEachLongPredict(bool useLazyLoad) const;
@@ -776,11 +777,9 @@ private:
      */
     void StopAnimationOnScrollStart(bool flushImmediately);
     /**
-     * @brief Checks if the animation is currently running.
-     *
-     * @return true if the animation is running, false otherwise.
+     * @return true if any translate animation (switching page / spring) is running, false otherwise.
      */
-    inline bool AnimationRunning() const;
+    inline bool DuringTranslateAnimation() const;
 
     /**
      *  NestableScrollContainer implementations
@@ -813,7 +812,7 @@ private:
 
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
 
-    void OnScrollStartRecursive(float position, float velocity = 0.f) override;
+    void OnScrollStartRecursive(float position, float velocity) override;
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
 
     /**

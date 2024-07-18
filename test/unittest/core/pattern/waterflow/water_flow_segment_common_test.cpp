@@ -576,6 +576,40 @@ HWTEST_F(WaterFlowSegmentCommonTest, Replace006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ChangeHeight001
+ * @tc.desc: Change height of items without notifying WaterFlow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, ChangeHeight001, TestSize.Level1)
+{
+    Create(
+        [](WaterFlowModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(400.0f));
+            ViewAbstract::SetHeight(CalcLength(600.f));
+            CreateItem(37);
+        },
+        false);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    auto sections = SECTION_7;
+    sections[3].onGetItemMainSizeByIndex = nullptr;
+    secObj->ChangeData(0, 0, sections);
+
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    FlushLayoutTask(frameNode_);
+
+    UpdateCurrentOffset(-1900.0f);
+    EXPECT_EQ(info_->startIndex_, 15);
+
+    auto item = GetChildFrameNode(frameNode_, 14);
+    item->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(100.0f), CalcLength(Dimension(300.0f))));
+
+    UpdateCurrentOffset(100.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 15) - GetChildY(frameNode_, 14), 302.0f);
+    EXPECT_EQ(GetChildRect(frameNode_, 14).Height(), 300.0f);
+}
+
+/**
  * @tc.name: Reset005
  * @tc.desc: Test Changing cross gap.
  * @tc.type: FUNC
@@ -775,8 +809,9 @@ HWTEST_F(WaterFlowSegmentCommonTest, Constraint001, TestSize.Level1)
         EXPECT_EQ(GetChildWidth(frameNode_, i), 500.f / 3);
     }
     for (int i = 5; i < 10; i++) {
-        EXPECT_EQ(GetChildWidth(frameNode_, i), (500.f - 3) / 5);
+        EXPECT_EQ(GetChildWidth(frameNode_, i), (500.f - 8.0f) / 5);
     }
+    EXPECT_EQ(GetChildX(frameNode_, 5), 5.0f);
     EXPECT_EQ(GetChildWidth(frameNode_, 10), 500.f);
     EXPECT_EQ(info_->endIndex_, 10);
 

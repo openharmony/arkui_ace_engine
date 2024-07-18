@@ -67,6 +67,8 @@ constexpr int32_t CARD_NODE_ID_RATION = 10000;
 constexpr int32_t CARD_ROOT_NODE_ID_RATION = 1000;
 constexpr int32_t CARD_BASE = 100000;
 
+const std::string ACTION_ARGU_SCROLL_STUB = "scrolltype"; // wait for change
+
 struct ActionTable {
     AceAction aceAction;
     ActionType action;
@@ -80,13 +82,18 @@ struct AccessibilityActionParam {
     bool setSelectionDir = false;
     int32_t setCursorIndex = -1;
     TextMoveUnit moveUnit = TextMoveUnit::STEP_CHARACTER;
+    AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_DEFAULT;
 };
 
 const std::map<Accessibility::ActionType, std::function<bool(const AccessibilityActionParam& param)>> ACTIONS = {
     { ActionType::ACCESSIBILITY_ACTION_SCROLL_FORWARD,
-        [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionScrollForward(); } },
+        [](const AccessibilityActionParam& param) {
+            return param.accessibilityProperty->ActActionScrollForward(param.scrollType);
+        } },
     { ActionType::ACCESSIBILITY_ACTION_SCROLL_BACKWARD,
-        [](const AccessibilityActionParam& param) { return param.accessibilityProperty->ActActionScrollBackward(); } },
+        [](const AccessibilityActionParam& param) {
+            return param.accessibilityProperty->ActActionScrollBackward(param.scrollType);
+        } },
     { ActionType::ACCESSIBILITY_ACTION_SET_TEXT,
         [](const AccessibilityActionParam& param) {
             return param.accessibilityProperty->ActActionSetText(param.setTextArgument);
@@ -1161,6 +1168,23 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     nodeInfo.SetTextType(accessibilityProperty->GetTextType());
     nodeInfo.SetTextLengthLimit(accessibilityProperty->GetTextLengthLimit());
     nodeInfo.SetOffset(accessibilityProperty->GetScrollOffSet());
+    auto context = node->GetRenderContext();
+    if (context != nullptr) {
+        nodeInfo.SetZIndex(context->GetZIndex().value_or(0));
+        nodeInfo.SetOpacity(context->GetOpacity().value_or(1));
+        nodeInfo.SetBackgroundColor(context->GetBackgroundColor().value_or(Color::TRANSPARENT).ToString());
+        nodeInfo.SetBackgroundImage(context->GetBackgroundImage().value_or(ImageSourceInfo("")).ToString());
+        if (context->GetForeground() != nullptr) {
+            nodeInfo.SetBlur(context->GetForeground()->propBlurRadius.value_or(Dimension(0)).ToString());
+        }
+    }
+    auto eventHub = node->GetEventHub<NG::EventHub>();
+    if (eventHub != nullptr) {
+        auto gestureEventHub = eventHub->GetGestureEventHub();
+        if (gestureEventHub != nullptr) {
+            nodeInfo.SetHitTestBehavior(gestureEventHub->GetHitTestModeStr());
+        }
+    }
     if (accessibilityProperty->HasUserDisabled()) {
         nodeInfo.SetEnabled(!accessibilityProperty->IsUserDisabled());
     }
@@ -1855,6 +1879,9 @@ bool ActAccessibilityFocus(int64_t elementId, RefPtr<NG::FrameNode>& frameNode, 
         renderContext->UpdateAccessibilityFocus(true);
     }
     currentFocusNodeId = frameNode->GetAccessibilityId();
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    accessibilityProperty->OnAccessibilityFocusCallback(true);
     return true;
 }
 
@@ -2489,6 +2516,13 @@ void JsAccessibilityManager::ProcessParameters(
     if (op == ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_POSITION) {
         paramsMap[ACTION_ARGU_SET_OFFSET] = params[EVENT_DUMP_ACTION_PARAM_INDEX];
     }
+
+    if ((op == ActionType::ACCESSIBILITY_ACTION_SCROLL_FORWARD) ||
+        (op == ActionType::ACCESSIBILITY_ACTION_SCROLL_BACKWARD)) {
+        if (params.size() > EVENT_DUMP_PARAM_LENGTH_LOWER) {
+            paramsMap = { { ACTION_ARGU_SCROLL_STUB, params[EVENT_DUMP_ACTION_PARAM_INDEX] } };
+        }
+    }
 }
 
 bool TransferExecuteAction(int64_t elementId, const RefPtr<NG::FrameNode>& node,
@@ -3012,7 +3046,7 @@ void JsAccessibilityManager::DumpTree(int32_t depth, int64_t nodeID)
             rootNode = ngPipeline->GetRootElement();
             CHECK_NULL_VOID(rootNode);
             nodeID = rootNode->GetAccessibilityId();
-            commonProperty.windowId = ngPipeline->GetWindowId();
+            commonProperty.windowId = static_cast<int32_t>(ngPipeline->GetWindowId());
             commonProperty.windowLeft = GetWindowLeft(ngPipeline->GetWindowId());
             commonProperty.windowTop = GetWindowTop(ngPipeline->GetWindowId());
             commonProperty.pageId = 0;
@@ -3726,6 +3760,17 @@ bool conversionDirection(std::string dir)
     return false;
 }
 
+inline void getArgumentByKey(const std::map<std::string, std::string> &actionArguments, const std::string checkKey,
+    int32_t &argument)
+{
+    auto iter = actionArguments.find(checkKey);
+    if (iter != actionArguments.end()) {
+        std::stringstream strArguments;
+        strArguments << iter->second;
+        strArguments >> argument;
+    }
+}
+
 bool ActAccessibilityAction(Accessibility::ActionType action, const std::map<std::string, std::string> actionArguments,
     RefPtr<NG::AccessibilityProperty> accessibilityProperty)
 {
@@ -3781,6 +3826,18 @@ bool ActAccessibilityAction(Accessibility::ActionType action, const std::map<std
         }
         param.setCursorIndex = position;
     }
+
+    if ((action == ActionType::ACCESSIBILITY_ACTION_SCROLL_FORWARD) ||
+        (action == ActionType::ACCESSIBILITY_ACTION_SCROLL_BACKWARD)) {
+        int32_t scrollType = static_cast<int32_t>(AccessibilityScrollType::SCROLL_DEFAULT);
+        getArgumentByKey(actionArguments, ACTION_ARGU_SCROLL_STUB, scrollType);
+        if ((scrollType < static_cast<int32_t>(AccessibilityScrollType::SCROLL_DEFAULT)) ||
+            (scrollType > static_cast<int32_t>(AccessibilityScrollType::SCROLL_MAX_TYPE))) {
+            scrollType = static_cast<int32_t>(AccessibilityScrollType::SCROLL_DEFAULT);
+        }
+        param.scrollType = static_cast<AccessibilityScrollType>(scrollType);
+    }
+
     auto accessibiltyAction = ACTIONS.find(action);
     if (accessibiltyAction != ACTIONS.end()) {
         param.accessibilityProperty = accessibilityProperty;
@@ -4888,7 +4945,7 @@ void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& 
     if (parentWindowId_ == 0) {
         output.windowId = static_cast<int32_t>(ngPipeline->GetFocusWindowId());
     } else {
-        output.windowId = GetWindowId();
+        output.windowId = static_cast<int32_t>(GetWindowId());
     }
     if (getParentRectHandler_) {
         getParentRectHandler_(output.windowTop, output.windowLeft);

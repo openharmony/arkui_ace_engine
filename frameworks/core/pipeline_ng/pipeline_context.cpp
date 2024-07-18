@@ -108,6 +108,16 @@ constexpr int32_t RESAMPLE_COORD_TIME_THRESHOLD = 20 * 1000 * 1000;
 constexpr int32_t VSYNC_PERIOD_COUNT = 2;
 constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
 constexpr int8_t RENDERING_SINGLE_COLOR = 1;
+
+#define CHECK_THREAD_SAFE(isFormRender, taskExecutor) CheckThreadSafe(isFormRender, taskExecutor, __func__, __LINE__)
+void CheckThreadSafe(
+    bool isFormRender, OHOS::Ace::RefPtr<OHOS::Ace::TaskExecutor>& taskExecutor, const char* func, int line)
+{
+    if (!isFormRender && !taskExecutor->WillRunOnCurrentThread(OHOS::Ace::TaskExecutor::TaskType::UI)) {
+        LOGW("[%{public}s:%{public}d] doesn't run on UI thread!", func, line);
+        OHOS::Ace::LogBacktrace();
+    }
+}
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -203,6 +213,7 @@ float PipelineContext::GetCurrentRootHeight()
 
 void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirtyNode)
 {
+    CHECK_THREAD_SAFE(isFormRender_, taskExecutor_);
     dirtyPropertyNodes_.emplace(dirtyNode);
     hasIdleTasks_ = true;
     RequestFrame();
@@ -315,6 +326,7 @@ void PipelineContext::FlushDirtyNodeUpdate()
     }
 
     // node api property diff before ets update.
+    CHECK_THREAD_SAFE(isFormRender_, taskExecutor_);
     decltype(dirtyPropertyNodes_) dirtyPropertyNodes(std::move(dirtyPropertyNodes_));
     dirtyPropertyNodes_.clear();
     for (const auto& node : dirtyPropertyNodes) {
@@ -674,6 +686,7 @@ void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp)
 
     int32_t displaySyncRate = GetOrCreateUIDisplaySyncManager()->GetDisplaySyncRate();
     frameRateManager_->SetDisplaySyncRate(displaySyncRate);
+    ArkUIPerfMonitor::GetInstance().RecordDisplaySyncRate(displaySyncRate);
 }
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
@@ -703,6 +716,7 @@ void PipelineContext::FlushMessages()
 void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
 {
     window_->Lock();
+    CHECK_THREAD_SAFE(isFormRender_, taskExecutor_);
     decltype(dirtyPropertyNodes_) dirtyPropertyNodes(std::move(dirtyPropertyNodes_));
     dirtyPropertyNodes_.clear();
     for (const auto& dirtyNode : dirtyPropertyNodes) {
@@ -991,7 +1005,7 @@ void PipelineContext::SetupRootElement()
     OnAreaChangedFunc onAreaChangedFunc = [weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager_))](
                                               const RectF& /* oldRect */, const OffsetF& /* oldOrigin */,
                                               const RectF& /* rect */, const OffsetF& /* origin */) {
-        TAG_LOGD(AceLogTag::ACE_OVERLAY, "start OnAreaChangedFunc");
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "start OnAreaChangedFunc");
         auto overlay = weakOverlayManger.Upgrade();
         CHECK_NULL_VOID(overlay);
         overlay->HideAllMenus();
@@ -1528,6 +1542,7 @@ void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
         privacyManager->RemoveNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
     }
 
+    CHECK_THREAD_SAFE(isFormRender_, taskExecutor_);
     dirtyPropertyNodes_.erase(frameNode);
     needRenderNode_.erase(frameNode);
 
@@ -1775,7 +1790,7 @@ bool PipelineContext::OnBackPressed()
 
     // If the tag of the last child of the rootnode is video, exit full screen.
     if (fullScreenManager_->OnBackPressed()) {
-        LOGI("fullscreen component：video or web consumed backpressed event");
+        LOGI("fullscreen component: video or web consumed backpressed event");
         return true;
     }
 
@@ -1913,6 +1928,7 @@ bool PipelineContext::SetIsFocusActive(bool isFocusActive)
     if (isFocusActive_ == isFocusActive) {
         return false;
     }
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "Pipeline focus turns to %{public}s", isFocusActive ? "active" : "inactive");
     isFocusActive_ = isFocusActive;
     for (auto& pair : isFocusActiveUpdateEvents_) {
         if (pair.second) {
@@ -2586,6 +2602,17 @@ void PipelineContext::FlushMouseEvent()
 {
     if (!lastMouseEvent_ || lastMouseEvent_->action == MouseAction::WINDOW_LEAVE) {
         return;
+    }
+    auto container = Container::Current();
+    if (container) {
+        int32_t sourceType = 0;
+        auto result = container->GetCurPointerEventSourceType(sourceType);
+        if (result) {
+            TAG_LOGI(AceLogTag::ACE_MOUSE,
+                "FlushMouseEvent: last pointer event sourceType:%{public}d last mouse event time:%{public}" PRId64
+                " current time %{public}" PRId64 "",
+                sourceType, static_cast<int64_t>(lastMouseEvent_->time.time_since_epoch().count()), GetSysTimestamp());
+        }
     }
     MouseEvent event;
     event.x = lastMouseEvent_->x;
@@ -3885,7 +3912,7 @@ void PipelineContext::ChangeDarkModeBrightness()
     dimension.SetValue(1);
     if (SystemProperties::GetColorMode() == ColorMode::DARK && appBgColor_.ColorToString().compare("#FF000000") == 0 &&
         mode != WindowMode::WINDOW_MODE_FULLSCREEN && !container->IsUIExtensionWindow() &&
-        !container->IsDynamicRender()) {
+        !container->IsDynamicRender() && !container->IsFormRender() && !IsJsCard()) {
         if (!onFocus_ && mode == WindowMode::WINDOW_MODE_FLOATING) {
             dimension.SetValue(1 + percent.second);
         } else {
@@ -3992,23 +4019,44 @@ void PipelineContext::GetInspectorTree()
     rootNode_->GetInspectorValue();
 }
 
-void PipelineContext::AddFrameNodeChangeListener(const RefPtr<FrameNode>& node)
+void PipelineContext::AddFrameNodeChangeListener(const WeakPtr<FrameNode>& node)
 {
+    CHECK_NULL_VOID(node.Upgrade());
     if (std::find(changeInfoListeners_.begin(), changeInfoListeners_.end(), node) == changeInfoListeners_.end()) {
         changeInfoListeners_.push_back(node);
     }
 }
 
-void PipelineContext::RemoveFrameNodeChangeListener(const RefPtr<FrameNode>& node)
+void PipelineContext::RemoveFrameNodeChangeListener(int32_t nodeId)
 {
-    changeInfoListeners_.remove(node);
+    if (changeInfoListeners_.empty()) {
+        return;
+    }
+    changeInfoListeners_.remove_if([nodeId](const WeakPtr<FrameNode>& node) {
+        return !node.Upgrade() || nodeId == node.Upgrade()->GetId();
+    });
 }
 
-void PipelineContext::AddChangedFrameNode(const RefPtr<FrameNode>& node)
+bool PipelineContext::AddChangedFrameNode(const WeakPtr<FrameNode>& node)
 {
+    CHECK_NULL_RETURN(node.Upgrade(), false);
+    if (changeInfoListeners_.empty() || !node.Upgrade()->IsOnMainTree()) {
+        return false;
+    }
     if (std::find(changedNodes_.begin(), changedNodes_.end(), node) == changedNodes_.end()) {
         changedNodes_.push_back(node);
     }
+    return true;
+}
+
+void PipelineContext::RemoveChangedFrameNode(int32_t nodeId)
+{
+    if (changedNodes_.empty()) {
+        return;
+    }
+    changedNodes_.remove_if([nodeId](const WeakPtr<FrameNode>& node) {
+        return !node.Upgrade() || nodeId == node.Upgrade()->GetId();
+    });
 }
 
 void PipelineContext::FlushNodeChangeFlag()
@@ -4016,8 +4064,9 @@ void PipelineContext::FlushNodeChangeFlag()
     ACE_FUNCTION_TRACE();
     if (!changeInfoListeners_.empty()) {
         for (const auto& it : changeInfoListeners_) {
-            if (it) {
-                it->ProcessFrameNodeChangeFlag();
+            auto listener = it.Upgrade();
+            if (listener) {
+                listener->ProcessFrameNodeChangeFlag();
             }
         }
     }
@@ -4029,9 +4078,9 @@ void PipelineContext::CleanNodeChangeFlag()
     auto cleanNodes = std::move(changedNodes_);
     changedNodes_.clear();
     for (const auto& it : cleanNodes) {
-        auto frameNode = AceType::DynamicCast<FrameNode>(it);
-        if (frameNode) {
-            frameNode->ClearChangeInfoFlag();
+        auto changeNode = it.Upgrade();
+        if (changeNode) {
+            changeNode->ClearChangeInfoFlag();
         }
     }
 }
@@ -4040,4 +4089,20 @@ void PipelineContext::NotifyAllWebPattern(bool isRegister)
 {
     rootNode_->NotifyWebPattern(isRegister);
 }
+#if defined(SUPPORT_TOUCH_TARGET_TEST)
+
+bool PipelineContext::OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe, const std::string& target)
+{
+    auto scalePoint = point.CreateScalePoint(GetViewScale());
+    if (scalePoint.type == TouchType::DOWN) {
+        TouchRestrict touchRestrict { TouchRestrict::NONE };
+        touchRestrict.sourceType = point.sourceType;
+        touchRestrict.touchEvent = point;
+        bool isTouchTarget = eventManager_->TouchTargetHitTest(
+            scalePoint, rootNode_, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe, target);
+        return isTouchTarget;
+    }
+    return false;
+}
+#endif
 } // namespace OHOS::Ace::NG

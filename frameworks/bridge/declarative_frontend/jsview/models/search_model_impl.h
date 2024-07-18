@@ -37,6 +37,12 @@ public:
     void SetSearchSrcPath(
         const std::string& src, const std::string& bundleName, const std::string& moduleName) override {}
     void SetRightIconSrcPath(const std::string& src) override {}
+    void SetSearchSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol) override{}
+    void SetSearchDefaultIcon() override{}
+    void SetSearchImageIcon(NG::IconOptions& iconOptions) override{}
+    void SetCancelSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol) override{}
+    void SetCancelDefaultIcon() override{}
+    void SetCancelImageIcon(NG::IconOptions& iconOptions) override{}
     void SetCancelButtonStyle(OHOS::Ace::CancelButtonStyle cancelButtonStyle) override {}
     void SetCancelIconSize(const Dimension& value) override {}
     void SetCancelIconColor(const Color& color) override {}

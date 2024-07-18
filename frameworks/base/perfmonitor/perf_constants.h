@@ -128,6 +128,9 @@ public:
 
     // PC start app from other
     static constexpr char LAUNCHER_APP_LAUNCH_FROM_OTHER[] = "LAUNCHER_APP_LAUNCH_FROM_OTHER";
+
+    // scroller animation
+    static constexpr char SCROLLER_ANIMATION[] = "SCROLLER_ANIMATION";
 };
 } // namespace OHOS::Ace
 #endif // ARKUI_PERF_SCENE_ID_H

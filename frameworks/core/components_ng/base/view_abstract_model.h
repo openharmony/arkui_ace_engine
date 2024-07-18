@@ -94,9 +94,11 @@ public:
     virtual void SetPadding(const CalcDimension& value) = 0;
     virtual void SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) = 0;
+    virtual void SetPaddings(const NG::PaddingProperty& paddings) = 0;
     virtual void SetMargin(const CalcDimension& value) = 0;
     virtual void SetMargins(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
         const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) = 0;
+    virtual void SetMargins(const NG::MarginProperty& margins) = 0;
     virtual void ResetSafeAreaPadding() = 0;
     virtual void SetSafeAreaPadding(const CalcDimension& value) = 0;
     virtual void SetSafeAreaPaddings(const std::optional<CalcDimension>& top,
@@ -106,12 +108,16 @@ public:
     virtual void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
         const std::optional<Dimension>& radiusBottomRight) = 0;
+    virtual void SetBorderRadius(const NG::BorderRadiusProperty& borderRadius) = 0;
     virtual void SetBorderColor(const Color& value) = 0;
     virtual void SetBorderColor(const std::optional<Color>& colorLeft, const std::optional<Color>& colorRight,
         const std::optional<Color>& colorTop, const std::optional<Color>& colorBottom) = 0;
+    virtual void SetBorderColor(const NG::BorderColorProperty& borderColors) = 0;
     virtual void SetBorderWidth(const Dimension& value) = 0;
     virtual void SetBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) = 0;
+    virtual void SetBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
+        const std::optional<Dimension>& top, const std::optional<Dimension>& bottom, bool isLocalized) = 0;
     virtual void SetBorderStyle(const BorderStyle& value) = 0;
     virtual void SetBorderStyle(const std::optional<BorderStyle>& styleLeft,
         const std::optional<BorderStyle>& styleRight, const std::optional<BorderStyle>& styleTop,
@@ -136,9 +142,11 @@ public:
     virtual void SetOuterBorderRadius(const std::optional<Dimension>& radiusTopLeft,
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
         const std::optional<Dimension>& radiusBottomRight) = 0;
+    virtual void SetOuterBorderRadius(const NG::BorderRadiusProperty& borderRadius) = 0;
     virtual void SetOuterBorderColor(const Color& value) = 0;
     virtual void SetOuterBorderColor(const std::optional<Color>& colorLeft, const std::optional<Color>& colorRight,
         const std::optional<Color>& colorTop, const std::optional<Color>& colorBottom) = 0;
+    virtual void SetOuterBorderColor(const NG::BorderColorProperty& borderColors) = 0;
     virtual void SetOuterBorderWidth(const Dimension& value) = 0;
     virtual void SetOuterBorderWidth(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom) = 0;

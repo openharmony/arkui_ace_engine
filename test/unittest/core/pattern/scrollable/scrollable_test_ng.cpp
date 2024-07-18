@@ -1858,6 +1858,7 @@ HWTEST_F(ScrollableTestNg, HandleClickScroll001, TestSize.Level1)
     scrollPn->scrollBar_->barRect_ = Rect(0.0f, 0.0f, 30.0f, 500.0f);
     scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
     scrollPn->isMousePressed_ = true;
+    scrollPn->scrollBar_->isScrollable_ = true;
     GestureEvent info;
     info.SetLocalLocation(Offset(1.0f, 150.0f));
     // /**
@@ -1903,6 +1904,7 @@ HWTEST_F(ScrollableTestNg, HandleLongPressScroll001, TestSize.Level1)
     scrollPn->scrollBar_->touchRegion_ = Rect(0.0f, 100.0f, 30.0f, 100.0f);
     scrollPn->scrollBar_->InitLongPressEvent();
     scrollPn->isMousePressed_ = true;
+    scrollPn->scrollBar_->isScrollable_ = true;
     /**
     * @tc.steps: step2. Test HandleClickEvent.
     * @tc.expect: CheckBarDirection equal to equal BarDirection's Value.
