@@ -280,39 +280,6 @@ MenuLayoutAlgorithm::~MenuLayoutAlgorithm()
     setVertical_.clear();
 }
 
-void MenuLayoutAlgorithm::ModifyNormalPreviewMenuPortraitPlacement(LayoutWrapper* layoutWrapper)
-{
-    CHECK_NULL_VOID(layoutWrapper);
-    auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(props);
-
-    auto hasPlacement = props->GetMenuPlacement().has_value();
-    if (placement_ == Placement::TOP_LEFT || placement_ == Placement::TOP || placement_ == Placement::TOP_RIGHT) {
-        if (!hasPlacement) {
-            placement_ = Placement::TOP_LEFT;
-            props->UpdateMenuPlacement(placement_);
-        }
-    } else if (!hasPlacement) {
-        placement_ = Placement::BOTTOM_LEFT;
-        props->UpdateMenuPlacement(placement_);
-    }
-}
-
-void MenuLayoutAlgorithm::ModifyNormalPreviewMenuPlacement(LayoutWrapper* layoutWrapper)
-{
-    CHECK_NULL_VOID(layoutWrapper);
-    auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(props);
-
-    auto hasPlacement = props->GetMenuPlacement().has_value();
-    if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
-        ModifyNormalPreviewMenuPortraitPlacement(layoutWrapper);
-    } else if (!hasPlacement) {
-        placement_ = Placement::RIGHT_TOP;
-        props->UpdateMenuPlacement(placement_);
-    }
-}
-
 void MenuLayoutAlgorithm::ModifyPreviewMenuPlacement(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -323,10 +290,13 @@ void MenuLayoutAlgorithm::ModifyPreviewMenuPlacement(LayoutWrapper* layoutWrappe
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
     auto hasPlacement = props->GetMenuPlacement().has_value();
-    if (menuTheme->GetNormalPlacement()) {
-        ModifyNormalPreviewMenuPlacement(layoutWrapper);
-    } else {
-        if (!hasPlacement) {
+    if (!hasPlacement) {
+        if (menuTheme->GetNormalPlacement() &&
+            SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
+            // for Phone with PORTRAIT orientation, default placement is BOTTOM_LEFT
+            placement_ = Placement::BOTTOM_LEFT;
+            props->UpdateMenuPlacement(placement_);
+        } else {
             placement_ = Placement::RIGHT_TOP;
             props->UpdateMenuPlacement(placement_);
         }
@@ -647,7 +617,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childConstraint.parentIdealSize.SetWidth(selectMenuWidth);
         childConstraint.selfIdealSize.SetWidth(selectMenuWidth);
     }
-    
+
     auto parentItem = menuPattern->GetParentMenuItem();
     CalculateIdealSize(layoutWrapper, childConstraint, padding, idealSize, parentItem);
 }
@@ -812,10 +782,11 @@ void MenuLayoutAlgorithm::LayoutNormalTopPreviewBottomMenuLessThan(
     CHECK_NULL_VOID(previewGeometryNode);
     CHECK_NULL_VOID(menuGeometryNode);
 
-    OffsetF center(targetOffset_.GetX() + targetSize_.Width() / 2, targetOffset_.GetY() + targetSize_.Height() / 2);
+    OffsetF center(
+        targetOffset_.GetX() + targetSize_.Width() / HALF, targetOffset_.GetY() + targetSize_.Height() / HALF);
     targetCenterOffset_ = center;
     auto previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
-    OffsetF offset(center.GetX() - previewSize.Width() / 2,
+    OffsetF offset(center.GetX() - previewSize.Width() / HALF,
         std::min<float>(center.GetY() - previewSize.Height() / HALF, param_.windowGlobalSizeF.Height() -
                                                                          param_.bottomSecurity - param_.bottom -
                                                                          totalSize.Height() - param_.previewMenuGap));
@@ -823,8 +794,8 @@ void MenuLayoutAlgorithm::LayoutNormalTopPreviewBottomMenuLessThan(
         static_cast<float>(wrapperRect_.Right()) - paddingEnd_ - previewSize.Width());
     auto y = std::clamp(offset.GetY(), static_cast<float>(wrapperRect_.Top()) + param_.topSecurity,
         static_cast<float>(wrapperRect_.Bottom()) - param_.bottomSecurity - previewSize.Height());
-    x = x + (previewSize.Width() - previewSize.Width() / previewScale_) / 2;
-    y = y + (previewSize.Height() - previewSize.Height() / previewScale_) / 2;
+    x = x + (previewSize.Width() - previewSize.Width() / previewScale_) / HALF;
+    y = y + (previewSize.Height() - previewSize.Height() / previewScale_) / HALF;
     previewGeometryNode->SetMarginFrameOffset(OffsetF(x, y));
 }
 
@@ -1080,55 +1051,6 @@ float MenuLayoutAlgorithm::GetMenuItemTotalHeight(const RefPtr<LayoutWrapper>& m
     return height;
 }
 
-void MenuLayoutAlgorithm::LayoutNormalPreviewMenu(LayoutWrapper* layoutWrapper)
-{
-    CHECK_NULL_VOID(layoutWrapper);
-    auto menuNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(menuNode);
-    auto parentNode = AceType::DynamicCast<FrameNode>(menuNode->GetParent());
-    CHECK_NULL_VOID(parentNode);
-
-    RefPtr<LayoutWrapper> menuLayoutWrapper;
-    RefPtr<LayoutWrapper> previewLayoutWrapper;
-    SizeF totalSize = GetPreviewNodeAndMenuNodeTotalSize(parentNode, previewLayoutWrapper, menuLayoutWrapper);
-    CHECK_NULL_VOID(menuLayoutWrapper);
-    CHECK_NULL_VOID(previewLayoutWrapper);
-    RefPtr<GeometryNode> menuGeometryNode = menuLayoutWrapper->GetGeometryNode();
-    RefPtr<GeometryNode> previewGeometryNode = previewLayoutWrapper->GetGeometryNode();
-    auto menuItemTotalHeight = GetMenuItemTotalHeight(menuLayoutWrapper);
-
-    if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
-        if (placement_ == Placement::TOP_LEFT || placement_ == Placement::TOP || placement_ == Placement::TOP_RIGHT) {
-            LayoutNormalBottomPreviewTopMenu(previewGeometryNode, menuGeometryNode, totalSize, menuItemTotalHeight);
-        } else {
-            LayoutNormalTopPreviewBottomMenu(previewGeometryNode, menuGeometryNode, totalSize, menuItemTotalHeight);
-        }
-    } else {
-        LayoutOtherDeviceLeftPreviewRightMenu(previewGeometryNode, menuGeometryNode, totalSize, menuItemTotalHeight);
-    }
-    UpdateScrollAndColumnLayoutConstraint(previewLayoutWrapper, menuLayoutWrapper);
-    auto previewSize = previewGeometryNode->GetMarginFrameSize();
-    previewOffset_ = previewGeometryNode->GetFrameOffset();
-    auto previewOffsetX = previewOffset_.GetX();
-    auto previewOffsetY = previewOffset_.GetY();
-    targetSize_ = previewSize * previewScale_;
-    targetOffset_ = OffsetF(previewOffsetX + (previewSize.Width() - targetSize_.Width()) / 2,
-        previewOffsetY + (previewSize.Height() - targetSize_.Height()) / 2);
-    auto previewHostNode = previewLayoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(previewHostNode);
-    auto renderContext = previewHostNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(previewOffsetX), Dimension(previewOffsetY)));
-
-    auto menuHostNode = menuLayoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(menuHostNode);
-    previewOriginOffset_ = targetCenterOffset_ - OffsetF(previewSize.Width() / 2, previewSize.Height() / 2);
-    previewSize_ = previewSize;
-    auto menuPattern = menuHostNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    menuPattern->SetPreviewOriginOffset(previewOriginOffset_);
-}
-
 void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenuLessThan(
     const RefPtr<GeometryNode>& previewGeometryNode, const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize)
 {
@@ -1238,14 +1160,16 @@ void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenu(const RefPtr<Geo
     }
 }
 
-void MenuLayoutAlgorithm::LayoutOtherDevicePreviewMenu(LayoutWrapper* layoutWrapper)
+void MenuLayoutAlgorithm::LayoutPreviewMenu(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
+    auto paintProperty = GetPaintProperty(layoutWrapper);
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateEnableArrow(false);
     auto menuNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(menuNode);
     auto parentNode = AceType::DynamicCast<FrameNode>(menuNode->GetParent());
     CHECK_NULL_VOID(parentNode);
-
     RefPtr<LayoutWrapper> menuLayoutWrapper;
     RefPtr<LayoutWrapper> previewLayoutWrapper;
     SizeF totalSize = GetPreviewNodeAndMenuNodeTotalSize(parentNode, previewLayoutWrapper, menuLayoutWrapper);
@@ -1256,15 +1180,36 @@ void MenuLayoutAlgorithm::LayoutOtherDevicePreviewMenu(LayoutWrapper* layoutWrap
     CHECK_NULL_VOID(menuGeometryNode);
     CHECK_NULL_VOID(previewGeometryNode);
     auto menuItemTotalHeight = GetMenuItemTotalHeight(menuLayoutWrapper);
-    LayoutOtherDeviceLeftPreviewRightMenu(previewGeometryNode, menuGeometryNode, totalSize, menuItemTotalHeight);
+    if (placement_ == Placement::BOTTOM_LEFT || placement_ == Placement::BOTTOM ||
+        placement_ == Placement::BOTTOM_RIGHT) {
+        LayoutNormalTopPreviewBottomMenu(previewGeometryNode, menuGeometryNode, totalSize, menuItemTotalHeight);
+    } else if (placement_ == Placement::TOP_LEFT || placement_ == Placement::TOP ||
+               placement_ == Placement::TOP_RIGHT) {
+        LayoutNormalBottomPreviewTopMenu(previewGeometryNode, menuGeometryNode, totalSize, menuItemTotalHeight);
+    } else {
+        LayoutOtherDeviceLeftPreviewRightMenu(previewGeometryNode, menuGeometryNode, totalSize, menuItemTotalHeight);
+    }
     UpdateScrollAndColumnLayoutConstraint(previewLayoutWrapper, menuLayoutWrapper);
+    UpdatePreviewPositionAndOffset(previewLayoutWrapper, menuLayoutWrapper);
+}
+
+void MenuLayoutAlgorithm::UpdatePreviewPositionAndOffset(
+    RefPtr<LayoutWrapper>& previewLayoutWrapper, RefPtr<LayoutWrapper>& menuLayoutWrapper)
+{
+    CHECK_NULL_VOID(previewLayoutWrapper);
+    CHECK_NULL_VOID(menuLayoutWrapper);
+    RefPtr<GeometryNode> previewGeometryNode = previewLayoutWrapper->GetGeometryNode();
+    RefPtr<GeometryNode> menuGeometryNode = menuLayoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(previewGeometryNode);
+    CHECK_NULL_VOID(menuGeometryNode);
+
     auto previewSize = previewGeometryNode->GetMarginFrameSize();
     previewOffset_ = previewGeometryNode->GetFrameOffset();
-    auto previewOffsetX = previewGeometryNode->GetFrameOffset().GetX();
-    auto previewOffsetY = previewGeometryNode->GetFrameOffset().GetY();
+    auto previewOffsetX = previewOffset_.GetX();
+    auto previewOffsetY = previewOffset_.GetY();
     targetSize_ = previewSize * previewScale_;
-    targetOffset_ = OffsetF(previewOffsetX + (previewSize.Width() - targetSize_.Width()) / 2,
-        previewOffsetY + (previewSize.Height() - targetSize_.Height()) / 2);
+    targetOffset_ = OffsetF(previewOffsetX + (previewSize.Width() - targetSize_.Width()) / HALF,
+        previewOffsetY + (previewSize.Height() - targetSize_.Height()) / HALF);
     auto previewHostNode = previewLayoutWrapper->GetHostNode();
     CHECK_NULL_VOID(previewHostNode);
     auto renderContext = previewHostNode->GetRenderContext();
@@ -1273,29 +1218,12 @@ void MenuLayoutAlgorithm::LayoutOtherDevicePreviewMenu(LayoutWrapper* layoutWrap
 
     auto menuHostNode = menuLayoutWrapper->GetHostNode();
     CHECK_NULL_VOID(menuHostNode);
-    previewOriginOffset_ = targetCenterOffset_ - OffsetF(previewSize.Width() / 2, previewSize.Height() / 2);
+    previewOriginOffset_ = targetCenterOffset_ - OffsetF(previewSize.Width() / HALF, previewSize.Height() / HALF);
     previewSize_ = previewSize;
     auto menuPattern = menuHostNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->SetPreviewOriginOffset(previewOriginOffset_);
 }
-
-void MenuLayoutAlgorithm::LayoutPreviewMenu(LayoutWrapper* layoutWrapper)
-{
-    auto paintProperty = GetPaintProperty(layoutWrapper);
-    CHECK_NULL_VOID(paintProperty);
-    paintProperty->UpdateEnableArrow(false);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
-    CHECK_NULL_VOID(menuTheme);
-    if (menuTheme->GetNormalLayout()) {
-        LayoutNormalPreviewMenu(layoutWrapper);
-    } else {
-        LayoutOtherDevicePreviewMenu(layoutWrapper);
-    }
-}
-
 OffsetF MenuLayoutAlgorithm::FixMenuOriginOffset(float beforeAnimationScale, float afterAnimationScale)
 {
     auto beforeRate = (1.0f - beforeAnimationScale) / 2;
