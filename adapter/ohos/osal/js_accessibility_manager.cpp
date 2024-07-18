@@ -1333,6 +1333,7 @@ static void UpdateWebAccessibilityElementInfo(
             nodeInfo.AddAction(action);
         }
     }
+    nodeInfo.SetAccessibilityGroup(false);
 }
 
 void UpdateWebAccessibilityElementInfo(RefPtr<NG::WebAccessibilityNode> node,
