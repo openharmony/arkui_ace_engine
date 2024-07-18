@@ -169,13 +169,13 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     swiperLayoutAlgorithm->SetIsFrameAnimation(translateAnimationIsRunning_);
 
     auto swiperPaintProperty = host->GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_RETURN(host, nullptr);
     auto effect = swiperPaintProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
     bool canOverScroll = effect == EdgeEffect::SPRING;
     swiperLayoutAlgorithm->SetCanOverScroll(canOverScroll);
     swiperLayoutAlgorithm->SetHasCachedCapture(hasCachedCapture_);
     swiperLayoutAlgorithm->SetIsCaptureReverse(isCaptureReverse_);
     swiperLayoutAlgorithm->SetCachedCount(GetCachedCount());
+    swiperLayoutAlgorithm->SetNextMarginIgnoreBlank(nextMarginIgnoreBlank_);
     return swiperLayoutAlgorithm;
 }
 
@@ -923,8 +923,11 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         isCaptureReverse_ = swiperLayoutAlgorithm->GetIsCaptureReverse();
         UpdateTargetCapture(swiperLayoutAlgorithm->GetIsNeedUpdateCapture());
     }
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
+
+    if (jumpIndex_) {
+        ignoreBlankSpringOffset_ = IgnoreBlankOffset(true);
+    }
+
     if (!targetIndex_) {
         SetIndicatorJumpIndex(jumpIndex_);
         CheckMarkDirtyNodeForRenderIndicator();
@@ -944,7 +947,6 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         if (!isInit) {
             OnIndexChange();
         }
-        ignoreBlankSpringOffset_ = IgnoreBlankOffset(true);
         jumpIndex_.reset();
         pauseTargetIndex_.reset();
         auto delayTime = GetInterval() - GetDuration();
@@ -2529,7 +2531,7 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset,
     currentFirstIndex_ = nextIndex.value_or(currentFirstIndex_);
     UpdateNextValidIndex();
     currentFirstIndex_ = GetLoopIndex(currentFirstIndex_);
-    CalculateGestureState(additionalOffset, currentTurnPageRate, preFirstIndex);
+    CalculateGestureState(additionalOffset - ignoreBlankSpringOffset_, currentTurnPageRate, preFirstIndex);
     turnPageRate_ = (currentTurnPageRate == FLT_MAX ? turnPageRate_ : currentTurnPageRate);
     touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     CheckMarkForIndicatorBoundary();
