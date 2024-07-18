@@ -59,7 +59,7 @@ static void ParseUri(napi_env env, napi_value uriNApi, std::string& uriString)
 static bool ParseParams(napi_env env, napi_value params, std::string& paramsString)
 {
     if (params == nullptr) {
-        return true;
+        return false;
     }
     napi_value globalValue;
     napi_get_global(env, &globalValue);
@@ -309,7 +309,6 @@ bool ParseParamWithCallback(napi_env env, std::shared_ptr<RouterAsyncContext> as
             TAG_LOGW(AceLogTag::ACE_ROUTER, "create return promise failed!");
         }
     }
-
     if (parseParamsSuccess == false) {
         asyncContext->callbackCode = ERROR_CODE_PARAM_INVALID;
         asyncContext->callbackMsg = "The 'params' parameter is invalid.";
