@@ -35,6 +35,7 @@ group("core_pattern_unittest") {
     "divider:divider_test_ng",
     "flex:flex_test_ng",
     "folder_stack:folder_stack_test_ng",
+    "form:form_node_test",
     "form:form_test_ng",
     "form_link:form_link_test",
     "gauge:gauge_test_ng",
