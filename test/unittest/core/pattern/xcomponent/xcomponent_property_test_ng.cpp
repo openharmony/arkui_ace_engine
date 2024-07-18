@@ -1034,7 +1034,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentModelNGTest024, TestSize.Level1)
      * @tc.expected: resultType == XComponentType::TEXTURE
      */
     XComponentModelNG::SetXComponentType(Referenced::RawPtr(frameNode), XCOMPONENT_TEXTURE_TYPE_VALUE);
-    auto resultType = xComponent.GetXComponentType(Referenced::RawPtr(frameNode));
+    auto resultType = XComponentModelNG::GetXComponentType(Referenced::RawPtr(frameNode));
     EXPECT_EQ(resultType, XCOMPONENT_TEXTURE_TYPE_VALUE);
 }
 
@@ -1078,8 +1078,8 @@ HWTEST_F(XComponentPropertyTestNg, XComponentModelNGTest025, TestSize.Level1)
     EXPECT_FALSE(pattern->hasXComponentInit_);
     pattern->BeforeSyncGeometryProperties(config);
     EXPECT_TRUE(pattern->hasXComponentInit_);
-    auto resultWidth = xComponent.GetXComponentSurfaceWidth(Referenced::RawPtr(frameNode));
-    auto resultHeight = xComponent.GetXComponentSurfaceHeight(Referenced::RawPtr(frameNode));
+    auto resultWidth = XComponentModelNG::GetXComponentSurfaceWidth(Referenced::RawPtr(frameNode));
+    auto resultHeight = XComponentModelNG::GetXComponentSurfaceHeight(Referenced::RawPtr(frameNode));
     EXPECT_EQ(resultWidth, SURFACE_WIDTH);
     EXPECT_EQ(resultHeight, SURFACE_HEIGHT);
 }
