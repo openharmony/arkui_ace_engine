@@ -50,8 +50,8 @@ struct BlurOption {
  
 enum class BlurStyleActivePolicy {
     FOLLOWS_WINDOW_ACTIVE_STATE = 0,
-    ALAWYS_ACTIVE = 1,
-    ALAWYS_INACTIVE = 2,
+    ALWAYS_ACTIVE = 1,
+    ALWAYS_INACTIVE = 2,
 };
 
 enum class BlurType {
@@ -82,7 +82,8 @@ struct EffectOption {
     void ToJsonValue(std::unique_ptr<JsonValue> &json, const NG::InspectorFilter &filter) const
     {
         static const char* ADAPTIVE_COLOR[] = { "AdaptiveColor.Default", "AdaptiveColor.Average" };
-        static const char* POLICY[] = { "FOLLOWS_WINDOW_ACTIVE_STATE", "ALAWYS_ACTIVE", "ALAWYS_INACTIVE" };
+        static const char* POLICY[] = { "BlurStyleActivePolicy.FOLLOWS_WINDOW_ACTIVE_STATE",
+            "BlurStyleActivePolicy.ALWAYS_ACTIVE", "BlurStyleActivePolicy.ALWAYS_INACTIVE" };
         static const char* BLUR_TYPE[] = { "WITHIN_WINDOW", "BEHIND_WINDOW" };
         auto jsonEffect = JsonUtil::Create(true);
         auto jsonBrightnessOption = JsonUtil::Create(true);
