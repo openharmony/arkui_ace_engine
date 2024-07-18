@@ -4144,40 +4144,28 @@ const PreviewTextInfo RichEditorPattern::GetPreviewTextInfo() const
 
 void RichEditorPattern::FinishTextPreview()
 {
-    FinishTextPreviewOperation(true);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "FinishTextPreview byImf");
+    CHECK_NULL_VOID(IsPreviewTextInputting());
+    CHECK_NULL_VOID(!previewTextRecord_.previewContent.empty());
+    auto previewContent = previewTextRecord_.previewContent;
+    FinishTextPreviewInner();
+    ProcessInsertValue(previewContent, true, false);
 }
 
-void RichEditorPattern::FinishTextPreviewOperation(bool calledbyImf)
+void RichEditorPattern::FinishTextPreviewInner()
 {
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "called by imf :[%{public}d]", calledbyImf);
     CHECK_NULL_VOID(IsPreviewTextInputting());
-    auto& record = previewTextRecord_;
-    auto previewContent = record.previewContent;
-    RemoveEmptySpans();
-    UpdateSpanPosition();
-    auto start = record.startOffset;
-    auto end = record.endOffset;
-    record.hasDiff = false;
-    if (calledbyImf) {
-        if (!previewContent.empty()) {
-            record.replacedRange.Set(start, end);
-            ProcessInsertValue(previewContent, true, false);
-        }
-    } else {
-        OperationRecord operationRecord;
-        DeleteByRange(&operationRecord, start, end);
-    }
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "FinishTextPreviewInner");
+    DeleteByRange(nullptr, previewTextRecord_.startOffset, previewTextRecord_.endOffset);
     previewTextRecord_.Reset();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void RichEditorPattern::NotifyExitTextPreview()
 {
     CHECK_NULL_VOID(IsPreviewTextInputting());
     CHECK_NULL_VOID(HasFocus());
-    FinishTextPreviewOperation(false);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NotifyExitTextPreview");
+    FinishTextPreviewInner();
     std::string text = "";
 #if defined(ENABLE_STANDARD_INPUT)
     MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
@@ -4241,9 +4229,16 @@ void RichEditorPattern::InsertValue(const std::string& insertValue, bool isIME)
     ProcessInsertValue(insertValue, isIME, true);
 }
 
+// isIME: controls whether to perform ime callbacks
+// calledByImf: true means real input; false means preview input
 void RichEditorPattern::ProcessInsertValue(const std::string& insertValue, bool isIME, bool calledByImf)
 {
-    if (isIME && !IsEditing()) {
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
+        "insertLen=%{public}zu, isIME=%{public}d, calledByImf=%{public}d, isSpanString=%{public}d",
+        StringUtils::ToWstring(insertValue).length(), isIME, calledByImf, isSpanStringMode_);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "insertValue=[%{public}s]", StringUtils::RestoreEscape(insertValue).c_str());
+
+    if (isIME && calledByImf && !IsEditing()) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NOT allow physical keyboard input in preview state");
         return;
     }
@@ -4251,7 +4246,6 @@ void RichEditorPattern::ProcessInsertValue(const std::string& insertValue, bool 
         InsertValueInStyledString(insertValue);
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "insertValue=[%{public}s]", StringUtils::RestoreEscape(insertValue).c_str());
     OperationRecord record;
     record.beforeCaretPosition = caretPosition_ + moveLength_;
     if (textSelector_.IsValid()) {
@@ -4261,12 +4255,12 @@ void RichEditorPattern::ProcessInsertValue(const std::string& insertValue, bool 
 
     RichEditorChangeValue changeValue;
     bool allowContentChange = BeforeChangeText(changeValue, record, RecordType::INSERT);
-    if (calledByImf) {
-        FinishTextPreviewOperation(false);
+    if (calledByImf && previewTextRecord_.IsValid()) {
+        FinishTextPreviewInner();
     }
     bool allowImeInput = isIME ? BeforeIMEInsertValue(insertValue) : true;
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "allowContentChange=%{public}d, allowImeInput=%{public}d",
-        allowContentChange, allowImeInput);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "allowContentChange=%{public}d, allowImeInput=%{public}d, hasDiff=%{public}d",
+        allowContentChange, allowImeInput, previewTextRecord_.hasDiff);
     CHECK_NULL_VOID(allowContentChange && allowImeInput || previewTextRecord_.hasDiff);
 
     ClearRedoOperationRecords();
