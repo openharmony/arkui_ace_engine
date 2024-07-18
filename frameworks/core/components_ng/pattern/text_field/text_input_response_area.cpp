@@ -27,6 +27,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/property/measure_property.h"
@@ -137,6 +138,19 @@ RefPtr<FrameNode> PasswordResponseArea::CreateNode()
     AddEvent(stackNode);
     stackNode->MarkModifyDone();
 
+    if (isShowSymbol()) {
+        auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        CHECK_NULL_RETURN(symbolNode, nullptr);
+        passwordNode_ = symbolNode;
+        InitSymbolEffectOptions();
+        UpdateSymbolSource();
+
+        symbolNode->MountToParent(stackNode);
+        stackNode_ = stackNode;
+        return stackNode;
+    }
+
     auto imageNode = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     imageNode->SetDraggable(false);
@@ -147,23 +161,11 @@ RefPtr<FrameNode> PasswordResponseArea::CreateNode()
     imageLayoutProperty->UpdateImageSourceInfo(currentImageSourceInfo.value());
     imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
     imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
-    auto eventHub = imageNode->GetEventHub<ImageEventHub>();
-    CHECK_NULL_RETURN(eventHub, nullptr);
-    eventHub->SetOnError([ weakNode = WeakClaim(AceType::RawPtr(imageNode)), weakArea = WeakClaim(this) ]
-        (const LoadImageFailEvent& info) {
-        auto host = weakNode.Upgrade();
-        CHECK_NULL_VOID(host);
-        auto area = weakArea.Upgrade();
-        CHECK_NULL_VOID(area);
-        auto imagePattern = host->GetPattern<ImagePattern>();
-        CHECK_NULL_VOID(imagePattern);
-        auto layoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
-        layoutProperty->UpdateImageSourceInfo(area->GetDefaultSourceInfo(area->isObscured_));
-        imagePattern->LoadImageDataIfNeed();
-    });
+
+    passwordNode_ = imageNode;
+    AddImageEventOnError();
     imageNode->MarkModifyDone();
     imageNode->MountToParent(stackNode);
-    passwordNode_ = imageNode;
     stackNode_ = stackNode;
     return stackNode;
 }
@@ -204,12 +206,18 @@ void PasswordResponseArea::AddEvent(const RefPtr<FrameNode>& node)
 
 void PasswordResponseArea::Refresh()
 {
-    auto imageNode = passwordNode_.Upgrade();
-    if (!imageNode) {
+    auto iconNode = passwordNode_.Upgrade();
+    if (!iconNode) {
         InitResponseArea();
         return;
     }
-    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+
+    if (isShowSymbol()) {
+        UpdateSymbolSource();
+        return;
+    }
+
+    auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     auto currentSrc = imageLayoutProperty->GetImageSourceInfoValue().GetSrc();
     LoadImageSourceInfo();
@@ -227,9 +235,13 @@ void PasswordResponseArea::OnPasswordIconClicked()
 
 void PasswordResponseArea::ChangeObscuredState()
 {
-    UpdateImageSource();
     auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
+    if (isShowSymbol()) {
+        UpdateSymbolSource();
+    } else {
+        UpdateImageSource();
+    }
     textFieldPattern->OnObscuredChanged(isObscured_);
 }
 
@@ -325,6 +337,25 @@ void PasswordResponseArea::LoadImageSourceInfo()
     }
 }
 
+void PasswordResponseArea::AddImageEventOnError()
+{
+    auto imageNode = passwordNode_.Upgrade();
+    auto eventHub = imageNode->GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnError([ weakNode = WeakClaim(AceType::RawPtr(imageNode)), weakArea = WeakClaim(this) ]
+        (const LoadImageFailEvent& info) {
+        auto host = weakNode.Upgrade();
+        CHECK_NULL_VOID(host);
+        auto area = weakArea.Upgrade();
+        CHECK_NULL_VOID(area);
+        auto imagePattern = host->GetPattern<ImagePattern>();
+        CHECK_NULL_VOID(imagePattern);
+        auto layoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
+        layoutProperty->UpdateImageSourceInfo(area->GetDefaultSourceInfo(area->isObscured_));
+        imagePattern->LoadImageDataIfNeed();
+    });
+}
+
 ImageSourceInfo PasswordResponseArea::GetDefaultSourceInfo(bool isObscured)
 {
     if (isObscured) {
@@ -349,6 +380,53 @@ void PasswordResponseArea::UpdateImageSource()
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(imagePattern);
     imagePattern->LoadImageDataIfNeed();
+}
+
+void PasswordResponseArea::UpdateSymbolSource()
+{
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto host = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto symbolNode = passwordNode_.Upgrade();
+    CHECK_NULL_VOID(symbolNode);
+    auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(symbolProperty);
+    auto currentSymbolId = isObscured_ ? textFieldTheme->GetShowSymbolId() : textFieldTheme->GetHideSymbolId();
+    symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(currentSymbolId));
+    symbolProperty->UpdateFontSize(textFieldTheme->GetSymbolSize());
+    symbolProperty->UpdateSymbolColorList({ textFieldTheme->GetSymbolColor() });
+
+    symbolNode->MarkModifyDone();
+    symbolNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void PasswordResponseArea::InitSymbolEffectOptions()
+{
+    auto symbolNode = passwordNode_.Upgrade();
+    CHECK_NULL_VOID(symbolNode);
+    auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(symbolProperty);
+    auto symbolEffectOptions = symbolProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+    symbolEffectOptions.SetEffectType(SymbolEffectType::REPLACE);
+    symbolEffectOptions.SetScopeType(Ace::ScopeType::WHOLE);
+    symbolEffectOptions.SetIsTxtActive(true);
+    symbolEffectOptions.SetIsTxtActiveSource(0);
+    symbolProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+}
+
+bool PasswordResponseArea::isShowSymbol()
+{
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
+    CHECK_NULL_RETURN(textFieldPattern, false);
+    return textFieldPattern->GetIsPasswordSymbol() &&
+        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN);
 }
 
 bool PasswordResponseArea::IsShowPasswordIcon()
