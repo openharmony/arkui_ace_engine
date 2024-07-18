@@ -222,6 +222,7 @@ bool SubwindowOhos::InitContainer()
     subPipelineContext->SetMinPlatformVersion(parentPipeline->GetMinPlatformVersion());
     subPipelineContext->SetupSubRootElement();
     subPipelineContext->SetKeyboardAnimationConfig(parentPipeline->GetKeyboardAnimationConfig());
+    subPipelineContext->SetDragNodeGrayscale(parentPipeline->GetDragNodeGrayscale());
     return true;
 }
 
