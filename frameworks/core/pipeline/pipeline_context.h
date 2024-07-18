@@ -1004,8 +1004,8 @@ private:
 
     std::function<void()> nextFrameLayoutCallback_ = nullptr;
     Size selectedItemSize_ { 0.0, 0.0 };
-    size_t selectedIndex_ = -1;
-    size_t insertIndex_ = -1;
+    int32_t selectedIndex_ = -1;
+    int32_t insertIndex_ = -1;
     RefPtr<RenderNode> initRenderNode_;
     std::string customDragInfo_;
     std::string selectedText_;

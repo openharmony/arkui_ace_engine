@@ -449,7 +449,7 @@ private:
     std::list<RefPtr<LayoutWrapper>> allFrameNodeChildren_;
     std::map<uint32_t, RefPtr<LayoutWrapper>> partFrameNodeChildren_;
     std::unique_ptr<FrameProxy> prevFrameProxy_;
-    uint32_t totalCount_ = 0;
+    int32_t totalCount_ = 0;
     FrameNode* hostNode_ { nullptr };
     uint32_t inUse_ = 0;
     bool delayReset_ = false;
