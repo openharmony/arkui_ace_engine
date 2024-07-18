@@ -64,43 +64,6 @@ struct LocaleProxy final {
     ~LocaleProxy() = default;
 
     Locale instance;
-
-    std::shared_ptr<SimpleDateFormat> simpleDateFormat_ = nullptr;
-    std::shared_ptr<Calendar> calendar_ = nullptr;
-    std::shared_ptr<DateTimePatternGenerator> patternGenerator_ = nullptr;
-
-    std::mutex proxyMutex_;
-
-    std::shared_ptr<SimpleDateFormat> GetSimpleDateFormat(const Locale& locale)
-    {
-        std::lock_guard<std::mutex> lock(proxyMutex_);
-        if (simpleDateFormat_) {
-            auto timeZone = TimeZone::createDefault();
-            simpleDateFormat_->setTimeZone(*timeZone);
-            delete timeZone;
-            return simpleDateFormat_;
-        }
-        UErrorCode status = U_ZERO_ERROR;
-        auto temp = std::make_shared<SimpleDateFormat>(UnicodeString(DEFAULT_FORMAT), locale, status);
-        if (U_SUCCESS(status)) {
-            simpleDateFormat_ = temp;
-        }
-        return simpleDateFormat_;
-    }
-
-    std::shared_ptr<Calendar> GetCalendar(const Locale& locale)
-    {
-        std::lock_guard<std::mutex> lock(proxyMutex_);
-        if (calendar_) {
-            return calendar_;
-        }
-        UErrorCode status = U_ZERO_ERROR;
-        auto temp = Calendar::createInstance(locale, status);
-        if (U_SUCCESS(status)) {
-            calendar_.reset(temp);
-        }
-        return calendar_;
-    }
 };
 
 namespace {
@@ -229,6 +192,52 @@ void GetLocalJsonObject(InternalResource::ResourceId id, std::string language, s
     }
 }
 
+std::shared_ptr<SimpleDateFormat> simpleDateFormat_ = nullptr;
+std::shared_ptr<Calendar> calendar_ = nullptr;
+std::shared_ptr<DateTimePatternGenerator> patternGenerator_ = nullptr;
+
+std::shared_ptr<SimpleDateFormat> GetSimpleDateFormat(const Locale& locale)
+{
+    if (simpleDateFormat_) {
+        auto timeZone = TimeZone::createDefault();
+        simpleDateFormat_->setTimeZone(*timeZone);
+        delete timeZone;
+        return simpleDateFormat_;
+    }
+    UErrorCode status = U_ZERO_ERROR;
+    auto temp = std::make_shared<SimpleDateFormat>(UnicodeString(DEFAULT_FORMAT), locale, status);
+    if (U_SUCCESS(status)) {
+        simpleDateFormat_ = temp;
+    }
+    return simpleDateFormat_;
+}
+
+std::shared_ptr<Calendar> GetCalendar(const Locale& locale)
+{
+    if (calendar_) {
+        return calendar_;
+    }
+    UErrorCode status = U_ZERO_ERROR;
+    auto temp = Calendar::createInstance(locale, status);
+    if (U_SUCCESS(status)) {
+        calendar_.reset(temp);
+    }
+    return calendar_;
+}
+
+std::shared_ptr<DateTimePatternGenerator> GetTimePatternGenerator(const Locale& locale)
+{
+    if (patternGenerator_) {
+        return patternGenerator_;
+    }
+    UErrorCode status = U_ZERO_ERROR;
+    auto temp = DateTimePatternGenerator::createInstance(locale, status);
+    if (U_SUCCESS(status)) {
+        patternGenerator_.reset(temp);
+    }
+    return patternGenerator_;
+}
+
 } // namespace
 
 // for entry.json
@@ -317,7 +326,7 @@ const std::string Localization::FormatDuration(uint32_t duration, bool needShowH
         needShowHour = true;
     }
     const char* engTimeFormat = needShowHour ? "HH:mm:ss" : "mm:ss";
-    auto simpleDateFormat = locale_->GetSimpleDateFormat(locale_->instance);
+    auto simpleDateFormat = GetSimpleDateFormat(locale_->instance);
     CHECK_NULL_RETURN(simpleDateFormat, "");
     simpleDateFormat->applyPattern(UnicodeString(engTimeFormat));
     
@@ -340,7 +349,7 @@ std::string Localization::FormatDuration(uint32_t duration, const std::string& f
     WaitingForInit();
     const char* engTimeFormat = format.c_str();
 
-    auto simpleDateFormat = locale_->GetSimpleDateFormat(locale_->instance);
+    auto simpleDateFormat = GetSimpleDateFormat(locale_->instance);
     CHECK_NULL_RETURN(simpleDateFormat, "");
     simpleDateFormat->applyPattern(UnicodeString(engTimeFormat));
 
@@ -361,7 +370,7 @@ std::string Localization::FormatDuration(uint32_t duration, const std::string& f
 const std::string Localization::FormatDateTime(DateTime dateTime, const std::string& format)
 {
     WaitingForInit();
-    auto calendar = locale_->GetCalendar(locale_->instance);
+    auto calendar = GetCalendar(locale_->instance);
     CHECK_NULL_RETURN(calendar, "");
     calendar->set(dateTime.year, dateTime.month, dateTime.day, dateTime.hour, dateTime.minute, dateTime.second);
 
@@ -369,13 +378,13 @@ const std::string Localization::FormatDateTime(DateTime dateTime, const std::str
     UDate date = calendar->getTime(status);
     CHECK_RETURN(status, "");
 
-    auto patternGenerator = DateTimePatternGenerator::createInstance(locale_->instance, status);
-    CHECK_RETURN(status, "");
+    auto patternGenerator = GetTimePatternGenerator(locale_->instance);
+    CHECK_NULL_RETURN(patternGenerator, "");
     UnicodeString pattern = patternGenerator->getBestPattern(UnicodeString(format.c_str()), status);
     delete patternGenerator;
     CHECK_RETURN(status, "");
 
-    auto simpleDateFormat = locale_->GetSimpleDateFormat(locale_->instance);
+    auto simpleDateFormat = GetSimpleDateFormat(locale_->instance);
     CHECK_NULL_RETURN(simpleDateFormat, "");
     simpleDateFormat->applyPattern(pattern);
     UnicodeString dateTimeStr;
