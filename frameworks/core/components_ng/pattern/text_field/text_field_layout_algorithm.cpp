@@ -427,6 +427,36 @@ float TextFieldLayoutAlgorithm::CalculateContentHeight(const LayoutConstraintF& 
     return std::min(contentConstraint.maxSize.Height(), height);
 }
 
+TextAlign TextFieldLayoutAlgorithm::GetCounterNodeAlignment(LayoutWrapper* layoutWrapper)
+{
+    bool isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, TextAlign::END);
+    RefPtr<LayoutProperty> property = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(property, TextAlign::END);
+    TextDirection layoutDirection = property->GetLayoutDirection();
+    TextAlign textAlign = TextAlign::END;
+    switch (layoutDirection) {
+        case TextDirection::LTR:
+        case TextDirection::AUTO:
+            if (isRTL) {
+                textAlign = TextAlign::START;
+            } else {
+                textAlign = TextAlign::END;
+            }
+            break;
+        case TextDirection::RTL:
+            if (isRTL) {
+                textAlign = TextAlign::END;
+            } else {
+                textAlign = TextAlign::START;
+            }
+            break;
+        default:
+            break;
+    }
+    return textAlign;
+}
 
 void TextFieldLayoutAlgorithm::UpdateCounterNode(
     uint32_t textLength, uint32_t maxLength, const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
@@ -458,7 +488,7 @@ void TextFieldLayoutAlgorithm::UpdateCounterNode(
     textLayoutProperty->UpdateFontSize(countTextStyle.GetFontSize());
     textLayoutProperty->UpdateTextColor(countTextStyle.GetTextColor());
     textLayoutProperty->UpdateFontWeight(countTextStyle.GetFontWeight());
-    textLayoutProperty->UpdateTextAlign(TextAlign::END);
+    textLayoutProperty->UpdateTextAlign(GetCounterNodeAlignment(layoutWrapper));
     textLayoutProperty->UpdateMaxLines(COUNTER_TEXT_MAXLINE);
     auto host = counterNode->GetHostNode();
     CHECK_NULL_VOID(host);
@@ -509,34 +539,9 @@ void TextFieldLayoutAlgorithm::HandleNonTextArea(LayoutWrapper* layoutWrapper, c
     RefPtr<GeometryNode> textGeometryNode = counterNode->GetGeometryNode();
     CHECK_NULL_VOID(textGeometryNode);
 
-    if (isRTL) {
-        HandleRTLNonTextArea(contentRect, textGeometryNode, frameRect, countX);
-    } else {
-        HandleLTRNonTextArea(contentRect, textGeometryNode, frameRect, countX);
-    }
+    countX = contentRect.GetX();
+    textGeometryNode->SetFrameOffset(OffsetF(countX, frameRect.Height() + textGeometryNode->GetFrameRect().Height()));
     counterNode->Layout();
-}
-
-void TextFieldLayoutAlgorithm::HandleRTLNonTextArea(const RectF& contentRect,
-    const RefPtr<GeometryNode>& textGeometryNode, const RectF& frameRect, float& countX)
-{
-    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-        countX = contentRect.GetX();
-    } else {
-        countX = -contentRect.Width();
-    }
-    textGeometryNode->SetFrameOffset(OffsetF(countX, frameRect.Height() + textGeometryNode->GetFrameRect().Height()));
-}
-
-void TextFieldLayoutAlgorithm::HandleLTRNonTextArea(const RectF& contentRect,
-    const RefPtr<GeometryNode>& textGeometryNode, const RectF& frameRect, float& countX)
-{
-    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-        countX = contentRect.Width();
-    } else {
-        countX = contentRect.GetX();
-    }
-    textGeometryNode->SetFrameOffset(OffsetF(countX, frameRect.Height() + textGeometryNode->GetFrameRect().Height()));
 }
 
 void TextFieldLayoutAlgorithm::HandleTextArea(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& counterNode,
