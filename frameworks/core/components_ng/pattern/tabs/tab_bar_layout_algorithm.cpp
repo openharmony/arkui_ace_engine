@@ -1040,8 +1040,8 @@ int32_t TabBarLayoutAlgorithm::CalcTabBarContentLetterNums(LayoutWrapper* layout
         CHECK_NULL_RETURN(textWrapper, 0);
         auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
         CHECK_NULL_RETURN(textLayoutProperty, 0);
-        if (tabBarLetterNums < textLayoutProperty->GetContent().value().length()) {
-            tabBarLetterNums = textLayoutProperty->GetContent().value().length();
+        if (tabBarLetterNums < static_cast<int32_t>(textLayoutProperty->GetContent().value().length())) {
+            tabBarLetterNums = static_cast<int32_t>(textLayoutProperty->GetContent().value().length());
         }
     }
     return tabBarLetterNums;
