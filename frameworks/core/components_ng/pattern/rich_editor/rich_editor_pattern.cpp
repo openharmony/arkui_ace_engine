@@ -1483,7 +1483,7 @@ bool RichEditorPattern::IsCustomSpanInCaretPos(int32_t position, bool downStream
     return false;
 }
 
-bool RichEditorPattern::SetCaretPosition(int32_t pos, bool needNotifyImf)
+bool RichEditorPattern::SetCaretPosition(int32_t pos)
 {
     auto correctPos = std::clamp(pos, 0, GetTextContentLength());
     ResetLastClickOffset();
@@ -1496,9 +1496,9 @@ bool RichEditorPattern::SetCaretPosition(int32_t pos, bool needNotifyImf)
             caretChangeListener_(caretPosition_);
         }
     }
-    if (needNotifyImf) {
-        UpdateCaretInfoToController();
-    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 }
 
@@ -3943,9 +3943,9 @@ void RichEditorPattern::UpdateCaretInfoToController()
         StringUtils::Str8ToStr16(text), start, end);
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT,
         "Caret update, pos=[%{public}.2f,%{public}.2f], size=[%{public}.2f,%{public}.2f], "
-        "textSelector=[%{public}d,%{public}d]",
-        cursorInfo.left, cursorInfo.top, cursorInfo.width, cursorInfo.height, textSelector_.GetStart(),
-        textSelector_.GetEnd());
+        "caretPosition=%{public}d, textSelector=[%{public}d,%{public}d]",
+        cursorInfo.left, cursorInfo.top, cursorInfo.width, cursorInfo.height,
+        caretPosition_, textSelector_.GetStart(), textSelector_.GetEnd());
 #else
     if (HasConnection()) {
         TextEditingValue editingValue;
@@ -4076,14 +4076,11 @@ bool RichEditorPattern::ReplacePreviewText(const std::string& previewTextValue, 
 }
 
 // Used for text replacement, without notifying developer caret change
-void RichEditorPattern::DeleteByRange(OperationRecord* const record, int32_t start, int32_t end, bool needNotifyImf)
+void RichEditorPattern::DeleteByRange(OperationRecord* const record, int32_t start, int32_t end)
 {
     auto length = end - start;
     CHECK_NULL_VOID(length > 0);
     caretPosition_ = std::clamp(start, 0, GetTextContentLength());
-    if (needNotifyImf) {
-        UpdateCaretInfoToController();
-    }
     std::wstring deleteText = DeleteForwardOperation(length);
     if (record && deleteText.length() != 0) {
         record->deleteText = StringUtils::ToString(deleteText);
@@ -4157,12 +4154,11 @@ void RichEditorPattern::FinishTextPreviewOperation(bool calledbyImf)
     UpdateSpanPosition();
     auto start = record.startOffset;
     auto end = record.endOffset;
+    record.hasDiff = false;
     if (calledbyImf) {
         if (!previewContent.empty()) {
             record.replacedRange.Set(start, end);
-            record.hasDiff = true;
             ProcessInsertValue(previewContent, true, false);
-            record.hasDiff = false;
         }
     } else {
         OperationRecord operationRecord;
@@ -4288,7 +4284,7 @@ void RichEditorPattern::InsertValueOperation(const std::string& insertValue, Ope
         CloseSelectOverlay();
         ResetSelection();
     } else if (previewTextRecord_.hasDiff) {
-        DeleteByRange(record, previewTextRecord_.replacedRange.start, previewTextRecord_.replacedRange.end, false);
+        DeleteByRange(record, previewTextRecord_.replacedRange.start, previewTextRecord_.replacedRange.end);
     }
     TextInsertValueInfo info;
     CalcInsertValueObj(info);
@@ -5656,7 +5652,7 @@ void RichEditorPattern::DeleteByDeleteValueInfo(const RichEditorDeleteValue& inf
     std::list<RefPtr<UINode>> deleteNode;
     auto eraseLength = ProcessDeleteNodes(deleteSpans);
     if (info.GetRichEditorDeleteDirection() == RichEditorDeleteDirection::BACKWARD) {
-        SetCaretPosition(caretPosition_ - eraseLength, !previewTextRecord_.isPreviewTextInputting);
+        SetCaretPosition(caretPosition_ - eraseLength);
     }
     UpdateSpanPosition();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
