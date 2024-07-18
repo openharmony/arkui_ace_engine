@@ -3723,6 +3723,14 @@ const ArkUI_AttributeItem* GetTransition(ArkUI_NodeHandle node)
     g_attributeItem.object = node->transitionOption;
     return &g_attributeItem;
 }
+
+const ArkUI_AttributeItem* GetUniqueID(ArkUI_NodeHandle node)
+{
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getNodeUniqueId(node->uiNodeHandle);
+    g_numberValues[0].i32 = resultValue;
+    return &g_attributeItem;
+}
+
 // Text
 int32_t SetFontColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
@@ -12588,6 +12596,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetExpandSafeArea,
         SetAreaChangeRatio,
         SetTransition,
+        nullptr,
     };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -12694,6 +12703,7 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetExpandSafeArea,
         GetAreaChangeRatio,
         GetTransition,
+        GetUniqueID,
     };
     if (subTypeId >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -12803,6 +12813,7 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetAccessibilityValue,
         ResetExpandSafeArea,
         ResetAreaChangeRatio,
+        nullptr,
         nullptr,
     };
     if (subTypeId >= sizeof(resetters) / sizeof(Setter*)) {

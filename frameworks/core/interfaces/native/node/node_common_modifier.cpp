@@ -6060,6 +6060,13 @@ void SetBorderDashParams(ArkUINodeHandle node, const ArkUI_Float32* values, ArkU
         ViewAbstract::SetDashWidth(frameNode, borderDashWidth);
     }
 }
+
+ArkUI_Int32 GetNodeUniqueId(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, -1);
+    return frameNode->GetId();
+}
 } // namespace
 
 namespace NodeModifier {
@@ -6135,7 +6142,7 @@ const ArkUICommonModifier* GetCommonModifier()
         ResetAccessibilityActions, GetAccessibilityActions, SetAccessibilityRole, ResetAccessibilityRole,
         GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
         SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition, SetDragPreview,
-        ResetDragPreview };
+        ResetDragPreview, GetNodeUniqueId };
 
     return &modifier;
 }

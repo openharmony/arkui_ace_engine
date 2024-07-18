@@ -338,6 +338,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest005, TestSize.Level1)
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_EXPAND_SAFE_AREA), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_VISIBLE_AREA_CHANGE_RATIO), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_TRANSITION), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_UNIQUE_ID), nullptr);
 }
 
 /**
